@@ -8,6 +8,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
 import { bearerTokenOf, claimsOf } from "./bearer"
 import { rejectRequest } from "./reject"
+import { forgetPasswordChange } from "./password-epoch-cache"
 
 /**
  * A changed password ends what was signed in before it (F15.1, F14
@@ -64,6 +65,7 @@ export function notePasswordChange(
         id: identity.id,
         app_metadata: { ...(identity.app_metadata ?? {}), [KEY]: new Date().toISOString() },
       })
+      forgetPasswordChange(identity.id)
     })().catch((error: unknown) => {
       logger.error({ event: "auth.password_change_not_noted", err: errorSummary(error) })
     })

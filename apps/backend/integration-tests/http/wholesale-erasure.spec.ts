@@ -8,7 +8,13 @@ import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
-import { accountApi, accountRecords, groupsOf, wholesaleApi } from "../helpers/wholesale"
+import {
+  accountApi,
+  accountRecords,
+  groupsOf,
+  wholesaleApi,
+  legacyPendingAccount,
+} from "../helpers/wholesale"
 
 jest.setTimeout(240 * 1000)
 
@@ -86,7 +92,11 @@ medusaIntegrationTestRunner({
       const guest = await getContainer()
         .resolve(Modules.CUSTOMER)
         .createCustomers({ email, has_account: false })
-      const pending = await accounts.made({ email, contact_name: "Ayşe Yılmaz", own_prices: true })
+      const pending = await legacyPendingAccount(getContainer(), {
+        email,
+        contact_name: "Ayşe Yılmaz",
+        own_prices: true,
+      })
 
       await erase(guest.id)
 

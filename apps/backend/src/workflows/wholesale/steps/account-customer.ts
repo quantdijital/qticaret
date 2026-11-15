@@ -2,13 +2,12 @@ import type { ICustomerModuleService, MedusaContainer } from "@medusajs/framewor
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ConflictError, ValidationError } from "../../../lib/errors"
-import { likeLiteral } from "../../../lib/db/like"
 import { namesToFill, normalizeEmail } from "../../../lib/wholesale"
 import type { CustomerNames } from "../../../lib/wholesale"
 import { BILLING_PROFILE_MODULE } from "../../../modules/billing-profile"
 import type BillingProfileModuleService from "../../../modules/billing-profile/service"
-import type { ProtectedProfileData } from "../../../modules/billing-profile/service"
-import { provenCustomer } from "../../account/proven-customer"
+import { openForRequest } from "../../../lib/staff/account"
+import { addressLogin } from "./account-login"
 import { accountById, wholesale } from "./account-rows"
 
 /**
@@ -28,39 +27,23 @@ interface CustomerRow extends CustomerNames {
 const NAME_FIELDS = ["id", "email", "has_account", "first_name", "last_name", "company_name"]
 
 /**
- * The customer with a sign-in at this address who has proven they own it
- * (`provenCustomer`), or null. An account registered with the address but
- * never confirmed counts as none (security review H1): the wholesaler is
- * then invited, and the account is taken on a proven sign-in.
- */
-export async function registeredCustomer(
-  container: Container,
-  email: string
-): Promise<CustomerRow | null> {
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "customer",
-    fields: NAME_FIELDS,
-    filters: { email: { $ilike: likeLiteral(normalizeEmail(email)) }, has_account: true },
-  })
-  const customer = (data[0] as CustomerRow | undefined) ?? null
-  return customer && (await provenCustomer(container, customer.id)) ? customer : null
-}
-
-/**
- * What a new account starts from: the address has no account yet (as a
- * pending invitation or a customer's), the level named exists, and the
- * customer with a sign-in at the address, if there is one. Read only.
+ * What a new account starts from (ADR-0068 Ek 2026-11-15 (2)): who signs
+ * in at the address (`addressLogin`), no wholesaler there yet (as an
+ * older pending invitation or a customer's account), and the level named.
+ * Read only.
  */
 export const resolveNewAccountStep = createStep(
   "wholesale-resolve-new-account",
   async (input: { email: string; tier_id: string | null }, { container }) => {
     const service = wholesale(container)
     const email = normalizeEmail(input.email)
-    const customer = await registeredCustomer(container, email)
+    const login = await addressLogin(container, email)
+    const customerId =
+      login.kind === "proven" || login.kind === "unproven" ? login.customer_id : null
     const [pending, owned] = await Promise.all([
       service.listWholesaleAccounts({ email }, { select: ["id"], take: 1 }),
-      customer
-        ? service.listWholesaleAccounts({ customer_id: customer.id }, { select: ["id"], take: 1 })
+      customerId
+        ? service.listWholesaleAccounts({ customer_id: customerId }, { select: ["id"], take: 1 })
         : Promise.resolve([]),
     ])
     if (pending.length > 0 || owned.length > 0) {
@@ -75,7 +58,7 @@ export const resolveNewAccountStep = createStep(
         throw new ValidationError("wholesale.tier_unknown", { field: "tier_id" })
       }
     }
-    return new StepResponse({ customer_id: customer?.id ?? null })
+    return new StepResponse({ login })
   }
 )
 
@@ -170,24 +153,35 @@ export const writeCustomerNamesStep = createStep(
   }
 )
 
+/** What binds the typed invoice identity, sealed in the route, to its address. */
+export const billingBinding = (email: string) => `wholesale.billing:${email}`
+
+/** The invoice identity staff typed, as the route seals it. */
+export interface TypedBilling {
+  legal_name: string
+  tax_office: string
+  tax_id: string
+}
+
 /**
- * The invoice identity staff typed (adr/0009), sealed in the route with
- * the customer's id: written only to that customer, and only when they
- * have none; a profile of their own stays theirs. Undone by removing it.
+ * The invoice identity staff typed (adr/0009), sealed in the route for
+ * the request and opened here once the customer is known: encrypted for
+ * that customer, written only when they have none; a profile of their
+ * own stays theirs. Undone by removing it.
  */
 export const wholesaleBillingProfileStep = createStep(
   "wholesale-billing-profile",
   async (
-    input: {
-      customer_id: string | null
-      billing: { customer_id: string; data: ProtectedProfileData } | null
-    },
+    input: { customer_id: string | null; email: string; billing: string | null },
     { container }
   ) => {
-    const { billing, customer_id } = input
-    if (!billing || !customer_id || billing.customer_id !== customer_id) {
+    const { customer_id } = input
+    if (!input.billing || !customer_id) {
       return new StepResponse("none" as const, null)
     }
+    const typed = JSON.parse(
+      openForRequest(input.billing, billingBinding(normalizeEmail(input.email)))
+    ) as TypedBilling
     const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
       entity: "customer",
       fields: ["billing_profile.id"],
@@ -197,7 +191,9 @@ export const wholesaleBillingProfileStep = createStep(
       return new StepResponse("kept" as const, null)
     }
     const service = container.resolve<BillingProfileModuleService>(BILLING_PROFILE_MODULE)
-    const profile = await service.createBillingProfiles(billing.data)
+    const profile = await service.createBillingProfiles(
+      service.prepareProfileData({ type: "corporate", ...typed }, customer_id)
+    )
     await container.resolve(ContainerRegistrationKeys.LINK).create({
       [Modules.CUSTOMER]: { customer_id },
       [BILLING_PROFILE_MODULE]: { billing_profile_id: profile.id },

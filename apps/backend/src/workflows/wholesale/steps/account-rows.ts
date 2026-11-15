@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ConflictError, uniqueViolationKeys } from "../../../lib/errors"
-import { allows, resendRefusal } from "../../../lib/wholesale"
+import { allows } from "../../../lib/wholesale"
 import type { AccountAction, AccountStatus } from "../../../lib/wholesale"
 import { WHOLESALE_MODULE } from "../../../modules/wholesale"
 import type WholesaleModuleService from "../../../modules/wholesale/service"
@@ -33,8 +33,8 @@ export async function accountById(
 const ACTION_STATE: Record<AccountAction, string> = {
   deactivate: "active",
   reactivate: "inactive",
-  resend: "pending",
   delete: "pending",
+  password: "bound",
 }
 
 /** The account is in a state that allows the action, or 409 says it is not. */
@@ -137,44 +137,6 @@ export const patchAccountStep = createStep(
   },
   async (before, { container }) => {
     if (before && Object.keys(before).length > 1) {
-      await wholesale(container).updateWholesaleAccounts(before)
-    }
-  }
-)
-
-/**
- * A pending account's invitation marked sent again (security review L2):
- * not within an hour of the last send, at most five resends, never once
- * it is past its days; 409 says which. Its 90 days restart, capped at 180
- * from the account's opening (`inviteExpiresAt`). Undone by the old date
- * and count.
- */
-export const markResentStep = createStep(
-  "wholesale-mark-resent",
-  async (input: { id: string; updated_by: string | null }, { container }) => {
-    const account = await accountById(container, input.id)
-    const refusal = resendRefusal(account, new Date())
-    if (refusal) {
-      throw new ConflictError(refusal)
-    }
-    await wholesale(container).updateWholesaleAccounts({
-      id: account.id,
-      invited_at: new Date(),
-      invite_count: account.invite_count + 1,
-      updated_by: input.updated_by,
-    })
-    return new StepResponse(
-      { id: account.id },
-      {
-        id: account.id,
-        invited_at: account.invited_at ?? null,
-        invite_count: account.invite_count,
-        updated_by: account.updated_by ?? null,
-      }
-    )
-  },
-  async (before, { container }) => {
-    if (before) {
       await wholesale(container).updateWholesaleAccounts(before)
     }
   }

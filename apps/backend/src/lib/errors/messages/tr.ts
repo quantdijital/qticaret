@@ -795,10 +795,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "wholesale.own_prices_off": "Bu toptancıya özel fiyatlar açık değil; önce açın.",
   "wholesale.tax_pair": "Vergi dairesi ve vergi numarasını birlikte girin.",
   "wholesale.company_for_tax": "Vergi bilgisi için firma adı gerekir.",
-  "wholesale.invite_too_soon":
-    "Davet az önce gönderildi; bir saat sonra yeniden gönderebilirsiniz.",
-  "wholesale.invite_limit": "Bu davet en çok 5 kez yeniden gönderilebilir.",
-  "wholesale.invite_expired": "Bu davetin süresi doldu; toptancıyı silip yeniden açın.",
+  "wholesale.account_not_bound": "Bu toptancının henüz bir müşteri hesabı yok.",
+  "wholesale.unproven_signup":
+    "Bu e-postayla açılmış ama adresi doğrulanmamış bir hesap var. Hesabı devralırsanız şifresi değişir ve açık oturumları kapanır.",
+  "wholesale.password_required": "Toptancının giriş yapacağı şifreyi yazın.",
+  "wholesale.login_in_use":
+    "Bu e-posta adresi mağaza ekibinden birinin girişinde kullanılıyor; toptancı için başka bir adres kullanın.",
+  "wholesale.login_not_made": "Toptancının girişi hazırlanamadı. Biraz sonra yeniden deneyin.",
+  "wholesale.no_password_login":
+    "Bu müşteri e-posta ve şifreyle değil, başka bir yolla (ör. Google) giriş yapıyor; şifre belirlenemez.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "platform_settings.color_contrast":

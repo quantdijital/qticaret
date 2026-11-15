@@ -1,7 +1,6 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
-import { sendAccountMessageStep } from "../steps/account-message"
-import { checkAccountStep, markResentStep, patchAccountStep } from "../steps/account-rows"
+import { checkAccountStep, patchAccountStep } from "../steps/account-rows"
 import { repriceCartsStep } from "../steps/carts"
 import { syncMembershipsStep } from "../steps/memberships"
 
@@ -81,31 +80,6 @@ export const reactivateAccountWorkflow = createWorkflow(
     releaseLockStep({ key: lock })
     return new WorkflowResponse(
       transform({ input, carts }, ({ input, carts }) => ({ id: input.id, carts }))
-    )
-  }
-)
-
-/**
- * A pending wholesaler's invitation sent again (ADR-0068 §3, decision
- * 13; review L2): an hour after the last send at the soonest, five times
- * at most, its 90 days restarting but never past 180 from the opening.
- * The message goes last; one that does not go keeps the new date.
- */
-export const resendInvitationWorkflow = createWorkflow(
-  "wholesale-resend-invitation",
-  (input: StatusInput) => {
-    const lock = transform({ input }, ({ input }) => lockOf(input))
-    acquireLockStep({ key: lock, timeout: 5, ttl: 60 })
-    checkAccountStep(
-      transform({ input }, ({ input }) => ({ id: input.id, action: "resend" as const }))
-    )
-    markResentStep(input)
-    releaseLockStep({ key: lock })
-    const sent = sendAccountMessageStep(
-      transform({ input }, ({ input }) => ({ account_id: input.id }))
-    )
-    return new WorkflowResponse(
-      transform({ input, sent }, ({ input, sent }) => ({ id: input.id, message: sent.message }))
     )
   }
 )

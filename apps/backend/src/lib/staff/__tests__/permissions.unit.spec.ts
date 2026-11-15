@@ -411,7 +411,7 @@ describe("staff roles", () => {
         ["GET", "/admin/wholesale/accounts/wacc_1/lines"],
         ["POST", "/admin/wholesale/accounts"],
         ["POST", "/admin/wholesale/accounts/wacc_1/deactivate"],
-        ["POST", "/admin/wholesale/accounts/wacc_1/invitation"],
+        ["POST", "/admin/wholesale/accounts/wacc_1/password"],
         ["POST", "/admin/wholesale/accounts/wacc_1/prices"],
         ["DELETE", "/admin/wholesale/accounts/wacc_1"],
       ] as const) {
@@ -495,7 +495,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/wholesale/accounts/:id": false,
   "POST /admin/wholesale/accounts/:id/deactivate": false,
   "POST /admin/wholesale/accounts/:id/reactivate": false,
-  "POST /admin/wholesale/accounts/:id/invitation": false,
+  "POST /admin/wholesale/accounts/:id/password": false,
   "POST /admin/wholesale/accounts/:id/prices": false,
   // adr/0050: bulk messages are written and sent by the owner and admin only
   "POST /admin/bulk-messages": false,

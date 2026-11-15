@@ -13,6 +13,7 @@ import {
   accountApi,
   accountRecords,
   groupsOf,
+  testPassword,
   tierRecords,
   wholesaleApi,
 } from "../helpers/wholesale"
@@ -31,8 +32,8 @@ const message = (answer: { data: unknown }) => (answer.data as { message?: strin
 
 /**
  * ADR-0068 slice 1b: wholesalers opened, changed, closed and reopened by
- * the owner and admin. A registered address is a wholesaler at once; any
- * other waits on its invitation. Closed, the wholesaler pays retail on
+ * the owner and admin, active at once (Ek 2026-11-15 (2)): a new address
+ * with the password staff typed, a proven customer with their own. Closed, the wholesaler pays retail on
  * the next request and their open cart is priced again. Retail is 100 TL;
  * the level sells at 80.00 (66.67 net).
  */
@@ -152,7 +153,17 @@ medusaIntegrationTestRunner({
           own_prices: false,
         },
         billing_profile: "written",
+        // Case 2: a customer who proved the address keeps their own password
+        password: "kept",
       })
+      // Their own password still signs them in
+      const own = await settle(
+        http.post("/auth/customer/emailpass", {
+          email: customer.email,
+          password: customer.password,
+        })
+      )
+      expect(own.status).toBe(200)
       // The address it was opened for is the customer's now: the account keeps none
       expect((await accountRecords(getContainer(), made.data.account.id)).email).toBeNull()
       const { groupId } = await tierRecords(getContainer(), tier.id)
@@ -173,37 +184,87 @@ medusaIntegrationTestRunner({
       expect([again.status, message(again)]).toEqual([409, "wholesale.exists"])
     })
 
-    it("invites an address with no account, pending, its invitation good for 90 days", async () => {
+    it("opens an address with no account with staff's password: active, signed in at once (case 1)", async () => {
       await staff.flag(true)
+      const { productId, tier } = await level("yeni")
       const email = fresh()
+      const password = testPassword()
       const made = await accounts.create({
         email,
         contact_name: "Ayşe Yılmaz",
         company_name: "Yılmaz Ticaret",
         tax_office: "Kadıköy",
         tax_id: "1234567890",
-        own_prices: true,
+        tier_id: tier.id,
+        password,
         min_quantity: 12,
       })
       expect(made.status).toBe(201)
       expect(made.data).toMatchObject({
         account: {
-          status: "pending",
+          status: "active",
           email,
           company_name: "Yılmaz Ticaret",
           contact_name: "Ayşe Yılmaz",
-          customer: null,
-          own_prices: true,
           min_quantity: 12,
         },
-        // Not kept for a pending wholesaler: they enter it on the storefront
-        billing_profile: "none",
+        password: "set",
+        billing_profile: "written",
       })
-      const days =
-        (new Date(made.data.account.invitation_expires_at ?? 0).getTime() - Date.now()) / 86_400_000
-      expect(Math.round(days)).toBe(90)
+      expect(made.data.account.customer).not.toBeNull()
+      // The password is in no answer
+      expect(JSON.stringify(made.data)).not.toContain(password)
+      const login = await settle(
+        http.post<{ token: string }>("/auth/customer/emailpass", { email, password })
+      )
+      expect(login.status).toBe(200)
+      const headers = { ...store.headers, authorization: `Bearer ${login.data.token}` }
+      expect(await priceFor(productId, headers)).toBe(80)
+
       const again = await accounts.create({ email, contact_name: "Ayşe", own_prices: true })
       expect([again.status, message(again)]).toEqual([409, "wholesale.exists"])
+      const none = await accounts.create({
+        email: fresh(),
+        contact_name: "Ayşe",
+        own_prices: true,
+        password: undefined,
+      })
+      expect([none.status, message(none)]).toEqual([400, "wholesale.password_required"])
+    })
+
+    it("sets a wholesaler's new password, every older sign-in ended", async () => {
+      await staff.flag(true)
+      const { productId, tier } = await level("sifre")
+      const email = fresh()
+      const first = testPassword()
+      const account = await accounts.made({
+        email,
+        contact_name: "Ali Kaya",
+        tier_id: tier.id,
+        password: first,
+      })
+      const before = await settle(
+        http.post<{ token: string }>("/auth/customer/emailpass", { email, password: first })
+      )
+      const oldHeaders = { ...store.headers, authorization: `Bearer ${before.data.token}` }
+      expect(await priceFor(productId, oldHeaders)).toBe(80)
+      // Sign-ins are compared by the second
+      await new Promise((resolve) => setTimeout(resolve, 1_100))
+
+      const second = testPassword()
+      const set = await accounts.password(account.id, second)
+      expect(set.status).toBe(200)
+      expect(JSON.stringify(set.data)).not.toContain(second)
+      expect((await settle(http.get("/store/customers/me", { headers: oldHeaders }))).status).toBe(
+        401
+      )
+      expect(
+        (await settle(http.post("/auth/customer/emailpass", { email, password: first }))).status
+      ).toBe(401)
+      const after = await settle(
+        http.post<{ token: string }>("/auth/customer/emailpass", { email, password: second })
+      )
+      expect(after.status).toBe(200)
     })
 
     it("finds wholesalers on the list by company and by state", async () => {
@@ -214,11 +275,11 @@ medusaIntegrationTestRunner({
         company_name: "Yılmaz Ticaret",
         own_prices: true,
       })
-      const listed = await accounts.list(`q=${encodeURIComponent("yılmaz")}&status=pending`)
+      const listed = await accounts.list(`q=${encodeURIComponent("yılmaz")}&status=active`)
       expect(listed.status).toBe(200)
       expect(listed.data.accounts.map((account) => account.id)).toContain(made.id)
-      const active = await accounts.list("status=active")
-      expect(active.data.accounts.map((account) => account.id)).not.toContain(made.id)
+      const pending = await accounts.list("status=pending")
+      expect(pending.data.accounts.map((account) => account.id)).not.toContain(made.id)
     })
 
     /** A level's wholesaler with one unit in their cart at 80. */

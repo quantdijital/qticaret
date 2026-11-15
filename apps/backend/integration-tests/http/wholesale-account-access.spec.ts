@@ -1,13 +1,18 @@
 import { randomUUID } from "node:crypto"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
 import type { HttpClient } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
-import { accountApi, accountRecords, wholesaleApi } from "../helpers/wholesale"
+import {
+  accountApi,
+  accountRecords,
+  legacyPendingAccount,
+  testPassword,
+  wholesaleApi,
+} from "../helpers/wholesale"
 
 jest.setTimeout(240 * 1000)
 
@@ -17,10 +22,10 @@ const message = (answer: { data: unknown }) => (answer.data as { message?: strin
  * ADR-0068 §9 for wholesalers (slice 1b): the routes take the account's id
  * only, its hidden group and own list are the module's (read as missing,
  * written as `wholesale.managed` through Medusa's routes, left out of its
- * lists), only a pending wholesaler is taken back, with its own list,
- * invitations are sent again to a pending one only, an hour apart, five
- * times, within 180 days and a staff member's budget (security review
- * L2), and the customer's wholesale link is the managers' to expand (M3).
+ * lists), only a pending wholesaler (one invited before staff set
+ * passwords, Ek 2026-11-15 (2)) is taken back, with its own list, a new
+ * password is set for a bound one only, and the customer's wholesale link
+ * is the managers' to expand (M3).
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -80,7 +85,7 @@ medusaIntegrationTestRunner({
     })
 
     it("takes a pending wholesaler back with its own list, never an active one", async () => {
-      const pending = await accounts.made({
+      const pending = await legacyPendingAccount(getContainer(), {
         email: fresh(),
         contact_name: "Ali Kaya",
         own_prices: true,
@@ -110,26 +115,10 @@ medusaIntegrationTestRunner({
       expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
     })
 
-    /** Moves an account's dates back as time would (the columns, not the API). */
-    const age = (id: string, fields: Record<string, unknown>) =>
-      getContainer()
-        .resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)("wholesale_account")
-        .where({ id })
-        .update(fields)
-
-    const HOUR = 3_600_000
-    const DAY = 24 * HOUR
-
-    it("sends an invitation again to a pending wholesaler only, an hour apart (L2)", async () => {
-      const pending = await accounts.made({ email: fresh(), contact_name: "Ali", own_prices: true })
-      const soon = await accounts.action(pending.id, "invitation")
-      expect([soon.status, message(soon)]).toEqual([409, "wholesale.invite_too_soon"])
-
-      await age(pending.id, { invited_at: new Date(Date.now() - 2 * HOUR) })
-      const resent = await accounts.action(pending.id, "invitation")
-      expect(resent.status).toBe(200)
-      expect(resent.data.message).toMatch(/^(sent|not_sent)$/)
-      expect((await accounts.get(pending.id)).data.account).toMatchObject({ invitations_sent: 2 })
+    it("sets a new password for a bound wholesaler only, by the platform's rule", async () => {
+      const pending = await legacyPendingAccount(getContainer(), { email: fresh() })
+      const unbound = await accounts.password(pending.id, testPassword())
+      expect([unbound.status, message(unbound)]).toEqual([409, "wholesale.account_not_bound"])
 
       const customer = await registerCustomer(http, store)
       const active = await accounts.made({
@@ -137,26 +126,13 @@ medusaIntegrationTestRunner({
         contact_name: "Ali Kaya",
         own_prices: true,
       })
-      const refused = await accounts.action(active.id, "invitation")
-      expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
-    })
-
-    it("resends five times at most, the invitation never past 180 days (L2)", async () => {
-      const pending = await accounts.made({ email: fresh(), contact_name: "Ali", own_prices: true })
-      await age(pending.id, { invited_at: new Date(Date.now() - 2 * HOUR), invite_count: 6 })
-      const capped = await accounts.action(pending.id, "invitation")
-      expect([capped.status, message(capped)]).toEqual([409, "wholesale.invite_limit"])
-
-      // Opened 100 days ago: a resend now ends 180 days from the opening, 80 from today
-      await age(pending.id, {
-        invited_at: new Date(Date.now() - 2 * HOUR),
-        invite_count: 2,
-        created_at: new Date(Date.now() - 100 * DAY),
+      const weak = await accounts.password(active.id, "123")
+      expect(weak.status).toBe(400)
+      const extra = await staff.post(`/admin/wholesale/accounts/${active.id}/password`, {
+        password: testPassword(),
+        email: "x@example.com",
       })
-      const resent = await accounts.action(pending.id, "invitation")
-      expect(resent.status).toBe(200)
-      const ends = new Date(resent.data.account.invitation_expires_at ?? 0).getTime()
-      expect(Math.round((ends - Date.now()) / DAY)).toBe(80)
+      expect(extra.status).toBe(400)
     })
 
     it("expands a customer's wholesale link for the owner and admin only (M3)", async () => {

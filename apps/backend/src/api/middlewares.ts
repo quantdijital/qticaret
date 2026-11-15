@@ -33,6 +33,7 @@ import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { storeProfileOf } from "./http/client-ip"
 import { ACCOUNT_ROUTES } from "./http/account-routes"
+import { SIGN_IN_EPOCH_ROUTES } from "./http/sign-in-epoch"
 import { ABANDONED_CART_ROUTES } from "./http/abandoned-cart-routes"
 import { ADDON_ROUTES } from "./http/addon-routes"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
@@ -324,6 +325,8 @@ export default defineMiddlewares({
     // adr/0061 Ek C14: Settings > Abonelik's reading
     ...PLAN_ROUTES,
     ...ACCOUNT_ROUTES,
+    // ADR-0068 Ek 2026-11-15 (2): a changed password ends every older sign-in on the Store
+    ...SIGN_IN_EPOCH_ROUTES,
     // 2026-11-06: customers edited and guests added by staff, carts left behind
     ...CUSTOMER_ROUTES,
     ...ABANDONED_CART_ROUTES,

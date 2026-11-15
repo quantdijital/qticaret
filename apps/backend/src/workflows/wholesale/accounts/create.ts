@@ -7,7 +7,6 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, createRemoteLinkStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { normalizeEmail } from "../../../lib/wholesale"
-import type { ProtectedProfileData } from "../../../modules/billing-profile/service"
 import { WHOLESALE_MODULE } from "../../../modules/wholesale"
 import {
   activateAccountStep,
@@ -15,7 +14,7 @@ import {
   wholesaleBillingProfileStep,
   writeCustomerNamesStep,
 } from "../steps/account-customer"
-import { sendAccountMessageStep } from "../steps/account-message"
+import { ensureLoginStep } from "../steps/account-login"
 import { createAccountRowStep } from "../steps/account-rows"
 import { syncMembershipsStep } from "../steps/memberships"
 import { repriceCartsStep } from "../steps/carts"
@@ -31,23 +30,28 @@ export interface CreateAccountInput {
   /** The own list's rate; opens the list. */
   rate_bps: number | null
   min_quantity: number | null
-  /** The invoice identity staff typed, sealed with the customer it was sealed for. */
-  billing: { customer_id: string; data: ProtectedProfileData } | null
+  /** The password staff typed, sealed for the request (`sealPassword`); null when none. */
+  sealed_password: string | null
+  /** Staff take over an address whose sign-up never proved it (Ek 2026-11-15 (2), case 3). */
+  take_over: boolean
+  /** The invoice identity staff typed, sealed for the request (`billingBinding`). */
+  billing: string | null
   created_by: string | null
 }
 
 /**
- * A new wholesaler (ADR-0068 §3), steps undone in reverse if one fails:
- * the address checked, the account written, its own list opened if asked.
- * When the address has a registered customer the account is theirs and
- * active at once: names handed on, linked, in its groups (and out of the
- * segments'), open carts priced again, the invoice identity written, and
- * "your wholesale account is open" sent. Otherwise it waits, pending, for
- * the invitation to the storefront's sign-up page. The message goes last
- * and never undoes the rest.
+ * A new wholesaler (ADR-0068 §3, Ek 2026-11-15 (2)), steps undone in
+ * reverse if one fails: the address checked, the account written, the
+ * customer and its sign-in made or taken as the address allows
+ * (`ensureLoginStep`: a new one with staff's password; a proven customer
+ * keeping theirs; an unconfirmed sign-up only when staff take it over),
+ * then the account bound and active at once: names handed on, linked, in
+ * its groups (and out of the segments'), open carts priced again, the
+ * invoice identity written. No message goes: staff hand the wholesaler
+ * their password.
  */
 export const createAccountWorkflow = createWorkflow(
-  // The address, names and sealed tax id pass through it: kept out of the workflow store (L3)
+  // The address, names, sealed password and tax id pass through it: kept out of the store (L3)
   { name: "wholesale-create-account", store: false },
   (input: CreateAccountInput) => {
     const lock = transform(
@@ -58,15 +62,25 @@ export const createAccountWorkflow = createWorkflow(
     const found = resolveNewAccountStep(
       transform({ input }, ({ input }) => ({ email: input.email, tier_id: input.tier_id }))
     )
-    const account = createAccountRowStep(
+    const login = ensureLoginStep(
       transform({ input, found }, ({ input, found }) => ({
+        email: input.email,
+        login: found.login,
+        sealed_password: input.sealed_password,
+        take_over: input.take_over,
+        contact_name: input.contact_name,
+        company_name: input.company_name,
+      }))
+    )
+    const account = createAccountRowStep(
+      transform({ input }, ({ input }) => ({
         email: normalizeEmail(input.email),
         company_name: input.company_name,
         contact_name: input.contact_name,
         tier_id: input.tier_id,
         rate_bps: input.rate_bps,
         min_quantity: input.min_quantity,
-        invited_at: found.customer_id ? null : new Date(),
+        invited_at: null,
         created_by: input.created_by,
       }))
     )
@@ -79,54 +93,48 @@ export const createAccountWorkflow = createWorkflow(
         input: transform({ account }, ({ account }) => ({ account_id: account.id })),
       })
     })
-    when("wholesale-create-active", { found }, ({ found }) => found.customer_id !== null).then(
-      () => {
-        const bound = transform({ account, found }, ({ account, found }) => ({
-          id: account.id,
-          customer_id: found.customer_id ?? "",
-        }))
-        const activated = activateAccountStep(bound)
-        writeCustomerNamesStep(
-          transform({ found, activated }, ({ found, activated }) => ({
-            customer_id: found.customer_id,
-            names: activated.fill,
-          }))
-        )
-        createRemoteLinkStep(
-          transform({ bound }, ({ bound }) => [
-            {
-              [Modules.CUSTOMER]: { customer_id: bound.customer_id },
-              [WHOLESALE_MODULE]: { wholesale_account_id: bound.id },
-            },
-          ])
-        )
-        const moved = syncMembershipsStep(
-          transform({ account }, ({ account }) => ({ account_id: account.id }))
-        )
-        repriceCartsStep(
-          transform({ found, moved }, ({ found, moved }) => ({
-            customer_id: found.customer_id,
-            changed: moved.added + moved.removed > 0,
-          }))
-        )
-      }
+    const bound = transform({ account, login }, ({ account, login }) => ({
+      id: account.id,
+      customer_id: login.customer_id,
+    }))
+    const activated = activateAccountStep(bound)
+    writeCustomerNamesStep(
+      transform({ bound, activated }, ({ bound, activated }) => ({
+        customer_id: bound.customer_id,
+        names: activated.fill,
+      }))
+    )
+    createRemoteLinkStep(
+      transform({ bound }, ({ bound }) => [
+        {
+          [Modules.CUSTOMER]: { customer_id: bound.customer_id },
+          [WHOLESALE_MODULE]: { wholesale_account_id: bound.id },
+        },
+      ])
+    )
+    const moved = syncMembershipsStep(
+      transform({ account }, ({ account }) => ({ account_id: account.id }))
+    )
+    repriceCartsStep(
+      transform({ bound, moved }, ({ bound, moved }) => ({
+        customer_id: bound.customer_id,
+        changed: moved.added + moved.removed > 0,
+      }))
     )
     const billing = wholesaleBillingProfileStep(
-      transform({ input, found }, ({ input, found }) => ({
-        customer_id: found.customer_id,
+      transform({ input, bound }, ({ input, bound }) => ({
+        customer_id: bound.customer_id,
+        email: input.email,
         billing: input.billing,
       }))
     )
     releaseLockStep({ key: lock })
-    const sent = sendAccountMessageStep(
-      transform({ account }, ({ account }) => ({ account_id: account.id }))
-    )
     return new WorkflowResponse(
-      transform({ account, found, billing, sent }, ({ account, found, billing, sent }) => ({
+      transform({ account, login, billing }, ({ account, login, billing }) => ({
         id: account.id,
-        status: found.customer_id ? ("active" as const) : ("pending" as const),
+        status: "active" as const,
+        password: login.password,
         billing_profile: billing,
-        message: sent.message,
       }))
     )
   }

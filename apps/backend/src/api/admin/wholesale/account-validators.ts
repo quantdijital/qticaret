@@ -5,14 +5,17 @@ import { minQuantity, percent } from "./validators"
 /**
  * Wholesalers' bodies (ADR-0068 §3). The account's Medusa group and list
  * are never named here: the routes take the account's id, the module
- * finds the rest (§9, IDOR). No password: the wholesaler sets it on the
- * storefront.
+ * finds the rest (§9, IDOR). A password is staff's to type (Ek
+ * 2026-11-15 (2)): checked by the platform's rule in the route, then only
+ * ever sealed; never trimmed, logged or kept.
  */
 
 const email = z.string().trim().toLowerCase().max(254).pipe(z.email())
 const companyName = z.string().trim().min(1).max(200)
 const contactName = z.string().trim().min(2).max(100)
 const tierId = z.string().trim().min(1).max(100)
+/** The rule (length, common words, breaches) is `newPasswordProblem`'s, in the route. */
+export const password = z.string().min(1).max(256)
 // Spaces are common when typing long numbers; the rest must be digits
 const taxId = z
   .string()
@@ -33,6 +36,10 @@ export const AdminPostWholesaleAccount = z
     /** The own list's rate; opens the list. */
     percent: percent.nullable().default(null),
     min_quantity: minQuantity.nullable().default(null),
+    /** The sign-in's password; not applied to a customer who proved the address (they keep theirs). */
+    password: password.optional(),
+    /** Take over an address whose sign-up never proved it: its password replaced, its sign-ins ended. */
+    take_over: z.boolean().default(false),
   })
   .strict()
   .superRefine((body, ctx) => {
@@ -66,8 +73,12 @@ export const AdminUpdateWholesaleAccount = z
   .refine((body) => Object.keys(body).length > 0)
 export type AdminUpdateWholesaleAccountType = z.infer<typeof AdminUpdateWholesaleAccount>
 
-/** A state change or a resend takes no body: anything sent is refused. */
+/** A state change takes no body: anything sent is refused. */
 export const AdminPostWholesaleAccountAction = z.object({}).strict()
+
+/** A wholesaler's new password, typed by staff (Ek 2026-11-15 (2)). */
+export const AdminPostWholesalePassword = z.object({ password }).strict()
+export type AdminPostWholesalePasswordType = z.infer<typeof AdminPostWholesalePassword>
 
 /** A page of the shop's wholesalers, newest first; `q` finds by address, company or name. */
 export const AdminGetWholesaleAccounts = z

@@ -9,7 +9,7 @@ import { ID } from "../types"
 
 /**
  * Wholesalers (ADR-0068 §3, adr/0011): opened, changed, closed, reopened,
- * invited again, taken back, and their own hand-entered prices, before
+ * given a new password, taken back, and their own hand-entered prices, before
  * and after. The address, company and contact are not written (the
  * customer record and the account hold them); the tax number never is.
  * A new account is found by the address in its body.
@@ -122,7 +122,8 @@ export const WHOLESALE_ACCOUNT_RESOURCES: readonly AuditedResource[] = [
   byId("DELETE", "", ""),
   byId("POST", "/deactivate", "/deactivate"),
   byId("POST", "/reactivate", "/reactivate"),
-  byId("POST", "/invitation", "/invitation"),
+  // Ek 2026-11-15 (2): that a new password was set, never the password
+  byId("POST", "/password", "/password"),
   {
     method: "POST",
     route: "POST /admin/wholesale/accounts/:id/prices",

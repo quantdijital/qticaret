@@ -16,12 +16,6 @@ export const INVITE_DAYS = 90
  */
 export const INVITE_CAP_DAYS = 180
 
-/** Resends one invitation may have (the first send not counted). */
-export const MAX_RESENDS = 5
-
-/** The shortest time between two sends of one invitation. */
-export const RESEND_COOLDOWN_MS = 60 * 60 * 1000
-
 const DAY = 24 * 60 * 60 * 1000
 
 /** An invitation's sends: the last one and the first (the account's opening). */
@@ -47,25 +41,6 @@ export const inviteCutoff = (now: Date): { invitedBefore: Date; openedBefore: Da
   invitedBefore: new Date(now.getTime() - INVITE_DAYS * DAY),
   openedBefore: new Date(now.getTime() - INVITE_CAP_DAYS * DAY),
 })
-
-/**
- * Why a resend is refused now, or null (security review L2): an hour
- * since the last send, five resends at most, and never for an invitation
- * already past its days (it is deleted; open the wholesaler anew).
- */
-export function resendRefusal(
-  account: { invited_at: Date | string | null; created_at: Date | string; invite_count: number },
-  now: Date
-): string | null {
-  if (!isInviteLive({ invitedAt: account.invited_at, openedAt: account.created_at }, now)) {
-    return "wholesale.invite_expired"
-  }
-  if (account.invite_count > MAX_RESENDS) {
-    return "wholesale.invite_limit"
-  }
-  const last = account.invited_at ? new Date(account.invited_at).getTime() : 0
-  return now.getTime() - last < RESEND_COOLDOWN_MS ? "wholesale.invite_too_soon" : null
-}
 
 /** An address as accounts are kept and matched: trimmed, lower case. */
 export const normalizeEmail = (email: string): string => email.trim().toLowerCase()
@@ -161,8 +136,10 @@ export const isEmptyMembershipPlan = (plan: MembershipPlan): boolean =>
 export const ACCOUNT_ACTIONS = {
   deactivate: ["active"],
   reactivate: ["inactive"],
-  resend: ["pending"],
+  // A pending account is one invited before staff set passwords (Ek 2026-11-15 (2)): taken back only
   delete: ["pending"],
+  // A new password typed by staff (Ek 2026-11-15 (2)): a bound account, open or closed
+  password: ["active", "inactive"],
 } as const satisfies Record<string, readonly AccountStatus[]>
 
 export type AccountAction = keyof typeof ACCOUNT_ACTIONS
