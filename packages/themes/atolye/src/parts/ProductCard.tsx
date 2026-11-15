@@ -2,10 +2,10 @@ import type { ShelfColumns, ShelfPhoneColumns } from "@qticaret/types"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
-import { CardBadges, CardRating, drawnCardVariant, isOut, quickAddWords } from "./card-parts"
+import { CardBadges, drawnCardVariant, isOut, quickAddWords } from "./card-parts"
+import { CardPriceRow, CardStars } from "./card-rows"
 import { CompactCard } from "./CompactCard"
 import { FramedCard } from "./FramedCard"
-import { Price } from "./Price"
 import { QuickAdd } from "./QuickAdd"
 import { shelfCard, shelfGrid, shelfSizes } from "./shelf-grid"
 
@@ -95,8 +95,8 @@ export function ProductCard({
             {product.title}
           </a>
         </h3>
-        {product.rating && <CardRating rating={product.rating} />}
-        {product.price && <Price price={product.price} t={t} className="mt-auto pt-1" />}
+        <CardStars product={product} t={t} />
+        <CardPriceRow product={product} t={t} className="mt-auto pt-1" />
       </div>
     </article>
   )

@@ -26,6 +26,7 @@ import { Quantity } from "./Quantity"
 import { StockAlert } from "./StockAlert"
 import { useScrolledAway } from "./use-scrolled-away"
 import { announceVariant, pressedAgain } from "./variant-pictures"
+import { STOCK_ALERT_ID } from "./anchors"
 import type {
   AddonWords,
   AlertWords,
@@ -36,7 +37,7 @@ import type {
 } from "./words"
 
 const FORM = "sepet-formu"
-const ALERT = "stok-bildirimi"
+const ALERT = STOCK_ALERT_ID
 
 /**
  * The buy column's working part: the chosen variant's price (with the

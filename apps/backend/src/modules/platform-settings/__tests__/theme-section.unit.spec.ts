@@ -41,7 +41,13 @@ describe("theme section", () => {
         hover_image: true,
         delivery_note: true,
         full_button: true,
-        empty_stars: false,
+        // adr/0049 Ek 2026-11-15: every pill, the price on a sold-out card, no stars without reviews
+        sale_badge: true,
+        low_stock_badge: true,
+        sold_out_badge: true,
+        sold_out_row: "price",
+        no_reviews: "hide",
+        button_style: "outline",
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",
@@ -263,15 +269,15 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
     const card = (product_card: Record<string, unknown>) =>
       full.safeParse({ ...defaults, product_card: { ...defaults.product_card, ...product_card } })
         .success
-    expect(card({ variant: "framed", hover_image: false, empty_stars: true })).toBe(true)
+    expect(card({ variant: "framed", hover_image: false, no_reviews: "empty_stars" })).toBe(true)
     // `technical` comes with Faz 4's card facts, not yet
     expect(card({ variant: "technical" })).toBe(false)
     expect(card({ full_button: "yes" })).toBe(false)
     // A patch of one switch keeps the others
     const after = full.parse(
-      mergePatch(defaults, patch.parse({ product_card: { empty_stars: true } }))
+      mergePatch(defaults, patch.parse({ product_card: { full_button: false } }))
     )
-    expect(after.product_card).toEqual({ ...defaults.product_card, empty_stars: true })
+    expect(after.product_card).toEqual({ ...defaults.product_card, full_button: false })
   })
 
   it("takes the section spacing from its list, the contract's (Tezgâh audit K-11)", () => {

@@ -111,8 +111,18 @@ export interface StoreThemeSettings {
     delivery_note: boolean
     /** A framed card's add button across its foot instead of the round "+" (E5). */
     full_button: boolean
-    /** Empty stars on a framed card without reviews, while the stars are shown (E5). */
-    empty_stars: boolean
+    /** The discount pill on the photo ("%30"), on every variant (adr/0049 Ek 2026-11-15). */
+    sale_badge: boolean
+    /** The "Az kaldı" pill on a low stock bucket; the compact card draws none. */
+    low_stock_badge: boolean
+    /** The "Tükendi" pill on a sold-out card's photo. */
+    sold_out_badge: boolean
+    /** A sold-out card's price row (`CARD_SOLD_OUT_ROWS`). */
+    sold_out_row: CardSoldOutRow
+    /** Where the stars stand on a product without reviews, while they are shown (`CARD_NO_REVIEWS`). */
+    no_reviews: CardNoReviews
+    /** The framed card's add button across its foot (`CARD_BUTTON_STYLES`). */
+    button_style: CardButtonStyle
   }
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
@@ -128,6 +138,33 @@ export interface StoreThemeSettings {
  */
 export const SECTION_SPACINGS = ["compact", "normal", "roomy"] as const
 export type SectionSpacing = (typeof SECTION_SPACINGS)[number]
+
+/**
+ * A sold-out card's price row (adr/0049 Ek 2026-11-15, the owner's
+ * decision b): `price` the price stays and nothing adds it to the cart
+ * (today's card, the default), `text` "Tükendi" in its place, `notify`
+ * "Gelince haber ver" to the product page's stock alert form.
+ */
+export const CARD_SOLD_OUT_ROWS = ["price", "text", "notify"] as const
+export type CardSoldOutRow = (typeof CARD_SOLD_OUT_ROWS)[number]
+
+/**
+ * A card's stars on a product without reviews, while the shop shows the
+ * stars (decision c): `hide` nothing (today's, the default), `empty_stars`
+ * empty stars and "Henüz yorum yok", `write_first` "İlk yorumu sen yaz" to
+ * the product page's reviews. Replaces the framed card's `empty_stars` switch.
+ */
+export const CARD_NO_REVIEWS = ["hide", "empty_stars", "write_first"] as const
+export type CardNoReviews = (typeof CARD_NO_REVIEWS)[number]
+
+/**
+ * The framed card's add button across its foot (decision d), the
+ * standard's names (`button_style`): `solid` filled in the action's colour,
+ * `outline` the quiet bordered button filled on hover (today's, the
+ * default), `text` an underlined word.
+ */
+export const CARD_BUTTON_STYLES = ["solid", "outline", "text"] as const
+export type CardButtonStyle = (typeof CARD_BUTTON_STYLES)[number]
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
 export interface StorefrontAnswer {

@@ -7843,7 +7843,7 @@
         },
         "faq": {
           "name": "Frequently asked questions",
-          "description": "Questions and answers; search engines are told about them as a FAQ too."
+          "description": "Questions and answers that open and close; shown on the page only."
         },
         "related_products": {
           "name": "Related products",
@@ -8296,6 +8296,7 @@
         "fontsHint": "The storefront loads its fonts from its own server; nothing about visitors goes to third parties.",
         "heading": "Headings",
         "body": "Body text",
+        "fontTerm": "font-family",
         "serif": "serif",
         "sans": "sans-serif",
         "fonts": {
@@ -8313,6 +8314,7 @@
         },
         "shapes": "Corners and buttons",
         "radius": "Corners",
+        "radiusTerm": "border-radius",
         "radii": {
           "sharp": "Sharp",
           "soft": "Soft",
@@ -8336,6 +8338,7 @@
         "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (120 px on a wide screen); Compact brings it to 66 px, Roomy to 144 px.",
         "card": "Product card",
         "ratio": "Image ratio",
+        "ratioTerm": "aspect-ratio",
         "ratios": {
           "4x5": "4:5 (portrait)",
           "1x1": "1:1 (square)",
@@ -8346,6 +8349,30 @@
         "show_brandHint": "The brand's name above the product's on the product card. Nothing shows for a product without a brand.",
         "show_rating": "Show the rating",
         "show_ratingHint": "Stars, the average and the number of reviews on the cards of products with approved reviews. Nothing shows for a product without reviews.",
+        "no_reviews": "Rating row without reviews",
+        "no_reviewsTerm": "rating",
+        "noReviews": {
+          "hide": "Hide",
+          "empty_stars": "Show empty stars",
+          "write_first": "“Write the first review” link"
+        },
+        "no_reviewsHint": "What stands where the stars go on a product without reviews. The link opens the reviews on the product page.",
+        "badges": "Badges",
+        "badgeTerm": "badge",
+        "sale_badge": "Show the sale badge",
+        "sale_badgeHint": "The discount (30%) in the photo's corner of a product on sale.",
+        "low_stock_badge": "Show the “Few left” badge",
+        "low_stock_badgeHint": "On a product running low; no number is shown. The compact card does not draw it.",
+        "sold_out_badge": "Show the “Sold out” badge",
+        "sold_out_badgeHint": "On the photo of a product that has sold out.",
+        "sold_out_row": "Price row when sold out",
+        "sold_out_rowTerm": "sold out",
+        "soldOutRows": {
+          "price": "Keep the price, button off",
+          "text": "“Sold out” text",
+          "notify": "“Notify me” link"
+        },
+        "sold_out_rowHint": "What stands in the price's place. None of them adds the product to the cart from the card; the link opens the stock alert form on the product page.",
         "cardVariant": "Card style",
         "cardVariants": {
           "standard": "Standard",
@@ -8361,8 +8388,14 @@
         "delivery_noteHint": "\"Free shipping\" under the price of a product whose price reaches the free shipping threshold. The threshold is set on the Promotions page.",
         "full_button": "Full-width button",
         "full_buttonHint": "An \"Add to cart\" button at the card's foot; on a product with options \"Options\" opens its page. Off, the round + stays on the photo's corner.",
-        "empty_stars": "Empty stars without reviews",
-        "empty_starsHint": "Empty stars and \"No reviews yet\" on a product without reviews. Only while \"Show rating\" is on.",
+        "button_style": "Button style",
+        "button_styleTerm": "button",
+        "buttonStyles": {
+          "solid": "Solid",
+          "outline": "Outline",
+          "text": "Text"
+        },
+        "button_styleHint": "The “Add to cart” and “Options” button at the card's foot. Outline fills with the main colour while the card is pointed at.",
         "grafit": {
           "action": "Back to Grafit",
           "hint": "Sets every field to the theme's default look (Grafit). The change goes into the draft; the storefront does not change until you publish.",

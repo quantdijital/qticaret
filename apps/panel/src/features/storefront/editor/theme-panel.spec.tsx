@@ -57,7 +57,7 @@ async function openTheme(options: ServeOptions = {}) {
   return screen.findByRole("textbox", { name: "Ana renk" })
 }
 
-async function choose(field: string, option: RegExp | string) {
+async function choose(field: RegExp | string, option: RegExp | string) {
   await user.click(screen.getByRole("combobox", { name: field }))
   await user.click(await screen.findByRole("option", { name: option }))
 }
@@ -80,7 +80,9 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     await openTheme()
     await choose("Kart biçimi", "Çerçeveli")
     await user.click(screen.getByRole("switch", { name: /^Üstüne gelince ikinci fotoğraf/ }))
-    await user.click(screen.getByRole("switch", { name: /^Yorumsuz üründe boş yıldız/ }))
+    await user.click(screen.getByRole("switch", { name: /^İndirim etiketini göster/ }))
+    await choose(/^Tükenmiş üründe fiyat satırı/, "“Gelince haber ver” bağlantısı")
+    await choose(/^Düğme stili/, "Yazı")
     await pass(AUTOSAVE_MS)
 
     await waitFor(() => {
@@ -88,7 +90,9 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
         ...THEME.product_card,
         variant: "framed",
         hover_image: false,
-        empty_stars: true,
+        sale_badge: false,
+        sold_out_row: "notify",
+        button_style: "text",
       })
     })
   })

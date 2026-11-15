@@ -47,7 +47,12 @@ describe("themeSettings", () => {
         hover_image: false,
         delivery_note: true,
         full_button: false,
-        empty_stars: true,
+        sale_badge: false,
+        low_stock_badge: true,
+        sold_out_badge: false,
+        sold_out_row: "notify",
+        no_reviews: "write_first",
+        button_style: "text",
       },
       header: { layout: "left", sticky: false },
       buttons: "square",
@@ -71,7 +76,12 @@ describe("themeSettings", () => {
         hover_image: true,
         delivery_note: true,
         full_button: true,
-        empty_stars: false,
+        sale_badge: true,
+        low_stock_badge: true,
+        sold_out_badge: true,
+        sold_out_row: "price",
+        no_reviews: "hide",
+        button_style: "outline",
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",
@@ -94,6 +104,10 @@ describe("themeSettings", () => {
           variant: "technical",
           hover_image: "yes",
           empty_stars: null,
+          sale_badge: "no",
+          sold_out_row: "hidden",
+          no_reviews: "stars",
+          button_style: "ghost",
         },
         header: { layout: "right", sticky: null },
         buttons: "circle",
@@ -104,6 +118,24 @@ describe("themeSettings", () => {
     expect(settings).toEqual(DEFAULT_THEME)
     expect(themeSettings("not an object", null)).toEqual(DEFAULT_THEME)
     expect(themeSettings({ colors: null }, null)).toEqual(DEFAULT_THEME)
+  })
+
+  it("reads a backend before the no-reviews choice by the framed card's empty stars switch", () => {
+    const old = (empty_stars: unknown, variant = "framed") =>
+      themeSettings({ product_card: { show_rating: true, variant, empty_stars } }, null)
+        .product_card.no_reviews
+    expect(old(true)).toBe("empty_stars")
+    expect(old(false)).toBe("hide")
+    // The switch drew only on the framed card: another's saved look does not change
+    expect(old(true, "standard")).toBe("hide")
+    expect(old(true, "technical")).toBe("hide")
+    expect(
+      themeSettings({ product_card: { empty_stars: true } }, null).product_card.no_reviews
+    ).toBe("hide")
+    expect(
+      themeSettings({ product_card: { empty_stars: true, no_reviews: "write_first" } }, null)
+        .product_card.no_reviews
+    ).toBe("write_first")
   })
 
   it("leaves the section's own version out: it is not a choice", () => {

@@ -1,5 +1,6 @@
 import type {
   BreadcrumbView,
+  CardShownView,
   CardVariant,
   InstallmentSummaryView,
   ProductCardView,
@@ -9,6 +10,7 @@ import type {
 } from "@qticaret/ui"
 import type { PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
 import { framedCard, type FramedCardOptions } from "./card-framed"
+import { cardShown } from "./card-shown"
 import { productImages, variantImages } from "./image"
 import { cardPrice, isAvailable, shownAmount, variantPrice } from "./price"
 import { specGroupsOf, specsOf } from "./specs"
@@ -27,6 +29,8 @@ export interface CardOptions {
   variant?: CardVariant
   /** A framed card's own, from the theme setting; none: a framed card shows only today's. */
   framed?: FramedCardOptions
+  /** Every card's pills and rows (adr/0049 Ek 2026-11-15); none: today's card. */
+  shown?: CardShownView
 }
 
 // Without the shop's settings: the brand as ever, no stars (the setting's own default)
@@ -36,7 +40,7 @@ const NO_FRAMED_EXTRAS: FramedCardOptions = {
   hoverImage: false,
   deliveryNote: false,
   fullButton: false,
-  emptyStars: false,
+  buttonStyle: "outline",
   freeShippingFrom: null,
 }
 
@@ -50,6 +54,7 @@ export function productCard(
   const variants = product.variants ?? []
   const variant = options.variant ?? "standard"
   const framed = framedCard(variant, product, displays, options.framed ?? NO_FRAMED_EXTRAS)
+  const shown = cardShown(options.shown)
   return {
     id: product.id,
     title: product.title,
@@ -60,6 +65,7 @@ export function productCard(
     available: variants.some(isAvailable),
     // Left out for today's card: its view is as it was; the compact card carries no extras
     ...(framed ? { variant, framed } : variant === "compact" ? { variant } : {}),
+    ...(shown ? { shown } : {}),
   }
 }
 

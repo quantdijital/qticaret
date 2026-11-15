@@ -19,6 +19,7 @@ import type { Opened } from "./opened"
 import { SectionPanel } from "./section-panel"
 import { LooksPanel } from "./shared/looks-panel"
 import { ThemePanel } from "./theme-panel"
+import { cardVariantsInUse } from "./forms/theme-registry"
 
 interface OpenedFormProps {
   opened: Opened
@@ -120,6 +121,8 @@ export function OpenedForm({
     return (
       <ThemePanel
         theme={doc.settings.theme}
+        variants={cardVariantsInUse(doc)}
+        focus={opened.focus ?? null}
         problems={partProblems(settingsProblems, "theme")}
         announcement={
           doc.header

@@ -3,6 +3,7 @@
 import { CircleAlert, LoaderCircle, Plus } from "lucide-react"
 import { useActionState, useEffect, useId, useRef } from "react"
 import type { ActionResult, FormAction } from "@qticaret/ui"
+import type { CardButtonStyle } from "@qticaret/types"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { cn } from "@qticaret/ui/lib/utils"
 import { announceCartAdded } from "../frame/events"
@@ -26,28 +27,41 @@ const INITIAL: ActionResult = { ok: false, error: null }
  * A card's quick add: a plain form posting the one variant, quantity 1,
  * to the storefront's add-to-cart action, so it works before the script.
  * On a card a 44 px round button on the photo's corner; `wide`, the
- * filled button the close-up's width; `fill`, a framed card's quiet
- * button across its foot, like its "Seçenekler" (UK5: the button does
- * not shout). Busy while sent; once in, the cart
+ * filled button the close-up's width; `fill`, a framed card's button
+ * across its foot in the shop's look, like its "Seçenekler" (UK5: quiet,
+ * `outline`, unless the shop asks otherwise). Busy while sent; once in, the cart
  * sheet opens and says so; refused, the reason in words with the
  * product's page as the way on.
  */
+/**
+ * A framed card's foot button in the shop's look (adr/0049 Ek 2026-11-15):
+ * `solid` filled in the action's colour, `outline` the quiet bordered one
+ * filled while the card is pointed at (today's), `text` an underlined word.
+ */
+export const cardButtonClass = (look: CardButtonStyle): string =>
+  look === "solid"
+    ? "gf-btn gf-card-btn gf-card-btn--solid"
+    : look === "text"
+      ? "gf-btn gf-btn--quiet gf-card-btn gf-card-btn--text"
+      : "gf-btn gf-btn--quiet gf-card-btn"
+
 export function QuickAdd({
   variantId,
   path,
   action,
   words,
   wide = false,
-  fill = false,
+  fill = null,
 }: {
   variantId: string
   path: string
   action: FormAction
   words: QuickAddWords
   wide?: boolean
-  fill?: boolean
+  /** Across a framed card's foot, in this look; none: the round "+" or `wide`. */
+  fill?: CardButtonStyle | null
 }) {
-  const shown = wide || fill
+  const shown = wide || fill !== null
   const [state, submit, pending] = useActionState(action, INITIAL)
   const sent = useRef(false)
   const errorId = useId()
@@ -72,7 +86,7 @@ export function QuickAdd({
       // A framed card's button keeps to the card's foot: no gap under it until there is an error
       className={cn(
         "relative z-(--z-raised)",
-        fill ? "flex flex-col" : wide ? "flex flex-col gap-2" : "contents"
+        fill !== null ? "flex flex-col" : wide ? "flex flex-col gap-2" : "contents"
       )}
     >
       <input type="hidden" name="variant_id" value={variantId} />
@@ -80,8 +94,8 @@ export function QuickAdd({
       <button
         type="submit"
         className={
-          fill
-            ? "gf-btn gf-btn--quiet gf-card-btn w-full"
+          fill !== null
+            ? `${cardButtonClass(fill)} w-full`
             : wide
               ? "gf-btn w-full sm:w-auto"
               : "gf-icon-btn absolute right-2 bottom-2 z-(--z-raised) size-11 bg-field text-text shadow-float hover:bg-paper-2"
@@ -108,7 +122,7 @@ export function QuickAdd({
           <span
             className={cn(
               "flex items-start gap-2 rounded-inner bg-field p-2 text-sm text-error shadow-float",
-              fill && "mt-2"
+              fill !== null && "mt-2"
             )}
           >
             <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />

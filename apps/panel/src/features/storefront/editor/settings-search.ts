@@ -6,6 +6,9 @@ import type {
 } from "@/features/storefront/api/layout"
 import { sectionFields } from "./forms/field-registry"
 import type { RegistryField } from "./forms/field-registry"
+import type { ThemeChoices } from "@/features/storefront/api/theme"
+import { THEME_FIELDS, THEME_GROUP_TITLES } from "./forms/theme-registry"
+import type { CardVariantsInUse, ThemeRegistryField } from "./forms/theme-registry"
 
 /**
  * The theme editor's settings search (adr/0049 Ek 2026-11-14 §6): over the
@@ -80,20 +83,81 @@ export function searchSettings(
       hits.push({ section, group, field: null, option: null })
     }
     for (const field of sectionFields(section, group)) {
-      const own = searchText(
-        [field.label, field.term ?? ""].map((key) => (key ? t(key) : "")).join(" ")
-      )
-      const option = field.options.find((key) =>
-        words.some((word) => searchText(t(key)).includes(word))
-      )
-      const text = `${own} ${option ? searchText(t(option)) : ""}`
-      if (words.some((word) => text.includes(word)) && has(`${name} ${text}`, words)) {
-        hits.push({ section, group, field, option: option ?? null })
+      const found = fieldMatch(words, name, field, t)
+      if (found) {
+        hits.push({ section, group, field, option: found.option })
       }
     }
   }
   return hits.slice(0, SEARCH_LIMIT)
 }
+
+/**
+ * Whether a field answers the words: its name, term or a choice holds one
+ * of them, the place's name and the field together all; with the choice
+ * found, if any. Null: not a hit.
+ */
+function fieldMatch(
+  words: readonly string[],
+  name: string,
+  field: Pick<RegistryField, "label" | "term" | "options">,
+  t: Translate
+): { option: string | null } | null {
+  const own = searchText(
+    [field.label, field.term ?? ""].map((key) => (key ? t(key) : "")).join(" ")
+  )
+  const option = field.options.find((key) =>
+    words.some((word) => searchText(t(key)).includes(word))
+  )
+  const text = `${own} ${option ? searchText(t(option)) : ""}`
+  return words.some((word) => text.includes(word)) && has(`${name} ${text}`, words)
+    ? { option: option ?? null }
+    : null
+}
+
+/** A theme setting found (colours, faces, corners, the card): opens the theme panel at it. */
+export interface ThemeHit {
+  theme: true
+  field: ThemeRegistryField
+  option: string | null
+}
+
+/**
+ * What the query finds among the theme's settings (adr/0049 Ek
+ * 2026-11-15), as among a section's: "tema" and the panel's name find
+ * every field with the rest of the words, "köşe" the corners. Only the
+ * fields the panel shows now (`shown`).
+ */
+export function searchTheme(
+  query: string,
+  theme: ThemeChoices,
+  variants: CardVariantsInUse,
+  t: Translate
+): ThemeHit[] {
+  const words = searchText(query).split(" ").filter(Boolean)
+  if (words.length === 0) {
+    return []
+  }
+  const name = searchText(t("storefront.editor.theme.title"))
+  return THEME_FIELDS.flatMap((field) => {
+    if (!field.shown(theme, variants)) {
+      return []
+    }
+    const found = fieldMatch(
+      words,
+      `${name} ${searchText(t(THEME_GROUP_TITLES[field.group]))}`,
+      field,
+      t
+    )
+    return found ? [{ theme: true as const, field, option: found.option }] : []
+  })
+}
+
+/** Every hit: the page's parts first, then the theme's settings, at most `SEARCH_LIMIT`. */
+export const allHits = (
+  sections: readonly SearchHit[],
+  theme: readonly ThemeHit[]
+): (SearchHit | ThemeHit)[] => [...sections, ...theme].slice(0, SEARCH_LIMIT)
 
 /** The page's parts the search looks through, named as the list names them. */
 export function searchedSections(

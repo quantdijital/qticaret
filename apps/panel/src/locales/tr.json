@@ -7843,7 +7843,7 @@
         },
         "faq": {
           "name": "Sık sorulan sorular",
-          "description": "Soru ve cevaplar; arama motorlarına da soru-cevap olarak bildirilir."
+          "description": "Açılır kapanır soru ve cevaplar; yalnız sayfada görünür."
         },
         "related_products": {
           "name": "Benzer ürünler",
@@ -8296,6 +8296,7 @@
         "fontsHint": "Vitrin yazı tiplerini kendi sunucusundan yükler; ziyaretçi bilgisi üçüncü taraflara gitmez.",
         "heading": "Başlıklar",
         "body": "Metin",
+        "fontTerm": "font-family",
         "serif": "tırnaklı",
         "sans": "tırnaksız",
         "fonts": {
@@ -8313,6 +8314,7 @@
         },
         "shapes": "Köşeler ve düğmeler",
         "radius": "Köşeler",
+        "radiusTerm": "border-radius",
         "radii": {
           "sharp": "Keskin",
           "soft": "Yumuşak",
@@ -8336,6 +8338,7 @@
         "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 120 px); Sık bunu 66 px'e indirir, Ferah 144 px'e çıkarır.",
         "card": "Ürün kartı",
         "ratio": "Görsel oranı",
+        "ratioTerm": "aspect-ratio",
         "ratios": {
           "4x5": "4:5 (dikey)",
           "1x1": "1:1 (kare)",
@@ -8346,6 +8349,30 @@
         "show_brandHint": "Ürün kartında, ürün adının üstünde marka adı. Markası olmayan üründe bir şey görünmez.",
         "show_rating": "Puanı göster",
         "show_ratingHint": "Onaylı değerlendirmesi olan ürünlerin kartında yıldız, ortalama puan ve değerlendirme sayısı. Değerlendirmesi olmayan üründe bir şey görünmez.",
+        "no_reviews": "Yorumsuz üründe puan satırı",
+        "no_reviewsTerm": "rating",
+        "noReviews": {
+          "hide": "Gizle",
+          "empty_stars": "Boş yıldız göster",
+          "write_first": "“İlk yorumu sen yaz” bağlantısı"
+        },
+        "no_reviewsHint": "Değerlendirmesi olmayan üründe yıldızların yeri. Bağlantı ürün sayfasındaki değerlendirmeleri açar.",
+        "badges": "Etiketler",
+        "badgeTerm": "badge",
+        "sale_badge": "İndirim etiketini göster",
+        "sale_badgeHint": "İndirimli üründe fotoğrafın köşesinde indirim oranı (%30).",
+        "low_stock_badge": "“Az kaldı” etiketini göster",
+        "low_stock_badgeHint": "Stoğu azalan üründe; adet yazılmaz. Kompakt kart bu etiketi çizmez.",
+        "sold_out_badge": "“Tükendi” etiketini göster",
+        "sold_out_badgeHint": "Stoğu biten ürünün fotoğrafında.",
+        "sold_out_row": "Tükenmiş üründe fiyat satırı",
+        "sold_out_rowTerm": "sold out",
+        "soldOutRows": {
+          "price": "Fiyat kalsın, düğme pasif",
+          "text": "“Tükendi” yazısı",
+          "notify": "“Gelince haber ver” bağlantısı"
+        },
+        "sold_out_rowHint": "Fiyatın yerinde ne görünür. Hiçbirinde ürün karttan sepete eklenmez; bağlantı ürün sayfasındaki stok bildirimi formunu açar.",
         "cardVariant": "Kart biçimi",
         "cardVariants": {
           "standard": "Standart",
@@ -8361,8 +8388,14 @@
         "delivery_noteHint": "Fiyatı ücretsiz kargo eşiğine ulaşan üründe fiyatın altında \"Ücretsiz kargo\" yazar. Eşik Kampanyalar sayfasındaki ayardan gelir.",
         "full_button": "Tam genişlik düğme",
         "full_buttonHint": "Kartın altında \"Sepete ekle\" düğmesi; seçenekli üründe \"Seçenekler\" ürün sayfasını açar. Kapalıyken fotoğrafın köşesinde yuvarlak + durur.",
-        "empty_stars": "Yorumsuz üründe boş yıldız",
-        "empty_starsHint": "Değerlendirmesi olmayan üründe boş yıldız ve \"Henüz yorum yok\". Yalnız \"Puanı göster\" açıkken.",
+        "button_style": "Düğme stili",
+        "button_styleTerm": "button",
+        "buttonStyles": {
+          "solid": "Dolu",
+          "outline": "Çerçeveli",
+          "text": "Yazı"
+        },
+        "button_styleHint": "Kartın altındaki “Sepete ekle” ve “Seçenekler” düğmesi. Çerçeveli, fare kartın üstüne gelince ana renkle dolar.",
         "grafit": {
           "action": "Grafit'e dön",
           "hint": "Bütün alanları temanın varsayılan görünümüne (Grafit) çeker. Değişiklik taslağa yazılır; Yayınla'ya basana kadar vitrin değişmez.",
