@@ -48,7 +48,7 @@ function Review({ review, words }: { review: ReviewView; words: ReviewListWords 
                 href={photo.image.src}
                 target="_blank"
                 rel="noopener"
-                className="relative block size-20 overflow-hidden rounded-inner bg-paper-2"
+                className="relative block size-20 overflow-hidden rounded-inner bg-media"
               >
                 <ResponsiveImage
                   image={{

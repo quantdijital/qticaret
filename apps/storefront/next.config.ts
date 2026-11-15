@@ -38,6 +38,9 @@ const SECURITY_HEADERS = [
   },
 ]
 
+/** A served image file's own CSP (an SVG opened as a document): nothing but its inline styles. */
+const IMAGE_FILE_CSP = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+
 const config: NextConfig = {
   htmlLimitedBots: /.*/,
   output: "standalone",
@@ -97,6 +100,12 @@ const config: NextConfig = {
         source: "/fonts/:file",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
+      // The providers' marks and the app's icon may be SVG: opened on their own
+      // they run nothing and load nothing (an `<img>` of them is unaffected)
+      ...["/marks/:file", "/icon.svg"].map((source) => ({
+        source,
+        headers: [{ key: "Content-Security-Policy", value: IMAGE_FILE_CSP }],
+      })),
     ]),
 }
 

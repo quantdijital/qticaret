@@ -19,6 +19,9 @@ const shop = await import("../magaza/page")
 const blog = await import("../blog/page")
 const reviews = await import("../yorumlar/page")
 
+// The catch-all's own segments: any address but Next's (`/_next/...` is a 404 of its own)
+const entityParams = { params: Promise.resolve({ path: ["liste"] }) }
+
 const seoOf = (title: string, canonical: string): SeoPayload => ({
   title,
   description: "Açıklama.",
@@ -60,7 +63,7 @@ describe("a paginated list's metadata", () => {
       seo: seoOf(`Kupalar Modelleri ve Fiyatları | ${SHOP}`, `https://${HOST}${path}?sayfa=2`),
       listing: { filters: {}, price: null, sort: null, page: 2, page_size: 24 },
     })
-    const metadata = await entity.generateMetadata()
+    const metadata = await entity.generateMetadata(entityParams)
     expect(metadata.title).toEqual({
       absolute: `Kupalar Modelleri ve Fiyatları – Sayfa 2 | ${SHOP}`,
     })
@@ -76,7 +79,9 @@ describe("a paginated list's metadata", () => {
       seo: seoOf(`Kampanyalar | ${SHOP}`, `https://${HOST}${path}`),
       listing: { filters: {}, price: null, sort: null, page: 1, page_size: 24 },
     })
-    expect((await entity.generateMetadata()).title).toEqual({ absolute: `Kampanyalar | ${SHOP}` })
+    expect((await entity.generateMetadata(entityParams)).title).toEqual({
+      absolute: `Kampanyalar | ${SHOP}`,
+    })
   })
 
   it("titles an author's later page and names it canonical", async () => {
@@ -86,7 +91,7 @@ describe("a paginated list's metadata", () => {
       entity_type: "post_author",
       seo: seoOf(`Deniz | ${SHOP}`, `https://${HOST}${path}`),
     })
-    const metadata = await entity.generateMetadata()
+    const metadata = await entity.generateMetadata(entityParams)
     expect(metadata.title).toEqual({ absolute: `Deniz – Sayfa 3 | ${SHOP}` })
     expect(metadata.alternates?.canonical).toBe(`https://${HOST}${path}?sayfa=3`)
     expect(metadata.openGraph?.url).toBe(`https://${HOST}${path}?sayfa=3`)
@@ -99,7 +104,7 @@ describe("a paginated list's metadata", () => {
       entity_type: "post_tag",
       seo: seoOf(`Çelik | ${SHOP}`, `https://${HOST}${path}`),
     })
-    expect((await entity.generateMetadata()).title).toEqual({
+    expect((await entity.generateMetadata(entityParams)).title).toEqual({
       absolute: `Çelik – Sayfa 2 | ${SHOP}`,
     })
   })

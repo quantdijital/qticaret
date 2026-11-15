@@ -1,38 +1,14 @@
 import { NextRequest } from "next/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { EdgeSite } from "@/lib/store-api/edge"
+import { TOKEN, context, request, site } from "./gate-fixtures"
+
+/** adr/0053: the shop's own maintenance, its open paths and the bypass cookie. */
 
 // The backend's answer for a bypass token, as the test sets it
 const edge = vi.hoisted(() => ({ checkBypass: vi.fn() }))
 vi.mock("../../store-api/edge", () => edge)
 
 const { maintenanceGate } = await import("../gate")
-
-const TOKEN = `mnb_AbCdEfGhIjKlMnOp.zzzzzzzz.${"A".repeat(43)}`
-
-const site = (enabled: boolean, suspended = false): EdgeSite => ({
-  suspended,
-  indexing: true,
-  canonicalHost: null,
-  indexNowKey: null,
-  shopName: "Mağaza",
-  tracking: { ga4: null, meta: null },
-  maintenance: {
-    enabled,
-    title: null,
-    message: null,
-    expectedAt: null,
-    allowPaths: ["/iletisim", "/sozlesmeler/*"],
-  },
-})
-
-const context = { nonce: "n", csp: "default-src 'self'", production: false, visitorIp: null }
-
-const request = (path: string, init: { method?: string; cookie?: string } = {}) =>
-  new NextRequest(`http://localhost:8000${path}`, {
-    method: init.method ?? "GET",
-    headers: init.cookie ? { cookie: init.cookie } : {},
-  })
 
 describe("maintenanceGate", () => {
   beforeEach(() => {
@@ -96,6 +72,67 @@ describe("maintenanceGate", () => {
       blocked: null,
       bypassed: false,
     })
+  })
+
+  // adr/0053 Ek 2026-11-15: an open path is open to look at; a write needs the cookie
+  it("answers a write by an open path's name with the 503, the bypass cookie aside", async () => {
+    const writes = [
+      ["/odeme/durum", "POST"],
+      ["/odeme/durum/x", "POST"],
+      ["/odeme/sonuc/x", "POST"],
+      ["/iletisim", "POST"],
+      ["/sozlesmeler/kvkk", "POST"],
+      ["/onizleme", "POST"],
+      ["/ONIZLEME/x", "POST"],
+      ["/bakim/gir", "POST"],
+      ["/favicon.ico", "POST"],
+      ["/onizleme/x", "PUT"],
+      ["/iletisim", "PATCH"],
+      ["/odeme/durum", "DELETE"],
+      ["/robots.txt", "OPTIONS"],
+    ] as const
+    for (const [path, method] of writes) {
+      const action = (cookie?: string) =>
+        new NextRequest(`http://localhost:8000${path}`, {
+          method,
+          headers: { "next-action": "7f00aa", ...(cookie ? { cookie } : {}) },
+        })
+      const dark = await maintenanceGate(action(), path, site(true), context)
+      expect(dark.blocked?.status, `${method} ${path}`).toBe(503)
+      edge.checkBypass.mockResolvedValue("open")
+      const bypassed = await maintenanceGate(
+        action(`qt_bypass=${TOKEN}`),
+        path,
+        site(true),
+        context
+      )
+      expect(bypassed, `${method} ${path}`).toEqual({ blocked: null, bypassed: true })
+      edge.checkBypass.mockReset()
+      // An open shop: nothing changes
+      expect(await maintenanceGate(action(), path, site(false), context)).toEqual({
+        blocked: null,
+        bypassed: false,
+      })
+    }
+  })
+
+  it("takes a card provider's returning POST, and every GET and HEAD an open path had", async () => {
+    for (const path of ["/odeme/sonuc", "/odeme/sonuc/hata"]) {
+      const gate = await maintenanceGate(
+        request(path, { method: "POST" }),
+        path,
+        site(true),
+        context
+      )
+      expect(gate).toEqual({ blocked: null, bypassed: false })
+    }
+    for (const method of ["GET", "HEAD"]) {
+      for (const path of ["/odeme/durum", "/odeme/sonuc/hata", "/bakim/gir", "/sozlesmeler/kvkk"]) {
+        const gate = await maintenanceGate(request(path, { method }), path, site(true), context)
+        expect(gate, `${method} ${path}`).toEqual({ blocked: null, bypassed: false })
+      }
+    }
+    expect(edge.checkBypass).not.toHaveBeenCalled()
   })
 
   it("lets a bypass cookie the backend accepts through, marked", async () => {
@@ -162,50 +199,5 @@ describe("maintenanceGate", () => {
       { ...context, production: true }
     )
     expect(hosted).toEqual({ blocked: null, bypassed: true })
-  })
-})
-
-/** adr/0061 Ek C15: the platform's suspension, open or dark the shop's maintenance. */
-describe("maintenanceGate for a suspended shop", () => {
-  beforeEach(() => {
-    edge.checkBypass.mockReset()
-    edge.checkBypass.mockResolvedValue("open")
-  })
-
-  it("darkens the shop's open paths and previews, a bypass cookie asked nothing", async () => {
-    for (const maintenance of [false, true]) {
-      for (const path of ["/", "/iletisim", "/sozlesmeler/kvkk", "/onizleme/x", "/bakim/gir"]) {
-        const gate = await maintenanceGate(
-          request(path, { cookie: `qt_bypass=${TOKEN}` }),
-          path,
-          site(maintenance, true),
-          context
-        )
-        expect(gate.blocked?.status).toBe(503)
-        expect(gate.blocked?.headers.get("retry-after")).toBe("3600")
-        // The cookie is the shop's maintenance business: neither checked nor cleared here
-        expect(gate.blocked?.headers.get("set-cookie")).toBeNull()
-        expect(await gate.blocked?.text()).toContain("Mağaza şu anda hizmet vermiyor")
-      }
-    }
-    expect(edge.checkBypass).not.toHaveBeenCalled()
-  })
-
-  it("keeps robots.txt, the sitemaps and a card provider's return open", async () => {
-    for (const path of ["/robots.txt", "/sitemap.xml", "/odeme/sonuc", "/odeme/durum/x"]) {
-      const gate = await maintenanceGate(request(path), path, site(false, true), context)
-      expect(gate).toEqual({ blocked: null, bypassed: false })
-    }
-  })
-
-  it("answers a HEAD with the headers alone", async () => {
-    const gate = await maintenanceGate(
-      request("/", { method: "HEAD" }),
-      "/",
-      site(false, true),
-      context
-    )
-    expect(gate.blocked?.status).toBe(503)
-    expect(await gate.blocked?.text()).toBe("")
   })
 })

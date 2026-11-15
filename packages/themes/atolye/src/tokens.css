@@ -175,3 +175,18 @@
     --color-signal-on-stage: oklch(from var(--primary) 78% min(c, 0.13) h);
   }
 }
+
+/*
+ * The photo well (adr/0067 S4, `media_ground`): the ground behind a product's
+ * or a category's photograph and a list's thumbnail, `bg-media` (a card, a
+ * gallery) and `bg-media-deep` (a row's small picture, a tone darker). One
+ * name for the decision, apart from the same tones on boxes, skeletons and
+ * empty states. `inline` on purpose: the utility prints the tone itself, so
+ * it resolves on the well and follows a section that retones the page
+ * (`look.css`, a menu bar's ground), as `bg-paper-2` / `bg-paper-3` did. A
+ * variable declared at `:root` would freeze the root's tone instead.
+ */
+@theme inline {
+  --color-media: var(--color-paper-2);
+  --color-media-deep: var(--color-paper-3);
+}
