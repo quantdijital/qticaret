@@ -103,6 +103,28 @@ describe("the theme editor's live preview (adr/0065 Faz 1)", () => {
     expect(src()).toBe(`${ORIGIN}${SESSION_PATH}`)
   })
 
+  it("keeps the frame where it is while the next page's sample is looked up", async () => {
+    const { posted, rerenderWith } = await openLive()
+    fromFrame(readyAt())
+    await pass()
+    rerenderWith({ round: 0, page: "/kategori/cakilar" })
+    await pass()
+    expect(posted.of("navigate")).toHaveLength(1)
+
+    // A product page asked for, its first sample not found yet: no trip to the home page
+    rerenderWith({ round: 0, page: null, holding: true })
+    await pass()
+    expect(posted.of("navigate")).toHaveLength(1)
+
+    rerenderWith({ round: 0, page: "/urun/sef-bicagi" })
+    await pass()
+    expect(posted.of("navigate")).toEqual([
+      expect.objectContaining({ payload: { page: "/kategori/cakilar" } }),
+      expect.objectContaining({ payload: { page: "/urun/sef-bicagi" } }),
+    ])
+    expect(src()).toBe(`${ORIGIN}${SESSION_PATH}`)
+  })
+
   it("scrolls to a moved section once its save is drawn, not before", async () => {
     const { posted, rerenderWith } = await openLive()
     fromFrame(readyAt())

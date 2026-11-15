@@ -17,6 +17,8 @@ interface Options {
   page: BodyGroup
   /** The page shown with the draft; null: the home page. */
   path: string | null
+  /** The page's first sample is still looked up: `path` does not name it yet. */
+  finding?: boolean
   opened: Opened
   ready: boolean
   round: number
@@ -38,6 +40,7 @@ export function useEditorPreview({
   doc,
   page,
   path,
+  finding = false,
   opened,
   ready,
   round,
@@ -68,6 +71,7 @@ export function useEditorPreview({
     ready,
     round,
     page: path,
+    holding: finding,
     selected,
     onKey: (key) => {
       if (key === "undo" || key === "redo") {

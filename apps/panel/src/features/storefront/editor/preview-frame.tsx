@@ -122,7 +122,9 @@ export function PreviewFrame({
   useEffect(() => {
     setScale(fit.scale)
   }, [fit.scale, setScale])
-  const address = preview.address && !missing && !finding ? preview.address : null
+  // The live frame stays on the page it shows while a sample is looked up: taken out, it would
+  // load the session's address again (adr/0065 §1)
+  const address = preview.address && !missing && (!finding || live) ? preview.address : null
   const [loaded, setLoaded] = useState<string | null>(null)
   // The spinner while a link is asked for, while the page it opens loads, and while the live
   // frame redraws

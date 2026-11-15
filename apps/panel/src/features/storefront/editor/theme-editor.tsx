@@ -98,6 +98,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     doc,
     page,
     path: target.path,
+    finding: target.finding,
     opened,
     ready: !layout.is_default || autosave.round > 0,
     round: autosave.round,

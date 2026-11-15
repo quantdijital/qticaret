@@ -25,6 +25,11 @@ interface Options {
   round: number
   /** The page shown with the draft; null: the home page. */
   page: string | null
+  /**
+   * The page asked for is still looked up (its first sample): the frame
+   * stays on the page it shows until `page` names it.
+   */
+  holding?: boolean
   /** The section whose form is open. */
   selected: string | null
   onKey: (key: "undo" | "redo" | "escape") => void
@@ -39,7 +44,15 @@ interface Options {
  * when the build turns the bridge off, the session is refused, or the
  * frame does not answer.
  */
-export function useLivePreview({ ready, round, page, selected, onKey, onMissing }: Options) {
+export function useLivePreview({
+  ready,
+  round,
+  page,
+  holding = false,
+  selected,
+  onKey,
+  onMissing,
+}: Options) {
   const [failed, setFailed] = useState(false)
   const session = useEditorSession(BRIDGE_ON && ready && !failed)
   const live = BRIDGE_ON && !failed && !session.isError
@@ -124,9 +137,10 @@ export function useLivePreview({ ready, round, page, selected, onKey, onMissing 
         // A frame just loaded shows the draft as last saved, on the page it opened at
         const shows = message.payload.path === "/" ? null : message.payload.path
         now.sentRound = round
-        now.shown = page
+        // While the page asked for is looked up, the frame stays where it is
+        now.shown = holding ? shows : page
         setDrawn({ round, page: shows })
-        if (shows !== page) {
+        if (shows !== now.shown) {
           send("navigate", { page })
         }
         return
@@ -222,12 +236,12 @@ export function useLivePreview({ ready, round, page, selected, onKey, onMissing 
 
   // Another page or sample: shown inside the same frame
   useEffect(() => {
-    if (!connected || page === state.current.shown) {
+    if (!connected || holding || page === state.current.shown) {
       return
     }
     state.current.shown = page
     send("navigate", { page })
-  }, [page, connected, send])
+  }, [page, holding, connected, send])
 
   // A redraw that never ends: back to signed links
   useEffect(() => {

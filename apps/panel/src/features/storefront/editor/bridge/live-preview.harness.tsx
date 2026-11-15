@@ -47,6 +47,7 @@ export const callsTo = (fetchMock: FetchMock, url: string) =>
 export interface HarnessProps {
   round: number
   page?: string | null
+  holding?: boolean
   selected?: string | null
   onKey?: (key: "undo" | "redo" | "escape") => void
   onMissing?: (id: string, reason: string) => void
@@ -54,11 +55,19 @@ export interface HarnessProps {
 
 /** The hook alone, with the frame as `PreviewFrame` draws it. */
 // eslint-disable-next-line react-refresh/only-export-components -- a test harness, never hot-reloaded
-function Harness({ round, page = null, selected = null, onKey, onMissing }: HarnessProps) {
+function Harness({
+  round,
+  page = null,
+  holding = false,
+  selected = null,
+  onKey,
+  onMissing,
+}: HarnessProps) {
   const preview = useLivePreview({
     ready: true,
     round,
     page,
+    holding,
     selected,
     onKey: onKey ?? (() => undefined),
     onMissing: onMissing ?? (() => undefined),
