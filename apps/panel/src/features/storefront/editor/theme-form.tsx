@@ -111,15 +111,9 @@ export function ThemeForm({
           onChange(next)
         }}
       />
-      <div className="sticky bottom-0 z-10 flex flex-wrap items-center gap-2 border-t bg-card px-5 py-3">
-        <Hint label={t(`${C}.grafit.hint`)} side="top" align="end" describe>
-          <Button
-            type="button"
-            variant="outline"
-            className="ml-auto"
-            disabled={isGrafit(shown)}
-            onClick={toGrafit}
-          >
+      <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-end gap-2 border-t bg-card px-5 py-3">
+        <Hint label={t(`${C}.grafit.hint`)} side="top" align="end" describe wrap>
+          <Button type="button" variant="outline" disabled={isGrafit(shown)} onClick={toGrafit}>
             {t(`${C}.grafit.action`)}
           </Button>
         </Hint>

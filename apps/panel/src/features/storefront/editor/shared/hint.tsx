@@ -1,4 +1,4 @@
-import { createContext, useContext, useId } from "react"
+import { cloneElement, createContext, useContext, useId } from "react"
 import type { ComponentProps, ReactElement, ReactNode } from "react"
 import {
   Tooltip,
@@ -19,8 +19,15 @@ const HintScope = createContext(false)
  * next one along opens at once, while one is still showing or just closed.
  */
 export function HintProvider({ children }: { children: ReactNode }) {
+  // Not hoverable: a hint closes as the pointer leaves its element. Otherwise
+  // leaving toward the words (out over the preview's iframe, which swallows
+  // the pointer) left the hint stuck open on the preview
   return (
-    <TooltipProvider delayDuration={HINT_DELAY_MS} skipDelayDuration={HINT_SKIP_MS}>
+    <TooltipProvider
+      delayDuration={HINT_DELAY_MS}
+      skipDelayDuration={HINT_SKIP_MS}
+      disableHoverableContent
+    >
       <HintScope.Provider value>{children}</HintScope.Provider>
     </TooltipProvider>
   )
@@ -36,6 +43,12 @@ type HintProps = {
    * name says something else).
    */
   describe?: boolean
+  /**
+   * Hang the hint on a span around the element, so it still shows while the
+   * element is disabled (a disabled button takes no pointer events; the
+   * panel's buttons let them through to the span).
+   */
+  wrap?: boolean
 } & Pick<ComponentProps<typeof TooltipContent>, "side" | "align" | "sideOffset">
 
 /**
@@ -47,6 +60,7 @@ export function Hint({
   label,
   children,
   describe = false,
+  wrap = false,
   side = "top",
   align = "center",
   sideOffset = 6,
@@ -56,12 +70,20 @@ export function Hint({
   if (!label) {
     return children
   }
+  const described = describe ? { "aria-describedby": id } : {}
   const hint = (
     <>
       <Tooltip>
-        <TooltipTrigger asChild {...(describe ? { "aria-describedby": id } : {})}>
-          {children}
-        </TooltipTrigger>
+        {wrap ? (
+          <TooltipTrigger asChild>
+            {/* The description stays on the element itself, not the span */}
+            <span className="inline-flex">{cloneElement(children, described)}</span>
+          </TooltipTrigger>
+        ) : (
+          <TooltipTrigger asChild {...described}>
+            {children}
+          </TooltipTrigger>
+        )}
         <TooltipContent
           side={side}
           align={align}

@@ -51,7 +51,7 @@ function UndoRedo({
   const { t } = useTranslation()
   return (
     <div className="flex shrink-0">
-      <Hint label={t(`${E}.undo`)} side="bottom">
+      <Hint label={t(`${E}.undo`)} side="bottom" wrap>
         <Button
           type="button"
           variant="ghost"
@@ -64,7 +64,7 @@ function UndoRedo({
           <Undo2 />
         </Button>
       </Hint>
-      <Hint label={t(`${E}.redo`)} side="bottom">
+      <Hint label={t(`${E}.redo`)} side="bottom" wrap>
         <Button
           type="button"
           variant="ghost"

@@ -61,6 +61,30 @@ describe("Hint: the editor's tooltip in place of the browser's title", () => {
     expect(screen.getByRole("radio", { name: "a" })).toHaveAttribute("data-state", "off")
   })
 
+  it("still shows on a disabled button when wrapped, its description staying on the button", async () => {
+    const user = userEvent.setup()
+    render(
+      <HintProvider>
+        <Hint label="Geri al" describe wrap>
+          <button type="button" aria-label="Geri al" disabled>
+            ↶
+          </button>
+        </Hint>
+      </HintProvider>
+    )
+    const button = screen.getByRole("button", { name: "Geri al" })
+    // The span takes the pointer the disabled button lets through
+    const span = button.parentElement
+    if (span?.tagName !== "SPAN") {
+      throw new Error("the hint did not wrap the button")
+    }
+    expect(button).toHaveAccessibleDescription("Geri al")
+    expect(span).not.toHaveAttribute("aria-describedby")
+
+    await user.hover(span)
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Geri al")
+  })
+
   it("leaves the element bare when there are no words", () => {
     render(
       <Hint label={null}>

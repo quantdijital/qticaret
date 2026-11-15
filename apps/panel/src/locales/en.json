@@ -7759,7 +7759,6 @@
         "addMarquee": "Add scrolling strip"
       },
       "row": {
-        "drag": "Drag to move",
         "problem": "A field needs fixing",
         "scheduled": "Scheduled",
         "moveUpOf": "Move {{name}} up",

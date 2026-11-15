@@ -139,26 +139,26 @@ export function SectionRow({
           />
         ) : null}
         {drag ? (
-          <Hint label={t(`${R}.drag`)} side="bottom" align="start">
-            <span
-              draggable
-              aria-hidden="true"
-              className="flex h-8 w-5 shrink-0 cursor-grab items-center justify-center text-muted-foreground active:cursor-grabbing"
-              onDragStart={(event) => {
-                event.dataTransfer.effectAllowed = "move"
-                // Firefox starts a drag only with data; the row is what follows the pointer
-                event.dataTransfer.setData("text/plain", id)
-                const row = event.currentTarget.closest("li")
-                if (row) {
-                  event.dataTransfer.setDragImage(row, 16, 16)
-                }
-                drag.onStart()
-              }}
-              onDragEnd={drag.onEnd}
-            >
-              <GripVertical className="size-3.5" />
-            </span>
-          </Hint>
+          // No hint of its own: the grab cursor says it, and a second tip under
+          // the row's type would cover the next row's name
+          <span
+            draggable
+            aria-hidden="true"
+            className="flex h-8 w-5 shrink-0 cursor-grab items-center justify-center text-muted-foreground active:cursor-grabbing"
+            onDragStart={(event) => {
+              event.dataTransfer.effectAllowed = "move"
+              // Firefox starts a drag only with data; the row is what follows the pointer
+              event.dataTransfer.setData("text/plain", id)
+              const row = event.currentTarget.closest("li")
+              if (row) {
+                event.dataTransfer.setDragImage(row, 16, 16)
+              }
+              drag.onStart()
+            }}
+            onDragEnd={drag.onEnd}
+          >
+            <GripVertical className="size-3.5" />
+          </span>
         ) : (
           <span aria-hidden="true" className="w-5 shrink-0" />
         )}
