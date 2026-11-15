@@ -74,7 +74,8 @@ export function Layout({
       </div>
     )
   }
-  // The catalog header draws the top links in its strip and the phone by its search: not twice
+  // The catalog header draws the top links (its strip's or its menu bar's) and the phone by
+  // its search: not twice
   const catalog = catalogOf(shop)
   const whatsapp =
     shop.contact.whatsappHref !== null &&
@@ -91,7 +92,7 @@ export function Layout({
           lines={shop.announcements}
           settings={shop.announcementSettings}
           mark={shop.announcementMark}
-          links={catalog?.strip ? [] : shop.topLinks}
+          links={catalog?.links ? [] : shop.topLinks}
           contact={
             catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact
           }

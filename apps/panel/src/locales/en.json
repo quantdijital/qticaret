@@ -7713,7 +7713,10 @@
           "hidden": "This section is hidden; it does not show in the preview.",
           "scheduled": "This section is outside its dates; it does not show in the preview now.",
           "other_page": "This section is on another page.",
-          "timeout": "The section was not found in the preview."
+          "timeout": "The section was not found in the preview.",
+          "incomplete": "This section is still empty. Fill in its required fields and it will show in the preview.",
+          "unsaved": "Changes are not saved yet because another section has missing fields. Once they are filled in, this section will show in the preview too.",
+          "empty": "This section has nothing to show right now. It will show in the preview once your shop has content for it, such as products, reviews or posts."
         },
         "liveOff": "Live preview is unavailable; the preview will reload after each save.",
         "edit": "Edit",
@@ -8805,7 +8808,7 @@
         "utility_bar": {
           "label": "Top utility strip",
           "term": "top bar",
-          "hint": "A thin light strip: the “Top menu” links from Menus and My account. Hidden on phones."
+          "hint": "A thin light strip: the “Top menu” links from Menus (where they stand is chosen below) and My account. Hidden on phones."
         },
         "phone": {
           "label": "Phone number",
@@ -8832,6 +8835,27 @@
           "stage": "Dark",
           "primary": "Brand colour",
           "well": "Light tint"
+        },
+        "search_width": {
+          "label": "Search box width",
+          "term": "search width",
+          "hint": "Narrow: a short box right after the logo; the rest of the row is left to the phone number and the icons.",
+          "wide": "Wide",
+          "narrow": "Narrow"
+        },
+        "top_links": {
+          "label": "Where the top menu links stand",
+          "term": "top links",
+          "hint": "The “Top menu” links from Menus. On the menu bar: plain words after the categories, under “More” when they do not fit. In the top strip: not in the header while the strip is off.",
+          "strip": "In the top strip",
+          "bar": "On the menu bar"
+        },
+        "tools_place": {
+          "label": "Where the account, favourites and cart icons stand",
+          "term": "icons",
+          "hint": "In the logo row: the icons with their names right of the phone number, “My account” shown once. Phones stay as they are.",
+          "bar": "On the menu bar",
+          "row": "In the logo row"
         },
         "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below.",
         "otherHint": "The search button, the My account text and the cart total."

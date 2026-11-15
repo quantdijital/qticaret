@@ -32,8 +32,8 @@ const ALWAYS_KEPT = ["placement"]
  * still reads; a look's step off its list is dropped (`storedLook`), and
  * so is a category grid's settings of a variant off its list
  * (`storedByVariant`), a product rail's card variant off its list too
- * (`storedCardVariant`), a header bar's menus' pictures off their list
- * (`storedMenuImages`). No variant at all is the default's to fill (the schema). A save is still
+ * (`storedCardVariant`), a header bar's menus' pictures or the catalog
+ * header's layout choices off their lists (`storedMenuImages`). No variant at all is the default's to fill (the schema). A save is still
  * held to the lists.
  */
 export function storedSection(stored: unknown): unknown {

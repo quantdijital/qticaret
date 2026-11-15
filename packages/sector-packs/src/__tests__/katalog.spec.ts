@@ -8,7 +8,7 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     expect(katalog).toMatchObject({
       pack: "cutlery",
       code: "katalog",
-      version: 2,
+      version: 3,
       theme: "atolye",
       name: "Katalog",
       tone: "light",
@@ -31,8 +31,30 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
       ["musteriyorumlari", "reviews"],
     ])
     expect(katalog?.layout.home?.[0]).toMatchObject({ variant: "category_list" })
-    // The shop's header and footer stay as they are
-    expect([katalog?.layout.header, katalog?.layout.footer]).toEqual([[], []])
+    // The shop's footer stays as it is
+    expect(katalog?.layout.footer).toEqual([])
+  })
+
+  it("draws the simpler catalog header with its own settings, on its third version", () => {
+    const katalog = storefrontPreset("cutlery", "katalog")
+    // One row (the tools named after the phone, a narrow search), no strip, the top links on the bar
+    expect(katalog?.layout.header).toEqual([
+      expect.objectContaining({
+        id: "mainheader",
+        type: "header_bar",
+        variant: "catalog",
+        utility_bar: false,
+        tools_place: "row",
+        top_links: "bar",
+        search_width: "narrow",
+        menu_ground: "stage",
+        highlight_link: null,
+      }),
+    ])
+    // The menu items' plain look is the style kit's (adr/0067 S1), not the header's
+    expect(katalog?.theme_settings).toMatchObject({ menu_style: "plain" })
+    expect(katalog?.theme_settings).not.toHaveProperty("shadow")
+    expect(katalogVersion()).toBe(3)
   })
 
   it("names the shop's categories by handle, never by id", () => {
@@ -52,7 +74,7 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     ])
   })
 
-  it("points the collectors' band at the shop's special collection, on its second version", () => {
+  it("points the collectors' band at the shop's special collection (since its second version)", () => {
     const strip = storefrontPreset("cutlery", "katalog")?.layout.home?.find(
       (each) => each.type === "price_bands"
     ) as { bands: { label: string; max: number | null; category_id?: unknown }[] } | undefined
@@ -68,7 +90,7 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
       undefined,
       undefined,
     ])
-    expect(katalogVersion()).toBe(2)
+    expect(katalogVersion()).toBeGreaterThanOrEqual(2)
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toContain("katalog")
   })
 })

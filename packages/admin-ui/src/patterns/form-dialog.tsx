@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { useReturnFocus } from "../hooks/use-return-focus"
 import { ADMIN_UI_NS } from "../i18n"
 import { Button } from "../ui/button"
 import { Dialog, DialogContent, DialogFooter } from "../ui/dialog"
@@ -31,6 +32,12 @@ interface FormDialogProps {
   guard?: ReturnType<typeof useDiscardGuard>
   /** The element (by id) the caret goes to on opening, in place of the first field. */
   initialFocus?: string | null
+  /**
+   * Where the caret goes on closing, in place of what had it when the
+   * dialog opened (the default, `useReturnFocus`): for a dialog opened from
+   * code, the caret elsewhere. Called once closed; null: Radix's own way.
+   */
+  returnFocus?: () => HTMLElement | null
   /** The submit button's words in place of "Kaydet" (`Yanıtla`). */
   submitLabel?: string
   /** Whether what is typed may be sent at all (within its limits); with `dirty`, it lights "Kaydet". */
@@ -61,6 +68,7 @@ export function FormDialog({
   onSubmit,
   guard,
   initialFocus,
+  returnFocus,
   submitLabel,
   canSubmit = true,
   footerStart,
@@ -70,6 +78,7 @@ export function FormDialog({
   const { t } = useTranslation(ADMIN_UI_NS)
   const own = useDiscardGuard(dirty)
   const { guard: ask, confirm } = guard ?? own
+  const onCloseAutoFocus = useReturnFocus(open, returnFocus)
   const close = () => {
     ask(() => {
       onOpenChange(false)
@@ -102,6 +111,7 @@ export function FormDialog({
               control.focus()
             }
           }}
+          onCloseAutoFocus={onCloseAutoFocus}
         >
           <form
             noValidate

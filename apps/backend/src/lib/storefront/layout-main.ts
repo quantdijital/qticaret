@@ -163,5 +163,8 @@ function catalogOf<L>(header: HeaderCatalog, resolve: (link: MenuLinkInput) => L
     phone: header.phone,
     categories_button: header.categories_button,
     menu_ground: header.menu_ground,
+    tools_place: header.tools_place,
+    top_links: header.top_links,
+    search_width: header.search_width,
   }
 }

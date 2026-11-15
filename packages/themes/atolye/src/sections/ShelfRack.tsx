@@ -1,4 +1,4 @@
-import { drawnVariant } from "@qticaret/ui"
+import { drawnVariant, fieldMark } from "@qticaret/ui"
 import type { FormAction, Translate } from "@qticaret/ui"
 import { ProductGrid } from "../parts/ProductCard"
 import { shelfColumns, shelfCount, shelfPhone } from "../parts/shelf-grid"
@@ -43,13 +43,17 @@ export function Rack({
         {section.title}
       </h2>
       {section.more && (
-        <a href={section.more.path} className="gf-link shrink-0 text-sm lg:text-md">
+        <a
+          href={section.more.path}
+          className="gf-link shrink-0 text-sm lg:text-md"
+          {...fieldMark(section.editor, "more")}
+        >
           {section.more.label}
         </a>
       )}
     </div>
   ) : (
-    <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} />
+    <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} ownMore />
   )
   const columns = shelfColumns(section.columns)
   const phone = shelfPhone(section.phoneColumns)
@@ -89,7 +93,11 @@ export function Rack({
       )}
       {columnsRail && section.more && (
         <p className="flex justify-center">
-          <a href={section.more.path} className="gf-btn gf-btn--quiet">
+          <a
+            href={section.more.path}
+            className="gf-btn gf-btn--quiet"
+            {...fieldMark(section.editor, "more")}
+          >
             {section.more.label}
           </a>
         </p>

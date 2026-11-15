@@ -211,7 +211,7 @@ export function PreviewFrame({
         {notice ? (
           <p
             role="status"
-            className="pointer-events-none absolute bottom-6 left-1/2 max-w-[90%] -translate-x-1/2 rounded-full border bg-card px-3 py-1.5 text-center text-xs text-muted-foreground shadow-card"
+            className="pointer-events-none absolute bottom-6 left-1/2 w-max max-w-[90%] -translate-x-1/2 rounded-full border bg-card px-3 py-1.5 text-center text-xs text-muted-foreground shadow-card"
           >
             {notice}
           </p>

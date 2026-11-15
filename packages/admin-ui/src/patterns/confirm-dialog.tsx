@@ -10,6 +10,7 @@ import {
 } from "../ui/alert-dialog"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { useReturnFocus } from "../hooks/use-return-focus"
 import { ADMIN_UI_NS } from "../i18n"
 import { cn } from "../lib/utils"
 
@@ -38,9 +39,10 @@ export function ConfirmDialog({
   children,
 }: ConfirmDialogProps) {
   const { t } = useTranslation(ADMIN_UI_NS)
+  const onCloseAutoFocus = useReturnFocus(open)
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

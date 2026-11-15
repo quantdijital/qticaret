@@ -172,7 +172,7 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
         </Button>
       ) : null}
       <LinkField
-        id="products-more"
+        id={PREVIEW_IDS.text(section.id, "more")}
         label={t(`${P}.more`)}
         term={t(`${P}.moreTerm`)}
         hint={t(`${P}.moreHint`)}

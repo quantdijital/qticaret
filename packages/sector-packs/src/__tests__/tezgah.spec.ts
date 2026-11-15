@@ -195,8 +195,8 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
   })
 
-  it("raised the cutlery pack's version with them (katalog's second, tezgah's fourth)", () => {
-    expect(sectorPack("cutlery")?.version).toBe(6)
+  it("raised the cutlery pack's version with them (katalog's third, tezgah's fourth)", () => {
+    expect(sectorPack("cutlery")?.version).toBe(7)
     expect(CODES.map((code) => read(code).version)).toEqual([4, 4, 4])
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",

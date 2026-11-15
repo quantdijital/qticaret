@@ -1,6 +1,5 @@
 import {
   BANNER_SETTINGS,
-  HEADER_MENU_GROUNDS,
   HEADER_MENU_IMAGES,
   MARQUEE_SETTINGS,
   SECTION_VARIANTS,
@@ -19,6 +18,11 @@ import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
 import { cardFooterFields } from "./card-field-ids"
 import { BANNER_GROUPS } from "./banner-groups"
 import { CONTENT_IDS, contentFields } from "./content-registry"
+import {
+  HEADER_CATALOG_STEPS,
+  headerCatalogOffers,
+  isHeaderCatalogStep,
+} from "./header-catalog-steps"
 import { SHELF_IDS, shelfFields } from "./shelf-registry"
 import { VISIBILITY_IDS, visibilityFields } from "./visibility-registry"
 
@@ -66,15 +70,18 @@ const HEADER = "storefront.editor.headerBar"
 
 /**
  * Where the catalog header's settings sit (adr/0049 Ek 2026-11-15, the
- * owner's rule: the basics open and first): what it shows and its menu
- * bar's ground with the header's own content; the written search button,
- * the written account link and the cart's subtotal closed in "Diğer
- * ayarlar". In the form's order.
+ * owner's rule: the basics open and first): what it shows, where its
+ * parts stand and its menu bar's ground with the header's own content; the
+ * written search button, the written account link and the cart's subtotal
+ * closed in "Diğer ayarlar". In the form's order.
  */
 export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, FieldGroupName>> = {
   search_placeholder: "content",
+  search_width: "content",
   utility_bar: "content",
+  top_links: "content",
   phone: "content",
+  tools_place: "content",
   categories_button: "content",
   menu_ground: "content",
   highlight_link: "content",
@@ -249,15 +256,19 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
     })
     if (section.variant === "catalog") {
       for (const field of Object.keys(HEADER_CATALOG_GROUPS) as HeaderCatalogField[]) {
+        // Only what the bar offers as it stands (`headerCatalogOffers`)
+        if (!headerCatalogOffers(section, field)) {
+          continue
+        }
+        const steps: readonly string[] = isHeaderCatalogStep(field)
+          ? HEADER_CATALOG_STEPS[field]
+          : []
         fields.push({
           key: `header.${field}`,
           group: HEADER_CATALOG_GROUPS[field],
           label: `${HEADER}.${field}.label`,
           term: `${HEADER}.${field}.term`,
-          options:
-            field === "menu_ground"
-              ? HEADER_MENU_GROUNDS.map((ground) => `${HEADER}.menu_ground.${ground}`)
-              : [],
+          options: steps.map((step) => `${HEADER}.${field}.${step}`),
           target: FIELD_IDS.header(id, field),
         })
       }

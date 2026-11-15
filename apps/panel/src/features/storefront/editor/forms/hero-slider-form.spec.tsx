@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, within } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
@@ -119,5 +119,32 @@ describe("the hero slider's form (adr/0049 Ek 2026-11-06)", () => {
     expect(within(dialog).getByText("2 / 2")).toBeVisible()
     expect(within(dialog).getByRole("textbox", { name: "Başlık" })).toHaveValue("")
     expect(within(dialog).getByRole("button", { name: "Sonraki slayt" })).toBeDisabled()
+  })
+
+  it("gives the caret back to the row that opened the dialog when Escape closes it", async () => {
+    const user = userEvent.setup()
+    renderForm()
+    const row = screen.getByRole("button", { name: "2. slayt: düzenle" })
+    await user.click(row)
+    await screen.findByRole("dialog", { name: "Slaydı düzenle" })
+    await user.keyboard("{Escape}")
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Slaydı düzenle" })).toBeNull()
+    })
+    await waitFor(() => {
+      expect(document.activeElement).toBe(row)
+    })
+  })
+
+  it("gives it to the row of the slide stepped to", async () => {
+    const user = userEvent.setup()
+    renderForm()
+    await user.click(screen.getByRole("button", { name: "1. slayt: düzenle" }))
+    const dialog = await screen.findByRole("dialog", { name: "Slaydı düzenle" })
+    await user.click(within(dialog).getByRole("button", { name: "Sonraki slayt" }))
+    await user.keyboard("{Escape}")
+    await waitFor(() => {
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "2. slayt: düzenle" }))
+    })
   })
 })
