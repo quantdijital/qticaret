@@ -16,7 +16,9 @@ const message = (answer: { data: unknown }) => (answer.data as { message?: strin
  * ADR-0068 §9 for wholesalers (slice 1b): the routes take the account's id
  * only, its hidden group and own list are the module's (read as missing,
  * written as `wholesale.managed` through Medusa's routes, left out of its
- * lists), and only a pending wholesaler is taken back, with its own list.
+ * lists), only a pending wholesaler is taken back, with its own list, and
+ * invitations are sent again to a pending one only, within a staff
+ * member's budget.
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -104,6 +106,35 @@ medusaIntegrationTestRunner({
       })
       const refused = await accounts.remove(active.id)
       expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
+    })
+
+    it("sends an invitation again to a pending wholesaler only, a staff member's budget", async () => {
+      await staff.flag(true)
+      const pending = await accounts.made({
+        email: fresh(),
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      const resent = await accounts.action(pending.id, "invitation")
+      expect(resent.status).toBe(200)
+      expect(resent.data.message).toMatch(/^(sent|not_sent)$/)
+
+      const customer = await registerCustomer(http, store)
+      const active = await accounts.made({
+        email: customer.email,
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      const refused = await accounts.action(active.id, "invitation")
+      expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
+
+      // Twenty an hour per staff member, the openings counted: the next is refused
+      const statuses: number[] = []
+      for (let i = 0; i < 20; i += 1) {
+        statuses.push((await accounts.action(pending.id, "invitation")).status)
+      }
+      expect(statuses).toContain(429)
+      expect(statuses.slice(0, statuses.indexOf(429)).every((status) => status === 200)).toBe(true)
     })
   },
 })

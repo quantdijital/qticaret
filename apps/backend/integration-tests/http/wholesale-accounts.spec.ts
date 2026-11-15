@@ -55,7 +55,8 @@ medusaIntegrationTestRunner({
     const fresh = () => `toptan-${randomUUID()}@example.com`
 
     async function level(handle: string) {
-      const product = await stockedProduct(getContainer(), shop, handle, null, 100)
+      // On the shelf: a cart takes a tracked variant only with stock at the channel's warehouse
+      const product = await stockedProduct(getContainer(), shop, handle, 50, 100)
       const tier = await staff.tier({ name: `Toptan ${handle}` })
       await staff.prices(tier.id, { set: [{ variant_id: product.variantId, net: "66.67" }] })
       return { ...product, tier }
@@ -72,23 +73,41 @@ medusaIntegrationTestRunner({
       return answer.data.product.variants[0]?.calculated_price.calculated_amount
     }
 
+    /** The customer's cart with one unit; status and body only reach an assertion. */
     async function cartWith(customer: TestCustomer, variantId: string) {
-      const made = await http.post<StoreCart>(
-        "/store/carts",
-        { region_id: shop.regionId },
-        { headers: customer.headers }
+      const made = await settle(
+        http.post<StoreCart>(
+          "/store/carts",
+          { region_id: shop.regionId },
+          { headers: customer.headers }
+        )
       )
-      await http.post(
-        `/store/carts/${made.data.cart.id}/line-items`,
-        { variant_id: variantId, quantity: 1 },
-        { headers: customer.headers }
+      expect({ status: made.status, data: made.status === 200 ? null : made.data }).toEqual({
+        status: 200,
+        data: null,
+      })
+      const cartId = made.data.cart.id
+      const added = await settle(
+        http.post(
+          `/store/carts/${cartId}/line-items`,
+          { variant_id: variantId, quantity: 1 },
+          { headers: customer.headers }
+        )
       )
-      return made.data.cart.id
+      expect({ status: added.status, data: added.status === 200 ? null : added.data }).toEqual({
+        status: 200,
+        data: null,
+      })
+      return cartId
     }
 
-    const cartPrice = async (customer: TestCustomer, cartId: string) =>
-      (await http.get<StoreCart>(`/store/carts/${cartId}`, { headers: customer.headers })).data.cart
-        .items[0]?.unit_price
+    async function cartPrice(customer: TestCustomer, cartId: string) {
+      const read = await settle(
+        http.get<StoreCart>(`/store/carts/${cartId}`, { headers: customer.headers })
+      )
+      expect(read.status).toBe(200)
+      return read.data.cart.items[0]?.unit_price
+    }
 
     it("answers as missing while the flag is off", async () => {
       expect((await accounts.list()).status).toBe(404)
@@ -140,12 +159,16 @@ medusaIntegrationTestRunner({
       expect(await groupsOf(getContainer(), customer.id)).toEqual([groupId])
       expect(await priceFor(productId, customer.headers)).toBe(80)
       expect(await priceFor(productId, store.headers)).toBe(100)
+    })
 
-      // One account per address, whatever its case
+    it("keeps one account per registered customer, whatever the address's case", async () => {
+      await staff.flag(true)
+      const customer = await registerCustomer(http, store)
+      await accounts.made({ email: customer.email, contact_name: "Ali Kaya", own_prices: true })
       const again = await accounts.create({
-        email: customer.email,
+        email: customer.email.toUpperCase(),
         contact_name: "Ali Kaya",
-        tier_id: tier.id,
+        own_prices: true,
       })
       expect([again.status, message(again)]).toEqual([409, "wholesale.exists"])
     })
@@ -181,17 +204,26 @@ medusaIntegrationTestRunner({
       expect(Math.round(days)).toBe(90)
       const again = await accounts.create({ email, contact_name: "Ayşe", own_prices: true })
       expect([again.status, message(again)]).toEqual([409, "wholesale.exists"])
-
-      // Found on the list by its company, and by state
-      const listed = await accounts.list("q=yılmaz&status=pending")
-      expect(listed.data.accounts.map((account) => account.id)).toContain(made.data.account.id)
-      const active = await accounts.list("status=active")
-      expect(active.data.accounts.map((account) => account.id)).not.toContain(made.data.account.id)
     })
 
-    it("closes a wholesaler to retail at once, its open cart too; reopens it", async () => {
+    it("finds wholesalers on the list by company and by state", async () => {
       await staff.flag(true)
-      const { productId, variantId, tier } = await level("kapat")
+      const made = await accounts.made({
+        email: fresh(),
+        contact_name: "Ayşe Yılmaz",
+        company_name: "Yılmaz Ticaret",
+        own_prices: true,
+      })
+      const listed = await accounts.list(`q=${encodeURIComponent("yılmaz")}&status=pending`)
+      expect(listed.status).toBe(200)
+      expect(listed.data.accounts.map((account) => account.id)).toContain(made.id)
+      const active = await accounts.list("status=active")
+      expect(active.data.accounts.map((account) => account.id)).not.toContain(made.id)
+    })
+
+    /** A level's wholesaler with one unit in their cart at 80. */
+    async function wholesalerWithCart(handle: string) {
+      const { productId, variantId, tier } = await level(handle)
       const customer = await registerCustomer(http, store)
       const account = await accounts.made({
         email: customer.email,
@@ -200,6 +232,12 @@ medusaIntegrationTestRunner({
       })
       const cartId = await cartWith(customer, variantId)
       expect(await cartPrice(customer, cartId)).toBe(80)
+      return { productId, customer, account, cartId }
+    }
+
+    it("closes a wholesaler to retail at once, their open cart too", async () => {
+      await staff.flag(true)
+      const { productId, customer, account, cartId } = await wholesalerWithCart("kapat")
 
       const closed = await accounts.action(account.id, "deactivate")
       expect(closed.status).toBe(200)
@@ -207,11 +245,19 @@ medusaIntegrationTestRunner({
       expect(await groupsOf(getContainer(), customer.id)).toEqual([])
       expect(await priceFor(productId, customer.headers)).toBe(100)
       expect(await cartPrice(customer, cartId)).toBe(100)
-      // Closed twice is refused; a closed one is not resent an invitation
+      // Closed twice is refused
       const twice = await accounts.action(account.id, "deactivate")
       expect([twice.status, message(twice)]).toEqual([409, "wholesale.account_not_active"])
+    })
+
+    it("reopens a closed wholesaler at wholesale, their open cart too", async () => {
+      await staff.flag(true)
+      const { productId, customer, account, cartId } = await wholesalerWithCart("yeniden")
+      expect((await accounts.action(account.id, "deactivate")).status).toBe(200)
+      expect(await cartPrice(customer, cartId)).toBe(100)
 
       const reopened = await accounts.action(account.id, "reactivate")
+      expect(reopened.status).toBe(200)
       expect(reopened.data.account.status).toBe("active")
       expect(await priceFor(productId, customer.headers)).toBe(80)
       expect(await cartPrice(customer, cartId)).toBe(80)
@@ -234,35 +280,6 @@ medusaIntegrationTestRunner({
 
       const none = await accounts.update(account.id, { tier_id: null })
       expect([none.status, message(none)]).toEqual([409, "wholesale.no_price_source"])
-    })
-
-    it("sends an invitation again to a pending wholesaler only, a staff member's budget", async () => {
-      await staff.flag(true)
-      const pending = await accounts.made({
-        email: fresh(),
-        contact_name: "Ali Kaya",
-        own_prices: true,
-      })
-      const resent = await accounts.action(pending.id, "invitation")
-      expect(resent.status).toBe(200)
-      expect(resent.data.message).toMatch(/^(sent|not_sent)$/)
-
-      const customer = await registerCustomer(http, store)
-      const active = await accounts.made({
-        email: customer.email,
-        contact_name: "Ali Kaya",
-        own_prices: true,
-      })
-      const refused = await accounts.action(active.id, "invitation")
-      expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
-
-      // Twenty an hour per staff member, the openings counted: the next is refused
-      const statuses: number[] = []
-      for (let i = 0; i < 20; i += 1) {
-        statuses.push((await accounts.action(pending.id, "invitation")).status)
-      }
-      expect(statuses).toContain(429)
-      expect(statuses.slice(0, statuses.indexOf(429)).every((status) => status === 200)).toBe(true)
     })
   },
 })

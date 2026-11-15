@@ -6,7 +6,7 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { WHOLESALE_MODULE } from "../../src/modules/wholesale"
 import type WholesaleModuleService from "../../src/modules/wholesale/service"
-import type { HttpClient } from "./http"
+import type { HttpClient, HttpResponse } from "./http"
 import { settle } from "./http"
 
 export interface TierAnswer {
@@ -26,11 +26,34 @@ export interface LineAnswer {
   undercut: boolean
 }
 
+/** An answer as a spec asserts on it: status and body only, never axios' own objects. */
+export interface PlainAnswer<T> {
+  status: number
+  data: T
+}
+
+/**
+ * Settles a call to a plain answer. axios' response holds its request,
+ * which holds the response back: such an object reaching a failed
+ * assertion breaks Jest's worker ("Converting circular structure").
+ */
+async function plain<T>(request: Promise<HttpResponse<T>>): Promise<PlainAnswer<T>> {
+  try {
+    const { status, data } = await settle(request)
+    return { status, data }
+  } catch (error) {
+    const { message, code } = error as { message?: unknown; code?: unknown }
+    // The cause would carry axios' circular objects to Jest's worker: its text is enough
+    // eslint-disable-next-line preserve-caught-error
+    throw new Error(`request failed without an answer: ${String(code)} ${String(message)}`)
+  }
+}
+
 /** Staff calls of a wholesale spec, as the owner. */
 export function wholesaleApi(http: HttpClient, headers: Record<string, string>) {
-  const post = <T>(url: string, body: unknown) => settle(http.post<T>(url, body, { headers }))
-  const get = <T>(url: string) => settle(http.get<T>(url, { headers }))
-  const del = <T>(url: string) => settle(http.delete<T>(url, { headers }))
+  const post = <T>(url: string, body: unknown) => plain(http.post<T>(url, body, { headers }))
+  const get = <T>(url: string) => plain(http.get<T>(url, { headers }))
+  const del = <T>(url: string) => plain(http.delete<T>(url, { headers }))
   return {
     post,
     get,
