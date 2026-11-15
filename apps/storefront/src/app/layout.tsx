@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
 import type { ReactNode } from "react"
 import { AnalyticsScripts } from "@/app/AnalyticsScripts"
-import { changeCartLine } from "@/app/actions/cart"
+import { addToCart, changeCartLine } from "@/app/actions/cart"
 import { saveCookieChoice } from "@/app/actions/cookies"
 import { NO_CART } from "@/lib/analytics/cart-changes"
 import { cartSnapshotOf } from "@/lib/analytics/cart-payloads"
@@ -10,6 +10,7 @@ import { analyticsTags } from "@/lib/analytics/tags"
 import { headerCart } from "@/lib/cart/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
+import { QUICK_VIEW_PATH } from "@/lib/views/quick-view"
 import { SUGGEST_PATH } from "@/lib/views/search-suggest"
 import { shopView } from "@/lib/views/shop"
 import { currentTheme } from "@/lib/views/theme-settings"
@@ -74,6 +75,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           subscribe={subscribeNewsletter}
           searchSuggest={SUGGEST_PATH}
           changeCartLine={changeCartLine}
+          // The cards' quick view dialog (adr/0049 Ek 2026-11-15): only while the shop has it on
+          {...(settings.product_card.quick_view
+            ? { quickView: { address: QUICK_VIEW_PATH, addToCart } }
+            : {})}
         >
           {children}
         </theme.Layout>

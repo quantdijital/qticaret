@@ -26,6 +26,7 @@ import type {
   ListingPageView,
   NotFoundPageView,
   ProductPageView,
+  QuickViewSetup,
   ReviewsPageView,
   ShopView,
 } from "./views"
@@ -190,6 +191,12 @@ export interface StorefrontTheme {
      * drawer shows its lines read only.
      */
     changeCartLine?: (form: FormData) => Promise<void>
+    /**
+     * The cards' quick view (adr/0049 Ek 2026-11-15), given only while the
+     * shop has it on: the dialog's address and form. None: no dialog, and a
+     * card's button (if any) goes to the product's page.
+     */
+    quickView?: QuickViewSetup
   }>
   HomePage: ComponentType<
     Page<HomePageView> & {

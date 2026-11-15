@@ -9,6 +9,7 @@ import type {
 } from "@qticaret/ui"
 import { CardBadges, isOut, quickAddWords } from "./card-parts"
 import { CardPriceRow, CardStars } from "./card-rows"
+import { CardQuickView } from "./card-quick-view"
 import { QuickAdd, cardButtonClass } from "./QuickAdd"
 
 /**
@@ -126,7 +127,7 @@ export function FramedCard({
   const round = !framed.fullButton && quickAdd && product.quickAdd && !out ? product.quickAdd : null
   const second = product.image ? framed.secondImage : null
   return (
-    <article className="group gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5">
+    <article className="group gf-card gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5">
       <div className="gf-card-media relative aspect-card overflow-hidden rounded-media bg-paper-2">
         {product.image && second ? (
           <Photos
@@ -147,6 +148,7 @@ export function FramedCard({
           )
         )}
         <CardBadges product={product} t={t} />
+        <CardQuickView product={product} t={t} />
         {round && quickAdd && (
           <QuickAdd
             variantId={round.variantId}

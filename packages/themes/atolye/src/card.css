@@ -215,3 +215,30 @@
     padding: var(--space-md);
   }
 }
+/*
+ * A card's quick view button (adr/0049 Ek 2026-11-15;
+ * `parts/QuickViewButton.tsx`) on `hover`: with a mouse, unseen until the
+ * card is hovered or anything in it has focus (still in place, nothing
+ * moves); its word beside the icon. On a touch screen, with nothing to
+ * point, the 44 px round icon always, its word for the reader only.
+ */
+@layer components {
+  @media (hover: hover) and (pointer: fine) {
+    .gf-quick-view[data-quick-view="hover"] {
+      opacity: 0;
+      transition: opacity var(--dur-short) var(--ease-out);
+    }
+    .gf-card:hover .gf-quick-view[data-quick-view="hover"],
+    .gf-card:focus-within .gf-quick-view[data-quick-view="hover"] {
+      opacity: 1;
+    }
+  }
+  @media not ((hover: hover) and (pointer: fine)) {
+    .gf-quick-view[data-quick-view="hover"] {
+      padding-inline: 0;
+    }
+    .gf-quick-view-word {
+      display: none;
+    }
+  }
+}

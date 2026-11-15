@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
+import type { PlaceOrderResult, QuickViewSetup, ShopView, Translate } from "@qticaret/ui"
 import { Announcement } from "./frame/Announcement"
 import { BackToTop } from "./frame/BackToTop"
 import { BottomBar } from "./frame/BottomBar"
@@ -8,6 +8,8 @@ import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { Header, catalogOf } from "./frame/Header"
 import { Marquee } from "./sections/Marquee"
+import { QuickViewHost } from "./frame/QuickViewHost"
+import { quickViewWords } from "./frame/quick-view-words"
 import { ScrollCue } from "./frame/ScrollCue"
 import { WhatsApp } from "./frame/WhatsApp"
 import { WhatsAppClear } from "./frame/WhatsAppClear"
@@ -32,6 +34,7 @@ export function Layout({
   subscribe,
   searchSuggest,
   changeCartLine,
+  quickView,
 }: {
   shop: ShopView
   t: Translate
@@ -40,6 +43,7 @@ export function Layout({
   subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   searchSuggest?: string
   changeCartLine?: (form: FormData) => Promise<void>
+  quickView?: QuickViewSetup
 }) {
   const skip = (
     <a href="#icerik" className="gf-skip">
@@ -125,6 +129,8 @@ export function Layout({
           overWhatsApp={whatsapp && backToTop.side === "right"}
         />
       )}
+      {/* The cards' quick view (adr/0049 Ek 2026-11-15): its dialog's code only on the first look */}
+      {quickView && <QuickViewHost setup={quickView} words={quickViewWords(t)} />}
       {consent}
       <ScrollCue />
     </div>
