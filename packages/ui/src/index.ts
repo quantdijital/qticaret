@@ -18,6 +18,7 @@ export type {
   HeaderBarVariant,
   HeroVariant,
   ProductMainVariant,
+  ProductsVariant,
   SectionVariant,
   TrustBadgesVariant,
   VariantSectionType,
@@ -54,4 +55,5 @@ export type * from "./home-views"
 export type * from "./main-views"
 export type * from "./marquee-views"
 export type * from "./payment-link-views"
+export type * from "./shelf-views"
 export type * from "./views"

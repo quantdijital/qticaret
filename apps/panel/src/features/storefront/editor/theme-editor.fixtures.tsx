@@ -62,6 +62,7 @@ export const DOC: LayoutDocument = {
     {
       id: "yeniurunler",
       type: "products",
+      variant: "grid",
       ...ALWAYS,
       title: null,
       source: { kind: "newest" },

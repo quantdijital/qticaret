@@ -21,24 +21,50 @@ export const SECTION_VARIANTS = {
    */
   categories: ["tiles", "linked"],
   /**
+   * The product rail (adr/0049 Ek 2026-11-15): `grid`, today's rows of
+   * cards; `carousel`, one row that slides (the scroller kit,
+   * `section-scroller`); `featured`, one large card beside two rows of
+   * three small ones; `compact`, small side-by-side cards three across;
+   * `columns`, two or three lists side by side, each its own title and
+   * source, in small cards. Counts by variant: `section-shelf`.
+   */
+  products: ["grid", "carousel", "featured", "compact", "columns"],
+  /**
    * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
    * drawing first. The header bar's `centered` is the theme setting's
-   * centred header (`header.layout`), read into the bar by name.
+   * centred header (`header.layout`), read into the bar by name; its
+   * `catalog` (N14) a utility strip, a wide search with the shop's phone and
+   * a filled menu bar with a "Kategoriler" button.
    */
-  header_bar: ["standard", "centered"],
+  header_bar: ["standard", "centered", "catalog"],
   footer_bar: ["ledger"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 /**
+ * The catalog header's menu bar ground (adr/0049 Ek 2026-11-15, N14):
+ * "Koyu / Ana renk / Açık", the marquee's names; the first the default.
+ * Mirrored by the backend's `HEADER_MENU_GROUNDS`.
+ */
+export const HEADER_MENU_GROUNDS = ["stage", "primary", "light"] as const
+
+export type HeaderMenuGround = (typeof HEADER_MENU_GROUNDS)[number]
+
+/** The catalog header's words: the search box's placeholder. Mirrored by the backend. */
+export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
+
+/**
  * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3, owner's
  * decision 4): the theme setting's `product_card.variant` everywhere, a
  * product rail's `card_variant` over it. `standard`: today's card;
- * `framed`: a bordered box with the add button across its foot (UK5).
+ * `framed`: a bordered box with the add button across its foot (UK5);
+ * `compact` (Ek 2026-11-15): a small side-by-side card (photo left, name,
+ * stars, price), no add button, the whole card one link. A `compact` or
+ * `columns` rail draws its cards compact whatever is set.
  * Mirrored by the backend's `PRODUCT_CARD_VARIANTS`.
  */
-export const CARD_VARIANTS = ["standard", "framed"] as const
+export const CARD_VARIANTS = ["standard", "framed", "compact"] as const
 
 export type CardVariant = (typeof CARD_VARIANTS)[number]
 
@@ -53,6 +79,7 @@ export type DefaultVariant<T extends VariantSectionType> = (typeof SECTION_VARIA
 export type TrustBadgesVariant = SectionVariant<"trust_badges">
 export type HeroVariant = SectionVariant<"hero">
 export type CategoriesVariant = SectionVariant<"categories">
+export type ProductsVariant = SectionVariant<"products">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type ProductMainVariant = SectionVariant<"product_main">

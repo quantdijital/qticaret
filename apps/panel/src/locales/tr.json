@@ -7881,7 +7881,8 @@
         },
         "header_bar": {
           "standard": "Solda logo",
-          "centered": "Ortada logo"
+          "centered": "Ortada logo",
+          "catalog": "Klasik katalog"
         },
         "footer_bar": {
           "ledger": "Standart"
@@ -7897,6 +7898,13 @@
         "hero": {
           "standard": "Tek görsel",
           "category_list": "Kategori listesi"
+        },
+        "products": {
+          "grid": "Izgara",
+          "carousel": "Kayan sıra",
+          "featured": "Öne çıkan",
+          "compact": "Kompakt liste",
+          "columns": "Yan yana listeler"
         }
       },
       "look": {
@@ -8273,7 +8281,8 @@
         "cardVariant": "Kart biçimi",
         "cardVariants": {
           "standard": "Standart",
-          "framed": "Çerçeveli"
+          "framed": "Çerçeveli",
+          "compact": "Kompakt"
         },
         "cardVariantHint": "Mağazadaki bütün ürün kartlarının biçimi. Ürün rafı kendi biçimini seçebilir; liste, arama ve kategori sayfası bunu kullanır.",
         "framed": "Çerçeveli kart",
@@ -8572,7 +8581,57 @@
       "headerBar": {
         "sticky": "Üst bilgi sabit kalsın",
         "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
-        "stickyTerm": "sticky"
+        "stickyTerm": "sticky",
+        "search_placeholder": {
+          "label": "Arama kutusundaki yazı",
+          "term": "placeholder",
+          "hint": "Boş bırakırsanız: “Ürün, kategori veya marka ara”."
+        },
+        "search_label": {
+          "label": "Arama düğmesi yazılı olsun",
+          "term": "button",
+          "hint": "Açıkken büyüteç yerine “Ara” yazan dolu düğme çıkar."
+        },
+        "account_text": {
+          "label": "Üst şeritte “Hesabım” yazısı",
+          "term": "link",
+          "hint": "Hesap simgesi menü çubuğunda her zaman durur."
+        },
+        "cart_total": {
+          "label": "Sepette tutarı göster",
+          "term": "subtotal",
+          "hint": "Sepet doluyken simgenin yanında ara toplam yazar."
+        },
+        "highlight_link": {
+          "label": "Vurgulu bağlantı",
+          "term": "link",
+          "hint": "Menü çubuğunda ana menünün sonunda öne çıkan tek bağlantı (ör. Kampanyalar)."
+        },
+        "utility_bar": {
+          "label": "Üst yardımcı şerit",
+          "term": "top bar",
+          "hint": "İnce açık şerit: Menüler'deki “Üst menü” bağlantıları ve Hesabım. Telefonda görünmez."
+        },
+        "phone": {
+          "label": "Telefon numarası",
+          "term": "phone",
+          "hint": "Mağaza bilgilerindeki telefon, aramanın sağında “Müşteri hizmetleri” yazısıyla. Telefon girilmemişse görünmez."
+        },
+        "categories_button": {
+          "label": "“Kategoriler” düğmesi",
+          "term": "dropdown",
+          "hint": "Menü çubuğunun başında; üst kategoriler ve alt kategorileri açılır liste olarak."
+        },
+        "menu_ground": {
+          "label": "Menü çubuğu zemini",
+          "term": "background",
+          "hint": "Yazı ve simge renkleri zemine göre okunur seçilir.",
+          "stage": "Koyu",
+          "primary": "Ana renk",
+          "light": "Açık"
+        },
+        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
+        "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
       },
       "main": {
         "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."
@@ -8632,6 +8691,100 @@
         "thumbsHint": "Her bantta o aralıktan birkaç ürün küçük görünür; vitrin fiyatlara göre kendisi seçer.",
         "thumbsCount": "Bant başına ürün",
         "full": "Ana sayfada zaten {{max}} fiyat bandı bölümü var (gizli olanlar da sayılır)."
+      },
+      "shelf": {
+        "layout": "Diziliş",
+        "scroll": "Kaydırma",
+        "firstTitle": "İlk listenin başlığı",
+        "list": "{{n}}. liste",
+        "addList": "Liste ekle",
+        "removeList": "Kaldır",
+        "rows": "Sıra sayısı",
+        "rowsTerm": "rows",
+        "rowsOption": "{{n}} sıra",
+        "rowsHint": "Masaüstünde üç sütun; telefonda kartlar alt alta.",
+        "perList": "Liste başına ürün",
+        "perListTerm": "per list",
+        "perListOption": "{{n}} ürün",
+        "perListHint": "Her listede gösterilecek ürün sayısı; listeler masaüstünde yan yana, telefonda alt alta.",
+        "featuredHint": "İlk ürün solda büyük, yanında küçük kartlar (toplam {{n}} ürün); telefonda büyük kart üstte.",
+        "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat."
+      },
+      "scroller": {
+        "desktop": {
+          "label": "Görünen kart (masaüstü)",
+          "term": "per view",
+          "three": "3",
+          "four": "4",
+          "five": "5",
+          "six": "6",
+          "hint": "Daha dar ekranlarda sayı kendiliğinden azalır."
+        },
+        "mobile": {
+          "label": "Görünen kart (telefon)",
+          "term": "per view",
+          "one": "1",
+          "peek": "1,5",
+          "two": "2",
+          "hint": "1,5: bir sonraki kartın ucu görünür, kaydırılabildiği anlaşılır."
+        },
+        "arrows": {
+          "label": "Oklar",
+          "term": "arrows",
+          "always": "Her zaman",
+          "hover": "Üzerine gelince",
+          "hidden": "Gizli",
+          "hint": "Gizliyken de dokunarak, fareyle ve klavyeyle kaydırılır."
+        },
+        "arrow_style": {
+          "label": "Ok biçimi",
+          "term": "arrow style",
+          "round": "Yuvarlak",
+          "square": "Kare",
+          "plain": "Yalın"
+        },
+        "arrow_position": {
+          "label": "Okların yeri",
+          "term": "position",
+          "head": "Başlığın yanında",
+          "sides": "Yanlarda",
+          "hint": "Yanlardaki oklar telefonda gösterilmez; orada parmakla kaydırılır."
+        },
+        "dots": {
+          "label": "Noktalar",
+          "term": "dots",
+          "off": "Gizle",
+          "on": "Göster",
+          "hint": "Kaçıncı sayfada olunduğunu gösteren noktalar."
+        },
+        "autoplay": {
+          "label": "Otomatik geçiş",
+          "term": "autoplay",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Üzerine gelince ve klavye odağındayken durur, görünür bir durdur düğmesi olur; hareketi azaltmayı seçen ziyaretçide çalışmaz."
+        },
+        "speed": {
+          "label": "Geçiş süresi",
+          "term": "interval",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı"
+        },
+        "loop": {
+          "label": "Döngü",
+          "term": "loop",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Sona gelince başa döner."
+        },
+        "drag": {
+          "label": "Sürükleyerek kaydırma",
+          "term": "drag",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Masaüstünde fareyle tutup sürükleyerek kaydırılır."
+        }
       }
     },
     "preferences": {

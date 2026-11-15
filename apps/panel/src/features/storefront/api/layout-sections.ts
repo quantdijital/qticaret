@@ -1,7 +1,6 @@
 import type {
   BannerSettings,
   BannerTone,
-  CardVariant,
   MarqueeSettings,
   ProductSource,
   SectionLook,
@@ -12,6 +11,7 @@ import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import type { CategoriesLinkedFields } from "@/features/storefront/api/layout-cards"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
+import type { ProductsSection } from "@/features/storefront/api/layout-shelf"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
@@ -48,7 +48,7 @@ interface SectionBase {
  * §6), absent until the shop sets a step, each step `null` for the
  * theme's own. The header's bar and the footer's box have none.
  */
-interface BodySectionBase extends SectionBase {
+export interface BodySectionBase extends SectionBase {
   look?: SectionLook
 }
 
@@ -134,19 +134,6 @@ interface CategoriesBase extends BodySectionBase {
 
 /** Today's picture tiles, or the linked cards with their own fields (adr/0049 Ek 2026-11-15). */
 export type CategoriesSection = CategoriesBase & ({ variant: "tiles" } | CategoriesLinkedFields)
-
-export interface ProductsSection extends BodySectionBase {
-  type: "products"
-  title: string | null
-  source: ProductSource
-  limit: number
-  /** Cards in a row on a wide screen; the theme steps down on narrower ones. */
-  columns: ShelfColumns
-  /** A "see all" link under the rail. */
-  more: LayoutLink | null
-  /** The rail's own card style over the theme's (adr/0049 Ek 2026-11-14 §3.3); null or absent: the theme's. */
-  card_variant?: CardVariant | null
-}
 
 /** One product up close (adr/0046 Ek 2026-11-05): the storefront adds its facts and spec table. */
 export interface FeaturedProductSection extends BodySectionBase {

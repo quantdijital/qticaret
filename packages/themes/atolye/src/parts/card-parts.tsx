@@ -26,11 +26,15 @@ export const isOut = (product: ProductCardView) => !product.available || product
 
 /**
  * The card variant Atölye draws (adr/0049 Ek 2026-11-14 §2.3): `framed`
- * when the card carries its own; anything else, a variant this build does
- * not know included, today's card.
+ * when the card carries its own, `compact` as it is (Ek 2026-11-15);
+ * anything else, a variant this build does not know included, today's card.
  */
 export const drawnCardVariant = (product: ProductCardView): CardVariant =>
-  product.variant === "framed" && product.framed ? "framed" : "standard"
+  product.variant === "framed" && product.framed
+    ? "framed"
+    : product.variant === "compact"
+      ? "compact"
+      : "standard"
 
 /**
  * The pills on a card's photo: a discount ("%30", the reader hears "%30

@@ -6,7 +6,7 @@ import { BottomBar } from "./frame/BottomBar"
 import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
-import { Header } from "./frame/Header"
+import { Header, catalogOf } from "./frame/Header"
 import { Marquee } from "./sections/Marquee"
 import { ScrollCue } from "./frame/ScrollCue"
 import { WhatsApp } from "./frame/WhatsApp"
@@ -62,6 +62,8 @@ export function Layout({
       </div>
     )
   }
+  // The catalog header draws the top links in its strip and the phone by its search: not twice
+  const catalog = catalogOf(shop)
   const whatsapp =
     shop.contact.whatsappHref !== null &&
     shop.bottomNav !== null &&
@@ -74,8 +76,8 @@ export function Layout({
       {skip}
       <Announcement
         lines={shop.announcements}
-        links={shop.topLinks}
-        contact={shop.contact}
+        links={catalog?.strip ? [] : shop.topLinks}
+        contact={catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact}
         words={{ announcements: t("nav.announcements"), links: t("nav.top_links") }}
       />
       {shop.marquee && <Marquee section={shop.marquee} t={t} header />}

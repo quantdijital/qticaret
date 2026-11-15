@@ -1,10 +1,5 @@
 import "server-only"
-import type {
-  ProductSource,
-  StoreCategorySection,
-  StoreLayoutSection,
-  StoreProductSection,
-} from "@qticaret/types"
+import type { StoreCategorySection, StoreLayoutSection, StoreProductSection } from "@qticaret/types"
 import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, Translate } from "@qticaret/ui"
@@ -13,7 +8,6 @@ import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
-import { railCardVariant } from "./card-framed"
 import { heroView, priceBandsView, withCounts } from "./catalog"
 import { linkedCategoriesView } from "./category-cards-data"
 import { picturedCategories } from "./category-tiles"
@@ -31,19 +25,13 @@ import {
   customerPhotoViews,
   type ProductContext,
   railCards,
-  railProducts,
   relatedProducts,
   reviewViews,
 } from "./section-data"
+import { shelfView } from "./shelf"
 import { contactOf } from "./shop"
 
 export type { ProductContext } from "./section-data"
-
-/** An untitled rail's name by where its products come from; the rest are "Yeni ürünler". */
-const RAIL_TITLES: Partial<Record<ProductSource["kind"], string>> = {
-  best_sellers: "home.best_sellers",
-  on_sale: "home.on_sale",
-}
 
 /** Any section of the design's page groups: the home page's, a product page's, a category page's. */
 export type BodySection = StoreLayoutSection | StoreProductSection | StoreCategorySection
@@ -141,22 +129,8 @@ async function sectionView(
           }
         : null
     }
-    case "products": {
-      const products = await railCards(await railProducts(section), railCardVariant(section))
-      // Nothing on sale now: no sale rail, rather than an empty one
-      if (products.length === 0 && section.source.kind === "on_sale") {
-        return null
-      }
-      return {
-        id,
-        type: "products",
-        title: section.title ?? t(RAIL_TITLES[section.source.kind] ?? "home.products"),
-        products,
-        more: layoutLink(section.more, t),
-        empty: t("home.no_products"),
-        columns: section.columns,
-      }
-    }
+    case "products":
+      return shelfView(section, t)
     case "related_products":
       return relatedView(section, t, context)
     case "brands": {

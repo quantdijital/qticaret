@@ -13,6 +13,8 @@
     "./section-catalog": "./src/store/section-catalog.ts",
     "./section-categories": "./src/store/section-categories.ts",
     "./section-footer": "./src/store/section-footer.ts",
+    "./section-scroller": "./src/store/section-scroller.ts",
+    "./section-shelf": "./src/store/section-shelf.ts",
     "./control-plane": {
       "qt-compiled": "./dist/control-plane/index.js",
       "default": "./src/control-plane/index.ts"

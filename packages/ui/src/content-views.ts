@@ -2,7 +2,6 @@ import type {
   CategoriesVariant,
   HeroVariant,
   SectionLook,
-  ShelfColumns,
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { BannerSectionView } from "./banner-views"
@@ -18,6 +17,7 @@ import type {
 import type { PaginationView } from "./listing-views"
 import type { MarqueeSectionView } from "./marquee-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
+import type { ProductsSectionView } from "./shelf-views"
 import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
 
 /**
@@ -78,20 +78,7 @@ export type HomeSectionView = { look?: SectionLookView } & (
        */
       linked?: CategoryCardsView | null
     }
-  | {
-      id: string
-      type: "products"
-      title: string
-      products: ProductCardView[]
-      more: LinkView | null
-      /** Words when the rail has nothing to show. */
-      empty: string
-      /**
-       * Cards in a row on a wide screen, the shop's choice (adr/0049 Ek
-       * 2026-11-05); the theme steps down on narrower ones. None: 3.
-       */
-      columns?: ShelfColumns
-    }
+  | ProductsSectionView
   | FeaturedProductSectionView
   | { id: string; type: "brands"; title: string; brands: LinkView[] }
   | { id: string; type: "posts"; title: string; posts: PostCardView[]; more: LinkView }

@@ -1,6 +1,25 @@
-import { CATEGORY_CARD_DEFAULTS, HERO_CATALOG_LIMITS, hasVariants } from "@qticaret/types"
+import {
+  CATEGORY_CARD_DEFAULTS,
+  HERO_CATALOG_LIMITS,
+  SCROLLER_DEFAULTS,
+  SHELF_LIMITS,
+  hasVariants,
+} from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
-import type { AnySection } from "@/features/storefront/api/layout"
+import type { AnySection, HeaderCatalogFields } from "@/features/storefront/api/layout"
+
+/** A bar switched to the catalog header starts from the backend's defaults (adr/0049 Ek 2026-11-15). */
+export const HEADER_CATALOG_DEFAULTS: Readonly<HeaderCatalogFields> = {
+  search_placeholder: null,
+  search_label: false,
+  account_text: true,
+  cart_total: false,
+  highlight_link: null,
+  utility_bar: true,
+  phone: true,
+  categories_button: true,
+  menu_ground: "stage",
+}
 
 /** A section whose type is drawn more than one way (adr/0049 Ek 2026-11-14 §2). */
 export type VariantSection = Extract<AnySection, { type: VariantSectionType }>
@@ -29,7 +48,18 @@ export const VARIANT_FIELDS: {
   },
   // The linked cards start from the contract's defaults (adr/0049 Ek 2026-11-15)
   categories: { tiles: {}, linked: CATEGORY_CARD_DEFAULTS },
-  header_bar: { standard: {}, centered: {} },
+  // A rail's own by variant (Ek 2026-11-15): a columns rail starts one more list, the newest
+  products: {
+    grid: { columns: 3 },
+    carousel: { scroller: SCROLLER_DEFAULTS },
+    featured: {},
+    compact: { rows: SHELF_LIMITS.compact.default },
+    columns: {
+      per_list: SHELF_LIMITS.columns.default,
+      lists: [{ title: null, source: { kind: "newest" } }],
+    },
+  },
+  header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
   footer_bar: { ledger: {} },
   product_main: { standard: {} },
   category_main: { standard: {} },

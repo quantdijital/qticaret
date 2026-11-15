@@ -14,6 +14,7 @@ export type * from "@/features/storefront/api/layout-sections"
 export type * from "@/features/storefront/api/layout-main"
 export type * from "@/features/storefront/api/layout-catalog"
 export type * from "@/features/storefront/api/layout-cards"
+export type * from "@/features/storefront/api/layout-shelf"
 
 export interface LayoutRevision {
   revision: number
