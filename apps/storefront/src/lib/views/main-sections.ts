@@ -56,6 +56,7 @@ export function headerBarOf(
       id: "mainheader",
       variant: theme.header.layout === "centered" ? "centered" : "standard",
       sticky: theme.header.sticky,
+      menuImages: true,
     }
   }
   const variant = variantOf("header_bar", bar.variant)
@@ -63,6 +64,8 @@ export function headerBarOf(
     id: bar.id,
     variant,
     sticky: bar.sticky,
+    // A backend before the setting prints none: the pictures stay, as before
+    menuImages: bar.menu_images !== false,
     ...(variant === "catalog" && parts
       ? { catalog: headerCatalogOf(bar.catalog, parts.t, parts.tree) }
       : {}),

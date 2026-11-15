@@ -46,6 +46,12 @@ export interface StoreMainSections {
     variant: HeaderBarVariant
     /** The header stays at the top of a long page. */
     sticky: boolean
+    /**
+     * The menus' category pictures (adr/0049 Ek 2026-11-15): the
+     * "Kategoriler" list, the menu's dropdowns and the phone's sheet, on
+     * every variant; an older backend prints none: drawn.
+     */
+    menu_images?: boolean
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
   }

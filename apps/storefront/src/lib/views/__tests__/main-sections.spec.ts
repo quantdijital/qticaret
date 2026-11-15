@@ -20,7 +20,19 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       id: "mainheader",
       variant: "centered",
       sticky: false,
+      menuImages: true,
     })
+  })
+
+  it("draws the menus' pictures unless the shop turned them off (adr/0049 Ek 2026-11-15)", () => {
+    const theme = { header: { layout: "left", sticky: true } } as const
+    const off = { ...MAIN, header_bar: { ...MAIN.header_bar, menu_images: false } }
+    const on = { ...MAIN, header_bar: { ...MAIN.header_bar, menu_images: true } }
+    expect(headerBarOf(off, theme).menuImages).toBe(false)
+    expect(headerBarOf(on, theme).menuImages).toBe(true)
+    // An older backend prints none: drawn, as before
+    expect(headerBarOf(MAIN, theme).menuImages).toBe(true)
+    expect(headerBarOf(undefined, theme).menuImages).toBe(true)
   })
 
   it("reads the theme's header from a backend before the main sections", () => {
@@ -28,6 +40,7 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       id: "mainheader",
       variant: "centered",
       sticky: false,
+      menuImages: true,
     })
     expect(headerBarOf(undefined, { header: { layout: "left", sticky: true } })).toMatchObject({
       variant: "standard",

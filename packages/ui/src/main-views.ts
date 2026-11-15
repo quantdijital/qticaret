@@ -23,6 +23,12 @@ export interface HeaderBarView {
   variant: HeaderBarVariant
   /** The header stays at the top of a long page. */
   sticky: boolean
+  /**
+   * The menus' category pictures as small squares: the "Kategoriler"
+   * list, the dropdowns and the phone's sheet (adr/0049 Ek 2026-11-15).
+   * False: their rows are words only; absent: drawn, as before.
+   */
+  menuImages?: boolean
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
 }

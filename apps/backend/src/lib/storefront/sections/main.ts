@@ -53,6 +53,12 @@ const headerCommon = {
   type: z.literal("header_bar"),
   /** The header stays at the top of a long page (the theme setting's `header.sticky` before). */
   sticky: z.boolean().default(true),
+  /**
+   * The menus' category pictures (adr/0049 Ek 2026-11-15): the
+   * "Kategoriler" list, the dropdowns and the phone's sheet, whatever the
+   * variant; a bar saved before it reads on, as the menus were drawn.
+   */
+  menu_images: z.boolean().default(true),
 }
 
 /** Today's header: the wordmark on the left, search, account and cart. */

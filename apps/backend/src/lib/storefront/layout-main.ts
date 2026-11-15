@@ -41,6 +41,7 @@ export const defaultHeaderBar = (theme: ThemeHeader): HeaderBar => ({
   ends_at: null,
   variant: theme.layout === "centered" ? "centered" : "standard",
   sticky: theme.sticky,
+  menu_images: true,
 })
 
 const FOOTER_BAR: FooterBar = {
@@ -124,6 +125,7 @@ export function mainSectionsOf<L>(
       type: header.type,
       variant: header.variant,
       sticky: header.sticky,
+      menu_images: header.menu_images,
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
     },
     // Its own settings only when the shop changed them, so a footer left alone prints as before
