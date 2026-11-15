@@ -55,6 +55,9 @@ async function savedBody(): Promise<Record<string, unknown>> {
   return init.body
 }
 
+/** A folded attribute's line (its menu button is named after it too). */
+const row = (name: string) => screen.getByRole("button", { name: new RegExp(`^${name}(?!:)`) })
+
 function renderDialog(saved: AttributeTemplate) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
@@ -75,6 +78,7 @@ describe("TemplateDialog: spec table groups", () => {
   it("adds a group by name, puts a field in it and sends both", async () => {
     renderDialog(template())
 
+    await userEvent.click(screen.getByRole("tab", { name: "Gruplar (0)" }))
     await userEvent.type(screen.getByRole("textbox", { name: "Yeni grup adı" }), "Ölçüler")
     await userEvent.click(screen.getByRole("button", { name: "Grup ekle" }))
     // A second one with the same name gets a key of its own
@@ -83,7 +87,8 @@ describe("TemplateDialog: spec table groups", () => {
     await userEvent.clear(screen.getByRole("textbox", { name: "2. grubun adı" }))
     await userEvent.type(screen.getByRole("textbox", { name: "2. grubun adı" }), "Bakım")
 
-    await userEvent.click(screen.getByRole("button", { name: /Genişlik/ }))
+    await userEvent.click(screen.getByRole("tab", { name: "Özellikler (1)" }))
+    await userEvent.click(row("Genişlik"))
     await userEvent.click(screen.getByRole("combobox", { name: "Grup" }))
     await userEvent.click(await screen.findByRole("option", { name: "Bakım" }))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
@@ -101,8 +106,10 @@ describe("TemplateDialog: spec table groups", () => {
   it("saves a template without groups as before", async () => {
     renderDialog(template())
 
+    await userEvent.click(screen.getByRole("tab", { name: "Şablon bilgisi" }))
     await userEvent.type(screen.getByRole("textbox", { name: /Şablon adı/ }), " ve dekor")
-    await userEvent.click(screen.getByRole("button", { name: /Genişlik/ }))
+    await userEvent.click(screen.getByRole("tab", { name: "Özellikler (1)" }))
+    await userEvent.click(row("Genişlik"))
     expect(screen.queryByRole("combobox", { name: "Grup" })).toBeNull()
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
@@ -124,6 +131,9 @@ describe("TemplateDialog: spec table groups", () => {
       })
     )
 
+    await userEvent.click(screen.getByRole("tab", { name: "Gruplar (2)" }))
+    // Each group says how many attributes it holds
+    expect(screen.getByText("1 özellik")).toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "2. grup: yukarı taşı" }))
     await userEvent.click(screen.getByRole("button", { name: "2. grup: kaldır" }))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))

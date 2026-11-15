@@ -6319,18 +6319,17 @@
   },
   "attributes": {
     "title": "Product attributes",
-    "subtitle": "Define the attributes products carry with templates; each product picks one.",
+    "subtitle": "Choose which attributes each kind of product fills in; each product picks a template.",
     "createTemplate": "Create template",
     "newTemplate": "New attribute template",
-    "templateHint": "The attributes of a kind of product: material, length, origin… The order is the product page's order.",
+    "templateHint": "The attributes products with this template fill in.",
     "empty": "No templates yet. Create the first one; for knives, say, steel type and blade length.",
     "count_one": "{{count}} attribute",
     "count_other": "{{count}} attributes",
     "templateName": "Template name",
-    "handle": "Handle",
-    "handleHint": "Made from the name; cannot change later.",
+    "handle": "Short name",
+    "handleHint": "Made from the name; fixed once saved.",
     "description": "Description",
-    "definitions": "Attributes",
     "noDefinitions": "This template has no attributes yet.",
     "add": "Add attribute",
     "untitled": "Untitled attribute",
@@ -6346,7 +6345,7 @@
     "unit": "Unit",
     "unitHint": "e.g. cm, g, HRC",
     "options": "Options",
-    "optionsHint": "Type and press Enter; the value used in addresses and filters is made from the name.",
+    "optionsHint": "Type and press Enter.",
     "optionsPlaceholder": "e.g. Stainless steel, Carbon steel",
     "removeOption": "Remove {{option}}",
     "flags": {
@@ -6356,12 +6355,11 @@
       "is_seo_highlight": "Highlight in search titles"
     },
     "scope": "Where it lives",
-    "scopeHint": "Attributes that change by variant (size, colour) are kept as product options.",
+    "scopeHint": "What changes with the shopper's choice, like size or colour, becomes a product option.",
     "scopes": {
       "product": "On the product",
       "variant": "On the variant (product option)"
     },
-    "variantBadge": "Variant",
     "optionTitle": "Option name",
     "optionTitleHint": "The product option's name, e.g. Size.",
     "variesBy": "Google equivalent",
@@ -6400,8 +6398,7 @@
     "changeTemplateDescription": "The product's current attribute values are deleted when you save.",
     "changeTemplateConfirm": "Change",
     "groups": {
-      "title": "Groups",
-      "hint": "Splits the product page's spec table into titled sections. Optional; without groups the attributes show as one list.",
+      "hint": "Splits the product page's spec table under headings. Optional; without groups it is one list.",
       "newName": "New group name",
       "newPlaceholder": "E.g. Dimensions",
       "add": "Add group",
@@ -6415,7 +6412,7 @@
       "unnamed": "Unnamed group"
     },
     "aliases": "Other names",
-    "aliasesHint": "Other names product descriptions use for this field; facts in descriptions match them too.",
+    "aliasesHint": "Other names descriptions use for this attribute; e.g. Made in for Origin.",
     "aliasesPlaceholder": "Type a name and press Enter",
     "removeAlias": "Remove “{{name}}”",
     "facts": {
@@ -6488,7 +6485,37 @@
       "report": "Download the report"
     },
     "previousTemplate": "Previous template",
-    "nextTemplate": "Next template"
+    "nextTemplate": "Next template",
+    "columns": {
+      "name": "Template",
+      "definitions": "Attributes"
+    },
+    "tabs": {
+      "definitions_one": "Attributes ({{count}})",
+      "definitions_other": "Attributes ({{count}})",
+      "groups_one": "Groups ({{count}})",
+      "groups_other": "Groups ({{count}})",
+      "info": "Template details"
+    },
+    "tabError": "A field on this tab needs fixing",
+    "descriptionHint": "Shown in the panel only.",
+    "definitionsHint": "Shown on the product page in this order. Drag to reorder.",
+    "typeFixed": "A saved attribute's type does not change.",
+    "textUnitHint": "Written beside the value, e.g. HRC.",
+    "badges": {
+      "required": "Required",
+      "filter": "Filter",
+      "variant": "Variant",
+      "hidden": "Hidden in the shop"
+    },
+    "advanced": {
+      "title": "Advanced",
+      "changed_one": "{{count}} setting on",
+      "changed_other": "{{count}} settings on"
+    },
+    "seoHint": "Its value may be used in the product's title on Google.",
+    "drag": "Drag to move",
+    "actions": "{{name}}: actions"
   },
   "brands": {
     "description": "Each brand has its own page, logo and products.",

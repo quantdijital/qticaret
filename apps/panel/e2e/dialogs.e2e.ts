@@ -135,12 +135,7 @@ const CASES: Case[] = [
     path: "/inventory",
     open: firstOf('main button[aria-label$="stok geçmişi"]'),
   },
-  {
-    name: "attribute template",
-    path: "/settings/attributes",
-    // A template's card, named by its attribute count; the settings menu beside is in main too
-    open: firstOf((page) => page.getByRole("main").getByRole("button", { name: /\d+ özellik/ })),
-  },
+  { name: "attribute template", path: "/settings/attributes", open: firstRow },
   { name: "media detail", path: "/media", open: firstOf("main ul > li > button") },
 ]
 
