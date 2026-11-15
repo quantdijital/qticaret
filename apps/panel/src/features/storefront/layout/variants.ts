@@ -36,13 +36,12 @@ export const VARIANT_FIELDS: {
 /**
  * Variants on the list the theme does not draw yet: shown, not offered
  * (as the theme settings' "Ortada" was, adr/0062 karar 6). A section saved
- * with one keeps it; the storefront draws the default meanwhile.
+ * with one keeps it; the storefront draws the default meanwhile. None
+ * today: the header bar's `centered` is drawn since 2026-11-15.
  */
 export const UNBUILT_VARIANTS: {
   readonly [T in VariantSectionType]?: ReadonlySet<SectionVariant<T>>
-} = {
-  header_bar: new Set(["centered"]),
-}
+} = {}
 
 export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: SectionVariant<T>) =>
   (UNBUILT_VARIANTS[type] as ReadonlySet<string> | undefined)?.has(variant) ?? false

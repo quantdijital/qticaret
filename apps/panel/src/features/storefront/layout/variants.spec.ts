@@ -4,7 +4,7 @@ import type { TrustBadgesSection } from "@/features/storefront/api/layout"
 import en from "@/locales/en.json"
 import tr from "@/locales/tr.json"
 import { newBodySection, newHomeSection } from "./sections"
-import { VARIANT_FIELDS, offersVariants, switchVariant } from "./variants"
+import { VARIANT_FIELDS, isUnbuilt, offersVariants, switchVariant } from "./variants"
 
 const strip = newHomeSection("trust_badges", "guvenserit") as TrustBadgesSection
 
@@ -45,5 +45,10 @@ describe("section variants in the editor", () => {
         expect(Object.keys(VARIANT_FIELDS[type as keyof typeof VARIANT_FIELDS])).toContain(variant)
       }
     }
+  })
+
+  it("offers the centred header: the theme draws both header bars (2026-11-15)", () => {
+    expect(isUnbuilt("header_bar", "centered")).toBe(false)
+    expect(isUnbuilt("header_bar", "standard")).toBe(false)
   })
 })
