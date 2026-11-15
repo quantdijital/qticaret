@@ -8,7 +8,7 @@ import { acceptMessage, editorKey, needsScroll, previewHref, selectionCss } from
 import { holdAddress, previewBase, shownPage } from "./bridge-nav"
 import { createOverlay } from "./overlay"
 import type { Overlay } from "./overlay"
-import { announceSelection, drawnSections } from "./overlay-core"
+import { announceSelection, drawnSections, settleSelection } from "./overlay-core"
 import { installPageHooks } from "./page-hooks"
 import { waitForSection } from "./wait-for"
 
@@ -83,6 +83,7 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
       ms: Math.round(performance.now() - state.startedAt),
     })
     state.overlay?.reposition()
+    state.chosen = settleSelection(state.chosen, state.selected)
     sendLocation()
     if (state.again) {
       state.again = false
@@ -169,6 +170,7 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
         case "init":
           state.scale = message.payload.scale
           state.selected = message.payload.selected
+          state.chosen = settleSelection(state.chosen, state.selected)
           overlay.setScale(state.scale)
           paint()
           return
@@ -194,7 +196,8 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
           const { id, reveal: how, flash: flashing } = message.payload
           state.selected = id
           paint()
-          if (!id) {
+          // The section left is let go at once; the one chosen is announced once it is drawn
+          if (state.chosen && state.chosen.id !== id) {
             announceSelection(state.chosen, null)
             state.chosen = null
           }
@@ -283,6 +286,8 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
       overlay.destroy()
       state.overlay = null
       delete root.dataset["qtEditor"]
+      announceSelection(state.chosen, null)
+      state.chosen = null
       state.waiting?.()
       state.style?.remove()
       state.style = null

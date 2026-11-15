@@ -155,6 +155,10 @@ export function SliderStage({
     }
     const select = hold(true)
     const deselect = hold(false)
+    // A slider just added is selected before this listens: the editor's mark says so
+    if (section.hasAttribute("data-qt-selected")) {
+      setHeld((was) => ({ ...was, editing: true }))
+    }
     section.addEventListener("qt:section:select", select)
     section.addEventListener("qt:section:deselect", deselect)
     return () => {

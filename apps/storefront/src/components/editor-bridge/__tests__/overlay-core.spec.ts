@@ -5,7 +5,9 @@ import {
   drawnSections,
   labelPlace,
   sectionAround,
+  SELECTED_MARK,
   sectionStep,
+  settleSelection,
   stepSection,
   strokeFactor,
 } from "../overlay-core"
@@ -96,6 +98,24 @@ describe("the label at the frame's scale", () => {
     // At half scale, the gap doubles with the strokes
     expect(labelPlace(box(100, 400), viewport, 2)).toEqual({ top: 112, right: 112 })
   })
+
+  it("hangs under a short section at the top of the view, on the left", () => {
+    const viewport = { width: 1000, height: 800 }
+    const box = (top: number, bottom: number) => ({
+      top,
+      bottom,
+      left: 0,
+      right: 1000,
+      width: 1000,
+      height: bottom - top,
+    })
+    // The page's header: its cart and search stay clear
+    expect(labelPlace(box(0, 80), viewport, 1)).toEqual({ top: 80, left: 6 })
+    expect(labelPlace(box(0, 80), viewport, 2)).toEqual({ top: 80, left: 12 })
+    // A tall section at the top, or a short one further down, keeps the corner inside
+    expect(labelPlace(box(0, 600), viewport, 1)).toEqual({ top: 6, right: 6 })
+    expect(labelPlace(box(200, 280), viewport, 1)).toEqual({ top: 206, right: 6 })
+  })
 })
 
 describe("the theme's editor events", () => {
@@ -119,5 +139,45 @@ describe("the theme's editor events", () => {
     announceSelection(at("head01"), at("rail02"))
     announceSelection(at("rail02"), null)
     expect(heard).toEqual(["select head01", "deselect head01", "select rail02", "deselect rail02"])
+  })
+
+  it("announces a section chosen before it was drawn once a redraw brings it", () => {
+    page()
+    const heard: string[] = []
+    document.addEventListener("qt:section:select", (event) => {
+      heard.push((event as CustomEvent<{ sectionId: string }>).detail.sectionId)
+    })
+    // Not drawn yet: nothing to announce
+    expect(settleSelection(null, "fresh1", document)).toBeNull()
+    const fresh = document.createElement("section")
+    fresh.setAttribute("data-qs", "fresh1")
+    document.body.append(fresh)
+    const chosen = settleSelection(null, "fresh1", document)
+    expect(chosen?.element).toBe(fresh)
+    expect(fresh.hasAttribute(SELECTED_MARK)).toBe(true)
+    // Already announced: a later redraw says nothing again
+    expect(settleSelection(chosen, "fresh1", document)).toBe(chosen)
+    // Drawn anew (a new element with the same id): the new one is announced
+    const again = document.createElement("section")
+    again.setAttribute("data-qs", "fresh1")
+    fresh.replaceWith(again)
+    expect(settleSelection(chosen, "fresh1", document)?.element).toBe(again)
+    expect(heard).toEqual(["fresh1", "fresh1"])
+  })
+
+  it("marks the chosen section for a theme part that listens late", () => {
+    page()
+    const head = document.querySelector('[data-qs="head01"]')
+    const rail = document.querySelector('[data-qs="rail02"]')
+    if (!head || !rail) {
+      throw new Error("no sections")
+    }
+    announceSelection(null, { id: "head01", element: head })
+    expect(head.hasAttribute(SELECTED_MARK)).toBe(true)
+    announceSelection({ id: "head01", element: head }, { id: "rail02", element: rail })
+    expect(head.hasAttribute(SELECTED_MARK)).toBe(false)
+    expect(rail.hasAttribute(SELECTED_MARK)).toBe(true)
+    announceSelection({ id: "rail02", element: rail }, null)
+    expect(document.querySelector(`[${SELECTED_MARK}]`)).toBeNull()
   })
 })

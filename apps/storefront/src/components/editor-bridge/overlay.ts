@@ -1,5 +1,5 @@
 import { sectionSelector } from "./bridge-core"
-import { drawnSections, labelPlace, strokeFactor } from "./overlay-core"
+import { drawnSections, labelPlace, strokeFactor, type LabelPlace } from "./overlay-core"
 
 /**
  * The editor layer in the preview frame (adr/0065 §4, Faz 2; owner's
@@ -42,9 +42,10 @@ function setBox(element: HTMLElement, rect: DOMRect) {
   element.style.height = `${String(Math.round(rect.height))}px`
 }
 
-function setCorner(element: HTMLElement, place: { top: number; right: number }) {
+function setCorner(element: HTMLElement, place: LabelPlace) {
   element.style.top = `${String(place.top)}px`
-  element.style.right = `${String(place.right)}px`
+  element.style.right = "right" in place ? `${String(place.right)}px` : ""
+  element.style.left = "left" in place ? `${String(place.left)}px` : ""
 }
 
 export function createOverlay({

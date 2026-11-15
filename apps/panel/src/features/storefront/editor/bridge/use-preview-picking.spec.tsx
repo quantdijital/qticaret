@@ -71,7 +71,8 @@ describe("picking in the preview", () => {
         }),
       { initialProps: { handshakes: 1 } }
     )
-    const labels = () => post.mock.calls.filter(([type]) => (type as string) === "labels")
+    const labels = () =>
+      (post.mock.calls as unknown as [string, unknown][]).filter(([type]) => type === "labels")
     expect(labels()).toHaveLength(1)
     hook.rerender({ handshakes: 1 })
     expect(labels()).toHaveLength(1)
