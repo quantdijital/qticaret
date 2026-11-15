@@ -7759,7 +7759,6 @@
         "addMarquee": "Kayan yazı ekle"
       },
       "row": {
-        "drag": "Sürükleyerek taşıyın",
         "problem": "Düzeltilecek alan var",
         "scheduled": "Zamanlanmış",
         "moveUpOf": "{{name}} bölümünü yukarı taşı",
@@ -8903,7 +8902,17 @@
         "pickLabelPlaceholder": "Çam yeşili",
         "showPrice": "Başlangıç fiyatını göster",
         "showPriceTerm": "price",
-        "showPriceHint": "Seçtiğiniz ürünlerin en düşük güncel fiyatı."
+        "showPriceHint": "Seçtiğiniz ürünlerin en düşük güncel fiyatı.",
+        "slides": "Slaytlar",
+        "slidesTerm": "slides",
+        "slidesHint": "En çok {{max}} slayt. Tek slayt durağan durur; iki ve üstü kendiliğinden döner, ayarları Kaydırma grubunda.",
+        "pictureOnly": "Yalnız görsel",
+        "slideImageHint": "Başlık, yazı ve düğme boşsa görsel alanın tamamını kaplar.",
+        "slideImageFirstHint": "Boş bırakırsanız mağazanın en yeni ürün fotoğrafı görünür. Başlık, yazı ve düğme boşsa görsel alanın tamamını kaplar.",
+        "slideLink": "Görselin bağlantısı",
+        "slideLinkTerm": "link",
+        "slideLinkHint": "Görsele tıklayan buraya gider.",
+        "slideWordsHint": "Hepsini boş bırakırsanız slayt yalnız görsel olur."
       },
       "categories": {
         "showCount": "Ürün sayısını göster",

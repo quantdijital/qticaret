@@ -2,6 +2,7 @@ import { CircleAlert, CloudCheck, Loader2, RotateCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { SaveStatus as Status } from "@/features/storefront/layout/use-autosave"
+import { Hint } from "./shared/hint"
 
 const S = "storefront.editor.status"
 
@@ -28,24 +29,25 @@ export function SaveStatus({ status, dirty, blocked, onRetry }: SaveStatusProps)
     body = (
       <>
         <CircleAlert className="size-4 shrink-0 text-destructive-text" aria-hidden="true" />
-        <span
-          className="min-w-0 truncate text-destructive-text max-sm:sr-only"
-          title={status.message}
-        >
-          {t(`${S}.error`, { message: status.message })}
-        </span>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          aria-label={t(`${S}.retry`)}
-          title={t(`${S}.retry`)}
-          className="shrink-0 max-sm:w-8 max-sm:px-0"
-          onClick={onRetry}
-        >
-          <RotateCw />
-          <span className="max-sm:hidden">{t(`${S}.retry`)}</span>
-        </Button>
+        {/* A long reason is cut short in the bar: the hint shows it whole */}
+        <Hint label={status.message} side="bottom">
+          <span className="min-w-0 truncate text-destructive-text max-sm:sr-only">
+            {t(`${S}.error`, { message: status.message })}
+          </span>
+        </Hint>
+        <Hint label={t(`${S}.retry`)} side="bottom">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label={t(`${S}.retry`)}
+            className="shrink-0 max-sm:w-8 max-sm:px-0"
+            onClick={onRetry}
+          >
+            <RotateCw />
+            <span className="max-sm:hidden">{t(`${S}.retry`)}</span>
+          </Button>
+        </Hint>
       </>
     )
   } else if (blocked && dirty) {

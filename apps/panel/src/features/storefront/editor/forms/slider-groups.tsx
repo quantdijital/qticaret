@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next"
-import type { HeroSliderSection } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
 import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { ScrollerFields } from "./scroller-fields"
 import { SLIDER_MAIN, SLIDER_OTHER } from "./scroller-groups"
+import type { KitSection } from "./slider-kit"
 import { asKit, withSliderKit } from "./slider-kit"
 
 /**
@@ -12,16 +12,18 @@ import { asKit, withSliderKit } from "./slider-kit"
  * 1.3): the scroller kit's turning by itself and its speed, the arrows and
  * their shape, the dots; looping sits closed in "Diğer ayarlar"
  * (`SliderOther`). The cards in view, the arrows' place and dragging are
- * not offered: a slider shows one slide, its arrows either side.
+ * not offered: a slider shows one slide, its arrows either side. The
+ * catalogue opening with two or more slides takes the same group (adr/0049
+ * Ek 2026-11-15).
  */
 export function SliderGroups({
   section,
   reveal,
   onChange,
 }: {
-  section: HeroSliderSection
+  section: KitSection
   reveal: (group: FieldGroupName) => number | null
-  onChange: (section: HeroSliderSection) => void
+  onChange: (section: KitSection) => void
 }) {
   const { t } = useTranslation()
   return (
@@ -43,8 +45,8 @@ export function SliderOther({
   section,
   onChange,
 }: {
-  section: HeroSliderSection
-  onChange: (section: HeroSliderSection) => void
+  section: KitSection
+  onChange: (section: KitSection) => void
 }) {
   return (
     <ScrollerFields

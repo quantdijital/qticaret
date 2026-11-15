@@ -1,32 +1,58 @@
 import {
+  HERO_CATALOG_SLIDER_DEFAULTS,
   SCROLLER_DEFAULTS,
   SLIDER_DEFAULTS,
   SLIDER_SCROLLER,
   sliderSettingsOf,
 } from "@qticaret/types"
 import type { ScrollerSettings, SliderSettings } from "@qticaret/types"
-import type { HeroSliderSection } from "@/features/storefront/api/layout"
+import type { AnySection, HeroSection, HeroSliderSection } from "@/features/storefront/api/layout"
 import { SLIDER_OTHER } from "./scroller-groups"
 
+/** H17's opening (`category_list`), whose slides turn on the slider's settings (adr/0049 Ek 2026-11-15). */
+export type CatalogHero = Extract<HeroSection, { variant: "category_list" }>
+
+/** A section that turns on the slider's settings: the sliding opening, or H17 with slides. */
+export type KitSection = HeroSliderSection | CatalogHero
+
+/**
+ * Whether the section turns on the slider's settings now: the sliding
+ * opening always; H17 only with two or more slides (one never moves, so
+ * the panel offers nothing for it; bilesen-standardi §0 ilke 3).
+ */
+export const turnsAsSlider = (section: AnySection): section is KitSection =>
+  section.type === "hero_slider" ||
+  (section.type === "hero" &&
+    section.variant === "category_list" &&
+    (section.slides?.length ?? 0) > 1)
+
+/** The section's own defaults: the sliding opening still, H17's slides turning by themselves. */
+export const kitDefaultsOf = (section: KitSection): SliderSettings =>
+  section.type === "hero" ? HERO_CATALOG_SLIDER_DEFAULTS : SLIDER_DEFAULTS
+
+/** The section's slider settings as a reader takes them (a step missing: its own default). */
+export const kitSettingsOf = (section: KitSection): SliderSettings =>
+  sliderSettingsOf(section, kitDefaultsOf(section))
+
 /** The slider's kit settings as the kit's fields take them (the ones it has no use for at their defaults). */
-export const asKit = (section: HeroSliderSection): ScrollerSettings => ({
+export const asKit = (section: KitSection): ScrollerSettings => ({
   ...SCROLLER_DEFAULTS,
-  ...sliderSettingsOf(section),
+  ...kitSettingsOf(section),
 })
 
 /**
- * The slider with the kit's fields' answer (bilesen-denetimi (b) 4): only
- * the settings it has use for kept, the switches from before the kit
- * dropped, and seconds saved before the kit dropped once the shop picks
- * another speed.
+ * The section with the kit's fields' answer (bilesen-denetimi (b) 4): only
+ * the settings it has use for kept; for the sliding opening the switches
+ * from before the kit dropped, and seconds saved before the kit dropped
+ * once the shop picks another speed.
  */
-export function withSliderKit(
-  section: HeroSliderSection,
-  next: ScrollerSettings
-): HeroSliderSection {
+export function withSliderKit(section: KitSection, next: ScrollerSettings): KitSection {
   const scroller = Object.fromEntries(
     SLIDER_SCROLLER.map((name) => [name, next[name]])
   ) as SliderSettings
+  if (section.type === "hero") {
+    return { ...section, scroller }
+  }
   const keep = scroller.speed === sliderSettingsOf(section).speed
   const out: HeroSliderSection = { ...section, scroller }
   delete out.autoplay
@@ -38,8 +64,9 @@ export function withSliderKit(
   return out
 }
 
-/** How many of the slider's closed kit settings are off the slider's default. */
-export const sliderOtherCount = (section: HeroSliderSection): number => {
-  const settings = sliderSettingsOf(section)
-  return SLIDER_OTHER.filter((name) => settings[name] !== SLIDER_DEFAULTS[name]).length
+/** How many of the section's closed kit settings are off its own default. */
+export const sliderOtherCount = (section: KitSection): number => {
+  const settings = kitSettingsOf(section)
+  const defaults = kitDefaultsOf(section)
+  return SLIDER_OTHER.filter((name) => settings[name] !== defaults[name]).length
 }

@@ -29,7 +29,7 @@ import { MarqueeSettings } from "./forms/marquee-settings"
 import { ScrollerFields } from "./forms/scroller-fields"
 import { SCROLLER_OTHER } from "./forms/scroller-groups"
 import { SliderGroups, SliderOther } from "./forms/slider-groups"
-import { sliderOtherCount } from "./forms/slider-kit"
+import { sliderOtherCount, turnsAsSlider } from "./forms/slider-kit"
 import { ShelfGroups } from "./forms/shelf-groups"
 import { ScheduleFields } from "./forms/schedule-fields"
 import { takesDevice } from "./forms/visibility-registry"
@@ -111,7 +111,8 @@ export function SectionPanel({
   const rail = shelf ?? (section.type === "related_products" ? section : null)
   const scroller = rail?.variant === "carousel" ? scrollerSettingsOf(rail.scroller) : null
   // The sliding opening turns on the kit's settings it has use for (bilesen-denetimi (b) 4)
-  const slider = section.type === "hero_slider" ? section : null
+  // and so does the catalogue opening once it has two or more slides (adr/0049 Ek 2026-11-15)
+  const slider = turnsAsSlider(section) ? section : null
   // The linked category cards' frame sits with the look (adr/0049 Ek 2026-11-15)
   const cards = section.type === "categories" && section.variant === "linked" ? section : null
   const set =

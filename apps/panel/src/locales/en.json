@@ -7759,7 +7759,6 @@
         "addMarquee": "Add scrolling strip"
       },
       "row": {
-        "drag": "Drag to move",
         "problem": "A field needs fixing",
         "scheduled": "Scheduled",
         "moveUpOf": "Move {{name}} up",
@@ -8903,7 +8902,17 @@
         "pickLabelPlaceholder": "Pine green",
         "showPrice": "Show the starting price",
         "showPriceTerm": "price",
-        "showPriceHint": "The lowest current price among the products you chose."
+        "showPriceHint": "The lowest current price among the products you chose.",
+        "slides": "Slides",
+        "slidesTerm": "slides",
+        "slidesHint": "Up to {{max}} slides. One slide stays still; two or more turn by themselves, set in the Scrolling group.",
+        "pictureOnly": "Picture only",
+        "slideImageHint": "With no heading, text or button the picture fills the whole tile.",
+        "slideImageFirstHint": "Left empty, the shop's newest product photo shows. With no heading, text or button the picture fills the whole tile.",
+        "slideLink": "Picture link",
+        "slideLinkTerm": "link",
+        "slideLinkHint": "A click on the picture goes here.",
+        "slideWordsHint": "Leave them all empty for a picture-only slide."
       },
       "categories": {
         "showCount": "Show product counts",
