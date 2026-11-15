@@ -9,6 +9,7 @@ import { errorText } from "@/lib/errors"
 import type { LivePreview } from "./bridge/use-live-preview"
 import { DEVICES, fitPreview, useRoom } from "./preview-fit"
 import type { Device } from "./preview-fit"
+import { Hint } from "./shared/hint"
 
 const V = "storefront.editor.preview"
 const D = "storefront.editor.device"
@@ -77,25 +78,26 @@ function PreviewBar({
         {DEVICES.map((each) => {
           const Icon = DEVICE_ICONS[each]
           return (
-            <ToggleGroupItem
-              key={each}
-              value={each}
-              aria-label={t(`${D}.${each}`)}
-              title={t(`${D}.${each}`)}
-            >
-              <Icon />
-              <span className="hidden @min-[34rem]:inline">{t(`${D}.${each}`)}</span>
-            </ToggleGroupItem>
+            <Hint key={each} label={t(`${D}.${each}`)} side="bottom">
+              {/* Its own state named again: the hint's would take the place of on/off */}
+              <ToggleGroupItem
+                value={each}
+                data-state={device === each ? "on" : "off"}
+                aria-label={t(`${D}.${each}`)}
+              >
+                <Icon />
+                <span className="hidden @min-[34rem]:inline">{t(`${D}.${each}`)}</span>
+              </ToggleGroupItem>
+            </Hint>
           )
         })}
       </ToggleGroup>
-      <span
-        className="tabular w-11 shrink-0 text-right text-xs text-muted-foreground"
-        title={t(`${V}.scaleHint`)}
-      >
-        <span className="sr-only">{t(`${V}.scale`)} </span>
-        {percent}
-      </span>
+      <Hint label={t(`${V}.scaleHint`)} side="bottom" align="end" describe>
+        <span className="tabular w-11 shrink-0 text-right text-xs text-muted-foreground">
+          <span className="sr-only">{t(`${V}.scale`)} </span>
+          {percent}
+        </span>
+      </Hint>
     </div>
   )
 }
