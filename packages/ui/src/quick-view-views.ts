@@ -29,6 +29,11 @@ export interface QuickViewView {
   summaryText: string | null
   /** Whether the dialog offers a quantity field; off, it adds one. */
   quantity: boolean
+  /**
+   * The product asks for more than a variant and a quantity (a gift card's
+   * recipient, a required add-on): the dialog offers its page, not the button.
+   */
+  needsPage: boolean
 }
 
 /** The layout's quick view (adr/0049 Ek 2026-11-15): given only while the shop has it on. */

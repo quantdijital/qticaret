@@ -19,7 +19,9 @@ import { discountWords, type QuickViewWords } from "./quick-view-words"
  * field; else one), "Sepete ekle" posting `addToCart`'s fields. A choice
  * changes nothing in the address. Once in, `onAdded` closes the dialog and
  * the cart drawer says so; refused, the reason in words with the product's
- * page as the way on.
+ * page as the way on. A product that asks more than this form sends (a gift
+ * card's recipient, a required add-on: `needsPage`) has its page's link in
+ * the button's place.
  */
 export function QuickViewBuy({
   view,
@@ -108,26 +110,33 @@ export function QuickViewBuy({
         {!view.quantity && <input type="hidden" name="quantity" value="1" />}
       </form>
       <div className="@container flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {view.quantity && (
-            <Quantity
+        {view.needsPage ? (
+          // A gift card's recipient or a required add-on: only its page asks it
+          <a href={view.path} className="gf-btn min-w-0 flex-1 basis-48">
+            {words.openPage}
+          </a>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            {view.quantity && (
+              <Quantity
+                form={formId}
+                name="quantity"
+                max={99}
+                words={words}
+                onValueChange={() => undefined}
+              />
+            )}
+            <button
+              type="submit"
               form={formId}
-              name="quantity"
-              max={99}
-              words={words}
-              onValueChange={() => undefined}
-            />
-          )}
-          <button
-            type="submit"
-            form={formId}
-            disabled={!available || pending}
-            aria-busy={pending}
-            className="gf-btn min-w-0 flex-1 basis-48"
-          >
-            {label}
-          </button>
-        </div>
+              disabled={!available || pending}
+              aria-busy={pending}
+              className="gf-btn min-w-0 flex-1 basis-48"
+            >
+              {label}
+            </button>
+          </div>
+        )}
         <p role="status" aria-live="polite" className="text-sm empty:hidden">
           {error && (
             <span className="flex items-start gap-2 text-error">

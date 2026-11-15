@@ -156,9 +156,11 @@ export default function QuickViewDialog({
                   />
                 </>
               )}
-              <a href={view?.path ?? ask.path} className="gf-link self-start">
-                {words.openPage}
-              </a>
+              {!view?.needsPage && (
+                <a href={view?.path ?? ask.path} className="gf-link self-start">
+                  {words.openPage}
+                </a>
+              )}
             </div>
           </div>
         </Dialog.Content>

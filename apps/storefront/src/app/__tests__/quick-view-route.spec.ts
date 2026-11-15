@@ -7,8 +7,11 @@ const requests = vi.hoisted(() => ({
   productById: vi.fn(),
   pathsOf: vi.fn(),
   priceDisplays: vi.fn(),
+  storefrontSettings: vi.fn(),
 }))
 vi.mock("@/lib/store-api/requests", () => requests)
+const addons = vi.hoisted(() => ({ productAddonsOrNone: vi.fn() }))
+vi.mock("@/lib/cart/addons", () => addons)
 const extras = vi.hoisted(() => ({ cardFacts: vi.fn() }))
 vi.mock("@/lib/store-api/extras", () => extras)
 const texts = vi.hoisted(() => ({ productTexts: vi.fn() }))
@@ -70,6 +73,8 @@ describe("GET /api/quick-view (adr/0049 Ek 2026-11-15)", () => {
     requests.productById.mockResolvedValue(PRODUCT)
     requests.pathsOf.mockResolvedValue({ prod_01: "/urun/katlanir-caki" })
     requests.priceDisplays.mockResolvedValue({})
+    requests.storefrontSettings.mockResolvedValue({ features: { gift_cards: true } })
+    addons.productAddonsOrNone.mockResolvedValue([])
     extras.cardFacts.mockResolvedValue({
       prod_01: { stock: "in", quick_add: null, rating: { average: 4.5, count: 12 } },
     })
@@ -136,6 +141,73 @@ describe("GET /api/quick-view (adr/0049 Ek 2026-11-15)", () => {
       expect(response.status).toBe(400)
     }
     expect(requests.productById).not.toHaveBeenCalled()
+  })
+
+  it("answers 404 with the same headers and no backend call when the shop has the quick view off", async () => {
+    theme.currentTheme.mockResolvedValue(withCard({ quick_view: false }))
+    const response = await ask("prod_01")
+    expect(response.status).toBe(404)
+    expect(response.headers.get("cache-control")).toBe("private, no-store")
+    expect(response.headers.get("x-robots-tag")).toBe("noindex")
+    expect(await response.json()).toEqual({ message: "quick_view.not_found" })
+    for (const call of [
+      requests.productById,
+      requests.pathsOf,
+      requests.priceDisplays,
+      texts.productTexts,
+      extras.cardFacts,
+    ]) {
+      expect(call).not.toHaveBeenCalled()
+    }
+  })
+
+  it("asks the product first: an unknown id is one call, a 404, and never asks for a path", async () => {
+    requests.productById.mockRejectedValue(new StoreApiError(404, "not_found", null))
+    const response = await ask("prod_unknown")
+    expect(response.status).toBe(404)
+    expect(requests.productById).toHaveBeenCalledTimes(1)
+    expect(requests.pathsOf).not.toHaveBeenCalled()
+    expect(texts.productTexts).not.toHaveBeenCalled()
+  })
+
+  it("sends a gift card or a product with a required add-on to its page, not the button", async () => {
+    expect(((await (await ask("prod_01")).json()) as QuickViewView).needsPage).toBe(false)
+
+    // A gift card asks its recipient (and takes no add-ons), while the shop has gift cards on
+    addons.productAddonsOrNone.mockClear()
+    requests.productById.mockResolvedValue({
+      ...PRODUCT,
+      product_extension: { is_gift_card: true },
+    })
+    expect(((await (await ask("prod_01")).json()) as QuickViewView).needsPage).toBe(true)
+    expect(addons.productAddonsOrNone).not.toHaveBeenCalled()
+    // ... as the page, which shows no recipient form while they are off
+    requests.storefrontSettings.mockResolvedValue({ features: { gift_cards: false } })
+    expect(((await (await ask("prod_01")).json()) as QuickViewView).needsPage).toBe(false)
+
+    requests.productById.mockResolvedValue(PRODUCT)
+    addons.productAddonsOrNone.mockResolvedValue([{ id: "addon_1", required: false }])
+    expect(((await (await ask("prod_01")).json()) as QuickViewView).needsPage).toBe(false)
+    addons.productAddonsOrNone.mockResolvedValue([
+      { id: "addon_1", required: false },
+      { id: "addon_2", required: true },
+    ])
+    expect(((await (await ask("prod_01")).json()) as QuickViewView).needsPage).toBe(true)
+  })
+
+  it("asks the path only after the product is found", async () => {
+    const order: string[] = []
+    requests.productById.mockImplementation(async () => {
+      await Promise.resolve()
+      order.push("product")
+      return PRODUCT
+    })
+    requests.pathsOf.mockImplementation(() => {
+      order.push("path")
+      return Promise.resolve({ prod_01: "/urun/katlanir-caki" })
+    })
+    expect((await ask("prod_01")).status).toBe(200)
+    expect(order).toEqual(["product", "path"])
   })
 
   it("answers 404 for a product not sold here or without a live page, 502 or the 429 for a failure", async () => {

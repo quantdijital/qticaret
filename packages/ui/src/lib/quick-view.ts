@@ -3,7 +3,7 @@ import type { QuickViewView } from "../quick-view-views"
 /**
  * A card's quick view in the browser (adr/0049 Ek 2026-11-15), shared by
  * every theme: the storefront's answer for one product, asked when the
- * dialog opens, kept for the page's life so a second look asks nothing.
+ * dialog opens, kept for a minute so a second look asks nothing.
  * No React here; the address is the storefront's own (the layout's
  * `quickView.address`), never the backend's (adr/0046 §5).
  */
@@ -24,10 +24,14 @@ const isView = (value: unknown): value is QuickViewView =>
 export const quickViewUrl = (address: string, productId: string): string =>
   `${address}?${new URLSearchParams({ id: productId }).toString()}`
 
-// The answers by product, for the page's life (a price is the shopper's: never shared)
-const kept = new Map<string, QuickViewView>()
+/** How long an answer is kept: a second look soon after asks nothing, a price never goes stale for long. */
+export const QUICK_VIEW_KEPT_MS = 60_000
 
-/** Forgets the kept answers (a test's fresh page). */
+// The answers by product, each with the time it lapses (a price is the shopper's: a signed-in
+// customer's group prices differ, so a sign-in or sign-out forgets them all)
+const kept = new Map<string, { view: QuickViewView; until: number }>()
+
+/** Forgets the kept answers (a sign-in or sign-out; a test's fresh page). */
 export function forgetQuickViews(): void {
   kept.clear()
 }
@@ -39,9 +43,10 @@ export async function loadQuickView(
   signal?: AbortSignal
 ): Promise<QuickViewAnswer> {
   const known = kept.get(productId)
-  if (known) {
-    return { status: "ready", view: known }
+  if (known && known.until > Date.now()) {
+    return { status: "ready", view: known.view }
   }
+  kept.delete(productId)
   try {
     const response = await fetch(quickViewUrl(address, productId), {
       ...(signal ? { signal } : {}),
@@ -55,7 +60,7 @@ export async function loadQuickView(
     if (!isView(body)) {
       return { status: "error" }
     }
-    kept.set(productId, body)
+    kept.set(productId, { view: body, until: Date.now() + QUICK_VIEW_KEPT_MS })
     return { status: "ready", view: body }
   } catch {
     return { status: "error" }

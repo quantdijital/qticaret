@@ -93,6 +93,7 @@ const VIEW: QuickViewView = {
   summaryHtml: null,
   summaryText: "Paslanmaz çelik.",
   quantity: true,
+  needsPage: false,
 }
 
 const answer = (status: number, body: unknown) =>
@@ -252,6 +253,18 @@ describe("the quick view dialog", () => {
     expect(
       dialog?.querySelector<HTMLInputElement>("input[name=quantity][type=hidden]")?.value
     ).toBe("1")
+  })
+
+  it("offers the product's page, not the button, for a product that asks more than the dialog sends", async () => {
+    vi.stubGlobal("fetch", answer(200, { ...VIEW, needsPage: true }))
+    draw({ ...CARD, quickView: "hover" })
+    await openDialog()
+    const dialog = document.querySelector<HTMLElement>("[role=dialog]")
+    expect(dialog?.querySelector("button[type=submit]")).toBeNull()
+    expect(dialog?.querySelector("input[name=quantity][type=number]")).toBeNull()
+    const links = dialog?.querySelectorAll('a[href="/urun/katlanir-caki"]') ?? []
+    expect(links).toHaveLength(1)
+    expect(links[0]?.textContent).toBe("Ürün sayfasına git")
   })
 
   it("closes once the line is in, and the cart drawer is told", async () => {

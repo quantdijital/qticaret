@@ -33,6 +33,8 @@ interface QuickViewInput {
   /** The stars in short (`cardRating`); null: no review. */
   rating: CardRatingView | null
   shown: QuickViewShown
+  /** The product asks for more than the dialog's fields (see `QuickViewView.needsPage`). */
+  needsPage: boolean
   t: Translate
   /** The shop's colour names: matching option values show as swatches. */
   swatchOf?: (value: string) => string | null
@@ -53,6 +55,7 @@ export function quickViewOf({
   summaryHtml,
   rating,
   shown,
+  needsPage,
   t,
   swatchOf,
 }: QuickViewInput): QuickViewView {
@@ -86,5 +89,6 @@ export function quickViewOf({
     summaryHtml: shown.summary ? summaryHtml : null,
     summaryText,
     quantity: shown.quantity,
+    needsPage,
   }
 }
