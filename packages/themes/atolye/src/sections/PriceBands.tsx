@@ -17,7 +17,9 @@ const COLUMNS: Record<number, string> = {
  * the page's ink (the shop's colour stays on actions: the border on hover,
  * Tezgâh audit K-05), its line under it and the products picked in it
  * small; the whole card one link to the catalogue filtered by the band's
- * range. On a phone one row that scrolls (70% a card), from 768 px two
+ * range, or, for a band with a category (adr/0049, 2026-11-15), to the
+ * category's page (filtered when the band has a bound), the category's
+ * name above the label as the opening's line above its heading. On a phone one row that scrolls (70% a card), from 768 px two
  * columns, from 1024 px all side by side. The cards stand on `field`, so
  * a steel-well ground (the section's look) frames them.
  */
@@ -35,11 +37,14 @@ export function PriceBands({ section }: { section: Of<"price_bands"> }) {
           )}
         >
           {section.bands.map((band) => (
-            <li key={band.path} className="min-w-0">
+            <li key={`${band.label}|${band.path}`} className="min-w-0">
               <a
                 href={band.path}
                 className="group flex h-full flex-col gap-2 rounded-tile border border-rule bg-field p-5 no-underline transition-colors hover:border-signal lg:p-6"
               >
+                {band.category && (
+                  <span className="text-sm font-semibold text-text-2">{band.category}</span>
+                )}
                 <span className="text-display leading-[1.15] font-extrabold tracking-(--tracking-head) text-text group-hover:underline group-hover:underline-offset-4">
                   {band.label}
                 </span>

@@ -6,9 +6,12 @@ import { bandRanges } from "../../lib/storefront/sections/price-bands"
 import { SEARCH_INDEX_MODULE } from "../../modules/search-index"
 import type SearchIndexModuleService from "../../modules/search-index/service"
 import { CURRENCY } from "../catalog/prices"
+import { categoryRows, subtreeIn } from "../content/landing-facet"
+import type { CategoryRow } from "../content/landing-facet"
 import { priceKey } from "../seo/listing-plan"
 
 type Channels = readonly string[] | null
+type Strip = Extract<BodySection, { type: "price_bands" }>
 
 /** A price bands section's products, per band in its order. */
 export type BandPick = string[][]
@@ -18,8 +21,9 @@ export type BandPick = string[][]
  * note "Katalog ana sayfası"), picked here for the shopper's sales
  * channels: each band's published products whose indexed price in the
  * shop's currency (the price the cards show, `search/prices.ts`) lies in
- * its range, those in stock first, then the newest; a product shown in an
- * earlier band is not shown again. The prices are the server's, never the
+ * its range (a band with a category: among its category's shown subtree),
+ * those in stock first, then the newest; a product shown in an earlier band
+ * is not shown again. The prices are the server's, never the
  * design's (golden rule 5). A strip the backend cannot pick is logged and
  * shown without products.
  */
@@ -35,21 +39,30 @@ async function liraKey(container: MedusaContainer): Promise<string | null> {
   return region ? priceKey(region.id, CURRENCY) : null
 }
 
+/**
+ * What a band lists before its price: its category's shown subtree, as the
+ * category's own listing does (`listingScope`), else the whole catalogue.
+ * The category itself is live (`liveRecords` left out a band whose is not).
+ */
+const bandScope = (rows: readonly CategoryRow[], categoryId: string | null) =>
+  categoryId ? { category_ids: subtreeIn(rows, categoryId, true) } : {}
+
 async function pickBands(
   container: MedusaContainer,
-  section: Extract<BodySection, { type: "price_bands" }>,
+  section: Strip,
   key: string,
-  channels: Channels
+  channels: Channels,
+  rows: readonly CategoryRow[]
 ): Promise<BandPick> {
   const index = container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE)
   const ranges = bandRanges(section.bands)
   // Enough to skip what the bands before showed
   const limit = section.thumbs * ranges.length
   const found = await Promise.all(
-    ranges.map(async ({ min, max }) => {
+    ranges.map(async ({ min, max }, at) => {
       const { ids } = await index.listing({
         channels: channels && [...channels],
-        scope: {},
+        scope: bandScope(rows, section.bands[at]?.category_id ?? null),
         text: null,
         filters: { brands: null, options: [], in_stock: false },
         price: { key, min, max },
@@ -74,20 +87,24 @@ export async function bandPicks(
   channels: Channels
 ): Promise<Map<string, BandPick>> {
   const strips = sections.filter(
-    (section): section is Extract<BodySection, { type: "price_bands" }> =>
-      section.type === "price_bands" && section.thumbs > 0
+    (section): section is Strip => section.type === "price_bands" && section.thumbs > 0
   )
   if (strips.length === 0) {
     return new Map()
   }
   try {
-    const key = await liraKey(container)
+    const categorised = strips.some((section) => section.bands.some((band) => band.category_id))
+    const [key, rows] = await Promise.all([
+      liraKey(container),
+      categorised ? categoryRows(container) : Promise.resolve([]),
+    ])
     if (!key) {
       return new Map()
     }
     const picks = await Promise.all(
       strips.map(
-        async (section) => [section.id, await pickBands(container, section, key, channels)] as const
+        async (section) =>
+          [section.id, await pickBands(container, section, key, channels, rows)] as const
       )
     )
     return new Map(picks)

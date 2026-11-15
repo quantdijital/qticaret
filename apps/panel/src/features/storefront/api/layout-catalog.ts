@@ -37,9 +37,16 @@ export interface HeroCatalogFields {
   show_price: boolean
 }
 
-/** One price band: its label, a line, and its upper bound in whole lira (none: "and up", last only). */
+/**
+ * One price band: its label, a line, its category and its upper bound in
+ * whole lira. Without a category a price band (none: "and up", the last
+ * price band only); with one the category's products up to it (none: the
+ * whole category, no price; adr/0049, 2026-11-15).
+ */
 export interface PriceBand {
   label: string
   text: string | null
   max: number | null
+  /** Absent from a design read before band categories: none. */
+  category_id?: string | null
 }

@@ -134,6 +134,38 @@ describe("the price bands", () => {
     // The band's big figure in the page's ink: the shop's colour stays on actions (K-05)
     expect(html).not.toMatch(/text-display[^"]*text-signal/)
     expect(html).toMatch(/text-display[^"]*text-text/)
+    // A price band names no category
+    expect(html).not.toContain("font-semibold text-text-2")
+  })
+
+  it("links a band with a category to its page, the category's name above the label", () => {
+    const html = home([
+      {
+        ...bands,
+        bands: [
+          {
+            label: "Koleksiyonluk",
+            text: "Özel seri",
+            category: "Özel Koleksiyon",
+            path: "/kategori/ozel-koleksiyon",
+            products: [],
+          },
+          {
+            label: "Kamp, ₺1.000'e kadar",
+            text: null,
+            category: "Kamp",
+            path: "/kategori/kamp?fiyat=-1000",
+            products: [],
+          },
+        ],
+      },
+    ])
+
+    expect(html).toContain('href="/kategori/ozel-koleksiyon"')
+    expect(html).toContain('href="/kategori/kamp?fiyat=-1000"')
+    expect(html).toMatch(
+      /text-text-2">Özel Koleksiyon<\/span><span class="text-display[^"]*">Koleksiyonluk</
+    )
   })
 })
 

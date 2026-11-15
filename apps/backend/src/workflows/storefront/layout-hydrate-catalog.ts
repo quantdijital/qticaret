@@ -58,7 +58,11 @@ export function hydrateHero(section: HeroSection, readers: Readers) {
   }
 }
 
-/** The price bands: each band's words filled, its range, and its products as picked. */
+/**
+ * The price bands: each band's words filled, its category (printed only
+ * when it has one, so a strip from before band categories prints as it
+ * did), its range, and its products as picked.
+ */
 export function hydratePriceBands(
   section: PriceBandsSection,
   pick: BandPick | undefined,
@@ -72,6 +76,7 @@ export function hydratePriceBands(
     bands: section.bands.map((band, index) => ({
       label: fill(band.label) ?? band.label,
       text: fill(band.text),
+      ...(band.category_id ? { category_id: band.category_id } : {}),
       min: ranges[index]?.min ?? null,
       max: band.max,
       product_ids: pick?.[index] ?? [],
