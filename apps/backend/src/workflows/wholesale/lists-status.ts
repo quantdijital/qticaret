@@ -6,6 +6,25 @@ import type WholesaleModuleService from "../../modules/wholesale/service"
 export type ListStatus = "active" | "draft"
 
 /**
+ * The wholesale price lists' statuses as one comparable value: two reads
+ * that differ mean the flag turned between them.
+ */
+export async function wholesaleListsState(container: MedusaContainer): Promise<string> {
+  const owned = await container.resolve<WholesaleModuleService>(WHOLESALE_MODULE).ownedIds()
+  const ids = [...owned.priceListIds]
+  if (ids.length === 0) {
+    return ""
+  }
+  const lists = await container
+    .resolve(Modules.PRICING)
+    .listPriceLists({ id: ids }, { select: ["id", "status"], take: null })
+  return lists
+    .map((list) => `${list.id}:${String(list.status)}`)
+    .sort()
+    .join(",")
+}
+
+/**
  * Sets the wholesale price lists' status (all of them, or these): drafts
  * price no one. Returns the lists it changed with their status before,
  * for an undo.
