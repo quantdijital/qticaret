@@ -123,6 +123,14 @@ export interface StoreThemeSettings {
     no_reviews: CardNoReviews
     /** The framed card's add button across its foot (`CARD_BUTTON_STYLES`). */
     button_style: CardButtonStyle
+    /** A "Hızlı bak" button on every card, opening the product in a dialog (adr/0049 Ek 2026-11-15). */
+    quick_view: boolean
+    /** How the button shows (`CARD_QUICK_VIEW_TRIGGERS`); a compact card always draws the icon. */
+    quick_view_trigger: CardQuickViewTrigger
+    /** The dialog's stars, short description and quantity field, each the shop's. */
+    quick_view_rating: boolean
+    quick_view_summary: boolean
+    quick_view_quantity: boolean
   }
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
@@ -165,6 +173,15 @@ export type CardNoReviews = (typeof CARD_NO_REVIEWS)[number]
  */
 export const CARD_BUTTON_STYLES = ["solid", "outline", "text"] as const
 export type CardButtonStyle = (typeof CARD_BUTTON_STYLES)[number]
+
+/**
+ * How a card's quick view button shows (adr/0049 Ek 2026-11-15): `hover`
+ * a "Hızlı bak" button while the card is pointed at or focused (a touch
+ * screen, with nothing to point, shows the icon), `icon` a small icon
+ * button always.
+ */
+export const CARD_QUICK_VIEW_TRIGGERS = ["hover", "icon"] as const
+export type CardQuickViewTrigger = (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
 export interface StorefrontAnswer {

@@ -48,6 +48,12 @@ describe("theme section", () => {
         sold_out_row: "price",
         no_reviews: "hide",
         button_style: "outline",
+        // adr/0049 Ek 2026-11-15: no quick view until the shop turns it on
+        quick_view: false,
+        quick_view_trigger: "hover",
+        quick_view_rating: true,
+        quick_view_summary: true,
+        quick_view_quantity: true,
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",
