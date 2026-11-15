@@ -6,6 +6,7 @@ import type { ReactNode } from "react"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import type { AnnouncementSetting } from "@qticaret/types"
 import type { AnnouncementBar, AnySection } from "@/features/storefront/api/layout"
 import { newAnnouncementBar } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
@@ -54,7 +55,7 @@ const bar = (over: Partial<AnnouncementBar> = {}): AnnouncementBar => ({
   lines: ["Kargo bedava", "Aynı gün kargo"],
   ...over,
 })
-const field = (setting: "mode" | "interval" | "pause_button" | "hover_pause") =>
+const field = (setting: AnnouncementSetting) =>
   document.getElementById(FIELD_IDS.announcement("duyuru0001", setting))
 
 /** docs/tema/bilesen-denetimi (b) 6: how several announcements show and turn. */
@@ -88,6 +89,43 @@ describe("the announcement bar's settings", () => {
     expect(changes.at(-1)).toMatchObject({ hover_pause: "off" })
   })
 
+  it("offer where the lines sit and the bar's size in an open Stil group, even for one line", async () => {
+    const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
+    expect(screen.getByRole("button", { name: "Stil" })).toHaveAttribute("aria-expanded", "true")
+    const align = field("align")
+    const size = field("size")
+    if (!align || !size) throw new Error("no align or size field")
+    expect(
+      within(align)
+        .getAllByRole("radio")
+        .map((radio) => radio.textContent)
+    ).toEqual(["Otomatik", "Sol", "Orta", "Sağ"])
+    expect(
+      within(size)
+        .getAllByRole("radio")
+        .map((radio) => radio.textContent)
+    ).toEqual(["Küçük", "Orta", "Büyük"])
+    // The bar as it was is chosen: Otomatik and Orta, nothing to reset
+    expect(within(align).getByRole("radio", { name: "Otomatik" })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    )
+    expect(within(size).getByRole("radio", { name: "Orta" })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    )
+    expect(screen.queryByRole("button", { name: "Varsayılana dön" })).toBeNull()
+
+    await userEvent.click(within(align).getByRole("radio", { name: "Orta" }))
+    expect(changes.at(-1)).toMatchObject({ align: "center", size: "medium" })
+    await userEvent.click(within(size).getByRole("radio", { name: "Büyük" }))
+    expect(changes.at(-1)).toMatchObject({ align: "center", size: "large" })
+    expect(screen.getByText(/bağlantılara değecekse hemen soluna kayar/)).toBeInTheDocument()
+
+    await userEvent.click(within(align).getByRole("button", { name: "Varsayılana dön" }))
+    expect(changes.at(-1)).toMatchObject({ align: "auto", size: "large" })
+  })
+
   it("hide the turning's settings side by side", () => {
     renderPanel(bar({ mode: "inline" }))
     expect(field("mode")).not.toBeNull()
@@ -102,6 +140,8 @@ describe("the announcement bar's settings", () => {
       )
 
     expect(keys(bar(), "birden çok")).toContain("announcement.mode")
+    expect(keys(bar({ lines: ["Kargo bedava"] }), "hizalama")).toContain("announcement.align")
+    expect(keys(bar(), "Büyük")).toContain("announcement.size")
     expect(keys(bar(), "interval")).not.toContain("announcement.interval")
     expect(keys(bar({ mode: "rotate" }), "geçiş süresi")).toContain("announcement.interval")
     expect(keys(bar({ mode: "rotate" }), "durdur")).toContain("announcement.pause_button")

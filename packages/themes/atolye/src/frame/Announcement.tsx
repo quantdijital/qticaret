@@ -4,6 +4,7 @@ import type { ContactView, LinkView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { AnnouncementTurns } from "./AnnouncementTurns"
+import { announcementStepsOf } from "./announcement-steps"
 
 /** The bar's lines as the shop wants several shown (docs/tema/bilesen-denetimi (b) 6). */
 function Lines({
@@ -16,6 +17,7 @@ function Lines({
   words: { announcements: string; pause: string; play: string }
 }) {
   const mode = lines.length > 1 ? (settings?.mode ?? "first") : "first"
+  const { align, size } = announcementStepsOf(settings)
   if (mode === "rotate" && settings) {
     return <AnnouncementTurns lines={lines} settings={settings} words={words} />
   }
@@ -24,7 +26,14 @@ function Lines({
     return (
       <ul
         aria-label={words.announcements}
-        className="flex min-w-0 flex-wrap items-center justify-center gap-x-3 py-2 font-semibold lg:justify-start"
+        className={cn(
+          "flex min-w-0 flex-wrap items-center",
+          align.justify,
+          "gap-x-3",
+          size.pad,
+          "font-semibold",
+          align.listWide
+        )}
       >
         {lines.map((line, index) => (
           <li key={index} className={cn("flex items-center gap-x-3", index > 0 && "max-lg:hidden")}>
@@ -40,7 +49,10 @@ function Lines({
     )
   }
   return (
-    <p aria-label={words.announcements} className="py-2 text-center font-semibold lg:text-left">
+    <p
+      aria-label={words.announcements}
+      className={cn(size.pad, align.text, "font-semibold", align.textWide)}
+    >
       {lines[0]}
     </p>
   )
@@ -48,12 +60,15 @@ function Lines({
 
 /**
  * The bar above the header, graphite: the shop's message (its
- * free-shipping threshold or campaign), centred on a phone; from 1024 px
- * the shop's small links and phone sit at its end. Several lines show as
- * the shop chose: the first alone (as before), taking turns in one place
- * (`AnnouncementTurns`: stops on hover, focus and its pause button, still
- * under reduced motion) or side by side on a wide screen. Without a line a
- * phone draws nothing; without lines, links or phone nothing is drawn.
+ * free-shipping threshold or campaign), centred on a phone and at the start
+ * from 1024 px unless the shop sets it at the start, the middle or the end
+ * (`align`; `announcement-steps.ts` has the rule beside the links), in one
+ * of three sizes; from 1024 px the shop's small links and phone sit at its
+ * end. Several lines show as the shop chose: the first alone (as before),
+ * taking turns in one place (`AnnouncementTurns`: stops on hover, focus
+ * and its pause button, still under reduced motion) or side by side on a
+ * wide screen. Without a line a phone draws nothing; without lines, links
+ * or phone nothing is drawn.
  */
 export function Announcement({
   lines,
@@ -75,17 +90,35 @@ export function Announcement({
   if (shown.length === 0 && !wide) {
     return null
   }
+  const { align, size } = announcementStepsOf(settings)
+  const tappable = cn("inline-flex", size.height, "items-center")
   return (
-    <div className={cn("gf-stage text-sm", shown.length === 0 && "max-lg:hidden")}>
-      <Container className="flex min-h-9 items-center justify-center gap-6 lg:justify-between">
+    <div className={cn("gf-stage", size.text, shown.length === 0 && "max-lg:hidden")}>
+      <Container
+        className={cn(
+          "flex",
+          size.height,
+          "items-center",
+          align.justify,
+          "gap-6",
+          align.barWide,
+          wide && align.spacer
+        )}
+      >
         {shown.length > 0 && <Lines lines={shown} settings={settings} words={words} />}
         {wide && (
-          <nav aria-label={words.links} className="ml-auto hidden items-center gap-1 lg:flex">
+          <nav
+            aria-label={words.links}
+            className={cn(align.nav, "hidden items-center gap-1 lg:flex", align.navWide)}
+          >
             {links.map((link) => (
               <a
                 key={link.path}
                 href={link.path}
-                className="inline-flex min-h-9 items-center rounded-button px-3 text-stage-text-2 pointer-coarse:min-h-11 no-underline hover:text-stage-text"
+                className={cn(
+                  tappable,
+                  "rounded-button px-3 text-stage-text-2 pointer-coarse:min-h-11 no-underline hover:text-stage-text"
+                )}
               >
                 {link.label}
               </a>
@@ -93,7 +126,11 @@ export function Announcement({
             {phone && (
               <a
                 href={phone.phoneHref ?? undefined}
-                className="tabular inline-flex min-h-9 items-center gap-2 rounded-button px-3 font-semibold pointer-coarse:min-h-11 no-underline"
+                className={cn(
+                  "tabular",
+                  tappable,
+                  "gap-2 rounded-button px-3 font-semibold pointer-coarse:min-h-11 no-underline"
+                )}
               >
                 <Phone className="size-4" aria-hidden="true" strokeWidth={2} />
                 {phone.phone}

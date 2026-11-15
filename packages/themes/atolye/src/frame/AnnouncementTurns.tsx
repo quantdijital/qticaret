@@ -4,6 +4,7 @@ import { Pause, Play } from "lucide-react"
 import { useEffect, useState } from "react"
 import type { AnnouncementSettings } from "@qticaret/types"
 import { cn } from "@qticaret/ui/lib/utils"
+import { announcementStepsOf } from "./announcement-steps"
 
 /** How long a line stays while they take turns, by the shop's step (ms; Dawn's own is 5 s). */
 export const ANNOUNCEMENT_INTERVAL: Readonly<Record<AnnouncementSettings["interval"], number>> = {
@@ -33,7 +34,8 @@ export function AnnouncementTurns({
   words,
 }: {
   lines: readonly string[]
-  settings: Pick<AnnouncementSettings, "interval" | "pause_button" | "hover_pause">
+  settings: Pick<AnnouncementSettings, "interval" | "pause_button" | "hover_pause"> &
+    Partial<Pick<AnnouncementSettings, "align" | "size">>
   words: { announcements: string; pause: string; play: string }
 }) {
   const [active, setActive] = useState(0)
@@ -68,6 +70,7 @@ export function AnnouncementTurns({
     }
   }, [turning, settings.interval, lines.length])
   const Icon = paused ? Play : Pause
+  const { align, size } = announcementStepsOf(settings)
   return (
     <div
       data-announcement-turns=""
@@ -97,7 +100,11 @@ export function AnnouncementTurns({
             aria-hidden={index === active ? undefined : true}
             data-active={index === active ? "" : undefined}
             className={cn(
-              "invisible py-2 text-center font-semibold opacity-0 transition-opacity duration-300 [grid-area:1/1] motion-reduce:transition-none lg:text-left",
+              "invisible",
+              size.pad,
+              align.text,
+              "font-semibold opacity-0 transition-opacity duration-300 [grid-area:1/1] motion-reduce:transition-none",
+              align.textWide,
               "data-active:visible data-active:opacity-100"
             )}
           >
@@ -113,7 +120,9 @@ export function AnnouncementTurns({
           setPaused(!paused)
         }}
         className={cn(
-          "inline-flex size-9 shrink-0 items-center justify-center rounded-button text-stage-text-2 hover:text-stage-text pointer-coarse:size-11 motion-reduce:hidden",
+          "inline-flex",
+          size.button,
+          "shrink-0 items-center justify-center rounded-button text-stage-text-2 hover:text-stage-text pointer-coarse:size-11 motion-reduce:hidden",
           // Shown on hover only where there is hover; a touch screen always shows it
           settings.pause_button === "hover" &&
             !over &&
