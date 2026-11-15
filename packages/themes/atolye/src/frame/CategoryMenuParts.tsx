@@ -8,12 +8,15 @@ export const LINK =
 export const PICTURED =
   "gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
 
-/** A category's panel: two columns for a long list, one narrow for a short; wider with the pictures. */
+/**
+ * A category's panel: two columns for a long list, one narrow for a short;
+ * wider with the pictures. Either is as tall as its own rows (owner,
+ * 2026-11-15: a two-column panel stood the whole "Kategoriler" column's
+ * height, an empty ground under a few rows).
+ */
 export function panelWidth(wide: boolean, pictures: boolean): string {
   if (wide) {
-    return pictures
-      ? "min-h-full w-[min(34rem,calc(100vw-26rem))]"
-      : "min-h-full w-[min(34rem,calc(100vw-24rem))]"
+    return pictures ? "w-[min(34rem,calc(100vw-26rem))]" : "w-[min(34rem,calc(100vw-24rem))]"
   }
   return pictures ? "w-72" : "w-64"
 }
