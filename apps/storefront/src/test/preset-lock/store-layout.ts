@@ -146,6 +146,8 @@ function headerBar(bar: Section | undefined, theme: Record<string, unknown>) {
     type: "header_bar" as const,
     variant: bar["variant"],
     sticky: bar["sticky"],
+    // The menus' pictures as the preset names them; none: left to the storefront's reading (`submenus`)
+    ...(bar["menu_images"] === undefined ? {} : { menu_images: bar["menu_images"] }),
     ...(bar["variant"] === "catalog"
       ? { catalog: Object.fromEntries(CATALOG_FIELDS.map((key) => [key, bar[key] ?? null])) }
       : {}),

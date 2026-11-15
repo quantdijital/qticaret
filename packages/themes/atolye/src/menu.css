@@ -6,7 +6,8 @@
  * pill; the phone's sheet gives its rows the same pills. The dropdown
  * keeps the floating surfaces' one recipe (a field with a rule edge and
  * the float shadow), as the search panel does, and the page's ink under
- * the catalog header's coloured menu bar.
+ * the catalog header's coloured menu bar. The shop may choose no pictures
+ * (`header_bar.menu_images` `off`): the rows are then words and counts only.
  */
 @layer components {
   .gf-drop {
@@ -58,6 +59,15 @@
   .gf-drop-all > :first-child {
     grid-column: 1 / 3;
     padding-left: var(--space-2xs);
+  }
+  /* No pictures, `off` (adr/0049 Ek 2026-11-15): the name and the count, 44 px, no square */
+  .gf-drop-row--words {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 2.75rem;
+  }
+  .gf-drop-row--words.gf-drop-all > :first-child {
+    grid-column: 1;
+    padding-left: 0;
   }
 
   .gf-menu-count {
