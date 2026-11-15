@@ -16,7 +16,7 @@ export function Guides({ section }: { section: Of<"posts"> }) {
   return (
     <section aria-labelledby={id} className="pt-(--section-gap)">
       <Container className="flex flex-col gap-6 lg:gap-10">
-        <SectionHead id={id} title={section.title} more={section.more} />
+        <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} />
         <ul className="grid gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))]">
           {posts.map((post) => (
             <li key={post.path} className="min-w-0">

@@ -49,6 +49,16 @@ export async function layoutPreviewToken(): Promise<string | null> {
 }
 
 /**
+ * Whether this request is the theme editor's live session (adr/0065 §1):
+ * its views say so (`editor`), and the theme marks its fields for the
+ * editor's labels (Faz 2b). A shared design link and a live page never are.
+ */
+export async function isEditorSession(): Promise<boolean> {
+  const token = await layoutPreviewToken()
+  return token !== null && SESSION_TOKEN.test(token)
+}
+
+/**
  * The draft a preview token opens: the live session's as last saved, else
  * the signed link's; null when it no longer opens.
  */

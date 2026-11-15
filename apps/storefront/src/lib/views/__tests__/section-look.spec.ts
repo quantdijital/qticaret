@@ -9,6 +9,7 @@ vi.mock("@/lib/store-api/requests", () => ({
   siteSeo: vi.fn(),
   storefrontSettings: vi.fn(),
 }))
+vi.mock("next/headers", () => ({ headers: () => Promise.resolve(new Headers()) }))
 vi.mock("@/lib/store-api/extras", () => ({
   cardFacts: vi.fn(() => Promise.resolve({})),
   categoryImages: vi.fn(() => Promise.resolve(new Map())),

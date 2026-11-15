@@ -9,7 +9,7 @@ import {
 } from "./bridge-nav"
 import type { Held } from "./bridge-nav"
 import type { Overlay } from "./overlay"
-import { drawnSections, sectionAround, sectionStep, stepSection } from "./overlay-core"
+import { drawnSections, fieldAround, sectionAround, sectionStep, stepSection } from "./overlay-core"
 
 /**
  * The preview page's own events, while the bridge runs (adr/0065 §6, Faz
@@ -56,7 +56,10 @@ export function installPageHooks({
       frame = 0
       // The layer's own label: the section stays framed
       if (!isLayer(pointed)) {
-        point(sectionAround(pointed)?.id ?? null)
+        const section = sectionAround(pointed)
+        point(section?.id ?? null)
+        // A field of it pointed at gets its own label (Faz 2b)
+        overlay.showField(section ? fieldAround(pointed, section.element) : null)
       }
     })
   }

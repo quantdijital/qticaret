@@ -28,7 +28,7 @@ export function PriceBands({ section }: { section: Of<"price_bands"> }) {
   return (
     <section aria-labelledby={id} className="pt-(--section-gap-s)">
       <Container className="flex flex-col gap-6 lg:gap-8">
-        <SectionHead id={id} title={section.title} />
+        <SectionHead id={id} title={section.title} marks={section.editor} />
         <ul
           className={cn(
             "gf-rail -mx-(--gutter) -my-1 grid auto-cols-[70%] grid-flow-col gap-(--gap-columns) overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1",

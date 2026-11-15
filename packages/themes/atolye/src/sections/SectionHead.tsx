@@ -1,3 +1,4 @@
+import { fieldMark } from "@qticaret/ui"
 import type { LinkView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
@@ -12,11 +13,14 @@ export function SectionHead({
   title,
   more,
   className,
+  marks,
 }: {
   id: string
   title: string
   more?: LinkView | null
   className?: string
+  /** The editor's live preview (adr/0065 Faz 2b): the title carries its field mark. */
+  marks?: boolean | undefined
 }) {
   return (
     <div
@@ -25,7 +29,9 @@ export function SectionHead({
         className
       )}
     >
-      <h2 id={id}>{title}</h2>
+      <h2 id={id} {...fieldMark(marks, "title")}>
+        {title}
+      </h2>
       {more && (
         <a href={more.path} className="gf-link shrink-0 text-sm lg:text-md">
           {more.label}

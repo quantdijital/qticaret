@@ -20,22 +20,29 @@ export function heroCatalogSlides(
   section: StoreHeroCatalog,
   t: Translate
 ): Pick<HeroCatalogView, "slides" | "slider"> {
-  const slides = (section.slides ?? []).flatMap((slide): HeroCatalogSlideView[] => {
+  const kept = (section.slides ?? []).flatMap((slide, at) => {
     const actions = slide.links.flatMap((link) => layoutLink(link, t) ?? [])
     const image = slide.image ? layoutImage(slide.image, slide.heading ?? "") : null
     const shows = image !== null || slide.heading !== null || slide.text !== null
     return shows || actions.length > 0
       ? [
           {
-            heading: slide.heading,
-            intro: slide.text,
-            actions,
-            image,
-            link: layoutLink(slide.link, t),
+            at,
+            view: {
+              heading: slide.heading,
+              intro: slide.text,
+              actions,
+              image,
+              link: layoutLink(slide.link, t),
+            },
           },
         ]
       : []
   })
+  // A slide after one left out says its place in the design (the editor's field mark)
+  const slides = kept.map(({ at, view }, drawn): HeroCatalogSlideView =>
+    at === drawn ? view : { ...view, at }
+  )
   if (slides.length === 0) {
     return {}
   }

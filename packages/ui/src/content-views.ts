@@ -50,9 +50,15 @@ export type SectionDeviceView = Exclude<SectionDevice, "all">
  * product and category pages out in the theme editor; every title already
  * in words (the shop's own or the storefront's default, a FAQ's aside),
  * every link already a path; its look beside (none: the theme's own) and
- * the screens it shows on (none: everywhere).
+ * the screens it shows on (none: everywhere). `editor` is set only in the
+ * theme editor's live preview: the theme then marks its fields
+ * (`fieldMark`, adr/0065 Faz 2b); never on a live page.
  */
-export type HomeSectionView = { look?: SectionLookView; device?: SectionDeviceView } & (
+export type HomeSectionView = {
+  look?: SectionLookView
+  device?: SectionDeviceView
+  editor?: true
+} & (
   | {
       id: string
       type: "hero"

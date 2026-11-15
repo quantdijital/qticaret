@@ -53,6 +53,12 @@ export interface HeroCatalogSlideView {
   actions: LinkView[]
   image: ImageView | null
   link: LinkView | null
+  /**
+   * Its place among the section's slides in the design (a slide with
+   * nothing to show is left out of the drawing), for the editor's field
+   * mark; absent: its place in the drawing.
+   */
+  at?: number
 }
 
 /**

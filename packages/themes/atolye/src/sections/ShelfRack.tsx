@@ -49,7 +49,7 @@ export function Rack({
       )}
     </div>
   ) : (
-    <SectionHead id={id} title={section.title} more={section.more} />
+    <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} />
   )
   const columns = shelfColumns(section.columns)
   const phone = shelfPhone(section.phoneColumns)

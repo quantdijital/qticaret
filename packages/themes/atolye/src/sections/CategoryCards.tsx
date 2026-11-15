@@ -147,6 +147,7 @@ export function CategoryCards({
   view,
   all,
   t,
+  marks,
 }: {
   id: string
   title: string
@@ -154,11 +155,13 @@ export function CategoryCards({
   /** The link beside the head: the shop's own, else every category. */
   all: LinkView
   t?: Translate
+  /** The editor's live preview (adr/0065 Faz 2b): the title carries its field mark. */
+  marks?: boolean | undefined
 }) {
   return (
     <section aria-labelledby={id} className="pt-(--section-gap-s)">
       <Container className="flex flex-col gap-6 lg:gap-10">
-        <SectionHead id={id} title={title} more={all} />
+        <SectionHead id={id} title={title} more={all} marks={marks} />
         <ul
           className={cn(
             view.phoneColumns === 2 ? "grid grid-cols-2" : "grid grid-cols-1 sm:grid-cols-2",

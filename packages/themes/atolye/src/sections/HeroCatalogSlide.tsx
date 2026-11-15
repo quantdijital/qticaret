@@ -1,4 +1,4 @@
-import { ResponsiveImage } from "@qticaret/ui"
+import { ResponsiveImage, fieldMark } from "@qticaret/ui"
 import type { HeroCatalogSlideView, HeroCatalogView, ImageView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
@@ -9,6 +9,10 @@ export const PHOTO_SIZES =
 export const WHOLE_SIZES = "(min-width: 1440px) 1000px, (min-width: 1024px) 70vw, 92vw"
 
 const WORDS = "flex flex-col items-start justify-center gap-4 p-5 sm:p-8 lg:gap-5 lg:p-10"
+
+/** A slide's field mark by its part (`heading`, `links.0`): the attribute to spread. */
+export type Mark = (key: string) => { "data-qf"?: string }
+const unmarked: Mark = () => ({})
 
 /** Whether the slide is its picture alone: no heading, line or button. */
 export const pictureOnly = (slide: HeroCatalogSlideView): boolean =>
@@ -31,6 +35,8 @@ export interface SlidePlace {
 /** What only the first slide shows: the line above, "from" and the products small. */
 export interface SlideExtras {
   eyebrow: string | null
+  /** The editor's live preview: the line above carries its field mark (adr/0065 Faz 2b). */
+  marks?: boolean | undefined
   catalog: Pick<HeroCatalogView, "from" | "picks">
   t: Translate
 }
@@ -75,6 +81,7 @@ export function CatalogSlide({
   image,
   place,
   extras,
+  mark = unmarked,
 }: {
   slide: HeroCatalogSlideView
   /** The picture drawn: the slide's, else (the first) the shop's newest pictured product. */
@@ -82,6 +89,8 @@ export function CatalogSlide({
   place: SlidePlace
   /** The first slide's own parts; null on the others. */
   extras: SlideExtras | null
+  /** The slide's field marks in the editor's preview (adr/0065 Faz 2b); none elsewhere. */
+  mark?: Mark | undefined
 }) {
   const Heading = place.level
   const hidden =
@@ -104,7 +113,7 @@ export function CatalogSlide({
         className={cn("gf-mosaic-feature gf-mosaic-feature--whole", place.stage && "h-full")}
       >
         {hidden}
-        <div className="gf-mosaic-photo">
+        <div className="gf-mosaic-photo" {...mark("image")}>
           {slide.link ? (
             <a
               href={slide.link.path}
@@ -135,17 +144,26 @@ export function CatalogSlide({
       <div
         className={stage ? cn(WORDS, "pb-16 sm:pb-16 lg:pb-16", stage.arrows && "lg:pl-20") : WORDS}
       >
-        {extras?.eyebrow && <p className="text-sm font-semibold text-text-2">{extras.eyebrow}</p>}
+        {extras?.eyebrow && (
+          <p className="text-sm font-semibold text-text-2" {...fieldMark(extras.marks, "eyebrow")}>
+            {extras.eyebrow}
+          </p>
+        )}
         {hidden}
         {slide.heading && (
           <Heading
             id={place.id}
+            {...mark("heading")}
             className="max-w-[18ch] text-hero leading-[1.08] tracking-(--tracking-display)"
           >
             {slide.heading}
           </Heading>
         )}
-        {slide.intro && <p className="max-w-[44ch] text-lead text-text-2">{slide.intro}</p>}
+        {slide.intro && (
+          <p className="max-w-[44ch] text-lead text-text-2" {...mark("text")}>
+            {slide.intro}
+          </p>
+        )}
         {extras?.catalog.from && (
           <p className="flex items-baseline gap-2">
             <b className="text-price font-extrabold tabular-nums">{extras.catalog.from}</b>
@@ -154,11 +172,11 @@ export function CatalogSlide({
         )}
         {action && (
           <div className="flex flex-wrap gap-2 pt-1">
-            <a href={action.path} className="gf-btn">
+            <a href={action.path} className="gf-btn" {...mark("links.0")}>
               {action.label}
             </a>
             {second && (
-              <a href={second.path} className="gf-btn gf-btn--quiet">
+              <a href={second.path} className="gf-btn gf-btn--quiet" {...mark("links.1")}>
                 {second.label}
               </a>
             )}
@@ -169,7 +187,7 @@ export function CatalogSlide({
         )}
       </div>
       {image && (
-        <div className="gf-mosaic-photo">
+        <div className="gf-mosaic-photo" {...mark("image")}>
           {slide.link ? (
             // With buttons the picture is one more target, kept from readers and the tab order
             <a
