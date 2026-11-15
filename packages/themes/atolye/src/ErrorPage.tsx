@@ -14,7 +14,7 @@ import { Container } from "./parts/Container"
  */
 export function ErrorPage({ t, retry }: { t: Translate; retry: () => void }) {
   return (
-    <Container className="py-(--section-gap-s)">
+    <Container className="py-(--section-gap)">
       <section
         aria-labelledby="hata"
         className="gf-stage mx-auto flex max-w-3xl flex-col gap-5 rounded-tile p-6 sm:p-10 lg:p-16"

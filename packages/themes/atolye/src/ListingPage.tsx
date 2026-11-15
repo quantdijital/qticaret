@@ -3,7 +3,7 @@ import type { FormAction, ListingPageView, Translate } from "@qticaret/ui"
 import { TileRail } from "./listing/CategoryTiles"
 import { FilterPanel, hasFilters } from "./listing/FilterPanel"
 import { FilterSheet } from "./listing/FilterSheet"
-import { Pager } from "./listing/Pager"
+import { Pager, hasPages } from "./listing/Pager"
 import { Empty, SearchHelp } from "./listing/SearchHelp"
 import { Toolbar } from "./listing/Toolbar"
 import { Container } from "./parts/Container"
@@ -122,9 +122,11 @@ export function ListingPage({
                 ) : (
                   <Empty view={view} t={t} />
                 )}
-                <div className="pt-4">
-                  <Pager pagination={view.pagination} t={t} />
-                </div>
+                {hasPages(view.pagination) && (
+                  <div className="pt-4">
+                    <Pager pagination={view.pagination} t={t} />
+                  </div>
+                )}
               </div>
             </div>
           ) : (

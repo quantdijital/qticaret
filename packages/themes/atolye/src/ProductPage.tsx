@@ -139,7 +139,7 @@ export function ProductPage({
 
         <Container
           data-gf-clear=""
-          className="flex flex-col gap-(--section-gap-s) pt-(--section-gap-s)"
+          className="flex flex-col gap-(--section-gap) pt-(--section-gap)"
         >
           <Details view={view} t={t} />
           <Community view={view} t={t} actions={actions} />

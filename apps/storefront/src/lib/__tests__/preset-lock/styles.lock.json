@@ -42,7 +42,7 @@
       "file": "header-catalog.css"
     },
     {
-      "sha256": "dc85f41eb2e31e9f960fd1cd4dee4e163b305639b96a23446ab97d72e3595316",
+      "sha256": "b717743da0f872a4506c70261f1f938fb6b1347bde9b5ef8cd2c3c7b3ab050f3",
       "file": "look.css"
     },
     {
@@ -82,7 +82,7 @@
       "file": "spotlight.css"
     },
     {
-      "sha256": "2cbeb356c32cf4498a2a97eff01013ae8f51e83a5bc8b6256f1ef493ff13dd9d",
+      "sha256": "3aec131c113e5c6fa9d6d20873a0b75d9d2f8d93640aeab7120e7090a347ebd8",
       "file": "styles.css"
     },
     {
@@ -94,7 +94,11 @@
       "file": "tabs.css"
     },
     {
-      "sha256": "99227965f65f0b48037afb83a1aa05c486d001ff338ae349834c955fb1bebfb4",
+      "sha256": "4579942a0fc10779daffa595c24398bb86c55625817a371b0b905a2526f0c8ef",
+      "file": "thin.css"
+    },
+    {
+      "sha256": "fee3334dfa8102b5a9bffa8669be76763710fa4e677ee86292981bef22ff5365",
       "file": "tokens.css"
     },
     {

@@ -16,7 +16,7 @@ const PROSE =
 export function Story({ section }: { section: Of<"rich_text"> }) {
   const id = headingId(section.id)
   return (
-    <section {...(section.title ? { "aria-labelledby": id } : {})} className="pt-(--section-gap)">
+    <section {...(section.title ? { "aria-labelledby": id } : {})} className="gf-section">
       <Container>
         <div className="grid gap-6 rounded-tile gf-pane p-6 sm:p-10 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-16">
           {section.title && (

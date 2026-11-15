@@ -58,6 +58,7 @@ describe("a section's look in Atölye", () => {
   it("maps every step of the contract onto a token, never a number of its own", () => {
     for (const step of ["none", "small", "medium", "large"]) {
       expect(LOOK_CSS).toContain(`[data-outer="${step}"]`)
+      expect(LOOK_CSS).toContain(`[data-below="${step}"]`)
       expect(LOOK_CSS).toContain(`[data-inner="${step}"]`)
     }
     for (const ground of ["page", "well", "stage", "primary"]) {
@@ -67,6 +68,23 @@ describe("a section's look in Atölye", () => {
     expect(LOOK_CSS).toContain('[data-width="narrow"]')
     expect(LOOK_CSS).toContain('[data-width="full"]')
     expect(LOOK_CSS).not.toMatch(/:\s*[1-9]\d*px/)
+  })
+
+  it("gives every section one gap, the same above it and inside a band (sahip 2026-11-15)", () => {
+    // Above: one rule for every section, which a step set below the one before stands in for
+    expect(LOOK_CSS).toMatch(
+      /\.gf-section \{\s*padding-top: var\(--section-top, var\(--section-gap\)\);/
+    )
+    expect(LOOK_CSS).toMatch(
+      /\.gf-look\[data-below\]:not\(\[data-show-on\]\) \+ :not\(\[data-outer\]\) \{\s*--section-top: 0px;\s*--look-outer: 0px;/
+    )
+    // Inside a band: the section gaps, step for step
+    expect(LOOK_CSS).toMatch(
+      /--look-inner-small: var\(--section-gap-s\);\s*--look-inner-medium: var\(--section-gap\);\s*--look-inner-large: var\(--section-gap-l\);/
+    )
+    const html = home([faq("sss1"), faq("sss2", { space_below: "large" }), faq("sss3")])
+    expect(html).toMatch(/<div class="[^"]*gf-look[^"]*" data-below="large" data-qs="sss2">/)
+    expect(html.match(/class="gf-section"/g)).toHaveLength(3)
   })
 
   it("keeps a sale readable on each ground and the sale badge in the deal's red", () => {

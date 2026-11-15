@@ -7936,12 +7936,27 @@
         "title": "More settings",
         "titleSet_one": "More settings · {{count}} setting",
         "titleSet_other": "More settings · {{count}} settings",
-        "hint": "The section's spacing and look. Any field left unset uses the theme's own look; the preview shows it at once.",
+        "hint": "The section's inner spacing and look. Any field left unset uses the theme's own look; the preview shows it at once.",
         "reset": "Back to default",
+        "spacing": {
+          "title": "Spacing",
+          "titleSet_one": "Spacing · {{count}} setting",
+          "titleSet_other": "Spacing · {{count}} settings",
+          "hint": "The space above and below the section. A side left unset uses the theme's section spacing (Theme settings > Section spacing); a thin strip uses the narrow one."
+        },
         "space_outer": {
-          "label": "Outer spacing",
-          "term": "margin",
-          "hint": "The space above the section, from the theme's scale; it shrinks on narrow screens.",
+          "label": "Top spacing",
+          "term": "margin-top",
+          "hint": "The space above the section, from the theme's section spacing; it shrinks on narrow screens.",
+          "none": "None",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large"
+        },
+        "space_below": {
+          "label": "Bottom spacing",
+          "term": "margin-bottom",
+          "hint": "The space below the section; it stands in for the next section's top spacing, and with both set the larger stays.",
           "none": "None",
           "small": "Small",
           "medium": "Medium",
@@ -7950,7 +7965,7 @@
         "space_inner": {
           "label": "Inner spacing",
           "term": "padding",
-          "hint": "The space inside the section; with a background it stays inside the colour.",
+          "hint": "The space inside the section, top and bottom alike, on the section spacing's scale; with a background it stays inside the colour.",
           "none": "None",
           "small": "Small",
           "medium": "Medium",
@@ -8371,7 +8386,7 @@
           "normal": "Normal",
           "roomy": "Roomy"
         },
-        "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (120 px on a wide screen); Compact brings it to 66 px, Roomy to 144 px.",
+        "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (96 px on a wide screen); Compact brings it to 53 px, Roomy to 115 px. A section's room inside its background comes from the same scale.",
         "surfaceStyle": "Box style",
         "surfaceStyleTerm": "surface style",
         "surfaceStyles": {
