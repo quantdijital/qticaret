@@ -112,6 +112,19 @@ medusaIntegrationTestRunner({
     const take = (cartId: string, headers: Record<string, string>) =>
       plain(http.post<CartAnswer>(`/store/carts/${cartId}/customer`, {}, { headers }))
 
+    /** The one answer for a cart that may not move, an unknown id's too (review M1). */
+    const refusedAsUnknown = (answer: { status: number; data: unknown }) => {
+      expect({
+        status: answer.status,
+        cart: JSON.stringify(answer.data).includes('"cart"'),
+      }).toEqual({ status: 404, cart: false })
+    }
+
+    it("answers an unknown cart id as any cart that may not move", async () => {
+      const { customer } = await levelWholesaler("bilinmez")
+      refusedAsUnknown(await take("cart_01UNKNOWN0000000000000000", customer.headers))
+    })
+
     it("prices a guest's cart again at wholesale once the wholesaler takes it", async () => {
       const { variantId, customer } = await levelWholesaler("sepet")
       const cartId = await cartWith(store.headers, variantId)
@@ -132,9 +145,22 @@ medusaIntegrationTestRunner({
       expect(unitOf(before)).toBe(100)
 
       const taken = await take(cartId, customer.headers)
-      // Medusa may refuse it; whatever it answers, the cart is as it was
-      expect(taken.status).toBeGreaterThanOrEqual(200)
+      // Answered as a cart that does not exist: nothing of it told, nothing of it changed
+      refusedAsUnknown(taken)
       expect(await stateOf(cartId)).toEqual(before)
+    })
+
+    it("still lets a retail customer take their own guest cart, at retail", async () => {
+      const { variantId } = await levelWholesaler("perakende")
+      const shopper = await registerCustomer(http, store)
+      const cartId = await cartWith(store.headers, variantId)
+      const taken = await take(cartId, shopper.headers)
+      expect(outcome(taken, 200)).toEqual({ status: 200, data: null })
+      expect(unitOf(await stateOf(cartId))).toBe(100)
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "cart", fields: ["customer_id"], filters: { id: cartId } })
+      expect((data[0] as { customer_id: string | null }).customer_id).toBe(shopper.id)
     })
 
     it("never prices a completed cart (review M1)", async () => {
@@ -152,7 +178,7 @@ medusaIntegrationTestRunner({
       const before = await stateOf(cartId)
       expect(unitOf(before)).toBe(100)
 
-      await take(cartId, customer.headers)
+      refusedAsUnknown(await take(cartId, customer.headers))
       expect(await stateOf(cartId)).toEqual(before)
     })
 
@@ -177,13 +203,9 @@ medusaIntegrationTestRunner({
       const before = await stateOf(cartId)
       expect(before.items.map((item) => Number(item.unit_price))).toEqual([100])
 
-      const taken = await take(cartId, customer.headers)
-      // The link's lines stay at the link's price, whatever Medusa answered the transfer
-      const after = (await stateOf(cartId)).items.map((item) => Number(item.unit_price))
-      expect({ status: taken.status, units: after }).toEqual({
-        status: taken.status,
-        units: [100],
-      })
+      // A link's cart never moves: its lines stay at the link's price
+      refusedAsUnknown(await take(cartId, customer.headers))
+      expect(await stateOf(cartId)).toEqual(before)
     })
 
     it("says without KDV for one unit what a one-unit cart says (review L4)", async () => {

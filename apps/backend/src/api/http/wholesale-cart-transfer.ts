@@ -28,8 +28,8 @@ async function cartRead(req: MedusaRequest, cartId: string, fields: string[]): P
 /**
  * Whether the transfer left the cart the session customer's own, still
  * open and not a payment link's (security review M1): only such a cart is
- * priced again. A link's cart keeps the prices its link was made at
- * (adr/0051: its lines are fixed).
+ * priced again. `cart-transfer-guard.ts` already lets no other cart reach
+ * Medusa's transfer; this is the second look, after it.
  */
 async function isOwnOpenCart(req: MedusaRequest, cartId: string, customerId: string) {
   const cart = (await cartRead(req, cartId, [
