@@ -51,7 +51,7 @@ describe("the featured shelf's large card (V-02)", () => {
       rule(card, ".gf-card-lead > .gf-card-framed .gf-card-media > :is(picture, .gf-card-slides)")
     ).toMatch(/position: absolute;\s*inset: 0/)
     const relative = [...lead.matchAll(/([^{}]+)\{[^}]*position: relative/g)].map((m) =>
-      m[1].replace(/\s+/g, " ")
+      (m[1] ?? "").replace(/\s+/g, " ")
     )
     expect(relative.length).toBeGreaterThan(0)
     for (const selector of relative) {
