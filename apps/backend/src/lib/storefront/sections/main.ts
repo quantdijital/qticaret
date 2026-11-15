@@ -57,21 +57,41 @@ export const HEADER_MENU_IMAGES = ["all", "submenus", "off"] as const
 type MenuImages = (typeof HEADER_MENU_IMAGES)[number]
 
 /**
- * A stored header bar's menus' pictures as today's list reads them
- * (forgiving on reading, as `storedLook`): a step off the list (a
- * development draft's `true`/`false` from before the steps, or a newer
- * build's) is dropped, so the bar reads with the default. A save is still
- * held to the list.
+ * The catalog header's layout choices (adr/0049 Ek 2026-11-15): mirror
+ * `@qticaret/types`' `HEADER_TOOLS_PLACES`, `HEADER_TOP_LINKS_PLACES` and
+ * `HEADER_SEARCH_WIDTHS` (a unit test keeps them equal); each list's first
+ * is the drawing from before it.
+ */
+export const HEADER_TOOLS_PLACES = ["bar", "row"] as const
+export const HEADER_TOP_LINKS_PLACES = ["strip", "bar"] as const
+export const HEADER_SEARCH_WIDTHS = ["wide", "narrow"] as const
+
+/** A header bar's named steps, each with its list: a stored bar keeps one only while listed. */
+const HEADER_STEPS: Readonly<Record<string, readonly unknown[]>> = {
+  menu_images: HEADER_MENU_IMAGES,
+  tools_place: HEADER_TOOLS_PLACES,
+  top_links: HEADER_TOP_LINKS_PLACES,
+  search_width: HEADER_SEARCH_WIDTHS,
+}
+
+/**
+ * A stored header bar's named steps as today's lists read them (forgiving
+ * on reading, as `storedLook`): a step off its list (a development draft's
+ * `true`/`false` from before the menus' pictures had steps, or a newer
+ * build's) is dropped, so the bar reads with that field's default. A save
+ * is still held to the lists.
  */
 export function storedMenuImages(section: Record<string, unknown>): Record<string, unknown> {
-  if (
-    section["type"] !== "header_bar" ||
-    !("menu_images" in section) ||
-    (HEADER_MENU_IMAGES as readonly unknown[]).includes(section["menu_images"])
-  ) {
+  if (section["type"] !== "header_bar") {
     return section
   }
-  return Object.fromEntries(Object.entries(section).filter(([key]) => key !== "menu_images"))
+  const off = (key: string) => {
+    const steps = HEADER_STEPS[key]
+    return steps !== undefined && !steps.includes(section[key])
+  }
+  return Object.keys(section).some(off)
+    ? Object.fromEntries(Object.entries(section).filter(([key]) => !off(key)))
+    : section
 }
 
 const headerCommon = {
@@ -111,6 +131,12 @@ export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
 
 type MenuGround = (typeof HEADER_MENU_GROUNDS)[number]
 
+/** One of a list's named steps, its first the default; one off the list is a stale or forged editor. */
+const step = <T extends string>(steps: readonly [T, ...T[]]) =>
+  z
+    .custom<T>((value) => (steps as readonly unknown[]).includes(value), MAIN_ERROR)
+    .default(steps[0])
+
 /**
  * N14 (adr/0049 Ek 2026-11-14, Ek 2026-11-15): a utility strip (the shop's
  * top menu, a written account link), the wordmark, a wide search and the
@@ -147,6 +173,12 @@ const headerCatalog = z
       )
       .default("stage")
       .transform((value): MenuGround => ((value as unknown) === "light" ? "well" : value)),
+    /** Account, favourites and the cart: the menu bar's icons, or named beside the phone. */
+    tools_place: step(HEADER_TOOLS_PLACES),
+    /** The shop's top links: in the strip (while it shows), or quiet at the menu bar's end. */
+    top_links: step(HEADER_TOP_LINKS_PLACES),
+    /** The search: wide, or 35 rem right after the wordmark. */
+    search_width: step(HEADER_SEARCH_WIDTHS),
   })
   .strict()
 

@@ -4,6 +4,9 @@ import type {
   HeaderBarVariant,
   HeaderMenuGround,
   HeaderMenuImages,
+  HeaderSearchWidth,
+  HeaderToolsPlace,
+  HeaderTopLinksPlace,
   ProductMainVariant,
   SectionLook,
 } from "@qticaret/types"
@@ -53,6 +56,10 @@ export interface HeaderCatalogFields {
   phone: boolean
   categories_button: boolean
   menu_ground: HeaderMenuGround
+  /** Its layout choices (Ek 2026-11-15); the server fills each one a bar was saved without. */
+  tools_place: HeaderToolsPlace
+  top_links: HeaderTopLinksPlace
+  search_width: HeaderSearchWidth
 }
 
 export type HeaderCatalogSection = HeaderBarCommon & { variant: "catalog" } & HeaderCatalogFields

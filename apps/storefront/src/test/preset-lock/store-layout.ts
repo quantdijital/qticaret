@@ -128,6 +128,10 @@ const CATALOG_FIELDS = [
   "phone",
   "categories_button",
   "menu_ground",
+  // The layout choices (Ek 2026-11-15); a preset without one: null, read as today's drawing
+  "tools_place",
+  "top_links",
+  "search_width",
 ] as const
 
 /** The header bar as `mainSectionsOf` prints it; none in the preset: the theme's header. */
