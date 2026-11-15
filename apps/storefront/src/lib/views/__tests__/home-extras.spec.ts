@@ -131,6 +131,22 @@ describe("a featured product section", () => {
     expect((await sectionViews([stale], t))[0]).toMatchObject({ settings: { gallery: "collage" } })
   })
 
+  it("passes the strips' look on, a missing step read as its default (adr/0049 Ek 2026-11-16)", async () => {
+    requests.productById.mockResolvedValue(PRODUCT)
+    const look = { gallery: "strips", strips_layout: "wide", strips_overlap: "on" }
+    const strips = { ...featured, ...look } as StoreLayoutSection
+    expect((await sectionViews([strips], t))[0]).toMatchObject({
+      settings: {
+        gallery: "strips",
+        strips_layout: "wide",
+        strips_slant: "medium",
+        strips_line: "thin",
+        strips_overlap: "on",
+        strips_dim: "on",
+      },
+    })
+  })
+
   it("is left out when its product has no live page now", async () => {
     requests.productById.mockRejectedValue(new StoreApiError(404, "not_found", null))
     expect(await sectionViews([featured], t)).toEqual([])
