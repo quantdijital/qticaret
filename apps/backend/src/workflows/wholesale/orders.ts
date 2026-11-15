@@ -62,12 +62,19 @@ export async function stampWholesaleOrder(
     return null
   }
   const placedAt = order.created_at
-  const [account] = (
-    await wholesale(container).listWholesaleAccounts(
-      { customer_id: order.customer_id },
-      { select: ["id", "status", "activated_at", "deactivated_at"], take: null }
-    )
-  ).filter((each) => wholesaleAt(each, placedAt))
+  const [account] =
+    // Deleted ones too: one deleted after the order still sold at wholesale when it was placed
+    // (review L4); its closing time, written on deletion, decides
+    (
+      await wholesale(container).listWholesaleAccounts(
+        { customer_id: order.customer_id },
+        {
+          select: ["id", "status", "activated_at", "deactivated_at"],
+          take: null,
+          withDeleted: true,
+        }
+      )
+    ).filter((each) => wholesaleAt(each, placedAt))
   if (!account) {
     return null
   }
@@ -119,9 +126,16 @@ export async function wholesalerNames(
   }
   const accounts = await wholesale(container).listWholesaleAccounts(
     { id: ids },
-    { select: ["id", "customer_id", "company_name", "contact_name"], take: null, withDeleted: true }
+    {
+      select: ["id", "customer_id", "company_name", "contact_name", "deleted_at"],
+      take: null,
+      withDeleted: true,
+    }
   )
-  const customerIds = accounts.flatMap((account) => account.customer_id ?? [])
+  // A deleted wholesaler is named by the company kept on its row only (review L2): never the
+  // customer record it no longer belongs to, whose names may be a person's
+  const live = accounts.filter((account) => !account.deleted_at)
+  const customerIds = live.flatMap((account) => account.customer_id ?? [])
   const { data } = customerIds.length
     ? await container.resolve(ContainerRegistrationKeys.QUERY).graph({
         entity: "customer",
@@ -141,6 +155,9 @@ export async function wholesalerNames(
   )
   return new Map(
     accounts.map((account) => {
+      if (account.deleted_at) {
+        return [account.id, account.company_name?.trim() ? account.company_name.trim() : null]
+      }
       const customer = account.customer_id ? customers.get(account.customer_id) : undefined
       const person = [customer?.first_name, customer?.last_name].filter(Boolean).join(" ")
       const name = [customer?.company_name, person, account.company_name, account.contact_name]

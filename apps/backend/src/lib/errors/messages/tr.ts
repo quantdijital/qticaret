@@ -807,6 +807,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "wholesale.login_not_made": "Toptancının girişi hazırlanamadı. Biraz sonra yeniden deneyin.",
   "wholesale.password_own_login":
     'Bu toptancı kendi doğruladığı hesabıyla giriş yapıyor; şifresini kendisi vitrindeki "Şifremi unuttum" ile yeniler.',
+  "wholesale.carts_not_repriced":
+    "Açık sepetlerin bir kısmı perakende fiyata güncellenemedi; toptancı silinmedi. Biraz sonra tekrar deneyin.",
   "wholesale.no_password_login":
     "Bu müşteri e-posta ve şifreyle değil, başka bir yolla (ör. Google) giriş yapıyor; şifre belirlenemez.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",

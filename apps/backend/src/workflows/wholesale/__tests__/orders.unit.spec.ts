@@ -1,4 +1,5 @@
-import { stampWholesaleOrder, wholesaleAt, wholesaleOrders } from "../orders"
+import { stampWholesaleOrder, wholesaleAt, wholesaleOrders, wholesalerNames } from "../orders"
+import { assertAllRepriced } from "../steps/carts"
 
 // A link is defined against the running app's modules; its query name is all that is read here
 jest.mock("../../../links/wholesale-account-order", () => ({
@@ -107,6 +108,45 @@ describe("a wholesale order's stamp (ADR-0068 Ek 2026-11-15 (2))", () => {
     expect(fake.graph).not.toHaveBeenCalled()
     expect(await wholesaleOrders(fake.container, { order_ids: ["order_1", "order_2"] })).toEqual(
       new Map([["order_1", "wacc_1"]])
+    )
+  })
+
+  it("names a deleted wholesaler by its kept company only, never the customer's names (L2)", async () => {
+    const modules: Record<string, unknown> = {
+      wholesale: {
+        listWholesaleAccounts: () =>
+          Promise.resolve([
+            { id: "wacc_live", customer_id: "cus_1", company_name: null, deleted_at: null },
+            { id: "wacc_gone", customer_id: "cus_2", company_name: "Kaya Ltd", deleted_at: PLACED },
+            { id: "wacc_erased", customer_id: null, company_name: null, deleted_at: PLACED },
+          ]),
+      },
+      query: {
+        graph: () =>
+          Promise.resolve({
+            data: [
+              { id: "cus_1", company_name: null, first_name: "Ali", last_name: "Kaya" },
+              { id: "cus_2", company_name: null, first_name: "Veli", last_name: "Ak" },
+            ],
+          }),
+      },
+    }
+    const names = await wholesalerNames({ resolve: (key: string) => modules[key] } as never, [
+      "wacc_live",
+      "wacc_gone",
+      "wacc_erased",
+    ])
+    expect(Object.fromEntries(names)).toEqual({
+      wacc_live: "Ali Kaya",
+      wacc_gone: "Kaya Ltd",
+      wacc_erased: null,
+    })
+  })
+
+  it("refuses a deletion while a cart could not be priced at retail (L3)", () => {
+    expect(assertAllRepriced({ repriced: 2, failed: 0 })).toEqual({ repriced: 2, failed: 0 })
+    expect(() => assertAllRepriced({ repriced: 1, failed: 1 })).toThrow(
+      "wholesale.carts_not_repriced"
     )
   })
 })

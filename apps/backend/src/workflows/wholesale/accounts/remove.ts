@@ -25,7 +25,7 @@ import {
   retireAccountRowStep,
   wholesale,
 } from "../steps/account-rows"
-import { repriceCartsStep } from "../steps/carts"
+import { repriceAllCartsStep, repriceOnUndoStep } from "../steps/carts"
 import { syncMembershipsStep } from "../steps/memberships"
 
 /** The own list's hand-entered prices taken away with it; undone by bringing them back. */
@@ -68,11 +68,15 @@ const readForDeleteStep = createStep(
     const company = (data[0] as { company_name?: string | null } | undefined)?.company_name
     return new StepResponse({
       customer_id: account.customer_id ?? null,
-      // The company the order list names; a person's name is not kept (KVKK inventory)
-      company_name:
-        [company, account.company_name]
-          .map((name) => name?.trim() ?? "")
-          .find((name) => name !== "") ?? null,
+      status: account.status,
+      deactivated_at: account.deactivated_at ?? null,
+      // The company the order list names, for a wholesaler that had orders (a bound one);
+      // nothing for one never bound (review L1). A person's name is never kept (KVKK)
+      company_name: account.customer_id
+        ? ([company, account.company_name]
+            .map((name) => name?.trim() ?? "")
+            .find((name) => name !== "") ?? null)
+        : null,
     })
   }
 )
@@ -82,14 +86,16 @@ const readForDeleteStep = createStep(
  * toptancıları silemiyorum"), whatever its state; also an older pending
  * one taken back or past its days. Only the wholesale side goes, each
  * step undone if a later one fails:
- * - closed first, as `deactivateAccountWorkflow` closes: out of its
- *   groups at once, its open carts priced again at retail (counted);
+ * - closed first, as `deactivateAccountWorkflow` closes (its closing
+ *   time written): out of its groups at once, every open cart priced
+ *   again at retail; one that cannot be refuses the deletion;
  * - its own list, hidden group and hand-entered prices deleted;
  * - its link to the customer dismissed; the customer and their sign-in
  *   stay, an ordinary retail customer;
- * - the row soft-deleted with only the company name kept, so its past
- *   orders stay wholesale orders and still show who placed them; the
- *   address and contact cleared. The same address may be opened again.
+ * - the row soft-deleted with only the company name kept (none for one
+ *   never bound), so its past orders stay wholesale orders and still show
+ *   who placed them; the address and contact cleared. The same address
+ *   may be opened again.
  */
 export const deleteAccountWorkflow = createWorkflow(
   "wholesale-delete-account",
@@ -99,17 +105,34 @@ export const deleteAccountWorkflow = createWorkflow(
     const account = checkAccountStep(
       transform({ input }, ({ input }) => ({ id: input.id, action: "delete" as const }))
     )
+    // The sync job writes the own list's rows under this lock: none while it is deleted
+    const listLock = transform(
+      { account },
+      ({ account }) => `wholesale-list:${account.private_price_list_id ?? account.id}`
+    )
+    acquireLockStep({ key: listLock, timeout: 30, ttl: 120 })
     const read = readForDeleteStep(transform({ input }, ({ input }) => ({ id: input.id })))
+    // On an undo, after its groups are back: its carts at wholesale again (review L3)
+    repriceOnUndoStep(transform({ read }, ({ read }) => ({ customer_id: read.customer_id })))
     patchAccountStep(
-      transform({ input }, ({ input }) => ({
+      transform({ input, read }, ({ input, read }) => ({
         id: input.id,
-        patch: { status: "inactive" as const, updated_by: input.updated_by },
+        patch: {
+          status: "inactive" as const,
+          // When it stopped selling at wholesale: an order stamped later decides by it (L4)
+          deactivated_at:
+            read.status === "inactive" && read.deactivated_at
+              ? new Date(read.deactivated_at)
+              : new Date(),
+          updated_by: input.updated_by,
+        },
       }))
     )
     const moved = syncMembershipsStep(
       transform({ input }, ({ input }) => ({ account_id: input.id }))
     )
-    const carts = repriceCartsStep(
+    // Every open cart at retail, or nothing deleted (review L3)
+    const carts = repriceAllCartsStep(
       transform({ account, moved }, ({ account, moved }) => ({
         customer_id: account.customer_id,
         changed: moved.added + moved.removed > 0,
@@ -152,6 +175,7 @@ export const deleteAccountWorkflow = createWorkflow(
         company_name: read.company_name,
       }))
     )
+    releaseLockStep({ key: listLock })
     releaseLockStep({ key: lock })
     return new WorkflowResponse(
       transform({ input, carts }, ({ input, carts }) => ({ id: input.id, carts }))

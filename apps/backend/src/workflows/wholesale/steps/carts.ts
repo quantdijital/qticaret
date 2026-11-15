@@ -12,6 +12,7 @@ import {
   refreshCartItemsWorkflow,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
+import { ConflictError } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
 
 // A customer's open carts are read this many at a time
@@ -114,5 +115,46 @@ export const repriceCartsStep = createStep(
       return new StepResponse<RepriceCounts>({ repriced: 0, failed: 0 })
     }
     return new StepResponse(await repriceCustomerCarts(container, input.customer_id))
+  }
+)
+
+/**
+ * Deleting a wholesaler (security review L3, the owner's decision): every
+ * open cart must be priced at retail, or nothing is deleted. A cart still
+ * failing after its retry refuses the deletion, and the workflow's undo
+ * leaves the wholesaler as it was.
+ */
+export function assertAllRepriced(counts: RepriceCounts): RepriceCounts {
+  if (counts.failed > 0) {
+    throw new ConflictError("wholesale.carts_not_repriced")
+  }
+  return counts
+}
+
+/** `repriceCartsStep`, refusing when a cart could not be priced again (a deletion). */
+export const repriceAllCartsStep = createStep(
+  "wholesale-reprice-all-carts",
+  async (input: { customer_id: string | null; changed: boolean }, { container }) => {
+    if (!input.customer_id || !input.changed) {
+      return new StepResponse<RepriceCounts>({ repriced: 0, failed: 0 })
+    }
+    return new StepResponse(
+      assertAllRepriced(await repriceCustomerCarts(container, input.customer_id))
+    )
+  }
+)
+
+/**
+ * Nothing on the way; on an undo, after the groups are back (it stands
+ * before them), the customer's open carts priced again: a deletion
+ * refused leaves its carts at wholesale, as before.
+ */
+export const repriceOnUndoStep = createStep(
+  "wholesale-reprice-on-undo",
+  (input: { customer_id: string | null }) => new StepResponse(undefined, input.customer_id),
+  async (customerId, { container }) => {
+    if (customerId) {
+      await repriceCustomerCarts(container, customerId)
+    }
   }
 )

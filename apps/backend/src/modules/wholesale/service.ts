@@ -1,4 +1,5 @@
-import { MedusaService } from "@medusajs/framework/utils"
+import type { Context } from "@medusajs/framework/types"
+import { InjectTransactionManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
 import { WholesaleAccount } from "./models/account"
 import { WholesaleManualPrice } from "./models/manual-price"
 import { WholesaleTier } from "./models/tier"
@@ -78,6 +79,29 @@ class WholesaleModuleService extends MedusaService({
   ): Promise<WholesaleList | null> {
     const lists = await this.wholesaleLists()
     return lists.find((each) => each.kind === list.kind && each.owner_id === list.owner_id) ?? null
+  }
+
+  /**
+   * Deleted wholesalers' rows of an erased person (ADR-0068 §10, review M1):
+   * the company name they kept for the order list (a sole trader's is a
+   * person's name) and the customer id cleared, the row left deleted. A
+   * deleted row is not reached by the generated update, so it is written
+   * here; only rows already soft-deleted are touched.
+   */
+  @InjectTransactionManager()
+  async clearDeletedAccounts(
+    ids: string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const manager = sharedContext.transactionManager as {
+      execute: (sql: string, params: unknown[]) => Promise<unknown>
+    }
+    for (const id of ids) {
+      await manager.execute(
+        'update "wholesale_account" set "company_name" = null, "customer_id" = null, "email" = null, "contact_name" = null where "id" = ? and "deleted_at" is not null',
+        [id]
+      )
+    }
   }
 
   /** The Medusa price lists and customer groups no one writes but this module. */

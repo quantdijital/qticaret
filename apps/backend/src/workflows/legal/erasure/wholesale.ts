@@ -29,7 +29,8 @@ async function accountsOf(container: Container, records: string[]): Promise<Acco
     ),
   ]
   const [bound, invited] = await Promise.all([
-    service.listWholesaleAccounts({ customer_id: records }, { take: null }),
+    // Deleted wholesalers too: their rows keep a company name for the order list (review M1)
+    service.listWholesaleAccounts({ customer_id: records }, { take: null, withDeleted: true }),
     emails.length === 0
       ? Promise.resolve([])
       : service.listWholesaleAccounts({ email: emails, status: "pending" }, { take: null }),
@@ -53,7 +54,10 @@ export async function eraseWholesale(container: Container, records: string[]): P
   const customers = container.resolve<ICustomerModuleService>(Modules.CUSTOMER)
   const accounts = await accountsOf(container, records)
   const owned = await service.ownedIds()
-  for (const account of accounts) {
+  const deleted = accounts.filter((account) => account.deleted_at)
+  // Already out of every group, their lists and link gone: only what names them is left
+  await service.clearDeletedAccounts(deleted.map((account) => account.id))
+  for (const account of accounts.filter((each) => !each.deleted_at)) {
     if (account.customer_id) {
       const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
         entity: "customer",

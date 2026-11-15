@@ -804,6 +804,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "wholesale.login_not_made": "The wholesaler's sign-in could not be prepared. Try again shortly.",
   "wholesale.password_own_login":
     'This wholesaler signs in with an account they verified themselves; they renew their password with "Forgot password" on the storefront.',
+  "wholesale.carts_not_repriced":
+    "Some open carts could not be updated to retail prices; the wholesaler was not deleted. Try again shortly.",
   "wholesale.no_password_login":
     "This customer signs in another way (e.g. Google), not with an e-mail and password; no password can be set.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",

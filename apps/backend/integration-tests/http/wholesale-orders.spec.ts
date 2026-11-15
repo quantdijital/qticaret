@@ -137,6 +137,18 @@ medusaIntegrationTestRunner({
       )
       const retailAfter = await board("stage=all")
       expect(retailAfter.data.orders.map((row) => row.id)).not.toContain(wholesaleId)
+      // Bought afterwards, at retail: not stamped wholesale by the deleted account (review L4)
+      const laterId = await order(async (cartId) => {
+        await transferCartCustomerWorkflow(container).run({
+          input: { id: cartId, customer_id: customer.id },
+        })
+      })
+      // Give the order.placed stamp time to run, then check it wrote nothing
+      await new Promise((resolve) => setTimeout(resolve, 1_500))
+      expect(
+        (await board("stage=all&segment=wholesale")).data.orders.map((row) => row.id)
+      ).not.toContain(laterId)
+      expect((await board("stage=all")).data.orders.map((row) => row.id)).toContain(laterId)
       // The wholesaler picker lists only wholesalers that are still there
       expect((await accounts.list()).data.accounts.map((each) => each.id)).not.toContain(account.id)
     })
