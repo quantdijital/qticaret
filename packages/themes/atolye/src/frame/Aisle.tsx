@@ -2,100 +2,102 @@
 
 import { ChevronDown } from "lucide-react"
 import { NavigationMenu } from "radix-ui"
-import { useState } from "react"
-import { ResponsiveImage } from "@qticaret/ui"
+import { useLayoutEffect, useRef, useState } from "react"
 import type { NavCategoryView } from "@qticaret/ui"
+import { cn } from "@qticaret/ui/lib/utils"
+import type { MenuWords } from "./menu-words"
+import { MenuCount, MenuThumb } from "./MenuParts"
 
 const ITEM =
   "group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
 
-/** A category's panel: its children in short columns beside its picture tile. */
-function Panel({ category, allIn }: { category: NavCategoryView; allIn: string }) {
+/**
+ * A category's dropdown: its children as 48 px rows (a 40 px picture, the
+ * name, the product count in a pill), then "Tümünü gör" with the
+ * category's own count in the dark pill. No panel, no big picture.
+ */
+function Drop({ category, words }: { category: NavCategoryView; words: MenuWords }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,18rem)] gap-(--space-xl) xl:grid-cols-[minmax(0,1fr)_minmax(0,21rem)]">
-      <div className="flex min-w-0 flex-col gap-4">
-        <div className="flex items-baseline justify-between gap-6 border-b border-rule pb-4">
-          <p className="text-title leading-tight font-extrabold tracking-(--tracking-display)">
-            {category.label}
-          </p>
-          <NavigationMenu.Link asChild>
-            <a href={category.path} className="gf-link shrink-0 text-sm">
-              {allIn}
-            </a>
-          </NavigationMenu.Link>
-        </div>
-        <ul className="columns-3 gap-x-(--gap-columns) xl:columns-4">
-          {category.children.map((child) => (
-            <li key={child.path} className="break-inside-avoid">
-              <NavigationMenu.Link asChild>
-                <a
-                  href={child.path}
-                  className="-mx-3 flex min-h-10 items-center pointer-coarse:min-h-11 rounded-inner px-3 py-2 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
-                >
-                  {child.label}
-                </a>
-              </NavigationMenu.Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-      {category.image && (
-        // The same page as the link above, by its picture: one stop for the keyboard
-        <a
-          href={category.path}
-          tabIndex={-1}
-          aria-hidden="true"
-          className="gf-stage group/tile relative flex aspect-[4/3] flex-col justify-end self-start overflow-hidden rounded-media no-underline after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:from-5% after:via-stage/0 after:via-55% after:to-transparent"
-        >
-          <ResponsiveImage
-            image={{ ...category.image, alt: "" }}
-            sizes="(min-width: 1280px) 336px, 288px"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <span className="relative z-(--z-raised) p-4 text-md font-extrabold underline-offset-4 group-hover/tile:underline">
-            {category.label}
-          </span>
+    <>
+      <ul>
+        {category.children.map((child) => (
+          <li key={child.path}>
+            <NavigationMenu.Link asChild>
+              <a href={child.path} className="gf-drop-row">
+                <MenuThumb category={child} size={40} />
+                <span>{child.label}</span>
+                <MenuCount count={words.counts[child.path]} />
+              </a>
+            </NavigationMenu.Link>
+          </li>
+        ))}
+      </ul>
+      <NavigationMenu.Link asChild>
+        <a href={category.path} className="gf-drop-row gf-drop-all">
+          {/* Heard in full ("Tümünü gör: Çakılar"), its visible words first (WCAG 2.5.3) */}
+          <span aria-hidden="true">{words.seeAll}</span>
+          <span className="sr-only">{words.allIn[category.path] ?? category.label}</span>
+          <MenuCount count={words.counts[category.path]} dark />
         </a>
-      )}
-    </div>
+      </NavigationMenu.Link>
+    </>
   )
 }
 
 /**
- * The category aisle from 1024 px: one line of the shop's top
- * categories; a category with children opens its panel, after a 150 ms
- * hover or by a press, Enter or Space; Escape, a press outside it or
- * leaving it closes it, the focus back on its button (Radix: the button
- * says whether it is open and which panel it opens; the arrow keys move
- * along the line). The panel floats over the page the container's width,
- * so nothing below moves: the category's name and "Tümünü gör" over its
- * children in short columns, its picture tile (the shop's own, else its
- * newest product's photo) beside them. Every panel is in the first HTML,
- * closed (`forceMount`), so each link reaches a crawler without a script
- * (docs/13). A closed panel still listens for presses outside it; it lets
- * them pass, or a press inside the open panel would close the menu before
- * its link is followed.
+ * The category aisle from 1024 px: one line of the shop's top categories
+ * (from the start, or centred under a centred header); a category with
+ * children opens its dropdown, after a 150 ms hover or by a press, Enter
+ * or Space; Escape, a press outside it or leaving it closes it, the focus
+ * back on its button (Radix: the button says whether it is open and which
+ * list it opens; the arrow keys move along the line). The dropdown hangs
+ * under its own category, 336 px wide, over the page, so nothing below
+ * moves; one that would pass the aisle's end lines up with its
+ * category's end instead. A category without children is a plain link.
+ * Every dropdown is in the first HTML, closed (`forceMount`), so each
+ * link reaches a crawler without a script (docs/13). A closed dropdown
+ * still listens for presses outside it; it lets them pass, or a press
+ * inside the open one would close the menu before its link is followed.
  */
 export function Aisle({
   categories,
   label,
-  allIn,
+  words,
+  centered = false,
 }: {
   categories: readonly NavCategoryView[]
   label: string
-  /** "Tümünü gör: {name}" for each category path, in words. */
-  allIn: Record<string, string>
+  words: MenuWords
+  /** The centred header's aisle: the line centred. */
+  centered?: boolean
 }) {
   const [open, setOpen] = useState("")
+  const root = useRef<HTMLElement>(null)
+
+  // Measured as it opens, before it is painted: past the aisle's end, it lines up at its end
+  useLayoutEffect(() => {
+    const drop = [...(root.current?.querySelectorAll<HTMLElement>("[data-gf-drop]") ?? [])].find(
+      (each) => open !== "" && each.getAttribute("data-gf-drop") === open
+    )
+    const bounds = root.current?.getBoundingClientRect()
+    const item = drop?.parentElement?.getBoundingClientRect()
+    if (drop && bounds && item) {
+      drop.setAttribute("data-align", item.left + drop.offsetWidth > bounds.right ? "end" : "start")
+    }
+  }, [open])
+
   return (
     <NavigationMenu.Root
+      ref={root}
       value={open}
       onValueChange={setOpen}
       delayDuration={150}
       aria-label={label}
       className="relative pb-2"
     >
-      <NavigationMenu.List className="-ml-3 flex flex-wrap items-center gap-x-1">
+      <NavigationMenu.List
+        className={cn("flex flex-wrap items-center gap-x-1", centered ? "justify-center" : "-ml-3")}
+      >
         {categories.map((category) =>
           category.children.length === 0 ? (
             <NavigationMenu.Item key={category.path}>
@@ -106,7 +108,7 @@ export function Aisle({
               </NavigationMenu.Link>
             </NavigationMenu.Item>
           ) : (
-            <NavigationMenu.Item key={category.path} value={category.path} className="static">
+            <NavigationMenu.Item key={category.path} value={category.path} className="relative">
               <NavigationMenu.Trigger className={ITEM}>
                 {category.label}
                 <ChevronDown
@@ -117,14 +119,15 @@ export function Aisle({
               </NavigationMenu.Trigger>
               <NavigationMenu.Content
                 forceMount
+                data-gf-drop={category.path}
                 onInteractOutside={(event) => {
                   if (open !== category.path) {
                     event.preventDefault()
                   }
                 }}
-                className="absolute top-full -right-3 -left-3 z-(--z-dropdown) rounded-tile border border-rule bg-field p-6 shadow-float data-[state=closed]:hidden xl:p-8"
+                className="gf-drop data-[state=closed]:hidden"
               >
-                <Panel category={category} allIn={allIn[category.path] ?? category.label} />
+                <Drop category={category} words={words} />
               </NavigationMenu.Content>
             </NavigationMenu.Item>
           )
