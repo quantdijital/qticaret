@@ -6,6 +6,15 @@ import { paragraphsOf } from "./text"
 /** The storefront's quick view address (the layout's `quickView.address`): `GET ?id=`. */
 export const QUICK_VIEW_PATH = "/api/quick-view"
 
+/**
+ * The address the dialog asks: in the theme editor's preview (its signed
+ * token, set by the proxy) the preview's own `/hizli-bakis`, so the answer
+ * reads the draft's settings the frame is showing, never the live ones; else
+ * `QUICK_VIEW_PATH`.
+ */
+export const quickViewAddress = (previewToken: string | null): string =>
+  previewToken ? `/onizleme/${previewToken}/hizli-bakis` : QUICK_VIEW_PATH
+
 // Medusa's product ids: `prod_` and a ULID; anything else is refused before the backend
 const PRODUCT_ID = /^prod_[0-9A-Za-z]{1,64}$/
 

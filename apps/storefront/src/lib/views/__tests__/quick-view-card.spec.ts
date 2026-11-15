@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import type { StoreProduct } from "@qticaret/types"
 import { productCard } from "../product"
-import { quickViewIdOf } from "../quick-view"
+import { QUICK_VIEW_PATH, quickViewAddress, quickViewIdOf } from "../quick-view"
 
 const PRODUCT = {
   id: "prod_01",
@@ -42,5 +42,12 @@ describe("a card's quick view", () => {
     expect(id("id=prod_")).toBeNull()
     expect(id("id=prod_01%2F..")).toBeNull()
     expect(id(`id=prod_${"a".repeat(65)}`)).toBeNull()
+  })
+
+  // In the theme editor's frame the dialog must read the draft it previews, not the live design
+  it("asks the preview's own address on a design preview, the shop's otherwise", () => {
+    const token = `sfl_01ABC.to51q5.${"a".repeat(43)}`
+    expect(quickViewAddress(null)).toBe(QUICK_VIEW_PATH)
+    expect(quickViewAddress(token)).toBe(`/onizleme/${token}/hizli-bakis`)
   })
 })

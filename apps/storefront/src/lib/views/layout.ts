@@ -29,9 +29,15 @@ const LAYOUT_TOKEN = /^sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
  * that no longer opens falls back to what is live; its page says 404.
  */
 export async function currentLayout(): Promise<StoreLayout> {
-  const token = (await headers()).get(LAYOUT_PREVIEW_HEADER)
-  const preview = token && LAYOUT_TOKEN.test(token) ? await layoutPreview(token) : null
+  const token = await layoutPreviewToken()
+  const preview = token ? await layoutPreview(token) : null
   return preview ?? (await storefrontLayout())
+}
+
+/** The design preview's token this request came on (its form only; the backend checks it), or null. */
+export async function layoutPreviewToken(): Promise<string | null> {
+  const token = (await headers()).get(LAYOUT_PREVIEW_HEADER)
+  return token && LAYOUT_TOKEN.test(token) ? token : null
 }
 
 /**

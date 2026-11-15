@@ -49,6 +49,20 @@ describe("the proxy on a preview page", () => {
     expect(response.headers.get("x-middleware-request-x-qt-layout-preview")).toBeNull()
   })
 
+  // adr/0049 Ek 2026-11-15: the frame's quick view dialog asks under the preview's address
+  it("sets the draft design's header on a design preview and on its quick view answers", async () => {
+    const design = `sfl_01JABCDEF.to51q5.${"a".repeat(43)}`
+    const header = "x-middleware-request-x-qt-layout-preview"
+    expect((await visit(`/onizleme/${design}`)).headers.get(header)).toBe(design)
+    const answers = await visit(`/onizleme/${design}/hizli-bakis?id=prod_01`)
+    expect(answers.headers.get(header)).toBe(design)
+    expect(answers.headers.get("x-robots-tag")).toBe("noindex, nofollow")
+    expect(answers.headers.get("cache-control")).toBe("private, no-store")
+    // Nothing else under a preview's address carries the token on
+    expect((await visit(`/onizleme/${design}/baska`)).headers.get(header)).toBeNull()
+    expect((await visit(`/onizleme/${design}/hizli-bakis/x`)).headers.get(header)).toBeNull()
+  })
+
   it("leaves a live product page indexable", async () => {
     const response = await visit("/urun/bir-urun")
     expect(response.headers.get("x-robots-tag")).toBeNull()

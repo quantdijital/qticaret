@@ -10,7 +10,8 @@ import { analyticsTags } from "@/lib/analytics/tags"
 import { headerCart } from "@/lib/cart/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
-import { QUICK_VIEW_PATH } from "@/lib/views/quick-view"
+import { layoutPreviewToken } from "@/lib/views/layout"
+import { quickViewAddress } from "@/lib/views/quick-view"
 import { SUGGEST_PATH } from "@/lib/views/search-suggest"
 import { shopView } from "@/lib/views/shop"
 import { currentTheme } from "@/lib/views/theme-settings"
@@ -27,11 +28,12 @@ export const metadata: Metadata = { formatDetection: { telephone: false } }
 export const viewport: Viewport = { width: "device-width", initialScale: 1 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const [shop, settings, requestHeaders, tags] = await Promise.all([
+  const [shop, settings, requestHeaders, tags, previewToken] = await Promise.all([
     shopView(),
     currentTheme(),
     headers(),
     analyticsTags(),
+    layoutPreviewToken(),
   ])
   // The shop's theme settings over the theme's own (adr/0053 §B), those the
   // theme takes: one style element with this response's nonce, so the CSP
@@ -77,7 +79,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           changeCartLine={changeCartLine}
           // The cards' quick view dialog (adr/0049 Ek 2026-11-15): only while the shop has it on
           {...(settings.product_card.quick_view
-            ? { quickView: { address: QUICK_VIEW_PATH, addToCart } }
+            ? { quickView: { address: quickViewAddress(previewToken), addToCart } }
             : {})}
         >
           {children}
