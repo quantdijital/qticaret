@@ -229,7 +229,7 @@ Sahip kararı, 2026-11-15. Sebep: iki geliştirici aynı bileşene farklı tasar
 | Fark | Yol | Örnek |
 | --- | --- | --- |
 | Küçük, her mağazanın işine yarar | Ayar; varsayılanı bugünkü görünümü korur | Yardımcı şerit aç/kapat, arama genişliği, menü öğesi kutulu/çizgili, gölge var/yok |
-| Düzenin iskeleti değişiyor | Yeni biçim; eskisi olduğu gibi kalır | Kategori listesi solda yerine üstte |
+| Düzenin iskeleti değişiyor | Yeni biçim; eskisi olduğu gibi kalır | Kategori listesi solda yerine üstte; kategorilerde alt kategorili kartın yanına fotoğraflı kolaj (`categories.variant: collage`) |
 
 **Hazır görünüm yalnız veridir.** Bir görünüm `layout.json` dosyasıdır: hangi bölüm, hangi biçim, hangi ayar değeri. İçine kod ya da gizli CSS girmez. Bir görünüm ayarlarla kurulamıyorsa eksik olan ayardır; ayar eklenir. Emsal: Divi'nin hazır tasarımları da modül ayarlarının kayıtlı değerleridir; Shopify tema ön ayarları da ayar değerleridir.
 
