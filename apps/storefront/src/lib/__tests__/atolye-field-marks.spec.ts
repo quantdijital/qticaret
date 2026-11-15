@@ -44,7 +44,7 @@ const catalog = (slides?: NonNullable<Hero["catalog"]>["slides"]): Partial<Hero>
     chips: [],
     picks: [],
     from: null,
-    ...(slides ? { slides } : {}),
+    ...(slides ? { slides, slider: { settings: SLIDER_DEFAULTS, interval: 6 } } : {}),
   },
 })
 
@@ -100,6 +100,30 @@ describe("the field marks in Atölye", () => {
     const html = home([{ ...hero(), editor: true }])
     expect(marks(html)).toEqual(["image", "heading", "text", "links.0"])
     expect(html).toMatch(/<h1 id="[^"]*" data-qf="heading"[^>]*>Bıçak, çakı ve kamp aletleri<\/h1>/)
+  })
+
+  it("mark a button by its place in the design when a broken one before it was left out", () => {
+    const html = home([{ ...hero({ actionsAt: [1] }), editor: true }])
+    expect(marks(html)).toEqual(["image", "heading", "text", "links.1"])
+    const slides = home([
+      {
+        ...hero(
+          catalog([
+            {
+              heading: "Bir",
+              intro: null,
+              actions: [{ label: "İkinci", path: "/b" }],
+              actionsAt: [1],
+              image: null,
+              link: null,
+            },
+          ])
+        ),
+        editor: true,
+      },
+    ])
+    expect(marks(slides)).toContain("slides.0.links.1")
+    expect(marks(slides)).not.toContain("slides.0.links.0")
   })
 
   it("mark a catalogue opening saved before slides with its own fields", () => {

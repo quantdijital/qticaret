@@ -19,7 +19,7 @@ vi.mock("@/lib/store-api/extras", () => ({
 }))
 
 const { sectionViews } = await import("../sections")
-const { isEditorSession } = await import("../layout")
+const { isEditorSession, layoutLinks } = await import("../layout")
 
 type Section = Parameters<typeof sectionViews>[0][number]
 
@@ -57,5 +57,29 @@ describe("the editor's views", () => {
       expect(view).not.toHaveProperty("editor")
       expect(await isEditorSession()).toBe(false)
     }
+  })
+})
+
+describe("a section's buttons", () => {
+  const link = (label: string | null, path: string | null) => ({
+    label,
+    kind: "page" as const,
+    target: null,
+    path,
+  })
+
+  it("say nothing more while every link is printed", () => {
+    const shown = layoutLinks([link("Bir", "/a"), link("İki", "/b")], t)
+    expect(shown).toEqual({
+      actions: [
+        { label: "Bir", path: "/a" },
+        { label: "İki", path: "/b" },
+      ],
+    })
+  })
+
+  it("say their place in the design once a broken one is left out (the field mark)", () => {
+    const shown = layoutLinks([link("Silinmiş", null), link("İki", "/b")], t)
+    expect(shown).toEqual({ actions: [{ label: "İki", path: "/b" }], actionsAt: [1] })
   })
 })

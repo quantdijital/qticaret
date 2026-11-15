@@ -122,6 +122,7 @@ export function HeroCatalog({
       heading: hero.heading,
       intro: hero.intro,
       actions: hero.actions,
+      ...(hero.actionsAt ? { actionsAt: hero.actionsAt } : {}),
       image: hero.image,
       link: null,
     },

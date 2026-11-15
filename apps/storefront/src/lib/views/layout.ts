@@ -93,6 +93,28 @@ export async function currentMenus(): Promise<StoreMenu[]> {
 export const layoutLink = (link: StoreLayoutLink | null, t: Translate): LinkView | null =>
   link ? menuLink({ ...link, children: [] }, t) : null
 
+/**
+ * A section's buttons as the theme prints them; a link with no name or
+ * address is left out. Only then each printed one says its place among
+ * the design's links (`actionsAt`), so the editor's field mark (adr/0065
+ * Faz 2b) names the button saved, not the one drawn before it.
+ */
+export function layoutLinks(
+  links: readonly StoreLayoutLink[],
+  t: Translate
+): { actions: LinkView[]; actionsAt?: number[] } {
+  const actions: LinkView[] = []
+  const at: number[] = []
+  links.forEach((link, index) => {
+    const view = layoutLink(link, t)
+    if (view) {
+      actions.push(view)
+      at.push(index)
+    }
+  })
+  return at.every((place, drawn) => place === drawn) ? { actions } : { actions, actionsAt: at }
+}
+
 /** A design picture with its sizes and versions; its alt text the shop's, else the media library's. */
 export const layoutImage = (image: StoreLayoutImage, fallbackAlt: string): ImageView =>
   imageView(image, fallbackAlt)

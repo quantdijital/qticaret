@@ -53,6 +53,8 @@ export interface HeroCatalogSlideView {
   actions: LinkView[]
   image: ImageView | null
   link: LinkView | null
+  /** Each button's place among the slide's links when a broken one was left out; absent: its drawn place. */
+  actionsAt?: number[]
   /**
    * Its place among the section's slides in the design (a slide with
    * nothing to show is left out of the drawing), for the editor's field

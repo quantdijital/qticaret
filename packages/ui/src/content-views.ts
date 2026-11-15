@@ -69,6 +69,8 @@ export type HomeSectionView = {
       intro: string | null
       /** At most two buttons, the first the main one. */
       actions: LinkView[]
+      /** Each button's place among the design's links when a broken one was left out (the editor's field mark); absent: its drawn place. */
+      actionsAt?: number[]
       image: ImageView | null
       /** How the opening is drawn (adr/0049 Ek 2026-11-14 §2); none: today's (`standard`). */
       variant?: HeroVariant

@@ -1,4 +1,4 @@
-import { ResponsiveImage, fieldMark } from "@qticaret/ui"
+import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
 import type { HeroCatalogSlideView, HeroCatalogView, ImageView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
@@ -172,11 +172,19 @@ export function CatalogSlide({
         )}
         {action && (
           <div className="flex flex-wrap gap-2 pt-1">
-            <a href={action.path} className="gf-btn" {...mark("links.0")}>
+            <a
+              href={action.path}
+              className="gf-btn"
+              {...mark(fieldKey("links", slide.actionsAt?.[0] ?? 0))}
+            >
               {action.label}
             </a>
             {second && (
-              <a href={second.path} className="gf-btn gf-btn--quiet" {...mark("links.1")}>
+              <a
+                href={second.path}
+                className="gf-btn gf-btn--quiet"
+                {...mark(fieldKey("links", slide.actionsAt?.[1] ?? 1))}
+              >
                 {second.label}
               </a>
             )}

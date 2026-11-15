@@ -1,4 +1,4 @@
-import { ResponsiveImage, fieldMark } from "@qticaret/ui"
+import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
 import type { ProductCardView } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { Preload } from "../parts/Preload"
@@ -69,7 +69,11 @@ export function Hero({
             )}
             {action && (
               <div className="pt-1">
-                <a href={action.path} className="gf-btn" {...fieldMark(on, "links.0")}>
+                <a
+                  href={action.path}
+                  className="gf-btn"
+                  {...fieldMark(on, fieldKey("links", hero.actionsAt?.[0] ?? 0))}
+                >
                   {action.label}
                 </a>
               </div>
