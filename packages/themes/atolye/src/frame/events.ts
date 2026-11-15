@@ -50,6 +50,14 @@ export const cartAddedMessage = (event: Event): string =>
     ? (event.detail as { message: string }).message
     : ""
 
+/**
+ * What the opened cart sheet says first: the words that came with the line
+ * (the product page's and the quick view's "Sepete eklendi." end in a stop,
+ * a card's not) and the cart's name, one stop between them.
+ */
+export const sheetDescription = (said: string, label: string): string =>
+  said ? `${said.replace(/[.!?…]+\s*$/, "")}. ${label}` : label
+
 /** The button a `qt:cart-added` event came from, for the drawer to give the focus back to (Z-03). */
 export const cartAddedOrigin = (event: Event): HTMLElement | null => {
   const origin =

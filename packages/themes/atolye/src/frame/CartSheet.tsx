@@ -6,7 +6,13 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, MiniCartView } from "@qticaret/ui"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
 import { CartSheetLine, type SheetLineWords } from "./CartSheetLine"
-import { CART_ADDED_EVENT, cartAddedMessage, cartAddedOrigin, isOwnClick } from "./events"
+import {
+  CART_ADDED_EVENT,
+  cartAddedMessage,
+  cartAddedOrigin,
+  isOwnClick,
+  sheetDescription,
+} from "./events"
 import { Sheet } from "./Sheet"
 
 export interface CartSheetWords {
@@ -228,7 +234,7 @@ export function CartSheet({
         onOpenChange={setOpen}
         side="right"
         title={words.title}
-        description={said ? `${said}. ${words.label}` : words.label}
+        description={sheetDescription(said, words.label)}
         closeLabel={words.close}
         onCloseAutoFocus={(event) => {
           // Back to what opened it while it is still on the page and shown, else the cart link (Tezgâh audit Y-03)
