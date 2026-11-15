@@ -13,6 +13,8 @@
 
 ## 2026-11-15: vitrin işleri ve ortak çalışma
 
+- `deniz/misafir-siparis-kaniti` (#73 incelemesinin devamı): misafir siparişlerinin hesaba bağlanması, hesaptan e-posta izni ve oturumlu stok bildirimi `provenCustomer` kanıtına bağlandı (kanıtsız: bağlama yok, izin/bildirim çift onaya); HTTP `guest-orders-proof.spec.ts` sahibin koşmasını bekliyor.
+
 - `dev`'e giren PR'lar: #9–#12 yorum alıntısı (~140 karakter, "…"), #37 ortalı üst bilgi + M1 açılır menü + katalog ana sayfası düzeltmeleri, #38 fiyat bandına kategori (güvenlik incelemesi: düşük bulgu kapatıldı), #44 ve #45 yorum kutuları eşit boy, #47 arama düğmelerinin hizası (alan yüksekliği aynı), #48 duyuru şeridine hizalama (`auto` varsayılan) ve boyut.
 - Kurallar: adr/0066 (üç katman, K1–K9), "Aynı işi iki kez yapma", "Yayımlanmış biçim sözleşmedir". Görünümlerim: Katalog, Grafit.
 - Yerel geliştirme veritabanı: My L'arte taslağına cutlery paketi ve `katalog` uygulandı (2026-11-14); sahip klasik katalog üst bilgisini ve duyuru şeridinde orta + büyük seçti. Yerel önizleme dalı `deniz/onizleme-yerel` (push edilmez) sade üst bilgiyi gösterir.

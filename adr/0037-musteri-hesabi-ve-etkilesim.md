@@ -92,6 +92,7 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
   - Doğrulama tamamlandığında Medusa olay yayımlamıyor. Bu yüzden bağlama, oturumlu müşterinin kendi hesabını ya da siparişlerini okuduğu ilk istekte yapılır (`GET /store/customers/me`, `GET /store/orders`). Oturum, adresin kanıtıdır.
   - Aynı e-postalı misafir kayıtlarının siparişleri hesaba taşınır. `ILIKE`'ta `_` ve `%` kaçışlanır.
   - Misafir kayıtları silinmez.
+  - **Ek 2026-11-15 (#73 güvenlik incelemesi):** oturum ve `has_account` kanıt sayılmaz; bağlama yalnız `provenCustomer` doğruysa yapılır (girişin kendi adresi kendi oturumunda doğrulanmış ya da sosyal sağlayıcı kefil; `workflows/orders/attach-guest-orders.ts`). Kanıtsız hesap hiçbir şey almaz; adres kanıtlandıktan sonraki ilk okumada bağlanır. Hesaptan e-posta izni ve oturumlu stok bildirimi de aynı kanıtla hemen kaydolur, yoksa çift onaya düşer.
 
 ## Uygulama notları (M4, sosyal giriş, 2026-10-28)
 - Apple'ın REST API'si resmî belgeden doğrulandı:

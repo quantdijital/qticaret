@@ -5,6 +5,7 @@ import { ValidationError } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
 import { BACK_IN_STOCK_MODULE } from "../../../modules/back-in-stock"
 import type BackInStockModuleService from "../../../modules/back-in-stock/service"
+import { provenCustomer } from "../../../workflows/account/proven-customer"
 import { sendMessageWorkflow } from "../../../workflows/messaging/send-message"
 import type { StorePostStockAlertType } from "./validators"
 
@@ -17,9 +18,10 @@ interface VariantRow {
 
 /**
  * POST /store/stock-alerts (F10.5, adr/0037 §4): to be told once when a
- * variant out of stock can be bought again. A signed-in customer's alert
- * is on at once; a guest's waits for the address to confirm it, and the
- * answer to a guest says the same whatever was there before.
+ * variant out of stock can be bought again. A signed-in customer who has
+ * proven their address (`provenCustomer`) has the alert on at once; anyone
+ * else's waits for the address to confirm it, and the answer to a guest
+ * says the same whatever was there before.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<StorePostStockAlertType>,
@@ -59,14 +61,16 @@ export async function POST(
   if (!email) {
     throw new ValidationError("stock_alerts.email_required", { field: "email" })
   }
+  // At once only for an address its owner has proven; a session alone is not proof
+  const confirmed = customerId !== null && (await provenCustomer(req.scope, customerId))
   const alert = await req.scope.resolve<BackInStockModuleService>(BACK_IN_STOCK_MODULE).subscribe({
     variant_id: variantId,
     product_id: variant.product_id,
     email,
     customer_id: customerId,
-    confirmed: customerId !== null,
+    confirmed,
   })
-  res.status(202).json({ status: customerId ? "active" : "pending" })
+  res.status(202).json({ status: confirmed ? "active" : "pending" })
   if (alert.token) {
     sendMessageWorkflow(req.scope)
       .run({

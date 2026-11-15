@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ValidationError } from "../../../../../lib/errors"
+import { provenCustomer } from "../../../../../workflows/account/proven-customer"
 import { askToConfirmConsent } from "../../../../../workflows/messaging/consent-confirmation"
 import { MESSAGING_MODULE } from "../../../../../modules/messaging"
 import type MessagingModuleService from "../../../../../modules/messaging/service"
@@ -20,11 +21,14 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
 /**
  * POST /store/customers/me/consents: the customer gives or withdraws
  * consent for campaign messages on a channel, kept with the text's version
- * and a keyed hash of the IP; İYS hears of it (F10 M11). The e-mail is the
- * login its owner confirmed, so it is recorded at once. The phone was only
- * typed: giving consent for it, or withdrawing one not this customer's own,
- * waits for the number's owner to confirm by SMS (double opt-in, security
- * review 2026-10-29), and the answer says so with `pending`.
+ * and a keyed hash of the IP; İYS hears of it (F10 M11). The e-mail is
+ * recorded at once when its owner has proven it is theirs
+ * (`provenCustomer`: the login's address confirmed, or a social provider
+ * vouching); a session alone is not proof (security review of PR #73), so
+ * otherwise it waits for the address to confirm, as the phone does. The
+ * phone was only typed: giving consent for it, or withdrawing one not this
+ * customer's own, waits for the number's owner to confirm by SMS (double
+ * opt-in, security review 2026-10-29), and the answer says so with `pending`.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<StorePostConsentType>,
@@ -38,10 +42,11 @@ export async function POST(
   }
   const messaging = req.scope.resolve<MessagingModuleService>(MESSAGING_MODULE)
   const evidence = storefrontEvidence(clientIp(req) ?? "", textVersion)
-  if (
-    channel === "email" ||
-    (status === "revoked" && (await ownConsent(req, customerId, address)))
-  ) {
+  const atOnce =
+    channel === "email"
+      ? await provenCustomer(req.scope, customerId)
+      : status === "revoked" && (await ownConsent(req, customerId, address))
+  if (atOnce) {
     await messaging.recordConsent({
       channel,
       address,
