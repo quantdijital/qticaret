@@ -82,6 +82,8 @@ describe("the theme's product rail variants", () => {
     expect(html).toContain("lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]")
     expect(html.match(/<article/g)).toHaveLength(7)
     expect(html).toContain('sizes="(min-width: 1440px) 540px')
+    // Its photo grows to the two rows beside it (card.css, K-07)
+    expect(html.match(/class="gf-card-lead min-w-0"/g)).toHaveLength(1)
   })
 
   it("draws compact cards: the photo small, one link, no add button", () => {

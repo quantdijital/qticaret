@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type {
   CategoriesVariant,
@@ -42,11 +41,14 @@ function Card({
 }) {
   const picture = view.imagePosition !== "none" ? (card.image ?? null) : null
   const side = picture !== null && view.imagePosition === "side"
+  // A card without subcategories to list is one link, its words centred in the row's height
+  const leaf = card.children.length === 0
   return (
     <article
       className={cn(
         "flex h-full min-w-0 gap-4",
-        side ? "flex-row items-start" : "flex-col",
+        side ? (leaf ? "flex-row items-center" : "flex-row items-start") : "flex-col",
+        leaf && "relative",
         view.frame === "lined" && "rounded-tile border border-rule bg-field p-4 sm:p-5"
       )}
     >
@@ -68,9 +70,15 @@ function Card({
           />
         </a>
       )}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className={cn("flex min-w-0 flex-1 flex-col", leaf && !side && "justify-center")}>
         <h3 className="text-md leading-tight font-extrabold tracking-[-0.01em] text-balance">
-          <a href={card.path} className="no-underline underline-offset-4 hover:underline">
+          <a
+            href={card.path}
+            className={cn(
+              "no-underline underline-offset-4 hover:underline",
+              leaf && "after:absolute after:inset-0 after:content-['']"
+            )}
+          >
             {card.label}
           </a>
         </h3>
@@ -101,11 +109,10 @@ function SeeAll({ link, name }: { link: LinkView; name: string }) {
   return (
     <a
       href={link.path}
-      className="gf-link mt-2 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold lg:pointer-fine:min-h-8"
+      className="gf-link mt-auto inline-flex min-h-11 items-center self-start pt-2 text-sm font-semibold lg:pointer-fine:min-h-8"
     >
       {link.label}
       <span className="sr-only">: {name}</span>
-      <ArrowRight className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
     </a>
   )
 }
@@ -115,7 +122,9 @@ function SeeAll({ link, name }: { link: LinkView; name: string }) {
  * catalogue's index: each category a card with its picture (a small
  * square beside the words, a 4:3 picture above them, or none), its name
  * in 800, its count when the shop shows counts, its first subcategories
- * as quiet links and "Tümünü gör" to its own page. Cards stand in a grid:
+ * as quiet links and "Tümünü gör" to its own page at the card's foot (one
+ * line across a row, no arrow); a card with none to list is one link, its
+ * picture and words centred in the row's height (Tezgâh audit K-08, K-09). Cards stand in a grid:
  * one column on a phone, two from 640 px, the shop's two to four from
  * 1024 px (four from 1280, three between). A card is framed by a hairline
  * on the field colour (`--radius-tile`), or plain on the page; nothing

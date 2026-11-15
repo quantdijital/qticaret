@@ -58,6 +58,12 @@ describe("the linked category cards", () => {
     expect(html).toMatch(/<a href="\/kategori\/mutfak" tabindex="-1" aria-hidden="true"/)
     // A card without a shown subcategory has no see-all link
     expect(html.match(/Tümünü gör/g)).toHaveLength(1)
+    // ...and is one link, its words centred in the row's height, no empty list (K-08);
+    // the see-all link sits at the card's foot, with no arrow (K-09)
+    expect(html.match(/after:absolute after:inset-0/g)).toHaveLength(1)
+    expect(html).toContain("flex-row items-center")
+    expect(html).not.toContain("lucide-arrow-right")
+    expect(html).toMatch(/class="gf-link mt-auto[^"]*">Tümünü gör/)
   })
 
   it("lays out four columns, pictures above or none, plain cards", () => {
