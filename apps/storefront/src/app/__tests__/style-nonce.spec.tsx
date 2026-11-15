@@ -105,6 +105,25 @@ describe("StyleNonce", () => {
     expect(openLock().getAttribute("nonce")).toBe("ZG9jdW1lbnQtbm9uY2U=")
   })
 
+  it("writes the nonce over an element that took the global's name (DOM clobbering)", () => {
+    const clobber = document.createElement("div")
+    clobber.id = "__webpack_nonce__"
+    document.body.append(clobber)
+    try {
+      expect(typeof window.__webpack_nonce__).not.toBe("string")
+      render(
+        <>
+          <StyleNonce nonce="Y2xvYmJlci10ZXN0" />
+          {sheet}
+        </>
+      )
+      expect(window.__webpack_nonce__).toBe("Y2xvYmJlci10ZXN0")
+      expect(openLock().getAttribute("nonce")).toBe("Y2xvYmJlci10ZXN0")
+    } finally {
+      clobber.remove()
+    }
+  })
+
   it("leaves the element without one when the response has no nonce", () => {
     render(
       <>

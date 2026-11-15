@@ -19,10 +19,13 @@ declare global {
  *
  * Only the first value counts: it is the document's, the one its policy
  * names. A server action or a refresh renders the layout again under a new
- * request's nonce, which this document's policy does not know.
+ * request's nonce, which this document's policy does not know. "First" is
+ * checked by type: an element with `id="__webpack_nonce__"` makes the
+ * browser hand back that element as the global (DOM clobbering), and a
+ * non-string is not a nonce, so the assignment shadows it.
  */
 export function StyleNonce({ nonce }: { nonce: string | undefined }) {
-  if (typeof window !== "undefined" && nonce && window.__webpack_nonce__ === undefined) {
+  if (typeof window !== "undefined" && nonce && typeof window.__webpack_nonce__ !== "string") {
     window.__webpack_nonce__ = nonce
   }
   return null
