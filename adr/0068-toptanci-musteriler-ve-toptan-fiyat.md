@@ -1,6 +1,6 @@
 # ADR-0068: Toptancı müşteriler ve toptan fiyat
 
-- **Durum:** Öneri. Sahibin 2026-11-15 kararları işlendi; kod başlamadı, sahip okuyup onaylayınca başlar.
+- **Durum:** Kabul (sahip, 2026-11-15). Açık soruların önerilen varsayılanları sahip tarafından onaylandı ("önerilerin uygundur"); yalnız yasal ve mali konu (Açık sorular 10) danışman görene kadar açık ve işaretli.
 - **Tarih:** 2026-11-15
 - **İlgili:** adr/0007 (KDV modeli, KDV dahil fiyat), adr/0009 (vergi kimliği), adr/0010 (para ve yuvarlama), adr/0011 (denetim kaydı), adr/0012 (özellik bayrakları), adr/0023 (fiyat geçmişi, 30 gün kuralı), adr/0024 (kupon ve kampanya kuralları), adr/0037 §6 (segmentler), adr/0040 (roller), adr/0041 (yasal metinler), adr/0042 G6 (hesap daveti), adr/0046 (vitrin, Store API çağrıları), adr/0050 (toplu kampanya), adr/0051 (ödeme bağlantısı), adr/0056 (arama dizini), adr/0061 §5.5 (paket koruması), adr/0066 (tema katmanları), docs/13 (JSON-LD, akışlar), `docs/kvkk-envanter.md`, docs/20 (B2B → F19), PROGRESS D14 (teklif isteme)
 - **Dayanak:** sahip (2026-11-15): "müşteri tarafında sahip veya yöneticiler yeni müşteri oluşturabilecek; bu oluşturduğu müşteri Toptancı olabilir; toptancı müşterisi oluştururken mağazadaki tüm ürünlerin / tekil ürünlerin fiyatlarını güncelleyebilecek ve bunları yalnızca o mail ile giren toptancı görecek; perakende fiyatlardan ziyade toptancıya o toptan fiyatlarla alışveriş yapabilmesini sağlayacak."
@@ -11,10 +11,26 @@
 
 1. **Fiyat modeli:** toptan **seviyeleri** (her biri bir müşteri grubu ve bir fiyat listesi, ör. "Toptan A/B": bütün ürünlerde yüzde indirim ve/veya ürün başına fiyat) ile **toptancıya özel** fiyatlar (tek bir toptancının listesi; teknik olarak tek üyeli gizli bir grup) birlikte. Öncelik: toptancıya özel > seviye > perakende. (Sahip "seviye" ne demek diye sordu; açıklandı, ikisi birlikte varsayılan seçildi; sahip değiştirebilir.)
 2. Toptancı **yalnız panelden** açılır (sahip ve yönetici rolü). İlk sürümde vitrinde başvuru formu yok.
-3. Toptancı fiyatları **KDV hariç** görür; KDV ödeme adımında ayrı satır olarak eklenir; tahsil edilen tutar değişmez. (Mali müşavire sorulacak: Açık sorular.)
+3. Toptancı fiyatları **KDV hariç** görür; KDV ödeme adımında ayrı satır olarak eklenir; tahsil edilen tutar değişmez. (Mali müşavire sorulacak: Açık sorular 10.)
 4. En az sipariş **adet** olarak (tutar değil). Ödeme yöntemi kısıtı yok.
 5. Acele yok; F16 canlıya çıkıştan bağımsız.
 6. Toptancı için fatura profili **zorunlu değil**.
+
+### Sahibin onayladığı varsayılanlar (2026-11-15, "önerilerin uygundur")
+
+Öneri sürümündeki açık sorular 1–9, 11 ve 12 önerilen varsayılanlarla karara bağlandı:
+
+7. **Seviye ve toptancıya özel fiyat birlikte** (karar 1 aynen; dilim 1a ikisini de kurar).
+8. **En az adet** ilk sürümde **sipariş başına toplam adet** (toptancı ya da seviye düzeyinde); ürün başına en az adet sonraki sürümde (§8, §11).
+9. Toptan fiyat **KDV hariç girilir**; KDV dahil karşılığı yanında bilgi olarak gösterilir (§4).
+10. **Otomatik kampanyalar toptancıya uygulanmaz**; kargo bedava eşiği kampanya değildir, uygulanır (§6).
+11. Herkese açık bir indirim seviye fiyatından **düşükse toptancı düşük olanı alır** (seviye listesi `sale`, §2).
+12. Toptancıya listede **fiyat süzgeci gösterilmez**; sıralama perakende sırasıyladır (§7).
+13. Kabul edilmeyen davet **90 gün** sonra silinir; yeniden gönderilebilir (§10).
+14. Özellik **mağaza bayrağıdır**: `customers.wholesale` (`owner: tenant`), kapalı başlar; F17'de pakete bağlanabilir (§9).
+15. Toptancı **seviye adını görmez**; vitrinde yalnız "Toptan fiyat · KDV hariç" (§7).
+16. **Toplu kampanya e-postası ve sepet hatırlatması toptancılara gitmez** (kampanya kitlesinde varsayılan hariç); işlemsel iletiler (sipariş, kargo) değişmez.
+17. Toptancıları **yalnız sahip ve yönetici** görür; operations siparişleri görür, toptancı listesini ve fiyatlarını görmez (§3, §9).
 
 ### Elimizde olan (kod, 2026-11-15 `dev`)
 
@@ -129,7 +145,7 @@ Bugünkü vitrin "fiyat herkes için aynıdır" varsayımıyla hızlıdır: `/st
 ### 8. En az adet kuralı
 
 - **İlk sürüm:** sipariş başına en az **toplam adet** (sepetteki ürün satırlarının adetleri toplamı; ek seçenek ve hediye paketi satırları sayılmaz). Geçerli değer: toptancının kendi değeri, yoksa seviyeninki, yoksa kural yok.
-- **Ürün başına en az adet** sonraya bırakılır (Açık sorular 2); veri modeli işaret tablosuna ya da seviyeye yeni alanla eklenebilir.
+- **Ürün başına en az adet** sonraya bırakılır (karar 8); veri modeli işaret tablosuna ya da seviyeye yeni alanla eklenebilir.
 - **Gösterim:** sepet sayfası `/me/wholesale`'deki değerle "Toptan siparişte en az {n} adet gerekir; sepetinizde {m} adet var." der, ödemeye geç düğmesini kapatır.
 - **Sunucu:** ödeme başlamadan (`POST /store/carts/:id/payment-session`, `checkout-guard.ts`) ve tamamlamada (`complete-cart-validate.ts`) `wholesale.min_quantity` (`ValidationError`, `{ field: "items" }`) ile reddeder. Ödeme başladıktan sonra sepet değişirse mevcut `payments.cart_changed` kuralı geçerlidir; para alınıp siparişin reddedildiği bir yol kalmaz.
 
@@ -171,7 +187,7 @@ Bugünkü vitrin "fiyat herkes için aynıdır" varsayımıyla hızlıdır: `/st
 - Toptancı yalnız kendi oturumunda toptan fiyat görür; perakende müşteri, botlar, akışlar ve başka toptancılar perakende görür. Herkese açık önbellek ve dizin aynı kalır.
 - Toptancı için liste sıralaması perakende sırasıdır ve fiyat süzgeci yoktur (bilerek kabul edilen sınır).
 - Oranlı her liste katalog büyüklüğünde satır taşır (ör. 5.000 varyant × 20 liste = 100.000 satır). Özel oranlı liste toptancı başınadır; çok toptancılı mağazada seviye + az sayıda elle satır önerilir, panel bunu söyler. Fiyat geçmişi aboneliği (adr/0023) toptan listesi olaylarını atlar (herkese açık fiyat değişmez).
-- Toptancıya toplu kampanya e-postası ve sepet hatırlatması perakende fiyat gösterebilir; kampanya kitlesinde toptancılar varsayılan hariçtir (Açık sorular 11).
+- Toptancıya toplu kampanya e-postası ve sepet hatırlatması perakende fiyat gösterebilir; kampanya kitlesinde toptancılar varsayılan hariçtir (karar 16).
 - Vitrin ve tema dokunuşu ekleyicidir: `PriceView`'a isteğe bağlı "KDV hariç" işareti, sepet özetine isteğe bağlı KDV satırı ve en az adet iletisi. Varsayılan çizim değişmez (adr/0066 K3(b)); görünüm kilidi testi yeşil kalır.
 - Sonradan: F19 B2B ADR'leri; e-fatura tarafında kurumsal profili olmayan toptancının faturası bireysel kesilir (mali müşavir).
 
@@ -188,17 +204,8 @@ Her dilim ayrı PR, `dev`'den `deniz/<konu>` dalı; Opus kodlayıcı ajan, sıra
 | 4 | Sepet kuralları: en az adet (sepet iletisi, ödeme öncesi koruma, tamamlama kancası), kupon reddi, otomatik kampanyanın toptancıya uygulanmaması (önce Context7 + test: promosyon kuralında grup dışlama 2.21.2'de çalışıyor mu; çalışmıyorsa toptancı sepetinde otomatik promosyonları kaldıran sepet kancası), kapanan toptancının sepetinin yenilenmesi ve `wholesale.prices_changed` | M | Evet (ödeme/sepet) | Sepet iletisi teması: `cart/CartPage.tsx` (yalnız ileti alanı) |
 | 5 | Belgeler ve uçtan uca: `docs/kvkk-envanter.md`, docs/06 ekran planı, docs/13 notu (herkese açık fiyat tek kaynak), e2e (toptancı daveti → kayıt → toptan fiyatla sipariş, kapatma → perakende), PROGRESS | S | Hayır | Hayır |
 
-## Açık sorular (sahibe; her birinde önerilen varsayılan)
+## Açık sorular
 
-1. **Seviye + toptancıya özel birlikte mi?** Varsayılan: evet (karar 1). Yalnız biri istenirse dilim 1a küçülür.
-2. **En az adet:** sipariş başına toplam adet mi, ürün başına mı? Varsayılan: ilk sürümde sipariş başına toplam adet (toptancı ya da seviye düzeyinde); ürün başına en az adet sonraki sürümde seçenek.
-3. **Toptan fiyat girişi KDV hariç mi dahil mi?** Varsayılan: KDV hariç girilir, dahil karşılığı yanında gösterilir.
-4. **Otomatik kampanyalar toptancıya uygulansın mı?** Varsayılan: hayır. Kargo bedava eşiği uygulanır.
-5. **Herkese açık bir indirim seviye fiyatından düşükse** toptancı hangisini alsın? Varsayılan: düşük olanı (Medusa `sale` davranışı). Seviye fiyatı her zaman geçerli olsun istenirse seviye listesi `override` yapılır; o zaman perakende indirim toptancıya hiç yansımaz.
-6. **Toptancıya listede fiyat süzgeci:** Varsayılan: gizli; sıralama perakende sırasıyla.
-7. **Kabul edilmeyen davetin ömrü:** Varsayılan: 90 gün, yeniden gönderilebilir.
-8. **Özellik kimin elinde?** Varsayılan: mağaza bayrağı (`customers.wholesale`, kapalı başlar); F17'de pakete bağlanabilir.
-9. **Toptancı seviye adını görsün mü?** Varsayılan: hayır; vitrinde yalnız "Toptan fiyat · KDV hariç".
-10. **Yasal ve mali (danışman yok; taslak işaretli kalır):** toptancıya KDV hariç gösterim, toptancıya 30 gün kuralının uygulanmaması, ödeme adımında tüketici sözleşmelerinin (ön bilgilendirme, mesafeli satış, adr/0041) toptancıya da gösterilmesi, kurumsal profili olmayan toptancının faturası. Varsayılan: KDV hariç gösterim ve indirim gösterimi yok; sözleşmeler aynen gösterilir (güvenli taraf); mali müşavir ve avukat görünce kesinleşir.
-11. **Toplu kampanya ve sepet hatırlatması toptancılara gitsin mi?** Varsayılan: kampanya kitlesinde toptancılar varsayılan hariç (e-postalar perakende fiyat gösterir); işlemsel iletiler (sipariş, kargo) değişmez.
-12. **Toptancıları kim görür?** Varsayılan: yalnız sahip ve yönetici; operations siparişleri görür, toptancı listesini ve fiyatlarını görmez.
+Öneri sürümündeki 1–9, 11 ve 12. sorular sahibin onayıyla karara bağlandı (Bağlam, "Sahibin onayladığı varsayılanlar", karar 7–17). Açık kalan:
+
+10. **Yasal ve mali (danışman yok; taslak işaretli kalır):** toptancıya KDV hariç gösterim, toptancıya 30 gün kuralının uygulanmaması, ödeme adımında tüketici sözleşmelerinin (ön bilgilendirme, mesafeli satış, adr/0041) toptancıya da gösterilmesi, kurumsal profili olmayan toptancının faturası. Uygulanan varsayılan: KDV hariç gösterim ve indirim gösterimi yok; sözleşmeler aynen gösterilir (güvenli taraf). Mali müşavir ve avukat görünce kesinleşir; o zamana kadar bu konular **taslak** olarak işaretli kalır.
