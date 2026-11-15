@@ -62,6 +62,8 @@ export function createFieldLayer({
   root.append(box, label)
 
   let current: FieldTarget | null = null
+  // The label's words, read once per field (and word): a scroll only moves it
+  let named: { target: FieldTarget; edit: string } | null = null
   let factor = 1
   let edit = ""
   let avoid: DOMRect | null = null
@@ -114,8 +116,11 @@ export function createFieldLayer({
       label.classList.remove("on")
       return
     }
-    label.textContent = edit
-    label.setAttribute("aria-label", name(current))
+    if (named?.target !== current || named.edit !== edit) {
+      named = { target: current, edit }
+      label.textContent = edit
+      label.setAttribute("aria-label", name(current))
+    }
     label.classList.add("on")
     place(label, rect)
   }
