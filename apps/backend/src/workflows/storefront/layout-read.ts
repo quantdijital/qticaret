@@ -150,6 +150,9 @@ export async function storeLayout(
             interval: section.interval,
             pause_button: section.pause_button,
             hover_pause: section.hover_pause,
+            // Where its lines sit and how big it is (adr/0049 Ek 2026-11-15)
+            align: section.align,
+            size: section.size,
           }
     ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),

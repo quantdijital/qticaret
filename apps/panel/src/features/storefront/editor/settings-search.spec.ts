@@ -97,7 +97,11 @@ describe("the theme editor's settings search", () => {
   })
 
   it("offers alignment only where it means something", () => {
-    expect(keys(search("hizalama"))).toEqual(["sss000001:look.align", "rafyeni001:look.align"])
+    expect(keys(search("hizalama"))).toEqual([
+      "duyuru0001:announcement.align",
+      "sss000001:look.align",
+      "rafyeni001:look.align",
+    ])
   })
 
   it("finds nothing for an empty query, and caps a long list", () => {

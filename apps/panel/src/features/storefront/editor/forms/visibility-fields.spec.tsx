@@ -109,6 +109,8 @@ describe("the screens a section shows on", () => {
       )?.group
     ).toBe("visibility")
     expect(sectionFields(newAnnouncementBar("duyuru0001"), "header").map((f) => f.key)).toEqual([
+      "announcement.align",
+      "announcement.size",
       "visible",
       "starts_at",
       "ends_at",

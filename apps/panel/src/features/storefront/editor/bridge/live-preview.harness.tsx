@@ -5,6 +5,7 @@ import { vi } from "vitest"
 import { bridgeMessage } from "@qticaret/types/editor-bridge"
 import type { ToPanelMessage, ToStorefrontMessage } from "@qticaret/types/editor-bridge"
 import { useLivePreview } from "./use-live-preview"
+import type { PickMessage } from "./use-live-preview"
 
 /** The storefront's dev origin the frame opens in tests (`STOREFRONT_ORIGIN`). */
 export const ORIGIN = "http://localhost:8000"
@@ -51,6 +52,7 @@ export interface HarnessProps {
   selected?: string | null
   onKey?: (key: "undo" | "redo" | "escape") => void
   onMissing?: (id: string, reason: string) => void
+  onPick?: (message: PickMessage) => void
 }
 
 /** The hook alone, with the frame as `PreviewFrame` draws it. */
@@ -62,6 +64,7 @@ function Harness({
   selected = null,
   onKey,
   onMissing,
+  onPick,
 }: HarnessProps) {
   const preview = useLivePreview({
     ready: true,
@@ -71,8 +74,9 @@ function Harness({
     selected,
     onKey: onKey ?? (() => undefined),
     onMissing: onMissing ?? (() => undefined),
+    ...(onPick ? { onPick } : {}),
   })
-  const { live, busy, address, frameKey, frame, onFrameLoad, selectAfterSave } = preview
+  const { live, busy, address, frameKey, frame, onFrameLoad, selectAfterSave, post } = preview
   return (
     <>
       <p data-testid="mode">{live ? "live" : "legacy"}</p>
@@ -87,6 +91,14 @@ function Harness({
         }}
       >
         moved
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          post("hover", { id: "girisbolumu" })
+        }}
+      >
+        hover
       </button>
     </>
   )

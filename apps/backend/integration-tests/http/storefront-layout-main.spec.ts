@@ -114,7 +114,15 @@ medusaIntegrationTestRunner({
       })
       expect(saved.status).toBe(200)
       expect((await admin()).draft.header).toEqual([
-        { ...bar, mode: "first", interval: "medium", pause_button: "always", hover_pause: "on" },
+        {
+          ...bar,
+          mode: "first",
+          interval: "medium",
+          pause_button: "always",
+          hover_pause: "on",
+          align: "auto",
+          size: "medium",
+        },
         {
           id: "mainheader",
           type: "header_bar",
