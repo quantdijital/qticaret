@@ -3,6 +3,7 @@ import { authenticate, validateAndTransformQuery } from "@medusajs/framework/htt
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { StoreGetWholesalePrices } from "../store/customers/me/wholesale-prices/validators"
 import { rateLimit } from "./rate-limit"
+import { repriceWholesaleTransfer } from "./wholesale-cart-transfer"
 
 // The session's customer only: no customer or group id is ever read from the request
 const signedIn = () => authenticate("customer", ["session", "bearer"])
@@ -12,7 +13,8 @@ const signedIn = () => authenticate("customer", ["session", "bearer"])
  * session (the explicit authenticate keeps them closed whatever core's
  * `/me` matchers do); answered the same for every non-wholesaler, the
  * flag off included, so no 404 tells the feature or an account apart.
- * Prices are counted per customer too. Reads only: no Store write.
+ * Prices are counted per customer too. Reads only: no Store write of
+ * ours; Medusa's cart transfer is followed by a reprice for a wholesaler.
  */
 export const WHOLESALE_STORE_ROUTES = [
   {
@@ -31,4 +33,6 @@ export const WHOLESALE_STORE_ROUTES = [
       validateAndTransformQuery(StoreGetWholesalePrices, {}),
     ],
   },
+  // A guest's cart taken by a wholesaler signing in is priced at wholesale at once (§7)
+  { matcher: "/store/carts/:id/customer", middlewares: [repriceWholesaleTransfer] },
 ]
