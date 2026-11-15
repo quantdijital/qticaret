@@ -14,6 +14,7 @@ import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { LinkField } from "./link-field"
+import { PREVIEW_IDS } from "./preview-fields"
 import { RecordListField } from "./record-fields"
 import { SwitchRow } from "../theme-fields"
 
@@ -92,7 +93,7 @@ export function CategoriesForm({
         />
       </div>
       <LinkField
-        id={`${section.id}-more`}
+        id={PREVIEW_IDS.text(section.id, "more")}
         label={t("storefront.editor.categories.more")}
         term={t("storefront.editor.categories.moreTerm")}
         hint={t("storefront.editor.categories.moreHint")}

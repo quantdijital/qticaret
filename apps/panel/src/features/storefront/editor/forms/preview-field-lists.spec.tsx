@@ -131,6 +131,16 @@ describe("a list row named by the preview", () => {
     expect(focusedAt(columns, "lists.0.title")).toHaveValue("Yeni gelenler")
   })
 
+  it("lands on a rail's and the categories' see-all link words", () => {
+    const rail: ProductsSection = {
+      ...(newHomeSection("products", "rafim00001") as ProductsSection),
+      more: link,
+    }
+    expect(focusedAt(rail, "more")).toHaveValue("Kampanya")
+    const categories = { ...newHomeSection("categories", "kateg00001"), more: link } as AnySection
+    expect(focusedAt(categories, "more")).toHaveValue("Kampanya")
+  })
+
   it("lands on the rich text's edit button and the newsletter's line", () => {
     const story = newHomeSection("rich_text", "metin00001")
     expect(focusedAt(story, "body")?.tagName).toBe("BUTTON")

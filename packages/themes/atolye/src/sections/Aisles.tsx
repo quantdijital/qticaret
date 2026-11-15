@@ -21,6 +21,7 @@ export function Aisles({
   all,
   t,
   marks,
+  ownAll = false,
 }: {
   id: string
   title: string
@@ -31,11 +32,13 @@ export function Aisles({
   t?: Translate
   /** The editor's live preview (adr/0065 Faz 2b): the title carries its field mark. */
   marks?: boolean | undefined
+  /** `all` is the shop's own link (`more`): in the preview it is marked too. */
+  ownAll?: boolean
 }) {
   return (
     <section aria-labelledby={id} className="pt-(--section-gap-s)">
       <Container className="flex flex-col gap-6 lg:gap-10">
-        <SectionHead id={id} title={title} more={all} marks={marks} />
+        <SectionHead id={id} title={title} more={all} marks={marks} ownMore={ownAll} />
         <ul
           className={cn(
             "gf-rail -mx-(--gutter) -my-1 grid auto-cols-[44%] grid-flow-col gap-(--gap-columns) overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1 sm:auto-cols-[30%]",

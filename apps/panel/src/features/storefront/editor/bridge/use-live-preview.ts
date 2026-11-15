@@ -11,6 +11,8 @@ import {
   createPickGate,
   frameOrigin,
 } from "./bridge-client"
+import { createFrameState, routeFrameMessage } from "./frame-messages"
+import type { FrameState } from "./frame-messages"
 import { READY_MS, RELOAD_LIMIT, RELOAD_WINDOW_MS, RENDER_MS } from "./live-preview-options"
 import type { LivePreviewOptions as Options, Payload } from "./live-preview-options"
 import { useEditorSession } from "./use-editor-session"
@@ -68,21 +70,7 @@ export function useLivePreview({
   const attach = useCallback((element: HTMLIFrameElement | null) => {
     frame.current = element
   }, [])
-  const state = useRef({
-    seq: 0,
-    connected: false,
-    /** When the frame last said it is ready, and whether it ever did. */
-    readyAt: -Infinity,
-    everConnected: false,
-    /** The frame left the preview (a link followed): reloaded at the next save or page change. */
-    stray: false,
-    shown: null as string | null,
-    scale: 1,
-    after: null as { id: string; reveal: Reveal; flash: boolean; round: number } | null,
-    sentRound: round,
-    /** When the frame was loaded again after leaving the preview (the last few). */
-    reloads: [] as number[],
-  })
+  const state = useRef<FrameState>(createFrameState(round))
   const keyGate = useRef(createKeyGate())
   const pickGate = useRef(createPickGate())
   const [connected, setConnected] = useState(false)
@@ -121,77 +109,30 @@ export function useLivePreview({
     if (!message) {
       return
     }
-    const now = state.current
-    switch (message.type) {
-      case "ready": {
-        now.readyAt = performance.now()
-        now.everConnected = true
-        now.stray = false
-        now.connected = true
-        setConnected(true)
+    routeFrameMessage(message, {
+      now: state.current,
+      round,
+      page,
+      holding,
+      selected,
+      send,
+      focused: () => document.activeElement === frame.current,
+      blur: () => frame.current?.blur(),
+      keyGate: keyGate.current,
+      pickGate: pickGate.current,
+      setConnected,
+      countHandshake: () => {
         setHandshakes((was) => was + 1)
-        send("init", { scale: now.scale, selected })
-        // A frame just loaded shows the draft as last saved, on the page it opened at
-        const shows = message.payload.path === "/" ? null : message.payload.path
-        now.sentRound = round
-        // While the page asked for is looked up, the frame stays where it is
-        now.shown = holding ? shows : page
-        setDrawn({ round, page: shows })
-        if (shows !== now.shown) {
-          send("navigate", { page })
-        }
-        return
-      }
-      case "rendered": {
-        setDrawn({ round: now.sentRound, page: now.shown })
-        const after = now.after
-        if (after && now.sentRound >= after.round) {
-          now.after = null
-          send("select", { id: after.id, reveal: after.reveal, flash: after.flash })
-        }
-        return
-      }
-      case "missing":
-        onMissing(message.payload.id, message.payload.reason)
-        return
-      case "key":
-        // A key pressed in the frame: it has the focus; and a few a second at most
-        if (!keyGate.current(document.activeElement === frame.current, Date.now())) {
-          return
-        }
-        if (message.payload.key === "escape") {
-          // Focus back to the panel
-          frame.current?.blur()
-        }
-        onKey(message.payload.key)
-        return
-      case "error":
-        giveUp()
-        return
-      case "left":
-        // Out of the preview with no bridge: reloaded on the preview's address for that page
-        now.connected = false
-        now.stray = true
-        setConnected(false)
-        setDrawn(null)
-        if (message.payload.path === null) {
-          setLeft((was) => was + 1)
-        }
-        onPick?.(message)
-        return
-      case "click":
-      case "field":
-      case "navigate-request":
-        // A press in the frame: it has the focus (pressing moves it there); a few a second at most
-        if (pickGate.current(document.activeElement === frame.current, Date.now())) {
-          onPick?.(message)
-        }
-        return
-      case "hover":
-      case "location":
-        onPick?.(message)
-        return
-    }
+      },
+      setDrawn,
+      countLeft: () => {
+        setLeft((was) => was + 1)
+      },
+      giveUp,
+      onKey,
+      onMissing,
+      onPick,
+    })
   })
   useEffect(() => {
     if (!live) {
