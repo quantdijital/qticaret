@@ -27,6 +27,12 @@
 - CI: `e2e` işi boş veritabanına migration ve demo mağazayı kurar, backend'i başlatır, testleri koşar. Başarısız çalıştırmanın raporu 7 gün saklanır.
 - Yeni ekran ya da akış eklendiğinde duman listesine eklenir (docs/06 kontrol listesi).
 
+## Görünüm kilidi (vitrin)
+- `apps/storefront/src/lib/__tests__/preset-lock.spec.tsx`, vitrin birim testlerinin parçasıdır (`pnpm verify:changed` koşar; tema ya da `sector-packs` değişince de, vitrin ikisine bağımlı). Kuralı docs/tema/bilesen-standardi.md §7.
+- `packages/sector-packs/packs/*/presets/*` altındaki her hazır görünüm kendiliğinden bulunur, sabit bir mağaza fikstürüne uygulanır ve vitrinin kendi görünüm katmanından (`shopView`, `homeSections`) temayla çizilir. Çerçeve ve ana sayfa (bölüm bölüm) HTML olarak `preset-lock/<paket>-<görünüm>/` altında saklanır; tema stil dosyaları sha256 özetleriyle `preset-lock/styles.lock.json`'da.
+- Kırılırsa: fark bilerekse görünümlere tarayıcıda bakılır, `pnpm lock:presets` ile örnekler yeniden yazılır ve PR'da etkilenen görünümler yazılır; değilse tasarım ayar ya da yeni biçim olarak gelir.
+- Kapsamaz: backend'in bölüm şemalarının varsayılanları (fikstür, backend'in yayın yolunu testte yeniden yazar), ürün ve kategori sayfaları, istemci tarafı davranış ve gerçek CSS çizimi (ekran görüntüsü karşılaştırması yok; stil yalnız dosya özetiyle kilitli).
+
 ## Kurallar
 - Dış servisler testte **asla** gerçek çağrılmaz. `packages/testing` altında mock sunucular (msw veya küçük HTTP sunucu):
   iyzico, PayTR, Geliver, e-fatura, SMS.

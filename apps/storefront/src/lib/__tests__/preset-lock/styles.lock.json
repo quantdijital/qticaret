@@ -1,0 +1,85 @@
+{
+  "note": "Digests of packages/themes/atolye/src/**/*.css; written by `pnpm lock:presets`",
+  "files": [
+    {
+      "sha256": "dc3cb7473aa09dc50c4d45a274690ce124cf9d094e615055175c994911a327bf",
+      "file": "banner.css"
+    },
+    {
+      "sha256": "1eaedba46318f683d6482745265ac93519bbba6c615d508187596cb31c0fb57a",
+      "file": "base.css"
+    },
+    {
+      "sha256": "2da830befd794e365b6688ee514aaf8904ef381be25b68632ad2b8329b027374",
+      "file": "buy.css"
+    },
+    {
+      "sha256": "2c302b7becab8fdf5d2567b69f69e8cf980eab7b0e53fca7eba18b72923d3c23",
+      "file": "card.css"
+    },
+    {
+      "sha256": "009f20572a7386589b74e7fc05d11ce34d3489a0e6ea3c1dab8bca9fe9a68a1c",
+      "file": "catalog.css"
+    },
+    {
+      "sha256": "f1ef03835bb1b47f3f983cf87e2a11a69109ae5a3c7395c7669f5a9573767011",
+      "file": "content.css"
+    },
+    {
+      "sha256": "8437a586b86f398a7f9c08dec74c034131a3a29964350c803e64101952edae1f",
+      "file": "frame.css"
+    },
+    {
+      "sha256": "48bce7e4a70cac1f21c93040e1d1c23aa9bad8a8caa529ea01977d981240cab3",
+      "file": "header-catalog.css"
+    },
+    {
+      "sha256": "dc85f41eb2e31e9f960fd1cd4dee4e163b305639b96a23446ab97d72e3595316",
+      "file": "look.css"
+    },
+    {
+      "sha256": "573e44da20c03343e924d68b4259a96b657ab8ca9a33d8d90da6f36fe668697d",
+      "file": "marquee-options.css"
+    },
+    {
+      "sha256": "40695ed3447f9da4148efeeb894cc487b05a3e0cc9aef1489ead239c7ad54115",
+      "file": "marquee.css"
+    },
+    {
+      "sha256": "6bebdfc8f51f407595cbfa30a152b92a7277cc268aff2bf8f14e49bb632f8957",
+      "file": "menu.css"
+    },
+    {
+      "sha256": "5b99386caf537145e0b40a4e2850effa589d856c9190b9fadd06cc65f1144638",
+      "file": "pages.css"
+    },
+    {
+      "sha256": "8ed56f1bc8e843be161b5935ffc586dcf851bb7b30e7fac5bc1a2c0f84d3c15f",
+      "file": "scroller.css"
+    },
+    {
+      "sha256": "f2535c467207a43b88f19881bb32353bd8d1092ba4160a8987d40952f5fe57de",
+      "file": "slider.css"
+    },
+    {
+      "sha256": "1a8827558ffb87c9de06e483b140a55a51f6c24666711c8b566a1771fc8d49bd",
+      "file": "styles.css"
+    },
+    {
+      "sha256": "74ef9994604e30f0bbf824e19ed75dedff97a3304ab23c444541d97cf58bd34b",
+      "file": "surface.css"
+    },
+    {
+      "sha256": "073dae8e256f00078f008d6be3322976dd8e1ce3d64e61629826a01053156d34",
+      "file": "tabs.css"
+    },
+    {
+      "sha256": "069e5556b741af3c60299a1af21c9b5cc700970e10b5dc7b2442ca6f547bb2f3",
+      "file": "tokens.css"
+    },
+    {
+      "sha256": "3eeb6df6a9d05b79d62a22ff0b1ae79054e6ad8fae07bc73eb72bb6448b56284",
+      "file": "ui.css"
+    }
+  ]
+}
