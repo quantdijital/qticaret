@@ -60,7 +60,7 @@ export function Summary({
   filter?: ReviewFilterView | null
 }) {
   return (
-    <div className="flex flex-col gap-5 rounded-tile border border-rule p-6 lg:p-8">
+    <div className="flex flex-1 flex-col gap-5 rounded-tile border border-rule p-6 lg:p-8">
       <p className="flex items-end gap-3">
         <span className="tabular text-figure leading-none font-extrabold tracking-(--tracking-display)">
           {summary.average}
@@ -136,15 +136,16 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
         <SectionHead id={id} title={section.title} more={section.more} />
         <div className="grid gap-(--gap-columns) lg:grid-cols-12">
           {summary && (
-            <div className="lg:col-span-4">
+            <div className="flex lg:col-span-4">
               <Summary summary={summary} t={t} />
             </div>
           )}
           {reviews.length > 0 && (
             <ul
-              // A phone slides the reviews sideways, the next one peeking, instead of a long column (third audit Z-08)
+              // A phone slides the reviews sideways, the next one peeking, instead of a long column (third audit Z-08);
+              // the cards in a row (or the rail) take one height, the summary's too
               className={cn(
-                "gf-rail grid items-start gap-(--gap-columns) max-md:-mx-(--gutter) max-md:auto-cols-[85%] max-md:grid-flow-col max-md:overflow-x-auto max-md:scroll-px-(--gutter) max-md:px-(--gutter) max-md:py-1 md:grid-cols-[repeat(3,minmax(0,1fr))]",
+                "gf-rail grid gap-(--gap-columns) max-md:-mx-(--gutter) max-md:auto-cols-[85%] max-md:grid-flow-col max-md:overflow-x-auto max-md:scroll-px-(--gutter) max-md:px-(--gutter) max-md:py-1 md:grid-cols-[repeat(3,minmax(0,1fr))]",
                 summary ? "lg:col-span-8" : "lg:col-span-12"
               )}
             >

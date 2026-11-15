@@ -5,12 +5,13 @@ import {
   ANNOUNCEMENT_SETTINGS,
   announcementSettingsOf,
 } from "@qticaret/types"
-import type { AnnouncementSetting } from "@qticaret/types"
+import type { AnnouncementSetting, AnnouncementStep } from "@qticaret/types"
 import type { AnnouncementBar } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
 import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { announcementOffers } from "./announcement-registry"
+import { AlignSketch, SizeSketch } from "./announcement-sketches"
 import { StepChoice } from "./step-choice"
 
 const A = "storefront.editor.announcement"
@@ -37,6 +38,13 @@ function StepsOf({
       value={announcementSettingsOf(section)[setting]}
       fallback={ANNOUNCEMENT_DEFAULTS[setting]}
       nameOf={(step) => t(`${A}.${setting}.${step}`)}
+      drawOf={
+        setting === "align"
+          ? (step) => <AlignSketch step={step as AnnouncementStep<"align">} />
+          : setting === "size"
+            ? (step) => <SizeSketch step={step as AnnouncementStep<"size">} />
+            : undefined
+      }
       onChange={(step) => {
         onChange({ ...section, [setting]: step })
       }}
@@ -101,6 +109,32 @@ export function AnnouncementMotion({
             }}
           />
         </div>
+      </div>
+    </PanelGroup>
+  )
+}
+
+/**
+ * Where the bar's lines sit and how big it is (adr/0049 Ek 2026-11-15), in
+ * the open "Stil" group, whatever the lines: "Hizalama" Otomatik (as
+ * before: centred on a phone, at the start on a wide screen) / Sol / Orta /
+ * Sağ, "Boyut" Küçük / Orta / Büyük.
+ */
+export function AnnouncementStyle({
+  section,
+  reveal,
+  onChange,
+}: {
+  section: AnnouncementBar
+  reveal: (group: FieldGroupName) => number | null
+  onChange: (section: AnnouncementBar) => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <PanelGroup title={t("storefront.editor.panel.appearance")} reveal={reveal("appearance")}>
+      <div className="flex flex-col gap-5">
+        <StepsOf section={section} setting="align" onChange={onChange} />
+        <StepsOf section={section} setting="size" onChange={onChange} />
       </div>
     </PanelGroup>
   )

@@ -8240,6 +8240,23 @@
           "on": "Açık",
           "off": "Kapalı",
           "hint": "Klavyeyle şeride gelince her zaman durur."
+        },
+        "align": {
+          "label": "Hizalama",
+          "term": "alignment",
+          "auto": "Otomatik",
+          "left": "Sol",
+          "center": "Orta",
+          "right": "Sağ",
+          "hint": "Otomatik: telefonda ortada, geniş ekranda solda. Geniş ekranda bağlantılar ve telefon hep sağ uçta kalır; Orta'da duyuru şeridin tam ortasında durur, bağlantılara değecekse hemen soluna kayar."
+        },
+        "size": {
+          "label": "Boyut",
+          "term": "size",
+          "small": "Küçük",
+          "medium": "Orta",
+          "large": "Büyük",
+          "hint": "Şeridin yüksekliği ve yazı boyu birlikte: 32, 36 ya da 44 piksel."
         }
       },
       "problems": {

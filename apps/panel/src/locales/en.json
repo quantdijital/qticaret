@@ -8240,6 +8240,23 @@
           "on": "On",
           "off": "Off",
           "hint": "It always stops when the keyboard reaches the bar."
+        },
+        "align": {
+          "label": "Alignment",
+          "term": "alignment",
+          "auto": "Automatic",
+          "left": "Left",
+          "center": "Centre",
+          "right": "Right",
+          "hint": "Automatic: centred on a phone, on the left on a wide screen. On a wide screen the links and phone stay at the right end; centred, the announcement stands in the middle of the bar and moves just left of the links if they would reach it."
+        },
+        "size": {
+          "label": "Size",
+          "term": "size",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large",
+          "hint": "The bar's height and text size together: 32, 36 or 44 pixels."
         }
       },
       "problems": {

@@ -1,7 +1,8 @@
 /**
  * The announcement bar's settings (`announcement_bar`, docs/tema/bilesen-
  * denetimi (b) 6, O14): how it shows more than one line, and, when the
- * lines take turns, how long each stays and how the turning stops. Every
+ * lines take turns, how long each stays and how the turning stops; where
+ * its lines sit and how big the bar is (adr/0049 Ek 2026-11-15). Every
  * setting is a closed list of named steps the theme maps onto its own
  * scale. The contract's list: a new step goes here first, then into the
  * backend's mirror (`lib/storefront/sections/announcement-bar.ts`, a test
@@ -27,18 +28,31 @@ export const ANNOUNCEMENT_SETTINGS = {
   pause_button: ["always", "hover"],
   /** Whether the turning stops under the pointer; it always stops while focus is in the bar. */
   hover_pause: ["on", "off"],
+  /**
+   * Where the lines sit: `auto` as before (centred on a phone, at the start
+   * from 1024 px), or at the start, the middle or the end at every width.
+   * The shop's links and phone (from 1024 px) stay at the bar's end: `right`
+   * sets the lines just before them; `center` sets them in the middle of the
+   * whole bar, and when the links would reach them they move left just
+   * enough to stand beside the links.
+   */
+  align: ["auto", "left", "center", "right"],
+  /** The bar's height and its words' size together; `medium` is the bar as it was. */
+  size: ["small", "medium", "large"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type AnnouncementSetting = keyof typeof ANNOUNCEMENT_SETTINGS
 export type AnnouncementStep<S extends AnnouncementSetting> =
   (typeof ANNOUNCEMENT_SETTINGS)[S][number]
 
-/** A new bar's settings, and what a bar saved before them reads as: the first line alone, as before. */
+/** A new bar's settings, and what a bar saved before them reads as: the bar as it was drawn before. */
 export const ANNOUNCEMENT_DEFAULTS: { readonly [S in AnnouncementSetting]: AnnouncementStep<S> } = {
   mode: "first",
   interval: "medium",
   pause_button: "always",
   hover_pause: "on",
+  align: "auto",
+  size: "medium",
 }
 
 /** The settings in the order the panel offers them. */
