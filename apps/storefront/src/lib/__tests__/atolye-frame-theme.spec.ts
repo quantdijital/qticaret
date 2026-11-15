@@ -71,7 +71,10 @@ describe("the theme's frame", () => {
   it("keeps every category panel's links in the HTML and the wordmark without a logo", () => {
     const html = renderFrame(atolyeTheme, shopFixture())
     expect(html).toContain('href="/kategori/cakilar/katlanir"')
-    expect(html).toContain("Tümünü gör: Çakılar")
+    // The panel names the category once, over "Tümünü gör"; a screen reader hears it whole (K-21)
+    expect(html).toMatch(
+      /<a href="\/kategori\/cakilar" aria-label="Tümünü gör: Çakılar"[^>]*>Tümünü gör<\/a>/
+    )
     expect(html).toContain("Örnek Atölye</span>")
   })
 

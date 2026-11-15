@@ -261,14 +261,30 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(themeSettings({ section_spacing: "compact" }, null).section_spacing).toBe("compact")
   })
 
-  it("keeps a sale apart from a red main colour: a graphite badge, an ink price (K-05)", () => {
+  it("keeps a sale apart from a warm main colour: a graphite badge, an ink price (K-05)", () => {
     const deal = ["--color-deal:var(--color-text)", "--color-deal-ink:var(--color-paper)"]
-    // Tezgâh's red, and reds around it
-    for (const primary of ["#b3261e", "#be2323", "#d32f2f", "#a4161a"]) {
+    // Tezgâh's red and reds around it, its orange set's (old and new) and an amber
+    for (const primary of [
+      "#b3261e",
+      "#be2323",
+      "#d32f2f",
+      "#a4161a",
+      "#c2410c",
+      "#b03b0b",
+      "#d38e00",
+    ]) {
       expect(atolyeDeclarations(colours({ primary })), primary).toEqual(deal)
     }
-    // Orange, wine, navy, the theme's own ink and a brown keep the theme's sale red
-    for (const primary of ["#c2410c", "#7a1a48", "#2f6690", null, "#6b4a3a"]) {
+    // Wine, navy, green, a yellow, the theme's own ink and a brown keep the theme's sale red
+    for (const primary of [
+      "#7a1a48",
+      "#2f6690",
+      "#33709c",
+      "#1d6835",
+      "#e5c100",
+      null,
+      "#6b4a3a",
+    ]) {
       expect(atolyeDeclarations(colours({ primary })), String(primary)).toEqual([])
     }
   })

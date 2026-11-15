@@ -171,7 +171,7 @@ export function FramedCard({
       </div>
       <div className="flex flex-1 flex-col gap-1 px-0.5">
         {product.brand && <p className="truncate text-xs text-text-3">{product.brand}</p>}
-        <h3 className="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md">
+        <h3 className="text-sm leading-snug font-semibold tracking-normal">
           <a
             href={product.path}
             className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"

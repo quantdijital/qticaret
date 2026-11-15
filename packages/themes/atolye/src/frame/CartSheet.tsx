@@ -149,6 +149,10 @@ export function CartSheetBody({
  * picture tiles. It opens by itself when a line went in, so no toast says
  * so; a card's quick add has its words said in the live region.
  */
+/** The element that has the focus, if any. */
+const focusedElement = () =>
+  document.activeElement instanceof HTMLElement ? document.activeElement : null
+
 export function CartSheet({
   cart,
   count,
@@ -171,6 +175,12 @@ export function CartSheet({
   const [open, setOpen] = useState(false)
   const [said, setSaid] = useState("")
   const trigger = useRef<HTMLAnchorElement>(null)
+  // What had the focus when it opened: the cart link, or a card's add button
+  const opener = useRef<HTMLElement | null>(null)
+  const openSheet = () => {
+    opener.current = focusedElement()
+    setOpen(true)
+  }
   useEffect(() => {
     const show = (event: Event) => {
       // A header may hold one cart a screen width (the catalog's): only the one shown opens
@@ -178,6 +188,7 @@ export function CartSheet({
         return
       }
       setSaid(cartAddedMessage(event))
+      opener.current = focusedElement()
       setOpen(true)
     }
     window.addEventListener(CART_ADDED_EVENT, show)
@@ -198,7 +209,7 @@ export function CartSheet({
           }
           event.preventDefault()
           setSaid("")
-          setOpen(true)
+          openSheet()
         }}
       >
         <ShoppingBag className="size-6" aria-hidden="true" strokeWidth={1.75} />
@@ -216,6 +227,13 @@ export function CartSheet({
         title={words.title}
         description={said ? `${said}. ${words.label}` : words.label}
         closeLabel={words.close}
+        onCloseAutoFocus={(event) => {
+          // Back to what opened it while it is still on the page and shown, else the cart link (Tezgâh audit Y-03)
+          event.preventDefault()
+          const back = opener.current
+          opener.current = null
+          ;(back?.isConnected && back.getClientRects().length > 0 ? back : trigger.current)?.focus()
+        }}
       >
         {/* A link followed from inside (a line's product, checkout, the cart) shuts it: back here, it is closed */}
         <div

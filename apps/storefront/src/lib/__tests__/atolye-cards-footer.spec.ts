@@ -160,13 +160,14 @@ describe("the footer's own settings", () => {
     expect(right).toContain("bottom-[calc(9.5rem+env(safe-area-inset-bottom))]")
     expect(right).toContain("rounded-pill")
     const left = on({ side: "left", shape: "square", mobile: false })
-    expect(left).toContain("left-4")
+    expect(left).toContain("left-2")
     expect(left).toContain("bottom-[calc(5rem+env(safe-area-inset-bottom))]")
     expect(left).toContain("rounded-inner")
     expect(left).toContain("max-lg:hidden")
-    // Inside the 48 px gutter from 1024 px: a 40 px face 4 px from the edge (K-10)
-    expect(right).toContain("lg:size-10")
-    expect(right).toContain("lg:right-1")
+    // A 40 px face; inside the 48 px gutter wider than 1024 px, 4 px from the edge (K-10, Y-02)
+    expect(right).toContain("size-10")
+    expect(right).not.toContain("size-12")
+    expect(right).toContain("min-[64.0625rem]:right-1")
     // One way up: the footer line's link goes where the button shows
     const link = /<a href="#top"[^>]*>/
     expect(renderFrame(atolyeTheme, shopFixture())).toMatch(link)

@@ -55,7 +55,7 @@ export function Menu({
   }, [])
   return (
     <details ref={ref} data-menu="" className={cn("group/menu relative", className)}>
-      <summary className="gf-chip w-full cursor-pointer justify-center gap-2 bg-paper-2">
+      <summary className="gf-chip w-full cursor-pointer justify-center gap-2 rounded-button bg-paper-2">
         {label}
         <ChevronDown
           className="size-4 shrink-0 transition-transform duration-(--dur-short) group-open/menu:rotate-180"
