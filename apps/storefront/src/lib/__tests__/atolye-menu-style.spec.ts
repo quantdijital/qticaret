@@ -174,6 +174,8 @@ describe("menu_style's steps in the stylesheet", () => {
     expect(copy?.body).toContain("content: attr(data-text)")
     expect(copy?.body).toContain("visibility: hidden")
     expect(copy?.body).toContain("font-weight: 800")
+    // The catalog bar's items may shrink (no wrap): the clipped copy still holds the width
+    expect(copy?.body).toContain("min-width: max-content")
     // Open is never colour alone: the arrow turns as well
     expect(headerOf(frame("standard"))).toContain("group-data-[state=open]:rotate-180")
   })

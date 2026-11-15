@@ -214,12 +214,15 @@
   [data-menu-style="plain"] .gf-menu-row[aria-expanded="true"] .gf-menu-word {
     font-weight: 800;
   }
-  /* The heavier copy under the words keeps their width (Deniz's bar, deniz/katalog-ust-sade) */
+  /* The heavier copy under the words keeps their width (Deniz's bar, deniz/katalog-ust-sade).
+     `min-width` keeps it in the item's smallest width too: the catalog bar's row does not
+     wrap, its items may shrink, and a clipped copy alone would shrink to nothing there. */
   [data-menu-style="plain"] .gf-menu-word[data-text] {
     display: inline-grid;
   }
   [data-menu-style="plain"] .gf-menu-word[data-text]::after {
     height: 0;
+    min-width: max-content;
     overflow: hidden;
     content: attr(data-text);
     content: attr(data-text) / "";
