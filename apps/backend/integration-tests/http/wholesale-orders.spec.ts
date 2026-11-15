@@ -8,6 +8,7 @@ import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { eventually } from "../helpers/eventually"
 import { createStorefront } from "../helpers/storefront"
 import { accountApi, wholesaleApi } from "../helpers/wholesale"
 
@@ -26,8 +27,8 @@ interface Board {
 
 /**
  * ADR-0068 Ek 2026-11-15 (2): an order placed by an active wholesaler is
- * stamped wholesale when it is created (`completeCartWorkflow`'s
- * `orderCreated`), and stays so after the account is closed. The panel's
+ * stamped wholesale once it is placed (the `order.placed` subscriber,
+ * decided as of the order's time), and stays so after the account is closed. The panel's
  * retail list leaves it out before counting and paging, and says when a
  * search found it there; the wholesale list shows it with its wholesaler.
  */
@@ -80,6 +81,11 @@ medusaIntegrationTestRunner({
         })
       })
 
+      // The stamp is the order.placed subscriber's: written just after the order
+      await eventually(
+        () => board("stage=all&segment=wholesale"),
+        (answer) => answer.data.orders.some((row) => row.id === wholesaleId)
+      )
       const retail = await board("stage=all")
       expect(retail.status).toBe(200)
       const retailIds = retail.data.orders.map((row) => row.id)

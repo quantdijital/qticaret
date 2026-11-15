@@ -5,8 +5,9 @@ import { WHOLESALE_MODULE } from "../../modules/wholesale"
 import { wholesale } from "./steps/account-rows"
 
 /**
- * Wholesale orders (ADR-0068 Ek 2026-11-15 (2)): stamped when placed,
- * read by the order lists. The stamp is a module link order ↔ wholesaler
+ * Wholesale orders (ADR-0068 Ek 2026-11-15 (2)): stamped when placed
+ * (`subscribers/wholesale-order-stamp.ts` on `order.placed`), read by the
+ * order lists. The stamp is a module link order ↔ wholesaler
  * (`links/wholesale-account-order.ts`), written by the server only.
  */
 
@@ -17,25 +18,60 @@ interface LinkRow {
   wholesale_account_id?: string | null
 }
 
-/** The order's customer's active wholesale account, linked to the order; null for a retail one. */
+const time = (value: Date | string | null | undefined) => (value ? new Date(value).getTime() : null)
+
+/**
+ * Whether the account sold at wholesale at that moment: bound and active
+ * by then, not closed before it. Read from the account's own dates, so a
+ * stamp written a little after the order (the event's subscriber) decides
+ * as of the order's placing, not of now.
+ */
+export function wholesaleAt(
+  account: {
+    status: string
+    activated_at?: Date | string | null
+    deactivated_at?: Date | string | null
+  },
+  placedAt: Date | string
+): boolean {
+  const placed = new Date(placedAt).getTime()
+  const activated = time(account.activated_at)
+  const closed = time(account.deactivated_at)
+  if (account.status === "pending" || activated === null || activated > placed) {
+    return false
+  }
+  return closed === null || closed > placed
+}
+
+/**
+ * The order linked to the wholesaler its customer was when it was placed;
+ * null for a retail order. A second run (a repeated event) finds the link
+ * and writes nothing.
+ */
 export async function stampWholesaleOrder(
   container: Container,
   orderId: string
 ): Promise<{ order_id: string; account_id: string } | null> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
-    fields: ["id", "customer_id"],
+    fields: ["id", "customer_id", "created_at"],
     filters: { id: orderId },
   })
-  const customerId = (data[0] as { customer_id?: string | null } | undefined)?.customer_id
-  if (!customerId) {
+  const order = data[0] as { customer_id?: string | null; created_at?: Date | string } | undefined
+  if (!order?.customer_id || !order.created_at) {
     return null
   }
-  const [account] = await wholesale(container).listWholesaleAccounts(
-    { customer_id: customerId, status: "active" },
-    { select: ["id"], take: 1 }
-  )
+  const placedAt = order.created_at
+  const [account] = (
+    await wholesale(container).listWholesaleAccounts(
+      { customer_id: order.customer_id },
+      { select: ["id", "status", "activated_at", "deactivated_at"], take: null }
+    )
+  ).filter((each) => wholesaleAt(each, placedAt))
   if (!account) {
+    return null
+  }
+  if ((await wholesaleOrders(container, { order_ids: [orderId] })).size > 0) {
     return null
   }
   await container.resolve(ContainerRegistrationKeys.LINK).create({
@@ -43,16 +79,6 @@ export async function stampWholesaleOrder(
     [WHOLESALE_MODULE]: { wholesale_account_id: account.id },
   })
   return { order_id: orderId, account_id: account.id }
-}
-
-export async function unstampWholesaleOrder(
-  container: Container,
-  stamp: { order_id: string; account_id: string }
-): Promise<void> {
-  await container.resolve(ContainerRegistrationKeys.LINK).dismiss({
-    [Modules.ORDER]: { order_id: stamp.order_id },
-    [WHOLESALE_MODULE]: { wholesale_account_id: stamp.account_id },
-  })
 }
 
 /**
