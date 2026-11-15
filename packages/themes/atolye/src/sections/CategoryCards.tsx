@@ -76,7 +76,10 @@ function Card({
             href={card.path}
             className={cn(
               "no-underline underline-offset-4 hover:underline",
-              leaf && "after:absolute after:inset-0 after:content-['']"
+              leaf
+                ? "after:absolute after:inset-0 after:content-['']"
+                : // A touch target of 44 px where only the name links (Tezgâh audit K-32)
+                  "pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
             )}
           >
             {card.label}
