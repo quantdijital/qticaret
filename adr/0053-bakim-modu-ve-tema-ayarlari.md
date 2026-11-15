@@ -220,9 +220,22 @@
   - **DÜŞÜK, kapandı:** bakımda ve askıda açık GET'ler `/odeme/sonuc` ve `/odeme/durum` altını da açıyordu; artık yalnız `/odeme/sonuc`, `/odeme/sonuc/hata`, `/odeme/durum` (uygulamada `app/odeme/` altında başka rota yok; `/odeme/kart` ve `/odeme` kapalı).
   - **DÜŞÜK, kapandı:** `/marks/:file` ve `/icon.svg` kendi CSP'sini alır (`default-src 'none'; style-src 'unsafe-inline'; sandbox`): doğrudan açılan bir SVG betik çalıştıramaz, bir şey yükleyemez; `<img>` ile gösterim etkilenmez.
   - **Bilinen sınırlar (açık):**
-    - (a) **ORTA, mimari:** bakım ve askı yalnız vitrin kenarındadır; backend store API bunları uygulamaz. Store API'yi doğrudan çağıran biri (yayınlanabilir anahtar vitrinde açık) bakımda da sepet kurup ödeme başlatabilir. Askı için backend'in sepet ve ödeme yazmalarını reddetmesi ayrı iştir (adr/0061 §5.5 ile birlikte ele alınmalı).
+    - (a) **ORTA, mimari; askıda kapandı, bakımda açık:**
+      - **Askı (PR #56, adr/0061 §5.5):** backend de reddediyor. Store API'ye doğrudan gelen sepet ve ödeme yazmaları `503 plan.suspended` ve `Retry-After` alır (`api/http/plan-guard.ts`):
+        - `/store/carts*` altındaki her yazma: yeni sepet, satır, adres, kargo, kod. `POST /store/carts/:id/payment-session` ve `/complete` de buna dahil.
+        - ödeme bağlantısının sepeti (`POST /store/payment-links/:token/cart`)
+        - sepet hatırlatıcısının kullanımı (`POST /store/cart-reminders/redeem`)
+        - Açık kalanlar: okumalar, POST ile yapılan sipariş erişim okuması, satış dışı yazmalar (hesap, onaylar, soru, yorum, verilmiş sipariş) ve sağlayıcı dönüşleri. Her Store API yazmasının kararı `lib/plan-guard/__tests__/store-writes.unit.spec.ts`'te yazılı.
+      - **Bakım:** backend bakımı hâlâ bilmiyor. Store API'de bakım modu için bir koruma yok; bakımla ilgili backend kodu yalnız atlatma bağlantısının iki route'u. Store API'yi doğrudan çağıran biri (yayınlanabilir anahtar vitrinde açık) bakımda da sepet kurup ödeme başlatabilir. Bakım tasarım gereği geçici ve mağazanın kendi kararı; sipariş açığı kapatılmak istenirse askıdaki korumanın bakım için bir benzeri ayrı iş olarak eklenir.
     - (b) Bakımda panel önizlemesindeki Server Action'lar (sepet, çerez tercihi) atlama çerezi olmadan `503` alır; önizleme GET'i açıktır. Bilinçli.
     - (c) `fonts` ve `marks` kökleri backend'in ayrılmış kök listesinde değil: aynı adla bir slug ya da yönlendirme kurulabilir; vitrin bu yolları dosya olarak cevapladığı için o kayıt görünmez. Backend listesine eklenmesi ayrı iş.
     - (d) Bakımda ACME HTTP-01 doğrulaması (`/.well-known/acme-challenge/*`) vitrine gelirse `503` alır; sertifika kenarda (ters vekil) alınmalı ya da DNS-01 kullanılmalı.
     - (e) `/_next/image/<alt yol>` dosya denetiminde `nextImage` sayılmaz (yalnız tam `/_next/image`), dinamik rotaya düşer; orada Next'in resim işleyicisi `startsWith('/_next/image')` ile yakalayıp (`images.unoptimized` iken) 404 çizer. Bu davranışa güvenilmedi: action taşıyabilecek istek zaten 1. ve 2. maddeyle proxy'de 405 alır.
-  - **Doğrulanmadı:** çalışan sunucuda (`next build && next start`) denenmedi. Eşleştirici ve proxy birim testlerle, Next'in kendi eşleştirme ve kaynak okuma işlevleriyle sınandı.
+  - **Çalışan sunucuda doğrulandı (2026-11-15):** üretim derlemesinde (`next build`, `next start -p 8100`, Next 16.4.2) ve geliştirme sunucusunda (8000) bakım açıkken atlatma çerezi olmadan denendi; sonuçlar ikisinde de aynı çıktı:
+    - `/_next/static/<olmayan>` ve `/_next/image/x`: `Next-Action` ya da `multipart` içerik tipiyle gelen POST `405` alıyor.
+    - `/favicon.ico`: POST `405`, GET düz `404`.
+    - `POST /odeme/durum` ve `/odeme/sonuc/x`, `GET /odeme/durum/x`, önizleme yazmaları (`/onizleme/x`, `/onizleme`, `/ONIZLEME/x`), `POST /` ve küçük harfli `post /`: hepsi `503`.
+    - `POST /odeme/sonuc`: route handler `303` dönüyor, action çalışmıyor.
+    - `/marks/*` ve `/icon.svg`: `200`, kendi CSP'leriyle.
+    - Kanıt: bu istekler sırasında backend'de yeni sepet oluşmadı. Atlatma çereziyle aynı action sepet kurdu.
+    - Denemenin geçerliliği: bakım kapalıyken aynı çerezsiz `POST /` action'ı sepet kurdu (karşı deneme).
