@@ -1,6 +1,7 @@
 import {
   BANNER_SETTINGS,
   HEADER_MENU_GROUNDS,
+  HEADER_MENU_IMAGES,
   MARQUEE_SETTINGS,
   SECTION_VARIANTS,
 } from "@qticaret/types"
@@ -146,6 +147,7 @@ export const FIELD_IDS = {
   ...SHELF_IDS,
   ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
+  menuImages: (sectionId: string) => `${sectionId}-menu-images`,
   header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
   ...ANNOUNCEMENT_IDS,
   ...VISIBILITY_IDS,
@@ -235,6 +237,15 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       term: "storefront.editor.headerBar.stickyTerm",
       options: [],
       target: FIELD_IDS.sticky(id),
+    })
+    // Every variant's: the menus' pictures (adr/0049 Ek 2026-11-15)
+    fields.push({
+      key: "menu_images",
+      group: "content",
+      label: `${HEADER}.menu_images.label`,
+      term: `${HEADER}.menu_images.term`,
+      options: HEADER_MENU_IMAGES.map((step) => `${HEADER}.menu_images.${step}`),
+      target: FIELD_IDS.menuImages(id),
     })
     if (section.variant === "catalog") {
       for (const field of Object.keys(HEADER_CATALOG_GROUPS) as HeaderCatalogField[]) {

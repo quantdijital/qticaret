@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import type { NextRequest, ProxyConfig } from "next/server"
 import { LANDING_COOKIE, landingCookieValue, landingOf } from "./lib/cart/landing"
 import { panelOrigins, paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
 import { maintenanceGate } from "./lib/maintenance/gate"
+import { isNextOwn } from "./lib/maintenance/rules"
 import {
   GONE_HEADER,
   GONE_PAGE_PATH,
@@ -17,6 +18,7 @@ import {
   canonicalHostRedirect,
   indexNowFile,
   isCataloguePage,
+  isFileName,
   isStaticFile,
   normalizedPath,
   resolvesAt,
@@ -75,14 +77,27 @@ export async function proxy(request: NextRequest): Promise<Response> {
   // The address as sent: Next's `nextUrl` drops a trailing slash on its own,
   // which would hide the very form we answer with a 301
   const { pathname, search } = new URL(request.url)
+  // Next's own address space, before any 301: nothing there takes a write, and a POST
+  // to a build file that is not there would fall to the catch-all page and run the
+  // Server Action it carries (adr/0053 Ek 2026-11-15)
+  if (pathname.startsWith("/_next/")) {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return new Response(null, { status: 405, headers: { allow: "GET, HEAD" } })
+    }
+    // A build file's or an image's GET came only for a header the matcher looks at: on to
+    // Next, no backend
+    if (isNextOwn(pathname)) {
+      return NextResponse.next()
+    }
+  }
   // The backend's refresh signal (adr/0048 Ek 2026-11-03) goes straight to its route: no host
   // 301, no normalising, no maintenance page (the backend follows no redirect), nothing resolved
   if (pathname === REFRESH_PATH) {
     return NextResponse.next()
   }
-  // The matcher already leaves these out; should one reach here, it is a file, never a page
-  if (isStaticFile(pathname)) {
-    return NextResponse.next()
+  // A file's name, asked of no backend: the file, a 404 where none lives, never a page
+  if (isFileName(pathname)) {
+    return fileResponse(pathname, request.method)
   }
   const visitor = visitorIp(request.headers, env.STOREFRONT_TRUSTED_PROXY_HOPS ?? 0)
   const site = await edgeSite(visitor)
@@ -238,13 +253,48 @@ export async function proxy(request: NextRequest): Promise<Response> {
   return response
 }
 
+/**
+ * Next's build files and images skip the proxy, but for a request that may
+ * carry a Server Action (`server-action-request-meta.js`: a POST with a
+ * `Next-Action` header, or a form's content type): a build file that is
+ * not there falls to the catch-all page, which would run it (`/_next/image/x`
+ * too, but for the image handler's catching it first; not relied on). A
+ * `has` value is a case-sensitive regex while a content type's case is the
+ * sender's, so the key alone: a browser's GET of a chunk or an image sends
+ * no content type. Literals only: Next reads this object from the source at
+ * build time (`extract-const-value.js` warns of an identifier and drops the
+ * whole matcher).
+ */
 export const config = {
-  // Everything but Next's own build files, the app's metadata files and the
-  // self-hosted faces and the providers' marks (`isStaticFile`): a file is no
-  // page to resolve or report
-  // Exact exclusions: a page whose path only starts like one still passes
-  // through here (its CSP, and the preview header set only here)
   matcher: [
-    "/((?!_next/static/|_next/image(?:$|/)|favicon\\.ico$|icon\\.svg$|apple-icon\\.png$|manifest\\.webmanifest$|fonts/[a-z-]+\\.[0-9a-f]{10}\\.woff2$|marks/[a-z_]+\\.(?:svg|png)$).*)",
+    // Everything but Next's own build files and images: no address skips the proxy only to
+    // land on a page, whose Server Actions would run past the maintenance gate. The
+    // storefront's files come through too and leave at once (`fileResponse`), asked of no
+    // backend; a name only shaped like one (`/favicon.ico`, no such file) is a 404
+    "/((?!_next/static/|_next/image(?:$|/)).*)",
+    { source: "/_next/:path*", has: [{ type: "header", key: "next-action" }] },
+    { source: "/_next/:path*", has: [{ type: "header", key: "content-type" }] },
   ],
+} satisfies ProxyConfig
+
+/**
+ * A file's name (`isFileName`): the file itself to GET and HEAD where one
+ * lives (`isStaticFile`), else a bare 404, never the catch-all page (a
+ * page carries the root layout's Server Actions, adr/0053 Ek 2026-11-15).
+ * No other method is a file's: 405.
+ */
+function fileResponse(pathname: string, method: string): Response {
+  if (method !== "GET" && method !== "HEAD") {
+    return new Response(null, { status: 405, headers: { allow: "GET, HEAD" } })
+  }
+  if (isStaticFile(pathname)) {
+    return NextResponse.next()
+  }
+  return new Response(method === "HEAD" ? null : "Not Found", {
+    status: 404,
+    headers: {
+      "content-type": "text/plain; charset=utf-8",
+      "x-content-type-options": "nosniff",
+    },
+  })
 }

@@ -69,6 +69,25 @@ export function headerMenuGroundOf(value: unknown): HeaderMenuGround {
     : "stage"
 }
 
+/**
+ * Where the header's menus show the categories' small pictures (adr/0049
+ * Ek 2026-11-15), every variant's setting: `all` "Her yerde" (the
+ * catalog header's "Kategoriler" list too), `submenus` "Yalnız alt
+ * menülerde" (the dropdowns and the phone's menu: the drawing from before
+ * the setting, so the default), `off` "Yok" (words only). Mirrored by the
+ * backend's `HEADER_MENU_IMAGES`.
+ */
+export const HEADER_MENU_IMAGES = ["all", "submenus", "off"] as const
+
+export type HeaderMenuImages = (typeof HEADER_MENU_IMAGES)[number]
+
+/** The menus' pictures as a reader takes them: absent or off the list, the default (`submenus`). */
+export function headerMenuImagesOf(value: unknown): HeaderMenuImages {
+  return (HEADER_MENU_IMAGES as readonly unknown[]).includes(value)
+    ? (value as HeaderMenuImages)
+    : "submenus"
+}
+
 /** The catalog header's words: the search box's placeholder. Mirrored by the backend. */
 export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
 

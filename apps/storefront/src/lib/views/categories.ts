@@ -50,6 +50,29 @@ export function navigation(
   })
 }
 
+/**
+ * The tree's entries without a picture of their own given the one the
+ * menu already shows for the same page (its newest product's photo,
+ * `withNavPictures`): the catalog header's "Kategoriler" list draws the
+ * dropdowns' squares with no request of its own. An entry the menu does
+ * not hold keeps what it has.
+ */
+export function withPicturesOf(
+  tree: readonly NavCategoryView[],
+  menu: readonly NavCategoryView[]
+): NavCategoryView[] {
+  const shown = new Map(
+    menu
+      .flatMap((entry) => [entry, ...entry.children])
+      .flatMap((entry) => (entry.image ? [[entry.path, entry.image] as const] : []))
+  )
+  const pictured = <E extends CategoryCardView>(entry: E): E => {
+    const image = entry.image ? undefined : shown.get(entry.path)
+    return image ? { ...entry, image } : entry
+  }
+  return tree.map((entry) => ({ ...pictured(entry), children: entry.children.map(pictured) }))
+}
+
 // The index shows the tree this deep; deeper categories are on their parents' pages
 const TREE_DEPTH = 4
 
