@@ -22,6 +22,10 @@
       "file": "catalog.css"
     },
     {
+      "sha256": "1630fe42b6e89ab34607a02be3ea2166efc31d3b1bc1826c74aedfd161cfcdf7",
+      "file": "chips.css"
+    },
+    {
       "sha256": "f1ef03835bb1b47f3f983cf87e2a11a69109ae5a3c7395c7669f5a9573767011",
       "file": "content.css"
     },
@@ -62,7 +66,7 @@
       "file": "slider.css"
     },
     {
-      "sha256": "1a8827558ffb87c9de06e483b140a55a51f6c24666711c8b566a1771fc8d49bd",
+      "sha256": "a45dadf7904625a49dcfc9b3ba3830f56b43cd9dc49274546459cbf48e6e66e9",
       "file": "styles.css"
     },
     {

@@ -215,9 +215,13 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
   })
 
   it("fills selected chips, the filters' count and active filter chips with the mark; notes with the soft highlight", () => {
+    // The option and installment pills name the chip family's class (adr/0067 step 3)
     for (const file of ["product/Options.tsx", "product/InstallmentPlans.tsx"]) {
-      expect(atolyeCss(file), file).toContain("has-[:checked]:bg-mark has-[:checked]:text-mark-ink")
+      expect(atolyeCss(file), file).toContain(" gf-pill ")
     }
+    expect(ruleBody(atolyeCss("chips.css"), ".gf-pill:has(:checked)")).toMatch(
+      /background-color: var\(--color-mark\);\s+color: var\(--color-mark-ink\);/
+    )
     for (const file of [
       "listing/Toolbar.tsx",
       "product/ReviewList.tsx",

@@ -54,7 +54,7 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
       {facts.length > 0 && (
         <dl aria-label={t("product.highlights")} className="flex flex-wrap gap-2 pt-1">
           {facts.map((fact) => (
-            <div key={fact.label} className="rounded-pill bg-paper-2 px-3 py-1.5 text-xs">
+            <div key={fact.label} className="gf-fact rounded-pill px-3 py-1.5 text-xs">
               <dt className="inline text-text-2">{fact.label}: </dt>
               <dd className="inline font-semibold">{fact.value}</dd>
             </div>
