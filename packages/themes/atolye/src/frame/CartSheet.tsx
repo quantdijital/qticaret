@@ -6,7 +6,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, MiniCartView } from "@qticaret/ui"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
 import { CartSheetLine, type SheetLineWords } from "./CartSheetLine"
-import { CART_ADDED_EVENT, cartAddedMessage, isOwnClick } from "./events"
+import { CART_ADDED_EVENT, cartAddedMessage, cartAddedOrigin, isOwnClick } from "./events"
 import { Sheet } from "./Sheet"
 
 export interface CartSheetWords {
@@ -149,9 +149,11 @@ export function CartSheetBody({
  * picture tiles. It opens by itself when a line went in, so no toast says
  * so; a card's quick add has its words said in the live region.
  */
-/** The element that has the focus, if any. */
+/** The element that has the focus, if any; the page itself is none (a busy button's focus drops there). */
 const focusedElement = () =>
-  document.activeElement instanceof HTMLElement ? document.activeElement : null
+  document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+    ? document.activeElement
+    : null
 
 export function CartSheet({
   cart,
@@ -188,7 +190,8 @@ export function CartSheet({
         return
       }
       setSaid(cartAddedMessage(event))
-      opener.current = focusedElement()
+      // The add button that sent it (Tezgâh audit Z-03), else what has the focus
+      opener.current = cartAddedOrigin(event) ?? focusedElement()
       setOpen(true)
     }
     window.addEventListener(CART_ADDED_EVENT, show)
