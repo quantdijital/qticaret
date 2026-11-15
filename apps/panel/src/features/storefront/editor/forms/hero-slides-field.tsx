@@ -12,6 +12,7 @@ import { isPictureOnly, pictureSlide, slidesOf, withSlides } from "./catalog-sli
 import { FIELD_IDS } from "./field-registry"
 import { FieldGroup } from "./fields"
 import type { CatalogHero } from "./slider-kit"
+import { useSlideFocus } from "../use-field-focus"
 
 const S = "storefront.editor.slider"
 const C = "storefront.editor.heroCatalog"
@@ -37,6 +38,14 @@ export function HeroSlidesField({
   const { t } = useTranslation()
   const [picking, setPicking] = useState(false)
   const [editing, setEditing] = useState<number | null>(null)
+  // The field an edit label in the preview named: its slide's dialog opens at it (Faz 2b)
+  const [initial, setInitial] = useState<string | null>(null)
+  useSlideFocus((slide, target) => {
+    if (slide < slidesOf(section).length) {
+      setEditing(slide)
+      setInitial(target)
+    }
+  })
   const slides = slidesOf(section)
   const setSlides = (next: HeroCatalogSlide[]) => {
     onChange(withSlides(section, next))
@@ -139,11 +148,13 @@ export function HeroSlidesField({
           slides={slides}
           index={editing}
           onIndexChange={setEditing}
+          initialFocus={initial}
           onSave={(index, slide) => {
             setSlides(slides.map((each, at) => (at === index ? slide : each)))
           }}
           onClose={() => {
             setEditing(null)
+            setInitial(null)
           }}
         />
       ) : null}

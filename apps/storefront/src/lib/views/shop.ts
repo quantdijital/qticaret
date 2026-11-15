@@ -26,7 +26,7 @@ import { withNavCounts } from "./nav-counts"
 import { cookieBannerOf } from "./cookies"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
-import { currentLayout, currentMenus } from "./layout"
+import { currentLayout, currentMenus, isEditorSession } from "./layout"
 import { sharedSettingsOf } from "./shared-settings"
 import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
@@ -119,6 +119,10 @@ export async function shopView(): Promise<ShopView> {
   )
   // The page's address as the proxy set it (never the visitor's)
   const url = requestHeaders.get("x-qt-url") ?? ""
+  // The editor's live session marks the one announcement bar and its lines (adr/0065 Faz 2b)
+  const bars = layout.header.filter((section) => section.type === "announcement_bar")
+  const [bar] = bars
+  const announcementMark = bars.length === 1 && bar && (await isEditorSession()) ? bar.id : null
   return {
     name: site.shop.name,
     logo: site.shop.logo_url
@@ -140,6 +144,7 @@ export async function shopView(): Promise<ShopView> {
     announcementSettings: announcementSettingsOf(
       layout.header.find((section) => section.type === "announcement_bar") ?? {}
     ),
+    ...(announcementMark ? { announcementMark } : {}),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
     // The catalog header's "Kategoriler" lists the top categories already read (no request),

@@ -1,3 +1,4 @@
+import { fieldKey, fieldMark } from "@qticaret/ui"
 import type {
   HeroCatalogSlideView,
   HeroCatalogView,
@@ -10,7 +11,7 @@ import { Preload } from "../parts/Preload"
 import { type Of, headingId } from "./plan"
 import { CatalogChips, CatalogList, CatalogTiles } from "./HeroCatalogParts"
 import { CatalogSlide, PHOTO_SIZES, WHOLE_SIZES, pictureOnly } from "./HeroCatalogSlide"
-import type { SlideExtras, SlidePlace } from "./HeroCatalogSlide"
+import type { Mark, SlideExtras, SlidePlace } from "./HeroCatalogSlide"
 import { SliderStage, type SliderWords } from "./SliderStage"
 
 /** The opening's variants this theme draws (`drawnVariant`): today's and the category list. */
@@ -29,6 +30,7 @@ function Slides({
   imageOf,
   place,
   extras,
+  markOf,
   t,
 }: {
   slides: HeroCatalogSlideView[]
@@ -36,6 +38,7 @@ function Slides({
   imageOf: (slide: HeroCatalogSlideView, index: number) => ImageView | null
   place: Omit<SlidePlace, "stage">
   extras: SlideExtras
+  markOf: (index: number) => Mark
   t: Translate
 }) {
   const total = slides.length
@@ -79,6 +82,7 @@ function Slides({
                 : { level: "h2", name: place.name, eager: false, stage: { arrows } }
             }
             extras={index === 0 ? extras : null}
+            mark={markOf(index)}
           />
         ))}
       </SliderStage>
@@ -118,6 +122,7 @@ export function HeroCatalog({
       heading: hero.heading,
       intro: hero.intro,
       actions: hero.actions,
+      ...(hero.actionsAt ? { actionsAt: hero.actionsAt } : {}),
       image: hero.image,
       link: null,
     },
@@ -134,7 +139,16 @@ export function HeroCatalog({
     name: hero.heading,
     eager: first,
   }
-  const extras: SlideExtras = { eyebrow: hero.eyebrow, catalog, t }
+  const extras: SlideExtras = { eyebrow: hero.eyebrow, marks: hero.editor, catalog, t }
+  // The editor's field marks (adr/0065 Faz 2b): a saved slide's under `slides.<n>`, an opening
+  // saved before slides its own words; nothing on a live page
+  const markOf =
+    (index: number): Mark =>
+    (key) =>
+      fieldMark(
+        hero.editor,
+        catalog.slides ? fieldKey("slides", catalog.slides[index]?.at ?? index, key) : key
+      )
   return (
     <section aria-labelledby={id} data-gf-catalog-hero="" className="pt-3 lg:pt-6">
       {first && opening && lead && (
@@ -149,6 +163,7 @@ export function HeroCatalog({
               imageOf={imageOf}
               place={place}
               extras={extras}
+              markOf={markOf}
               t={t}
             />
           ) : opening ? (
@@ -157,6 +172,7 @@ export function HeroCatalog({
               image={lead}
               place={{ ...place, stage: null }}
               extras={extras}
+              mark={markOf(0)}
             />
           ) : null}
           {catalog.list.length > 0 && <CatalogList catalog={catalog} t={t} />}

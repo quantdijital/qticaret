@@ -19,7 +19,7 @@ import { pathsOf, priceDisplays, siteSeo } from "@/lib/store-api/requests"
 import { categoryCounts } from "@/lib/store-api/extras"
 import { picturedCategories } from "./category-tiles"
 import { productImages } from "./image"
-import { currentMenus, layoutImage, layoutLink } from "./layout"
+import { currentMenus, layoutImage, layoutLink, layoutLinks } from "./layout"
 import { heroCatalogSlides } from "./hero-slides"
 import { hrefOf } from "./listing"
 import { shownAmount } from "./price"
@@ -170,7 +170,7 @@ export async function heroView(section: StoreHeroSection, t: Translate): Promise
     eyebrow: section.eyebrow,
     heading,
     intro: section.text,
-    actions: section.links.flatMap((link) => layoutLink(link, t) ?? []),
+    ...layoutLinks(section.links, t),
     image: section.image ? layoutImage(section.image, heading) : null,
     ...(section.variant === "category_list"
       ? { variant: section.variant, catalog: await heroCatalogView(section, t) }

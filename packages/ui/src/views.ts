@@ -131,6 +131,13 @@ export interface ShopView {
    */
   announcementSettings?: AnnouncementSettings
   /**
+   * The announcement bar's section id, set only in the theme editor's live
+   * preview (adr/0065 Faz 2b): the bar then carries its section mark and
+   * each line its field mark (`lines.<n>`). Absent on a live page, whose
+   * bar stays as it is drawn today.
+   */
+  announcementMark?: string
+  /**
    * The header group's scrolling strip, drawn above the shop's header on
    * every page but the checkout's (adr/0049 Ek 2026-11-14 §4.1); none or
    * absent: no strip.

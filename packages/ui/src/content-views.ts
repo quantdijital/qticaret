@@ -50,9 +50,15 @@ export type SectionDeviceView = Exclude<SectionDevice, "all">
  * product and category pages out in the theme editor; every title already
  * in words (the shop's own or the storefront's default, a FAQ's aside),
  * every link already a path; its look beside (none: the theme's own) and
- * the screens it shows on (none: everywhere).
+ * the screens it shows on (none: everywhere). `editor` is set only in the
+ * theme editor's live preview: the theme then marks its fields
+ * (`fieldMark`, adr/0065 Faz 2b); never on a live page.
  */
-export type HomeSectionView = { look?: SectionLookView; device?: SectionDeviceView } & (
+export type HomeSectionView = {
+  look?: SectionLookView
+  device?: SectionDeviceView
+  editor?: true
+} & (
   | {
       id: string
       type: "hero"
@@ -63,6 +69,8 @@ export type HomeSectionView = { look?: SectionLookView; device?: SectionDeviceVi
       intro: string | null
       /** At most two buttons, the first the main one. */
       actions: LinkView[]
+      /** Each button's place among the design's links when a broken one was left out (the editor's field mark); absent: its drawn place. */
+      actionsAt?: number[]
       image: ImageView | null
       /** How the opening is drawn (adr/0049 Ek 2026-11-14 §2); none: today's (`standard`). */
       variant?: HeroVariant

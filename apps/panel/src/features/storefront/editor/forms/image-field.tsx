@@ -31,32 +31,35 @@ export function ImageField({
   altError,
 }: ImageFieldProps) {
   const { t } = useTranslation()
+  // Its box carries the id: the settings search and the preview's field label land on it
   return (
-    <MediaField
-      id={id}
-      label={label}
-      hint={hint}
-      value={image?.url ?? null}
-      emptyText={t(`${F}.noImage`)}
-      removable={removable}
-      onChange={(asset) => {
-        const own = image?.alt?.trim() ? image.alt : null
-        onChange(asset ? { url: asset.url, alt: own ?? asset.alt } : null)
-      }}
-    >
-      {image ? (
-        <TextField
-          id={`${id}-alt`}
-          label={t(`${F}.alt`)}
-          hint={t(`${F}.altHint`)}
-          value={image.alt}
-          max={LAYOUT_LIMITS.alt}
-          error={altError}
-          onChange={(alt) => {
-            onChange({ ...image, alt })
-          }}
-        />
-      ) : null}
-    </MediaField>
+    <div id={id}>
+      <MediaField
+        id={id}
+        label={label}
+        hint={hint}
+        value={image?.url ?? null}
+        emptyText={t(`${F}.noImage`)}
+        removable={removable}
+        onChange={(asset) => {
+          const own = image?.alt?.trim() ? image.alt : null
+          onChange(asset ? { url: asset.url, alt: own ?? asset.alt } : null)
+        }}
+      >
+        {image ? (
+          <TextField
+            id={`${id}-alt`}
+            label={t(`${F}.alt`)}
+            hint={t(`${F}.altHint`)}
+            value={image.alt}
+            max={LAYOUT_LIMITS.alt}
+            error={altError}
+            onChange={(alt) => {
+              onChange({ ...image, alt })
+            }}
+          />
+        ) : null}
+      </MediaField>
+    </div>
   )
 }

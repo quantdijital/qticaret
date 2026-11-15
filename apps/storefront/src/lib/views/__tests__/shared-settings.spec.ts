@@ -35,6 +35,8 @@ vi.mock("@/lib/store-api/extras", () => ({
 vi.mock("../layout", async (importOriginal) => ({
   ...(await importOriginal<LayoutModule>()),
   currentShared: shared.current,
+  // A live page: no editor session
+  isEditorSession: () => Promise.resolve(false),
 }))
 
 const { sectionViews } = await import("../sections")

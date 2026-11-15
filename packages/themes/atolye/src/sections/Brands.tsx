@@ -13,7 +13,7 @@ export function Brands({ section }: { section: Of<"brands"> }) {
   return (
     <section aria-labelledby={id} className="pt-(--section-gap)">
       <Container className="flex flex-col gap-6">
-        <SectionHead id={id} title={section.title} />
+        <SectionHead id={id} title={section.title} marks={section.editor} />
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           {section.brands.map((brand) => (
             <li key={brand.path} className="min-w-0">

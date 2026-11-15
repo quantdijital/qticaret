@@ -130,6 +130,37 @@ describe("the theme editor's bridge messages (adr/0065 §2)", () => {
     ).toBeNull()
   })
 
+  it("reads a field's edit label (Faz 2b) with a key a selector cannot be broken by", () => {
+    for (const field of ["heading", "links.0", "slides.12.heading", "slides.0.links.1", "title"]) {
+      const message = bridgeMessage("field", { id: "abc123", field }, 3)
+      expect(readToPanel(message)).toEqual(message)
+    }
+    const field = bridgeMessage("field", { id: "abc123", field: "heading" }, 1)
+    for (const bad of [
+      "",
+      "Heading",
+      'heading"]',
+      "heading]{}",
+      ".heading",
+      "heading.",
+      "slides..heading",
+      "slides.123.heading",
+      "a.b.c.d.e",
+      "0.heading",
+      "heading text",
+      "<img>",
+      "h".repeat(81),
+    ]) {
+      expect(readToPanel({ ...field, payload: { id: "abc123", field: bad } })).toBeNull()
+    }
+    expect(readToPanel({ ...field, payload: { id: "x", field: "heading" } })).toBeNull()
+    expect(
+      readToPanel({ ...field, payload: { id: "abc123", field: "heading", extra: 1 } })
+    ).toBeNull()
+    // Never sent to the frame
+    expect(readToStorefront(field)).toBeNull()
+  })
+
   it("drops what is not an object, will not serialise or is larger than the limit", () => {
     expect(readToStorefront("select")).toBeNull()
     expect(readToStorefront(null)).toBeNull()

@@ -1,5 +1,6 @@
 import { sectionSelector } from "./bridge-core"
-import { drawnSections, labelPlace, strokeFactor, type LabelPlace } from "./overlay-core"
+import { FIELD_CSS, createFieldLayer } from "./field-layer"
+import { drawnSections, knownName, labelPlace, strokeFactor, type LabelPlace } from "./overlay-core"
 
 /**
  * The editor layer in the preview frame (adr/0065 §4, Faz 2; owner's
@@ -20,6 +21,8 @@ export interface Overlay {
   /** Frames a section (null: none). */
   show(id: string | null): void
   shown(): string | null
+  /** Faz 2b: frames a field of the section shown, with its own label (null: none). */
+  showField(field: { key: string; element: Element } | null): void
   /** Moves the keyboard's focus to the label (Alt+↓/↑). */
   focusLabel(): void
   /** Follows the page: a scroll, a resize, a redraw. */
@@ -34,7 +37,8 @@ const CSS = `:host{all:initial;position:fixed;inset:0;pointer-events:none;z-inde
 .label,.handle{position:absolute;pointer-events:auto;display:none;align-items:center;gap:calc(6px*var(--k));box-sizing:border-box;margin:0;border:0;border-radius:calc(4px*var(--k));background:${ACCENT};color:#fff;font:600 calc(12px*var(--k))/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;padding:calc(5px*var(--k)) calc(8px*var(--k));cursor:pointer;white-space:nowrap;max-width:calc(320px*var(--k))}
 .label:focus-visible,.handle:focus-visible{outline:calc(2px*var(--k)) solid #fff;outline-offset:calc(-4px*var(--k))}
 .name{overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.9}
-.on{display:flex}.box.on{display:block}`
+.on{display:flex}.box.on{display:block}
+${FIELD_CSS}`
 
 function setBox(element: HTMLElement, rect: DOMRect) {
   element.style.transform = `translate(${String(Math.round(rect.left))}px,${String(Math.round(rect.top))}px)`
@@ -52,11 +56,14 @@ export function createOverlay({
   nonce,
   touch,
   onEdit,
+  onEditField,
 }: {
   nonce: string | undefined
   /** A screen without hover: a handle on every section rather than a label on hover. */
   touch: boolean
   onEdit: (id: string) => void
+  /** Faz 2b: a field's label was pressed. */
+  onEditField: (id: string, key: string) => void
 }): Overlay {
   const host = document.createElement("qt-editor-layer")
   const root = host.attachShadow({ mode: "closed" })
@@ -75,6 +82,8 @@ export function createOverlay({
   const word = document.createElement("span")
   label.append(name, word)
   root.append(style, box, label)
+  // After the section's label: its fields' labels follow it in the tab order
+  const fields = createFieldLayer({ root, onEdit: onEditField })
   document.body.append(host)
 
   let current: string | null = null
@@ -95,7 +104,7 @@ export function createOverlay({
   })
 
   const labelText = (id: string) => {
-    const known = names[id]
+    const known = knownName(names, id)
     return known ? `${edit}: ${known}` : edit
   }
   const viewport = () => ({
@@ -110,19 +119,23 @@ export function createOverlay({
     if (!current || !rect || rect.width === 0 || rect.height === 0) {
       box.classList.remove("on")
       label.classList.remove("on")
+      fields.reposition(null)
       return
     }
     setBox(box, rect)
     box.classList.add("on")
     if (touch || !edit) {
       label.classList.remove("on")
+      fields.reposition(null)
       return
     }
-    name.textContent = names[current] ?? ""
+    name.textContent = knownName(names, current)
     word.textContent = edit
     label.setAttribute("aria-label", labelText(current))
     setCorner(label, labelPlace(rect, viewport(), factor))
     label.classList.add("on")
+    // A field's label keeps clear of the section's (Faz 2b)
+    fields.reposition(label.getBoundingClientRect())
   }
 
   const drawHandles = () => {
@@ -159,21 +172,35 @@ export function createOverlay({
     setScale(scale) {
       factor = strokeFactor(scale)
       host.style.setProperty("--k", String(factor))
+      fields.setFactor(factor)
       drawCurrent()
       drawHandles()
     },
     setLabels(nextEdit, nextNames) {
       edit = nextEdit
       names = nextNames
+      fields.setWord(nextEdit)
       drawCurrent()
       drawHandles()
     },
     show(id) {
+      // Another section: the last one's field and keyboard labels go
+      if (id !== current) {
+        fields.show(null)
+        fields.handles(null)
+      }
       current = id
       drawCurrent()
     },
     shown: () => current,
+    showField(field) {
+      fields.show(field && current ? { id: current, ...field } : null)
+    },
     focusLabel() {
+      // The section's fields get the keyboard's labels, after its own (Faz 2b)
+      const selector = current ? sectionSelector(current) : null
+      const element = selector ? document.querySelector(selector) : null
+      fields.handles(current && element ? { id: current, element } : null)
       if (current && label.classList.contains("on")) {
         label.focus({ preventScroll: true })
       } else if (current) {
@@ -185,6 +212,7 @@ export function createOverlay({
       drawHandles()
     },
     destroy() {
+      fields.destroy()
       host.remove()
       handles.clear()
     },

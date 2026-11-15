@@ -32,8 +32,11 @@ export function AnnouncementTurns({
   lines,
   settings,
   words,
+  keys,
 }: {
   lines: readonly string[]
+  /** Each line's field key in the editor's live preview (adr/0065 Faz 2b); none elsewhere. */
+  keys?: readonly string[] | undefined
   settings: Pick<AnnouncementSettings, "interval" | "pause_button" | "hover_pause"> &
     Partial<Pick<AnnouncementSettings, "align" | "size">>
   words: { announcements: string; pause: string; play: string }
@@ -97,6 +100,7 @@ export function AnnouncementTurns({
         {lines.map((line, index) => (
           <li
             key={index}
+            {...(keys?.[index] ? { "data-qf": keys[index] } : {})}
             aria-hidden={index === active ? undefined : true}
             data-active={index === active ? "" : undefined}
             className={cn(

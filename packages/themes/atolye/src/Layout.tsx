@@ -90,6 +90,7 @@ export function Layout({
         <Announcement
           lines={shop.announcements}
           settings={shop.announcementSettings}
+          mark={shop.announcementMark}
           links={catalog?.strip ? [] : shop.topLinks}
           contact={
             catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact
