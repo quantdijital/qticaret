@@ -125,12 +125,12 @@
 
 - **Bakım açıkken** her sayfa isteği şunu alır: `503`, `Retry-After`, `Cache-Control: no-store` ve sade bir sayfa (başlık, metin, beklenen zaman; tema çerçevesi ve menü yok).
   - `Retry-After`: `expected_at` ilerideyse kalan saniye, 300 ile 86400 arasına kırpılır. Yoksa ya da geçmişse 3600.
-- **Açık kalanlar:**
-  - `/onizleme/*`, yalnız `GET` ve `HEAD` (Ek 2026-11-15: kök düzen her sayfaya sepet ve çerez Server Action'larını taşıyor; Next bunları jetona bakılmadan önce `/onizleme/x`'e gönderilen POST'ta da çalıştırıyordu. Önizleme altındaki diğer yöntemler atlama çerezi ister, `allow_paths` de açamaz)
+- **Açık kalanlar** (Ek 2026-11-15: yol bazlı açıklık yalnız `GET` ve `HEAD` içindir; başka yöntem yalnız `POST /odeme/sonuc` ve `POST /odeme/sonuc/hata`'da geçer, geri kalanı atlama çerezi ister):
+  - `/onizleme/*`
   - `/odeme/sonuc*`: sağlayıcı dönüşü. Öneri: `/odeme/durum` da açık kalsın, `/odeme/sonuc`'un yönlendirdiği yer orası; yoksa ödemesi geçen alıcı bakım sayfası görür.
   - `/{indexnow_key}.txt`, `/robots.txt`, `/sitemap*`
   - `/bakim/gir`
-  - statik dosyalar (`/_next/static/*`, `favicon.ico`)
+  - statik dosyalar (`/_next/static/*`, `/_next/image`, vitrinin gerçekten var olan dosyaları: `app/icon.svg`, `public/fonts`, `public/marks`); `/_next/webpack-hmr` yalnız geliştirmede
   - `allow_paths`: tam eşleşme; `/x/*` ise `/x` ve altı. Karşılaştırma vitrinin normalize ettiği (küçük harf, sondaki `/` yok) yolla yapılır.
   - atlama çerezi taşıyan ziyaretçi.
 - **`/bakim/gir?t=…`:**
@@ -196,3 +196,18 @@
 - **§B.2 zemin renkleri:** listeye `steel` `#f8fafc` eklendi (Atölye'nin `--color-paper`'ının sRGB karşılığı; testle token'a bağlı). `warm`, `neutral`, `cool` aynı değerlerle duruyor.
 - **§B.3 karşıtlık:** kural aynı (beyazla ve seçilen zeminle 3:1); `steel` seçiliyken gerçek Grafit zeminine göre ölçülür. Kuyu yüzeyi (`paper-2`) koşulu adr/0062 karar 6 ile, ton kümeleri tanımlanınca eklenir.
 - **§B.7 taslak:** tema ayarı adr/0063 karar 3 uygulanınca "Yayınla" ile yayına girecek (sahip, 2026-11-14); o işe kadar kayıt hemen yayındadır.
+
+## Ek (2026-11-15): bakımda ve askıda yazma yalnız atlama çereziyle
+
+- **Bağlam:** kapı yalnız vitrinin kenarında (`proxy.ts`) çalışır; backend store API bakımı bilmez. Kök düzen her sayfaya sepet ve çerez Server Action'larını taşır ve Next, `Next-Action` başlıklı bir POST'u eşleşen herhangi bir sayfa adresinde sayfa çizilmeden çalıştırır. Güvenlik incelemesi (PR #39) şu açıkları buldu:
+  1. Eşleştiricinin dışarıda bıraktığı ama dosyası olmayan adlar (`/favicon.ico`, `/apple-icon.png`, `/manifest.webmanifest`, desene uyan olmayan yazı tipi ve işaret adları) kapıya uğramadan `[...path]` sayfasına düşüyor; oraya gönderilen action bakımda ve askıda çalışıyor, GET'te CSP'siz HTML dönüyordu.
+  2. Yol bazlı açıklık (`/odeme/durum*`, `/odeme/sonuc/<alt yol>`, `allow_paths`) yöntem ayırmıyordu.
+  3. Önizleme istisnası harfe duyarlıydı ve sondaki `/`'ı istiyordu (`POST /onizleme`, `POST /ONIZLEME/x` kaçıyordu).
+  4. `/_next/webpack-hmr` üretimde de açık sayılıyordu.
+- **Karar:**
+  - Bakımda ve askıda yol bazlı açıklık yalnız `GET` ve `HEAD`'e tanınır. Başka yöntem yalnız tam yolu listelenen route handler'larda geçer: bugün `POST /odeme/sonuc` ve `POST /odeme/sonuc/hata` (ödeme sağlayıcısının dönüşü; route handler Server Action çalıştırmaz). Diğer her yazma (`/odeme/durum*`, `allow_paths`, alt yollar, önizleme, tanınmayan yöntem) atlama çerezi ister; askıda hiç geçmez. Önizlemeye özel istisna bu genel kurala katıldı.
+  - `/bakim/gir` listede yok: route yalnız `GET` ve `HEAD` alıyor; açmanın bir faydası yok, kapalı kalması güvenli varsayılan.
+  - Eşleştirici yalnız Next'in kendi çıktılarını (`/_next/static/`, `/_next/image`) dışarıda bırakır. Dosya adı biçimindeki her istek (`isFileName`) proxy'de backend'e sorulmadan cevaplanır: gerçekten var olan dosyaya (`isStaticFile`; spec `public/` ve `app/` ile birebir eşleştiğini sınar) `GET`/`HEAD` geçer, olmayan ada düz `404`, başka yönteme `405`. Kapının çalışmadığı hiçbir adres bir sayfaya düşmez.
+  - `/_next/webpack-hmr` yalnız geliştirmede açık sayılır.
+- **Ödünleşim:** `allow_paths` içindeki bir sayfanın formu (ör. iletişim) bakımda gönderilemez; ziyaretçi sayfayı görür, gönderince bakım sayfasını alır. Güvenli varsayılan budur. İhtiyaç çıkarsa ileride `allow_paths` için açık bir ayarla (varsayılan kapalı, yalnız seçilen yolda `POST`) gevşetilebilir.
+- **Bedel:** yazı tipi ve işaret istekleri artık proxy'den geçer; proxy bunlarda backend'e gitmeden hemen döner.

@@ -5,6 +5,7 @@ import {
   isAllowedPath,
   isBypassToken,
   isOpenDuringMaintenance,
+  isOpenWhileSuspended,
   isStorefrontOpenPath,
   retryAfterSeconds,
 } from "../rules"
@@ -22,11 +23,10 @@ describe("the paths a dark shop keeps open", () => {
     "/robots.txt",
     "/sitemap.xml",
     "/sitemap-products-1.xml",
-    "/_next/webpack-hmr",
     "/_next/static/chunks/a.js",
     "/_next/image",
     "/.well-known/security.txt",
-    "/favicon.ico",
+    "/fonts/inter-latin.c940764593.woff2",
     "/icon.svg",
   ])("leaves %s open", (path) => {
     expect(isStorefrontOpenPath(path)).toBe(true)
@@ -78,17 +78,61 @@ describe("the paths a dark shop keeps open", () => {
   it("is open when either the storefront or the shop keeps the path", () => {
     expect(isOpenDuringMaintenance("/odeme/sonuc", "GET", [])).toBe(true)
     expect(isOpenDuringMaintenance("/iletisim", "GET", ["/iletisim"])).toBe(true)
-    expect(isOpenDuringMaintenance("/iletisim", "POST", ["/iletisim"])).toBe(true)
+    expect(isOpenDuringMaintenance("/iletisim", "HEAD", ["/iletisim"])).toBe(true)
     expect(isOpenDuringMaintenance("/", "GET", ["/iletisim"])).toBe(false)
   })
 
-  it("keeps a preview open to look at only: no Server Action posted under it", () => {
+  // adr/0053 Ek 2026-11-15: every page runs the root layout's Server Actions posted to it
+  it("opens a path by its name to GET and HEAD only, a preview and the shop's paths alike", () => {
+    const allow = ["/iletisim", "/onizleme/*", "/sozlesmeler/*"]
     expect(isOpenDuringMaintenance("/onizleme/x", "GET", [])).toBe(true)
     expect(isOpenDuringMaintenance("/onizleme/x", "HEAD", [])).toBe(true)
-    for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
-      expect(isOpenDuringMaintenance("/onizleme/x", method, [])).toBe(false)
-      // Not even when the shop listed it among its open paths
-      expect(isOpenDuringMaintenance("/onizleme/x", method, ["/onizleme/*"])).toBe(false)
+    for (const method of ["POST", "PUT", "PATCH", "DELETE", "OPTIONS", "get", "PROPFIND"]) {
+      for (const path of [
+        "/onizleme/x",
+        "/onizleme",
+        "/ONIZLEME/x",
+        "/iletisim",
+        "/sozlesmeler/kvkk",
+        "/odeme/durum",
+        "/odeme/durum/x",
+        "/odeme/sonuc/x",
+        "/bakim/gir",
+        "/robots.txt",
+        "/icon.svg",
+        "/favicon.ico",
+        "/",
+      ]) {
+        expect(isOpenDuringMaintenance(path, method, allow), `${method} ${path}`).toBe(false)
+      }
+    }
+  })
+
+  it("takes a card provider's return as a POST, at its route handlers' exact paths", () => {
+    for (const path of ["/odeme/sonuc", "/odeme/sonuc/hata"]) {
+      expect(isOpenDuringMaintenance(path, "POST", [])).toBe(true)
+      expect(isOpenWhileSuspended(path, "POST")).toBe(true)
+    }
+    for (const path of ["/odeme/sonuc/", "/ODEME/SONUC", "/odeme/sonuc/hata/x"]) {
+      expect(isOpenDuringMaintenance(path, "POST", [])).toBe(false)
+      expect(isOpenWhileSuspended(path, "POST")).toBe(false)
+    }
+  })
+
+  it("keeps the dev server's reload socket open in development only", () => {
+    expect(isStorefrontOpenPath("/_next/webpack-hmr", true)).toBe(true)
+    expect(isStorefrontOpenPath("/_next/webpack-hmr")).toBe(false)
+    expect(isOpenWhileSuspended("/_next/webpack-hmr", "GET", true)).toBe(true)
+    expect(isOpenWhileSuspended("/_next/webpack-hmr", "GET")).toBe(false)
+  })
+
+  it("keeps a suspended shop's open paths to GET and HEAD as well", () => {
+    for (const path of ["/odeme/durum", "/odeme/sonuc/x", "/robots.txt"]) {
+      expect(isOpenWhileSuspended(path, "GET")).toBe(true)
+      expect(isOpenWhileSuspended(path, "HEAD")).toBe(true)
+      for (const method of ["POST", "PUT", "PATCH", "DELETE", "OPTIONS"]) {
+        expect(isOpenWhileSuspended(path, method)).toBe(false)
+      }
     }
   })
 })

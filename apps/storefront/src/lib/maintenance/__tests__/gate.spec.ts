@@ -26,7 +26,13 @@ const site = (enabled: boolean, suspended = false): EdgeSite => ({
   },
 })
 
-const context = { nonce: "n", csp: "default-src 'self'", production: false, visitorIp: null }
+const context = {
+  nonce: "n",
+  csp: "default-src 'self'",
+  production: false,
+  development: false,
+  visitorIp: null,
+}
 
 const request = (path: string, init: { method?: string; cookie?: string } = {}) =>
   new NextRequest(`http://localhost:8000${path}`, {
@@ -96,6 +102,78 @@ describe("maintenanceGate", () => {
       blocked: null,
       bypassed: false,
     })
+  })
+
+  // adr/0053 Ek 2026-11-15: an open path is open to look at; a write needs the cookie
+  it("answers a write by an open path's name with the 503, the bypass cookie aside", async () => {
+    const writes = [
+      ["/odeme/durum", "POST"],
+      ["/odeme/durum/x", "POST"],
+      ["/odeme/sonuc/x", "POST"],
+      ["/iletisim", "POST"],
+      ["/sozlesmeler/kvkk", "POST"],
+      ["/onizleme", "POST"],
+      ["/ONIZLEME/x", "POST"],
+      ["/bakim/gir", "POST"],
+      ["/favicon.ico", "POST"],
+      ["/onizleme/x", "PUT"],
+      ["/iletisim", "PATCH"],
+      ["/odeme/durum", "DELETE"],
+      ["/robots.txt", "OPTIONS"],
+    ] as const
+    for (const [path, method] of writes) {
+      const action = (cookie?: string) =>
+        new NextRequest(`http://localhost:8000${path}`, {
+          method,
+          headers: { "next-action": "7f00aa", ...(cookie ? { cookie } : {}) },
+        })
+      const dark = await maintenanceGate(action(), path, site(true), context)
+      expect(dark.blocked?.status, `${method} ${path}`).toBe(503)
+      edge.checkBypass.mockResolvedValue("open")
+      const bypassed = await maintenanceGate(
+        action(`qt_bypass=${TOKEN}`),
+        path,
+        site(true),
+        context
+      )
+      expect(bypassed, `${method} ${path}`).toEqual({ blocked: null, bypassed: true })
+      edge.checkBypass.mockReset()
+      // An open shop: nothing changes
+      expect(await maintenanceGate(action(), path, site(false), context)).toEqual({
+        blocked: null,
+        bypassed: false,
+      })
+    }
+  })
+
+  it("takes a card provider's returning POST, and every GET and HEAD an open path had", async () => {
+    for (const path of ["/odeme/sonuc", "/odeme/sonuc/hata"]) {
+      const gate = await maintenanceGate(
+        request(path, { method: "POST" }),
+        path,
+        site(true),
+        context
+      )
+      expect(gate).toEqual({ blocked: null, bypassed: false })
+    }
+    for (const method of ["GET", "HEAD"]) {
+      for (const path of ["/odeme/durum", "/odeme/sonuc/x", "/bakim/gir", "/sozlesmeler/kvkk"]) {
+        const gate = await maintenanceGate(request(path, { method }), path, site(true), context)
+        expect(gate, `${method} ${path}`).toEqual({ blocked: null, bypassed: false })
+      }
+    }
+    expect(edge.checkBypass).not.toHaveBeenCalled()
+  })
+
+  it("keeps the dev server's reload socket open in development only", async () => {
+    const path = "/_next/webpack-hmr"
+    const production = await maintenanceGate(request(path), path, site(true), context)
+    expect(production.blocked?.status).toBe(503)
+    const development = await maintenanceGate(request(path), path, site(true), {
+      ...context,
+      development: true,
+    })
+    expect(development).toEqual({ blocked: null, bypassed: false })
   })
 
   it("lets a bypass cookie the backend accepts through, marked", async () => {
@@ -194,6 +272,34 @@ describe("maintenanceGate for a suspended shop", () => {
   it("keeps robots.txt, the sitemaps and a card provider's return open", async () => {
     for (const path of ["/robots.txt", "/sitemap.xml", "/odeme/sonuc", "/odeme/durum/x"]) {
       const gate = await maintenanceGate(request(path), path, site(false, true), context)
+      expect(gate).toEqual({ blocked: null, bypassed: false })
+    }
+  })
+
+  it("takes a write only at a card provider's return (adr/0053 Ek 2026-11-15)", async () => {
+    for (const [path, method] of [
+      ["/odeme/durum", "POST"],
+      ["/odeme/durum/x", "POST"],
+      ["/odeme/sonuc/x", "POST"],
+      ["/robots.txt", "POST"],
+      ["/sitemap.xml", "DELETE"],
+      ["/odeme/sonuc", "PUT"],
+    ] as const) {
+      const gate = await maintenanceGate(
+        request(path, { method }),
+        path,
+        site(false, true),
+        context
+      )
+      expect(gate.blocked?.status, `${method} ${path}`).toBe(503)
+    }
+    for (const path of ["/odeme/sonuc", "/odeme/sonuc/hata"]) {
+      const gate = await maintenanceGate(
+        request(path, { method: "POST" }),
+        path,
+        site(true, true),
+        context
+      )
       expect(gate).toEqual({ blocked: null, bypassed: false })
     }
   })

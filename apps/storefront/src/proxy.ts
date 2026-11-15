@@ -17,6 +17,7 @@ import {
   canonicalHostRedirect,
   indexNowFile,
   isCataloguePage,
+  isFileName,
   isStaticFile,
   normalizedPath,
   resolvesAt,
@@ -80,9 +81,9 @@ export async function proxy(request: NextRequest): Promise<Response> {
   if (pathname === REFRESH_PATH) {
     return NextResponse.next()
   }
-  // The matcher already leaves these out; should one reach here, it is a file, never a page
-  if (isStaticFile(pathname)) {
-    return NextResponse.next()
+  // A file's name, asked of no backend: the file, a 404 where none lives, never a page
+  if (isFileName(pathname)) {
+    return fileResponse(pathname, request.method)
   }
   const visitor = visitorIp(request.headers, env.STOREFRONT_TRUSTED_PROXY_HOPS ?? 0)
   const site = await edgeSite(visitor)
@@ -151,6 +152,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
     nonce,
     csp,
     production: env.NODE_ENV === "production",
+    development: env.NODE_ENV === "development",
     visitorIp: visitor,
   })
   if (gate.blocked) {
@@ -239,12 +241,31 @@ export async function proxy(request: NextRequest): Promise<Response> {
 }
 
 export const config = {
-  // Everything but Next's own build files, the app's metadata files and the
-  // self-hosted faces and the providers' marks (`isStaticFile`): a file is no
-  // page to resolve or report
-  // Exact exclusions: a page whose path only starts like one still passes
-  // through here (its CSP, and the preview header set only here)
-  matcher: [
-    "/((?!_next/static/|_next/image(?:$|/)|favicon\\.ico$|icon\\.svg$|apple-icon\\.png$|manifest\\.webmanifest$|fonts/[a-z-]+\\.[0-9a-f]{10}\\.woff2$|marks/[a-z_]+\\.(?:svg|png)$).*)",
-  ],
+  // Everything but Next's own build files and images: no address skips the proxy only to
+  // land on a page, whose Server Actions would run past the maintenance gate. The
+  // storefront's files come through too and leave at once (`fileResponse`), asked of no
+  // backend; a name only shaped like one (`/favicon.ico`, no such file) is a 404
+  matcher: ["/((?!_next/static/|_next/image(?:$|/)).*)"],
+}
+
+/**
+ * A file's name (`isFileName`): the file itself to GET and HEAD where one
+ * lives (`isStaticFile`), else a bare 404, never the catch-all page (a
+ * page carries the root layout's Server Actions, adr/0053 Ek 2026-11-15).
+ * No other method is a file's: 405.
+ */
+function fileResponse(pathname: string, method: string): Response {
+  if (method !== "GET" && method !== "HEAD") {
+    return new Response(null, { status: 405, headers: { allow: "GET, HEAD" } })
+  }
+  if (isStaticFile(pathname)) {
+    return NextResponse.next()
+  }
+  return new Response(method === "HEAD" ? null : "Not Found", {
+    status: 404,
+    headers: {
+      "content-type": "text/plain; charset=utf-8",
+      "x-content-type-options": "nosniff",
+    },
+  })
 }

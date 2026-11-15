@@ -4,7 +4,7 @@
  * token looks like. Pure: the proxy, the bypass route and the tests share
  * them. Not `server-only`: the proxy runs outside React's server environment.
  */
-import { backendFile } from "../seo/paths"
+import { backendFile, isStaticFile } from "../seo/paths"
 
 /** The page that takes a bypass link (`/bakim/gir?t=<token>`) and sets its cookie. */
 export const BYPASS_PATH = "/bakim/gir"
@@ -50,24 +50,34 @@ export function retryAfterSeconds(expectedAt: string | null, now = Date.now()): 
 const under = (path: string, root: string) => path === root || path.startsWith(`${root}/`)
 
 /**
- * Next's and the browser's own files the storefront serves while dark:
- * the app's icon (`app/icon.svg`), the favicon and a manifest. The build's
- * files (`/_next/static`) never reach the proxy.
+ * Next's own requests that may reach the proxy: the build's files and
+ * images (the matcher leaves them out already), and in development the
+ * dev server's reload socket. Not every `/_next/` path: nothing else of
+ * Next's is a dark shop's business (adr/0061 Ek C15 review L3).
  */
-const STATIC_FILES = new Set([
-  "/favicon.ico",
-  "/icon.svg",
-  "/apple-icon.png",
-  "/manifest.webmanifest",
-])
+const NEXT_OWN = /^\/_next\/(?:static\/|image(?:\/|$))/
+const DEV_SOCKET = "/_next/webpack-hmr"
+
+const isNextOwn = (path: string, development: boolean) =>
+  NEXT_OWN.test(path) || (development && path === DEV_SOCKET)
 
 /**
- * Next's own requests that may reach the proxy: the build's files and
- * images (the matcher leaves them out already) and the dev server's
- * reload socket. Not every `/_next/` path: nothing else of Next's is a
- * dark shop's business (adr/0061 Ek C15 review L3).
+ * The only requests but GET and HEAD a dark shop answers without the
+ * bypass cookie (adr/0053 Ek 2026-11-15): a card provider's return, which
+ * may come back as a POST, at its route handlers' exact paths (route
+ * handlers run no Server Action). A path open by its name is open to look
+ * at, never to act from: every page carries the root layout's Server
+ * Actions (the cart, the cookie choices) and Next runs one posted to any
+ * address a page matches, before the page renders. The bypass link's route
+ * takes GET and HEAD only, so it is not listed.
  */
-const NEXT_OWN = /^\/_next\/(?:static\/|image(?:\/|$)|webpack-hmr$)/
+const OPEN_WRITE_PATHS: ReadonlySet<string> = new Set(["/odeme/sonuc", "/odeme/sonuc/hata"])
+
+const isOpenWrite = (path: string, method: string) =>
+  method === "POST" && OPEN_WRITE_PATHS.has(path)
+
+/** Fail-closed: anything but these two methods, whatever its spelling, is a write. */
+const isRead = (method: string) => method === "GET" || method === "HEAD"
 
 /**
  * robots.txt, the sitemaps and security.txt, by their exact names
@@ -85,19 +95,21 @@ const isCrawlerFile = (path: string) => backendFile(path) !== null
  *   must not meet the maintenance page);
  * - the bypass link's page;
  * - robots.txt and the sitemaps (a 5xx robots.txt stops all crawling);
- * - Next's own files and the dev server's socket, and static files.
+ * - Next's own files (the dev server's socket in development), and the
+ *   storefront's files (`isStaticFile`).
  * The IndexNow key file and the backend's files are answered before the
- * proxy looks at maintenance.
+ * proxy looks at maintenance, the storefront's files too. Open to GET and
+ * HEAD only (`isOpenDuringMaintenance`).
  */
-export function isStorefrontOpenPath(path: string): boolean {
+export function isStorefrontOpenPath(path: string, development = false): boolean {
   return (
     path.startsWith("/onizleme/") ||
     under(path, "/odeme/sonuc") ||
     under(path, "/odeme/durum") ||
     path === BYPASS_PATH ||
     isCrawlerFile(path) ||
-    NEXT_OWN.test(path) ||
-    STATIC_FILES.has(path)
+    isNextOwn(path, development) ||
+    isStaticFile(path)
   )
 }
 
@@ -105,17 +117,21 @@ export function isStorefrontOpenPath(path: string): boolean {
  * What stays open while the platform has suspended the shop (adr/0061
  * §5.5, Ek C15): robots.txt and the sitemaps (crawlers keep the pages), a
  * card provider's return (a payment already started settles), Next's own
- * files and static files. Narrower than maintenance: no preview, no
- * bypass link's page, none of the shop's own open paths; the shop cannot
- * open a suspended storefront.
+ * files and the storefront's files. Narrower than maintenance: no preview,
+ * no bypass link's page, none of the shop's own open paths; the shop
+ * cannot open a suspended storefront. As there, only GET and HEAD go by
+ * the path; a write only to the provider's return (adr/0053 Ek 2026-11-15).
  */
-export function isOpenWhileSuspended(path: string): boolean {
+export function isOpenWhileSuspended(path: string, method: string, development = false): boolean {
+  if (!isRead(method)) {
+    return isOpenWrite(path, method)
+  }
   return (
     under(path, "/odeme/sonuc") ||
     under(path, "/odeme/durum") ||
     isCrawlerFile(path) ||
-    NEXT_OWN.test(path) ||
-    STATIC_FILES.has(path)
+    isNextOwn(path, development) ||
+    isStaticFile(path)
   )
 }
 
@@ -143,19 +159,20 @@ export function isAllowedPath(path: string, allowPaths: readonly string[]): bool
 }
 
 /**
- * A preview is open to look at, never to act from: every page carries the
- * root layout's Server Actions (the cart, the cookie choices), and Next runs
- * one posted to any address its route matches (`/onizleme/x` included)
- * before the page reads the token. So while dark, only GET and HEAD pass
- * there by path; anything else needs the bypass cookie like every page.
+ * Whether a request is answered as usual while the shop is dark, cookie
+ * aside. The storefront's and the shop's open paths are open to look at
+ * (GET, HEAD); anything else passes only at a card provider's return
+ * (adr/0053 Ek 2026-11-15): a Server Action posted to a preview, to an open
+ * page's form (`/iletisim`) or below `/odeme/durum` needs the bypass cookie.
  */
-const isPreviewWrite = (path: string, method: string) =>
-  path.startsWith("/onizleme/") && method !== "GET" && method !== "HEAD"
-
-/** Whether a request is answered as usual while the shop is dark, cookie aside. */
-export const isOpenDuringMaintenance = (
+export function isOpenDuringMaintenance(
   path: string,
   method: string,
-  allowPaths: readonly string[]
-): boolean =>
-  !isPreviewWrite(path, method) && (isStorefrontOpenPath(path) || isAllowedPath(path, allowPaths))
+  allowPaths: readonly string[],
+  development = false
+): boolean {
+  if (!isRead(method)) {
+    return isOpenWrite(path, method)
+  }
+  return isStorefrontOpenPath(path, development) || isAllowedPath(path, allowPaths)
+}
