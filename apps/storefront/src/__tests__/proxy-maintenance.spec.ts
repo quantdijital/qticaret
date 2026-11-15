@@ -113,8 +113,64 @@ describe("the proxy's maintenance gate for writes", () => {
     expect(passed(await visit("/odeme/durum"))).toBe(true)
   })
 
-  it("keeps the dev server's reload socket open in development", async () => {
-    expect(passed(await visit("/_next/webpack-hmr"))).toBe(true)
+  it("darkens what is below the payment pages, their exact paths open", async () => {
+    for (const path of ["/odeme/durum/x", "/odeme/sonuc/x", "/odeme/sonuc/hata/x"]) {
+      expect((await visit(path)).status, path).toBe(503)
+    }
+    for (const path of ["/odeme/durum", "/odeme/sonuc", "/odeme/sonuc/hata"]) {
+      expect(passed(await visit(path)), path).toBe(true)
+    }
+  })
+})
+
+/**
+ * adr/0053 Ek 2026-11-15, second review: a POST to a build file that is not
+ * there falls to the catch-all page, which runs the Server Action it carries.
+ * The matcher sends such a request here (`proxy-matcher.spec.ts`).
+ */
+describe("the proxy under /_next/", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    storeCaches().busy.clear()
+    edge.edgeSite.mockResolvedValue(site(true))
+    edge.resolveForProxy.mockResolvedValue({ type: "entity", path: "/urun/bir-urun" })
+  })
+
+  it("answers anything but GET and HEAD 405 before any 301, dark shop or open", async () => {
+    for (const enabled of [true, false]) {
+      edge.edgeSite.mockResolvedValue(site(enabled))
+      for (const path of [
+        "/_next/static/x.js",
+        "/_next/static/chunks/a.js",
+        "/_next/static/x.js/",
+        "/_next/image",
+        "/_next/data/b/x.json",
+        "/_next/hmr",
+      ]) {
+        for (const method of ["POST", "PUT", "PATCH", "DELETE", "OPTIONS"]) {
+          const response = await visit(path, { method })
+          expect(response.status, `${method} ${path}`).toBe(405)
+          expect(response.headers.get("allow")).toBe("GET, HEAD")
+        }
+      }
+    }
+    expect(edge.edgeSite).not.toHaveBeenCalled()
+  })
+
+  it("passes a build file's and an image's GET and HEAD on to Next, asking no backend", async () => {
+    for (const method of ["GET", "HEAD"]) {
+      for (const path of ["/_next/static/chunks/a.js", "/_next/image", "/_next/image/x"]) {
+        expect(passed(await visit(path, { method })), `${method} ${path}`).toBe(true)
+      }
+    }
+    expect(edge.edgeSite).not.toHaveBeenCalled()
+  })
+
+  it("keeps `/_next/data/` reads as they were: through the gate", async () => {
+    expect((await visit("/_next/data/b/x.json")).status).toBe(503)
+    edge.edgeSite.mockResolvedValue(site(false))
+    expect(passed(await visit("/_next/data/b/x.json"))).toBe(true)
+    expect(edge.edgeSite).toHaveBeenCalledTimes(2)
   })
 })
 

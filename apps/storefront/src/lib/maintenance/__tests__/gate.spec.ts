@@ -1,44 +1,14 @@
 import { NextRequest } from "next/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { EdgeSite } from "@/lib/store-api/edge"
+import { TOKEN, context, request, site } from "./gate-fixtures"
+
+/** adr/0053: the shop's own maintenance, its open paths and the bypass cookie. */
 
 // The backend's answer for a bypass token, as the test sets it
 const edge = vi.hoisted(() => ({ checkBypass: vi.fn() }))
 vi.mock("../../store-api/edge", () => edge)
 
 const { maintenanceGate } = await import("../gate")
-
-const TOKEN = `mnb_AbCdEfGhIjKlMnOp.zzzzzzzz.${"A".repeat(43)}`
-
-const site = (enabled: boolean, suspended = false): EdgeSite => ({
-  suspended,
-  indexing: true,
-  canonicalHost: null,
-  indexNowKey: null,
-  shopName: "Mağaza",
-  tracking: { ga4: null, meta: null },
-  maintenance: {
-    enabled,
-    title: null,
-    message: null,
-    expectedAt: null,
-    allowPaths: ["/iletisim", "/sozlesmeler/*"],
-  },
-})
-
-const context = {
-  nonce: "n",
-  csp: "default-src 'self'",
-  production: false,
-  development: false,
-  visitorIp: null,
-}
-
-const request = (path: string, init: { method?: string; cookie?: string } = {}) =>
-  new NextRequest(`http://localhost:8000${path}`, {
-    method: init.method ?? "GET",
-    headers: init.cookie ? { cookie: init.cookie } : {},
-  })
 
 describe("maintenanceGate", () => {
   beforeEach(() => {
@@ -157,23 +127,12 @@ describe("maintenanceGate", () => {
       expect(gate).toEqual({ blocked: null, bypassed: false })
     }
     for (const method of ["GET", "HEAD"]) {
-      for (const path of ["/odeme/durum", "/odeme/sonuc/x", "/bakim/gir", "/sozlesmeler/kvkk"]) {
+      for (const path of ["/odeme/durum", "/odeme/sonuc/hata", "/bakim/gir", "/sozlesmeler/kvkk"]) {
         const gate = await maintenanceGate(request(path, { method }), path, site(true), context)
         expect(gate, `${method} ${path}`).toEqual({ blocked: null, bypassed: false })
       }
     }
     expect(edge.checkBypass).not.toHaveBeenCalled()
-  })
-
-  it("keeps the dev server's reload socket open in development only", async () => {
-    const path = "/_next/webpack-hmr"
-    const production = await maintenanceGate(request(path), path, site(true), context)
-    expect(production.blocked?.status).toBe(503)
-    const development = await maintenanceGate(request(path), path, site(true), {
-      ...context,
-      development: true,
-    })
-    expect(development).toEqual({ blocked: null, bypassed: false })
   })
 
   it("lets a bypass cookie the backend accepts through, marked", async () => {
@@ -240,78 +199,5 @@ describe("maintenanceGate", () => {
       { ...context, production: true }
     )
     expect(hosted).toEqual({ blocked: null, bypassed: true })
-  })
-})
-
-/** adr/0061 Ek C15: the platform's suspension, open or dark the shop's maintenance. */
-describe("maintenanceGate for a suspended shop", () => {
-  beforeEach(() => {
-    edge.checkBypass.mockReset()
-    edge.checkBypass.mockResolvedValue("open")
-  })
-
-  it("darkens the shop's open paths and previews, a bypass cookie asked nothing", async () => {
-    for (const maintenance of [false, true]) {
-      for (const path of ["/", "/iletisim", "/sozlesmeler/kvkk", "/onizleme/x", "/bakim/gir"]) {
-        const gate = await maintenanceGate(
-          request(path, { cookie: `qt_bypass=${TOKEN}` }),
-          path,
-          site(maintenance, true),
-          context
-        )
-        expect(gate.blocked?.status).toBe(503)
-        expect(gate.blocked?.headers.get("retry-after")).toBe("3600")
-        // The cookie is the shop's maintenance business: neither checked nor cleared here
-        expect(gate.blocked?.headers.get("set-cookie")).toBeNull()
-        expect(await gate.blocked?.text()).toContain("Mağaza şu anda hizmet vermiyor")
-      }
-    }
-    expect(edge.checkBypass).not.toHaveBeenCalled()
-  })
-
-  it("keeps robots.txt, the sitemaps and a card provider's return open", async () => {
-    for (const path of ["/robots.txt", "/sitemap.xml", "/odeme/sonuc", "/odeme/durum/x"]) {
-      const gate = await maintenanceGate(request(path), path, site(false, true), context)
-      expect(gate).toEqual({ blocked: null, bypassed: false })
-    }
-  })
-
-  it("takes a write only at a card provider's return (adr/0053 Ek 2026-11-15)", async () => {
-    for (const [path, method] of [
-      ["/odeme/durum", "POST"],
-      ["/odeme/durum/x", "POST"],
-      ["/odeme/sonuc/x", "POST"],
-      ["/robots.txt", "POST"],
-      ["/sitemap.xml", "DELETE"],
-      ["/odeme/sonuc", "PUT"],
-    ] as const) {
-      const gate = await maintenanceGate(
-        request(path, { method }),
-        path,
-        site(false, true),
-        context
-      )
-      expect(gate.blocked?.status, `${method} ${path}`).toBe(503)
-    }
-    for (const path of ["/odeme/sonuc", "/odeme/sonuc/hata"]) {
-      const gate = await maintenanceGate(
-        request(path, { method: "POST" }),
-        path,
-        site(true, true),
-        context
-      )
-      expect(gate).toEqual({ blocked: null, bypassed: false })
-    }
-  })
-
-  it("answers a HEAD with the headers alone", async () => {
-    const gate = await maintenanceGate(
-      request("/", { method: "HEAD" }),
-      "/",
-      site(false, true),
-      context
-    )
-    expect(gate.blocked?.status).toBe(503)
-    expect(await gate.blocked?.text()).toBe("")
   })
 })

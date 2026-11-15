@@ -35,15 +35,13 @@ export async function maintenanceGate(
     nonce: string
     csp: string
     production: boolean
-    /** The dev server's reload socket stays open only here. */
-    development: boolean
     visitorIp: string | null
   }
 ): Promise<MaintenanceGate> {
   // The platform's suspension (adr/0061 Ek C15) before the shop's own maintenance: no
   // open path of the shop's and no bypass cookie opens it
   if (site.suspended) {
-    return isOpenWhileSuspended(pathname, request.method, context.development)
+    return isOpenWhileSuspended(pathname, request.method)
       ? { blocked: null, bypassed: false }
       : {
           blocked: maintenanceResponse(suspendedNotice(site.shopName), {
@@ -56,7 +54,7 @@ export async function maintenanceGate(
   const { maintenance } = site
   if (
     !maintenance.enabled ||
-    isOpenDuringMaintenance(pathname, request.method, maintenance.allowPaths, context.development)
+    isOpenDuringMaintenance(pathname, request.method, maintenance.allowPaths)
   ) {
     return { blocked: null, bypassed: false }
   }

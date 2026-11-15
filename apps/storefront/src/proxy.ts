@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import type { NextRequest, ProxyConfig } from "next/server"
 import { LANDING_COOKIE, landingCookieValue, landingOf } from "./lib/cart/landing"
 import { panelOrigins, paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
 import { maintenanceGate } from "./lib/maintenance/gate"
+import { isNextOwn } from "./lib/maintenance/rules"
 import {
   GONE_HEADER,
   GONE_PAGE_PATH,
@@ -76,6 +77,19 @@ export async function proxy(request: NextRequest): Promise<Response> {
   // The address as sent: Next's `nextUrl` drops a trailing slash on its own,
   // which would hide the very form we answer with a 301
   const { pathname, search } = new URL(request.url)
+  // Next's own address space, before any 301: nothing there takes a write, and a POST
+  // to a build file that is not there would fall to the catch-all page and run the
+  // Server Action it carries (adr/0053 Ek 2026-11-15)
+  if (pathname.startsWith("/_next/")) {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return new Response(null, { status: 405, headers: { allow: "GET, HEAD" } })
+    }
+    // A build file's or an image's GET came only for a header the matcher looks at: on to
+    // Next, no backend
+    if (isNextOwn(pathname)) {
+      return NextResponse.next()
+    }
+  }
   // The backend's refresh signal (adr/0048 Ek 2026-11-03) goes straight to its route: no host
   // 301, no normalising, no maintenance page (the backend follows no redirect), nothing resolved
   if (pathname === REFRESH_PATH) {
@@ -152,7 +166,6 @@ export async function proxy(request: NextRequest): Promise<Response> {
     nonce,
     csp,
     production: env.NODE_ENV === "production",
-    development: env.NODE_ENV === "development",
     visitorIp: visitor,
   })
   if (gate.blocked) {
@@ -240,13 +253,29 @@ export async function proxy(request: NextRequest): Promise<Response> {
   return response
 }
 
+/**
+ * Next's build files and images skip the proxy, but for a request that may
+ * carry a Server Action (`server-action-request-meta.js`: a POST with a
+ * `Next-Action` header, or a form's content type): a build file that is
+ * not there falls to the catch-all page, which would run it (`/_next/image/x`
+ * too, but for the image handler's catching it first; not relied on). A
+ * `has` value is a case-sensitive regex while a content type's case is the
+ * sender's, so the key alone: a browser's GET of a chunk or an image sends
+ * no content type. Literals only: Next reads this object from the source at
+ * build time (`extract-const-value.js` warns of an identifier and drops the
+ * whole matcher).
+ */
 export const config = {
-  // Everything but Next's own build files and images: no address skips the proxy only to
-  // land on a page, whose Server Actions would run past the maintenance gate. The
-  // storefront's files come through too and leave at once (`fileResponse`), asked of no
-  // backend; a name only shaped like one (`/favicon.ico`, no such file) is a 404
-  matcher: ["/((?!_next/static/|_next/image(?:$|/)).*)"],
-}
+  matcher: [
+    // Everything but Next's own build files and images: no address skips the proxy only to
+    // land on a page, whose Server Actions would run past the maintenance gate. The
+    // storefront's files come through too and leave at once (`fileResponse`), asked of no
+    // backend; a name only shaped like one (`/favicon.ico`, no such file) is a 404
+    "/((?!_next/static/|_next/image(?:$|/)).*)",
+    { source: "/_next/:path*", has: [{ type: "header", key: "next-action" }] },
+    { source: "/_next/:path*", has: [{ type: "header", key: "content-type" }] },
+  ],
+} satisfies ProxyConfig
 
 /**
  * A file's name (`isFileName`): the file itself to GET and HEAD where one

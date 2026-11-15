@@ -1,17 +1,20 @@
-import { readdirSync } from "node:fs"
+import { readFileSync, readdirSync } from "node:fs"
+import type { IncomingHttpHeaders } from "node:http"
 import { join } from "node:path"
+import { extractExportedConstValue } from "next/dist/build/analysis/extract-const-value"
+import { parseModule } from "next/dist/build/analysis/parse-module"
+import { loadBindings } from "next/dist/build/swc"
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server"
 import { describe, expect, it } from "vitest"
 import { FONT_FILES } from "@/app/fonts"
 import { SERVED_FILES, isFileName, isStaticFile } from "@/lib/seo/paths"
 import { shopMarks } from "@/lib/views/card-extras"
 import { config } from "../proxy"
 
-// As Next 16 compiles the matcher (`.next/server/functions-config-manifest.json`): the
-// pattern as written, with an optional data prefix and RSC suffix around it
-const matcher = new RegExp(
-  `^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:${config.matcher[0] ?? ""})(\\.json|\\.rsc|\\.segments\\/.+\\.segment\\.rsc)?[\\/#\\?]?$`
-)
-const proxied = (pathname: string) => matcher.test(pathname)
+// Next's own matching (`getMiddlewareMatchers` + `getMiddlewareRouteMatcher`), the one its
+// router runs on every request: the source compiled as the build compiles it, `has` included
+const proxied = (pathname: string, headers: IncomingHttpHeaders = {}) =>
+  unstable_doesMiddlewareMatch({ config, url: `http://localhost:8000${pathname}`, headers })
 
 const ROOT = join(__dirname, "..", "..")
 const filesIn = (dir: string) =>
@@ -20,10 +23,51 @@ const filesIn = (dir: string) =>
     .map((entry) => entry.name)
 
 describe("the proxy's matcher", () => {
-  it("leaves out Next's build files and images only", () => {
-    for (const path of ["/_next/static/chunks/main.js", "/_next/image", "/_next/image/x"]) {
-      expect(proxied(path)).toBe(false)
+  it("leaves out Next's build files and images when nothing could carry a Server Action", () => {
+    for (const path of [
+      "/_next/static/chunks/main.js",
+      "/_next/static/chunks/a.js",
+      "/_next/static/x.js",
+      "/_next/image",
+      "/_next/image/x",
+    ]) {
+      expect(proxied(path), path).toBe(false)
+      expect(proxied(path, { accept: "*/*", "next-router-prefetch": "1" }), path).toBe(false)
     }
+  })
+
+  // adr/0053 Ek 2026-11-15, second review: a build file that is not there falls to the
+  // catch-all page, which runs a Server Action posted to it (`server-action-request-meta.js`)
+  it("takes a build file's or an image's request that may carry a Server Action", () => {
+    for (const path of [
+      "/_next/static/x.js",
+      "/_next/static/chunks/a.js",
+      "/_next/static/",
+      "/_next/image",
+      "/_next/image/x",
+    ]) {
+      expect(proxied(path, { "next-action": "7f00aa" }), path).toBe(true)
+      for (const type of [
+        "multipart/form-data; boundary=x",
+        "application/x-www-form-urlencoded",
+        "Multipart/Form-Data; boundary=x",
+        "text/plain;charset=UTF-8",
+      ]) {
+        expect(proxied(path, { "content-type": type }), `${path} ${type}`).toBe(true)
+      }
+    }
+  })
+
+  // The build reads `config` from the source, not the module: a value it cannot read is
+  // only warned about and the proxy then runs on every request, its matcher gone
+  it("is read from the source by the build as written", async () => {
+    await loadBindings()
+    const source = readFileSync(join(ROOT, "src", "proxy.ts"), "utf8")
+    const read = extractExportedConstValue(
+      (await parseModule("proxy.ts", source)) as Parameters<typeof extractExportedConstValue>[0],
+      "config"
+    )
+    expect(read).toEqual({ value: config })
   })
 
   // adr/0053 Ek 2026-11-15: an address the proxy skips falls to a page when no file lives
@@ -32,6 +76,7 @@ describe("the proxy's matcher", () => {
     for (const path of [
       "/",
       "/urun/keten-gomlek",
+      "/onizleme/x",
       "/favicon.ico",
       "/icon.svg",
       "/apple-icon.png",
@@ -43,10 +88,12 @@ describe("the proxy's matcher", () => {
       "/icon.svg-rehberi",
       "/fonts/rehber",
       "/_next/imagex",
+      "/_next/staticx",
       "/_next/data/x.json",
-      "/_next/webpack-hmr",
+      "/_next/hmr",
+      "/%5Fnext/static/x.js",
     ]) {
-      expect(proxied(path)).toBe(true)
+      expect(proxied(path), path).toBe(true)
     }
   })
 })

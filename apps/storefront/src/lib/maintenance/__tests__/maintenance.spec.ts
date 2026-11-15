@@ -37,6 +37,10 @@ describe("the paths a dark shop keeps open", () => {
     "/odeme",
     "/odeme/kart",
     "/odeme/sonuclar",
+    // The payment pages by their exact paths: nothing lives below them
+    "/odeme/sonuc/x",
+    "/odeme/sonuc/hata/x",
+    "/odeme/durum/x",
     "/sepet",
     "/hesap/giris",
     "/urun/keten-gomlek",
@@ -50,6 +54,9 @@ describe("the paths a dark shop keeps open", () => {
     "/sitemap.xml/x",
     "/_next/data/x.json",
     "/_next/x",
+    // Next 16's dev socket is `/_next/hmr`, an upgrade the router takes before the proxy
+    "/_next/webpack-hmr",
+    "/_next/hmr",
     "/kategoriler",
   ])("closes %s", (path) => {
     expect(isStorefrontOpenPath(path)).toBe(false)
@@ -119,20 +126,19 @@ describe("the paths a dark shop keeps open", () => {
     }
   })
 
-  it("keeps the dev server's reload socket open in development only", () => {
-    expect(isStorefrontOpenPath("/_next/webpack-hmr", true)).toBe(true)
-    expect(isStorefrontOpenPath("/_next/webpack-hmr")).toBe(false)
-    expect(isOpenWhileSuspended("/_next/webpack-hmr", "GET", true)).toBe(true)
-    expect(isOpenWhileSuspended("/_next/webpack-hmr", "GET")).toBe(false)
-  })
-
   it("keeps a suspended shop's open paths to GET and HEAD as well", () => {
-    for (const path of ["/odeme/durum", "/odeme/sonuc/x", "/robots.txt"]) {
+    for (const path of ["/odeme/durum", "/robots.txt"]) {
       expect(isOpenWhileSuspended(path, "GET")).toBe(true)
       expect(isOpenWhileSuspended(path, "HEAD")).toBe(true)
       for (const method of ["POST", "PUT", "PATCH", "DELETE", "OPTIONS"]) {
         expect(isOpenWhileSuspended(path, method)).toBe(false)
       }
+    }
+    for (const path of ["/odeme/sonuc", "/odeme/sonuc/hata"]) {
+      expect(isOpenWhileSuspended(path, "GET"), path).toBe(true)
+    }
+    for (const path of ["/odeme/durum/x", "/odeme/sonuc/x", "/odeme/sonuc/hata/x"]) {
+      expect(isOpenWhileSuspended(path, "GET"), path).toBe(false)
     }
   })
 })
