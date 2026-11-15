@@ -112,6 +112,7 @@ describe("every admin write route has a plan decision", () => {
       "seo.sitemap",
       "seo.url_style",
       "tr_address.sync",
+      "wholesale.carts",
       "wholesale.sync",
     ]
     expect([...PLAN_OPEN_JOBS, ...closedJobs].sort()).toEqual([...JOB_TYPE_KEYS].sort())
@@ -148,8 +149,9 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/bulk-messages/:id/pause",
     "POST /admin/bulk-messages/:id/cancel",
     "DELETE /admin/google",
-    // ADR-0068 §9: a wholesaler closed is access taken away
+    // ADR-0068 §9: a wholesaler closed, a pending invitation taken back: access taken away
     "POST /admin/wholesale/accounts/:id/deactivate",
+    "DELETE /admin/wholesale/accounts/:id",
   ])("keeps %s open", (route) => {
     expect(decisionOf(route)).toEqual({ allowed: true, reason: "open" })
   })
@@ -193,7 +195,6 @@ describe("the plan guard's allow-list", () => {
     // ADR-0068 §9: a wholesaler opened, changed, reopened, invited again or priced sells anew
     "POST /admin/wholesale/accounts",
     "POST /admin/wholesale/accounts/:id",
-    "DELETE /admin/wholesale/accounts/:id",
     "POST /admin/wholesale/accounts/:id/reactivate",
     "POST /admin/wholesale/accounts/:id/invitation",
     "POST /admin/wholesale/accounts/:id/prices",

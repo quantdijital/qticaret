@@ -160,8 +160,10 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/marketing-feeds/token",
   ]),
   ...open(POST, ["/admin/api-access/:id/revoke", "/admin/staff/members/:id/reset-mfa"]),
-  // ADR-0068 §9: a wholesaler closed (pays retail from the next request); reopening sells anew
+  // ADR-0068 §9: a wholesaler closed (pays retail from the next request), a pending
+  // invitation taken back (review L6: taking access away); reopening sells anew
   { methods: POST, path: "/admin/wholesale/accounts/:id/deactivate" },
+  { methods: DELETE, path: "/admin/wholesale/accounts/:id" },
 ]
 
 const closed = (paths: readonly string[]): Rule[] =>

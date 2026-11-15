@@ -25,6 +25,7 @@ import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 import { requireFeature } from "./require-feature"
 import { guardWholesaleRecords, hideWholesaleRecords } from "./wholesale-guard"
+import { guardWholesaleLinkFields } from "./wholesale-link-fields"
 import { guardWholesaleMembers, hideWholesalePriceRows } from "./wholesale-reads"
 
 type Middleware = (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => unknown
@@ -120,6 +121,11 @@ export const WHOLESALE_ROUTES = [
     methods: ["POST" as const],
     middlewares: staff(validateAndTransformBody(AdminPostWholesalePrices)),
   },
+  // Review M3: the customer's wholesale link is the managers' to expand, never the Store's
+  ...["/admin/*", "/store/*"].map((matcher) => ({
+    matcher,
+    middlewares: [guardWholesaleLinkFields],
+  })),
   // ADR-0068 §9: no write round the module to its groups and lists, and no read of them by id
   ...GUARDED_ROUTES.map(({ matcher, check }) => ({
     matcher,

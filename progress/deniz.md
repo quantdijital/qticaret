@@ -9,6 +9,7 @@
 3. **Bakım modunda backend** (#43 bulgu 2'nin ikinci yarısı, adr/0053): ödeme ve sipariş reddedilir; personelin atlatma çereziyle denemesi vitrinin imzalı başlığıyla geçer. Güvenlik incelemesi şart. Dosyalar: backend `api/http/`, vitrin `proxy.ts` / `lib/maintenance` (Oğuzhan'ın #43'ü birleştikten sonra, üstüne).
 4. **Sade klasik katalog üst bilgisi** (adr/0066 uyarlaması): `deniz/katalog-ust-sade` olduğu gibi birleşmez. (a) #42 (G2) birleşince bölüm ayarları: araçların yeri (menü çubuğu / üst satır) ve üst bağlantıların yeri (şerit / menü çubuğu sonu), yeni alanlar, varsayılan bugünkü çizim; (b) ADR-0067 ve G5'ten sonra Katalog görünümünün verisine sade değerler (şerit kapalı, düz menü, dar arama). Görünüş basamaklarını Oğuzhan'ın adlarıyla kullanırım, ayrıca açmam. İş bitince dal silinir.
 5. **ADR-0068 toptancı müşteriler ve toptan fiyat** (Kabul; 1a kodlanıyor, `deniz/toptanci-1a`). Dilim 3 vitrin/tema dosyalarına (`parts/Price.tsx`, `LinePrice.tsx`, sepet ve ödeme özeti) yalnız yeni veri ekler; başlamadan Oğuzhan'a haber.
+   - **Açık risk (1b güvenlik incelemesi M1):** toptancı kapatılınca açık sepetlerin hepsi yeniden fiyatlanır; iki denemede de fiyatlanamayan sepet sayılıp yanıtta ve denetim kaydında görünür ama eski toptan fiyatla ödemeye gidebilir. Bunu dilim 4'teki tamamlama kancası (`wholesale.prices_changed`) kapatır; o gelene kadar risk açık.
 
 ## 2026-11-15: vitrin işleri ve ortak çalışma
 

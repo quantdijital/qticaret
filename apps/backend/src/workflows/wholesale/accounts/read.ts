@@ -27,6 +27,8 @@ export interface AccountRead {
   sync_pending: boolean
   invited_at: Date | null
   invitation_expires_at: Date | null
+  /** While pending: how many times the invitation went out, the first counted. */
+  invitations_sent: number | null
   activated_at: Date | null
   deactivated_at: Date | null
   created_at: Date
@@ -68,7 +70,10 @@ function readOf(
     sync_pending: requested !== null && (synced === null || synced < requested),
     invited_at: invited,
     invitation_expires_at:
-      account.status === "pending" && invited ? inviteExpiresAt(invited) : null,
+      account.status === "pending" && invited
+        ? inviteExpiresAt({ invitedAt: invited, openedAt: account.created_at })
+        : null,
+    invitations_sent: account.status === "pending" ? account.invite_count : null,
     activated_at: date(account.activated_at),
     deactivated_at: date(account.deactivated_at),
     created_at: new Date(account.created_at),

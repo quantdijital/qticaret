@@ -8,6 +8,7 @@ import type { CustomerNames } from "../../../lib/wholesale"
 import { BILLING_PROFILE_MODULE } from "../../../modules/billing-profile"
 import type BillingProfileModuleService from "../../../modules/billing-profile/service"
 import type { ProtectedProfileData } from "../../../modules/billing-profile/service"
+import { provenCustomer } from "../../account/proven-customer"
 import { accountById, wholesale } from "./account-rows"
 
 /**
@@ -26,7 +27,12 @@ interface CustomerRow extends CustomerNames {
 
 const NAME_FIELDS = ["id", "email", "has_account", "first_name", "last_name", "company_name"]
 
-/** The customer with a sign-in at this address (the address proven at sign-up), or null. */
+/**
+ * The customer with a sign-in at this address who has proven they own it
+ * (`provenCustomer`), or null. An account registered with the address but
+ * never confirmed counts as none (security review H1): the wholesaler is
+ * then invited, and the account is taken on a proven sign-in.
+ */
 export async function registeredCustomer(
   container: Container,
   email: string
@@ -36,7 +42,8 @@ export async function registeredCustomer(
     fields: NAME_FIELDS,
     filters: { email: { $ilike: likeLiteral(normalizeEmail(email)) }, has_account: true },
   })
-  return (data[0] as CustomerRow | undefined) ?? null
+  const customer = (data[0] as CustomerRow | undefined) ?? null
+  return customer && (await provenCustomer(container, customer.id)) ? customer : null
 }
 
 /**
@@ -93,6 +100,10 @@ export const activateAccountStep = createStep(
   async (input: { id: string; customer_id: string }, { container }) => {
     const account = await accountById(container, input.id)
     if (account.status !== "pending") {
+      // Taken by this customer already: nothing to do; bound to another meanwhile: refused (L1)
+      if (account.customer_id !== input.customer_id) {
+        throw new ConflictError("wholesale.account_not_pending")
+      }
       return new StepResponse({ fill: {} }, null)
     }
     const customer = await customerNames(container, input.customer_id)

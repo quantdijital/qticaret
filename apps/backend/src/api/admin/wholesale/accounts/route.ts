@@ -6,6 +6,7 @@ import { createAccountWorkflow } from "../../../../workflows/wholesale/accounts/
 import { readAccounts } from "../../../../workflows/wholesale/accounts/read"
 import { registeredCustomer } from "../../../../workflows/wholesale/steps/account-customer"
 import { queueWholesaleSync } from "../../../../workflows/wholesale/queue"
+import { AUDIT_RESOURCE_ID } from "../../../http/audit/notes"
 import type {
   AdminGetWholesaleAccountsType,
   AdminPostWholesaleAccountType,
@@ -80,6 +81,8 @@ export async function POST(
   if (body.percent !== null) {
     await queueWholesaleSync(req.scope, actor)
   }
+  // The entry names the account made (review I1)
+  res.locals[AUDIT_RESOURCE_ID] = result.id
   res.status(201).json({
     account: await accountViewOf(req, result.id),
     message: result.message,

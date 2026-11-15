@@ -15,6 +15,7 @@ const account = (fields: Partial<AccountRead>): AccountRead => ({
   sync_pending: false,
   invited_at: null,
   invitation_expires_at: null,
+  invitations_sent: null,
   activated_at: null,
   deactivated_at: null,
   created_at: new Date(0),

@@ -11,6 +11,7 @@ import {
 import { acquireLockStep, createRemoteLinkStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { isInviteLive, normalizeEmail } from "../../../lib/wholesale"
 import { WHOLESALE_MODULE } from "../../../modules/wholesale"
+import { provenCustomer } from "../../account/proven-customer"
 import { activateAccountStep, writeCustomerNamesStep } from "../steps/account-customer"
 import { wholesale } from "../steps/account-rows"
 import { repriceCartsStep } from "../steps/carts"
@@ -19,12 +20,12 @@ import { syncMembershipsStep } from "../steps/memberships"
 type Container = Pick<MedusaContainer, "resolve">
 
 /**
- * The pending account a signed-in customer may take (ADR-0068 §3), on the
- * proof `attachGuestOrders` takes: an account with a sign-in (signing in
- * proved the address: an e-mail login is confirmed first, a social
- * provider vouches for it), whose address is the invitation's, with no
- * wholesale account of its own, the invitation not past its 90 days.
- * Null when there is none: the usual answer, and a cheap one.
+ * The pending account a signed-in customer may take (ADR-0068 §3): the
+ * invitation's address is theirs, they have no wholesale account of their
+ * own, the invitation is not past its days, and they have proven the
+ * address (security review H1: `has_account` alone is not proof; see
+ * `provenCustomer`). Null when there is none: the usual answer, and a
+ * cheap one, the proof read last.
  */
 export async function claimableAccount(
   container: Container,
@@ -43,16 +44,22 @@ export async function claimableAccount(
   const service = wholesale(container)
   const [pending] = await service.listWholesaleAccounts(
     { email: normalizeEmail(customer.email), status: "pending" },
-    { select: ["id", "invited_at"], take: 1 }
+    { select: ["id", "invited_at", "created_at"], take: 1 }
   )
-  if (!pending || !isInviteLive(pending.invited_at ?? null, now)) {
+  if (
+    !pending ||
+    !isInviteLive({ invitedAt: pending.invited_at ?? null, openedAt: pending.created_at }, now)
+  ) {
     return null
   }
   const own = await service.listWholesaleAccounts(
     { customer_id: customerId },
     { select: ["id"], take: 1 }
   )
-  return own.length > 0 ? null : pending.id
+  if (own.length > 0) {
+    return null
+  }
+  return (await provenCustomer(container, customerId)) ? pending.id : null
 }
 
 const findClaimStep = createStep(
@@ -65,11 +72,15 @@ const findClaimStep = createStep(
  * The invited wholesaler signed in (ADR-0068 §3): the pending account
  * becomes theirs and active, the names it held handed to the customer
  * record where blank, linked, the customer in its groups (out of the
- * segments'), and an open cart priced again. Run again it finds nothing.
- * No Store write route: it runs on the customer reading their account.
+ * segments'), and their open carts priced again. Under the customer's
+ * lock and the account's (the one staff changes take, review L1); the
+ * activation refuses an account bound to someone else meanwhile. Run
+ * again it finds nothing. No Store write route: it runs on the customer
+ * reading their account. Kept out of the workflow store: names pass
+ * through it (review L3).
  */
 export const claimAccountWorkflow = createWorkflow(
-  "wholesale-claim-account",
+  { name: "wholesale-claim-account", store: false },
   (input: { customer_id: string }) => {
     const lock = transform({ input }, ({ input }) => `wholesale-claim:${input.customer_id}`)
     acquireLockStep({ key: lock, timeout: 5, ttl: 60 })
@@ -83,6 +94,10 @@ export const claimAccountWorkflow = createWorkflow(
         id: found.account_id ?? "",
         customer_id: input.customer_id,
       }))
+      const accountLock = transform({ bound }, ({ bound }) => `wholesale-account:${bound.id}`)
+      acquireLockStep({ key: accountLock, timeout: 5, ttl: 60 }).config({
+        name: "wholesale-claim-account-lock",
+      })
       const activated = activateAccountStep(bound)
       writeCustomerNamesStep(
         transform({ input, activated }, ({ input, activated }) => ({
@@ -107,6 +122,7 @@ export const claimAccountWorkflow = createWorkflow(
           changed: moved.added + moved.removed > 0,
         }))
       )
+      releaseLockStep({ key: accountLock }).config({ name: "wholesale-claim-account-unlock" })
       return bound
     })
     releaseLockStep({ key: lock })

@@ -47,7 +47,8 @@ export interface CreateAccountInput {
  * and never undoes the rest.
  */
 export const createAccountWorkflow = createWorkflow(
-  "wholesale-create-account",
+  // The address, names and sealed tax id pass through it: kept out of the workflow store (L3)
+  { name: "wholesale-create-account", store: false },
   (input: CreateAccountInput) => {
     const lock = transform(
       { input },

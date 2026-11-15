@@ -9,18 +9,63 @@ export type AccountStatus = "pending" | "active" | "inactive"
 /** An invitation not taken up is deleted after this many days (decision 13); a resend starts it again. */
 export const INVITE_DAYS = 90
 
+/**
+ * However often it is resent, an invitation ends this many days after the
+ * account was opened (its first invitation): a resend restarts the 90 days
+ * up to this cap, never past it (security review L2).
+ */
+export const INVITE_CAP_DAYS = 180
+
+/** Resends one invitation may have (the first send not counted). */
+export const MAX_RESENDS = 5
+
+/** The shortest time between two sends of one invitation. */
+export const RESEND_COOLDOWN_MS = 60 * 60 * 1000
+
 const DAY = 24 * 60 * 60 * 1000
 
-/** When an invitation sent at `invitedAt` stops being taken up. */
-export const inviteExpiresAt = (invitedAt: Date): Date =>
-  new Date(invitedAt.getTime() + INVITE_DAYS * DAY)
+/** An invitation's sends: the last one and the first (the account's opening). */
+export interface InviteDates {
+  invitedAt: Date | string | null
+  openedAt: Date | string
+}
+
+/** When an invitation stops being taken up: 90 days from its last send, at most 180 from the first. */
+export function inviteExpiresAt(dates: { invitedAt: Date | string; openedAt: Date | string }) {
+  const last = new Date(dates.invitedAt).getTime() + INVITE_DAYS * DAY
+  const cap = new Date(dates.openedAt).getTime() + INVITE_CAP_DAYS * DAY
+  return new Date(Math.min(last, cap))
+}
 
 /** Whether an invitation may still be taken up at `now`. */
-export const isInviteLive = (invitedAt: Date | string | null, now: Date): boolean =>
-  invitedAt !== null && inviteExpiresAt(new Date(invitedAt)) > now
+export const isInviteLive = (dates: InviteDates, now: Date): boolean =>
+  dates.invitedAt !== null &&
+  inviteExpiresAt({ invitedAt: dates.invitedAt, openedAt: dates.openedAt }) > now
 
-/** The cut-off: a pending account invited before it is past its 90 days. */
-export const inviteCutoff = (now: Date): Date => new Date(now.getTime() - INVITE_DAYS * DAY)
+/** The cut-offs: invited last before the first, or opened before the second, it is past its days. */
+export const inviteCutoff = (now: Date): { invitedBefore: Date; openedBefore: Date } => ({
+  invitedBefore: new Date(now.getTime() - INVITE_DAYS * DAY),
+  openedBefore: new Date(now.getTime() - INVITE_CAP_DAYS * DAY),
+})
+
+/**
+ * Why a resend is refused now, or null (security review L2): an hour
+ * since the last send, five resends at most, and never for an invitation
+ * already past its days (it is deleted; open the wholesaler anew).
+ */
+export function resendRefusal(
+  account: { invited_at: Date | string | null; created_at: Date | string; invite_count: number },
+  now: Date
+): string | null {
+  if (!isInviteLive({ invitedAt: account.invited_at, openedAt: account.created_at }, now)) {
+    return "wholesale.invite_expired"
+  }
+  if (account.invite_count > MAX_RESENDS) {
+    return "wholesale.invite_limit"
+  }
+  const last = account.invited_at ? new Date(account.invited_at).getTime() : 0
+  return now.getTime() - last < RESEND_COOLDOWN_MS ? "wholesale.invite_too_soon" : null
+}
 
 /** An address as accounts are kept and matched: trimmed, lower case. */
 export const normalizeEmail = (email: string): string => email.trim().toLowerCase()

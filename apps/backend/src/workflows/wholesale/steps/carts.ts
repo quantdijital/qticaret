@@ -14,8 +14,8 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { errorSummary, logger } from "../../../lib/logging"
 
-// A customer's open carts, newest first; an older one is priced again when next touched
-const OPEN_CARTS = 20
+// A customer's open carts are read this many at a time
+const CART_PAGE = 100
 
 /**
  * One cart's lines priced again from its customer's groups as they are
@@ -37,43 +37,82 @@ export const repriceCartWorkflow = createWorkflow(
   }
 )
 
-/** The customer's carts not yet ordered. */
-export async function openCartsOf(
-  container: Pick<MedusaContainer, "resolve">,
+type Container = Pick<MedusaContainer, "resolve">
+
+/** Every cart of the customer not yet ordered, a page at a time. */
+export async function openCartsOf(container: Container, customerId: string): Promise<string[]> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const ids: string[] = []
+  for (let skip = 0; ; skip += CART_PAGE) {
+    const { data } = await query.graph({
+      entity: "cart",
+      fields: ["id"],
+      filters: { customer_id: customerId, completed_at: null },
+      pagination: { skip, take: CART_PAGE, order: { id: "ASC" } },
+    })
+    ids.push(...(data as { id: string }[]).map((cart) => cart.id))
+    if (data.length < CART_PAGE) {
+      return ids
+    }
+  }
+}
+
+export interface RepriceCounts {
+  repriced: number
+  /** Carts that failed twice: named in the log, counted in the answer and the audit entry. */
+  failed: number
+}
+
+/** One cart priced again; a failure is tried once more. */
+async function repriceOne(container: Container, cartId: string): Promise<boolean> {
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      await repriceCartWorkflow(container as MedusaContainer).run({ input: { cart_id: cartId } })
+      return true
+    } catch (error) {
+      logger.warn({
+        event: "wholesale.cart_reprice_failed",
+        cart_id: cartId,
+        attempt,
+        err: errorSummary(error),
+      })
+    }
+  }
+  return false
+}
+
+/** Every open cart of the customer priced again from their groups as they are now. */
+export async function repriceCustomerCarts(
+  container: Container,
   customerId: string
-): Promise<string[]> {
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "cart",
-    fields: ["id"],
-    filters: { customer_id: customerId, completed_at: null },
-    pagination: { take: OPEN_CARTS, order: { updated_at: "DESC" } },
-  })
-  return (data as { id: string }[]).map((cart) => cart.id)
+): Promise<RepriceCounts> {
+  const counts: RepriceCounts = { repriced: 0, failed: 0 }
+  for (const cartId of await openCartsOf(container, customerId)) {
+    if (await repriceOne(container, cartId)) {
+      counts.repriced += 1
+    } else {
+      counts.failed += 1
+    }
+  }
+  return counts
 }
 
 /**
  * The customer's open carts priced again once their groups changed
- * (ADR-0068 §3): a closed wholesaler's cart at retail, a new one's at
- * wholesale. Nothing to undo: the prices follow the groups. A cart that
- * fails is logged and left; checkout prices it again before payment.
+ * (ADR-0068 §3; review M1): every one of them, not only the newest; a
+ * closed wholesaler's at retail, a new one's at wholesale. A cart that
+ * fails is tried once more, then counted as failed in the result (the
+ * route answers it and the audit entry records it), never dropped
+ * silently. Until slice 4's completion hook (`wholesale.prices_changed`)
+ * lands, such a cart could still check out at its old prices. Nothing to
+ * undo: the prices follow the groups.
  */
 export const repriceCartsStep = createStep(
   "wholesale-reprice-carts",
   async (input: { customer_id: string | null; changed: boolean }, { container }) => {
     if (!input.customer_id || !input.changed) {
-      return new StepResponse({ repriced: 0 })
+      return new StepResponse<RepriceCounts>({ repriced: 0, failed: 0 })
     }
-    let repriced = 0
-    for (const cartId of await openCartsOf(container, input.customer_id)) {
-      try {
-        await repriceCartWorkflow(container).run({
-          input: { cart_id: cartId },
-        })
-        repriced += 1
-      } catch (error) {
-        logger.warn({ event: "wholesale.cart_reprice_failed", err: errorSummary(error) })
-      }
-    }
-    return new StepResponse({ repriced })
+    return new StepResponse(await repriceCustomerCarts(container, input.customer_id))
   }
 )

@@ -793,6 +793,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "wholesale.own_prices_off": "This wholesaler has no prices of their own yet; turn them on first.",
   "wholesale.tax_pair": "Enter the tax office and the tax number together.",
   "wholesale.company_for_tax": "A company name is needed with tax details.",
+  "wholesale.invite_too_soon": "The invitation was just sent; you can send it again in an hour.",
+  "wholesale.invite_limit": "This invitation can be sent again at most 5 times.",
+  "wholesale.invite_expired":
+    "This invitation has expired; delete the wholesaler and add them again.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.color_duplicate": "Each colour name can be listed once.",
   "platform_settings.color_contrast":

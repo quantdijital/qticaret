@@ -82,15 +82,23 @@ export const deletePendingAccountWorkflow = createWorkflow(
 
 /**
  * Invitations not taken up in 90 days (decision 13, ADR-0068 §10): each
- * pending account invited before the cut-off removed. One that fails is
+ * pending account last invited 90 days ago, or opened 180 days ago
+ * however often resent (review L2), removed. One that fails is
  * logged and tried again on the next run. Returns how many went.
  */
 export async function removeExpiredInvitations(
   container: MedusaContainer,
   now: Date = new Date()
 ): Promise<number> {
+  const cutoff = inviteCutoff(now)
   const expired = await wholesale(container).listWholesaleAccounts(
-    { status: "pending", invited_at: { $lt: inviteCutoff(now) } },
+    {
+      status: "pending",
+      $or: [
+        { invited_at: { $lt: cutoff.invitedBefore } },
+        { created_at: { $lt: cutoff.openedBefore } },
+      ],
+    },
     { select: ["id"], take: null }
   )
   let removed = 0

@@ -795,6 +795,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "wholesale.own_prices_off": "Bu toptancıya özel fiyatlar açık değil; önce açın.",
   "wholesale.tax_pair": "Vergi dairesi ve vergi numarasını birlikte girin.",
   "wholesale.company_for_tax": "Vergi bilgisi için firma adı gerekir.",
+  "wholesale.invite_too_soon":
+    "Davet az önce gönderildi; bir saat sonra yeniden gönderebilirsiniz.",
+  "wholesale.invite_limit": "Bu davet en çok 5 kez yeniden gönderilebilir.",
+  "wholesale.invite_expired": "Bu davetin süresi doldu; toptancıyı silip yeniden açın.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "platform_settings.color_contrast":

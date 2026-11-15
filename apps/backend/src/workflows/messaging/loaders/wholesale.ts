@@ -53,7 +53,7 @@ export async function loadWholesaleInvite(
     account?.status !== "pending" ||
     !account.email ||
     !invitedAt ||
-    !isInviteLive(invitedAt, new Date()) ||
+    !isInviteLive({ invitedAt, openedAt: account.created_at }, new Date()) ||
     !storefrontUrl
   ) {
     return null
@@ -61,7 +61,10 @@ export async function loadWholesaleInvite(
   return {
     vars: {
       registerUrl: `${storefrontUrl}${REGISTER_PATH}`,
-      expiresAt: await dayOf(container, inviteExpiresAt(invitedAt)),
+      expiresAt: await dayOf(
+        container,
+        inviteExpiresAt({ invitedAt, openedAt: account.created_at })
+      ),
     },
     recipients: { email: account.email },
     receiverId: null,

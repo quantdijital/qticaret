@@ -109,7 +109,8 @@ const planUpdateStep = createStep(
  * fails.
  */
 export const updateAccountWorkflow = createWorkflow(
-  "wholesale-update-account",
+  // Names pass through it: kept out of the workflow store (L3)
+  { name: "wholesale-update-account", store: false },
   (input: UpdateAccountInput) => {
     const lock = transform({ input }, ({ input }) => `wholesale-account:${input.id}`)
     acquireLockStep({ key: lock, timeout: 5, ttl: 60 })

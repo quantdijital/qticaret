@@ -23,6 +23,8 @@ export const WholesaleAccount = model
     rate_bps: model.number().nullable(),
     /** Overrides the level's; null: the level's, or no rule. */
     min_quantity: model.number().nullable(),
+    /** Invitations sent while pending, the first counted; a resend is capped (review L2). */
+    invite_count: model.number().default(1),
     status: model.enum(["pending", "active", "inactive"]).default("pending"),
     invited_at: model.dateTime().nullable(),
     activated_at: model.dateTime().nullable(),

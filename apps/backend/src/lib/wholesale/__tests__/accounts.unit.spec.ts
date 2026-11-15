@@ -8,6 +8,7 @@ import {
   membershipPlan,
   namesToFill,
   normalizeEmail,
+  resendRefusal,
   splitContactName,
 } from ".."
 
@@ -15,19 +16,48 @@ const at = (iso: string) => new Date(iso)
 
 describe("a wholesaler's invitation (ADR-0068 §10, decision 13)", () => {
   const sent = at("2026-11-15T10:00:00.000Z")
+  const first = { invitedAt: sent, openedAt: sent }
 
-  it("lasts 90 days from its send, a resend counting from the resend", () => {
-    expect(inviteExpiresAt(sent).toISOString()).toBe("2027-02-13T10:00:00.000Z")
-    expect(isInviteLive(sent, at("2027-02-13T09:59:59.000Z"))).toBe(true)
-    expect(isInviteLive(sent, at("2027-02-13T10:00:00.000Z"))).toBe(false)
-    expect(isInviteLive(null, sent)).toBe(false)
-    expect(isInviteLive(sent.toISOString(), at("2026-12-01T00:00:00.000Z"))).toBe(true)
+  it("lasts 90 days from its send", () => {
+    expect(inviteExpiresAt(first).toISOString()).toBe("2027-02-13T10:00:00.000Z")
+    expect(isInviteLive(first, at("2027-02-13T09:59:59.000Z"))).toBe(true)
+    expect(isInviteLive(first, at("2027-02-13T10:00:00.000Z"))).toBe(false)
+    expect(isInviteLive({ invitedAt: null, openedAt: sent }, sent)).toBe(false)
+    expect(
+      isInviteLive(
+        { invitedAt: sent.toISOString(), openedAt: sent.toISOString() },
+        at("2026-12-01T00:00:00.000Z")
+      )
+    ).toBe(true)
   })
 
-  it("is past its days once sent before the cut-off", () => {
-    const now = at("2027-02-13T10:00:00.001Z")
-    expect(sent < inviteCutoff(now)).toBe(true)
-    expect(sent < inviteCutoff(at("2027-02-13T09:00:00.000Z"))).toBe(false)
+  it("restarts its 90 days on a resend, never past 180 from the first send (review L2)", () => {
+    const resent = { invitedAt: at("2027-01-15T10:00:00.000Z"), openedAt: sent }
+    expect(inviteExpiresAt(resent).toISOString()).toBe("2027-04-15T10:00:00.000Z")
+    const late = { invitedAt: at("2027-04-01T10:00:00.000Z"), openedAt: sent }
+    // 180 days from the opening, not 90 from the late resend
+    expect(inviteExpiresAt(late).toISOString()).toBe("2027-05-14T10:00:00.000Z")
+  })
+
+  it("is past its days once sent before one cut-off or opened before the other", () => {
+    const cutoff = inviteCutoff(at("2027-02-13T10:00:00.001Z"))
+    expect(sent < cutoff.invitedBefore).toBe(true)
+    expect(sent < cutoff.openedBefore).toBe(false)
+    expect(sent < inviteCutoff(at("2027-02-13T09:00:00.000Z")).invitedBefore).toBe(false)
+    expect(sent < inviteCutoff(at("2027-05-14T10:00:00.001Z")).openedBefore).toBe(true)
+  })
+
+  it("is resent an hour after the last send at the soonest, five times at most", () => {
+    const account = { invited_at: sent, created_at: sent, invite_count: 1 }
+    expect(resendRefusal(account, at("2026-11-15T10:30:00.000Z"))).toBe("wholesale.invite_too_soon")
+    expect(resendRefusal(account, at("2026-11-15T11:00:00.000Z"))).toBeNull()
+    expect(resendRefusal({ ...account, invite_count: 6 }, at("2026-11-16T10:00:00.000Z"))).toBe(
+      "wholesale.invite_limit"
+    )
+    expect(
+      resendRefusal({ ...account, invite_count: 5 }, at("2026-11-16T10:00:00.000Z"))
+    ).toBeNull()
+    expect(resendRefusal(account, at("2027-03-01T10:00:00.000Z"))).toBe("wholesale.invite_expired")
   })
 
   it("keeps and matches addresses trimmed and in lower case", () => {
