@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { t } from "../i18n"
+import { escapeHtml } from "../security/html"
 import { retryAfterSeconds } from "./rules"
 
 /**
@@ -20,16 +21,8 @@ export interface MaintenanceNotice {
   expectedAt: string | null
 }
 
-const ESCAPES: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-}
-
 /** The shop's text goes into HTML as text, never as markup. */
-export const escapeHtml = (text: string): string => text.replace(/[&<>"']/g, (c) => ESCAPES[c] ?? c)
+export { escapeHtml }
 
 const WHEN = new Intl.DateTimeFormat("tr-TR", {
   day: "numeric",
