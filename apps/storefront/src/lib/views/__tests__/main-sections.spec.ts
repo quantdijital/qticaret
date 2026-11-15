@@ -122,7 +122,7 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
         {
           ...catalog,
           header_bar: { ...catalog.header_bar, catalog: { ...catalog.header_bar.catalog, ...set } },
-        } as StoreMainSections,
+        },
         { header: { layout: "left", sticky: true } },
         { t, tree: () => tree }
       ).catalog

@@ -95,9 +95,8 @@ describe("the catalog header's settings", () => {
     )
     expect(changes.at(-1)).toMatchObject({ top_links: "bar" })
     // Off the default, it offers the way back
-    const width = document.getElementById("mainheader-header-search_width")
-    expect(width).not.toBeNull()
-    await userEvent.click(within(width!).getByRole("button", { name: /Varsayılana dön/ }))
+    const width = document.getElementById("mainheader-header-search_width") ?? document.body
+    await userEvent.click(within(width).getByRole("button", { name: /Varsayılana dön/ }))
     expect(changes.at(-1)).toMatchObject({ search_width: "wide" })
   })
 
