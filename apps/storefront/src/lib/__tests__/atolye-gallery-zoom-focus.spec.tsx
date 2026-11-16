@@ -58,6 +58,15 @@ afterEach(() => {
 
 const settle = () => new Promise((done) => setTimeout(done, 20))
 
+/**
+ * The dialog gives the focus back in a timer of its own once it is gone; on
+ * a busy CI runner that came after the 20 ms above. Waited for (1 s at most).
+ */
+const focusReturnsTo = (opener: HTMLElement | null) =>
+  vi.waitFor(() => {
+    expect(document.activeElement).toBe(opener)
+  })
+
 async function open() {
   await act(async () => {
     root.render(<Gallery images={["a", "b"].map(picture)} initial="R" words={words} />)
@@ -86,7 +95,7 @@ describe("the gallery's zoom", () => {
       await settle()
     })
     expect(document.querySelector("[role=dialog]")).toBeNull()
-    expect(document.activeElement).toBe(opener)
+    await focusReturnsTo(opener)
   })
 
   it("gives the focus back to the enlarge button when the close button is pressed", async () => {
@@ -96,7 +105,7 @@ describe("the gallery's zoom", () => {
       await settle()
     })
     expect(document.querySelector("[role=dialog]")).toBeNull()
-    expect(document.activeElement).toBe(opener)
+    await focusReturnsTo(opener)
   })
 
   it("does so too when a press on the picture opened it", async () => {
@@ -115,6 +124,6 @@ describe("the gallery's zoom", () => {
         ?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
       await settle()
     })
-    expect(document.activeElement).toBe(opener)
+    await focusReturnsTo(opener)
   })
 })

@@ -252,10 +252,11 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2e-report
-          # The report and traces live in dot directories, which are left out by default
+          # The report and traces live in dot directories, which are left out by default.
+          # Not the backend's log: the artifact is public and nothing proves every line
+          # of a dev server's log (Medusa's own included) goes through our redaction
           include-hidden-files: true
           path: |
             apps/panel/e2e/.report
             apps/panel/e2e/.results
-            backend.log
           retention-days: 7
