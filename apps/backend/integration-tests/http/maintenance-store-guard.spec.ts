@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakePaytrAccount, paytrNotification, startFakePaytr } from "@qticaret/testing"
 import type { FakePaytr } from "@qticaret/testing"
@@ -104,7 +105,8 @@ medusaIntegrationTestRunner({
       const registered = await settle(
         http.post<Refusal>("/auth/customer/emailpass/register", {
           email: "yeni.musteri@example.com",
-          password: "Uzun-ve-guclu-1-parola",
+          // Throwaway, made per run: never a literal in the source
+          password: randomUUID(),
         })
       )
       const products = await settle(http.get("/store/products", store()))
