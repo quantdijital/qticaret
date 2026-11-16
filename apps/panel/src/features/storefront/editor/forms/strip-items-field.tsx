@@ -13,6 +13,7 @@ import { useRecordNames } from "./record-names"
 import { useSlideRows } from "./slide-rows"
 import { StripItemDialog } from "./strip-item-dialog"
 import { newStripItem, targetOf } from "./strip-items"
+import { useStripPictures } from "./strip-pictures"
 import { useSlideFocus } from "../use-field-focus"
 
 const G = "storefront.editor.stripGallery"
@@ -40,8 +41,8 @@ function useStripNames(items: readonly StripItem[]): (item: StripItem) => string
 
 /**
  * The strip gallery's strips (adr/0049 Ek 2026-11-16), as the sliding
- * opening lists its slides: a row a strip (its own picture small, its
- * heading or its record's name, its source's kind) opening one dialog
+ * opening lists its slides: a row a strip (its own picture small, else
+ * its record's; its heading or its record's name, its source's kind) opening one dialog
  * each, moved and taken off in place. "Şerit ekle" adds a product strip
  * and opens it; at eight it is closed and says so.
  */
@@ -61,6 +62,7 @@ export function StripItemsField({
   const [initial, setInitial] = useState<string | null>(null)
   const { rowRef, rowAt } = useSlideRows()
   const nameOf = useStripNames(section.items)
+  const pictureOf = useStripPictures(section.items)
   useSlideFocus((slide, target) => {
     if (slide < section.items.length) {
       setEditing(slide)
@@ -84,6 +86,7 @@ export function StripItemsField({
               key.startsWith(`items.${String(index)}.`)
             )
             const shown = item.title ?? nameOf(item)
+            const picture = pictureOf(item)
             return (
               <li
                 key={`${item.source.kind}-${String(index)}`}
@@ -98,11 +101,13 @@ export function StripItemsField({
                     setEditing(index)
                   }}
                 >
-                  {item.image ? (
+                  {picture ? (
                     <img
-                      src={item.image.url}
+                      src={picture.url}
                       alt=""
-                      className="aspect-[3/4] w-9 shrink-0 rounded-sm bg-muted object-cover"
+                      loading="lazy"
+                      data-fit={picture.fit}
+                      className="aspect-[3/4] w-9 shrink-0 rounded-sm bg-muted object-cover data-[fit=contain]:object-contain data-[fit=contain]:p-0.5"
                     />
                   ) : (
                     <span className="flex aspect-[3/4] w-9 shrink-0 items-center justify-center rounded-sm bg-muted text-muted-foreground">

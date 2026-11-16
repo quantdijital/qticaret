@@ -22,15 +22,20 @@ export const collectionsQuery = () =>
     staleTime: 5 * 60_000,
   })
 
-/** The names of the products a promotion names, for its chips. */
+/** The names of the products a promotion names, for its chips; with each one's small picture for lists that show it. */
 export const productNamesQuery = (ids: readonly string[]) =>
   queryOptions({
     queryKey: ["promotions", "product-names", [...ids].sort()],
     queryFn: async () =>
       ids.length === 0
         ? []
-        : (await sdk.admin.product.list({ id: [...ids], fields: "id,title", limit: ids.length }))
-            .products,
+        : (
+            await sdk.admin.product.list({
+              id: [...ids],
+              fields: "id,title,thumbnail",
+              limit: ids.length,
+            })
+          ).products,
     enabled: ids.length > 0,
   })
 
