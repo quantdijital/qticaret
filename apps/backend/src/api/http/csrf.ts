@@ -28,7 +28,8 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"])
 // Medusa's default session cookie name (sessionOptions.name is not set)
 const SESSION_COOKIE = "connect.sid"
 // Admin routes that take files as multipart: uploads (Medusa's product import is closed, F3.9)
-const MULTIPART_PATH = /^\/admin\/uploads(\/|$)/
+// and a product's video (adr/0069 §3)
+const MULTIPART_PATH = /^\/admin\/(uploads(\/|$)|products\/[^/]+\/videos$)/
 // The product sheet upload (F3.9): its bytes as the body, typed as what they are
 const SHEET_PATH = /^\/admin\/catalog\/imports$/
 const SHEET_TYPES = [

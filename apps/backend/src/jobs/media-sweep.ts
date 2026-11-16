@@ -5,6 +5,7 @@ import {
   deriveProductMediaWorkflow,
   removeAbandonedMediaWorkflow,
 } from "../workflows/media/workflows"
+import { sweepProductVideosWorkflow } from "../workflows/media/video/workflows"
 
 const PAGE = 500
 // An upload no product took within a day was left behind (a wizard closed)
@@ -51,7 +52,9 @@ async function readAssets(container: MedusaContainer) {
  * is brought in line again (a missed save, a failed version; nothing to do
  * costs a query), and uploads no product ever took go after a day. An image
  * a product once had stays: orders and emails may show it. So does one put
- * in the media library: it goes only when deleted there.
+ * in the media library: it goes only when deleted there. Videos left
+ * without a product for a day go, and a failed clip's source after a week
+ * (adr/0069 §11).
  */
 export default async function mediaSweep(container: MedusaContainer) {
   const { products, abandoned } = await readAssets(container)
@@ -66,6 +69,14 @@ export default async function mediaSweep(container: MedusaContainer) {
     input: { ids: abandoned },
   })
   logger.info({ event: "media.swept", products: products.size, removed })
+  try {
+    const { result: videos } = await sweepProductVideosWorkflow(container).run({
+      input: { now: Date.now() },
+    })
+    logger.info({ event: "media.videos_swept", ...videos })
+  } catch (error) {
+    logger.warn({ event: "media.videos_sweep_failed", err: errorSummary(error) })
+  }
 }
 
 export const config = {

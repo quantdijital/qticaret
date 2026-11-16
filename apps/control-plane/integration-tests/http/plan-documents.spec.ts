@@ -16,6 +16,8 @@ import { client, freshSlug, makeTenant, proved } from "../helpers/tenants"
 jest.setTimeout(240 * 1000)
 
 const FLAG = "test.platform_sample"
+// adr/0069: the first business flag, on by default
+const VIDEOS = "catalog.product_videos"
 
 interface Detail {
   features: { key: string; value: boolean; package?: boolean; override?: boolean }[]
@@ -127,10 +129,15 @@ medusaIntegrationTestRunner({
 
       const detail = (await call.get(`/admin/cp/tenants/${tenant.id}`, owner))
         .data as unknown as Detail
+      // adr/0069: the product videos flag is listed first, at its default
       expect(detail.features).toEqual([
+        expect.objectContaining({ key: VIDEOS, value: true }),
         expect.objectContaining({ key: FLAG, package: false, override: true, value: true }),
       ])
-      expect(detail.platform_flags).toEqual([{ key: FLAG, default: true }])
+      expect(detail.platform_flags).toEqual([
+        { key: VIDEOS, default: true },
+        { key: FLAG, default: true },
+      ])
 
       expect((await call.delete(`${path}/${FLAG}`, operator)).status).toBe(200)
       expect((await call.delete(`${path}/${FLAG}`, operator)).status).toBe(404)

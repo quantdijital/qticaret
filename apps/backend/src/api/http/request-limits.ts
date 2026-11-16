@@ -1,5 +1,8 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { VIDEO_MAX_REQUEST_BYTES } from "../../lib/media/video/limits"
+import { drainLimitFor, refuse } from "./drain-body"
 import { rejectRequest } from "./reject"
+import { routePath } from "./request-path"
 
 /**
  * Bounds on what one request may ask for (docs/04, F2.10): Medusa has no
@@ -44,12 +47,21 @@ export const storeLimitGuard = limitGuard(STORE_MAX_LIMIT)
 /** `/admin/*`: a `limit` above what the dashboard asks for is refused (bulk reads, adr/0011). */
 export const adminLimitGuard = limitGuard(ADMIN_MAX_LIMIT)
 
+// A product video's upload (adr/0069 §3): streamed to disk, never into multer's memory
+const VIDEO_UPLOAD_PATH = /^\/admin\/products\/[^/]+\/videos$/
+
+/** Whether the request is a product video's upload, by the path Express routes. */
+export const isVideoUpload = (req: MedusaRequest): boolean =>
+  req.method === "POST" && VIDEO_UPLOAD_PATH.test(routePath(req))
+
 /**
  * Multipart requests (`/admin/uploads`, product imports): the declared size
  * is checked before multer starts buffering. A request without a length
  * (chunked) is refused too: its size is unknown until it is all in memory.
  * Judged by content type, not path: multer reads any multipart body on the
- * routes that use it, however the path is spelled.
+ * routes that use it, however the path is spelled. A product video's
+ * upload alone has a limit of its own (52 MB: 50 MB of clip and the
+ * framing); its route streams the body to disk and counts it again.
  */
 export function uploadSizeGate(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
   // Global so it runs before the core routes' multer, which route
@@ -58,24 +70,30 @@ export function uploadSizeGate(req: MedusaRequest, res: MedusaResponse, next: Me
     next()
     return
   }
+  const video = isVideoUpload(req)
+  const limit = video ? VIDEO_MAX_REQUEST_BYTES : MAX_UPLOAD_REQUEST_BYTES
   const declared = req.headers["content-length"]
+  // A signed-in person's refused body is drained (bounded by this route's limit and a
+  // margin) before the answer, so the client reads it (drain-body.ts)
   if (declared === undefined) {
-    rejectRequest(
+    refuse(
       req,
       res,
       411,
       { type: "invalid_data", message: "errors.length_required" },
-      "upload_length_missing"
+      "upload_length_missing",
+      drainLimitFor(limit)
     )
     return
   }
-  if (Number(declared) > MAX_UPLOAD_REQUEST_BYTES) {
-    rejectRequest(
+  if (Number(declared) > limit) {
+    refuse(
       req,
       res,
       413,
-      { type: "invalid_data", message: "errors.request_too_large" },
-      "upload_too_large"
+      { type: "invalid_data", message: video ? "video.too_large" : "errors.request_too_large" },
+      "upload_too_large",
+      drainLimitFor(limit)
     )
     return
   }

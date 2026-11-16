@@ -157,6 +157,23 @@ describe("audit registry", () => {
     })
   })
 
+  it("records a product's videos added and removed (adr/0069 §3)", () => {
+    expect(matchAuditedResource("POST", "/admin/products/prod_01A/videos")).toMatchObject({
+      resource: { route: "POST /admin/products/:id/videos", resourceType: "media_video" },
+      params: { id: "prod_01A" },
+    })
+    const removed = matchAuditedResource("DELETE", "/admin/products/prod_01A/videos/mvid_01B")
+    expect(removed).toMatchObject({
+      resource: { route: "DELETE /admin/products/:id/videos/:video_id" },
+      params: { id: "prod_01A", video_id: "mvid_01B" },
+    })
+    if (!removed) {
+      throw new Error("the removal is not audited")
+    }
+    expect(removed.resource.resourceId(removed.params)).toBe("mvid_01B")
+    expect(matchAuditedResource("GET", "/admin/products/prod_01A/videos")).toBeNull()
+  })
+
   it("records a preset applied as a change of the design, by its pack and code", () => {
     const match = matchAuditedResource("POST", "/admin/storefront-presets/general/grafit/apply")
     expect(match).toMatchObject({

@@ -85,6 +85,8 @@ import {
   MEDIA_ROUTES,
   STORE_MEDIA_FIELDS,
   STORE_VARIANT_IMAGE_FIELDS,
+  rejectStoreVideoFields,
+  restrictAdminVideoFields,
   restrictStoreMediaFields,
 } from "./http/media-routes"
 import { GIFT_CARD_ROUTES } from "./http/gift-card-routes"
@@ -100,6 +102,7 @@ import { PROMOTION_ROUTES } from "./http/promotion-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
 import { STOCK_ROUTES } from "./http/stock-routes"
 import { uploadValidator } from "./http/upload-validator"
+import { VIDEO_ROUTES } from "./http/video-routes"
 import { guardUploadStorage, registerUploads } from "./http/plan-limit-guards"
 import { PLAN_ROUTES } from "./http/plan-routes"
 import { StorePostPrivacyRequest } from "./store/customers/me/privacy-requests/validators"
@@ -162,6 +165,8 @@ export default defineMiddlewares({
         // ADR-0068 §7: no price list row, a wholesale one included, by any `fields`
         rejectStorePriceRows,
         restrictStoreMediaFields,
+        // adr/0069: no video leaf until slice 4 opens them
+        rejectStoreVideoFields,
         rejectStoreSeoFields,
         restrictStoreGiftCardFields,
       ],
@@ -181,6 +186,8 @@ export default defineMiddlewares({
         guardStaffRoles,
         guardPlanStatus,
         rejectSensitiveFields,
+        // adr/0069: a video's storage keys and uploader never through `fields`
+        restrictAdminVideoFields,
         auditMutations,
       ],
     },
@@ -376,6 +383,8 @@ export default defineMiddlewares({
     ...STOCK_ROUTES,
     // F3.3: product images
     ...MEDIA_ROUTES,
+    // adr/0069: product videos, behind their flag
+    ...VIDEO_ROUTES,
     // F4.4/F4.6: promotion codes
     ...PROMOTION_ROUTES,
     // F4.3: price display
