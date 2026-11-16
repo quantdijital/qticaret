@@ -65,7 +65,7 @@
 /* From 1024 px the shown panel's whole-list link and its arrows (a carousel's
    head row, else the panel's own aside) stand on the tab row's line, at its
    right end, and the cards follow right under the tabs (Tezgâh audit K-04).
-   The tab row leaves them room; on a phone they keep their own row under it */
+   The tab row leaves them room; below 1024 px they stand under the cards */
 @media (width >= 64rem) {
   @supports selector(:has(*)) {
     .gf-tabs {
@@ -83,25 +83,46 @@
     }
   }
 }
-/* On a phone and a tablet too (owner 2026-11-16: the link stood alone on a row
-   between the pills and the cards; "tableti de düzelt"): below 1024 px a plain
-   panel's link stands at the tab row's right end, as a section head's does, the
-   pills scrolling beside it (the row is a rail); the reserved room counts the
-   gutter the rail runs past its box. A carousel's head keeps its row: its arrows
-   stand there with the link. The desktop's rules above are as they were */
+/* On a phone and a tablet (owner 2026-11-16: a pill cut at the scrolling row's
+   edge, and a link between the pills and the cards, are both refused): below
+   1024 px the pills wrap onto as many lines as they need (`ShelfTabs`) and the
+   shown panel's whole-list link stands under its cards, a full-width quiet
+   button (`.gf-btn.gf-btn--quiet`'s look, ui.css). A plain panel's link
+   follows its cards in the markup; a carousel's head row (its link, its
+   arrows beside it) moves under its cards. The desktop's rules above are as
+   they were */
 @media (width < 64rem) {
+  .gf-tabs > [data-panel] .gf-tab-aside > a {
+    flex: 1 1 auto;
+    min-height: 3rem;
+    justify-content: center;
+    padding: var(--space-sm) var(--space-lg);
+    border: 1px solid var(--color-edge);
+    border-radius: var(--button-radius);
+    background: transparent;
+    color: var(--color-text);
+    font-size: var(--text-md);
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color var(--dur-micro) var(--ease-out),
+      border-color var(--dur-micro) var(--ease-out),
+      transform var(--dur-micro) var(--ease-out);
+  }
+  .gf-tabs > [data-panel] .gf-tab-aside > a:active {
+    transform: translateY(1px);
+  }
+  @media (hover: hover) {
+    .gf-tabs > [data-panel] .gf-tab-aside > a:hover {
+      border-color: var(--color-text);
+      background: var(--color-paper-2);
+    }
+  }
   @supports selector(:has(*)) {
-    .gf-tabs:has(> [data-panel] section > .gf-tab-aside) {
-      position: relative;
-    }
-    .gf-tabs > [data-panel] section > .gf-tab-aside {
-      position: absolute;
-      top: 0.25rem;
-      right: 0;
-      max-width: min(9rem, 40%);
-    }
-    .gf-tabs:has(> [data-panel] section > .gf-tab-aside) > .gf-tab-row {
-      padding-inline-end: calc(min(9rem, 40%) + var(--gutter));
+    .gf-tabs > [data-panel] .gf-scroller-head:has(.gf-tab-aside > a) {
+      order: 1;
+      align-items: center;
     }
   }
 }

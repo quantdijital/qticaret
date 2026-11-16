@@ -30,7 +30,9 @@ export function ShelfTabs({
       <ShelfTabsReveal />
       <fieldset className="gf-tab-row min-w-0 border-0 p-0">
         <legend className="sr-only">{label}</legend>
-        <div className="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-2 overflow-x-auto px-(--gutter) py-1">
+        {/* Below 1024 px the pills wrap onto as many lines as they need, none
+            cut (owner 2026-11-16); from 1024 px one rail that scrolls */}
+        <div className="gf-rail flex flex-wrap gap-(--space-xs) py-1 lg:-mx-(--gutter) lg:flex-nowrap lg:scroll-px-(--gutter) lg:overflow-x-auto lg:px-(--gutter)">
           {tabs.map((tab, index) => (
             <label
               key={tab}

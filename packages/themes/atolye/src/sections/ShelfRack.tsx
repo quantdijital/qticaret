@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { drawnVariant, fieldMark } from "@qticaret/ui"
 import type { FormAction, Translate } from "@qticaret/ui"
 import { ProductGrid } from "../parts/ProductCard"
@@ -32,8 +33,10 @@ export const shelfVariant = (section: Of<"products">) =>
  * and `columns` as `ShelfLayouts` draws them, `strips` as `ShelfStrips`, `ranked` as
  * `ShelfRanked`, `stage_list` as `ShelfStage`. In tabs its own head is for
  * the reader only (its pill names it) and its "all products" link stands
- * with its arrows beside the tab row, as a section head's link does; a
- * columns rail's lists carry their own headings, its link under them.
+ * with its arrows beside the tab row from 1024 px, as a section head's
+ * link does, and under the cards as a full-width button below that (owner
+ * 2026-11-16); a columns rail's lists carry their own headings, its link
+ * under them.
  */
 export function Rack({
   section,
@@ -49,25 +52,42 @@ export function Rack({
   const variant = shelfVariant(section)
   const columnsRail = variant === "columns"
   const id = headingId(columnsRail ? (section.lists?.[0]?.id ?? section.id) : section.id)
+  // In tabs the panel's head is for the reader only (its pill names it)
+  const title = (
+    <h2 id={id} className="sr-only">
+      {section.title}
+    </h2>
+  )
+  const more = section.more && (
+    <a
+      href={section.more.path}
+      className="gf-link shrink-0 text-sm lg:text-md"
+      {...fieldMark(section.editor, "more")}
+    >
+      {section.more.label}
+    </a>
+  )
+  // The panel's whole list: beside the tab row from 1024 px, under the cards
+  // as a full-width button below that (`tabs.css`)
+  const aside = (children: ReactNode) => (
+    <div className="gf-tab-aside flex min-h-11 items-center justify-end gap-4">{children}</div>
+  )
   const head = tabbed ? (
-    // Beside the tab row from 1024 px (`tabs.css`): the panel's whole list, then its arrows
-    <div className="gf-tab-aside flex min-h-11 items-center justify-end gap-4">
-      <h2 id={id} className="sr-only">
-        {section.title}
-      </h2>
-      {section.more && (
-        <a
-          href={section.more.path}
-          className="gf-link shrink-0 text-sm lg:text-md"
-          {...fieldMark(section.editor, "more")}
-        >
-          {section.more.label}
-        </a>
-      )}
-    </div>
+    title
   ) : (
     <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} ownMore />
   )
+  // A plain panel's link follows its cards in the page's order too; a
+  // carousel's stays in its head row beside the arrows (`Scroller`)
+  const foot = tabbed && more ? aside(more) : null
+  const carouselHead = tabbed
+    ? aside(
+        <>
+          {title}
+          {more}
+        </>
+      )
+    : head
   const columns = shelfColumns(section.columns)
   const phone = shelfPhone(section.phoneColumns)
   const empty = section.products.length === 0
@@ -78,9 +98,10 @@ export function Rack({
         <>
           {head}
           <p className="rounded-media gf-pane p-4 text-text-2">{section.empty}</p>
+          {foot}
         </>
       ) : variant === "carousel" ? (
-        <CarouselShelf {...props} head={head} />
+        <CarouselShelf {...props} head={carouselHead} />
       ) : columnsRail ? (
         <ColumnsShelf {...props} />
       ) : (
@@ -108,6 +129,7 @@ export function Rack({
               phone={phone}
             />
           )}
+          {foot}
         </>
       )}
       {columnsRail && section.more && (
