@@ -177,13 +177,15 @@ medusaIntegrationTestRunner({
       const refused = [
         { ...footer, ground: "primary" },
         { ...footer, badge_style: "mono" },
-        { ...footer, about: "a".repeat(241) },
       ]
       for (const section of refused) {
         const answer = await save({ footer: [section] })
         expect(answer.status).toBe(400)
         expect(answer.data.message).toContain("storefront_layout.section_invalid")
       }
+      // An over-long line is refused by the shared text field's length rule,
+      // which Medusa's body validation words itself (no key), as for every text field
+      expect((await save({ footer: [{ ...footer, about: "a".repeat(241) }] })).status).toBe(400)
 
       // Switched to it alone: read whole, its defaults printed
       expect((await save({ footer: [footer] })).status).toBe(200)
