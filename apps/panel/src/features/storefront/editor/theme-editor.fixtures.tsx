@@ -174,6 +174,9 @@ export interface AdminMock {
 }
 
 export const PATH = "/admin/storefront-layout"
+export const DESIGNS = "/admin/storefront-designs"
+/** The draft a restore replaced, kept by the server. */
+export const KEPT_DRAFT = { id: "sfd_kept1", kind: "auto", name: null } as const
 export const SETTINGS = "/admin/platform-settings/storefront"
 export const THEME_SETTINGS = "/admin/platform-settings/theme"
 const STOREFRONT: StorefrontSettings = {
@@ -282,7 +285,13 @@ export function serve(
       return Promise.resolve({ section: "theme", values: theme, version: 1 })
     }
     if (url.startsWith(`${PATH}/revisions/`)) {
-      return answer({ ...current, draft: { ...DOC, header: [] }, has_changes: true })
+      // The draft it replaces kept first, as an automatic save (adr/0064 Ek 2026-11-17)
+      const restored = { ...current, draft: { ...DOC, header: [] }, has_changes: true }
+      return answer(restored).then((done) => ({ ...done, auto_saved: KEPT_DRAFT }))
+    }
+    // A look saved from the editor (its looks menu, a publication)
+    if (url === DESIGNS && init?.method === "POST") {
+      return Promise.resolve({ design: null })
     }
     return Promise.reject(new Error(`unexpected ${url}`))
   })

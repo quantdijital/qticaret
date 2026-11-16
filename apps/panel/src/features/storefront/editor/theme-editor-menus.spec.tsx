@@ -74,14 +74,15 @@ async function askToRestore() {
   serve(fetchMock, admin, withMenusRevision())
   renderEditor()
   await opened()
-  await user.click(screen.getByRole("button", { name: "Sürümler" }))
-  const sheet = await screen.findByRole("dialog", { name: "Yayınlanan sürümler" })
+  await user.click(screen.getByRole("button", { name: "Görünümler" }))
+  await user.click(await screen.findByRole("menuitem", { name: "Yayın geçmişi" }))
+  const sheet = await screen.findByRole("dialog", { name: "Yayın geçmişi" })
   // Only the version that put menus live says so
   const badges = within(sheet).getAllByText("Menülerle")
   expect(badges).toHaveLength(1)
-  expect(badges[0]?.closest("li")).toHaveTextContent("2. sürüm")
-  await user.click(within(sheet).getByRole("button", { name: "2. sürümü taslağa geri yükle" }))
-  return screen.findByRole("alertdialog", { name: "2. sürüm taslağa yüklensin mi?" })
+  expect(badges[0]?.closest("li")).toHaveTextContent("2. yayın")
+  await user.click(within(sheet).getByRole("button", { name: "2. yayını taslağa geri yükle" }))
+  return screen.findByRole("alertdialog", { name: "2. yayın taslağa yüklensin mi?" })
 }
 
 describe("menus in the design's draft (adr/0063 §3)", HEAVY, () => {
