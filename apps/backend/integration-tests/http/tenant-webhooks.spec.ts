@@ -22,6 +22,17 @@ import { loadTrAddressFixture } from "../helpers/tr-address"
 
 jest.setTimeout(180 * 1000)
 
+// The minute's job (jobs/tenant-webhooks.ts) runs in this process too and holds no lock a
+// case could take: between a case's own calls it queued the stock changes and delivered
+// what was due (PR #88; PR #112's CI: `first` also took the two stock changes it had just
+// queued, `delivered: 2`). Medusa loads jobs with require(), so it registers this one: the
+// schedule kept, the run doing nothing. Each case runs the job's halves itself
+jest.mock("../../src/jobs/tenant-webhooks", () => ({
+  ...jest.requireActual<Record<string, unknown>>("../../src/jobs/tenant-webhooks"),
+  __esModule: true,
+  default: () => Promise.resolve(),
+}))
+
 interface Received {
   headers: Record<string, string | string[] | undefined>
   body: string
@@ -119,7 +130,7 @@ medusaIntegrationTestRunner({
       const stock = await queueStockChanges(getContainer())
       await deliverWebhooks(getContainer(), minutesLater(3))
 
-      // The order's own deliveries: the scheduled jobs may deliver a stock change between them
+      // The order's own deliveries; the stock changes come after them
       const [refused, sent] = received.filter((each) => each.body.includes('"type":"order.placed"'))
       const signature = String(sent?.headers["x-webhook-signature"] ?? "")
       const [, t = "", v1 = ""] = /^t=(\d+),v1=([0-9a-f]{64})$/.exec(signature) ?? []

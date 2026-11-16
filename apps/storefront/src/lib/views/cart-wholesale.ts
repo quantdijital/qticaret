@@ -1,4 +1,4 @@
-import type { Translate } from "@qticaret/ui"
+import type { CheckoutBlockedView, Translate } from "@qticaret/ui"
 import type { Wholesale } from "@/lib/account/wholesale"
 import type { CartLine } from "@/lib/cart/cart"
 
@@ -37,4 +37,16 @@ export function wholesaleMinimumText(
   }
   const units = orderUnits(cart.items)
   return units > 0 && units < min ? t(WHOLESALE_MINIMUM, { min, units }) : null
+}
+
+/**
+ * The cart page's `checkoutBlocked` for a wholesaler's cart short of its
+ * minimum (ADR-0068 §8): "Ödemeye geç" drawn off with the minimum and the
+ * count as its reason; null for anyone else. A hint only, as above.
+ */
+export function wholesaleCheckoutBlocked(
+  ...args: Parameters<typeof wholesaleMinimumText>
+): CheckoutBlockedView | null {
+  const reason = wholesaleMinimumText(...args)
+  return reason ? { reason } : null
 }

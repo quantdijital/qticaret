@@ -6,6 +6,7 @@ import { t } from "@/lib/i18n"
 import { wholesaleDisplay } from "@/lib/store-api/wholesale-prices"
 import { cartLinesOf, miniCartOf } from "../cart"
 import { lineNetOf, netTotalsOf, taxLinesOf } from "../cart-tax"
+import { wholesaleCheckoutBlocked } from "../cart-wholesale"
 import { summaryOf } from "../checkout-summary"
 import { filterViews } from "../facets"
 import type { ListingState } from "../listing"
@@ -139,6 +140,27 @@ describe("a wholesaler's cart without KDV", () => {
     const own = miniCartOf(cart(true), 150, t, new Map(), new Map(), true)
     expect(own).toMatchObject({ subtotal: "133,33 TL", freeShipping: { reached: true } })
     expect(own?.taxNote).toBe(t("cart.drawer_wholesale_note"))
+  })
+
+  it("holds the drawer's checkout under the minimum with the cart page's reason (§8)", () => {
+    // The frame's drawer is built from the same answer as every page (`shopView`), drawn again
+    // with the layout after each cart change: one helper for the drawer and the cart page
+    const short = cart(true)
+    short.items = short.items.map((line) => ({ ...line, variant_id: "variant_1" }))
+    const wholesaler = { active: true, minQuantity: 10 }
+    const blocked = wholesaleCheckoutBlocked(short, wholesaler, t)
+    expect(miniCartOf(short, 150, t, new Map(), new Map(), true, blocked)).toMatchObject({
+      checkoutBlocked: {
+        reason: "Toptan siparişte en az 10 adet gerekir; sepetinizde 2 adet var.",
+      },
+    })
+    expect(miniCartOf(short, 150, t, new Map(), new Map(), true)).not.toHaveProperty(
+      "checkoutBlocked"
+    )
+    const retail = wholesaleCheckoutBlocked(short, { active: false, minQuantity: null }, t)
+    expect(miniCartOf(short, 150, t, new Map(), new Map(), false, retail)).not.toHaveProperty(
+      "checkoutBlocked"
+    )
   })
 
   it("adds the KDV line to the checkout's basket for the wholesaler only, the total Medusa's", () => {

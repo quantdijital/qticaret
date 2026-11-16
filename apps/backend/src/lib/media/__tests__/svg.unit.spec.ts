@@ -1,5 +1,6 @@
 import { SVG_MAX_BYTES, looksLikeSvg } from "../svg"
 import { SvgRefusal, cleanSvg } from "../svg-clean"
+import { prescan } from "../svg-scan"
 
 // The cleaner itself, as the worker runs it (svg-worker.unit.spec.ts covers the worker)
 const sanitizeSvg = (bytes: Buffer) => cleanSvg(bytes, SVG_MAX_BYTES)
@@ -209,6 +210,10 @@ describe("sanitizeSvg: a logo as it may be stored", () => {
     ["5,001 shallow elements", "<rect/>".repeat(5_001)],
     ["a tree too deep for a recursive walk", "<g>".repeat(4_900)],
   ])("refuses %s within a second, before DOMPurify reads it", (_name, body) => {
+    // The text's read refuses it, with no clock; the second (a refusal takes
+    // milliseconds, a parse of the nested trees 1.3 s and up) shows the
+    // cleaner asks that read before it parses
+    expect(prescan(svg(body).toString())).toBe("upload.svg_too_complex")
     const started = Date.now()
     expect(refusal(svg(body))).toBe("upload.svg_too_complex")
     expect(Date.now() - started).toBeLessThan(1_000)

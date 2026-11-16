@@ -1,9 +1,10 @@
 "use client"
 
 import { ShoppingBag } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, MiniCartView } from "@qticaret/ui"
+import { CheckoutLink } from "../cart/CheckoutLink"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
 import { CartSheetLine, type SheetLineWords } from "./CartSheetLine"
 import {
@@ -90,7 +91,8 @@ function EmptyCart({
 
 /**
  * What the drawer holds: free shipping's distance, the lines, the
- * subtotal and the two ways on; or, empty, the shop's category tiles.
+ * subtotal and the two ways on (checkout drawn off with its reason while
+ * the cart cannot go to the payment); or, empty, the shop's category tiles.
  */
 export function CartSheetBody({
   cart,
@@ -103,6 +105,8 @@ export function CartSheetBody({
   change?: ((form: FormData) => Promise<void>) | undefined
   words: CartSheetWords
 }) {
+  // A header may hold a cart a screen width (the catalog's): the reason's id is each one's own
+  const id = useId()
   if (!cart || cart.lines.length === 0) {
     return <EmptyCart categories={categories} words={words} />
   }
@@ -135,9 +139,12 @@ export function CartSheetBody({
           <span className="tabular text-lg font-extrabold">{cart.subtotal}</span>
         </p>
         <p className="text-xs text-text-3">{cart.taxNote ?? words.note}</p>
-        <a href="/odeme" className="gf-btn w-full">
-          {words.checkout}
-        </a>
+        <CheckoutLink
+          id={`${id}-odeme-engeli`}
+          label={words.checkout}
+          blocked={cart.checkoutBlocked}
+          className="w-full"
+        />
         <a href="/sepet" className="gf-btn gf-btn--quiet w-full">
           {words.viewCart}
         </a>
