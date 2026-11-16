@@ -58,8 +58,10 @@ function Newsletter({
  * The bottom line (owner 2026-11-17: the year and the cookie choices on
  * one line, the ways to pay in their place, by their own marks): the year
  * and the shop's name, the ways to pay and the carriers in the middle, the
- * cookie choices and "Yukarı çık" at the end. Below 1024 px the marks take
- * their own row first, the year and the choices share the next.
+ * cookie choices and "Yukarı çık" at the end. Below 1280 px the marks take
+ * their own row first, the year and the choices share the next; the rule
+ * between the ways to pay and the carriers only from 768 px, where the
+ * marks keep to one row (below, it would stand alone at a row's start).
  */
 function BottomLine({ shop, t }: { shop: ShopView; t: Translate }) {
   const year = new Date().getFullYear()
@@ -78,7 +80,7 @@ function BottomLine({ shop, t }: { shop: ShopView; t: Translate }) {
           <div className="gf-foot-marks">
             <MarkList marks={payments} label={t("footer.payment_marks")} />
             {payments.length > 0 && carriers.length > 0 && (
-              <span aria-hidden="true" className="h-6 w-px shrink-0 bg-rule" />
+              <span aria-hidden="true" className="h-6 w-px shrink-0 bg-rule max-md:hidden" />
             )}
             <MarkList marks={carriers} label={t("footer.carrier_marks")} />
           </div>

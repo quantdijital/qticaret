@@ -67,7 +67,11 @@
     gap: 2rem var(--gap-columns);
   }
 
-  /* The bottom line: the marks first on their own row, then the year beside the choices */
+  /*
+   * The bottom line: the marks first on their own row, then the year beside
+   * the choices; one row from 1280 px (at 1024 a full row of marks leaves
+   * the year and the choices too little room, both broke in two)
+   */
   .gf-foot-line {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -77,7 +81,7 @@
     align-items: center;
     gap: 0.75rem 1.5rem;
   }
-  @media (min-width: 64rem) {
+  @media (min-width: 80rem) {
     .gf-foot-line {
       grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       grid-template-areas: "copy marks tools";
