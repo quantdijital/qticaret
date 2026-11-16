@@ -4,6 +4,7 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { RetryableError, ValidationError } from "../../lib/errors"
 import {
   UPLOAD_CONCURRENCY,
+  VIDEO_MAX_REQUEST_BYTES,
   VIDEOS_PER_PRODUCT,
   createSlots,
   makeVideoTempDir,
@@ -16,6 +17,7 @@ import {
 } from "../../lib/media/video"
 import type { ProbeVerdict, ReceivedVideo, VideoSignature } from "../../lib/media/video"
 import { assertStorageFits } from "../../lib/plan-limits"
+import { drainBody } from "../../lib/security/upload/drain"
 import { productVideos } from "../../workflows/media/video/read"
 
 /**
@@ -95,8 +97,10 @@ export async function withCheckedVideo<T>(
     const verdict = await probeVideo(received.path, signature.demuxer)
     return await use({ ...received, ...signature, ...verdict })
   } finally {
-    if (!reading && !req.readableEnded) {
-      req.resume()
+    // Refused before the body was read: it is drained first, so the refusal reaches the
+    // client instead of a reset (bounded by the path's 52 MB; drain.ts)
+    if (!reading) {
+      await drainBody(req, { maxBytes: VIDEO_MAX_REQUEST_BYTES })
     }
     if (dir !== null) {
       await removeVideoTempDir(dir)

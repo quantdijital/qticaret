@@ -8,6 +8,7 @@ import { pipeline } from "node:stream/promises"
 import busboy from "busboy"
 import { ValidationError } from "../../errors"
 import { logger } from "../../logging"
+import { drainBody } from "../../security/upload/drain"
 import { VIDEO_MAX_BYTES, VIDEO_TITLE_MAX } from "./limits"
 
 /**
@@ -161,11 +162,13 @@ export function receiveVideo(
       writer?.destroy()
       if (destroyRequest) {
         req.destroy()
-      } else {
-        // Drained (bounded by the path's gate) so the answer reaches the client
-        req.resume()
       }
-      void fileClosed(writer).then(() => {
+      // The rest of the body is drained (bounded) before the refusal goes, so the client
+      // reads it instead of a reset (lib/security/upload/drain.ts)
+      void Promise.all([
+        fileClosed(writer),
+        destroyRequest ? Promise.resolve(false) : drainBody(req),
+      ]).then(() => {
         reject(error instanceof Error ? error : new Error("video upload failed"))
       })
     }

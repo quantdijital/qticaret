@@ -297,6 +297,7 @@ medusaIntegrationTestRunner({
       action: string
       resource_type: string | null
       resource_id: string | null
+      outcome: number | null
       changes: { diff?: Record<string, { before?: unknown; after?: unknown }> } | null
     }
 
@@ -361,9 +362,18 @@ medusaIntegrationTestRunner({
         (await settle(http.delete(`${url()}/${video.id}`, { headers: owner.headers }))).status
       ).toBe(404)
 
-      const entries = await auditOf(video.id, 1)
+      // Three removals named this video: on the other product (404), the one that took it
+      // (200) and the one after (404). Each is recorded; the 200 is the one that changed it
+      const entries = await auditOf(video.id, 3)
+      expect(
+        entries
+          .filter((entry) => entry.action === "DELETE /admin/products/:id/videos/:video_id")
+          .map((entry) => entry.outcome)
+          .sort()
+      ).toEqual([200, 404, 404])
       const removal = entries.find(
-        (entry) => entry.action === "DELETE /admin/products/:id/videos/:video_id"
+        (entry) =>
+          entry.action === "DELETE /admin/products/:id/videos/:video_id" && entry.outcome === 200
       )
       expect(removal).toMatchObject({ resource_type: "media_video", resource_id: video.id })
       // What it was, before: its kind and title, never a file key or the uploader

@@ -98,12 +98,20 @@ describe("a video's fields through `fields` (adr/0069, security review D3)", () 
 })
 
 describe("a video upload's body (security review O2)", () => {
+  // A request whose body has been read: the refusal waits for a body's drain (drain.ts)
   const upload = (headers: Record<string, string>) =>
-    request({ path: "/admin/products/prod_1/videos", method: "POST", headers })
+    Object.assign(request({ path: "/admin/products/prod_1/videos", method: "POST", headers }), {
+      complete: true,
+    })
 
-  it("takes a multipart form of declared length", () => {
-    const result = run(
-      requireVideoForm,
+  async function form(req: MedusaRequest) {
+    const result = run(requireVideoForm, req)
+    await new Promise((resolve) => setImmediate(resolve))
+    return result
+  }
+
+  it("takes a multipart form of declared length", async () => {
+    const result = await form(
       upload({ "content-type": "multipart/form-data; boundary=x", "content-length": "1024" })
     )
     expect(result.next).toHaveBeenCalled()
@@ -114,15 +122,14 @@ describe("a video upload's body (security review O2)", () => {
     ["application/json", 415],
     ["multipart/mixed; boundary=x", 415],
     ["video/mp4", 415],
-  ])("refuses %s with %s before reading it", (type, status) => {
-    const result = run(requireVideoForm, upload({ "content-type": type, "content-length": "10" }))
+  ])("refuses %s with %s before reading it", async (type, status) => {
+    const result = await form(upload({ "content-type": type, "content-length": "10" }))
     expect(result.status()).toBe(status)
     expect(result.next).not.toHaveBeenCalled()
   })
 
-  it("refuses a body of unknown length", () => {
-    const result = run(
-      requireVideoForm,
+  it("refuses a body of unknown length", async () => {
+    const result = await form(
       upload({ "content-type": "multipart/form-data; boundary=x", "transfer-encoding": "chunked" })
     )
     expect(result.status()).toBe(411)

@@ -7,8 +7,9 @@ import type {
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { PRODUCT_VIDEOS } from "../../modules/platform-settings/features"
 import { requireUserActor } from "./actor"
+import { VIDEO_MAX_REQUEST_BYTES } from "../../lib/media/video/limits"
+import { refuseAfterDrain } from "./drain-body"
 import { rateLimit } from "./rate-limit"
-import { rejectRequest } from "./reject"
 import { requireFeature } from "./require-feature"
 
 const staffOf = (req: MedusaRequest) =>
@@ -18,30 +19,34 @@ const staffOf = (req: MedusaRequest) =>
  * An upload is a multipart form with its length declared (security review
  * O2): the size gate checks multipart bodies only, so any other type is
  * refused here (415) before anything reads it, and so is a body of
- * unknown length (411).
+ * unknown length (411). Each answered once the body is drained (bounded at
+ * the video path's 52 MB), so the client reads it (drain-body.ts).
  */
 export function requireVideoForm(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
 ): void {
+  const limits = { maxBytes: VIDEO_MAX_REQUEST_BYTES }
   if (!(req.headers["content-type"] ?? "").toLowerCase().startsWith("multipart/form-data")) {
-    rejectRequest(
+    void refuseAfterDrain(
       req,
       res,
       415,
       { type: "invalid_data", message: "video.file_required" },
-      "video_not_multipart"
+      "video_not_multipart",
+      limits
     )
     return
   }
   if (req.headers["content-length"] === undefined) {
-    rejectRequest(
+    void refuseAfterDrain(
       req,
       res,
       411,
       { type: "invalid_data", message: "errors.length_required" },
-      "video_length_missing"
+      "video_length_missing",
+      limits
     )
     return
   }

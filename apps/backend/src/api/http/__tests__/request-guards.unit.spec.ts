@@ -259,55 +259,58 @@ describe("adminLimitGuard", () => {
 })
 
 describe("uploadSizeGate", () => {
-  const multipart = (path: string, length?: string) =>
-    request({
-      path,
-      headers: {
-        "content-type": "Multipart/Form-Data; boundary=x",
-        ...(length === undefined ? {} : { "content-length": length }),
-      },
-    })
-
-  it("refuses a missing or oversized length before the upload is read", () => {
-    expect(run(uploadSizeGate, multipart("/admin/uploads")).status()).toBe(411)
-    expect(
-      run(uploadSizeGate, multipart("/admin/uploads", String(30 * 1024 * 1024))).status()
-    ).toBe(413)
-    expect(run(uploadSizeGate, multipart("/admin/uploads", "1024")).next).toHaveBeenCalled()
-  })
-
-  it("checks every multipart request, however the path is spelled", () => {
-    expect(run(uploadSizeGate, multipart("/ADMIN/UPLOADS")).status()).toBe(411)
-    expect(run(uploadSizeGate, multipart("/admin/products/import")).status()).toBe(411)
-  })
-
-  it("gives a product video's upload its own 52 MB, and nothing else (adr/0069 §3)", () => {
-    const MB = 1024 * 1024
-    const video = (length: string, method = "POST", path = "/admin/products/prod_1/videos") =>
+  // A request whose body has been read (a refusal waits for the body's drain: drain.ts)
+  const multipart = (path: string, length?: string, method = "POST") =>
+    Object.assign(
       request({
         path,
         method,
-        headers: { "content-type": "multipart/form-data; boundary=x", "content-length": length },
-      })
-    expect(run(uploadSizeGate, video(String(52 * MB))).next).toHaveBeenCalled()
-    const over = run(uploadSizeGate, video(String(52 * MB + 1)))
+        headers: {
+          "content-type": "Multipart/Form-Data; boundary=x",
+          ...(length === undefined ? {} : { "content-length": length }),
+        },
+      }),
+      { complete: true }
+    )
+
+  /** The gate's answer, once its refusal (sent after the drain) has gone. */
+  async function gate(req: MedusaRequest) {
+    const result = run(uploadSizeGate, req)
+    await new Promise((resolve) => setImmediate(resolve))
+    return result
+  }
+
+  it("refuses a missing or oversized length before the upload is read", async () => {
+    expect((await gate(multipart("/admin/uploads"))).status()).toBe(411)
+    expect((await gate(multipart("/admin/uploads", String(30 * 1024 * 1024)))).status()).toBe(413)
+    expect((await gate(multipart("/admin/uploads", "1024"))).next).toHaveBeenCalled()
+  })
+
+  it("checks every multipart request, however the path is spelled", async () => {
+    expect((await gate(multipart("/ADMIN/UPLOADS"))).status()).toBe(411)
+    expect((await gate(multipart("/admin/products/import"))).status()).toBe(411)
+  })
+
+  it("gives a product video's upload its own 52 MB, and nothing else (adr/0069 §3)", async () => {
+    const MB = 1024 * 1024
+    const video = (length: string, method = "POST", path = "/admin/products/prod_1/videos") =>
+      multipart(path, length, method)
+    expect((await gate(video(String(52 * MB)))).next).toHaveBeenCalled()
+    const over = await gate(video(String(52 * MB + 1)))
     expect(over.status()).toBe(413)
     expect(over.body()).toMatchObject({ message: "video.too_large" })
     // However the path is spelled, as Express routes it
     expect(
-      run(uploadSizeGate, video(String(40 * MB), "POST", "/ADMIN/Products/prod_1/Videos/")).next
+      (await gate(video(String(40 * MB), "POST", "/ADMIN/Products/prod_1/Videos/"))).next
     ).toHaveBeenCalled()
     // Without a length, refused as any upload
-    expect(run(uploadSizeGate, multipart("/admin/products/prod_1/videos")).status()).toBe(411)
+    expect((await gate(multipart("/admin/products/prod_1/videos"))).status()).toBe(411)
     // Its neighbours keep the 25 MB of uploads
     expect(
-      run(
-        uploadSizeGate,
-        video(String(30 * MB), "POST", "/admin/products/prod_1/videos/x")
-      ).status()
+      (await gate(video(String(30 * MB), "POST", "/admin/products/prod_1/videos/x"))).status()
     ).toBe(413)
-    expect(run(uploadSizeGate, video(String(30 * MB), "POST", "/admin/uploads")).status()).toBe(413)
-    expect(run(uploadSizeGate, video(String(30 * MB), "PUT")).status()).toBe(413)
+    expect((await gate(video(String(30 * MB), "POST", "/admin/uploads"))).status()).toBe(413)
+    expect((await gate(video(String(30 * MB), "PUT"))).status()).toBe(413)
   })
 
   it("leaves other bodies to the body parser's own limit", () => {

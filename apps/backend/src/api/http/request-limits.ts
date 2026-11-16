@@ -1,5 +1,6 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { VIDEO_MAX_REQUEST_BYTES } from "../../lib/media/video/limits"
+import { refuseAfterDrain } from "./drain-body"
 import { rejectRequest } from "./reject"
 import { routePath } from "./request-path"
 
@@ -71,8 +72,9 @@ export function uploadSizeGate(req: MedusaRequest, res: MedusaResponse, next: Me
   }
   const video = isVideoUpload(req)
   const declared = req.headers["content-length"]
+  // Answered once the body is drained (bounded), so the client reads it (drain-body.ts)
   if (declared === undefined) {
-    rejectRequest(
+    void refuseAfterDrain(
       req,
       res,
       411,
@@ -82,7 +84,7 @@ export function uploadSizeGate(req: MedusaRequest, res: MedusaResponse, next: Me
     return
   }
   if (Number(declared) > (video ? VIDEO_MAX_REQUEST_BYTES : MAX_UPLOAD_REQUEST_BYTES)) {
-    rejectRequest(
+    void refuseAfterDrain(
       req,
       res,
       413,
