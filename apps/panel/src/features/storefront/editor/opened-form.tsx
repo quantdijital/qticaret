@@ -18,6 +18,7 @@ import { tabMates } from "@/features/storefront/layout/shelf-tabs"
 import type { Opened } from "./opened"
 import { SectionPanel } from "./section-panel"
 import { LooksPanel } from "./shared/looks-panel"
+import { PreferencesPanel } from "./shared/preferences-panel"
 import { ThemePanel } from "./theme-panel"
 import { cardVariantsInUse } from "./forms/theme-registry"
 
@@ -36,7 +37,8 @@ interface OpenedFormProps {
 /**
  * The theme editor's open panel (adr/0049): the open section's settings,
  * the theme's settings (adr/0063 §3) or the stock line and colour names,
- * each writing to the draft; nothing open: nothing.
+ * each writing to the draft; the storefront's preferences, saved at once
+ * apart from it; nothing open: nothing.
  */
 export function OpenedForm({
   opened,
@@ -104,6 +106,9 @@ export function OpenedForm({
         }}
       />
     )
+  }
+  if (opened?.kind === "preferences") {
+    return <PreferencesPanel onBack={onClose} />
   }
   if (opened?.kind === "looks") {
     return (

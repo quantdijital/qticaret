@@ -66,7 +66,14 @@ const E = "storefront.editor"
  * preview redraws in place after each save (adr/0065);
  * "Yayınla" puts the draft live.
  */
-export function ThemeEditor({ layout }: { layout: AdminLayout }) {
+export function ThemeEditor({
+  layout,
+  openAtFirst = null,
+}: {
+  layout: AdminLayout
+  /** A panel the address asks for (`?open=preferences`: the old preferences page's links). */
+  openAtFirst?: "preferences" | null
+}) {
   const { t } = useTranslation()
   const router = useRouter()
   const navigate = useNavigate()
@@ -85,7 +92,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     stored: layout.is_default ? null : layout.draft,
     blocked: problems.size > 0 || acting,
   })
-  const [opened, setOpened] = useState<Opened>(null)
+  const [opened, setOpened] = useState<Opened>(() => (openAtFirst ? { kind: openAtFirst } : null))
   // Each pick of the settings search a fresh number: the same field picked again is shown again
   const picks = useRef(0)
   // The page worked on and shown; a link followed in the preview may change it (adr/0065 Faz 2)
@@ -238,6 +245,9 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
           looksProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
             (field) => partOf(field) === "looks"
           )}
+          onPreferences={() => {
+            setOpened({ kind: "preferences" })
+          }}
         />
       </SettingsSearch>
     </>

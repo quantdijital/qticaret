@@ -165,30 +165,30 @@ test("opens an order with what each line was paid", async ({ page, guard }) => {
   await guard.assertHealthy()
 })
 
-test("sends the old storefront settings address to the storefront preferences", async ({
-  page,
-  guard,
-}) => {
-  await page.goto("/settings/storefront?part=maintenance")
-  await expect(page).toHaveURL(/\/storefront\/preferences\?part=maintenance$/)
-  await expect(pageHeading(page)).toHaveText("Vitrin tercihleri")
-  await expect(page.getByRole("tab", { name: "Bakım modu" })).toHaveAttribute(
-    "aria-selected",
-    "true"
-  )
+test("sends the old maintenance addresses to Settings > Maintenance", async ({ page, guard }) => {
+  for (const old of [
+    "/settings/storefront?part=maintenance",
+    "/storefront/preferences?part=maintenance",
+  ]) {
+    await page.goto(old)
+    await expect(page).toHaveURL(/\/settings\/maintenance$/)
+    await expect(pageHeading(page)).toHaveText("Bakım modu")
+  }
   await guard.assertHealthy()
 })
 
-test("opens the first preferences tab for a part that moved to the theme editor", async ({
+test("opens the theme editor's preferences for the old preferences addresses", async ({
   page,
   guard,
 }) => {
-  // Colour swatches and "Az kaldı" are in the theme editor (adr/0049 Ek 2026-11-06)
-  await page.goto("/settings/storefront?part=swatches")
-  await expect(page).toHaveURL(/\/storefront\/preferences$/)
-  await expect(page.getByRole("tab", { name: "İletişim formu" })).toHaveAttribute(
-    "aria-selected",
-    "true"
-  )
+  // The contact form and the info pages are a panel of the editor (the owner, 2026-11-16)
+  for (const old of [
+    "/storefront/preferences?part=contact",
+    "/settings/storefront?part=swatches",
+  ]) {
+    await page.goto(old)
+    await expect(page).toHaveURL(/\/storefront\/editor\?open=preferences$/)
+    await expect(page.getByRole("form", { name: "İletişim formu" })).toBeVisible()
+  }
   await guard.assertHealthy()
 })

@@ -71,7 +71,6 @@
     "reviews": "Reviews and questions",
     "menus": "Menus",
     "themeEditor": "Theme editor",
-    "storefrontPreferences": "Storefront preferences",
     "bulkMessages": "Bulk messages",
     "paymentLinks": "Payment links",
     "media": "Media library",
@@ -318,7 +317,8 @@
       "legal": "Legal texts",
       "einvoice": "Invoices and accounting",
       "migration": "Migration",
-      "subscription": "Subscription"
+      "subscription": "Subscription",
+      "maintenance": "Maintenance mode"
     },
     "appearance": {
       "title": "Appearance",
@@ -1928,7 +1928,8 @@
       "legal": "Contracts, policies and the privacy notice",
       "einvoice": "Invoicing program, timing and series, carrier details, accounting",
       "migration": "Catalog, customers and 301s from the old platform",
-      "subscription": "Your package, limits and usage, payment status"
+      "subscription": "Your package, limits and usage, payment status",
+      "maintenance": "Closing the storefront for a while, the maintenance page and the bypass link"
     },
     "marketing": {
       "title": "Marketing",
@@ -2992,6 +2993,11 @@
           "today": "Today"
         }
       }
+    },
+    "maintenance": {
+      "title": "Maintenance mode",
+      "description": "Close the storefront for a while: shoppers see a short maintenance page instead of the shop. A change goes live as soon as it is saved.",
+      "dark": "Shop in maintenance"
     }
   },
   "status": {
@@ -7860,7 +7866,8 @@
           "bottom": "Add section below"
         },
         "looks": "Stock and colour swatches",
-        "addMarquee": "Add scrolling strip"
+        "addMarquee": "Add scrolling strip",
+        "preferences": "Storefront preferences"
       },
       "row": {
         "problem": "A field needs fixing",
@@ -8955,6 +8962,10 @@
           "hexPlaceholder": "#1e3a8a",
           "add": "Add colour",
           "hint": "At most {{max}} colours; each name at most {{length}} characters, written once."
+        },
+        "preferences": {
+          "title": "Storefront preferences",
+          "description": "How the shop works: the pages that show the contact form and the payment and shipping facts. These settings are not part of the draft: Save puts them live at once, without waiting for Publish. Maintenance mode is in Settings > Maintenance mode."
         }
       },
       "pendingMenus": {
@@ -9457,16 +9468,6 @@
         "count_one": "{{count}} setting found",
         "count_other": "{{count}} settings found"
       }
-    },
-    "preferences": {
-      "description": "How the shop works: the contact form's page, the pages that show payment and shipping facts, and maintenance mode. How the storefront looks (trust badges, colour swatches, “Az kaldı”) is in the theme editor. Each tab saves its own card.",
-      "editor": "Open the theme editor",
-      "tabs": {
-        "contact": "Contact form",
-        "infoPages": "Payment and shipping pages",
-        "maintenance": "Maintenance mode"
-      },
-      "dark": "Shop in maintenance"
     },
     "maintenance": {
       "status": {

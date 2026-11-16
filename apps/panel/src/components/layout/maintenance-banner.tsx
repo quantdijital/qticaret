@@ -24,11 +24,7 @@ export function MaintenanceBanner() {
     >
       <Construction className="size-4 shrink-0" aria-hidden="true" />
       <span className="min-w-0 flex-1 font-medium">{t(`${B}.text`)}</span>
-      <Link
-        to="/storefront/preferences"
-        search={{ part: "maintenance" }}
-        className="font-medium underline underline-offset-4"
-      >
+      <Link to="/settings/maintenance" className="font-medium underline underline-offset-4">
         {t(`${B}.link`)}
       </Link>
     </div>

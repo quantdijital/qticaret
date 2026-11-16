@@ -73,8 +73,13 @@ describe("Settings home", () => {
     )
     // Accounting, warehouses and SMS are tabs of invoices, shipping and e-mail now; the
     // storefront's parts are under Storefront in the main menu (adr/0049)
-    // adr/0061 Ek C14: Subscription joined the system group
-    expect(screen.getAllByRole("link")).toHaveLength(19)
+    // adr/0061 Ek C14: Subscription joined the system group; maintenance came from the
+    // storefront preferences (the owner, 2026-11-16)
+    expect(screen.getAllByRole("link")).toHaveLength(20)
+    expect(screen.getByRole("link", { name: /Bakım modu/ })).toHaveAttribute(
+      "href",
+      "/settings/maintenance"
+    )
     expect(screen.getByRole("link", { name: /Abonelik.*limitler/ })).toHaveAttribute(
       "href",
       "/settings/subscription"
@@ -86,8 +91,11 @@ describe("Settings home", () => {
     staff.allowed = (capability) => ["orders", "stock", "moderation"].includes(capability)
     render(<SettingsHomePage />)
 
-    // Integrations show the shop's set-up and its failures: those who set it up (F12.2)
+    // Integrations show the shop's set-up and its failures: those who set it up (F12.2).
+    // Maintenance shows them whether the storefront is dark, its switch read-only, as the
+    // storefront preferences page did (adr/0053)
     expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "/settings/maintenance",
       "/settings/security",
       "/settings/jobs",
     ])

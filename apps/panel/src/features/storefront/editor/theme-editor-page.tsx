@@ -14,7 +14,7 @@ import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 const E = "storefront.editor"
 
 /** Storefront > Theme editor: the shop's design, read once, then held by the editor. */
-export function ThemeEditorPage() {
+export function ThemeEditorPage({ open = null }: { open?: "preferences" | null }) {
   const { t } = useTranslation()
   useDocumentTitle(t(`${E}.title`))
   const query = useQuery(layoutQuery())
@@ -22,7 +22,7 @@ export function ThemeEditorPage() {
     // One tooltip clock for the whole editor: the next hint along opens at once
     return (
       <HintProvider>
-        <ThemeEditor layout={query.data} />
+        <ThemeEditor layout={query.data} openAtFirst={open} />
       </HintProvider>
     )
   }

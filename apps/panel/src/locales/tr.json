@@ -71,7 +71,6 @@
     "reviews": "Yorumlar ve sorular",
     "menus": "Menüler",
     "themeEditor": "Tema düzenleyici",
-    "storefrontPreferences": "Vitrin tercihleri",
     "bulkMessages": "Toplu ileti",
     "paymentLinks": "Ödeme bağlantıları",
     "media": "Ortam kütüphanesi",
@@ -318,7 +317,8 @@
       "legal": "Yasal metinler",
       "einvoice": "Fatura ve muhasebe",
       "migration": "Taşıma",
-      "subscription": "Abonelik"
+      "subscription": "Abonelik",
+      "maintenance": "Bakım modu"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1928,7 +1928,8 @@
       "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
       "einvoice": "Fatura programı, kesim anı ve seri, taşıyıcı bilgileri, muhasebe",
       "migration": "Eski platformdan katalog, müşteri ve 301 yönlendirmeleri",
-      "subscription": "Paketiniz, limitler ve kullanım, ödeme durumu"
+      "subscription": "Paketiniz, limitler ve kullanım, ödeme durumu",
+      "maintenance": "Vitrini geçici olarak kapatma, bakım sayfası ve atlatma bağlantısı"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -2992,6 +2993,11 @@
           "today": "Bugün"
         }
       }
+    },
+    "maintenance": {
+      "title": "Bakım modu",
+      "description": "Vitrini geçici olarak kapatın: alıcılar mağaza yerine kısa bir bakım sayfası görür. Değişiklik kaydedildiği anda vitrine geçer.",
+      "dark": "Mağaza bakımda"
     }
   },
   "status": {
@@ -7860,7 +7866,8 @@
           "bottom": "Alta bölüm ekle"
         },
         "looks": "Stok ve renk örnekleri",
-        "addMarquee": "Kayan yazı ekle"
+        "addMarquee": "Kayan yazı ekle",
+        "preferences": "Vitrin tercihleri"
       },
       "row": {
         "problem": "Düzeltilecek alan var",
@@ -8955,6 +8962,10 @@
           "hexPlaceholder": "#1e3a8a",
           "add": "Renk ekle",
           "hint": "En çok {{max}} renk; her ad en çok {{length}} karakter ve bir kez yazılır."
+        },
+        "preferences": {
+          "title": "Vitrin tercihleri",
+          "description": "Mağazanın nasıl çalıştığı: iletişim formunun ve ödeme, kargo bilgisinin gösterildiği sayfalar. Bu ayarlar taslağa girmez: Kaydet'e bastığınızda hemen vitrine geçer, Yayınla'yı beklemez. Bakım modu Ayarlar > Bakım modu'ndadır."
         }
       },
       "pendingMenus": {
@@ -9457,16 +9468,6 @@
         "count_one": "{{count}} ayar bulundu",
         "count_other": "{{count}} ayar bulundu"
       }
-    },
-    "preferences": {
-      "description": "Mağazanın nasıl çalıştığı: iletişim formunun sayfası, ödeme ve kargo bilgisinin gösterildiği sayfalar ve bakım modu. Vitrinin görünüşü (güven rozetleri, renk örnekleri, “Az kaldı”) tema düzenleyicidedir. Her sekme kendi kartını kaydeder.",
-      "editor": "Tema düzenleyiciyi aç",
-      "tabs": {
-        "contact": "İletişim formu",
-        "infoPages": "Ödeme ve kargo sayfaları",
-        "maintenance": "Bakım modu"
-      },
-      "dark": "Mağaza bakımda"
     },
     "maintenance": {
       "status": {

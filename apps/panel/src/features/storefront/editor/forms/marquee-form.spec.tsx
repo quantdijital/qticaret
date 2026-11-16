@@ -148,6 +148,7 @@ describe("scrolling strips per page", () => {
         themeProblem={false}
         onLooks={() => undefined}
         looksProblem={false}
+        onPreferences={() => undefined}
       />
     )
     const { rerender } = render(tree(docWith(0, 1)))

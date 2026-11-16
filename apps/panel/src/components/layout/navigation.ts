@@ -15,7 +15,6 @@ import {
   Search,
   Settings,
   ShoppingBag,
-  SlidersHorizontal,
   Store,
   Tag,
   Users,
@@ -92,12 +91,12 @@ export const NAV_GROUPS: NavGroup[] = [
     // What the shop's customers see around its catalog (adr/0049); the editor opens full screen
     key: "storefront",
     items: [
+      // The storefront's preferences are a panel of it (the owner, 2026-11-16)
       { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
       { key: "menus", to: "/storefront/menus", icon: ListTree },
       { key: "content", to: "/content", icon: FileText },
       // Every picture the shop uploaded; the pickers of every image field open it too
       { key: "media", to: "/media", icon: Images },
-      { key: "storefrontPreferences", to: "/storefront/preferences", icon: SlidersHorizontal },
     ],
   },
   {

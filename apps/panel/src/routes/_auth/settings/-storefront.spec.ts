@@ -1,10 +1,14 @@
 import { isRedirect } from "@tanstack/react-router"
 import { describe, expect, it } from "vitest"
-import { Route } from "./storefront"
+import { Route as Preferences } from "../storefront/preferences"
+import { Route as Storefront } from "./storefront"
 
-/** The redirect the old Settings > Storefront address throws for this search. */
-function redirectFor(search: Record<string, unknown>) {
-  const beforeLoad = Route.options.beforeLoad as unknown as (context: {
+/** The redirect an old address throws for this search. */
+function redirectFor(
+  route: { options: { beforeLoad?: unknown } },
+  search: Record<string, unknown>
+) {
+  const beforeLoad = route.options.beforeLoad as (context: {
     search: Record<string, unknown>
   }) => void
   try {
@@ -18,18 +22,40 @@ function redirectFor(search: Record<string, unknown>) {
   throw new Error("no redirect")
 }
 
-describe("the old Settings > Storefront address", () => {
-  it("opens Storefront > Preferences on the tab it names", () => {
-    expect(redirectFor({ part: "maintenance" })).toMatchObject({
-      to: "/storefront/preferences",
-      search: { part: "maintenance" },
+describe("the old Storefront > Preferences address (out of the sidebar, 2026-11-16)", () => {
+  it("opens the theme editor with its preferences panel for the contact and info pages", () => {
+    for (const part of [undefined, "contact", "infoPages"]) {
+      expect(redirectFor(Preferences, part ? { part } : {})).toMatchObject({
+        to: "/storefront/editor",
+        search: { open: "preferences" },
+        replace: true,
+      })
+    }
+  })
+
+  it("opens Settings > Maintenance for maintenance", () => {
+    expect(redirectFor(Preferences, { part: "maintenance" })).toMatchObject({
+      to: "/settings/maintenance",
+    })
+  })
+})
+
+describe("the older Settings > Storefront address", () => {
+  it("lands where the part it names went", () => {
+    expect(redirectFor(Storefront, { part: "maintenance" })).toMatchObject({
+      to: "/settings/maintenance",
+    })
+    expect(redirectFor(Storefront, { part: "contact" })).toMatchObject({
+      to: "/storefront/editor",
+      search: { open: "preferences" },
     })
   })
 
-  it("drops a part that moved to the theme editor, so the first tab opens", () => {
+  it("opens the editor's preferences for a part that moved to the theme editor earlier", () => {
     // The full search still holds what no route validates (TanStack keeps the raw keys)
-    const options = redirectFor({ part: "swatches" })
-    expect(options.to).toBe("/storefront/preferences")
-    expect(options.search).toEqual({})
+    expect(redirectFor(Storefront, { part: "swatches" })).toMatchObject({
+      to: "/storefront/editor",
+      search: { open: "preferences" },
+    })
   })
 })
