@@ -175,11 +175,68 @@ describe("checkWholesaleCartForPayment", () => {
     })
   })
 
-  it("lets the start go on when Medusa's refresh changes nothing (logged)", async () => {
+  it("stops the start when Medusa's refresh leaves the cart wrong (review Y2): never charged", async () => {
+    // This check and Medusa read 79 and 80: the completion would refuse after the charge
     const { scope } = container([cartOf()], { priceNow: 79 })
+    await expect(checkWholesaleCartForPayment(scope, "cart_1")).rejects.toMatchObject({
+      name: "ConflictError",
+      safeMessage: "wholesale.payment_unavailable",
+    })
+    expect(run).toHaveBeenCalledTimes(1)
+    // A code that stays on a wholesaler's cart after the refresh: the same
+    const coded = cartOf({ promotions: [{ code: "YAZ10", is_automatic: false }] })
+    const kept = container([coded, coded])
+    await expect(checkWholesaleCartForPayment(kept.scope, "cart_1")).rejects.toMatchObject({
+      safeMessage: "wholesale.payment_unavailable",
+    })
+  })
+
+  it("goes on when the refresh took only a promotion's link, the total the same", async () => {
+    const linked = cartOf({ promotions: [{ code: "KIS", is_automatic: true }] })
+    const { scope } = container([linked, cartOf()])
     await expect(checkWholesaleCartForPayment(scope, "cart_1")).resolves.toEqual({
       repriced: true,
     })
+  })
+
+  it("never lets a cart start that the completion would then refuse (review Y2)", async () => {
+    const stale = cartOf()
+    const repriced = cartOf({
+      total: 200,
+      items: [{ id: "item_1", variant_id: "variant_1", quantity: 2, unit_price: 100 }],
+    })
+    const cases: { reads: Cart[]; priceNow: number; active: boolean }[] = [
+      { reads: [cartOf()], priceNow: 80, active: true },
+      { reads: [stale, repriced], priceNow: 100, active: false },
+      { reads: [stale, stale], priceNow: 79, active: true },
+      {
+        reads: [cartOf({ promotions: [{ code: "K", is_automatic: true }] }), cartOf()],
+        priceNow: 80,
+        active: true,
+      },
+      {
+        reads: [cartOf({ promotions: [{ code: "Y", is_automatic: false }] })],
+        priceNow: 80,
+        active: true,
+      },
+    ]
+    for (const { reads, priceNow, active } of cases) {
+      shopper.mockResolvedValue(active ? ACTIVE : NOT_WHOLESALE)
+      const started = await checkWholesaleCartForPayment(
+        container(reads, { priceNow }).scope,
+        "cart_1"
+      ).then(
+        () => true,
+        () => false
+      )
+      if (started) {
+        // The cart as the start left it, nothing changed since
+        const last = reads[reads.length - 1] ?? cartOf()
+        await expect(
+          assertWholesaleCartCompletes(container([last], { priceNow }).scope, "cart_1")
+        ).resolves.toBeUndefined()
+      }
+    }
   })
 
   it("refuses a wholesaler's cart short of its minimum before pricing anything", async () => {

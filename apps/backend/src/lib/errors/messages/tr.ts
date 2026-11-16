@@ -813,6 +813,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu müşteri e-posta ve şifreyle değil, başka bir yolla (ör. Google) giriş yapıyor; şifre belirlenemez.",
   "wholesale.prices_changed":
     "Sepetinizdeki fiyatlar güncellendi. Yeni tutarı kontrol edip ödemeyi yeniden başlatın.",
+  "wholesale.payment_unavailable":
+    "Sepetinizin ödemesi şu an başlatılamıyor. Sepetinizi yenileyip biraz sonra tekrar deneyin.",
   "wholesale.min_quantity":
     "Toptan siparişte en az {{min}} adet gerekir; sepetinizde {{units}} adet var.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",

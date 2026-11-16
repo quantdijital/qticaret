@@ -36,6 +36,16 @@ describe("wholesalePromotionContext", () => {
     expect(shopper).toHaveBeenCalledWith(scope, "cus_1")
   })
 
+  it("finds the customer by the cart's `customer` as Medusa's refresh reads it (review O2 b)", async () => {
+    const unnamed = { ...cart, customer_id: null }
+    const context = await wholesalePromotionContext(scope, {
+      ...unnamed,
+      customer: { id: "cus_2" },
+    })
+    expect(context?.items).toHaveLength(1)
+    expect(shopper).toHaveBeenCalledWith(scope, "cus_2")
+  })
+
   it("leaves every other cart as Medusa reads it", async () => {
     await expect(
       wholesalePromotionContext(scope, { ...cart, customer_id: null })

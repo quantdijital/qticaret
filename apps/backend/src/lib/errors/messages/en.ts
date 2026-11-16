@@ -810,6 +810,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This customer signs in another way (e.g. Google), not with an e-mail and password; no password can be set.",
   "wholesale.prices_changed":
     "The prices in your cart were updated. Check the new total and start the payment again.",
+  "wholesale.payment_unavailable":
+    "The payment for your cart cannot be started right now. Refresh your cart and try again shortly.",
   "wholesale.min_quantity":
     "A wholesale order needs at least {{min}} items; your cart has {{units}}.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",

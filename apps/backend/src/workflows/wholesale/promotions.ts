@@ -13,6 +13,12 @@ interface Adjusted {
 /** The cart as Medusa's promotion workflow hands it to `setPromotionContext` (2.21.2). */
 export interface PromotionCart {
   customer_id?: string | null
+  /**
+   * Medusa's refresh reads the cart with `customer.*` (2.21.2
+   * `cartFieldsForRefreshSteps`), not `customer_id` by name: either names
+   * the customer (slice 4 review O2 b).
+   */
+  customer?: { id?: string | null } | null
   metadata?: Record<string, unknown> | null
   items?: (Adjusted | null)[] | null
   shipping_methods?: (Adjusted | null)[] | null
@@ -31,7 +37,7 @@ export async function wholesalePromotionContext(
   container: Container,
   cart: PromotionCart | null | undefined
 ): Promise<ReturnType<typeof promotionShells> | undefined> {
-  const customerId = cart?.customer_id
+  const customerId = cart?.customer_id ?? cart?.customer?.id
   if (!cart || !customerId || linkIdOfCart(cart.metadata) !== null) {
     return undefined
   }

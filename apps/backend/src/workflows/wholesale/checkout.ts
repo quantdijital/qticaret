@@ -202,8 +202,8 @@ export async function assertWholesaleCartCompletes(
   }
 }
 
-/** The cart's total and line prices, to tell whether a refresh changed what is paid. */
-const pricedState = (cart: CheckoutCart | undefined): string =>
+/** What the shopper pays: the cart's total and its lines' prices (a promotion's link alone is not). */
+const paidState = (cart: CheckoutCart | undefined): string =>
   JSON.stringify([
     cart?.total === null || cart?.total === undefined
       ? null
@@ -211,7 +211,6 @@ const pricedState = (cart: CheckoutCart | undefined): string =>
     (cart?.items ?? []).flatMap((line) =>
       line ? [[line.id, fromMedusaAmount(line.unit_price, { allowRounding: true })]] : []
     ),
-    (cart?.promotions ?? []).flatMap((promotion) => (promotion?.code ? [promotion.code] : [])),
   ])
 
 /**
@@ -219,11 +218,17 @@ const pricedState = (cart: CheckoutCart | undefined): string =>
  * cart short of its minimum is refused (`wholesale.min_quantity`); a cart
  * not at its customer's prices now, or a wholesaler's carrying a
  * promotion, is priced again by Medusa's own refresh (it takes the cart's
- * lock, so this runs before the start takes it) and the start stops with
- * 409 `wholesale.prices_changed`: the shopper sees the new total before
- * paying it. The prices stay: they are the right ones. Should the refresh
- * change nothing, this check and Medusa read a price differently: logged
- * as an error and let through, Medusa's price being the cart's.
+ * lock, so this runs before the start takes it) and judged again by the
+ * same rule the order's completion applies (`needsPricing`):
+ * - right now and what is paid changed: the start stops with 409
+ *   `wholesale.prices_changed`, the shopper sees the new total before
+ *   paying it; the prices stay, they are the right ones;
+ * - right now and only a promotion's link went: the start goes on;
+ * - still not right (this check and Medusa read a price differently):
+ *   logged as an error with the cart, and the start stops with 409
+ *   `wholesale.payment_unavailable` (slice 4 review Y2): the completion
+ *   would refuse it after a card was charged. A cart this lets through is
+ *   one the completion lets through too, nothing changing in between.
  */
 export async function checkWholesaleCartForPayment(
   container: MedusaContainer,
@@ -240,10 +245,20 @@ export async function checkWholesaleCartForPayment(
     return { repriced: false }
   }
   await repriceCartWorkflow(container).run({ input: { cart_id: cart.id } })
-  if (pricedState(await readCart(container, cart.id)) !== pricedState(cart)) {
+  const after = await readCart(container, cart.id)
+  const again = await reviewWholesaleCart(container, after)
+  if (again && needsPricing(again)) {
+    logger.error({
+      event: "wholesale.price_check_diverged",
+      cart_id: cart.id,
+      lines: again.stale.length,
+      promotions: again.promotions,
+    })
+    throw new ConflictError("wholesale.payment_unavailable")
+  }
+  if (paidState(after) !== paidState(cart)) {
     throw new ConflictError("wholesale.prices_changed")
   }
-  logger.error({ event: "wholesale.price_check_diverged", lines: review.stale.length })
   return { repriced: true }
 }
 
