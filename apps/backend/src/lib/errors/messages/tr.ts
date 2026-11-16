@@ -1070,6 +1070,23 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "SVG dosyasında çok fazla ya da çok iç içe öğe var. Dosyayı sadeleştirip yeniden deneyin.",
   "upload.svg_too_many": "Tek seferde en çok 3 SVG dosyası yüklenebilir.",
   "upload.svg_busy": "SVG dosyaları şu an işleniyor. Birkaç saniye sonra yeniden deneyin.",
+  // adr/0069: product videos
+  "video.too_large": "Video en çok 50 MB olabilir.",
+  "video.too_long": "Video en çok 30 saniye olabilir.",
+  "video.unsupported_type": "Bu dosya türü yüklenemez. MP4, MOV, WebM ya da GIF yükleyin.",
+  "video.dimensions_too_large": "Videonun çözünürlüğü çok yüksek (en çok 4K).",
+  "video.frame_rate_too_high": "Videonun kare hızı çok yüksek (en çok saniyede 120 kare).",
+  "video.unreadable": "Video okunamadı; dosya bozuk olabilir.",
+  "video.limit_per_product": "Bir ürüne en çok 2 video eklenebilir.",
+  "video.processing_failed":
+    "Video hazırlanamadı. Yeniden deneyin; olmazsa başka bir dosya yükleyin.",
+  "video.youtube_invalid": "Geçerli bir YouTube bağlantısı girin.",
+  "video.youtube_unavailable": "Bu video gömülemiyor ya da herkese açık değil.",
+  "video.upload_unavailable": "Video şu an yüklenemiyor.",
+  "video.upload_busy": "Şu an başka videolar yükleniyor. Birkaç saniye sonra yeniden deneyin.",
+  "video.file_required": "Yüklenecek bir video dosyası seçin.",
+  "video.title_invalid": "Video başlığı en çok 200 karakter olabilir ve satır sonu içeremez.",
+  "video.unknown": "Video bulunamadı.",
   "media.svg_logo_only":
     "SVG yalnızca mağaza logosu ve site simgesi olarak kullanılabilir. Bu alan için PNG, JPEG, WebP ya da AVIF görsel seçin.",
   "cart.completed": "Bu sepetle sipariş zaten verildi.",

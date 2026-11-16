@@ -1061,6 +1061,23 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The SVG file has too many or too deeply nested elements. Simplify it and try again.",
   "upload.svg_too_many": "At most 3 SVG files can be uploaded at once.",
   "upload.svg_busy": "SVG files are being processed now. Try again in a few seconds.",
+  // adr/0069: product videos
+  "video.too_large": "A video can be 50 MB at most.",
+  "video.too_long": "A video can be 30 seconds long at most.",
+  "video.unsupported_type": "This file type cannot be uploaded. Upload MP4, MOV, WebM or GIF.",
+  "video.dimensions_too_large": "The video's resolution is too high (4K at most).",
+  "video.frame_rate_too_high": "The video's frame rate is too high (120 frames a second at most).",
+  "video.unreadable": "The video could not be read; the file may be damaged.",
+  "video.limit_per_product": "A product can have 2 videos at most.",
+  "video.processing_failed":
+    "The video could not be prepared. Try again; if it fails again, upload another file.",
+  "video.youtube_invalid": "Enter a valid YouTube link.",
+  "video.youtube_unavailable": "This video cannot be embedded or is not public.",
+  "video.upload_unavailable": "Videos cannot be uploaded right now.",
+  "video.upload_busy": "Other videos are being uploaded now. Try again in a few seconds.",
+  "video.file_required": "Choose a video file to upload.",
+  "video.title_invalid": "A video's title can be 200 characters at most, on one line.",
+  "video.unknown": "Video not found.",
   "media.svg_logo_only":
     "SVG can be used only as the shop's logo and site icon. Choose a PNG, JPEG, WebP or AVIF image for this field.",
   "cart.completed": "An order was already placed with this cart.",
