@@ -8051,7 +8051,8 @@
           "compact": "Kompakt liste",
           "columns": "Yan yana listeler",
           "strips": "Çapraz şeritler",
-          "ranked": "Sıralı liste"
+          "ranked": "Sıralı liste",
+          "stage_list": "Sahne ve liste"
         },
         "categories": {
           "tiles": "Görselli karo",
@@ -9407,6 +9408,35 @@
           "row": "Tek sıra"
         },
         "rankedCard": "Bu biçimde kart biçimi seçilmez: her ürün sıra numarasının yanında görseli, adı, puanı ve fiyatıyla çizilir. Hızlı bakış ve sepete ekle düğmeleri kartlardaki gibi görünür.",
+        "stageCount": "Ürün sayısı",
+        "stageCountTerm": "stage_count",
+        "stageCountHint": "Sahnedeki ürün de sayılır. Altıda liste satırları küçülür; telefonda sahne üstte, liste altında.",
+        "stageNoCard": "Bu biçimde kart yok: sahnedeki ürün büyük görselle, fiyatı ve Sepete ekle düğmesiyle; listede her ürün küçük görselli bir satır, satırın tamamı ürün sayfasına gider.",
+        "stage": {
+          "stage_side": {
+            "label": "Sahnenin yeri",
+            "term": "stage_side",
+            "hint": "Geniş ekranda sahne bu tarafta, liste öbür tarafta durur. Telefonda sahne her zaman üstte.",
+            "steps": {
+              "start": "Solda",
+              "end": "Sağda"
+            }
+          },
+          "stage_ground": {
+            "label": "Sahne zemini",
+            "term": "stage_ground",
+            "hint": "Koyu: temanın grafit sahnesi, yazılar açık. Hafif ton: açık gri zemin. Listede sahnedeki ürünün satırı da bu zemini alır.",
+            "steps": {
+              "stage": "Koyu",
+              "well": "Hafif ton"
+            }
+          },
+          "stage_follow": {
+            "label": "Satıra gelince sahne değişsin",
+            "term": "stage_follow",
+            "hint": "Açıkken bütün ürünler listede; geniş ekranda fareyle üstüne gelinen ya da klavyeyle seçilen satırın ürünü sahneye geçer. Kapalıyken ilk ürün sahnede sabit, kalanlar listede."
+          }
+        },
         "tabs": "Yanındaki rafla sekmeli birleşsin",
         "tabsTerm": "tabs",
         "tabsJoined": "Şu rafla sekmeli tek rafta birleşiyor: {{names}}. Kapatırsan bu raf ayrı çizilir.",

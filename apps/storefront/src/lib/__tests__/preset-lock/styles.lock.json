@@ -82,6 +82,10 @@
       "file": "shadow.css"
     },
     {
+      "sha256": "33f55ca728160e7f4ebd8a2618fbbef1fb2b00659500babc60a3839c52298db4",
+      "file": "shelf-stage.css"
+    },
+    {
       "sha256": "3387302b63b02d13e5cd9045eea950a64220ca11ecb9ced92c948583ee901c7e",
       "file": "shelf-strips.css"
     },
@@ -98,7 +102,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "9d579bbcdaf2b82079784d56c1b61eb435fec3f8a193b1eefa5bbac4e55e80d3",
+      "sha256": "e570cda958089b033ed96351b18573be38058ba8344f53c1b66db3cd23eccf45",
       "file": "styles.css"
     },
     {

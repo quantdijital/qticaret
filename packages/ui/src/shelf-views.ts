@@ -6,6 +6,7 @@ import type {
   ShelfPhoneColumns,
   ShelfRankedLayout,
   ShelfRows,
+  ShelfStageSettings,
   ShelfStripsSettings,
   ShelfTabs,
 } from "@qticaret/types"
@@ -62,6 +63,12 @@ export interface ProductsSectionView {
    * the rail's count, each beside its place.
    */
   rankedLayout?: ShelfRankedLayout
+  /**
+   * `stage_list` (Ek 2026-11-16): one product large on a stage beside a
+   * list; `products` already cut to the rail's count, the stage's first.
+   * Its side, ground and follow, each a step the contract knows.
+   */
+  stage?: ShelfStageSettings
 }
 
 /** One list of a `columns` rail: its title (the shop's, else its source's name) and its cards. */

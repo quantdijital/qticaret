@@ -1,0 +1,183 @@
+/*
+ * A product rail drawn as a stage list (`sections/ShelfStage.tsx`, adr/0049
+ * Ek 2026-11-16): one product large on a stage beside the list of the
+ * rail's. From 1024 px the stage takes seven twelfths (on the left, or the
+ * right with `data-side="end"`) and the list the rest, the two as high as
+ * each other: the rows share the stage's height, and when the rows are
+ * the taller the photograph covers the stage's grown height. Below it the
+ * stage stands above the list.
+ *
+ * The stage's ground is the graphite stage (its inks, the lifted sale
+ * red, the stage's focus ring) or the light well. The row on the stage,
+ * marked, takes the same ground: the list's one dark row is the product
+ * the stage shows. A phone hides that row from sight (the stage stands
+ * right above), not from readers.
+ * Row photographs shrink as the rows grow in number, so six still fit
+ * beside the stage.
+ */
+@layer components {
+  .gf-stage-list {
+    display: grid;
+    gap: 1.5rem var(--gap-columns);
+  }
+
+  /* The stage's inks on graphite: what sits on it reads in the stage's own */
+  .gf-stage-list[data-ground="stage"] :is(.gf-stage-box, [data-pick][data-on]) {
+    --color-text: var(--color-stage-text);
+    --color-text-2: var(--color-stage-text-2);
+    --color-text-3: var(--color-stage-text-2);
+    --color-rule: var(--color-stage-rule);
+    --color-paper: var(--color-stage);
+    --color-paper-2: var(--color-stage-2);
+    --color-field: var(--color-stage-2);
+    --color-media: var(--color-stage-2);
+    --color-ok: var(--color-ok-on-stage);
+    --color-focus: var(--color-signal-on-stage);
+    background: var(--color-stage);
+    color: var(--color-stage-text);
+  }
+  .gf-stage-list[data-ground="stage"] [data-pick][data-on] .text-deal {
+    color: var(--color-deal-on-stage);
+  }
+  .gf-stage-list[data-ground="well"] :is(.gf-stage-box, [data-pick][data-on]) {
+    --color-media: var(--color-paper-3);
+    background: var(--color-paper-2);
+  }
+  /* A rail on a graphite band (the section's ground): the stage and its row a step lighter */
+  .gf-look[data-ground="stage"]
+    .gf-stage-list[data-ground="stage"]
+    :is(.gf-stage-box, [data-pick][data-on]) {
+    background: var(--color-stage-2);
+  }
+
+  .gf-stage-box {
+    display: grid;
+    padding: 0.75rem;
+  }
+  .gf-stage-panel {
+    display: grid;
+    gap: 1rem;
+  }
+  /* The photograph's least height is the shop's card ratio; a taller stage it covers */
+  .gf-stage-photo::before {
+    content: "";
+    display: block;
+    aspect-ratio: var(--aspect-card);
+  }
+
+  .gf-stage-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .gf-stage-rows > li {
+    display: flex;
+  }
+  .gf-stage-row {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.5rem;
+    border-radius: var(--radius-media);
+    transition: background-color 160ms var(--ease-out);
+  }
+  .gf-stage-list:not([data-follow="on"]) .gf-stage-row:hover {
+    background: var(--color-paper-2);
+  }
+  .gf-stage-rows > [data-on] {
+    border-radius: var(--radius-media);
+    transition: background-color 160ms var(--ease-out);
+  }
+  .gf-stage-thumb {
+    width: 4rem;
+    aspect-ratio: var(--aspect-card);
+  }
+
+  /* A row's one pill on its photo, as the compact card's */
+  .gf-stage-pill {
+    position: absolute;
+    top: 0.25rem;
+    left: 0.25rem;
+    border-radius: var(--radius-pill);
+    padding: 0.125rem 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .gf-stage-pill[data-tone="deal"] {
+    background: var(--color-deal);
+    color: var(--color-deal-ink);
+  }
+  .gf-stage-pill[data-tone="out"] {
+    background: var(--color-text);
+    color: var(--color-paper);
+  }
+
+  @media (min-width: 40rem) {
+    .gf-stage-box {
+      padding: 1rem;
+    }
+  }
+  @media (min-width: 48rem) {
+    .gf-stage-panel {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: var(--gap-columns);
+    }
+    .gf-stage-thumb {
+      width: 4.5rem;
+    }
+  }
+  /*
+   * Stacked, the stage's own product stands right above the list: not twice
+   * to the eye. Its row stays for readers (the stage's copy is kept from
+   * them) and shows again while it holds the keyboard's focus.
+   */
+  @media (max-width: 63.99rem) {
+    .gf-stage-list[data-follow="on"] [data-pick][data-on]:not(:focus-within) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+  @media (min-width: 64rem) {
+    .gf-stage-list {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+    .gf-stage-list[data-side="end"] {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+    .gf-stage-list[data-side="end"] .gf-stage-box {
+      order: 2;
+    }
+    .gf-stage-rows > li {
+      flex: 1 1 0;
+    }
+    .gf-stage-thumb {
+      width: 5rem;
+    }
+    /* Three rows or fewer share the stage's height with room to spare: larger photos */
+    .gf-stage-list:is([data-rows="1"], [data-rows="2"], [data-rows="3"]) .gf-stage-thumb {
+      width: 6rem;
+    }
+    .gf-stage-list:is([data-rows="5"], [data-rows="6"]) .gf-stage-thumb {
+      width: 3.5rem;
+    }
+  }
+
+  /* The stage answers the list: the photograph called up settles in, not on first paint */
+  @media (prefers-reduced-motion: no-preference) {
+    .gf-stage-list[data-on] .gf-stage-panel:not([hidden]) {
+      animation: gf-stage-in 240ms var(--ease-out);
+    }
+  }
+  @keyframes gf-stage-in {
+    from {
+      opacity: 0;
+    }
+  }
+}

@@ -27,6 +27,7 @@ export const SHELF_LIMITS = {
   columns: { lists: { min: 1, max: 2 }, per_list: [3, 4], default: 4 },
   strips: { counts: [2, 3, 4, 5, 6, 7, 8], default: 5 },
   ranked: { counts: [3, 4, 5, 6, 7, 8, 9, 10], default: 5 },
+  stage_list: { counts: [3, 4, 5, 6], default: 4 },
 } as const
 
 /**
@@ -36,6 +37,30 @@ export const SHELF_LIMITS = {
  */
 export const SHELF_RANKED_LAYOUTS = ["lead", "row"] as const
 export const SHELF_RANKED_LAYOUT_DEFAULT: (typeof SHELF_RANKED_LAYOUTS)[number] = "lead"
+
+/**
+ * A stage list rail's own settings (adr/0049 Ek 2026-11-16): the stage's
+ * side, its ground and whether it follows the list, each list's first the
+ * default. Mirrors `@qticaret/types`' `SHELF_STAGE_SETTINGS` and
+ * `SHELF_STAGE_DEFAULTS`; a unit test keeps them equal.
+ */
+export const SHELF_STAGE_SETTINGS = {
+  stage_side: ["start", "end"],
+  stage_ground: ["stage", "well"],
+  stage_follow: ["on", "off"],
+} as const satisfies Record<string, readonly [string, ...string[]]>
+
+type StageSetting = keyof typeof SHELF_STAGE_SETTINGS
+
+export const SHELF_STAGE_DEFAULTS: {
+  readonly [S in StageSetting]: (typeof SHELF_STAGE_SETTINGS)[S][number]
+} = { stage_side: "start", stage_ground: "stage", stage_follow: "on" }
+
+const stageSetting = <S extends StageSetting>(name: S) =>
+  stepSetting<(typeof SHELF_STAGE_SETTINGS)[S][number]>(
+    SHELF_STAGE_SETTINGS[name],
+    SHELF_STAGE_DEFAULTS[name]
+  )
 
 /**
  * A strips rail's own settings (adr/0049 Ek 2026-11-16): the strips'
@@ -200,6 +225,22 @@ const ranked = z
   })
   .strict()
 
+/**
+ * One product large on a stage beside a list of the rail's (Ek
+ * 2026-11-16): how many, the stage's side and ground, and whether the
+ * stage follows the list.
+ */
+const stageList = z
+  .object({
+    ...common,
+    variant: z.literal("stage_list"),
+    stage_count: count(SHELF_LIMITS.stage_list.counts, SHELF_LIMITS.stage_list.default),
+    stage_side: stageSetting("stage_side"),
+    stage_ground: stageSetting("stage_ground"),
+    stage_follow: stageSetting("stage_follow"),
+  })
+  .strict()
+
 export const PRODUCTS_BRANCHES: Readonly<Record<SectionVariant<"products">, VariantBranch>> = {
   grid,
   carousel,
@@ -208,12 +249,13 @@ export const PRODUCTS_BRANCHES: Readonly<Record<SectionVariant<"products">, Vari
   columns: columnsBranch,
   strips,
   ranked,
+  stage_list: stageList,
 }
 
 /** A product rail (adr/0049 Ek 2026-11-15): a branch per variant. */
 export const products = z.discriminatedUnion(
   "variant",
-  [grid, carousel, featured, compact, columnsBranch, strips, ranked],
+  [grid, carousel, featured, compact, columnsBranch, strips, ranked, stageList],
   VARIANT_ERROR
 )
 
@@ -232,6 +274,8 @@ export function shelfLimit(section: ProductsSection): number {
       return section.strips_count
     case "ranked":
       return section.ranked_count
+    case "stage_list":
+      return section.stage_count
     case "grid":
     case "carousel":
       return section.limit

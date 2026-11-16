@@ -151,6 +151,12 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
   düzen `ranked_layout` **lead** (birinci büyük) / row (tek sıra). Kart biçimi seçilmez (kartın
   parçalarıyla çizilir); hızlı bakış ve sepete ekle simge olarak kalır. Rakam yalnız göz için,
   ekran okuyucu sırayı başlıktaki gizli "1."den duyar.
+- Ek 2026-11-16 (ürün rafı `stage_list` "Sahne ve liste", adr/0049): bir ürün sahnede büyük, yanında
+  satır listesi; kendi sayısı `stage_count` 3–**4**–6 (sahnedeki dahil), `stage_side` **start**/end,
+  `stage_ground` **stage**/well, `stage_follow` **on**/off (1024 px'ten fareyle durulan ya da
+  klavyeyle odaklanılan satır sahneye geçer; dokunuşta değişmez). Kart seçimi yok; tek eylem sahnede.
+  Aynı ürün iki yerde görünüyorsa biri okunur: sahnedeki kopya `aria-hidden` (eylemi hariç), satır
+  `aria-current`.
 - **Boş durum:** kaynak boşsa vitrin bölümü çizmez; panel formu bunu ipucunda söyler (ör. "İndirimde
   ürün yokken bölüm görünmez"). Sütun dolmuyorsa ipucu eksik adedi söyler (`columnsShort`).
 

@@ -27,8 +27,10 @@ const issues = (doc: Record<string, unknown>) =>
 const home = (section: Record<string, unknown>) => layoutDocument.parse({ home: [section] }).home[0]
 
 describe("a product rail's ranked variant (adr/0049 Ek 2026-11-16)", () => {
-  it("comes last on the rail's list", () => {
-    expect(SECTION_VARIANTS.products.at(-1)).toBe("ranked")
+  it("comes after strips on the rail's list", () => {
+    expect(SECTION_VARIANTS.products.indexOf("ranked")).toBe(
+      SECTION_VARIANTS.products.indexOf("strips") + 1
+    )
   })
 
   it("fills five places, the first large, on a rail switched to ranked", () => {

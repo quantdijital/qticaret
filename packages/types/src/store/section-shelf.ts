@@ -1,6 +1,6 @@
 /**
  * The product rail's own counts by variant (adr/0049 Ek 2026-11-15, owner's
- * request): what `featured`, `compact`, `columns`, `strips` and `ranked` show, fixed by the
+ * request): what `featured`, `compact`, `columns`, `strips`, `ranked` and `stage_list` show, fixed by the
  * contract rather than the shop's `limit` (which `grid` and `carousel`
  * keep). Mirrored by the backend's `SHELF_LIMITS`; a unit test keeps them
  * equal.
@@ -32,6 +32,11 @@ export const SHELF_LIMITS = {
    * beside its place; five by default.
    */
   ranked: { counts: [3, 4, 5, 6, 7, 8, 9, 10], default: 5 },
+  /**
+   * One product on a stage beside the list (Ek 2026-11-16): three to six
+   * products, the stage's one counted.
+   */
+  stage_list: { counts: [3, 4, 5, 6], default: 4 },
 } as const
 
 /**
@@ -49,6 +54,51 @@ export const SHELF_RANKED_LAYOUT_DEFAULT: ShelfRankedLayout = "lead"
 /** A ranked rail's layout as a reader takes it: one it knows, anything else the default. */
 export const shelfRankedLayoutOf = (value: unknown): ShelfRankedLayout =>
   SHELF_RANKED_LAYOUTS.find((each) => each === value) ?? SHELF_RANKED_LAYOUT_DEFAULT
+
+/**
+ * A stage list rail's own settings (adr/0049 Ek 2026-11-16), read only
+ * while the rail is `stage_list`, each list's first step the default:
+ * which side the stage stands on from 1024 px (`start` left, `end` right);
+ * its ground, the graphite stage or the light well (the marquee's and the
+ * look's names); and whether the stage follows the list (`on`: every
+ * product listed, the one under the pointer or the focus taking the stage;
+ * `off`: the first on the stage, the rest listed, nothing moves).
+ * Mirrored by the backend's `products.ts`; a unit test keeps them equal.
+ */
+export const SHELF_STAGE_SETTINGS = {
+  stage_side: ["start", "end"],
+  stage_ground: ["stage", "well"],
+  stage_follow: ["on", "off"],
+} as const satisfies Record<string, readonly [string, ...string[]]>
+
+export type ShelfStageSetting = keyof typeof SHELF_STAGE_SETTINGS
+export type ShelfStageSettings = {
+  [S in ShelfStageSetting]: (typeof SHELF_STAGE_SETTINGS)[S][number]
+}
+
+/** A rail switched to a stage list, and what a reader takes for a step it lacks or does not know. */
+export const SHELF_STAGE_DEFAULTS: Readonly<ShelfStageSettings> = {
+  stage_side: "start",
+  stage_ground: "stage",
+  stage_follow: "on",
+}
+
+/** The stage list's settings in the order the panel offers them. */
+export const SHELF_STAGE_SETTING_NAMES = Object.keys(SHELF_STAGE_SETTINGS) as ShelfStageSetting[]
+
+/** Every stage list setting as a reader takes it: one missing or off its list reads as its default. */
+export function shelfStageOf(
+  section: Partial<Record<ShelfStageSetting, unknown>>
+): ShelfStageSettings {
+  const settings: Partial<Record<ShelfStageSetting, string>> = {}
+  for (const name of SHELF_STAGE_SETTING_NAMES) {
+    const steps: readonly unknown[] = SHELF_STAGE_SETTINGS[name]
+    settings[name] = steps.includes(section[name])
+      ? (section[name] as string)
+      : SHELF_STAGE_DEFAULTS[name]
+  }
+  return settings as ShelfStageSettings
+}
 
 /**
  * Cards in a row on a phone (docs/tema/bilesen-denetimi (b) 3, O8; the
@@ -90,6 +140,7 @@ export const shelfJoins = (section: { variant?: unknown; tabs?: unknown }): bool
 export type ShelfRows = (typeof SHELF_LIMITS.compact.rows)[number]
 export type ShelfPerList = (typeof SHELF_LIMITS.columns.per_list)[number]
 export type ShelfStripsCount = (typeof SHELF_LIMITS.strips.counts)[number]
+export type ShelfStageCount = (typeof SHELF_LIMITS.stage_list.counts)[number]
 
 /** A strips rail's count as a reader takes it: one on the list as it is, anything else the default. */
 export const shelfStripsCountOf = (value: unknown): ShelfStripsCount =>
@@ -100,6 +151,9 @@ export type ShelfRankedCount = (typeof SHELF_LIMITS.ranked.counts)[number]
 /** A ranked rail's count as a reader takes it: one on the list as it is, anything else the default. */
 export const shelfRankedCountOf = (value: unknown): ShelfRankedCount =>
   SHELF_LIMITS.ranked.counts.find((each) => each === value) ?? SHELF_LIMITS.ranked.default
+/** A stage list's count as a reader takes it: one on the list as it is, anything else the default. */
+export const shelfStageCountOf = (value: unknown): ShelfStageCount =>
+  SHELF_LIMITS.stage_list.counts.find((each) => each === value) ?? SHELF_LIMITS.stage_list.default
 
 /** A compact rail's rows as a reader takes them: 2 or 3, anything else the default. */
 export const shelfRowsOf = (value: unknown): ShelfRows =>
@@ -121,6 +175,7 @@ export function shelfLimit(section: {
   per_list?: unknown
   strips_count?: unknown
   ranked_count?: unknown
+  stage_count?: unknown
 }): number {
   switch (section.variant) {
     case "featured":
@@ -133,6 +188,8 @@ export function shelfLimit(section: {
       return shelfStripsCountOf(section.strips_count)
     case "ranked":
       return shelfRankedCountOf(section.ranked_count)
+    case "stage_list":
+      return shelfStageCountOf(section.stage_count)
     default:
       return section.limit
   }
@@ -192,4 +249,9 @@ export interface StoreProductsSection extends ShelfPick {
   /** `ranked`: how many products, each beside its place, and how they stand from 1024 px. */
   ranked_count?: ShelfRankedCount
   ranked_layout?: ShelfRankedLayout
+  /** `stage_list`: how many products (the stage's one counted), and its side, ground and follow. */
+  stage_count?: ShelfStageCount
+  stage_side?: ShelfStageSettings["stage_side"]
+  stage_ground?: ShelfStageSettings["stage_ground"]
+  stage_follow?: ShelfStageSettings["stage_follow"]
 }

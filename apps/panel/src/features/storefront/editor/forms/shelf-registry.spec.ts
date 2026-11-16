@@ -89,4 +89,25 @@ describe("a product list's fields for the settings search", () => {
     )
     for (const key of keys(grid)) expect(key).not.toMatch(/ranked_/)
   })
+
+  it("names a stage list's count, side, ground and follow in Diziliş, never its card (Ek 2026-11-16)", () => {
+    const stage = switchVariant(grid, "stage_list")
+    expect(keys(stage)).toContain("variant:variant")
+    expect(keys(stage).filter((key) => key.startsWith("layout:"))).toEqual([
+      "layout:stage_count",
+      "layout:stage_side",
+      "layout:stage_ground",
+      "layout:stage_follow",
+      "layout:tabs",
+    ])
+    expect(sectionFields(stage, "home").find((field) => field.key === "stage_ground")).toEqual(
+      expect.objectContaining({
+        label: "storefront.editor.shelf.stage.stage_ground.label",
+        options: ["stage", "well"].map(
+          (step) => `storefront.editor.shelf.stage.stage_ground.steps.${step}`
+        ),
+      })
+    )
+    for (const key of keys(grid)) expect(key).not.toMatch(/stage_/)
+  })
 })

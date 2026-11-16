@@ -3,6 +3,7 @@ import {
   SCROLLER_SETTINGS,
   SHELF_RANKED_LAYOUTS,
   SHELF_STRIPS_SETTINGS,
+  SHELF_STAGE_SETTINGS,
   SHELF_STRIPS_SETTING_NAMES,
   SLIDER_SCROLLER,
   scrollerSettingsOf,
@@ -11,6 +12,7 @@ import {
 import type {
   ScrollerSetting,
   ScrollerSettings,
+  ShelfStageSetting,
   ShelfStripsSetting,
   SliderSettings,
   SliderSource,
@@ -32,6 +34,8 @@ export type ShelfField =
   | ShelfStripsSetting
   | "ranked_count"
   | "ranked_layout"
+  | "stage_count"
+  | ShelfStageSetting
   | "card_variant"
   | "tabs"
 
@@ -108,7 +112,12 @@ export function shelfFields(section: Extract<AnySection, { type: "products" }>):
           options: SHELF_RANKED_LAYOUTS.map((step) => `${SHELF}.rankedLayout.${step}`),
         }
       : null,
-    variant === "compact" || variant === "columns" || variant === "strips" || variant === "ranked"
+    ...(variant === "stage_list" ? stageFields(id) : []),
+    variant === "compact" ||
+    variant === "columns" ||
+    variant === "strips" ||
+    variant === "ranked" ||
+    variant === "stage_list"
       ? null
       : field(
           "card_variant",
@@ -141,6 +150,44 @@ function stripsFields(id: string): RegistryField[] {
     target: SHELF_IDS.shelf(id, name),
   }))
   return [count, ...look]
+}
+
+/** A stage list's side and ground as steps, then its follow switch (`ShelfStageFields`). */
+export const SHELF_STAGE_STEPS = [
+  "stage_side",
+  "stage_ground",
+] as const satisfies readonly ShelfStageSetting[]
+
+/** A stage list setting's words (`storefront.editor.shelf.stage.<setting>`), and a step's name. */
+export const stageLabel = (name: ShelfStageSetting) => `${SHELF}.stage.${name}`
+export const stageStepKey = (name: ShelfStageSetting, step: string) =>
+  `${SHELF}.stage.${name}.steps.${step}`
+
+/** A stage list's count, side, ground and follow, in "Diziliş" as `ShelfGroups` shows them. */
+function stageFields(id: string): RegistryField[] {
+  const count: RegistryField = {
+    key: "stage_count",
+    group: "layout",
+    label: `${SHELF}.stageCount`,
+    term: `${SHELF}.stageCountTerm`,
+    options: [],
+    target: SHELF_IDS.shelf(id, "stage_count"),
+  }
+  const names = [...SHELF_STAGE_STEPS, "stage_follow"] as const
+  return [
+    count,
+    ...names.map((name): RegistryField => ({
+      key: name,
+      group: "layout",
+      label: `${stageLabel(name)}.label`,
+      term: `${stageLabel(name)}.term`,
+      options:
+        name === "stage_follow"
+          ? []
+          : SHELF_STAGE_SETTINGS[name].map((step) => stageStepKey(name, step)),
+      target: SHELF_IDS.shelf(id, name),
+    })),
+  ]
 }
 
 /**

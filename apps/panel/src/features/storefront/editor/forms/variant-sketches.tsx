@@ -8,6 +8,7 @@ import {
   ShelfFeatured,
   ShelfGrid,
   ShelfRanked,
+  ShelfStage,
   ShelfStrips,
 } from "./shelf-sketches"
 
@@ -181,6 +182,7 @@ const SKETCHES: {
     columns: ShelfColumns,
     strips: ShelfStrips,
     ranked: ShelfRanked,
+    stage_list: ShelfStage,
   },
 }
 

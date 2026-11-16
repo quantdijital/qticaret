@@ -10,8 +10,10 @@ import {
 import { SECTION_VARIANTS, variantOf } from "../store/section-variants.js"
 
 describe("a product rail's ranked variant (adr/0049 Ek 2026-11-16)", () => {
-  it("comes last on the rail's list, today's grid still the default", () => {
-    expect(SECTION_VARIANTS.products.at(-1)).toBe("ranked")
+  it("comes after strips on the rail's list, today's grid still the default", () => {
+    expect(SECTION_VARIANTS.products.indexOf("ranked")).toBe(
+      SECTION_VARIANTS.products.indexOf("strips") + 1
+    )
     expect(variantOf("products", undefined)).toBe("grid")
     expect(variantOf("products", "ranked")).toBe("ranked")
   })

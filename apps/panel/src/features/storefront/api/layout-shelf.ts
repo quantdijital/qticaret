@@ -9,6 +9,8 @@ import type {
   ShelfRankedCount,
   ShelfRankedLayout,
   ShelfRows,
+  ShelfStageCount,
+  ShelfStageSettings,
   ShelfStripsCount,
   ShelfStripsSettings,
   ShelfTabs,
@@ -53,6 +55,11 @@ export interface ProductsSection extends BodySectionBase {
   /** `ranked` (Ek 2026-11-16): how many places, and how they stand from 1024 px. */
   ranked_count?: ShelfRankedCount
   ranked_layout?: ShelfRankedLayout
+  /** `stage_list` (Ek 2026-11-16): how many products, and the stage's side, ground and follow. */
+  stage_count?: ShelfStageCount
+  stage_side?: ShelfStageSettings["stage_side"]
+  stage_ground?: ShelfStageSettings["stage_ground"]
+  stage_follow?: ShelfStageSettings["stage_follow"]
 }
 
 /** One more list of a `columns` rail: its title (null: its source's name) and source. */

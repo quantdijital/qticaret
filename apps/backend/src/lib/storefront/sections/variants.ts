@@ -20,8 +20,17 @@ export const SECTION_VARIANTS = {
   // Today's picture tiles; `linked` each category a card with its subcategories' links;
   // `collage` photo-led cards filling each row, the first wider
   categories: ["tiles", "linked", "collage"],
-  // The product rail (adr/0049 Ek 2026-11-15): today's grid first; `strips` and `ranked` Ek 2026-11-16
-  products: ["grid", "carousel", "featured", "compact", "columns", "strips", "ranked"],
+  // The product rail (adr/0049 Ek 2026-11-15): today's grid first; `strips`, `ranked`, `stage_list` Ek 2026-11-16
+  products: [
+    "grid",
+    "carousel",
+    "featured",
+    "compact",
+    "columns",
+    "strips",
+    "ranked",
+    "stage_list",
+  ],
   // A product page's related products (bilesen-denetimi (b) 7): today's grid first
   related_products: ["grid", "carousel"],
   // The main sections (adr/0049 Ek 2026-11-14 §5, §7): today's drawing first.

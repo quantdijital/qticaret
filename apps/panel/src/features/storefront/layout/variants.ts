@@ -6,6 +6,7 @@ import {
   SHELF_LIMITS,
   SHELF_PHONE_DEFAULT,
   SHELF_RANKED_LAYOUT_DEFAULT,
+  SHELF_STAGE_DEFAULTS,
   SHELF_STRIPS_DEFAULTS,
   hasVariants,
 } from "@qticaret/types"
@@ -74,6 +75,8 @@ export const VARIANT_FIELDS: {
       ranked_count: SHELF_LIMITS.ranked.default,
       ranked_layout: SHELF_RANKED_LAYOUT_DEFAULT,
     },
+    // Ek 2026-11-16: four products, the stage on the left in graphite, following the list
+    stage_list: { stage_count: SHELF_LIMITS.stage_list.default, ...SHELF_STAGE_DEFAULTS },
   },
   // The related products as a rail's grid or carousel (bilesen-denetimi (b) 7)
   related_products: {

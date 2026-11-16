@@ -31,9 +31,21 @@ export const SECTION_VARIANTS = {
    * upright strip with slanted seams, its name and price over the foot,
    * no card (`SHELF_STRIPS_SETTINGS`); `ranked` (Ek 2026-11-16), a ranked
    * list, each product beside its place in large figures, the first large
-   * or all in one row (`SHELF_RANKED_LAYOUTS`). Counts by variant: `section-shelf`.
+   * or all in one row (`SHELF_RANKED_LAYOUTS`); `stage_list` (Ek 2026-11-16), one
+   * product large on a stage beside a list of the rail's products, the row
+   * under the pointer or the focus taking the stage (`SHELF_STAGE_SETTINGS`).
+   * Counts by variant: `section-shelf`.
    */
-  products: ["grid", "carousel", "featured", "compact", "columns", "strips", "ranked"],
+  products: [
+    "grid",
+    "carousel",
+    "featured",
+    "compact",
+    "columns",
+    "strips",
+    "ranked",
+    "stage_list",
+  ],
   /**
    * A product page's related products (bilesen-denetimi (b) 7): `grid`,
    * today's rows; `carousel`, one row that slides (the scroller kit).
