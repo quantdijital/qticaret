@@ -139,9 +139,13 @@ export type ShelfStripsSettings = {
   [S in ShelfStripsSetting]: (typeof SHELF_STRIPS_SETTINGS)[S][number]
 }
 
-/** A rail switched to strips, and what a reader takes for a step it lacks or does not know. */
+/**
+ * A rail switched to strips, and what a reader takes for a step it lacks
+ * or does not know: low strips (a rail sits among other sections; the
+ * gallery's medium is a whole screen at 1440 px), the shared look.
+ */
 export const SHELF_STRIPS_DEFAULTS: Readonly<ShelfStripsSettings> = {
-  strips_height: "medium",
+  strips_height: "low",
   ...STRIPS_LOOK_DEFAULTS,
 }
 

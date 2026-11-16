@@ -29,10 +29,11 @@ describe("a product rail's strips variant (adr/0049 Ek 2026-11-16)", () => {
     expect(variantOf("products", "strips")).toBe("strips")
   })
 
-  it("offers the height before the shared look", () => {
+  it("offers the height before the shared look, low by default (the gallery stays medium)", () => {
     expect(SHELF_STRIPS_SETTING_NAMES).toEqual(["strips_height", ...LOOK])
     expect(SHELF_STRIPS_SETTINGS.strips_height).toEqual(STRIP_GALLERY_SETTINGS.height)
-    expect(SHELF_STRIPS_DEFAULTS.strips_height).toBe(STRIP_GALLERY_DEFAULTS.height)
+    expect(SHELF_STRIPS_DEFAULTS.strips_height).toBe("low")
+    expect(STRIP_GALLERY_DEFAULTS.height).toBe("medium")
   })
 
   it("shares the look's names, steps and defaults with the gallery and the featured product", () => {
@@ -48,13 +49,13 @@ describe("a product rail's strips variant (adr/0049 Ek 2026-11-16)", () => {
 
   it("reads a missing or unknown step as its default", () => {
     expect(shelfStripsOf({})).toEqual(SHELF_STRIPS_DEFAULTS)
-    expect(shelfStripsOf({ strips_height: "low", strips_overlap: "on" })).toMatchObject({
-      strips_height: "low",
+    expect(shelfStripsOf({ strips_height: "high", strips_overlap: "on" })).toMatchObject({
+      strips_height: "high",
       strips_overlap: "on",
       strips_slant: "medium",
     })
     expect(shelfStripsOf({ strips_height: "giant", strips_line: 4 })).toMatchObject({
-      strips_height: "medium",
+      strips_height: "low",
       strips_line: "thin",
     })
   })

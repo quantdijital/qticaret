@@ -65,7 +65,7 @@ describe("a product rail drawn as strips", () => {
     expect(html).toContain('href="/kategori/raf"')
     expect(html).toContain('class="gf-shelf-strips"')
     expect(html).toMatch(
-      /<ul class="gf-strips rounded-media [^"]*aspect-square[^"]*" data-count="5"/
+      /<ul class="gf-strips rounded-media [^"]*aspect-\[4\/3\][^"]*" data-count="5"/
     )
     expect(count(html, 'class="gf-strip-cut"')).toBe(5)
     // No card, so none of its actions: the strip is a storefront view
@@ -90,7 +90,7 @@ describe("a product rail drawn as strips", () => {
     const html = home([
       rail({
         strips: {
-          strips_height: "low",
+          strips_height: "high",
           strips_slant: "steep",
           strips_line: "none",
           strips_overlap: "on",
@@ -98,7 +98,7 @@ describe("a product rail drawn as strips", () => {
         },
       }),
     ])
-    expect(html).toContain("aspect-[4/3] sm:aspect-[2/1] lg:aspect-[3/1]")
+    expect(html).toContain("aspect-[4/5] sm:aspect-[4/3] lg:aspect-[16/9]")
     expect(html).toContain('data-phone="scroll"')
     expect(html).toContain('data-slant="steep"')
     expect(html).toContain('data-line="none"')
@@ -108,6 +108,8 @@ describe("a product rail drawn as strips", () => {
 
   it("draws a rail without its look (an older storefront) with the defaults", () => {
     const html = home([rail({ strips: undefined })])
+    // Low strips: a rail sits among other sections
+    expect(html).toContain("aspect-[4/3] sm:aspect-[2/1] lg:aspect-[3/1]")
     expect(html).toContain('data-slant="medium"')
     expect(html).toContain('data-line="thin"')
     expect(html).toContain('data-dim="on"')

@@ -44,7 +44,7 @@ type StripsSetting = keyof typeof SHELF_STRIPS_SETTINGS
 export const SHELF_STRIPS_DEFAULTS: {
   readonly [S in StripsSetting]: (typeof SHELF_STRIPS_SETTINGS)[S][number]
 } = {
-  strips_height: "medium",
+  strips_height: "low",
   ...STRIPS_LOOK_DEFAULTS,
 }
 

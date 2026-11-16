@@ -71,14 +71,14 @@ describe("a product rail drawn as strips (adr/0049 Ek 2026-11-16)", () => {
     const [five, three] = await sectionViews(
       [
         rail(),
-        rail({ id: "raf0002", strips_count: 3, strips_height: "low", strips_overlap: "on" }),
+        rail({ id: "raf0002", strips_count: 3, strips_height: "high", strips_overlap: "on" }),
       ],
       t
     )
     expect(five).toMatchObject({ variant: "strips", strips: SHELF_STRIPS_DEFAULTS })
     expect(five && "products" in five ? five.products : []).toHaveLength(5)
     expect(three).toMatchObject({
-      strips: { ...SHELF_STRIPS_DEFAULTS, strips_height: "low", strips_overlap: "on" },
+      strips: { ...SHELF_STRIPS_DEFAULTS, strips_height: "high", strips_overlap: "on" },
     })
     expect(three && "products" in three ? three.products : []).toHaveLength(3)
   })

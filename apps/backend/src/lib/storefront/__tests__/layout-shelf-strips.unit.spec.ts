@@ -34,7 +34,7 @@ describe("a product rail's strips variant (adr/0049 Ek 2026-11-16)", () => {
     expect(home(rail())).toMatchObject({
       variant: "strips",
       strips_count: 5,
-      strips_height: "medium",
+      strips_height: "low",
       strips_slant: "medium",
       strips_line: "thin",
       strips_overlap: "off",
@@ -46,7 +46,7 @@ describe("a product rail's strips variant (adr/0049 Ek 2026-11-16)", () => {
   it("keeps the steps it was saved with", () => {
     const saved = {
       strips_count: 8,
-      strips_height: "low",
+      strips_height: "high",
       strips_slant: "steep",
       strips_line: "none",
       strips_overlap: "on",
@@ -91,7 +91,7 @@ describe("a product rail's strips variant (adr/0049 Ek 2026-11-16)", () => {
       product_ids: ["prod_1"],
       filled_with_newest: true,
       strips_count: 4,
-      strips_height: "medium",
+      strips_height: "low",
       strips_slant: "medium",
       strips_line: "thin",
       strips_overlap: "on",
