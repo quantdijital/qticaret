@@ -28,6 +28,8 @@ export interface AppearanceSettings {
 const isLogoUrl = (value: string): boolean =>
   value.length <= MAX_URL_LENGTH &&
   isCleanText(value) &&
+  // A backslash is no part of our storage's addresses; browsers read `/\host` as `//host`
+  !value.includes("\\") &&
   (value.startsWith("https://") ||
     value.startsWith("http://") ||
     (value.startsWith("/") && !value.startsWith("//")))

@@ -173,6 +173,8 @@ export function StoreBrandCard({
             />
           </div>
         </div>
+        {/* An SVG's font declarations are cleaned away: text in a logo keeps its look as outlines */}
+        <p className="text-xs text-muted-foreground">{t(`${B}.svgText`)}</p>
       </Group>
       <Group title={t(`${B}.favicon.title`)}>
         <StoreFaviconField

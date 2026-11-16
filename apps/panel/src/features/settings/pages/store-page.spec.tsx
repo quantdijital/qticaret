@@ -72,6 +72,8 @@ describe("StorePage", () => {
     )
     const brand = card("Marka")
     expect(within(brand).getByText("Logo yok")).toBeInTheDocument()
+    // An SVG logo's text: outlined, since its font declarations are cleaned away
+    expect(within(brand).getByText(/eğriye çevir/)).toBeInTheDocument()
     // No site icon yet: the storefront's own, said beside the empty frame
     expect(within(brand).getByText("Simge yok")).toBeInTheDocument()
     expect(within(brand).getByText(/vitrin varsayılan simgeyi gösterir/)).toBeInTheDocument()

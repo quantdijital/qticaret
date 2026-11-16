@@ -447,7 +447,8 @@
           "notSquare": "Simge kare değil; tarayıcı onu sıkıştırarak gösterebilir. Kare bir görsel önerilir.",
           "small": "Simge 48 × 48 pikselden küçük; Google arama sonuçlarında gösterilmeyebilir.",
           "unmeasured": "Bu görselin boyutu bilinmiyor. Kütüphaneye yeniden yükleyip seçin."
-        }
+        },
+        "svgText": "SVG logonuzda yazı varsa, tasarım programınızda yazıyı \"eğriye çevir\" / \"ana hatlara dönüştür\" ile dışa aktarın: yüklemede yazı tipi bildirimleri temizlenir, eğriye çevrilmiş yazı aynen görünür."
       },
       "region": "Bölge ve birimler",
       "regionHint": "Tarihlerin ve ürün ölçülerinin nasıl tutulacağı.",
