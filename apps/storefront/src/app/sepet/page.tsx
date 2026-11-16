@@ -24,7 +24,7 @@ import {
   withGiftLines,
 } from "@/lib/views/cart"
 import { netDiscountOf, netTotalsOf, taxLinesOf } from "@/lib/views/cart-tax"
-import { wholesaleMinimumText } from "@/lib/views/cart-wholesale"
+import { wholesaleCheckoutBlocked } from "@/lib/views/cart-wholesale"
 import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
 import { currentWholesale } from "@/lib/account/wholesale"
 import { theme } from "@/theme"
@@ -76,8 +76,6 @@ export default async function CartPage({
       : asked && CART_ERRORS.has(asked)
         ? t(asked)
         : null
-  // A wholesaler's order under its minimum units (ADR-0068 §8), said while it is short
-  const error = refused ?? wholesaleMinimumText(cart, wholesale, t)
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
   const [gifts, addons, extras, paths, pictures] = await Promise.all([
@@ -136,7 +134,10 @@ export default async function CartPage({
             gifts.length > 0 && paidByCard ? t("gift_card.not_payable_with_credit") : null,
           credit: cart?.credit_line_total ? formatLira(cart.credit_line_total) : null,
           freeShipping: freeShippingOf(subtotal, settings.free_shipping_threshold, t),
-          error,
+          error: refused,
+          // A wholesaler's order under its minimum units (ADR-0068 §8): "Ödemeye geç" off
+          // with the reason beside it while it is short; the backend refuses the payment itself
+          checkoutBlocked: wholesaleCheckoutBlocked(cart, wholesale, t),
           locked,
           shipping: extras.shipping ?? null,
           offers: extras.offers ?? [],

@@ -5,6 +5,7 @@ import { Container } from "../parts/Container"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
 import { CartLine } from "./CartLine"
 import { CartSummary } from "./CartSummary"
+import { CheckoutLink } from "./CheckoutLink"
 import { Upsell } from "./Upsell"
 
 /** A note over the lines: an error in the error's colour, anything else plain. */
@@ -81,6 +82,8 @@ function EmptyCart({ view, t, actions }: Omit<Page, "note">) {
  * desktop with the codes and the backend's shipping estimate, the shop's
  * promises under it, then products to add. On a phone a bar holds the
  * subtotal and "Ödemeye geç" in the thumb's reach above the bottom bar.
+ * While the cart cannot go to the payment (`checkoutBlocked`) both
+ * buttons are drawn off with the reason under them.
  */
 export function CartPage({
   view,
@@ -151,15 +154,23 @@ export function CartPage({
           <CartSummary view={view} t={t} actions={actions} />
           <div
             data-sticky-buy=""
-            className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-(--z-sticky) flex items-center gap-4 rounded-tile bg-field p-3 pl-5 shadow-float lg:hidden"
+            className={cn(
+              "sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-(--z-sticky) flex items-center gap-4 rounded-tile bg-field p-3 pl-5 shadow-float lg:hidden",
+              // The reason takes a row of its own under the subtotal and the button
+              view.checkoutBlocked && "flex-wrap gap-y-2"
+            )}
           >
             <p className="flex flex-col leading-tight">
               <span className="text-xs text-text-2">{t("cart.subtotal")}</span>
               <span className="tabular text-lg font-extrabold">{view.subtotal}</span>
             </p>
-            <a href="/odeme" className="gf-btn flex-1">
-              {t("cart.checkout")}
-            </a>
+            <CheckoutLink
+              id="odeme-engeli-telefon"
+              label={t("cart.checkout")}
+              blocked={view.checkoutBlocked}
+              className="flex-1"
+              reasonClassName="basis-full"
+            />
           </div>
         </div>
       </div>

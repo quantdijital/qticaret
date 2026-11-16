@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { t } from "@/lib/i18n"
-import { orderUnits, wholesaleMinimumText } from "../cart-wholesale"
+import { orderUnits, wholesaleCheckoutBlocked, wholesaleMinimumText } from "../cart-wholesale"
 
 /** ADR-0068 §8: a wholesaler's minimum units, said on the cart page while the cart is short. */
 
@@ -32,6 +32,21 @@ describe("the cart's minimum notice", () => {
     ).toBeNull()
     expect(
       wholesaleMinimumText({ items: [line(1)] }, { active: true, minQuantity: null }, t)
+    ).toBeNull()
+  })
+})
+
+describe("the cart's checkout button", () => {
+  it("is held back with the minimum as its reason while the cart is short", () => {
+    expect(wholesaleCheckoutBlocked({ items: [line(4)] }, WHOLESALER, t)).toEqual({
+      reason: "Toptan siparişte en az 10 adet gerekir; sepetinizde 4 adet var.",
+    })
+  })
+
+  it("is left as ever once the cart reaches it, or for anyone else", () => {
+    expect(wholesaleCheckoutBlocked({ items: [line(10)] }, WHOLESALER, t)).toBeNull()
+    expect(
+      wholesaleCheckoutBlocked({ items: [line(1)] }, { ...WHOLESALER, active: false }, t)
     ).toBeNull()
   })
 })

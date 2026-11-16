@@ -2,6 +2,7 @@ import { Lock } from "lucide-react"
 import type { CartPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { TrustIcon } from "../parts/TrustIcon"
+import { CheckoutLink } from "./CheckoutLink"
 import { promotionWords } from "./code-words"
 import { CodeForm } from "./CodeForm"
 
@@ -33,7 +34,8 @@ function Row({
  * on a desktop: the codes (a coupon; a gift card while the shop sells
  * them), items, discount, gift card, shipping as the backend prices it
  * before an address, the subtotal large, then "Ödemeye geç" (on a phone
- * the sticky bar holds it) and the shop's promises under the well. A
+ * the sticky bar holds it; drawn off with its reason while the cart cannot
+ * go to the payment) and the shop's promises under the well. A
  * wholesaler's (ADR-0068 §5): the items without KDV, the KDV as its own
  * row, a note under the subtotal.
  */
@@ -103,9 +105,12 @@ export function CartSummary({
         </dl>
         {view.tax && <p className="text-sm text-text-2">{view.tax.note}</p>}
         <div className="flex flex-col gap-3 max-lg:hidden">
-          <a href="/odeme" className="gf-btn w-full">
-            {t("cart.checkout")}
-          </a>
+          <CheckoutLink
+            id="odeme-engeli"
+            label={t("cart.checkout")}
+            blocked={view.checkoutBlocked}
+            className="w-full"
+          />
           <p className="flex items-center justify-center gap-2 text-sm text-text-2">
             <Lock className="size-4" aria-hidden="true" strokeWidth={2} />
             {t("cart.secure")}
