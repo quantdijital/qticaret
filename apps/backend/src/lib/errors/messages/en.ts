@@ -842,6 +842,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.url_invalid": "The address must start with https:// or /.",
   "platform_settings.favicon_unknown":
     "The site icon must come from your media library. Upload the image there and choose it again.",
+  "platform_settings.logo_unknown":
+    "The logo must come from your media library. Upload the image there and choose it again.",
   "platform_settings.favicon_type":
     "The site icon must be a PNG. Save your icon as a PNG and upload it.",
   "platform_settings.favicon_too_large":

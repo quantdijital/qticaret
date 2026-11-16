@@ -845,6 +845,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.url_invalid": "Adres https:// ile ya da / ile başlamalı.",
   "platform_settings.favicon_unknown":
     "Site simgesi ortam kütüphanenizden seçilmeli. Görseli kütüphaneye yükleyip yeniden seçin.",
+  "platform_settings.logo_unknown":
+    "Logo ortam kütüphanenizden seçilmeli. Görseli kütüphaneye yükleyip yeniden seçin.",
   "platform_settings.favicon_type":
     "Site simgesi PNG olmalı. Simgenizi PNG olarak kaydedip yükleyin.",
   "platform_settings.favicon_too_large":

@@ -2,8 +2,12 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { parseEnv, storefrontOrigin } from "../../lib/env"
 import type { Env } from "../../lib/env"
+import { namesSvg } from "../../lib/media/svg-use"
 import type { Brand } from "../../lib/messaging/templates"
+import { MEDIA_MODULE } from "../../modules/media"
+import type MediaModuleService from "../../modules/media/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import { mailPngOf } from "../platform-settings/steps/brand-images"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type {
   AppearanceSettings,
@@ -54,6 +58,28 @@ export function mailLogoUrl(
   return logo?.startsWith("http://") && isDeveloperMachine(env) ? logo : null
 }
 
+/**
+ * The logo a message shows: mail clients (Gmail, Outlook) draw no SVG, so
+ * an SVG logo is sent as the PNG made of it when it was chosen
+ * (`steps/brand-images.ts`); without one, none, and the mail shows the
+ * shop's name.
+ */
+export async function mailLogoSource(
+  container: Pick<MedusaContainer, "resolve">,
+  logo: string | null | undefined
+): Promise<string | null> {
+  if (!logo) {
+    return null
+  }
+  if (!namesSvg(logo)) {
+    return logo
+  }
+  const [asset] = await container
+    .resolve<MediaModuleService>(MEDIA_MODULE)
+    .listMediaAssets({ url: logo }, { select: ["derivatives"], take: 1 })
+  return mailPngOf(asset?.derivatives)?.url ?? null
+}
+
 /** The shop's name alone (Medusa's store name, else "Mağaza"): its replies under reviews sign with it. */
 export async function shopNameRead(container: Pick<MedusaContainer, "resolve">): Promise<string> {
   const { data } = await container
@@ -76,7 +102,7 @@ export async function brandOf(container: Pick<MedusaContainer, "resolve">): Prom
   const env = parseEnv()
   return {
     shopName: shopNameOf(stores[0]),
-    logoUrl: mailLogoUrl(appearance.logo_light_url, env),
+    logoUrl: mailLogoUrl(await mailLogoSource(container, appearance.logo_light_url), env),
     color: appearance.brand_color,
     contactEmail: store.contact_email,
     contactPhone: store.contact_phone,

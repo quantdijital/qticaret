@@ -11,10 +11,15 @@ export interface SiteIcon {
 
 const TYPES = new Set(["image/png", "image/svg+xml"])
 
-// Only what the backend would have stored: an https address or a path of its own
+// Only what the backend would have stored: an address of its storage (http where storage is
+// local: a developer's machine) or a path of its own; never a script-capable or inline one
 const usable = (url: string | null | undefined): url is string => {
   const value = url?.trim() ?? ""
-  return value.startsWith("https://") || (value.startsWith("/") && !value.startsWith("//"))
+  return (
+    value.startsWith("https://") ||
+    value.startsWith("http://") ||
+    (value.startsWith("/") && !value.startsWith("//"))
+  )
 }
 
 /**

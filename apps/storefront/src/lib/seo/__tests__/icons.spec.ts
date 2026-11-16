@@ -39,8 +39,11 @@ describe("siteIcons: the shop's site icon in <head>", () => {
   })
 
   it("names none for an address the backend would not store, and no type it does not know", () => {
+    // A developer's machine stores files locally, over http: the backend's own address
+    expect(siteIcons({ favicon_url: "http://localhost/static/simge.png" })).toEqual({
+      icon: [{ url: "http://localhost/static/simge.png", type: "image/png" }],
+    })
     for (const value of [
-      "http://cdn.magaza.example/simge.png",
       "//evil.example/x.png",
       "javascript:alert(1)",
       "data:image/png;base64,AAAA",

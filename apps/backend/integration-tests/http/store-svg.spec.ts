@@ -3,10 +3,12 @@ import { basename, join } from "node:path"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { MEDIA_MODULE } from "../../src/modules/media"
 import type MediaModuleService from "../../src/modules/media/service"
+import { brandOf, mailLogoSource } from "../../src/workflows/messaging/brand"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
+import { outcome } from "../helpers/wholesale-store"
 
 jest.setTimeout(120 * 1000)
 
@@ -65,12 +67,21 @@ medusaIntegrationTestRunner({
       expect(record).toMatchObject({ mime_type: "image/svg+xml", width: 64, height: 64 })
       const url = media?.url ?? ""
 
-      // As the logo and the site icon
+      // A logo from outside the library is refused: what is stored is what the upload cleaned
+      const outside = await post<{ message?: string }>("/admin/platform-settings/appearance", {
+        logo_light_url: "https://cdn.example/logo.svg",
+      })
+      expect([outside.status, outside.data.message]).toEqual([
+        400,
+        "platform_settings.logo_unknown",
+      ])
+
+      // As the logo and the site icon (the local store's address is http: it is the upload's)
       const saved = await post("/admin/platform-settings/appearance", {
         logo_light_url: url,
         favicon_url: url,
       })
-      expect(saved.status).toBe(200)
+      expect(outcome(saved, 200)).toEqual({ status: 200, data: null })
       const site = (await http.get<Site>("/store/seo/site", { headers: store.headers })).data.shop
       expect(site).toMatchObject({
         logo_url: url,
@@ -79,11 +90,19 @@ medusaIntegrationTestRunner({
       })
       // Apple's home screen takes no SVG: its own PNG, made from the cleaned file
       expect(site.apple_touch_url).toMatch(/\.png$/)
+      // Nor do mail clients: the light logo's PNG goes in the mails
+      const [drawn] = await container
+        .resolve<MediaModuleService>(MEDIA_MODULE)
+        .listMediaAssets({ id: media?.id ?? "" }, { select: ["derivatives"] })
+      const mail = (drawn?.derivatives as { mail_png?: { url: string } } | null)?.mail_png?.url
+      expect(mail).toMatch(/\.png$/)
+      expect((await brandOf(container)).logoUrl).toBeNull() // http is a developer's machine's only
+      expect(await mailLogoSource(container, url)).toBe(mail)
 
       // Anywhere else it is refused, by what the server knows of it
-      const product = await post<{ message?: string }>("/admin/products", {
+      const productBody = (images: { url: string }[]) => ({
         title: "Kupa",
-        images: [{ url }],
+        images,
         options: [{ title: "Boyut", values: ["Standart"] }],
         variants: [
           {
@@ -94,11 +113,23 @@ medusaIntegrationTestRunner({
           },
         ],
       })
+      const product = await post<{ message?: string }>("/admin/products", productBody([{ url }]))
       expect([product.status, product.data.message]).toEqual([400, "media.svg_logo_only"])
       const share = await post<{ message?: string }>("/admin/platform-settings/seo", {
         default_og_image: url,
       })
       expect([share.status, share.data.message]).toEqual([400, "media.svg_logo_only"])
+      // A page's own share image neither
+      const plain = await post<{ product: { id: string } }>("/admin/products", productBody([]))
+      expect(outcome(plain, 200)).toEqual({ status: 200, data: null })
+      const og = await settle(
+        http.put<{ message?: string }>(
+          `/admin/seo/product/${plain.data.product.id}`,
+          { og_image_override: file?.id },
+          { headers: admin.headers }
+        )
+      )
+      expect([og.status, og.data.message]).toEqual([400, "media.svg_logo_only"])
     })
   },
 })

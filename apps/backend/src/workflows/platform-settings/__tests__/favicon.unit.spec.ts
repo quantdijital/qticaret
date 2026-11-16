@@ -1,13 +1,14 @@
 import sharp from "sharp"
 import { sanitizeSvg } from "../../../lib/media/svg"
+import { MAIL_LOGO_BOX, appleTouchPng, mailLogoPng } from "../../../lib/media/svg-raster"
 import {
   APPLE_TOUCH_SIDE,
   FAVICON_MAX_BYTES,
   FAVICON_SVG_MAX_BYTES,
   appleTouchOf,
-  appleTouchPng,
   faviconProblem,
-} from "../steps/favicon"
+  mailPngOf,
+} from "../steps/brand-images"
 
 describe("faviconProblem: what the site icon may be", () => {
   it("takes a PNG within 1 MB and an SVG within 100 KB", () => {
@@ -59,13 +60,31 @@ describe("the SVG icon's home screen PNG", () => {
     }
   })
 
-  it("reads the PNG kept on the record, and none from anything else", () => {
-    expect(appleTouchOf({ apple_touch: { url: "https://cdn.example/a.png" } })).toEqual({
+  it("reads the PNGs kept on the record, and none from anything else", () => {
+    expect(
+      appleTouchOf({ apple_touch: { url: "https://cdn.example/a.png", width: 180, height: 180 } })
+    ).toEqual({
       url: "https://cdn.example/a.png",
       width: APPLE_TOUCH_SIDE,
       height: APPLE_TOUCH_SIDE,
     })
+    expect(
+      mailPngOf({ mail_png: { url: "https://cdn.example/m.png", width: 600, height: 200 } })
+    ).toEqual({ url: "https://cdn.example/m.png", width: 600, height: 200 })
     expect(appleTouchOf(null)).toBeNull()
-    expect(appleTouchOf({ srcset: {} })).toBeNull()
+    expect(mailPngOf({ srcset: {} })).toBeNull()
+  })
+})
+
+describe("the SVG logo's PNG for mail clients", () => {
+  it("draws a wide logo within 600 × 200, keeping its shape and its transparent ground", async () => {
+    const { buffer } = sanitizeSvg(
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 50"><rect width="300" height="50" fill="#0a0"/></svg>'
+      )
+    )
+    const meta = await sharp(await mailLogoPng(buffer)).metadata()
+    expect([meta.format, meta.width, meta.height]).toEqual(["png", MAIL_LOGO_BOX.width, 100])
+    expect(meta.hasAlpha).toBe(true)
   })
 })
