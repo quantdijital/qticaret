@@ -4,8 +4,8 @@ import { errorSummary, logger } from "../logging"
 import type { CleanSvg } from "./svg-clean"
 
 export type { CleanSvg } from "./svg-clean"
-export { SVG_DEFAULT_SIDE } from "./svg-clean"
 export {
+  SVG_DEFAULT_SIDE,
   SVG_MAX_ALL_ATTRIBUTES,
   SVG_MAX_ATTRIBUTES,
   SVG_MAX_DEPTH,
@@ -111,6 +111,10 @@ function runWorker(
       })
     }, START_TIMEOUT_MS)
     worker.on("message", (message: { ready: true } | Answer) => {
+      // Settled already (timed out, failed): a late word starts nothing
+      if (settled) {
+        return
+      }
       if ("ready" in message) {
         started = true
         clearTimeout(timer)
@@ -202,7 +206,7 @@ async function slot(): Promise<() => void> {
           waiting.splice(index, 1)
         }
         reject(busy())
-      }, SVG_WAIT_TIMEOUT_MS),
+      }, SVG_WAIT_TIMEOUT_MS).unref(),
     }
     waiting.push(entry)
   })

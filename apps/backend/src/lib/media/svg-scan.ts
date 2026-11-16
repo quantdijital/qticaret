@@ -17,6 +17,9 @@ export const SVG_MAX_ALL_ATTRIBUTES = 20_000
 /** One attribute's value at most (a path's `d` can be long: a whole logo's outline). */
 export const SVG_MAX_VALUE = 100_000
 
+/** The box of an SVG that names no size of any kind. */
+export const SVG_DEFAULT_SIDE = 512
+
 /** How far into a file its start is looked for. */
 const HEAD = 4_096
 
@@ -42,12 +45,13 @@ function doctypeEnd(text: string, at: number): number {
   if (close < 0) {
     return -1
   }
-  const subset = text.indexOf("[", at)
-  if (subset < 0 || subset > close) {
+  // A `[` only before the first `>` opens an internal subset: looked for there alone
+  const subset = text.slice(at, close).indexOf("[")
+  if (subset < 0) {
     return close + 1
   }
   // An internal subset `[ … ]` may hold `>`: the DOCTYPE ends at the first `>` after its `]`
-  const bracket = text.indexOf("]", subset)
+  const bracket = text.indexOf("]", at + subset)
   if (bracket < 0) {
     return -1
   }

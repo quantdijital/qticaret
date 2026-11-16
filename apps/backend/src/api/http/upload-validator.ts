@@ -104,6 +104,7 @@ async function checkUploads(req: MedusaRequest, res: MedusaResponse): Promise<bo
       } catch (error) {
         if (isRetryableError(error)) {
           // Every cleaning slot taken and the queue full or too slow: try again shortly
+          res.setHeader("Retry-After", String(Math.ceil((error.retryAfterMs ?? 5_000) / 1_000)))
           rejectRequest(
             req,
             res,

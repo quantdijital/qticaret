@@ -14,6 +14,7 @@ import {
   SVG_MAX_DEPTH,
   SVG_MAX_ELEMENTS,
   SVG_MAX_VALUE,
+  SVG_DEFAULT_SIDE,
   plainNumber,
   prescan,
 } from "./svg-scan"
@@ -38,8 +39,6 @@ import {
  * `viewBox` when it named none (pages reserve its box: no layout shift).
  */
 
-/** The box of an SVG that names no size of any kind. */
-export const SVG_DEFAULT_SIDE = 512
 const SVG_MAX_SIDE = 10_000
 const SVG_NS = "http://www.w3.org/2000/svg"
 const SVG_MIME = "image/svg+xml"
