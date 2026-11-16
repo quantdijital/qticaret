@@ -25,9 +25,10 @@ const valuesOf = (saved: StorefrontSettings): Values => ({
  * The pages the storefront shows its live facts beside (adr/0046 Ek
  * 2026-11-05), chosen as the contact page is: the payment page gets the
  * ways to pay and the installment rates, the shipping page the carriers
- * and the shop's promises. A field left empty names no page.
+ * and the shop's promises. A field left empty names no page. Saved at
+ * once to the storefront section, not the draft.
  */
-export function InfoPagesCard({ saved }: { saved: StorefrontSettings }) {
+export function InfoPagesFields({ saved }: { saved: StorefrontSettings }) {
   const { t } = useTranslation()
   const { save, saving } = useSaveStorefront()
   const values = valuesOf(saved)
@@ -51,8 +52,8 @@ export function InfoPagesCard({ saved }: { saved: StorefrontSettings }) {
   const shippingError = errorLine(t, form.formState.errors.shipping)
   return (
     <CardForm
+      bare
       title={t(`${C}.title`)}
-      description={t(`${C}.description`)}
       dirty={form.formState.isDirty}
       saving={saving}
       onSubmit={() => void submit()}
@@ -60,37 +61,35 @@ export function InfoPagesCard({ saved }: { saved: StorefrontSettings }) {
         form.reset(values, FULL_RESET)
       }}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          label={t(`${C}.payment`)}
-          htmlFor="storefront-payment-page"
-          hint={t(`${C}.paymentHint`)}
-          error={paymentError}
-        >
-          <Input
-            id="storefront-payment-page"
-            autoComplete="off"
-            placeholder={PAYMENT_DEFAULT}
-            aria-invalid={Boolean(paymentError)}
-            {...form.register("payment")}
-          />
-        </Field>
-        <Field
-          label={t(`${C}.shipping`)}
-          htmlFor="storefront-shipping-page"
-          hint={t(`${C}.shippingHint`)}
-          error={shippingError}
-        >
-          <Input
-            id="storefront-shipping-page"
-            autoComplete="off"
-            placeholder={SHIPPING_DEFAULT}
-            aria-invalid={Boolean(shippingError)}
-            {...form.register("shipping")}
-          />
-        </Field>
-      </div>
-      <p className="text-[13px] text-muted-foreground">{t(`${C}.empty`)}</p>
+      <Field
+        label={t(`${C}.payment`)}
+        htmlFor="storefront-payment-page"
+        hint={t(`${C}.paymentHint`)}
+        error={paymentError}
+      >
+        <Input
+          id="storefront-payment-page"
+          autoComplete="off"
+          placeholder={PAYMENT_DEFAULT}
+          aria-invalid={Boolean(paymentError)}
+          {...form.register("payment")}
+        />
+      </Field>
+      <Field
+        label={t(`${C}.shipping`)}
+        htmlFor="storefront-shipping-page"
+        hint={t(`${C}.shippingHint`)}
+        error={shippingError}
+      >
+        <Input
+          id="storefront-shipping-page"
+          autoComplete="off"
+          placeholder={SHIPPING_DEFAULT}
+          aria-invalid={Boolean(shippingError)}
+          {...form.register("shipping")}
+        />
+      </Field>
+      <p className="text-xs text-muted-foreground">{t(`${C}.empty`)}</p>
     </CardForm>
   )
 }

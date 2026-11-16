@@ -79,7 +79,7 @@ describe("WholesalerPage", () => {
     expect(screen.getByText("Ali Kaya · satinalma@kayabicak.com.tr")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Toptan A" })).toHaveAttribute(
       "href",
-      "/customers/wholesale/tiers/$id"
+      "/wholesale/tiers/$id"
     )
     expect(screen.getByRole("status")).toHaveTextContent(/^Toptancı hesabı açıldı ve etkin\./)
     await userEvent.click(screen.getByRole("button", { name: "Kapat" }))
@@ -173,7 +173,7 @@ describe("WholesalerPage", () => {
     expect(within(ask).getByText(/Müşteri kaydı ve girişi kalır/)).toBeInTheDocument()
     await userEvent.click(within(ask).getByRole("button", { name: "Sil" }))
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith({ to: "/customers/wholesale" })
+      expect(navigate).toHaveBeenCalledWith({ to: "/wholesale" })
     })
     expect(toast.success).toHaveBeenCalledWith("Toptancı silindi. 1 açık sepet yeniden fiyatlandı.")
     expect(writes()[0]).toEqual(["/admin/wholesale/accounts/wsa_1", { method: "DELETE" }])

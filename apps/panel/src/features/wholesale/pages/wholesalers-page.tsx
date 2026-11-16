@@ -24,7 +24,7 @@ import { WholesaleGate } from "@/features/wholesale/components/wholesale-gate"
 import { WholesaleNav } from "@/features/wholesale/components/wholesale-nav"
 import { errorText } from "@/lib/errors"
 
-const route = getRouteApi("/_auth/customers/wholesale/")
+const route = getRouteApi("/_auth/wholesale/")
 const W = "wholesale.list"
 
 type StatusTab = AccountStatus | "all"
@@ -48,7 +48,7 @@ function WholesalersList({ onAdd }: { onAdd: () => void }) {
   const setSearch = (next: { q?: string; status?: StatusTab; page?: number }) => {
     const nextStatus = next.status ?? status
     void navigate({
-      to: "/customers/wholesale",
+      to: "/wholesale",
       search: {
         q: (next.q ?? q) || undefined,
         status: nextStatus === "all" ? undefined : nextStatus,
@@ -94,7 +94,7 @@ function WholesalersList({ onAdd }: { onAdd: () => void }) {
             loading={list.isPending}
             stale={list.isPlaceholderData}
             onRowClick={(account) => {
-              void navigate({ to: "/customers/wholesale/$id", params: { id: account.id } })
+              void navigate({ to: "/wholesale/$id", params: { id: account.id } })
             }}
             empty={
               <div className="flex flex-col items-center gap-3 text-center">
@@ -136,7 +136,7 @@ function WholesalersList({ onAdd }: { onAdd: () => void }) {
 }
 
 /**
- * Müşteriler > Toptancılar (ADR-0068 slice 2, Ek 2026-11-15 (2)): every
+ * Toptancılar (ADR-0068 slice 2; its own menu item, the owner 2026-11-16): every
  * wholesaler, active or closed, found by address, company or contact. Owner and admin
  * only, while the shop sells wholesale.
  */

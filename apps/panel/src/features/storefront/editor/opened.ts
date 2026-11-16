@@ -10,6 +10,8 @@ export type Opened =
   | { kind: "theme"; focus?: FieldFocus & { group: ThemeGroupName } }
   /** The stock line and colour names, drafted with the design (adr/0049 Ek 2026-11-06). */
   | { kind: "looks" }
+  /** How the storefront behaves (contact and info pages): saved at once, not drafted. */
+  | { kind: "preferences" }
   | null
 
 /** What names the open panel, so the column starts at its top when another opens. */
@@ -17,5 +19,5 @@ export function formKeyOf(opened: Opened, sectionId: string | null): string | nu
   if (sectionId !== null) {
     return sectionId
   }
-  return opened?.kind === "theme" || opened?.kind === "looks" ? opened.kind : null
+  return opened && opened.kind !== "section" ? opened.kind : null
 }

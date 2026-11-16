@@ -239,3 +239,7 @@
     - `/marks/*` ve `/icon.svg`: `200`, kendi CSP'leriyle.
     - Kanıt: bu istekler sırasında backend'de yeni sepet oluşmadı. Atlatma çereziyle aynı action sepet kurdu.
     - Denemenin geçerliliği: bakım kapalıyken aynı çerezsiz `POST /` action'ı sepet kurdu (karşı deneme).
+
+## Ek (2026-11-16): bakım modu Ayarlar'da
+
+Sahip: "bu vitrin tercihleri tema düzenleyici de tema ayarları içinde olabilir sidebarda gereksiz gördüm." Vitrin tercihleri kenar çubuğundan kalkıp tema düzenleyicinin paneli olunca bakım modu oraya alınmadı: düzenleyicide her şey "Yayınla"ya kadar taslaktır, bakım anahtarı ise kaydedildiği an vitrini kapatır; taslak sanılması yanıltır. Bakım modu Ayarlar > Mağaza grubunda kendi sayfasıdır (`/settings/maintenance`): anahtar ve bakım sayfası metinleri yalnız sahibin (`OWNER_ONLY`), atlatma bağlantısı sahip ve yöneticinin; sayfayı her rol görür (anahtar salt okunur), Vitrin tercihlerindeki sekmede olduğu gibi. Paneldeki bakım şeridinin bağlantısı ve eski `?part=maintenance` adresleri buraya gelir. Veri, uç ve kaydetme anlamı değişmedi.

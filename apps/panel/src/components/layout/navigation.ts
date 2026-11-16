@@ -15,13 +15,14 @@ import {
   Search,
   Settings,
   ShoppingBag,
-  SlidersHorizontal,
+  Store,
   Tag,
   Users,
   Warehouse,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { Capability } from "@/features/auth/api/staff"
+import { WHOLESALE_FLAG } from "@/features/wholesale/api/types"
 
 /**
  * The panel's map (docs/06 ekran planı): one place for the sidebar, the
@@ -64,6 +65,15 @@ export const NAV_GROUPS: NavGroup[] = [
         needs: "paymentLinks",
       },
       { key: "customers", to: "/customers", icon: Users },
+      // ADR-0068: the wholesalers, their levels and orders, apart from the retail customers
+      // (the owner, 2026-11-16), for owner and admin while the shop sells wholesale
+      {
+        key: "wholesale",
+        to: "/wholesale",
+        icon: Store,
+        feature: WHOLESALE_FLAG,
+        needs: "wholesale",
+      },
     ],
   },
   {
@@ -81,12 +91,12 @@ export const NAV_GROUPS: NavGroup[] = [
     // What the shop's customers see around its catalog (adr/0049); the editor opens full screen
     key: "storefront",
     items: [
+      // The storefront's preferences are a panel of it (the owner, 2026-11-16)
       { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
       { key: "menus", to: "/storefront/menus", icon: ListTree },
       { key: "content", to: "/content", icon: FileText },
       // Every picture the shop uploaded; the pickers of every image field open it too
       { key: "media", to: "/media", icon: Images },
-      { key: "storefrontPreferences", to: "/storefront/preferences", icon: SlidersHorizontal },
     ],
   },
   {

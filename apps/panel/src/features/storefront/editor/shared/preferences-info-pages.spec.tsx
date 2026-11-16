@@ -1,27 +1,26 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { URL, answer, card, posts, renderPage } from "./preferences-page.fixtures"
-import type { Init } from "./preferences-page.fixtures"
+import {
+  URL,
+  answer,
+  form as card,
+  posts,
+  renderPanel as renderPage,
+} from "./preferences-panel.fixtures"
+import type { Init } from "./preferences-panel.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-// The open tab comes from the address (`?part=infoPages`)
-vi.mock("@tanstack/react-router", () => ({
-  Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
-  useSearch: () => ({ part: "infoPages" }),
-  useNavigate: () => vi.fn(),
-}))
 
 const TITLE = "Ödeme ve kargo sayfaları"
 const PAYMENT = "Ödeme seçenekleri sayfası"
 const SHIPPING = "Kargo ve teslimat sayfası"
 
-describe("PreferencesPage: payment and shipping pages (adr/0046 Ek 2026-11-05)", () => {
+describe("the editor's storefront preferences: payment and shipping pages (adr/0046 Ek 2026-11-05)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     answer(fetchMock)

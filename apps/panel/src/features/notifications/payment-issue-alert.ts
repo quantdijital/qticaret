@@ -46,7 +46,7 @@ export function paymentIssueAlert(t: TFunction, data: Record<string, unknown>) {
     link: shelf
       ? { to: "/inventory" as const, search: {}, params: {} }
       : issue === "wholesale_price_check"
-        ? { to: "/customers/wholesale" as const, search: {}, params: {} }
+        ? { to: "/wholesale" as const, search: {}, params: {} }
         : { to: "/orders" as const, search: {}, params: {} },
   }
 }

@@ -221,7 +221,7 @@ describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)",
     await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
 
     const title = await screen.findByText("Toptan sepetin ödemesi başlatılamadı")
-    expect(title.closest("a")).toHaveAttribute("href", "/customers/wholesale")
+    expect(title.closest("a")).toHaveAttribute("href", "/wholesale")
     expect(screen.getByText(/Sepet cart_01W toptancının/)).toBeInTheDocument()
   })
 })
@@ -251,7 +251,7 @@ describe("NotificationBell: a wholesaler's order and what is read (ADR-0068, adr
 
     expect(fetchMock).toHaveBeenCalledWith("/admin/alerts/bell")
     const title = await screen.findByText("Yeni toptan sipariş #1201")
-    expect(title.closest("a")).toHaveAttribute("href", "/customers/wholesale/orders")
+    expect(title.closest("a")).toHaveAttribute("href", "/wholesale/orders")
     expect(screen.getByText("₺4.500,00 · Havale bekleniyor")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Tümünü gör" })).toHaveAttribute(
       "href",

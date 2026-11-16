@@ -1,12 +1,17 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { toast } from "sonner"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { MaintenanceSettings } from "@/features/storefront/api/maintenance"
-import { SAVED as STOREFRONT, SHOP_TOKENS, card, renderPage } from "./preferences-page.fixtures"
-import type { Init } from "./preferences-page.fixtures"
+import { MaintenancePage } from "./maintenance-page"
+
+interface Init {
+  method?: string
+  body?: unknown
+}
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 
@@ -14,9 +19,33 @@ vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
-  useSearch: () => ({ part: "maintenance" }),
-  useNavigate: () => vi.fn(),
 }))
+
+/** The shop's details as `GET /admin/shop-tokens` gives them (adr/0048); the address not given. */
+const SHOP_TOKENS = [
+  { name: "mağaza_adı", value: "Örnek Bıçak" },
+  { name: "telefon", value: "0212 123 45 67" },
+  { name: "e_posta", value: "destek@ornek.com" },
+  { name: "adres", value: null },
+  { name: "whatsapp", value: "0532 123 45 67" },
+  { name: "ücretsiz_kargo_eşiği", value: "₺1.500" },
+]
+
+function renderPage() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={client}>
+      <MaintenancePage />
+    </QueryClientProvider>
+  )
+}
+
+/** The card under a title; each has its own save button. */
+function card(title: string): HTMLElement {
+  const section = screen.getByRole("heading", { name: title }).closest<HTMLElement>("section")
+  if (!section) throw new Error(`No card titled ${title}`)
+  return section
+}
 
 const URL = "/admin/platform-settings/maintenance"
 const BYPASS = "/admin/maintenance/bypass"
@@ -61,7 +90,7 @@ function serve({ role = "owner", stored = {}, bypass }: Server = {}) {
     if (url === "/admin/shop-tokens") {
       return Promise.resolve({ tokens: SHOP_TOKENS })
     }
-    return Promise.resolve({ section: "storefront", values: STOREFRONT, version: 1 })
+    return Promise.resolve({})
   })
 }
 
@@ -75,7 +104,7 @@ async function findCard(title: string) {
   return card(title)
 }
 
-describe("the maintenance tab", () => {
+describe("Settings > Maintenance (adr/0053)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     vi.mocked(toast.success).mockReset()
@@ -84,8 +113,7 @@ describe("the maintenance tab", () => {
   it("lets the owner turn maintenance on once confirmed; the header says so", async () => {
     serve()
     renderPage()
-    const tabs = within(await screen.findByRole("tablist", { name: "Vitrin tercihleri" }))
-    expect(tabs.getByRole("tab", { name: "Bakım modu" })).toHaveAttribute("aria-selected", "true")
+    expect(await screen.findByRole("heading", { level: 1, name: "Bakım modu" })).toBeVisible()
     const on = await toggle()
     await waitFor(() => {
       expect(on).toBeEnabled()

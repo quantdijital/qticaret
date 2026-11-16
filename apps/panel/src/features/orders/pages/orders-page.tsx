@@ -26,7 +26,7 @@ function WholesaleMatches({ board, q }: { board: OrderBoard; q: string }) {
       <span>
         {t("orders.wholesaleMatches", { count })}{" "}
         <Link
-          to="/customers/wholesale/orders"
+          to="/wholesale/orders"
           search={{ q }}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >

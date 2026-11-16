@@ -1,9 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { PreferencesPage } from "@/features/storefront/pages/preferences-page"
-import { preferencesTabSearch } from "@/features/storefront/preferences-tabs"
+import { movedPreferences, preferencesTabSearch } from "@/features/storefront/preferences-tabs"
 
-/** `/storefront/preferences?part=contact|infoPages|maintenance` (adr/0049). */
+/**
+ * The old Storefront > Preferences (adr/0049), out of the sidebar since
+ * 2026-11-16: `?part=maintenance` opens Settings > Maintenance, the rest
+ * the theme editor with its preferences panel open.
+ */
 export const Route = createFileRoute("/_auth/storefront/preferences")({
   validateSearch: preferencesTabSearch,
-  component: PreferencesPage,
+  beforeLoad: ({ search }) => {
+    throw movedPreferences(search.part)
+  },
 })

@@ -31,7 +31,7 @@ export function orderAlert(t: TFunction, data: Record<string, unknown>) {
       Icon: Store,
       tone: "bg-info-soft text-info-text",
       link: {
-        to: "/customers/wholesale/orders" as const,
+        to: "/wholesale/orders" as const,
         search: number ? { q: number, stage: "all" } : {},
         params: {},
       },

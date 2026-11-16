@@ -84,7 +84,7 @@ describe("TiersPage", () => {
     await userEvent.click(within(dialog).getByRole("button", { name: "Seviyeyi aç" }))
     await waitFor(() => {
       expect(navigate).toHaveBeenCalledWith({
-        to: "/customers/wholesale/tiers/$id",
+        to: "/wholesale/tiers/$id",
         params: { id: "wst_new" },
       })
     })
