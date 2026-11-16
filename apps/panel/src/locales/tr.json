@@ -7924,7 +7924,8 @@
           "carousel": "Kayan sıra",
           "featured": "Öne çıkan",
           "compact": "Kompakt liste",
-          "columns": "Yan yana listeler"
+          "columns": "Yan yana listeler",
+          "strips": "Çapraz şeritler"
         },
         "categories": {
           "tiles": "Görselli karo",

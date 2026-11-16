@@ -4,6 +4,12 @@ import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 import { scroller } from "./scroller"
 import { collectionSource, manualSource } from "./sources"
+import {
+  STRIPS_HEIGHTS,
+  STRIPS_LOOK_DEFAULTS,
+  STRIPS_LOOK_SETTINGS,
+  stepSetting,
+} from "./strips-look"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
 import { PRODUCT_CARD_VARIANTS } from "../../../modules/platform-settings/sections/theme"
@@ -19,7 +25,34 @@ export const SHELF_LIMITS = {
   featured: 7,
   compact: { across: 3, rows: [2, 3], default: 2 },
   columns: { lists: { min: 1, max: 2 }, per_list: [3, 4], default: 4 },
+  strips: { counts: [2, 3, 4, 5, 6, 7, 8], default: 5 },
 } as const
+
+/**
+ * A strips rail's own settings (adr/0049 Ek 2026-11-16): the strips'
+ * height and the look every strips drawing shares. Mirrors
+ * `@qticaret/types`' `SHELF_STRIPS_SETTINGS` and `SHELF_STRIPS_DEFAULTS`;
+ * a unit test keeps them equal.
+ */
+export const SHELF_STRIPS_SETTINGS = {
+  strips_height: STRIPS_HEIGHTS,
+  ...STRIPS_LOOK_SETTINGS,
+} as const satisfies Record<string, readonly [string, ...string[]]>
+
+type StripsSetting = keyof typeof SHELF_STRIPS_SETTINGS
+
+export const SHELF_STRIPS_DEFAULTS: {
+  readonly [S in StripsSetting]: (typeof SHELF_STRIPS_SETTINGS)[S][number]
+} = {
+  strips_height: "medium",
+  ...STRIPS_LOOK_DEFAULTS,
+}
+
+const stripsSetting = <S extends StripsSetting>(name: S) =>
+  stepSetting<(typeof SHELF_STRIPS_SETTINGS)[S][number]>(
+    SHELF_STRIPS_SETTINGS[name],
+    SHELF_STRIPS_DEFAULTS[name]
+  )
 
 export const productSource = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("newest") }).strict(),
@@ -128,18 +161,36 @@ const columnsBranch = z
   })
   .strict()
 
+/**
+ * Each product one slanted strip, its name and price over the foot (Ek
+ * 2026-11-16): how many, how high, and the shared look.
+ */
+const strips = z
+  .object({
+    ...common,
+    variant: z.literal("strips"),
+    strips_count: count(SHELF_LIMITS.strips.counts, SHELF_LIMITS.strips.default),
+    strips_height: stripsSetting("strips_height"),
+    strips_slant: stripsSetting("strips_slant"),
+    strips_line: stripsSetting("strips_line"),
+    strips_overlap: stripsSetting("strips_overlap"),
+    strips_dim: stripsSetting("strips_dim"),
+  })
+  .strict()
+
 export const PRODUCTS_BRANCHES: Readonly<Record<SectionVariant<"products">, VariantBranch>> = {
   grid,
   carousel,
   featured,
   compact,
   columns: columnsBranch,
+  strips,
 }
 
 /** A product rail (adr/0049 Ek 2026-11-15): a branch per variant. */
 export const products = z.discriminatedUnion(
   "variant",
-  [grid, carousel, featured, compact, columnsBranch],
+  [grid, carousel, featured, compact, columnsBranch, strips],
   VARIANT_ERROR
 )
 
@@ -154,6 +205,8 @@ export function shelfLimit(section: ProductsSection): number {
       return SHELF_LIMITS.compact.across * section.rows
     case "columns":
       return section.per_list
+    case "strips":
+      return section.strips_count
     case "grid":
     case "carousel":
       return section.limit

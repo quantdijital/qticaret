@@ -27,9 +27,11 @@ export const SECTION_VARIANTS = {
    * `section-scroller`); `featured`, one large card beside two rows of
    * three small ones; `compact`, small side-by-side cards three across;
    * `columns`, two or three lists side by side, each its own title and
-   * source, in small cards. Counts by variant: `section-shelf`.
+   * source, in small cards; `strips` (Ek 2026-11-16), each product one
+   * upright strip with slanted seams, its name and price over the foot,
+   * no card (`SHELF_STRIPS_SETTINGS`). Counts by variant: `section-shelf`.
    */
-  products: ["grid", "carousel", "featured", "compact", "columns"],
+  products: ["grid", "carousel", "featured", "compact", "columns", "strips"],
   /**
    * A product page's related products (bilesen-denetimi (b) 7): `grid`,
    * today's rows; `carousel`, one row that slides (the scroller kit).

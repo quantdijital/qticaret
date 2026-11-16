@@ -1,6 +1,6 @@
 /**
  * The product rail's own counts by variant (adr/0049 Ek 2026-11-15, owner's
- * request): what `featured`, `compact` and `columns` show, fixed by the
+ * request): what `featured`, `compact`, `columns` and `strips` show, fixed by the
  * contract rather than the shop's `limit` (which `grid` and `carousel`
  * keep). Mirrored by the backend's `SHELF_LIMITS`; a unit test keeps them
  * equal.
@@ -9,6 +9,7 @@
  */
 import type { ProductSource, ShelfColumns, StoreLayoutLink } from "./layout.js"
 import type { ScrollerSettings } from "./section-scroller.js"
+import type { ShelfStripsSettings } from "./section-strips.js"
 import type { CardVariant, ProductsVariant } from "./section-variants.js"
 
 export const SHELF_LIMITS = {
@@ -21,6 +22,11 @@ export const SHELF_LIMITS = {
    * and one or two more, each three or four small cards.
    */
   columns: { lists: { min: 1, max: 2 }, per_list: [3, 4], default: 4 },
+  /**
+   * Each product one slanted strip (Ek 2026-11-16): two to eight, the
+   * theme's `STRIPS_MOST` the upper bound; a phone scrolls past three.
+   */
+  strips: { counts: [2, 3, 4, 5, 6, 7, 8], default: 5 },
 } as const
 
 /**
@@ -62,6 +68,11 @@ export const shelfJoins = (section: { variant?: unknown; tabs?: unknown }): bool
 
 export type ShelfRows = (typeof SHELF_LIMITS.compact.rows)[number]
 export type ShelfPerList = (typeof SHELF_LIMITS.columns.per_list)[number]
+export type ShelfStripsCount = (typeof SHELF_LIMITS.strips.counts)[number]
+
+/** A strips rail's count as a reader takes it: one on the list as it is, anything else the default. */
+export const shelfStripsCountOf = (value: unknown): ShelfStripsCount =>
+  SHELF_LIMITS.strips.counts.find((each) => each === value) ?? SHELF_LIMITS.strips.default
 
 /** A compact rail's rows as a reader takes them: 2 or 3, anything else the default. */
 export const shelfRowsOf = (value: unknown): ShelfRows =>
@@ -81,6 +92,7 @@ export function shelfLimit(section: {
   limit: number
   rows?: unknown
   per_list?: unknown
+  strips_count?: unknown
 }): number {
   switch (section.variant) {
     case "featured":
@@ -89,6 +101,8 @@ export function shelfLimit(section: {
       return SHELF_LIMITS.compact.across * shelfRowsOf(section.rows)
     case "columns":
       return shelfPerListOf(section.per_list)
+    case "strips":
+      return shelfStripsCountOf(section.strips_count)
     default:
       return section.limit
   }
@@ -138,4 +152,11 @@ export interface StoreProductsSection extends ShelfPick {
   /** `columns`: cards per list, and its one or two more lists. */
   per_list?: ShelfPerList
   lists?: StoreShelfList[]
+  /** `strips`: how many products, one strip each; its look is `ShelfStripsSettings`' fields. */
+  strips_count?: ShelfStripsCount
+  strips_height?: ShelfStripsSettings["strips_height"]
+  strips_slant?: ShelfStripsSettings["strips_slant"]
+  strips_line?: ShelfStripsSettings["strips_line"]
+  strips_overlap?: ShelfStripsSettings["strips_overlap"]
+  strips_dim?: ShelfStripsSettings["strips_dim"]
 }

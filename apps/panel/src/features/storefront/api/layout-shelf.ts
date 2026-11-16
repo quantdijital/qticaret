@@ -7,6 +7,8 @@ import type {
   ShelfPerList,
   ShelfPhoneColumns,
   ShelfRows,
+  ShelfStripsCount,
+  ShelfStripsSettings,
   ShelfTabs,
 } from "@qticaret/types"
 import type { BodySectionBase, LayoutLink } from "@/features/storefront/api/layout-sections"
@@ -39,6 +41,13 @@ export interface ProductsSection extends BodySectionBase {
   /** `columns`: cards per list, and the one or two lists beside the rail's own. */
   per_list?: ShelfPerList
   lists?: ShelfList[]
+  /** `strips` (Ek 2026-11-16): how many products, one strip each, and the strips' height and look. */
+  strips_count?: ShelfStripsCount
+  strips_height?: ShelfStripsSettings["strips_height"]
+  strips_slant?: ShelfStripsSettings["strips_slant"]
+  strips_line?: ShelfStripsSettings["strips_line"]
+  strips_overlap?: ShelfStripsSettings["strips_overlap"]
+  strips_dim?: ShelfStripsSettings["strips_dim"]
 }
 
 /** One more list of a `columns` rail: its title (null: its source's name) and source. */

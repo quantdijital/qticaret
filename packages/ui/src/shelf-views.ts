@@ -5,6 +5,7 @@ import type {
   ShelfPerList,
   ShelfPhoneColumns,
   ShelfRows,
+  ShelfStripsSettings,
   ShelfTabs,
 } from "@qticaret/types"
 import type { ProductCardView } from "./product-views"
@@ -48,6 +49,12 @@ export interface ProductsSectionView {
   lists?: ShelfListView[]
   /** `columns`: cards per list. */
   perList?: ShelfPerList
+  /**
+   * `strips` (Ek 2026-11-16): each product one slanted strip, its name and
+   * price over the foot, no card actions; `products` already cut to the
+   * rail's count. The strips' height and look, each a step the contract knows.
+   */
+  strips?: ShelfStripsSettings
 }
 
 /** One list of a `columns` rail: its title (the shop's, else its source's name) and its cards. */

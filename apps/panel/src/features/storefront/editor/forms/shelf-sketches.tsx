@@ -104,3 +104,36 @@ export function ShelfColumns() {
     </>
   )
 }
+
+/** Five products as slanted strips side by side, a name over each one's foot (Ek 2026-11-16). */
+export function ShelfStrips() {
+  // Over 8–104 × 2–30: each seam runs 4 across, 2 apart, the outer edges straight
+  const run = 4
+  const width = (96 - 4 * 2 + 4 * run) / 5
+  return (
+    <>
+      {range(5).map((at) => {
+        const left = 8 + at * (width + 2 - run)
+        const right = left + width
+        const top = at === 0 ? left : left + run
+        const foot = at === 4 ? right : right - run
+        return (
+          <g key={at}>
+            <polygon
+              points={`${String(top)},2 ${String(right)},2 ${String(foot)},30 ${String(left)},30`}
+              className={`fill-current ${at === 1 ? "opacity-60" : "opacity-35"}`}
+            />
+            <rect
+              x={left + 3}
+              y={24}
+              width={width - run - 6}
+              height={2}
+              rx={1}
+              className="fill-current opacity-80"
+            />
+          </g>
+        )
+      })}
+    </>
+  )
+}

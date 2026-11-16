@@ -7,6 +7,7 @@ import {
   ShelfCompact,
   ShelfFeatured,
   ShelfGrid,
+  ShelfStrips,
 } from "./shelf-sketches"
 
 // Each variant drawn in small for the "Biçim" choice (adr/0049 Ek 2026-11-14 §2.6):
@@ -177,6 +178,7 @@ const SKETCHES: {
     featured: ShelfFeatured,
     compact: ShelfCompact,
     columns: ShelfColumns,
+    strips: ShelfStrips,
   },
 }
 

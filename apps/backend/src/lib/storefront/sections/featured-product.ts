@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { optional, recordId, shopText, title } from "../layout-fields"
 import { bodyFields } from "./look"
+import { STRIPS_LOOK_DEFAULTS, STRIPS_LOOK_SETTINGS } from "./strips-look"
 
 /**
  * The featured product's settings (adr/0049 Ek 2026-11-15): how its
@@ -13,10 +14,8 @@ import { bodyFields } from "./look"
 export const FEATURED_PRODUCT_SETTINGS = {
   gallery: ["collage", "strips"],
   strips_layout: ["side", "wide"],
-  strips_slant: ["soft", "medium", "steep"],
-  strips_line: ["none", "thin", "medium", "thick"],
-  strips_overlap: ["off", "on"],
-  strips_dim: ["off", "on"],
+  // The look every strips drawing shares (`strips-look.ts`)
+  ...STRIPS_LOOK_SETTINGS,
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof FEATURED_PRODUCT_SETTINGS
@@ -26,10 +25,7 @@ type Step<S extends Setting> = (typeof FEATURED_PRODUCT_SETTINGS)[S][number]
 export const FEATURED_PRODUCT_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   gallery: "collage",
   strips_layout: "side",
-  strips_slant: "medium",
-  strips_line: "thin",
-  strips_overlap: "off",
-  strips_dim: "on",
+  ...STRIPS_LOOK_DEFAULTS,
 }
 
 /** The strips' look: printed to the store only with the strips. */

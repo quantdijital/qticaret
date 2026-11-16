@@ -7924,7 +7924,8 @@
           "carousel": "Carousel",
           "featured": "Featured",
           "compact": "Compact list",
-          "columns": "Lists side by side"
+          "columns": "Lists side by side",
+          "strips": "Slanted strips"
         },
         "categories": {
           "tiles": "Picture tiles",
