@@ -141,6 +141,11 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
 - Sütun: masaüstü **ve** telefon (Dawn'ın `featured-collection`, `collection-list`, `related-products`
   bölümlerindeki `columns_desktop` 1–6 + `columns_mobile` 1/2 çifti, yanında `swipe_on_mobile`).
 - Biçim: en az ızgara ve kayan (kayan = §4.4 takımı). Kart biçimi tema genelinde, bölümde geçersiz kılınır.
+- Ek 2026-11-16 (ürün rafı `strips` "Çapraz şeritler", adr/0049): kart yerine şerit; kendi sayısı
+  `strips_count` 2–**5**–8 (`limit` değil), `strips_height` **low**/medium/high + ortak şerit görünümü
+  (`strips_slant`, `strips_line`, `strips_overlap`, `strips_dim`; galeri ve öne çıkan ürünle aynı).
+  Kart eylemi (sepete ekle, hızlı bakış, favori) bilerek yok: şeridin tamamı ürün sayfasına gider.
+  Dar ekranda fazlası yatay kaydırılır (§4.4 Ek), ürün gizlenmez.
 - **Boş durum:** kaynak boşsa vitrin bölümü çizmez; panel formu bunu ipucunda söyler (ör. "İndirimde
   ürün yokken bölüm görünmez"). Sütun dolmuyorsa ipucu eksik adedi söyler (`columnsShort`).
 
