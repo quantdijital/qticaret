@@ -160,15 +160,25 @@ describe("WholesalersPage", () => {
     expect(listReads()).toHaveLength(0)
   })
 
-  it("gives owner and admin Toptancılar's three tabs", async () => {
+  it("gives owner and admin Toptancılar's three tabs under Müşteriler's, the way back one click", async () => {
     serve([account()])
     renderWith(clientWith({ role: "admin" }), <WholesalersPage />)
-    expect(await screen.findByRole("link", { name: "Toptancılar" })).toHaveAttribute(
+    const section = await screen.findByRole("navigation", { name: "Müşteri ekranları" })
+    expect(within(section).getByRole("link", { name: "Müşteriler" })).toHaveAttribute(
+      "href",
+      "/customers"
+    )
+    expect(await within(section).findByRole("link", { name: "Toptancılar" })).toHaveAttribute(
       "href",
       "/customers/wholesale"
     )
-    expect(screen.getByRole("link", { name: "Toptan seviyeleri" })).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Siparişler" })).toHaveAttribute(
+    const tabs = screen.getByRole("navigation", { name: "Toptancılar bölümleri" })
+    expect(within(tabs).getByRole("link", { name: "Toptancı listesi" })).toHaveAttribute(
+      "href",
+      "/customers/wholesale"
+    )
+    expect(within(tabs).getByRole("link", { name: "Toptan seviyeleri" })).toBeInTheDocument()
+    expect(within(tabs).getByRole("link", { name: "Siparişler" })).toHaveAttribute(
       "href",
       "/customers/wholesale/orders"
     )

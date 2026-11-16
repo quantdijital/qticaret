@@ -20,9 +20,10 @@ export function CustomersNav() {
       items={[
         { to: "/customers", label: t("customers.sectionCustomers") },
         { to: "/customers/groups", label: t("customers.sectionGroups") },
-        // One entry; its own tabs (wholesalers, levels, orders) are inside it (Ek 2026-11-15 (2))
+        // One entry, marked on all its screens; its own tabs (wholesalers, levels, orders)
+        // are a row below it (Ek 2026-11-15 (2))
         ...(wholesale
-          ? [{ to: "/customers/wholesale", label: t("customers.sectionWholesale") }]
+          ? [{ to: "/customers/wholesale", label: t("customers.sectionWholesale"), exact: false }]
           : []),
         ...(carts
           ? [{ to: "/customers/abandoned-carts", label: t("customers.sectionAbandoned") }]
