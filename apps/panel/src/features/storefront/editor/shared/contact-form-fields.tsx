@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next"
 import type { z } from "zod"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { contactFormSchema, errorLine, useSaveStorefront } from "@/features/settings/storefront"
 import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { HintedName } from "../forms/field-hint"
 
 const C = "settings.storefront.contactForm"
 // What the field offers when the form is turned back on: the server's own default
@@ -54,14 +56,16 @@ export function ContactFormFields({ saved }: { saved: StorefrontSettings }) {
       }}
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-col gap-0.5">
+        <HintedName
+          name={t(`${C}.enabled`)}
+          hint={t(`${C}.hint`)}
+          hintId="storefront-contact-enabled-hint"
+        >
           <label htmlFor="storefront-contact-enabled" className="text-sm">
             {t(`${C}.enabled`)}
           </label>
-          <span id="storefront-contact-enabled-hint" className="text-xs text-muted-foreground">
-            {t(`${C}.hint`)}
-          </span>
-        </div>
+        </HintedName>
+        <HiddenHint id="storefront-contact-enabled-hint">{t(`${C}.hint`)}</HiddenHint>
         <Controller
           control={form.control}
           name="enabled"

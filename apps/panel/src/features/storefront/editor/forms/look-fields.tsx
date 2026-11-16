@@ -1,6 +1,7 @@
 import { RotateCcw } from "lucide-react"
 import { useRef } from "react"
 import { useTranslation } from "react-i18next"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -8,6 +9,7 @@ import type { SectionLook, SectionLookField, SectionLookStep } from "@qticaret/t
 import type { LookedSection } from "@/features/storefront/api/layout"
 import { lookStep, lookStepsFor, withLookStep } from "@/features/storefront/layout/look"
 import { PanelGroup } from "../panel-header"
+import { HintedName } from "./field-hint"
 import { FIELD_IDS, lookFieldsIn, lookSetIn } from "./field-registry"
 import type { FieldGroupName } from "./field-registry"
 import { LookSketch } from "./look-sketches"
@@ -46,12 +48,18 @@ function LookField<F extends SectionLookField>({
   return (
     <div id={id} data-look-field={field} className="flex flex-col gap-2">
       <div className="flex min-h-7 items-center justify-between gap-2">
-        <span id={`${id}-label`} className="text-sm font-medium">
-          {t(`${LOOK}.${field}.label`)}{" "}
-          <small className="text-[11px] font-normal text-muted-foreground">
-            {t(`${LOOK}.${field}.term`)}
-          </small>
-        </span>
+        <HintedName
+          name={t(`${LOOK}.${field}.label`)}
+          hint={t(`${LOOK}.${field}.hint`)}
+          hintId={`${id}-hint`}
+        >
+          <span id={`${id}-label`} className="text-sm font-medium">
+            {t(`${LOOK}.${field}.label`)}{" "}
+            <small className="text-[11px] font-normal text-muted-foreground">
+              {t(`${LOOK}.${field}.term`)}
+            </small>
+          </span>
+        </HintedName>
         {value !== null ? (
           <Button
             type="button"
@@ -73,7 +81,7 @@ function LookField<F extends SectionLookField>({
         type="single"
         variant="outline"
         aria-labelledby={`${id}-label`}
-        aria-describedby={value === null ? undefined : `${id}-hint`}
+        aria-describedby={`${id}-hint`}
         value={value ?? ""}
         onValueChange={(next) => {
           onChange(next === "" ? null : (next as SectionLook[F]))
@@ -91,11 +99,7 @@ function LookField<F extends SectionLookField>({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      {value === null ? null : (
-        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-          {t(`${LOOK}.${field}.hint`)}
-        </p>
-      )}
+      <HiddenHint id={`${id}-hint`}>{t(`${LOOK}.${field}.hint`)}</HiddenHint>
     </div>
   )
 }

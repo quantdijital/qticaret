@@ -1,6 +1,7 @@
 import { RotateCcw } from "lucide-react"
 import { useRef } from "react"
 import { useTranslation } from "react-i18next"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -8,6 +9,7 @@ import { BANNER_DEFAULTS, BANNER_SETTINGS } from "@qticaret/types"
 import type { BannerSetting, BannerStep } from "@qticaret/types"
 import type { BannerSection } from "@/features/storefront/api/layout"
 import { Hint } from "../shared/hint"
+import { HintedName } from "./field-hint"
 import { FIELD_IDS } from "./field-registry"
 
 const B = "storefront.editor.banner"
@@ -60,12 +62,14 @@ function BannerSettingField<S extends BannerSetting>({
   return (
     <div id={id} className="flex flex-col gap-2">
       <div className="flex min-h-7 items-center justify-between gap-2">
-        <span id={`${id}-label`} className="text-sm font-medium">
-          {t(`${B}.${setting}.label`)}{" "}
-          <small className="text-[11px] font-normal text-muted-foreground">
-            {t(`${B}.${setting}.term`)}
-          </small>
-        </span>
+        <HintedName name={t(`${B}.${setting}.label`)} hint={hint} hintId={`${id}-hint`}>
+          <span id={`${id}-label`} className="text-sm font-medium">
+            {t(`${B}.${setting}.label`)}{" "}
+            <small className="text-[11px] font-normal text-muted-foreground">
+              {t(`${B}.${setting}.term`)}
+            </small>
+          </span>
+        </HintedName>
         {value !== fallback ? (
           <Button
             type="button"
@@ -112,11 +116,7 @@ function BannerSettingField<S extends BannerSetting>({
           </Hint>
         ))}
       </ToggleGroup>
-      {hint ? (
-        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-          {hint}
-        </p>
-      ) : null}
+      {hint ? <HiddenHint id={`${id}-hint`}>{hint}</HiddenHint> : null}
     </div>
   )
 }

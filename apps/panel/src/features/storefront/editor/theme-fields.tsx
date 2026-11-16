@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
+import { HintedName } from "./forms/field-hint"
 import { isHexColor } from "@/features/settings/storefront"
 import { BACKGROUNDS } from "@/features/storefront/api/theme"
 import { STOREFRONT_BACKGROUNDS } from "@/theme/storefront"
@@ -89,9 +91,15 @@ export function BackgroundField({
   const { t } = useTranslation()
   return (
     <div id={id} className="flex flex-col gap-2">
-      <span id="theme-background-label" className="text-sm font-medium">
-        {t(`${C}.background`)}
-      </span>
+      <HintedName
+        name={t(`${C}.background`)}
+        hint={t(`${C}.backgroundHint`)}
+        hintId="theme-background-hint"
+      >
+        <span id="theme-background-label" className="text-sm font-medium">
+          {t(`${C}.background`)}
+        </span>
+      </HintedName>
       {/* Side by side once each gets 160 px; one under another below that */}
       <RadioGroup
         aria-labelledby="theme-background-label"
@@ -117,9 +125,7 @@ export function BackgroundField({
           </label>
         ))}
       </RadioGroup>
-      <p id="theme-background-hint" className="text-xs text-muted-foreground">
-        {t(`${C}.backgroundHint`)}
-      </p>
+      <HiddenHint id="theme-background-hint">{t(`${C}.backgroundHint`)}</HiddenHint>
     </div>
   )
 }
@@ -191,19 +197,22 @@ export function SwitchRow({
   checked: boolean
   onChange: (checked: boolean) => void
 }) {
+  const hintId = `${id}-hint`
   return (
     <div className="flex items-start justify-between gap-4">
-      <label htmlFor={id} className="flex flex-col gap-0.5 text-sm">
-        {term ? (
-          <span>
-            {label} <small className="text-[11px] text-muted-foreground">{term}</small>
-          </span>
-        ) : (
-          label
-        )}
-        <span className="text-xs text-muted-foreground">{hint}</span>
-      </label>
-      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+      <HintedName name={label} hint={hint} hintId={hintId}>
+        <label htmlFor={id} className="text-sm">
+          {label}
+          {term ? (
+            <>
+              {" "}
+              <small className="text-[11px] text-muted-foreground">{term}</small>
+            </>
+          ) : null}
+        </label>
+      </HintedName>
+      <HiddenHint id={hintId}>{hint}</HiddenHint>
+      <Switch id={id} aria-describedby={hintId} checked={checked} onCheckedChange={onChange} />
     </div>
   )
 }

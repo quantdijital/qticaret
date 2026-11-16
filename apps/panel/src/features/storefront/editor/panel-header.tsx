@@ -3,6 +3,8 @@ import type { LucideIcon } from "lucide-react"
 import { useContext, useId, useLayoutEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { FieldHints } from "@qticaret/admin-ui/hooks/use-field-hints"
+import { HiddenHint, InfoTip } from "@qticaret/admin-ui/patterns/info-tip"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { EditorChromeContext } from "./editor-layout"
@@ -71,8 +73,34 @@ export function Panel({
           {title}
         </h2>
       </div>
-      {children}
+      {/* Every field's help text as a small (i) beside its name (docs/18 §7.1) */}
+      <FieldHints style="tip">{children}</FieldHints>
     </div>
+  )
+}
+
+/** A group header's title button over the whole row, as before an (i) stood in it. */
+const WHOLE_ROW =
+  "flex h-11 w-full items-center justify-between gap-2 px-5 text-left text-sm font-semibold hover:bg-muted/60"
+
+/**
+ * The title button beside an (i): its `::before` covers the row (a press
+ * anywhere on it folds the group), drawn under the words, and carries the
+ * hover and the keyboard outline the row had.
+ */
+const STRETCHED =
+  "flex min-w-0 items-center gap-2 text-left text-sm font-semibold before:absolute before:inset-0 before:-z-10 hover:before:bg-muted/60 focus-visible:outline-none [html:not([data-input=pointer])_&:focus-visible]:before:outline-2 [html:not([data-input=pointer])_&:focus-visible]:before:-outline-offset-2 [html:not([data-input=pointer])_&:focus-visible]:before:outline-ring"
+
+function Chevron({ open, className }: { open: boolean; className?: string }) {
+  return (
+    <ChevronDown
+      aria-hidden="true"
+      className={cn(
+        "size-4 shrink-0 text-muted-foreground transition-transform",
+        open && "rotate-180",
+        className
+      )}
+    />
   )
 }
 
@@ -149,12 +177,18 @@ export function PanelGroup({
       ) : (
         <h3
           id={`${id}-title`}
-          className="sticky top-[calc(var(--editor-panel-head)+var(--editor-panel-tabs,0px))] z-[5] bg-card"
+          className={cn(
+            "sticky top-[calc(var(--editor-panel-head)+var(--editor-panel-tabs,0px))] z-[5] bg-card",
+            // The (i) beside the title is a button of its own: the title's button stretches
+            // over the row (its `::before`), the (i) stands above it
+            hint && "flex h-11 items-center gap-2 px-5"
+          )}
         >
           <button
             type="button"
             aria-expanded={open}
             aria-controls={`${id}-body`}
+            aria-describedby={hint ? `${id}-hint` : undefined}
             onClick={() => {
               if (layout) {
                 layout.toggle(key)
@@ -162,7 +196,7 @@ export function PanelGroup({
                 setOwnOpen((was) => !was)
               }
             }}
-            className="flex h-11 w-full items-center justify-between gap-2 px-5 text-left text-sm font-semibold hover:bg-muted/60"
+            className={hint ? STRETCHED : WHOLE_ROW}
           >
             <span className="flex min-w-0 items-center gap-2">
               <span data-panel-group-title className="truncate">
@@ -175,23 +209,25 @@ export function PanelGroup({
                 </span>
               ) : null}
             </span>
-            <ChevronDown
-              aria-hidden="true"
-              className={cn(
-                "size-4 shrink-0 text-muted-foreground transition-transform",
-                open && "rotate-180"
-              )}
-            />
+            {hint ? null : <Chevron open={open} />}
           </button>
+          {hint ? (
+            <>
+              <InfoTip name={title} hint={hint} hintId={`${id}-hint`} />
+              <Chevron open={open} className="pointer-events-none ml-auto" />
+            </>
+          ) : null}
         </h3>
       )}
+      {hint && !lone ? <HiddenHint id={`${id}-hint`}>{hint}</HiddenHint> : null}
       <div
         id={`${id}-body`}
         data-panel-group-body
         hidden={!open}
         className={cn("@container flex flex-col gap-5 px-5 pt-1 pb-6", lone && "pt-5", className)}
       >
-        {hint ? <p className="-mt-1 text-xs text-muted-foreground">{hint}</p> : null}
+        {/* Alone in its tab there is no title to hang the (i) on: the words stay */}
+        {hint && lone ? <p className="-mt-1 text-xs text-muted-foreground">{hint}</p> : null}
         <GroupMarkContext.Provider value={marks.note}>{children}</GroupMarkContext.Provider>
       </div>
     </div>

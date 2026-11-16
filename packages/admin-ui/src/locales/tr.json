@@ -24,6 +24,9 @@
     "discardText": "Bu penceredeki değişiklikler kaydedilmedi; devam ederseniz kaybolur.",
     "discardTitle": "Kaydedilmemiş değişiklikler atılsın mı?"
   },
+  "infoTip": {
+    "label": "Bilgi: {{name}}"
+  },
   "leave": {
     "confirm": "Kaydetmeden çık",
     "description": "Bu sayfadan çıkarsanız yaptığınız değişiklikler kaybolur.",

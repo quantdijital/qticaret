@@ -24,6 +24,9 @@
     "discardText": "The changes in this window are not saved; they are lost if you go on.",
     "discardTitle": "Discard unsaved changes?"
   },
+  "infoTip": {
+    "label": "Info: {{name}}"
+  },
   "leave": {
     "confirm": "Leave without saving",
     "description": "If you leave this page, your changes will be lost.",

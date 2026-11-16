@@ -2,8 +2,10 @@ import { useTranslation } from "react-i18next"
 import { ArrowDown, ArrowUp } from "lucide-react"
 import { PAYMENT_BADGES } from "@qticaret/types"
 import type { PaymentBadge } from "@qticaret/types"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
+import { HintedName } from "./field-hint"
 
 const F = "storefront.editor.footerBar.payment_badges"
 
@@ -32,10 +34,21 @@ export function PaymentBadgesField({
     onChange(next)
   }
   return (
-    <fieldset id={id} className="flex flex-col gap-2">
+    <fieldset
+      id={id}
+      aria-labelledby={`${id}-label`}
+      aria-describedby={`${id}-hint`}
+      className="flex flex-col gap-2"
+    >
       <legend className="mb-2 text-sm font-medium">
-        {t(`${F}.label`)}{" "}
-        <small className="text-[11px] font-normal text-muted-foreground">{t(`${F}.term`)}</small>
+        <HintedName name={t(`${F}.label`)} hint={t(`${F}.hint`)} hintId={`${id}-hint`}>
+          <span id={`${id}-label`}>
+            {t(`${F}.label`)}{" "}
+            <small className="text-[11px] font-normal text-muted-foreground">
+              {t(`${F}.term`)}
+            </small>
+          </span>
+        </HintedName>
       </legend>
       <ul className="flex flex-col gap-1">
         {[...picked, ...rest].map((badge) => {
@@ -88,7 +101,7 @@ export function PaymentBadgesField({
           )
         })}
       </ul>
-      <p className="text-xs text-muted-foreground">{t(`${F}.hint`)}</p>
+      <HiddenHint id={`${id}-hint`}>{t(`${F}.hint`)}</HiddenHint>
     </fieldset>
   )
 }
