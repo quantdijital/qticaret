@@ -594,6 +594,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   // which stays the catalog roles' as a content draft's does
   "POST /admin/products/:id/duplicate": false,
   "POST /admin/products/:id/preview": false,
+  // adr/0069: a product's videos are written by those who write its images
+  "POST /admin/products/:id/videos": false,
+  "DELETE /admin/products/:id/videos/:video_id": false,
   "POST /admin/category-restrictions/:category_id": false,
   "POST /admin/category-images/:category_id": false,
   "POST /admin/collections/:id/details": false,

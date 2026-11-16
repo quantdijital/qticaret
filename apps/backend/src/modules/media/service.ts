@@ -7,12 +7,23 @@ import { MediaVideo } from "./models/media-video"
 export type MediaAssetRecord = InferTypeOf<typeof MediaAsset>
 export type MediaVideoRecord = InferTypeOf<typeof MediaVideo>
 
+const MediaServiceBase = MedusaService({ MediaAsset, MediaVideo })
+type Generated = InstanceType<typeof MediaServiceBase>
+
 /**
  * Product images (F3.3) and videos (adr/0069). The rules (whose file it
  * is, when the versions are remade, which files go with an image or a
  * video) live in the workflows that write here.
  */
-class MediaModuleService extends MedusaService({ MediaAsset, MediaVideo }) {
+class MediaModuleService extends MediaServiceBase {
+  // Medusa's types pluralize "Video" as "Videoes"; the methods it makes at
+  // runtime are named with its `pluralize`, "Videos". Typed as generated
+  declare listMediaVideos: Generated["listMediaVideoes"]
+  declare createMediaVideos: Generated["createMediaVideoes"]
+  declare updateMediaVideos: Generated["updateMediaVideoes"]
+  declare deleteMediaVideos: Generated["deleteMediaVideoes"]
+  declare softDeleteMediaVideos: Generated["softDeleteMediaVideoes"]
+
   /**
    * Bytes held in storage (adr/0061 §5.4, C13's usage report; adr/0069 §3):
    * the images' stored masters, and every file a video holds (its source

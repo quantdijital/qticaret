@@ -154,6 +154,23 @@ describe("csrfProtection", () => {
       run(csrfProtection, admin("/admin/products", "application/x-www-form-urlencoded")).status()
     ).toBe(403)
     expect(run(csrfProtection, admin("/admin/products", "text/plain")).status()).toBe(403)
+    // A product's video (adr/0069): multipart on its own path only
+    expect(
+      run(csrfProtection, admin("/admin/products/prod_1/videos", "multipart/form-data; boundary=x"))
+        .next
+    ).toHaveBeenCalled()
+    expect(
+      run(
+        csrfProtection,
+        admin("/admin/products/prod_1", "multipart/form-data; boundary=x")
+      ).status()
+    ).toBe(403)
+    expect(
+      run(
+        csrfProtection,
+        admin("/admin/products/prod_1/videos/mvid_1", "multipart/form-data; boundary=x")
+      ).status()
+    ).toBe(403)
     // Multipart only where files are taken
     expect(
       run(csrfProtection, admin("/admin/invites", "multipart/form-data; boundary=x")).status()
@@ -262,6 +279,35 @@ describe("uploadSizeGate", () => {
   it("checks every multipart request, however the path is spelled", () => {
     expect(run(uploadSizeGate, multipart("/ADMIN/UPLOADS")).status()).toBe(411)
     expect(run(uploadSizeGate, multipart("/admin/products/import")).status()).toBe(411)
+  })
+
+  it("gives a product video's upload its own 52 MB, and nothing else (adr/0069 §3)", () => {
+    const MB = 1024 * 1024
+    const video = (length: string, method = "POST", path = "/admin/products/prod_1/videos") =>
+      request({
+        path,
+        method,
+        headers: { "content-type": "multipart/form-data; boundary=x", "content-length": length },
+      })
+    expect(run(uploadSizeGate, video(String(52 * MB))).next).toHaveBeenCalled()
+    const over = run(uploadSizeGate, video(String(52 * MB + 1)))
+    expect(over.status()).toBe(413)
+    expect(over.body()).toMatchObject({ message: "video.too_large" })
+    // However the path is spelled, as Express routes it
+    expect(
+      run(uploadSizeGate, video(String(40 * MB), "POST", "/ADMIN/Products/prod_1/Videos/")).next
+    ).toHaveBeenCalled()
+    // Without a length, refused as any upload
+    expect(run(uploadSizeGate, multipart("/admin/products/prod_1/videos")).status()).toBe(411)
+    // Its neighbours keep the 25 MB of uploads
+    expect(
+      run(
+        uploadSizeGate,
+        video(String(30 * MB), "POST", "/admin/products/prod_1/videos/x")
+      ).status()
+    ).toBe(413)
+    expect(run(uploadSizeGate, video(String(30 * MB), "POST", "/admin/uploads")).status()).toBe(413)
+    expect(run(uploadSizeGate, video(String(30 * MB), "PUT")).status()).toBe(413)
   })
 
   it("leaves other bodies to the body parser's own limit", () => {

@@ -21,5 +21,7 @@ export {
   videoUploadAvailable,
 } from "./tools"
 export type { VideoToolCheck, VideoToolPaths } from "./tools"
+export { canMoveVideo, openingStatus } from "./status"
+export type { VideoStatus } from "./status"
 export { makeVideoTempDir, readHead, receiveVideo, removeVideoTempDir } from "./receive"
 export type { ReceivedVideo } from "./receive"

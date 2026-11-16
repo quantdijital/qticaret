@@ -18,8 +18,10 @@ export interface PlatformFlagDefinition {
 }
 
 export const PLATFORM_FLAGS: readonly PlatformFlagDefinition[] = Object.freeze([
-  // The shop's test-only platform flag (`test.platform_sample`): the platform
-  // has no business flag yet, and the path must be proven end to end
+  // Product videos (adr/0069 §12), the first business flag: on unless a package turns it off.
+  // Added to the shops first, then offered by the control plane (docs/08 "Ekleme")
+  { key: "catalog.product_videos", default: true },
+  // The shop's test-only platform flag (`test.platform_sample`): the path proven end to end
   { key: "test.platform_sample", default: true, testOnly: true },
 ])
 

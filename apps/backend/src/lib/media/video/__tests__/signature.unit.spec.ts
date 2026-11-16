@@ -1,6 +1,6 @@
 import { SIGNATURE_BYTES, videoSignature } from ".."
 
-const bytes = (...parts: (string | number[])[]): Uint8Array =>
+const bytes = (...parts: (string | number[] | Uint8Array)[]): Uint8Array =>
   Buffer.concat(
     parts.map((part) =>
       typeof part === "string" ? Buffer.from(part, "latin1") : Buffer.from(part)

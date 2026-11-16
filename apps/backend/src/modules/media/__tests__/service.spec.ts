@@ -31,5 +31,39 @@ moduleIntegrationTestRunner<MediaModuleService>({
         url: asset.url,
       })
     })
+
+    it("opens a video waiting for its job and counts every file it holds (adr/0069)", async () => {
+      const before = await service.storedBytes()
+      await service.createMediaAssets({
+        file_id: "tabak-01J.jpg",
+        url: "https://cdn.example.com/tabak-01J.jpg",
+        size: 1000,
+      })
+      const video = await service.createMediaVideos({
+        kind: "upload",
+        source_file_id: "video-kaynak-01J.mov",
+        source_bytes: 5_000_000,
+        source_format: "mov",
+        stored_bytes: 5_000_000,
+      })
+      expect(video.id).toMatch(/^mvid_/)
+      expect(video).toMatchObject({ status: "uploaded", position: 1, attempts: 0 })
+      expect(await service.storedBytes()).toBe(before + 1000 + 5_000_000)
+
+      // Processed: the source goes, the outputs and the poster count instead
+      await service.updateMediaVideos({
+        id: video.id,
+        source_file_id: null,
+        stored_bytes: 1_200_000,
+      })
+      expect(await service.storedBytes()).toBe(before + 1000 + 1_200_000)
+
+      // Removed: nothing of it counts
+      await service.softDeleteMediaVideos([video.id])
+      expect(await service.storedBytes()).toBe(before + 1000)
+      await expect(
+        service.createMediaVideos({ kind: "vimeo" as "upload", stored_bytes: 0 })
+      ).rejects.toThrow()
+    })
   },
 })
