@@ -253,8 +253,9 @@ describe("ThemeEditor", () => {
       within(sheet).getByRole("button", { name: "1. yayını kayıtlı görünümlere ekle" })
     )
     const naming = await screen.findByRole("dialog", { name: "Görünümü kaydet" })
-    const field = within(naming).getByRole("textbox", { name: "Ad" })
-    expect(field).toHaveValue(expect.stringMatching(/^1\. yayın, \d{1,2} \S+$/) as string)
+    const field = within(naming).getByRole<HTMLInputElement>("textbox", { name: "Ad" })
+    // jest-dom's toHaveValue compares with lodash and ignores asymmetric matchers
+    expect(field.value).toMatch(/^1\. yayın, \d{1,2} \S+$/)
     await user.clear(field)
     await user.type(field, "Bayram vitrini")
     await user.click(within(naming).getByRole("button", { name: "Kaydet" }))
@@ -269,8 +270,8 @@ describe("ThemeEditor", () => {
     await user.click(screen.getByRole("button", { name: "Görünümler" }))
     await user.click(await screen.findByRole("menuitem", { name: "Bu görünümü kaydet" }))
     const draft = await screen.findByRole("dialog", { name: "Görünümü kaydet" })
-    expect(within(draft).getByRole("textbox", { name: "Ad" })).toHaveValue(
-      expect.stringMatching(/^Görünümüm, /) as string
+    expect(within(draft).getByRole<HTMLInputElement>("textbox", { name: "Ad" }).value).toMatch(
+      /^Görünümüm, /
     )
     await user.click(within(draft).getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {
