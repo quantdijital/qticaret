@@ -16,39 +16,37 @@ export interface PlacedOrder {
   references: string[]
 }
 
-interface CartRow {
-  completed_at?: unknown
-  order?: { id?: string | null } | null
-  payment_collection?: {
-    payments?:
-      | ({ payment_session_id?: string | null; data?: Record<string, unknown> | null } | null)[]
-      | null
-  } | null
-}
-
 // Where each provider's reference sits in a payment's data (as `statement-payments.ts` reads it)
 const REFERENCE_KEYS = ["merchant_oid", "payment_id"] as const
 
 const fieldOf = (value: unknown, key: string): unknown =>
   typeof value === "object" && value !== null ? (value as Record<string, unknown>)[key] : undefined
 
-/** A cart row's placed order; null only when the cart has no order and is not completed. */
-export function placedOrderOf(row: CartRow | undefined): PlacedOrder | null {
-  if (!row || (!row.order?.id && !row.completed_at)) {
+const textOf = (value: unknown): string | null =>
+  typeof value === "string" && value !== "" ? value : null
+
+/**
+ * A cart row's placed order (its `completed_at`, `order.id` and payments'
+ * `payment_session_id` and `data`, as the query reads them); null only
+ * when the cart has no order and is not completed.
+ */
+export function placedOrderOf(row: unknown): PlacedOrder | null {
+  const orderId = textOf(fieldOf(fieldOf(row, "order"), "id"))
+  if (!orderId && !fieldOf(row, "completed_at")) {
     return null
   }
-  const payments = (row.payment_collection?.payments ?? []).flatMap((payment) =>
-    payment ? [payment] : []
-  )
+  const listed = fieldOf(fieldOf(row, "payment_collection"), "payments")
+  const payments: unknown[] = Array.isArray(listed) ? listed : []
   return {
-    order_id: row.order?.id ?? null,
-    session_ids: payments.flatMap((payment) =>
-      typeof payment.payment_session_id === "string" ? [payment.payment_session_id] : []
-    ),
+    order_id: orderId,
+    session_ids: payments.flatMap((payment) => {
+      const sessionId = textOf(fieldOf(payment, "payment_session_id"))
+      return sessionId ? [sessionId] : []
+    }),
     references: payments.flatMap((payment) =>
       REFERENCE_KEYS.flatMap((key) => {
-        const value = payment.data?.[key]
-        return typeof value === "string" && value !== "" ? [value] : []
+        const reference = textOf(fieldOf(fieldOf(payment, "data"), key))
+        return reference ? [reference] : []
       })
     ),
   }
@@ -69,7 +67,7 @@ export async function placedOrderOfCart(
     ],
     filters: { id: cartId },
   })
-  return placedOrderOf(data[0] as CartRow | undefined)
+  return placedOrderOf(data[0])
 }
 
 /**
