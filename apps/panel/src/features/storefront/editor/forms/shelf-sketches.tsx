@@ -137,3 +137,22 @@ export function ShelfStrips() {
     </>
   )
 }
+
+/**
+ * One product on a dark stage (its photo, its name and price beside it),
+ * a list of four rows beside the stage, the stage's own row dark (Ek 2026-11-16).
+ */
+export function ShelfStage() {
+  return (
+    <>
+      <rect x={8} y={2} width={56} height={28} rx={3} className="fill-current opacity-80" />
+      <rect x={11} y={5} width={30} height={22} rx={2} className="fill-background opacity-40" />
+      <rect x={45} y={19} width={15} height={2} rx={1} className="fill-background opacity-80" />
+      <rect x={45} y={23.5} width={10} height={2} rx={1} className="fill-background opacity-60" />
+      <rect x={66} y={1.5} width={40} height={8} rx={1.5} className="fill-current opacity-20" />
+      {range(4).map((index) => (
+        <Row key={index} x={68} y={3 + index * 7.2} w={34} />
+      ))}
+    </>
+  )
+}

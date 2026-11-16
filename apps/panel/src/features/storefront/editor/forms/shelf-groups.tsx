@@ -5,6 +5,7 @@ import {
   SHELF_PHONE_DEFAULT,
   scrollerSettingsOf,
   shelfPhoneColumnsOf,
+  shelfStageCountOf,
   shelfStripsCountOf,
 } from "@qticaret/types"
 import type { ProductsSection } from "@/features/storefront/api/layout"
@@ -15,6 +16,7 @@ import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { PhoneColumnsField } from "./phone-columns-field"
 import { ScrollerFields } from "./scroller-fields"
+import { ShelfStageFields } from "./shelf-stage-fields"
 import { ShelfStripsFields } from "./shelf-strips-fields"
 import { ShelfTabsField } from "./shelf-tabs-field"
 import { SCROLLER_MAIN } from "./scroller-groups"
@@ -83,7 +85,8 @@ function CountChoice<N extends number>({
  * Its rarely changed scroller settings sit closed in "Diğer ayarlar"
  * (`SectionPanel`). A field the variant does not use is not shown: the
  * card on a compact or columns rail (always compact) or a strips one (no
- * card; its count and look instead), the tabs switch on a
+ * card; its count and look instead) or a stage list (its own stage and
+ * rows; its count, side, ground and follow instead), the tabs switch on a
  * columns rail (it never joins).
  */
 export function ShelfGroups({
@@ -179,9 +182,27 @@ export function ShelfGroups({
               />
               <ShelfStripsFields section={section} onChange={onChange} />
             </>
+          ) : variant === "stage_list" ? (
+            <>
+              <CountChoice
+                id={FIELD_IDS.shelf(id, "stage_count")}
+                label={t(`${SH}.stageCount`)}
+                term={t(`${SH}.stageCountTerm`)}
+                option={String}
+                hint={t(`${SH}.stageCountHint`)}
+                counts={SHELF_LIMITS.stage_list.counts}
+                value={shelfStageCountOf(section.stage_count)}
+                onChange={(stage_count) => {
+                  set({ stage_count })
+                }}
+              />
+              <ShelfStageFields section={section} onChange={onChange} />
+            </>
           ) : null}
           {variant === "strips" ? (
             <p className="text-xs text-muted-foreground">{t(`${SH}.stripsNoCard`)}</p>
+          ) : variant === "stage_list" ? (
+            <p className="text-xs text-muted-foreground">{t(`${SH}.stageNoCard`)}</p>
           ) : variant === "compact" || variant === "columns" ? (
             <p className="text-xs text-muted-foreground">{t(`${SH}.cardCompact`)}</p>
           ) : (

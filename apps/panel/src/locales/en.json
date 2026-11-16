@@ -8023,7 +8023,8 @@
           "featured": "Featured",
           "compact": "Compact list",
           "columns": "Lists side by side",
-          "strips": "Slanted strips"
+          "strips": "Slanted strips",
+          "stage_list": "Stage and list"
         },
         "categories": {
           "tiles": "Picture tiles",
@@ -9364,6 +9365,35 @@
         },
         "cardCompact": "Cards in this layout are always compact: a small photo, name, stars and price.",
         "stripsNoCard": "No cards in this layout: each product is one strip with its name and price, the whole strip linking to its page. The add to cart and quick view buttons are not shown.",
+        "stageCount": "Number of products",
+        "stageCountTerm": "stage_count",
+        "stageCountHint": "The product on the stage counts too. At six the list's rows get smaller; on phones the stage sits on top, the list below.",
+        "stageNoCard": "No cards in this layout: the product on the stage shows a large photo, its price and Add to cart; in the list each product is one row with a small photo, the whole row linking to its page.",
+        "stage": {
+          "stage_side": {
+            "label": "Stage side",
+            "term": "stage_side",
+            "hint": "On wide screens the stage stands on this side, the list on the other. On phones the stage is always on top.",
+            "steps": {
+              "start": "Left",
+              "end": "Right"
+            }
+          },
+          "stage_ground": {
+            "label": "Stage background",
+            "term": "stage_ground",
+            "hint": "Dark: the theme's graphite stage with light text. Light tint: a pale grey background. The list row of the product on the stage takes this background too.",
+            "steps": {
+              "stage": "Dark",
+              "well": "Light tint"
+            }
+          },
+          "stage_follow": {
+            "label": "Change the stage on hover",
+            "term": "stage_follow",
+            "hint": "On: every product is listed; on wide screens the row under the mouse or chosen with the keyboard takes the stage. Off: the first product stays on the stage, the rest are listed."
+          }
+        },
         "tabs": "Join the rail beside it in tabs",
         "tabsTerm": "tabs",
         "tabsJoined": "Joins this rail in one tabbed shelf: {{names}}. Turn it off to draw this rail on its own.",
