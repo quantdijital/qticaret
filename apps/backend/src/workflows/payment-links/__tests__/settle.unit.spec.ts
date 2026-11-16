@@ -1,5 +1,6 @@
 import { asValue } from "@medusajs/framework/awilix"
 import { ContainerRegistrationKeys, createMedusaContainer } from "@medusajs/framework/utils"
+import { logger } from "../../../lib/logging"
 import { PAYMENT_LINKS_MODULE } from "../../../modules/payment-links"
 import type * as LinkCarts from "../link-carts"
 import type * as Paid from "../paid"
@@ -46,7 +47,7 @@ afterEach(() => {
 })
 
 describe("settling payment links on the hour", () => {
-  it("looks at every completed cart of a link these two days, oldest first", async () => {
+  it("looks at every completed cart of a link these two days, a page at a time", async () => {
     completed.mockResolvedValue([])
     const now = new Date("2026-11-16T12:00:00Z")
 
@@ -99,6 +100,55 @@ describe("settling payment links on the hour", () => {
 
     await expect(settlePaymentLinks(container())).resolves.toBe(0)
     expect(markRun).toHaveBeenCalledWith({ input: { order_id: "order_2" }, throwOnError: false })
+  })
+
+  it("goes on past a full page, from the last cart of the page before", async () => {
+    const full = Array.from({ length: 500 }, (_, index) => ({
+      cart_id: `cart_${String(index).padStart(3, "0")}`,
+      link_id: "plink_1",
+      order_id: null,
+    }))
+    completed
+      .mockResolvedValueOnce(full)
+      .mockResolvedValueOnce([{ cart_id: "cart_900", link_id: "plink_1", order_id: "order_1" }])
+    links.listPaymentLinks.mockResolvedValue([link({})])
+    const now = new Date("2026-11-16T12:00:00Z")
+    const since = new Date("2026-11-14T12:00:00Z")
+
+    await expect(settlePaymentLinks(container(), now)).resolves.toBe(1)
+    expect(completed).toHaveBeenCalledTimes(2)
+    expect(completed).toHaveBeenNthCalledWith(1, expect.anything(), { since }, 500)
+    expect(completed).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      { since, after: "cart_499" },
+      500
+    )
+    expect(markRun).toHaveBeenCalledWith({ input: { order_id: "order_1" }, throwOnError: false })
+  })
+
+  it("stops at its ceiling of pages a run and says so", async () => {
+    const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
+    let page = 0
+    completed.mockImplementation(() => {
+      page += 1
+      return Promise.resolve(
+        Array.from({ length: 500 }, (_, index) => ({
+          cart_id: `cart_${String(page)}_${String(index).padStart(3, "0")}`,
+          link_id: "plink_1",
+          order_id: null,
+        }))
+      )
+    })
+
+    await expect(settlePaymentLinks(container())).resolves.toBe(0)
+    expect(completed).toHaveBeenCalledTimes(20)
+    expect(warn).toHaveBeenCalledWith({
+      event: "payment_links.settle_ceiling",
+      pages: 20,
+      page_size: 500,
+    })
+    warn.mockRestore()
   })
 
   it("logs a failed mark and goes on", async () => {
