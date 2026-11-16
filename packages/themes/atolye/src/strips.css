@@ -275,6 +275,32 @@
     white-space: nowrap;
   }
 
+  /*
+   * A strip's pill (a product rail's discount or "Tükendi"): small on the
+   * strip's top, inside its slanted left edge (the first strip's is straight).
+   */
+  .gf-strip-flag {
+    position: absolute;
+    top: var(--space-sm);
+    left: calc(var(--strip-run) + var(--strip-line) + var(--space-xs));
+    padding: var(--space-3xs) var(--space-2xs);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-xs);
+    font-weight: 800;
+    line-height: 1;
+  }
+  .gf-strip:first-child .gf-strip-flag {
+    left: var(--space-sm);
+  }
+  .gf-strip-flag[data-tone="deal"] {
+    background: var(--color-deal);
+    color: var(--color-deal-ink);
+  }
+  .gf-strip-flag[data-tone="out"] {
+    background: var(--color-stage);
+    color: var(--color-stage-text);
+  }
+
   /* The others darken while one is looked at (`data-dim`) */
   .gf-strips[data-dim="on"] .gf-strip-frame::after {
     content: "";

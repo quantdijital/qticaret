@@ -31,7 +31,8 @@ export const STRIPS_LOOK_BEFORE: StripsLook = {
 export interface StripItem {
   /** Unique among the strips (React's key). */
   key: string
-  image: ImageView
+  /** None: the strip's well alone under its words (a product without a photograph). */
+  image: ImageView | null
   /** The whole strip a link to it; none: a plain picture. */
   href?: string | null | undefined
   /** A line over the photograph's foot (a product's name, a category). */
@@ -41,6 +42,19 @@ export interface StripItem {
   /** The editor's field marks on the words (`fieldMark`). */
   titleMark?: { "data-qf"?: string } | undefined
   noteMark?: { "data-qf"?: string } | undefined
+  /**
+   * A small pill on the strip's top (a product rail's "%30" or "Tükendi"):
+   * `text` shown, `label` what a screen reader hears instead (none: the
+   * text). After the words in the link, so its name reads them first.
+   */
+  flag?: StripFlag | null | undefined
+}
+
+/** A strip's pill: a deal's tone or a sold-out one's. */
+export interface StripFlag {
+  text: string
+  label?: string | undefined
+  tone: "deal" | "out"
 }
 
 /** How far a strip under the pointer widens against the others (`--strip-grow`, strips.css). */
@@ -88,6 +102,22 @@ export interface StripsShape {
 /** A photograph's width against its height, when the image says both. */
 function aspectOf(image: ImageView): number | null {
   return image.width && image.height ? image.width / image.height : null
+}
+
+/** A strip's pill, its words for a screen reader apart when they differ. */
+function Flag({ flag }: { flag: StripFlag }) {
+  return (
+    <span className="gf-strip-flag" data-tone={flag.tone}>
+      {flag.label && flag.label !== flag.text ? (
+        <>
+          <span aria-hidden="true">{flag.text}</span>
+          <span className="sr-only">{flag.label}</span>
+        </>
+      ) : (
+        flag.text
+      )}
+    </span>
+  )
 }
 
 /**
@@ -190,12 +220,14 @@ export function Strips({
         const words = Boolean(item.title) || Boolean(item.note)
         const inner = (
           <span className="gf-strip-frame">
-            <ResponsiveImage
-              image={item.image}
-              sizes={sizesOf(item.image)}
-              priority={priority && at === 0}
-              className="gf-strip-image"
-            />
+            {item.image ? (
+              <ResponsiveImage
+                image={item.image}
+                sizes={sizesOf(item.image)}
+                priority={priority && at === 0}
+                className="gf-strip-image"
+              />
+            ) : null}
             {words ? (
               <span className="gf-strip-text">
                 {item.title ? (
@@ -210,6 +242,7 @@ export function Strips({
                 ) : null}
               </span>
             ) : null}
+            {item.flag ? <Flag flag={item.flag} /> : null}
           </span>
         )
         return (
