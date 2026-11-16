@@ -167,7 +167,11 @@ describe("the catalog header's settings", () => {
       "mainheader-header-strip_note_link",
       "mainheader-header-top_links",
     ])
-    expect(screen.getByText(/Örnek: 1500 TL üzeri kargo bedava/)).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /\{ücretsiz_kargo_eşiği\} üzeri kargo bedava \(eşik girilmemişse not görünmez\)/
+      )
+    ).toBeInTheDocument()
     const note = screen.getByLabelText(/Şerit notu/)
     expect(note).toHaveAttribute("maxLength", "80")
     await user.type(note, "Kargo bedava")
