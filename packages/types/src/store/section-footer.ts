@@ -21,6 +21,12 @@ export const FOOTER_BAR_SETTINGS = {
   back_to_top_side: ["right", "left"],
   /** Its face: round or square (the theme's radius). */
   back_to_top_shape: ["round", "square"],
+  /**
+   * How the shop is named over its contact (owner 2026-11-16): its name
+   * in the display face as before, or its logo from the store profile
+   * (`appearance`, the one place a logo is uploaded); no logo: the name.
+   */
+  brand: ["name", "logo"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type FooterBarSetting = keyof typeof FOOTER_BAR_SETTINGS
@@ -66,6 +72,7 @@ export const FOOTER_BAR_DEFAULTS = {
   back_to_top_side: "right",
   back_to_top_shape: "round",
   back_to_top_mobile: true,
+  brand: "name",
 } as const satisfies { [S in FooterBarSetting]: FooterBarStep<S> } & {
   payment_badges: readonly PaymentBadge[]
   back_to_top: boolean
@@ -82,4 +89,6 @@ export interface StoreFooterBarSettings {
   back_to_top_shape: FooterBarStep<"back_to_top_shape">
   /** Shown on a phone too. */
   back_to_top_mobile: boolean
+  /** The name or the store profile's logo over the contact; `name` as before. */
+  brand: FooterBarStep<"brand">
 }

@@ -173,6 +173,8 @@ export function StoreBrandCard({
             />
           </div>
         </div>
+        {/* Where the logos show: the header, and the footer when its settings choose the logo */}
+        <p className="text-xs text-muted-foreground">{t(`${B}.logosUse`)}</p>
         {/* An SVG's font declarations are cleaned away: text in a logo keeps its look as outlines */}
         <p className="text-xs text-muted-foreground">{t(`${B}.svgText`)}</p>
       </Group>

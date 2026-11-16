@@ -34,6 +34,8 @@ export interface CategoriesCollageFields {
 
 /** The footer's settings, the same in every footer variant. */
 export interface FooterBarFields {
+  /** The name or the store profile's logo over the contact (owner 2026-11-16). */
+  brand: FooterBarStep<"brand">
   social: FooterBarStep<"social">
   /** In the shop's order, each once. */
   payment_badges: PaymentBadge[]

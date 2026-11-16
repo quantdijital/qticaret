@@ -53,7 +53,7 @@ describe("the category cards' collage variant", () => {
 })
 
 describe("the footer bar's own settings", () => {
-  it("draws the footer as before by default: written profiles, no badges, no button", () => {
+  it("draws the footer as before by default: written profiles, no badges, no button, the name", () => {
     expect(FOOTER_BAR_DEFAULTS).toEqual({
       social: "text",
       payment_badges: [],
@@ -61,7 +61,9 @@ describe("the footer bar's own settings", () => {
       back_to_top_side: "right",
       back_to_top_shape: "round",
       back_to_top_mobile: true,
+      brand: "name",
     })
+    expect(FOOTER_BAR_SETTINGS.brand).toEqual(["name", "logo"])
     for (const [setting, steps] of Object.entries(FOOTER_BAR_SETTINGS)) {
       expect(steps[0]).toBe(FOOTER_BAR_DEFAULTS[setting as keyof typeof FOOTER_BAR_SETTINGS])
     }

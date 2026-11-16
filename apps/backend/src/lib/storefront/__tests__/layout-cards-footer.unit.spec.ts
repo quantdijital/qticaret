@@ -220,6 +220,25 @@ describe("the footer bar's own settings (adr/0049 Ek 2026-11-15)", () => {
     })
   })
 
+  it("names the shop by its logo only when the shop chose it (owner 2026-11-16)", () => {
+    const named = withMainSections(layoutDocument.parse({ footer: [footer()] }), LEFT)
+    expect(named.footer[0]).toMatchObject({ brand: "name" })
+    expect(mainSectionsOf(named).footer_bar).not.toHaveProperty("brand")
+    const logo = withMainSections(
+      layoutDocument.parse({ footer: [footer({ brand: "logo" })] }),
+      LEFT
+    )
+    expect(mainSectionsOf(logo).footer_bar).toEqual({
+      id: "mainfooter",
+      type: "footer_bar",
+      variant: "ledger",
+      brand: "logo",
+    })
+    expect(issues({ footer: [footer({ brand: "image" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+  })
+
   it("leaves the button's place out while it is off", () => {
     const doc = withMainSections(
       layoutDocument.parse({ footer: [footer({ back_to_top_side: "left" })] }),

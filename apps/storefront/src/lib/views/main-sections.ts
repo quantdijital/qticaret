@@ -20,6 +20,7 @@ import type {
   CategoryMainView,
   FooterBarView,
   HeaderBarView,
+  ImageView,
   NavCategoryView,
   ProductMainView,
   SectionLookView,
@@ -94,14 +95,21 @@ const isBadge = (value: unknown): value is PaymentBadge =>
  * pay it does not know is left out, a repeat too); a backend before them
  * prints none, and the footer is drawn as before.
  */
-export function footerBarOf(main: Main, t: Translate): FooterBarView {
+export function footerBarOf(
+  main: Main,
+  t: Translate,
+  logo: ImageView | null = null
+): FooterBarView {
   const bar = main?.footer_bar
   const social = footerStep("social", bar?.social)
+  // The store profile's logo over the contact when the shop chose it and has one; else the name
+  const named = footerStep("brand", bar?.brand) === "logo" && logo !== null
   const badges = [...new Set((bar?.payment_badges ?? []).filter(isBadge))]
   return {
     id: bar?.id ?? "mainfooter",
     variant: variantOf("footer_bar", bar?.variant),
     ...(social !== FOOTER_BAR_DEFAULTS.social ? { social } : {}),
+    ...(named ? { logo } : {}),
     ...(badges.length > 0
       ? { paymentBadges: badges.map((key) => ({ key, label: t(`marks.${key}`) })) }
       : {}),

@@ -20,8 +20,9 @@ const Corner = ({ side }: { side: "right" | "left" }) => (
 )
 
 /**
- * The footer's own settings (adr/0049 Ek 2026-11-15): how the shop's
- * profiles show (their addresses are the store details' social accounts),
+ * The footer's own settings (adr/0049 Ek 2026-11-15): the shop named by
+ * its name or its logo (the store profile's own, owner 2026-11-16), how the
+ * shop's profiles show (their addresses are the store details' social accounts),
  * the ways to pay it names, and a "back to top" button; the button's
  * corner, face and phones show only while it is on. The menus, details
  * and marks are edited on their own screens.
@@ -32,6 +33,19 @@ export function FooterBarForm({ section, onChange }: SectionFormProps<FooterBarS
     CARD_FIELD_IDS.footer(section.id, field)
   return (
     <div className="flex flex-col gap-5">
+      <StepChoice
+        id={id("brand")}
+        label={t(`${F}.brand.label`)}
+        term={t(`${F}.brand.term`)}
+        hint={t(`${F}.brand.hint`)}
+        steps={FOOTER_BAR_SETTINGS.brand}
+        value={section.brand}
+        fallback={FOOTER_BAR_DEFAULTS.brand}
+        nameOf={(step) => t(`${F}.brand.${step}`)}
+        onChange={(brand) => {
+          onChange({ ...section, brand })
+        }}
+      />
       <StepChoice
         id={id("social")}
         label={t(`${F}.social.label`)}

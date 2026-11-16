@@ -48,7 +48,7 @@ describe("the draft a preset makes (adr/0063 §4)", () => {
     expect(doc.home[2]).toEqual(
       expect.objectContaining({ more: { kind: "system", target: "shop", label: null } })
     )
-    expect(doc.footer.map((section) => section.id)).toEqual(["ebultenkutusu"])
+    expect(doc.footer.map((section) => section.id)).toEqual(["mainfooter", "ebultenkutusu"])
     const { theme, ...rest } = doc.settings
     expect(rest).toEqual({ ...KEPT, menus: null, preset: APPLIED })
     expect(theme).toEqual(presetTheme(grafit.theme_settings))

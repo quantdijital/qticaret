@@ -1,5 +1,5 @@
 import { Mail, MapPin, Phone } from "lucide-react"
-import { drawnVariant, fieldMark, sectionMark } from "@qticaret/ui"
+import { ResponsiveImage, drawnVariant, fieldMark, sectionMark } from "@qticaret/ui"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { FooterLinks } from "./FooterLinks"
@@ -12,18 +12,35 @@ import { SmallPrint } from "./SmallPrint"
 const LINE =
   "inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-9"
 
-/** How the shop is reached: its name, registered title when it differs, address, phone, e-mail, profiles (`FooterSocial`). */
+/**
+ * How the shop is reached: its name (or the store profile's logo, when the
+ * shop chose it in the footer: `footerBar.logo`, the image's alt text the
+ * heading's name), registered title when it differs, address, phone,
+ * e-mail, profiles (`FooterSocial`).
+ */
 function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
   const { contact } = shop
   const title = shop.companyTitle ?? shop.name
+  const logo = shop.footerBar?.logo
   return (
     <section aria-labelledby="footer-contact" className="flex flex-col gap-4 lg:col-span-4">
-      <h2
-        id="footer-contact"
-        className="text-wordmark leading-tight font-extrabold tracking-(--tracking-display)"
-      >
-        {shop.name}
-      </h2>
+      {logo ? (
+        // The header's logo box: 40 px tall, as wide as its shape, at most 14rem
+        <h2 id="footer-contact" className="flex min-h-11 items-center">
+          <ResponsiveImage
+            image={logo}
+            sizes="224px"
+            className="h-10 w-auto max-w-56 object-contain object-left"
+          />
+        </h2>
+      ) : (
+        <h2
+          id="footer-contact"
+          className="text-wordmark leading-tight font-extrabold tracking-(--tracking-display)"
+        >
+          {shop.name}
+        </h2>
+      )}
       <ul className="flex flex-col text-sm">
         {title !== shop.name && <li className="pb-1 font-semibold text-text">{title}</li>}
         {contact.address && (
