@@ -156,6 +156,10 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
   oklar/noktalar/ikisi/hiçbiri, Autoplay + Autoplay Speed, Pause on Hover, Pause on Interaction,
   Infinite Loop) ve Horizon'un "Carousel navigation" grubu (ok stili `icons_style`, ok şekli
   `icons_shape`) bu takımın karşılığıdır.
+- Ek 2026-11-16 (şerit galeri, `strip_gallery`): masaüstünde sığan, yalnız dar ekranda taşan dizi
+  karusel değildir, takımı almaz: 1024 px altında yalnız doğal yatay kaydırma + yakalama (oksuz,
+  noktasız; Dawn'ın `swipe_on_mobile` karşılığı), her öğe ekranın sabit payını gösterir (telefonda
+  %43, tablette %30), hiçbir öğe gizlenmez. Ortak parça `parts/Strips.tsx` `phone="scroll"` (adr/0049 Ek).
 
 ### 4.5 Hareketli (kendiliğinden hareket eden her şey)
 - Hız ya da süre (§3), yön, üzerine gelince dur (aç/kapat), **durdur düğmesi** (kaldırılamaz, yalnız
