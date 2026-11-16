@@ -39,3 +39,5 @@ ce4a7847aa47be21cf9229ae76fcd8a99599cf35:docs/03-yol-haritasi.md:generic-api-key
 ebeed5808153082b83c706a74c4e920f53662a7f:apps/storefront/e2e/catalog.ts:generic-api-key:50
 # backend: a made-up key in Stripe's live shape (body 0123456789abcdefABCDEF); the fixture is now built from parts
 c82914678d4ae5be8974e4a2e514ebb494401493:apps/backend/src/lib/errors/__tests__/provider-text.unit.spec.ts:stripe-access-token:31
+# backend maintenance guard test: made-up sign-up password (Turkish words + a number) on deniz/bakim-modu-backend
+06cc67d9378f9582a48f6b8e5fb195e9283ea2b1:apps/backend/integration-tests/http/maintenance-store-guard.spec.ts:generic-api-key:107
