@@ -6,6 +6,15 @@ import { DESIGN_ID, DESIGN_LIMITS } from "../../../lib/storefront/designs/limits
 const NAME_INVALID = { message: "storefront_design.name_invalid" }
 
 /**
+ * Invisible format characters (Unicode `Cf`: zero-width spaces and joiners,
+ * direction marks, embeddings, overrides and isolates, the BOM). A name
+ * carrying them can read differently from what it holds wherever it is shown
+ * (the list, the audit trail, a media item's usage label), so a look's name
+ * refuses them. Kept here, not in `isCleanText`, which other fields share.
+ */
+const FORMAT_CHARACTER = /\p{Cf}/u
+
+/**
  * A saved look's name (adr/0064 §3): 1–60 characters of plain text,
  * trimmed. One rule, not `min`/`max`: Medusa's body validation words
  * those itself and the panel would not get the key.
@@ -14,7 +23,11 @@ export const designName = z
   .string(NAME_INVALID)
   .trim()
   .refine(
-    (value) => value.length >= 1 && value.length <= DESIGN_LIMITS.name && isCleanText(value),
+    (value) =>
+      value.length >= 1 &&
+      value.length <= DESIGN_LIMITS.name &&
+      isCleanText(value) &&
+      !FORMAT_CHARACTER.test(value),
     NAME_INVALID
   )
 
