@@ -14,11 +14,10 @@ import {
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
+import { libraryImage } from "../../lib/media/library-image"
 import { refuseSvgImages } from "../../lib/media/svg-use"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import type CatalogExtensionModuleService from "../../modules/catalog-extension/service"
-import { MEDIA_MODULE } from "../../modules/media"
-import type MediaModuleService from "../../modules/media/service"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
 import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { COLLECTION_EXTENSION_FIELDS } from "./collection-fields"
@@ -70,13 +69,7 @@ const planCollectionDetailsStep = createStep(
     if (input.image) {
       // A logo's format, not a category's or collection's picture (lib/media/svg-use.ts)
       await refuseSvgImages(container, [input.image.url], "image")
-      const uploaded = await container
-        .resolve<MediaModuleService>(MEDIA_MODULE)
-        .listMediaAssets(
-          { url: input.image.url, file_id: { $ne: null } },
-          { select: ["id"], take: 1 }
-        )
-      if (uploaded.length === 0) {
+      if (!(await libraryImage(container, { url: input.image.url }))) {
         throw new ValidationError("catalog.collection_image_unknown", { field: "image" })
       }
     }

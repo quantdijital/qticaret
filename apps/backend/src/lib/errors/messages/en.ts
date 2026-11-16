@@ -81,7 +81,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "chargebacks.unknown": "Chargeback not found.",
   "brands.description_invalid":
     "The description is too long or holds characters that cannot be used.",
-  "brands.logo_unknown": "The logo must be one of the shop's uploaded images.",
+  "brands.logo_unknown": "Choose the logo from the media library: it must be an image there.",
   "brands.name_invalid": "Enter the brand's name (120 characters at most).",
   "brands.name_taken": "A brand with this name already exists.",
   "brands.unknown": "Brand not found.",

@@ -87,7 +87,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "chargebacks.transition_invalid": "Kayıt bu duruma geçemez; kapanmış kayıt yeniden açılmaz.",
   "chargebacks.unknown": "Ters ibraz kaydı bulunamadı.",
   "brands.description_invalid": "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
-  "brands.logo_unknown": "Logo mağazanın yüklenen görsellerinden biri olmalı.",
+  "brands.logo_unknown": "Logo ortam kütüphanesinden seçilmeli: kütüphanedeki bir görsel olmalı.",
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
   "brands.name_taken": "Bu adla bir marka zaten var.",
   "brands.unknown": "Marka bulunamadı.",
