@@ -8,6 +8,7 @@ import "@/lib/i18n"
 import type { AnySection } from "@/features/storefront/api/layout"
 import { newHomeSection } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
+import { openGroup } from "../settings-groups.fixtures"
 import { FIELD_IDS } from "./field-registry"
 
 vi.mock("@tanstack/react-router", () => ({
@@ -57,10 +58,14 @@ const field = (name: string) => {
 }
 
 /** adr/0049 Ek 2026-11-16: the strip gallery's settings, open under its content. */
-describe("the strip gallery's Diziliş group", () => {
+describe("the strip gallery's Diziliş group, in Stil", () => {
   it("offers its steps and switches with the contract's defaults, each set and reset", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("strip_gallery", ID))
+    // İçerik opens first: the Diziliş group stands in the hidden Stil tab
+    expect(screen.queryByRole("button", { name: "Diziliş" })).toBeNull()
+    await openGroup(user, "Diziliş")
+    expect(screen.getByRole("tab", { selected: true })).toHaveAccessibleName(/^Stil/)
     expect(field("width").getByRole("radio", { name: "Tam genişlik" })).toHaveAttribute(
       "data-state",
       "on"

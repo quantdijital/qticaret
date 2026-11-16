@@ -9,6 +9,7 @@ import type { AnySection } from "@/features/storefront/api/layout"
 import { newBodySection } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
 import { FIELD_IDS } from "./field-registry"
+import { openTab } from "../settings-groups.fixtures"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -53,8 +54,10 @@ const byId = (id: string) => document.getElementById(id)
 
 /** docs/tema/bilesen-denetimi (b) 7: the related products as a rail's grid or carousel. */
 describe("the related products' variant and card", () => {
-  it("start as today's grid with its columns and the theme's card", () => {
+  it("start as today's grid with its columns and the theme's card", async () => {
+    const user = userEvent.setup()
     renderPanel(newBodySection("product", "related_products", ID))
+    await openTab(user, "style")
     const variant = byId(FIELD_IDS.variant(ID))
     if (!variant) throw new Error("no variant field")
 
@@ -69,11 +72,13 @@ describe("the related products' variant and card", () => {
   })
 
   it("slide with the scroller kit once switched, the columns dropped, the card kept", async () => {
+    const user = userEvent.setup()
     const changes = renderPanel(newBodySection("product", "related_products", ID))
+    await openTab(user, "style")
     const variant = byId(FIELD_IDS.variant(ID))
     if (!variant) throw new Error("no variant field")
 
-    await userEvent.click(within(variant).getByRole("radio", { name: /Kayan sıra/ }))
+    await user.click(within(variant).getByRole("radio", { name: /Kayan sıra/ }))
 
     const last = changes.at(-1)
     expect(last).toMatchObject({ type: "related_products", variant: "carousel" })

@@ -7939,14 +7939,10 @@
       },
       "look": {
         "title": "Diğer ayarlar",
-        "titleSet_one": "Diğer ayarlar · {{count}} ayar",
-        "titleSet_other": "Diğer ayarlar · {{count}} ayar",
-        "hint": "Bölümün iç boşluğu ve görünüşü. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
+        "hint": "Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
         "reset": "Varsayılana dön",
         "spacing": {
           "title": "Boşluk",
-          "titleSet_one": "Boşluk · {{count}} ayar",
-          "titleSet_other": "Boşluk · {{count}} ayar",
           "hint": "Bölümün üstündeki ve altındaki boşluk. Seçilmeyen taraf temanın bölüm aralığını kullanır (Tema ayarları > Bölüm aralığı); ince şeritlerde dar aralığı."
         },
         "space_outer": {
@@ -8026,7 +8022,7 @@
         "layout": "Diziliş",
         "scroll": "Kaydırma",
         "motion": "Hareket",
-        "appearance": "Stil",
+        "appearance": "Yazı ve zemin",
         "variant": "Biçim",
         "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir.",
         "device": {
@@ -8036,7 +8032,26 @@
           "mobile": "Yalnız telefonda",
           "desktop": "Yalnız masaüstünde",
           "hint": "Telefon: 1024 pikselden dar ekranlar (tablet dahil). Gizlendiği cihazda bölümün görselleri indirilmez; sayfanın ilk görseli yine indirilir."
-        }
+        },
+        "tabs": {
+          "label": "Ayar sekmeleri",
+          "content": "İçerik",
+          "contentTerm": "content",
+          "style": "Stil",
+          "styleTerm": "style",
+          "advanced": "Gelişmiş",
+          "advancedTerm": "advanced",
+          "marked": "varsayılandan farklı ayar var"
+        },
+        "groups": {
+          "search": "Arama",
+          "topBar": "Üst şerit",
+          "menu": "Menü çubuğu",
+          "icons": "Simgeler ve iletişim",
+          "frame": "Görünüm"
+        },
+        "marked_one": "{{count}} ayar varsayılandan farklı",
+        "marked_other": "{{count}} ayar varsayılandan farklı"
       },
       "defaults": {
         "heading": "Mağazanızın adı",
@@ -8861,8 +8876,6 @@
         "subtextPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
         "link": "Bağlantı (isteğe bağlı)",
         "full": "Bu sayfada zaten {{max}} kayan yazı var (üst bilgideki de sayılır).",
-        "lookHint": "Kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
-        "headerLookHint": "Kapatma düğmesi.",
         "size": {
           "label": "Boy",
           "term": "size",
@@ -9048,8 +9061,7 @@
           "bar": "Menü çubuğunda",
           "row": "Logo satırında"
         },
-        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama (arama görünümü simgeyse kutu durmaz, alt menüdeki “Ara” açar).",
-        "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
+        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama (arama görünümü simgeyse kutu durmaz, alt menüdeki “Ara” açar)."
       },
       "categoryCards": {
         "columns": {
@@ -9335,6 +9347,17 @@
           "on": "Açık",
           "hint": "Masaüstünde fareyle tutup sürükleyerek kaydırılır."
         }
+      },
+      "panelSearch": {
+        "label": "Bu bölümün ayarlarında ara",
+        "themeLabel": "Tema ayarlarında ara",
+        "placeholder": "Bu bölümün ayarlarında ara…",
+        "themePlaceholder": "Tema ayarlarında ara…",
+        "clear": "Aramayı temizle",
+        "results": "Bulunan ayarlar",
+        "empty": "“{{query}}” için ayar bulunamadı.",
+        "count_one": "{{count}} ayar bulundu",
+        "count_other": "{{count}} ayar bulundu"
       }
     },
     "preferences": {

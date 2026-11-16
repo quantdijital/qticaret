@@ -11,9 +11,9 @@ const keys = (section: ProductsSection) =>
 
 /** adr/0049 Ek 2026-11-15: a product list's fields in the settings search, as its variant shows them. */
 describe("a product list's fields for the settings search", () => {
-  it("puts the variant first in Diziliş, with a grid's cards in a row (wide, phone) and its card", () => {
+  it("keeps the variant in its own Biçim, then a grid's cards in a row (wide, phone) and its card in Diziliş", () => {
+    expect(keys(grid)).toContain("variant:variant")
     expect(keys(grid).filter((key) => key.startsWith("layout:"))).toEqual([
-      "layout:variant",
       "layout:columns",
       "layout:columns_mobile",
       "layout:card_variant",

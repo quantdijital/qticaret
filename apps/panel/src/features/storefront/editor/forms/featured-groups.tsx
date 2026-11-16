@@ -55,7 +55,7 @@ export function FeaturedGroups({
     onChange({ ...section, ...next })
   }
   return (
-    <PanelGroup title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
+    <PanelGroup name="layout" title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
       <StepChoice
         id={FIELD_IDS.content(section.id, "gallery")}
         label={t(`${P}.gallery`)}

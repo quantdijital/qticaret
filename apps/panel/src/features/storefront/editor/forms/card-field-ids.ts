@@ -66,7 +66,7 @@ export function cardFooterFields(section: AnySection): RegistryField[] {
   if (section.type === "categories" && section.variant === "linked") {
     return CARD_FIELDS.map((field) => ({
       key: `cards.${field}`,
-      group: field === "frame" ? "look" : "content",
+      group: field === "frame" ? "frame" : "content",
       label: `${CARDS}.${field}.label`,
       term: `${CARDS}.${field}.term`,
       options: stepsOf(CARDS, field),

@@ -21,6 +21,7 @@ import {
   serve,
 } from "./theme-editor.fixtures"
 import type { AdminMock, Init, ServeOptions } from "./theme-editor.fixtures"
+import { openGroups } from "./settings-groups.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 const admin = vi.hoisted<AdminMock>(() => ({
@@ -49,13 +50,20 @@ const HEAVY = { timeout: 15_000 }
 
 let user: UserEvent
 
-/** The editor with the theme's settings open. */
-async function openTheme(options: ServeOptions = {}) {
-  serve(fetchMock, admin, layoutOf(), options)
-  renderEditor()
+/** The theme's settings open from the tree, no group open yet (they come closed). */
+async function toTheme() {
   const tree = await opened()
   await user.click(within(tree).getByRole("button", { name: "Tema ayarları" }))
-  return screen.findByRole("textbox", { name: "Ana renk" })
+  await screen.findByRole("searchbox", { name: "Tema ayarlarında ara" })
+}
+
+/** The editor with the theme's settings open, "Renkler" and the `groups` named opened. */
+async function openTheme(options: ServeOptions = {}, ...groups: string[]) {
+  serve(fetchMock, admin, layoutOf(), options)
+  renderEditor()
+  await toTheme()
+  await openGroups(user, "Renkler", ...groups)
+  return screen.getByRole("textbox", { name: "Ana renk" })
 }
 
 async function choose(field: RegExp | string, option: RegExp | string) {
@@ -77,8 +85,21 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     releaseClock()
   })
 
+  it("comes with its groups closed, no tabs, and opens one to its fields", async () => {
+    serve(fetchMock, admin, layoutOf())
+    renderEditor()
+    await toTheme()
+    expect(screen.queryByRole("tab")).toBeNull()
+    for (const title of ["Renkler", "Yazı tipleri", "Şekiller", "Yüzeyler", "Ürün kartı"]) {
+      expect(screen.getByRole("button", { name: title })).toHaveAttribute("aria-expanded", "false")
+    }
+    expect(screen.queryByRole("textbox", { name: "Ana renk" })).toBeNull()
+    await openGroups(user, "Renkler")
+    expect(screen.getByRole("textbox", { name: "Ana renk" })).toBeVisible()
+  })
+
   it("saves the card style and the framed card's switches into the draft (adr/0049 Ek 2026-11-14 §3.3)", async () => {
-    await openTheme()
+    await openTheme({}, "Ürün kartı", "Çerçeveli kart")
     await choose("Kart biçimi", "Çerçeveli")
     await user.click(screen.getByRole("switch", { name: /^Üstüne gelince ikinci fotoğraf/ }))
     await user.click(screen.getByRole("switch", { name: /^İndirim etiketini göster/ }))
@@ -99,7 +120,7 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
   })
 
   it("shows the quick view's look and contents only once it is on, and saves them (adr/0049 Ek 2026-11-15)", async () => {
-    await openTheme()
+    await openTheme({}, "Ürün kartı")
     const off = screen.getByRole("switch", { name: /^Hızlı bakışı göster/ })
     expect(off.getAttribute("aria-checked")).toBe("false")
     expect(screen.queryByRole("combobox", { name: /^Düğmenin görünüşü/ })).toBeNull()
@@ -123,7 +144,7 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
   })
 
   it("saves every choice into the draft as it is made, the preview reloading, nothing live", async () => {
-    const primary = await openTheme()
+    const primary = await openTheme({}, "Yazı tipleri", "Ürün kartı")
     const preview = await screen.findByTitle("Vitrin önizlemesi")
     expect(preview).toHaveAttribute("src", expect.stringContaining("/onizleme/sfl_1"))
     expect(screen.getByText(/taslağın parçasıdır/)).toBeVisible()
@@ -200,7 +221,10 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
 
   it("keeps saving a colour stored before the well rule until it is changed", async () => {
     // Stored in the draft already: the server lets it be, so does the editor
-    const primary = await openTheme({ theme: { colors: { ...THEME.colors, primary: "#2f8dff" } } })
+    const primary = await openTheme(
+      { theme: { colors: { ...THEME.colors, primary: "#2f8dff" } } },
+      "Şekiller"
+    )
     expect(primary).toHaveValue("#2f8dff")
     expect(screen.queryByRole("alert")).toBeNull()
     await choose("Köşeler", "Keskin")
@@ -219,8 +243,8 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     let refuse = false
     serve(fetchMock, admin, layoutOf(), { refuse: () => (refuse ? refusal : null) })
     renderEditor()
-    const tree = await opened()
-    await user.click(within(tree).getByRole("button", { name: "Tema ayarları" }))
+    await toTheme()
+    await openGroups(user, "Şekiller")
     await pass(AUTOSAVE_MS)
     refuse = true
     await choose("Köşeler", "Keskin")
@@ -233,7 +257,7 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
   })
 
   it("takes a change back with the editor's undo, as any change to the design", async () => {
-    await openTheme()
+    await openTheme({}, "Şekiller")
     await user.click(screen.getByRole("combobox", { name: "Köşeler" }))
     await user.click(await screen.findByRole("option", { name: "Keskin" }))
     expect(screen.getByRole("combobox", { name: "Köşeler" })).toHaveTextContent("Keskin")

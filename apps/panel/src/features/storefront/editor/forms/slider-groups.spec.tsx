@@ -10,6 +10,7 @@ import type { AnySection, HeroSliderSection } from "@/features/storefront/api/la
 import { newHomeSection } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
 import { FIELD_IDS } from "./field-registry"
+import { openGroup, openTab } from "../settings-groups.fixtures"
 import { withSliderKit } from "./slider-kit"
 
 vi.mock("@tanstack/react-router", () => ({
@@ -73,10 +74,15 @@ const box = (id: string) => {
 }
 
 describe("the hero slider's kit settings (bilesen-denetimi (b) 4)", () => {
-  it("opens Kaydırma with turning, arrows and dots; the speed once it turns by itself", async () => {
+  it("offers Kaydırma in Stil with turning, arrows and dots; the speed once it turns by itself", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(start())
-    expect(screen.getByRole("button", { name: "Kaydırma" })).toBeVisible()
+    await openTab(user, "style")
+    expect(screen.getByRole("button", { name: "Kaydırma" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
+    await openGroup(user, "Kaydırma")
     const autoplay = box(FIELD_IDS.scroller("kayangiris", "autoplay")).getByRole("switch")
     expect(autoplay).not.toBeChecked()
     expect(box(FIELD_IDS.scroller("kayangiris", "dots")).getByRole("switch")).toBeChecked()

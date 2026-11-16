@@ -6,6 +6,9 @@ import { MARQUEE_DEFAULTS } from "@qticaret/types"
 import { i18next } from "@/lib/i18n"
 import type { MarqueeSection } from "@/features/storefront/api/layout"
 import { newHomeSection } from "@/features/storefront/layout/sections"
+import { tabOfGroup } from "../panel-groups"
+import { openGroup } from "../settings-groups.fixtures"
+import { SettingsLayout } from "../settings-layout"
 import { searchSettings } from "../settings-search"
 import {
   MARQUEE_APPEARANCE_SETTINGS,
@@ -27,7 +30,7 @@ const newStrip = (more: Partial<MarqueeSection> = {}) => ({
   ...more,
 })
 
-/** The strip's two open groups and its closed ones' settings, every change kept. */
+/** The strip's groups outside a panel's tabs (open on their own) and its rare settings, every change kept. */
 function renderGroups(section = newStrip()) {
   const changes: MarqueeSection[] = []
   function Holder() {
@@ -63,10 +66,18 @@ describe("a scrolling strip's settings", () => {
     expect(MARQUEE_OTHER_SETTINGS).toEqual(["closable"])
   })
 
-  it("opens the motion and look groups at first", () => {
-    renderGroups()
-    expect(screen.getByRole("button", { name: "Hareket" })).toHaveAttribute("aria-expanded", "true")
-    expect(screen.getByRole("button", { name: "Stil" })).toHaveAttribute("aria-expanded", "true")
+  it("stands the motion and look groups in Stil, closed at first in the panel", async () => {
+    const user = userEvent.setup()
+    render(
+      <SettingsLayout scope="section:marquee" resetKey="kayanyazi" tabOf={tabOfGroup} focus={null}>
+        <MarqueeGroups section={newStrip()} reveal={() => null} onChange={() => undefined} />
+      </SettingsLayout>
+    )
+    for (const title of ["Hareket", "Yazı ve zemin"]) {
+      expect(screen.getByRole("button", { name: title })).toHaveAttribute("aria-expanded", "false")
+    }
+    await openGroup(user, "Hareket")
+    expect(screen.getByRole("slider", { name: /Hız/ })).toBeInTheDocument()
   })
 
   it("moves the speed over five stops, read out by name", async () => {
