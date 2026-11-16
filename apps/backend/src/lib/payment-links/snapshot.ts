@@ -188,11 +188,12 @@ export const heldByOther = (
   link: { claimed_cart_id?: string | null; claimed_at?: Date | string | null },
   cartId: string,
   now = new Date()
-): boolean =>
-  Boolean(link.claimed_cart_id) &&
-  link.claimed_cart_id !== cartId &&
-  link.claimed_at != null &&
-  new Date(link.claimed_at).getTime() + CLAIM_TTL_MS > now.getTime()
+): boolean => {
+  if (!link.claimed_cart_id || link.claimed_cart_id === cartId || !link.claimed_at) {
+    return false
+  }
+  return new Date(link.claimed_at).getTime() + CLAIM_TTL_MS > now.getTime()
+}
 
 /** A new link's end: `hours` from now, within one hour and seven days. */
 export function linkEnd(hours: number, now = new Date()): Date {

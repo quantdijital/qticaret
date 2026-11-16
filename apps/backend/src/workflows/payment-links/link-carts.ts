@@ -50,6 +50,29 @@ export async function placedOrders(
   return placed
 }
 
+/** The query's own condition, its bound values and its order (fixed SQL, values bound). */
+function scopeOf(by: { link_id: string } | { since: Date; after?: string }): {
+  scope: string
+  values: (string | Date)[]
+  order: string
+} {
+  if ("link_id" in by) {
+    return {
+      scope: "AND metadata ->> ? = ?",
+      values: [CART_LINK_KEY, by.link_id],
+      order: "completed_at ASC, id",
+    }
+  }
+  if (by.after) {
+    return {
+      scope: "AND completed_at >= ? AND id < ?",
+      values: [by.since, by.after],
+      order: "id DESC",
+    }
+  }
+  return { scope: "AND completed_at >= ?", values: [by.since], order: "id DESC" }
+}
+
 /**
  * The completed carts opened from links (one link's oldest first): every cart a link
  * was ever bound to, not only its latest (a link names one cart; one it
@@ -67,16 +90,7 @@ export async function completedLinkCarts(
   limit = 500
 ): Promise<LinkCart[]> {
   const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
-  let scope = "AND metadata ->> ? = ?"
-  let values: (string | Date)[] = []
-  let order = "completed_at ASC, id"
-  if ("link_id" in by) {
-    values = [CART_LINK_KEY, by.link_id]
-  } else {
-    scope = by.after ? "AND completed_at >= ? AND id < ?" : "AND completed_at >= ?"
-    values = by.after ? [by.since, by.after] : [by.since]
-    order = "id DESC"
-  }
+  const { scope, values, order } = scopeOf(by)
   const { rows } = await knex.raw<{ rows: { id: string; link_id: string }[] }>(
     `SELECT id, metadata ->> ? AS link_id
        FROM cart

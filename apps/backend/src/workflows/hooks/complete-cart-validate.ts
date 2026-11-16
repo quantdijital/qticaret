@@ -33,6 +33,7 @@ type CartRow = Parameters<typeof checkoutProblem>[0] &
   PaymentFacts &
   FeeCart & {
     promotions?: ({ code?: string | null; is_automatic?: boolean | null } | null)[] | null
+    order?: { id: string } | null
   }
 
 // One handler per hook: the checkout rules of lib/checkout (F3.2), a payment
@@ -40,7 +41,8 @@ type CartRow = Parameters<typeof checkoutProblem>[0] &
 // current price (F4.5), the one-code rule (F4.4), the contracts accepted
 // as published now (F13.2), a restricted product's buyer's age (F13.3) and
 // the wholesale rules (ADR-0068 slice 4), read fresh for the cart being completed.
-// Throwing stops the checkout. Last, a payment link's cart holds its link
+// Throwing stops the checkout; a cart already an order is never judged (it
+// answers with that order). Last, a payment link's cart holds its link
 // (adr/0051 §5); a completion failing after the hook lets go of it. The
 // hook's cart is typed loosely: only its id is used
 completeCartWorkflow.hooks.validate(
@@ -54,12 +56,19 @@ completeCartWorkflow.hooks.validate(
         "shipping_methods.id",
         "promotions.code",
         "promotions.is_automatic",
+        "order.id",
         ...PAYMENT_FACT_FIELDS,
         ...FEE_CART_FIELDS,
       ],
       filters: { id: cart.id },
     })
     const row = (data[0] ?? {}) as CartRow
+    // A cart that is already an order (a provider's late or repeated notice): Medusa (2.21.2)
+    // runs this hook before it answers with that order, so nothing here may refuse it; a
+    // refusal would read as a payment without an order and refund a placed order's money
+    if (row.order?.id) {
+      return new StepResponse<undefined, LinkClaim | null>(undefined, null)
+    }
     const problem = checkoutProblem(row)
     if (problem) {
       throw new ValidationError(problem.key, { field: problem.field })

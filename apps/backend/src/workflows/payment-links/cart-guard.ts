@@ -33,6 +33,7 @@ interface CartRow {
       } | null)[]
     | null
   promotions?: ({ code?: string | null; is_automatic?: boolean | null } | null)[] | null
+  order?: { id: string } | null
 }
 
 export type LinkCartProblem =
@@ -62,10 +63,11 @@ async function cartRow(container: Container, cartId: string): Promise<CartRow | 
       "items.metadata",
       "promotions.code",
       "promotions.is_automatic",
+      "order.id",
     ],
     filters: { id: cartId },
   })
-  return data[0]
+  return data[0] as CartRow | undefined
 }
 
 /** Marks an open link's prices as moved and tells staff, once. */
@@ -105,6 +107,10 @@ async function linkCartCheck(
   now: Date
 ): Promise<{ problem: LinkCartProblem | null; link_id: string | null }> {
   const cart = await cartRow(container, cartId)
+  // Completing a cart already an order answers with that order: nothing to judge, no hold
+  if (at === "complete" && cart?.order?.id) {
+    return { problem: null, link_id: null }
+  }
   const linkId = cart ? linkIdOfCart(cart.metadata) : null
   return {
     problem: cart ? await cartProblem(container, cart, linkId, at, now) : null,
