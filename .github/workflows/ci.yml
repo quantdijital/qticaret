@@ -238,6 +238,12 @@ jobs:
           # A few days of orders: the order page's tests open one
           pnpm --filter @qticaret/backend seed:demo-orders days=3
       - name: Start the backend
+        # Two browsers run ~120 tests from one address: past the admin's 1,200 requests a
+        # minute per IP, /admin/users/me answered 429 and the panel showed its sign-in page
+        # mid-run. LOAD_TEST scales per-IP limits up, on development only (lib/env.ts)
+        env:
+          NODE_ENV: development
+          LOAD_TEST: "on"
         run: |
           pnpm --filter @qticaret/backend dev > backend.log 2>&1 &
           for attempt in $(seq 1 90); do
