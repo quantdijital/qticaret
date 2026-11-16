@@ -5,13 +5,18 @@ import { DESIGN_ID, DESIGN_LIMITS } from "../../../lib/storefront/designs/limits
 
 const NAME_INVALID = { message: "storefront_design.name_invalid" }
 
-/** A saved look's name (adr/0064 §3): 1–60 characters of plain text, trimmed. */
+/**
+ * A saved look's name (adr/0064 §3): 1–60 characters of plain text,
+ * trimmed. One rule, not `min`/`max`: Medusa's body validation words
+ * those itself and the panel would not get the key.
+ */
 export const designName = z
   .string(NAME_INVALID)
   .trim()
-  .min(1, NAME_INVALID)
-  .max(DESIGN_LIMITS.name, NAME_INVALID)
-  .refine((value) => isCleanText(value), NAME_INVALID)
+  .refine(
+    (value) => value.length >= 1 && value.length <= DESIGN_LIMITS.name && isCleanText(value),
+    NAME_INVALID
+  )
 
 /**
  * "Bu görünümü kaydet": the draft, or a kept publication (`revision`), under
