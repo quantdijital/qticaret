@@ -192,10 +192,10 @@ class PaymentLinksModuleService extends MedusaService({ PaymentLink, PaymentLink
   }
 
   /**
-   * Records carts as their links' in one statement, each pair once: a
-   * pair already kept is left as it is (`ON CONFLICT DO NOTHING`), so the
-   * same pairs written again change nothing. Every value bound. How many
-   * it added.
+   * Records carts as their links' in one statement, each cart once: a
+   * cart already kept (under any link) is left as it is (`ON CONFLICT DO
+   * NOTHING`, on either unique index), so the same pairs written again
+   * change nothing. Every value bound. How many it added.
    */
   @InjectTransactionManager()
   async recordLinkCarts(
@@ -209,7 +209,7 @@ class PaymentLinksModuleService extends MedusaService({ PaymentLink, PaymentLink
     const rows = (await manager.execute(
       `INSERT INTO payment_link_cart (id, link_id, cart_id, created_at, updated_at)
        VALUES ${pairs.map(() => "(?, ?, ?, now(), now())").join(", ")}
-       ON CONFLICT (link_id, cart_id) WHERE deleted_at IS NULL DO NOTHING
+       ON CONFLICT DO NOTHING
        RETURNING id`,
       pairs.flatMap((pair) => [generateEntityId(undefined, "plcart"), pair.link_id, pair.cart_id])
     )) as unknown[]

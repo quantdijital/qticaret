@@ -42,15 +42,18 @@ describe("completedLinkCarts", () => {
       { cart_id: "cart_2", link_id: "plink_1", order_id: null },
     ])
     const [sql, values] = knex.raw.mock.calls[0] as [string, unknown[]]
-    // The links' own table first (by the link's id), the carts by their ids
-    expect(sql).toMatch(/FROM payment_link_cart plc\s+JOIN cart c ON c\.id = plc\.cart_id/u)
-    expect(sql).toMatch(/AND plc\.link_id = \?/u)
+    // The links' own tables first (the carts kept, and the link's latest), the carts by id
+    expect(sql).toMatch(
+      /FROM payment_link_cart plc\s+WHERE plc\.deleted_at IS NULL AND plc\.link_id = \?/u
+    )
+    expect(sql).toMatch(/UNION\s+SELECT pl\.cart_id, pl\.id AS link_id\s+FROM payment_link pl/u)
+    expect(sql).toMatch(/AND pl\.id = \?\) x\s+JOIN cart c ON c\.id = x\.cart_id/u)
     expect(sql).toMatch(/c\.completed_at IS NOT NULL/u)
-    expect(sql).toMatch(/ORDER BY c\.completed_at ASC, plc\.cart_id/u)
+    expect(sql).toMatch(/ORDER BY c\.completed_at ASC, x\.cart_id/u)
     // Never the carts' JSON metadata
     expect(sql).not.toMatch(/metadata/u)
-    // Every value bound, the link's id among them
-    expect(values).toEqual(["plink_1", 10])
+    // Every value bound, the link's id in both halves
+    expect(values).toEqual(["plink_1", "plink_1", 10])
   })
 
   it("pages the carts completed since a time by id, newest first, past the page before's last", async () => {
@@ -63,12 +66,15 @@ describe("completedLinkCarts", () => {
     const [first, firstValues] = knex.raw.mock.calls[0] as [string, unknown[]]
     const [next, nextValues] = knex.raw.mock.calls[1] as [string, unknown[]]
     expect(first).toMatch(/FROM payment_link_cart plc/u)
+    expect(first).toMatch(/FROM payment_link pl\s/u)
+    // Every link's carts: no link's id asked for
+    expect(first).not.toMatch(/link_id = \?|pl\.id = \?/u)
     expect(first).not.toMatch(/metadata/u)
-    expect(first).toMatch(/ORDER BY plc\.cart_id DESC\s/u)
+    expect(first).toMatch(/ORDER BY x\.cart_id DESC\s/u)
     expect(first).not.toMatch(/cart_id < \?/u)
     expect(firstValues).toEqual([since, 500])
-    expect(next).toMatch(/AND c\.completed_at >= \? AND plc\.cart_id < \?/u)
-    expect(next).toMatch(/ORDER BY plc\.cart_id DESC\s/u)
+    expect(next).toMatch(/AND c\.completed_at >= \? AND x\.cart_id < \?/u)
+    expect(next).toMatch(/ORDER BY x\.cart_id DESC\s/u)
     expect(nextValues).toEqual([since, "cart_499", 500])
   })
 

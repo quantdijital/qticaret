@@ -118,35 +118,58 @@ medusaIntegrationTestRunner({
       expect(placed).toEqual([{ cart_id: second, link_id: id, order_id: order.order_id }])
     })
 
-    it("settles on the hour through the table: a cart it does not keep is not looked at", async () => {
-      const { id, orderId } = await paidThenLost()
+    it("still sees a link's latest cart that has no row: settled on the hour, no second cart", async () => {
+      const first = await paidThenLost()
+      const second = await paidThenLost()
+      // Both carts as if opened by the code before the table: the link names them alone
+      await forgetRows(first.id)
+      await forgetRows(second.id)
+
+      // The second by its reopening (the link's own read), the first on the hour
+      const again = await open(second.token)
+      const settled = await settlePaymentLinks(getContainer())
+      const rows = await Promise.all([
+        linkRow(getContainer(), first.id),
+        linkRow(getContainer(), second.id),
+      ])
+
+      expect(settled).toBeGreaterThanOrEqual(1)
+      expect(rows[0]).toMatchObject({ status: "paid", order_id: first.orderId })
+      expect(again.status).toBe(404)
+      expect(again.data.message).toBe("payment_link.unavailable")
+      expect(rows[1]).toMatchObject({ status: "paid", order_id: second.orderId })
+    })
+
+    it("sees a given-up cart that became an order once it is filled in: no second cart", async () => {
+      const { id, token } = await newLink()
+      const first = (await open(token)).data.cart_id ?? ""
+      const second = (await open(token)).data.cart_id ?? ""
+      // The race: the first cart passed its completion check before the second was bound,
+      // and became an order; the paid mark for it never ran
+      await linksOf(getContainer()).updatePaymentLinks({ id, cart_id: first })
+      const order = await complete(first)
+      await eventually(
+        () => linkRow(getContainer(), id),
+        (row) => row.status === "paid"
+      )
+      const lost = { id, status: "open" as const, order_id: null, paid_at: null, closed_at: null }
+      await linksOf(getContainer()).updatePaymentLinks({ ...lost, cart_id: second })
+      // Opened before the table: only the mark on the carts names the link
       await forgetRows(id)
 
       await settlePaymentLinks(getContainer())
       const unseen = await linkRow(getContainer(), id)
       const filled = await fillPaymentLinkCarts(getContainer())
-      const settled = await settlePaymentLinks(getContainer())
-      const row = await linkRow(getContainer(), id)
-
-      expect(unseen).toMatchObject({ status: "open", order_id: null })
-      expect(filled.added).toBeGreaterThanOrEqual(1)
-      expect(settled).toBeGreaterThanOrEqual(1)
-      expect(row).toMatchObject({ status: "paid", order_id: orderId })
-    })
-
-    it("opens no second cart for a link whose filled-in cart became an order", async () => {
-      const { id, token, cartId, orderId } = await paidThenLost()
-      await forgetRows(id)
-
-      await fillPaymentLinkCarts(getContainer())
       const kept = await rowsOf({ link_id: id })
       const again = await open(token)
       const row = await linkRow(getContainer(), id)
 
-      expect(kept.map((entry) => entry.cart_id)).toEqual([cartId])
+      expect(unseen).toMatchObject({ status: "open", order_id: null })
+      expect(filled.added).toBeGreaterThanOrEqual(2)
+      expect(kept.map((entry) => entry.cart_id).sort()).toEqual([first, second].sort())
       expect(again.status).toBe(404)
       expect(again.data.message).toBe("payment_link.unavailable")
-      expect(row).toMatchObject({ status: "paid", order_id: orderId })
+      expect(row).toMatchObject({ status: "paid", order_id: order.order_id })
     })
 
     it("fills in a cart that has only the link's mark, once however often it runs", async () => {

@@ -54,36 +54,48 @@ export async function placedOrders(
   return placed
 }
 
-/** The query's own condition, its bound values and its order (fixed SQL, values bound). */
-function scopeOf(by: { link_id: string } | { since: Date; after?: string }): {
+interface Scope {
+  /** The link's own condition, in both halves of the union (one link's, or none). */
+  link: { kept: string; latest: string; values: string[] }
+  /** The carts' condition, its bound values and the order. */
   scope: string
   values: (string | Date)[]
   order: string
-} {
+}
+
+/** The query's own conditions, their bound values and its order (fixed SQL, values bound). */
+function scopeOf(by: { link_id: string } | { since: Date; after?: string }): Scope {
   if ("link_id" in by) {
     return {
-      scope: "AND plc.link_id = ?",
-      values: [by.link_id],
-      order: "c.completed_at ASC, plc.cart_id",
+      link: { kept: "AND plc.link_id = ?", latest: "AND pl.id = ?", values: [by.link_id] },
+      scope: "",
+      values: [],
+      order: "c.completed_at ASC, x.cart_id",
     }
   }
+  const link: Scope["link"] = { kept: "", latest: "", values: [] }
   if (by.after) {
     return {
-      scope: "AND c.completed_at >= ? AND plc.cart_id < ?",
+      link,
+      scope: "AND c.completed_at >= ? AND x.cart_id < ?",
       values: [by.since, by.after],
-      order: "plc.cart_id DESC",
+      order: "x.cart_id DESC",
     }
   }
-  return { scope: "AND c.completed_at >= ?", values: [by.since], order: "plc.cart_id DESC" }
+  return { link, scope: "AND c.completed_at >= ?", values: [by.since], order: "x.cart_id DESC" }
 }
 
 /**
  * The completed carts opened from links (one link's oldest first): every cart a link
  * was ever bound to, not only its latest (a link names one cart; one it
  * gave up while that cart was completing may still have become an order).
- * Found through the payment links' own `payment_link_cart` (by the link's
- * id, indexed), then the carts read by their ids: never by the carts' JSON
- * metadata, which Medusa's `cart` table does not index. Each with its order.
+ * Found through the payment links' own tables, then the carts read by
+ * their ids: never by the carts' JSON metadata, which Medusa's `cart`
+ * table does not index. The carts kept in `payment_link_cart` (by the
+ * link's id, indexed), and with them each link's latest cart
+ * (`payment_link.cart_id`): a cart opened while no row was written for it
+ * (the code before the table, still serving during a deploy; a table
+ * rolled back and made again) is seen all the same. Each with its order.
  *
  * Those completed since a time come a page at a time, newest cart id first
  * (Medusa's ids sort by their making): `after` is the last id of the page
@@ -95,18 +107,23 @@ export async function completedLinkCarts(
   limit = 500
 ): Promise<LinkCart[]> {
   const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
-  const { scope, values, order } = scopeOf(by)
+  const { link, scope, values, order } = scopeOf(by)
   const { rows } = await knex.raw<{ rows: { id: string; link_id: string }[] }>(
-    `SELECT plc.cart_id AS id, plc.link_id
-       FROM payment_link_cart plc
-       JOIN cart c ON c.id = plc.cart_id
-      WHERE plc.deleted_at IS NULL
-        AND c.deleted_at IS NULL
+    `SELECT x.cart_id AS id, x.link_id
+       FROM (SELECT plc.cart_id, plc.link_id
+               FROM payment_link_cart plc
+              WHERE plc.deleted_at IS NULL ${link.kept}
+             UNION
+             SELECT pl.cart_id, pl.id AS link_id
+               FROM payment_link pl
+              WHERE pl.deleted_at IS NULL AND pl.cart_id IS NOT NULL ${link.latest}) x
+       JOIN cart c ON c.id = x.cart_id
+      WHERE c.deleted_at IS NULL
         AND c.completed_at IS NOT NULL
         ${scope}
       ORDER BY ${order}
       LIMIT ?`,
-    [...values, limit]
+    [...link.values, ...link.values, ...values, limit]
   )
   const orders = await placedOrders(
     container,

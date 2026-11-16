@@ -75,4 +75,6 @@ export const PaymentLink = model
     { on: ["email_hash"], where: "deleted_at IS NULL AND email_hash IS NOT NULL" },
     { on: ["closed_at"], where: "deleted_at IS NULL AND purged_at IS NULL" },
     { on: ["created_at"], where: "deleted_at IS NULL" },
+    // A cart's link, by its latest cart (`completedLinkCarts`, the abandoned carts' list)
+    { on: ["cart_id"], where: "deleted_at IS NULL AND cart_id IS NOT NULL" },
   ])

@@ -13,4 +13,8 @@ export const PaymentLinkCart = model
     link_id: model.text(),
     cart_id: model.text(),
   })
-  .indexes([{ on: ["link_id", "cart_id"], unique: true }, { on: ["link_id"] }, { on: ["cart_id"] }])
+  // A cart is one link's (cart_id unique); the pair's index also finds a link's carts
+  .indexes([
+    { on: ["link_id", "cart_id"], unique: true },
+    { on: ["cart_id"], unique: true },
+  ])
