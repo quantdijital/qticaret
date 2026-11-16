@@ -56,6 +56,7 @@ import { STOREFRONT_MENU_ROUTES } from "./http/storefront-menu-routes"
 import { STOREFRONT_CARD_ROUTES } from "./http/storefront-card-routes"
 import { LEGAL_ROUTES } from "./http/legal-routes"
 import { MAINTENANCE_ROUTES } from "./http/maintenance-routes"
+import { refuseWritesInMaintenance } from "./http/maintenance-guard"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
 import { GOOGLE_ROUTES } from "./http/google-routes"
 import { EINVOICE_ROUTES } from "./http/einvoice-routes"
@@ -159,6 +160,8 @@ export default defineMiddlewares({
       middlewares: [
         rateLimit(storeProfileOf),
         storeLimitGuard,
+        // adr/0053 Ek 2026-11-17: a dark shop's Store API takes no sale or form
+        refuseWritesInMaintenance,
         rejectSensitiveFields,
         restrictStoreAttributeFields,
         rejectStoreVariantExtension,

@@ -468,6 +468,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "maintenance.not_enabled":
     "Bakım modu kapalı. Bu bağlantı yalnızca mağaza bakımdayken oluşturulabilir.",
   "maintenance.bypass_unknown": "Bakım bağlantısı geçersiz ya da süresi dolmuş.",
+  "maintenance.shop_closed":
+    "Mağaza kısa bir bakım arasında; şu anda sipariş ve form kabul edilmiyor. Lütfen biraz sonra yeniden deneyin.",
   "consents.link_invalid":
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. İzninizi hesabınızdan ya da yeniden abone olarak verebilirsiniz.",
   "stock_alerts.link_invalid":
