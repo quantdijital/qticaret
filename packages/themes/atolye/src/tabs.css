@@ -83,6 +83,27 @@
     }
   }
 }
+/* On a phone too (owner 2026-11-16: the link stood alone on a row between the
+   pills and the cards): a plain panel's link stands at the tab row's right end,
+   as a section head's does, the pills scrolling beside it (the row is a rail);
+   the reserved room counts the gutter the rail runs past its box. A carousel's
+   head keeps its row: its arrows stand there with the link. The tablet is as it was */
+@media (width < 40rem) {
+  @supports selector(:has(*)) {
+    .gf-tabs:has(> [data-panel] section > .gf-tab-aside) {
+      position: relative;
+    }
+    .gf-tabs > [data-panel] section > .gf-tab-aside {
+      position: absolute;
+      top: 0.25rem;
+      right: 0;
+      max-width: min(9rem, 40%);
+    }
+    .gf-tabs:has(> [data-panel] section > .gf-tab-aside) > .gf-tab-row {
+      padding-inline-end: calc(min(9rem, 40%) + var(--gutter));
+    }
+  }
+}
 
 /* The product's description and specs (product/InfoTabs): two heading-sized
    tabs over a hairline, the chosen one in ink on a 2px rule. Without the
