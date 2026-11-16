@@ -100,6 +100,44 @@ describe("the brands' index", () => {
     )
     // The brand without one is untouched beside it
     expect(html).toContain(TILE)
+    // No size known: the plate takes the logo's width once it loads, as before
+    expect(tile).not.toMatch(/<img[^>]* (width|height)=/)
+  })
+
+  it("sizes a logo's plate before its file arrives when the server read its size", () => {
+    const tileOf = (width: number, height: number) => {
+      const logo = { src: "https://cdn.example/l.png", alt: "", width, height }
+      const brands = [
+        {
+          label: "Kızılcık",
+          path: "/marka/k",
+          logo: { ...logo, sources: { avif: null, webp: null } },
+        },
+      ]
+      const html = renderPage(atolyeTheme, "BrandsPage", {
+        view: { ...view, groups: [{ letter: "K", anchor: "harf-k", brands }] },
+      })
+      expect(html).not.toContain("style=")
+      return /<a href="\/marka\/k"[^>]*>(.*?)<\/a>/.exec(html)?.[1] ?? ""
+    }
+    const plate = (tile: string) =>
+      /<span class="gf-logo-plate ([^"]*)"/.exec(tile)?.[1]?.split(" ")
+    // 3:1 whole at 120 px, 6:1 kept at 120 px (lower), a square at the square, a small one its own
+    for (const [width, height, step] of [
+      [600, 200, "w-30"],
+      [600, 100, "w-30"],
+      [400, 400, "w-10"],
+      [500, 300, "w-17"],
+      [60, 20, "w-15"],
+    ] as const) {
+      const tile = tileOf(width, height)
+      expect(plate(tile)).toEqual(
+        expect.arrayContaining(["h-10", "max-w-30", "min-w-10", "overflow-hidden", step])
+      )
+      expect(tile).toMatch(new RegExp(`<img[^>]*width="${String(width)}"`))
+      expect(tile).toMatch(new RegExp(`<img[^>]*height="${String(height)}"`))
+      expect(tile).toMatch(/<img[^>]*class="max-h-10 max-w-full object-contain"/)
+    }
   })
 
   it("says so when the shop has no brand", () => {

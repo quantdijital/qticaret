@@ -56,6 +56,8 @@ describe("the brands section", () => {
     // the logo stands on the cell itself, not on a plate inside it
     expect(cell).toContain('<span class="flex h-10 max-w-full items-center"><img')
     expect(cell).toMatch(/<img[^>]*class="h-9 w-auto max-w-full object-contain"/)
+    // No size known: the logo waits for its file, as before
+    expect(cell).not.toMatch(/<img[^>]* (width|height)=/)
     // The name is the logo's alt text, not printed beside it
     expect(cell).not.toContain(">Bora<")
     // The cell is the logo's light ground (a mark's, which no section ground turns; its hover kept
@@ -68,5 +70,17 @@ describe("the brands section", () => {
     expect(link.split(" ")).not.toContain("bg-field")
     // The brand without one keeps its name
     expect(html).toContain(CELL)
+  })
+
+  it("prints a logo's size the server read, so its room is kept before the file arrives", () => {
+    const html = home([
+      { label: "Bora", path: "/marka/bora", logo: { ...logo("Bora"), width: 300, height: 100 } },
+    ])
+    const img = /<a href="\/marka\/bora"[^>]*>.*?(<img[^>]*>)/.exec(html)?.[1] ?? ""
+    expect(img).toContain('width="300"')
+    expect(img).toContain('height="100"')
+    // Drawn as before otherwise: the fixed height wins over the printed one, the ratio kept
+    expect(img).toContain('class="h-9 w-auto max-w-full object-contain"')
+    expect(html).not.toContain("style=")
   })
 })

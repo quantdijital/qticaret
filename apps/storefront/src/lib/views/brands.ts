@@ -1,11 +1,31 @@
-import type { BrandLinkView, BrandsPageView } from "@qticaret/ui"
-import type { StoreBrand } from "@qticaret/types"
+import type { BrandLinkView, BrandsPageView, ImageView } from "@qticaret/ui"
+import { type StoreBrand, brandLogoSize } from "@qticaret/types"
 
 const TURKISH = new Intl.Collator("tr")
 const GRAPHEMES = new Intl.Segmenter("tr", { granularity: "grapheme" })
 
 // Letters of the Turkish alphabet that carry a mark of their own; other marks fold (Â → A)
 const OWN_LETTERS = new Set(["Ç", "Ğ", "İ", "Ö", "Ş", "Ü"])
+
+/**
+ * A brand's logo as a theme draws it, or null: the shop's own upload, one
+ * file with no versions. Its size, when the server read it, lets the theme
+ * save its room before it loads; unknown, the logo waits for its file as it
+ * did before sizes were kept.
+ */
+export function brandLogo(brand: StoreBrand, alt: string): ImageView | null {
+  if (!brand.logo_url) {
+    return null
+  }
+  const size = brandLogoSize(brand)
+  return {
+    src: brand.logo_url,
+    alt,
+    width: size?.width ?? null,
+    height: size?.height ?? null,
+    sources: { avif: null, webp: null },
+  }
+}
 
 /**
  * The letter a brand is listed under: its first, upper case as Turkish
@@ -46,15 +66,7 @@ export function brandGroups(
     const link: BrandLinkView = {
       label: brand.name,
       path,
-      logo: brand.logo_url
-        ? {
-            src: brand.logo_url,
-            alt: "",
-            width: null,
-            height: null,
-            sources: { avif: null, webp: null },
-          }
-        : null,
+      logo: brandLogo(brand, ""),
     }
     groups.set(letter, [...(groups.get(letter) ?? []), link])
   }

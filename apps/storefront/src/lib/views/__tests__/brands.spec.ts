@@ -1,6 +1,6 @@
 import type { StoreBrand } from "@qticaret/types"
 import { describe, expect, it } from "vitest"
-import { brandGroups, letterOf } from "../brands"
+import { brandGroups, brandLogo, letterOf } from "../brands"
 
 const brand = (id: string, name: string, logo: string | null = null): StoreBrand => ({
   id,
@@ -73,6 +73,25 @@ describe("the brand index (/markalar)", () => {
       },
     })
     expect(groups[0]?.brands[0]?.logo).toBeNull()
+  })
+
+  it("gives a logo the size the server read, and none when it is unknown", () => {
+    const sized = {
+      ...brand("b1", "Arcos", "https://cdn.example/arcos.png"),
+      logo_width: 600,
+      logo_height: 200,
+    }
+    const half = {
+      ...brand("b2", "Bora", "https://cdn.example/bora.png"),
+      logo_width: 600,
+      logo_height: null,
+    }
+    const paths = { b1: "/marka/b1", b2: "/marka/b2" }
+    const [arcos, bora] = brandGroups([sized, half], paths, "Diğer").map((group) => group.brands[0])
+    expect(arcos?.logo).toMatchObject({ width: 600, height: 200 })
+    expect(bora?.logo).toMatchObject({ width: null, height: null })
+    // No logo, no size: a size without a file draws nothing
+    expect(brandLogo({ ...brand("b3", "Cem"), logo_width: 600, logo_height: 200 }, "")).toBeNull()
   })
 
   it("is empty without a brand at a live path", () => {

@@ -14,6 +14,8 @@ import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
 import { claimBrandPathStep } from "./steps/claim-brand-path"
 import { deleteBrandStep } from "./steps/delete-brand"
+import { fillLogoSizesStep } from "./steps/fill-logo-sizes"
+import type { FillLogoSizesInput } from "./steps/fill-logo-sizes"
 import { planProductBrandStep } from "./steps/plan-product-brand"
 import type { SetProductBrandInput } from "./steps/plan-product-brand"
 import { saveBrandStep } from "./steps/save-brand"
@@ -76,5 +78,20 @@ export const setProductBrandWorkflow = createWorkflow(
     emitEventStep({ eventName: CATALOG_PRODUCT_SAVED, data: saved })
     releaseLockStep({ key })
     return new WorkflowResponse(undefined)
+  }
+)
+
+/**
+ * Gives brands whose logo was set before sizes were kept their logo's
+ * width and height (`brand-logo-sizes:backfill`, the demo catalogue); a
+ * brand with a size is left as it is.
+ */
+export const fillBrandLogoSizesWorkflow = createWorkflow(
+  "brands-fill-logo-sizes",
+  (input: FillLogoSizesInput) => {
+    acquireLockStep(BRANDS_LOCK)
+    const result = fillLogoSizesStep(input)
+    releaseLockStep({ key: BRANDS_LOCK.key })
+    return new WorkflowResponse(result)
   }
 )

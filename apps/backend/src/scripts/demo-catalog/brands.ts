@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { BRANDS_MODULE } from "../../modules/brands"
 import type BrandsModuleService from "../../modules/brands/service"
-import { saveBrandWorkflow } from "../../workflows/brands/workflows"
+import { fillBrandLogoSizesWorkflow, saveBrandWorkflow } from "../../workflows/brands/workflows"
 import { deriveLibraryMediaWorkflow } from "../../workflows/media/workflows"
 import { uploadDemoImage } from "./images"
 import type { DemoCatalog } from "./schema"
@@ -30,7 +30,9 @@ async function uploadLogo(
  * The file's brands by handle; one missing is made through the panel's
  * workflow, with its logo when the file gives one. A brand already here
  * is kept as it is, save that one without a logo gets the file's (a run
- * before logos, or a brand made by hand); a logo the shop chose stays.
+ * before logos, or a brand made by hand); a logo the shop chose stays. A
+ * logo saved here is measured as the panel's is; one set before sizes were
+ * kept gets its size too.
  */
 export async function ensureBrands(
   container: MedusaContainer,
@@ -71,6 +73,11 @@ export async function ensureBrands(
     ids.set(brand.handle, result.id)
     created += existing ? 0 : 1
     logos += logoFileId ? 1 : 0
+  }
+  if (ids.size > 0) {
+    await fillBrandLogoSizesWorkflow(container).run({
+      input: { apply: true, ids: [...ids.values()] },
+    })
   }
   return { ids, created, logos }
 }

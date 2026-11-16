@@ -14,6 +14,8 @@ export const presentBrand = (brand: BrandRecord, products = 0) => ({
   description: brand.description,
   logo_file_id: brand.logo_file_id,
   logo_url: brand.logo_url,
+  logo_width: brand.logo_width,
+  logo_height: brand.logo_height,
   is_active: brand.is_active,
   product_count: products,
   created_at: brand.created_at,

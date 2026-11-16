@@ -7,6 +7,7 @@ import { BRANDS_MODULE } from "../../modules/brands"
 import type BrandsModuleService from "../../modules/brands/service"
 import type { BrandRecord } from "../../modules/brands/service"
 import { publicUploadUrl } from "../files/public-upload"
+import { measureLogo } from "./logo-size"
 
 /**
  * What a brand save may hold (F3.11): a name the shop has once, a slug
@@ -31,6 +32,9 @@ export interface BrandFields {
   description: string | null
   logo_file_id: string | null
   logo_url: string | null
+  /** The logo's size in pixels, read on the server; null when unknown. */
+  logo_width: number | null
+  logo_height: number | null
   is_active: boolean
 }
 
@@ -98,6 +102,8 @@ export async function brandFields(
         : descriptionOf(input.description),
     logo_file_id: current?.logo_file_id ?? null,
     logo_url: current?.logo_url ?? null,
+    logo_width: current?.logo_width ?? null,
+    logo_height: current?.logo_height ?? null,
     is_active: input.is_active ?? current?.is_active ?? true,
   }
   if (input.logo_file_id !== undefined && input.logo_file_id !== current?.logo_file_id) {
@@ -109,6 +115,11 @@ export async function brandFields(
     await refuseSvgImages(container, [url], "logo_file_id")
     fields.logo_file_id = input.logo_file_id
     fields.logo_url = url
+    // Its size from the file, never from the request; one that cannot be read stays unknown
+    const size =
+      input.logo_file_id && url ? await measureLogo(container, input.logo_file_id, url) : null
+    fields.logo_width = size?.width ?? null
+    fields.logo_height = size?.height ?? null
   }
   await assertUnique(container, fields, current?.id ?? null)
   return fields

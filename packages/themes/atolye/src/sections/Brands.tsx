@@ -7,7 +7,8 @@ import { SectionHead } from "./SectionHead"
  * A brand's logo in its cell, standing for its name (the alt text): on the
  * cell's own light ground (`LOGO_CELL`), every logo the same 36 px tall,
  * its width its own up to the cell's. Its row's height is fixed, so
- * nothing moves when the file arrives.
+ * nothing moves when the file arrives; a size the server read is printed
+ * too, so the logo's own room is kept before then (none: as before).
  */
 function BrandLogo({ logo }: { logo: ImageView }) {
   return (
@@ -15,6 +16,8 @@ function BrandLogo({ logo }: { logo: ImageView }) {
       <img
         src={logo.src}
         alt={logo.alt}
+        width={logo.width ?? undefined}
+        height={logo.height ?? undefined}
         loading="lazy"
         decoding="async"
         className="h-9 w-auto max-w-full object-contain"

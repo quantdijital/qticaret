@@ -38,6 +38,8 @@ export const saveBrandStep = createStep(
       description: current.description,
       logo_file_id: current.logo_file_id,
       logo_url: current.logo_url,
+      logo_width: current.logo_width,
+      logo_height: current.logo_height,
       is_active: current.is_active,
     }
     const undo: Undo = { id: current.id, previous }

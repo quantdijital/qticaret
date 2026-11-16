@@ -52,4 +52,6 @@ export const STORE_BRAND_FIELDS = [
   "brand.name",
   "brand.handle",
   "brand.logo_url",
+  "brand.logo_width",
+  "brand.logo_height",
 ]
