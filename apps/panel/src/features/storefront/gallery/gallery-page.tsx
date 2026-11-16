@@ -125,7 +125,12 @@ export function GalleryPage() {
         </SectionCard>
       )}
       <GallerySection
-        title={t(`${G}.saved.title`, { count: saved, max: limits.saved })}
+        title={
+          // The count once it is known: not "0/10" while loading or when it could not be read
+          gallery
+            ? t(`${G}.saved.title`, { count: saved, max: limits.saved })
+            : t(`${G}.saved.heading`)
+        }
         description={t(`${G}.saved.autoNote`, { max: limits.auto })}
       >
         {designs.isError ? (

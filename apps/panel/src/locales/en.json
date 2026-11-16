@@ -9648,6 +9648,7 @@
       },
       "saved": {
         "title": "My saved looks ({{count}}/{{max}})",
+        "heading": "My saved looks",
         "autoNote": "The last {{max}} automatic saves are kept; they don't count toward the saved-look limit.",
         "empty": "You have no saved looks yet. Save the current look to come back to it any time.",
         "emptyAction": "Save the current look",

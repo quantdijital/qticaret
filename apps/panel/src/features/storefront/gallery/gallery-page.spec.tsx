@@ -147,6 +147,8 @@ describe("GalleryPage", () => {
     renderPage()
 
     expect(await screen.findByText("Kayıtlı görünümler yüklenemedi.")).toBeInTheDocument()
+    // No count it could not read
+    expect(section("Kayıtlı görünümlerim")).toBeInTheDocument()
     expect(screen.getAllByRole("button", { name: "Tekrar dene" })).toHaveLength(1)
     expect(await screen.findByRole("heading", { name: "Grafit" })).toBeInTheDocument()
   })

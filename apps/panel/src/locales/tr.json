@@ -9648,6 +9648,7 @@
       },
       "saved": {
         "title": "Kayıtlı görünümlerim ({{count}}/{{max}})",
+        "heading": "Kayıtlı görünümlerim",
         "autoNote": "Otomatik kayıtların son {{max}} tanesi tutulur; adlı kayıt sınırına sayılmaz.",
         "empty": "Henüz kayıtlı görünümünüz yok. Şu anki görünümü kaydederek istediğiniz zaman geri dönebilirsiniz.",
         "emptyAction": "Şu anki görünümü kaydet",
