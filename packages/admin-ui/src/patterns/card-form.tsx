@@ -25,6 +25,11 @@ interface CardFormProps {
    * editor's panel groups); the title names the form for screen readers.
    */
   bare?: boolean
+  /**
+   * The form fills the card when a row stretches it (`PageGrid`), so a
+   * closing part of its own (`mt-auto`) sits at the card's foot.
+   */
+  fill?: boolean
   children: ReactNode
 }
 
@@ -45,6 +50,7 @@ export function CardForm({
   onReset,
   collapse,
   bare = false,
+  fill = false,
   children,
 }: CardFormProps) {
   const { t } = useTranslation(ADMIN_UI_NS)
@@ -52,7 +58,7 @@ export function CardForm({
     <form
       noValidate
       aria-label={bare ? title : undefined}
-      className="flex flex-col gap-5"
+      className={cn("flex flex-col gap-5", fill && "flex-1")}
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()

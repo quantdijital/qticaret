@@ -1,5 +1,4 @@
 import type { AppearanceSettings } from "@qticaret/types"
-import type { ReactNode } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -37,7 +36,17 @@ const GROUND: Record<Tone, string> = {
   dark: "bg-foreground text-background/70 dark:bg-card dark:text-muted-foreground",
 }
 
-/** One logo on its ground: chosen from the media library, replaced or taken off. */
+/**
+ * Side by side, each picture's label, frame and words take one row of the
+ * row's grid (a subgrid), so the three frames line up even when a label
+ * runs to two lines.
+ */
+const BRAND_TILE = "@lg:row-span-3 @lg:grid @lg:grid-rows-subgrid"
+
+/**
+ * One logo on its ground: chosen from the media library, replaced or taken
+ * off. Empty, the same dashed frame as the site icon beside it.
+ */
 function LogoSlot({
   tone,
   url,
@@ -56,8 +65,9 @@ function LogoSlot({
       value={url || null}
       frame="logo"
       svg
-      ground={GROUND[tone]}
+      {...(url ? { ground: GROUND[tone] } : {})}
       emptyText={t(`${B}.none`)}
+      className={BRAND_TILE}
       onChange={(asset) => {
         onChange(asset?.url ?? "")
       }}
@@ -65,22 +75,14 @@ function LogoSlot({
   )
 }
 
-/** A part of the card under its own small heading. */
-function Group({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-3 border-t pt-5">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      {children}
-    </div>
-  )
-}
-
 /**
  * The shop's brand (adr/0048): its name, its logos and the storefront's
  * site icon, each picture shown as it will be seen. The storefront,
  * e-mails and Google read them, and `{mağaza_adı}` shows the name. The
- * name is Medusa's store record, the pictures the appearance section's;
- * one save.
+ * name on top, alone on its row; under it the three pictures side by side
+ * in frames of one height (a column each on a phone), then what any of
+ * them may be. The name is Medusa's store record, the pictures the
+ * appearance section's; one save.
  */
 export function StoreBrandCard({
   storeId,
@@ -154,39 +156,39 @@ export function StoreBrandCard({
           {...form.register("name", { validate: (text) => text.trim().length > 0 })}
         />
       </Field>
-      <Group title={t(`${B}.logos`)}>
-        <div className="@container">
-          <div className="grid gap-5 @md:grid-cols-2">
-            <LogoSlot
-              tone="light"
-              url={light}
-              onChange={(url) => {
-                setImage("logo_light_url", url)
-              }}
-            />
-            <LogoSlot
-              tone="dark"
-              url={dark}
-              onChange={(url) => {
-                setImage("logo_dark_url", url)
-              }}
-            />
-          </div>
+      <div className="@container flex flex-col gap-4 border-t pt-5">
+        <div className="grid gap-x-4 gap-y-6 @lg:grid-cols-3">
+          <LogoSlot
+            tone="light"
+            url={light}
+            onChange={(url) => {
+              setImage("logo_light_url", url)
+            }}
+          />
+          <LogoSlot
+            tone="dark"
+            url={dark}
+            onChange={(url) => {
+              setImage("logo_dark_url", url)
+            }}
+          />
+          <StoreFaviconField
+            url={favicon}
+            name={typedName.trim() || name}
+            className={BRAND_TILE}
+            onChange={(url) => {
+              setImage("favicon_url", url)
+            }}
+          />
         </div>
-        {/* Where the logos show: the header and the footer */}
-        <p className="text-xs text-muted-foreground">{t(`${B}.logosUse`)}</p>
-        {/* An SVG's font declarations are cleaned away: text in a logo keeps its look as outlines */}
-        <p className="text-xs text-muted-foreground">{t(`${B}.svgText`)}</p>
-      </Group>
-      <Group title={t(`${B}.favicon.title`)}>
-        <StoreFaviconField
-          url={favicon}
-          name={typedName.trim() || name}
-          onChange={(url) => {
-            setImage("favicon_url", url)
-          }}
-        />
-      </Group>
+        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+          {/* Where the logos show: the header and the footer */}
+          <p>{t(`${B}.logosUse`)}</p>
+          <p>{t(`${B}.formats`)}</p>
+          {/* An SVG's font declarations are cleaned away: text in a logo keeps its look as outlines */}
+          <p>{t(`${B}.svgText`)}</p>
+        </div>
+      </div>
     </CardForm>
   )
 }
