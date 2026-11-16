@@ -193,6 +193,16 @@
     color: var(--color-text);
     box-shadow: var(--shadow-float-edged);
   }
+  /* From 1024 px it is 56 rem wide at least, from the box's left edge, kept inside
+     the header's content (the field's script sets both, frame/search-panel-fit.ts;
+     owner 2026-11-16, adr/0049) */
+  @media (width >= 64rem) {
+    .gf-suggest {
+      right: auto;
+      left: var(--gf-suggest-x, 0px);
+      width: var(--gf-suggest-w, 100%);
+    }
+  }
   /* An option: a link the field's arrow keys reach (`aria-selected`), 44 px or more */
   .gf-option {
     display: flex;

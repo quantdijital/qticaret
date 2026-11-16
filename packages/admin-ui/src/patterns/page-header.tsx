@@ -30,8 +30,8 @@ export function PageHeader({ title, description, action, badge, back }: PageHead
           {back.label}
         </Link>
       ) : null}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-1 sm:flex-[1_1_5.5rem]">
           <div className="flex flex-wrap items-center gap-3">
             {/* A title with no break in it (a customer known by e-mail only) wraps anywhere */}
             <h1 className="min-w-0 text-2xl leading-8 font-semibold tracking-[-0.015em] wrap-anywhere">
@@ -41,7 +41,9 @@ export function PageHeader({ title, description, action, badge, back }: PageHead
           </div>
           {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
         </div>
-        {action ? <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div> : null}
+        {action ? (
+          <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">{action}</div>
+        ) : null}
       </div>
     </header>
   )
