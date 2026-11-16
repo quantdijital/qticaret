@@ -51,7 +51,12 @@ export function checkStepUpProof(
     return "invalid"
   }
   try {
-    const sealed = Buffer.from(token, "base64url").toString("base64")
+    const bytes = Buffer.from(token, "base64url")
+    // One spelling per proof: a last character's unused bits set, or a stray one, open nothing
+    if (bytes.toString("base64url") !== token) {
+      return "invalid"
+    }
+    const sealed = bytes.toString("base64")
     const payload = JSON.parse(decryptPii(sealed, key, context(binding))) as { x?: unknown }
     if (typeof payload.x !== "number") {
       return "invalid"
