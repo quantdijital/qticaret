@@ -1,4 +1,5 @@
-import { MedusaService } from "@medusajs/framework/utils"
+import type { Context } from "@medusajs/framework/types"
+import { InjectTransactionManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, hashPii, parseKey } from "@qticaret/server-kit"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
 import { paymentLinkTokenHash } from "../../lib/payment-links/token"
@@ -35,6 +36,18 @@ export interface PaymentLinkPrivate {
   contact: PaymentLinkContact
   address: PaymentLinkAddress | null
 }
+
+interface Executor {
+  execute: (sql: string, params: unknown[]) => Promise<unknown>
+}
+
+/**
+ * How long a completion's hold on its link lasts. Medusa's completion runs
+ * in seconds under the cart's lock; a hold left by a process that died
+ * halfway frees itself after this, and a cart of the link that did become
+ * an order still refuses every other (`completedLinkCarts`).
+ */
+export const CLAIM_TTL_MS = 15 * 60 * 1000
 
 const SEAL = "payment-links.private"
 const TOKEN_SEAL = "payment-links.token"
@@ -91,6 +104,46 @@ class PaymentLinksModuleService extends MedusaService({ PaymentLink }) {
     } catch {
       return null
     }
+  }
+
+  /**
+   * Holds an open link for one of its carts while that cart becomes its
+   * order, in one statement: of two carts (or two notices) completing at
+   * once, one holds it and the other is refused, whatever each read before.
+   * Only the link's latest cart may hold it; the same cart holds it again
+   * (a notice repeated); another cart's hold counts until `CLAIM_TTL_MS`.
+   */
+  @InjectTransactionManager()
+  async claimForCart(
+    linkId: string,
+    cartId: string,
+    now: Date = new Date(),
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const manager = sharedContext.transactionManager as Executor
+    const rows = (await manager.execute(
+      `UPDATE payment_link SET claimed_cart_id = ?, claimed_at = ?, updated_at = now()
+        WHERE id = ? AND deleted_at IS NULL AND status = 'open' AND cart_id = ?
+          AND (claimed_cart_id IS NULL OR claimed_cart_id = ? OR claimed_at < ?)
+       RETURNING id`,
+      [cartId, now, linkId, cartId, cartId, new Date(now.getTime() - CLAIM_TTL_MS)]
+    )) as unknown[]
+    return rows.length > 0
+  }
+
+  /** Lets go of a cart's hold (its completion failed); another cart's hold is left. */
+  @InjectTransactionManager()
+  async releaseClaim(
+    linkId: string,
+    cartId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const manager = sharedContext.transactionManager as Executor
+    await manager.execute(
+      `UPDATE payment_link SET claimed_cart_id = NULL, claimed_at = NULL, updated_at = now()
+        WHERE id = ? AND claimed_cart_id = ?`,
+      [linkId, cartId]
+    )
   }
 
   /** The link a token names, whatever its state; null for none. */

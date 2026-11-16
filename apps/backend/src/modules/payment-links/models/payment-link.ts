@@ -46,6 +46,13 @@ export const PaymentLink = model
     /** The latest cart opened from it: an earlier one no longer completes. */
     cart_id: model.text().nullable(),
     order_id: model.text().nullable(),
+    /**
+     * The cart whose completion holds the link (`claimForCart`, service.ts):
+     * while it holds it no other cart of the link becomes an order. Released
+     * when that completion fails; a hold older than its time-out is free.
+     */
+    claimed_cart_id: model.text().nullable(),
+    claimed_at: model.dateTime().nullable(),
     opened_count: model.number().default(0),
     last_opened_at: model.dateTime().nullable(),
     sent_count: model.number().default(0),
