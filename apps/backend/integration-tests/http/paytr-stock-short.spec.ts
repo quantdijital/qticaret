@@ -1,4 +1,4 @@
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import { updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakePaytrAccount, paytrNotification, startFakePaytr } from "@qticaret/testing"
@@ -10,12 +10,12 @@ import { STOCK_LEDGER_MODULE } from "../../src/modules/stock-ledger"
 import { WEBHOOK_EVENTS_MODULE } from "../../src/modules/webhook-events"
 import type WebhookEventsModuleService from "../../src/modules/webhook-events/service"
 import type StockLedgerModuleService from "../../src/modules/stock-ledger/service"
-import { BACKORDER_MARK } from "../../src/lib/stock/backorder"
 import { sweepBackorderRaises } from "../../src/workflows/payments/backorder-sweep"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import {
+  cartPayments,
   connectPaytr,
   notifyPaytr,
   orderOfCart,
@@ -23,7 +23,15 @@ import {
   startPaytrPayment,
   storeReturnUrls,
 } from "../helpers/paytr"
-import { orderOne, stockShop, stockedProduct } from "../helpers/stock"
+import {
+  failOrderLineReservation,
+  holdsOf,
+  orderOne,
+  orderRowOf,
+  shelfOf,
+  stockShop,
+  stockedProduct,
+} from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
@@ -58,40 +66,14 @@ medusaIntegrationTestRunner({
         paymentAmount: 21000,
         testMode: true,
       })
-    const orderRow = async (orderId: string) => {
-      const { data } = await getContainer()
-        .resolve(ContainerRegistrationKeys.QUERY)
-        .graph({
-          entity: "order",
-          fields: ["id", "display_id", "metadata", "items.id"],
-          filters: { id: orderId },
-        })
-      return data[0] as unknown as {
-        id: string
-        display_id: number
-        metadata: Record<string, unknown> | null
-        items: { id: string }[]
-      }
-    }
+    const orderRow = (orderId: string) => orderRowOf(getContainer(), orderId)
     const variantRow = async () => {
       const [variant] = await getContainer()
         .resolve(Modules.PRODUCT)
         .listProductVariants({ id: variantId }, { select: ["allow_backorder"] })
       return variant
     }
-    const shelf = async () => {
-      const [level] = await getContainer()
-        .resolve(Modules.INVENTORY)
-        .listInventoryLevels(
-          { inventory_item_id: itemId, location_id: shop.locationId },
-          { select: ["stocked_quantity", "reserved_quantity", "metadata"] }
-        )
-      return {
-        stocked: Number(level?.stocked_quantity),
-        reserved: Number(level?.reserved_quantity),
-        marked: Boolean(level?.metadata?.[BACKORDER_MARK]),
-      }
-    }
+    const shelf = () => shelfOf(getContainer(), itemId, shop.locationId)
     const ledger = (reference: string) =>
       getContainer()
         .resolve<StockLedgerModuleService>(STOCK_LEDGER_MODULE)
@@ -199,25 +181,59 @@ medusaIntegrationTestRunner({
       const cartId = await readyCart(container, shop, variantId)
       const merchantOid = await startPaytrPayment(http, storefront.headers, cartId)
       fake.pay(merchantOid)
-      const inventory = container.resolve(Modules.INVENTORY)
-      const busy = jest
-        .spyOn(inventory, "createReservationItems")
-        .mockRejectedValueOnce(
-          new Error("Knex: Timeout acquiring a connection. The pool is probably full.")
-        )
-
-      const first = await notifyPaytr(http, success(merchantOid))
-      const between = await orderOfCart(container, cartId)
-      busy.mockRestore()
-      const second = await notifyPaytr(http, success(merchantOid))
+      const holds = () => holdsOf(container, itemId)
+      const paymentsBefore = await cartPayments(container, cartId)
+      const holdsBefore = await holds()
+      const shelfBefore = await shelf()
+      // Only the completion's hold of the order's lines meets the busy database
+      const busy = failOrderLineReservation(
+        container,
+        variantId,
+        new Error("Knex: Timeout acquiring a connection. The pool is probably full.")
+      )
+      const notices = async () => {
+        const first = await notifyPaytr(http, success(merchantOid))
+        const between = {
+          order: await orderOfCart(container, cartId),
+          payments: await cartPayments(container, cartId),
+          refunds: [...(fake.payments.get(merchantOid)?.refunds ?? [])],
+          holds: await holds(),
+          shelf: await shelf(),
+        }
+        return { first, between, second: await notifyPaytr(http, success(merchantOid)) }
+      }
+      let seen: Awaited<ReturnType<typeof notices>>
+      try {
+        seen = await notices()
+      } finally {
+        busy.restore()
+      }
+      const { first, between, second } = seen
       const order = await orderOfCart(container, cartId)
+      const placed = await orderRow(order ?? "")
+      const recoveries = await container
+        .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
+        .listPaymentRecoveries({ cart_id: cartId })
+      const orderLineCalls = busy.calls.filter((call) => call.order_line)
 
       expect(first.status).toBe(503)
       expect(first.data).not.toBe("OK")
-      expect(between).toBeNull()
+      expect(between.order).toBeNull()
+      // The failure hit the order's line hold, once: the first notice's, not the second's
+      expect(busy.calls.filter((call) => call.rejected)).toEqual([orderLineCalls[0]])
+      expect(orderLineCalls.map((call) => call.rejected)).toEqual([true, false])
+      expect(orderLineCalls[1]?.line_item_ids).toEqual(placed.items.map((item) => item.id))
+      // Kept for the next notice: not given back, the session the same, nothing held
+      expect(between.payments).toEqual(paymentsBefore)
+      expect(between.payments.payments).toEqual([])
+      expect(between.refunds).toEqual([])
+      expect(recoveries).toEqual([])
+      expect(between.holds).toBe(holdsBefore)
+      expect(between.shelf).toEqual(shelfBefore)
       expect(second.data).toBe("OK")
       expect(order).toMatch(/^order_/)
-      expect((await orderRow(order ?? "")).metadata?.["stock_short"]).toBeUndefined()
+      expect(placed.metadata?.["stock_short"]).toBeUndefined()
+      expect(await holds()).toBe(holdsBefore + 1)
     })
 
     it("does not start a payment for a unit another order took, unless it sells past the shelf", async () => {

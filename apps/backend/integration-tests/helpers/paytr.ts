@@ -98,6 +98,50 @@ export const notifyPaytr = (http: HttpClient, fields: Record<string, string>) =>
     })
   )
 
+/**
+ * The cart's payment sessions and payments: a completion that failed and
+ * gave the money back leaves a refunded payment and a new session
+ * (Medusa's `compensatePaymentIfNeededStep`).
+ */
+export async function cartPayments(
+  container: MedusaContainer,
+  cartId: string
+): Promise<{
+  sessions: { id: string; status: string }[]
+  payments: { id: string; canceled_at: unknown; refunds: { id: string }[] }[]
+}> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "cart",
+    fields: [
+      "payment_collection.payment_sessions.id",
+      "payment_collection.payment_sessions.status",
+      "payment_collection.payments.id",
+      "payment_collection.payments.canceled_at",
+      "payment_collection.payments.refunds.id",
+    ],
+    filters: { id: cartId },
+  })
+  const row: unknown = data[0]
+  const collection = (
+    row as
+      | {
+          payment_collection?: {
+            payment_sessions?: { id: string; status: string }[] | null
+            payments?: { id: string; canceled_at: unknown; refunds?: { id: string }[] | null }[]
+          } | null
+        }
+      | undefined
+  )?.payment_collection
+  return {
+    sessions: (collection?.payment_sessions ?? []).map(({ id, status }) => ({ id, status })),
+    payments: (collection?.payments ?? []).map(({ id, canceled_at, refunds }) => ({
+      id,
+      canceled_at,
+      refunds: (refunds ?? []).map((refund) => ({ id: refund.id })),
+    })),
+  }
+}
+
 /** The order a cart became, if any. */
 export async function orderOfCart(
   container: MedusaContainer,
