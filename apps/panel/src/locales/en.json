@@ -445,7 +445,8 @@
           "type": "The site icon must be a PNG. Save your icon as a PNG and upload it.",
           "tooLarge": "The site icon can be at most 1 MB. Choose a smaller PNG.",
           "notSquare": "The icon is not square; the browser may squeeze it. A square image is recommended.",
-          "small": "The icon is smaller than 48 × 48 pixels; Google may not show it in search results."
+          "small": "The icon is smaller than 48 × 48 pixels; Google may not show it in search results.",
+          "unmeasured": "This image's size is not known. Upload it to the library again and choose it."
         }
       },
       "region": "Region and units",
@@ -6769,7 +6770,8 @@
     "seeAll": "See all",
     "unreadMark": "Unread: ",
     "wholesaleOrder": {
-      "title": "New wholesale order #{{number}}"
+      "title": "New wholesale order #{{number}}",
+      "transfer": "Bank transfer awaited"
     },
     "page": {
       "description": "Alerts from your shop; the unread ones are counted on the bell.",
@@ -6798,6 +6800,14 @@
       "clear": "Clear selection",
       "select": "Select notification",
       "noMatch": "No notifications in this view."
+    },
+    "newOrder": {
+      "title": "New order #{{number}}",
+      "description": "{{total}}"
+    },
+    "bankTransfer": {
+      "title": "Bank transfer awaited: #{{number}}",
+      "description": "Confirm the order once the {{total}} payment arrives."
     }
   },
   "content": {

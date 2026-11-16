@@ -139,10 +139,13 @@ medusaIntegrationTestRunner({
       const held = await container
         .resolve(Modules.INVENTORY)
         .listReservationItems({ line_item_id: order.items.map((item) => item.id) })
-      const alerts = await eventually(
-        () => shopAlerts(order.id),
-        (rows) => rows.length > 0
-      )
+      // Beside the order's own "new order" alert, the one that asks for the missing units
+      const alerts = (
+        await eventually(
+          () => shopAlerts(order.id),
+          (rows) => rows.some((row) => row.data?.["kind"] === "stock_short")
+        )
+      ).filter((row) => row.data?.["kind"] === "stock_short")
       const access = await settle(
         http.post(`/store/carts/${cartId}/order-access`, {}, { headers: storefront.headers })
       )

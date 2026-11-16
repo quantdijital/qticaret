@@ -445,7 +445,8 @@
           "type": "Site simgesi PNG olmalı. Simgenizi PNG olarak kaydedip yükleyin.",
           "tooLarge": "Site simgesi en çok 1 MB olabilir. Daha küçük bir PNG seçin.",
           "notSquare": "Simge kare değil; tarayıcı onu sıkıştırarak gösterebilir. Kare bir görsel önerilir.",
-          "small": "Simge 48 × 48 pikselden küçük; Google arama sonuçlarında gösterilmeyebilir."
+          "small": "Simge 48 × 48 pikselden küçük; Google arama sonuçlarında gösterilmeyebilir.",
+          "unmeasured": "Bu görselin boyutu bilinmiyor. Kütüphaneye yeniden yükleyip seçin."
         }
       },
       "region": "Bölge ve birimler",
@@ -6769,7 +6770,8 @@
     "seeAll": "Tümünü gör",
     "unreadMark": "Okunmadı: ",
     "wholesaleOrder": {
-      "title": "Yeni toptan sipariş #{{number}}"
+      "title": "Yeni toptan sipariş #{{number}}",
+      "transfer": "Havale bekleniyor"
     },
     "page": {
       "description": "Mağazanızdan gelen uyarılar; okunmamışlar zilde sayılır.",
@@ -6798,6 +6800,14 @@
       "clear": "Seçimi temizle",
       "select": "Bildirimi seç",
       "noMatch": "Bu görünümde bildirim yok."
+    },
+    "newOrder": {
+      "title": "Yeni sipariş #{{number}}",
+      "description": "{{total}}"
+    },
+    "bankTransfer": {
+      "title": "Havale bekleniyor: #{{number}}",
+      "description": "{{total}} tutarındaki ödeme gelince siparişi onaylayın."
     }
   },
   "content": {

@@ -210,15 +210,16 @@ describe("NotificationBell: a wholesaler's order and what is read (ADR-0068, adr
     fetchMock.mockReset()
   })
 
-  it("names the wholesaler, leads to its order on the wholesale list, and counts only the unread", async () => {
+  it("asks the bell's own route, leads a wholesaler's order to the wholesale list, counts only the unread", async () => {
     fetchMock.mockResolvedValue(
       feed([
+        // As the bell's route sends it: no company (the page names it)
         alert("noti_9", {
           kind: "wholesale_order",
           order_id: "order_9",
           number: "1201",
           total: "₺4.500,00",
-          company: "Kaya Bıçak Ltd",
+          bank_transfer: true,
         }),
         alert("noti_10", { kind: "low_stock", name: "Kupa", available: 2, threshold: 5 }, true),
       ])
@@ -227,13 +228,47 @@ describe("NotificationBell: a wholesaler's order and what is read (ADR-0068, adr
 
     await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
 
+    expect(fetchMock).toHaveBeenCalledWith("/admin/alerts/bell")
     const title = await screen.findByText("Yeni toptan sipariş #1201")
     expect(title.closest("a")).toHaveAttribute("href", "/customers/wholesale/orders")
-    expect(screen.getByText("Kaya Bıçak Ltd · ₺4.500,00")).toBeInTheDocument()
+    expect(screen.getByText("₺4.500,00 · Havale bekleniyor")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Tümünü gör" })).toHaveAttribute(
       "href",
       "/notifications"
     )
+  })
+
+  it("words a retail order and a transfer awaited, each leading to the order", async () => {
+    fetchMock.mockResolvedValue(
+      feed([
+        alert("noti_12", {
+          kind: "new_order",
+          order_id: "order_12",
+          number: "88",
+          total: "₺120,00",
+        }),
+        alert("noti_13", {
+          kind: "bank_transfer_pending",
+          order_id: "order_13",
+          number: "89",
+          total: "₺75,00",
+        }),
+      ])
+    )
+    renderBell()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 2 yeni" }))
+
+    const order = await screen.findByText("Yeni sipariş #88")
+    expect(order.closest("a")).toHaveAttribute("href", "/orders/$id")
+    expect(screen.getByText("₺120,00")).toBeInTheDocument()
+    expect(screen.getByText("Havale bekleniyor: #89").closest("a")).toHaveAttribute(
+      "href",
+      "/orders/$id"
+    )
+    expect(
+      screen.getByText("₺75,00 tutarındaki ödeme gelince siparişi onaylayın.")
+    ).toBeInTheDocument()
   })
 
   it("marks an alert read as it is followed, and all of them with one button", async () => {

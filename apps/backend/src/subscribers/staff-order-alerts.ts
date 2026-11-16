@@ -1,22 +1,18 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { fromMedusaAmount } from "../lib/money"
-import type { MedusaAmount } from "../lib/money"
-import { notificationText } from "../lib/notifications/messages"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { BANK_TRANSFER_PAYMENT_PROVIDER_ID } from "../lib/payments/checkout"
 import { alertStaff } from "../workflows/messaging/staff"
 
 interface OrderRow {
-  display_id: number
-  total: MedusaAmount
   payment_collections?:
     ({ payment_sessions?: ({ provider_id: string } | null)[] | null } | null)[] | null
 }
 
 /**
- * The shop hears of a new order (F9.7): by e-mail to its staff list, and
- * one paid by bank transfer also in the panel's bell, since the shop has
- * to confirm the money when it comes.
+ * The shop hears of a new order by e-mail to its staff list (F9.7), and
+ * of one paid by bank transfer again, since the shop has to confirm the
+ * money when it comes. The panel's bell rings from the order's stamp
+ * (`wholesale-order-stamp.ts`), which knows whether it is wholesale.
  */
 export default async function staffOrderAlerts({
   event: { data },
@@ -24,7 +20,7 @@ export default async function staffOrderAlerts({
 }: SubscriberArgs<{ id: string }>) {
   const { data: orders } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
-    fields: ["display_id", "total", "payment_collections.payment_sessions.provider_id"],
+    fields: ["id", "payment_collections.payment_sessions.provider_id"],
     filters: { id: data.id },
   })
   const order = orders[0] as OrderRow | undefined
@@ -37,29 +33,9 @@ export default async function staffOrderAlerts({
       (session) => session?.provider_id === BANK_TRANSFER_PAYMENT_PROVIDER_ID
     )
   )
-  if (!transfer) {
-    return
+  if (transfer) {
+    await alertStaff(container, { template: "staff.bank_transfer", resource_id: data.id })
   }
-  const number = String(order.display_id)
-  const total = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(
-    fromMedusaAmount(order.total, { allowRounding: true }) / 100
-  )
-  await container.resolve(Modules.NOTIFICATION).createNotifications({
-    to: "",
-    channel: "feed",
-    template: "admin-ui",
-    trigger_type: "orders.bank_transfer_pending",
-    resource_id: data.id,
-    resource_type: "order",
-    idempotency_key: `orders.bank_transfer_pending:${data.id}`,
-    data: {
-      kind: "bank_transfer_pending",
-      order_id: data.id,
-      number,
-      ...notificationText("orders.bank_transfer_pending", { number, total }),
-    },
-  })
-  await alertStaff(container, { template: "staff.bank_transfer", resource_id: data.id })
 }
 
 export const config: SubscriberConfig = { event: "order.placed" }

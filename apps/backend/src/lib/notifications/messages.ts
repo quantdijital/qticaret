@@ -70,6 +70,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Geçici stok düzeltmesi geri alındı",
       description: "Sepet {{cart}} için artırılan stok geri alındı; stok sayılarını kontrol edin.",
     },
+    "orders.new_order": {
+      title: "Yeni sipariş: #{{number}}",
+      description: "{{total}} tutarında. Siparişler'de görün.",
+    },
     "wholesale.order_placed": {
       title: "Yeni toptan sipariş: #{{number}}",
       description: "{{total}} tutarında. Müşteriler > Toptancılar > Siparişler'de görün.",
@@ -205,6 +209,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.shelf_restored": {
       title: "A temporary stock raise was taken back",
       description: "The stock raised for cart {{cart}} was lowered again; check the stock counts.",
+    },
+    "orders.new_order": {
+      title: "New order: #{{number}}",
+      description: "For {{total}}. See it under Orders.",
     },
     "wholesale.order_placed": {
       title: "New wholesale order: #{{number}}",

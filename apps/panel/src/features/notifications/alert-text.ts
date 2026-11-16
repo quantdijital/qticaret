@@ -14,7 +14,7 @@ import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { paymentIssueAlert } from "@/features/notifications/payment-issue-alert"
 import { returnRefundAlert } from "@/features/notifications/return-alert"
 import { stockShortAlert } from "@/features/notifications/stock-short-alert"
-import { wholesaleOrderAlert } from "@/features/notifications/wholesale-alert"
+import { orderAlert } from "@/features/notifications/order-alert"
 import { paymentLinkAlert } from "@/features/payment-links/components/link-alert"
 import { isConnectable } from "@/features/settings/payment-methods"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
@@ -30,7 +30,7 @@ export function useAlertText(data: Record<string, unknown>) {
     returnRefundAlert(t, data) ??
     stockShortAlert(t, data) ??
     paymentIssueAlert(t, data) ??
-    wholesaleOrderAlert(t, data)
+    orderAlert(t, data)
   if (alert) {
     return alert
   }
