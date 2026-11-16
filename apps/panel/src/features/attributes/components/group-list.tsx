@@ -20,14 +20,18 @@ const G = "attributes.groups"
 const NONE = "__none__"
 
 /**
- * The template's spec table sections (adr/0013 Ek 2026-11-04): added by
- * name, renamed, reordered, removed. Optional: a template without them
- * shows one list. A removed section's fields fall back to none.
+ * The template's spec table sections (adr/0013 Ek 2026-11-04), on their
+ * own tab: added by name, renamed, reordered, removed, each with how many
+ * attributes it holds. Optional: a template without them shows one list.
+ * A removed section's fields fall back to none.
  */
 export function GroupList() {
   const { t } = useTranslation()
   const { control, register, getValues, setValue, formState } = useFormContext<TemplateForm>()
   const groups = useFieldArray({ control, name: "groups", keyName: "fieldKey" })
+  const definitions = useWatch({ control, name: "definitions" })
+  const members = (key: string) =>
+    definitions.filter((definition) => definition.group === key).length
   const [draft, setDraft] = useState("")
   const full = groups.fields.length >= GROUP_LIMITS.groups
   const add = () => {
@@ -50,10 +54,7 @@ export function GroupList() {
   }
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium">{t(`${G}.title`)}</span>
-        <p className="text-xs text-muted-foreground">{t(`${G}.hint`)}</p>
-      </div>
+      <p className="text-[13px] text-muted-foreground">{t(`${G}.hint`)}</p>
       {groups.fields.length > 0 ? (
         <ol className="flex flex-col gap-2">
           {groups.fields.map((field, index) => {
@@ -76,6 +77,9 @@ export function GroupList() {
                     })}
                   />
                 </RowCell>
+                <span className="hidden h-9 w-24 shrink-0 items-center justify-end sm:flex text-xs text-muted-foreground tabular-nums">
+                  {t("attributes.count", { count: members(field.key) })}
+                </span>
                 <RowActions
                   index={index}
                   count={groups.fields.length}

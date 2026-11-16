@@ -2,23 +2,69 @@ import { useQuery } from "@tanstack/react-query"
 import { LayoutList, Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
-import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { useRecordWalk } from "@qticaret/admin-ui/hooks/use-record-walk"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { templatesQuery } from "@/features/attributes/api"
 import { TemplateDialog } from "@/features/attributes/components/template-dialog"
+import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
+
+const A = "attributes"
+
+function useColumns(onOpen: (template: AttributeTemplate) => void): Column<AttributeTemplate>[] {
+  const { t } = useTranslation()
+  return [
+    {
+      key: "name",
+      header: t(`${A}.columns.name`),
+      cell: (template) => (
+        <div className="flex min-w-0 flex-col items-start">
+          {/* The row opens it too; this is the keyboard's way in */}
+          <button
+            type="button"
+            className="max-w-full truncate text-left font-medium hover:underline"
+            onClick={(event) => {
+              event.stopPropagation()
+              onOpen(template)
+            }}
+          >
+            {template.name}
+          </button>
+          {template.description ? (
+            <span className="max-w-full truncate text-xs text-muted-foreground">
+              {template.description}
+            </span>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      key: "definitions",
+      header: t(`${A}.columns.definitions`),
+      align: "right",
+      cell: (template) => (
+        <span className="text-muted-foreground tabular-nums">
+          {t(`${A}.count`, { count: template.definitions.length })}
+        </span>
+      ),
+    },
+  ]
+}
 
 /**
  * Settings > Product attributes (adr/0013): templates that say which
- * attributes a kind of product carries. Sector needs live here as data,
- * never as code (CLAUDE.md).
+ * attributes a kind of product carries, one row each; a row opens its
+ * template. Sector needs live here as data, never as code (CLAUDE.md).
  */
 export function AttributesPage() {
   const { t } = useTranslation()
   const query = useQuery(templatesQuery())
   const walk = useRecordWalk(query.data, (template) => template.id)
+  const columns = useColumns(walk.show)
   const [creating, setCreating] = useState(false)
   const add = (
     <Button
@@ -27,63 +73,34 @@ export function AttributesPage() {
       }}
     >
       <Plus />
-      {t("attributes.createTemplate")}
+      {t(`${A}.createTemplate`)}
     </Button>
   )
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t("attributes.title")}
-        description={t("attributes.subtitle")}
-        action={add}
-      />
-      {query.isError ? (
-        <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
-      ) : !query.data ? (
-        <LoadingRows rows={4} />
-      ) : query.data.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed px-6 py-14 text-center">
-          <LayoutList className="size-8 text-muted-foreground" aria-hidden="true" />
-          <p className="max-w-md text-sm text-muted-foreground">{t("attributes.empty")}</p>
-          {add}
-        </div>
-      ) : (
-        <ul className="grid gap-[var(--grid-gap)] md:grid-cols-2">
-          {query.data.map((template) => (
-            <li key={template.id}>
-              <button
-                type="button"
-                onClick={() => {
-                  walk.show(template)
-                }}
-                className="flex w-full flex-col gap-3 rounded-lg border bg-card p-5 text-left shadow-card transition-colors hover:border-input"
-              >
-                <span className="flex items-baseline justify-between gap-3">
-                  <span className="font-medium">{template.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {t("attributes.count", { count: template.definitions.length })}
-                  </span>
-                </span>
-                {template.description ? (
-                  <span className="line-clamp-2 text-[13px] text-muted-foreground">
-                    {template.description}
-                  </span>
-                ) : null}
-                <span className="flex flex-wrap gap-1.5">
-                  {[...template.definitions]
-                    .sort((a, b) => a.rank - b.rank)
-                    .slice(0, 8)
-                    .map((definition) => (
-                      <span key={definition.id} className="rounded-md bg-muted px-2 py-0.5 text-xs">
-                        {definition.label}
-                      </span>
-                    ))}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <PageHeader title={t(`${A}.title`)} description={t(`${A}.subtitle`)} action={add} />
+      <section className="overflow-hidden rounded-lg border bg-card shadow-card">
+        {query.isError ? (
+          <div className="p-5">
+            <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            rows={query.data}
+            rowKey={(template) => template.id}
+            loading={query.isPending}
+            onRowClick={walk.show}
+            empty={
+              <div className="flex flex-col items-center gap-3 text-center">
+                <LayoutList className="size-8 text-muted-foreground" aria-hidden="true" />
+                <p className="max-w-md text-sm text-muted-foreground">{t(`${A}.empty`)}</p>
+                {add}
+              </div>
+            }
+          />
+        )}
+      </section>
       {walk.open ? (
         <TemplateDialog
           template={walk.open}
