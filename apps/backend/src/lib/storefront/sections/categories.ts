@@ -28,16 +28,49 @@ export const CATEGORY_CARD_DEFAULTS = {
   links: CATEGORY_CARD_LIMITS.links.default,
 } as const
 
-type Setting = keyof typeof CATEGORY_CARD_SETTINGS
+/**
+ * The collage's settings: mirrors `@qticaret/types`' `CATEGORY_COLLAGE_SETTINGS`
+ * and `CATEGORY_COLLAGE_DEFAULTS`, its columns the cards' own lists.
+ */
+export const CATEGORY_COLLAGE_SETTINGS = {
+  columns: CATEGORY_CARD_SETTINGS.columns,
+  columns_mobile: CATEGORY_CARD_SETTINGS.columns_mobile,
+  height: ["low", "medium", "high"],
+  lead: ["off", "on"],
+} as const
+
+export const CATEGORY_COLLAGE_DEFAULTS = {
+  columns: 4,
+  columns_mobile: 1,
+  height: "medium",
+  lead: "on",
+  links: 4,
+} as const
+
+type Lists = Readonly<Record<string, readonly (string | number)[]>>
 
 /** A step on the setting's list; another is a stale or forged editor, as a variant off its list is. */
-const step = <S extends Setting>(setting: S) =>
+const stepOn =
+  <L extends Lists>(lists: L, defaults: { readonly [K in keyof L]: L[K][number] }) =>
+  <S extends keyof L & string>(setting: S) =>
+    z
+      .custom<L[S][number]>(
+        (value) => (lists[setting] as readonly unknown[]).includes(value),
+        VARIANT_ERROR
+      )
+      .default(defaults[setting])
+
+const step = stepOn(CATEGORY_CARD_SETTINGS, CATEGORY_CARD_DEFAULTS)
+const collageStep = stepOn(CATEGORY_COLLAGE_SETTINGS, CATEGORY_COLLAGE_DEFAULTS)
+
+/** Subcategory links under each card's name, the variant's own default. */
+const links = (fallback: number) =>
   z
-    .custom<(typeof CATEGORY_CARD_SETTINGS)[S][number]>(
-      (value) => (CATEGORY_CARD_SETTINGS[setting] as readonly unknown[]).includes(value),
-      VARIANT_ERROR
-    )
-    .default(CATEGORY_CARD_DEFAULTS[setting])
+    .number()
+    .int()
+    .min(CATEGORY_CARD_LIMITS.links.min)
+    .max(CATEGORY_CARD_LIMITS.links.max)
+    .default(fallback)
 
 /** What every variant has: the title, the categories named, the counts and the link beside the title. */
 const common = {
@@ -68,21 +101,34 @@ const linked = z
     columns_mobile: step("columns_mobile"),
     image_position: step("image_position"),
     frame: step("frame"),
-    links: z
-      .number()
-      .int()
-      .min(CATEGORY_CARD_LIMITS.links.min)
-      .max(CATEGORY_CARD_LIMITS.links.max)
-      .default(CATEGORY_CARD_LIMITS.links.default),
+    links: links(CATEGORY_CARD_LIMITS.links.default),
+  })
+  .strict()
+
+/**
+ * Each category a card led by its photograph, its name, count and first
+ * `links` subcategories under it; rows filled edge to edge, at most
+ * `columns` cards in one, the first twice as wide while `lead` is on.
+ */
+const collage = z
+  .object({
+    ...common,
+    variant: z.literal("collage"),
+    columns: collageStep("columns"),
+    columns_mobile: collageStep("columns_mobile"),
+    height: collageStep("height"),
+    lead: collageStep("lead"),
+    links: links(CATEGORY_COLLAGE_DEFAULTS.links),
   })
   .strict()
 
 export const CATEGORIES_BRANCHES: Readonly<Record<SectionVariant<"categories">, VariantBranch>> = {
   tiles,
   linked,
+  collage,
 }
 
 /** The shop's categories as cards. */
-export const categories = z.discriminatedUnion("variant", [tiles, linked], VARIANT_ERROR)
+export const categories = z.discriminatedUnion("variant", [tiles, linked, collage], VARIANT_ERROR)
 
 export type CategoriesSection = z.infer<typeof categories>

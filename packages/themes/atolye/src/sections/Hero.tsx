@@ -34,7 +34,7 @@ export function Hero({
   // The editor's field marks (adr/0065 Faz 2b): in its live preview only
   const on = hero.editor
   return (
-    <section aria-labelledby={id} className="pt-3 lg:pt-6">
+    <section aria-labelledby={id} className={first ? "pt-3 lg:pt-6" : "gf-section"}>
       {first && image && <Preload image={image} sizes={SIZES} />}
       <Container>
         <div className="gf-stage relative grid overflow-hidden rounded-tile lg:min-h-[clamp(28rem,58svh,36rem)] lg:grid-cols-12">

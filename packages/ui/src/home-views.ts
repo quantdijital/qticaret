@@ -1,4 +1,4 @@
-import type { SliderSettings } from "@qticaret/types"
+import type { FeaturedProductSettings, SliderSettings } from "@qticaret/types"
 import type { RatingBarView, SpecGroupView } from "./card-views"
 import type { CardRatingView, ImageView, LinkView, ProductCardView, SpecView } from "./views"
 
@@ -97,6 +97,11 @@ export interface FeaturedProductSectionView {
   facts: SpecView[]
   /** The spec table in its template's sections (`ProductPageView.specGroups`); none: no attributes. */
   specGroups: SpecGroupView[]
+  /**
+   * How its photographs stand (adr/0049 Ek 2026-11-15). Absent (an older
+   * storefront): the collage, as before the setting.
+   */
+  settings?: FeaturedProductSettings
 }
 
 /**

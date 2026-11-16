@@ -86,6 +86,7 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
   return (
     <>
       <PanelGroup
+        name="fonts"
         title={t(THEME_GROUP_TITLES.fonts)}
         hint={t(`${C}.fontsHint`)}
         reveal={reveal("fonts")}
@@ -116,7 +117,7 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
           />
         </Pair>
       </PanelGroup>
-      <PanelGroup title={t(THEME_GROUP_TITLES.shapes)} reveal={reveal("shapes")}>
+      <PanelGroup name="shapes" title={t(THEME_GROUP_TITLES.shapes)} reveal={reveal("shapes")}>
         <Pair>
           <ChoiceSelect
             id={THEME_IDS.radius}
@@ -144,7 +145,11 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
           <KitChoice field="chip_style" {...kit} />
         </Pair>
       </PanelGroup>
-      <PanelGroup title={t(THEME_GROUP_TITLES.surfaces)} reveal={reveal("surfaces")}>
+      <PanelGroup
+        name="surfaces"
+        title={t(THEME_GROUP_TITLES.surfaces)}
+        reveal={reveal("surfaces")}
+      >
         <Pair>
           <ChoiceSelect
             id={THEME_IDS.surface_style}

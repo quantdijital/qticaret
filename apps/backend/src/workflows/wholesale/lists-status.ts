@@ -1,25 +1,36 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { WHOLESALE_MODULE } from "../../modules/wholesale"
 import type WholesaleModuleService from "../../modules/wholesale/service"
 
 export type ListStatus = "active" | "draft"
 
+/** A list's last write in milliseconds; none read, nothing to compare. */
+const writtenAt = (value: Date | string | null | undefined): string =>
+  value ? String(new Date(value).getTime()) : ""
+
 /**
- * The wholesale price lists' statuses as one comparable value: two reads
- * that differ mean the flag turned between them.
+ * The wholesale price lists' statuses and last writes as one comparable
+ * value: two reads that differ mean a list changed between them, even a
+ * flag turned off and on again (the statuses alone would read the same).
  */
-export async function wholesaleListsState(container: MedusaContainer): Promise<string> {
+export async function wholesaleListsState(
+  container: Pick<MedusaContainer, "resolve">
+): Promise<string> {
   const owned = await container.resolve<WholesaleModuleService>(WHOLESALE_MODULE).ownedIds()
   const ids = [...owned.priceListIds]
   if (ids.length === 0) {
     return ""
   }
-  const lists = await container
-    .resolve(Modules.PRICING)
-    .listPriceLists({ id: ids }, { select: ["id", "status"], take: null })
+  // Through the query: the pricing module's list DTO does not carry `updated_at`
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "price_list",
+    fields: ["id", "status", "updated_at"],
+    filters: { id: ids },
+  })
+  const lists = data as { id: string; status: unknown; updated_at?: Date | string | null }[]
   return lists
-    .map((list) => `${list.id}:${String(list.status)}`)
+    .map((list) => `${list.id}:${String(list.status)}:${writtenAt(list.updated_at)}`)
     .sort()
     .join(",")
 }

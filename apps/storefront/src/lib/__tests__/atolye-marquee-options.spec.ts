@@ -90,7 +90,7 @@ describe("the scrolling strip's newer settings in Atölye", () => {
 
   it("puts the screens on the outermost box, on a page and in the header", () => {
     expect(home([strip({ device: "mobile" })])).toMatch(
-      /<div class="pt-\(--section-gap-s\)" data-mq-shell="" data-device="mobile">/
+      /<div class="gf-section" data-thin="" data-mq-shell="" data-device="mobile">/
     )
     const frame = renderFrame(
       atolyeTheme,

@@ -11,7 +11,11 @@ import { Container } from "../parts/Container"
 import { SectionHead } from "./SectionHead"
 
 /** The category cards' variants this theme draws (`drawnVariant`). */
-export const CATEGORY_VARIANTS = ["tiles", "linked"] as const satisfies readonly CategoriesVariant[]
+export const CATEGORY_VARIANTS = [
+  "tiles",
+  "linked",
+  "collage",
+] as const satisfies readonly CategoriesVariant[]
 
 /**
  * Cards in a row from 1024 px, the shop's choice; two from 640 px; one on a
@@ -162,7 +166,7 @@ export function CategoryCards({
   ownAll?: boolean
 }) {
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap-s)">
+    <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-6 lg:gap-10">
         <SectionHead id={id} title={title} more={all} marks={marks} ownMore={ownAll} />
         <ul

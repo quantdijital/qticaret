@@ -16,6 +16,7 @@ import {
   serve,
 } from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
+import { openGroup, openTab } from "./settings-groups.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 const admin = vi.hoisted<AdminMock>(() => ({
@@ -168,6 +169,7 @@ describe("the section forms", HEAVY, () => {
 
   it("lays a product list five across, saying what narrower screens show and a count that falls short", async () => {
     await open("Ürün listesi")
+    await openGroup(user, "Diziliş")
     const three = screen.getByRole("radio", { name: "Satırda 3 ürün" })
     expect(three).toBeChecked()
     expect(screen.getByText(/yan yana 3 ürün, iki sıra \(6 ürün\)/)).toBeVisible()
@@ -179,9 +181,12 @@ describe("the section forms", HEAVY, () => {
     // Twelve fill two rows of five: nothing to suggest
     expect(screen.queryByText(/yalnız dolu sıraları/)).toBeNull()
 
+    // The count is the list's content, its hint stands by the columns
+    await openTab(user, "content")
     fireEvent.change(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" }), {
       target: { value: "8" },
     })
+    await openTab(user, "style")
     expect(screen.getByText(/sayıyı en az 10 yapın/)).toBeVisible()
     await saved((doc) => {
       expect(doc.home[1]).toMatchObject({ type: "products", columns: 5, limit: 8 })
@@ -190,6 +195,7 @@ describe("the section forms", HEAVY, () => {
 
   it("frames a product list's cards over the theme's style, and gives it back (adr/0049 Ek 2026-11-14 §3.3)", async () => {
     await open("Ürün listesi")
+    await openGroup(user, "Diziliş")
     const field = screen.getByRole("combobox", { name: "Kart biçimi" })
     expect(field).toHaveTextContent("Temadaki biçim")
 
@@ -208,6 +214,7 @@ describe("the section forms", HEAVY, () => {
 
   it("schedules a section in local time, refusing an end before its start", async () => {
     await open("Blog yazıları")
+    await openGroup(user, "Görünürlük")
     const starts = screen.getByLabelText("Başlangıç")
     const ends = screen.getByLabelText("Bitiş")
 

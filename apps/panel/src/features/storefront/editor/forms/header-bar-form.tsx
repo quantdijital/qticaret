@@ -1,35 +1,54 @@
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { HEADER_MENU_IMAGES } from "@qticaret/types"
+import { HEADER_MENU_IMAGES, HEADER_SEARCH_STYLES } from "@qticaret/types"
 import type { HeaderBarSection } from "@/features/storefront/api/layout"
+import type { SectionProblems } from "@/features/storefront/layout/problems"
+import { PANEL_GROUPS } from "../panel-groups"
+import { PanelGroup } from "../panel-header"
 import { SwitchRow } from "../theme-fields"
 import { FIELD_IDS } from "./field-registry"
-import type { SectionFormProps } from "./form-props"
+import type { FieldGroupName } from "./field-registry"
 import { HeaderCatalogFields } from "./header-catalog-fields"
+import { headerSetIn } from "./header-marks"
 import { StepChoice } from "./step-choice"
 
 const H = "storefront.editor.headerBar"
 
 /**
- * The shop's header bar (adr/0049 Ek 2026-11-14 §5): whether it stays at
- * the top of a long page, the theme settings' "Sabit üst bilgi" before,
- * and where its menus show the categories' small pictures (Ek 2026-11-15;
- * every variant's, as the dropdowns and the phone's menu are): three named
- * steps, the default the drawing from before.
- * Its look is the variant's ("Biçim"); the logo and menus are edited on
- * their own screens. The catalog header adds what it shows and its menu
- * bar's ground here (Ek 2026-11-15), the pictures beside its "Kategoriler"
- * button; its finer settings sit closed in "Diğer ayarlar" (`SectionPanel`).
+ * The shop's header bar (adr/0049 Ek 2026-11-14 §5, Ek 2026-11-15) in its
+ * panel groups (adr/0065 Ek, sekmeler): under "İçerik" by the part of the
+ * bar they fill, the search (its look first), the thin strip above, the
+ * menu bar (the menus' pictures beside the "Kategoriler" button), the
+ * icons and the phone; staying at the top of a long page with the fine
+ * settings under "Gelişmiş". A header of the other variants has its
+ * search's look, its menus' pictures and staying at the top. Its look is
+ * the variant's ("Biçim"); the logo and menus are edited on their own
+ * screens.
  */
-export function HeaderBarForm({ section, problems, onChange }: SectionFormProps<HeaderBarSection>) {
+export function HeaderGroups({
+  section,
+  problems,
+  reveal,
+  onChange,
+}: {
+  section: HeaderBarSection
+  problems: SectionProblems
+  reveal: (group: FieldGroupName) => number | null
+  onChange: (section: HeaderBarSection, field?: string) => void
+}) {
   const { t } = useTranslation()
-  const sticky = (
-    <SwitchRow
-      id={FIELD_IDS.sticky(section.id)}
-      label={t(`${H}.sticky`)}
-      hint={t(`${H}.stickyHint`)}
-      checked={section.sticky}
-      onChange={(next) => {
-        onChange({ ...section, sticky: next })
+  const searchStyle = (
+    <StepChoice
+      id={FIELD_IDS.searchStyle(section.id)}
+      label={t(`${H}.search_style.label`)}
+      term={t(`${H}.search_style.term`)}
+      hint={t(`${H}.search_style.hint`)}
+      steps={HEADER_SEARCH_STYLES}
+      value={section.search_style}
+      fallback="field"
+      nameOf={(step) => t(`${H}.search_style.${step}`)}
+      onChange={(step) => {
+        onChange({ ...section, search_style: step })
       }}
     />
   )
@@ -48,25 +67,56 @@ export function HeaderBarForm({ section, problems, onChange }: SectionFormProps<
       }}
     />
   )
-  if (section.variant !== "catalog") {
-    return (
-      <div className="flex flex-col gap-5">
-        {menuImages}
-        {sticky}
-      </div>
-    )
-  }
-  return (
-    <div className="flex flex-col gap-5">
+  const group = (name: FieldGroupName, fields: ReactNode) => (
+    <PanelGroup
+      name={name}
+      title={t(PANEL_GROUPS[name].title)}
+      marked={headerSetIn(section, name)}
+      reveal={reveal(name)}
+    >
+      {fields}
+    </PanelGroup>
+  )
+  const catalog = section.variant === "catalog" ? section : null
+  const fields = (name: FieldGroupName, extra: { before?: ReactNode; after?: ReactNode } = {}) =>
+    catalog ? (
       <HeaderCatalogFields
-        section={section}
-        group="content"
+        section={catalog}
+        group={name}
         problems={problems}
         onChange={onChange}
-        afterCategories={menuImages}
+        beforeSearch={extra.before}
+        afterCategories={extra.after}
       />
-      {sticky}
-      <p className="text-xs text-muted-foreground">{t(`${H}.phoneNote`)}</p>
-    </div>
+    ) : (
+      (extra.before ?? extra.after)
+    )
+  return (
+    <>
+      {group("search", fields("search", { before: searchStyle }))}
+      {catalog ? group("topBar", fields("topBar")) : null}
+      {group("menu", fields("menu", { after: menuImages }))}
+      {catalog
+        ? group(
+            "icons",
+            <>
+              {fields("icons")}
+              <p className="text-xs text-muted-foreground">{t(`${H}.phoneNote`)}</p>
+            </>
+          )
+        : null}
+      {group(
+        "look",
+        <SwitchRow
+          id={FIELD_IDS.sticky(section.id)}
+          label={t(`${H}.sticky`)}
+          hint={t(`${H}.stickyHint`)}
+          checked={section.sticky}
+          onChange={(next) => {
+            onChange({ ...section, sticky: next })
+          }}
+        />
+      )}
+    </>
   )
 }

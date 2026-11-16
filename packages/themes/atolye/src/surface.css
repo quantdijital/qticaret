@@ -78,6 +78,34 @@
 }
 
 /*
+ * A brand's logo plate on `/markalar` (`BrandsPage`), `lined`: the field's
+ * white, a step off its tile's tone at `filled`; a ruled tile stands on the
+ * paper, the same white to the eye, and the plate vanished into it (a
+ * logo's own white ground then read as a stray box). It keeps its white,
+ * as a logo's colours need it, inside the box's hairline.
+ */
+[data-surface="lined"] .gf-pane .gf-logo-plate {
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+}
+
+/*
+ * A brand's logo cell in the home brands section (`sections/Brands`): the
+ * logo stands on the cell's own light ground (`bg-chip`, a mark's ground),
+ * one surface, not a plate in a box; on graphite or the shop's colour the
+ * cell stays light so a logo's own colours read. Its hover keeps it light:
+ * the tones a chip's hover reads (the plain one's `paper-3`, the lined
+ * chips' `paper-2` and their ink ring, `ui.css`, `chips.css`) turn to steps
+ * off the chip, and its ink (an unloaded logo's name, that ring) to the
+ * graphite, which no section ground turns. A cell without a logo is not
+ * touched.
+ */
+.gf-logo-cell {
+  --color-text: var(--color-stage);
+  --color-paper-2: color-mix(in oklab, var(--color-stage) 4%, var(--color-chip));
+  --color-paper-3: color-mix(in oklab, var(--color-stage) 7%, var(--color-chip));
+}
+
+/*
  * A cart line's quantity (`gf-stepper`, `parts/Stepper`), `lined`: drawn
  * in the field's light ground, a step off its box's tone at `filled`; in a
  * ruled box on the paper the two are a step apart in lightness and the

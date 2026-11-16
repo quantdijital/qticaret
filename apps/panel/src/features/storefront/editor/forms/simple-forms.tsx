@@ -9,6 +9,7 @@ import type {
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import type { Problem } from "@/features/storefront/layout/problems"
 import { CategoryCardsFields } from "./category-cards-fields"
+import { CategoryCollageFields } from "./category-collage-fields"
 import { FIELD_IDS } from "./field-registry"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
@@ -79,6 +80,8 @@ export function CategoriesForm({
       />
       {section.variant === "linked" ? (
         <CategoryCardsFields section={section} onChange={onChange} />
+      ) : section.variant === "collage" ? (
+        <CategoryCollageFields section={section} onChange={onChange} />
       ) : null}
       <div id={FIELD_IDS.content(section.id, "show_count")}>
         <SwitchRow

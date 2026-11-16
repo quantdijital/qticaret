@@ -42,9 +42,9 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "products") {
     return section.more ? [section.more] : []
   }
-  // The catalog header's highlighted last link (adr/0049 Ek 2026-11-15)
+  // The catalog header's highlighted last link and its strip's note (adr/0049 Ek 2026-11-15)
   if (section.type === "header_bar" && section.variant === "catalog") {
-    return section.highlight_link ? [section.highlight_link] : []
+    return [section.highlight_link, section.strip_note_link].flatMap((link) => (link ? [link] : []))
   }
   return []
 }

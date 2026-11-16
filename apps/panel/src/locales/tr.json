@@ -7924,7 +7924,8 @@
         },
         "categories": {
           "tiles": "Görselli karo",
-          "linked": "Alt kategorili kart"
+          "linked": "Alt kategorili kart",
+          "collage": "Fotoğraflı kolaj"
         },
         "related_products": {
           "grid": "Izgara",
@@ -7933,14 +7934,25 @@
       },
       "look": {
         "title": "Diğer ayarlar",
-        "titleSet_one": "Diğer ayarlar · {{count}} ayar",
-        "titleSet_other": "Diğer ayarlar · {{count}} ayar",
-        "hint": "Bölümün boşluğu ve görünüşü. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
+        "hint": "Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
         "reset": "Varsayılana dön",
+        "spacing": {
+          "title": "Boşluk",
+          "hint": "Bölümün üstündeki ve altındaki boşluk. Seçilmeyen taraf temanın bölüm aralığını kullanır (Tema ayarları > Bölüm aralığı); ince şeritlerde dar aralığı."
+        },
         "space_outer": {
-          "label": "Dış boşluk",
-          "term": "margin",
-          "hint": "Bölümün üstündeki boşluk; temanın ölçüsünden gelir, dar ekranda kendiliğinden küçülür.",
+          "label": "Üst boşluk",
+          "term": "margin-top",
+          "hint": "Bölümün üstündeki boşluk; temanın bölüm aralığından gelir, dar ekranda kendiliğinden küçülür.",
+          "none": "Yok",
+          "small": "Dar",
+          "medium": "Orta",
+          "large": "Geniş"
+        },
+        "space_below": {
+          "label": "Alt boşluk",
+          "term": "margin-bottom",
+          "hint": "Bölümün altındaki boşluk; sonraki bölümün üst boşluğunun yerine geçer, ikisi de seçiliyse büyüğü kalır.",
           "none": "Yok",
           "small": "Dar",
           "medium": "Orta",
@@ -7949,7 +7961,7 @@
         "space_inner": {
           "label": "İç boşluk",
           "term": "padding",
-          "hint": "Bölümün kendi içindeki boşluk; zemin seçiliyse rengin içinde kalır.",
+          "hint": "Bölümün kendi içindeki üst ve alt boşluk, bölüm aralığıyla aynı ölçüden; zemin seçiliyse rengin içinde kalır.",
           "none": "Yok",
           "small": "Dar",
           "medium": "Orta",
@@ -8005,7 +8017,7 @@
         "layout": "Diziliş",
         "scroll": "Kaydırma",
         "motion": "Hareket",
-        "appearance": "Stil",
+        "appearance": "Yazı ve zemin",
         "variant": "Biçim",
         "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir.",
         "device": {
@@ -8015,7 +8027,26 @@
           "mobile": "Yalnız telefonda",
           "desktop": "Yalnız masaüstünde",
           "hint": "Telefon: 1024 pikselden dar ekranlar (tablet dahil). Gizlendiği cihazda bölümün görselleri indirilmez; sayfanın ilk görseli yine indirilir."
-        }
+        },
+        "tabs": {
+          "label": "Ayar sekmeleri",
+          "content": "İçerik",
+          "contentTerm": "content",
+          "style": "Stil",
+          "styleTerm": "style",
+          "advanced": "Gelişmiş",
+          "advancedTerm": "advanced",
+          "marked": "varsayılandan farklı ayar var"
+        },
+        "groups": {
+          "search": "Arama",
+          "topBar": "Üst şerit",
+          "menu": "Menü çubuğu",
+          "icons": "Simgeler ve iletişim",
+          "frame": "Görünüm"
+        },
+        "marked_one": "{{count}} ayar varsayılandan farklı",
+        "marked_other": "{{count}} ayar varsayılandan farklı"
       },
       "defaults": {
         "heading": "Mağazanızın adı",
@@ -8370,7 +8401,7 @@
           "normal": "Normal",
           "roomy": "Ferah"
         },
-        "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 120 px); Sık bunu 66 px'e indirir, Ferah 144 px'e çıkarır.",
+        "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 96 px); Sık bunu 53 px'e indirir, Ferah 115 px'e çıkarır. Zeminli bölümün iç boşluğu da aynı ölçüden gelir.",
         "surfaceStyle": "Kutu stili",
         "surfaceStyleTerm": "surface style",
         "surfaceStyles": {
@@ -8527,7 +8558,50 @@
       },
       "featured": {
         "product": "Ürün",
-        "hint": "Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendi sayfasından gelir. Ürün yayında değilken bölüm vitrinde görünmez."
+        "hint": "Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendi sayfasından gelir. Ürün yayında değilken bölüm vitrinde görünmez.",
+        "gallery": "Fotoğraf düzeni",
+        "galleryTerm": "gallery",
+        "galleries": {
+          "collage": "Kolaj",
+          "strips": "Çapraz şeritler"
+        },
+        "galleryHint": {
+          "collage": "Solda büyük bir fotoğraf; geniş ekranda yanında iki küçük fotoğraf.",
+          "strips": "Fotoğraflar çapraz şeritler hâlinde yan yana. Geniş ekranda fareyle üstüne gelinen şerit genişler; telefonda en çok üç şerit, eşit kalır."
+        },
+        "stripsLayout": "Şeritlerin yeri",
+        "stripsLayoutTerm": "strips_layout",
+        "stripsLayouts": {
+          "side": "Yazının yanında",
+          "wide": "Boydan boya"
+        },
+        "stripsLayoutHint": {
+          "side": "Şeritler solda, ürünün adı ve fiyatı sağda; en çok dört şerit.",
+          "wide": "Şeritler bölümün bütün genişliğini kaplar, ürünün adı ve fiyatı altında; en çok altı şerit. Ekranın bir ucundan öbürüne uzansın isterseniz Görünüm'de genişliği “Tam” yapın."
+        },
+        "stripsSlant": "Eğim",
+        "stripsSlantTerm": "strips_slant",
+        "stripsSlants": {
+          "soft": "Hafif",
+          "medium": "Orta",
+          "steep": "Keskin"
+        },
+        "stripsSlantHint": "Şeritleri ayıran çizgilerin ne kadar yatık durduğu.",
+        "stripsLine": "Çizgi kalınlığı",
+        "stripsLineTerm": "strips_line",
+        "stripsLines": {
+          "none": "Yok",
+          "thin": "İnce",
+          "medium": "Orta",
+          "thick": "Kalın"
+        },
+        "stripsLineHint": "Şeritlerin arasındaki boşluk. “Yok” seçilirse şeritler birbirine değer.",
+        "stripsOverlap": "Üst üste bindir",
+        "stripsOverlapTerm": "strips_overlap",
+        "stripsOverlapHint": "Her şerit bir öncekinin üstüne biner, kenarında ince bir gölge olur; fareyle üstüne gelinen en üste çıkar.",
+        "stripsDim": "Diğerlerini karart",
+        "stripsDimTerm": "strips_dim",
+        "stripsDimHint": "Geniş ekranda bir şeridin üstüne gelinince ya da klavyeyle seçilince diğer şeritler kararır."
       },
       "sample": {
         "label": {
@@ -8689,8 +8763,6 @@
         "subtextPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
         "link": "Bağlantı (isteğe bağlı)",
         "full": "Bu sayfada zaten {{max}} kayan yazı var (üst bilgideki de sayılır).",
-        "lookHint": "Kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
-        "headerLookHint": "Kapatma düğmesi.",
         "size": {
           "label": "Boy",
           "term": "size",
@@ -8810,7 +8882,17 @@
         "utility_bar": {
           "label": "Üst yardımcı şerit",
           "term": "top bar",
-          "hint": "İnce açık şerit: Menüler'deki “Üst menü” bağlantıları (yerleri aşağıda) ve Hesabım. Telefonda görünmez."
+          "hint": "İnce açık şerit: kısa bir not, Menüler'deki “Üst menü” bağlantıları (yerleri aşağıda) ve Hesabım. Telefonda görünmez."
+        },
+        "strip_note": {
+          "label": "Şerit notu",
+          "term": "strip note",
+          "hint": "Kısa bir duyuru ya da kampanya cümlesi. Örnek: 1500 TL üzeri kargo bedava."
+        },
+        "strip_note_link": {
+          "label": "Not bağlantısı",
+          "term": "link",
+          "hint": "Seçersen not tıklanır. Boş bırakırsan düz yazı kalır."
         },
         "phone": {
           "label": "Telefon numarası",
@@ -8830,6 +8912,13 @@
           "submenus": "Alt menülerde",
           "off": "Yok"
         },
+        "search_style": {
+          "label": "Arama görünümü",
+          "term": "search",
+          "hint": "Simge: geniş ekranda büyüteç, basınca arama kutusu açılır; telefonda üst bilgide kutu durmaz, alt menüdeki “Ara” kutuyu yukarıdan açar.",
+          "field": "Kutu",
+          "icon": "Simge, basınca açılır"
+        },
         "menu_ground": {
           "label": "Menü çubuğu zemini",
           "term": "background",
@@ -8841,7 +8930,7 @@
         "search_width": {
           "label": "Arama kutusunun genişliği",
           "term": "search width",
-          "hint": "Dar: logonun hemen yanında kısa bir kutu; kalan yer telefon numarasına ve simgelere kalır.",
+          "hint": "Dar: logonun hemen yanında kısa bir kutu; kalan yer telefon numarasına ve simgelere kalır. Arama simgeyse açılan kutu bu genişlikte olur.",
           "wide": "Geniş",
           "narrow": "Dar"
         },
@@ -8859,14 +8948,29 @@
           "bar": "Menü çubuğunda",
           "row": "Logo satırında"
         },
-        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
-        "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
+        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama (arama görünümü simgeyse kutu durmaz, alt menüdeki “Ara” açar)."
       },
       "categoryCards": {
         "columns": {
           "label": "Bir sıradaki kart",
           "term": "columns",
-          "hint": "Geniş ekranda yan yana kaç kart; dar ekranda tema kendiliğinden azaltır."
+          "hint": "Geniş ekranda yan yana kaç kart; dar ekranda tema kendiliğinden azaltır.",
+          "hintCollage": "Geniş ekranda bir sırada en çok kaç kart; öne çıkan ilk kart iki kart sayılır. Sıralar her zaman uçtan uca dolar."
+        },
+        "lead": {
+          "label": "İlk kategoriyi öne çıkar",
+          "term": "featured",
+          "hint": "İlk kart iki kat geniş, sırası daha yüksek; telefonda en üstte büyük durur.",
+          "off": "Kapalı",
+          "on": "Açık"
+        },
+        "height": {
+          "label": "Fotoğraf yüksekliği",
+          "term": "height",
+          "hint": "Kartların fotoğraf alanı; öne çıkan kartın sırası biraz daha yüksek.",
+          "low": "Alçak",
+          "medium": "Orta",
+          "high": "Yüksek"
         },
         "image_position": {
           "label": "Görselin yeri",
@@ -8885,7 +8989,8 @@
         "links": {
           "label": "Alt kategori sayısı",
           "term": "links",
-          "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar."
+          "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar.",
+          "hintCollage": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız fotoğraf ve ad. Kartın tamamı kategoriye gider."
         },
         "columns_mobile": {
           "1": "1 kart",
@@ -9120,6 +9225,17 @@
           "on": "Açık",
           "hint": "Masaüstünde fareyle tutup sürükleyerek kaydırılır."
         }
+      },
+      "panelSearch": {
+        "label": "Bu bölümün ayarlarında ara",
+        "themeLabel": "Tema ayarlarında ara",
+        "placeholder": "Bu bölümün ayarlarında ara…",
+        "themePlaceholder": "Tema ayarlarında ara…",
+        "clear": "Aramayı temizle",
+        "results": "Bulunan ayarlar",
+        "empty": "“{{query}}” için ayar bulunamadı.",
+        "count_one": "{{count}} ayar bulundu",
+        "count_other": "{{count}} ayar bulundu"
       }
     },
     "preferences": {

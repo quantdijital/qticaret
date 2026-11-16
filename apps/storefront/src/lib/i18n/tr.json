@@ -756,6 +756,8 @@
   "search.help": "Arama önerileri",
   "search.sort_relevance": "En alakalı",
   "search.clear": "Aramayı temizle",
+  "search.open": "Aramayı aç",
+  "search.close": "Aramayı kapat",
   "search.suggest.products": "Ürünler",
   "search.suggest.categories": "Kategoriler",
   "search.suggest.brands": "Markalar",

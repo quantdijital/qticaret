@@ -21,7 +21,7 @@ export function Signup({
 }) {
   const id = headingId(section.id)
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap)">
+    <section aria-labelledby={id} className="gf-section">
       <Container>
         <div className="grid gap-6 rounded-tile gf-pane p-6 sm:p-10 lg:grid-cols-12 lg:items-end lg:gap-(--gap-columns) lg:p-14">
           <h2 id={id} className="lg:col-span-5" {...fieldMark(section.editor, "title")}>

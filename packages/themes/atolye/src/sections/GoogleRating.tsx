@@ -22,7 +22,7 @@ export function GoogleRating({ section, t }: { section: Of<"google_rating">; t: 
   const excerpts = section.excerpts.slice(0, 3)
   const wide = excerpts.length === 0
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap)">
+    <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-6 lg:gap-10">
         <SectionHead id={id} title={section.title} marks={section.editor} />
         <div className="grid gap-(--gap-columns) lg:grid-cols-12">

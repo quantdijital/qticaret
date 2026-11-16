@@ -3,6 +3,7 @@ import {
   createPriceListsWorkflow,
   updateProductVariantsWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PRICE_HISTORY_MODULE } from "../../src/modules/price-history"
 import type PriceHistoryModuleService from "../../src/modules/price-history/service"
@@ -100,14 +101,20 @@ medusaIntegrationTestRunner({
         input: { customersData: [{ name: "Toptan" }] },
       })
       await saleList(variantId, 50, { rules: { "customer.groups.id": [groups[0]?.id ?? ""] } })
-      // Begins in a moment, with no event when it does
-      await saleList(variantId, 70, { starts_at: new Date(Date.now() + 2000) })
-      await pause(3000)
-      expect(await history().lastPrices([variantId], ["try"])).toEqual([
-        expect.objectContaining({ amount: "100" }),
-      ])
-
-      expect(await recordAllSellingPrices(getContainer(), "reconcile")).toBeGreaterThan(0)
+      // Begins in a moment, with no event when it does. The minute's boundary job
+      // (jobs/price-list-boundaries.ts) records such a start too; its lock is held here
+      // so this case shows the hourly reconcile finding it (on CI the job once ran in
+      // the pause and recorded it first)
+      const reconciled = await getContainer()
+        .resolve(Modules.LOCKING)
+        .execute("price-list-boundaries", async () => {
+          await saleList(variantId, 70, { starts_at: new Date(Date.now() + 2000) })
+          await pause(3000)
+          const unseen = await history().lastPrices([variantId], ["try"])
+          return { unseen, recorded: await recordAllSellingPrices(getContainer(), "reconcile") }
+        })
+      expect(reconciled.unseen).toEqual([expect.objectContaining({ amount: "100" })])
+      expect(reconciled.recorded).toBeGreaterThan(0)
       const rows = await recordsOf(variantId, 2)
       expect(rows.at(-1)).toMatchObject({ amount: 70, original_amount: 100, reason: "reconcile" })
       // Nothing new the second time

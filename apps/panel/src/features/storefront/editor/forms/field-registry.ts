@@ -1,6 +1,7 @@
 import {
   BANNER_SETTINGS,
   HEADER_MENU_IMAGES,
+  HEADER_SEARCH_STYLES,
   MARQUEE_SETTINGS,
   SECTION_VARIANTS,
 } from "@qticaret/types"
@@ -11,7 +12,7 @@ import type {
   LayoutGroup,
   LookedSection,
 } from "@/features/storefront/api/layout"
-import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
+import { lookFieldsFor, lookStep, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
 import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
@@ -36,17 +37,26 @@ import { VISIBILITY_IDS, visibilityFields } from "./visibility-registry"
  * so a search lands on the field it names.
  */
 
-/** The panel group a field sits in: a field in a closed group opens it. */
+/**
+ * The panel group a field sits in: a field in a closed group opens it.
+ * Each group's tab and title: `panel-groups.ts`.
+ */
 export type FieldGroupName =
+  | "content"
+  | "search"
+  | "topBar"
+  | "menu"
+  | "icons"
   | "variant"
   | "placement"
-  | "content"
   | "layout"
   | "scroll"
   | "motion"
   | "appearance"
-  | "look"
+  | "frame"
+  | "spacing"
   | "visibility"
+  | "look"
 
 export interface RegistryField {
   /** The field's name in the search: `variant`, `look.ground`, `starts_at`. */
@@ -69,26 +79,60 @@ const BANNER = "storefront.editor.banner"
 const HEADER = "storefront.editor.headerBar"
 
 /**
- * Where the catalog header's settings sit (adr/0049 Ek 2026-11-15, the
- * owner's rule: the basics open and first): what it shows, where its
- * parts stand and its menu bar's ground with the header's own content; the
- * written search button, the written account link and the cart's subtotal
- * closed in "Diğer ayarlar". In the form's order.
+ * Where the catalog header's settings sit (adr/0065 Ek, sekmeler): by the
+ * part of the bar they fill, each its own closed group under "İçerik":
+ * the search, the thin strip above, the menu bar, the icons and the phone.
+ * In the form's order.
  */
 export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, FieldGroupName>> = {
-  search_placeholder: "content",
-  search_width: "content",
-  utility_bar: "content",
-  top_links: "content",
-  phone: "content",
-  tools_place: "content",
-  categories_button: "content",
-  menu_ground: "content",
-  highlight_link: "content",
-  search_label: "look",
-  account_text: "look",
-  cart_total: "look",
+  search_placeholder: "search",
+  search_width: "search",
+  search_label: "search",
+  utility_bar: "topBar",
+  strip_note: "topBar",
+  strip_note_link: "topBar",
+  top_links: "topBar",
+  categories_button: "menu",
+  menu_ground: "menu",
+  highlight_link: "menu",
+  phone: "icons",
+  tools_place: "icons",
+  account_text: "icons",
+  cart_total: "icons",
 }
+
+/**
+ * Every header's own settings beside the catalog's: the search's look with
+ * the search, the menus' pictures with the menu bar, staying at the top
+ * (as Elementor's "Sticky") with the fine settings under "Gelişmiş".
+ */
+export const HEADER_GROUPS = {
+  search_style: "search",
+  menu_images: "menu",
+  sticky: "look",
+} as const satisfies Readonly<Record<string, FieldGroupName>>
+
+/**
+ * Where a body section's look sits: the space above, below and inside it
+ * in "Boşluk" (Gelişmiş), its ground, alignment and width in "Görünüm"
+ * (Stil).
+ */
+export const LOOK_GROUPS: Readonly<Record<SectionLookField, FieldGroupName>> = {
+  space_outer: "spacing",
+  space_below: "spacing",
+  space_inner: "spacing",
+  ground: "frame",
+  align: "frame",
+  width: "frame",
+}
+
+/** The look's fields of a group the type offers, in the contract's order. */
+export const lookFieldsIn = (type: LookedSection["type"], group: FieldGroupName) =>
+  lookFieldsFor(type).filter((field) => LOOK_GROUPS[field] === group)
+
+/** How many of a group's look fields the shop set: its title's mark. */
+export const lookSetIn = (section: LookedSection, group: FieldGroupName): number =>
+  lookFieldsIn(section.type, group).filter((field) => lookStep(section, field) !== null).length
 
 export type HeaderCatalogField = keyof HeaderCatalogFields
 
@@ -155,6 +199,7 @@ export const FIELD_IDS = {
   ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   menuImages: (sectionId: string) => `${sectionId}-menu-images`,
+  searchStyle: (sectionId: string) => `${sectionId}-search-style`,
   header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
   ...ANNOUNCEMENT_IDS,
   ...VISIBILITY_IDS,
@@ -175,8 +220,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
     const variants: readonly string[] = SECTION_VARIANTS[section.type]
     fields.push({
       key: "variant",
-      // A product rail's sits first in its open "Diziliş"
-      group: section.type === "products" ? "layout" : "variant",
+      group: "variant",
       label: `${P}.variant`,
       term: null,
       options: variants.map((variant) => `storefront.editor.variants.${section.type}.${variant}`),
@@ -239,21 +283,26 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   if (section.type === "header_bar") {
     fields.push({
       key: "sticky",
-      group: "content",
+      group: HEADER_GROUPS.sticky,
       label: "storefront.editor.headerBar.sticky",
       term: "storefront.editor.headerBar.stickyTerm",
       options: [],
       target: FIELD_IDS.sticky(id),
     })
-    // Every variant's: the menus' pictures (adr/0049 Ek 2026-11-15)
-    fields.push({
-      key: "menu_images",
-      group: "content",
-      label: `${HEADER}.menu_images.label`,
-      term: `${HEADER}.menu_images.term`,
-      options: HEADER_MENU_IMAGES.map((step) => `${HEADER}.menu_images.${step}`),
-      target: FIELD_IDS.menuImages(id),
-    })
+    // Every variant's: the search's look and the menus' pictures (adr/0049 Ek 2026-11-15)
+    for (const [key, steps, target] of [
+      ["search_style", HEADER_SEARCH_STYLES, FIELD_IDS.searchStyle(id)],
+      ["menu_images", HEADER_MENU_IMAGES, FIELD_IDS.menuImages(id)],
+    ] as const) {
+      fields.push({
+        key,
+        group: HEADER_GROUPS[key],
+        label: `${HEADER}.${key}.label`,
+        term: `${HEADER}.${key}.term`,
+        options: steps.map((step: string) => `${HEADER}.${key}.${step}`),
+        target,
+      })
+    }
     if (section.variant === "catalog") {
       for (const field of Object.keys(HEADER_CATALOG_GROUPS) as HeaderCatalogField[]) {
         // Only what the bar offers as it stands (`headerCatalogOffers`)
@@ -279,7 +328,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       const steps: readonly string[] = lookStepsFor(section.type, field)
       fields.push({
         key: `look.${field}`,
-        group: "look",
+        group: LOOK_GROUPS[field],
         label: `${LOOK}.${field}.label`,
         term: `${LOOK}.${field}.term`,
         options: steps.map((step) => `${LOOK}.${field}.${step}`),

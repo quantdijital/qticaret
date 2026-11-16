@@ -18,6 +18,7 @@ import {
   serve,
 } from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
+import { openGroup, openTab } from "./settings-groups.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 const admin = vi.hoisted<AdminMock>(() => ({
@@ -270,17 +271,18 @@ describe("ThemeEditor", () => {
     await user.click(within(chooser).getByRole("button", { name: /Görsel bant/ }))
 
     expect(await screen.findByRole("heading", { name: "Görsel bant" })).toBeVisible()
-    // Its basics open in "Diziliş", its width and buttons closed in "Diğer ayarlar" (denetim 1.4)
-    const layout = screen.getByRole("group", { name: "Diziliş" })
-    for (const name of ["Yükseklik height", "Yazının yeri position", "Perde gücü overlay"]) {
-      expect(within(layout).getByRole("radiogroup", { name })).toBeVisible()
-    }
-    expect(screen.getByRole("button", { name: "Diğer ayarlar" })).toHaveAttribute(
+    expect(screen.getByRole("alert")).toHaveTextContent("En az bir görsel ekleyin.")
+    expect(status()).toHaveTextContent("Düzeltilecek alan var")
+    // Its basics in "Diziliş", its width and buttons in "Görünüm", both under Stil (denetim 1.4)
+    await openTab(user, "style")
+    expect(screen.getByRole("button", { name: "Görünüm" })).toHaveAttribute(
       "aria-expanded",
       "false"
     )
-    expect(screen.getByRole("alert")).toHaveTextContent("En az bir görsel ekleyin.")
-    expect(status()).toHaveTextContent("Düzeltilecek alan var")
+    const layout = await openGroup(user, "Diziliş")
+    for (const name of ["Yükseklik height", "Yazının yeri position", "Perde gücü overlay"]) {
+      expect(within(layout).getByRole("radiogroup", { name })).toBeVisible()
+    }
     // However long it waits
     await pass(10 * AUTOSAVE_MS)
     expect(postsTo(fetchMock)).toEqual([])

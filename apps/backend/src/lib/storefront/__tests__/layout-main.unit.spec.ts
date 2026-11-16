@@ -26,6 +26,7 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       variant: "centered",
       sticky: false,
       menu_images: "submenus",
+      search_style: "field",
       ...ALWAYS,
     })
     expect(doc.footer).toEqual([
@@ -82,6 +83,7 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       variant: "standard",
       sticky: true,
       menu_images: "submenus",
+      search_style: "field",
       ...ALWAYS,
     })
     expect(doc.category[0]).toMatchObject({ variant: "standard", by_variant: {} })
@@ -153,6 +155,7 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       variant: "standard",
       sticky: true,
       menu_images: "submenus",
+      search_style: "field",
     })
     expect(main.footer_bar).toEqual({ id: "mainfooter", type: "footer_bar", variant: "ledger" })
     expect(main.product_main).toMatchObject({ variant: "standard", look: { width: "narrow" } })
