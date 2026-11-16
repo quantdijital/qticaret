@@ -12,7 +12,7 @@ import type {
   ProductMainVariant,
 } from "@qticaret/types"
 import type { SectionLookView } from "./content-views"
-import type { LinkView, NavCategoryView } from "./views"
+import type { ImageView, LinkView, NavCategoryView } from "./views"
 
 /**
  * The main sections as a theme draws them (adr/0049 Ek 2026-11-14 §5, §7):
@@ -110,6 +110,11 @@ export interface FooterBarView {
   paymentBadges?: { key: string; label: string }[]
   /** The floating "back to top" button; none (or absent): not drawn. */
   backToTop?: BackToTopView | null
+  /**
+   * The store profile's logo, naming the shop over its contact as the
+   * header's does (owner 2026-11-16); absent (no logo): its name.
+   */
+  logo?: ImageView
 }
 
 export interface BackToTopView {

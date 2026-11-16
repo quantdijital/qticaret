@@ -1,7 +1,7 @@
 import { sectorPack, storefrontPreset } from "../index"
 
 describe("the presets in this package (adr/0063 §8)", () => {
-  it("reads grafit in the general pack: Atölye's look with compact sections, no menus, no demo", () => {
+  it("reads grafit in the general pack: Atölye's look, balanced and compact, no menus, no demo", () => {
     const grafit = storefrontPreset("general", "grafit")
     expect(grafit).toMatchObject({
       pack: "general",
@@ -22,11 +22,12 @@ describe("the presets in this package (adr/0063 §8)", () => {
       theme: "atolye",
       colors: { primary: null, accent: null, background: "steel" },
       typography: { heading: "manrope", body: "manrope" },
-      radius: "soft",
+      radius: "gentle",
       product_card: { ratio: "1:1", show_brand: true, show_rating: false },
       header: { layout: "left", sticky: true },
       buttons: "pill",
       section_spacing: "compact",
+      density: "balanced",
     })
     const layout = grafit?.layout
     expect(layout?.home?.map((each) => [each.id, each.type])).toEqual([

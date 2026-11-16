@@ -9,9 +9,15 @@ import type { ImageView } from "@qticaret/ui"
 import { LayerPortal } from "../frame/Layers"
 import type { GalleryWords } from "./words"
 
-/** Where the pointer is over the picture, as the enlarged picture's origin (CSSOM, never a style attribute). */
+/**
+ * Where the pointer is over the picture, as the enlarged picture's origin
+ * (CSSOM, never a style attribute). Measured on the lens's frame, which is
+ * never scaled: the lens's own box is two and a half times larger while
+ * enlarged, and read there one jump of the pointer moved the origin only
+ * part of the way (a press on the graphite then landed on the photograph).
+ */
 function follow(lens: HTMLElement, clientX: number, clientY: number) {
-  const box = lens.getBoundingClientRect()
+  const box = (lens.parentElement ?? lens).getBoundingClientRect()
   const x = ((clientX - box.left) / box.width) * 100
   const y = ((clientY - box.top) / box.height) * 100
   lens.style.setProperty(
@@ -110,7 +116,10 @@ export function Zoom({
           onPointerDown={(event) => {
             pressed.current = { x: event.clientX, y: event.clientY }
           }}
-          onPointerUp={(event) => {
+          // Read on the click, not the pointer's release: closed on the release, the dialog was
+          // gone when a touch screen's click followed, and that click fell through to the page
+          // under it (the gallery opened again, or a link was followed)
+          onClick={(event) => {
             const from = pressed.current
             pressed.current = null
             // A drag pans the enlarged picture; a press on a button is the button's

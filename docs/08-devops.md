@@ -17,6 +17,7 @@ Postgres, Redis, Mailpit (e-posta yakalama), SeaweedFS (S3; MinIO arşivlendi, a
 - Health check endpoint'i; graceful shutdown (SIGTERM'de iş bitirme)
 - DB ve Redis bağlantıları TLS + auth; yalnızca iç ağdan erişim (docs/04)
 - Staging/önizleme: `X-Robots-Tag: noindex` + basic auth; F16.13 otomatik kontrol
+- Ürün videoları (adr/0069): imaja dağıtımın `ffmpeg` paketi (≥ 7, `libx264` ve `libvpx-vp9` ile) girer ve canlıda `FFMPEG_PATH`/`FFPROBE_PATH` mutlak yolla **zorunlu** yazılır (PATH'e güvenilmez); açılıştaki denetim ya da öz-sınama geçmezse video yükleme kapalı kalır (`media.video_unavailable` logu)
 
 ## Tenant provisioning (F16)
 `infra/tenant/create-tenant <slug>`:

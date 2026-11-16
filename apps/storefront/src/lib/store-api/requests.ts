@@ -18,6 +18,7 @@ import type {
 } from "@qticaret/types"
 import { currentWholesale } from "../account/wholesale"
 import type { SiteIcon } from "../seo/icons"
+import type { LogoSource } from "../views/footer-logo"
 import { isStoreApiError } from "./errors"
 import { keepResolution, keptResolution } from "./resolutions"
 import { storeGet, storePublicGet } from "./server"
@@ -29,8 +30,11 @@ import { wholesaleDisplays } from "./wholesale-prices"
  */
 
 export interface SiteAnswer extends SiteSeo {
-  /** The site icon's fields: none from a backend before it (`lib/seo/icons.ts`). */
-  shop: { name: string; logo_url: string | null } & SiteIcon
+  /**
+   * The site icon's fields: none from a backend before it (`lib/seo/icons.ts`);
+   * the store profile's two logos with their sizes (`logos`), none before them.
+   */
+  shop: LogoSource & SiteIcon
   home: SeoPayload
 }
 

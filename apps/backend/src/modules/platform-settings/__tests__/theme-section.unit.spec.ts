@@ -2,6 +2,7 @@ import path from "node:path"
 import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
+  RADIUS_STEPS,
   SECTION_SPACINGS,
   STYLE_KIT_DEFAULTS,
   SURFACE_STYLES,
@@ -66,6 +67,8 @@ describe("theme section", () => {
       shadow: "float",
       chip_style: "filled",
       media_ground: "well",
+      // adr/0067 Ek 2026-11-16: today's room
+      density: "airy",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)
@@ -318,6 +321,28 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
     expect(withCardDefaults({ ...defaults, section_spacing: "roomy" })).toMatchObject({
       section_spacing: "roomy",
     })
+  })
+
+  it("takes the corners from their list, the contract's; the steps added later keep the old ones (adr/0067 Ek 2026-11-16)", () => {
+    const contract = jest.requireActual<{ RADIUS_STEPS: unknown }>(CONTRACT_FILE)
+    expect(RADIUS_STEPS).toEqual(contract.RADIUS_STEPS)
+    expect(RADIUS_STEPS).toEqual(["sharp", "crisp", "gentle", "soft", "round"])
+    for (const radius of RADIUS_STEPS) {
+      expect(saved({ radius }).success).toBe(true)
+    }
+    expect(defaults.radius).toBe("soft")
+    expect(full.parse(mergePatch(defaults, patch.parse({ radius: "gentle" })))).toEqual({
+      ...defaults,
+      radius: "gentle",
+    })
+    expect(saved({ radius: "rounder" }).success).toBe(false)
+    expect(saved({ radius: 0.8 }).success).toBe(false)
+  })
+
+  it("takes the tight section spacing beside the three before it, their meaning kept", () => {
+    expect(SECTION_SPACINGS).toEqual(["tight", "compact", "normal", "roomy"])
+    expect(saved({ section_spacing: "tight" }).success).toBe(true)
+    expect(saved({ section_spacing: "tighter" }).success).toBe(false)
   })
 
   it("takes the surface style from its list, the contract's; one stored before it reads filled (Z-04)", () => {

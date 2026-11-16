@@ -9,6 +9,7 @@ import {
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_NO_REVIEWS,
   CARD_SOLD_OUT_ROWS,
+  RADIUS_STEPS,
   SECTION_SPACINGS,
   SURFACE_STYLES,
 } from "@qticaret/types/storefront"
@@ -112,8 +113,17 @@ const HEADING_FONTS: readonly ThemeHeadingFont[] = [
 ]
 const BODY_FONTS: readonly ThemeBodyFont[] = ["inter", "manrope", "source-sans", "nunito"]
 
-/** The corner scale's factor (`--radius-scale`); soft is the theme's own. */
-const RADIUS_SCALE = { sharp: "0.2", soft: null, round: "1.5" } as const
+/**
+ * The corner scale's factor (`--radius-scale`); soft is the theme's own.
+ * `crisp` and `gentle` stand between sharp and soft (adr/0067 Ek 2026-11-16).
+ */
+const RADIUS_SCALE = {
+  sharp: "0.2",
+  crisp: "0.6",
+  gentle: "0.8",
+  soft: null,
+  round: "1.5",
+} as const
 
 /**
  * The buttons' corners (`--button-radius`); pill is the theme's own. Square
@@ -201,7 +211,7 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
       heading: oneOf(at(raw, "typography", "heading"), HEADING_FONTS, d.typography.heading),
       body: oneOf(at(raw, "typography", "body"), BODY_FONTS, d.typography.body),
     },
-    radius: oneOf(at(raw, "radius"), ["sharp", "soft", "round"], d.radius),
+    radius: oneOf(at(raw, "radius"), RADIUS_STEPS, d.radius),
     product_card: {
       ratio: oneOf(at(raw, "product_card", "ratio"), ["4:5", "1:1", "3:4"], d.product_card.ratio),
       show_brand: flag(at(raw, "product_card", "show_brand"), d.product_card.show_brand),

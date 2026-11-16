@@ -125,6 +125,8 @@ describe("the panel's mirror of the Atölye theme", () => {
     const scale = tableOf("RADIUS_SCALE")
     expect(ATOLYE_RADIUS_SCALE).toEqual({
       sharp: Number(entry(scale, "sharp")),
+      crisp: Number(entry(scale, "crisp")),
+      gentle: Number(entry(scale, "gentle")),
       // Nothing printed: the theme's own scale
       soft: entry(scale, "soft") === null ? 1 : Number.NaN,
       round: Number(entry(scale, "round")),

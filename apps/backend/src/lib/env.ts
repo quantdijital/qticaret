@@ -24,6 +24,15 @@ import { LOG_LEVELS } from "./logging/levels"
 
 export { EnvValidationError, isLocalEnv, isLoopbackUrl }
 
+// A program's absolute path, one line: run without a shell, never a command line
+const programPath = z
+  .string()
+  .max(1024)
+  .refine(
+    (value) => value.startsWith("/") && !value.includes("\n") && !value.includes("\0"),
+    "must be an absolute path"
+  )
+
 const envSchema = z.object({
   // No default: an unset NODE_ENV must not quietly mean "development" and
   // relax security settings (see isLocalEnv)
@@ -178,6 +187,10 @@ const envSchema = z.object({
     .optional(),
   S3_ACCESS_KEY_ID: z.string().min(1).optional(),
   S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  // adr/0069 §4: the distribution's ffmpeg and ffprobe for product videos; unset, PATH's.
+  // Missing, video uploads are closed (lib/media/video/tools.ts)
+  FFMPEG_PATH: programPath.optional(),
+  FFPROBE_PATH: programPath.optional(),
   // adr/0061 Ek C9: the control plane's plan documents (lib/control-plane/env.ts)
   ...CONTROL_PLANE_ENV,
 })

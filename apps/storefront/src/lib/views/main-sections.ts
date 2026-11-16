@@ -20,6 +20,7 @@ import type {
   CategoryMainView,
   FooterBarView,
   HeaderBarView,
+  ImageView,
   NavCategoryView,
   ProductMainView,
   SectionLookView,
@@ -92,9 +93,15 @@ const isBadge = (value: unknown): value is PaymentBadge =>
  * The footer with its own settings (adr/0049 Ek 2026-11-15): each read
  * forgivingly (a step this build does not know is the default, a way to
  * pay it does not know is left out, a repeat too); a backend before them
- * prints none, and the footer is drawn as before.
+ * prints none, and the footer is drawn as before. The shop's logo, when it
+ * has one, names it over the contact (owner 2026-11-16: the header's logo,
+ * in the footer too); none, its name.
  */
-export function footerBarOf(main: Main, t: Translate): FooterBarView {
+export function footerBarOf(
+  main: Main,
+  t: Translate,
+  logo: ImageView | null = null
+): FooterBarView {
   const bar = main?.footer_bar
   const social = footerStep("social", bar?.social)
   const badges = [...new Set((bar?.payment_badges ?? []).filter(isBadge))]
@@ -102,6 +109,7 @@ export function footerBarOf(main: Main, t: Translate): FooterBarView {
     id: bar?.id ?? "mainfooter",
     variant: variantOf("footer_bar", bar?.variant),
     ...(social !== FOOTER_BAR_DEFAULTS.social ? { social } : {}),
+    ...(logo ? { logo } : {}),
     ...(badges.length > 0
       ? { paymentBadges: badges.map((key) => ({ key, label: t(`marks.${key}`) })) }
       : {}),

@@ -61,6 +61,9 @@ export const PAYMENT_LINKS = "orders.payment_links"
 /** Wholesale customers and their prices (ADR-0068). */
 export const CUSTOMERS_WHOLESALE = "customers.wholesale"
 
+/** Product videos: clips the shop uploads and YouTube links (adr/0069). */
+export const PRODUCT_VIDEOS = "catalog.product_videos"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -154,6 +157,14 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.customers_wholesale.label",
     descriptionKey: "qticaret.features.customers_wholesale.description",
+  },
+  // adr/0069 §12: a package's feature, on by default (the storage limit bounds it); off,
+  // the video routes are missing and the storefront shows none, records and files stay
+  [PRODUCT_VIDEOS]: {
+    default: true,
+    owner: "platform",
+    labelKey: "qticaret.features.catalog_product_videos.label",
+    descriptionKey: "qticaret.features.catalog_product_videos.description",
   },
 })
 

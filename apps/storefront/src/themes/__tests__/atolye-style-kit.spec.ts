@@ -22,6 +22,7 @@ const OFF_DEFAULT = {
   shadow: "none",
   chip_style: "lined",
   media_ground: "page",
+  density: "balanced",
 } as const
 
 /** The frame's root element: the first tag the theme's Layout prints. */
@@ -38,9 +39,16 @@ describe("the style kit in the storefront (adr/0067)", () => {
       shadow: "float",
       chip_style: "filled",
       media_ground: "well",
+      density: "airy",
     })
     const odd = themeSettings(
-      { menu_style: "boxed", shadow: "0 0 4px red", chip_style: 1, media_ground: null },
+      {
+        menu_style: "boxed",
+        shadow: "0 0 4px red",
+        chip_style: 1,
+        media_ground: null,
+        density: "12px",
+      },
       null
     )
     expect(odd).toMatchObject({
@@ -48,6 +56,7 @@ describe("the style kit in the storefront (adr/0067)", () => {
       shadow: "float",
       chip_style: "filled",
       media_ground: "well",
+      density: "airy",
     })
   })
 
@@ -68,6 +77,7 @@ describe("the style kit in the storefront (adr/0067)", () => {
       'data-shadow="none"',
       'data-chip-style="lined"',
       'data-media-ground="page"',
+      'data-density="balanced"',
     ]) {
       expect(all).toContain(mark)
     }

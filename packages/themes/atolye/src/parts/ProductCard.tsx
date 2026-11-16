@@ -138,7 +138,7 @@ export function ProductGrid({
     <ul
       data-columns={columns}
       className={cn(
-        "grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-8 md:grid-cols-[repeat(3,minmax(0,1fr))] lg:gap-y-10",
+        "grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-[repeat(3,minmax(0,1fr))]",
         wide && "lg:grid-cols-[repeat(4,minmax(0,1fr))]",
         columns && shelfGrid(columns, phone)
       )}

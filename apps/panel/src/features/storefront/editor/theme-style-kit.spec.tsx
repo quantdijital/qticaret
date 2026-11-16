@@ -15,6 +15,7 @@ const ready = vi.hoisted(() => ({
   shadow: false,
   chip_style: false,
   media_ground: false,
+  density: false,
 }))
 vi.mock("./forms/style-kit-ready", () => ({ STYLE_KIT_READY: ready }))
 
@@ -34,26 +35,45 @@ const choicesIn = (group: string) =>
     .getAllByRole("combobox")
     .map((box) => box.getAttribute("id"))
 
-const KIT_NAMES = ["Menü stili", "Gölge", "Çip stili", "Fotoğraf zemini"]
+const KIT_NAMES = ["Menü stili", "Gölge", "Çip stili", "Fotoğraf zemini", "Yoğunluk"]
 
 afterEach(() => {
-  Object.assign(ready, { menu_style: false, shadow: false, chip_style: false, media_ground: false })
+  Object.assign(ready, {
+    menu_style: false,
+    shadow: false,
+    chip_style: false,
+    media_ground: false,
+    density: false,
+  })
 })
 
 /** adr/0067 §1, §2.7: the style kit in the theme panel. */
 describe("the style kit in the theme panel", () => {
-  it("splits corners and buttons into shapes and surfaces (§2.7)", () => {
+  it("splits corners and buttons into shapes, the room into spacing, the rest into surfaces (§2.7, Ek 2026-11-16)", () => {
     expect(THEME_FIELDS.filter((f) => f.group === "shapes").map((f) => f.key)).toEqual([
       "radius",
       "buttons",
       "chip_style",
+    ])
+    expect(THEME_FIELDS.filter((f) => f.group === "spacing").map((f) => f.key)).toEqual([
+      "section_spacing",
+      "density",
     ])
     expect(THEME_FIELDS.filter((f) => f.group === "surfaces").map((f) => f.key)).toEqual([
       "surface_style",
       "shadow",
       "media_ground",
       "menu_style",
-      "section_spacing",
+    ])
+    // The panel's order: colours, faces, shapes, spacing, surfaces, the card
+    expect([...new Set(THEME_FIELDS.map((f) => f.group))]).toEqual([
+      "colors",
+      "fonts",
+      "shapes",
+      "spacing",
+      "surfaces",
+      "card",
+      "framed",
     ])
   })
 
@@ -61,7 +81,8 @@ describe("the style kit in the theme panel", () => {
     draw()
     expect(screen.getByRole("group", { name: "Şekiller" })).toBeVisible()
     expect(choicesIn("Şekiller")).toEqual(["theme-radius", "theme-buttons"])
-    expect(choicesIn("Yüzeyler")).toEqual(["theme-surface-style", "theme-section-spacing"])
+    expect(choicesIn("Boşluklar")).toEqual(["theme-section-spacing"])
+    expect(choicesIn("Yüzeyler")).toEqual(["theme-surface-style"])
     for (const name of KIT_NAMES) {
       expect(screen.queryByRole("combobox", { name })).toBeNull()
     }
@@ -76,17 +97,24 @@ describe("the style kit in the theme panel", () => {
   })
 
   it("shows a field once its step turns it on, in its group's place, its term small", async () => {
-    Object.assign(ready, { menu_style: true, shadow: true, chip_style: true, media_ground: true })
+    Object.assign(ready, {
+      menu_style: true,
+      shadow: true,
+      chip_style: true,
+      media_ground: true,
+      density: true,
+    })
     const onChange = draw()
     expect(choicesIn("Şekiller")).toEqual(["theme-radius", "theme-buttons", "theme-chip-style"])
+    expect(choicesIn("Boşluklar")).toEqual(["theme-section-spacing", "theme-density"])
     expect(choicesIn("Yüzeyler")).toEqual([
       "theme-surface-style",
       "theme-shadow",
       "theme-media-ground",
       "theme-menu-style",
-      "theme-section-spacing",
     ])
     expect(screen.getByRole("combobox", { name: "Menü stili" })).toHaveTextContent("Dolu")
+    expect(screen.getByRole("combobox", { name: "Yoğunluk" })).toHaveTextContent("Ferah")
     expect(screen.getByRole("combobox", { name: "Gölge" })).toHaveTextContent("Açılır katmanlarda")
     expect(screen.getByRole("combobox", { name: "Fotoğraf zemini" })).toHaveTextContent("Hafif ton")
     expect(screen.getByText("menu items").tagName).toBe("SMALL")
@@ -96,6 +124,26 @@ describe("the style kit in the theme panel", () => {
     await user.click(screen.getByRole("combobox", { name: "Menü stili" }))
     await user.click(await screen.findByRole("option", { name: "Sade" }))
     expect(onChange).toHaveBeenLastCalledWith({ ...THEME, menu_style: "plain" })
+
+    // adr/0067 Ek 2026-11-16: the density's three steps, airy first
+    await user.click(screen.getByRole("combobox", { name: "Yoğunluk" }))
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
+      "Ferah",
+      "Dengeli",
+      "Sıkı",
+    ])
+    await user.click(screen.getByRole("option", { name: "Dengeli" }))
+    expect(onChange).toHaveBeenLastCalledWith({ ...THEME, density: "balanced" })
+  })
+
+  it("finds the spacing by the words a shop owner uses for it (owner 2026-11-16)", () => {
+    ready.density = true
+    for (const word of ["boşluk", "bosluk", "aralık", "sıkı", "ferah", "yoğunluk"]) {
+      expect(found(word), word).toEqual(["section_spacing", "density"])
+    }
+    expect(found("bölüm aralığı")).toEqual(["section_spacing"])
+    expect(found("dengeli")).toEqual(["density"])
+    expect(found("çok sık")).toEqual(["section_spacing"])
   })
 
   it("turns on one field alone", () => {

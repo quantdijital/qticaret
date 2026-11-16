@@ -24,11 +24,18 @@ interface Frame {
     shadow: string
     chip_style: string
     media_ground: string
+    density: string
   }
 }
 
-/** The style kit at today's drawing (adr/0067 §1). */
-const KIT = { menu_style: "filled", shadow: "float", chip_style: "filled", media_ground: "well" }
+/** The style kit at today's drawing (adr/0067 §1, S6 its Ek 2026-11-16). */
+const KIT = {
+  menu_style: "filled",
+  shadow: "float",
+  chip_style: "filled",
+  media_ground: "well",
+  density: "airy",
+}
 
 /** The card's variant and the framed card's switches at their defaults (adr/0049 Ek 2026-11-14 §3.3). */
 const CARD = {

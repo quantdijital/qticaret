@@ -12,6 +12,7 @@ export const STYLE_KIT = {
   shadow: ["float", "none"],
   chip_style: ["filled", "lined"],
   media_ground: ["well", "page"],
+  density: ["airy", "balanced", "compact"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StyleKitField = keyof typeof STYLE_KIT
@@ -27,6 +28,7 @@ export const STYLE_KIT_DEFAULTS: Readonly<StyleKitSettings> = {
   shadow: "float",
   chip_style: "filled",
   media_ground: "well",
+  density: "airy",
 }
 
 /** The kit's fields for the theme section's schema: a step on its list only. */
@@ -35,6 +37,7 @@ export const styleKitSchema = {
   shadow: z.enum(STYLE_KIT.shadow),
   chip_style: z.enum(STYLE_KIT.chip_style),
   media_ground: z.enum(STYLE_KIT.media_ground),
+  density: z.enum(STYLE_KIT.density),
 }
 
 /**

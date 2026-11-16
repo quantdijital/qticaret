@@ -4,6 +4,7 @@ import {
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
+  RADIUS_STEPS,
   SECTION_SPACINGS,
   STYLE_KIT,
   STYLE_KIT_DEFAULTS,
@@ -31,7 +32,8 @@ export const BACKGROUNDS = [
   "neutral",
   "cool",
 ] as const satisfies StorefrontBackground[]
-export const RADII = ["sharp", "soft", "round"] as const
+/** The corners, sharpest first (adr/0067 Ek 2026-11-16 added `crisp` and `gentle`): the contract's list. */
+export const RADII = RADIUS_STEPS
 export const CARD_RATIOS = ["4:5", "1:1", "3:4"] as const
 /** How cards are drawn (adr/0049 Ek 2026-11-14 §3.3): the contract's list; a rail may pick its own. */
 export { CARD_VARIANTS }
@@ -58,7 +60,7 @@ export const BUTTON_SHAPES = ["pill", "rounded", "square"] as const
 export { SECTION_SPACINGS }
 /** How the theme's boxes stand (Tezgâh audit Z-04): the contract's list, `filled` today's tone. */
 export { SURFACE_STYLES }
-/** The style kit (adr/0067 §1): menu items, shadow, chips, the photos' ground; first step the default. */
+/** The style kit (adr/0067 §1): menu items, shadow, chips, the photos' ground, density; first step the default. */
 export { STYLE_KIT }
 
 export type HeadingFont = (typeof HEADING_FONTS)[number]

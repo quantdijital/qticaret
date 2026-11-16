@@ -95,6 +95,10 @@ jobs:
           REDIS_URL: redis://localhost:6379
       # --continue: every failing package is reported, not only the first
       - run: pnpm turbo run lint typecheck --continue
+      # Product videos (adr/0069): the backend's unit tests run the real ffprobe
+      # on clips ffmpeg makes in the test; without it they skip and say so
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
       # One package's tests at a time: beside lint and typecheck the runner's
       # four cores starved the UI suites past their 5 s per-test timeout
       - run: pnpm turbo run test --continue --concurrency=1
@@ -167,6 +171,11 @@ jobs:
             echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
+      # Product videos (adr/0069): the video upload suite needs ffmpeg and
+      # ffprobe on the server; any HTTP shard may hold it
+      - name: Install ffmpeg
+        if: matrix.suite != 'modules'
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
       # One jest worker, replaced when its heap grows (jest.config.js)
       - name: Run the suite
         env:

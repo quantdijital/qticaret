@@ -182,6 +182,8 @@ export function StoreBrandCard({
           />
         </div>
         <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+          {/* Where the logos show: the header and the footer */}
+          <p>{t(`${B}.logosUse`)}</p>
           <p>{t(`${B}.formats`)}</p>
           {/* An SVG's font declarations are cleaned away: text in a logo keeps its look as outlines */}
           <p>{t(`${B}.svgText`)}</p>
