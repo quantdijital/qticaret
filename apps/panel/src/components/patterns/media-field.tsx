@@ -49,6 +49,8 @@ interface MediaFieldProps {
   /** The card's own title already names it: the label is read out, not shown. */
   hideLabel?: boolean
   pickerTitle?: string
+  /** An SVG may be chosen: the shop's logos and site icon only (the server refuses it elsewhere). */
+  svg?: boolean
   /** What goes with the picture (its alt text), beside it while there is one. */
   children?: ReactNode
   /** Beside the empty frame in place of the hint: what shows without a picture. */
@@ -78,6 +80,7 @@ export function MediaField({
   inline = false,
   hideLabel = false,
   pickerTitle,
+  svg = false,
   children,
   emptyAside,
 }: MediaFieldProps) {
@@ -92,7 +95,7 @@ export function MediaField({
     if (!file) {
       return
     }
-    const problem = fileProblem(file)
+    const problem = fileProblem(file, svg)
     if (problem) {
       toast.error(`${file.name}: ${t(`media.upload.problem.${problem}`)}`)
       return
@@ -218,6 +221,7 @@ export function MediaField({
         open={picking}
         onOpenChange={setPicking}
         title={pickerTitle ?? label}
+        svg={svg}
         onSelect={([asset]) => {
           if (asset) {
             onChange(asset)

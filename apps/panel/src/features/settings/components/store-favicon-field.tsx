@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { MediaField } from "@/components/patterns/media-field"
-import { faviconRefusal, faviconWarnings } from "@/features/settings/favicon"
+import { faviconRefusal, faviconWarnings, isSvgIcon } from "@/features/settings/favicon"
 
 const F = "settings.store.brand.favicon"
 
@@ -65,7 +65,7 @@ export function StoreFaviconField({
   const { t } = useTranslation()
   const [size, setSize] = useState<{ url: string; width: number; height: number } | null>(null)
   // Measured for this address only: a new choice is measured again as it loads
-  const warnings = faviconWarnings(size?.url === url ? size : null)
+  const warnings = faviconWarnings(size?.url === url ? size : null, isSvgIcon(url))
   return (
     <MediaField
       id="store-favicon"
@@ -73,6 +73,7 @@ export function StoreFaviconField({
       hint={t(`${F}.hint`)}
       value={url || null}
       frame="square"
+      svg
       inline
       emptyText={t(`${F}.none`)}
       emptyAside={<p className="text-xs text-muted-foreground">{t(`${F}.empty`)}</p>}

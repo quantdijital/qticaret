@@ -2,7 +2,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { FAVICON_MAX_BYTES, faviconRefusal, faviconWarnings } from "@/features/settings/favicon"
+import { fileProblem } from "@/features/media/api/media"
+import {
+  FAVICON_MAX_BYTES,
+  FAVICON_SVG_MAX_BYTES,
+  faviconRefusal,
+  faviconWarnings,
+  isSvgIcon,
+} from "@/features/settings/favicon"
 import { StoreFaviconField } from "./store-favicon-field"
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: vi.fn() } } }))
@@ -53,6 +60,31 @@ describe("the site icon's rules (the server's, said at once)", () => {
       "settings.store.brand.favicon.small",
     ])
     expect(faviconWarnings(null)).toEqual([])
+  })
+
+  it("takes an SVG within 100 KB, square by its box and never too small", () => {
+    expect(faviconRefusal({ mime_type: "image/svg+xml", size: FAVICON_SVG_MAX_BYTES })).toBeNull()
+    expect(faviconRefusal({ mime_type: "image/svg+xml", size: FAVICON_SVG_MAX_BYTES + 1 })).toBe(
+      "settings.store.brand.favicon.tooLarge"
+    )
+    expect(faviconWarnings({ width: 16, height: 16 }, true)).toEqual([])
+    expect(faviconWarnings({ width: 32, height: 16 }, true)).toEqual([
+      "settings.store.brand.favicon.notSquare",
+    ])
+    expect(isSvgIcon("https://cdn.ornek.com/simge.svg?v=2")).toBe(true)
+    expect(isSvgIcon(ICON)).toBe(false)
+  })
+
+  it("offers an SVG to the logo and site icon pickers only", () => {
+    const svg = new File(["<svg/>"], "logo.svg", { type: "image/svg+xml" })
+    expect(fileProblem(svg)).toBe("type")
+    expect(fileProblem(svg, true)).toBeNull()
+    expect(
+      fileProblem(
+        new File([new Uint8Array(201 * 1024)], "big.svg", { type: "image/svg+xml" }),
+        true
+      )
+    ).toBe("svgSize")
   })
 })
 

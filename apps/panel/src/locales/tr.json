@@ -429,21 +429,21 @@
         "name": "Mağaza adı",
         "nameRequired": "Mağazanıza bir ad verin.",
         "light": "Logo (açık zemin)",
-        "lightHint": "Beyaz ya da açık renkli zeminde kullanılır: vitrinin üstü, e-postalar ve Google.",
+        "lightHint": "Beyaz ya da açık renkli zeminde kullanılır: vitrinin üstü, e-postalar ve Google. PNG ya da SVG.",
         "dark": "Logo (koyu zemin)",
-        "darkHint": "Koyu zeminde okunan bir sürüm; isteğe bağlı.",
+        "darkHint": "Koyu zeminde okunan bir sürüm; isteğe bağlı. PNG ya da SVG.",
         "none": "Logo yok",
         "logos": "Logolar",
         "favicon": {
           "title": "Site simgesi",
           "label": "Site simgesi (favicon)",
-          "hint": "Tarayıcı sekmesinde, yer imlerinde ve telefonun ana ekranında görünür. Kare bir PNG yükleyin; 512 × 512 piksel önerilir, en çok 1 MB.",
+          "hint": "Tarayıcı sekmesinde, yer imlerinde ve telefonun ana ekranında görünür. Kare bir PNG (512 × 512 piksel önerilir, en çok 1 MB) ya da SVG (en çok 100 KB) yükleyin.",
           "none": "Simge yok",
-          "empty": "Yüklemezseniz vitrin varsayılan simgeyi gösterir. Kare bir PNG yükleyin; 512 × 512 piksel önerilir, en çok 1 MB.",
+          "empty": "Yüklemezseniz vitrin varsayılan simgeyi gösterir. Kare bir PNG (512 × 512 piksel önerilir, en çok 1 MB) ya da SVG (en çok 100 KB) yükleyin.",
           "tab": "Tarayıcı sekmesi",
           "home": "Ana ekran",
-          "type": "Site simgesi PNG olmalı. Simgenizi PNG olarak kaydedip yükleyin.",
-          "tooLarge": "Site simgesi en çok 1 MB olabilir. Daha küçük bir PNG seçin.",
+          "type": "Site simgesi PNG ya da SVG olmalı.",
+          "tooLarge": "Site simgesi PNG ise en çok 1 MB, SVG ise en çok 100 KB olabilir. Daha küçük bir dosya seçin.",
           "notSquare": "Simge kare değil; tarayıcı onu sıkıştırarak gösterebilir. Kare bir görsel önerilir.",
           "small": "Simge 48 × 48 pikselden küçük; Google arama sonuçlarında gösterilmeyebilir.",
           "unmeasured": "Bu görselin boyutu bilinmiyor. Kütüphaneye yeniden yükleyip seçin."
@@ -10098,7 +10098,8 @@
       "done_other": "{{count}} görsel kütüphaneye eklendi.",
       "problem": {
         "type": "Bu dosya türü yüklenemez",
-        "size": "10 MB'tan büyük"
+        "size": "10 MB'tan büyük",
+        "svgSize": "SVG en çok 200 KB olabilir"
       },
       "status": {
         "waiting": "Sırada",

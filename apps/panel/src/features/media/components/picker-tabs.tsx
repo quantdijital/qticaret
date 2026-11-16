@@ -10,7 +10,12 @@ import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { DialogBody, DialogFooter } from "@qticaret/admin-ui/ui/dialog"
 import { Input } from "@qticaret/admin-ui/ui/input"
-import { importToLibrary, mediaListQuery, useMediaChanged } from "@/features/media/api/media"
+import {
+  importToLibrary,
+  isSvgAsset,
+  mediaListQuery,
+  useMediaChanged,
+} from "@/features/media/api/media"
 import type { MediaAsset } from "@/features/media/api/media"
 import { MediaGrid } from "@/features/media/components/media-grid"
 import { UploadZone } from "@/features/media/components/upload-zone"
@@ -25,10 +30,12 @@ interface TabProps {
   /** How many may still be chosen (a product's room left). */
   max: number
   onChoose: (assets: MediaAsset[]) => void
+  /** SVG offered too (a logo, the site icon); elsewhere the library's SVGs are not shown. */
+  svg?: boolean
 }
 
 /** The library to choose from: search, pages, one or several marked, then "Seç". */
-export function LibraryTab({ multiple, max, onChoose }: TabProps) {
+export function LibraryTab({ multiple, max, onChoose, svg = false }: TabProps) {
   const { t } = useTranslation()
   const [q, setQ] = useState("")
   const [page, setPage] = useState(0)
@@ -66,7 +73,7 @@ export function LibraryTab({ multiple, max, onChoose }: TabProps) {
         ) : (
           <MediaGrid
             dense
-            items={list.data?.media}
+            items={list.data?.media.filter((asset) => svg || !isSvgAsset(asset))}
             loading={list.isPending}
             stale={list.isPlaceholderData}
             selected={new Set(chosen.keys())}
@@ -115,6 +122,7 @@ export function UploadTab({
   max,
   onChoose,
   zone,
+  svg = false,
 }: TabProps & { zone?: Ref<UploadZoneHandle> }) {
   const { t } = useTranslation()
   const [uploaded, setUploaded] = useState<MediaAsset[]>([])
@@ -124,6 +132,7 @@ export function UploadTab({
         <UploadZone
           ref={zone}
           fill
+          svg={svg}
           multiple={multiple}
           onUploaded={(assets, failed) => {
             const usable = assets.slice(0, multiple ? max : 1)

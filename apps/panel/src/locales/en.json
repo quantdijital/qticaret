@@ -429,21 +429,21 @@
         "name": "Shop name",
         "nameRequired": "Give your shop a name.",
         "light": "Logo (light background)",
-        "lightHint": "Used on white or light backgrounds: the top of the storefront, e-mails and Google.",
+        "lightHint": "Used on white or light grounds: the top of the storefront, e-mails and Google. PNG or SVG.",
         "dark": "Logo (dark background)",
-        "darkHint": "A version that reads on dark backgrounds; optional.",
+        "darkHint": "A version that reads on a dark ground; optional. PNG or SVG.",
         "none": "No logo",
         "logos": "Logos",
         "favicon": {
           "title": "Site icon",
           "label": "Site icon (favicon)",
-          "hint": "Shown in the browser tab, bookmarks and on a phone's home screen. Upload a square PNG; 512 × 512 pixels is recommended, at most 1 MB.",
+          "hint": "Shown in the browser tab, bookmarks and on a phone's home screen. Upload a square PNG (512 × 512 pixels recommended, at most 1 MB) or an SVG (at most 100 KB).",
           "none": "No icon",
-          "empty": "Without one the storefront shows its default icon. Upload a square PNG; 512 × 512 pixels is recommended, at most 1 MB.",
+          "empty": "Without one the storefront shows its default icon. Upload a square PNG (512 × 512 pixels recommended, at most 1 MB) or an SVG (at most 100 KB).",
           "tab": "Browser tab",
           "home": "Home screen",
-          "type": "The site icon must be a PNG. Save your icon as a PNG and upload it.",
-          "tooLarge": "The site icon can be at most 1 MB. Choose a smaller PNG.",
+          "type": "The site icon must be a PNG or an SVG.",
+          "tooLarge": "The site icon can be at most 1 MB as a PNG, 100 KB as an SVG. Choose a smaller file.",
           "notSquare": "The icon is not square; the browser may squeeze it. A square image is recommended.",
           "small": "The icon is smaller than 48 × 48 pixels; Google may not show it in search results.",
           "unmeasured": "This image's size is not known. Upload it to the library again and choose it."
@@ -10098,7 +10098,8 @@
       "done_other": "{{count}} images added to the library.",
       "problem": {
         "type": "This file type cannot be uploaded",
-        "size": "Larger than 10 MB"
+        "size": "Larger than 10 MB",
+        "svgSize": "An SVG can be at most 200 KB"
       },
       "status": {
         "waiting": "Waiting",

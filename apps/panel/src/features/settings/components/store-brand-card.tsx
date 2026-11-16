@@ -55,6 +55,7 @@ function LogoSlot({
       hint={t(`${B}.${tone}Hint`)}
       value={url || null}
       frame="logo"
+      svg
       ground={GROUND[tone]}
       emptyText={t(`${B}.none`)}
       onChange={(asset) => {
