@@ -163,6 +163,20 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
 export const DEMO_STOCKED_QUANTITY = 100
 
 /**
+ * The demo's top links ("Üst menü"; the catalog header's strip, the bar
+ * above the others): the storefront's own pages only, which every shop
+ * has (the demo has no content pages, so no "Hakkımızda" or "İletişim").
+ */
+export const DEMO_TOP_LINKS = {
+  title: "Üst bağlantılar",
+  links: [
+    { kind: "system", target: "order_lookup", label: "Sipariş takibi" },
+    { kind: "system", target: "sale", label: null },
+    { kind: "system", target: "reviews", label: "Yorumlar" },
+  ],
+} as const
+
+/**
  * The demo storefront's frame (F18 D3): sample lines and promises, so the
  * frame is seen filled; no links (the demo has no content pages) and no
  * WhatsApp number (a made-up one would reach a stranger).

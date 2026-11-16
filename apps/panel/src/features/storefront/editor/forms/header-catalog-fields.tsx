@@ -53,8 +53,10 @@ function CatalogField({
   const { t } = useTranslation()
   const problemText = useProblemText()
   const id = FIELD_IDS.header(section.id, field)
-  if (field === "search_placeholder") {
-    const error = problemText(problems[field], HEADER_CATALOG_LIMITS.search_placeholder)
+  if (field === "search_placeholder" || field === "strip_note") {
+    // One line of plain words: the search box's, or the strip's note (Ek 2026-11-15)
+    const max = HEADER_CATALOG_LIMITS[field]
+    const error = problemText(problems[field], max)
     return (
       <div className="flex flex-col gap-1.5">
         <label htmlFor={id}>
@@ -62,13 +64,13 @@ function CatalogField({
         </label>
         <Input
           id={id}
-          value={section.search_placeholder ?? ""}
-          maxLength={HEADER_CATALOG_LIMITS.search_placeholder}
+          value={section[field] ?? ""}
+          maxLength={max}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
           onChange={(event) => {
             const words = event.target.value.replace(/\s*[\r\n\t]+\s*/g, " ")
-            onChange({ ...section, search_placeholder: words.trim() === "" ? null : words }, id)
+            onChange({ ...section, [field]: words.trim() === "" ? null : words }, id)
           }}
         />
         {error ? (
@@ -81,17 +83,17 @@ function CatalogField({
       </div>
     )
   }
-  if (field === "highlight_link") {
+  if (field === "highlight_link" || field === "strip_note_link") {
     return (
       <div id={id}>
         <LinkField
           id={`${id}-input`}
-          label={t(`${H}.highlight_link.label`)}
-          hint={t(`${H}.highlight_link.hint`)}
-          link={section.highlight_link}
+          label={t(`${H}.${field}.label`)}
+          hint={t(`${H}.${field}.hint`)}
+          link={section[field]}
           error={problemText(problems[field])}
           onChange={(link, typing) => {
-            onChange({ ...section, highlight_link: link }, typing ? id : undefined)
+            onChange({ ...section, [field]: link }, typing ? id : undefined)
           }}
         />
       </div>
@@ -167,7 +169,8 @@ function CatalogField({
  * 2026-11-15): what it shows and its menu bar's ground open with the
  * header's content, the rest closed in "Diğer ayarlar" (`SectionPanel`).
  * `afterCategories`, a setting of every variant's that belongs beside the
- * "Kategoriler" button (the menus' pictures), stands right under it.
+ * "Kategoriler" button (the menus' pictures), stands right under it;
+ * `beforeSearch` (the search's look) over the search box's own words.
  */
 export function HeaderCatalogFields({
   section,
@@ -175,12 +178,14 @@ export function HeaderCatalogFields({
   problems,
   onChange,
   afterCategories,
+  beforeSearch,
 }: {
   section: HeaderCatalogSection
   group: FieldGroupName
   problems: SectionProblems
   onChange: Change
   afterCategories?: ReactNode
+  beforeSearch?: ReactNode
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -188,6 +193,7 @@ export function HeaderCatalogFields({
         .filter((field) => headerCatalogOffers(section, field))
         .map((field) => (
           <Fragment key={field}>
+            {field === "search_placeholder" && beforeSearch}
             <CatalogField section={section} field={field} problems={problems} onChange={onChange} />
             {field === "categories_button" && afterCategories}
           </Fragment>

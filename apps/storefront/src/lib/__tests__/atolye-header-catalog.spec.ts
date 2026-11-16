@@ -76,6 +76,44 @@ describe("the catalog header", () => {
     expect(html).toMatch(/data-cm-top="0"[^>]*aria-expanded="false"/)
   })
 
+  it("draws a category's two-column panel as tall as its own rows, as a one-column one", () => {
+    const kids = (n: number) =>
+      Array.from({ length: n }, (_, at) => ({
+        label: `Alt ${String(at + 1)}`,
+        path: `/kategori/cok/${String(at + 1)}`,
+      }))
+    for (const images of ["all", "submenus", "off"] as const) {
+      const html = renderFrame(
+        atolyeTheme,
+        shopFixture({
+          headerBar: {
+            id: "mainheader",
+            variant: "catalog",
+            sticky: true,
+            menuImages: images,
+            catalog: {
+              ...CATALOG,
+              categories: [
+                { label: "Az", path: "/kategori/az", children: kids(2) },
+                { label: "Çok", path: "/kategori/cok", children: kids(7) },
+              ],
+            },
+          },
+        })
+      )
+      const panels = [...html.matchAll(/data-cm-sub="\d"[^>]*class="([^"]+)"/g)].map(
+        (found) => found[1] ?? ""
+      )
+      expect(panels).toHaveLength(2)
+      // Owner 2026-11-15: the wide panel stood the whole column's height, empty under its rows
+      for (const panel of panels) {
+        expect(panel).not.toContain("min-h-")
+      }
+      expect(panels[1]).toContain("w-[min(34rem")
+      expect(html).toContain('class="columns-2 gap-x-6"')
+    }
+  })
+
   it("takes the shop's words, a written search button, the highlighted link and the cart's subtotal", () => {
     const html = renderFrame(
       atolyeTheme,

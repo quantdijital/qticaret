@@ -32,7 +32,10 @@ describe("iyzico client against the fake server", () => {
     api = createIyzicoApi({
       sandboxUrl: sandbox.url,
       liveUrl: live.url,
-      timeoutMs: 500,
+      // No case here waits on the timeout (the hanging one is aborted). At 500 ms a busy CI
+      // runner timed a local answer out, the read was asked again and the fake counted
+      // both (or the retry missed the answer a case had queued)
+      timeoutMs: 10_000,
       retry: { baseDelayMs: 1 },
       sleep: () => Promise.resolve(),
     })

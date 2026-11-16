@@ -16,6 +16,7 @@ import {
   serve,
 } from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
+import { openGroup, openTab } from "./settings-groups.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 const admin = vi.hoisted<AdminMock>(() => ({
@@ -76,7 +77,10 @@ describe("the product and category pages' section forms", HEAVY, () => {
 
   it("writes FAQ questions and answers, an answer with the shop's details, and orders them", async () => {
     await openOn("Kategori sayfası", "Sık sorulan sorular")
+    // Where it stands is under "Stil", its questions under "İçerik"
+    await openGroup(user, "Yeri")
     expect(screen.getByRole("radio", { name: "Izgaranın üstü" })).toBeChecked()
+    await openTab(user, "content")
 
     await user.click(screen.getByRole("button", { name: "Soru ekle" }))
     expect(screen.getAllByRole("alert").map((alert) => alert.textContent)).toEqual([
@@ -118,6 +122,7 @@ describe("the product and category pages' section forms", HEAVY, () => {
   it("moves a category page's section below the products from its settings", async () => {
     await openOn("Kategori sayfası", "Sık sorulan sorular")
 
+    await openGroup(user, "Yeri")
     await user.click(screen.getByRole("radio", { name: "Izgaranın altı" }))
     await saved((doc) => {
       // The grid (the main section) stays first, in no place
@@ -164,18 +169,21 @@ describe("the product and category pages' section forms", HEAVY, () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Bir koleksiyon seçin.")
   })
 
-  it("stands related products' cards in a row open in Diziliş, as a product rail's (denetim 1.15)", async () => {
+  it("stands related products' cards in a row in Stil › Diziliş, as a product rail's (denetim 1.15)", async () => {
     await openOn("Ürün sayfası", "Benzer ürünler")
-    const layout = screen.getByRole("group", { name: "Diziliş" })
+    const content = screen.getByRole("group", { name: "İçerik" })
+    expect(within(content).queryByRole("radiogroup", { name: /Satırda ürün/ })).toBeNull()
+    await openTab(user, "advanced")
+    expect(screen.getByRole("button", { name: "Boşluk" })).toHaveAttribute("aria-expanded", "false")
+    await openTab(user, "style")
+    expect(screen.getByRole("button", { name: "Diziliş" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
+    const layout = await openGroup(user, "Diziliş")
     expect(within(layout).getByRole("button", { name: "Diziliş" })).toHaveAttribute(
       "aria-expanded",
       "true"
-    )
-    const content = screen.getByRole("group", { name: "İçerik" })
-    expect(within(content).queryByRole("radiogroup", { name: /Satırda ürün/ })).toBeNull()
-    expect(screen.getByRole("button", { name: "Diğer ayarlar" })).toHaveAttribute(
-      "aria-expanded",
-      "false"
     )
 
     const columns = within(layout).getByRole("radiogroup", { name: "Satırda ürün columns" })

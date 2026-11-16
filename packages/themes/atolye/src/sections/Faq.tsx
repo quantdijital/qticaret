@@ -30,7 +30,7 @@ export function Faq({
   // The editor's field marks (adr/0065 Faz 2b): each row its place in the design
   const on = section.editor
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap)">
+    <section aria-labelledby={id} className="gf-section">
       <Container className="grid gap-6 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-(--gap-columns) lg:gap-y-8">
         <h2 id={id} className="lg:col-span-4" {...fieldMark(on, "title")}>
           {section.title ?? t("faq.title")}

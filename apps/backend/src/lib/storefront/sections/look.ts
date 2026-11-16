@@ -21,6 +21,7 @@ import { base, device } from "../layout-fields"
  */
 export const SECTION_LOOK = {
   space_outer: ["none", "small", "medium", "large"],
+  space_below: ["none", "small", "medium", "large"],
   space_inner: ["none", "small", "medium", "large"],
   ground: ["page", "well", "stage", "primary"],
   align: ["start", "center"],
@@ -49,6 +50,7 @@ const step = <F extends LookField>(field: F) => {
 export const sectionLook = z
   .object({
     space_outer: step("space_outer"),
+    space_below: step("space_below"),
     space_inner: step("space_inner"),
     ground: step("ground"),
     align: step("align"),

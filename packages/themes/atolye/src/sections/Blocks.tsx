@@ -10,6 +10,7 @@ import { Aisles } from "./Aisles"
 import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
 import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
+import { CategoryCollage } from "./CategoryCollage"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
 import { GoogleRating } from "./GoogleRating"
@@ -58,12 +59,15 @@ function BlockView({
   block,
   next,
   first,
+  afterOpening,
   context,
 }: {
   block: Block
   /** The block after it: a help section right after the FAQ joins it there. */
   next: Block | undefined
   first: boolean
+  /** Right after the page's picture opening: a trust strip keeps close to it. */
+  afterOpening: boolean
   context: Context
 }) {
   const { t, subscribe, quickAdd } = context
@@ -99,12 +103,26 @@ function BlockView({
           label={t("footer.trust")}
           variant={drawnVariant("trust_badges", section.variant, PROMISE_VARIANTS)}
           marks={section.editor}
+          hug={afterOpening}
         />
       )
-    case "categories":
-      // The linked cards when the theme draws them and the view has them; else today's tiles
-      return drawnVariant("categories", section.variant, CATEGORY_VARIANTS) === "linked" &&
-        section.linked ? (
+    case "categories": {
+      // The variant's drawing when the theme draws it and the view has it; else today's tiles
+      const drawn = drawnVariant("categories", section.variant, CATEGORY_VARIANTS)
+      if (drawn === "collage" && section.collage) {
+        return (
+          <CategoryCollage
+            id={headingId(section.id)}
+            title={section.title}
+            view={section.collage}
+            all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+            ownAll={Boolean(section.more)}
+            t={t}
+            marks={section.editor}
+          />
+        )
+      }
+      return drawn === "linked" && section.linked ? (
         <CategoryCards
           id={headingId(section.id)}
           title={section.title}
@@ -125,6 +143,7 @@ function BlockView({
           marks={section.editor}
         />
       )
+    }
     case "banner":
       return <Campaign section={section} label={t("home.banner")} first={first} />
     case "featured_product":
@@ -203,6 +222,7 @@ export function Blocks({
           block={block}
           next={blocks[index + 1]}
           first={heroFirst && index === 0}
+          afterOpening={heroFirst && index === 1}
           context={context}
         />
       </Look>

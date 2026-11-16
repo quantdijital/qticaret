@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { SEO_REDIRECTS_MODULE } from "../../src/modules/seo-redirects"
 import type SeoRedirectsModuleService from "../../src/modules/seo-redirects/service"
 import { createAdminUser } from "../helpers/admin"
+import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
@@ -142,9 +143,16 @@ medusaIntegrationTestRunner({
       expect(await settled("/urun/keten-gomlek", "gone")).toMatchObject({ type: "gone" })
       expect(await resolve("/urun/seramik-kupa")).toMatchObject({ type: "gone" })
 
-      const listed = await http.get<{ paths: { path: string; answer: string; name: string }[] }>(
-        "/admin/seo/old-paths?q=gomlek",
-        { headers: admin.headers }
+      // "gone" is answered as soon as the product is deleted; the subscriber that keeps its
+      // path among the old ones may come a moment later on a busy runner
+      const listed = await eventually(
+        () =>
+          http.get<{ paths: { path: string; answer: string; name: string }[] }>(
+            "/admin/seo/old-paths?q=gomlek",
+            { headers: admin.headers }
+          ),
+        (answer) => answer.data.paths.length > 0,
+        100
       )
       expect(listed.data.paths).toEqual([
         expect.objectContaining({

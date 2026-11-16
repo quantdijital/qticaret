@@ -10,9 +10,10 @@ import type { SectionLook } from "./section-look.js"
 import type { SectionDevice } from "./section-device.js"
 import type { AnnouncementSettings } from "./section-announcement.js"
 import type { FaqSettings } from "./section-faq.js"
+import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
-import type { StoreCategoriesLinked } from "./section-categories.js"
+import type { StoreCategoriesCollage, StoreCategoriesLinked } from "./section-categories.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
 import type { ScrollerSettings, SliderSettings } from "./section-scroller.js"
@@ -80,7 +81,8 @@ export interface StoreSectionLookPart {
 /**
  * The category cards: today's picture tiles (`tiles`, and absent from a
  * backend before variants) or, as `linked` (adr/0049 Ek 2026-11-15), each
- * category a card with its first subcategories as links. A reader takes a
+ * category a card with its first subcategories as links, or as `collage`,
+ * photo-led cards filling each row. A reader takes a
  * variant it does not know as `tiles` and leaves the other's fields unread.
  */
 export type StoreCategoriesSection = {
@@ -92,7 +94,7 @@ export type StoreCategoriesSection = {
   show_count?: boolean
   /** The link beside the title; none (or absent): the storefront's "every category". */
   more?: StoreLayoutLink | null
-} & ({ variant?: "tiles" } | StoreCategoriesLinked)
+} & ({ variant?: "tiles" } | StoreCategoriesLinked | StoreCategoriesCollage)
 
 export type StoreLayoutSection = StoreSectionLookPart &
   (
@@ -197,15 +199,19 @@ export interface StoreHeroSlide {
   tone: "light" | "dark"
 }
 
-/** One live product up close on the home page (adr/0046 Ek 2026-11-05); the storefront reads it. */
-export interface StoreFeaturedProductSection {
+/**
+ * One live product up close on the home page (adr/0046 Ek 2026-11-05); the
+ * storefront reads it. Its settings (adr/0049 Ek 2026-11-15) are printed
+ * only off their default: one absent reads as it (`featuredProductSettingsOf`).
+ */
+export type StoreFeaturedProductSection = {
   id: string
   type: "featured_product"
   title: string | null
   /** The shop's line about it, its `{tokens}` filled; null: none. */
   text: string | null
   product_id: string
-}
+} & Partial<FeaturedProductSettings>
 
 /**
  * Questions and answers in plain text, the answers' `{tokens}` already

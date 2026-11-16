@@ -31,7 +31,7 @@ function MissingPage({
   const words = WORDS[kind]
   const id = kind === "gone" ? "kaldirildi" : "bulunamadi"
   return (
-    <Container className="flex flex-col gap-(--section-gap-s) pt-6 lg:pt-10">
+    <Container className="flex flex-col gap-(--section-gap) pt-6 lg:pt-10">
       <section
         aria-labelledby={id}
         className="gf-stage grid gap-8 overflow-hidden rounded-tile p-6 sm:p-10 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-16"

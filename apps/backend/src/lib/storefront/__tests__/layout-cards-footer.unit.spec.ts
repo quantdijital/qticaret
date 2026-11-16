@@ -7,6 +7,8 @@ import {
   CATEGORY_CARD_DEFAULTS,
   CATEGORY_CARD_LIMITS,
   CATEGORY_CARD_SETTINGS,
+  CATEGORY_COLLAGE_DEFAULTS,
+  CATEGORY_COLLAGE_SETTINGS,
   categories,
 } from "../sections/categories"
 import { FOOTER_BAR_DEFAULTS, FOOTER_BAR_SETTINGS, PAYMENT_BADGES } from "../sections/footer-bar"
@@ -122,6 +124,51 @@ describe("the category cards' linked variant (adr/0049 Ek 2026-11-15)", () => {
     expect(CATEGORY_CARD_SETTINGS).toEqual(own["CATEGORY_CARD_SETTINGS"])
     expect(CATEGORY_CARD_LIMITS).toEqual(own["CATEGORY_CARD_LIMITS"])
     expect(CATEGORY_CARD_DEFAULTS).toEqual(own["CATEGORY_CARD_DEFAULTS"])
+    expect(CATEGORY_COLLAGE_SETTINGS).toEqual(own["CATEGORY_COLLAGE_SETTINGS"])
+    expect(CATEGORY_COLLAGE_DEFAULTS).toEqual(own["CATEGORY_COLLAGE_DEFAULTS"])
+  })
+})
+
+describe("the category cards' collage variant (adr/0049 Ek 2026-11-15)", () => {
+  it("fills the collage's settings with its own defaults, keeping what was saved", () => {
+    const [filled] = layoutDocument.parse({ home: [cards({ variant: "collage" })] }).home
+    const [kept] = layoutDocument.parse({
+      home: [cards({ variant: "collage", columns: 3, height: "high", lead: "off", links: 0 })],
+    }).home
+
+    expect(filled).toMatchObject({ variant: "collage", ...CATEGORY_COLLAGE_DEFAULTS })
+    expect(kept).toMatchObject({ columns: 3, height: "high", lead: "off", links: 0 })
+  })
+
+  it("refuses steps off its lists and the linked cards' own fields", () => {
+    const collage = (more: Record<string, unknown>) => ({
+      home: [cards({ variant: "collage", ...more })],
+    })
+    expect(issues(collage({ height: "tall" }))).toEqual(["storefront_layout.section_invalid"])
+    expect(issues(collage({ lead: true }))).toEqual(["storefront_layout.section_invalid"])
+    expect(issues(collage({ columns: 5 }))).toEqual(["storefront_layout.section_invalid"])
+    expect(issues(collage({ links: 9 }))).toHaveLength(1)
+    expect(issues(collage({ frame: "lined" }))).toHaveLength(1)
+    expect(issues(collage({ image_position: "top" }))).toHaveLength(1)
+    expect(issues(collage({ columns_mobile: 2, height: "low", links: 8 }))).toEqual([])
+  })
+
+  it("prints the collage with its settings, the phone's columns only when two", async () => {
+    const one = categories.parse(cards({ ...ALWAYS, variant: "collage" }))
+    const two = categories.parse(cards({ ...ALWAYS, variant: "collage", columns_mobile: 2 }))
+
+    expect(await hydrateSection(one, at)).toEqual({
+      id: "kategori01",
+      type: "categories",
+      title: null,
+      category_ids: [],
+      variant: "collage",
+      columns: 4,
+      height: "medium",
+      lead: "on",
+      links: 4,
+    })
+    expect(await hydrateSection(two, at)).toMatchObject({ columns_mobile: 2 })
   })
 })
 

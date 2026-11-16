@@ -132,9 +132,15 @@ medusaIntegrationTestRunner({
       await settled(orderId, 2)
       const [meta] = fake.metaEvents
       const [ga4] = fake.ga4Requests
-      const [kept] = await getContainer()
-        .resolve<ConversionsModuleService>(CONVERSIONS_MODULE)
-        .listTrackingConsents({ order_id: orderId })
+      // The send step forgets the browser after both events are recorded: waited for too
+      const [kept] = await eventually(
+        () =>
+          getContainer()
+            .resolve<ConversionsModuleService>(CONVERSIONS_MODULE)
+            .listTrackingConsents({ order_id: orderId }),
+        (rows) => rows[0]?.client_encrypted === null,
+        100
+      )
 
       expect(meta).toMatchObject({
         event_name: "Purchase",

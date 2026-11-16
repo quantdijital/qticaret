@@ -58,4 +58,43 @@ describe("breakOut", () => {
     expect(html).toContain(`window.top.location.href="/"`)
     expect(html).toContain(`<a href="/" target="_top">`)
   })
+
+  // The address is parsed before it is checked: a backslash reads as a slash, and a tab
+  // or line break is dropped, so each of these would have been `//evil.example`
+  it.each([
+    ["a backslash", "https://shop.test/\\evil.example/x"],
+    ["a tab", "https://shop.test/\t/evil.example/x"],
+    ["a line break", "https://shop.test/\n/evil.example/x"],
+  ])("sends the window home for a path that starts with %s", async (_, url) => {
+    const html = await bodyOf(breakOut(framedRequest(url), "Devam et"))
+
+    expect(html).toContain(`window.top.location.href="/"`)
+    expect(html).toContain(`<a href="/" target="_top">`)
+  })
+
+  it("keeps an encoded tab as a path on this site", async () => {
+    const html = await bodyOf(
+      breakOut(framedRequest("https://shop.test/%09/evil.example"), "Devam et")
+    )
+
+    expect(html).toContain(`window.top.location.href="/%09/evil.example"`)
+    expect(html).toContain(`<a href="/%09/evil.example" target="_top">`)
+  })
+
+  it("never lets a line separator in the query end the script's string", async () => {
+    // Built from code points: the characters themselves would end lines in this file
+    const [lineSeparator, paragraphSeparator] = [0x2028, 0x2029].map((code) =>
+      String.fromCharCode(code)
+    )
+    const html = await bodyOf(
+      breakOut(
+        framedRequest(`https://shop.test/odeme/sonuc?x=a${lineSeparator}b${paragraphSeparator}c`),
+        "Devam et"
+      )
+    )
+
+    expect(html).not.toContain(lineSeparator)
+    expect(html).not.toContain(paragraphSeparator)
+    expect(html).toContain(`window.top.location.href="/odeme/sonuc?x=a%E2%80%A8b%E2%80%A9c"`)
+  })
 })

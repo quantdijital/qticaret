@@ -150,7 +150,11 @@ export function HeroCatalog({
         catalog.slides ? fieldKey("slides", catalog.slides[index]?.at ?? index, key) : key
       )
   return (
-    <section aria-labelledby={id} data-gf-catalog-hero="" className="pt-3 lg:pt-6">
+    <section
+      aria-labelledby={id}
+      data-gf-catalog-hero=""
+      className={first ? "pt-3 lg:pt-6" : "gf-section"}
+    >
       {first && opening && lead && (
         <Preload image={lead} sizes={pictureOnly(opening) ? WHOLE_SIZES : PHOTO_SIZES} />
       )}

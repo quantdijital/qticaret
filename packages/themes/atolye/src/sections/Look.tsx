@@ -5,7 +5,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 
 /**
  * A section's look (adr/0049 Ek 2026-11-14 §6) in this theme: a box around
- * the section that names each step the shop set (`data-outer`, `data-inner`,
+ * the section that names each step the shop set (`data-outer`, `data-below`, `data-inner`,
  * `data-ground`, `data-align`, `data-width`); `look.css` maps them onto the
  * theme's own scale (section gaps, the spacing scale, its measured grounds,
  * the container). No inline style: the steps are attributes, the values
@@ -52,6 +52,7 @@ export function Look({
     <div
       className={cn("group/look gf-look", look.ground === "stage" && "gf-stage")}
       data-outer={look.space_outer}
+      data-below={look.space_below}
       data-inner={look.space_inner}
       data-ground={look.ground}
       data-align={look.align}

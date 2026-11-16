@@ -57,6 +57,7 @@ export function SearchBox({
   browse = [],
   written = false,
   marks = false,
+  onLeave,
   className,
 }: {
   id: string
@@ -69,6 +70,8 @@ export function SearchBox({
   written?: boolean
   /** The theme editor's live preview (adr/0065 Faz 2b): the box carries the search words' field mark. */
   marks?: boolean | undefined
+  /** A box that opens on a press (`SearchToggle`, `SearchDrop`): Escape with no panel closes it, the words kept. */
+  onLeave?: (() => void) | undefined
   className?: string
 }) {
   const hydrated = useHydrated()
@@ -178,11 +181,13 @@ export function SearchBox({
   const keyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Escape") {
       // The panel first, then the words; never the browser's own clearing
-      if (shown || text) {
+      if (shown || text || onLeave) {
         event.preventDefault()
       }
       if (shown) {
         close()
+      } else if (onLeave) {
+        onLeave()
       } else if (text) {
         clear()
       }

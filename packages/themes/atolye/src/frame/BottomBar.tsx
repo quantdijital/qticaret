@@ -25,7 +25,8 @@ const ITEM =
  * on a tinted pill in the ink, `aria-current`. Its height is held at the
  * page's foot from the first paint, so nothing moves and the footer's
  * last line stays clear. "Kategoriler" opens the menu sheet and "Ara"
- * the header's search field where the visitor is (links without script).
+ * the header's search field where the visitor is, or drops it from the
+ * top when the header draws its search as an icon (links without script).
  */
 export function BottomBar({
   nav,

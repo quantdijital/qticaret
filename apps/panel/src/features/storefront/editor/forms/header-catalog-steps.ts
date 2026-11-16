@@ -28,18 +28,18 @@ export const isHeaderCatalogStep = (field: string): field is HeaderCatalogStepFi
  * Whether the panel offers a catalog setting as the bar stands
  * (bilesen-standardi §0, "geniş düşün, az göster"): the strip's written
  * "Hesabım" only while the tools stand on the menu bar (in the top row
- * they carry it), the strip itself only while it has something to hold
- * (the top links or that "Hesabım").
+ * they carry it), the strip's note and its link only while the strip is
+ * on. The strip itself is always offered: its note may be all it holds.
  */
 export function headerCatalogOffers(
-  section: Pick<HeaderCatalogFields, "tools_place" | "top_links">,
+  section: Pick<HeaderCatalogFields, "tools_place" | "utility_bar">,
   field: keyof HeaderCatalogFields
 ): boolean {
   if (field === "account_text") {
     return section.tools_place !== "row"
   }
-  if (field === "utility_bar") {
-    return section.tools_place !== "row" || section.top_links !== "bar"
+  if (field === "strip_note" || field === "strip_note_link") {
+    return section.utility_bar
   }
   return true
 }

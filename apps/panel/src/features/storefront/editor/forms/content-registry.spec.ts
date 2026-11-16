@@ -81,6 +81,41 @@ describe("the content fields' register", () => {
     ])
   })
 
+  it("puts the featured product's photographs layout in Diziliş, its steps searchable", () => {
+    const featured = newHomeSection("featured_product", "yakin00001")
+    expect(keys(featured)).toEqual(["layout:gallery"])
+    const [gallery] = contentFields(featured)
+    expect(gallery?.options.map((key) => i18next.t(key, { lng: "tr" }))).toEqual([
+      "Kolaj",
+      "Çapraz şeritler",
+    ])
+  })
+
+  it("adds the strips' look under it while the strips are chosen (adr/0049 Ek 2026-11-16)", () => {
+    const featured = newHomeSection("featured_product", "yakin00001")
+    const strips = { ...featured, gallery: "strips" } as AnySection
+    expect(keys(strips)).toEqual([
+      "layout:gallery",
+      "layout:strips_layout",
+      "layout:strips_slant",
+      "layout:strips_line",
+      "layout:strips_overlap",
+      "layout:strips_dim",
+    ])
+    const named = contentFields(strips).map((field) => [
+      i18next.t(field.label, { lng: "tr" }),
+      i18next.t(field.term ?? "", { lng: "tr" }),
+      field.options.map((key) => i18next.t(key, { lng: "tr" })).join(" / "),
+    ])
+    expect(named.slice(1)).toEqual([
+      ["Şeritlerin yeri", "strips_layout", "Yazının yanında / Boydan boya"],
+      ["Eğim", "strips_slant", "Hafif / Orta / Keskin"],
+      ["Çizgi kalınlığı", "strips_line", "Yok / İnce / Orta / Kalın"],
+      ["Üst üste bindir", "strips_overlap", ""],
+      ["Diğerlerini karart", "strips_dim", ""],
+    ])
+  })
+
   it("names the catalogue opening's list count, product counts and prices", () => {
     const hero = switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list")
     expect(keys(hero)).toEqual([
@@ -127,6 +162,7 @@ describe("the content fields' register", () => {
       },
       switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list"),
       newHomeSection("categories", "kategori01"),
+      newHomeSection("featured_product", "yakin00001"),
     ]
     for (const section of sections) {
       for (const field of contentFields(section)) {

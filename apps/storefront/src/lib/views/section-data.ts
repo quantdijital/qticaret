@@ -3,14 +3,16 @@ import type {
   CardVariant,
   RelatedSource,
   StoreLayoutSection,
+  StoreBrand,
   StoreProduct,
   StoreReviewPhoto,
 } from "@qticaret/types"
 import type {
   CategoryCardView,
   CustomerPhotoView,
-  LinkView,
+  ImageView,
   ProductCardView,
+  SectionBrandView,
   Translate,
 } from "@qticaret/ui"
 import { t as words } from "@/lib/i18n"
@@ -192,8 +194,22 @@ export async function categoryLinks(ids: readonly string[]): Promise<CategoryCar
   return named.map(({ card }) => card)
 }
 
-export async function brandLinks(ids: readonly string[]): Promise<LinkView[]> {
-  const { brands } = await storeGet<{ brands: { id: string; name: string }[] }>("/store/brands", {
+// A brand's logo is the shop's own upload: one file, no versions, its size read by the theme's box
+const brandLogo = (src: string, name: string): ImageView => ({
+  src,
+  alt: name,
+  width: null,
+  height: null,
+  sources: { avif: null, webp: null },
+})
+
+/**
+ * The brands a section names (or every one), each at its page with its
+ * logo when it has one: the logo stands for the name, so its alt text is
+ * the name (`/markalar` prints the name beside it, alt empty).
+ */
+export async function brandLinks(ids: readonly string[]): Promise<SectionBrandView[]> {
+  const { brands } = await storeGet<{ brands: StoreBrand[] }>("/store/brands", {
     limit: 100,
   })
   const chosen =
@@ -204,7 +220,12 @@ export async function brandLinks(ids: readonly string[]): Promise<LinkView[]> {
   )
   return chosen.flatMap((brand) => {
     const path = paths[brand.id]
-    return path ? [{ label: brand.name, path }] : []
+    if (!path) {
+      return []
+    }
+    return brand.logo_url
+      ? [{ label: brand.name, path, logo: brandLogo(brand.logo_url, brand.name) }]
+      : [{ label: brand.name, path }]
   })
 }
 

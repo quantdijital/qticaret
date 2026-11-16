@@ -194,7 +194,7 @@ export function HeroSlider({
       id={headingId(section.id)}
       aria-roledescription="carousel"
       aria-label={words.label}
-      className="pt-3 lg:pt-6"
+      className={first ? "pt-3 lg:pt-6" : "gf-section"}
     >
       {first && opening.mobileImage && (
         <Preload image={opening.mobileImage} sizes={SIZES} media={PHONE} />

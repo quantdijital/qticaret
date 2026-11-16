@@ -57,6 +57,7 @@ medusaIntegrationTestRunner({
         variant: "standard",
         sticky: true,
         menu_images: "submenus",
+        search_style: "field",
         ...ALWAYS,
       })
       expect(opened.draft.footer[0]).toMatchObject({ type: "footer_bar", variant: "ledger" })
@@ -72,6 +73,7 @@ medusaIntegrationTestRunner({
           variant: "standard",
           sticky: true,
           menu_images: "submenus",
+          search_style: "field",
         },
         footer_bar: { id: "mainfooter", type: "footer_bar", variant: "ledger" },
         product_main: { id: "mainproduct", type: "product_main", variant: "standard" },
@@ -105,6 +107,7 @@ medusaIntegrationTestRunner({
             variant: "centered",
             sticky: false,
             menu_images: "all",
+            search_style: "icon",
           },
         ],
         product: [
@@ -129,6 +132,7 @@ medusaIntegrationTestRunner({
           variant: "centered",
           sticky: false,
           menu_images: "all",
+          search_style: "icon",
           ...ALWAYS,
         },
       ])
@@ -143,6 +147,7 @@ medusaIntegrationTestRunner({
         variant: "centered",
         sticky: false,
         menu_images: "all",
+        search_style: "icon",
       })
       expect(after.product.map((section) => section.type)).toEqual(["help"])
       expect(after.main["product_main"]).toMatchObject({ look: { width: "narrow" } })
