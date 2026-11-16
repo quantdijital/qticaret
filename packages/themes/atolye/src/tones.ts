@@ -61,7 +61,9 @@ export const ATOLYE_TONES: Readonly<Record<ThemeBackground, ToneSet>> = {
  * on every section gap (`--section-scale` over `tokens.css`'s gaps, each
  * screen width's own): `normal` is the theme's own and never printed;
  * `compact` brings the gap of 96 / 64 / 48 px (desktop / tablet / phone)
- * to 53 / 35 / 26 px, a dense catalog's rhythm; `roomy` opens it to
+ * to 53 / 35 / 26 px, a dense catalog's rhythm; `tight` (adr/0067 Ek
+ * 2026-11-16) to 34 / 22 / 17 px (33.6 / 22.4 / 16.8, the round factor
+ * closest to the 32 / 24 / 20 px asked for); `roomy` opens it to
  * 115 / 77 / 58 px.
  */
 export const ATOLYE_SECTION_SCALE: Readonly<Record<SectionSpacing, string | null>> = {
