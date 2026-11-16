@@ -89,13 +89,27 @@ medusaIntegrationTestRunner({
         application_method: {
           type: "percentage",
           target_type: "shipping_methods",
+          // 2.21.2 asks a cap of an `each` or `once` promotion: one shipping method
           allocation: "each",
+          max_quantity: 1,
           value: 100,
         },
       })
       const guest = await readyShopperCart(http, getContainer(), shop, store.headers, variantId)
       expect(await adjustmentsOf(guest)).toEqual({ items: 0, shipping: 1 })
       expect((await cartPrices(getContainer(), guest)).codes).toEqual(["KARGOBEDAVA"])
+
+      // The guest's cart taken by the wholesaler: its shipping adjustment and link come off
+      const taken = await plain(
+        http.post(`/store/carts/${guest}/customer`, {}, { headers: customer.headers })
+      )
+      expect(outcome(taken, 200)).toEqual({ status: 200, data: null })
+      expect(await adjustmentsOf(guest)).toEqual({ items: 0, shipping: 0 })
+      expect(await cartPrices(getContainer(), guest)).toEqual({
+        units: [80],
+        discount: 0,
+        codes: [],
+      })
 
       const wholesale = await readyShopperCart(
         http,

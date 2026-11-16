@@ -180,6 +180,19 @@ medusaIntegrationTestRunner({
         status: 200,
         type: "order",
       })
+      // One unit at the level's 80.00 and the seed's 90.00 shipping, no discount
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "order",
+          fields: ["total", "discount_total"],
+          filters: { id: order.data.order?.id ?? "" },
+        })
+      const placed = data[0] as { total: unknown; discount_total: unknown }
+      expect({ total: Number(placed.total), discount: Number(placed.discount_total) }).toEqual({
+        total: 170,
+        discount: 0,
+      })
     })
 
     it("keeps a wholesaler's cart theirs and at wholesale when its e-mail changes", async () => {
