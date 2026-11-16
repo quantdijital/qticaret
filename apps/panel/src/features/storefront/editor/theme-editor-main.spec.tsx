@@ -15,6 +15,7 @@ import {
   serve,
 } from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
+import { openTab } from "./settings-groups.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 const admin = vi.hoisted<AdminMock>(() => ({
@@ -60,9 +61,13 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     await frame()
 
     await user.click(within(tree).getByRole("button", { name: "Üst bilgi" }))
-    const sticky = await screen.findByRole("switch", { name: /^Üst bilgi sabit kalsın/ })
+    await screen.findByRole("searchbox", { name: "Bu bölümün ayarlarında ara" })
+    // Staying at the top is Gelişmiş's one group: open with no header
+    await openTab(user, "advanced")
+    const sticky = screen.getByRole("switch", { name: /^Üst bilgi sabit kalsın/ })
     expect(sticky).toBeChecked()
     // The theme draws the centred header now: offered, with no "in preparation" marker
+    await openTab(user, "style")
     expect(screen.getByRole("radio", { name: "Ortada logo" })).toBeEnabled()
     expect(screen.queryByText(/hazırlanıyor/)).toBeNull()
     expect(screen.getByRole("radio", { name: "Solda logo" })).toBeChecked()
@@ -74,6 +79,7 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     expect(screen.queryByRole("button", { name: "Bölümü kaldır" })).toBeNull()
     expect(screen.queryByText("Görünürlük")).toBeNull()
 
+    await openTab(user, "advanced")
     await user.click(sticky)
     await pass(AUTOSAVE_MS)
     await waitFor(() => {
@@ -85,6 +91,7 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
       })
     })
 
+    await openTab(user, "style")
     await user.click(screen.getByRole("radio", { name: "Ortada logo" }))
     await pass(AUTOSAVE_MS)
     await waitFor(() => {

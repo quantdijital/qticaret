@@ -12,6 +12,7 @@ import { newAnnouncementBar } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
 import { searchSettings } from "../settings-search"
 import { FIELD_IDS, sectionFields } from "./field-registry"
+import { openGroup, openTab } from "../settings-groups.fixtures"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -66,7 +67,8 @@ describe("the announcement bar's settings", () => {
     expect(screen.queryByRole("button", { name: "Hareket" })).toBeNull()
   })
 
-  it("show the turning's settings in an open Hareket group once the lines take turns", async () => {
+  it("show the turning's settings in Stil › Hareket once the lines take turns", async () => {
+    const user = userEvent.setup()
     const changes = renderPanel(bar())
     const mode = field("mode")
     if (!mode) throw new Error("no mode field")
@@ -77,21 +79,32 @@ describe("the announcement bar's settings", () => {
     ).toEqual(["Yalnız ilki", "Sırayla dönsün", "Yan yana"])
     expect(field("interval")).toBeNull()
 
-    await userEvent.click(screen.getByRole("radio", { name: /Sırayla dönsün/ }))
+    await user.click(screen.getByRole("radio", { name: /Sırayla dönsün/ }))
     expect(changes.at(-1)).toMatchObject({ mode: "rotate" })
-    expect(screen.getByRole("button", { name: "Hareket" })).toHaveAttribute("aria-expanded", "true")
-    await userEvent.click(screen.getByRole("radio", { name: /Hızlı/ }))
+    // The group comes in "Stil", closed as every group but the variant
+    expect(field("interval")).not.toBeNull()
+    await openTab(user, "style")
+    expect(screen.getByRole("button", { name: "Hareket" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
+    await openGroup(user, "Hareket")
+    await user.click(screen.getByRole("radio", { name: /Hızlı/ }))
     expect(changes.at(-1)).toMatchObject({ interval: "fast" })
-    await userEvent.click(screen.getByRole("radio", { name: /Üzerine gelince/ }))
+    await user.click(screen.getByRole("radio", { name: /Üzerine gelince/ }))
     expect(changes.at(-1)).toMatchObject({ pause_button: "hover" })
     expect(screen.getByText(/Düğme tamamen kaldırılamaz/)).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("switch", { name: /Üzerine gelince dur/ }))
+    await user.click(screen.getByRole("switch", { name: /Üzerine gelince dur/ }))
     expect(changes.at(-1)).toMatchObject({ hover_pause: "off" })
   })
 
-  it("offer where the lines sit and the bar's size in an open Stil group, even for one line", async () => {
+  it("offer where the lines sit and the bar's size alone in Stil, open, even for one line", async () => {
+    const user = userEvent.setup()
     const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
-    expect(screen.getByRole("button", { name: "Stil" })).toHaveAttribute("aria-expanded", "true")
+    await openTab(user, "style")
+    // "Yazı ve zemin" is the tab's one group: open, with no header to fold it
+    expect(screen.queryByRole("button", { name: "Yazı ve zemin" })).toBeNull()
+    expect(screen.getByRole("group", { name: "Yazı ve zemin" })).toBeInTheDocument()
     const align = field("align")
     const size = field("size")
     if (!align || !size) throw new Error("no align or size field")
@@ -116,13 +129,13 @@ describe("the announcement bar's settings", () => {
     )
     expect(screen.queryByRole("button", { name: "Varsayılana dön" })).toBeNull()
 
-    await userEvent.click(within(align).getByRole("radio", { name: "Orta" }))
+    await user.click(within(align).getByRole("radio", { name: "Orta" }))
     expect(changes.at(-1)).toMatchObject({ align: "center", size: "medium" })
-    await userEvent.click(within(size).getByRole("radio", { name: "Büyük" }))
+    await user.click(within(size).getByRole("radio", { name: "Büyük" }))
     expect(changes.at(-1)).toMatchObject({ align: "center", size: "large" })
     expect(screen.getByText(/bağlantılara değecekse hemen soluna kayar/)).toBeInTheDocument()
 
-    await userEvent.click(within(align).getByRole("button", { name: "Varsayılana dön" }))
+    await user.click(within(align).getByRole("button", { name: "Varsayılana dön" }))
     expect(changes.at(-1)).toMatchObject({ align: "auto", size: "large" })
   })
 

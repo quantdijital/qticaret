@@ -8,6 +8,7 @@ import "@/lib/i18n"
 import type { AnySection } from "@/features/storefront/api/layout"
 import { newHomeSection } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
+import { openTab } from "../settings-groups.fixtures"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -49,8 +50,11 @@ function renderPanel(section: AnySection) {
 
 /** adr/0049 Ek 2026-11-14 §2.6: "Biçim" at the head of a section's settings. */
 describe("the section's variant choice", () => {
-  it("draws each variant in small with its everyday name, the section's own picked", () => {
+  it("draws each variant in small with its everyday name, the section's own picked", async () => {
+    const user = userEvent.setup()
     renderPanel(newHomeSection("trust_badges", "guvenserit"))
+    // Under "Stil", the variant's group the one open at first
+    await openTab(user, "style")
 
     const choice = screen.getByRole("group", { name: "Biçim" })
     const strip = within(choice).getByRole("radio", { name: "Şerit" })
@@ -62,10 +66,12 @@ describe("the section's variant choice", () => {
   })
 
   it("switches the section to the picked variant, one change", async () => {
+    const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("trust_badges", "guvenserit"))
+    await openTab(user, "style")
 
-    await userEvent.click(screen.getByRole("radio", { name: "Çizgili kutular" }))
-    await userEvent.click(screen.getByRole("radio", { name: "Çizgili kutular" }))
+    await user.click(screen.getByRole("radio", { name: "Çizgili kutular" }))
+    await user.click(screen.getByRole("radio", { name: "Çizgili kutular" }))
 
     expect(changes).toEqual([expect.objectContaining({ id: "guvenserit", variant: "lined" })])
     expect(screen.getByRole("radio", { name: "Çizgili kutular" })).toBeChecked()

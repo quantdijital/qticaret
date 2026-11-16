@@ -27,7 +27,7 @@ export function SliderGroups({
 }) {
   const { t } = useTranslation()
   return (
-    <PanelGroup title={t("storefront.editor.panel.scroll")} reveal={reveal("scroll")}>
+    <PanelGroup name="scroll" title={t("storefront.editor.panel.scroll")} reveal={reveal("scroll")}>
       <ScrollerFields
         value={asKit(section)}
         settings={SLIDER_MAIN}

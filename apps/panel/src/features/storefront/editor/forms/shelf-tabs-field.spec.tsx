@@ -11,6 +11,7 @@ import { tabMates } from "@/features/storefront/layout/shelf-tabs"
 import { switchVariant } from "@/features/storefront/layout/variants"
 import { SectionPanel } from "../section-panel"
 import { FIELD_IDS } from "./field-registry"
+import { openGroup } from "../settings-groups.fixtures"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -86,6 +87,7 @@ describe("the rail's tabs switch", () => {
     const user = userEvent.setup()
     const section = rail("bir0000001")
     const changes = renderPanel(section, [rail("iki0000001", { title: "İndirimdekiler" })])
+    await openGroup(user, "Diziliş")
     const box = document.getElementById(FIELD_IDS.shelf(section.id, "tabs"))
     if (!box) throw new Error("the tabs field is not drawn")
     const field = within(box)

@@ -1,12 +1,19 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import type { ReactNode } from "react"
 import { useState } from "react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { i18next } from "@/lib/i18n"
-import type { HeaderBarSection } from "@/features/storefront/api/layout"
+import type { AnySection, HeaderBarSection } from "@/features/storefront/api/layout"
 import { switchVariant } from "@/features/storefront/layout/variants"
+import { SectionPanel } from "../section-panel"
 import { searchSettings } from "../settings-search"
-import { HeaderBarForm } from "./header-bar-form"
+import { openGroup } from "../settings-groups.fixtures"
+
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
+}))
 
 const centered: HeaderBarSection = {
   id: "mainheader",
@@ -20,22 +27,36 @@ const centered: HeaderBarSection = {
   search_style: "field",
 }
 
+/** The bar's panel as the editor holds it: every change kept. */
 function renderBar(section: HeaderBarSection) {
-  const changes: HeaderBarSection[] = []
+  const changes: AnySection[] = []
   function Holder() {
-    const [value, setValue] = useState(section)
+    const [value, setValue] = useState<AnySection>(section)
     return (
-      <HeaderBarForm
+      <SectionPanel
         section={value}
+        group="header"
         problems={{}}
+        canDuplicate={false}
         onChange={(next) => {
           changes.push(next)
           setValue(next)
         }}
+        onPlace={vi.fn()}
+        onBack={vi.fn()}
+        onDuplicate={vi.fn()}
+        onRemove={vi.fn()}
+        badges={[]}
+        onBadges={vi.fn()}
       />
     )
   }
-  render(<Holder />)
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  render(
+    <QueryClientProvider client={client}>
+      <Holder />
+    </QueryClientProvider>
+  )
   return changes
 }
 
@@ -49,8 +70,10 @@ const stepsOf = () => {
 
 /** adr/0049 Ek 2026-11-15: the header search as a box or as an icon that opens it. */
 describe("the header search's look", () => {
-  it("offers the box and the icon, the box (the drawing from before) chosen with no reset", () => {
+  it("offers the box and the icon in İçerik › Arama, the box (the drawing from before) chosen with no reset", async () => {
+    const user = userEvent.setup()
     renderBar(centered)
+    await openGroup(user, "Arama")
     const steps = stepsOf()
     expect(within(steps).getByText("Arama görünümü")).toBeInTheDocument()
     expect(within(steps).getByText("search")).toBeInTheDocument()
@@ -64,10 +87,12 @@ describe("the header search's look", () => {
   })
 
   it("picks the icon and goes back to the box", async () => {
+    const user = userEvent.setup()
     const changes = renderBar(centered)
-    await userEvent.click(screen.getByRole("radio", { name: "Simge, basınca açılır" }))
+    await openGroup(user, "Arama")
+    await user.click(screen.getByRole("radio", { name: "Simge, basınca açılır" }))
     expect(changes.at(-1)).toMatchObject({ variant: "centered", search_style: "icon" })
-    await userEvent.click(within(stepsOf()).getByRole("button", { name: /Varsayılana dön/ }))
+    await user.click(within(stepsOf()).getByRole("button", { name: /Varsayılana dön/ }))
     expect(changes.at(-1)).toMatchObject({ search_style: "field" })
   })
 
@@ -75,6 +100,7 @@ describe("the header search's look", () => {
     const catalog = switchVariant({ ...centered, search_style: "icon" }, "catalog")
     expect(catalog).toMatchObject({ search_style: "icon" })
     expect(switchVariant(catalog, "standard")).toMatchObject({ search_style: "icon" })
+    const user = userEvent.setup()
     const changes = renderBar(catalog)
     const order = [
       ...document.querySelectorAll(
@@ -86,7 +112,8 @@ describe("the header search's look", () => {
       "mainheader-header-search_placeholder",
       "mainheader-header-search_width",
     ])
-    await userEvent.click(within(stepsOf()).getByRole("radio", { name: "Kutu" }))
+    await openGroup(user, "Arama")
+    await user.click(within(stepsOf()).getByRole("radio", { name: "Kutu" }))
     expect(changes.at(-1)).toMatchObject({ variant: "catalog", search_style: "field" })
   })
 
