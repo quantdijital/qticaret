@@ -83,9 +83,15 @@ export async function wholesaleDataFor(
   const tierName = new Map(tiers.map((tier) => [tier.id, tier.name]))
   const placed = await wholesaleOrders(container, { order_ids: orderIds })
   const numbers = await orderNumbers(container, [...placed.keys()])
+  const companies = await liveCompanies(container, accounts)
   return accounts.map((account) => ({
     durum: account.deleted_at ? "silindi" : (STATUS[account.status] ?? account.status),
-    firma_adı: account.company_name,
+    // A bound, live account's company is the customer record's (moved there on activation,
+    // ADR-0068 §1), as the panel names it (`wholesalerNames`); a deleted or pending row keeps its own
+    firma_adı:
+      !account.deleted_at && account.customer_id
+        ? (companies.get(account.customer_id) ?? account.company_name)
+        : account.company_name,
     // Only an old pending invitation keeps these; once active the customer record holds them
     yetkili_adı: account.contact_name,
     e_posta: account.email,
@@ -102,6 +108,34 @@ export async function wholesaleDataFor(
       .filter(([, accountId]) => accountId === account.id)
       .flatMap(([orderId]) => numbers.get(orderId) ?? []),
   }))
+}
+
+/** The company on the customer record of each bound, live account, by customer id. */
+async function liveCompanies(
+  container: Container,
+  accounts: AccountRow[]
+): Promise<Map<string, string | null>> {
+  const ids = [
+    ...new Set(
+      accounts.flatMap((account) =>
+        !account.deleted_at && account.customer_id ? [account.customer_id] : []
+      )
+    ),
+  ]
+  if (ids.length === 0) {
+    return new Map()
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "customer",
+    fields: ["id", "company_name"],
+    filters: { id: ids },
+  })
+  return new Map(
+    (data as { id: string; company_name?: string | null }[]).map((row) => [
+      row.id,
+      row.company_name?.trim() ? row.company_name.trim() : null,
+    ])
+  )
 }
 
 /** The orders' numbers as the customer sees them (`display_id`). */
