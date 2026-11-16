@@ -13,6 +13,7 @@ import type MessagingModuleService from "../../modules/messaging/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { MarketingSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { activeWholesalers } from "../wholesale/marketing"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -114,7 +115,10 @@ export interface AudienceInput {
  * once by keyed hash, less the suppressed, the unconsented, consents İYS
  * has not been told of and, with the shop's frequency cap, anyone another
  * campaign reached within 24 hours. Addresses are hashed here and never
- * leave this function.
+ * leave this function. Active wholesalers are not in any audience at all
+ * (ADR-0068 decision 16: the message shows retail prices and offers),
+ * named by a source or not, under their customer record or a bare
+ * newsletter consent at the same address.
  */
 export async function resolveAudience(container: Container, input: AudienceInput): Promise<Sorted> {
   const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
@@ -122,13 +126,19 @@ export async function resolveAudience(container: Container, input: AudienceInput
   const marketing = (await container
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .getSection("marketing")) as unknown as MarketingSettings
-  const [consents, suppressed, reached] = await Promise.all([
+  const [consents, suppressed, reached, wholesalers] = await Promise.all([
     grantedConsents(messaging, input.channel),
     suppressedHashes(messaging, input.channel),
     container
       .resolve<CampaignsModuleService>(CAMPAIGNS_MODULE)
       .reachedSince(new Date(now.getTime() - DAY_MS), input.campaign_id),
+    activeWholesalers(container),
   ])
+  const wholesaleHashes = new Set(
+    (input.channel === "email" ? [...wholesalers.emails] : wholesalers.phones).flatMap(
+      (address) => messaging.recipientOf(input.channel, address)?.hash ?? []
+    )
+  )
   const candidates: Candidate[] = []
   let invalid = 0
   const seen = new Set<string>()
@@ -137,6 +147,12 @@ export async function resolveAudience(container: Container, input: AudienceInput
     const recipient = address ? messaging.recipientOf(input.channel, address) : null
     // "All consented" names only those with consent: the rest are not in its audience at all
     if (seen.has(customer.id) || (onlyConsented && !(recipient && consents.has(recipient.hash)))) {
+      return
+    }
+    if (
+      wholesalers.customerIds.has(customer.id) ||
+      (recipient && wholesaleHashes.has(recipient.hash))
+    ) {
       return
     }
     seen.add(customer.id)
@@ -163,7 +179,7 @@ export async function resolveAudience(container: Container, input: AudienceInput
     } else {
       // The newsletter's subscribers: consents without a customer record (adr/0050 §3)
       for (const consent of consents.values()) {
-        if (consent.customer_id === null) {
+        if (consent.customer_id === null && !wholesaleHashes.has(consent.recipient_hash)) {
           candidates.push({
             hash: consent.recipient_hash,
             source: "consent",

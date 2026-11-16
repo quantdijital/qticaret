@@ -4988,6 +4988,7 @@
       },
       "block": {
         "no_email": "The cart has no e-mail address; no reminder can be sent.",
+        "wholesale": "This cart is a wholesaler's. A reminder shows retail prices; wholesalers get none.",
         "reminded": "A reminder was already sent for this cart; each cart gets one.",
         "no_consent": "The customer has not consented to commercial e-mail. A reminder is a commercial message; it goes only to those who consented (İYS).",
         "suppressed": "Nothing is sent to this address (it is on the block list).",

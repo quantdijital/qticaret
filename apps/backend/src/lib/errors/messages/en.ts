@@ -435,6 +435,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "customers.note_too_long": "A note can be at most 2000 characters.",
   "abandoned_carts.unknown": "The cart was not found or became an order.",
   "abandoned_carts.no_email": "This cart has no e-mail address.",
+  "abandoned_carts.wholesale": "This cart is a wholesaler's; wholesalers get no cart reminders.",
   "abandoned_carts.no_consent":
     "The customer has not consented to commercial e-mail; reminders go to those who did.",
   "abandoned_carts.suppressed": "Nothing is sent to this address (it is on the block list).",

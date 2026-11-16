@@ -24,6 +24,7 @@ interface SeoPayload {
 - SEO alanları ürün, varyant grubu, kategori, marka, koleksiyon, içerik sayfası, blog yazısı ve facet landing sayfasında aynı arayüzle bulunur.
 - JSON-LD ve meta etiketleri **sunucu tarafında ilk HTML'de** basılır (F18 garantisi). JavaScript ile sonradan enjekte edilen yapılandırılmış veri gecikmeli işlenir veya yok sayılır; canonical/noindex çelişkisi olursa Google hangisini alacağını kendisi seçer (Google, Aralık 2025 JS SEO rehberi).
 - Googlebot HTML'in ilk 2 MB'ını alır; `<head>` ve JSON-LD her zaman HTML'in başında yer alır, inline base64 görsel yasaktır.
+- **Herkese açık fiyat tek kaynaktır (adr/0068 §7):** JSON-LD `Offer`, ürün akışları (Merchant, Meta), site haritası, arama dizini, raflar, `/store/price-display` (paylaşılan önbellekli) ve toplu kampanya e-postası fiyatı müşteri bağlamı olmadan, perakende olarak okur. Toptancı fiyatı yalnız oturum açmış toptancının kişisel uçlarından (`/store/customers/me/wholesale*`, `private, no-store`) gelir; bir toptancı ürün sayfasını açtığında da JSON-LD perakende kalır (botlar giriş yapmaz). Vitrinin paylaşılan önbelleği müşterinin kendi yollarını ve KDV hariç (toptan) fiyat gösterimini hiç tutmaz (`lib/store-api/personal.ts`); toptancının oturumunda analitik olaylar tutarsız gider (`lib/analytics/amounts.ts`). Herkese açık bir okuyucuya müşteri bağlamı eklemek SEO çıktısını kişiye göre değiştirir: yapılmaz.
 
 ## 2. URL ve bilgi mimarisi
 

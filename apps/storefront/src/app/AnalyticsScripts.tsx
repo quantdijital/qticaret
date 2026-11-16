@@ -36,18 +36,21 @@ export function AnalyticsScripts({
   ga4,
   meta,
   adSignals,
+  amounts,
   nonce,
   cart,
 }: {
   ga4: string | null
   meta: string | null
   adSignals: boolean
+  /** False in a signed-in wholesaler's session: events go without prices (ADR-0068 §7). */
+  amounts: boolean
   nonce: string | undefined
   cart: CartSnapshot
 }) {
   useEffect(() => {
-    configureAnalytics({ ga4, meta, adSignals }, nonce)
-  }, [ga4, meta, adSignals, nonce])
+    configureAnalytics({ ga4, meta, adSignals, amounts }, nonce)
+  }, [ga4, meta, adSignals, amounts, nonce])
   // After the tags are configured (effects run in order): the cart's look needs the answer
   const cartKey = JSON.stringify(cart)
   useEffect(() => {
