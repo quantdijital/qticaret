@@ -8567,8 +8567,41 @@
         },
         "galleryHint": {
           "collage": "Solda büyük bir fotoğraf; geniş ekranda yanında iki küçük fotoğraf.",
-          "strips": "En çok dört fotoğraf eşit, çapraz şeritler hâlinde yan yana. Geniş ekranda fareyle üstüne gelinen şerit genişler; telefonda eşit kalır."
-        }
+          "strips": "Fotoğraflar çapraz şeritler hâlinde yan yana. Geniş ekranda fareyle üstüne gelinen şerit genişler; telefonda en çok üç şerit, eşit kalır."
+        },
+        "stripsLayout": "Şeritlerin yeri",
+        "stripsLayoutTerm": "strips_layout",
+        "stripsLayouts": {
+          "side": "Yazının yanında",
+          "wide": "Boydan boya"
+        },
+        "stripsLayoutHint": {
+          "side": "Şeritler solda, ürünün adı ve fiyatı sağda; en çok dört şerit.",
+          "wide": "Şeritler bölümün bütün genişliğini kaplar, ürünün adı ve fiyatı altında; en çok altı şerit. Ekranın bir ucundan öbürüne uzansın isterseniz Görünüm'de genişliği “Tam” yapın."
+        },
+        "stripsSlant": "Eğim",
+        "stripsSlantTerm": "strips_slant",
+        "stripsSlants": {
+          "soft": "Hafif",
+          "medium": "Orta",
+          "steep": "Keskin"
+        },
+        "stripsSlantHint": "Şeritleri ayıran çizgilerin ne kadar yatık durduğu.",
+        "stripsLine": "Çizgi kalınlığı",
+        "stripsLineTerm": "strips_line",
+        "stripsLines": {
+          "none": "Yok",
+          "thin": "İnce",
+          "medium": "Orta",
+          "thick": "Kalın"
+        },
+        "stripsLineHint": "Şeritlerin arasındaki boşluk. “Yok” seçilirse şeritler birbirine değer.",
+        "stripsOverlap": "Üst üste bindir",
+        "stripsOverlapTerm": "strips_overlap",
+        "stripsOverlapHint": "Her şerit bir öncekinin üstüne biner, kenarında ince bir gölge olur; fareyle üstüne gelinen en üste çıkar.",
+        "stripsDim": "Diğerlerini karart",
+        "stripsDimTerm": "strips_dim",
+        "stripsDimHint": "Geniş ekranda bir şeridin üstüne gelinince ya da klavyeyle seçilince diğer şeritler kararır."
       },
       "sample": {
         "label": {

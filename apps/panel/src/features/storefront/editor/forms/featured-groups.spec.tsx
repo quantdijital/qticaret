@@ -83,7 +83,7 @@ describe("the featured product's photographs layout", () => {
 
     await user.click(field().getByRole("radio", { name: "Çapraz şeritler" }))
     expect(changes.at(-1)).toMatchObject({ type: "featured_product", gallery: "strips" })
-    expect(field().getByText(/En çok dört fotoğraf/)).toBeInTheDocument()
+    expect(field().getByText(/çapraz şeritler hâlinde yan yana/)).toBeInTheDocument()
 
     await user.click(field().getByRole("button", { name: "Varsayılana dön" }))
     expect(changes.at(-1)).toMatchObject({ gallery: "collage" })
@@ -96,5 +96,66 @@ describe("the featured product's photographs layout", () => {
     await openGroup(user, "Diziliş")
 
     expect(field().getByRole("radio", { name: "Çapraz şeritler" })).toBeChecked()
+  })
+})
+
+const fieldOf = (name: Parameters<typeof FIELD_IDS.content>[1]) => {
+  const found = document.getElementById(FIELD_IDS.content(ID, name))
+  if (!found) throw new Error(`no ${name} field`)
+  return found
+}
+const strips = () => {
+  const section = newHomeSection("featured_product", ID) as FeaturedProductSection
+  return { ...section, gallery: "strips" as const }
+}
+
+/** adr/0049 Ek 2026-11-16: the strips' own look, under the photographs layout. */
+describe("the featured product's strips look", () => {
+  it("hides it with the collage", () => {
+    renderPanel(newHomeSection("featured_product", ID))
+
+    expect(document.getElementById(FIELD_IDS.content(ID, "strips_slant"))).toBeNull()
+    expect(screen.queryByText("Eğim")).toBeNull()
+  })
+
+  it("shows the bolder defaults for strips saved before it", () => {
+    renderPanel(strips())
+
+    const slant = within(fieldOf("strips_slant"))
+    expect(slant.getByText("strips_slant")).toBeInTheDocument()
+    expect(slant.getByRole("radio", { name: "Orta" })).toBeChecked()
+    expect(
+      within(fieldOf("strips_layout")).getByRole("radio", { name: "Yazının yanında" })
+    ).toBeChecked()
+    expect(within(fieldOf("strips_line")).getByRole("radio", { name: "İnce" })).toBeChecked()
+    expect(fieldOf("strips_overlap")).toHaveAttribute("aria-checked", "false")
+    expect(fieldOf("strips_dim")).toHaveAttribute("aria-checked", "true")
+    expect(screen.getByLabelText(/Üst üste bindir/)).toBe(fieldOf("strips_overlap"))
+  })
+
+  it("saves each step and switch, the wide layout saying how it stands", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(strips())
+
+    await user.click(within(fieldOf("strips_layout")).getByRole("radio", { name: "Boydan boya" }))
+    expect(changes.at(-1)).toMatchObject({ gallery: "strips", strips_layout: "wide" })
+    expect(screen.getByText(/bütün genişliğini kaplar/)).toBeInTheDocument()
+
+    await user.click(within(fieldOf("strips_slant")).getByRole("radio", { name: "Keskin" }))
+    await user.click(within(fieldOf("strips_line")).getByRole("radio", { name: "Yok" }))
+    await user.click(fieldOf("strips_overlap"))
+    await user.click(fieldOf("strips_dim"))
+    expect(changes.at(-1)).toMatchObject({
+      strips_layout: "wide",
+      strips_slant: "steep",
+      strips_line: "none",
+      strips_overlap: "on",
+      strips_dim: "off",
+    })
+
+    await user.click(
+      within(fieldOf("strips_slant")).getByRole("button", { name: "Varsayılana dön" })
+    )
+    expect(changes.at(-1)).toMatchObject({ strips_slant: "medium" })
   })
 })
