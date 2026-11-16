@@ -19,6 +19,7 @@ import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as AuthCategoriesRouteImport } from './routes/_auth/categories'
 import { Route as AuthInventoryRouteImport } from './routes/_auth/inventory'
 import { Route as AuthMediaRouteImport } from './routes/_auth/media'
+import { Route as AuthNotificationsRouteImport } from './routes/_auth/notifications'
 import { Route as AuthReportsRouteImport } from './routes/_auth/reports'
 import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
 import { Route as SecuritySetupRouteImport } from './routes/security/setup'
@@ -155,6 +156,11 @@ const AuthInventoryRoute = AuthInventoryRouteImport.update({
 const AuthMediaRoute = AuthMediaRouteImport.update({
   id: '/media',
   path: '/media',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthNotificationsRoute = AuthNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthReportsRoute = AuthReportsRouteImport.update({
@@ -633,6 +639,7 @@ export interface FileRoutesByFullPath {
   '/categories': typeof AuthCategoriesRoute
   '/inventory': typeof AuthInventoryRoute
   '/media': typeof AuthMediaRoute
+  '/notifications': typeof AuthNotificationsRoute
   '/reports': typeof AuthReportsRouteWithChildren
   '/settings': typeof AuthSettingsRouteWithChildren
   '/security/setup': typeof SecuritySetupRoute
@@ -732,6 +739,7 @@ export interface FileRoutesByTo {
   '/categories': typeof AuthCategoriesRoute
   '/inventory': typeof AuthInventoryRoute
   '/media': typeof AuthMediaRoute
+  '/notifications': typeof AuthNotificationsRoute
   '/security/setup': typeof SecuritySetupRoute
   '/brands/$id': typeof AuthBrandsIdRoute
   '/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
@@ -831,6 +839,7 @@ export interface FileRoutesById {
   '/_auth/categories': typeof AuthCategoriesRoute
   '/_auth/inventory': typeof AuthInventoryRoute
   '/_auth/media': typeof AuthMediaRoute
+  '/_auth/notifications': typeof AuthNotificationsRoute
   '/_auth/reports': typeof AuthReportsRouteWithChildren
   '/_auth/settings': typeof AuthSettingsRouteWithChildren
   '/security/setup': typeof SecuritySetupRoute
@@ -933,6 +942,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/inventory'
     | '/media'
+    | '/notifications'
     | '/reports'
     | '/settings'
     | '/security/setup'
@@ -1032,6 +1042,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/inventory'
     | '/media'
+    | '/notifications'
     | '/security/setup'
     | '/brands/$id'
     | '/bulk-messages/$id'
@@ -1130,6 +1141,7 @@ export interface FileRouteTypes {
     | '/_auth/categories'
     | '/_auth/inventory'
     | '/_auth/media'
+    | '/_auth/notifications'
     | '/_auth/reports'
     | '/_auth/settings'
     | '/security/setup'
@@ -1302,6 +1314,13 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/media'
       preLoaderRoute: typeof AuthMediaRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/notifications': {
+      id: '/_auth/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthNotificationsRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/reports': {
@@ -2030,6 +2049,7 @@ interface AuthRouteChildren {
   AuthCategoriesRoute: typeof AuthCategoriesRoute
   AuthInventoryRoute: typeof AuthInventoryRoute
   AuthMediaRoute: typeof AuthMediaRoute
+  AuthNotificationsRoute: typeof AuthNotificationsRoute
   AuthReportsRoute: typeof AuthReportsRouteWithChildren
   AuthSettingsRoute: typeof AuthSettingsRouteWithChildren
   AuthIndexRoute: typeof AuthIndexRoute
@@ -2085,6 +2105,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthCategoriesRoute: AuthCategoriesRoute,
   AuthInventoryRoute: AuthInventoryRoute,
   AuthMediaRoute: AuthMediaRoute,
+  AuthNotificationsRoute: AuthNotificationsRoute,
   AuthReportsRoute: AuthReportsRouteWithChildren,
   AuthSettingsRoute: AuthSettingsRouteWithChildren,
   AuthIndexRoute: AuthIndexRoute,

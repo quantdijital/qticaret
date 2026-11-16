@@ -27,6 +27,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "cart.metadata_reserved": "Bu satır bilgisi yalnızca mağaza tarafından yazılır.",
   "bank_transfer.not_this_order": "Bu siparişin ödemesi havale/EFT ile değil.",
   "bank_transfer.order_canceled": "İptal edilmiş siparişin havalesi onaylanamaz.",
+  "notifications.read_target": "Okundu sayılacak bildirimleri seçin ya da tümünü işaretleyin.",
   "orders.cancel_after_packing":
     "Paketlenmiş ya da kargoya verilmiş sipariş iptal edilemez; ürün elinize ulaşınca iade talebi oluşturun.",
   "orders.cancel_contact_shop":

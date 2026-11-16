@@ -10,13 +10,42 @@ const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
+  Link: ({
+    children,
+    to,
+    onClick,
+    className,
+  }: {
+    children: ReactNode
+    to: string
+    onClick?: () => void
+    className?: string
+  }) => (
+    <a
+      href={to}
+      className={className}
+      onClick={(event) => {
+        event.preventDefault()
+        onClick?.()
+      }}
+    >
+      {children}
+    </a>
+  ),
 }))
 
-const alert = (id: string, data: Record<string, unknown>) => ({
+const alert = (id: string, data: Record<string, unknown>, read = false) => ({
   id,
   created_at: "2026-11-01T09:30:00Z",
   data,
+  read,
+})
+
+/** `GET /admin/alerts` as the server answers: the page and the person's unread count. */
+const feed = (notifications: ReturnType<typeof alert>[]) => ({
+  notifications,
+  count: notifications.length,
+  unread: notifications.filter((each) => !each.read).length,
 })
 
 function renderBell() {
@@ -31,12 +60,11 @@ function renderBell() {
 describe("NotificationBell: contact messages (adr/0047)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
-    localStorage.clear()
   })
 
   it("words a contact message from its subject and leads to the messages", async () => {
-    fetchMock.mockResolvedValue({
-      notifications: [
+    fetchMock.mockResolvedValue(
+      feed([
         alert("noti_1", {
           kind: "contact_message",
           message_id: "cm_1",
@@ -46,8 +74,8 @@ describe("NotificationBell: contact messages (adr/0047)", () => {
         }),
         // A subject the panel does not know reads as "other"
         alert("noti_2", { kind: "contact_message", message_id: "cm_2", subject: "<b>x</b>" }),
-      ],
-    })
+      ])
+    )
     renderBell()
 
     await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 2 yeni" }))
@@ -59,16 +87,16 @@ describe("NotificationBell: contact messages (adr/0047)", () => {
   })
 
   it("names a KVKK request's last day to answer", async () => {
-    fetchMock.mockResolvedValue({
-      notifications: [
+    fetchMock.mockResolvedValue(
+      feed([
         alert("noti_3", {
           kind: "contact_message",
           message_id: "cm_3",
           subject: "kvkk",
           due_at: "2026-12-01T20:59:59.000Z",
         }),
-      ],
-    })
+      ])
+    )
     renderBell()
 
     await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
@@ -81,12 +109,11 @@ describe("NotificationBell: contact messages (adr/0047)", () => {
 describe("NotificationBell: a return's refund deadline (adr/0032 Ek 2026-11-03)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
-    localStorage.clear()
   })
 
   it("words the law's last day from its data and leads to the order's returns", async () => {
-    fetchMock.mockResolvedValue({
-      notifications: [
+    fetchMock.mockResolvedValue(
+      feed([
         alert("noti_4", {
           kind: "return_refund_deadline",
           return_request_id: "rreq_1",
@@ -96,8 +123,8 @@ describe("NotificationBell: a return's refund deadline (adr/0032 Ek 2026-11-03)"
           // The server's own Turkish wording is not shown: the panel words it
           title: "#1042 siparişinin iadesi için son gün 15 Kasım 2026",
         }),
-      ],
-    })
+      ])
+    )
     renderBell()
 
     await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
@@ -114,20 +141,19 @@ describe("NotificationBell: a return's refund deadline (adr/0032 Ek 2026-11-03)"
 describe("NotificationBell: a paid order placed short of stock (adr/0026 Ek 2026-11-06)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
-    localStorage.clear()
   })
 
   it("names the order and the lines the shelf lacked, and leads to the order", async () => {
-    fetchMock.mockResolvedValue({
-      notifications: [
+    fetchMock.mockResolvedValue(
+      feed([
         alert("noti_5", {
           kind: "stock_short",
           order_id: "order_1",
           number: "696",
           lines: [{ title: "Chuby / Kahverengi", short: 1 }, { title: 3 }],
         }),
-      ],
-    })
+      ])
+    )
     renderBell()
 
     await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
@@ -141,12 +167,11 @@ describe("NotificationBell: a paid order placed short of stock (adr/0026 Ek 2026
 describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
-    localStorage.clear()
   })
 
   it("names the provider, reference and cart of a payment that cannot become an order", async () => {
-    fetchMock.mockResolvedValue({
-      notifications: [
+    fetchMock.mockResolvedValue(
+      feed([
         alert("noti_6", {
           kind: "payment_issue",
           issue: "completion_stuck",
@@ -165,8 +190,8 @@ describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)",
         }),
         // An issue the panel does not know is not worded as one
         alert("noti_8", { kind: "payment_issue", issue: "other", title: "Sunucunun metni" }),
-      ],
-    })
+      ])
+    )
     renderBell()
 
     await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 3 yeni" }))
@@ -177,5 +202,62 @@ describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)",
       screen.getByText("İade edilmiş PayTR ödemesi siparişe dönüştürülmedi")
     ).toBeInTheDocument()
     expect(screen.getByText(/payses01DEF, sepet —/)).toBeInTheDocument()
+  })
+})
+
+describe("NotificationBell: a wholesaler's order and what is read (ADR-0068, adr/0020)", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+  })
+
+  it("names the wholesaler, leads to its order on the wholesale list, and counts only the unread", async () => {
+    fetchMock.mockResolvedValue(
+      feed([
+        alert("noti_9", {
+          kind: "wholesale_order",
+          order_id: "order_9",
+          number: "1201",
+          total: "₺4.500,00",
+          company: "Kaya Bıçak Ltd",
+        }),
+        alert("noti_10", { kind: "low_stock", name: "Kupa", available: 2, threshold: 5 }, true),
+      ])
+    )
+    renderBell()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
+
+    const title = await screen.findByText("Yeni toptan sipariş #1201")
+    expect(title.closest("a")).toHaveAttribute("href", "/customers/wholesale/orders")
+    expect(screen.getByText("Kaya Bıçak Ltd · ₺4.500,00")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Tümünü gör" })).toHaveAttribute(
+      "href",
+      "/notifications"
+    )
+  })
+
+  it("marks an alert read as it is followed, and all of them with one button", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      Promise.resolve(
+        path === "/admin/alerts/read"
+          ? { ok: true }
+          : feed([alert("noti_11", { kind: "wholesale_order", number: "7", company: "Kaya" })])
+      )
+    )
+    renderBell()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
+    await userEvent.click(await screen.findByText("Yeni toptan sipariş #7"))
+    expect(fetchMock).toHaveBeenCalledWith("/admin/alerts/read", {
+      method: "POST",
+      body: { ids: ["noti_11"] },
+    })
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
+    await userEvent.click(await screen.findByRole("button", { name: "Tümünü okundu say" }))
+    expect(fetchMock).toHaveBeenCalledWith("/admin/alerts/read", {
+      method: "POST",
+      body: { all: true },
+    })
   })
 })

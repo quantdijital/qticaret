@@ -24,6 +24,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "cart.metadata_reserved": "This line detail is set by the shop only.",
   "bank_transfer.not_this_order": "This order was not paid by bank transfer.",
   "bank_transfer.order_canceled": "A cancelled order's transfer cannot be confirmed.",
+  "notifications.read_target": "Choose the notifications to mark read, or mark them all.",
   "orders.cancel_after_packing":
     "An order packed or shipped cannot be cancelled; once it arrives, ask for a return.",
   "orders.cancel_contact_shop":

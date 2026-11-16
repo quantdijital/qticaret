@@ -6750,6 +6750,40 @@
         "title": "A temporary stock raise was taken back",
         "description": "The stock raised for cart {{cart}} was lowered again after the run stopped halfway. Check the stock counts."
       }
+    },
+    "markAllRead": "Mark all read",
+    "seeAll": "See all",
+    "unreadMark": "Unread: ",
+    "wholesaleOrder": {
+      "title": "New wholesale order #{{number}}"
+    },
+    "page": {
+      "description": "Alerts from your shop; the unread ones are counted on the bell.",
+      "views": "Notification views",
+      "tabs": {
+        "all": "All",
+        "unread": "Unread",
+        "read": "Read"
+      },
+      "group": "Notification kind",
+      "groups": {
+        "all": "All kinds",
+        "orders": "Orders and returns",
+        "wholesale": "Wholesale orders",
+        "payments": "Payments",
+        "stock": "Stock",
+        "invoices": "Invoices and accounting",
+        "messages": "Messages and e-mail",
+        "system": "Connections and migration"
+      },
+      "bulk": "Selected notifications",
+      "selected_one": "{{formatted}} notification selected",
+      "selected_other": "{{formatted}} notifications selected",
+      "markSelected": "Mark read",
+      "markOne": "Mark read",
+      "clear": "Clear selection",
+      "select": "Select notification",
+      "noMatch": "No notifications in this view."
     }
   },
   "content": {

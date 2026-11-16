@@ -168,18 +168,14 @@ describe("staff roles", () => {
     expect(decide("readonly", method, path)).toEqual({ allowed: false, reason: "private" })
   })
 
-  it("lets every role read the team's feed, and only the owner and admin customers' messages", () => {
+  it("lets every role read the team's alerts and mark its own read; Medusa's feed is the owner's and admin's", () => {
     for (const role of STAFF_ROLES) {
-      expect(allowed(role, "GET", "/admin/notifications", { notificationChannel: "feed" })).toBe(
-        true
-      )
+      expect(allowed(role, "GET", "/admin/alerts")).toBe(true)
+      expect(decide(role, "POST", "/admin/alerts/read")).toEqual({ allowed: true, reason: "own" })
     }
-    expect(allowed("admin", "GET", "/admin/notifications", { notificationChannel: "email" })).toBe(
-      true
-    )
-    expect(
-      allowed("operations", "GET", "/admin/notifications", { notificationChannel: "email" })
-    ).toBe(false)
+    expect(allowed("admin", "GET", "/admin/notifications")).toBe(true)
+    expect(allowed("operations", "GET", "/admin/notifications")).toBe(false)
+    expect(allowed("readonly", "GET", "/admin/notifications")).toBe(false)
   })
 
   it("lets every role read and change its own account, never another's", () => {
@@ -433,6 +429,8 @@ describe("staff roles", () => {
  */
 const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/accounting/syncs/:id/retry": false,
+  // One's own read alerts (adr/0020)
+  "POST /admin/alerts/read": true,
   "POST /admin/api-access/:id/revoke": false,
   "DELETE /admin/api-access/:id": false,
   "POST /admin/api-access": false,
