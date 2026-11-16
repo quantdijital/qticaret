@@ -254,4 +254,15 @@ describe("authProfile", () => {
       ])
     )
   })
+
+  it("limits saved looks per staff member from any address, applies tighter (adr/0064)", () => {
+    expect(RATE_LIMIT_PROFILES.storefront_design_write).toEqual({
+      name: "storefront_design_write",
+      perIdentityAnyIp: { max: 60, windowMs: 60 * 60 * 1000 },
+    })
+    expect(RATE_LIMIT_PROFILES.storefront_design_apply).toEqual({
+      name: "storefront_design_apply",
+      perIdentityAnyIp: { max: 20, windowMs: 60 * 60 * 1000 },
+    })
+  })
 })

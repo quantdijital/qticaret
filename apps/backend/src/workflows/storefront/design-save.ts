@@ -39,7 +39,7 @@ export interface SaveDesignInput {
 /**
  * The draft (or a kept publication) kept as a named look: read on the
  * server, never taken from the request; no draft saved yet: the design the
- * editor opens (what is live, else the default). Undone, it is removed.
+ * editor opens (the default). Undone, it is removed.
  */
 const createDesignStep = createStep(
   "storefront-design-create",

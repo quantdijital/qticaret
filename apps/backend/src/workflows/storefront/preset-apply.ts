@@ -38,8 +38,11 @@ const PRESET_LOCK = { timeout: 30, ttl: 120 }
  *
  * What the shop has no record for is left out and named in `skipped`,
  * never stood in for; a header or footer the preset leaves empty keeps the
- * shop's sections, named in `kept`. Any step failing undoes the uploads, their records
- * and the draft. Two locks, always in this order: the pack's
+ * shop's sections, named in `kept`. The draft it replaces is kept first as
+ * a saved look (adr/0064 Ek 2026-11-17 §1: `save_as` names it, else an
+ * automatic one unless nothing new would be kept), named in `auto_saved`.
+ * Any step failing undoes the uploads, their records, that save and the
+ * draft. Two locks, always in this order: the pack's
  * (`presetLockKey`) from the ledger's read to the draft's write, so two
  * applies never both upload an image the shop deleted and one of them
  * leaves it unrecorded in the library; the

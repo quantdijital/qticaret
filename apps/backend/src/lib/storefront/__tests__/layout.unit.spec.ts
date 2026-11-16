@@ -42,6 +42,7 @@ describe("storefront layout document (adr/0049)", () => {
         theme: null,
         menus: null,
         preset: null,
+        design: null,
       },
     })
   })

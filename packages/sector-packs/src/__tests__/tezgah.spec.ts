@@ -195,6 +195,15 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
   })
 
+  it("shows the three as one gallery card, each by its colour (adr/0064 Ek 2026-11-17)", () => {
+    expect(CODES.map((code) => [read(code).family, read(code).swatch])).toEqual([
+      ["tezgah", "Antrasit ve kırmızı"],
+      ["tezgah", "Lacivert ve çelik"],
+      ["tezgah", "Antrasit ve turuncu"],
+    ])
+    expect(read("katalog")).toMatchObject({ family: null, swatch: null })
+  })
+
   it("raised the cutlery pack's version with them (katalog's third, tezgah's fifth)", () => {
     expect(sectorPack("cutlery")?.version).toBe(8)
     expect(CODES.map((code) => read(code).version)).toEqual([5, 5, 5])
