@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { EditorChromeContext } from "./editor-layout"
+import { GroupMarkContext, useGroupMarks } from "./group-mark"
 import { SettingsLayoutContext } from "./settings-layout-state"
 import { Hint } from "./shared/hint"
 
@@ -85,7 +86,7 @@ export function PanelGroup({
   name,
   title,
   hint,
-  marked = 0,
+  marked,
   children,
   className,
   defaultOpen = true,
@@ -99,8 +100,11 @@ export function PanelGroup({
   name?: string
   title: string
   hint?: string | undefined
-  /** How many of its settings are off their defaults: a small mark beside the title. */
-  marked?: number
+  /**
+   * How many of its settings are off their defaults: a small mark beside the
+   * title. Not given: its fields showing "Varsayılana dön" (`group-mark.ts`).
+   */
+  marked?: number | undefined
   children: ReactNode
   className?: string
   defaultOpen?: boolean
@@ -121,7 +125,10 @@ export function PanelGroup({
   const register = layout?.register
   useLayoutEffect(() => register?.(key), [register, key])
   const mark = layout?.mark
-  useLayoutEffect(() => (marked > 0 ? mark?.(key, marked) : undefined), [mark, key, marked])
+  const marks = useGroupMarks()
+  // The form's own count where it gives one, else its fields' "Varsayılana dön"
+  const count = marked ?? marks.count
+  useLayoutEffect(() => (count > 0 ? mark?.(key, count) : undefined), [mark, key, count])
   const open = layout ? layout.isOpen(key) : ownOpen
   const lone = layout ? layout.isLone(key) : false
   const shown = layout ? layout.isShown(key) : true
@@ -161,10 +168,10 @@ export function PanelGroup({
               <span data-panel-group-title className="truncate">
                 {title}
               </span>
-              {marked > 0 ? (
+              {count > 0 ? (
                 <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-[11px] font-medium text-accent-foreground">
-                  <span aria-hidden="true">{marked}</span>
-                  <span className="sr-only">{`, ${t(`${P}.marked`, { count: marked })}`}</span>
+                  <span aria-hidden="true">{count}</span>
+                  <span className="sr-only">{`, ${t(`${P}.marked`, { count })}`}</span>
                 </span>
               ) : null}
             </span>
@@ -185,7 +192,7 @@ export function PanelGroup({
         className={cn("@container flex flex-col gap-5 px-5 pt-1 pb-6", lone && "pt-5", className)}
       >
         {hint ? <p className="-mt-1 text-xs text-muted-foreground">{hint}</p> : null}
-        {children}
+        <GroupMarkContext.Provider value={marks.note}>{children}</GroupMarkContext.Provider>
       </div>
     </div>
   )

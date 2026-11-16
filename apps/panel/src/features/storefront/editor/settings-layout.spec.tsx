@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type {
+  FeaturedProductSection,
   HeaderBarSection,
   HeaderCatalogSection,
   ProductsSection,
@@ -157,6 +158,21 @@ describe("the settings panel's tabs", () => {
     expect(tabButton("style")).toHaveAccessibleName(/varsayılandan farklı ayar var/)
     await openTab(user, "style")
     expect(toggle(/^Görünüm/)).toHaveAccessibleName("Görünüm, 1 ayar varsayılandan farklı")
+  })
+})
+
+describe("a group whose form gives no count", () => {
+  it("counts its settings showing Varsayılana dön, and the mark goes with the default", async () => {
+    const user = userEvent.setup()
+    const featured = newHomeSection("featured_product", "onecikan01") as FeaturedProductSection
+    renderPanel({ ...featured, gallery: "strips" })
+    expect(tabButton("style")?.querySelector("[data-tab-marked]")).not.toBeNull()
+    await openTab(user, "style")
+    expect(toggle(/^Diziliş/)).toHaveAccessibleName("Diziliş, 1 ayar varsayılandan farklı")
+    await openGroup(user, /^Diziliş/)
+    await user.click(screen.getByRole("button", { name: "Varsayılana dön" }))
+    expect(toggle(/^Diziliş/)).toHaveAccessibleName("Diziliş")
+    expect(tabButton("style")?.querySelector("[data-tab-marked]")).toBeNull()
   })
 })
 
