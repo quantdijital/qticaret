@@ -143,6 +143,7 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/order-board/export",
     "POST /admin/staff/me/profile",
     "POST /admin/staff/me/password",
+    "POST /admin/alerts/read",
     "DELETE /admin/staff/members/:id",
     "POST /admin/api-access/:id/revoke",
     // Review M1: stopping what still goes out
