@@ -41,7 +41,7 @@ const png = (width: number, height: number) =>
     .toBuffer()
 
 describe("a brand logo's size, read on the server (marka logosu boyutu)", () => {
-  it("reads a file outside the library by its header", async () => {
+  it("reads a logo kept from before the library rule (the backfill) by its header", async () => {
     const bytes = await png(240, 60)
     const { container, getAsBuffer } = setup(null, () => [bytes])
     await expect(measureLogo(container, "serbest.png", "https://cdn/serbest.png")).resolves.toEqual(

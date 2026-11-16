@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ConflictError, ValidationError } from "../../lib/errors"
+import { libraryImage } from "../../lib/media/library-image"
 import { refuseSvgImages } from "../../lib/media/svg-use"
 import { containsPattern, isCleanText } from "../../lib/security"
 import { isValidSlug, toSlug } from "../../lib/seo"
@@ -12,7 +13,7 @@ import { measureLogo } from "./logo-size"
 /**
  * What a brand save may hold (F3.11): a name the shop has once, a slug
  * handle (made from the name when none is given), clean text, and a logo
- * from the shop's own uploads.
+ * that is an image in the media library (the shop's own uploads).
  */
 
 export const BRAND_LIMITS = { name: 120, description: 5000 } as const
@@ -86,6 +87,21 @@ async function assertUnique(container: MedusaContainer, fields: BrandFields, id:
   }
 }
 
+/**
+ * A newly chosen logo's public address: an image in the media library
+ * (`lib/media/library-image.ts`), as the shop's own logos are. Any other
+ * stored file (an invoice, a label, a feed) is refused even when its key
+ * is known, so the Store API never hands its address out.
+ */
+async function logoUrl(container: MedusaContainer, fileId: string): Promise<string> {
+  const asset = await libraryImage(container, { file_id: fileId })
+  const url = asset ? await publicUploadUrl(container, fileId) : null
+  if (url === null) {
+    throw new ValidationError("brands.logo_unknown", { field: "logo_file_id" })
+  }
+  return url
+}
+
 /** The brand as it will be stored: `current` filled in with what the save sends. */
 export async function brandFields(
   container: MedusaContainer,
@@ -106,11 +122,9 @@ export async function brandFields(
     logo_height: current?.logo_height ?? null,
     is_active: input.is_active ?? current?.is_active ?? true,
   }
+  // Only a newly chosen logo is checked: one kept from before this rule (any stored file) stays
   if (input.logo_file_id !== undefined && input.logo_file_id !== current?.logo_file_id) {
-    const url = input.logo_file_id ? await publicUploadUrl(container, input.logo_file_id) : null
-    if (input.logo_file_id && url === null) {
-      throw new ValidationError("brands.logo_unknown", { field: "logo_file_id" })
-    }
+    const url = input.logo_file_id ? await logoUrl(container, input.logo_file_id) : null
     // A product brand's logo is a catalogue picture: no SVG (the shop's own logos only)
     await refuseSvgImages(container, [url], "logo_file_id")
     fields.logo_file_id = input.logo_file_id

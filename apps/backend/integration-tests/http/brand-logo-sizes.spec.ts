@@ -39,33 +39,26 @@ medusaIntegrationTestRunner({
     const storeGet = <T>(url: string) => settle(http.get<T>(url, { headers: store.headers }))
     const knex = () => getContainer().resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
 
-    /** An image uploaded through the checked route; in the library unless `library` is false. */
-    async function upload(name: string, bytes: Buffer, library = true): Promise<string> {
+    /** An image uploaded through the checked route and kept in the library. */
+    async function upload(name: string, bytes: Buffer): Promise<string> {
       const form = new FormData()
       form.append("files", new Blob([new Uint8Array(bytes)], { type: "image/png" }), name)
       const { data } = await http.post<{ files: { id: string }[] }>("/admin/uploads", form, admin)
       const fileId = data.files[0]?.id ?? ""
-      if (library) {
-        const registered = await post("/admin/media", { file_ids: [fileId], library: true })
-        expect(registered.status).toBe(200)
-      }
+      const registered = await post("/admin/media", { file_ids: [fileId], library: true })
+      expect(registered.status).toBe(200)
       return fileId
     }
 
-    /** A stored file that is no image (put in storage some other way): its size cannot be read. */
-    async function textFile(): Promise<string> {
+    /** A file put in storage some other way (no upload, no media record), as a label's is. */
+    async function storedFile(filename: string, mimeType: string, bytes: Buffer): Promise<string> {
       const [file] = await getContainer()
         .resolve(Modules.FILE)
-        .createFiles([
-          {
-            filename: "logo-notu.txt",
-            mimeType: "text/plain",
-            content: Buffer.from("not a picture").toString("base64"),
-            access: "public",
-          },
-        ])
+        .createFiles([{ filename, mimeType, content: bytes.toString("base64"), access: "public" }])
       return file?.id ?? ""
     }
+    /** One that is no image: its size cannot be read. */
+    const textFile = () => storedFile("logo-notu.txt", "text/plain", Buffer.from("not a picture"))
 
     beforeEach(async () => {
       admin = await createAdminUser(http, getContainer())
@@ -106,24 +99,23 @@ medusaIntegrationTestRunner({
       })
     })
 
-    it("reads a file outside the library by its header, and leaves one with no size unknown", async () => {
-      // Uploaded and never put in the library: no record, its header says its size
-      const loose = await upload("serbest-logo.png", await picture(240, 60), false)
+    it("reads a library record that knows no size by its file's header; a file outside the library is no logo", async () => {
+      // A library image whose record lacks its size (an older one): its header says it
+      const older = await upload("eski-kayit.png", await picture(240, 60))
+      await knex()("media_asset").where("file_id", older).update({ width: null, height: null })
       const fromHeader = await post<{ brand: Brand }>("/admin/brands", {
-        name: "Serbest",
-        logo_file_id: loose,
+        name: "Eski Kayıt",
+        logo_file_id: older,
       })
       expect(fromHeader.status).toBe(201)
       expect(fromHeader.data.brand).toMatchObject({ logo_width: 240, logo_height: 60 })
 
-      // No image at all: the save goes through, the logo drawn as before (no size)
-      const unknown = await post<{ brand: Brand }>("/admin/brands", {
-        name: "Ölçülemez",
-        logo_file_id: await textFile(),
-      })
-      expect(unknown.status).toBe(201)
-      expect(unknown.data.brand.logo_url).not.toBeNull()
-      expect(unknown.data.brand).toMatchObject({ logo_width: null, logo_height: null })
+      // A picture put in storage some other way, or no image at all: refused (brand-logo-source)
+      const loose = await storedFile("serbest-logo.png", "image/png", await picture(240, 60))
+      for (const key of [loose, await textFile()]) {
+        const refused = await post("/admin/brands", { name: "Serbest", logo_file_id: key })
+        expect([refused.status, refused.data.message]).toEqual([400, "brands.logo_unknown"])
+      }
     })
 
     it("takes no size from the request, and lets no one in without signing in", async () => {
@@ -155,29 +147,37 @@ medusaIntegrationTestRunner({
       const old = (
         await post<{ brand: Brand }>("/admin/brands", { name: "Eski", logo_file_id: wide })
       ).data.brand
-      const broken = (
-        await post<{ brand: Brand }>("/admin/brands", {
-          name: "Bozuk",
-          logo_file_id: await textFile(),
-        })
-      ).data.brand
+      // Logos set before they had to be library images: any stored file, kept as it was
+      const legacyLogo = async (name: string, fileId: string) => {
+        const brand = (await post<{ brand: Brand }>("/admin/brands", { name })).data.brand
+        const { url } = await getContainer().resolve(Modules.FILE).retrieveFile(fileId)
+        await knex()("brand").where("id", brand.id).update({ logo_file_id: fileId, logo_url: url })
+        return brand
+      }
+      const outside = await legacyLogo(
+        "Kütüphane Dışı",
+        await storedFile("serbest-eski.png", "image/png", await picture(200, 50))
+      )
+      const broken = await legacyLogo("Bozuk", await textFile())
       const bare = (await post<{ brand: Brand }>("/admin/brands", { name: "Logosuz" })).data.brand
       // As a brand saved before the migration stands: a logo, no size
       await knex()("brand").where("id", old.id).update({ logo_width: null, logo_height: null })
 
       const run = (apply: boolean) => fillBrandLogoSizes(getContainer(), { apply })
       const checked = await run(false)
-      expect(checked).toEqual({ missing: 2, measured: 1, unmeasured: [broken.id], written: 0 })
+      expect(checked).toEqual({ missing: 3, measured: 2, unmeasured: [broken.id], written: 0 })
       const [still] = (await knex()("brand").select("logo_width").where("id", old.id)) as {
         logo_width: number | null
       }[]
       expect(still?.logo_width).toBeNull()
 
       const applied = await run(true)
-      expect(applied).toEqual({ missing: 2, measured: 1, unmeasured: [broken.id], written: 1 })
+      expect(applied).toEqual({ missing: 3, measured: 2, unmeasured: [broken.id], written: 2 })
       const { data } = await storeGet<{ brands: Brand[] }>("/store/brands")
       const byId = new Map(data.brands.map((brand) => [brand.id, brand]))
       expect(byId.get(old.id)).toMatchObject({ logo_width: 600, logo_height: 100 })
+      // Measured by its header, though the library has no record of it
+      expect(byId.get(outside.id)).toMatchObject({ logo_width: 200, logo_height: 50 })
       expect(byId.get(broken.id)).toMatchObject({ logo_width: null, logo_height: null })
       expect(byId.get(bare.id)).toMatchObject({ logo_url: null, logo_width: null })
 

@@ -83,14 +83,13 @@
     }
   }
 }
-/* On a phone and a tablet (owner 2026-11-16: a pill cut at the scrolling row's
-   edge, and a link between the pills and the cards, are both refused): below
-   1024 px the pills wrap onto as many lines as they need (`ShelfTabs`) and the
-   shown panel's whole-list link stands under its cards, a full-width quiet
-   button (`.gf-btn.gf-btn--quiet`'s look, ui.css). A plain panel's link
-   follows its cards in the markup; a carousel's head row (its link, its
-   arrows beside it) moves under its cards. The desktop's rules above are as
-   they were */
+/* On a phone and a tablet (owner 2026-11-16: a link between the pills and
+   the cards is refused): below 1024 px the pills stay on one line that scrolls
+   sideways (`ShelfTabs`, its edges' fades in `tabs-rail.css`) and the shown
+   panel's whole-list link stands under its cards, a full-width quiet button
+   (`.gf-btn.gf-btn--quiet`'s look, ui.css). A plain panel's link follows its
+   cards in the markup; a carousel's head row (its link, its arrows beside it)
+   moves under its cards. The desktop's rules above are as they were */
 @media (width < 64rem) {
   .gf-tabs > [data-panel] .gf-tab-aside > a {
     flex: 1 1 auto;

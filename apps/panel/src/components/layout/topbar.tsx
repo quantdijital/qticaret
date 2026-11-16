@@ -34,9 +34,9 @@ export function Topbar() {
   const { t } = useTranslation()
   const [commandOpen, setCommandOpen] = useState(false)
   const { data: seo } = useQuery(seoSettingsQuery())
-  // The bound domain, else the storefront address the panel already frames (no domain yet);
+  // The bound domain, else the storefront address the backend gives (no domain yet);
   // none until the settings are read, so it never points elsewhere first
-  const store = seo ? storefrontHome(seo.values.canonical_host) : null
+  const store = seo ? storefrontHome(seo.values.canonical_host, seo.storefront_url) : null
 
   return (
     <header className="sticky top-0 z-20 flex h-[var(--layout-topbar-height)] shrink-0 items-center gap-3 border-b bg-card px-4 lg:px-[var(--page-padding-wide)]">

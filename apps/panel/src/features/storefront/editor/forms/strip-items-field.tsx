@@ -41,8 +41,8 @@ function useStripNames(items: readonly StripItem[]): (item: StripItem) => string
 
 /**
  * The strip gallery's strips (adr/0049 Ek 2026-11-16), as the sliding
- * opening lists its slides: a row a strip (its own picture small, else
- * its record's; its heading or its record's name, its source's kind) opening one dialog
+ * opening lists its slides: a row a strip (the picture the storefront draws for it, small;
+ * its heading or its record's name, its source's kind) opening one dialog
  * each, moved and taken off in place. "Şerit ekle" adds a product strip
  * and opens it; at eight it is closed and says so.
  */
@@ -103,11 +103,10 @@ export function StripItemsField({
                 >
                   {picture ? (
                     <img
-                      src={picture.url}
+                      src={picture}
                       alt=""
                       loading="lazy"
-                      data-fit={picture.fit}
-                      className="aspect-[3/4] w-9 shrink-0 rounded-sm bg-muted object-cover data-[fit=contain]:object-contain data-[fit=contain]:p-0.5"
+                      className="aspect-[3/4] w-9 shrink-0 rounded-sm bg-muted object-cover"
                     />
                   ) : (
                     <span className="flex aspect-[3/4] w-9 shrink-0 items-center justify-center rounded-sm bg-muted text-muted-foreground">

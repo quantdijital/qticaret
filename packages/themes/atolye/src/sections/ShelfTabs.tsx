@@ -1,5 +1,6 @@
 import { Children } from "react"
 import type { ReactNode } from "react"
+import { ShelfTabsFollow } from "./ShelfTabsFollow"
 import { ShelfTabsReveal } from "./ShelfTabsReveal"
 
 /**
@@ -28,11 +29,14 @@ export function ShelfTabs({
   return (
     <div className="gf-tabs flex flex-col gap-(--head-gap-s)">
       <ShelfTabsReveal />
+      <ShelfTabsFollow />
       <fieldset className="gf-tab-row min-w-0 border-0 p-0">
         <legend className="sr-only">{label}</legend>
-        {/* Below 1024 px the pills wrap onto as many lines as they need, none
-            cut (owner 2026-11-16); from 1024 px one rail that scrolls */}
-        <div className="gf-rail flex flex-wrap gap-(--space-xs) py-1 lg:-mx-(--gutter) lg:flex-nowrap lg:scroll-px-(--gutter) lg:overflow-x-auto lg:px-(--gutter)">
+        {/* One line of pills that scrolls sideways, past the container to the
+            screen's edges, the first pill on the page's left line; below
+            1024 px a cut edge fades while more waits (`tabs-rail.css`,
+            owner 2026-11-16) */}
+        <div className="gf-rail -mx-(--gutter) flex gap-(--space-xs) overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1">
           {tabs.map((tab, index) => (
             <label
               key={tab}

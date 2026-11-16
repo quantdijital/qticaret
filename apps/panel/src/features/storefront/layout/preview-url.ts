@@ -16,19 +16,39 @@ export const STOREFRONT_ORIGIN: string | null = configured
 
 const ABSOLUTE = /^https?:\/\//
 
+/** An address's origin when it is an http(s) one, else null. */
+function httpOrigin(address: string | null | undefined): string | null {
+  if (!address || !ABSOLUTE.test(address)) {
+    return null
+  }
+  try {
+    return new URL(address).origin
+  } catch {
+    return null
+  }
+}
+
+// Only while developing: a build's `VITE_STOREFRONT_ORIGIN` is the editor's frame, not this link
+const DEV_HOME = import.meta.env.DEV ? STOREFRONT_ORIGIN : null
+
 /**
  * Where "Mağazayı görüntüle" goes: the shop's canonical host when one is
- * set, else the storefront's origin the panel already frames
- * (`STOREFRONT_ORIGIN`, http or https only); null when neither is known.
+ * set, else the address the backend says the storefront has
+ * (`storefront_url` beside the SEO settings, from its own configuration),
+ * else, while developing, the storefront the panel already frames. Each an
+ * http(s) origin only; null when none is known (no button).
  */
 export function storefrontHome(
   canonicalHost: string | null | undefined,
-  origin: string | null = STOREFRONT_ORIGIN
+  served: string | null | undefined,
+  fallback: string | null = DEV_HOME
 ): string | null {
   if (canonicalHost) {
-    return `https://${canonicalHost}`
+    // A host alone: one that reads as more (a path, a user) is none
+    const origin = httpOrigin(`https://${canonicalHost}`)
+    return origin === `https://${canonicalHost.toLowerCase()}` ? origin : null
   }
-  return origin && ABSOLUTE.test(origin) ? origin : null
+  return httpOrigin(served) ?? httpOrigin(fallback)
 }
 
 /**
