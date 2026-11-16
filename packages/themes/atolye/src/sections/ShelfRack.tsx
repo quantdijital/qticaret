@@ -5,10 +5,19 @@ import { shelfColumns, shelfCount, shelfPhone } from "../parts/shelf-grid"
 import { type Of, headingId } from "./plan"
 import { SectionHead } from "./SectionHead"
 import { CarouselShelf, ColumnsShelf, CompactShelf, FeaturedShelf } from "./ShelfLayouts"
+import { StageShelf } from "./ShelfStage"
 import { StripsShelf } from "./ShelfStrips"
 
 /** The rail's variants Atölye draws (adr/0049 Ek 2026-11-15, 2026-11-16); another reads as `grid`. */
-const DRAWN = ["grid", "carousel", "featured", "compact", "columns", "strips"] as const
+const DRAWN = [
+  "grid",
+  "carousel",
+  "featured",
+  "compact",
+  "columns",
+  "strips",
+  "stage_list",
+] as const
 
 /** The variant Atölye draws for the rail: its own when drawn here, else a grid. */
 export const shelfVariant = (section: Of<"products">) =>
@@ -18,7 +27,7 @@ export const shelfVariant = (section: Of<"products">) =>
  * One rail's panel, drawn as its variant: `grid` two rows of the shop's
  * cards-in-a-row (3, 4 or 5; three rows of the shop's two or one on a phone), whole rows
  * only, the rest behind "Tümünü gör"; `carousel`, `featured`, `compact`
- * and `columns` as `ShelfLayouts` draws them, `strips` as `ShelfStrips`. In tabs its own head is for
+ * and `columns` as `ShelfLayouts` draws them, `strips` as `ShelfStrips`, `stage_list` as `ShelfStage`. In tabs its own head is for
  * the reader only (its pill names it) and its "all products" link stands
  * with its arrows beside the tab row, as a section head's link does; a
  * columns rail's lists carry their own headings, its link under them.
@@ -80,6 +89,8 @@ export function Rack({
             <CompactShelf {...props} />
           ) : variant === "strips" ? (
             <StripsShelf section={section} t={t} />
+          ) : variant === "stage_list" ? (
+            <StageShelf {...props} />
           ) : (
             <ProductGrid
               products={section.products.slice(
