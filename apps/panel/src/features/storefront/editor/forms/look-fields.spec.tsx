@@ -11,6 +11,7 @@ import { SectionPanel } from "../section-panel"
 import type { FieldFocus } from "../use-field-focus"
 import { FIELD_IDS } from "./field-registry"
 import type { FieldGroupName } from "./field-registry"
+import { openGroup, openTab } from "../settings-groups.fixtures"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -59,20 +60,25 @@ function renderPanel(
   return changes
 }
 
-const lookToggle = (name = /^Diğer ayarlar/) => screen.getByRole("button", { name })
+const groupToggle = (name: RegExp) => screen.getByRole("button", { name })
 
-/** adr/0049 Ek 2026-11-14 §6: a body section's look, closed at first. */
+/**
+ * adr/0049 Ek 2026-11-14 §6, adr/0065 Ek (sekmeler): a body section's
+ * look, its ground, alignment and width in "Görünüm" under "Stil", the
+ * space around and inside it in "Boşluk" under "Gelişmiş", both closed.
+ */
 describe("the section's look settings", () => {
-  it("come closed under the content, the fields hidden until opened", async () => {
+  it("come closed in Stil › Görünüm, the fields hidden until opened", async () => {
+    const user = userEvent.setup()
     renderPanel(newHomeSection("products", "rafyeni001"))
+    await openTab(user, "style")
 
-    expect(lookToggle()).toHaveAttribute("aria-expanded", "false")
-    expect(screen.queryByRole("radiogroup", { name: /İç boşluk/ })).toBeNull()
+    expect(groupToggle(/^Görünüm/)).toHaveAttribute("aria-expanded", "false")
+    expect(screen.queryByRole("radiogroup", { name: /Zemin/ })).toBeNull()
 
-    await userEvent.click(lookToggle())
+    await user.click(groupToggle(/^Görünüm/))
 
     for (const [label, term] of [
-      ["İç boşluk", "padding"],
       ["Zemin", "background"],
       ["Hizalama", "text-align"],
       ["Genişlik", "width"],
@@ -84,13 +90,15 @@ describe("the section's look settings", () => {
     expect(screen.queryByText(/temanın ölçüsünden/)).not.toBeInTheDocument()
   })
 
-  it("keeps the space above and below in their own open group (sahip 2026-11-15)", async () => {
+  it("keeps the space above, below and inside in Gelişmiş › Boşluk (sahip 2026-11-15)", async () => {
+    const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("products", "rafyeni001"))
+    await openGroup(user, "Boşluk")
 
-    const spacing = screen.getByRole("button", { name: /^Boşluk/ })
-    expect(spacing).toHaveAttribute("aria-expanded", "true")
+    expect(groupToggle(/^Boşluk/)).toHaveAttribute("aria-expanded", "true")
     const above = screen.getByRole("radiogroup", { name: "Üst boşluk margin-top" })
     const below = screen.getByRole("radiogroup", { name: "Alt boşluk margin-bottom" })
+    expect(screen.getByRole("radiogroup", { name: "İç boşluk padding" })).toBeInTheDocument()
     expect(
       within(below)
         .getAllByRole("radio")
@@ -98,35 +106,37 @@ describe("the section's look settings", () => {
     ).toEqual(["Yok", "Dar", "Orta", "Geniş"])
     expect(within(above).getByRole("radio", { name: "Orta" })).not.toBeChecked()
 
-    await userEvent.click(within(below).getByRole("radio", { name: "Dar" }))
+    await user.click(within(below).getByRole("radio", { name: "Dar" }))
 
     expect(changes.at(-1)).toMatchObject({ look: { space_below: "small", space_outer: null } })
-    expect(screen.getByRole("button", { name: /^Boşluk · 1 ayar/ })).toBeInTheDocument()
-    // The other group counts only its own
-    expect(lookToggle(/^Diğer ayarlar$/)).toBeInTheDocument()
+    // The group's mark says how many of its settings are set
+    expect(groupToggle(/^Boşluk, 1 ayar varsayılandan farklı/)).toBeInTheDocument()
   })
 
-  it("sets a step, says how many are set, and puts the theme's own back", async () => {
+  it("sets a step, marks the group, and puts the theme's own back", async () => {
+    const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("products", "rafyeni001"))
-    await userEvent.click(lookToggle())
+    await openGroup(user, "Görünüm")
 
     const ground = screen.getByRole("radiogroup", { name: "Zemin background" })
-    await userEvent.click(within(ground).getByRole("radio", { name: "Hafif ton" }))
+    await user.click(within(ground).getByRole("radio", { name: "Hafif ton" }))
 
     expect(changes.at(-1)).toMatchObject({ look: { ground: "well", space_outer: null } })
-    expect(lookToggle(/1 ayar/)).toBeInTheDocument()
+    expect(groupToggle(/^Görünüm, 1 ayar/)).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole("button", { name: "Varsayılana dön" }))
+    await user.click(screen.getByRole("button", { name: "Varsayılana dön" }))
 
     expect(changes.at(-1)).not.toHaveProperty("look")
     expect(within(ground).getByRole("radio", { name: "Hafif ton" })).not.toBeChecked()
     // The reset button goes: the focus stays on the field, not the page
     expect(within(ground).getByRole("radio", { name: "Sayfa" })).toHaveFocus()
+    expect(groupToggle(/^Görünüm$/)).toBeInTheDocument()
   })
 
   it("offers only what means something in the section", async () => {
+    const user = userEvent.setup()
     renderPanel(newHomeSection("faq", "sss000001"))
-    await userEvent.click(lookToggle())
+    await openGroup(user, "Görünüm")
 
     const ground = screen.getByRole("radiogroup", { name: "Zemin background" })
     expect(within(ground).queryByRole("radio", { name: "Ana renk" })).toBeNull()
@@ -134,25 +144,29 @@ describe("the section's look settings", () => {
   })
 
   it("has no alignment where the words sit on a picture", async () => {
+    const user = userEvent.setup()
     renderPanel(newHomeSection("hero", "girisbolumu"))
-    await userEvent.click(lookToggle())
+    await openGroup(user, "Görünüm")
 
+    expect(screen.getByRole("radiogroup", { name: /Zemin/ })).toBeInTheDocument()
     expect(screen.queryByRole("radiogroup", { name: /Hizalama/ })).toBeNull()
   })
 
   it("is not offered for the footer's box", () => {
     renderPanel(newFooterNewsletter("bulten0001"), { group: "footer" })
 
-    expect(screen.queryByRole("button", { name: /^Diğer ayarlar/ })).toBeNull()
+    expect(document.querySelector('[data-panel-group="frame"]')).toBeNull()
+    expect(document.querySelector('[data-panel-group="spacing"]')).toBeNull()
   })
 
-  it("opens at the field the settings search picked, focused and marked", () => {
+  it("opens at the field the settings search picked, its tab and group open, focused and marked", () => {
     const target = FIELD_IDS.look("rafyeni001", "ground")
     renderPanel(newHomeSection("products", "rafyeni001"), {
-      focus: { target, group: "look", nonce: 1 },
+      focus: { target, group: "frame", nonce: 1 },
     })
 
-    expect(lookToggle()).toHaveAttribute("aria-expanded", "true")
+    expect(screen.getByRole("tab", { name: /^Stil/ })).toHaveAttribute("aria-selected", "true")
+    expect(groupToggle(/^Görünüm/)).toHaveAttribute("aria-expanded", "true")
     const field = document.getElementById(target)
     expect(field).toHaveAttribute("data-highlight")
     expect(field?.querySelector('[role="radio"]')).toHaveFocus()

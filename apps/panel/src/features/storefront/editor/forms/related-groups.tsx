@@ -30,7 +30,11 @@ export function RelatedGroups({
   const id = section.id
   return (
     <>
-      <PanelGroup title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
+      <PanelGroup
+        name="layout"
+        title={t("storefront.editor.panel.layout")}
+        reveal={reveal("layout")}
+      >
         <div className="flex flex-col gap-5">
           {section.variant === "carousel" ? null : (
             <>
@@ -64,7 +68,11 @@ export function RelatedGroups({
         </div>
       </PanelGroup>
       {section.variant === "carousel" ? (
-        <PanelGroup title={t("storefront.editor.panel.scroll")} reveal={reveal("scroll")}>
+        <PanelGroup
+          name="scroll"
+          title={t("storefront.editor.panel.scroll")}
+          reveal={reveal("scroll")}
+        >
           <ScrollerFields
             value={scrollerSettingsOf(section.scroller)}
             settings={SCROLLER_MAIN}

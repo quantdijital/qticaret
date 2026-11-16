@@ -110,7 +110,7 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
 
   return (
     <>
-      <PanelGroup title={t(THEME_GROUP_TITLES.card)} reveal={reveal("card")}>
+      <PanelGroup name="card" title={t(THEME_GROUP_TITLES.card)} reveal={reveal("card")}>
         <Pair>
           {choice("ratio")}
           {choice("variant")}
@@ -132,7 +132,7 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
         {QUICK_VIEW_SWITCHES.map(toggle)}
       </PanelGroup>
       {/* Read wherever a card is framed: a rail may frame its own while the shop's cards stay standard */}
-      <PanelGroup title={t(THEME_GROUP_TITLES.framed)} reveal={reveal("framed")}>
+      <PanelGroup name="framed" title={t(THEME_GROUP_TITLES.framed)} reveal={reveal("framed")}>
         <p className="text-sm text-muted-foreground">{t(`${C}.framedHint`)}</p>
         {FRAMED_CARD_SWITCHES.map(toggle)}
         {choice("button_style")}

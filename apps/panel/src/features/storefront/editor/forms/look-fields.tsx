@@ -6,16 +6,10 @@ import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { SectionLook, SectionLookField, SectionLookStep } from "@qticaret/types"
 import type { LookedSection } from "@/features/storefront/api/layout"
-import {
-  type LookPart,
-  lookCount,
-  lookFieldsFor,
-  lookStep,
-  lookStepsFor,
-  withLookStep,
-} from "@/features/storefront/layout/look"
+import { lookStep, lookStepsFor, withLookStep } from "@/features/storefront/layout/look"
 import { PanelGroup } from "../panel-header"
-import { FIELD_IDS } from "./field-registry"
+import { FIELD_IDS, lookFieldsIn, lookSetIn } from "./field-registry"
+import type { FieldGroupName } from "./field-registry"
 import { LookSketch } from "./look-sketches"
 
 const LOOK = "storefront.editor.look"
@@ -105,26 +99,25 @@ function LookField<F extends SectionLookField>({
     </div>
   )
 }
-
 /**
- * A body section's look, its spacing in the open "Boşluk" group and the
- * rest in the closed "Diğer ayarlar" (`part`): only the
- * fields its type offers (no alignment where the words sit on a picture),
- * each set and reset on its own; every change shows in the preview at once.
+ * A body section's look fields of one panel group (`LOOK_GROUPS`): the
+ * space above, below and inside it in "Boşluk", its ground, alignment and
+ * width in "Görünüm"; only the fields its type offers (no alignment where
+ * the words sit on a picture), each set and reset on its own; every
+ * change shows in the preview at once.
  */
 export function LookFields<S extends LookedSection>({
   section,
-  part,
+  group,
   onChange,
 }: {
   section: S
-  /** One group's fields: the open "Boşluk" (`spacing`) or the closed "Diğer ayarlar" (`other`). */
-  part?: LookPart
+  group: FieldGroupName
   onChange: (section: S, field?: string) => void
 }) {
   return (
     <div className="flex flex-col gap-5">
-      {lookFieldsFor(section.type, part).map((field) => (
+      {lookFieldsIn(section.type, group).map((field) => (
         <LookField
           key={field}
           section={section}
@@ -140,9 +133,9 @@ export function LookFields<S extends LookedSection>({
 }
 
 /**
- * The open "Boşluk" group: the space above and below a section, within
- * reach on every body section (sahip 2026-11-15), its title counting the
- * steps set. None set is the theme's section spacing on both sides.
+ * The "Boşluk" group under "Gelişmiş": the space above, below and inside
+ * a section, on every body section (sahip 2026-11-15), its title marking
+ * the steps set. None set is the theme's section spacing.
  */
 export function SpacingGroup<S extends LookedSection>({
   section,
@@ -154,17 +147,18 @@ export function SpacingGroup<S extends LookedSection>({
   onChange: (section: S, field?: string) => void
 }) {
   const { t } = useTranslation()
-  if (lookFieldsFor(section.type, "spacing").length === 0) {
+  if (lookFieldsIn(section.type, "spacing").length === 0) {
     return null
   }
-  const set = lookCount(section, "spacing")
   return (
     <PanelGroup
-      title={set > 0 ? t(`${LOOK}.spacing.titleSet`, { count: set }) : t(`${LOOK}.spacing.title`)}
+      name="spacing"
+      title={t(`${LOOK}.spacing.title`)}
+      marked={lookSetIn(section, "spacing")}
       hint={t(`${LOOK}.spacing.hint`)}
       reveal={reveal}
     >
-      <LookFields section={section} part="spacing" onChange={onChange} />
+      <LookFields section={section} group="spacing" onChange={onChange} />
     </PanelGroup>
   )
 }

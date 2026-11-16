@@ -11,6 +11,7 @@ import { switchVariant } from "@/features/storefront/layout/variants"
 import { SectionPanel } from "../section-panel"
 import { CARD_FIELD_IDS } from "./card-field-ids"
 import { FIELD_IDS } from "./field-registry"
+import { openGroup } from "../settings-groups.fixtures"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -70,7 +71,9 @@ function steps(id: string) {
 describe("the phone's columns", () => {
   it("are a grid rail's, two by default, saved as one when picked", async () => {
     const rail = newHomeSection("products", "raf0000001") as ProductsSection
+    const user = userEvent.setup()
     const changes = renderPanel(rail)
+    await openGroup(user, "Diziliş")
     const field = steps(FIELD_IDS.shelf("raf0000001", "columns_mobile"))
 
     expect(field.names).toEqual(["1 kart", "2 kart"])
@@ -88,7 +91,9 @@ describe("the phone's columns", () => {
 
   it("are the related products' too, beside their cards in a row", async () => {
     const related = newBodySection("product", "related_products", "benzer0001")
+    const user = userEvent.setup()
     const changes = renderPanel(related, "product")
+    await openGroup(user, "Diziliş")
     const field = steps(FIELD_IDS.content("benzer0001", "columns_mobile"))
 
     expect(field.checked).toBe("2 kart")

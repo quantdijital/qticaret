@@ -35,7 +35,7 @@ export function SectionLayoutGroup({
     return null
   }
   return (
-    <PanelGroup title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
+    <PanelGroup name="layout" title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
       <BannerSettings section={section} settings={BANNER_LAYOUT_SETTINGS} onChange={onChange} />
     </PanelGroup>
   )

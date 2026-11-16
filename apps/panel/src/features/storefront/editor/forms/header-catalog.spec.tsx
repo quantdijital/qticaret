@@ -1,19 +1,25 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import type { ReactNode } from "react"
 import { useState } from "react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { i18next } from "@/lib/i18n"
-import type { HeaderBarSection } from "@/features/storefront/api/layout"
+import type { AnySection, HeaderBarSection } from "@/features/storefront/api/layout"
 import {
   HEADER_CATALOG_DEFAULTS,
   isUnbuilt,
   switchVariant,
 } from "@/features/storefront/layout/variants"
 import { sectionProblems } from "@/features/storefront/layout/problems"
+import { SectionPanel } from "../section-panel"
 import { searchSettings } from "../settings-search"
+import { openGroup, openGroups, openTab } from "../settings-groups.fixtures"
 import { headerCatalogIn } from "./field-registry"
-import { HeaderBarForm } from "./header-bar-form"
-import { HeaderCatalogOther } from "./header-catalog-other"
+
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
+}))
 
 const standard: HeaderBarSection = {
   id: "mainheader",
@@ -27,25 +33,36 @@ const standard: HeaderBarSection = {
   search_style: "field",
 }
 
-/** The bar's open content and its closed "Diğer ayarlar", every change kept. */
+/** The bar's panel as the editor holds it, its groups closed at first: every change kept. */
 function renderBar(section: HeaderBarSection) {
-  const changes: HeaderBarSection[] = []
+  const changes: AnySection[] = []
   function Holder() {
-    const [value, setValue] = useState(section)
-    const keep = (next: HeaderBarSection) => {
-      changes.push(next)
-      setValue(next)
-    }
+    const [value, setValue] = useState<AnySection>(section)
     return (
-      <>
-        <HeaderBarForm section={value} problems={{}} onChange={keep} />
-        {value.variant === "catalog" ? (
-          <HeaderCatalogOther section={value} problems={{}} reveal={null} onChange={keep} />
-        ) : null}
-      </>
+      <SectionPanel
+        section={value}
+        group="header"
+        problems={{}}
+        canDuplicate={false}
+        onChange={(next) => {
+          changes.push(next)
+          setValue(next)
+        }}
+        onPlace={vi.fn()}
+        onBack={vi.fn()}
+        onDuplicate={vi.fn()}
+        onRemove={vi.fn()}
+        badges={[]}
+        onBadges={vi.fn()}
+      />
     )
   }
-  render(<Holder />)
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  render(
+    <QueryClientProvider client={client}>
+      <Holder />
+    </QueryClientProvider>
+  )
   return changes
 }
 
@@ -59,25 +76,36 @@ describe("the catalog header's settings", () => {
     expect(back).toEqual(standard)
   })
 
-  it("puts the basics first and open, the finer ones closed", () => {
-    expect(headerCatalogIn("content")).toEqual([
+  it("puts each setting in the part of the bar it fills, in the form's order", async () => {
+    expect(headerCatalogIn("search")).toEqual([
       "search_placeholder",
       "search_width",
+      "search_label",
+    ])
+    expect(headerCatalogIn("topBar")).toEqual([
       "utility_bar",
       "strip_note",
       "strip_note_link",
       "top_links",
-      "phone",
-      "tools_place",
-      "categories_button",
-      "menu_ground",
-      "highlight_link",
     ])
-    expect(headerCatalogIn("look")).toEqual(["search_label", "account_text", "cart_total"])
+    expect(headerCatalogIn("menu")).toEqual(["categories_button", "menu_ground", "highlight_link"])
+    expect(headerCatalogIn("icons")).toEqual(["phone", "tools_place", "account_text", "cart_total"])
+    expect(headerCatalogIn("content")).toEqual([])
+    expect(headerCatalogIn("look")).toEqual([])
+    // In the panel: four closed groups under "İçerik", no "İçerik" group of its own
+    const user = userEvent.setup()
+    renderBar(switchVariant(standard, "catalog"))
+    await openTab(user, "content")
+    for (const title of ["Arama", "Üst şerit", "Menü çubuğu", "Simgeler ve iletişim"]) {
+      expect(screen.getByRole("button", { name: title })).toHaveAttribute("aria-expanded", "false")
+    }
+    expect(screen.queryByRole("button", { name: "İçerik" })).toBeNull()
   })
 
   it("offers the three layout choices, each starting at today's drawing", async () => {
+    const user = userEvent.setup()
     const changes = renderBar(switchVariant(standard, "catalog"))
+    await openGroups(user, "Arama", "Üst şerit", "Simgeler ve iletişim")
     const choice = (name: RegExp) => screen.getByRole("radiogroup", { name })
     const names = (name: RegExp) =>
       within(choice(name))
@@ -89,31 +117,32 @@ describe("the catalog header's settings", () => {
     expect(
       within(choice(/Arama kutusunun genişliği/)).getByRole("radio", { name: "Geniş" })
     ).toBeChecked()
-    await userEvent.click(
+    await user.click(
       within(choice(/Arama kutusunun genişliği/)).getByRole("radio", { name: "Dar" })
     )
     expect(changes.at(-1)).toMatchObject({ search_width: "narrow" })
-    await userEvent.click(
+    await user.click(
       within(choice(/Üst menü bağlantılarının yeri/)).getByRole("radio", { name: "Menü çubuğunda" })
     )
     expect(changes.at(-1)).toMatchObject({ top_links: "bar" })
     // Off the default, it offers the way back
     const width = document.getElementById("mainheader-header-search_width") ?? document.body
-    await userEvent.click(within(width).getByRole("button", { name: /Varsayılana dön/ }))
+    await user.click(within(width).getByRole("button", { name: /Varsayılana dön/ }))
     expect(changes.at(-1)).toMatchObject({ search_width: "wide" })
   })
 
   it("hides what the tools in the logo row leave without a job", async () => {
+    const user = userEvent.setup()
     const changes = renderBar(switchVariant(standard, "catalog"))
-    await userEvent.click(screen.getByRole("button", { name: /Diğer ayarlar/ }))
+    await openGroups(user, "Üst şerit", "Simgeler ve iletişim")
     expect(screen.getByRole("switch", { name: /Üst şeritte “Hesabım” yazısı/ })).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("radio", { name: "Logo satırında" }))
+    await user.click(screen.getByRole("radio", { name: "Logo satırında" }))
     expect(changes.at(-1)).toMatchObject({ tools_place: "row" })
     // The row carries "Hesabım": the strip's written one is no longer offered
     expect(screen.queryByRole("switch", { name: /Üst şeritte “Hesabım” yazısı/ })).toBeNull()
     expect(screen.getByRole("switch", { name: /Üst yardımcı şerit/ })).toBeInTheDocument()
     // With the top links on the bar too, the strip is still offered: its note may be all it holds
-    await userEvent.click(
+    await user.click(
       within(screen.getByRole("radiogroup", { name: /Üst menü bağlantılarının yeri/ })).getByRole(
         "radio",
         { name: "Menü çubuğunda" }
@@ -124,7 +153,9 @@ describe("the catalog header's settings", () => {
   })
 
   it("offers the strip's note and its link right under the strip, only while it is on", async () => {
+    const user = userEvent.setup()
     const changes = renderBar(switchVariant(standard, "catalog"))
+    await openGroup(user, "Üst şerit")
     const order = [
       ...document.querySelectorAll(
         "#mainheader-header-utility_bar, #mainheader-header-strip_note, #mainheader-header-strip_note_link, #mainheader-header-top_links"
@@ -139,23 +170,32 @@ describe("the catalog header's settings", () => {
     expect(screen.getByText(/Örnek: 1500 TL üzeri kargo bedava/)).toBeInTheDocument()
     const note = screen.getByLabelText(/Şerit notu/)
     expect(note).toHaveAttribute("maxLength", "80")
-    await userEvent.type(note, "Kargo bedava")
+    await user.type(note, "Kargo bedava")
     expect(changes.at(-1)).toMatchObject({ strip_note: "Kargo bedava" })
-    await userEvent.clear(note)
+    await user.clear(note)
     expect(changes.at(-1)).toMatchObject({ strip_note: null })
     const linkBox = document.getElementById("mainheader-header-strip_note_link") ?? document.body
     expect(within(linkBox).getByText("Not bağlantısı")).toBeInTheDocument()
     expect(within(linkBox).getByRole("button", { name: "Bağlantı seç" })).toBeInTheDocument()
     // The strip off: its note and link go with it
-    await userEvent.click(screen.getByRole("switch", { name: /Üst yardımcı şerit/ }))
+    await user.click(screen.getByRole("switch", { name: /Üst yardımcı şerit/ }))
     expect(changes.at(-1)).toMatchObject({ utility_bar: false })
     expect(screen.queryByLabelText(/Şerit notu/)).toBeNull()
     expect(document.getElementById("mainheader-header-strip_note_link")).toBeNull()
   })
 
-  it("shows today's bar only its pictures' steps and sticky switch", () => {
+  it("shows today's bar only its search, its pictures' steps and sticky switch", async () => {
+    const user = userEvent.setup()
     renderBar(standard)
+    // Staying at the top is Gelişmiş's one group: open, no header to fold it
+    await openTab(user, "advanced")
     expect(screen.getByRole("switch", { name: /Üst bilgi sabit kalsın/ })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Diğer ayarlar" })).toBeNull()
+    await openTab(user, "content")
+    expect(
+      screen.getAllByRole("button", { expanded: false }).map((each) => each.textContent)
+    ).toEqual(["Arama", "Menü çubuğu"])
+    await openGroup(user, "Menü çubuğu")
     const steps = screen.getByRole("radiogroup", {
       name: /Menüde kategori resimleri/,
     })
@@ -171,15 +211,17 @@ describe("the catalog header's settings", () => {
   })
 
   it("picks each step on today's bar too, and goes back to the default", async () => {
+    const user = userEvent.setup()
     const changes = renderBar(standard)
-    await userEvent.click(screen.getByRole("radio", { name: "Yok" }))
+    await openGroup(user, "Menü çubuğu")
+    await user.click(screen.getByRole("radio", { name: "Yok" }))
     expect(changes.at(-1)).toMatchObject({
       variant: "standard",
       menu_images: "off",
     })
-    await userEvent.click(screen.getByRole("radio", { name: "Her yerde" }))
+    await user.click(screen.getByRole("radio", { name: "Her yerde" }))
     expect(changes.at(-1)).toMatchObject({ menu_images: "all" })
-    await userEvent.click(screen.getByRole("button", { name: /Varsayılana dön/ }))
+    await user.click(screen.getByRole("button", { name: /Varsayılana dön/ }))
     expect(changes.at(-1)).toMatchObject({ menu_images: "submenus" })
   })
 
@@ -189,33 +231,41 @@ describe("the catalog header's settings", () => {
     expect(switchVariant(catalog, "centered")).toMatchObject({
       menu_images: "all",
     })
+    const user = userEvent.setup()
     const changes = renderBar(catalog)
+    await openGroup(user, "Menü çubuğu")
     const order = [
       ...document.querySelectorAll("#mainheader-header-categories_button, #mainheader-menu-images"),
     ].map((each) => each.id)
     expect(order).toEqual(["mainheader-header-categories_button", "mainheader-menu-images"])
     expect(screen.getByRole("radio", { name: "Her yerde" })).toBeChecked()
-    await userEvent.click(screen.getByRole("radio", { name: "Alt menülerde" }))
+    await user.click(screen.getByRole("radio", { name: "Alt menülerde" }))
     expect(changes.at(-1)).toMatchObject({
       variant: "catalog",
       menu_images: "submenus",
     })
   })
+
   it("changes what the catalog bar shows, its ground and words", async () => {
+    const user = userEvent.setup()
     const changes = renderBar(switchVariant(standard, "catalog"))
-    await userEvent.click(screen.getByRole("switch", { name: /Telefon numarası/ }))
+    await openGroups(user, "Arama", "Menü çubuğu", "Simgeler ve iletişim")
+    await user.click(screen.getByRole("switch", { name: /Telefon numarası/ }))
     expect(changes.at(-1)).toMatchObject({ phone: false })
-    await userEvent.click(screen.getByRole("radio", { name: "Ana renk" }))
+    await user.click(screen.getByRole("radio", { name: "Ana renk" }))
     expect(changes.at(-1)).toMatchObject({ menu_ground: "primary" })
-    await userEvent.type(screen.getByLabelText(/Arama kutusundaki yazı/), "Kod ara")
+    await user.type(screen.getByLabelText(/Arama kutusundaki yazı/), "Kod ara")
     expect(changes.at(-1)).toMatchObject({ search_placeholder: "Kod ara" })
-    await userEvent.clear(screen.getByLabelText(/Arama kutusundaki yazı/))
+    await user.clear(screen.getByLabelText(/Arama kutusundaki yazı/))
     expect(changes.at(-1)).toMatchObject({ search_placeholder: null })
-    // The closed group opens to its three switches, its title counting what was set
-    await userEvent.click(screen.getByRole("button", { name: /Diğer ayarlar/ }))
-    await userEvent.click(screen.getByRole("switch", { name: /Sepette tutarı göster/ }))
+    // The finer switches stand with the part of the bar they change
+    await user.click(screen.getByRole("switch", { name: /Sepette tutarı göster/ }))
     expect(changes.at(-1)).toMatchObject({ cart_total: true })
-    expect(screen.getByRole("button", { name: /Diğer ayarlar · 1 ayar/ })).toBeInTheDocument()
+    expect(
+      within(screen.getByRole("group", { name: "Arama" })).getByRole("switch", {
+        name: /Arama düğmesi yazılı olsun/,
+      })
+    ).toBeInTheDocument()
   })
 
   it("is found by its everyday words and technical terms", () => {

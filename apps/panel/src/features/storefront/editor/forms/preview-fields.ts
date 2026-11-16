@@ -1,5 +1,7 @@
 import type { AnySection, HeroSection, ProductsSection } from "@/features/storefront/api/layout"
 import { slidesOf } from "./catalog-slides"
+import { HEADER_CATALOG_GROUPS } from "./field-registry"
+import type { FieldGroupName } from "./field-registry"
 import { listField, placeOf, tabRail } from "./preview-lists"
 
 /**
@@ -17,8 +19,8 @@ import { listField, placeOf, tabRail } from "./preview-lists"
 export interface PreviewField {
   /** The element to bring into view and focus (its id). */
   target: string
-  /** Every such field sits in the open "İçerik" group. */
-  group: "content"
+  /** The panel group it sits in: "İçerik", the catalog header's by the part of the bar. */
+  group: FieldGroupName
   /** A slide's field: that slide's dialog opens at it. */
   slide?: number
   /** Another section's field (a shelf's pill names the rail beside it): that section opens. */
@@ -132,7 +134,10 @@ function wordField(section: AnySection, word: string): PreviewField | null {
   return section.type === "header_bar" &&
     section.variant === "catalog" &&
     HEADER_FIELDS.includes(word)
-    ? content(PREVIEW_IDS.header(section.id, word))
+    ? {
+        target: PREVIEW_IDS.header(section.id, word),
+        group: HEADER_CATALOG_GROUPS[word as keyof typeof HEADER_CATALOG_GROUPS],
+      }
     : null
 }
 

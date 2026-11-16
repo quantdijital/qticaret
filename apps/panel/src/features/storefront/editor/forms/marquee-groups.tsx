@@ -24,10 +24,18 @@ export function MarqueeGroups<S extends MarqueeSection | HeaderMarquee>({
   const { t } = useTranslation()
   return (
     <>
-      <PanelGroup title={t("storefront.editor.panel.motion")} reveal={reveal("motion")}>
+      <PanelGroup
+        name="motion"
+        title={t("storefront.editor.panel.motion")}
+        reveal={reveal("motion")}
+      >
         <MarqueeSettings section={section} settings={MARQUEE_MOTION_SETTINGS} onChange={onChange} />
       </PanelGroup>
-      <PanelGroup title={t("storefront.editor.panel.appearance")} reveal={reveal("appearance")}>
+      <PanelGroup
+        name="appearance"
+        title={t("storefront.editor.panel.appearance")}
+        reveal={reveal("appearance")}
+      >
         <MarqueeSettings
           section={section}
           settings={MARQUEE_APPEARANCE_SETTINGS}

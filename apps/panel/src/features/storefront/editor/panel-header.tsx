@@ -1,11 +1,13 @@
 import { ArrowLeft, ChevronDown, PanelLeft } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { useContext, useId, useState } from "react"
+import { useContext, useId, useLayoutEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { EditorChromeContext } from "./editor-layout"
+import { GroupMarkContext, useGroupMarks } from "./group-mark"
+import { SettingsLayoutContext } from "./settings-layout-state"
 import { Hint } from "./shared/hint"
 
 const P = "storefront.editor.panel"
@@ -81,58 +83,116 @@ export function Panel({
  * changes: the settings search found a field in it.
  */
 export function PanelGroup({
+  name,
   title,
   hint,
+  marked,
   children,
   className,
   defaultOpen = true,
   reveal = null,
 }: {
+  /**
+   * Its name in the panel's tabs (`panel-groups.ts`): inside a
+   * `SettingsLayout` it stands in its tab, closed at first, and opens as
+   * the layout says; outside one (or with no name) it folds on its own.
+   */
+  name?: string
   title: string
   hint?: string | undefined
+  /**
+   * How many of its settings are off their defaults: a small mark beside the
+   * title. Not given: its fields showing "Varsayılana dön" (`group-mark.ts`).
+   */
+  marked?: number | undefined
   children: ReactNode
   className?: string
   defaultOpen?: boolean
   reveal?: number | null
 }) {
-  const [open, setOpen] = useState(defaultOpen || reveal !== null)
+  const { t } = useTranslation()
+  const layout = useContext(SettingsLayoutContext)
+  // A group with no name still stands in a layout: in "İçerik", under its own title
+  const key = name ?? `untitled:${title}`
+  const [ownOpen, setOwnOpen] = useState(defaultOpen || reveal !== null)
   const [revealed, setRevealed] = useState(reveal)
   if (reveal !== revealed) {
     setRevealed(reveal)
     if (reveal !== null) {
-      setOpen(true)
+      setOwnOpen(true)
     }
   }
+  const register = layout?.register
+  useLayoutEffect(() => register?.(key), [register, key])
+  const mark = layout?.mark
+  const marks = useGroupMarks()
+  // The form's own count where it gives one, else its fields' "Varsayılana dön"
+  const count = marked ?? marks.count
+  useLayoutEffect(() => (count > 0 ? mark?.(key, count) : undefined), [mark, key, count])
+  const open = layout ? layout.isOpen(key) : ownOpen
+  const lone = layout ? layout.isLone(key) : false
+  const shown = layout ? layout.isShown(key) : true
   const id = useId()
   return (
-    <div role="group" aria-labelledby={`${id}-title`} className="border-b last:border-b-0">
-      <h3 id={`${id}-title`} className="sticky top-[var(--editor-panel-head)] z-[5] bg-card">
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-controls={`${id}-body`}
-          onClick={() => {
-            setOpen((was) => !was)
-          }}
-          className="flex h-11 w-full items-center justify-between gap-2 px-5 text-left text-sm font-semibold hover:bg-muted/60"
+    <div
+      role="group"
+      aria-labelledby={`${id}-title`}
+      data-panel-group={layout ? key : (name ?? "")}
+      hidden={!shown}
+      className="border-b last:border-b-0"
+    >
+      {lone ? (
+        // Alone in its tab: nothing to fold, its name kept for the screen reader and the search
+        <h3 id={`${id}-title`} className="sr-only">
+          <span data-panel-group-title>{title}</span>
+        </h3>
+      ) : (
+        <h3
+          id={`${id}-title`}
+          className="sticky top-[calc(var(--editor-panel-head)+var(--editor-panel-tabs,0px))] z-[5] bg-card"
         >
-          {title}
-          <ChevronDown
-            aria-hidden="true"
-            className={cn(
-              "size-4 shrink-0 text-muted-foreground transition-transform",
-              open && "rotate-180"
-            )}
-          />
-        </button>
-      </h3>
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={`${id}-body`}
+            onClick={() => {
+              if (layout) {
+                layout.toggle(key)
+              } else {
+                setOwnOpen((was) => !was)
+              }
+            }}
+            className="flex h-11 w-full items-center justify-between gap-2 px-5 text-left text-sm font-semibold hover:bg-muted/60"
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              <span data-panel-group-title className="truncate">
+                {title}
+              </span>
+              {count > 0 ? (
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-[11px] font-medium text-accent-foreground">
+                  <span aria-hidden="true">{count}</span>
+                  <span className="sr-only">{`, ${t(`${P}.marked`, { count })}`}</span>
+                </span>
+              ) : null}
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              className={cn(
+                "size-4 shrink-0 text-muted-foreground transition-transform",
+                open && "rotate-180"
+              )}
+            />
+          </button>
+        </h3>
+      )}
       <div
         id={`${id}-body`}
+        data-panel-group-body
         hidden={!open}
-        className={cn("@container flex flex-col gap-5 px-5 pt-1 pb-6", className)}
+        className={cn("@container flex flex-col gap-5 px-5 pt-1 pb-6", lone && "pt-5", className)}
       >
         {hint ? <p className="-mt-1 text-xs text-muted-foreground">{hint}</p> : null}
-        {children}
+        <GroupMarkContext.Provider value={marks.note}>{children}</GroupMarkContext.Provider>
       </div>
     </div>
   )

@@ -5,6 +5,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { MARQUEE_SETTINGS } from "@qticaret/types"
 import type { MarqueeSetting, MarqueeStep } from "@qticaret/types"
+import { useOffDefault } from "../group-mark"
 
 const M = "storefront.editor.marquee"
 
@@ -28,8 +29,9 @@ export function SettingHint({ setting }: { setting: MarqueeSetting }) {
   return hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null
 }
 
-/** "Varsayılana dön", once the setting differs from the strip's default. */
+/** "Varsayılana dön", once the setting differs from its default: it counts on its group's title. */
 export function ResetButton({ onReset }: { onReset: () => void }) {
+  useOffDefault()
   const { t } = useTranslation()
   return (
     <Button type="button" variant="ghost" size="xs" onClick={onReset}>
