@@ -4,14 +4,27 @@
 
 ## Sıradaki işler (güncel tutulur; Oğuzhan başlamadan önce buraya bakar)
 
-1. **Sahibin panelde bakması bekleniyor:** toptancı akışı (şifreyle oluşturma, Yeni şifre, Hesabı devral, Sil). Bulgu çıkarsa ayrı düzeltme PR'ı. (Bildirimler sayfası ve mağaza profili onaylandı.)
-2. **BirFatura:** öneri A (sipariş çekme) için sahibin onayı ve test hesabı → ADR → F1/F2 (`docs/entegrasyonlar/plan-basitkargo-birfatura.md`). BasitKargo askıda: sahibin "gerek yok" notu teyit bekliyor; BirFatura'nın kargo gönderisi oluşturduğuna dair kanıt yok, sahibe soruldu.
-3. **Ödeme bağlantısı takipleri** (#107'den): `cart` üzerinde `metadata ->> 'qt_payment_link'` kısmi dizini (migration); tam önleme için bağlantı üzerinde DB düzeyinde tekil talep (iki sepetin milisaniyeler içinde birlikte tamamlanması bugün kabul edilen risk); `paid_twice` logunun tekrarı; `settlePaymentLinks`'in 500 sınırı.
+1. **PayTR "veritabanı meşgul" testinin yeniden yazımı** (`apps/backend/integration-tests/http/paytr-stock-short.spec.ts`): enjekte edilen hata sipariş satırı rezervasyonlarını hedeflemeli.
+2. **Ödeme bağlantısı takipleri** (#107'den): `cart` üzerinde `metadata ->> 'qt_payment_link'` kısmi dizini (migration); eşzamanlı tamamlamada bağlantı üzerinde DB düzeyinde tek sahiplenme (iki sepetin milisaniyeler içinde birlikte tamamlanması bugün kabul edilen risk); `paid_twice` logunun tekrarı; `settlePaymentLinks`'in 500 sınırı.
+3. **ADR-0069 ürün videoları, dilim 2–8** (dilim 1 #117 ile birleşti): dilim 4 (galeride video karesi, CSP `media-src`/`frame-src`) Oğuzhan'ın alanıyla kesişir, başlamadan haber.
 4. **Toptancı dilim 5** (adr/0068): belgeler, KVKK dışa aktarımı, kampanya e-postalarından hariç tutma, e2e. 3. dilim incelemesinin notları: I2 analitik olaylar toptancının ödediği fiyatı üçüncü taraf etiketlerine (GA4, Meta) taşır (KVKK envanteri, çerez metni); I3 `vat_exclusive` gösterimi paylaşılan önbelleğe girmez (`PriceDisplay`'i önbelleğe alan her yeni kod denetler).
-5. **ADR-0069 ürün videoları** (Kabul, 2026-11-16): dilim 1'den başlayarak, 8 dilim, ~13–14 iş günü; sunucuda ffmpeg gerekir; dilim 4 (galeride video karesi, CSP `media-src`/`frame-src`) Oğuzhan'ın alanıyla kesişir, başlamadan haber.
-6. **Canlıya çıkış listesine eklenecekler:** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); ffmpeg kurulumu; BirFatura için gerekirse ayrı alt alan adı.
-7. **Sahibin bekleyen kararları:** ağır testler (HTTP parçaları, e2e) yalnız `dev` ve PR'larda mı koşsun; toptan/perakende ayrımı raporlarda, panoda ve plan sayacında; toptancı "Sil" müşteri kaydını da silsin mi (bugün perakende müşteri olarak kalır); Katalog görünümü menü zemini / duyuru şeridi; `packages/themes/base` (eskimiş); canlı alan adları; ADR-0064.
-8. **Bakım modunda backend** (#43 bulgu 2'nin ikinci yarısı, adr/0053): ödeme ve sipariş reddedilir; personelin atlatma çereziyle denemesi vitrinin imzalı başlığıyla geçer. Güvenlik incelemesi şart.
+5. **Bakım modunda backend koruması** (#43 bulgu 2'nin ikinci yarısı, adr/0053): ödeme ve sipariş reddedilir; personelin atlatma çereziyle denemesi vitrinin imzalı başlığıyla geçer. Güvenlik incelemesi şart.
+6. **BirFatura entegrasyonu:** A yolu onaylandı (siparişleri BirFatura çeker); test hesabı gelince ADR → F1/F2 (`docs/entegrasyonlar/plan-basitkargo-birfatura.md`). BasitKargo şimdilik yok.
+7. **Canlıya çıkış listesine eklenecekler:** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); sunucuya ffmpeg (`FFMPEG_PATH` / `FFPROBE_PATH`); BirFatura için gerekirse ayrı alt alan adı.
+8. **Sahibin panelde bakması bekleniyor:** toptancı akışı (şifreyle oluşturma, Yeni şifre, Hesabı devral, Sil); mağaza profili Genel ekranı ve kenar çubuğu simgesi (#123). Bulgu çıkarsa ayrı düzeltme PR'ı.
+9. **Sahibin bekleyen kararları:** ağır testler (HTTP parçaları, e2e) yalnız `dev` ve PR'larda mı koşsun; toptan/perakende ayrımı raporlarda, panoda ve plan sayacında; toptancı "Sil" müşteri kaydını da silsin mi (bugün perakende müşteri olarak kalır); Katalog görünümü menü zemini / duyuru şeridi; `packages/themes/base` (eskimiş); canlı alan adları; ADR-0064.
+
+## 2026-11-16 (akşam): ürün videoları dilim 1, Atölye boşlukları, galeri, telefon araması
+
+- **Ürün videoları dilim 1 (#117, ADR-0069):** `media_video` modeli, `POST/GET/DELETE /admin/products/:id/videos` (akışla yükleme, 50 MB), ffprobe ile doğrulama (ayrı süreç, sınırlı; araç yoksa yükleme kapalı), kota, ürün başına 2 video, platform bayrağı `catalog.product_videos`. Migration `Migration20261116143512`. Yeni paket `busboy`; isteğe bağlı `FFMPEG_PATH` / `FFPROBE_PATH`; CI'a ffmpeg. Aynı PR'da ayrı hata: üst panelden gelen plan belgesi derin birleştirmeyle saklanıyor, imza tutmuyordu; artık knex ile tek seferde bütün yazılıyor.
+- **Galeri büyütme (#118, #121):** büyütülen fotoğraf ortada; masaüstünde fotoğraf dışına tıklamak kapatır; dokunmatiğin hayalet tıklaması yutulur.
+- **Atölye boşluk yoğunluğu (#119, #120):** Katalog ve Grafit hazır görünümleri `section_spacing: compact`, yoğunluk Dengeli, köşe Ölçülü seçer; yeni `density` stil basamağı (Ferah varsayılan / Dengeli / Sıkı), bölüm aralığında `tight` ("Çok sık"), köşede `gentle` ("Ölçülü") ve `crisp` ("Belirgin"); panelde ayrı "Boşluklar" grubu. Telefon/tablette sekmeli rafta "Tüm ürünler" hap satırında. Varsayılan çizim değişmedi; kilit bilerek yeniden yazıldı.
+- **Altbilgi logosu (#122):** altbilgi mağazanın logosu varsa onu gösterir.
+- **Mağaza profili (#123):** Genel ekranında "Marka" kartı (açık/koyu logo, site simgesi aynı boyda), "Bölge ve birimler" kartı eşit yükseklikte; panel kenar çubuğu ve sekme simgesi site simgesinden.
+- **Telefon araması (#124 → #130):** #124 her üst bilgiye telefonda duran bir arama kutusu koymuştu; sahip kararıyla geri alındı: telefonda hiçbir üst bilgide kutu yok, alt çubuktaki "Ara" aramayı üstten açar (`qt:open-search`). `search_style` yalnız geniş ekranı etkiler. adr/0049 eki düzeltildi.
+- **Günün önceki birleşmeleri** (#85–#114) aşağıdaki iki notta; orada açık görünen #112 (SVG test süre sınırları) ve #113 (toptancı tema metinleri, en az adette "Ödemeye geç" kapalı) da birleşti.
+- **Sahibin kararları:** BirFatura A yolu onaylandı (siparişleri BirFatura çeker); BasitKargo şimdilik yok. BirFatura test hesabı bekleniyor.
+- **Açık PR'lar:** Oğuzhan'ın #125–#129'u (marka logosu yalnız ortam kitaplığından, kurulum adımları satırı, sıralı raf, panelde vitrin adresi, şerit satırı resmi); kendisi birleştirir.
 
 ## 2026-11-16 (devam): ödeme bağlantısı, toptancı menüsü, entegrasyon araştırması, ADR-0069 kabul
 
