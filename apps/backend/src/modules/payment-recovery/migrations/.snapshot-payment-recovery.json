@@ -129,7 +129,7 @@
           "scale": null,
           "default": "'pending'",
           "comment": null,
-          "enumItems": ["pending", "refunded", "failed"],
+          "enumItems": ["pending", "refunded", "failed", "order_exists"],
           "mappedType": "enum"
         },
         "attempts": {

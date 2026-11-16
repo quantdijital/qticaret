@@ -5,6 +5,9 @@ import { PaymentRecovery } from "./models/payment-recovery"
 // Tries before a refund is left to the shop (the job runs every few minutes)
 export const MAX_REFUND_ATTEMPTS = 10
 
+/** The statuses of a payment being, or left to be, given back: every one but `order_exists`. */
+export const GIVEN_BACK = ["pending", "refunded", "failed"] as const
+
 export interface RecoveryInput {
   provider: string
   reference: string
@@ -49,6 +52,14 @@ class PaymentRecoveryModuleService extends MedusaService({ PaymentRecovery }) {
       refunded_at: new Date(),
       error_code: null,
     })
+  }
+
+  /**
+   * The payment belongs to a placed order after all (finding 2026-11-16):
+   * never given back; out of the job's queue for good, the shop told.
+   */
+  async markOrderExists(id: string): Promise<void> {
+    await this.updatePaymentRecoveries({ id, status: "order_exists", error_code: "order_exists" })
   }
 
   /** One more try that did not give the money back; past the limit it is the shop's to do. */

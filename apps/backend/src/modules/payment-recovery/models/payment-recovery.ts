@@ -5,6 +5,8 @@ import { model } from "@medusajs/framework/utils"
  * replaced while its form stayed payable, a payment that does not match
  * its session, a cart that could not be completed. Each is given back by
  * the recovery job; one that cannot be is left for the shop, with an alert.
+ * One found to belong to a placed order after all is never given back
+ * (`order_exists`, finding 2026-11-16): the shop is told instead.
  */
 export const PaymentRecovery = model
   .define("payment_recovery", {
@@ -17,7 +19,7 @@ export const PaymentRecovery = model
     currency_code: model.text(),
     test_mode: model.boolean(),
     reason: model.enum(["session_gone", "amount_mismatch", "completion_failed"]),
-    status: model.enum(["pending", "refunded", "failed"]).default("pending"),
+    status: model.enum(["pending", "refunded", "failed", "order_exists"]).default("pending"),
     attempts: model.number().default(0),
     /** Our reference for the refund, so an answer lost on the way can be looked up. */
     refund_reference: model.text(),

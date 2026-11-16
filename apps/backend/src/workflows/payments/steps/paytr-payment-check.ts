@@ -83,6 +83,7 @@ export const checkPaytrPaymentStep = createStep(
             ...taken,
             provider: "paytr",
             reference: notification.merchant_oid,
+            session_id: target.session_id,
             attempts: claim.attempts,
           }
         : { kind: "orphan", reason: "amount_mismatch", ...taken, cart_id: target.cart_id }

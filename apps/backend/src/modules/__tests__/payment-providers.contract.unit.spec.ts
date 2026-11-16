@@ -16,6 +16,7 @@ import PaytrProviderService from "../payment-paytr/service"
 jest.mock("../payment-paytr/account", () => ({
   storedPaytrAccount: jest.fn(),
   storedPaymentSettings: jest.fn(),
+  isRecordedForRefund: jest.fn().mockResolvedValue(false),
 }))
 jest.mock("../payment-iyzico/account", () => ({
   storedIyzicoAccount: jest.fn(),

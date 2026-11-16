@@ -29,7 +29,9 @@ export interface IyzicoCallbackResult {
  * form's result and its signature checked. A payment that matches its
  * session and passed the fraud check completes the cart under Medusa's
  * cart lock; a completed cart returns its order, so a repeat (a refreshed
- * page, the job) never opens a second one. A payment that cannot become an
+ * page, the job) never opens a second one. A form whose payment the order
+ * already holds is answered as paid before iyzico is asked again, nothing
+ * judged anew (finding 2026-11-16). A payment that cannot become an
  * order is recorded to be given back, for good: a later callback or the
  * job never makes it an order. The form's record (`payment-forms`) closes
  * once nothing more can come of it. No event record as PayTR's: iyzico
@@ -49,9 +51,14 @@ export const iyzicoCallbackWorkflow = createWorkflow(
       verdict,
       completion,
     })
-    const outcome = transform({ check, completion }, ({ check, completion }): IyzicoOutcome =>
+    // The order placed now, or the one the form's payment placed before (a repeat)
+    const orderId = transform(
+      { check, completion },
+      ({ check, completion }): string | null => completion.order_id ?? check.order_id ?? null
+    )
+    const outcome = transform({ check, orderId }, ({ check, orderId }): IyzicoOutcome =>
       // A paid cart that cannot complete is given back: not an order
-      check.outcome === "paid" && !completion.order_id ? "orphan" : check.outcome
+      check.outcome === "paid" && !orderId ? "orphan" : check.outcome
     )
     closePaymentFormStep({ session_id: input.session_id, outcome })
     // The shopper's message; a repeated callback is sent once a day (F9)
@@ -70,11 +77,11 @@ export const iyzicoCallbackWorkflow = createWorkflow(
     })
     return new WorkflowResponse(
       transform(
-        { outcome, target, completion },
-        ({ outcome, target, completion }): IyzicoCallbackResult => ({
+        { outcome, target, orderId },
+        ({ outcome, target, orderId }): IyzicoCallbackResult => ({
           outcome,
           return_urls: target && !target.orphan ? target.return_urls : null,
-          order_id: completion.order_id,
+          order_id: orderId,
         })
       )
     )
