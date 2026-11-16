@@ -103,6 +103,28 @@ medusaIntegrationTestRunner({
       expect(await flags().isFeatureEnabled(FLAG)).toBe(false)
     })
 
+    // adr/0069 slice 1 review: Medusa's update deep-merged the stored JSON, so a key the
+    // new document no longer named stayed, the row failed its signature and gave no flags
+    it("stores a newer document whole: a flag or field it drops does not linger", async () => {
+      const videos = "catalog.product_videos"
+      const first = signed(
+        doc(20, {
+          platform_flags: { [FLAG]: true, [videos]: true },
+          billing: { ...doc(20).billing, package_name: "Standart" },
+        })
+      )
+      expect((await push(first)).data).toMatchObject({ applied: true })
+      const second = signed(doc(21, { platform_flags: { [videos]: false } }))
+      expect((await push(second)).data).toMatchObject({ applied: true })
+
+      const stored = await plans().storedPlan(TENANT_ID)
+      expect(stored?.document).toEqual(second.document)
+      expect(await plans().planState()).toMatchObject({ serial: 21, status: "active" })
+      expect(await flags().isFeatureEnabled(videos)).toBe(false)
+      // Not named any more: back to its default, not the older document's value
+      expect(await flags().isFeatureEnabled(FLAG)).toBe(true)
+    })
+
     it("is unmanaged without the public keys: 404, platform flags at their defaults", async () => {
       await push(signed(doc(4)))
       expect(await flags().isFeatureEnabled(FLAG)).toBe(false)

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs"
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
@@ -52,9 +52,13 @@ function clip(name: string, args: string[]): Buffer {
 const lavfi = (spec: string) => ["-f", "lavfi", "-i", spec]
 
 // Upload directories this process leaves in the temp folder (lib/media/video/receive.ts)
+// An upload's own: a directory holding its `source` (not the start's self-test, nor this file's clips)
 const leftovers = () =>
   readdirSync(tmpdir()).filter(
-    (name) => name.startsWith("qt-video-") && !name.startsWith("qt-video-clips-")
+    (name) =>
+      name.startsWith("qt-video-") &&
+      !name.startsWith("qt-video-clips-") &&
+      existsSync(join(tmpdir(), name, "source"))
   )
 
 interface VideoBody {

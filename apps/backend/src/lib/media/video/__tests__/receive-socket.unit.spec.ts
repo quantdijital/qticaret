@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, readdirSync, readlinkSync } from "node:fs"
+import { existsSync, mkdtempSync, readdirSync, readlinkSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { createServer } from "node:http"
 import type { IncomingMessage, Server } from "node:http"
 import { connect } from "node:net"
@@ -39,12 +41,12 @@ interface Outcome {
 }
 
 /** A server that hands each request to the receiver and reports how it ended. */
-function receiver(maxBytes?: number, timeouts?: { idleMs: number; totalMs: number }) {
+function receiver(root: string, maxBytes?: number, timeouts?: { idleMs: number; totalMs: number }) {
   const outcomes: Promise<Outcome>[] = []
   const server: Server = createServer((req: IncomingMessage, res) => {
     outcomes.push(
       (async () => {
-        const dir = await makeVideoTempDir()
+        const dir = await makeVideoTempDir(root)
         try {
           await receiveVideo(req, dir, maxBytes, timeouts)
           res.end("ok")
@@ -120,8 +122,14 @@ async function settled(outcomes: Promise<Outcome>[]): Promise<Outcome> {
 
 describe("the receiver on a real socket (security review Y1, O2)", () => {
   let server: Server | null = null
+  let root = ""
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), "qt-test-sock-"))
+  })
 
   afterEach(async () => {
+    rmSync(root, { recursive: true, force: true })
     await new Promise<void>((resolve) => {
       if (server) {
         server.close(() => {
@@ -145,7 +153,7 @@ describe("the receiver on a real socket (security review Y1, O2)", () => {
     } = {}
   ) {
     const before = openFds()
-    const made = receiver(options.maxBytes, options.timeouts)
+    const made = receiver(root, options.maxBytes, options.timeouts)
     server = made.server
     const port = await listen(made.server)
     await send(port, chunks, end, options.pauseMs)
@@ -160,7 +168,9 @@ describe("the receiver on a real socket (security review Y1, O2)", () => {
     server = null
     await new Promise((resolve) => setTimeout(resolve, 50))
     // No upload's file open, whatever else the process holds
-    expect(openUploadFiles()).toEqual([])
+    expect(openUploadFiles().filter((file) => file.includes(root))).toEqual([])
+    // Nothing left under this test's own root (other tests' directories never show here)
+    expect(readdirSync(root)).toEqual([])
     return { outcome, leaked: openFds() - before }
   }
 

@@ -61,12 +61,17 @@ async function precheck(container: MedusaContainer, productId: string, bytes: nu
 /**
  * Runs `use` with the checked clip, then removes its temporary file
  * whatever happened. A refusal before the body was read drains it (the
- * path's gate bounds it at 52 MB), so the answer reaches the client.
+ * path's gate bounds it at 52 MB), so the answer reaches the client. On
+ * every way out the order is fixed (review): the receiver has closed the
+ * file, the directory is removed, and only then is the place given back,
+ * so a new upload never starts beside an old one's file still on disk.
+ * `tempRoot`: where the directory is made (tests; the system's otherwise).
  */
 export async function withCheckedVideo<T>(
   req: MedusaRequest,
   productId: string,
-  use: (video: CheckedVideo) => Promise<T>
+  use: (video: CheckedVideo) => Promise<T>,
+  tempRoot?: string
 ): Promise<T> {
   let reading = false
   let dir: string | null = null
@@ -77,7 +82,7 @@ export async function withCheckedVideo<T>(
     }
     release = await uploadSlots.take()
     await precheck(req.scope as MedusaContainer, productId, declaredBytes(req))
-    dir = await makeVideoTempDir()
+    dir = await makeVideoTempDir(tempRoot)
     reading = true
     const received = await receiveVideo(req, dir)
     const signature = videoSignature(await readHead(received.path))
@@ -88,12 +93,12 @@ export async function withCheckedVideo<T>(
     const verdict = await probeVideo(received.path, signature.demuxer)
     return await use({ ...received, ...signature, ...verdict })
   } finally {
-    release?.()
     if (!reading && !req.readableEnded) {
       req.resume()
     }
     if (dir !== null) {
       await removeVideoTempDir(dir)
     }
+    release?.()
   }
 }
