@@ -7,7 +7,7 @@ import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
-import { fillBrandLogoSizesWorkflow } from "../../src/workflows/brands/workflows"
+import { fillBrandLogoSizes } from "../../src/workflows/brands/backfill-logo-sizes"
 
 jest.setTimeout(120 * 1000)
 
@@ -133,6 +133,10 @@ medusaIntegrationTestRunner({
         logo_height: 1,
       })
       expect(sent.status).toBe(400)
+      // A key out of storage's folder is refused before anything reads it
+      for (const key of ["../yol.png", "/yol.png"]) {
+        expect((await post("/admin/brands", { name: "Yol", logo_file_id: key })).status).toBe(400)
+      }
       const brand = (await post<{ brand: Brand }>("/admin/brands", { name: "Elle" })).data.brand
       const changed = await post(`/admin/brands/${brand.id}`, { logo_width: 9999 })
       expect(changed.status).toBe(400)
@@ -161,16 +165,15 @@ medusaIntegrationTestRunner({
       // As a brand saved before the migration stands: a logo, no size
       await knex()("brand").where("id", old.id).update({ logo_width: null, logo_height: null })
 
-      const run = (apply: boolean) =>
-        fillBrandLogoSizesWorkflow(getContainer()).run({ input: { apply } })
-      const checked = (await run(false)).result
+      const run = (apply: boolean) => fillBrandLogoSizes(getContainer(), { apply })
+      const checked = await run(false)
       expect(checked).toEqual({ missing: 2, measured: 1, unmeasured: [broken.id], written: 0 })
       const [still] = (await knex()("brand").select("logo_width").where("id", old.id)) as {
         logo_width: number | null
       }[]
       expect(still?.logo_width).toBeNull()
 
-      const applied = (await run(true)).result
+      const applied = await run(true)
       expect(applied).toEqual({ missing: 2, measured: 1, unmeasured: [broken.id], written: 1 })
       const { data } = await storeGet<{ brands: Brand[] }>("/store/brands")
       const byId = new Map(data.brands.map((brand) => [brand.id, brand]))
@@ -179,7 +182,7 @@ medusaIntegrationTestRunner({
       expect(byId.get(bare.id)).toMatchObject({ logo_url: null, logo_width: null })
 
       // Again: nothing more to write
-      expect((await run(true)).result).toEqual({
+      expect(await run(true)).toEqual({
         missing: 1,
         measured: 0,
         unmeasured: [broken.id],

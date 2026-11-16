@@ -45,8 +45,11 @@ export interface StoreBrand {
   logo_height?: number | null
 }
 
+/** The longest logo side the backend keeps (`LOGO_SIDE_MAX` there): keep the two the same. */
+export const BRAND_LOGO_SIDE_MAX = 65_535
+
 const isSide = (value: unknown): value is number =>
-  typeof value === "number" && Number.isInteger(value) && value > 0
+  typeof value === "number" && Number.isInteger(value) && value > 0 && value <= BRAND_LOGO_SIDE_MAX
 
 /**
  * A brand logo's size when the answer gives both sides as whole pixels,

@@ -1,7 +1,7 @@
 import type { ExecArgs } from "@medusajs/framework/types"
 import { AUDIT_LOG_MODULE } from "../modules/audit-log"
 import type AuditLogModuleService from "../modules/audit-log/service"
-import { fillBrandLogoSizesWorkflow } from "../workflows/brands/workflows"
+import { fillBrandLogoSizes } from "../workflows/brands/backfill-logo-sizes"
 
 /**
  * Usage: pnpm --filter @qticaret/backend brand-logo-sizes:backfill [apply]
@@ -18,7 +18,7 @@ import { fillBrandLogoSizesWorkflow } from "../workflows/brands/workflows"
 export default async function run({ container, args }: ExecArgs): Promise<void> {
   const out = (line: string) => process.stdout.write(`${line}\n`)
   const apply = args.includes("apply")
-  const { result } = await fillBrandLogoSizesWorkflow(container).run({ input: { apply } })
+  const result = await fillBrandLogoSizes(container, { apply })
   const counts = {
     missing: result.missing,
     measured: result.measured,

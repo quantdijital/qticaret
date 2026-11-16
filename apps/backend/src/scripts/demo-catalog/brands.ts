@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { BRANDS_MODULE } from "../../modules/brands"
 import type BrandsModuleService from "../../modules/brands/service"
-import { fillBrandLogoSizesWorkflow, saveBrandWorkflow } from "../../workflows/brands/workflows"
+import { fillBrandLogoSizes } from "../../workflows/brands/backfill-logo-sizes"
+import { saveBrandWorkflow } from "../../workflows/brands/workflows"
 import { deriveLibraryMediaWorkflow } from "../../workflows/media/workflows"
 import { uploadDemoImage } from "./images"
 import type { DemoCatalog } from "./schema"
@@ -75,9 +76,7 @@ export async function ensureBrands(
     logos += logoFileId ? 1 : 0
   }
   if (ids.size > 0) {
-    await fillBrandLogoSizesWorkflow(container).run({
-      input: { apply: true, ids: [...ids.values()] },
-    })
+    await fillBrandLogoSizes(container, { apply: true, ids: [...ids.values()] })
   }
   return { ids, created, logos }
 }

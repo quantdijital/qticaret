@@ -82,9 +82,10 @@ export const setProductBrandWorkflow = createWorkflow(
 )
 
 /**
- * Gives brands whose logo was set before sizes were kept their logo's
- * width and height (`brand-logo-sizes:backfill`, the demo catalogue); a
- * brand with a size is left as it is.
+ * Gives one page of brands whose logo was set before sizes were kept
+ * their logo's width and height; a brand with a size is left as it is.
+ * The lock is held for one page only, so a long run never outlasts it
+ * (`fillBrandLogoSizes` runs every page).
  */
 export const fillBrandLogoSizesWorkflow = createWorkflow(
   "brands-fill-logo-sizes",
