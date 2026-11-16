@@ -4,11 +4,11 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
+import { VIDEO_MAX_REQUEST_BYTES } from "../../lib/media/video/limits"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { PRODUCT_VIDEOS } from "../../modules/platform-settings/features"
 import { requireUserActor } from "./actor"
-import { VIDEO_MAX_REQUEST_BYTES } from "../../lib/media/video/limits"
-import { refuseAfterDrain } from "./drain-body"
+import { drainLimitFor, refuse } from "./drain-body"
 import { rateLimit } from "./rate-limit"
 import { requireFeature } from "./require-feature"
 
@@ -19,17 +19,18 @@ const staffOf = (req: MedusaRequest) =>
  * An upload is a multipart form with its length declared (security review
  * O2): the size gate checks multipart bodies only, so any other type is
  * refused here (415) before anything reads it, and so is a body of
- * unknown length (411). Each answered once the body is drained (bounded at
- * the video path's 52 MB), so the client reads it (drain-body.ts).
+ * unknown length (411). Each answered once the body is drained (bounded by
+ * the video path's limit), so the client reads it (drain-body.ts). Runs
+ * after the person and the upload budget are checked (review B2).
  */
 export function requireVideoForm(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
 ): void {
-  const limits = { maxBytes: VIDEO_MAX_REQUEST_BYTES }
+  const limits = drainLimitFor(VIDEO_MAX_REQUEST_BYTES)
   if (!(req.headers["content-type"] ?? "").toLowerCase().startsWith("multipart/form-data")) {
-    void refuseAfterDrain(
+    refuse(
       req,
       res,
       415,
@@ -40,7 +41,7 @@ export function requireVideoForm(
     return
   }
   if (req.headers["content-length"] === undefined) {
-    void refuseAfterDrain(
+    refuse(
       req,
       res,
       411,
@@ -57,9 +58,9 @@ export function requireVideoForm(
  * A product's videos (adr/0069), behind `catalog.product_videos` (first: off,
  * the routes do not exist). Under `/admin/products*`, so the plan guard
  * (closed in a restricted shop) and the product write role apply as for
- * images. An upload is a person's (it records who), reads its own body
- * (no parser: streamed to disk, lib/media/video/receive.ts) and has a
- * budget of its own per address and per staff member.
+ * images. An upload is a person's (it records who), has a budget of its own
+ * per address and per staff member (a refused one counts too), and reads
+ * its own body (no parser: streamed to disk, lib/media/video/receive.ts).
  */
 export const VIDEO_ROUTES = [
   {
@@ -73,9 +74,9 @@ export const VIDEO_ROUTES = [
     bodyParser: false as const,
     middlewares: [
       requireFeature(PRODUCT_VIDEOS),
-      requireVideoForm,
       requireUserActor,
       rateLimit(() => RATE_LIMIT_PROFILES.media_video, { identity: staffOf }),
+      requireVideoForm,
     ],
   },
   {

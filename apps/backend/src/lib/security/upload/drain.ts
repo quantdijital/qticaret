@@ -6,30 +6,48 @@ import type { IncomingMessage } from "node:http"
  * is still sending lets the server close the connection under it (Node
  * closes a `Connection: close` request once answered): the client's next
  * write meets a reset and it never reads the answer, so the panel shows a
- * network error instead of "too large". Draining is bounded: a body
- * declared past `maxBytes`, of unknown length, or not done in `maxMs` is
- * not waited for (the answer then goes with the connection closed after it).
+ * network error instead of "too large".
+ *
+ * Bounded every way (security review B1, B4): never past `maxBytes` (a
+ * body declared larger, or of unknown length, is not waited for), never
+ * past `maxMs`, never for a client already gone, and at most
+ * `MAX_CONCURRENT_DRAINS` at once in this process. Whoever is not drained
+ * is answered at once with the connection closed after it. Whether a
+ * request may be drained at all (only a signed-in person's) is the
+ * caller's to decide.
  */
 
-export const DRAIN_MAX_BYTES = 64 * 1024 * 1024
 export const DRAIN_MAX_MS = 30_000
+/** Drains running at once in this process; one more is answered without one. */
+export const MAX_CONCURRENT_DRAINS = 4
 
 export interface DrainLimits {
-  maxBytes?: number
+  maxBytes: number
   maxMs?: number
 }
 
+let active = 0
+
+/** Drains running now (tests, logs). */
+export const activeDrains = (): number => active
+
 /** True once the body has been read to its end; false when it was not waited for. */
-export function drainBody(req: IncomingMessage, limits: DrainLimits = {}): Promise<boolean> {
-  const maxBytes = limits.maxBytes ?? DRAIN_MAX_BYTES
+export function drainBody(req: IncomingMessage, limits: DrainLimits): Promise<boolean> {
   const maxMs = limits.maxMs ?? DRAIN_MAX_MS
   if (req.readableEnded || req.complete) {
     return Promise.resolve(true)
   }
-  const declared = Number(req.headers["content-length"])
-  if (!Number.isSafeInteger(declared) || declared < 0 || declared > maxBytes) {
+  if (req.destroyed) {
     return Promise.resolve(false)
   }
+  const declared = Number(req.headers["content-length"])
+  if (!Number.isSafeInteger(declared) || declared < 0 || declared > limits.maxBytes) {
+    return Promise.resolve(false)
+  }
+  if (active >= MAX_CONCURRENT_DRAINS) {
+    return Promise.resolve(false)
+  }
+  active += 1
   return new Promise((resolve) => {
     let settled = false
     const finish = (ended: boolean) => {
@@ -37,6 +55,7 @@ export function drainBody(req: IncomingMessage, limits: DrainLimits = {}): Promi
         return
       }
       settled = true
+      active -= 1
       clearTimeout(timer)
       req.off("end", onEnd)
       req.off("close", onClose)

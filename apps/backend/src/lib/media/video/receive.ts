@@ -9,7 +9,14 @@ import busboy from "busboy"
 import { ValidationError } from "../../errors"
 import { logger } from "../../logging"
 import { drainBody } from "../../security/upload/drain"
-import { VIDEO_MAX_BYTES, VIDEO_TITLE_MAX } from "./limits"
+import { VIDEO_MAX_BYTES, VIDEO_MAX_REQUEST_BYTES, VIDEO_TITLE_MAX } from "./limits"
+
+/**
+ * A refused upload's rest, drained before the refusal (review B5): briefly,
+ * since its place among the uploads and its file are held meanwhile; a
+ * body not done by then is answered with the connection closed after it.
+ */
+const REFUSED_DRAIN = { maxBytes: VIDEO_MAX_REQUEST_BYTES, maxMs: 5_000 }
 
 /**
  * A video upload's body, streamed to a private temporary file (adr/0069
@@ -104,8 +111,13 @@ export function receiveVideo(
   timeouts: ReceiveTimeouts = RECEIVE_TIMEOUTS
 ): Promise<ReceivedVideo> {
   const path = join(dir, SOURCE_NAME)
+  // Refused unread (not a form, or no boundary): drained first, briefly (review B6)
+  const refuseUnread = async (): Promise<never> => {
+    await drainBody(req, REFUSED_DRAIN)
+    throw refuse("video.file_required")
+  }
   if (!(req.headers["content-type"] ?? "").toLowerCase().startsWith("multipart/form-data")) {
-    return Promise.reject(refuse("video.file_required"))
+    return refuseUnread()
   }
   return new Promise((resolve, reject) => {
     let parser: busboy.Busboy
@@ -126,7 +138,7 @@ export function receiveVideo(
       })
     } catch {
       // No boundary
-      reject(refuse("video.file_required"))
+      refuseUnread().catch(reject)
       return
     }
     const abort = new AbortController()
@@ -167,7 +179,7 @@ export function receiveVideo(
       // reads it instead of a reset (lib/security/upload/drain.ts)
       void Promise.all([
         fileClosed(writer),
-        destroyRequest ? Promise.resolve(false) : drainBody(req),
+        destroyRequest ? Promise.resolve(false) : drainBody(req, REFUSED_DRAIN),
       ]).then(() => {
         reject(error instanceof Error ? error : new Error("video upload failed"))
       })

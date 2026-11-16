@@ -9,6 +9,7 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { MedusaError } from "@medusajs/framework/utils"
 import { PlanLimitError, toHttpError } from "../../../lib/errors"
 import { logger } from "../../../lib/logging"
+import { activeDrains } from "../../../lib/security/upload/drain"
 import { uploadSizeGate } from "../request-limits"
 import { requireVideoForm } from "../video-routes"
 import { uploadSlotState, withCheckedVideo } from "../video-upload"
@@ -67,7 +68,14 @@ describe("early refusals of a video upload, over a real socket", () => {
   /** The route's chain as the app runs it: the gate, the form check, then the upload. */
   function serve(): Promise<number> {
     server = createServer((incoming: IncomingMessage, outgoing: ServerResponse) => {
-      const req = Object.assign(incoming, { scope: {} }) as unknown as MedusaRequest
+      // Medusa's authentication runs before our middlewares: `x-test-actor` stands in for it
+      const actor = incoming.headers["x-test-actor"]
+      const req = Object.assign(incoming, {
+        scope: {},
+        ...(typeof actor === "string"
+          ? { auth_context: { actor_id: actor, actor_type: "user" } }
+          : {}),
+      }) as unknown as MedusaRequest
       const res = Object.assign(outgoing, {
         status(code: number) {
           outgoing.statusCode = code
@@ -162,7 +170,11 @@ describe("early refusals of a video upload, over a real socket", () => {
     return { status, body: text.slice(text.indexOf("\r\n\r\n") + 4), reset: state.reset }
   }
 
+  // A signed-in person's request (the only kind whose refused body is drained)
+  const SIGNED_IN = { "X-Test-Actor": "user_01TEST" }
+
   const form = (length: number) => ({
+    ...SIGNED_IN,
     "Content-Type": `multipart/form-data; boundary=${BOUNDARY}`,
     "Content-Length": String(length),
   })
@@ -171,7 +183,11 @@ describe("early refusals of a video upload, over a real socket", () => {
     ["a body past 52 MB", form(53 * MB), 53 * MB, 413, "video.too_large"],
     [
       "a body that is not a form",
-      { "Content-Type": "application/x-www-form-urlencoded", "Content-Length": String(2 * MB) },
+      {
+        ...SIGNED_IN,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Length": String(2 * MB),
+      },
       2 * MB,
       415,
       "video.file_required",
@@ -193,6 +209,7 @@ describe("early refusals of a video upload, over a real socket", () => {
     const answer = await send(
       port,
       {
+        ...SIGNED_IN,
         "Content-Type": `multipart/form-data; boundary=${BOUNDARY}`,
         "Transfer-Encoding": "chunked",
       },
@@ -200,6 +217,97 @@ describe("early refusals of a video upload, over a real socket", () => {
     )
     expect(answer.status).toBe(411)
     expect(answer.body).toContain("errors.length_required")
+  })
+
+  /** A raw connection: headers and some body sent, then what the server does is watched. */
+  async function open(port: number) {
+    const socket = connect(port, "127.0.0.1")
+    const chunks: Buffer[] = []
+    socket.on("data", (chunk: Buffer) => chunks.push(chunk))
+    socket.on("error", () => undefined)
+    const closed = new Promise<void>((resolve) => {
+      socket.once("close", () => {
+        resolve()
+      })
+    })
+    await new Promise<void>((resolve) => {
+      socket.once("connect", () => {
+        resolve()
+      })
+    })
+    const text = () => Buffer.concat(chunks).toString("utf8")
+    return { socket, closed, text }
+  }
+
+  const request = (headers: Record<string, string>) =>
+    `POST /admin/products/prod_01TEST/videos HTTP/1.1\r\n${Object.entries({
+      Host: "localhost",
+      ...headers,
+    })
+      .map(([name, value]) => `${name}: ${value}`)
+      .join("\r\n")}\r\n\r\n`
+
+  const within = (promise: Promise<unknown>, ms: number) =>
+    Promise.race([
+      promise.then(() => true),
+      new Promise<boolean>((resolve) => {
+        setTimeout(() => {
+          resolve(false)
+        }, ms)
+      }),
+    ])
+
+  it("never drains a stranger's body: answers at once and closes the connection (B1)", async () => {
+    const port = await serve()
+    const client = await open(port)
+    // Declared 53 MB, nothing sent: a drain would wait 30 s for it
+    client.socket.write(
+      request({
+        "Content-Type": `multipart/form-data; boundary=${BOUNDARY}`,
+        "Content-Length": String(53 * MB),
+      })
+    )
+    expect(await within(client.closed, 2_000)).toBe(true)
+    expect(client.text()).toMatch(/^HTTP\/1\.1 413/)
+    expect(client.text().toLowerCase()).toContain("connection: close")
+  })
+
+  it("lets go at once of a client that leaves mid-body: no drain, no place held (B4)", async () => {
+    mockShop.videos = null
+    const port = await serve()
+    const client = await open(port)
+    client.socket.write(request(form(4 * MB)))
+    client.socket.write(Buffer.alloc(MB, 1))
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    client.socket.destroy()
+    for (let tries = 0; tries < 50 && activeDrains() > 0; tries++) {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+    expect(activeDrains()).toBe(0)
+    expect(uploadSlotState()).toEqual({ running: 0, waiting: 0 })
+    expect(readdirSync(root)).toEqual([])
+  })
+
+  it("keeps a kept-alive connection usable after a drained refusal", async () => {
+    const port = await serve()
+    const client = await open(port)
+    const notAForm = (length: number, connection: string) =>
+      request({
+        ...SIGNED_IN,
+        Connection: connection,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Length": String(length),
+      })
+    client.socket.write(notAForm(MB, "keep-alive"))
+    client.socket.write(Buffer.alloc(MB, 1))
+    for (let tries = 0; tries < 200 && !client.text().includes("video.file_required"); tries++) {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+    // The same connection takes a second request and answers it
+    client.socket.write(notAForm(10, "close"))
+    client.socket.write("x".repeat(10))
+    await client.closed
+    expect(client.text().match(/HTTP\/1\.1 415/g)).toHaveLength(2)
   })
 
   it.each([

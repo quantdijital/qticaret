@@ -18,6 +18,7 @@ import {
 import type { ProbeVerdict, ReceivedVideo, VideoSignature } from "../../lib/media/video"
 import { assertStorageFits } from "../../lib/plan-limits"
 import { drainBody } from "../../lib/security/upload/drain"
+import { drainLimitFor } from "./drain-body"
 import { productVideos } from "../../workflows/media/video/read"
 
 /**
@@ -100,7 +101,13 @@ export async function withCheckedVideo<T>(
     // Refused before the body was read: it is drained first, so the refusal reaches the
     // client instead of a reset (bounded by the path's 52 MB; drain.ts)
     if (!reading) {
-      await drainBody(req, { maxBytes: VIDEO_MAX_REQUEST_BYTES })
+      await drainBody(req, drainLimitFor(VIDEO_MAX_REQUEST_BYTES))
+    }
+    // A body still not all read (past the drain's bounds): the answer closes the
+    // connection after it rather than leave the client's rest unread (review B6)
+    const answer = req.res
+    if (!req.complete && answer && !answer.headersSent) {
+      answer.setHeader("Connection", "close")
     }
     if (dir !== null) {
       await removeVideoTempDir(dir)
