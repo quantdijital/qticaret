@@ -82,11 +82,15 @@
       "file": "slider.css"
     },
     {
-      "sha256": "96cbf6ecb2d4739eeb9f320c0e3062cca687c4f214f0d3f39aab55b94d2b6f6f",
+      "sha256": "fd1224ca73b4aa0f421ed889d3a5ad8fffa2c402c231b68b7c49ab83b24dd2e9",
+      "file": "strip-gallery.css"
+    },
+    {
+      "sha256": "f990dc8f3ff42ebf75def0622f5b00e336460b81a466c3a0af9a3284a91c6147",
       "file": "strips.css"
     },
     {
-      "sha256": "8717b68fba84d6e576e6bde0bafd1f7d72f50aa925a8781f8adbb18c84112b53",
+      "sha256": "f7ce8b4664836b780042f4e25230a44ae6e530603f26c46cf8400f7fcd01d65b",
       "file": "styles.css"
     },
     {
