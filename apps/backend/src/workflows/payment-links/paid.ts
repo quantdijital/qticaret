@@ -1,4 +1,4 @@
-import type { IOrderModuleService } from "@medusajs/framework/types"
+import type { IOrderModuleService, MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import {
   StepResponse,
@@ -7,11 +7,13 @@ import {
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
 import { errorSummary, logger } from "../../lib/logging"
-import type { PaymentLinkStatus } from "../../lib/payment-links/snapshot"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
 import { alertLink } from "./alerts"
+import type { LinkAlert } from "./alerts"
 import { CART_LINK_KEY, linkIdOfCart } from "./cart-guard"
+
+type Container = Pick<MedusaContainer, "resolve">
 
 interface OrderRow {
   id: string
@@ -19,20 +21,10 @@ interface OrderRow {
   cart?: { id: string; metadata?: Record<string, unknown> | null } | null
 }
 
-/** The link as it was before this step marked it paid. */
-interface LinkBefore {
-  id: string
-  status: PaymentLinkStatus
-  order_id: string | null
-  paid_at: Date | string | null
-  closed_at: Date | string | null
-}
-
-/** What the step undoes: the order's keys it wrote (their earlier values) and the link it marked. */
+/** What the step undoes: only the order's keys it wrote, back to their earlier values. */
 interface Undo {
   order_id: string
-  metadata: Record<string, unknown> | null
-  link: LinkBefore | null
+  metadata: Record<string, unknown>
 }
 
 /** Who made the link, on the order, for its page ("Ödeme bağlantısından", adr/0051 §13). */
@@ -40,12 +32,15 @@ export const ORDER_LINK_BY_KEY = "qt_payment_link_by"
 /** The link's number (1042 for `PL-1042`), so the order's page names it without reading the link. */
 export const ORDER_LINK_NUMBER_KEY = "qt_payment_link_number"
 
+const service = (container: Container) =>
+  container.resolve<PaymentLinksModuleService>(PAYMENT_LINKS_MODULE)
+
 /**
  * The order's keys for its link that are not written yet. Medusa merges
  * metadata by top-level key, so only these are sent and the order's other
  * keys stay as they are.
  */
-function missingMarks(
+export function missingMarks(
   metadata: Record<string, unknown> | null | undefined,
   link: { id: string; number: number; created_by: string }
 ): Record<string, unknown> {
@@ -69,16 +64,59 @@ function earlierValues(
   )
 }
 
+/** The bell, never the step's failure (alertLink logs its own; this catches anything else). */
+async function ring(
+  container: Container,
+  kind: LinkAlert,
+  link: Parameters<typeof alertLink>[2],
+  orderId: string
+) {
+  await alertLink(container, kind, link, orderId).catch((error: unknown) => {
+    logger.warn({ event: "payment_links.alert_failed", kind, err: errorSummary(error) })
+  })
+}
+
 const skip = () => new StepResponse<{ paid: boolean }, Undo | null>({ paid: false }, null)
 
 /**
- * An order placed from a link's cart (adr/0051 §5): the order names the link
- * and who made it, the link is paid and names the order, and staff hear of
- * it in the bell. The order's keys are written first, so a step cut short
- * leaves the link open and the next run does it all again. A link already
- * paid by this order whose keys are missing (a run cut short before this
- * order of writes) gets them; a repeated event finds it all done and does
- * nothing. The bell is one per link (its idempotency key).
+ * Closes the link for this order unless it is paid already (a guarded
+ * write: a link another run paid in the meantime is never overwritten).
+ * A link closed before (expired, canceled) keeps its `closed_at`. True when
+ * this order now holds the link.
+ */
+async function closeForOrder(
+  container: Container,
+  link: { id: string; closed_at?: Date | string | null },
+  orderId: string
+): Promise<boolean> {
+  const links = service(container)
+  const now = new Date()
+  const updated = await links.updatePaymentLinks({
+    selector: { id: link.id, status: { $ne: "paid" } },
+    data: {
+      status: "paid",
+      order_id: orderId,
+      paid_at: now,
+      closed_at: link.closed_at ? new Date(link.closed_at) : now,
+    },
+  })
+  if (updated.length > 0) {
+    return true
+  }
+  const [again] = await links.listPaymentLinks({ id: link.id }, { take: 1 })
+  return again?.order_id === orderId
+}
+
+/**
+ * An order placed from a link's cart (adr/0051 §5). The link is closed
+ * first, so a link whose order exists never stays open for a second
+ * payment (money first); then the order names the link and who made it
+ * (for its page; a failed write is logged and left for the next run or the
+ * hourly settle, `settle.ts`); then the bell. A link this order already
+ * paid gets the keys it misses; a repeated event finds it all done and
+ * does nothing. An order from a cart that was not the link's latest, from
+ * a link no longer open, or from a link another order paid, is a possible
+ * second charge: staff are told (`needs_review`).
  */
 export const markLinkPaidStep = createStep(
   "payment-links-mark-paid",
@@ -93,78 +131,73 @@ export const markLinkPaidStep = createStep(
     if (!order?.cart || !linkId) {
       return skip()
     }
-    const links = container.resolve<PaymentLinksModuleService>(PAYMENT_LINKS_MODULE)
-    const [link] = await links.listPaymentLinks({ id: linkId }, { take: 1 })
-    const paidHere = link?.status === "paid" && link.order_id === order.id
-    if (!link || (link.status === "paid" && !paidHere)) {
+    const [link] = await service(container).listPaymentLinks({ id: linkId }, { take: 1 })
+    if (!link) {
       return skip()
     }
-    if (!paidHere && link.cart_id !== order.cart.id) {
-      // The completion guard refuses such a cart: an order from one is worth a look
-      logger.error({ event: "payment_links.paid_from_other_cart", linkId, orderId: order.id })
+    let paidHere = link.status === "paid" && link.order_id === order.id
+    if (link.status === "paid" && !paidHere) {
+      logger.error({ event: "payment_links.paid_twice", linkId, orderId: order.id })
+      await ring(container, "needs_review", link, order.id)
       return skip()
     }
     const marks = missingMarks(order.metadata, link)
     if (paidHere && Object.keys(marks).length === 0) {
       return skip()
     }
-    const undo: Undo = { order_id: order.id, metadata: null, link: null }
-    try {
-      if (Object.keys(marks).length > 0) {
+    if (!paidHere) {
+      const odd =
+        link.cart_id !== order.cart.id ? "other_cart" : link.status !== "open" ? "not_open" : null
+      if (odd) {
+        // The completion guard refuses such a cart: the link is closed all the same (its
+        // money was taken), and staff look at it
+        logger.warn({
+          event: "payment_links.paid_unexpected",
+          reason: odd,
+          linkId,
+          orderId: order.id,
+          status: link.status,
+        })
+      }
+      paidHere = await closeForOrder(container, link, order.id)
+      if (!paidHere) {
+        logger.error({ event: "payment_links.paid_twice", linkId, orderId: order.id })
+        await ring(container, "needs_review", link, order.id)
+        return skip()
+      }
+      if (odd) {
+        await ring(container, "needs_review", link, order.id)
+      }
+    }
+    let undo: Undo | null = null
+    if (Object.keys(marks).length > 0) {
+      try {
         await container
           .resolve<IOrderModuleService>(Modules.ORDER)
           .updateOrders(order.id, { metadata: marks })
-        undo.metadata = earlierValues(order.metadata, marks)
-      }
-      if (!paidHere) {
-        const now = new Date()
-        await links.updatePaymentLinks({
-          id: link.id,
-          status: "paid",
-          order_id: order.id,
-          paid_at: now,
-          closed_at: now,
+        undo = { order_id: order.id, metadata: earlierValues(order.metadata, marks) }
+      } catch (error) {
+        // The link stays paid: the next run (or the hourly settle) writes the keys
+        logger.error({
+          event: "payment_links.order_marks_failed",
+          linkId,
+          orderId: order.id,
+          err: errorSummary(error),
         })
-        undo.link = {
-          id: link.id,
-          status: link.status,
-          order_id: link.order_id ?? null,
-          paid_at: link.paid_at ?? null,
-          closed_at: link.closed_at ?? null,
-        }
       }
-    } catch (error) {
-      logger.error({
-        event: "payment_links.mark_paid_failed",
-        linkId,
-        orderId: order.id,
-        err: errorSummary(error),
-      })
-      // Undo what was written, so the next run starts from the same place
-      return StepResponse.permanentFailure("payment_links.mark_paid_failed", undo)
     }
-    await alertLink(container, "paid", link, order.id)
+    await ring(container, "paid", link, order.id)
     return new StepResponse<{ paid: boolean }, Undo | null>({ paid: true }, undo)
   },
+  // Only the order's keys this step wrote: a paid link is never opened again (its money was taken)
   async (undo, { container }) => {
+    // Null (nothing written), or the step's answer where Medusa passes that instead
     if (!undo?.order_id) {
       return
     }
-    if (undo.link) {
-      const { id, status, order_id, paid_at, closed_at } = undo.link
-      await container.resolve<PaymentLinksModuleService>(PAYMENT_LINKS_MODULE).updatePaymentLinks({
-        id,
-        status,
-        order_id,
-        paid_at: paid_at === null ? null : new Date(paid_at),
-        closed_at: closed_at === null ? null : new Date(closed_at),
-      })
-    }
-    if (undo.metadata) {
-      await container
-        .resolve<IOrderModuleService>(Modules.ORDER)
-        .updateOrders(undo.order_id, { metadata: undo.metadata })
-    }
+    await container
+      .resolve<IOrderModuleService>(Modules.ORDER)
+      .updateOrders(undo.order_id, { metadata: undo.metadata })
   }
 )
 

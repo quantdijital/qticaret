@@ -22,6 +22,8 @@ import type { PaymentLinkAddress } from "../../modules/payment-links/service"
 import { alertLink } from "./alerts"
 import { CART_LINK_KEY, linkCartProblem, markPricesChanged } from "./cart-guard"
 import { linkLockKey } from "./manage"
+import { markPaymentLinkPaidWorkflow } from "./paid"
+import { placedOrders } from "./settle"
 import { currentPrices, liraRegion, shortLines } from "./pricing"
 import { linesOf } from "./views"
 
@@ -54,6 +56,19 @@ const prepareCartStep = createStep(
     const [link] = await links.listPaymentLinks({ id: input.link_id }, { take: 1 })
     const live = link && new Date(link.expires_at).getTime() > Date.now()
     if (!link || !live || (link.status !== "open" && link.status !== "draft")) {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "payment_link.unavailable")
+    }
+    // The link's cart became an order its paid mark has not closed it for yet (the event
+    // still on its way, or lost): never a second cart, so never a second charge. Closed now
+    const placed = await placedOrders(container, link.cart_id ? [link.cart_id] : [])
+    if (link.cart_id && placed.has(link.cart_id)) {
+      const orderId = placed.get(link.cart_id)
+      if (orderId) {
+        await markPaymentLinkPaidWorkflow(container).run({
+          input: { order_id: orderId },
+          throwOnError: false,
+        })
+      }
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "payment_link.unavailable")
     }
     if (!isOpen(link)) {

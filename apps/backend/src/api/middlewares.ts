@@ -63,6 +63,7 @@ import { INVOICE_ROUTES } from "./http/invoice-routes"
 import { MIGRATION_ROUTES } from "./http/migration-routes"
 import { MARKETING_ROUTES } from "./http/marketing-routes"
 import { ORDER_EDIT_ROUTES } from "./http/order-edit-routes"
+import { ORDER_STAFF_KEY_ROUTES } from "./http/order-staff-keys"
 import { PAYMENT_LINK_ROUTES } from "./http/payment-link-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
 import { REVIEW_ROUTES } from "./http/review-routes"
@@ -356,6 +357,8 @@ export default defineMiddlewares({
     ...ORDER_EDIT_ROUTES,
     // adr/0051: payment links behind their flag; a link's cart locked; Medusa's draft orders closed
     ...PAYMENT_LINK_ROUTES,
+    // adr/0051 §13: the link's maker on an order is the staff's, never the customer's answer
+    ...ORDER_STAFF_KEY_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
     // Ürünler > Koleksiyonlar: the panel's list, a collection's text, picture and visibility
