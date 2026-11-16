@@ -2,6 +2,38 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-15 akşam – 2026-11-16 gece: çapraz şeritler, sekmeli düzenleyici, Tezgâh bölümleri
+
+- **Sıradaki işler:**
+  1. Sahibin bakacağı kararlar:
+     - Tezgâh'ın yeni basamakları seçmesi (çip, foto zemini, gölge): yalnız `layout.json` verisi.
+     - İkinci, "marjinal" bir raf görünümü önerisi: büyük sıra numaralı "ilk beş" (ayrı biçim olarak).
+     - Panelde kaynaklı şerit satırında küçük resim.
+     - Marka logosu boyutunu backend'de saklamak.
+     - Üst çubukta "Mağazayı görüntüle" düğmesi.
+     - `CLAUDE.md`'deki "GitHub Actions kapalı" maddesi artık yanlış: Actions PR'larda koşuyor; madde güncellenmeli.
+  2. Deniz'e iletilecekler:
+     - CI'da kararsız http testleri: `payment-links-cart`, `staff-mfa` (yeniden koşunca geçiyor).
+     - `misafir-siparis-kaniti` dalında iki tür hatası: `proven-customer.ts`, `legal/erasure/sign-ins.ts`.
+     - `toptanci-2-panel` dalında gitleaks istisna biçimi, ayrıca `password-change.ts` ile hız sınırı profili çakışması.
+- **`dev`'e giren PR'lar:**
+  - #81 şerit notu ve üst bağlantılar.
+  - #82 öne çıkan üründe çapraz şeritler.
+  - #83 marka logoları.
+  - #84 kategori kolajı.
+  - #86 arama simgesi, kategori paneli zemini, Esc ve önizleme düzeltmeleri.
+  - #87 bölüm boşlukları tek kaynaktan, Üst/Alt boşluk ayarı, ince şerit kuralı, boş sayfalama kutusu.
+  - #89 şerit çekirdeği (`parts/Strips.tsx`) ve ortak `strips_*` ayarları.
+  - #91 düzenleyicide İçerik/Stil/Gelişmiş sekmeleri, kapalı gruplar, bölüm içi ayar araması (docs/18 §7.1 kuralı).
+  - #90 yeni bölüm "Çapraz şeritler" (`strip_gallery`, 2–8 şerit, her şeride kaynak).
+  - #92 ürün rafına "Çapraz şeritler" biçimi (`strips`; `strips_count` 2–8, varsayılan 5; yükseklik varsayılanı Alçak; kart eylemleri bilerek yok; telefonda yana kaydırma).
+- **Kanıt düzeni:** Her bölüm işi çalışan sistemde geçici yöneticiyle taslak önizlemesinde Chromium + WebKit, 1440/768/390 denendi (konsol, CSP, yatay taşma, bağlantılar); panelde sekme/grup yerleşimi ve canlı önizleme betikle doğrulandı. Geçici yönetici her turdan sonra silindi.
+- **Dersler:**
+  1. Yeni panel alanı `field-registry.ts`'te bir gruba bağlanır; grubu `panel-groups.ts` sekmeye yerleştirir. Kapalı grup yüzünden düşen testte önce grup açılır (`settings-groups.fixtures.ts` `openGroup`).
+  2. Aynı http spec dosyasındaki testler veritabanını paylaşabiliyor (siparişler kalıyor); çok satan sıralamasında adetler önceki durumların üstünde seçilir.
+  3. Vitrin geliştirme sunucusu dal değişimini kaçırabiliyor; değişen dosyalara dokunup geri almak ("nudge") yeniden derletiyor.
+- **Yerel durum:** Taslakta Tezgâh; "Tezgâhtan seçmeler" şerit bölümü ve "Çok satanlar" rafı Çapraz şeritler biçiminde (sahip görsün diye). Yayın değişmedi.
+
 ## 2026-11-15 gündüz: görünüm izolasyonu, stil takımı, öğe düzeyinde "Düzenle"
 
 - **Amaç:** İki geliştiricinin hazır görünümleri birbirini bozmasın (adr/0066 tema katmanları, adr/0067 stil takımı), stil takımının beş adımını koda taşımak, canlı düzenleyicide Faz 2 ve Faz 2b.
