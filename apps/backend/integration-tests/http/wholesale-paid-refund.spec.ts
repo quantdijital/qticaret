@@ -138,13 +138,22 @@ medusaIntegrationTestRunner({
         http.post<{ addons?: { id: string; choices?: { id: string }[] }[] }>(
           `/admin/products/${product.productId}/catalog`,
           {
+            // A choice add-on offers at least two choices (ADDON_CHOICES_MIN)
             addons: [
-              { kind: "choice", label: "Kılıf", choices: [{ label: "Desenli Siyah", price: 300 }] },
+              {
+                kind: "choice",
+                label: "Kılıf",
+                choices: [
+                  { label: "Desenli Siyah", price: 300 },
+                  { label: "Desensiz Siyah", price: 250 },
+                ],
+              },
             ],
           },
           { headers: admin.headers }
         )
       )
+      expect(outcome(saved, 200)).toEqual({ status: 200, data: null })
       const addon = saved.data.addons?.[0]
       const cartId = await readyCart(getContainer(), shop, product.variantId)
       const { data } = await getContainer()
