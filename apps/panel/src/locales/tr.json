@@ -6329,18 +6329,17 @@
   },
   "attributes": {
     "title": "Ürün özellikleri",
-    "subtitle": "Ürünlerin alacağı özellikleri şablonlarla tanımlayın; her ürün bir şablon seçer.",
+    "subtitle": "Her ürün türü için hangi özelliklerin doldurulacağını belirleyin; her ürün bir şablon seçer.",
     "createTemplate": "Şablon oluştur",
     "newTemplate": "Yeni özellik şablonu",
-    "templateHint": "Bir ürün türünün özellikleri: malzeme, uzunluk, menşe… Sıra, ürün sayfasındaki sıradır.",
+    "templateHint": "Bu şablonu seçen ürünlerin dolduracağı özellikler.",
     "empty": "Henüz şablon yok. Ürünleriniz için ilk şablonu oluşturun; örneğin bıçaklar için çelik türü ve ağız uzunluğu.",
     "count_one": "{{count}} özellik",
     "count_other": "{{count}} özellik",
     "templateName": "Şablon adı",
-    "handle": "Tanıtıcı",
-    "handleHint": "Addan oluşur; sonradan değiştirilemez.",
+    "handle": "Kısa ad",
+    "handleHint": "Addan oluşur; kaydedince değişmez.",
     "description": "Açıklama",
-    "definitions": "Özellikler",
     "noDefinitions": "Bu şablonda henüz özellik yok.",
     "add": "Özellik ekle",
     "untitled": "Adsız özellik",
@@ -6356,7 +6355,7 @@
     "unit": "Birim",
     "unitHint": "Örn. cm, g, HRC",
     "options": "Seçenekler",
-    "optionsHint": "Yazıp Enter'a basın; adres ve filtrelerde kullanılacak değer addan oluşur.",
+    "optionsHint": "Yazıp Enter'a basın.",
     "optionsPlaceholder": "Örn. Paslanmaz çelik, Karbon çelik",
     "removeOption": "{{option}} seçeneğini kaldır",
     "flags": {
@@ -6366,12 +6365,11 @@
       "is_seo_highlight": "Arama başlığında öne çıkar"
     },
     "scope": "Nerede tutulur",
-    "scopeHint": "Varyanta göre değişen özellikler (beden, renk) ürün seçenekleri olarak tutulur.",
+    "scopeHint": "Beden, renk gibi seçime göre değişenler ürün seçeneği olur.",
     "scopes": {
       "product": "Ürünün kendisinde",
       "variant": "Varyantta (ürün seçeneği)"
     },
-    "variantBadge": "Varyant",
     "optionTitle": "Seçenek adı",
     "optionTitleHint": "Ürün seçeneğinin adı, örn. Beden.",
     "variesBy": "Google'a göre karşılığı",
@@ -6410,8 +6408,7 @@
     "changeTemplateDescription": "Ürünün mevcut özellik değerleri kaydettiğinizde silinecek.",
     "changeTemplateConfirm": "Değiştir",
     "groups": {
-      "title": "Gruplar",
-      "hint": "Ürün sayfasındaki özellik tablosunu başlıklı bölümlere ayırır. İsteğe bağlı; grup yoksa özellikler tek listede görünür.",
+      "hint": "Ürün sayfasındaki özellik tablosunu başlıklara ayırır. İsteğe bağlı; grup yoksa tek liste görünür.",
       "newName": "Yeni grup adı",
       "newPlaceholder": "Örn. Ölçüler",
       "add": "Grup ekle",
@@ -6425,7 +6422,7 @@
       "unnamed": "Adsız grup"
     },
     "aliases": "Başka adları",
-    "aliasesHint": "Ürün açıklamalarında bu alan için geçen başka adlar; açıklamadaki özellikler bunlarla da eşleşir.",
+    "aliasesHint": "Açıklamalarda bu özellik için geçen başka adlar; örn. Menşei için Üretim yeri.",
     "aliasesPlaceholder": "Ad yazıp Enter'a basın",
     "removeAlias": "“{{name}}” adını kaldır",
     "facts": {
@@ -6498,7 +6495,37 @@
       "report": "Raporu indir"
     },
     "previousTemplate": "Önceki şablon",
-    "nextTemplate": "Sonraki şablon"
+    "nextTemplate": "Sonraki şablon",
+    "columns": {
+      "name": "Şablon",
+      "definitions": "Özellikler"
+    },
+    "tabs": {
+      "definitions_one": "Özellikler ({{count}})",
+      "definitions_other": "Özellikler ({{count}})",
+      "groups_one": "Gruplar ({{count}})",
+      "groups_other": "Gruplar ({{count}})",
+      "info": "Şablon bilgisi"
+    },
+    "tabError": "Bu sekmede düzeltilecek bir alan var",
+    "descriptionHint": "Yalnızca panelde görünür.",
+    "definitionsHint": "Ürün sayfasında bu sırayla görünür. Tutup sürükleyerek sıralayın.",
+    "typeFixed": "Kaydedilen özelliğin türü değişmez.",
+    "textUnitHint": "Değerin yanında yazılır, örn. HRC.",
+    "badges": {
+      "required": "Zorunlu",
+      "filter": "Filtre",
+      "variant": "Varyant",
+      "hidden": "Vitrinde gizli"
+    },
+    "advanced": {
+      "title": "Gelişmiş",
+      "changed_one": "{{count}} ayar açık",
+      "changed_other": "{{count}} ayar açık"
+    },
+    "seoHint": "Değeri, ürünün Google'da görünen başlığında kullanılabilir.",
+    "drag": "Sürükleyerek taşı",
+    "actions": "{{name}}: işlemler"
   },
   "brands": {
     "description": "Markaların kendi sayfası, logosu ve ürünleri olur.",
@@ -7932,7 +7959,8 @@
           "carousel": "Kayan sıra",
           "featured": "Öne çıkan",
           "compact": "Kompakt liste",
-          "columns": "Yan yana listeler"
+          "columns": "Yan yana listeler",
+          "strips": "Çapraz şeritler"
         },
         "categories": {
           "tiles": "Görselli karo",
@@ -9263,7 +9291,16 @@
         "perListOption": "{{n}} ürün",
         "perListHint": "Her listede gösterilecek ürün sayısı; listeler masaüstünde yan yana, telefonda alt alta.",
         "featuredHint": "İlk ürün solda büyük, yanında küçük kartlar (toplam {{n}} ürün); telefonda büyük kart üstte.",
+        "stripsCount": "Ürün sayısı",
+        "stripsCountTerm": "strips_count",
+        "stripsCountHint": "Her ürün bir şerit. Telefonda üçten, tablette dörtten fazlası yana kaydırılır.",
+        "stripsHeight": {
+          "label": "Yükseklik",
+          "term": "strips_height",
+          "hint": "Şeritlerin boyu; telefonda biraz kısalır."
+        },
         "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat.",
+        "stripsNoCard": "Bu biçimde kart yok: her ürün bir şerit, üstünde adı ve fiyatı; şeridin tamamı ürün sayfasına gider. Sepete ekle ve hızlı bakış düğmeleri görünmez.",
         "tabs": "Yanındaki rafla sekmeli birleşsin",
         "tabsTerm": "tabs",
         "tabsJoined": "Şu rafla sekmeli tek rafta birleşiyor: {{names}}. Kapatırsan bu raf ayrı çizilir.",

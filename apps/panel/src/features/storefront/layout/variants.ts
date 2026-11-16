@@ -5,6 +5,7 @@ import {
   SCROLLER_DEFAULTS,
   SHELF_LIMITS,
   SHELF_PHONE_DEFAULT,
+  SHELF_STRIPS_DEFAULTS,
   hasVariants,
 } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
@@ -65,6 +66,8 @@ export const VARIANT_FIELDS: {
       per_list: SHELF_LIMITS.columns.default,
       lists: [{ title: null, source: { kind: "newest" } }],
     },
+    // Ek 2026-11-16: five strips, the shared look's defaults
+    strips: { strips_count: SHELF_LIMITS.strips.default, ...SHELF_STRIPS_DEFAULTS },
   },
   // The related products as a rail's grid or carousel (bilesen-denetimi (b) 7)
   related_products: {

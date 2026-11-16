@@ -107,9 +107,11 @@ export async function registrationEmailFromIdentity(
 
 /**
  * A signed-in customer reading their account or orders takes in the
- * orders they placed as a guest with the same address (adr/0037 §1):
- * signing in proves the address. A failure only leaves them where they
- * were. No `methods` on its routes (Medusa's own): the method is checked here.
+ * orders they placed as a guest with the same address (adr/0037 §1), once
+ * they have proven the address (`provenCustomer`; a session alone is not
+ * proof): the first read after the confirmation takes them. A failure
+ * only leaves them where they were. No `methods` on its routes (Medusa's
+ * own): the method is checked here.
  */
 export async function attachGuestOrders(
   req: MedusaRequest,

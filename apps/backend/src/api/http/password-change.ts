@@ -6,6 +6,7 @@ import type {
 } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
+import { clearUnconfirmedDetailsWorkflow } from "../../workflows/account/clear-unconfirmed-details"
 import { bearerTokenOf, claimsOf } from "./bearer"
 import { rejectRequest } from "./reject"
 import { forgetPasswordChange } from "./password-epoch-cache"
@@ -36,7 +37,9 @@ function bearerOf(req: MedusaRequest): { identity: string; issued: number } | nu
 /**
  * `POST /auth/:actor_type/emailpass/update` (a reset link's new password):
  * once Medusa took it (an answer of 200: the reset token checked), the
- * identity notes when. The token names the login address.
+ * identity notes when, and an account its login never confirmed loses
+ * the details typed into it (`clearUnconfirmedDetailsWorkflow`). The
+ * token names the login address.
  */
 export function notePasswordChange(
   req: MedusaRequest,
@@ -65,7 +68,15 @@ export function notePasswordChange(
         id: identity.id,
         app_metadata: { ...(identity.app_metadata ?? {}), [KEY]: new Date().toISOString() },
       })
+      // Before the clearing below, so a failure there cannot keep an old sign-in alive
       forgetPasswordChange(identity.id)
+      // An account its login never confirmed: what was typed into it is not the owner's
+      const customerId = identity.app_metadata?.["customer_id"]
+      if (typeof customerId === "string" && customerId !== "") {
+        await clearUnconfirmedDetailsWorkflow(req.scope).run({
+          input: { customer_id: customerId },
+        })
+      }
     })().catch((error: unknown) => {
       logger.error({ event: "auth.password_change_not_noted", err: errorSummary(error) })
     })

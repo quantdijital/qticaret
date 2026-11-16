@@ -22,13 +22,23 @@ export async function customerAddresses(container: Container, customerId: string
   return { email: customer.email, sms: customer.phone }
 }
 
-/** The customer's answer on each channel, and whether they have an address there. */
-export async function customerConsents(container: Container, customerId: string) {
+/**
+ * The customer's answer on each channel, and whether they have an address
+ * there. `emailUnproven`: the shopper has not shown the account's address
+ * is theirs (`provenCustomer`), so its owner's answer is not shown to them.
+ */
+export async function customerConsents(
+  container: Container,
+  customerId: string,
+  options: { emailUnproven?: boolean } = {}
+) {
   const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
   const addresses = await customerAddresses(container, customerId)
   const read = (channel: "email" | "sms") => {
     const address = addresses[channel]
-    return address ? messaging.consentRecordOf(channel, address) : Promise.resolve(null)
+    return address && !(channel === "email" && options.emailUnproven)
+      ? messaging.consentRecordOf(channel, address)
+      : Promise.resolve(null)
   }
   const [email, sms] = await Promise.all([read("email"), read("sms")])
   return {

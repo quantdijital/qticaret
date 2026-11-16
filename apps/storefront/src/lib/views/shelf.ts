@@ -2,6 +2,7 @@ import "server-only"
 import type { ProductSource, StoreProductsSection } from "@qticaret/types"
 import { scrollerSettingsOf } from "@qticaret/types/section-scroller"
 import { shelfLimit, shelfPerListOf, shelfRowsOf, shelfTabsOf } from "@qticaret/types/section-shelf"
+import { shelfStripsOf } from "@qticaret/types/section-strips"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { CardVariant, ProductsSectionView, ShelfListView, Translate } from "@qticaret/ui"
 import { railCardVariant } from "./card-framed"
@@ -53,9 +54,13 @@ async function listViews(
     : kept.map(({ view, at }) => ({ ...view, at }))
 }
 
-/** The card a rail draws: compact on a compact or columns rail, else its own or the setting's. */
+/**
+ * The card a rail draws: compact on a compact or columns rail, else its
+ * own or the setting's. A strips rail draws no card: compact asks the
+ * least of it (no framed card's second photo), its price as any card's.
+ */
 const cardOf = (variant: ProductsSectionView["variant"], section: StoreProductsSection) =>
-  variant === "compact" || variant === "columns"
+  variant === "compact" || variant === "columns" || variant === "strips"
     ? ("compact" satisfies CardVariant)
     : railCardVariant(section)
 
@@ -103,5 +108,6 @@ export async function shelfView(
     ...(variant === "grid" && section.columns_mobile === 1 ? { phoneColumns: 1 as const } : {}),
     ...(variant === "carousel" ? { scroller: scrollerSettingsOf(section.scroller) } : {}),
     ...(variant === "compact" ? { rows: shelfRowsOf(section.rows) } : {}),
+    ...(variant === "strips" ? { strips: shelfStripsOf(section) } : {}),
   }
 }

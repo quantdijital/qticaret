@@ -5,6 +5,7 @@ import {
   SHELF_PHONE_DEFAULT,
   scrollerSettingsOf,
   shelfPhoneColumnsOf,
+  shelfStripsCountOf,
 } from "@qticaret/types"
 import type { ProductsSection } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
@@ -14,6 +15,7 @@ import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { PhoneColumnsField } from "./phone-columns-field"
 import { ScrollerFields } from "./scroller-fields"
+import { ShelfStripsFields } from "./shelf-strips-fields"
 import { ShelfTabsField } from "./shelf-tabs-field"
 import { SCROLLER_MAIN } from "./scroller-groups"
 
@@ -80,7 +82,8 @@ function CountChoice<N extends number>({
  * carousel only, "Kaydırma" (cards in view, the arrows).
  * Its rarely changed scroller settings sit closed in "Diğer ayarlar"
  * (`SectionPanel`). A field the variant does not use is not shown: the
- * card on a compact or columns rail (always compact), the tabs switch on a
+ * card on a compact or columns rail (always compact) or a strips one (no
+ * card; its count and look instead), the tabs switch on a
  * columns rail (it never joins).
  */
 export function ShelfGroups({
@@ -160,8 +163,26 @@ export function ShelfGroups({
             <p className="text-xs text-muted-foreground">
               {t(`${SH}.featuredHint`, { n: SHELF_LIMITS.featured })}
             </p>
+          ) : variant === "strips" ? (
+            <>
+              <CountChoice
+                id={FIELD_IDS.shelf(id, "strips_count")}
+                label={t(`${SH}.stripsCount`)}
+                term={t(`${SH}.stripsCountTerm`)}
+                option={String}
+                hint={t(`${SH}.stripsCountHint`)}
+                counts={SHELF_LIMITS.strips.counts}
+                value={shelfStripsCountOf(section.strips_count)}
+                onChange={(strips_count) => {
+                  set({ strips_count })
+                }}
+              />
+              <ShelfStripsFields section={section} onChange={onChange} />
+            </>
           ) : null}
-          {variant === "compact" || variant === "columns" ? (
+          {variant === "strips" ? (
+            <p className="text-xs text-muted-foreground">{t(`${SH}.stripsNoCard`)}</p>
+          ) : variant === "compact" || variant === "columns" ? (
             <p className="text-xs text-muted-foreground">{t(`${SH}.cardCompact`)}</p>
           ) : (
             <CardVariantField
