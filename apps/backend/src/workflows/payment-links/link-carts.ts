@@ -51,7 +51,7 @@ export async function placedOrders(
 }
 
 /**
- * The completed carts opened from links, oldest first: every cart a link
+ * The completed carts opened from links (one link's oldest first): every cart a link
  * was ever bound to, not only its latest (a link names one cart; one it
  * gave up while that cart was completing may still have become an order).
  * Read straight from the carts' metadata (a JSON key the typed query cannot

@@ -103,12 +103,13 @@ class PaymentLinksModuleService extends MedusaService({ PaymentLink }) {
    * Holds an open link for one of its carts while that cart becomes its
    * order, in one statement: of two carts (or two notices) completing at
    * once, one holds it and the other is refused, whatever each read before.
-   * Only the link's latest cart may hold it; the same cart holds it again
-   * (a notice repeated); another cart's hold counts until `CLAIM_TTL_MS`,
-   * by the database's clock. `token` names this completion run (only it
-   * lets go). `busy`: the cart is the link's latest and open, but another
-   * cart's completion holds it now (it may yet fail: try again);
-   * `refused`: the cart may not become the link's order.
+   * Only the link's latest cart may hold it, and only while no run holds
+   * it (this cart's own included: a run holds it alone until it lets go);
+   * a hold counts until `CLAIM_TTL_MS`, by the database's clock. `token`
+   * names this completion run (only it lets go). `busy`: the cart is the
+   * link's latest and the link open, so only a hold stopped it (the holder
+   * may yet fail: try again); `refused`: the cart may not become the
+   * link's order.
    */
   @InjectTransactionManager()
   async claimForCart(
@@ -118,27 +119,47 @@ class PaymentLinksModuleService extends MedusaService({ PaymentLink }) {
     @MedusaContext() sharedContext: Context = {}
   ): Promise<"held" | "busy" | "refused"> {
     const manager = sharedContext.transactionManager as Executor
-    const ttl = CLAIM_TTL_MS / 1000
     const rows = (await manager.execute(
       `UPDATE payment_link
           SET claimed_cart_id = ?, claimed_at = now(), claim_token = ?, updated_at = now()
         WHERE id = ? AND deleted_at IS NULL AND status = 'open' AND cart_id = ?
-          AND (claimed_cart_id IS NULL OR claimed_cart_id = ?
-               OR claimed_at < now() - make_interval(secs => ?))
+          AND (claimed_cart_id IS NULL OR claimed_at < now() - make_interval(secs => ?))
        RETURNING id`,
-      [cartId, token, linkId, cartId, cartId, ttl]
+      [cartId, token, linkId, cartId, CLAIM_TTL_MS / 1000]
     )) as unknown[]
     if (rows.length > 0) {
       return "held"
     }
+    // Whatever the hold did since (let go, or still held), the cart was stopped by it alone
     const [row] = (await manager.execute(
       `SELECT 1 AS busy FROM payment_link
-        WHERE id = ? AND deleted_at IS NULL AND status = 'open' AND cart_id = ?
-          AND claimed_cart_id IS NOT NULL AND claimed_cart_id <> ?
-          AND claimed_at >= now() - make_interval(secs => ?)`,
-      [linkId, cartId, cartId, ttl]
+        WHERE id = ? AND deleted_at IS NULL AND status = 'open' AND cart_id = ?`,
+      [linkId, cartId]
     )) as unknown[]
     return row ? "busy" : "refused"
+  }
+
+  /**
+   * Cancels or expires an open (or `draft`) link in one statement, unless a
+   * cart's completion holds it now: the customer is paying, and a hold
+   * taken between a read and a write would leave a canceled link paid.
+   * Whether it closed.
+   */
+  @InjectTransactionManager()
+  async closeUnlessHeld(
+    linkId: string,
+    change: { status: "canceled" | "expired"; canceled_by: string | null; closed_at: Date },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const manager = sharedContext.transactionManager as Executor
+    const rows = (await manager.execute(
+      `UPDATE payment_link SET status = ?, canceled_by = ?, closed_at = ?, updated_at = now()
+        WHERE id = ? AND deleted_at IS NULL AND status IN ('open', 'draft')
+          AND (claimed_cart_id IS NULL OR claimed_at < now() - make_interval(secs => ?))
+       RETURNING id`,
+      [change.status, change.canceled_by, change.closed_at, linkId, CLAIM_TTL_MS / 1000]
+    )) as unknown[]
+    return rows.length > 0
   }
 
   /** Lets go of the hold this completion run took (it failed); any other hold is left. */

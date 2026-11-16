@@ -5,6 +5,7 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { CLAIM_TTL_MS } from "../../src/lib/payment-links/snapshot"
+import { completionFailureOf } from "../../src/lib/payments/completion"
 import { completedLinkCarts } from "../../src/workflows/payment-links/link-carts"
 import { createAdminUser } from "../helpers/admin"
 import { completeWithSystemPayment } from "../helpers/checkout"
@@ -122,6 +123,11 @@ medusaIntegrationTestRunner({
       })
 
       const waiting = await complete(second)
+      // As a card's notice reads it: tried again, never refunded
+      const notice = await completeCartWorkflow(getContainer()).run({
+        input: { id: second },
+        throwOnError: false,
+      })
       const paymentsWhileHeld = await paymentsOf(second)
       // The first cart's completion failed: its compensation lets go, and the second goes on
       await linksOf(getContainer()).releaseClaim(id, "run_first")
@@ -135,6 +141,7 @@ medusaIntegrationTestRunner({
       )
 
       expect(waiting).toEqual({ order_id: null, message: "errors.temporarily_unavailable" })
+      expect(completionFailureOf(notice.errors[0]?.error)).toBe("retry")
       expect(paymentsWhileHeld).toHaveLength(0)
       expect(errors).toEqual([])
       expect(paid).toMatchObject({ order_id: result.id, claimed_cart_id: second })
@@ -160,19 +167,21 @@ medusaIntegrationTestRunner({
       expect((await linkRow(getContainer(), id)).status).toBe("canceled")
     })
 
-    it("lets a run let go only of its own hold", async () => {
+    it("lets one run hold the link at a time, and only that run let go", async () => {
       const { id, token } = await newLink()
       const cartId = (await open(token)).data.cart_id ?? ""
-      await linksOf(getContainer()).claimForCart(id, cartId, "run_one")
-      // The same cart's notice again: it holds the link under its own run
-      await linksOf(getContainer()).claimForCart(id, cartId, "run_two")
+      const first = await linksOf(getContainer()).claimForCart(id, cartId, "run_one")
+      // The same cart's completion run again, the first still under way: it waits its turn
+      const second = await linksOf(getContainer()).claimForCart(id, cartId, "run_two")
 
-      await linksOf(getContainer()).releaseClaim(id, "run_one")
-      const kept = await linkRow(getContainer(), id)
       await linksOf(getContainer()).releaseClaim(id, "run_two")
+      const kept = await linkRow(getContainer(), id)
+      await linksOf(getContainer()).releaseClaim(id, "run_one")
       const freed = await linkRow(getContainer(), id)
 
-      expect(kept).toMatchObject({ claimed_cart_id: cartId, claim_token: "run_two" })
+      expect(first).toBe("held")
+      expect(second).toBe("busy")
+      expect(kept).toMatchObject({ claimed_cart_id: cartId, claim_token: "run_one" })
       expect(freed).toMatchObject({ claimed_cart_id: null, claimed_at: null, claim_token: null })
     })
 
@@ -203,7 +212,7 @@ medusaIntegrationTestRunner({
       }
     })
 
-    it("makes one order of one cart completed again twice at once (two late notices)", async () => {
+    it("answers a paid link's cart completed again (late notices) with its one order", async () => {
       const { id, token } = await newLink()
       const cartId = (await open(token)).data.cart_id ?? ""
       const first = await complete(cartId)
@@ -213,14 +222,17 @@ medusaIntegrationTestRunner({
         (row) => row.status === "paid"
       )
 
-      const again = await Promise.all([
-        completeCartWorkflow(getContainer()).run({ input: { id: cartId }, throwOnError: false }),
-        completeCartWorkflow(getContainer()).run({ input: { id: cartId }, throwOnError: false }),
-      ])
-      const ids = new Set(again.flatMap(({ result }) => (result?.id ? [result.id] : [])))
+      const late = () =>
+        completeCartWorkflow(getContainer()).run({ input: { id: cartId }, throwOnError: false })
+      const firstNotice = await late()
+      const secondNotice = await late()
+      const again = [firstNotice, secondNotice]
 
       expect(first.order_id).toMatch(/^order_/)
-      expect([...ids].every((orderId) => orderId === first.order_id)).toBe(true)
+      // Medusa answers a completed cart with its order before the validate hook: the link's
+      // checks (and its hold) never refuse, so a paid order's money is never refunded
+      expect(again.map(({ errors }) => errors)).toEqual([[], []])
+      expect(again.map(({ result }) => result.id)).toEqual([first.order_id, first.order_id])
       expect(await ordersOf(id)).toHaveLength(1)
       expect(await paymentsOf(cartId)).toHaveLength(1)
     })

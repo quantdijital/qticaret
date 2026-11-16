@@ -9,7 +9,7 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ConflictError, ValidationError } from "../../lib/errors"
-import { extendedEnd, heldByOther, isOpen } from "../../lib/payment-links/snapshot"
+import { extendedEnd, isOpen } from "../../lib/payment-links/snapshot"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
 import { closeLinkPromotion, reopenLinkPromotion } from "./promotion"
@@ -44,17 +44,21 @@ const cancelLinkStep = createStep(
     if (link.status !== "open" && link.status !== "draft") {
       throw new ConflictError("payment_link.not_open")
     }
-    // A cart's completion holds it: the customer is paying now, so staff wait for the outcome
-    if (heldByOther(link, "")) {
-      throw new ConflictError("payment_link.paying")
-    }
-    const now = new Date()
-    await service(container).updatePaymentLinks({
-      id: link.id,
+    const closed = await service(container).closeUnlessHeld(link.id, {
       status: "canceled",
       canceled_by: input.actor_id,
-      closed_at: now,
+      closed_at: new Date(),
     })
+    if (!closed) {
+      // A cart's completion holds it (the customer is paying now: staff wait for the
+      // outcome), or it closed since it was read
+      const again = await linkById(container, link.id)
+      throw new ConflictError(
+        again.status === "open" || again.status === "draft"
+          ? "payment_link.paying"
+          : "payment_link.not_open"
+      )
+    }
     await closeLinkPromotion(container, link.promotion_id)
     return new StepResponse(
       { id: link.id },
