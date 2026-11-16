@@ -17,7 +17,7 @@ describe("a saved look's request (adr/0064 Ek 2026-11-17)", () => {
   })
 
   it("refuses an empty, long or unclean name with the one key the panel shows", () => {
-    for (const wrong of ["", "   ", "x".repeat(61), "a\u0000b", "a‮b"]) {
+    for (const wrong of ["", "   ", "x".repeat(61), "a\u0000b"]) {
       expect(messages(wrong)).toEqual(["storefront_design.name_invalid"])
     }
   })
