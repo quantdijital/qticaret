@@ -10,11 +10,21 @@ const PERSONAL_PATH = /^\/store\/customers(\/|$)/
 
 export const isPersonalPath = (path: string): boolean => PERSONAL_PATH.test(path)
 
+/**
+ * A price display as `wholesaleDisplay()` makes it: by its shape, not a
+ * bare `vat_exclusive` key (a product's own metadata may hold one, review L3).
+ */
+const isWholesaleDisplay = (record: Record<string, unknown>): boolean =>
+  record["vat_exclusive"] === true &&
+  typeof record["current"] === "string" &&
+  typeof record["gross"] === "string"
+
 /** How many values a scan looks at: a shop-wide answer is a few thousand at most. */
 const SCAN_BUDGET = 200_000
 
 /**
- * Whether the answer holds a wholesaler's price anywhere in it: `yes`,
+ * Whether the answer holds a wholesaler's price anywhere in it (a
+ * wholesale display, or the personal route's `wholesale_prices`): `yes`,
  * `no`, or `unknown` past the budget (too large to look through).
  */
 export function personalPriceIn(answer: unknown): "yes" | "no" | "unknown" {
@@ -29,7 +39,7 @@ export function personalPriceIn(answer: unknown): "yes" | "no" | "unknown" {
       continue
     }
     const record = value as Record<string, unknown>
-    if (!Array.isArray(value) && record["vat_exclusive"] === true) {
+    if (!Array.isArray(value) && (isWholesaleDisplay(record) || "wholesale_prices" in record)) {
       return "yes"
     }
     // One by one: spreading a long list into push() would overflow the call

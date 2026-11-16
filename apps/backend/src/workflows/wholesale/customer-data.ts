@@ -61,7 +61,10 @@ export async function wholesaleDataFor(
   const [own, invited] = await Promise.all([
     service.listWholesaleAccounts({ customer_id: customerId }, { take: null, withDeleted: true }),
     emails.length
-      ? service.listWholesaleAccounts({ email: emails, status: "pending" }, { take: null })
+      ? service.listWholesaleAccounts(
+          { email: emails, status: "pending", customer_id: null },
+          { take: null }
+        )
       : [],
   ])
   const accounts = [

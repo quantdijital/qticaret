@@ -263,11 +263,14 @@ export async function abandonedCartDetail(
         remindedLately: lately,
         storefront,
       }),
-      whatsapp: whatsappNumber(
-        phone ? normalizeRecipient("sms", phone) : null,
-        row.consent.sms,
-        suppressed.sms
-      ),
+      // A nudge about the cart too: none to a wholesaler (ADR-0068 decision 16, review I2)
+      whatsapp: wholesale
+        ? null
+        : whatsappNumber(
+            phone ? normalizeRecipient("sms", phone) : null,
+            row.consent.sms,
+            suppressed.sms
+          ),
     },
   }
 }

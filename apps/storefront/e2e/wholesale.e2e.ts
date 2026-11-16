@@ -41,6 +41,9 @@ interface Board {
 
 type Undo = () => Promise<unknown>
 
+// The sign-in types a password: no trace keeps it, even of a failed run (security review L5)
+test.use({ trace: "off" })
+
 async function signIn(page: Page, email: string, password: string): Promise<void> {
   await page.goto("/hesap/giris")
   await dismissCookies(page)
