@@ -53,6 +53,7 @@ import { CONTACT_ROUTES } from "./http/contact-routes"
 import { ALERT_ROUTES } from "./http/alert-routes"
 import { EMAIL_LINK_ROUTES } from "./http/email-link-routes"
 import { STOREFRONT_MENU_ROUTES } from "./http/storefront-menu-routes"
+import { STOREFRONT_DESIGN_ROUTES } from "./http/storefront-design-routes"
 import { STOREFRONT_CARD_ROUTES } from "./http/storefront-card-routes"
 import { LEGAL_ROUTES } from "./http/legal-routes"
 import { MAINTENANCE_ROUTES } from "./http/maintenance-routes"
@@ -352,6 +353,7 @@ export default defineMiddlewares({
     ...CONTACT_ROUTES,
     ...EMAIL_LINK_ROUTES,
     ...STOREFRONT_MENU_ROUTES,
+    ...STOREFRONT_DESIGN_ROUTES,
     // adr/0053: maintenance mode's bypass link
     ...MAINTENANCE_ROUTES,
     ...MARKETING_ROUTES,

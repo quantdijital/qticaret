@@ -10250,6 +10250,7 @@
       "none": "Not used anywhere.",
       "unnamed": "Unnamed record",
       "storefrontLink": "Storefront design",
+      "autoSavedLook": "Automatic save",
       "logoLink": "Shop logo",
       "shareImageLink": "The shop's share image",
       "seoPage": "Share image: {{page}}",
@@ -10269,6 +10270,7 @@
         "category": "Category image",
         "etbis_qr": "ETBİS QR code",
         "collection": "Collection picture",
+        "storefront_design": "Saved look",
         "favicon": "Site icon"
       },
       "seoTypes": {

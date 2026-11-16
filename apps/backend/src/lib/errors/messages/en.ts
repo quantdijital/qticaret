@@ -1013,6 +1013,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_preset.theme_invalid": "The look's theme settings cannot be used in this shop.",
   "storefront_preset.layout_invalid": "The look's page design cannot be used in this shop.",
   "storefront_preset.demo_unavailable": "Demo content is not offered with this look yet.",
+  // adr/0064: saved looks
+  "storefront_design.unknown": "This saved look was not found.",
+  "storefront_design.limit_reached": "You can save up to 10 looks. Delete one to save another.",
+  "storefront_design.name_taken": "A saved look already has this name.",
+  "storefront_design.name_invalid": "The name must be 1–60 characters with no unusable characters.",
+  "storefront_design.unreadable": "This saved look can no longer be opened.",
+  "storefront_design.too_large": "The look is too large to save.",
   "storefront_menus.text_invalid":
     "Menu and link names must be at most 60 characters, without disallowed characters.",
   "storefront_menus.target_invalid": "The link's target is not valid.",

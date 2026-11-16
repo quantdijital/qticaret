@@ -1,0 +1,38 @@
+import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
+import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import type { LayoutDocument } from "../../lib/storefront/layout"
+import { autoSaveDraftStep } from "./design-steps"
+import { LAYOUT_LOCK, saveDraftSteps } from "./layout"
+
+export interface ReplaceDraftInput {
+  /** The design the draft becomes (`draftSource`): a kept revision, what is live or the default. */
+  source: LayoutDocument
+  actor: string | null
+  reason: "restore" | "discard"
+}
+
+/**
+ * The draft replaced whole by a revision restored or by what is live
+ * (discarded), kept first as an automatic save (adr/0064 Ek 2026-11-17
+ * §1.2: nothing replaces the draft unkept). Checked and written as the
+ * editor's save; any step failing leaves the draft and the saved looks as
+ * they were.
+ */
+export const replaceDraftWorkflow = createWorkflow(
+  "storefront-layout-replace-draft",
+  (input: ReplaceDraftInput) => {
+    acquireLockStep(LAYOUT_LOCK)
+    const autoSaved = autoSaveDraftStep(
+      transform({ input }, ({ input }) => ({
+        actor: input.actor,
+        save_as: null,
+        reason: input.reason,
+      }))
+    )
+    saveDraftSteps(transform({ input }, ({ input }) => input.source))
+    releaseLockStep({ key: LAYOUT_LOCK.key })
+    return new WorkflowResponse(
+      transform({ autoSaved }, ({ autoSaved }) => ({ auto_saved: autoSaved }))
+    )
+  }
+)

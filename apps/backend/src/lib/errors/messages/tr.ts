@@ -1020,6 +1020,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_preset.theme_invalid": "Hazır görünümün tema ayarları bu mağazada kullanılamıyor.",
   "storefront_preset.layout_invalid": "Hazır görünümün sayfa düzeni bu mağazada kullanılamıyor.",
   "storefront_preset.demo_unavailable": "Demo içerik bu görünümde henüz sunulmuyor.",
+  // adr/0064: saved looks
+  "storefront_design.unknown": "Bu kayıtlı görünüm bulunamadı.",
+  "storefront_design.limit_reached":
+    "En çok 10 görünüm kaydedebilirsiniz. Yenisi için birini silin.",
+  "storefront_design.name_taken": "Bu adla kayıtlı bir görünüm var.",
+  "storefront_design.name_invalid":
+    "Ad 1–60 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "storefront_design.unreadable": "Bu kayıtlı görünüm artık açılamıyor.",
+  "storefront_design.too_large": "Görünüm kaydedilemeyecek kadar büyük.",
   "storefront_menus.text_invalid":
     "Menü adı ve bağlantı adı en fazla 60 karakter olmalı ve kullanılamayan karakter içermemeli.",
   "storefront_menus.target_invalid": "Bağlantının hedefi geçerli değil.",

@@ -22,6 +22,7 @@ import { SEO_RESOURCES } from "./resources/seo"
 import { SETTINGS_RESOURCES } from "./resources/settings"
 import { STAFF_RESOURCES } from "./resources/staff"
 import { STOCK_RESOURCES } from "./resources/stock"
+import { STOREFRONT_DESIGN_RESOURCES } from "./resources/storefront-designs"
 import { STOREFRONT_LAYOUT_RESOURCES } from "./resources/storefront-layout"
 import { TAX_RESOURCES } from "./resources/tax"
 import { WHOLESALE_RESOURCES } from "./resources/wholesale"
@@ -60,6 +61,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...PRODUCT_REVIEW_RESOURCES,
   ...MESSAGING_RESOURCES,
   ...STOREFRONT_LAYOUT_RESOURCES,
+  ...STOREFRONT_DESIGN_RESOURCES,
   ...WHOLESALE_RESOURCES,
   ...WHOLESALE_ACCOUNT_RESOURCES,
 ]
