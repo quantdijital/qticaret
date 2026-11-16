@@ -7,7 +7,7 @@ import {
   usePublishLayout,
   useRestoreRevision,
 } from "@/features/storefront/api/layout"
-import type { LayoutDocument } from "@/features/storefront/api/layout"
+import type { KeptDraft, LayoutDocument } from "@/features/storefront/api/layout"
 import { previewAddress } from "@/features/storefront/layout/preview-url"
 import { errorText } from "@/lib/errors"
 
@@ -38,7 +38,12 @@ export function useEditorActions({ flush, page, onLoaded }: EditorActionsOptions
   const preview = useMutation({ mutationFn: fetchLayoutPreview })
   const failed = (failure: unknown) => toast.error(errorText(t, failure))
   const unsaved = () => toast.error(t(`${E}.unsaved`))
+  // The draft replaced was kept first (adr/0064 Ek 2026-11-17): said under the toast
+  const keptNote = (kept: KeptDraft | null) =>
+    kept ? { description: t(`${E}.keptDraft`) } : undefined
   return {
+    /** Stores what waits to be saved first (before a look is saved from the draft). */
+    store: flush,
     busy: publish.isPending || discard.isPending || restore.isPending,
     publishing: publish.isPending,
     publish: async () => {
@@ -56,9 +61,9 @@ export function useEditorActions({ flush, page, onLoaded }: EditorActionsOptions
     },
     discard: () => {
       discard.mutate(undefined, {
-        onSuccess: (layout) => {
+        onSuccess: ({ layout, kept }) => {
           onLoaded(layout.draft)
-          toast.success(t(`${E}.discard.done`))
+          toast.success(t(`${E}.discard.done`), keptNote(kept))
         },
         onError: failed,
       })
@@ -67,9 +72,9 @@ export function useEditorActions({ flush, page, onLoaded }: EditorActionsOptions
       restore.mutate(
         { revision, menus },
         {
-          onSuccess: (layout) => {
+          onSuccess: ({ layout, kept }) => {
             onLoaded(layout.draft)
-            toast.success(t(`${E}.revisions.restored`, { revision }))
+            toast.success(t(`${E}.revisions.restored`, { revision }), keptNote(kept))
           },
           onError: failed,
         }

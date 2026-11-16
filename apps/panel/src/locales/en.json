@@ -74,7 +74,8 @@
     "bulkMessages": "Bulk messages",
     "paymentLinks": "Payment links",
     "media": "Media library",
-    "collections": "Collections"
+    "collections": "Collections",
+    "looks": "Looks"
   },
   "login": {
     "title": "Sign in",
@@ -7807,27 +7808,30 @@
         "retry": "Retry"
       },
       "revisions": {
-        "open": "Versions",
-        "title": "Published versions",
-        "description": "Each publish is kept as a version; the last 20 are kept. Load one into the draft, edit it, then publish it again.",
-        "empty": "Nothing published yet; versions show here after the first publish.",
-        "item": "Version {{revision}}",
+        "open": "Publication history",
+        "title": "Publication history",
+        "description": "The last 20 publications are kept by themselves. Add one you want to keep for good to 'My saved looks'.",
+        "empty": "Nothing published yet; publications show here after the first one.",
+        "item": "Publication {{revision}}",
         "live": "Live",
         "restore": "Load into draft",
-        "restoreOf": "Load version {{revision}} into the draft",
-        "confirmTitle": "Load version {{revision}} into the draft?",
-        "confirmText": "The draft's changes are replaced by this version. The storefront does not change until you publish.",
+        "restoreOf": "Load publication {{revision}} into the draft",
+        "confirmTitle": "Load publication {{revision}} into the draft?",
+        "confirmText": "The draft's changes are replaced by this publication; the current draft is saved to 'My saved looks' automatically. The storefront does not change until you publish.",
         "confirm": "Load into draft",
-        "restored": "Version {{revision}} is in the draft.",
+        "restored": "Publication {{revision}} is in the draft.",
         "menusBadge": "With menus",
-        "confirmKeep": "This version is loaded into the draft. The storefront does not change until you publish.",
-        "menusText": "When this version was published it changed the menus too. The menus come into the draft as well: publish it again and that day's menus replace today's.",
-        "skipMenus": "Leave the menus out, keep today's"
+        "confirmKeep": "This publication is loaded into the draft. The storefront does not change until you publish.",
+        "menusText": "When this publication went live it changed the menus too. The menus come into the draft as well: publish it again and that day's menus replace today's.",
+        "skipMenus": "Leave the menus out, keep today's",
+        "saveAs": "Add to saved looks",
+        "saveAsOf": "Add publication {{revision}} to saved looks",
+        "saveAsName": "Publication {{revision}}, {{date}}"
       },
       "discard": {
         "open": "Discard changes",
         "title": "Discard the draft's changes?",
-        "text": "The draft goes back to the design that is live (the default one if nothing was published). This cannot be undone.",
+        "text": "The draft goes back to the design that is live (the default one if nothing was published). The current draft is saved to 'My saved looks' automatically.",
         "confirm": "Discard changes",
         "done": "The draft is back to the live design."
       },
@@ -9550,7 +9554,13 @@
         "empty": "No setting found for “{{query}}”.",
         "count_one": "{{count}} setting found",
         "count_other": "{{count}} settings found"
-      }
+      },
+      "looks": {
+        "open": "Looks",
+        "save": "Save this look",
+        "all": "All looks"
+      },
+      "keptDraft": "The previous draft was saved to 'My saved looks' automatically."
     },
     "maintenance": {
       "status": {
@@ -9612,6 +9622,125 @@
       "banner": {
         "text": "The storefront is in maintenance mode: shoppers see the maintenance page instead of the shop.",
         "link": "Maintenance settings"
+      }
+    },
+    "gallery": {
+      "title": "Looks",
+      "description": "Choose your store's look, save it and come back to it any time. Changes stay hidden from visitors until you publish.",
+      "openEditor": "Open theme editor",
+      "thumbAlt": "Thumbnail of the {{name}} look",
+      "sections_one": "{{count}} section",
+      "sections_other": "{{count}} sections",
+      "from": "From {{name}}",
+      "current": {
+        "title": "Current look",
+        "liveLabel": "Live",
+        "live": "{{name}} · published {{date}}",
+        "neverLive": "Not published yet; visitors see the default look.",
+        "draftLabel": "Draft",
+        "draftEdited": "{{name}}, edited",
+        "draftChanged": "The draft has unpublished changes",
+        "draftSame": "The draft matches what is live",
+        "newVersion": "This ready-made look has a new version. Apply it again to bring the new version into the draft.",
+        "edit": "Edit",
+        "save": "Save this look",
+        "full": "Saved looks are full; delete one to save another."
+      },
+      "saved": {
+        "title": "My saved looks ({{count}}/{{max}})",
+        "autoNote": "The last {{max}} automatic saves are kept; they don't count toward the saved-look limit.",
+        "empty": "You have no saved looks yet. Save the current look to come back to it any time.",
+        "emptyAction": "Save the current look",
+        "unavailable": "Saved looks could not be loaded."
+      },
+      "auto": {
+        "badge": "Automatic",
+        "name": "{{source}}, {{date}}",
+        "nameEdited": "{{source}}, {{date}}, edited",
+        "own": "Your own design"
+      },
+      "badge": {
+        "live": "Live",
+        "draft": "In draft",
+        "edited": "edited",
+        "newVersion": "New version"
+      },
+      "tone": {
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "card": {
+        "apply": "Load into draft",
+        "applyOf": "Load ‘{{name}}’ into the draft",
+        "actions": "Actions for ‘{{name}}’",
+        "rename": "Rename",
+        "keep": "Keep with a name",
+        "delete": "Delete"
+      },
+      "rename": {
+        "title": "Rename look",
+        "keepTitle": "Keep with a name",
+        "keepText": "Once named, the automatic save is kept for good and counts toward the saved-look limit."
+      },
+      "delete": {
+        "title": "Delete ‘{{name}}’?",
+        "text": "The saved look is deleted permanently; this can't be undone. The live look doesn't change.",
+        "confirm": "Delete look",
+        "done": "‘{{name}}’ deleted."
+      },
+      "presets": {
+        "title": "Ready-made looks",
+        "description": "Apply a look to the draft, then change it as you like in the editor.",
+        "preview": "Preview",
+        "previewOf": "Preview ‘{{name}}’",
+        "apply": "Apply",
+        "applyOf": "Apply ‘{{name}}’ to the draft",
+        "colors": "Colour set",
+        "noPreview": "This look has no picture yet; a sketch is shown.",
+        "frameShop": "Whatever of the header and footer this look doesn't define stays yours."
+      },
+      "apply": {
+        "title": "Apply ‘{{name}}’ to the draft?",
+        "vitrin": "The storefront doesn't change yet. The look is applied to the draft; visitors see today's look until you press Publish.",
+        "draftChanged": "The draft's unpublished changes will be replaced by this look. They aren't lost: the current draft is saved to 'My saved looks' automatically.",
+        "autoSave": "If you changed your current look, it is saved to 'My saved looks' automatically.",
+        "frameReplaced": "The header and footer change to this look's.",
+        "headerReplaced": "The header changes to this look's.",
+        "footerReplaced": "The footer changes to this look's.",
+        "headerKept": "Your header is kept.",
+        "footerKept": "Your footer is kept.",
+        "menusReplaced": "This look brings menus too. When you press Publish, the shop's menus are replaced by this look's.",
+        "menusKept": "Your menus are left alone.",
+        "menusNever": "Your menus are left alone; saved looks don't carry menus.",
+        "pendingMenusLost": "The draft has a menu change waiting to be published; it isn't saved.",
+        "shopData": "Your trust badges, colour swatches and 'Low stock' setting are kept.",
+        "saveAs": {
+          "label": "Also save the current look with a name",
+          "full": "Saved looks are full ({{max}}/{{max}}). An automatic save is still made."
+        },
+        "confirm": "Apply to draft and edit"
+      },
+      "save": {
+        "title": "Save look",
+        "text": "The draft's look is added to 'My saved looks' under this name. Menus aren't saved with it.",
+        "textRevision": "Publication {{revision}} is added to 'My saved looks' under this name. Menus aren't saved with it.",
+        "name": "Name",
+        "nameHint": "Up to 60 characters.",
+        "confirm": "Save",
+        "done": "‘{{name}}’ saved.",
+        "defaultSource": "My look"
+      },
+      "report": {
+        "applied": "‘{{name}}’ is in the draft.",
+        "saved": "Your previous look was saved as ‘{{saved}}’.",
+        "savedAuto": "Your previous look was saved to 'My saved looks' automatically.",
+        "skipped_one": "{{count}} section was left out: the shop has no {{refs}}.",
+        "skipped_other": "{{count}} sections were left out: the shop has no {{refs}}.",
+        "kept": "Your header/footer was kept."
+      },
+      "history": {
+        "lead": "Older publications:",
+        "link": "Theme editor › Looks › Publication history"
       }
     }
   },

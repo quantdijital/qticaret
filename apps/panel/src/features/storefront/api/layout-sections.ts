@@ -366,6 +366,13 @@ export interface LayoutSettings {
    * edits one: menus are the Menüler screen's.
    */
   menus: MenuInput[] | null
+  /**
+   * The ready-made look the design was last given (adr/0063 §4), and the
+   * look applied with its digest (adr/0064 Ek 2026-11-17): labels the
+   * server writes and reads; the editor carries them as they are.
+   */
+  preset?: { pack: string; code: string; version: number } | null
+  design?: { id: string | null; digest: string } | null
 }
 
 /** The header: the announcement bar, the scrolling strip and the shop's bar, each at most once. */

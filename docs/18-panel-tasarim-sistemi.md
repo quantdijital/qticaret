@@ -65,7 +65,7 @@ Sürümler `apps/panel/package.json`'da exact ve ≥14 gün kuralıyla (docs/04)
 - Vurgu rengiyle boyanmış başlık, rastgele mor/mavi gradyan butonlar.
 - Yan yana dizilmiş dört "özellik kartı" düzeni; hero bölümü; pazarlama dili.
 - Yer tutucu metin ("Lorem", "Hoş geldin! 🚀"); ünlem işaretleri; "Harika!" tonu.
-- Tablo yerine kart ızgarası (veri listeleri tablodur).
+- Tablo yerine kart ızgarası (veri listeleri tablodur). Bilinçli istisnalar, göze göre ayırt edilen şeyler: Ortam kütüphanesi (§7 `media-picker`) ve Görünümler sayfası (`/storefront/looks`, adr/0064 Ek 2026-11-17): hazır ve kayıtlı görünümler çizilen şemalarıyla (`DesignThumb`) kart ızgarasında; kartlar sayfanın üstünde durur, bir `SectionCard`ın içine konmaz (kart içinde kart yok), kartlarda birincil düğme yok (sayfanın tek birincil eylemi "Tema düzenleyiciyi aç").
 - Sayfa başına birden çok birincil buton.
 - Animasyonlu sayaçlar, zıplayan geçişler, yükleme spinner'ı (iskelet kullanılır).
 - Google Fonts ve dış CDN; inline base64 görsel.

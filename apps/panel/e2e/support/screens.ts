@@ -37,6 +37,8 @@ export const SECTIONS = [
   // The storefront's preferences, a panel of the editor (the owner, 2026-11-16): the
   // contact form's page and the payment and shipping pages
   "/storefront/editor?open=preferences",
+  // Ready-made and saved looks (adr/0064): the current one, the shop's, the gallery's
+  "/storefront/looks",
   "/storefront/menus",
   "/content",
   // The media library: every picture the shop uploaded or brought in

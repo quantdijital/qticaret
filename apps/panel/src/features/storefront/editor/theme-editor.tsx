@@ -42,10 +42,10 @@ import { OpenedForm } from "./opened-form"
 import { formKeyOf } from "./opened"
 import type { Opened } from "./opened"
 import type { Device } from "./preview-fit"
-import { PendingMenus } from "./pending-menus"
+import { EditorNotices } from "./editor-notices"
 import { PreviewFrame } from "./preview-frame"
 import { DraftTools, PublishButton } from "./publish-controls"
-import { RevisionsSheet } from "./revisions-sheet"
+import { LooksMenu } from "./looks-menu"
 import { SamplePicker } from "./sample-picker"
 import { SaveStatus } from "./save-status"
 import { sectionLabel } from "./section-meta"
@@ -196,14 +196,12 @@ export function ThemeEditor({
   const pendingMenus = doc.settings.menus
   const tree = (
     <>
-      {pendingMenus ? (
-        <PendingMenus
-          count={pendingMenus.length}
-          onDrop={() => {
-            act({ type: "settings", settings: { ...doc.settings, menus: null } })
-          }}
-        />
-      ) : null}
+      <EditorNotices
+        pendingMenus={pendingMenus}
+        onDropMenus={() => {
+          act({ type: "settings", settings: { ...doc.settings, menus: null } })
+        }}
+      />
       <SettingsSearch
         doc={doc}
         page={page}
@@ -254,12 +252,11 @@ export function ThemeEditor({
   )
   const tools = (
     <>
-      <RevisionsSheet
+      <LooksMenu
+        actions={actions}
         revisions={live.revisions}
         live={live.revision}
-        ask={changed}
-        busy={actions.busy}
-        onRestore={actions.restore}
+        changed={changed}
       />
       <DraftTools actions={actions} changed={changed} />
     </>

@@ -49,16 +49,30 @@ export const LAYOUT_KEY = ["storefront-layout"] as const
 /** Publish, discard and restore: the autosave waits while one runs. */
 export const LAYOUT_ACTION_KEY = [...LAYOUT_KEY, "action"] as const
 
+/**
+ * The looks gallery's queries (`features/storefront/gallery/api.ts`): a
+ * publish, discard or restore changes what it shows (adr/0064 Ek 2026-11-17).
+ */
+export const GALLERY_KEY = ["storefront-gallery"] as const
+
 /** The layout as the server answers; an older backend may leave the page groups out. */
-interface Answer {
+export interface LayoutAnswer {
   layout: Omit<AdminLayout, "draft"> & {
     draft: Omit<LayoutDocument, "product" | "category"> &
       Partial<Pick<LayoutDocument, "product" | "category">>
   }
 }
+type Answer = LayoutAnswer
+
+/** The draft kept before a discard or a restore replaced it; null: it held nothing new. */
+export interface KeptDraft {
+  id: string
+  kind: "saved" | "auto"
+  name: string | null
+}
 
 /** A draft from before the product and category pages had sections reads with both empty. */
-const withAllGroups = (layout: Answer["layout"]): AdminLayout => ({
+export const withAllGroups = (layout: Answer["layout"]): AdminLayout => ({
   ...layout,
   draft: {
     ...layout.draft,
@@ -99,20 +113,48 @@ const post = (path: string, body: object = {}) =>
 export const useSaveLayout = () =>
   useLayoutAction((document: LayoutDocument) => post(PATH, { document }), false)
 
-/** A menu set the draft carried is live now (adr/0063 §3): the Menüler screen reads again. */
+/**
+ * A menu set the draft carried is live now (adr/0063 §3): the Menüler
+ * screen reads again; so does the gallery ("Yayında").
+ */
 export const usePublishLayout = () =>
   useLayoutAction(
     () => post(`${PATH}/publish`),
     true,
-    (client) => void client.invalidateQueries({ queryKey: MENUS_KEY })
+    (client) => {
+      void client.invalidateQueries({ queryKey: MENUS_KEY })
+      void client.invalidateQueries({ queryKey: GALLERY_KEY })
+    }
   )
 
+/**
+ * The draft replaced whole (a discard, a restore): the server keeps the
+ * one it replaces as an automatic save first (adr/0064 Ek 2026-11-17), so
+ * the gallery reads again, and `kept` names it for the toast.
+ */
+function useDraftReplace<T>(
+  call: (input: T) => Promise<Answer & { auto_saved?: KeptDraft | null }>
+) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationKey: LAYOUT_ACTION_KEY,
+    mutationFn: async (input: T) => {
+      const answer = await call(input)
+      return { layout: withAllGroups(answer.layout), kept: answer.auto_saved ?? null }
+    },
+    onSuccess: ({ layout }) => {
+      client.setQueryData(LAYOUT_KEY, layout)
+      void client.invalidateQueries({ queryKey: GALLERY_KEY })
+    },
+  })
+}
+
 /** The draft back to what is live (or the default design). */
-export const useDiscardLayout = () => useLayoutAction(() => post(`${PATH}/discard`))
+export const useDiscardLayout = () => useDraftReplace(() => post(`${PATH}/discard`))
 
 /** A published revision back into the draft; `menus: false` leaves out the menus it put live. */
 export const useRestoreRevision = () =>
-  useLayoutAction(({ revision, menus }: { revision: number; menus: boolean }) =>
+  useDraftReplace(({ revision, menus }: { revision: number; menus: boolean }) =>
     post(`${PATH}/revisions/${encodeURIComponent(String(revision))}/restore`, { menus })
   )
 
