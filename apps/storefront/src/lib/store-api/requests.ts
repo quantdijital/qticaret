@@ -28,7 +28,8 @@ import { wholesaleDisplays } from "./wholesale-prices"
  */
 
 export interface SiteAnswer extends SiteSeo {
-  shop: { name: string; logo_url: string | null }
+  /** `favicon_url`: the shop's site icon; none from a backend before it (`lib/seo/icons.ts`). */
+  shop: { name: string; logo_url: string | null; favicon_url?: string | null }
   home: SeoPayload
 }
 

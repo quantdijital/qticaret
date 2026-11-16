@@ -9,6 +9,7 @@ import { attachMediaStep } from "../media/steps/attach-media"
 import { syncFreeShippingWorkflow } from "../promotions/free-shipping"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
 import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
+import { faviconMediaStep } from "./steps/favicon"
 import { saveSettingsSectionStep } from "./steps/save-settings-section"
 import { shareImageMediaStep } from "./steps/share-image"
 import type { SaveSettingsSectionInput } from "./steps/save-settings-section"
@@ -23,17 +24,22 @@ const thresholdOf = (values: Record<string, unknown> | null | undefined): number
  * old values back. Pages' SEO answers use the shop's name, templates and
  * host, so cached ones are forgotten. The promotions section's free
  * shipping threshold reaches the shipping options' prices (F4.5). The SEO
- * section's share image must be one of the shop's uploads, and is kept.
+ * section's share image must be one of the shop's uploads, and is kept;
+ * so must the appearance section's site icon, a PNG within its limit.
  * A section the storefront shows is shown at once (adr/0048 ek 2026-11-03).
  */
 export const updatePlatformSettingsWorkflow = createWorkflow(
   "platform-settings-update-section",
   (input: SaveSettingsSectionInput) => {
     const shareImage = shareImageMediaStep(input)
+    const favicon = faviconMediaStep(input)
     const saved = saveSettingsSectionStep(input)
     // Kept like a page's cover: the nightly sweep leaves a used upload alone
     attachMediaStep(
-      transform({ shareImage }, ({ shareImage }) => ({ link: shareImage, record: [] }))
+      transform({ shareImage, favicon }, ({ shareImage, favicon }) => ({
+        link: [...shareImage, ...favicon],
+        record: [],
+      }))
     )
     forgetResolutionsStep()
     when({ input }, ({ input }) => input.section === "promotions").then(() => {

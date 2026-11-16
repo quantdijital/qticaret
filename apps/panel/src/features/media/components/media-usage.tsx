@@ -67,6 +67,12 @@ function Place({ use }: { use: MediaUse }) {
           {t(`${U}.logoLink`)}
         </Link>
       )
+    case "favicon":
+      return (
+        <Link to="/settings/store" className={LINK}>
+          {t(`${U}.faviconLink`)}
+        </Link>
+      )
     case "etbis_qr":
       return (
         <Link to="/settings/store" search={{ part: "legal" }} className={LINK}>

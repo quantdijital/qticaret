@@ -840,6 +840,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.timezone_invalid": "Choose a valid time zone.",
   "platform_settings.unknown_section": "There is no such settings section.",
   "platform_settings.url_invalid": "The address must start with https:// or /.",
+  "platform_settings.favicon_unknown":
+    "The site icon must come from your media library. Upload the image there and choose it again.",
+  "platform_settings.favicon_type":
+    "The site icon must be a PNG. Save your icon as a PNG and upload it.",
+  "platform_settings.favicon_too_large":
+    "The site icon can be at most 1 MB. Choose a smaller PNG (512 × 512 pixels is enough).",
   "product_attributes.definition_locked":
     "An attribute products have values for cannot change its key or unit.",
   "product_attributes.definition_unknown": "The attribute does not belong to this template.",

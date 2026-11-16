@@ -19,6 +19,7 @@ export const CONTROL_PLANE_APPEARANCE: AppearanceSettings = {
   sidebar_mode: "expanded",
   logo_light_url: null,
   logo_dark_url: null,
+  favicon_url: null,
 }
 
 const DARK_QUERY = "(prefers-color-scheme: dark)"

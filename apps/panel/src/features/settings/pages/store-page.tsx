@@ -26,7 +26,8 @@ const S = "settings.store"
  * Settings > Store profile (adr/0048, "mağaza bilgileri tek kaynak"): every
  * detail of the shop in one place, read from here by the storefront, the
  * legal texts, e-mails and Google's structured data. In tabs (the owner:
- * no page of cards running down): the name, logos and units; how the shop
+ * no page of cards running down): the brand (name, logos, site icon) and
+ * units; how the shop
  * is reached and when; its legal identity; its social accounts. Each card
  * saves its own part.
  */
@@ -69,15 +70,16 @@ export function StorePage() {
       <SettingsTabs
         label={t(`${S}.title`)}
         tabs={[
+          // The brand (name, logos, site icon) wide; the short region and units on the right
           tab("general", (data) => (
             <PageGrid>
               <StoreBrandCard
                 storeId={data.store.id}
                 name={data.store.name}
                 appearance={data.appearance}
-                className={spanOf(6)}
+                className={spanOf(8)}
               />
-              <RegionCard saved={data.values} className={spanOf(6)} />
+              <RegionCard saved={data.values} className={spanOf(4)} />
             </PageGrid>
           )),
           tab("contact", (data) => (

@@ -42,7 +42,7 @@ const identityOf = (identity: LegalIdentity) => ({
  * as an `OnlineStore` (with its legal identity, F13.9) and its `WebSite`. No blocks until the canonical
  * host is set: they need absolute URLs. And the robots value of the
  * storefront's own pages (search results, cart, account). For the
- * storefront's frame (F18, adr/0046): the shop's name and logo, and the
+ * storefront's frame (F18, adr/0046): the shop's name, logo and site icon, and the
  * home page's `seo` object, shaped as resolve's for every other page. And
  * whether the shop is dark (adr/0053): the storefront answers 503 with
  * `Retry-After` and this page but for its system paths, the paths left
@@ -86,7 +86,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       : null,
     jsonLd,
     system_pages: SYSTEM_PAGES,
-    shop: { name: shop.name, logo_url: appearance.logo_light_url },
+    // The site icon the shop chose; null: the storefront's own
+    shop: {
+      name: shop.name,
+      logo_url: appearance.logo_light_url,
+      favicon_url: appearance.favicon_url ?? null,
+    },
     home: homeSeo({ shop, home: seo.home, ogImage: seo.default_og_image, jsonLd }),
     maintenance,
     tracking,

@@ -41,6 +41,8 @@ export type MediaUseKind =
   | "category"
   /** The shop's ETBİS QR code (Settings > Store profile > Legal); no `id`. */
   | "etbis_qr"
+  /** The storefront's site icon (Settings > Store profile > General); no `id`. */
+  | "favicon"
   /** A collection's picture: `id` the collection, `label` its title. */
   | "collection"
 

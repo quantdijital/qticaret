@@ -24,6 +24,8 @@ export type MediaUseKind =
   // adr/0046 Ek 2026-11-04: a category's picture, the footer's ETBİS QR code
   | "category"
   | "etbis_qr"
+  // The storefront's site icon (appearance `favicon_url`)
+  | "favicon"
   // A collection's picture (Ürünler > Koleksiyonlar)
   | "collection"
 
@@ -120,7 +122,7 @@ async function seoImages(container: Container, target: MediaTarget): Promise<Med
   }))
 }
 
-/** The shop's logos (appearance), its share image (seo) and its ETBİS QR code (store). */
+/** The shop's logos and site icon (appearance), its share image (seo) and its ETBİS QR code (store). */
 async function settings(container: Container, target: MediaTarget): Promise<MediaUse[]> {
   const service = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
   const [appearance, seo, store] = (await Promise.all([
@@ -128,13 +130,16 @@ async function settings(container: Container, target: MediaTarget): Promise<Medi
     service.getSection("seo"),
     service.getSection("store"),
   ])) as unknown as [
-    { logo_light_url?: string | null; logo_dark_url?: string | null },
+    { logo_light_url?: string | null; logo_dark_url?: string | null; favicon_url?: string | null },
     { default_og_image?: string | null },
     { etbis_qr_url?: string | null },
   ]
   return [
     ...(appearance.logo_light_url === target.url || appearance.logo_dark_url === target.url
       ? [{ kind: "logo" as const, id: null, label: null }]
+      : []),
+    ...(appearance.favicon_url === target.url
+      ? [{ kind: "favicon" as const, id: null, label: null }]
       : []),
     ...(seo.default_og_image === target.url
       ? [{ kind: "share_image" as const, id: null, label: null }]

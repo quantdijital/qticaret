@@ -843,6 +843,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.timezone_invalid": "Geçerli bir saat dilimi seçin.",
   "platform_settings.unknown_section": "Böyle bir ayar bölümü yok.",
   "platform_settings.url_invalid": "Adres https:// ile ya da / ile başlamalı.",
+  "platform_settings.favicon_unknown":
+    "Site simgesi ortam kütüphanenizden seçilmeli. Görseli kütüphaneye yükleyip yeniden seçin.",
+  "platform_settings.favicon_type":
+    "Site simgesi PNG olmalı. Simgenizi PNG olarak kaydedip yükleyin.",
+  "platform_settings.favicon_too_large":
+    "Site simgesi en çok 1 MB olabilir. Daha küçük bir PNG seçin (512 × 512 piksel yeterli).",
   "product_attributes.definition_locked":
     "Ürünlerde değeri olan bir özelliğin anahtarı ve birimi değiştirilemez.",
   "product_attributes.definition_unknown": "Özellik bu şablona ait değil.",

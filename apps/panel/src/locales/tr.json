@@ -424,15 +424,29 @@
         "social": "Sosyal hesaplar"
       },
       "brand": {
-        "title": "Mağaza adı ve logo",
-        "description": "Vitrinde, e-postalarda ve Google'da görünür. Metinlerdeki {mağaza_adı} bilgisi bu adı gösterir.",
+        "title": "Marka",
+        "description": "Mağazanızın adı, logoları ve site simgesi. Vitrinde, e-postalarda ve Google'da görünür; metinlerdeki {mağaza_adı} bilgisi bu adı gösterir.",
         "name": "Mağaza adı",
         "nameRequired": "Mağazanıza bir ad verin.",
         "light": "Logo (açık zemin)",
         "lightHint": "Beyaz ya da açık renkli zeminde kullanılır: vitrinin üstü, e-postalar ve Google.",
         "dark": "Logo (koyu zemin)",
         "darkHint": "Koyu zeminde okunan bir sürüm; isteğe bağlı.",
-        "none": "Logo yok"
+        "none": "Logo yok",
+        "logos": "Logolar",
+        "favicon": {
+          "title": "Site simgesi",
+          "label": "Site simgesi (favicon)",
+          "hint": "Tarayıcı sekmesinde, yer imlerinde ve telefonun ana ekranında görünür. Kare bir PNG yükleyin; 512 × 512 piksel önerilir, en çok 1 MB.",
+          "none": "Simge yok",
+          "empty": "Yüklemezseniz vitrin varsayılan simgeyi gösterir. Kare bir PNG yükleyin; 512 × 512 piksel önerilir, en çok 1 MB.",
+          "tab": "Tarayıcı sekmesi",
+          "home": "Ana ekran",
+          "type": "Site simgesi PNG olmalı. Simgenizi PNG olarak kaydedip yükleyin.",
+          "tooLarge": "Site simgesi en çok 1 MB olabilir. Daha küçük bir PNG seçin.",
+          "notSquare": "Simge kare değil; tarayıcı onu sıkıştırarak gösterebilir. Kare bir görsel önerilir.",
+          "small": "Simge 48 × 48 pikselden küçük; Google arama sonuçlarında gösterilmeyebilir."
+        }
       },
       "region": "Bölge ve birimler",
       "regionHint": "Tarihlerin ve ürün ölçülerinin nasıl tutulacağı.",
@@ -10154,7 +10168,8 @@
         "order": "Sipariş",
         "category": "Kategori görseli",
         "etbis_qr": "ETBİS karekodu",
-        "collection": "Koleksiyon görseli"
+        "collection": "Koleksiyon görseli",
+        "favicon": "Site simgesi"
       },
       "seoTypes": {
         "product": "ürün sayfası",
@@ -10167,7 +10182,8 @@
         "post_category": "blog kategorisi",
         "post_tag": "blog etiketi"
       },
-      "etbisQrLink": "Mağazanın ETBİS karekodu"
+      "etbisQrLink": "Mağazanın ETBİS karekodu",
+      "faviconLink": "Mağazanın site simgesi"
     }
   },
   "confirmEmail": {

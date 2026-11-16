@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { storeTabSearch } from "@/features/settings/store-tabs"
-import { answer, card, posts, renderPage } from "./store-page.fixtures"
+import { APPEARANCE, SAVED, answer, card, posts, renderPage } from "./store-page.fixtures"
 import type { Init } from "./store-page.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
@@ -70,7 +70,11 @@ describe("StorePage", () => {
       "src",
       "https://cdn.ornek.com/logo.png"
     )
-    expect(within(card("Mağaza adı ve logo")).getByText("Logo yok")).toBeInTheDocument()
+    const brand = card("Marka")
+    expect(within(brand).getByText("Logo yok")).toBeInTheDocument()
+    // No site icon yet: the storefront's own, said beside the empty frame
+    expect(within(brand).getByText("Simge yok")).toBeInTheDocument()
+    expect(within(brand).getByText(/vitrin varsayılan simgeyi gösterir/)).toBeInTheDocument()
     expect(card("Bölge ve birimler")).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole("tab", { name: "İletişim" }))
@@ -98,7 +102,7 @@ describe("StorePage", () => {
   it("renames the shop and removes a logo in one save", async () => {
     renderPage()
     const name = await screen.findByRole("textbox", { name: /^Mağaza adı/ })
-    const brand = card("Mağaza adı ve logo")
+    const brand = card("Marka")
 
     await userEvent.type(name, " Evi")
     await userEvent.click(
@@ -113,6 +117,36 @@ describe("StorePage", () => {
       })
     })
     expect(storeApi.update).toHaveBeenCalledWith("store_1", { name: "Örnek Bıçak Evi" })
+  })
+
+  it("shows the site icon as a tab and a home screen show it, and takes it off alone", async () => {
+    const icon = "https://cdn.ornek.com/simge.png"
+    answer(fetchMock, { ...SAVED, appearance: { ...APPEARANCE, favicon_url: icon } })
+    renderPage()
+    await screen.findByRole("textbox", { name: /^Mağaza adı/ })
+    const brand = card("Marka")
+
+    expect(within(brand).getByRole("img", { name: "Site simgesi (favicon)" })).toHaveAttribute(
+      "src",
+      icon
+    )
+    expect(within(brand).getByText("Tarayıcı sekmesi")).toBeInTheDocument()
+    expect(within(brand).getByText("Ana ekran")).toBeInTheDocument()
+    // The tab names the shop beside the icon
+    expect(within(brand).getByText("Örnek Bıçak")).toBeInTheDocument()
+
+    await userEvent.click(
+      within(brand).getByRole("button", { name: "Site simgesi (favicon): görseli kaldır" })
+    )
+    await userEvent.click(within(brand).getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/appearance", {
+        method: "POST",
+        body: { favicon_url: null },
+      })
+    })
+    expect(storeApi.update).not.toHaveBeenCalled()
   })
 
   it("saves the contact details to the store, the address to the legal identity", async () => {

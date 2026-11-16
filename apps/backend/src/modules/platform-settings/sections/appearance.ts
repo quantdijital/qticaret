@@ -17,6 +17,8 @@ export interface AppearanceSettings {
   sidebar_mode: "expanded" | "collapsed" | "auto"
   logo_light_url: string | null
   logo_dark_url: string | null
+  /** The storefront's site icon (a PNG from the media library); none: the storefront's own. */
+  favicon_url: string | null
 }
 
 // A logo lives in our own storage (https) or under this host; never a
@@ -48,6 +50,8 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     sidebar_mode: z.enum(["expanded", "collapsed", "auto"]),
     logo_light_url: logoUrl,
     logo_dark_url: logoUrl,
+    // One of the shop's uploads, a PNG within its limit: `workflows/platform-settings/steps/favicon.ts`
+    favicon_url: logoUrl,
   },
   {
     brand_color: "#2f6feb",
@@ -58,5 +62,6 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     sidebar_mode: "expanded",
     logo_light_url: null,
     logo_dark_url: null,
+    favicon_url: null,
   }
 )
