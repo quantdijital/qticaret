@@ -59,8 +59,6 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/exchanges/:id", "exchange", false],
   ["/admin/notifications", "notification", true, ["id", "created_at"]],
   ["/admin/notifications/:id", "notification", false],
-  // adr/0020: the panel's bell and its page (a wholesaler's order names the company)
-  ["/admin/alerts", "notification", true],
   // F4.6: a batch's unused codes each take a discount
   ["/admin/promotions/:id/code-batches/:campaign_id/codes", "promotion", false],
   // F4.8: a card's code spends it and its note names whom it was for; a

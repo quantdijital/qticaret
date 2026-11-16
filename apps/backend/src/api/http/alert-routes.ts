@@ -1,5 +1,6 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { AdminGetAlerts, AdminPostAlertsRead } from "../admin/alerts/validators"
+import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { requireUserActor } from "./actor"
 
 /**
@@ -12,6 +13,12 @@ export const ALERT_ROUTES = [
     matcher: "/admin/alerts",
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetAlerts, {})],
+  },
+  // The bell: no parameters, so nothing asked can change what it holds
+  {
+    matcher: "/admin/alerts/bell",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
   },
   {
     matcher: "/admin/alerts/read",

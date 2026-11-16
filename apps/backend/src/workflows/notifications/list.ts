@@ -1,7 +1,16 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { feedFilters, isUnread, readFloor, readStateOf } from "../../lib/notifications/feed"
+import { hiddenTriggers } from "../../lib/notifications/access"
+import {
+  READ_STATE_KEY,
+  feedFilters,
+  isUnread,
+  readFloor,
+  readStateOf,
+} from "../../lib/notifications/feed"
 import type { AlertGroup, AlertState, ReadState } from "../../lib/notifications/feed"
+import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
+import type StaffRolesModuleService from "../../modules/staff-roles/service"
 import { wholesalerNames } from "../wholesale/orders"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -22,99 +31,160 @@ export interface AlertPage {
   limit: number
 }
 
-/** Who reads, and what their user record keeps of it. */
+/** The bell's few newest alerts; the page has the rest. */
+export const BELL_SIZE = 20
+
+/**
+ * Who reads: what their user record keeps of it, and the alert kinds their
+ * role does not get, the role read here on the server (adr/0040).
+ */
 export async function readerOf(
   container: Container,
   userId: string
-): Promise<{ state: ReadState; floor: Date | null; metadata: Record<string, unknown> }> {
-  const user = await container
-    .resolve(Modules.USER)
-    .retrieveUser(userId, { select: ["id", "created_at", "metadata"] })
-  const metadata = user.metadata ?? {}
-  const state = readStateOf(metadata)
-  return { state, floor: readFloor(state, user.created_at), metadata }
+): Promise<{ state: ReadState; floor: Date | null; hidden: string[]; stored: unknown }> {
+  const [user, role] = await Promise.all([
+    container
+      .resolve(Modules.USER)
+      .retrieveUser(userId, { select: ["id", "created_at", "metadata"] }),
+    container.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).roleOf(userId),
+  ])
+  const state = readStateOf(user.metadata)
+  return {
+    state,
+    floor: readFloor(state, user.created_at),
+    hidden: hiddenTriggers(role),
+    // The state as kept, for a mark to put back if it fails
+    stored: user.metadata?.[READ_STATE_KEY],
+  }
 }
+
+const WHOLESALE_KIND = "wholesale_order"
 
 /**
  * A wholesaler's order names its wholesaler as the order lists do (closed
  * and erased ones too), read now: the row itself keeps only the ids.
+ * Whether any was named: such a page is a recorded read (adr/0011).
  */
-async function withWholesalers(container: Container, rows: AlertRow[]): Promise<AlertRow[]> {
+async function withWholesalers(
+  container: Container,
+  rows: AlertRow[]
+): Promise<{ rows: AlertRow[]; named: boolean }> {
   const accounts = rows.flatMap((row) =>
-    row.data?.["kind"] === "wholesale_order" && typeof row.data["account_id"] === "string"
+    row.data?.["kind"] === WHOLESALE_KIND && typeof row.data["account_id"] === "string"
       ? [row.data["account_id"]]
       : []
   )
   if (accounts.length === 0) {
-    return rows
+    return { rows, named: false }
   }
   const names = await wholesalerNames(container, accounts)
-  return rows.map((row) => {
-    const account = row.data?.["account_id"]
-    if (row.data?.["kind"] !== "wholesale_order" || typeof account !== "string") {
-      return row
-    }
-    return { ...row, data: { ...row.data, company: names.get(account) ?? null } }
-  })
+  return {
+    named: true,
+    rows: rows.map((row) => {
+      const account = row.data?.["account_id"]
+      if (row.data?.["kind"] !== WHOLESALE_KIND || typeof account !== "string") {
+        return row
+      }
+      return { ...row, data: { ...row.data, company: names.get(account) ?? null } }
+    }),
+  }
 }
 
 /**
- * One person's page of the shop's alerts (adr/0020), newest first: read
- * or not by them, filtered by group, without the kinds their role does
- * not see (a wholesaler's order for a role that sees no wholesalers).
+ * The bell's row: what it words the alert from, no one's name in it. A
+ * wholesaler's order without its account (the page names the company);
+ * a contact message without the server's own Turkish texts, which older
+ * rows wrote with the sender's name (the panel words it from the subject).
  */
-export async function listAlerts(
-  container: Container,
-  input: {
-    userId: string
-    seesWholesale: boolean
-    state: AlertState
-    group: AlertGroup | null
-    offset: number
-    limit: number
+const BELL_LEAVES_OUT: Readonly<Record<string, readonly string[]>> = {
+  [WHOLESALE_KIND]: ["account_id", "company"],
+  contact_message: ["title", "description"],
+}
+
+function bellData(data: Record<string, unknown> | null): Record<string, unknown> | null {
+  const out = data ? BELL_LEAVES_OUT[String(data["kind"])] : undefined
+  if (!data || !out) {
+    return data
   }
-): Promise<AlertPage> {
-  const { state, floor } = await readerOf(container, input.userId)
+  return Object.fromEntries(Object.entries(data).filter(([key]) => !out.includes(key)))
+}
+
+type Reader = Awaited<ReturnType<typeof readerOf>>
+
+async function page(
+  container: Container,
+  reader: Reader,
+  input: { state: AlertState; group: AlertGroup | null; offset: number; limit: number }
+) {
   const service = container.resolve(Modules.NOTIFICATION)
-  const page = feedFilters({
-    state: input.state,
-    group: input.group,
-    readState: state,
-    floor,
-    seesWholesale: input.seesWholesale,
-  })
-  const unreadFilter = feedFilters({
-    state: "unread",
-    group: null,
-    readState: state,
-    floor,
-    seesWholesale: input.seesWholesale,
-  })
-  const select = ["id", "created_at", "data"]
-  const [[rows, count], unread] = await Promise.all([
-    page
-      ? service.listAndCountNotifications(page, {
-          select,
+  const seen = { readState: reader.state, floor: reader.floor, hidden: reader.hidden }
+  const filters = feedFilters({ ...seen, state: input.state, group: input.group })
+  const unreadFilters = feedFilters({ ...seen, state: "unread", group: null })
+  const [[rows, count], [, unread]] = await Promise.all([
+    filters
+      ? service.listAndCountNotifications(filters, {
+          select: ["id", "created_at", "data"],
           order: { created_at: "DESC" },
           skip: input.offset,
           take: input.limit,
         })
       : Promise.resolve([[], 0] as [never[], number]),
-    unreadFilter
-      ? service.listAndCountNotifications(unreadFilter, { select: ["id"], take: 1 })
+    unreadFilters
+      ? service.listAndCountNotifications(unreadFilters, { select: ["id"], take: 1 })
       : Promise.resolve([[], 0] as [never[], number]),
   ])
-  const shaped = rows.map((row) => ({
+  const shaped: AlertRow[] = rows.map((row) => ({
     id: row.id,
     created_at: row.created_at,
     data: row.data ?? null,
-    read: !isUnread(row, state, floor),
+    read: !isUnread(row, reader.state, reader.floor),
   }))
+  return { rows: shaped, count, unread }
+}
+
+/**
+ * One person's page of the shop's alerts (adr/0020), newest first: read
+ * or not by them, filtered by group, without the kinds their role does
+ * not get. `named`: a wholesaler was named on it, which the route records.
+ */
+export async function listAlerts(
+  container: Container,
+  input: {
+    userId: string
+    state: AlertState
+    group: AlertGroup | null
+    offset: number
+    limit: number
+  }
+): Promise<AlertPage & { named: boolean }> {
+  const reader = await readerOf(container, input.userId)
+  const { rows, count, unread } = await page(container, reader, input)
+  const named = await withWholesalers(container, rows)
   return {
-    notifications: await withWholesalers(container, shaped),
+    notifications: named.rows,
     count,
-    unread: unread[1],
+    unread,
     offset: input.offset,
     limit: input.limit,
+    named: named.named,
   }
+}
+
+/**
+ * The bell (polled every minute): the count and the newest few, with no
+ * one's personal data in them, so it is no recorded read and never waits
+ * on the audit log. Nothing asked changes that: it takes no parameters.
+ */
+export async function bellAlerts(
+  container: Container,
+  userId: string
+): Promise<{ notifications: AlertRow[]; unread: number }> {
+  const reader = await readerOf(container, userId)
+  const { rows, unread } = await page(container, reader, {
+    state: "all",
+    group: null,
+    offset: 0,
+    limit: BELL_SIZE,
+  })
+  return { notifications: rows.map((row) => ({ ...row, data: bellData(row.data) })), unread }
 }

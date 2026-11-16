@@ -7,6 +7,7 @@ import {
   isUnread,
   readFloor,
   readStateOf,
+  visibleFeed,
   withRead,
 } from "../feed"
 
@@ -60,14 +61,20 @@ describe("the feed's filters", () => {
   const state = { until: floor.toISOString(), ids: ["noti_1"] }
 
   it("is the feed alone for one who sees everything", () => {
-    expect(
-      feedFilters({ state: "all", group: null, readState: state, floor, seesWholesale: true })
-    ).toEqual({ channel: "feed" })
+    expect(feedFilters({ state: "all", group: null, readState: state, floor, hidden: [] })).toEqual(
+      { channel: "feed" }
+    )
   })
 
   it("leaves a wholesaler's order out for a role that does not see wholesalers, keeping untyped rows", () => {
     expect(
-      feedFilters({ state: "all", group: null, readState: state, floor, seesWholesale: false })
+      feedFilters({
+        state: "all",
+        group: null,
+        readState: state,
+        floor,
+        hidden: [WHOLESALE_ORDER_TRIGGER],
+      })
     ).toEqual({
       channel: "feed",
       $and: [
@@ -78,7 +85,7 @@ describe("the feed's filters", () => {
 
   it("narrows by a group's prefixes and by what is read or not", () => {
     expect(
-      feedFilters({ state: "unread", group: "stock", readState: state, floor, seesWholesale: true })
+      feedFilters({ state: "unread", group: "stock", readState: state, floor, hidden: [] })
     ).toEqual({
       channel: "feed",
       $and: [
@@ -88,10 +95,18 @@ describe("the feed's filters", () => {
       ],
     })
     expect(
-      feedFilters({ state: "read", group: null, readState: state, floor, seesWholesale: true })
+      feedFilters({ state: "read", group: null, readState: state, floor, hidden: [] })
     ).toEqual({
       channel: "feed",
       $and: [{ $or: [{ created_at: { $lte: floor } }, { id: ["noti_1"] }] }],
+    })
+  })
+
+  it("gives marking read the same visible feed as the list", () => {
+    expect(visibleFeed([])).toEqual({ channel: "feed" })
+    expect(visibleFeed(["webhooks.disabled"])).toEqual({
+      channel: "feed",
+      $and: [{ $or: [{ trigger_type: null }, { trigger_type: { $nin: ["webhooks.disabled"] } }] }],
     })
   })
 
@@ -102,7 +117,7 @@ describe("the feed's filters", () => {
         group: null,
         readState: NOTHING,
         floor: null,
-        seesWholesale: true,
+        hidden: [],
       })
     ).toBeNull()
   })

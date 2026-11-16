@@ -48,6 +48,44 @@ function readDetails(req: MedusaRequest, list: boolean): Record<string, unknown>
 }
 
 /**
+ * Records one read of personal data; false (and a 503 already sent) when
+ * the record cannot be written. For a route that knows only from its own
+ * answer whether it shows any (`/admin/alerts`): it records before it
+ * answers, as the middleware does.
+ */
+export async function recordSensitiveRead(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  resourceType: string,
+  list: boolean
+): Promise<boolean> {
+  const { action, resourceId } = describeRoute(req.method, auditPath(req))
+  // Bound with `methods`, so Express has matched and decoded the parameters
+  const params = req.params as Record<string, string | undefined> | undefined
+  try {
+    await auditService(req).record({
+      kind: "sensitive_read",
+      action,
+      resource_type: resourceType,
+      resource_id: list ? null : (params?.["id"] ?? resourceId),
+      changes: readDetails(req, list),
+      ...auditContext(req),
+    })
+    return true
+  } catch (error) {
+    logger.error({ event: "audit.write_failed", action, err: errorSummary(error) })
+    rejectRequest(
+      req,
+      res,
+      503,
+      { type: "temporarily_unavailable", message: "errors.temporarily_unavailable" },
+      "audit_unavailable"
+    )
+    return false
+  }
+}
+
+/**
  * Reads of personal data (F2.5, adr/0011: tax ids, addresses, contact
  * details), recorded before the answer is sent. When the record cannot be
  * written the read is refused with 503: personal data is never shown without
@@ -62,29 +100,8 @@ export function auditSensitiveRead(resourceType: string, options: SensitiveReadO
       next()
       return
     }
-    const { action, resourceId } = describeRoute(req.method, auditPath(req))
-    // Bound with `methods`, so Express has matched and decoded the parameters
-    const params = req.params as Record<string, string | undefined> | undefined
-    try {
-      await auditService(req).record({
-        kind: "sensitive_read",
-        action,
-        resource_type: resourceType,
-        resource_id: list ? null : (params?.["id"] ?? resourceId),
-        changes: readDetails(req, list),
-        ...auditContext(req),
-      })
-    } catch (error) {
-      logger.error({ event: "audit.write_failed", action, err: errorSummary(error) })
-      rejectRequest(
-        req,
-        res,
-        503,
-        { type: "temporarily_unavailable", message: "errors.temporarily_unavailable" },
-        "audit_unavailable"
-      )
-      return
+    if (await recordSensitiveRead(req, res, resourceType, list)) {
+      next()
     }
-    next()
   }
 }

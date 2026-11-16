@@ -32,8 +32,6 @@ export interface AlertPage {
 }
 
 export const ALERTS_KEY = ["notifications"] as const
-/** The bell shows the newest ones; the page has the rest. */
-export const BELL_SIZE = 20
 export const ALERTS_PAGE_SIZE = 25
 
 export interface AlertFilters {
@@ -46,11 +44,16 @@ export interface AlertFilters {
 const fetchAlerts = (query: Record<string, string | number>) =>
   sdk.client.fetch<AlertPage>("/admin/alerts", { query })
 
-/** The bell: the newest alerts and the unread count; alerts come from the server's own work. */
+/**
+ * The bell (`GET /admin/alerts/bell`): the newest alerts and the unread
+ * count, no one's name in them (a wholesaler's order without its company:
+ * the page names it); alerts come from the server's own work.
+ */
 export const bellQuery = () =>
   queryOptions({
     queryKey: [...ALERTS_KEY, "bell"],
-    queryFn: () => fetchAlerts({ limit: BELL_SIZE }),
+    queryFn: () =>
+      sdk.client.fetch<Pick<AlertPage, "notifications" | "unread">>("/admin/alerts/bell"),
     refetchInterval: 60_000,
   })
 

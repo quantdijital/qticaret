@@ -91,6 +91,14 @@ const notIn = (values: readonly string[]): Filter => ({
   $or: [{ trigger_type: null }, { trigger_type: { $nin: [...values] } }],
 })
 
+/**
+ * The feed as one role sees it (`access.ts` `hiddenTriggers`): every row
+ * the list, the bell's count and marking read may touch.
+ */
+export function visibleFeed(hidden: readonly string[]): Filter {
+  return hidden.length > 0 ? { channel: "feed", $and: [notIn(hidden)] } : { channel: "feed" }
+}
+
 const unreadFilter = (state: ReadState, floor: Date | null): Filter[] => [
   ...(floor ? [{ created_at: { $gt: floor } }] : []),
   ...(state.ids.length > 0 ? [{ id: { $nin: state.ids } }] : []),
@@ -115,7 +123,8 @@ export function feedFilters(input: {
   group: AlertGroup | null
   readState: ReadState
   floor: Date | null
-  seesWholesale: boolean
+  /** The kinds the person's role does not get (`access.ts` `hiddenTriggers`). */
+  hidden: readonly string[]
 }): Filter | null {
   const parts: Filter[] = []
   if (input.group) {
@@ -123,8 +132,8 @@ export function feedFilters(input: {
       $or: ALERT_GROUPS[input.group].map((prefix) => ({ trigger_type: { $like: `${prefix}%` } })),
     })
   }
-  if (!input.seesWholesale) {
-    parts.push(notIn([WHOLESALE_ORDER_TRIGGER]))
+  if (input.hidden.length > 0) {
+    parts.push(notIn(input.hidden))
   }
   if (input.state === "unread") {
     parts.push(...unreadFilter(input.readState, input.floor))
