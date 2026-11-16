@@ -5,12 +5,12 @@ import { atolyeCss } from "@/test/atolye-css"
 import { renderPage } from "@/test/theme-render"
 
 /**
- * The tabbed shelf on a phone (owner 2026-11-16: "tüm ürünler alt satırda
+ * The tabbed shelf on a phone and a tablet (owner 2026-11-16: "tüm ürünler alt satırda
  * kalıyor o yüzden piller sonra link sonra ürünler saçma ve karmaşık
  * görünüyor"): the panel's "all products" link stood alone on a row under
- * the pills. Below 640 px it stands at the tab row's right end, as on a
+ * the pills; then "tableti de düzelt"). Below 1024 px it stands at the tab row's right end, as on a
  * wide screen and as a section head's link does; the pills scroll beside
- * it. The markup is the same; the tablet's and the desktop's rules too.
+ * it. The markup is the same; the desktop's rules too.
  */
 
 const TABS = atolyeCss("tabs.css")
@@ -61,7 +61,7 @@ function block(css: string, opening: string): string {
   throw new Error(`${opening} is not closed`)
 }
 
-describe("the tabbed shelf on a phone", () => {
+describe("the tabbed shelf on a phone and a tablet", () => {
   it("keeps its markup: radio pills in a named group, in a rail that scrolls sideways, each panel's link in its aside", () => {
     expect(html).toContain('<fieldset class="gf-tab-row min-w-0 border-0 p-0">')
     expect(html).toContain('<legend class="sr-only">')
@@ -77,8 +77,10 @@ describe("the tabbed shelf on a phone", () => {
     expect(html).toMatch(/class="sr-only">Çok satanlar<\/h2><a href="\/magaza" class="gf-link/)
   })
 
-  it("lifts a plain panel's link onto the tab row's line below 640 px, out of the panel's flow", () => {
-    const phone = block(TABS, "@media (width < 40rem)")
+  it("lifts a plain panel's link onto the tab row's line below 1024 px, out of the panel's flow", () => {
+    // One rule for the phone and the tablet: below the desktop's own step, exactly
+    const phone = block(TABS, "@media (width < 64rem)")
+    expect(TABS).not.toContain("@media (width < 40rem)")
     expect(phone).toMatch(
       /\.gf-tabs > \[data-panel\] section > \.gf-tab-aside \{\s*position: absolute;\s*top: 0\.25rem;\s*right: 0;\s*max-width: min\(9rem, 40%\);\s*\}/
     )
@@ -95,7 +97,7 @@ describe("the tabbed shelf on a phone", () => {
     expect(phone).toContain("@supports selector(:has(*))")
   })
 
-  it("leaves the tablet and the desktop as they were", () => {
+  it("leaves the desktop as it was", () => {
     expect(block(TABS, "@media (width >= 64rem)")).toBe(`@media (width >= 64rem) {
   @supports selector(:has(*)) {
     .gf-tabs {
@@ -113,7 +115,7 @@ describe("the tabbed shelf on a phone", () => {
     }
   }
 }`)
-    // No other rule moves the aside between 640 and 1024 px
+    // No other rule moves the aside: the desktop's and the phone and tablet's, nothing else
     expect(TABS.match(/gf-tab-aside/g)).toHaveLength(4)
   })
 })
