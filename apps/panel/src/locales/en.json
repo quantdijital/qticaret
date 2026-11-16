@@ -8548,6 +8548,8 @@
           "lined": "Lined"
         },
         "surfaceStyleHint": "The product page's info boxes, the category page's filters and subcategories, the cart's boxes. Filled is a tone darker than the page; Lined is a 1 px rule on the page's ground.",
+        "spacing": "Spacing",
+        "spacingWords": "spacing gap space tight compact roomy airy density",
         "surfaces": "Surfaces",
         "styleKit": {
           "menu_style": {

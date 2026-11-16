@@ -8548,6 +8548,8 @@
           "lined": "Çizgili"
         },
         "surfaceStyleHint": "Ürün sayfasındaki bilgi kutuları, kategori sayfasındaki filtreler ve alt kategoriler, sepetteki kutular. Dolu, sayfadan bir ton koyu zemindir; Çizgili, sayfa zemininde 1 px çizgidir.",
+        "spacing": "Boşluklar",
+        "spacingWords": "boşluk aralık mesafe sık sıkı ferah geniş yoğunluk",
         "surfaces": "Yüzeyler",
         "styleKit": {
           "menu_style": {

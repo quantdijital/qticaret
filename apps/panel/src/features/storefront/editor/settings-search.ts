@@ -93,18 +93,20 @@ export function searchSettings(
 }
 
 /**
- * Whether a field answers the words: its name, term or a choice holds one
- * of them, the place's name and the field together all; with the choice
+ * Whether a field answers the words: its name, term, search-only words
+ * (a theme field's `keywords`) or a choice holds one of them, the place's name and the field together all; with the choice
  * found, if any. Null: not a hit.
  */
 function fieldMatch(
   words: readonly string[],
   name: string,
-  field: Pick<RegistryField, "label" | "term" | "options">,
+  field: Pick<RegistryField, "label" | "term" | "options"> & { keywords?: string | null },
   t: Translate
 ): { option: string | null } | null {
   const own = searchText(
-    [field.label, field.term ?? ""].map((key) => (key ? t(key) : "")).join(" ")
+    [field.label, field.term ?? "", field.keywords ?? ""]
+      .map((key) => (key ? t(key) : ""))
+      .join(" ")
   )
   const option = field.options.find((key) =>
     words.some((word) => searchText(t(key)).includes(word))

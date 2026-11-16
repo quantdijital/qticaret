@@ -37,13 +37,15 @@ import { STYLE_KIT_READY } from "./style-kit-ready"
 const C = "storefront.editor.theme"
 
 /** The theme panel's groups, in its order. */
-export type ThemeGroupName = "colors" | "fonts" | "shapes" | "surfaces" | "card" | "framed"
+export type ThemeGroupName =
+  "colors" | "fonts" | "shapes" | "spacing" | "surfaces" | "card" | "framed"
 
 /** Each group's title (i18n key), as the panel and a hit's second line show it. */
 export const THEME_GROUP_TITLES: Readonly<Record<ThemeGroupName, string>> = {
   colors: `${C}.colors`,
   fonts: `${C}.fontsTitle`,
   shapes: `${C}.shapes`,
+  spacing: `${C}.spacing`,
   surfaces: `${C}.surfaces`,
   card: `${C}.card`,
   framed: `${C}.framed`,
@@ -65,6 +67,8 @@ interface FieldMeta {
   term?: string
   /** The choices' names (i18n keys): "Hap" finds the buttons. */
   options?: readonly string[]
+  /** More words the search finds it by, never shown (an i18n key): "boşluk" finds the spacing. */
+  keywords?: string
   /** Whether the field means anything now; hidden from the form and the search otherwise. */
   shown?: (theme: ThemeChoices, variants: CardVariantsInUse) => boolean
 }
@@ -147,6 +151,16 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   },
   // adr/0067 §2.7: shapes are corners, buttons and chips; surfaces the rest
   chip_style: kitField("chip_style", "shapes"),
+  // The room on the page in its own group, by name (owner 2026-11-16: the section spacing
+  // was not found among the surfaces); the corners stay shapes
+  section_spacing: {
+    group: "spacing",
+    label: `${C}.sectionSpacing`,
+    term: `${C}.sectionSpacingTerm`,
+    options: named(SECTION_SPACINGS, "sectionSpacings"),
+    keywords: `${C}.spacingWords`,
+  },
+  density: { ...kitField("density", "spacing"), keywords: `${C}.spacingWords` },
   surface_style: {
     group: "surfaces",
     label: `${C}.surfaceStyle`,
@@ -156,13 +170,6 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   shadow: kitField("shadow", "surfaces"),
   media_ground: kitField("media_ground", "surfaces"),
   menu_style: kitField("menu_style", "surfaces"),
-  section_spacing: {
-    group: "surfaces",
-    label: `${C}.sectionSpacing`,
-    term: `${C}.sectionSpacingTerm`,
-    options: named(SECTION_SPACINGS, "sectionSpacings"),
-  },
-  density: kitField("density", "surfaces"),
   "product_card.ratio": {
     group: "card",
     label: `${C}.ratio`,
@@ -234,6 +241,8 @@ export interface ThemeRegistryField {
   label: string
   term: string | null
   options: readonly string[]
+  /** Search-only words (an i18n key); null: none. */
+  keywords: string | null
   /** The element the search scrolls to, focuses and marks. */
   target: string
   shown: (theme: ThemeChoices, variants: CardVariantsInUse) => boolean
@@ -256,6 +265,7 @@ export const THEME_FIELDS: readonly ThemeRegistryField[] = (
           label: meta.label,
           term: meta.term ?? null,
           options: meta.options ?? [],
+          keywords: meta.keywords ?? null,
           target: idOf(key),
           shown: meta.shown ?? always,
         },

@@ -49,19 +49,31 @@ afterEach(() => {
 
 /** adr/0067 §1, §2.7: the style kit in the theme panel. */
 describe("the style kit in the theme panel", () => {
-  it("splits corners and buttons into shapes and surfaces (§2.7)", () => {
+  it("splits corners and buttons into shapes, the room into spacing, the rest into surfaces (§2.7, Ek 2026-11-16)", () => {
     expect(THEME_FIELDS.filter((f) => f.group === "shapes").map((f) => f.key)).toEqual([
       "radius",
       "buttons",
       "chip_style",
+    ])
+    expect(THEME_FIELDS.filter((f) => f.group === "spacing").map((f) => f.key)).toEqual([
+      "section_spacing",
+      "density",
     ])
     expect(THEME_FIELDS.filter((f) => f.group === "surfaces").map((f) => f.key)).toEqual([
       "surface_style",
       "shadow",
       "media_ground",
       "menu_style",
-      "section_spacing",
-      "density",
+    ])
+    // The panel's order: colours, faces, shapes, spacing, surfaces, the card
+    expect([...new Set(THEME_FIELDS.map((f) => f.group))]).toEqual([
+      "colors",
+      "fonts",
+      "shapes",
+      "spacing",
+      "surfaces",
+      "card",
+      "framed",
     ])
   })
 
@@ -69,7 +81,8 @@ describe("the style kit in the theme panel", () => {
     draw()
     expect(screen.getByRole("group", { name: "Şekiller" })).toBeVisible()
     expect(choicesIn("Şekiller")).toEqual(["theme-radius", "theme-buttons"])
-    expect(choicesIn("Yüzeyler")).toEqual(["theme-surface-style", "theme-section-spacing"])
+    expect(choicesIn("Boşluklar")).toEqual(["theme-section-spacing"])
+    expect(choicesIn("Yüzeyler")).toEqual(["theme-surface-style"])
     for (const name of KIT_NAMES) {
       expect(screen.queryByRole("combobox", { name })).toBeNull()
     }
@@ -93,13 +106,12 @@ describe("the style kit in the theme panel", () => {
     })
     const onChange = draw()
     expect(choicesIn("Şekiller")).toEqual(["theme-radius", "theme-buttons", "theme-chip-style"])
+    expect(choicesIn("Boşluklar")).toEqual(["theme-section-spacing", "theme-density"])
     expect(choicesIn("Yüzeyler")).toEqual([
       "theme-surface-style",
       "theme-shadow",
       "theme-media-ground",
       "theme-menu-style",
-      "theme-section-spacing",
-      "theme-density",
     ])
     expect(screen.getByRole("combobox", { name: "Menü stili" })).toHaveTextContent("Dolu")
     expect(screen.getByRole("combobox", { name: "Yoğunluk" })).toHaveTextContent("Ferah")
@@ -122,6 +134,16 @@ describe("the style kit in the theme panel", () => {
     ])
     await user.click(screen.getByRole("option", { name: "Dengeli" }))
     expect(onChange).toHaveBeenLastCalledWith({ ...THEME, density: "balanced" })
+  })
+
+  it("finds the spacing by the words a shop owner uses for it (owner 2026-11-16)", () => {
+    ready.density = true
+    for (const word of ["boşluk", "bosluk", "aralık", "sıkı", "ferah", "yoğunluk"]) {
+      expect(found(word), word).toEqual(["section_spacing", "density"])
+    }
+    expect(found("bölüm aralığı")).toEqual(["section_spacing"])
+    expect(found("dengeli")).toEqual(["density"])
+    expect(found("çok sık")).toEqual(["section_spacing"])
   })
 
   it("turns on one field alone", () => {
