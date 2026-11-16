@@ -4,6 +4,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import sharp from "sharp"
 import { ValidationError } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
+import { libraryImage } from "../../../lib/media/library-image"
 import { SVG_MIME, looksLikeSvg } from "../../../lib/media/svg"
 import {
   APPLE_TOUCH_SIDE,
@@ -156,7 +157,6 @@ export const brandImagesStep = createStep(
     const saved = (await container
       .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
       .getSection("appearance")) as Partial<Record<Field, string | null>>
-    const media = container.resolve<MediaModuleService>(MEDIA_MODULE)
     const kept: string[] = []
     for (const field of sent) {
       const url = values[field] as string
@@ -164,13 +164,11 @@ export const brandImagesStep = createStep(
       if (saved[field] === url) {
         continue
       }
-      const [asset] = (await media.listMediaAssets(
-        { url, file_id: { $ne: null } },
-        {
-          select: ["id", "file_id", "mime_type", "size", "derivatives", "derivative_file_ids"],
-          take: 1,
-        }
-      )) as BrandAsset[]
+      const asset = (await libraryImage(container, { url }, [
+        "size",
+        "derivatives",
+        "derivative_file_ids",
+      ])) as BrandAsset | null
       if (!asset) {
         throw new ValidationError(UNKNOWN[field], { field })
       }

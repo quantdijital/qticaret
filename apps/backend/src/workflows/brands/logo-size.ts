@@ -29,8 +29,10 @@ const sizeOf = (width: unknown, height: unknown): LogoSize | null =>
 /**
  * A stored file's bytes, read no further than an upload may be (the
  * upload check's own limit): null for a longer one, which is never held
- * whole. A logo need not be a library record, so its key may name any
- * stored file, and storage gives no size before it is read.
+ * whole. A new logo is a library image, yet its record may not know its
+ * size (an older one), and a logo kept from before that rule (which the
+ * backfill measures) may name any stored file; storage gives no size
+ * before it is read.
  */
 async function readWithinUploadLimit(stream: Readable): Promise<Buffer | null> {
   const max = DEFAULT_UPLOAD_LIMITS.maxBytes
@@ -55,7 +57,8 @@ async function readWithinUploadLimit(stream: Readable): Promise<Buffer | null> {
  * A brand logo's width and height in pixels, read on the server and never
  * taken from the request: the media library's record of the file (made
  * when it was uploaded, from the cleaned file), else the stored file's own
- * header, read only up to the upload limit. Null when neither says (no
+ * header, read only up to the upload limit (a record with no size, a logo
+ * kept from before logos had to be library images). Null when neither says (no
  * image, a file larger than an upload may be, one storage cannot give):
  * the storefront then draws the logo as before, without a size.
  */
