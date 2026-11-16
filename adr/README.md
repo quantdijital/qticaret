@@ -74,3 +74,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0066 | [Tema katmanları ve görünüm izolasyonu](0066-tema-katmanlari-ve-gorunum-izolasyonu.md) | — |
 | 0067 | [Stil takımı: tema düzeyinde kimlik basamakları ve taşıma sırası](0067-stil-takimi.md) | — |
 | 0068 | [Toptancı müşteriler ve toptan fiyat](0068-toptanci-musteriler-ve-toptan-fiyat.md) | — |
+| 0069 | [Ürün videoları: yükleme, dönüştürme, depolama ve vitrinde gösterim](0069-urun-videolari.md) | — |
