@@ -9,6 +9,7 @@ import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
 import { cn } from "@qticaret/ui/lib/utils"
 import { SearchPanel, panelOf, statusOf } from "./SearchPanel"
 import type { SearchPanelWords } from "./SearchPanel"
+import { usePanelFit } from "./search-panel-fit"
 
 export interface SearchWords extends SearchPanelWords {
   label: string
@@ -16,12 +17,6 @@ export interface SearchWords extends SearchPanelWords {
   submit: string
   /** "Aramayı temizle". */
   clear: string
-}
-
-/** The room under the panel's top down to the on-screen keyboard (the visual viewport's end). */
-function fitAboveKeyboard(panel: HTMLElement, view: VisualViewport): void {
-  const room = view.offsetTop + view.height - panel.getBoundingClientRect().top - 12
-  panel.style.setProperty("--gf-suggest-room", `${String(Math.max(160, Math.floor(room)))}px`)
 }
 
 /** The results page's own search, for the field to keep it ("" anywhere else). */
@@ -42,6 +37,8 @@ const still = () => () => undefined
  * characters, 200 ms after the last key, the panel under it shows the
  * hits, "did you mean", the categories and brands and "Tüm sonuçları
  * gör (n)"; each change drops the request before it (`createSuggester`).
+ * From 1024 px the panel is 56 rem wide at least, from the box's left
+ * edge, kept inside the header's content (`usePanelFit`).
  * The arrow keys move through the options, Enter opens the one they are
  * on (or searches), Escape closes the panel (then clears the field), a
  * press outside closes it; the focus stays in the field. The browser's
@@ -129,24 +126,8 @@ export function SearchBox({
     }
   }, [shown])
 
-  // On a phone the panel ends above the on-screen keyboard and scrolls inside
-  useEffect(() => {
-    const element = panel.current
-    const view = window.visualViewport
-    if (!shown || !element || !view) {
-      return
-    }
-    const fit = () => {
-      fitAboveKeyboard(element, view)
-    }
-    fit()
-    view.addEventListener("resize", fit)
-    view.addEventListener("scroll", fit)
-    return () => {
-      view.removeEventListener("resize", fit)
-      view.removeEventListener("scroll", fit)
-    }
-  }, [shown])
+  // Wide, the panel opens wider than the box within the header; on a phone it ends above the keyboard
+  usePanelFit(form, panel, shown)
 
   // The option the arrow keys are on stays in the panel's view
   useEffect(() => {
