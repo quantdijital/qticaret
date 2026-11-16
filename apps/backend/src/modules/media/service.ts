@@ -23,6 +23,52 @@ class MediaModuleService extends MediaServiceBase {
   declare updateMediaVideos: Generated["updateMediaVideoes"]
   declare deleteMediaVideos: Generated["deleteMediaVideoes"]
   declare softDeleteMediaVideos: Generated["softDeleteMediaVideoes"]
+  declare restoreMediaVideos: Generated["restoreMediaVideoes"]
+
+  /**
+   * Removed videos whose files storage has not taken yet (adr/0069 §11):
+   * the nightly sweep tries them again. Read here, beside soft deleted
+   * rows, with the columns named.
+   */
+  @InjectManager()
+  async videosWithFilesLeft(
+    limit = 500,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<
+    {
+      id: string
+      source_file_id: string | null
+      output_file_ids: string[] | null
+      poster_file_ids: string[] | null
+    }[]
+  > {
+    const manager = sharedContext.manager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("media: removed videos are read with a manager")
+    }
+    return await manager.execute(
+      `SELECT id, source_file_id, output_file_ids, poster_file_ids FROM media_video
+       WHERE deleted_at IS NOT NULL
+         AND (source_file_id IS NOT NULL OR output_file_ids IS NOT NULL OR poster_file_ids IS NOT NULL)
+       ORDER BY id LIMIT ?`,
+      [limit]
+    )
+  }
+
+  /** A removed video's files are gone: its record no longer names them, nor counts them. */
+  @InjectManager()
+  async forgetVideoFiles(id: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
+    const manager = sharedContext.manager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("media: a video's files are forgotten with a manager")
+    }
+    await manager.execute(
+      `UPDATE media_video SET source_file_id = NULL, output_file_ids = NULL,
+         poster_file_ids = NULL, stored_bytes = 0, updated_at = now()
+       WHERE id = ?`,
+      [id]
+    )
+  }
 
   /**
    * Bytes held in storage (adr/0061 §5.4, C13's usage report; adr/0069 §3):

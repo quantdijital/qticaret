@@ -65,5 +65,31 @@ moduleIntegrationTestRunner<MediaModuleService>({
         service.createMediaVideos({ kind: "vimeo" as "upload", stored_bytes: 0 })
       ).rejects.toThrow()
     })
+
+    it("finds removed videos whose files are still named, until they are forgotten (D4)", async () => {
+      const video = await service.createMediaVideos({
+        kind: "upload",
+        source_file_id: "video-kaynak-02J.mp4",
+        output_file_ids: ["cikti-02J.mp4"],
+        stored_bytes: 3000,
+      })
+      // Live: not the sweep's
+      expect((await service.videosWithFilesLeft()).map((row) => row.id)).not.toContain(video.id)
+      await service.softDeleteMediaVideos([video.id])
+      expect(await service.videosWithFilesLeft()).toContainEqual({
+        id: video.id,
+        source_file_id: "video-kaynak-02J.mp4",
+        output_file_ids: ["cikti-02J.mp4"],
+        poster_file_ids: null,
+      })
+      await service.forgetVideoFiles(video.id)
+      expect((await service.videosWithFilesLeft()).map((row) => row.id)).not.toContain(video.id)
+
+      // Undone removal: the record comes back as it was
+      const again = await service.createMediaVideos({ kind: "upload", stored_bytes: 10 })
+      await service.softDeleteMediaVideos([again.id])
+      await service.restoreMediaVideos([again.id])
+      expect(await service.listMediaVideos({ id: again.id })).toHaveLength(1)
+    })
   },
 })

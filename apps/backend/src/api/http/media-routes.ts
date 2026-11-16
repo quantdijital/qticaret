@@ -82,6 +82,46 @@ export const STORE_MEDIA_FIELDS = ["media_assets", ...STORE_MEDIA_LEAVES]
  */
 export const STORE_VARIANT_IMAGE_FIELDS = ["images.variants", "images.variants.id"]
 
+/**
+ * A product's videos through `fields` (adr/0069, security review D3): the
+ * storefront gets none of them until slice 4 opens its leaves one by one;
+ * the admin API only what the panel's own list shows. Storage keys, the
+ * uploader and bookkeeping never leave, whatever the role or the flag.
+ * Matched anywhere in a token (`items.product.media_videos...` too).
+ */
+export const ADMIN_VIDEO_LEAVES = [
+  "media_videos.id",
+  "media_videos.kind",
+  "media_videos.status",
+  "media_videos.title",
+  "media_videos.position",
+  "media_videos.width",
+  "media_videos.height",
+  "media_videos.duration_ms",
+  "media_videos.source_format",
+  "media_videos.source_bytes",
+  "media_videos.stored_bytes",
+  "media_videos.outputs",
+  "media_videos.poster",
+  "media_videos.youtube_id",
+  "media_videos.error_code",
+  "media_videos.created_at",
+] as const
+
+const VIDEO_RELATION = /media_video/i
+
+export const rejectStoreVideoFields = restrictStoreRelation(
+  VIDEO_RELATION,
+  [],
+  "media_video_fields"
+)
+
+export const restrictAdminVideoFields = restrictStoreRelation(
+  VIDEO_RELATION,
+  ADMIN_VIDEO_LEAVES,
+  "media_video_fields"
+)
+
 export const restrictStoreMediaFields = restrictStoreRelation(
   /(^|\.)\*?media_assets\b/,
   STORE_MEDIA_LEAVES,

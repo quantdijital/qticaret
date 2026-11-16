@@ -54,28 +54,27 @@ async function readVideos(container: MedusaContainer): Promise<VideoRow[]> {
 
 export interface VideoSweep {
   removed: number
+  files_removed: number
   sources_removed: number
 }
 
 /**
  * The nightly tidy of videos (adr/0069 §11): a video without a product for
- * a day (its product deleted, or its removal's files refused by storage)
- * goes, files first and the record (soft deleted) only once storage took
- * them; a failed clip's source goes after a week. A refusal is tried again
- * the next night.
+ * a day (its product deleted) is removed, the record first (soft deleted)
+ * and then its files, as a removal from the panel; a removed video whose
+ * files storage refused has them tried again; a failed clip's source goes
+ * after a week. A refusal is tried again the next night.
  */
 export const sweepVideosStep = createStep(
   "media-video-sweep",
   async (now: number, { container }) => {
     const service = container.resolve<MediaModuleService>(MEDIA_MODULE)
-    const result: VideoSweep = { removed: 0, sources_removed: 0 }
+    const result: VideoSweep = { removed: 0, files_removed: 0, sources_removed: 0 }
     for (const video of await readVideos(container)) {
       const age = now - new Date(video.created_at).getTime()
       if (!video.product?.id && age > DAY_MS) {
-        if (await removeFiles(container, videoFileIds(video))) {
-          await service.softDeleteMediaVideos([video.id])
-          result.removed += 1
-        }
+        await service.softDeleteMediaVideos([video.id])
+        result.removed += 1
         continue
       }
       const idle = now - new Date(video.updated_at).getTime()
@@ -90,7 +89,14 @@ export const sweepVideosStep = createStep(
         }
       }
     }
-    if (result.removed + result.sources_removed > 0) {
+    // Removed records (just now, or a refused removal before) whose files are still named
+    for (const left of await service.videosWithFilesLeft()) {
+      if (await removeFiles(container, videoFileIds(left))) {
+        await service.forgetVideoFiles(left.id)
+        result.files_removed += 1
+      }
+    }
+    if (result.removed + result.files_removed + result.sources_removed > 0) {
       forgetUsage("storage_mb")
     }
     return new StepResponse(result)

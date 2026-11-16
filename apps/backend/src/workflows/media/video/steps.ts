@@ -137,22 +137,44 @@ export const findProductVideoStep = createStep(
 )
 
 /**
- * Removes a video taken off its product (adr/0069 §11): its files first,
- * then the record (soft deleted). Storage refusing leaves the record, off
- * the product, with its file ids: the nightly sweep tries again. Nothing
- * to undo once files are gone; the step before it (the link) is undone on
- * a failure here.
+ * A video's record taken away (soft deleted), undone by restoring it. Before
+ * its files (security review D4): a failure here leaves the video whole on
+ * its product, never a record whose files are gone.
  */
-export const removeVideoStep = createStep(
-  "media-video-remove",
+export const softDeleteVideoStep = createStep(
+  "media-video-soft-delete",
+  async (id: string, { container }) => {
+    await media(container).softDeleteMediaVideos([id])
+    forgetUsage("storage_mb")
+    return new StepResponse(id, id)
+  },
+  async (id, { container }) => {
+    if (id) {
+      await media(container).restoreMediaVideos([id])
+      forgetUsage("storage_mb")
+    }
+  }
+)
+
+/**
+ * The removed video's files go (adr/0069 §11), the last step: nothing can
+ * be undone after it, and it does not fail. Storage refusing, or the
+ * record not marked, leaves the removed record naming its files: the
+ * nightly sweep tries again.
+ */
+export const removeVideoFilesStep = createStep(
+  "media-video-remove-files",
   async (video: MediaVideoRecord, { container }) => {
     const removed = await removeFiles(container, videoFileIds(video))
-    if (removed) {
-      await media(container).softDeleteMediaVideos([video.id])
-      forgetUsage("storage_mb")
-    } else {
+    if (!removed) {
       logger.warn({ event: "media.video_files_kept", video_id: video.id })
+      return new StepResponse(false)
     }
-    return new StepResponse(removed)
+    try {
+      await media(container).forgetVideoFiles(video.id)
+    } catch (error) {
+      logger.warn({ event: "media.video_files_not_forgotten", err: errorSummary(error) })
+    }
+    return new StepResponse(true)
   }
 )

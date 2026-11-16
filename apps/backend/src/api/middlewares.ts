@@ -85,6 +85,8 @@ import {
   MEDIA_ROUTES,
   STORE_MEDIA_FIELDS,
   STORE_VARIANT_IMAGE_FIELDS,
+  rejectStoreVideoFields,
+  restrictAdminVideoFields,
   restrictStoreMediaFields,
 } from "./http/media-routes"
 import { GIFT_CARD_ROUTES } from "./http/gift-card-routes"
@@ -163,6 +165,8 @@ export default defineMiddlewares({
         // ADR-0068 §7: no price list row, a wholesale one included, by any `fields`
         rejectStorePriceRows,
         restrictStoreMediaFields,
+        // adr/0069: no video leaf until slice 4 opens them
+        rejectStoreVideoFields,
         rejectStoreSeoFields,
         restrictStoreGiftCardFields,
       ],
@@ -182,6 +186,8 @@ export default defineMiddlewares({
         guardStaffRoles,
         guardPlanStatus,
         rejectSensitiveFields,
+        // adr/0069: a video's storage keys and uploader never through `fields`
+        restrictAdminVideoFields,
         auditMutations,
       ],
     },

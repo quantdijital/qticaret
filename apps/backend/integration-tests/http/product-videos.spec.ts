@@ -2,18 +2,23 @@ import { spawnSync } from "node:child_process"
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { LIMIT_KEYS } from "@qticaret/types/control-plane"
+import type { PlanLimits } from "@qticaret/types/control-plane"
 import { videoToolPaths } from "../../src/lib/media/video"
-import { CONTROL_PLANE_MODULE } from "../../src/modules/control-plane"
-import type ControlPlaneModuleService from "../../src/modules/control-plane/service"
 import { MEDIA_MODULE } from "../../src/modules/media"
 import type MediaModuleService from "../../src/modules/media/service"
+import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
+import { PRODUCT_VIDEOS } from "../../src/modules/platform-settings/features"
+import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
+import { sweepProductVideosWorkflow } from "../../src/workflows/media/video/workflows"
 import { createAdminUser } from "../helpers/admin"
 import { doc, managedForThisFile, signed } from "../helpers/control-plane"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { nextSerial, setPlanLimits, setPlanStatus } from "../helpers/plan-limits"
+import { createStorefront } from "../helpers/storefront"
 
 jest.setTimeout(300 * 1000)
 
@@ -90,6 +95,8 @@ medusaIntegrationTestRunner({
       settle(http.post<VideoBody>(url(), data, { headers }))
     const list = () => settle(http.get<VideoBody>(url(), { headers: owner.headers }))
     const media = () => getContainer().resolve<MediaModuleService>(MEDIA_MODULE)
+    const flags = () =>
+      getContainer().resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
 
     beforeEach(async () => {
       await setPlanLimits(getContainer(), {})
@@ -120,26 +127,139 @@ medusaIntegrationTestRunner({
       expect(refused.data.message).toBe("video.too_large")
     })
 
-    it("keeps uploads to the catalog roles, an open plan and the flag", async () => {
+    it("keeps uploads and removals to the catalog roles", async () => {
       const operations = await createAdminUser(http, getContainer(), "operations")
       expect((await upload(form("x"), operations.headers)).status).toBe(403)
+      const removal = await settle(
+        http.delete(`${url()}/mvid_01TEST`, { headers: operations.headers })
+      )
+      expect(removal.status).toBe(403)
+    })
 
+    it("closes uploads and removals in a restricted shop, and keeps the list readable", async () => {
       await setPlanStatus(getContainer(), "restricted")
       const restricted = await upload(form("x"))
       expect(restricted.status).toBe(403)
       expect(restricted.data.message).toBe("plan.restricted")
-      await setPlanLimits(getContainer(), {})
-
-      await getContainer()
-        .resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE)
-        .storePlanDocument(
-          signed(doc(nextSerial(), { platform_flags: { "catalog.product_videos": false } })),
-          "push"
-        )
-      expect((await upload(form("x"))).status).toBe(404)
-      expect((await list()).status).toBe(404)
-      await setPlanLimits(getContainer(), {})
+      const removal = await settle(
+        http.delete<VideoBody>(`${url()}/mvid_01TEST`, { headers: owner.headers })
+      )
+      expect(removal.data.message).toBe("plan.restricted")
       expect((await list()).status).toBe(200)
+    })
+
+    // Review item 0: the flag reaches the shop only through the push route (its workflow
+    // syncs the platform flags); a document stored directly leaves them as they were
+    it("answers as if the routes did not exist while the flag is off, and alike for each", async () => {
+      const pushFlag = async (on: boolean) => {
+        const pushed = await settle(
+          http.post(
+            "/hooks/control-plane/plan",
+            signed(
+              doc(nextSerial(), {
+                limits: Object.fromEntries(LIMIT_KEYS.map((key) => [key, null])) as PlanLimits,
+                platform_flags: { [PRODUCT_VIDEOS]: on },
+              })
+            )
+          )
+        )
+        expect(pushed.status).toBe(200)
+        expect(await flags().isFeatureEnabled(PRODUCT_VIDEOS)).toBe(on)
+      }
+      await pushFlag(false)
+      const off = [
+        await upload(form("x")),
+        await list(),
+        await settle(http.delete(`${url()}/mvid_01TEST`, { headers: owner.headers })),
+      ]
+      expect(off.map((answer) => answer.status)).toEqual([404, 404, 404])
+      await pushFlag(true)
+      expect((await list()).status).toBe(200)
+    })
+
+    /** A video record on the product as an upload leaves it, without the upload. */
+    async function linkedVideo(product: string, fields: Record<string, unknown> = {}) {
+      const video = await media().createMediaVideos({
+        kind: "upload",
+        source_format: "mp4",
+        source_file_id: "video-kaynak-test.mp4",
+        source_bytes: 1000,
+        stored_bytes: 1000,
+        uploaded_by: "user_01TEST",
+        ...fields,
+      })
+      await getContainer()
+        .resolve(ContainerRegistrationKeys.LINK)
+        .create({
+          [Modules.PRODUCT]: { product_id: product },
+          [MEDIA_MODULE]: { media_video_id: video.id },
+        })
+      return video
+    }
+
+    it("never gives a video's storage key or uploader through `fields` (review D3)", async () => {
+      await linkedVideo(productId)
+      const readonly = await createAdminUser(http, getContainer(), "readonly")
+      const admin = (fields: string, headers = readonly.headers) =>
+        settle(
+          http.get<{ product?: Record<string, unknown>; message?: string }>(
+            `/admin/products/${productId}?fields=${encodeURIComponent(fields)}`,
+            { headers }
+          )
+        )
+      for (const fields of [
+        "*media_videos",
+        "+media_videos.*",
+        "+media_videos.source_file_id",
+        "+media_videos.uploaded_by",
+        "+media_videos.output_file_ids",
+      ]) {
+        const answer = await admin(fields)
+        expect(answer.status).toBe(400)
+        expect(JSON.stringify(answer.data)).not.toMatch(/video-kaynak|user_01TEST/)
+        expect((await admin(fields, owner.headers)).status).toBe(400)
+      }
+      const safe = await admin("id,+media_videos.id,+media_videos.status")
+      expect(safe.status).toBe(200)
+      expect(JSON.stringify(safe.data)).not.toMatch(/video-kaynak|user_01TEST/)
+      const listed = await settle(
+        http.get(`/admin/products?fields=${encodeURIComponent("*media_videos")}`, {
+          headers: readonly.headers,
+        })
+      )
+      expect(listed.status).toBe(400)
+
+      // The storefront: nothing of a video until slice 4 opens its leaves
+      const { headers } = await createStorefront(getContainer())
+      for (const fields of ["*media_videos", "+media_videos.id", "+media_videos.source_file_id"]) {
+        const answer = await settle(
+          http.get(`/store/products?fields=${encodeURIComponent(fields)}`, { headers })
+        )
+        expect(answer.status).toBe(400)
+        expect(JSON.stringify(answer.data)).not.toMatch(/video-kaynak|user_01TEST/)
+      }
+    })
+
+    it("sweeps only videos without a product: a linked one a day old stays (review D5)", async () => {
+      const kept = await linkedVideo(productId, { source_file_id: null })
+      const orphan = await media().createMediaVideos({
+        kind: "upload",
+        source_format: "mp4",
+        stored_bytes: 0,
+      })
+      const later = Date.now() + 2 * 24 * 60 * 60 * 1000
+      const { result } = await sweepProductVideosWorkflow(getContainer()).run({
+        input: { now: later },
+      })
+      expect(result.removed).toBe(1)
+      const left = await media().listMediaVideos({ id: [kept.id, orphan.id] })
+      expect(left.map((video) => video.id)).toEqual([kept.id])
+      expect((await list()).data.videos?.map((video) => video.id)).toEqual([kept.id])
+      // Today, nothing is old enough
+      const now = await sweepProductVideosWorkflow(getContainer()).run({
+        input: { now: Date.now() },
+      })
+      expect(now.result.removed).toBe(0)
     })
 
     if (!tools) {

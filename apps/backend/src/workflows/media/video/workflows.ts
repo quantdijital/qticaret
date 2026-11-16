@@ -14,7 +14,8 @@ import {
   checkVideoStorageStep,
   createVideoRecordStep,
   findProductVideoStep,
-  removeVideoStep,
+  removeVideoFilesStep,
+  softDeleteVideoStep,
   storeVideoSourceStep,
 } from "./steps"
 import { sweepVideosStep } from "./sweep"
@@ -87,8 +88,9 @@ export const uploadProductVideoWorkflow = createWorkflow(
 )
 
 /**
- * A video taken off its product (adr/0069 §11): the link goes, then its
- * files, then the record. A video of another product is a 404.
+ * A video taken off its product (adr/0069 §11): the link goes, the record
+ * goes (both undone on a failure), then its files, which nothing undoes.
+ * A video of another product is a 404.
  */
 export const removeProductVideoWorkflow = createWorkflow(
   "media-video-remove",
@@ -104,7 +106,8 @@ export const removeProductVideoWorkflow = createWorkflow(
         },
       ])
     )
-    const removed = removeVideoStep(video)
+    softDeleteVideoStep(transform({ video }, ({ video }) => video.id))
+    const removed = removeVideoFilesStep(video)
     releaseLockStep({ key })
     return new WorkflowResponse(removed)
   }
