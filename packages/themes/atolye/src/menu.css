@@ -60,7 +60,6 @@
 
   .gf-drop {
     position: absolute;
-    top: calc(100% + var(--space-xs));
     left: 0;
     z-index: var(--z-dropdown);
     width: 21rem;
@@ -75,6 +74,18 @@
   .gf-drop[data-align="end"] {
     right: 0;
     left: auto;
+  }
+  /*
+   * The menu bar's dropdowns hang one step (8 px) under their item, so a
+   * category's dropdown and the "Kategoriler" list (`.gf-hang`,
+   * frame/CategoryMenu) stand the same 4 px off the bar's lower edge (the
+   * 44 px items sit centred in the 52 px bar). Moving across the step
+   * keeps either open: Radix's close delay for the dropdown, the list's
+   * own 250 ms one (CLOSE_AFTER).
+   */
+  .gf-drop,
+  .gf-hang {
+    top: calc(100% + var(--space-xs));
   }
   .gf-drop-row {
     display: grid;

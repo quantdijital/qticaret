@@ -62,7 +62,9 @@ describe("the tall menus scroll inside", () => {
       })
     )
     // The panel's containing block is the box (`absolute`), outside the scrolling list
-    expect(html).toMatch(/<nav id="[^"]+" aria-label="Tüm kategoriler" hidden="" class="absolute /)
+    expect(html).toMatch(
+      /<nav id="[^"]+" aria-label="Tüm kategoriler" hidden="" class="gf-hang absolute /
+    )
     expect(html).toMatch(/<ul data-cm-list="top" class="flex flex-col">/)
     expect(html).toMatch(/data-cm-sub="0" hidden="" class="absolute top-0 left-full/)
     expect(rule('[data-cm-list="top"]')).toContain("margin: calc(-1 * var(--space-xs))")
@@ -75,5 +77,34 @@ describe("the tall menus scroll inside", () => {
     expect(rule('[data-menu-style="plain"]) .gf-drop-all:hover:not(:active)')).toContain(
       "background-color: var(--color-field)"
     )
+  })
+})
+
+/**
+ * The menu bar's panels hang alike (owner, 2026-11-16: "kategorileri hover
+ * olup açılan dropdown headere yapışık geliyor diğer menü linklerinde öyle
+ * değil"; a fix): the "Kategoriler" list hung 4 px under its 44 px button,
+ * which ends 4 px above the 52 px bar's edge, so it touched the bar; a
+ * category's dropdown hangs 8 px under its item. Both now take one rule.
+ */
+describe("the menu bar's panels hang alike", () => {
+  it("hangs the Kategoriler list one step under its button, as a category's dropdown", () => {
+    const html = renderFrame(
+      atolyeTheme,
+      shopFixture({
+        headerBar: { id: "mainheader", variant: "catalog", sticky: true, catalog: CATALOG },
+      })
+    )
+    const list = /aria-label="Tüm kategoriler" hidden="" class="([^"]+)"/.exec(html)?.[1] ?? ""
+
+    expect(list.split(" ")).toContain("gf-hang")
+    // No offset of its own: the shared rule places it
+    expect(list).not.toMatch(/(^| )-?(top|mt)-/)
+    expect(MENU_CSS).toMatch(
+      /\.gf-drop,\s*\.gf-hang \{\s*top: calc\(100% \+ var\(--space-xs\)\);\s*\}/
+    )
+    // One place sets the step: the dropdown's own rule leaves it out
+    expect(rule(".gf-drop")).not.toContain("top:")
+    expect(MENU_CSS.match(/top: calc\(100% \+ var\(--space-xs\)\)/g)).toHaveLength(1)
   })
 })
