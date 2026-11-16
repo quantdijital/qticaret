@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
-import { base, optional, text } from "../layout-fields"
+import { base, optional, shopText, text } from "../layout-fields"
 import { storefrontLink } from "../menus"
 import { footerBarFields } from "./footer-bar"
 import { sectionLook } from "./look"
@@ -201,8 +201,11 @@ const headerCatalog = z
     top_links: step(HEADER_TOP_LINKS_PLACES),
     /** The search: wide, or 35 rem right after the wordmark. */
     search_width: step(HEADER_SEARCH_WIDTHS),
-    /** A short plain line at the strip's start (a campaign, free shipping); none: no note. */
-    strip_note: optional(text(HEADER_CATALOG_LIMITS.strip_note)),
+    /**
+     * A short plain line at the strip's start (a campaign, free shipping);
+     * the shop's details as `{belirteç}`s (adr/0048), filled when read. None: no note.
+     */
+    strip_note: optional(shopText(HEADER_CATALOG_LIMITS.strip_note)),
     /** Where the note goes; none, or broken on reading: the note stays plain words. */
     strip_note_link: optional(storefrontLink),
   })

@@ -170,9 +170,25 @@ export async function storeLayout(
         placement: section.placement,
       }))
     ),
-    main: mainSectionsOf(doc, (link) => at.links.get(link) ?? null),
+    main: withShopNote(
+      mainSectionsOf(doc, (link) => at.links.get(link) ?? null),
+      values
+    ),
     settings: sharedOf(doc, legacy, values),
   }
+}
+
+/** The catalog header's strip note with the shop's details in place (adr/0048). */
+function withShopNote<M extends ReturnType<typeof mainSectionsOf>>(
+  main: M,
+  values: Awaited<ReturnType<typeof shopInfoValues>>
+): M {
+  const bar = main.header_bar
+  if (!("catalog" in bar)) {
+    return main
+  }
+  const catalog = { ...bar.catalog, strip_note: fill(bar.catalog.strip_note, values) }
+  return { ...main, header_bar: { ...bar, catalog } }
 }
 
 /** The shared settings as the storefront draws them: the badges' details in place, the theme applied. */

@@ -1,9 +1,61 @@
 {
   "format": "quant-storefront-preset",
   "code": "tezgah-lacivert",
-  "version": 5,
+  "version": 6,
   "theme": "atolye",
   "name": "Tezgâh · Lacivert ve çelik",
-  "description": "Tezgâh'ın düzeni, lacivert ve çelik mavisi renk takımıyla: düğme ve bağlantılar çelik mavisi, seçili sekme ve sayaçlar lacivert, menü çubuğu grafit. Kategori listeli klasik katalog; keskin köşe, çerçeveli kart. Menülere ve ürünlere dokunmaz.",
-  "tone": "light"
+  "description": "Tezgâh'ın düzeni, lacivert ve çelik mavisi renk takımıyla (menü çubuğu grafit). Kategori listeli katalog: arama simgeli sade üst bilgi, resimli kategori menüsü, dört slaytlı giriş, sahne ve liste, kolaj, şeritli yakın plan, sekmeli raf, sıralı indirimler, şerit galerisi, kampanya bandı, çok satanlar, markalar, kayan şerit, yazılar, yorumlar, SSS ve dolu alt bilgi; menüleri de kurar.",
+  "tone": "light",
+  "credits": [
+    {
+      "file": "images/acilis-bileme.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Whetstone_Knife_Sharpening,_2015-(01).jpg",
+      "license": "CC BY 2.0, Didriks (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/acilis-indirim.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:A_classic_bowie_knife_-_7thdragon_knifeworks.jpg",
+      "license": "CC BY-SA 4.0, Bowiemaker (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/acilis-kamp.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Mora_knife_01.jpg",
+      "license": "Public domain, Wabajack (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/acilis-sef-bicaklari.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Chefs_knifes_on_a_wooden_cutting_board.jpg",
+      "license": "CC BY-SA 4.0, T. Bjornstad (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/bant-bicak-setleri.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Knivmagnet.jpg",
+      "license": "Public domain, Nillerdk (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/serit-av-bicagi.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Hand_Forged_Bowie_Knife.jpg",
+      "license": "CC BY-SA 4.0, Tiny Home Nomad (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/serit-cakilar.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Umnumzaan_Ofront.jpg",
+      "license": "CC BY-SA 3.0, Crk historian (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/serit-kiliclar.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Katana,_sword_(AM_1934.316-2).jpg",
+      "license": "CC BY 4.0, [Sada], Kane (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/serit-multitool.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Leatherman_sidekick-ausgeklappt.jpg",
+      "license": "CC BY 4.0, Riquix (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/serit-santoku.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:180mm_santoku_(top-down_view).jpg",
+      "license": "CC BY-SA 4.0, Benlisquare (küçültülüp WebP'ye çevrildi)"
+    }
+  ]
 }
