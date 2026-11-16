@@ -7809,6 +7809,10 @@
           "name": "Görsel bant",
           "description": "1–6 görsel; geniş ekranda yan yana. Her birinin başlığı, satırı ve bir ya da iki düğmesi olabilir."
         },
+        "strip_gallery": {
+          "name": "Çapraz şeritler",
+          "description": "2–8 görsel, eğik kesilmiş şeritler hâlinde yan yana; üstüne gelinen genişler. Her şerit bir ürün, kategori, koleksiyon, marka ya da kendi görseliniz olabilir; yazısını ve bağlantısını isterseniz kendiniz yazarsınız."
+        },
         "categories": {
           "name": "Kategoriler",
           "description": "Seçtiğiniz kategoriler; seçmezseniz ana kategorileriniz."
@@ -8318,7 +8322,10 @@
         "wellContrast": "Bu renk, sayfa zemininin bir ton koyusu olan alanlarda (bağlantıların ve çerçeveli düğmelerin durduğu kutular) yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin.",
         "marqueeLimit": "Aynı sayfada en çok {{max}} kayan yazı olabilir (üst bilgideki her sayfada sayılır); birini kaldırın.",
         "bandsOrder": "Üst sınırlar sırayla artmalı; sınırı olmayan bant yalnız en sonda olabilir.",
-        "bandsLimit": "Ana sayfada en çok {{max}} fiyat bandı bölümü olabilir (gizli olanlar da sayılır); birini kaldırın."
+        "bandsLimit": "Ana sayfada en çok {{max}} fiyat bandı bölümü olabilir (gizli olanlar da sayılır); birini kaldırın.",
+        "stripsTwo": "En az iki şerit ekleyin.",
+        "brandRequired": "Bir marka seçin.",
+        "imageRequired": "Bir görsel seçin."
       },
       "theme": {
         "title": "Tema ayarları",
@@ -8679,6 +8686,111 @@
           "dark": "Koyu yazı, açık görsel"
         },
         "toneHint": "Yazının arkasına görsele uygun bir gölge eklenir. Telefonda yazı görselin altında, koyu zeminde durur."
+      },
+      "stripGallery": {
+        "textHint": "İsteğe bağlı; başlığın altında kısa bir satır.",
+        "items": "Şeritler",
+        "itemsHint": "{{min}}–{{max}} şerit; soldan sağa bu sırayla dizilir. Düzenlemek için bir şeride tıklayın.",
+        "empty": "Henüz şerit yok. Bölüm en az {{min}} şeritle kaydedilir.",
+        "item": "{{number}}. şerit",
+        "noTitle": "Başlık yok",
+        "add": "Şerit ekle",
+        "full": "En çok {{max}} şerit eklenebilir.",
+        "editItem": "Şeridi düzenle",
+        "source": "Kaynak",
+        "kind": "Şeridin kaynağı",
+        "kindHint": "Boş bıraktığınız görsel, başlık, alt satır ve bağlantı seçtiğiniz kayıttan gelir. Kaynağı değiştirince kendi yazdıklarınız korunur.",
+        "kinds": {
+          "product": "Ürün",
+          "category": "Kategori",
+          "collection": "Koleksiyon",
+          "brand": "Marka",
+          "custom": "Serbest görsel"
+        },
+        "own": "Görsel ve yazılar",
+        "ownHint": "Hepsi isteğe bağlı; doldurduğunuz alan kaynağın bilgisinin yerine geçer.",
+        "image": "Görsel",
+        "imageHint": {
+          "product": "Boş bırakırsanız ürünün görseli kullanılır. Dikey ya da kare görseller şeride en iyi oturur.",
+          "category": "Boş bırakırsanız kategorinin görseli kullanılır. Dikey ya da kare görseller şeride en iyi oturur.",
+          "collection": "Boş bırakırsanız koleksiyonun görseli kullanılır. Dikey ya da kare görseller şeride en iyi oturur.",
+          "brand": "Boş bırakırsanız markanın görseli kullanılır. Dikey ya da kare görseller şeride en iyi oturur.",
+          "custom": "Zorunlu. Dikey ya da kare görseller şeride en iyi oturur."
+        },
+        "title": "Başlık",
+        "emptyAs": "Boşsa: {{value}}",
+        "titleHint": {
+          "product": "Boş bırakırsanız ürünün adı yazar.",
+          "category": "Boş bırakırsanız kategorinin adı yazar.",
+          "collection": "Boş bırakırsanız koleksiyonun adı yazar.",
+          "brand": "Boş bırakırsanız markanın adı yazar.",
+          "custom": "İsteğe bağlı; boş bırakırsanız şeritte başlık görünmez."
+        },
+        "note": "Alt satır",
+        "noteHint": {
+          "product": "Boş bırakırsanız ürünün fiyatı yazar.",
+          "category": "Boş bırakırsanız kategorideki ürün sayısı yazar.",
+          "collection": "İsteğe bağlı; boş bırakırsanız alt satır görünmez.",
+          "brand": "İsteğe bağlı; boş bırakırsanız alt satır görünmez.",
+          "custom": "İsteğe bağlı; boş bırakırsanız alt satır görünmez."
+        },
+        "link": "Bağlantı",
+        "linkHint": {
+          "product": "Boş bırakırsanız ürün sayfası açılır.",
+          "category": "Boş bırakırsanız kategori sayfası açılır.",
+          "collection": "Boş bırakırsanız koleksiyon sayfası açılır.",
+          "brand": "Boş bırakırsanız marka sayfası açılır.",
+          "custom": "İsteğe bağlı; boş bırakırsanız şerit bir yere gitmez."
+        },
+        "width": {
+          "label": "Genişlik",
+          "term": "width",
+          "hint": "Tam genişlikte şeritler ekranın bir ucundan öbürüne uzanır; kutulu olanlar sayfa genişliğinde, köşeleri yuvarlak durur.",
+          "full": "Tam genişlik",
+          "boxed": "Kutulu"
+        },
+        "height": {
+          "label": "Yükseklik",
+          "term": "height",
+          "hint": "Şeritlerin boyu; telefonda biraz kısalır.",
+          "low": "Alçak",
+          "medium": "Orta",
+          "high": "Yüksek"
+        },
+        "captions": {
+          "label": "Yazılar",
+          "term": "captions",
+          "hint": "Her şeridin altında başlığı ve alt satırı, ya da yalnız görseller.",
+          "on": "Göster",
+          "off": "Gizle"
+        },
+        "strips_slant": {
+          "label": "Eğim",
+          "term": "strips_slant",
+          "hint": "Şeritleri ayıran çizgilerin ne kadar yatık durduğu.",
+          "soft": "Hafif",
+          "medium": "Orta",
+          "steep": "Keskin"
+        },
+        "strips_line": {
+          "label": "Çizgi kalınlığı",
+          "term": "strips_line",
+          "hint": "Şeritlerin arasındaki boşluk. “Yok” seçilirse şeritler birbirine değer.",
+          "none": "Yok",
+          "thin": "İnce",
+          "medium": "Orta",
+          "thick": "Kalın"
+        },
+        "strips_overlap": {
+          "label": "Üst üste bindir",
+          "term": "strips_overlap",
+          "hint": "Her şerit bir öncekinin üstüne biner, kenarında ince bir gölge olur; fareyle üstüne gelinen en üste çıkar."
+        },
+        "strips_dim": {
+          "label": "Diğerlerini karart",
+          "term": "strips_dim",
+          "hint": "Geniş ekranda bir şeridin üstüne gelinince ya da klavyeyle seçilince diğer şeritler kararır."
+        }
       },
       "googleRating": {
         "excerpts": "Son yorumlardan alıntı göster",

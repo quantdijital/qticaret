@@ -13,6 +13,7 @@ import { PriceBandsForm } from "./forms/price-bands-form"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
+import { StripGalleryForm } from "./forms/strip-gallery-form"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { TrustBadgeList } from "./shared/trust-badge-list"
 
@@ -40,6 +41,8 @@ export function FormOf({
       return <HeroSliderForm section={section} {...props} />
     case "banner":
       return <BannerForm section={section} {...props} />
+    case "strip_gallery":
+      return <StripGalleryForm section={section} {...props} />
     case "categories":
       return <CategoriesForm section={section} {...props} />
     case "products":

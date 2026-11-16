@@ -37,7 +37,7 @@ const ONLY: Partial<Record<LookedType, readonly SectionLookField[]>> = {
  * Types with a width of their own (the band's "Kutulu / Tam", adr/0049 Ek
  * 2026-11-14 §3.3 E2): the look's width is not offered beside it.
  */
-const OWN_WIDTH: ReadonlySet<LookedType> = new Set(["banner"])
+const OWN_WIDTH: ReadonlySet<LookedType> = new Set(["banner", "strip_gallery"])
 
 /**
  * The space above and below a section, in their own open "Boşluk" group

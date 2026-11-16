@@ -6,6 +6,7 @@ import { BannerSettings } from "./banner-settings"
 import { FeaturedGroups } from "./featured-groups"
 import type { FieldGroupName } from "./field-registry"
 import { RelatedGroups } from "./related-groups"
+import { StripGalleryGroups } from "./strip-gallery-groups"
 
 /**
  * The open "Diziliş" group under a section's content, for the sections
@@ -30,6 +31,9 @@ export function SectionLayoutGroup({
   }
   if (section.type === "featured_product") {
     return <FeaturedGroups section={section} reveal={reveal} onChange={onChange} />
+  }
+  if (section.type === "strip_gallery") {
+    return <StripGalleryGroups section={section} reveal={reveal} onChange={onChange} />
   }
   if (section.type !== "banner") {
     return null

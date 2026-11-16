@@ -20,6 +20,7 @@ import type { PaginationView } from "./listing-views"
 import type { MarqueeSectionView } from "./marquee-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ProductsSectionView } from "./shelf-views"
+import type { StripGallerySectionView } from "./strip-views"
 import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
 
 /**
@@ -91,6 +92,7 @@ export type HomeSectionView = {
   | GoogleRatingSectionView
   | MarqueeSectionView
   | BannerSectionView
+  | StripGallerySectionView
   | {
       id: string
       type: "categories"

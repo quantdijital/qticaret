@@ -21,6 +21,7 @@
     "./section-footer": "./src/store/section-footer.ts",
     "./section-scroller": "./src/store/section-scroller.ts",
     "./section-shelf": "./src/store/section-shelf.ts",
+    "./section-strips": "./src/store/section-strips.ts",
     "./editor-bridge": "./src/editor-bridge.ts",
     "./control-plane": {
       "qt-compiled": "./dist/control-plane/index.js",

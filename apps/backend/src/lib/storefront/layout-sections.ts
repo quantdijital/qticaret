@@ -17,6 +17,7 @@ import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
 import { richText } from "./sections/rich-text"
 import { priceBands } from "./sections/price-bands"
+import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
 import { footerNewsletter, worded } from "./sections/worded"
 
@@ -61,6 +62,7 @@ export const pageSection = z.discriminatedUnion(
     faq,
     marquee,
     priceBands,
+    stripGallery,
   ],
   SECTION_TYPE
 )

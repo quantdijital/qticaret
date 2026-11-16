@@ -29,6 +29,7 @@ import { Shelf } from "./Shelf"
 import { Signup } from "./Signup"
 import { Spotlight } from "./Spotlight"
 import { Story } from "./Story"
+import { StripGallery } from "./StripGallery"
 
 export type Subscribe = (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
 
@@ -146,6 +147,8 @@ function BlockView({
     }
     case "banner":
       return <Campaign section={section} label={t("home.banner")} first={first} />
+    case "strip_gallery":
+      return <StripGallery section={section} t={t} first={first} />
     case "featured_product":
       return <Spotlight section={section} t={t} quickAdd={quickAdd} />
     case "reviews":
