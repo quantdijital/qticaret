@@ -11,8 +11,9 @@ import { CategoryMenu } from "./CategoryMenu"
 import { HeaderCatalogStrip } from "./HeaderCatalogStrip"
 import { HeaderCatalogTools } from "./HeaderCatalogTools"
 import { MenuSheet } from "./MenuSheet"
-import { PhoneSearch } from "./PhoneSearch"
 import { SearchBox } from "./SearchBox"
+import { SearchDrop } from "./SearchDrop"
+import { SearchDropOpener } from "./SearchDropOpener"
 import { SearchToggle } from "./SearchToggle"
 import { Wordmark } from "./Wordmark"
 import { LABELLED, accountOf, allInOf, searchOf } from "./header-words"
@@ -55,17 +56,16 @@ const NARROW_SEARCH = "lg:[&>[role=search]]:max-w-140"
  * account, favourites and the cart with its count (and subtotal, when the
  * shop asks). Sticky, the strip folds away while the page scrolls down
  * (`ScrollCue`, `data-gf-strip`); the search and the menu bar stay. A
- * phone keeps the standard header's rows: the menu, the wordmark,
- * favourites and the cart over the search pill (`data-gf-head-row` folds).
+ * phone keeps the standard header's row: the menu, the wordmark,
+ * favourites and the cart (`data-gf-head-row` folds), the search dropping
+ * from the top on the bottom bar's "Ara" (`SearchDrop`, as every header).
  *
  * Its layout choices (Ek 2026-11-15; each default the drawing above):
  * the tools named in the top row after the phone (`toolsPlace: row`,
  * `HeaderCatalogTools`), the top links quiet at the menu bar's end
  * (`topLinksPlace: bar`, `Aisle`'s `links`), the search 35 rem
  * (`searchWidth: narrow`). Every header's `searchStyle: icon` puts a
- * magnifier before the phone that opens the box as wide (`SearchToggle`);
- * a phone's search is this header's pill under the row in every variant
- * (`PhoneSearch`, owner 2026-11-16).
+ * magnifier before the phone that opens the box as wide (`SearchToggle`).
  */
 export function HeaderCatalog({
   shop,
@@ -182,6 +182,8 @@ export function HeaderCatalog({
             <span className="tabular text-lg font-extrabold">{shop.contact.phone}</span>
           </a>
         )}
+        {/* The editor's preview draws no bottom bar: a phone's way into the dropping search there */}
+        {shop.editor && <SearchDropOpener label={t("search.open")} className={LABELLED} />}
         {row ? (
           <HeaderCatalogTools
             account={account}
@@ -199,7 +201,7 @@ export function HeaderCatalog({
           </nav>
         )}
       </Container>
-      <PhoneSearch {...box} />
+      <SearchDrop {...box} title={t("search.title")} closeLabel={t("search.close")} />
       <div className="gf-menubar hidden lg:block" data-ground={catalog.menuGround}>
         <Container>
           <div className="relative flex min-h-13 items-center gap-2 py-1">

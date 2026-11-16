@@ -93,8 +93,9 @@ describe("the theme's live search", () => {
       saveCookies: () => Promise.resolve(),
       searchSuggest: "/api/search/suggest",
     })
-    expect(html.match(/action="\/arama"/g)).toHaveLength(2)
-    expect(html.match(/type="search"/g)).toHaveLength(2)
+    // One: the wide screen's; a phone's drops from the bottom bar's "Ara" (owner 2026-11-16)
+    expect(html.match(/action="\/arama"/g)).toHaveLength(1)
+    expect(html.match(/type="search"/g)).toHaveLength(1)
     expect(html).not.toContain('role="combobox"')
     expect(html).not.toContain("Aramayı temizle")
     expect(html).not.toContain('role="listbox"')

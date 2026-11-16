@@ -9176,7 +9176,7 @@
         "search_style": {
           "label": "Arama görünümü",
           "term": "search",
-          "hint": "Simge: geniş ekranda büyüteç, basınca arama kutusu açılır. Telefonda arama kutusu her üst bilgide satırın altında durur.",
+          "hint": "Simge: geniş ekranda büyüteç, basınca arama kutusu açılır. Telefonda hiçbir üst bilgide kutu durmaz; alt menüdeki “Ara” aramayı yukarıdan açar.",
           "field": "Kutu",
           "icon": "Simge, basınca açılır"
         },
