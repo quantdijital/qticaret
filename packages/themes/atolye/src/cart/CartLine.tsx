@@ -86,6 +86,7 @@ export function CartLine({
       total={line.total}
       original={line.original}
       before={t("price.before")}
+      note={line.taxNote}
       large
       className="ml-auto"
     />

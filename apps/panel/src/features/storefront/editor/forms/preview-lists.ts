@@ -21,7 +21,7 @@ export function placeOf(part: string | undefined, length: number): number | null
 }
 
 /** A row's field: `<list>.<place>.<field>` with a place the list has and a field it shows. */
-function row(
+export function row(
   parts: readonly string[],
   list: string,
   length: number,
@@ -68,6 +68,9 @@ export function listField(
 
 /** A band slide's fields the theme marks (`Campaign`). */
 const BANNER_PARTS: readonly string[] = ["heading", "text", "image", "link", "second_link"]
+
+/** A strip gallery strip's fields the theme marks (`StripGallery`); its dialog opens at them. */
+export const STRIP_PARTS: readonly string[] = ["title", "note", "image"]
 
 /**
  * A shelf's pill naming a rail beside it (`tabs.<place>.<count>`, the

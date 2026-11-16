@@ -1,4 +1,5 @@
 import type { LineAddonView } from "./addon-views"
+import type { TaxLinesView } from "./cart-views"
 import type { BreadcrumbView, ImageView, LinkView } from "./views"
 
 /**
@@ -80,6 +81,7 @@ export interface CheckoutLineView {
   title: string
   detail: string | null
   quantity: number
+  /** KDV included; without it when the summary carries `tax` (a wholesaler's, ADR-0068 §5). */
   total: string
   image: ImageView | null
   /** The product's page with the line's variant chosen; null or absent: plain text (as the cart's). */
@@ -97,6 +99,12 @@ export interface CheckoutSummaryView {
   /** Null until a shipping method is chosen. */
   shipping: string | null
   total: string
+  /**
+   * A wholesaler's basket (ADR-0068 §5): the lines and items without KDV
+   * (the discount too), the KDV on the items as a line of its own; the
+   * shipping and the total as they are. Absent for every other shopper.
+   */
+  tax?: TaxLinesView | null
 }
 
 export type CheckoutStep = "address" | "shipping" | "payment"

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+import { currentWholesale } from "@/lib/account/wholesale"
 import { checkoutCart } from "@/lib/checkout/cart"
 import { sessionCurrent } from "@/lib/checkout/pay"
 import { paymentFrame } from "@/lib/checkout/payment-cookie"
@@ -25,10 +26,12 @@ export default async function CardPage() {
   if (!frame || !cart) {
     redirect("/odeme")
   }
-  const [current, paths, pictures] = await Promise.all([
+  const [current, paths, pictures, wholesale] = await Promise.all([
     sessionCurrent(cart.id, frame.session),
     productPathsOf(cart.items),
     linePicturesOf(cart.items),
+    // A wholesaler's basket is without KDV, the KDV a line of its own (ADR-0068 §5)
+    currentWholesale(),
   ])
   if (!current) {
     redirect("/odeme?hata=payments.cart_changed")
@@ -38,7 +41,7 @@ export default async function CardPage() {
       t={t}
       view={{
         frameUrl: frame.url,
-        summary: summaryOf(cart, t, paths, pictures),
+        summary: summaryOf(cart, t, paths, pictures, wholesale.active && wholesale.vatExclusive),
         backPath: "/odeme",
       }}
     />

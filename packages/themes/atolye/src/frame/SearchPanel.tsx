@@ -239,6 +239,9 @@ export function SearchPanel({
                           {product.price.before}
                         </s>
                       )}
+                      {product.price.taxNote && (
+                        <span className="text-xs text-text-2">{product.price.taxNote}</span>
+                      )}
                     </span>
                   )}
                 </span>

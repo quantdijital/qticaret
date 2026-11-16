@@ -4,6 +4,7 @@ import { headers } from "next/headers"
 import type { ContactView, ShopView, Translate } from "@qticaret/ui"
 import type { LegalIdentity, StoreLayout } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
+import { RETAIL, currentWholesale } from "@/lib/account/wholesale"
 import { headerCart } from "@/lib/cart/cart"
 import { cookieConsent, onCookiePreferencesPage } from "@/lib/legal/cookies"
 import { t } from "@/lib/i18n"
@@ -99,13 +100,15 @@ export async function shopView(): Promise<ShopView> {
     categoryCounts(),
   ])
   // The drawer's lines link to their products' pages (gone or hidden ones read as text)
-  const [paths, linePaths, linePictures] = await Promise.all([
+  // A wholesaler's drawer is without KDV (ADR-0068 §5); asked only with lines to show
+  const [paths, linePaths, linePictures, wholesale] = await Promise.all([
     pathsOf(
       "product_category",
       categories.map((category) => category.id)
     ),
     productPathsOf(cart?.items ?? []),
     linePicturesOf(cart?.items ?? []),
+    customer && (cart?.items.length ?? 0) > 0 ? currentWholesale() : RETAIL,
   ])
   // The shop's own menu when it made one (adr/0049), else its top categories; pictures on both
   // Each top entry without the shop's own picture shows its newest product's photo;
@@ -140,7 +143,14 @@ export async function shopView(): Promise<ShopView> {
       : null,
     categories: menu,
     cartQuantity: (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0),
-    cart: miniCartOf(cart, free_shipping_threshold, t, linePaths, linePictures),
+    cart: miniCartOf(
+      cart,
+      free_shipping_threshold,
+      t,
+      linePaths,
+      linePictures,
+      wholesale.active && wholesale.vatExclusive
+    ),
     // The header's and footer's sections from the design (adr/0049)
     announcements: layout.header.flatMap((section) =>
       section.type === "announcement_bar" ? section.lines : []

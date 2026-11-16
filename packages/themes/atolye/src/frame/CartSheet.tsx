@@ -134,7 +134,7 @@ export function CartSheetBody({
           <span className="font-semibold">{words.subtotal}</span>
           <span className="tabular text-lg font-extrabold">{cart.subtotal}</span>
         </p>
-        <p className="text-xs text-text-3">{words.note}</p>
+        <p className="text-xs text-text-3">{cart.taxNote ?? words.note}</p>
         <a href="/odeme" className="gf-btn w-full">
           {words.checkout}
         </a>

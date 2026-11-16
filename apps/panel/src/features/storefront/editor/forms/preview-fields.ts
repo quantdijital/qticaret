@@ -2,7 +2,7 @@ import type { AnySection, HeroSection, ProductsSection } from "@/features/storef
 import { slidesOf } from "./catalog-slides"
 import { HEADER_CATALOG_GROUPS } from "./field-registry"
 import type { FieldGroupName } from "./field-registry"
-import { listField, placeOf, tabRail } from "./preview-lists"
+import { STRIP_PARTS, listField, placeOf, row, tabRail } from "./preview-lists"
 
 /**
  * The fields the live preview can point at (adr/0065 §9, Faz 2b): the
@@ -59,6 +59,7 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
   "price_bands",
   "related_products",
   "featured_product",
+  "strip_gallery",
   "rich_text",
   "faq",
   "newsletter",
@@ -66,7 +67,12 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
 ])
 
 /** The sections whose one line of text the theme marks (`text`). */
-const TEXTED: ReadonlySet<AnySection["type"]> = new Set(["featured_product", "newsletter", "help"])
+const TEXTED: ReadonlySet<AnySection["type"]> = new Set([
+  "featured_product",
+  "strip_gallery",
+  "newsletter",
+  "help",
+])
 
 /** The catalog header's fields the theme marks: its search box's words, its highlighted link, its strip's note. */
 const HEADER_FIELDS: readonly string[] = ["search_placeholder", "highlight_link", "strip_note"]
@@ -164,6 +170,14 @@ export function previewField(
     return part !== null && slide !== null
       ? { ...content(PREVIEW_IDS.heroSlide(slide, part)), slide }
       : null
+  }
+  if (section.type === "strip_gallery" && first === "items") {
+    // A strip's words and picture: its dialog opens at the field
+    const field = row(parts, "items", section.items.length, STRIP_PARTS)
+    const strip = placeOf(second, section.items.length)
+    return field === null || strip === null
+      ? null
+      : { ...content(PREVIEW_IDS.text(section.id, field)), slide: strip }
   }
   if (section.type === "announcement_bar") {
     const line =

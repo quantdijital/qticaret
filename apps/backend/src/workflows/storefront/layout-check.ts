@@ -7,6 +7,7 @@ import { bannerImages, bannerLinks } from "../../lib/storefront/sections/banner"
 import { catalogSlides } from "../../lib/storefront/sections/hero"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
 import { shelfSources } from "../../lib/storefront/sections/products"
+import { stripGalleryImages, stripRecord } from "../../lib/storefront/sections/strip-gallery"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
@@ -42,6 +43,9 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "products") {
     return section.more ? [section.more] : []
   }
+  if (section.type === "strip_gallery") {
+    return section.items.flatMap((each) => (each.link ? [each.link] : []))
+  }
   // The catalog header's highlighted last link and its strip's note (adr/0049 Ek 2026-11-15)
   if (section.type === "header_bar" && section.variant === "catalog") {
     return [section.highlight_link, section.strip_note_link].flatMap((link) => (link ? [link] : []))
@@ -60,7 +64,7 @@ export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection
   )
 
 /** Every record a section names by id, as a link would point at it. */
-function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {
+export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {
   const as = (kind: MenuLinkKind) => (target: string) => ({ kind, target })
   if (section.type === "categories") {
     return section.category_ids.map(as("category"))
@@ -86,6 +90,13 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
   }
   if (section.type === "featured_product") {
     return [as("product")(section.product_id)]
+  }
+  // A strip's source: it exists when saved (a draft one counts), as a link's record
+  if (section.type === "strip_gallery") {
+    return section.items.flatMap((each) => {
+      const record = stripRecord(each)
+      return record ? [as(record.kind)(record.target)] : []
+    })
   }
   // A rail's or a product page's related products: their category, collection or choice
   // (each of a columns rail's lists too)
@@ -122,6 +133,9 @@ export function imagesOf(section: BodySection): string[] {
   }
   if (section.type === "banner") {
     return bannerImages(section)
+  }
+  if (section.type === "strip_gallery") {
+    return stripGalleryImages(section)
   }
   if (section.type === "rich_text") {
     return docStats(section.body).images.map((each) => each.src)

@@ -29,6 +29,7 @@ import {
 } from "./section-data"
 import { relatedView } from "./related"
 import { shelfView } from "./shelf"
+import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
 
 export type { ProductContext } from "./section-data"
@@ -200,6 +201,8 @@ async function sectionView(
     }
     case "marquee":
       return marqueeView(section, t)
+    case "strip_gallery":
+      return stripGalleryView(section, t)
     case "help": {
       const contact = contactOf(await legalIdentity(), t)
       const reachable = Boolean(contact.whatsappHref ?? contact.phone ?? contact.email)

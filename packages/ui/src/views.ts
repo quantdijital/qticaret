@@ -45,6 +45,12 @@ export interface PriceView {
    * beside the price, never instead of it. None: no such offer.
    */
   cartOffer?: string | null
+  /**
+   * A signed-in wholesaler's note beside a price without KDV ("Toptan
+   * fiyat · KDV hariç", ADR-0068 §5–§7): `current` is then without KDV.
+   * Absent for every other shopper, whose price includes it.
+   */
+  taxNote?: string | null
 }
 
 export interface LinkView {
@@ -110,6 +116,12 @@ export interface MiniCartView {
   freeShipping: FreeShippingView | null
   /** A payment link's cart (adr/0051): its lines are fixed; the note, in words. */
   locked?: string | null
+  /**
+   * A wholesaler's drawer (ADR-0068 §5): the lines and the subtotal are
+   * without KDV and this says so, in place of the drawer's usual note.
+   * Absent for every other shopper.
+   */
+  taxNote?: string | null
 }
 
 /** Everything the frame around every page shows (D3, docs/19 §4). */

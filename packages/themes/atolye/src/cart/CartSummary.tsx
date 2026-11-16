@@ -33,7 +33,9 @@ function Row({
  * on a desktop: the codes (a coupon; a gift card while the shop sells
  * them), items, discount, gift card, shipping as the backend prices it
  * before an address, the subtotal large, then "Ödemeye geç" (on a phone
- * the sticky bar holds it) and the shop's promises under the well.
+ * the sticky bar holds it) and the shop's promises under the well. A
+ * wholesaler's (ADR-0068 §5): the items without KDV, the KDV as its own
+ * row, a note under the subtotal.
  */
 export function CartSummary({
   view,
@@ -79,8 +81,13 @@ export function CartSummary({
           />
         )}
         <dl className="flex flex-col gap-3 text-md">
-          <Row term={t("cart.items")} value={view.items} />
+          {view.tax ? (
+            <Row term={t("cart.items_net")} value={view.tax.items} />
+          ) : (
+            <Row term={t("cart.items")} value={view.items} />
+          )}
           {view.discount && <Row term={t("cart.discount")} value={`−${view.discount}`} deal />}
+          {view.tax && <Row term={t("cart.vat")} value={view.tax.vat} />}
           {view.credit && <Row term={t("cart.gift_card_credit")} value={`−${view.credit}`} deal />}
           <Row
             term={t("cart.shipping")}
@@ -88,10 +95,13 @@ export function CartSummary({
             quiet={!view.shipping}
           />
           <div className="mt-2 flex items-baseline justify-between gap-4 rounded-media gf-shape bg-paper p-4">
-            <dt className="font-semibold">{t("cart.subtotal")}</dt>
+            <dt className="font-semibold">
+              {t(view.tax ? "cart.subtotal_with_vat" : "cart.subtotal")}
+            </dt>
             <dd className="tabular text-title font-extrabold">{view.subtotal}</dd>
           </div>
         </dl>
+        {view.tax && <p className="text-sm text-text-2">{view.tax.note}</p>}
         <div className="flex flex-col gap-3 max-lg:hidden">
           <a href="/odeme" className="gf-btn w-full">
             {t("cart.checkout")}

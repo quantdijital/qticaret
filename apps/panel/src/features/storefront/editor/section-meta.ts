@@ -5,6 +5,7 @@ import {
   BookOpen,
   Boxes,
   CircleHelp,
+  Columns3,
   GalleryHorizontal,
   GalleryHorizontalEnd,
   LayoutGrid,
@@ -35,6 +36,7 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   hero: PanelTop,
   hero_slider: GalleryHorizontalEnd,
   banner: GalleryHorizontal,
+  strip_gallery: Columns3,
   categories: LayoutGrid,
   products: ShoppingBag,
   featured_product: ScanSearch,
@@ -82,6 +84,7 @@ function ownTitle(section: AnySection): string | null {
     case "newsletter":
     case "help":
     case "price_bands":
+    case "strip_gallery":
       return section.title
     case "announcement_bar":
       return section.lines.find((line) => line.trim() !== "") ?? null

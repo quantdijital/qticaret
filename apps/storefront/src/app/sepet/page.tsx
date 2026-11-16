@@ -23,7 +23,9 @@ import {
   withAddonForms,
   withGiftLines,
 } from "@/lib/views/cart"
+import { netDiscountOf, netTotalsOf, taxLinesOf } from "@/lib/views/cart-tax"
 import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
+import { currentWholesale } from "@/lib/account/wholesale"
 import { theme } from "@/theme"
 
 // docs/13 §7: the cart is noindex,nofollow (backend `system_pages`)
@@ -53,13 +55,16 @@ export default async function CartPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const [cart, query, settings, shared] = await Promise.all([
+  const [cart, query, settings, shared, wholesale] = await Promise.all([
     currentCart(),
     searchParams,
     storefrontSettings(),
     // The design's badges (adr/0049 Ek 2026-11-06)
     currentShared(),
+    // A wholesaler's cart is shown without KDV, the KDV a line of its own (ADR-0068 §5)
+    currentWholesale(),
   ])
+  const net = cart && wholesale.active && wholesale.vatExclusive ? netTotalsOf(cart) : null
   const asked = typeof query["hata"] === "string" ? query["hata"] : null
   // A line sold out since it was added (adr/0026 Ek 2026-11-06): named as the shelf stands now
   const error =
@@ -89,7 +94,7 @@ export default async function CartPage({
   const giftLines = new Set(gifts.map((gift) => gift.line_id))
   const lines = withGiftLines(
     withAddonForms(
-      cartLinesOf(cart, paths, pictures),
+      cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
       cart ? { ...cart, items: cart.items.filter((line) => !giftLines.has(line.id)) } : null,
       addons,
       t
@@ -111,8 +116,13 @@ export default async function CartPage({
         view={{
           lines,
           items: formatLira(items),
-          discount: differs(items, subtotal) ? formatLira(items - subtotal) : null,
+          discount: net
+            ? netDiscountOf(net)
+            : differs(items, subtotal)
+              ? formatLira(items - subtotal)
+              : null,
           subtotal: formatLira(subtotal),
+          ...(net ? { tax: taxLinesOf(net, t("cart.wholesale_note")) } : {}),
           // A link's code is the link's own, never shown to copy
           promotions: locked ? [] : codesOf(cart),
           giftCards:

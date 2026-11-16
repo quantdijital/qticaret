@@ -69,6 +69,7 @@ export function BuyBar({
                   {price.before}
                 </s>
               )}
+              {price.taxNote && <span className="text-xs text-text-2">{price.taxNote}</span>}
             </p>
           )}
         </div>

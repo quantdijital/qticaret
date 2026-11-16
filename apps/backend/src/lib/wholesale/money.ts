@@ -55,3 +55,19 @@ export function netOfGross(gross: Kurus, vat: number): Kurus {
   checkVat(vat)
   return prorateKurus(gross, BPS_PER_WHOLE, BPS_PER_WHOLE + vat)
 }
+
+/**
+ * A price Medusa calculated, as the wholesaler is shown it (ADR-0068 §5):
+ * without KDV and with it. A KDV-included price (the shop's, adr/0007)
+ * gives its net by `netOfGross`, so a hand-entered net price comes back to
+ * the kuruş it was entered as; a price without KDV gives its gross.
+ */
+export function shownWholesale(
+  amount: Kurus,
+  taxInclusive: boolean,
+  vat: number
+): { net: Kurus; gross: Kurus } {
+  return taxInclusive
+    ? { net: netOfGross(amount, vat), gross: amount }
+    : { net: amount, gross: grossOfNet(amount, vat) }
+}

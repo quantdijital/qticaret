@@ -1,4 +1,4 @@
-import { FEATURED_PRODUCT_SETTINGS } from "@qticaret/types"
+import { FEATURED_PRODUCT_SETTINGS, STRIP_GALLERY_SETTINGS } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
 import { scrollerFields, sliderFields } from "./shelf-registry"
@@ -29,14 +29,17 @@ export type ContentField =
   | "thumbs_count"
   | "slider_height"
   | "slides"
-  | "open_first"
-  | "single_open"
-  | "gallery"
-  | "strips_layout"
+  | "width"
+  | "height"
+  | "captions"
   | "strips_slant"
   | "strips_line"
   | "strips_overlap"
   | "strips_dim"
+  | "open_first"
+  | "single_open"
+  | "gallery"
+  | "strips_layout"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -65,6 +68,27 @@ const entry = (
   options,
   target: CONTENT_IDS.content(section.id, field),
 })
+
+/** The strip gallery's settings, open in "Diziliş" (`strip-gallery-groups.tsx`): five steps, two switches. */
+function stripGalleryFields(section: AnySection): RegistryField[] {
+  const G = `${E}.stripGallery`
+  return (Object.keys(STRIP_GALLERY_SETTINGS) as (keyof typeof STRIP_GALLERY_SETTINGS)[]).map(
+    (name) => {
+      const switched = name === "strips_overlap" || name === "strips_dim"
+      const steps: readonly string[] = STRIP_GALLERY_SETTINGS[name]
+      return {
+        ...entry(
+          section,
+          name,
+          `${G}.${name}.label`,
+          switched ? [] : steps.map((step) => `${G}.${name}.${step}`),
+          "layout"
+        ),
+        term: `${G}.${name}.term`,
+      }
+    }
+  )
+}
 
 /** The featured product's strips' look (`featured-groups.tsx`): three steps, two switches. */
 function stripsFields(section: AnySection): RegistryField[] {
@@ -167,6 +191,8 @@ export function contentFields(section: AnySection): RegistryField[] {
         ),
         ...(section.gallery === "strips" ? stripsFields(section) : []),
       ]
+    case "strip_gallery":
+      return stripGalleryFields(section)
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":

@@ -19,6 +19,8 @@ export interface CartLine {
   total: number
   /** Before discounts, KDV included. */
   original_total: number
+  /** The KDV in `total` (Medusa's): a wholesaler's line is shown without it (ADR-0068 §5). */
+  tax_total?: number | null
   product_id?: string | null
   /** The line's variant, for its price display's cart offer (adr/0046 Ek 2026-11-05). */
   variant_id?: string | null
@@ -32,6 +34,9 @@ export interface Cart {
   /** Items before discounts and after, KDV included (Medusa's cart totals). */
   original_item_total: number
   item_total: number
+  /** Items before discounts without KDV, and the KDV on them after (Medusa's; ADR-0068 §5). */
+  item_subtotal?: number | null
+  item_tax_total?: number | null
   total: number
   completed_at: string | null
   items: CartLine[]
@@ -52,6 +57,8 @@ const CART_FIELDS = [
   "currency_code",
   "original_item_total",
   "item_total",
+  "item_subtotal",
+  "item_tax_total",
   "total",
   "completed_at",
   "metadata",
@@ -64,6 +71,7 @@ const CART_FIELDS = [
   "items.unit_price",
   "items.total",
   "items.original_total",
+  "items.tax_total",
   "items.product_id",
   "items.variant_id",
   "items.metadata",
