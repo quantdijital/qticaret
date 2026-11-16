@@ -21,7 +21,14 @@ const product = (id: string): ProductCardView => ({
   id,
   title: `Ürün ${id}`,
   path: `/urun/${id}`,
-  image: { src: `/media/${id}.jpg`, alt: id, width: 800, height: 1000, sources: {} },
+  brand: null,
+  image: {
+    src: `/media/${id}.jpg`,
+    alt: id,
+    width: 800,
+    height: 1000,
+    sources: { avif: null, webp: null },
+  },
   price: { current: "100,00 TL", before: null, from: false, discount: null },
   available: true,
 })
