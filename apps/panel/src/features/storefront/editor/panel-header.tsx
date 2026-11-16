@@ -164,7 +164,7 @@ export function PanelGroup({
   return (
     <div
       role="group"
-      aria-labelledby={`${id}-title`}
+      aria-labelledby={`${id}-name`}
       data-panel-group={layout ? key : (name ?? "")}
       hidden={!shown}
       className="border-b last:border-b-0"
@@ -172,7 +172,9 @@ export function PanelGroup({
       {lone ? (
         // Alone in its tab: nothing to fold, its name kept for the screen reader and the search
         <h3 id={`${id}-title`} className="sr-only">
-          <span data-panel-group-title>{title}</span>
+          <span id={`${id}-name`} data-panel-group-title>
+            {title}
+          </span>
         </h3>
       ) : (
         <h3
@@ -199,7 +201,7 @@ export function PanelGroup({
             className={hint ? STRETCHED : WHOLE_ROW}
           >
             <span className="flex min-w-0 items-center gap-2">
-              <span data-panel-group-title className="truncate">
+              <span id={`${id}-name`} data-panel-group-title className="truncate">
                 {title}
               </span>
               {count > 0 ? (

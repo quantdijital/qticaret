@@ -74,6 +74,8 @@ describe("the section forms", HEAVY, () => {
     expect(await open("Giriş")).toHaveTextContent("Giriş")
 
     await user.type(screen.getByRole("textbox", { name: "Başlık" }), "Yeni sezon")
+    // The buttons stand in their own group, closed under "İçerik"
+    await openGroup(user, "Düğmeler")
     await user.click(screen.getByRole("button", { name: "Düğme ekle" }))
     const picker = await screen.findByRole("dialog", { name: "Bağlantı ekle" })
     await user.click(within(picker).getByRole("tab", { name: "Mağaza sayfası" }))

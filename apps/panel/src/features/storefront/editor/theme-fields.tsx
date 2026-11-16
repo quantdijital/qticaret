@@ -142,6 +142,11 @@ interface ChoiceSelectProps<T extends string> {
   render: (option: T) => ReactNode
   /** What the choice changes on the storefront, and what to know about the chosen one. */
   hint?: string | undefined
+  /**
+   * What to know about the chosen option, shown under it rather than in
+   * the (i): a warning the shop owner acts on now (docs/18 §7.1).
+   */
+  note?: string | undefined
   /** Options shown but not offered (not drawn by the theme yet). */
   unavailable?: ReadonlySet<T> | undefined
 }
@@ -156,8 +161,10 @@ export function ChoiceSelect<T extends string>({
   onChange,
   render,
   hint,
+  note,
   unavailable,
 }: ChoiceSelectProps<T>) {
+  const noteId = `${id}-note`
   return (
     <Field label={label} term={term} htmlFor={id} hint={hint}>
       <Select
@@ -166,7 +173,7 @@ export function ChoiceSelect<T extends string>({
           onChange(next as T)
         }}
       >
-        <SelectTrigger id={id} className="w-full">
+        <SelectTrigger id={id} aria-describedby={note ? noteId : undefined} className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -177,42 +184,67 @@ export function ChoiceSelect<T extends string>({
           ))}
         </SelectContent>
       </Select>
+      {note ? (
+        <p id={noteId} className="text-xs text-muted-foreground">
+          {note}
+        </p>
+      ) : null}
     </Field>
   )
 }
 
-/** A yes-or-no choice with what it does; a technical term, when given, small beside its name. */
+/**
+ * A yes-or-no choice with what it does in its (i); a technical term, when
+ * given, small beside its name. `note` is what the switch does here and
+ * now (the rails it joins), shown under its name rather than in the (i).
+ */
 export function SwitchRow({
   id,
   label,
   term,
   hint,
+  note,
   checked,
   onChange,
 }: {
   id: string
   label: string
   term?: string | undefined
-  hint: string
+  hint?: string | undefined
+  note?: string | undefined
   checked: boolean
   onChange: (checked: boolean) => void
 }) {
   const hintId = `${id}-hint`
+  const noteId = `${id}-note`
+  const described = [hint ? hintId : null, note ? noteId : null].filter(Boolean).join(" ")
   return (
     <div className="flex items-start justify-between gap-4">
-      <HintedName name={label} hint={hint} hintId={hintId}>
-        <label htmlFor={id} className="text-sm">
-          {label}
-          {term ? (
-            <>
-              {" "}
-              <small className="text-[11px] text-muted-foreground">{term}</small>
-            </>
-          ) : null}
-        </label>
-      </HintedName>
-      <HiddenHint id={hintId}>{hint}</HiddenHint>
-      <Switch id={id} aria-describedby={hintId} checked={checked} onCheckedChange={onChange} />
+      <div className="flex min-w-0 flex-col gap-1">
+        <HintedName name={label} hint={hint} hintId={hintId}>
+          <label htmlFor={id} className="text-sm">
+            {label}
+            {term ? (
+              <>
+                {" "}
+                <small className="text-[11px] text-muted-foreground">{term}</small>
+              </>
+            ) : null}
+          </label>
+        </HintedName>
+        {note ? (
+          <p id={noteId} className="text-xs text-muted-foreground">
+            {note}
+          </p>
+        ) : null}
+      </div>
+      {hint ? <HiddenHint id={hintId}>{hint}</HiddenHint> : null}
+      <Switch
+        id={id}
+        aria-describedby={described || undefined}
+        checked={checked}
+        onCheckedChange={onChange}
+      />
     </div>
   )
 }

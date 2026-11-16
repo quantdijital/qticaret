@@ -8177,6 +8177,16 @@
           "marked": "some settings are off their defaults"
         },
         "groups": {
+          "buttons": "Buttons",
+          "categoryList": "Category list",
+          "tiles": "Tiles beside it",
+          "chips": "Quick links",
+          "picks": "Small products",
+          "cards": "Cards",
+          "thumbs": "Product pictures",
+          "opening": "How the questions open",
+          "options": "Options",
+          "backToTop": "Back to top button",
           "search": "Search",
           "topBar": "Top strip",
           "menu": "Menu bar",

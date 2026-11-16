@@ -190,14 +190,16 @@ describe("the catalog header's groups", () => {
     expect(toggle(/^Simgeler ve iletişim/)).not.toHaveAccessibleName(/farklı/)
   })
 
-  it("takes a field picked in the preview to its group: the search box's words in Arama", () => {
+  it("takes a field picked in the preview to its group: the strip's note in Üst şerit", () => {
     const { pick } = renderPanel(catalog, "header")
-    expect(toggle(/^Arama/)).toHaveAttribute("aria-expanded", "false")
-    const target = FIELD_IDS.header(catalog.id, "search_placeholder")
-    act(() => {
-      pick({ target, group: "search", nonce: 1 })
-    })
+    // "İçerik" opens at its first group, the search; the strip stands closed
     expect(toggle(/^Arama/)).toHaveAttribute("aria-expanded", "true")
+    expect(toggle(/^Üst şerit/)).toHaveAttribute("aria-expanded", "false")
+    const target = FIELD_IDS.header(catalog.id, "strip_note")
+    act(() => {
+      pick({ target, group: "topBar", nonce: 1 })
+    })
+    expect(toggle(/^Üst şerit/)).toHaveAttribute("aria-expanded", "true")
     expect(document.getElementById(target)).toHaveFocus()
   })
 })

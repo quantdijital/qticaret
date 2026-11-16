@@ -142,9 +142,9 @@ export function contentFields(section: AnySection): RegistryField[] {
       return section.variant === "category_list"
         ? [
             entry(section, "slides", `${C}.slides`),
-            entry(section, "list_limit", `${C}.listLimit`),
-            entry(section, "show_count", `${C}.showCount`),
-            entry(section, "show_price", `${C}.showPrice`),
+            entry(section, "list_limit", `${C}.listLimit`, [], "categoryList"),
+            entry(section, "show_count", `${C}.showCount`, [], "categoryList"),
+            entry(section, "show_price", `${C}.showPrice`, [], "picks"),
             // Two or more slides turn on the slider's settings (adr/0049 Ek 2026-11-15)
             ...(turnsAsSlider(section)
               ? sliderFields(section.id, section, kitDefaultsOf(section))
@@ -159,8 +159,10 @@ export function contentFields(section: AnySection): RegistryField[] {
       ]
     case "price_bands":
       return [
-        entry(section, "thumbs", `${PB}.thumbs`),
-        ...(section.thumbs > 0 ? [entry(section, "thumbs_count", `${PB}.thumbsCount`)] : []),
+        entry(section, "thumbs", `${PB}.thumbs`, [], "thumbs"),
+        ...(section.thumbs > 0
+          ? [entry(section, "thumbs_count", `${PB}.thumbsCount`, [], "thumbs")]
+          : []),
       ]
     case "hero_slider":
       return [
@@ -168,15 +170,16 @@ export function contentFields(section: AnySection): RegistryField[] {
           section,
           "slider_height",
           `${S}.height`,
-          ["compact", "regular"].map((height) => `${S}.heights.${height}`)
+          ["compact", "regular"].map((height) => `${S}.heights.${height}`),
+          "options"
         ),
         // The scroller kit's settings it has use for (bilesen-denetimi (b) 4)
         ...sliderFields(section.id, section),
       ]
     case "faq":
       return [
-        entry(section, "open_first", `${E}.faq.openFirst`),
-        entry(section, "single_open", `${E}.faq.singleOpen`),
+        entry(section, "open_first", `${E}.faq.openFirst`, [], "opening"),
+        entry(section, "single_open", `${E}.faq.singleOpen`, [], "opening"),
       ]
     case "featured_product":
       // Its photographs layout, open in "Diziliş" (adr/0049 Ek 2026-11-15); the strips' look
