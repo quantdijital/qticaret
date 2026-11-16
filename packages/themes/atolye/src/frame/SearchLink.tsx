@@ -1,17 +1,17 @@
 "use client"
 
 import type { MouseEvent, ReactNode } from "react"
-import { isOwnClick } from "./events"
+import { OPEN_SEARCH_EVENT, askFrame, isOwnClick } from "./events"
 
-/** The phone header's search field (Header). */
+/** A phone's search field, in the dropping search (`SearchDrop`). */
 export const PHONE_SEARCH = "arama-dar"
 
 /**
- * The bottom bar's "Ara": puts the cursor in the header's search where
- * the visitor is, so the keyboard opens at once and the live panel
- * answers as they type (no page to load first). Every header has the
- * field on a phone (`PhoneSearch`). Without script, or with the field
- * off the screen, a plain link to `/arama`.
+ * The bottom bar's "Ara": drops a phone's search down from the top
+ * (`SearchDrop`, `qt:open-search`; every header, owner 2026-11-16), the
+ * cursor in its field, so the keyboard opens at once and the live panel
+ * answers as they type (no page to load first). Without script, or with
+ * no dropping search to hear it, a plain link to `/arama`.
  */
 export function SearchLink({
   className,
@@ -26,13 +26,11 @@ export function SearchLink({
     if (isOwnClick(event)) {
       return
     }
-    const field = document.getElementById(PHONE_SEARCH)
-    if (!(field instanceof HTMLInputElement) || field.offsetParent === null) {
-      return
+    // Safari gives a pressed link no focus: the dropping search takes it as the one to go back to
+    event.currentTarget.focus({ preventScroll: true })
+    if (askFrame(OPEN_SEARCH_EVENT)) {
+      event.preventDefault()
     }
-    event.preventDefault()
-    field.focus()
-    field.select()
   }
   return (
     <a

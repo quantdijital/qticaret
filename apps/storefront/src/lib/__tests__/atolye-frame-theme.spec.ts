@@ -37,9 +37,9 @@ describe("the theme's frame", () => {
     expect(html).not.toContain('aria-label="Kurumsal bağlantılar"')
   })
 
-  it("has two script-free searches, favourites and the cart with its count", () => {
+  it("has one script-free search (a phone's drops from Ara), favourites and the cart with its count", () => {
     const html = renderFrame(atolyeTheme, shopFixture())
-    expect(html.match(/action="\/arama"/g)).toHaveLength(2)
+    expect(html.match(/action="\/arama"/g)).toHaveLength(1)
     expect(html).toContain('href="/hesap/favoriler"')
     expect(html).toContain('aria-label="Sepet, 2 ürün"')
     expect(html).toContain('href="/sepet"')
@@ -204,7 +204,7 @@ describe("the theme's frame", () => {
   it("keeps the bottom bar's search a link to /arama before the script, and the field's example whole", () => {
     const html = renderFrame(atolyeTheme, shopFixture())
     expect(html).toMatch(/<a href="\/arama"[^>]*>(?:(?!<\/a>).)*Ara<\/a>/)
-    expect(html).toMatch(/id="arama-dar"[^>]*class="gf-field pr-14"/)
+    expect(html).toMatch(/id="arama-genis"[^>]*class="gf-field pr-14"/)
   })
 })
 

@@ -68,6 +68,35 @@ test.describe("the phone's bottom bar", () => {
     await expect(categories).toBeFocused()
   })
 
+  test("drops the search from the top on Ara, no box in the header, and gives the focus back", async ({
+    page,
+  }) => {
+    await page.goto("/")
+    await dismissCookies(page)
+    // The header is its 56 px row alone (owner 2026-11-16): no search box in it
+    const banner = page.getByRole("banner")
+    await expect(banner.getByRole("searchbox").or(banner.getByRole("combobox"))).toHaveCount(0)
+    const head = await page.locator("[data-gf-head]").boundingBox()
+    expect(head?.height ?? 0).toBeLessThanOrEqual(58)
+
+    const ara = bottomBar(page).getByRole("link", { name: "Ara" })
+    await ara.click()
+    const drop = page.getByRole("dialog", { name: "Arama" })
+    await expect(drop).toBeVisible()
+    await expect(page).toHaveURL(/\/$/)
+    const field = drop.locator("#arama-dar")
+    await expect(field).toBeFocused()
+    await page.keyboard.press("Escape")
+    await expect(drop).toBeHidden()
+    await expect(ara).toBeFocused()
+
+    await ara.click()
+    await expect(drop).toBeVisible()
+    await drop.getByRole("button", { name: "Aramayı kapat" }).click()
+    await expect(drop).toBeHidden()
+    await expect(ara).toBeFocused()
+  })
+
   test("stays away from the checkout, whose own header has no search, only the way back", async ({
     page,
   }) => {
@@ -91,8 +120,8 @@ test.describe("the phone's bottom bar", () => {
     await expect(bottomBar(page)).toHaveCount(0)
     await expect(page.getByRole("searchbox")).toHaveCount(0)
     await page.goto("/sepet")
-    // The cart keeps the shop's frame
-    await expect(page.getByRole("searchbox")).not.toHaveCount(0)
+    // The cart keeps the shop's frame: the bottom bar, its "Ara" dropping the search
+    await expect(bottomBar(page).getByRole("link", { name: "Ara" })).toBeVisible()
     await expect(
       bottomBar(page).getByRole("link", { name: /^Sepet, [1-9]\d* ürün$/ })
     ).toHaveAttribute("aria-current", "page")

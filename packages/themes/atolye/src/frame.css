@@ -3,8 +3,8 @@
  * <html>, the header's height `--gf-head-h` and its folding part
  * `--gf-head-fold`). Scrolling down past the header folds it: from 1024 px
  * the category aisle slides behind the top row (wordmark, search, account,
- * cart stay); on a phone the top row slides away and the search stays,
- * the bottom bar keeping the menu, the cart and the account. Turning back
+ * cart stay); on a phone the top row, the whole header, slides away, the
+ * bottom bar keeping the menu, the search, the cart and the account. Turning back
  * opens it again; it stays open while anything in it has the focus or a
  * category panel is open. The WhatsApp button steps aside while the page
  * scrolls down and while a field is being typed in. Only transform and
@@ -62,11 +62,12 @@ html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state
       width: min(40rem, calc(100vw - 2 * var(--gutter)));
     }
   }
-  /* A listing's filter and sort pills stay under the header on a phone (Toolbar) */
+  /* A listing's filter and sort pills stay under the header on a phone (Toolbar;
+     its 56 px row and rule, 57 px, until measured) */
   @media (width < 64rem) {
     .gf-listbar {
       position: sticky;
-      top: var(--gf-head-h, 7.3125rem);
+      top: var(--gf-head-h, 3.5625rem);
       z-index: var(--z-sticky);
     }
   }

@@ -85,20 +85,20 @@ describe("the centred header (header bar `centered`)", () => {
     expect(head).toMatch(/<ul[^>]*class="flex flex-wrap items-center gap-x-1 justify-center"/)
   })
 
-  it("on a phone: the menu on the left, the wordmark, favourites and cart, the search under them", () => {
+  it("on a phone: the menu on the left, the wordmark, favourites and cart, no search box", () => {
     const head = headerOf(centred())
     const menu = head.indexOf('aria-label="Menüyü aç"')
     const mark = head.indexOf("Örnek Atölye</span>")
     const favourites = head.indexOf('href="/hesap/favoriler"')
-    const phoneSearch = head.indexOf('id="arama-dar"')
     expect(menu).toBeGreaterThan(-1)
     expect(menu).toBeLessThan(mark)
     expect(mark).toBeLessThan(favourites)
-    expect(favourites).toBeLessThan(phoneSearch)
     // The menu button is the phone's; the account waits for 1024 px
     expect(head).toMatch(/aria-label="Menüyü aç"[^>]*class="gf-icon-btn -ml-2.5 lg:hidden"/)
     expect(head).toMatch(/<a href="\/hesap" aria-label="Hesabım" class="[^"]*max-lg:hidden/)
-    expect(head).toMatch(/<div class="[^"]*pb-2 lg:hidden"><form/)
+    // The bottom bar's "Ara" drops the search from the top (owner 2026-11-16): no pill row
+    expect(head).not.toContain('id="arama-dar"')
+    expect(head).not.toMatch(/<div class="[^"]*pb-2 lg:hidden"><form/)
     // The skip link still leads the page
     expect(centred()).toMatch(/^<div[^>]*><a href="#icerik" class="gf-skip">/)
   })

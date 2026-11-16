@@ -8,16 +8,19 @@ import type { HeaderBarView, HeaderCatalogView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { renderFrame, shopFixture } from "@/test/theme-render"
 // The theme's own parts: it exports pages, not these
+import { Header } from "../../../../../packages/themes/atolye/src/frame/Header"
+import { SearchDrop } from "../../../../../packages/themes/atolye/src/frame/SearchDrop"
+import { SearchLink } from "../../../../../packages/themes/atolye/src/frame/SearchLink"
 import { SearchToggle } from "../../../../../packages/themes/atolye/src/frame/SearchToggle"
 import { searchOf } from "../../../../../packages/themes/atolye/src/frame/header-words"
 
 /**
  * The header search as an icon (adr/0049 Ek 2026-11-15; adr/0066 K3b):
  * `field`, the default, is the drawing from before (the open box on wide
- * screens, the pill under a phone's row); `icon` draws a magnifier that
- * opens the box from 1024 px, as wide as the header gave the box. A
- * phone keeps the pill under its row whatever the style (owner
- * 2026-11-16: the catalog header's phone search in every header).
+ * screens); `icon` draws a magnifier that opens the box from 1024 px, as
+ * wide as the header gave the box. A phone's header has no box whatever
+ * the style, in every variant (owner 2026-11-16): the bottom bar's "Ara"
+ * drops it from the top.
  */
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -60,13 +63,34 @@ const head = (headerBar: HeaderBarView) => {
 }
 
 describe("the header search's look, as the server prints it", () => {
-  it("keeps the open box and the phone's pill by default, on every variant", () => {
+  it("keeps the open box by default from 1024 px, on every variant", () => {
     for (const variant of ["standard", "centered", "catalog"] as const) {
       for (const style of [undefined, "field"] as const) {
         const header = head(bar(variant, style))
         expect(header.querySelector("[data-search-toggle]")).toBeNull()
         expect(header.querySelector("input#arama-genis")).not.toBeNull()
-        expect(header.querySelector("input#arama-dar")).not.toBeNull()
+      }
+    }
+  })
+
+  it("draws no box on a phone, in every variant and either style (owner 2026-11-16)", () => {
+    for (const variant of ["standard", "centered", "catalog"] as const) {
+      for (const style of [undefined, "field", "icon"] as const) {
+        const header = head(bar(variant, style))
+        const label = `${variant} ${String(style)}`
+        expect(header.querySelector("#arama-dar"), label).toBeNull()
+        // The one search the header prints is the wide screen's, hidden under 1024 px
+        const forms = [...header.querySelectorAll<HTMLElement>("[role=search]")]
+        expect(forms, label).toHaveLength(1)
+        const wide = forms[0]?.closest("[data-search-toggle]") ?? forms[0]
+        const classes = wide?.className.split(" ") ?? []
+        expect(
+          classes.includes("gf-search-toggle") ||
+            (classes.includes("hidden") && classes.includes("lg:block")),
+          label
+        ).toBe(true)
+        // The dropping search waits closed: nothing of it in the page until "Ara"
+        expect(header.ownerDocument.querySelector("[data-search-drop], [role=dialog]")).toBeNull()
       }
     }
   })
@@ -79,12 +103,12 @@ describe("the header search's look, as the server prints it", () => {
     const link = toggle?.querySelector("a")
     expect(link?.getAttribute("href")).toBe("/arama")
     expect(link?.getAttribute("aria-label")).toBe("Aramayı aç")
-    // The box waits inside, the same GET form; a phone keeps its pill under the row
+    // The box waits inside, the same GET form; a phone's header has none
     expect(
       toggle?.querySelector(".gf-search-toggle__box form[action='/arama'] input#arama-genis")
     ).not.toBeNull()
-    expect(header.querySelector("#arama-dar")).not.toBeNull()
-    expect(header.querySelectorAll("[role=search]")).toHaveLength(2)
+    expect(header.querySelector("#arama-dar")).toBeNull()
+    expect(header.querySelectorAll("[role=search]")).toHaveLength(1)
   })
 
   it("puts the magnifier beside the tools on the standard and catalog headers, as wide as their box", () => {
@@ -99,7 +123,7 @@ describe("the header search's look, as the server prints it", () => {
     expect(toggle?.className).toContain("[--gf-search-open:45rem]")
     // The written "Ara" stays the box's submit
     expect(toggle?.querySelector("button[type=submit]")?.textContent).toBe("Ara")
-    expect(wide.querySelector("#arama-dar")).not.toBeNull()
+    expect(wide.querySelector("#arama-dar")).toBeNull()
     const narrow = head(bar("catalog", "icon", { searchWidth: "narrow" }))
     expect(narrow.querySelector("[data-search-toggle]")?.className).toContain(
       "[--gf-search-open:35rem]"
@@ -167,5 +191,81 @@ describe("the magnifier and the dropping search, in the browser", () => {
       document.body.dispatchEvent(new Event("pointerdown", { bubbles: true }))
     })
     expect(toggle.hasAttribute("data-open")).toBe(false)
+  })
+
+  it("drops a phone's search from the top on the bottom bar's Ara, closing back to it", async () => {
+    act(() => {
+      root.render(
+        <>
+          <SearchLink className="" current={false}>
+            Ara
+          </SearchLink>
+          <SearchDrop {...search} title={t("search.title")} closeLabel={t("search.close")} />
+        </>
+      )
+    })
+    const link = host.querySelector<HTMLAnchorElement>('a[href="/arama"]')
+    if (!link) {
+      throw new Error("no link")
+    }
+    link.focus()
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })
+    act(() => {
+      link.dispatchEvent(click)
+    })
+    // The link stays where it is: the drop heard it
+    expect(click.defaultPrevented).toBe(true)
+    const drop = document.querySelector<HTMLElement>("[data-search-drop]")
+    expect(drop?.getAttribute("role")).toBe("dialog")
+    expect(drop?.textContent).toContain("Arama")
+    expect(document.activeElement).toBe(document.getElementById("arama-dar"))
+    expect(drop?.querySelector('button[aria-label="Aramayı kapat"]')).not.toBeNull()
+    press(document.activeElement ?? document.body, "Escape")
+    expect(document.querySelector("[data-search-drop]")).toBeNull()
+    // Radix gives the focus back a task later
+    await act(async () => {
+      await new Promise((done) => setTimeout(done, 0))
+    })
+    expect(document.activeElement).toBe(link)
+  })
+
+  it("hears the bottom bar's Ara under every header, either style", () => {
+    for (const variant of ["standard", "centered", "catalog"] as const) {
+      for (const style of ["field", "icon"] as const) {
+        const label = `${variant} ${style}`
+        // No categories: the aisle, which measures itself, is not drawn (jsdom lays out nothing)
+        const shop = shopFixture({ headerBar: bar(variant, style), categories: [] })
+        act(() => {
+          root.render(<Header shop={shop} t={t} />)
+        })
+        expect(document.querySelector("[data-search-drop]"), label).toBeNull()
+        // What the bottom bar's "Ara" sends (`SearchLink`): heard, so the link stays put
+        let heard = false
+        act(() => {
+          heard = !window.dispatchEvent(new Event("qt:open-search", { cancelable: true }))
+        })
+        expect(heard, label).toBe(true)
+        expect(document.querySelector("[data-search-drop]"), label).not.toBeNull()
+        expect(document.activeElement, label).toBe(document.getElementById("arama-dar"))
+        press(document.activeElement ?? document.body, "Escape")
+        expect(document.querySelector("[data-search-drop]"), label).toBeNull()
+      }
+    }
+  })
+
+  it("leaves Ara a plain link to the search page when no dropping search hears it", () => {
+    act(() => {
+      root.render(
+        <SearchLink className="" current={false}>
+          Ara
+        </SearchLink>
+      )
+    })
+    const link = host.querySelector<HTMLAnchorElement>('a[href="/arama"]')
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })
+    act(() => {
+      link?.dispatchEvent(click)
+    })
+    expect(click.defaultPrevented).toBe(false)
   })
 })

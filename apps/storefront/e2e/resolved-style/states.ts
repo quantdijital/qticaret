@@ -132,14 +132,25 @@ export const STATES: StyleState[] = [
     pages: ["home"],
     apply: async (page) => {
       const banner = page.getByRole("banner")
-      // A header that draws the search field: focused, with the suggestions
-      // for the first word of the first product card (a GET, as typing makes it)
+      // The first word of the first product card, read before a layer hides the page
+      const card = await firstVisible(page.getByRole("main").locator('a[href*="/urun/"]'))
+      const word = /\p{L}{3,}/u.exec((await card?.textContent()) ?? "")?.[0] ?? ""
+      const inBanner = banner.getByRole("searchbox").or(banner.getByRole("combobox"))
+      // A phone's header draws no field: the bottom bar's "Ara" drops the search from the top
+      const ara = await firstVisible(
+        page.getByRole("navigation", { name: "Hızlı gezinme" }).getByRole("link", { name: "Ara" })
+      )
+      if (ara && !(await firstVisible(inBanner))) {
+        await ara.click({ timeout: WAIT })
+        await page.waitForTimeout(300)
+      }
+      const drop = page.getByRole("dialog", { name: "Arama" })
+      // A header (or the dropped search) that draws the field: focused, with the suggestions
+      // for that word (a GET, as typing makes it)
       const field = await firstVisible(
-        banner.getByRole("searchbox").or(banner.getByRole("combobox"))
+        inBanner.or(drop.getByRole("searchbox")).or(drop.getByRole("combobox"))
       )
       if (field) {
-        const card = await firstVisible(page.getByRole("main").locator('a[href*="/urun/"]'))
-        const word = /\p{L}{3,}/u.exec((await card?.textContent()) ?? "")?.[0] ?? ""
         const why = await open(page, field, "")
         if (!why && word) {
           await field.pressSequentially(word.toLocaleLowerCase("tr"), { timeout: WAIT })
