@@ -78,6 +78,15 @@ medusaIntegrationTestRunner({
       expect((await card())?.applied_at).toEqual(expect.any(String))
       expect((await staff.gallery()).current.draft).toMatchObject({ design_id: id, edited: false })
 
+      // The label is the server's: a draft sent with another, or none, keeps the stored one
+      const forged = { id: "sfd_01FORGED", digest: "0".repeat(64) }
+      for (const design of [forged, null]) {
+        const sent = await staff.saveDraft({ ...draft, settings: { ...draft.settings, design } })
+        expect(sent.status).toBe(200)
+        expect(sent.data.layout.draft.settings.design).toEqual(draft.settings.design)
+      }
+      expect(await card()).toMatchObject({ in_draft: true, edited: false })
+
       await staff.saveDraft({ ...draft, home: [helpBox("yardimkutusu", "Bize yazın, hemen")] })
       expect(await card()).toMatchObject({ in_draft: true, edited: true })
       expect((await staff.post("/admin/storefront-layout/publish")).status).toBe(200)
@@ -158,6 +167,39 @@ medusaIntegrationTestRunner({
         "Bize yazın"
       )
       expect((await staff.saveDesign({ name: "Yok", revision: 9999 })).status).toBe(404)
+      // Past the column's integer: refused before the database reads it
+      expect((await staff.saveDesign({ name: "Yok", revision: 2_147_483_648 })).status).toBe(400)
+      const past = await staff.post("/admin/storefront-layout/revisions/2147483648/restore")
+      expect(past.status).toBe(404)
+    })
+
+    it("applies the oldest of five automatic saves: it stays, the next oldest makes room", async () => {
+      const container = getContainer()
+      const { staff, own } = await ownerWithDraft()
+      expect((await staff.post("/admin/storefront-layout/publish")).status).toBe(200)
+      const titles = ["Bir", "İki", "Üç", "Dört", "Beş"]
+      for (const title of titles) {
+        await staff.saveDraft({ ...own, home: [helpBox("yardimkutusu", title)] })
+        expect((await staff.post("/admin/storefront-layout/discard")).status).toBe(200)
+      }
+      const titleOf = (row: { document: { home?: unknown[] } }) =>
+        (row.document.home?.[0] as { title?: string } | undefined)?.title
+      const autos = async () =>
+        (await storedDesigns(container)).filter((row) => row.kind === "auto")
+      const five = await autos()
+      expect(five.map(titleOf).sort()).toEqual([...titles].sort())
+      const oldest = five.find((row) => titleOf(row) === "Bir")?.id ?? ""
+
+      // Something new in the draft: applying keeps it, a sixth automatic save
+      await staff.saveDraft({ ...own, home: [helpBox("yardimkutusu", "Altı")] })
+      const applied = await staff.applyDesign(oldest)
+      expect(applied.status).toBe(200)
+      expect(applied.data.result.design).toMatchObject({ id: oldest, kind: "auto" })
+      expect((applied.data.layout.draft.home[0] as { title?: string }).title).toBe("Bir")
+      const after = await autos()
+      expect(after).toHaveLength(5)
+      expect(after.map((row) => row.id)).toContain(oldest)
+      expect(after.map(titleOf).sort()).toEqual(["Altı", "Beş", "Bir", "Dört", "Üç"].sort())
     })
 
     it("refuses a look naming a record gone, whole: the draft and the saved looks as they were", async () => {

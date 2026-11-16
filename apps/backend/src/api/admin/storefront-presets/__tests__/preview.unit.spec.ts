@@ -16,7 +16,7 @@ jest.mock("@qticaret/sector-packs", () => {
   }
 })
 jest.mock("node:fs/promises", () => ({
-  stat: (...args: unknown[]): unknown => mockStat(...args),
+  lstat: (...args: unknown[]): unknown => mockStat(...args),
   readFile: (...args: unknown[]): unknown => mockRead(...args),
 }))
 
@@ -92,6 +92,14 @@ describe("a ready-made look's picture (adr/0063 §7)", () => {
     mockStat.mockResolvedValueOnce(file(1000, false))
     await expect(presetPreview(container, "kahve", "kahve-1")).resolves.toBeNull()
     mockStat.mockResolvedValueOnce(file(PRESET_LIMITS.previewBytes + 1))
+    await expect(presetPreview(container, "kahve", "kahve-1")).resolves.toBeNull()
+    expect(mockRead).not.toHaveBeenCalled()
+  })
+
+  it("has none for a symbolic link, never following it", async () => {
+    const { container } = containerWith(["kahve"])
+    // lstat describes the link itself: not a file, whatever it points at
+    mockStat.mockResolvedValueOnce({ size: 10, isFile: () => false, isSymbolicLink: () => true })
     await expect(presetPreview(container, "kahve", "kahve-1")).resolves.toBeNull()
     expect(mockRead).not.toHaveBeenCalled()
   })

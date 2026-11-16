@@ -33,6 +33,7 @@ describe("GET /admin/storefront-presets/:pack/:code/preview (adr/0063 §7)", () 
       "Content-Type": "image/webp",
       "X-Content-Type-Options": "nosniff",
       "Content-Security-Policy": "default-src 'none'",
+      "Cross-Origin-Resource-Policy": "same-origin",
       "Cache-Control": "private, max-age=300",
     })
   })

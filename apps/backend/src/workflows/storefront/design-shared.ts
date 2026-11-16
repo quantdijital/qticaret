@@ -169,7 +169,7 @@ export async function lookOf(
       summary: designSummary(partsOf(document), { ...source, edited: false, reason }),
     }
   }
-  if (JSON.stringify(look.document).length > DESIGN_LIMITS.bytes) {
+  if (Buffer.byteLength(JSON.stringify(look.document), "utf8") > DESIGN_LIMITS.bytes) {
     throw new ValidationError("storefront_design.too_large", { field: "document" })
   }
   return look

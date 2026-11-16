@@ -264,5 +264,10 @@ describe("authProfile", () => {
       name: "storefront_design_apply",
       perIdentityAnyIp: { max: 20, windowMs: 60 * 60 * 1000 },
     })
+    // The draft discarded or a revision restored: each keeps the draft first
+    expect(RATE_LIMIT_PROFILES.storefront_draft_replace).toEqual({
+      name: "storefront_draft_replace",
+      perIdentityAnyIp: { max: 60, windowMs: 60 * 60 * 1000 },
+    })
   })
 })

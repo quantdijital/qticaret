@@ -1,4 +1,4 @@
-import { readFile, stat } from "node:fs/promises"
+import { lstat, readFile } from "node:fs/promises"
 import { join } from "node:path"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import {
@@ -45,7 +45,8 @@ export async function presetPreview(
     return null
   }
   const file = join(preset.dir, PRESET_PREVIEW)
-  const info = await stat(file).catch(() => null)
+  // lstat: a symbolic link is not the file the loader found, whatever it points at
+  const info = await lstat(file).catch(() => null)
   if (!info?.isFile() || info.size > PRESET_LIMITS.previewBytes) {
     return null
   }

@@ -19,6 +19,7 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   res.setHeader("Content-Type", "image/webp")
   res.setHeader("X-Content-Type-Options", "nosniff")
   res.setHeader("Content-Security-Policy", "default-src 'none'")
+  res.setHeader("Cross-Origin-Resource-Policy", "same-origin")
   res.setHeader("Cache-Control", "private, max-age=300")
   res.send(image)
 }

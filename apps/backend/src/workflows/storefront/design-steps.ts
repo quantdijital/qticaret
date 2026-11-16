@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { storedSettings } from "../../lib/storefront/layout-settings"
 import type { LayoutSettings } from "../../lib/storefront/layout-settings"
+import type { LayoutDocument } from "../../lib/storefront/layout"
 import { autoToEvict } from "../../lib/storefront/designs/evict"
 import { DESIGN_LIMITS } from "../../lib/storefront/designs/limits"
 import type { DesignReason } from "../../lib/storefront/designs/summary"
@@ -20,6 +21,8 @@ export interface AutoSaveInput {
   /** Keep the draft under this name instead (a named saved look, within the ten). */
   save_as: string | null
   reason: DesignReason
+  /** The saved look being applied: never the automatic save removed to make room. */
+  keep?: string
 }
 
 /**
@@ -33,6 +36,21 @@ export function shopSettingsOf(
   const { trust_badges, color_swatches, low_stock } = storedSettings(draft)
   return { trust_badges, color_swatches, low_stock }
 }
+
+/**
+ * The draft as staff saved it, its saved-look label (`settings.design`)
+ * the one stored, never what the request sent: only applying a look writes
+ * it (adr/0064 Ek 2026-11-17 §2), so the gallery's "Taslakta" and
+ * "düzenlenmiş" stay true. Under the design's lock, which the workflow holds.
+ */
+export const keepDesignMarkStep = createStep(
+  "storefront-layout-keep-design-mark",
+  async (draft: LayoutDocument, { container }) => {
+    const row = await layoutRow(container)
+    const design = storedSettings(row?.draft ?? null).design
+    return new StepResponse<LayoutDocument>({ ...draft, settings: { ...draft.settings, design } })
+  }
+)
 
 /** The same, read from the draft now (under the design's lock, by the caller). */
 export async function keptShopSettings(container: Container) {
@@ -124,7 +142,7 @@ export const autoSaveDraftStep = createStep(
         { kind: "auto" },
         { select: [...DESIGN_ROW_FIELDS], take: null }
       )) as DesignRow[]
-      const evict = autoToEvict(autos, DESIGN_LIMITS.auto)
+      const evict = autoToEvict(autos, DESIGN_LIMITS.auto, input.keep)
       if (evict.length > 0) {
         await service.deleteStorefrontDesigns(evict.map((each) => each.id))
         undo.evicted = evict

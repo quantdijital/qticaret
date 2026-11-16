@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
+import { MAX_REVISION } from "../../../../../../lib/storefront/designs/limits"
 import { replaceDraftWorkflow } from "../../../../../../workflows/storefront/draft-replace"
 import { draftSource } from "../../../../../../workflows/storefront/layout"
 import { adminLayout } from "../../../read"
@@ -17,7 +18,7 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const revision = Number(req.params["revision"])
-  if (!Number.isInteger(revision) || revision < 1) {
+  if (!Number.isInteger(revision) || revision < 1 || revision > MAX_REVISION) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.revision_unknown")
   }
   const source = await draftSource(req.scope, revision, req.validatedBody.menus)

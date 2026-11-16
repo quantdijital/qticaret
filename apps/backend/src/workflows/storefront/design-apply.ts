@@ -114,6 +114,7 @@ export const applyDesignWorkflow = createWorkflow(
         actor: input.actor,
         save_as: input.save_as,
         reason: "design_apply" as const,
+        keep: input.id,
       }))
     )
     const draft = composeDesignDraftStep(design)

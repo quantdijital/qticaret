@@ -1,18 +1,19 @@
 import { MedusaError } from "@medusajs/framework/utils"
 import { z } from "@medusajs/framework/zod"
 import { isCleanText } from "../../../lib/security/text"
-import { DESIGN_ID, DESIGN_LIMITS } from "../../../lib/storefront/designs/limits"
+import { DESIGN_ID, DESIGN_LIMITS, MAX_REVISION } from "../../../lib/storefront/designs/limits"
 
 const NAME_INVALID = { message: "storefront_design.name_invalid" }
 
 /**
  * Invisible format characters (Unicode `Cf`: zero-width spaces and joiners,
- * direction marks, embeddings, overrides and isolates, the BOM). A name
+ * direction marks, embeddings, overrides and isolates, the BOM) and the
+ * line and paragraph separators (`Zl`, `Zp`, which break a line). A name
  * carrying them can read differently from what it holds wherever it is shown
  * (the list, the audit trail, a media item's usage label), so a look's name
  * refuses them. Kept here, not in `isCleanText`, which other fields share.
  */
-const FORMAT_CHARACTER = /\p{Cf}/u
+const FORMAT_CHARACTER = /[\p{Cf}\p{Zl}\p{Zp}]/u
 
 /**
  * A saved look's name (adr/0064 §3): 1–60 characters of plain text,
@@ -36,7 +37,7 @@ export const designName = z
  * a name. The design itself is read on the server, never sent.
  */
 export const AdminPostStorefrontDesign = z
-  .object({ name: designName, revision: z.number().int().min(1).optional() })
+  .object({ name: designName, revision: z.number().int().min(1).max(MAX_REVISION).optional() })
   .strict()
 export type AdminPostStorefrontDesignType = z.output<typeof AdminPostStorefrontDesign>
 

@@ -137,6 +137,12 @@ export const RATE_LIMIT_PROFILES = {
     name: "storefront_design_apply",
     perIdentityAnyIp: { max: 20, windowMs: HOUR },
   },
+  // adr/0064 Ek 2026-11-17: the draft discarded or a revision restored (each keeps
+  // the draft first as an automatic save); per staff member, an editor's routine
+  storefront_draft_replace: {
+    name: "storefront_draft_replace",
+    perIdentityAnyIp: { max: 60, windowMs: HOUR },
+  },
   // adr/0053: the storefront checking a visitor's maintenance bypass (it keeps
   // the answer a minute); per the visitor's address, a guess finds nothing
   maintenance_bypass: { name: "maintenance_bypass", perIp: { max: 60, windowMs: MINUTE } },

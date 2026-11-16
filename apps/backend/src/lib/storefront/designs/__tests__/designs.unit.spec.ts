@@ -175,4 +175,19 @@ describe("the automatic saves removed past the limit", () => {
     ]
     expect(autoToEvict(rows, 1).map((each) => each.id)).toEqual(["sfd_old"])
   })
+
+  it("never removes the one kept (the look being applied): the next oldest goes", () => {
+    const rows = [
+      row("sfd_a", "2026-11-17T10:00:00Z"),
+      row("sfd_b", "2026-11-17T11:00:00Z"),
+      row("sfd_c", "2026-11-17T12:00:00Z"),
+      row("sfd_d", "2026-11-17T13:00:00Z"),
+      row("sfd_e", "2026-11-17T14:00:00Z"),
+      row("sfd_new", "2026-11-17T15:00:00Z"),
+    ]
+    expect(autoToEvict(rows, 5, "sfd_a").map((each) => each.id)).toEqual(["sfd_b"])
+    expect(autoToEvict(rows, 5, "sfd_c").map((each) => each.id)).toEqual(["sfd_a"])
+    expect(autoToEvict(rows, 5, "sfd_named").map((each) => each.id)).toEqual(["sfd_a"])
+    expect(autoToEvict(rows, 5, null).map((each) => each.id)).toEqual(["sfd_a"])
+  })
 })
