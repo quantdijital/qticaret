@@ -792,7 +792,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 - [ ] Çok dilli içerik: Medusa Translation modülü feature flag arkasında, şimdilik kapalı. Ana içerik Türkçe; çok dil F19.
 - [x] Medusa'da CSRF koruması yok → F2 S3'te Origin kontrolü + JSON gövde şartı (ADR-0004 F2.10 eki).
 - [ ] Trivy imaj taraması: üretim Dockerfile'ı ile birlikte F16'da.
-- [ ] GitHub Actions dakikaları: private repo, ücretsiz kota 2000 dk/ay; ilk ayda izlenecek.
+- [x] GitHub Actions dakikaları: repo public oldu, Actions yeniden açık; her push'ta CI ve Security koşar (#88, #93, #98; 2026-11-16). Repo private'a dönerse kota (2000 dk/ay) yeniden izlenir.
 - [ ] `adr/0003` hosting ve veri yerleşimi kararı (en geç F15 öncesi; KVKK danışmanı görüşü gerekli)
 - [ ] Kod dışı gereksinimler takibi: `docs/12-kod-disi-gereksinimler.md` (avukat, mali müşavir, sağlayıcı anlaşmaları)
 - [x] `adr/0005` içerik önerileri: kural motoru + opsiyonel LLM. Kabul (2026-10-31; LLM kapalı başlar).
