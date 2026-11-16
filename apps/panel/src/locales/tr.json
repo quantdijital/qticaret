@@ -453,6 +453,7 @@
       "region": "Bölge ve birimler",
       "regionHint": "Tarihlerin ve ürün ölçülerinin nasıl tutulacağı.",
       "timezone": "Saat dilimi",
+      "clock": "Mağaza saati: {{time}}",
       "weightUnit": "Ağırlık birimi",
       "dimensionUnit": "Ölçü birimi",
       "unitsHint": "Ürün formları bu birimlerle açılır. Kayıtlı ürünlerin değerleri çevrilmez.",

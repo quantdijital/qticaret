@@ -453,6 +453,7 @@
       "region": "Region and units",
       "regionHint": "How dates and product measurements are kept.",
       "timezone": "Time zone",
+      "clock": "Shop time: {{time}}",
       "weightUnit": "Weight unit",
       "dimensionUnit": "Dimension unit",
       "unitsHint": "Product forms open in these units. Saved products are not converted.",

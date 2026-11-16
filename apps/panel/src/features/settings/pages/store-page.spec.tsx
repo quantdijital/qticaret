@@ -129,6 +129,30 @@ describe("StorePage", () => {
     expect(within(brand).getByText(/PNG ya da SVG olabilir/)).toBeInTheDocument()
   })
 
+  it("fills the region card to the row's height: fields on top, its facts at the foot", async () => {
+    renderPage()
+    await screen.findByRole("textbox", { name: /^Mağaza adı/ })
+    const region = card("Bölge ve birimler")
+    const form = region.querySelector("form")
+
+    // The card, its body and its form each take the height the row gives
+    expect(region).toHaveClass("flex", "flex-col")
+    expect(form?.parentElement).toHaveClass("flex-1", "flex-col")
+    expect(form).toHaveClass("flex-1", "flex-col")
+    // The shop's clock in the zone chosen and what the units change, pushed to the foot
+    const clock = within(region).getByText(/^Mağaza saati: \d{2}[.:]\d{2}$/)
+    const facts = clock.closest("p")?.parentElement
+    expect(facts).toHaveClass("mt-auto")
+    expect(facts).toHaveTextContent("Kayıtlı ürünlerin değerleri çevrilmez.")
+
+    // A change shows the save bar under the facts; the form still fills the card
+    await userEvent.click(within(region).getByRole("radio", { name: "Kilogram (kg)" }))
+    const saveButton = within(region).getByRole("button", { name: "Kaydet" })
+    expect(saveButton).toBeVisible()
+    expect(facts?.nextElementSibling).toContainElement(saveButton)
+    expect(form).toHaveClass("flex-1")
+  })
+
   it("opens the tab a link names, and keeps only a tab it knows in the address", async () => {
     route.set({ part: "social" })
     renderPage()
