@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ConflictError, ValidationError } from "../../lib/errors"
+import { refuseSvgImages } from "../../lib/media/svg-use"
 import { containsPattern, isCleanText } from "../../lib/security"
 import { isValidSlug, toSlug } from "../../lib/seo"
 import { BRANDS_MODULE } from "../../modules/brands"
@@ -104,6 +105,8 @@ export async function brandFields(
     if (input.logo_file_id && url === null) {
       throw new ValidationError("brands.logo_unknown", { field: "logo_file_id" })
     }
+    // A product brand's logo is a catalogue picture: no SVG (the shop's own logos only)
+    await refuseSvgImages(container, [url], "logo_file_id")
     fields.logo_file_id = input.logo_file_id
     fields.logo_url = url
   }

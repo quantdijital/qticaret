@@ -4,6 +4,13 @@ export {
   DEFAULT_UPLOAD_LIMITS,
   UPLOAD_MEDIA_TYPES,
   storedName,
+  validateLibraryUpload,
   validateUpload,
 } from "./validate-upload"
-export type { AcceptedUpload, UploadFile, UploadLimits } from "./validate-upload"
+export type {
+  AcceptedUpload,
+  LibraryUpload,
+  SvgUpload,
+  UploadFile,
+  UploadLimits,
+} from "./validate-upload"

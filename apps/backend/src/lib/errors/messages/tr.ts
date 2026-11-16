@@ -1053,6 +1053,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "upload.unreadable_image": "Görsel okunamadı; dosya bozuk olabilir.",
   "upload.unsupported_type":
     "Bu dosya türü desteklenmiyor; JPEG, PNG, WebP ya da AVIF görsel yükleyin.",
+  "upload.svg_invalid":
+    "SVG dosyası okunamadı ya da temizlendikten sonra geriye bir SVG görseli kalmadı. Dosyayı tasarım programınızdan düz SVG olarak yeniden kaydedin.",
+  "upload.svg_too_large":
+    "SVG dosyası en çok 200 KB olabilir. Dosyayı sadeleştirip yeniden deneyin.",
+  "upload.svg_too_complex":
+    "SVG dosyasında çok fazla ya da çok iç içe öğe var. Dosyayı sadeleştirip yeniden deneyin.",
+  "media.svg_logo_only":
+    "SVG yalnızca mağaza logosu ve site simgesi olarak kullanılabilir. Bu alan için PNG, JPEG, WebP ya da AVIF görsel seçin.",
   "cart.completed": "Bu sepetle sipariş zaten verildi.",
   "cart.email_required": "Siparişi tamamlamak için e-posta adresi gerekir.",
   "cart.empty": "Sepet boş.",

@@ -3,6 +3,7 @@ import { AdminGetStockMovements, AdminPostStockWatch } from "../admin/stock-item
 import { AdminCreateWarehouse, AdminUpdateWarehouse } from "../admin/warehouses/validators"
 import { GetTrDistricts, GetTrProvinces } from "../tr-address/validators"
 import { BACKORDER_CLAIMS, backorderGate } from "../validation/backorder-gate"
+import { svgImageGate } from "../validation/svg-image-gate"
 import { keepStockedLocation } from "../validation/stock-location-delete"
 import { existingLocationAddress, validateTrAddresses } from "../validation/tr-address"
 
@@ -54,10 +55,11 @@ export const STOCK_ROUTES = [
     middlewares: [validateAndTransformBody(AdminPostStockWatch)],
   },
   // F3.8: selling past stock needs the preorder flag, whichever route sets it
+  // The same product routes take no SVG picture: that is the logos' and site icon's alone
   ...Object.entries(BACKORDER_CLAIMS).map(([matcher, claimsOf]) => ({
     matcher,
     methods: ["POST" as const],
-    middlewares: [backorderGate(claimsOf)],
+    middlewares: [backorderGate(claimsOf), svgImageGate],
   })),
   {
     matcher: "/admin/tr-address/provinces",

@@ -1045,6 +1045,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "upload.unreadable_image": "The image could not be read; the file may be damaged.",
   "upload.unsupported_type":
     "This file type is not supported; upload a JPEG, PNG, WebP or AVIF image.",
+  "upload.svg_invalid":
+    "The SVG file could not be read, or no SVG image was left once it was cleaned. Save it again as a plain SVG from your design program.",
+  "upload.svg_too_large": "An SVG file can be at most 200 KB. Simplify it and try again.",
+  "upload.svg_too_complex":
+    "The SVG file has too many or too deeply nested elements. Simplify it and try again.",
+  "media.svg_logo_only":
+    "SVG can be used only as the shop's logo and site icon. Choose a PNG, JPEG, WebP or AVIF image for this field.",
   "cart.completed": "An order was already placed with this cart.",
   "cart.email_required": "An email address is needed to place the order.",
   "cart.empty": "The cart is empty.",

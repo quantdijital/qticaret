@@ -14,6 +14,7 @@ import {
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
+import { refuseSvgImages } from "../../lib/media/svg-use"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import type CatalogExtensionModuleService from "../../modules/catalog-extension/service"
 import { MEDIA_MODULE } from "../../modules/media"
@@ -67,6 +68,8 @@ const planCollectionDetailsStep = createStep(
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "catalog.collection_unknown")
     }
     if (input.image) {
+      // A logo's format, not a category's or collection's picture (lib/media/svg-use.ts)
+      await refuseSvgImages(container, [input.image.url], "image")
       const uploaded = await container
         .resolve<MediaModuleService>(MEDIA_MODULE)
         .listMediaAssets(

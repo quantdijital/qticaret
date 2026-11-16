@@ -4,6 +4,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { errorSummary, logger } from "../../../lib/logging"
 import { assertStorageWithinLimit, forgetUsage } from "../../../lib/plan-limits"
 import { displayName, readImage } from "../../../lib/media"
+import { SVG_MIME, looksLikeSvg, sanitizeSvg } from "../../../lib/media/svg"
 import { UPLOAD_MEDIA_TYPES, readImageInfo } from "../../../lib/security/upload"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
@@ -44,6 +45,23 @@ async function sizeOf(bytes: Buffer) {
 /** What the library shows of a stored file: its name, type, bytes and size. */
 async function describe(container: MedusaContainer, fileId: string) {
   const bytes = await readFile(container, fileId)
+  if (readImageInfo(bytes) === null && looksLikeSvg(bytes)) {
+    // Stored as the upload's cleaner left it; read again by it here, for its size: one
+    // that does not pass now (a file put in storage another way) is no image of ours
+    let svg
+    try {
+      svg = sanitizeSvg(bytes)
+    } catch {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "media.not_an_image")
+    }
+    return {
+      filename: displayName(fileId),
+      mime_type: SVG_MIME,
+      size: bytes.length,
+      width: svg.width,
+      height: svg.height,
+    }
+  }
   const size = await sizeOf(bytes)
   const type = readImageInfo(bytes)?.type
   return {

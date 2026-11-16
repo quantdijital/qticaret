@@ -5,36 +5,39 @@
 > F15 yalnızca doğrulama (pentest, yük, fraud) fazıdır.
 
 ## Tehdit modeli (özet)
-| Varlık | Tehdit | Önlem |
-|---|---|---|
-| Ödeme akışı | Tutar manipülasyonu, sahte callback, replay, open redirect | Sunucu tarafı tutar, imza doğrulama, idempotency, dönüş URL allowlist |
-| Tenant secret'ları | Sızıntı (log, repo, hata mesajı, CI çıktısı) | Secret manager, redaksiyon, secret scanning, CI maskeleme |
-| Müşteri verisi (KVKK) | Yetkisiz erişim, aşırı veri, okuma izi yokluğu | RBAC, maskeleme, minimizasyon, saklama süreleri, okuma denetimi |
-| Admin hesapları | Credential stuffing, oturum çalma, CSRF | 2FA, rate limit, httpOnly/secure cookie, CSRF token, oturum süresi |
-| Müşteri hesapları | Credential stuffing, hesap ele geçirme, sahte kayıt | Rate limit, e-posta doğrulama, şifre sıfırlama tek kullanımlık token |
-| Webhook endpoint'leri | Sahte istek, DoS | İmza/HMAC, IP allowlist (varsa), rate limit, hızlı 200 + kuyruk |
-| Dosya yükleme / dışa aktarma | SVG-XSS, MIME sahteciliği, EXIF sızıntısı, CSV formül enjeksiyonu, XXE, zip bomb | Tür doğrulama, yeniden kodlama, EXIF temizleme, hücre kaçışlama, güvenli XML parser |
-| Sunucu taraflı istekler | SSRF (webhook, geçişte görsel indirme, feed, LLM/entegrasyon URL'leri) | `lib/security/safe-fetch`: iç IP aralıkları ve DNS rebinding reddi |
-| Mesajlaşma | SMS pumping (OTP/şifre sıfırlama ile fatura şişirme; checkout'ta yazılan numaraya sipariş SMS'i) | Telefon + IP + hesap başına SMS kotası, captcha eşiği; IP başına saatte 10'dan fazla tamamlanan sepetin SMS'i tutulur (adr/0037 M9) |
-| Mesajlaşma | Uydurma adreslere giden e-postaların geri dönmesi, gönderici itibarının düşmesi | E-posta alan adının MX denetimi (kayıt, misafir sepeti, stok bildirimi), mağazanın günlük e-posta sınırı (adr/0037 M9) |
-| Tenant alan adları | Subdomain takeover, yanlış tenant'a yönlenme | Kapatmada DNS temizliği doğrulaması, sahiplik kanıtı |
-| Bağımlılıklar | Supply-chain saldırısı | Lockfile, Renovate bekleme süresi, audit, SBOM, imaj taraması |
-| Tenant izolasyonu | Yanlış tenant'a erişim, kaynak çalma | Instance-per-tenant, ayrı DB kullanıcıları, ağ izolasyonu |
+
+| Varlık                       | Tehdit                                                                                           | Önlem                                                                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Ödeme akışı                  | Tutar manipülasyonu, sahte callback, replay, open redirect                                       | Sunucu tarafı tutar, imza doğrulama, idempotency, dönüş URL allowlist                                                               |
+| Tenant secret'ları           | Sızıntı (log, repo, hata mesajı, CI çıktısı)                                                     | Secret manager, redaksiyon, secret scanning, CI maskeleme                                                                           |
+| Müşteri verisi (KVKK)        | Yetkisiz erişim, aşırı veri, okuma izi yokluğu                                                   | RBAC, maskeleme, minimizasyon, saklama süreleri, okuma denetimi                                                                     |
+| Admin hesapları              | Credential stuffing, oturum çalma, CSRF                                                          | 2FA, rate limit, httpOnly/secure cookie, CSRF token, oturum süresi                                                                  |
+| Müşteri hesapları            | Credential stuffing, hesap ele geçirme, sahte kayıt                                              | Rate limit, e-posta doğrulama, şifre sıfırlama tek kullanımlık token                                                                |
+| Webhook endpoint'leri        | Sahte istek, DoS                                                                                 | İmza/HMAC, IP allowlist (varsa), rate limit, hızlı 200 + kuyruk                                                                     |
+| Dosya yükleme / dışa aktarma | SVG-XSS, MIME sahteciliği, EXIF sızıntısı, CSV formül enjeksiyonu, XXE, zip bomb                 | Tür doğrulama, yeniden kodlama, EXIF temizleme, hücre kaçışlama, güvenli XML parser                                                 |
+| Sunucu taraflı istekler      | SSRF (webhook, geçişte görsel indirme, feed, LLM/entegrasyon URL'leri)                           | `lib/security/safe-fetch`: iç IP aralıkları ve DNS rebinding reddi                                                                  |
+| Mesajlaşma                   | SMS pumping (OTP/şifre sıfırlama ile fatura şişirme; checkout'ta yazılan numaraya sipariş SMS'i) | Telefon + IP + hesap başına SMS kotası, captcha eşiği; IP başına saatte 10'dan fazla tamamlanan sepetin SMS'i tutulur (adr/0037 M9) |
+| Mesajlaşma                   | Uydurma adreslere giden e-postaların geri dönmesi, gönderici itibarının düşmesi                  | E-posta alan adının MX denetimi (kayıt, misafir sepeti, stok bildirimi), mağazanın günlük e-posta sınırı (adr/0037 M9)              |
+| Tenant alan adları           | Subdomain takeover, yanlış tenant'a yönlenme                                                     | Kapatmada DNS temizliği doğrulaması, sahiplik kanıtı                                                                                |
+| Bağımlılıklar                | Supply-chain saldırısı                                                                           | Lockfile, Renovate bekleme süresi, audit, SBOM, imaj taraması                                                                       |
+| Tenant izolasyonu            | Yanlış tenant'a erişim, kaynak çalma                                                             | Instance-per-tenant, ayrı DB kullanıcıları, ağ izolasyonu                                                                           |
 
 ## Zamanlama: güvenlik tabanı önce
-| Ne | Faz | Not |
-|---|---|---|
-| gitleaks, `pnpm audit`, SAST (Semgrep veya CodeQL), Trivy imaj taraması, SBOM | F0.7 | CI'da; kritik bulgu build'i kırar |
-| Env şeması (Zod), açılışta doğrulama | F0.6 | |
-| `lib/security`: safe-fetch (SSRF), timing-safe compare, upload validator, CSV kaçışlama, güvenli XML | F2.9 | Tüm fazlar bu kütüphaneyi kullanır |
-| Rate limit middleware (Redis), güvenlik header'ları, CORS, hata sanitizasyonu, pino redaksiyon | F2.10 | Route eklenmeden önce hazır |
-| Audit log (mutasyon + hassas veri okuma) | F2.5 | |
-| Admin 2FA (TOTP), rol tabanlı yetki | F12.6 + ADR | Canlı öncesi hazır; ekip için zorunluluk sahibin anahtarı (varsayılan açık) |
-| Pentest, yük testi, fraud-guard, WAF | F15 | Doğrulama |
+
+| Ne                                                                                                   | Faz         | Not                                                                         |
+| ---------------------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------- |
+| gitleaks, `pnpm audit`, SAST (Semgrep veya CodeQL), Trivy imaj taraması, SBOM                        | F0.7        | CI'da; kritik bulgu build'i kırar                                           |
+| Env şeması (Zod), açılışta doğrulama                                                                 | F0.6        |                                                                             |
+| `lib/security`: safe-fetch (SSRF), timing-safe compare, upload validator, CSV kaçışlama, güvenli XML | F2.9        | Tüm fazlar bu kütüphaneyi kullanır                                          |
+| Rate limit middleware (Redis), güvenlik header'ları, CORS, hata sanitizasyonu, pino redaksiyon       | F2.10       | Route eklenmeden önce hazır                                                 |
+| Audit log (mutasyon + hassas veri okuma)                                                             | F2.5        |                                                                             |
+| Admin 2FA (TOTP), rol tabanlı yetki                                                                  | F12.6 + ADR | Canlı öncesi hazır; ekip için zorunluluk sahibin anahtarı (varsayılan açık) |
+| Pentest, yük testi, fraud-guard, WAF                                                                 | F15         | Doğrulama                                                                   |
 
 ## Zorunlu kurallar
 
 ### Ödeme
+
 - Kart verisi sisteme **hiç** girmez: iyzico Checkout Form / PayTR iFrame (hosted). PCI kapsamı SAQ-A seviyesinde kalır.
 - Tutar, para birimi, sepet kalemleri **her zaman** sunucudaki sepetten üretilir.
 - Callback geldiğinde sonuç, sağlayıcı API'sinden **tekrar sorgulanır**; callback gövdesine güvenilmez.
@@ -46,17 +49,24 @@
 - Dolandırıcılık (`fraud-guard`, F15.6, ADR-0044): dış servissiz iş kanıtı doğrulaması (kayıt, müşteri girişi, siparişimi bul, stok bildirimi ve ödeme başlatmada eşik aşılınca 428); ödeme başlatmada sayılan hız kuralları (her ödeme yolu, kartla ödeme dahil; IP'de engel uzak, doğrulama yakın: CGNAT; e-posta yalnızca doğrulama ister); şüpheli sipariş puanı ve Siparişler > İnceleme (bekleyen ya da reddedilen sipariş kargoya verilemez); kara liste (e-posta ve telefon yalnızca anahtarlı özetle; kayıt, hesap ve ödemede 403, girişte yanlış şifre yanıtı, siparişte kancayla bir kez daha).
 
 ### Promosyon ve stok
+
 - Kupon kullanım limiti ve stok rezervasyonu eşzamanlı isteklerde kilit/atomik işlemle korunur (yarış durumu testli).
 - Kupon kodu denemesine rate limit; tek kullanımlık kodlar tahmin edilemez üretilir.
 
 ### Dosya yükleme ve dışa aktarma
-- Görsel yükleme: izinli türler (jpeg, png, webp, avif); SVG varsayılan kapalı, açılırsa sanitize edilir.
+
+- Görsel yükleme: izinli türler (jpeg, png, webp, avif); SVG yalnız mağaza logoları ve site simgesi için, temizlenerek (aşağıda).
   Tür, uzantıdan değil içerikten (magic bytes) doğrulanır. Görsel worker'da yeniden kodlanır (EXIF/konum verisi silinir).
 - Boyut ve piksel sınırı; sınır aşımı açıklayıcı hata.
 - Uygulama (F2 S5, `lib/security/upload`, `src/api/http/upload-validator.ts`):
   - `POST /admin/uploads`'ta her dosya baytlarından okunur. Kabul edilen dosya, içeriğinin türüne göre yeniden adlandırılır (`<slug>.<png|jpg|webp|avif|csv>`) ve MIME türü yeniden yazılır. Gerekçe: depolama dosyayı uzantısına göre servis eder; PNG başlıklı ama `.html` adlı bir dosya backend origin'inde stored XSS olurdu.
   - İstek başına en fazla 20 dosya. Bir dosya reddedilirse hiçbir dosya saklanmaz.
   - Medusa'nın `/static` dosyaları bizim header'larımızı almaz. F16'da proxy `/static` için nosniff ve `Content-Security-Policy: default-src 'none'; sandbox` ekler; uzun vadede yüklemeler cookie'siz ayrı bir origin'den servis edilir.
+- **SVG (sahip, 2026-11-16: mağaza logoları ve site simgesi):**
+  - Yalnız ortam kütüphanesinin yüklemesi (`POST /admin/uploads`, `validateLibraryUpload`) SVG alır; tür içerikten belirlenir, dosya en çok 200 KB. Yorum fotoğrafı, adresten içe aktarma, geçiş ve hazır görünüm görselleri SVG'yi eskisi gibi reddeder.
+  - Depoya yalnız temizlenmiş hali yazılır (`lib/media/svg.ts`): DOMPurify 3.4.17 (MPL-2.0 / Apache-2.0) SVG profili, jsdom 26.1.0 üzerinde. Atılanlar: `script`, `foreignObject`, `iframe`/`object`/`embed`, `image`/`feImage`, `use` (DOMPurify'ın profili dışında), bütün animasyonlar (`animate*`, `set`, `discard`), `a` (içeriği kalır), bütün `on*` öznitelikleri, `#id` dışındaki her `href`/`xlink:href` (`javascript:`, `data:`, dış adres), `#id` dışını gösteren CSS `url(`, `@import`, `expression(` (stil özniteliği atılır, `<style>` öğesi bütünüyle atılır). HTML ayrıştırıcı DOCTYPE/ENTITY genişletmez (XXE ve "billion laughs" yok). Sonuçta tek bir kök `<svg>` ve en az bir çizim öğesi kalmalı; en çok 5.000 öğe, 64 derinlik; XML olarak yeniden yazılır, `viewBox`'tan genişlik/yükseklik eklenir. Özgün dosya saklanmaz. Raster türev (WebP/AVIF) üretilmez.
+  - Yalnız mağaza logoları (açık/koyu zemin) ve site simgesi SVG olabilir; ürün, marka, kategori, koleksiyon görselleri, sayfa/yazı kapağı, paylaşım görseli, vitrin düzeni görselleri SVG'yi sunucuda `media.svg_logo_only` ile reddeder (`lib/media/svg-use.ts`: kütüphane kaydının türü ya da `.svg` adresi; istemci bayrağına bakılmaz). Site simgesi SVG ise sunucu temizlenmiş dosyadan 180×180 PNG (`apple-touch-icon`) üretir.
+  - **Sunum başlıkları:** dosyalar nesne deposundan (S3 uyumlu SeaweedFS; testte ve yerelde Medusa `/static`) doğrudan servis edilir. Medusa'nın `file-s3` sağlayıcısı yalnız `Content-Type` (`image/svg+xml`) yazar; S3 nesne başına `X-Content-Type-Options` ya da `Content-Security-Policy` başlığı tutamaz. Bugün SVG doğrudan açıldığında tek savunma temizlemedir (betik, olay özniteliği, dış başvuru kalmaz). Vitrin ve panel SVG'yi yalnız `<img>` ile gösterir (img içinde betik hiç çalışmaz). **Canlıya çıkışta (aaPanel VPS, kendi depolama):** depolama alanını önleyen nginx'te `location ~* \.svg$` için `add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox" always;` ve `add_header X-Content-Type-Options nosniff always;` (gerekirse `Content-Disposition: inline`); depolama alan adı panel/vitrin/backend çerezlerini almayan ayrı bir origin olmalı.
   - `POST /admin/uploads/presigned-urls` (file-s3 ile çalışır hâle gelir) bu doğrulamadan geçmediği için F3.9'un kontrollü içe aktarma yolu gelene kadar kapalıdır (F2 S13). Medusa'nın `GET/DELETE /admin/uploads/:id` uçları iş sonucu dosyalarını göstermez.
 - CSV/Excel dışa aktarımda `=`, `+`, `-`, `@`, tab, CR (ve tam genişlik biçimleri) ile başlayan metinler kaçışlanır (formül enjeksiyonu). Türkçe Excel satırı `;` ile böldüğü için hücre içinde `,`, `;` ya da tab'dan sonra başlayan formüller de kaçışlanır. Dışa aktarımın ayırıcısı ve BOM'u ilk dışa aktarım işiyle (S13) kararlaştırılır.
 - XML okuma (geçiş, feed, UBL): DTD ve external entity kapalı, boyut sınırı (5 MB), iç içe derinlik sınırı (64), değerler metin olarak kalır (`06100` posta kodudur). Zip çıkarmada toplam boyut, dosya sayısı ve sıkıştırma oranı sınırı; yol aşımı, symlink, kontrol karakteri ve aynı ada (büyük/küçük harf ve Unicode biçimi dahil) sahip girdiler reddedilir.
@@ -65,6 +75,7 @@
 - Uygulama (F2 S13, adr/0014): iş sonuçları `access: private` ve tahmin edilemez adla saklanır; indirme 5 dakikalık imzalı bağlantıdır, kişisel veri içeren sonuçta okuma kaydı yazılır (yazılamazsa 503). Dev SeaweedFS bucket'ı anonim okumaya açıktır (adr/0006): private dosyalar orada yalnızca adlarıyla korunur. Prod'da private bucket ya da anonim okumasız politika F16 şartıdır.
 
 ### Sunucu taraflı istekler (SSRF)
+
 - Kullanıcı/tenant kontrollü her URL (`tenant-webhooks`, geçişte görsel indirme, feed kaynakları, muhasebe/LLM uç noktaları)
   `lib/security/safe-fetch` üzerinden gider: DNS çözümü sonrası özel/iç/link-local aralıklar reddedilir, yönlendirmeler yeniden doğrulanır,
   yalnızca http/https, zaman aşımı ve yanıt boyutu sınırı. Uygulama (F2 S4):
@@ -81,11 +92,13 @@
 - **Üst panelin plan belgesi itmesi (adr/0061 Ek C9):** hedef mağazanın iç ağ adresi olduğu için `safe-fetch`'in "yalnız genel adres" kuralı burada ters düşer. Kural bunun yerine izin listesidir: `CP_TENANT_API_HOSTS` (`ad[:port]`; tek etiketli ad ya da `.internal`/`.local` altı; portsuz yalnız 9000/80/443), yerelde ayrıca bu makinenin 9000 ve 9200–9299 portları; yalnız taban URL (kimlik bilgisi, sorgu, yol yok), `http` yalnız listedeki iç adlara, yönlendirme izlenmez, 5 sn, yanıt gövdesi okunmaz. Mağazanın çekmesi `CONTROL_PLANE_URL`'e gider (yapılandırma, kullanıcı girdisi değil): yönlendirme hata sayılır, 10 sn, yanıt 16 KB'ı geçerse okunmaz; yerel olmayan ortamda `http` yalnız tek etiketli DNS adına (IP, köşeli IPv6 dahil, `https` ister).
 
 ### Giden entegrasyonlar
+
 - Tenant API anahtarları yalnızca oluşturulurken bir kez gösterilir, hash'li saklanır (çekirdek davranışı doğrulanır).
 - Destek erişimi (break-glass) süreli, gerekçeli ve audit log'lu (F16.10).
 - LLM/AI sağlayıcısına (adr/0005) kişisel veri gönderilmez; yalnızca ürün/içerik verisi; sağlayıcı sözleşmesi `docs/12`.
 
 ### Secret yönetimi
+
 - Secret'lar: geliştirmede `.env` (git'e girmez), prod'da secret manager / Docker secrets.
 - Üst panelin (control plane) secret deposu (adr/0061 §4, Ek C8): `vault` modülü.
   - **Zarf şifreleme:** her kayıt kendi veri anahtarıyla, veri anahtarı `CP_MASTER_KEY` (yerel KEK; OpenBao Transit F16) altında sarılı; AAD sahip + ad + sürüm. Satırda düz metin yok.
@@ -109,7 +122,9 @@
 - Claude Code `.env*` dosyalarını okuyamaz (`.claude/settings.json` deny).
 
 ### Üst panel (control plane) güven sınırı
+
 Ayrıntı adr/0061 §3 ve Ek'leri; özet:
+
 - **Yüzey:** yalnız `/health`, personel girişi, `/admin/cp/*` ve mağazaların imzalı `/tenant-api/*`'ı cevaplanır (izin listesi, Medusa'nın ticaret rotaları 404). Ekran genel internete açık değildir (F16: IP listesi ya da Cloudflare Access).
 - **Personel:** `owner`, `operator`, `finance`, `readonly`; kapalı varsayılan rota tablosu (`lib/staff/route-table*.ts`, her ucun kararı birim testte). 2FA her zaman zorunlu. Yeniden doğrulama: askı ve geri açma, personel ve rol, anahtarlar, ödeme işaretleme ve bağışlama, paket fiyatı **ve paketin deneme/ek süresi** (`/plans/:id/terms`, Ek C19 L1), mağaza ek süresi, hedef sürüm, TCKN görme. Her mutasyon ve hassas okuma denetim kaydında (yalnız ekleme, değer yok).
 - **Mağaza ile:** iki yönde Ed25519 imza (paylaşılan sır yok); plan belgesi `serial`, istekler zaman + tek kullanımlık `nonce` ile tekrar saldırısına kapalı. Mağaza saklanan belgeyi her yüklemede yeniden doğrular; tutmayan satıra inanmaz (son doğrulanmış durum ya da `restricted`; satırın kendi durumu daha katıysa o, yani askıdaki mağaza askıda kalır), başka mağazanın satırı mağazayı kısıtlar, daha önce belge uygulamış mağazada silinen satır `restricted` sayılır (`control_plane_marker`), aynı serial'lı geçerli belge bozuk satırı onarır (Ek C19 I2, I3 ve takip incelemesi).
@@ -119,6 +134,7 @@ Ayrıntı adr/0061 §3 ve Ek'leri; özet:
 - **Sırlar:** üst panelin sırları zarf şifreli `vault`'tadır (aşağıda); mağazanın çalışma sırları üst panelde tutulmaz.
 
 ### Kimlik doğrulama ve yetki
+
 - Medusa auth modülü kullanılır; kendi auth sistemi yazılmaz.
 - Store API kimlik modeli (cookie session mı, bearer JWT mi) `adr/0004` ile karara bağlanır; karar F1'de verilir, F10.1 uygular.
 - Admin: 2FA (TOTP), Medusa 2.21'in yerleşik MFA'sıyla (adr/0040). Ekip için zorunluluk sahibin Ayarlar > Güvenlik'teki anahtarıdır (varsayılan açık; kullanıcı kararı 2026-10-29). Kodu bu oturumda geçmemiş kişi yalnızca kendini görür (`staff.mfa_required`); kurulumdan sonra kodla yeniden girilir. `AUTH_MFA_ENCRYPTION_KEY` canlıda zorunlu; `ADMIN_MFA=off` yalnızca yerelde. API anahtarlarından 2FA istenmez (kendi kapsamları var).
@@ -145,6 +161,7 @@ Ayrıntı adr/0061 §3 ve Ek'leri; özet:
   - Açık oturumlar: girişte (`POST /auth/session`) oturum kimliği kişinin listesine yazılır (Redis, oturum ömrü kadar), çıkışta silinir; sayma ve kapatma yalnızca bu listeyi okur, her kimlik oturum deposunda doğrulanır (oturum deposunun tamamı, müşteri oturumları dahil, hiç okunmaz). Sayı profil yanıtında değil, ayrı uçtan gelir (`GET /admin/staff/me/sessions`). "Diğerlerini kapat" yeniden doğrulama ister. Bu düzenden önce açılmış oturumlar listede olmadığından ömürleri (en çok 10 saat) dolana kadar kapatılamaz. Son giriş zamanı tutulmadığından gösterilmez. Bearer token'lar kendi ömrü dolana kadar geçerli kalır, yenilenemez.
 
 ### API
+
 - Tüm girdiler Zod ile doğrulanır (`validateAndTransformBody`, `validateAndTransformQuery`).
 - Rate limiting: Redis tabanlı; login, kayıt, şifre sıfırlama, checkout, taksit sorgusu, kupon denemesi, SMS tetikleyen uçlar, webhook için ayrı limitler. Uygulama (F2 S3, `lib/security/rate-limit`, `src/api/http/rate-limit.ts`):
   - Profiller `RATE_LIMIT_PROFILES`'ta tanımlı. Her profilin IP başına ve (IP + kimlik) başına sınırı olabilir. Kimlik, e-posta ya da telefonun `PII_HASH_KEY` ile HMAC'idir; düz değer ya da sözlükle çözülebilecek düz özet saklanmaz.
@@ -181,6 +198,7 @@ Ayrıntı adr/0061 §3 ve Ek'leri; özet:
 - Toplu sorgularda sayfalama limiti zorunlu (max 100). Store API'de `fields` ile hassas alan sızdırmama testi.
 
 ### Veri ve KVKK
+
 - TCKN, telefon, adres: loglarda maskeli; admin listelerinde maskeli, detayda yetkiye bağlı açık.
 - Hassas veri **okuma** da audit log'a düşer: kim, hangi müşteri kaydı, ne zaman (TCKN/adres görüntüleme, dışa aktarma).
   - Uygulama (F2 S8, adr/0011, `modules/audit-log`, `src/api/http/audit/`):
@@ -199,6 +217,7 @@ Ayrıntı adr/0061 §3 ve Ek'leri; özet:
   Tenant veri sorumlusu, platform veri işleyen olduğundan bildirim sorumluluğu sözleşmede netleşir.
 
 ### Altyapı
+
 - Container'lar non-root, salt-okunur dosya sistemi (mümkün olduğunca).
 - DB kullanıcısı en az yetki; migration kullanıcısı ayrı. DB ve Redis yalnızca iç ağdan erişilir, bağlantılar TLS, Redis auth zorunlu.
 - Tenant'lar arası ağ izolasyonu; DB'ler ayrı.
@@ -207,6 +226,7 @@ Ayrıntı adr/0061 §3 ve Ek'leri; özet:
 - Varsayılan `<slug>.<platform-domain>` adresi, tenant kendi domain'ini bağladığında ona 301 ile yönlenir (hem güvenlik hem SEO).
 
 ### Bağımlılıklar ve supply chain
+
 - `pnpm` lockfile zorunlu, `--frozen-lockfile` CI'da.
 - Renovate: haftalık; güvenlik yamaları hemen.
 - Yeni yayımlanmış paket sürümlerini (son 14 gün) otomatik alma; Renovate `minimumReleaseAge`.
@@ -223,6 +243,7 @@ Ayrıntı adr/0061 §3 ve Ek'leri; özet:
   (Mart 2026 trivy-action tag ele geçirme olayı, CVE-2026-33634).
 
 ## Review süreci
+
 - Her faz sonunda `/guvenlik-review` çalıştırılır. Ödeme/kargo/fatura/auth/webhook/upload PR'larında `security-reviewer` ajanı zorunlu.
 - Her PR şablonunda "Güvenlik etkisi" alanı doldurulur (yok / var: açıklama).
 - F15'te dış pentest; bulgular kapatılmadan canlıya çıkılmaz. Sorumlu açıklama politikası (`/.well-known/security.txt`) yayımlanır.

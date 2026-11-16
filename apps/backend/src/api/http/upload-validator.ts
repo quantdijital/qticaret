@@ -2,7 +2,8 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { isValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
 import { sanitizeImage } from "../../lib/media"
-import { UPLOAD_MEDIA_TYPES, storedName, validateUpload } from "../../lib/security/upload"
+import { sanitizeSvg } from "../../lib/media/svg"
+import { UPLOAD_MEDIA_TYPES, storedName, validateLibraryUpload } from "../../lib/security/upload"
 import type { UploadFile } from "../../lib/security/upload"
 import { rejectRequest } from "./reject"
 
@@ -56,7 +57,7 @@ export async function uploadValidator(
   const accepted = []
   for (const file of files) {
     try {
-      accepted.push({ file, type: validateUpload(file) })
+      accepted.push({ file, type: validateLibraryUpload(file) })
     } catch (error) {
       if (!isValidationError(error)) {
         throw error
@@ -65,8 +66,22 @@ export async function uploadValidator(
       return
     }
   }
-  // Images are stored cleaned: upright, without EXIF/GPS and other metadata (F3.3)
+  // Images are stored cleaned: upright, without EXIF/GPS and other metadata (F3.3); an SVG
+  // as its cleaner leaves it, never as sent (lib/media/svg.ts)
   for (const { file, type } of accepted) {
+    if (type.type === "svg") {
+      try {
+        file.buffer = sanitizeSvg(file.buffer).buffer
+        file.size = file.buffer.length
+      } catch (error) {
+        if (!isValidationError(error)) {
+          throw error
+        }
+        refuse(req, res, error.safeMessage)
+        return
+      }
+      continue
+    }
     try {
       const clean = await sanitizeImage(file.buffer, type.type)
       file.buffer = clean.buffer

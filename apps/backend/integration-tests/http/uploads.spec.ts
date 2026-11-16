@@ -28,9 +28,13 @@ const form = (...files: [content: Buffer | string, name: string, type: string][]
   return data
 }
 
-const SVG = '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'
+// Nothing of an SVG left once cleaned: refused
+const EMPTY_SVG = "<svg><foreignObject><p>x</p>"
 
-/** F2.9b KK: SVG and fake MIME uploads are refused (docs/04). */
+/**
+ * F2.9b KK: fake MIME uploads are refused (docs/04); an SVG is told by its
+ * content and stored only as cleaned (the logos' and site icon's, 2026-11-16).
+ */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
@@ -86,13 +90,27 @@ medusaIntegrationTestRunner({
       expect(broken.data.message).toBe("upload.unreadable_image")
     })
 
-    it("refuses an SVG and a fake image, and accepts a real PNG", async () => {
-      const svg = await upload(form([SVG, "logo.svg", "image/svg+xml"]))
+    it("stores an SVG cleaned, refuses one with nothing left and a fake image, accepts a real PNG", async () => {
+      const svg = await upload(
+        form([
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10" onload="alert(1)"><script>alert(2)</script><rect width="5" height="5" fill="#c00" onclick="alert(3)"/><use href="https://evil.example/x.svg#a"/></svg>`,
+          "logo.png",
+          "image/png",
+        ])
+      )
+      const empty = await upload(form(["<svg><foreignObject>", "x.svg", "image/svg+xml"]))
       const fake = await upload(form(["#!/bin/sh\necho hi", "photo.png", "image/png"]))
       const png = await upload(form([PNG_1X1, "photo.png", "image/png"]))
 
-      expect(svg.status).toBe(400)
-      expect(svg.data.message).toBe("upload.unsupported_type")
+      // Told by its content, named and stored as what it is, and only as cleaned
+      expect(svg.status).toBe(200)
+      const name = basename(svg.data.files?.[0]?.url ?? "")
+      expect(name).toMatch(/-logo\.svg$/)
+      const stored = readFileSync(join(STATIC_DIR, name), "utf8")
+      expect(stored).toContain('<rect width="5" height="5" fill="#c00"/>')
+      expect(stored).toMatch(/width="20"/)
+      expect(stored).not.toMatch(/script|alert|onload|onclick|evil\.example|<use/)
+      expect([empty.status, empty.data.message]).toEqual([400, "upload.svg_invalid"])
       expect(fake.status).toBe(400)
       expect(fake.data.message).toBe("upload.unsupported_type")
       expect(png.status).toBe(200)
@@ -130,7 +148,7 @@ medusaIntegrationTestRunner({
       const before = storedFiles().length
 
       const response = await upload(
-        form([PNG_1X1, "a.png", "image/png"], [SVG, "b.svg", "image/svg+xml"])
+        form([PNG_1X1, "a.png", "image/png"], [EMPTY_SVG, "b.svg", "image/svg+xml"])
       )
 
       expect(response.status).toBe(400)

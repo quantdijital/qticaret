@@ -1,4 +1,8 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { SVG_MIME } from "../../../../lib/media/svg"
+import { MEDIA_MODULE } from "../../../../modules/media"
+import type MediaModuleService from "../../../../modules/media/service"
+import { appleTouchOf } from "../../../../workflows/platform-settings/steps/favicon"
 import { homeSeo } from "../../../../lib/seo/home"
 import { siteJsonLd } from "../../../../lib/seo/jsonld"
 import { SCHEMA_DAYS } from "../../../../lib/shop/hours"
@@ -18,6 +22,33 @@ import type { LegalIdentity } from "../../../../workflows/legal/identity"
 import { shopOf } from "../../../../workflows/seo/payload-sources"
 import { planModeFor } from "../../../../lib/plan-guard"
 import { siteMaintenance } from "../../../../workflows/storefront/maintenance"
+
+/**
+ * The site icon as the storefront's `<head>` names it: its address and
+ * type, and Apple's home screen icon (the PNG itself; an SVG's own PNG, or
+ * none when it could not be made). None chosen: all null.
+ */
+async function siteIcon(
+  scope: MedusaRequest["scope"],
+  url: string | null
+): Promise<{
+  favicon_url: string | null
+  favicon_type: string | null
+  apple_touch_url: string | null
+}> {
+  if (!url) {
+    return { favicon_url: null, favicon_type: null, apple_touch_url: null }
+  }
+  const [asset] = await scope
+    .resolve<MediaModuleService>(MEDIA_MODULE)
+    .listMediaAssets({ url }, { select: ["mime_type", "derivatives"], take: 1 })
+  const type = asset?.mime_type === SVG_MIME ? SVG_MIME : "image/png"
+  return {
+    favicon_url: url,
+    favicon_type: type,
+    apple_touch_url: type === SVG_MIME ? (appleTouchOf(asset?.derivatives)?.url ?? null) : url,
+  }
+}
 
 const identityOf = (identity: LegalIdentity) => ({
   legalName: identity.company_title,
@@ -86,11 +117,11 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       : null,
     jsonLd,
     system_pages: SYSTEM_PAGES,
-    // The site icon the shop chose; null: the storefront's own
+    // The site icon the shop chose, its type and Apple's home screen PNG; null: the storefront's own
     shop: {
       name: shop.name,
       logo_url: appearance.logo_light_url,
-      favicon_url: appearance.favicon_url ?? null,
+      ...(await siteIcon(req.scope, appearance.favicon_url ?? null)),
     },
     home: homeSeo({ shop, home: seo.home, ogImage: seo.default_og_image, jsonLd }),
     maintenance,

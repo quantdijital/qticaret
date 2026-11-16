@@ -4,6 +4,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { errorSummary, logger } from "../../../lib/logging"
 import { deriveImages, versionName } from "../../../lib/media"
 import type { Derivative } from "../../../lib/media"
+import { looksLikeSvg } from "../../../lib/media/svg"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
 import { removeFiles, storePublicFile } from "../files"
@@ -46,6 +47,10 @@ async function storeVersions(
   const made: { derivative: Derivative; file: StoredFile }[] = []
   try {
     const master = await container.resolve(Modules.FILE).getAsBuffer(target.fileId)
+    // No raster versions of an SVG, whichever way it got here
+    if (looksLikeSvg(master)) {
+      return made
+    }
     for (const derivative of await deriveImages(master)) {
       const file = await storePublicFile(
         container,
