@@ -51,8 +51,9 @@ describe("a product list's fields for the settings search", () => {
 
   it("names a strips list's count and look in Diziliş, never its card (Ek 2026-11-16)", () => {
     const strips = switchVariant(grid, "strips")
+    // The variant in Stil › Biçim, the count and look in Stil › Diziliş (docs/18 §7.1)
+    expect(keys(strips)).toContain("variant:variant")
     expect(keys(strips).filter((key) => key.startsWith("layout:"))).toEqual([
-      "layout:variant",
       "layout:strips_count",
       "layout:strips_height",
       "layout:strips_slant",

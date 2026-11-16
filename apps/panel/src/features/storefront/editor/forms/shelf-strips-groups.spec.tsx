@@ -8,6 +8,7 @@ import "@/lib/i18n"
 import type { AnySection } from "@/features/storefront/api/layout"
 import { newHomeSection } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
+import { openGroup } from "../settings-groups.fixtures"
 import { FIELD_IDS } from "./field-registry"
 import type { ShelfField } from "./shelf-registry"
 
@@ -66,15 +67,23 @@ const STRIPS_FIELDS: ShelfField[] = [
   "strips_dim",
 ]
 
+/** Picks a variant in Stil › Biçim, then opens Stil › Diziliş where its fields stand (docs/18 §7.1). */
+async function pickVariant(user: ReturnType<typeof userEvent.setup>, name: RegExp) {
+  const variant = await openGroup(user, "Biçim")
+  await user.click(within(variant).getByRole("radio", { name }))
+  await openGroup(user, "Diziliş")
+}
+
 /** adr/0049 Ek 2026-11-16: a product rail's strips in Diziliş, only while it is strips. */
 describe("a product rail's strips in Diziliş", () => {
   it("shows the count and look once strips is picked, low and five by default, no card", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("products", ID))
+    await openGroup(user, "Diziliş")
     for (const name of STRIPS_FIELDS) expect(fieldOf(name)).toBeNull()
     expect(screen.getByRole("combobox", { name: /Kart biçimi/ })).toBeVisible()
 
-    await user.click(screen.getByRole("radio", { name: /Çapraz şeritler/ }))
+    await pickVariant(user, /Çapraz şeritler/)
     for (const name of STRIPS_FIELDS) expect(fieldOf(name)).not.toBeNull()
     expect(changes.at(-1)).toMatchObject({
       variant: "strips",
@@ -101,7 +110,7 @@ describe("a product rail's strips in Diziliş", () => {
   it("offers two to eight products, and sets and resets each step and switch", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("products", ID))
-    await user.click(screen.getByRole("radio", { name: /Çapraz şeritler/ }))
+    await pickVariant(user, /Çapraz şeritler/)
 
     const counts = field("strips_count").getAllByRole("radio")
     expect(counts.map((radio) => radio.textContent)).toEqual(["2", "3", "4", "5", "6", "7", "8"])
@@ -126,10 +135,10 @@ describe("a product rail's strips in Diziliş", () => {
   it("hides the strips' fields and drops them on another variant", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("products", ID))
-    await user.click(screen.getByRole("radio", { name: /Çapraz şeritler/ }))
+    await pickVariant(user, /Çapraz şeritler/)
     await user.click(field("strips_count").getByRole("radio", { name: "7" }))
 
-    await user.click(screen.getByRole("radio", { name: /Kayan sıra/ }))
+    await pickVariant(user, /Kayan sıra/)
     for (const name of STRIPS_FIELDS) expect(fieldOf(name)).toBeNull()
     expect(screen.queryByText(/Bu biçimde kart yok/)).toBeNull()
     expect(screen.getByRole("combobox", { name: /Kart biçimi/ })).toBeVisible()
