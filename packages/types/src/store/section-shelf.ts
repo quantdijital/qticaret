@@ -1,6 +1,6 @@
 /**
  * The product rail's own counts by variant (adr/0049 Ek 2026-11-15, owner's
- * request): what `featured`, `compact`, `columns` and `strips` show, fixed by the
+ * request): what `featured`, `compact`, `columns`, `strips` and `ranked` show, fixed by the
  * contract rather than the shop's `limit` (which `grid` and `carousel`
  * keep). Mirrored by the backend's `SHELF_LIMITS`; a unit test keeps them
  * equal.
@@ -27,7 +27,28 @@ export const SHELF_LIMITS = {
    * theme's `STRIPS_MOST` the upper bound; a phone scrolls past three.
    */
   strips: { counts: [2, 3, 4, 5, 6, 7, 8], default: 5 },
+  /**
+   * A ranked list (Ek 2026-11-16, "ilk beş"): three to ten products, each
+   * beside its place; five by default.
+   */
+  ranked: { counts: [3, 4, 5, 6, 7, 8, 9, 10], default: 5 },
 } as const
+
+/**
+ * How a ranked rail stands from 1024 px (Ek 2026-11-16): `lead`, the first
+ * large on the left and the rest in rows beside it (the default; on a
+ * phone the first large on top); `row`, every product in one row (two
+ * past five), each its figure beside its photograph. A phone reads both
+ * as a list, each place's figure on the left. Mirrored by the backend's
+ * `products.ts`; a unit test keeps them equal.
+ */
+export const SHELF_RANKED_LAYOUTS = ["lead", "row"] as const
+export type ShelfRankedLayout = (typeof SHELF_RANKED_LAYOUTS)[number]
+export const SHELF_RANKED_LAYOUT_DEFAULT: ShelfRankedLayout = "lead"
+
+/** A ranked rail's layout as a reader takes it: one it knows, anything else the default. */
+export const shelfRankedLayoutOf = (value: unknown): ShelfRankedLayout =>
+  SHELF_RANKED_LAYOUTS.find((each) => each === value) ?? SHELF_RANKED_LAYOUT_DEFAULT
 
 /**
  * Cards in a row on a phone (docs/tema/bilesen-denetimi (b) 3, O8; the
@@ -74,6 +95,12 @@ export type ShelfStripsCount = (typeof SHELF_LIMITS.strips.counts)[number]
 export const shelfStripsCountOf = (value: unknown): ShelfStripsCount =>
   SHELF_LIMITS.strips.counts.find((each) => each === value) ?? SHELF_LIMITS.strips.default
 
+export type ShelfRankedCount = (typeof SHELF_LIMITS.ranked.counts)[number]
+
+/** A ranked rail's count as a reader takes it: one on the list as it is, anything else the default. */
+export const shelfRankedCountOf = (value: unknown): ShelfRankedCount =>
+  SHELF_LIMITS.ranked.counts.find((each) => each === value) ?? SHELF_LIMITS.ranked.default
+
 /** A compact rail's rows as a reader takes them: 2 or 3, anything else the default. */
 export const shelfRowsOf = (value: unknown): ShelfRows =>
   value === 3 ? 3 : SHELF_LIMITS.compact.default
@@ -93,6 +120,7 @@ export function shelfLimit(section: {
   rows?: unknown
   per_list?: unknown
   strips_count?: unknown
+  ranked_count?: unknown
 }): number {
   switch (section.variant) {
     case "featured":
@@ -103,6 +131,8 @@ export function shelfLimit(section: {
       return shelfPerListOf(section.per_list)
     case "strips":
       return shelfStripsCountOf(section.strips_count)
+    case "ranked":
+      return shelfRankedCountOf(section.ranked_count)
     default:
       return section.limit
   }
@@ -159,4 +189,7 @@ export interface StoreProductsSection extends ShelfPick {
   strips_line?: ShelfStripsSettings["strips_line"]
   strips_overlap?: ShelfStripsSettings["strips_overlap"]
   strips_dim?: ShelfStripsSettings["strips_dim"]
+  /** `ranked`: how many products, each beside its place, and how they stand from 1024 px. */
+  ranked_count?: ShelfRankedCount
+  ranked_layout?: ShelfRankedLayout
 }

@@ -8043,7 +8043,8 @@
           "featured": "Öne çıkan",
           "compact": "Kompakt liste",
           "columns": "Yan yana listeler",
-          "strips": "Çapraz şeritler"
+          "strips": "Çapraz şeritler",
+          "ranked": "Sıralı liste"
         },
         "categories": {
           "tiles": "Görselli karo",
@@ -9384,6 +9385,17 @@
         },
         "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat.",
         "stripsNoCard": "Bu biçimde kart yok: her ürün bir şerit, üstünde adı ve fiyatı; şeridin tamamı ürün sayfasına gider. Sepete ekle ve hızlı bakış düğmeleri görünmez.",
+        "rankedCount": "Ürün sayısı",
+        "rankedCountTerm": "ranked_count",
+        "rankedCountHint": "Kaç ürün sıralansın. Sıra listenin kaynağından gelir: çok satanlarda en çok satan, indirimdekilerde en yüksek indirim, yeni ürünlerde en yeni önce.",
+        "rankedLayout": {
+          "label": "Düzen",
+          "term": "ranked_layout",
+          "hint": "Birinci büyük: ilk ürün solda büyük, ötekiler yanında satır satır (telefonda ilk ürün üstte). Tek sıra: hepsi yan yana, beşten fazlası iki sıra; telefonda alt alta liste.",
+          "lead": "Birinci büyük",
+          "row": "Tek sıra"
+        },
+        "rankedCard": "Bu biçimde kart biçimi seçilmez: her ürün sıra numarasının yanında görseli, adı, puanı ve fiyatıyla çizilir. Hızlı bakış ve sepete ekle düğmeleri kartlardaki gibi görünür.",
         "tabs": "Yanındaki rafla sekmeli birleşsin",
         "tabsTerm": "tabs",
         "tabsJoined": "Şu rafla sekmeli tek rafta birleşiyor: {{names}}. Kapatırsan bu raf ayrı çizilir.",

@@ -5,6 +5,7 @@ import {
   SHELF_PHONE_DEFAULT,
   scrollerSettingsOf,
   shelfPhoneColumnsOf,
+  shelfRankedCountOf,
   shelfStripsCountOf,
 } from "@qticaret/types"
 import type { ProductsSection } from "@/features/storefront/api/layout"
@@ -15,6 +16,7 @@ import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { PhoneColumnsField } from "./phone-columns-field"
 import { ScrollerFields } from "./scroller-fields"
+import { ShelfRankedFields } from "./shelf-ranked-fields"
 import { ShelfStripsFields } from "./shelf-strips-fields"
 import { ShelfTabsField } from "./shelf-tabs-field"
 import { SCROLLER_MAIN } from "./scroller-groups"
@@ -82,8 +84,9 @@ function CountChoice<N extends number>({
  * carousel only, "Kaydırma" (cards in view, the arrows).
  * Its rarely changed scroller settings sit closed in "Diğer ayarlar"
  * (`SectionPanel`). A field the variant does not use is not shown: the
- * card on a compact or columns rail (always compact) or a strips one (no
- * card; its count and look instead), the tabs switch on a
+ * card on a compact or columns rail (always compact), a strips one (no
+ * card; its count and look instead) or a ranked one (its own places drawn
+ * from the card's parts; its count and layout instead), the tabs switch on a
  * columns rail (it never joins).
  */
 export function ShelfGroups({
@@ -179,9 +182,27 @@ export function ShelfGroups({
               />
               <ShelfStripsFields section={section} onChange={onChange} />
             </>
+          ) : variant === "ranked" ? (
+            <>
+              <CountChoice
+                id={FIELD_IDS.shelf(id, "ranked_count")}
+                label={t(`${SH}.rankedCount`)}
+                term={t(`${SH}.rankedCountTerm`)}
+                option={String}
+                hint={t(`${SH}.rankedCountHint`)}
+                counts={SHELF_LIMITS.ranked.counts}
+                value={shelfRankedCountOf(section.ranked_count)}
+                onChange={(ranked_count) => {
+                  set({ ranked_count })
+                }}
+              />
+              <ShelfRankedFields section={section} onChange={onChange} />
+            </>
           ) : null}
           {variant === "strips" ? (
             <p className="text-xs text-muted-foreground">{t(`${SH}.stripsNoCard`)}</p>
+          ) : variant === "ranked" ? (
+            <p className="text-xs text-muted-foreground">{t(`${SH}.rankedCard`)}</p>
           ) : variant === "compact" || variant === "columns" ? (
             <p className="text-xs text-muted-foreground">{t(`${SH}.cardCompact`)}</p>
           ) : (
