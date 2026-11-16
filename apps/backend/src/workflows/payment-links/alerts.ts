@@ -15,6 +15,37 @@ type Container = Pick<MedusaContainer, "resolve">
  */
 export type LinkAlert = "paid" | "prices_changed" | "out_of_stock" | "needs_review"
 
+/** The bell's idempotency key: per link and kind, per link and order for `needs_review`. */
+export const alertKey = (kind: LinkAlert, linkId: string, orderId: string | null): string =>
+  `payment_links.${kind}:${kind === "needs_review" && orderId ? `${linkId}:${orderId}` : linkId}`
+
+/**
+ * Whether the bell rang already (the notification module keeps its key):
+ * what it reports is not logged again. False when it cannot be read.
+ */
+export async function alerted(
+  container: Container,
+  kind: LinkAlert,
+  linkId: string,
+  orderId: string | null
+): Promise<boolean> {
+  try {
+    const notifications = container.resolve(Modules.NOTIFICATION) as unknown as {
+      listNotifications: (
+        filters: Record<string, unknown>,
+        config: { select: string[]; take: number }
+      ) => Promise<unknown[]>
+    }
+    const found = await notifications.listNotifications(
+      { idempotency_key: alertKey(kind, linkId, orderId) },
+      { select: ["id"], take: 1 }
+    )
+    return found.length > 0
+  } catch {
+    return false
+  }
+}
+
 /**
  * One bell per link and kind (per link and order for `needs_review`): the
  * team's own feed, the number and total only. A link paid at the door
@@ -29,7 +60,6 @@ export async function alertLink(
   orderId: string | null = null,
   due: "on_delivery" | null = null
 ): Promise<void> {
-  const once = kind === "needs_review" && orderId ? `${link.id}:${orderId}` : link.id
   const words = kind === "paid" && due ? "payment_links.paid_on_delivery" : `payment_links.${kind}`
   try {
     const number = linkNumber(link.number)
@@ -41,7 +71,7 @@ export async function alertLink(
       trigger_type: `payment_links.${kind}`,
       resource_id: link.id,
       resource_type: "payment_link",
-      idempotency_key: `payment_links.${kind}:${once}`,
+      idempotency_key: alertKey(kind, link.id, orderId),
       data: {
         kind: `payment_link_${kind}`,
         payment_link_id: link.id,
