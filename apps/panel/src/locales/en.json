@@ -7565,6 +7565,18 @@
     "confirm": "Verify",
     "cancelled": "Nothing was done."
   },
+  "session": {
+    "rateLimited": {
+      "toast": "Too many requests, try again in a moment.",
+      "title": "Too many requests",
+      "text": "Try again in a moment."
+    },
+    "unavailable": {
+      "title": "The panel could not load",
+      "text": "Your details could not be read just now; try again in a moment."
+    },
+    "retry": "Try again"
+  },
   "restrictions": {
     "label": "Age limit",
     "reason": "Reason",

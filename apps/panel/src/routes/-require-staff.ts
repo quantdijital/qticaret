@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query"
 import { redirect } from "@tanstack/react-router"
-import { currentUserQuery } from "@/features/auth/api/me"
+import { loadCurrentUser } from "@/features/auth/api/session"
 import { staffQuery } from "@/features/auth/api/staff"
 import { appearanceQuery } from "@/features/settings/api/appearance"
 import { sdk } from "@/lib/sdk"
@@ -18,7 +18,9 @@ export async function requireStaff({
   context: { queryClient: QueryClient }
   location: { href: string }
 }) {
-  const user = await context.queryClient.query(currentUserQuery()).catch(() => null)
+  // Signed out (401, 403) goes to sign-in; too many requests or no answer keeps
+  // the user already read, or shows the route's "try again" page
+  const user = await loadCurrentUser(context.queryClient)
   if (!user) {
     throw redirect({ to: "/login", search: { redirect: location.href } })
   }

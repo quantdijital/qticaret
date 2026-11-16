@@ -7565,6 +7565,18 @@
     "confirm": "Doğrula",
     "cancelled": "İşlem yapılmadı."
   },
+  "session": {
+    "rateLimited": {
+      "toast": "Çok fazla istek, biraz sonra yeniden deneyin.",
+      "title": "Çok fazla istek",
+      "text": "Biraz sonra yeniden deneyin."
+    },
+    "unavailable": {
+      "title": "Panel şu an yüklenemedi",
+      "text": "Bilgiler şu an alınamadı; biraz sonra yeniden deneyin."
+    },
+    "retry": "Yeniden dene"
+  },
   "restrictions": {
     "label": "Yaş sınırı",
     "reason": "Neden",

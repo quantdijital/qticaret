@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest"
 import { i18next } from "./i18n"
-import { errorText, responseFailure } from "./errors"
+import { errorText, responseFailure, retryAfterSeconds } from "./errors"
 
 const t = i18next.t.bind(i18next)
 const json = (status: number, body: unknown, statusText = "") =>
@@ -84,5 +84,25 @@ describe("errorText", () => {
     expect(errorText(t, { status: 400, message: "Bu değer başka bir kayıtta kullanılıyor." })).toBe(
       "Bu değer başka bir kayıtta kullanılıyor."
     )
+  })
+})
+
+describe("retryAfterSeconds", () => {
+  it("reads seconds and an HTTP date, and nothing else", () => {
+    const now = Date.parse("2026-11-16T10:00:00Z")
+    expect(retryAfterSeconds("30", now)).toBe(30)
+    expect(retryAfterSeconds("Mon, 16 Nov 2026 10:00:05 GMT", now)).toBe(5)
+    expect(retryAfterSeconds("Mon, 16 Nov 2026 09:59:00 GMT", now)).toBe(0)
+    expect(retryAfterSeconds(null, now)).toBeNull()
+    expect(retryAfterSeconds("soon", now)).toBeNull()
+  })
+
+  it("keeps a 429's Retry-After on the failure", async () => {
+    const failure = await responseFailure(json(429, { message: "x" }))
+    expect(failure).toMatchObject({ status: 429, retry_after: null })
+    const limited = await responseFailure(
+      new Response("{}", { status: 429, headers: { "retry-after": "7" } })
+    )
+    expect(limited).toMatchObject({ status: 429, retry_after: 7 })
   })
 })
