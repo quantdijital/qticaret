@@ -36,6 +36,31 @@ export interface StoreBrand {
   name: string
   handle: string
   logo_url: string | null
+  /**
+   * The logo's size in pixels, read on the server when it was set; null
+   * when unknown, absent where the answer leaves it out (a product's
+   * brand). With both, a theme saves the logo's room before it loads.
+   */
+  logo_width?: number | null
+  logo_height?: number | null
+}
+
+/** The longest logo side the backend keeps (`LOGO_SIDE_MAX` there): keep the two the same. */
+export const BRAND_LOGO_SIDE_MAX = 65_535
+
+const isSide = (value: unknown): value is number =>
+  typeof value === "number" && Number.isInteger(value) && value > 0 && value <= BRAND_LOGO_SIDE_MAX
+
+/**
+ * A brand logo's size when the answer gives both sides as whole pixels,
+ * else null (unknown, absent, or something no theme can draw by): a
+ * theme then draws the logo as it did before sizes were kept.
+ */
+export function brandLogoSize(
+  brand: Pick<StoreBrand, "logo_width" | "logo_height">
+): { width: number; height: number } | null {
+  const { logo_width: width, logo_height: height } = brand
+  return isSide(width) && isSide(height) ? { width, height } : null
 }
 
 /** `GET /store/brands`: an active brand as a brands page lists it (F3.11). */

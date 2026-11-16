@@ -1,7 +1,17 @@
 import { ResponsiveImage } from "@qticaret/ui"
-import type { BrandLinkView, BrandsPageView, Translate } from "@qticaret/ui"
+import type { BrandLinkView, BrandsPageView, ImageView, Translate } from "@qticaret/ui"
 import { Container } from "./parts/Container"
 import { Trail } from "./parts/Trail"
+import { logoPlateWidth } from "./parts/logo-plate"
+
+const PLATE_CLASS =
+  "gf-logo-plate flex h-10 max-w-30 min-w-10 items-center justify-center overflow-hidden rounded-inner bg-field"
+
+// A known size adds the plate's width; unknown, the class is the one from before
+const plateClass = (logo: ImageView): string => {
+  const width = logoPlateWidth(logo)
+  return width ? `${PLATE_CLASS} ${width}` : PLATE_CLASS
+}
 
 /**
  * A brand as a filled tile: its logo on a white plate when it has one, its
@@ -10,7 +20,10 @@ import { Trail } from "./parts/Trail"
  * (a 3:1 wordmark whole); a logo wider still keeps its ratio, lower. The
  * name keeps its line first: where the tile is narrow the plate gives way
  * down to the square, its logo smaller, and only then does the name wrap
- * (as it did beside the square).
+ * (as it did beside the square). A logo whose size the server read gets its
+ * width and height, and its plate the width it will take (`logoPlateWidth`),
+ * before the file arrives: the name does not move when it does. One without
+ * is drawn as before.
  */
 function BrandTile({ brand }: { brand: BrandLinkView }) {
   return (
@@ -19,7 +32,7 @@ function BrandTile({ brand }: { brand: BrandLinkView }) {
       className="flex min-h-16 min-w-0 items-center gap-3 rounded-media gf-pane p-3 transition-colors duration-(--dur-micro) hover:bg-paper-3"
     >
       {brand.logo && (
-        <span className="gf-logo-plate flex h-10 max-w-30 min-w-10 items-center justify-center overflow-hidden rounded-inner bg-field">
+        <span className={plateClass(brand.logo)}>
           <ResponsiveImage
             image={brand.logo}
             sizes="120px"

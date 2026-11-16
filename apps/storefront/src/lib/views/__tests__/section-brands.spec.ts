@@ -58,6 +58,24 @@ describe("the brands section's brands", () => {
     ])
   })
 
+  it("gives a logo the size the server read, so the section saves its room", async () => {
+    server.storeGet.mockResolvedValue({
+      brands: [
+        {
+          ...brand("b_bora", "Bora", "https://cdn.example/bora.png"),
+          logo_width: 300,
+          logo_height: 100,
+        },
+      ],
+    })
+    const [bora] = await brandLinks([])
+    expect(bora?.logo).toMatchObject({
+      src: "https://cdn.example/bora.png",
+      width: 300,
+      height: 100,
+    })
+  })
+
   it("keeps the order the section names them in", async () => {
     const links = await brandLinks(["b_bora", "b_yok", "b_ada"])
     expect(links.map((link) => link.label)).toEqual(["Bora", "Ada"])

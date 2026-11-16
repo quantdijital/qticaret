@@ -7,8 +7,12 @@ import { demoCatalogSchema } from "../schema"
 
 const saveRun = jest.fn()
 const deriveRun = jest.fn()
+const fillRun = jest.fn()
 jest.mock("../../../workflows/brands/workflows", () => ({
   saveBrandWorkflow: () => ({ run: saveRun }),
+}))
+jest.mock("../../../workflows/brands/backfill-logo-sizes", () => ({
+  fillBrandLogoSizes: (...args: unknown[]) => fillRun(...args) as unknown,
 }))
 jest.mock("../../../workflows/media/workflows", () => ({
   deriveLibraryMediaWorkflow: () => ({ run: deriveRun }),
@@ -116,6 +120,11 @@ describe("the demo catalogue's brands", () => {
       ]),
       created: 0,
       logos: 1,
+    })
+    // A logo set before sizes were kept (brand_2's) gets its size; the step skips sized ones
+    expect(fillRun).toHaveBeenCalledWith(expect.anything(), {
+      apply: true,
+      ids: ["brand_1", "brand_2", "brand_3"],
     })
   })
 

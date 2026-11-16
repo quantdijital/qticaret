@@ -10,7 +10,6 @@ import type {
 import type {
   CategoryCardView,
   CustomerPhotoView,
-  ImageView,
   ProductCardView,
   SectionBrandView,
   Translate,
@@ -21,6 +20,7 @@ import { isStoreApiError } from "@/lib/store-api/errors"
 import { cardFacts, categoryImages, latestReviewPhotos } from "@/lib/store-api/extras"
 import { storeGet } from "@/lib/store-api/server"
 import { categoryCard, customerPhotos, reviewPhotos, withCardFacts } from "./card-extras"
+import { brandLogo } from "./brands"
 import { childrenOf } from "./categories"
 import { productCards, variantIdsOf } from "./product"
 import { cardOptions } from "./theme-settings"
@@ -194,15 +194,6 @@ export async function categoryLinks(ids: readonly string[]): Promise<CategoryCar
   return named.map(({ card }) => card)
 }
 
-// A brand's logo is the shop's own upload: one file, no versions, its size read by the theme's box
-const brandLogo = (src: string, name: string): ImageView => ({
-  src,
-  alt: name,
-  width: null,
-  height: null,
-  sources: { avif: null, webp: null },
-})
-
 /**
  * The brands a section names (or every one), each at its page with its
  * logo when it has one: the logo stands for the name, so its alt text is
@@ -223,9 +214,8 @@ export async function brandLinks(ids: readonly string[]): Promise<SectionBrandVi
     if (!path) {
       return []
     }
-    return brand.logo_url
-      ? [{ label: brand.name, path, logo: brandLogo(brand.logo_url, brand.name) }]
-      : [{ label: brand.name, path }]
+    const logo = brandLogo(brand, brand.name)
+    return logo ? [{ label: brand.name, path, logo }] : [{ label: brand.name, path }]
   })
 }
 

@@ -12,12 +12,22 @@ export const AdminGetBrands = z
   .strict()
 export type AdminGetBrandsType = z.infer<typeof AdminGetBrands>
 
+/**
+ * A stored file's key: no path out of storage's folder (a `..` segment, a
+ * leading slash). Keys storage makes never hold one; a folder inside one
+ * (`klasor/logo-01J.png`) stays allowed.
+ */
+const fileKey = z
+  .string()
+  .max(64)
+  .refine((key) => !/^[\\/]/.test(key) && !/(^|[\\/])\.\.([\\/]|$)/.test(key))
+
 // Shape and size only; names, handles and logos are checked in the workflow
 const fields = {
   name: z.string().max(500),
   handle: z.string().max(200).optional(),
   description: z.string().max(20_000).nullable().optional(),
-  logo_file_id: z.string().max(64).nullable().optional(),
+  logo_file_id: fileKey.nullable().optional(),
   is_active: z.boolean().optional(),
 }
 
