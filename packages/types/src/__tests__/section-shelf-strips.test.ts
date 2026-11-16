@@ -16,7 +16,7 @@ import { SECTION_VARIANTS, variantOf } from "../store/section-variants.js"
 const LOOK = ["strips_slant", "strips_line", "strips_overlap", "strips_dim"] as const
 
 describe("a product rail's strips variant (adr/0049 Ek 2026-11-16)", () => {
-  it("comes last on the rail's list, today's grid still the default", () => {
+  it("comes after the earlier drawings on the rail's list, today's grid still the default", () => {
     expect(SECTION_VARIANTS.products).toEqual([
       "grid",
       "carousel",
@@ -24,6 +24,7 @@ describe("a product rail's strips variant (adr/0049 Ek 2026-11-16)", () => {
       "compact",
       "columns",
       "strips",
+      "ranked",
     ])
     expect(variantOf("products", undefined)).toBe("grid")
     expect(variantOf("products", "strips")).toBe("strips")

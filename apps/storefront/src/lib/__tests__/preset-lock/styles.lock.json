@@ -66,6 +66,10 @@
       "file": "pages.css"
     },
     {
+      "sha256": "1794898d553852105e6f30a1d890cdab92d33cc4509d9db802ebf82e7419f823",
+      "file": "ranked.css"
+    },
+    {
       "sha256": "8ed56f1bc8e843be161b5935ffc586dcf851bb7b30e7fac5bc1a2c0f84d3c15f",
       "file": "scroller.css"
     },
@@ -94,7 +98,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "fc370fe60146a6f2d3c01d598334fbcb562fb700afd13213f6b55cbb208de07f",
+      "sha256": "9d579bbcdaf2b82079784d56c1b61eb435fec3f8a193b1eefa5bbac4e55e80d3",
       "file": "styles.css"
     },
     {

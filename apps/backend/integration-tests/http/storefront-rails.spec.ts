@@ -228,5 +228,62 @@ medusaIntegrationTestRunner({
       })
       expect(rack).not.toHaveProperty("columns")
     })
+
+    it("saves a ranked rail with its count and layout, picks that many in order, refuses an off-list count or layout", async () => {
+      const container = getContainer()
+      const a = await product("sira-a")
+      const b = await product("sira-b")
+      const c = await product("sira-c")
+      await product("sira-d")
+      // Above any sale an earlier case in this file left behind; its own window (21 days)
+      await order(b.variantId, 50)
+      await order(a.variantId, 45)
+      await order(c.variantId, 40)
+      await indexCatalogue(container)
+
+      // adr/0049 Ek 2026-11-16: three to ten places; the count is ranked_count, not limit
+      const ranked = (more: Record<string, unknown> = {}): Section => ({
+        id: "siraliraf1",
+        type: "products",
+        ...ALWAYS,
+        title: null,
+        source: { kind: "best_sellers", days: 21 },
+        more: null,
+        variant: "ranked",
+        ...more,
+      })
+      const save = (section: Section) =>
+        settle(
+          http.post(
+            "/admin/storefront-layout",
+            { document: { header: [], home: [section], footer: [], product: [], category: [] } },
+            asOwner
+          )
+        )
+      for (const refused of [
+        { ranked_count: 2 },
+        { ranked_count: 11 },
+        { ranked_layout: "grid" },
+        { ranked_layout: "Birinci büyük" },
+        { strips_count: 3 },
+      ]) {
+        expect((await save(ranked(refused))).status).toBe(400)
+      }
+
+      // Saved without them: five places, the first large
+      const [plain] = await previewHome([ranked()])
+      expect(plain).toMatchObject({ variant: "ranked", ranked_count: 5, ranked_layout: "lead" })
+
+      const [rack] = await previewHome([ranked({ ranked_count: 3, ranked_layout: "row" })])
+      expect(rack).toMatchObject({
+        id: "siraliraf1",
+        variant: "ranked",
+        source: { kind: "best_sellers", days: 21 },
+        ranked_count: 3,
+        ranked_layout: "row",
+        product_ids: [b.productId, a.productId, c.productId],
+      })
+      expect(rack).not.toHaveProperty("strips_count")
+    })
   },
 })

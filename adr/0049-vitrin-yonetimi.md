@@ -778,6 +778,17 @@ Sahip 4, 5, 6 ve 11'i kendisi seçti; teknik ve küçük kararlarda "önerilerle
 - **Hazır görünümler:** dokunulmadı, hiçbiri bu biçimi kullanmıyor; görünüm kilidinde HTML değişmedi, yalnız tema stil özeti (yeni `shelf-strips.css`).
 - **Bilerek konmayan:** şeritte kart eylemleri, rafın `limit`'iyle ortak sayı, sekme başına ayrı şerit görünümü.
 
+### Ek 2026-11-16 (Oğuzhan): ürün rafında "Sıralı liste" biçimi (`products` variant `ranked`)
+
+- **Dayanak:** sahip isteği ("ilk beş" tarzı sıralı raf). Yeni **biçim**, `products` biçim listesinin sonunda; varsayılan `grid` ve yayımlanmış biçimler değişmedi (adr/0066), bu bir alternatif. Migration yok.
+- **Ayarlar** (yalnız `ranked` iken okunur, basılır ve sunulur; sözleşme `@qticaret/types/section-shelf`, backend aynası `sections/products.ts` eşitlik testiyle): `ranked_count` 3–**5**–10 (`SHELF_LIMITS.ranked`; mağazanın `limit`'i değil, kaynak tam bu kadar ürün ister) ve `ranked_layout` **lead**/row. Listede olmayan değer kayıtta `storefront_layout.section_invalid`, okurken varsayılan; başka biçimde bu alanlar reddedilir.
+- **Çizim:** sıra kaynağın sırasıdır (çok satanlarda satış, indirimdekilerde indirim). Tek `<ol role="list">`; her ürün büyük sıra rakamının yanında görseli, markası, adı (tek bağlantı), puanı ve fiyatıyla. `lead`: 768 px'ten ilk ürün solda büyük, ötekiler yanında satır satır (1280 px'ten 7+ üründe iki sütun satır); telefonda ilk ürün üstte büyük. `row`: 1024 px'ten hepsi büyük yan yana (6'da 3, 7–8'de 4, 9–10'da 5 sütun), daha darda liste.
+- **Kartın parçaları:** kart bileşeni yerine onun yıldız ve fiyat satırları; fiyat kartlarla aynı sunucu yolundan (toptancı notu dahil, istemciden tutar alınmaz). Tek rozet: "Tükendi" indirimin önünde (kompakt kart mantığı), mağaza kapattıysa yok. Hızlı bakış ve sepete ekle simge olarak her sıranın yanında; `QuickAdd`'e yeni `inline` seçeneği (varsayılan kapalı, öteki çizimler aynı). Tükenmişte sepete ekle yok. Görselsiz ürün atlanmaz (boş görsel alanı).
+- **Erişilebilirlik:** rakam yalnız göz için (`aria-hidden`), başlıkta ekran okuyucuya "1." (`home.rank_place`); WebKit biçimsiz listede rolü düşürdüğü için `role="list"` yeniden söylenir. Satır içi `style` yok (`data-layout`, `data-count`, `data-size`).
+- **Panel:** Stil › Biçim'de "Sıralı liste" (çizimli), Stil › Diziliş'te ürün sayısı ve düzen ("Birinci büyük" / "Tek sıra", çizimli, "Varsayılana dön"); kart biçimi seçimi yerine nedenini söyleyen not; ayar aramasında.
+- **Hazır görünümler:** dokunulmadı, hiçbiri bu biçimi kullanmıyor; görünüm kilidinde HTML değişmedi, yalnız tema stil özeti (yeni `ranked.css`).
+- **Bilerek konmayan:** sıra numarasının mağazaca elle verilmesi (sıra kaynağındır), rafın `limit`'iyle ortak sayı, kart biçimi seçimi.
+
 ### Ek 2026-11-15 (Oğuzhan): `catalog` üst bilginin şeridinde kısa not
 
 - **Dayanak:** sahibin gözlemi: şeridin solu boş duruyor (demoda üst menü boş, yalnız sağda "Hesabım"); "kampanya vb." kısa bir metin konabilsin. adr/0066 §2: yeni ayar, varsayılanı bugünkü çizim.
