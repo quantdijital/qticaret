@@ -38,7 +38,7 @@
       "file": "density.css"
     },
     {
-      "sha256": "bcae1714d67d6a42fe98bb80471c25b9d629cf8033284b9a41d5578f31d16716",
+      "sha256": "4e80b18c2ae70a66cf28e869772a1e7f4406d9896d30d685a59bf3c477e9a5b2",
       "file": "frame.css"
     },
     {
@@ -130,7 +130,7 @@
       "file": "tokens.css"
     },
     {
-      "sha256": "b90cddf079830af5f328cb4084ba11bef37acd0a31470759e0666703ee7dc579",
+      "sha256": "05fbe82b4005c28a182f630c00881424ab11105a41b782037f9e2104e26f6622",
       "file": "ui.css"
     }
   ]

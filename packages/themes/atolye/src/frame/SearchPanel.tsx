@@ -131,7 +131,8 @@ function Group({ label, children }: { label: string; children: ReactNode }) {
  * brands; the shop's categories when nothing was found; "Tüm sonuçları
  * gör (n)" last. Loading shows rows of the hits' height, or keeps the last
  * answer dimmed; a failure is one quiet line. The field keeps the focus;
- * `active` is the option the arrow keys are on.
+ * `active` is the option the arrow keys are on. Wide, the hits take the
+ * room the panel opens to (`search-panel-fit`), the help 17 rem beside.
  */
 export function SearchPanel({
   model,
@@ -200,7 +201,7 @@ export function SearchPanel({
         hidden={!model || model.paths.length === 0}
         className={cn(
           "grid gap-x-4 gap-y-3 p-2 transition-opacity duration-(--dur-micro) lg:p-3",
-          model && model.products.length > 0 && side > 0 && "lg:grid-cols-[minmax(0,1fr)_13rem]",
+          model && model.products.length > 0 && side > 0 && "lg:grid-cols-[minmax(0,1fr)_17rem]",
           model?.busy && "opacity-60"
         )}
       >
