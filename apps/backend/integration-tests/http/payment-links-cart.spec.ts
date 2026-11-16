@@ -124,13 +124,12 @@ medusaIntegrationTestRunner({
       )
       // The paid step marks the link, then writes the order's number and maker: waited for
       // too (the order carries the link's id from the start, its cart's, so that is no sign)
+      // (the order module's own list: typed alike with or without Medusa's generated types)
       const orders = await eventually(
-        async (): Promise<{ metadata?: Record<string, unknown> | null }[]> => {
-          const { data } = await getContainer()
-            .resolve(ContainerRegistrationKeys.QUERY)
-            .graph({ entity: "order", fields: ["metadata"], filters: { id: order.order_id ?? "" } })
-          return data as { metadata?: Record<string, unknown> | null }[]
-        },
+        () =>
+          getContainer()
+            .resolve(Modules.ORDER)
+            .listOrders({ id: order.order_id ?? "" }, { select: ["id", "metadata"] }),
         (rows) => rows[0]?.metadata?.["qt_payment_link_number"] !== undefined
       )
       // The bell follows the paid mark: on a slow runner it can come a moment later
