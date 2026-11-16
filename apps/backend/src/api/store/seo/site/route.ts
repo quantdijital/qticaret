@@ -50,6 +50,43 @@ async function siteIcon(
   }
 }
 
+/** A logo as the storefront draws it: the shop's own upload's address and its size. */
+interface SiteLogo {
+  url: string
+  width: number | null
+  height: number | null
+}
+
+/**
+ * The store profile's two logos (light and dark ground), each the library's
+ * own upload (the appearance section takes no other), with the size the
+ * library measured (an SVG's from its viewBox): the storefront reserves
+ * the box and nothing moves. None chosen: null; one the library no longer
+ * holds keeps its address, its size unknown.
+ */
+async function siteLogos(
+  scope: MedusaRequest["scope"],
+  appearance: Pick<AppearanceSettings, "logo_light_url" | "logo_dark_url">
+): Promise<{ light: SiteLogo | null; dark: SiteLogo | null }> {
+  const urls = [appearance.logo_light_url, appearance.logo_dark_url].filter(
+    (url): url is string => typeof url === "string" && url.length > 0
+  )
+  const assets =
+    urls.length === 0
+      ? []
+      : await scope
+          .resolve<MediaModuleService>(MEDIA_MODULE)
+          .listMediaAssets({ url: urls }, { select: ["url", "width", "height"], take: urls.length })
+  const logo = (url: string | null): SiteLogo | null => {
+    if (!url) {
+      return null
+    }
+    const asset = assets.find((each) => each.url === url)
+    return { url, width: asset?.width ?? null, height: asset?.height ?? null }
+  }
+  return { light: logo(appearance.logo_light_url), dark: logo(appearance.logo_dark_url) }
+}
+
 const identityOf = (identity: LegalIdentity) => ({
   legalName: identity.company_title,
   taxID: identity.tax_number,
@@ -73,7 +110,8 @@ const identityOf = (identity: LegalIdentity) => ({
  * as an `OnlineStore` (with its legal identity, F13.9) and its `WebSite`. No blocks until the canonical
  * host is set: they need absolute URLs. And the robots value of the
  * storefront's own pages (search results, cart, account). For the
- * storefront's frame (F18, adr/0046): the shop's name, logo and site icon, and the
+ * storefront's frame (F18, adr/0046): the shop's name, its two logos (light and
+ * dark ground) and site icon, and the
  * home page's `seo` object, shaped as resolve's for every other page. And
  * whether the shop is dark (adr/0053): the storefront answers 503 with
  * `Retry-After` and this page but for its system paths, the paths left
@@ -121,6 +159,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     shop: {
       name: shop.name,
       logo_url: appearance.logo_light_url,
+      // Both of the store profile's logos with their sizes (owner 2026-11-16): a footer that
+      // shows the logo takes the one for its ground, the other when the shop has only that
+      logos: await siteLogos(req.scope, appearance),
       ...(await siteIcon(req.scope, appearance.favicon_url ?? null)),
     },
     home: homeSeo({ shop, home: seo.home, ogImage: seo.default_og_image, jsonLd }),

@@ -449,6 +449,7 @@
           "small": "Simge 48 × 48 pikselden küçük; Google arama sonuçlarında gösterilmeyebilir.",
           "unmeasured": "Bu görselin boyutu bilinmiyor. Kütüphaneye yeniden yükleyip seçin."
         },
+        "logosUse": "Logolar üst bilgide ve altbilgide kullanılır.",
         "svgText": "SVG logonuzda yazı varsa, tasarım programınızda yazıyı \"eğriye çevir\" / \"ana hatlara dönüştür\" ile dışa aktarın: yüklemede yazı tipi bildirimleri temizlenir, eğriye çevrilmiş yazı aynen görünür."
       },
       "region": "Bölge ve birimler",

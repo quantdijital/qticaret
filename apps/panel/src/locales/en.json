@@ -449,6 +449,7 @@
           "small": "The icon is smaller than 48 × 48 pixels; Google may not show it in search results.",
           "unmeasured": "This image's size is not known. Upload it to the library again and choose it."
         },
+        "logosUse": "The logos are used in the header and the footer.",
         "svgText": "If your SVG logo has text, convert it to outlines (\"create outlines\" / \"outline text\") in your design program before exporting: font declarations are cleaned away on upload, outlined text looks the same."
       },
       "region": "Region and units",
