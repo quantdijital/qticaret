@@ -16,12 +16,14 @@ import {
   Settings,
   ShoppingBag,
   SlidersHorizontal,
+  Store,
   Tag,
   Users,
   Warehouse,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { Capability } from "@/features/auth/api/staff"
+import { WHOLESALE_FLAG } from "@/features/wholesale/api/types"
 
 /**
  * The panel's map (docs/06 ekran planı): one place for the sidebar, the
@@ -64,6 +66,15 @@ export const NAV_GROUPS: NavGroup[] = [
         needs: "paymentLinks",
       },
       { key: "customers", to: "/customers", icon: Users },
+      // ADR-0068: the wholesalers, their levels and orders, apart from the retail customers
+      // (the owner, 2026-11-16), for owner and admin while the shop sells wholesale
+      {
+        key: "wholesale",
+        to: "/wholesale",
+        icon: Store,
+        feature: WHOLESALE_FLAG,
+        needs: "wholesale",
+      },
     ],
   },
   {

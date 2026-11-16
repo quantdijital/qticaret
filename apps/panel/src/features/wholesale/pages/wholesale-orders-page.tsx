@@ -21,7 +21,7 @@ import { WholesaleNav } from "@/features/wholesale/components/wholesale-nav"
 import { accountTitle } from "@/features/wholesale/format"
 import type { WholesaleOrderSearch } from "@/features/wholesale/search"
 
-const route = getRouteApi("/_auth/customers/wholesale/orders")
+const route = getRouteApi("/_auth/wholesale/orders")
 const O = "wholesale.orders"
 // Radix's Select takes no empty value: "every wholesaler" is this
 const EVERY = "all"
@@ -36,7 +36,7 @@ function useWholesalerColumn(): Column<BoardOrder> {
     cell: (order) =>
       order.wholesaler?.id ? (
         <Link
-          to="/customers/wholesale/$id"
+          to="/wholesale/$id"
           params={{ id: order.wholesaler.id }}
           className="font-medium hover:underline"
           onClick={(event) => {
@@ -98,7 +98,7 @@ function WholesaleOrders() {
   const setSearch = (next: WholesaleOrderSearch) => {
     const merged = { ...search, ...next }
     void navigate({
-      to: "/customers/wholesale/orders",
+      to: "/wholesale/orders",
       search: { ...cleanSearch(merged), wholesaler: merged.wholesaler },
       replace: true,
     })

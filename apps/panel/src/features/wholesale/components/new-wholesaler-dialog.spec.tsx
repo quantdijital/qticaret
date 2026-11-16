@@ -98,7 +98,7 @@ describe("NewWholesalerDialog", () => {
     await userEvent.click(screen.getByRole("button", { name: "Toptancıyı aç" }))
     await waitFor(() => {
       expect(navigate).toHaveBeenCalledWith({
-        to: "/customers/wholesale/$id",
+        to: "/wholesale/$id",
         params: { id: "wsa_new" },
       })
     })

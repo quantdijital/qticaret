@@ -88,6 +88,9 @@ import { Route as AuthSettingsSubscriptionRouteImport } from './routes/_auth/set
 import { Route as AuthSettingsTeamRouteImport } from './routes/_auth/settings/team'
 import { Route as AuthStorefrontMenusRouteImport } from './routes/_auth/storefront/menus'
 import { Route as AuthStorefrontPreferencesRouteImport } from './routes/_auth/storefront/preferences'
+import { Route as AuthWholesaleIndexRouteImport } from './routes/_auth/wholesale/index'
+import { Route as AuthWholesaleIdRouteImport } from './routes/_auth/wholesale/$id'
+import { Route as AuthWholesaleOrdersRouteImport } from './routes/_auth/wholesale/orders'
 import { Route as FullscreenPrintOrdersRouteImport } from './routes/_fullscreen/print/orders'
 import { Route as FullscreenStorefrontEditorRouteImport } from './routes/_fullscreen/storefront/editor'
 import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
@@ -107,6 +110,8 @@ import { Route as AuthSettingsShippingIndexRouteImport } from './routes/_auth/se
 import { Route as AuthSettingsShippingCarrierRouteImport } from './routes/_auth/settings/shipping/$carrier'
 import { Route as AuthSettingsSmsIndexRouteImport } from './routes/_auth/settings/sms/index'
 import { Route as AuthSettingsSmsProviderRouteImport } from './routes/_auth/settings/sms/$provider'
+import { Route as AuthWholesaleTiersIndexRouteImport } from './routes/_auth/wholesale/tiers/index'
+import { Route as AuthWholesaleTiersIdRouteImport } from './routes/_auth/wholesale/tiers/$id'
 import { Route as AuthCustomersWholesaleTiersIndexRouteImport } from './routes/_auth/customers/wholesale/tiers/index'
 import { Route as AuthCustomersWholesaleTiersIdRouteImport } from './routes/_auth/customers/wholesale/tiers/$id'
 
@@ -509,6 +514,21 @@ const AuthStorefrontPreferencesRoute =
     path: '/storefront/preferences',
     getParentRoute: () => AuthRoute,
   } as any)
+const AuthWholesaleIndexRoute = AuthWholesaleIndexRouteImport.update({
+  id: '/wholesale/',
+  path: '/wholesale/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthWholesaleIdRoute = AuthWholesaleIdRouteImport.update({
+  id: '/wholesale/$id',
+  path: '/wholesale/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthWholesaleOrdersRoute = AuthWholesaleOrdersRouteImport.update({
+  id: '/wholesale/orders',
+  path: '/wholesale/orders',
+  getParentRoute: () => AuthRoute,
+} as any)
 const FullscreenPrintOrdersRoute = FullscreenPrintOrdersRouteImport.update({
   id: '/print/orders',
   path: '/print/orders',
@@ -617,6 +637,16 @@ const AuthSettingsSmsProviderRoute = AuthSettingsSmsProviderRouteImport.update({
   path: '/sms/$provider',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthWholesaleTiersIndexRoute = AuthWholesaleTiersIndexRouteImport.update({
+  id: '/wholesale/tiers/',
+  path: '/wholesale/tiers/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthWholesaleTiersIdRoute = AuthWholesaleTiersIdRouteImport.update({
+  id: '/wholesale/tiers/$id',
+  path: '/wholesale/tiers/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthCustomersWholesaleTiersIndexRoute =
   AuthCustomersWholesaleTiersIndexRouteImport.update({
     id: '/customers/wholesale/tiers/',
@@ -695,6 +725,8 @@ export interface FileRoutesByFullPath {
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
   '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/wholesale/$id': typeof AuthWholesaleIdRoute
+  '/wholesale/orders': typeof AuthWholesaleOrdersRoute
   '/print/orders': typeof FullscreenPrintOrdersRoute
   '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands/': typeof AuthBrandsIndexRoute
@@ -710,6 +742,7 @@ export interface FileRoutesByFullPath {
   '/reviews/': typeof AuthReviewsIndexRoute
   '/seo/': typeof AuthSeoIndexRoute
   '/settings/': typeof AuthSettingsIndexRoute
+  '/wholesale/': typeof AuthWholesaleIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
   '/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
@@ -720,6 +753,7 @@ export interface FileRoutesByFullPath {
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/wholesale/tiers/$id': typeof AuthWholesaleTiersIdRoute
   '/customers/wholesale/': typeof AuthCustomersWholesaleIndexRoute
   '/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
   '/settings/legal/': typeof AuthSettingsLegalIndexRoute
@@ -727,6 +761,7 @@ export interface FileRoutesByFullPath {
   '/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping/': typeof AuthSettingsShippingIndexRoute
   '/settings/sms/': typeof AuthSettingsSmsIndexRoute
+  '/wholesale/tiers/': typeof AuthWholesaleTiersIndexRoute
   '/customers/wholesale/tiers/$id': typeof AuthCustomersWholesaleTiersIdRoute
   '/customers/wholesale/tiers/': typeof AuthCustomersWholesaleTiersIndexRoute
 }
@@ -793,6 +828,8 @@ export interface FileRoutesByTo {
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
   '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/wholesale/$id': typeof AuthWholesaleIdRoute
+  '/wholesale/orders': typeof AuthWholesaleOrdersRoute
   '/print/orders': typeof FullscreenPrintOrdersRoute
   '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands': typeof AuthBrandsIndexRoute
@@ -808,6 +845,7 @@ export interface FileRoutesByTo {
   '/reviews': typeof AuthReviewsIndexRoute
   '/seo': typeof AuthSeoIndexRoute
   '/settings': typeof AuthSettingsIndexRoute
+  '/wholesale': typeof AuthWholesaleIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
   '/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
@@ -818,6 +856,7 @@ export interface FileRoutesByTo {
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/wholesale/tiers/$id': typeof AuthWholesaleTiersIdRoute
   '/customers/wholesale': typeof AuthCustomersWholesaleIndexRoute
   '/promotions/price-lists': typeof AuthPromotionsPriceListsIndexRoute
   '/settings/legal': typeof AuthSettingsLegalIndexRoute
@@ -825,6 +864,7 @@ export interface FileRoutesByTo {
   '/settings/payments': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping': typeof AuthSettingsShippingIndexRoute
   '/settings/sms': typeof AuthSettingsSmsIndexRoute
+  '/wholesale/tiers': typeof AuthWholesaleTiersIndexRoute
   '/customers/wholesale/tiers/$id': typeof AuthCustomersWholesaleTiersIdRoute
   '/customers/wholesale/tiers': typeof AuthCustomersWholesaleTiersIndexRoute
 }
@@ -896,6 +936,8 @@ export interface FileRoutesById {
   '/_auth/settings/team': typeof AuthSettingsTeamRoute
   '/_auth/storefront/menus': typeof AuthStorefrontMenusRoute
   '/_auth/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/_auth/wholesale/$id': typeof AuthWholesaleIdRoute
+  '/_auth/wholesale/orders': typeof AuthWholesaleOrdersRoute
   '/_fullscreen/print/orders': typeof FullscreenPrintOrdersRoute
   '/_fullscreen/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/_auth/brands/': typeof AuthBrandsIndexRoute
@@ -911,6 +953,7 @@ export interface FileRoutesById {
   '/_auth/reviews/': typeof AuthReviewsIndexRoute
   '/_auth/seo/': typeof AuthSeoIndexRoute
   '/_auth/settings/': typeof AuthSettingsIndexRoute
+  '/_auth/wholesale/': typeof AuthWholesaleIndexRoute
   '/_auth/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/_auth/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
   '/_auth/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
@@ -921,6 +964,7 @@ export interface FileRoutesById {
   '/_auth/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/_auth/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/_auth/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/_auth/wholesale/tiers/$id': typeof AuthWholesaleTiersIdRoute
   '/_auth/customers/wholesale/': typeof AuthCustomersWholesaleIndexRoute
   '/_auth/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
   '/_auth/settings/legal/': typeof AuthSettingsLegalIndexRoute
@@ -928,6 +972,7 @@ export interface FileRoutesById {
   '/_auth/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/_auth/settings/shipping/': typeof AuthSettingsShippingIndexRoute
   '/_auth/settings/sms/': typeof AuthSettingsSmsIndexRoute
+  '/_auth/wholesale/tiers/': typeof AuthWholesaleTiersIndexRoute
   '/_auth/customers/wholesale/tiers/$id': typeof AuthCustomersWholesaleTiersIdRoute
   '/_auth/customers/wholesale/tiers/': typeof AuthCustomersWholesaleTiersIndexRoute
 }
@@ -998,6 +1043,8 @@ export interface FileRouteTypes {
     | '/settings/team'
     | '/storefront/menus'
     | '/storefront/preferences'
+    | '/wholesale/$id'
+    | '/wholesale/orders'
     | '/print/orders'
     | '/storefront/editor'
     | '/brands/'
@@ -1013,6 +1060,7 @@ export interface FileRouteTypes {
     | '/reviews/'
     | '/seo/'
     | '/settings/'
+    | '/wholesale/'
     | '/content/landings/$id'
     | '/customers/wholesale/$id'
     | '/customers/wholesale/orders'
@@ -1023,6 +1071,7 @@ export interface FileRouteTypes {
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
     | '/settings/sms/$provider'
+    | '/wholesale/tiers/$id'
     | '/customers/wholesale/'
     | '/promotions/price-lists/'
     | '/settings/legal/'
@@ -1030,6 +1079,7 @@ export interface FileRouteTypes {
     | '/settings/payments/'
     | '/settings/shipping/'
     | '/settings/sms/'
+    | '/wholesale/tiers/'
     | '/customers/wholesale/tiers/$id'
     | '/customers/wholesale/tiers/'
   fileRoutesByTo: FileRoutesByTo
@@ -1096,6 +1146,8 @@ export interface FileRouteTypes {
     | '/settings/team'
     | '/storefront/menus'
     | '/storefront/preferences'
+    | '/wholesale/$id'
+    | '/wholesale/orders'
     | '/print/orders'
     | '/storefront/editor'
     | '/brands'
@@ -1111,6 +1163,7 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/seo'
     | '/settings'
+    | '/wholesale'
     | '/content/landings/$id'
     | '/customers/wholesale/$id'
     | '/customers/wholesale/orders'
@@ -1121,6 +1174,7 @@ export interface FileRouteTypes {
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
     | '/settings/sms/$provider'
+    | '/wholesale/tiers/$id'
     | '/customers/wholesale'
     | '/promotions/price-lists'
     | '/settings/legal'
@@ -1128,6 +1182,7 @@ export interface FileRouteTypes {
     | '/settings/payments'
     | '/settings/shipping'
     | '/settings/sms'
+    | '/wholesale/tiers'
     | '/customers/wholesale/tiers/$id'
     | '/customers/wholesale/tiers'
   id:
@@ -1198,6 +1253,8 @@ export interface FileRouteTypes {
     | '/_auth/settings/team'
     | '/_auth/storefront/menus'
     | '/_auth/storefront/preferences'
+    | '/_auth/wholesale/$id'
+    | '/_auth/wholesale/orders'
     | '/_fullscreen/print/orders'
     | '/_fullscreen/storefront/editor'
     | '/_auth/brands/'
@@ -1213,6 +1270,7 @@ export interface FileRouteTypes {
     | '/_auth/reviews/'
     | '/_auth/seo/'
     | '/_auth/settings/'
+    | '/_auth/wholesale/'
     | '/_auth/content/landings/$id'
     | '/_auth/customers/wholesale/$id'
     | '/_auth/customers/wholesale/orders'
@@ -1223,6 +1281,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/payments/$provider'
     | '/_auth/settings/shipping/$carrier'
     | '/_auth/settings/sms/$provider'
+    | '/_auth/wholesale/tiers/$id'
     | '/_auth/customers/wholesale/'
     | '/_auth/promotions/price-lists/'
     | '/_auth/settings/legal/'
@@ -1230,6 +1289,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/payments/'
     | '/_auth/settings/shipping/'
     | '/_auth/settings/sms/'
+    | '/_auth/wholesale/tiers/'
     | '/_auth/customers/wholesale/tiers/$id'
     | '/_auth/customers/wholesale/tiers/'
   fileRoutesById: FileRoutesById
@@ -1799,6 +1859,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthStorefrontPreferencesRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/wholesale/': {
+      id: '/_auth/wholesale/'
+      path: '/wholesale'
+      fullPath: '/wholesale/'
+      preLoaderRoute: typeof AuthWholesaleIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/wholesale/$id': {
+      id: '/_auth/wholesale/$id'
+      path: '/wholesale/$id'
+      fullPath: '/wholesale/$id'
+      preLoaderRoute: typeof AuthWholesaleIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/wholesale/orders': {
+      id: '/_auth/wholesale/orders'
+      path: '/wholesale/orders'
+      fullPath: '/wholesale/orders'
+      preLoaderRoute: typeof AuthWholesaleOrdersRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_fullscreen/print/orders': {
       id: '/_fullscreen/print/orders'
       path: '/print/orders'
@@ -1931,6 +2012,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/sms/$provider'
       preLoaderRoute: typeof AuthSettingsSmsProviderRouteImport
       parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/wholesale/tiers/': {
+      id: '/_auth/wholesale/tiers/'
+      path: '/wholesale/tiers'
+      fullPath: '/wholesale/tiers/'
+      preLoaderRoute: typeof AuthWholesaleTiersIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/wholesale/tiers/$id': {
+      id: '/_auth/wholesale/tiers/$id'
+      path: '/wholesale/tiers/$id'
+      fullPath: '/wholesale/tiers/$id'
+      preLoaderRoute: typeof AuthWholesaleTiersIdRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_auth/customers/wholesale/tiers/': {
       id: '/_auth/customers/wholesale/tiers/'
@@ -2079,6 +2174,8 @@ interface AuthRouteChildren {
   AuthSeoSearchRoute: typeof AuthSeoSearchRoute
   AuthStorefrontMenusRoute: typeof AuthStorefrontMenusRoute
   AuthStorefrontPreferencesRoute: typeof AuthStorefrontPreferencesRoute
+  AuthWholesaleIdRoute: typeof AuthWholesaleIdRoute
+  AuthWholesaleOrdersRoute: typeof AuthWholesaleOrdersRoute
   AuthBrandsIndexRoute: typeof AuthBrandsIndexRoute
   AuthBulkMessagesIndexRoute: typeof AuthBulkMessagesIndexRoute
   AuthCollectionsIndexRoute: typeof AuthCollectionsIndexRoute
@@ -2090,13 +2187,16 @@ interface AuthRouteChildren {
   AuthPromotionsIndexRoute: typeof AuthPromotionsIndexRoute
   AuthReviewsIndexRoute: typeof AuthReviewsIndexRoute
   AuthSeoIndexRoute: typeof AuthSeoIndexRoute
+  AuthWholesaleIndexRoute: typeof AuthWholesaleIndexRoute
   AuthContentLandingsIdRoute: typeof AuthContentLandingsIdRoute
   AuthCustomersWholesaleIdRoute: typeof AuthCustomersWholesaleIdRoute
   AuthCustomersWholesaleOrdersRoute: typeof AuthCustomersWholesaleOrdersRoute
   AuthPromotionsPriceListsIdRoute: typeof AuthPromotionsPriceListsIdRoute
   AuthPromotionsPriceListsNewRoute: typeof AuthPromotionsPriceListsNewRoute
+  AuthWholesaleTiersIdRoute: typeof AuthWholesaleTiersIdRoute
   AuthCustomersWholesaleIndexRoute: typeof AuthCustomersWholesaleIndexRoute
   AuthPromotionsPriceListsIndexRoute: typeof AuthPromotionsPriceListsIndexRoute
+  AuthWholesaleTiersIndexRoute: typeof AuthWholesaleTiersIndexRoute
   AuthCustomersWholesaleTiersIdRoute: typeof AuthCustomersWholesaleTiersIdRoute
   AuthCustomersWholesaleTiersIndexRoute: typeof AuthCustomersWholesaleTiersIndexRoute
 }
@@ -2135,6 +2235,8 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthSeoSearchRoute: AuthSeoSearchRoute,
   AuthStorefrontMenusRoute: AuthStorefrontMenusRoute,
   AuthStorefrontPreferencesRoute: AuthStorefrontPreferencesRoute,
+  AuthWholesaleIdRoute: AuthWholesaleIdRoute,
+  AuthWholesaleOrdersRoute: AuthWholesaleOrdersRoute,
   AuthBrandsIndexRoute: AuthBrandsIndexRoute,
   AuthBulkMessagesIndexRoute: AuthBulkMessagesIndexRoute,
   AuthCollectionsIndexRoute: AuthCollectionsIndexRoute,
@@ -2146,13 +2248,16 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthPromotionsIndexRoute: AuthPromotionsIndexRoute,
   AuthReviewsIndexRoute: AuthReviewsIndexRoute,
   AuthSeoIndexRoute: AuthSeoIndexRoute,
+  AuthWholesaleIndexRoute: AuthWholesaleIndexRoute,
   AuthContentLandingsIdRoute: AuthContentLandingsIdRoute,
   AuthCustomersWholesaleIdRoute: AuthCustomersWholesaleIdRoute,
   AuthCustomersWholesaleOrdersRoute: AuthCustomersWholesaleOrdersRoute,
   AuthPromotionsPriceListsIdRoute: AuthPromotionsPriceListsIdRoute,
   AuthPromotionsPriceListsNewRoute: AuthPromotionsPriceListsNewRoute,
+  AuthWholesaleTiersIdRoute: AuthWholesaleTiersIdRoute,
   AuthCustomersWholesaleIndexRoute: AuthCustomersWholesaleIndexRoute,
   AuthPromotionsPriceListsIndexRoute: AuthPromotionsPriceListsIndexRoute,
+  AuthWholesaleTiersIndexRoute: AuthWholesaleTiersIndexRoute,
   AuthCustomersWholesaleTiersIdRoute: AuthCustomersWholesaleTiersIdRoute,
   AuthCustomersWholesaleTiersIndexRoute: AuthCustomersWholesaleTiersIndexRoute,
 }

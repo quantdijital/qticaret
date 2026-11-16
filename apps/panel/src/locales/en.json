@@ -50,6 +50,7 @@
     "products": "Products",
     "orders": "Orders",
     "customers": "Customers",
+    "wholesale": "Wholesalers",
     "settings": "Settings",
     "account": "Account",
     "logout": "Sign out",
@@ -4681,7 +4682,6 @@
     "sections": "Customer screens",
     "sectionCustomers": "Customers",
     "sectionGroups": "Groups and segments",
-    "sectionWholesale": "Wholesalers",
     "sectionContact": "Contact messages",
     "contactMessages": {
       "title": "Contact messages",
@@ -10548,7 +10548,7 @@
     },
     "nav": {
       "label": "Wholesale sections",
-      "accounts": "Wholesaler list",
+      "accounts": "Wholesalers",
       "tiers": "Wholesale levels",
       "orders": "Orders"
     },

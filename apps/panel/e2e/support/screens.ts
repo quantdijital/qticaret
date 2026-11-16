@@ -19,9 +19,9 @@ export const SECTIONS = [
   "/reviews/google",
   "/customers/groups",
   // Wholesalers, their levels and orders (ADR-0068): the lists, or why they are closed while off
-  "/customers/wholesale",
-  "/customers/wholesale/tiers",
-  "/customers/wholesale/orders",
+  "/wholesale",
+  "/wholesale/tiers",
+  "/wholesale/orders",
   "/customers/contact-messages",
   // Every alert of the bell, read and unread (adr/0020)
   "/notifications",

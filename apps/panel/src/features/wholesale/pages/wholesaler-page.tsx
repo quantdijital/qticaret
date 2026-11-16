@@ -23,9 +23,9 @@ import { accountSubtitle, accountTitle } from "@/features/wholesale/format"
 import { outcomeLines, useOutcome } from "@/features/wholesale/outcome"
 import { errorText } from "@/lib/errors"
 
-const route = getRouteApi("/_auth/customers/wholesale/$id")
+const route = getRouteApi("/_auth/wholesale/$id")
 const D = "wholesale.detail"
-const BACK = "/customers/wholesale"
+const BACK = "/wholesale"
 
 /** What happened when the wholesaler was opened, said once on arriving here. */
 function CreatedNotice({ id }: { id: string }) {

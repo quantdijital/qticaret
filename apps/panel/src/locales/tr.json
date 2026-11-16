@@ -50,6 +50,7 @@
     "products": "Ürünler",
     "orders": "Siparişler",
     "customers": "Müşteriler",
+    "wholesale": "Toptancılar",
     "settings": "Ayarlar",
     "account": "Hesap",
     "logout": "Çıkış yap",
@@ -4681,7 +4682,6 @@
     "sections": "Müşteri ekranları",
     "sectionCustomers": "Müşteriler",
     "sectionGroups": "Gruplar ve segmentler",
-    "sectionWholesale": "Toptancılar",
     "sectionContact": "İletişim mesajları",
     "contactMessages": {
       "title": "İletişim mesajları",
@@ -10548,7 +10548,7 @@
     },
     "nav": {
       "label": "Toptancılar bölümleri",
-      "accounts": "Toptancı listesi",
+      "accounts": "Toptancılar",
       "tiers": "Toptan seviyeleri",
       "orders": "Siparişler"
     },

@@ -111,7 +111,7 @@ export function AccountActions({ account }: { account: WholesaleAccount }) {
         open={deleting}
         onOpenChange={setDeleting}
         onDeleted={() => {
-          void navigate({ to: "/customers/wholesale" })
+          void navigate({ to: "/wholesale" })
         }}
       />
       {settable ? (

@@ -93,7 +93,7 @@ export function AccountStatusCard({ account }: { account: WholesaleAccount }) {
     t(`${D}.tier`),
     account.tier ? (
       <Link
-        to="/customers/wholesale/tiers/$id"
+        to="/wholesale/tiers/$id"
         params={{ id: account.tier.id }}
         className="font-medium hover:underline"
       >
