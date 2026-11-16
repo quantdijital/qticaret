@@ -132,3 +132,54 @@ export async function cartPrices(container: MedusaContainer, cartId: string): Pr
     ),
   }
 }
+
+/** A promotion made as the panel makes one (`/admin/promotions`); the body's own fields win. */
+export async function makePromotion(
+  http: HttpClient,
+  headers: Record<string, string>,
+  body: Record<string, unknown>
+): Promise<void> {
+  const made = await plain(
+    http.post(
+      "/admin/promotions",
+      { type: "standard", is_tax_inclusive: true, status: "active", ...body },
+      { headers }
+    )
+  )
+  if (made.status !== 200) {
+    throw new Error(`promotion not made: ${String(made.status)} ${JSON.stringify(made.data)}`)
+  }
+}
+
+/** 10% off the whole order, automatic or by its code. */
+export const orderPercent = (
+  http: HttpClient,
+  headers: Record<string, string>,
+  code: string,
+  automatic: boolean
+) =>
+  makePromotion(http, headers, {
+    code,
+    is_automatic: automatic,
+    application_method: {
+      type: "percentage",
+      target_type: "order",
+      allocation: "across",
+      value: 10,
+    },
+  })
+
+/** Adds a code to the cart as the storefront does. */
+export const addCode = (
+  http: HttpClient,
+  cartId: string,
+  headers: Record<string, string>,
+  code: string
+) =>
+  plain(
+    http.post<{ message?: string }>(
+      `/store/carts/${cartId}/promotions`,
+      { promo_codes: [code] },
+      { headers }
+    )
+  )

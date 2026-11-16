@@ -1,4 +1,4 @@
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { wholesaleListsState } from "../../src/workflows/wholesale/lists-status"
 import { createAdminUser } from "../helpers/admin"
@@ -11,14 +11,16 @@ import type { Storefront } from "../helpers/storefront"
 import { loadTrAddressFixture } from "../helpers/tr-address"
 import { accountApi, tierRecords, wholesaleApi } from "../helpers/wholesale"
 import {
+  addCode,
   bankTransferOn,
   cartPrices,
   completeCart,
   leaveGroup,
+  orderPercent,
   readyShopperCart,
   startPayment,
 } from "../helpers/wholesale-checkout"
-import { outcome } from "../helpers/wholesale-store"
+import { outcome, plain } from "../helpers/wholesale-store"
 
 jest.setTimeout(240 * 1000)
 
@@ -146,6 +148,58 @@ medusaIntegrationTestRunner({
         1
       )
       expect((await startPayment(http, shopper.headers, retail)).status).toBe(200)
+    })
+
+    it("takes a guest's code off the cart a wholesaler takes, then pays it (review O1)", async () => {
+      const { variantId, customer } = await levelWholesaler("misafir-kod")
+      await orderPercent(http, admin.headers, "YAZ10", false)
+      const cartId = await readyShopperCart(http, getContainer(), shop, store.headers, variantId)
+      expect((await addCode(http, cartId, store.headers, "YAZ10")).status).toBe(200)
+      expect(await cartPrices(getContainer(), cartId)).toEqual({
+        units: [100],
+        discount: 10,
+        codes: ["YAZ10"],
+      })
+
+      const taken = await plain(
+        http.post(`/store/carts/${cartId}/customer`, {}, { headers: customer.headers })
+      )
+      expect(outcome(taken, 200)).toEqual({ status: 200, data: null })
+      // Medusa's own refresh dismisses every link its rules no longer apply (REPLACE)
+      expect(await cartPrices(getContainer(), cartId)).toEqual({
+        units: [80],
+        discount: 0,
+        codes: [],
+      })
+      expect(outcome(await startPayment(http, customer.headers, cartId), 200)).toEqual({
+        status: 200,
+        data: null,
+      })
+      const order = await completeCart(http, customer.headers, cartId)
+      expect({ status: order.status, type: order.data.type }).toEqual({
+        status: 200,
+        type: "order",
+      })
+    })
+
+    it("keeps a wholesaler's cart theirs and at wholesale when its e-mail changes", async () => {
+      const { variantId, customer } = await levelWholesaler("eposta")
+      const cartId = await readyShopperCart(http, getContainer(), shop, customer.headers, variantId)
+      const changed = await plain(
+        http.post(
+          `/store/carts/${cartId}`,
+          { email: "satin.alma@example.com" },
+          { headers: customer.headers }
+        )
+      )
+      expect(outcome(changed, 200)).toEqual({ status: 200, data: null })
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "cart", fields: ["customer_id", "email"], filters: { id: cartId } })
+      // Medusa 2.21.2 `updateCartWorkflow`: a registered customer's cart keeps its customer
+      expect(data[0]).toMatchObject({ customer_id: customer.id, email: "satin.alma@example.com" })
+      expect((await cartPrices(getContainer(), cartId)).units).toEqual([80])
+      expect((await startPayment(http, customer.headers, cartId)).status).toBe(200)
     })
 
     it("reads the lists' state from the database, a flag turn changing it (#93 review D4)", async () => {
