@@ -7,7 +7,6 @@ import {
   shelfPhoneColumnsOf,
 } from "@qticaret/types"
 import type { ProductsSection } from "@/features/storefront/api/layout"
-import { switchVariant } from "@/features/storefront/layout/variants"
 import { PanelGroup } from "../panel-header"
 import { CardVariantField } from "./card-variant-field"
 import { ColumnsField } from "./columns-field"
@@ -17,7 +16,6 @@ import { PhoneColumnsField } from "./phone-columns-field"
 import { ScrollerFields } from "./scroller-fields"
 import { ShelfTabsField } from "./shelf-tabs-field"
 import { SCROLLER_MAIN } from "./scroller-groups"
-import { VariantField } from "./variant-field"
 
 const SH = "storefront.editor.shelf"
 
@@ -76,9 +74,10 @@ function CountChoice<N extends number>({
 }
 
 /**
- * A product rail's open groups under its content (adr/0049 Ek 2026-11-15):
- * "Diziliş" (the variant drawn in small, what that variant counts, the
- * card) and, on a carousel only, "Kaydırma" (cards in view, the arrows).
+ * A product rail's groups under "Stil" after its "Biçim" (adr/0049 Ek
+ * 2026-11-15; the variant stands in its own open group as every other
+ * section's): "Diziliş" (what that variant counts, the card) and, on a
+ * carousel only, "Kaydırma" (cards in view, the arrows).
  * Its rarely changed scroller settings sit closed in "Diğer ayarlar"
  * (`SectionPanel`). A field the variant does not use is not shown: the
  * card on a compact or columns rail (always compact), the tabs switch on a
@@ -104,17 +103,12 @@ export function ShelfGroups({
   const { variant } = section
   return (
     <>
-      <PanelGroup title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
+      <PanelGroup
+        name="layout"
+        title={t("storefront.editor.panel.layout")}
+        reveal={reveal("layout")}
+      >
         <div className="flex flex-col gap-5">
-          <VariantField
-            id={FIELD_IDS.variant(id)}
-            type="products"
-            value={variant}
-            onChange={(next) => {
-              // Its own step in the history: "Geri al" brings the old variant back
-              onChange(switchVariant(section, next))
-            }}
-          />
           {variant === "grid" ? (
             <>
               <div id={FIELD_IDS.shelf(id, "columns")}>
@@ -191,7 +185,11 @@ export function ShelfGroups({
         </div>
       </PanelGroup>
       {variant === "carousel" ? (
-        <PanelGroup title={t("storefront.editor.panel.scroll")} reveal={reveal("scroll")}>
+        <PanelGroup
+          name="scroll"
+          title={t("storefront.editor.panel.scroll")}
+          reveal={reveal("scroll")}
+        >
           <ScrollerFields
             value={scrollerSettingsOf(section.scroller)}
             settings={SCROLLER_MAIN}

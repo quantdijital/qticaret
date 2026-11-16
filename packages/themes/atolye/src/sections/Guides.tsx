@@ -14,7 +14,7 @@ export function Guides({ section }: { section: Of<"posts"> }) {
   const id = headingId(section.id)
   const posts = section.posts.slice(0, 3)
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap)">
+    <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-6 lg:gap-10">
         <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} />
         <ul className="grid gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))]">

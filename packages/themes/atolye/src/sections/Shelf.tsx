@@ -33,7 +33,7 @@ export function Shelf({
     return null
   }
   return (
-    <div className="pt-(--section-gap)">
+    <div className="gf-section">
       <Container>
         {sections.length === 1 ? (
           <Rack section={first} t={t} quickAdd={quickAdd} tabbed={false} />

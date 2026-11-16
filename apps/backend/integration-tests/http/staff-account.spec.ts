@@ -171,24 +171,30 @@ medusaIntegrationTestRunner({
 
     it("asks a member with 2FA for its code, and its code does not stand in for the password", async () => {
       const member = await createAdminUser(http, getContainer(), "admin")
-      const { secret } = await setUpTotp(http, member)
+      const { secret, code: setUpCode } = await setUpTotp(http, member)
       const fresh = randomUUID()
       const body = { current_password: member.password, new_password: fresh }
-      // The setup used this step's code; Medusa takes one step either side
-      const withCode = (steps: number) =>
-        call({
-          ...member.plain,
-          "x-reauth-method": "totp",
-          "x-reauth-secret": totp(secret, steps),
-        })
+      // A code is taken once, within a step either side of now: each call gets one not
+      // given before (a fixed "step before" met the set-up's code across a 30 s boundary)
+      const given = [setUpCode]
+      const withCode = () => {
+        const code = [1, -1, 0]
+          .map((step) => totp(secret, step))
+          .find((each) => !given.includes(each))
+        if (!code) {
+          throw new Error("every code Medusa would take now was given already")
+        }
+        given.push(code)
+        return call({ ...member.plain, "x-reauth-method": "totp", "x-reauth-secret": code })
+      }
 
       const bare = await call(member.plain).post("/admin/staff/me/password", body)
       const byPassword = await call(member.headers).post("/admin/staff/me/password", body)
-      const wrongPassword = await withCode(1).post("/admin/staff/me/password", {
+      const wrongPassword = await withCode().post("/admin/staff/me/password", {
         current_password: "yanlis-sifre-2026",
         new_password: fresh,
       })
-      const right = await withCode(-1).post("/admin/staff/me/password", body)
+      const right = await withCode().post("/admin/staff/me/password", body)
 
       expect([bare.status, keyOf(bare.data)]).toEqual([428, "staff.reauth_required"])
       expect([byPassword.status, keyOf(byPassword.data)]).toEqual([428, "staff.reauth_failed"])

@@ -132,7 +132,7 @@ export function Campaign({
   )
   const full = section.width === "full"
   // Opening the page it sits under the header as the hero does; edge to edge, right against it
-  const top = !first ? "pt-(--section-gap)" : full ? undefined : "pt-3 lg:pt-6"
+  const top = !first ? "gf-section" : full ? undefined : "pt-3 lg:pt-6"
   return (
     <section aria-label={label} className={top}>
       {full ? list : <Container>{list}</Container>}

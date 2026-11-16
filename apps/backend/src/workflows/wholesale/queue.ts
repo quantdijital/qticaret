@@ -11,11 +11,16 @@ import { WHOLESALE_SYNC_JOB } from "../async-job/types/wholesale-sync"
  */
 export async function queueWholesaleCarts(
   container: MedusaContainer,
-  requestedBy: string | null
+  requestedBy: string | null,
+  attempt = 0
 ): Promise<boolean> {
   try {
     await enqueueAsyncJobWorkflow(container).run({
-      input: { type: WHOLESALE_CARTS_JOB, input: {}, requested_by: requestedBy },
+      input: {
+        type: WHOLESALE_CARTS_JOB,
+        input: attempt > 0 ? { attempt } : {},
+        requested_by: requestedBy,
+      },
     })
     return true
   } catch (error) {

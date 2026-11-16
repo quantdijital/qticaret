@@ -132,6 +132,9 @@ const CATALOG_FIELDS = [
   "tools_place",
   "top_links",
   "search_width",
+  // The strip's note (Ek 2026-11-15); a preset without one: none
+  "strip_note",
+  "strip_note_link",
 ] as const
 
 /** The header bar as `mainSectionsOf` prints it; none in the preset: the theme's header. */
@@ -152,6 +155,8 @@ function headerBar(bar: Section | undefined, theme: Record<string, unknown>) {
     sticky: bar["sticky"],
     // The menus' pictures as the preset names them; none: left to the storefront's reading (`submenus`)
     ...(bar["menu_images"] === undefined ? {} : { menu_images: bar["menu_images"] }),
+    // The search's look likewise; none: the box (`field`)
+    ...(bar["search_style"] === undefined ? {} : { search_style: bar["search_style"] }),
     ...(bar["variant"] === "catalog"
       ? { catalog: Object.fromEntries(CATALOG_FIELDS.map((key) => [key, bar[key] ?? null])) }
       : {}),

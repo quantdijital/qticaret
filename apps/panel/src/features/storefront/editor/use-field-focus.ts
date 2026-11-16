@@ -28,27 +28,46 @@ export function useFieldFocus(focus: FieldFocus | null) {
       return
     }
     const element = document.getElementById(focus.target)
-    if (!element) {
-      return
-    }
-    // jsdom has no media queries: a test scrolls at once
-    const still =
-      typeof window.matchMedia !== "function" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    element.scrollIntoView({ block: "center", behavior: still ? "auto" : "smooth" })
-    const control = element.matches(FOCUSABLE)
-      ? element
-      : element.querySelector<HTMLElement>(FOCUSABLE)
-    control?.focus({ preventScroll: true })
-    element.setAttribute("data-highlight", "")
-    const timer = window.setTimeout(() => {
-      element.removeAttribute("data-highlight")
-    }, HIGHLIGHT_MS)
-    return () => {
-      window.clearTimeout(timer)
-      element.removeAttribute("data-highlight")
-    }
+    return element ? showField(element) : undefined
   }, [focus])
+}
+
+/**
+ * What takes the focus for a field: the element itself if it can, else
+ * the choice picked in it (a radio group's, a row of steps'), else its
+ * first control.
+ */
+function focusIn(element: HTMLElement): HTMLElement | null {
+  if (element.matches(FOCUSABLE) || element.tabIndex >= 0) {
+    return element
+  }
+  return (
+    element.querySelector<HTMLElement>('[role="radio"][tabindex="0"], [data-state="on"]') ??
+    element.querySelector<HTMLElement>(FOCUSABLE)
+  )
+}
+
+/**
+ * Scrolls a field into view, focuses its control and marks it for a
+ * moment; the returned function takes the mark off at once. `control`:
+ * the element to focus when it is not the field's first focusable one (a
+ * hit of the panel's own search names it).
+ */
+export function showField(element: HTMLElement, control?: HTMLElement | null): () => void {
+  // jsdom has no media queries: a test scrolls at once
+  const still =
+    typeof window.matchMedia !== "function" ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  element.scrollIntoView({ block: "center", behavior: still ? "auto" : "smooth" })
+  focusIn(control ?? element)?.focus({ preventScroll: true })
+  element.setAttribute("data-highlight", "")
+  const timer = window.setTimeout(() => {
+    element.removeAttribute("data-highlight")
+  }, HIGHLIGHT_MS)
+  return () => {
+    window.clearTimeout(timer)
+    element.removeAttribute("data-highlight")
+  }
 }
 
 /** The field the open section's panel was asked to show, for a part that opens a dialog. */

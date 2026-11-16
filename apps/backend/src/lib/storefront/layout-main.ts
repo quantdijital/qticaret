@@ -42,6 +42,7 @@ export const defaultHeaderBar = (theme: ThemeHeader): HeaderBar => ({
   variant: theme.layout === "centered" ? "centered" : "standard",
   sticky: theme.sticky,
   menu_images: "submenus",
+  search_style: "field",
 })
 
 const FOOTER_BAR: FooterBar = {
@@ -126,6 +127,7 @@ export function mainSectionsOf<L>(
       variant: header.variant,
       sticky: header.sticky,
       menu_images: header.menu_images,
+      search_style: header.search_style,
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
     },
     // Its own settings only when the shop changed them, so a footer left alone prints as before
@@ -166,5 +168,7 @@ function catalogOf<L>(header: HeaderCatalog, resolve: (link: MenuLinkInput) => L
     tools_place: header.tools_place,
     top_links: header.top_links,
     search_width: header.search_width,
+    strip_note: header.strip_note,
+    strip_note_link: header.strip_note_link ? resolve(header.strip_note_link) : null,
   }
 }

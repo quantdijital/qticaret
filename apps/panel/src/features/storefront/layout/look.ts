@@ -27,22 +27,36 @@ const LONG_TEXT: ReadonlySet<LookedType> = new Set(["rich_text", "faq"])
  * Ek 2026-11-14 §4.1, §6); the space above it and its width stay.
  */
 const ONLY: Partial<Record<LookedType, readonly SectionLookField[]>> = {
-  marquee: ["space_outer", "width"],
+  marquee: ["space_outer", "space_below", "width"],
   // The page's main block keeps its own grounds and inner spacing (adr/0049 Ek 2026-11-14 §7)
-  product_main: ["space_outer", "width"],
-  category_main: ["space_outer", "width"],
+  product_main: ["space_outer", "space_below", "width"],
+  category_main: ["space_outer", "space_below", "width"],
 }
 
-/** The look's fields the panel offers for a type, in the contract's order. */
 /**
  * Types with a width of their own (the band's "Kutulu / Tam", adr/0049 Ek
  * 2026-11-14 §3.3 E2): the look's width is not offered beside it.
  */
 const OWN_WIDTH: ReadonlySet<LookedType> = new Set(["banner"])
 
-export const lookFieldsFor = (type: LookedType): readonly SectionLookField[] =>
+/**
+ * The space above and below a section, in their own open "Boşluk" group
+ * (sahip 2026-11-15: every section's spacing within reach); the rest of
+ * the look stays in the closed "Diğer ayarlar".
+ */
+export const SPACING_FIELDS: readonly SectionLookField[] = ["space_outer", "space_below"]
+
+/** Which group a field sits in: `spacing` ("Boşluk") or `other` ("Diğer ayarlar"); none: both. */
+export type LookPart = "spacing" | "other"
+
+const inPart = (field: SectionLookField, part: LookPart | undefined) =>
+  part === undefined || SPACING_FIELDS.includes(field) === (part === "spacing")
+
+/** The look's fields the panel offers for a type, in the contract's order (only one group's, with `part`). */
+export const lookFieldsFor = (type: LookedType, part?: LookPart): readonly SectionLookField[] =>
   SECTION_LOOK_FIELDS.filter(
     (field) =>
+      inPart(field, part) &&
       (ONLY[type]?.includes(field) ?? true) &&
       (field !== "align" || !NO_ALIGN.has(type)) &&
       (field !== "width" || !OWN_WIDTH.has(type))
@@ -61,6 +75,7 @@ export function lookStepsFor<F extends SectionLookField>(
 
 const NONE: SectionLook = {
   space_outer: null,
+  space_below: null,
   space_inner: null,
   ground: null,
   align: null,
@@ -92,6 +107,6 @@ export function withLookStep<S extends LookedSection, F extends SectionLookField
   return rest
 }
 
-/** How many of the type's offered fields the shop set: the closed group says so. */
-export const lookCount = (section: LookedSection): number =>
-  lookFieldsFor(section.type).filter((field) => lookStep(section, field) !== null).length
+/** How many of the type's offered fields the shop set (in one group, with `part`): the group's title says so. */
+export const lookCount = (section: LookedSection, part?: LookPart): number =>
+  lookFieldsFor(section.type, part).filter((field) => lookStep(section, field) !== null).length

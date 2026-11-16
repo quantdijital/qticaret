@@ -118,6 +118,32 @@ describe("a featured product section", () => {
       },
       facts: [{ label: "Çelik", value: "Çelik değeri", highlight: true }],
       specGroups: [{ title: null, rows: [{ label: "Bakım" }, { label: "Çelik" }] }],
+      // Printed by the backend only off the collage: one absent is the collage
+      settings: { gallery: "collage" },
+    })
+  })
+
+  it("passes the photographs' layout on, an unknown step read as the collage", async () => {
+    requests.productById.mockResolvedValue(PRODUCT)
+    const strips = { ...featured, gallery: "strips" } as StoreLayoutSection
+    const stale = { ...featured, gallery: "mosaic" } as unknown as StoreLayoutSection
+    expect((await sectionViews([strips], t))[0]).toMatchObject({ settings: { gallery: "strips" } })
+    expect((await sectionViews([stale], t))[0]).toMatchObject({ settings: { gallery: "collage" } })
+  })
+
+  it("passes the strips' look on, a missing step read as its default (adr/0049 Ek 2026-11-16)", async () => {
+    requests.productById.mockResolvedValue(PRODUCT)
+    const look = { gallery: "strips", strips_layout: "wide", strips_overlap: "on" }
+    const strips = { ...featured, ...look } as StoreLayoutSection
+    expect((await sectionViews([strips], t))[0]).toMatchObject({
+      settings: {
+        gallery: "strips",
+        strips_layout: "wide",
+        strips_slant: "medium",
+        strips_line: "thin",
+        strips_overlap: "on",
+        strips_dim: "on",
+      },
     })
   })
 

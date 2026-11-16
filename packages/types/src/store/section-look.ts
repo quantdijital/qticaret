@@ -11,7 +11,13 @@
 export const SECTION_LOOK = {
   /** Above the section (margin): none, then the theme's small, medium and large section gaps. */
   space_outer: ["none", "small", "medium", "large"],
-  /** Inside it (padding), from the theme's spacing scale. */
+  /**
+   * Below it (margin), the same steps. The gap between two sections is one
+   * gap, never two added: a step set here stands in for the next section's
+   * own gap above it; set on both sides, the larger stands.
+   */
+  space_below: ["none", "small", "medium", "large"],
+  /** Inside it (padding, top and bottom alike), the same section gaps: a band's room equals the gap around it. */
   space_inner: ["none", "small", "medium", "large"],
   /** Its ground: the page's, a tinted well, the dark stage, the shop's own colour; pairs the theme measured. */
   ground: ["page", "well", "stage", "primary"],

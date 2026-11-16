@@ -85,7 +85,7 @@ export function AnnouncementMotion({
   }
   const id = FIELD_IDS.announcement(section.id, "hover_pause")
   return (
-    <PanelGroup title={t("storefront.editor.panel.motion")} reveal={reveal("motion")}>
+    <PanelGroup name="motion" title={t("storefront.editor.panel.motion")} reveal={reveal("motion")}>
       <div className="flex flex-col gap-5">
         <StepsOf section={section} setting="interval" onChange={onChange} />
         <StepsOf section={section} setting="pause_button" onChange={onChange} />
@@ -131,7 +131,11 @@ export function AnnouncementStyle({
 }) {
   const { t } = useTranslation()
   return (
-    <PanelGroup title={t("storefront.editor.panel.appearance")} reveal={reveal("appearance")}>
+    <PanelGroup
+      name="appearance"
+      title={t("storefront.editor.panel.appearance")}
+      reveal={reveal("appearance")}
+    >
       <div className="flex flex-col gap-5">
         <StepsOf section={section} setting="align" onChange={onChange} />
         <StepsOf section={section} setting="size" onChange={onChange} />

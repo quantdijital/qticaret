@@ -154,6 +154,17 @@ describe("the theme's listing page", () => {
     expect(html).toMatch(/aria-current="page" aria-label="Sayfa 2"/)
   })
 
+  it("leaves no room under the grid of a one-page list, and keeps the pages' room on a longer one", () => {
+    expect(page()).toMatch(/<div class="pt-4"><nav aria-label="Sayfalar"/)
+    const single = page({
+      total: 3,
+      pagination: { page: 1, pages: 1, previous: null, next: null, pagePath: {} },
+    })
+    expect(single).toContain('href="/urun/a"')
+    expect(single).not.toContain('<div class="pt-4">')
+    expect(single).not.toContain('aria-label="Sayfalar"')
+  })
+
   it("loads the first page's first photos at once", () => {
     const first = page({ pagination: { ...view().pagination, page: 1 } })
     expect(first.match(/fetchPriority="high"/g)).toHaveLength(2)

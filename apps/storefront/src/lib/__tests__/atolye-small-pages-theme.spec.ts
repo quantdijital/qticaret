@@ -53,6 +53,55 @@ describe("the brands' index", () => {
     expect(html).not.toContain("style=")
   })
 
+  // A tile without a logo as the page drew it before logos widened (adr/0066: unchanged)
+  const TILE =
+    '<a href="/marka/celik-usta" class="flex min-h-16 min-w-0 items-center gap-3 rounded-media gf-pane p-3 transition-colors duration-(--dur-micro) hover:bg-paper-3"><span class="min-w-0 text-md font-semibold break-words">Çelik Usta</span></a>'
+
+  it("draws a brand without a logo as its name, as before", () => {
+    const html = renderPage(atolyeTheme, "BrandsPage", { view })
+    expect(html).toContain(TILE)
+  })
+
+  it("gives a logo a plate 40 px tall and as wide as its ratio, up to 120 px, the name's line first", () => {
+    const withLogo = {
+      ...view,
+      groups: [
+        ...view.groups.slice(0, 1),
+        {
+          letter: "K",
+          anchor: "harf-k",
+          brands: [
+            {
+              label: "Kızılcık",
+              path: "/marka/kizilcik",
+              logo: {
+                src: "https://cdn.example/kizilcik.png",
+                alt: "",
+                width: null,
+                height: null,
+                sources: { avif: null, webp: null },
+              },
+            },
+          ],
+        },
+      ],
+    }
+    const html = renderPage(atolyeTheme, "BrandsPage", { view: withLogo })
+    const tile = /<a href="\/marka\/kizilcik"[^>]*>(.*?)<\/a>/.exec(html)?.[1] ?? ""
+    // A fixed height, the width the logo's own from the square (a square logo's plate, as before) to 120 px
+    expect(tile).toContain(
+      'class="gf-logo-plate flex h-10 max-w-30 min-w-10 items-center justify-center overflow-hidden rounded-inner bg-field"'
+    )
+    expect(tile).toMatch(/<img[^>]*class="max-h-10 max-w-full object-contain"/)
+    expect(tile).toContain('src="https://cdn.example/kizilcik.png"')
+    // The name keeps its line and leaves the square's room: the plate gives way first
+    expect(tile).toContain(
+      '<span class="max-w-[calc(100%-3.25rem)] min-w-0 shrink-0 text-md font-semibold break-words">Kızılcık</span>'
+    )
+    // The brand without one is untouched beside it
+    expect(html).toContain(TILE)
+  })
+
   it("says so when the shop has no brand", () => {
     const html = renderPage(atolyeTheme, "BrandsPage", { view: { ...view, groups: [] } })
     expect(html).toContain(t("brands.empty"))
