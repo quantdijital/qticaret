@@ -22,11 +22,14 @@ vi.mock("@/features/auth/api/me", () => ({
   useLogout: () => ({ mutate: vi.fn() }),
 }))
 vi.mock("@/features/auth/api/staff", () => ({ useStaff: () => staff.current }))
-const seo = vi.hoisted(() => ({ host: null as string | null }))
+const seo = vi.hoisted(() => ({
+  host: null as string | null,
+  served: undefined as string | null | undefined,
+}))
 vi.mock("@/features/settings/api/seo", () => ({
   seoSettingsQuery: () => ({
     queryKey: ["seo"],
-    queryFn: () => ({ values: { canonical_host: seo.host } }),
+    queryFn: () => ({ values: { canonical_host: seo.host }, storefront_url: seo.served }),
   }),
 }))
 vi.mock("@qticaret/admin-ui/ui/sidebar", () => ({ SidebarTrigger: () => null }))
@@ -45,6 +48,7 @@ function renderTopbar() {
 describe("Topbar's 'Mağazayı görüntüle'", () => {
   beforeEach(() => {
     seo.host = null
+    seo.served = undefined
   })
 
   it("opens the bound domain in a new tab", async () => {
@@ -60,7 +64,31 @@ describe("Topbar's 'Mağazayı görüntüle'", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer")
   })
 
-  it("opens the storefront the panel already frames while no domain is bound", async () => {
+  it("opens the bound domain before the address the backend gives", async () => {
+    seo.host = "magaza.example.com"
+    seo.served = "https://vitrin.example.net"
+    renderTopbar()
+    const link = await screen.findByRole("link", { name: /Mağazayı görüntüle/ })
+    expect(link).toHaveAttribute("href", "https://magaza.example.com")
+  })
+
+  it("opens the address the backend gives while no domain is bound", async () => {
+    seo.served = "https://vitrin.example.net"
+    renderTopbar()
+    const link = await screen.findByRole("link", { name: /Mağazayı görüntüle/ })
+    expect(link).toHaveAttribute("href", "https://vitrin.example.net")
+    expect(link).toHaveAttribute("target", "_blank")
+  })
+
+  it("never opens an address out of shape the backend's answer holds", async () => {
+    seo.served = "javascript:alert(1)"
+    renderTopbar()
+    const link = await screen.findByRole("link", { name: /Mağazayı görüntüle/ })
+    // While developing, the storefront the panel frames stands in
+    expect(link).toHaveAttribute("href", STOREFRONT_ORIGIN)
+  })
+
+  it("opens the storefront the panel already frames while developing and nothing else is known", async () => {
     // The development default or `VITE_STOREFRONT_ORIGIN`: never made up here
     expect(STOREFRONT_ORIGIN).toMatch(/^https?:\/\//)
     renderTopbar()

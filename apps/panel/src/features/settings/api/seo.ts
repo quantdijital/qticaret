@@ -12,6 +12,8 @@ export interface SeoSettingsResponse {
     }
   }
   version: number
+  /** Where the storefront opens, as the backend's configuration says (read only); null: unknown. */
+  storefront_url?: string | null
 }
 
 export const seoSettingsQuery = () =>

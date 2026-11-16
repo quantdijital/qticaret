@@ -83,7 +83,9 @@ const envSchema = z.object({
   // adr/0048 ek 2026-11-03: where a publication or a settings save tells the
   // storefront's server to forget its shop-wide answers (`POST /api/yenile`,
   // signed with the secret above). Unset: the shop's canonical host once
-  // deployed, http://localhost:8000 on a developer's machine
+  // deployed, http://localhost:8000 on a developer's machine. With no domain
+  // bound, the panel's "Mağazayı görüntüle" opens it too (`lib/storefront/home.ts`):
+  // a public address, so staff can open it
   STOREFRONT_ORIGIN: z
     .url({ protocol: /^https?$/ })
     .refine(isBareOrigin, "must be an origin: scheme, host and port only")

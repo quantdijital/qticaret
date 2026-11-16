@@ -1,6 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { ValidationError } from "../../../../lib/errors"
+import { storefrontHome } from "../../../../lib/storefront/home"
 import { PLATFORM_SETTINGS_MODULE } from "../../../../modules/platform-settings"
 import { isSectionName } from "../../../../modules/platform-settings/sections"
 import type { SectionName, SeoSettings } from "../../../../modules/platform-settings/sections"
@@ -36,11 +37,24 @@ async function refuseStyleChange(req: AuthenticatedMedusaRequest<SectionValues>)
   }
 }
 
+/**
+ * A section's answer: its stored values; the SEO section's also says where
+ * the storefront opens (`storefront_url`, read only: never a stored value,
+ * so a save cannot send it), for the panel's "Mağazayı görüntüle".
+ */
+async function sectionAnswer(req: AuthenticatedMedusaRequest, section: SectionName) {
+  const service = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+  const stored = await service.readSection(section)
+  if (section !== "seo") {
+    return { section, ...stored }
+  }
+  const host = (stored.values as unknown as SeoSettings).canonical_host
+  return { section, ...stored, storefront_url: storefrontHome(host) }
+}
+
 /** A settings section as stored, defaults filled in (adr/0012). */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
-  const section = sectionParam(req)
-  const service = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  res.json({ section, ...(await service.readSection(section)) })
+  res.json(await sectionAnswer(req, sectionParam(req)))
 }
 
 /** Saves the fields sent over the current values; the body was checked by the section's schema. */
@@ -55,6 +69,5 @@ export async function POST(
   await updatePlatformSettingsWorkflow(req.scope).run({
     input: { section, values: req.validatedBody, actor_id: req.auth_context.actor_id || null },
   })
-  const service = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  res.json({ section, ...(await service.readSection(section)) })
+  res.json(await sectionAnswer(req, section))
 }
