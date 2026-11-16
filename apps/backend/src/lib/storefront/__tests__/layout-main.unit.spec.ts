@@ -42,8 +42,6 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
         back_to_top_side: "right",
         back_to_top_shape: "round",
         back_to_top_mobile: true,
-        // The shop's name over its contact, as before (owner 2026-11-16)
-        brand: "name",
       },
     ])
     expect(doc.product.map((section) => section.type)).toEqual(["product_main", "help"])

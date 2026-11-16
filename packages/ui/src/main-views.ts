@@ -111,8 +111,8 @@ export interface FooterBarView {
   /** The floating "back to top" button; none (or absent): not drawn. */
   backToTop?: BackToTopView | null
   /**
-   * The store profile's logo the shop chose to be named by over its
-   * contact (owner 2026-11-16); absent (not chosen, or no logo): its name.
+   * The store profile's logo, naming the shop over its contact as the
+   * header's does (owner 2026-11-16); absent (no logo): its name.
    */
   logo?: ImageView
 }

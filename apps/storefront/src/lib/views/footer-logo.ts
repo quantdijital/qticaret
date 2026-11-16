@@ -18,8 +18,9 @@ const size = (value: unknown): number | null =>
   typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.round(value) : null
 
 /**
- * The logo the footer names the shop with when it chose the logo (owner
- * 2026-11-16): the store profile's own, never a second upload. The footer
+ * The logo the footer names the shop with (owner 2026-11-16: "header
+ * logosuyla bağlansın"): the store profile's own, as the header's, never a
+ * second upload. The footer
  * stands on the page's light well, so the light-ground logo first, the
  * dark-ground one when the shop has only that; its size when the library
  * measured it (an SVG's from its viewBox), so the box is kept as it loads.

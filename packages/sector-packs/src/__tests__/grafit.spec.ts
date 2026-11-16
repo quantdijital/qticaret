@@ -36,9 +36,7 @@ describe("the presets in this package (adr/0063 §8)", () => {
       ["blogyazilari", "posts"],
     ])
     expect(layout?.home?.[2]?.["more"]).toEqual({ $href: "/magaza", label: null })
-    expect(layout?.footer?.map((each) => each.type)).toEqual(["footer_bar", "newsletter"])
-    // The footer names the shop by its store profile logo; no logo, its name (owner 2026-11-16)
-    expect(layout?.footer?.[0]).toMatchObject({ id: "mainfooter", brand: "logo" })
+    expect(layout?.footer?.map((each) => each.type)).toEqual(["newsletter"])
     expect([layout?.header, layout?.product, layout?.category]).toEqual([[], [], []])
   })
 

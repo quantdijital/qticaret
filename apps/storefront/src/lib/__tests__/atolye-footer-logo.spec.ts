@@ -4,10 +4,10 @@ import type { FooterBarView, ImageView } from "@qticaret/ui"
 import { renderFrame, shopFixture } from "@/test/theme-render"
 
 /**
- * Atölye's footer names the shop by its name, as before, or by the store
- * profile's logo when the shop chose it (owner 2026-11-16): the image in
- * the contact's heading, its alt text the heading's name, in the header
- * logo's 40 px box.
+ * Atölye's footer names the shop by the store profile's logo when it has
+ * one, as the header does (owner 2026-11-16), else by its name as before:
+ * the image in the contact's heading, its alt text the heading's name, in
+ * the header logo's 40 px box.
  */
 
 const BAR: FooterBarView = { id: "mainfooter", variant: "ledger" }
@@ -31,7 +31,7 @@ const heading = (footerBar: FooterBarView | undefined) => {
 }
 
 describe("the footer's brand (owner 2026-11-16)", () => {
-  it("writes the name as before when the shop did not choose the logo", () => {
+  it("writes the name as before when the shop has no logo", () => {
     const before =
       '<h2 id="footer-contact" class="text-wordmark leading-tight font-extrabold tracking-(--tracking-display)">Örnek Bıçak</h2>'
     expect(heading(BAR)).toBe(before)

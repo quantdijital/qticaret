@@ -54,15 +54,6 @@
   ],
   "footer": [
     {
-      "id": "mainfooter",
-      "type": "footer_bar",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "variant": "ledger",
-      "brand": "logo"
-    },
-    {
       "id": "ebultenkutusu",
       "type": "newsletter",
       "visible": true,

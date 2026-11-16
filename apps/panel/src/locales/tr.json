@@ -449,7 +449,7 @@
           "small": "Simge 48 × 48 pikselden küçük; Google arama sonuçlarında gösterilmeyebilir.",
           "unmeasured": "Bu görselin boyutu bilinmiyor. Kütüphaneye yeniden yükleyip seçin."
         },
-        "logosUse": "Logolar vitrinin üst bilgisinde ve, altbilgi ayarında Logo seçilirse, altbilgide kullanılır.",
+        "logosUse": "Logolar üst bilgide ve altbilgide kullanılır.",
         "svgText": "SVG logonuzda yazı varsa, tasarım programınızda yazıyı \"eğriye çevir\" / \"ana hatlara dönüştür\" ile dışa aktarın: yüklemede yazı tipi bildirimleri temizlenir, eğriye çevrilmiş yazı aynen görünür."
       },
       "region": "Bölge ve birimler",
@@ -9247,13 +9247,6 @@
         }
       },
       "footerBar": {
-        "brand": {
-          "label": "Marka",
-          "term": "logo",
-          "hint": "Logo, Ayarlar → Mağaza profili → Marka'dan gelir. Logo yoksa mağaza adı yazılır.",
-          "name": "Mağaza adı",
-          "logo": "Logo"
-        },
         "social": {
           "label": "Sosyal hesaplar",
           "term": "social links",

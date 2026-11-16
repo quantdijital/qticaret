@@ -4,10 +4,10 @@ import { footerLogoOf } from "../footer-logo"
 import { footerBarOf } from "../main-sections"
 
 /**
- * The footer named by the store profile's logo (owner 2026-11-16: "mağaza
- * logosu footerdeki logoyu etkilemiyor"): a choice of the footer bar
- * (`brand`), the logo the profile's own (light ground first, the dark
- * one when it is the only one), the name whenever there is no logo.
+ * The footer named by the store profile's logo (owner 2026-11-16: "header
+ * logosuyla bağlansın işte"): no setting, the header's source, the light
+ * ground logo first, the dark one when it is the only one, the name
+ * whenever there is no logo.
  */
 
 const t = (key: string) => key
@@ -69,25 +69,20 @@ describe("the footer's logo (owner 2026-11-16)", () => {
   })
 })
 
-describe("the footer bar's brand (owner 2026-11-16)", () => {
+describe("the footer bar with the shop's logo (owner 2026-11-16)", () => {
   const image = footerLogoOf({ name: "B", logo_url: "/m/a.svg" })
 
-  it("names the shop as before: no choice, the name, or a step this build does not know", () => {
-    expect(footerBarOf(footer({}), t, image)).toEqual({ id: "mainfooter", variant: "ledger" })
-    expect(footerBarOf(footer({ brand: "name" }), t, image)).not.toHaveProperty("logo")
-    expect(footerBarOf(footer({ brand: "wordmark" }), t, image)).not.toHaveProperty("logo")
-    expect(footerBarOf(undefined, t, image)).not.toHaveProperty("logo")
-  })
-
-  it("carries the logo when the shop chose it, and nothing when the shop has none", () => {
-    expect(footerBarOf(footer({ brand: "logo" }), t, image)).toEqual({
+  it("carries the logo whenever the shop has one, with no setting of its own", () => {
+    expect(footerBarOf(footer({}), t, image)).toEqual({
       id: "mainfooter",
       variant: "ledger",
       logo: image,
     })
-    expect(footerBarOf(footer({ brand: "logo" }), t, null)).toEqual({
-      id: "mainfooter",
-      variant: "ledger",
-    })
+    expect(footerBarOf(undefined, t, image)).toMatchObject({ logo: image })
+  })
+
+  it("carries none without a logo: the footer writes the name as before", () => {
+    expect(footerBarOf(footer({}), t, null)).toEqual({ id: "mainfooter", variant: "ledger" })
+    expect(footerBarOf(footer({}), t)).toEqual({ id: "mainfooter", variant: "ledger" })
   })
 })

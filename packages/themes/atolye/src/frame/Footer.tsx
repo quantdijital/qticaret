@@ -13,9 +13,9 @@ const LINE =
   "inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-9"
 
 /**
- * How the shop is reached: its name (or the store profile's logo, when the
- * shop chose it in the footer: `footerBar.logo`, the image's alt text the
- * heading's name), registered title when it differs, address, phone,
+ * How the shop is reached: its logo when the store profile has one
+ * (`footerBar.logo`, the header's; the image's alt text the heading's
+ * name), else its name; registered title when it differs, address, phone,
  * e-mail, profiles (`FooterSocial`).
  */
 function Contact({ shop, t }: { shop: ShopView; t: Translate }) {

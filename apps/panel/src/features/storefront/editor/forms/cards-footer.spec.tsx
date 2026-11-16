@@ -143,19 +143,6 @@ describe("the footer's settings", () => {
     expect(changes.at(-1)).toMatchObject({ payment_badges: ["cash_on_delivery"] })
   })
 
-  it("names the shop by its name or by the store profile's logo, saying where the logo comes from", async () => {
-    const changes = renderHeld(footer, (value, keep) => (
-      <FooterBarForm section={value} problems={{}} onChange={keep} />
-    ))
-    const brand = screen.getByRole("radio", { name: "Mağaza adı" })
-    expect(brand).toBeChecked()
-    expect(screen.getByText(/Logo, Ayarlar → Mağaza profili → Marka'dan gelir/)).toBeVisible()
-    await userEvent.click(screen.getByRole("radio", { name: "Logo" }))
-    expect(changes.at(-1)).toMatchObject({ brand: "logo" })
-    expect(search("logo", footer, "footer")).toContain("footer.brand")
-    expect(search("marka", footer, "footer")).toContain("footer.brand")
-  })
-
   it("shows the button's corner, face and phones only while it is on", async () => {
     const changes = renderHeld(footer, (value, keep) => (
       <FooterBarForm section={value} problems={{}} onChange={keep} />

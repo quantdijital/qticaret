@@ -31,7 +31,6 @@ export const COLLAGE_FIELDS = ["lead", "columns", "columns_mobile", "height", "l
 export type CollageField = (typeof COLLAGE_FIELDS)[number]
 
 export const FOOTER_FIELDS = [
-  "brand",
   "social",
   "payment_badges",
   "back_to_top",
