@@ -2,7 +2,8 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
 import { isBody, isShowing, readStoredLayout } from "../../lib/storefront/layout"
 import { mainSectionsOf, withMainSections } from "../../lib/storefront/layout-main"
-import { fillShopText } from "../../lib/shop/tokens"
+import { fillShopText, fillShopTextWhole } from "../../lib/shop/tokens"
+import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { shownSettings } from "../../lib/storefront/layout-settings"
 import { MEDIA_MODULE } from "../../modules/media"
 import type MediaModuleService from "../../modules/media/service"
@@ -178,16 +179,24 @@ export async function storeLayout(
   }
 }
 
-/** The catalog header's strip note with the shop's details in place (adr/0048). */
-function withShopNote<M extends ReturnType<typeof mainSectionsOf>>(
+/**
+ * The catalog header's strip note with the shop's details in place (adr/0048);
+ * a note naming a detail the shop has not given (no free-shipping threshold)
+ * is not shown, never as half a sentence.
+ */
+export function withShopNote<M extends ReturnType<typeof mainSectionsOf>>(
   main: M,
-  values: Awaited<ReturnType<typeof shopInfoValues>>
+  values: ShopInfoValues
 ): M {
   const bar = main.header_bar
   if (!("catalog" in bar)) {
     return main
   }
-  const catalog = { ...bar.catalog, strip_note: fill(bar.catalog.strip_note, values) }
+  const note = bar.catalog.strip_note
+  const catalog = {
+    ...bar.catalog,
+    strip_note: note === null ? null : fillShopTextWhole(note, values),
+  }
   return { ...main, header_bar: { ...bar, catalog } }
 }
 

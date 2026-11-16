@@ -1,6 +1,6 @@
 import { storefrontPreset } from "@qticaret/sector-packs"
 import { presetDocument, presetTheme } from "../document"
-import { resolvePreset } from "../resolve"
+import { presetMarkers, resolvePreset } from "../resolve"
 import type { PresetLink, PresetLookups } from "../resolve"
 
 /** The Tezgâh preset and its colour siblings (docs/tema/tezgah-tasarim-dili.md). */
@@ -22,12 +22,31 @@ const KEPT = {
   low_stock: { enabled: true, threshold: 5 },
 }
 
-// A resolved link as `presetLookups` gives it (the union's own fields beside `kind`)
-const category = (target: string) => ({ kind: "category", target }) as PresetLink
-const system = (target: "shop" | "sale" | "categories") =>
-  ({ kind: "system", target }) as PresetLink
+// The storefront's own pages the preset links to (menu-hrefs' `SYSTEM_PATHS`)
+const SYSTEM: Readonly<Record<string, string>> = {
+  "/magaza": "shop",
+  "/kampanyalar": "sale",
+  "/kategoriler": "categories",
+  "/markalar": "brands",
+  "/yorumlar": "reviews",
+  "/sepet": "cart",
+  "/hesap": "account",
+  "/siparis": "order_lookup",
+}
 
-/** Every handle and address the preset names, as a shop that has them all would answer. */
+/** A resolved link as `presetLookups` gives it: a system page, a brand or a category. */
+function linkOf(href: string, index: number): PresetLink {
+  const system = SYSTEM[href]
+  if (system) {
+    return { kind: "system", target: system } as PresetLink
+  }
+  const kind = href.startsWith("/marka/") ? "brand" : "category"
+  return { kind, target: `${kind === "brand" ? "brand" : "pcat"}_${String(index)}` } as PresetLink
+}
+
+const markers = presetMarkers({ layout: tezgah.layout, menus: tezgah.menus })
+
+/** Every handle, address and picture the preset names, as a shop that has them all would answer. */
 const everything: PresetLookups = {
   records: new Map(
     tezgah.handles.map((ref, index) => [
@@ -35,53 +54,61 @@ const everything: PresetLookups = {
       ref.startsWith("product:") ? `prod_${String(index)}` : `pcat_${String(index)}`,
     ])
   ),
-  links: new Map<string, PresetLink>([
-    ["/magaza", system("shop")],
-    ["/kampanyalar", system("sale")],
-    ["/kategoriler", system("categories")],
-    ["/kategori/av-bicaklari", category("pcat_av")],
-    ["/kategori/outdoor-ve-kamp/kamp-bicaklari", category("pcat_kamp")],
-    ["/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari", category("pcat_sef")],
-  ]),
-  images: new Map(),
+  links: new Map([...markers.hrefs].map((href, index) => [href, linkOf(href, index)])),
+  images: new Map(tezgah.images.map((image) => [image.path, `/static/${image.path}`])),
+}
+
+const draft = (code: string, lookups: PresetLookups) => {
+  const preset = read(code)
+  const resolved = resolvePreset(preset.layout, preset.menus, lookups)
+  const doc = presetDocument(
+    resolved,
+    presetTheme(preset.theme_settings),
+    { pack: "cutlery", code, version: preset.version },
+    KEPT
+  )
+  return { resolved, doc }
 }
 
 describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => {
   it.each(CODES)(
     "%s makes a design the editor's schema takes, every reference resolved",
     (code) => {
-      const preset = read(code)
-      const resolved = resolvePreset(preset.layout, preset.menus, everything)
-      const doc = presetDocument(
-        resolved,
-        presetTheme(preset.theme_settings),
-        { pack: "cutlery", code, version: preset.version },
-        KEPT
-      )
+      const { resolved, doc } = draft(code, everything)
 
       expect(resolved.skipped).toEqual([])
       expect(resolved.dropped).toEqual([])
-      expect(doc.home).toHaveLength(15)
+      expect(resolved.images).toEqual(tezgah.images.map((image) => image.path))
+      expect(doc.home).toHaveLength(18)
       expect(doc.header).toEqual([
         expect.objectContaining({
           type: "header_bar",
           variant: "catalog",
           menu_ground: "stage",
           menu_images: "all",
+          search_style: "icon",
+          strip_note: "{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava",
         }),
       ])
-      expect(doc.header[0]).toHaveProperty("highlight_link.kind", "system")
+      expect(doc.header[0]).toHaveProperty("strip_note_link.target", "sale")
       expect(doc.footer.map((section) => section.type)).toEqual(["footer_bar", "newsletter"])
-      expect(doc.footer[0]).toMatchObject({
-        social: "icons",
-        payment_badges: ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
-        back_to_top: true,
-        back_to_top_shape: "square",
-      })
+      expect(doc.product.map((section) => section.type)).toEqual([
+        "product_main",
+        "trust_badges",
+        "related_products",
+        "faq",
+      ])
+      expect(doc.category.map((section) => section.type)).toEqual(["category_main", "trust_badges"])
+      const opening = doc.home[0] as { slides?: { image: { url: string } | null }[] }
+      expect(opening.slides?.map((slide) => slide.image?.url)).toEqual([
+        "/static/images/acilis-sef-bicaklari.webp",
+        "/static/images/acilis-kamp.webp",
+        "/static/images/acilis-indirim.webp",
+        "/static/images/acilis-bileme.webp",
+      ])
       expect(doc.home.find((section) => section.id === "kullanimagore")).toMatchObject({
         variant: "collage",
         columns: 4,
-        columns_mobile: 1,
         height: "medium",
         lead: "on",
         links: 5,
@@ -89,7 +116,6 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
       expect(doc.settings.theme).toMatchObject({
         radius: "sharp",
         buttons: "square",
-        section_spacing: "compact",
         surface_style: "lined",
         typography: { heading: "inter", body: "inter" },
         product_card: { variant: "framed", hover_image: false },
@@ -97,7 +123,7 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
     }
   )
 
-  it("leaves out only the close-up in a shop with the pack's skeleton and none of its products", () => {
+  it("in a shop with the pack's skeleton and none of its products, leaves out only the close-up", () => {
     const skeleton: PresetLookups = {
       ...everything,
       records: new Map(
@@ -106,27 +132,21 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
           .map((ref, index) => [ref, `pcat_${String(index)}`])
       ),
     }
-    const resolved = resolvePreset(tezgah.layout, tezgah.menus, skeleton)
-    const doc = presetDocument(
-      resolved,
-      presetTheme(tezgah.theme_settings),
-      { pack: "cutlery", code: "tezgah", version: tezgah.version },
-      KEPT
-    )
+    const { resolved, doc } = draft("tezgah", skeleton)
 
     expect(resolved.dropped).toEqual(["home.yakinplan"])
+    // The opening stays: only its small products the shop lacks go (adr/0063 §5)
     expect(resolved.skipped).toEqual([
+      { where: "home.tezgahacilis", ref: "product:miras-sam-celigi-gyuto-21-cm" },
+      { where: "home.tezgahacilis", ref: "product:karacelik-doruk-n690-av-bicagi" },
+      { where: "home.tezgahacilis", ref: "product:demirhan-bozkurt-d2-kilitli-caki" },
+      { where: "home.tezgahacilis", ref: "product:yoruk-usta-18-fonksiyonlu-multitool" },
       { where: "home.yakinplan", ref: "product:karacelik-alageyik-sam-celigi-av-bicagi" },
     ])
-    expect(doc.home.map((section) => section.id)).not.toContain("yakinplan")
-    // The price bands still stand between the tabbed rails and the featured one
-    expect(doc.home.map((section) => section.id).slice(2, 8)).toEqual([
-      "yenirafi",
-      "avrafi",
-      "kamprafi",
-      "sefrafi",
-      "fiyatbantlari",
-      "coksatanlar",
-    ])
+    const ids = doc.home.map((section) => section.id)
+    expect(ids).not.toContain("yakinplan")
+    expect(ids[0]).toBe("tezgahacilis")
+    expect(doc.home[0]).toMatchObject({ picks: [], tiles: [{}, {}] })
+    expect(doc.home).toHaveLength(17)
   })
 })

@@ -540,15 +540,6 @@
       "closable": "off"
     },
     {
-      "id": "yazilar",
-      "type": "posts",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "title": "Ustadan notlar",
-      "limit": 3
-    },
-    {
       "id": "musteriyorumlari",
       "type": "reviews",
       "visible": true,
@@ -687,15 +678,6 @@
       ],
       "open_first": "off",
       "single_open": "on"
-    },
-    {
-      "id": "urunyardim",
-      "type": "help",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "title": "Hangi modeli seçeceğinize karar veremediniz mi?",
-      "text": "Çelik, namlu boyu ya da kullanım için bize yazın; işinize uygun modeli birlikte seçelim."
     }
   ],
   "category": [
@@ -715,16 +697,6 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "lined",
-      "placement": "bottom"
-    },
-    {
-      "id": "kategoriyardim",
-      "type": "help",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "title": "Doğru bıçağı birlikte seçelim",
-      "text": "Çelik, sertlik ya da namlu boyu arasında kararsız kaldıysanız bize yazın; kullanımınıza uygun modeli önerelim.",
       "placement": "bottom"
     }
   ]
