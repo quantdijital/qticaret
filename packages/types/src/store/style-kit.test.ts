@@ -7,7 +7,7 @@ import {
   styleKitAttributes,
 } from "./style-kit.js"
 
-/** adr/0067 §1: the kit's four new steps; the backend mirrors them (`theme-style-kit.unit.spec.ts`). */
+/** adr/0067 §1 and its Ek 2026-11-16 (S6): the kit's steps; the backend mirrors them (`theme-style-kit.unit.spec.ts`). */
 describe("the style kit", () => {
   it("names each field's steps as adr/0067 §1 does, today's drawing first", () => {
     expect(STYLE_KIT).toEqual({
@@ -15,8 +15,15 @@ describe("the style kit", () => {
       shadow: ["float", "none"],
       chip_style: ["filled", "lined"],
       media_ground: ["well", "page"],
+      density: ["airy", "balanced", "compact"],
     })
-    expect(STYLE_KIT_FIELDS).toEqual(["menu_style", "shadow", "chip_style", "media_ground"])
+    expect(STYLE_KIT_FIELDS).toEqual([
+      "menu_style",
+      "shadow",
+      "chip_style",
+      "media_ground",
+      "density",
+    ])
   })
 
   it("defaults each field to its first step, and leaves surface_style out (it came before)", () => {
@@ -33,6 +40,7 @@ describe("the style kit", () => {
       "data-shadow",
       "data-chip-style",
       "data-media-ground",
+      "data-density",
     ])
   })
 
@@ -52,12 +60,17 @@ describe("the style kit", () => {
         shadow: "none",
         chip_style: "lined",
         media_ground: "page",
+        density: "compact",
       })
     ).toEqual({
       "data-menu-style": "underline",
       "data-shadow": "none",
       "data-chip-style": "lined",
       "data-media-ground": "page",
+      "data-density": "compact",
+    })
+    expect(styleKitAttributes({ ...STYLE_KIT_DEFAULTS, density: "balanced" })).toEqual({
+      "data-density": "balanced",
     })
   })
 })

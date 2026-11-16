@@ -245,7 +245,14 @@ medusaIntegrationTestRunner({
       // The shop's badges stay; the theme is grafit's, written into the design
       expect(draft.settings.trust_badges).toEqual(badges)
       expect(draft.settings["theme"]).toEqual(
-        expect.objectContaining({ theme: "atolye", radius: "soft", buttons: "pill" })
+        // Grafit's own steps (2026-11-16, adr/0067 Ek): gentle corners, compact sections, balanced room
+        expect.objectContaining({
+          theme: "atolye",
+          radius: "gentle",
+          buttons: "pill",
+          section_spacing: "compact",
+          density: "balanced",
+        })
       )
       expect(first.data.layout.has_changes).toBe(true)
       expect((await layoutRow(container))?.published).toEqual(live)

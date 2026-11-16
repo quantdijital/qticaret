@@ -31,7 +31,7 @@ export function PriceBands({ section }: { section: Of<"price_bands"> }) {
   const id = headingId(section.id)
   return (
     <section aria-labelledby={id} className="gf-section">
-      <Container className="flex flex-col gap-6 lg:gap-8">
+      <Container className="flex flex-col gap-(--head-gap-m)">
         <SectionHead id={id} title={section.title} marks={section.editor} />
         <ul
           className={cn(

@@ -5,6 +5,7 @@ import { PRODUCT_CARD_VARIANTS, productCardSchema, upgradeCard } from "./theme-c
 import type { ProductCardSettings } from "./theme-card"
 import { STYLE_KIT_DEFAULTS, styleKitSchema, withStyleKitDefaults } from "./theme-style-kit"
 import type { StyleKitSettings } from "./theme-style-kit"
+import { RADIUS_STEPS, SECTION_SPACINGS, SURFACE_STYLES } from "./theme-steps"
 
 export {
   CARD_BUTTON_STYLES,
@@ -16,6 +17,7 @@ export {
 } from "./theme-card"
 export type { ProductCardSettings } from "./theme-card"
 export { STYLE_KIT, STYLE_KIT_DEFAULTS, withStyleKitDefaults } from "./theme-style-kit"
+export { RADIUS_STEPS, SECTION_SPACINGS, SURFACE_STYLES } from "./theme-steps"
 
 /** The storefront themes this build carries (adr/0046 §7); a new theme is a deploy. */
 export const INSTALLED_THEMES = ["atolye"] as const
@@ -93,7 +95,7 @@ export interface ThemeSettings extends StyleKitSettings {
     heading: (typeof HEADING_FONTS)[number]
     body: (typeof BODY_FONTS)[number]
   }
-  radius: "sharp" | "soft" | "round"
+  radius: (typeof RADIUS_STEPS)[number]
   product_card: ProductCardSettings
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
@@ -102,22 +104,6 @@ export interface ThemeSettings extends StyleKitSettings {
   /** How the theme draws its boxes (`SURFACE_STYLES`): a filled tone or a 1 px rule. */
   surface_style: (typeof SURFACE_STYLES)[number]
 }
-
-/**
- * The gap between sections, theme-wide (Tezgâh audit K-11, as Shopify
- * themes' section spacing): `normal` the theme's own gaps, `compact` a
- * dense catalog's, `roomy` a showcase's. Mirrors `@qticaret/types`'
- * `SECTION_SPACINGS` (a unit test keeps them equal).
- */
-export const SECTION_SPACINGS = ["compact", "normal", "roomy"] as const
-
-/**
- * How the theme draws its boxes (Tezgâh audit Z-04): `filled` a tone darker
- * than the page (today's, the default), `lined` the page's ground inside a
- * 1 px rule. Mirrors `@qticaret/types`' `SURFACE_STYLES` (a unit test keeps
- * them equal).
- */
-export const SURFACE_STYLES = ["filled", "lined"] as const
 
 const color = z
   .string()
@@ -285,7 +271,7 @@ export const themeSection = defineSection<ThemeSettings>(
       })
       .strict(),
     typography: z.object({ heading: z.enum(HEADING_FONTS), body: z.enum(BODY_FONTS) }).strict(),
-    radius: z.enum(["sharp", "soft", "round"]),
+    radius: z.enum(RADIUS_STEPS),
     product_card: productCardSchema,
     header: z.object({ layout: z.enum(["centered", "left"]), sticky: z.boolean() }).strict(),
     buttons: z.enum(["pill", "rounded", "square"]),

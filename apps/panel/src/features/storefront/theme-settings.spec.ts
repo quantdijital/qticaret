@@ -45,6 +45,7 @@ const SAVED: ThemeSettings = {
   shadow: "float",
   chip_style: "filled",
   media_ground: "well",
+  density: "airy",
 }
 
 describe("the theme settings as the form holds them (adr/0053 §B)", () => {
@@ -62,6 +63,7 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       shadow: "float",
       chip_style: "filled",
       media_ground: "well",
+      density: "airy",
     })
   })
 })
@@ -100,6 +102,7 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       shadow: "float",
       chip_style: "filled",
       media_ground: "well",
+      density: "airy",
     })
     // As the form holds it
     expect(GRAFIT_VALUES.colors).toEqual({ primary: "", accent: "", background: "steel" })
@@ -124,6 +127,9 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       { ...g, shadow: "none" },
       { ...g, chip_style: "lined" },
       { ...g, media_ground: "page" },
+      { ...g, density: "balanced" },
+      { ...g, radius: "gentle" },
+      { ...g, section_spacing: "tight" },
       { ...g, product_card: { ...g.product_card, ratio: "4:5" } },
       { ...g, product_card: { ...g.product_card, show_brand: false } },
       { ...g, product_card: { ...g.product_card, show_rating: true } },

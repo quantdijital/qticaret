@@ -167,12 +167,14 @@ export function CategoryCards({
 }) {
   return (
     <section aria-labelledby={id} className="gf-section">
-      <Container className="flex flex-col gap-6 lg:gap-10">
+      <Container className="flex flex-col gap-(--head-gap)">
         <SectionHead id={id} title={title} more={all} marks={marks} ownMore={ownAll} />
         <ul
           className={cn(
             view.phoneColumns === 2 ? "grid grid-cols-2" : "grid grid-cols-1 sm:grid-cols-2",
-            view.frame === "lined" ? "gap-(--gap-columns)" : "gap-x-(--gap-columns) gap-y-8",
+            view.frame === "lined"
+              ? "gap-(--gap-columns)"
+              : "gap-x-(--gap-columns) gap-y-(--gap-rows-s)",
             COLUMNS[view.columns]
           )}
         >

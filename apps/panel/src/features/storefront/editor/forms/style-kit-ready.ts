@@ -18,4 +18,6 @@ export const STYLE_KIT_READY: Readonly<Record<StyleKitField, boolean>> = {
   chip_style: true,
   // S4, step 5: the photos' ground (`data-media-ground`)
   media_ground: true,
+  // S6, adr/0067 Ek 2026-11-16: the room around sections' heads and grids (`data-density`)
+  density: true,
 }

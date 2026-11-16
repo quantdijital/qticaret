@@ -73,8 +73,9 @@ interface ThemeChoicesProps {
 
 /**
  * The theme's fixed-list choices: faces, shapes (corners, buttons, chips),
- * surfaces (boxes, shadow, the photos' ground, menu items, section
- * spacing; adr/0067 §2.7), the product card. The header's layout and stickiness are the header bar's now
+ * spacing (between sections, the density), surfaces (boxes, shadow, the
+ * photos' ground, menu items; adr/0067 §2.7 and its Ek 2026-11-16), the
+ * product card. The header's layout and stickiness are the header bar's now
  * (adr/0049 Ek 2026-11-14 §5), in the tree under "Üst bilgi".
  */
 export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoicesProps) {
@@ -145,6 +146,23 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
           <KitChoice field="chip_style" {...kit} />
         </Pair>
       </PanelGroup>
+      <PanelGroup name="spacing" title={t(THEME_GROUP_TITLES.spacing)} reveal={reveal("spacing")}>
+        <Pair>
+          <ChoiceSelect
+            id={THEME_IDS.section_spacing}
+            label={t(`${C}.sectionSpacing`)}
+            term={t(`${C}.sectionSpacingTerm`)}
+            value={theme.section_spacing}
+            options={SECTION_SPACINGS}
+            onChange={(value) => {
+              onChange({ ...theme, section_spacing: value })
+            }}
+            render={(option) => t(`${C}.sectionSpacings.${option}`)}
+            hint={t(`${C}.sectionSpacingHint`)}
+          />
+          <KitChoice field="density" {...kit} />
+        </Pair>
+      </PanelGroup>
       <PanelGroup
         name="surfaces"
         title={t(THEME_GROUP_TITLES.surfaces)}
@@ -166,18 +184,6 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
           <KitChoice field="shadow" {...kit} />
           <KitChoice field="media_ground" {...kit} />
           <KitChoice field="menu_style" {...kit} />
-          <ChoiceSelect
-            id={THEME_IDS.section_spacing}
-            label={t(`${C}.sectionSpacing`)}
-            term={t(`${C}.sectionSpacingTerm`)}
-            value={theme.section_spacing}
-            options={SECTION_SPACINGS}
-            onChange={(value) => {
-              onChange({ ...theme, section_spacing: value })
-            }}
-            render={(option) => t(`${C}.sectionSpacings.${option}`)}
-            hint={t(`${C}.sectionSpacingHint`)}
-          />
         </Pair>
       </PanelGroup>
       <ThemeCardGroups theme={theme} variants={variants} reveal={reveal} onChange={onChange} />

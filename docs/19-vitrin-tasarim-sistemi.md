@@ -50,7 +50,7 @@ Adlar shadcn/ui'ninkidir; bağlantı `packages/ui/src/styles.css`'te, değerler 
 | `--announcement`, `--announcement-foreground` | Duyuru şeridi |
 | `--highlight`, `--highlight-foreground` | Rozet ve vurgu (sepet sayacı, giriş noktası); mağazanın `accent`'i, yoksa `--primary` |
 | `--radius` | Köşe ölçeği (`sm`/`md`/`lg`/`xl` ondan türer) |
-| `--radius-scale` | Bütün köşe ölçeğinin çarpanı: `soft` 1, `sharp` 0,2, `round` 1,5 |
+| `--radius-scale` | Bütün köşe ölçeğinin çarpanı: `sharp` 0,2, `crisp` 0,6, `gentle` 0,8, `soft` 1, `round` 1,5 |
 | `--button-radius` | Düğme ve düğme gibi bağlantıların köşesi (`rounded-button`): `pill` tam, `rounded` 0,75rem, `square` 0px (birimli: tema `min()` içinde uzunlukla karşılaştırır) |
 | `--card-ratio` | Ürün kartı görselinin oranı (`aspect-card`): 4 / 5, 1 / 1, 3 / 4 |
 | `--font-sans`, `--font-heading` | Gövde ve başlık yazı tipi |
@@ -63,11 +63,13 @@ Kontrast (WCAG AA 4.5:1) temanın `styles.css` başında hesaplı yazılır. Ma�
 | Ayar | Basılan | Atölye'de okuyan |
 | --- | --- | --- |
 | `typography` | `--font-heading`, `--font-sans`; başlık yüzü 800 taşımıyorsa `--display-weight` | `tokens.css` `--font-display: var(--font-heading)`, `--font-body: var(--font-sans)`; Manrope yedeği `styles.css`'te. Fiyat ve tutarlar gövde yüzüyle (başlık içinde tutar yok; `atolye-price-face.spec.ts`) |
-| `radius` | `--radius-scale` (0,2 / 1 / 1,5) | `--radius-tile` / `-media` / `-inner` = `calc(20 / 14 / 10 px × çarpan)`; `--radius-pill` çarpılmaz |
+| `radius` | `--radius-scale` (0,2 / 0,6 / 0,8 / 1 / 1,5; `soft` basılmaz) | `--radius-tile` / `-media` / `-inner` = `calc(20 / 14 / 10 px × çarpan)`: Ölçülü 16 / 11,2 / 8, Belirgin 12 / 8,4 / 6; `--radius-pill` çarpılmaz |
 | `buttons` | `--button-radius` (999px / 0,75rem / 0px) | `.gf-btn`, `.gf-icon-btn`, `.gf-field`, `.gf-skip` ve `rounded-button` sınıfı (düğme gibi bağlantılar, seçim kutusu, adet hapı ve adımları, sayfalama, dosya düğmesi). Kutu alanlar (metin kutusu, ürün formu alanı) `rounded-box` = `min(--button-radius, --radius-inner)`. Çip, rozet, sekme, sayaç `--radius-pill`'de kalır |
 | `colors.background` | `steel` dışında tonun yüzey kümesi: `--color-paper`, `-paper-2`, `-paper-3`, `-field`, `-chip`, `-rule` | Küme `packages/themes/atolye/src/tones.ts` `ATOLYE_TONES`; her tonun `paper`'ı `THEME_BACKGROUNDS` değeridir, ötekiler Grafit'in OKLCH açıklık basamaklarıyla (−2,8 / −6,8 / +1,0 / +0,2 / −8,9) ondan türetilir. `--background`, `--muted`, `--border`, `--card` token'ları izlediği için ayrıca basılmaz. Grafit sahneler tona bağlanmaz |
 | `colors.accent` | `--highlight`, `--highlight-foreground` ve `--color-mark`, `-mark-ink`, `-mark-deep` | Not ve vurgu yüzeyleri `bg-highlight-soft` (vurgunun %9'u, zemine karışık); seçili çip, seçili raf sekmesi, etkin süzgeç çipleri ve süzgeç sayacı `mark`. Vurgu yokken yüzeyler ana rengi, `mark` grafiti (`text` / `paper`) kullanır. İndirim, stok ve hata renkleri sabit; duyuru şeridi grafit |
 | `product_card.ratio` | `--card-ratio` | `aspect-card` |
+| `section_spacing` | `--section-scale` (`tight` 0,35 / `compact` 0,55 / `roomy` 1,2; `normal` basılmaz) | `--section-gap-s` / `--section-gap` / `--section-gap-l` (`tokens.css`): bölüm arası 96 / 64 / 48 px; Çok sık 34 / 22 / 17, Sık 53 / 35 / 26, Ferah 115 / 77 / 58 |
+| `density` (stil takımı S6) | Hiçbir değişken basılmaz; `airy` dışında tema kökünde `data-density` | `density.css`: `--head-gap` / `-m` / `-s` (başlık → içerik), `--gap-columns`, `--gap-rows` / `-s`, `--footer-gap`, Sıkı'da telefonun `--gutter`'ı. Dengeli: başlık altı 24 / 16, ızgara 20 × 28 (tablet 16 × 20, telefon 12 × 20), alt bilgiye 48 / 40 / 32 px; Sıkı: 16 / 12, 16 × 20 (12 × 12, 8 × 12), 32 / 24 / 20, telefon kenarı 12 px. Tablo `density.css` başında; adr/0067 Ek 2026-11-16 |
 
 Sabit mürekkeplerin dört tondaki karşıtlığı birim testidir (`themes/__tests__/atolye-tones.spec.ts`): `text` / `text-2` / `text-3` yazının durduğu her yüzeyde ≥ 4,5:1, alan örnek metni alan zemininde ≥ 4,5:1, kontrol kenarı (`edge`) ≥ 3:1. Önyükleme bütçesi (seçilen iki yüz ≤ 125 000 bayt, 20 çiftin hepsi) `app/__tests__/fonts.spec.ts`'te.
 

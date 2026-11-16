@@ -132,7 +132,7 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
   }
   return (
     <section aria-labelledby={id} className="gf-section">
-      <Container className="flex flex-col gap-6 lg:gap-10">
+      <Container className="flex flex-col gap-(--head-gap)">
         <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} />
         <div className="grid gap-(--gap-columns) lg:grid-cols-12">
           {summary && (

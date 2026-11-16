@@ -67,6 +67,7 @@ describe("themeSettings", () => {
       shadow: "none",
       chip_style: "lined",
       media_ground: "page",
+      density: "compact",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -108,6 +109,8 @@ describe("themeSettings", () => {
       shadow: "float",
       chip_style: "filled",
       media_ground: "well",
+      // adr/0067 Ek 2026-11-16: today's room
+      density: "airy",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -273,6 +276,9 @@ describe("themeStyle", () => {
   it("scales the corners, shapes the buttons and the cards' pictures", () => {
     expect(themeStyle(theme({ radius: "sharp" }))).toBe(":root{--radius-scale:0.2}")
     expect(themeStyle(theme({ radius: "round" }))).toBe(":root{--radius-scale:1.5}")
+    // adr/0067 Ek 2026-11-16: the two steps between sharp and soft
+    expect(themeStyle(theme({ radius: "crisp" }))).toBe(":root{--radius-scale:0.6}")
+    expect(themeStyle(theme({ radius: "gentle" }))).toBe(":root{--radius-scale:0.8}")
     expect(themeStyle(theme({ buttons: "rounded" }))).toBe(":root{--button-radius:0.75rem}")
     // With its unit: the theme compares it with a length in `min()`
     expect(themeStyle(theme({ buttons: "square" }))).toBe(":root{--button-radius:0px}")
@@ -312,6 +318,7 @@ describe("themeView", () => {
         shadow: "float",
         chip_style: "filled",
         media_ground: "well",
+        density: "airy",
       },
     })
     expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")

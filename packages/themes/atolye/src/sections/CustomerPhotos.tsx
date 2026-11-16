@@ -23,7 +23,7 @@ export function CustomerPhotos({
   }
   return (
     <section aria-labelledby={id} className="pt-(--section-gap)">
-      <Container className="flex flex-col gap-6">
+      <Container className="flex flex-col gap-(--head-gap-s)">
         <h2 id={id}>{t("reviews.customer_photos")}</h2>
         <ul className="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-(--gap-columns) overflow-x-auto px-(--gutter) lg:mx-0 lg:grid lg:grid-cols-[repeat(6,minmax(0,1fr))] lg:overflow-visible lg:px-0">
           {photos.slice(0, 12).map((photo, index) => {

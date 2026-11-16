@@ -20,6 +20,11 @@ export const STYLE_KIT = {
   chip_style: ["filled", "lined"],
   /** S4: the well behind a product's and a category's photo; `page` the page's own ground. */
   media_ground: ["well", "page"],
+  /**
+   * S6 (adr/0067 Ek 2026-11-16): the room under a section's heading, between a
+   * grid's columns and rows and above the footer; `airy` today's.
+   */
+  density: ["airy", "balanced", "compact"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StyleKitField = keyof typeof STYLE_KIT
@@ -28,7 +33,7 @@ export type StyleKitStep<F extends StyleKitField> = (typeof STYLE_KIT)[F][number
 /** The kit as the theme settings keep it: every field present. */
 export type StyleKit = { [F in StyleKitField]: StyleKitStep<F> }
 
-/** The fields in the contract's order (adr/0067 §1, S1 to S4). */
+/** The fields in the contract's order (adr/0067 §1, S1 to S4; S6 its Ek 2026-11-16). */
 export const STYLE_KIT_FIELDS = Object.keys(STYLE_KIT) as StyleKitField[]
 
 /** Each field's default, its list's first step: today's drawing. */
@@ -37,6 +42,7 @@ export const STYLE_KIT_DEFAULTS: Readonly<StyleKit> = {
   shadow: "float",
   chip_style: "filled",
   media_ground: "well",
+  density: "airy",
 }
 
 /** The attribute a step off the default is marked with on the theme's root element. */
@@ -47,7 +53,7 @@ export const styleKitAttribute = (field: StyleKitField): `data-${string}` =>
  * The kit's marks (adr/0067 §3b): each field off its default as a `data-*`
  * attribute for the theme's root element (`data-menu-style="plain"`,
  * `data-shadow="none"`, `data-chip-style="lined"`, `data-media-ground=
- * "page"`); nothing at a default, so a page at today's drawing prints what
+ * "page"`, `data-density="balanced"`); nothing at a default, so a page at today's drawing prints what
  * it did before the kit. A theme's stylesheet reads a step with an
  * attribute selector over its own (`[data-shadow="none"] .gf-drop`) or sets
  * a token there (`[data-shadow="none"] { --shadow-float: none }`); the
