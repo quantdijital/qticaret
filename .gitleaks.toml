@@ -1,9 +1,6 @@
-# gitleaks config (docs/04): default rules plus narrowly scoped exceptions.
-# Used by the pre-commit hook and the CI security workflow.
+# gitleaks config (docs/04): the default rules. Exceptions are made per
+# finding in .gitleaksignore (commit, file, rule, line) with the reason it
+# is no secret; never by path. Used by the pre-commit hook and the CI
+# security workflow.
 [extend]
 useDefault = true
-
-[[allowlists]]
-description = "Turkish prose in Markdown trips the generic keyword rule (e.g. 'secret iptali, DNS/...'); provider-specific rules still apply to docs"
-targetRules = ["generic-api-key"]
-paths = ['''\.md$''']

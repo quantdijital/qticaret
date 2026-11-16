@@ -2,8 +2,16 @@ import { describe, expect, it } from "vitest"
 import { SECTION_LOOK, SECTION_LOOK_FIELDS, lookOf } from "../store/section-look.js"
 
 describe("a section's look (adr/0049 Ek 2026-11-14 §6)", () => {
-  it("names the five fields with their steps, in the panel's order", () => {
-    expect(SECTION_LOOK_FIELDS).toEqual(["space_outer", "space_inner", "ground", "align", "width"])
+  it("names the six fields with their steps, in the panel's order", () => {
+    expect(SECTION_LOOK_FIELDS).toEqual([
+      "space_outer",
+      "space_below",
+      "space_inner",
+      "ground",
+      "align",
+      "width",
+    ])
+    expect(SECTION_LOOK.space_below).toEqual(SECTION_LOOK.space_outer)
     expect(SECTION_LOOK.ground).toEqual(["page", "well", "stage", "primary"])
   })
 

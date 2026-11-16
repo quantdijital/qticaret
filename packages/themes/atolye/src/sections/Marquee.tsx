@@ -94,7 +94,8 @@ function Item({
  * weight, capitals, room, large outlined items, the screens it shows on
  * and a close button) are attributes too; the screens and a closed strip
  * take its outermost box (`data-mq-shell`) off the page, so a hidden strip
- * leaves no gap. On a page it stands edge to edge, or in the container
+ * leaves no gap. On a page it is a thin strip (`data-thin`, `thin.css`):
+ * the small section gap above it and before the next section. It stands edge to edge, or in the container
  * with rounded corners when the shop boxed it; in the header it is a band
  * above the shop's header.
  */
@@ -193,7 +194,7 @@ export function Marquee({
     return strip
   }
   return (
-    <div className="pt-(--section-gap-s)" {...shell}>
+    <div className="gf-section" data-thin="" {...shell}>
       {boxed ? <Container>{strip}</Container> : strip}
     </div>
   )

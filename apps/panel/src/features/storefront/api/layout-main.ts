@@ -4,6 +4,7 @@ import type {
   HeaderBarVariant,
   HeaderMenuGround,
   HeaderMenuImages,
+  HeaderSearchStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -39,6 +40,12 @@ interface HeaderBarCommon extends MainBase {
    * as `submenus`.
    */
   menu_images: HeaderMenuImages
+  /**
+   * How the search stands (adr/0049 Ek 2026-11-15), on every variant: `field`
+   * (the box), `icon` (a magnifier that opens it; on a phone the bottom bar's
+   * "Ara" drops it down); the server reads a bar saved before it as `field`.
+   */
+  search_style: HeaderSearchStyle
 }
 
 /**
@@ -60,6 +67,9 @@ export interface HeaderCatalogFields {
   tools_place: HeaderToolsPlace
   top_links: HeaderTopLinksPlace
   search_width: HeaderSearchWidth
+  /** The strip's short note and where it goes (Ek 2026-11-15); null: none. */
+  strip_note: string | null
+  strip_note_link: LayoutLink | null
 }
 
 export type HeaderCatalogSection = HeaderBarCommon & { variant: "catalog" } & HeaderCatalogFields

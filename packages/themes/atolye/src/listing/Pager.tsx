@@ -17,13 +17,22 @@ export function visiblePages(page: number, pages: number): (number | "gap")[] {
 const STEP = "gf-btn gf-btn--quiet gf-btn--small gap-1"
 
 /**
+ * Whether the pager draws anything: a one-page list has no pages to
+ * show. A caller that puts room around the pager asks this first, so an
+ * empty pager leaves no gap under the list.
+ */
+export function hasPages(pagination: PaginationView): boolean {
+  return pagination.pages > 1
+}
+
+/**
  * A listing's pages as real links (docs/13 §7: each page its own
  * address, crawlable, no script): the previous and next as quiet pills,
  * the numbers between as 44 px circles, the current one dark; where the
  * page is said in words above them.
  */
 export function Pager({ pagination, t }: { pagination: PaginationView; t: Translate }) {
-  if (pagination.pages <= 1) {
+  if (!hasPages(pagination)) {
     return null
   }
   return (

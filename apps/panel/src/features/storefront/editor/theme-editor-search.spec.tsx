@@ -51,13 +51,13 @@ describe("the theme editor's settings search", () => {
     renderEditor()
     await opened()
 
-    await user.type(searchbox(), "margin")
+    await user.type(searchbox(), "margin-top")
 
     const hits = within(screen.getByRole("list", { name: "Arama sonuçları" }))
     expect(hits.getAllByRole("button").map((hit) => hit.textContent)).toEqual([
-      "Dış boşluk margin" + "Giriş · Diğer ayarlar",
-      "Dış boşluk margin" + "Ürün listesi · Diğer ayarlar",
-      "Dış boşluk margin" + "Blog yazıları · Diğer ayarlar",
+      "Üst boşluk margin-top" + "Giriş · Gelişmiş › Boşluk",
+      "Üst boşluk margin-top" + "Ürün listesi · Gelişmiş › Boşluk",
+      "Üst boşluk margin-top" + "Blog yazıları · Gelişmiş › Boşluk",
     ])
     // The list of the page's parts gives way while something is typed
     expect(screen.queryByRole("navigation", { name: "Sayfanın bölümleri" })).toBeNull()
@@ -124,14 +124,14 @@ describe("the theme editor's settings search", () => {
     await user.type(searchbox(), "ürün listesi zemin")
     await user.click(screen.getByRole("button", { name: /Zemin background/ }))
 
-    expect(screen.getByRole("button", { name: /^Diğer ayarlar/ })).toHaveAttribute(
-      "aria-expanded",
-      "true"
-    )
+    // Its tab picked, its closed group opened
+    expect(screen.getByRole("tab", { name: /^Stil/ })).toHaveAttribute("aria-selected", "true")
+    expect(screen.getByRole("button", { name: "Görünüm" })).toHaveAttribute("aria-expanded", "true")
     const ground = screen.getByRole("radiogroup", { name: "Zemin background" })
     expect(ground.closest("[data-highlight]")).not.toBeNull()
 
     await user.click(within(ground).getByRole("radio", { name: "Koyu" }))
+    expect(screen.getByRole("button", { name: /^Görünüm, 1 ayar/ })).toBeInTheDocument()
     await pass(AUTOSAVE_MS)
 
     await waitFor(() => {

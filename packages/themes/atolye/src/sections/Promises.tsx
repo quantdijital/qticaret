@@ -14,6 +14,8 @@ interface PromisesProps {
   variant?: PromiseVariant
   /** The theme editor's live preview (adr/0065 Faz 2b): each badge's words carry their field marks. */
   marks?: boolean | undefined
+  /** Right under a picture opening: it keeps close to it; anywhere else a thin strip's small gap. */
+  hug?: boolean
 }
 
 /**
@@ -23,14 +25,16 @@ interface PromisesProps {
  * two by two equal cards, each its icon on top, a one-line title and its
  * line under it, so the titles and lines start at the same height; from
  * 640 px the icon beside the text; from 1024 px all across in one tinted
- * strip. Lined (GB4): the same badges as boxes split by hairlines.
+ * strip. Lined (GB4): the same badges as boxes split by hairlines. Either
+ * is a thin strip (`data-thin`, `thin.css`): the small section gap above it
+ * and before the next section.
  */
-export function Promises({ badges, label, variant = "strip", marks }: PromisesProps) {
+export function Promises({ badges, label, variant = "strip", marks, hug = false }: PromisesProps) {
   if (badges.length === 0) {
     return null
   }
   return (
-    <section aria-label={label} className="pt-3 lg:pt-4">
+    <section aria-label={label} data-thin="" className={hug ? "pt-3 lg:pt-4" : "gf-section"}>
       <Container>
         {variant === "lined" ? (
           <Lined badges={badges} marks={marks} />

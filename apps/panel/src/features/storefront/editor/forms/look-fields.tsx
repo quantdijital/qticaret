@@ -6,13 +6,10 @@ import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { SectionLook, SectionLookField, SectionLookStep } from "@qticaret/types"
 import type { LookedSection } from "@/features/storefront/api/layout"
-import {
-  lookFieldsFor,
-  lookStep,
-  lookStepsFor,
-  withLookStep,
-} from "@/features/storefront/layout/look"
-import { FIELD_IDS } from "./field-registry"
+import { lookStep, lookStepsFor, withLookStep } from "@/features/storefront/layout/look"
+import { PanelGroup } from "../panel-header"
+import { FIELD_IDS, lookFieldsIn, lookSetIn } from "./field-registry"
+import type { FieldGroupName } from "./field-registry"
 import { LookSketch } from "./look-sketches"
 
 const LOOK = "storefront.editor.look"
@@ -102,22 +99,25 @@ function LookField<F extends SectionLookField>({
     </div>
   )
 }
-
 /**
- * A body section's look, in the closed "Diğer ayarlar" group: only the
- * fields its type offers (no alignment where the words sit on a picture),
- * each set and reset on its own; every change shows in the preview at once.
+ * A body section's look fields of one panel group (`LOOK_GROUPS`): the
+ * space above, below and inside it in "Boşluk", its ground, alignment and
+ * width in "Görünüm"; only the fields its type offers (no alignment where
+ * the words sit on a picture), each set and reset on its own; every
+ * change shows in the preview at once.
  */
 export function LookFields<S extends LookedSection>({
   section,
+  group,
   onChange,
 }: {
   section: S
+  group: FieldGroupName
   onChange: (section: S, field?: string) => void
 }) {
   return (
     <div className="flex flex-col gap-5">
-      {lookFieldsFor(section.type).map((field) => (
+      {lookFieldsIn(section.type, group).map((field) => (
         <LookField
           key={field}
           section={section}
@@ -129,5 +129,36 @@ export function LookFields<S extends LookedSection>({
         />
       ))}
     </div>
+  )
+}
+
+/**
+ * The "Boşluk" group under "Gelişmiş": the space above, below and inside
+ * a section, on every body section (sahip 2026-11-15), its title marking
+ * the steps set. None set is the theme's section spacing.
+ */
+export function SpacingGroup<S extends LookedSection>({
+  section,
+  reveal,
+  onChange,
+}: {
+  section: S
+  reveal: number | null
+  onChange: (section: S, field?: string) => void
+}) {
+  const { t } = useTranslation()
+  if (lookFieldsIn(section.type, "spacing").length === 0) {
+    return null
+  }
+  return (
+    <PanelGroup
+      name="spacing"
+      title={t(`${LOOK}.spacing.title`)}
+      marked={lookSetIn(section, "spacing")}
+      hint={t(`${LOOK}.spacing.hint`)}
+      reveal={reveal}
+    >
+      <LookFields section={section} group="spacing" onChange={onChange} />
+    </PanelGroup>
   )
 }

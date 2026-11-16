@@ -205,6 +205,8 @@ function fieldsOf(section: AnySection): Found[] {
               textProblem(section.search_placeholder, HEADER_CATALOG_LIMITS.search_placeholder),
             ],
             ["highlight_link", linkProblem(section.highlight_link)],
+            ["strip_note", textProblem(section.strip_note, HEADER_CATALOG_LIMITS.strip_note)],
+            ["strip_note_link", linkProblem(section.strip_note_link)],
           ]
         : []
     case "footer_bar":

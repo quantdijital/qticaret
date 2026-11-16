@@ -7951,7 +7951,8 @@
         },
         "categories": {
           "tiles": "Picture tiles",
-          "linked": "Cards with subcategories"
+          "linked": "Cards with subcategories",
+          "collage": "Photo collage"
         },
         "related_products": {
           "grid": "Grid",
@@ -7960,14 +7961,25 @@
       },
       "look": {
         "title": "More settings",
-        "titleSet_one": "More settings · {{count}} setting",
-        "titleSet_other": "More settings · {{count}} settings",
-        "hint": "The section's spacing and look. Any field left unset uses the theme's own look; the preview shows it at once.",
+        "hint": "A field left unpicked uses the theme's own look; the preview shows it at once.",
         "reset": "Back to default",
+        "spacing": {
+          "title": "Spacing",
+          "hint": "The space above and below the section. A side left unset uses the theme's section spacing (Theme settings > Section spacing); a thin strip uses the narrow one."
+        },
         "space_outer": {
-          "label": "Outer spacing",
-          "term": "margin",
-          "hint": "The space above the section, from the theme's scale; it shrinks on narrow screens.",
+          "label": "Top spacing",
+          "term": "margin-top",
+          "hint": "The space above the section, from the theme's section spacing; it shrinks on narrow screens.",
+          "none": "None",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large"
+        },
+        "space_below": {
+          "label": "Bottom spacing",
+          "term": "margin-bottom",
+          "hint": "The space below the section; it stands in for the next section's top spacing, and with both set the larger stays.",
           "none": "None",
           "small": "Small",
           "medium": "Medium",
@@ -7976,7 +7988,7 @@
         "space_inner": {
           "label": "Inner spacing",
           "term": "padding",
-          "hint": "The space inside the section; with a background it stays inside the colour.",
+          "hint": "The space inside the section, top and bottom alike, on the section spacing's scale; with a background it stays inside the colour.",
           "none": "None",
           "small": "Small",
           "medium": "Medium",
@@ -8032,7 +8044,7 @@
         "layout": "Layout",
         "scroll": "Scrolling",
         "motion": "Motion",
-        "appearance": "Style",
+        "appearance": "Text and ground",
         "variant": "Layout",
         "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back.",
         "device": {
@@ -8042,7 +8054,26 @@
           "mobile": "Phones only",
           "desktop": "Desktop only",
           "hint": "Phones: screens narrower than 1024 pixels (tablets included). Where it is hidden its pictures are not downloaded; the page's first picture still is."
-        }
+        },
+        "tabs": {
+          "label": "Settings tabs",
+          "content": "Content",
+          "contentTerm": "content",
+          "style": "Style",
+          "styleTerm": "style",
+          "advanced": "Advanced",
+          "advancedTerm": "advanced",
+          "marked": "some settings are off their defaults"
+        },
+        "groups": {
+          "search": "Search",
+          "topBar": "Top strip",
+          "menu": "Menu bar",
+          "icons": "Icons and contact",
+          "frame": "Look"
+        },
+        "marked_one": "{{count}} setting differs from the default",
+        "marked_other": "{{count}} settings differ from the default"
       },
       "defaults": {
         "heading": "Your shop's name",
@@ -8397,7 +8428,7 @@
           "normal": "Normal",
           "roomy": "Roomy"
         },
-        "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (120 px on a wide screen); Compact brings it to 66 px, Roomy to 144 px.",
+        "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (96 px on a wide screen); Compact brings it to 53 px, Roomy to 115 px. A section's room inside its background comes from the same scale.",
         "surfaceStyle": "Box style",
         "surfaceStyleTerm": "surface style",
         "surfaceStyles": {
@@ -8554,7 +8585,50 @@
       },
       "featured": {
         "product": "Product",
-        "hint": "The pictures, headline facts, price and spec table come from the product's own page. While the product is not published the section does not show."
+        "hint": "The pictures, headline facts, price and spec table come from the product's own page. While the product is not published the section does not show.",
+        "gallery": "Photo layout",
+        "galleryTerm": "gallery",
+        "galleries": {
+          "collage": "Collage",
+          "strips": "Slanted strips"
+        },
+        "galleryHint": {
+          "collage": "One large photo on the left; on wide screens two small ones beside it.",
+          "strips": "The photos side by side as slanted strips. On wide screens the strip under the mouse widens; on phones at most three, and they stay equal."
+        },
+        "stripsLayout": "Where the strips stand",
+        "stripsLayoutTerm": "strips_layout",
+        "stripsLayouts": {
+          "side": "Beside the text",
+          "wide": "Full width"
+        },
+        "stripsLayoutHint": {
+          "side": "The strips on the left, the product's name and price on the right; up to four strips.",
+          "wide": "The strips fill the section's whole width, the product's name and price under them; up to six strips. To run them from one edge of the screen to the other, set the width to “Full” under Look."
+        },
+        "stripsSlant": "Slant",
+        "stripsSlantTerm": "strips_slant",
+        "stripsSlants": {
+          "soft": "Slight",
+          "medium": "Medium",
+          "steep": "Sharp"
+        },
+        "stripsSlantHint": "How far the lines between the strips lean.",
+        "stripsLine": "Line thickness",
+        "stripsLineTerm": "strips_line",
+        "stripsLines": {
+          "none": "None",
+          "thin": "Thin",
+          "medium": "Medium",
+          "thick": "Thick"
+        },
+        "stripsLineHint": "The space between the strips. With “None” the strips touch.",
+        "stripsOverlap": "Overlap",
+        "stripsOverlapTerm": "strips_overlap",
+        "stripsOverlapHint": "Each strip lies over the one before it with a thin shadow on its edge; the one under the mouse comes to the top.",
+        "stripsDim": "Darken the others",
+        "stripsDimTerm": "strips_dim",
+        "stripsDimHint": "On wide screens, while the mouse is over a strip or the keyboard selects one, the other strips darken."
       },
       "sample": {
         "label": {
@@ -8716,8 +8790,6 @@
         "subtextPlaceholder": "On orders placed before 2 pm",
         "link": "Link (optional)",
         "full": "This page already has {{max}} scrolling strips (the header's counts too).",
-        "lookHint": "A close button; the space around the strip and its width.",
-        "headerLookHint": "A close button.",
         "size": {
           "label": "Size",
           "term": "size",
@@ -8837,7 +8909,17 @@
         "utility_bar": {
           "label": "Top utility strip",
           "term": "top bar",
-          "hint": "A thin light strip: the “Top menu” links from Menus (where they stand is chosen below) and My account. Hidden on phones."
+          "hint": "A thin light strip: a short note, the “Top menu” links from Menus (where they stand is chosen below) and My account. Hidden on phones."
+        },
+        "strip_note": {
+          "label": "Strip note",
+          "term": "strip note",
+          "hint": "A short announcement or offer. Example: Free shipping over 1500 TL."
+        },
+        "strip_note_link": {
+          "label": "Note link",
+          "term": "link",
+          "hint": "Pick one and the note becomes clickable. Leave it empty and it stays plain text."
         },
         "phone": {
           "label": "Phone number",
@@ -8857,6 +8939,13 @@
           "submenus": "In submenus",
           "off": "None"
         },
+        "search_style": {
+          "label": "Search look",
+          "term": "search",
+          "hint": "Icon: a magnifier on wide screens that opens the search box; on a phone the header shows no box and the bottom bar's “Ara” drops it down from the top.",
+          "field": "Box",
+          "icon": "Icon, opens on press"
+        },
         "menu_ground": {
           "label": "Menu bar background",
           "term": "background",
@@ -8868,7 +8957,7 @@
         "search_width": {
           "label": "Search box width",
           "term": "search width",
-          "hint": "Narrow: a short box right after the logo; the rest of the row is left to the phone number and the icons.",
+          "hint": "Narrow: a short box right after the logo; the rest of the row is left to the phone number and the icons. With the search as an icon, the box opens this wide.",
           "wide": "Wide",
           "narrow": "Narrow"
         },
@@ -8886,14 +8975,29 @@
           "bar": "On the menu bar",
           "row": "In the logo row"
         },
-        "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below.",
-        "otherHint": "The search button, the My account text and the cart total."
+        "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below (with the search as an icon there is no box; the bottom bar’s “Ara” opens it)."
       },
       "categoryCards": {
         "columns": {
           "label": "Cards in a row",
           "term": "columns",
-          "hint": "How many cards side by side on a wide screen; the theme shows fewer on narrow screens."
+          "hint": "How many cards side by side on a wide screen; the theme shows fewer on narrow screens.",
+          "hintCollage": "At most this many cards in a row on a wide screen; the featured first card counts as two. Rows always fill edge to edge."
+        },
+        "lead": {
+          "label": "Feature the first category",
+          "term": "featured",
+          "hint": "The first card twice as wide, its row taller; on a phone it stands large at the top.",
+          "off": "Off",
+          "on": "On"
+        },
+        "height": {
+          "label": "Photo height",
+          "term": "height",
+          "hint": "The cards' photo area; the featured card's row a little taller.",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
         },
         "image_position": {
           "label": "Picture position",
@@ -8912,7 +9016,8 @@
         "links": {
           "label": "Subcategories shown",
           "term": "links",
-          "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more."
+          "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more.",
+          "hintCollage": "At most this many subcategories under each name; 0 shows only the photo and the name. The whole card goes to the category."
         },
         "columns_mobile": {
           "1": "1 card",
@@ -9147,6 +9252,17 @@
           "on": "On",
           "hint": "Scrolls by dragging with a mouse on a wide screen."
         }
+      },
+      "panelSearch": {
+        "label": "Search this section's settings",
+        "themeLabel": "Search the theme settings",
+        "placeholder": "Search this section's settings…",
+        "themePlaceholder": "Search the theme settings…",
+        "clear": "Clear search",
+        "results": "Settings found",
+        "empty": "No setting found for “{{query}}”.",
+        "count_one": "{{count}} setting found",
+        "count_other": "{{count}} settings found"
       }
     },
     "preferences": {

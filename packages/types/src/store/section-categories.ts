@@ -40,6 +40,49 @@ export const CATEGORY_CARD_DEFAULTS = {
   [S in CategoryCardSetting]: CategoryCardStep<S>
 } & { links: number }
 
+/**
+ * The `collage` variant (adr/0049 Ek 2026-11-15): each category a card
+ * led by its photograph, its name under it, its count and its first
+ * subcategories as quiet links; rows filled edge to edge, the first card
+ * twice as wide and its row taller while `lead` is on. `columns` and
+ * `columns_mobile` keep their meaning (cards in a row, the lead counting
+ * two); `height` is the photo's, in the dictionary's steps
+ * (bilesen-standardi §3); `lead` is a named switch (off/on).
+ */
+export const CATEGORY_COLLAGE_SETTINGS = {
+  columns: CATEGORY_CARD_SETTINGS.columns,
+  columns_mobile: CATEGORY_CARD_SETTINGS.columns_mobile,
+  height: ["low", "medium", "high"],
+  lead: ["off", "on"],
+} as const satisfies Record<string, readonly [string | number, ...(string | number)[]]>
+
+export type CategoryCollageSetting = keyof typeof CATEGORY_COLLAGE_SETTINGS
+export type CategoryCollageStep<S extends CategoryCollageSetting> =
+  (typeof CATEGORY_COLLAGE_SETTINGS)[S][number]
+
+/** A section switched to `collage`, and what a reader takes for a field it lacks. */
+export const CATEGORY_COLLAGE_DEFAULTS = {
+  columns: 4,
+  columns_mobile: 1,
+  height: "medium",
+  lead: "on",
+  links: 4,
+} as const satisfies {
+  [S in CategoryCollageSetting]: CategoryCollageStep<S>
+} & { links: number }
+
+/** `collage`'s own fields as `GET /store/storefront-layout` prints them. */
+export interface StoreCategoriesCollage {
+  variant: "collage"
+  columns: CategoryCollageStep<"columns">
+  /** Printed only when not the default (1). */
+  columns_mobile?: CategoryCollageStep<"columns_mobile">
+  height: CategoryCollageStep<"height">
+  lead: CategoryCollageStep<"lead">
+  /** Subcategory links under each card's name at most (0–8, `CATEGORY_CARD_LIMITS`). */
+  links: number
+}
+
 /** `linked`'s own fields as `GET /store/storefront-layout` prints them. */
 export interface StoreCategoriesLinked {
   variant: "linked"

@@ -53,6 +53,7 @@ const catalogHeader = () =>
       variant: "standard",
       sticky: true,
       menu_images: "submenus",
+      search_style: "field",
     },
     "catalog"
   ) as HeaderBarSection
@@ -147,6 +148,9 @@ describe("the preview's register, list rows and one-word fields", () => {
       FIELD_IDS.header("mainheader", "search_placeholder")
     )
     expect(target(header, "highlight_link")).toBe(FIELD_IDS.header("mainheader", "highlight_link"))
+    // The strip's note (Ek 2026-11-15): its words' field, the one the form focuses
+    expect(target(header, "strip_note")).toBe(FIELD_IDS.header("mainheader", "strip_note"))
+    expect(target(header, "strip_note_link")).toBeNull()
     expect(target(header, "phone")).toBeNull()
     const standard: HeaderBarSection = { ...header, variant: "standard" }
     expect(target(standard, "search_placeholder")).toBeNull()

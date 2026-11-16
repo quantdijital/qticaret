@@ -13,6 +13,7 @@ import {
   newHomeSection,
 } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
+import { openGroup } from "../settings-groups.fixtures"
 import { searchSettings } from "../settings-search"
 import { FIELD_IDS, sectionFields } from "./field-registry"
 
@@ -64,8 +65,10 @@ function deviceField(id: string): HTMLElement {
 
 /** docs/tema/bilesen-standardi §2, denetim O1: which screens show a section. */
 describe("the screens a section shows on", () => {
-  it("stand in the open Görünürlük group of a body section, everywhere at first", async () => {
+  it("stand in Gelişmiş › Görünürlük of a body section, everywhere at first", async () => {
+    const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("faq", "sssyeni001"))
+    await openGroup(user, "Görünürlük")
     const field = deviceField("sssyeni001")
 
     const radios = within(field).getAllByRole("radio")
@@ -76,9 +79,9 @@ describe("the screens a section shows on", () => {
     ])
     expect(within(field).getByText("device")).toBeInTheDocument()
     expect(radios[0]).toHaveAttribute("aria-checked", "true")
-    await userEvent.click(screen.getByRole("radio", { name: /Yalnız telefonda/ }))
+    await user.click(screen.getByRole("radio", { name: /Yalnız telefonda/ }))
     expect(changes.at(-1)).toMatchObject({ device: "mobile" })
-    await userEvent.click(screen.getByRole("button", { name: "Varsayılana dön" }))
+    await user.click(screen.getByRole("button", { name: "Varsayılana dön" }))
     expect(changes.at(-1)).toMatchObject({ device: "all" })
   })
 

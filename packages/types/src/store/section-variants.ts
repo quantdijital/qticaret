@@ -17,9 +17,10 @@ export const SECTION_VARIANTS = {
   hero: ["standard", "category_list"],
   /**
    * `tiles`: today's picture tiles; `linked`: each category a card with its
-   * first subcategories as links (adr/0049 Ek 2026-11-15).
+   * first subcategories as links (adr/0049 Ek 2026-11-15); `collage`:
+   * photo-led cards filling each row, the first one wider while `lead` is on.
    */
-  categories: ["tiles", "linked"],
+  categories: ["tiles", "linked", "collage"],
   /**
    * The product rail (adr/0049 Ek 2026-11-15): `grid`, today's rows of
    * cards; `carousel`, one row that slides (the scroller kit,
@@ -89,6 +90,26 @@ export function headerMenuImagesOf(value: unknown): HeaderMenuImages {
 }
 
 /**
+ * How the header's search stands (adr/0049 Ek 2026-11-15, adr/0066 §2
+ * "küçük yerleşim → bölüm ayarı"), every variant's setting: `field`
+ * "Kutu" (the search box drawn open, the drawing from before the setting,
+ * so the default), `icon` "Simge, basınca açılır" (from 1024 px a
+ * magnifier that opens the box beside it; on a phone no box in the
+ * header, the bottom bar's "Ara" drops it down from the top). Mirrored by
+ * the backend's `HEADER_SEARCH_STYLES`.
+ */
+export const HEADER_SEARCH_STYLES = ["field", "icon"] as const
+
+export type HeaderSearchStyle = (typeof HEADER_SEARCH_STYLES)[number]
+
+/** The search's look as a reader takes it: absent or off the list, the default (`field`). */
+export function headerSearchStyleOf(value: unknown): HeaderSearchStyle {
+  return (HEADER_SEARCH_STYLES as readonly unknown[]).includes(value)
+    ? (value as HeaderSearchStyle)
+    : "field"
+}
+
+/**
  * The catalog header's small layout choices (adr/0049 Ek 2026-11-15,
  * adr/0066 §2 "küçük yerleşim → bölüm ayarı"), each list's first step the
  * drawing from before it, so a bar saved without one reads as drawn:
@@ -119,8 +140,8 @@ export const headerTopLinksPlaceOf = (value: unknown): HeaderTopLinksPlace =>
 export const headerSearchWidthOf = (value: unknown): HeaderSearchWidth =>
   stepOf(HEADER_SEARCH_WIDTHS, value)
 
-/** The catalog header's words: the search box's placeholder. Mirrored by the backend. */
-export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
+/** The catalog header's words: the search box's placeholder, the strip's note. Mirrored by the backend. */
+export const HEADER_CATALOG_LIMITS = { search_placeholder: 60, strip_note: 80 } as const
 
 /**
  * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3, owner's

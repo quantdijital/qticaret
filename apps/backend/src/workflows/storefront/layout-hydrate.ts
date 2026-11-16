@@ -9,6 +9,7 @@ import type {
 } from "../../lib/storefront/sections/marquee"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { RailPick } from "../../lib/storefront/rails"
+import { FEATURED_STRIPS_SETTINGS } from "../../lib/storefront/sections/featured-product"
 import { hasLook } from "../../lib/storefront/sections/look"
 import { shownDevice } from "../../lib/storefront/layout-fields"
 import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
@@ -174,6 +175,14 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         title: section.title,
         text: fill(section.text, at.values),
         product_id: section.product_id,
+        // Printed only off the collage, so a section from before it prints as it did;
+        // the strips' look with them, every step (adr/0049 Ek 2026-11-16)
+        ...(section.gallery === "strips"
+          ? {
+              gallery: section.gallery,
+              ...Object.fromEntries(FEATURED_STRIPS_SETTINGS.map((name) => [name, section[name]])),
+            }
+          : {}),
       }
     case "rich_text": {
       const body = fillShopDoc(section.body, at.values)
@@ -218,6 +227,16 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
               ...(section.columns_mobile === 2 ? { columns_mobile: 2 as const } : {}),
               image_position: section.image_position,
               frame: section.frame,
+              links: section.links,
+            }
+          : {}),
+        ...(section.variant === "collage"
+          ? {
+              variant: section.variant,
+              columns: section.columns,
+              ...(section.columns_mobile === 2 ? { columns_mobile: 2 as const } : {}),
+              height: section.height,
+              lead: section.lead,
               links: section.links,
             }
           : {}),

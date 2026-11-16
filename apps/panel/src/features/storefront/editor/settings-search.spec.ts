@@ -51,16 +51,22 @@ describe("the theme editor's settings search", () => {
   })
 
   it("finds a look field by its Turkish name, without accents, on every body section", () => {
-    expect(keys(search("dış boşluk"))).toEqual([
+    expect(keys(search("üst boşluk"))).toEqual([
       "sss000001:look.space_outer",
       "guvenserit:look.space_outer",
       "rafyeni001:look.space_outer",
     ])
-    expect(keys(search("dis bosluk"))).toEqual(keys(search("dış boşluk")))
+    expect(keys(search("ust bosluk"))).toEqual(keys(search("üst boşluk")))
+    expect(keys(search("alt boşluk"))).toEqual([
+      "sss000001:look.space_below",
+      "guvenserit:look.space_below",
+      "rafyeni001:look.space_below",
+    ])
   })
 
   it("finds the same field by its technical term", () => {
-    expect(keys(search("MARGIN"))).toEqual(keys(search("dış boşluk")))
+    expect(keys(search("MARGIN-TOP"))).toEqual(keys(search("üst boşluk")))
+    expect(keys(search("margin-bottom"))).toEqual(keys(search("alt boşluk")))
     expect(search("padding").every((hit) => hit.field?.key === "look.space_inner")).toBe(true)
   })
 

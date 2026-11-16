@@ -8,7 +8,7 @@ import type {
 } from "@qticaret/types"
 import type { BannerSectionView } from "./banner-views"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
-import type { CategoryCardsView } from "./category-card-views"
+import type { CategoryCardsView, CategoryCollageView } from "./category-card-views"
 import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
 import type {
   FeaturedProductSectionView,
@@ -44,6 +44,15 @@ export type SectionLookView = Partial<SectionLook>
  * in the hidden section is not fetched.
  */
 export type SectionDeviceView = Exclude<SectionDevice, "all">
+
+/**
+ * A brand in the brands section: its page, and its logo when the shop
+ * gave it one (its `alt` the brand's name, as the logo stands for the
+ * name); none (or absent): the theme draws the name.
+ */
+export interface SectionBrandView extends LinkView {
+  logo?: ImageView | null
+}
 
 /**
  * A section as the theme draws it (adr/0049): the shop lays the home,
@@ -97,10 +106,12 @@ export type HomeSectionView = {
        * their subcategories); a theme without that drawing draws the tiles.
        */
       linked?: CategoryCardsView | null
+      /** `collage`'s settings and cards; a theme without that drawing draws the tiles. */
+      collage?: CategoryCollageView | null
     }
   | ProductsSectionView
   | FeaturedProductSectionView
-  | { id: string; type: "brands"; title: string; brands: LinkView[] }
+  | { id: string; type: "brands"; title: string; brands: SectionBrandView[] }
   | { id: string; type: "posts"; title: string; posts: PostCardView[]; more: LinkView }
   | {
       id: string

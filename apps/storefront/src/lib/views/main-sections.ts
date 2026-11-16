@@ -6,7 +6,11 @@ import type {
   StoreThemeSettings,
 } from "@qticaret/types"
 import { lookOf } from "@qticaret/types/section-look"
-import { headerMenuImagesOf, variantOf } from "@qticaret/types/section-variants"
+import {
+  headerMenuImagesOf,
+  headerSearchStyleOf,
+  variantOf,
+} from "@qticaret/types/section-variants"
 import {
   FOOTER_BAR_DEFAULTS,
   FOOTER_BAR_SETTINGS,
@@ -57,6 +61,7 @@ export function headerBarOf(
       variant: theme.header.layout === "centered" ? "centered" : "standard",
       sticky: theme.header.sticky,
       menuImages: "submenus",
+      searchStyle: "field",
     }
   }
   const variant = variantOf("header_bar", bar.variant)
@@ -66,6 +71,8 @@ export function headerBarOf(
     sticky: bar.sticky,
     // A backend before the setting prints none: the submenus' pictures, as drawn before
     menuImages: headerMenuImagesOf(bar.menu_images),
+    // A backend before the search's look prints none: the box, as drawn before
+    searchStyle: headerSearchStyleOf(bar.search_style),
     ...(variant === "catalog" && parts
       ? { catalog: headerCatalogOf(bar.catalog, parts.t, parts.tree) }
       : {}),

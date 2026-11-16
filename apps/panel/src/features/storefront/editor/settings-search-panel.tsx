@@ -6,6 +6,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
 import type { FieldGroupName } from "./forms/field-registry"
+import { PANEL_GROUPS, tabTitle } from "./panel-groups"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { allHits, searchSettings, searchTheme, searchedSections } from "./settings-search"
 import type { SearchHit, ThemeHit } from "./settings-search"
@@ -13,18 +14,9 @@ import { THEME_GROUP_TITLES, cardVariantsInUse } from "./forms/theme-registry"
 
 const S = "storefront.editor.search"
 
-/** Each panel group's name, shown under a field found in it. */
-const GROUP_NAMES: Readonly<Record<FieldGroupName, string>> = {
-  variant: "storefront.editor.panel.variant",
-  placement: "storefront.editor.panel.placement",
-  content: "storefront.editor.panel.content",
-  layout: "storefront.editor.panel.layout",
-  scroll: "storefront.editor.panel.scroll",
-  motion: "storefront.editor.panel.motion",
-  appearance: "storefront.editor.panel.appearance",
-  look: "storefront.editor.look.title",
-  visibility: "storefront.editor.panel.visibility",
-}
+/** Where a field found sits in its section's panel: "Stil › Görünüm" (`panel-groups.ts`). */
+const placeOf = (t: (key: string) => string, group: FieldGroupName) =>
+  `${t(tabTitle(PANEL_GROUPS[group].tab).label)} › ${t(PANEL_GROUPS[group].title)}`
 
 /** A hit's field name, its term small beside it, and the choice found. */
 function FieldName({
@@ -97,7 +89,7 @@ function HitRow({ hit, onPick }: { hit: SearchHit; onPick: (hit: SearchHit) => v
           )}
           <span className="truncate text-xs text-muted-foreground">
             {field
-              ? `${name} · ${t(GROUP_NAMES[field.group])}`
+              ? `${name} · ${placeOf(t, field.group)}`
               : t(`storefront.editor.types.${kindOf(hit.section, inFooter)}.name`)}
           </span>
         </span>

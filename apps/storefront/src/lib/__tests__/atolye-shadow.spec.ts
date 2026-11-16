@@ -29,6 +29,7 @@ const BARE = [
   "cart/CartPage.tsx",
   "frame/ConsentFrame.tsx",
   "frame/QuickViewDialog.tsx",
+  "frame/SearchDrop.tsx",
   "frame/Sheet.tsx",
   "parts/QuickAdd.tsx",
   "parts/QuickViewButton.tsx",

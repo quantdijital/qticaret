@@ -26,6 +26,10 @@
       "file": "chips.css"
     },
     {
+      "sha256": "7e5fc3fe01b9bbc2cf6f253ad20a4bb9f07dd32f32a87200c0c2ff363932b804",
+      "file": "collage.css"
+    },
+    {
       "sha256": "f1ef03835bb1b47f3f983cf87e2a11a69109ae5a3c7395c7669f5a9573767011",
       "file": "content.css"
     },
@@ -38,7 +42,7 @@
       "file": "header-catalog.css"
     },
     {
-      "sha256": "dc85f41eb2e31e9f960fd1cd4dee4e163b305639b96a23446ab97d72e3595316",
+      "sha256": "b717743da0f872a4506c70261f1f938fb6b1347bde9b5ef8cd2c3c7b3ab050f3",
       "file": "look.css"
     },
     {
@@ -66,6 +70,10 @@
       "file": "scroller.css"
     },
     {
+      "sha256": "c6b11413dd5282f5b9b8a85c0d1a4300b1a5f70f766cf0e1c297d3144fe63b54",
+      "file": "search-toggle.css"
+    },
+    {
       "sha256": "c5b8abb98e34e8679c59eed0088d136c120617ceaff68d90548b46ce4638313a",
       "file": "shadow.css"
     },
@@ -74,11 +82,15 @@
       "file": "slider.css"
     },
     {
-      "sha256": "19daaeba5056b1612848faa52bc80b13533848e28b2be686d6fe90e502fb4655",
+      "sha256": "96cbf6ecb2d4739eeb9f320c0e3062cca687c4f214f0d3f39aab55b94d2b6f6f",
+      "file": "strips.css"
+    },
+    {
+      "sha256": "8717b68fba84d6e576e6bde0bafd1f7d72f50aa925a8781f8adbb18c84112b53",
       "file": "styles.css"
     },
     {
-      "sha256": "6d43b7f13073c87531d51a7cb498501c27fac4db0751e8b1f40623e2db8d538a",
+      "sha256": "72ae9bb94afea4a7f1209ec47f4c52042649fd62b8cf50d13c62d8af24be0324",
       "file": "surface.css"
     },
     {
@@ -86,7 +98,11 @@
       "file": "tabs.css"
     },
     {
-      "sha256": "99227965f65f0b48037afb83a1aa05c486d001ff338ae349834c955fb1bebfb4",
+      "sha256": "4579942a0fc10779daffa595c24398bb86c55625817a371b0b905a2526f0c8ef",
+      "file": "thin.css"
+    },
+    {
+      "sha256": "fee3334dfa8102b5a9bffa8669be76763710fa4e677ee86292981bef22ff5365",
       "file": "tokens.css"
     },
     {

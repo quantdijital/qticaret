@@ -231,6 +231,22 @@ Kurallar:
 | LeaveGuard | Uzun formlar (sihirbaz, kampanya) | Kaydedilmemiş değişiklikle sayfadan çıkarken onay; kayıttan sonraki yönlendirme `ignoreBlocker` ile |
 | Sunucu panosu (board) | Sunucunun filtreleyemediği hesaplanan durumlar | Sipariş aşaması ve satılabilir stok gibi: en yeni N kayıt sunucuda sıralanır, sekme sayıları ve `limited` bayrağıyla döner (`/admin/order-board`, `/admin/stock-board`) |
 
+### 7.1 Tema düzenleyicisinin ayar paneli: sekmeler ve gruplar (2026-11-16, adr/0065 Ek)
+
+Bölüm panelinin gövdesi `SettingsLayout`'tur (`features/storefront/editor/settings-layout.tsx`): üstte "Bu bölümün ayarlarında ara" kutusu, altında üç sekme, sekmenin içinde başlığına kadar kapalı gruplar. Tema ayarları paneli aynı düzeni sekmesiz kullanır (kapalı gruplar + "Tema ayarlarında ara").
+
+| Sekme | Gruplar (sırasıyla) | Ne girer |
+| --- | --- | --- |
+| İçerik `content` | İçerik; katalog üst bilgisinde yerine Arama, Üst şerit, Menü çubuğu, Simgeler ve iletişim | Bölümün söylediği ve gösterdiği: yazı, görsel, bağlantı, öğeler, hangi ürün ya da kategori, kaç tane |
+| Stil `style` | Biçim (açık gelir), Yeri, Diziliş, Kaydırma, Hareket, Yazı ve zemin, Görünüm | Nasıl çizildiği: biçim, diziliş ve sayılar, kayma ve hareket, zemin, hizalama, genişlik, kart çerçevesi |
+| Gelişmiş `advanced` | Boşluk, Görünürlük, Diğer ayarlar | Çevresindeki boşluk, ne zaman ve hangi cihazda göründüğü, seyrek değişen ince ayarlar (kapatma düğmesi, döngü, sabit üst bilgi) |
+
+- **Tek kaynak** `editor/panel-groups.ts` (`PANEL_GROUPS`: grup adı → sekme + başlık anahtarı). Alanın yeri grubunun yeridir; `forms/field-registry.ts` her alana bir grup verir, arama ve önizlemeden gelen odak buradan okur.
+- **Yeni ayar ekleyen sekmesini ve grubunu bildirir:** alanı var olan bir `PanelGroup name="…"` içine koyar ve kayıttaki (`field-registry.ts` ya da ilgili `*-registry.ts`) grubunu aynı yazar; yeni grup gerekiyorsa `PANEL_GROUPS`'a bir satır ekler (başlık TR + EN). `panel-groups.spec.tsx` her bölüm türünü ve biçimini açar: listede olmayan grup ya da kendi grubunda çizilmeyen kayıtlı alan testi düşürür.
+- **Bildirilmemiş grup formu kırmaz:** listede olmayan ya da adsız grup İçerik sekmesinde kendi başlığıyla görünür, alanları çalışır ve aramada bulunur; yalnız yeri yanlıştır, test bunu yakalar.
+- **Davranış:** sekmede tek grup varsa başlıksız ve açık durur; kişinin açtığı/kapattığı gruplar bölüm türü başına bu tarayıcıda hatırlanır (`qticaret.editor.groups.v1`; depolama yoksa yine çalışır). Varsayılandan farklı ayar tutan grubun başlığında sayı rozeti, o sekmenin adında küçük nokta; grup sayıyı kendisi vermezse içindeki "Varsayılana dön" düğmelerini sayar (`group-mark.ts`), bu yüzden varsayılanı olan yeni ayar `ResetButton`'ı kullanır. Bütün gruplar DOM'da kalır (diğer sekmeler `hidden`): sekme değişince yazılan kaybolmaz. Sekmeler WAI-ARIA `tablist` (oklar, Home, End).
+- **Arama:** alan adı, küçük teknik terim, yardım metni ve seçenek adlarında; Türkçe büyük/küçük harf ve aksan duyarsız ("ic bosluk" → "İç boşluk"). Sonuç "Sekme › Grup" der; Enter ilk sonuca, ↓ listeye gider, Esc temizler. Sonuç seçilince sekme ve grup açılır, alan odaklanır. Önizlemede bir öğeye basmak da aynı yolu izler.
+
 ---
 
 ## 8. Erişilebilirlik ve performans

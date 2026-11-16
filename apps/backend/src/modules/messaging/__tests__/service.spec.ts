@@ -131,7 +131,11 @@ moduleIntegrationTestRunner<MessagingModuleService>({
         const unknown = await service.confirmConsentRequest(`${token}x`)
 
         expect(before).toBeNull()
-        expect(JSON.stringify(kept)).not.toMatch(/765|4321/)
+        // The whole number, as typed and as normalised: a few of its digits can turn up
+        // by chance in the record's random hex (the token's hash)
+        for (const phone of ["5327654321", "532 765 43 21"]) {
+          expect(JSON.stringify(kept)).not.toContain(phone)
+        }
         expect(JSON.stringify(kept)).not.toContain(token)
         expect(confirmed).toEqual({ channel: "sms", status: "granted" })
         expect(again).toBeNull()

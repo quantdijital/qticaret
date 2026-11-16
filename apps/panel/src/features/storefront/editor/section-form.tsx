@@ -6,7 +6,6 @@ import { FaqForm } from "./forms/faq-form"
 import { FeaturedForm } from "./forms/featured-form"
 import { FooterBarForm } from "./forms/footer-bar-form"
 import { GoogleRatingForm } from "./forms/google-rating-form"
-import { HeaderBarForm } from "./forms/header-bar-form"
 import { HeroForm } from "./forms/hero-form"
 import { HeroSliderForm } from "./forms/hero-slider-form"
 import { MarqueeForm } from "./forms/marquee-form"
@@ -77,11 +76,11 @@ export function FormOf({
     case "newsletter":
     case "help":
       return <WordedForm section={section} {...props} />
-    case "header_bar":
-      return <HeaderBarForm section={section} {...props} />
     case "footer_bar":
       return <FooterBarForm section={section} {...props} />
-    // The other main sections have nothing of their own yet: their variant and look
+    // The header's settings stand in their own groups (`HeaderGroups`); the other main
+    // sections have nothing of their own yet: their variant and look
+    case "header_bar":
     case "product_main":
     case "category_main":
       return null

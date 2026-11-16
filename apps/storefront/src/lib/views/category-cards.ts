@@ -1,7 +1,8 @@
-import type { StoreCategoriesLinked, StoreCategory } from "@qticaret/types"
+import type { StoreCategoriesCollage, StoreCategoriesLinked, StoreCategory } from "@qticaret/types"
 import type {
   CategoryCardView,
   CategoryCardsView,
+  CategoryCollageView,
   LinkView,
   LinkedCategoryCardView,
   Translate,
@@ -55,6 +56,21 @@ export const cardsView = (
   ...(section.columns_mobile === 2 ? { phoneColumns: 2 as const } : {}),
   imagePosition: section.image_position,
   frame: section.frame,
+  cards,
+})
+
+/**
+ * The collage's settings with its cards (adr/0049 Ek 2026-11-15); a card's
+ * "see all" is not drawn there (the whole card links to the category).
+ */
+export const collageView = (
+  section: Pick<StoreCategoriesCollage, "columns" | "columns_mobile" | "height" | "lead">,
+  cards: LinkedCategoryCardView[]
+): CategoryCollageView => ({
+  columns: section.columns,
+  ...(section.columns_mobile === 2 ? { phoneColumns: 2 as const } : {}),
+  height: section.height,
+  lead: section.lead === "on",
   cards,
 })
 

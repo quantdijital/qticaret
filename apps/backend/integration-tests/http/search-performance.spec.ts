@@ -11,7 +11,7 @@ import { searchFields } from "../../src/lib/search/document"
 import { SEARCH_INDEX_MODULE } from "../../src/modules/search-index"
 import type SearchIndexModuleService from "../../src/modules/search-index/service"
 import type { DocumentInput, ListingPlan } from "../../src/modules/search-index/types"
-import { rebuildSearchIndex } from "../../src/workflows/search/drain"
+import { searchIndexMinute } from "../../src/workflows/search/upkeep"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { stockShop } from "../helpers/stock"
@@ -183,13 +183,14 @@ medusaIntegrationTestRunner({
       const priceKey = `${shop.regionId}:try`
       const rows = catalogue(store.salesChannelId, priceKey)
 
-      // The index's minute (jobs/search-index-minute.ts) builds an empty index from the
-      // catalogue and takes out every row with no product: on a slow machine it raced the
-      // synthetic rows below and took a third of them out. The shop's own index is built
-      // first, under the minute's lock, so the minute finds it built and leaves them alone
+      // The index's minute (jobs/search-index-minute.ts) queues every row again on its
+      // first run (an empty index is built; the automatic offers' state, never written
+      // yet, reads as changed) and takes out every row with no product: on a busy runner
+      // it raced the synthetic rows below and took up to three quarters of them out. Its
+      // first run is done here, under its lock, before them; later runs find nothing new
       await container
         .resolve(Modules.LOCKING)
-        .execute("search-index-minute", () => rebuildSearchIndex(container))
+        .execute("search-index-minute", () => searchIndexMinute(container))
 
       const writing = performance.now()
       for (let at = 0; at < rows.length; at += 500) {

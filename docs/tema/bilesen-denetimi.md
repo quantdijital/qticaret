@@ -79,11 +79,11 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 | Ad | **Tür adı yanıltıcı:** "Görsel slayt" kaymaz, yan yana durur; "Giriş slaytı" ile karışır. Öneri: "Görsel bandı" |
 | Shopify | Dawn `image-banner` (iki görsel yan yana alabilir): 1.2'deki takım + `stack_images_on_mobile`; perde yüzde, yükseklikte `adapt` (görsele göre) |
 
-### 1.5 `categories` "Kategoriler"
+### 1.5 `categories` "Kategoriler" — `tiles`, `linked`, `collage`
 
 | | |
 | --- | --- |
-| Var | `title`, `category_ids` ≤24 (boş: üst kategoriler), `show_count`, `more` (İçerik); `look` tam |
+| Var | `title`, `category_ids` ≤24 (boş: üst kategoriler), `show_count`, `more` (İçerik); `look` tam. Sonradan (adr/0049 Ek 2026-11-15): `linked` (alt kategorili kart: `columns`, `columns_mobile`, `image_position`, `frame`, `links`) ve `collage` (fotoğraflı kolaj: `lead`, `columns`, `columns_mobile`, `height`, `links`) biçimleri |
 | Eksik | Liste/ızgara ailesi: sütun sayısı (masaüstü/telefon), adet sınırı, biçim (ızgara/kayan; kaydırma takımı), görsel oranı, kart biçimi (görsel üstte/yanında) |
 | Grup | — |
 | Ad | `show_count` etiketi `heroCatalog.showCount`'tan ödünç (doğru ama anahtar ailesi dağınık) |
@@ -103,10 +103,10 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 
 | | |
 | --- | --- |
-| Var | `product_id`, `title`, `text` (İçerik); `look` tam |
+| Var | `product_id`, `title`, `text` (İçerik); `gallery` **collage**/strips (Diziliş, 2026-11-15); `look` tam |
 | Eksik | Görselin yeri (sol/sağ), görsel boyu, gösterilecek parçalar (fiyat, puan, özellik tablosu, sepete ekle) aç/kapat |
-| Grup | — |
-| Ad | — |
+| Grup | "Diziliş" (fotoğraf düzeni) |
+| Ad | "Fotoğraf düzeni <small>gallery</small>": Kolaj / Çapraz şeritler |
 | Shopify | Dawn `featured-product`: `media_size` small/medium/large, `media_position` left/right, `media_fit`, `image_zoom` lightbox/hover/none, `hide_variants`, `secondary_background`; parçalar blok (başlık, fiyat, seçenek, satın al, puan, paylaş…) |
 
 ### 1.8 `brands` "Markalar"
@@ -213,7 +213,7 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 
 | | |
 | --- | --- |
-| Var | Biçim; `sticky`, `menu_images` (her biçimde İçerik; menülerde kategori resimleri: all/**submenus**/off → Her yerde/Alt menülerde/Yok; varsayılan bugünkü çizim, adr/0049 Ek 2026-11-15). `catalog`: İçerik'te `search_placeholder`, `utility_bar`, `phone`, `categories_button` (ardından `menu_images`), `menu_ground`, `highlight_link`; kapalı "Diğer ayarlar"da `search_label`, `account_text`, `cart_total` |
+| Var | Biçim; `sticky`, `search_style` (her biçimde İçerik; arama kutu ya da basınca açılan simge: **field**/icon → Kutu/Simge, basınca açılır, adr/0049 Ek 2026-11-15), `menu_images` (her biçimde İçerik; menülerde kategori resimleri: all/**submenus**/off → Her yerde/Alt menülerde/Yok; varsayılan bugünkü çizim, adr/0049 Ek 2026-11-15). `catalog`: İçerik'te `search_placeholder`, `utility_bar`, `phone`, `categories_button` (ardından `menu_images`), `menu_ground`, `highlight_link`; kapalı "Diğer ayarlar"da `search_label`, `account_text`, `cart_total` |
 | Eksik | Yapışkanlık basamakları (her zaman / yukarı kaydırınca / hiç); logo boyu; telefonda logo yeri; alt çizgi; menü türü (açılır / mega / çekmece) |
 | Grup | — |
 | Ad | `sticky` hem tema ayarı `header.sticky` hem bölüm ayarı; `centered` biçimi tema ayarı `header.layout`'tan okunuyor: iki doğruluk kaynağı. O5 (`menu_ground`) |

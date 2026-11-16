@@ -395,6 +395,7 @@ medusaIntegrationTestRunner({
           // The steps the shop set reach the storefront, the others the theme's own
           look: {
             space_outer: "none",
+            space_below: null,
             space_inner: null,
             ground: "well",
             align: null,
