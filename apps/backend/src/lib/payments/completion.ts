@@ -9,7 +9,8 @@ import { isRetryable } from "../errors"
  * - `refund`: the cart's own rules refuse it (it changed, an address, a
  *   code, a payment fee or account no longer right, a contract published
  *   since, an age not declared, a buyer on the block list, a gift line not
- *   ready). It never will be placed: the money is given back.
+ *   ready, a wholesale cart not at its customer's prices now or short of its
+ *   minimum, ADR-0068 slice 4). It never will be placed: the money is given back.
  * - `retry`: anything else (a lock, the database, the provider unreachable)
  *   is tried again: money is given back only when the order surely cannot
  *   be placed.
@@ -18,7 +19,7 @@ export type CompletionFailure = "stock" | "refund" | "retry"
 
 // The cart's own rules, as the completeCartWorkflow `validate` hook throws them
 const CART_RULES =
-  /^(cart|payments|promotions|cash_on_delivery|bank_transfer|legal|age|fraud|gift_card)\./
+  /^(cart|payments|promotions|cash_on_delivery|bank_transfer|legal|age|fraud|gift_card|wholesale)\./
 
 // Medusa's inventory refusals (v2.21: the inventory module's `ensureInventoryLevels`,
 // core-flows' `prepareConfirmInventoryInput` and `confirmInventoryStep`)

@@ -1,5 +1,5 @@
 import { MedusaError } from "@medusajs/framework/utils"
-import { ProviderError, RetryableError, ValidationError } from "../../errors"
+import { ConflictError, ProviderError, RetryableError, ValidationError } from "../../errors"
 import { completionFailureOf } from "../completion"
 
 // A workflow run hands its errors back as plain objects: their own fields, copied
@@ -50,9 +50,17 @@ describe("completionFailureOf (adr/0026 Ek 2026-11-06)", () => {
       "age.declaration_required",
       "fraud.buyer_blocked",
       "gift_card.recipient_required",
+      // ADR-0068 slice 4: a wholesale cart's own rules, never passed by trying again
+      "wholesale.min_quantity",
+      "promotions.wholesale_no_code",
     ]) {
       expect(completionFailureOf(new ValidationError(key))).toBe("refund")
       expect(completionFailureOf(plain(new ValidationError(key)))).toBe("refund")
+    }
+    // A cart not at its customer's prices now is a conflict, refunded alike
+    for (const key of ["wholesale.prices_changed", "cart.prices_changed"]) {
+      expect(completionFailureOf(new ConflictError(key))).toBe("refund")
+      expect(completionFailureOf(plain(new ConflictError(key)))).toBe("refund")
     }
   })
 
