@@ -1,0 +1,160 @@
+/*
+ * The brand columns footer (`frame/FooterColumns.tsx`, adr/0049 Ek
+ * 2026-11-17). Its ground is the shop's pick (`data-ground`, the look's
+ * names): the steel well (`paper-2`, the ledger's), the page (`paper`,
+ * under a rule) or the graphite stage (`gf-stage` for the buttons, the
+ * field and the focus ring; the footer's own tokens turn to the stage's,
+ * as a look's stage band does).
+ *
+ * The ways to pay (`.gf-pay`) are the networks' and providers' own files,
+ * untouched: each on a small white card (`data-badges="card"`, the
+ * networks' own field), or straight on a light ground (`plain`); on the
+ * stage always on cards, a mark needs its light ground. A way to pay that
+ * is no company's (a transfer, cash at the door, instalments) is its icon
+ * and its name on the ground's field. Each mark has its own height so the
+ * row reads even: a wide wordmark lower, a square box taller.
+ */
+@layer components {
+  .gf-footer-cols[data-ground="well"] {
+    background: var(--color-paper-2);
+  }
+  .gf-footer-cols[data-ground="page"] {
+    border-top: 1px solid var(--color-rule);
+    background: var(--color-paper);
+  }
+  .gf-footer-cols[data-ground="stage"] > * {
+    --color-text: var(--color-stage-text);
+    --color-text-2: var(--color-stage-text-2);
+    --color-text-3: var(--color-stage-text-2);
+    --color-placeholder: var(--color-stage-text-2);
+    --color-rule: var(--color-stage-rule);
+    --color-edge: var(--color-stage-text-2);
+    --color-paper: var(--color-stage);
+    --color-paper-2: var(--color-stage-2);
+    --color-paper-3: var(--color-stage-rule);
+    --color-field: var(--color-stage-2);
+    --color-ok: var(--color-ok-on-stage);
+    --color-error: var(--color-error-on-stage);
+    --color-focus: var(--color-signal-on-stage);
+  }
+
+  /* The strip's ways to reach the shop: as many across as fit, each its round sign */
+  .gf-reach {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 1rem var(--gap-columns);
+  }
+  .gf-reach-sign {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    background: var(--color-field);
+    color: var(--color-text);
+  }
+  .gf-reach a:hover .gf-reach-sign {
+    border-color: var(--color-edge);
+  }
+
+  /* From 1024 px the link columns stand side by side, as many as fit at 10rem */
+  .gf-foot-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 2rem var(--gap-columns);
+  }
+
+  /* The bottom line: the marks first on their own row, then the year beside the choices */
+  .gf-foot-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "marks marks"
+      "copy tools";
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+  }
+  @media (min-width: 64rem) {
+    .gf-foot-line {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      grid-template-areas: "copy marks tools";
+    }
+  }
+  .gf-foot-copy {
+    grid-area: copy;
+  }
+  .gf-foot-marks {
+    display: flex;
+    grid-area: marks;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+  }
+  .gf-foot-tools {
+    display: flex;
+    grid-area: tools;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0 1.25rem;
+  }
+
+  .gf-pay {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .gf-pay > li {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    height: 2rem;
+    padding-inline: 0.625rem;
+    border: 1px solid var(--color-rule);
+    border-radius: calc(var(--radius-inner) * 0.6);
+    background: var(--color-field);
+    color: var(--color-text-2);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  /* A mark's own white card: the networks draw their marks for a light field */
+  .gf-pay > li[data-logo] {
+    min-width: 3.25rem;
+    padding-inline: 0.5rem;
+    border-color: color-mix(in oklab, var(--color-rule) 70%, transparent);
+    background: #fff;
+  }
+  .gf-pay img {
+    width: auto;
+    max-width: 4.5rem;
+    height: 1.125rem;
+    object-fit: contain;
+  }
+  .gf-pay [data-mark="visa"] img {
+    height: 0.875rem;
+  }
+  .gf-pay [data-mark="mastercard"] img {
+    height: 1.25rem;
+  }
+  .gf-pay [data-mark="amex"] img {
+    height: 1.5rem;
+  }
+  .gf-pay [data-mark="troy"] img,
+  .gf-pay [data-mark="paytr"] img,
+  .gf-pay [data-mark="iyzico"] img {
+    height: 1rem;
+  }
+  /* Straight on a light ground: no card, the marks a little taller */
+  .gf-footer-cols[data-badges="plain"]:not([data-ground="stage"]) .gf-pay > li[data-logo] {
+    min-width: 0;
+    padding-inline: 0.25rem;
+    border-color: transparent;
+    background: transparent;
+  }
+}
