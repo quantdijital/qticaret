@@ -64,8 +64,59 @@ medusaIntegrationTestRunner({
         },
       })
 
+    /**
+     * A lock held until `release` (Medusa's locking runs the callback while it holds it).
+     * Resolves once it is held.
+     */
+    async function hold(key: string) {
+      let release: () => void = () => undefined
+      const released = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      let held: () => void = () => undefined
+      const holding = new Promise<void>((resolve) => {
+        held = resolve
+      })
+      const done = getContainer()
+        .resolve(Modules.LOCKING)
+        .execute(key, async () => {
+          held()
+          await released
+        })
+      await holding
+      return async () => {
+        release()
+        await done
+      }
+    }
+
+    // The scheduled jobs write the very records these cases count: the minute's boundaries
+    // (jobs/price-list-boundaries.ts) and the hourly check (jobs/price-history-reconcile.ts).
+    // On CI they fired mid-case and recorded a list's start first (runs 43784685978,
+    // 43793730246). Every case holds both jobs' locks; a job that fires meanwhile waits 1 s
+    // for its lock and skips. What a case wants of either job it runs itself: the boundaries
+    // directly, the hourly check with only its own lock let go for that call.
+    let releaseBoundaries: () => Promise<void>
+    let releaseHourly: () => Promise<void>
+
+    async function reconcile() {
+      await releaseHourly()
+      try {
+        return await recordAllSellingPrices(getContainer(), "reconcile")
+      } finally {
+        releaseHourly = await hold("price-history-all")
+      }
+    }
+
     beforeEach(async () => {
+      releaseBoundaries = await hold("price-list-boundaries")
+      releaseHourly = await hold("price-history-all")
       shop = await stockShop(getContainer())
+    })
+
+    afterEach(async () => {
+      await releaseHourly()
+      await releaseBoundaries()
     })
 
     it("records a price and each change of it, a sale list's included", async () => {
@@ -101,25 +152,19 @@ medusaIntegrationTestRunner({
         input: { customersData: [{ name: "Toptan" }] },
       })
       await saleList(variantId, 50, { rules: { "customer.groups.id": [groups[0]?.id ?? ""] } })
-      // Begins in a moment, with no event when it does. The minute's boundary job
-      // (jobs/price-list-boundaries.ts) records such a start too; its lock is held here
-      // so this case shows the hourly reconcile finding it (on CI the job once ran in
-      // the pause and recorded it first)
-      const reconciled = await getContainer()
-        .resolve(Modules.LOCKING)
-        .execute("price-list-boundaries", async () => {
-          await saleList(variantId, 70, { starts_at: new Date(Date.now() + 2000) })
-          await pause(3000)
-          const unseen = await history().lastPrices([variantId], ["try"])
-          return { unseen, recorded: await recordAllSellingPrices(getContainer(), "reconcile") }
-        })
-      expect(reconciled.unseen).toEqual([expect.objectContaining({ amount: "100" })])
-      expect(reconciled.recorded).toBeGreaterThan(0)
+      // Begins in a moment, with no event when it does
+      await saleList(variantId, 70, { starts_at: new Date(Date.now() + 2000) })
+      await pause(3000)
+      expect(await history().lastPrices([variantId], ["try"])).toEqual([
+        expect.objectContaining({ amount: "100" }),
+      ])
+
+      expect(await reconcile()).toBeGreaterThan(0)
       const rows = await recordsOf(variantId, 2)
       expect(rows.at(-1)).toMatchObject({ amount: 70, original_amount: 100, reason: "reconcile" })
       // Nothing new the second time
       const before = (await recordsOf(variantId, 2)).length
-      await recordAllSellingPrices(getContainer(), "reconcile")
+      await reconcile()
       expect((await recordsOf(variantId, before)).length).toBe(before)
     })
 
@@ -136,7 +181,7 @@ medusaIntegrationTestRunner({
       expect(rows.at(-1)).toMatchObject({ amount: 60, reason: "price_change" })
       expect(new Date(rows.at(-1)?.recorded_at ?? 0).getTime()).toBe(startsAt.getTime())
       // The hourly check finds it already recorded
-      await recordAllSellingPrices(getContainer(), "reconcile")
+      await reconcile()
       expect((await recordsOf(variantId, 2)).length).toBe(2)
     })
   },

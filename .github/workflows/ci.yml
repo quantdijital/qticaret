@@ -183,8 +183,8 @@ jobs:
     runs-on: ubuntu-24.04
     # About 120 tests take 20 to 25 minutes on a runner (the accessibility pass alone ~11)
     timeout-minutes: 40
-    # A real backend on a fresh database with the demo shop; the panel's dev
-    # server proxies to it, as on a developer's machine (apps/panel/e2e)
+    # A real backend on a fresh database with the demo shop; the panel, built and
+    # served by `vite preview`, proxies to it (apps/panel/e2e)
     services:
       postgres:
         image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
@@ -238,13 +238,36 @@ jobs:
           # A few days of orders: the order page's tests open one
           pnpm --filter @qticaret/backend seed:demo-orders days=3
       - name: Start the backend
+        # Two browsers run ~120 tests from one address: past the admin's 1,200 requests a
+        # minute per IP, /admin/users/me answered 429 and the panel showed its sign-in page
+        # mid-run. LOAD_TEST scales per-IP limits up, on development only (lib/env.ts)
+        env:
+          NODE_ENV: development
+          LOAD_TEST: "on"
         run: |
           pnpm --filter @qticaret/backend dev > backend.log 2>&1 &
           for attempt in $(seq 1 90); do
             if curl -fsS http://localhost:9000/health > /dev/null; then exit 0; fi
             sleep 2
           done
-          cat backend.log
+          # The end of it only: the log is public
+          tail -n 100 backend.log
+          exit 1
+      # The panel built once and served by `vite preview`, which proxies to the backend as
+      # the dev server does (preview.proxy defaults to server.proxy). The dev server serves
+      # the app as separate, untransformed-until-asked modules on every one of the many page
+      # loads the ~120 tests make, and the tests took 23 to over 38 minutes with it. Built in
+      # development mode, so the i18n missing-key warnings the tests watch for stay on.
+      # Playwright finds the server running and uses it (reuseExistingServer)
+      - name: Build and serve the panel
+        run: |
+          pnpm --filter @qticaret/panel exec vite build --mode development
+          pnpm --filter @qticaret/panel exec vite preview --port 5173 --strictPort > panel.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:5173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          tail -n 100 panel.log
           exit 1
       - run: pnpm --filter @qticaret/panel test:e2e
       - name: Keep the report of a failed run
