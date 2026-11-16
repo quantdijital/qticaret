@@ -228,5 +228,64 @@ medusaIntegrationTestRunner({
       })
       expect(rack).not.toHaveProperty("columns")
     })
+
+    it("saves a stage list with its count and settings, picks that many, refuses an off-list count or step", async () => {
+      const container = getContainer()
+      const a = await product("sahne-a")
+      const b = await product("sahne-b")
+      const c = await product("sahne-c")
+      await product("sahne-d")
+      // Above any sale an earlier case left behind; its own window (21 days), the best sellers
+      // being held a few minutes per window
+      await order(a.variantId, 45)
+      await order(b.variantId, 40)
+      await order(c.variantId, 35)
+      await indexCatalogue(container)
+
+      // adr/0049 Ek 2026-11-16: one on the stage beside the list, three to six; the count is stage_count
+      const stage = (more: Record<string, unknown> = {}): Section => ({
+        id: "sahneraf01",
+        type: "products",
+        ...ALWAYS,
+        title: null,
+        source: { kind: "best_sellers", days: 21 },
+        more: null,
+        variant: "stage_list",
+        stage_count: 3,
+        ...more,
+      })
+      const save = (section: Section) =>
+        settle(
+          http.post(
+            "/admin/storefront-layout",
+            { document: { header: [], home: [section], footer: [], product: [], category: [] } },
+            asOwner
+          )
+        )
+      for (const refused of [
+        { stage_count: 2 },
+        { stage_count: 7 },
+        { stage_side: "top" },
+        { stage_ground: "primary" },
+        { stage_follow: true },
+        { strips_count: 4 },
+      ]) {
+        expect((await save(stage(refused))).status).toBe(400)
+      }
+
+      const [rack] = await previewHome([stage({ stage_side: "end" })])
+      expect(rack).toMatchObject({
+        id: "sahneraf01",
+        variant: "stage_list",
+        source: { kind: "best_sellers", days: 21 },
+        stage_count: 3,
+        // Saved without them: each list's first step
+        stage_side: "end",
+        stage_ground: "stage",
+        stage_follow: "on",
+        product_ids: [a.productId, b.productId, c.productId],
+      })
+      expect(rack).not.toHaveProperty("strips_count")
+    })
   },
 })
