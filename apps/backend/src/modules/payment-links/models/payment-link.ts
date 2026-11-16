@@ -50,9 +50,12 @@ export const PaymentLink = model
      * The cart whose completion holds the link (`claimForCart`, service.ts):
      * while it holds it no other cart of the link becomes an order. Released
      * when that completion fails; a hold older than its time-out is free.
+     * `claim_token` names the one completion run that holds it, so only that
+     * run lets go of it.
      */
     claimed_cart_id: model.text().nullable(),
     claimed_at: model.dateTime().nullable(),
+    claim_token: model.text().nullable(),
     opened_count: model.number().default(0),
     last_opened_at: model.dateTime().nullable(),
     sent_count: model.number().default(0),

@@ -1,6 +1,8 @@
 import { asValue } from "@medusajs/framework/awilix"
 import { createMedusaContainer } from "@medusajs/framework/utils"
+import { isRetryable } from "../../../lib/errors"
 import { logger } from "../../../lib/logging"
+import { CLAIM_TTL_MS, heldByOther } from "../../../lib/payment-links/snapshot"
 import { PAYMENT_LINKS_MODULE } from "../../../modules/payment-links"
 import { claimLinkForCart, releaseLinkClaim } from "../cart-guard"
 
@@ -18,18 +20,20 @@ afterEach(() => {
 })
 
 describe("a completion's hold on its payment link", () => {
-  it("holds the link for the cart and hands back what to let go of", async () => {
-    links.claimForCart.mockResolvedValue(true)
+  it("holds the link for the cart under a mark of its own run", async () => {
+    links.claimForCart.mockResolvedValue("held")
 
-    await expect(claimLinkForCart(container(), "plink_1", "cart_1")).resolves.toEqual({
-      link_id: "plink_1",
-      cart_id: "cart_1",
-    })
-    expect(links.claimForCart).toHaveBeenCalledWith("plink_1", "cart_1")
+    const claim = await claimLinkForCart(container(), "plink_1", "cart_1")
+
+    expect(claim).toEqual({ link_id: "plink_1", cart_id: "cart_1", token: expect.any(String) })
+    expect(links.claimForCart).toHaveBeenCalledWith("plink_1", "cart_1", claim.token)
+    // Every run its own mark
+    const again = await claimLinkForCart(container(), "plink_1", "cart_1")
+    expect(again.token).not.toBe(claim.token)
   })
 
-  it("refuses the cart as for a closed link when another holds it, ids only in the log", async () => {
-    links.claimForCart.mockResolvedValue(false)
+  it("refuses a cart that may not become the link's order as for a closed link, ids only in the log", async () => {
+    links.claimForCart.mockResolvedValue("refused")
     const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
 
     await expect(claimLinkForCart(container(), "plink_1", "cart_2")).rejects.toMatchObject({
@@ -42,10 +46,22 @@ describe("a completion's hold on its payment link", () => {
     })
   })
 
-  it("lets go of the cart's own hold when its completion fails later", async () => {
-    await releaseLinkClaim(container(), { link_id: "plink_1", cart_id: "cart_1" })
+  it("has the cart tried again while another cart's completion holds the link", async () => {
+    links.claimForCart.mockResolvedValue("busy")
+    jest.spyOn(logger, "info").mockImplementation(() => undefined)
 
-    expect(links.releaseClaim).toHaveBeenCalledWith("plink_1", "cart_1")
+    const error = await claimLinkForCart(container(), "plink_1", "cart_2").catch(
+      (thrown: unknown) => thrown
+    )
+
+    // Retried, never refunded: the holder may yet fail
+    expect(isRetryable(error)).toBe(true)
+  })
+
+  it("lets go of its own run's hold when its completion fails later", async () => {
+    await releaseLinkClaim(container(), { link_id: "plink_1", cart_id: "cart_1", token: "run_1" })
+
+    expect(links.releaseClaim).toHaveBeenCalledWith("plink_1", "run_1")
   })
 
   it("lets go of nothing for an ordinary cart, or the hook's answer passed instead", async () => {
@@ -54,5 +70,25 @@ describe("a completion's hold on its payment link", () => {
     await releaseLinkClaim(container(), {} as never)
 
     expect(links.releaseClaim).not.toHaveBeenCalled()
+  })
+})
+
+describe("heldByOther", () => {
+  const now = new Date("2026-11-16T12:00:00Z")
+  const at = (ms: number) => new Date(now.getTime() - ms)
+
+  it("is another cart's fresh hold only", () => {
+    expect(heldByOther({ claimed_cart_id: "cart_1", claimed_at: at(1000) }, "cart_2", now)).toBe(
+      true
+    )
+    expect(heldByOther({ claimed_cart_id: "cart_2", claimed_at: at(1000) }, "cart_2", now)).toBe(
+      false
+    )
+    expect(
+      heldByOther({ claimed_cart_id: "cart_1", claimed_at: at(CLAIM_TTL_MS + 1) }, "cart_2", now)
+    ).toBe(false)
+    expect(heldByOther({ claimed_cart_id: null, claimed_at: null }, "cart_2", now)).toBe(false)
+    // "": any cart's hold (cancel and expiry)
+    expect(heldByOther({ claimed_cart_id: "cart_1", claimed_at: at(1000) }, "", now)).toBe(true)
   })
 })

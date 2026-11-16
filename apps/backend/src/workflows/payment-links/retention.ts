@@ -1,6 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../../lib/logging"
-import { COMPLETION_GRACE_MS, RETENTION_DAYS, linkNumber } from "../../lib/payment-links/snapshot"
+import {
+  COMPLETION_GRACE_MS,
+  RETENTION_DAYS,
+  heldByOther,
+  linkNumber,
+} from "../../lib/payment-links/snapshot"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
 import { closeLinkPromotion } from "./promotion"
@@ -38,10 +43,18 @@ export async function sweepPaymentLinks(
       status: ["open", "draft"],
       expires_at: { $lt: new Date(now.getTime() - COMPLETION_GRACE_MS) },
     },
-    { select: ["id", "promotion_id"], take: PAGE, order: { expires_at: "ASC" } }
+    {
+      select: ["id", "promotion_id", "claimed_cart_id", "claimed_at"],
+      take: PAGE,
+      order: { expires_at: "ASC" },
+    }
   )
   let expired = 0
   for (const link of due) {
+    // A cart's completion holds it (its payment under way): left for the next hour
+    if (heldByOther(link, "", now)) {
+      continue
+    }
     try {
       await links.updatePaymentLinks({ id: link.id, status: "expired", closed_at: now })
       await closeLinkPromotion(container, link.promotion_id)

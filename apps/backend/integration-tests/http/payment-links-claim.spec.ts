@@ -4,7 +4,7 @@ import {
   createPaymentCollectionForCartWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { CLAIM_TTL_MS } from "../../src/modules/payment-links/service"
+import { CLAIM_TTL_MS } from "../../src/lib/payment-links/snapshot"
 import { completedLinkCarts } from "../../src/workflows/payment-links/link-carts"
 import { createAdminUser } from "../helpers/admin"
 import { completeWithSystemPayment } from "../helpers/checkout"
@@ -95,22 +95,85 @@ medusaIntegrationTestRunner({
       await linkFlag(http, owner.headers, false)
     })
 
-    it("refuses a cart of the link while another cart's completion holds it, before any payment", async () => {
+    it("opens no second cart while the first cart's completion holds the link", async () => {
       const { id, token } = await newLink()
       const first = (await open(token)).data.cart_id ?? ""
       // The first cart's completion is under way: it holds the link
-      const held = await linksOf(getContainer()).claimForCart(id, first)
-      const second = (await open(token)).data.cart_id ?? ""
-
-      const refused = await complete(second)
+      const held = await linksOf(getContainer()).claimForCart(id, first, "run_first")
+      const second = await open(token)
       const row = await linkRow(getContainer(), id)
 
-      expect(held).toBe(true)
-      expect(second).not.toBe(first)
-      expect(refused).toEqual({ order_id: null, message: "cart.payment_link_closed" })
-      expect(await paymentsOf(second)).toHaveLength(0)
-      expect(await ordersOf(id)).toHaveLength(0)
-      expect(row).toMatchObject({ status: "open", cart_id: second, claimed_cart_id: first })
+      expect(held).toBe("held")
+      expect(second.status).toBe(409)
+      expect(second.data.message).toBe("payment_link.unavailable")
+      expect(row).toMatchObject({ status: "open", cart_id: first, claimed_cart_id: first })
+    })
+
+    it("tries a cart again, its payment untouched, while another cart's completion holds the link", async () => {
+      const { id, token } = await newLink()
+      const first = (await open(token)).data.cart_id ?? ""
+      const second = (await open(token)).data.cart_id ?? ""
+      // The first cart passed its checks before the second was bound, and holds the link now
+      await linksOf(getContainer()).updatePaymentLinks({
+        id,
+        claimed_cart_id: first,
+        claimed_at: new Date(),
+        claim_token: "run_first",
+      })
+
+      const waiting = await complete(second)
+      const paymentsWhileHeld = await paymentsOf(second)
+      // The first cart's completion failed: its compensation lets go, and the second goes on
+      await linksOf(getContainer()).releaseClaim(id, "run_first")
+      const { result, errors } = await completeCartWorkflow(getContainer()).run({
+        input: { id: second },
+        throwOnError: false,
+      })
+      const paid = await eventually(
+        () => linkRow(getContainer(), id),
+        (row) => row.status === "paid"
+      )
+
+      expect(waiting).toEqual({ order_id: null, message: "errors.temporarily_unavailable" })
+      expect(paymentsWhileHeld).toHaveLength(0)
+      expect(errors).toEqual([])
+      expect(paid).toMatchObject({ order_id: result.id, claimed_cart_id: second })
+      expect(await ordersOf(id)).toHaveLength(1)
+    })
+
+    it("keeps staff from canceling a link while a cart's completion holds it", async () => {
+      const { id, token } = await newLink()
+      const cartId = (await open(token)).data.cart_id ?? ""
+      await linksOf(getContainer()).claimForCart(id, cartId, "run_one")
+
+      const refused = await settle(
+        http.post<Answer>(`/admin/payment-links/${id}/cancel`, {}, { headers: owner.headers })
+      )
+      await linksOf(getContainer()).releaseClaim(id, "run_one")
+      const canceled = await settle(
+        http.post<Answer>(`/admin/payment-links/${id}/cancel`, {}, { headers: owner.headers })
+      )
+
+      expect(refused.status).toBe(409)
+      expect(refused.data.message).toBe("payment_link.paying")
+      expect(canceled.status).toBe(200)
+      expect((await linkRow(getContainer(), id)).status).toBe("canceled")
+    })
+
+    it("lets a run let go only of its own hold", async () => {
+      const { id, token } = await newLink()
+      const cartId = (await open(token)).data.cart_id ?? ""
+      await linksOf(getContainer()).claimForCart(id, cartId, "run_one")
+      // The same cart's notice again: it holds the link under its own run
+      await linksOf(getContainer()).claimForCart(id, cartId, "run_two")
+
+      await linksOf(getContainer()).releaseClaim(id, "run_one")
+      const kept = await linkRow(getContainer(), id)
+      await linksOf(getContainer()).releaseClaim(id, "run_two")
+      const freed = await linkRow(getContainer(), id)
+
+      expect(kept).toMatchObject({ claimed_cart_id: cartId, claim_token: "run_two" })
+      expect(freed).toMatchObject({ claimed_cart_id: null, claimed_at: null, claim_token: null })
     })
 
     it("makes exactly one order when a cart completes while the link opens another", async () => {
@@ -140,10 +203,15 @@ medusaIntegrationTestRunner({
       }
     })
 
-    it("makes one order of one cart completed twice at once (two notices)", async () => {
+    it("makes one order of one cart completed again twice at once (two late notices)", async () => {
       const { id, token } = await newLink()
       const cartId = (await open(token)).data.cart_id ?? ""
       const first = await complete(cartId)
+      // The notices come after the link is paid
+      await eventually(
+        () => linkRow(getContainer(), id),
+        (row) => row.status === "paid"
+      )
 
       const again = await Promise.all([
         completeCartWorkflow(getContainer()).run({ input: { id: cartId }, throwOnError: false }),
@@ -160,11 +228,13 @@ medusaIntegrationTestRunner({
     it("frees a hold its completion left behind once it is stale", async () => {
       const { id, token } = await newLink()
       const abandoned = (await open(token)).data.cart_id ?? ""
-      await linksOf(getContainer()).claimForCart(
+      // A completion that died halfway, long ago: its hold was never let go
+      await linksOf(getContainer()).updatePaymentLinks({
         id,
-        abandoned,
-        new Date(Date.now() - CLAIM_TTL_MS - 60_000)
-      )
+        claimed_cart_id: abandoned,
+        claimed_at: new Date(Date.now() - CLAIM_TTL_MS - 60_000),
+        claim_token: "run_dead",
+      })
       const latest = (await open(token)).data.cart_id ?? ""
 
       const order = await complete(latest)

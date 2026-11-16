@@ -9,7 +9,8 @@ import { markPaymentLinkPaidWorkflow, missingMarks } from "./paid"
 
 // Carts looked at a page; a shop makes a few links a day
 const PAGE = 500
-// Pages looked at a run: what lies past them waits for the next hour, and the run says so
+// Pages looked at a run, newest carts first; past them the run stops and says so. The older
+// carts beyond were looked at by the runs of the hours before
 const MAX_PAGES = 20
 // How far back a link's completed cart is looked at
 const WINDOW_MS = 2 * 24 * 60 * 60 * 1000

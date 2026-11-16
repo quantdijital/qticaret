@@ -40,6 +40,13 @@ export const MAX_QUANTITY = 999
 export const MAX_DISCOUNT_PERCENT = 99
 /** After its end, a payment already under way may still complete for this long. */
 export const COMPLETION_GRACE_MS = 60 * 60 * 1000
+/**
+ * How long a completion's hold on its link lasts (`claimForCart`).
+ * Medusa's completion runs in seconds under the cart's lock; a hold left by
+ * a process that died halfway frees itself after this, and a cart of the
+ * link that did become an order still refuses every other.
+ */
+export const CLAIM_TTL_MS = 15 * 60 * 1000
 /** A closed link's personal data stays this long (docs/kvkk-envanter.md). */
 export const RETENTION_DAYS = 30
 
@@ -172,6 +179,20 @@ export function shownStatusFilter(
 export const completesNow = (link: Lifetime, now = new Date()): boolean =>
   link.status === "open" &&
   new Date(link.expires_at).getTime() + COMPLETION_GRACE_MS > now.getTime()
+
+/**
+ * Whether a cart's completion other than `cartId`'s holds the link now
+ * (`claimForCart`); "" for any cart's. A hold past `CLAIM_TTL_MS` is free.
+ */
+export const heldByOther = (
+  link: { claimed_cart_id?: string | null; claimed_at?: Date | string | null },
+  cartId: string,
+  now = new Date()
+): boolean =>
+  Boolean(link.claimed_cart_id) &&
+  link.claimed_cart_id !== cartId &&
+  link.claimed_at != null &&
+  new Date(link.claimed_at).getTime() + CLAIM_TTL_MS > now.getTime()
 
 /** A new link's end: `hours` from now, within one hour and seven days. */
 export function linkEnd(hours: number, now = new Date()): Date {

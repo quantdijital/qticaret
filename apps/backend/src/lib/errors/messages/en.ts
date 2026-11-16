@@ -1340,6 +1340,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This discount is over your limit (20% at most). The shop owner can give more.",
   "payment_link.discount_invalid": "The discount is not valid; it cannot cover the whole order.",
   "payment_link.not_open": "This link is no longer open.",
+  "payment_link.paying":
+    "The customer is paying with this link right now. Try again in a few minutes.",
   "payment_link.extend_limit":
     "A link can stay valid for at most 7 days from its making; it cannot be extended further.",
   "payment_link.sent_recently": "This link was just sent; try again in 10 minutes.",

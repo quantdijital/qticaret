@@ -48,7 +48,7 @@ describe("completedLinkCarts", () => {
     expect(values).toEqual(["qt_payment_link", "qt_payment_link", "qt_payment_link", "plink_1", 10])
   })
 
-  it("pages the carts completed since a time by id, past the page before's last", async () => {
+  it("pages the carts completed since a time by id, newest first, past the page before's last", async () => {
     knex.raw.mockResolvedValue({ rows: [] })
     const since = new Date("2026-11-14T12:00:00Z")
 
@@ -57,11 +57,11 @@ describe("completedLinkCarts", () => {
 
     const [first, firstValues] = knex.raw.mock.calls[0] as [string, unknown[]]
     const [next, nextValues] = knex.raw.mock.calls[1] as [string, unknown[]]
-    expect(first).toMatch(/ORDER BY id\s/u)
-    expect(first).not.toMatch(/id > \?/u)
+    expect(first).toMatch(/ORDER BY id DESC\s/u)
+    expect(first).not.toMatch(/id < \?/u)
     expect(firstValues).toEqual(["qt_payment_link", "qt_payment_link", since, 500])
-    expect(next).toMatch(/AND completed_at >= \? AND id > \?/u)
-    expect(next).toMatch(/ORDER BY id\s/u)
+    expect(next).toMatch(/AND completed_at >= \? AND id < \?/u)
+    expect(next).toMatch(/ORDER BY id DESC\s/u)
     expect(nextValues).toEqual(["qt_payment_link", "qt_payment_link", since, "cart_499", 500])
   })
 

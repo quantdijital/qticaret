@@ -388,6 +388,22 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "claim_token": {
+          "name": "claim_token",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "opened_count": {
           "name": "opened_count",
           "type": "integer",

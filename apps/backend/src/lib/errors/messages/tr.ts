@@ -1336,6 +1336,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu indirim sınırınızı aşıyor (en çok %20). Daha fazlasını mağaza sahibi verebilir.",
   "payment_link.discount_invalid": "İndirim tutarı geçersiz; siparişin tamamını karşılayamaz.",
   "payment_link.not_open": "Bu bağlantı artık açık değil.",
+  "payment_link.paying":
+    "Müşteri bu bağlantıyla şu an ödeme yapıyor. Birkaç dakika sonra yeniden deneyin.",
   "payment_link.extend_limit":
     "Bağlantı oluşturulduğundan en çok 7 gün geçerli olabilir; daha fazla uzatılamaz.",
   "payment_link.sent_recently": "Bu bağlantı az önce gönderildi; 10 dakika sonra yeniden deneyin.",

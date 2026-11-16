@@ -2,6 +2,7 @@ import type { Context } from "@medusajs/framework/types"
 import { InjectTransactionManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, hashPii, parseKey } from "@qticaret/server-kit"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
+import { CLAIM_TTL_MS } from "../../lib/payment-links/snapshot"
 import { paymentLinkTokenHash } from "../../lib/payment-links/token"
 import { PaymentLink } from "./models/payment-link"
 
@@ -40,14 +41,6 @@ export interface PaymentLinkPrivate {
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
 }
-
-/**
- * How long a completion's hold on its link lasts. Medusa's completion runs
- * in seconds under the cart's lock; a hold left by a process that died
- * halfway frees itself after this, and a cart of the link that did become
- * an order still refuses every other (`completedLinkCarts`).
- */
-export const CLAIM_TTL_MS = 15 * 60 * 1000
 
 const SEAL = "payment-links.private"
 const TOKEN_SEAL = "payment-links.token"
@@ -111,38 +104,56 @@ class PaymentLinksModuleService extends MedusaService({ PaymentLink }) {
    * order, in one statement: of two carts (or two notices) completing at
    * once, one holds it and the other is refused, whatever each read before.
    * Only the link's latest cart may hold it; the same cart holds it again
-   * (a notice repeated); another cart's hold counts until `CLAIM_TTL_MS`.
+   * (a notice repeated); another cart's hold counts until `CLAIM_TTL_MS`,
+   * by the database's clock. `token` names this completion run (only it
+   * lets go). `busy`: the cart is the link's latest and open, but another
+   * cart's completion holds it now (it may yet fail: try again);
+   * `refused`: the cart may not become the link's order.
    */
   @InjectTransactionManager()
   async claimForCart(
     linkId: string,
     cartId: string,
-    now: Date = new Date(),
+    token: string,
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<boolean> {
+  ): Promise<"held" | "busy" | "refused"> {
     const manager = sharedContext.transactionManager as Executor
+    const ttl = CLAIM_TTL_MS / 1000
     const rows = (await manager.execute(
-      `UPDATE payment_link SET claimed_cart_id = ?, claimed_at = ?, updated_at = now()
+      `UPDATE payment_link
+          SET claimed_cart_id = ?, claimed_at = now(), claim_token = ?, updated_at = now()
         WHERE id = ? AND deleted_at IS NULL AND status = 'open' AND cart_id = ?
-          AND (claimed_cart_id IS NULL OR claimed_cart_id = ? OR claimed_at < ?)
+          AND (claimed_cart_id IS NULL OR claimed_cart_id = ?
+               OR claimed_at < now() - make_interval(secs => ?))
        RETURNING id`,
-      [cartId, now, linkId, cartId, cartId, new Date(now.getTime() - CLAIM_TTL_MS)]
+      [cartId, token, linkId, cartId, cartId, ttl]
     )) as unknown[]
-    return rows.length > 0
+    if (rows.length > 0) {
+      return "held"
+    }
+    const [row] = (await manager.execute(
+      `SELECT 1 AS busy FROM payment_link
+        WHERE id = ? AND deleted_at IS NULL AND status = 'open' AND cart_id = ?
+          AND claimed_cart_id IS NOT NULL AND claimed_cart_id <> ?
+          AND claimed_at >= now() - make_interval(secs => ?)`,
+      [linkId, cartId, cartId, ttl]
+    )) as unknown[]
+    return row ? "busy" : "refused"
   }
 
-  /** Lets go of a cart's hold (its completion failed); another cart's hold is left. */
+  /** Lets go of the hold this completion run took (it failed); any other hold is left. */
   @InjectTransactionManager()
   async releaseClaim(
     linkId: string,
-    cartId: string,
+    token: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     const manager = sharedContext.transactionManager as Executor
     await manager.execute(
-      `UPDATE payment_link SET claimed_cart_id = NULL, claimed_at = NULL, updated_at = now()
-        WHERE id = ? AND claimed_cart_id = ?`,
-      [linkId, cartId]
+      `UPDATE payment_link
+          SET claimed_cart_id = NULL, claimed_at = NULL, claim_token = NULL, updated_at = now()
+        WHERE id = ? AND claim_token = ?`,
+      [linkId, token]
     )
   }
 
