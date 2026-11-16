@@ -178,6 +178,7 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
             render={(option) => t(`${C}.sectionSpacings.${option}`)}
             hint={t(`${C}.sectionSpacingHint`)}
           />
+          <KitChoice field="density" {...kit} />
         </Pair>
       </PanelGroup>
       <ThemeCardGroups theme={theme} variants={variants} reveal={reveal} onChange={onChange} />

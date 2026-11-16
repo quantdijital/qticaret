@@ -18,7 +18,7 @@ const saved = (body: Record<string, unknown>) => full.safeParse(mergePatch(defau
 const beforeKit = (): Record<string, unknown> =>
   Object.fromEntries(Object.entries(defaults).filter(([key]) => !Object.hasOwn(STYLE_KIT, key)))
 
-/** adr/0067 §1: the style kit's four new steps, each a theme setting. */
+/** adr/0067 §1 and its Ek 2026-11-16: the style kit's steps, each a theme setting. */
 describe("theme section: the style kit", () => {
   it("holds the contract's lists, today's drawing first and the default", () => {
     const contract = jest.requireActual<Record<string, unknown>>(CONTRACT_FILE)
@@ -29,6 +29,7 @@ describe("theme section: the style kit", () => {
       shadow: "float",
       chip_style: "filled",
       media_ground: "well",
+      density: "airy",
     })
     for (const [field, steps] of Object.entries(STYLE_KIT)) {
       expect(defaults[field as keyof typeof STYLE_KIT]).toBe(steps[0])
@@ -55,6 +56,8 @@ describe("theme section: the style kit", () => {
     ["a photo ground as a colour", { media_ground: "#ffffff" }],
     ["a step that is not a string", { chip_style: 1 }],
     ["no step", { media_ground: null }],
+    ["a density off the list", { density: "tight" }],
+    ["a density as a length", { density: "12px" }],
   ])("refuses %s", (_, body) => {
     expect(saved(body).success).toBe(false)
   })
@@ -67,6 +70,7 @@ describe("theme section: the style kit", () => {
 
   it("reads a design's theme or a preset written before the kit at today's drawing", () => {
     expect(withCardDefaults(beforeKit())).toEqual(defaults)
+    expect(withCardDefaults(beforeKit())).toMatchObject({ density: "airy" })
     expect(withCardDefaults({ ...beforeKit(), chip_style: "lined" })).toEqual({
       ...defaults,
       chip_style: "lined",
@@ -81,12 +85,18 @@ describe("theme section: the style kit", () => {
   })
 
   it("serves the kit to the storefront with the rest of the theme", () => {
-    const theme = { ...defaults, menu_style: "underline", media_ground: "page" } as const
+    const theme = {
+      ...defaults,
+      menu_style: "underline",
+      media_ground: "page",
+      density: "balanced",
+    } as const
     expect(shownTheme(theme, defaults, null)).toMatchObject({
       menu_style: "underline",
       shadow: "float",
       chip_style: "filled",
       media_ground: "page",
+      density: "balanced",
     })
     expect(shownTheme(null, theme, null)).toMatchObject({ menu_style: "underline" })
   })

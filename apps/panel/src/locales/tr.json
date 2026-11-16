@@ -8519,10 +8519,12 @@
         "radiusTerm": "border-radius",
         "radii": {
           "sharp": "Keskin",
+          "crisp": "Belirgin",
+          "gentle": "Ölçülü",
           "soft": "Yumuşak",
           "round": "Yuvarlak"
         },
-        "radiusHint": "Kutular, görseller ve iç köşeler. Yumuşak, Grafit'in 20 / 14 / 10 px köşeleridir; Keskin bunları beşte birine indirir, Yuvarlak bir buçuk katına çıkarır.",
+        "radiusHint": "Kutular, görseller ve iç köşeler. Yumuşak, Grafit'in 20 / 14 / 10 px köşeleridir; Ölçülü bunları 16 / 11 / 8 px'e, Belirgin 12 / 8 / 6 px'e, Keskin 4 / 3 / 2 px'e indirir, Yuvarlak 30 / 21 / 15 px'e çıkarır.",
         "buttons": "Düğmeler",
         "buttonShapes": {
           "pill": "Hap",
@@ -8533,11 +8535,12 @@
         "sectionSpacing": "Bölüm aralığı",
         "sectionSpacingTerm": "section spacing",
         "sectionSpacings": {
+          "tight": "Çok sık",
           "compact": "Sık",
           "normal": "Normal",
           "roomy": "Ferah"
         },
-        "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 96 px); Sık bunu 53 px'e indirir, Ferah 115 px'e çıkarır. Zeminli bölümün iç boşluğu da aynı ölçüden gelir.",
+        "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 96 px); Sık bunu 53 px'e, Çok sık 34 px'e indirir, Ferah 115 px'e çıkarır. Zeminli bölümün iç boşluğu da aynı ölçüden gelir.",
         "surfaceStyle": "Kutu stili",
         "surfaceStyleTerm": "surface style",
         "surfaceStyles": {
@@ -8583,6 +8586,16 @@
               "page": "Sayfa"
             },
             "hint": "Ürün ve kategori fotoğraflarının arkası, liste küçük resimleri dahil. Hafif ton, sayfadan bir ton koyu zemindir; Sayfa, sayfanın kendi zeminidir."
+          },
+          "density": {
+            "label": "Yoğunluk",
+            "term": "density",
+            "steps": {
+              "airy": "Ferah",
+              "balanced": "Dengeli",
+              "compact": "Sıkı"
+            },
+            "hint": "Bölüm başlığı ile içeriği, ürün ızgarasının sütun ve satır araları ve alt bilgiye kalan boşluk birlikte değişir; bölümler arası boşluk Bölüm aralığı'ndadır. Ferah, temanın kendi ölçüsüdür (geniş ekranda başlık altı 40 px, ızgara 24 × 40 px, alt bilgiye 64 px); Dengeli bunları 24 px, 20 × 28 px ve 48 px'e, Sıkı 16 px, 16 × 20 px ve 32 px'e indirir."
           }
         },
         "card": "Ürün kartı",

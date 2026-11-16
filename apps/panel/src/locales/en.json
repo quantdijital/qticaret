@@ -8519,10 +8519,12 @@
         "radiusTerm": "border-radius",
         "radii": {
           "sharp": "Sharp",
+          "crisp": "Crisp",
+          "gentle": "Gentle",
           "soft": "Soft",
           "round": "Round"
         },
-        "radiusHint": "Boxes, pictures and inner corners. Soft is Grafit's 20 / 14 / 10 px; Sharp cuts them to a fifth, Round makes them one and a half times as large.",
+        "radiusHint": "Boxes, pictures and inner corners. Soft is Grafit's 20 / 14 / 10 px; Gentle brings them to 16 / 11 / 8 px, Crisp to 12 / 8 / 6 px, Sharp to 4 / 3 / 2 px, Round makes them 30 / 21 / 15 px.",
         "buttons": "Buttons",
         "buttonShapes": {
           "pill": "Pill",
@@ -8533,11 +8535,12 @@
         "sectionSpacing": "Section spacing",
         "sectionSpacingTerm": "section spacing",
         "sectionSpacings": {
+          "tight": "Tight",
           "compact": "Compact",
           "normal": "Normal",
           "roomy": "Roomy"
         },
-        "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (96 px on a wide screen); Compact brings it to 53 px, Roomy to 115 px. A section's room inside its background comes from the same scale.",
+        "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (96 px on a wide screen); Compact brings it to 53 px, Tight to 34 px, Roomy to 115 px. A section's room inside its background comes from the same scale.",
         "surfaceStyle": "Box style",
         "surfaceStyleTerm": "surface style",
         "surfaceStyles": {
@@ -8583,6 +8586,16 @@
               "page": "Page"
             },
             "hint": "Behind product and category photos, list thumbnails included. Light tone is a tone darker than the page; Page is the page's own ground."
+          },
+          "density": {
+            "label": "Density",
+            "term": "density",
+            "steps": {
+              "airy": "Airy",
+              "balanced": "Balanced",
+              "compact": "Compact"
+            },
+            "hint": "The room between a section's heading and its content, between a product grid's columns and rows, and above the footer change together; the space between sections is Section spacing's. Airy is the theme's own (on a wide screen 40 px under a heading, a 24 × 40 px grid, 64 px above the footer); Balanced brings them to 24 px, 20 × 28 px and 48 px, Compact to 16 px, 16 × 20 px and 32 px."
           }
         },
         "card": "Product card",

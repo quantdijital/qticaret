@@ -162,6 +162,7 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
     term: `${C}.sectionSpacingTerm`,
     options: named(SECTION_SPACINGS, "sectionSpacings"),
   },
+  density: kitField("density", "surfaces"),
   "product_card.ratio": {
     group: "card",
     label: `${C}.ratio`,

@@ -64,6 +64,7 @@ export const ATOLYE_TONES: Readonly<Record<ThemeBackground, ToneSet>> = {
  * rhythm; `roomy` opens it to 144 px.
  */
 export const ATOLYE_SECTION_SCALE: Readonly<Record<SectionSpacing, string | null>> = {
+  tight: "0.35",
   compact: "0.55",
   normal: null,
   roomy: "1.2",

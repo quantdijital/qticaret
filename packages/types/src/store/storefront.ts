@@ -100,7 +100,7 @@ export interface StoreThemeSettings extends StyleKit {
     background: ThemeBackground
   }
   typography: { heading: ThemeHeadingFont; body: ThemeBodyFont }
-  radius: "sharp" | "soft" | "round"
+  radius: RadiusStep
   product_card: {
     ratio: "4:5" | "1:1" | "3:4"
     show_brand: boolean
@@ -154,12 +154,23 @@ export const SURFACE_STYLES = ["filled", "lined"] as const
 export type SurfaceStyle = (typeof SURFACE_STYLES)[number]
 
 /**
- * The gap between sections, theme-wide (Tezgâh audit K-11, as Shopify
- * themes' section spacing): `compact` a dense catalog's, `normal` the
- * theme's own (the default, today's gaps), `roomy` a showcase's. The
- * theme maps each onto its own scale; the backend mirrors the list.
+ * The corners, sharpest first (adr/0062 §8): the theme scales its three
+ * corners (a tile's, a photo's, an inner part's) by each step's factor;
+ * `soft` is the theme's own and the default. `crisp` and `gentle`, between
+ * `sharp` and `soft`, came later (adr/0067 Ek 2026-11-16); the others keep
+ * their meaning. The backend mirrors the list.
  */
-export const SECTION_SPACINGS = ["compact", "normal", "roomy"] as const
+export const RADIUS_STEPS = ["sharp", "crisp", "gentle", "soft", "round"] as const
+export type RadiusStep = (typeof RADIUS_STEPS)[number]
+
+/**
+ * The gap between sections, theme-wide (Tezgâh audit K-11, as Shopify
+ * themes' section spacing), closest first: `tight` the closest (adr/0067
+ * Ek 2026-11-16), `compact` a dense catalog's, `normal` the theme's own
+ * (the default, today's gaps), `roomy` a showcase's. The theme maps each
+ * onto its own scale; the backend mirrors the list.
+ */
+export const SECTION_SPACINGS = ["tight", "compact", "normal", "roomy"] as const
 export type SectionSpacing = (typeof SECTION_SPACINGS)[number]
 
 /**

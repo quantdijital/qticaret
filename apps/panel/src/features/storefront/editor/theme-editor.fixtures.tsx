@@ -55,6 +55,7 @@ export const THEME: ThemeSettings = {
   shadow: "float",
   chip_style: "filled",
   media_ground: "well",
+  density: "airy",
 }
 
 export const DOC: LayoutDocument = {
