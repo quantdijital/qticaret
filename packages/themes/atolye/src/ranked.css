@@ -47,6 +47,16 @@
       --rank-figure: 2.625rem;
     }
   }
+  @media (min-width: 64rem) {
+    .gf-rank[data-size="line"] {
+      --rank-figure: 4rem;
+      --rank-columns: 5rem 7.5rem minmax(0, 1fr) auto;
+      --rank-gap: var(--space-lg);
+    }
+    .gf-rank[data-size="line"][data-wide] {
+      --rank-figure: 3.5rem;
+    }
+  }
 
   /* Large: the figure about half the photograph's height, the two-figure "10" narrower */
   .gf-rank[data-size="lead"] {
@@ -57,7 +67,7 @@
     --rank-gap: 0;
     --rank-figure-align: start;
     --rank-figure-nums: lining-nums;
-    --rank-tuck: -0.14em;
+    --rank-tuck: -0.04em;
     --rank-title: var(--text-title);
     --rank-acts-position: absolute;
     --rank-acts-shadow: var(--shadow-float);
@@ -74,7 +84,7 @@
       --rank-gap: 0;
       --rank-figure-align: start;
       --rank-figure-nums: lining-nums;
-      --rank-tuck: -0.14em;
+      --rank-tuck: -0.04em;
       --rank-title: var(--text-md);
       --rank-acts-position: absolute;
       --rank-acts-shadow: var(--shadow-float);

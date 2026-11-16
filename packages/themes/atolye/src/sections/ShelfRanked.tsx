@@ -18,7 +18,7 @@ type Size = "lead" | "row" | "line"
 const SIZES: Readonly<Record<Size, string>> = {
   lead: "(min-width: 1440px) 440px, (min-width: 768px) 34vw, 78vw",
   row: "(min-width: 1440px) 320px, (min-width: 1024px) 23vw, (min-width: 768px) 96px, 72px",
-  line: "(min-width: 768px) 96px, 72px",
+  line: "(min-width: 1024px) 120px, (min-width: 768px) 96px, 72px",
 }
 
 /**
