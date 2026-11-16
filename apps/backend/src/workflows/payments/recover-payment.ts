@@ -16,7 +16,9 @@ import type PaymentRecoveryModuleService from "../../modules/payment-recovery/se
 import { MAX_REFUND_ATTEMPTS } from "../../modules/payment-recovery/service"
 import { recoverIyzicoPayment } from "./recover-iyzico"
 import { recoverPaytrPayment } from "./recover-paytr"
+import { alertPaymentIssue } from "./issue-alert"
 import { orderOfRecovery } from "./recovery-order"
+import type { OrderCheck } from "./recovery-order"
 
 type Recovery = Awaited<ReturnType<PaymentRecoveryModuleService["retrievePaymentRecovery"]>>
 
@@ -59,31 +61,37 @@ async function report(
 }
 
 /**
- * A payment recorded to be given back that belongs to a placed order
- * after all (finding 2026-11-16): never refunded, out of the queue for
- * good, the shop told (ids and the amount only).
+ * A payment recorded to be given back that a placed order stands in the
+ * way of (finding 2026-11-16), never refunded here, the shop told (ids and
+ * the amount only). The order holds it: out of the queue for good
+ * (`order_exists`). The order holds another payment of the cart (likely
+ * paid twice, review N2): left to the shop to check and give back by hand.
  */
 async function stopForOrder(
   container: MedusaContainer,
   recovery: Recovery,
-  orderId: string | null
+  check: { kind: "held" | "beside"; order_id: string }
 ): Promise<RecoveryOutcome> {
-  await container
-    .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
-    .markOrderExists(recovery.id)
+  const service = container.resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
+  const held = check.kind === "held"
+  if (held) {
+    await service.markOrderExists(recovery.id)
+  } else {
+    await service.markAttempt(recovery.id, MAX_REFUND_ATTEMPTS, "payment_beside_order")
+  }
   logger.error({
-    event: "payments.orphan_order_exists",
+    event: held ? "payments.orphan_order_exists" : "payments.orphan_beside_order",
     recoveryId: recovery.id,
     provider: recovery.provider,
     reference: recovery.reference,
     cartId: recovery.cart_id,
-    orderId,
+    orderId: check.order_id,
   })
   await container
     .resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
     .record({
       kind: "system",
-      action: "payments.orphan_refund_stopped",
+      action: held ? "payments.orphan_refund_stopped" : "payments.orphan_refund_held",
       resource_type: "payment_recovery",
       resource_id: recovery.id,
       outcome: 409,
@@ -93,27 +101,39 @@ async function stopForOrder(
         amount: recovery.amount,
         reason: recovery.reason,
         cart_id: recovery.cart_id,
-        order_id: orderId,
+        order_id: check.order_id,
       },
     })
     .catch((error: unknown) => {
       logger.warn({ event: "payments.recovery_audit_failed", err: errorSummary(error) })
     })
-  await alertRecovery(container, "orphan_order_exists", { ...recovery, order_id: orderId }).catch(
-    (error: unknown) => {
+  if (held) {
+    await alertRecovery(container, "orphan_order_exists", {
+      ...recovery,
+      order_id: check.order_id,
+    }).catch((error: unknown) => {
       logger.warn({ event: "payments.recovery_alert_failed", err: errorSummary(error) })
-    }
-  )
-  return "order_exists"
+    })
+    return "order_exists"
+  }
+  // Never fails what raised it
+  await alertPaymentIssue(container, {
+    issue: "payment_beside_order",
+    provider: recovery.provider,
+    reference: recovery.reference,
+    cart_id: recovery.cart_id,
+    amount: recovery.amount,
+  })
+  return "failed"
 }
 
 /**
  * Gives back one payment that became no order (adr/0026 §6), each provider
- * its own way (`recover-paytr.ts`, `recover-iyzico.ts`). A payment found
- * to belong to a placed order is never given back; when that cannot be
- * read, nothing is given back this run (fail closed, tried again). A
- * failure is tried again later; one that could give money back twice is
- * left to the shop.
+ * its own way (`recover-paytr.ts`, `recover-iyzico.ts`). A placed order in
+ * the way stops it (`stopForOrder`); when that cannot be read, nothing is
+ * given back this run (fail closed), counted as a try so that one never
+ * readable ends with the shop. A failure is tried again later; one that
+ * could give money back twice is left to the shop.
  */
 export async function refundRecovery(
   container: MedusaContainer,
@@ -123,20 +143,6 @@ export async function refundRecovery(
   const recovery = await service.retrievePaymentRecovery(recoveryId)
   if (recovery.status !== "pending" || !REFUNDED_HERE.includes(recovery.provider)) {
     return "skipped"
-  }
-  let placed: { order_id: string | null } | null
-  try {
-    placed = await orderOfRecovery(container, recovery)
-  } catch (error) {
-    logger.warn({
-      event: "payments.recovery_order_check_failed",
-      recoveryId: recovery.id,
-      err: errorSummary(error),
-    })
-    return "pending"
-  }
-  if (placed) {
-    return stopForOrder(container, recovery, placed.order_id)
   }
   const fail = async (code: string): Promise<RecoveryOutcome> => {
     const status = await service.markAttempt(recovery.id, recovery.attempts, code)
@@ -154,6 +160,23 @@ export async function refundRecovery(
     await service.markAttempt(recovery.id, MAX_REFUND_ATTEMPTS, code)
     await report(container, { ...recovery, error_code: code }, "failed")
     return "failed"
+  }
+  let check: OrderCheck
+  try {
+    check = await orderOfRecovery(container, recovery)
+  } catch (error) {
+    logger.warn({
+      event: "payments.recovery_order_check_failed",
+      recoveryId: recovery.id,
+      err: errorSummary(error),
+    })
+    return fail("order_check_failed")
+  }
+  if (check?.kind === "unread") {
+    return fail("order_unread")
+  }
+  if (check) {
+    return stopForOrder(container, recovery, check)
   }
   const recover = recovery.provider === "iyzico" ? recoverIyzicoPayment : recoverPaytrPayment
   return recover(container, recovery, { fail, giveUp, done })

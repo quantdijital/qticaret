@@ -12,49 +12,64 @@ export interface RecoveryRow {
   cart_id: string | null
 }
 
+/**
+ * What a placed order means for an orphan's refund (finding 2026-11-16):
+ * - `held`: the order holds this very payment: never given back;
+ * - `beside`: the cart "could not be completed", yet is an order paid with
+ *   another payment: likely paid twice; left to the shop, not given back
+ *   on its own (review N2);
+ * - `unread`: the cart is marked completed, its order cannot be read:
+ *   nothing given back now, tried again.
+ * Null: no order stands in the way (none, or an order paid otherwise for
+ * a payment replaced or for the wrong amount: money taken for nothing).
+ */
+export type OrderCheck =
+  | { kind: "held"; order_id: string }
+  | { kind: "beside"; order_id: string }
+  | { kind: "unread" }
+  | null
+
 /** Our payment session behind an orphan's reference, where the reference names it (PayTR). */
 export const sessionOfRecovery = (recovery: Pick<RecoveryRow, "provider" | "reference">) =>
   recovery.provider === "paytr" ? paytrSessionIdOf(recovery.reference) : null
 
-/**
- * Whether the cart's placed order stops the orphan's refund (finding
- * 2026-11-16). A cart that "could not be completed" yet is an order was
- * misjudged: never given back, whichever payment the order holds (one it
- * does not hold is the shop's to look at, review N2). Any other orphan of
- * the cart is stopped only when the order holds its payment: a payment
- * replaced or for the wrong amount beside an order paid otherwise is
- * still money taken for nothing, and goes back.
- */
-export function orderStopsRefund(recovery: RecoveryRow, placed: PlacedOrder): boolean {
-  if (recovery.reason === "completion_failed") {
-    return true
+/** The orphan against its cart's placed order (see `OrderCheck`). */
+export function orderCheckOf(recovery: RecoveryRow, placed: PlacedOrder | null): OrderCheck {
+  if (!placed) {
+    return null
+  }
+  if (!placed.order_id) {
+    return { kind: "unread" }
   }
   const sessionId = sessionOfRecovery(recovery)
-  return (
+  if (
     placed.references.includes(recovery.reference) ||
     (sessionId !== null && placed.session_ids.includes(sessionId))
-  )
+  ) {
+    return { kind: "held", order_id: placed.order_id }
+  }
+  return recovery.reason === "completion_failed"
+    ? { kind: "beside", order_id: placed.order_id }
+    : null
 }
 
 /**
- * The placed order an orphan's payment belongs to, before it is given
- * back: by its cart, then by its payment session (PayTR's reference names
- * it; a session gone with its cart unknown is found this way). `found`
- * with a null order: the cart is marked completed, its order unread; still
- * never refunded. Throws when it cannot read: the caller refunds nothing
- * then (fail closed).
+ * The placed order in the way of an orphan's refund: by its cart, then by
+ * its payment session (PayTR's reference names it; a session gone with its
+ * cart unknown is found this way). Throws when it cannot read: the caller
+ * gives nothing back then (fail closed).
  */
 export async function orderOfRecovery(
   container: Container,
   recovery: RecoveryRow
-): Promise<{ order_id: string | null } | null> {
+): Promise<OrderCheck> {
   if (recovery.cart_id) {
-    const placed = await placedOrderOfCart(container, recovery.cart_id)
-    if (placed && orderStopsRefund(recovery, placed)) {
-      return { order_id: placed.order_id }
+    const check = orderCheckOf(recovery, await placedOrderOfCart(container, recovery.cart_id))
+    if (check) {
+      return check
     }
   }
   const sessionId = sessionOfRecovery(recovery)
   const orderId = sessionId ? await orderOfSession(container, sessionId) : null
-  return orderId ? { order_id: orderId } : null
+  return orderId ? { kind: "held", order_id: orderId } : null
 }

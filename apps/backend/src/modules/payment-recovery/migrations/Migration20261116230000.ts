@@ -11,6 +11,8 @@ export class Migration20261116230000 extends Migration {
     )
   }
 
+  // Refused while an `order_exists` row stands: on purpose, no status is safe to fold it into
+  // (`failed` asks the shop to refund a placed order's money by hand)
   override async down(): Promise<void> {
     this.addSql(
       `alter table if exists "payment_recovery" drop constraint if exists "payment_recovery_status_check";`

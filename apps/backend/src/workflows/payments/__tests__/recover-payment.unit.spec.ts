@@ -22,6 +22,10 @@ const recoverPaytrPayment = jest.fn<Promise<string>, unknown[]>()
 jest.mock("../recover-paytr", () => ({
   recoverPaytrPayment: (...args: unknown[]) => recoverPaytrPayment(...args),
 }))
+const alertPaymentIssue = jest.fn<Promise<void>, unknown[]>()
+jest.mock("../issue-alert", () => ({
+  alertPaymentIssue: (...args: unknown[]) => alertPaymentIssue(...args),
+}))
 const recoverIyzicoPayment = jest.fn<Promise<string>, unknown[]>()
 jest.mock("../recover-iyzico", () => ({
   recoverIyzicoPayment: (...args: unknown[]) => recoverIyzicoPayment(...args),
@@ -121,11 +125,42 @@ describe("refundRecovery never refunds a placed order's payment (finding 2026-11
 
   it("stops an iyzico orphan the same way, before any cancel or refund", async () => {
     const { container } = containerWith(row({ provider: "iyzico", reference: "27000001" }), {
-      cart: cartOrdered("payses_01JIYZICO0000000000000000", "x"),
+      cart: {
+        completed_at: "2026-11-16T10:00:00Z",
+        order: { id: "order_01" },
+        payment_collection: {
+          payments: [{ payment_session_id: "payses_01JIYZICO", data: { payment_id: "27000001" } }],
+        },
+      },
     })
 
     expect(await refundRecovery(container, "precov_01")).toBe("order_exists")
     expect(recoverIyzicoPayment).not.toHaveBeenCalled()
+  })
+
+  it("leaves a 'could not complete' payment beside an order paid otherwise to the shop", async () => {
+    const { container, service } = containerWith(row(), {
+      cart: cartOrdered("payses_01JOTHER00000000000000000", "payses01JOTHER00000000000000000"),
+    })
+
+    expect(await refundRecovery(container, "precov_01")).toBe("failed")
+    expect(recoverPaytrPayment).not.toHaveBeenCalled()
+    expect(service.markOrderExists).not.toHaveBeenCalled()
+    expect(service.markAttempt).toHaveBeenCalledWith("precov_01", 10, "payment_beside_order")
+    expect(alertPaymentIssue).toHaveBeenCalledWith(
+      container,
+      expect.objectContaining({ issue: "payment_beside_order", reference: MERCHANT_OID })
+    )
+  })
+
+  it("waits, counting a try, on a cart marked completed whose order cannot be read", async () => {
+    const { container, service } = containerWith(row(), {
+      cart: { completed_at: "2026-11-16T10:00:00Z", order: null },
+    })
+
+    expect(await refundRecovery(container, "precov_01")).toBe("pending")
+    expect(recoverPaytrPayment).not.toHaveBeenCalled()
+    expect(service.markAttempt).toHaveBeenCalledWith("precov_01", 0, "order_unread")
   })
 
   it("finds the order by PayTR's session when the orphan names no cart", async () => {
@@ -138,12 +173,12 @@ describe("refundRecovery never refunds a placed order's payment (finding 2026-11
     expect(recoverPaytrPayment).not.toHaveBeenCalled()
   })
 
-  it("refunds nothing this run when the order cannot be read (fail closed)", async () => {
+  it("refunds nothing this run when the order cannot be read (fail closed), counting a try", async () => {
     const { container, service } = containerWith(row(), { fail: true })
 
     expect(await refundRecovery(container, "precov_01")).toBe("pending")
     expect(recoverPaytrPayment).not.toHaveBeenCalled()
-    expect(service.markAttempt).not.toHaveBeenCalled()
+    expect(service.markAttempt).toHaveBeenCalledWith("precov_01", 0, "order_check_failed")
     expect(service.markOrderExists).not.toHaveBeenCalled()
   })
 

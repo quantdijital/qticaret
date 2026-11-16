@@ -18,7 +18,7 @@ export type PaymentVerdict =
       provider?: string
       reference?: string
       /** Our payment session the money was taken for: a placed order must hold it (review N2). */
-      session_id?: string
+      session_id: string
       /** How many times the provider's notice was taken up, this one included. */
       attempts?: number
     }

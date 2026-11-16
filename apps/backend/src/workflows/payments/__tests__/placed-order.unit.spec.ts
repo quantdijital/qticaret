@@ -1,5 +1,5 @@
 import { holdsSession, paytrSessionIdOf, placedOrderOf } from "../placed-order"
-import { orderStopsRefund, sessionOfRecovery } from "../recovery-order"
+import { orderCheckOf, sessionOfRecovery } from "../recovery-order"
 import { answeredBefore } from "../steps/iyzico-callback"
 import type { IyzicoTarget } from "../steps/iyzico-callback"
 
@@ -57,10 +57,6 @@ describe("holdsSession (review N2)", () => {
     expect(holdsSession(placed([SESSION]), OTHER)).toBe(false)
     expect(holdsSession(placed([]), OTHER)).toBe(false)
   })
-
-  it("takes a notice that names no session as the order's own", () => {
-    expect(holdsSession(placed([SESSION]), undefined)).toBe(true)
-  })
 })
 
 describe("paytrSessionIdOf", () => {
@@ -76,7 +72,7 @@ describe("paytrSessionIdOf", () => {
   })
 })
 
-describe("orderStopsRefund (finding 2026-11-16)", () => {
+describe("orderCheckOf (finding 2026-11-16, security review round 1)", () => {
   const orphan = (reason: "session_gone" | "amount_mismatch" | "completion_failed") => ({
     provider: "paytr",
     reference: MERCHANT_OID,
@@ -84,29 +80,40 @@ describe("orderStopsRefund (finding 2026-11-16)", () => {
     cart_id: "cart_01",
   })
 
-  it("stops a cart that 'could not complete' yet is an order, whichever payment it holds", () => {
-    expect(orderStopsRefund(orphan("completion_failed"), placed([SESSION]))).toBe(true)
-    expect(orderStopsRefund(orphan("completion_failed"), placed([OTHER]))).toBe(true)
-    expect(orderStopsRefund(orphan("completion_failed"), { ...placed([]), order_id: null })).toBe(
-      true
-    )
-  })
-
   it("stops any orphan whose payment the order holds, by session or by reference", () => {
-    expect(orderStopsRefund(orphan("amount_mismatch"), placed([SESSION]))).toBe(true)
+    expect(orderCheckOf(orphan("completion_failed"), placed([SESSION]))).toEqual({
+      kind: "held",
+      order_id: "order_01",
+    })
+    expect(orderCheckOf(orphan("amount_mismatch"), placed([SESSION]))).toEqual({
+      kind: "held",
+      order_id: "order_01",
+    })
     expect(
-      orderStopsRefund(
-        { provider: "iyzico", reference: "27000001", reason: "amount_mismatch", cart_id: "c" },
+      orderCheckOf(
+        { provider: "iyzico", reference: "27000001", reason: "completion_failed", cart_id: "c" },
         placed([OTHER], ["27000001"])
       )
-    ).toBe(true)
+    ).toEqual({ kind: "held", order_id: "order_01" })
   })
 
-  it("lets a payment beside an order paid otherwise go back", () => {
-    expect(orderStopsRefund(orphan("amount_mismatch"), placed([OTHER], ["payses01OTHER"]))).toBe(
-      false
-    )
-    expect(orderStopsRefund(orphan("session_gone"), placed([OTHER]))).toBe(false)
+  it("leaves a 'could not complete' payment beside an order paid otherwise to the shop", () => {
+    expect(orderCheckOf(orphan("completion_failed"), placed([OTHER], ["payses01OTHER"]))).toEqual({
+      kind: "beside",
+      order_id: "order_01",
+    })
+  })
+
+  it("waits on a cart marked completed whose order cannot be read", () => {
+    expect(orderCheckOf(orphan("completion_failed"), { ...placed([]), order_id: null })).toEqual({
+      kind: "unread",
+    })
+  })
+
+  it("lets a replaced or mismatched payment beside an order paid otherwise go back", () => {
+    expect(orderCheckOf(orphan("amount_mismatch"), placed([OTHER], ["payses01OTHER"]))).toBeNull()
+    expect(orderCheckOf(orphan("session_gone"), placed([OTHER]))).toBeNull()
+    expect(orderCheckOf(orphan("completion_failed"), null)).toBeNull()
   })
 })
 

@@ -2,18 +2,20 @@ import { fakePaytrAccount, startFakePaytr } from "@qticaret/testing"
 import type { FakePaytr } from "@qticaret/testing"
 import { HOSTED_CHECKOUT } from "../../../lib/payments/checkout"
 import type { HostedCheckout } from "../../../lib/payments/checkout"
-import { storedPaymentSettings, storedPaytrAccount } from "../account"
+import { isRecordedForRefund, storedPaymentSettings, storedPaytrAccount } from "../account"
 import PaytrProviderService from "../service"
 
 jest.mock("../account", () => ({
   storedPaytrAccount: jest.fn(),
   storedPaymentSettings: jest.fn(),
+  isRecordedForRefund: jest.fn(),
 }))
 
 // A made-up account, fresh per run; the fake server checks every signature with it
 const account = fakePaytrAccount()
 const stored = jest.mocked(storedPaytrAccount)
 const settings = jest.mocked(storedPaymentSettings)
+const recorded = jest.mocked(isRecordedForRefund)
 
 const checkout: HostedCheckout = {
   email: "ayse.yilmaz@example.com",
@@ -75,6 +77,7 @@ describe("PayTR payment provider (adr/0026)", () => {
 
   beforeEach(() => {
     stored.mockResolvedValue({ ...account, testMode: true })
+    recorded.mockResolvedValue(false)
     settings.mockResolvedValue({
       installments_enabled: true,
       max_installment: 0,
@@ -176,6 +179,21 @@ describe("PayTR payment provider (adr/0026)", () => {
     expect(await provider.getPaymentStatus({ data: { ...data, test_mode: false } })).toMatchObject({
       status: "error",
     })
+  })
+
+  it("never authorizes a payment recorded to be given back, or given back already", async () => {
+    const data = (await start({ session_id: "payses_01REC", checkout })).data ?? {}
+    fake.pay("payses01REC")
+
+    recorded.mockResolvedValue(true)
+    const whileRecorded = await provider.authorizePayment({ data })
+    recorded.mockResolvedValue(false)
+    fake.payments.get("payses01REC")?.refunds.push({ amount: 100, referenceNo: null })
+    const refunded = await provider.authorizePayment({ data })
+
+    expect(whileRecorded).toMatchObject({ status: "error" })
+    expect(recorded).toHaveBeenCalledWith("payses01REC")
+    expect(refunded).toMatchObject({ status: "error" })
   })
 
   it("lets a session go without asking PayTR, and wants a new start for a new amount", async () => {

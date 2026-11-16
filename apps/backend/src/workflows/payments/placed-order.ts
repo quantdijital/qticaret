@@ -74,11 +74,10 @@ export async function placedOrderOfCart(
 
 /**
  * Whether the order holds the notice's payment (review N2): its session is
- * one the order's payments came from. A notice that names no session is
- * taken as the order's own.
+ * one the order's payments came from.
  */
-export const holdsSession = (placed: PlacedOrder, sessionId: string | undefined): boolean =>
-  sessionId === undefined || placed.session_ids.includes(sessionId)
+export const holdsSession = (placed: PlacedOrder, sessionId: string): boolean =>
+  placed.session_ids.includes(sessionId)
 
 /** Our payment session behind PayTR's reference (`payses01…` → `payses_01…`); null if not ours. */
 export const paytrSessionIdOf = (merchantOid: string): string | null =>

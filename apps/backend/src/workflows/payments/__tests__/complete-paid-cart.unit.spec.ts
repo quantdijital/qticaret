@@ -104,6 +104,19 @@ describe("completePaidCart never gives back a placed order's money (finding 2026
       safeMessage: "payments.completed_cart_without_order",
     })
     expect(completeRun).not.toHaveBeenCalled()
+    expect(alertPaymentIssue).not.toHaveBeenCalled()
+  })
+
+  it("tells the shop once such a cart has come back many times", async () => {
+    const { container } = containerReading({ completed_at: new Date(), order: null })
+
+    await expect(completePaidCart(container, { ...verdict, attempts: 5 })).rejects.toMatchObject({
+      safeMessage: "payments.completed_cart_without_order",
+    })
+    expect(alertPaymentIssue).toHaveBeenCalledWith(
+      container,
+      expect.objectContaining({ issue: "completion_stuck", cart_id: "cart_01" })
+    )
   })
 
   it("tries again when the cart cannot be read: never a refund", async () => {

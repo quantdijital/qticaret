@@ -43,6 +43,9 @@ async function answeredBefore(
   placed: PlacedOrder
 ): Promise<PaidCartCompletion> {
   if (!placed.order_id) {
+    if ((verdict.attempts ?? 0) >= STUCK_ATTEMPTS) {
+      await stuck(container, verdict)
+    }
     throw new RetryableError("payments.completed_cart_without_order")
   }
   if (!holdsSession(placed, verdict.session_id)) {
