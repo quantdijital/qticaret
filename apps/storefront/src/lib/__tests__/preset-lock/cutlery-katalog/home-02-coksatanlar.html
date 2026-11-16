@@ -10,7 +10,7 @@
             Ürün bölümleri
           </legend>
           <div
-            class="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-2 overflow-x-auto px-(--gutter) py-1"
+            class="gf-rail flex flex-wrap gap-(--space-xs) py-1 lg:-mx-(--gutter) lg:flex-nowrap lg:scroll-px-(--gutter) lg:overflow-x-auto lg:px-(--gutter)"
           >
             <label class="gf-tab">
               <input type="radio" name="bolum-coksatanlar-raf" checked="" value="0"/>
@@ -29,14 +29,9 @@
         <div data-panel="0">
           <div>
             <section aria-labelledby="bolum-coksatanlar" class="flex flex-col gap-(--head-gap-s)">
-              <div class="gf-tab-aside flex min-h-11 items-center justify-end gap-4">
-                <h2 id="bolum-coksatanlar" class="sr-only">
-                  Çok satanlar
-                </h2>
-                <a href="/magaza" class="gf-link shrink-0 text-sm lg:text-md">
-                  Tüm ürünler
-                </a>
-              </div>
+              <h2 id="bolum-coksatanlar" class="sr-only">
+                Çok satanlar
+              </h2>
               <ul
                 data-columns="5"
                 class="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:grid-cols-[repeat(4,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]"
@@ -662,20 +657,20 @@
                   </article>
                 </li>
               </ul>
+              <div class="gf-tab-aside flex min-h-11 items-center justify-end gap-4">
+                <a href="/magaza" class="gf-link shrink-0 text-sm lg:text-md">
+                  Tüm ürünler
+                </a>
+              </div>
             </section>
           </div>
         </div>
         <div data-panel="1">
           <div data-qs="yenigelenler">
             <section aria-labelledby="bolum-yenigelenler" class="flex flex-col gap-(--head-gap-s)">
-              <div class="gf-tab-aside flex min-h-11 items-center justify-end gap-4">
-                <h2 id="bolum-yenigelenler" class="sr-only">
-                  Yeni gelenler
-                </h2>
-                <a href="/magaza" class="gf-link shrink-0 text-sm lg:text-md">
-                  Tüm ürünler
-                </a>
-              </div>
+              <h2 id="bolum-yenigelenler" class="sr-only">
+                Yeni gelenler
+              </h2>
               <ul
                 data-columns="5"
                 class="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:grid-cols-[repeat(4,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]"
@@ -1301,17 +1296,20 @@
                   </article>
                 </li>
               </ul>
+              <div class="gf-tab-aside flex min-h-11 items-center justify-end gap-4">
+                <a href="/magaza" class="gf-link shrink-0 text-sm lg:text-md">
+                  Tüm ürünler
+                </a>
+              </div>
             </section>
           </div>
         </div>
         <div data-panel="2">
           <div data-qs="kilicrafi">
             <section aria-labelledby="bolum-kilicrafi" class="flex flex-col gap-(--head-gap-s)">
-              <div class="gf-tab-aside flex min-h-11 items-center justify-end gap-4">
-                <h2 id="bolum-kilicrafi" class="sr-only">
-                  Kılıç Modelleri
-                </h2>
-              </div>
+              <h2 id="bolum-kilicrafi" class="sr-only">
+                Kılıç Modelleri
+              </h2>
               <ul
                 data-columns="5"
                 class="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:grid-cols-[repeat(4,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]"
