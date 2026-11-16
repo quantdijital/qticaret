@@ -78,6 +78,10 @@
       "file": "shadow.css"
     },
     {
+      "sha256": "3387302b63b02d13e5cd9045eea950a64220ca11ecb9ced92c948583ee901c7e",
+      "file": "shelf-strips.css"
+    },
+    {
       "sha256": "f2535c467207a43b88f19881bb32353bd8d1092ba4160a8987d40952f5fe57de",
       "file": "slider.css"
     },
@@ -86,11 +90,11 @@
       "file": "strip-gallery.css"
     },
     {
-      "sha256": "4f4c0bd4d0fabf9660e738a6a4d966fc7aafddd4a2abc03305dbf88dd00684d2",
+      "sha256": "e33896f029de6a7de4023b8de4bb083aa3762fef61eb176537d9016d1665a7de",
       "file": "strips.css"
     },
     {
-      "sha256": "f7ce8b4664836b780042f4e25230a44ae6e530603f26c46cf8400f7fcd01d65b",
+      "sha256": "fc370fe60146a6f2d3c01d598334fbcb562fb700afd13213f6b55cbb208de07f",
       "file": "styles.css"
     },
     {
