@@ -46,5 +46,23 @@ moduleIntegrationTestRunner<PaymentRecoveryModuleService>({
       expect(status).toBe("failed")
       expect((await service.retrievePaymentRecovery(id)).error_code).toBe("refund_locked")
     })
+
+    it("takes a payment of a placed order out of the refund queue for good", async () => {
+      const { id } = await service.recordOrphan({
+        ...orphan,
+        reference: "payses01PLACED000000000000000",
+        reason: "completion_failed",
+      })
+
+      await service.markOrderExists(id)
+      const pending = await service.listPaymentRecoveries({ status: "pending" })
+
+      expect(await service.retrievePaymentRecovery(id)).toMatchObject({
+        status: "order_exists",
+        error_code: "order_exists",
+        refunded_at: null,
+      })
+      expect(pending.map((row) => row.id)).not.toContain(id)
+    })
   },
 })
