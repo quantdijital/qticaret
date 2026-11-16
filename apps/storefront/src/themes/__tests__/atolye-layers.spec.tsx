@@ -147,14 +147,13 @@ describe("every portal of the theme goes through its layers", () => {
     expect(bare).toEqual([])
   })
 
-  it("draws the six layers through LayerPortal", () => {
+  it("draws the five layers through LayerPortal", () => {
     const users = sourceFiles(THEME_SRC)
       .filter((file) => readFileSync(file, "utf8").includes("<LayerPortal>"))
       .map((file) => relative(THEME_SRC, file))
       .sort()
     expect(users).toEqual([
       "frame/QuickViewDialog.tsx",
-      "frame/SearchDrop.tsx",
       "frame/Sheet.tsx",
       "product/Installments.tsx",
       "product/Write.tsx",

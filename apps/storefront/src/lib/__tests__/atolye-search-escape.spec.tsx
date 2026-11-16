@@ -5,16 +5,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { t } from "@/lib/i18n"
 import { shopFixture } from "@/test/theme-render"
 // The theme's own parts: it exports pages, not these
-import { SearchDrop } from "../../../../../packages/themes/atolye/src/frame/SearchDrop"
-import { SearchLink } from "../../../../../packages/themes/atolye/src/frame/SearchLink"
+import { PhoneSearch } from "../../../../../packages/themes/atolye/src/frame/PhoneSearch"
 import { SearchToggle } from "../../../../../packages/themes/atolye/src/frame/SearchToggle"
 import { searchOf } from "../../../../../packages/themes/atolye/src/frame/header-words"
 
 /**
- * Escape in a search that opens on a press (adr/0049 Ek 2026-11-15) is the
- * same on every width: the live panel first, then the box (the wide
- * screen's magnifier, the phone's dropping layer), the focus back on what
- * opened it. With no panel, one Escape closes the box.
+ * Escape in a search that opens on a press (adr/0049 Ek 2026-11-15, the
+ * wide screen's magnifier): the live panel first, then the box, the focus
+ * back on what opened it; with no panel, one Escape closes the box. A
+ * phone's search is the pill that is always there (owner 2026-11-16, every
+ * header): Escape closes its panel, then clears its words, the focus kept.
  */
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -64,13 +64,6 @@ describe("Escape in a search that opens on a press", () => {
     return element
   }
 
-  /** Radix gives the focus back a task later. */
-  const settle = async () => {
-    await act(async () => {
-      await new Promise((done) => setTimeout(done, 0))
-    })
-  }
-
   it("on a wide screen: the panel, then the box, back to the magnifier", () => {
     act(() => {
       root.render(
@@ -101,51 +94,26 @@ describe("Escape in a search that opens on a press", () => {
     expect(input.value).toBe("bı")
   })
 
-  it("on a phone: the panel, then the layer, back to Ara; one Escape with no panel", async () => {
+  it("on a phone: the pill's panel first, then its words, the focus kept in it", () => {
     act(() => {
-      root.render(
-        <>
-          <SearchLink className="" current={false}>
-            Ara
-          </SearchLink>
-          <SearchDrop {...search} title={t("search.title")} closeLabel={t("search.close")} />
-        </>
-      )
+      root.render(<PhoneSearch {...search} />)
     })
-    const link = host.querySelector<HTMLAnchorElement>('a[href="/arama"]')
-    if (!link) {
-      throw new Error("no link")
-    }
-    const open = () => {
-      act(() => {
-        link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }))
-      })
-    }
-    open()
     const input = field("arama-dar")
-    expect(document.activeElement).toBe(input)
+    act(() => {
+      input.focus()
+    })
     type(input, "bı")
     expect(input.getAttribute("aria-expanded")).toBe("true")
 
     press(input)
     expect(input.getAttribute("aria-expanded")).toBe("false")
-    expect(document.querySelector("[data-search-drop]")).not.toBeNull()
     expect(document.activeElement).toBe(input)
     expect(input.value).toBe("bı")
 
     press(input)
-    expect(document.querySelector("[data-search-drop]")).toBeNull()
-    await settle()
-    expect(document.activeElement).toBe(link)
-
-    // No panel (nothing typed): one Escape closes the layer
-    open()
-    const again = field("arama-dar")
-    type(again, "")
-    expect(again.getAttribute("aria-expanded")).toBe("false")
-    press(again)
-    expect(document.querySelector("[data-search-drop]")).toBeNull()
-    await settle()
-    expect(document.activeElement).toBe(link)
+    expect(input.value).toBe("")
+    expect(document.activeElement).toBe(input)
+    // Nothing to close: the pill stays, no layer was ever opened
+    expect(document.querySelector("[role=dialog]")).toBeNull()
   })
 })

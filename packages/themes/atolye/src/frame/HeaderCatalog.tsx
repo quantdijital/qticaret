@@ -11,10 +11,8 @@ import { CategoryMenu } from "./CategoryMenu"
 import { HeaderCatalogStrip } from "./HeaderCatalogStrip"
 import { HeaderCatalogTools } from "./HeaderCatalogTools"
 import { MenuSheet } from "./MenuSheet"
+import { PhoneSearch } from "./PhoneSearch"
 import { SearchBox } from "./SearchBox"
-import { SearchDrop } from "./SearchDrop"
-import { SearchDropOpener } from "./SearchDropOpener"
-import { PHONE_SEARCH } from "./SearchLink"
 import { SearchToggle } from "./SearchToggle"
 import { Wordmark } from "./Wordmark"
 import { LABELLED, accountOf, allInOf, searchOf } from "./header-words"
@@ -65,8 +63,9 @@ const NARROW_SEARCH = "lg:[&>[role=search]]:max-w-140"
  * `HeaderCatalogTools`), the top links quiet at the menu bar's end
  * (`topLinksPlace: bar`, `Aisle`'s `links`), the search 35 rem
  * (`searchWidth: narrow`). Every header's `searchStyle: icon` puts a
- * magnifier before the phone that opens the box as wide (`SearchToggle`),
- * and drops a phone's search from the top (`SearchDrop`).
+ * magnifier before the phone that opens the box as wide (`SearchToggle`);
+ * a phone's search is this header's pill under the row in every variant
+ * (`PhoneSearch`, owner 2026-11-16).
  */
 export function HeaderCatalog({
   shop,
@@ -183,8 +182,6 @@ export function HeaderCatalog({
             <span className="tabular text-lg font-extrabold">{shop.contact.phone}</span>
           </a>
         )}
-        {/* The editor's preview draws no bottom bar: a phone's way into the dropping search there */}
-        {icon && shop.editor && <SearchDropOpener label={t("search.open")} className={LABELLED} />}
         {row ? (
           <HeaderCatalogTools
             account={account}
@@ -202,13 +199,7 @@ export function HeaderCatalog({
           </nav>
         )}
       </Container>
-      {icon ? (
-        <SearchDrop {...box} title={t("search.title")} closeLabel={t("search.close")} />
-      ) : (
-        <Container className="pb-2 lg:hidden">
-          <SearchBox {...box} id={PHONE_SEARCH} />
-        </Container>
-      )}
+      <PhoneSearch {...box} />
       <div className="gf-menubar hidden lg:block" data-ground={catalog.menuGround}>
         <Container>
           <div className="relative flex min-h-13 items-center gap-2 py-1">

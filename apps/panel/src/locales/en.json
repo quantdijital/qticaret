@@ -9176,7 +9176,7 @@
         "search_style": {
           "label": "Search look",
           "term": "search",
-          "hint": "Icon: a magnifier on wide screens that opens the search box; on a phone the header shows no box and the bottom bar's “Ara” drops it down from the top.",
+          "hint": "Icon: a magnifier on wide screens that opens the search box. On a phone the search box stands under the header's row in every header.",
           "field": "Box",
           "icon": "Icon, opens on press"
         },

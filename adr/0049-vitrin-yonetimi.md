@@ -853,3 +853,11 @@ Sahip 4, 5, 6 ve 11'i kendisi seçti; teknik ve küçük kararlarda "önerilerle
 - **Backend dar eki:** `GET /store/seo/site` `shop.logos` = `{ light, dark }`, her biri `{ url, width, height }` (mağazanın kendi yüklemesi; ölçü medya kitaplığının ölçtüğü, SVG'de viewBox'tan). Koyu zemin logosuna düşmek ve logonun yerini yüklenmeden ayırmak (CLS) için gerekli; `logo_url` aynı kaldı, yanıt `no-store` kaldı. `logos` yoksa (eski backend) `logo_url`, ölçüsüz.
 - **Panel:** Marka kartında "Logolar üst bilgide ve altbilgide kullanılır." Alt bilgi formunda yeni alan yok.
 - **Hazır görünümler:** veri değişmedi (ayar olmadığı için seçilecek bir şey yok).
+
+### Ek 2026-11-16 (Deniz): telefonda arama her üst bilgide katalog biçimindeki gibi
+
+- **Dayanak:** sahip: "mobil arama davranışını katalog headerdeki ile aynı yap hepsinde. tüm headerlerde katalogdaki gibi çalışsın arama."
+- **Envanter (390 px, aynı ayarlarla):** `standard`, `centered` ve `catalog` biçimleri telefonda aynı arama parçasını çiziyordu (satırın altında 48 px arama hapı, `#arama-dar`); fark yalnız `search_style: icon` seçilince çıkıyordu: hap çizilmiyor, alt çubuktaki "Ara" aramayı yukarıdan düşen bir katman olarak açıyordu (`SearchDrop`, önizlemede satırda büyüteç `SearchDropOpener`). Katalog görünümleri (Katalog, Tezgâh) kutu biçimindedir; sahibin gördüğü fark buydu.
+- **Karar:** telefonda (1024 px altı, üst bilgilerin kendi `lg` eşiği) arama her biçimde ve her arama görünümünde katalog üst bilgisinin parçasıdır: ortak `frame/PhoneSearch.tsx` (satırın altında her zaman duran hap; sayfa aşağı kayınca satır katlanır, hap kalır; alt çubuğun "Ara"sı imleci haba koyar; canlı öneri paneli altında açılır; Escape önce paneli kapatır, sonra yazıyı siler). `search_style: icon` artık yalnız geniş ekranın büyütecidir (`SearchToggle`, değişmedi). Düşen katman ve önizlemenin telefon büyüteci kalktı (`SearchDrop`, `SearchDropOpener`, `qt:open-search`). Masaüstü ve tablet çizimi değişmedi.
+- **§7:** sahibin açık kararıyla yerinde değişti: bütün üst bilgi biçimlerinde telefonda arama katalog biçimindeki gibi. `search_style: icon` seçmiş mağazanın telefon üst bilgisi 57 px'ten 117 px'e çıkar (hap görünür). Hazır görünümlerin hiçbiri `icon` seçmediği için kilit değişmedi.
+- **Panel:** "Arama görünümü" ipucu telefonda kutunun her üst bilgide durduğunu söyler.
