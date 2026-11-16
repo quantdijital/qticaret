@@ -29,9 +29,11 @@ export const SECTION_VARIANTS = {
    * `columns`, two or three lists side by side, each its own title and
    * source, in small cards; `strips` (Ek 2026-11-16), each product one
    * upright strip with slanted seams, its name and price over the foot,
-   * no card (`SHELF_STRIPS_SETTINGS`). Counts by variant: `section-shelf`.
+   * no card (`SHELF_STRIPS_SETTINGS`); `ranked` (Ek 2026-11-16), a ranked
+   * list, each product beside its place in large figures, the first large
+   * or all in one row (`SHELF_RANKED_LAYOUTS`). Counts by variant: `section-shelf`.
    */
-  products: ["grid", "carousel", "featured", "compact", "columns", "strips"],
+  products: ["grid", "carousel", "featured", "compact", "columns", "strips", "ranked"],
   /**
    * A product page's related products (bilesen-denetimi (b) 7): `grid`,
    * today's rows; `carousel`, one row that slides (the scroller kit).

@@ -6,6 +6,8 @@ import type {
   ShelfColumns,
   ShelfPerList,
   ShelfPhoneColumns,
+  ShelfRankedCount,
+  ShelfRankedLayout,
   ShelfRows,
   ShelfStripsCount,
   ShelfStripsSettings,
@@ -48,6 +50,9 @@ export interface ProductsSection extends BodySectionBase {
   strips_line?: ShelfStripsSettings["strips_line"]
   strips_overlap?: ShelfStripsSettings["strips_overlap"]
   strips_dim?: ShelfStripsSettings["strips_dim"]
+  /** `ranked` (Ek 2026-11-16): how many places, and how they stand from 1024 px. */
+  ranked_count?: ShelfRankedCount
+  ranked_layout?: ShelfRankedLayout
 }
 
 /** One more list of a `columns` rail: its title (null: its source's name) and source. */

@@ -1,7 +1,13 @@
 import "server-only"
 import type { ProductSource, StoreProductsSection } from "@qticaret/types"
 import { scrollerSettingsOf } from "@qticaret/types/section-scroller"
-import { shelfLimit, shelfPerListOf, shelfRowsOf, shelfTabsOf } from "@qticaret/types/section-shelf"
+import {
+  shelfLimit,
+  shelfPerListOf,
+  shelfRankedLayoutOf,
+  shelfRowsOf,
+  shelfTabsOf,
+} from "@qticaret/types/section-shelf"
 import { shelfStripsOf } from "@qticaret/types/section-strips"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { CardVariant, ProductsSectionView, ShelfListView, Translate } from "@qticaret/ui"
@@ -58,9 +64,10 @@ async function listViews(
  * The card a rail draws: compact on a compact or columns rail, else its
  * own or the setting's. A strips rail draws no card: compact asks the
  * least of it (no framed card's second photo), its price as any card's.
+ * A ranked rail draws its own places from the card's parts, so compact too.
  */
 const cardOf = (variant: ProductsSectionView["variant"], section: StoreProductsSection) =>
-  variant === "compact" || variant === "columns" || variant === "strips"
+  variant === "compact" || variant === "columns" || variant === "strips" || variant === "ranked"
     ? ("compact" satisfies CardVariant)
     : railCardVariant(section)
 
@@ -109,5 +116,6 @@ export async function shelfView(
     ...(variant === "carousel" ? { scroller: scrollerSettingsOf(section.scroller) } : {}),
     ...(variant === "compact" ? { rows: shelfRowsOf(section.rows) } : {}),
     ...(variant === "strips" ? { strips: shelfStripsOf(section) } : {}),
+    ...(variant === "ranked" ? { rankedLayout: shelfRankedLayoutOf(section.ranked_layout) } : {}),
   }
 }

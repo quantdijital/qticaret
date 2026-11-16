@@ -5,6 +5,7 @@ import {
   SCROLLER_DEFAULTS,
   SHELF_LIMITS,
   SHELF_PHONE_DEFAULT,
+  SHELF_RANKED_LAYOUT_DEFAULT,
   SHELF_STRIPS_DEFAULTS,
   hasVariants,
 } from "@qticaret/types"
@@ -68,6 +69,11 @@ export const VARIANT_FIELDS: {
     },
     // Ek 2026-11-16: five strips, the shared look's defaults
     strips: { strips_count: SHELF_LIMITS.strips.default, ...SHELF_STRIPS_DEFAULTS },
+    // Ek 2026-11-16: five places, the first large
+    ranked: {
+      ranked_count: SHELF_LIMITS.ranked.default,
+      ranked_layout: SHELF_RANKED_LAYOUT_DEFAULT,
+    },
   },
   // The related products as a rail's grid or carousel (bilesen-denetimi (b) 7)
   related_products: {

@@ -1,0 +1,281 @@
+/*
+ * A product rail drawn as a ranked list (`sections/ShelfRanked.tsx`, adr/0049
+ * Ek 2026-11-16): one ordered list, each place its figure large in the
+ * heading face's heaviest weight beside the photograph. The figure is the
+ * section's one loud thing; the rest keeps the compact card's quiet type.
+ *
+ * A place stands in one of two ways, set by custom properties so both read
+ * the same rules: a row of the list (the figure in a column of its own,
+ * a small photograph, the words, the actions at the row's end), or large
+ * (the figure tucked under the photograph's left edge, its foot on the
+ * photograph's foot, the words under the photograph, the actions on its
+ * corner). The first of a `lead` rail stands large at every width, a
+ * `row` rail's from 1024 px; every other place is a row.
+ */
+@layer components {
+  .gf-ranked {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  /* A row of the list */
+  .gf-rank {
+    --rank-figure: 2.5rem;
+    --rank-columns: 3rem 4.5rem minmax(0, 1fr) auto;
+    --rank-areas: "n photo text acts";
+    --rank-align: center;
+    --rank-gap: var(--space-sm);
+    --rank-figure-align: end;
+    --rank-figure-nums: tabular-nums lining-nums;
+    --rank-tuck: 0;
+    --rank-title: var(--text-sm);
+    --rank-acts-position: static;
+    --rank-acts-shadow: none;
+    --rank-pill-at: var(--space-2xs);
+    --rank-pill-pad: 2px 6px;
+    --rank-pill-size: 0.6875rem;
+  }
+
+  @media (min-width: 48rem) {
+    .gf-rank:is([data-size="line"], [data-size="row"]) {
+      --rank-figure: 3rem;
+      --rank-columns: 3.75rem 6rem minmax(0, 1fr) auto;
+      --rank-gap: var(--space-md);
+    }
+    .gf-rank:is([data-size="line"], [data-size="row"])[data-wide] {
+      --rank-figure: 2.625rem;
+    }
+  }
+
+  /* Large: the figure about half the photograph's height, the two-figure "10" narrower */
+  .gf-rank[data-size="lead"] {
+    --rank-figure: 52cqi;
+    --rank-columns: auto minmax(0, 1fr);
+    --rank-areas: "n photo" ". text";
+    --rank-align: end;
+    --rank-gap: 0;
+    --rank-figure-align: start;
+    --rank-figure-nums: lining-nums;
+    --rank-tuck: -0.14em;
+    --rank-title: var(--text-title);
+    --rank-acts-position: absolute;
+    --rank-acts-shadow: var(--shadow-float);
+    --rank-pill-at: var(--space-xs);
+    --rank-pill-pad: 4px 8px;
+    --rank-pill-size: var(--text-xs);
+  }
+  @media (min-width: 64rem) {
+    .gf-rank[data-size="row"] {
+      --rank-figure: 52cqi;
+      --rank-columns: auto minmax(0, 1fr);
+      --rank-areas: "n photo" ". text";
+      --rank-align: end;
+      --rank-gap: 0;
+      --rank-figure-align: start;
+      --rank-figure-nums: lining-nums;
+      --rank-tuck: -0.14em;
+      --rank-title: var(--text-md);
+      --rank-acts-position: absolute;
+      --rank-acts-shadow: var(--shadow-float);
+      --rank-pill-at: var(--space-xs);
+      --rank-pill-pad: 4px 8px;
+      --rank-pill-size: var(--text-xs);
+    }
+  }
+  .gf-rank[data-wide] {
+    --rank-figure: 2.25rem;
+  }
+  .gf-rank[data-size="lead"][data-wide] {
+    --rank-figure: 34cqi;
+  }
+  @media (min-width: 64rem) {
+    .gf-rank[data-size="row"][data-wide] {
+      --rank-figure: 34cqi;
+    }
+  }
+  .gf-rank-card {
+    position: relative;
+    display: grid;
+    height: 100%;
+    grid-template-columns: var(--rank-columns);
+    grid-template-areas: var(--rank-areas);
+    align-items: var(--rank-align);
+    column-gap: var(--rank-gap);
+    row-gap: var(--space-sm);
+  }
+
+  .gf-rank-n {
+    position: relative;
+    grid-area: n;
+    margin-inline-end: var(--rank-tuck);
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: var(--rank-figure);
+    font-variant-numeric: var(--rank-figure-nums);
+    font-weight: 800;
+    letter-spacing: -0.06em;
+    line-height: 0.74;
+    text-align: var(--rank-figure-align);
+    user-select: none;
+  }
+
+  /* After the figure, so it lies over the figure's tucked edge; the link's cover lies over both */
+  .gf-rank-photo {
+    position: relative;
+    grid-area: photo;
+    overflow: hidden;
+    aspect-ratio: var(--aspect-card);
+    border-radius: var(--radius-media);
+    background: var(--color-media);
+  }
+
+  .gf-rank-text {
+    display: flex;
+    min-width: 0;
+    grid-area: text;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+  .gf-rank-brand {
+    overflow: hidden;
+    color: var(--color-text-3);
+    font-size: var(--text-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .gf-rank-title {
+    font-size: var(--rank-title);
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 1.375;
+  }
+
+  .gf-rank-acts {
+    position: var(--rank-acts-position);
+    z-index: var(--z-raised);
+    top: var(--space-xs);
+    right: var(--space-xs);
+    display: flex;
+    grid-area: acts;
+    gap: var(--space-xs);
+  }
+  .gf-rank-acts button {
+    box-shadow: var(--rank-acts-shadow);
+  }
+
+  .gf-rank-pill {
+    position: absolute;
+    top: var(--rank-pill-at);
+    left: var(--rank-pill-at);
+    padding: var(--rank-pill-pad);
+    border-radius: var(--radius-pill);
+    font-size: var(--rank-pill-size);
+    font-weight: 800;
+    line-height: 1;
+  }
+  .gf-rank-pill[data-tone="deal"] {
+    background: var(--color-deal);
+    color: var(--color-deal-ink);
+  }
+  .gf-rank-pill[data-tone="out"] {
+    background: var(--color-text);
+    color: var(--color-paper);
+  }
+
+  /*
+   * `lead` from 768 px: the first on the left over every row beside it,
+   * the rows spread over its height; past six places, from 1280 px, the
+   * rows in two columns, read down the first, then the second.
+   */
+  @media (min-width: 48rem) {
+    .gf-ranked[data-layout="lead"] {
+      display: grid;
+      align-items: center;
+      column-gap: var(--space-xl);
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-rows: repeat(var(--rank-rows), auto);
+      row-gap: var(--space-md);
+    }
+    .gf-ranked[data-layout="lead"] > .gf-rank:first-child {
+      align-self: start;
+      grid-column: 1;
+      grid-row: 1 / span var(--rank-rows);
+    }
+    .gf-ranked[data-layout="lead"] > .gf-rank:not(:first-child) {
+      grid-column: 2;
+    }
+    .gf-ranked[data-count="3"] {
+      --rank-rows: 2;
+    }
+    .gf-ranked[data-count="4"] {
+      --rank-rows: 3;
+    }
+    .gf-ranked[data-count="5"] {
+      --rank-rows: 4;
+    }
+    .gf-ranked[data-count="6"] {
+      --rank-rows: 5;
+    }
+    .gf-ranked[data-count="7"] {
+      --rank-rows: 6;
+    }
+    .gf-ranked[data-count="8"] {
+      --rank-rows: 7;
+    }
+    .gf-ranked[data-count="9"] {
+      --rank-rows: 8;
+    }
+    .gf-ranked[data-count="10"] {
+      --rank-rows: 9;
+    }
+  }
+  @media (min-width: 80rem) {
+    .gf-ranked[data-layout="lead"]:is(
+        [data-count="7"],
+        [data-count="8"],
+        [data-count="9"],
+        [data-count="10"]
+      ) {
+      grid-auto-flow: column;
+      grid-template-columns: minmax(0, 4fr) repeat(2, minmax(0, 3.5fr));
+    }
+    .gf-ranked[data-layout="lead"]:is(
+        [data-count="7"],
+        [data-count="8"],
+        [data-count="9"],
+        [data-count="10"]
+      )
+      > .gf-rank:not(:first-child) {
+      grid-column: auto;
+    }
+    .gf-ranked[data-layout="lead"][data-count="7"] {
+      --rank-rows: 3;
+    }
+    .gf-ranked[data-layout="lead"]:is([data-count="8"], [data-count="9"]) {
+      --rank-rows: 4;
+    }
+    .gf-ranked[data-layout="lead"][data-count="10"] {
+      --rank-rows: 5;
+    }
+  }
+
+  /* `row` from 1024 px: all in one row, five at most; past five, two even rows */
+  @media (min-width: 64rem) {
+    .gf-ranked[data-layout="row"] {
+      display: grid;
+      column-gap: var(--gap-columns);
+      grid-template-columns: repeat(var(--rank-across), minmax(0, 1fr));
+      row-gap: var(--space-xl);
+    }
+    .gf-ranked[data-layout="row"]:is([data-count="3"], [data-count="6"]) {
+      --rank-across: 3;
+    }
+    .gf-ranked[data-layout="row"]:is([data-count="4"], [data-count="7"], [data-count="8"]) {
+      --rank-across: 4;
+    }
+    .gf-ranked[data-layout="row"]:is([data-count="5"], [data-count="9"], [data-count="10"]) {
+      --rank-across: 5;
+    }
+  }
+}

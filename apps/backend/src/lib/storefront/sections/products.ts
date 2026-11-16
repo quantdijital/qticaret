@@ -26,7 +26,16 @@ export const SHELF_LIMITS = {
   compact: { across: 3, rows: [2, 3], default: 2 },
   columns: { lists: { min: 1, max: 2 }, per_list: [3, 4], default: 4 },
   strips: { counts: [2, 3, 4, 5, 6, 7, 8], default: 5 },
+  ranked: { counts: [3, 4, 5, 6, 7, 8, 9, 10], default: 5 },
 } as const
+
+/**
+ * How a ranked rail stands from 1024 px (adr/0049 Ek 2026-11-16): the
+ * first large beside the rest, or all in one row. Mirrors `@qticaret/types`'
+ * `SHELF_RANKED_LAYOUTS` and its default; a unit test keeps them equal.
+ */
+export const SHELF_RANKED_LAYOUTS = ["lead", "row"] as const
+export const SHELF_RANKED_LAYOUT_DEFAULT: (typeof SHELF_RANKED_LAYOUTS)[number] = "lead"
 
 /**
  * A strips rail's own settings (adr/0049 Ek 2026-11-16): the strips'
@@ -178,6 +187,19 @@ const strips = z
   })
   .strict()
 
+/**
+ * A ranked list, each product beside its place in large figures (Ek
+ * 2026-11-16): how many, and how they stand from 1024 px.
+ */
+const ranked = z
+  .object({
+    ...common,
+    variant: z.literal("ranked"),
+    ranked_count: count(SHELF_LIMITS.ranked.counts, SHELF_LIMITS.ranked.default),
+    ranked_layout: stepSetting(SHELF_RANKED_LAYOUTS, SHELF_RANKED_LAYOUT_DEFAULT),
+  })
+  .strict()
+
 export const PRODUCTS_BRANCHES: Readonly<Record<SectionVariant<"products">, VariantBranch>> = {
   grid,
   carousel,
@@ -185,12 +207,13 @@ export const PRODUCTS_BRANCHES: Readonly<Record<SectionVariant<"products">, Vari
   compact,
   columns: columnsBranch,
   strips,
+  ranked,
 }
 
 /** A product rail (adr/0049 Ek 2026-11-15): a branch per variant. */
 export const products = z.discriminatedUnion(
   "variant",
-  [grid, carousel, featured, compact, columnsBranch, strips],
+  [grid, carousel, featured, compact, columnsBranch, strips, ranked],
   VARIANT_ERROR
 )
 
@@ -207,6 +230,8 @@ export function shelfLimit(section: ProductsSection): number {
       return section.per_list
     case "strips":
       return section.strips_count
+    case "ranked":
+      return section.ranked_count
     case "grid":
     case "carousel":
       return section.limit

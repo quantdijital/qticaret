@@ -7,6 +7,7 @@ import {
   ShelfCompact,
   ShelfFeatured,
   ShelfGrid,
+  ShelfRanked,
   ShelfStrips,
 } from "./shelf-sketches"
 
@@ -179,6 +180,7 @@ const SKETCHES: {
     compact: ShelfCompact,
     columns: ShelfColumns,
     strips: ShelfStrips,
+    ranked: ShelfRanked,
   },
 }
 

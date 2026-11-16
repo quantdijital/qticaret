@@ -8023,7 +8023,8 @@
           "featured": "Featured",
           "compact": "Compact list",
           "columns": "Lists side by side",
-          "strips": "Slanted strips"
+          "strips": "Slanted strips",
+          "ranked": "Ranked list"
         },
         "categories": {
           "tiles": "Picture tiles",
@@ -9364,6 +9365,17 @@
         },
         "cardCompact": "Cards in this layout are always compact: a small photo, name, stars and price.",
         "stripsNoCard": "No cards in this layout: each product is one strip with its name and price, the whole strip linking to its page. The add to cart and quick view buttons are not shown.",
+        "rankedCount": "Products",
+        "rankedCountTerm": "ranked_count",
+        "rankedCountHint": "How many products to rank. The order comes from the list's source: the best seller first, the deepest discount first, or the newest first.",
+        "rankedLayout": {
+          "label": "Layout",
+          "term": "ranked_layout",
+          "hint": "First large: the first product large on the left, the others in rows beside it (on a phone the first on top). One row: all side by side, two rows past five; a list on a phone.",
+          "lead": "First large",
+          "row": "One row"
+        },
+        "rankedCard": "No card choice in this layout: each product stands beside its place with its photo, name, stars and price. The quick view and add to cart buttons show as on the cards.",
         "tabs": "Join the rail beside it in tabs",
         "tabsTerm": "tabs",
         "tabsJoined": "Joins this rail in one tabbed shelf: {{names}}. Turn it off to draw this rail on its own.",
