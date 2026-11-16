@@ -1,7 +1,8 @@
+import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { HomeSectionView, ProductCardView } from "@qticaret/ui"
-import { atolyeCss } from "@/test/atolye-css"
+import { ATOLYE_SOURCE, atolyeCss } from "@/test/atolye-css"
 import { renderPage } from "@/test/theme-render"
 
 /**
@@ -9,12 +10,15 @@ import { renderPage } from "@/test/theme-render"
  * sonra link sonra ürünler saçma ve karmaşık": the panel's "all products" link
  * stood alone on a row between the pills and the cards. Then, of the scrolling
  * pill row with the link at its end: "pilin birisi lap diye kesik görünüyor,
- * hoş değil". Below 1024 px the pills wrap, none cut, and the link stands
- * under the cards as a full-width quiet button. The desktop's rules are as
- * they were.
+ * hoş değil"; the pills wrapped for a while. Last: "piller sağa kaydırılabilir
+ * olsun, alt satıra düşmesin. Tüm ürünler düğmesinin altta olması güzel."
+ * Below 1024 px the pills stay on one line that scrolls to the screen's
+ * edges, a cut edge fading while more waits past it, and the link stands
+ * under the cards as a full-width quiet button. The desktop is as it was.
  */
 
 const TABS = atolyeCss("tabs.css")
+const RAIL = atolyeCss("tabs-rail.css")
 
 const product = (id: string): ProductCardView => ({
   id,
@@ -72,28 +76,64 @@ function block(css: string, opening: string): string {
 }
 
 describe("the tabbed shelf on a phone and a tablet", () => {
-  it("wraps the pills below 1024 px and keeps one scrolling rail from 1024 px", () => {
+  it("keeps the pills on one line that scrolls past the container to the screen's edges", () => {
     expect(html).toContain('<fieldset class="gf-tab-row min-w-0 border-0 p-0">')
     expect(html).toContain('<legend class="sr-only">')
     expect(html.match(/<input type="radio" name="[^"]+-raf"/g)).toHaveLength(3)
     const pills = /<legend class="sr-only">[^<]*<\/legend><div class="([^"]*)"/.exec(html)?.[1]
     const classes = (pills ?? "").split(" ")
-    // Below 1024 px: lines of pills, none cut, the row inside the page's gutter
-    expect(classes).toEqual(expect.arrayContaining(["flex", "flex-wrap", "gap-(--space-xs)"]))
-    expect(classes.filter((name) => !name.startsWith("lg:"))).not.toContain("overflow-x-auto")
-    expect(classes.filter((name) => !name.startsWith("lg:"))).not.toContain("-mx-(--gutter)")
-    // From 1024 px: the rail as before, past the container by the gutter
+    // At every width: one line, the first pill on the page's left line and
+    // the last able to scroll fully into view (the gutter's padding at both ends)
     expect(classes).toEqual(
       expect.arrayContaining([
         "gf-rail",
-        "lg:flex-nowrap",
-        "lg:overflow-x-auto",
-        "lg:-mx-(--gutter)",
-        "lg:px-(--gutter)",
-        "lg:scroll-px-(--gutter)",
+        "flex",
+        "gap-(--space-xs)",
+        "overflow-x-auto",
+        "-mx-(--gutter)",
+        "px-(--gutter)",
+        "scroll-px-(--gutter)",
       ])
     )
+    expect(classes).not.toContain("flex-wrap")
+    expect(classes.filter((name) => name.startsWith("lg:"))).toEqual([])
     expect(TABS).toMatch(/\.gf-tab \{[^}]*white-space: nowrap;/)
+  })
+
+  it("fades a cut edge below 1024 px only while more waits past it", () => {
+    expect(RAIL).not.toContain("@media (width >= 64rem)")
+    const below = block(RAIL, "@media (width < 64rem)")
+    // A loose snap to a pill's start (the bar hidden and the overscroll held by `.gf-rail`)
+    expect(below).toMatch(/\.gf-tab-row > \.gf-rail \{\s*scroll-snap-type: x proximity;\s*\}/)
+    // The fades follow the row's own scrolling: an inactive timeline (every
+    // pill in view) or a browser without one draws none
+    const fades = block(below, "@supports (animation-timeline: scroll())")
+    expect(fades).toMatch(
+      /mask-image: linear-gradient\(\s*to right,\s*transparent,\s*#000 var\(--gf-tab-fade-start\),\s*#000 calc\(100% - var\(--gf-tab-fade-end\)\),\s*transparent\s*\);/
+    )
+    expect(fades).toContain("animation-timeline: scroll(self inline);")
+    for (const name of ["--gf-tab-fade-start", "--gf-tab-fade-end"]) {
+      expect(block(RAIL, `@property ${name}`)).toContain("initial-value: 0px;")
+    }
+    // The start fades over the gutter (a pill snapped to the left line stands
+    // clear of it), the end over 2rem
+    expect(block(RAIL, "@keyframes gf-tab-fade-start")).toContain(
+      "--gf-tab-fade-start: var(--gutter);"
+    )
+    expect(block(RAIL, "@keyframes gf-tab-fade-end")).toMatch(/from \{\s*--gf-tab-fade-end: 2rem;/)
+    // Nothing moves by itself: no animation runs on a clock
+    expect(RAIL).not.toMatch(/animation:[^;]*\d+m?s\b/)
+  })
+
+  it("brings a pill reached by the keys or chosen into view whole, clear of the fade", () => {
+    const below = block(RAIL, "@media (width < 64rem)")
+    expect(below).toMatch(
+      /\.gf-tab-row > \.gf-rail > \.gf-tab > input \{\s*position: absolute;\s*inset: 0;\s*width: 100%;\s*height: 100%;[^}]*scroll-margin-inline: 1rem;/
+    )
+    const follow = readFileSync(`${ATOLYE_SOURCE}sections/ShelfTabsFollow.tsx`, "utf8")
+    expect(follow).toContain('const NARROW = "(width < 64rem)"')
+    expect(follow).toContain('inline: "nearest"')
+    expect(follow).toMatch(/matchMedia\(REDUCED\)\.matches \? "auto" : "smooth"/)
   })
 
   it("puts a plain panel's link after its cards, its title for a reader before them", () => {

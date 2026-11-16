@@ -24,6 +24,7 @@
 @import "./base.css" layer(base);
 @import "./ui.css";
 @import "./tabs.css";
+@import "./tabs-rail.css";
 @import "./buy.css";
 @import "./chips.css";
 @import "./pages.css";

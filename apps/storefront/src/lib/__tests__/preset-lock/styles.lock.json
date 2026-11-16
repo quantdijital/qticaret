@@ -106,7 +106,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "016b1eab66e9bd5fae1f6a457f62801f7d536b841cfb1670209c84e197487bdc",
+      "sha256": "b46f9c917d1a3ad7188ac55668a7ab33de4521e65c9f3393ac52d418b485f062",
       "file": "styles.css"
     },
     {
@@ -114,7 +114,11 @@
       "file": "surface.css"
     },
     {
-      "sha256": "683a6ac44694feb2257a32531f246e5dc45326bb9b4b649322b2bf5f4d7d8037",
+      "sha256": "1527701aa7214c2fbe2ecc99ef9dcf04f3c7bffe71b8183558ba3755300cbc38",
+      "file": "tabs-rail.css"
+    },
+    {
+      "sha256": "7ec6cbea56c4d225616e9ad9424be8e137e6b6a39cb6c56b9ee46bd841d5ab7d",
       "file": "tabs.css"
     },
     {
