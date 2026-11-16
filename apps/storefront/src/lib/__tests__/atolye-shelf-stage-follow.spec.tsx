@@ -141,6 +141,19 @@ describe("a stage list following its list", () => {
     expect(shown()).toEqual(["3"])
   })
 
+  it("does not choose the row a pointer leaves the list through", () => {
+    draw()
+    point(rowAt(3), "mouse")
+    const list = host.querySelector(".gf-stage-list")
+    if (!list) throw new Error("no list")
+    point(list, "mouse", "pointerleave")
+    act(() => {
+      vi.advanceTimersByTime(120)
+    })
+    expect(shown()).toEqual(["0"])
+    expect(marked()).toEqual(["0"])
+  })
+
   it("puts the focused row on the stage at once", () => {
     draw()
     act(() => {

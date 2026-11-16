@@ -68,6 +68,10 @@ export function ShelfStageFollow() {
         show(at)
       }, PAUSE_MS)
     }
+    // Leaving the list through a row on its way elsewhere: that row was crossed, not chosen
+    const leave = () => {
+      window.clearTimeout(timer)
+    }
     // A finger's tap focuses the row's link on its way to the product: not a choice
     let touched = false
     const press = (event: PointerEvent) => {
@@ -85,12 +89,14 @@ export function ShelfStageFollow() {
       }
     }
     root.addEventListener("pointerover", over)
+    root.addEventListener("pointerleave", leave)
     root.addEventListener("focusin", focus)
     root.addEventListener("pointerdown", press)
     document.addEventListener("keydown", key)
     return () => {
       window.clearTimeout(timer)
       root.removeEventListener("pointerover", over)
+      root.removeEventListener("pointerleave", leave)
       root.removeEventListener("focusin", focus)
       root.removeEventListener("pointerdown", press)
       document.removeEventListener("keydown", key)
