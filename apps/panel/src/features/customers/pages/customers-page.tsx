@@ -14,7 +14,6 @@ import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { Avatar, AvatarFallback } from "@qticaret/admin-ui/ui/avatar"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { useCan } from "@/features/auth/api/staff"
-import { CustomerDialog } from "@/features/customers/components/customer-dialog"
 import {
   CUSTOMER_PAGE_SIZE,
   customerCountsQuery,
@@ -23,6 +22,7 @@ import {
 import type { CustomerKind, CustomerListItem } from "@/features/customers/api/customers"
 import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { customerName, initialsOf } from "@/features/customers/names"
+import { NewCustomerDialog } from "@/features/wholesale/components/new-customer-dialog"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
 
@@ -124,7 +124,7 @@ export function CustomersPage() {
           ) : undefined
         }
       />
-      {mayAdd ? <CustomerDialog customer={null} open={adding} onOpenChange={setAdding} /> : null}
+      {mayAdd ? <NewCustomerDialog open={adding} onOpenChange={setAdding} /> : null}
       <CustomersNav />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs

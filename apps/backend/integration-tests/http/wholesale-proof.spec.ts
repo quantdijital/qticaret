@@ -9,7 +9,13 @@ import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
-import { accountApi, groupsOf, wholesaleApi } from "../helpers/wholesale"
+import {
+  accountApi,
+  groupsOf,
+  legacyPendingAccount,
+  testPassword,
+  wholesaleApi,
+} from "../helpers/wholesale"
 
 jest.setTimeout(240 * 1000)
 
@@ -20,10 +26,22 @@ interface StoreProduct {
 /**
  * Security review H1: an account registered with an address but never
  * confirmed has `has_account` too, and a refreshed token reads
- * `/store/customers/me`. It neither takes a wholesale invitation nor is
- * made a wholesaler at once; a code asked for another address proves
- * nothing; the real confirmation does. Retail 100, the level 80.
+ * `/store/customers/me`. It neither takes an invitation left from before
+ * staff set passwords nor is made a wholesaler at once (Ek 2026-11-15
+ * (2), case 3): staff are told, and only an explicit take-over binds the
+ * address, its password replaced and the intruder's sign-ins ended; a code
+ * asked for another address proves nothing; the real confirmation does.
+ * Retail 100, the level 80.
  */
+/** What the intruder saves on their record before the take-over (M5): none of it may follow. */
+const PLANTED = {
+  first_name: "Saldırgan",
+  last_name: "Kişi",
+  address_1: "Bilinmeyen Sk. 1",
+  city: "Kadıköy",
+  phone: "+905321112233",
+}
+
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
@@ -99,7 +117,11 @@ medusaIntegrationTestRunner({
     it("lets no unconfirmed registration take an invitation (a)", async () => {
       const { productId, tier } = await level("dogrulanmamis")
       const email = `davet-${randomUUID()}@example.com`
-      const invited = await accounts.made({ email, contact_name: "Ali Kaya", tier_id: tier.id })
+      const invited = await legacyPendingAccount(getContainer(), {
+        email,
+        contact_name: "Ali Kaya",
+        tier_id: tier.id,
+      })
       const intruder = await unconfirmed(email)
 
       await readMe(intruder.headers)
@@ -108,22 +130,22 @@ medusaIntegrationTestRunner({
       expect(await priceFor(productId, intruder.headers)).not.toBe(80)
     })
 
-    it("invites an unconfirmed account's address rather than making it a wholesaler (b)", async () => {
+    it("refuses an unconfirmed sign-up's address until staff take it over (b)", async () => {
       const email = `acik-${randomUUID()}@example.com`
       const intruder = await unconfirmed(email)
-      const made = await accounts.create({
+      const body = {
         email,
         contact_name: "Ali Kaya",
         company_name: "Kaya Bıçak",
         tax_office: "Kadıköy",
         tax_id: "1234567890",
         own_prices: true,
-      })
-      expect(made.status).toBe(201)
-      expect(made.data).toMatchObject({
-        account: { status: "pending", customer: null },
-        billing_profile: "none",
-      })
+      }
+      const refused = await accounts.create(body)
+      expect([refused.status, (refused.data as { message?: string }).message]).toEqual([
+        409,
+        "wholesale.unproven_signup",
+      ])
       const { data } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
         .graph({
@@ -134,12 +156,125 @@ medusaIntegrationTestRunner({
       expect((data[0] as { billing_profile?: unknown } | undefined)?.billing_profile ?? null).toBe(
         null
       )
+      expect(await groupsOf(getContainer(), intruder.id)).toEqual([])
+    })
+
+    it("takes an unconfirmed sign-up over: every sign-in ended, nothing it planted kept (b2)", async () => {
+      const { productId, tier } = await level("devral")
+      const email = `devral-${randomUUID()}@example.com`
+      const intruder = await unconfirmed(email)
+      // What the intruder planted on their record: an address the wholesaler must not inherit
+      await getContainer()
+        .resolve(Modules.CUSTOMER)
+        .createCustomerAddresses([
+          { customer_id: intruder.id, ...PLANTED, is_default_shipping: true },
+        ])
+      // Really saved on the intruder's record, so the cart check below proves something
+      const { data: before } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "customer",
+          fields: [
+            "addresses.first_name",
+            "addresses.last_name",
+            "addresses.address_1",
+            "addresses.city",
+            "addresses.phone",
+          ],
+          filters: { id: intruder.id },
+        })
+      expect((before[0] as { addresses?: unknown[] } | undefined)?.addresses).toEqual([PLANTED])
+      // A second sign-in at the address in another case, where the provider keeps them apart (M2)
+      const variant = email.replace(/^d/, "D")
+      const second = await settle(
+        http.post("/auth/customer/emailpass/register", {
+          email: variant,
+          password: intruder.password,
+        })
+      )
+      const password = testPassword()
+      const made = await accounts.create({
+        email,
+        contact_name: "Ali Kaya",
+        company_name: "Kaya Bıçak",
+        tax_office: "Kadıköy",
+        tax_id: "1234567890",
+        tier_id: tier.id,
+        password,
+        take_over: true,
+      })
+      expect(made.status).toBe(201)
+      expect(made.data).toMatchObject({ account: { status: "active" }, password: "replaced" })
+      // A fresh customer for the wholesaler; the sign-up's record retired (M5)
+      const customerId = made.data.account.customer?.id ?? ""
+      expect(customerId).not.toBe(intruder.id)
+      const query = getContainer().resolve(ContainerRegistrationKeys.QUERY)
+      const { data: rows } = await query.graph({
+        entity: "customer",
+        fields: ["id", "has_account", "addresses.id", "billing_profile.legal_name"],
+        filters: { id: [customerId, intruder.id] },
+        withDeleted: true,
+      })
+      const byId = new Map(
+        (
+          rows as {
+            id: string
+            has_account: boolean
+            addresses?: unknown[]
+            billing_profile?: { legal_name?: string } | null
+          }[]
+        ).map((row) => [row.id, row])
+      )
+      expect(byId.get(customerId)).toMatchObject({
+        has_account: true,
+        addresses: [],
+        billing_profile: { legal_name: "Kaya Bıçak" },
+      })
+      expect(byId.get(intruder.id)?.has_account).toBe(false)
+
+      // Every sign-in from before the take-over is refused, not only a refresh
+      expect((await readMe(intruder.headers)).status).toBe(401)
+      expect(await priceFor(productId, intruder.headers)).toBe(401)
+      for (const address of second.status === 200 ? [email, variant] : [email]) {
+        const old = await settle(
+          http.post("/auth/customer/emailpass", { email: address, password: intruder.password })
+        )
+        expect({ address, status: old.status }).toEqual({ address, status: 401 })
+      }
+
+      // The change is noted a second ahead (L6): a sign-in after it waits that second out
+      await new Promise((resolve) => setTimeout(resolve, 2_100))
+      const login = await settle(
+        http.post<{ token: string }>("/auth/customer/emailpass", { email, password })
+      )
+      expect(login.status).toBe(200)
+      const headers = { ...store.headers, authorization: `Bearer ${login.data.token}` }
+      expect((await readMe(headers)).status).toBe(200)
+      expect(await priceFor(productId, headers)).toBe(80)
+      // The wholesaler's first cart starts with no address of the intruder's
+      const cart = await settle(
+        http.post<{ cart: { shipping_address: unknown } }>(
+          "/store/carts",
+          { region_id: shop.regionId },
+          { headers }
+        )
+      )
+      // Medusa may give a new cart the single-country region's country code; nothing planted
+      const given = cart.data.cart.shipping_address as Record<string, unknown> | null | undefined
+      for (const [field, planted] of Object.entries(PLANTED)) {
+        expect({ field, value: given?.[field] ?? null }).not.toEqual({ field, value: planted })
+      }
+      expect(JSON.stringify(given ?? {})).not.toContain("Bilinmeyen")
     })
 
     it("counts no code confirmed for another address (c)", async () => {
       const { tier } = await level("baska-adres")
       const email = `hedef-${randomUUID()}@example.com`
-      const invited = await accounts.made({ email, contact_name: "Ali Kaya", tier_id: tier.id })
+      const invited = await legacyPendingAccount(getContainer(), {
+        email,
+        contact_name: "Ali Kaya",
+        tier_id: tier.id,
+      })
       const intruder = await unconfirmed(email)
       // The intruder confirms an address of their own, in their own session
       const own = `kendi-${randomUUID()}@example.com`
@@ -156,7 +291,11 @@ medusaIntegrationTestRunner({
     it("takes the invitation once the address is really confirmed (d)", async () => {
       const { productId, tier } = await level("dogrulanmis")
       const email = `gercek-${randomUUID()}@example.com`
-      const invited = await accounts.made({ email, contact_name: "Ali Kaya", tier_id: tier.id })
+      const invited = await legacyPendingAccount(getContainer(), {
+        email,
+        contact_name: "Ali Kaya",
+        tier_id: tier.id,
+      })
       const owner = await unconfirmed(email)
       await readMe(owner.headers)
       expect((await accounts.get(invited.id)).data.account.status).toBe("pending")

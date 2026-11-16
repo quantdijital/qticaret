@@ -8,7 +8,6 @@ import {
   membershipPlan,
   namesToFill,
   normalizeEmail,
-  resendRefusal,
   splitContactName,
 } from ".."
 
@@ -45,19 +44,6 @@ describe("a wholesaler's invitation (ADR-0068 §10, decision 13)", () => {
     expect(sent < cutoff.openedBefore).toBe(false)
     expect(sent < inviteCutoff(at("2027-02-13T09:00:00.000Z")).invitedBefore).toBe(false)
     expect(sent < inviteCutoff(at("2027-05-14T10:00:00.001Z")).openedBefore).toBe(true)
-  })
-
-  it("is resent an hour after the last send at the soonest, five times at most", () => {
-    const account = { invited_at: sent, created_at: sent, invite_count: 1 }
-    expect(resendRefusal(account, at("2026-11-15T10:30:00.000Z"))).toBe("wholesale.invite_too_soon")
-    expect(resendRefusal(account, at("2026-11-15T11:00:00.000Z"))).toBeNull()
-    expect(resendRefusal({ ...account, invite_count: 6 }, at("2026-11-16T10:00:00.000Z"))).toBe(
-      "wholesale.invite_limit"
-    )
-    expect(
-      resendRefusal({ ...account, invite_count: 5 }, at("2026-11-16T10:00:00.000Z"))
-    ).toBeNull()
-    expect(resendRefusal(account, at("2027-03-01T10:00:00.000Z"))).toBe("wholesale.invite_expired")
   })
 
   it("keeps and matches addresses trimmed and in lower case", () => {
@@ -152,17 +138,19 @@ describe("the groups a wholesaler's customer is in (ADR-0068 §2, §3)", () => {
 })
 
 describe("what each state allows (ADR-0068 §3)", () => {
-  it("closes an active one, reopens a closed one, resends and takes back a pending one", () => {
+  it("closes an active one, reopens a closed one, deletes any, sets an open one's password", () => {
     expect(allows("deactivate", "active")).toBe(true)
     expect(allows("deactivate", "pending")).toBe(false)
     expect(allows("deactivate", "inactive")).toBe(false)
     expect(allows("reactivate", "inactive")).toBe(true)
     expect(allows("reactivate", "active")).toBe(false)
-    expect(allows("resend", "pending")).toBe(true)
-    expect(allows("resend", "active")).toBe(false)
+    expect(allows("password", "active")).toBe(true)
+    expect(allows("password", "inactive")).toBe(false)
+    expect(allows("password", "pending")).toBe(false)
     expect(allows("delete", "pending")).toBe(true)
-    expect(allows("delete", "active")).toBe(false)
-    expect(allows("delete", "inactive")).toBe(false)
+    // Deleted whatever its state (Ek 2026-11-15 (2))
+    expect(allows("delete", "active")).toBe(true)
+    expect(allows("delete", "inactive")).toBe(true)
   })
 
   it("keeps a level or an own list: never neither", () => {

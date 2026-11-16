@@ -1,12 +1,15 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { percentToBps } from "../../../../lib/wholesale"
-import { BILLING_PROFILE_MODULE } from "../../../../modules/billing-profile"
-import type BillingProfileModuleService from "../../../../modules/billing-profile/service"
+import { ValidationError } from "../../../../lib/errors"
+import { sealForRequest } from "../../../../lib/staff/account"
+import { normalizeEmail, percentToBps } from "../../../../lib/wholesale"
 import { createAccountWorkflow } from "../../../../workflows/wholesale/accounts/create"
 import { readAccounts } from "../../../../workflows/wholesale/accounts/read"
-import { registeredCustomer } from "../../../../workflows/wholesale/steps/account-customer"
+import { billingBinding } from "../../../../workflows/wholesale/steps/account-customer"
+import type { TypedBilling } from "../../../../workflows/wholesale/steps/account-customer"
+import { sealPassword } from "../../../../workflows/wholesale/steps/login-password"
 import { queueWholesaleSync } from "../../../../workflows/wholesale/queue"
 import { AUDIT_RESOURCE_ID } from "../../../http/audit/notes"
+import { newPasswordProblem } from "../../../http/password-policy"
 import type {
   AdminGetWholesaleAccountsType,
   AdminPostWholesaleAccountType,
@@ -26,38 +29,41 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
 }
 
 /**
- * The invoice identity typed with the account, sealed here where the
- * plaintext enters (adr/0009) with the id of the customer who has a
- * sign-in at the address; the workflow writes it only to that customer.
- * A pending wholesaler's is not kept: they enter it on the storefront.
+ * The invoice identity typed with the account (adr/0009), sealed here
+ * where the plaintext enters, for this request only; the workflow opens
+ * it once the customer is known and encrypts it for them.
  */
-async function sealedBilling(req: AuthenticatedMedusaRequest, body: AdminPostWholesaleAccountType) {
+function sealedBilling(body: AdminPostWholesaleAccountType): string | null {
   if (body.tax_id === undefined || body.tax_office === undefined || body.company_name === null) {
     return null
   }
-  const customer = await registeredCustomer(req.scope, body.email)
-  if (!customer) {
+  const typed: TypedBilling = {
+    legal_name: body.company_name,
+    tax_office: body.tax_office,
+    tax_id: body.tax_id,
+  }
+  return sealForRequest(JSON.stringify(typed), billingBinding(normalizeEmail(body.email)))
+}
+
+/** The typed password by the platform's rule (adr/0043), then sealed; none typed, null. */
+async function sealedPassword(body: AdminPostWholesaleAccountType): Promise<string | null> {
+  if (body.password === undefined) {
     return null
   }
-  const data = req.scope
-    .resolve<BillingProfileModuleService>(BILLING_PROFILE_MODULE)
-    .prepareProfileData(
-      {
-        type: "corporate",
-        legal_name: body.company_name,
-        tax_office: body.tax_office,
-        tax_id: body.tax_id,
-      },
-      customer.id
-    )
-  return { customer_id: customer.id, data }
+  const email = normalizeEmail(body.email)
+  const problem = await newPasswordProblem(body.password, email)
+  if (problem) {
+    throw new ValidationError(problem, { field: "password" })
+  }
+  return sealPassword(email, body.password)
 }
 
 /**
- * `POST /admin/wholesale/accounts`: a new wholesaler. An address with an
- * account becomes a wholesaler at once and is told; any other is invited
- * to the storefront's sign-up page. `message` says whether the e-mail
- * went; `billing_profile` whether the invoice identity was written.
+ * `POST /admin/wholesale/accounts` (ADR-0068 Ek 2026-11-15 (2)): a new
+ * wholesaler, active at once. `password` says whether staff's password
+ * was set (a new sign-in), replaced (an unconfirmed sign-up taken over)
+ * or not applied (a customer who proved the address keeps theirs);
+ * `billing_profile` whether the invoice identity was written.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostWholesaleAccountType>,
@@ -74,7 +80,9 @@ export async function POST(
       own_prices: body.own_prices,
       rate_bps: body.percent === null ? null : percentToBps(body.percent),
       min_quantity: body.min_quantity,
-      billing: await sealedBilling(req, body),
+      sealed_password: await sealedPassword(body),
+      take_over: body.take_over,
+      billing: sealedBilling(body),
       created_by: actor,
     },
   })
@@ -85,7 +93,7 @@ export async function POST(
   res.locals[AUDIT_RESOURCE_ID] = result.id
   res.status(201).json({
     account: await accountViewOf(req, result.id),
-    message: result.message,
+    password: result.password,
     billing_profile: result.billing_profile,
   })
 }

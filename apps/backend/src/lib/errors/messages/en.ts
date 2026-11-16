@@ -51,6 +51,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Invalid tracking: a carrier name, a 4–40 character tracking number and an https link.",
   "orders.nothing_to_deliver": "No parcel of the shop's own delivery waits to be delivered.",
   "orders.deliver_failed": "The order could not be marked delivered; try again on its page.",
+  "orders.wholesaler_filter_denied": "Only the shop owner and admins can filter by wholesaler.",
   "orders.range_invalid":
     "Invalid date range: days as YYYY-MM-DD, and the start cannot come after the end.",
   "orders.note_unknown": "Note not found; it may have been removed.",
@@ -781,7 +782,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "wholesale.managed":
     "This group or price list belongs to wholesale; change it on the wholesale screens.",
   "wholesale.tier_exists": "A wholesale level or customer group with this name already exists.",
-  "wholesale.tier_in_use": "Wholesalers are on this level; move them to another level first.",
+  "wholesale.tier_in_use":
+    "Wholesalers are on this level; move them to another level or delete them first.",
   "wholesale.tier_unknown": "Wholesale level not found.",
   "wholesale.variant_unknown": "One of the products chosen no longer exists.",
   "wholesale.exists": "A wholesaler with this e-mail address already exists.",
@@ -793,10 +795,19 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "wholesale.own_prices_off": "This wholesaler has no prices of their own yet; turn them on first.",
   "wholesale.tax_pair": "Enter the tax office and the tax number together.",
   "wholesale.company_for_tax": "A company name is needed with tax details.",
-  "wholesale.invite_too_soon": "The invitation was just sent; you can send it again in an hour.",
-  "wholesale.invite_limit": "This invitation can be sent again at most 5 times.",
-  "wholesale.invite_expired":
-    "This invitation has expired; delete the wholesaler and add them again.",
+  "wholesale.account_not_bound": "This wholesaler has no customer account yet.",
+  "wholesale.unproven_signup":
+    "An account was opened with this e-mail but its address was never confirmed. Taking it over changes its password and ends its open sessions.",
+  "wholesale.password_required": "Type the password the wholesaler will sign in with.",
+  "wholesale.login_in_use":
+    "This e-mail address is a staff member's sign-in; use another address for the wholesaler.",
+  "wholesale.login_not_made": "The wholesaler's sign-in could not be prepared. Try again shortly.",
+  "wholesale.password_own_login":
+    'This wholesaler signs in with an account they verified themselves; they renew their password with "Forgot password" on the storefront.',
+  "wholesale.carts_not_repriced":
+    "Some open carts could not be updated to retail prices; the wholesaler was not deleted. Try again shortly.",
+  "wholesale.no_password_login":
+    "This customer signs in another way (e.g. Google), not with an e-mail and password; no password can be set.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.color_duplicate": "Each colour name can be listed once.",
   "platform_settings.color_contrast":

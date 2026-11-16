@@ -19,10 +19,12 @@ import {
   AdminGetWholesaleAccounts,
   AdminPostWholesaleAccount,
   AdminPostWholesaleAccountAction,
+  AdminPostWholesalePassword,
   AdminUpdateWholesaleAccount,
 } from "../admin/wholesale/account-validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
+import { requireReauth } from "./reauth"
 import { requireFeature } from "./require-feature"
 import { guardWholesaleRecords, hideWholesaleRecords } from "./wholesale-guard"
 import { guardWholesaleLinkFields } from "./wholesale-link-fields"
@@ -33,12 +35,6 @@ type Middleware = (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunc
 // A level's rate rewrites every variant's row: a small budget per staff member
 const perStaff = () =>
   rateLimit(() => RATE_LIMIT_PROFILES.bulk_ship, {
-    identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
-  })
-
-// A wholesaler opened or invited again mails an address in the shop's name
-const perStaffInvite = () =>
-  rateLimit(() => RATE_LIMIT_PROFILES.wholesale_invite, {
     identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
   })
 
@@ -92,7 +88,12 @@ export const WHOLESALE_ROUTES = [
   {
     matcher: "/admin/wholesale/accounts",
     methods: ["POST" as const],
-    middlewares: staff(perStaffInvite(), validateAndTransformBody(AdminPostWholesaleAccount)),
+    middlewares: staff(
+      perStaff(),
+      // Taking over an unconfirmed sign-up replaces someone's password: proved again (review M4)
+      requireReauth((req) => (req.body as { take_over?: unknown } | undefined)?.take_over === true),
+      validateAndTransformBody(AdminPostWholesaleAccount)
+    ),
   },
   { matcher: "/admin/wholesale/accounts/:id", methods: ["GET" as const], middlewares: staff() },
   {
@@ -100,16 +101,26 @@ export const WHOLESALE_ROUTES = [
     methods: ["POST" as const],
     middlewares: staff(perStaff(), validateAndTransformBody(AdminUpdateWholesaleAccount)),
   },
-  { matcher: "/admin/wholesale/accounts/:id", methods: ["DELETE" as const], middlewares: staff() },
+  // Ek 2026-11-15 (2): any wholesaler deleted, the customer kept; the other writes' budget
+  {
+    matcher: "/admin/wholesale/accounts/:id",
+    methods: ["DELETE" as const],
+    middlewares: staff(perStaff()),
+  },
   ...["deactivate", "reactivate"].map((action) => ({
     matcher: `/admin/wholesale/accounts/:id/${action}`,
     methods: ["POST" as const],
     middlewares: staff(validateAndTransformBody(AdminPostWholesaleAccountAction)),
   })),
+  // Ek 2026-11-15 (2): staff type a wholesaler's new password; every older sign-in ends
   {
-    matcher: "/admin/wholesale/accounts/:id/invitation",
+    matcher: "/admin/wholesale/accounts/:id/password",
     methods: ["POST" as const],
-    middlewares: staff(perStaffInvite(), validateAndTransformBody(AdminPostWholesaleAccountAction)),
+    middlewares: staff(
+      perStaff(),
+      requireReauth(),
+      validateAndTransformBody(AdminPostWholesalePassword)
+    ),
   },
   {
     matcher: "/admin/wholesale/accounts/:id/lines",

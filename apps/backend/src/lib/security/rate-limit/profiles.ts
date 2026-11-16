@@ -190,13 +190,6 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 30, windowMs: 15 * MINUTE },
     perIdentityAnyIp: { max: 10, windowMs: 15 * MINUTE },
   },
-  // ADR-0068 §3: a wholesaler opened or their invitation sent again mails an address in the
-  // shop's name; per staff member from any address
-  wholesale_invite: {
-    name: "wholesale_invite",
-    perIp: { max: 30, windowMs: 15 * MINUTE },
-    perIdentityAnyIp: { max: 20, windowMs: HOUR },
-  },
   // ADR-0068 §7: a wholesaler's own prices, asked by the storefront's server for each
   // page's cards (a hundred variants a call); per customer from any address too
   wholesale_prices: {

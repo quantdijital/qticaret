@@ -40,6 +40,8 @@ export interface BoardOrder {
   addons: { lines: number; non_withdrawable: boolean }
   /** Units a paid order was placed without (adr/0026 Ek 2026-11-06), while it is still to send. */
   stock_short?: number
+  /** The wholesaler who placed it (ADR-0068 Ek 2026-11-15 (2)); its id for owner and admin only. */
+  wholesaler?: { id?: string; name: string | null } | null
 }
 
 /** Where a carrier's parcel stands (adr/0031), as the server names it. */
@@ -61,6 +63,8 @@ export interface OrderBoard {
   limit: number
   /** More orders than one read covers; the counts are of the newest ones. */
   limited: boolean
+  /** On the retail list: wholesale orders the search found, left out (they are under Toptancılar). */
+  wholesale_matches?: number
 }
 
 /** Where the money stands, apart from the stage (F12.3). */
@@ -79,6 +83,10 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 export const CARRIER_FILTERS = ["aras", "yurtici", "geliver", "own"] as const
 export type CarrierFilter = (typeof CARRIER_FILTERS)[number]
 
+/** Whose orders a list shows (ADR-0068 Ek 2026-11-15 (2)): retail is the server's default. */
+export const ORDER_SEGMENTS = ["retail", "wholesale", "all"] as const
+export type OrderSegment = (typeof ORDER_SEGMENTS)[number]
+
 /** The list's filters as the server takes them, the export's too; days are Turkish `YYYY-MM-DD`. */
 export interface OrderFilters {
   stage: OrderStage
@@ -91,6 +99,10 @@ export interface OrderFilters {
   carrier?: CarrierFilter | undefined
   from?: string | undefined
   to?: string | undefined
+  /** Retail orders unless set; the wholesale list and a customer's page set it. */
+  segment?: OrderSegment | undefined
+  /** One wholesaler's orders, on the wholesale list. */
+  wholesaler?: string | undefined
 }
 
 /** The filters as the server names them, empty ones left out. */
@@ -104,6 +116,8 @@ export const filterQuery = (filters: OrderFilters): Record<string, string> => ({
   ...(filters.carrier ? { carrier: filters.carrier } : {}),
   ...(filters.from ? { from: filters.from } : {}),
   ...(filters.to ? { to: filters.to } : {}),
+  ...(filters.segment ? { segment: filters.segment } : {}),
+  ...(filters.wholesaler ? { wholesaler: filters.wholesaler } : {}),
 })
 
 export interface OrderBoardParams extends OrderFilters {

@@ -22,6 +22,8 @@ export interface AccountRead {
   customer: { id: string; email: string | null } | null
   tier: { id: string; name: string } | null
   own_prices: boolean
+  /** The sign-in is one staff made or took over: staff may set its password (review M4). */
+  staff_login: boolean
   rate_bps: number | null
   min_quantity: number | null
   sync_pending: boolean
@@ -65,6 +67,7 @@ function readOf(
     customer: customer ? { id: customer.id, email: customer.email } : null,
     tier: account.tier_id && tierName ? { id: account.tier_id, name: tierName } : null,
     own_prices: account.private_price_list_id !== null,
+    staff_login: account.staff_login,
     rate_bps: account.rate_bps ?? null,
     min_quantity: account.min_quantity ?? null,
     sync_pending: requested !== null && (synced === null || synced < requested),

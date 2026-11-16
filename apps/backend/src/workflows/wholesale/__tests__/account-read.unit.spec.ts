@@ -10,6 +10,7 @@ const account = (fields: Partial<AccountRead>): AccountRead => ({
   customer: null,
   tier: null,
   own_prices: false,
+  staff_login: false,
   rate_bps: null,
   min_quantity: null,
   sync_pending: false,

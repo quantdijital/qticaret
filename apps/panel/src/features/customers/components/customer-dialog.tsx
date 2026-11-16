@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
+import type { ReactNode } from "react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -66,11 +67,16 @@ export function CustomerDialog({
   customer,
   open,
   onOpenChange,
+  lead,
+  initialFocus,
 }: {
   /** Null: "Yeni müşteri". */
   customer: CustomerDetail | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Above the fields: "Yeni müşteri"'s Bireysel / Toptancı choice (ADR-0068 §3). */
+  lead?: ReactNode
+  initialFocus?: string | null
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -135,8 +141,10 @@ export function CustomerDialog({
         void submit()
       }}
       submitLabel={customer ? t("common.save") : t(`${F}.create`)}
+      initialFocus={initialFocus ?? null}
     >
       <DialogBody>
+        {lead}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
             label={t(`${F}.firstName`)}

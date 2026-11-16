@@ -6,6 +6,7 @@ import type { LifecycleOrder } from "../../../lib/dashboard"
 import { createSingleFlight } from "../../../lib/cache"
 import { PAYMENT_METHOD_FIELDS, paymentMethodOf } from "../../../lib/orders/payment-method"
 import type { PaymentMethodOrder } from "../../../lib/orders/payment-method"
+import { wholesaleOrders } from "../../../workflows/wholesale/orders"
 import { MAX_ORDERS_READ, NOT_ORDERS } from "../dashboard/orders"
 import { deliveriesOf, shippingOf } from "./parcels"
 import type { DeliveryOrder } from "./parcels"
@@ -74,15 +75,40 @@ async function filtered(
 }
 
 /**
+ * The wholesale orders a wholesale list reads (one wholesaler's, or all);
+ * null for a list that is not one (ADR-0068 Ek 2026-11-15 (2)).
+ */
+async function wholesaleScope(
+  scope: MedusaContainer,
+  filters: OrderFilters
+): Promise<string[] | null> {
+  if (filters.segment !== "wholesale") {
+    return null
+  }
+  const linked = await wholesaleOrders(
+    scope,
+    filters.wholesaler ? { account_id: filters.wholesaler } : {}
+  )
+  return [...linked.keys()]
+}
+
+/**
  * The orders the list's filters leave, newest first (adr/0022). Stages
  * come from payment and shipment records the database cannot filter on,
  * so the newest MAX_ORDERS_READ orders the search and the days leave are
- * read and sorted here; `limited` says when there were more.
+ * read and sorted here; `limited` says when there were more. The retail
+ * list leaves wholesale orders out before anything is counted (ADR-0068
+ * Ek 2026-11-15 (2)); `wholesale_matches` says how many it left out of a
+ * search, so staff are told where to look.
  */
 export async function boardRows(
   scope: MedusaContainer,
   filters: OrderFilters
-): Promise<{ rows: StageRow[]; limited: boolean }> {
+): Promise<{ rows: StageRow[]; limited: boolean; wholesale_matches: number }> {
+  const only = await wholesaleScope(scope, filters)
+  if (only !== null && only.length === 0) {
+    return { rows: [], limited: false, wholesale_matches: 0 }
+  }
   const fields = [
     "id",
     ...LIFECYCLE_FIELDS,
@@ -96,6 +122,10 @@ export async function boardRows(
     filters.to ?? "",
     filters.method ? "m" : "",
     filters.carrier ? "c" : "",
+    filters.segment,
+    filters.wholesaler ?? "",
+    // A new wholesale order changes the wholesale list's ids
+    only ? String(only.length) : "",
   ].join("|")
   const { data, metadata } = await stageRead(key, () =>
     scope.resolve(ContainerRegistrationKeys.QUERY).graph({
@@ -106,13 +136,23 @@ export async function boardRows(
         is_draft_order: false,
         ...(filters.q ? { q: filters.q } : {}),
         ...(filters.customer_id ? { customer_id: filters.customer_id } : {}),
+        ...(only ? { id: only } : {}),
         ...createdWithin(filters),
       },
       pagination: { skip: 0, take: MAX_ORDERS_READ, order: { created_at: "DESC" } },
     })
   )
+  const read = data as unknown as StageRow[]
+  let kept = read
+  let wholesaleMatches = 0
+  if (filters.segment === "retail") {
+    const linked = await wholesaleOrders(scope, { order_ids: read.map((row) => row.id) })
+    kept = read.filter((row) => !linked.has(row.id))
+    wholesaleMatches = filters.q ? read.length - kept.length : 0
+  }
   return {
-    rows: await filtered(scope, data as unknown as StageRow[], filters),
+    rows: await filtered(scope, kept, filters),
     limited: (metadata?.count ?? data.length) > data.length,
+    wholesale_matches: wholesaleMatches,
   }
 }

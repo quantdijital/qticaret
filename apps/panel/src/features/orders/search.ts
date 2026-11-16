@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { OrderFilters } from "./api/orders"
 import {
   CARRIER_FILTERS,
   ORDER_STAGES,
@@ -37,3 +38,28 @@ export const isFiltered = (search: OrderListSearch): boolean =>
   Boolean(
     search.payment ?? search.shipping ?? search.method ?? search.carrier ?? search.from ?? search.to
   )
+
+/** The address's search without its empty parts: an "all" tab, an empty search, page 1. */
+export const cleanSearch = (search: OrderListSearch): OrderListSearch => ({
+  q: search.q === "" ? undefined : search.q,
+  stage: search.stage === "all" ? undefined : search.stage,
+  payment: search.payment,
+  shipping: search.shipping,
+  method: search.method,
+  carrier: search.carrier,
+  from: search.from,
+  to: search.to,
+  page: search.page && search.page > 1 ? search.page : undefined,
+})
+
+/** The list's filters as the address holds them. */
+export const filtersOf = (search: OrderListSearch): OrderFilters => ({
+  stage: search.stage ?? "all",
+  q: search.q ?? "",
+  payment: search.payment,
+  shipping: search.shipping,
+  method: search.method,
+  carrier: search.carrier,
+  from: search.from,
+  to: search.to,
+})

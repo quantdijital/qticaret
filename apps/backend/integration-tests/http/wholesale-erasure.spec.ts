@@ -8,7 +8,15 @@ import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
-import { accountApi, accountRecords, groupsOf, wholesaleApi } from "../helpers/wholesale"
+import { WHOLESALE_MODULE } from "../../src/modules/wholesale"
+import type WholesaleModuleService from "../../src/modules/wholesale/service"
+import {
+  accountApi,
+  accountRecords,
+  groupsOf,
+  wholesaleApi,
+  legacyPendingAccount,
+} from "../helpers/wholesale"
 
 jest.setTimeout(240 * 1000)
 
@@ -80,13 +88,49 @@ medusaIntegrationTestRunner({
       expect(await groupsOf(getContainer(), customer.id)).toEqual([])
     })
 
+    it("clears the company a deleted wholesaler's row kept, with the customer (review M1)", async () => {
+      const customer = await registerCustomer(http, store)
+      const account = await accounts.made({
+        email: customer.email,
+        contact_name: "Ali Kaya",
+        company_name: "Ali Kaya",
+        own_prices: true,
+      })
+      expect((await accounts.remove(account.id)).status).toBe(200)
+      const service = getContainer().resolve<WholesaleModuleService>(WHOLESALE_MODULE)
+      const kept = await service.listWholesaleAccounts(
+        { id: account.id },
+        { take: 1, withDeleted: true }
+      )
+      // A sole trader's company is a person's name: kept for the order list until erased
+      expect(kept[0]?.company_name).toBe("Ali Kaya")
+
+      await erase(customer.id)
+
+      const [row] = await service.listWholesaleAccounts(
+        { id: account.id },
+        { take: 1, withDeleted: true }
+      )
+      expect(row).toMatchObject({
+        company_name: null,
+        customer_id: null,
+        email: null,
+        contact_name: null,
+      })
+      expect(row?.deleted_at).not.toBeNull()
+    })
+
     it("takes an invitation pending to the erased customer's address too", async () => {
       // A guest record at the address (an order's), and a pending invitation to it
       const email = `kvkk-${randomUUID()}@example.com`
       const guest = await getContainer()
         .resolve(Modules.CUSTOMER)
         .createCustomers({ email, has_account: false })
-      const pending = await accounts.made({ email, contact_name: "Ayşe Yılmaz", own_prices: true })
+      const pending = await legacyPendingAccount(getContainer(), {
+        email,
+        contact_name: "Ayşe Yılmaz",
+        own_prices: true,
+      })
 
       await erase(guest.id)
 

@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ConflictError, uniqueViolationKeys } from "../../../lib/errors"
-import { allows, resendRefusal } from "../../../lib/wholesale"
+import { allows } from "../../../lib/wholesale"
 import type { AccountAction, AccountStatus } from "../../../lib/wholesale"
 import { WHOLESALE_MODULE } from "../../../modules/wholesale"
 import type WholesaleModuleService from "../../../modules/wholesale/service"
@@ -33,8 +33,8 @@ export async function accountById(
 const ACTION_STATE: Record<AccountAction, string> = {
   deactivate: "active",
   reactivate: "inactive",
-  resend: "pending",
   delete: "pending",
+  password: "active",
 }
 
 /** The account is in a state that allows the action, or 409 says it is not. */
@@ -70,8 +70,10 @@ export interface AccountRowInput {
   tier_id: string | null
   rate_bps: number | null
   min_quantity: number | null
-  /** Set when no registered customer has the address: the invitation goes out. */
+  /** Null: no invitation goes out any more (Ek 2026-11-15 (2)). */
   invited_at: Date | null
+  /** The sign-in is one staff made or took over (review M4). */
+  staff_login: boolean
   created_by: string | null
 }
 
@@ -143,60 +145,37 @@ export const patchAccountStep = createStep(
 )
 
 /**
- * A pending account's invitation marked sent again (security review L2):
- * not within an hour of the last send, at most five resends, never once
- * it is past its days; 409 says which. Its 90 days restart, capped at 180
- * from the account's opening (`inviteExpiresAt`). Undone by the old date
- * and count.
+ * The account gone (deleted by staff, or a pending one past its days):
+ * the address and contact cleared, the company name the order list shows
+ * kept, the row soft-deleted so its Medusa ids still tell the price
+ * events apart and its past orders still name it. Undone by putting the
+ * fields back and restoring the row.
  */
-export const markResentStep = createStep(
-  "wholesale-mark-resent",
-  async (input: { id: string; updated_by: string | null }, { container }) => {
-    const account = await accountById(container, input.id)
-    const refusal = resendRefusal(account, new Date())
-    if (refusal) {
-      throw new ConflictError(refusal)
-    }
-    await wholesale(container).updateWholesaleAccounts({
-      id: account.id,
-      invited_at: new Date(),
-      invite_count: account.invite_count + 1,
-      updated_by: input.updated_by,
-    })
-    return new StepResponse(
-      { id: account.id },
-      {
-        id: account.id,
-        invited_at: account.invited_at ?? null,
-        invite_count: account.invite_count,
-        updated_by: account.updated_by ?? null,
-      }
-    )
-  },
-  async (before, { container }) => {
-    if (before) {
-      await wholesale(container).updateWholesaleAccounts(before)
-    }
-  }
-)
-
-/**
- * The account gone for good (a pending one taken back or past its 90
- * days): what named a person (address, company, contact) cleared, the
- * row soft-deleted so its Medusa ids still tell the price events apart.
- * The workflow's last step: nothing after it to undo it for.
- */
-export const removeAccountRowStep = createStep(
-  "wholesale-remove-account-row",
-  async (input: { id: string }, { container }) => {
+export const retireAccountRowStep = createStep(
+  "wholesale-retire-account-row",
+  async (input: { id: string; company_name: string | null }, { container }) => {
     const service = wholesale(container)
+    const account = await accountById(container, input.id)
+    const before = {
+      id: account.id,
+      email: account.email ?? null,
+      company_name: account.company_name ?? null,
+      contact_name: account.contact_name ?? null,
+    }
     await service.updateWholesaleAccounts({
       id: input.id,
       email: null,
-      company_name: null,
+      company_name: input.company_name,
       contact_name: null,
     })
     await service.softDeleteWholesaleAccounts([input.id])
-    return new StepResponse({ id: input.id })
+    return new StepResponse({ id: input.id }, before)
+  },
+  async (before, { container }) => {
+    if (before) {
+      const service = wholesale(container)
+      await service.restoreWholesaleAccounts([before.id])
+      await service.updateWholesaleAccounts(before)
+    }
   }
 )

@@ -204,6 +204,8 @@ const CAPABILITY_PROBES = {
   abandonedCarts: ["GET", "/admin/abandoned-carts"],
   // 2026-11-06: an order's message sent again: owner, admin, operations
   resendMessages: ["POST", "/admin/orders/:id/messages/:message_id/resend"],
+  // ADR-0068 §3, §9: the wholesalers, their levels and prices, read or written: owner and admin
+  wholesale: ["GET", "/admin/wholesale/accounts"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

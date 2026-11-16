@@ -18,6 +18,7 @@ import {
   groupsOf,
   tierRecords,
   wholesaleApi,
+  legacyPendingAccount,
 } from "../helpers/wholesale"
 
 jest.setTimeout(240 * 1000)
@@ -29,7 +30,8 @@ interface StoreProduct {
 const DAY = 86_400_000
 
 /**
- * ADR-0068 §3: an invited wholesaler signs up with the invited address and,
+ * ADR-0068 §3: a wholesaler invited before staff set passwords (Ek
+ * 2026-11-15 (2) opens new ones active) signs up with the invited address and,
  * reading their own account, takes the pending account: no Store write
  * route, the proof `attachGuestOrders` takes. The customer's groups never
  * show on the Store API. Retail 100 TL, the level 80.00.
@@ -56,13 +58,13 @@ medusaIntegrationTestRunner({
       const tier = await staff.tier({ name: `Toptan ${handle}` })
       await staff.prices(tier.id, { set: [{ variant_id: product.variantId, net: "66.67" }] })
       const email = `davet-${randomUUID()}@example.com`
-      const account = await accounts.made({
+      // Invited before staff set passwords (Ek 2026-11-15 (2)): the claim still serves such
+      const account = await legacyPendingAccount(getContainer(), {
         email,
         contact_name: "Ayşe Nur Yılmaz",
         company_name: "Yılmaz Ticaret",
         tier_id: tier.id,
       })
-      expect(account.status).toBe("pending")
       return { ...product, tier, email, account }
     }
 

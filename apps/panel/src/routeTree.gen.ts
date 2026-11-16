@@ -90,6 +90,9 @@ import { Route as AuthStorefrontPreferencesRouteImport } from './routes/_auth/st
 import { Route as FullscreenPrintOrdersRouteImport } from './routes/_fullscreen/print/orders'
 import { Route as FullscreenStorefrontEditorRouteImport } from './routes/_fullscreen/storefront/editor'
 import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
+import { Route as AuthCustomersWholesaleIndexRouteImport } from './routes/_auth/customers/wholesale/index'
+import { Route as AuthCustomersWholesaleIdRouteImport } from './routes/_auth/customers/wholesale/$id'
+import { Route as AuthCustomersWholesaleOrdersRouteImport } from './routes/_auth/customers/wholesale/orders'
 import { Route as AuthPromotionsPriceListsIndexRouteImport } from './routes/_auth/promotions/price-lists/index'
 import { Route as AuthPromotionsPriceListsIdRouteImport } from './routes/_auth/promotions/price-lists/$id'
 import { Route as AuthPromotionsPriceListsNewRouteImport } from './routes/_auth/promotions/price-lists/new'
@@ -103,6 +106,8 @@ import { Route as AuthSettingsShippingIndexRouteImport } from './routes/_auth/se
 import { Route as AuthSettingsShippingCarrierRouteImport } from './routes/_auth/settings/shipping/$carrier'
 import { Route as AuthSettingsSmsIndexRouteImport } from './routes/_auth/settings/sms/index'
 import { Route as AuthSettingsSmsProviderRouteImport } from './routes/_auth/settings/sms/$provider'
+import { Route as AuthCustomersWholesaleTiersIndexRouteImport } from './routes/_auth/customers/wholesale/tiers/index'
+import { Route as AuthCustomersWholesaleTiersIdRouteImport } from './routes/_auth/customers/wholesale/tiers/$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -514,6 +519,24 @@ const AuthContentLandingsIdRoute = AuthContentLandingsIdRouteImport.update({
   path: '/content/landings/$id',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthCustomersWholesaleIndexRoute =
+  AuthCustomersWholesaleIndexRouteImport.update({
+    id: '/customers/wholesale/',
+    path: '/customers/wholesale/',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthCustomersWholesaleIdRoute =
+  AuthCustomersWholesaleIdRouteImport.update({
+    id: '/customers/wholesale/$id',
+    path: '/customers/wholesale/$id',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthCustomersWholesaleOrdersRoute =
+  AuthCustomersWholesaleOrdersRouteImport.update({
+    id: '/customers/wholesale/orders',
+    path: '/customers/wholesale/orders',
+    getParentRoute: () => AuthRoute,
+  } as any)
 const AuthPromotionsPriceListsIndexRoute =
   AuthPromotionsPriceListsIndexRouteImport.update({
     id: '/promotions/price-lists/',
@@ -588,6 +611,18 @@ const AuthSettingsSmsProviderRoute = AuthSettingsSmsProviderRouteImport.update({
   path: '/sms/$provider',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthCustomersWholesaleTiersIndexRoute =
+  AuthCustomersWholesaleTiersIndexRouteImport.update({
+    id: '/customers/wholesale/tiers/',
+    path: '/customers/wholesale/tiers/',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthCustomersWholesaleTiersIdRoute =
+  AuthCustomersWholesaleTiersIdRouteImport.update({
+    id: '/customers/wholesale/tiers/$id',
+    path: '/customers/wholesale/tiers/$id',
+    getParentRoute: () => AuthRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
@@ -669,6 +704,8 @@ export interface FileRoutesByFullPath {
   '/seo/': typeof AuthSeoIndexRoute
   '/settings/': typeof AuthSettingsIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
+  '/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
   '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
@@ -676,12 +713,15 @@ export interface FileRoutesByFullPath {
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/customers/wholesale/': typeof AuthCustomersWholesaleIndexRoute
   '/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
   '/settings/legal/': typeof AuthSettingsLegalIndexRoute
   '/settings/marketing/': typeof AuthSettingsMarketingIndexRoute
   '/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping/': typeof AuthSettingsShippingIndexRoute
   '/settings/sms/': typeof AuthSettingsSmsIndexRoute
+  '/customers/wholesale/tiers/$id': typeof AuthCustomersWholesaleTiersIdRoute
+  '/customers/wholesale/tiers/': typeof AuthCustomersWholesaleTiersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AuthIndexRoute
@@ -761,6 +801,8 @@ export interface FileRoutesByTo {
   '/seo': typeof AuthSeoIndexRoute
   '/settings': typeof AuthSettingsIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
+  '/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
   '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
@@ -768,12 +810,15 @@ export interface FileRoutesByTo {
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/customers/wholesale': typeof AuthCustomersWholesaleIndexRoute
   '/promotions/price-lists': typeof AuthPromotionsPriceListsIndexRoute
   '/settings/legal': typeof AuthSettingsLegalIndexRoute
   '/settings/marketing': typeof AuthSettingsMarketingIndexRoute
   '/settings/payments': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping': typeof AuthSettingsShippingIndexRoute
   '/settings/sms': typeof AuthSettingsSmsIndexRoute
+  '/customers/wholesale/tiers/$id': typeof AuthCustomersWholesaleTiersIdRoute
+  '/customers/wholesale/tiers': typeof AuthCustomersWholesaleTiersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -858,6 +903,8 @@ export interface FileRoutesById {
   '/_auth/seo/': typeof AuthSeoIndexRoute
   '/_auth/settings/': typeof AuthSettingsIndexRoute
   '/_auth/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/_auth/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
+  '/_auth/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
   '/_auth/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/_auth/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/_auth/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
@@ -865,12 +912,15 @@ export interface FileRoutesById {
   '/_auth/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/_auth/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/_auth/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/_auth/customers/wholesale/': typeof AuthCustomersWholesaleIndexRoute
   '/_auth/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
   '/_auth/settings/legal/': typeof AuthSettingsLegalIndexRoute
   '/_auth/settings/marketing/': typeof AuthSettingsMarketingIndexRoute
   '/_auth/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/_auth/settings/shipping/': typeof AuthSettingsShippingIndexRoute
   '/_auth/settings/sms/': typeof AuthSettingsSmsIndexRoute
+  '/_auth/customers/wholesale/tiers/$id': typeof AuthCustomersWholesaleTiersIdRoute
+  '/_auth/customers/wholesale/tiers/': typeof AuthCustomersWholesaleTiersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -954,6 +1004,8 @@ export interface FileRouteTypes {
     | '/seo/'
     | '/settings/'
     | '/content/landings/$id'
+    | '/customers/wholesale/$id'
+    | '/customers/wholesale/orders'
     | '/promotions/price-lists/$id'
     | '/promotions/price-lists/new'
     | '/settings/legal/$kind'
@@ -961,12 +1013,15 @@ export interface FileRouteTypes {
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
     | '/settings/sms/$provider'
+    | '/customers/wholesale/'
     | '/promotions/price-lists/'
     | '/settings/legal/'
     | '/settings/marketing/'
     | '/settings/payments/'
     | '/settings/shipping/'
     | '/settings/sms/'
+    | '/customers/wholesale/tiers/$id'
+    | '/customers/wholesale/tiers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1046,6 +1101,8 @@ export interface FileRouteTypes {
     | '/seo'
     | '/settings'
     | '/content/landings/$id'
+    | '/customers/wholesale/$id'
+    | '/customers/wholesale/orders'
     | '/promotions/price-lists/$id'
     | '/promotions/price-lists/new'
     | '/settings/legal/$kind'
@@ -1053,12 +1110,15 @@ export interface FileRouteTypes {
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
     | '/settings/sms/$provider'
+    | '/customers/wholesale'
     | '/promotions/price-lists'
     | '/settings/legal'
     | '/settings/marketing'
     | '/settings/payments'
     | '/settings/shipping'
     | '/settings/sms'
+    | '/customers/wholesale/tiers/$id'
+    | '/customers/wholesale/tiers'
   id:
     | '__root__'
     | '/_auth'
@@ -1142,6 +1202,8 @@ export interface FileRouteTypes {
     | '/_auth/seo/'
     | '/_auth/settings/'
     | '/_auth/content/landings/$id'
+    | '/_auth/customers/wholesale/$id'
+    | '/_auth/customers/wholesale/orders'
     | '/_auth/promotions/price-lists/$id'
     | '/_auth/promotions/price-lists/new'
     | '/_auth/settings/legal/$kind'
@@ -1149,12 +1211,15 @@ export interface FileRouteTypes {
     | '/_auth/settings/payments/$provider'
     | '/_auth/settings/shipping/$carrier'
     | '/_auth/settings/sms/$provider'
+    | '/_auth/customers/wholesale/'
     | '/_auth/promotions/price-lists/'
     | '/_auth/settings/legal/'
     | '/_auth/settings/marketing/'
     | '/_auth/settings/payments/'
     | '/_auth/settings/shipping/'
     | '/_auth/settings/sms/'
+    | '/_auth/customers/wholesale/tiers/$id'
+    | '/_auth/customers/wholesale/tiers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1736,6 +1801,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthContentLandingsIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/customers/wholesale/': {
+      id: '/_auth/customers/wholesale/'
+      path: '/customers/wholesale'
+      fullPath: '/customers/wholesale/'
+      preLoaderRoute: typeof AuthCustomersWholesaleIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/customers/wholesale/$id': {
+      id: '/_auth/customers/wholesale/$id'
+      path: '/customers/wholesale/$id'
+      fullPath: '/customers/wholesale/$id'
+      preLoaderRoute: typeof AuthCustomersWholesaleIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/customers/wholesale/orders': {
+      id: '/_auth/customers/wholesale/orders'
+      path: '/customers/wholesale/orders'
+      fullPath: '/customers/wholesale/orders'
+      preLoaderRoute: typeof AuthCustomersWholesaleOrdersRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/promotions/price-lists/': {
       id: '/_auth/promotions/price-lists/'
       path: '/promotions/price-lists'
@@ -1826,6 +1912,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/sms/$provider'
       preLoaderRoute: typeof AuthSettingsSmsProviderRouteImport
       parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/customers/wholesale/tiers/': {
+      id: '/_auth/customers/wholesale/tiers/'
+      path: '/customers/wholesale/tiers'
+      fullPath: '/customers/wholesale/tiers/'
+      preLoaderRoute: typeof AuthCustomersWholesaleTiersIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/customers/wholesale/tiers/$id': {
+      id: '/_auth/customers/wholesale/tiers/$id'
+      path: '/customers/wholesale/tiers/$id'
+      fullPath: '/customers/wholesale/tiers/$id'
+      preLoaderRoute: typeof AuthCustomersWholesaleTiersIdRouteImport
+      parentRoute: typeof AuthRoute
     }
   }
 }
@@ -1971,9 +2071,14 @@ interface AuthRouteChildren {
   AuthReviewsIndexRoute: typeof AuthReviewsIndexRoute
   AuthSeoIndexRoute: typeof AuthSeoIndexRoute
   AuthContentLandingsIdRoute: typeof AuthContentLandingsIdRoute
+  AuthCustomersWholesaleIdRoute: typeof AuthCustomersWholesaleIdRoute
+  AuthCustomersWholesaleOrdersRoute: typeof AuthCustomersWholesaleOrdersRoute
   AuthPromotionsPriceListsIdRoute: typeof AuthPromotionsPriceListsIdRoute
   AuthPromotionsPriceListsNewRoute: typeof AuthPromotionsPriceListsNewRoute
+  AuthCustomersWholesaleIndexRoute: typeof AuthCustomersWholesaleIndexRoute
   AuthPromotionsPriceListsIndexRoute: typeof AuthPromotionsPriceListsIndexRoute
+  AuthCustomersWholesaleTiersIdRoute: typeof AuthCustomersWholesaleTiersIdRoute
+  AuthCustomersWholesaleTiersIndexRoute: typeof AuthCustomersWholesaleTiersIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -2021,9 +2126,14 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthReviewsIndexRoute: AuthReviewsIndexRoute,
   AuthSeoIndexRoute: AuthSeoIndexRoute,
   AuthContentLandingsIdRoute: AuthContentLandingsIdRoute,
+  AuthCustomersWholesaleIdRoute: AuthCustomersWholesaleIdRoute,
+  AuthCustomersWholesaleOrdersRoute: AuthCustomersWholesaleOrdersRoute,
   AuthPromotionsPriceListsIdRoute: AuthPromotionsPriceListsIdRoute,
   AuthPromotionsPriceListsNewRoute: AuthPromotionsPriceListsNewRoute,
+  AuthCustomersWholesaleIndexRoute: AuthCustomersWholesaleIndexRoute,
   AuthPromotionsPriceListsIndexRoute: AuthPromotionsPriceListsIndexRoute,
+  AuthCustomersWholesaleTiersIdRoute: AuthCustomersWholesaleTiersIdRoute,
+  AuthCustomersWholesaleTiersIndexRoute: AuthCustomersWholesaleTiersIndexRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

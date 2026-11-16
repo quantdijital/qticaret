@@ -9,7 +9,7 @@ import { ID } from "../types"
 
 /**
  * Wholesalers (ADR-0068 §3, adr/0011): opened, changed, closed, reopened,
- * invited again, taken back, and their own hand-entered prices, before
+ * given a new password, taken back, and their own hand-entered prices, before
  * and after. The address, company and contact are not written (the
  * customer record and the account hold them); the tax number never is.
  * A new account is found by the address in its body.
@@ -29,6 +29,7 @@ const accountSnapshot = (account: Account | undefined): Snapshot =>
         customer_id: account.customer_id ?? null,
         tier_id: account.tier_id ?? null,
         own_prices: account.private_price_list_id !== null,
+        staff_login: account.staff_login,
         rate_bps: account.rate_bps ?? null,
         min_quantity: account.min_quantity ?? null,
         invited_at: stamp(account.invited_at),
@@ -122,7 +123,8 @@ export const WHOLESALE_ACCOUNT_RESOURCES: readonly AuditedResource[] = [
   byId("DELETE", "", ""),
   byId("POST", "/deactivate", "/deactivate"),
   byId("POST", "/reactivate", "/reactivate"),
-  byId("POST", "/invitation", "/invitation"),
+  // Ek 2026-11-15 (2): that a new password was set, never the password
+  byId("POST", "/password", "/password"),
   {
     method: "POST",
     route: "POST /admin/wholesale/accounts/:id/prices",

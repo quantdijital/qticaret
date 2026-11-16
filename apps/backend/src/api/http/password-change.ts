@@ -9,6 +9,7 @@ import { errorSummary, logger } from "../../lib/logging"
 import { clearUnconfirmedDetailsWorkflow } from "../../workflows/account/clear-unconfirmed-details"
 import { bearerTokenOf, claimsOf } from "./bearer"
 import { rejectRequest } from "./reject"
+import { forgetPasswordChange } from "./password-epoch-cache"
 
 /**
  * A changed password ends what was signed in before it (F15.1, F14
@@ -67,6 +68,8 @@ export function notePasswordChange(
         id: identity.id,
         app_metadata: { ...(identity.app_metadata ?? {}), [KEY]: new Date().toISOString() },
       })
+      // Before the clearing below, so a failure there cannot keep an old sign-in alive
+      forgetPasswordChange(identity.id)
       // An account its login never confirmed: what was typed into it is not the owner's
       const customerId = identity.app_metadata?.["customer_id"]
       if (typeof customerId === "string" && customerId !== "") {

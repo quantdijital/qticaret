@@ -29,9 +29,10 @@ import { PrivacyRequestsCard } from "@/features/customers/components/privacy-req
 
 const route = getRouteApi("/_auth/customers/$id")
 
-// The order board's own stage rule, so the stages here match the order list
+// The order board's own stage rule, so the stages here match the order list; a
+// wholesaler's wholesale orders too (ADR-0068 Ek 2026-11-15 (2))
 const ordersOf = (customerId: string) =>
-  orderBoardQuery({ stage: "all", q: "", page: 0, customerId })
+  orderBoardQuery({ stage: "all", q: "", page: 0, customerId, segment: "all" })
 
 function OrdersCard({ customerId }: { customerId: string }) {
   const { t } = useTranslation()

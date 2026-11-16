@@ -1,13 +1,22 @@
 import { randomUUID } from "node:crypto"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
 import type { HttpClient } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
-import { accountApi, accountRecords, wholesaleApi } from "../helpers/wholesale"
+import { WHOLESALE_MODULE } from "../../src/modules/wholesale"
+import type WholesaleModuleService from "../../src/modules/wholesale/service"
+import { settle } from "../helpers/http"
+import {
+  accountApi,
+  accountRecords,
+  groupsOf,
+  legacyPendingAccount,
+  testPassword,
+  wholesaleApi,
+} from "../helpers/wholesale"
 
 jest.setTimeout(240 * 1000)
 
@@ -17,10 +26,10 @@ const message = (answer: { data: unknown }) => (answer.data as { message?: strin
  * ADR-0068 §9 for wholesalers (slice 1b): the routes take the account's id
  * only, its hidden group and own list are the module's (read as missing,
  * written as `wholesale.managed` through Medusa's routes, left out of its
- * lists), only a pending wholesaler is taken back, with its own list,
- * invitations are sent again to a pending one only, an hour apart, five
- * times, within 180 days and a staff member's budget (security review
- * L2), and the customer's wholesale link is the managers' to expand (M3).
+ * lists), only a pending wholesaler (one invited before staff set
+ * passwords, Ek 2026-11-15 (2)) is taken back, with its own list, a new
+ * password is set for a bound one only, and the customer's wholesale link
+ * is the managers' to expand (M3).
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -28,9 +37,10 @@ medusaIntegrationTestRunner({
     let staff: ReturnType<typeof wholesaleApi>
     let accounts: ReturnType<typeof accountApi>
     let store: Storefront
+    let admin: Awaited<ReturnType<typeof createAdminUser>>
 
     beforeEach(async () => {
-      const admin = await createAdminUser(http, getContainer())
+      admin = await createAdminUser(http, getContainer())
       staff = wholesaleApi(http, admin.headers)
       accounts = accountApi(http, admin.headers)
       store = await createStorefront(getContainer())
@@ -79,8 +89,8 @@ medusaIntegrationTestRunner({
       expect(listed.data.customer_groups.map((group) => group.id)).not.toContain(groupId)
     })
 
-    it("takes a pending wholesaler back with its own list, never an active one", async () => {
-      const pending = await accounts.made({
+    it("takes an older pending wholesaler back with its own list", async () => {
+      const pending = await legacyPendingAccount(getContainer(), {
         email: fresh(),
         contact_name: "Ali Kaya",
         own_prices: true,
@@ -99,64 +109,117 @@ medusaIntegrationTestRunner({
         .resolve(Modules.CUSTOMER)
         .listCustomerGroups({ id: [before.groupId ?? ""] })
       expect({ lists: lists.length, groups: groups.length }).toEqual({ lists: 0, groups: 0 })
+    })
 
+    it("deletes an active wholesaler: the wholesale side only, the customer stays retail", async () => {
       const customer = await registerCustomer(http, store)
       const active = await accounts.made({
         email: customer.email,
         contact_name: "Ali Kaya",
+        company_name: "Kaya Bıçak Ltd",
         own_prices: true,
       })
-      const refused = await accounts.remove(active.id)
-      expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
-    })
+      const before = await accountRecords(getContainer(), active.id)
+      expect(await groupsOf(getContainer(), customer.id)).toEqual([before.groupId])
 
-    /** Moves an account's dates back as time would (the columns, not the API). */
-    const age = (id: string, fields: Record<string, unknown>) =>
-      getContainer()
-        .resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)("wholesale_account")
-        .where({ id })
-        .update(fields)
+      const removed = await accounts.remove(active.id)
+      expect(removed.status).toBe(200)
+      expect(removed.data).toMatchObject({ deleted: true, carts: { repriced: 0, failed: 0 } })
+      expect((await accounts.get(active.id)).status).toBe(404)
+      expect((await accounts.list()).data.accounts.map((account) => account.id)).not.toContain(
+        active.id
+      )
+      // Out of its groups, its own list gone; the customer and their sign-in stay
+      expect(await groupsOf(getContainer(), customer.id)).toEqual([])
+      const lists = await getContainer()
+        .resolve(Modules.PRICING)
+        .listPriceLists({ id: [before.priceListId ?? ""] })
+      expect(lists).toHaveLength(0)
+      expect(
+        (await settle(http.get("/store/customers/me", { headers: customer.headers }))).status
+      ).toBe(200)
+      // The row keeps the company name only, for the order list
+      const row = await getContainer()
+        .resolve<WholesaleModuleService>(WHOLESALE_MODULE)
+        .listWholesaleAccounts({ id: active.id }, { take: 1, withDeleted: true })
+      expect(row[0]).toMatchObject({
+        email: null,
+        contact_name: null,
+        company_name: "Kaya Bıçak Ltd",
+      })
 
-    const HOUR = 3_600_000
-    const DAY = 24 * HOUR
-
-    it("sends an invitation again to a pending wholesaler only, an hour apart (L2)", async () => {
-      const pending = await accounts.made({ email: fresh(), contact_name: "Ali", own_prices: true })
-      const soon = await accounts.action(pending.id, "invitation")
-      expect([soon.status, message(soon)]).toEqual([409, "wholesale.invite_too_soon"])
-
-      await age(pending.id, { invited_at: new Date(Date.now() - 2 * HOUR) })
-      const resent = await accounts.action(pending.id, "invitation")
-      expect(resent.status).toBe(200)
-      expect(resent.data.message).toMatch(/^(sent|not_sent)$/)
-      expect((await accounts.get(pending.id)).data.account).toMatchObject({ invitations_sent: 2 })
-
-      const customer = await registerCustomer(http, store)
-      const active = await accounts.made({
+      // The same address opened again: a new account, its own sign-in rule
+      const again = await accounts.made({
         email: customer.email,
         contact_name: "Ali Kaya",
         own_prices: true,
       })
-      const refused = await accounts.action(active.id, "invitation")
-      expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
+      expect(again.id).not.toBe(active.id)
+      expect((await accounts.get(again.id)).data.account).toMatchObject({
+        status: "active",
+        staff_login: false,
+      })
+      // Operations may not delete
+      const operations = accountApi(
+        http,
+        (await createAdminUser(http, getContainer(), "operations")).headers
+      )
+      expect((await operations.remove(again.id)).status).toBe(403)
     })
 
-    it("resends five times at most, the invitation never past 180 days (L2)", async () => {
-      const pending = await accounts.made({ email: fresh(), contact_name: "Ali", own_prices: true })
-      await age(pending.id, { invited_at: new Date(Date.now() - 2 * HOUR), invite_count: 6 })
-      const capped = await accounts.action(pending.id, "invitation")
-      expect([capped.status, message(capped)]).toEqual([409, "wholesale.invite_limit"])
+    it("sets a new password only on an open account whose sign-in staff made (review M4)", async () => {
+      const pending = await legacyPendingAccount(getContainer(), { email: fresh() })
+      const unbound = await accounts.password(pending.id, testPassword())
+      expect([unbound.status, message(unbound)]).toEqual([409, "wholesale.account_not_bound"])
 
-      // Opened 100 days ago: a resend now ends 180 days from the opening, 80 from today
-      await age(pending.id, {
-        invited_at: new Date(Date.now() - 2 * HOUR),
-        invite_count: 2,
-        created_at: new Date(Date.now() - 100 * DAY),
+      // A customer who proved their own address keeps their own password
+      const customer = await registerCustomer(http, store)
+      const kept = await accounts.made({
+        email: customer.email,
+        contact_name: "Ali Kaya",
+        own_prices: true,
       })
-      const resent = await accounts.action(pending.id, "invitation")
-      expect(resent.status).toBe(200)
-      const ends = new Date(resent.data.account.invitation_expires_at ?? 0).getTime()
-      expect(Math.round((ends - Date.now()) / DAY)).toBe(80)
+      const own = await accounts.password(kept.id, testPassword())
+      expect([own.status, message(own)]).toEqual([409, "wholesale.password_own_login"])
+      expect((await accounts.get(kept.id)).data.account).toMatchObject({ staff_login: false })
+
+      const made = await accounts.made({
+        email: fresh(),
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      expect((await accounts.get(made.id)).data.account).toMatchObject({ staff_login: true })
+      const weak = await accounts.password(made.id, "123")
+      expect(weak.status).toBe(400)
+      const extra = await staff.post(`/admin/wholesale/accounts/${made.id}/password`, {
+        password: testPassword(),
+        email: "x@example.com",
+      })
+      expect(extra.status).toBe(400)
+      // Not on a closed account
+      expect((await accounts.action(made.id, "deactivate")).status).toBe(200)
+      const closed = await accounts.password(made.id, testPassword())
+      expect([closed.status, message(closed)]).toEqual([409, "wholesale.account_not_active"])
+    })
+
+    it("asks staff to prove themselves again for a new password and a take-over (review M4)", async () => {
+      const made = await accounts.made({
+        email: fresh(),
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      const plain = accountApi(http, admin.plain)
+      expect((await plain.password(made.id, testPassword())).status).toBe(428)
+      const takeOver = await plain.create({
+        email: fresh(),
+        contact_name: "Ali",
+        own_prices: true,
+        take_over: true,
+      })
+      expect(takeOver.status).toBe(428)
+      // An ordinary opening needs no proof
+      const ordinary = await plain.create({ email: fresh(), contact_name: "Ali", own_prices: true })
+      expect(ordinary.status).toBe(201)
     })
 
     it("expands a customer's wholesale link for the owner and admin only (M3)", async () => {
@@ -187,9 +250,13 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(owned.data)).toContain(account.id)
     })
 
-    it("counts openings against a staff member's budget: twenty an hour", async () => {
+    // Opening a wholesaler mails no one any more (Ek 2026-11-15 (2)): it counts against the
+    // wholesale writes' budget (`bulk_ship`), thirty in ten minutes per staff member from any
+    // address. Its per-address ten a minute is multiplied in integration tests (`perIpScale`);
+    // the per-person count is not, and is what this measures
+    it("counts openings against a staff member's wholesale budget: thirty in ten minutes", async () => {
       const statuses: number[] = []
-      for (let i = 0; i < 21; i += 1) {
+      for (let i = 0; i < 31; i += 1) {
         const made = await accounts.create({
           email: fresh(),
           contact_name: "Ali",
@@ -197,8 +264,8 @@ medusaIntegrationTestRunner({
         })
         statuses.push(made.status)
       }
-      expect(statuses.slice(0, 20).every((status) => status === 201)).toBe(true)
-      expect(statuses[20]).toBe(429)
+      expect(statuses.slice(0, 30).every((status) => status === 201)).toBe(true)
+      expect(statuses[30]).toBe(429)
     })
   },
 })

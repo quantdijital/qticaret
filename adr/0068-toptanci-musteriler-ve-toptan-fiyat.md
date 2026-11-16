@@ -241,3 +241,59 @@ Her dilim ayrı PR, `dev`'den `deniz/<konu>` dalı; Opus kodlayıcı ajan, sıra
 ### Kabul testi (yeni hali)
 
 Durum 2 özel satırı fiyat kuralıyla (modülün yazdığı biçimde) 90 bekler; durum 4'te üye 80, misafir 60 öder; yeni durum: kuralsız herkese açık `override` 60 varken üye yine 80 öder. Seviye listeleri `override` türündedir.
+
+## Ek 2026-11-15 (2): davetsiz hesap
+
+### Karar (sahip, 2026-11-15)
+
+Sahip: "toptancıya davet maili atmak gereksiz toptancı hesabını direkt ben oluşturucam şifresi vs dahil. direkt toptancıya ileteceğim. o giriş yapacak. toptan seviyeleri toptancılar sekmesi içinde ek tab olarak açılsın. Siparişlerde toptancıdan gelen siparişler direkt bu toptancılar sekmesi içinde Siparişler diye görünsün klasik müşteri siparişleri ile karıştırılmasın."
+
+- **§3 değişir:** toptancıyı personel (sahip, yönetici) şifresiyle birlikte açar; hesap **hemen etkindir**. Davet e-postası, bekleyen (`pending`) durum ve "Daveti yeniden gönder" yeni hesaplar için yoktur. Şifre vitrin kaydıyla aynı kuraldadır (adr/0043: en az 10 karakter, sık kullanılan değil, adresi içermeyen, sızıntı listesinde olmayan); panel güçlü bir şifre üretip kopyalatabilir, şifre yalnız o formda görünür.
+- **Güven çapası:** e-posta kutusu kanıtının yerini personelin kararı alır. Toptan bayrağı, personelin açtığı hesaba bağlıdır; personelin açtığı adres onaylanmış sayılır (adresin `AuthVerification` kaydı personel adına doğrulanır), böylece `provenCustomer` ve onu kullanan korumalar aynı kalır.
+- **Şifrenin yolu:** panelden HTTPS ile gelir, route'ta kuralla denetlenir ve hemen istek için mühürlenir (`sealForRequest`); iş akışları `store: false` çalışır; şifre yalnız kimlik sağlayıcının özetine (`emailpass`) yazılır. Logda, denetim kaydında (yalnız "şifre değişti" ve alan adları), hata iletisinde ve test verisinde yer almaz.
+
+### Üç durum
+
+1. **Adreste hesap yok:** müşteri kaydı ve e-posta girişi personelin şifresiyle açılır, adres onaylanır, toptancı hesabı bağlanır, etkin. (`password: "set"`)
+2. **Adresi kanıtlanmış müşteri var:** bugünkü gibi bağlanır ve etkinleşir; yazılan şifre **uygulanmaz**, müşteri kendi şifresiyle girer; panel bunu söyler. Personel gerçek bir müşterinin şifresini sessizce değiştiremez. (`password: "kept"`)
+3. **Kayıtlı ama adresi kanıtlanmamış hesap var** (adres başkası tarafından tutulmuş olabilir): istek `wholesale.unproven_signup` (409) ile reddedilir; panel durumu söyler ve açık bir **"Hesabı devral"** seçeneği sunar. Devralma (`take_over: true`, yeniden doğrulamayla): adresteki bütün girişlerin şifresi personelinkiyle değişir, değişiklik zamanı kimliklere yazılır ve **bütün eski oturum ve jetonları** reddedilir, kaydın müşteri kaydı emekliye ayrılır ve toptancıya yeni bir müşteri kaydı açılır (aşağıda "Güvenlik incelemesinden sonra"), adres onaylanır, toptancı bağlanır. Denetim kaydına şifresiz yazılır. (`password: "replaced"`)
+4. Adres bir personel girişiyse (`app_metadata.user_id`) ya da giriş başka bir müşteriye bağlıysa: `wholesale.login_in_use` (409); dokunulmaz.
+
+### Oturumların sonlanması
+
+`api/http/sign-in-epoch.ts` her `/store/*` isteğinde jetonun (`iat`) ya da oturumun (`POST /auth/session`'da yazılan açılış zamanı) kimliğin `password_changed_at`'inden eski olup olmadığına bakar; eskiyse 401 (oturum ayrıca yok edilir). Kimlik okuması 5 sn tutulur; aynı süreçteki değişiklik bu tutmayı hemen siler. Açılış zamanı yazılmamış eski bir oturum, değişiklik oturum ömründen (10 sa) gençse reddedilir. Bu kural sıfırlama bağlantısıyla şifre değiştiren her müşteriye de uygulanır (bugüne kadar yalnız yenileme ve oturum açmada uygulanıyordu).
+
+### Yeni panel işlemi: "Yeni şifre belirle"
+
+Toptancının sayfasında, aynı kuralla; eski oturumlar biter; denetlenir (`POST /admin/wholesale/accounts/:id/password`). Toptancı vitrinin normal "şifremi unuttum" yolunu da kullanabilir. Yalnız e-posta ve şifreyle giren müşteride; Google ile giren müşteride `wholesale.no_password_login`.
+
+### Silinen ve uyuyan
+
+- **Silinen:** davetin yeniden gönderimi (uç, iş akışı, adımı, `resendRefusal`), `account.wholesale_invite` ve `account.wholesale_enabled` şablonları, metinleri ve yükleyicileri, `wholesale_invite` hız sınırı profili (açma ve şifre işlemleri öbür toptan yazmaları gibi personel başına `bulk_ship` bütçesindedir), ilgili hata metinleri.
+- **Uyuyan (Ek'ten önce açılmış bekleyen kayıtlar için):** girişte sahiplenme (`api/http/wholesale-claim.ts`, `workflows/wholesale/accounts/claim.ts`), 90/180 gün silme işi (`jobs/wholesale-invites-expiry.ts`), bekleyen kaydın silinmesi (`DELETE`, panelde düğmesi yok). Yeni hesaplar bunlara hiç girmez. `provenCustomer` ve koruması kalır.
+- **Migration yok:** `invite_count`, `invited_at`, `email` sütunları kalır.
+
+### Toptan siparişler
+
+- Etkin bir toptancının verdiği sipariş **toptan siparişidir**: sipariş verilince (`order.placed` aboneliği, `subscribers/wholesale-order-stamp.ts`) sunucu, siparişin müşterisinin **siparişin zamanında** etkin olan toptancı hesabını (etkinleşme ve kapanma zamanlarından) bulur ve sipariş ↔ toptancı **modül bağı** (`links/wholesale-account-order.ts`) yazar. `completeCartWorkflow`'un `orderCreated` kancası kullanılmaz: Medusa bir kancaya tek işleyici verir ve onu sadakat eklentisi (`@medusajs/loyalty-plugin`) tutar; bunu `workflows/hooks/__tests__/single-handlers.unit.spec.ts` korur. Geri alınan bir ödemede `order.placed` gelmez; tekrar gelen olay ikinci bağ yazmaz. İstemciden hiçbir bilgi alınmaz; hesap sonradan kapansa da sipariş toptan kalır. Bağ yazılamazsa sipariş etkilenmez, olay loglanır (`wholesale.order_stamp_failed`) ve sipariş perakende listesinde kalır.
+- Panel sipariş listesi (`/admin/order-board`) `segment=retail` (varsayılan) toptan siparişleri sayım ve sayfalamadan **önce** sunucuda dışarıda bırakır; `segment=wholesale` (isteğe göre `wholesaler=`) yalnız onları, toptancı adıyla gösterir; `segment=all` müşterinin sayfası içindir. Perakende listede sipariş numarasıyla arama toptan bir siparişi bulursa `wholesale_matches` sayısı döner, panel "Toptancılar > Siparişler'de" der. Kargo, fatura, iade ve sipariş sayfası aynı kod yolundadır. Dışa aktarma listenin filtresini izler.
+- **Karışık kalan sayılar (sahip karar verecek):** ana sayfa özeti ve günlük satış kartları (`/admin/home/summary`, `/admin/dashboard/*`), Raporlar (ürün, kategori, günlük, finans, marka, pazarlama), paket sınırı "aylık sipariş" sayacı ve ödeme/fatura kuyrukları perakende ve toptan siparişleri birlikte sayar.
+
+### Panel
+
+Müşteriler altında tek "Toptancılar" girişi (bayrak açıkken, sahip ve yönetici); içinde üç sekme, her biri kendi adresiyle: Toptancılar (`/customers/wholesale`), Toptan seviyeleri (`/customers/wholesale/tiers`; ayrı menü girişi kaldırıldı, adres aynı), Siparişler (`/customers/wholesale/orders`).
+
+### Güvenlik incelemesinden sonra (2026-11-16)
+
+- **Devralma (M2, M5):** adresteki **bütün** e-posta girişleri (büyük/küçük harf farkıyla açılmış ikinci giriş dahil) personelin şifresini alır ve eski oturumları biter; hepsinin müşteri bağı kaldırılır. Kaydın kendi girişi (yoksa ilki) toptancıya kalır. Kaydın müşteri kaydı **emekliye ayrılır** (`has_account=false`, misafir kaydı olur; adreste zaten misafir kaydı varsa Medusa'nın adres başına tek misafir kuralı yüzünden yumuşak silinir) ve toptancıya **yeni bir müşteri kaydı** açılır: kaydın bıraktığı adres, ad, telefon, izinler, fatura profili ve siparişler yeni hesaba geçmez. Sonraki bir adım başarısız olursa hepsi geri alınır. Açık sepetleri kenara alma adımı kalktı (eski kayıt toptan gruba hiç girmez).
+- **Personel girişi (M3):** `user_id` taşıyan bir kimlik (müşteriyle aynı kimlik olsa da), adres kanıtlanmış olsa bile hiç kullanılmaz (`wholesale.login_in_use`); yeni şifre işlemi de böyle bir kimliğe dokunmaz.
+- **"Yeni şifre" (M4, sahip kararı):** yalnız girişini personelin açtığı ya da devraldığı (durum 1 ve 3) ve **açık** hesapta. Hesapta sunucunun yazdığı `staff_login` (migration `Migration20261116090000`); durum 2'de `false`: uç `wholesale.password_own_login` ile reddeder, panel düğmeyi göstermez ve müşterinin vitrindeki "Şifremi unuttum"u kullandığını söyler. Yeni şifre ve devralma panelin mevcut yeniden doğrulamasını (`requireReauth`, adr/0040 §3) ister.
+- **Oturumlar (H1, L6, L9, INFO):** istek hem oturum hem jeton taşıyorsa ikisi de ayrı ayrı tartılır (Medusa önce oturumu okur; eski çerez yanında sahte bir jeton artık geçmez); eskimiş oturum yok edilir. Personelin yaptığı değişiklik bir saniye ileri yazılır: aynı saniyede açılmış oturum da biter. Açılış zamanı olmayan eski oturum için 10 saat kuralı kalır (ilk görüşte damgalamak, değişiklikten önce açılmış bir oturumu temize çıkarırdı); kayan ömürlü bir oturum bu sınırı aşabilir, yalnız bu kuraldan önce açılmışlar için. Personelin kendi şifre değişikliğinden sonra yenilenen oturum damgalanır. Okunamayan kimlik "hiç değişmedi" diye tutulmaz. Geri alma için eski şifre özeti, süre dolan bir anahtarla mühürlenmeden adımın bellekteki geri alma verisinde tutulur (iş akışları `store: false`); geri alma başarısız olursa `wholesale.password_undo_failed` hata logu düşer, giriş yeni şifreyle kalır ve sahibi vitrinden sıfırlayabilir.
+- **Sipariş listesi (L7, sahip kararı):** operations toptan siparişleri görür ve gönderir (`segment=wholesale|all`), ama `wholesaler=` süzgeci yalnız sahip ve yöneticiye açıktır (`orders.wholesaler_filter_denied`); öbür rollere satırda yalnız firma adı gider, hesap kimliği gitmez.
+- **Panel (L8):** şifre taşıyan iki işlem bitince hiçbir şey tutmaz (`gcTime: 0`, form sıfırlanır).
+- **Toptancıyı silmek (sahip: "bu toptancıları silemiyorum"):** her durumdaki toptancı silinebilir (sahip ve yönetici, `deleteAccountWorkflow`, eski bekleyen kaydı silme ve süre dolumu da bu yoldan): kapatma gibi gruplardan çıkar ve açık sepetleri perakendeye yeniden fiyatlanır, özel listesi, gizli grubu ve elle fiyatları silinir, müşteri bağı kaldırılır; müşteri kaydı ve girişi perakende müşteri olarak kalır. Satır yumuşak silinir, yalnız firma adı kalır: geçmiş toptan siparişleri Toptancılar > Siparişler'de adıyla kalır, perakende listeye geçmez; aynı e-posta yeniden açılabilir. Seviye silme reddi metni "taşıyın ya da silin" der. Silme incelemesinden sonra: bir açık sepet perakendeye çevrilemezse silme reddedilir ve toptancı olduğu gibi kalır (`wholesale.carts_not_repriced`; kapatma eskisi gibi sayar); silme kapanma zamanını yazar ve sipariş damgası silinmiş satırları da tarihleriyle okur (silmeden hemen önceki sipariş toptan, sonraki perakende kalır); silinmiş toptancı listede yalnız satırda kalan firma adıyla anılır, müşteri kaydının adlarıyla değil; hiç bağlanmamış bekleyen kayıtta firma adı da kalmaz; müşteri silinince (KVKK) satırdaki firma adı ve müşteri kimliği temizlenir. Silme, eşitleme işinin listeye yazarken tuttuğu kilidi de tutar.
+- **Adres yazım hatası:** personelin yanlış yazdığı bir adres, hesabı o adresin sahibine verir (sosyal giriş ya da vitrindeki sıfırlama ile girer); bu yüzden açma penceresi e-posta alanının altında adresi bir kez daha kontrol etmeyi söyler.
+
+### Kalan risk
+
+Personel ilk şifreyi bilir; toptancıya ilk girişte şifresini değiştirmesi önerilir (panel bunu söyler). Devralma, gerçek sahibi adresini doğrulamamış bir müşterinin şifresini değiştirir; bu yüzden açık bir seçimdir ve denetlenir. Oturum kontrolü her Store isteğine bir kimlik okuması ekler (5 sn tutulur).

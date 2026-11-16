@@ -12,14 +12,17 @@ const messages = (body: unknown) => {
 
 // A VKN that passes the checksum, made up for the test
 const VKN = "1234567890"
+// Made up for the test and built from parts, so no secret scanner takes it for one
+const PASSWORD = ["Toptan", "Firma", "2026"].join("-")
 
-describe("a new wholesaler's body (ADR-0068 §3)", () => {
-  it("takes an address and a contact with a level, lower-casing the address", () => {
+describe("a new wholesaler's body (ADR-0068 §3, Ek 2026-11-15 (2))", () => {
+  it("takes an address, a contact, a level and the password staff typed, lower-casing the address", () => {
     expect(
       AdminPostWholesaleAccount.parse({
         email: "  Toptan@Firma.com ",
         contact_name: " Ali Kaya ",
         tier_id: "wtier_1",
+        password: ` ${PASSWORD} `,
       })
     ).toEqual({
       email: "toptan@firma.com",
@@ -29,7 +32,29 @@ describe("a new wholesaler's body (ADR-0068 §3)", () => {
       own_prices: false,
       percent: null,
       min_quantity: null,
+      // Never trimmed: its spaces are its own; the platform's rule is checked in the route
+      password: ` ${PASSWORD} `,
+      take_over: false,
     })
+  })
+
+  it("takes a take-over only as a yes or no, and a password of 1 to 256 characters", () => {
+    const body = { email: "a@firma.com", contact_name: "Ali Kaya", tier_id: "wtier_1" }
+    expect(
+      AdminPostWholesaleAccount.parse({ ...body, password: PASSWORD, take_over: true })
+    ).toMatchObject({
+      take_over: true,
+    })
+    // None typed: the workflow asks for one where the address needs it (wholesale.password_required)
+    expect(AdminPostWholesaleAccount.safeParse(body).success).toBe(true)
+    for (const bad of [
+      { password: "" },
+      { password: "x".repeat(257) },
+      { password: 12345678901 },
+      { take_over: "yes" },
+    ]) {
+      expect(AdminPostWholesaleAccount.safeParse({ ...body, ...bad }).success).toBe(false)
+    }
   })
 
   it("takes its own prices instead of a level, a rate opening them", () => {
@@ -59,10 +84,10 @@ describe("a new wholesaler's body (ADR-0068 §3)", () => {
     )
   })
 
-  it("never takes a password, a Medusa group or list, a status or a customer id", () => {
+  it("never takes a Medusa group or list, a status, a customer id or who made the sign-in", () => {
     const body = { email: "a@firma.com", contact_name: "Ali Kaya", tier_id: "wtier_1" }
     for (const extra of [
-      { password: "x" },
+      { staff_login: true },
       { private_group_id: "cusgroup_x" },
       { private_price_list_id: "plist_x" },
       { customer_group_id: "cusgroup_x" },

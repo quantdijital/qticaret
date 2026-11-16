@@ -192,11 +192,11 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/google/merchant/sync",
     "POST /admin/gift-cards",
     "POST /admin/store-credit-accounts/:id/credit",
-    // ADR-0068 §9: a wholesaler opened, changed, reopened, invited again or priced sells anew
+    // ADR-0068 §9: a wholesaler opened, changed, reopened, given a password or priced sells anew
     "POST /admin/wholesale/accounts",
     "POST /admin/wholesale/accounts/:id",
     "POST /admin/wholesale/accounts/:id/reactivate",
-    "POST /admin/wholesale/accounts/:id/invitation",
+    "POST /admin/wholesale/accounts/:id/password",
     "POST /admin/wholesale/accounts/:id/prices",
     "POST /admin/wholesale/tiers",
   ])("closes %s", (route) => {
