@@ -1,5 +1,5 @@
 import { Worker } from "node:worker_threads"
-import { ValidationError } from "../errors"
+import { RetryableError, ValidationError } from "../errors"
 import { errorSummary, logger } from "../logging"
 import type { CleanSvg } from "./svg-clean"
 
@@ -125,11 +125,19 @@ function runWorker(
       }
       finish(() => {
         if (message.ok) {
-          resolve({
-            buffer: Buffer.from(message.buffer),
-            width: message.width,
-            height: message.height,
-          })
+          // What comes back is checked as any other input: within the limit, a real box
+          const buffer = Buffer.from(message.buffer)
+          const sides = [message.width, message.height]
+          if (
+            buffer.length === 0 ||
+            buffer.length > maxBytes ||
+            !sides.every((side) => Number.isFinite(side) && side > 0)
+          ) {
+            logger.warn({ event: "media.svg_clean_answer_invalid", bytes: buffer.length })
+            reject(new ValidationError("upload.svg_invalid", { field: "files" }))
+            return
+          }
+          resolve({ buffer, width: message.width, height: message.height })
         } else if (message.code) {
           reject(new ValidationError(message.code, { field: "files" }))
         } else {
@@ -153,26 +161,60 @@ function runWorker(
   })
 }
 
-let running = 0
-const waiting: (() => void)[] = []
+/** Cleanings waiting for a slot at most; past it the upload is refused as busy. */
+export const SVG_MAX_WAITING = 8
+/** How long a cleaning waits for a slot at most. */
+export const SVG_WAIT_TIMEOUT_MS = 15_000
 
+let running = 0
+const waiting: { take: () => void; timer: NodeJS.Timeout }[] = []
+
+const busy = () => new RetryableError("upload.svg_busy", { retryAfterMs: 5_000 })
+
+/**
+ * A slot among the two cleanings at once. A freed slot passes straight to
+ * the first waiting (the count never drops in between, so no newcomer
+ * slips past the queue); at most eight wait, none longer than 15 s.
+ */
 async function slot(): Promise<() => void> {
-  if (running >= CONCURRENCY) {
-    await new Promise<void>((resolve) => {
-      waiting.push(resolve)
-    })
+  const release = () => {
+    const next = waiting.shift()
+    if (next) {
+      clearTimeout(next.timer)
+      next.take()
+    } else {
+      running--
+    }
   }
-  running++
-  return () => {
-    running--
-    waiting.shift()?.()
+  if (running < CONCURRENCY) {
+    running++
+    return release
   }
+  if (waiting.length >= SVG_MAX_WAITING) {
+    throw busy()
+  }
+  await new Promise<void>((resolve, reject) => {
+    const entry = {
+      take: resolve,
+      timer: setTimeout(() => {
+        const index = waiting.indexOf(entry)
+        if (index >= 0) {
+          waiting.splice(index, 1)
+        }
+        reject(busy())
+      }, SVG_WAIT_TIMEOUT_MS),
+    }
+    waiting.push(entry)
+  })
+  return release
 }
 
 /**
  * The SVG as it may be stored (cleaned, its box), or a `ValidationError`
- * (`upload.svg_*`; `upload.svg_too_complex` past the time or memory limit).
- * A cleaner that cannot start throws a plain error: the upload fails.
+ * (`upload.svg_*`; `upload.svg_too_complex` past the time or memory limit),
+ * or a `RetryableError` (`upload.svg_busy`: too many waiting, or waiting
+ * too long). A cleaner that cannot start throws a plain error: the upload
+ * fails.
  */
 export async function sanitizeSvg(
   bytes: Uint8Array,

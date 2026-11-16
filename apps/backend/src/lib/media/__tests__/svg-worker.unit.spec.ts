@@ -1,5 +1,6 @@
-import { isValidationError } from "../../errors"
-import { SVG_MAX_BYTES, sanitizeSvg } from "../svg"
+import { join } from "node:path"
+import { isRetryableError, isValidationError } from "../../errors"
+import { SVG_MAX_BYTES, SVG_MAX_WAITING, sanitizeSvg } from "../svg"
 import { cleanSvg } from "../svg-clean"
 
 /**
@@ -20,6 +21,9 @@ async function refusal(promise: Promise<unknown>): Promise<string> {
     await promise
     return "kept"
   } catch (error) {
+    if (isRetryableError(error)) {
+      return `busy: ${error.safeMessage}`
+    }
     return isValidationError(error) ? error.safeMessage : `thrown: ${String(error)}`
   }
 }
@@ -54,6 +58,26 @@ describe("sanitizeSvg: the cleaner in a worker", () => {
       sanitizeSvg(LOGO, SVG_MAX_BYTES, { module: "/nowhere/svg-clean.js" })
     )
     expect(outcome).toMatch(/^thrown: /)
+  })
+
+  it("checks the worker's answer as any input: a box that is no number is refused", async () => {
+    expect(
+      await refusal(
+        sanitizeSvg(LOGO, SVG_MAX_BYTES, {
+          module: join(__dirname, "fixtures/bad-answer-cleaner.cjs"),
+        })
+      )
+    ).toBe("upload.svg_invalid")
+  })
+
+  it("lets eight wait for the two slots and refuses one more as busy", async () => {
+    const slow = { module: join(__dirname, "fixtures/slow-cleaner.cjs"), timeoutMs: 10_000 }
+    const runs = Array.from({ length: 2 + SVG_MAX_WAITING + 1 }, () =>
+      refusal(sanitizeSvg(LOGO, SVG_MAX_BYTES, slow))
+    )
+    const outcomes = await Promise.all(runs)
+    expect(outcomes.filter((outcome) => outcome === "kept")).toHaveLength(2 + SVG_MAX_WAITING)
+    expect(outcomes.filter((outcome) => outcome === "busy: upload.svg_busy")).toHaveLength(1)
   })
 
   it("refuses a file past the limit before any worker starts", async () => {

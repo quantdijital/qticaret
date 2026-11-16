@@ -16,6 +16,9 @@ describe("appearance section: the brand pictures' addresses", () => {
     ["a backslash", "/\\evil.example/logo.png"],
     ["a backslash in a host", "https://cdn.magaza.example\\@evil.example/x.png"],
     ["a protocol-relative address", "//evil.example/logo.png"],
+    // Browsers drop tabs and line breaks from addresses: `/\t/host` is `//host`
+    ["a tab", "/\t/evil.example/logo.png"],
+    ["a line break", "/\n/evil.example/logo.png"],
     ["a script", "javascript:alert(1)"],
     ["inline data", "data:image/svg+xml;base64,AAAA"],
   ])("refuses %s", (_name, url) => {

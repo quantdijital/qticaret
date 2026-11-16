@@ -1068,6 +1068,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "SVG dosyası en çok 200 KB olabilir. Dosyayı sadeleştirip yeniden deneyin.",
   "upload.svg_too_complex":
     "SVG dosyasında çok fazla ya da çok iç içe öğe var. Dosyayı sadeleştirip yeniden deneyin.",
+  "upload.svg_too_many": "Tek seferde en çok 3 SVG dosyası yüklenebilir.",
+  "upload.svg_busy": "SVG dosyaları şu an işleniyor. Birkaç saniye sonra yeniden deneyin.",
   "media.svg_logo_only":
     "SVG yalnızca mağaza logosu ve site simgesi olarak kullanılabilir. Bu alan için PNG, JPEG, WebP ya da AVIF görsel seçin.",
   "cart.completed": "Bu sepetle sipariş zaten verildi.",
