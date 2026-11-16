@@ -2,20 +2,26 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
-## 2026-11-15 akşam – 2026-11-16 gece: çapraz şeritler, sekmeli düzenleyici, Tezgâh bölümleri
+## 2026-11-16 gündüz: raf biçimleri, marka logosu boyutu, panel küçük işleri
 
 - **Sıradaki işler:**
-  1. Sahibin bakacağı kararlar:
-     - Tezgâh'ın yeni basamakları seçmesi (çip, foto zemini, gölge): yalnız `layout.json` verisi.
-     - İkinci, "marjinal" bir raf görünümü önerisi: büyük sıra numaralı "ilk beş" (ayrı biçim olarak).
-     - Panelde kaynaklı şerit satırında küçük resim.
-     - Marka logosu boyutunu backend'de saklamak.
-     - Üst çubukta "Mağazayı görüntüle" düğmesi.
-     - `CLAUDE.md`'deki "GitHub Actions kapalı" maddesi artık yanlış: Actions PR'larda koşuyor; madde güncellenmeli.
-  2. Deniz'e iletilecekler:
-     - CI'da kararsız http testleri: `payment-links-cart`, `staff-mfa` (yeniden koşunca geçiyor).
-     - `misafir-siparis-kaniti` dalında iki tür hatası: `proven-customer.ts`, `legal/erasure/sign-ins.ts`.
-     - `toptanci-2-panel` dalında gitleaks istisna biçimi, ayrıca `password-change.ts` ile hız sınırı profili çakışması.
+  1. Güvenlik sertleştirmesi: marka logosu olarak depodaki herhangi bir dosya anahtarı kabul ediliyor; yalnız kütüphane kaydı olan görsel kabul edilmeli (#115 güvenlik incelemesi, Bilgi-1).
+  2. "Mağazayı görüntüle": üretim derlemesinde alan adı bağlı değilken vitrin adresi yapılandırması (`VITE_STOREFRONT_ORIGIN`) gerekir, yoksa düğme çıkmaz.
+  3. Panel şerit satırındaki resim ile vitrinin çizdiği resim farklı olabilir (vitrin görselsiz kategori/marka için en yeni ürünün fotoğrafını çiziyor).
+  4. Panel ana sayfasında 768 px'te kurulum adımları listesi yatay taşıyor (önceden var olan kusur).
+  5. "Sıralı liste" rafında 1024 px "Tek sıra" düzeninde artı düğmesi ve indirim rozeti küçük görselde sıkışık.
+- **`dev`'e giren PR'lar:**
+  - #104 `CLAUDE.md` CI maddesi (Actions PR'larda koşuyor).
+  - #105 şerit satırında kaynağın resmi.
+  - #106 "Mağazayı görüntüle" alan adı yokken de.
+  - #109 ürün rafı "Sıralı liste" biçimi (`ranked`).
+  - #108 ürün rafı "Sahne ve liste" biçimi (`stage_list`).
+  - #115 marka logosu boyutu (brands `logo_width`/`logo_height`, migration, doldurma betiği `brand-logo-sizes:backfill`); güvenlik incelemesi yapıldı.
+- **Kapanan karar:** Tezgâh'ın çip, foto zemini ve gölge basamakları: sahip kararı 2026-11-16, bugünkü kalsın.
+- **Kural hatırlatması:** Yeni tasarımlar eski görünümleri ezmez, alternatif biçim olarak eklenir (sahip, 2026-11-16).
+
+## 2026-11-15 akşam – 2026-11-16 gece: çapraz şeritler, sekmeli düzenleyici, Tezgâh bölümleri
+
 - **`dev`'e giren PR'lar:**
   - #81 şerit notu ve üst bağlantılar.
   - #82 öne çıkan üründe çapraz şeritler.
