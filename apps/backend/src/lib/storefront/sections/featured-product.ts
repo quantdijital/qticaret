@@ -4,12 +4,19 @@ import { bodyFields } from "./look"
 
 /**
  * The featured product's settings (adr/0049 Ek 2026-11-15): how its
- * photographs stand, today's collage by default. Mirrors `@qticaret/types`'
- * `FEATURED_PRODUCT_SETTINGS` and `FEATURED_PRODUCT_DEFAULTS` (the backend
- * reads no runtime value from that package); a unit test keeps them equal.
+ * photographs stand, today's collage by default, and the strips' own look
+ * (Ek 2026-11-16), read only while they are strips. Mirrors
+ * `@qticaret/types`' `FEATURED_PRODUCT_SETTINGS`, `FEATURED_PRODUCT_DEFAULTS`
+ * and `FEATURED_STRIPS_SETTINGS` (the backend reads no runtime value from
+ * that package); a unit test keeps them equal.
  */
 export const FEATURED_PRODUCT_SETTINGS = {
   gallery: ["collage", "strips"],
+  strips_layout: ["side", "wide"],
+  strips_slant: ["soft", "medium", "steep"],
+  strips_line: ["none", "thin", "medium", "thick"],
+  strips_overlap: ["off", "on"],
+  strips_dim: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof FEATURED_PRODUCT_SETTINGS
@@ -18,7 +25,21 @@ type Step<S extends Setting> = (typeof FEATURED_PRODUCT_SETTINGS)[S][number]
 /** A new section's steps, filled where one saved before them has none (no migration). */
 export const FEATURED_PRODUCT_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   gallery: "collage",
+  strips_layout: "side",
+  strips_slant: "medium",
+  strips_line: "thin",
+  strips_overlap: "off",
+  strips_dim: "on",
 }
+
+/** The strips' look: printed to the store only with the strips. */
+export const FEATURED_STRIPS_SETTINGS = [
+  "strips_layout",
+  "strips_slant",
+  "strips_line",
+  "strips_overlap",
+  "strips_dim",
+] as const satisfies readonly Setting[]
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
 
@@ -39,5 +60,10 @@ export const featuredProduct = z
     text: optional(shopText(240)),
     product_id: recordId,
     gallery: setting("gallery"),
+    strips_layout: setting("strips_layout"),
+    strips_slant: setting("strips_slant"),
+    strips_line: setting("strips_line"),
+    strips_overlap: setting("strips_overlap"),
+    strips_dim: setting("strips_dim"),
   })
   .strict()

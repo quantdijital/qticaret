@@ -1,4 +1,5 @@
 import { isShowing, layoutDocument } from "../layout"
+import { FEATURED_PRODUCT_DEFAULTS } from "../sections/featured-product"
 
 // Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
 const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
@@ -105,7 +106,7 @@ describe("storefront layout document (adr/0049)", () => {
   it("takes one featured product on the home page only (adr/0046 Ek 2026-11-05)", () => {
     const featured = { id: "yakin001", type: "featured_product", product_id: "prod_1" }
     expect(layoutDocument.parse({ home: [featured] }).home).toEqual([
-      { ...featured, ...ALWAYS, title: null, text: null, gallery: "collage" },
+      { ...featured, ...ALWAYS, title: null, text: null, ...FEATURED_PRODUCT_DEFAULTS },
     ])
     expect(layoutDocument.safeParse({ product: [featured] }).success).toBe(false)
     expect(layoutDocument.safeParse({ home: [{ ...featured, product_id: "" }] }).success).toBe(
