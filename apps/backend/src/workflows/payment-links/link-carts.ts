@@ -97,6 +97,9 @@ function scopeOf(by: { link_id: string } | { since: Date; after?: string }): Sco
  * (the code before the table, still serving during a deploy; a table
  * rolled back and made again) is seen all the same. Each with its order.
  *
+ * The latest carts' half reads every link (no time bound: a shop makes a
+ * few links a day, each joined to its cart by the cart's primary key).
+ *
  * Those completed since a time come a page at a time, newest cart id first
  * (Medusa's ids sort by their making): `after` is the last id of the page
  * before (a key every page moves past exactly).

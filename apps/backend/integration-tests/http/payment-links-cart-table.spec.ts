@@ -172,6 +172,18 @@ medusaIntegrationTestRunner({
       expect(row).toMatchObject({ status: "paid", order_id: order.order_id })
     })
 
+    it("keeps the cart a link gives up, though it was opened without a row", async () => {
+      const { id, token } = await newLink()
+      const first = (await open(token)).data.cart_id ?? ""
+      // Opened by the code before the table: the link names it, no row keeps it
+      await forgetRows(id)
+      const second = (await open(token)).data.cart_id ?? ""
+      const kept = await rowsOf({ link_id: id })
+
+      expect(second).not.toBe(first)
+      expect(kept.map((entry) => entry.cart_id).sort()).toEqual([first, second].sort())
+    })
+
     it("fills in a cart that has only the link's mark, once however often it runs", async () => {
       const { id } = await newLink()
       const carts = getContainer().resolve(Modules.CART)

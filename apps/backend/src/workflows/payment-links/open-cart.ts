@@ -157,13 +157,24 @@ const presetShippingStep = createStep(
 
 /**
  * The cart kept as the link's in `payment_link_cart`, where the link's
- * carts are looked up (`completedLinkCarts`). Undone, the row goes: only
- * the one this step wrote.
+ * carts are looked up (`completedLinkCarts`). The cart it gives up is
+ * kept too, if it has no row yet (one opened by the code before the
+ * table): once given up it is no longer the link's latest, and only its
+ * row shows it. Undone, the new cart's row goes: only the one this step
+ * wrote (a given-up cart's row is true either way).
  */
 const recordCartStep = createStep(
   "payment-links-record-cart",
   async (input: { link_id: string; cart_id: string }, { container }) => {
-    const row = await service(container).createPaymentLinkCarts({
+    const links = service(container)
+    const [link] = await links.listPaymentLinks(
+      { id: input.link_id },
+      { select: ["id", "cart_id"], take: 1 }
+    )
+    if (link?.cart_id && link.cart_id !== input.cart_id) {
+      await links.recordLinkCarts([{ link_id: link.id, cart_id: link.cart_id }])
+    }
+    const row = await links.createPaymentLinkCarts({
       link_id: input.link_id,
       cart_id: input.cart_id,
     })
