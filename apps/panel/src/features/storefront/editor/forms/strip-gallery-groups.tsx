@@ -50,7 +50,7 @@ export function StripGalleryGroups({
     onChange({ ...section, ...next })
   }
   return (
-    <PanelGroup title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
+    <PanelGroup name="layout" title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
       {STRIP_STEP_SETTINGS.map((name) => (
         <StepChoice<string>
           key={name}
