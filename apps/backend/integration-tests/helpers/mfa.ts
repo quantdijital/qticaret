@@ -9,7 +9,7 @@ import { totp } from "./totp"
 export async function setUpTotp(
   http: HttpClient,
   admin: { plain: Record<string, string>; headers: Record<string, string> }
-): Promise<{ factorId: string; secret: string; codes: string[] }> {
+): Promise<{ factorId: string; secret: string; codes: string[]; code: string }> {
   const started = await http.post<{ mfa_factor: { id: string }; secret: string }>(
     "/auth/mfa/factors",
     { provider: "totp", label: "Panel" },
@@ -30,5 +30,7 @@ export async function setUpTotp(
     factorId: started.data.mfa_factor.id,
     secret: started.data.secret,
     codes: codes.data.recovery_codes,
+    // Given twice already (verify and step-up): never taken again (api/http/reauth.ts)
+    code,
   }
 }
