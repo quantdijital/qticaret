@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { STOREFRONT_ORIGIN } from "@/features/storefront/layout/preview-url"
 import { Topbar } from "./topbar"
 
 const staff = vi.hoisted(() => ({ current: { role: "owner", can: { settings: true } } }))
@@ -21,8 +22,12 @@ vi.mock("@/features/auth/api/me", () => ({
   useLogout: () => ({ mutate: vi.fn() }),
 }))
 vi.mock("@/features/auth/api/staff", () => ({ useStaff: () => staff.current }))
+const seo = vi.hoisted(() => ({ host: null as string | null }))
 vi.mock("@/features/settings/api/seo", () => ({
-  seoSettingsQuery: () => ({ queryKey: ["seo"], queryFn: () => ({ values: {} }) }),
+  seoSettingsQuery: () => ({
+    queryKey: ["seo"],
+    queryFn: () => ({ values: { canonical_host: seo.host } }),
+  }),
 }))
 vi.mock("@qticaret/admin-ui/ui/sidebar", () => ({ SidebarTrigger: () => null }))
 vi.mock("@/features/notifications/notification-bell", () => ({ NotificationBell: () => null }))
@@ -36,6 +41,35 @@ function renderTopbar() {
     </QueryClientProvider>
   )
 }
+
+describe("Topbar's 'Mağazayı görüntüle'", () => {
+  beforeEach(() => {
+    seo.host = null
+  })
+
+  it("opens the bound domain in a new tab", async () => {
+    seo.host = "magaza.example.com"
+    renderTopbar()
+    // Its name starts with the words it shows, and says where it opens
+    const link = await screen.findByRole("link", {
+      name: "Mağazayı görüntüle (yeni sekmede açılır)",
+    })
+    expect(link).toHaveTextContent("Mağazayı görüntüle")
+    expect(link).toHaveAttribute("href", "https://magaza.example.com")
+    expect(link).toHaveAttribute("target", "_blank")
+    expect(link).toHaveAttribute("rel", "noopener noreferrer")
+  })
+
+  it("opens the storefront the panel already frames while no domain is bound", async () => {
+    // The development default or `VITE_STOREFRONT_ORIGIN`: never made up here
+    expect(STOREFRONT_ORIGIN).toMatch(/^https?:\/\//)
+    renderTopbar()
+    const link = await screen.findByRole("link", { name: /Mağazayı görüntüle/ })
+    expect(link).toHaveAttribute("href", STOREFRONT_ORIGIN)
+    expect(link).toHaveAttribute("target", "_blank")
+    expect(link).toHaveAttribute("rel", "noopener noreferrer")
+  })
+})
 
 describe("Topbar account menu", () => {
   beforeEach(() => {

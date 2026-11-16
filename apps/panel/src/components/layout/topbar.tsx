@@ -20,6 +20,7 @@ import { useCurrentUser, useLogout } from "@/features/auth/api/me"
 import { useStaff } from "@/features/auth/api/staff"
 import { NotificationBell } from "@/features/notifications/notification-bell"
 import { seoSettingsQuery } from "@/features/settings/api/seo"
+import { storefrontHome } from "@/features/storefront/layout/preview-url"
 import { CommandMenu } from "./command-menu"
 
 function initials(name: string): string {
@@ -33,7 +34,9 @@ export function Topbar() {
   const { t } = useTranslation()
   const [commandOpen, setCommandOpen] = useState(false)
   const { data: seo } = useQuery(seoSettingsQuery())
-  const host = seo?.values.canonical_host
+  // The bound domain, else the storefront address the panel already frames (no domain yet);
+  // none until the settings are read, so it never points elsewhere first
+  const store = seo ? storefrontHome(seo.values.canonical_host) : null
 
   return (
     <header className="sticky top-0 z-20 flex h-[var(--layout-topbar-height)] shrink-0 items-center gap-3 border-b bg-card px-4 lg:px-[var(--page-padding-wide)]">
@@ -57,10 +60,15 @@ export function Topbar() {
         </KbdGroup>
       </button>
       <div className="ml-auto flex items-center gap-2">
-        {host ? (
+        {store ? (
           <Button asChild variant="outline" className="hidden h-9 md:inline-flex">
-            <a href={`https://${host}`} target="_blank" rel="noreferrer">
-              <ExternalLink />
+            <a
+              href={store}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("topbar.viewStoreNewTab")}
+            >
+              <ExternalLink aria-hidden="true" />
               {t("topbar.viewStore")}
             </a>
           </Button>

@@ -3027,7 +3027,8 @@
   },
   "topbar": {
     "viewStore": "Mağazayı görüntüle",
-    "storeSettings": "Mağaza ayarları"
+    "storeSettings": "Mağaza ayarları",
+    "viewStoreNewTab": "Mağazayı görüntüle (yeni sekmede açılır)"
   },
   "period": {
     "today": "Bugün",

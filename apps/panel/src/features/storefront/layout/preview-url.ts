@@ -17,6 +17,21 @@ export const STOREFRONT_ORIGIN: string | null = configured
 const ABSOLUTE = /^https?:\/\//
 
 /**
+ * Where "Mağazayı görüntüle" goes: the shop's canonical host when one is
+ * set, else the storefront's origin the panel already frames
+ * (`STOREFRONT_ORIGIN`, http or https only); null when neither is known.
+ */
+export function storefrontHome(
+  canonicalHost: string | null | undefined,
+  origin: string | null = STOREFRONT_ORIGIN
+): string | null {
+  if (canonicalHost) {
+    return `https://${canonicalHost}`
+  }
+  return origin && ABSOLUTE.test(origin) ? origin : null
+}
+
+/**
  * The address the frame and the new tab open: the storefront's origin with
  * the signed path, else the server's absolute link; null when neither is
  * known (no canonical host set and no origin configured). With `page`, the
