@@ -200,11 +200,34 @@ medusaIntegrationTestRunner({
       const merchantOid = await startPaytrPayment(http, storefront.headers, cartId)
       fake.pay(merchantOid)
       const inventory = container.resolve(Modules.INVENTORY)
-      const busy = jest
-        .spyOn(inventory, "createReservationItems")
-        .mockRejectedValueOnce(
-          new Error("Knex: Timeout acquiring a connection. The pool is probably full.")
-        )
+      // The busy database for this cart's own reservation only, and proved to have met it.
+      // A bare `mockRejectedValueOnce` gives its one failure to whichever caller of the
+      // shared inventory service comes first; on a loaded CI runner (PR #117) the notice
+      // answered 400 instead of 503, and the case could not tell which call the failure met
+      const { data: carts } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: "cart",
+        fields: ["items.id"],
+        filters: { id: cartId },
+      })
+      const lineIds = new Set(
+        ((carts[0] as { items?: { id: string }[] } | undefined)?.items ?? []).map(({ id }) => id)
+      )
+      const original = inventory.createReservationItems.bind(inventory) as (
+        ...args: unknown[]
+      ) => Promise<unknown>
+      let injected = 0
+      const busy = jest.spyOn(inventory, "createReservationItems").mockImplementation(((
+        ...args: unknown[]
+      ) => {
+        const items = [args[0]].flat() as { line_item_id?: string | null }[]
+        if (injected === 0 && items.some((item) => lineIds.has(item.line_item_id ?? ""))) {
+          injected += 1
+          return Promise.reject(
+            new Error("Knex: Timeout acquiring a connection. The pool is probably full.")
+          )
+        }
+        return original(...args)
+      }) as typeof inventory.createReservationItems)
 
       const first = await notifyPaytr(http, success(merchantOid))
       const between = await orderOfCart(container, cartId)
@@ -212,6 +235,9 @@ medusaIntegrationTestRunner({
       const second = await notifyPaytr(http, success(merchantOid))
       const order = await orderOfCart(container, cartId)
 
+      // The failure met this cart's completion, once
+      expect(lineIds.size).toBeGreaterThan(0)
+      expect(injected).toBe(1)
       expect(first.status).toBe(503)
       expect(first.data).not.toBe("OK")
       expect(between).toBeNull()
