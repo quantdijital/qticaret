@@ -27,8 +27,8 @@ vi.mock("../layout", () => ({
     link?.path ? { label: link.label ?? "", path: link.path } : null,
 }))
 
-const t = (key: string, values?: Record<string, string>) =>
-  values ? `${key}:${Object.values(values).join(",")}` : key
+const t = (key: string, values?: Record<string, string | number>) =>
+  values ? `${key}:${Object.values(values).map(String).join(",")}` : key
 
 const photo = (src: string, alt = ""): ImageView => ({
   src,

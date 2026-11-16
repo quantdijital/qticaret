@@ -35,8 +35,8 @@ vi.mock("../image", () => ({
   productImages: (product: StoreProduct) => [photo(`/${product.id}.webp`, product.title)],
 }))
 
-const t = (key: string, values?: Record<string, string>) =>
-  values ? `${key}:${Object.values(values).join(",")}` : key
+const t = (key: string, values?: Record<string, string | number>) =>
+  values ? `${key}:${Object.values(values).map(String).join(",")}` : key
 
 function photo(src: string, alt = ""): ImageView {
   return { src, alt, width: null, height: null, sources: { avif: null, webp: null } }
