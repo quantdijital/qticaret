@@ -1,6 +1,7 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createPaymentCollectionForCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import paymentLinkPaid from "../../src/subscribers/payment-link-paid"
 import { createAdminUser } from "../helpers/admin"
 import { completeWithSystemPayment } from "../helpers/checkout"
 import { eventually } from "../helpers/eventually"
@@ -122,8 +123,8 @@ medusaIntegrationTestRunner({
         () => linkRow(getContainer(), id),
         (row) => row.status === "paid"
       )
-      // The paid step marks the link, then writes the order's number and maker: waited for
-      // too (the order carries the link's id from the start, its cart's, so that is no sign)
+      // The paid step writes the order's number and maker, then marks the link: read with a
+      // wait all the same (the order carries the link's id from the start, its cart's)
       // (the order module's own list: typed alike with or without Medusa's generated types)
       const orders = await eventually(
         () =>
@@ -142,6 +143,19 @@ medusaIntegrationTestRunner({
           ).listNotifications({ resource_id: id, trigger_type: "payment_links.paid" }),
         (found) => found.length > 0
       )
+      // order.placed again (a redelivered event): the link is paid and the order's keys are
+      // written, so nothing is written again and no second bell rings
+      await paymentLinkPaid({
+        event: { name: "order.placed", data: { id: order.order_id ?? "" } },
+        container: getContainer(),
+        pluginOptions: {},
+      })
+      const bellsAfter = await (
+        getContainer().resolve(Modules.NOTIFICATION) as unknown as {
+          listNotifications: (filters: Record<string, unknown>) => Promise<unknown[]>
+        }
+      ).listNotifications({ resource_id: id, trigger_type: "payment_links.paid" })
+      const linkAfter = await linkRow(getContainer(), id)
       const reopened = await open(token)
 
       expect(first.status).toBe(200)
@@ -172,6 +186,8 @@ medusaIntegrationTestRunner({
       })
       expect(made.data.payment_link?.number).toBe(`PL-${String(paid.number)}`)
       expect(bells).toHaveLength(1)
+      expect(bellsAfter).toHaveLength(1)
+      expect(linkAfter).toMatchObject({ status: "paid", order_id: order.order_id })
       expect(reopened.status).toBe(404)
     })
 
