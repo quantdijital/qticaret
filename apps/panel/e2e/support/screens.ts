@@ -19,9 +19,9 @@ export const SECTIONS = [
   "/reviews/google",
   "/customers/groups",
   // Wholesalers, their levels and orders (ADR-0068): the lists, or why they are closed while off
-  "/customers/wholesale",
-  "/customers/wholesale/tiers",
-  "/customers/wholesale/orders",
+  "/wholesale",
+  "/wholesale/tiers",
+  "/wholesale/orders",
   "/customers/contact-messages",
   // Every alert of the bell, read and unread (adr/0020)
   "/notifications",
@@ -34,13 +34,10 @@ export const SECTIONS = [
   // swatches, trust badges and when a product card says "Az kaldı" are in it (adr/0049
   // Ek 2026-11-06)
   "/storefront/editor",
+  // The storefront's preferences, a panel of the editor (the owner, 2026-11-16): the
+  // contact form's page and the payment and shipping pages
+  "/storefront/editor?open=preferences",
   "/storefront/menus",
-  "/storefront/preferences",
-  "/storefront/preferences?part=contact",
-  // The shop's payment and shipping pages
-  "/storefront/preferences?part=infoPages",
-  // Maintenance mode and its bypass link (adr/0053)
-  "/storefront/preferences?part=maintenance",
   "/content",
   // The media library: every picture the shop uploaded or brought in
   "/media",
@@ -70,6 +67,8 @@ export const SETTINGS = [
   "/settings/store",
   // The legal identity beside the ETBİS QR code
   "/settings/store?part=legal",
+  // Maintenance mode and its bypass link (adr/0053)
+  "/settings/maintenance",
   "/settings/payments",
   "/settings/payments/paytr",
   "/settings/payments/iyzico",

@@ -24,9 +24,9 @@ const valuesOf = (saved: StorefrontSettings): Values => ({
 /**
  * The page the storefront's contact form shows on, below its text
  * (adr/0047); turned off, the storefront shows no form and the path is
- * saved as none.
+ * saved as none. Saved at once to the storefront section, not the draft.
  */
-export function ContactFormCard({ saved }: { saved: StorefrontSettings }) {
+export function ContactFormFields({ saved }: { saved: StorefrontSettings }) {
   const { t } = useTranslation()
   const { save, saving } = useSaveStorefront()
   const values = valuesOf(saved)
@@ -44,8 +44,8 @@ export function ContactFormCard({ saved }: { saved: StorefrontSettings }) {
   const error = errorLine(t, form.formState.errors.path)
   return (
     <CardForm
+      bare
       title={t(`${C}.title`)}
-      description={t(`${C}.description`)}
       dirty={form.formState.isDirty}
       saving={saving}
       onSubmit={() => void submit()}
@@ -55,10 +55,10 @@ export function ContactFormCard({ saved }: { saved: StorefrontSettings }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <label htmlFor="storefront-contact-enabled" className="text-sm font-medium">
+          <label htmlFor="storefront-contact-enabled" className="text-sm">
             {t(`${C}.enabled`)}
           </label>
-          <span id="storefront-contact-enabled-hint" className="text-[13px] text-muted-foreground">
+          <span id="storefront-contact-enabled-hint" className="text-xs text-muted-foreground">
             {t(`${C}.hint`)}
           </span>
         </div>
@@ -87,7 +87,6 @@ export function ContactFormCard({ saved }: { saved: StorefrontSettings }) {
             autoComplete="off"
             placeholder={DEFAULT_PATH}
             aria-invalid={Boolean(error)}
-            className="sm:w-80"
             {...form.register("path")}
           />
         </Field>

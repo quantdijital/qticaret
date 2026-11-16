@@ -63,7 +63,7 @@ export function NewWholesalerDialog({
       rememberOutcome(made, values.tax_id.trim() !== "")
       form.reset(blankAccount)
       onOpenChange(false)
-      void navigate({ to: "/customers/wholesale/$id", params: { id: made.account.id } })
+      void navigate({ to: "/wholesale/$id", params: { id: made.account.id } })
     } catch (error) {
       if (!takingOver && codeOf(error) === UNPROVEN_SIGNUP) {
         setTakeOver(values)

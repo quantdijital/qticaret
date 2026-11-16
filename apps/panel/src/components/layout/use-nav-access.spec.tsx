@@ -64,6 +64,27 @@ describe("the menu's items behind a flag and a capability", () => {
     expect(client("owner", false)(links)).toBe(false)
   })
 
+  it("offers Toptancılar to owner and admin only while the shop sells wholesale", () => {
+    const wholesale = navItem("wholesale")
+    const client = (role: "owner" | "operations", flag: boolean) => {
+      const query = new QueryClient({
+        defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+      })
+      query.setQueryData(STAFF_KEY, staff(role))
+      query.setQueryData(featuresQuery().queryKey, [
+        { key: "customers.wholesale", default: false, owner: "tenant", enabled: flag },
+      ])
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={query}>{children}</QueryClientProvider>
+      )
+      return renderHook(() => useNavAccess(), { wrapper }).result.current
+    }
+    expect(client("owner", true)(wholesale)).toBe(true)
+    expect(client("owner", false)(wholesale)).toBe(false)
+    expect(client("operations", true)(wholesale)).toBe(false)
+    expect(accessFor({})(wholesale)).toBe(false)
+  })
+
   it("leaves items with neither alone", () => {
     expect(accessFor({})(navItem("promotions"))).toBe(true)
   })

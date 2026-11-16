@@ -21,8 +21,9 @@ describe("the wholesale screens' words", () => {
   })
 
   it.each([
-    "customers.sectionWholesale",
-    // Toptancılar's three tabs and the retail list's pointer to wholesale orders
+    // The menu item of its own (the owner, 2026-11-16), its three tabs and the retail list's
+    // pointer to wholesale orders
+    "nav.wholesale",
     "wholesale.nav.accounts",
     "wholesale.nav.tiers",
     "wholesale.nav.orders",
@@ -34,6 +35,12 @@ describe("the wholesale screens' words", () => {
     expect(typeof at(tr, path)).toBe("string")
     expect(typeof at(en, path)).toBe("string")
   })
+
+  it("name no Toptancılar tab under Müşteriler any more (the owner, 2026-11-16)", () => {
+    expect(at(tr, "customers.sectionWholesale")).toBeUndefined()
+    expect(at(en, "customers.sectionWholesale")).toBeUndefined()
+  })
+
   it("name no invitation template any more (Ek 2026-11-15 (2))", () => {
     expect(
       at(tr, "settings.notifications.templates.names.account.wholesale_invite")

@@ -1,6 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { WholesalerPage } from "@/features/wholesale/pages/wholesaler-page"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
+// Toptancılar left Müşteriler for its own menu item (the owner, 2026-11-16): old links land there
 export const Route = createFileRoute("/_auth/customers/wholesale/$id")({
-  component: WholesalerPage,
+  beforeLoad: ({ params }) => {
+    throw redirect({ to: "/wholesale/$id", params, replace: true })
+  },
 })

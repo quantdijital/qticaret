@@ -1,5 +1,6 @@
 import {
   Bell,
+  Construction,
   CreditCard,
   FileClock,
   FileText,
@@ -48,6 +49,8 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
     key: "shop",
     sections: [
       { key: "store", to: "/settings/store", icon: Store, needs: "settings" },
+      // adr/0053: everyone sees whether the storefront is dark; only the owner turns it
+      { key: "maintenance", to: "/settings/maintenance", icon: Construction },
       { key: "appearance", to: "/settings/appearance", icon: Palette, needs: "settings" },
       { key: "seo", to: "/settings/seo", icon: Search, needs: "settings" },
       { key: "attributes", to: "/settings/attributes", icon: ListChecks, needs: "settings" },

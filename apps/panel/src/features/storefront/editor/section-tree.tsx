@@ -1,4 +1,4 @@
-import { Columns3, Contact, Palette, Store, SwatchBook } from "lucide-react"
+import { Columns3, Contact, Palette, SlidersHorizontal, Store, SwatchBook } from "lucide-react"
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
 import type {
@@ -42,13 +42,15 @@ interface SectionTreeProps {
   /** The stock line and colour names in the draft (adr/0049 Ek 2026-11-06), and whether one is wrong. */
   onLooks: () => void
   looksProblem: boolean
+  /** How the storefront behaves (contact and info pages), saved at once apart from the draft. */
+  onPreferences: () => void
 }
 
 /**
  * The page's parts as the storefront draws them, top to bottom: the
  * header, the chosen page's own sections, the footer; then the theme's
- * own settings and the stock line and colour names every page shares
- * (the trust badges are edited in each trust strip section). The menus, the logo and the contact details are edited
+ * own settings, the stock line and colour names every page shares and
+ * the storefront's preferences (the trust badges are edited in each trust strip section). The menus, the logo and the contact details are edited
  * on their own screens, linked from where they show.
  */
 export function SectionTree({
@@ -63,6 +65,7 @@ export function SectionTree({
   themeProblem,
   onLooks,
   looksProblem,
+  onPreferences,
 }: SectionTreeProps) {
   const { t } = useTranslation()
   const store = t(`${T}.storeProfile`)
@@ -212,6 +215,7 @@ export function SectionTree({
           problem={looksProblem}
           onClick={onLooks}
         />
+        <ThemeRow icon={SlidersHorizontal} label={t(`${T}.preferences`)} onClick={onPreferences} />
       </TreeGroup>
     </nav>
   )

@@ -18,7 +18,7 @@ import { WholesaleNav } from "@/features/wholesale/components/wholesale-nav"
 import { ratePercent } from "@/features/wholesale/format"
 import { errorText } from "@/lib/errors"
 
-const route = getRouteApi("/_auth/customers/wholesale/tiers/")
+const route = getRouteApi("/_auth/wholesale/tiers/")
 const T = "wholesale.tiers"
 
 function useTierColumns(): Column<WholesaleTier>[] {
@@ -77,7 +77,7 @@ function TiersList({ onAdd }: { onAdd: () => void }) {
         loading={list.isPending}
         stale={list.isPlaceholderData}
         onRowClick={(tier) => {
-          void navigate({ to: "/customers/wholesale/tiers/$id", params: { id: tier.id } })
+          void navigate({ to: "/wholesale/tiers/$id", params: { id: tier.id } })
         }}
         empty={
           <div className="flex flex-col items-center gap-3 text-center">
@@ -97,7 +97,7 @@ function TiersList({ onAdd }: { onAdd: () => void }) {
           count={list.data.count}
           onPageChange={(next) => {
             void navigate({
-              to: "/customers/wholesale/tiers",
+              to: "/wholesale/tiers",
               search: { page: next > 0 ? next + 1 : undefined },
               replace: true,
             })
@@ -109,7 +109,7 @@ function TiersList({ onAdd }: { onAdd: () => void }) {
 }
 
 /**
- * Müşteriler > Toptan seviyeleri (ADR-0068 §1): the levels wholesalers
+ * Toptancılar > Toptan seviyeleri (ADR-0068 §1): the levels wholesalers
  * buy at ("Toptan A"), each a rate off every variant and/or prices by
  * hand, and the fewest units an order holds.
  */

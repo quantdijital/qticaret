@@ -52,7 +52,7 @@ export function TierDialog({
         const { tier: made } = await create.mutateAsync(body)
         toast.success(t(`${T}.created`))
         onOpenChange(false)
-        void navigate({ to: "/customers/wholesale/tiers/$id", params: { id: made.id } })
+        void navigate({ to: "/wholesale/tiers/$id", params: { id: made.id } })
         return
       }
       await update.mutateAsync({

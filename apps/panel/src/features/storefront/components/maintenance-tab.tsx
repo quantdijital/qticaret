@@ -10,7 +10,7 @@ import { MaintenancePageCard } from "./maintenance-page-card"
 import { MaintenanceStatusCard } from "./maintenance-status-card"
 
 /**
- * Storefront > Preferences > Maintenance (adr/0053): the switch and the
+ * Settings > Maintenance's body (adr/0053): the switch and the
  * bypass link side by side, the dark page's texts under them. Writing is
  * the owner's (`can.maintenance`); the link is the owner's and the admin's.
  */

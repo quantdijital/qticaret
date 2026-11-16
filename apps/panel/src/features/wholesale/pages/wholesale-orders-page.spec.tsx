@@ -72,7 +72,7 @@ describe("WholesaleOrdersPage (Ek 2026-11-15 (2))", () => {
     expect(await screen.findByText("#1050")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Kaya Bıçak Ltd" })).toHaveAttribute(
       "href",
-      "/customers/wholesale/$id"
+      "/wholesale/$id"
     )
     expect(fetchMock).toHaveBeenCalledWith("/admin/order-board", {
       query: { stage: "all", segment: "wholesale", offset: 0 },
@@ -91,7 +91,7 @@ describe("WholesaleOrdersPage (Ek 2026-11-15 (2))", () => {
     await userEvent.click(await screen.findByRole("option", { name: "Tüm toptancılar" }))
     expect(navigate).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        to: "/customers/wholesale/orders",
+        to: "/wholesale/orders",
         search: expect.objectContaining({ wholesaler: undefined, stage: "to_ship" }) as unknown,
       })
     )

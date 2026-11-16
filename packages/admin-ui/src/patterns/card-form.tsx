@@ -20,6 +20,11 @@ interface CardFormProps {
   onReset: () => void
   /** Folds to its title and a one-line summary (a page's secondary parts, docs/18 §7). */
   collapse?: CollapseOptions | undefined
+  /**
+   * No card around it, inside a frame that already titles it (the theme
+   * editor's panel groups); the title names the form for screen readers.
+   */
+  bare?: boolean
   children: ReactNode
 }
 
@@ -39,12 +44,14 @@ export function CardForm({
   onSubmit,
   onReset,
   collapse,
+  bare = false,
   children,
 }: CardFormProps) {
   const { t } = useTranslation(ADMIN_UI_NS)
   const form = (
     <form
       noValidate
+      aria-label={bare ? title : undefined}
       className="flex flex-col gap-5"
       onSubmit={(event) => {
         event.preventDefault()
@@ -68,6 +75,9 @@ export function CardForm({
       </div>
     </form>
   )
+  if (bare) {
+    return form
+  }
   return collapse ? (
     <CollapsibleSection
       {...collapse}

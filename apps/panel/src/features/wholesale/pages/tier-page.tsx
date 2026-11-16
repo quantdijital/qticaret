@@ -18,9 +18,9 @@ import { WholesaleGate } from "@/features/wholesale/components/wholesale-gate"
 import { ratePercent } from "@/features/wholesale/format"
 import { errorText } from "@/lib/errors"
 
-const route = getRouteApi("/_auth/customers/wholesale/tiers/$id")
+const route = getRouteApi("/_auth/wholesale/tiers/$id")
 const T = "wholesale.tiers"
-const BACK = "/customers/wholesale/tiers"
+const BACK = "/wholesale/tiers"
 
 function TierActions({ tier }: { tier: WholesaleTier }) {
   const { t } = useTranslation()

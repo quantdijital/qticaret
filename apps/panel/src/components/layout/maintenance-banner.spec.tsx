@@ -10,18 +10,8 @@ const fetchMock = vi.hoisted(() => vi.fn<(url: string) => Promise<unknown>>())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    to,
-    search,
-    children,
-    className,
-  }: {
-    to: string
-    search: { part: string }
-    children: ReactNode
-    className?: string
-  }) => (
-    <a href={`${to}?part=${search.part}`} className={className}>
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
       {children}
     </a>
   ),
@@ -55,7 +45,7 @@ describe("MaintenanceBanner", () => {
     fetchMock.mockReset()
   })
 
-  it("says the storefront is dark on every page, linking to its tab", async () => {
+  it("says the storefront is dark on every page, linking to Settings > Maintenance", async () => {
     fetchMock.mockResolvedValue(section(true))
     renderBanner()
 
@@ -65,7 +55,7 @@ describe("MaintenanceBanner", () => {
     )
     expect(screen.getByRole("link", { name: "Bakım modu ayarları" })).toHaveAttribute(
       "href",
-      "/storefront/preferences?part=maintenance"
+      "/settings/maintenance"
     )
     expect(fetchMock).toHaveBeenCalledWith(URL)
   })
