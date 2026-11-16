@@ -264,7 +264,6 @@ describe("the theme's home page: the shelf", () => {
     expect(rails).toHaveLength(2)
     // Past the container by the gutter, padded and snapping at the gutter: the
     // mandatory snap would otherwise pull the first pill onto the screen's edge
-    // (the pills from 1024 px only: below that they wrap inside the gutter)
     for (const rail of rails) {
       expect(rail).toContain("-mx-(--gutter)")
       expect(rail).toContain("px-(--gutter)")

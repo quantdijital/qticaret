@@ -1,0 +1,68 @@
+/* The shelf tabs' pill row on a phone and a tablet (sections/ShelfTabs; owner
+   2026-11-16: "piller sağa kaydırılabilir olsun, alt satıra düşmesin", and of
+   the earlier row, "pilin birisi lap diye kesik"). Below 1024 px the pills
+   stay on one line that scrolls sideways past the container to the screen's
+   edges, the first pill on the page's left line and the last one able to
+   come fully into view (the gutter's padding at both ends). It snaps loosely
+   to a pill's start. An edge the row is cut at fades while more waits past
+   it, so no pill ends abruptly; with every pill in view nothing fades. The
+   start's fade is the gutter's width, so a pill snapped to the page's left
+   line stands clear of it; the end's is 2rem. The fades follow the
+   visitor's own scrolling, nothing moves by itself. From 1024 px the row
+   is as it was (`.gf-rail`'s snap, no fade) */
+@property --gf-tab-fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --gf-tab-fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@keyframes gf-tab-fade-start {
+  to {
+    --gf-tab-fade-start: var(--gutter);
+  }
+}
+@keyframes gf-tab-fade-end {
+  from {
+    --gf-tab-fade-end: 2rem;
+  }
+}
+@media (width < 64rem) {
+  .gf-tab-row > .gf-rail {
+    scroll-snap-type: x proximity;
+  }
+  /* A pill reached by the keys or chosen scrolls into view whole, clear of
+     the fade (`ShelfTabsFollow` brings its radio into view): the radio
+     covers its pill, at zero size it would stand at the pill's start */
+  .gf-tab-row > .gf-rail > .gf-tab > input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: inherit;
+    scroll-margin-inline: 1rem;
+  }
+  /* Where the browser cannot drive the fades by scrolling, or the row does
+     not scroll at all (its timeline inactive), there is none */
+  @supports (animation-timeline: scroll()) {
+    .gf-tab-row > .gf-rail {
+      mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 var(--gf-tab-fade-start),
+        #000 calc(100% - var(--gf-tab-fade-end)),
+        transparent
+      );
+      animation:
+        gf-tab-fade-start linear both,
+        gf-tab-fade-end linear both;
+      animation-timeline: scroll(self inline);
+      animation-range:
+        0 2rem,
+        calc(100% - 2rem) 100%;
+    }
+  }
+}
