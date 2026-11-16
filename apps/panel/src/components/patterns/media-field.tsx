@@ -55,6 +55,8 @@ interface MediaFieldProps {
   children?: ReactNode
   /** Beside the empty frame in place of the hint: what shows without a picture. */
   emptyAside?: ReactNode
+  /** On the field's own box: its place in a row of fields (a subgrid that lines up frames). */
+  className?: string
 }
 
 const hasFiles = (event: DragEvent) => event.dataTransfer.types.includes("Files")
@@ -83,6 +85,7 @@ export function MediaField({
   svg = false,
   children,
   emptyAside,
+  className,
 }: MediaFieldProps) {
   const { t } = useTranslation()
   const changed = useMediaChanged()
@@ -122,7 +125,11 @@ export function MediaField({
     <div
       role="group"
       aria-labelledby={`${id}-label`}
-      className={cn("flex min-w-0 flex-col gap-2", inline && "sm:flex-row sm:items-start sm:gap-4")}
+      className={cn(
+        "flex min-w-0 flex-col gap-2",
+        inline && "sm:flex-row sm:items-start sm:gap-4",
+        className
+      )}
     >
       {inline ? null : title}
       <button

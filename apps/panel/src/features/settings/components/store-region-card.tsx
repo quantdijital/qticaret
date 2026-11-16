@@ -16,6 +16,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { StoreSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 // The zones a Turkish shop meets first; the browser knows the rest
 const PREFERRED_ZONES = [
@@ -57,12 +58,13 @@ function UnitChoice<K extends "weight_unit" | "dimension_unit">({
         <RadioGroup
           value={field.value}
           onValueChange={field.onChange}
-          className="flex flex-wrap gap-2"
+          // The two choices one width and one height, side by side once the card has room for both
+          className="grid gap-2 @[22rem]:grid-cols-2"
         >
           {options.map((option) => (
             <label
               key={option}
-              className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
+              className="flex h-9 min-w-0 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
             >
               <RadioGroupItem value={option} />
               {t(`settings.store.units.${option}`)}
@@ -74,7 +76,11 @@ function UnitChoice<K extends "weight_unit" | "dimension_unit">({
   )
 }
 
-/** The shop's time zone and the units its product forms open in. */
+/**
+ * The shop's time zone and the units its product forms open in: short
+ * facts, in the store profile's right column beside the brand and as tall
+ * as it (its content on top, docs/18 §2).
+ */
 export function RegionCard({ saved, className }: { saved: StoreSettings; className?: string }) {
   const { t } = useTranslation()
   const save = useSaveSection<StoreSettings>("store")
@@ -96,7 +102,7 @@ export function RegionCard({ saved, className }: { saved: StoreSettings; classNa
     <CardForm
       title={t("settings.store.region")}
       description={t("settings.store.regionHint")}
-      className={className}
+      className={cn("@container", className)}
       dirty={form.formState.isDirty}
       saving={save.isPending}
       onSubmit={() => void submit()}

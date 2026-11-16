@@ -70,7 +70,8 @@ export function StorePage() {
       <SettingsTabs
         label={t(`${S}.title`)}
         tabs={[
-          // The brand (name, logos, site icon) wide; the short region and units on the right
+          // The brand (name, then logos and site icon in one row) wide; the short region and
+          // units on the right, as tall as it (PageGrid stretches a row's cells)
           tab("general", (data) => (
             <PageGrid>
               <StoreBrandCard

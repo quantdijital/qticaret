@@ -89,6 +89,46 @@ describe("StorePage", () => {
     expect(screen.queryByRole("textbox", { name: /^Mağaza adı/ })).toBeNull()
   })
 
+  it("lays the brand beside the region as tall, its three pictures in one row of frames", async () => {
+    renderPage()
+    await screen.findByRole("textbox", { name: /^Mağaza adı/ })
+    const brand = card("Marka")
+    const region = card("Bölge ve birimler")
+
+    // One PageGrid row, 8 + 4: its cells stretch to one height
+    expect(brand.parentElement).toBe(region.parentElement)
+    expect(brand.parentElement).toHaveClass("grid", "items-stretch", "xl:grid-cols-12")
+    expect(brand).toHaveClass("xl:col-span-8")
+    expect(region).toHaveClass("xl:col-span-4")
+    // Every field in place: the name, the three pictures, the time zone and the units
+    const tiles = ["Logo (açık zemin)", "Logo (koyu zemin)", "Site simgesi (favicon)"].map((name) =>
+      within(brand).getByRole("group", { name })
+    )
+    const row = tiles[0]?.parentElement
+    expect(row).toHaveClass("grid", "@lg:grid-cols-3")
+    for (const tile of tiles) {
+      expect(tile.parentElement).toBe(row)
+      // Label, frame and words on the row's own lines: the frames line up, one height
+      expect(tile).toHaveClass("@lg:row-span-3", "@lg:grid-rows-subgrid")
+      expect(within(tile).getAllByRole("button")[0]).toHaveClass("h-24", "w-full")
+    }
+    expect(within(region).getByRole("combobox", { name: "Saat dilimi" })).toBeInTheDocument()
+    expect(
+      within(region)
+        .getAllByRole("radio")
+        .map((radio) => radio.parentElement?.textContent)
+    ).toEqual(["Gram (g)", "Kilogram (kg)", "Santimetre (cm)", "Milimetre (mm)"])
+    // The empty ones a dashed frame of the same size; a logo on its own ground once chosen
+    const [light, dark, icon] = tiles.map((tile) => within(tile).getAllByRole("button")[0])
+    expect(light).toHaveClass("bg-card")
+    expect(dark).toHaveClass("border-dashed")
+    expect(dark).toHaveTextContent("Logo yok")
+    expect(icon).toHaveClass("border-dashed")
+    expect(icon).toHaveTextContent("Simge yok")
+    // What any of them may be, once under the row
+    expect(within(brand).getByText(/PNG ya da SVG olabilir/)).toBeInTheDocument()
+  })
+
   it("opens the tab a link names, and keeps only a tab it knows in the address", async () => {
     route.set({ part: "social" })
     renderPage()
