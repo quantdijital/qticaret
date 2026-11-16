@@ -38,6 +38,9 @@ const uploadSlots = createSlots({
   busy: () => new RetryableError("video.upload_busy", { retryAfterMs: 10_000 }),
 })
 
+/** Uploads in progress here (tests, logs). */
+export const uploadSlotState = () => uploadSlots.state()
+
 const declaredBytes = (req: MedusaRequest): number => {
   const declared = Number(req.headers["content-length"])
   return Number.isSafeInteger(declared) && declared > 0 ? declared : 0

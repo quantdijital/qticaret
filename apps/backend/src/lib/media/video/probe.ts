@@ -1,4 +1,3 @@
-import { isAbsolute } from "node:path"
 import { RetryableError, ValidationError } from "../../errors"
 import { logger } from "../../logging"
 import {
@@ -15,55 +14,13 @@ import type { Spawner } from "./run-tool"
 import type { VideoDemuxer } from "./signature"
 import { createSlots } from "./slots"
 import type { Slots } from "./slots"
-import { videoToolPaths } from "./tools"
+import { videoToolPaths } from "./paths"
+import { probeArgs } from "./probe-args"
 
 /**
  * ffprobe on an uploaded clip (adr/0069 §3), the second gate after the
- * signature. The demuxer is forced from the signature (`-f mov|matroska`),
- * so ffprobe never guesses the format from content: the HLS, concat and
- * other demuxers that open further files are never chosen. Only the `file`
- * protocol is allowed, and the input is our own path with its `file:`
- * prefix: a nested `concat:`, `subfile:`, `data:`, `http:` or `hls:` path
- * inside the clip cannot be opened. A MOV's external data references stay
- * off by name too (`-enable_drefs 0`, `-use_absolute_path 0`).
+ * signature, with the argument list and bounds of `probe-args.ts`.
  */
-
-// Only what the verdict reads: no tags (they hold places, devices, names)
-const SHOW_ENTRIES = [
-  "stream=index,codec_type,codec_name,width,height,avg_frame_rate,r_frame_rate,nb_frames,duration",
-  "stream_disposition=attached_pic",
-  "format=format_name,duration,nb_streams",
-].join(":")
-
-// A MOV may point at other files (data references); both are off by default, and stay off
-const DEMUXER_OPTIONS: Readonly<Record<VideoDemuxer, readonly string[]>> = {
-  mov: ["-enable_drefs", "0", "-use_absolute_path", "0"],
-  matroska: [],
-  gif: [],
-}
-
-/** ffprobe's whole argument list for a clip at `path` read with `demuxer`. */
-export function probeArgs(demuxer: VideoDemuxer, path: string): string[] {
-  if (!isAbsolute(path) || path.includes("\n") || path.includes("\0")) {
-    throw new Error("video probe: the path must be one of ours, absolute")
-  }
-  return [
-    "-hide_banner",
-    "-loglevel",
-    "error",
-    "-protocol_whitelist",
-    "file",
-    ...DEMUXER_OPTIONS[demuxer],
-    "-f",
-    demuxer,
-    "-show_entries",
-    SHOW_ENTRIES,
-    "-of",
-    "json",
-    "-i",
-    `file:${path}`,
-  ]
-}
 
 const busy = () => new RetryableError("video.upload_busy", { retryAfterMs: 10_000 })
 

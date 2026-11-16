@@ -1076,6 +1076,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "video.upload_unavailable": "Videos cannot be uploaded right now.",
   "video.upload_busy": "Other videos are being uploaded now. Try again in a few seconds.",
   "video.file_required": "Choose a video file to upload.",
+  "video.upload_timeout": "The video upload took too long. Check your connection and try again.",
   "video.title_invalid": "A video's title can be 200 characters at most, on one line.",
   "video.unknown": "Video not found.",
   "media.svg_logo_only":

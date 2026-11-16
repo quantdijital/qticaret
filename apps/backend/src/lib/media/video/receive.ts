@@ -1,13 +1,13 @@
 import { createWriteStream } from "node:fs"
-import { mkdtemp, open, rm } from "node:fs/promises"
+import type { WriteStream } from "node:fs"
 import type { IncomingMessage } from "node:http"
-import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { Transform } from "node:stream"
+import type { Readable } from "node:stream"
 import { pipeline } from "node:stream/promises"
 import busboy from "busboy"
 import { ValidationError } from "../../errors"
-import { SIGNATURE_BYTES, VIDEO_MAX_BYTES, VIDEO_TITLE_MAX } from "./limits"
+import { VIDEO_MAX_BYTES, VIDEO_TITLE_MAX } from "./limits"
 
 /**
  * A video upload's body, streamed to a private temporary file (adr/0069
@@ -15,8 +15,15 @@ import { SIGNATURE_BYTES, VIDEO_MAX_BYTES, VIDEO_TITLE_MAX } from "./limits"
  * multipart body; the file's bytes are counted as they pass and the upload
  * is cut the moment it goes past 50 MB. One file part (`file`) and an
  * optional `title`; anything else refuses the upload. The caller makes the
- * directory (`makeVideoTempDir`, 0700) and removes it on every way out
- * (`removeVideoTempDir`); the file inside is written 0600.
+ * directory (`makeVideoTempDir`, 0700) and removes it on every way out;
+ * the file inside is written 0600.
+ *
+ * Every way out (security review Y1, O2) tears the whole chain down: the
+ * parser, the file part, the counter and the file are destroyed, and the
+ * answer waits until the file's descriptor is closed, so the directory's
+ * removal frees the disk. A client that goes away (`close` before the body
+ * is complete), stays silent past `idleMs` or takes longer than `totalMs`
+ * ends it too; a timed-out request's socket is destroyed.
  */
 
 export interface ReceivedVideo {
@@ -25,20 +32,16 @@ export interface ReceivedVideo {
   title: string | null
 }
 
-const SOURCE_NAME = "source"
-
-/** A fresh private directory for one upload's file (mkdtemp makes it 0700). */
-export const makeVideoTempDir = (root: string = tmpdir()): Promise<string> =>
-  mkdtemp(join(root, "qt-video-"))
-
-/** Removes an upload's directory and what is in it; never throws. */
-export async function removeVideoTempDir(dir: string): Promise<void> {
-  try {
-    await rm(dir, { recursive: true, force: true })
-  } catch {
-    // Already gone, or the next start's tmp cleaning takes it
-  }
+export interface ReceiveTimeouts {
+  /** Silence allowed between two pieces of the body. */
+  idleMs: number
+  /** The whole body at most. */
+  totalMs: number
 }
+
+export const RECEIVE_TIMEOUTS: ReceiveTimeouts = { idleMs: 30_000, totalMs: 120_000 }
+
+const SOURCE_NAME = "source"
 
 const refuse = (code: string) => new ValidationError(code, { field: "file" })
 
@@ -57,20 +60,35 @@ function cleanTitle(value: string): string | null {
   return title === "" ? null : title
 }
 
+/** Resolves once `writer`'s descriptor is closed (at once when there is none). */
+function closed(writer: WriteStream | null): Promise<void> {
+  if (!writer || writer.closed) {
+    return Promise.resolve()
+  }
+  return new Promise((resolve) => {
+    writer.once("close", () => {
+      resolve()
+    })
+  })
+}
+
 /**
  * Reads the request's multipart body into `<dir>/source`. Throws a
  * `ValidationError`: `video.too_large` past `maxBytes`, `video.file_required`
- * without a file part, `upload.too_many_files` for more parts than allowed,
- * `video.title_invalid`, `video.unreadable` for an empty file. A refused
- * body is drained (bounded by the path's declared-size gate) so the answer
- * reaches the client.
+ * without a file part (or a body that is not multipart), `upload.too_many_files`
+ * for more parts than allowed, `video.title_invalid`, `video.unreadable` for
+ * an empty, broken or abandoned body, `video.upload_timeout`.
  */
 export function receiveVideo(
   req: IncomingMessage,
   dir: string,
-  maxBytes: number = VIDEO_MAX_BYTES
+  maxBytes: number = VIDEO_MAX_BYTES,
+  timeouts: ReceiveTimeouts = RECEIVE_TIMEOUTS
 ): Promise<ReceivedVideo> {
   const path = join(dir, SOURCE_NAME)
+  if (!(req.headers["content-type"] ?? "").toLowerCase().startsWith("multipart/form-data")) {
+    return Promise.reject(refuse("video.file_required"))
+  }
   return new Promise((resolve, reject) => {
     let parser: busboy.Busboy
     try {
@@ -89,24 +107,70 @@ export function receiveVideo(
         },
       })
     } catch {
-      // Not multipart, or no boundary
+      // No boundary
       reject(refuse("video.file_required"))
       return
     }
+    const abort = new AbortController()
+    let file: Readable | null = null
+    let counter: Transform | null = null
+    let writer: WriteStream | null = null
+    let writing: Promise<void> | null = null
     let settled = false
+    let parsed = false
     let bytes = 0
     let title: string | null = null
-    let writing: Promise<void> | null = null
-    let parsed = false
-    const fail = (error: unknown) => {
+    const timers: { idle?: NodeJS.Timeout; total?: NodeJS.Timeout } = {}
+
+    const stopListening = () => {
+      clearTimeout(timers.idle)
+      clearTimeout(timers.total)
+      req.off("data", onData)
+      req.off("close", onClose)
+      req.off("error", onError)
+    }
+    /** Tears everything down; the answer waits for the file's descriptor to close. */
+    const fail = (error: unknown, destroyRequest = false) => {
       if (settled) {
         return
       }
       settled = true
+      stopListening()
+      abort.abort()
       req.unpipe(parser)
-      req.resume()
-      reject(error instanceof Error ? error : new Error("video upload failed"))
+      parser.destroy()
+      file?.destroy()
+      counter?.destroy()
+      writer?.destroy()
+      if (destroyRequest) {
+        req.destroy()
+      } else {
+        // Drained (bounded by the path's gate) so the answer reaches the client
+        req.resume()
+      }
+      void closed(writer).then(() => {
+        reject(error instanceof Error ? error : new Error("video upload failed"))
+      })
     }
+    const timedOut = () => {
+      fail(refuse("video.upload_timeout"), true)
+    }
+    const onData = () => {
+      clearTimeout(timers.idle)
+      timers.idle = setTimeout(timedOut, timeouts.idleMs)
+    }
+    // The client went away before its body was complete
+    const onClose = () => {
+      if (!req.complete) {
+        fail(refuse("video.unreadable"))
+      }
+    }
+    const onError = () => {
+      fail(refuse("video.unreadable"))
+    }
+    timers.total = setTimeout(timedOut, timeouts.totalMs)
+    timers.idle = setTimeout(timedOut, timeouts.idleMs)
+
     const finish = () => {
       if (settled || !parsed) {
         return
@@ -116,7 +180,8 @@ export function receiveVideo(
         return
       }
       writing.then(
-        () => {
+        async () => {
+          await closed(writer)
           if (settled) {
             return
           }
@@ -125,6 +190,7 @@ export function receiveVideo(
             return
           }
           settled = true
+          stopListening()
           resolve({ path, bytes, title })
         },
         (error: unknown) => {
@@ -132,13 +198,15 @@ export function receiveVideo(
         }
       )
     }
-    parser.on("file", (name, file) => {
+
+    parser.on("file", (name, part) => {
       if (name !== "file" || writing) {
-        file.resume()
+        part.resume()
         fail(refuse(name === "file" ? "upload.too_many_files" : "video.file_required"))
         return
       }
-      const counter = new Transform({
+      file = part
+      counter = new Transform({
         transform(chunk: Buffer, _encoding, done) {
           bytes += chunk.length
           if (bytes > maxBytes) {
@@ -148,12 +216,12 @@ export function receiveVideo(
           done(null, chunk)
         },
       })
-      file.on("limit", () => {
-        counter.destroy(refuse("video.too_large"))
+      part.on("limit", () => {
+        counter?.destroy(refuse("video.too_large"))
       })
-      writing = pipeline(file, counter, createWriteStream(path, { flags: "wx", mode: 0o600 }))
+      writer = createWriteStream(path, { flags: "wx", mode: 0o600 })
+      writing = pipeline(part, counter, writer, { signal: abort.signal })
       writing.catch((error: unknown) => {
-        file.resume()
         fail(error)
       })
     })
@@ -185,24 +253,9 @@ export function receiveVideo(
       parsed = true
       finish()
     })
-    req.on("error", () => {
-      fail(refuse("video.unreadable"))
-    })
+    req.on("data", onData)
+    req.on("close", onClose)
+    req.on("error", onError)
     req.pipe(parser)
   })
-}
-
-/** The first bytes of a received file, enough to tell what it is. */
-export async function readHead(
-  path: string,
-  length: number = SIGNATURE_BYTES
-): Promise<Uint8Array> {
-  const handle = await open(path, "r")
-  try {
-    const buffer = Buffer.alloc(length)
-    const { bytesRead } = await handle.read(buffer, 0, length, 0)
-    return buffer.subarray(0, bytesRead)
-  } finally {
-    await handle.close()
-  }
 }

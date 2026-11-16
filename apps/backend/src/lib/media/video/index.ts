@@ -4,7 +4,11 @@ export { videoSignature } from "./signature"
 export type { VideoDemuxer, VideoSignature, VideoSourceFormat } from "./signature"
 export { assessProbe, decimalOf, probeOutputSchema, rateOf } from "./probe-verdict"
 export type { ProbeOutput, ProbeVerdict } from "./probe-verdict"
-export { probeArgs, probeVideo } from "./probe"
+export { inputBounds, probeArgs } from "./probe-args"
+export { probeVideo } from "./probe"
+export { videoToolPaths } from "./paths"
+export type { VideoToolPaths } from "./paths"
+export { probeSelfTest } from "./self-test"
 export type { ProbeOptions } from "./probe"
 export { ToolStartError, runTool } from "./run-tool"
 export type { Spawner, ToolOptions, ToolRun } from "./run-tool"
@@ -16,12 +20,12 @@ export {
   majorOf,
   resetVideoToolsCheck,
   versionOf,
-  videoToolPaths,
   videoTools,
   videoUploadAvailable,
 } from "./tools"
-export type { VideoToolCheck, VideoToolPaths } from "./tools"
+export type { VideoToolCheck } from "./tools"
 export { canMoveVideo, openingStatus } from "./status"
 export type { VideoStatus } from "./status"
-export { makeVideoTempDir, readHead, receiveVideo, removeVideoTempDir } from "./receive"
-export type { ReceivedVideo } from "./receive"
+export { RECEIVE_TIMEOUTS, receiveVideo } from "./receive"
+export type { ReceiveTimeouts, ReceivedVideo } from "./receive"
+export { makeVideoTempDir, readHead, removeVideoTempDir } from "./temp-files"

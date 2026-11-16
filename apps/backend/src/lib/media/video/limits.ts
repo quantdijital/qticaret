@@ -38,6 +38,47 @@ export const VIDEO_CODECS: ReadonlySet<string> = new Set([
   "mpeg4",
 ])
 
+/** Codecs a cover picture beside the video (`attached_pic`) may be in: MP4/MOV cover art. */
+export const COVER_CODECS: ReadonlySet<string> = new Set(["mjpeg", "png"])
+
+/**
+ * The decoders ffprobe may open while it reads a clip (`-codec_whitelist`,
+ * security review O1): the video codecs above by their decoders' names
+ * (AV1 is read by dav1d where it is installed) and the sound phones and
+ * browsers record. Any other stream is still listed by its codec's name,
+ * from the container, and refused by the rules; only its decoder is never
+ * opened.
+ */
+export const PROBE_DECODERS = [
+  "h264",
+  "hevc",
+  "vp8",
+  "vp9",
+  "av1",
+  "libdav1d",
+  "mpeg4",
+  // A cover picture's (the codecs it may be in, above)
+  "mjpeg",
+  "png",
+  // Sound: phones (AAC), browsers (Opus, Vorbis), cameras (PCM), MP3
+  "aac",
+  "opus",
+  "vorbis",
+  "mp3float",
+  "pcm_s16le",
+  "pcm_s16be",
+  "pcm_s24le",
+] as const
+
+/** ffprobe's own bounds on what it reads and allocates (security review O1). */
+export const PROBE_BOUNDS = {
+  // ffmpeg's defaults, written out: enough for a phone's HEVC MOV, whose sizes are in its header
+  probesize: 5_000_000,
+  analyzeduration: 5_000_000,
+  // One allocation at most: a 4K frame is ~30 MB, a 50 MB clip's largest sample is less
+  maxAlloc: 256 * 1024 * 1024,
+} as const
+
 /** How long one ffprobe run may take before it is killed and the clip refused. */
 export const PROBE_TIMEOUT_MS = 15_000
 

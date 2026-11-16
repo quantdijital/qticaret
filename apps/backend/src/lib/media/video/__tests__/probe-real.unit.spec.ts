@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process"
 import { mkdtemp, readFile, rm, stat, truncate, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { probeVideo, readHead, videoSignature, videoToolPaths } from ".."
+import { probeSelfTest, probeVideo, readHead, videoSignature, videoToolPaths } from ".."
 import type { VideoDemuxer } from ".."
 
 /**
@@ -220,5 +220,56 @@ describeReal("the real ffprobe on made clips (adr/0069 §3)", () => {
     const { size } = await stat(at("cut.mp4"))
     await truncate(at("cut.mp4"), Math.floor(size / 2))
     expect(await check("cut.mp4")).toEqual({ refused: "video.unreadable" })
+  })
+
+  // Security review O1: the bounding options, run by the real ffprobe
+  it("passes the start's self-test with the upload's bounds", async () => {
+    expect(await probeSelfTest(paths)).toBe(true)
+  })
+
+  it("keeps a clip with cover art (JPEG or PNG beside the video)", async () => {
+    ffmpeg([...source("color=size=32x32:rate=1:duration=1"), "-frames:v", "1", at("cover.png")])
+    ffmpeg([
+      ...source("testsrc=size=160x120:rate=10:duration=1"),
+      "-i",
+      at("cover.png"),
+      "-map",
+      "0:v",
+      "-map",
+      "1:v",
+      "-c:v:0",
+      "mpeg4",
+      "-c:v:1",
+      "png",
+      "-disposition:v:1",
+      "attached_pic",
+      at("cover.mp4"),
+    ])
+    expect(await check("cover.mp4")).toMatchObject({ verdict: { width: 160, height: 120 } })
+  })
+
+  it("refuses a frame far past 4K, and a codec outside the list", async () => {
+    // 8000 × 8000: past the side and the pixels; the decoder's own bound holds it too
+    ffmpeg([
+      ...source("color=size=8000x8000:rate=1:duration=1"),
+      "-frames:v",
+      "1",
+      "-c:v",
+      "mpeg4",
+      at("huge.mp4"),
+    ])
+    const huge = await check("huge.mp4")
+    expect(["video.dimensions_too_large", "video.unreadable"]).toContain(huge.refused)
+    // ProRes: a codec phones do not write, its decoder never opened
+    ffmpeg([
+      ...source("testsrc=size=64x64:rate=5:duration=1"),
+      "-c:v",
+      "prores_ks",
+      "-f",
+      "mov",
+      at("prores.mov"),
+    ])
+    const prores = await check("prores.mov")
+    expect(["video.unsupported_type", "video.unreadable"]).toContain(prores.refused)
   })
 })

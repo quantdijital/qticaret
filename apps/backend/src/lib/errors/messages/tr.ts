@@ -1085,6 +1085,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "video.upload_unavailable": "Video şu an yüklenemiyor.",
   "video.upload_busy": "Şu an başka videolar yükleniyor. Birkaç saniye sonra yeniden deneyin.",
   "video.file_required": "Yüklenecek bir video dosyası seçin.",
+  "video.upload_timeout":
+    "Video yüklemesi çok uzun sürdü. Bağlantınızı kontrol edip yeniden deneyin.",
   "video.title_invalid": "Video başlığı en çok 200 karakter olabilir ve satır sonu içeremez.",
   "video.unknown": "Video bulunamadı.",
   "media.svg_logo_only":

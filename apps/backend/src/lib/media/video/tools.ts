@@ -1,12 +1,15 @@
 import { errorSummary, logger } from "../../logging"
+import { videoToolPaths } from "./paths"
 import { runTool } from "./run-tool"
 import type { Spawner } from "./run-tool"
+import { probeSelfTest } from "./self-test"
 
 /**
  * ffmpeg and ffprobe on this machine (adr/0069 §4): the distribution's
  * package, found at `FFMPEG_PATH` / `FFPROBE_PATH` or on `PATH`. Checked
  * once at start (both answer `-version`, ffmpeg has the encoders slice 2
- * uses) and kept in memory. Missing, video uploads are closed with
+ * uses, and ffprobe reads a clip ffmpeg makes with the bounds every
+ * upload gets: `self-test.ts`) and kept in memory. Missing, video uploads are closed with
  * `video.upload_unavailable` and the panel hides the option; one error is
  * logged. The panel learns only "available or not", never why.
  */
@@ -19,27 +22,12 @@ export const REQUIRED_ENCODERS = ["libx264", "libvpx-vp9"] as const
 // adr/0069 §4: version 7 or later; an older one is logged, not refused
 const MIN_MAJOR_VERSION = 7
 
-export interface VideoToolPaths {
-  ffmpeg: string
-  ffprobe: string
-}
-
 export interface VideoToolCheck {
   available: boolean
   /** What is missing, for the log: `ffmpeg`, `ffprobe`, an encoder's name. */
   missing: string[]
   /** ffmpeg's version as it names itself (`7.1.1`), for the log. */
   version: string | null
-}
-
-/** Where the programs are: the env's absolute paths (checked at start, lib/env.ts) or PATH. */
-export function videoToolPaths(env: NodeJS.ProcessEnv = process.env): VideoToolPaths {
-  const ffmpeg = env["FFMPEG_PATH"]?.trim() ?? ""
-  const ffprobe = env["FFPROBE_PATH"]?.trim() ?? ""
-  return {
-    ffmpeg: ffmpeg === "" ? "ffmpeg" : ffmpeg,
-    ffprobe: ffprobe === "" ? "ffprobe" : ffprobe,
-  }
 }
 
 const VERSION_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_+~"
@@ -89,7 +77,10 @@ async function answers(
   }
 }
 
-/** Checks the programs now: whether both answer and ffmpeg has the encoders. */
+/**
+ * Checks the programs now: whether both answer, ffmpeg has the encoders,
+ * and ffprobe runs with the upload's bounding options (`probe_options`).
+ */
 export async function checkVideoTools(
   options: { env?: NodeJS.ProcessEnv; spawn?: Spawner } = {}
 ): Promise<VideoToolCheck> {
@@ -111,6 +102,9 @@ export async function checkVideoTools(
         missing.push(encoder)
       }
     }
+  }
+  if (missing.length === 0 && !(await probeSelfTest(paths, options.spawn))) {
+    missing.push("probe_options")
   }
   return { available: missing.length === 0, missing, version: versionOf(ffmpeg ?? "") }
 }

@@ -25,13 +25,29 @@ const slots = () =>
   })
 
 describe("ffprobe's argument list (adr/0069 §3)", () => {
-  it("forces the MOV demuxer, the file protocol only, MOV references off, and our path", () => {
+  it("forces and allows the MOV demuxer alone, the file protocol only, bounds, and our path", () => {
     expect(probeArgs("mov", PATH)).toEqual([
       "-hide_banner",
       "-loglevel",
       "error",
+      "-max_alloc",
+      "268435456",
       "-protocol_whitelist",
       "file",
+      "-format_whitelist",
+      "mov",
+      "-codec_whitelist",
+      "h264,hevc,vp8,vp9,av1,libdav1d,mpeg4,mjpeg,png,aac,opus,vorbis,mp3float,pcm_s16le,pcm_s16be,pcm_s24le",
+      "-max_streams",
+      "16",
+      "-max_pixels",
+      "9437184",
+      "-threads",
+      "1",
+      "-probesize",
+      "5000000",
+      "-analyzeduration",
+      "5000000",
       "-enable_drefs",
       "0",
       "-use_absolute_path",
@@ -47,19 +63,29 @@ describe("ffprobe's argument list (adr/0069 §3)", () => {
     ])
   })
 
-  it("forces Matroska for WebM, with no MOV-only options", () => {
+  it("forces and allows Matroska alone for WebM, with no MOV-only options", () => {
     const args = probeArgs("matroska", PATH)
-    expect(args.slice(0, 7)).toEqual([
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-protocol_whitelist",
-      "file",
-      "-f",
-      "matroska",
-    ])
+    expect(
+      args.slice(args.indexOf("-format_whitelist"), args.indexOf("-format_whitelist") + 2)
+    ).toEqual(["-format_whitelist", "matroska"])
+    expect(args.slice(args.indexOf("-f"), args.indexOf("-f") + 2)).toEqual(["-f", "matroska"])
     expect(args).not.toContain("-enable_drefs")
     expect(args.at(-1)).toBe(`file:${PATH}`)
+  })
+
+  it("puts every bound before the input, where ffprobe applies it to the input", () => {
+    const args = probeArgs("mov", PATH)
+    const input = args.indexOf("-i")
+    for (const option of [
+      "-codec_whitelist",
+      "-max_streams",
+      "-max_pixels",
+      "-f",
+      "-format_whitelist",
+    ]) {
+      expect(args.indexOf(option)).toBeGreaterThan(-1)
+      expect(args.indexOf(option)).toBeLessThan(input)
+    }
   })
 
   it("asks for no tags (places, devices, names) and nothing but our file", () => {

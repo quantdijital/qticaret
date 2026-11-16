@@ -103,6 +103,31 @@ describe("ffprobe's answer against the limits (adr/0069 §3)", () => {
     ).toBe("video.dimensions_too_large")
   })
 
+  it("takes a cover picture in JPEG or PNG only (security review D1)", () => {
+    const cover = (codec: string) => ({
+      ...MP4_WITH_COVER,
+      streams: [MP4_WITH_COVER.streams[0], { ...MP4_WITH_COVER.streams[1], codec_name: codec }],
+    })
+    expect(codeOf(() => assessProbe(cover("png"), "mov"))).toBeNull()
+    expect(codeOf(() => assessProbe(cover("bmp"), "mov"))).toBe("video.unsupported_type")
+    expect(codeOf(() => assessProbe(cover("prores"), "mov"))).toBe("video.unsupported_type")
+  })
+
+  it("holds the greater of the two frame rates, and refuses when neither reads (D2)", () => {
+    const rates = (avg: string, real: string) =>
+      phoneWith({ avg_frame_rate: avg, r_frame_rate: real })
+    expect(codeOf(() => assessProbe(rates("30/1", "240/1"), "mov"))).toBe(
+      "video.frame_rate_too_high"
+    )
+    expect(codeOf(() => assessProbe(rates("240/1", "30/1"), "mov"))).toBe(
+      "video.frame_rate_too_high"
+    )
+    expect(codeOf(() => assessProbe(rates("0/0", "30/1"), "mov"))).toBeNull()
+    expect(codeOf(() => assessProbe(rates("0/0", "0/0"), "mov"))).toBe("video.unreadable")
+    expect(codeOf(() => assessProbe(rates("1/0", "0/0"), "mov"))).toBe("video.unreadable")
+    expect(codeOf(() => assessProbe(rates("1/0", "abc"), "mov"))).toBe("video.unreadable")
+  })
+
   it("refuses sound only, or only a cover picture", () => {
     const audio = { ...PHONE_HEVC_MOV, streams: PHONE_HEVC_MOV.streams.slice(1) }
     expect(codeOf(() => assessProbe(audio, "mov"))).toBe("video.unsupported_type")

@@ -34,8 +34,16 @@ function request(body: Buffer, contentType = `multipart/form-data; boundary=${BO
   for (let at = 0; at < body.length; at += 64 * 1024) {
     chunks.push(body.subarray(at, at + 64 * 1024))
   }
-  const stream = Readable.from(chunks) as Readable & { headers: Record<string, string> }
+  const stream = Readable.from(chunks) as Readable & {
+    headers: Record<string, string>
+    complete: boolean
+  }
   stream.headers = { "content-type": contentType, "content-length": String(body.length) }
+  // As Node's request: complete once the whole body was read
+  stream.complete = false
+  stream.on("end", () => {
+    stream.complete = true
+  })
   return stream as unknown as IncomingMessage
 }
 

@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { ValidationError } from "../../errors"
 import {
+  COVER_CODECS,
   VIDEO_CODECS,
   VIDEO_MAX_DURATION_MS,
   VIDEO_MAX_FPS,
@@ -111,7 +112,7 @@ const sizeOk = (stream: ProbeStream): boolean => {
   )
 }
 
-function checkPicture(stream: ProbeStream): void {
+function checkSize(stream: ProbeStream): void {
   if (stream.width === undefined || stream.height === undefined) {
     throw refuse("video.unreadable")
   }
@@ -120,13 +121,27 @@ function checkPicture(stream: ProbeStream): void {
   }
 }
 
+/** A cover picture (security review D1): a JPEG or PNG within the size rule. */
+function checkPicture(stream: ProbeStream): void {
+  checkSize(stream)
+  if (stream.codec_name === undefined || !COVER_CODECS.has(stream.codec_name)) {
+    throw refuse("video.unsupported_type")
+  }
+}
+
 function checkVideoStream(stream: ProbeStream): void {
-  checkPicture(stream)
+  checkSize(stream)
   if (stream.codec_name === undefined || !VIDEO_CODECS.has(stream.codec_name)) {
     throw refuse("video.unsupported_type")
   }
-  const fps = rateOf(stream.avg_frame_rate) ?? rateOf(stream.r_frame_rate)
-  if (fps !== null && fps > VIDEO_MAX_FPS) {
+  // Both rates, the greater counts (security review D2); neither readable: refused
+  const rates = [rateOf(stream.avg_frame_rate), rateOf(stream.r_frame_rate)].filter(
+    (rate): rate is number => rate !== null
+  )
+  if (rates.length === 0) {
+    throw refuse("video.unreadable")
+  }
+  if (Math.max(...rates) > VIDEO_MAX_FPS) {
     throw refuse("video.frame_rate_too_high")
   }
   const frames = decimalOf(stream.nb_frames)
