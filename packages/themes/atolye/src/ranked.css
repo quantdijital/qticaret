@@ -75,14 +75,19 @@
     --rank-pill-pad: 4px 8px;
     --rank-pill-size: var(--text-xs);
   }
+  /*
+   * A row rail's places side by side: the figure's column one share of
+   * every place, its figure set against the photograph, so each photograph
+   * stands the same size and height whatever its figure's width ("1" or "4")
+   */
   @media (min-width: 64rem) {
     .gf-rank[data-size="row"] {
-      --rank-figure: 52cqi;
-      --rank-columns: auto minmax(0, 1fr);
+      --rank-figure: 44cqi;
+      --rank-columns: minmax(0, 7fr) minmax(0, 18fr);
       --rank-areas: "n photo" ". text";
       --rank-align: end;
       --rank-gap: 0;
-      --rank-figure-align: start;
+      --rank-figure-align: end;
       --rank-figure-nums: lining-nums;
       --rank-tuck: -0.04em;
       --rank-title: var(--text-md);
@@ -101,7 +106,7 @@
   }
   @media (min-width: 64rem) {
     .gf-rank[data-size="row"][data-wide] {
-      --rank-figure: 34cqi;
+      --rank-figure: 29cqi;
     }
   }
   .gf-rank-card {
@@ -110,6 +115,8 @@
     height: 100%;
     grid-template-columns: var(--rank-columns);
     grid-template-areas: var(--rank-areas);
+    /* A place stretched by a taller neighbour keeps its photograph at the top */
+    align-content: start;
     align-items: var(--rank-align);
     column-gap: var(--rank-gap);
     row-gap: var(--space-sm);
@@ -248,7 +255,22 @@
         [data-count="10"]
       ) {
       grid-auto-flow: column;
-      grid-template-columns: minmax(0, 4fr) repeat(2, minmax(0, 3.5fr));
+      grid-template-columns: minmax(0, 3fr) repeat(2, minmax(0, 3.5fr));
+    }
+    /* Two columns of rows: each row at the tablet's measure, so its words keep their width */
+    .gf-ranked[data-layout="lead"]:is(
+        [data-count="7"],
+        [data-count="8"],
+        [data-count="9"],
+        [data-count="10"]
+      )
+      > .gf-rank[data-size="line"] {
+      --rank-figure: 3rem;
+      --rank-columns: 3.75rem 6rem minmax(0, 1fr) auto;
+      --rank-gap: var(--space-md);
+    }
+    .gf-ranked[data-layout="lead"][data-count="10"] > .gf-rank[data-size="line"][data-wide] {
+      --rank-figure: 2.625rem;
     }
     .gf-ranked[data-layout="lead"]:is(
         [data-count="7"],
