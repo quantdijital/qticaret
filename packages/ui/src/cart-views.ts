@@ -95,6 +95,19 @@ export interface CartPageView {
   trust?: TrustBadgeView[]
   /** Products to add, never one already in the cart: the shop's best sellers or newest. */
   upsell?: { title: string; products: ProductCardView[] } | null
+  /**
+   * Why the cart cannot go to the payment yet, in words (a wholesaler's
+   * order under its minimum units, ADR-0068 §8): "Ödemeye geç" is drawn
+   * off with the reason beside it. Null or left out: the button as ever.
+   * A hint only; the backend refuses the payment itself.
+   */
+  checkoutBlocked?: CheckoutBlockedView | null
+}
+
+/** A reason the cart stops before the payment (`CartPageView.checkoutBlocked`). */
+export interface CheckoutBlockedView {
+  /** "Toptan siparişte en az 10 adet gerekir; sepetinizde 4 adet var." */
+  reason: string
 }
 
 /** The KDV shown on its own line (ADR-0068 §5): never added up here, Medusa's amounts in words. */

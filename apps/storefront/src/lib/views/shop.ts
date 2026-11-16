@@ -19,6 +19,7 @@ import { categoryCounts, categoryImages } from "@/lib/store-api/extras"
 import { bottomNavOf, isCheckoutPage } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
 import { miniCartOf } from "./cart"
+import { wholesaleCheckoutBlocked } from "./cart-wholesale"
 import { linePicturesOf, productPathsOf } from "./line-paths"
 import { imageView } from "./image"
 import { navigation, withPicturesOf } from "./categories"
@@ -149,7 +150,9 @@ export async function shopView(): Promise<ShopView> {
       t,
       linePaths,
       linePictures,
-      wholesale.active && wholesale.vatExclusive
+      wholesale.active && wholesale.vatExclusive,
+      // Under a wholesaler's minimum units, "Ödemeye geç" off as on the cart page (ADR-0068 §8)
+      wholesaleCheckoutBlocked(cart, wholesale, t)
     ),
     // The header's and footer's sections from the design (adr/0049)
     announcements: layout.header.flatMap((section) =>

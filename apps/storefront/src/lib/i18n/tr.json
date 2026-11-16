@@ -143,7 +143,7 @@
   "cart.promotion_remove": "Kodu kaldır",
   "cart.promotion_applied": "İndirim kodu uygulandı.",
   "cart.promotion_invalid": "Bu kod geçerli değil ya da bu sepete uygulanamıyor.",
-  "promotions.wholesale_no_code": "Toptan siparişlerde indirim kodu kullanılamaz.",
+  "promotions.wholesale_no_code": "Toptan siparişte indirim kodu kullanılamaz.",
   "checkout.title": "Ödeme",
   "checkout.secure_note": "Bilgileriniz şifreli bağlantıyla iletilir",
   "checkout.step_address": "İletişim ve teslimat adresi",

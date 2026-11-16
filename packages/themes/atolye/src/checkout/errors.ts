@@ -56,7 +56,11 @@ export const CHECKOUT_ERRORS = [
   "gift_card.recipient_required",
   "gift_card.sale_disabled",
   "gift_card.not_payable_with_credit",
+  // Also a wholesale cart's `wholesale.prices_changed`, said in these words by the storefront
   "cart.prices_changed",
+  // A wholesale cart the backend could not set right before paying (ADR-0068 slice 4 Y2).
+  // `wholesale.min_quantity` never reaches the form: the storefront goes back to the cart
+  "wholesale.payment_unavailable",
   ...CART_FIX_ERRORS,
   ...LINK_ERRORS,
   "cart.payment_link_no_cod",
