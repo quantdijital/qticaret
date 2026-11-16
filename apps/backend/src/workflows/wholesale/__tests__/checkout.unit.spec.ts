@@ -1,7 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { WHOLESALE_MODULE } from "../../../modules/wholesale"
-import { assertWholesaleCartCompletes, checkWholesaleCartForPayment } from "../checkout"
+import { alertPaymentIssue } from "../../payments/issue-alert"
+import { assertWholesaleCartCompletes } from "../checkout"
+import { checkWholesaleCartForPayment } from "../checkout-start"
 import { NOT_WHOLESALE, wholesaleShopper } from "../shopper"
 import { repriceCartWorkflow } from "../steps/carts"
 
@@ -10,9 +12,11 @@ jest.mock("../shopper", () => ({
   wholesaleShopper: jest.fn(),
 }))
 jest.mock("../steps/carts", () => ({ repriceCartWorkflow: jest.fn() }))
+jest.mock("../../payments/issue-alert", () => ({ alertPaymentIssue: jest.fn() }))
 
 const shopper = wholesaleShopper as jest.MockedFunction<typeof wholesaleShopper>
 const reprice = repriceCartWorkflow as unknown as jest.Mock
+const alert = alertPaymentIssue as jest.MockedFunction<typeof alertPaymentIssue>
 
 const ACTIVE = { active: true, vat_exclusive: true, min_quantity: null }
 
@@ -183,12 +187,36 @@ describe("checkWholesaleCartForPayment", () => {
       safeMessage: "wholesale.payment_unavailable",
     })
     expect(run).toHaveBeenCalledTimes(1)
+    // The shop told, by the cart: one bell per cart (review N3)
+    expect(alert).toHaveBeenCalledWith(scope, {
+      issue: "wholesale_price_check",
+      provider: "wholesale",
+      reference: "cart_1",
+      cart_id: "cart_1",
+    })
     // A code that stays on a wholesaler's cart after the refresh: the same
     const coded = cartOf({ promotions: [{ code: "YAZ10", is_automatic: false }] })
     const kept = container([coded, coded])
     await expect(checkWholesaleCartForPayment(kept.scope, "cart_1")).rejects.toMatchObject({
       safeMessage: "wholesale.payment_unavailable",
     })
+  })
+
+  it("says no more than unavailable when Medusa's refresh itself fails (review N4)", async () => {
+    shopper.mockResolvedValue(NOT_WHOLESALE)
+    run.mockRejectedValue(
+      new Error("Variants variant_1 do not exist or belong to a product that is not published")
+    )
+    const { scope } = container([cartOf()], { priceNow: 100 })
+    const refused = await checkWholesaleCartForPayment(scope, "cart_1").catch(
+      (error: unknown) => error
+    )
+    expect(refused).toMatchObject({
+      name: "ConflictError",
+      safeMessage: "wholesale.payment_unavailable",
+    })
+    expect((refused as Error).message).not.toContain("variant_1")
+    expect(alert).not.toHaveBeenCalled()
   })
 
   it("goes on when the refresh took only a promotion's link, the total the same", async () => {

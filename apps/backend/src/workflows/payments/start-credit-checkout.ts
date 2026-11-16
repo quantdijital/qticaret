@@ -16,7 +16,7 @@ import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
 import { repriceAddonLinesStep } from "../addons/checkout"
-import { checkWholesaleCartStep } from "../wholesale/checkout"
+import { assertWholesaleCartStep, checkWholesaleCartStep } from "../wholesale/checkout-start"
 import { applyPaymentFeeStep } from "./steps/payment-fee"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
 
@@ -109,6 +109,8 @@ export const startCreditCheckoutWorkflow = createWorkflow(
       provider_id: "credit",
     })
     checkNothingDueStep({ cart_id: input.cart_id })
+    // The wholesale rules once more under the lock, as the completion reads them (review N2)
+    assertWholesaleCartStep({ cart_id: input.cart_id })
     when(
       "payments-credit-create-collection",
       { cart },

@@ -13,9 +13,13 @@ import { alertStaff } from "../messaging/staff"
  * - `refunded_before_order`: the provider shows the payment refunded (by
  *   hand, in its panel): no order is opened for it;
  * - `shelf_restored`: a stock level raised for a paid order was left so
- *   (a crash) and has been lowered back.
+ *   (a crash) and has been lowered back;
+ * - `wholesale_price_check`: a wholesale cart the payment start could not
+ *   set at its customer's prices (ADR-0068 slice 4 review N3): no payment
+ *   was started; the reference is the cart, so once per cart.
  */
-export type PaymentIssue = "completion_stuck" | "refunded_before_order" | "shelf_restored"
+export type PaymentIssue =
+  "completion_stuck" | "refunded_before_order" | "shelf_restored" | "wholesale_price_check"
 
 export interface PaymentIssueInput {
   issue: PaymentIssue
@@ -31,6 +35,7 @@ const PROVIDER_NAMES: Readonly<Record<string, string>> = {
   paytr: "PayTR",
   iyzico: "iyzico",
   stock: "Stok",
+  wholesale: "Toptan fiyat denetimi",
 }
 
 const amountText = (kurus: number | null | undefined) =>

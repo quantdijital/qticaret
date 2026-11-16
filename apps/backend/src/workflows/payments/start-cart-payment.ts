@@ -12,7 +12,7 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import { repriceAddonLinesStep } from "../addons/checkout"
-import { checkWholesaleCartStep } from "../wholesale/checkout"
+import { assertWholesaleCartStep, checkWholesaleCartStep } from "../wholesale/checkout-start"
 import { paymentBasket } from "../../lib/payments/basket"
 import { HOSTED_CHECKOUT, isHostedFormProvider } from "../../lib/payments/checkout"
 import type { HostedCheckout } from "../../lib/payments/checkout"
@@ -66,6 +66,8 @@ export const startCartPaymentWorkflow = createWorkflow(
     checkPaymentFeeStep({ cart_id: input.cart_id, fee: fee.fee })
     // Units another order took since they were put in the cart (adr/0026 Ek 2026-11-06)
     checkCartStockStep(input.cart_id)
+    // The wholesale rules once more under the lock, as the completion reads them (review N2)
+    assertWholesaleCartStep({ cart_id: input.cart_id })
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,
