@@ -1,5 +1,7 @@
 import type { BrandLinkView, BrandsPageView, ImageView } from "@qticaret/ui"
-import { type StoreBrand, brandLogoSize } from "@qticaret/types"
+import type { StoreBrand } from "@qticaret/types"
+// A value from the subpath: the root re-exports with `.js` specifiers Turbopack cannot follow
+import { brandLogoSize } from "@qticaret/types/catalog"
 
 const TURKISH = new Intl.Collator("tr")
 const GRAPHEMES = new Intl.Segmenter("tr", { granularity: "grapheme" })
