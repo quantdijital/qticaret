@@ -53,10 +53,17 @@ describe("completionFailureOf (adr/0026 Ek 2026-11-06)", () => {
       // ADR-0068 slice 4: a wholesale cart's own rules, never passed by trying again
       "wholesale.min_quantity",
       "promotions.wholesale_no_code",
+      // adr/0052: a line's add-on picks, or the shop's add-ons switched off
+      "addons.unavailable",
+      "addons.required",
+      "addons.max_quantity",
+      "catalog.addons_disabled",
     ]) {
       expect(completionFailureOf(new ValidationError(key))).toBe("refund")
       expect(completionFailureOf(plain(new ValidationError(key)))).toBe("refund")
     }
+    // Only that one catalog refusal is the cart's: the catalog's own checks are not
+    expect(completionFailureOf(new ValidationError("catalog.description_blocks"))).toBe("retry")
     // A cart not at its customer's prices now is a conflict, refunded alike
     for (const key of ["wholesale.prices_changed", "cart.prices_changed"]) {
       expect(completionFailureOf(new ConflictError(key))).toBe("refund")
