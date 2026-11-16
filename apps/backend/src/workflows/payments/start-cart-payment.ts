@@ -12,6 +12,7 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import { repriceAddonLinesStep } from "../addons/checkout"
+import { assertWholesaleCartStep, checkWholesaleCartStep } from "../wholesale/checkout-start"
 import { paymentBasket } from "../../lib/payments/basket"
 import { HOSTED_CHECKOUT, isHostedFormProvider } from "../../lib/payments/checkout"
 import type { HostedCheckout } from "../../lib/payments/checkout"
@@ -49,6 +50,9 @@ export const startCartPaymentWorkflow = createWorkflow(
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,
     })
+    // A wholesaler's minimum, and every cart at its customer's prices now, or the start
+    // stops for the shopper to see them (ADR-0068 §7, §8); after the add-on step's own cart check
+    checkWholesaleCartStep({ cart_id: input.cart_id })
     // Cash on delivery's fee line put right first: Medusa's cart workflows that
     // change lines take the cart's lock themselves (adr/0029)
     const fee = applyPaymentFeeStep({
@@ -62,6 +66,8 @@ export const startCartPaymentWorkflow = createWorkflow(
     checkPaymentFeeStep({ cart_id: input.cart_id, fee: fee.fee })
     // Units another order took since they were put in the cart (adr/0026 Ek 2026-11-06)
     checkCartStockStep(input.cart_id)
+    // The wholesale rules once more under the lock, as the completion reads them (review N2)
+    assertWholesaleCartStep({ cart_id: input.cart_id })
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,

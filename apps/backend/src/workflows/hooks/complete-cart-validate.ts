@@ -17,6 +17,7 @@ import { assertConsented } from "../legal/consent"
 import { assertGiftLinesReady } from "../gift-cards/cart-gifts"
 import { assertAddonLinesCurrent } from "../addons/checkout"
 import { assertLinkCartCompletes } from "../payment-links/cart-guard"
+import { assertWholesaleCartCompletes } from "../wholesale/checkout"
 import { expectedCodFee } from "../payments/steps/payment-fee"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
@@ -31,8 +32,8 @@ type CartRow = Parameters<typeof checkoutProblem>[0] &
 // One handler per hook: the checkout rules of lib/checkout (F3.2), a payment
 // for the cart's current total (F5), the payment fee (F6), shipping at its
 // current price (F4.5), the one-code rule (F4.4), the contracts accepted
-// as published now (F13.2) and a restricted product's buyer's age (F13.3),
-// read fresh for the cart being completed.
+// as published now (F13.2), a restricted product's buyer's age (F13.3) and
+// the wholesale rules (ADR-0068 slice 4), read fresh for the cart being completed.
 // Throwing stops the checkout. The hook's cart is typed
 // loosely: only its id is used
 completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, { container }) => {
@@ -77,6 +78,9 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
   await assertAddonLinesCurrent(container, cart.id)
   // A payment link's cart: the link still open, this its latest cart, its lines and code as made (adr/0051 §5)
   await assertLinkCartCompletes(container, cart.id)
+  // A wholesaler's cart: no code, its minimum, and every cart at its customer's prices now,
+  // a closed or removed wholesaler's too (ADR-0068 §6–§8, review M1)
+  await assertWholesaleCartCompletes(container, cart.id)
   // The rule is checked as codes are sent too; requests racing each other
   // can each see an empty cart, so it is checked once more here (ADR-0024)
   if (enteredCodes(row.promotions).length > 1) {

@@ -15,7 +15,13 @@ import { paymentMethods } from "@/lib/checkout/options"
 import { rememberPaymentFrame } from "@/lib/checkout/payment-cookie"
 import { recordTracking } from "@/lib/checkout/tracking"
 import { paymentRedirectOrigins, storefrontEnv } from "@/lib/env"
-import { acceptTerms, checkoutError, PlaceOrder, pricesChanged } from "@/lib/checkout/place-order"
+import {
+  acceptTerms,
+  checkoutError,
+  PlaceOrder,
+  pricesChanged,
+  shortOfMinimum,
+} from "@/lib/checkout/place-order"
 import {
   challengeOf,
   completeCart,
@@ -139,6 +145,10 @@ export async function placeOrder(
     if (isStoreApiError(error) && error.messageKey === OUT_OF_STOCK) {
       // A unit another order took since it was put in the cart (adr/0026 Ek 2026-11-06): the cart names it
       redirect(`/sepet?hata=${OUT_OF_STOCK}`)
+    }
+    if (shortOfMinimum(error)) {
+      // A wholesaler's order under its minimum units (ADR-0068 §8): the cart says both numbers
+      redirect("/sepet")
     }
     if (pricesChanged(error)) {
       // The page comes back in this answer with the new totals; the shopper pays again, never this action

@@ -808,6 +808,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Some open carts could not be updated to retail prices; the wholesaler was not deleted. Try again shortly.",
   "wholesale.no_password_login":
     "This customer signs in another way (e.g. Google), not with an e-mail and password; no password can be set.",
+  "wholesale.prices_changed":
+    "The prices in your cart were updated. Check the new total and start the payment again.",
+  "wholesale.payment_unavailable":
+    "The payment for your cart cannot be started right now. Refresh your cart and try again shortly.",
+  "wholesale.min_quantity":
+    "A wholesale order needs at least {{min}} items; your cart has {{units}}.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.color_duplicate": "Each colour name can be listed once.",
   "platform_settings.color_contrast":
@@ -895,6 +901,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "promotions.codes_template":
     "Single-use codes can only be made from a standard promotion with a code.",
   "promotions.one_code": "A cart takes one discount code; remove the one you added first.",
+  "promotions.wholesale_no_code": "Discount codes cannot be used on wholesale orders.",
   "seo.canonical_invalid":
     "The canonical address must be a path on this site, e.g. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "The record ID is not valid.",

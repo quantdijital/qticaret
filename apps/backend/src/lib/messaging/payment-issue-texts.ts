@@ -14,6 +14,10 @@ export const PAYMENT_ISSUE_TEXTS: Readonly<Record<string, string>> = {
   "staff_payment_issue.shelf_restored.subject": "Geçici stok düzeltmesi geri alındı ({{cart}})",
   "staff_payment_issue.shelf_restored.intro":
     "Ödemesi alınan bir sipariş için stok geçici olarak artırılmıştı; işlem yarıda kaldığı için artış geri alındı. Stok sayılarını ve bu sepetin siparişini kontrol edin.",
+  "staff_payment_issue.wholesale_price_check.subject":
+    "Toptan sepetin ödemesi başlatılamadı ({{cart}})",
+  "staff_payment_issue.wholesale_price_check.intro":
+    "Bir toptancının sepeti, ödeme başlarken toptancının bugünkü fiyatlarına getirilemedi; ödeme başlatılmadı ve para alınmadı. Bu sepetteki ürünlerin toptan ve perakende fiyatlarını kontrol edin.",
   "staff_payment_issue.preheader": "Ödeme: {{provider}}, referans {{reference}}.",
   "staff_payment_issue.heading": "Bir ödeme ilgi bekliyor",
   "staff_payment_issue.provider": "Ödeme kuruluşu",
