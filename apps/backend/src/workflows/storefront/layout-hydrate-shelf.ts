@@ -48,6 +48,16 @@ export function hydrateShelf<L>(
           ...picks?.get(listKey(section.id, index)),
         })),
       }
+    case "strips":
+      return {
+        ...common,
+        strips_count: section.strips_count,
+        strips_height: section.strips_height,
+        strips_slant: section.strips_slant,
+        strips_line: section.strips_line,
+        strips_overlap: section.strips_overlap,
+        strips_dim: section.strips_dim,
+      }
     case "featured":
       return common
   }

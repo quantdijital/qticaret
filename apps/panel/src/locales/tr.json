@@ -7924,7 +7924,8 @@
           "carousel": "Kayan sıra",
           "featured": "Öne çıkan",
           "compact": "Kompakt liste",
-          "columns": "Yan yana listeler"
+          "columns": "Yan yana listeler",
+          "strips": "Çapraz şeritler"
         },
         "categories": {
           "tiles": "Görselli karo",
@@ -9255,7 +9256,16 @@
         "perListOption": "{{n}} ürün",
         "perListHint": "Her listede gösterilecek ürün sayısı; listeler masaüstünde yan yana, telefonda alt alta.",
         "featuredHint": "İlk ürün solda büyük, yanında küçük kartlar (toplam {{n}} ürün); telefonda büyük kart üstte.",
+        "stripsCount": "Ürün sayısı",
+        "stripsCountTerm": "strips_count",
+        "stripsCountHint": "Her ürün bir şerit. Telefonda üçten, tablette dörtten fazlası yana kaydırılır.",
+        "stripsHeight": {
+          "label": "Yükseklik",
+          "term": "strips_height",
+          "hint": "Şeritlerin boyu; telefonda biraz kısalır."
+        },
         "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat.",
+        "stripsNoCard": "Bu biçimde kart yok: her ürün bir şerit, üstünde adı ve fiyatı; şeridin tamamı ürün sayfasına gider. Sepete ekle ve hızlı bakış düğmeleri görünmez.",
         "tabs": "Yanındaki rafla sekmeli birleşsin",
         "tabsTerm": "tabs",
         "tabsJoined": "Şu rafla sekmeli tek rafta birleşiyor: {{names}}. Kapatırsan bu raf ayrı çizilir.",

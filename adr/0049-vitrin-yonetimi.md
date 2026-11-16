@@ -767,6 +767,17 @@ Sahip 4, 5, 6 ve 11'i kendisi seçti; teknik ve küçük kararlarda "önerilerle
 - **Hazır görünümler:** dokunulmadı, hiçbiri bu bölümü taşımaz; görünüm kilidinde HTML değişmedi, yalnız tema stil özetleri (yeni `strip-gallery.css`, `strips.css`'te yalnız `data-phone="scroll"` ile açılan kurallar).
 - **Bilerek konmayan:** şerit başına odak noktası, otomatik kaynak (ör. "en yeni 6 ürün"), tek canlı öğe kalınca bölümü gizleme (tek düz şerit çizilir).
 
+### Ek 2026-11-16 (Oğuzhan): ürün rafında "Çapraz şeritler" biçimi (`products` variant `strips`)
+
+- **Dayanak:** sahip isteği (şerit çizimi ürün rafında da). Yeni **biçim**, `products` biçim listesinin sonunda; varsayılan `grid` ve yayımlanmış biçimler değişmedi (adr/0066). Ortak çekirdek `parts/Strips.tsx` (yukarıdaki iki Ek). Migration yok.
+- **Ürün sayısı:** rafın kendi alanı `strips_count` 2–**5**–8 (`SHELF_LIMITS.strips`; kompakt ve öne çıkan biçimler gibi mağazanın `limit`'i değil): kaynak tam bu kadar ürün ister, fazlası istenmez. Telefonda 3'ten, tablette 4'ten fazlası yatay kaydırılır (`phone="scroll"`, galerideki gibi), hiçbir ürün gizlenmez.
+- **Ayarlar** (yalnız `strips` iken okunur, basılır ve sunulur; sözleşme `@qticaret/types/section-strips` `SHELF_STRIPS_SETTINGS`, backend aynası `sections/products.ts` eşitlik testiyle): `strips_height` **low**/medium/high (galerinin yükseklik basamakları; rafta varsayılan Alçak: raf öteki bölümlerin arasında durur, galerinin Orta'sı 1440 px'te bir ekranı doldurur) ve galeri/öne çıkan ürünle aynı `strips_slant` / `strips_line` / `strips_overlap` / `strips_dim` (aynı ad, basamak, varsayılan). Listede olmayan değer kayıtta `storefront_layout.section_invalid`, okurken varsayılan; başka biçimde bu alanlar reddedilir.
+- **Şerit:** ürün adı ve fiyat ayakta; fiyat kartlarla aynı sunucu yolundan (`priceDisplays`, istemciden tutar alınmaz). Görselsiz ürün atlanmaz (şeridin zemini + yazılar). Tükenmiş: "Tükendi" rozeti (mağaza kapattıysa yok); indirim: kısa "%30" rozeti (ekran okuyucuya "%30 indirim"); üstü çizili eski fiyat, "Az kaldı" ve marka şeritte yok (tek kısa satır).
+- **Kart eylemleri bilerek yok:** sepete ekle, hızlı bakış ve favori şeritte yok; şerit bir vitrin görünümü, tek bağlantı ürün sayfasına (eylemler orada). Panelde kart seçimi yerine bunu söyleyen not. Erişilebilirlik: ürün başına tek `<a>`, adı ürün adı + fiyat + rozet; görsel `alt=""` (ad zaten yazılı). Tüm görseller lazy.
+- **Panel:** Diziliş'te biçim "Çapraz şeritler" seçilince ürün sayısı, yükseklik, eğim, çizgi (çizimli basamaklar), bindirme ve karartma (anahtar), her biri "Varsayılana dön" ile; ayar aramasında. Görünüm etiketleri galerinin anahtarları (mağaza tek ad takımı görür).
+- **Hazır görünümler:** dokunulmadı, hiçbiri bu biçimi kullanmıyor; görünüm kilidinde HTML değişmedi, yalnız tema stil özeti (yeni `shelf-strips.css`).
+- **Bilerek konmayan:** şeritte kart eylemleri, rafın `limit`'iyle ortak sayı, sekme başına ayrı şerit görünümü.
+
 ### Ek 2026-11-15 (Oğuzhan): `catalog` üst bilginin şeridinde kısa not
 
 - **Dayanak:** sahibin gözlemi: şeridin solu boş duruyor (demoda üst menü boş, yalnız sağda "Hesabım"); "kampanya vb." kısa bir metin konabilsin. adr/0066 §2: yeni ayar, varsayılanı bugünkü çizim.

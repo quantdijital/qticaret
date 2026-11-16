@@ -170,5 +170,63 @@ medusaIntegrationTestRunner({
         [b.productId, c.productId, d.productId, a.productId],
       ])
     })
+
+    it("saves a strips rail with its count and look, picks that many, refuses an off-list count or step", async () => {
+      const container = getContainer()
+      await product("serit-a")
+      const b = await product("serit-b")
+      const c = await product("serit-c")
+      // Above any sale an earlier case in this file left behind; its own window (14 days), as the
+      // best sellers are held a few minutes per window
+      await order(b.variantId, 30)
+      await order(c.variantId, 20)
+      await indexCatalogue(container)
+
+      // adr/0049 Ek 2026-11-16: a strip per product, two to eight; the count is strips_count, not limit
+      const strips = (more: Record<string, unknown> = {}): Section => ({
+        id: "seritraf01",
+        type: "products",
+        ...ALWAYS,
+        title: null,
+        source: { kind: "best_sellers", days: 14 },
+        more: null,
+        variant: "strips",
+        strips_count: 2,
+        ...more,
+      })
+      const save = (section: Section) =>
+        settle(
+          http.post(
+            "/admin/storefront-layout",
+            { document: { header: [], home: [section], footer: [], product: [], category: [] } },
+            asOwner
+          )
+        )
+      for (const refused of [
+        { strips_count: 1 },
+        { strips_count: 9 },
+        { strips_height: "tall" },
+        { strips_slant: "dik" },
+        { strips_overlap: true },
+      ]) {
+        expect((await save(strips(refused))).status).toBe(400)
+      }
+
+      const [rack] = await previewHome([strips({ strips_slant: "steep" })])
+      expect(rack).toMatchObject({
+        id: "seritraf01",
+        variant: "strips",
+        source: { kind: "best_sellers", days: 14 },
+        strips_count: 2,
+        // Saved without them: the rail's own default height (low) and the shared look's
+        strips_height: "low",
+        strips_slant: "steep",
+        strips_line: "thin",
+        strips_overlap: "off",
+        strips_dim: "on",
+        product_ids: [b.productId, c.productId],
+      })
+      expect(rack).not.toHaveProperty("columns")
+    })
   },
 })

@@ -1,0 +1,47 @@
+/*
+ * A product rail drawn as strips (`sections/ShelfStrips.tsx`, adr/0049 Ek
+ * 2026-11-16): the shared strips (`strips.css`) in the container, each a
+ * product. A product photograph is often light (a studio's white ground),
+ * so the words over its foot stand on a deeper graphite than a gallery's
+ * and the price, what the shopper came for, reads in the words' own
+ * colour, heavy and in even figures. From 1024 px a row of five or fewer
+ * reads its names a step larger.
+ */
+@layer components {
+  .gf-shelf-strips .gf-strip-text {
+    background: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--color-stage) 90%, transparent),
+      color-mix(in oklab, var(--color-stage) 72%, transparent) 55%,
+      transparent
+    );
+  }
+  /* A narrow strip wraps its price at a space ("1.250,00 / TL") rather than cut a figure off */
+  .gf-shelf-strips .gf-strip-note {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--color-stage-text);
+    font-weight: 700;
+    white-space: normal;
+  }
+  @media (max-width: 39.99rem) {
+    .gf-shelf-strips .gf-strip-title {
+      font-size: var(--text-sm);
+    }
+    .gf-shelf-strips .gf-strip-note {
+      font-size: var(--text-xs);
+    }
+  }
+  /* Overlapping, the strip under the pointer lies over its right neighbour's foot: its words start past it */
+  .gf-shelf-strips .gf-strips[data-overlap="on"] .gf-strip + .gf-strip .gf-strip-text {
+    padding-left: calc(var(--strip-line) + var(--strip-overlap) + var(--space-sm));
+  }
+  @media (min-width: 64rem) {
+    .gf-shelf-strips
+      .gf-strips:is([data-count="2"], [data-count="3"], [data-count="4"], [data-count="5"])
+      .gf-strip-title {
+      font-size: var(--text-lg);
+    }
+  }
+}

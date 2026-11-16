@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { image, optional, recordId, shopText, title } from "../layout-fields"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
+import { STRIPS_HEIGHTS, STRIPS_LOOK_DEFAULTS, STRIPS_LOOK_SETTINGS } from "./strips-look"
 
 /**
  * The strip gallery, `strip_gallery` (adr/0049 Ek 2026-11-16): two to
@@ -25,12 +26,10 @@ export const STRIP_SOURCE_KINDS = ["product", "category", "collection", "brand",
 
 export const STRIP_GALLERY_SETTINGS = {
   width: ["full", "boxed"],
-  height: ["low", "medium", "high"],
+  height: STRIPS_HEIGHTS,
   captions: ["on", "off"],
-  strips_slant: ["soft", "medium", "steep"],
-  strips_line: ["none", "thin", "medium", "thick"],
-  strips_overlap: ["off", "on"],
-  strips_dim: ["off", "on"],
+  // The look every strips drawing shares (`strips-look.ts`)
+  ...STRIPS_LOOK_SETTINGS,
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof STRIP_GALLERY_SETTINGS
@@ -41,10 +40,7 @@ export const STRIP_GALLERY_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   width: "full",
   height: "medium",
   captions: "on",
-  strips_slant: "medium",
-  strips_line: "thin",
-  strips_overlap: "off",
-  strips_dim: "on",
+  ...STRIPS_LOOK_DEFAULTS,
 }
 
 export const STRIP_GALLERY_SETTING_NAMES = Object.keys(STRIP_GALLERY_SETTINGS) as Setting[]
