@@ -13,7 +13,9 @@ const MAX_ROUNDS = 3
 /**
  * A run that ends unsettled is queued again by the sweep
  * (`requeueUnsettledCarts`), this many times at most: 1 + 3 runs of
- * MAX_ROUNDS passes each, then an error in the log and the night's run.
+ * MAX_ROUNDS passes each, then an error in the log. A cart left at old
+ * prices is put right when it is paid for: the payment start prices it
+ * again and the order's completion refuses it (`wholesale.prices_changed`).
  */
 export const MAX_CARTS_REQUEUES = 3
 
@@ -63,7 +65,8 @@ export const wholesaleCarts: JobType<WholesaleCartsInput> = {
         failed += counts.failed
         await context.progress(Math.min(99, Math.round(((index + 1) / customers.length) * 100)))
       }
-      settled = (await wholesaleListsState(context.container)) === before
+      // A state that cannot be read never counts as settled (#93 review D4)
+      settled = before !== null && (await wholesaleListsState(context.container)) === before
     }
     if (failed > 0) {
       logger.warn({ event: "wholesale.carts_left_unpriced", failed })

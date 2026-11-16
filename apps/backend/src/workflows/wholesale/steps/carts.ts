@@ -104,9 +104,10 @@ export async function repriceCustomerCarts(
  * closed wholesaler's at retail, a new one's at wholesale. A cart that
  * fails is tried once more, then counted as failed in the result (the
  * route answers it and the audit entry records it), never dropped
- * silently. Until slice 4's completion hook (`wholesale.prices_changed`)
- * lands, such a cart could still check out at its old prices. Nothing to
- * undo: the prices follow the groups.
+ * silently. Such a cart cannot be paid at its old prices: the payment
+ * start prices it again and the order's completion refuses it
+ * (`wholesale.prices_changed`, slice 4). Nothing to undo: the prices
+ * follow the groups.
  */
 export const repriceCartsStep = createStep(
   "wholesale-reprice-carts",

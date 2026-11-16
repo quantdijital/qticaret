@@ -73,6 +73,13 @@ describe("the wholesale carts job (security review M2)", () => {
     expect(reprice).toHaveBeenCalledTimes(6)
   })
 
+  it("never counts a pass as settled when the lists' state cannot be read (#93 review D4)", async () => {
+    state.mockResolvedValue(null)
+
+    await expect(run()).resolves.toMatchObject({ summary: { settled: false } })
+    expect(reprice).toHaveBeenCalledTimes(6)
+  })
+
   it("takes a re-run's attempt, within the bound", () => {
     expect(wholesaleCarts.input.safeParse({ attempt: 3 }).success).toBe(true)
     expect(wholesaleCarts.input.safeParse({ attempt: 4 }).success).toBe(false)
