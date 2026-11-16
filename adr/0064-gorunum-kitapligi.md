@@ -230,3 +230,30 @@ Daha önce verilenler: içerik Shopify'daki gibi (düzenler ve tema ayarları; m
 | G7 | Belgeler: `docs/06-admin-ux.md` (Görünümler sayfası), `docs/kvkk-envanter.md` satırı, adr/0063'e "karar 8 ve iş 2.6 adr/0064'e taşındı" notu | S | G5 | ikisi | — |
 
 Toplam: üç M, bir L, üç S. adr/0063 iş 2.6 (M) G5'in içinde kalır; ayrıca yapılmaz. Ödeme, auth ve migration kuralı gereği G1–G3 PR'ına Deniz bakar. **Çakışma notu:** Deniz'in açık PR'ı #13 (`deniz/katalog-anasayfa`) `workflows/storefront/layout-check.ts`'e (+23), `lib/storefront/layout-sections.ts`'e, `packages/types/src/store/layout.ts`'e, panel çeviri dosyalarına ve `cutlery` paketine üçüncü hazır görünüm (`katalog`) ekliyor. Bu ADR'ın işleri `layout-check.ts`'teki yürüyüşü kullanır (G3) ve çeviri dosyalarına kendi bölümünü ekler; G3 PR #13 birleştikten sonra başlar. Belge şemasına alan eklenmesi yalnız K3 (b) seçilirse olur.
+
+## Ek 2026-11-17: Görünüm galerisi, otomatik kayıtlar ve uygulamadaki sapmalar
+
+Sahibin 2026-11-17 isteği (Görünümler sayfası, kayıtlı görünümlerin listesi, hazır görünüm galerisi) ve o geceki varsayılan kararlar (sahip uyurken, "bu gece kodla" sözüyle) bu ADR'ın gövdesini aşağıdaki maddelerle değiştirir; çelişen gövde cümlesinde bu ek geçerlidir. Durum "Öneri" kalır.
+
+1. **Otomatik kayıt tek yedek değil, son 5 kayıtlık döner liste.** Adlı kayıt sınırına (10) sayılmaz; altıncısı yazılınca en eski otomatik kayıt kalıcı silinir (en eski `created_at`, eşitlikte `id`); adlı kayıt asla kendiliğinden silinmez. Ad panelde kurulur: "{kaynak}, {tarih saat}, düzenlenmiş" (kaynak: hazır görünümün adı, kayıtlı görünümün adı ya da "Kendi tasarımınız"; `summary.source_name`'e kayıt anında yazılır). Gereksiz kayıt yazılmaz: düzen satırı yoksa; taslak, uygulandığı hazır görünümden hiç değişmemişse (`settings.design.id = null` ve özet eşit); aynı özetli silinmemiş bir kayıt zaten varsa; **"Vazgeç"te taslak yayındakiyle aynıysa** (yayın zaten sürüm geçmişinde; bu son kural uygulamada eklendi, 5'lik listenin gereksiz kayıtla dönmesini önler).
+2. **`settings.design: { id: "sfd_…" | null, digest: hex64 } | null`** (K3 (b)'nin genişletilmesi). Hazır görünüm uygulaması `id: null`, kayıtlı görünüm uygulaması kaydın kimliğini yazar; yayınla canlı kopyaya geçer; vitrine gitmez. Özet (`lib/storefront/designs/digest.ts`), belgenin düzenleyicinin açtığı hâlinin (eksik ortak ayarlar eski alanlardan doldurulmuş) anahtarları sıralı JSON'unun sha256'sıdır; `design`, `preset`, `menus` ile mağazanın kendi verisi (`trust_badges`, `color_swatches`, `low_stock`) karşılaştırmaya girmez. "Düzenlenmiş", işaretteki özetle bugünkü özet farklıysa doğrudur; işaret yoksa yanlıştır.
+3. **Otomatik kaydı adlandırmak onu adlı kayda çevirir** (`kind: saved`; 10'luk sınıra girer, dolu ise `limit_reached`).
+4. **Taslağı bütünüyle değiştiren her işlem önce taslağı kaydeder:** hazır görünüm uygulama, kayıtlı görünüm uygulama, yayın geçmişinden geri yükleme ve düzenleyicideki "Vazgeç". Tek adım (`autoSaveDraftStep`), düzen kilidi altında; uygulama atarsa kayıt telafiyle geri alınır, kayıt atarsa uygulama olmaz. Hazır ve kayıtlı görünüm uygulamasında `save_as` verilirse otomatik kayıt yerine o adla adlı kayıt yazılır.
+5. **Kayıtlı görünümün "Önizle"si = taslağa alma.** İmzalı `sfd_` önizleme jetonu (G4) ertelendi: vitrine dokunur ve ayrı güvenlik incelemesi ister. Akış: otomatik kayıt, taslağa alma, düzenleyicinin canlı önizlemesi.
+6. **Budama (G3'teki `prune.ts`) ertelendi.** Silinmiş bir kayda başvuran kayıtlı görünüm bütünüyle reddedilir (`storefront_layout.target_unknown`); taslak ve kayıtlar eski hâlinde kalır (telafi). Yanıtta `skipped` / `dropped` bugün hep boştur; budama gelince dolar.
+7. **Hazır görünüm çeşitleri:** manifestte isteğe bağlı `family` (aile kodu, `PRESET_CODE`) ve `swatch` (en çok 40 karakter renk adı). Tezgâh'ın üç `preset.json`'u `family: "tezgah"` ve renk adlarını taşır; görünüşü değiştirmediği için görünüm sürümü artmadı. Galeride bir aile tek kart ve renk seçimidir.
+8. **Yayın geçmişi:** düzenleyicideki çekmecenin adı "Yayın geçmişi" olur ve her satırda "Kayıtlı görünümlere ekle" bulunur (`POST /admin/storefront-designs { name, revision }`). Son 20 yayın kuralı değişmez.
+9. **Galeri adresi `/storefront/looks`, i18n adı `storefront.gallery.*`:** mevcut `storefront.editor.tree.looks` ("Stok ve renk örnekleri") ve `shared/looks-panel` ile karışmasın.
+10. **KVKK:** §7'deki tek envanter satırı (`created_by`, `published_by`) değişmeden geçerli; belge PR'ında (galerinin belge işi) eklenir.
+
+**Küçük resimler.** Hazır görünümlerin `preview.webp` dosyaları bu aşamada üretilmez ve depoya girmez (demo fotoğraflarının lisansı sahip onayını bekliyor); galeri panelin `summary`'den çizdiği şemayla çalışır. Sunum ucu hazırdır: `GET /admin/storefront-presets/:pack/:code/preview` yalnız galerinin listelediği görünümler (`general` ve bu mağazaya uygulanmış paketler) için, yükleyicinin bulduğu klasör ve sabit dosya adıyla, en çok 256 KB, `image/webp` + `nosniff` + `default-src 'none'` + `private, max-age=300` ile sunar; istemciden yol parçası alınmaz.
+
+**Uygulamada plandan sapmalar.**
+
+- Migration `Migration20261116220159` (UTC zaman damgası); kısmi benzersiz dizin `name_key WHERE kind = 'saved' AND deleted_at IS NULL`; `down()` yalnız tabloyu düşürür.
+- Kaydedilen belge düzenleyicinin açtığı hâliyle (eksik ortak ayarlar doldurulmuş), `menus: null` ve `design: null` ile saklanır; bugünkü şemanın okuyamadığı bir taslak ham saklanır (kayıp olmaz), uygulanınca `storefront_design.unreadable` verir.
+- Hata türleri: `name_taken` ve `limit_reached` 409; `too_large`, `unreadable` ve `name_invalid` 400; `unknown` 404.
+- Hazır görünüm kartındaki `in_draft` / `live`, o tarafa sonradan bir kayıtlı görünüm uygulanmışsa boş (null) döner.
+- Silme kalıcıdır (K2 (a)); telafide satır aynı kimlikle geri yazılır.
+
+**Uygulama sırası güncellemesi.** G1 ve G2 ile G3'ün budama dışı kısmı tek PR'da yapıldı (backend). G3 budaması ve G4 ayrı iş olarak kalır. G5 ve G6 panel PR'ıdır; G7 belgeleri ayrı PR'dadır.

@@ -147,6 +147,10 @@ medusaIntegrationTestRunner({
         const refused = await staff.saveDesign(body)
         expect(refused.status).toBe(400)
       }
+      for (const name of ["", "x".repeat(61), "a\u0000b"]) {
+        const refused = await staff.saveDesign({ name })
+        expect(refused.data.message).toBe("storefront_design.name_invalid")
+      }
       expect((await staff.saveDesign({ name: "Yeni" })).status).toBe(200)
       for (let at = 3; at <= 9; at++) {
         expect((await staff.saveDesign({ name: `Görünüm ${String(at)}` })).status).toBe(200)
