@@ -86,8 +86,13 @@ const shown = () =>
 const marked = () =>
   [...host.querySelectorAll<HTMLElement>("[data-pick][data-on]")].map((row) => row.dataset["pick"])
 
-const point = (target: Element, pointerType: string) => {
-  const event = new Event("pointerover", { bubbles: true })
+const current = () =>
+  [...host.querySelectorAll<HTMLElement>("[data-pick] a[aria-current='true']")].map(
+    (link) => link.closest<HTMLElement>("[data-pick]")?.dataset["pick"]
+  )
+
+const point = (target: Element, pointerType: string, type = "pointerover") => {
+  const event = new Event(type, { bubbles: true })
   Object.defineProperty(event, "pointerType", { value: pointerType })
   act(() => {
     target.dispatchEvent(event)
@@ -136,6 +141,8 @@ describe("a stage list following its list", () => {
     })
     expect(shown()).toEqual(["1"])
     expect(marked()).toEqual(["1"])
+    // A reader hears the row it chose as the current one, and only that one
+    expect(current()).toEqual(["1"])
   })
 
   it("changes nothing under a finger or below 1024 px", () => {
@@ -145,11 +152,24 @@ describe("a stage list following its list", () => {
       vi.advanceTimersByTime(120)
     })
     expect(shown()).toEqual(["0"])
-    wide = false
+    // A tap focuses the link on its way to the product: still not a choice
+    point(rowAt(2), "touch", "pointerdown")
     act(() => {
       ;(rowAt(2) as HTMLElement).focus()
     })
     expect(shown()).toEqual(["0"])
+    expect(current()).toEqual(["0"])
+    // The keyboard after it chooses again
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }))
+      ;(rowAt(1) as HTMLElement).focus()
+    })
+    expect(shown()).toEqual(["1"])
+    wide = false
+    act(() => {
+      ;(rowAt(2) as HTMLElement).focus()
+    })
+    expect(shown()).toEqual(["1"])
   })
 
   it("lets the stage's other photographs load once the list is entered", () => {

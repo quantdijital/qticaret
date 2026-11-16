@@ -16,8 +16,8 @@ import type { Of } from "./plan"
  */
 const STAGE_SIZES =
   "(min-width: 1440px) 440px, (min-width: 1024px) 31vw, (min-width: 768px) 56vw, 90vw"
-/** A row's photo: 56 to 80 px by the rows' count (`shelf-stage.css`), 80 px at most. */
-const ROW_SIZES = "80px"
+/** A row's photo: 56 to 96 px by the rows' count (`shelf-stage.css`), 96 px at most. */
+const ROW_SIZES = "96px"
 
 /**
  * The stage's price: large, as the close-up's; a sold-out product the shop
@@ -74,21 +74,29 @@ function StageAction({
  * panel, the action sits above it. Only the first is shown in the HTML;
  * the others wait `hidden` (their photographs not loaded) until the list
  * calls them.
+ *
+ * Following the list, the stage repeats a row (`echo`): its photograph,
+ * brand, name and price are kept from readers and its link from the tab
+ * order, the row (marked `aria-current`) the one place a reader meets the
+ * product; the stars and the action, which the row lacks, stay.
  */
 function StagePanel({
   product,
   at,
   t,
   quickAdd,
+  echo,
 }: {
   product: ProductCardView
   at: number
   t: Translate
   quickAdd: FormAction | undefined
+  echo: boolean
 }) {
+  const unread = echo ? ({ "aria-hidden": true } as const) : {}
   return (
     <article className="gf-stage-panel group relative" data-stage={at} hidden={at !== 0}>
-      <div className="gf-stage-photo relative overflow-hidden rounded-media bg-media">
+      <div className="gf-stage-photo relative overflow-hidden rounded-media bg-media" {...unread}>
         {product.image && (
           <ResponsiveImage
             image={product.image}
@@ -99,17 +107,27 @@ function StagePanel({
         <CardBadges product={product} t={t} />
       </div>
       <div className="flex min-w-0 flex-col justify-end gap-2 p-1 md:py-2">
-        {product.brand && <p className="truncate text-sm text-text-2">{product.brand}</p>}
-        <h3 className="text-title leading-tight font-extrabold tracking-(--tracking-head) md:text-section">
+        {product.brand && (
+          <p className="truncate text-sm text-text-2" {...unread}>
+            {product.brand}
+          </p>
+        )}
+        <h3
+          className="text-title leading-tight font-extrabold tracking-(--tracking-head) md:text-section"
+          {...unread}
+        >
           <a
             href={product.path}
             className="line-clamp-4 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            {...(echo ? { tabIndex: -1 } : {})}
           >
             {product.title}
           </a>
         </h3>
         <CardStars product={product} t={t} />
-        <StagePrice product={product} t={t} />
+        <div {...unread}>
+          <StagePrice product={product} t={t} />
+        </div>
         <div className="pt-2">
           <StageAction product={product} t={t} quickAdd={quickAdd} />
         </div>
@@ -140,8 +158,19 @@ function RowPill({ product, t }: { product: ProductCardView; t: Translate }) {
   )
 }
 
-/** One row of the list: a small photo, the name on two lines, the price; the whole row one link. */
-function StageRow({ product, t }: { product: ProductCardView; t: Translate }) {
+/**
+ * One row of the list: a small photo, the name on two lines, the price;
+ * the whole row one link, `aria-current` while its product is on the stage.
+ */
+function StageRow({
+  product,
+  t,
+  current,
+}: {
+  product: ProductCardView
+  t: Translate
+  current: boolean
+}) {
   return (
     <article className="gf-stage-row group relative">
       <div className="gf-stage-thumb relative shrink-0 overflow-hidden rounded-media bg-media">
@@ -159,6 +188,7 @@ function StageRow({ product, t }: { product: ProductCardView; t: Translate }) {
           <a
             href={product.path}
             className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            aria-current={current ? "true" : undefined}
           >
             {product.title}
           </a>
@@ -176,7 +206,8 @@ function StageRow({ product, t }: { product: ProductCardView; t: Translate }) {
  * under the pointer or the keyboard's focus takes the stage from 1024 px
  * (`ShelfStageFollow`, the page's one small island); before the script,
  * on a phone and on a touch screen the first stays, its row marked (a
- * phone hides that row: the stage stands right above it). Not following,
+ * phone hides that row from sight, not from readers: the stage stands
+ * right above it). Not following,
  * the first takes the stage and the rest are listed, nothing moves. Each
  * row is one link to its product; the stage carries the add button.
  */
@@ -207,7 +238,14 @@ export function StageShelf({
         className={cn("gf-stage-box rounded-tile", settings.stage_ground === "stage" && "gf-stage")}
       >
         {staged.map((product, at) => (
-          <StagePanel key={product.id} product={product} at={at} t={t} quickAdd={quickAdd} />
+          <StagePanel
+            key={product.id}
+            product={product}
+            at={at}
+            t={t}
+            quickAdd={quickAdd}
+            echo={follow}
+          />
         ))}
       </div>
       {listed.length > 0 && (
@@ -218,7 +256,7 @@ export function StageShelf({
               data-pick={follow ? at : undefined}
               data-on={follow && at === 0 ? "" : undefined}
             >
-              <StageRow product={product} t={t} />
+              <StageRow product={product} t={t} current={follow && at === 0} />
             </li>
           ))}
         </ul>

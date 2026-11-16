@@ -10,7 +10,8 @@
  * The stage's ground is the graphite stage (its inks, the lifted sale
  * red, the stage's focus ring) or the light well. The row on the stage,
  * marked, takes the same ground: the list's one dark row is the product
- * the stage shows. A phone hides that row (the stage stands right above).
+ * the stage shows. A phone hides that row from sight (the stage stands
+ * right above), not from readers.
  * Row photographs shrink as the rows grow in number, so six still fit
  * beside the stage.
  */
@@ -42,8 +43,10 @@
     --color-media: var(--color-paper-3);
     background: var(--color-paper-2);
   }
-  /* A rail on a graphite band (the section's ground): the stage a step lighter */
-  .gf-look[data-ground="stage"] .gf-stage-list[data-ground="stage"] .gf-stage-box {
+  /* A rail on a graphite band (the section's ground): the stage and its row a step lighter */
+  .gf-look[data-ground="stage"]
+    .gf-stage-list[data-ground="stage"]
+    :is(.gf-stage-box, [data-pick][data-on]) {
     background: var(--color-stage-2);
   }
 
@@ -125,10 +128,20 @@
       width: 4.5rem;
     }
   }
-  /* Stacked, the stage's own product stands right above the list: not twice */
+  /*
+   * Stacked, the stage's own product stands right above the list: not twice
+   * to the eye. Its row stays for readers (the stage's copy is kept from
+   * them) and shows again while it holds the keyboard's focus.
+   */
   @media (max-width: 63.99rem) {
-    .gf-stage-list[data-follow="on"] [data-pick][data-on] {
-      display: none;
+    .gf-stage-list[data-follow="on"] [data-pick][data-on]:not(:focus-within) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
   }
   @media (min-width: 64rem) {
@@ -146,6 +159,10 @@
     }
     .gf-stage-thumb {
       width: 5rem;
+    }
+    /* Three rows or fewer share the stage's height with room to spare: larger photos */
+    .gf-stage-list:is([data-rows="1"], [data-rows="2"], [data-rows="3"]) .gf-stage-thumb {
+      width: 6rem;
     }
     .gf-stage-list:is([data-rows="5"], [data-rows="6"]) .gf-stage-thumb {
       width: 3.5rem;

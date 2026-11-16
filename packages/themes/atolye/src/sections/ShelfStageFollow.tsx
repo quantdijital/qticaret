@@ -45,7 +45,14 @@ export function ShelfStageFollow() {
         panel.hidden = panel.dataset["stage"] !== at
       }
       for (const row of root.querySelectorAll<HTMLElement>("[data-pick]")) {
-        row.toggleAttribute("data-on", row.dataset["pick"] === at)
+        const on = row.dataset["pick"] === at
+        row.toggleAttribute("data-on", on)
+        const link = row.querySelector("a")
+        if (on) {
+          link?.setAttribute("aria-current", "true")
+        } else {
+          link?.removeAttribute("aria-current")
+        }
       }
     }
     const rowOf = (target: EventTarget | null) =>
@@ -61,20 +68,32 @@ export function ShelfStageFollow() {
         show(at)
       }, PAUSE_MS)
     }
+    // A finger's tap focuses the row's link on its way to the product: not a choice
+    let touched = false
+    const press = (event: PointerEvent) => {
+      touched = event.pointerType === "touch"
+    }
+    const key = () => {
+      touched = false
+    }
     const focus = (event: FocusEvent) => {
       warmUp()
       const at = rowOf(event.target)?.dataset["pick"]
-      if (at !== undefined) {
+      if (at !== undefined && !touched) {
         window.clearTimeout(timer)
         show(at)
       }
     }
     root.addEventListener("pointerover", over)
     root.addEventListener("focusin", focus)
+    root.addEventListener("pointerdown", press)
+    document.addEventListener("keydown", key)
     return () => {
       window.clearTimeout(timer)
       root.removeEventListener("pointerover", over)
       root.removeEventListener("focusin", focus)
+      root.removeEventListener("pointerdown", press)
+      document.removeEventListener("keydown", key)
     }
   }, [])
   return <span ref={mark} hidden />

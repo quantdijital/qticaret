@@ -94,6 +94,26 @@ describe("a product rail drawn as a stage list", () => {
     expect(count(html, 'href="/urun/p2"')).toBe(2)
   })
 
+  it("lets a reader meet the staged product once: in its row, marked current", () => {
+    const html = home([rail()])
+    const stage = panelOf(html, 0)
+    // The stage's copy of the row is kept from readers and the tab order, its action kept
+    expect(stage).toContain('<h3 class="text-title')
+    expect(stage).toMatch(/<h3 [^>]*aria-hidden="true"><a href="\/urun\/p0" [^>]*tabindex="-1"/i)
+    expect(stage).toMatch(/gf-stage-photo[^"]*" aria-hidden="true"/)
+    expect(stage).toContain('value="var_p0"')
+    expect(stage).not.toMatch(/<button[^>]*aria-hidden/)
+    expect(count(html, 'aria-current="true"')).toBe(1)
+    expect(html).toMatch(/<li data-pick="0" data-on="">.*?aria-current="true">Ürün p0<\/a>/)
+  })
+
+  it("keeps the stage whole for readers when it does not follow: nothing repeats", () => {
+    const html = home([rail({ stage: { ...SHELF_STAGE_DEFAULTS, stage_follow: "off" } })])
+    expect(panelOf(html, 0)).not.toContain('aria-hidden="true"><a')
+    expect(panelOf(html, 0)).not.toContain('tabindex="-1"')
+    expect(html).not.toContain("aria-current")
+  })
+
   it("puts the first on the stage and lists the rest when the stage does not follow", () => {
     const html = home([
       rail({
