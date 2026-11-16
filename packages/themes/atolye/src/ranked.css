@@ -35,6 +35,8 @@
     --rank-pill-at: var(--space-2xs);
     --rank-pill-pad: 2px 6px;
     --rank-pill-size: 0.6875rem;
+    --rank-tracks: none;
+    --rank-acts-justify: auto;
   }
 
   @media (min-width: 48rem) {
@@ -115,6 +117,7 @@
     height: 100%;
     grid-template-columns: var(--rank-columns);
     grid-template-areas: var(--rank-areas);
+    grid-template-rows: var(--rank-tracks);
     /* A place stretched by a taller neighbour keeps its photograph at the top */
     align-content: start;
     align-items: var(--rank-align);
@@ -175,6 +178,7 @@
     right: var(--space-xs);
     display: flex;
     grid-area: acts;
+    justify-self: var(--rank-acts-justify);
     gap: var(--space-xs);
   }
   .gf-rank-acts button {
@@ -308,6 +312,27 @@
     }
     .gf-ranked[data-layout="row"]:is([data-count="5"], [data-count="9"], [data-count="10"]) {
       --rank-across: 5;
+    }
+  }
+  /*
+   * Five across below 1280 px leaves each photograph ~130 px, too small to
+   * carry the round "+" and the pill on it: the actions leave its corner for
+   * the place's foot under its right edge, drawn as a row's (a 1 px line,
+   * no shadow; a refusal opens above it, over the place), all at one
+   * height, and the pill is a row's size. From 1280 px, and with four or
+   * fewer across, the places stand as before.
+   */
+  @media (64rem <= width < 80rem) {
+    .gf-ranked[data-layout="row"]:is([data-count="5"], [data-count="9"], [data-count="10"])
+      > .gf-rank {
+      --rank-areas: "n photo" ". text" ". acts";
+      --rank-tracks: auto auto 1fr;
+      --rank-acts-justify: end;
+      --rank-acts-position: static;
+      --rank-acts-shadow: none;
+      --rank-pill-at: var(--space-2xs);
+      --rank-pill-pad: 2px 6px;
+      --rank-pill-size: 0.6875rem;
     }
   }
 }
