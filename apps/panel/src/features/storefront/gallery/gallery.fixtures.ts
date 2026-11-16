@@ -6,7 +6,8 @@ export function summary(overrides: Partial<DesignSummary> = {}): DesignSummary {
     source: "preset",
     source_name: "Grafit",
     preset: { pack: "general", code: "grafit", version: 1 },
-    colors: { primary: "#1f2933", accent: "#c2410c", background: "#ffffff" },
+    // The theme's own colours (`thumbColors`): no colour written here (house rules)
+    colors: { primary: null, accent: null, background: null },
     fonts: { heading: "Inter", body: "Inter" },
     sections: { header: 2, home: 6, footer: 1, product: 3, category: 2 },
     home_types: ["hero", "product-grid", "rich-text"],
