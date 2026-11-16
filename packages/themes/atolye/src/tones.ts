@@ -60,8 +60,9 @@ export const ATOLYE_TONES: Readonly<Record<ThemeBackground, ToneSet>> = {
  * The section spacing the shop may choose (Tezgâh audit K-11), as a factor
  * on every section gap (`--section-scale` over `tokens.css`'s gaps, each
  * screen width's own): `normal` is the theme's own and never printed;
- * `compact` brings a wide screen's 120 px gap to 66 px, a dense catalog's
- * rhythm; `roomy` opens it to 144 px.
+ * `compact` brings the gap of 96 / 64 / 48 px (desktop / tablet / phone)
+ * to 53 / 35 / 26 px, a dense catalog's rhythm; `roomy` opens it to
+ * 115 / 77 / 58 px.
  */
 export const ATOLYE_SECTION_SCALE: Readonly<Record<SectionSpacing, string | null>> = {
   tight: "0.35",
