@@ -86,6 +86,21 @@ describe("placeOrder with a price that moved", () => {
     expect(next.revalidatePath).not.toHaveBeenCalled()
   })
 
+  it("says a wholesale cart priced again in the cart's own words (ADR-0068 slice 4)", async () => {
+    pay.startPayment.mockRejectedValueOnce(new StoreApiError(409, "wholesale.prices_changed", null))
+    await expect(submit()).resolves.toMatchObject({ error: "cart.prices_changed" })
+    pay.completeCart.mockRejectedValueOnce(new StoreApiError(409, "wholesale.prices_changed", null))
+    await expect(submit()).resolves.toMatchObject({ error: "cart.prices_changed" })
+    expect(next.revalidatePath).toHaveBeenCalledTimes(2)
+    expect(next.redirect).not.toHaveBeenCalled()
+  })
+
+  it("sends a wholesale order under its minimum to the cart, which says it (ADR-0068 §8)", async () => {
+    pay.startPayment.mockRejectedValue(new StoreApiError(400, "wholesale.min_quantity", null))
+    await expect(submit()).rejects.toThrow("redirect:/sepet")
+    expect(pay.completeCart).not.toHaveBeenCalled()
+  })
+
   it("sends a unit another order took to the cart, which names it (adr/0026 Ek 2026-11-06)", async () => {
     pay.startPayment.mockRejectedValue(new StoreApiError(400, "cart.out_of_stock", null))
     await expect(submit()).rejects.toThrow("redirect:/sepet?hata=cart.out_of_stock")

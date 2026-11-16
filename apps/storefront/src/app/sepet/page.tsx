@@ -24,6 +24,7 @@ import {
   withGiftLines,
 } from "@/lib/views/cart"
 import { netDiscountOf, netTotalsOf, taxLinesOf } from "@/lib/views/cart-tax"
+import { wholesaleMinimumText } from "@/lib/views/cart-wholesale"
 import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
 import { currentWholesale } from "@/lib/account/wholesale"
 import { theme } from "@/theme"
@@ -67,7 +68,7 @@ export default async function CartPage({
   const net = cart && wholesale.active && wholesale.vatExclusive ? netTotalsOf(cart) : null
   const asked = typeof query["hata"] === "string" ? query["hata"] : null
   // A line sold out since it was added (adr/0026 Ek 2026-11-06): named as the shelf stands now
-  const error =
+  const refused =
     asked === OUT_OF_STOCK
       ? cart
         ? outOfStockText(await cartShortLines(cart.id), t)
@@ -75,6 +76,8 @@ export default async function CartPage({
       : asked && CART_ERRORS.has(asked)
         ? t(asked)
         : null
+  // A wholesaler's order under its minimum units (ADR-0068 §8), said while it is short
+  const error = refused ?? wholesaleMinimumText(cart, wholesale, t)
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
   const [gifts, addons, extras, paths, pictures] = await Promise.all([

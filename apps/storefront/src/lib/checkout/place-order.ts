@@ -114,13 +114,30 @@ const KNOWN = new Set([
 ])
 
 /**
- * An add-on line's price moved since it was put in the cart (adr/0052 §5):
- * the backend set it at its price now and stopped the payment. The page is
- * drawn again with the new totals and the shopper starts the payment
- * again; never retried by itself (the price shown before paying is the one paid).
+ * `wholesale.prices_changed` is the same refusal for a cart not at its
+ * customer's prices now (ADR-0068 slice 4): a wholesaler closed, removed
+ * or repriced since the lines were priced, or a campaign left on a
+ * wholesaler's cart. The backend priced it again; the shopper sees the
+ * cart's own "prices updated" words.
+ */
+const PRICES_CHANGED = new Set(["cart.prices_changed", "wholesale.prices_changed"])
+
+/**
+ * An add-on line's price moved since it was put in the cart (adr/0052 §5),
+ * or a wholesale cart's (`PRICES_CHANGED`): the backend set it at its price
+ * now and stopped the payment. The page is drawn again with the new totals
+ * and the shopper starts the payment again; never retried by itself (the
+ * price shown before paying is the one paid).
  */
 export const pricesChanged = (error: unknown): boolean =>
-  isStoreApiError(error) && error.status === 409 && error.messageKey === "cart.prices_changed"
+  isStoreApiError(error) && error.status === 409 && PRICES_CHANGED.has(error.messageKey ?? "")
+
+/**
+ * A wholesaler's cart short of its minimum units (ADR-0068 §8): fixed in
+ * the cart, whose page says the minimum and the count.
+ */
+export const shortOfMinimum = (error: unknown): boolean =>
+  isStoreApiError(error) && error.messageKey === "wholesale.min_quantity"
 
 export function checkoutError(error: unknown, fallback: string): string {
   if (!isStoreApiError(error)) {
@@ -135,6 +152,10 @@ export function checkoutError(error: unknown, fallback: string): string {
   const key = error.messageKey ?? ""
   if (KNOWN.has(key)) {
     return key
+  }
+  // Said in the words the theme already has for it
+  if (PRICES_CHANGED.has(key)) {
+    return "cart.prices_changed"
   }
   if (key.startsWith("tr_address.")) {
     const issues = (error.body as { issues?: { code?: unknown }[] } | null)?.issues ?? []
