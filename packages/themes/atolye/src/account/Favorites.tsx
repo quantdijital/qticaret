@@ -74,7 +74,7 @@ export function Favorites({
       <h2 id="favori-sayisi" className="text-title">
         {t("listing.count", { count: view.favorites.length })}
       </h2>
-      <ul className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-8 md:grid-cols-[repeat(3,minmax(0,1fr))] lg:gap-y-10">
+      <ul className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-[repeat(3,minmax(0,1fr))]">
         {view.favorites.map((item) => (
           <li key={item.id} className="relative min-w-0">
             {item.card ? <ProductCard product={item.card} t={t} /> : <PlainCard item={item} />}
