@@ -132,8 +132,9 @@ const requestOf = (route: string): [string, string] => {
   return [method, pattern.replace(/:\w+/g, "x_01jabc")]
 }
 
+// With a body as the parser leaves it: `{}` for a POST without one
 const decided = (route: string) =>
-  decideMaintenanceRequest(...requestOf(route)).closed ? "closed" : "open"
+  decideMaintenanceRequest(...requestOf(route), {}).closed ? "closed" : "open"
 
 describe("the Store API while the shop is in maintenance (adr/0053 Ek 2026-11-17)", () => {
   it("has a decision for every write route of ours, and none for a route that is gone", () => {
@@ -188,6 +189,22 @@ describe("the Store API while the shop is in maintenance (adr/0053 Ek 2026-11-17
     expect(decideMaintenanceRequest("POST", "/store/consents/cookies/x").closed).toBe(true)
     // A storefront path is never a Store API one: `/storefront` is not `/store`
     expect(decideMaintenanceRequest("POST", "/storefront/x").closed).toBe(false)
+  })
+
+  it("takes a return request, never an exchange (security review L4)", () => {
+    const returns = (body: unknown) =>
+      decideMaintenanceRequest("POST", "/store/orders/order_1/returns", body)
+
+    expect(returns({ kind: "return", items: [] }).closed).toBe(false)
+    // Left out, the route's schema makes it a return
+    expect(returns({ items: [] }).closed).toBe(false)
+    expect(returns({ kind: "exchange", items: [] })).toEqual({
+      closed: true,
+      reason: "maintenance_exchange",
+    })
+    for (const body of [{ kind: "RETURN" }, { kind: null }, undefined, null, [], "kind=return"]) {
+      expect(returns(body).closed).toBe(true)
+    }
   })
 })
 

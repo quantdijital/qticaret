@@ -15,46 +15,77 @@ import { maintenanceState } from "../../workflows/storefront/maintenance"
 import { rejectRequest } from "./reject"
 import { routePath } from "./request-path"
 
+interface SectionState {
+  enabled: boolean
+  version: number
+}
+
 const WARN_EVERY_MS = 60_000
 let lastWarning = Number.NEGATIVE_INFINITY
+// The last section read: what a failed read falls back on (security review L1)
+let lastKnown: MaintenanceSettings | null = null
+/**
+ * The section's stored version, once per cached section value (security
+ * review L2): the settings cache hands out a new object after every save and
+ * every reload, so a save ends old links as soon as the cache sees it, and
+ * any number of well-formed tokens costs one database read per snapshot.
+ */
+const versions = new WeakMap<object, Promise<SectionState>>()
 
 /**
  * The section from the platform settings' cache (adr/0012: invalidated on
- * every save, other processes within a second). Unreadable: null, logged
- * at most once a minute.
+ * every save, other processes within a second). When a read fails the last
+ * one read stands; with none ever read, null (logged at most once a minute).
  */
 async function maintenanceOf(req: MedusaRequest): Promise<MaintenanceSettings | null> {
   try {
     const values: unknown = await req.scope
       .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
       .getSection("maintenance")
-    return values as MaintenanceSettings
+    lastKnown = values as MaintenanceSettings
+    return lastKnown
   } catch (error) {
     if (Date.now() - lastWarning >= WARN_EVERY_MS) {
       lastWarning = Date.now()
-      logger.warn({ event: "maintenance.guard_unreadable", err: errorSummary(error) })
+      logger.warn({
+        event: "maintenance.guard_unreadable",
+        fallback: lastKnown === null ? "open" : "last_read",
+        err: errorSummary(error),
+      })
     }
-    return null
+    return lastKnown
   }
+}
+
+function sectionState(req: MedusaRequest, section: MaintenanceSettings): Promise<SectionState> {
+  const held = versions.get(section)
+  if (held) {
+    return held
+  }
+  const read = maintenanceState(req.scope)
+  versions.set(section, read)
+  read.catch(() => versions.delete(section))
+  return read
 }
 
 /**
  * A bypass link's holder, through the storefront: the token is checked as
  * `GET /store/maintenance/bypass/:token` checks it (its signature, its
- * week, the section's version now), so only a link the owner or an admin
- * made opens the shop. A malformed or ended token costs no read.
+ * week, the section's version), so only a link the owner or an admin made
+ * for the section as saved opens the shop. A malformed or ended token
+ * costs no read.
  */
-async function holdsBypass(req: MedusaRequest): Promise<boolean> {
+async function holdsBypass(req: MedusaRequest, section: MaintenanceSettings): Promise<boolean> {
   const sent = req.headers[MAINTENANCE_BYPASS_HEADER]
   const parts = typeof sent === "string" ? bypassParts(sent) : null
   if (!parts) {
     return false
   }
   try {
-    const state = await maintenanceState(req.scope)
+    const state = await sectionState(req, section)
     return state.enabled && bypassOpens(orderAccessKey(), parts, state.version)
   } catch {
-    // An unreadable section opens no link; the guard's own read already said the shop is dark
+    // An unreadable section opens no link
     return false
   }
 }
@@ -65,22 +96,23 @@ async function holdsBypass(req: MedusaRequest): Promise<boolean> {
  * with `Retry-After`, as the storefront's page does, unless
  * `lib/storefront/maintenance-guard.ts` names it open or the caller holds
  * a bypass link. Reads never reach the setting. A setting that cannot be
- * read blocks nothing (fail-open, logged): maintenance is the shop's own
- * pause, enforced first at the storefront's edge, and the write itself
- * needs the same database that just failed.
+ * read is taken as last read; never read at all, it blocks nothing
+ * (fail-open, logged): maintenance is the shop's own pause, enforced first
+ * at the storefront's edge, and the write needs the database that failed.
  */
 export async function refuseWritesInMaintenance(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
 ): Promise<void> {
-  const decision = decideMaintenanceRequest(req.method, routePath(req))
+  const body: unknown = req.body
+  const decision = decideMaintenanceRequest(req.method, routePath(req), body)
   if (!decision.closed) {
     next()
     return
   }
   const maintenance = await maintenanceOf(req)
-  if (!maintenance?.enabled || (await holdsBypass(req))) {
+  if (!maintenance?.enabled || (await holdsBypass(req, maintenance))) {
     next()
     return
   }

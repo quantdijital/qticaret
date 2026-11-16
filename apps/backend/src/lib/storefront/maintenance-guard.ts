@@ -31,7 +31,8 @@ const READS: ReadonlySet<string> = new Set(["GET", "HEAD", "OPTIONS"])
  *   just before maintenance still finds its order), a guest's order
  *   lookup, a gift card's balance, a shipping option's price;
  * - an order already placed: its cancellation and return request (the
- *   shopper's right of withdrawal does not wait for the shop);
+ *   shopper's right of withdrawal does not wait for the shop), not an
+ *   exchange, which picks and prices a new variant (security review L4);
  * - consent and privacy: withdrawing consent (account, cookies, a message's
  *   unsubscribe), confirming one asked for from a message already sent,
  *   a stock alert's confirmation link, a KVKK request (its deadline runs);
@@ -44,13 +45,28 @@ const OPEN_WRITES: readonly RegExp[] = [
   /^\/store\/gift-cards\/balance$/,
   /^\/store\/shipping-options\/[^/]+\/calculate$/,
   /^\/store\/orders\/[^/]+\/cancel$/,
-  /^\/store\/orders\/[^/]+\/returns$/,
   /^\/store\/customers\/me\/consents$/,
   /^\/store\/customers\/me\/privacy-requests$/,
   /^\/store\/consents\/(?:cookies|unsubscribe|confirm)$/,
   /^\/store\/stock-alerts\/confirm$/,
   /^\/store\/seo\/not-found$/,
 ]
+
+/**
+ * A return request: open while dark only as a return (`kind` left out is
+ * one, the route's schema defaults it); an exchange or anything else is
+ * closed. Read from the raw body: the guard runs before the route's own
+ * validation, which refuses any other value anyway.
+ */
+const RETURN_REQUEST = /^\/store\/orders\/[^/]+\/returns$/
+
+const isPlainReturn = (body: unknown): boolean => {
+  if (body === null || typeof body !== "object" || Array.isArray(body)) {
+    return false
+  }
+  const { kind } = body as { kind?: unknown }
+  return kind === undefined || kind === "return"
+}
 
 /** A new shopper account: Medusa's registration of a customer identity (any provider). */
 const REGISTRATION = /^\/auth\/customer\/[^/]+\/register$/
@@ -62,9 +78,14 @@ const OPEN: MaintenanceDecision = { closed: false }
 /**
  * Whether a request is closed while the shop is in maintenance, whatever
  * the setting says: the middleware reads the setting only for one that is.
- * `path` is the route path (lower case, no trailing slash, no query).
+ * `path` is the route path (lower case, no trailing slash, no query);
+ * `body` the parsed request body, read only for a return request.
  */
-export function decideMaintenanceRequest(method: string, path: string): MaintenanceDecision {
+export function decideMaintenanceRequest(
+  method: string,
+  path: string,
+  body?: unknown
+): MaintenanceDecision {
   if (READS.has(method.toUpperCase())) {
     return OPEN
   }
@@ -76,6 +97,9 @@ export function decideMaintenanceRequest(method: string, path: string): Maintena
   }
   if (OPEN_WRITES.some((open) => open.test(path))) {
     return OPEN
+  }
+  if (RETURN_REQUEST.test(path)) {
+    return isPlainReturn(body) ? OPEN : { closed: true, reason: "maintenance_exchange" }
   }
   return { closed: true, reason: "maintenance_store_write" }
 }
