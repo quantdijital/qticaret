@@ -67,7 +67,7 @@ async function cartRow(container: Container, cartId: string): Promise<CartRow | 
     ],
     filters: { id: cartId },
   })
-  return data[0] as CartRow | undefined
+  return data[0]
 }
 
 /** Marks an open link's prices as moved and tells staff, once. */
