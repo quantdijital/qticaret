@@ -111,6 +111,9 @@ const KNOWN = new Set([
   "cart.payment_link_prices_changed",
   "cart.payment_link_code_misused",
   "cart.payment_link_no_cod",
+  // A wholesale cart the backend could not set right before paying (ADR-0068 slice 4 review Y2);
+  // a theme that does not list it says its own "could not complete" words
+  "wholesale.payment_unavailable",
 ])
 
 /**

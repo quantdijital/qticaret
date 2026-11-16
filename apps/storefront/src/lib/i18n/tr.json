@@ -904,6 +904,7 @@
   "cart.line_unknown": "Bu satır artık sepette yok.",
   "catalog.addons_disabled": "Ek seçenekler şu an sunulmuyor. Seçimli ürünü sepetten çıkarıp seçimsiz ekleyebilirsiniz.",
   "cart.prices_changed": "Fiyatlar güncellendi, lütfen kontrol edip yeniden deneyin.",
+  "wholesale.payment_unavailable": "Sepetinizin ödemesi şu an başlatılamıyor. Sepetinizi yenileyip biraz sonra tekrar deneyin.",
   "checkout.fix_in_cart": "Sepete dön",
   "order.return_non_withdrawable": "Bu satır için cayma hakkı yok; yalnızca ayıplı/yanlış ürün iadesi.",
   "returns.withdrawal_excluded": "Bu üründe cayma hakkı yok (kişiye özel hazırlanan ürün, teslim edilen dijital içerik ya da ifa edilen hizmet); yalnızca ayıplı ya da yanlış geldiyse iade edilebilir, değişim yapılmaz. Nedeni \"Hasarlı geldi\", \"Yanlış ürün geldi\" ya da \"Açıklamadaki gibi değil\" seçin.",

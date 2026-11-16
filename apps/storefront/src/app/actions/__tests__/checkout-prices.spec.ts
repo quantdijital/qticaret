@@ -95,6 +95,15 @@ describe("placeOrder with a price that moved", () => {
     expect(next.redirect).not.toHaveBeenCalled()
   })
 
+  it("passes a wholesale cart the backend could not set right on by its key (review Y2)", async () => {
+    pay.startPayment.mockRejectedValue(
+      new StoreApiError(409, "wholesale.payment_unavailable", null)
+    )
+    await expect(submit()).resolves.toMatchObject({ error: "wholesale.payment_unavailable" })
+    expect(next.revalidatePath).not.toHaveBeenCalled()
+    expect(pay.completeCart).not.toHaveBeenCalled()
+  })
+
   it("sends a wholesale order under its minimum to the cart, which says it (ADR-0068 §8)", async () => {
     pay.startPayment.mockRejectedValue(new StoreApiError(400, "wholesale.min_quantity", null))
     await expect(submit()).rejects.toThrow("redirect:/sepet")
