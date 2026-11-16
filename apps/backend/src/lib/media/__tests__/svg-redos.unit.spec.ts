@@ -68,6 +68,31 @@ describe("the review's payloads, under a hard time limit", () => {
     expect(ms).toBeLessThan(1_000)
   })
 
+  it.each([
+    ["B2: a comment closed by --!> hides no tags", `<svg><!----!>${"<g>".repeat(60_000)}`],
+    ["B2: attributes without values count", `<svg><rect ${"a ".repeat(25_000)}/></svg>`],
+    ["B2: a quoted > ends no tag", `<svg>${'<g a=">">'.repeat(100)}`],
+    ["B2: a / in an unquoted value closes nothing", `<svg>${"<g a=/>".repeat(100)}`],
+    ["B2: an HTML element's / closes nothing", `<svg><foreignObject>${"<div/>".repeat(100)}`],
+    ["B3: a template", "<svg><template><rect/></template></svg>"],
+  ])("%s: refused before it is parsed", (_name, text) => {
+    const { value, ms } = timed(() => prescan(text))
+    expect(value).toBe("upload.svg_too_complex")
+    expect(ms).toBeLessThan(100)
+  })
+
+  it("keeps a logo's many shapes that close themselves", () => {
+    const shapes = '<path d="M0 0h1v1z"/>'.repeat(200)
+    expect(prescan(`<svg xmlns="http://www.w3.org/2000/svg">${shapes}</svg>`)).toBeNull()
+    expect(
+      cleaned(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">${shapes}</svg>`)
+    ).toBe("kept")
+  })
+
+  it("B3: the cleaner refuses a template (the text's look first, the parsed tree behind it)", () => {
+    expect(cleaned("<svg><template><rect/></template></svg>")).toBe("upload.svg_too_complex")
+  })
+
   it("YENİ-5: an element with 25,000 attributes is refused before it is parsed", () => {
     const text = `<svg><rect ${"a=1 ".repeat(25_000)}/></svg>`
     const { value, ms } = timed(() => cleaned(text))

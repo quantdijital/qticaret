@@ -59,6 +59,8 @@ const FORBIDDEN = [
   "animateColor",
   "set",
   "discard",
+  // Outside DOMPurify's SVG profile already; named here so no profile change lets it in
+  "use",
   "a",
 ]
 // DOMPurify reads tag names lower-cased from the HTML parser; both spellings, to be sure
@@ -135,6 +137,8 @@ function checkShape(root: Element): void {
     const [node, depth] = next
     attributes += node.attributes.length
     if (
+      // A template's content is a fragment apart, which `children` does not walk: none at all
+      node.localName === "template" ||
       depth > SVG_MAX_DEPTH ||
       ++count > SVG_MAX_ELEMENTS ||
       node.attributes.length > SVG_MAX_ATTRIBUTES ||

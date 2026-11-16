@@ -4,6 +4,9 @@
  * expression with a quantifier runs on the text here: the earlier ones
  * backtracked (a file of comments, a run of `<a`, a long run of spaces
  * held the process for seconds or for good, security review 2026-11-16).
+ * Every loop moves its position forward on every turn, or stops: a loop
+ * that could stand still (`<!----><!doctype [>` did) is a hang on the
+ * event loop. Each says below why it ends.
  */
 
 /** The most elements, nesting, attributes on one element and in all that an SVG may have. */
@@ -21,6 +24,7 @@ const isSpace = (code: number) =>
   code === 0x20 || code === 0x09 || code === 0x0a || code === 0x0d || code === 0x0c
 const isLetter = (code: number) => (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a)
 
+// Ends: `at` grows by one each turn, up to the text's length
 function skipSpaces(text: string, from: number): number {
   let at = from
   while (at < text.length && isSpace(text.charCodeAt(at))) {
@@ -31,6 +35,25 @@ function skipSpaces(text: string, from: number): number {
 
 const startsWithAt = (text: string, at: number, word: string): boolean =>
   text.slice(at, at + word.length).toLowerCase() === word
+
+/** Where a DOCTYPE that starts at `at` ends (after its `>`), or -1: never closed. */
+function doctypeEnd(text: string, at: number): number {
+  const close = text.indexOf(">", at)
+  if (close < 0) {
+    return -1
+  }
+  const subset = text.indexOf("[", at)
+  if (subset < 0 || subset > close) {
+    return close + 1
+  }
+  // An internal subset `[ … ]` may hold `>`: the DOCTYPE ends at the first `>` after its `]`
+  const bracket = text.indexOf("]", subset)
+  if (bracket < 0) {
+    return -1
+  }
+  const end = text.indexOf(">", bracket)
+  return end < 0 ? -1 : end + 1
+}
 
 /**
  * A detection, not a cleaner: does the file start as an SVG document? A
@@ -51,29 +74,20 @@ export function looksLikeSvg(bytes: Uint8Array): boolean {
     }
     at = skipSpaces(text, end + 2)
   }
+  // Ends: each turn moves `at` past what it read, or returns; one that would not move returns
   for (;;) {
+    let end: number
     if (startsWithAt(text, at, "<!--")) {
-      const end = text.indexOf("-->", at + 4)
-      if (end < 0) {
-        return false
-      }
-      at = skipSpaces(text, end + 3)
+      end = commentEnd(text, at)
     } else if (startsWithAt(text, at, "<!doctype")) {
-      const subset = text.indexOf("[", at)
-      const close = text.indexOf(">", at)
-      if (close < 0) {
-        return false
-      }
-      // An internal subset `[ … ]` may hold `>`: the DOCTYPE ends at the `>` after its `]`
-      const end =
-        subset >= 0 && subset < close ? text.indexOf(">", text.indexOf("]", subset)) : close
-      if (end < 0) {
-        return false
-      }
-      at = skipSpaces(text, end + 1)
+      end = doctypeEnd(text, at)
     } else {
       break
     }
+    if (end <= at || end > text.length) {
+      return false
+    }
+    at = skipSpaces(text, end)
   }
   if (!startsWithAt(text, at, "<svg")) {
     return false
@@ -97,27 +111,47 @@ export function plainNumber(value: string | null): number | null {
 
 export type ScanRefusal = "upload.svg_too_complex"
 
-/** Where a comment that starts at `at` ends: `<!-->` and `<!--->` are empty, one never closed ends the text. */
+/**
+ * Where a comment that starts at `at` (`<!--`) ends, as an HTML parser
+ * reads it: `<!-->` and `<!--->` are empty, `-->` and `--!>` close it, one
+ * never closed runs to the end. Ends: `index` grows by one each turn.
+ */
 function commentEnd(text: string, at: number): number {
-  if (text.charCodeAt(at + 4) === 0x3e) {
+  if (text.startsWith(">", at + 4)) {
     return at + 5
   }
   if (text.startsWith("->", at + 4)) {
     return at + 6
   }
-  const end = text.indexOf("-->", at + 4)
-  return end < 0 ? text.length : end + 3
+  for (let index = at + 4; index < text.length; index++) {
+    if (text.charCodeAt(index) === 0x2d && text.charCodeAt(index + 1) === 0x2d) {
+      if (text.charCodeAt(index + 2) === 0x3e) {
+        return index + 3
+      }
+      if (text.charCodeAt(index + 2) === 0x21 && text.charCodeAt(index + 3) === 0x3e) {
+        return index + 4
+      }
+    }
+  }
+  return text.length
+}
+
+interface Tag {
+  name: string
+  /** Just past the tag's `>` (quotes respected), or the text's end. */
+  end: number
+  attributes: number
+  /** A `/` right before the `>`, outside any value (`<g a=/>` is no self-closing tag). */
+  selfClosing: boolean
 }
 
 /**
- * The tag's name from `at` (just after `<` or `</`) and where its text
- * ends; attributes counted by their `=` (one in a value counts as one more:
- * a count too high only refuses).
+ * The tag from `at` (just after `<` or `</`): its name, then its
+ * attributes read as the HTML tokenizer reads them, a quoted value whole
+ * (a `>` in it does not end the tag), every name counted with or without
+ * a value. Ends: `index` grows by at least one each turn, up to the end.
  */
-function readTag(
-  text: string,
-  at: number
-): { name: string; end: number; equals: number; selfClosing: boolean } {
+function readTag(text: string, at: number): Tag {
   let index = at
   while (index < text.length) {
     const code = text.charCodeAt(index)
@@ -127,29 +161,92 @@ function readTag(
     index++
   }
   const name = text.slice(at, index).toLowerCase()
-  const close = text.indexOf(">", index)
-  const end = close < 0 ? text.length : close
-  let equals = 0
-  for (let i = index; i < end; i++) {
-    if (text.charCodeAt(i) === 0x3d) {
-      equals++
+  let attributes = 0
+  let selfClosing = false
+  while (index < text.length) {
+    const code = text.charCodeAt(index)
+    if (code === 0x3e) {
+      return { name, end: index + 1, attributes, selfClosing }
+    }
+    if (isSpace(code)) {
+      index++
+      continue
+    }
+    if (code === 0x2f) {
+      selfClosing = text.charCodeAt(index + 1) === 0x3e
+      index++
+      continue
+    }
+    selfClosing = false
+    // An attribute's name, up to a space, `=`, `/` or `>`
+    attributes++
+    while (index < text.length) {
+      const c = text.charCodeAt(index)
+      if (isSpace(c) || c === 0x3d || c === 0x2f || c === 0x3e) {
+        break
+      }
+      index++
+    }
+    index = skipSpaces(text, index)
+    if (text.charCodeAt(index) !== 0x3d) {
+      continue
+    }
+    index = skipSpaces(text, index + 1)
+    const quote = text.charCodeAt(index)
+    if (quote === 0x22 || quote === 0x27) {
+      const close = text.indexOf(String.fromCharCode(quote), index + 1)
+      index = close < 0 ? text.length : close + 1
+    } else {
+      // Unquoted: up to a space or `>` (a `/` in it is the value's, not a self-closing mark)
+      while (index < text.length) {
+        const c = text.charCodeAt(index)
+        if (isSpace(c) || c === 0x3e) {
+          break
+        }
+        index++
+      }
     }
   }
-  return {
-    name,
-    end: close < 0 ? text.length : close + 1,
-    equals,
-    selfClosing: close > 0 && text.charCodeAt(close - 1) === 0x2f,
-  }
+  return { name, end: text.length, attributes, selfClosing: false }
 }
 
 /**
- * A linear look at the text before it is parsed: elements (start tags),
- * nesting as an HTML parser would follow it (an end tag closes the
- * nearest open element of its name, one with none open is ignored),
- * attributes on each element and in all. Comments (empty ones too) and
- * other markup declarations are skipped. It may count more than the tree
- * a parser builds, never less, so a file past it is refused.
+ * Where a self-closing mark is honoured: on an element of the SVG's own
+ * namespace. Inside an HTML integration point (`foreignObject`, `desc`,
+ * `title`) or for an HTML element that breaks out of it, the HTML parser
+ * ignores it: the element stays open.
+ */
+const INTEGRATION_POINTS = new Set(["foreignobject", "desc", "title"])
+const BREAKOUT = new Set([
+  ..."b big blockquote body br center code dd div dl dt em embed h1 h2 h3 h4 h5 h6 head hr i img li listing menu meta nobr ol p pre ruby s small span strong strike sub sup table tt u ul var".split(
+    " "
+  ),
+])
+
+function inSvgContent(open: readonly string[]): boolean {
+  for (let index = open.length - 1; index >= 0; index--) {
+    const name = open[index] ?? ""
+    if (name === "svg") {
+      return true
+    }
+    if (INTEGRATION_POINTS.has(name)) {
+      return false
+    }
+  }
+  return false
+}
+
+/**
+ * A look at the text before it is parsed: elements (start tags), nesting
+ * as an HTML parser would mostly follow it (an end tag closes the nearest
+ * open element of its name, one with none open is ignored; a self-closing
+ * mark counts only on an SVG element), attributes on each element and in
+ * all (with or without a value), and no `<template>` (its content is no
+ * child the tree counts). Comments, empty ones and `--!>` too, and other
+ * markup declarations are skipped. A guess, not the parser: it can still
+ * count less than the tree in HTML corners (implied end tags, adoption),
+ * which is why the worker counts the parsed tree again before cleaning.
+ * Ends: `at` moves past each piece it reads (at least one character).
  */
 export function prescan(text: string): ScanRefusal | null {
   const open: string[] = []
@@ -175,15 +272,18 @@ export function prescan(text: string): ScanRefusal | null {
     } else if (isLetter(next)) {
       const tag = readTag(text, at + 1)
       elements++
-      attributes += tag.equals
+      attributes += tag.attributes
       if (
+        tag.name === "template" ||
         elements > SVG_MAX_ELEMENTS ||
-        tag.equals > SVG_MAX_ATTRIBUTES ||
+        tag.attributes > SVG_MAX_ATTRIBUTES ||
         attributes > SVG_MAX_ALL_ATTRIBUTES
       ) {
         return "upload.svg_too_complex"
       }
-      if (!tag.selfClosing) {
+      const closesItself =
+        tag.selfClosing && !BREAKOUT.has(tag.name) && (tag.name === "svg" || inSvgContent(open))
+      if (!closesItself) {
         open.push(tag.name)
         if (open.length > SVG_MAX_DEPTH) {
           return "upload.svg_too_complex"
@@ -193,7 +293,7 @@ export function prescan(text: string): ScanRefusal | null {
     } else {
       end = at + 1
     }
-    at = text.indexOf("<", end)
+    at = text.indexOf("<", Math.max(end, at + 1))
   }
   return null
 }
