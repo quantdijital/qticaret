@@ -30,6 +30,8 @@ export const OPEN_ALERTS: readonly string[] = [
   "payment_links.paid",
   "payment_links.prices_changed",
   "payment_links.out_of_stock",
+  // An order from a link to look at (a second charge possible): the number and total only
+  "payment_links.needs_review",
   "stock.low",
   "einvoice.issue_stopped",
   "einvoice.return_needed",

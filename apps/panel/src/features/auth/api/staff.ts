@@ -69,11 +69,13 @@ export type PlanStatus = "active" | "restricted" | "suspended"
 export const STAFF_KEY = ["auth", "staff"] as const
 
 /** `GET /admin/staff/me`: the signed-in staff member's role and what it allows. */
+export const STAFF_STALE_MS = 60_000
+
 export const staffQuery = () =>
   queryOptions({
     queryKey: STAFF_KEY,
     queryFn: () => sdk.client.fetch<StaffMe>("/admin/staff/me"),
-    staleTime: 60_000,
+    staleTime: STAFF_STALE_MS,
   })
 
 export function useStaff(): StaffMe | undefined {

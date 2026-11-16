@@ -6749,6 +6749,14 @@
       "title": "Ödeme bağlantısı {{number}}: stokta olmayan ürün",
       "description": "Müşteri ödeyemedi. Stoğu güncelleyin ya da bağlantıyı iptal edip yenisini oluşturun."
     },
+    "paymentLinkOrdered": {
+      "title": "Ödeme bağlantısı {{number}}: sipariş verildi",
+      "description": "Ödeme kapıda alınacak; sipariş Siparişler'de."
+    },
+    "paymentLinkReview": {
+      "title": "Ödeme bağlantısı {{number}}: siparişi kontrol edin",
+      "description": "Bu bağlantıdan beklenmeyen bir sipariş oluştu. Aynı bağlantı için iki kez ödeme alınıp alınmadığına bakın."
+    },
     "stockShort": {
       "title": "Stok yetersiz sipariş #{{number}}",
       "description": "Eksik: {{lines}}. Üretin ya da tedarik edin; edemeyecekseniz iptal edip iade edin."
@@ -7564,6 +7572,18 @@
     "failedPassword": "Şifre doğru değil; yeniden deneyin.",
     "confirm": "Doğrula",
     "cancelled": "İşlem yapılmadı."
+  },
+  "session": {
+    "rateLimited": {
+      "toast": "Çok fazla istek, biraz sonra yeniden deneyin.",
+      "title": "Çok fazla istek",
+      "text": "Biraz sonra yeniden deneyin."
+    },
+    "unavailable": {
+      "title": "Panel şu an yüklenemedi",
+      "text": "Bilgiler şu an alınamadı; biraz sonra yeniden deneyin."
+    },
+    "retry": "Yeniden dene"
   },
   "restrictions": {
     "label": "Yaş sınırı",

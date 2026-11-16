@@ -6749,6 +6749,14 @@
       "title": "Payment link {{number}}: a product is out of stock",
       "description": "The customer could not pay. Update the stock, or cancel the link and create a new one."
     },
+    "paymentLinkOrdered": {
+      "title": "Payment link {{number}}: order placed",
+      "description": "Payment is taken at the door; the order is in Orders."
+    },
+    "paymentLinkReview": {
+      "title": "Payment link {{number}}: check the order",
+      "description": "An unexpected order came from this link. Check whether the link was paid twice."
+    },
     "stockShort": {
       "title": "Order #{{number}} is short of stock",
       "description": "Missing: {{lines}}. Make or source them; if you cannot, cancel and refund."
@@ -7564,6 +7572,18 @@
     "failedPassword": "The password is not right; try again.",
     "confirm": "Verify",
     "cancelled": "Nothing was done."
+  },
+  "session": {
+    "rateLimited": {
+      "toast": "Too many requests, try again in a moment.",
+      "title": "Too many requests",
+      "text": "Try again in a moment."
+    },
+    "unavailable": {
+      "title": "The panel could not load",
+      "text": "Your details could not be read just now; try again in a moment."
+    },
+    "retry": "Try again"
   },
   "restrictions": {
     "label": "Age limit",

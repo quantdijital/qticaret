@@ -76,9 +76,20 @@ export function errorText(t: TFunction, error: unknown): string {
   return t("errors.generic")
 }
 
+/** A `Retry-After` header in whole seconds (seconds or an HTTP date); null when absent or unreadable. */
+export function retryAfterSeconds(header: string | null, now = Date.now()): number | null {
+  const value = header?.trim() ?? ""
+  if (/^\d+$/.test(value)) {
+    return Number(value)
+  }
+  const at = value === "" ? Number.NaN : Date.parse(value)
+  return Number.isNaN(at) ? null : Math.max(0, Math.ceil((at - now) / 1000))
+}
+
 /**
  * A failed `fetch` answer as the errors the SDK throws, its body's key and
- * a provider's parts kept beside the sentence, for `errorText`.
+ * a provider's parts kept beside the sentence, for `errorText`; a 429's
+ * `Retry-After` too, which the SDK's error drops.
  */
 export async function responseFailure(response: Response): Promise<Error> {
   const body = (await response.json().catch(() => null)) as Record<string, unknown> | null
@@ -91,6 +102,7 @@ export async function responseFailure(response: Response): Promise<Error> {
     code: text("code") ?? null,
     provider: text("provider") ?? null,
     provider_message: text("provider_message") ?? null,
+    retry_after: retryAfterSeconds(response.headers.get("retry-after")),
   })
 }
 
