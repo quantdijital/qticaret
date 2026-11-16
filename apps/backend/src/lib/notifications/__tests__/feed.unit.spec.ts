@@ -60,32 +60,39 @@ describe("the feed's filters", () => {
   const floor = new Date("2026-11-10T00:00:00.000Z")
   const state = { until: floor.toISOString(), ids: ["noti_1"] }
 
-  it("is the feed alone for one who sees everything", () => {
-    expect(feedFilters({ state: "all", group: null, readState: state, floor, hidden: [] })).toEqual(
-      { channel: "feed" }
-    )
-  })
-
-  it("leaves a wholesaler's order out for a role that does not see wholesalers, keeping untyped rows", () => {
+  it("is the feed alone for the owner, who gets every kind", () => {
     expect(
       feedFilters({
         state: "all",
         group: null,
         readState: state,
         floor,
-        hidden: [WHOLESALE_ORDER_TRIGGER],
+        visible: null,
       })
-    ).toEqual({
-      channel: "feed",
-      $and: [
-        { $or: [{ trigger_type: null }, { trigger_type: { $nin: [WHOLESALE_ORDER_TRIGGER] } }] },
-      ],
-    })
+    ).toEqual({ channel: "feed" })
+  })
+
+  it("holds anyone else to the kinds their role gets: no untyped or unknown row", () => {
+    expect(
+      feedFilters({
+        state: "all",
+        group: null,
+        readState: state,
+        floor,
+        visible: ["stock.low"],
+      })
+    ).toEqual({ channel: "feed", $and: [{ trigger_type: ["stock.low"] }] })
   })
 
   it("narrows by a group's prefixes and by what is read or not", () => {
     expect(
-      feedFilters({ state: "unread", group: "stock", readState: state, floor, hidden: [] })
+      feedFilters({
+        state: "unread",
+        group: "stock",
+        readState: state,
+        floor,
+        visible: null,
+      })
     ).toEqual({
       channel: "feed",
       $and: [
@@ -95,7 +102,13 @@ describe("the feed's filters", () => {
       ],
     })
     expect(
-      feedFilters({ state: "read", group: null, readState: state, floor, hidden: [] })
+      feedFilters({
+        state: "read",
+        group: null,
+        readState: state,
+        floor,
+        visible: null,
+      })
     ).toEqual({
       channel: "feed",
       $and: [{ $or: [{ created_at: { $lte: floor } }, { id: ["noti_1"] }] }],
@@ -103,10 +116,10 @@ describe("the feed's filters", () => {
   })
 
   it("gives marking read the same visible feed as the list", () => {
-    expect(visibleFeed([])).toEqual({ channel: "feed" })
-    expect(visibleFeed(["webhooks.disabled"])).toEqual({
+    expect(visibleFeed(null)).toEqual({ channel: "feed" })
+    expect(visibleFeed([WHOLESALE_ORDER_TRIGGER])).toEqual({
       channel: "feed",
-      $and: [{ $or: [{ trigger_type: null }, { trigger_type: { $nin: ["webhooks.disabled"] } }] }],
+      $and: [{ trigger_type: [WHOLESALE_ORDER_TRIGGER] }],
     })
   })
 
@@ -117,7 +130,7 @@ describe("the feed's filters", () => {
         group: null,
         readState: NOTHING,
         floor: null,
-        hidden: [],
+        visible: null,
       })
     ).toBeNull()
   })

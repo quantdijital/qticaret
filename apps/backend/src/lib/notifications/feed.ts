@@ -86,17 +86,17 @@ export function isUnread(
 
 type Filter = Record<string, unknown>
 
-/** Rows with no `trigger_type` are kept by an exclusion: `NOT IN` alone would drop them. */
-const notIn = (values: readonly string[]): Filter => ({
-  $or: [{ trigger_type: null }, { trigger_type: { $nin: [...values] } }],
-})
+/** Only these kinds (`access.ts` `visibleTriggers`); null: every kind, untyped rows too. */
+const kinds = (visible: readonly string[] | null): Filter[] =>
+  visible === null ? [] : [{ trigger_type: [...visible] }]
 
 /**
- * The feed as one role sees it (`access.ts` `hiddenTriggers`): every row
+ * The feed as one role sees it (`access.ts` `visibleTriggers`): every row
  * the list, the bell's count and marking read may touch.
  */
-export function visibleFeed(hidden: readonly string[]): Filter {
-  return hidden.length > 0 ? { channel: "feed", $and: [notIn(hidden)] } : { channel: "feed" }
+export function visibleFeed(visible: readonly string[] | null): Filter {
+  const only = kinds(visible)
+  return only.length > 0 ? { channel: "feed", $and: only } : { channel: "feed" }
 }
 
 const unreadFilter = (state: ReadState, floor: Date | null): Filter[] => [
@@ -115,16 +115,16 @@ const readFilter = (state: ReadState, floor: Date | null): Filter | null => {
 
 /**
  * The notification module's filter for one person's page of the feed:
- * the group, read or unread, and the kinds their role does not see left
- * out on the server. Null: no row can match (nothing read yet).
+ * the group, read or unread, and only the kinds their role gets, decided
+ * on the server. Null: no row can match (nothing read yet).
  */
 export function feedFilters(input: {
   state: AlertState
   group: AlertGroup | null
   readState: ReadState
   floor: Date | null
-  /** The kinds the person's role does not get (`access.ts` `hiddenTriggers`). */
-  hidden: readonly string[]
+  /** The kinds the person's role gets (`access.ts` `visibleTriggers`); null: all. */
+  visible: readonly string[] | null
 }): Filter | null {
   const parts: Filter[] = []
   if (input.group) {
@@ -132,9 +132,7 @@ export function feedFilters(input: {
       $or: ALERT_GROUPS[input.group].map((prefix) => ({ trigger_type: { $like: `${prefix}%` } })),
     })
   }
-  if (input.hidden.length > 0) {
-    parts.push(notIn(input.hidden))
-  }
+  parts.push(...kinds(input.visible))
   if (input.state === "unread") {
     parts.push(...unreadFilter(input.readState, input.floor))
   } else if (input.state === "read") {

@@ -203,6 +203,27 @@ describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)",
     ).toBeInTheDocument()
     expect(screen.getByText(/payses01DEF, sepet —/)).toBeInTheDocument()
   })
+
+  it("words a wholesale cart whose prices could not be set, and leads to the wholesalers", async () => {
+    fetchMock.mockResolvedValue(
+      feed([
+        alert("noti_14", {
+          kind: "payment_issue",
+          issue: "wholesale_price_check",
+          provider: "paytr",
+          reference: "payses01GHI",
+          cart_id: "cart_01W",
+        }),
+      ])
+    )
+    renderBell()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
+
+    const title = await screen.findByText("Toptan sepetin ödemesi başlatılamadı")
+    expect(title.closest("a")).toHaveAttribute("href", "/customers/wholesale")
+    expect(screen.getByText(/Sepet cart_01W toptancının/)).toBeInTheDocument()
+  })
 })
 
 describe("NotificationBell: a wholesaler's order and what is read (ADR-0068, adr/0020)", () => {

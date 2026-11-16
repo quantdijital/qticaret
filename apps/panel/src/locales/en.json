@@ -6764,6 +6764,10 @@
       "shelf_restored": {
         "title": "A temporary stock raise was taken back",
         "description": "The stock raised for cart {{cart}} was lowered again after the run stopped halfway. Check the stock counts."
+      },
+      "wholesale_price_check": {
+        "title": "A wholesale cart's payment could not start",
+        "description": "Cart {{cart}} could not be brought to the wholesaler's prices of today; no payment was taken. Check the wholesale and retail prices of its products."
       }
     },
     "markAllRead": "Mark all read",

@@ -3,7 +3,13 @@ import type { TFunction } from "i18next"
 
 const text = (value: unknown): string => (typeof value === "string" ? value : "")
 
-const ISSUES = ["completion_stuck", "refunded_before_order", "shelf_restored"] as const
+const ISSUES = [
+  "completion_stuck",
+  "refunded_before_order",
+  "shelf_restored",
+  // A wholesaler's cart its prices could not be set for (PR #100): the wholesale roles' alone
+  "wholesale_price_check",
+] as const
 type Issue = (typeof ISSUES)[number]
 
 const isIssue = (value: unknown): value is Issue => ISSUES.includes(value as Issue)
@@ -39,6 +45,8 @@ export function paymentIssueAlert(t: TFunction, data: Record<string, unknown>) {
     tone: shelf ? "bg-warning-soft text-warning-text" : "bg-destructive-soft text-destructive-text",
     link: shelf
       ? { to: "/inventory" as const, search: {}, params: {} }
-      : { to: "/orders" as const, search: {}, params: {} },
+      : issue === "wholesale_price_check"
+        ? { to: "/customers/wholesale" as const, search: {}, params: {} }
+        : { to: "/orders" as const, search: {}, params: {} },
   }
 }

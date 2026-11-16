@@ -41,7 +41,7 @@ export const markAlertsReadStep = createStep(
     const before = reader.stored as Stored
     const notifications = container.resolve(Modules.NOTIFICATION)
     // `id` and the operators are every model's; Medusa's filter type names neither
-    const visible = visibleFeed(reader.hidden) as Record<string, unknown>
+    const visible = visibleFeed(reader.visible) as Record<string, unknown>
     let next: ReadState
     if (input.all) {
       const [newest] = await notifications.listNotifications(visible, {

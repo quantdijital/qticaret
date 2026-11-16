@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { hiddenTriggers } from "../../lib/notifications/access"
+import { visibleTriggers } from "../../lib/notifications/access"
 import {
   READ_STATE_KEY,
   feedFilters,
@@ -41,7 +41,7 @@ export const BELL_SIZE = 20
 export async function readerOf(
   container: Container,
   userId: string
-): Promise<{ state: ReadState; floor: Date | null; hidden: string[]; stored: unknown }> {
+): Promise<{ state: ReadState; floor: Date | null; visible: string[] | null; stored: unknown }> {
   const [user, role] = await Promise.all([
     container
       .resolve(Modules.USER)
@@ -52,7 +52,7 @@ export async function readerOf(
   return {
     state,
     floor: readFloor(state, user.created_at),
-    hidden: hiddenTriggers(role),
+    visible: visibleTriggers(role),
     // The state as kept, for a mark to put back if it fails
     stored: user.metadata?.[READ_STATE_KEY],
   }
@@ -91,23 +91,32 @@ async function withWholesalers(
 }
 
 /**
- * The bell's row: what it words the alert from, no one's name in it. A
- * wholesaler's order without its account (the page names the company);
- * a contact message without the server's own Turkish texts, which older
- * rows wrote with the sender's name (the panel words it from the subject).
+ * What a row never shows, on the page or in the bell: a contact message's
+ * server-worded Turkish texts, which older rows wrote with the sender's
+ * name (the panel words it from the subject).
  */
-const BELL_LEAVES_OUT: Readonly<Record<string, readonly string[]>> = {
-  [WHOLESALE_KIND]: ["account_id", "company"],
+const LEFT_OUT: Readonly<Record<string, readonly string[]>> = {
   contact_message: ["title", "description"],
 }
 
-function bellData(data: Record<string, unknown> | null): Record<string, unknown> | null {
-  const out = data ? BELL_LEAVES_OUT[String(data["kind"])] : undefined
+/** The bell leaves a wholesaler's out too (its account; the page names the company). */
+const BELL_LEAVES_OUT: Readonly<Record<string, readonly string[]>> = {
+  ...LEFT_OUT,
+  [WHOLESALE_KIND]: ["account_id", "company"],
+}
+
+function without(
+  data: Record<string, unknown> | null,
+  table: Readonly<Record<string, readonly string[]>>
+): Record<string, unknown> | null {
+  const out = data ? table[String(data["kind"])] : undefined
   if (!data || !out) {
     return data
   }
   return Object.fromEntries(Object.entries(data).filter(([key]) => !out.includes(key)))
 }
+
+const bellData = (data: Record<string, unknown> | null) => without(data, BELL_LEAVES_OUT)
 
 type Reader = Awaited<ReturnType<typeof readerOf>>
 
@@ -117,7 +126,7 @@ async function page(
   input: { state: AlertState; group: AlertGroup | null; offset: number; limit: number }
 ) {
   const service = container.resolve(Modules.NOTIFICATION)
-  const seen = { readState: reader.state, floor: reader.floor, hidden: reader.hidden }
+  const seen = { readState: reader.state, floor: reader.floor, visible: reader.visible }
   const filters = feedFilters({ ...seen, state: input.state, group: input.group })
   const unreadFilters = feedFilters({ ...seen, state: "unread", group: null })
   const [[rows, count], [, unread]] = await Promise.all([
@@ -136,7 +145,7 @@ async function page(
   const shaped: AlertRow[] = rows.map((row) => ({
     id: row.id,
     created_at: row.created_at,
-    data: row.data ?? null,
+    data: without(row.data ?? null, LEFT_OUT),
     read: !isUnread(row, reader.state, reader.floor),
   }))
   return { rows: shaped, count, unread }

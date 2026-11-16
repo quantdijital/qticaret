@@ -6764,6 +6764,10 @@
       "shelf_restored": {
         "title": "Geçici stok düzeltmesi geri alındı",
         "description": "Sepet {{cart}} için artırılan stok, işlem yarıda kaldığı için geri alındı. Stok sayılarını kontrol edin."
+      },
+      "wholesale_price_check": {
+        "title": "Toptan sepetin ödemesi başlatılamadı",
+        "description": "Sepet {{cart}} toptancının bugünkü fiyatlarına getirilemedi; ödeme alınmadı. Bu sepetteki ürünlerin toptan ve perakende fiyatlarını kontrol edin."
       }
     },
     "markAllRead": "Tümünü okundu say",

@@ -96,13 +96,23 @@ export async function alertPlacedOrder(
   if (!kind) {
     return null
   }
+  // One alert per order whatever its kind: a run whose stamp failed rang the retail one, and
+  // the event coming again (the stamp written now) rings no wholesale one beside it
+  const notifications = container.resolve(Modules.NOTIFICATION)
+  const [rung] = await notifications.listNotifications(
+    { channel: "feed", resource_id: order.id, trigger_type: Object.values(TRIGGERS) },
+    { select: ["id"], take: 1 }
+  )
+  if (rung) {
+    return null
+  }
   const number = String(order.display_id)
   const total = new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency: (order.currency_code ?? "try").toUpperCase(),
   }).format(fromMedusaAmount(order.total, { allowRounding: true }) / 100)
   const trigger = TRIGGERS[kind]
-  await container.resolve(Modules.NOTIFICATION).createNotifications({
+  await notifications.createNotifications({
     to: "",
     channel: "feed",
     template: "admin-ui",
