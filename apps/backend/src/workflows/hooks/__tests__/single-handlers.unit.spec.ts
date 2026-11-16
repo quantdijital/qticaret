@@ -12,8 +12,12 @@ const FOLDER = join(__dirname, "..")
 
 /** Hooks a plugin of medusa-config registers itself: not ours to take. */
 const HELD_BY_PLUGINS: Readonly<Record<string, string>> = {
-  // @medusajs/loyalty-plugin: its gift cards cloned onto the order
+  // @medusajs/loyalty-plugin 2.21.2 (`src/workflows/hooks/*`): its gift cards cloned onto
+  // the order, its credit taken before the payment, the cart's credit lines kept current
   "completeCartWorkflow.orderCreated": "@medusajs/loyalty-plugin",
+  "completeCartWorkflow.beforePaymentAuthorization": "@medusajs/loyalty-plugin",
+  "refreshCartItemsWorkflow.beforeRefreshingPaymentCollection": "@medusajs/loyalty-plugin",
+  "createOrderCreditLinesWorkflow.creditLinesCreated": "@medusajs/loyalty-plugin",
 }
 
 // `someWorkflow.hooks.name(` or a cast of `someWorkflow.hooks` used as `.name(`
@@ -36,7 +40,10 @@ function registrations(): { hook: string; file: string }[] {
 
 describe("workflow hooks have one handler each", () => {
   it("finds the folder's hooks", () => {
-    expect(registrations().map(({ hook }) => hook)).toContain("completeCartWorkflow.validate")
+    const hooks = registrations().map(({ hook }) => hook)
+    expect(hooks).toContain("completeCartWorkflow.validate")
+    // ADR-0068 slice 4: a wholesaler's cart takes no promotion
+    expect(hooks).toContain("updateCartPromotionsWorkflow.setPromotionContext")
   })
 
   it("registers no hook twice, and none a plugin holds", () => {

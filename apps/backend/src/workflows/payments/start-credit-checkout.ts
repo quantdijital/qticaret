@@ -16,6 +16,7 @@ import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
 import { repriceAddonLinesStep } from "../addons/checkout"
+import { checkWholesaleCartStep } from "../wholesale/checkout"
 import { applyPaymentFeeStep } from "./steps/payment-fee"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
 
@@ -91,6 +92,9 @@ export const startCreditCheckoutWorkflow = createWorkflow(
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,
     })
+    // A wholesaler's minimum, and every cart at its customer's prices now, or the start
+    // stops for the shopper to see them (ADR-0068 §7, §8); after the add-on step's own cart check
+    checkWholesaleCartStep({ cart_id: input.cart_id })
     // A cash on delivery fee line left from an earlier choice goes (no fee without a way to pay)
     applyPaymentFeeStep({
       cart_id: input.cart_id,
