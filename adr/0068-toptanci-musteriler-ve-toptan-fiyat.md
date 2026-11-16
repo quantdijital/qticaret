@@ -122,7 +122,7 @@ Bugünkü vitrin "fiyat herkes için aynıdır" varsayımıyla hızlıdır: `/st
 ### 6. Kampanyalar, kuponlar, indirimli fiyat gösterimi
 
 - **Kupon:** toptancı sepetinde kod kabul edilmez (varsayılan). Store'daki kod yolu (`api/http/promotion-routes.ts`, `/store/carts` altında `oneCodePerCart`'ın yanında) `promotions.wholesale_no_code` ile reddeder; tamamlama kancası da kodlu toptancı sepetini reddeder.
-- **Otomatik kampanyalar:** toptancıya uygulanmaz (varsayılan). Mekanizma dilim 4'te seçilir (§Uygulama sırası).
+- **Otomatik kampanyalar:** toptancıya uygulanmaz (varsayılan). Mekanizma dilim 4'te seçildi: promosyon bağlamı kancası (Ek 2026-11-16).
 - **Kargo bedava eşiği** (adr/0024, kargo seçeneği fiyat kuralı) promosyon değildir; toptancıya da uygulanır.
 - **İndirimden önceki fiyat (Fiyat Etiketi Yön., adr/0023):** toptancı tacirdir; ona üstü çizili fiyat, "%X indirim" rozeti ve 30 gün bilgisi gösterilmez. Tek fiyat ve "KDV hariç" notu. Perakende fiyat "karşılaştırma" olarak da gösterilmez.
 - Hediye kartı ve mağaza kredisi toptancıya da açıktır (değişiklik yok).
@@ -297,3 +297,37 @@ Müşteriler altında tek "Toptancılar" girişi (bayrak açıkken, sahip ve yö
 ### Kalan risk
 
 Personel ilk şifreyi bilir; toptancıya ilk girişte şifresini değiştirmesi önerilir (panel bunu söyler). Devralma, gerçek sahibi adresini doğrulamamış bir müşterinin şifresini değiştirir; bu yüzden açık bir seçimdir ve denetlenir. Oturum kontrolü her Store isteğine bir kimlik okuması ekler (5 sn tutulur).
+
+## Ek 2026-11-16: dilim 4 (ödeme anı denetimi, kampanyalar, kupon, en az adet)
+
+### Ödeme anı fiyat denetimi (1b incelemesi M1'i kapatır)
+
+- **Hangi sepet:** müşterisi toptancı olan ya da bir zaman olmuş (kapalı, silinmiş satır dahil: `withDeleted`) sepet. Misafir sepeti, hiç toptancı olmamış müşterinin sepeti ve ödeme bağlantısı sepeti (`qt_payment_link`) denetlenmez. Ödeme bağlantısı dışarıda kalır: satırlarını, kodunu ve fiyatını personel belirler, bağlantının kendi kilidi (`linkCartProblem`) bunları zaten tutar (§7 "ödeme bağlantısı toptan fiyat okumaz"); toptan kuralları ona uygulanırsa bağlantının kodu düşer ve bağlantı `cart.payment_link_changed` ile kırılırdı.
+- **Karşılaştırma:** her satırın birim fiyatı, Medusa'nın satırı bugün fiyatladığı bağlamla (sepetin para birimi ve bölgesi, müşteri ve o anki grupları, satırın adedi; `addons/cart.ts` ile aynı) yeniden okunur; kuruşta farklıysa satır bayattır. Kendi kuralıyla fiyatlanan satırlar (`is_custom_price`: ek seçenek satırları, kapıda ödeme bedeli) ve bugün fiyatı olmayan satırlar bu denetimin değildir. Etkin toptancının sepetinde herhangi bir promosyon (otomatik dahil) olması da "yeniden fiyatlanmalı" sayılır. Fiyat istemciden hiç alınmaz.
+- **Ödeme başlangıcı:** `startCartPaymentWorkflow` ve `startCreditCheckoutWorkflow`'a ek seçenek adımından hemen sonra `checkWholesaleCartStep` girer (sepet kilidini almadan önce; Medusa'nın yenilemesi kilidi kendisi alır). Bayat sepet Medusa'nın kendi yenilemesiyle (`repriceCartWorkflow` → `refreshCartItemsWorkflow`, `force_refresh`) yeniden fiyatlanır ve başlangıç 409 `wholesale.prices_changed` ile durur; yeni fiyat kalır. Yenileme hiçbir şeyi değiştirmezse (bizim okumamız Medusa'nınkinden ayrıldıysa) Medusa'nın fiyatı geçerli sayılır, `wholesale.price_check_diverged` hata logu düşer ve başlangıç sürer.
+- **Tamamlama:** kanca olarak `completeCartWorkflow.hooks.validate` seçildi: zaten bizim tek dinleyicimiz var (`hooks/complete-cart-validate.ts`), denetim oraya eklendi. `orderCreated`, `beforePaymentAuthorization` (ikisi de `completeCartWorkflow`) ve `refreshCartItemsWorkflow.beforeRefreshingPaymentCollection` `@medusajs/loyalty-plugin` 2.21.2'nindir (kaynakta `src/workflows/hooks/*`); `single-handlers.unit.spec.ts` artık dördünü de listeler. `validate` ödeme yetkilendirmeden önce çalışır; Medusa belgesi kancada sepeti değiştirmeyi yasaklar ve tamamlama sepet kilidini tutar: denetim yalnız okur, bayat sepeti 409 `wholesale.prices_changed`, kodlu toptancı sepetini 400 `promotions.wholesale_no_code`, eksik adedi 400 `wholesale.min_quantity` ile reddeder. Yeniden fiyatlama bir sonraki ödeme başlangıcındadır. Zaten siparişe dönmüş sepet (tamamlamanın tekrar çağrılması) denetlenmez.
+- **Kalan sınır:** başlangıçta "ayrıldı" diye geçen bir sepeti tamamlama yine reddeder (yalnız okuyabildiği için); bu durum hata logudur, bizim fiyat okumamızın Medusa'dan ayrıldığını gösterir ve düzeltilmelidir.
+
+### Otomatik kampanyalar toptancıya uygulanmaz: mekanizma
+
+Medusa 2.21.2 kaynağıyla incelendi (`packages/modules/promotion/src/utils/validations/promotion-rule.ts`, `compute-actions/build-promotion-rule-query-filter-from-context.ts`, `services/promotion-module.ts` `computeActions`; `core-flows` `update-cart-promotions.ts`):
+
+- **Grup dışlayan kural (`customer.groups.id` `ne` toptan grupları) reddedildi.** Bellekteki değerlendirme `ne`'yi doğru yapar (bağlamdaki hiçbir grup listede değilse geçer), ama otomatik promosyonlar önce veritabanında süzülür ve bu süzgeç **kuralının özniteliği bağlamda olmayan her promosyonu dışarıda bırakır**: grubu olmayan müşteri ve misafir sepetinde `customer.groups.id` yoktur, yani kampanya perakende müşteriden de kalkardı. Ayrıca her otomatik promosyona kural eklemeyi (panelden açılanlar dahil) gerektirirdi.
+- **Seçilen: `updateCartPromotionsWorkflow.hooks.setPromotionContext`** (`hooks/cart-promotion-context.ts`, başka dinleyicisi yok). Medusa her promosyon hesabını bu iş akışından geçirir (her sepet değişikliğinden sonraki yenileme, kod ekleme ve çıkarma) ve kancanın döndürdüğünü sepet bağlamının üstüne koyar. Etkin toptancının sepeti (bayrak açık; ödeme bağlantısı sepeti hariç) için satırlar ve kargo yöntemleri **kabuk** olarak verilir (`lib/wholesale/cart.ts` `promotionShells`): her satır ve yöntem kimliğini ve mevcut indirimlerini taşır (Medusa gösterilen her indirimi kaldırma eylemi üretir), ama indirime açık değildir, tutarı ve adedi 0'dır, ürün/varyant gibi bir kuralın eşleşeceği alan taşımaz. Sonuç: hiçbir promosyon (otomatik ya da kodlu, standart ya da al-öde, sipariş, satır ya da kargo hedefli) uygulanmaz, eski indirimler kalkar, sepetin promosyon bağları boşalır. Kapanan toptancı ya da bayrağın kapanması: kanca hiçbir şey döndürmez, sepet perakendedir ve kampanyalar uygulanır.
+- Kanıt: HTTP `wholesale-promotions.spec.ts` (misafir kampanyayı alır, toptancı almaz; toptancının devraldığı misafir sepetinden kampanya kalkar).
+
+### Kupon
+
+Kod gönderen Store istekleri (`POST /store/carts` kodla, `POST /store/carts/:id` kodla, `POST /store/carts/:id/promotions`) sepetin müşterisine (yeni sepette oturumun müşterisine) bakan `refuseWholesaleCodes` ile 400 `promotions.wholesale_no_code` alır; ara katman kod denemesi sayıldıktan sonra (`couponTries`) ve tek kod kuralından önce çalışır, kod çıkarmak hiç reddedilmez. Arka korumalar: kabuk bağlam kodun hiç uygulanmamasını sağlar, tamamlama kodlu toptancı sepetini reddeder.
+
+### En az adet
+
+§8'deki gibi; tek fark yer: denetim `checkout-guard.ts` ara katmanında değil ödeme başlangıcı iş akışının adımındadır (iş mantığı workflow'da). Sayım ürün satırlarının adetleridir (varyantsız kapıda ödeme bedeli sayılmaz). Hata `values: { min, units }` taşır. Vitrin sepet sayfası mevcut ileti alanında (`CartPageView.error`) "Toptan siparişte en az {min} adet gerekir; sepetinizde {units} adet var." der; ödemede `wholesale.min_quantity` gelirse sepete döner. "Ödemeye geç" düğmesini kapatmak tema alanı ister, bu dilimde yapılmadı.
+
+### #93 düşük bulguları
+
+D1: "gece senkronu" sözü kaldırıldı, kalan sepetleri bu dilimin ödeme anı denetimi düzeltir. D2: başarısız ya da yarıda kalan (`interrupted`) sepet işi aynı `attempt` sınırıyla yeniden kuyruğa girer (iptal edilen girmez). D3: bayrak kancasında iş zaten kuyruktaysa loglanır. D4: bir listenin son yazılma zamanı okunamazsa durum "bilinmiyor" döner ve tur oturmuş sayılmaz; gerçek veritabanıyla HTTP doğrulaması `wholesale-payment.spec.ts`'te.
+
+### Yeni hata kodları
+
+`wholesale.prices_changed` (409), `wholesale.min_quantity` (400, `values.min`, `values.units`), `promotions.wholesale_no_code` (400). Vitrin `wholesale.prices_changed`'i temanın bildiği `cart.prices_changed` sözüyle gösterir.
