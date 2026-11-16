@@ -3034,7 +3034,8 @@
   },
   "topbar": {
     "viewStore": "View store",
-    "storeSettings": "Store settings"
+    "storeSettings": "Store settings",
+    "viewStoreNewTab": "View store (opens in a new tab)"
   },
   "period": {
     "today": "Today",
