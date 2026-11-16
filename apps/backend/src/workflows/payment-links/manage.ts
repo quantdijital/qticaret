@@ -67,13 +67,14 @@ const cancelLinkStep = createStep(
   },
   async (before, { container }) => {
     if (before) {
-      await service(container).updatePaymentLinks({
-        id: before.id,
-        status: before.status,
-        canceled_by: null,
-        closed_at: null,
+      // Only the cancel this step wrote: a link paid since stays paid
+      const undone = await service(container).updatePaymentLinks({
+        selector: { id: before.id, status: "canceled" },
+        data: { status: before.status, canceled_by: null, closed_at: null },
       })
-      await reopenLinkPromotion(container, before.promotion_id)
+      if (undone.length > 0) {
+        await reopenLinkPromotion(container, before.promotion_id)
+      }
     }
   }
 )

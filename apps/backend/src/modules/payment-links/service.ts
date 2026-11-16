@@ -143,7 +143,8 @@ class PaymentLinksModuleService extends MedusaService({ PaymentLink }) {
    * Cancels or expires an open (or `draft`) link in one statement, unless a
    * cart's completion holds it now: the customer is paying, and a hold
    * taken between a read and a write would leave a canceled link paid.
-   * Whether it closed.
+   * Whether it closed. Raw SQL: no module event is sent for the write
+   * (none is listened to for links today).
    */
   @InjectTransactionManager()
   async closeUnlessHeld(
