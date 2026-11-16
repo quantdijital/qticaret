@@ -1,7 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query"
 import { redirect } from "@tanstack/react-router"
-import { currentUserQuery } from "@/features/auth/api/me"
-import { staffQuery } from "@/features/auth/api/staff"
+import { loadCurrentUser, loadStaff } from "@/features/auth/api/session"
 import { appearanceQuery } from "@/features/settings/api/appearance"
 import { sdk } from "@/lib/sdk"
 import { applyAppearance, rememberAppearance } from "@qticaret/admin-ui/theme"
@@ -18,14 +17,20 @@ export async function requireStaff({
   context: { queryClient: QueryClient }
   location: { href: string }
 }) {
-  const user = await context.queryClient.query(currentUserQuery()).catch(() => null)
+  // Signed out (401, 403) goes to sign-in; too many requests or no answer keeps
+  // the user already read, or shows the route's "try again" page
+  const user = await loadCurrentUser(context.queryClient)
   if (!user) {
     throw redirect({ to: "/login", search: { redirect: location.href } })
   }
   // 2FA first (adr/0040 §2): no factor, its setup; a factor this session
-  // has not passed (signed in before it was set up), a new sign-in
-  const staff = await context.queryClient.query(staffQuery()).catch(() => null)
-  if (staff?.role && staff.mfa.required && !staff.mfa.passed) {
+  // has not passed (signed in before it was set up), a new sign-in. A role
+  // that cannot be read is never "no 2FA to ask": the recent one, or "try again"
+  const staff = await loadStaff(context.queryClient)
+  if (!staff) {
+    throw redirect({ to: "/login", search: { redirect: location.href } })
+  }
+  if (staff.role && staff.mfa.required && !staff.mfa.passed) {
     if (!staff.mfa.enabled) {
       throw redirect({ to: "/security/setup" })
     }

@@ -6749,6 +6749,14 @@
       "title": "Ödeme bağlantısı {{number}}: stokta olmayan ürün",
       "description": "Müşteri ödeyemedi. Stoğu güncelleyin ya da bağlantıyı iptal edip yenisini oluşturun."
     },
+    "paymentLinkOrdered": {
+      "title": "Ödeme bağlantısı {{number}}: sipariş verildi",
+      "description": "Ödeme kapıda alınacak; sipariş Siparişler'de."
+    },
+    "paymentLinkReview": {
+      "title": "Ödeme bağlantısı {{number}}: siparişi kontrol edin",
+      "description": "Bu bağlantıdan beklenmeyen bir sipariş oluştu. Aynı bağlantı için iki kez ödeme alınıp alınmadığına bakın."
+    },
     "stockShort": {
       "title": "Stok yetersiz sipariş #{{number}}",
       "description": "Eksik: {{lines}}. Üretin ya da tedarik edin; edemeyecekseniz iptal edip iade edin."
@@ -7565,6 +7573,18 @@
     "confirm": "Doğrula",
     "cancelled": "İşlem yapılmadı."
   },
+  "session": {
+    "rateLimited": {
+      "toast": "Çok fazla istek, biraz sonra yeniden deneyin.",
+      "title": "Çok fazla istek",
+      "text": "Biraz sonra yeniden deneyin."
+    },
+    "unavailable": {
+      "title": "Panel şu an yüklenemedi",
+      "text": "Bilgiler şu an alınamadı; biraz sonra yeniden deneyin."
+    },
+    "retry": "Yeniden dene"
+  },
   "restrictions": {
     "label": "Yaş sınırı",
     "reason": "Neden",
@@ -8024,6 +8044,7 @@
           "compact": "Kompakt liste",
           "columns": "Yan yana listeler",
           "strips": "Çapraz şeritler",
+          "ranked": "Sıralı liste",
           "stage_list": "Sahne ve liste"
         },
         "categories": {
@@ -9365,6 +9386,17 @@
         },
         "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat.",
         "stripsNoCard": "Bu biçimde kart yok: her ürün bir şerit, üstünde adı ve fiyatı; şeridin tamamı ürün sayfasına gider. Sepete ekle ve hızlı bakış düğmeleri görünmez.",
+        "rankedCount": "Ürün sayısı",
+        "rankedCountTerm": "ranked_count",
+        "rankedCountHint": "Kaç ürün sıralansın. Sıra listenin kaynağından gelir: çok satanlarda en çok satan, indirimdekilerde en yüksek indirim, yeni ürünlerde en yeni önce.",
+        "rankedLayout": {
+          "label": "Düzen",
+          "term": "ranked_layout",
+          "hint": "Birinci büyük: ilk ürün solda büyük, ötekiler yanında satır satır (telefonda ilk ürün üstte). Tek sıra: hepsi yan yana, beşten fazlası iki sıra; telefonda alt alta liste.",
+          "lead": "Birinci büyük",
+          "row": "Tek sıra"
+        },
+        "rankedCard": "Bu biçimde kart biçimi seçilmez: her ürün sıra numarasının yanında görseli, adı, puanı ve fiyatıyla çizilir. Hızlı bakış ve sepete ekle düğmeleri kartlardaki gibi görünür.",
         "stageCount": "Ürün sayısı",
         "stageCountTerm": "stage_count",
         "stageCountHint": "Sahnedeki ürün de sayılır. Altıda liste satırları küçülür; telefonda sahne üstte, liste altında.",

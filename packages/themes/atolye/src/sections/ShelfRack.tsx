@@ -5,6 +5,7 @@ import { shelfColumns, shelfCount, shelfPhone } from "../parts/shelf-grid"
 import { type Of, headingId } from "./plan"
 import { SectionHead } from "./SectionHead"
 import { CarouselShelf, ColumnsShelf, CompactShelf, FeaturedShelf } from "./ShelfLayouts"
+import { RankedShelf } from "./ShelfRanked"
 import { StageShelf } from "./ShelfStage"
 import { StripsShelf } from "./ShelfStrips"
 
@@ -16,6 +17,7 @@ const DRAWN = [
   "compact",
   "columns",
   "strips",
+  "ranked",
   "stage_list",
 ] as const
 
@@ -27,7 +29,8 @@ export const shelfVariant = (section: Of<"products">) =>
  * One rail's panel, drawn as its variant: `grid` two rows of the shop's
  * cards-in-a-row (3, 4 or 5; three rows of the shop's two or one on a phone), whole rows
  * only, the rest behind "Tümünü gör"; `carousel`, `featured`, `compact`
- * and `columns` as `ShelfLayouts` draws them, `strips` as `ShelfStrips`, `stage_list` as `ShelfStage`. In tabs its own head is for
+ * and `columns` as `ShelfLayouts` draws them, `strips` as `ShelfStrips`, `ranked` as
+ * `ShelfRanked`, `stage_list` as `ShelfStage`. In tabs its own head is for
  * the reader only (its pill names it) and its "all products" link stands
  * with its arrows beside the tab row, as a section head's link does; a
  * columns rail's lists carry their own headings, its link under them.
@@ -89,6 +92,8 @@ export function Rack({
             <CompactShelf {...props} />
           ) : variant === "strips" ? (
             <StripsShelf section={section} t={t} />
+          ) : variant === "ranked" ? (
+            <RankedShelf {...props} />
           ) : variant === "stage_list" ? (
             <StageShelf {...props} />
           ) : (

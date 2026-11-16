@@ -138,6 +138,27 @@ export function ShelfStrips() {
   )
 }
 
+/** A place's figure: a heavy upright bar, a narrow "1" in small. */
+const Figure = ({ x, y, h }: { x: number; y: number; h: number }) => (
+  <rect x={x} y={y} width={h * 0.32} height={h} rx={0.75} className="fill-current opacity-80" />
+)
+
+/** A ranked list (Ek 2026-11-16): the first large beside its figure, the rest in rows, each its figure. */
+export function ShelfRanked() {
+  return (
+    <>
+      <Figure x={8} y={14} h={16} />
+      <Card x={14} y={2} w={26} h={28} />
+      {range(4).map((index) => (
+        <g key={index}>
+          <Figure x={50} y={3 + index * 7.5} h={5} />
+          <Row x={54} y={2 + index * 7.5} w={50} />
+        </g>
+      ))}
+    </>
+  )
+}
+
 /**
  * One product on a dark stage (its photo, its name and price beside it),
  * a list of four rows beside the stage, the stage's own row dark (Ek 2026-11-16).

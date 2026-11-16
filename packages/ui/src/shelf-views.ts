@@ -4,6 +4,7 @@ import type {
   ShelfColumns,
   ShelfPerList,
   ShelfPhoneColumns,
+  ShelfRankedLayout,
   ShelfRows,
   ShelfStageSettings,
   ShelfStripsSettings,
@@ -56,6 +57,12 @@ export interface ProductsSectionView {
    * rail's count. The strips' height and look, each a step the contract knows.
    */
   strips?: ShelfStripsSettings
+  /**
+   * `ranked` (Ek 2026-11-16): how the ranked list stands from 1024 px, a
+   * step the contract knows; `products` in their order, already cut to
+   * the rail's count, each beside its place.
+   */
+  rankedLayout?: ShelfRankedLayout
   /**
    * `stage_list` (Ek 2026-11-16): one product large on a stage beside a
    * list; `products` already cut to the rail's count, the stage's first.

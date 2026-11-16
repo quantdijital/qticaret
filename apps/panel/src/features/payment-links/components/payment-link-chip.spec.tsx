@@ -76,7 +76,10 @@ describe("PaymentLinkChip (adr/0051 §13)", () => {
   it("reads the link's number from the order's metadata, and nothing else", () => {
     expect(orderPaymentLinkNumber({ qt_payment_link_number: "PL-1042" })).toBe("PL-1042")
     expect(orderPaymentLinkNumber({ qt_payment_link_number: "<b>PL-1</b>" })).toBeNull()
-    expect(orderPaymentLinkNumber({ qt_payment_link_number: 1042 })).toBeNull()
+    // The backend writes the whole number (adr/0051 notes): shown as PL-n
+    expect(orderPaymentLinkNumber({ qt_payment_link_number: 1042 })).toBe("PL-1042")
+    expect(orderPaymentLinkNumber({ qt_payment_link_number: 0 })).toBeNull()
+    expect(orderPaymentLinkNumber({ qt_payment_link_number: 10.5 })).toBeNull()
     expect(orderPaymentLinkNumber({ qt_payment_link: "plink_01JX" })).toBeNull()
     expect(orderPaymentLinkNumber(undefined)).toBeNull()
   })

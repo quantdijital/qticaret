@@ -9,11 +9,20 @@ import { ConfirmEmailPage } from "./confirm-email-page"
 const me = vi.hoisted(() => vi.fn())
 const navigate = vi.hoisted(() => vi.fn())
 
-vi.mock("@/lib/sdk", () => ({ sdk: { admin: { user: { me } } } }))
+vi.mock("@/lib/sdk", () => ({ sdk: {} }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
   useNavigate: () => navigate,
 }))
+
+/** The user read (`/admin/users/me`, a plain request) answered from `me`: its user, or its status. */
+async function answerMe(): Promise<Response> {
+  try {
+    return new Response(JSON.stringify(await me()), { status: 200 })
+  } catch (error) {
+    return new Response("{}", { status: (error as { status: number }).status })
+  }
+}
 
 function renderPage(hash = "#token=muhurlu-baglanti-0123456789") {
   window.history.replaceState(null, "", `/confirm-email${hash}`)
@@ -27,14 +36,16 @@ function renderPage(hash = "#token=muhurlu-baglanti-0123456789") {
 }
 
 describe("ConfirmEmailPage", () => {
-  const fetchMock = vi.fn()
+  const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>()
 
   beforeEach(() => {
     me.mockReset()
     navigate.mockReset()
     fetchMock.mockReset()
     window.sessionStorage.clear()
-    vi.stubGlobal("fetch", fetchMock)
+    vi.stubGlobal("fetch", (url: string, init?: RequestInit) =>
+      url.startsWith("/admin/users/me") ? answerMe() : fetchMock(url, init)
+    )
   })
 
   afterEach(() => {

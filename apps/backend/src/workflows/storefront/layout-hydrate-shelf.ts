@@ -58,6 +58,12 @@ export function hydrateShelf<L>(
         strips_overlap: section.strips_overlap,
         strips_dim: section.strips_dim,
       }
+    case "ranked":
+      return {
+        ...common,
+        ranked_count: section.ranked_count,
+        ranked_layout: section.ranked_layout,
+      }
     case "stage_list":
       return {
         ...common,

@@ -146,6 +146,11 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
   (`strips_slant`, `strips_line`, `strips_overlap`, `strips_dim`; galeri ve öne çıkan ürünle aynı).
   Kart eylemi (sepete ekle, hızlı bakış, favori) bilerek yok: şeridin tamamı ürün sayfasına gider.
   Dar ekranda fazlası yatay kaydırılır (§4.4 Ek), ürün gizlenmez.
+- Ek 2026-11-16 (ürün rafı `ranked` "Sıralı liste", adr/0049): kaynağın sırasıyla tek sıralı liste,
+  her ürün büyük sıra rakamının yanında; kendi sayısı `ranked_count` 3–**5**–10 (`limit` değil),
+  düzen `ranked_layout` **lead** (birinci büyük) / row (tek sıra). Kart biçimi seçilmez (kartın
+  parçalarıyla çizilir); hızlı bakış ve sepete ekle simge olarak kalır. Rakam yalnız göz için,
+  ekran okuyucu sırayı başlıktaki gizli "1."den duyar.
 - Ek 2026-11-16 (ürün rafı `stage_list` "Sahne ve liste", adr/0049): bir ürün sahnede büyük, yanında
   satır listesi; kendi sayısı `stage_count` 3–**4**–6 (sahnedeki dahil), `stage_side` **start**/end,
   `stage_ground` **stage**/well, `stage_follow` **on**/off (1024 px'ten fareyle durulan ya da

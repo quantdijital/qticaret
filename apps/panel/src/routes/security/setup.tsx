@@ -1,17 +1,18 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { currentUserQuery } from "@/features/auth/api/me"
-import { staffQuery } from "@/features/auth/api/staff"
+import { loadCurrentUser, loadStaff } from "@/features/auth/api/session"
+import { SessionErrorBoundary } from "@/features/auth/pages/session-unavailable-page"
 import { MfaSetupPage } from "@/features/security/pages/mfa-setup-page"
 
 /** 2FA setup, outside the shell: signed in, a role, and no factor yet (adr/0040 §2). */
 export const Route = createFileRoute("/security/setup")({
+  errorComponent: SessionErrorBoundary,
   beforeLoad: async ({ context, location }) => {
-    const user = await context.queryClient.query(currentUserQuery()).catch(() => null)
-    if (!user) {
+    const user = await loadCurrentUser(context.queryClient)
+    const staff = user ? await loadStaff(context.queryClient) : null
+    if (!user || !staff) {
       throw redirect({ to: "/login", search: { redirect: location.href } })
     }
-    const staff = await context.queryClient.query(staffQuery()).catch(() => null)
-    if (!staff?.role || staff.mfa.enabled) {
+    if (!staff.role || staff.mfa.enabled) {
       throw redirect({ to: "/" })
     }
   },

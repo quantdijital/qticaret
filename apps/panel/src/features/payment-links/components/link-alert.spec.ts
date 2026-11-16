@@ -16,6 +16,29 @@ describe("paymentLinkAlert (the bell, adr/0051)", () => {
     expect(alert?.link).toEqual({ to: "/orders/$id", search: {}, params: { id: "order_1" } })
   })
 
+  it("says 'order placed', not 'paid', for a link paid at the door", () => {
+    const alert = paymentLinkAlert(t, {
+      kind: "payment_link_paid",
+      payment_link_id: "plink_01",
+      number: "PL-1042",
+      order_id: "order_1",
+      payment_due: "on_delivery",
+    })
+    expect(alert?.title).toBe("Ödeme bağlantısı PL-1042: sipariş verildi")
+    expect(alert?.description).toBe("Ödeme kapıda alınacak; sipariş Siparişler'de.")
+  })
+
+  it("leads an order to check for a second charge to that order", () => {
+    const alert = paymentLinkAlert(t, {
+      kind: "payment_link_needs_review",
+      payment_link_id: "plink_01",
+      number: "PL-1042",
+      order_id: "order_2",
+    })
+    expect(alert?.title).toBe("Ödeme bağlantısı PL-1042: siparişi kontrol edin")
+    expect(alert?.link).toEqual({ to: "/orders/$id", search: {}, params: { id: "order_2" } })
+  })
+
   it("leads a repriced or short link to the link, to make it again", () => {
     const prices = paymentLinkAlert(t, {
       kind: "payment_link_prices_changed",

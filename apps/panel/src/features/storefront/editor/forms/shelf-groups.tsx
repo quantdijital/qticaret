@@ -5,6 +5,7 @@ import {
   SHELF_PHONE_DEFAULT,
   scrollerSettingsOf,
   shelfPhoneColumnsOf,
+  shelfRankedCountOf,
   shelfStageCountOf,
   shelfStripsCountOf,
 } from "@qticaret/types"
@@ -16,6 +17,7 @@ import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { PhoneColumnsField } from "./phone-columns-field"
 import { ScrollerFields } from "./scroller-fields"
+import { ShelfRankedFields } from "./shelf-ranked-fields"
 import { ShelfStageFields } from "./shelf-stage-fields"
 import { ShelfStripsFields } from "./shelf-strips-fields"
 import { ShelfTabsField } from "./shelf-tabs-field"
@@ -84,10 +86,11 @@ function CountChoice<N extends number>({
  * carousel only, "Kaydırma" (cards in view, the arrows).
  * Its rarely changed scroller settings sit closed in "Diğer ayarlar"
  * (`SectionPanel`). A field the variant does not use is not shown: the
- * card on a compact or columns rail (always compact) or a strips one (no
- * card; its count and look instead) or a stage list (its own stage and
- * rows; its count, side, ground and follow instead), the tabs switch on a
- * columns rail (it never joins).
+ * card on a compact or columns rail (always compact), a strips one (no
+ * card; its count and look instead), a ranked one (its own places drawn
+ * from the card's parts; its count and layout instead) or a stage list (its
+ * own stage and rows; its count, side, ground and follow instead), the tabs
+ * switch on a columns rail (it never joins).
  */
 export function ShelfGroups({
   section,
@@ -182,6 +185,22 @@ export function ShelfGroups({
               />
               <ShelfStripsFields section={section} onChange={onChange} />
             </>
+          ) : variant === "ranked" ? (
+            <>
+              <CountChoice
+                id={FIELD_IDS.shelf(id, "ranked_count")}
+                label={t(`${SH}.rankedCount`)}
+                term={t(`${SH}.rankedCountTerm`)}
+                option={String}
+                hint={t(`${SH}.rankedCountHint`)}
+                counts={SHELF_LIMITS.ranked.counts}
+                value={shelfRankedCountOf(section.ranked_count)}
+                onChange={(ranked_count) => {
+                  set({ ranked_count })
+                }}
+              />
+              <ShelfRankedFields section={section} onChange={onChange} />
+            </>
           ) : variant === "stage_list" ? (
             <>
               <CountChoice
@@ -201,6 +220,8 @@ export function ShelfGroups({
           ) : null}
           {variant === "strips" ? (
             <p className="text-xs text-muted-foreground">{t(`${SH}.stripsNoCard`)}</p>
+          ) : variant === "ranked" ? (
+            <p className="text-xs text-muted-foreground">{t(`${SH}.rankedCard`)}</p>
           ) : variant === "stage_list" ? (
             <p className="text-xs text-muted-foreground">{t(`${SH}.stageNoCard`)}</p>
           ) : variant === "compact" || variant === "columns" ? (

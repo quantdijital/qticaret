@@ -73,6 +73,23 @@ describe("a product list's fields for the settings search", () => {
     for (const key of keys(grid)) expect(key).not.toMatch(/strips_/)
   })
 
+  it("names a ranked list's count and layout in Diziliş, never its card (Ek 2026-11-16)", () => {
+    const ranked = switchVariant(grid, "ranked")
+    expect(keys(ranked)).toContain("variant:variant")
+    expect(keys(ranked).filter((key) => key.startsWith("layout:"))).toEqual([
+      "layout:ranked_count",
+      "layout:ranked_layout",
+      "layout:tabs",
+    ])
+    // The layouts are found by their everyday names too
+    expect(sectionFields(ranked, "home").find((field) => field.key === "ranked_layout")).toEqual(
+      expect.objectContaining({
+        options: ["lead", "row"].map((step) => `storefront.editor.shelf.rankedLayout.${step}`),
+      })
+    )
+    for (const key of keys(grid)) expect(key).not.toMatch(/ranked_/)
+  })
+
   it("names a stage list's count, side, ground and follow in Diziliş, never its card (Ek 2026-11-16)", () => {
     const stage = switchVariant(grid, "stage_list")
     expect(keys(stage)).toContain("variant:variant")

@@ -1,6 +1,7 @@
 import {
   SCROLLER_DEFAULTS,
   SCROLLER_SETTINGS,
+  SHELF_RANKED_LAYOUTS,
   SHELF_STRIPS_SETTINGS,
   SHELF_STAGE_SETTINGS,
   SHELF_STRIPS_SETTING_NAMES,
@@ -31,6 +32,8 @@ export type ShelfField =
   | "per_list"
   | "strips_count"
   | ShelfStripsSetting
+  | "ranked_count"
+  | "ranked_layout"
   | "stage_count"
   | ShelfStageSetting
   | "card_variant"
@@ -100,10 +103,20 @@ export function shelfFields(section: Extract<AnySection, { type: "products" }>):
     variant === "compact" ? field("rows", `${SHELF}.rows`, `${SHELF}.rowsTerm`) : null,
     variant === "columns" ? field("per_list", `${SHELF}.perList`, `${SHELF}.perListTerm`) : null,
     ...(variant === "strips" ? stripsFields(id) : []),
+    variant === "ranked"
+      ? field("ranked_count", `${SHELF}.rankedCount`, `${SHELF}.rankedCountTerm`)
+      : null,
+    variant === "ranked"
+      ? {
+          ...field("ranked_layout", `${SHELF}.rankedLayout.label`, `${SHELF}.rankedLayout.term`),
+          options: SHELF_RANKED_LAYOUTS.map((step) => `${SHELF}.rankedLayout.${step}`),
+        }
+      : null,
     ...(variant === "stage_list" ? stageFields(id) : []),
     variant === "compact" ||
     variant === "columns" ||
     variant === "strips" ||
+    variant === "ranked" ||
     variant === "stage_list"
       ? null
       : field(

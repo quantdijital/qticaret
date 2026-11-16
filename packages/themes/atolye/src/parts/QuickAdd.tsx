@@ -41,6 +41,7 @@ export function QuickAdd({
   words,
   wide = false,
   fill = null,
+  inline = false,
 }: {
   variantId: string
   path: string
@@ -49,6 +50,12 @@ export function QuickAdd({
   wide?: boolean
   /** Across a framed card's foot, in this look; none: the round "+" or `wide`. */
   fill?: CardButtonStyle | null
+  /**
+   * The "+" in a row of its own size beside the quick view's inline icon
+   * (a ranked rail's places, Ek 2026-11-16): drawn by a 1 px line, not
+   * floated on a photo's corner; a refusal opens above it.
+   */
+  inline?: boolean
 }) {
   const shown = wide || fill !== null
   const [state, submit, pending] = useActionState(action, INITIAL)
@@ -77,7 +84,13 @@ export function QuickAdd({
       // A framed card's button keeps to the card's foot: no gap under it until there is an error
       className={cn(
         "relative z-(--z-raised)",
-        fill !== null ? "flex flex-col" : wide ? "flex flex-col gap-2" : "contents"
+        fill !== null
+          ? "flex flex-col"
+          : wide
+            ? "flex flex-col gap-2"
+            : inline
+              ? "flex shrink-0"
+              : "contents"
       )}
     >
       <input type="hidden" name="variant_id" value={variantId} />
@@ -89,7 +102,9 @@ export function QuickAdd({
             ? `${cardButtonClass(fill)} w-full`
             : wide
               ? "gf-btn w-full sm:w-auto"
-              : "gf-icon-btn absolute right-2 bottom-2 z-(--z-raised) size-11 bg-field text-text shadow-float hover:bg-paper-2"
+              : inline
+                ? "gf-icon-btn size-11 border border-rule bg-field text-text hover:bg-paper-2"
+                : "gf-icon-btn absolute right-2 bottom-2 z-(--z-raised) size-11 bg-field text-text shadow-float hover:bg-paper-2"
         }
         aria-label={words.label}
         aria-busy={pending}
@@ -110,7 +125,13 @@ export function QuickAdd({
       <span
         id={errorId}
         role="alert"
-        className={shown ? "" : "absolute inset-x-2 bottom-14 z-(--z-raised)"}
+        className={
+          shown
+            ? ""
+            : inline
+              ? "absolute right-0 bottom-full z-(--z-raised) mb-2 w-64 max-w-[calc(100vw-2rem)]"
+              : "absolute inset-x-2 bottom-14 z-(--z-raised)"
+        }
       >
         {error && (
           <span

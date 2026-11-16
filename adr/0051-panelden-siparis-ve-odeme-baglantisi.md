@@ -167,6 +167,13 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. `operations` yalnız
 - **Kurumsal fatura bilgisi (VKN, unvan) v1'de yok.** Yalnız teslimat adresi önceden girilebilir; fatura adresi de aynı adres olur.
 - **Süre sonu işi saatlik** (`payment-links-expiry`, :17). Ödeme başlatma bağlantının bitişine kadar açıktır; başlamış bir ödeme bitişten sonra 1 saat daha siparişe dönebilir. İş bağlantıyı bu saatten sonra `expired` yapar ve kodunu kapatır.
 - **Sipariş işareti:** `qt_source` yerine `order.metadata.qt_payment_link` (bağlantı kimliği), `qt_payment_link_number` (numara, tam sayı: `PL-1042` için `1042`) ve `qt_payment_link_by` (oluşturan personel).
+  - **Ek 2026-11-16:** `qt_payment_link_by` artık yazılmıyor; siparişin metadata'sı müşterinin siparişidir. Oluşturan, bağlantının kendi kaydından (`created_by`) okunur. Daha önce ödenmiş siparişlerde anahtar kalabilir.
+- **Ödendi işareti (Ek 2026-11-16, güvenlik incelemesi):**
+  - Sırası: önce bağlantı kapanır, sonra siparişin anahtarları yazılır, sonra zil çalar. Bağlantıyı kapatan yazım bağlantının kilidi altında ve koşulludur: ödenmiş bağlantının üzerine yazılmaz. Telafi bağlantıyı yeniden açmaz.
+  - `order.placed` aboneliği bir kez çalışır: olay yolu başarısız aboneyi yeniden denemez. Saatlik iş, süre sonundan önce, son iki günde siparişe dönmüş bağlantı sepetlerine bakar ve eksik kalanı tamamlar.
+  - Bağlantının herhangi bir sepeti siparişe dönmüşse (son sepeti ya da tamamlanırken bırakılmış eski bir sepeti) yeni sepet açılmaz, ödeme başlamaz ve tamamlanmaz. Bu kural iptal edilen sipariş için de geçerlidir: siparişi iptal edilen bağlantı yeniden açılamaz, personel yeni bağlantı oluşturur.
+  - Beklenmeyen sipariş personelin ziline `payment_links.needs_review` olarak düşer. Beklenmeyen sipariş: bağlantının son sepetinden olmayan, açık olmayan bir bağlantıdan gelen ya da başka bir siparişin ödediği bağlantıdan gelen sipariş.
+  - Zil para durumuna göre çalar. Havalede bağlantı zil çalmaz; siparişin "havale bekleniyor" bildirimi yeter. Kapıda ödemede "sipariş verildi, ödeme kapıda" der. Diğer durumlarda "ödendi" der.
 - **Ek seçenekli satırlar (adr/0052)** v1'de yok. Bağlantı sepetinde `/line-items/:id/addons` kilitli.
 - **Hız sınırları:** vitrin `pay_link` (IP başına 15 dakikada 30); personel başına oluşturma ve gönderim birlikte saatte 60; önizleme saatte 600.
 - **Taslak siparişler:** `/admin/draft-orders*` yazmaları bayraktan bağımsız olarak herkese `orders.use_payment_link` (400) ile kapalı.

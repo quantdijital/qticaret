@@ -6,6 +6,8 @@ import type {
   ShelfColumns,
   ShelfPerList,
   ShelfPhoneColumns,
+  ShelfRankedCount,
+  ShelfRankedLayout,
   ShelfRows,
   ShelfStageCount,
   ShelfStageSettings,
@@ -50,6 +52,9 @@ export interface ProductsSection extends BodySectionBase {
   strips_line?: ShelfStripsSettings["strips_line"]
   strips_overlap?: ShelfStripsSettings["strips_overlap"]
   strips_dim?: ShelfStripsSettings["strips_dim"]
+  /** `ranked` (Ek 2026-11-16): how many places, and how they stand from 1024 px. */
+  ranked_count?: ShelfRankedCount
+  ranked_layout?: ShelfRankedLayout
   /** `stage_list` (Ek 2026-11-16): how many products, and the stage's side, ground and follow. */
   stage_count?: ShelfStageCount
   stage_side?: ShelfStageSettings["stage_side"]

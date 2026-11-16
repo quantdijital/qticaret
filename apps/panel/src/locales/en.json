@@ -6749,6 +6749,14 @@
       "title": "Payment link {{number}}: a product is out of stock",
       "description": "The customer could not pay. Update the stock, or cancel the link and create a new one."
     },
+    "paymentLinkOrdered": {
+      "title": "Payment link {{number}}: order placed",
+      "description": "Payment is taken at the door; the order is in Orders."
+    },
+    "paymentLinkReview": {
+      "title": "Payment link {{number}}: check the order",
+      "description": "An unexpected order came from this link. Check whether the link was paid twice."
+    },
     "stockShort": {
       "title": "Order #{{number}} is short of stock",
       "description": "Missing: {{lines}}. Make or source them; if you cannot, cancel and refund."
@@ -7565,6 +7573,18 @@
     "confirm": "Verify",
     "cancelled": "Nothing was done."
   },
+  "session": {
+    "rateLimited": {
+      "toast": "Too many requests, try again in a moment.",
+      "title": "Too many requests",
+      "text": "Try again in a moment."
+    },
+    "unavailable": {
+      "title": "The panel could not load",
+      "text": "Your details could not be read just now; try again in a moment."
+    },
+    "retry": "Try again"
+  },
   "restrictions": {
     "label": "Age limit",
     "reason": "Reason",
@@ -8024,6 +8044,7 @@
           "compact": "Compact list",
           "columns": "Lists side by side",
           "strips": "Slanted strips",
+          "ranked": "Ranked list",
           "stage_list": "Stage and list"
         },
         "categories": {
@@ -9365,6 +9386,17 @@
         },
         "cardCompact": "Cards in this layout are always compact: a small photo, name, stars and price.",
         "stripsNoCard": "No cards in this layout: each product is one strip with its name and price, the whole strip linking to its page. The add to cart and quick view buttons are not shown.",
+        "rankedCount": "Products",
+        "rankedCountTerm": "ranked_count",
+        "rankedCountHint": "How many products to rank. The order comes from the list's source: the best seller first, the deepest discount first, or the newest first.",
+        "rankedLayout": {
+          "label": "Layout",
+          "term": "ranked_layout",
+          "hint": "First large: the first product large on the left, the others in rows beside it (on a phone the first on top). One row: all side by side, two rows past five; a list on a phone.",
+          "lead": "First large",
+          "row": "One row"
+        },
+        "rankedCard": "No card choice in this layout: each product stands beside its place with its photo, name, stars and price. The quick view and add to cart buttons show as on the cards.",
         "stageCount": "Number of products",
         "stageCountTerm": "stage_count",
         "stageCountHint": "The product on the stage counts too. At six the list's rows get smaller; on phones the stage sits on top, the list below.",

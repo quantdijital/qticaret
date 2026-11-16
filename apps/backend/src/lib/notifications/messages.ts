@@ -166,6 +166,15 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Müşteri ödeyemedi. Stoğu güncelleyin ya da bağlantıyı iptal edip yenisini oluşturun.",
     },
+    "payment_links.paid_on_delivery": {
+      title: "Ödeme bağlantısı {{number}}: sipariş verildi ({{total}})",
+      description: "Ödeme kapıda alınacak; sipariş Siparişler'de.",
+    },
+    "payment_links.needs_review": {
+      title: "Ödeme bağlantısı {{number}}: siparişi kontrol edin",
+      description:
+        "Bu bağlantıdan beklenmeyen bir sipariş oluştu. Aynı bağlantı için iki kez ödeme alınıp alınmadığına Siparişler'den bakın.",
+    },
   },
   en: {
     "contact.message_received": {
@@ -313,6 +322,15 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Payment link {{number}}: an item is out of stock",
       description:
         "The customer could not pay. Update the stock, or cancel the link and make a new one.",
+    },
+    "payment_links.paid_on_delivery": {
+      title: "Payment link {{number}}: order placed ({{total}})",
+      description: "Payment is taken at the door; the order is in Orders.",
+    },
+    "payment_links.needs_review": {
+      title: "Payment link {{number}}: check the order",
+      description:
+        "An unexpected order came from this link. Check in Orders whether the link was paid twice.",
     },
   },
 }
