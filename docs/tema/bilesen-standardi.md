@@ -110,6 +110,9 @@ varsayılan değer ayarın nasıl kullanılacağını gösterir, deneme metni (l
 | Aç/kapat | — | Etiket olumlu cümle ("Noktaları göster") | `off`/`on` → Kapalı/Açık; anahtar düğmesiyle çizilir |
 | Cihaz | `device` | Cihaz <small>device</small> | all/mobile/desktop → Her yerde/Yalnız telefonda/Yalnız masaüstünde |
 | Fotoğraf düzeni (öne çıkan ürün) | `gallery` | Fotoğraf düzeni <small>gallery</small> | collage/strips → Kolaj/Çapraz şeritler |
+| Yoğunluk (tema, stil takımı S6) | `density` | Yoğunluk <small>density</small> | airy/balanced/compact → Ferah/Dengeli/Sıkı (başlık → içerik, ızgara sütun ve satırı, alt bilgiye boşluk; adr/0067 Ek 2026-11-16) |
+| Bölüm aralığı (tema) | `section_spacing` | Bölüm aralığı <small>section spacing</small> | tight/compact/normal/roomy → Çok sık/Sık/Normal/Ferah (çarpan 0,35/0,55/1/1,2) |
+| Köşeler (tema) | `radius` | Köşeler <small>border-radius</small> | sharp/crisp/gentle/soft/round → Keskin/Belirgin/Ölçülü/Yumuşak/Yuvarlak (çarpan 0,2/0,6/0,8/1/1,5) |
 
 **Aç/kapat saklama kuralı:** ileride üçüncü seçenek alabilecek ayar (`dots`: kapalı/açık → sayılı)
 adlandırılmış adım `off`/`on` olur; kesin evet/hayır olan içerik anahtarı (`show_count`, `phone`)
@@ -219,7 +222,9 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
 8. **Erişilebilirlik:** başlık hiyerarşisi (`headingId`), düğmelerde `aria-label`, bölge etiketi,
    klavyeyle tam kullanım, 4,5:1 yazı karşıtlığı her basamakta, hareket kuralları (§4.5).
 9. **Performans:** CLS 0 (yükseklik/oran önceden), ilk görsel öncelikli, JS yalnız etkileşimde;
-   `docs/21` bütçeleri.
+   `docs/21` bütçeleri. **Boşluk belirteçten:** bölüm başlığının altı `gap-(--head-gap)` / `-m` / `-s`, ızgaranın satırı
+   `gap-y-(--gap-rows)` / `-s`, sütunu `--gap-columns`, alt bilgiye `--footer-gap`; elle `gap-6
+   lg:gap-10` yazılmaz, yoksa mağazanın yoğunluk ayarı (`density`) o bölüme ulaşmaz.
 10. **Testler:** sözleşme/ayna eşitliği, backend şema (varsayılan, ret), panel formu (grup, gizleme,
     arama), tema çizimi; adr/0049 deseni.
 11. **ADR notu:** adr/0049'a tarihli ek: alanlar, varsayılanlar, panel düzeni, §4 listesinde
