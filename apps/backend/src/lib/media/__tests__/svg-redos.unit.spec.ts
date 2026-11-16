@@ -10,7 +10,17 @@ import { looksLikeSvg, plainNumber, prescan } from "../svg-scan"
  * 190,000 spaces took 18 s, `<!-->` hid 4,000 tags from the count). Every
  * read before parsing is now a linear loop; the cleaner runs in a worker
  * besides (svg-worker.unit.spec.ts).
+ *
+ * The clock limits catch a hang, not a slow machine: a linear read here
+ * takes a millisecond or less, the old patterns seconds or for ever, and a
+ * busy shared CI runner can pause any one call for hundreds of ms (GC, its
+ * neighbours: 388 ms seen on a 100 ms limit). Two seconds tells them apart;
+ * that a read is linear the size test shows with no clock limit. YENİ-4
+ * keeps a second on purpose: there the cleaner must refuse before it
+ * parses, and a parse of that tree alone takes more (1.3 s and up).
  */
+
+const HANG_MS = 2_000
 
 const timed = <T>(run: () => T): { value: T; ms: number } => {
   const started = performance.now()
@@ -31,7 +41,7 @@ describe("the review's payloads, under a hard time limit", () => {
   it("YENİ-1: a run of comments is no SVG, at once (it reached looksLikeSvg on every upload)", () => {
     const { value, ms } = timed(() => looksLikeSvg(Buffer.from(`${"<!---->".repeat(40)}x`)))
     expect(value).toBe(false)
-    expect(ms).toBeLessThan(50)
+    expect(ms).toBeLessThan(HANG_MS)
     // Still an SVG after comments, a declaration and a DOCTYPE with its subset
     expect(
       looksLikeSvg(
@@ -47,15 +57,15 @@ describe("the review's payloads, under a hard time limit", () => {
     ["YENİ-2: <a × 20,000", "<a".repeat(20_000)],
   ])("%s is read once, linearly", (_name, text) => {
     const { ms } = timed(() => prescan(text))
-    expect(ms).toBeLessThan(50)
+    expect(ms).toBeLessThan(HANG_MS)
     const whole = timed(() => cleaned(text))
-    expect(whole.ms).toBeLessThan(2_000)
+    expect(whole.ms).toBeLessThan(HANG_MS)
   })
 
   it("YENİ-3: a width of 190,000 spaces is no number, at once", () => {
     const { value, ms } = timed(() => plainNumber(`1${" ".repeat(190_000)}x`))
     expect(value).toBeNull()
-    expect(ms).toBeLessThan(50)
+    expect(ms).toBeLessThan(HANG_MS)
     expect(plainNumber(" 64px ")).toBe(64)
   })
 
@@ -78,7 +88,7 @@ describe("the review's payloads, under a hard time limit", () => {
   ])("%s: refused before it is parsed", (_name, text) => {
     const { value, ms } = timed(() => prescan(text))
     expect(value).toBe("upload.svg_too_complex")
-    expect(ms).toBeLessThan(100)
+    expect(ms).toBeLessThan(HANG_MS)
   })
 
   it("keeps a logo's many shapes that close themselves", () => {
@@ -95,9 +105,10 @@ describe("the review's payloads, under a hard time limit", () => {
 
   it("YENİ-5: an element with 25,000 attributes is refused before it is parsed", () => {
     const text = `<svg><rect ${"a=1 ".repeat(25_000)}/></svg>`
+    expect(prescan(text)).toBe("upload.svg_too_complex")
     const { value, ms } = timed(() => cleaned(text))
     expect(value).toBe("upload.svg_too_complex")
-    expect(ms).toBeLessThan(1_000)
+    expect(ms).toBeLessThan(HANG_MS)
     // Many elements of a few attributes each, past the total
     expect(prescan(`<svg>${'<rect x="1" y="1" width="1" height="1"/>'.repeat(5_001)}`)).toBe(
       "upload.svg_too_complex"
@@ -113,8 +124,42 @@ describe("the review's payloads, under a hard time limit", () => {
       () => cleanStyleSheet(`.a{fill:${letters}(}`),
     ]
     for (const run of runs) {
-      expect(timed(run).ms).toBeLessThan(200)
+      expect(timed(run).ms).toBeLessThan(HANG_MS)
     }
+  })
+})
+
+const fill = (piece: string, length: number) => piece.repeat(Math.ceil(length / piece.length))
+
+// The fastest of seven runs, the two sizes in turn: a pause only lengthens a
+// run, and a runner slowed throughout slows both sizes alike
+function fastest(small: () => unknown, large: () => unknown): [number, number] {
+  small()
+  large()
+  let best: [number, number] = [Infinity, Infinity]
+  for (let turn = 0; turn < 7; turn++) {
+    best = [Math.min(best[0], timed(small).ms), Math.min(best[1], timed(large).ms)]
+  }
+  return best
+}
+
+const SHAPES: [string, (length: number) => string][] = [
+  ["a run of <a (YENİ-2)", (length) => `<svg>${fill("<a", length)}`],
+  ["a run of comments", (length) => `<svg>${fill("<!---->", length)}`],
+  ["attributes without values", (length) => `<svg><rect ${fill("a ", length)}/></svg>`],
+  ["a comment never closed", (length) => `<svg><!--${fill("-", length)}`],
+]
+
+describe("linear by the ratio, not the clock: eight times the text, about eight times the read", () => {
+  it.each(SHAPES)("%s", (_name, shape) => {
+    const small = shape(SVG_MAX_BYTES / 8)
+    const large = shape(SVG_MAX_BYTES)
+    const [fast, slow] = fastest(
+      () => prescan(small),
+      () => prescan(large)
+    )
+    // Linear reads about 8 (measured 7.5 to 8.5), a quadratic one about 64
+    expect(slow / Math.max(fast, 0.01)).toBeLessThan(24)
   })
 })
 
@@ -182,10 +227,11 @@ describe("generated inputs (fixed seed): an answer, never a hang", () => {
   )
 
   it("reads every one's start and tags linearly", () => {
+    // Each within the hang limit: a pause on one call is no hang; the ratio test shows linear
     for (const input of inputs) {
       const bytes = Buffer.from(input)
       const { ms } = timed(() => [looksLikeSvg(bytes), prescan(input)])
-      expect(ms).toBeLessThan(100)
+      expect(ms).toBeLessThan(HANG_MS)
     }
   })
 
@@ -199,7 +245,7 @@ describe("generated inputs (fixed seed): an answer, never a hang", () => {
         "upload.svg_too_complex",
         "upload.svg_too_large",
       ]).toContain(value)
-      expect(ms).toBeLessThan(2_000)
+      expect(ms).toBeLessThan(HANG_MS)
     }
   })
 })
