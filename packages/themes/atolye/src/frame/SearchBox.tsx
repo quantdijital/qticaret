@@ -70,7 +70,7 @@ export function SearchBox({
   written?: boolean
   /** The theme editor's live preview (adr/0065 Faz 2b): the box carries the search words' field mark. */
   marks?: boolean | undefined
-  /** A box that opens on a press (`SearchToggle`, `SearchDrop`): Escape with no panel closes it, the words kept. */
+  /** A box that opens on a press (`SearchToggle`): Escape with no panel closes it, the words kept. */
   onLeave?: (() => void) | undefined
   className?: string
 }) {

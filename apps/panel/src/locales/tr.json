@@ -9160,7 +9160,7 @@
         "search_style": {
           "label": "Arama görünümü",
           "term": "search",
-          "hint": "Simge: geniş ekranda büyüteç, basınca arama kutusu açılır; telefonda üst bilgide kutu durmaz, alt menüdeki “Ara” kutuyu yukarıdan açar.",
+          "hint": "Simge: geniş ekranda büyüteç, basınca arama kutusu açılır. Telefonda arama kutusu her üst bilgide satırın altında durur.",
           "field": "Kutu",
           "icon": "Simge, basınca açılır"
         },
