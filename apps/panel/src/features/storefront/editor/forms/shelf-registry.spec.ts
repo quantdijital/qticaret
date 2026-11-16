@@ -48,4 +48,27 @@ describe("a product list's fields for the settings search", () => {
     expect(columns).not.toContain("layout:tabs")
     expect(keys(switchVariant(grid, "carousel"))).toContain("layout:tabs")
   })
+
+  it("names a strips list's count and look in Diziliş, never its card (Ek 2026-11-16)", () => {
+    const strips = switchVariant(grid, "strips")
+    expect(keys(strips).filter((key) => key.startsWith("layout:"))).toEqual([
+      "layout:variant",
+      "layout:strips_count",
+      "layout:strips_height",
+      "layout:strips_slant",
+      "layout:strips_line",
+      "layout:strips_overlap",
+      "layout:strips_dim",
+      "layout:tabs",
+    ])
+    // The steps are found by their everyday names too
+    expect(sectionFields(strips, "home").find((field) => field.key === "strips_height")).toEqual(
+      expect.objectContaining({
+        options: ["low", "medium", "high"].map(
+          (step) => `storefront.editor.stripGallery.height.${step}`
+        ),
+      })
+    )
+    for (const key of keys(grid)) expect(key).not.toMatch(/strips_/)
+  })
 })
