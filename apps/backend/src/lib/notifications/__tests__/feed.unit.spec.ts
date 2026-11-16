@@ -84,6 +84,12 @@ describe("the feed's filters", () => {
     ).toEqual({ channel: "feed", $and: [{ trigger_type: ["stock.low"] }] })
   })
 
+  it("asks for nothing when the role gets no kind", () => {
+    expect(
+      feedFilters({ state: "all", group: null, readState: state, floor, visible: [] })
+    ).toBeNull()
+  })
+
   it("narrows by a group's prefixes and by what is read or not", () => {
     expect(
       feedFilters({

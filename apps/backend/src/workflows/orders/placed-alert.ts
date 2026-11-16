@@ -13,6 +13,9 @@ type Container = Pick<MedusaContainer, "resolve">
 export type PlacedAlert = "wholesale_order" | "bank_transfer_pending" | "new_order"
 
 export const NEW_ORDER_TRIGGER = "orders.new_order"
+
+/** The one key an order's placed alert is written under, whichever kind it is. */
+export const placedAlertKey = (orderId: string) => `order_placed:${orderId}`
 export const BANK_TRANSFER_TRIGGER = "orders.bank_transfer_pending"
 
 /**
@@ -119,7 +122,10 @@ export async function alertPlacedOrder(
     trigger_type: trigger,
     resource_id: order.id,
     resource_type: "order",
-    idempotency_key: `${trigger}:${order.id}`,
+    // One key per order whatever the kind: two runs at once (a repeated event) cannot both
+    // write, a retail and a wholesale row side by side included; the notification module
+    // keeps `idempotency_key` unique
+    idempotency_key: placedAlertKey(order.id),
     data: {
       kind,
       order_id: order.id,

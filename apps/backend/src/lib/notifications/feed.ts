@@ -126,6 +126,10 @@ export function feedFilters(input: {
   /** The kinds the person's role gets (`access.ts` `visibleTriggers`); null: all. */
   visible: readonly string[] | null
 }): Filter | null {
+  // No kind at all (a user without a role): nothing to ask the database for
+  if (input.visible?.length === 0) {
+    return null
+  }
   const parts: Filter[] = []
   if (input.group) {
     parts.push({

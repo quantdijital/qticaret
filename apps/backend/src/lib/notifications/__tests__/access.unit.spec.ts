@@ -38,11 +38,10 @@ function feedTriggers(): { literal: string[]; templated: string[]; named: string
         continue
       }
       const quoted = /^"([^"]+)"$/.exec(expression)
-      const template = /^`([^`$]*)\$\{/.exec(expression)
       if (quoted?.[1]) {
         literal.push(quoted[1])
-      } else if (template?.[1] !== undefined) {
-        templated.push(template[1])
+      } else if (expression.startsWith("`")) {
+        templated.push(expression)
       } else {
         named.push(expression)
       }
@@ -52,6 +51,35 @@ function feedTriggers(): { literal: string[]; templated: string[]; named: string
 }
 
 const KNOWN = [...OPEN_ALERTS, ...Object.keys(ALERT_ACCESS)]
+
+/** The members of a string union type, read from its source (`export type X = "a" | "b"`). */
+function unionOf(file: string, name: string): string[] {
+  const text = readFileSync(join(SRC, file), "utf8")
+  const start = text.indexOf(`export type ${name} =`)
+  expect(start).toBeGreaterThanOrEqual(0)
+  const line = text.slice(start, text.indexOf("\n", start))
+  return [...line.matchAll(/"([a-z_]+)"/g)].map((match) => match[1] ?? "")
+}
+
+/** Each templated writer's `trigger_type`, and every value it can take from its type. */
+const TEMPLATED: Record<string, string[]> = {
+  "`payments.${input.issue}`": unionOf("workflows/payments/issue-alert.ts", "PaymentIssue").map(
+    (issue) => `payments.${issue}`
+  ),
+  "`payments.${alert}`": unionOf("lib/payments/recovery-alert.ts", "RecoveryAlert").map(
+    (alert) => `payments.${alert}`
+  ),
+  "`payment_links.${kind}`": unionOf("workflows/payment-links/alerts.ts", "LinkAlert").map(
+    (kind) => `payment_links.${kind}`
+  ),
+  // quota.ts: `${channel}_daily_limit`
+  "`messaging.${kind}`": unionOf("lib/messaging/recipients.ts", "MessageChannel").map(
+    (channel) => `messaging.${channel}_daily_limit`
+  ),
+  "`einvoice.${document}_due`": unionOf("workflows/einvoice/queue-return.ts", "ReturnDocument").map(
+    (document) => `einvoice.${document}_due`
+  ),
+}
 
 describe("every alert kind is named, open or closed (adr/0020)", () => {
   const { literal, templated, named } = feedTriggers()
@@ -64,10 +92,16 @@ describe("every alert kind is named, open or closed (adr/0020)", () => {
     expect(literal.filter((trigger) => !KNOWN.includes(trigger))).toEqual([])
   })
 
-  it("names some kind for every templated writer's start", () => {
-    expect(
-      templated.filter((start) => !KNOWN.some((trigger) => trigger.startsWith(start)))
-    ).toEqual([])
+  it("knows every templated writer, and names each value its type allows", () => {
+    // A template with no table entry here is a new writer: name its values first
+    expect(templated.filter((template) => !(template in TEMPLATED))).toEqual([])
+    for (const template of templated) {
+      const values = TEMPLATED[template] ?? []
+      // A template with nothing fixed before its first `${` would match any kind
+      expect([template, /^`[a-z_]+\./.test(template)]).toEqual([template, true])
+      expect(values.length).toBeGreaterThan(0)
+      expect(values.filter((value) => !KNOWN.includes(value))).toEqual([])
+    }
   })
 
   it("knows each kind set through a constant or a variable", () => {

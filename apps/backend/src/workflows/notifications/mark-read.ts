@@ -40,6 +40,10 @@ export const markAlertsReadStep = createStep(
     const users = container.resolve(Modules.USER)
     const before = reader.stored as Stored
     const notifications = container.resolve(Modules.NOTIFICATION)
+    // No kind at all (a user without a role): nothing to mark
+    if (reader.visible?.length === 0) {
+      return new StepResponse({ state: reader.state }, null)
+    }
     // `id` and the operators are every model's; Medusa's filter type names neither
     const visible = visibleFeed(reader.visible) as Record<string, unknown>
     let next: ReadState

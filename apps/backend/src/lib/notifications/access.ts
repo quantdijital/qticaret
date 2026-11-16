@@ -7,8 +7,11 @@ import { WHOLESALE_ORDER_TRIGGER } from "./feed"
  * Which roles see which alerts (adr/0020, adr/0040). Every kind written to
  * the feed is named here, one of two ways; a kind named in neither (a new
  * writer forgotten here) is the owner's alone until it is: fail closed.
- * A unit test reads the writers' sources and holds every `trigger_type`
- * to these lists.
+ * A unit test reads the files that write to the feed and checks each
+ * `trigger_type` written as a literal, each template's values (from the
+ * union type it is built on, listed in the test) and the two constants
+ * against these lists; a kind built some other way is not caught there,
+ * only kept from the other roles here.
  */
 
 /** Every role's: an order's, a payment's trouble, a customer's message, stock, returns, invoices. */
