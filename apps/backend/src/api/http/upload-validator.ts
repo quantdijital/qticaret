@@ -71,7 +71,7 @@ export async function uploadValidator(
   for (const { file, type } of accepted) {
     if (type.type === "svg") {
       try {
-        file.buffer = sanitizeSvg(file.buffer).buffer
+        file.buffer = (await sanitizeSvg(file.buffer)).buffer
         file.size = file.buffer.length
       } catch (error) {
         if (!isValidationError(error)) {

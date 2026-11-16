@@ -36,14 +36,31 @@ const PROPERTIES = new Set([
   "shape-rendering",
 ])
 
+// Every pattern here is one character class under one quantifier, anchored at both ends:
+// linear, no backtracking (security review 2026-11-16)
 // A selector of classes, ids and elements, grouped and combined
 const SELECTOR = /^[a-zA-Z0-9_\-.#\s>,*]+$/
 // A value of plain characters: words, numbers, units, colours, commas, functions' parentheses
 const VALUE = /^[a-zA-Z0-9#.,%\s()-]+$/
 // `url(#id)`, the only reference a value may hold
 const LOCAL_URL = /^url\(#[a-zA-Z0-9_-]+\)$/
-const FUNCTION = /([a-zA-Z-]+)\(/g
 const FUNCTIONS = new Set(["rgb", "rgba", "hsl", "hsla", "url"])
+
+const isNameCharacter = (code: number) =>
+  (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a) || code === 0x2d
+
+/** The names of the functions a value calls (`rgb(` → "rgb"), read backwards from each `(`. */
+function functionsOf(value: string): string[] {
+  const names: string[] = []
+  for (let open = value.indexOf("("); open >= 0; open = value.indexOf("(", open + 1)) {
+    let start = open
+    while (start > 0 && isNameCharacter(value.charCodeAt(start - 1))) {
+      start--
+    }
+    names.push(value.slice(start, open).toLowerCase())
+  }
+  return names
+}
 
 /** One `property: value`, rebuilt; null when the list does not read it in full. */
 function declaration(text: string): string | null {
@@ -56,12 +73,10 @@ function declaration(text: string): string | null {
   if (!PROPERTIES.has(property) || value === "" || !VALUE.test(value)) {
     return null
   }
-  for (const match of value.matchAll(FUNCTION)) {
-    if (!FUNCTIONS.has((match[1] ?? "").toLowerCase())) {
-      return null
-    }
+  if (functionsOf(value).some((name) => !FUNCTIONS.has(name))) {
+    return null
   }
-  if (/url\(/i.test(value) && !LOCAL_URL.test(value)) {
+  if (value.toLowerCase().includes("url(") && !LOCAL_URL.test(value)) {
     return null
   }
   return `${property}:${value}`
@@ -85,10 +100,25 @@ export function cleanDeclarations(text: string): string | null {
   return kept.length > 0 ? kept.join(";") : null
 }
 
+/** The sheet without its comments (a rule's text may not hide in one); an unclosed one ends it. */
+function withoutComments(text: string): string {
+  const parts: string[] = []
+  let at = 0
+  for (let open = text.indexOf("/*"); open >= 0; open = text.indexOf("/*", at)) {
+    parts.push(text.slice(at, open), " ")
+    const close = text.indexOf("*/", open + 2)
+    if (close < 0) {
+      return parts.join("")
+    }
+    at = close + 2
+  }
+  parts.push(text.slice(at))
+  return parts.join("")
+}
+
 /** A `<style>` element's sheet as kept: only whole rules the list reads; "" when none. */
 export function cleanStyleSheet(text: string): string {
-  // Comments first (a rule's text may not hide in one); an unclosed one ends the sheet
-  const plain = text.replace(/\/\*[\s\S]*?(\*\/|$)/g, " ")
+  const plain = withoutComments(text)
   const rules: string[] = []
   for (const chunk of plain.split("}")) {
     const open = chunk.indexOf("{")
@@ -102,7 +132,7 @@ export function cleanStyleSheet(text: string): string {
     }
     const declarations = cleanDeclarations(body)
     if (declarations) {
-      rules.push(`${selector.replace(/\s+/g, " ")}{${declarations}}`)
+      rules.push(`${selector.split(/\s+/).join(" ")}{${declarations}}`)
     }
   }
   return rules.join("")
@@ -115,9 +145,24 @@ export function cleanStyleSheet(text: string): string {
  * anything but an `#id`.
  */
 export function valueReachesOut(value: string): boolean {
-  if (/[\\@]|image-set|image\(|expression|javascript:/i.test(value)) {
+  const lower = value.toLowerCase()
+  if (
+    lower.includes("\\") ||
+    lower.includes("@") ||
+    ["image-set", "image(", "expression", "javascript:"].some((word) => lower.includes(word))
+  ) {
     return true
   }
-  const urls = value.match(/url\([^)]*\)?/gi) ?? []
-  return urls.some((url) => !LOCAL_URL.test(url.replace(/\s+/g, "")))
+  // Each `url(` up to its `)` (none: to the end), read with indexOf, spaces left out
+  for (let open = lower.indexOf("url("); open >= 0; open = lower.indexOf("url(", open + 4)) {
+    const close = lower.indexOf(")", open)
+    const url = value
+      .slice(open, close < 0 ? value.length : close + 1)
+      .split(/\s/)
+      .join("")
+    if (!LOCAL_URL.test(url)) {
+      return true
+    }
+  }
+  return false
 }

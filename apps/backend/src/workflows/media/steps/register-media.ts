@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { isValidationError } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
 import { assertStorageWithinLimit, forgetUsage } from "../../../lib/plan-limits"
 import { displayName, readImage } from "../../../lib/media"
@@ -52,8 +53,12 @@ async function describe(container: MedusaContainer, fileId: string) {
     // no image of ours, and no record is made of it
     let svg
     try {
-      svg = sanitizeSvg(bytes)
-    } catch {
+      svg = await sanitizeSvg(bytes)
+    } catch (error) {
+      // A cleaner that could not start is ours to see, not the file's refusal
+      if (!isValidationError(error)) {
+        throw error
+      }
       throw new MedusaError(MedusaError.Types.INVALID_DATA, "media.not_an_image")
     }
     if (!svg.buffer.equals(bytes)) {

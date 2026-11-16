@@ -1,5 +1,6 @@
 import sharp from "sharp"
-import { sanitizeSvg } from "../../../lib/media/svg"
+import { SVG_MAX_BYTES } from "../../../lib/media/svg"
+import { cleanSvg } from "../../../lib/media/svg-clean"
 import { MAIL_LOGO_BOX, appleTouchPng, mailLogoPng } from "../../../lib/media/svg-raster"
 import {
   APPLE_TOUCH_SIDE,
@@ -44,10 +45,11 @@ describe("faviconProblem: what the site icon may be", () => {
 describe("the SVG icon's home screen PNG", () => {
   it("draws the cleaned SVG at 180 px square, whatever size it names", async () => {
     for (const attrs of ['viewBox="0 0 16 16"', 'viewBox="0 0 9000 3000"']) {
-      const { buffer } = sanitizeSvg(
+      const { buffer } = cleanSvg(
         Buffer.from(
           `<svg xmlns="http://www.w3.org/2000/svg" ${attrs}><rect width="100%" height="100%" fill="#c00"/></svg>`
-        )
+        ),
+        SVG_MAX_BYTES
       )
       const png = await appleTouchPng(buffer)
       const meta = await sharp(png).metadata()
@@ -78,10 +80,11 @@ describe("the SVG icon's home screen PNG", () => {
 
 describe("the SVG logo's PNG for mail clients", () => {
   it("draws a wide logo within 600 × 200, keeping its shape and its transparent ground", async () => {
-    const { buffer } = sanitizeSvg(
+    const { buffer } = cleanSvg(
       Buffer.from(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 50"><rect width="300" height="50" fill="#0a0"/></svg>'
-      )
+      ),
+      SVG_MAX_BYTES
     )
     const meta = await sharp(await mailLogoPng(buffer)).metadata()
     expect([meta.format, meta.width, meta.height]).toEqual(["png", MAIL_LOGO_BOX.width, 100])

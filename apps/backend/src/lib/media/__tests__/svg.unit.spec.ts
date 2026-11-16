@@ -1,5 +1,8 @@
-import { isValidationError } from "../../errors"
-import { SVG_MAX_BYTES, looksLikeSvg, sanitizeSvg } from "../svg"
+import { SVG_MAX_BYTES, looksLikeSvg } from "../svg"
+import { SvgRefusal, cleanSvg } from "../svg-clean"
+
+// The cleaner itself, as the worker runs it (svg-worker.unit.spec.ts covers the worker)
+const sanitizeSvg = (bytes: Buffer) => cleanSvg(bytes, SVG_MAX_BYTES)
 
 const svg = (body: string, attrs = 'viewBox="0 0 120 40"') =>
   Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" ${attrs}>${body}</svg>`)
@@ -12,7 +15,7 @@ function refusal(input: Buffer): string | null {
     sanitizeSvg(input)
     return null
   } catch (error) {
-    return isValidationError(error) ? error.safeMessage : "thrown"
+    return error instanceof SvgRefusal ? error.safeMessage : "thrown"
   }
 }
 
