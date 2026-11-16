@@ -20,9 +20,9 @@ import { productVideos } from "../../workflows/media/video/read"
 
 /**
  * A product video's upload, checked before anything is stored (adr/0069
- * §3), in this order: the programs are on this machine; a place among the
- * uploads this process takes at once; the product exists, has room for
- * another video and the package's storage takes the declared size; the
+ * §3), in this order: the product exists, has room for another video and
+ * the package's storage takes the declared size; the programs are on this
+ * machine; a place among the uploads this process takes at once; the
  * body, streamed to a private temporary file and cut past 50 MB; what the
  * bytes are (never the name or MIME type sent); ffprobe forced to that
  * demuxer. The temporary directory goes on every way out.
@@ -77,11 +77,13 @@ export async function withCheckedVideo<T>(
   let dir: string | null = null
   let release: (() => void) | null = null
   try {
+    // The product, its room and the storage limit first: they need no body and no tools,
+    // and say more than "unavailable" would
+    await precheck(req.scope as MedusaContainer, productId, declaredBytes(req))
     if (!(await videoUploadAvailable())) {
       throw new RetryableError("video.upload_unavailable")
     }
     release = await uploadSlots.take()
-    await precheck(req.scope as MedusaContainer, productId, declaredBytes(req))
     dir = await makeVideoTempDir(tempRoot)
     reading = true
     const received = await receiveVideo(req, dir)

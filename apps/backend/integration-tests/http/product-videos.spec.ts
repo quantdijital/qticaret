@@ -15,6 +15,7 @@ import type PlatformSettingsModuleService from "../../src/modules/platform-setti
 import { sweepProductVideosWorkflow } from "../../src/workflows/media/video/workflows"
 import { createAdminUser } from "../helpers/admin"
 import { doc, managedForThisFile, signed } from "../helpers/control-plane"
+import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { nextSerial, setPlanLimits, setPlanStatus } from "../helpers/plan-limits"
@@ -292,6 +293,88 @@ medusaIntegrationTestRunner({
       expect(now.result.removed).toBe(0)
     })
 
+    interface AuditRow {
+      action: string
+      resource_type: string | null
+      resource_id: string | null
+      changes: { diff?: Record<string, { before?: unknown; after?: unknown }> } | null
+    }
+
+    /**
+     * A video's mutation entries. They are written once the answer has gone (adr/0011,
+     * `audit/mutations.ts`), so they are read until `count` are there, as the other
+     * audit suites do.
+     */
+    const auditOf = (id: string, count: number) =>
+      eventually(
+        async () =>
+          (
+            await http.get<{ audit_entries: AuditRow[] }>(
+              `/admin/audit-log?resource_id=${id}&kind=mutation&limit=20`,
+              { headers: owner.headers }
+            )
+          ).data.audit_entries,
+        (entries) => entries.length >= count
+      )
+
+    // Without ffmpeg too: what needs no clip is checked before the tools are asked for
+    it("refuses a third video and a full storage before the tools or the body", async () => {
+      await linkedVideo(productId)
+      await linkedVideo(productId)
+      const third = await upload(form("x"))
+      expect(third.status).toBe(400)
+      expect(third.data.message).toBe("video.limit_per_product")
+
+      const [other] = await getContainer()
+        .resolve(Modules.PRODUCT)
+        .createProducts([{ title: "Ekmek Bıçağı" }])
+      await setPlanLimits(getContainer(), { storage_mb: 0 })
+      const full = await settle(
+        http.post<VideoBody>(`/admin/products/${other?.id ?? ""}/videos`, form("x"), {
+          headers: owner.headers,
+        })
+      )
+      expect(full.status).toBe(403)
+      expect(full.data.message).toBe("plan.limit_reached")
+    })
+
+    it("removes a video, records it, and keeps no storage key in the record", async () => {
+      const video = await linkedVideo(productId, { title: "Yakın çekim" })
+      const before = await media().storedBytes()
+      const [other] = await getContainer()
+        .resolve(Modules.PRODUCT)
+        .createProducts([{ title: "Ekmek Bıçağı" }])
+      const elsewhere = await settle(
+        http.delete(`/admin/products/${other?.id ?? ""}/videos/${video.id}`, {
+          headers: owner.headers,
+        })
+      )
+      expect(elsewhere.status).toBe(404)
+
+      const removed = await settle(http.delete(`${url()}/${video.id}`, { headers: owner.headers }))
+      expect(removed.status).toBe(200)
+      expect(removed.data).toEqual({ id: video.id, object: "media_video", deleted: true })
+      expect((await list()).data.videos).toEqual([])
+      expect(await media().listMediaVideos({ id: video.id })).toEqual([])
+      expect(await media().storedBytes()).toBe(before - 1000)
+      expect(
+        (await settle(http.delete(`${url()}/${video.id}`, { headers: owner.headers }))).status
+      ).toBe(404)
+
+      const entries = await auditOf(video.id, 1)
+      const removal = entries.find(
+        (entry) => entry.action === "DELETE /admin/products/:id/videos/:video_id"
+      )
+      expect(removal).toMatchObject({ resource_type: "media_video", resource_id: video.id })
+      // What it was, before: its kind and title, never a file key or the uploader
+      expect(removal?.changes?.diff?.[video.id]?.before).toEqual({
+        kind: "upload",
+        title: "Yakın çekim",
+        youtube_id: null,
+      })
+      expect(JSON.stringify(entries)).not.toMatch(/video-kaynak|user_01TEST/)
+    })
+
     if (!tools) {
       it("says uploads are unavailable without ffmpeg, and stores nothing", async () => {
         const refused = await upload(form("x"))
@@ -424,13 +507,11 @@ medusaIntegrationTestRunner({
     it("records who added and removed a video, without its storage key", async () => {
       const stored = await upload(form(small()))
       const id = stored.data.video?.id ?? ""
-      await settle(http.delete(`${url()}/${id}`, { headers: owner.headers }))
-      const log = await settle(
-        http.get<{
-          audit_entries: { action: string; resource_id: string | null; changes: unknown }[]
-        }>("/admin/audit-log?limit=20", { headers: owner.headers })
+      expect((await settle(http.delete(`${url()}/${id}`, { headers: owner.headers }))).status).toBe(
+        200
       )
-      const actions = log.data.audit_entries.filter((entry) => entry.resource_id === id)
+      // Written after each answer (adr/0011): read until both are there
+      const actions = await auditOf(id, 2)
       expect(actions.map((entry) => entry.action).sort()).toEqual([
         "DELETE /admin/products/:id/videos/:video_id",
         "POST /admin/products/:id/videos",
