@@ -1,10 +1,15 @@
 import { FAVICON_MAX_BYTES, faviconProblem } from "../steps/favicon"
 
 describe("faviconProblem: what the site icon may be", () => {
-  it("takes a PNG within the limit, its size unknown too", () => {
+  it("takes a PNG within the limit", () => {
     expect(faviconProblem({ mime_type: "image/png", size: 4096 })).toBeNull()
     expect(faviconProblem({ mime_type: "image/png", size: FAVICON_MAX_BYTES })).toBeNull()
-    expect(faviconProblem({ mime_type: "image/png", size: null })).toBeNull()
+  })
+
+  it("refuses one whose size was never measured: it proves no limit", () => {
+    expect(faviconProblem({ mime_type: "image/png", size: null })).toBe(
+      "platform_settings.favicon_unknown"
+    )
   })
 
   it("refuses any other type: the library holds no ICO or SVG, and a JPEG is no icon", () => {

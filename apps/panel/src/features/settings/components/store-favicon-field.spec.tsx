@@ -39,6 +39,9 @@ describe("the site icon's rules (the server's, said at once)", () => {
     expect(faviconRefusal({ mime_type: "image/png", size: FAVICON_MAX_BYTES + 1 })).toBe(
       "settings.store.brand.favicon.tooLarge"
     )
+    expect(faviconRefusal({ mime_type: "image/png", size: null })).toBe(
+      "settings.store.brand.favicon.unmeasured"
+    )
   })
 
   it("warns of a shape that is not square or too small, never refuses it", () => {

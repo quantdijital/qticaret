@@ -13,7 +13,11 @@ export function faviconRefusal(asset: Pick<MediaAsset, "mime_type" | "size">): s
   if (asset.mime_type !== FAVICON_MIME) {
     return `${F}.type`
   }
-  if (asset.size !== null && asset.size > FAVICON_MAX_BYTES) {
+  // A record that never measured its file proves no limit (the server refuses it too)
+  if (asset.size === null) {
+    return `${F}.unmeasured`
+  }
+  if (asset.size > FAVICON_MAX_BYTES) {
     return `${F}.tooLarge`
   }
   return null

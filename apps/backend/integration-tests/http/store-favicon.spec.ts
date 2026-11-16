@@ -11,6 +11,7 @@ jest.setTimeout(120 * 1000)
 const ICON = "https://cdn.magaza.example/simge.png"
 const PHOTO = "https://cdn.magaza.example/kapak.jpg"
 const HEAVY = "https://cdn.magaza.example/agir.png"
+const UNMEASURED = "https://cdn.magaza.example/olcusuz.png"
 
 interface Site {
   shop: { name: string; logo_url: string | null; favicon_url: string | null }
@@ -35,6 +36,7 @@ medusaIntegrationTestRunner({
         { url: ICON, file_id: "favicon-icon", mime_type: "image/png", size: 4_096 },
         { url: PHOTO, file_id: "favicon-photo", mime_type: "image/jpeg", size: 40_960 },
         { url: HEAVY, file_id: "favicon-heavy", mime_type: "image/png", size: 2 * 1024 * 1024 },
+        { url: UNMEASURED, file_id: "favicon-unmeasured", mime_type: "image/png", size: null },
       ])
       const save = (favicon_url: string | null) =>
         settle(
@@ -61,6 +63,12 @@ medusaIntegrationTestRunner({
       expect([heavy.status, heavy.data.message]).toEqual([
         400,
         "platform_settings.favicon_too_large",
+      ])
+      // A record that never measured its file proves no limit
+      const unmeasured = await save(UNMEASURED)
+      expect([unmeasured.status, unmeasured.data.message]).toEqual([
+        400,
+        "platform_settings.favicon_unknown",
       ])
       // Not script-capable or inline, as a logo
       expect((await save("data:image/png;base64,AAAA")).status).toBe(400)

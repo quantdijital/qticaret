@@ -23,7 +23,11 @@ export function faviconProblem(asset: FaviconAsset): string | null {
   if (asset.mime_type !== FAVICON_MIME) {
     return "platform_settings.favicon_type"
   }
-  if (asset.size !== null && asset.size > FAVICON_MAX_BYTES) {
+  // A record that never measured its file (an older one) proves no limit: upload it again
+  if (asset.size === null) {
+    return "platform_settings.favicon_unknown"
+  }
+  if (asset.size > FAVICON_MAX_BYTES) {
     return "platform_settings.favicon_too_large"
   }
   return null

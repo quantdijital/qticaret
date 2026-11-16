@@ -266,6 +266,19 @@ medusaIntegrationTestRunner({
         .listNotifications({ template: "account.password_reset" })
       // The token names no stored row and sits in no stored data, a workflow's included
       expect(JSON.stringify(rows)).not.toMatch(/token=|eyJ/)
+      // Nor does Medusa's own list give it to the owner: no rendered content is kept
+      const listed = await http.get<{ notifications: Record<string, unknown>[] }>(
+        "/admin/notifications?channel=email&limit=100",
+        { headers: admin.headers }
+      )
+      const sent = listed.data.notifications.filter(
+        (row) => (row["template"] ?? row["trigger_type"]) === "account.password_reset"
+      )
+      expect(sent.length).toBeGreaterThan(0)
+      for (const row of sent) {
+        expect(row["content"] ?? null).toBeNull()
+      }
+      expect(JSON.stringify(listed.data)).not.toMatch(/token=|eyJ|sifre-yenile/)
       const token = /token=([^"&]+)/.exec(mail?.html ?? "")?.[1] ?? ""
       const executions: { rows: { count: number }[] } = await getContainer()
         .resolve(ContainerRegistrationKeys.PG_CONNECTION)
