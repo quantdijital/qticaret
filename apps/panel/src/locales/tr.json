@@ -6785,6 +6785,10 @@
       "wholesale_price_check": {
         "title": "Toptan sepetin ödemesi başlatılamadı",
         "description": "Sepet {{cart}} toptancının bugünkü fiyatlarına getirilemedi; ödeme alınmadı. Bu sepetteki ürünlerin toptan ve perakende fiyatlarını kontrol edin."
+      },
+      "payment_beside_order": {
+        "title": "Siparişi olan sepete ikinci {{provider}} ödemesi",
+        "description": "{{amount}} ({{reference}}, sepet {{cart}}) başka bir ödemeyle açılmış siparişin sepetine alındı; otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin; öyleyse fazlasını sağlayıcının panelinden iade edin."
       }
     },
     "markAllRead": "Tümünü okundu say",

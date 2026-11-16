@@ -18,6 +18,10 @@ export const PAYMENT_ISSUE_TEXTS: Readonly<Record<string, string>> = {
     "Toptan sepetin ödemesi başlatılamadı ({{cart}})",
   "staff_payment_issue.wholesale_price_check.intro":
     "Bir toptancının sepeti, ödeme başlarken toptancının bugünkü fiyatlarına getirilemedi; ödeme başlatılmadı ve para alınmadı. Bu sepetteki ürünlerin toptan ve perakende fiyatlarını kontrol edin.",
+  "staff_payment_issue.payment_beside_order.subject":
+    "Siparişi olan sepete ikinci ödeme ({{reference}})",
+  "staff_payment_issue.payment_beside_order.intro":
+    "Bu sepet başka bir ödemeyle zaten siparişe dönüşmüştü; {{provider}} bu ödemeyi de aldı. Otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin; öyleyse fazla ödemeyi {{provider}} panelinden iade edin.",
   "staff_payment_issue.preheader": "Ödeme: {{provider}}, referans {{reference}}.",
   "staff_payment_issue.heading": "Bir ödeme ilgi bekliyor",
   "staff_payment_issue.provider": "Ödeme kuruluşu",

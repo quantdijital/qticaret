@@ -16,10 +16,17 @@ import { alertStaff } from "../messaging/staff"
  *   (a crash) and has been lowered back;
  * - `wholesale_price_check`: a wholesale cart the payment start could not
  *   set at its customer's prices (ADR-0068 slice 4 review N3): no payment
- *   was started; the reference is the cart, so once per cart.
+ *   was started; the reference is the cart, so once per cart;
+ * - `payment_beside_order`: a payment for a cart already an order through
+ *   another payment (finding 2026-11-16, review N2): not given back on its
+ *   own; the shop checks whether the shopper paid twice.
  */
 export type PaymentIssue =
-  "completion_stuck" | "refunded_before_order" | "shelf_restored" | "wholesale_price_check"
+  | "completion_stuck"
+  | "refunded_before_order"
+  | "shelf_restored"
+  | "wholesale_price_check"
+  | "payment_beside_order"
 
 export interface PaymentIssueInput {
   issue: PaymentIssue

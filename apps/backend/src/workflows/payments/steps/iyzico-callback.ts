@@ -12,7 +12,10 @@ import type PaymentFormsModuleService from "../../../modules/payment-forms/servi
 import { iyzicoSession } from "../../../modules/payment-iyzico/session"
 import { PAYMENT_RECOVERY_MODULE } from "../../../modules/payment-recovery"
 import type PaymentRecoveryModuleService from "../../../modules/payment-recovery/service"
+import { GIVEN_BACK } from "../../../modules/payment-recovery/service"
 import type { RecoveryInput } from "../../../modules/payment-recovery/service"
+import { placedOrderOfCart } from "../placed-order"
+import type { PlacedOrder } from "../placed-order"
 import type { PaymentVerdict } from "./payment-orphan"
 
 export interface IyzicoForm {
@@ -94,6 +97,25 @@ export interface IyzicoCheck {
   verdict: PaymentVerdict
   /** iyzico's payment, signed: the orphan's reference. */
   payment_id: string | null
+  /** The order the session's payment already placed: answered without asking iyzico again. */
+  order_id?: string
+}
+
+/**
+ * A form whose payment the cart's order already holds (a refreshed page, a
+ * re-posted callback, the reconcile job; finding 2026-11-16): handled, as
+ * when it was paid, and nothing is judged or completed again. An order
+ * that holds another session's payment is not this form's: it goes on to
+ * iyzico's answer (and the shop is told, `complete-paid-cart.ts`).
+ */
+export function answeredBefore(
+  target: IyzicoTarget,
+  placed: PlacedOrder | null
+): IyzicoCheck | null {
+  if (target.orphan || !placed?.order_id || !placed.session_ids.includes(target.session_id)) {
+    return null
+  }
+  return { outcome: "paid", verdict: { kind: "skip" }, payment_id: null, order_id: placed.order_id }
 }
 
 /**
@@ -160,6 +182,7 @@ export function iyzicoVerdict(
       ...taken,
       provider: "iyzico",
       reference: result.paymentId ?? target.session_id,
+      session_id: target.session_id,
     },
     payment_id: result.paymentId,
   }
@@ -176,6 +199,11 @@ export const checkIyzicoPaymentStep = createStep(
         payment_id: null,
       })
     }
+    const before = target.orphan ? null : await placedOrderOfCart(container, target.cart_id)
+    const answered = answeredBefore(target, before)
+    if (answered) {
+      return new StepResponse<IyzicoCheck>(answered)
+    }
     const account = iyzicoCredentialsOf(
       await container
         .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
@@ -191,7 +219,10 @@ export const checkIyzicoPaymentStep = createStep(
     const [recorded] = result?.paymentId
       ? await container
           .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
-          .listPaymentRecoveries({ provider: "iyzico", reference: result.paymentId }, { take: 1 })
+          .listPaymentRecoveries(
+            { provider: "iyzico", reference: result.paymentId, status: [...GIVEN_BACK] },
+            { take: 1 }
+          )
       : []
     return new StepResponse(iyzicoVerdict(target, result, account.testMode, recorded ?? null))
   }

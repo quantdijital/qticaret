@@ -25,7 +25,7 @@ import { fromMedusaAmount, kurus } from "../../lib/money"
 import { startedByCheckout } from "../../lib/payments/checkout"
 import { paytrApi, paytrFormUrl } from "../../lib/payments/paytr"
 import type { PaytrCredentials } from "../../lib/payments/paytr"
-import { storedPaymentSettings, storedPaytrAccount } from "./account"
+import { isRecordedForRefund, storedPaymentSettings, storedPaytrAccount } from "./account"
 import { pendingReferenceOf, refundPaytrPayment, refundReferenceOf } from "./refund"
 import { paytrSession, tokenRequestOf } from "./session"
 
@@ -91,8 +91,15 @@ class PaytrProviderService extends AbstractPaymentProvider {
     }
   }
 
-  /** What PayTR holds for the session, against what the session expected. */
-  private async statusOf(data: Record<string, unknown> | undefined): Promise<PaymentSessionStatus> {
+  /**
+   * What PayTR holds for the session, against what the session expected.
+   * Authorizing, a payment given back already (by hand, or recorded to be
+   * by the recovery job) is never an order (security review 2026-11-16).
+   */
+  private async statusOf(
+    data: Record<string, unknown> | undefined,
+    authorizing: boolean
+  ): Promise<PaymentSessionStatus> {
     const session = paytrSession(data)
     const paid = await paytrApi().queryStatus(await this.account(), session.merchant_oid)
     if (!paid) {
@@ -102,15 +109,25 @@ class PaytrProviderService extends AbstractPaymentProvider {
       paid.paymentAmount === kurus(session.amount) &&
       paid.currencyCode === session.currency_code &&
       paid.testMode === session.test_mode
-    return matches ? "captured" : "error"
+    if (!matches) {
+      return "error"
+    }
+    if (
+      authorizing &&
+      (paid.refunds.some((refund) => refund.amount > 0) ||
+        (await isRecordedForRefund(session.merchant_oid)))
+    ) {
+      return "error"
+    }
+    return "captured"
   }
 
   async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
-    return { status: await this.statusOf(input.data), data: input.data ?? {} }
+    return { status: await this.statusOf(input.data, true), data: input.data ?? {} }
   }
 
   async getPaymentStatus(input: GetPaymentStatusInput): Promise<GetPaymentStatusOutput> {
-    return { status: await this.statusOf(input.data), data: input.data ?? {} }
+    return { status: await this.statusOf(input.data, false), data: input.data ?? {} }
   }
 
   // PayTR takes the money when the shopper pays: nothing is left to capture

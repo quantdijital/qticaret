@@ -66,6 +66,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "{{amount}} ({{reference}}, sepet {{cart}}) {{provider}} panelinde iade edilmiş görünüyor.",
     },
+    "payments.payment_beside_order": {
+      title: "Siparişi olan sepete ikinci {{provider}} ödemesi",
+      description:
+        "{{amount}} ({{reference}}, sepet {{cart}}) başka bir ödemeyle açılmış siparişin sepetine alındı; otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin.",
+    },
     "payments.shelf_restored": {
       title: "Geçici stok düzeltmesi geri alındı",
       description: "Sepet {{cart}} için artırılan stok geri alındı; stok sayılarını kontrol edin.",
@@ -107,6 +112,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.orphan_refund_failed": {
       title: "{{provider}} ödemesi iade edilemedi",
       description: "{{amount}} ({{reference}}) {{provider}} panelinden elle iade edilmeli.",
+    },
+    "payments.orphan_order_exists": {
+      title: "{{provider}} ödemesi iade edilmedi: siparişi var",
+      description:
+        "{{amount}} ({{reference}}) iade listesine yazılmıştı, ancak sipariş {{order}} bu ödemeyle açılmış. Otomatik iade durduruldu; siparişi ve ödemeyi kontrol edin, iade etmeyin.",
     },
     "webhooks.disabled": {
       title: "{{host}} webhook aboneliği kapatıldı",
@@ -220,6 +230,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "{{amount}} ({{reference}}, cart {{cart}}) shows as refunded in {{provider}}'s panel.",
     },
+    "payments.payment_beside_order": {
+      title: "A second {{provider}} payment for a cart already ordered",
+      description:
+        "{{amount}} ({{reference}}, cart {{cart}}) was taken for a cart whose order another payment opened; it was not refunded automatically. Check whether the customer paid twice.",
+    },
     "payments.shelf_restored": {
       title: "A temporary stock raise was taken back",
       description: "The stock raised for cart {{cart}} was lowered again; check the stock counts.",
@@ -265,6 +280,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.orphan_refund_failed": {
       title: "{{provider}} payment could not be refunded",
       description: "{{amount}} ({{reference}}) must be refunded by hand in the {{provider}} panel.",
+    },
+    "payments.orphan_order_exists": {
+      title: "{{provider}} payment not refunded: it has an order",
+      description:
+        "{{amount}} ({{reference}}) was listed to be refunded, but order {{order}} was placed with it. The automatic refund was stopped; check the order and the payment, do not refund it.",
     },
     "webhooks.disabled": {
       title: "The {{host}} webhook subscription was turned off",

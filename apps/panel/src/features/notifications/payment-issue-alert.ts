@@ -7,6 +7,8 @@ const ISSUES = [
   "completion_stuck",
   "refunded_before_order",
   "shelf_restored",
+  // A second payment for a cart already ordered (finding 2026-11-16): never refunded on its own
+  "payment_beside_order",
   // A wholesaler's cart its prices could not be set for (PR #100): the wholesale roles' alone
   "wholesale_price_check",
 ] as const

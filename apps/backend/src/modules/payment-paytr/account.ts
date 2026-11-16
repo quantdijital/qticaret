@@ -4,6 +4,9 @@ import { paytrCredentialsOf } from "../../lib/payments/paytr"
 import type { PaytrCredentials } from "../../lib/payments/paytr"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../integration-credentials"
 import type IntegrationCredentialsModuleService from "../integration-credentials/service"
+import { PAYMENT_RECOVERY_MODULE } from "../payment-recovery"
+import type PaymentRecoveryModuleService from "../payment-recovery/service"
+import { GIVEN_BACK } from "../payment-recovery/service"
 import type { PaymentSettings } from "../platform-settings/sections"
 
 /**
@@ -17,6 +20,22 @@ export async function storedPaytrAccount(): Promise<PaytrCredentials | null> {
     INTEGRATION_CREDENTIALS_MODULE
   )
   return paytrCredentialsOf(await credentials.read("paytr"))
+}
+
+/**
+ * Whether PayTR's payment is recorded to be given back (`payment-recovery`),
+ * as iyzico's provider asks (security review 2026-11-16): never an order,
+ * however its cart is completed, so the recovery job never refunds an order
+ * placed meanwhile. One found to be a placed order's (`order_exists`) is not.
+ */
+export async function isRecordedForRefund(merchantOid: string): Promise<boolean> {
+  const [row] = await container
+    .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
+    .listPaymentRecoveries(
+      { provider: "paytr", reference: merchantOid, status: [...GIVEN_BACK] },
+      { take: 1, select: ["id"] }
+    )
+  return row !== undefined
 }
 
 /** The shop's installment choices (F5 V6), read at the time of the call like the account. */

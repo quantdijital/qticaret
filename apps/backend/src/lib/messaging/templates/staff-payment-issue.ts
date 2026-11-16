@@ -8,7 +8,12 @@ import type { MessageTemplate } from "./types"
  * before its order, a stock raise lowered back after a crash.
  */
 export interface StaffPaymentIssueVars {
-  issue: "completion_stuck" | "refunded_before_order" | "shelf_restored" | "wholesale_price_check"
+  issue:
+    | "completion_stuck"
+    | "refunded_before_order"
+    | "shelf_restored"
+    | "wholesale_price_check"
+    | "payment_beside_order"
   provider: string
   reference: string
   cart: string
@@ -20,6 +25,7 @@ export const PAYMENT_ISSUES: readonly StaffPaymentIssueVars["issue"][] = [
   "refunded_before_order",
   "shelf_restored",
   "wholesale_price_check",
+  "payment_beside_order",
 ]
 
 export const staffPaymentIssue: MessageTemplate<StaffPaymentIssueVars> = {

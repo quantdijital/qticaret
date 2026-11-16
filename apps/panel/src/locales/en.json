@@ -6785,6 +6785,10 @@
       "wholesale_price_check": {
         "title": "A wholesale cart's payment could not start",
         "description": "Cart {{cart}} could not be brought to the wholesaler's prices of today; no payment was taken. Check the wholesale and retail prices of its products."
+      },
+      "payment_beside_order": {
+        "title": "A second {{provider}} payment for a cart already ordered",
+        "description": "{{amount}} ({{reference}}, cart {{cart}}) was taken for a cart whose order another payment opened; it was not refunded automatically. Check whether the customer paid twice; if so, refund the extra in the provider's panel."
       }
     },
     "markAllRead": "Mark all read",
