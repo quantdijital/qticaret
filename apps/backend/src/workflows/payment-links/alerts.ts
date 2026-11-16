@@ -17,16 +17,20 @@ export type LinkAlert = "paid" | "prices_changed" | "out_of_stock" | "needs_revi
 
 /**
  * One bell per link and kind (per link and order for `needs_review`): the
- * team's own feed, the number and total only. A bell that cannot be
- * written is logged; it never stops the customer's payment or the order.
+ * team's own feed, the number and total only. A link paid at the door
+ * (`due: "on_delivery"`) rings its "paid" bell worded "ordered": the money
+ * comes with the parcel. A bell that cannot be written is logged; it never
+ * stops the customer's payment or the order.
  */
 export async function alertLink(
   container: Container,
   kind: LinkAlert,
   link: { id: string; number: number; items_total: number; discount_total: number },
-  orderId: string | null = null
+  orderId: string | null = null,
+  due: "on_delivery" | null = null
 ): Promise<void> {
   const once = kind === "needs_review" && orderId ? `${link.id}:${orderId}` : link.id
+  const words = kind === "paid" && due ? "payment_links.paid_on_delivery" : `payment_links.${kind}`
   try {
     const number = linkNumber(link.number)
     const total = formatLira(link.items_total - link.discount_total)
@@ -43,7 +47,8 @@ export async function alertLink(
         payment_link_id: link.id,
         number,
         ...(orderId ? { order_id: orderId } : {}),
-        ...notificationText(`payment_links.${kind}`, { number, total }),
+        ...(due ? { payment_due: due } : {}),
+        ...notificationText(words, { number, total }),
       },
     })
   } catch (error) {

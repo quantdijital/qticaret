@@ -9,13 +9,13 @@ import { enteredCodes } from "../../lib/promotions"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
 import { alertLink } from "./alerts"
+import { CART_LINK_KEY, completedLinkCarts } from "./link-carts"
 import { paymentLinkSettings } from "./settings"
 import { linesOf } from "./views"
 
 type Container = Pick<MedusaContainer, "resolve">
 
-/** The cart's metadata key naming the link it was opened from; the server's alone (`qt_`). */
-export const CART_LINK_KEY = "qt_payment_link"
+export { CART_LINK_KEY }
 
 interface CartRow {
   id: string
@@ -81,8 +81,9 @@ export async function markPricesChanged(container: Container, linkId: string): P
  * order (`at: "complete"`) as far as payment links go (adr/0051 §4, §5):
  * - a link's code only on the cart opened from that link;
  * - a cart opened from a link: the link still open (at completion, an
- *   hour past its end for a payment under way), this cart its latest,
- *   its lines and code as the link made them, at the link's prices.
+ *   hour past its end for a payment under way), this cart its latest, no
+ *   other cart of the link an order, its lines and code as the link made
+ *   them, at the link's prices.
  * Null for an ordinary cart that carries no link's code.
  */
 export async function linkCartProblem(
@@ -116,6 +117,12 @@ export async function linkCartProblem(
   }
   if (link.cart_id !== cart.id) {
     return "cart.payment_link_superseded"
+  }
+  // Another cart of this link already became an order (its paid mark not run yet, or
+  // lost): this one is never paid too
+  const placed = await completedLinkCarts(container, { link_id: link.id }, 10)
+  if (placed.some((other) => other.cart_id !== cart.id)) {
+    return "cart.payment_link_closed"
   }
   const expectedCodes = link.promotion_code ? [link.promotion_code] : []
   if (

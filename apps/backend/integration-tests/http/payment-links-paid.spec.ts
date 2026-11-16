@@ -1,9 +1,11 @@
+import { Modules } from "@medusajs/framework/utils"
 import { createPaymentCollectionForCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { settlePaymentLinks } from "../../src/workflows/payment-links/settle"
 import { createAdminUser } from "../helpers/admin"
 import { completeWithSystemPayment } from "../helpers/checkout"
 import { eventually } from "../helpers/eventually"
+import { BANK_TRANSFER } from "../helpers/gift-sale"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import {
@@ -108,11 +110,65 @@ medusaIntegrationTestRunner({
       expect(row).toMatchObject({ status: "paid", order_id: orderId })
     })
 
-    it("lets no storefront make a cart a link's own, and shows no staff id on the customer's order", async () => {
+    it("closes the link for an order from a cart it gave up, its event lost: no reopening, no paying the later cart", async () => {
+      const made = await makeLink(http, owner.headers, linkBody(shop, product.variantId))
+      const id = made.data.payment_link?.id ?? ""
+      const token = tokenOf(made.data.share?.url)
+      const first = (await open(token)).data.cart_id ?? ""
+      const second = (await open(token)).data.cart_id ?? ""
+      // The race: the first cart passed its completion check before the second was bound,
+      // and became an order; the paid mark for it never ran
+      await linksOf(getContainer()).updatePaymentLinks({ id, cart_id: first })
+      const order = await complete(first)
+      await eventually(
+        () => linkRow(getContainer(), id),
+        (row) => row.status === "paid"
+      )
+      const lost = { id, status: "open" as const, order_id: null, paid_at: null, closed_at: null }
+      await linksOf(getContainer()).updatePaymentLinks({ ...lost, cart_id: second })
+      const start = await settle(
+        http.post<Answer>(
+          `/store/carts/${second}/payment-session`,
+          { provider_id: BANK_TRANSFER },
+          { headers: store.headers }
+        )
+      )
+      const again = await open(token)
+      const closedByOpening = await linkRow(getContainer(), id)
+      await linksOf(getContainer()).updatePaymentLinks({ ...lost, cart_id: second })
+      await settlePaymentLinks(getContainer())
+      const closedOnTheHour = await linkRow(getContainer(), id)
+
+      expect(order.order_id).toMatch(/^order_/)
+      expect(second).not.toBe(first)
+      expect(start.status).toBe(400)
+      expect(start.data.message).toBe("cart.payment_link_closed")
+      expect(again.status).toBe(404)
+      expect(again.data.message).toBe("payment_link.unavailable")
+      expect(closedByOpening).toMatchObject({ status: "paid", order_id: order.order_id })
+      expect(closedOnTheHour).toMatchObject({ status: "paid", order_id: order.order_id })
+    })
+
+    it("lets no storefront make a cart a link's own, and keeps the link's maker off the order", async () => {
       const { id, cartId, orderId } = await paidThenLost()
       const forged = await settle(
         http.post<Answer>(
           "/store/carts",
+          { metadata: { qt_payment_link: id } },
+          { headers: store.headers }
+        )
+      )
+      // The update path too, on a cart of the shopper's own
+      const own = await settle(
+        http.post<{ cart?: { id: string } }>(
+          "/store/carts",
+          { region_id: shop.regionId },
+          { headers: store.headers }
+        )
+      )
+      const marked = await settle(
+        http.post<Answer>(
+          `/store/carts/${own.data.cart?.id ?? ""}`,
           { metadata: { qt_payment_link: id } },
           { headers: store.headers }
         )
@@ -131,14 +187,23 @@ medusaIntegrationTestRunner({
           { headers: { ...store.headers, "x-order-token": key.data.token ?? "" } }
         )
       )
+      const [stored] = await getContainer()
+        .resolve(Modules.ORDER)
+        .listOrders({ id: orderId }, { select: ["id", "metadata"] })
 
       expect(forged.status).toBe(400)
       expect(forged.data.message).toBe("cart.metadata_reserved")
+      expect(own.status).toBe(200)
+      expect(marked.status).toBe(400)
+      expect(marked.data.message).toBe("cart.metadata_reserved")
       expect(key.status).toBe(200)
       expect(read.status).toBe(200)
-      // The order keeps its link and number for the customer; the maker is the staff's
-      expect(read.data.order?.metadata).toMatchObject({ qt_payment_link: id })
-      expect(read.data.order?.metadata).not.toHaveProperty("qt_payment_link_by")
+      // Medusa's Store order answer keeps to its allowed fields: metadata is not among them
+      // (2.21.2), so even `+metadata` brings none. Whatever it brings, no staff member's id
+      expect(read.data.order?.metadata?.["qt_payment_link_by"]).toBeUndefined()
+      // Nor is it on the order at all: the panel reads the maker from the link
+      expect(stored?.metadata).toMatchObject({ qt_payment_link: id })
+      expect(stored?.metadata).not.toHaveProperty("qt_payment_link_by")
     })
   },
 })

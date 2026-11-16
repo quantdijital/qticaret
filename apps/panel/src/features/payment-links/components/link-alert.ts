@@ -30,9 +30,14 @@ export function paymentLinkAlert(t: TFunction, data: Record<string, unknown>) {
     ? { to: "/orders/$id" as const, search: {}, params: { id: order } }
     : linkPage
   if (kind === "payment_link_paid") {
+    // Paid at the door: the order is placed, the money comes with the parcel
+    const words =
+      data["payment_due"] === "on_delivery"
+        ? "notifications.paymentLinkOrdered"
+        : "notifications.paymentLinkPaid"
     return {
-      title: t("notifications.paymentLinkPaid.title", { number }),
-      description: t("notifications.paymentLinkPaid.description"),
+      title: t(`${words}.title`, { number }),
+      description: t(`${words}.description`),
       Icon: CircleCheck,
       tone: "bg-success-soft text-success-text",
       link: orderPage,

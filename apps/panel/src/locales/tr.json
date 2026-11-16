@@ -6749,6 +6749,10 @@
       "title": "Ödeme bağlantısı {{number}}: stokta olmayan ürün",
       "description": "Müşteri ödeyemedi. Stoğu güncelleyin ya da bağlantıyı iptal edip yenisini oluşturun."
     },
+    "paymentLinkOrdered": {
+      "title": "Ödeme bağlantısı {{number}}: sipariş verildi",
+      "description": "Ödeme kapıda alınacak; sipariş Siparişler'de."
+    },
     "paymentLinkReview": {
       "title": "Ödeme bağlantısı {{number}}: siparişi kontrol edin",
       "description": "Bu bağlantıdan beklenmeyen bir sipariş oluştu. Aynı bağlantı için iki kez ödeme alınıp alınmadığına bakın."

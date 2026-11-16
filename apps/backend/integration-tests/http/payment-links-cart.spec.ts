@@ -182,8 +182,11 @@ medusaIntegrationTestRunner({
         qt_payment_link: id,
         // The number itself (PL-n), for the order's page without the link's recorded read
         qt_payment_link_number: paid.number,
-        qt_payment_link_by: owner.userId,
       })
+      // Who made the link is the link's (the panel reads it there), never on the customer's order
+      expect((orders[0] as { metadata: Record<string, unknown> }).metadata).not.toHaveProperty(
+        "qt_payment_link_by"
+      )
       expect(made.data.payment_link?.number).toBe(`PL-${String(paid.number)}`)
       expect(bells).toHaveLength(1)
       expect(bellsAfter).toHaveLength(1)

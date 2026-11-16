@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { logger } from "../lib/logging"
+import { errorSummary, logger } from "../lib/logging"
 import { sweepPaymentLinks } from "../workflows/payment-links/retention"
 import { settlePaymentLinks } from "../workflows/payment-links/settle"
 
@@ -12,7 +12,11 @@ import { settlePaymentLinks } from "../workflows/payment-links/settle"
  * became an order is paid, not expired.
  */
 export default async function paymentLinksExpiry(container: MedusaContainer) {
-  const settled = await settlePaymentLinks(container)
+  // A failed settle never keeps the hour's expiry and KVKK removal from running
+  const settled = await settlePaymentLinks(container).catch((error: unknown) => {
+    logger.error({ event: "payment_links.settle_run_failed", err: errorSummary(error) })
+    return 0
+  })
   const { expired, purged } = await sweepPaymentLinks(container)
   if (settled > 0 || expired > 0 || purged > 0) {
     logger.info({ event: "payment_links.swept", settled, expired, purged })

@@ -6749,6 +6749,10 @@
       "title": "Payment link {{number}}: a product is out of stock",
       "description": "The customer could not pay. Update the stock, or cancel the link and create a new one."
     },
+    "paymentLinkOrdered": {
+      "title": "Payment link {{number}}: order placed",
+      "description": "Payment is taken at the door; the order is in Orders."
+    },
     "paymentLinkReview": {
       "title": "Payment link {{number}}: check the order",
       "description": "An unexpected order came from this link. Check whether the link was paid twice."

@@ -40,13 +40,14 @@ const OPEN: Link = {
 }
 // The order carries the cart's link id from the start (Medusa copies the cart's metadata)
 const PLACED = { qt_payment_link: "plink_1", gift_note: "kept" }
-const MARKED = { ...PLACED, qt_payment_link_number: 1042, qt_payment_link_by: "user_1" }
+const MARKED = { ...PLACED, qt_payment_link_number: 1042 }
 
 let link: Link
 let metadata: Record<string, unknown>
 let cartId: string
+let provider: string
 /** The bells written, by idempotency key (the notification module skips a key it has). */
-let bells: Map<string, { trigger_type: string }>
+let bells: Map<string, { trigger_type: string; data?: unknown }>
 
 /** Medusa's metadata rule: top-level keys merge, "" removes one. */
 function merge(into: Record<string, unknown>, patch: Record<string, unknown>) {
@@ -65,6 +66,10 @@ const links = { listPaymentLinks: jest.fn(), updatePaymentLinks: jest.fn() }
 const orders = { updateOrders: jest.fn() }
 const notifications = { createNotifications: jest.fn() }
 
+/** The locking module as one process sees it: one holder per key, the rest wait their turn. */
+const held = new Map<string, Promise<unknown>>()
+const locking = { execute: jest.fn() }
+
 function container() {
   const made = createMedusaContainer()
   made.register({
@@ -72,6 +77,7 @@ function container() {
     [PAYMENT_LINKS_MODULE]: asValue(links),
     [Modules.ORDER]: asValue(orders),
     [Modules.NOTIFICATION]: asValue(notifications),
+    [Modules.LOCKING]: asValue(locking),
   })
   return made
 }
@@ -82,10 +88,10 @@ const settle = (promise: Promise<{ result: unknown }>) =>
     (error: unknown) => ({ result: null, error })
   )
 
-const run = () =>
+const run = (orderId = "order_1") =>
   settle(
     markPaymentLinkPaidWorkflow(container()).run({
-      input: { order_id: "order_1" },
+      input: { order_id: orderId },
       throwOnError: true,
     })
   )
@@ -96,20 +102,41 @@ beforeEach(() => {
   link = { ...OPEN }
   metadata = { ...PLACED }
   cartId = "cart_1"
+  provider = "pp_system_default"
   bells = new Map()
-  query.graph.mockImplementation(() =>
+  held.clear()
+  locking.execute.mockImplementation(async (key: string, work: () => Promise<unknown>) => {
+    const before = held.get(key) ?? Promise.resolve()
+    const mine = before.then(work, work)
+    held.set(
+      key,
+      mine.catch(() => undefined)
+    )
+    return mine
+  })
+  query.graph.mockImplementation(({ filters }: { filters: { id: string } }) =>
     Promise.resolve({
-      data: [{ id: "order_1", metadata, cart: { id: cartId, metadata: PLACED } }],
+      data: [
+        {
+          id: filters.id,
+          metadata,
+          cart: { id: cartId, metadata: PLACED },
+          payment_collections: [{ payment_sessions: [{ provider_id: provider }] }],
+        },
+      ],
     })
   )
   links.listPaymentLinks.mockImplementation(() => Promise.resolve([{ ...link }]))
-  // The guarded write: a link paid already is not touched
-  links.updatePaymentLinks.mockImplementation(({ selector, data }: GuardedUpdate) => {
-    if (link.id !== selector.id || link.status === selector.status.$ne) {
-      return Promise.resolve([])
+  // Medusa's guarded write reads, then writes (a moment between): a link paid already is
+  // not touched, unless another write slips in between, which only the lock prevents
+  links.updatePaymentLinks.mockImplementation(async ({ selector, data }: GuardedUpdate) => {
+    const read = { ...link }
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    if (read.id !== selector.id || read.status === selector.status.$ne) {
+      return []
     }
     link = { ...link, ...data }
-    return Promise.resolve([link])
+    return [link]
   })
   orders.updateOrders.mockImplementation(
     (_id: string, patch: { metadata: Record<string, unknown> }) => {
@@ -131,21 +158,78 @@ afterEach(() => {
 })
 
 describe("marking a payment link paid", () => {
-  it("closes the link first, then writes the order's two keys, and rings the bell once", async () => {
+  it("closes the link first under its lock, then writes the order's number, and rings the bell once", async () => {
     const { result, error } = await run()
 
     expect(error).toBeNull()
     expect(result).toEqual({ paid: true })
     expect(link).toMatchObject({ status: "paid", order_id: "order_1" })
+    expect(locking.execute).toHaveBeenCalledWith(
+      "payment-link:plink_1",
+      expect.any(Function),
+      expect.objectContaining({ timeout: expect.any(Number) as unknown })
+    )
     expect(links.updatePaymentLinks.mock.invocationCallOrder[0]).toBeLessThan(
       orders.updateOrders.mock.invocationCallOrder[0] ?? 0
     )
-    // Only the missing keys are sent: Medusa merges the rest
+    // Only the missing key is sent (Medusa merges the rest); the link's maker stays the link's
     expect(orders.updateOrders).toHaveBeenCalledWith("order_1", {
-      metadata: { qt_payment_link_number: 1042, qt_payment_link_by: "user_1" },
+      metadata: { qt_payment_link_number: 1042 },
     })
     expect(metadata).toEqual(MARKED)
     expect([...bells.keys()]).toEqual(["payment_links.paid:plink_1"])
+    expect([...bells.values()][0]).toMatchObject({
+      data: { title: expect.stringMatching(/ödendi/u) as unknown },
+    })
+  })
+
+  it("lets one of two orders at once hold the link; the other is for staff to check", async () => {
+    const [first, second] = await Promise.all([run("order_1"), run("order_2")])
+
+    expect([first.result, second.result]).toEqual([{ paid: true }, { paid: false }])
+    expect(link).toMatchObject({ status: "paid", order_id: "order_1" })
+    expect([...bells.keys()].sort()).toEqual([
+      "payment_links.needs_review:plink_1:order_2",
+      "payment_links.paid:plink_1",
+    ])
+  })
+
+  it("words the bell 'ordered' for a link paid at the door", async () => {
+    provider = "pp_cod_cod"
+
+    await run()
+
+    expect([...bells.values()]).toEqual([
+      expect.objectContaining({
+        trigger_type: "payment_links.paid",
+        data: expect.objectContaining({
+          payment_due: "on_delivery",
+          title: expect.stringMatching(/sipariş verildi/u) as unknown,
+        }) as unknown,
+      }),
+    ])
+  })
+
+  it("rings no link bell for a bank transfer: the order's own alert says the money is awaited", async () => {
+    provider = "pp_bank-transfer_bank-transfer"
+
+    const { result } = await run()
+
+    expect(result).toEqual({ paid: true })
+    expect(link.status).toBe("paid")
+    expect(bells.size).toBe(0)
+  })
+
+  it("does not take the lock again when its caller holds it (opening a cart)", async () => {
+    await settle(
+      markPaymentLinkPaidWorkflow(container()).run({
+        input: { order_id: "order_1", link_locked: true },
+        throwOnError: true,
+      })
+    )
+
+    expect(locking.execute).not.toHaveBeenCalled()
+    expect(link.status).toBe("paid")
   })
 
   it("keeps the link paid when the order's write fails, and the next run writes the keys", async () => {
@@ -289,7 +373,7 @@ describe("undoing a paid mark", () => {
     // The cart's link id and the order's other keys were there before: they stay
     expect(metadata).toEqual(PLACED)
     expect(orders.updateOrders).toHaveBeenLastCalledWith("order_1", {
-      metadata: { qt_payment_link_number: "", qt_payment_link_by: "" },
+      metadata: { qt_payment_link_number: "" },
     })
   })
 })
