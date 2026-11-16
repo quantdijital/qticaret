@@ -21,7 +21,7 @@ afterEach(() => {
 })
 
 describe("completedLinkCarts", () => {
-  it("finds every completed cart of one link by its metadata, with its order", async () => {
+  it("finds every completed cart of one link through payment_link_cart, with its order", async () => {
     knex.raw.mockResolvedValue({
       rows: [
         { id: "cart_1", link_id: "plink_1" },
@@ -42,10 +42,15 @@ describe("completedLinkCarts", () => {
       { cart_id: "cart_2", link_id: "plink_1", order_id: null },
     ])
     const [sql, values] = knex.raw.mock.calls[0] as [string, unknown[]]
-    expect(sql).toMatch(/completed_at IS NOT NULL/u)
-    expect(sql).toMatch(/ORDER BY completed_at ASC/u)
+    // The links' own table first (by the link's id), the carts by their ids
+    expect(sql).toMatch(/FROM payment_link_cart plc\s+JOIN cart c ON c\.id = plc\.cart_id/u)
+    expect(sql).toMatch(/AND plc\.link_id = \?/u)
+    expect(sql).toMatch(/c\.completed_at IS NOT NULL/u)
+    expect(sql).toMatch(/ORDER BY c\.completed_at ASC, plc\.cart_id/u)
+    // Never the carts' JSON metadata
+    expect(sql).not.toMatch(/metadata/u)
     // Every value bound, the link's id among them
-    expect(values).toEqual(["qt_payment_link", "qt_payment_link", "qt_payment_link", "plink_1", 10])
+    expect(values).toEqual(["plink_1", 10])
   })
 
   it("pages the carts completed since a time by id, newest first, past the page before's last", async () => {
@@ -57,12 +62,14 @@ describe("completedLinkCarts", () => {
 
     const [first, firstValues] = knex.raw.mock.calls[0] as [string, unknown[]]
     const [next, nextValues] = knex.raw.mock.calls[1] as [string, unknown[]]
-    expect(first).toMatch(/ORDER BY id DESC\s/u)
-    expect(first).not.toMatch(/id < \?/u)
-    expect(firstValues).toEqual(["qt_payment_link", "qt_payment_link", since, 500])
-    expect(next).toMatch(/AND completed_at >= \? AND id < \?/u)
-    expect(next).toMatch(/ORDER BY id DESC\s/u)
-    expect(nextValues).toEqual(["qt_payment_link", "qt_payment_link", since, "cart_499", 500])
+    expect(first).toMatch(/FROM payment_link_cart plc/u)
+    expect(first).not.toMatch(/metadata/u)
+    expect(first).toMatch(/ORDER BY plc\.cart_id DESC\s/u)
+    expect(first).not.toMatch(/cart_id < \?/u)
+    expect(firstValues).toEqual([since, 500])
+    expect(next).toMatch(/AND c\.completed_at >= \? AND plc\.cart_id < \?/u)
+    expect(next).toMatch(/ORDER BY plc\.cart_id DESC\s/u)
+    expect(nextValues).toEqual([since, "cart_499", 500])
   })
 
   it("says so when a completed cart shows no order", async () => {

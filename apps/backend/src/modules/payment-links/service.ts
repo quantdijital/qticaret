@@ -1,10 +1,16 @@
 import type { Context } from "@medusajs/framework/types"
-import { InjectTransactionManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
+import {
+  InjectTransactionManager,
+  MedusaContext,
+  MedusaService,
+  generateEntityId,
+} from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, hashPii, parseKey } from "@qticaret/server-kit"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
 import { CLAIM_TTL_MS } from "../../lib/payment-links/snapshot"
 import { paymentLinkTokenHash } from "../../lib/payment-links/token"
 import { PaymentLink } from "./models/payment-link"
+import { PaymentLinkCart } from "./models/payment-link-cart"
 
 export interface PaymentLinksOptions {
   hashKey: string
@@ -32,6 +38,12 @@ export interface PaymentLinkAddress {
   country_code: string
 }
 
+/** A cart opened from a link, as `payment_link_cart` keeps it. */
+export interface LinkCartPair {
+  link_id: string
+  cart_id: string
+}
+
 /** What a link keeps sealed. */
 export interface PaymentLinkPrivate {
   contact: PaymentLinkContact
@@ -51,7 +63,7 @@ const HASH = "payment-links.email"
  * token as a hash. Everything else is Medusa's generated CRUD; the
  * workflows decide what changes when.
  */
-class PaymentLinksModuleService extends MedusaService({ PaymentLink }) {
+class PaymentLinksModuleService extends MedusaService({ PaymentLink, PaymentLinkCart }) {
   private readonly hashKey: Buffer
   private readonly encryptionKey: Buffer
 
@@ -177,6 +189,31 @@ class PaymentLinksModuleService extends MedusaService({ PaymentLink }) {
         WHERE id = ? AND claim_token = ?`,
       [linkId, token]
     )
+  }
+
+  /**
+   * Records carts as their links' in one statement, each pair once: a
+   * pair already kept is left as it is (`ON CONFLICT DO NOTHING`), so the
+   * same pairs written again change nothing. Every value bound. How many
+   * it added.
+   */
+  @InjectTransactionManager()
+  async recordLinkCarts(
+    pairs: LinkCartPair[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    if (pairs.length === 0) {
+      return 0
+    }
+    const manager = sharedContext.transactionManager as Executor
+    const rows = (await manager.execute(
+      `INSERT INTO payment_link_cart (id, link_id, cart_id, created_at, updated_at)
+       VALUES ${pairs.map(() => "(?, ?, ?, now(), now())").join(", ")}
+       ON CONFLICT (link_id, cart_id) WHERE deleted_at IS NULL DO NOTHING
+       RETURNING id`,
+      pairs.flatMap((pair) => [generateEntityId(undefined, "plcart"), pair.link_id, pair.cart_id])
+    )) as unknown[]
+    return rows.length
   }
 
   /** The link a token names, whatever its state; null for none. */

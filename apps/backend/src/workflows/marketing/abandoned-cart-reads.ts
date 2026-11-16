@@ -7,7 +7,6 @@ import type { MedusaAmount } from "../../lib/money"
 import { CART_REMINDERS_MODULE } from "../../modules/cart-reminders"
 import type CartRemindersModuleService from "../../modules/cart-reminders/service"
 import { brandOf } from "../messaging/brand"
-import { CART_LINK_KEY } from "../payment-links/cart-guard"
 import { channelFacts } from "./abandoned-cart-consents"
 import {
   ABANDONED_AFTER_MS,
@@ -27,7 +26,8 @@ const DAY_MS = 24 * 60 * 60 * 1000
 const ROW_LINES = 3
 
 // Carts with lines and a way to reach their shopper, not an order, not a
-// payment link's (the team made those), untouched for an hour but within
+// payment link's (the team made those; found in the links' own `payment_link_cart`,
+// not by the cart's metadata), untouched for an hour but within
 // the window, whose shopper has placed no order since. Values bound.
 const WHERE = `
   FROM cart c
@@ -36,7 +36,8 @@ const WHERE = `
    AND c.completed_at IS NULL
    AND c.updated_at < ? AND c.updated_at >= ?
    AND (NULLIF(btrim(c.email), '') IS NOT NULL OR NULLIF(btrim(a.phone), '') IS NOT NULL)
-   AND (c.metadata IS NULL OR c.metadata ->> '${CART_LINK_KEY}' IS NULL)
+   AND NOT EXISTS (
+         SELECT 1 FROM payment_link_cart plc WHERE plc.cart_id = c.id AND plc.deleted_at IS NULL)
    AND EXISTS (SELECT 1 FROM cart_line_item li WHERE li.cart_id = c.id AND li.deleted_at IS NULL)
    AND NOT EXISTS (
          SELECT 1 FROM "order" o

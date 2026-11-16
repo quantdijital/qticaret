@@ -156,6 +156,27 @@ const presetShippingStep = createStep(
 )
 
 /**
+ * The cart kept as the link's in `payment_link_cart`, where the link's
+ * carts are looked up (`completedLinkCarts`). Undone, the row goes: only
+ * the one this step wrote.
+ */
+const recordCartStep = createStep(
+  "payment-links-record-cart",
+  async (input: { link_id: string; cart_id: string }, { container }) => {
+    const row = await service(container).createPaymentLinkCarts({
+      link_id: input.link_id,
+      cart_id: input.cart_id,
+    })
+    return new StepResponse(row.id, row.id)
+  },
+  async (rowId, { container }) => {
+    if (rowId) {
+      await service(container).deletePaymentLinkCarts(rowId)
+    }
+  }
+)
+
+/**
  * The link names this cart as its own: an earlier one opened from it no
  * longer completes (a card charged for that one is refunded as a payment
  * without an order, adr/0026 §6). Undone, the earlier cart and counts return.
@@ -206,6 +227,7 @@ export const openPaymentLinkCartWorkflow = createWorkflow(
       input: transform({ prepared }, ({ prepared }) => prepared.cart),
     })
     const cartId = transform({ cart }, ({ cart }) => cart.id)
+    recordCartStep({ link_id: input.link_id, cart_id: cartId })
     const bound = bindCartStep({ link_id: input.link_id, cart_id: cartId })
     checkCartStep({ cart_id: cartId })
     presetShippingStep(

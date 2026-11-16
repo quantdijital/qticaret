@@ -5,7 +5,11 @@ import { logger } from "../../lib/logging"
 
 type Container = Pick<MedusaContainer, "resolve">
 
-/** The cart's metadata key naming the link it was opened from; the server's alone (`qt_`). */
+/**
+ * The cart's metadata key naming the link it was opened from; the server's alone (`qt_`).
+ * Kept on the cart for the checkout and the storefront; the link's carts are looked up
+ * through `payment_link_cart` (`completedLinkCarts`).
+ */
 export const CART_LINK_KEY = "qt_payment_link"
 
 /** A completed cart opened from a link, and the order it became (null when none shows). */
@@ -58,27 +62,28 @@ function scopeOf(by: { link_id: string } | { since: Date; after?: string }): {
 } {
   if ("link_id" in by) {
     return {
-      scope: "AND metadata ->> ? = ?",
-      values: [CART_LINK_KEY, by.link_id],
-      order: "completed_at ASC, id",
+      scope: "AND plc.link_id = ?",
+      values: [by.link_id],
+      order: "c.completed_at ASC, plc.cart_id",
     }
   }
   if (by.after) {
     return {
-      scope: "AND completed_at >= ? AND id < ?",
+      scope: "AND c.completed_at >= ? AND plc.cart_id < ?",
       values: [by.since, by.after],
-      order: "id DESC",
+      order: "plc.cart_id DESC",
     }
   }
-  return { scope: "AND completed_at >= ?", values: [by.since], order: "id DESC" }
+  return { scope: "AND c.completed_at >= ?", values: [by.since], order: "plc.cart_id DESC" }
 }
 
 /**
  * The completed carts opened from links (one link's oldest first): every cart a link
  * was ever bound to, not only its latest (a link names one cart; one it
  * gave up while that cart was completing may still have become an order).
- * Read straight from the carts' metadata (a JSON key the typed query cannot
- * filter on); writes go through the modules. Each with its order.
+ * Found through the payment links' own `payment_link_cart` (by the link's
+ * id, indexed), then the carts read by their ids: never by the carts' JSON
+ * metadata, which Medusa's `cart` table does not index. Each with its order.
  *
  * Those completed since a time come a page at a time, newest cart id first
  * (Medusa's ids sort by their making): `after` is the last id of the page
@@ -92,15 +97,16 @@ export async function completedLinkCarts(
   const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
   const { scope, values, order } = scopeOf(by)
   const { rows } = await knex.raw<{ rows: { id: string; link_id: string }[] }>(
-    `SELECT id, metadata ->> ? AS link_id
-       FROM cart
-      WHERE deleted_at IS NULL
-        AND completed_at IS NOT NULL
-        AND metadata ->> ? IS NOT NULL
+    `SELECT plc.cart_id AS id, plc.link_id
+       FROM payment_link_cart plc
+       JOIN cart c ON c.id = plc.cart_id
+      WHERE plc.deleted_at IS NULL
+        AND c.deleted_at IS NULL
+        AND c.completed_at IS NOT NULL
         ${scope}
       ORDER BY ${order}
       LIMIT ?`,
-    [CART_LINK_KEY, CART_LINK_KEY, ...values, limit]
+    [...values, limit]
   )
   const orders = await placedOrders(
     container,
