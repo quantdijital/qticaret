@@ -38,8 +38,10 @@ test("opens the theme editor with the draft in the preview and a section's setti
   await page.getByRole("button", { name: "Bölümlere dön" }).click()
   await expect(tree).toBeVisible()
 
-  await page.getByRole("button", { name: "Sürümler" }).click()
-  await expect(page.getByRole("dialog", { name: "Yayınlanan sürümler" })).toBeVisible()
+  // The publications are kept under the bar's "Görünümler" menu (adr/0064 Ek 2026-11-17)
+  await page.getByRole("button", { name: "Görünümler" }).click()
+  await page.getByRole("menuitem", { name: "Yayın geçmişi" }).click()
+  await expect(page.getByRole("dialog", { name: "Yayın geçmişi" })).toBeVisible()
   await page.keyboard.press("Escape")
 
   await page.getByRole("button", { name: "Çık", exact: true }).click()
@@ -84,6 +86,7 @@ test("lays the theme editor out for the window it has", async ({ page, guard }) 
     await expect(bar.getByRole("button", { name: "Çık", exact: true })).toBeVisible()
     await expect(bar.getByRole("combobox", { name: "Düzenlenen sayfa" })).toBeVisible()
     await expect(bar.getByRole("button", { name: "Yayınla" })).toBeVisible()
+    await expect(bar.getByRole("button", { name: "Görünümler" })).toBeVisible()
     await expect(bar.getByRole("status", { name: "Taslağın durumu" })).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       page.viewportSize()?.width ?? 0
