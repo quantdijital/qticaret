@@ -118,8 +118,10 @@ describe("the featured product's strips look", () => {
     expect(screen.queryByText("Eğim")).toBeNull()
   })
 
-  it("shows the bolder defaults for strips saved before it", () => {
+  it("shows in Stil › Diziliş the bolder defaults for strips saved before it", async () => {
+    const user = userEvent.setup()
     renderPanel(strips())
+    await openGroup(user, "Diziliş")
 
     const slant = within(fieldOf("strips_slant"))
     expect(slant.getByText("strips_slant")).toBeInTheDocument()
@@ -136,6 +138,7 @@ describe("the featured product's strips look", () => {
   it("saves each step and switch, the wide layout saying how it stands", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(strips())
+    await openGroup(user, "Diziliş")
 
     await user.click(within(fieldOf("strips_layout")).getByRole("radio", { name: "Boydan boya" }))
     expect(changes.at(-1)).toMatchObject({ gallery: "strips", strips_layout: "wide" })

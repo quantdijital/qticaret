@@ -44,6 +44,12 @@ const SAMPLES: [string, LayoutGroup, AnySection][] = [
   ...HOME_TYPES.flatMap((type) => withVariants(newHomeSection(type, "ornekbolum1"))).map(
     (section): [string, LayoutGroup, AnySection] => [name(section), "home", section]
   ),
+  // The featured product's strips' own look shows only with the strips chosen
+  [
+    "featured_product (strips gallery)",
+    "home",
+    { ...newHomeSection("featured_product", "oneurun001"), gallery: "strips" } as AnySection,
+  ],
   ...PRODUCT_TYPES.flatMap((type) =>
     withVariants(newBodySection("product", type, "urunbolum1"))
   ).map((section): [string, LayoutGroup, AnySection] => [
