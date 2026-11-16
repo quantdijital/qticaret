@@ -1,5 +1,7 @@
 # Uygulama planı: BasitKargo ve BirFatura
 
+> **2026-11-16:** BasitKargo için sahibin "gerek yok" notu var (teyit bekliyor); bu belgenin BasitKargo dilimleri askıda. BirFatura A yolu sahibin onayını bekliyor.
+
 > Durum: **öneri, kod yok** (2026-11-16). Sahibin isteği: "kargo entegrasyonunda https://basitkargo.com/api entegrasyonu, fatura tarafında https://birfatura.com/ entegrasyonlarını da yapmalıyız." Ayrıntılar: `docs/entegrasyonlar/basitkargo.md`, `docs/entegrasyonlar/birfatura.md`.
 
 ## Yol haritasındaki yeri
