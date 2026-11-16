@@ -1,6 +1,6 @@
 # ADR-0069: Ürün videoları: yükleme, dönüştürme, depolama ve vitrinde gösterim
 
-- **Durum:** Öneri (2026-11-16). Yön sahibin kararıdır (aşağıda "Sahibin kararları"); bu belge onu ayrıntılandırır. Açık sorular sahibe sorulacak.
+- **Durum:** Kabul (sahip, 2026-11-16). Yön sahibin kararıdır (aşağıda "Sahibin kararları"); bu belge onu ayrıntılandırır. Öneri sürümündeki açık soruların önerilen varsayılanları sahip tarafından onaylandı ("ürün videolarında önerdiğin şekilde iyi"); aşağıda "Kararlar (sahip, 2026-11-16)". Yalnız YouTube çerez metni (karar 7) avukat görene kadar yasal taslak olarak işaretli kalır.
 - **Tarih:** 2026-11-16
 - **İlgili:** adr/0003 (barındırma), adr/0006 (SeaweedFS), adr/0011 (denetim kaydı), adr/0012 (özellik bayrakları), adr/0014 (asenkron iş altyapısı), adr/0016 (görsel işleme hattı), adr/0020 (kilit sağlayıcısı), adr/0040 (roller), adr/0041 §5 (çerez onayı, yasal metinler), adr/0046 (vitrin ve tema sözleşmesi), adr/0061 §5 ve Ek C9, C14 (paket limitleri, platform bayrakları, depolama kotası), adr/0066 (tema katmanları), docs/04 (dosya yükleme, SSRF), docs/05 §8, docs/13 (JSON-LD, site haritası), docs/14 (danışman), docs/18 §7 (görsel için tek giriş), docs/21 (vitrin ölçümü), `docs/kvkk-envanter.md`, `docs/tema/bilesen-standardi.md` §7
 
@@ -66,9 +66,9 @@
   - `stored_bytes` (o an depoda tuttuğu bütün dosyalar: kaynak + çıktılar + kapak), `error_code` (i18n anahtarı), `attempts`, `heartbeat_at`, `processed_at`, `uploaded_by`
 - **Neden `MediaAsset`'e tür sütunu değil:** `MediaAsset`'in benzersiz `url` dizini, ürün görsellerini Medusa'nın `images`'ıyla eşleyen plan (`plan-product-media.ts`), kütüphane listesi ve süpürme kuralları (bir kez ürüne bağlanan görselin ana dosyası siparişler için kalır) hepsi görsel varsayar. Videonun durum makinesi, kuyruğu ve iki çıktısı ayrı tabloda daha az koşullu kodla yaşar.
 - **Neden Medusa `images` değil:** `images` her yerde görsel diye okunur (küçük resim, sipariş satırı, Google Merchant, akışlar, e-postalar). Video oraya girmez; kapak görseli de girmez (§7).
-- **Kaynak dosya:** iş başarıyla bitince **silinir** (KVKK: konum ve cihaz bilgisi taşır; kota). `failed` kaydın kaynağı "Yeniden dene" için 7 gün tutulur, sonra süpürmeyle silinir. Bedeli: kalite ayarı ileride değişirse eski videolar yeniden yüklenmeden yeniden kodlanamaz (Açık soru 4).
+- **Kaynak dosya:** iş başarıyla bitince **silinir** (KVKK: konum ve cihaz bilgisi taşır; kota). `failed` kaydın kaynağı "Yeniden dene" için 7 gün tutulur, sonra süpürmeyle silinir. Bedeli: kalite ayarı ileride değişirse eski videolar yeniden yüklenmeden yeniden kodlanamaz (Kararlar 4).
 - **Varyanta özel video ilk sürümde yok.** Varyant görselleri `images` içindeki sıra numarasıyla taşınır; videoyu oraya karıştırmak bu sözleşmeyi bozar. Gerekirse ileride `MediaVideo`'ya isteğe bağlı varyant kimlikleri eklenir.
-- **Ürün başına en çok 2 video** (yüklenen + YouTube toplamı; Açık soru 2). Sunucu sayar, panel düğmeyi kapatır.
+- **Ürün başına en çok 2 video** (yüklenen + YouTube toplamı; Kararlar 2). Sunucu sayar, panel düğmeyi kapatır.
 - Ürün kopyalama (`use-duplicate.ts`), xlsx içe/dışa aktarma ve eski siteden geçiş videoyu ilk sürümde taşımaz.
 
 ### 2. Galeride yer
@@ -102,14 +102,14 @@
   - Workflow mağaza genelinde tek kilidi (`acquireLockStep`, anahtar `media:video`, Redis kilidi) alır; alamazsa çıkar (sıradaki tur alır). Kilidi alan en eski `uploaded` kaydı `processing` yapar, işler, bitince bir sonrakine geçer. **Eşzamanlılık 1.**
   - Kalp atışı 30 sn'de bir; 10 dakika sessiz kalan `processing` kaydı süpürücü `uploaded`'a geri koyar (`attempts + 1`).
   - Girdi hatası (bozuk akış, sınır dışı) **hemen** `failed`; altyapı hatası (zaman aşımı, ffmpeg çöktü, depo yazamadı) en çok 3 deneme, sonra `failed` (`video.processing_failed`).
-- **Aynı makinedeki mağazalar:** instance-per-tenant'ta her mağazanın kendi kilidi var; aynı VPS'te N mağaza aynı anda N ffmpeg çalıştırabilir. F16'da makine başına tek dönüştürme yuvası gerekir (Açık soru 9).
+- **Aynı makinedeki mağazalar:** instance-per-tenant'ta her mağazanın kendi kilidi var; aynı VPS'te N mağaza aynı anda N ffmpeg çalıştırabilir. F16'da makine başına tek dönüştürme yuvası gerekir (Kararlar 9).
 - **İşlem adımları** (`lib/media/video/` altında ince bir `spawn` sarmalayıcısı; kabuk yok, argüman dizisi):
   1. Kaynağı `getDownloadStream` ile `mkdtemp` dizinine (`0700`) indir. Boş disk < 500 MB ise başlama (`fs.statfs`).
   2. ffprobe'u yeniden çalıştır (istekteki denetimin aynısı; dosya depoda değişmiş olabilir).
   3. **MP4:** H.264 (libx264), `-preset medium -crf 24 -maxrate 2M -bufsize 4M -profile:v high -pix_fmt yuv420p -movflags +faststart`.
   4. **WebM:** VP9 (libvpx-vp9), `-crf 33 -b:v 2M -row-mt 1 -deadline good -cpu-used 4`. AV1 seçilmedi: SVT-AV1 hızlı olsa da Safari'de AV1 yalnız donanım çözücülü cihazlarda var; VP9 Chrome/Firefox/Edge'de her yerde, MP4 her tarayıcıda yedek.
   5. Ortak: kısa kenar en çok **720 px** (büyütme yok, en-boy korunur, çift piksel), `-fpsmax 30`, `-t 30`, yalnız ilk video akışı (`-map 0:v:0`), **ses, altyazı, veri akışları ve bölümler atılır** (`-an -sn -dn -map_chapters -1`), **meta veri silinir** (`-map_metadata -1`, `-fflags +bitexact`). iPhone MOV'un konum (`com.apple.quicktime.location.ISO6709`), cihaz ve tarih etiketleri ve ayrı meta veri izi böylece çıktıya girmez.
-  6. **Kapak:** ilk kare PNG olarak çıkarılır, `sharp` ile `lib/media` hattından geçer (`sanitizeImage` + `deriveImages`: WebP/AVIF `srcset`), ad `{ürün-slug}-video-{n}-{genişlik}`. Tamamen koyu ilk kare için küçük kural Açık soru 10'da.
+  6. **Kapak:** ilk kare PNG olarak çıkarılır, `sharp` ile `lib/media` hattından geçer (`sanitizeImage` + `deriveImages`: WebP/AVIF `srcset`), ad `{ürün-slug}-video-{n}-{genişlik}`. Tamamen koyu ilk kare için küçük kural Kararlar 10'da.
   7. Çıktılar ffprobe ile doğrulanır (süre ≤ 30 sn, ses yok, etiket yok); sonra `storePublicFile` benzeri akışla genel yazılır (`video/mp4`, `video/webm`; ad `{ürün-slug}-video-{n}.{mp4|webm}`).
   8. Kayıt `ready`; kaynak silinir; `stored_bytes` güncellenir; `media.video_ready` yayınlanır (ürünün SEO yükü ve arama dizini bunu dinler). Hata yolunda yazılan çıktılar silinir.
 - **Kaynak sınırları:** her ffmpeg geçişi 4 dakikada, iş bütünü 10 dakikada `SIGKILL`; `-threads 2` (4 çekirdekli VPS'in yarısı), süreç önceliği `os.setPriority(pid, 19)`; F16'da işçi kapsayıcısının CPU ve bellek sınırı (Docker `cpus`, `mem_limit`) asıl tavandır. Ağ: girdi yalnız yerel dosya, `-protocol_whitelist file`; F16'da işçi kapsayıcısının dışarı çıkışı kapatılabiliyorsa kapatılır (doğrulanmadı: depo ve veritabanı erişimiyle birlikte nasıl kurulacağı F16'da). 30 sn'lik 720p klibin süresi 2 çekirdekte ölçülmedi; dilim 2'de ölçülür ve buraya yazılır.
@@ -167,7 +167,7 @@
   - her zaman görünür oynat/durdur düğmesi (WCAG 2.2.2: 5 sn'den uzun kendiliğinden hareket eden içerik durdurulabilmeli), klavyeyle erişilir; erişilebilir ad `title`
   - `play()` reddedilirse (tarayıcı otomatik oynatmayı kapatmışsa) sessizce kapak + düğme
 - **YouTube karesi:** kapak (bizim depomuzdaki kopya; §8) + "Videoyu oynat" düğmesi + tek satır bilgi ("Oynattığınızda video YouTube'dan yüklenir."). Tıklanınca `<iframe src="https://www.youtube-nocookie.com/embed/{id}?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="…">` eklenir. Tıklamadan önce Google'a hiçbir istek gitmez (kapak dahil).
-- **Kapsam:** ilk sürümde yalnız ürün sayfası. Liste kartı, hızlı bakış (`QuickViewGallery.tsx`), ana sayfa rafları değişmez (Açık soru 6).
+- **Kapsam:** ilk sürümde yalnız ürün sayfası. Liste kartı, hızlı bakış (`QuickViewGallery.tsx`), ana sayfa rafları değişmez (Kararlar 6).
 - **Performans kabulü:** docs/21 yöntemiyle videolu ürün sayfasında mobil LCP ≤ 2,5 sn ve bugünkü ölçümden kötü değil, CLS ≤ 0,1; açılışta video baytı inmez (ağ kaydında `.mp4/.webm` yok).
 
 ### 8. YouTube bağlantısı
@@ -176,7 +176,7 @@
 - Video gerçekten gömülebilir mi ve adı: YouTube oEmbed (`https://www.youtube.com/oembed?url=…&format=json`) `lib/security/safe-fetch` ile; gömme kapalı ya da gizli videoda `video.youtube_unavailable`. oEmbed'in davranışı (401/404) bu ADR için belgeden doğrulanmadı; dilim 5'te denenir. oEmbed'den gelen ad yalnız boş `title`'ı doldurur.
 - **Kapak:** sunucu `https://i.ytimg.com/vi/{id}/maxresdefault.jpg`'yi (yoksa `hqdefault.jpg`) `workflows/media/import-fetch.ts`'in SSRF kurallarıyla bir kez indirir, görsel hattından geçirir (`sanitizeImage` + türevler) ve depomuza yazar. Vitrin kapağı bizden yükler: ziyaretçinin IP'si tıklamadan önce Google'a gitmez. Kapak indirilemezse kayıt yine açılır, vitrin ürünün ilk görselini kapak olarak kullanır.
 - Kotaya yalnız kapak sayılır. YouTube kaydının `duration_ms`'i boştur (oEmbed süre vermez).
-- **Çerez ve KVKK:** `youtube-nocookie` oynatmadan önce çerez yazmaz diye bilinir; oynatınca YouTube çerez, yerel depolama ve IP işler (ikincil kaynaklar; Google'ın kendi sayfası doğrulanmadı). Karar: tıklamadan önce iframe yok; tıklama kullanıcının açık eylemidir; kapakta tek satır bilgi; çerez politikası şablonuna (adr/0041 §5) "Üçüncü taraf: YouTube (Google), yalnız videoyu oynattığınızda" satırı ve aydınlatma metnine yurt dışına aktarım notu eklenir. Pazarlama çerez onayının ayrıca istenip istenmeyeceği yasal sorudur (Açık soru 7); danışman görene kadar taslak.
+- **Çerez ve KVKK:** `youtube-nocookie` oynatmadan önce çerez yazmaz diye bilinir; oynatınca YouTube çerez, yerel depolama ve IP işler (ikincil kaynaklar; Google'ın kendi sayfası doğrulanmadı). Karar: tıklamadan önce iframe yok; tıklama kullanıcının açık eylemidir; kapakta tek satır bilgi; çerez politikası şablonuna (adr/0041 §5) "Üçüncü taraf: YouTube (Google), yalnız videoyu oynattığınızda" satırı ve aydınlatma metnine yurt dışına aktarım notu eklenir. Pazarlama çerez onayının ayrıca istenip istenmeyeceği yasal sorudur: tıklama yeterli sayıldı (Kararlar 7); avukat görene kadar yasal taslak.
 
 ### 9. SEO
 
@@ -186,7 +186,7 @@
 
 ### 10. Panel
 
-- **Tek giriş (docs/18 §7):** ürün sayfasındaki görsel kartı "Görseller ve videolar" olur. Aynı bırakma alanı ve aynı ortam penceresi: "Bilgisayardan yükle" video ve GIF dosyasını da kabul eder (yalnız bu kartta; içerik türüne göre görsel ucuna ya da video ucuna gider), "Adres" alanı YouTube bağlantısını tanır ve video olarak ekler. Kütüphane sekmesi yalnız görsel listeler (videolar ilk sürümde kütüphanede yok; Açık soru 8). Ayrı "Video ekle" düğmesi yok.
+- **Tek giriş (docs/18 §7):** ürün sayfasındaki görsel kartı "Görseller ve videolar" olur. Aynı bırakma alanı ve aynı ortam penceresi: "Bilgisayardan yükle" video ve GIF dosyasını da kabul eder (yalnız bu kartta; içerik türüne göre görsel ucuna ya da video ucuna gider), "Adres" alanı YouTube bağlantısını tanır ve video olarak ekler. Kütüphane sekmesi yalnız görsel listeler (videolar ilk sürümde kütüphanede yok; Kararlar 8). Ayrı "Video ekle" düğmesi yok.
 - **Izgara:** video kareleri 2. sıradan başlar (§2), kapakla ve köşede oynat işaretiyle; görsel kareleriyle aynı boy (eşit yükseklik, boş alan yok). Durum karenin üstünde kısa yazı: **"İşleniyor"** ya da **"İşlenemedi"**; hazırda yazı yok. İşleyen video varken liste 5 sn'de bir yenilenir.
 - **Kareye tıklama → standart pencere** ("Video"): önizleme (hazırsa oynatılır), başlık alanı, süre ve boyut, YouTube'da bağlantı (salt okunur, "YouTube'da aç"), `failed`'da hata cümlesi ve yalnız altyapı hatasında "Yeniden dene", "Videoyu kaldır". Ürün sihirbazında video yok (ürün kaydedildikten sonra eklenir).
 - Hata metinleri i18n (`tr` örnekleri): `video.too_large` "Video en çok 50 MB olabilir.", `video.too_long` "Video en çok 30 saniye olabilir.", `video.unsupported_type` "Bu dosya türü yüklenemez. MP4, MOV, WebM ya da GIF yükleyin.", `video.dimensions_too_large` "Videonun çözünürlüğü çok yüksek (en çok 4K).", `video.unreadable` "Video okunamadı; dosya bozuk olabilir.", `video.limit_per_product` "Bir ürüne en çok 2 video eklenebilir.", `video.processing_failed` "Video hazırlanamadı. Yeniden deneyin; olmazsa başka bir dosya yükleyin.", `video.youtube_invalid` "Geçerli bir YouTube bağlantısı girin.", `video.youtube_unavailable` "Bu video gömülemiyor ya da herkese açık değil.", `video.upload_unavailable` "Video şu an yüklenemiyor." Hiçbir yerde "demo/test" yazısı yok.
@@ -199,7 +199,7 @@
 
 ### 12. Çok müşterili etki
 
-- **Bayrak:** `catalog.product_videos`, `owner: platform` (paket özelliği; adr/0061 Ek C9'un ilk iş bayrağı), varsayılan **açık** (Açık soru 3). Kapalıyken uçlar 404, panel kartı yalnız görsel kabul eder, vitrin videoyu göstermez (kayıtlar ve dosyalar durur, açılınca döner). Bayrak `packages/types/src/control-plane/platform-flags.ts` listesine de girer; `platform-flags-contract.unit.spec.ts` iki tarafı eşler. Dağıtım sırası docs/08'deki "ekleme" kuralıdır: önce mağazalar yeni sürümle, sonra üst panel bayrağı sunar.
+- **Bayrak:** `catalog.product_videos`, `owner: platform` (paket özelliği; adr/0061 Ek C9'un ilk iş bayrağı), varsayılan **açık** (Kararlar 3). Kapalıyken uçlar 404, panel kartı yalnız görsel kabul eder, vitrin videoyu göstermez (kayıtlar ve dosyalar durur, açılınca döner). Bayrak `packages/types/src/control-plane/platform-flags.ts` listesine de girer; `platform-flags-contract.unit.spec.ts` iki tarafı eşler. Dağıtım sırası docs/08'deki "ekleme" kuralıdır: önce mağazalar yeni sürümle, sonra üst panel bayrağı sunar.
 - **Kota:** paketin `storage_mb` limiti videoyu da sayar (§3); ayrı video limiti yok.
 - **Kısıtlı/askıdaki mağaza:** `/admin/products*` kapalı olduğundan yükleme ve kaldırma kapalıdır (görsellerle aynı). Kuyruktaki işler sürer.
 
@@ -243,17 +243,17 @@ Her dilim ayrı PR, `dev`'den `deniz/<konu>` dalı; kodlayıcı ajan sırayla. S
 
 Toplam kabaca 13–14 iş günü. Dilim 1 ve 2 birbirine bağlıdır; 3, 4 ve 5 dilim 2'den sonra bağımsızdır; 6 dilim 4'ten, 7 dilim 2'den sonra gelir.
 
-## Açık sorular
+## Kararlar (sahip, 2026-11-16)
 
-Sahibe sorulacak; her birinde önerilen varsayılan bu ADR'de uygulanmış haldedir.
+Öneri sürümündeki 10 açık soru, sahibin onayıyla ("ürün videolarında önerdiğin şekilde iyi") önerilen varsayılanlarla karara bağlandı. Bu varsayılanlar ADR'nin gövdesinde zaten uygulanmış haldeydi; gövde değişmedi.
 
-1. **Galerideki yer:** video hep ilk görselin ardından mı (2. kare), yoksa sahip sürükleyerek istediği yere koyabilsin mi? **Öneri:** ilk sürümde sabit 2. kare (ilk kare hep görsel: hız puanı korunur); serbest sıra sonra, migration gerektirmez.
-2. **"Ürün başına 1–2 video"** yüklenen + YouTube toplamı mı? **Öneri:** toplam en çok 2.
-3. **Paket özelliği:** video bütün paketlerde açık mı başlasın? **Öneri:** `catalog.product_videos` varsayılan açık; depolama kotası zaten sınırlar, ucuz pakette üst panelden kapatılabilir.
-4. **Kaynak dosya:** video hazır olunca orijinal silinsin mi? **Öneri:** silinsin (konum bilgisi taşır, kotadan yer). Bedeli: ileride kalite ayarı değişirse eski videolar yeniden yüklenmeden iyileştirilemez.
-5. **Kalite:** 720p, 2 Mb/sn tavan yeterli mi (ürün detayı, bıçak ağzı gibi ince işçilik)? **Öneri:** evet; dilim 2'de örnek klip sahibe gösterilir, gerekirse tavan 3 Mb/sn yapılır.
-6. **Ürün kartı ve hızlı bakış:** listede üzerine gelince video, hızlı bakışta video olsun mu? **Öneri:** ilk sürümde yalnız ürün sayfası.
-7. **YouTube çerezi (yasal, danışman yok):** tıklama + kapaktaki tek satır bilgi yeterli mi, yoksa ziyaretçi pazarlama çerezlerine onay vermeden YouTube hiç oynatılmasın mı? **Öneri:** tıklama yeterli sayılır, çerez politikasına YouTube satırı eklenir; avukat görene kadar taslak işaretli.
-8. **Medya kütüphanesi:** videolar kütüphane sayfasında da listelensin mi (başka ürüne yeniden kullanmak için)? **Öneri:** ilk sürümde hayır; video ürüne aittir.
-9. **F16, aynı VPS'te birden çok mağaza:** dönüştürme makine başına tek mi olsun (bütün mağazalar sıraya girer), mağaza başına tek mi? **Öneri:** makine başına 1 yuva (Redis mağazalar arasında paylaşılıyorsa ad alanı dışında tek anahtar, değilse paylaşılan bir dizinde `flock`); F16 kurulumunda kesinleşir.
-10. **Kapak karesi:** ilk kare kararmayla başlıyorsa (tamamen siyah) ne yapılsın? **Öneri:** ilk kare; ortalama parlaklığı çok düşükse 1. saniyedeki kare. Panelden kapak seçmek sonraki sürüm.
+1. **Galerideki yer:** video hep ilk görselin ardından mı (2. kare), yoksa sahip sürükleyerek istediği yere koyabilsin mi? **Karar:** ilk sürümde sabit 2. kare (ilk kare hep görsel: hız puanı korunur); serbest sıra sonra, migration gerektirmez.
+2. **"Ürün başına 1–2 video"** yüklenen + YouTube toplamı mı? **Karar:** toplam en çok 2.
+3. **Paket özelliği:** video bütün paketlerde açık mı başlasın? **Karar:** `catalog.product_videos` varsayılan açık; depolama kotası zaten sınırlar, ucuz pakette üst panelden kapatılabilir.
+4. **Kaynak dosya:** video hazır olunca orijinal silinsin mi? **Karar:** silinir (konum bilgisi taşır, kotadan yer). Bedeli: ileride kalite ayarı değişirse eski videolar yeniden yüklenmeden iyileştirilemez.
+5. **Kalite:** 720p, 2 Mb/sn tavan yeterli mi (ürün detayı, bıçak ağzı gibi ince işçilik)? **Karar:** evet; dilim 2'de örnek klip sahibe gösterilir, gerekirse tavan 3 Mb/sn yapılır.
+6. **Ürün kartı ve hızlı bakış:** listede üzerine gelince video, hızlı bakışta video olsun mu? **Karar:** ilk sürümde yalnız ürün sayfası; ürün kartında ve hızlı bakışta video yok.
+7. **YouTube çerezi (yasal, danışman yok):** tıklama + kapaktaki tek satır bilgi yeterli mi, yoksa ziyaretçi pazarlama çerezlerine onay vermeden YouTube hiç oynatılmasın mı? **Karar:** oynatıcı tıklanınca yüklenir ve kapaktaki tek satır bilgi yeterli sayılır; çerez politikasına YouTube satırı eklenir. Yasal metin avukat görene kadar **yasal taslak** olarak işaretli kalır.
+8. **Medya kütüphanesi:** videolar kütüphane sayfasında da listelensin mi (başka ürüne yeniden kullanmak için)? **Karar:** ilk sürümde hayır; video ürüne aittir.
+9. **F16, aynı VPS'te birden çok mağaza:** dönüştürme makine başına tek mi olsun (bütün mağazalar sıraya girer), mağaza başına tek mi? **Karar:** makine başına 1 dönüştürme yuvası (Redis mağazalar arasında paylaşılıyorsa ad alanı dışında tek anahtar, değilse paylaşılan bir dizinde `flock`); mekanizma F16 kurulumunda kesinleşir.
+10. **Kapak karesi:** ilk kare kararmayla başlıyorsa (tamamen siyah) ne yapılsın? **Karar:** ilk kare; ortalama parlaklığı çok düşükse 1. saniyedeki kare. Panelden kapak seçmek sonraki sürüm.
