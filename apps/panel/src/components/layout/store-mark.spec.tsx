@@ -57,7 +57,15 @@ describe("StoreMark (the shop at the top of the menu)", () => {
 
     expect(picture()).toHaveAttribute("src", ICON)
     expect(picture()).toHaveAttribute("alt", "")
-    expect(picture()).toHaveClass("size-8", "shrink-0", "object-contain")
+    expect(picture()).toHaveClass("size-full", "object-contain")
+    // On a tile of the page's surface (a token), so a dark drawing reads on an ink menu
+    expect(picture()?.parentElement).toHaveClass(
+      "size-8",
+      "shrink-0",
+      "rounded-md",
+      "bg-background",
+      "p-1"
+    )
     expect(screen.getByText("Örnek Bıçak")).toBeInTheDocument()
   })
 

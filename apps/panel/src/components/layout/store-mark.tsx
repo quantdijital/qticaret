@@ -6,7 +6,7 @@ import { useStoreName } from "@/features/settings/api/store"
 /**
  * The shop's identity at the top of the menu: its site icon when it has
  * one (the owner, 2026-11-16: square, it fits the square box the menu
- * keeps when folded), else its logo (the dark-surface one on an ink or
+ * keeps when folded), on a small tile of the page's surface, else its logo (the dark-surface one on an ink or
  * brand menu), else its initial on the brand colour. It reads the
  * appearance settings the store profile saves into, so a new icon shows
  * here at once. Its name beside it says what the picture is (`alt=""`);
@@ -23,13 +23,19 @@ export function StoreMark() {
     : values.sidebar === "light"
       ? values.logo_light_url
       : (values.logo_dark_url ?? values.logo_light_url)
-  const picture = values?.favicon_url ?? logo
+  const icon = values?.favicon_url ?? null
   const name = storeName ?? t("app.name")
 
   return (
     <div className="flex min-w-0 items-center gap-2.5">
-      {picture ? (
-        <img src={picture} alt="" className="size-8 shrink-0 rounded-md object-contain" />
+      {icon ? (
+        // On the page's own surface, as an app icon: a dark drawing on a clear ground still
+        // reads on an ink menu, and a light menu shows the same tile
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-sidebar-border bg-background p-1">
+          <img src={icon} alt="" className="size-full object-contain" />
+        </span>
+      ) : logo ? (
+        <img src={logo} alt="" className="size-8 shrink-0 rounded-md object-contain" />
       ) : (
         <span
           aria-hidden="true"
