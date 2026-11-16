@@ -16,6 +16,7 @@ import { SpacingGroup } from "./forms/look-fields"
 import { FrameGroup, OtherGroup } from "./forms/look-groups"
 import { MarqueeGroups } from "./forms/marquee-groups"
 import { AnnouncementMotion, AnnouncementStyle } from "./forms/announcement-settings"
+import { FooterStyleGroup } from "./forms/footer-columns-fields"
 import { HeaderGroups } from "./forms/header-bar-form"
 import { SectionLayoutGroup } from "./forms/layout-group"
 import { SliderGroups } from "./forms/slider-groups"
@@ -167,6 +168,9 @@ export function SectionPanel({
           ) : null}
           {slider ? <SliderGroups section={slider} reveal={reveal} onChange={onChange} /> : null}
           {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
+          {section.type === "footer_bar" && section.variant === "brand_columns" ? (
+            <FooterStyleGroup section={section} reveal={reveal("appearance")} onChange={onChange} />
+          ) : null}
           {section.type === "announcement_bar" ? (
             <>
               <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />

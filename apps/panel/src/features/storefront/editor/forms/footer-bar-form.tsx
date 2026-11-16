@@ -4,6 +4,7 @@ import type { FooterBarSection } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
 import { CARD_FIELD_IDS } from "./card-field-ids"
 import type { SectionFormProps } from "./form-props"
+import { FooterColumnsContent } from "./footer-columns-fields"
 import { PaymentBadgesField } from "./payment-badges-field"
 import { StepChoice } from "./step-choice"
 
@@ -23,10 +24,12 @@ const Corner = ({ side }: { side: "right" | "left" }) => (
  * The footer's own settings (adr/0049 Ek 2026-11-15): how the shop's
  * profiles show (their addresses are the store details' social accounts),
  * the ways to pay it names, and a "back to top" button; the button's
- * corner, face and phones show only while it is on. The menus, details
+ * corner, face and phones show only while it is on; the brand columns
+ * footer's strip and short line after them (its look under "Stil",
+ * `FooterStyleGroup`). The menus, details
  * and marks are edited on their own screens.
  */
-export function FooterBarForm({ section, onChange }: SectionFormProps<FooterBarSection>) {
+export function FooterBarForm({ section, problems, onChange }: SectionFormProps<FooterBarSection>) {
   const { t } = useTranslation()
   const id = (field: Parameters<typeof CARD_FIELD_IDS.footer>[1]) =>
     CARD_FIELD_IDS.footer(section.id, field)
@@ -104,6 +107,9 @@ export function FooterBarForm({ section, onChange }: SectionFormProps<FooterBarS
             }}
           />
         </>
+      ) : null}
+      {section.variant === "brand_columns" ? (
+        <FooterColumnsContent section={section} problems={problems} onChange={onChange} />
       ) : null}
     </div>
   )
