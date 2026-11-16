@@ -7,7 +7,8 @@ import type {
 // jsdom 26: the last line without an ES module dependency, which Jest's CommonJS runtime
 // (the unit tests) cannot load; it parses only, no script ever runs in it
 import { JSDOM } from "jsdom"
-import { ValidationError } from "../errors"
+import { ValidationError, isValidationError } from "../errors"
+import { cleanDeclarations, cleanStyleSheet, valueReachesOut } from "./svg-css"
 
 /**
  * SVG for the shop's logos and site icon (the owner, 2026-11-16: "logoyu
@@ -17,10 +18,13 @@ import { ValidationError } from "../errors"
  * allow list. Gone: scripts, `foreignObject`, frames and embeds, `<use>`
  * (outside DOMPurify's SVG profile for its past bypasses), every
  * animation (one can rewrite an `href`), every `on*` handler, raster
- * images, every reference out of the document (`href` keeps `#id` only,
- * CSS `url()` too, no `@import`), and the DOCTYPE with its entities (the
- * HTML parser expands none: no XXE, no "billion laughs"). What is left
- * must be one `<svg>` within the size, element and depth limits; it is
+ * images, every reference out of the document (`href` keeps `#id` only),
+ * every attribute value with an escape, an at-rule, an image function or
+ * a `url()` to anything but an `#id`, and the DOCTYPE with its entities
+ * (the HTML parser expands none: no XXE, no "billion laughs"). CSS (a
+ * `<style>` sheet, a `style` attribute) is rebuilt from an allow list
+ * (`svg-css.ts`). The size, element and depth limits are measured before
+ * DOMPurify reads it. What is left must be one `<svg>`; it is
  * written out again as XML, with a width and height from its `viewBox`
  * when it named none (pages reserve its box: no layout shift).
  */
@@ -57,19 +61,6 @@ const FORBIDDEN = [
 const FORBID_TAGS = [...new Set([...FORBIDDEN, ...FORBIDDEN.map((tag) => tag.toLowerCase())])]
 // Taken with everything inside them (a link's shapes stay: it is only unwrapped)
 const FORBID_CONTENTS = FORBID_TAGS.filter((tag) => tag !== "a")
-
-const URL_REFERENCE = /url\(\s*(['"]?)([^'")]*)\1\s*\)/gi
-
-/** Whether CSS (a `style` attribute or element, a `fill`) reaches outside the document. */
-export function cssReachesOut(css: string): boolean {
-  if (/@import|expression\s*\(|javascript:|behaviou?r\s*:|-moz-binding/i.test(css)) {
-    return true
-  }
-  // An unclosed or unquoted `url(` the pattern cannot read is refused with the rest
-  const opened = (css.match(/url\(/gi) ?? []).length
-  const read = [...css.matchAll(URL_REFERENCE)]
-  return opened !== read.length || read.some((match) => !(match[2] ?? "").trim().startsWith("#"))
-}
 
 const LINKS = new Set(["href", "xlink:href"])
 
@@ -119,23 +110,106 @@ function boxOf(svg: Element): { width: number; height: number } {
   return { width: clamp(width), height: clamp(height) }
 }
 
+/**
+ * Elements and depth, counted on the parsed document with a stack (no
+ * recursion): one past the limits is refused before DOMPurify reads it,
+ * whose "keep the content, drop the element" path copies a deep tree over
+ * and over (`"<a>".repeat(4000)` would hold the event loop).
+ */
 function checkShape(root: Element): void {
+  const stack: [Element, number][] = [[root, 0]]
   let count = 0
-  const walk = (node: Element, depth: number) => {
+  for (let next = stack.pop(); next; next = stack.pop()) {
+    const [node, depth] = next
     if (depth > SVG_MAX_DEPTH || ++count > SVG_MAX_ELEMENTS) {
       refuse("upload.svg_too_complex")
     }
     for (const child of Array.from(node.children)) {
-      walk(child, depth + 1)
+      stack.push([child, depth + 1])
     }
   }
-  walk(root, 1)
+}
+
+const TAG = /<(\/?)([a-zA-Z][^\s/>]*)[^>]*?(\/?)>/g
+
+/**
+ * A linear look at the text before anything is parsed: start tags (one
+ * element at least each) and how deep they nest as written. A parser
+ * building a 4,000-deep tree spends seconds; this spends microseconds.
+ * It reads tags only, so it may count a file deeper than its tree (an
+ * unclosed tag): such a file is refused, which a design program's never is.
+ */
+function prescan(text: string): void {
+  const tags = text.replace(/<!--[\s\S]*?(-->|$)/g, "")
+  let depth = 0
+  let count = 0
+  for (const [, closing, , selfClosing] of tags.matchAll(TAG)) {
+    if (closing) {
+      depth = Math.max(0, depth - 1)
+      continue
+    }
+    if (++count > SVG_MAX_ELEMENTS || (!selfClosing && ++depth > SVG_MAX_DEPTH)) {
+      refuse("upload.svg_too_complex")
+    }
+  }
+}
+
+/** Measures before cleaning: the text, then the parsed tree; the counts and depth, or a refusal. */
+function measure(window: JSDOM["window"], text: string): void {
+  prescan(text)
+  try {
+    const parsed = new window.DOMParser().parseFromString(text, "text/html")
+    checkShape(parsed.body)
+  } catch (error) {
+    if (isValidationError(error)) {
+      throw error
+    }
+    // A parser out of stack on a deep tree: too complex, not our failure
+    refuse("upload.svg_too_complex")
+  }
 }
 
 export interface CleanSvg {
   buffer: Buffer
   width: number
   height: number
+}
+
+function addHooks(purify: ReturnType<typeof createDOMPurify>): void {
+  purify.addHook("uponSanitizeElement", (node, data: UponSanitizeElementHookEvent) => {
+    // A style sheet keeps only the rules its allow list reads in full (svg-css.ts)
+    if (data.tagName === "style") {
+      const sheet = cleanStyleSheet(node.textContent ?? "")
+      if (sheet === "") {
+        node.parentNode?.removeChild(node)
+      } else {
+        node.textContent = sheet
+      }
+    }
+  })
+  purify.addHook("uponSanitizeAttribute", (_node, data: UponSanitizeAttributeHookEvent) => {
+    const name = data.attrName.toLowerCase()
+    if (LINKS.has(name)) {
+      data.keepAttr = data.attrValue.trim().startsWith("#")
+    } else if (name.startsWith("on")) {
+      data.keepAttr = false
+    } else if (name === "style") {
+      const kept = cleanDeclarations(data.attrValue)
+      data.keepAttr = kept !== null
+      data.attrValue = kept ?? ""
+    } else if (valueReachesOut(data.attrValue)) {
+      data.keepAttr = false
+    }
+  })
+}
+
+const CONFIG: Config & { RETURN_DOM: true } = {
+  USE_PROFILES: { svg: true, svgFilters: true },
+  FORBID_TAGS,
+  // Added to DOMPurify's own list, which keeps `style`, `script` and the rest
+  ADD_FORBID_CONTENTS: FORBID_CONTENTS,
+  ALLOW_DATA_ATTR: false,
+  RETURN_DOM: true,
 }
 
 /** The SVG as it may be stored, or a `ValidationError` (`upload.svg_*`). */
@@ -146,31 +220,11 @@ export function sanitizeSvg(bytes: Uint8Array, maxBytes = SVG_MAX_BYTES): CleanS
   const text = decode(bytes)
   const { window } = new JSDOM("")
   try {
+    measure(window, text)
     const purify = createDOMPurify(window)
-    purify.addHook("uponSanitizeElement", (node, data: UponSanitizeElementHookEvent) => {
-      // A style sheet that reaches out goes whole: editing CSS is no job for a pattern
-      if (data.tagName === "style" && cssReachesOut(node.textContent ?? "")) {
-        node.parentNode?.removeChild(node)
-      }
-    })
-    purify.addHook("uponSanitizeAttribute", (_node, data: UponSanitizeAttributeHookEvent) => {
-      const name = data.attrName.toLowerCase()
-      if (LINKS.has(name)) {
-        data.keepAttr = data.attrValue.trim().startsWith("#")
-      } else if (name.startsWith("on") || /url\(|@import|expression/i.test(data.attrValue)) {
-        data.keepAttr = !name.startsWith("on") && !cssReachesOut(data.attrValue)
-      }
-    })
-    const config: Config & { RETURN_DOM: true } = {
-      USE_PROFILES: { svg: true, svgFilters: true },
-      FORBID_TAGS,
-      // Added to DOMPurify's own list, which keeps `style`, `script` and the rest
-      ADD_FORBID_CONTENTS: FORBID_CONTENTS,
-      ALLOW_DATA_ATTR: false,
-      RETURN_DOM: true,
-    }
+    addHooks(purify)
     // RETURN_DOM: the cleaned `<body>`, an element of jsdom's window
-    const body = purify.sanitize(text, config) as unknown as Element
+    const body = purify.sanitize(text, CONFIG) as unknown as Element
     const roots = Array.from(body.children)
     const svg = roots[0]
     if (roots.length !== 1 || svg?.namespaceURI !== SVG_NS || svg.localName !== "svg") {
@@ -180,7 +234,6 @@ export function sanitizeSvg(bytes: Uint8Array, maxBytes = SVG_MAX_BYTES): CleanS
     if (svg.children.length === 0) {
       return refuse("upload.svg_invalid")
     }
-    checkShape(svg)
     const box = boxOf(svg)
     if (number(svg.getAttribute("width")) === null) {
       svg.setAttribute("width", String(box.width))
@@ -189,7 +242,7 @@ export function sanitizeSvg(bytes: Uint8Array, maxBytes = SVG_MAX_BYTES): CleanS
       svg.setAttribute("height", String(box.height))
     }
     const xml = new window.XMLSerializer().serializeToString(svg)
-    // What is stored must read back as one SVG document
+    // A form check only (the cleaning is above): what is stored reads back as one SVG document
     const check = new window.DOMParser().parseFromString(xml, SVG_MIME)
     if (
       check.getElementsByTagName("parsererror").length > 0 ||

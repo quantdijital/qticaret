@@ -1,5 +1,5 @@
 import { isValidationError } from "../../errors"
-import { SVG_MAX_BYTES, cssReachesOut, looksLikeSvg, sanitizeSvg } from "../svg"
+import { SVG_MAX_BYTES, looksLikeSvg, sanitizeSvg } from "../svg"
 
 const svg = (body: string, attrs = 'viewBox="0 0 120 40"') =>
   Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" ${attrs}>${body}</svg>`)
@@ -94,10 +94,84 @@ describe("sanitizeSvg: a logo as it may be stored", () => {
     )
     expect(out).not.toMatch(/evil\.example|@import/)
     expect(out).toContain(".b{fill:url(#g)}")
-    expect(cssReachesOut("fill:url(#a);stroke:url('#b')")).toBe(false)
-    expect(cssReachesOut("background:url(//evil.example/x)")).toBe(true)
-    expect(cssReachesOut("fill:url(#a")).toBe(true)
-    expect(cssReachesOut("width:expression(alert(1))")).toBe(true)
+  })
+
+  it.each([
+    ["an escaped @import", "<style>@\\69mport 'https://x.example/y.css'; .a{fill:red}</style>"],
+    ["an escaped url() in a style", '<rect style="fill:u\\72l(https://x.example/t)" width="1"/>'],
+    ["a font face", "<style>@font-face{src:u\\72l(https://x.example/f.woff)}</style>"],
+    ["an image set", "<style>.a{fill:image-set('https://x.example/t' 1x)}</style>"],
+    ["an escaped url() in fill", '<rect fill="u\\72l(https://x.example/t)" width="1"/>'],
+    ["an image set in fill", '<rect fill="image-set(\'https://x.example/t\' 1x)" width="1"/>'],
+  ])("keeps no outside reference through %s", (_name, body) => {
+    const out = clean(svg(`${body}<rect width="9" height="9"/>`))
+    expect(out).not.toMatch(/x\.example|\\|@|image-set/)
+    expect(out).toContain('<rect width="9" height="9"/>')
+  })
+
+  it("keeps an Illustrator logo's class colours, gradients and clip paths", () => {
+    const illustrator = Buffer.from(
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+        '<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 60">\n' +
+        "  <defs>\n" +
+        "    <style>\n      .cls-1 {\n        fill: url(#linear-gradient);\n      }\n\n      .cls-2 {\n        fill: #1d1d1b;\n        stroke: #fff;\n        stroke-miterlimit: 10;\n      }\n\n      .cls-3 {\n        clip-path: url(#clippath);\n      }\n    </style>\n" +
+        '    <clipPath id="clippath"><rect class="cls-2" x="0" y="0" width="60" height="60"/></clipPath>\n' +
+        '    <linearGradient id="linear-gradient" x1="0" y1="30" x2="60" y2="30" gradientUnits="userSpaceOnUse">\n' +
+        '      <stop offset="0" stop-color="#c8102e"/>\n      <stop offset="1" stop-color="#7a0019"/>\n' +
+        "    </linearGradient>\n  </defs>\n" +
+        '  <g class="cls-3"><circle class="cls-1" cx="30" cy="30" r="30"/></g>\n' +
+        '  <path class="cls-2" d="M80,10h40v40h-40z"/>\n</svg>\n'
+    )
+    const out = clean(illustrator)
+    // Cleaned again (as the library reads it back), the same file
+    expect(clean(out)).toBe(out)
+    for (const kept of [
+      ".cls-1{fill:url(#linear-gradient)}",
+      ".cls-2{fill:#1d1d1b;stroke:#fff;stroke-miterlimit:10}",
+      // clip-path is no colour property: the sheet drops it, the attribute below keeps it
+      'id="clippath"',
+      'id="linear-gradient"',
+      'stop-color="#c8102e"',
+      'class="cls-1"',
+      'd="M80,10h40v40h-40z"',
+      'viewBox="0 0 200 60"',
+    ]) {
+      expect(out).toContain(kept)
+    }
+  })
+
+  it("keeps a Figma logo's presentation attributes, gradients and clip paths", () => {
+    const figma = Buffer.from(
+      '<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
+        '<g clip-path="url(#clip0_1_2)">\n' +
+        '<path d="M0 0H40V40H0V0Z" fill="url(#paint0_linear_1_2)"/>\n' +
+        '<path d="M50 5H110V35H50V5Z" fill="#111827" fill-opacity="0.9" stroke="#F9FAFB" stroke-width="2"/>\n' +
+        "</g>\n<defs>\n" +
+        '<linearGradient id="paint0_linear_1_2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">\n' +
+        '<stop stop-color="#6366F1"/>\n<stop offset="1" stop-color="#EC4899"/>\n</linearGradient>\n' +
+        '<clipPath id="clip0_1_2">\n<rect width="120" height="40" fill="white"/>\n</clipPath>\n' +
+        "</defs>\n</svg>\n"
+    )
+    const out = clean(figma)
+    expect(clean(out)).toBe(out)
+    for (const kept of [
+      'clip-path="url(#clip0_1_2)"',
+      'fill="url(#paint0_linear_1_2)"',
+      'fill-opacity="0.9"',
+      'stroke="#F9FAFB"',
+      'stop-color="#EC4899"',
+      'id="clip0_1_2"',
+      'width="120"',
+    ]) {
+      expect(out).toContain(kept)
+    }
+  })
+
+  it("is the same once cleaned again (the library reads a stored SVG back)", () => {
+    const once = sanitizeSvg(
+      svg('<style>.a{fill:#000}</style><path class="a" d="M0 0h1v1z" fill="url(#g)"/>')
+    ).buffer
+    expect(sanitizeSvg(once).buffer.equals(once)).toBe(true)
   })
 
   it("expands no entity: no XXE, no billion laughs", () => {
@@ -124,6 +198,17 @@ describe("sanitizeSvg: a logo as it may be stored", () => {
     expect(refusal(svg(`<rect/>${" ".repeat(SVG_MAX_BYTES)}`))).toBe("upload.svg_too_large")
     expect(refusal(svg(`${"<g>".repeat(100)}${"</g>".repeat(100)}`))).toBe("upload.svg_too_complex")
     expect(refusal(svg('<rect width="1"/>'.repeat(6_000)))).toBe("upload.svg_too_complex")
+  })
+
+  it.each([
+    ["4,000 nested links", "<a>".repeat(4_000)],
+    ["4,000 nested unknown elements", "<x>".repeat(4_000)],
+    ["5,001 shallow elements", "<rect/>".repeat(5_001)],
+    ["a tree too deep for a recursive walk", "<g>".repeat(4_900)],
+  ])("refuses %s within a second, before DOMPurify reads it", (_name, body) => {
+    const started = Date.now()
+    expect(refusal(svg(body))).toBe("upload.svg_too_complex")
+    expect(Date.now() - started).toBeLessThan(1_000)
   })
 
   it("tells an SVG by its content", () => {

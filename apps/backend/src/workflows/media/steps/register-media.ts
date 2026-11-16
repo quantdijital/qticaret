@@ -46,12 +46,17 @@ async function sizeOf(bytes: Buffer) {
 async function describe(container: MedusaContainer, fileId: string) {
   const bytes = await readFile(container, fileId)
   if (readImageInfo(bytes) === null && looksLikeSvg(bytes)) {
-    // Stored as the upload's cleaner left it; read again by it here, for its size: one
-    // that does not pass now (a file put in storage another way) is no image of ours
+    // Read again by the cleaner, for two things: its size (the library keeps it), and
+    // proof that storage holds what the upload check wrote. The cleaner gives back the
+    // same file for one it wrote; one it would change (put in storage some other way) is
+    // no image of ours, and no record is made of it
     let svg
     try {
       svg = sanitizeSvg(bytes)
     } catch {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "media.not_an_image")
+    }
+    if (!svg.buffer.equals(bytes)) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, "media.not_an_image")
     }
     return {
