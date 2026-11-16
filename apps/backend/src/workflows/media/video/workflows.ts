@@ -107,8 +107,10 @@ export const removeProductVideoWorkflow = createWorkflow(
       ])
     )
     softDeleteVideoStep(transform({ video }, ({ video }) => video.id))
-    const removed = removeVideoFilesStep(video)
     releaseLockStep({ key })
+    // The very last step (security review B-1): nothing after it can fail and undo the
+    // record and the link over files already gone
+    const removed = removeVideoFilesStep(video)
     return new WorkflowResponse(removed)
   }
 )

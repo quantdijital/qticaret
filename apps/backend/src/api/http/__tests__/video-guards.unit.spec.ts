@@ -71,6 +71,25 @@ describe("a video's fields through `fields` (adr/0069, security review D3)", () 
     expect(result.status()).toBe(400)
   })
 
+  it.each([
+    ["an object", { x: "media_videos" }],
+    ["a list holding an object", ["id", { x: "media_videos" }]],
+    ["a number", 5],
+  ])("refuses `fields` it cannot read: %s (review B-4)", (_, fields) => {
+    const req = request({ path: "/admin/products/prod_1", query: { fields } })
+    expect(run(restrictAdminVideoFields, req).status()).toBe(400)
+    const store = request({ path: "/store/products", query: { fields } })
+    expect(run(rejectStoreVideoFields, store).status()).toBe(400)
+  })
+
+  it("leaves a request without `fields`, or with a list of strings, to the rules", () => {
+    expect(
+      run(rejectStoreVideoFields, request({ path: "/store/products" })).next
+    ).toHaveBeenCalled()
+    const list = request({ path: "/store/products", query: { fields: ["id", "+title"] } })
+    expect(run(rejectStoreVideoFields, list).next).toHaveBeenCalled()
+  })
+
   it("gives the admin API the panel's own leaves", () => {
     const fields = "+media_videos.id,+media_videos.status,+media_videos.poster,+media_videos.title"
     const result = run(restrictAdminVideoFields, withFields("/admin/products/prod_1", fields))

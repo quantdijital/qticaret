@@ -52,11 +52,25 @@ export function fieldTokens(req: MedusaRequest): string[] {
  * depth over Medusa's allowed list, whose handling of these forms is
  * internal.
  */
+/**
+ * Whether `fields` is absent, a string or a list of strings: any other
+ * shape (`fields[x]=...`, a nested object) is one the guards cannot read,
+ * so it is refused rather than passed on unread (security review B-4).
+ */
+export function fieldsReadable(req: MedusaRequest): boolean {
+  const fields: unknown = req.query["fields"]
+  return (
+    fields === undefined ||
+    typeof fields === "string" ||
+    (Array.isArray(fields) && fields.every((value) => typeof value === "string"))
+  )
+}
+
 export function restrictStoreRelation(relation: RegExp, leaves: readonly string[], reason: string) {
   return (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction): void => {
-    const refused = fieldTokens(req).some(
-      (token) => relation.test(token) && !leaves.includes(token)
-    )
+    const refused =
+      !fieldsReadable(req) ||
+      fieldTokens(req).some((token) => relation.test(token) && !leaves.includes(token))
     if (refused) {
       rejectRequest(
         req,

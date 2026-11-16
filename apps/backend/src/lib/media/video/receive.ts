@@ -7,6 +7,7 @@ import type { Readable } from "node:stream"
 import { pipeline } from "node:stream/promises"
 import busboy from "busboy"
 import { ValidationError } from "../../errors"
+import { logger } from "../../logging"
 import { VIDEO_MAX_BYTES, VIDEO_TITLE_MAX } from "./limits"
 
 /**
@@ -60,14 +61,30 @@ function cleanTitle(value: string): string | null {
   return title === "" ? null : title
 }
 
-/** Resolves once `writer`'s descriptor is closed (at once when there is none). */
-function closed(writer: WriteStream | null): Promise<void> {
+/** How long a file may take to close before the upload is given up on anyway (review B-2). */
+export const CLOSE_WAIT_MS = 5_000
+
+/**
+ * Whether `writer`'s descriptor closed (at once when there is none) within
+ * `waitMs`. A file that does not is logged; the caller refuses the upload
+ * either way, and never waits on it for ever.
+ */
+export function fileClosed(
+  writer: { closed: boolean; once: (event: "close", listener: () => void) => unknown } | null,
+  waitMs = CLOSE_WAIT_MS
+): Promise<boolean> {
   if (!writer || writer.closed) {
-    return Promise.resolve()
+    return Promise.resolve(true)
   }
   return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      logger.warn({ event: "media.video_file_not_closed", wait_ms: waitMs })
+      resolve(false)
+    }, waitMs)
+    timer.unref()
     writer.once("close", () => {
-      resolve()
+      clearTimeout(timer)
+      resolve(true)
     })
   })
 }
@@ -148,7 +165,7 @@ export function receiveVideo(
         // Drained (bounded by the path's gate) so the answer reaches the client
         req.resume()
       }
-      void closed(writer).then(() => {
+      void fileClosed(writer).then(() => {
         reject(error instanceof Error ? error : new Error("video upload failed"))
       })
     }
@@ -181,8 +198,12 @@ export function receiveVideo(
       }
       writing.then(
         async () => {
-          await closed(writer)
+          const done = await fileClosed(writer)
           if (settled) {
+            return
+          }
+          if (!done) {
+            fail(refuse("video.unreadable"))
             return
           }
           if (bytes === 0) {

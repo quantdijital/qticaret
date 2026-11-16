@@ -80,7 +80,19 @@ export function storedRowProblem(stored: StoredPlan, config: ControlPlaneConfig)
     { document: stored.document, kid: stored.kid, signature: stored.signature },
     config
   )
-  return check.ok ? null : check.code
+  if (!check.ok) {
+    return check.code
+  }
+  // The row's own columns must say what the signed document says (security review A-3):
+  // one who can write the database cannot lower `serial` to have an older signed
+  // document taken again, nor file a document under another shop's row
+  if (stored.serial !== check.signed.document.serial) {
+    return "control_plane.stored_serial_mismatch"
+  }
+  if (stored.tenant_id !== check.signed.document.tenant_id) {
+    return "control_plane.stored_tenant_mismatch"
+  }
+  return null
 }
 
 /** The status a row says, read without trusting it (a damaged row may have no document). */

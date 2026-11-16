@@ -15,6 +15,7 @@ import { ControlPlaneMarker } from "./models/control-plane-marker"
 import { ControlPlanePlan } from "./models/control-plane-plan"
 import type { PlanSource } from "./models/control-plane-plan"
 import { replacePlanRow } from "./replace-row"
+import type { TransactionalManager } from "./replace-row"
 import {
   LastVerified,
   stateOfStored,
@@ -213,19 +214,19 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan, Contro
       confirmed_at: pulled ? now : (row?.confirmed_at ?? null),
       source,
     }
-    const executor = sharedContext.transactionManager as Executor
+    const manager = sharedContext.transactionManager as TransactionalManager
     if (order === "same" && row) {
       const repaired = storedRowProblem(storedOf(row), controlPlaneConfig()) !== null
       if (repaired) {
         // The whole document, never merged into the old one (replace-row.ts)
-        await replacePlanRow(executor, row.id, values)
+        await replacePlanRow(manager, row.id, values)
       } else if (pulled) {
         await this.updateControlPlanePlans({ id: row.id, confirmed_at: now }, sharedContext)
       }
       return { outcome: "same", previous: null, marked: false, repaired }
     }
     if (row) {
-      await replacePlanRow(executor, row.id, values)
+      await replacePlanRow(manager, row.id, values)
     } else {
       await this.createControlPlanePlans([{ tenant_id: tenantId, ...values }], sharedContext)
     }
@@ -292,7 +293,7 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan, Contro
       return
     }
     // The previous document whole, as it was signed (replace-row.ts)
-    await replacePlanRow(sharedContext.transactionManager as Executor, row.id, previous)
+    await replacePlanRow(sharedContext.transactionManager as TransactionalManager, row.id, previous)
   }
 }
 

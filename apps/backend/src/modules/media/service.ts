@@ -65,7 +65,7 @@ class MediaModuleService extends MediaServiceBase {
     await manager.execute(
       `UPDATE media_video SET source_file_id = NULL, output_file_ids = NULL,
          poster_file_ids = NULL, stored_bytes = 0, updated_at = now()
-       WHERE id = ?`,
+       WHERE id = ? AND deleted_at IS NOT NULL`,
       [id]
     )
   }

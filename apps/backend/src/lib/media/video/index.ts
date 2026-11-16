@@ -26,6 +26,11 @@ export {
 export type { VideoToolCheck } from "./tools"
 export { canMoveVideo, openingStatus } from "./status"
 export type { VideoStatus } from "./status"
-export { RECEIVE_TIMEOUTS, receiveVideo } from "./receive"
+export { CLOSE_WAIT_MS, RECEIVE_TIMEOUTS, fileClosed, receiveVideo } from "./receive"
 export type { ReceiveTimeouts, ReceivedVideo } from "./receive"
-export { makeVideoTempDir, readHead, removeVideoTempDir } from "./temp-files"
+export {
+  makeVideoTempDir,
+  readHead,
+  removeVideoTempDir,
+  sweepStaleVideoTempDirs,
+} from "./temp-files"

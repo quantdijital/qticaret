@@ -50,6 +50,21 @@ describe("the stored plan document, checked again (adr/0061 Ek C19 I2)", () => {
     )
   })
 
+  it("trusts a row only when its own serial and shop are the signed document's (review A-3)", () => {
+    const stored = row()
+    // An older signed document taken again by lowering the column
+    expect(storedRowProblem({ ...stored, serial: stored.serial - 1 }, config)).toBe(
+      "control_plane.stored_serial_mismatch"
+    )
+    expect(storedRowProblem({ ...stored, serial: stored.serial + 1 }, config)).toBe(
+      "control_plane.stored_serial_mismatch"
+    )
+    expect(storedRowProblem({ ...stored, tenant_id: "ten_other" }, config)).toBe(
+      "control_plane.stored_tenant_mismatch"
+    )
+    expect(storedRowProblem(stored, config)).toBeNull()
+  })
+
   it("keeps the last verified state of this shop, else restricts; logs the code only", () => {
     const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
     const last = new LastVerified()

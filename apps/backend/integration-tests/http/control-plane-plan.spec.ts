@@ -125,6 +125,30 @@ medusaIntegrationTestRunner({
       expect(await flags().isFeatureEnabled(FLAG)).toBe(true)
     })
 
+    // Security review A-1: the row is written with bound values; a `?` or a quote in the
+    // document's own words must neither break the write nor change what is stored
+    it("stores a document whose words hold SQL's special characters exactly as signed", async () => {
+      const words = (tag: string) => ({
+        package_name: `Bıçak ${tag}? ?? 'tek' "çift" \\ $1 :ad %s 🔪`,
+        payment_instruction: [
+          `Havale ${tag}: IBAN TR00 0000? Açıklamaya sipariş no ?? yazın.`,
+          `Tırnak ' ve " ve ters bölü \\ ve $1, $2::jsonb, :ad, %s, %%`,
+          "Çok satırlı: ğüşöçİ ı 🔪🧾",
+        ].join("\n"),
+      })
+      for (const [serial, tag] of [
+        [30, "ilk"],
+        [31, "ikinci"],
+      ] as const) {
+        const pushed = signed(doc(serial, { billing: { ...doc(serial).billing, ...words(tag) } }))
+        const answer = await push(pushed)
+        expect(answer.status).toBe(200)
+        expect(answer.data).toMatchObject({ applied: true, serial })
+        expect((await plans().storedPlan(TENANT_ID))?.document).toEqual(pushed.document)
+        expect(await plans().planState()).toMatchObject({ serial, status: "active" })
+      }
+    })
+
     it("is unmanaged without the public keys: 404, platform flags at their defaults", async () => {
       await push(signed(doc(4)))
       expect(await flags().isFeatureEnabled(FLAG)).toBe(false)

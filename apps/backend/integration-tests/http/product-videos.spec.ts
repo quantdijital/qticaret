@@ -233,6 +233,32 @@ medusaIntegrationTestRunner({
       )
       expect(listed.status).toBe(400)
 
+      // Review B-4: a wildcard, a shape the guard cannot read, an order or a filter on the link
+      const raw = (query: string) =>
+        settle(
+          http.get<Record<string, unknown>>(`/admin/products/${productId}?${query}`, {
+            headers: readonly.headers,
+          })
+        )
+      const wildcard = await raw("fields=*")
+      // Medusa's own answer to a bare wildcard (taken or refused), never a video's keys
+      expect([200, 400]).toContain(wildcard.status)
+      expect(JSON.stringify(wildcard.data)).not.toMatch(/media_video|video-kaynak|user_01TEST/)
+      expect((await raw(`fields=${encodeURIComponent("*,*media_videos")}`)).status).toBe(400)
+      expect((await raw("fields%5Bx%5D=media_videos")).status).toBe(400)
+      for (const query of [
+        "order=media_videos.source_file_id",
+        `order=${encodeURIComponent("-media_videos.uploaded_by")}`,
+        "media_videos%5Bsource_file_id%5D=video-kaynak-test.mp4",
+      ]) {
+        const answer = await settle(
+          http.get<Record<string, unknown>>(`/admin/products?${query}`, {
+            headers: readonly.headers,
+          })
+        )
+        expect(JSON.stringify(answer.data)).not.toMatch(/video-kaynak|user_01TEST/)
+      }
+
       // The storefront: nothing of a video until slice 4 opens its leaves
       const { headers } = await createStorefront(getContainer())
       for (const fields of ["*media_videos", "+media_videos.id", "+media_videos.source_file_id"]) {
