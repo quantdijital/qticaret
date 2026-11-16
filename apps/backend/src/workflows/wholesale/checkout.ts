@@ -50,8 +50,13 @@ export async function readCart(
     fields: CART_FIELDS,
     filters: { id: cartId },
   })
-  return data[0] as CheckoutCart | undefined
+  const first: unknown = data[0]
+  return isCheckoutCart(first) ? first : undefined
 }
+
+/** A cart row as the query answers it: an object with its id (its fields are the query's). */
+const isCheckoutCart = (value: unknown): value is CheckoutCart =>
+  typeof value === "object" && value !== null && "id" in value
 
 /** The customer is, or once was, a wholesaler: a closed or removed one's carts are judged too. */
 async function everWholesale(container: Container, customerId: string): Promise<boolean> {
