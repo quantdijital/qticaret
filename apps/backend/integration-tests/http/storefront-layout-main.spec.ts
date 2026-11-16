@@ -26,27 +26,36 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
 
-    it("reads the main sections in, saves the header bar's own, and gives them to the storefront apart", async () => {
+    /** The owner's design (read, save, publish) and the storefront's live read. */
+    const open = async () => {
       const container = getContainer()
       const owner = await createAdminUser(http, container)
       const store = await createStorefront(container)
       const asOwner = { headers: owner.headers }
-      const admin = async () =>
-        (await settle(http.get<AdminLayout>("/admin/storefront-layout", asOwner))).data.layout
-      const live = async () =>
-        (
-          await settle(
-            http.get<StoreLayout>("/store/storefront-layout", { headers: store.headers })
-          )
-        ).data.layout
-      const save = (document: Partial<Groups>) =>
-        settle(
-          http.post<AdminLayout>(
-            "/admin/storefront-layout",
-            { document: { header: [], home: [], footer: [], ...document } },
-            asOwner
-          )
-        )
+      return {
+        admin: async () =>
+          (await settle(http.get<AdminLayout>("/admin/storefront-layout", asOwner))).data.layout,
+        live: async () =>
+          (
+            await settle(
+              http.get<StoreLayout>("/store/storefront-layout", { headers: store.headers })
+            )
+          ).data.layout,
+        save: (document: Partial<Groups>) =>
+          settle(
+            http.post<AdminLayout>(
+              "/admin/storefront-layout",
+              { document: { header: [], home: [], footer: [], ...document } },
+              asOwner
+            )
+          ),
+        publish: async () =>
+          (await settle(http.post("/admin/storefront-layout/publish", {}, asOwner))).status,
+      }
+    }
+
+    it("reads the main sections in, saves the header bar's own, and gives them to the storefront apart", async () => {
+      const { admin, live, save, publish } = await open()
 
       // The default design: each main section read in, the header bar from the theme's header
       const opened = await admin()
@@ -136,9 +145,7 @@ medusaIntegrationTestRunner({
           ...ALWAYS,
         },
       ])
-      expect(
-        (await settle(http.post("/admin/storefront-layout/publish", {}, asOwner))).status
-      ).toBe(200)
+      expect(await publish()).toBe(200)
       const after = await live()
       expect(after.header.map((section) => section.type)).toEqual(["announcement_bar"])
       expect(after.main["header_bar"]).toEqual({
@@ -153,6 +160,86 @@ medusaIntegrationTestRunner({
       expect(after.main["product_main"]).toMatchObject({ look: { width: "narrow" } })
       expect(after.footer).toEqual([])
       expect((await admin()).has_changes).toBe(false)
+    })
+
+    it("saves the brand columns footer's own settings and prints them for the storefront (adr/0049 Ek 2026-11-17)", async () => {
+      const { admin, live, save, publish } = await open()
+      const footer = { id: "mainfooter", type: "footer_bar", variant: "brand_columns" }
+
+      // Its settings only on its own variant, each step on its list, the line kept short
+      expect(
+        (
+          await save({
+            footer: [{ id: "mainfooter", type: "footer_bar", variant: "ledger", ground: "stage" }],
+          })
+        ).status
+      ).toBe(400)
+      const refused = [
+        { ...footer, ground: "primary" },
+        { ...footer, badge_style: "mono" },
+        { ...footer, about: "a".repeat(241) },
+      ]
+      for (const section of refused) {
+        const answer = await save({ footer: [section] })
+        expect(answer.status).toBe(400)
+        expect(answer.data.message).toContain("storefront_layout.section_invalid")
+      }
+
+      // Switched to it alone: read whole, its defaults printed
+      expect((await save({ footer: [footer] })).status).toBe(200)
+      expect((await admin()).draft.footer[0]).toEqual({
+        ...footer,
+        ...ALWAYS,
+        social: "text",
+        payment_badges: [],
+        back_to_top: false,
+        back_to_top_side: "right",
+        back_to_top_shape: "round",
+        back_to_top_mobile: true,
+        top_strip: true,
+        about: null,
+        ground: "well",
+        badge_style: "card",
+      })
+
+      // What the shop set, beside the footer's common settings, live on publishing
+      const saved = await save({
+        footer: [
+          {
+            ...footer,
+            social: "icons",
+            payment_badges: ["visa", "mastercard", "troy", "amex", "installments"],
+            top_strip: false,
+            about: "  Hafta içi 16.00'ya kadar verilen sipariş aynı gün kargoda.  ",
+            ground: "page",
+            badge_style: "plain",
+          },
+        ],
+      })
+      expect(saved.status).toBe(200)
+      expect(await publish()).toBe(200)
+      const after = await live()
+      expect(after.footer).toEqual([])
+      expect(after.main["footer_bar"]).toEqual({
+        ...footer,
+        social: "icons",
+        payment_badges: ["visa", "mastercard", "troy", "amex", "installments"],
+        columns: {
+          top_strip: false,
+          about: "Hafta içi 16.00'ya kadar verilen sipariş aynı gün kargoda.",
+          ground: "page",
+          badge_style: "plain",
+        },
+      })
+
+      // Back to the ledger: its print as before, the columns' settings gone
+      expect((await save({ footer: [{ ...footer, variant: "ledger" }] })).status).toBe(200)
+      expect(await publish()).toBe(200)
+      expect((await live()).main["footer_bar"]).toEqual({
+        id: "mainfooter",
+        type: "footer_bar",
+        variant: "ledger",
+      })
     })
   },
 })
