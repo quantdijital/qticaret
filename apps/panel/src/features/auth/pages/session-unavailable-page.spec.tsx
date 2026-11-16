@@ -7,10 +7,7 @@ import { SessionErrorBoundary } from "./session-unavailable-page"
 
 const router = vi.hoisted(() => ({ invalidate: vi.fn() }))
 
-vi.mock("@tanstack/react-router", () => ({
-  useRouter: () => router,
-  ErrorComponent: ({ error }: { error: Error }) => <p>router error: {error.message}</p>,
-}))
+vi.mock("@tanstack/react-router", () => ({ useRouter: () => router }))
 // The introduction beside the box: not this page's concern
 vi.mock("@/features/auth/components/auth-intro", () => ({ AuthIntro: () => null }))
 
@@ -38,9 +35,13 @@ describe("SessionErrorBoundary", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Çok fazla istek")
   })
 
-  it("leaves any other error to the router's view", () => {
-    show(new Error("boom"))
+  it("shows any other error in the panel's own words, never its internals", async () => {
+    show(new Error('relation "order" does not exist'))
 
-    expect(screen.getByText("router error: boom")).toBeInTheDocument()
+    expect(screen.getByRole("alert")).toHaveTextContent("Bilgiler yüklenemedi.")
+    expect(screen.queryByText(/does not exist/u)).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Tekrar dene" }))
+
+    expect(router.invalidate).toHaveBeenCalledTimes(1)
   })
 })

@@ -1,6 +1,7 @@
-import { ErrorComponent, useRouter } from "@tanstack/react-router"
+import { useRouter } from "@tanstack/react-router"
 import type { ErrorComponentProps } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { SessionUnavailableError } from "@/features/auth/api/session"
 import { AuthHeading, AuthShell } from "@/features/auth/components/auth-shell"
@@ -31,11 +32,27 @@ export function SessionUnavailablePage({ reason }: { reason: SessionUnavailableE
   )
 }
 
-/** A signed-in route's error view: its own page for an unread session, the router's for the rest. */
+/** Any other failure: the panel's own error state, no internals on screen. */
+function RouteFailed() {
+  const { t } = useTranslation()
+  const router = useRouter()
+  return (
+    <div className="p-6">
+      <ErrorState
+        text={t("errors.loadFailed")}
+        onRetry={() => {
+          void router.invalidate()
+        }}
+      />
+    </div>
+  )
+}
+
+/** A signed-in route's error view: its own page for an unread session, the panel's state for the rest. */
 export function SessionErrorBoundary({ error }: ErrorComponentProps) {
   return error instanceof SessionUnavailableError ? (
     <SessionUnavailablePage reason={error.reason} />
   ) : (
-    <ErrorComponent error={error} />
+    <RouteFailed />
   )
 }

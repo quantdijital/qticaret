@@ -1,6 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { loadCurrentUser } from "@/features/auth/api/session"
-import { staffQuery } from "@/features/auth/api/staff"
+import { loadCurrentUser, loadStaff } from "@/features/auth/api/session"
 import { SessionErrorBoundary } from "@/features/auth/pages/session-unavailable-page"
 import { MfaSetupPage } from "@/features/security/pages/mfa-setup-page"
 
@@ -9,11 +8,11 @@ export const Route = createFileRoute("/security/setup")({
   errorComponent: SessionErrorBoundary,
   beforeLoad: async ({ context, location }) => {
     const user = await loadCurrentUser(context.queryClient)
-    if (!user) {
+    const staff = user ? await loadStaff(context.queryClient) : null
+    if (!user || !staff) {
       throw redirect({ to: "/login", search: { redirect: location.href } })
     }
-    const staff = await context.queryClient.query(staffQuery()).catch(() => null)
-    if (!staff?.role || staff.mfa.enabled) {
+    if (!staff.role || staff.mfa.enabled) {
       throw redirect({ to: "/" })
     }
   },
