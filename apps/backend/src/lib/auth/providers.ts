@@ -7,6 +7,16 @@ interface ProviderEntry {
 }
 
 /**
+ * The social providers whose sign-in proves the address it carries
+ * (`provenCustomer`). A provider joins this list only if it refuses an
+ * address its owner has not verified: Google (Medusa's provider refuses
+ * `email_verified: false`, 2.21.2) and Apple (ours checks it,
+ * `modules/auth-apple`). Every social provider `customerAuthProviders`
+ * offers must be on it, or decided otherwise (unit-tested).
+ */
+export const ADDRESS_VOUCHING_PROVIDERS: readonly string[] = ["google", "apple"]
+
+/**
  * The customer's ways in (adr/0037 §3): e-mail always; Google and Apple
  * once the shop's OAuth client is set at provisioning, every value of it.
  */
