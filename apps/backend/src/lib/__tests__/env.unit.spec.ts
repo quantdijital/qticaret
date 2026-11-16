@@ -5,6 +5,7 @@ import {
   isLocalEnv,
   parseEnv,
   s3Settings,
+  sharedFileOrigins,
   storefrontOrigin,
 } from "../env"
 
@@ -155,6 +156,40 @@ describe("parseEnv", () => {
       bucket: "qticaret",
       fileUrl: s3Env.S3_FILE_URL,
     })
+  })
+
+  it("names the page origins a deployed shop's files share (an uploaded SVG would run there)", () => {
+    const deployed = { ...s3Env, NODE_ENV: "production" as const }
+    expect(
+      sharedFileOrigins({
+        ...deployed,
+        BACKEND_URL: "https://magaza.example.com",
+        STOREFRONT_ORIGIN: "https://www.magaza.example.com",
+      })
+    ).toEqual([])
+    expect(
+      sharedFileOrigins({
+        ...deployed,
+        S3_FILE_URL: "https://magaza.example.com/files",
+        BACKEND_URL: "https://magaza.example.com",
+      })
+    ).toEqual(["backend"])
+    expect(
+      sharedFileOrigins({
+        ...deployed,
+        S3_FILE_URL: "https://www.magaza.example.com/files",
+        STOREFRONT_ORIGIN: "https://www.magaza.example.com",
+      })
+    ).toEqual(["storefront"])
+    // A developer's machine and the tests: quiet
+    expect(
+      sharedFileOrigins({
+        ...s3Env,
+        NODE_ENV: "development",
+        S3_FILE_URL: "http://localhost:9000/files",
+        BACKEND_URL: "http://localhost:9000",
+      })
+    ).toEqual([])
   })
 
   it.each(["production", "staging"])(
