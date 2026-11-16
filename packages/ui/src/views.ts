@@ -1,6 +1,6 @@
 import type { AnnouncementSettings, SocialNetwork, TrustIcon } from "@qticaret/types"
 import type { CategoryCardView, ShopMarkView } from "./card-views"
-import type { CartLineView, FreeShippingView } from "./cart-views"
+import type { CartLineView, CheckoutBlockedView, FreeShippingView } from "./cart-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
 import type { FooterBarView, HeaderBarView } from "./main-views"
 import type { MarqueeSectionView } from "./marquee-views"
@@ -122,6 +122,12 @@ export interface MiniCartView {
    * Absent for every other shopper.
    */
   taxNote?: string | null
+  /**
+   * Why the cart cannot go to the payment yet, as on the cart page
+   * (`CartPageView.checkoutBlocked`): the drawer's "Ödemeye geç" is drawn
+   * off with the reason beside it. Null or left out: the button as ever.
+   */
+  checkoutBlocked?: CheckoutBlockedView | null
 }
 
 /** Everything the frame around every page shows (D3, docs/19 §4). */

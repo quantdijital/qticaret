@@ -1,6 +1,7 @@
 import { formatLira } from "@qticaret/ui"
 import type {
   CartLineView,
+  CheckoutBlockedView,
   FreeShippingView,
   ImageView,
   MiniCartView,
@@ -75,7 +76,8 @@ export function cartLinesOf(
  * The header drawer's cart; null without lines. A wholesaler's
  * (`vatExcluded`, ADR-0068 §5): lines and subtotal without KDV, said so;
  * free shipping still measured on the KDV-included amount, as the
- * backend's rule reads it.
+ * backend's rule reads it. `checkoutBlocked`: why the cart cannot go to
+ * the payment yet, as the cart page says it (`wholesaleCheckoutBlocked`).
  */
 export function miniCartOf(
   cart: Cart | null,
@@ -83,7 +85,8 @@ export function miniCartOf(
   t: Translate,
   paths: ReadonlyMap<string, string> = new Map(),
   pictures: ReadonlyMap<string, ImageView> = new Map(),
-  vatExcluded = false
+  vatExcluded = false,
+  checkoutBlocked: CheckoutBlockedView | null = null
 ): MiniCartView | null {
   if (!cart || cart.items.length === 0) {
     return null
@@ -95,6 +98,7 @@ export function miniCartOf(
     freeShipping: freeShippingOf(cart.item_total, threshold, t),
     locked: lockedNoteOf(cart, t),
     ...(net ? { taxNote: t("cart.drawer_wholesale_note") } : {}),
+    ...(checkoutBlocked ? { checkoutBlocked } : {}),
   }
 }
 
