@@ -17,9 +17,15 @@ setFeatureFlagWorkflow.hooks.featureSet(
     }
     const changed = await setWholesaleListsStatus(container, enabled ? "active" : "draft")
     if (changed.length > 0) {
-      await queueWholesaleCarts(container, null).catch((error: unknown) => {
+      const queued = await queueWholesaleCarts(container, null).catch((error: unknown) => {
         logger.warn({ event: "wholesale.carts_not_queued", err: errorSummary(error) })
+        return null
       })
+      // One already queued or running (#93 review D3): it sees the lists change and runs
+      // again unsettled; the payment start and completion check its carts either way
+      if (queued === false) {
+        logger.info({ event: "wholesale.carts_already_queued", enabled })
+      }
     }
     return new StepResponse(undefined, changed)
   },

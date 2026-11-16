@@ -9,16 +9,23 @@ import { isRetryable } from "../errors"
  * - `refund`: the cart's own rules refuse it (it changed, an address, a
  *   code, a payment fee or account no longer right, a contract published
  *   since, an age not declared, a buyer on the block list, a gift line not
- *   ready). It never will be placed: the money is given back.
+ *   ready, an add-on pick no longer sold or the add-ons switched off, a
+ *   wholesale cart not at its customer's prices now or short of its minimum,
+ *   ADR-0068 slice 4). It never will be placed: the money is given back.
  * - `retry`: anything else (a lock, the database, the provider unreachable)
  *   is tried again: money is given back only when the order surely cannot
  *   be placed.
  */
 export type CompletionFailure = "stock" | "refund" | "retry"
 
-// The cart's own rules, as the completeCartWorkflow `validate` hook throws them
+// The cart's own rules, as the completeCartWorkflow `validate` hook throws them. Every
+// `addons.*` key is a verdict on the picks or their product (adr/0052), none a passing fault
 const CART_RULES =
-  /^(cart|payments|promotions|cash_on_delivery|bank_transfer|legal|age|fraud|gift_card)\./
+  /^(cart|payments|promotions|cash_on_delivery|bank_transfer|legal|age|fraud|gift_card|wholesale|addons)\./
+
+// Rules named in full where their namespace also holds other refusals: `catalog.*` is mostly
+// the panel's catalog checks; only the add-ons switched off is the cart's (adr/0052)
+const CART_RULE_KEYS = new Set(["catalog.addons_disabled"])
 
 // Medusa's inventory refusals (v2.21: the inventory module's `ensureInventoryLevels`,
 // core-flows' `prepareConfirmInventoryInput` and `confirmInventoryStep`)
@@ -40,7 +47,8 @@ export function completionFailureOf(error: unknown): CompletionFailure {
     string,
     unknown
   >
-  if (CART_RULES.test(textOf(fields["safeMessage"]))) {
+  const rule = textOf(fields["safeMessage"])
+  if (CART_RULES.test(rule) || CART_RULE_KEYS.has(rule)) {
     return "refund"
   }
   const message = textOf(fields["message"])

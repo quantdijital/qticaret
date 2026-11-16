@@ -12,9 +12,10 @@ const MORE_ROW =
  * "Daha fazla"'s panel: the floating surfaces' one recipe, the page's ink;
  * a list taller than the screen allows scrolls inside (`.gf-menu-scroll`,
  * `menu.css`). Drawn only once the bar is measured, never in the first HTML.
+ * It hangs as far under the bar as the other dropdowns (`.gf-hang`).
  */
 export const MORE_PANEL =
-  "gf-menu-scroll absolute top-full right-0 z-(--z-dropdown) w-max rounded-tile border border-rule bg-field p-6 text-text shadow-float-edged data-[state=closed]:hidden xl:p-8"
+  "gf-menu-scroll gf-hang absolute right-0 z-(--z-dropdown) w-max rounded-tile border border-rule bg-field p-6 text-text shadow-float-edged data-[state=closed]:hidden xl:p-8"
 
 /**
  * The categories that did not fit on the bar's line, each with its

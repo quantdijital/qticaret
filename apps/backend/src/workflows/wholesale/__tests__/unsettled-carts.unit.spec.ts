@@ -61,6 +61,30 @@ describe("requeueUnsettledCarts (M1)", () => {
     expect(queue).not.toHaveBeenCalled()
   })
 
+  it("queues a failed or interrupted run again, by its input's attempt (#93 review D2)", async () => {
+    for (const errorCode of ["interrupted", "internal"]) {
+      const { container } = run(null, {
+        status: "failed",
+        error_code: errorCode,
+        input: { attempt: 1 },
+      })
+      await expect(requeueUnsettledCarts(container, NOW)).resolves.toBe("queued")
+      expect(queue).toHaveBeenLastCalledWith(container, null, 2)
+    }
+    // The flag's own run carries no attempt
+    const first = run(null, { status: "failed", input: {} })
+    await expect(requeueUnsettledCarts(first.container, NOW)).resolves.toBe("queued")
+    expect(queue).toHaveBeenLastCalledWith(first.container, null, 1)
+  })
+
+  it("gives a failing run up at the same bound, and leaves a cancelled one", async () => {
+    const failing = run(null, { status: "failed", input: { attempt: 3 } })
+    await expect(requeueUnsettledCarts(failing.container, NOW)).resolves.toBe("gave_up")
+    const cancelled = run(null, { status: "cancelled", input: {} })
+    await expect(requeueUnsettledCarts(cancelled.container, NOW)).resolves.toBe("none")
+    expect(queue).not.toHaveBeenCalled()
+  })
+
   it("says so when another carts run is already queued or running", async () => {
     queue.mockResolvedValue(false)
     const { container } = run({ settled: false })

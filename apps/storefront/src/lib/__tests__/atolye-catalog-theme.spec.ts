@@ -106,6 +106,26 @@ describe("the catalogue opening (H17)", () => {
   })
 })
 
+/** Each price band card's top-level parts, by their class, in drawing order. */
+const cardParts = (html: string): string[][] =>
+  [...html.matchAll(/<a href="[^"]*" class="group flex h-full[^"]*">(.*?)<\/a>/gs)].map(
+    ([, inside = ""]) => {
+      const parts: string[] = []
+      let depth = 0
+      for (const [, closing, attributes = ""] of inside.matchAll(
+        /<(\/?)(?:span|picture)([^>]*)>/g
+      )) {
+        if (closing) {
+          depth -= 1
+          continue
+        }
+        if (depth === 0) parts.push(/class="([^"]*)"/.exec(attributes)?.[1] ?? "")
+        depth += 1
+      }
+      return parts
+    }
+  )
+
 describe("the price bands", () => {
   const bands: HomeSectionView = {
     id: "fiyat",
@@ -138,7 +158,7 @@ describe("the price bands", () => {
     expect(html).not.toContain("font-semibold text-text-2")
   })
 
-  it("links a band with a category to its page, the category's name above the label", () => {
+  it("links a band with a category to its page without an extra line above the label", () => {
     const html = home([
       {
         ...bands,
@@ -163,9 +183,39 @@ describe("the price bands", () => {
 
     expect(html).toContain('href="/kategori/ozel-koleksiyon"')
     expect(html).toContain('href="/kategori/kamp?fiyat=-1000"')
-    expect(html).toMatch(
-      /text-text-2">Özel Koleksiyon<\/span><span class="text-display[^"]*">Koleksiyonluk</
-    )
+    // The label is the card's first line: the category's name is not drawn
+    // (it pushed that card's label below its neighbours', owner 2026-11-16)
+    expect(html).not.toContain("Özel Koleksiyon")
+    expect(html).not.toContain(">Kamp<")
+    expect(html).toMatch(/<a href="\/kategori\/ozel-koleksiyon"[^>]*><span class="text-display/)
+  })
+
+  it("draws a price band and a category band on one skeleton, the products at the card's foot", () => {
+    const card = (over: { category?: string; text: string | null; path: string }) => ({
+      label: "Band",
+      products: [{ label: "Pars", path: "/urun/pars", image: picture("pars") }],
+      ...over,
+    })
+    const html = home([
+      {
+        ...bands,
+        bands: [
+          card({ text: "Anahtarlık çakılar", path: "/magaza?fiyat=-500" }),
+          card({ text: "Özel seri", category: "Özel Koleksiyon", path: "/kategori/ozel" }),
+          card({ text: null, category: "Kamp", path: "/kategori/kamp" }),
+        ],
+      },
+    ])
+    const skeletons = cardParts(html)
+      // A band without a line has no line: compare the parts every card draws
+      .map((parts) => parts.filter((name) => name !== "text-sm text-text-2"))
+
+    expect(skeletons).toHaveLength(3)
+    expect(new Set(skeletons.map((parts) => JSON.stringify(parts))).size).toBe(1)
+    // Label first, the products last and pushed to the foot whatever the lines above take
+    expect(skeletons[0]?.[0]).toMatch(/^text-display /)
+    expect(skeletons[0]?.at(-1)).toMatch(/\bmt-auto\b/)
+    expect(html).toMatch(/<a href="\/magaza\?fiyat=-500" class="group flex h-full flex-col /)
   })
 })
 

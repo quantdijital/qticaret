@@ -78,6 +78,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Yeni toptan sipariş: #{{number}}",
       description: "{{total}} tutarında. Müşteriler > Toptancılar > Siparişler'de görün.",
     },
+    "payments.wholesale_price_check": {
+      title: "Toptan sepetin ödemesi başlatılamadı",
+      description:
+        "Sepet {{cart}} toptancının bugünkü fiyatlarına getirilemedi; ödeme alınmadı. Bu sepetteki ürünlerin toptan ve perakende fiyatlarını kontrol edin.",
+    },
     "orders.stock_short": {
       title: "Stok yetersiz sipariş #{{number}}",
       description:
@@ -217,6 +222,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "wholesale.order_placed": {
       title: "New wholesale order: #{{number}}",
       description: "For {{total}}. See it under Customers > Wholesalers > Orders.",
+    },
+    "payments.wholesale_price_check": {
+      title: "A wholesale cart's payment could not start",
+      description:
+        "Cart {{cart}} could not be set at the wholesaler's prices now; no payment was taken. Check the wholesale and retail prices of its products.",
     },
     "orders.stock_short": {
       title: "Order #{{number}} is short of stock",

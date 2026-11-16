@@ -34,6 +34,14 @@ describe("wholesaleListsState (M1)", () => {
     })
   })
 
+  it("reads as unknown, never as the statuses alone, when a list's last write is missing (D4)", async () => {
+    const missing = containerWith([
+      { id: "plist_a", status: "active", updated_at: new Date("2026-11-16T10:00:00Z") },
+      { id: "plist_b", status: "active", updated_at: null },
+    ])
+    expect(await wholesaleListsState(missing.container)).toBeNull()
+  })
+
   it("reads the same for the same lists, whatever order they come in", async () => {
     const at = new Date("2026-11-16T10:00:00Z")
     const one = containerWith([

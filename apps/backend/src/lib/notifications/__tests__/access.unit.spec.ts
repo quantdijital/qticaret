@@ -57,8 +57,10 @@ function unionOf(file: string, name: string): string[] {
   const text = readFileSync(join(SRC, file), "utf8")
   const start = text.indexOf(`export type ${name} =`)
   expect(start).toBeGreaterThanOrEqual(0)
-  const line = text.slice(start, text.indexOf("\n", start))
-  return [...line.matchAll(/"([a-z_]+)"/g)].map((match) => match[1] ?? "")
+  // The type may run over several lines (a formatter wraps a long union): up to the blank line
+  const end = text.indexOf("\n\n", start)
+  const union = text.slice(start, end < 0 ? text.length : end)
+  return [...union.matchAll(/"([a-z_]+)"/g)].map((match) => match[1] ?? "")
 }
 
 /** Each templated writer's `trigger_type`, and every value it can take from its type. */
@@ -118,6 +120,12 @@ describe("every alert kind is named, open or closed (adr/0020)", () => {
         "orders.new_order",
         "orders.bank_transfer_pending",
       ])
+    )
+  })
+
+  it("sees every payment issue the writers raise, the wholesale price check (#100) too", () => {
+    expect(TEMPLATED["`payments.${input.issue}`"]).toEqual(
+      expect.arrayContaining(["payments.completion_stuck", "payments.wholesale_price_check"])
     )
   })
 

@@ -14,6 +14,7 @@ import {
 } from "@/lib/cart/cart"
 import { linkCartRefusal } from "@/lib/cart/payment-link"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { WHOLESALE_NO_CODE } from "@/lib/views/cart-wholesale"
 
 const AddToCart = z.object({
   variant_id: z.string().regex(/^variant_[0-9A-Za-z]{10,64}$/),
@@ -130,7 +131,12 @@ export async function applyPromotion(_state: ActionResult, form: FormData): Prom
       ok: false,
       error:
         linkCartRefusal(error) ??
-        (error.status === 429 ? "errors.too_many_requests" : "cart.promotion_invalid"),
+        // A wholesaler's cart takes no code (ADR-0068 §6): told as such
+        (error.messageKey === WHOLESALE_NO_CODE
+          ? WHOLESALE_NO_CODE
+          : error.status === 429
+            ? "errors.too_many_requests"
+            : "cart.promotion_invalid"),
     }
   }
   revalidatePath("/", "layout")

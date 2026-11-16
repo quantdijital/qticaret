@@ -12,6 +12,7 @@ import {
   sentCodes,
 } from "../validation/promotion-codes"
 import { rateLimit } from "./rate-limit"
+import { refuseWholesaleCodes } from "./wholesale-codes"
 
 // Code tries counted per address and per cart (F4.6): only requests that send a code
 function couponProfile(req: MedusaRequest) {
@@ -34,7 +35,11 @@ const couponTries = rateLimit(couponProfile, {
  */
 export const PROMOTION_ROUTES = [
   { matcher: "/admin/promotions", middlewares: [normalizePromotionCode] },
-  { matcher: "/store/carts", middlewares: [couponTries, normalizePromoCodes, oneCodePerCart] },
+  // ADR-0068 §6: a wholesaler's cart takes no code, told before the one-code rule
+  {
+    matcher: "/store/carts",
+    middlewares: [couponTries, normalizePromoCodes, refuseWholesaleCodes, oneCodePerCart],
+  },
   // F4.6: the list without single-use code batches, a promotion's batches and their codes
   ...[
     "/admin/promotion-board",

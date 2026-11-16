@@ -812,6 +812,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Açık sepetlerin bir kısmı perakende fiyata güncellenemedi; toptancı silinmedi. Biraz sonra tekrar deneyin.",
   "wholesale.no_password_login":
     "Bu müşteri e-posta ve şifreyle değil, başka bir yolla (ör. Google) giriş yapıyor; şifre belirlenemez.",
+  "wholesale.prices_changed":
+    "Sepetinizdeki fiyatlar güncellendi. Yeni tutarı kontrol edip ödemeyi yeniden başlatın.",
+  "wholesale.payment_unavailable":
+    "Sepetinizin ödemesi şu an başlatılamıyor. Sepetinizi yenileyip biraz sonra tekrar deneyin.",
+  "wholesale.min_quantity":
+    "Toptan siparişte en az {{min}} adet gerekir; sepetinizde {{units}} adet var.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "platform_settings.color_contrast":
@@ -908,6 +914,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Tek kullanımlık kodlar yalnızca kodlu, standart bir kampanyadan üretilebilir.",
   "promotions.one_code":
     "Sepette tek bir indirim kodu kullanılabilir; önce eklediğiniz kodu çıkarın.",
+  "promotions.wholesale_no_code": "Toptan siparişlerde indirim kodu kullanılamaz.",
   "seo.canonical_invalid": "Canonical adres bu sitede bir yol olmalı, örn. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "Kayıt kimliği geçerli değil.",
   "seo.entity_type_invalid": "Kayıt türü geçerli değil.",
