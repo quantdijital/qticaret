@@ -107,7 +107,9 @@ describe("a product rail drawn as strips", () => {
   })
 
   it("draws a rail without its look (an older storefront) with the defaults", () => {
-    const html = home([rail({ strips: undefined })])
+    const older = { ...rail() } as Partial<ProductsSectionView>
+    delete older.strips
+    const html = home([older as HomeSectionView])
     // Low strips: a rail sits among other sections
     expect(html).toContain("aspect-[4/3] sm:aspect-[2/1] lg:aspect-[3/1]")
     expect(html).toContain('data-slant="medium"')
