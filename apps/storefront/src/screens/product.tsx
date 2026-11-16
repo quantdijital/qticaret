@@ -23,7 +23,7 @@ import { currentLayout } from "@/lib/views/layout"
 import { addonFieldsOf } from "@/lib/views/addons"
 import { shopMarks } from "@/lib/views/card-extras"
 import { legalDocument, legalPath } from "@/lib/views/legal"
-import { shownAmount } from "@/lib/views/price"
+import { isVatExclusive, shownAmount } from "@/lib/views/price"
 import { productPage, variantIdsOf } from "@/lib/views/product"
 import { productShipping } from "@/lib/views/product-shipping"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
@@ -91,9 +91,10 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   const here = `${url.pathname}${url.search}`
   // The badges and colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
   const shared = sharedSettingsOf(layout, storefront)
-  // What the shopper pays, an automatic promotion included (adr/0023 Ek 2026-11-05)
+  // What the shopper pays, an automatic promotion included (adr/0023 Ek 2026-11-05).
+  // A wholesaler's own price never goes into the page's Open Graph (ADR-0068 §7)
   const amounts = (product.variants ?? []).flatMap((variant) => {
-    const amount = shownAmount(variant, displays)
+    const amount = isVatExclusive(variant, displays) ? null : shownAmount(variant, displays)
     return amount === null ? [] : [amount]
   })
   const lowest = amounts.length > 0 ? Math.min(...amounts) : null

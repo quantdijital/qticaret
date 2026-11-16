@@ -12,6 +12,7 @@ import { subscribeNewsletter } from "@/app/actions/newsletter"
 import type { AnalyticsEvent } from "@/lib/analytics/events"
 import { listContext, listEvent, listItems } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
+import { currentWholesale } from "@/lib/account/wholesale"
 import { t } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
@@ -198,14 +199,18 @@ export async function ListingContent({
   }
   const products = await productsByIds(answer.product_ids)
   // One stock read for the page's cards (adr/0046 Ek 2026-11-04)
-  const [paths, displays, facts] = await Promise.all([
+  const [paths, displays, facts, wholesale] = await Promise.all([
     pathsOf(
       "product",
       products.map((product) => product.id)
     ),
     priceDisplays(variantIdsOf(products)),
     cardFacts(products.map((product) => product.id)),
+    currentWholesale(),
   ])
+  // The index holds retail prices only (ADR-0068 §7): a wholesaler's sort says it is the
+  // retail order, and the price range, whose bounds would mislead, is not offered
+  const retailOnly = wholesale.active
   const href = (each: typeof state) => hrefOf(url.pathname, each)
   const sort: SortOptionView[] = [
     {
@@ -220,12 +225,12 @@ export async function ListingContent({
       current: state.sort === "yeni",
     },
     {
-      label: t("listing.sort_price_up"),
+      label: t(retailOnly ? "listing.sort_retail_price_up" : "listing.sort_price_up"),
       path: href(withSort(state, "fiyat-artan")),
       current: state.sort === "fiyat-artan",
     },
     {
-      label: t("listing.sort_price_down"),
+      label: t(retailOnly ? "listing.sort_retail_price_down" : "listing.sort_price_down"),
       path: href(withSort(state, "fiyat-azalan")),
       current: state.sort === "fiyat-azalan",
     },
@@ -238,7 +243,8 @@ export async function ListingContent({
     answer.facets,
     type === "brand",
     t,
-    swatchLookup(shared.color_swatches)
+    swatchLookup(shared.color_swatches),
+    !retailOnly
   )
   const first = current === 1 && facets.active.length === 0
   const cards = withCardFacts(productCards(products, paths, displays, options), facts, options, t)

@@ -23,6 +23,7 @@ import { notePasswordChange, tokenAfterPasswordChange } from "./password-change"
 import { newPasswordPolicy } from "./password-policy"
 import { verificationOfOwnIdentity } from "./verification"
 import { claimWholesaleAccount } from "./wholesale-claim"
+import { customerOnPost, guardCartTransfer } from "./cart-transfer-guard"
 import { optionalCustomer, orderPageAccess } from "./order-access"
 import { rateLimit } from "./rate-limit"
 import { rejectRequest } from "./reject"
@@ -152,6 +153,9 @@ export const ACCOUNT_ROUTES = [
     middlewares: [registrationEmailFromIdentity],
   },
   { matcher: "/store/orders/:id", middlewares: [orderPageAccess] },
+  // ADR-0068 slice 3 review M1: a cart moves to the signed-in customer only when it is open,
+  // no payment link's, and nobody's, a guest's or theirs; else Medusa's transfer never runs
+  { matcher: "/store/carts/:id/customer", middlewares: [customerOnPost, guardCartTransfer] },
   { matcher: "/store/orders", middlewares: [attachGuestOrders] },
   // ADR-0068 §3: an invited wholesaler's account taken on the same proof
   { matcher: "/store/customers/me", middlewares: [attachGuestOrders, claimWholesaleAccount] },

@@ -11,6 +11,7 @@ import type { Cart } from "@/lib/cart/cart"
 import type { GiftLine } from "@/lib/cart/gift"
 import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { addonFormOf, lineAddonsOf } from "./addons"
+import { lineNetOf, netTotalsOf } from "./cart-tax"
 import { lineImageOf, linePathOf } from "./line-paths"
 
 /** Kuruş, so float noise never says "0,00 TL more". */
@@ -46,12 +47,14 @@ export const differs = (a: number, b: number) => kurus(a) !== kurus(b)
 /**
  * The cart's lines as the cart page and the drawer show them, each with its
  * add-on picks (adr/0052), its product's page (`productPathsOf`) and its
- * picture's versions (`linePicturesOf`).
+ * picture's versions (`linePicturesOf`). `taxNote`: a wholesaler's lines
+ * (ADR-0068 §5), each total without its KDV, said so, never struck through.
  */
 export function cartLinesOf(
   cart: Cart | null,
   paths: ReadonlyMap<string, string> = new Map(),
-  pictures: ReadonlyMap<string, ImageView> = new Map()
+  pictures: ReadonlyMap<string, ImageView> = new Map(),
+  taxNote: string | null = null
 ): CartLineView[] {
   return (cart?.items ?? []).map((line) => ({
     ...lineAddonsOf(line.metadata),
@@ -59,29 +62,39 @@ export function cartLinesOf(
     title: line.title,
     detail: line.variant_title ?? line.subtitle,
     quantity: line.quantity,
-    total: formatLira(line.total),
-    original: differs(line.original_total, line.total) ? formatLira(line.original_total) : null,
+    total: formatLira(taxNote ? lineNetOf(line) : line.total),
+    original:
+      !taxNote && differs(line.original_total, line.total) ? formatLira(line.original_total) : null,
+    ...(taxNote ? { taxNote } : {}),
     image: lineImageOf(line.thumbnail, line.title, pictures),
     path: linePathOf(paths, line),
   }))
 }
 
-/** The header drawer's cart; null without lines. */
+/**
+ * The header drawer's cart; null without lines. A wholesaler's
+ * (`vatExcluded`, ADR-0068 §5): lines and subtotal without KDV, said so;
+ * free shipping still measured on the KDV-included amount, as the
+ * backend's rule reads it.
+ */
 export function miniCartOf(
   cart: Cart | null,
   threshold: number | null,
   t: Translate,
   paths: ReadonlyMap<string, string> = new Map(),
-  pictures: ReadonlyMap<string, ImageView> = new Map()
+  pictures: ReadonlyMap<string, ImageView> = new Map(),
+  vatExcluded = false
 ): MiniCartView | null {
   if (!cart || cart.items.length === 0) {
     return null
   }
+  const net = vatExcluded ? netTotalsOf(cart) : null
   return {
-    lines: cartLinesOf(cart, paths, pictures),
-    subtotal: formatLira(cart.item_total),
+    lines: cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
+    subtotal: formatLira(net ? net.net / 100 : cart.item_total),
     freeShipping: freeShippingOf(cart.item_total, threshold, t),
     locked: lockedNoteOf(cart, t),
+    ...(net ? { taxNote: t("cart.drawer_wholesale_note") } : {}),
   }
 }
 

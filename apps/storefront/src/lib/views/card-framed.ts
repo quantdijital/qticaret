@@ -3,7 +3,7 @@ import type { CardButtonStyle } from "@qticaret/types"
 import type { PriceDisplay, StoreLayoutSection, StoreProduct } from "@qticaret/types"
 import { CARD_VARIANTS } from "@qticaret/types/section-variants"
 import { productImages } from "./image"
-import { shownAmount } from "./price"
+import { paidAmount } from "./price"
 import { isShipped } from "./product-shipping"
 
 /**
@@ -34,7 +34,8 @@ function shipsFree(
     return false
   }
   const amounts = (product.variants ?? []).flatMap((variant) => {
-    const amount = shownAmount(variant, displays)
+    // The KDV-included amount, as the free shipping rule reads it (a wholesaler's too)
+    const amount = paidAmount(variant, displays)
     return amount === null ? [] : [amount]
   })
   return amounts.length > 0 && Math.min(...amounts) >= from

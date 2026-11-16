@@ -6,7 +6,8 @@ import type { PriceView } from "@qticaret/ui"
  * the struck price before it only when the price rule allows one, the
  * discount as a red pill and the saving in words; an automatic cart
  * offer's condition on a tinted line under it, beside the price and
- * never instead of it (adr/0046 Ek 2026-11-05). Every amount is the
+ * never instead of it (adr/0046 Ek 2026-11-05); a wholesaler's note
+ * under a price without KDV (ADR-0068). Every amount is the
  * storefront's own words. `compact` under a smaller name (the quick
  * view's section-sized one): the same step below the name as on the page.
  */
@@ -40,6 +41,7 @@ export function Price({
           </span>
         )}
       </p>
+      {price.taxNote && <p className="text-sm text-text-2">{price.taxNote}</p>}
       {price.saving && (
         <p className="text-sm font-semibold text-deal">
           {words.saving.replace("{amount}", price.saving)}

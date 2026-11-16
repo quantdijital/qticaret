@@ -1,5 +1,5 @@
 import type { PriceDisplay, StoreProduct } from "@qticaret/types"
-import { shownAmount } from "../views/price"
+import { paidAmount } from "../views/price"
 import type { AnalyticsEvent, AnalyticsItem, ListContext, PageContext } from "./events"
 import { itemsValue } from "./events"
 
@@ -30,7 +30,7 @@ export function productItems(
       {
         id: variant.id,
         name: product.title,
-        price: shownAmount(variant, displays),
+        price: paidAmount(variant, displays),
         quantity: 1,
         brand: product.brand?.name ?? null,
         variant: variant.title ?? null,
@@ -67,7 +67,7 @@ export function listEvent(
     listName,
     items: products.map((product) => {
       const prices = (product.variants ?? []).flatMap((variant) => {
-        const price = shownAmount(variant, displays)
+        const price = paidAmount(variant, displays)
         return price === null ? [] : [price]
       })
       return {

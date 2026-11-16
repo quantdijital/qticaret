@@ -227,6 +227,15 @@ export interface PriceDisplay {
   rule_version: string
   /** An automatic promotion the cart applies past a minimum; absent from a backend before it. */
   cart_offer?: StoreCartOffer | null
+  /**
+   * A signed-in wholesaler's display (ADR-0068 §7), made by the
+   * storefront's server from `/store/customers/me/wholesale-prices`, never
+   * by the public `/store/price-display`: `current` is then without KDV.
+   * Absent: the public display, KDV included.
+   */
+  vat_exclusive?: boolean
+  /** With `vat_exclusive`: what the wholesaler pays, KDV included, lira ("80.00"). */
+  gross?: string
 }
 
 /** A cart offer to name beside a price: "Sepette %10 indirim", "2.000 TL ve üzeri sepette…". */
