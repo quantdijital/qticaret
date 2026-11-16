@@ -151,7 +151,7 @@
         [data-count="7"],
         [data-count="8"]
       ) {
-      --strip-share: 0.3;
+      --strip-basis: calc(100cqw * 0.3 - var(--strip-step));
     }
   }
   @media (max-width: 39.99rem) {
@@ -162,7 +162,7 @@
         [data-count="7"],
         [data-count="8"]
       ) {
-      --strip-share: 0.43;
+      --strip-basis: calc(100cqw * 0.43 - var(--strip-step));
     }
   }
   @media (max-width: 63.99rem) {
@@ -177,8 +177,9 @@
     }
     .gf-strips[data-phone="scroll"] .gf-strip {
       display: block;
-      /* No share (the row fits): a basis of 0, the strips sharing the width as before */
-      flex: 1 0 calc(100cqw * var(--strip-share, 0));
+      /* Each shows its share past the next one's seam (the step: a gap, or a run and an overlap
+         under it); no share (the row fits): a basis of 0, the strips sharing the width as before */
+      flex: 1 0 var(--strip-basis, 0px);
       scroll-snap-align: start;
     }
     .gf-strips[data-phone="scroll"] .gf-strip:not(:first-child, :last-child) .gf-strip-cut {

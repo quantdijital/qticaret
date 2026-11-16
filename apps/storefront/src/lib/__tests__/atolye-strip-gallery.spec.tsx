@@ -137,9 +137,9 @@ describe("the strip gallery's stylesheet", () => {
     expect(css).toMatch(
       /@media \(max-width: 63\.99rem\) \{\s*\.gf-strips\[data-phone="scroll"\] \{[^}]*overflow-x: auto;[^}]*scroll-snap-type: x mandatory;/
     )
-    expect(css).toContain("flex: 1 0 calc(100cqw * var(--strip-share, 0));")
-    expect(css).toContain("--strip-share: 0.43;")
-    expect(css).toContain("--strip-share: 0.3;")
+    expect(css).toContain("flex: 1 0 var(--strip-basis, 0px);")
+    expect(css).toContain("--strip-basis: calc(100cqw * 0.43 - var(--strip-step));")
+    expect(css).toContain("--strip-basis: calc(100cqw * 0.3 - var(--strip-step));")
   })
 
   it("meets the screen's edges square when edge to edge", async () => {
