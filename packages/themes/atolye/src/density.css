@@ -1,0 +1,82 @@
+/*
+ * The shop's density (adr/0067 Ek 2026-11-16, S6 `density`): the room under
+ * a section's heading (`--head-gap*`), between a grid's columns
+ * (`--gap-columns`) and rows (`--gap-rows*`), above the footer
+ * (`--footer-gap`), and on the tightest step a phone's side margin
+ * (`--gutter`). `airy` is the theme's own (`tokens.css`) and is never
+ * marked; a step off it is the theme root's `data-density` (and the layers'
+ * host's, `frame/Layers.tsx`), each token set there over what it inherits
+ * from `:root`. The gap between sections is not here: it is the section
+ * spacing's (`--section-scale`, `tones.ts`). Touch targets, the sticky
+ * header and a control's own padding never change.
+ *
+ * Each block keeps its token's own screen steps: the head and row gaps
+ * Tailwind's `lg:` (64rem, the classes they came from), the columns, the
+ * footer and the gutter the tokens' `max-width` steps.
+ *
+ * | px (desktop / tablet / phone) | airy         | balanced     | compact      |
+ * | ----------------------------- | ------------ | ------------ | ------------ |
+ * | head → body (large)           | 40 / 24 / 24 | 24 / 16 / 16 | 16 / 12 / 12 |
+ * | head → body (medium)          | 32 / 24 / 24 | 24 / 16 / 16 | 16 / 12 / 12 |
+ * | head → body (small)           | 24 / 24 / 24 | 24 / 16 / 16 | 16 / 12 / 12 |
+ * | grid columns                  | 24 / 24 / 12 | 20 / 16 / 12 | 16 / 12 / 8  |
+ * | grid rows (product grid)      | 40 / 32 / 32 | 28 / 20 / 20 | 20 / 12 / 12 |
+ * | grid rows (smaller grids)     | 32 / 32 / 32 | 28 / 20 / 20 | 20 / 12 / 12 |
+ * | last section → footer         | 64 / 48 / 40 | 48 / 40 / 32 | 32 / 24 / 20 |
+ * | side margin (gutter)          | 48 / 24 / 16 | 48 / 24 / 16 | 48 / 24 / 12 |
+ */
+[data-density="balanced"] {
+  --head-gap: 1.5rem;
+  --head-gap-m: 1.5rem;
+  --head-gap-s: 1.5rem;
+  --gap-rows: 1.75rem;
+  --gap-rows-s: 1.75rem;
+  --gap-columns: 20px;
+  --footer-gap: 48px;
+}
+[data-density="compact"] {
+  --head-gap: 1rem;
+  --head-gap-m: 1rem;
+  --head-gap-s: 1rem;
+  --gap-rows: 1.25rem;
+  --gap-rows-s: 1.25rem;
+  --gap-columns: 16px;
+  --footer-gap: 32px;
+}
+@media (max-width: 64rem) {
+  [data-density="balanced"] {
+    --gap-columns: 16px;
+    --footer-gap: 40px;
+  }
+  [data-density="compact"] {
+    --gap-columns: 12px;
+    --footer-gap: 24px;
+  }
+}
+@media (width < 64rem) {
+  [data-density="balanced"] {
+    --head-gap: 1rem;
+    --head-gap-m: 1rem;
+    --head-gap-s: 1rem;
+    --gap-rows: 1.25rem;
+    --gap-rows-s: 1.25rem;
+  }
+  [data-density="compact"] {
+    --head-gap: 0.75rem;
+    --head-gap-m: 0.75rem;
+    --head-gap-s: 0.75rem;
+    --gap-rows: 0.75rem;
+    --gap-rows-s: 0.75rem;
+  }
+}
+@media (max-width: 40rem) {
+  [data-density="balanced"] {
+    --gap-columns: 12px;
+    --footer-gap: 32px;
+  }
+  [data-density="compact"] {
+    --gutter: 12px;
+    --gap-columns: 8px;
+    --footer-gap: 20px;
+  }
+}

@@ -63,12 +63,12 @@ export function FeaturedShelf({ section, t, quickAdd }: LayoutProps) {
     return null
   }
   return (
-    <div className="grid gap-x-(--gap-columns) gap-y-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div className="grid gap-x-(--gap-columns) gap-y-(--gap-rows-s) lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <div className="gf-card-lead min-w-0">
         <ProductCard product={lead} t={t} quickAdd={quickAdd} sizes={LEAD_SIZES} />
       </div>
       {rest.length > 0 && (
-        <ul className="grid grid-cols-[repeat(2,minmax(0,1fr))] content-start gap-x-(--gap-columns) gap-y-8 md:grid-cols-[repeat(3,minmax(0,1fr))]">
+        <ul className="grid grid-cols-[repeat(2,minmax(0,1fr))] content-start gap-x-(--gap-columns) gap-y-(--gap-rows-s) md:grid-cols-[repeat(3,minmax(0,1fr))]">
           {rest.map((product) => (
             <li key={product.id} className="min-w-0">
               <ProductCard product={product} t={t} quickAdd={quickAdd} sizes={SMALL_SIZES} />

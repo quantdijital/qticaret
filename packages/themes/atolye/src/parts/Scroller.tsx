@@ -155,7 +155,7 @@ export function Scroller({
     <div
       role="region"
       aria-label={words.label}
-      className="gf-scroller flex flex-col gap-6"
+      className="gf-scroller flex flex-col gap-(--head-gap-s)"
       data-desktop={settings.desktop}
       data-mobile={settings.mobile}
       data-arrows={settings.arrows}

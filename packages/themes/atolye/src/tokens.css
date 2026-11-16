@@ -135,6 +135,18 @@
   --container-narrow: 960px;
   --gutter: 48px;
   --gap-columns: 24px;
+  /* A section's heading to its body, three steps: under a section's h2 (aisles,
+     category cards and collage, guides, ratings, reviews, a product's related rail),
+     the price bands', and a product rail's, its tabs', the brands' and photos'. Then
+     a grid's rows: the product grid's, and the smaller grids' (the featured rail, the
+     category cards). Each was a hand-written gap (`gap-6 lg:gap-10`, `gap-y-8
+     lg:gap-y-10`…), kept to the rem on the same 1024 px step (`lg:`, below); the
+     shop's density reads them (`density.css`, adr/0067 Ek 2026-11-16) */
+  --head-gap: 2.5rem;
+  --head-gap-m: 2rem;
+  --head-gap-s: 1.5rem;
+  --gap-rows: 2.5rem;
+  --gap-rows-s: 2rem;
   /* The gap between sections (`--section-gap`, every section's one gap: above it, and
      inside a band; sahip 2026-11-15) and the small and large steps a shop can pick,
      each width's own, times the shop's section spacing
@@ -165,6 +177,14 @@
     --section-gap: calc(64px * var(--section-scale, 1));
     --section-gap-l: calc(96px * var(--section-scale, 1));
     --footer-gap: 48px;
+  }
+}
+/* Below Tailwind's `lg:` exactly (1024 px is `lg:`'s, not this step's) */
+@media (width < 64rem) {
+  :root {
+    --head-gap: 1.5rem;
+    --head-gap-m: 1.5rem;
+    --gap-rows: 2rem;
   }
 }
 @media (max-width: 40rem) {

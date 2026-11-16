@@ -73,7 +73,7 @@ export function Rack({
   const empty = section.products.length === 0
   const props = { section, t, quickAdd }
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-6">
+    <section aria-labelledby={id} className="flex flex-col gap-(--head-gap-s)">
       {empty ? (
         <>
           {head}

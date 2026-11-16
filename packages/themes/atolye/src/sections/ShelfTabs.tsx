@@ -26,7 +26,7 @@ export function ShelfTabs({
 }) {
   const panels = Children.toArray(children)
   return (
-    <div className="gf-tabs flex flex-col gap-6">
+    <div className="gf-tabs flex flex-col gap-(--head-gap-s)">
       <ShelfTabsReveal />
       <fieldset className="gf-tab-row min-w-0 border-0 p-0">
         <legend className="sr-only">{label}</legend>

@@ -32,7 +32,13 @@ export const ATOLYE_COLORS = {
 export const ATOLYE_RADII = { tile: 20, media: 14, inner: 10 } as const
 
 /** The corner scale each choice multiplies them by (storefront `RADIUS_SCALE`; soft is the theme's own). */
-export const ATOLYE_RADIUS_SCALE = { sharp: 0.2, soft: 1, round: 1.5 } as const
+export const ATOLYE_RADIUS_SCALE = {
+  sharp: 0.2,
+  crisp: 0.6,
+  gentle: 0.8,
+  soft: 1,
+  round: 1.5,
+} as const
 
 /**
  * The corners of buttons, the search field, form fields and the quantity

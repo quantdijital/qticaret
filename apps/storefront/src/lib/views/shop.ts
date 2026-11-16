@@ -34,6 +34,7 @@ import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
+import { footerLogoOf } from "./footer-logo"
 import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
 
@@ -171,7 +172,7 @@ export async function shopView(): Promise<ShopView> {
       t,
       tree: () => withPicturesOf(navigation(categories, paths, pictures), menu),
     }),
-    footerBar: footerBarOf(layout.main, t),
+    footerBar: footerBarOf(layout.main, t, footerLogoOf(site.shop)),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name, editing),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),

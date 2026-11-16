@@ -65,7 +65,15 @@ async function openTheme(options: ServeOptions = {}) {
   const tree = await opened()
   await user.click(within(tree).getByRole("button", { name: "Tema ayarları" }))
   await screen.findByRole("searchbox", { name: "Tema ayarlarında ara" })
-  await openGroups(user, "Renkler", "Yazı tipleri", "Şekiller", "Yüzeyler", "Ürün kartı")
+  await openGroups(
+    user,
+    "Renkler",
+    "Yazı tipleri",
+    "Şekiller",
+    "Boşluklar",
+    "Yüzeyler",
+    "Ürün kartı"
+  )
   return screen.getByRole("textbox", { name: "Ana renk" })
 }
 
@@ -166,9 +174,11 @@ describe("the theme settings show what the theme draws (adr/0062 §12)", HEAVY, 
     expect(screen.queryByRole("switch", { name: "Üst bilgi sabit kalsın" })).toBeNull()
   })
 
-  it("offers the section spacing beside the shapes, its term small, into the draft (K-11)", async () => {
+  it("offers the section spacing in the spacing group, its term small, into the draft (K-11)", async () => {
     await openTheme()
-    const spacing = screen.getByRole("combobox", { name: "Bölüm aralığı" })
+    const spacing = within(screen.getByRole("group", { name: "Boşluklar" })).getByRole("combobox", {
+      name: "Bölüm aralığı",
+    })
     expect(spacing).toHaveTextContent("Normal")
     expect(screen.getByText("section spacing").tagName).toBe("SMALL")
     await choose("Bölüm aralığı", "Sık")

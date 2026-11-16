@@ -90,7 +90,14 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     renderEditor()
     await toTheme()
     expect(screen.queryByRole("tab")).toBeNull()
-    for (const title of ["Renkler", "Yazı tipleri", "Şekiller", "Yüzeyler", "Ürün kartı"]) {
+    for (const title of [
+      "Renkler",
+      "Yazı tipleri",
+      "Şekiller",
+      "Boşluklar",
+      "Yüzeyler",
+      "Ürün kartı",
+    ]) {
       expect(screen.getByRole("button", { name: title })).toHaveAttribute("aria-expanded", "false")
     }
     expect(screen.queryByRole("textbox", { name: "Ana renk" })).toBeNull()

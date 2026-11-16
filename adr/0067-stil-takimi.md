@@ -19,7 +19,7 @@ Hepsi tema ayarıdır (adr/0062), adlandırılmış basamaktır (serbest sayı y
 | S4 | `media_ground` | Fotoğraf zemini <small>image background</small> | `well` Hafif ton · `page` Sayfa | `well` | Ürün ve kategori fotoğrafının arkasındaki kuyu, liste küçük resimleri |
 | S5 | `surface_style` (genişletme) | Kutu stili <small>surface style</small> | `filled` Dolu · `lined` Çizgili (değişmez) | `filled` | Bugün ayarın kapsamadığı ~17 kutu da ayara bağlanır |
 
-Sonraya bırakılan: `density` (Sıklık: `comfortable` / `compact`). Hiçbir görünüm bugün istemiyor (adr/0066 K5); gerektiğinde bu ADR'ye ek olarak açılır.
+Sonraya bırakılan: `density` (Sıklık: `comfortable` / `compact`). Hiçbir görünüm bugün istemiyor (adr/0066 K5); gerektiğinde bu ADR'ye ek olarak açılır. Açıldı: Ek 2026-11-16 (S6).
 
 ### 2. Yorum kararları
 
@@ -81,7 +81,7 @@ Dökümün sayımı: daldaki 17 değişikliğin 3'ü takımla ifade edilir (`men
 
 ## Açık kalanlar
 
-1. `density` ne zaman ve hangi adla ("Sık" bölüm aralığında kullanılıyor; öneri "Sıkı").
+1. ~~`density` ne zaman ve hangi adla ("Sık" bölüm aralığında kullanılıyor; öneri "Sıkı").~~ Kapandı: Ek 2026-11-16 (`density`: Ferah / Dengeli / Sıkı).
 2. ~~Hesap, sipariş ve ödeme sayfalarındaki kutuların tam listesi adım 4'te çıkarılır.~~ Kapandı: Ek 2026-11-15.
 3. Tema ayarlarının ayar aramasına girmesi.
 
@@ -139,3 +139,40 @@ Tema tek tek okundu (hesap, sipariş, ödeme, hediye, ödeme bağlantısı, içe
 - **Nötr zeminli bildirimler bağlandı:** `role="status"`/`"alert"` notları zemini nötr tonsa (yazısı ya da simgesi yeşil/kırmızı olsa da) kutu sayıldı; mevcut `gf-box` emsali böyle (`product/StockAlert.tsx`, `product/Forms.tsx`, sepet notu). Anlam rengini zemininde taşıyan bildirim yok; vurgu zeminliler aşağıda dışarıda.
 - **Bilerek dışarıda:** fotoğraf kuyuları ve iskeletler (`media_ground`); çip, hap, rozet, durum hapları ve simge madalyonları (`chip_style` ya da denetim); form denetimleri (ödeme seçeneği kartı `checkout/fields.tsx`, eklenti seçeneği, adet); menü ve açılır yüzeyler (`MenuSheet` hızlı bağlantı kutusu dahil, `menu_style`); yüzen katmanlar (çerez bandı, sepetin yapışkan çubuğu); vurgu zeminli notlar (`bg-highlight-soft`: havale, hesap teklifi, onay notları; anlam rengi); bölüm zeminleri (`Campaign`, alt bilgi bantları); güvence şeridi `strip` biçimi (`trust_badges` kendi `lined` basamağını taşır) ve kategori kartları (`categories.frame`); zaten çizgili kutular (yorum kartları, yardım kutusu, fiyat bantları, SSS sayfasının yan kutusu: iki basamakta da çizgili, ayarla uyumlu); çizgili kartın içindeki ton blokları (mağaza yanıtı `ReviewReply`, Google yorumunun alt kutusu: çizgi alırsa çift çizgi olur); ürün açıklamasındaki alıntı (`[&_blockquote]`, yazı biçimi).
 - **Hazır görünümler:** Grafit ve Katalog değişmez. Tezgâh ×3 kilitli sayfalarda yalnız ana sayfanın yazı kartlarında (`home-09-yazilar`) değişir; geri kalanı kilit dışı sayfalardadır.
+
+## Ek 2026-11-16: S6 `density`, bölüm aralığına `tight`, köşeye iki ara basamak (açık kalan 1 kapandı)
+
+**Dayanak.** Sahip (2026-11-16): temadaki boşluklar ve köşeler bir e-ticaret mağazası için fazla açık. Ölçüm ve öneri sunuldu, "Dengeli" hedef onaylandı ("önerilerini beğendim uygula"); düğmeler ve arama kutusu hap kalır, kartlara yeni kenarlık eklenmez. İleride "Sıkı" basamağı da olacak ama hiçbir hazır görünüm onu seçmez.
+
+**Nereye yazılır (adr/0066 §2).** Fark bir görünüştür ve temanın bütününe yayılır (her bölümün başlık altı, her ızgara, alt bilgiye boşluk): bölüm ayarı değil, yeni biçim hiç değil; stil takımında basamak. §1'de "sonraya" bırakılan `density` bu ektir; yeni ADR gerekmedi. Bölüm aralığı ve köşe zaten tema ayarıdır (adr/0062); onlara basamak eklenir, anlamları (K6) değişmez.
+
+**Karar.**
+
+| Alan | Basamaklar (ilk varsayılan; panel adı) | Nasıl basılır |
+| --- | --- | --- |
+| S6 `density` (yeni, `STYLE_KIT`) | `airy` Ferah · `balanced` Dengeli · `compact` Sıkı | `airy` dışında tema kökünde `data-density` (kit deseni: portallara da ulaşır); `density.css` belirteçleri o öğede yeniden tanımlar |
+| `section_spacing` (genişler) | `tight` Çok sık (yeni, ×0,35) · `compact` Sık ×0,55 · `normal` · `roomy` Ferah ×1,2 | `--section-scale` (değişmedi) |
+| `radius` (genişler) | `sharp` Keskin ×0,2 · `crisp` Belirgin ×0,6 (yeni) · `gentle` Ölçülü ×0,8 (yeni) · `soft` Yumuşak ×1 · `round` Yuvarlak ×1,5 | `--radius-scale` (değişmedi) |
+
+Gerçek değerler (px, masaüstü / tablet / telefon; tablet 640–1023 px):
+
+| Ölçü | Ferah (bugün) | Dengeli | Sıkı |
+| --- | --- | --- | --- |
+| Başlık → içerik (`--head-gap`; `-m` fiyat bantları, `-s` ürün rafı, sekmeler, markalar, müşteri fotoğrafları) | 40 / 24 / 24 (32 / 24 / 24; 24) | 24 / 16 / 16 (hepsi) | 16 / 12 / 12 (hepsi) |
+| Izgara sütun (`--gap-columns`) | 24 / 24 / 12 | 20 / 16 / 12 | 16 / 12 / 8 |
+| Izgara satır (`--gap-rows`; `-s` öne çıkan raf, kategori kartları) | 40 / 32 / 32 (32) | 28 / 20 / 20 | 20 / 12 / 12 |
+| Alt bilgiye (`--footer-gap`) | 64 / 48 / 40 | 48 / 40 / 32 | 32 / 24 / 20 |
+| Kenar boşluğu (`--gutter`) | 48 / 24 / 16 | aynı | 48 / 24 / 12 |
+| Bölüm arası (`section_spacing`, ayrı ayar) | Normal 96 / 64 / 48 | Sık 53 / 35 / 26 | Çok sık 34 / 22 / 17 (33,6 / 22,4 / 16,8; istenen 32 / 24 / 20'ye en yakın yuvarlak çarpan 0,35) |
+| Köşe karo / fotoğraf / iç (`radius`, ayrı ayar) | Yumuşak 20 / 14 / 10 | Ölçülü 16 / 11,2 / 8 | Belirgin 12 / 8,4 / 6 |
+
+1. **Yoğunluk bölüm aralığını kapsamaz.** Bölümler arası boşluk `section_spacing`'de kalır (iki ayar, iki soru); "Dengeli" görünüm ikisini birlikte seçer. 44 px dokunma hedefi, yapışkan üst bilgi ölçüleri ve denetimlerin kendi iç boşluğu hiçbir basamakta değişmez (§1'deki çekince böyle karşılandı).
+2. **Önce taşıma (§3 a).** Bölüm başlığının altı ve ızgara satırı bileşenlerde elle yazılıydı (`gap-6 lg:gap-10` 7 yer, `gap-6 lg:gap-8` 1, `gap-6` 5, `gap-y-8 lg:gap-y-10` 2, `gap-y-8` 3). Bunlar aynı değeri taşıyan belirteçlere taşındı (`tokens.css`, rem cinsinden, Tailwind'in `lg:` eşiğinde: 1024 px `lg:`'nin); her yerin eski sınıfı ile yeni belirteci 13 genişlikte aynı çözülüyor (`atolye-gap-tokens.spec.ts`). Kilit yalnız sınıf adlarında ve `tokens.css` özetinde değişti.
+3. **Basamaklar (§3 b).** `density.css` yalnız `tokens.css`'in tanımladığı belirteçleri ve yalnız `[data-density="balanced"|"compact"]` altında yazar; her belirteç kendi ekran eşiğini korur (başlık ve satır `lg:`, sütun, alt bilgi ve kenar `max-width`). Varsayılanda öznitelik basılmaz; bütün hazır görünümlerin HTML'i bu adımda değişmedi (kilit yalnız stil özetinde).
+4. **Hazır görünümler (veri).** Grafit ve Katalog: `density: balanced`, `radius: gentle`, `section_spacing: compact` (dal `deniz/tema-aralik-sik`). Tezgâh ×3 dokunulmadı (zaten `compact` aralık; yoğunluğu Oğuzhan'ın sıradaki işi). `tight`, `crisp` ve Sıkı yoğunluğu hiçbir görünüm seçmez.
+5. **Panel.** Tema ayarlarına "Boşluklar" grubu (Şekiller ile Yüzeyler arasında): Bölüm aralığı (Yüzeyler'den taşındı) ve Yoğunluk; köşeler Şekiller'de kalır. Tema alanı aramada görünmeyen sözcüklerle de bulunur (`keywords`: boşluk, aralık, sıkı, ferah, yoğunluk). İpuçları gerçek piksel değerlerini yazar.
+6. **Ayna ve okuma.** Sözleşme `STYLE_KIT.density`, `RADIUS_STEPS`, `SECTION_SPACINGS`; backend aynası (`theme-style-kit.ts`, düz listeler `theme-steps.ts`) ve eşitlik testleri. Ayar JSON'dadır, migration yok. Bilinmeyen basamak vitrinde varsayılana düşer, backend kaydı reddeder.
+
+**Değerlendirilen seçenekler.** (a) Yoğunluğu tema ayarı olarak (`theme.density`, kit dışında) eklemek: kitin işaret ve portal altyapısını yeniden yazmak gerekirdi; reddedildi. (b) Yoğunluğu `--section-scale` gibi bir çarpanla basmak: başlık, ızgara ve kenar boşluğu farklı oranlarda küçülmeli (24 → 16 ama 12 → 12) ve serbest sayıya kayar; reddedildi. (c) Bölüm aralığını yoğunluğa bağlamak: kayıtlı `section_spacing` değerlerinin anlamı değişirdi (K6); reddedildi.
+
+**Açık kalan.** Çözülmüş stil denetimi (`style:capture` / `style:diff`) bu dalda koşulmadı (sunucu ister): taşıma commit'i için "aynı", hazır görünüm commit'i için Grafit ve Katalog'da beklenen fark; ana oturum koşar.

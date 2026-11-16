@@ -3,10 +3,11 @@
   "theme": "atolye",
   "colors": { "primary": null, "accent": null, "background": "steel" },
   "typography": { "heading": "manrope", "body": "manrope" },
-  "radius": "soft",
+  "radius": "gentle",
   "product_card": { "ratio": "1:1", "show_brand": true, "show_rating": false },
   "header": { "layout": "left", "sticky": true },
   "buttons": "pill",
   "section_spacing": "compact",
-  "menu_style": "plain"
+  "menu_style": "plain",
+  "density": "balanced"
 }

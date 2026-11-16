@@ -20,9 +20,16 @@ const LOGO =
   '<script>alert(2)</script><defs><linearGradient id="g"><stop offset="0" stop-color="#123"/></linearGradient></defs>' +
   '<circle cx="32" cy="32" r="30" fill="url(#g)"/><image href="https://evil.example/x.png"/></svg>'
 
+interface SiteLogo {
+  url: string
+  width: number | null
+  height: number | null
+}
+
 interface Site {
   shop: {
     logo_url: string | null
+    logos: { light: SiteLogo | null; dark: SiteLogo | null }
     favicon_url: string | null
     favicon_type: string | null
     apple_touch_url: string | null
@@ -88,6 +95,14 @@ medusaIntegrationTestRunner({
         favicon_url: url,
         favicon_type: "image/svg+xml",
       })
+      // Both of the store profile's logos with the library's size, an SVG's from its viewBox
+      // (owner 2026-11-16: the footer may show the logo); no dark one chosen: null
+      expect(site.logos).toEqual({ light: { url, width: 64, height: 64 }, dark: null })
+      const both = await post("/admin/platform-settings/appearance", { logo_dark_url: url })
+      expect(outcome(both, 200)).toEqual({ status: 200, data: null })
+      const logos = (await http.get<Site>("/store/seo/site", { headers: store.headers })).data.shop
+        .logos
+      expect(logos.dark).toEqual({ url, width: 64, height: 64 })
       // Apple's home screen takes no SVG: its own PNG, made from the cleaned file
       expect(site.apple_touch_url).toMatch(/\.png$/)
       // Nor do mail clients: the light logo's PNG goes in the mails

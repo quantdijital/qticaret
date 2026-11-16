@@ -95,18 +95,29 @@ async function open() {
   // A square photograph fitted into the 1000 × 600 area: 600 × 600 from x 200 to 800
   lens.getBoundingClientRect = () => rect(AREA)
   img.getBoundingClientRect = () => rect(AREA)
+  // The lens's frame: never scaled, the area itself
+  if (lens.parentElement) {
+    lens.parentElement.getBoundingClientRect = () => rect(AREA)
+  }
   Object.defineProperty(img, "naturalWidth", { value: 1000 })
   Object.defineProperty(img, "naturalHeight", { value: 1000 })
   return { opener, dialog, lens, img }
 }
 
-/** A pointer pressed at one point and let go at another (the same one: a press). */
+/**
+ * A mouse pressed at one point and let go at another (the same one: a
+ * press), as a browser sends it: down, up, then the click at the release.
+ */
 async function press(on: Element, from: [number, number], to: [number, number] = from) {
+  const at = (point: [number, number]) => ({
+    bubbles: true,
+    clientX: point[0],
+    clientY: point[1],
+  })
   await act(async () => {
-    on.dispatchEvent(
-      new MouseEvent("pointerdown", { bubbles: true, clientX: from[0], clientY: from[1] })
-    )
-    on.dispatchEvent(new MouseEvent("pointerup", { bubbles: true, clientX: to[0], clientY: to[1] }))
+    on.dispatchEvent(new MouseEvent("pointerdown", at(from)))
+    on.dispatchEvent(new MouseEvent("pointerup", at(to)))
+    on.dispatchEvent(new MouseEvent("click", at(to)))
     await settle()
   })
 }
@@ -155,6 +166,41 @@ describe("the gallery's zoom: where a press lands", () => {
     await press(img, [300, 364], [100, 364])
     expect(document.querySelector("[role=dialog]")).not.toBeNull()
     expect(lens.hasAttribute("data-zoomed")).toBe(true)
+  })
+
+  it("decides on the click, not on the release: nothing is left for a click to fall through to", async () => {
+    const { lens, img } = await open()
+    await act(async () => {
+      img.dispatchEvent(
+        new MouseEvent("pointerdown", { bubbles: true, clientX: 100, clientY: 364 })
+      )
+      img.dispatchEvent(new MouseEvent("pointerup", { bubbles: true, clientX: 100, clientY: 364 }))
+      await settle()
+    })
+    // The release alone: still open, so the click that follows lands in the dialog, not the page
+    expect(document.querySelector("[role=dialog]")).not.toBeNull()
+    expect(lens.hasAttribute("data-zoomed")).toBe(false)
+    await act(async () => {
+      img.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 100, clientY: 364 }))
+      await settle()
+    })
+    expect(document.querySelector("[role=dialog]")).toBeNull()
+  })
+
+  it("follows the pointer on the unscaled frame while enlarged, so one jump reaches the graphite", async () => {
+    const { lens, img } = await open()
+    await press(img, [500, 364])
+    // Enlarged two and a half times about the middle: the lens's own box is that large now
+    const big = { left: -750, top: -386, width: 2500, height: 1500 }
+    lens.getBoundingClientRect = () => rect(big)
+    await act(async () => {
+      lens.dispatchEvent(
+        new MouseEvent("pointermove", { bubbles: true, clientX: 250, clientY: 304 })
+      )
+      await settle()
+    })
+    // The point over the frame (25 %, 40 %), not over the enlarged box
+    expect(lens.style.getPropertyValue("transform-origin")).toBe("25% 40%")
   })
 
   it("leaves a press on a button to the button: the arrows step, the close button closes", async () => {

@@ -34,6 +34,10 @@
       "file": "content.css"
     },
     {
+      "sha256": "ab54c5cda5fe0d45808b178140b9edbb513f779d0a51e535120be91c17ffb103",
+      "file": "density.css"
+    },
+    {
       "sha256": "8437a586b86f398a7f9c08dec74c034131a3a29964350c803e64101952edae1f",
       "file": "frame.css"
     },
@@ -102,7 +106,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "e570cda958089b033ed96351b18573be38058ba8344f53c1b66db3cd23eccf45",
+      "sha256": "016b1eab66e9bd5fae1f6a457f62801f7d536b841cfb1670209c84e197487bdc",
       "file": "styles.css"
     },
     {
@@ -110,7 +114,7 @@
       "file": "surface.css"
     },
     {
-      "sha256": "073dae8e256f00078f008d6be3322976dd8e1ce3d64e61629826a01053156d34",
+      "sha256": "c915cffb60df14c90aa1df5fbea78591a2032b8d9766657006abc01f3661acd9",
       "file": "tabs.css"
     },
     {
@@ -118,7 +122,7 @@
       "file": "thin.css"
     },
     {
-      "sha256": "fee3334dfa8102b5a9bffa8669be76763710fa4e677ee86292981bef22ff5365",
+      "sha256": "fd4388ca46b87a25b817da6bbace66208112578bd98a33a8fdd78225384e0a92",
       "file": "tokens.css"
     },
     {

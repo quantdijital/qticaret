@@ -144,7 +144,7 @@ export function ProductPage({
           <Details view={view} t={t} />
           <Community view={view} t={t} actions={actions} />
           {view.related.length > 0 && (
-            <section aria-labelledby="benzer-urunler" className="flex flex-col gap-6 lg:gap-10">
+            <section aria-labelledby="benzer-urunler" className="flex flex-col gap-(--head-gap)">
               <SectionHead id="benzer-urunler" title={t("product.related")} />
               <ProductGrid
                 products={view.related.slice(0, 8)}
