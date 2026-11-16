@@ -44,13 +44,21 @@ const cancelLinkStep = createStep(
     if (link.status !== "open" && link.status !== "draft") {
       throw new ConflictError("payment_link.not_open")
     }
-    const now = new Date()
-    await service(container).updatePaymentLinks({
-      id: link.id,
+    const closed = await service(container).closeUnlessHeld(link.id, {
       status: "canceled",
       canceled_by: input.actor_id,
-      closed_at: now,
+      closed_at: new Date(),
     })
+    if (!closed) {
+      // A cart's completion holds it (the customer is paying now: staff wait for the
+      // outcome), or it closed since it was read
+      const again = await linkById(container, link.id)
+      throw new ConflictError(
+        again.status === "open" || again.status === "draft"
+          ? "payment_link.paying"
+          : "payment_link.not_open"
+      )
+    }
     await closeLinkPromotion(container, link.promotion_id)
     return new StepResponse(
       { id: link.id },
@@ -59,13 +67,14 @@ const cancelLinkStep = createStep(
   },
   async (before, { container }) => {
     if (before) {
-      await service(container).updatePaymentLinks({
-        id: before.id,
-        status: before.status,
-        canceled_by: null,
-        closed_at: null,
+      // Only the cancel this step wrote: a link paid since stays paid
+      const undone = await service(container).updatePaymentLinks({
+        selector: { id: before.id, status: "canceled" },
+        data: { status: before.status, canceled_by: null, closed_at: null },
       })
-      await reopenLinkPromotion(container, before.promotion_id)
+      if (undone.length > 0) {
+        await reopenLinkPromotion(container, before.promotion_id)
+      }
     }
   }
 )

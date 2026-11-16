@@ -50,21 +50,47 @@ export async function placedOrders(
   return placed
 }
 
+/** The query's own condition, its bound values and its order (fixed SQL, values bound). */
+function scopeOf(by: { link_id: string } | { since: Date; after?: string }): {
+  scope: string
+  values: (string | Date)[]
+  order: string
+} {
+  if ("link_id" in by) {
+    return {
+      scope: "AND metadata ->> ? = ?",
+      values: [CART_LINK_KEY, by.link_id],
+      order: "completed_at ASC, id",
+    }
+  }
+  if (by.after) {
+    return {
+      scope: "AND completed_at >= ? AND id < ?",
+      values: [by.since, by.after],
+      order: "id DESC",
+    }
+  }
+  return { scope: "AND completed_at >= ?", values: [by.since], order: "id DESC" }
+}
+
 /**
- * The completed carts opened from links, oldest first: every cart a link
+ * The completed carts opened from links (one link's oldest first): every cart a link
  * was ever bound to, not only its latest (a link names one cart; one it
  * gave up while that cart was completing may still have become an order).
  * Read straight from the carts' metadata (a JSON key the typed query cannot
  * filter on); writes go through the modules. Each with its order.
+ *
+ * Those completed since a time come a page at a time, newest cart id first
+ * (Medusa's ids sort by their making): `after` is the last id of the page
+ * before (a key every page moves past exactly).
  */
 export async function completedLinkCarts(
   container: Container,
-  by: { link_id: string } | { since: Date },
+  by: { link_id: string } | { since: Date; after?: string },
   limit = 500
 ): Promise<LinkCart[]> {
   const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
-  const scope = "link_id" in by ? "AND metadata ->> ? = ?" : "AND completed_at >= ?"
-  const values = "link_id" in by ? [CART_LINK_KEY, by.link_id] : [by.since]
+  const { scope, values, order } = scopeOf(by)
   const { rows } = await knex.raw<{ rows: { id: string; link_id: string }[] }>(
     `SELECT id, metadata ->> ? AS link_id
        FROM cart
@@ -72,7 +98,7 @@ export async function completedLinkCarts(
         AND completed_at IS NOT NULL
         AND metadata ->> ? IS NOT NULL
         ${scope}
-      ORDER BY completed_at ASC, id
+      ORDER BY ${order}
       LIMIT ?`,
     [CART_LINK_KEY, CART_LINK_KEY, ...values, limit]
   )

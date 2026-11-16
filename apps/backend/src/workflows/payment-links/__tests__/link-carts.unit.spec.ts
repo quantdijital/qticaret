@@ -48,6 +48,23 @@ describe("completedLinkCarts", () => {
     expect(values).toEqual(["qt_payment_link", "qt_payment_link", "qt_payment_link", "plink_1", 10])
   })
 
+  it("pages the carts completed since a time by id, newest first, past the page before's last", async () => {
+    knex.raw.mockResolvedValue({ rows: [] })
+    const since = new Date("2026-11-14T12:00:00Z")
+
+    await completedLinkCarts(container(), { since })
+    await completedLinkCarts(container(), { since, after: "cart_499" }, 500)
+
+    const [first, firstValues] = knex.raw.mock.calls[0] as [string, unknown[]]
+    const [next, nextValues] = knex.raw.mock.calls[1] as [string, unknown[]]
+    expect(first).toMatch(/ORDER BY id DESC\s/u)
+    expect(first).not.toMatch(/id < \?/u)
+    expect(firstValues).toEqual(["qt_payment_link", "qt_payment_link", since, 500])
+    expect(next).toMatch(/AND completed_at >= \? AND id < \?/u)
+    expect(next).toMatch(/ORDER BY id DESC\s/u)
+    expect(nextValues).toEqual(["qt_payment_link", "qt_payment_link", since, "cart_499", 500])
+  })
+
   it("says so when a completed cart shows no order", async () => {
     const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
     knex.raw.mockResolvedValue({ rows: [{ id: "cart_1", link_id: "plink_1" }] })

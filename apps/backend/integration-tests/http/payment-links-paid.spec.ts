@@ -110,6 +110,22 @@ medusaIntegrationTestRunner({
       expect(row).toMatchObject({ status: "paid", order_id: orderId })
     })
 
+    it("settles past its first page: every link of the window, a page at a time", async () => {
+      const first = await paidThenLost()
+      const second = await paidThenLost()
+
+      // A page of one cart: the second link lies on the second page
+      const settled = await settlePaymentLinks(getContainer(), new Date(), 1)
+      const rows = await Promise.all([
+        linkRow(getContainer(), first.id),
+        linkRow(getContainer(), second.id),
+      ])
+
+      expect(settled).toBe(2)
+      expect(rows[0]).toMatchObject({ status: "paid", order_id: first.orderId })
+      expect(rows[1]).toMatchObject({ status: "paid", order_id: second.orderId })
+    })
+
     it("closes the link for an order from a cart it gave up, its event lost: no reopening, no paying the later cart", async () => {
       const made = await makeLink(http, owner.headers, linkBody(shop, product.variantId))
       const id = made.data.payment_link?.id ?? ""

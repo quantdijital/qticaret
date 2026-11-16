@@ -10,6 +10,7 @@ import {
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
+import { logger } from "../../../lib/logging"
 import { PAYMENT_LINKS_MODULE } from "../../../modules/payment-links"
 import { markLinkPaidStep, markPaymentLinkPaidWorkflow } from "../paid"
 
@@ -64,7 +65,7 @@ interface GuardedUpdate {
 const query = { graph: jest.fn() }
 const links = { listPaymentLinks: jest.fn(), updatePaymentLinks: jest.fn() }
 const orders = { updateOrders: jest.fn() }
-const notifications = { createNotifications: jest.fn() }
+const notifications = { createNotifications: jest.fn(), listNotifications: jest.fn() }
 
 /** The locking module as one process sees it: one holder per key, the rest wait their turn. */
 const held = new Map<string, Promise<unknown>>()
@@ -151,6 +152,10 @@ beforeEach(() => {
       }
       return Promise.resolve([])
     }
+  )
+  notifications.listNotifications.mockImplementation(
+    ({ idempotency_key }: { idempotency_key: string }) =>
+      Promise.resolve(bells.has(idempotency_key) ? [{ id: "noti_1" }] : [])
   )
 })
 afterEach(() => {
@@ -300,6 +305,40 @@ describe("marking a payment link paid", () => {
     expect(orders.updateOrders).not.toHaveBeenCalled()
     expect(links.updatePaymentLinks).not.toHaveBeenCalled()
     expect([...bells.keys()]).toEqual(["payment_links.needs_review:plink_1:order_1"])
+  })
+
+  it("logs such an order once, however often the event or the hourly settle finds it", async () => {
+    link = { ...OPEN, status: "paid", order_id: "order_other" }
+    const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+
+    await run()
+    await run()
+    await run()
+
+    const twice = error.mock.calls.filter(
+      ([entry]) => (entry as { event?: string }).event === "payment_links.paid_twice"
+    )
+    expect(twice).toEqual([
+      [{ event: "payment_links.paid_twice", linkId: "plink_1", orderId: "order_1" }],
+    ])
+    expect(notifications.createNotifications).toHaveBeenCalledTimes(1)
+    error.mockRestore()
+  })
+
+  it("logs it again while its bell could not be written, so it is not lost", async () => {
+    link = { ...OPEN, status: "paid", order_id: "order_other" }
+    notifications.createNotifications.mockRejectedValue(new Error("db down"))
+    const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+    jest.spyOn(logger, "warn").mockImplementation(() => undefined)
+
+    await run()
+    await run()
+
+    const twice = error.mock.calls.filter(
+      ([entry]) => (entry as { event?: string }).event === "payment_links.paid_twice"
+    )
+    expect(twice).toHaveLength(2)
+    jest.restoreAllMocks()
   })
 
   it("closes a link whose order came from an earlier cart, and tells staff", async () => {

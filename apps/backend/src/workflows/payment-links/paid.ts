@@ -13,7 +13,7 @@ import {
 } from "../../lib/payments/checkout"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
-import { alertLink } from "./alerts"
+import { alerted, alertLink } from "./alerts"
 import type { LinkAlert } from "./alerts"
 import { linkIdOfCart } from "./cart-guard"
 import { CART_LINK_KEY } from "./link-carts"
@@ -114,6 +114,24 @@ async function ring(
 const skip = () => new StepResponse<{ paid: boolean }, Undo | null>({ paid: false }, null)
 
 /**
+ * A second order of a link another order paid: logged and told to staff
+ * once per link and order. The event retried and the hourly settle find it
+ * again for two days; its bell already rung, they pass in silence.
+ */
+async function paidTwice(
+  container: Container,
+  link: Parameters<typeof alertLink>[2],
+  orderId: string
+) {
+  if (await alerted(container, "needs_review", link.id, orderId)) {
+    return skip()
+  }
+  logger.error({ event: "payment_links.paid_twice", linkId: link.id, orderId })
+  await ring(container, "needs_review", link, orderId)
+  return skip()
+}
+
+/**
  * Closes the link for this order unless it is paid already, under the
  * link's lock (the one a cart's opening holds; Medusa's update reads before
  * it writes, so the guarded write alone is not enough): of two orders at
@@ -188,9 +206,7 @@ export const markLinkPaidStep = createStep(
     }
     let paidHere = link.status === "paid" && link.order_id === order.id
     if (link.status === "paid" && !paidHere) {
-      logger.error({ event: "payment_links.paid_twice", linkId, orderId: order.id })
-      await ring(container, "needs_review", link, order.id)
-      return skip()
+      return paidTwice(container, link, order.id)
     }
     const marks = missingMarks(order.metadata, link)
     if (paidHere && Object.keys(marks).length === 0) {
@@ -212,9 +228,7 @@ export const markLinkPaidStep = createStep(
       }
       paidHere = await closeForOrder(container, link, order.id, input.link_locked === true)
       if (!paidHere) {
-        logger.error({ event: "payment_links.paid_twice", linkId, orderId: order.id })
-        await ring(container, "needs_review", link, order.id)
-        return skip()
+        return paidTwice(container, link, order.id)
       }
       if (odd) {
         await ring(container, "needs_review", link, order.id)

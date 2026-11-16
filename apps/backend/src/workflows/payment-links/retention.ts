@@ -43,7 +43,15 @@ export async function sweepPaymentLinks(
   let expired = 0
   for (const link of due) {
     try {
-      await links.updatePaymentLinks({ id: link.id, status: "expired", closed_at: now })
+      const closed = await links.closeUnlessHeld(link.id, {
+        status: "expired",
+        canceled_by: null,
+        closed_at: now,
+      })
+      // A cart's completion holds it (its payment under way): left for the next hour
+      if (!closed) {
+        continue
+      }
       await closeLinkPromotion(container, link.promotion_id)
       expired += 1
     } catch (error) {

@@ -4,10 +4,15 @@ import { errorSummary, logger } from "../../lib/logging"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
 import { completedLinkCarts } from "./link-carts"
+import type { LinkCart } from "./link-carts"
 import { markPaymentLinkPaidWorkflow, missingMarks } from "./paid"
 
-// Carts looked at a run, oldest first: a shop makes a few links a day
+// Carts looked at a page; a shop makes a few links a day
 const PAGE = 500
+// Pages looked at a run, newest cart ids first (an id dates the cart's making, not its
+// completion); past them the run stops and says so: a shop makes a few links a day, so a run
+// reaching it means something to look at
+const MAX_PAGES = 20
 // How far back a link's completed cart is looked at
 const WINDOW_MS = 2 * 24 * 60 * 60 * 1000
 
@@ -40,17 +45,36 @@ async function markPaid(container: MedusaContainer, orderId: string): Promise<bo
  * completing: a link not yet paid is closed for that order; a link paid
  * by it whose order misses its keys gets them; a link another order paid
  * is a second charge staff are told of (`needs_review`, once). The mark is
- * idempotent; the count is the orders it settled.
+ * idempotent; the count is the orders it settled. The carts come a page
+ * at a time, up to `MAX_PAGES` a run (logged when reached).
  */
 export async function settlePaymentLinks(
   container: MedusaContainer,
-  now = new Date()
+  now = new Date(),
+  pageSize = PAGE
 ): Promise<number> {
-  const carts = await completedLinkCarts(
-    container,
-    { since: new Date(now.getTime() - WINDOW_MS) },
-    PAGE
-  )
+  const since = new Date(now.getTime() - WINDOW_MS)
+  let settled = 0
+  let after: string | undefined
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const carts = await completedLinkCarts(
+      container,
+      after ? { since, after } : { since },
+      pageSize
+    )
+    settled += await settlePage(container, carts)
+    const last = carts[carts.length - 1]
+    if (carts.length < pageSize || !last) {
+      return settled
+    }
+    after = last.cart_id
+  }
+  logger.warn({ event: "payment_links.settle_ceiling", pages: MAX_PAGES, page_size: pageSize })
+  return settled
+}
+
+/** One page of carts: the orders whose link is not settled for them, each marked. */
+async function settlePage(container: MedusaContainer, carts: LinkCart[]): Promise<number> {
   const placed = carts.flatMap((cart) =>
     cart.order_id ? [{ ...cart, order_id: cart.order_id }] : []
   )
