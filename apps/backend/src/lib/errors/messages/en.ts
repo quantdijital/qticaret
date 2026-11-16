@@ -24,6 +24,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "cart.metadata_reserved": "This line detail is set by the shop only.",
   "bank_transfer.not_this_order": "This order was not paid by bank transfer.",
   "bank_transfer.order_canceled": "A cancelled order's transfer cannot be confirmed.",
+  "notifications.read_target": "Choose the notifications to mark read, or mark them all.",
   "orders.cancel_after_packing":
     "An order packed or shipped cannot be cancelled; once it arrives, ask for a return.",
   "orders.cancel_contact_shop":
@@ -845,6 +846,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.timezone_invalid": "Choose a valid time zone.",
   "platform_settings.unknown_section": "There is no such settings section.",
   "platform_settings.url_invalid": "The address must start with https:// or /.",
+  "platform_settings.favicon_unknown":
+    "The site icon must come from your media library. Upload the image there and choose it again.",
+  "platform_settings.logo_unknown":
+    "The logo must come from your media library. Upload the image there and choose it again.",
+  "platform_settings.favicon_type":
+    "The site icon must be a PNG. Save your icon as a PNG and upload it.",
+  "platform_settings.favicon_too_large":
+    "The site icon can be at most 1 MB. Choose a smaller PNG (512 × 512 pixels is enough).",
   "product_attributes.definition_locked":
     "An attribute products have values for cannot change its key or unit.",
   "product_attributes.definition_unknown": "The attribute does not belong to this template.",
@@ -1045,6 +1054,15 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "upload.unreadable_image": "The image could not be read; the file may be damaged.",
   "upload.unsupported_type":
     "This file type is not supported; upload a JPEG, PNG, WebP or AVIF image.",
+  "upload.svg_invalid":
+    "The SVG file could not be read, or no SVG image was left once it was cleaned. Save it again as a plain SVG from your design program.",
+  "upload.svg_too_large": "An SVG file can be at most 200 KB. Simplify it and try again.",
+  "upload.svg_too_complex":
+    "The SVG file has too many or too deeply nested elements. Simplify it and try again.",
+  "upload.svg_too_many": "At most 3 SVG files can be uploaded at once.",
+  "upload.svg_busy": "SVG files are being processed now. Try again in a few seconds.",
+  "media.svg_logo_only":
+    "SVG can be used only as the shop's logo and site icon. Choose a PNG, JPEG, WebP or AVIF image for this field.",
   "cart.completed": "An order was already placed with this cart.",
   "cart.email_required": "An email address is needed to place the order.",
   "cart.empty": "The cart is empty.",

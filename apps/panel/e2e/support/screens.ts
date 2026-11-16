@@ -23,6 +23,8 @@ export const SECTIONS = [
   "/customers/wholesale/tiers",
   "/customers/wholesale/orders",
   "/customers/contact-messages",
+  // Every alert of the bell, read and unread (adr/0020)
+  "/notifications",
   "/promotions",
   "/promotions/price-lists",
   "/promotions/gift-cards",

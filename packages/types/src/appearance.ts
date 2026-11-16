@@ -32,6 +32,8 @@ export interface AppearanceSettings {
   sidebar_mode: SidebarMode
   logo_light_url: string | null
   logo_dark_url: string | null
+  /** The storefront's site icon (a PNG from the media library); none: the storefront's own. */
+  favicon_url: string | null
 }
 
 export const BRAND_COLOR_PATTERN = /^#[0-9a-f]{6}$/
@@ -45,6 +47,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   sidebar_mode: "expanded",
   logo_light_url: null,
   logo_dark_url: null,
+  favicon_url: null,
 }
 
 /** Starting points, not themes: each goes through the engine like any colour. */

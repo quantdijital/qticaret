@@ -9,6 +9,8 @@ import { NO_CART } from "@/lib/analytics/cart-changes"
 import { cartSnapshotOf } from "@/lib/analytics/cart-payloads"
 import { analyticsTags } from "@/lib/analytics/tags"
 import { headerCart } from "@/lib/cart/cart"
+import { siteIcons } from "@/lib/seo/icons"
+import { siteSeo } from "@/lib/store-api/requests"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { layoutPreviewToken } from "@/lib/views/layout"
@@ -23,8 +25,21 @@ import "@qticaret/storefront-theme-styles"
 // Every page is made per request: prices, stock and the cart are live (adr/0046 §2)
 export const dynamic = "force-dynamic"
 
-// Each page sets its own title and robots from the backend's seo object
-export const metadata: Metadata = { formatDetection: { telephone: false } }
+/**
+ * Each page sets its own title and robots from the backend's seo object;
+ * the frame sets the shop's site icon when it chose one (the store
+ * profile), from the same site answer the frame reads (refreshed with
+ * it). Without one, or without an answer, `app/icon.svg` stays.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  let icons: Metadata["icons"] | undefined
+  try {
+    icons = siteIcons((await siteSeo()).shop)
+  } catch {
+    icons = undefined
+  }
+  return { formatDetection: { telephone: false }, ...(icons ? { icons } : {}) }
+}
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1 }
 

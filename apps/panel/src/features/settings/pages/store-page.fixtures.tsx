@@ -36,7 +36,11 @@ export const APPEARANCE: AppearanceSettings = {
   logo_light_url: "https://cdn.ornek.com/logo.png",
 }
 
-const SAVED: Record<string, object> = { store: STORE, legal: LEGAL, appearance: APPEARANCE }
+export const SAVED: Record<string, object> = {
+  store: STORE,
+  legal: LEGAL,
+  appearance: APPEARANCE,
+}
 
 export interface Init {
   method?: string
@@ -45,13 +49,13 @@ export interface Init {
 
 export type FetchMock = Mock<(url: string, init?: Init) => Promise<unknown>>
 
-/** Each section as saved, a save answered with the body over it. */
-export function answer(fetchMock: FetchMock) {
+/** Each section as saved (`saved`, these by default), a save answered with the body over it. */
+export function answer(fetchMock: FetchMock, saved: Record<string, object> = SAVED) {
   fetchMock.mockImplementation((url: string, init?: Init) => {
     const section = url.replace("/admin/platform-settings/", "")
     return Promise.resolve({
       section,
-      values: { ...SAVED[section], ...init?.body },
+      values: { ...saved[section], ...init?.body },
       version: init?.method === "POST" ? 2 : 1,
     })
   })

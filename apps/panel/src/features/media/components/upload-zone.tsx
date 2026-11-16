@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Progress } from "@qticaret/admin-ui/ui/progress"
 import {
   IMAGE_ACCEPT,
+  SVG_ACCEPT,
   fileProblem,
   uploadToLibrary,
   useMediaChanged,
@@ -36,6 +37,8 @@ interface UploadZoneProps {
   /** The zone fills the room it is given (a dialog's tab). */
   fill?: boolean
   ref?: Ref<UploadZoneHandle> | undefined
+  /** An SVG is taken too: a logo's or the site icon's picker. */
+  svg?: boolean
   /**
    * The files that made it into the library, once the drop is through, and
    * how many did not (their reasons stay listed here).
@@ -48,7 +51,13 @@ interface UploadZoneProps {
  * once, each sent in turn with its own state, a bar for the whole drop.
  * A file of the wrong type or past 10 MB is named and skipped.
  */
-export function UploadZone({ multiple = true, fill = false, ref, onUploaded }: UploadZoneProps) {
+export function UploadZone({
+  multiple = true,
+  fill = false,
+  ref,
+  svg = false,
+  onUploaded,
+}: UploadZoneProps) {
   const { t } = useTranslation()
   const changed = useMediaChanged()
   const [over, setOver] = useState(false)
@@ -79,7 +88,7 @@ export function UploadZone({ multiple = true, fill = false, ref, onUploaded }: U
     const stored: MediaAsset[] = []
     for (const [index, file] of chosen.entries()) {
       const key = items[index]?.key ?? ""
-      const problem = fileProblem(file)
+      const problem = fileProblem(file, svg)
       if (problem) {
         mark(key, "failed", t(`media.upload.problem.${problem}`))
         continue
@@ -137,7 +146,7 @@ export function UploadZone({ multiple = true, fill = false, ref, onUploaded }: U
         <span className="text-xs text-muted-foreground">{t("media.upload.types")}</span>
         <input
           type="file"
-          accept={IMAGE_ACCEPT}
+          accept={svg ? SVG_ACCEPT : IMAGE_ACCEPT}
           multiple={multiple}
           className="sr-only"
           disabled={busy}

@@ -17,14 +17,22 @@ export interface AppearanceSettings {
   sidebar_mode: "expanded" | "collapsed" | "auto"
   logo_light_url: string | null
   logo_dark_url: string | null
+  /** The storefront's site icon (a PNG from the media library); none: the storefront's own. */
+  favicon_url: string | null
 }
 
-// A logo lives in our own storage (https) or under this host; never a
-// script-capable or inline source
+// A logo is an address of our own storage, never a script-capable or inline source. Which
+// one is the workflow's to say (`steps/brand-images.ts`: a newly chosen one must be the
+// shop's upload); storage serves over http where it is local (tests, a developer's machine
+// without S3), so the scheme alone is no proof either way
 const isLogoUrl = (value: string): boolean =>
   value.length <= MAX_URL_LENGTH &&
   isCleanText(value) &&
-  (value.startsWith("https://") || (value.startsWith("/") && !value.startsWith("//")))
+  // A backslash is no part of our storage's addresses; browsers read `/\host` as `//host`
+  !value.includes("\\") &&
+  (value.startsWith("https://") ||
+    value.startsWith("http://") ||
+    (value.startsWith("/") && !value.startsWith("//")))
 
 const logoUrl = z
   .string()
@@ -48,6 +56,8 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     sidebar_mode: z.enum(["expanded", "collapsed", "auto"]),
     logo_light_url: logoUrl,
     logo_dark_url: logoUrl,
+    // A PNG or a cleaned SVG of the shop's uploads: `workflows/platform-settings/steps/brand-images.ts`
+    favicon_url: logoUrl,
   },
   {
     brand_color: "#2f6feb",
@@ -58,5 +68,6 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     sidebar_mode: "expanded",
     logo_light_url: null,
     logo_dark_url: null,
+    favicon_url: null,
   }
 )

@@ -424,15 +424,31 @@
         "social": "Social accounts"
       },
       "brand": {
-        "title": "Shop name and logo",
-        "description": "Shown on the storefront, in e-mails and on Google. The {mağaza_adı} detail in texts shows this name.",
+        "title": "Brand",
+        "description": "Your shop's name, logos and site icon. Shown on the storefront, in e-mails and on Google; {mağaza_adı} in texts shows this name.",
         "name": "Shop name",
         "nameRequired": "Give your shop a name.",
         "light": "Logo (light background)",
-        "lightHint": "Used on white or light backgrounds: the top of the storefront, e-mails and Google.",
+        "lightHint": "Used on white or light grounds: the top of the storefront, e-mails and Google. PNG or SVG.",
         "dark": "Logo (dark background)",
-        "darkHint": "A version that reads on dark backgrounds; optional.",
-        "none": "No logo"
+        "darkHint": "A version that reads on a dark ground; optional. PNG or SVG.",
+        "none": "No logo",
+        "logos": "Logos",
+        "favicon": {
+          "title": "Site icon",
+          "label": "Site icon (favicon)",
+          "hint": "Shown in the browser tab, bookmarks and on a phone's home screen. Upload a square PNG (512 × 512 pixels recommended, at most 1 MB) or an SVG (at most 100 KB).",
+          "none": "No icon",
+          "empty": "Without one the storefront shows its default icon. Upload a square PNG (512 × 512 pixels recommended, at most 1 MB) or an SVG (at most 100 KB).",
+          "tab": "Browser tab",
+          "home": "Home screen",
+          "type": "The site icon must be a PNG or an SVG.",
+          "tooLarge": "The site icon can be at most 1 MB as a PNG, 100 KB as an SVG. Choose a smaller file.",
+          "notSquare": "The icon is not square; the browser may squeeze it. A square image is recommended.",
+          "small": "The icon is smaller than 48 × 48 pixels; Google may not show it in search results.",
+          "unmeasured": "This image's size is not known. Upload it to the library again and choose it."
+        },
+        "svgText": "If your SVG logo has text, convert it to outlines (\"create outlines\" / \"outline text\") in your design program before exporting: font declarations are cleaned away on upload, outlined text looks the same."
       },
       "region": "Region and units",
       "regionHint": "How dates and product measurements are kept.",
@@ -6749,7 +6765,54 @@
       "shelf_restored": {
         "title": "A temporary stock raise was taken back",
         "description": "The stock raised for cart {{cart}} was lowered again after the run stopped halfway. Check the stock counts."
+      },
+      "wholesale_price_check": {
+        "title": "A wholesale cart's payment could not start",
+        "description": "Cart {{cart}} could not be brought to the wholesaler's prices of today; no payment was taken. Check the wholesale and retail prices of its products."
       }
+    },
+    "markAllRead": "Mark all read",
+    "seeAll": "See all",
+    "unreadMark": "Unread: ",
+    "wholesaleOrder": {
+      "title": "New wholesale order #{{number}}",
+      "transfer": "Bank transfer awaited"
+    },
+    "page": {
+      "description": "Alerts from your shop; the unread ones are counted on the bell.",
+      "views": "Notification views",
+      "tabs": {
+        "all": "All",
+        "unread": "Unread",
+        "read": "Read"
+      },
+      "group": "Notification kind",
+      "groups": {
+        "all": "All kinds",
+        "orders": "Orders and returns",
+        "wholesale": "Wholesale orders",
+        "payments": "Payments",
+        "stock": "Stock",
+        "invoices": "Invoices and accounting",
+        "messages": "Messages and e-mail",
+        "system": "Connections and migration"
+      },
+      "bulk": "Selected notifications",
+      "selected_one": "{{formatted}} notification selected",
+      "selected_other": "{{formatted}} notifications selected",
+      "markSelected": "Mark read",
+      "markOne": "Mark read",
+      "clear": "Clear selection",
+      "select": "Select notification",
+      "noMatch": "No notifications in this view."
+    },
+    "newOrder": {
+      "title": "New order #{{number}}",
+      "description": "{{total}}"
+    },
+    "bankTransfer": {
+      "title": "Bank transfer awaited: #{{number}}",
+      "description": "Confirm the order once the {{total}} payment arrives."
     }
   },
   "content": {
@@ -10040,7 +10103,8 @@
       "done_other": "{{count}} images added to the library.",
       "problem": {
         "type": "This file type cannot be uploaded",
-        "size": "Larger than 10 MB"
+        "size": "Larger than 10 MB",
+        "svgSize": "An SVG can be at most 200 KB"
       },
       "status": {
         "waiting": "Waiting",
@@ -10120,7 +10184,8 @@
         "order": "Order",
         "category": "Category image",
         "etbis_qr": "ETBİS QR code",
-        "collection": "Collection picture"
+        "collection": "Collection picture",
+        "favicon": "Site icon"
       },
       "seoTypes": {
         "product": "product page",
@@ -10133,7 +10198,8 @@
         "post_category": "blog category",
         "post_tag": "blog tag"
       },
-      "etbisQrLink": "The shop's ETBİS QR code"
+      "etbisQrLink": "The shop's ETBİS QR code",
+      "faviconLink": "The shop's site icon"
     }
   },
   "confirmEmail": {
@@ -10482,7 +10548,7 @@
     },
     "nav": {
       "label": "Wholesale sections",
-      "accounts": "Wholesalers",
+      "accounts": "Wholesaler list",
       "tiers": "Wholesale levels",
       "orders": "Orders"
     },

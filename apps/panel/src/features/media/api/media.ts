@@ -10,6 +10,15 @@ export const MEDIA_PAGE_SIZE = 24
 export const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/avif"
 const ACCEPTED_TYPES = new Set(IMAGE_ACCEPT.split(","))
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+/**
+ * An SVG: offered only by the shop's logo and site icon fields (the server
+ * cleans it at upload and refuses it anywhere else, `lib/media/svg-use.ts`).
+ */
+export const SVG_MIME = "image/svg+xml"
+export const SVG_ACCEPT = `${IMAGE_ACCEPT},${SVG_MIME}`
+export const MAX_SVG_BYTES = 200 * 1024
+
+export const isSvgAsset = (asset: Pick<MediaAsset, "mime_type">) => asset.mime_type === SVG_MIME
 
 export interface MediaAsset {
   id: string
@@ -41,6 +50,8 @@ export type MediaUseKind =
   | "category"
   /** The shop's ETBİS QR code (Settings > Store profile > Legal); no `id`. */
   | "etbis_qr"
+  /** The storefront's site icon (Settings > Store profile > General); no `id`. */
+  | "favicon"
   /** A collection's picture: `id` the collection, `label` its title. */
   | "collection"
 
@@ -81,8 +92,15 @@ export const mediaDetailQuery = (id: string) =>
         .media,
   })
 
-/** Why a file cannot go up, before it is sent: its type or its size (the server checks again). */
-export function fileProblem(file: File): "type" | "size" | null {
+/**
+ * Why a file cannot go up, before it is sent: its type or its size (the
+ * server checks again). An SVG only where `svg` is offered (a logo, the
+ * site icon), within its own smaller limit.
+ */
+export function fileProblem(file: File, svg = false): "type" | "size" | "svgSize" | null {
+  if (file.type === SVG_MIME && svg) {
+    return file.size > MAX_SVG_BYTES ? "svgSize" : null
+  }
   if (!ACCEPTED_TYPES.has(file.type)) {
     return "type"
   }

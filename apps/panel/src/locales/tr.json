@@ -424,15 +424,31 @@
         "social": "Sosyal hesaplar"
       },
       "brand": {
-        "title": "Mağaza adı ve logo",
-        "description": "Vitrinde, e-postalarda ve Google'da görünür. Metinlerdeki {mağaza_adı} bilgisi bu adı gösterir.",
+        "title": "Marka",
+        "description": "Mağazanızın adı, logoları ve site simgesi. Vitrinde, e-postalarda ve Google'da görünür; metinlerdeki {mağaza_adı} bilgisi bu adı gösterir.",
         "name": "Mağaza adı",
         "nameRequired": "Mağazanıza bir ad verin.",
         "light": "Logo (açık zemin)",
-        "lightHint": "Beyaz ya da açık renkli zeminde kullanılır: vitrinin üstü, e-postalar ve Google.",
+        "lightHint": "Beyaz ya da açık renkli zeminde kullanılır: vitrinin üstü, e-postalar ve Google. PNG ya da SVG.",
         "dark": "Logo (koyu zemin)",
-        "darkHint": "Koyu zeminde okunan bir sürüm; isteğe bağlı.",
-        "none": "Logo yok"
+        "darkHint": "Koyu zeminde okunan bir sürüm; isteğe bağlı. PNG ya da SVG.",
+        "none": "Logo yok",
+        "logos": "Logolar",
+        "favicon": {
+          "title": "Site simgesi",
+          "label": "Site simgesi (favicon)",
+          "hint": "Tarayıcı sekmesinde, yer imlerinde ve telefonun ana ekranında görünür. Kare bir PNG (512 × 512 piksel önerilir, en çok 1 MB) ya da SVG (en çok 100 KB) yükleyin.",
+          "none": "Simge yok",
+          "empty": "Yüklemezseniz vitrin varsayılan simgeyi gösterir. Kare bir PNG (512 × 512 piksel önerilir, en çok 1 MB) ya da SVG (en çok 100 KB) yükleyin.",
+          "tab": "Tarayıcı sekmesi",
+          "home": "Ana ekran",
+          "type": "Site simgesi PNG ya da SVG olmalı.",
+          "tooLarge": "Site simgesi PNG ise en çok 1 MB, SVG ise en çok 100 KB olabilir. Daha küçük bir dosya seçin.",
+          "notSquare": "Simge kare değil; tarayıcı onu sıkıştırarak gösterebilir. Kare bir görsel önerilir.",
+          "small": "Simge 48 × 48 pikselden küçük; Google arama sonuçlarında gösterilmeyebilir.",
+          "unmeasured": "Bu görselin boyutu bilinmiyor. Kütüphaneye yeniden yükleyip seçin."
+        },
+        "svgText": "SVG logonuzda yazı varsa, tasarım programınızda yazıyı \"eğriye çevir\" / \"ana hatlara dönüştür\" ile dışa aktarın: yüklemede yazı tipi bildirimleri temizlenir, eğriye çevrilmiş yazı aynen görünür."
       },
       "region": "Bölge ve birimler",
       "regionHint": "Tarihlerin ve ürün ölçülerinin nasıl tutulacağı.",
@@ -6749,7 +6765,54 @@
       "shelf_restored": {
         "title": "Geçici stok düzeltmesi geri alındı",
         "description": "Sepet {{cart}} için artırılan stok, işlem yarıda kaldığı için geri alındı. Stok sayılarını kontrol edin."
+      },
+      "wholesale_price_check": {
+        "title": "Toptan sepetin ödemesi başlatılamadı",
+        "description": "Sepet {{cart}} toptancının bugünkü fiyatlarına getirilemedi; ödeme alınmadı. Bu sepetteki ürünlerin toptan ve perakende fiyatlarını kontrol edin."
       }
+    },
+    "markAllRead": "Tümünü okundu say",
+    "seeAll": "Tümünü gör",
+    "unreadMark": "Okunmadı: ",
+    "wholesaleOrder": {
+      "title": "Yeni toptan sipariş #{{number}}",
+      "transfer": "Havale bekleniyor"
+    },
+    "page": {
+      "description": "Mağazanızdan gelen uyarılar; okunmamışlar zilde sayılır.",
+      "views": "Bildirim görünümleri",
+      "tabs": {
+        "all": "Tümü",
+        "unread": "Okunmamış",
+        "read": "Okunmuş"
+      },
+      "group": "Bildirim türü",
+      "groups": {
+        "all": "Tüm türler",
+        "orders": "Siparişler ve iadeler",
+        "wholesale": "Toptan siparişler",
+        "payments": "Ödemeler",
+        "stock": "Stok",
+        "invoices": "Fatura ve muhasebe",
+        "messages": "Mesajlar ve e-posta",
+        "system": "Bağlantılar ve taşıma"
+      },
+      "bulk": "Seçili bildirimler",
+      "selected_one": "{{formatted}} bildirim seçildi",
+      "selected_other": "{{formatted}} bildirim seçildi",
+      "markSelected": "Okundu say",
+      "markOne": "Okundu say",
+      "clear": "Seçimi temizle",
+      "select": "Bildirimi seç",
+      "noMatch": "Bu görünümde bildirim yok."
+    },
+    "newOrder": {
+      "title": "Yeni sipariş #{{number}}",
+      "description": "{{total}}"
+    },
+    "bankTransfer": {
+      "title": "Havale bekleniyor: #{{number}}",
+      "description": "{{total}} tutarındaki ödeme gelince siparişi onaylayın."
     }
   },
   "content": {
@@ -10040,7 +10103,8 @@
       "done_other": "{{count}} görsel kütüphaneye eklendi.",
       "problem": {
         "type": "Bu dosya türü yüklenemez",
-        "size": "10 MB'tan büyük"
+        "size": "10 MB'tan büyük",
+        "svgSize": "SVG en çok 200 KB olabilir"
       },
       "status": {
         "waiting": "Sırada",
@@ -10120,7 +10184,8 @@
         "order": "Sipariş",
         "category": "Kategori görseli",
         "etbis_qr": "ETBİS karekodu",
-        "collection": "Koleksiyon görseli"
+        "collection": "Koleksiyon görseli",
+        "favicon": "Site simgesi"
       },
       "seoTypes": {
         "product": "ürün sayfası",
@@ -10133,7 +10198,8 @@
         "post_category": "blog kategorisi",
         "post_tag": "blog etiketi"
       },
-      "etbisQrLink": "Mağazanın ETBİS karekodu"
+      "etbisQrLink": "Mağazanın ETBİS karekodu",
+      "faviconLink": "Mağazanın site simgesi"
     }
   },
   "confirmEmail": {
@@ -10482,7 +10548,7 @@
     },
     "nav": {
       "label": "Toptancılar bölümleri",
-      "accounts": "Toptancılar",
+      "accounts": "Toptancı listesi",
       "tiers": "Toptan seviyeleri",
       "orders": "Siparişler"
     },

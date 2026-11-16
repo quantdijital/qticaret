@@ -7,7 +7,7 @@ import {
 import { customerAuthProviders } from "./src/lib/auth/providers"
 import { assertCompiledPackages } from "./src/lib/control-plane/compiled-packages"
 import { assertControlPlaneConfigured } from "./src/lib/control-plane/env"
-import { isLocalEnv, parseEnv, s3Settings } from "./src/lib/env"
+import { isLocalEnv, parseEnv, s3Settings, sharedFileOrigins } from "./src/lib/env"
 import { warnFakeProviders } from "./src/lib/fake-providers"
 import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger, logger } from "./src/lib/logging"
 import { lockingModules, tenantNamespace } from "./src/lib/redis"
@@ -30,6 +30,11 @@ if (!s3 && !isLocalEnv(env)) {
   // NODE_ENV unset counts as deployed: files on local disk are lost on
   // restart and served unauthenticated under /static (F16 sets NODE_ENV)
   logger.warn({ event: "files.local_disk", nodeEnv: env.NODE_ENV ?? null })
+}
+// Files served from a page's own origin: an uploaded file runs under its cookies (docs/04)
+const sharing = sharedFileOrigins(env)
+if (sharing.length > 0) {
+  logger.warn({ event: "files.same_origin_as_pages", shares: sharing })
 }
 // A fake provider server set (development only; refused when deployed): one
 // warning per provider, as the panel's test mode words do not hold then.

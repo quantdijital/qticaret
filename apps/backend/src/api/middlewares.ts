@@ -50,6 +50,7 @@ import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
 import { COMMUNICATION_ROUTES } from "./http/communication-routes"
 import { CONTACT_ROUTES } from "./http/contact-routes"
+import { ALERT_ROUTES } from "./http/alert-routes"
 import { EMAIL_LINK_ROUTES } from "./http/email-link-routes"
 import { STOREFRONT_MENU_ROUTES } from "./http/storefront-menu-routes"
 import { STOREFRONT_CARD_ROUTES } from "./http/storefront-card-routes"
@@ -321,6 +322,8 @@ export default defineMiddlewares({
       middlewares: [validateAndTransformBody(AdminPostRevealTaxId)],
     },
     ...MESSAGING_ROUTES,
+    // adr/0020: the bell and its page, read per staff member
+    ...ALERT_ROUTES,
     // adr/0061 Ek C9: the control plane's signed plan document push
     ...CONTROL_PLANE_ROUTES,
     // adr/0061 Ek C14: Settings > Abonelik's reading

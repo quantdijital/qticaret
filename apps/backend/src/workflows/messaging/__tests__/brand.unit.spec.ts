@@ -1,4 +1,4 @@
-import { mailLogoUrl, storefrontUrlOf } from "../brand"
+import { mailLogoSource, mailLogoUrl, storefrontUrlOf } from "../brand"
 
 const development = { NODE_ENV: "development" as const }
 const production = { NODE_ENV: "production" as const }
@@ -44,5 +44,29 @@ describe("a message's logo", () => {
     expect(mailLogoUrl(local, development)).toBe(local)
     expect(mailLogoUrl(local, production)).toBeNull()
     expect(mailLogoUrl(local, { NODE_ENV: "test" })).toBeNull()
+  })
+})
+
+describe("mailLogoSource: the logo mail clients can draw", () => {
+  const withAssets = (rows: { url: string; derivatives: unknown }[]) =>
+    ({
+      resolve: () => ({
+        listMediaAssets: (filters: { url: string }) =>
+          Promise.resolve(rows.filter((row) => row.url === filters.url)),
+      }),
+    }) as unknown as Parameters<typeof mailLogoSource>[0]
+
+  it("keeps a raster logo, and sends an SVG one as its PNG, or none", async () => {
+    const svg = "https://cdn.example.com/logo.svg"
+    const png = "https://cdn.example.com/mail-logo.png"
+    const container = withAssets([{ url: svg, derivatives: { mail_png: { url: png } } }])
+
+    expect(await mailLogoSource(container, "https://cdn.example.com/logo.png")).toBe(
+      "https://cdn.example.com/logo.png"
+    )
+    expect(await mailLogoSource(container, svg)).toBe(png)
+    // No PNG made of it: the mail shows the shop's name
+    expect(await mailLogoSource(withAssets([{ url: svg, derivatives: null }]), svg)).toBeNull()
+    expect(await mailLogoSource(container, null)).toBeNull()
   })
 })

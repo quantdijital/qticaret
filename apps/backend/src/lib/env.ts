@@ -411,6 +411,43 @@ export function storefrontOrigin(
   return isLocalEnv(env) ? LOCAL_STOREFRONT_URL : null
 }
 
+/**
+ * The origins the shop's files share with its pages, deployed: storage
+ * served from the backend's (the panel's) or the storefront's origin lets
+ * an uploaded file (an SVG logo, cleaned as it is) run under that origin's
+ * cookies. Empty: apart, or not deployed (a developer's machine, tests).
+ * A warning at start, never a refusal (docs/04).
+ */
+export function sharedFileOrigins(
+  env: Pick<
+    Env,
+    | "NODE_ENV"
+    | "BACKEND_URL"
+    | "STOREFRONT_ORIGIN"
+    | "S3_REGION"
+    | "S3_BUCKET"
+    | "S3_FILE_URL"
+    | "S3_ACCESS_KEY_ID"
+    | "S3_SECRET_ACCESS_KEY"
+    | "S3_ENDPOINT"
+  >
+): string[] {
+  if (isLocalEnv(env)) {
+    return []
+  }
+  const files = s3Settings(env as Env)?.fileUrl
+  if (!files) {
+    return []
+  }
+  const origin = new URL(files).origin
+  return [
+    ...(env.BACKEND_URL && new URL(env.BACKEND_URL).origin === origin ? ["backend"] : []),
+    ...(env.STOREFRONT_ORIGIN && new URL(env.STOREFRONT_ORIGIN).origin === origin
+      ? ["storefront"]
+      : []),
+  ]
+}
+
 /** The panel's origin, for links staff open (an invitation). */
 export function panelUrl(env: Pick<Env, "BACKEND_URL" | "NODE_ENV"> = parseEnv()): string {
   return isLocalEnv(env) && !env.BACKEND_URL ? LOCAL_PANEL_URL : backendUrl(env)

@@ -1,9 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { isValidationError } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
 import { assertStorageWithinLimit, forgetUsage } from "../../../lib/plan-limits"
 import { displayName, readImage } from "../../../lib/media"
+import { SVG_MIME, looksLikeSvg, sanitizeSvg } from "../../../lib/media/svg"
 import { UPLOAD_MEDIA_TYPES, readImageInfo } from "../../../lib/security/upload"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
@@ -44,6 +46,32 @@ async function sizeOf(bytes: Buffer) {
 /** What the library shows of a stored file: its name, type, bytes and size. */
 async function describe(container: MedusaContainer, fileId: string) {
   const bytes = await readFile(container, fileId)
+  if (readImageInfo(bytes) === null && looksLikeSvg(bytes)) {
+    // Read again by the cleaner, for two things: its size (the library keeps it), and
+    // proof that storage holds what the upload check wrote. The cleaner gives back the
+    // same file for one it wrote; one it would change (put in storage some other way) is
+    // no image of ours, and no record is made of it
+    let svg
+    try {
+      svg = await sanitizeSvg(bytes)
+    } catch (error) {
+      // A cleaner that could not start is ours to see, not the file's refusal
+      if (!isValidationError(error)) {
+        throw error
+      }
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "media.not_an_image")
+    }
+    if (!svg.buffer.equals(bytes)) {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "media.not_an_image")
+    }
+    return {
+      filename: displayName(fileId),
+      mime_type: SVG_MIME,
+      size: bytes.length,
+      width: svg.width,
+      height: svg.height,
+    }
+  }
   const size = await sizeOf(bytes)
   const type = readImageInfo(bytes)?.type
   return {

@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/util
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { publicUploadUrl } from "../../files/public-upload"
 import { ValidationError } from "../../../lib/errors"
+import { refuseSvgImages } from "../../../lib/media/svg-use"
 import { seoTextHash } from "../../../lib/seo"
 import { SEO_ENTITIES, seoEntityFilter } from "../entities"
 import type { SeoEntityType, SeoValues } from "../entities"
@@ -74,11 +75,17 @@ async function countSame(
   return (data as { id: string }[]).filter((row) => row.id !== ownId).length
 }
 
-/** The OG image must be one of the shop's own uploads, never a job's private result (adr/0015). */
+/**
+ * The OG image must be one of the shop's own uploads, never a job's
+ * private result (adr/0015), and no SVG: share cards take none, and SVG
+ * is the shop's logos' and site icon's alone (`lib/media/svg-use.ts`).
+ */
 async function assertOwnFile(container: MedusaContainer, fileId: string): Promise<void> {
-  if ((await publicUploadUrl(container, fileId)) === null) {
+  const url = await publicUploadUrl(container, fileId)
+  if (url === null) {
     throw new ValidationError("seo.og_image_unknown", { field: "og_image_override" })
   }
+  await refuseSvgImages(container, [url], "og_image_override")
 }
 
 /** Checks a page's SEO save and works out what to write; writes nothing. */

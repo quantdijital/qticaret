@@ -17,8 +17,6 @@ export interface Rule {
 export interface RequestFacts {
   /** `type` of a queued job's body, when there is one. */
   jobType?: string | undefined
-  /** The `channel` a notification list asks for, when it asks for one alone. */
-  notificationChannel?: string | undefined
   /** The type of the API key a `DELETE /admin/api-keys/:id` names, when it is one we have. */
   apiKeyType?: string | undefined
 }
@@ -42,6 +40,8 @@ export const SELF: readonly Rule[] = [
  * from the request.
  */
 export const OWN: readonly Rule[] = [
+  // What one has read of the shop's alerts is one's own (adr/0020)
+  { methods: ["POST"], path: "/admin/alerts/read" },
   { methods: ["GET", "POST"], path: "/admin/staff/me/profile" },
   { methods: ["POST"], path: "/admin/staff/me/password" },
   { methods: ["POST"], path: "/admin/staff/me/email" },
@@ -139,13 +139,10 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/staff*" },
   // A run's steps keep what they read: customers, addresses, payments
   { methods: "*", path: "/admin/workflows-executions*" },
-  // Medusa's sent messages carry each customer's address: the team's own
-  // feed (the panel's bell) is the one channel the others read
-  {
-    methods: "*",
-    path: "/admin/notifications",
-    when: (facts) => facts.notificationChannel !== "feed",
-  },
+  // Medusa's sent messages carry each customer's address, and its feed holds every
+  // alert, a wholesaler's order too: the others read the team's alerts through
+  // `/admin/alerts` (the panel's bell), which leaves out what their role does not see
+  { methods: "*", path: "/admin/notifications" },
   { methods: "*", path: "/admin/notifications/:id" },
   // Who the shop turns away, and why (adr/0044 §4)
   { methods: "*", path: "/admin/fraud/blocks*" },

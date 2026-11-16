@@ -3,6 +3,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { EMPTY_DOC, contentDoc, docStats, summaryOf } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
+import { refuseSvgImages } from "../../lib/media/svg-use"
 import { isCleanText } from "../../lib/security"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import { CONTENT_MODULE } from "../../modules/content"
@@ -106,12 +107,18 @@ export const canonical = (body: unknown): string | null => {
   return parsed.success ? JSON.stringify(parsed.data) : null
 }
 
-/** The uploaded media records behind these addresses; one that is not the shop's upload refuses the save. */
+/**
+ * The uploaded media records behind these addresses; one that is not the
+ * shop's upload refuses the save, and so does an SVG (logos and the site
+ * icon only, `lib/media/svg-use.ts`): every page, cover, slide and share
+ * image goes through here.
+ */
 export async function mediaOf(container: MedusaContainer, urls: string[], field: string) {
   const unique = [...new Set(urls)]
   if (unique.length === 0) {
     return []
   }
+  await refuseSvgImages(container, unique, field)
   const assets = await container
     .resolve<MediaModuleService>(MEDIA_MODULE)
     .listMediaAssets({ url: unique, file_id: { $ne: null } }, { select: ["id", "url"] })

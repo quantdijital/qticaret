@@ -1,8 +1,9 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { isValidationError } from "../../lib/errors"
+import { isRetryableError, isValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
 import { sanitizeImage } from "../../lib/media"
-import { UPLOAD_MEDIA_TYPES, storedName, validateUpload } from "../../lib/security/upload"
+import { sanitizeSvg } from "../../lib/media/svg"
+import { UPLOAD_MEDIA_TYPES, storedName, validateLibraryUpload } from "../../lib/security/upload"
 import type { UploadFile } from "../../lib/security/upload"
 import { rejectRequest } from "./reject"
 
@@ -43,30 +44,84 @@ function refuse(req: MedusaRequest, res: MedusaResponse, reason: string) {
   rejectRequest(req, res, 400, { type: "invalid_data", message: reason }, reason)
 }
 
+/** SVGs in one upload at most: each takes a cleaning worker (lib/media/svg.ts). */
+export const MAX_SVGS_PER_UPLOAD = 3
+
+/**
+ * Express does not catch an async middleware's rejection (Medusa wraps its
+ * route handlers, not these): anything unexpected is logged here and
+ * passed on as a fixed error, so no rejection goes unhandled and no
+ * module path or cause reaches the answer.
+ */
 export async function uploadValidator(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
 ) {
+  let proceed: boolean
+  try {
+    proceed = await checkUploads(req, res)
+  } catch (error) {
+    logger.error({ event: "upload.check_failed", err: errorSummary(error) })
+    next(new Error("upload check failed"))
+    return
+  }
+  if (proceed) {
+    next()
+  }
+}
+
+/** Whether the request goes on: false when it was answered (a file refused). */
+async function checkUploads(req: MedusaRequest, res: MedusaResponse): Promise<boolean> {
   const files = uploadedFiles(req)
   if (files.length > MAX_FILES_PER_UPLOAD) {
     refuse(req, res, "upload.too_many_files")
-    return
+    return false
   }
   const accepted = []
   for (const file of files) {
     try {
-      accepted.push({ file, type: validateUpload(file) })
+      accepted.push({ file, type: validateLibraryUpload(file) })
     } catch (error) {
       if (!isValidationError(error)) {
         throw error
       }
       refuse(req, res, error.safeMessage)
-      return
+      return false
     }
   }
-  // Images are stored cleaned: upright, without EXIF/GPS and other metadata (F3.3)
+  if (accepted.filter(({ type }) => type.type === "svg").length > MAX_SVGS_PER_UPLOAD) {
+    refuse(req, res, "upload.svg_too_many")
+    return false
+  }
+  // Images are stored cleaned: upright, without EXIF/GPS and other metadata (F3.3); an SVG
+  // as its cleaner leaves it, never as sent (lib/media/svg.ts)
   for (const { file, type } of accepted) {
+    if (type.type === "svg") {
+      try {
+        file.buffer = (await sanitizeSvg(file.buffer)).buffer
+        file.size = file.buffer.length
+      } catch (error) {
+        if (isRetryableError(error)) {
+          // Every cleaning slot taken and the queue full or too slow: try again shortly
+          res.setHeader("Retry-After", String(Math.ceil((error.retryAfterMs ?? 5_000) / 1_000)))
+          rejectRequest(
+            req,
+            res,
+            503,
+            { type: "temporarily_unavailable", message: error.safeMessage },
+            error.safeMessage
+          )
+          return false
+        }
+        if (!isValidationError(error)) {
+          throw error
+        }
+        refuse(req, res, error.safeMessage)
+        return false
+      }
+      continue
+    }
     try {
       const clean = await sanitizeImage(file.buffer, type.type)
       file.buffer = clean.buffer
@@ -75,12 +130,12 @@ export async function uploadValidator(
       // A header that passed the check over pixels the decoder cannot read
       logger.info({ event: "upload.image_unreadable", err: errorSummary(error) })
       refuse(req, res, "upload.unreadable_image")
-      return
+      return false
     }
   }
   for (const { file, type } of accepted) {
     file.originalname = storedName(multerName(file.originalname), type)
     file.mimetype = UPLOAD_MEDIA_TYPES[type.type].mime
   }
-  next()
+  return true
 }

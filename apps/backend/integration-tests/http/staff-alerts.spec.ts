@@ -33,6 +33,13 @@ medusaIntegrationTestRunner({
 
     const mailsTo = (address: string) =>
       fake.messages.filter(({ to }) => to.includes(address)).map(({ template }) => template)
+    const orderBell = (orderId: string) =>
+      getContainer()
+        .resolve(Modules.NOTIFICATION)
+        .listNotifications(
+          { channel: "feed", resource_id: orderId },
+          { select: ["trigger_type", "data"] }
+        )
     const settings = (body: Record<string, unknown>) =>
       http.post("/admin/platform-settings/notifications", body, { headers: admin.headers })
 
@@ -92,17 +99,52 @@ medusaIntegrationTestRunner({
         () => Promise.resolve(STAFF.flatMap(mailsTo)),
         (templates) => templates.length === 4
       )
-      const bell = await getContainer()
-        .resolve(Modules.NOTIFICATION)
-        .listNotifications({ channel: "feed", resource_id: data.order.id })
+      const bell = await eventually(
+        () => orderBell(data.order.id),
+        (rows) => rows.length > 0
+      )
+      // A moment more, for a second alert of the same order to show
+      await new Promise((resolve) => setTimeout(resolve, 500))
       const shopper = fake.messages.find(({ template }) => template === "order.placed")
 
       for (const address of STAFF) {
         expect(mailsTo(address).sort()).toEqual(["staff.bank_transfer", "staff.new_order"])
       }
-      expect(bell).toHaveLength(1)
+      // The transfer's own alert alone: no "new order" beside it
+      expect(await orderBell(data.order.id)).toHaveLength(1)
       expect(bell[0]?.data).toMatchObject({ kind: "bank_transfer_pending" })
       expect(shopper?.text).toContain("IBAN: TR33 0006 1005 1978 6457 8413 26")
+    })
+
+    it("rings the bell once for an order paid any other way, with no one's name in it", async () => {
+      const orderId = await placeOrder(getContainer(), {
+        regionId: shop.regionId,
+        salesChannelId: shop.salesChannelId,
+        shippingOptionId: shop.shippingOptionId,
+        items: [{ variant_id: variantId, quantity: 1 }],
+        address: PAYTR_ADDRESS,
+        email: "musteri@example.com",
+      })
+      const bell = await eventually(
+        () => orderBell(orderId),
+        (rows) => rows.length > 0
+      )
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      expect(await orderBell(orderId)).toHaveLength(1)
+      expect(bell[0]?.trigger_type).toBe("orders.new_order")
+      expect(bell[0]?.data).toMatchObject({ kind: "new_order", order_id: orderId })
+      expect(Object.keys(bell[0]?.data ?? {}).sort()).toEqual(
+        ["description", "kind", "number", "order_id", "title", "total"].sort()
+      )
+      const row = JSON.stringify(bell[0]?.data)
+      for (const personal of [
+        "musteri@example.com",
+        PAYTR_ADDRESS.first_name,
+        PAYTR_ADDRESS.phone,
+      ]) {
+        expect(row).not.toContain(personal)
+      }
     })
 
     it("sends no alert the shop turned off, and none without a staff list", async () => {

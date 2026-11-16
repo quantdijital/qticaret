@@ -149,6 +149,8 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/staff/me/sessions/end-others",
     "/admin/staff/invites/info",
     "/admin/staff/invites/accept",
+    // One's own alerts marked read: the person's own state, while orders still come in
+    "/admin/alerts/read",
   ]),
   // Taking access away is never closed: a member who left, an invitation, a key, a
   // webhook, the feed's link; a member locked out of their 2FA let back in

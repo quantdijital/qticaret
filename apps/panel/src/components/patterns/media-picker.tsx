@@ -26,6 +26,8 @@ export interface MediaPickerProps {
   /** At most this many may be chosen. */
   max?: number
   title?: string
+  /** SVG offered too: the shop's logos and site icon only (the server refuses it elsewhere). */
+  svg?: boolean
 }
 
 /**
@@ -41,6 +43,7 @@ export function MediaPicker({
   multiple = false,
   max = 20,
   title,
+  svg = false,
 }: MediaPickerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -49,6 +52,7 @@ export function MediaPicker({
           multiple={multiple}
           max={max}
           title={title}
+          svg={svg}
           onChoose={(assets) => {
             onSelect(assets)
             onOpenChange(false)
@@ -74,11 +78,13 @@ function PickerContent({
   multiple,
   max,
   title,
+  svg,
   onChoose,
 }: {
   multiple: boolean
   max: number
   title: string | undefined
+  svg: boolean
   onChoose: (assets: MediaAsset[]) => void
 }) {
   const { t } = useTranslation()
@@ -132,11 +138,11 @@ function PickerContent({
           <TabsTrigger value="address">{t("media.picker.addressTab")}</TabsTrigger>
         </TabsList>
         <TabsContent value="library" className={TAB}>
-          <LibraryTab multiple={multiple} max={max} onChoose={onChoose} />
+          <LibraryTab multiple={multiple} max={max} svg={svg} onChoose={onChoose} />
         </TabsContent>
         {/* Kept mounted: a drop on another tab is handed to its zone */}
         <TabsContent value="upload" forceMount className={TAB}>
-          <UploadTab multiple={multiple} max={max} onChoose={onChoose} zone={zone} />
+          <UploadTab multiple={multiple} max={max} svg={svg} onChoose={onChoose} zone={zone} />
         </TabsContent>
         <TabsContent value="address" className={TAB}>
           <AddressTab onChoose={onChoose} />

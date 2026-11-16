@@ -1,4 +1,8 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { SVG_MIME } from "../../../../lib/media/svg"
+import { MEDIA_MODULE } from "../../../../modules/media"
+import type MediaModuleService from "../../../../modules/media/service"
+import { appleTouchOf } from "../../../../workflows/platform-settings/steps/brand-images"
 import { homeSeo } from "../../../../lib/seo/home"
 import { siteJsonLd } from "../../../../lib/seo/jsonld"
 import { SCHEMA_DAYS } from "../../../../lib/shop/hours"
@@ -18,6 +22,33 @@ import type { LegalIdentity } from "../../../../workflows/legal/identity"
 import { shopOf } from "../../../../workflows/seo/payload-sources"
 import { planModeFor } from "../../../../lib/plan-guard"
 import { siteMaintenance } from "../../../../workflows/storefront/maintenance"
+
+/**
+ * The site icon as the storefront's `<head>` names it: its address and
+ * type, and Apple's home screen icon (the PNG itself; an SVG's own PNG, or
+ * none when it could not be made). None chosen: all null.
+ */
+async function siteIcon(
+  scope: MedusaRequest["scope"],
+  url: string | null
+): Promise<{
+  favicon_url: string | null
+  favicon_type: string | null
+  apple_touch_url: string | null
+}> {
+  if (!url) {
+    return { favicon_url: null, favicon_type: null, apple_touch_url: null }
+  }
+  const [asset] = await scope
+    .resolve<MediaModuleService>(MEDIA_MODULE)
+    .listMediaAssets({ url }, { select: ["mime_type", "derivatives"], take: 1 })
+  const type = asset?.mime_type === SVG_MIME ? SVG_MIME : "image/png"
+  return {
+    favicon_url: url,
+    favicon_type: type,
+    apple_touch_url: type === SVG_MIME ? (appleTouchOf(asset?.derivatives)?.url ?? null) : url,
+  }
+}
 
 const identityOf = (identity: LegalIdentity) => ({
   legalName: identity.company_title,
@@ -42,7 +73,7 @@ const identityOf = (identity: LegalIdentity) => ({
  * as an `OnlineStore` (with its legal identity, F13.9) and its `WebSite`. No blocks until the canonical
  * host is set: they need absolute URLs. And the robots value of the
  * storefront's own pages (search results, cart, account). For the
- * storefront's frame (F18, adr/0046): the shop's name and logo, and the
+ * storefront's frame (F18, adr/0046): the shop's name, logo and site icon, and the
  * home page's `seo` object, shaped as resolve's for every other page. And
  * whether the shop is dark (adr/0053): the storefront answers 503 with
  * `Retry-After` and this page but for its system paths, the paths left
@@ -86,7 +117,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       : null,
     jsonLd,
     system_pages: SYSTEM_PAGES,
-    shop: { name: shop.name, logo_url: appearance.logo_light_url },
+    // The site icon the shop chose, its type and Apple's home screen PNG; null: the storefront's own
+    shop: {
+      name: shop.name,
+      logo_url: appearance.logo_light_url,
+      ...(await siteIcon(req.scope, appearance.favicon_url ?? null)),
+    },
     home: homeSeo({ shop, home: seo.home, ogImage: seo.default_og_image, jsonLd }),
     maintenance,
     tracking,
