@@ -85,7 +85,8 @@ describe("the tall menus scroll inside", () => {
  * olup açılan dropdown headere yapışık geliyor diğer menü linklerinde öyle
  * değil"; a fix): the "Kategoriler" list hung 4 px under its 44 px button,
  * which ends 4 px above the 52 px bar's edge, so it touched the bar; a
- * category's dropdown hangs 8 px under its item. Both now take one rule.
+ * category's dropdown hangs 8 px under its item. "Daha fazla"'s panel hung
+ * right under its button, inside the bar. All three now take one rule.
  */
 describe("the menu bar's panels hang alike", () => {
   it("hangs the Kategoriler list one step under its button, as a category's dropdown", () => {
@@ -106,5 +107,11 @@ describe("the menu bar's panels hang alike", () => {
     // One place sets the step: the dropdown's own rule leaves it out
     expect(rule(".gf-drop")).not.toContain("top:")
     expect(MENU_CSS.match(/top: calc\(100% \+ var\(--space-xs\)\)/g)).toHaveLength(1)
+  })
+
+  it("hangs the Daha fazla panel by the same rule", () => {
+    // Drawn only once the bar is measured: its class is the whole of its placement
+    expect(MORE_PANEL.split(" ")).toContain("gf-hang")
+    expect(MORE_PANEL).not.toMatch(/(^| )-?(top|mt)-/)
   })
 })

@@ -77,11 +77,13 @@
   }
   /*
    * The menu bar's dropdowns hang one step (8 px) under their item, so a
-   * category's dropdown and the "Kategoriler" list (`.gf-hang`,
-   * frame/CategoryMenu) stand the same 4 px off the bar's lower edge (the
-   * 44 px items sit centred in the 52 px bar). Moving across the step
-   * keeps either open: Radix's close delay for the dropdown, the list's
-   * own 250 ms one (CLOSE_AFTER).
+   * category's dropdown, the "Kategoriler" list (frame/CategoryMenu) and
+   * the "Daha fazla" panel (frame/AisleMore), the last two `.gf-hang`,
+   * stand the same 4 px off the bar's lower edge (the 44 px items sit
+   * centred in the 52 px bar). Moving across the step keeps each open:
+   * Radix's 150 ms close delay for the dropdown and "Daha fazla" (the
+   * panel's pointer entering cancels it), the list's own 250 ms one
+   * (CLOSE_AFTER).
    */
   .gf-drop,
   .gf-hang {
