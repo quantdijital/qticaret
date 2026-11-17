@@ -99,10 +99,12 @@ export function compare(before: Layout, after: Layout): Comparison {
 }
 
 /**
- * The look the draft was last given applied again, so its saved-look mark
- * comes back as it was (only applying writes it): the saved look it names
- * when still there, the ready-made one it names, else the backup. Then the
- * draft itself saved whole over it, as the theme editor saves.
+ * The draft's saved-look mark brought back as it was first (saving the
+ * draft keeps the stored one; only applying or discarding writes it): the
+ * saved look it names applied again when still there, the ready-made one
+ * it names, or, with none, the draft discarded to what is live (a design
+ * from before saved looks carries none); else the backup. Then the draft
+ * itself saved whole over it, as the theme editor saves.
  */
 async function putBack(api: AdminApi, before: Before, backup: string | null): Promise<void> {
   const mark = before.layout.draft.settings?.design ?? null
@@ -113,6 +115,8 @@ async function putBack(api: AdminApi, before: Before, backup: string | null): Pr
     await api.post(`/admin/storefront-presets/${preset.pack}/${preset.code}/apply`, {
       demo: false,
     })
+  } else if (!mark) {
+    await api.post("/admin/storefront-layout/discard", {})
   } else if (backup) {
     await api.post(`/admin/storefront-designs/${backup}/apply`, {})
   }

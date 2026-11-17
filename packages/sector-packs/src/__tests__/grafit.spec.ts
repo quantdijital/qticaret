@@ -14,7 +14,7 @@ describe("the presets in this package (adr/0063 §8)", () => {
       menus: null,
       demo: null,
       images: [],
-      preview: null,
+      preview: "preview.webp",
       handles: [],
     })
     expect(grafit?.theme_settings).toEqual({

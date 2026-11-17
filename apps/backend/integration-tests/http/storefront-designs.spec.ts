@@ -246,7 +246,7 @@ medusaIntegrationTestRunner({
         swatch: null,
         has_header: false,
         has_footer: true,
-        preview_url: null,
+        has_preview: true,
         summary: {
           source: "preset",
           source_name: "Grafit",
@@ -255,19 +255,22 @@ medusaIntegrationTestRunner({
           reason: null,
         },
       })
+      expect(grafit?.["preview_url"]).toMatch(
+        /^\/admin\/storefront-presets\/general\/grafit\/preview\?v=\d+$/
+      )
       expect(grafit).not.toHaveProperty("layout")
 
-      // Signed out; no picture in this build; a pack not applied here; a code no pack writes
+      // Its picture (`pnpm preset:previews`), sent as an image only
+      const picture = await staff.get("/admin/storefront-presets/general/grafit/preview")
+      expect(picture.status).toBe(200)
+      expect(picture.headers["content-type"]).toMatch(/^image\/webp/)
+      expect(picture.headers["x-content-type-options"]).toBe("nosniff")
+
+      // Signed out; a pack not applied here; a code no pack writes
       expect(
         (await settle(http.get("/admin/storefront-presets/general/grafit/preview"))).status
       ).toBe(401)
-      for (const path of [
-        "general/grafit",
-        "cutlery/tezgah",
-        "general/Grafit",
-        "general/..%2Fgrafit",
-        "yok/yok",
-      ]) {
+      for (const path of ["cutlery/tezgah", "general/Grafit", "general/..%2Fgrafit", "yok/yok"]) {
         expect((await staff.get(`/admin/storefront-presets/${path}/preview`)).status).toBe(404)
       }
       const operations = staffClient(

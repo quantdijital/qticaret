@@ -1,5 +1,5 @@
 /**
- * `NODE_ENV=development pnpm preset:previews -- --yes [--only <code>,…] [--backup-to <file>]`
+ * `NODE_ENV=development pnpm preset:previews -- --yes [--only <code>,…] [--backup-to <file>] [--pictures <file>]`
  *
  * The gallery's thumbnails for the ready-made looks (adr/0063 §7, adr/0064
  * Ek 2026-11-17): every preset applied in turn to the theme editor's draft
@@ -12,6 +12,8 @@
  * The developer's draft is kept first as a saved look, put back at the end
  * and checked against what was read before (`--backup-to` also writes it to
  * a file); nothing is published. Refused outside development or without `--yes`.
+ * `--pictures` writes the file names of the photos each thumbnail shows,
+ * for its credits (docs/12).
  */
 import { existsSync } from "node:fs"
 import { writeFile } from "node:fs/promises"
@@ -24,6 +26,7 @@ import { print, printError } from "../resolved-style/print.ts"
 import { settle } from "../resolved-style/settle.ts"
 import { BACKUP_NAME, keepBackup, readBefore, restore } from "./draft.ts"
 import type { Before } from "./draft.ts"
+import { asShopperSees, picturesInView } from "./frame.ts"
 
 const STOREFRONT_URL = process.env["E2E_BASE_URL"] ?? "http://localhost:8000"
 const REPO_ROOT = join(import.meta.dirname, "..", "..", "..", "..")
@@ -38,10 +41,11 @@ const QUALITIES = [0.72, 0.64, 0.56, 0.48, 0.4]
 interface Options {
   only: string[] | null
   backupTo: string | null
+  pictures: string | null
 }
 
 const USAGE =
-  "NODE_ENV=development pnpm preset:previews -- --yes [--only <code>,…] [--backup-to <file>]"
+  "NODE_ENV=development pnpm preset:previews -- --yes [--only <code>,…] [--backup-to <file>] [--pictures <file>]"
 
 function parseArgs(argv: string[]): Options {
   const args = argv.filter((each) => each !== "--")
@@ -57,11 +61,15 @@ function parseArgs(argv: string[]): Options {
     const at = args.indexOf(flag)
     return at === -1 ? null : (args[at + 1] ?? null)
   }
+  const file = (flag: string) => {
+    const given = value(flag)
+    return given ? resolve(process.env["INIT_CWD"] ?? process.cwd(), given) : null
+  }
   const only = value("--only")
-  const backupTo = value("--backup-to")
   return {
     only: only ? only.split(",").filter(Boolean) : null,
-    backupTo: backupTo ? resolve(process.env["INIT_CWD"] ?? process.cwd(), backupTo) : null,
+    backupTo: file("--backup-to"),
+    pictures: file("--pictures"),
   }
 }
 
@@ -108,8 +116,16 @@ async function toWebp(encoder: Page, png: Buffer): Promise<Buffer> {
   throw new Error(`the thumbnail stays over ${String(MAX_BYTES / 1024)} KB`)
 }
 
-/** One look: applied, its draft preview drawn and written next to its preset.json. */
-async function captureOne(api: AdminApi, browser: Browser, encoder: Page, preset: Preset) {
+/**
+ * One look: applied, its draft preview drawn and written next to its
+ * preset.json. Returns the photos it shows.
+ */
+async function captureOne(
+  api: AdminApi,
+  browser: Browser,
+  encoder: Page,
+  preset: Preset
+): Promise<string[]> {
   const dir = join(PACKS, preset.pack, "presets", preset.code)
   if (!existsSync(join(dir, "preset.json"))) {
     throw new Error(`${preset.pack}/${preset.code}: no preset folder in this checkout`)
@@ -132,12 +148,14 @@ async function captureOne(api: AdminApi, browser: Browser, encoder: Page, preset
   try {
     const page = await context.newPage()
     await settle(page, `${STOREFRONT_URL}${path}`, print)
+    await asShopperSees(page)
     const webp = await toWebp(encoder, await page.screenshot({ type: "png" }))
     await writeFile(join(dir, "preview.webp"), webp)
     print(
       `${preset.pack}/${preset.code}: ${String(Math.round(webp.length / 1024))} KB` +
         (skipped || dropped ? ` (skipped ${String(skipped)}, dropped ${String(dropped)})` : "")
     )
+    return await picturesInView(page)
   } finally {
     await context.close()
   }
@@ -150,13 +168,17 @@ async function captureAll(api: AdminApi, options: Options): Promise<void> {
     throw new Error("no ready-made look to draw")
   }
   const browser = await chromium.launch()
+  const pictures: Record<string, string[]> = {}
   try {
     const encoder = await (await browser.newContext()).newPage()
     for (const preset of chosen) {
-      await captureOne(api, browser, encoder, preset)
+      pictures[`${preset.pack}/${preset.code}`] = await captureOne(api, browser, encoder, preset)
     }
   } finally {
     await browser.close()
+  }
+  if (options.pictures) {
+    await writeFile(options.pictures, `${JSON.stringify(pictures, null, 2)}\n`)
   }
 }
 

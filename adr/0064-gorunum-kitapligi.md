@@ -248,6 +248,8 @@ Sahibin 2026-11-17 isteği (Görünümler sayfası, kayıtlı görünümlerin li
 
 **Küçük resimler.** Hazır görünümlerin `preview.webp` dosyaları bu aşamada üretilmez ve depoya girmez (demo fotoğraflarının lisansı sahip onayını bekliyor); galeri panelin `summary`'den çizdiği şemayla çalışır. Sunum ucu hazırdır: `GET /admin/storefront-presets/:pack/:code/preview` yalnız galerinin listelediği görünümler (`general` ve bu mağazaya uygulanmış paketler) için, yükleyicinin bulduğu klasör ve sabit dosya adıyla, en çok 256 KB, `image/webp` + `nosniff` + `default-src 'none'` + `private, max-age=300` ile sunar; istemciden yol parçası alınmaz.
 
+*Güncelleme (aynı gün, sahip onayıyla):* küçük resimler üretildi ve depoya girdi: beş hazır görünümün `preview.webp`'si (800×500), `NODE_ENV=development pnpm preset:previews -- --yes` ile (`apps/storefront/e2e/preset-preview/`). Betik geliştiricinin taslağını önce kayıtlı görünüm olarak saklar, sonunda birebir geri koyar ve karşılaştırır. Görünen fotoğrafların kaynağı ve atfı docs/12 "Görsel kaynakları ve atıf"tadır. Görünüş değişmediği için görünüm sürümleri artmadı.
+
 **Uygulamada plandan sapmalar.**
 
 - Migration `Migration20261116220159` (UTC zaman damgası); kısmi benzersiz dizin `name_key WHERE kind = 'saved' AND deleted_at IS NULL`; `down()` yalnız tabloyu düşürür.
