@@ -23,7 +23,7 @@
    - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
    - D4-1: düzenleme iadesinde referansla sürdürme gerçek bir düzenleme iadesiyle denenmedi.
 
-Bitenler: ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186). Toptan analitik L1/L2 + SMS L4 #187'de, açık (CI bekliyor). Sıra: 1 test hesabı gelince öne alınır; 2 canlıya çıkışta; 3 ve 4 sahipte.
+Bitenler: ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 test hesabı gelince öne alınır; 2 canlıya çıkışta; 3 ve 4 sahipte.
 
 ## 2026-11-17 akşam → 2026-11-18 gece: ürün videoları bitti, D4-1, köken denetimi
 
@@ -35,7 +35,7 @@ Bitenler: ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#1
   - #178: sahibin isteğiyle "Grafit" hazır görünümü kalktı; Grafit adlı tema varsayılanı duruyor. Görünüm e2e'si için CI cutlery paketini uyguluyor.
   - #185 (D4-1): kısmen yapılmış iyzico iadesine çıkış yolu; dört güvenlik incelemesi turu. Panel ve düzenleme iadelerinde `made_in_part`; `lost_part` yanıtları; iptal ve iade iadeleri akış yeniden koşunca kaldığı yerden sürer; "Kalanı iyzico panelinden elle iade ettim"; bilinmeyen iyzico ret kodları parçayı bilinmez bırakır.
   - #186: vitrin Store API köken denetimi (istekler backend kökeninde kalır); fatura dosya adı başlığı da düzeldi.
-- **Açık PR:** #187 toptan analitik L1/L2 + SMS L4 (analitik tutarları sayfa ve sipariş başına karar verilir; toptancının hiçbir telefonu SMS'e girmez); güvenlik denetimleri yeşil, CI sürüyor.
+  - #187: toptan analitik L1/L2 + SMS L4 (analitik tutarları sayfa ve sipariş başına karar verilir; toptancının hiçbir telefonu SMS'e girmez).
 - **Sahibin kararları (2026-11-17):**
   - GIF yükleme yok (dilim 7 iptal).
   - Grafit hazır görünümü kalksın.
