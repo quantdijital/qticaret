@@ -279,7 +279,8 @@ describe("staff settle an open refund they checked at the provider (O2), sending
       data: { pending_refund: { reference_no: REFERENCE, amount: 1000 } },
     })
 
-    await settleRefundByHand(shop.container, { ...input, outcome: "made" })
+    // The lost part answered for (D4-1 M2): seen given back, the whole refund is made
+    await settleRefundByHand(shop.container, { ...input, lost_part: "made" })
 
     const order = (mock: jest.Mock) => mock.mock.invocationCallOrder[0] ?? 0
     expect(order(shop.saveProviderParts)).toBeLessThan(order(shop.createRefunds))
@@ -292,7 +293,7 @@ describe("staff settle an open refund they checked at the provider (O2), sending
     expect(nameOff).toBeLessThan(order(shop.updateOrderRefunds))
   })
 
-  it("settles iyzico's parts whose answer was lost, and refuses a refund made in part (O-2)", async () => {
+  it("settles iyzico's parts whose answer was lost by staff's answer for them (O-2, D4-1 M2)", async () => {
     const sending = { transaction_id: "t1", amount: 1000, state: "sending" }
     const lost = containerWith({ ledger: [{ ...open, provider_parts: [sending] }] })
     const lostAgain = containerWith({ ledger: [{ ...open, provider_parts: [sending] }] })
@@ -302,17 +303,32 @@ describe("staff settle an open refund they checked at the provider (O2), sending
     ]
     const inPart = containerWith({ ledger: [{ ...open, provider_parts: half }] })
 
-    await settleRefundByHand(lost.container, { ...input, outcome: "made" })
-    await settleRefundByHand(lostAgain.container, { ...input, outcome: "not_made" })
+    expect(await settleRefundByHand(lost.container, { ...input, lost_part: "made" })).toEqual({
+      reference: REFERENCE,
+      status: "done",
+    })
+    expect(
+      await settleRefundByHand(lostAgain.container, { ...input, lost_part: "not_made" })
+    ).toEqual({ reference: REFERENCE, status: "failed" })
 
     expect(lost.saveProviderParts).toHaveBeenCalledWith(REFERENCE, [{ ...sending, state: "done" }])
     expect(lostAgain.saveProviderParts).toHaveBeenCalledWith(REFERENCE, [])
-    for (const outcome of ["made", "not_made"] as const) {
+    // A part without an answer: never an outcome alone, the lost part answered first
+    for (const outcome of ["made", "not_made", "made_in_part"] as const) {
       await expect(
         settleRefundByHand(inPart.container, { ...input, outcome })
-      ).rejects.toMatchObject({ safeMessage: "orders.refund_check_partial" })
+      ).rejects.toMatchObject({ safeMessage: "orders.refund_lost_part_required" })
     }
     expect(inPart.saveProviderParts).not.toHaveBeenCalled()
+  })
+
+  it("never takes an answer for a lost part a refund no longer has", async () => {
+    const shop = containerWith({ ledger: [open] })
+
+    await expect(
+      settleRefundByHand(shop.container, { ...input, lost_part: "made" })
+    ).rejects.toMatchObject({ safeMessage: "orders.refund_lost_part_none" })
+    expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
   })
 
   it("refuses a refund not open, or another order's", async () => {

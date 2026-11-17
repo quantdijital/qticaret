@@ -69,6 +69,8 @@ export const refundOrderWorkflow = createWorkflow(
         amount: plan.amount,
         lines: plan.lines,
         made_before: plan.done || plan.made,
+        // Done already under this reference: nothing at all was written now (review D4-1, L2)
+        closed_before: plan.done,
       }))
     )
   }

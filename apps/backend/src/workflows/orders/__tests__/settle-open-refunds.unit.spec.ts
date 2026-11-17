@@ -71,6 +71,7 @@ let orderStatus = "pending"
 beforeEach(() => {
   jest.resetAllMocks()
   orderStatus = "pending"
+  refundRun.mockResolvedValue({ result: { closed_before: false } })
 })
 
 describe("a cancel's refund the job closed, its order still open (review D4-5)", () => {
@@ -102,6 +103,18 @@ describe("a cancel's refund the job closed, its order still open (review D4-5)",
 
     expect(await settleOpenRefunds(container, NOW)).toEqual({ closed: 0, failed: 0, open: 1 })
     expect(refundRun).not.toHaveBeenCalled()
+  })
+
+  it("counts and tells nothing for a refund closed meanwhile under the lock (D4-1, L2)", async () => {
+    traceIs("shown")
+    refundRun.mockResolvedValue({ result: { closed_before: true } })
+
+    expect(await settleOpenRefunds(ledgerWith([[cancel()]]).container, NOW)).toEqual({
+      closed: 0,
+      failed: 0,
+      open: 0,
+    })
+    expect(alertPaymentIssue).not.toHaveBeenCalled()
   })
 
   it("tells nothing for an order canceled, or a refund not a cancel's", async () => {
@@ -206,6 +219,16 @@ describe("the settling job reads open refunds again and never sends one (review 
       status: "pending",
       error_code: "refund_incomplete",
     })
+  })
+
+  it("never marks over a staff check's code: a check cut short keeps it (D4-1, L1)", async () => {
+    traceIs("unknown")
+    const cut = ledgerWith([
+      [entryOf({ error_code: "checked_made_in_part", updated_at: ago(STRANDED_MS) })],
+    ])
+
+    expect(await settleOpenRefunds(cut.container, NOW)).toEqual({ closed: 0, failed: 0, open: 1 })
+    expect(cut.updateOrderRefunds).not.toHaveBeenCalled()
   })
 
   it("leaves one it cannot read, and tells the shop once it is an hour old", async () => {

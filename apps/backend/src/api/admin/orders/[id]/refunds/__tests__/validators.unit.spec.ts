@@ -1,5 +1,5 @@
 import { checkedNote } from "../../../../../../workflows/orders/made-refund-record"
-import { AdminPostOrderRefund } from "../validators"
+import { AdminPostOrderRefund, AdminPostOrderRefundSettle } from "../validators"
 
 const REFERENCE = "0123456789abcdef0123456789abcdef"
 
@@ -18,5 +18,31 @@ describe("the order refund request (F5 V5; security review D4, sixth round D-1)"
       expect(parsed.success).toBe(false)
       expect(parsed.error?.issues[0]?.message).toBe("orders.refund_note_reserved")
     }
+  })
+})
+
+describe("an open refund settled by hand (review O2; D4-1)", () => {
+  it("takes the three outcomes, made in part among them", () => {
+    for (const outcome of ["made", "not_made", "made_in_part"]) {
+      expect(AdminPostOrderRefundSettle.safeParse({ outcome }).success).toBe(true)
+    }
+  })
+
+  it("never takes an amount: the made part is read from the ledger", () => {
+    expect(
+      AdminPostOrderRefundSettle.safeParse({ outcome: "made_in_part", amount: 240 }).success
+    ).toBe(false)
+    expect(AdminPostOrderRefundSettle.safeParse({ outcome: "made_some" }).success).toBe(false)
+  })
+
+  it("takes an answer for a lost part instead of an outcome, never both nor neither (M2)", () => {
+    for (const lost_part of ["made", "not_made"]) {
+      expect(AdminPostOrderRefundSettle.safeParse({ lost_part }).success).toBe(true)
+    }
+    const both = AdminPostOrderRefundSettle.safeParse({ outcome: "made", lost_part: "made" })
+    expect(both.success).toBe(false)
+    expect(both.error?.issues[0]?.message).toBe("orders.refund_settle_mode")
+    expect(AdminPostOrderRefundSettle.safeParse({}).success).toBe(false)
+    expect(AdminPostOrderRefundSettle.safeParse({ lost_part: "maybe" }).success).toBe(false)
   })
 })

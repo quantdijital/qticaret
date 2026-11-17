@@ -158,7 +158,8 @@ medusaIntegrationTestRunner({
       const checked = await settle(
         http.post<{ refund?: { status: string } }>(
           `/admin/orders/${orderId}/refunds/${lostRef}/settle`,
-          { outcome: "not_made" },
+          // The lost part answered for (D4-1 M2): iyzico's panel shows it not refunded
+          { lost_part: "not_made" },
           { headers: admin.headers }
         )
       )
@@ -190,7 +191,7 @@ medusaIntegrationTestRunner({
       const cut = await settle(
         http.post(
           `/admin/orders/${orderId}/refunds/${lostRef}/settle`,
-          { outcome: "made" },
+          { lost_part: "made" },
           { headers: admin.headers }
         )
       )

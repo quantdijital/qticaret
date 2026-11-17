@@ -27,6 +27,8 @@ function RefundRow({ refund, currency }: { refund: ShopRefund; currency: string 
       </span>
       {refund.incomplete ? (
         <StatusBadge tone="warning">{t("orders.refunds.states.incomplete")}</StatusBadge>
+      ) : refund.made_in_part ? (
+        <StatusBadge tone="success">{t("orders.refunds.states.made_in_part")}</StatusBadge>
       ) : (
         <StatusBadge tone={TONES[refund.status]}>
           {t(`orders.refunds.states.${refund.status}`)}

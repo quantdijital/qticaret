@@ -39,3 +39,12 @@ export const cancelRefundReference = (paymentId: string): string =>
  */
 export const isCancelRefundReference = (reference: string): boolean =>
   reference.startsWith("cancel")
+
+/**
+ * A refund a flow makes again under its own reference until it is done: a
+ * cancel's, a return's (`return<request>`). Never closed in part by staff
+ * (review D4-1, S1): run again, the flow sends what is left (M1). An
+ * edit's is not: the edit never makes its refund again (MF1).
+ */
+export const isFlowOwnedRefund = (reference: string): boolean =>
+  isCancelRefundReference(reference) || reference.startsWith("return")

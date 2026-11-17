@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, within } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
@@ -127,19 +127,27 @@ describe("OpenReturnDialog", () => {
     await chooseReason(user, "Beden/ölçü uymadı")
     expect(within(dialog).getByRole("button", { name: "Talebi aç" })).toBeDisabled()
     await user.click(within(dialog).getByRole("combobox", { name: "Yerine gidecek seçenek" }))
-    await user.click(screen.getByRole("option", { name: "L" }))
+    // The list opens in a portal: waited for, never assumed open (a flake under load)
+    await user.click(await screen.findByRole("option", { name: "L" }))
     await user.click(within(dialog).getByRole("button", { name: "Talebi aç" }))
 
-    expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/return-requests", {
-      method: "POST",
-      body: {
-        kind: "exchange",
-        reason: "size_issue",
-        items: [{ line_item_id: "item_1", quantity: 2, variant_id: "variant_l" }],
-      },
+    // The mutation runs and settles after the click: its call, toast and close are waited for
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/return-requests", {
+        method: "POST",
+        body: {
+          kind: "exchange",
+          reason: "size_issue",
+          items: [{ line_item_id: "item_1", quantity: 2, variant_id: "variant_l" }],
+        },
+      })
     })
-    expect(toast.success).toHaveBeenCalledWith("Talep açıldı; müşteriye e-posta gönderildi.")
-    expect(onClose).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("Talep açıldı; müşteriye e-posta gönderildi.")
+    })
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled()
+    })
   })
 
   it("opens a return with a note", async () => {

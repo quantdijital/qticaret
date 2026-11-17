@@ -80,6 +80,25 @@ async function updateRefundedTotal(
     .updatePaymentCollections(collectionId, { refunded_amount: refunded } as never)
 }
 
+// What the payment can still give back: its captures less its refunds
+const leftOf = (payment: PaymentRow) => MathBN.sub(sum(payment.captures), sum(payment.refunds))
+
+/**
+ * Refuses, before anything is written, a record of `amount` kuruş past
+ * what the payment took less what it gave back (D4-1: a refund made in
+ * part is checked so before its entry is rewritten).
+ */
+export async function assertRecordable(
+  container: Pick<MedusaContainer, "resolve">,
+  paymentId: string,
+  amount: number
+): Promise<void> {
+  const payment = await readPayment(container, paymentId)
+  if (!payment || MathBN.lt(leftOf(payment), toMedusaAmount(kurus(amount)))) {
+    throw new ConflictError("orders.refund_exceeds_paid")
+  }
+}
+
 /**
  * Medusa's record of a refund made outside its call (the provider's answer
  * lost, its refund deleted with the failure; review 2026-11-17, D-2): once,
@@ -99,8 +118,7 @@ export async function recordMadeRefund(
   const amount = toMedusaAmount(kurus(entry.amount))
   let refundId = checkedRefundOf(payment, entry)
   if (!refundId) {
-    const left = MathBN.sub(sum(payment.captures), sum(payment.refunds))
-    if (MathBN.lt(left, amount)) {
+    if (MathBN.lt(leftOf(payment), amount)) {
       throw new ConflictError("orders.refund_exceeds_paid")
     }
     refundId = (

@@ -14,18 +14,54 @@ import {
   DialogTitle,
 } from "@qticaret/admin-ui/ui/dialog"
 import { useSettleRefund } from "@/features/orders/api/orders"
+import type { SettleBody, SettleOutcome } from "@/features/orders/api/orders"
 import type { ShopRefund } from "@/features/orders/api/payments"
 import { errorText } from "@/lib/errors"
 
 const S = "orders.refunds.settle"
-
-type Outcome = "made" | "not_made"
 
 const PROVIDERS: Readonly<Record<string, string>> = {
   paytr: "PayTR",
   iyzico: "iyzico",
   "bank-transfer": "Havale/EFT",
   cod: "Kapıda ödeme",
+}
+
+const kurusOf = (lira: string) => Math.round(Number(lira) * 100)
+
+// A cancel's or a return's refund: run again, its flow sends what is left; never closed in part
+// here (an edit's is: the edit never makes its refund again)
+const isFlowOwned = (reference: string) => /^(cancel|return)/.test(reference)
+
+/**
+ * An iyzico refund made in part (D4-1): every part answered, together
+ * short of the amount; what was given back and what was not, in kuruş.
+ * Only shown: the server reads the made part from its own record.
+ */
+function madeInPartOf(refund: ShopRefund): { done: number; rest: number } | null {
+  const parts = refund.parts ?? []
+  if (parts.length === 0 || parts.some((part) => part.state !== "done")) {
+    return null
+  }
+  const done = parts.reduce((sum, part) => sum + kurusOf(part.amount), 0)
+  const amount = kurusOf(refund.amount)
+  return done > 0 && done < amount ? { done, rest: amount - done } : null
+}
+
+/**
+ * Staff's answer: an outcome, what iyzico's panel shows of a part whose
+ * answer was lost, or a flow's rest given back by hand outside iyzico
+ * (`made_by_hand`: the whole amount recorded as made, nothing sent).
+ */
+type Choice = SettleOutcome | "lost_made" | "lost_not_made" | "made_by_hand"
+
+const BODIES: Readonly<Record<Choice, SettleBody>> = {
+  made: { outcome: "made" },
+  not_made: { outcome: "not_made" },
+  made_in_part: { outcome: "made_in_part" },
+  lost_made: { lost_part: "made" },
+  lost_not_made: { lost_part: "not_made" },
+  made_by_hand: { outcome: "made" },
 }
 
 /** What staff look for in the provider's panel: who, which reference, how much, when, its parts. */
@@ -67,8 +103,14 @@ function RefundFacts({ refund, currency }: { refund: ShopRefund; currency: strin
 /**
  * A refund whose record stayed incomplete, checked by staff in the
  * provider's panel (review 2026-11-17, O2, D-4): what to look for is
- * shown; the two answers weigh the same, and the one chosen is asked once
- * more before it is sent. Nothing is refunded from here.
+ * shown; the answers weigh the same, and the one chosen is asked once more
+ * before it is sent. An iyzico part whose answer was lost is asked about
+ * first (D4-1 M2); the server works out the rest. An iyzico refund made in
+ * part is checked against iyzico's panel: its record closed at the part
+ * made, what is left shown to be refunded anew, or left open when the
+ * figures do not match; a cancel's or a return's is left to its flow, or
+ * recorded whole once staff gave its rest back by hand. Nothing is
+ * refunded from here.
  */
 export function SettleRefundDialog({
   orderId,
@@ -83,7 +125,23 @@ export function SettleRefundDialog({
 }) {
   const { t } = useTranslation()
   const settle = useSettleRefund(orderId)
-  const [chosen, setChosen] = useState<Outcome | null>(null)
+  const [chosen, setChosen] = useState<Choice | null>(null)
+  const lost = refund?.parts?.find((part) => part.state !== "done") ?? null
+  const inPart = refund ? madeInPartOf(refund) : null
+  const values = {
+    amount: refund ? formatMoney(refund.amount, currency) : "",
+    done: inPart ? formatMoney(inPart.done / 100, currency) : "",
+    rest: inPart ? formatMoney(inPart.rest / 100, currency) : "",
+    part: lost ? formatMoney(lost.amount, currency) : "",
+  }
+  const flowOwned = refund !== null && isFlowOwned(refund.reference)
+  const choices: readonly Choice[] = lost
+    ? ["lost_not_made", "lost_made"]
+    : inPart
+      ? flowOwned
+        ? ["made_by_hand"]
+        : ["made_in_part"]
+      : ["not_made", "made"]
   const close = (open: boolean) => {
     if (!open) {
       setChosen(null)
@@ -95,29 +153,32 @@ export function SettleRefundDialog({
       return
     }
     settle.mutate(
-      { reference: refund.reference, outcome: chosen },
+      { reference: refund.reference, ...BODIES[chosen] },
       {
-        onSuccess: () => {
-          toast.success(t(`${S}.done.${chosen}`))
+        onSuccess: (answer) => {
+          const done = lost ? `${S}.done.lost.${answer.refund.status}` : `${S}.done.${chosen}`
+          toast.success(t(done, values))
           close(false)
         },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )
   }
+  const ask = lost ? `${S}.lost` : inPart ? `${S}.in_part` : S
+  const hint = inPart && flowOwned ? `${ask}.flow_owned` : `${ask}.hint`
   return (
     <Dialog open={refund !== null} onOpenChange={close}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t(chosen ? `${S}.sure.${chosen}` : `${S}.title`)}</DialogTitle>
+          <DialogTitle>{t(chosen ? `${S}.sure.${chosen}` : `${ask}.title`, values)}</DialogTitle>
           <DialogDescription>
-            {t(chosen ? `${S}.sure.description` : `${S}.question`)}
+            {t(chosen ? `${S}.sure.description` : `${ask}.question`, values)}
           </DialogDescription>
         </DialogHeader>
         <DialogBody>
           {refund ? <RefundFacts refund={refund} currency={currency} /> : null}
           {chosen ? null : (
-            <p className="mt-3 text-[13px] text-muted-foreground">{t(`${S}.hint`)}</p>
+            <p className="mt-3 text-[13px] text-muted-foreground">{t(hint, values)}</p>
           )}
         </DialogBody>
         <DialogFooter>
@@ -138,17 +199,30 @@ export function SettleRefundDialog({
               </Button>
             </>
           ) : (
-            (["not_made", "made"] as const).map((outcome) => (
-              <Button
-                key={outcome}
-                variant="outline"
-                onClick={() => {
-                  setChosen(outcome)
-                }}
-              >
-                {t(`${S}.${outcome}`)}
-              </Button>
-            ))
+            <>
+              {/* Not as iyzico's panel shows it: left open, nothing written */}
+              {lost || (inPart && !flowOwned) ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    close(false)
+                  }}
+                >
+                  {t(`${S}.keep_open`)}
+                </Button>
+              ) : null}
+              {choices.map((choice) => (
+                <Button
+                  key={choice}
+                  variant="outline"
+                  onClick={() => {
+                    setChosen(choice)
+                  }}
+                >
+                  {t(`${S}.${choice}`)}
+                </Button>
+              ))}
+            </>
           )}
         </DialogFooter>
       </DialogContent>

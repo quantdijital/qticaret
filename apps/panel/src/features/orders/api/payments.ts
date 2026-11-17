@@ -48,6 +48,8 @@ export interface ShopRefund {
   status: "pending" | "done" | "failed"
   /** Pending with its money gone, or maybe gone, its record not closed: the shop checks the provider. */
   incomplete?: boolean
+  /** Closed by staff at the part iyzico made: its amount is that part, the rest refunded anew. */
+  made_in_part?: boolean
   /** Whose payment it gave back: `paytr`, `iyzico`, `bank-transfer`, `cod`. */
   provider?: string | null
   /** The reference as the provider was given it: what to look for in its panel. */

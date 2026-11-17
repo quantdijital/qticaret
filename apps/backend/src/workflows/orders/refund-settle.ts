@@ -40,6 +40,10 @@ export const ENTRY_FIELDS = [
   "updated_at",
 ]
 
+/** The entry's code when a staff check wrote it (`checked_*`), kept as it closes; else null. */
+export const checkedCodeOf = (code: string | null | undefined): string | null =>
+  code?.startsWith("checked_") ? code : null
+
 /** An entry as `refundTraceOf` reads it. */
 export const tracedOf = (entry: LedgerEntry): TracedRefund => ({
   reference: entry.reference,
@@ -75,7 +79,9 @@ export async function settleFailedEntry(
     return
   }
   const code = trace === "none" ? REFUND_UNCONFIRMED : REFUND_INCOMPLETE
-  await ledger.updateOrderRefunds({ id: entryId, status: "pending", error_code: code })
+  // A staff check's mark kept (review D4-1): the job closes such a refund, never marks over it
+  const kept = code === REFUND_INCOMPLETE ? checkedCodeOf(entry.error_code) : null
+  await ledger.updateOrderRefunds({ id: entryId, status: "pending", error_code: kept ?? code })
   logger.error({
     event: "orders.refund_unsettled",
     orderId: entry.order_id,

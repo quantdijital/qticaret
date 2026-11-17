@@ -14,6 +14,7 @@ import type IntegrationCredentialsModuleService from "../../modules/integration-
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { UNSETTLED } from "../orders/refund-settle"
+import { CHECKED_MADE_IN_PART } from "../orders/made-in-part"
 import { iyzicoDetails } from "./iyzico-details"
 import { paytrDetails } from "./paytr-details"
 
@@ -52,6 +53,8 @@ export interface OrderRefundEntry {
   status: string
   /** Pending with its money gone, or maybe gone, its record not closed: the shop checks the provider. */
   incomplete: boolean
+  /** Closed by staff at the part iyzico made (D4-1): its amount is that part, the rest refunded anew. */
+  made_in_part: boolean
   /** Whose payment it gave back: `paytr`, `iyzico`, `bank-transfer`, `cod`; null when unknown. */
   provider: string | null
   /** The reference as the provider was given it (PayTR: letters and digits, at most 64). */
@@ -191,6 +194,7 @@ export async function orderPaymentDetails(
       incomplete:
         refund.status === "pending" &&
         (UNSETTLED as readonly (string | null)[]).includes(refund.error_code),
+      made_in_part: refund.status === "done" && refund.error_code === CHECKED_MADE_IN_PART,
       note: refund.note,
       created_by: refund.created_by,
       created_at: new Date(refund.created_at).toISOString(),

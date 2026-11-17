@@ -42,13 +42,23 @@ export const ORDER_RESOURCES: readonly AuditedResource[] = [
         .listOrderRefunds(
           // This order's refund only: another order's reference never reaches its record (D-5)
           { reference: params["reference"] ?? "", order_id: params["id"] ?? "" },
-          { select: ["status", "error_code", "amount"], take: 1 }
+          { select: ["status", "error_code", "amount", "provider_parts"], take: 1 }
         )
+      // iyzico's answered parts (kuruş): with the amount before and after, what a refund made
+      // in part was closed at and what was left to refund anew (D4-1)
+      const parts = (refund?.provider_parts as { amount: number; state: string }[] | null) ?? []
       return {
         refunded: money.refunded,
         refundable: money.refundable,
         refund: refund
-          ? { status: refund.status, error_code: refund.error_code, amount: refund.amount }
+          ? {
+              status: refund.status,
+              error_code: refund.error_code,
+              amount: refund.amount,
+              done: parts
+                .filter((part) => part.state === "done")
+                .reduce((sum, part) => sum + part.amount, 0),
+            }
           : null,
       }
     },

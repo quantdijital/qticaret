@@ -4,7 +4,7 @@ import { cancelRefundReference, isCancelRefundReference } from "../../../lib/ord
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import { refundForCancel } from "../cancel-refunds"
 import { ConflictError } from "../../../lib/errors"
-import { referenceTaken, triedAgain } from "../steps/order-refund-guard"
+import { allAnswered, referenceTaken, triedAgain } from "../steps/order-refund-guard"
 
 const refundRun = jest.fn()
 jest.mock("../refund-order", () => ({
@@ -114,9 +114,53 @@ describe("a cancel refunds each payment once, under the payment's own reference 
       expect(triedAgain("pending", trace)).toBe("unsettled")
     }
     // Asked only to close, one no longer open is left as it is (D-3)
-    expect(triedAgain("failed", null, true)).toBe("done")
-    expect(triedAgain("done", null, true)).toBe("done")
-    expect(triedAgain("pending", "made", true)).toBe("made")
+    const closeOnly = { closeOnly: true }
+    expect(triedAgain("failed", null, closeOnly)).toBe("done")
+    expect(triedAgain("done", null, closeOnly)).toBe("done")
+    expect(triedAgain("pending", "made", closeOnly)).toBe("made")
+  })
+
+  it("sends on a refund made in part whose every part was answered, never only to close (D4-1 M1)", () => {
+    expect(triedAgain("pending", "partial", { answered: true })).toBe("send")
+    // A part without an answer may have been made: never sent on
+    expect(triedAgain("pending", "partial", { answered: false })).toBe("unsettled")
+    expect(triedAgain("pending", "partial", { closeOnly: true, answered: true })).toBe("unsettled")
+    expect(triedAgain("pending", "unknown", { answered: true })).toBe("unsettled")
+    expect(allAnswered([{ state: "done" }, { state: "done" }])).toBe(true)
+    expect(allAnswered([{ state: "done" }, { state: "sending" }])).toBe(false)
+    expect(allAnswered([])).toBe(false)
+  })
+
+  it("resumes only what is still open: a refund failed meanwhile is never planned anew (SF2)", () => {
+    const resumeOnly = { resumeOnly: true }
+    expect(triedAgain("pending", "partial", { ...resumeOnly, answered: true })).toBe("send")
+    // Turned failed after the pass read it: left as it is, the cancel's own loop plans it
+    expect(triedAgain("failed", null, resumeOnly)).toBe("done")
+    expect(triedAgain("done", null, resumeOnly)).toBe("done")
+    expect(triedAgain("pending", "made", resumeOnly)).toBe("made")
+    expect(triedAgain("pending", "partial", { ...resumeOnly, answered: false })).toBe("unsettled")
+  })
+
+  it("lets its own refund of a payment made in part send on; another is only closed (M1)", async () => {
+    const own = {
+      reference: cancelRefundReference("pay_P0"),
+      payment_id: "pay_P0",
+      amount: 33000,
+    }
+    const panel = {
+      reference: "0123456789abcdef0123456789abcdef",
+      payment_id: "pay_P0",
+      amount: 50,
+    }
+    readOrderMoney.mockResolvedValue({ refundable: 0 })
+    paymentRemainders.mockResolvedValue([])
+
+    await refundForCancel(ledgerWith([own, panel]) as never, input)
+
+    expect(references()).toEqual([
+      expect.objectContaining({ reference: own.reference, resume_only: true }),
+      expect.objectContaining({ reference: panel.reference, close_only: true }),
+    ])
   })
 
   it("refunds each payment with money left, a hosted form's first, up to what is refundable", async () => {
