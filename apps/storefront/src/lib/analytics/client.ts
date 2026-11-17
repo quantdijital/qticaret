@@ -28,10 +28,15 @@ export interface AllowedTags extends TrackingIds {
 
 const MAX_PENDING = 30
 
-/** An event, and the key that makes it once per browser (a purchase), if any. */
+/**
+ * An event, the key that makes it once per browser (a purchase), if any,
+ * and false when its page said it carries no amount whoever the visitor is
+ * (a wholesale order's purchase, ADR-0068 slice 5 review L2).
+ */
 interface Waiting {
   event: AnalyticsEvent
   once: string | null
+  amounts: boolean
 }
 
 // null until the frame says what this visitor allows: events wait for it
@@ -43,9 +48,9 @@ let seenCart: CartSnapshot | undefined
 
 const measuring = (): boolean => (allowed?.ga4 ?? allowed?.meta ?? null) !== null
 
-function send(event: AnalyticsEvent): void {
-  // Anything but a plain yes leaves the amounts out
-  const amounts = allowed?.amounts === true
+function send(event: AnalyticsEvent, own: boolean): void {
+  // Anything but a plain yes, the visitor's and the event's own, leaves the amounts out
+  const amounts = own && allowed?.amounts === true
   if (allowed?.ga4 && window.gtag) {
     const [name, params] = amounts ? ga4Event(event) : ga4EventWithoutAmounts(event)
     // The address GA4 records is ours, its keys taken out (an order's link, a preview's)
@@ -102,7 +107,7 @@ export function configureAnalytics(tags: AllowedTags, nonce: string | undefined)
   waiting.forEach(deliver)
 }
 
-function deliver({ event, once }: Waiting): void {
+function deliver({ event, once, amounts }: Waiting): void {
   if (!measuring()) {
     return
   }
@@ -110,24 +115,43 @@ function deliver({ event, once }: Waiting): void {
   if (once && !firstTime(once)) {
     return
   }
-  send(event)
+  send(event, amounts)
 }
 
 /**
  * Sends an event to the tags this visitor allows; before the frame says
- * which, it waits. With `once`, only the first time in this browser.
+ * which, it waits. With `once`, only the first time in this browser. With
+ * `amounts` false, without amounts whoever the visitor is.
  */
-export function track(event: AnalyticsEvent, once: string | null = null): void {
+export function track(event: AnalyticsEvent, once: string | null = null, amounts = true): void {
   if (typeof window === "undefined") {
     return
   }
   if (allowed === null) {
     if (pending.length < MAX_PENDING) {
-      pending.push({ event, once })
+      pending.push({ event, once, amounts })
     }
     return
   }
-  deliver({ event, once })
+  deliver({ event, once, amounts })
+}
+
+/**
+ * A page's word that this visitor's events carry no amounts (ADR-0068
+ * slice 5 review L1). The frame said it when it was last drawn, and a soft
+ * navigation does not draw it again: each page with events of its own
+ * says it too, asked on that page's request (`TrackEvents`). A customer
+ * made a wholesaler since sends their next events, the page's and those
+ * after it, without amounts. A page only ever takes amounts away: one the
+ * router shows again may be older than the frame (drawn before the cookie
+ * answer, say), so only the frame, drawn fresh by the server
+ * (`configureAnalytics`), or a reload gives them back. Before the frame
+ * has spoken it is the frame's own request: nothing to do.
+ */
+export function noteAmounts(amounts: boolean): void {
+  if (allowed !== null && !amounts && allowed.amounts) {
+    allowed = { ...allowed, amounts: false }
+  }
 }
 
 /** What the page shows, for later events: a card chosen, a line added, the payment chosen. */

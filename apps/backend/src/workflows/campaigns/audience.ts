@@ -13,7 +13,7 @@ import type MessagingModuleService from "../../modules/messaging/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { MarketingSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
-import { activeWholesalers } from "../wholesale/marketing"
+import { activeWholesalers, wholesalersPhones } from "../wholesale/marketing"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -118,7 +118,9 @@ export interface AudienceInput {
  * leave this function. Active wholesalers are not in any audience at all
  * (ADR-0068 decision 16: the message shows retail prices and offers),
  * named by a source or not, under their customer record or a bare
- * newsletter consent at the same address.
+ * newsletter consent at the same address; for a text, at any phone of
+ * theirs (`wholesalersPhones`: address book, orders), so a guest order's
+ * consent or an imported number does not bring them back.
  */
 export async function resolveAudience(container: Container, input: AudienceInput): Promise<Sorted> {
   const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
@@ -134,10 +136,12 @@ export async function resolveAudience(container: Container, input: AudienceInput
       .reachedSince(new Date(now.getTime() - DAY_MS), input.campaign_id),
     activeWholesalers(container),
   ])
+  // A text leaves out every phone a wholesaler is known by, not only their record's (review L4)
   const wholesaleHashes = new Set(
-    (input.channel === "email" ? [...wholesalers.emails] : wholesalers.phones).flatMap(
-      (address) => messaging.recipientOf(input.channel, address)?.hash ?? []
-    )
+    (input.channel === "email"
+      ? [...wholesalers.emails]
+      : [...wholesalers.phones, ...(await wholesalersPhones(container, wholesalers))]
+    ).flatMap((address) => messaging.recipientOf(input.channel, address)?.hash ?? [])
   )
   const candidates: Candidate[] = []
   let invalid = 0

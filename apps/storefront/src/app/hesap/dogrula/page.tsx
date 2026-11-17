@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { pendingToken } from "@/lib/account/session"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
+import { visitorAmounts } from "@/lib/analytics/tags"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { authActions } from "@/lib/theme-actions"
@@ -19,13 +20,21 @@ const CODE = /^[\w-]{10,128}$/
  * that registered, one click; elsewhere the password is asked again.
  */
 export default async function VerifyPage({ searchParams }: { searchParams: Promise<Query> }) {
-  const [query, pending] = await Promise.all([searchParams, pendingToken()])
+  const [query, pending, amounts] = await Promise.all([
+    searchParams,
+    pendingToken(),
+    visitorAmounts(),
+  ])
   const code = typeof query["code"] === "string" && CODE.test(query["code"]) ? query["code"] : null
   return (
     <>
       {/* Just registered: the sign-up, once in this tab (docs/20) */}
       {query["yeni"] === "1" && (
-        <TrackEvents events={[{ name: "sign_up", method: "email" }]} once="sign_up" />
+        <TrackEvents
+          events={[{ name: "sign_up", method: "email" }]}
+          once="sign_up"
+          visitorAmounts={amounts}
+        />
       )}
       <theme.AuthPage
         t={t}

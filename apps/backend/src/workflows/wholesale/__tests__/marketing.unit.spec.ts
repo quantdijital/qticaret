@@ -1,7 +1,12 @@
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import { WHOLESALE_MODULE } from "../../../modules/wholesale"
-import { NO_WHOLESALERS, activeWholesalers, isWholesalersCart } from "../marketing"
+import {
+  NO_WHOLESALERS,
+  activeWholesalers,
+  isWholesalersCart,
+  wholesalersPhones,
+} from "../marketing"
 
 function container(shop: {
   enabled?: boolean
@@ -78,5 +83,115 @@ describe("isWholesalersCart", () => {
       isWholesalersCart(wholesalers, { customer_id: "cus_9", email: "ayse@example.com" })
     ).toBe(false)
     expect(isWholesalersCart(NO_WHOLESALERS, { customer_id: "cus_1" })).toBe(false)
+  })
+})
+
+/** Slice 5 review L4: a text campaign leaves out every phone a wholesaler is known by. */
+describe("wholesalersPhones", () => {
+  interface Graph {
+    entity: string
+    filters: Record<string, unknown>
+    pagination: { skip: number }
+  }
+  /** The orders' table as `orderIdsByEmail` reads it: its ids by lower-cased address. */
+  const ordersTable = (byEmail: Record<string, string[]>) => {
+    const asked: { sql: string; values: string[] }[] = []
+    const knex = () => ({
+      select: () => ({
+        whereNull: () => ({
+          whereRaw: (sql: string, values: string[]) => {
+            asked.push({ sql, values })
+            return Promise.resolve(
+              values.flatMap((email) => byEmail[email] ?? []).map((id) => ({ id }))
+            )
+          },
+        }),
+      }),
+    })
+    return { knex, asked }
+  }
+  const scope = (answer: (args: Graph) => unknown[], byEmail: Record<string, string[]> = {}) => {
+    const graph = jest.fn((args: Graph) => Promise.resolve({ data: answer(args) }))
+    const table = ordersTable(byEmail)
+    return {
+      graph,
+      asked: table.asked,
+      container: {
+        resolve: (key: string) => {
+          if (key === (ContainerRegistrationKeys.PG_CONNECTION as string)) {
+            return table.knex
+          }
+          if (key !== (ContainerRegistrationKeys.QUERY as string)) {
+            throw new Error(`unexpected ${key}`)
+          }
+          return { graph }
+        },
+      },
+    }
+  }
+  const wholesalers = {
+    customerIds: new Set(["cus_1"]),
+    emails: new Set(["toptan@example.com"]),
+    phones: ["+905321234567"],
+  }
+
+  it("reads the record's, the address book's and the orders' phones, signed in or out", async () => {
+    const { container, graph, asked } = scope(
+      ({ entity, filters }) => {
+        if (entity === "customer") {
+          return [
+            {
+              phone: "+905321234567",
+              addresses: [{ phone: "0532 765 43 21" }, { phone: null }, { phone: "  " }],
+            },
+          ]
+        }
+        return "customer_id" in filters
+          ? [{ shipping_address: { phone: "05551112233" }, billing_address: { phone: null } }]
+          : [{ shipping_address: { phone: "+90 544 000 11 22" }, billing_address: null }]
+      },
+      { "toptan@example.com": ["order_guest"] }
+    )
+
+    const phones = await wholesalersPhones(container, wholesalers)
+
+    expect(phones.sort()).toEqual(
+      ["+905321234567", "0532 765 43 21", "05551112233", "+90 544 000 11 22"].sort()
+    )
+    expect(graph.mock.calls.map(([args]) => [args.entity, args.filters])).toEqual([
+      ["customer", { id: ["cus_1"] }],
+      ["order", { customer_id: ["cus_1"] }],
+      ["order", { id: ["order_guest"] }],
+    ])
+    // However the guest typed it ("Toptan@Example.com"): the address is compared lower-cased
+    expect(asked).toEqual([{ sql: "lower(btrim(email)) in (?)", values: ["toptan@example.com"] }])
+  })
+
+  it("reads no signed-out order when none was placed under their address", async () => {
+    const { container, graph } = scope(() => [])
+    await wholesalersPhones(container, wholesalers)
+    expect(graph.mock.calls.map(([args]) => args.entity)).toEqual(["customer", "order"])
+  })
+
+  it("reads every page of a wholesaler's orders", async () => {
+    const { container, graph } = scope(({ entity, filters, pagination }) => {
+      if (entity !== "order" || !("customer_id" in filters)) {
+        return []
+      }
+      return pagination.skip === 0
+        ? Array.from({ length: 1_000 }, () => ({ shipping_address: { phone: "05551112233" } }))
+        : [{ shipping_address: { phone: "05559998877" } }]
+    })
+
+    const phones = await wholesalersPhones(container, wholesalers)
+
+    expect(phones.sort()).toEqual(["05551112233", "05559998877"])
+    expect(graph).toHaveBeenCalledTimes(3)
+  })
+
+  it("reads nothing while there is no wholesaler", async () => {
+    const { container, graph } = scope(() => [])
+    expect(await wholesalersPhones(container, NO_WHOLESALERS)).toEqual([])
+    expect(graph).not.toHaveBeenCalled()
   })
 })
