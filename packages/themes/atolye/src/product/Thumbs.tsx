@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ImageView } from "@qticaret/ui"
@@ -19,16 +19,20 @@ const smooth = () =>
  * on a narrow phone), the one shown outlined. Each is an anchor to its
  * slide before the script; with it, a press swaps the main photograph.
  * More than four: the row slides (a swipe, or the two slim arrows beside
- * it, a page at a time), and it keeps the photograph shown in view.
+ * it, a page at a time), and it keeps the photograph shown in view. A
+ * video's square (adr/0069 §7) shows its poster with a play mark.
  */
 export function Thumbs({
   images,
+  videos = {},
   index,
   slideId,
   onChoose,
   words,
 }: {
   images: ImageView[]
+  /** The squares that are videos, by their place in `images` (their posters): each one's title. */
+  videos?: Readonly<Record<number, string>>
   index: number
   slideId: (n: number) => string
   onChoose: (n: number) => void
@@ -116,7 +120,12 @@ export function Thumbs({
             <a
               href={`#${slideId(n + 1)}`}
               aria-current={n === index ? "true" : undefined}
-              aria-label={words.show.replace("{n}", String(n + 1))}
+              aria-label={
+                videos[n] === undefined
+                  ? words.show.replace("{n}", String(n + 1))
+                  : // A function: the title as written (`$&`, `$'` are not patterns here)
+                    words.videoShow.replace("{title}", () => videos[n] ?? "")
+              }
               onClick={(event) => {
                 event.preventDefault()
                 onChoose(n)
@@ -131,6 +140,17 @@ export function Thumbs({
                 sizes="(min-width: 768px) 128px, 25vw"
                 className="absolute inset-0 h-full w-full object-cover"
               />
+              {videos[n] !== undefined && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 flex items-center justify-center"
+                  data-video-mark=""
+                >
+                  <span className="flex size-8 items-center justify-center rounded-pill bg-stage/80 text-stage-text">
+                    <Play className="size-4" aria-hidden="true" strokeWidth={2} />
+                  </span>
+                </span>
+              )}
             </a>
           </li>
         ))}

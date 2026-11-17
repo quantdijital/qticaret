@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { AI_KEY } from "@/features/ai/api/ai"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
@@ -92,6 +93,8 @@ function useAccountMutation<T>(call: (input: T) => Promise<AccountAnswer>) {
       await client.invalidateQueries({ queryKey: ACCOUNTS_KEY })
       // The setup checklist's payment step
       await client.invalidateQueries({ queryKey: ["dashboard", "setup"] })
+      // An AI service's state is its account's (adr/0071 §3)
+      await client.invalidateQueries({ queryKey: AI_KEY })
     },
   })
 }

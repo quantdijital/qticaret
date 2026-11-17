@@ -191,7 +191,13 @@ const GEMINI: AiService = {
   dataNoteKey: "ai.data_note.gemini",
 }
 
-/** Development and tests only: writes from the data alone, never leaves the machine. */
+/**
+ * NODE_ENV test and development only (never staging or production):
+ * writes from the data alone, never leaves the machine. Connected like
+ * any service, through its own credential provider (`fake`,
+ * `providers-ai.ts`, offered under the same rule); its connector is
+ * reached only through `connector-of.ts`.
+ */
 export const FAKE_SERVICE: AiService = {
   id: "fake",
   credentialProvider: "fake",

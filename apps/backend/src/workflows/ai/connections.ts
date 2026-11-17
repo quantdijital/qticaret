@@ -1,0 +1,35 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
+import type { AiConnection, AiFlags } from "../../lib/ai/select"
+import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
+import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
+import { isAiCredentialProvider } from "../../modules/integration-credentials/providers-ai"
+import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import { AI_OWN_KEYS } from "../../modules/platform-settings/features"
+import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+
+type Resolver = Pick<MedusaContainer, "resolve">
+
+/**
+ * What the AI core reads of the shop to choose a service (adr/0071 §4,
+ * §6): each AI account reduced to its state (never a secret, nor part of
+ * one), and which ways of paying the package opens. The services list
+ * and a suggestion's choice both read them here and decide with
+ * `usableServices` alone.
+ */
+export async function aiConnectionsOf(container: Resolver): Promise<AiConnection[]> {
+  const statuses = await container
+    .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
+    .describeAll()
+  return statuses.flatMap((status) =>
+    isAiCredentialProvider(status.provider) && status.state !== "not_configured"
+      ? [{ provider: status.provider, status: status.state }]
+      : []
+  )
+}
+
+export async function aiFlagsOf(container: Resolver): Promise<AiFlags> {
+  const ownKeys = await container
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .isFeatureEnabled(AI_OWN_KEYS)
+  return { ownKeys }
+}

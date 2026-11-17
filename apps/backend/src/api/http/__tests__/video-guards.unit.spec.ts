@@ -1,6 +1,10 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { logger } from "../../../lib/logging"
-import { rejectStoreVideoFields, restrictAdminVideoFields } from "../media-routes"
+import {
+  STORE_VIDEO_LEAVES,
+  restrictAdminVideoFields,
+  restrictStoreVideoFields,
+} from "../media-routes"
 import { requireVideoForm } from "../video-routes"
 import { fakeResponse } from "./fakes"
 
@@ -39,20 +43,36 @@ describe("a video's fields through `fields` (adr/0069, security review D3)", () 
 
   it.each([
     "*media_videos",
-    "+media_videos.id",
+    "media_videos",
     "media_videos.*",
-    "+media_videos.outputs",
+    "+media_videos.source_file_id",
+    "+media_videos.output_file_ids",
+    "+media_videos.poster_file_ids",
+    "+media_videos.error_code",
+    "+media_videos.uploaded_by",
+    "+media_videos.attempts",
+    "+media_videos.retry_from",
+    "+media_videos.failed_at",
+    "+media_videos.heartbeat_at",
+    "+media_videos.stored_bytes",
+    "+media_videos.outputs.url",
     "items.product.media_videos.id",
     "+MEDIA_VIDEOS.id",
     "id,title,+media_video.id",
-  ])("gives the storefront none: %s", (fields) => {
-    const result = run(rejectStoreVideoFields, withFields("/store/products", fields))
+  ])("gives the storefront no key, bookkeeping or whole relation: %s", (fields) => {
+    const result = run(restrictStoreVideoFields, withFields("/store/products", fields))
     expect(result.status()).toBe(400)
     expect(result.next).not.toHaveBeenCalled()
   })
 
+  it("gives the storefront the gallery's leaves, named one by one (slice 4)", () => {
+    const fields = STORE_VIDEO_LEAVES.map((leaf) => `+${leaf}`).join(",")
+    const result = run(restrictStoreVideoFields, withFields("/store/products/prod_1", fields))
+    expect(result.next).toHaveBeenCalled()
+  })
+
   it("leaves the storefront's other fields alone", () => {
-    const result = run(rejectStoreVideoFields, withFields("/store/products", "+media_assets.url"))
+    const result = run(restrictStoreVideoFields, withFields("/store/products", "+media_assets.url"))
     expect(result.next).toHaveBeenCalled()
   })
 
@@ -79,15 +99,15 @@ describe("a video's fields through `fields` (adr/0069, security review D3)", () 
     const req = request({ path: "/admin/products/prod_1", query: { fields } })
     expect(run(restrictAdminVideoFields, req).status()).toBe(400)
     const store = request({ path: "/store/products", query: { fields } })
-    expect(run(rejectStoreVideoFields, store).status()).toBe(400)
+    expect(run(restrictStoreVideoFields, store).status()).toBe(400)
   })
 
   it("leaves a request without `fields`, or with a list of strings, to the rules", () => {
     expect(
-      run(rejectStoreVideoFields, request({ path: "/store/products" })).next
+      run(restrictStoreVideoFields, request({ path: "/store/products" })).next
     ).toHaveBeenCalled()
     const list = request({ path: "/store/products", query: { fields: ["id", "+title"] } })
-    expect(run(rejectStoreVideoFields, list).next).toHaveBeenCalled()
+    expect(run(restrictStoreVideoFields, list).next).toHaveBeenCalled()
   })
 
   it("gives the admin API the panel's own leaves", () => {

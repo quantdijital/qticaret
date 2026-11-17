@@ -85,6 +85,7 @@ export function ProductPage({
             <div className="md:sticky md:top-(--gf-stick-top)">
               <Gallery
                 images={view.images}
+                videos={view.videos ?? []}
                 own={Object.fromEntries(
                   view.variants.flatMap((variant) =>
                     variant.images && variant.images.length > 0

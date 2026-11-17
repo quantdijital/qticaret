@@ -14,6 +14,7 @@ import type { NewsletterLookView } from "./newsletter-views"
 
 // The views by topic; every name is exported from here as before
 export type * from "./product-views"
+export type * from "./video-views"
 export type * from "./listing-views"
 export type * from "./content-views"
 export type * from "./newsletter-views"

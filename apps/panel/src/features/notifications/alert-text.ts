@@ -10,6 +10,7 @@ import {
   Webhook,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { isAiService } from "@/features/ai/services"
 import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { paymentIssueAlert } from "@/features/notifications/payment-issue-alert"
 import { returnRefundAlert } from "@/features/notifications/return-alert"
@@ -52,9 +53,16 @@ export function useAlertText(data: Record<string, unknown>) {
     const who =
       text(data["actor"]) || (data["actor_id"] ? t("notifications.providerAccount.owner") : "")
     const provider = text(data["provider"])
+    // An AI service's account is one too (adr/0071 §3); its name and page are the AI settings'
+    const ai = isAiService(provider)
     return {
       title: t("notifications.providerAccount.title", {
-        provider: t(`settings.payments.methods.${provider}.name`, { defaultValue: provider }),
+        provider: t(
+          ai ? `ai.services.${provider}.name` : `settings.payments.methods.${provider}.name`,
+          {
+            defaultValue: provider,
+          }
+        ),
       }),
       description: [
         changes.map((change) => t(`notifications.providerAccount.changes.${change}`)).join(", "),
@@ -65,9 +73,11 @@ export function useAlertText(data: Record<string, unknown>) {
       Icon: ShieldAlert,
       tone: "bg-info-soft text-info-text",
       // Straight to the provider's page; one the panel does not know opens the list
-      link: isConnectable(provider)
-        ? { to: "/settings/payments/$provider" as const, search: {}, params: { provider } }
-        : { to: "/settings/payments" as const, search: {}, params: {} },
+      link: ai
+        ? { to: "/settings/ai" as const, search: {}, params: {} }
+        : isConnectable(provider)
+          ? { to: "/settings/payments/$provider" as const, search: {}, params: { provider } }
+          : { to: "/settings/payments" as const, search: {}, params: {} },
     }
   }
   if (data["kind"] === "webhook_disabled") {

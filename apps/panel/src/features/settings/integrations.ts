@@ -41,6 +41,11 @@ export function settingsLinkOf(id: string) {
     case "google":
     case "feeds":
       return linkOptions({ to: "/settings/marketing" })
+    // adr/0071 §13: the AI services are set up on their own page
+    case "deepseek":
+    case "minimax":
+    case "gemini":
+      return linkOptions({ to: "/settings/ai" })
     default:
       return null
   }

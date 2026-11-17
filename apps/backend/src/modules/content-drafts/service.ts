@@ -48,6 +48,23 @@ class ContentDraftsModuleService extends MedusaService({ ContentDraft, DraftUsag
     return claimed.length > 0
   }
 
+  /**
+   * Gives back one claimed in `month` (`YYYY-MM`): an AI call that failed
+   * before the service took it (adr/0071 §8). Never below zero.
+   */
+  @InjectTransactionManager()
+  async releaseQuota(month: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
+    const manager = sharedContext.transactionManager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("content_drafts: the quota is released in a transaction")
+    }
+    await manager.execute(
+      `UPDATE draft_usage SET count = count - 1, updated_at = now()
+       WHERE month = ? AND deleted_at IS NULL AND count > 0`,
+      [month]
+    )
+  }
+
   /** Drafts asked for this month. */
   @InjectManager()
   async usedThisMonth(

@@ -4,6 +4,11 @@ import {
   QueryContext,
   getVariantAvailability,
 } from "@medusajs/framework/utils"
+import { PLATFORM_SETTINGS_MODULE } from "../../../../modules/platform-settings"
+import { PRODUCT_VIDEOS } from "../../../../modules/platform-settings/features"
+import type PlatformSettingsModuleService from "../../../../modules/platform-settings/service"
+import { STORE_VIDEO_LEAVES } from "../../../http/media-routes"
+import { shopperVideos } from "../../../http/store-product-videos"
 import { productTexts } from "../../products/[id]/description/read"
 
 // The product page's fields (the storefront's `PAGE_FIELDS`), prices in the lira region
@@ -62,6 +67,8 @@ const FIELDS = [
   "product_extension.kind",
   "product_extension.description_doc",
   "product_extension.summary_doc",
+  // Its videos (adr/0069 §6): the Store API's own leaves, the ready ones while the flag is on
+  ...STORE_VIDEO_LEAVES,
 ]
 
 const CURRENCY = "try"
@@ -107,7 +114,8 @@ export async function previewedProduct(
  * A product's page as the storefront reads it, whatever its state (F18
  * preview): priced in the lira region, stock counted for the shopper's
  * sales channel, the shop's private attributes left out, its descriptions
- * as HTML. The documents themselves stay here.
+ * as HTML, its ready videos as the Store API gives them (adr/0069 §6). The
+ * documents themselves stay here.
  */
 export async function previewProductPage(
   container: Pick<MedusaContainer, "resolve">,
@@ -155,6 +163,10 @@ export async function previewProductPage(
       ? (availability[variant.id]?.availability ?? 0)
       : 0
   }
+  const videosOn = await container
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .isFeatureEnabled(PRODUCT_VIDEOS)
+  shopperVideos(product, videosOn)
   product.attribute_values = (product.attribute_values ?? []).filter(
     (value) => value?.definition?.is_public !== false
   )
