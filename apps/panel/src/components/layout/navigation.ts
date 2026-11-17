@@ -6,6 +6,7 @@ import {
   Images,
   Layers,
   LayoutDashboard,
+  LayoutTemplate,
   Link2,
   ListTree,
   Mails,
@@ -91,6 +92,8 @@ export const NAV_GROUPS: NavGroup[] = [
     // What the shop's customers see around its catalog (adr/0049); the editor opens full screen
     key: "storefront",
     items: [
+      // Ready-made and saved looks into the draft (adr/0064)
+      { key: "looks", to: "/storefront/looks", icon: LayoutTemplate },
       // The storefront's preferences are a panel of it (the owner, 2026-11-16)
       { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
       { key: "menus", to: "/storefront/menus", icon: ListTree },

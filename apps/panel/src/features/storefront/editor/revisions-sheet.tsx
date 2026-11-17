@@ -1,4 +1,4 @@
-import { History, RotateCcw } from "lucide-react"
+import { BookmarkPlus, RotateCcw } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
@@ -15,11 +15,14 @@ import {
 } from "@qticaret/admin-ui/ui/sheet"
 import type { LayoutRevision } from "@/features/storefront/api/layout"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
-import { BarButton } from "./bar-button"
+import { dayOf } from "@/features/storefront/gallery/design-name"
+import { SaveDesignDialog } from "@/features/storefront/gallery/name-dialog"
 
 const V = "storefront.editor.revisions"
 
 interface RevisionsSheetProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   revisions: readonly LayoutRevision[]
   /** The revision on the storefront now (the last published). */
   live: number
@@ -31,16 +34,26 @@ interface RevisionsSheetProps {
 }
 
 /**
- * Each published design, newest first, any of them back into the draft. A
- * revision that put a menu set live says so before it is restored, and may
- * come without it (adr/0063 §3): published again, it would replace the
- * shop's menus with that day's.
+ * "Yayın geçmişi": each published design, newest first, the last 20 kept
+ * by themselves (a safety net, adr/0064 Ek 2026-11-17); any of them back
+ * into the draft, or kept for good as a saved look. A revision that put a
+ * menu set live says so before it is restored, and may come without it
+ * (adr/0063 §3): published again, it would replace the shop's menus with
+ * that day's.
  */
-export function RevisionsSheet({ revisions, live, ask, busy, onRestore }: RevisionsSheetProps) {
+export function RevisionsSheet({
+  open,
+  onOpenChange: setOpen,
+  revisions,
+  live,
+  ask,
+  busy,
+  onRestore,
+}: RevisionsSheetProps) {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
   const [asking, setAsking] = useState<LayoutRevision | null>(null)
   const [skipMenus, setSkipMenus] = useState(false)
+  const [keeping, setKeeping] = useState<LayoutRevision | null>(null)
   const restore = (revision: LayoutRevision) => {
     if (ask || revision.has_menus) {
       setSkipMenus(false)
@@ -52,14 +65,6 @@ export function RevisionsSheet({ revisions, live, ask, busy, onRestore }: Revisi
   }
   return (
     <>
-      <BarButton
-        variant="outline"
-        icon={<History />}
-        label={t(`${V}.open`)}
-        onClick={() => {
-          setOpen(true)
-        }}
-      />
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent className="w-full sm:max-w-md">
           <SheetHeader>
@@ -74,8 +79,8 @@ export function RevisionsSheet({ revisions, live, ask, busy, onRestore }: Revisi
             ) : (
               <ol aria-label={t(`${V}.title`)} className="flex flex-col divide-y rounded-md border">
                 {revisions.map((each) => (
-                  <li key={each.revision} className="flex items-center gap-3 px-3 py-2.5">
-                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <li key={each.revision} className="flex flex-wrap items-center gap-3 px-3 py-2.5">
+                    <div className="flex min-w-40 flex-1 flex-col gap-0.5">
                       <span className="flex items-center gap-2 text-sm font-medium">
                         {t(`${V}.item`, { revision: each.revision })}
                         {each.revision === live ? (
@@ -89,19 +94,33 @@ export function RevisionsSheet({ revisions, live, ask, busy, onRestore }: Revisi
                         {formatDateTime(each.published_at)}
                       </span>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={busy}
-                      aria-label={t(`${V}.restoreOf`, { revision: each.revision })}
-                      onClick={() => {
-                        restore(each)
-                      }}
-                    >
-                      <RotateCcw />
-                      {t(`${V}.restore`)}
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={t(`${V}.saveAsOf`, { revision: each.revision })}
+                        onClick={() => {
+                          setKeeping(each)
+                        }}
+                      >
+                        <BookmarkPlus />
+                        {t(`${V}.saveAs`)}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        aria-label={t(`${V}.restoreOf`, { revision: each.revision })}
+                        onClick={() => {
+                          restore(each)
+                        }}
+                      >
+                        <RotateCcw />
+                        {t(`${V}.restore`)}
+                      </Button>
+                    </div>
                   </li>
                 ))}
               </ol>
@@ -143,6 +162,23 @@ export function RevisionsSheet({ revisions, live, ask, busy, onRestore }: Revisi
           </div>
         ) : null}
       </ConfirmDialog>
+      <SaveDesignDialog
+        open={keeping !== null}
+        onOpenChange={(next) => {
+          if (!next) {
+            setKeeping(null)
+          }
+        }}
+        revision={keeping?.revision ?? 0}
+        initial={
+          keeping
+            ? t(`${V}.saveAsName`, {
+                revision: keeping.revision,
+                date: dayOf(keeping.published_at),
+              })
+            : ""
+        }
+      />
     </>
   )
 }

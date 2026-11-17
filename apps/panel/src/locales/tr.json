@@ -74,7 +74,8 @@
     "bulkMessages": "Toplu ileti",
     "paymentLinks": "Ödeme bağlantıları",
     "media": "Ortam kütüphanesi",
-    "collections": "Koleksiyonlar"
+    "collections": "Koleksiyonlar",
+    "looks": "Görünümler"
   },
   "login": {
     "title": "Giriş yap",
@@ -7808,27 +7809,30 @@
         "retry": "Tekrar dene"
       },
       "revisions": {
-        "open": "Sürümler",
-        "title": "Yayınlanan sürümler",
-        "description": "Her yayın bir sürüm olarak saklanır; son 20 sürüm tutulur. Bir sürümü taslağa yükleyip düzenleyebilir, sonra yeniden yayınlayabilirsiniz.",
-        "empty": "Henüz yayın yok; ilk yayından sonra sürümler burada görünür.",
-        "item": "{{revision}}. sürüm",
+        "open": "Yayın geçmişi",
+        "title": "Yayın geçmişi",
+        "description": "Son 20 yayın kendiliğinden tutulur. Kalıcı saklamak istediğinizi 'Kayıtlı görünümlerim'e ekleyin.",
+        "empty": "Henüz yayın yok; ilk yayından sonra burada görünür.",
+        "item": "{{revision}}. yayın",
         "live": "Yayında",
         "restore": "Taslağa geri yükle",
-        "restoreOf": "{{revision}}. sürümü taslağa geri yükle",
-        "confirmTitle": "{{revision}}. sürüm taslağa yüklensin mi?",
-        "confirmText": "Taslaktaki değişiklikler bu sürümle değiştirilir. Vitrin, siz yayınlayana kadar değişmez.",
+        "restoreOf": "{{revision}}. yayını taslağa geri yükle",
+        "confirmTitle": "{{revision}}. yayın taslağa yüklensin mi?",
+        "confirmText": "Taslaktaki değişiklikler bu yayınla değiştirilir; şimdiki taslak 'Kayıtlı görünümlerim'e otomatik kaydedilir. Vitrin, siz yayınlayana kadar değişmez.",
         "confirm": "Taslağa yükle",
-        "restored": "{{revision}}. sürüm taslağa yüklendi.",
+        "restored": "{{revision}}. yayın taslağa yüklendi.",
         "menusBadge": "Menülerle",
-        "confirmKeep": "Bu sürüm taslağa yüklenir. Vitrin, siz yayınlayana kadar değişmez.",
-        "menusText": "Bu sürüm yayınlandığında menüleri de değiştirmişti. Menüler de taslağa gelir: yeniden yayınlarsanız bugünkü menülerin yerine o günkü menüler geçer.",
-        "skipMenus": "Menüleri alma, bugünkü menüler kalsın"
+        "confirmKeep": "Bu yayın taslağa yüklenir. Vitrin, siz yayınlayana kadar değişmez.",
+        "menusText": "Bu yayın menüleri de değiştirmişti. Menüler de taslağa gelir: yeniden yayınlarsanız bugünkü menülerin yerine o günkü menüler geçer.",
+        "skipMenus": "Menüleri alma, bugünkü menüler kalsın",
+        "saveAs": "Kayıtlı görünümlere ekle",
+        "saveAsOf": "{{revision}}. yayını kayıtlı görünümlere ekle",
+        "saveAsName": "{{revision}}. yayın, {{date}}"
       },
       "discard": {
         "open": "Değişiklikleri at",
         "title": "Taslaktaki değişiklikler atılsın mı?",
-        "text": "Taslak, vitrinde yayında olan tasarıma döner (hiç yayın yoksa varsayılan tasarıma). Bu işlem geri alınamaz.",
+        "text": "Taslak, vitrinde yayında olan tasarıma döner (hiç yayın yoksa varsayılan tasarıma). Şimdiki taslak 'Kayıtlı görünümlerim'e otomatik kaydedilir.",
         "confirm": "Değişiklikleri at",
         "done": "Taslak, yayındaki tasarıma döndü."
       },
@@ -9586,7 +9590,13 @@
         "empty": "“{{query}}” için ayar bulunamadı.",
         "count_one": "{{count}} ayar bulundu",
         "count_other": "{{count}} ayar bulundu"
-      }
+      },
+      "looks": {
+        "open": "Görünümler",
+        "save": "Bu görünümü kaydet",
+        "all": "Tüm görünümler"
+      },
+      "keptDraft": "Önceki taslak 'Kayıtlı görünümlerim'e otomatik kaydedildi."
     },
     "maintenance": {
       "status": {
@@ -9648,6 +9658,126 @@
       "banner": {
         "text": "Vitrin bakım modunda: alıcılar mağaza yerine bakım sayfasını görüyor.",
         "link": "Bakım modu ayarları"
+      }
+    },
+    "gallery": {
+      "title": "Görünümler",
+      "description": "Mağazanızın görünümünü seçin, kaydedin ve istediğiniz zaman geri dönün. Değişiklikler siz yayınlayana kadar ziyaretçilere görünmez.",
+      "openEditor": "Tema düzenleyiciyi aç",
+      "thumbAlt": "{{name}} görünümünün küçük resmi",
+      "sections_one": "{{count}} bölüm",
+      "sections_other": "{{count}} bölüm",
+      "from": "{{name}} görünümünden",
+      "current": {
+        "title": "Şu anki görünüm",
+        "liveLabel": "Yayında",
+        "live": "{{name}} · {{date}} tarihinde yayınlandı",
+        "neverLive": "Henüz yayınlanmadı; ziyaretçiler varsayılan görünümü görüyor.",
+        "draftLabel": "Taslak",
+        "draftEdited": "{{name}}, düzenlenmiş",
+        "draftChanged": "Taslakta yayınlanmamış değişiklik var",
+        "draftSame": "Taslak yayındakiyle aynı",
+        "newVersion": "Bu hazır görünümün yeni sürümü var. Yeniden uygularsanız taslağa yeni sürüm gelir.",
+        "edit": "Düzenle",
+        "save": "Bu görünümü kaydet",
+        "full": "Adlı kayıtlar dolu; yenisi için birini silin."
+      },
+      "saved": {
+        "title": "Kayıtlı görünümlerim ({{count}}/{{max}})",
+        "heading": "Kayıtlı görünümlerim",
+        "autoNote": "Otomatik kayıtların son {{max}} tanesi tutulur; adlı kayıt sınırına sayılmaz.",
+        "empty": "Henüz kayıtlı görünümünüz yok. Şu anki görünümü kaydederek istediğiniz zaman geri dönebilirsiniz.",
+        "emptyAction": "Şu anki görünümü kaydet",
+        "unavailable": "Kayıtlı görünümler yüklenemedi."
+      },
+      "auto": {
+        "badge": "Otomatik",
+        "name": "{{source}}, {{date}}",
+        "nameEdited": "{{source}}, {{date}}, düzenlenmiş",
+        "own": "Kendi tasarımınız"
+      },
+      "badge": {
+        "live": "Yayında",
+        "draft": "Taslakta",
+        "edited": "düzenlenmiş",
+        "newVersion": "Yeni sürüm var"
+      },
+      "tone": {
+        "light": "Açık",
+        "dark": "Koyu"
+      },
+      "card": {
+        "apply": "Taslağa al",
+        "applyOf": "‘{{name}}’ görünümünü taslağa al",
+        "actions": "‘{{name}}’ için işlemler",
+        "rename": "Adını değiştir",
+        "keep": "Adıyla sakla",
+        "delete": "Sil"
+      },
+      "rename": {
+        "title": "Görünümün adını değiştir",
+        "keepTitle": "Adıyla sakla",
+        "keepText": "Adı verilen otomatik kayıt kalıcı olur ve adlı kayıt sınırına sayılır."
+      },
+      "delete": {
+        "title": "‘{{name}}’ silinsin mi?",
+        "text": "Kayıtlı görünüm kalıcı olarak silinir; geri alınamaz. Yayındaki görünüm değişmez.",
+        "confirm": "Görünümü sil",
+        "done": "‘{{name}}’ silindi."
+      },
+      "presets": {
+        "title": "Hazır görünümler",
+        "description": "Bir görünümü taslağa uygulayın, sonra düzenleyicide istediğiniz gibi değiştirin.",
+        "preview": "Önizle",
+        "previewOf": "‘{{name}}’ görünümünü önizle",
+        "apply": "Uygula",
+        "applyOf": "‘{{name}}’ görünümünü taslağa uygula",
+        "colors": "Renk takımı",
+        "noPreview": "Bu görünümün resmi henüz yok; şema gösteriliyor.",
+        "frameShop": "Üst ve alt bilgiden bu görünümün tanımlamadığı kısım sizinki olarak kalır."
+      },
+      "apply": {
+        "title": "‘{{name}}’ taslağa uygulansın mı?",
+        "vitrin": "Vitrin hemen değişmez. Görünüm taslağa uygulanır; siz Yayınla'ya basana kadar ziyaretçiler bugünkü görünümü görür.",
+        "draftChanged": "Taslaktaki yayınlanmamış değişiklikler bu görünümle değiştirilecek. Kaybolmazlar: şimdiki taslak 'Kayıtlı görünümlerim'e otomatik kaydedilir.",
+        "autoSave": "Şimdiki görünümünüzde değişiklik yaptıysanız 'Kayıtlı görünümlerim'e otomatik kaydedilir.",
+        "frameReplaced": "Üst ve alt bilgi bu görünümünküyle değişir.",
+        "headerReplaced": "Üst bilgi bu görünümünküyle değişir.",
+        "footerReplaced": "Alt bilgi bu görünümünküyle değişir.",
+        "headerKept": "Üst bilginiz korunur.",
+        "footerKept": "Alt bilginiz korunur.",
+        "menusReplaced": "Bu görünüm menü de içerir. Yayınla'ya bastığınızda mağazanın menüleri bu görünümün menüleriyle değişir.",
+        "menusKept": "Menülerinize dokunulmaz.",
+        "menusNever": "Menülerinize dokunulmaz; kayıtlı görünümler menü taşımaz.",
+        "pendingMenusLost": "Taslakta yayınlanmayı bekleyen menü değişikliği var; kayda alınmaz.",
+        "shopData": "Güven rozetleri, renk örnekleri ve 'Az kaldı' ayarınız korunur.",
+        "saveAs": {
+          "label": "Şimdiki görünümü adıyla da kaydet",
+          "full": "Adlı kayıtlar dolu ({{max}}/{{max}}). Otomatik kayıt yine alınır."
+        },
+        "confirm": "Taslağa uygula ve düzenle"
+      },
+      "save": {
+        "title": "Görünümü kaydet",
+        "text": "Taslaktaki görünüm bu adla 'Kayıtlı görünümlerim'e eklenir. Menüler kayda alınmaz.",
+        "textRevision": "{{revision}}. yayın bu adla 'Kayıtlı görünümlerim'e eklenir. Menüler kayda alınmaz.",
+        "name": "Ad",
+        "nameHint": "En çok 60 karakter.",
+        "confirm": "Kaydet",
+        "done": "‘{{name}}’ kaydedildi.",
+        "defaultSource": "Görünümüm"
+      },
+      "report": {
+        "applied": "‘{{name}}’ taslağa uygulandı.",
+        "saved": "Önceki görünümünüz ‘{{saved}}’ adıyla kaydedildi.",
+        "savedAuto": "Önceki görünümünüz 'Kayıtlı görünümlerim'e otomatik kaydedildi.",
+        "skipped_one": "{{count}} bölüm eklenmedi: mağazada {{refs}} yok.",
+        "skipped_other": "{{count}} bölüm eklenmedi: mağazada {{refs}} yok.",
+        "kept": "Üst/alt bilginiz korundu."
+      },
+      "history": {
+        "lead": "Daha eski yayınlar:",
+        "link": "Tema düzenleyici › Görünümler › Yayın geçmişi"
       }
     }
   },

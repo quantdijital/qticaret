@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
 import {
+  DESIGNS,
   DOC,
   holdClock,
   lastSaved,
@@ -122,6 +123,26 @@ describe("ThemeEditor", () => {
     expect(screen.getByRole("button", { name: "Yayınla" })).toBeEnabled()
   })
 
+  it("carries the look the draft was given through its saves (adr/0064 Ek 2026-11-17)", async () => {
+    const preset = { pack: "general", code: "grafit", version: 1 }
+    const design = { id: "sfd_look1", digest: "a".repeat(64) }
+    serve(
+      fetchMock,
+      admin,
+      layoutOf({ draft: { ...DOC, settings: { ...DOC.settings, preset, design } } })
+    )
+    renderEditor()
+    await opened()
+
+    await user.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
+    await pass(0)
+    await waitFor(() => {
+      expect(lastSaved(fetchMock)?.home[0]).toMatchObject({ visible: false })
+    })
+    // Labels only, the server's to judge: the editor sends them back as they are
+    expect(lastSaved(fetchMock)?.settings).toMatchObject({ preset, design })
+  })
+
   it("keeps a refused change, says why, and sends it again on retry", async () => {
     let refuse = true
     serve(fetchMock, admin, layoutOf(), {
@@ -196,13 +217,16 @@ describe("ThemeEditor", () => {
     renderEditor()
     const tree = await opened()
 
-    await user.click(screen.getByRole("button", { name: "Sürümler" }))
-    const sheet = await screen.findByRole("dialog", { name: "Yayınlanan sürümler" })
+    // The publication history is the looks menu's safety net (adr/0064 Ek 2026-11-17)
+    await user.click(screen.getByRole("button", { name: "Görünümler" }))
+    await user.click(await screen.findByRole("menuitem", { name: "Yayın geçmişi" }))
+    const sheet = await screen.findByRole("dialog", { name: "Yayın geçmişi" })
     expect(within(sheet).getByText("Yayında")).toBeInTheDocument()
-    await user.click(within(sheet).getByRole("button", { name: "1. sürümü taslağa geri yükle" }))
+    await user.click(within(sheet).getByRole("button", { name: "1. yayını taslağa geri yükle" }))
     const confirm = await screen.findByRole("alertdialog", {
-      name: "1. sürüm taslağa yüklensin mi?",
+      name: "1. yayın taslağa yüklensin mi?",
     })
+    expect(confirm).toHaveTextContent("şimdiki taslak 'Kayıtlı görünümlerim'e otomatik kaydedilir")
     await user.click(within(confirm).getByRole("button", { name: "Taslağa yükle" }))
 
     await waitFor(() => {
@@ -210,6 +234,52 @@ describe("ThemeEditor", () => {
     })
     // The restored version has no announcement bar
     expect(await within(tree).findByRole("button", { name: "Duyuru şeridi ekle" })).toBeVisible()
+    // The draft it replaced was kept: the toast says so
+    await waitFor(() => {
+      expect(vi.mocked(toast.success)).toHaveBeenCalledWith("1. yayın taslağa yüklendi.", {
+        description: "Önceki taslak 'Kayıtlı görünümlerim'e otomatik kaydedildi.",
+      })
+    })
+  })
+
+  it("keeps a publication, or the draft, as a saved look under a name", async () => {
+    renderEditor()
+    await opened()
+
+    await user.click(screen.getByRole("button", { name: "Görünümler" }))
+    await user.click(await screen.findByRole("menuitem", { name: "Yayın geçmişi" }))
+    const sheet = await screen.findByRole("dialog", { name: "Yayın geçmişi" })
+    await user.click(
+      within(sheet).getByRole("button", { name: "1. yayını kayıtlı görünümlere ekle" })
+    )
+    const naming = await screen.findByRole("dialog", { name: "Görünümü kaydet" })
+    const field = within(naming).getByRole<HTMLInputElement>("textbox", { name: "Ad" })
+    // jest-dom's toHaveValue compares with lodash and ignores asymmetric matchers
+    expect(field.value).toMatch(/^1\. yayın, \d{1,2} \S+$/)
+    await user.clear(field)
+    await user.type(field, "Bayram vitrini")
+    await user.click(within(naming).getByRole("button", { name: "Kaydet" }))
+    await waitFor(() => {
+      expect(postsTo(fetchMock, DESIGNS).map(([, init]) => init?.body)).toEqual([
+        { name: "Bayram vitrini", revision: 1 },
+      ])
+    })
+    await user.keyboard("{Escape}")
+
+    // The draft itself, what waits stored first
+    await user.click(screen.getByRole("button", { name: "Görünümler" }))
+    await user.click(await screen.findByRole("menuitem", { name: "Bu görünümü kaydet" }))
+    const draft = await screen.findByRole("dialog", { name: "Görünümü kaydet" })
+    expect(within(draft).getByRole<HTMLInputElement>("textbox", { name: "Ad" }).value).toMatch(
+      /^Görünümüm, /
+    )
+    await user.click(within(draft).getByRole("button", { name: "Kaydet" }))
+    await waitFor(() => {
+      expect(postsTo(fetchMock, DESIGNS)).toHaveLength(2)
+    })
+    expect(postsTo(fetchMock, DESIGNS).at(-1)?.[1]?.body).toEqual({
+      name: expect.stringMatching(/^Görünümüm, /) as string,
+    })
   })
 
   it("undoes and redoes a change, and brings a removed section back from its notice", async () => {
