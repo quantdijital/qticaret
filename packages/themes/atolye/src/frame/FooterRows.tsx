@@ -12,6 +12,7 @@ import { BottomLine } from "./FooterBottomLine"
 import { FooterNewsletterBox, footerNewsletterVariant } from "./FooterNewsletter"
 import { FooterIdentity } from "./FooterIdentity"
 import { FooterBlock } from "./footer-blocks/FooterBlock"
+import { foldJoins } from "./footer-blocks/fold-joins"
 import { NewsletterForm } from "./NewsletterForm"
 import { newsletterWords } from "./newsletter-words"
 import { legalLabel } from "./SmallPrint"
@@ -53,6 +54,7 @@ function Row({
   dark: boolean
 }) {
   const shares = sharesOf(row.layout)
+  const joins = foldJoins(row, shop, Boolean(subscribe))
   return (
     <div
       className={cn(
@@ -82,6 +84,7 @@ function Row({
                 editor={editor}
                 subscribe={subscribe}
                 share={shares[at] ?? 1}
+                join={joins.get(block.id)}
               />
             ))}
           </div>

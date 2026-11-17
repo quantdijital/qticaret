@@ -208,6 +208,55 @@ describe("the free rows footer", () => {
     expect(html).toContain('class="gf-fblock" data-block="text" data-device="mobile"')
   })
 
+  it("joins closed menus one after another into one list on a phone", () => {
+    const menu = (n: number, over: Partial<FooterBlockView> = {}) =>
+      ({
+        ...at(n),
+        type: "menu",
+        title: `Menü ${String(n)}`,
+        links: [{ label: "SSS", path: "/sss" }],
+        collapsePhone: true,
+        ...over,
+      }) as FooterBlockView
+    const html = draw(
+      shopWith([
+        row({
+          layout: "1-1-1-1",
+          columns: [
+            // The first stands alone; the next in its column and the next column's join it
+            { blocks: [menu(0), menu(1)] },
+            { blocks: [menu(2)] },
+            // A computer's block keeps its column's box on a phone: no join across it
+            {
+              blocks: [
+                { ...BLOCKS[4], at: 3, id: "blokmasaust", device: "desktop" } as FooterBlockView,
+              ],
+            },
+            // An open menu is no fold; nor is what follows a block between
+            {
+              blocks: [
+                menu(4),
+                menu(5, { collapsePhone: false }),
+                { ...BLOCKS[4], at: 6, id: "bloksizmetin" } as FooterBlockView,
+                menu(7),
+              ],
+            },
+          ],
+        }),
+      ])
+    )
+    const joins = [...html.matchAll(/data-block="menu"( data-fold-join="(\w+)")?/g)].map(
+      (match) => match[2] ?? "-"
+    )
+    expect(joins).toEqual(["-", "block", "column", "-", "-", "-"])
+    const css = atolyeCss("footer-rows.css")
+    expect(css).toContain('.gf-fblock[data-fold-join="block"]')
+    expect(css).toContain('.gf-fblock[data-fold-join="column"]')
+    // A lone closed menu stands on its own
+    const lone = draw(shopWith([row({ layout: "1", columns: [{ blocks: [menu(0)] }] })]))
+    expect(lone).not.toContain("data-fold-join")
+  })
+
   it("puts field marks on its rows and blocks only in the editor's live preview", () => {
     const live = draw(shopWith([row()]))
     expect(live).not.toContain("data-qf=")

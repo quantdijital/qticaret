@@ -3,6 +3,7 @@ import { fieldMark } from "@qticaret/ui"
 import type { FooterBlockView, PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { BrandBlock } from "./BrandBlock"
 import { ContactBlock } from "./ContactBlock"
+import type { FoldJoin } from "./fold-joins"
 import { ImageBlock } from "./ImageBlock"
 import { MenuBlock } from "./MenuBlock"
 import { NewsletterBlock } from "./NewsletterBlock"
@@ -21,6 +22,8 @@ interface Props {
   subscribe?: Subscribe | undefined
   /** The column's share of the row (its picture's `sizes`). */
   share: number
+  /** A closed menu after another one on a phone: drawn joined to it (`fold-joins.ts`). */
+  join?: FoldJoin | undefined
 }
 
 function body({ block, shop, t, editor, subscribe, share }: Props): ReactNode {
@@ -61,12 +64,13 @@ export function FooterBlock(props: Props) {
   if (content === null) {
     return null
   }
-  const { block, editor } = props
+  const { block, editor, join } = props
   return (
     <div
       className="gf-fblock"
       data-block={block.type}
       {...(block.device === "all" ? {} : { "data-device": block.device })}
+      {...(join ? { "data-fold-join": join } : {})}
       {...fieldMark(editor, `blocks.${String(block.at)}`)}
     >
       {content}

@@ -211,6 +211,23 @@
     }
   }
 
+  /*
+   * Closed menus one after another (`data-fold-join`, `fold-joins.ts`): one
+   * list below 1024 px, as the brand columns' accordion, no room between
+   * and one rule (each fold's top rule over the one before's bottom). In a
+   * column always; across columns only while they stack (a phone, one column).
+   */
+  @media (max-width: 63.999rem) {
+    .gf-fblock[data-fold-join="block"] {
+      margin-top: calc(-2rem - 1px);
+    }
+  }
+  @media (max-width: 47.999rem) {
+    .gf-frow-grid:not([data-phone-columns="2"]) .gf-fblock[data-fold-join="column"] {
+      margin-top: calc(-2.5rem - 1px);
+    }
+  }
+
   /* The text block's words in the footer's small measure; a link is a 44 px target */
   .gf-foot-prose {
     display: flex;
