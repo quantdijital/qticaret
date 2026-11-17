@@ -42,6 +42,10 @@
       "file": "footer-columns.css"
     },
     {
+      "sha256": "e589cac46a1bf032a8c70610e4d45b945e9fbfade52b742685ae6f1fb9834e94",
+      "file": "footer-rows.css"
+    },
+    {
       "sha256": "4e80b18c2ae70a66cf28e869772a1e7f4406d9896d30d685a59bf3c477e9a5b2",
       "file": "frame.css"
     },
@@ -114,7 +118,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "4f73a81475f21c9e66650add3fcaa90ffcd0ad012b892a22427fa99f7037928f",
+      "sha256": "db6ba9983724750117c248b1a47b0080bb184308be806df2a1d530ba6e3ba9e1",
       "file": "styles.css"
     },
     {

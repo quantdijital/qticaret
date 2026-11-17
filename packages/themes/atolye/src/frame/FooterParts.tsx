@@ -1,9 +1,18 @@
 import { Banknote, CalendarRange, Landmark, Mail, MapPin, Phone, Plus } from "lucide-react"
 import type { ReactNode } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
-import type { LinkView, ShopMarkView, ShopView, Translate } from "@qticaret/ui"
+import type {
+  ContactView,
+  ImageView,
+  LinkView,
+  ShopMarkView,
+  ShopView,
+  SocialLinkView,
+  Translate,
+} from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
+import { FooterIdentity } from "./FooterIdentity"
 import { FooterSocial } from "./FooterSocial"
 
 /*
@@ -57,12 +66,14 @@ export function ReachList({
   shop,
   t,
   className,
+  contact = shop.contact,
 }: {
   shop: ShopView
   t: Translate
   className?: string
+  /** The ways a free rows footer's contact block keeps (adr/0070); absent: the shop's. */
+  contact?: Pick<ContactView, "phone" | "phoneHref" | "whatsappHref" | "email">
 }) {
-  const { contact } = shop
   if (!contact.phoneHref && !contact.whatsappHref && !contact.email) {
     return null
   }
@@ -109,22 +120,36 @@ export function BrandBlock({
   t,
   about,
   withContact,
+  block,
   children,
 }: {
   shop: ShopView
   t: Translate
   about: string | null
   withContact: boolean
+  /**
+   * Drawn as the free rows footer's block (adr/0070): its own logo (null:
+   * the name) and profiles, its heading's id, no address and no identity
+   * lines (the legal strip says them); in the editor its line's field mark.
+   */
+  block?: {
+    logo: ImageView | null
+    profiles: readonly SocialLinkView[]
+    headingId: string
+    aboutMark: { "data-qf"?: string }
+  }
   children?: ReactNode
 }) {
   const { contact } = shop
-  const logo = shop.footerBar?.logo
-  const title = shop.companyTitle ?? shop.name
-  const qr = shop.etbisQr ?? null
+  const logo = block ? block.logo : shop.footerBar?.logo
+  const headingId = block?.headingId ?? "footer-brand"
   return (
-    <section aria-labelledby="footer-brand" className="flex flex-col gap-5 lg:col-span-4">
+    <section
+      aria-labelledby={headingId}
+      className={cn("flex flex-col gap-5", !block && "lg:col-span-4")}
+    >
       {logo ? (
-        <h2 id="footer-brand" className="flex min-h-11 items-center">
+        <h2 id={headingId} className="flex min-h-11 items-center">
           <ResponsiveImage
             image={logo}
             sizes="224px"
@@ -133,62 +158,50 @@ export function BrandBlock({
         </h2>
       ) : (
         <h2
-          id="footer-brand"
+          id={headingId}
           className="text-wordmark leading-tight font-extrabold tracking-(--tracking-display)"
         >
           {shop.name}
         </h2>
       )}
-      {about && <p className="max-w-[40ch] text-sm text-text-2">{about}</p>}
-      <ul className="flex flex-col text-sm">
-        {contact.address && (
-          <li className="flex items-start gap-3 py-2 text-text-2">
-            <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
-            <span className="max-w-[36ch]">{contact.address}</span>
-          </li>
-        )}
-        {withContact && contact.phone && contact.phoneHref && (
-          <li>
-            <a href={contact.phoneHref} className={cn(LINK, "tabular gap-3")}>
-              <Phone className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
-              {contact.phone}
-            </a>
-          </li>
-        )}
-        {withContact && contact.email && (
-          <li>
-            <a href={`mailto:${contact.email}`} className={cn(LINK, "gap-3 break-all")}>
-              <Mail className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
-              {contact.email}
-            </a>
-          </li>
-        )}
-      </ul>
+      {about && (
+        <p className="max-w-[40ch] text-sm text-text-2" {...block?.aboutMark}>
+          {about}
+        </p>
+      )}
+      {!block && (
+        <ul className="flex flex-col text-sm">
+          {contact.address && (
+            <li className="flex items-start gap-3 py-2 text-text-2">
+              <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
+              <span className="max-w-[36ch]">{contact.address}</span>
+            </li>
+          )}
+          {withContact && contact.phone && contact.phoneHref && (
+            <li>
+              <a href={contact.phoneHref} className={cn(LINK, "tabular gap-3")}>
+                <Phone className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
+                {contact.phone}
+              </a>
+            </li>
+          )}
+          {withContact && contact.email && (
+            <li>
+              <a href={`mailto:${contact.email}`} className={cn(LINK, "gap-3 break-all")}>
+                <Mail className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
+                {contact.email}
+              </a>
+            </li>
+          )}
+        </ul>
+      )}
       <FooterSocial
-        profiles={shop.social}
+        profiles={block ? block.profiles : shop.social}
         style={shop.footerBar?.social ?? "text"}
         label={t("footer.social")}
       />
       {children}
-      {(shop.identityLines.length > 0 || qr !== null || title !== shop.name) && (
-        <div className="flex items-start gap-4">
-          {qr && (
-            <span className="block size-14 shrink-0 rounded-inner border border-rule bg-chip p-1">
-              <ResponsiveImage
-                image={{ ...qr, alt: t("footer.etbis_qr_alt") }}
-                sizes="56px"
-                className="h-full w-full object-contain"
-              />
-            </span>
-          )}
-          <ul className="flex flex-col gap-0.5 text-xs text-text-3">
-            {title !== shop.name && <li className="font-semibold text-text-2">{title}</li>}
-            {shop.identityLines.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {!block && <FooterIdentity shop={shop} t={t} />}
     </section>
   )
 }

@@ -16,12 +16,21 @@ const TOOL =
  * their own row first, the year and the choices share the next; the rule
  * between the ways to pay and the carriers only from 768 px, where the
  * marks keep to one row (below, it would stand alone at a row's start).
+ * `marks` off (the free rows footer's `bottom_badges`, adr/0070): no marks.
  */
-export function BottomLine({ shop, t }: { shop: ShopView; t: Translate }) {
+export function BottomLine({
+  shop,
+  t,
+  marks = true,
+}: {
+  shop: ShopView
+  t: Translate
+  marks?: boolean
+}) {
   const year = new Date().getFullYear()
   const badges = shop.footerBar?.paymentBadges ?? []
-  const payments = badges.length > 0 ? badges : (shop.paymentMarks ?? [])
-  const carriers = shop.carrierMarks ?? []
+  const payments = !marks ? [] : badges.length > 0 ? badges : (shop.paymentMarks ?? [])
+  const carriers = marks ? (shop.carrierMarks ?? []) : []
   // The floating button does the same job: the line's link stays only where it does not show
   const floating = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (

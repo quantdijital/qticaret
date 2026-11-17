@@ -135,6 +135,10 @@ export async function shopView(): Promise<ShopView> {
   const bars = layout.header.filter((section) => section.type === "announcement_bar")
   const [bar] = bars
   const announcementMark = bars.length === 1 && bar && editing ? bar.id : null
+  // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
+  const trustBadges = sharedSettingsOf(layout, frame).trust_badges
+  const contact = contactOf(identity, t)
+  const social = socialLinks(identity.same_as)
   return {
     name: site.shop.name,
     logo: site.shop.logo_url
@@ -175,14 +179,23 @@ export async function shopView(): Promise<ShopView> {
       t,
       tree: () => withPicturesOf(navigation(categories, paths, pictures), menu),
     }),
-    footerBar: footerBarOf(layout.main, t, footerLogoOf(site.shop)),
+    // The free rows footer's blocks take the details read here (adr/0070: no request of their own)
+    footerBar: footerBarOf(layout.main, t, footerLogoOf(site.shop), {
+      menus,
+      contact,
+      social,
+      name: site.shop.name,
+      title: identity.company_title ?? site.shop.name,
+      trustBadges,
+      payments: shopMarks(marks?.payments, t),
+      carriers: shopMarks(marks?.carriers, t),
+    }),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name, editing),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),
-    // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
-    trustBadges: sharedSettingsOf(layout, frame).trust_badges,
-    contact: contactOf(identity, t),
-    social: socialLinks(identity.same_as),
+    trustBadges,
+    contact,
+    social,
     companyTitle: identity.company_title,
     cookieBanner: cookieBannerOf(
       cookies,
