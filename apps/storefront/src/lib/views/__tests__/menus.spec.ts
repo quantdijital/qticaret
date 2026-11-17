@@ -53,6 +53,26 @@ describe("menu links", () => {
     expect(menuLink(link({ kind: "category", label: null, path: "/a" }), t)).toBeNull()
   })
 
+  it("prints only a path of its own or a secure address, whatever the backend sent", () => {
+    const at = (path: string) => menuLink(link({ label: "Bağlantı", path }), t)?.path ?? null
+    expect(at("/magaza")).toBe("/magaza")
+    expect(at("https://ornek.example/sayfa")).toBe("https://ornek.example/sayfa")
+    for (const bad of [
+      "//kotu.example",
+      "/\\kotu.example",
+      "javascript:alert(1)",
+      "JavaScript:alert(1)",
+      "data:text/html,x",
+      "http://ornek.example",
+      "https://",
+      "https:///kotu",
+      "magaza",
+      "/ma gaza",
+    ]) {
+      expect(at(bad)).toBeNull()
+    }
+  })
+
   it("builds the header's panels, the top links and the footer's columns in order", () => {
     const menus = [
       menu("footer", [link({ label: "Blog", kind: "system", target: "blog" })], {
