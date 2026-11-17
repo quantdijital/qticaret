@@ -9,20 +9,26 @@ import type { RefundPlan } from "./order-refund"
 const withData = (id: string, data: Record<string, unknown>) =>
   ({ id, data }) as unknown as UpdatePaymentDTO
 
-/** Takes the refund's name off the payment's data, nothing else: the provider may have written to it. */
+/** Whether the payment's data names a refund under way. */
+export const namesPendingRefund = (data: Record<string, unknown> | null | undefined): boolean =>
+  data?.["pending_refund"] !== undefined && data["pending_refund"] !== null
+
+/**
+ * Takes the refund's name off the payment's data, nothing else: the
+ * provider may have written to it. Written as `null`: Medusa merges an
+ * update into the stored JSON (2.21.2 `mikro-orm-repository` `update`,
+ * `mergeObjectProperties`), so a key left out stays as it was.
+ */
 export async function dropPendingRefund(
   container: Pick<MedusaContainer, "resolve">,
   paymentId: string
 ): Promise<boolean> {
   const payments = container.resolve(Modules.PAYMENT)
   const [payment] = await payments.listPayments({ id: paymentId }, { select: ["id", "data"] })
-  if (!payment?.data || !("pending_refund" in payment.data)) {
+  if (!payment || !namesPendingRefund(payment.data)) {
     return false
   }
-  const data = Object.fromEntries(
-    Object.entries(payment.data).filter(([key]) => key !== "pending_refund")
-  )
-  await payments.updatePayment(withData(payment.id, data))
+  await payments.updatePayment(withData(payment.id, { pending_refund: null }))
   return true
 }
 

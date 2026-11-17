@@ -164,6 +164,8 @@ medusaIntegrationTestRunner({
         { amount: 24000, referenceNo: "refund0000000031" },
       ])
       expect((payments[0] as { refunds: unknown[] }).refunds).toHaveLength(1)
+      // Closed, the payment names no refund under way
+      expect((await paymentOf(orderId))?.data).toHaveProperty("pending_refund", null)
     })
 
     it("leaves no payment naming a refund once a cancel's refunds are through", async () => {
@@ -187,7 +189,8 @@ medusaIntegrationTestRunner({
       )
 
       expect(cancelled.status).toBe(200)
-      expect((await paymentOf(orderId))?.data).not.toHaveProperty("pending_refund")
+      // Medusa merges payment data on update: a name is taken off as null, never left standing
+      expect((await paymentOf(orderId))?.data).toHaveProperty("pending_refund", null)
       // Nothing more given back: the one refund made before the cancel
       expect(fake.payments.get(reference)?.refunds).toEqual([
         { amount: 33000, referenceNo: "refund0000000034" },
