@@ -9,6 +9,7 @@ import type {
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { BottomLine } from "./FooterBottomLine"
+import { FooterNewsletterBox, footerNewsletterVariant } from "./FooterNewsletter"
 import { FooterIdentity } from "./FooterIdentity"
 import { FooterBlock } from "./footer-blocks/FooterBlock"
 import { foldJoins } from "./footer-blocks/fold-joins"
@@ -125,8 +126,10 @@ function LegalStrip({ shop, t }: { shop: ShopView; t: Translate }) {
 
 /**
  * The free rows footer (adr/0070, "Serbest düzen"): on the ground the shop
- * picks (`data-ground`, the brand columns' names and tokens), its rows of
- * blocks, then the two fixed parts no layout takes away: the legal strip
+ * picks (`data-ground`, the brand columns' names and tokens), first the
+ * footer group's newsletter band when the shop set it on the footer's
+ * ground (`joined`, adr/0070 §4 Ek: as the brand columns draw it, under a
+ * rule), its rows of blocks, then the two fixed parts no layout takes away: the legal strip
  * and the bottom line (the year, the ways to pay when `bottomBadges`, the
  * cookie choices, "Yukarı çık").
  */
@@ -145,6 +148,8 @@ export function FooterRows({
 }) {
   const editor = shop.editor === true
   const dark = free.ground === "stage"
+  const drawn = subscribe && shop.newsletter?.joined ? footerNewsletterVariant(shop) : null
+  const band = drawn === "split" || drawn === "image_card" || drawn === "strip" ? drawn : null
   return (
     <footer
       data-gf-clear=""
@@ -154,6 +159,13 @@ export function FooterRows({
       data-badges={free.badgeStyle}
       className={cn("gf-footer-rows mt-(--footer-gap)")}
     >
+      {subscribe && band && (
+        <div data-footer-band="" className={cn("border-b border-rule", dark && "gf-stage")}>
+          <Container className="py-8 lg:py-10">
+            <FooterNewsletterBox shop={shop} t={t} subscribe={subscribe} variant={band} />
+          </Container>
+        </div>
+      )}
       {rows.map((row, index) => (
         <Row
           key={row.id}

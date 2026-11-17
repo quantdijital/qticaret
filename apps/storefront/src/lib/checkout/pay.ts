@@ -60,7 +60,7 @@ export async function startPayment(
 ): Promise<PaymentSession> {
   const offline = OFFLINE_PROVIDERS.has(providerId)
   const { payment_session } = await storeCall<{ payment_session: PaymentSession }>(
-    `/store/carts/${cartId}/payment-session`,
+    `/store/carts/${encodeURIComponent(cartId)}/payment-session`,
     {
       method: "POST",
       body: offline
@@ -100,10 +100,13 @@ export function sessionMatches(cart: SessionFacts, sessionId: string): boolean {
 
 /** `sessionMatches` for the cart as the backend holds it now. */
 export async function sessionCurrent(cartId: string, sessionId: string): Promise<boolean> {
-  const { cart } = await storeGet<{ cart: SessionFacts }>(`/store/carts/${cartId}`, {
-    fields:
-      "total,payment_collection.payment_sessions.id,payment_collection.payment_sessions.amount",
-  })
+  const { cart } = await storeGet<{ cart: SessionFacts }>(
+    `/store/carts/${encodeURIComponent(cartId)}`,
+    {
+      fields:
+        "total,payment_collection.payment_sessions.id,payment_collection.payment_sessions.amount",
+    }
+  )
   return sessionMatches(cart, sessionId)
 }
 
@@ -112,7 +115,10 @@ export type Completion =
 
 /** An offline payment's order: the cart completes now (bank transfer awaits the money). */
 export async function completeCart(cartId: string): Promise<string | null> {
-  const answer = await storePost<Completion>(`/store/carts/${cartId}/complete`, {})
+  const answer = await storePost<Completion>(
+    `/store/carts/${encodeURIComponent(cartId)}/complete`,
+    {}
+  )
   return answer.type === "order" ? answer.order.id : null
 }
 
@@ -123,7 +129,7 @@ export async function completeCart(cartId: string): Promise<string | null> {
 export async function orderAccess(cartId: string): Promise<{ id: string; token: string } | null> {
   try {
     const { order_id, token } = await storePost<{ order_id: string; token: string }>(
-      `/store/carts/${cartId}/order-access`,
+      `/store/carts/${encodeURIComponent(cartId)}/order-access`,
       {}
     )
     return { id: order_id, token }

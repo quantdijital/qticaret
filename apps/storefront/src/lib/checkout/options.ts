@@ -92,7 +92,7 @@ export async function contracts(
     CONTRACT_KINDS.map(async (kind) => {
       try {
         const { document } = await storeGet<{ document: Contract }>(
-          `/store/carts/${cartId}/legal/${kind}`,
+          `/store/carts/${encodeURIComponent(cartId)}/legal/${kind}`,
           payment === "credit" ? {} : { payment }
         )
         return document
@@ -115,7 +115,7 @@ export interface AgeCheck {
 
 export async function ageCheck(cartId: string): Promise<AgeCheck> {
   const { age_check } = await storeGet<{ age_check: AgeCheck }>(
-    `/store/carts/${cartId}/age-declaration`
+    `/store/carts/${encodeURIComponent(cartId)}/age-declaration`
   )
   return age_check
 }

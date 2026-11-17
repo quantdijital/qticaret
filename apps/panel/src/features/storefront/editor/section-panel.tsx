@@ -22,6 +22,8 @@ import { FrameGroup, OtherGroup } from "./forms/look-groups"
 import { MarqueeGroups } from "./forms/marquee-groups"
 import { AnnouncementMotion, AnnouncementStyle } from "./forms/announcement-settings"
 import { FooterStyleGroup } from "./forms/footer-columns-fields"
+import { NewsletterBandGroup } from "./forms/newsletter-band-group"
+import { isFooterBand } from "./forms/newsletter-band"
 import { HeaderGroups } from "./forms/header-bar-form"
 import { SectionLayoutGroup } from "./forms/layout-group"
 import { SliderGroups } from "./forms/slider-groups"
@@ -186,6 +188,13 @@ export function SectionPanel({
           {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
           {section.type === "footer_bar" && section.variant !== "ledger" ? (
             <FooterStyleGroup section={section} reveal={reveal("appearance")} onChange={onChange} />
+          ) : null}
+          {isFooterBand(section, group) ? (
+            <NewsletterBandGroup
+              section={section}
+              reveal={reveal("placement")}
+              onChange={onChange}
+            />
           ) : null}
           {section.type === "announcement_bar" ? (
             <>

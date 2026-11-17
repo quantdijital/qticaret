@@ -56,4 +56,10 @@ export interface StoreNewsletterSection {
   show_note?: boolean
   /** `image_card`: the picture, filled from the media library; absent or null: drawn as `split`. */
   image?: StoreLayoutImage | null
+  /**
+   * The footer box's `split`, `image_card`, `strip`: true draws the band on
+   * the free rows footer's ground as its top band (adr/0070 §4 Ek); absent:
+   * above the footer. The other footers draw it inside them either way.
+   */
+  joined?: boolean
 }

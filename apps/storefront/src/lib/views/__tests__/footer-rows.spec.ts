@@ -144,7 +144,7 @@ describe("the free rows footer's view (adr/0070)", () => {
 
   it("fills the brand, newsletter, trust, payments and picture blocks", () => {
     const blocks = blocksOf([
-      block(0, { type: "brand", logo: true, about: "  Kısa  ", social: true }),
+      block(0, { type: "brand", logo: true, about: "  Kısa  ", social: true, address: true }),
       block(1, { type: "newsletter", title: null, text: null, description: null, variant: "x" }),
       block(2, { type: "trust", limit: 2, layout: "grid" }),
       block(3, { type: "payments", title: null, carriers: true }),
@@ -162,7 +162,12 @@ describe("the free rows footer's view (adr/0070)", () => {
       "payments",
       "image",
     ])
-    expect(blocks[0]).toMatchObject({ logo: null, about: "Kısa", social: PARTS.social })
+    expect(blocks[0]).toMatchObject({
+      logo: null,
+      about: "Kısa",
+      social: PARTS.social,
+      address: PARTS.contact.address,
+    })
     expect(blocks[1]).toMatchObject({
       title: "newsletter.title",
       consent: 'newsletter.text:{"shop":"Örnek Atölye Ltd. Şti."}',

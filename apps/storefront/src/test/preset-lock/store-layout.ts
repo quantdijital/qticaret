@@ -2,6 +2,7 @@ import type { StoreLayout } from "@qticaret/types"
 import { FOOTER_BAR_DEFAULTS, FOOTER_COLUMNS_DEFAULTS } from "@qticaret/types/section-footer"
 import type { StorefrontPreset } from "@qticaret/sector-packs"
 import { BEST_SELLERS, ON_SALE, PRODUCTS } from "./fixture-shop"
+import { footerRowsPrint } from "./footer-rows-print"
 import { resolveGroup } from "./preset-resolve"
 import type { Section } from "./preset-resolve"
 
@@ -112,6 +113,9 @@ function footerNewsletter(box: Section) {
     ...(box["description"] ? { description: box["description"] } : {}),
     ...(promise && box["note"] ? { note: box["note"] } : {}),
     ...(promise && box["show_note"] === false ? { show_note: false } : {}),
+    ...(variant !== "standard" && variant !== "in_footer" && box["joined"] === true
+      ? { joined: true }
+      : {}),
   }
 }
 
@@ -143,6 +147,8 @@ function footerBar(bar: Section | undefined) {
           ),
         }
       : {}),
+    // The free rows footer prints its ground, its marks and its rows (`footerRowsOf`)
+    ...(bar["variant"] === "free_rows" ? footerRowsPrint(bar) : {}),
   }
 }
 

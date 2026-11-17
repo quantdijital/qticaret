@@ -129,12 +129,14 @@ export function BrandBlock({
   withContact: boolean
   /**
    * Drawn as the free rows footer's block (adr/0070): its own logo (null:
-   * the name) and profiles, its heading's id, no address and no identity
-   * lines (the legal strip says them); in the editor its line's field mark.
+   * the name) and profiles, its heading's id, the address only when the
+   * block keeps it (null: none), no identity lines (the legal strip says
+   * them); in the editor its line's field mark.
    */
   block?: {
     logo: ImageView | null
     profiles: readonly SocialLinkView[]
+    address: string | null
     headingId: string
     aboutMark: { "data-qf"?: string }
   }
@@ -168,6 +170,14 @@ export function BrandBlock({
         <p className="max-w-[40ch] text-sm text-text-2" {...block?.aboutMark}>
           {about}
         </p>
+      )}
+      {block?.address && (
+        <ul className="flex flex-col text-sm">
+          <li className="flex items-start gap-3 py-2 text-text-2">
+            <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
+            <span className="max-w-[36ch]">{block.address}</span>
+          </li>
+        </ul>
       )}
       {!block && (
         <ul className="flex flex-col text-sm">

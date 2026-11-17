@@ -29,7 +29,7 @@ export function newBlock<T extends FooterBlockType>(type: T, id: string): Footer
   const blocks: { [K in FooterBlockType]: FooterBlockOf<K> } = {
     text: { id, ...SHOWN, type: "text", title: null, body: { type: "doc", content: [] } },
     menu: { id, ...SHOWN, type: "menu", slot: 1, title: null, collapse_phone: true },
-    brand: { id, ...SHOWN, type: "brand", logo: true, about: null, social: false },
+    brand: { id, ...SHOWN, type: "brand", logo: true, about: null, social: false, address: false },
     newsletter: {
       id,
       ...SHOWN,

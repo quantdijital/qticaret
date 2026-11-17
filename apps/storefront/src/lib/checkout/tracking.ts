@@ -29,7 +29,7 @@ export async function recordTracking(cartId: string): Promise<void> {
   const fbp = jar.get("_fbp")?.value
   const fbc = jar.get("_fbc")?.value
   const agent = incoming.get("user-agent")
-  await storeCall(`/store/carts/${cartId}/tracking`, {
+  await storeCall(`/store/carts/${encodeURIComponent(cartId)}/tracking`, {
     method: "POST",
     body: {
       ...(ga ? { ga_client_id: ga } : {}),

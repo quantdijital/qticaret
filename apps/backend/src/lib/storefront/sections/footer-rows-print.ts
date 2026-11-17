@@ -59,7 +59,13 @@ function printedBlock<L>(block: FooterBlock, tools: FooterRowTools<L>) {
         collapse_phone: block.collapse_phone,
       }
     case "brand":
-      return { type: block.type, logo: block.logo, about: block.about, social: block.social }
+      return {
+        type: block.type,
+        logo: block.logo,
+        about: block.about,
+        social: block.social,
+        address: block.address,
+      }
     case "newsletter":
       return {
         type: block.type,

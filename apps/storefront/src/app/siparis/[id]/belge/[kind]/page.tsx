@@ -33,7 +33,7 @@ export default async function OrderDocument({
   let document: { title: string; html: string; created_at: string | null }
   try {
     ;({ document } = await storeCall<{ document: typeof document }>(
-      `/store/orders/${id}/legal/${KINDS[kind as keyof typeof KINDS]}`,
+      `/store/orders/${encodeURIComponent(id)}/legal/${KINDS[kind as keyof typeof KINDS]}`,
       token ? { headers: { "x-order-token": token } } : {}
     ))
   } catch (error) {

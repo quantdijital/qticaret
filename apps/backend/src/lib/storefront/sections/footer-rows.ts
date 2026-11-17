@@ -160,7 +160,15 @@ export const footerStartRows = (): FooterRow[] => {
       columns: [
         {
           blocks: [
-            { ...block, id: "footerbrand", type: "brand", logo: true, about: null, social: false },
+            {
+              ...block,
+              id: "footerbrand",
+              type: "brand",
+              logo: true,
+              about: null,
+              social: false,
+              address: false,
+            },
           ],
         },
         { blocks: [menu(1)] },

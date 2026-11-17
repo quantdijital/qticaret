@@ -123,6 +123,7 @@ function bodyOf(block: StoreFooterBlock, parts: FooterRowsParts): Body | null {
         name: parts.name,
         about: words(block.about)?.slice(0, FOOTER_ROWS_LIMITS.about) ?? null,
         social: on(block.social, false) ? [...parts.social] : [],
+        address: on(block.address, false) ? parts.contact.address : null,
       }
     case "newsletter":
       return {

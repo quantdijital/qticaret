@@ -67,6 +67,8 @@ export type FooterBlockView = FooterBlockViewBase &
         about: string | null
         /** The shop's profiles; empty: none (or the block shows none). */
         social: SocialLinkView[]
+        /** The shop's address under its line; null: none (or the block shows none). */
+        address: string | null
       }
     | {
         type: "newsletter"

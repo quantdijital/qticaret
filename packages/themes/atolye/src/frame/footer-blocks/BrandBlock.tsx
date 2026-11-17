@@ -4,7 +4,7 @@ import type { BlockProps } from "./shared"
 
 /**
  * The shop's logo (or name), its own short line and, when the block asks,
- * its profiles: the brand columns' brand block without the address and
+ * its address and its profiles: the brand columns' brand block without
  * the identity lines (the legal strip below the rows says those).
  */
 export function BrandBlock({ block, shop, t, editor }: BlockProps<"brand">) {
@@ -17,6 +17,7 @@ export function BrandBlock({ block, shop, t, editor }: BlockProps<"brand">) {
       block={{
         logo: block.logo,
         profiles: block.social,
+        address: block.address,
         headingId: blockHeadingId(block.at),
         aboutMark: blockMark(editor, block.at, "about"),
       }}

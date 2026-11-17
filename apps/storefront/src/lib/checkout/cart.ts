@@ -110,9 +110,12 @@ export async function checkoutCart(): Promise<CheckoutCart | null> {
     return null
   }
   try {
-    const { cart } = await storeGet<{ cart: CheckoutCart }>(`/store/carts/${id}`, {
-      fields: FIELDS,
-    })
+    const { cart } = await storeGet<{ cart: CheckoutCart }>(
+      `/store/carts/${encodeURIComponent(id)}`,
+      {
+        fields: FIELDS,
+      }
+    )
     return cart.completed_at ? null : cart
   } catch (error) {
     if (isNotFound(error)) {

@@ -133,6 +133,8 @@ const brandBlock = z
     logo: z.boolean().default(true),
     about: optional(text(L.about)),
     social: z.boolean().default(false),
+    /** The shop's address (its store details) under its line, as the brand columns draw it. */
+    address: z.boolean().default(false),
   })
   .strict()
 
