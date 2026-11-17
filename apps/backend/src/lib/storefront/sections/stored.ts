@@ -1,5 +1,5 @@
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
-import { storedFooterRows } from "./footer-rows"
+import { storedFooterRows } from "./footer-rows-stored"
 import { storedLook } from "./look"
 import { MAIN_BRANCHES, storedByVariant, storedMenuImages } from "./main"
 import { PRODUCTS_BRANCHES, storedCardVariant } from "./products"

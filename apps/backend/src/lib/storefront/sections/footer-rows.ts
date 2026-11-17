@@ -1,5 +1,4 @@
 import { z } from "@medusajs/framework/zod"
-import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { base } from "../layout-fields"
 import {
   FOOTER_BLOCK_MAX,
@@ -7,7 +6,7 @@ import {
   FOOTER_ROWS_LIMITS,
   footerBlock,
 } from "./footer-blocks"
-import type { FooterBlock, FooterBlockType } from "./footer-blocks"
+import type { FooterBlock } from "./footer-blocks"
 
 /**
  * The `free_rows` footer's rows (adr/0070 §2): one to six rows, each a
@@ -210,69 +209,4 @@ export const footerRowsFields = {
   /** The ways to pay in the fixed bottom line. */
   bottom_badges: z.boolean().default(FOOTER_ROWS_DEFAULTS.bottom_badges),
   rows: footerRows,
-}
-
-const isBlockType = (type: unknown): type is FooterBlockType =>
-  (FOOTER_BLOCK_TYPES as readonly unknown[]).includes(type)
-
-const listOf = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
-
-/**
- * A stored `free_rows` footer's rows as today's bounds read them (adr/0049
- * Ek 2026-11-14 §2.3, forgiving on reading): a block today's schema does
- * not read (a type off the list, a newer build's field, a step out of its
- * range) is left out, and so is whatever stands past a bound (a seventh
- * row, a column's seventh block, a type's or the footer's blocks past
- * their count); a row's columns are cut or filled to its split. What is
- * left draws. A save is still held to the schema.
- */
-export function storedFooterRows(section: Record<string, unknown>): Record<string, unknown> {
-  if (
-    section["type"] !== "footer_bar" ||
-    section["variant"] !== "free_rows" ||
-    !Array.isArray(section["rows"])
-  ) {
-    return section
-  }
-  const counts = new Map<string, number>()
-  let total = 0
-  const keeps = (block: unknown): boolean => {
-    if (!isPlainObject(block) || !isBlockType(block["type"]) || total >= L.blocks) {
-      return false
-    }
-    const type = block["type"]
-    const count = counts.get(type) ?? 0
-    if (count >= FOOTER_BLOCK_MAX[type] || !footerBlock.safeParse(block).success) {
-      return false
-    }
-    counts.set(type, count + 1)
-    total += 1
-    return true
-  }
-  const rows = section["rows"]
-    .filter(isPlainObject)
-    .slice(0, L.rows)
-    .map((row) => {
-      // A split off the list reads as a new row's
-      const layout = (FOOTER_ROW_LAYOUTS as readonly unknown[]).includes(row["layout"])
-        ? (row["layout"] as FooterRowLayout)
-        : FOOTER_ROW_DEFAULTS.layout
-      const stored = listOf(row["columns"])
-      const columns = Array.from({ length: footerRowColumns(layout) }, (_, index) => {
-        const column = stored[index]
-        const kept: unknown[] = []
-        for (const block of isPlainObject(column) ? listOf(column["blocks"]) : []) {
-          if (kept.length < L.perColumn && keeps(block)) {
-            kept.push(block)
-          }
-        }
-        return { blocks: kept }
-      })
-      return { ...row, layout, columns }
-    })
-  if (rows.length > 0) {
-    return { ...section, rows }
-  }
-  // No row left: the variant's starting rows, as a footer saved without any
-  return Object.fromEntries(Object.entries(section).filter(([key]) => key !== "rows"))
 }

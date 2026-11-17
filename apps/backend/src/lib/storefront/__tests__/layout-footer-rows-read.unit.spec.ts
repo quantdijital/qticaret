@@ -84,4 +84,92 @@ describe("the free rows footer read back (adr/0070 ยง2; adr/0049 Ek 2026-11-14 ย
     expect(rowsOf(doc([]))).toEqual(footerStartRows())
     expect(rowsOf(doc(["x", 3]))).toEqual(footerStartRows())
   })
+
+  it("reads a row's steps off their lists as a new row's and drops a field a row does not have", () => {
+    const stored = doc([
+      row([[menu(1)]], {
+        ground: "dark",
+        space: "huge",
+        align: "right",
+        phone_columns: 3,
+        divider: "yes",
+        glow: true,
+      }),
+    ])
+    expect(issues(stored).length).toBeGreaterThan(0)
+    const [first] = rowsOf(stored)
+    expect(first).toMatchObject({
+      ground: "inherit",
+      space: "medium",
+      align: "start",
+      phone_columns: 1,
+      divider: false,
+    })
+    expect(first).not.toHaveProperty("glow")
+    expect(first?.columns[0]?.blocks).toHaveLength(1)
+  })
+
+  it("leaves out a row whose id is not one, the others standing", () => {
+    const good = row([[menu(1)]])
+    const rows = rowsOf(
+      doc([row([[menu(2)]], { id: "KISA" }), { ...row([[]]), id: undefined }, good])
+    )
+    expect(rows.map((each) => each.id)).toEqual([good.id])
+    expect(rowsOf(doc([row([[]], { id: 7 })]))).toEqual(footerStartRows())
+  })
+
+  it("reads rows that are no list, and the variant's own steps off their lists, as the defaults", () => {
+    for (const rows of ["x", 3, { id: "rowone001" }, null]) {
+      expect(rowsOf(doc(rows))).toEqual(footerStartRows())
+    }
+    const [bar] = readStoredLayout({
+      footer: [footer({ ground: "primary", badge_style: "mono", bottom_badges: "yes" })],
+    }).footer
+    expect(bar).toMatchObject({ ground: "well", badge_style: "card", bottom_badges: true })
+  })
+
+  it("reads a row's or block's id a section has, or one stored twice, under a fresh id", () => {
+    const twin = menu(1)
+    const home = [{ id: "homeband01", type: "trust_badges" }]
+    const stored = doc(
+      [
+        row([
+          [
+            { ...twin, id: "homeband01" },
+            { ...menu(2), id: "mainfooter" },
+          ],
+        ]),
+        row([[twin], [{ ...menu(3), id: twin.id }]], { id: "homeband01" }),
+      ],
+      { home }
+    )
+    expect(issues(stored)).toEqual([key("section_duplicate")])
+    const rows = rowsOf(stored)
+    const ids = [
+      ...rows.map((each) => each.id),
+      ...rows.flatMap((each) => each.columns.flatMap((column) => column.blocks.map((b) => b.id))),
+    ]
+    expect(new Set([...ids, "homeband01", "mainfooter"]).size).toBe(ids.length + 2)
+    for (const each of ids) {
+      expect(each).toMatch(/^[a-z0-9]{6,24}$/)
+    }
+    // The first holder keeps its id
+    expect(ids).toContain(twin.id)
+  })
+
+  it("reads the starting row beside a section that has one of its fixed ids under fresh ids", () => {
+    const home = [
+      { id: "footerbrand", type: "trust_badges" },
+      { id: "footerrow1", type: "rich_text", body: { type: "doc", content: [] } },
+    ]
+    const rows = rowsOf({ footer: [footer()], home })
+    const start = footerStartRows()
+    expect(rows).toHaveLength(1)
+    expect(rows[0]?.id).not.toBe("footerrow1")
+    const brand = rows[0]?.columns[0]?.blocks[0]
+    expect(brand).toMatchObject({ type: "brand" })
+    expect(brand?.id).not.toBe("footerbrand")
+    // The ids nothing else has stay as they were
+    expect(rows[0]?.columns[1]?.blocks[0]?.id).toBe(start[0]?.columns[1]?.blocks[0]?.id)
+  })
 })
