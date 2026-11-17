@@ -1,4 +1,10 @@
 export { reasonOf } from "./reason"
+export {
+  INSUFFICIENT_INVENTORY,
+  STOCK_REFUSALS,
+  isInsufficientInventory,
+  isStockRefusal,
+} from "./refusals"
 export type { DerivedReason } from "./reason"
 export { lowStockThresholds } from "./thresholds"
 export type { Thresholds } from "./thresholds"

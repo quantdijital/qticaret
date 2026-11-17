@@ -1,5 +1,5 @@
-import { MedusaError } from "@medusajs/framework/utils"
 import { isRetryable } from "../errors"
+import { isStockRefusal } from "../stock/refusals"
 
 /**
  * What a paid cart's failed completion means (adr/0026 Ek 2026-11-06):
@@ -27,15 +27,6 @@ const CART_RULES =
 // the panel's catalog checks; only the add-ons switched off is the cart's (adr/0052)
 const CART_RULE_KEYS = new Set(["catalog.addons_disabled"])
 
-// Medusa's inventory refusals (v2.21: the inventory module's `ensureInventoryLevels`,
-// core-flows' `prepareConfirmInventoryInput` and `confirmInventoryStep`)
-const STOCK_REFUSALS = [
-  /^Not enough stock available for item \S+ at location \S+/,
-  /^Item \S+ is not stocked at location \S+/,
-  /^Sales channel \S+ is not associated with any stock location for variant \S+/,
-  /^Some variant does not have the required inventory/,
-]
-
 const textOf = (value: unknown): string => (typeof value === "string" ? value : "")
 
 /** The kind of an error a completion handed back, plain object or Error alike. */
@@ -51,18 +42,6 @@ export function completionFailureOf(error: unknown): CompletionFailure {
   if (CART_RULES.test(rule) || CART_RULE_KEYS.has(rule)) {
     return "refund"
   }
-  const message = textOf(fields["message"])
-  const type = textOf(fields["type"])
-  // Medusa's words decide, its type (when it travelled) only confirms them: a
-  // NOT_ALLOWED alone is also a closed cart or a payment refused
-  if (
-    STOCK_REFUSALS.some((pattern) => pattern.test(message)) &&
-    (type === "" ||
-      type === MedusaError.Types.NOT_ALLOWED ||
-      type === MedusaError.Types.NOT_FOUND ||
-      type === MedusaError.Types.INVALID_DATA)
-  ) {
-    return "stock"
-  }
-  return "retry"
+  // Medusa's inventory refusals (`lib/stock/refusals`): its words decide
+  return isStockRefusal(error) ? "stock" : "retry"
 }

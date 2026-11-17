@@ -98,6 +98,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bulk_edit.stock_out_of_range": "The new stock would pass the limit.",
   "bulk_edit.stock_untracked": "This product's stock is not tracked.",
   "cart.address_required": "An address is needed to complete the order.",
+  "cart.insufficient_stock": "There are not as many of this item in stock as you asked for.",
   "cart.out_of_stock":
     "This item just sold out: {{name}}. Remove it from your cart or lower its quantity.",
   "cart.shipping_changed":

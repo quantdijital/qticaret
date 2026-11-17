@@ -13,6 +13,11 @@ import {
   removePromotion,
 } from "@/lib/cart/cart"
 import { linkCartRefusal } from "@/lib/cart/payment-link"
+import {
+  INSUFFICIENT_STOCK,
+  insufficientStockPath,
+  isInsufficientStock,
+} from "@/lib/cart/stock-refusal"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { WHOLESALE_NO_CODE } from "@/lib/views/cart-wholesale"
 
@@ -33,6 +38,10 @@ function messageFor(error: unknown): string {
   const locked = linkCartRefusal(error)
   if (locked) {
     return locked
+  }
+  // More units than are for sale: said so, not "not for sale"
+  if (isInsufficientStock(error)) {
+    return INSUFFICIENT_STOCK
   }
   return error.status === 400 || error.status === 404
     ? "cart.variant_unavailable"
@@ -87,6 +96,11 @@ export async function changeCartLine(form: FormData): Promise<void> {
   try {
     await changeLine(parsed.data.line_id, parsed.data.quantity)
   } catch (error) {
+    // More units than are for sale: back with the count the backend named, if any;
+    // the line keeps the quantity it had
+    if (isInsufficientStock(error)) {
+      redirect(insufficientStockPath(error))
+    }
     // An add-on line holds no more units than its picks allow (adr/0052); a
     // payment link's cart keeps its lines as they are (adr/0051)
     const key = isStoreApiError(error) ? error.messageKey : null

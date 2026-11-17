@@ -6,6 +6,7 @@ import { z } from "zod"
 import type { ActionResult } from "@qticaret/ui"
 import { addonError } from "@/lib/addons/errors"
 import { linkCartRefusal } from "@/lib/cart/payment-link"
+import { INSUFFICIENT_STOCK, isInsufficientStock } from "@/lib/cart/stock-refusal"
 import { fieldOf, hasPicks, pickedLimit, selectionsOf } from "@/lib/addons/selections"
 import { addAddonLine, productAddons, saveAddonLine } from "@/lib/cart/addons"
 import { addLine } from "@/lib/cart/cart"
@@ -21,8 +22,9 @@ const AddLine = z.object({
 
 /** A failed add in words: an add-on refusal by its key, the core add's as the plain form says it. */
 function addFailure(error: unknown): string {
-  const core =
-    isStoreApiError(error) && (error.status === 400 || error.status === 404)
+  const core = isInsufficientStock(error)
+    ? INSUFFICIENT_STOCK
+    : isStoreApiError(error) && (error.status === 400 || error.status === 404)
       ? "cart.variant_unavailable"
       : "cart.add_failed"
   return linkCartRefusal(error) ?? addonError(error, core)
