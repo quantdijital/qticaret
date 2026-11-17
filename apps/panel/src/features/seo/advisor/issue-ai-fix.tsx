@@ -58,8 +58,11 @@ export function IssueAiFix({
     }
     const field = FIELD_IDS[ai.field]?.(id)
     if (field) {
+      // The layer handing the focus back may stop the scroll on the way (WebKit): the field ends it
       window.setTimeout(() => {
-        document.getElementById(field)?.focus({ preventScroll: true })
+        const element = document.getElementById(field)
+        element?.focus({ preventScroll: true })
+        element?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, FOCUS_DELAY_MS)
     }
     toast.success(t("seo.advisor.aiFilled"))
