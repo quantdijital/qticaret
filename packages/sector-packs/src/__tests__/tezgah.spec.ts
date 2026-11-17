@@ -24,7 +24,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(tezgah).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 6,
+      version: 7,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -162,12 +162,18 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
     expect(footer?.map((each) => each.type)).toEqual(["footer_bar", "newsletter"])
     expect(footer?.[0]).toMatchObject({
-      variant: "ledger",
+      variant: "brand_columns",
       social: "icons",
+      top_strip: true,
+      ground: "well",
+      badge_style: "card",
       payment_badges: ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
       back_to_top: true,
       back_to_top_shape: "square",
     })
+    const about = (footer?.[0] as { about?: string } | undefined)?.about ?? ""
+    expect(about.length).toBeGreaterThan(0)
+    expect(about.length).toBeLessThanOrEqual(240)
   })
 
   it("fills the product and category pages with sections every shop draws", () => {
@@ -261,9 +267,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(read("katalog")).toMatchObject({ family: null, swatch: null })
   })
 
-  it("raised the cutlery pack's version with them (tezgah's sixth)", () => {
-    expect(sectorPack("cutlery")?.version).toBe(9)
-    expect(CODES.map((code) => read(code).version)).toEqual([6, 6, 6])
+  it("raised the cutlery pack's version with them (tezgah's seventh)", () => {
+    expect(sectorPack("cutlery")?.version).toBe(10)
+    expect(CODES.map((code) => read(code).version)).toEqual([7, 7, 7])
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",
       ...CODES,
