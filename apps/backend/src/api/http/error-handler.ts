@@ -182,17 +182,43 @@ export function platformErrorHandler(
   // A line asked for more units than are for sale: said so, with the count when it is small
   const lineAsk = cartLineAskOf(error, req)
   if (lineAsk) {
-    void insufficientStockError(req.scope, lineAsk).then(
-      (refusal) => {
-        answer(refusal, req, res, requestId)
-      },
-      () => {
-        answer(error, req, res, requestId)
-      }
-    )
+    void insufficientStockError(req.scope, lineAsk)
+      .then(
+        (refusal) => {
+          answerLater(refusal, req, res, requestId)
+        },
+        () => {
+          answerLater(error, req, res, requestId)
+        }
+      )
+      // Nothing may escape as an unhandled rejection: the answer is cut off instead
+      .catch(() => {
+        cutOff(res)
+      })
     return
   }
   answer(error, req, res, requestId)
+}
+
+/** The answer after a wait: unless something else answered meanwhile (a timeout, a closed socket). */
+function answerLater(
+  error: unknown,
+  req: MedusaRequest,
+  res: MedusaResponse,
+  requestId: string
+): void {
+  if (res.headersSent) {
+    return
+  }
+  answer(error, req, res, requestId)
+}
+
+function cutOff(res: MedusaResponse): void {
+  try {
+    res.destroy()
+  } catch {
+    // The socket is gone already
+  }
 }
 
 function answer(error: unknown, req: MedusaRequest, res: MedusaResponse, requestId: string): void {

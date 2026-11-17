@@ -42,16 +42,39 @@ export function cartLineAskOf(error: unknown, req: MedusaRequest): LineAsk | nul
   return { cartId: match[1], lineId, variantId: lineId ? null : variantId }
 }
 
+/** How long the answer waits for the count before it goes without one. */
+export const COUNT_READ_DEADLINE_MS = 1_500
+
+/** The count, or null when the read fails or outlasts `deadlineMs`; the timer is always cleared. */
+async function unitsWithin(
+  read: Promise<number | null>,
+  deadlineMs: number
+): Promise<number | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const late = new Promise<null>((resolve) => {
+    timer = setTimeout(() => {
+      resolve(null)
+    }, deadlineMs)
+  })
+  try {
+    return await Promise.race([read.catch(() => null), late])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 /**
  * The refusal as the shopper hears it: `cart.insufficient_stock`, with the
  * units for sale when they are few (1 to `SHOWN_UNITS_MAX`). A count that
- * cannot be read leaves the sentence without one; it never fails.
+ * cannot be read, or not within `deadlineMs`, leaves the sentence without
+ * one; it never fails.
  */
 export async function insufficientStockError(
   container: Pick<MedusaContainer, "resolve">,
-  ask: LineAsk
+  ask: LineAsk,
+  deadlineMs: number = COUNT_READ_DEADLINE_MS
 ): Promise<ValidationError> {
-  const units = await lineAvailableUnits(container, ask).catch(() => null)
+  const units = await unitsWithin(lineAvailableUnits(container, ask), deadlineMs)
   const shown = units !== null && units >= 1 && units <= SHOWN_UNITS_MAX
   return new ValidationError(INSUFFICIENT_STOCK, {
     field: "quantity",
