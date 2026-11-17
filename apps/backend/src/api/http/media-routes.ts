@@ -83,12 +83,31 @@ export const STORE_MEDIA_FIELDS = ["media_assets", ...STORE_MEDIA_LEAVES]
 export const STORE_VARIANT_IMAGE_FIELDS = ["images.variants", "images.variants.id"]
 
 /**
- * A product's videos through `fields` (adr/0069, security review D3): the
- * storefront gets none of them until slice 4 opens its leaves one by one;
- * the admin API only what the panel's own list shows. Storage keys, the
- * uploader and bookkeeping never leave, whatever the role or the flag.
- * Matched anywhere in a token (`items.product.media_videos...` too).
+ * A product's videos through `fields` (adr/0069 §6, security review D3):
+ * the storefront names its leaves one by one, on the product itself only
+ * (what the gallery draws: the outputs' and the poster's public addresses,
+ * sizes and versions); the admin API only what the panel's own list
+ * shows. Storage keys, file ids, the uploader, the error and the job's
+ * bookkeeping never leave, whatever the role or the flag. Matched anywhere
+ * in a token (`items.product.media_videos...` too).
  */
+export const STORE_VIDEO_LEAVES = [
+  "media_videos.id",
+  "media_videos.kind",
+  "media_videos.status",
+  "media_videos.title",
+  "media_videos.position",
+  "media_videos.width",
+  "media_videos.height",
+  "media_videos.duration_ms",
+  "media_videos.outputs",
+  "media_videos.poster",
+  "media_videos.youtube_id",
+] as const
+
+// Medusa's allowed list needs the relation named for the leaves to resolve
+export const STORE_VIDEO_FIELDS = ["media_videos", ...STORE_VIDEO_LEAVES]
+
 export const ADMIN_VIDEO_LEAVES = [
   "media_videos.id",
   "media_videos.kind",
@@ -110,9 +129,9 @@ export const ADMIN_VIDEO_LEAVES = [
 
 const VIDEO_RELATION = /media_video/i
 
-export const rejectStoreVideoFields = restrictStoreRelation(
+export const restrictStoreVideoFields = restrictStoreRelation(
   VIDEO_RELATION,
-  [],
+  STORE_VIDEO_LEAVES,
   "media_video_fields"
 )
 

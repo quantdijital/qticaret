@@ -87,10 +87,12 @@ import {
   MEDIA_ROUTES,
   STORE_MEDIA_FIELDS,
   STORE_VARIANT_IMAGE_FIELDS,
-  rejectStoreVideoFields,
+  STORE_VIDEO_FIELDS,
   restrictAdminVideoFields,
   restrictStoreMediaFields,
+  restrictStoreVideoFields,
 } from "./http/media-routes"
+import { storeProductVideos } from "./http/store-product-videos"
 import { GIFT_CARD_ROUTES } from "./http/gift-card-routes"
 import { GIFT_CARD_SALE_ROUTES, STORE_GIFT_PRODUCT_FIELDS } from "./http/gift-card-sale-routes"
 import { ORDER_REFUND_ROUTES } from "./http/order-refund-routes"
@@ -169,8 +171,8 @@ export default defineMiddlewares({
         // ADR-0068 §7: no price list row, a wholesale one included, by any `fields`
         rejectStorePriceRows,
         restrictStoreMediaFields,
-        // adr/0069: no video leaf until slice 4 opens them
-        rejectStoreVideoFields,
+        // adr/0069 §6: a video's public leaves one by one, never a key or the uploader
+        restrictStoreVideoFields,
         rejectStoreSeoFields,
         restrictStoreGiftCardFields,
       ],
@@ -252,10 +254,13 @@ export default defineMiddlewares({
           ...STORE_ATTRIBUTE_FIELDS,
           ...STORE_BRAND_FIELDS,
           ...STORE_MEDIA_FIELDS,
+          ...STORE_VIDEO_FIELDS,
           ...STORE_VARIANT_IMAGE_FIELDS,
           ...STORE_GIFT_PRODUCT_FIELDS
         ),
         hidePrivateAttributes,
+        // adr/0069 §6, §12: the ready videos only, none while the flag is off
+        storeProductVideos,
       ],
     },
     // F11.8: the product list's searches counted for the report and the advisor
