@@ -46,7 +46,7 @@ export async function saveAddress(_state: ActionResult, form: FormData): Promise
     return { ok: false, error: parsed.error }
   }
   try {
-    await storePost(`/store/carts/${cart.id}`, addressPayload(parsed.value))
+    await storePost(`/store/carts/${encodeURIComponent(cart.id)}`, addressPayload(parsed.value))
   } catch (error) {
     return { ok: false, error: checkoutError(error, "checkout.address_invalid") }
   }
@@ -83,7 +83,9 @@ export async function chooseShipping(_state: ActionResult, form: FormData): Prom
     return { ok: false, error: "checkout.shipping_required" }
   }
   try {
-    await storePost(`/store/carts/${cart.id}/shipping-methods`, { option_id: parsed.data })
+    await storePost(`/store/carts/${encodeURIComponent(cart.id)}/shipping-methods`, {
+      option_id: parsed.data,
+    })
   } catch (error) {
     return { ok: false, error: checkoutError(error, "checkout.shipping_failed") }
   }

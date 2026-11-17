@@ -53,20 +53,20 @@ export async function acceptTerms(cartId: string, input: PlaceOrderInput): Promi
     if (input.accept !== "on") {
       return "checkout.accept_required"
     }
-    await storePost(`/store/carts/${cartId}/legal-consents`, { documents })
+    await storePost(`/store/carts/${encodeURIComponent(cartId)}/legal-consents`, { documents })
   }
   const age = await ageCheck(cartId)
   if (age.required && !age.declared) {
     if (!input.birth_date || input.age_confirm !== "on") {
       return "checkout.age_required"
     }
-    await storeCall(`/store/carts/${cartId}/age-declaration`, {
+    await storeCall(`/store/carts/${encodeURIComponent(cartId)}/age-declaration`, {
       method: "POST",
       body: { birth_date: input.birth_date, confirmed: true },
     })
   }
   if (input.marketing_version && (input.marketing_email || input.marketing_sms)) {
-    await storePost(`/store/carts/${cartId}/consents`, {
+    await storePost(`/store/carts/${encodeURIComponent(cartId)}/consents`, {
       email: input.marketing_email === "on",
       sms: input.marketing_sms === "on",
       text_version: input.marketing_version,

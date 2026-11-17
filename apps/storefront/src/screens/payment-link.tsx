@@ -28,7 +28,7 @@ export const paymentLinkMetadata: Metadata = {
 async function paymentLinkOf(token: string): Promise<StorePaymentLink | null> {
   try {
     const { payment_link } = await storeGet<{ payment_link: StorePaymentLink }>(
-      `/store/payment-links/${token}`
+      `/store/payment-links/${encodeURIComponent(token)}`
     )
     return payment_link
   } catch (error) {

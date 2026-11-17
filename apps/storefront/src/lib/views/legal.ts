@@ -43,7 +43,9 @@ export interface LegalDocument {
 
 /** A kind the shop has not published answers 404: kept a minute as null like a text (`storePublicFind`). */
 export const legalDocument = cache(async (kind: string): Promise<LegalDocument | null> => {
-  const answer = await storePublicFind<{ document: LegalDocument }>(`/store/legal/${kind}`)
+  const answer = await storePublicFind<{ document: LegalDocument }>(
+    `/store/legal/${encodeURIComponent(kind)}`
+  )
   return answer?.document ?? null
 })
 

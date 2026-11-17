@@ -44,7 +44,7 @@ export async function cancelOrder(form: FormData): Promise<void> {
   const { order_id, token } = parsed.data
   let note = "iptal"
   try {
-    await storeCall(`/store/orders/${order_id}/cancel`, {
+    await storeCall(`/store/orders/${encodeURIComponent(order_id)}/cancel`, {
       method: "POST",
       body: {},
       headers: keyed(token),
@@ -135,7 +135,7 @@ export async function requestReturn(
       ? items.map((item) => ({ ...item, variant_id: variantOf(item.line_item_id) ?? "" }))
       : items
   try {
-    await storeCall(`/store/orders/${order_id}/returns`, {
+    await storeCall(`/store/orders/${encodeURIComponent(order_id)}/returns`, {
       method: "POST",
       body: { kind, items: lines, reason, ...(note ? { note } : {}) },
       headers: keyed(token),

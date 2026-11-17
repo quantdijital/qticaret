@@ -133,7 +133,7 @@ export const currentCustomer = cache(async (): Promise<StoreCustomer | null> => 
 
 /** The shopper's open cart becomes the customer's (Medusa's cart transfer). */
 export function claimCart(cartId: string, token: string) {
-  return storeCall(`/store/carts/${cartId}/customer`, {
+  return storeCall(`/store/carts/${encodeURIComponent(cartId)}/customer`, {
     method: "POST",
     body: {},
     headers: bearer(token),

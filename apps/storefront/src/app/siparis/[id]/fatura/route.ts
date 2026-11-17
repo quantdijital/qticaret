@@ -1,4 +1,5 @@
 import { storefrontEnv } from "@/lib/env"
+import { storeUrl } from "@/lib/store-api/core"
 import { publishableKey } from "@/lib/store-api/publishable-key"
 import { sessionToken } from "@/lib/account/session"
 import { orderInvoice } from "@/lib/orders/order"
@@ -27,8 +28,9 @@ export async function GET(
   }
   const env = storefrontEnv()
   const session = await sessionToken()
-  const url = new URL(`/store/orders/${id}/invoice/pdf`, env.MEDUSA_BACKEND_URL)
-  url.searchParams.set("invoice", invoice.id)
+  const url = storeUrl(`/store/orders/${encodeURIComponent(id)}/invoice/pdf`, {
+    invoice: invoice.id,
+  })
   const answer = await fetch(url, {
     headers: {
       "x-publishable-api-key": await publishableKey(env),

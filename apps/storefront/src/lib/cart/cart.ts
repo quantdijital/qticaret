@@ -94,7 +94,7 @@ async function readCart(id: string, giftCards: boolean): Promise<Cart> {
   if (giftCards) {
     try {
       return (
-        await storeGet<{ cart: Cart }>(`/store/carts/${id}`, {
+        await storeGet<{ cart: Cart }>(`/store/carts/${encodeURIComponent(id)}`, {
           fields: CART_FIELDS + GIFT_CARD_FIELDS,
         })
       ).cart
@@ -104,7 +104,11 @@ async function readCart(id: string, giftCards: boolean): Promise<Cart> {
       }
     }
   }
-  return (await storeGet<{ cart: Cart }>(`/store/carts/${id}`, { fields: CART_FIELDS })).cart
+  return (
+    await storeGet<{ cart: Cart }>(`/store/carts/${encodeURIComponent(id)}`, {
+      fields: CART_FIELDS,
+    })
+  ).cart
 }
 
 /** The shopper's open cart, or null (none yet, gone, or already ordered). */
@@ -148,7 +152,9 @@ async function newCart(): Promise<string> {
   // Where the visit came from goes with its first cart (F11.2); a refusal costs the cart nothing
   const landing = readLanding((await cookies()).get(cookieName(LANDING_COOKIE))?.value)
   if (landing) {
-    await storePost(`/store/carts/${cart.id}/source`, landing).catch(() => undefined)
+    await storePost(`/store/carts/${encodeURIComponent(cart.id)}/source`, landing).catch(
+      () => undefined
+    )
   }
   return cart.id
 }
@@ -173,7 +179,7 @@ export async function addLine(
   })
   const cartId = existing?.id ?? (await newCart())
   try {
-    await storePost(`/store/carts/${cartId}/line-items`, line)
+    await storePost(`/store/carts/${encodeURIComponent(cartId)}/line-items`, line)
     return cartId
   } catch (error) {
     if (!existing || !isNotFound(error)) {
@@ -181,7 +187,7 @@ export async function addLine(
     }
     await forgetCart()
     const fresh = await newCart()
-    await storePost(`/store/carts/${fresh}/line-items`, line)
+    await storePost(`/store/carts/${encodeURIComponent(fresh)}/line-items`, line)
     return fresh
   }
 }
@@ -195,7 +201,7 @@ export async function changeLine(lineId: string, quantity: number): Promise<void
   if (!cartId) {
     return
   }
-  const line = `/store/carts/${cartId}/line-items/${encodeURIComponent(lineId)}`
+  const line = `/store/carts/${encodeURIComponent(cartId)}/line-items/${encodeURIComponent(lineId)}`
   if (quantity === 0) {
     await storeDelete(line)
   } else {
@@ -230,9 +236,9 @@ async function repriceShipping(read: () => Promise<Cart | null>): Promise<void> 
     )
   )
   for (const option_id of options) {
-    await storePost(`/store/carts/${cart.id}/shipping-methods`, { option_id }).catch(
-      () => undefined
-    )
+    await storePost(`/store/carts/${encodeURIComponent(cart.id)}/shipping-methods`, {
+      option_id,
+    }).catch(() => undefined)
   }
 }
 
@@ -245,7 +251,7 @@ export async function addPromotion(code: string): Promise<boolean> {
   if (!cartId) {
     return false
   }
-  await storePost(`/store/carts/${cartId}/promotions`, { promo_codes: [code] })
+  await storePost(`/store/carts/${encodeURIComponent(cartId)}/promotions`, { promo_codes: [code] })
   const cart = await currentCart()
   const taken = codesOf(cart).some((each) => each.toLowerCase() === code.toLowerCase())
   if (taken) {
@@ -260,7 +266,7 @@ export async function addGiftCard(code: string): Promise<boolean> {
   if (!cartId) {
     return false
   }
-  await storePost(`/store/carts/${cartId}/gift-cards`, { code })
+  await storePost(`/store/carts/${encodeURIComponent(cartId)}/gift-cards`, { code })
   const cart = await currentCart()
   return (cart?.gift_cards ?? []).some((card) => card.code.toUpperCase() === code.toUpperCase())
 }
@@ -268,7 +274,7 @@ export async function addGiftCard(code: string): Promise<boolean> {
 export async function removeGiftCard(code: string): Promise<void> {
   const cartId = await cartIdFromCookie()
   if (cartId) {
-    await storeDelete(`/store/carts/${cartId}/gift-cards`, { code })
+    await storeDelete(`/store/carts/${encodeURIComponent(cartId)}/gift-cards`, { code })
   }
 }
 
@@ -276,7 +282,9 @@ export async function removeGiftCard(code: string): Promise<void> {
 export async function removePromotion(code: string): Promise<void> {
   const cartId = await cartIdFromCookie()
   if (cartId) {
-    await storeDelete(`/store/carts/${cartId}/promotions`, { promo_codes: [code] })
+    await storeDelete(`/store/carts/${encodeURIComponent(cartId)}/promotions`, {
+      promo_codes: [code],
+    })
     await repriceShipping(currentCart)
   }
 }
