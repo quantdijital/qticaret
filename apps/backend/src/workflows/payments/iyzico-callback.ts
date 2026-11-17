@@ -35,7 +35,9 @@ export interface IyzicoCallbackResult {
  * order is recorded to be given back, for good: a later callback or the
  * job never makes it an order. The form's record (`payment-forms`) closes
  * once nothing more can come of it. No event record as PayTR's: iyzico
- * does not resend a callback.
+ * does not resend a callback; a paid form's takes are only counted
+ * (`webhook-events`, `steps/iyzico-takes.ts`), so a completion that keeps
+ * failing reaches the shop after as many takes as PayTR's.
  */
 export const iyzicoCallbackWorkflow = createWorkflow(
   "payments-iyzico-callback",

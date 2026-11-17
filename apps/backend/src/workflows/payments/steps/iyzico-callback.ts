@@ -16,6 +16,7 @@ import { GIVEN_BACK } from "../../../modules/payment-recovery/service"
 import type { RecoveryInput } from "../../../modules/payment-recovery/service"
 import { placedOrderOfCart } from "../placed-order"
 import type { PlacedOrder } from "../placed-order"
+import { withIyzicoTakes } from "./iyzico-takes"
 import type { PaymentVerdict } from "./payment-orphan"
 
 export interface IyzicoForm {
@@ -224,7 +225,8 @@ export const checkIyzicoPaymentStep = createStep(
             { take: 1 }
           )
       : []
-    return new StepResponse(iyzicoVerdict(target, result, account.testMode, recorded ?? null))
+    const check = iyzicoVerdict(target, result, account.testMode, recorded ?? null)
+    return new StepResponse(await withIyzicoTakes(container, check))
   }
 )
 
