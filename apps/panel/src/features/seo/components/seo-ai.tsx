@@ -36,7 +36,7 @@ export function SeoAiField({
   return (
     <div className="flex items-start gap-1.5">
       <div className="min-w-0 flex-1">{children}</div>
-      <AiButton task={task} entity={entity} onUse={onUse} />
+      <AiButton task={task} entity={entity} onUse={onUse} size="icon" />
     </div>
   )
 }

@@ -20,6 +20,8 @@ export interface AiButtonProps {
   onUse: (text: string) => void
   /** The ready options to offer, a subset of the task's; left out: the task's own. */
   options?: readonly string[]
+  /** The button's size: `icon` stands level with a 36px field beside it (docs/18 §2). */
+  size?: "icon-sm" | "icon"
 }
 
 /**
@@ -29,7 +31,7 @@ export interface AiButtonProps {
  * the task does not allow draws nothing. Nothing is saved: "Kullan" hands
  * the text to `onUse`.
  */
-export function AiButton({ task, entity, onUse, options }: AiButtonProps) {
+export function AiButton({ task, entity, onUse, options, size = "icon-sm" }: AiButtonProps) {
   const { t } = useTranslation()
   const services = useQuery(aiServicesQuery())
   const view = services.data?.tasks.find((each) => each.id === task)
@@ -54,7 +56,7 @@ export function AiButton({ task, entity, onUse, options }: AiButtonProps) {
       <Button
         type="button"
         variant="ghost"
-        size="icon-sm"
+        size={size}
         aria-label={t("ai.suggest.button")}
         title={t("ai.suggest.button")}
       >
