@@ -223,6 +223,8 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   // Content, reviews and the storefront
   "/admin/content*",
   "/admin/content-drafts*",
+  // adr/0071 §6: AI suggestions and their decisions write as the drafts do
+  "/admin/ai*",
   "/admin/landings*",
   "/admin/legal-documents*",
   "/admin/product-reviews*",

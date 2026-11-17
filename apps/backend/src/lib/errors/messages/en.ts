@@ -1124,6 +1124,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The video could not be prepared. Try again; if it fails again, upload another file.",
   "video.youtube_invalid": "Enter a valid YouTube link.",
   "video.youtube_unavailable": "This video cannot be embedded or is not public.",
+  "video.youtube_unreachable": "YouTube cannot be reached right now. Try again in a few minutes.",
   "video.upload_unavailable": "Videos cannot be uploaded right now.",
   "video.upload_busy": "Other videos are being uploaded now. Try again in a few seconds.",
   "video.file_required": "Choose a video file to upload.",

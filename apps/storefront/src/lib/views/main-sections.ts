@@ -28,6 +28,8 @@ import type {
 } from "@qticaret/ui"
 import { shopMarks } from "./card-extras"
 import { footerColumnsOf } from "./footer-columns"
+import { footerRowsOf, freeRowsOf } from "./footer-rows"
+import type { FooterRowsParts } from "./footer-rows"
 import { headerCatalogOf } from "./header-catalog"
 
 /**
@@ -88,6 +90,9 @@ const footerStep = <S extends FooterBarSetting>(setting: S, value: unknown): Foo
   return listed.includes(value) ? (value as FooterBarStep<S>) : FOOTER_BAR_DEFAULTS[setting]
 }
 
+/** What the free rows footer's blocks are filled with, beyond the words and the logo. */
+export type FreeRowsParts = Omit<FooterRowsParts, "t" | "logo">
+
 const isBadge = (value: unknown): value is PaymentBadge =>
   (PAYMENT_BADGES as readonly unknown[]).includes(value)
 
@@ -102,7 +107,8 @@ const isBadge = (value: unknown): value is PaymentBadge =>
 export function footerBarOf(
   main: Main,
   t: Translate,
-  logo: ImageView | null = null
+  logo: ImageView | null = null,
+  rows?: FreeRowsParts
 ): FooterBarView {
   const bar = main?.footer_bar
   const social = footerStep("social", bar?.social)
@@ -110,6 +116,9 @@ export function footerBarOf(
   const variant = variantOf("footer_bar", bar?.variant)
   // The brand columns footer draws a card network by its own mark; the ledger writes its name
   const columns = variant === "brand_columns"
+  // The free rows footer too (adr/0070), its rows filled with the shop's details
+  const free = variant === "free_rows" && rows !== undefined
+  const marks = shopMarks(badges, t)
   return {
     id: bar?.id ?? "mainfooter",
     variant,
@@ -117,12 +126,22 @@ export function footerBarOf(
     ...(logo ? { logo } : {}),
     ...(badges.length > 0
       ? {
-          paymentBadges: columns
-            ? shopMarks(badges, t)
-            : badges.map((key) => ({ key, label: t(`marks.${key}`) })),
+          paymentBadges:
+            columns || free ? marks : badges.map((key) => ({ key, label: t(`marks.${key}`) })),
         }
       : {}),
     ...(columns ? { columns: footerColumnsOf(bar?.columns) } : {}),
+    ...(free
+      ? {
+          freeRows: freeRowsOf(bar),
+          rows: footerRowsOf(bar?.rows, {
+            ...rows,
+            t,
+            logo,
+            payments: marks.length > 0 ? marks : rows.payments,
+          }),
+        }
+      : {}),
     ...(bar?.back_to_top === true
       ? {
           backToTop: {

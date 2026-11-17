@@ -19,7 +19,7 @@ import {
   videoTileLabel,
 } from "@/features/products/video-facts"
 import { errorText } from "@/lib/errors"
-import { Fact, TitleForm, VideoPreview } from "./video-parts"
+import { Fact, TitleForm, VideoPreview, YoutubeLink } from "./video-parts"
 
 const V = "products.videos"
 
@@ -117,7 +117,9 @@ interface VideoDialogProps {
 /**
  * One product video (adr/0069 §10), the image dialog's size (`lg`): the
  * clip beside its title, its length and size, its state; a failure's
- * sentence, "Yeniden dene" for the infrastructure's, and removing it.
+ * sentence, "Yeniden dene" for the infrastructure's, and removing it. A
+ * YouTube video (slice 5) shows its cover (never the player), its link
+ * with "YouTube'da aç", and no length or size rows while it has none.
  */
 export function VideoDialog({ productId, video, onClose }: VideoDialogProps) {
   const { t } = useTranslation()
@@ -156,12 +158,18 @@ export function VideoDialog({ productId, video, onClose }: VideoDialogProps) {
                   video={video}
                   onDirtyChange={setDirty}
                 />
+                {video.kind === "youtube" ? <YoutubeLink id={video.youtube_id} /> : null}
                 <dl className="divide-y">
                   <State video={video} />
-                  <Fact label={t(`${V}.duration`)}>
-                    {video.duration_ms ? formatDuration(video.duration_ms) : "—"}
-                  </Fact>
-                  <Fact label={t(`${V}.dimensions`)}>{formatDimensions(video) ?? "—"}</Fact>
+                  {/* A YouTube video has neither (oEmbed gives none): no empty rows for it */}
+                  {video.kind === "youtube" && !video.duration_ms ? null : (
+                    <Fact label={t(`${V}.duration`)}>
+                      {video.duration_ms ? formatDuration(video.duration_ms) : "—"}
+                    </Fact>
+                  )}
+                  {video.kind === "youtube" && !formatDimensions(video) ? null : (
+                    <Fact label={t(`${V}.dimensions`)}>{formatDimensions(video) ?? "—"}</Fact>
+                  )}
                 </dl>
               </div>
             </div>

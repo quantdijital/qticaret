@@ -162,7 +162,9 @@ const openDraftStep = createStep(
   async (input: DecideInput, { container }) => {
     const [draft] = await container
       .resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
-      .listContentDrafts({ id: input.id }, { take: 1 })
+      // adr/0005 drafts only: an AI core suggestion is decided on its own routes and never
+      // written to the product here (adr/0071 §11; security review of PR 170, O1)
+      .listContentDrafts({ id: input.id, source: "ai_draft" }, { take: 1 })
     if (draft?.status !== "draft") {
       throw new ValidationError("content_drafts.not_open")
     }

@@ -1,3 +1,4 @@
+import { fakeSecret } from "@qticaret/testing"
 import { isProviderError } from "../../errors/errors"
 import { openAiCompatibleText } from "../connectors/openai-compatible"
 import {
@@ -171,7 +172,7 @@ describe("connector options (D5)", () => {
     for (const timeoutMs of [Number.NaN, -1, 0, 1.5, Number.POSITIVE_INFINITY]) {
       let thrown: unknown
       try {
-        openAiCompatibleText({ ...deepseek(), apiKey: "test-key-not-a-real-one", timeoutMs })
+        openAiCompatibleText({ ...deepseek(), apiKey: fakeSecret(), timeoutMs })
       } catch (error) {
         thrown = error
       }

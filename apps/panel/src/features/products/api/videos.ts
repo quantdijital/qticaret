@@ -119,6 +119,25 @@ export function useRetryVideo(productId: string) {
   })
 }
 
+/** A YouTube link added as the product's video (adr/0069 §8): the server takes its id alone. */
+export function useAddYoutubeVideo(productId: string) {
+  const changed = useVideosChanged(productId)
+  return useMutation({
+    mutationFn: (url: string) =>
+      sdk.client.fetch<{ video: ProductVideo }>(
+        `/admin/products/${encodeURIComponent(productId)}/videos/youtube`,
+        { method: "POST", body: { url } }
+      ),
+    onSettled: changed,
+  })
+}
+
+const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/
+
+/** The video's page on YouTube ("YouTube'da aç"), built from its id; null without a valid one. */
+export const youtubeWatchUrl = (id: string | null): string | null =>
+  id && YOUTUBE_ID.test(id) ? `https://www.youtube.com/watch?v=${id}` : null
+
 export function useRemoveVideo(productId: string) {
   const changed = useVideosChanged(productId)
   return useMutation({

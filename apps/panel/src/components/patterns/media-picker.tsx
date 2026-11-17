@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/
 import type { MediaAsset } from "@/features/media/api/media"
 import { AddressTab, LibraryTab, UploadTab } from "@/features/media/components/picker-tabs"
 import type { UploadZoneHandle } from "@/features/media/components/upload-zone"
-import type { VideoIntake } from "@/features/media/video-intake"
+import type { VideoIntake, YoutubeIntake } from "@/features/media/video-intake"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 
 type Source = "library" | "upload" | "address"
@@ -34,6 +34,11 @@ export interface MediaPickerProps {
    * files too and hands them here; the library stays pictures only.
    */
   video?: VideoIntake | undefined
+  /**
+   * A product's gallery (adr/0069 slice 5): a YouTube link typed into
+   * "Adres" is added to the product as a video, not brought into the library.
+   */
+  youtube?: YoutubeIntake | undefined
 }
 
 /**
@@ -51,6 +56,7 @@ export function MediaPicker({
   title,
   svg = false,
   video,
+  youtube,
 }: MediaPickerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,6 +67,10 @@ export function MediaPicker({
           title={title}
           svg={svg}
           video={video}
+          youtube={youtube}
+          onDone={() => {
+            onOpenChange(false)
+          }}
           onChoose={(assets) => {
             onSelect(assets)
             onOpenChange(false)
@@ -88,6 +98,8 @@ function PickerContent({
   title,
   svg,
   video,
+  youtube,
+  onDone,
   onChoose,
 }: {
   multiple: boolean
@@ -95,6 +107,8 @@ function PickerContent({
   title: string | undefined
   svg: boolean
   video: VideoIntake | undefined
+  youtube: YoutubeIntake | undefined
+  onDone: () => void
   onChoose: (assets: MediaAsset[]) => void
 }) {
   const { t } = useTranslation()
@@ -162,7 +176,7 @@ function PickerContent({
           />
         </TabsContent>
         <TabsContent value="address" className={TAB}>
-          <AddressTab onChoose={onChoose} />
+          <AddressTab onChoose={onChoose} youtube={youtube} onDone={onDone} />
         </TabsContent>
       </Tabs>
     </DialogContent>

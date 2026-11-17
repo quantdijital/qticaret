@@ -1,8 +1,10 @@
 /**
  * The storefront's Content Security Policy (docs/04, adr/0046 §4): scripts
  * only with this request's nonce (and what they load, `strict-dynamic`),
- * nothing framed but a card provider's form, no plugins, forms only to ourselves. Pictures may come
- * from any HTTPS host: product images live on the file storage or a CDN.
+ * nothing framed but a card provider's form and YouTube's privacy-enhanced
+ * player, no plugins, forms only to ourselves. Pictures may come
+ * from any HTTPS host: product images live on the file storage or a CDN;
+ * a product's videos likewise (`media-src`, adr/0069 §5).
  * Development relaxes what Next's dev server needs (eval, inline styles,
  * its websocket); a nonce makes browsers ignore 'unsafe-inline', so dev
  * styles go without one.
@@ -20,6 +22,16 @@ export const RADIX_STYLE_HASHES = [
   // pointer-events:none (docs/21: six refusals a page, Best Practices 92)
   "'sha256-1OjyRYLAOH1vhXLUN4bBHal0rWxuwBDBP220NNc0CNU='",
 ]
+
+/**
+ * YouTube's privacy-enhanced player (adr/0069 §7, §8): the one source a
+ * product's YouTube video is framed from, its `/embed/` path alone
+ * (security review N1), and only after the visitor presses play (the
+ * theme adds the frame then). The player's own
+ * requests (scripts, images, streams) are its own document's, under its
+ * own policy: nothing of YouTube's is opened in ours but this frame.
+ */
+export const YOUTUBE_PLAYER_SOURCE = "https://www.youtube-nocookie.com/embed/"
 
 export interface FrameRules {
   /** Card providers' own pages a form may lead to (a checkout without script follows a 303 there). */
@@ -89,9 +101,12 @@ export function contentSecurityPolicy(
     development ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`,
     ...(development ? [] : [`style-src-attr 'unsafe-hashes' ${RADIX_STYLE_HASHES.join(" ")}`]),
     `img-src 'self' data: blob: https:${development ? " http:" : ""}`,
+    // A product's clips (adr/0069 §5) come from the file storage or a CDN, as its pictures do
+    `media-src 'self' https:${development ? " http:" : ""}`,
     "font-src 'self'",
     `connect-src 'self'${tagConnects}${development ? " ws: http://localhost:*" : ""}`,
-    `frame-src ${frameOrigins.length > 0 ? frameOrigins.join(" ") : "'none'"}`,
+    // A product's YouTube video (adr/0069 §8), framed only once pressed; the card providers' forms
+    `frame-src ${[YOUTUBE_PLAYER_SOURCE, ...frameOrigins].join(" ")}`,
     "object-src 'none'",
     "base-uri 'self'",
     `form-action 'self'${formOrigins.length > 0 ? ` ${formOrigins.join(" ")}` : ""}`,

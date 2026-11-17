@@ -37,6 +37,8 @@ export interface ProviderErrorShape extends ErrorShape<"provider"> {
   readonly retryAfterMs?: number
   /** The provider's own short text about the failure, made safe (`providerText`). */
   readonly providerMessage?: string
+  /** Other services of ours that could do the same (adr/0071 §4 "try with another service"). */
+  readonly alternatives?: readonly string[]
 }
 
 export interface ConflictErrorShape extends ErrorShape<"conflict"> {
@@ -113,6 +115,8 @@ export interface ProviderErrorInit {
    * only as `providerText` leaves it: one short line, nothing secret.
    */
   providerMessage?: string | null | undefined
+  /** Our own names of services that could be tried instead; never text from outside. */
+  alternatives?: readonly string[]
   /** The account's values the provider may quote back (user name, password): masked, never kept. */
   secrets?: readonly (string | null | undefined)[]
   cause?: unknown
@@ -128,6 +132,7 @@ export class ProviderError extends Error implements ProviderErrorShape {
   readonly safeMessage: string
   readonly retryAfterMs?: number
   readonly providerMessage?: string
+  readonly alternatives?: readonly string[]
 
   constructor(init: ProviderErrorInit) {
     super(`${init.provider} error ${init.providerCode}`, causeOf(init))
@@ -141,6 +146,9 @@ export class ProviderError extends Error implements ProviderErrorShape {
     const said = providerText(init.providerMessage, init.secrets)
     if (said !== undefined) {
       this.providerMessage = said
+    }
+    if (init.alternatives !== undefined) {
+      this.alternatives = [...init.alternatives]
     }
   }
 }

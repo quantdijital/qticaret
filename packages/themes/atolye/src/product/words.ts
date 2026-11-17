@@ -156,6 +156,17 @@ export const galleryWords = (t: Translate) => ({
   show: t("product.image_show"),
   thumbsPrevious: t("product.thumbs_previous"),
   thumbsNext: t("product.thumbs_next"),
+  /** A video's own button (adr/0069 §7): "Videoyu oynat", shown while it does not play. */
+  videoPlay: t("product.video_play"),
+  /** Its accessible name, playing or not: "Videoyu oynat: {title}", "Videoyu durdur: {title}". */
+  videoPlayNamed: t("product.video_play_named"),
+  videoPauseNamed: t("product.video_pause_named"),
+  /** A video's thumbnail: "Video: {title}". */
+  videoShow: t("product.video_show"),
+  /** A YouTube video's line before it is pressed (adr/0069 §7): where it will load from. */
+  videoYoutubeNote: t("product.video_youtube_note"),
+  /** The YouTube player's accessible name once pressed: "YouTube videosu: {title}". */
+  videoYoutubeFrame: t("product.video_youtube_frame"),
 })
 
 export type GalleryWords = ReturnType<typeof galleryWords>

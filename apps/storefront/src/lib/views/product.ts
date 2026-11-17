@@ -13,6 +13,7 @@ import { framedCard, type FramedCardOptions } from "./card-framed"
 import { cardShown } from "./card-shown"
 import { productImages, variantImages } from "./image"
 import { cardPrice, isAvailable, isVatExclusive, shownAmount, variantPrice } from "./price"
+import { productVideos } from "./product-videos"
 import { specGroupsOf, specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
 
@@ -190,6 +191,7 @@ export function productPage({
   }))
   const requested = views.find((variant) => variant.id === requestedVariant)
   const selected = requested ?? views.find((variant) => variant.available) ?? views[0] ?? null
+  const videos = productVideos(product)
   return {
     id: product.id,
     title: product.title,
@@ -201,6 +203,8 @@ export function productPage({
     brand: product.brand && brandPath ? { label: product.brand.name, path: brandPath } : null,
     breadcrumbs: breadcrumbsOf(seo, t("home.label"), product.title),
     images: productImages(product),
+    // Left out without one: a product without videos is drawn as before (adr/0069 §7)
+    ...(videos.length > 0 ? { videos } : {}),
     options,
     variants: views,
     selectedVariantId: selected?.id ?? null,

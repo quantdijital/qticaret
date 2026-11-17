@@ -151,6 +151,11 @@ const envSchema = z.object({
   CONTENT_DRAFT_PROVIDER: z.enum(["fake"]).optional(),
   // How many drafts a month the shop may ask for
   CONTENT_DRAFT_MONTHLY_QUOTA: z.coerce.number().int().min(0).max(100_000).optional(),
+  // adr/0071 §8: the AI core's daily abuse ceiling per shop, by kind of work. Unset:
+  // lib/ai/limits.ts' default (text 500, image 100, video 10); a value may only lower it
+  AI_DAILY_LIMIT_TEXT: z.coerce.number().int().min(0).max(100_000).optional(),
+  AI_DAILY_LIMIT_IMAGE: z.coerce.number().int().min(0).max(100_000).optional(),
+  AI_DAILY_LIMIT_VIDEO: z.coerce.number().int().min(0).max(100_000).optional(),
   // F10.11: the platform's API key for CrUX (Chrome's field data); off until set
   CRUX_API_KEY: z.string().max(200).optional(),
   // A fake Google (OAuth and Merchant API) in tests; refused when deployed

@@ -95,6 +95,27 @@ describe("a provider's own words", () => {
       provider_message: "Barkod yok",
     })
   })
+
+  it("offer staff the other services by our own names only, nobody else (Info 7)", () => {
+    const failed = {
+      qtErrorKind: "provider",
+      safeMessage: "ai.provider_unavailable",
+      provider: "deepseek",
+      providerCode: "http_503",
+      retryable: true,
+      alternatives: ["openai", "Bad <b>", 7, "gemini", ...Array.from({ length: 12 }, () => "x")],
+    }
+    const body = toHttpError(failed, { providerDetail: true })?.body
+    expect(body?.alternatives).toEqual([
+      "openai",
+      "gemini",
+      ...Array.from({ length: 8 }, () => "x"),
+    ])
+    expect(toHttpError(failed)?.body).not.toHaveProperty("alternatives")
+    expect(
+      new ProviderError({ provider: "fake", providerCode: "x", retryable: false, alternatives: [] })
+    ).toMatchObject({ alternatives: [] })
+  })
 })
 
 describe("providerFailureSentence", () => {

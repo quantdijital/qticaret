@@ -25,6 +25,8 @@ export interface HttpErrorResponse {
     provider?: string
     /** What it said, made safe (`providerText`): the admin API only. */
     provider_message?: string
+    /** Other services to try (adr/0071 §4): the admin API only. */
+    alternatives?: string[]
     /** A plan limit refusal's (`plan.limit_reached`): which limit, used now, allowed. */
     limit?: string
     used?: number
@@ -51,6 +53,20 @@ const PROVIDER_NAME = /^[a-z][a-z0-9_-]{0,31}$/
 export interface ProviderDetail {
   provider: string
   provider_message?: string
+  alternatives?: string[]
+}
+
+// At most a registry's worth, each one of our own names
+const MAX_ALTERNATIVES = 10
+
+function alternativesOf(value: unknown): { alternatives?: string[] } {
+  if (!Array.isArray(value)) {
+    return {}
+  }
+  const names = value
+    .filter((each): each is string => typeof each === "string" && PROVIDER_NAME.test(each))
+    .slice(0, MAX_ALTERNATIVES)
+  return { alternatives: names }
 }
 
 function providerDetail(value: ProviderErrorShape): ProviderDetail | null {
@@ -59,7 +75,11 @@ function providerDetail(value: ProviderErrorShape): ProviderDetail | null {
   }
   // Made safe again: a workflow hands the error back as a plain object
   const said = providerText(value.providerMessage)
-  return { provider: value.provider, ...(said === undefined ? {} : { provider_message: said }) }
+  return {
+    provider: value.provider,
+    ...(said === undefined ? {} : { provider_message: said }),
+    ...alternativesOf(value.alternatives),
+  }
 }
 
 /**

@@ -32,6 +32,7 @@ export function NewsletterForm({
   quiet = false,
   joined = false,
   marks,
+  textKey = "text",
   className,
 }: {
   action: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
@@ -42,6 +43,8 @@ export function NewsletterForm({
   joined?: boolean
   /** The theme editor's live preview (adr/0065 Faz 2b): the consent sentence carries its field mark (`text`). */
   marks?: boolean | undefined
+  /** The consent sentence's field key; a free rows footer's block names its own (`blocks.<at>.text`). */
+  textKey?: string
   className?: string
 }) {
   const [sent, setSent] = useState(false)
@@ -105,7 +108,7 @@ export function NewsletterForm({
             required
             className="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
           />
-          <span {...fieldMark(marks, "text")}>
+          <span {...fieldMark(marks, textKey)}>
             {words.consent}
             {joined ? null : " "}
             {joined ? null : privacy}

@@ -14,6 +14,7 @@ const NOTE = draftNote([
   "Google Analytics ve Meta'ya yurt dışı aktarımın dayanağı (KVKK Aydınlatma Metnindeki notla aynı).",
   'Çerez bandında "Tümünü kabul et" ve "Yalnızca zorunlu" düğmeleri yan yana ve aynı boyutta, ancak "Tümünü kabul et" dolgulu (daha belirgin) çiziliyor; Rehber ve Kurulun 2026/347 sayılı İlke Kararı karşısında yeterliliği.',
   "Google ve Meta çerezlerinin süreleri sağlayıcıların kendi belgelerinden alındı (Google Analytics 2 yıl; Meta 90 gün); sağlayıcı değiştirirse tablo güncellenmeli.",
+  "Ürün sayfasındaki YouTube videoları: oynatıcı yalnızca ziyaretçi videoyu oynattığında yüklenir (öncesinde YouTube'a istek gitmez) ve kapakta bunu söyleyen bir satır vardır. Bu tıklamanın yeterli sayılıp sayılmadığı, yoksa pazarlama çerezlerine onay verilmeden YouTube'un hiç oynatılmaması gerekip gerekmediği; YouTube'un oynatınca yazdığı çerezlerin ve yerel depolama kayıtlarının adları ve süreleri Google'ın belgelerinden doğrulanmadı.",
 ])
 
 const COOKIES: Block = table(
@@ -122,6 +123,9 @@ export const cookiePolicy: { title: string; content: Block[] } = {
     COOKIES,
     p(
       "Analitik ve pazarlama çerezleri, yalnızca Mağaza ilgili hizmeti siteye bağlamışsa ve siz izin verdiyseniz yüklenir. Bu çerezler Google ve Meta'nın betikleri tarafından sitemizin alan adına yazılır; Google ve Meta ayrıca kendi alan adlarında kendi çerezlerini kullanabilir. Bu çerezler ilgili şirketlerin gizlilik politikalarına tabidir."
+    ),
+    p(
+      "Üçüncü taraf: YouTube (Google), yalnız videoyu oynattığınızda. Ürün sayfalarındaki YouTube videoları, siz oynat düğmesine basana kadar yalnızca kendi sunucumuzdaki bir kapak görseli olarak gösterilir; bu sırada YouTube'a hiçbir istek gönderilmez ve çerez yazılmaz. Videoyu oynattığınızda oynatıcı YouTube'un gelişmiş gizlilik modundaki adresinden (youtube-nocookie.com) yüklenir; YouTube bu andan itibaren IP adresinizi işleyebilir, tarayıcınıza kendi çerezlerini ve yerel depolama kayıtlarını yazabilir. Bu işlemler Google'ın gizlilik politikasına tabidir."
     ),
     p(
       "Analitik veya pazarlama çerezlerine izin verdiyseniz, bir satın almanın yalnızca bir kez sayılması için tarayıcınızın oturum deposuna (sessionStorage) siparişe ait bir işaret yazılır; sekme kapanınca silinir."

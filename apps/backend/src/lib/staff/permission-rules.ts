@@ -148,6 +148,8 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/fraud/blocks*" },
   // The package, its use and what the shop owes the platform (adr/0061 Ek C14): owner and admin
   { methods: "*", path: "/admin/plan" },
+  // The AI core's use and estimated cost (adr/0071 §6): owner and admin; the services list is everyone's
+  { methods: "*", path: "/admin/ai/usage" },
   // Wholesalers, their levels and prices (ADR-0068 §9): owner and admin; operations sees orders
   { methods: "*", path: "/admin/wholesale*" },
 ]

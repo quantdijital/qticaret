@@ -64,7 +64,11 @@ export function hidePrivateAttributes(
   res: MedusaResponse,
   next: MedusaNextFunction
 ) {
-  if (req.method !== "GET" || !fieldTokens(req).some((token) => ATTRIBUTE_RELATION.test(token))) {
+  // A HEAD runs the GET route and sizes its answer: cleaned alike (adr/0069 review S1)
+  if (
+    !["GET", "HEAD"].includes(req.method) ||
+    !fieldTokens(req).some((token) => ATTRIBUTE_RELATION.test(token))
+  ) {
     next()
     return
   }

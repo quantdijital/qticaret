@@ -168,11 +168,12 @@ describe("MediaCard with product videos", () => {
     upload = false
     videos = [clip("mvid_1")]
     renderCard()
-    // The videos still show; the zone and its dialog take pictures alone
+    // The videos still show; the zone and its dialog take pictures and a YouTube link
+    // (slice 5: a link needs no tools on the server), never a clip's file
     expect(await screen.findByRole("button", { name: "1. video" })).toBeInTheDocument()
-    const zone = screen.getByRole("button", { name: /Görsel ekle: sürükleyin/ })
+    const zone = screen.getByRole("button", { name: /Görsel ya da video ekle: sürükleyin/ })
     await userEvent.click(zone)
-    const dialog = await screen.findByRole("dialog", { name: "Görsel ekle" })
+    const dialog = await screen.findByRole("dialog", { name: "Görsel ya da video ekle" })
     await userEvent.click(within(dialog).getByRole("tab", { name: "Bilgisayardan yükle" }))
     const input = within(dialog).getByLabelText("Bilgisayardan görsel seç")
     expect(input.getAttribute("accept")).not.toMatch(/video/)

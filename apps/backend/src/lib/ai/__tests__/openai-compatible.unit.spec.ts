@@ -213,6 +213,25 @@ describe("OpenAI compatible text connector (adr/0071 §8, §9)", () => {
     expect(calls).toHaveLength(2)
   })
 
+  it("tells a connection never made from one cut after sending (D3)", async () => {
+    const refused = Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" })
+    const reset = Object.assign(new Error("socket hang up"), { code: "ECONNRESET" })
+    const never = connectorFor("deepseek", [
+      new SafeFetchError("request_failed", { cause: refused }),
+      new SafeFetchError("request_failed", { cause: refused }),
+    ])
+    const cut = connectorFor("deepseek", [new SafeFetchError("request_failed", { cause: reset })])
+
+    expect(await failure(never.connector.complete(REQUEST))).toMatchObject({
+      safeMessage: "ai.provider_unavailable",
+      providerCode: "connect_failed",
+    })
+    expect(await failure(cut.connector.complete(REQUEST))).toMatchObject({
+      safeMessage: "ai.provider_unavailable",
+      providerCode: "request_failed",
+    })
+  })
+
   it("gives a timeout when the caller gives up", async () => {
     const { connector, calls } = connectorFor("deepseek", [new SafeFetchError("aborted")])
     const controller = new AbortController()

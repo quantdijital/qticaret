@@ -75,7 +75,9 @@ describe("Settings home", () => {
     // storefront's parts are under Storefront in the main menu (adr/0049)
     // adr/0061 Ek C14: Subscription joined the system group; maintenance came from the
     // storefront preferences (the owner, 2026-11-16)
-    expect(screen.getAllByRole("link")).toHaveLength(20)
+    // adr/0071 §13: AI joined the system group
+    expect(screen.getAllByRole("link")).toHaveLength(21)
+    expect(screen.getByRole("link", { name: /Yapay zekâ/ })).toHaveAttribute("href", "/settings/ai")
     expect(screen.getByRole("link", { name: /Bakım modu/ })).toHaveAttribute(
       "href",
       "/settings/maintenance"

@@ -308,6 +308,7 @@
       "attributes": "Product attributes",
       "locations": "Locations",
       "integrations": "Integrations",
+      "ai": "AI",
       "notifications": "E-mail and SMS",
       "sms": "SMS",
       "marketing": "Marketing",
@@ -1919,6 +1920,7 @@
       "notifications": "E-mail sender and limit, SMS and İYS, templates, staff alerts",
       "sms": "SMS service and daily sending limit",
       "integrations": "Whether the connected services are working",
+      "ai": "The services that draft texts, their keys and this month's use",
       "features": "Shop features you can turn on or off",
       "jobs": "Long jobs such as exports, and their files",
       "audit": "Who changed what in the panel, and when",
@@ -3180,6 +3182,9 @@
       "removeDescription": "The video comes off the product and the storefront, and its files are deleted. This cannot be undone.",
       "removed": "Video removed.",
       "sourceGone": "The uploaded file is no longer kept; remove the video and upload it again.",
+      "youtube": "YouTube",
+      "youtubeOpen": "Open on YouTube",
+      "youtubeAdded": "YouTube video added.",
       "errors": {
         "too_large": "A video can be 50 MB at most.",
         "too_long": "A video can be 30 seconds long at most.",
@@ -3189,7 +3194,9 @@
         "unreadable": "The video could not be read; the file may be damaged.",
         "limit_per_product": "A product can have 2 videos at most.",
         "processing_failed": "The video could not be prepared. Try again; if it fails again, upload another file.",
-        "upload_unavailable": "Videos cannot be uploaded right now."
+        "upload_unavailable": "Videos cannot be uploaded right now.",
+        "youtube_invalid": "Enter a valid YouTube link.",
+        "youtube_unavailable": "This video cannot be embedded or is not public."
       }
     },
     "wizard": {
@@ -10779,7 +10786,10 @@
       "chooseUploaded_other": "Choose the {{count}} uploaded images",
       "address": "Image address",
       "addressHint": "The image is copied from this address into the library; pages show the shop's own copy. JPG, PNG, WebP or AVIF, 10 MB at most.",
-      "import": "Bring in and choose"
+      "import": "Bring in and choose",
+      "addressVideo": "Address of the image or the YouTube video",
+      "addressHintVideo": "An image is copied from this address into the library (JPG, PNG, WebP or AVIF, 10 MB at most). A YouTube link is added to the product as a video; the storefront shows only its cover until a visitor plays it.",
+      "addYoutube": "Add the video"
     },
     "field": {
       "empty": "No image chosen",
@@ -11220,6 +11230,145 @@
       "hint": "Pass the password on to the wholesaler; suggest they change it at first sign-in. Their open sessions end. This password is not shown again.",
       "save": "Save password",
       "saved": "New password saved; the wholesaler's open sessions were ended."
+    }
+  },
+  "ai": {
+    "title": "AI",
+    "description": "Connect the services that draft texts such as product titles and descriptions for you. They run on your own account's key; you pay the service.",
+    "notInPlan": "Your plan does not include using AI with your own key. Stored keys are kept and work again once your plan changes.",
+    "capabilities": {
+      "text": "Writing text",
+      "vision": "Understanding images",
+      "image_edit": "Image editing",
+      "image_generate": "Image generation",
+      "video": "Video"
+    },
+    "services": {
+      "deepseek": {
+        "name": "DeepSeek",
+        "description": "Low-cost text service.",
+        "rejected": "DeepSeek refused the stored key. Change the key or check the balance of your DeepSeek account.",
+        "checks": {
+          "secret_invalid": "DeepSeek did not accept the key. Copy it again and enter it."
+        }
+      },
+      "minimax": {
+        "name": "MiniMax",
+        "description": "Text service (international platform).",
+        "rejected": "MiniMax refused the stored key. Change the key or check the balance of your MiniMax account.",
+        "checks": {
+          "secret_invalid": "MiniMax did not accept the key. Copy it again and enter it."
+        }
+      },
+      "gemini": {
+        "name": "Gemini",
+        "description": "Google's text service.",
+        "rejected": "Gemini refused the stored key. Change the key or check billing on your Google account.",
+        "checks": {
+          "secret_invalid": "Gemini did not accept the key. Copy it again and enter it."
+        }
+      },
+      "fake": {
+        "name": "Test service",
+        "description": "Shown in development only; connects to no real service.",
+        "rejected": "The test service refused the stored key.",
+        "checks": {
+          "secret_invalid": "The test service did not accept the key."
+        }
+      }
+    },
+    "data_note": {
+      "deepseek": "Data is processed and stored in China. DeepSeek's privacy policy lists training its models as a use of the data.",
+      "minimax": "Where data is processed and whether it trains models is not stated.",
+      "gemini": "On the free tier Google uses the content sent to improve its products; on the paid tier it does not.",
+      "fake": "Data never leaves this computer."
+    },
+    "data_detail": {
+      "deepseek": "DeepSeek processes and stores the text sent on servers in the People's Republic of China. Its privacy policy lists improving (training) its models among the uses of the data. Only content published on your storefront, such as products, categories and pages, is sent.",
+      "minimax": "MiniMax's international platform is used. Where data is processed and whether it trains models could not be verified from the service's documentation; we suggest reading MiniMax's own terms before connecting. Only content published on your storefront is sent.",
+      "gemini": "Under Google's terms, content sent on the free tier is used to improve Google's products and may be read by people at Google; on the paid tier (billing on) it is not. Data may be processed in any country where Google has facilities. Only content published on your storefront is sent.",
+      "fake": "A fake service for development: it writes its answer from the data itself and connects nowhere."
+    },
+    "tasks": {
+      "test_text": "Test text"
+    },
+    "card": {
+      "capabilities": "What it can do",
+      "connect": "Connect",
+      "change": "Change key",
+      "test": "Test connection",
+      "remove": "Remove",
+      "ownerConnects": "The store owner can connect the service.",
+      "keptUnused": "A key is stored but not used, as your plan does not allow it.",
+      "connectTitle": "Connect {{name}}",
+      "changeTitle": "Change the {{name}} key",
+      "dialogDescription": "Enter the key from your {{name}} account. It is tried with {{name}} before it is saved and never shown again.",
+      "key": "Key",
+      "keyHint": "Copy it from the API keys section of your {{name}} console.",
+      "keyRequired": "Enter the key.",
+      "save": "Save and test",
+      "removeTitle": "Remove the {{name}} connection?",
+      "removeDescription": "The stored key is deleted; AI suggestions no longer use {{name}}. To connect again you need to enter the key again.",
+      "dataTitle": "Where your data goes",
+      "dataTip": "{{name}} data details",
+      "noPersonalData": "No personal data is sent: no order, customer or staff details go in any task."
+    },
+    "usage": {
+      "title": "This month's use",
+      "description": "How many times AI was used, with which service and for which task.",
+      "estimateHint": "The cost is an estimate from the services' list prices and the length of the text used (tokens); the actual amount is on the service's invoice.",
+      "estimateNote": "Costs are estimates; the exact amount is on the service's invoice.",
+      "empty": "AI has not been used this month yet.",
+      "byService": "By service",
+      "byTask": "By task",
+      "name": "Name",
+      "count": "Uses",
+      "cost": "Estimated cost",
+      "tries_one": "{{count}} time",
+      "tries_other": "{{count}} times",
+      "notUsed_one": "{{count}} gave no result",
+      "notUsed_other": "{{count}} gave no result",
+      "monthly": "Your plan's monthly limit",
+      "daily": {
+        "text": "Today (text)"
+      },
+      "ofLimit": "{{used}} / {{max}}",
+      "unlimited": "{{used}} · no limit",
+      "ceilingNote": "At the limit no new suggestion can be asked for; the daily limit resets at midnight."
+    },
+    "suggest": {
+      "button": "Suggest with AI",
+      "from": "AI suggestion · {{name}}",
+      "loading": "Preparing a suggestion…",
+      "use": "Use",
+      "retry": "Try again",
+      "dismiss": "Cancel",
+      "otherServices": "Try another service",
+      "tryWith": "Try {{name}}",
+      "service": "Service",
+      "option": "Option",
+      "refused": "No suitable suggestion came out. You can try again.",
+      "note": "Use only fills the field; saving is up to you."
+    },
+    "hint": {
+      "text": "Connect an AI service to fill this field in one click.",
+      "connect": "Connect",
+      "ownerOnly": "With an AI service connected this field fills in one click; the store owner can connect one.",
+      "close": "Close the tip"
+    },
+    "errors": {
+      "no_service": "No connected AI service can do this.",
+      "service_unavailable": "The chosen service can no longer do this. Pick another one from the list.",
+      "own_keys_not_in_plan": "Your plan does not include AI with your own key.",
+      "key_rejected": "{{name}} did not accept the key. Change it under Settings › AI.",
+      "provider_balance": "The {{name}} account has no balance or quota left.",
+      "provider_busy": "{{name}} is busy right now. Try again shortly.",
+      "provider_unavailable": "{{name}} is not answering right now.",
+      "timeout": "{{name}} did not answer in time.",
+      "content_blocked": "{{name}} gave no suggestion for this content (safety filter).",
+      "provider_response_invalid": "{{name}} gave an unexpected answer.",
+      "input_unsupported": "This content cannot be sent to the service (type or size not suitable).",
+      "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow."
     }
   }
 }

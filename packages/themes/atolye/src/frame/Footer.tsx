@@ -4,6 +4,7 @@ import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import type { ReactNode } from "react"
 import { FooterColumns } from "./FooterColumns"
+import { FooterRows } from "./FooterRows"
 import { FooterNewsletterBox, footerNewsletterVariant } from "./FooterNewsletter"
 import { FooterLinks } from "./FooterLinks"
 import { FooterMarks } from "./FooterMarks"
@@ -103,10 +104,19 @@ export function Footer({
   subscribe?: ((state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>) | undefined
 }) {
   // The design's footer (adr/0049 Ek 2026-11-14 §5): today's ledger, or the brand columns (Ek 2026-11-17)
-  const variant = drawnVariant("footer_bar", shop.footerBar?.variant, ["ledger", "brand_columns"])
+  // or the free rows (adr/0070)
+  const variant = drawnVariant("footer_bar", shop.footerBar?.variant, [
+    "ledger",
+    "brand_columns",
+    "free_rows",
+  ])
   const columns = shop.footerBar?.columns
   if (variant === "brand_columns" && columns) {
     return <FooterColumns shop={shop} t={t} subscribe={subscribe} columns={columns} />
+  }
+  const { freeRows, rows } = shop.footerBar ?? {}
+  if (variant === "free_rows" && freeRows && rows) {
+    return <FooterRows shop={shop} t={t} subscribe={subscribe} free={freeRows} rows={rows} />
   }
   // The newsletter box's variant (adr/0049 Ek 2026-11-17): today's row, a band, or in the contact column
   const news = subscribe ? footerNewsletterVariant(shop) : null

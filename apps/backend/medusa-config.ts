@@ -254,6 +254,8 @@ module.exports = defineConfig({
     },
     // F10.13 (adr/0005): drafts a provider wrote, shown only once staff approve them
     { resolve: "./src/modules/content-drafts" },
+    // adr/0071 §5: the AI core's calls, chosen services and daily ceiling
+    { resolve: "./src/modules/ai" },
     // F10.11 (docs/13 §10): what Search Console and CrUX say of the shop
     { resolve: "./src/modules/seo-insights" },
     // F10.9 (adr/0038 §4): measurement consent per cart and order, and the events sent

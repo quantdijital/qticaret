@@ -13,6 +13,7 @@ import type {
   ProductMainVariant,
 } from "@qticaret/types"
 import type { SectionLookView } from "./content-views"
+import type { FooterRowView, FooterRowsView } from "./footer-rows-views"
 import type { ShopMarkView } from "./card-views"
 import type { ImageView, LinkView, NavCategoryView } from "./views"
 
@@ -114,6 +115,10 @@ export interface FooterBarView {
   paymentBadges?: ShopMarkView[]
   /** The `brand_columns` footer's own settings (adr/0049 Ek 2026-11-17); absent on the others. */
   columns?: FooterColumnsView
+  /** The `free_rows` footer's own settings (adr/0070); absent on the others. */
+  freeRows?: FooterRowsView
+  /** The `free_rows` footer's rows, their blocks resolved; absent on the others. */
+  rows?: FooterRowView[]
   /** The floating "back to top" button; none (or absent): not drawn. */
   backToTop?: BackToTopView | null
   /**

@@ -3,14 +3,19 @@
 import { ChevronLeft, ChevronRight, ImageOff, Maximize2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
-import type { ImageView } from "@qticaret/ui"
+import type { ImageView, ProductVideoView } from "@qticaret/ui"
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
+import { gallerySlides, slideOfPlace } from "./gallery-slides"
+import { GalleryVideo } from "./GalleryVideo"
+import { GalleryYoutube } from "./GalleryYoutube"
 import { Thumbs } from "./Thumbs"
 import { VARIANT_CHOSEN_EVENT, chosenVariant, pictureOrder } from "./variant-pictures"
 import type { GalleryWords } from "./words"
 import { Zoom } from "./Zoom"
 
 const slideId = (n: number) => `gorsel-${String(n)}`
+
+const SIZES = "(min-width: 1280px) 680px, (min-width: 768px) 46vw, 100vw"
 
 const smooth = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
@@ -26,16 +31,23 @@ const smooth = () =>
  * Only the first loads eagerly (LCP). Without a photograph the well holds
  * the name's first letter. A variant chosen with pictures of its own
  * (`variant-pictures.ts`) brings them to the front, the counter, the
- * thumbnails and the zoom following; the square keeps its size.
+ * thumbnails and the zoom following; the square keeps its size. The
+ * shop's videos (adr/0069 §7) sit among them after as many photographs as
+ * each says (`GalleryVideo`; a YouTube video `GalleryYoutube`), a play
+ * mark on their thumbnails; the zoom
+ * shows the photographs alone. Without videos the gallery is as it was.
  */
 export function Gallery({
   images: all,
+  videos = [],
   own = {},
   openOn = null,
   initial,
   words,
 }: {
   images: ImageView[]
+  /** The product's videos (adr/0069); none: the photographs alone. */
+  videos?: readonly ProductVideoView[]
   /** Each variant's own pictures, as places in `images`. */
   own?: Readonly<Record<string, readonly number[]>>
   /** The variant whose pictures it opens on (`?variant=`); none: the product's order. */
@@ -52,7 +64,9 @@ export function Gallery({
   const hydrated = useHydrated()
   const order = pictureOrder(all.length, own, variant)
   const images = order.flatMap((place) => (all[place] ? [all[place]] : []))
-  const count = images.length
+  const slides = gallerySlides(images, videos)
+  const count = slides.length
+  const current = slides[index]
   const shown = order.join()
 
   // A variant chosen with pictures of its own: they come to the front, the first in view
@@ -134,24 +148,52 @@ export function Gallery({
           tabIndex={count > 1 ? 0 : undefined}
           aria-label={count > 1 ? words.label : undefined}
         >
-          {images.map((image, n) => (
-            <li
-              key={image.src}
-              id={slideId(n + 1)}
-              data-index={n}
-              className="relative aspect-square w-full shrink-0"
-              onClick={() => {
-                setZoom(n)
-              }}
-            >
-              <ResponsiveImage
-                image={image}
-                sizes="(min-width: 1280px) 680px, (min-width: 768px) 46vw, 100vw"
-                priority={n === 0}
-                className="absolute inset-0 h-full w-full cursor-zoom-in object-contain"
-              />
-            </li>
-          ))}
+          {slides.map((slide, n) =>
+            slide.kind === "image" ? (
+              <li
+                key={slide.image.src}
+                id={slideId(n + 1)}
+                data-index={n}
+                className="relative aspect-square w-full shrink-0"
+                onClick={() => {
+                  setZoom(slide.place)
+                }}
+              >
+                <ResponsiveImage
+                  image={slide.image}
+                  sizes={SIZES}
+                  priority={n === 0}
+                  className="absolute inset-0 h-full w-full cursor-zoom-in object-contain"
+                />
+              </li>
+            ) : (
+              <li
+                key={slide.video.id}
+                id={slideId(n + 1)}
+                data-index={n}
+                className="relative aspect-square w-full shrink-0"
+              >
+                {slide.video.youtube ? (
+                  // A YouTube video: its cover until pressed, nothing of YouTube's before
+                  <GalleryYoutube
+                    video={slide.video}
+                    sizes={SIZES}
+                    priority={n === 0}
+                    words={words}
+                  />
+                ) : (
+                  // Without photographs its poster is the first picture: it never starts by itself
+                  <GalleryVideo
+                    video={slide.video}
+                    sizes={SIZES}
+                    priority={n === 0}
+                    autoplay={images.length > 0}
+                    words={words}
+                  />
+                )}
+              </li>
+            )
+          )}
         </ul>
         {count > 1 && (
           <p
@@ -161,14 +203,15 @@ export function Gallery({
             {position}
           </p>
         )}
-        {hydrated && (
+        {/* The zoom shows the photographs: none on a video's square */}
+        {hydrated && current?.kind !== "video" && (
           <button
             ref={opener}
             type="button"
             className="gf-icon-btn absolute top-3 right-3 bg-stage/80 text-stage-text hover:bg-stage-2 focus-visible:outline-signal-on-stage"
             aria-label={words.zoom}
             onClick={() => {
-              setZoom(index)
+              setZoom(current?.kind === "image" ? current.place : 0)
             }}
           >
             <Maximize2 className="size-5" aria-hidden="true" strokeWidth={2} />
@@ -203,7 +246,12 @@ export function Gallery({
         // A new set starts its row at its first (the browser's scroll anchoring would keep an old one)
         <Thumbs
           key={shown}
-          images={images}
+          images={slides.map((slide) =>
+            slide.kind === "image" ? slide.image : slide.video.poster
+          )}
+          videos={Object.fromEntries(
+            slides.flatMap((slide, n) => (slide.kind === "video" ? [[n, slide.video.title]] : []))
+          )}
           index={index}
           slideId={slideId}
           onChoose={go}
@@ -218,7 +266,7 @@ export function Gallery({
           returnTo={opener}
           onClose={(last) => {
             setZoom(null)
-            go(last)
+            go(slideOfPlace(slides, last))
           }}
         />
       )}
