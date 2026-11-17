@@ -31,6 +31,34 @@ export interface StoreMediaAsset {
   derivatives: MediaDerivatives | null
 }
 
+/**
+ * A product's video as the Store API gives it (adr/0069 §6, its leaves one
+ * by one): the backend sends only the ready ones, and none while
+ * `catalog.product_videos` is off. Addresses are public storage URLs.
+ */
+export interface StoreMediaVideo {
+  id: string
+  kind: "upload" | "youtube"
+  status: "uploaded" | "processing" | "ready" | "failed"
+  title: string | null
+  /** After this many pictures (today always 1). */
+  position: number | null
+  width: number | null
+  height: number | null
+  duration_ms: number | null
+  outputs: {
+    mp4?: { url: string; bytes?: number } | null
+    webm?: { url: string; bytes?: number } | null
+  } | null
+  poster: {
+    url: string
+    width: number | null
+    height: number | null
+    derivatives: MediaDerivatives | null
+  } | null
+  youtube_id: string | null
+}
+
 export interface StoreBrand {
   id: string
   name: string
@@ -192,6 +220,8 @@ export interface StoreProduct {
   variants?: StoreVariant[] | null
   brand?: StoreBrand | null
   media_assets?: StoreMediaAsset[] | null
+  /** Asked on the product page (adr/0069): its ready videos; none while the flag is off. */
+  media_videos?: StoreMediaVideo[] | null
   attribute_values?: StoreAttributeValue[] | null
   /**
    * The catalog's own row; the Store API answers only its gift card mark

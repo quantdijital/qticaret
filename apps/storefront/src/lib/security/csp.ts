@@ -2,7 +2,8 @@
  * The storefront's Content Security Policy (docs/04, adr/0046 §4): scripts
  * only with this request's nonce (and what they load, `strict-dynamic`),
  * nothing framed but a card provider's form, no plugins, forms only to ourselves. Pictures may come
- * from any HTTPS host: product images live on the file storage or a CDN.
+ * from any HTTPS host: product images live on the file storage or a CDN;
+ * a product's videos likewise (`media-src`, adr/0069 §5).
  * Development relaxes what Next's dev server needs (eval, inline styles,
  * its websocket); a nonce makes browsers ignore 'unsafe-inline', so dev
  * styles go without one.
@@ -89,6 +90,8 @@ export function contentSecurityPolicy(
     development ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`,
     ...(development ? [] : [`style-src-attr 'unsafe-hashes' ${RADIX_STYLE_HASHES.join(" ")}`]),
     `img-src 'self' data: blob: https:${development ? " http:" : ""}`,
+    // A product's clips (adr/0069 §5) come from the file storage or a CDN, as its pictures do
+    `media-src 'self' https:${development ? " http:" : ""}`,
     "font-src 'self'",
     `connect-src 'self'${tagConnects}${development ? " ws: http://localhost:*" : ""}`,
     `frame-src ${frameOrigins.length > 0 ? frameOrigins.join(" ") : "'none'"}`,
