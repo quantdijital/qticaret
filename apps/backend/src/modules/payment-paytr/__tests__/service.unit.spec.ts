@@ -2,13 +2,19 @@ import { fakePaytrAccount, startFakePaytr } from "@qticaret/testing"
 import type { FakePaytr } from "@qticaret/testing"
 import { HOSTED_CHECKOUT } from "../../../lib/payments/checkout"
 import type { HostedCheckout } from "../../../lib/payments/checkout"
-import { isRecordedForRefund, storedPaymentSettings, storedPaytrAccount } from "../account"
+import {
+  isRecordedForRefund,
+  recoveryRefundReference,
+  storedPaymentSettings,
+  storedPaytrAccount,
+} from "../account"
 import PaytrProviderService from "../service"
 
 jest.mock("../account", () => ({
   storedPaytrAccount: jest.fn(),
   storedPaymentSettings: jest.fn(),
   isRecordedForRefund: jest.fn(),
+  recoveryRefundReference: jest.fn(),
 }))
 
 // A made-up account, fresh per run; the fake server checks every signature with it
@@ -78,6 +84,7 @@ describe("PayTR payment provider (adr/0026)", () => {
   beforeEach(() => {
     stored.mockResolvedValue({ ...account, testMode: true })
     recorded.mockResolvedValue(false)
+    jest.mocked(recoveryRefundReference).mockResolvedValue(null)
     settings.mockResolvedValue({
       installments_enabled: true,
       max_installment: 0,
@@ -216,36 +223,66 @@ describe("PayTR payment provider (adr/0026)", () => {
     return { data, oid }
   }
 
-  it("refunds once per Medusa refund, and records it in the payment's data", async () => {
+  const sentRefunds = () => fake.requests.filter((request) => request.path === "/odeme/iade")
+  // Medusa's own refund (no order refund named one), and one our refund workflow named;
+  // Medusa brings a new key to every try
+  let tries = 0
+  const own = (lira: number, data: Record<string, unknown>, key = `ref_01TRY${String(++tries)}`) =>
+    provider.refundPayment({ amount: lira, data, context: { idempotency_key: key } })
+  const named = (amount: number, data: Record<string, unknown>, reference: string) =>
+    own(amount / 100, { ...data, pending_refund: { reference_no: reference, amount } })
+
+  it("sends Medusa's own refund once, whatever key each try or run brings, and records it", async () => {
     const { data, oid } = await paidSession("payses_01REF")
-    const refund = () =>
-      provider.refundPayment({ amount: 10, data, context: { idempotency_key: "ref_01ABC" } })
 
-    const first = await refund()
-    const again = await refund()
+    const first = await own(10, data)
+    // A retried step, or a second run
+    const again = await own(10, data)
+    // A try after the first's data was kept: answered from it, PayTR not even asked
+    fake.requests.length = 0
+    const kept = await own(10, first.data ?? {})
 
-    expect(first.data?.["refunds"]).toEqual([{ reference_no: "ref01ABC", amount: 1000 }])
-    expect(again.data?.["refunds"]).toEqual([{ reference_no: "ref01ABC", amount: 1000 }])
-    expect(fake.payments.get(oid)?.refunds).toEqual([{ amount: 1000, referenceNo: "ref01ABC" }])
+    const made = [{ reference_no: `M${oid}A1000`, amount: 1000 }]
+    expect([first, again, kept].map((each) => each.data?.["refunds"])).toEqual([made, made, made])
+    expect(fake.requests).toHaveLength(0)
+    expect(fake.payments.get(oid)?.refunds).toEqual([{ amount: 1000, referenceNo: `M${oid}A1000` }])
+  })
+
+  it("takes the recovery job's refund of the same amount as made, and sends nothing", async () => {
+    const { data, oid } = await paidSession("payses_01JOB")
+    fake.payments.get(oid)?.refunds.push({ amount: 3456, referenceNo: `R${oid}` })
+    jest.mocked(recoveryRefundReference).mockResolvedValue(`R${oid}`)
+    fake.requests.length = 0
+
+    const refund = await own(34.56, data)
+
+    expect(refund.data?.["refunds"]).toEqual([{ reference_no: `R${oid}`, amount: 3456 }])
+    expect(recoveryRefundReference).toHaveBeenCalledWith(oid)
+    expect(sentRefunds()).toHaveLength(0)
+  })
+
+  it("sends parts of different amounts, and never one past what was paid", async () => {
+    const { data, oid } = await paidSession("payses_01PRT")
+
+    await named(1000, data, "qtref01A")
+    await named(2000, data, "qtref01B")
+    fake.requests.length = 0
+    // 30,00 of 34,56 given back: 5,00 more, or the whole payment, would pass it
+    expect(await reasonOf(named(500, data, "qtref01C"))).toBe("paytr.refund_exceeds_payment")
+    expect(await reasonOf(own(34.56, data))).toBe("paytr.refund_exceeds_payment")
+
+    expect(sentRefunds()).toHaveLength(0)
+    expect(fake.payments.get(oid)?.refunds).toEqual([
+      { amount: 1000, referenceNo: "qtref01A" },
+      { amount: 2000, referenceNo: "qtref01B" },
+    ])
   })
 
   it("says why PayTR refused a refund, and never refunds across test and live", async () => {
     const { data } = await paidSession("payses_01RFX")
 
-    expect(
-      await reasonOf(
-        provider.refundPayment({ amount: 99, data, context: { idempotency_key: "ref_01BIG" } })
-      )
-    ).toBe("paytr.refund_exceeds_payment")
-    expect(
-      await reasonOf(
-        provider.refundPayment({
-          amount: 10,
-          data: { ...data, test_mode: false },
-          context: { idempotency_key: "ref_01LIVE" },
-        })
-      )
-    ).toBe("paytr.test_mode_mismatch")
+    expect(await reasonOf(own(99, data))).toBe("paytr.refund_exceeds_payment")
+    expect(await reasonOf(own(10, { ...data, test_mode: false }))).toBe("paytr.test_mode_mismatch")
     expect(await reasonOf(provider.refundPayment({ amount: 10, data }))).toBe(
       "payments.refund_reference_missing"
     )
@@ -253,18 +290,9 @@ describe("PayTR payment provider (adr/0026)", () => {
 
   it("keeps one reference across tries when the refund workflow named it", async () => {
     const { data, oid } = await paidSession("payses_01PND")
-    const withPending = { ...data, pending_refund: { reference_no: "qtref01KEY", amount: 1000 } }
 
-    await provider.refundPayment({
-      amount: 10,
-      data: withPending,
-      context: { idempotency_key: "ref_01TRY1" },
-    })
-    await provider.refundPayment({
-      amount: 10,
-      data: withPending,
-      context: { idempotency_key: "ref_01TRY2" },
-    })
+    await named(1000, data, "qtref01KEY")
+    await named(1000, data, "qtref01KEY")
 
     expect(fake.payments.get(oid)?.refunds).toEqual([{ amount: 1000, referenceNo: "qtref01KEY" }])
   })

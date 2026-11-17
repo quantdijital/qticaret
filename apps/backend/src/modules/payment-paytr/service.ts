@@ -25,8 +25,18 @@ import { fromMedusaAmount, kurus } from "../../lib/money"
 import { startedByCheckout } from "../../lib/payments/checkout"
 import { paytrApi, paytrFormUrl } from "../../lib/payments/paytr"
 import type { PaytrCredentials } from "../../lib/payments/paytr"
-import { isRecordedForRefund, storedPaymentSettings, storedPaytrAccount } from "./account"
-import { pendingReferenceOf, refundPaytrPayment, refundReferenceOf } from "./refund"
+import {
+  isRecordedForRefund,
+  recoveryRefundReference,
+  storedPaymentSettings,
+  storedPaytrAccount,
+} from "./account"
+import {
+  ownRefundReferenceOf,
+  pendingReferenceOf,
+  refundPaytrPayment,
+  refundReferenceOf,
+} from "./refund"
 import { paytrSession, tokenRequestOf } from "./session"
 
 // PayTR keeps an iFrame token this long (`timeout_limit`, minutes)
@@ -152,20 +162,34 @@ class PaytrProviderService extends AbstractPaymentProvider {
   /**
    * Gives back `amount` of the payment under a reference that stays the
    * same when the refund is tried again: the one our refund workflow put in
-   * the payment's data (`pending_refund`), else Medusa's key for this try.
+   * the payment's data (`pending_refund`). A refund Medusa asks for on its
+   * own (its cart completion's give-back; it always names a key) goes under
+   * the payment's and the amount's reference, not the key it makes anew
+   * for each try, and counts as made when PayTR shows the recovery job's
+   * refund of that amount: asked twice (a retried step, a second run, the
+   * job before it), it is sent to PayTR once (PR #137 review).
    */
   async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
     const amount = fromMedusaAmount(input.amount, { allowRounding: true })
-    const reference = pendingReferenceOf(input.data, amount) ?? input.context?.idempotency_key
-    if (!reference) {
+    const account = await this.account()
+    const ours = pendingReferenceOf(input.data, amount)
+    if (ours) {
+      return {
+        data: await refundPaytrPayment(account, input.data, amount, refundReferenceOf(ours)),
+      }
+    }
+    if (!input.context?.idempotency_key) {
       throw new ValidationError("payments.refund_reference_missing")
     }
+    const { merchant_oid } = paytrSession(input.data)
+    const job = await recoveryRefundReference(merchant_oid)
     return {
       data: await refundPaytrPayment(
-        await this.account(),
+        account,
         input.data,
         amount,
-        refundReferenceOf(reference)
+        ownRefundReferenceOf(merchant_oid, amount),
+        job ? [job] : []
       ),
     }
   }
