@@ -597,7 +597,7 @@
                   "device": "all",
                   "type": "contact",
                   "title": null,
-                  "address": false,
+                  "address": true,
                   "phone": true,
                   "whatsapp": true,
                   "email": true,
@@ -613,7 +613,7 @@
           "space": "medium",
           "align": "start",
           "phone_columns": 1,
-          "divider": false,
+          "divider": true,
           "layout": "2-1-1-1",
           "columns": [
             {
