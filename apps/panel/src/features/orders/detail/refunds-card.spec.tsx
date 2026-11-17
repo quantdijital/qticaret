@@ -59,13 +59,12 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
     expect(toast.success).toHaveBeenCalledWith("İade kaydı tamamlandı.")
   })
 
-  it("sends `not_made` for money that did not go back, iyzico's parts shown", async () => {
+  it("sends `not_made` for money that did not go back", async () => {
     fetchMock.mockResolvedValue({ refund: { status: "failed" } })
-    renderCard([refund({ provider: "iyzico", parts: [{ amount: "30.00", state: "sending" }] })])
+    renderCard([refund({ provider: "paytr" })])
 
     await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
-    expect(await screen.findByText(/yanıtı gelmedi/)).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("button", { name: "Para gitmedi" }))
+    await userEvent.click(await screen.findByRole("button", { name: "Para gitmedi" }))
     await userEvent.click(screen.getByRole("button", { name: "Onayla" }))
 
     await waitFor(() => {
@@ -74,6 +73,34 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
         body: { outcome: "not_made" },
       })
     })
+  })
+
+  it("asks first about an iyzico part whose answer was lost, and sends that answer (D4-1 M2)", async () => {
+    fetchMock.mockResolvedValue({ refund: { status: "failed" } })
+    renderCard([refund({ provider: "iyzico", parts: [{ amount: "30.00", state: "sending" }] })])
+
+    await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
+    expect(
+      await screen.findByText(
+        "iyzico panelinde bu ₺30,00 tutarındaki parça iade edilmiş görünüyor mu?"
+      )
+    ).toBeInTheDocument()
+    // Never "money went back" alone: the part is answered for, the server works out the rest
+    expect(screen.queryByRole("button", { name: "Para gitti" })).toBeNull()
+    expect(screen.getByRole("button", { name: "Tutmuyor, açık bırak" })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Hayır, iade edilmemiş" }))
+    expect(fetchMock).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole("button", { name: "Onayla" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(`/admin/orders/order_1/refunds/${REFERENCE}/settle`, {
+        method: "POST",
+        body: { lost_part: "not_made" },
+      })
+    })
+    expect(toast.success).toHaveBeenCalledWith(
+      "İade kaydı kapatıldı; kalemler yeniden iade edilebilir."
+    )
   })
 
   it("closes an iyzico refund made in part at its answered parts, the rest shown (D4-1)", async () => {
@@ -117,7 +144,8 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
     )
   })
 
-  it("keeps both answers when a part's answer was lost: never taken as made in part", async () => {
+  it("asks about a lost part beside a done one, never taking it as made in part (M2)", async () => {
+    fetchMock.mockResolvedValue({ refund: { status: "done" } })
     renderCard([
       refund({
         provider: "iyzico",
@@ -130,9 +158,19 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
     ])
 
     await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
+    await userEvent.click(await screen.findByRole("button", { name: "Evet, iade edilmiş" }))
 
-    expect(await screen.findByRole("button", { name: "Para gitti" })).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /yapılan kısmı kaydet/ })).toBeNull()
+    expect(
+      screen.getByText("Emin misiniz: ₺30,00 tutarındaki parça iade edilmiş mi?")
+    ).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Onayla" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(`/admin/orders/order_1/refunds/${REFERENCE}/settle`, {
+        method: "POST",
+        body: { lost_part: "made" },
+      })
+    })
   })
 
   it("leaves a refund made in part open when iyzico's panel does not match, sending nothing", async () => {
@@ -165,7 +203,9 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
 
     await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
 
-    expect(await screen.findByText(/o akıştan tamamlayın/)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/yeniden çalıştırınca yalnız kalan ₺60,00 gönderilir/)
+    ).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /yapılan kısmı kaydet/ })).toBeNull()
     expect(screen.queryByRole("button", { name: "Para gitti" })).toBeNull()
   })

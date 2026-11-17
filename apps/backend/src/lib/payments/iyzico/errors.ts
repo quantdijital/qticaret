@@ -71,9 +71,12 @@ const NEVER_SENT = new Set(["network_error", "circuit_open"])
 export const nothingDone = (error: unknown): boolean =>
   isIyzicoRefusal(error) || (error instanceof ProviderError && NEVER_SENT.has(error.providerCode))
 
-// iyzico's refusals of a refund part known to leave it unmade (5093 and 10245: past what is left
+// iyzico's refusals of a refund part known to leave it unmade (1000 and 1001: the call's
+// signature or API key refused before anything is processed; 5093 and 10245: past what is left
 // of its line; 10223: the payment's own day; 10237: a bank that takes no refunds)
 const PART_REFUSALS: ReadonlySet<string> = new Set([
+  "signature_invalid",
+  "api_key_invalid",
   "refund_exceeds_line",
   "refund_same_day",
   "refund_not_supported",

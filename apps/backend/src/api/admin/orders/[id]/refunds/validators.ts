@@ -56,12 +56,20 @@ export const AdminPostOrderRefund = z
 /**
  * An open refund checked at the provider by staff: the money went back, or
  * it did not; or an iyzico refund made in part is closed at what its
- * answered parts gave back (D4-1). No amount: the server reads it from the
- * ledger's parts.
+ * answered parts gave back (D4-1). A refund with an iyzico part whose
+ * answer was lost is answered for that part instead (`lost_part`, D4-1 M2):
+ * one or the other. No amount: the server reads it from the ledger's parts.
  */
 export const AdminPostOrderRefundSettle = z
-  .object({ outcome: z.enum(["made", "not_made", "made_in_part"]) })
+  .object({
+    outcome: z.enum(["made", "not_made", "made_in_part"]).optional(),
+    lost_part: z.enum(["made", "not_made"]).optional(),
+  })
   .strict()
+  .refine((body) => (body.outcome === undefined) !== (body.lost_part === undefined), {
+    message: "orders.refund_settle_mode",
+    path: ["outcome"],
+  })
 
 // A ledger reference as the ledger keeps them: the panel's key, a cancel's, a return's, an edit's
 export const LEDGER_REFERENCE = /^[A-Za-z0-9]{1,64}$/

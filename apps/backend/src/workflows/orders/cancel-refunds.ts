@@ -19,7 +19,8 @@ export interface CancelRefundInput {
  * a cancel's from a try before as any other. The refund's plan closes one
  * whose money is surely back (recorded, or shown by the provider) and
  * refuses the rest (`orders.refund_unsettled`): the cancel waits, its
- * money neither counted as given back nor sent a second time.
+ * money neither counted as given back nor sent a second time. The
+ * cancel's own refund made in part sends on what is left (D4-1 M1).
  */
 async function settleOpenRefunds(
   container: MedusaContainer,
@@ -38,7 +39,9 @@ async function settleOpenRefunds(
         reference: entry.reference,
         request: { amount: kurus(entry.amount) },
         payment_id: entry.payment_id,
-        close_only: true,
+        // This cancel's own refund of the payment is its own to finish: one iyzico made in part,
+        // every part answered, sends what is left (review D4-1 M1); any other is only closed
+        close_only: entry.reference !== cancelRefundReference(entry.payment_id),
         note: input.note,
         created_by: input.created_by,
       },

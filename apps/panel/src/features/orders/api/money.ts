@@ -90,11 +90,18 @@ export const refundPreviewQuery = (id: string, request: RefundRequest | null) =>
  */
 export type SettleOutcome = "made" | "not_made" | "made_in_part"
 
+/**
+ * One or the other: an outcome, or, for a refund with an iyzico part whose
+ * answer was lost, whether iyzico's panel shows that part refunded (the
+ * server works out the rest). `pending`: a flow's refund left to its flow.
+ */
+export type SettleBody = { outcome: SettleOutcome } | { lost_part: "made" | "not_made" }
+
 export const useSettleRefund = (id: string) =>
-  useOrderMutation(({ reference, outcome }: { reference: string; outcome: SettleOutcome }) =>
-    sdk.client.fetch(
+  useOrderMutation(({ reference, ...body }: { reference: string } & SettleBody) =>
+    sdk.client.fetch<{ refund: { status: "done" | "failed" | "pending" } }>(
       `/admin/orders/${encodeURIComponent(id)}/refunds/${encodeURIComponent(reference)}/settle`,
-      { method: "POST", body: { outcome } }
+      { method: "POST", body }
     )
   )
 

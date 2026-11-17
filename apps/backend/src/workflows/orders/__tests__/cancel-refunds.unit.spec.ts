@@ -4,7 +4,7 @@ import { cancelRefundReference, isCancelRefundReference } from "../../../lib/ord
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import { refundForCancel } from "../cancel-refunds"
 import { ConflictError } from "../../../lib/errors"
-import { referenceTaken, triedAgain } from "../steps/order-refund-guard"
+import { allAnswered, referenceTaken, triedAgain } from "../steps/order-refund-guard"
 
 const refundRun = jest.fn()
 jest.mock("../refund-order", () => ({
@@ -117,6 +117,39 @@ describe("a cancel refunds each payment once, under the payment's own reference 
     expect(triedAgain("failed", null, true)).toBe("done")
     expect(triedAgain("done", null, true)).toBe("done")
     expect(triedAgain("pending", "made", true)).toBe("made")
+  })
+
+  it("sends on a refund made in part whose every part was answered, never only to close (D4-1 M1)", () => {
+    expect(triedAgain("pending", "partial", false, true)).toBe("send")
+    // A part without an answer may have been made: never sent on
+    expect(triedAgain("pending", "partial", false, false)).toBe("unsettled")
+    expect(triedAgain("pending", "partial", true, true)).toBe("unsettled")
+    expect(triedAgain("pending", "unknown", false, true)).toBe("unsettled")
+    expect(allAnswered([{ state: "done" }, { state: "done" }])).toBe(true)
+    expect(allAnswered([{ state: "done" }, { state: "sending" }])).toBe(false)
+    expect(allAnswered([])).toBe(false)
+  })
+
+  it("lets its own refund of a payment made in part send on; another is only closed (M1)", async () => {
+    const own = {
+      reference: cancelRefundReference("pay_P0"),
+      payment_id: "pay_P0",
+      amount: 33000,
+    }
+    const panel = {
+      reference: "0123456789abcdef0123456789abcdef",
+      payment_id: "pay_P0",
+      amount: 50,
+    }
+    readOrderMoney.mockResolvedValue({ refundable: 0 })
+    paymentRemainders.mockResolvedValue([])
+
+    await refundForCancel(ledgerWith([own, panel]) as never, input)
+
+    expect(references()).toEqual([
+      expect.objectContaining({ reference: own.reference, close_only: false }),
+      expect.objectContaining({ reference: panel.reference, close_only: true }),
+    ])
   })
 
   it("refunds each payment with money left, a hosted form's first, up to what is refundable", async () => {

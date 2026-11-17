@@ -34,4 +34,15 @@ describe("an open refund settled by hand (review O2; D4-1)", () => {
     ).toBe(false)
     expect(AdminPostOrderRefundSettle.safeParse({ outcome: "made_some" }).success).toBe(false)
   })
+
+  it("takes an answer for a lost part instead of an outcome, never both nor neither (M2)", () => {
+    for (const lost_part of ["made", "not_made"]) {
+      expect(AdminPostOrderRefundSettle.safeParse({ lost_part }).success).toBe(true)
+    }
+    const both = AdminPostOrderRefundSettle.safeParse({ outcome: "made", lost_part: "made" })
+    expect(both.success).toBe(false)
+    expect(both.error?.issues[0]?.message).toBe("orders.refund_settle_mode")
+    expect(AdminPostOrderRefundSettle.safeParse({}).success).toBe(false)
+    expect(AdminPostOrderRefundSettle.safeParse({ lost_part: "maybe" }).success).toBe(false)
+  })
 })

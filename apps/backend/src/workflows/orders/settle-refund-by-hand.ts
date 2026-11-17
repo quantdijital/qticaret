@@ -14,8 +14,13 @@ import { orderRefundLockKey } from "../../lib/orders/locks"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import type { ProviderPart } from "../../modules/order-refunds/service"
-import { CHECKED_MADE_IN_PART, PANEL_REFUND_KEY, keepMadePart, madeInPart } from "./made-in-part"
-import { assertRecordable, recordMadeRefund } from "./made-refund-record"
+import {
+  CHECKED_MADE_IN_PART,
+  PANEL_REFUND_KEY,
+  resolveLostPart,
+  settleMadeInPart,
+} from "./made-in-part"
+import { recordMadeRefund } from "./made-refund-record"
 import { tracedOf } from "./refund-settle"
 import type { LedgerEntry } from "./refund-settle"
 import { refundTraceOf } from "./refund-trace"
@@ -30,8 +35,20 @@ export interface SettleRefundByHandInput {
    * or, for an iyzico refund made in part (D4-1), that the parts iyzico
    * answered are what was made and the rest was not.
    */
-  outcome: "made" | "not_made" | "made_in_part"
+  outcome?: "made" | "not_made" | "made_in_part" | undefined
+  /**
+   * For a refund with an iyzico part whose answer was lost, and only then
+   * (review D4-1, M2): whether iyzico's panel shows that part given back.
+   * The server works out the rest from its ledger.
+   */
+  lost_part?: "made" | "not_made" | undefined
   actor_id: string
+}
+
+export interface SettledByHand {
+  reference: string
+  /** `pending`: a flow's refund made in part, its lost part answered, left to its flow (M1). */
+  status: "done" | "failed" | "pending"
 }
 
 /** Checked at the provider by staff: the codes say so in the ledger (the audit log says who). */
@@ -68,6 +85,14 @@ async function assertSettleable(
   if (parts.some((part) => part.state === "done")) {
     throw new ConflictError("orders.refund_check_partial")
   }
+  await assertNotShown(container, entry)
+}
+
+/** "Not made" never for money shown back: recorded, or shown by the provider (D-1). */
+async function assertNotShown(
+  container: Pick<MedusaContainer, "resolve">,
+  entry: LedgerEntry
+): Promise<void> {
   const { trace } = await refundTraceOf(container, tracedOf(entry))
   if (trace === "made" || trace === "shown") {
     throw new ConflictError("orders.refund_check_shown")
@@ -87,7 +112,7 @@ async function assertSettleable(
 export async function settleRefundByHand(
   container: Pick<MedusaContainer, "resolve">,
   input: SettleRefundByHandInput
-): Promise<{ reference: string; status: "done" | "failed" }> {
+): Promise<SettledByHand> {
   const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
   const [entry] = await ledger.listOrderRefunds(
     { reference: input.reference },
@@ -111,22 +136,48 @@ export async function settleRefundByHand(
   if (entry.status !== "pending") {
     throw new ValidationError("orders.refund_not_open")
   }
-  if (input.outcome === "made_in_part") {
-    return settleMadeInPart(container, entry, input.actor_id)
-  }
-  await assertSettleable(container, entry, input.outcome)
-  const made = input.outcome === "made"
-  // The parts first (review O4-1): cut short after this, the refund reads `shown` (every part
-  // answered, the whole amount) and the settling job closes it; never a lost part left behind
   const parts = partsOf(entry)
-  if (parts.some((part) => part.state === "sending")) {
-    await ledger.saveProviderParts(
-      entry.reference,
-      made ? parts.map((part) => ({ ...part, state: "done" as const })) : []
+  // A part whose answer was lost is answered for first, and only then (M2)
+  const lost = parts.some((part) => part.state === "sending")
+  if (lost !== (input.lost_part !== undefined)) {
+    throw new ConflictError(
+      lost ? "orders.refund_lost_part_required" : "orders.refund_lost_part_none"
     )
   }
+  if (input.lost_part) {
+    return settleLostPart(container, entry, input.lost_part, input.actor_id)
+  }
+  if (input.outcome === "made_in_part") {
+    return settleMadeInPart(container, entry, parts, input.actor_id)
+  }
+  if (!input.outcome) {
+    throw new ValidationError("orders.refund_settle_mode")
+  }
+  await assertSettleable(container, entry, input.outcome)
+  return settleWhole(container, entry, input.outcome === "made", parts, input.actor_id)
+}
+
+/**
+ * The refund closed whole: made (Medusa's record and the money move
+ * written if missing) or not (failed, its lines free again). The parts
+ * first (review O4-1): cut short after this, a made refund reads `shown`
+ * and the settling job closes it; never a lost part left behind.
+ */
+async function settleWhole(
+  container: Pick<MedusaContainer, "resolve">,
+  entry: LedgerEntry,
+  made: boolean,
+  parts: readonly ProviderPart[],
+  actorId: string,
+  lostPart?: "made" | "not_made"
+): Promise<SettledByHand> {
+  const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+  const next = made ? parts : []
+  if (JSON.stringify(next) !== JSON.stringify(partsOf(entry))) {
+    await ledger.saveProviderParts(entry.reference, [...next])
+  }
   if (made) {
-    await recordMadeRefund(container, entry, input.actor_id)
+    await recordMadeRefund(container, entry, actorId)
     await restoreRefundTransaction(container, entry)
   }
   // The name off before the entry is closed (D4-4): a closed refund never leaves one standing
@@ -141,54 +192,53 @@ export async function settleRefundByHand(
     event: "orders.refund_checked",
     orderId: entry.order_id,
     reference: entry.reference,
-    outcome: input.outcome,
+    outcome: made ? "made" : "not_made",
+    ...(lostPart ? { lostPart } : {}),
   })
   return { reference: entry.reference, status }
 }
 
 /**
- * An iyzico refund made in part, closed by staff as made in part (D4-1):
- * Medusa's refund record and the order's money move for exactly the parts
- * iyzico answered `done` (read from the ledger, never from the request),
- * the entry closed at that amount, its lines spread to match; the rest is
- * refunded anew under a new reference. Any part without an answer is
- * refused: it may have been made. Sends nothing. In this order: the entry
- * rewritten (cut short, it reads `shown` and the job closes it), Medusa's
- * record (`recordMadeRefund`: one, by its note), the money move, the name
- * off the payment, the entry closed.
+ * A refund with a part whose answer was lost, staff having looked it up in
+ * iyzico's panel (review D4-1, M2): that part done or taken off, then what
+ * the ledger's parts add up to decides. The whole amount: made. Nothing:
+ * not made (never for money shown back). Part of it: a panel refund closes
+ * at that part; a cancel's, a return's or an edit's keeps its answered
+ * parts open for its flow, which sends what is left (M1).
  */
-async function settleMadeInPart(
+async function settleLostPart(
   container: Pick<MedusaContainer, "resolve">,
   entry: LedgerEntry & { lines?: unknown },
+  answer: "made" | "not_made",
   actorId: string
-): Promise<{ reference: string; status: "done" }> {
-  const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-  // A cancel's, a return's or an edit's refund: its own flow finishes it (S1)
-  if (!PANEL_REFUND_KEY.test(entry.reference)) {
-    throw new ConflictError("orders.refund_in_part_flow_owned")
+): Promise<SettledByHand> {
+  const parts = resolveLostPart(partsOf(entry), answer)
+  const done = total(parts)
+  if (done > entry.amount) {
+    throw new ConflictError("orders.refund_check_not_partial")
   }
-  const { done, remainder } = madeInPart(entry.amount, partsOf(entry))
-  // Past what the payment can give back: refused before the entry is touched
-  await assertRecordable(container, entry.payment_id, done)
-  await keepMadePart(container, entry, done)
-  const made = { ...entry, amount: done }
-  await recordMadeRefund(container, made, actorId)
-  await restoreRefundTransaction(container, made)
-  await dropPendingRefund(container, entry.payment_id)
-  await ledger.updateOrderRefunds({
-    id: entry.id,
-    status: "done",
-    error_code: CHECKED_MADE_IN_PART,
-  })
+  if (done === entry.amount) {
+    return settleWhole(container, entry, true, parts, actorId, answer)
+  }
+  if (done === 0) {
+    await assertNotShown(container, entry)
+    return settleWhole(container, entry, false, parts, actorId, answer)
+  }
+  if (PANEL_REFUND_KEY.test(entry.reference)) {
+    return settleMadeInPart(container, entry, parts, actorId, answer)
+  }
+  await container
+    .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+    .saveProviderParts(entry.reference, parts)
   logger.info({
     event: "orders.refund_checked",
     orderId: entry.order_id,
     reference: entry.reference,
-    outcome: "made_in_part",
+    outcome: "left_to_flow",
+    lostPart: answer,
     done,
-    remainder,
   })
-  return { reference: entry.reference, status: "done" }
+  return { reference: entry.reference, status: "pending" }
 }
 
 export const settleRefundByHandStep = createStep(

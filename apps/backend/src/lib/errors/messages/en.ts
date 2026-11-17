@@ -1186,7 +1186,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.refund_check_part_unknown":
     "iyzico did not answer for a part of this refund; that part may have been made. Check iyzico's panel or write to its support team before closing it in part.",
   "orders.refund_in_part_flow_owned":
-    "This refund belongs to the order's cancel, a return request or an order edit; it cannot be closed in part here. Finish the rest from that flow; if it does not move on, write to the support team.",
+    "This refund belongs to the order's cancel, a return request or an order edit; it cannot be closed in part here. Run the cancel or the return again and only the rest is sent.",
+  "orders.refund_lost_part_required":
+    "iyzico did not answer for a part of this refund. First choose whether iyzico's panel shows that part refunded.",
+  "orders.refund_lost_part_none":
+    "No part of this refund is left without an answer; reload the page and try again.",
+  "orders.refund_settle_mode":
+    "Choose either the refund's outcome or the state of the part without an answer.",
   "orders.refund_check_not_partial":
     "This refund does not look made in part; settle it with the other choices.",
   "orders.refund_check_shown":

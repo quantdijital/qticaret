@@ -4050,9 +4050,16 @@
           "title": "This refund was made in part",
           "question": "By iyzico's answers, {{done}} of the {{amount}} refund was given back; {{rest}} was not.",
           "hint": "No money is sent from here. Check in iyzico's panel that exactly {{done}} was given back for this refund. If it matches, the record closes at {{done}}; the remaining {{rest}} can be refunded again from the order's refund step by entering an amount. If it does not, leave the record open and write to iyzico's support team. Your choice is written to the audit log.",
-          "flow_owned": "This refund belongs to the order's cancel, a return request or an order edit; it cannot be closed in part here. Finish the rest from that flow; if it does not move on, write to the support team.",
-          "keep_open": "Does not match, leave open"
+          "flow_owned": "This refund belongs to the order's cancel, a return request or an order edit; it cannot be closed in part here. Run the cancel or the return again and only the remaining {{rest}} is sent."
         },
+        "lost": {
+          "title": "A part's answer was lost",
+          "question": "Does iyzico's panel show this {{part}} part refunded?",
+          "hint": "No money is sent from here. The record settles by your answer and the parts iyzico answered; any amount not given back can be refunded again. If you cannot see it in the panel, leave the record open and write to iyzico's support team. Your choice is written to the audit log."
+        },
+        "lost_made": "Yes, refunded",
+        "lost_not_made": "No, not refunded",
+        "keep_open": "Does not match, leave open",
         "provider": "Payment provider",
         "reference": "Reference",
         "amount": "Amount",
@@ -4066,6 +4073,8 @@
           "made": "Are you sure the money went back to the customer?",
           "not_made": "Are you sure the money did not go back to the customer?",
           "made_in_part": "Are you sure the record should close at {{done}}?",
+          "lost_made": "Are you sure the {{part}} part was refunded?",
+          "lost_not_made": "Are you sure the {{part}} part was not refunded?",
           "description": "This choice settles the record and is written to the audit log. Confirm if you checked the provider's panel by the reference above."
         },
         "back": "Back",
@@ -4073,7 +4082,12 @@
         "done": {
           "made": "The refund's record is complete.",
           "not_made": "The refund's record is closed; its lines can be refunded again.",
-          "made_in_part": "The refund's record closed at {{done}}; the remaining {{rest}} can be refunded again."
+          "made_in_part": "The refund's record closed at {{done}}; the remaining {{rest}} can be refunded again.",
+          "lost": {
+            "done": "The refund's record closed at what iyzico made; any rest can be refunded again.",
+            "failed": "The refund's record is closed; its lines can be refunded again.",
+            "pending": "The part's state is saved. Run the cancel or the return again and only the rest is sent."
+          }
         }
       }
     },

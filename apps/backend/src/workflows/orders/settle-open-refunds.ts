@@ -13,11 +13,11 @@ import {
   REFUND_INCOMPLETE,
   REFUND_UNCONFIRMED,
   UNSETTLED,
+  checkedCodeOf,
   tracedOf,
 } from "./refund-settle"
 import type { LedgerEntry } from "./refund-settle"
 import { refundTraceOf } from "./refund-trace"
-import { checkedCodeOf } from "./steps/order-refund"
 
 // An entry this fresh may be a refund under way: left to the next round
 const QUIET_MS = 2 * 60 * 1000

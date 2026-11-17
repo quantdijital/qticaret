@@ -12,9 +12,9 @@ import type OrderRefundsModuleService from "../../../modules/order-refunds/servi
 import type { ProviderPart } from "../../../modules/order-refunds/service"
 import { finishCheckedRecord } from "../made-refund-record"
 import { readOrderMoney } from "../order-money"
-import { settleFailedEntry, tracedOf } from "../refund-settle"
+import { checkedCodeOf, settleFailedEntry, tracedOf } from "../refund-settle"
 import { refundTraceOf } from "../refund-trace"
-import { referenceTaken, triedAgain } from "./order-refund-guard"
+import { allAnswered, referenceTaken, triedAgain } from "./order-refund-guard"
 import { dropPendingRefund } from "./pending-refund"
 
 export interface RefundOrderInput {
@@ -53,10 +53,6 @@ export interface RefundPlan {
   /** A staff check's code on the entry (`checked_*`), kept when it is closed (review D4-1, L1). */
   checked_code?: string | null
 }
-
-/** The entry's code when a staff check wrote it, kept as the refund closes; null otherwise. */
-export const checkedCodeOf = (code: string | null | undefined): string | null =>
-  code?.startsWith("checked_") ? code : null
 
 type Amount = MedusaAmount | null | undefined
 interface PaymentRow {
@@ -155,7 +151,12 @@ export const planOrderRefundStep = createStep(
         ? (await refundTraceOf(container, tracedOf(existing))).trace
         : null
     let action = existing
-      ? triedAgain(existing.status, trace, input.close_only === true)
+      ? triedAgain(
+          existing.status,
+          trace,
+          input.close_only === true,
+          allAnswered(existing.provider_parts as ProviderPart[] | null)
+        )
       : input.close_only
         ? "done"
         : "replan"

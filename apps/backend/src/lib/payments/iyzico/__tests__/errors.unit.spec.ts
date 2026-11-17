@@ -21,9 +21,12 @@ describe("an iyzico call that surely did nothing (F5 V10, review D4-3)", () => {
 })
 
 describe("a refund part surely not made (review D4-1, S2)", () => {
-  it.each(["5093", "10245", "10223", "10237"])("is iyzico's known refusal %s", (code) => {
-    expect(refundPartNotMade(iyzicoError(code))).toBe(true)
-  })
+  it.each(["1000", "1001", "5093", "10245", "10223", "10237"])(
+    "is iyzico's known refusal %s",
+    (code) => {
+      expect(refundPartNotMade(iyzicoError(code))).toBe(true)
+    }
+  )
 
   it("is a call that never left", () => {
     expect(refundPartNotMade(client("network_error"))).toBe(true)

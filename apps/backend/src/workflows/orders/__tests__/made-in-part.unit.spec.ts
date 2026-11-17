@@ -6,7 +6,7 @@ import {
 } from "@medusajs/framework/utils"
 import type { ProviderPart, RefundLine } from "../../../modules/order-refunds/service"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
-import { linesMadeInPart, madeInPart } from "../made-in-part"
+import { linesMadeInPart, madeInPart, resolveLostPart } from "../made-in-part"
 import { checkedNote } from "../made-refund-record"
 import { settleRefundByHand } from "../settle-refund-by-hand"
 import { closeRefundEntry } from "../steps/order-refund"
@@ -69,6 +69,14 @@ describe("an iyzico refund made in part: what was made and what is left (D4-1)",
     made.forEach((line, index) => {
       expect(line.net).toBeLessThanOrEqual(lines[index]?.net ?? 0)
     })
+  })
+
+  it("answers for a lost part: made, it is done; not made, it is taken off (M2)", () => {
+    const parts = [done(24000), sending(3000)]
+
+    expect(resolveLostPart(parts, "made")).toEqual([done(24000), done(3000, "t2")])
+    expect(resolveLostPart(parts, "not_made")).toEqual([done(24000)])
+    expect(resolveLostPart([sending(3000)], "not_made")).toEqual([])
   })
 
   it("drops a line left with nothing and no units; keeps none for a refund of no lines", () => {
@@ -203,12 +211,66 @@ describe("staff close an iyzico refund made in part, sending nothing (D4-1)", ()
     expect(shop.calls.at(-1)).toBe("updateOrderRefunds")
   })
 
-  it("refuses a part without an answer, writing nothing", async () => {
+  it("refuses a part without an answer until staff answer for it, writing nothing", async () => {
     const shop = shopWith({ ...open, provider_parts: [done(24000), sending(3000)] })
 
     await expect(settleRefundByHand(shop.container, input)).rejects.toMatchObject({
-      safeMessage: "orders.refund_check_part_unknown",
+      safeMessage: "orders.refund_lost_part_required",
     })
+    expect(shop.createRefunds).not.toHaveBeenCalled()
+    expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
+  })
+
+  const lostInput = { order_id: "order_01", reference: REFERENCE, actor_id: "user_01" }
+
+  it("closes in part at the answered parts when the lost part was not made (M2)", async () => {
+    const shop = shopWith({ ...open, provider_parts: [done(24000), sending(3000)] })
+
+    expect(
+      await settleRefundByHand(shop.container, { ...lostInput, lost_part: "not_made" })
+    ).toEqual({ reference: REFERENCE, status: "done" })
+    expect(shop.createRefunds).toHaveBeenCalledWith(expect.objectContaining({ amount: "240.00" }))
+    // The answer written with the rewrite: the lost part taken off
+    expect(shop.updateOrderRefunds).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ amount: 24000, provider_parts: [done(24000)] })
+    )
+  })
+
+  it("counts the lost part when it was made: in part, or whole when it adds up (M2)", async () => {
+    const short = shopWith({ ...open, provider_parts: [done(24000), sending(3000)] })
+    const whole = shopWith({ ...open, provider_parts: [done(24000), sending(6000)] })
+
+    await settleRefundByHand(short.container, { ...lostInput, lost_part: "made" })
+    await settleRefundByHand(whole.container, { ...lostInput, lost_part: "made" })
+
+    expect(short.createRefunds).toHaveBeenCalledWith(expect.objectContaining({ amount: "270.00" }))
+    expect(short.updateOrderRefunds).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "done", error_code: "checked_made_in_part" })
+    )
+    expect(whole.createRefunds).toHaveBeenCalledWith(expect.objectContaining({ amount: "300.00" }))
+    expect(whole.updateOrderRefunds).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "done", error_code: "checked_made" })
+    )
+  })
+
+  it("leaves a flow's refund open with its lost part answered, recording nothing (M1, M2)", async () => {
+    const reference = "cancelpay01JABC"
+    const shop = shopWith({ ...open, reference, provider_parts: [done(24000), sending(3000)] })
+    const saveProviderParts = jest.fn()
+    shop.container.register({
+      [ORDER_REFUNDS_MODULE]: asValue({
+        listOrderRefunds: () =>
+          Promise.resolve([{ ...open, reference, provider_parts: [done(24000), sending(3000)] }]),
+        updateOrderRefunds: shop.updateOrderRefunds,
+        saveProviderParts,
+      }),
+    })
+
+    expect(
+      await settleRefundByHand(shop.container, { ...lostInput, reference, lost_part: "not_made" })
+    ).toEqual({ reference, status: "pending" })
+    expect(saveProviderParts).toHaveBeenCalledWith(reference, [done(24000)])
     expect(shop.createRefunds).not.toHaveBeenCalled()
     expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
   })
