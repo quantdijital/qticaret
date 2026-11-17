@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { MediaPicker } from "@/components/patterns/media-picker"
 import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
 import { handOnClips } from "@/features/media/video-intake"
-import type { VideoIntake } from "@/features/media/video-intake"
+import type { VideoIntake, YoutubeIntake } from "@/features/media/video-intake"
 import { registerMedia } from "@/features/products/api/media"
 import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
@@ -31,6 +31,8 @@ export interface GalleryVideos {
   pending: { key: string; name: string; progress: number | null }[]
   /** Where video files go; none: videos cannot be uploaded here (only pictures are taken). */
   intake?: VideoIntake | undefined
+  /** Where a YouTube link typed into the dialog's address goes (slice 5). */
+  youtube?: YoutubeIntake | undefined
   onOpen: (id: string) => void
 }
 
@@ -83,6 +85,10 @@ export function ImageGallery({
   const room = MAX_IMAGES - images.length
   const intake = videos?.intake
   const takesVideo = Boolean(intake && !intake.refusal)
+  // A YouTube link (slice 5) needs no upload on the server: room for a video is room for it
+  const takesLink = Boolean(videos?.youtube && !videos.youtube.refusal)
+  // Why no video is taken now (two already): said once, whichever way it would come
+  const videoRefusal = intake?.refusal ?? videos?.youtube?.refusal ?? null
   const missing = onAlt ? images.filter((image) => image.alt && !image.alt.value.trim()) : []
   useRevealTarget(altTarget ?? "", () => {
     const first = missing.find((image) => !image.alt?.legacy)
@@ -140,9 +146,9 @@ export function ImageGallery({
       compact={compact}
       busy={busy}
       over={over}
-      disabled={working || (room <= 0 && !takesVideo)}
+      disabled={working || (room <= 0 && !takesVideo && !takesLink)}
       label={
-        takesVideo
+        takesVideo || takesLink
           ? t("products.media.addLabelVideo", { max: MAX_IMAGES })
           : t("products.media.addLabel", { max: MAX_IMAGES })
       }
@@ -233,7 +239,7 @@ export function ImageGallery({
             <PendingVideoTile key={item.key} name={item.name} progress={item.progress} />
           ))}
           {images.slice(1).map((image, at) => imageTile(image, at + 1))}
-          {room > 0 || takesVideo ? <li>{zone(true)}</li> : null}
+          {room > 0 || takesVideo || takesLink ? <li>{zone(true)}</li> : null}
         </ul>
       )}
       {images.length > 0 ? (
@@ -255,14 +261,17 @@ export function ImageGallery({
           ) : null}
         </div>
       ) : null}
-      {intake?.refusal ? <p className="text-xs text-muted-foreground">{intake.refusal}</p> : null}
+      {videoRefusal ? <p className="text-xs text-muted-foreground">{videoRefusal}</p> : null}
       <MediaPicker
         open={picking}
         onOpenChange={setPicking}
         multiple
         max={Math.max(1, room)}
-        title={t(takesVideo ? "products.media.pickerTitleVideo" : "products.media.pickerTitle")}
+        title={t(
+          takesVideo || takesLink ? "products.media.pickerTitleVideo" : "products.media.pickerTitle"
+        )}
         video={intake}
+        youtube={videos?.youtube}
         onSelect={(assets) => {
           // A picture the product has already is not added twice
           const shown = new Set(images.map((image) => image.url))

@@ -3180,6 +3180,9 @@
       "removeDescription": "Video üründen ve vitrinden kaldırılır, dosyaları silinir. Bu işlem geri alınamaz.",
       "removed": "Video kaldırıldı.",
       "sourceGone": "Yüklenen dosya artık saklanmıyor; videoyu kaldırıp yeniden yükleyin.",
+      "youtube": "YouTube",
+      "youtubeOpen": "YouTube'da aç",
+      "youtubeAdded": "YouTube videosu eklendi.",
       "errors": {
         "too_large": "Video en çok 50 MB olabilir.",
         "too_long": "Video en çok 30 saniye olabilir.",
@@ -3189,7 +3192,9 @@
         "unreadable": "Video okunamadı; dosya bozuk olabilir.",
         "limit_per_product": "Bir ürüne en çok 2 video eklenebilir.",
         "processing_failed": "Video hazırlanamadı. Yeniden deneyin; olmazsa başka bir dosya yükleyin.",
-        "upload_unavailable": "Video şu an yüklenemiyor."
+        "upload_unavailable": "Video şu an yüklenemiyor.",
+        "youtube_invalid": "Geçerli bir YouTube bağlantısı girin.",
+        "youtube_unavailable": "Bu video gömülemiyor ya da herkese açık değil."
       }
     },
     "wizard": {
@@ -10497,7 +10502,10 @@
       "chooseUploaded_other": "Yüklenen {{count}} görseli seç",
       "address": "Görselin adresi",
       "addressHint": "Görsel bu adresten kütüphaneye kopyalanır; sayfalar mağazanın kendi kopyasını gösterir. JPG, PNG, WebP ya da AVIF, en çok 10 MB.",
-      "import": "Kütüphaneye al ve seç"
+      "import": "Kütüphaneye al ve seç",
+      "addressVideo": "Görselin ya da YouTube videosunun adresi",
+      "addressHintVideo": "Görsel bu adresten kütüphaneye kopyalanır (JPG, PNG, WebP ya da AVIF, en çok 10 MB). YouTube bağlantısı ürüne video olarak eklenir; vitrinde ziyaretçi oynatana kadar yalnızca kapağı görünür.",
+      "addYoutube": "Videoyu ekle"
     },
     "field": {
       "empty": "Görsel seçilmedi",
