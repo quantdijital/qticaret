@@ -140,6 +140,23 @@ describe("staff roles", () => {
     }
   })
 
+  it("decides the AI core's routes as adr/0071 §6's table says", () => {
+    const routes = [
+      ["GET", "/admin/ai/services"],
+      ["POST", "/admin/ai/suggestions"],
+      ["POST", "/admin/ai/suggestions/cdraft_1/accept"],
+      ["POST", "/admin/ai/suggestions/cdraft_1/dismiss"],
+      ["GET", "/admin/ai/usage"],
+    ] as const
+    const table = (role: "owner" | "admin" | "operations" | "readonly") =>
+      routes.map(([method, path]) => allowed(role, method, path))
+
+    expect(table("owner")).toEqual([true, true, true, true, true])
+    expect(table("admin")).toEqual([true, true, true, true, true])
+    expect(table("operations")).toEqual([true, false, false, false, false])
+    expect(table("readonly")).toEqual([true, false, false, false, false])
+  })
+
   it("lets operations read and run the day, never change the shop's settings (KK1)", () => {
     expect(allowed("operations", "GET", "/admin/orders")).toBe(true)
     expect(allowed("operations", "GET", "/admin/products/prod_1")).toBe(true)
@@ -486,6 +503,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/content-drafts/:id/approve": false,
   "POST /admin/content-drafts/:id/reject": false,
   "POST /admin/content-drafts": false,
+  // adr/0071 §6: AI suggestions; operations gets only its own area's tasks (Aşama 9)
+  "POST /admin/ai/suggestions": false,
+  "POST /admin/ai/suggestions/:id/accept": false,
+  "POST /admin/ai/suggestions/:id/dismiss": false,
   "POST /admin/content/:id": false,
   "DELETE /admin/content/:id": false,
   "POST /admin/content": false,

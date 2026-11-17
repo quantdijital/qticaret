@@ -86,6 +86,19 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 30, windowMs: 10 * MINUTE },
     perIdentity: { max: 20, windowMs: 10 * MINUTE },
   },
+  // adr/0071 §8: staff asking the AI core for a text suggestion; each is a call to a
+  // service at the shop's cost, beside the daily ceiling and the monthly limit
+  ai_text: {
+    name: "ai_text",
+    perIp: { max: 30, windowMs: 10 * MINUTE },
+    perIdentity: { max: 20, windowMs: 10 * MINUTE },
+  },
+  // adr/0071 §8: image and video work, dearer and slower than text: narrower
+  ai_media: {
+    name: "ai_media",
+    perIp: { max: 10, windowMs: 10 * MINUTE },
+    perIdentity: { max: 10, windowMs: 10 * MINUTE },
+  },
   // The media library bringing in an image by its address: each is a fetch from the internet
   media_import: { name: "media_import", perIp: { max: 60, windowMs: 10 * MINUTE } },
   // A product video's upload (adr/0069 §3): up to 50 MB and an ffprobe run each; per
