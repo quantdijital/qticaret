@@ -6010,6 +6010,9 @@
       "why": "Neden önemli, nasıl düzeltilir",
       "goToField": "Alana git",
       "fixed": "Düzeltme uygulandı.",
+      "aiFix": "Yapay zekâyla düzelt",
+      "aiFixLabel": "Yapay zekâyla düzelt: {{finding}}",
+      "aiFilled": "Öneri alana kondu; kaydedince geçerli olur.",
       "grades": {
         "excellent": "Mükemmel",
         "good": "İyi",
