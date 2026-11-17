@@ -1,22 +1,38 @@
-import { CircleCheck, ImagePlus, Loader2 } from "lucide-react"
+import { CircleCheck } from "lucide-react"
 import { useState } from "react"
 import type { DragEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { MediaPicker } from "@/components/patterns/media-picker"
 import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
+import { handOnClips } from "@/features/media/video-intake"
+import type { VideoIntake } from "@/features/media/video-intake"
 import { registerMedia } from "@/features/products/api/media"
 import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { GalleryTile } from "./gallery-tile"
 import type { GalleryImage } from "./gallery-tile"
+import { GalleryZone } from "./gallery-zone"
+import { PendingVideoTile, VideoTile } from "./video-tile"
+import type { GalleryVideo } from "./video-tile"
 
 export type { GalleryImage } from "./gallery-tile"
+export type { GalleryVideo } from "./video-tile"
 
 export const MAX_IMAGES = 20
 
 const hasFiles = (event: DragEvent) => event.dataTransfer.types.includes("Files")
+
+/** The product's videos among its pictures (adr/0069 §10; the product page only). */
+export interface GalleryVideos {
+  items: GalleryVideo[]
+  /** Clips going up now, each with the share sent. */
+  pending: { key: string; name: string; progress: number | null }[]
+  /** Where video files go; none: videos cannot be uploaded here (only pictures are taken). */
+  intake?: VideoIntake | undefined
+  onOpen: (id: string) => void
+}
 
 interface ImageGalleryProps {
   images: GalleryImage[]
@@ -32,6 +48,8 @@ interface ImageGalleryProps {
   wide?: boolean
   /** The advisor's "alt text missing" lands here: the first picture without one opens. */
   altTarget?: string
+  /** Videos with the pictures: their tiles after the first picture, video files taken too. */
+  videos?: GalleryVideos | undefined
 }
 
 /**
@@ -39,7 +57,9 @@ interface ImageGalleryProps {
  * zone, or the last tile once there are pictures, opens the media
  * dialog on a click (library, upload, address); files dropped on it go
  * up at once. Tiles are dragged into order, the first is the main
- * picture; a click on one opens its alt text and its actions.
+ * picture; a click on one opens its alt text and its actions. With
+ * `videos` (adr/0069 §10), the same zone and dialog take video files,
+ * and the videos sit right after the first picture, never dragged.
  */
 export function ImageGallery({
   images,
@@ -51,6 +71,7 @@ export function ImageGallery({
   disabled = false,
   wide = false,
   altTarget,
+  videos,
 }: ImageGalleryProps) {
   const { t } = useTranslation()
   const [busy, setBusy] = useState(false)
@@ -60,6 +81,8 @@ export function ImageGallery({
   const [target, setTarget] = useState<number | null>(null)
   const [openKey, setOpenKey] = useState<string | null>(null)
   const room = MAX_IMAGES - images.length
+  const intake = videos?.intake
+  const takesVideo = Boolean(intake && !intake.refusal)
   const missing = onAlt ? images.filter((image) => image.alt && !image.alt.value.trim()) : []
   useRevealTarget(altTarget ?? "", () => {
     const first = missing.find((image) => !image.alt?.legacy)
@@ -68,7 +91,8 @@ export function ImageGallery({
     }
   })
 
-  const upload = async (files: File[]) => {
+  const upload = async (dropped: File[]) => {
+    const files = intake ? handOnClips(dropped, intake) : dropped
     if (files.length === 0 || room <= 0) {
       return
     }
@@ -112,43 +136,77 @@ export function ImageGallery({
     },
   }
   const zone = (compact: boolean) => (
-    <button
-      type="button"
-      disabled={working || room <= 0}
-      aria-label={t("products.media.addLabel", { max: MAX_IMAGES })}
-      onClick={() => {
+    <GalleryZone
+      compact={compact}
+      busy={busy}
+      over={over}
+      disabled={working || (room <= 0 && !takesVideo)}
+      label={
+        takesVideo
+          ? t("products.media.addLabelVideo", { max: MAX_IMAGES })
+          : t("products.media.addLabel", { max: MAX_IMAGES })
+      }
+      types={takesVideo ? t("products.media.typesVideo") : t("products.media.types")}
+      onOpen={() => {
         setPicking(true)
       }}
-      className={cn(
-        "flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed text-center transition-colors outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60",
-        compact ? "aspect-square px-2" : "px-6 py-10",
-        over ? "border-primary bg-accent" : "border-border hover:border-input hover:bg-muted/50"
-      )}
-    >
-      <span
-        className={cn(
-          "flex items-center justify-center rounded-full bg-accent text-accent-foreground",
-          compact ? "size-8" : "size-12"
-        )}
-      >
-        {busy ? (
-          <Loader2 className={compact ? "size-4 animate-spin" : "size-5 animate-spin"} />
-        ) : (
-          <ImagePlus className={compact ? "size-4" : "size-5"} aria-hidden="true" />
-        )}
-      </span>
-      <span className={compact ? "text-xs font-medium" : "text-sm font-medium"}>
-        {t(compact ? "products.media.addShort" : "products.media.drop")}
-      </span>
-      {compact ? null : (
-        <span className="text-xs text-muted-foreground">{t("products.media.types")}</span>
-      )}
-    </button>
+    />
   )
+  const imageTile = (image: GalleryImage, index: number) => (
+    <GalleryTile
+      key={image.key}
+      image={image}
+      index={index}
+      count={images.length}
+      disabled={working}
+      withAlt={Boolean(onAlt)}
+      open={openKey === image.key}
+      onOpenChange={(open) => {
+        setOpenKey(open ? image.key : null)
+      }}
+      dragging={dragging === index}
+      target={target === index && dragging !== null && dragging !== index}
+      drag={{
+        start: () => {
+          setDragging(index)
+        },
+        over: () => {
+          setTarget(index)
+        },
+        end: () => {
+          setDragging(null)
+          setTarget(null)
+        },
+        drop: () => {
+          if (dragging !== null && dragging !== index) {
+            onMove(dragging, index)
+          }
+          setDragging(null)
+          setTarget(null)
+        },
+      }}
+      onMakeMain={() => {
+        onMakeMain(index)
+      }}
+      onMove={(to) => {
+        onMove(index, to)
+      }}
+      onRemove={() => {
+        setOpenKey(null)
+        onRemove(index)
+      }}
+      onAlt={(alt) => {
+        onAlt?.(index, alt)
+      }}
+    />
+  )
+  const clips = videos?.items ?? []
+  const sending = videos?.pending ?? []
+  const filled = images.length + clips.length + sending.length > 0
 
   return (
     <div className="flex flex-col gap-3" {...fileDrop}>
-      {images.length === 0 ? (
+      {!filled ? (
         zone(false)
       ) : (
         <ul
@@ -159,55 +217,23 @@ export function ImageGallery({
             wide && "md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-9"
           )}
         >
-          {images.map((image, index) => (
-            <GalleryTile
-              key={image.key}
-              image={image}
-              index={index}
-              count={images.length}
-              disabled={working}
-              withAlt={Boolean(onAlt)}
-              open={openKey === image.key}
-              onOpenChange={(open) => {
-                setOpenKey(open ? image.key : null)
-              }}
-              dragging={dragging === index}
-              target={target === index && dragging !== null && dragging !== index}
-              drag={{
-                start: () => {
-                  setDragging(index)
-                },
-                over: () => {
-                  setTarget(index)
-                },
-                end: () => {
-                  setDragging(null)
-                  setTarget(null)
-                },
-                drop: () => {
-                  if (dragging !== null && dragging !== index) {
-                    onMove(dragging, index)
-                  }
-                  setDragging(null)
-                  setTarget(null)
-                },
-              }}
-              onMakeMain={() => {
-                onMakeMain(index)
-              }}
-              onMove={(to) => {
-                onMove(index, to)
-              }}
-              onRemove={() => {
-                setOpenKey(null)
-                onRemove(index)
-              }}
-              onAlt={(alt) => {
-                onAlt?.(index, alt)
+          {images.slice(0, 1).map((image) => imageTile(image, 0))}
+          {/* adr/0069 §2: the videos come right after the first picture */}
+          {clips.map((video, at) => (
+            <VideoTile
+              key={video.id}
+              video={video}
+              number={at + 1}
+              onOpen={() => {
+                videos?.onOpen(video.id)
               }}
             />
           ))}
-          {room > 0 ? <li>{zone(true)}</li> : null}
+          {sending.map((item) => (
+            <PendingVideoTile key={item.key} name={item.name} progress={item.progress} />
+          ))}
+          {images.slice(1).map((image, at) => imageTile(image, at + 1))}
+          {room > 0 || takesVideo ? <li>{zone(true)}</li> : null}
         </ul>
       )}
       {images.length > 0 ? (
@@ -229,12 +255,14 @@ export function ImageGallery({
           ) : null}
         </div>
       ) : null}
+      {intake?.refusal ? <p className="text-xs text-muted-foreground">{intake.refusal}</p> : null}
       <MediaPicker
         open={picking}
         onOpenChange={setPicking}
         multiple
         max={Math.max(1, room)}
-        title={t("products.media.pickerTitle")}
+        title={t(takesVideo ? "products.media.pickerTitleVideo" : "products.media.pickerTitle")}
+        video={intake}
         onSelect={(assets) => {
           // A picture the product has already is not added twice
           const shown = new Set(images.map((image) => image.url))

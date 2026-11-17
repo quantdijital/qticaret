@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/
 import type { MediaAsset } from "@/features/media/api/media"
 import { AddressTab, LibraryTab, UploadTab } from "@/features/media/components/picker-tabs"
 import type { UploadZoneHandle } from "@/features/media/components/upload-zone"
+import type { VideoIntake } from "@/features/media/video-intake"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 
 type Source = "library" | "upload" | "address"
@@ -28,6 +29,11 @@ export interface MediaPickerProps {
   title?: string
   /** SVG offered too: the shop's logos and site icon only (the server refuses it elsewhere). */
   svg?: boolean
+  /**
+   * A product's gallery (adr/0069 §10): "Bilgisayardan yükle" takes video
+   * files too and hands them here; the library stays pictures only.
+   */
+  video?: VideoIntake | undefined
 }
 
 /**
@@ -44,6 +50,7 @@ export function MediaPicker({
   max = 20,
   title,
   svg = false,
+  video,
 }: MediaPickerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,6 +60,7 @@ export function MediaPicker({
           max={max}
           title={title}
           svg={svg}
+          video={video}
           onChoose={(assets) => {
             onSelect(assets)
             onOpenChange(false)
@@ -79,12 +87,14 @@ function PickerContent({
   max,
   title,
   svg,
+  video,
   onChoose,
 }: {
   multiple: boolean
   max: number
   title: string | undefined
   svg: boolean
+  video: VideoIntake | undefined
   onChoose: (assets: MediaAsset[]) => void
 }) {
   const { t } = useTranslation()
@@ -142,7 +152,14 @@ function PickerContent({
         </TabsContent>
         {/* Kept mounted: a drop on another tab is handed to its zone */}
         <TabsContent value="upload" forceMount className={TAB}>
-          <UploadTab multiple={multiple} max={max} svg={svg} onChoose={onChoose} zone={zone} />
+          <UploadTab
+            multiple={multiple}
+            max={max}
+            svg={svg}
+            video={video}
+            onChoose={onChoose}
+            zone={zone}
+          />
         </TabsContent>
         <TabsContent value="address" className={TAB}>
           <AddressTab onChoose={onChoose} />

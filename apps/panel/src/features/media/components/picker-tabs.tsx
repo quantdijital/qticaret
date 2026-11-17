@@ -20,6 +20,7 @@ import type { MediaAsset } from "@/features/media/api/media"
 import { MediaGrid } from "@/features/media/components/media-grid"
 import { UploadZone } from "@/features/media/components/upload-zone"
 import type { UploadZoneHandle } from "@/features/media/components/upload-zone"
+import type { VideoIntake } from "@/features/media/video-intake"
 import { errorText } from "@/lib/errors"
 
 const P = "media.picker"
@@ -123,7 +124,8 @@ export function UploadTab({
   onChoose,
   zone,
   svg = false,
-}: TabProps & { zone?: Ref<UploadZoneHandle> }) {
+  video,
+}: TabProps & { zone?: Ref<UploadZoneHandle>; video?: VideoIntake | undefined }) {
   const { t } = useTranslation()
   const [uploaded, setUploaded] = useState<MediaAsset[]>([])
   return (
@@ -133,6 +135,7 @@ export function UploadTab({
           ref={zone}
           fill
           svg={svg}
+          video={video}
           multiple={multiple}
           onUploaded={(assets, failed) => {
             const usable = assets.slice(0, multiple ? max : 1)
