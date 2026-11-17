@@ -61,6 +61,10 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      // Browser autofill fires keydown events without a key
+      if (typeof event.key !== "string") {
+        return
+      }
       if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault()
         change(!open)

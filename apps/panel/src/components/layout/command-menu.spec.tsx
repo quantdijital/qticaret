@@ -75,3 +75,37 @@ describe("CommandMenu search", () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })
+
+describe("CommandMenu shortcut", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("toggles on Ctrl+K", () => {
+    const onOpenChange = renderMenu()
+
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "K", ctrlKey: true }))
+
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("ignores a keydown without a key, as browser autofill sends", () => {
+    const onOpenChange = renderMenu()
+    // A listener that throws is reported on window, not to the dispatcher
+    const errors: unknown[] = []
+    const onError = (event: ErrorEvent) => {
+      event.preventDefault()
+      errors.push(event.error)
+    }
+    window.addEventListener("error", onError)
+    // Autofill's synthetic keydown carries no key at all
+    const event = new KeyboardEvent("keydown", { ctrlKey: true })
+    Object.defineProperty(event, "key", { value: undefined })
+
+    window.dispatchEvent(event)
+    window.removeEventListener("error", onError)
+
+    expect(errors).toEqual([])
+    expect(onOpenChange).not.toHaveBeenCalled()
+  })
+})
