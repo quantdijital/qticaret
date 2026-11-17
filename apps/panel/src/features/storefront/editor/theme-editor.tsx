@@ -4,31 +4,13 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
-import {
-  LAYOUT_ACTION_KEY,
-  MARQUEE_LIMITS,
-  PRICE_BANDS_LIMITS,
-  layoutQuery,
-} from "@/features/storefront/api/layout"
-import type {
-  AdminLayout,
-  AnySection,
-  LayoutDocument,
-  Placement,
-} from "@/features/storefront/api/layout"
+import { LAYOUT_ACTION_KEY, layoutQuery } from "@/features/storefront/api/layout"
+import type { AdminLayout, AnySection, LayoutDocument } from "@/features/storefront/api/layout"
 import { editorReducer, initialEditorState } from "@/features/storefront/layout/editor-state"
 import { documentProblems } from "@/features/storefront/layout/problems"
 import { SETTINGS_KEY, partOf } from "@/features/storefront/layout/settings-problems"
-import {
-  findSection,
-  idsOf,
-  marqueesOn,
-  priceBandsOn,
-  newBodySection,
-  newSectionId,
-} from "@/features/storefront/layout/sections"
+import { findSection } from "@/features/storefront/layout/sections"
 import { useAutosave } from "@/features/storefront/layout/use-autosave"
-import { AddSectionDialog } from "./add-section-dialog"
 import {
   OpenedSectionContext,
   SectionHoverContext,
@@ -37,6 +19,8 @@ import {
 } from "./editor-layout"
 import type { EditorView } from "./editor-layout"
 import { EditorShell } from "./editor-shell"
+import { SectionChooser } from "./section-chooser"
+import type { Adding } from "./section-chooser"
 import { useEditorSidebar } from "./editor-sidebar"
 import { EditorTopBar } from "./editor-top-bar"
 import { OpenedForm } from "./opened-form"
@@ -104,7 +88,7 @@ export function ThemeEditor({
   })
   const { page, target } = place
   // The chooser is open for this side of a category page's products (the others have one)
-  const [adding, setAdding] = useState<Placement | null>(null)
+  const [adding, setAdding] = useState<Adding | null>(null)
   const shape = useEditorLayout()
   const [view, setView] = useState<EditorView>("edit")
   // A phone's preview starts as a phone; a wider screen's as a desktop
@@ -246,6 +230,9 @@ export function ThemeEditor({
           onAddSection={(placement) => {
             setAdding(placement ?? "bottom")
           }}
+          onAddFooterSection={() => {
+            setAdding("footer")
+          }}
           onTheme={() => {
             setOpened({ kind: "theme" })
           }}
@@ -337,22 +324,16 @@ export function ThemeEditor({
           />
         </SectionHoverContext.Provider>
       </OpenedSectionContext.Provider>
-      <AddSectionDialog
-        open={adding !== null}
+      <SectionChooser
+        doc={doc}
         page={page}
-        placement={adding ?? "bottom"}
-        marqueeFull={marqueesOn(doc, page) >= MARQUEE_LIMITS.perPage}
-        priceBandsFull={priceBandsOn(doc, page) >= PRICE_BANDS_LIMITS.perPage}
-        onOpenChange={(open) => {
-          if (!open) {
-            setAdding(null)
-          }
+        adding={adding}
+        act={act}
+        onClose={() => {
+          setAdding(null)
         }}
-        onPick={(type) => {
-          const id = newSectionId(idsOf(doc))
-          const section = newBodySection(page, type, id, adding ?? "bottom")
+        onAdded={(id) => {
           markNew(id)
-          act({ type: "add", group: page, section })
           setAdding(null)
           setOpened({ kind: "section", id })
         }}

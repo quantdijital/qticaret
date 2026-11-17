@@ -21,7 +21,8 @@ export const LAYOUT_LIMITS = {
   category: 12,
   /** The strips, the header bar and the usage menu, each once (adr/0049 Ek 2026-11-14 §5). */
   header: 5,
-  footer: 3,
+  /** The bar and above it a box, a rich text, trust badges, a strip (adr/0070 §4). */
+  footer: 5,
   items: 24,
   slides: 6,
   faq: 12,

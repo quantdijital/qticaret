@@ -36,6 +36,7 @@ import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
 import { footerLogoOf } from "./footer-logo"
+import { footerNewsletterOf, footerSectionsOf } from "./footer-group"
 import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
 
@@ -54,7 +55,7 @@ export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
 
 /** The footer's newsletter box in the design's words; null when the shop took it out. */
 function newsletterOf(layout: StoreLayout, shop: string, editing: boolean): ShopView["newsletter"] {
-  const [section] = layout.footer
+  const section = footerNewsletterOf(layout)
   return section
     ? {
         title: section.title ?? t("newsletter.title"),
@@ -131,7 +132,11 @@ export async function shopView(): Promise<ShopView> {
   const url = requestHeaders.get("x-qt-url") ?? ""
   // The editor's live session marks the frame's fields: the one announcement bar and its
   // lines, the header strip, the catalog header, the footer's newsletter (adr/0065 Faz 2b)
-  const editing = await isEditorSession()
+  // The footer group's sections above the footer (adr/0070 §4): not on the pages of paying
+  const [editing, footerSections] = await Promise.all([
+    isEditorSession(),
+    isCheckoutPage(url) ? Promise.resolve([]) : footerSectionsOf(layout, t),
+  ])
   const bars = layout.header.filter((section) => section.type === "announcement_bar")
   const [bar] = bars
   const announcementMark = bars.length === 1 && bar && editing ? bar.id : null
@@ -191,6 +196,7 @@ export async function shopView(): Promise<ShopView> {
       carriers: shopMarks(marks?.carriers, t),
     }),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name, editing),
+    ...(footerSections.length > 0 ? { footerSections } : {}),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),
     trustBadges,

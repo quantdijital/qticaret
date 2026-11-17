@@ -211,7 +211,10 @@ export function presetAnswer(preset: StorefrontPreset): PresetAnswer {
   const layout = {
     header: header.filter((each) => each.type !== "header_bar").map(printed),
     home: group("home").map(hydrated),
-    footer: footer.filter((each) => each.type === "newsletter").map(footerNewsletter),
+    // The footer group in its order (adr/0070 §4): the box as printed, the others as a page's
+    footer: footer
+      .filter((each) => each.type !== "footer_bar")
+      .map((each) => (each.type === "newsletter" ? footerNewsletter(each) : hydrated(each))),
     product: product.filter((each) => each.type !== "product_main").map(hydrated),
     category: category
       .filter((each) => each.type !== "category_main")

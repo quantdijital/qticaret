@@ -306,10 +306,12 @@ export const newHeaderMarquee = (id: string): HeaderMarquee => ({
 
 /**
  * Scrolling strips a page would show (adr/0049 Ek 2026-11-14 §4.1): the
- * header's, on every page, with the page's own; hidden ones count too.
+ * header's and the footer group's (adr/0070 §4), on every page, with the page's own;
+ * hidden ones count too.
  */
 export const marqueesOn = (doc: LayoutDocument, page: BodyGroup): number =>
-  [...doc.header, ...doc[page]].filter((section) => section.type === "marquee").length
+  [...doc.header, ...doc.footer, ...doc[page]].filter((section) => section.type === "marquee")
+    .length
 
 /** A page's price bands strips (the home page's only), hidden ones counted. */
 export const priceBandsOn = (doc: LayoutDocument, page: BodyGroup): number =>

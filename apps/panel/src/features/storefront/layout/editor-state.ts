@@ -137,6 +137,12 @@ function reorder<T extends { id: string }>(list: readonly T[], id: string, to: n
 
 function move(doc: LayoutDocument, id: string, to: number): LayoutDocument {
   const found = findSection(doc, id)
+  if (found?.group === "footer" && !isMain(found.section)) {
+    // The footer group's sections above its bar (adr/0070 §4): the bar has no place in the order
+    const list = doc.footer.filter((section) => !isMain(section))
+    const moved = reorder(list, id, to)
+    return moved === list ? doc : { ...doc, footer: withBody(doc.footer, moved) }
+  }
   if (!found || !isBodyGroup(found.group) || isMain(found.section)) {
     return doc
   }

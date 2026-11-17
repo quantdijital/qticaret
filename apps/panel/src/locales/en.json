@@ -7971,7 +7971,6 @@
         "themeSettings": "Theme settings",
         "add": "Add section",
         "addAnnouncement": "Add announcement bar",
-        "addNewsletter": "Add newsletter box",
         "empty": {
           "home": "The home page has no sections; the storefront shows only the header and footer.",
           "product": "No sections added to the product pages; the product's own details show."
@@ -7991,6 +7990,9 @@
         },
         "looks": "Stock and colour swatches",
         "addMarquee": "Add scrolling strip",
+        "footerGroup": "Footer sections",
+        "addFooterSection": "Add section to footer",
+        "footerFull": "The footer has every section it can take; each is added once.",
         "preferences": "Storefront preferences"
       },
       "row": {
@@ -8018,7 +8020,8 @@
           "home": "It is added at the end of the home page; drag it or use its arrows to move it.",
           "product": "It is added on every product page, under the product's own details.",
           "top": "It is added on every category page, above the product grid.",
-          "bottom": "It is added on every category page, below the product grid."
+          "bottom": "It is added on every category page, below the product grid.",
+          "footer": "Shown above the footer on every page but checkout; each section is added once, then drag to change their order."
         }
       },
       "types": {

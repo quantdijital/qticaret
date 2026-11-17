@@ -6,6 +6,7 @@ import { BottomBar } from "./frame/BottomBar"
 import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
+import { FooterGroup } from "./frame/FooterGroup"
 import { Header, catalogOf } from "./frame/Header"
 import { LayerMarks } from "./frame/Layers"
 import { layerMarks, rootMarks } from "./frame/root-marks"
@@ -115,6 +116,7 @@ export function Layout({
         <main id="icerik" className="flex-1">
           {children}
         </main>
+        <FooterGroup shop={shop} t={t} subscribe={subscribe} />
         <Footer shop={shop} t={t} subscribe={subscribe} />
         {shop.bottomNav && (
           <BottomBar
