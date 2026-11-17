@@ -13,6 +13,12 @@ const SHORT: Readonly<Record<string, string>> = {
   "/yasal/kvkk-aydinlatma-metni": "footer.legal_short_privacy",
 }
 
+/** A legal text's link as a footer row shows it: its short name, the full title its `title`. */
+export function legalLabel(link: LinkView, t: Translate): LinkView & { title?: string } {
+  const short = SHORT[link.path]
+  return short ? { path: link.path, label: t(short), title: link.label } : link
+}
+
 function LegalItems({
   links,
   t,
@@ -24,12 +30,12 @@ function LegalItems({
 }) {
   return (
     <>
-      {links.map((link) => {
-        const short = SHORT[link.path]
+      {links.map((each) => {
+        const link = legalLabel(each, t)
         return (
           <li key={link.path}>
-            <a href={link.path} title={short ? link.label : undefined} className={className}>
-              {short ? t(short) : link.label}
+            <a href={link.path} title={link.title} className={className}>
+              {link.label}
             </a>
           </li>
         )

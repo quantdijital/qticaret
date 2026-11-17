@@ -76,6 +76,7 @@ export const isFileName = (pathname: string): boolean =>
 
 // The providers' marks in the footer (card-extras `MARK_LOGOS`): `public/marks/`, by the spec
 const MARK_FILES = [
+  "amex.svg",
   "aras.svg",
   "iyzico.svg",
   "mastercard.svg",

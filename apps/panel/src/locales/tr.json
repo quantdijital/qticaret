@@ -8037,7 +8037,8 @@
           "catalog": "Klasik katalog"
         },
         "footer_bar": {
-          "ledger": "Standart"
+          "ledger": "Standart",
+          "brand_columns": "Marka ve sütunlar"
         },
         "product_main": {
           "standard": "Standart"
@@ -9288,7 +9289,7 @@
         "payment_badges": {
           "label": "Ödeme rozetleri",
           "term": "payment badges",
-          "hint": "Seçtikleriniz bu sırayla yazılı rozet olarak görünür. Hiçbirini seçmezseniz bağlı ödeme sağlayıcılarınızın işaretleri görünür.",
+          "hint": "Seçtikleriniz bu sırayla görünür: Standart biçimde yazılı rozet, Marka ve sütunlar biçiminde kart ağlarının kendi logosu (Visa, Mastercard, Troy, American Express). Hiçbirini seçmezseniz bağlı ödeme sağlayıcılarınızın işaretleri görünür.",
           "visa": "Visa",
           "mastercard": "Mastercard",
           "troy": "Troy",
@@ -9320,6 +9321,30 @@
           "label": "Telefonda da göster",
           "term": "mobile",
           "hint": "Kapalıysa düğme yalnız geniş ekranlarda görünür."
+        },
+        "top_strip": {
+          "label": "Üst şerit",
+          "term": "top strip",
+          "hint": "Sütunların üstünde bülten kutusu ile telefon, WhatsApp ve e-posta adresiniz. Kapalıysa telefon ve e-posta marka bloğunda, bülten onların altında durur."
+        },
+        "about": {
+          "label": "Kısa tanıtım",
+          "term": "about",
+          "hint": "Logonuzun altında kısa bir paragraf: ne sattığınız, kargo ya da iade sözünüz. Boşsa görünmez."
+        },
+        "ground": {
+          "label": "Zemin",
+          "term": "background",
+          "well": "Hafif ton",
+          "page": "Sayfa",
+          "stage": "Koyu"
+        },
+        "badge_style": {
+          "label": "Ödeme logoları",
+          "term": "payment marks",
+          "hint": "Koyu zeminde logolar her zaman beyaz kartta durur; kart ağları logolarını açık zeminde ister.",
+          "card": "Kart içinde",
+          "plain": "Yalın"
         }
       },
       "main": {

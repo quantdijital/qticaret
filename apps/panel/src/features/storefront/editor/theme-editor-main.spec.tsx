@@ -103,14 +103,15 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     })
   })
 
-  it("opens the footer and the product's block with no choice of a single variant, and keeps them first", async () => {
+  it("opens the footer with its two variants and the product's block with no choice of a single one, and keeps them first", async () => {
     renderEditor()
     const tree = await opened()
     await frame()
 
     await user.click(within(tree).getByRole("button", { name: "Alt bilgi" }))
     expect(await screen.findByText(/İletişim bilgileriniz, menüleriniz/)).toBeVisible()
-    expect(screen.queryByText("Biçim")).toBeNull()
+    // Two footers since 2026-11-17 (the ledger and the brand columns): the footer's "Biçim" stands
+    expect(screen.getByText("Biçim")).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: "Bölümü kaldır" })).toBeNull()
     await user.click(screen.getByRole("button", { name: "Bölümlere dön" }))
 

@@ -2,7 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { base, optional, shopText, text } from "../layout-fields"
 import { storefrontLink } from "../menus"
-import { footerBarFields } from "./footer-bar"
+import { footerBarFields, footerColumnsFields } from "./footer-bar"
 import { sectionLook } from "./look"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
@@ -221,7 +221,7 @@ export const headerBar = z.discriminatedUnion(
  * Today's footer: Grafit's ledger of the shop's details, menus and marks,
  * with the footer's own settings (adr/0049 Ek 2026-11-15, `footer-bar.ts`).
  */
-export const footerBar = z
+const footerLedger = z
   .object({
     ...mainBase,
     type: z.literal("footer_bar"),
@@ -229,6 +229,27 @@ export const footerBar = z
     ...footerBarFields,
   })
   .strict()
+
+/**
+ * The brand columns footer (adr/0049 Ek 2026-11-17): the footer's own
+ * settings and the variant's (`footerColumnsFields`), each with a default,
+ * so a footer switched to it reads whole.
+ */
+const footerColumns = z
+  .object({
+    ...mainBase,
+    type: z.literal("footer_bar"),
+    variant: z.literal("brand_columns"),
+    ...footerBarFields,
+    ...footerColumnsFields,
+  })
+  .strict()
+
+export const footerBar = z.discriminatedUnion(
+  "variant",
+  [footerLedger, footerColumns],
+  VARIANT_ERROR
+)
 
 /** The product's own block: its gallery and buying column, above the group's other sections. */
 export const productMain = z
@@ -272,7 +293,7 @@ export const categoryMain = z
 /** Each main section's variants' branches: what a section read as that variant keeps. */
 export const MAIN_BRANCHES = {
   header_bar: { standard: headerStandard, centered: headerCentered, catalog: headerCatalog },
-  footer_bar: { ledger: footerBar },
+  footer_bar: { ledger: footerLedger, brand_columns: footerColumns },
   product_main: { standard: productMain },
   category_main: { standard: categoryMain },
 } as const satisfies {

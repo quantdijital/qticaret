@@ -1,6 +1,6 @@
 import type { LayoutDocument } from "./layout"
 import type { MenuLinkInput } from "./menus"
-import { footerBarDefaults, footerSettingsOf } from "./sections/footer-bar"
+import { footerBarDefaults, footerColumnsOf, footerSettingsOf } from "./sections/footer-bar"
 import { hasLook } from "./sections/look"
 import type { SectionLook } from "./sections/look"
 import { MAIN_SECTION_IDS } from "./sections/main"
@@ -109,7 +109,8 @@ const lookOf = (section: { look?: SectionLook | undefined }) =>
  * product's block and the category grid with their look only when the shop
  * set a step, as a body section prints it; the catalog header with its
  * own settings, its highlighted link placed by `resolve` (a broken one
- * null); the footer with the settings the shop changed. Read off a
+ * null); the footer with the settings the shop changed (the brand
+ * columns footer with all of its own, `columns`). Read off a
  * document `withMainSections` filled; one somehow missing is its default.
  */
 export function mainSectionsOf<L>(
@@ -136,6 +137,7 @@ export function mainSectionsOf<L>(
       type: footer.type,
       variant: footer.variant,
       ...footerSettingsOf(footer),
+      ...(footer.variant === "brand_columns" ? { columns: footerColumnsOf(footer) } : {}),
     },
     product_main: {
       id: product.id,

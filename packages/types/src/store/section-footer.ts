@@ -27,10 +27,11 @@ export type FooterBarSetting = keyof typeof FOOTER_BAR_SETTINGS
 export type FooterBarStep<S extends FooterBarSetting> = (typeof FOOTER_BAR_SETTINGS)[S][number]
 
 /**
- * The ways to pay a shop may name in its footer, each drawn as its name in
- * a small framed box (never a company's mark), in the order the shop
- * keeps them. None picked: the theme shows the marks of the providers the
- * shop has, as before.
+ * The ways to pay a shop may name in its footer, in the order the shop
+ * keeps them: the ledger draws each as its name in a small framed box;
+ * `brand_columns` draws a card network by its own mark (the storefront's
+ * `public/marks`), the others by their name. None picked: the theme shows
+ * the marks of the providers the shop has, as before.
  */
 export const PAYMENT_BADGES = [
   "visa",
@@ -70,6 +71,47 @@ export const FOOTER_BAR_DEFAULTS = {
   payment_badges: readonly PaymentBadge[]
   back_to_top: boolean
   back_to_top_mobile: boolean
+}
+
+/**
+ * The `brand_columns` footer's own settings (adr/0049 Ek 2026-11-17), kept
+ * only while the footer is drawn as it: its ground (the look's names:
+ * "Hafif ton / Sayfa / Koyu", the steel well first) and how the ways to
+ * pay stand (each mark on its own small white card, or straight on the
+ * ground; on the dark ground always on cards, a mark needs its light).
+ * Mirrored by the backend's `FOOTER_COLUMNS_SETTINGS`; a test keeps them equal.
+ */
+export const FOOTER_COLUMNS_SETTINGS = {
+  ground: ["well", "page", "stage"],
+  badge_style: ["card", "plain"],
+} as const satisfies Record<string, readonly [string, ...string[]]>
+
+export type FooterColumnsSetting = keyof typeof FOOTER_COLUMNS_SETTINGS
+export type FooterColumnsStep<S extends FooterColumnsSetting> =
+  (typeof FOOTER_COLUMNS_SETTINGS)[S][number]
+
+/** The short line under the shop's name, at most this many characters. */
+export const FOOTER_COLUMNS_LIMITS = { about: 240 } as const
+
+/** A footer switched to `brand_columns` starts with these. */
+export const FOOTER_COLUMNS_DEFAULTS = {
+  /** The strip above the columns: the newsletter box and the shop's ways to reach it. */
+  top_strip: true,
+  about: null,
+  ground: "well",
+  badge_style: "card",
+} as const satisfies { [S in FooterColumnsSetting]: FooterColumnsStep<S> } & {
+  top_strip: boolean
+  about: null
+}
+
+/** The `brand_columns` footer's own settings as `GET /store/storefront-layout` prints them. */
+export interface StoreFooterColumns {
+  top_strip: boolean
+  /** A short line about the shop under its name; null: none. */
+  about: string | null
+  ground: FooterColumnsStep<"ground">
+  badge_style: FooterColumnsStep<"badge_style">
 }
 
 /** The footer bar's own settings as `GET /store/storefront-layout` prints them. */

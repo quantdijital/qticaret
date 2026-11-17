@@ -118,7 +118,7 @@ describe("the linked category cards' settings", () => {
 /** adr/0049 Ek 2026-11-15: the footer's profiles, ways to pay and back to top button. */
 describe("the footer's settings", () => {
   it("shows the profiles as icons and picks, orders and drops ways to pay", async () => {
-    const changes = renderHeld(footer, (value, keep) => (
+    const changes = renderHeld<FooterBarSection>(footer, (value, keep) => (
       <FooterBarForm section={value} problems={{}} onChange={keep} />
     ))
     await userEvent.click(screen.getByRole("radio", { name: "Simgeyle" }))
@@ -144,7 +144,7 @@ describe("the footer's settings", () => {
   })
 
   it("shows the button's corner, face and phones only while it is on", async () => {
-    const changes = renderHeld(footer, (value, keep) => (
+    const changes = renderHeld<FooterBarSection>(footer, (value, keep) => (
       <FooterBarForm section={value} problems={{}} onChange={keep} />
     ))
     expect(screen.queryByText(/Düğmenin yeri/)).toBeNull()

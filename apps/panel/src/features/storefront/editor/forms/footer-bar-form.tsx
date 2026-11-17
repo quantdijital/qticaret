@@ -5,6 +5,7 @@ import { SwitchRow } from "../theme-fields"
 import { NamedGroup } from "../named-group"
 import { CARD_FIELD_IDS } from "./card-field-ids"
 import type { SectionFormProps } from "./form-props"
+import { FooterColumnsContent } from "./footer-columns-fields"
 import { PaymentBadgesField } from "./payment-badges-field"
 import { StepChoice } from "./step-choice"
 
@@ -25,10 +26,11 @@ const Corner = ({ side }: { side: "right" | "left" }) => (
  * profiles show (their addresses are the store details' social accounts),
  * the ways to pay it names ("İçerik"), and a "back to top" button in its
  * own group, closed; the button's corner, face and phones show only while
- * it is on. The menus, details
+ * it is on; the brand columns footer's strip and short line sit in
+ * "İçerik" too (its look under "Stil", `FooterStyleGroup`). The menus, details
  * and marks are edited on their own screens.
  */
-export function FooterBarForm({ section, onChange }: SectionFormProps<FooterBarSection>) {
+export function FooterBarForm({ section, problems, onChange }: SectionFormProps<FooterBarSection>) {
   const { t } = useTranslation()
   const id = (field: Parameters<typeof CARD_FIELD_IDS.footer>[1]) =>
     CARD_FIELD_IDS.footer(section.id, field)
@@ -55,6 +57,9 @@ export function FooterBarForm({ section, onChange }: SectionFormProps<FooterBarS
             onChange({ ...section, payment_badges })
           }}
         />
+        {section.variant === "brand_columns" ? (
+          <FooterColumnsContent section={section} problems={problems} onChange={onChange} />
+        ) : null}
       </NamedGroup>
       <NamedGroup name="backToTop">
         <SwitchRow

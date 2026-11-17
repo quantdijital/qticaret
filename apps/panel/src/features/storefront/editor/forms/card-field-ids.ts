@@ -2,6 +2,7 @@ import {
   CATEGORY_CARD_SETTINGS,
   CATEGORY_COLLAGE_SETTINGS,
   FOOTER_BAR_SETTINGS,
+  FOOTER_COLUMNS_SETTINGS,
   PAYMENT_BADGES,
 } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
@@ -38,7 +39,17 @@ export const FOOTER_FIELDS = [
   "back_to_top_shape",
   "back_to_top_mobile",
 ] as const
-export type FooterField = (typeof FOOTER_FIELDS)[number]
+/** The brand columns footer's own (adr/0049 Ek 2026-11-17): words under "İçerik", the look under "Stil". */
+export const FOOTER_COLUMNS_FIELDS = ["top_strip", "about", "ground", "badge_style"] as const
+export type FooterColumnsField = (typeof FOOTER_COLUMNS_FIELDS)[number]
+const FOOTER_COLUMNS_GROUPS = {
+  top_strip: "content",
+  about: "content",
+  ground: "appearance",
+  badge_style: "appearance",
+} as const satisfies Record<FooterColumnsField, string>
+
+export type FooterField = (typeof FOOTER_FIELDS)[number] | FooterColumnsField
 
 export const CARD_FIELD_IDS = {
   card: (sectionId: string, field: CardField | CollageField) => `${sectionId}-cards-${field}`,
@@ -51,6 +62,7 @@ const stepsOf = (prefix: string, field: string): readonly string[] => {
     ...CATEGORY_CARD_SETTINGS,
     ...CATEGORY_COLLAGE_SETTINGS,
     ...FOOTER_BAR_SETTINGS,
+    ...FOOTER_COLUMNS_SETTINGS,
     // The ways to pay, found by name ("Troy", "Kapıda ödeme")
     payment_badges: PAYMENT_BADGES,
   }
@@ -85,16 +97,28 @@ export function cardFooterFields(section: AnySection): RegistryField[] {
     }))
   }
   if (section.type === "footer_bar") {
-    return FOOTER_FIELDS.filter(
+    const common = FOOTER_FIELDS.filter(
       (field) => section.back_to_top || !field.startsWith("back_to_top_")
     ).map((field) => ({
       key: `footer.${field}`,
-      group: field.startsWith("back_to_top") ? "backToTop" : "content",
+      group: field.startsWith("back_to_top") ? ("backToTop" as const) : ("content" as const),
       label: `${FOOTER}.${field}.label`,
       term: `${FOOTER}.${field}.term`,
       options: stepsOf(FOOTER, field),
       target: CARD_FIELD_IDS.footer(section.id, field),
     }))
+    const own =
+      section.variant === "brand_columns"
+        ? FOOTER_COLUMNS_FIELDS.map((field) => ({
+            key: `footer.${field}`,
+            group: FOOTER_COLUMNS_GROUPS[field],
+            label: `${FOOTER}.${field}.label`,
+            term: `${FOOTER}.${field}.term`,
+            options: stepsOf(FOOTER, field),
+            target: CARD_FIELD_IDS.footer(section.id, field),
+          }))
+        : []
+    return [...common, ...own]
   }
   return []
 }
