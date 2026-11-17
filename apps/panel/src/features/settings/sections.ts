@@ -14,6 +14,7 @@ import {
   Palette,
   Plug,
   Search,
+  Sparkles,
   ShieldCheck,
   Store,
   ToggleRight,
@@ -90,6 +91,8 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
       { key: "security", to: "/settings/security", icon: ShieldCheck },
       { key: "team", to: "/settings/team", icon: Users, needs: "team" },
       { key: "integrations", to: "/settings/integrations", icon: Plug, needs: "settings" },
+      // adr/0071 §13: the AI services and their use; the owner connects, the admin tests and reads
+      { key: "ai", to: "/settings/ai", icon: Sparkles, needs: "settings" },
       { key: "api", to: "/settings/api", icon: KeyRound, needs: "keys" },
       { key: "features", to: "/settings/features", icon: ToggleRight, needs: "settings" },
       // F14: moving the shop in from its old platform, the owner's alone

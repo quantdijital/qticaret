@@ -308,6 +308,7 @@
       "attributes": "Ürün özellikleri",
       "locations": "Depolar",
       "integrations": "Entegrasyonlar",
+      "ai": "Yapay zekâ",
       "notifications": "E-posta ve SMS",
       "sms": "SMS",
       "marketing": "Pazarlama",
@@ -1919,6 +1920,7 @@
       "notifications": "E-posta gönderici ve sınırı, SMS ve İYS, şablonlar, personel uyarıları",
       "sms": "SMS hizmeti ve günlük gönderim sınırı",
       "integrations": "Bağlı dış servislerin çalışıp çalışmadığı",
+      "ai": "Metin taslağı yazan servisler, anahtarları ve bu ayki kullanım",
       "features": "Açılıp kapatılabilen mağaza özellikleri",
       "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
       "audit": "Panelde kim neyi ne zaman değiştirdi",
@@ -10938,6 +10940,111 @@
       "hint": "Şifreyi toptancıya iletin; ilk girişte değiştirmesini önerin. Açık oturumları kapanır. Bu şifre bir daha gösterilmez.",
       "save": "Şifreyi kaydet",
       "saved": "Yeni şifre kaydedildi; toptancının açık oturumları kapandı."
+    }
+  },
+  "ai": {
+    "title": "Yapay zekâ",
+    "description": "Ürün başlığı, açıklaması gibi metinleri sizin için taslak olarak yazan servisleri buradan bağlarsınız. Kendi hesabınızın anahtarıyla çalışır; ücreti servise siz ödersiniz.",
+    "notInPlan": "Paketiniz kendi anahtarınızla yapay zekâ kullanmayı kapsamıyor. Kayıtlı anahtarlar silinmez, paketiniz değişince yeniden çalışır.",
+    "capabilities": {
+      "text": "Metin yazma",
+      "vision": "Görseli anlama",
+      "image_edit": "Görsel düzenleme",
+      "image_generate": "Görsel üretme",
+      "video": "Video"
+    },
+    "services": {
+      "deepseek": {
+        "name": "DeepSeek",
+        "description": "Uygun fiyatlı metin servisi.",
+        "rejected": "DeepSeek kayıtlı anahtarı reddetti. Anahtarı değiştirin ya da DeepSeek hesabınızda bakiye olup olmadığına bakın.",
+        "checks": {
+          "secret_invalid": "DeepSeek anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
+        }
+      },
+      "minimax": {
+        "name": "MiniMax",
+        "description": "Metin servisi (uluslararası platform).",
+        "rejected": "MiniMax kayıtlı anahtarı reddetti. Anahtarı değiştirin ya da MiniMax hesabınızda bakiye olup olmadığına bakın.",
+        "checks": {
+          "secret_invalid": "MiniMax anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
+        }
+      },
+      "gemini": {
+        "name": "Gemini",
+        "description": "Google'ın metin servisi.",
+        "rejected": "Gemini kayıtlı anahtarı reddetti. Anahtarı değiştirin ya da Google hesabınızda faturalandırmaya bakın.",
+        "checks": {
+          "secret_invalid": "Gemini anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
+        }
+      },
+      "fake": {
+        "name": "Deneme servisi",
+        "description": "Yalnız geliştirme ortamında görünür; gerçek bir servise bağlanmaz.",
+        "rejected": "Deneme servisi kayıtlı anahtarı reddetti.",
+        "checks": {
+          "secret_invalid": "Deneme servisi anahtarı kabul etmedi."
+        }
+      }
+    },
+    "data_note": {
+      "deepseek": "Veri Çin'de işlenir ve saklanır. DeepSeek, gizlilik metninde verinin model eğitiminde kullanılabileceğini yazar.",
+      "minimax": "Verinin nerede işlendiği ve model eğitiminde kullanılıp kullanılmadığı belirtilmemiş.",
+      "gemini": "Ücretsiz kullanımda Google gönderilen içeriği kendi ürünlerini geliştirmek için kullanır; ücretli kullanımda kullanmaz.",
+      "fake": "Veri bu bilgisayardan çıkmaz."
+    },
+    "data_detail": {
+      "deepseek": "DeepSeek gönderilen metni Çin Halk Cumhuriyeti'ndeki sunucularında işler ve saklar. Gizlilik metninde modellerini geliştirmek (eğitmek) de verinin kullanım amaçları arasında sayılır. Mağazanızdan yalnız ürün, kategori, sayfa gibi vitrinde yayımlanan içerik gider.",
+      "minimax": "MiniMax'ın uluslararası platformu kullanılır. Verinin hangi ülkede işlendiği ve model eğitiminde kullanılıp kullanılmadığı servisin belgelerinden doğrulanamadı; bağlamadan önce MiniMax'ın kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
+      "gemini": "Google'ın şartlarına göre ücretsiz katmanda gönderilen içerik Google ürünlerini geliştirmede kullanılır ve Google çalışanlarınca okunabilir; ücretli katmanda (faturalandırma açık) kullanılmaz. Veri, Google'ın tesisi olan herhangi bir ülkede işlenebilir. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
+      "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
+    },
+    "tasks": {
+      "test_text": "Deneme metni"
+    },
+    "card": {
+      "capabilities": "Yapabildikleri",
+      "connect": "Bağla",
+      "change": "Anahtarı değiştir",
+      "test": "Bağlantıyı dene",
+      "remove": "Kaldır",
+      "ownerConnects": "Servisi mağaza sahibi bağlayabilir.",
+      "keptUnused": "Anahtar kayıtlı ama paketiniz izin vermediği için kullanılmıyor.",
+      "connectTitle": "{{name}} bağla",
+      "changeTitle": "{{name}} anahtarını değiştir",
+      "dialogDescription": "{{name}} hesabınızdan aldığınız anahtarı girin. Kaydetmeden önce {{name}} ile denenir; anahtar bir daha gösterilmez.",
+      "key": "Anahtar",
+      "keyHint": "{{name}} panelinde API anahtarları bölümünden kopyalayıp yapıştırın (API key).",
+      "keyRequired": "Anahtarı girin.",
+      "save": "Kaydet ve dene",
+      "removeTitle": "{{name}} bağlantısı kaldırılsın mı?",
+      "removeDescription": "Kayıtlı anahtar silinir; yapay zekâ önerileri {{name}} ile çalışmaz. Yeniden bağlamak için anahtarı tekrar girmeniz gerekir.",
+      "dataTitle": "Veriniz nereye gider",
+      "dataTip": "{{name}} veri ayrıntısı",
+      "noPersonalData": "Kişisel veri gönderilmez: sipariş, müşteri ve çalışan bilgisi hiçbir işte gitmez."
+    },
+    "usage": {
+      "title": "Bu ayki kullanım",
+      "description": "Hangi servisle, hangi iş için kaç kez yapay zekâ kullanıldığı.",
+      "estimateHint": "Maliyet, servislerin liste fiyatlarından ve kullanılan metin uzunluğundan (token) hesaplanan tahmindir; gerçek tutar servisin faturasındadır.",
+      "estimateNote": "Maliyet tahminidir; kesin tutar servisin faturasında yazar.",
+      "empty": "Bu ay yapay zekâ henüz kullanılmadı.",
+      "byService": "Servise göre",
+      "byTask": "İşe göre",
+      "name": "Ad",
+      "count": "Kullanım",
+      "cost": "Tahmini maliyet",
+      "tries_one": "{{count}} kez",
+      "tries_other": "{{count}} kez",
+      "notUsed_one": "{{count}} tanesi sonuç vermedi",
+      "notUsed_other": "{{count}} tanesi sonuç vermedi",
+      "monthly": "Paketinizin aylık sınırı",
+      "daily": {
+        "text": "Bugün (metin)"
+      },
+      "ofLimit": "{{used}} / {{max}}",
+      "unlimited": "{{used}} · sınır yok",
+      "ceilingNote": "Sınıra ulaşınca yeni öneri istenemez; günlük sınır gece yarısı sıfırlanır."
     }
   }
 }
