@@ -75,3 +75,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0067 | [Stil takımı: tema düzeyinde kimlik basamakları ve taşıma sırası](0067-stil-takimi.md) | — |
 | 0068 | [Toptancı müşteriler ve toptan fiyat](0068-toptanci-musteriler-ve-toptan-fiyat.md) | — |
 | 0069 | [Ürün videoları: yükleme, dönüştürme, depolama ve vitrinde gösterim](0069-urun-videolari.md) | — |
+| 0071 | [Yapay zekâ çekirdeği: servis ve yetenek kaydı, kendi anahtarım, platform kredisi](0071-yapay-zeka-cekirdegi.md) | — |
