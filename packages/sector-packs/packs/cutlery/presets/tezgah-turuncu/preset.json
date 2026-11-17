@@ -5,6 +5,8 @@
   "theme": "atolye",
   "name": "Tezgâh · Antrasit ve turuncu",
   "description": "Tezgâh'ın düzeni, antrasit ve turuncu renk takımıyla (menü çubuğu grafit). Kategori listeli katalog: arama simgeli sade üst bilgi, resimli kategori menüsü, dört slaytlı giriş, sahne ve liste, kolaj, şeritli yakın plan, sekmeli raf, sıralı indirimler, şerit galerisi, kampanya bandı, çok satanlar, markalar, kayan şerit, yorumlar, SSS ve dolu alt bilgi; menüleri de kurar.",
+  "family": "tezgah",
+  "swatch": "Antrasit ve turuncu",
   "tone": "light",
   "credits": [
     {

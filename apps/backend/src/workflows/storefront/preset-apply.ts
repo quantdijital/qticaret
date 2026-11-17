@@ -8,6 +8,7 @@ import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { recordAuditEntryStep } from "../audit-log/steps/record-audit-entry"
 import { registerMediaStep } from "../media/steps/register-media"
 import { askForVersions } from "../media/workflows"
+import { autoSaveDraftStep } from "./design-steps"
 import { LAYOUT_LOCK, saveDraftSteps } from "./layout"
 import {
   planPresetImagesStep,
@@ -37,8 +38,11 @@ const PRESET_LOCK = { timeout: 30, ttl: 120 }
  *
  * What the shop has no record for is left out and named in `skipped`,
  * never stood in for; a header or footer the preset leaves empty keeps the
- * shop's sections, named in `kept`. Any step failing undoes the uploads, their records
- * and the draft. Two locks, always in this order: the pack's
+ * shop's sections, named in `kept`. The draft it replaces is kept first as
+ * a saved look (adr/0064 Ek 2026-11-17 §1: `save_as` names it, else an
+ * automatic one unless nothing new would be kept), named in `auto_saved`.
+ * Any step failing undoes the uploads, their records, that save and the
+ * draft. Two locks, always in this order: the pack's
  * (`presetLockKey`) from the ledger's read to the draft's write, so two
  * applies never both upload an image the shop deleted and one of them
  * leaves it unrecorded in the library; the
@@ -90,6 +94,14 @@ export const applyPresetWorkflow = createWorkflow(
       }))
     )
     acquireLockStep(LAYOUT_LOCK)
+    // The draft kept before the look replaces it (adr/0064 Ek 2026-11-17 §1.2)
+    const autoSaved = autoSaveDraftStep(
+      transform({ input }, ({ input }) => ({
+        actor: input.actor,
+        save_as: input.save_as ?? null,
+        reason: "preset_apply" as const,
+      }))
+    )
     const draft = composePresetDraftStep(
       transform({ preset, resolution, recorded }, ({ preset, resolution, recorded }) => ({
         preset,
@@ -104,8 +116,8 @@ export const applyPresetWorkflow = createWorkflow(
       transform({ preset }, ({ preset }) => ({ key: presetLockKey(preset.pack) }))
     ).config({ name: "storefront-preset-unlock-images" })
     const entry = transform(
-      { input, preset, draft, recorded },
-      ({ input, preset, draft, recorded }) => ({
+      { input, preset, draft, recorded, autoSaved },
+      ({ input, preset, draft, recorded, autoSaved }) => ({
         actor: input.actor,
         audit: {
           action: "storefront_layout.preset_applied",
@@ -123,6 +135,7 @@ export const applyPresetWorkflow = createWorkflow(
             dropped: draft.dropped.length,
             kept: draft.kept.length,
             images_added: recorded.added,
+            auto_saved: autoSaved?.id ?? null,
           },
         },
       })
@@ -131,18 +144,23 @@ export const applyPresetWorkflow = createWorkflow(
       recordAuditEntryStep(transform({ entry }, ({ entry }) => entry.audit))
     })
     return new WorkflowResponse(
-      transform({ preset, draft, recorded }, ({ preset, draft, recorded }) => ({
-        pack: preset.pack,
-        preset: preset.code,
-        version: preset.version,
-        skipped: draft.skipped,
-        dropped: draft.dropped,
-        /** The shop's header or footer sections kept where the preset leaves the group empty. */
-        kept: draft.kept,
-        images: { added: recorded.added, kept: recorded.kept },
-        // Demo records come with work item 2.4 (adr/0063 §5)
-        demo: { added: 0, kept: 0 },
-      }))
+      transform(
+        { preset, draft, recorded, autoSaved },
+        ({ preset, draft, recorded, autoSaved }) => ({
+          pack: preset.pack,
+          preset: preset.code,
+          version: preset.version,
+          skipped: draft.skipped,
+          dropped: draft.dropped,
+          /** The shop's header or footer sections kept where the preset leaves the group empty. */
+          kept: draft.kept,
+          images: { added: recorded.added, kept: recorded.kept },
+          // Demo records come with work item 2.4 (adr/0063 §5)
+          demo: { added: 0, kept: 0 },
+          /** The draft kept before (adr/0064 Ek 2026-11-17); null: nothing new to keep. */
+          auto_saved: autoSaved,
+        })
+      )
     )
   }
 )

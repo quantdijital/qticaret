@@ -10286,6 +10286,7 @@
       "none": "Hiçbir yerde kullanılmıyor.",
       "unnamed": "Adsız kayıt",
       "storefrontLink": "Vitrin tasarımı",
+      "autoSavedLook": "Otomatik kayıt",
       "logoLink": "Mağaza logosu",
       "shareImageLink": "Mağazanın paylaşım görseli",
       "seoPage": "Paylaşım görseli: {{page}}",
@@ -10305,6 +10306,7 @@
         "category": "Kategori görseli",
         "etbis_qr": "ETBİS karekodu",
         "collection": "Koleksiyon görseli",
+        "storefront_design": "Kayıtlı görünüm",
         "favicon": "Site simgesi"
       },
       "seoTypes": {

@@ -59,5 +59,76 @@ moduleIntegrationTestRunner<StorefrontLayoutModuleService>({
         { revision: 1, published_at: at, published_by: null, menus },
       ])
     })
+
+    describe("saved looks (adr/0064 Ek 2026-11-17)", () => {
+      const look = (kind: "saved" | "auto", name: string | null, digest = "a".repeat(64)) => ({
+        kind,
+        name,
+        name_key: name === null ? null : name.toLocaleLowerCase("tr-TR"),
+        document: { home: [{ id: "a1b2c3", type: "posts" }], settings: { menus: null } },
+        digest,
+        summary: { source: "own", reason: "manual" },
+        created_by: "user_1",
+      })
+
+      it("keeps one named look per name, its key in Turkish lower case", async () => {
+        await service.createStorefrontDesigns(look("saved", "İstanbul"))
+        await expect(service.createStorefrontDesigns(look("saved", "istanbul"))).rejects.toThrow()
+        expect(await service.listStorefrontDesigns({ kind: "saved" })).toHaveLength(1)
+      })
+
+      it("takes any number of automatic looks with no name, and a removed name back", async () => {
+        await service.createStorefrontDesigns([look("auto", null), look("auto", null)])
+        expect(await service.listStorefrontDesigns({ kind: "auto" })).toHaveLength(2)
+
+        const gone = await service.createStorefrontDesigns(look("saved", "Kış"))
+        await service.softDeleteStorefrontDesigns(gone.id)
+        const again = await service.createStorefrontDesigns(look("saved", "Kış"))
+        expect(again.id).not.toBe(gone.id)
+        expect(again.id).toMatch(/^sfd_/)
+      })
+
+      it("an automatic look's key does not hold a name: a named one of any name is taken", async () => {
+        await service.createStorefrontDesigns({ ...look("auto", null), name_key: "yaz" })
+        await expect(service.createStorefrontDesigns(look("saved", "Yaz"))).resolves.toMatchObject({
+          kind: "saved",
+        })
+      })
+
+      it("sums up the looks newest first without their documents, the removed left out", async () => {
+        const first = await service.createStorefrontDesigns(look("saved", "Bir", "b".repeat(64)))
+        const second = await service.createStorefrontDesigns(look("auto", null, "c".repeat(64)))
+        const gone = await service.createStorefrontDesigns(look("saved", "Üç"))
+        await service.softDeleteStorefrontDesigns(gone.id)
+
+        const summaries = await service.designSummaries()
+
+        expect(summaries.map((row) => row.id)).toEqual([second.id, first.id])
+        for (const row of summaries) {
+          expect(row).not.toHaveProperty("document")
+          expect(Object.keys(row).sort()).toEqual(
+            [
+              "applied_at",
+              "created_at",
+              "created_by",
+              "digest",
+              "id",
+              "kind",
+              "name",
+              "summary",
+              "updated_at",
+            ].sort()
+          )
+        }
+        expect(summaries[1]).toMatchObject({
+          kind: "saved",
+          name: "Bir",
+          digest: "b".repeat(64),
+          summary: { source: "own", reason: "manual" },
+          created_by: "user_1",
+          applied_at: null,
+        })
+      })
+    })
   },
 })

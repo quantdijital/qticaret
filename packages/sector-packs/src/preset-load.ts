@@ -190,6 +190,8 @@ export function readPreset(dir: string, pack: string, code: string): StorefrontP
     name: manifest.name,
     description: manifest.description,
     tone: manifest.tone,
+    family: manifest.family ?? null,
+    swatch: manifest.swatch ?? null,
     credits: manifest.credits,
     pack,
     dir,

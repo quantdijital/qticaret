@@ -52,6 +52,8 @@ export type MediaUseKind =
   | "etbis_qr"
   /** The storefront's site icon (Settings > Store profile > General); no `id`. */
   | "favicon"
+  /** A saved look (Vitrin > Görünümler): `id` the look, `label` its name (null: automatic). */
+  | "storefront_design"
   /** A collection's picture: `id` the collection, `label` its title. */
   | "collection"
 

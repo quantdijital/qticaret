@@ -87,6 +87,8 @@ function Place({ use }: { use: MediaUse }) {
       )
     case "seo":
       return <span>{t(`${U}.seoPage`, { page: t(`${U}.seoTypes.${use.label ?? "page"}`) })}</span>
+    case "storefront_design":
+      return <span>{use.label ?? t(`${U}.autoSavedLook`)}</span>
     case "order":
       return <span>{t(`${U}.orderText`)}</span>
   }

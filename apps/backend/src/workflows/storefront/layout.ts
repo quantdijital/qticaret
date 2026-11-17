@@ -15,6 +15,7 @@ import type { LayoutDocument } from "../../lib/storefront/layout"
 import type StorefrontLayoutModuleService from "../../modules/storefront-layout/service"
 import { KEPT_REVISIONS } from "../../modules/storefront-layout/service"
 import { attachMediaStep } from "../media/steps/attach-media"
+import { keepDesignMarkStep } from "./design-steps"
 import { checkLayout } from "./layout-check"
 import { defaultLayout } from "./layout-default"
 import { json, layoutRow, layouts } from "./layout-row"
@@ -72,13 +73,14 @@ const checkLayoutStep = createStep(
  * Saves the theme editor's draft (adr/0049), as the editor saves while
  * staff work: checked, written, its images kept from the nightly sweep.
  * Nothing reaches shoppers until it is published; the theme's settings
- * and a menu set included (adr/0063 §3).
+ * and a menu set included (adr/0063 §3). The saved-look label is the
+ * stored one: only applying a look writes it (adr/0064).
  */
 export const saveLayoutDraftWorkflow = createWorkflow(
   "storefront-layout-save-draft",
   (draft: LayoutDocument) => {
     acquireLockStep(LAYOUT_LOCK)
-    const saved = saveDraftSteps(draft)
+    const saved = saveDraftSteps(keepDesignMarkStep(draft))
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(saved)
   }

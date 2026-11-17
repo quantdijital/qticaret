@@ -21,7 +21,13 @@ export async function POST(
   }
   const { pack, code } = path.data
   const { result } = await applyPresetWorkflow(req.scope).run({
-    input: { pack, code, demo: req.validatedBody.demo, actor: req.auth_context.actor_id },
+    input: {
+      pack,
+      code,
+      demo: req.validatedBody.demo,
+      actor: req.auth_context.actor_id,
+      save_as: req.validatedBody.save_as ?? null,
+    },
   })
   res.json({ result, layout: await adminLayout(req.scope) })
 }
