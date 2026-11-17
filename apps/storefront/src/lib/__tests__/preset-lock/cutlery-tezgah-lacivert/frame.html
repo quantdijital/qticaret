@@ -1143,80 +1143,6 @@
     <main data-preset-lock="page">
     </main>
   </main>
-  <div data-footer-group="">
-    <div data-qs="ebultenkutusu">
-      <div class="gf-section">
-        <div class="mx-auto w-full max-w-(--container) px-(--gutter)">
-          <section
-            aria-labelledby="bolum-ebultenkutusu"
-            data-news="split"
-            class="grid gap-5 lg:grid-cols-12 lg:items-center lg:gap-x-(--gap-columns) rounded-tile gf-pane p-6 sm:px-8 sm:py-7 lg:px-10"
-          >
-            <div class="lg:col-span-6">
-              <div class="flex min-w-0 flex-col gap-1.5">
-                <h2 id="bolum-ebultenkutusu" class="text-title">
-                  Yeni modeller e-postanızda
-                </h2>
-                <p class="max-w-[52ch] text-text-2 text-sm">
-                  Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz.
-                </p>
-                <p class="text-xs font-semibold text-text-2">
-                  Ayda birkaç e-posta. İstediğiniz an ayrılırsınız.
-                </p>
-              </div>
-            </div>
-            <form class="flex flex-col gap-2 gf-news lg:col-span-5 lg:col-start-8">
-              <label for="bolum-ebultenkutusu-form-eposta" class="sr-only">
-                E-posta adresiniz
-              </label>
-              <div class="gf-join">
-                <input
-                  id="bolum-ebultenkutusu-form-eposta"
-                  type="email"
-                  required=""
-                  maxLength="254"
-                  autoComplete="email"
-                  inputMode="email"
-                  placeholder="ornek@eposta.com"
-                  aria-describedby="bolum-ebultenkutusu-form-durum"
-                  class="gf-field min-w-0 flex-1"
-                  name="email"
-                />
-                <button type="submit" class="gf-btn shrink-0">
-                  Abone ol
-                </button>
-              </div>
-              <div class="gf-news-more flex flex-col gap-3">
-                <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
-                  <input
-                    type="checkbox"
-                    required=""
-                    class="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
-                    name="consent"
-                    value="1"
-                  />
-                  <span>
-                    Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak Örnek Atölye Ltd. Şti. tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.
-                  </span>
-                </label>
-                <p
-                  id="bolum-ebultenkutusu-form-durum"
-                  role="alert"
-                  class="min-h-[1lh] text-sm font-semibold"
-                >
-                </p>
-              </div>
-              <p class="gf-news-privacy text-xs">
-                <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
-                  KVKK aydınlatma metni
-                </a>
-              </p>
-            </form>
-          </section>
-        </div>
-      </div>
-    </div>
-  </div>
   <footer
     data-gf-clear=""
     data-qs="mainfooter"
@@ -1225,6 +1151,72 @@
     data-badges="card"
     class="gf-footer-rows mt-(--footer-gap)"
   >
+    <div data-footer-band="" class="border-b border-rule">
+      <div class="mx-auto w-full max-w-(--container) px-(--gutter) py-8 lg:py-10">
+        <section
+          aria-labelledby="bulten"
+          data-news="split"
+          class="grid gap-5 lg:grid-cols-12 lg:items-center lg:gap-x-(--gap-columns)"
+        >
+          <div class="lg:col-span-6">
+            <div class="flex min-w-0 flex-col gap-1.5">
+              <h2 id="bulten" class="text-title">
+                Yeni modeller e-postanızda
+              </h2>
+              <p class="max-w-[52ch] text-text-2 text-sm">
+                Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz.
+              </p>
+              <p class="text-xs font-semibold text-text-2">
+                Ayda birkaç e-posta. İstediğiniz an ayrılırsınız.
+              </p>
+            </div>
+          </div>
+          <form class="flex flex-col gap-2 gf-news lg:col-span-5 lg:col-start-8">
+            <label for="bulten-alt-eposta" class="sr-only">
+              E-posta adresiniz
+            </label>
+            <div class="gf-join">
+              <input
+                id="bulten-alt-eposta"
+                type="email"
+                required=""
+                maxLength="254"
+                autoComplete="email"
+                inputMode="email"
+                placeholder="ornek@eposta.com"
+                aria-describedby="bulten-alt-durum"
+                class="gf-field min-w-0 flex-1"
+                name="email"
+              />
+              <button type="submit" class="gf-btn shrink-0">
+                Abone ol
+              </button>
+            </div>
+            <div class="gf-news-more flex flex-col gap-3">
+              <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
+                <input
+                  type="checkbox"
+                  required=""
+                  class="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
+                  name="consent"
+                  value="1"
+                />
+                <span>
+                  Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak Örnek Atölye Ltd. Şti. tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.
+                </span>
+              </label>
+              <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold">
+              </p>
+            </div>
+            <p class="gf-news-privacy text-xs">
+              <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
+                KVKK aydınlatma metni
+              </a>
+            </p>
+          </form>
+        </section>
+      </div>
+    </div>
     <div class="gf-frow" data-ground="inherit" data-space="medium" data-align="start">
       <div
         class="mx-auto w-full max-w-(--container) px-(--gutter) gf-frow-grid"
@@ -1234,18 +1226,6 @@
         <div class="gf-fcol">
           <div class="gf-fblock" data-block="contact">
             <section class="flex flex-col gap-4">
-              <p class="flex items-start gap-3 text-sm text-text-2">
-                <svg
-                  width="24"
-                  height="24"
-                  stroke-width="2"
-                  class="lucide lucide-map-pin mt-0.5 size-4 shrink-0"
-                  aria-hidden="true"
-                />
-                <span class="max-w-[36ch]">
-                  Örnek Mah. 1. Sok. No: 1, Denizli
-                </span>
-              </p>
               <ul aria-label="Bize ulaşın" class="gf-reach">
                 <li class="min-w-0">
                   <a
@@ -1362,6 +1342,20 @@
               <p class="max-w-[40ch] text-sm text-text-2">
                 Mutfak bıçaklarından çakılara, kamp aletlerinden bileme ve bakım ürünlerine kadar özenle seçilmiş bir seçki. Ayrıntılar ürün sayfalarında; sorularınız için bize yazabilirsiniz.
               </p>
+              <ul class="flex flex-col text-sm">
+                <li class="flex items-start gap-3 py-2 text-text-2">
+                  <svg
+                    width="24"
+                    height="24"
+                    stroke-width="2"
+                    class="lucide lucide-map-pin mt-0.5 size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span class="max-w-[36ch]">
+                    Örnek Mah. 1. Sok. No: 1, Denizli
+                  </span>
+                </li>
+              </ul>
               <ul aria-label="Sosyal medya" class="flex flex-wrap gap-2">
                 <li>
                   <a

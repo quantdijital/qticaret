@@ -171,7 +171,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(footer?.map((each) => each.type)).toEqual(["footer_bar", "newsletter"])
     // adr/0070 PR-5: the free rows the panel's seed gives (the reach strip, the brand and three menus)
     const bar = footer?.[0] as {
-      rows?: { columns: { blocks: { type: string; about?: string }[] }[] }[]
+      rows?: { columns: { blocks: { type: string; about?: string; address?: boolean }[] }[] }[]
     }
     expect(footer?.[0]).toMatchObject({
       variant: "free_rows",
@@ -188,6 +188,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       ["contact"],
       ["brand", "menu", "menu", "menu"],
     ])
+    // The address where the brand columns drew it: under the brand's line, not in the reach strip
+    expect(blocks[0]?.[0]).toMatchObject({ type: "contact", address: false })
+    expect(blocks[1]?.[0]).toMatchObject({ type: "brand", address: true })
     const about = blocks[1]?.[0]?.about ?? ""
     expect(about.length).toBeGreaterThan(0)
     expect(about.length).toBeLessThanOrEqual(240)
@@ -195,7 +198,13 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     for (const code of CODES) {
       const box = read(code).layout.footer?.[1] as
         { text?: string | null; description?: string; note?: string } | undefined
-      expect(box).toMatchObject({ id: "ebultenkutusu", variant: "split", show_note: true })
+      // On the footer's ground as its top band, as the brand columns drew it (adr/0070 §4 Ek)
+      expect(box).toMatchObject({
+        id: "ebultenkutusu",
+        variant: "split",
+        show_note: true,
+        joined: true,
+      })
       expect(box?.text).toBeNull()
       expect(box?.description?.length).toBeLessThanOrEqual(240)
       expect(box?.note?.length).toBeLessThanOrEqual(80)
