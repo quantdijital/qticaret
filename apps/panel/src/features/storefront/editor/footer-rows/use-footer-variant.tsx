@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
@@ -23,11 +23,16 @@ export function useFooterVariant(doc: LayoutDocument, dispatch: Dispatch<EditorA
   const { t } = useTranslation()
   const pending = doc.settings.menus
   const saved = useQuery({ ...menusQuery(), enabled: pending === null })
+  const client = useQueryClient()
   const [leaving, setLeaving] = useState<{
     section: FooterBarSection
     next: FooterBarVariant
   } | null>(null)
-  const menuCount = footerTitles(pending ?? saved.data ?? []).length
+  // Picked before the menus came: they are fetched first, so the seed holds them
+  const menus = async () =>
+    pending ??
+    saved.data ??
+    (await client.query({ ...menusQuery(), staleTime: "static" }).catch(() => []))
   const leave = (section: FooterBarSection, next: FooterBarVariant) => {
     dispatch({ type: "update", section: switchVariant(section, next) })
   }
@@ -40,7 +45,10 @@ export function useFooterVariant(doc: LayoutDocument, dispatch: Dispatch<EditorA
           taken.add(id)
           return id
         }
-        dispatch({ type: "footer", sections: seedFooter(doc.footer, menuCount, newId) })
+        void menus().then((list) => {
+          const count = footerTitles(list).length
+          dispatch({ type: "footer", sections: seedFooter(doc.footer, count, newId) })
+        })
       } else if (section.variant === "free_rows") {
         setLeaving({ section, next })
       } else {

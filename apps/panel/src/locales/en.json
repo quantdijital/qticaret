@@ -9995,7 +9995,8 @@
           "confirm": "Change variant"
         },
         "moveUpOf": "Move {{name}} up",
-        "moveDownOf": "Move {{name}} down"
+        "moveDownOf": "Move {{name}} down",
+        "backToFooter": "Back to the footer"
       }
     },
     "maintenance": {

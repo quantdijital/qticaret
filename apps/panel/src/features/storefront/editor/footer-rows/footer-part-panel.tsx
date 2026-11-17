@@ -78,7 +78,12 @@ export function FooterPartPanel({
     : t(`${FR}.types.${found?.block.type ?? "text"}.name`)
   return (
     <FieldFocusContext.Provider value={focus}>
-      <Panel icon={found ? BLOCK_ICONS[found.block.type] : Rows3} title={title} onBack={onBack}>
+      <Panel
+        icon={found ? BLOCK_ICONS[found.block.type] : Rows3}
+        title={title}
+        onBack={onBack}
+        back={t(`${FR}.backToFooter`)}
+      >
         <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
           {found ? t(`${FR}.types.${found.block.type}.description`) : t(`${FR}.row.description`)}
         </p>
@@ -125,6 +130,8 @@ export function FooterPartPanel({
           onDuplicate={() => {
             set(row ? duplicateRow(rows, row.id, newId) : duplicateBlock(rows, part.id, newId))
           }}
+          removeLabel={t(row ? `${FR}.actions.removeRow` : `${FR}.actions.remove`)}
+          canRemove={!row || rows.length > 1}
           onRemove={() => {
             const next = row ? removeRow(rows, row.id) : removeBlock(rows, part.id)
             if (next !== rows) {

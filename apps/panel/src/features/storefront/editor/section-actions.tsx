@@ -15,12 +15,17 @@ export function SectionActions({
   note = null,
   onDuplicate,
   onRemove,
+  removeLabel,
+  canRemove = true,
 }: {
   canCopy: boolean
   canDuplicate: boolean
   note?: string | null
   onDuplicate: () => void
   onRemove: () => void
+  /** What the remove button takes off, when not a section (a footer row or block). */
+  removeLabel?: string
+  canRemove?: boolean
 }) {
   const { t } = useTranslation()
   return (
@@ -32,9 +37,15 @@ export function SectionActions({
             {t(`${P}.duplicate`)}
           </Button>
         ) : null}
-        <Button type="button" variant="ghost" className="text-destructive-text" onClick={onRemove}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-destructive-text"
+          disabled={!canRemove}
+          onClick={onRemove}
+        >
           <Trash2 />
-          {t(`${P}.remove`)}
+          {removeLabel ?? t(`${P}.remove`)}
         </Button>
       </div>
       {canCopy && !canDuplicate && note ? (

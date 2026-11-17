@@ -9995,7 +9995,8 @@
           "confirm": "Biçimi değiştir"
         },
         "moveUpOf": "{{name}}: yukarı taşı",
-        "moveDownOf": "{{name}}: aşağı taşı"
+        "moveDownOf": "{{name}}: aşağı taşı",
+        "backToFooter": "Alt bilgiye dön"
       }
     },
     "maintenance": {
