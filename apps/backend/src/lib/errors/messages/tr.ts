@@ -1029,6 +1029,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Ana sayfada en çok iki fiyat bandı bölümü olabilir; gizli ya da zamanlanmış olanlar da sayılır.",
   "storefront_layout.price_bands_order":
     "Fiyat aralıkları artan sırada olmalı; üst sınırı olmayan aralık yalnız sonda olabilir.",
+  // adr/0070: the free rows footer ("Serbest düzen")
+  "storefront_layout.footer_rows_limit": "Alt bilgide en az bir, en çok altı satır olabilir.",
+  "storefront_layout.footer_blocks_limit":
+    "Alt bilgide çok fazla blok var: bir sütunda en çok 6, toplamda en çok 24 blok olabilir; bazı blok türleri yalnız bir kez eklenebilir.",
+  "storefront_layout.footer_columns_mismatch":
+    "Satırın sütun sayısı seçilen düzenle uyuşmuyor; sayfayı yenileyip yeniden deneyin.",
+  "storefront_layout.footer_block_invalid":
+    "Alt bilgideki bir blok kaydedilemedi; alanlarını kontrol edin (yazı bloğunda başlık, resim ve tablo kullanılamaz; uygulama bağlantıları yalnız App Store ve Google Play adresi olabilir).",
+  "storefront_layout.footer_newsletter_twice":
+    "Alt bilgide iki bülten formu olamaz; bülten bloğunu ya da alt bilgi grubundaki bülten bölümünü kaldırın ya da gizleyin.",
   "storefront_layout.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "storefront_layout.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "storefront_layout.schedule_invalid": "Bölümün bitiş zamanı başlangıçtan sonra olmalı.",

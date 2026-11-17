@@ -37,7 +37,8 @@ export const SECTION_VARIANTS = {
   // `centered` is the theme setting's centred header (`header.layout`), read
   // into the bar; its drawing stays on adr/0062 karar 6's branch. `catalog` is N14
   header_bar: ["standard", "centered", "catalog"],
-  footer_bar: ["ledger", "brand_columns"],
+  // `free_rows` (adr/0070): the shop's own rows of blocks
+  footer_bar: ["ledger", "brand_columns", "free_rows"],
   // The newsletter box (Ek 2026-11-17 e-bülten): today's first; `in_footer` the footer's only
   newsletter: ["standard", "split", "image_card", "strip", "in_footer"],
   product_main: ["standard"],

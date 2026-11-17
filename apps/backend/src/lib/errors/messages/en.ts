@@ -1021,6 +1021,16 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The home page can show at most two price bands sections; hidden or scheduled ones count too.",
   "storefront_layout.price_bands_order":
     "Price bands must rise; only the last one may have no upper bound.",
+  // adr/0070: the free rows footer ("Serbest düzen")
+  "storefront_layout.footer_rows_limit": "The footer takes one to six rows.",
+  "storefront_layout.footer_blocks_limit":
+    "The footer has too many blocks: a column takes up to 6 and the footer up to 24; some block types can be added only once.",
+  "storefront_layout.footer_columns_mismatch":
+    "The row's columns do not match its layout; refresh the page and try again.",
+  "storefront_layout.footer_block_invalid":
+    "A footer block could not be saved; check its fields (a text block takes no headings, pictures or tables; app links must be App Store or Google Play addresses).",
+  "storefront_layout.footer_newsletter_twice":
+    "The footer cannot show two newsletter forms; remove or hide the newsletter block or the footer group's newsletter section.",
   "storefront_layout.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "storefront_layout.color_duplicate": "Each colour name can be listed once.",
   "storefront_layout.schedule_invalid": "The section must end after it starts.",

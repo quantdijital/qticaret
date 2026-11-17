@@ -2,7 +2,10 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
 import { isBody, isShowing, readStoredLayout } from "../../lib/storefront/layout"
 import { mainSectionsOf, withMainSections } from "../../lib/storefront/layout-main"
-import { fillShopText, fillShopTextWhole } from "../../lib/shop/tokens"
+import { fillShopDoc, fillShopText, fillShopTextWhole } from "../../lib/shop/tokens"
+import type { MenuLinkInput } from "../../lib/storefront/menus"
+import { freeBlocksOf } from "../../lib/storefront/sections/footer-rules"
+import { footerRowImages, footerRowLinks } from "../../lib/storefront/sections/footer-rows-print"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { shownSettings } from "../../lib/storefront/layout-settings"
 import { newsletterImages, printedNewsletter } from "../../lib/storefront/sections/newsletter"
@@ -78,8 +81,17 @@ export async function storeLayout(
   // The header's scrolling strip links like a body section (adr/0049 Ek 2026-11-14 §4.1),
   // the catalog header bar's highlighted link too (it always shows)
   const bar = doc.header.filter((section) => section.type === "header_bar")
-  const links = [...body, ...headerLinked({ header: [...header, ...bar] })].flatMap(linksOf)
-  const urls = [...body.flatMap(imageUrls), ...footer.flatMap(newsletterImages)]
+  // A free rows footer's shown blocks (adr/0070 §2.2): their pictures and those pictures' links
+  const blocks = freeBlocksOf(doc.footer).filter((block) => block.visible)
+  const links = [
+    ...[...body, ...headerLinked({ header: [...header, ...bar] })].flatMap(linksOf),
+    ...footerRowLinks(blocks),
+  ]
+  const urls = [
+    ...body.flatMap(imageUrls),
+    ...footer.flatMap(newsletterImages),
+    ...footerRowImages(blocks),
+  ]
   const [values, resolved, assets, picks, bands] = await Promise.all([
     shopInfoValues(container),
     resolveLinks(
@@ -140,6 +152,7 @@ export async function storeLayout(
       })
     ),
   }
+  const resolve = (link: MenuLinkInput) => at.links.get(link) ?? null
   return {
     header: header.map((section) =>
       section.type === "marquee"
@@ -176,7 +189,13 @@ export async function storeLayout(
       }))
     ),
     main: withShopNote(
-      mainSectionsOf(doc, (link) => at.links.get(link) ?? null),
+      mainSectionsOf(doc, resolve, {
+        fill: (text) => fill(text, values),
+        doc: (body) => fillShopDoc(body, values),
+        // A picture gone from the library since the save: its block is not drawn
+        picture: (url) => at.images.get(url) ?? null,
+        resolve,
+      }),
       values
     ),
     settings: sharedOf(doc, legacy, values),

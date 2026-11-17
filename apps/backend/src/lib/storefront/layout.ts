@@ -10,6 +10,7 @@ import {
 } from "./layout-sections"
 import type { BodySection, PageMain } from "./layout-sections"
 import { layoutSettings, storedSettings } from "./layout-settings"
+import { freeRowIds, freeRowsConflict } from "./sections/footer-rules"
 import { isMainType } from "./sections/main"
 import { PRICE_BANDS_LIMITS } from "./sections/price-bands"
 import { storedSection } from "./sections/stored"
@@ -90,8 +91,14 @@ export const layoutDocument = z
       ...doc.product,
       ...doc.category,
     ]
-    if (new Set(all.map((section) => section.id)).size !== all.length) {
+    // A free rows footer's rows and blocks take ids among the sections' (adr/0070 §2)
+    const ids = [...all.map((section) => section.id), ...freeRowIds(doc.footer)]
+    if (new Set(ids).size !== ids.length) {
       ctx.addIssue({ code: "custom", message: "storefront_layout.section_duplicate" })
+    }
+    const conflict = freeRowsConflict(doc.footer)
+    if (conflict) {
+      ctx.addIssue({ code: "custom", message: conflict })
     }
     const mainTwice = [doc.product, doc.category].some(
       (page) => page.filter((section) => isMainType(section.type)).length > 1

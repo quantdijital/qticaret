@@ -21,6 +21,7 @@
     "./section-catalog": "./src/store/section-catalog.ts",
     "./section-categories": "./src/store/section-categories.ts",
     "./section-footer": "./src/store/section-footer.ts",
+    "./section-footer-rows": "./src/store/section-footer-rows.ts",
     "./section-scroller": "./src/store/section-scroller.ts",
     "./section-shelf": "./src/store/section-shelf.ts",
     "./section-strips": "./src/store/section-strips.ts",

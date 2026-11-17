@@ -119,6 +119,6 @@ describe("the brand columns footer (adr/0049 Ek 2026-11-17)", () => {
     expect(FOOTER_COLUMNS_SETTINGS).toEqual(own["FOOTER_COLUMNS_SETTINGS"])
     expect(FOOTER_COLUMNS_LIMITS).toEqual(own["FOOTER_COLUMNS_LIMITS"])
     expect(FOOTER_COLUMNS_DEFAULTS).toEqual(own["FOOTER_COLUMNS_DEFAULTS"])
-    expect(SECTION_VARIANTS.footer_bar).toEqual(["ledger", "brand_columns"])
+    expect(SECTION_VARIANTS.footer_bar).toEqual(["ledger", "brand_columns", "free_rows"])
   })
 })

@@ -91,3 +91,24 @@ export function FooterBrandColumns() {
     </>
   )
 }
+
+/**
+ * Free rows (adr/0070): the shop's own rows, each split into columns of
+ * its choosing, above the fixed bottom line.
+ */
+export function FooterFreeRows() {
+  return (
+    <>
+      <Frame />
+      <rect x={6} y={6} width={48} height={5} rx={1} className="fill-current opacity-40" />
+      <rect x={58} y={6} width={48} height={5} rx={1} className="fill-current opacity-40" />
+      <rect x={6} y={13} width={38} height={8} rx={1} className="fill-current opacity-55" />
+      <rect x={48} y={13} width={17} height={8} rx={1} className="fill-current opacity-40" />
+      <rect x={69} y={13} width={17} height={8} rx={1} className="fill-current opacity-40" />
+      <rect x={90} y={13} width={16} height={8} rx={1} className="fill-current opacity-40" />
+      <line x1={6} y1={23.5} x2={106} y2={23.5} className="stroke-current opacity-30" />
+      <rect x={6} y={25} width={14} height={1.5} rx={0.75} className="fill-current opacity-35" />
+      <rect x={92} y={25} width={14} height={1.5} rx={0.75} className="fill-current opacity-35" />
+    </>
+  )
+}

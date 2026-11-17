@@ -8083,7 +8083,8 @@
         },
         "footer_bar": {
           "ledger": "Standard",
-          "brand_columns": "Brand and columns"
+          "brand_columns": "Brand and columns",
+          "free_rows": "Free layout"
         },
         "product_main": {
           "standard": "Standard"
@@ -8538,6 +8539,11 @@
         "marqueeLimit": "A page may show up to {{max}} scrolling strips (the header's counts on every page); remove one.",
         "bandsOrder": "Upper bounds must rise; only the last band may have none.",
         "bandsLimit": "The home page can have at most {{max}} price bands sections (hidden ones count too); remove one.",
+        "footerRowsLimit": "The footer takes one to {{max}} rows.",
+        "footerBlocksLimit": "Too many blocks: a column takes up to 6 and the footer up to 24; some block types can be added only once.",
+        "footerColumnsMismatch": "The row's columns do not match its layout.",
+        "footerBlockInvalid": "This block cannot be saved; check its fields.",
+        "footerNewsletterTwice": "The footer cannot show two newsletter forms; remove the newsletter block or the newsletter section.",
         "stripsTwo": "Add at least two strips.",
         "brandRequired": "Choose a brand.",
         "imageRequired": "Choose a picture."
