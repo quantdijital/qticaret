@@ -7,7 +7,7 @@ import type { VideoDemuxer, VideoSourceFormat } from "../../../lib/media/video/s
 import { makeVideoTempDir, removeVideoTempDir } from "../../../lib/media/video/temp-files"
 import { freeDiskBytes, transcodeClip } from "../../../lib/media/video/transcode"
 import type { TranscodeOptions } from "../../../lib/media/video/transcode"
-import { classifyFailure, infraError } from "../../../lib/media/video/transcode-errors"
+import { classifyFailure, infraError, inputError } from "../../../lib/media/video/transcode-errors"
 import type { Failure } from "../../../lib/media/video/transcode-errors"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
@@ -29,7 +29,15 @@ const DEMUXER: Readonly<Record<VideoSourceFormat, VideoDemuxer>> = {
   mp4: "mov",
   mov: "mov",
   webm: "matroska",
-  gif: "gif",
+}
+
+/** The demuxer a stored source is read with; any other format (never written) is refused. */
+export function sourceDemuxer(format: string): VideoDemuxer {
+  const demuxer = Object.hasOwn(DEMUXER, format) ? DEMUXER[format as VideoSourceFormat] : undefined
+  if (!demuxer) {
+    throw inputError("video.unsupported_type", `video job: source format ${format}`)
+  }
+  return demuxer
 }
 
 export type ProcessOutcome =
@@ -71,9 +79,10 @@ export async function processVideo(
     if ((await freeDiskBytes(dir)) < MIN_FREE_DISK_BYTES) {
       throw infraError("video job: under 500 MB of free disk")
     }
+    const demuxer = sourceDemuxer(video.source_format)
     const source = join(dir, "source")
     await downloadSource(container, video.source_file_id, source, signal)
-    const clip = await transcodeClip(source, DEMUXER[video.source_format], dir, {
+    const clip = await transcodeClip(source, demuxer, dir, {
       ...options.transcode,
       signal,
     })

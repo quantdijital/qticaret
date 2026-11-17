@@ -15,7 +15,8 @@ import type { EntityManager } from "@medusajs/framework/mikro-orm/knex"
 export interface ClaimedVideo {
   id: string
   source_file_id: string
-  source_format: "mp4" | "mov" | "webm" | "gif"
+  // The column also allows `gif` (never written: GIF is not uploaded, owner 2026-11-17)
+  source_format: "mp4" | "mov" | "webm"
   source_bytes: number | null
   /** Tries made before this one; also this claim's fencing token. */
   attempts: number

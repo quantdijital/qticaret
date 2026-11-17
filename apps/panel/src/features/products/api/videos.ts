@@ -47,8 +47,8 @@ export const VIDEO_POLL_MS = 5000
 
 /**
  * Whether a picked file goes to the video route: MP4, MOV or WebM by its
- * type or, when the browser names none, its extension. A GIF stays an
- * image (adr/0069 slice 7 brings it to video).
+ * type or, when the browser names none, its extension. A GIF is never a
+ * video (adr/0069 Kararlar 11): it goes the image way and is refused there.
  */
 export function isVideoFile(file: Pick<File, "name" | "type">): boolean {
   if (VIDEO_TYPES.has(file.type)) {

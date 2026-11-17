@@ -1,18 +1,19 @@
 /**
  * What a video file is, read from its first bytes (adr/0069 §3): the name
  * and the MIME type it came with are never asked. Only MP4/MOV (an `ftyp`
- * box with a known brand), WebM (an EBML header whose DocType is `webm`)
- * and GIF are recognised; Matroska, AVI, FLV, MPEG-TS, HLS/DASH playlists
- * and everything else read as null.
+ * box with a known brand) and WebM (an EBML header whose DocType is
+ * `webm`) are recognised; GIF (never uploaded, owner 2026-11-17),
+ * Matroska, AVI, FLV, MPEG-TS, HLS/DASH playlists and everything else
+ * read as null.
  *
  * Untrusted bytes: every loop here walks forward by at least one byte a
  * turn within a bound fixed up front, and no regular expression is used.
  */
 
-export type VideoSourceFormat = "mp4" | "mov" | "webm" | "gif"
+export type VideoSourceFormat = "mp4" | "mov" | "webm"
 
 /** The demuxer ffprobe and ffmpeg are forced to use (`-f`): never guessed from content. */
-export type VideoDemuxer = "mov" | "matroska" | "gif"
+export type VideoDemuxer = "mov" | "matroska"
 
 export interface VideoSignature {
   format: VideoSourceFormat
@@ -146,12 +147,7 @@ function webm(bytes: Uint8Array): VideoSignature | null {
   return null
 }
 
-function gif(bytes: Uint8Array): VideoSignature | null {
-  const head = bytes.length >= 6 ? ascii(bytes, 0, 6) : ""
-  return head === "GIF87a" || head === "GIF89a" ? { format: "gif", demuxer: "gif" } : null
-}
-
 /** The file's kind by its first bytes (`SIGNATURE_BYTES` of them are enough), or null. */
 export function videoSignature(bytes: Uint8Array): VideoSignature | null {
-  return isoMedia(bytes) ?? webm(bytes) ?? gif(bytes)
+  return isoMedia(bytes) ?? webm(bytes)
 }

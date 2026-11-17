@@ -78,7 +78,7 @@ describe("ffprobe's answer against the limits (adr/0069 §3)", () => {
     ],
     // Codecs and streams
     ["ProRes", phoneWith({ codec_name: "prores" }), "video.unsupported_type"],
-    ["a GIF stream (slice 7)", phoneWith({ codec_name: "gif" }), "video.unsupported_type"],
+    ["a GIF stream", phoneWith({ codec_name: "gif" }), "video.unsupported_type"],
     ["no codec name", phoneWith({ codec_name: undefined }), "video.unsupported_type"],
   ])("refuses %s", (_, output, code) => {
     expect(codeOf(() => assessProbe(output, "mov"))).toBe(code)

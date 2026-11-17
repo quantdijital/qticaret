@@ -3188,7 +3188,7 @@
       "errors": {
         "too_large": "A video can be 50 MB at most.",
         "too_long": "A video can be 30 seconds long at most.",
-        "unsupported_type": "This file type cannot be uploaded. Upload MP4, MOV, WebM or GIF.",
+        "unsupported_type": "This file type cannot be uploaded. Upload MP4, MOV or WebM.",
         "dimensions_too_large": "The video's resolution is too high (4K at most).",
         "frame_rate_too_high": "The video's frame rate is too high (120 frames a second at most).",
         "unreadable": "The video could not be read; the file may be damaged.",

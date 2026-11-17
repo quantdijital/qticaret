@@ -19,7 +19,6 @@ const SOURCE_FILE: Readonly<Record<VideoSourceFormat, { name: string; mime: stri
   mp4: { name: "video-kaynak.mp4", mime: "video/mp4" },
   mov: { name: "video-kaynak.mov", mime: "video/quicktime" },
   webm: { name: "video-kaynak.webm", mime: "video/webm" },
-  gif: { name: "video-kaynak.gif", mime: "image/gif" },
 }
 
 const media = (container: { resolve: (key: string) => unknown }) =>
