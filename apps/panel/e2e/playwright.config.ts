@@ -10,7 +10,9 @@ const isCI = Boolean(process.env["CI"])
  * and axe finds no serious accessibility issue. They run against the
  * panel's dev server (started here if it is not running) and a backend
  * that is: `pnpm --filter backend dev`. Nothing they do writes data,
- * apart from the temporary admin, which the teardown deletes.
+ * apart from the temporary admin, which the teardown deletes, and what a
+ * test removes itself (a look's saved drafts, a product's video: the
+ * video test also needs ffmpeg on both machines).
  */
 export default defineConfig({
   testDir: ".",
