@@ -22,6 +22,8 @@ export interface AiButtonProps {
   options?: readonly string[]
   /** The button's size: `icon` stands level with a 36px field beside it (docs/18 §2). */
   size?: "icon-sm" | "icon"
+  /** The button's name when a form has more than one ("Başlık için…"); left out: the shared one. */
+  label?: string
 }
 
 /**
@@ -31,8 +33,9 @@ export interface AiButtonProps {
  * the task does not allow draws nothing. Nothing is saved: "Kullan" hands
  * the text to `onUse`.
  */
-export function AiButton({ task, entity, onUse, options, size = "icon-sm" }: AiButtonProps) {
+export function AiButton({ task, entity, onUse, options, size = "icon-sm", label }: AiButtonProps) {
   const { t } = useTranslation()
+  const name = label ?? t("ai.suggest.button")
   const services = useQuery(aiServicesQuery())
   const view = services.data?.tasks.find((each) => each.id === task)
   const usable = view?.usable ?? []
@@ -53,13 +56,7 @@ export function AiButton({ task, entity, onUse, options, size = "icon-sm" }: AiB
   }
   const trigger = (
     <PopoverTrigger asChild>
-      <Button
-        type="button"
-        variant="ghost"
-        size={size}
-        aria-label={t("ai.suggest.button")}
-        title={t("ai.suggest.button")}
-      >
+      <Button type="button" variant="ghost" size={size} aria-label={name} title={name}>
         <Sparkles />
       </Button>
     </PopoverTrigger>
@@ -69,11 +66,7 @@ export function AiButton({ task, entity, onUse, options, size = "icon-sm" }: AiB
     return hintGone ? null : (
       <Popover open={open} onOpenChange={setOpen}>
         {trigger}
-        <PopoverContent
-          align="end"
-          aria-label={t("ai.suggest.button")}
-          className="w-72 max-w-[calc(100vw-2rem)]"
-        >
+        <PopoverContent align="end" aria-label={name} className="w-72 max-w-[calc(100vw-2rem)]">
           <AiConnectHint
             onClose={() => {
               setOpen(false)
@@ -123,7 +116,7 @@ export function AiButton({ task, entity, onUse, options, size = "icon-sm" }: AiB
       {trigger}
       <PopoverContent
         align="end"
-        aria-label={t("ai.suggest.button")}
+        aria-label={name}
         className="flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-3"
       >
         <AiServicePicker

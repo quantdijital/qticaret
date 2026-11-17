@@ -148,14 +148,9 @@ describe("SeoCard", () => {
     const urls = () => net.mock.calls.map(([url]) => String(url))
     const seoWrites = () =>
       fetchMock.mock.calls.filter(([, init]) => (init as { method?: string } | undefined)?.method)
-    // The title's button comes first, the description's second
-    const titleButton = async () => {
-      const [first] = await screen.findAllByRole("button", { name: "Yapay zekâ ile öner" })
-      if (!first) {
-        throw new Error("no AI button")
-      }
-      return first
-    }
+    // Each button says its field (two of one name would be the same to a screen reader)
+    const titleButton = () =>
+      screen.findByRole("button", { name: "Başlık için yapay zekâ ile öner" })
 
     beforeEach(() => {
       localStorage.clear()
@@ -264,12 +259,29 @@ describe("SeoCard", () => {
       expect(within(picker).getAllByRole("radio")).toHaveLength(2)
     })
 
+    it("names each button by its field and fills the description from its own", async () => {
+      offer(["deepseek"])
+      const user = userEvent.setup()
+      renderCard()
+
+      expect(await titleButton()).toBeInTheDocument()
+      await user.click(screen.getByRole("button", { name: "Açıklama için yapay zekâ ile öner" }))
+      await user.click(await screen.findByRole("button", { name: "Kullan" }))
+      await waitFor(() => {
+        expect(field("seo-description-cent_1")).toHaveValue(SUGGESTED)
+      })
+      expect(field("seo-title-cent_1")).toHaveValue("")
+      expect(JSON.parse((net.mock.calls[0]?.[1] as { body: string }).body)).toMatchObject({
+        task: "seo_description",
+      })
+    })
+
     it("has no button on a card the AI core does not write for", () => {
       offer(["deepseek"])
       renderCard("collection")
       expect(field("seo-title-cent_1")).toBeInTheDocument()
       expect(fetchMock).not.toHaveBeenCalledWith("/admin/ai/services")
-      expect(screen.queryByRole("button", { name: "Yapay zekâ ile öner" })).not.toBeInTheDocument()
+      expect(screen.queryByRole("button", { name: /yapay zekâ ile öner/i })).not.toBeInTheDocument()
     })
   })
 })

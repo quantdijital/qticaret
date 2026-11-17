@@ -5744,7 +5744,9 @@
       "canonical": "Canonical adres",
       "canonicalHint": "Yalnızca bu sitede bir yol. Boşsa sayfanın kendi adresi kullanılır.",
       "saved": "SEO alanları kaydedildi.",
-      "duplicates": "Başka sayfalarla aynı: başlık {{title}}, açıklama {{description}} sayfada. Kayıt yapıldı, ama benzersiz metinler arama sonuçlarında daha iyi görünür."
+      "duplicates": "Başka sayfalarla aynı: başlık {{title}}, açıklama {{description}} sayfada. Kayıt yapıldı, ama benzersiz metinler arama sonuçlarında daha iyi görünür.",
+      "aiTitle": "Başlık için yapay zekâ ile öner",
+      "aiDescription": "Açıklama için yapay zekâ ile öner"
     },
     "redirectsCard": {
       "title": "Yönlendirmeler ve 404",
