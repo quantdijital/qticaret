@@ -51,6 +51,8 @@ export interface ProbeOptions {
   slots?: Slots
   timeoutMs?: number
   env?: NodeJS.ProcessEnv
+  /** Fired, ffprobe is killed (or never started): `ProbeStoppedError`. */
+  signal?: AbortSignal
 }
 
 /**
@@ -73,7 +75,12 @@ export async function probeVideo(
       timeoutMs: options.timeoutMs ?? PROBE_TIMEOUT_MS,
       maxOutputBytes: PROBE_MAX_OUTPUT_BYTES,
       ...(options.spawn ? { spawn: options.spawn } : {}),
+      ...(options.signal ? { signal: options.signal } : {}),
     })
+    if (run.aborted) {
+      // Stopped by the caller (the transcoding job's time, a removal): nothing about the clip
+      throw new ProbeStoppedError()
+    }
     if (run.timedOut || run.overflow || run.code !== 0) {
       // ffprobe's own words are not logged: they may quote the file's contents
       logger.info({

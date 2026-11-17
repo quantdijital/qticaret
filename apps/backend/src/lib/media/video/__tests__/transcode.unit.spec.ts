@@ -1,11 +1,9 @@
-import { writeFileSync } from "node:fs"
 import { mkdtemp, rm } from "node:fs/promises"
 import os from "node:os"
 import { join } from "node:path"
-import sharp from "sharp"
-import { PROCESSING_FAILED, classifyFailure, createSlots, transcodeClip } from ".."
+import { PROCESSING_FAILED, classifyFailure, transcodeClip } from ".."
 import type { FakeProgram } from "./fake-spawn"
-import { fakeSpawn } from "./fake-spawn"
+import { fakeEnv, healthyPrograms, posterPng, testSlots } from "./transcode-fakes"
 
 /**
  * The transcoding run with stand-in programs (adr/0069 §4): the order of
@@ -13,47 +11,11 @@ import { fakeSpawn } from "./fake-spawn"
  * (fails at once) and which the machine's (tried again).
  */
 
-const SOURCE_ANSWER = JSON.stringify({
-  streams: [
-    {
-      index: 0,
-      codec_type: "video",
-      codec_name: "h264",
-      width: 1920,
-      height: 1080,
-      avg_frame_rate: "30/1",
-      r_frame_rate: "30/1",
-      duration: "10.000000",
-      nb_frames: "300",
-    },
-  ],
-  format: { format_name: "mov,mp4,m4a,3gp,3g2,mj2", duration: "10.000000", nb_streams: 1 },
-})
-
-const outputAnswer = (codec: string, container: string) =>
-  JSON.stringify({
-    streams: [
-      {
-        index: 0,
-        codec_type: "video",
-        codec_name: codec,
-        width: 1280,
-        height: 720,
-        duration: "10",
-      },
-    ],
-    format: { format_name: container, duration: "10.000000", tags: {} },
-  })
-
 let png: Buffer
 let dir: string
 
 beforeAll(async () => {
-  png = await sharp({
-    create: { width: 64, height: 36, channels: 3, background: { r: 200, g: 120, b: 40 } },
-  })
-    .png()
-    .toBuffer()
+  png = await posterPng()
 })
 
 beforeEach(async () => {
@@ -65,31 +27,10 @@ afterEach(async () => {
   jest.restoreAllMocks()
 })
 
-/** Programs that work: each ffmpeg pass writes its output, each ffprobe answers for its file. */
-function healthy(overrides: (args: readonly string[]) => FakeProgram | null = () => null) {
-  return fakeSpawn((command, args) => {
-    const override = overrides(args)
-    if (override) {
-      return override
-    }
-    const target = (args[args.length - 1] ?? "").replace(/^file:/, "")
-    if (command === "ffmpeg" || command.endsWith("/nice")) {
-      writeFileSync(target, target.endsWith(".png") ? png : Buffer.alloc(1000, 1))
-      return {}
-    }
-    if (target.endsWith("output.mp4")) {
-      return { stdout: outputAnswer("h264", "mov,mp4,m4a,3gp,3g2,mj2") }
-    }
-    if (target.endsWith("output.webm")) {
-      return { stdout: outputAnswer("vp9", "matroska,webm") }
-    }
-    return { stdout: SOURCE_ANSWER }
-  })
-}
-
-const env = { FFMPEG_PATH: "ffmpeg", FFPROBE_PATH: "ffprobe" }
-const slots = () =>
-  createSlots({ concurrency: 1, maxWaiting: 1, waitTimeoutMs: 1000, busy: () => new Error("busy") })
+const healthy = (overrides?: (args: readonly string[]) => FakeProgram | null) =>
+  healthyPrograms(png, overrides)
+const env = fakeEnv
+const slots = testSlots
 
 const failureOf = async (run: Promise<unknown>) => {
   try {

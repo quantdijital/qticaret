@@ -7,7 +7,11 @@ export interface StoredFile {
   url: string
 }
 
-/** A public file written whole: an image version the storefront serves. */
+/**
+ * A public file written whole: an image version the storefront serves, a
+ * video's poster. Storage refusing it, whatever it kept of it under its
+ * key is removed before the error goes on (adr/0069 re-review 4).
+ */
 export async function storePublicFile(
   container: MedusaContainer,
   filename: string,
@@ -17,9 +21,14 @@ export async function storePublicFile(
   const upload = await container
     .resolve(Modules.FILE)
     .getUploadStream({ filename, mimeType, access: "public" })
-  upload.writeStream.end(content)
-  // The key and URL come with the stream; what the promise resolves to varies by provider
-  await upload.promise
+  try {
+    upload.writeStream.end(content)
+    // The key and URL come with the stream; what the promise resolves to varies by provider
+    await upload.promise
+  } catch (error) {
+    await removeFiles(container, [upload.fileKey])
+    throw error
+  }
   return { id: upload.fileKey, url: upload.url }
 }
 

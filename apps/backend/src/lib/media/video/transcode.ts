@@ -45,6 +45,8 @@ export interface TranscodeOptions {
   signal?: AbortSignal
   /** Another limiter (tests). */
   slots?: Slots
+  /** Another limiter for the job's ffprobe of the source (tests). */
+  probeSlots?: Slots
   passTimeoutMs?: number
   /** The `nice` ffmpeg is started through; null: none (then `setPriority` alone). Default: the system's. */
   nice?: string | null
@@ -90,6 +92,19 @@ const encodeSlots: Slots = createSlots({
   maxWaiting: 8,
   waitTimeoutMs: JOB_TIMEOUT_MS,
   busy: () => infraError("video encode: no slot"),
+})
+
+/**
+ * The job's ffprobe runs apart from the uploads' (two at once, eight
+ * waiting): a busy upload pool (`video.upload_busy`) must not cost a clip
+ * one of its three tries. The job works one clip at a time in a process,
+ * so one slot is enough; those waiting wait as long as a job may take.
+ */
+const jobProbeSlots: Slots = createSlots({
+  concurrency: 1,
+  maxWaiting: 8,
+  waitTimeoutMs: JOB_TIMEOUT_MS,
+  busy: () => infraError("video job probe: no slot"),
 })
 
 // How many ffmpeg processes this process runs now, and the most at once (logs, tests)
@@ -227,9 +242,12 @@ export async function transcodeClip(
   dir: string,
   options: TranscodeOptions = {}
 ): Promise<TranscodedClip> {
+  // The job's own probe slot (re-review 2): uploads filling theirs is no try lost here
   const probed = await probeVideo(source, demuxer, {
+    slots: options.probeSlots ?? jobProbeSlots,
     ...(options.spawn ? { spawn: options.spawn } : {}),
     ...(options.env ? { env: options.env } : {}),
+    ...(options.signal ? { signal: options.signal } : {}),
   })
   const release = await (options.slots ?? encodeSlots).take()
   try {

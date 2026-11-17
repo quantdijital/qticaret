@@ -17,7 +17,7 @@ import { lockHeld } from "./queue-lock"
 export interface JobWatch {
   readonly signal: AbortSignal
   readonly state: { gone: boolean; lockLost: boolean }
-  /** Stops the timers and waits for a beat in flight. */
+  /** Stops the timers and waits for a beat in flight, a few seconds at most. */
   stop(): Promise<void>
 }
 
@@ -25,12 +25,16 @@ export interface WatchOptions {
   heartbeatMs: number
   jobTimeoutMs: number
   keepLock?: () => Promise<void>
+  /** How long `stop` waits for a beat in flight (default 5 s). */
+  stopWaitMs?: number
 }
+
+const STOP_WAIT_MS = 5_000
 
 export function watchJob(
   media: MediaModuleService,
   video: ClaimedVideo,
-  { heartbeatMs, jobTimeoutMs, keepLock }: WatchOptions
+  { heartbeatMs, jobTimeoutMs, keepLock, stopWaitMs = STOP_WAIT_MS }: WatchOptions
 ): JobWatch {
   const controller = new AbortController()
   const state = { gone: false, lockLost: false }
@@ -79,7 +83,23 @@ export function watchJob(
     state,
     async stop() {
       halt()
-      await inFlight
+      if (inFlight === null) {
+        return
+      }
+      // A beat whose database or lock call hangs is not waited for past a few seconds
+      // (re-review 1): the job returns and the queue goes on; the claim's fence keeps
+      // whatever that beat might still write harmless
+      let timer: NodeJS.Timeout | undefined
+      const waited = new Promise<"late">((resolve) => {
+        timer = setTimeout(() => {
+          resolve("late")
+        }, stopWaitMs)
+      })
+      const outcome = await Promise.race([inFlight.then(() => "done" as const), waited])
+      clearTimeout(timer)
+      if (outcome === "late") {
+        logger.warn({ event: "media.video_heartbeat_hung", video_id: video.id })
+      }
     },
   }
 }

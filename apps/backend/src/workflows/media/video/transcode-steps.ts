@@ -102,7 +102,13 @@ export async function removeUnheldOutputs(
     held =
       now !== null && !now.removed && now.status === "ready" && fileIds.some((id) => named.has(id))
   } catch (error) {
-    logger.warn({ event: "media.video_outputs_not_checked", err: errorSummary(error) })
+    // Kept unchecked: named here (public storage keys, nothing secret) to be removed by hand
+    logger.warn({
+      event: "media.video_outputs_kept_unchecked",
+      video_id: videoId,
+      file_ids: fileIds,
+      err: errorSummary(error),
+    })
     return false
   }
   if (held) {

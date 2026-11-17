@@ -68,9 +68,12 @@ export function scaleFilter(shortEdge: number = OUTPUT_SHORT_EDGE): string {
 }
 
 /**
- * ffmpeg's own stop (security review S5), behind our SIGKILL: CPU seconds
- * in user time, so a pass using its two encoder threads in full reaches it
- * when the 4-minute wall clock limit does. Our kill stays the first line.
+ * ffmpeg's own stop (security review S5), a backstop behind our SIGKILL:
+ * user CPU seconds of the whole process, every thread counted (the
+ * decoder, x264's lookahead, the filters, as well as the two encoder
+ * threads). Sized as two threads busy for the 4-minute pass, so it lines
+ * up with the wall clock limit only roughly: a pass using more threads
+ * reaches it sooner. Our kill stays the first line.
  */
 export const FFMPEG_CPU_LIMIT_S = (ENCODE_THREADS * PASS_TIMEOUT_MS) / 1000
 
