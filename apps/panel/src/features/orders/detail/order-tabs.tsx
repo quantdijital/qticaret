@@ -53,7 +53,7 @@ export function OrderTabs({
             key: "refunds",
             label: t(`${T}.refunds`),
             count: refunds.length,
-            content: <RefundsCard refunds={[...refunds]} currency={currency} />,
+            content: <RefundsCard orderId={orderId} refunds={[...refunds]} currency={currency} />,
           },
         ]
       : []),

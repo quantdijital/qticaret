@@ -82,6 +82,19 @@ export const refundPreviewQuery = (id: string, request: RefundRequest | null) =>
     retry: false,
   })
 
+/**
+ * An open refund checked at the provider by staff: the money went back
+ * (`made`) or it did not (`not_made`). Sends nothing; the server records
+ * who and when.
+ */
+export const useSettleRefund = (id: string) =>
+  useOrderMutation(({ reference, outcome }: { reference: string; outcome: "made" | "not_made" }) =>
+    sdk.client.fetch(
+      `/admin/orders/${encodeURIComponent(id)}/refunds/${encodeURIComponent(reference)}/settle`,
+      { method: "POST", body: { outcome } }
+    )
+  )
+
 /** Gives the money back; `reference` makes a refund tried again happen once. */
 export const useRefundOrder = (id: string) =>
   useOrderMutation((body: RefundRequest & { reference: string; note?: string }) =>

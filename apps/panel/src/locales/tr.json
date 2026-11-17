@@ -3984,6 +3984,18 @@
         "pending": "Sürüyor",
         "failed": "Yapılamadı",
         "incomplete": "Doğrulanıyor: kaydı yarım"
+      },
+      "settle": {
+        "open": "Kaydı yarım iadeyi sağlayıcıda kontrol et",
+        "title": "Bu iade sağlayıcıda görünüyor mu?",
+        "question": "{{amount}} iadenin kaydı tamamlanamadı. Ödeme kuruluşunun panelinde bu iade müşteriye yapılmış görünüyor mu?",
+        "hint": "Buradan para gönderilmez. \"Para gitti\" kaydı kapatır; \"Para gitmedi\" kaydı başarısız yapar ve kalemler yeniden iade edilebilir. Seçiminiz denetim kaydına yazılır.",
+        "made": "Para gitti",
+        "not_made": "Para gitmedi",
+        "done": {
+          "made": "İade kaydı tamamlandı.",
+          "not_made": "İade kaydı kapatıldı; kalemler yeniden iade edilebilir."
+        }
       }
     },
     "chargeback": {

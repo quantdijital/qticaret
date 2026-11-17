@@ -3984,6 +3984,18 @@
         "pending": "In progress",
         "failed": "Failed",
         "incomplete": "Being checked: record incomplete"
+      },
+      "settle": {
+        "open": "Check the incomplete refund at the provider",
+        "title": "Does the provider show this refund?",
+        "question": "The record of the {{amount}} refund could not be completed. Does the payment provider's panel show it refunded to the customer?",
+        "hint": "No money is sent from here. \"Money went back\" closes the record; \"Money did not go back\" fails it and its lines can be refunded again. Your choice is written to the audit log.",
+        "made": "Money went back",
+        "not_made": "Money did not go back",
+        "done": {
+          "made": "The refund's record is complete.",
+          "not_made": "The refund's record is closed; its lines can be refunded again."
+        }
       }
     },
     "chargeback": {
