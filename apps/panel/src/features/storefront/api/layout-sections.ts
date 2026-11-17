@@ -402,7 +402,11 @@ export interface LayoutSettings {
 
 /** The header: the announcement bar, the scrolling strip and the shop's bar, each at most once. */
 export type HeaderSection = AnnouncementBar | HeaderMarquee | HeaderBarSection
-export type FooterSection = FooterNewsletter | FooterBarSection
+/** The footer group (adr/0070 §4): the bar, and above it a box, a rich text, badges, a strip. */
+export type FooterSection =
+  FooterNewsletter | FooterBarSection | RichTextSection | TrustBadgesSection | MarqueeSection
+/** The footer group's sections drawn as a page's, each at most once (adr/0070 §4). */
+export type FooterBodySection = RichTextSection | TrustBadgesSection | MarqueeSection
 
 /** Each group's sections; the product and category pages' main one beside their body (`BodySection`). */
 export interface LayoutDocument {

@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import {
+  FOOTER_BODY_TYPES,
   LAYOUT_LIMITS,
   MARQUEE_PER_PAGE,
   categorySection,
@@ -47,18 +48,20 @@ const marquees = (sections: readonly { type: string }[]) =>
 
 /**
  * Whether a page would show more scrolling strips than it may (adr/0049
- * Ek 2026-11-14 §4.1): the header's, on every page, counts with the home,
- * product or category page's own. Hidden and scheduled ones count too: a
- * campaign's strip may come on beside the others.
+ * Ek 2026-11-14 §4.1): the header's and the footer group's, on every page
+ * (adr/0070 §4), count with the home, product or category page's own.
+ * Hidden and scheduled ones count too: a campaign's strip may come on
+ * beside the others.
  */
 const tooManyMarquees = (doc: {
   header: readonly { type: string }[]
+  footer: readonly { type: string }[]
   home: readonly { type: string }[]
   product: readonly { type: string }[]
   category: readonly { type: string }[]
 }) =>
   [doc.home, doc.product, doc.category].some(
-    (page) => marquees(doc.header) + marquees(page) > MARQUEE_PER_PAGE
+    (page) => marquees(doc.header) + marquees(doc.footer) + marquees(page) > MARQUEE_PER_PAGE
   )
 
 /** Whether the home page has more price bands strips than it may; hidden ones count too. */
@@ -132,9 +135,20 @@ export const layoutDocument = z
 
 export type LayoutDocument = z.infer<typeof layoutDocument>
 
-/** Every page's body sections (home, product, category): checked and shown alike. */
-export const bodySections = (doc: LayoutDocument): BodySection[] =>
-  [...doc.home, ...doc.product, ...doc.category].filter(isBody)
+/** The footer group's sections drawn as a page's (adr/0070 §4): not its bar, not its box. */
+export const footerBody = <S extends { type: string }>(
+  section: S
+): section is Extract<S, { type: (typeof FOOTER_BODY_TYPES)[number] }> =>
+  (FOOTER_BODY_TYPES as readonly string[]).includes(section.type)
+
+/**
+ * Every page's body sections (home, product, category) and the footer
+ * group's drawn alike (adr/0070 §4): checked and shown alike.
+ */
+export const bodySections = (doc: LayoutDocument): BodySection[] => [
+  ...[...doc.home, ...doc.product, ...doc.category].filter(isBody),
+  ...doc.footer.filter(footerBody),
+]
 
 /** Whether a page's section is one of its body's, not its main one. */
 export const isBody = <S extends { type: string }>(section: S): section is Exclude<S, PageMain> =>

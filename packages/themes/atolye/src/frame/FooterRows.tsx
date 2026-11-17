@@ -9,12 +9,9 @@ import type {
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { BottomLine } from "./FooterBottomLine"
-import { FooterNewsletterBox, footerNewsletterVariant } from "./FooterNewsletter"
 import { FooterIdentity } from "./FooterIdentity"
 import { FooterBlock } from "./footer-blocks/FooterBlock"
 import { foldJoins } from "./footer-blocks/fold-joins"
-import { NewsletterForm } from "./NewsletterForm"
-import { newsletterWords } from "./newsletter-words"
 import { legalLabel } from "./SmallPrint"
 
 type Subscribe = (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
@@ -127,61 +124,6 @@ function LegalStrip({ shop, t }: { shop: ShopView; t: Translate }) {
 }
 
 /**
- * The footer group's newsletter section while the footer is laid out in
- * rows (no block of its own there): a band at the footer's top, drawn its
- * own way; `standard` as the ledger's row (until the group's bands, adr/0070 §4).
- */
-function NewsletterBand({
-  dark,
-  shop,
-  t,
-  subscribe,
-}: {
-  shop: ShopView
-  t: Translate
-  subscribe: Subscribe
-  dark: boolean
-}) {
-  const news = shop.newsletter
-  const drawn = footerNewsletterVariant(shop)
-  if (!news || drawn === null || drawn === "in_footer") {
-    return null
-  }
-  return (
-    <div className={cn("gf-foot-band border-b border-rule", dark && "gf-stage")}>
-      <Container className="py-8 lg:py-10">
-        {drawn === "standard" ? (
-          <section
-            aria-labelledby="bulten"
-            {...sectionMark(news.mark)}
-            className="grid gap-4 lg:grid-cols-12 lg:items-start lg:gap-(--gap-columns)"
-          >
-            <h2
-              id="bulten"
-              className="max-w-[24ch] text-title lg:col-span-4"
-              {...fieldMark(Boolean(news.mark), "title")}
-            >
-              {news.title}
-            </h2>
-            <NewsletterForm
-              id="bulten-alt"
-              quiet
-              action={subscribe}
-              privacyPath={shop.privacyPath}
-              words={newsletterWords(t, news.text)}
-              marks={Boolean(news.mark)}
-              className="lg:col-span-6"
-            />
-          </section>
-        ) : (
-          <FooterNewsletterBox shop={shop} t={t} subscribe={subscribe} variant={drawn} />
-        )}
-      </Container>
-    </div>
-  )
-}
-
-/**
  * The free rows footer (adr/0070, "Serbest düzen"): on the ground the shop
  * picks (`data-ground`, the brand columns' names and tokens), its rows of
  * blocks, then the two fixed parts no layout takes away: the legal strip
@@ -212,7 +154,6 @@ export function FooterRows({
       data-badges={free.badgeStyle}
       className={cn("gf-footer-rows mt-(--footer-gap)")}
     >
-      {subscribe && <NewsletterBand shop={shop} t={t} subscribe={subscribe} dark={dark} />}
       {rows.map((row, index) => (
         <Row
           key={row.id}

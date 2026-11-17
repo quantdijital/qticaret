@@ -1,6 +1,7 @@
 import type { AnnouncementSettings, SocialNetwork, TrustIcon } from "@qticaret/types"
 import type { CategoryCardView, ShopMarkView } from "./card-views"
 import type { CartLineView, CheckoutBlockedView, FreeShippingView } from "./cart-views"
+import type { HomeSectionView } from "./content-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
 import type { FooterBarView, HeaderBarView } from "./main-views"
 import type { MarqueeSectionView } from "./marquee-views"
@@ -188,6 +189,13 @@ export interface ShopView {
         mark?: string
       } & Partial<NewsletterLookView>)
     | null
+  /**
+   * The footer group's sections drawn above the footer on every page but
+   * the checkout's, in the group's order, as a page's (adr/0070 §4): a
+   * rich text, trust badges, a scrolling strip, and under the free rows
+   * footer the newsletter box as a band. None or absent: nothing above it.
+   */
+  footerSections?: readonly HomeSectionView[]
   /** The header's small links (about, contact…). */
   topLinks: LinkView[]
   /** The shop's own columns, or the storefront's (categories, help). */

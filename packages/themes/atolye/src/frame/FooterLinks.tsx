@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react"
 import type { ReactNode } from "react"
 import type { FooterGroupView } from "@qticaret/ui"
+import { outsideRel } from "./FooterParts"
 
 type FooterGroup = FooterGroupView
 
@@ -17,7 +18,7 @@ function Links({ group, className }: { group: FooterGroup; className: string }) 
     <ul className="flex flex-col">
       {group.links.map((link) => (
         <li key={link.path}>
-          <a href={link.path} className={className}>
+          <a href={link.path} rel={outsideRel(link.path)} className={className}>
             {link.label}
           </a>
         </li>

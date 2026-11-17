@@ -7971,7 +7971,6 @@
         "themeSettings": "Tema ayarları",
         "add": "Bölüm ekle",
         "addAnnouncement": "Duyuru şeridi ekle",
-        "addNewsletter": "E-bülten kutusu ekle",
         "empty": {
           "home": "Ana sayfada bölüm yok; vitrin yalnız üst ve alt bilgiyi gösterir.",
           "product": "Ürün sayfalarına eklenmiş bölüm yok; ürünün kendi bilgileri görünür."
@@ -7991,6 +7990,9 @@
         },
         "looks": "Stok ve renk örnekleri",
         "addMarquee": "Kayan yazı ekle",
+        "footerGroup": "Alt bilginin bölümleri",
+        "addFooterSection": "Alt bilgiye bölüm ekle",
+        "footerFull": "Alt bilgide eklenebilecek her bölüm var; her biri bir kez eklenir.",
         "preferences": "Vitrin tercihleri"
       },
       "row": {
@@ -8018,7 +8020,8 @@
           "home": "Ana sayfanın sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz.",
           "product": "Bütün ürün sayfalarında, ürünün kendi bilgilerinin altına eklenir.",
           "top": "Bütün kategori sayfalarında, ürün ızgarasının üstüne eklenir.",
-          "bottom": "Bütün kategori sayfalarında, ürün ızgarasının altına eklenir."
+          "bottom": "Bütün kategori sayfalarında, ürün ızgarasının altına eklenir.",
+          "footer": "Bütün sayfalarda, ödeme sayfası dışında, alt bilginin üstünde görünür; her bölüm bir kez eklenir, sonra sürükleyerek sırasını değiştirebilirsiniz."
         }
       },
       "types": {

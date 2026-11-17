@@ -142,7 +142,6 @@ describe("the scrolling strip (adr/0049 Ek 2026-11-14 §4.1)", () => {
       "storefront_layout.section_duplicate",
     ])
     expect(issues({ header: [strip("kayan00001", { look: { width: "full" } })] })).toHaveLength(1)
-    expect(issues({ footer: [strip("kayan00001")] }).length).toBeGreaterThan(0)
   })
 
   it("lets a page show two strips at most, the header's counted on every page", () => {

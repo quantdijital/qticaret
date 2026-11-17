@@ -12,6 +12,7 @@ import type {
   LookedSection,
 } from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStep, lookStepsFor } from "@/features/storefront/layout/look"
+import { isFooterBody } from "@/features/storefront/layout/footer-group"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { offeredVariants, offersVariants } from "@/features/storefront/layout/variants"
 import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
@@ -220,11 +221,13 @@ export const FIELD_IDS = {
 } as const
 
 /**
- * Whether the section takes a look: a page's body section or its main one
- * (not the header's or the footer's parts).
+ * Whether the section takes a look: a page's body section or its main one,
+ * and the footer group's sections drawn as a page's (adr/0070 §4); not the
+ * header's parts, the footer's bar or its newsletter box.
  */
 export const takesLook = (section: AnySection, group: LayoutGroup): section is LookedSection =>
-  isBodyGroup(group) && section.type !== "announcement_bar"
+  (isBodyGroup(group) && section.type !== "announcement_bar") ||
+  (group === "footer" && isFooterBody(section))
 
 /** The fields the section's panel shows, in its order, as the search finds them. */
 export function sectionFields(section: AnySection, group: LayoutGroup): RegistryField[] {

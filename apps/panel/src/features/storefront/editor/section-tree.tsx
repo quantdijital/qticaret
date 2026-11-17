@@ -14,17 +14,18 @@ import {
   isScheduled,
   marqueesOn,
   newAnnouncementBar,
-  newFooterNewsletter,
   newHeaderMarquee,
   newSectionId,
 } from "@/features/storefront/layout/sections"
 import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
+import { footerAbove, footerTypesLeft } from "@/features/storefront/layout/footer-group"
 import { mainOf } from "@/features/storefront/layout/main-sections"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { FooterRowsTree } from "./footer-rows/footer-rows-tree"
 import type { FooterPart } from "./footer-rows/footer-rows-fields"
 import { PageSections } from "./page-sections"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
+import { SectionList } from "./section-list"
 import { SectionRow } from "./section-row"
 import { AddRow, ElsewhereRow, ThemeRow, TreeGroup } from "./tree-rows"
 
@@ -39,6 +40,8 @@ interface SectionTreeProps {
   onOpen: (id: string) => void
   onRemove: (section: AnySection) => void
   onAddSection: (placement?: Placement) => void
+  /** Opens the chooser for the footer group (adr/0070 §4). */
+  onAddFooterSection?: () => void
   onTheme: () => void
   /** A theme setting in the draft the server would refuse (adr/0063 §3). */
   themeProblem: boolean
@@ -69,6 +72,7 @@ export function SectionTree({
   onOpen,
   onRemove,
   onAddSection,
+  onAddFooterSection = () => undefined,
   onTheme,
   themeProblem,
   onLooks,
@@ -105,14 +109,10 @@ export function SectionTree({
       />
     )
   }
-  const add = (which: "announcement" | "marquee" | "newsletter") => {
+  const add = (which: "announcement" | "marquee") => {
     const id = newSectionId(idsOf(doc))
-    if (which === "newsletter") {
-      dispatch({ type: "add", group: "footer", section: newFooterNewsletter(id) })
-    } else {
-      const section = which === "marquee" ? newHeaderMarquee(id) : newAnnouncementBar(id)
-      dispatch({ type: "add", group: "header", section })
-    }
+    const section = which === "marquee" ? newHeaderMarquee(id) : newAnnouncementBar(id)
+    dispatch({ type: "add", group: "header", section })
     onOpen(id)
   }
   // The header draws its bar first, its strip under it (adr/0049 Ek 2026-11-14 §4.1)
@@ -120,7 +120,8 @@ export function SectionTree({
   const strip = doc.header.find((section) => section.type === "marquee")
   // A strip in the header shows on every page: not while a page already has its two
   const stripFull = BODY_GROUPS.some((body) => marqueesOn(doc, body) >= MARQUEE_LIMITS.perPage)
-  const newsletter = doc.footer.find((section) => section.type === "newsletter")
+  // The footer group's sections above its bar, in their order (adr/0070 §4); the bar stays last
+  const above = footerAbove(doc)
   // The free rows footer opens its rows and blocks under its line (adr/0070 §7)
   const footerBar = mainOf(doc, "footer_bar")
   const freeRows =
@@ -194,6 +195,25 @@ export function SectionTree({
       </TreeGroup>
       <TreeGroup title={t(`${T}.footer`)}>
         <ul className="flex flex-col gap-0.5">
+          {above.length > 0 ? (
+            <li>
+              <SectionList
+                label={t(`${T}.footerGroup`)}
+                sections={above}
+                inFooter
+                full
+                problems={problems}
+                dispatch={dispatch}
+                onOpen={onOpen}
+                onRemove={onRemove}
+              />
+            </li>
+          ) : null}
+          <AddRow
+            label={t(`${T}.addFooterSection`)}
+            full={footerTypesLeft(doc).length === 0 ? t(`${T}.footerFull`) : null}
+            onClick={onAddFooterSection}
+          />
           {mainRow("footer_bar")}
           {freeRows ? (
             <li>
@@ -209,16 +229,6 @@ export function SectionTree({
               />
             </li>
           ) : null}
-          {newsletter ? (
-            row(newsletter, true)
-          ) : (
-            <AddRow
-              label={t(`${T}.addNewsletter`)}
-              onClick={() => {
-                add("newsletter")
-              }}
-            />
-          )}
           <ElsewhereRow
             icon={Columns3}
             name={t(`${T}.columns`)}

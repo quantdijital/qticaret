@@ -16,6 +16,7 @@ import {
   header,
   styleDigests,
 } from "@/test/preset-lock/presets"
+import { lockFixtures } from "@/test/preset-lock/fixtures"
 import { presetAnswer } from "@/test/preset-lock/store-layout"
 import { store } from "@/test/preset-lock/store-mock"
 
@@ -87,6 +88,8 @@ async function homeHtml(layout: StoreLayout): Promise<string> {
 }
 
 const PRESETS = allPresets()
+/** Designs no pack ships, locked beside the presets (their frame only). */
+const FIXTURES = lockFixtures()
 
 /** The pages every preset's folder keeps; the home page's sections beside them (`home-<nn>-<id>.html`). */
 const LOCKED_PAGES = ["frame.html", "home.html"]
@@ -117,7 +120,7 @@ describe("the preset lock (docs/tema/bilesen-standardi.md §7)", () => {
   })
 
   it("keeps a snapshot for every preset and none for a preset that is gone", () => {
-    const keys = new Set(PRESETS.map(({ key }) => key))
+    const keys = new Set([...PRESETS, ...FIXTURES].map(({ key }) => key))
     const stale = folders(LOCK_DIR).filter((name) => !keys.has(name))
     if (UPDATING) {
       stale.forEach((name) => {
@@ -126,9 +129,12 @@ describe("the preset lock (docs/tema/bilesen-standardi.md §7)", () => {
       return
     }
     // Vitest writes a missing file snapshot on any run; a new preset's is written on purpose only
-    const missing = [...keys].filter(
-      (key) => !LOCKED_PAGES.every((page) => existsSync(join(LOCK_DIR, key, page)))
-    )
+    const missing = [
+      ...PRESETS.filter(
+        ({ key }) => !LOCKED_PAGES.every((page) => existsSync(join(LOCK_DIR, key, page)))
+      ),
+      ...FIXTURES.filter(({ key }) => !existsSync(join(LOCK_DIR, key, "frame.html"))),
+    ].map(({ key }) => key)
     expect(missing, `presets without a snapshot. ${UPDATE_HINT}`).toEqual([])
     expect(stale, "snapshots of presets that are gone: run `pnpm lock:presets`").toEqual([])
   })
@@ -173,6 +179,23 @@ describe("the preset lock (docs/tema/bilesen-standardi.md §7)", () => {
     } else {
       expect(left, message("sections gone from the page")).toEqual([])
     }
+  })
+
+  it.each(FIXTURES)("draws the $key fixture's frame as locked", async ({ key, preset }) => {
+    expect(FIXTURES.length).toBeGreaterThan(0)
+    const answer = presetAnswer(preset)
+    store.layout = answer.layout
+    store.menus = menusOf(preset.menus)
+    const frame = header(key, fixtureNotes(answer)) + htmlLines(await frameHtml())
+    if (!UPDATING) {
+      expect(existsSync(join(LOCK_DIR, key, "frame.html")), `fixture ${key}. ${UPDATE_HINT}`).toBe(
+        true
+      )
+    }
+    await expect(
+      frame,
+      `fixture ${key} is drawn differently (preset-lock/${key}/frame.html). ${UPDATE_HINT}`
+    ).toMatchFileSnapshot(`./preset-lock/${key}/frame.html`)
   })
 
   it("keeps the theme's stylesheets as locked", async () => {
