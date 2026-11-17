@@ -14,15 +14,15 @@ import type MediaModuleService from "../../../modules/media/service"
 import type { ClaimedVideo, ReadyVideo } from "../../../modules/media/service"
 import { removeFiles } from "../files"
 import { downloadSource, storeOutputs, videoNaming } from "./outputs"
+import { watchJob } from "./watch"
 
 /**
  * One clip through the job (adr/0069 §4 steps 1–7): the source down to a
  * private directory of its own (0700; not begun below 500 MB of free
  * disk), ffprobe, the MP4, the WebM and the poster made and checked, then
- * stored public. Every 30 s the record's heartbeat is written and the
- * shop's lock held on (`keepLock`); the video gone from the job (removed
- * from the panel, swept back) or 10 minutes passed, ffmpeg is killed. On
- * any failure the files stored so far are removed; the directory always is.
+ * stored public. The job is watched (`watch.ts`: heartbeat, lock, 10
+ * minutes); stopped, ffmpeg and any transfer are cut. On any failure the
+ * files stored so far are removed; the directory always is.
  */
 
 const DEMUXER: Readonly<Record<VideoSourceFormat, VideoDemuxer>> = {
@@ -53,53 +53,42 @@ export async function processVideo(
   options: ProcessOptions = {}
 ): Promise<ProcessOutcome> {
   const media = container.resolve<MediaModuleService>(MEDIA_MODULE)
-  const controller = new AbortController()
-  // Set by the heartbeat: the video stopped being this job's
-  const state = { gone: false }
-  const deadline = setTimeout(() => {
-    controller.abort()
-  }, options.jobTimeoutMs ?? JOB_TIMEOUT_MS)
-  const beat = setInterval(() => {
-    void (async () => {
-      try {
-        if (!(await media.beatVideo(video.id))) {
-          state.gone = true
-          controller.abort()
-          return
-        }
-        await options.keepLock?.()
-      } catch (error) {
-        logger.warn({ event: "media.video_heartbeat_failed", err: errorSummary(error) })
-      }
-    })()
-  }, options.heartbeatMs ?? HEARTBEAT_MS)
   const stored: string[] = []
   const dir = await makeVideoTempDir()
+  // Watched from here (review S3): no timer outlives a directory that could not be made
+  const watch = watchJob(media, video, {
+    heartbeatMs: options.heartbeatMs ?? HEARTBEAT_MS,
+    jobTimeoutMs: options.jobTimeoutMs ?? JOB_TIMEOUT_MS,
+    ...(options.keepLock ? { keepLock: options.keepLock } : {}),
+  })
+  const { signal } = watch
+  const stillOn = (when: string) => {
+    if (signal.aborted) {
+      throw infraError(`video job: stopped ${when}`)
+    }
+  }
   try {
     if ((await freeDiskBytes(dir)) < MIN_FREE_DISK_BYTES) {
       throw infraError("video job: under 500 MB of free disk")
     }
     const source = join(dir, "source")
-    await downloadSource(container, video.source_file_id, source)
+    await downloadSource(container, video.source_file_id, source, signal)
     const clip = await transcodeClip(source, DEMUXER[video.source_format], dir, {
       ...options.transcode,
-      signal: controller.signal,
+      signal,
     })
     const poster = await makePoster(clip.poster)
     const { slug, n } = await videoNaming(container, video.id)
-    if (controller.signal.aborted) {
-      throw infraError("video job: stopped before storing")
-    }
+    stillOn("before storing")
     const saved = await storeOutputs(
       container,
       videoFileBase(slug, n),
       clip.outputs,
       poster,
-      (fileId) => stored.push(fileId)
+      (fileId) => stored.push(fileId),
+      signal
     )
-    if (state.gone) {
-      throw infraError("video job: the video went while it was stored")
-    }
+    stillOn("while storing")
     return {
       ok: true,
       fileIds: [...stored],
@@ -111,13 +100,14 @@ export async function processVideo(
         output_file_ids: saved.output_file_ids,
         poster: saved.poster,
         poster_file_ids: saved.poster_file_ids,
-        // The source too, until it is removed (the next step)
+        // The source too, until it is removed (the workflow's last step)
         stored_bytes: saved.bytes + (video.source_bytes ?? 0),
       },
     }
   } catch (error) {
+    await watch.stop()
     await removeFiles(container, stored)
-    if (state.gone) {
+    if (watch.state.gone) {
       logger.info({ event: "media.video_job_left", video_id: video.id })
       return { ok: false, gone: true }
     }
@@ -131,8 +121,7 @@ export async function processVideo(
     })
     return { ok: false, failure }
   } finally {
-    clearInterval(beat)
-    clearTimeout(deadline)
+    await watch.stop()
     await removeVideoTempDir(dir)
   }
 }

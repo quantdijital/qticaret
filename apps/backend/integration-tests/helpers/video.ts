@@ -2,10 +2,14 @@ import { spawnSync } from "node:child_process"
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { Readable } from "node:stream"
+import { pipeline } from "node:stream/promises"
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { videoToolPaths } from "../../src/lib/media/video"
-import { VIDEO_QUEUE_LOCK } from "../../src/workflows/media/video/transcode-steps"
+import { MEDIA_MODULE } from "../../src/modules/media"
+import type MediaModuleService from "../../src/modules/media/service"
+import { VIDEO_QUEUE_LOCK } from "../../src/workflows/media/video/queue-lock"
 
 /**
  * Product video suites (adr/0069): whether ffmpeg and its encoders are
@@ -71,6 +75,40 @@ export async function probeStored(
   ])
   rmSync(path, { force: true })
   return JSON.parse(run.stdout) as StoredProbe
+}
+
+/** A file put in storage (`private`: as an upload leaves its source); its id. */
+export async function storedFile(
+  container: MedusaContainer,
+  bytes: Buffer,
+  access: "private" | "public" = "private",
+  filename = "video-kaynak.mp4"
+): Promise<string> {
+  const file = await container
+    .resolve(Modules.FILE)
+    .getUploadStream({ filename, mimeType: "video/mp4", access })
+  await pipeline(Readable.from([bytes]), file.writeStream)
+  await file.promise
+  return file.fileKey
+}
+
+/** A video record linked to `productId`, as the upload leaves one (no file of its own). */
+export async function linkedVideo(
+  container: MedusaContainer,
+  productId: string,
+  fields: Record<string, unknown>
+) {
+  const video = await container.resolve<MediaModuleService>(MEDIA_MODULE).createMediaVideos({
+    kind: "upload",
+    source_format: "mp4",
+    stored_bytes: 0,
+    ...fields,
+  })
+  await container.resolve(ContainerRegistrationKeys.LINK).create({
+    [Modules.PRODUCT]: { product_id: productId },
+    [MEDIA_MODULE]: { media_video_id: video.id },
+  })
+  return video
 }
 
 /** Whether storage still has the file. */

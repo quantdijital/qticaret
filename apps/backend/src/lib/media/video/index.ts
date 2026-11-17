@@ -30,6 +30,7 @@ export { CLOSE_WAIT_MS, RECEIVE_TIMEOUTS, fileClosed, receiveVideo } from "./rec
 export type { ReceiveTimeouts, ReceivedVideo } from "./receive"
 export {
   COMMON_OUTPUT_ARGS,
+  FFMPEG_CPU_LIMIT_S,
   MP4_ENCODER_ARGS,
   OUTPUT_DEMUXER,
   WEBM_ENCODER_ARGS,
@@ -56,9 +57,12 @@ export {
   encodeActivity,
   frameBrightness,
   freeDiskBytes,
+  niced,
   resetEncodeActivity,
+  systemNice,
   transcodeClip,
 } from "./transcode"
+export { ProbeStoppedError } from "./probe"
 export type { MadeOutput, TranscodeOptions, TranscodedClip } from "./transcode"
 export { makePoster, videoFileBase } from "./poster"
 export type { PosterImages } from "./poster"

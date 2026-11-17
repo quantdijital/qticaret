@@ -1,46 +1,32 @@
 import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { errorSummary, logger } from "../../../lib/logging"
 import { afterFailure } from "../../../lib/media/video/transcode-errors"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
 import type { ClaimedVideo } from "../../../modules/media/service"
-import { isLockBusy } from "../../pricing/price-history"
 import { removeFiles } from "../files"
 import { processVideo } from "./process"
 import type { ProcessOutcome } from "./process"
+import { holdVideoQueue, lockHeld, releaseVideoQueue } from "./queue-lock"
 
 /**
  * The transcoding job's steps (adr/0069 §4): the shop's one lock, the
- * oldest waiting clip taken, the clip made, the outcome written, the
- * source removed. Each step that writes to storage or moves the record
- * undoes itself when a later one fails.
+ * oldest waiting clip taken, the clip made, the outcome written, the lock
+ * let go, the source removed. Each step that writes to storage or moves
+ * the record undoes itself when a later one fails; the last two never fail.
  */
-
-/** The shop-wide lock: one clip at a time in the shop, whichever process runs it. */
-export const VIDEO_QUEUE_LOCK = "media:video"
-// Held on by the heartbeat (every 30 s); a process that died lets it go within two minutes
-const LOCK_EXPIRE_S = 120
 
 const media = (container: { resolve: (key: string) => unknown }) =>
   container.resolve(MEDIA_MODULE) as MediaModuleService
-
-const locking = (container: MedusaContainer) => container.resolve(Modules.LOCKING)
-
-const lockHeld = (error: unknown): boolean =>
-  isLockBusy(error) || (error as { type?: unknown } | null)?.type === MedusaError.Types.CONFLICT
-
-/** Holds the lock (again) as `owner`: the same owner refreshes its expiry. */
-export const holdVideoQueue = (container: MedusaContainer, owner: string) =>
-  locking(container).acquire(VIDEO_QUEUE_LOCK, { ownerId: owner, expire: LOCK_EXPIRE_S })
 
 /**
  * The lock taken at once, or null: another process (or this one) is
  * working the queue, and this run leaves (adr/0069 §4: "alamazsa çıkar").
  * Not `acquireLockStep`: that one waits and then fails the workflow, and
  * its lock cannot be held on past its ttl while a clip takes minutes.
+ * Undone by letting it go, which never throws (review M1).
  */
 export const takeVideoQueueStep = createStep(
   "media-video-take-queue",
@@ -58,17 +44,17 @@ export const takeVideoQueueStep = createStep(
   },
   async (owner, { container }) => {
     if (owner) {
-      await locking(container).release(VIDEO_QUEUE_LOCK, { ownerId: owner })
+      await releaseVideoQueue(container, owner)
     }
   }
 )
 
-/** The lock let go, the workflow's last step. */
+/** The lock let go; never throws (review M1): a store that is down leaves it to expire. */
 export const releaseVideoQueueStep = createStep(
   "media-video-release-queue",
   async (owner: string | null, { container }) => {
     if (owner) {
-      await locking(container).release(VIDEO_QUEUE_LOCK, { ownerId: owner })
+      await releaseVideoQueue(container, owner)
     }
     return new StepResponse(null)
   }
@@ -77,7 +63,7 @@ export const releaseVideoQueueStep = createStep(
 /**
  * The oldest `uploaded` clip, now `processing` (none of `exclude`: those
  * this run already tried). Undone as a failed try (an infrastructure one):
- * back to the queue, or failed past its tries.
+ * back to the queue, or failed past its tries; only while the claim holds.
  */
 export const claimNextVideoStep = createStep(
   "media-video-claim",
@@ -91,32 +77,65 @@ export const claimNextVideoStep = createStep(
   async (video, { container }) => {
     if (video) {
       const next = afterFailure(video.attempts, { kind: "infra", code: "" })
-      await media(container).markVideoTried(video.id, next)
+      await media(container).markVideoTried(video.id, video.attempts, next)
     }
   }
 )
 
-/** The clip made and stored (`processVideo`); undone by removing what was stored. */
+/**
+ * Stored outputs a failed workflow leaves (review M1): removed unless the
+ * record holds them as `ready` (then they are the video, served). A record
+ * that cannot be read keeps them: a stray file is the lesser harm.
+ */
+export async function removeUnheldOutputs(
+  container: MedusaContainer,
+  videoId: string,
+  fileIds: readonly string[]
+): Promise<boolean> {
+  if (fileIds.length === 0) {
+    return false
+  }
+  let held: boolean
+  try {
+    const now = await media(container).videoFiles(videoId)
+    const named = new Set([...(now?.output_file_ids ?? []), ...(now?.poster_file_ids ?? [])])
+    held =
+      now !== null && !now.removed && now.status === "ready" && fileIds.some((id) => named.has(id))
+  } catch (error) {
+    logger.warn({ event: "media.video_outputs_not_checked", err: errorSummary(error) })
+    return false
+  }
+  if (held) {
+    return false
+  }
+  await removeFiles(container, fileIds)
+  return true
+}
+
+/** The clip made and stored (`processVideo`); undone by removing what no ready record holds. */
 export const transcodeVideoStep = createStep(
   "media-video-transcode",
   async (input: { owner: string | null; video: ClaimedVideo | null }, { container }) => {
     const { owner, video } = input
     if (!owner || !video) {
-      return new StepResponse<ProcessOutcome | null, string[]>(null, [])
+      return new StepResponse<ProcessOutcome | null, { id: string; files: string[] } | null>(
+        null,
+        null
+      )
     }
     const outcome = await processVideo(container, video, {
       keepLock: async () => {
         await holdVideoQueue(container, owner)
       },
     })
-    return new StepResponse<ProcessOutcome | null, string[]>(
+    return new StepResponse<ProcessOutcome | null, { id: string; files: string[] } | null>(
       outcome,
-      outcome.ok ? outcome.fileIds : []
+      outcome.ok ? { id: video.id, files: outcome.fileIds } : null
     )
   },
-  async (fileIds, { container }) => {
-    if (fileIds && fileIds.length > 0) {
-      await removeFiles(container, fileIds)
+  async (made, { container }) => {
+    if (made) {
+      await removeUnheldOutputs(container, made.id, made.files)
     }
   }
 )
@@ -127,18 +146,24 @@ export interface SettledVideo {
   source_file_id: string | null
 }
 
+type Settled = StepResponse<SettledVideo | null, string | null>
+
 /**
- * The outcome written while the video is still the job's: `ready` with its
- * outputs, or a failed try (`afterFailure`: an input error fails now, an
- * infrastructure one is tried three times). A video removed meanwhile has
- * its new files removed and is left alone. Undone by taking `ready` back.
+ * The outcome written while the claim holds (fenced by its `attempts`):
+ * `ready` with its outputs, or a failed try (`afterFailure`: an input
+ * error fails now, an infrastructure one is tried three times). A video
+ * removed or swept back meanwhile has the new files removed and is left
+ * alone. Undone by taking `ready` back while the source is still there.
  */
 export const settleVideoStep = createStep(
   "media-video-settle",
-  async (input: { video: ClaimedVideo | null; outcome: ProcessOutcome | null }, { container }) => {
+  async (
+    input: { video: ClaimedVideo | null; outcome: ProcessOutcome | null },
+    { container }
+  ): Promise<Settled> => {
     const { video, outcome } = input
     if (!video || !outcome) {
-      return new StepResponse<SettledVideo | null, string | null>(null, null)
+      return new StepResponse(null, null)
     }
     const settled = (status: SettledVideo["status"]) => ({
       id: video.id,
@@ -146,22 +171,19 @@ export const settleVideoStep = createStep(
       source_file_id: video.source_file_id,
     })
     if (outcome.ok) {
-      if (await media(container).markVideoReady(video.id, outcome.ready)) {
+      if (await media(container).markVideoReady(video.id, video.attempts, outcome.ready)) {
         logger.info({ event: "media.video_ready", video_id: video.id })
-        return new StepResponse<SettledVideo | null, string | null>(settled("ready"), video.id)
+        return new StepResponse(settled("ready"), video.id)
       }
       await removeFiles(container, outcome.fileIds)
-      return new StepResponse<SettledVideo | null, string | null>(settled("gone"), null)
+      return new StepResponse(settled("gone"), null)
     }
     if ("gone" in outcome) {
-      return new StepResponse<SettledVideo | null, string | null>(settled("gone"), null)
+      return new StepResponse(settled("gone"), null)
     }
     const next = afterFailure(video.attempts, outcome.failure)
-    const written = await media(container).markVideoTried(video.id, next)
-    return new StepResponse<SettledVideo | null, string | null>(
-      settled(written ? next.status : "gone"),
-      null
-    )
+    const written = await media(container).markVideoTried(video.id, video.attempts, next)
+    return new StepResponse(settled(written ? next.status : "gone"), null)
   },
   async (readyId, { container }) => {
     if (readyId) {
@@ -172,9 +194,10 @@ export const settleVideoStep = createStep(
 
 /**
  * A ready video's source goes (adr/0069 §1: it holds the place and the
- * device; it counts against storage). The last step: it never fails;
- * storage refusing, the record keeps naming it and the nightly sweep
- * tries again.
+ * device; it counts against storage). The workflow's very last step, after
+ * the lock and the event (review M1): nothing after it can undo `ready`,
+ * and it never fails; storage refusing, the record keeps naming it and the
+ * nightly sweep tries again.
  */
 export const removeVideoSourceStep = createStep(
   "media-video-remove-source",

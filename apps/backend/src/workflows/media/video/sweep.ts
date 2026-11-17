@@ -100,8 +100,9 @@ export const sweepVideosStep = createStep(
     }
     // Removed records (just now, or a refused removal before) whose files are still named
     for (const left of await service.videosWithFilesLeft()) {
-      if (await removeFiles(container, videoFileIds(left))) {
-        await service.forgetVideoFiles(left.id)
+      const ids = videoFileIds(left)
+      if (await removeFiles(container, ids)) {
+        await service.forgetVideoFiles(left.id, ids)
         result.files_removed += 1
       }
     }

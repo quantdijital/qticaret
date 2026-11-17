@@ -1,15 +1,18 @@
-import { ValidationError } from "../../../errors"
-import { RetryableError } from "../../../errors"
+import { RetryableError, ValidationError } from "../../../errors"
 import {
   PROCESSING_FAILED,
+  ProbeStoppedError,
   VideoJobError,
   afterFailure,
   assessOutput,
   classifyFailure,
+  createSlots,
   infraError,
   inputError,
+  probeVideo,
 } from ".."
 import { ToolStartError } from "../run-tool"
+import { fakeSpawn } from "./fake-spawn"
 
 /** adr/0069 §4: an output's check, and the two classes of failure. */
 
@@ -79,6 +82,13 @@ describe("an output's check", () => {
     ],
     ["a date on the stream", mp4({ stream: { tags: { creation_time: "2026-11-01" } } })],
     ["a sound stream", mp4({ extra: [{ index: 1, codec_type: "audio", codec_name: "aac" }] })],
+    // Review S6: captions carried inside the H.264 stream
+    ["closed captions", mp4({ stream: { closed_captions: 1 } })],
+    // Review INFO: a structural tag with a value its muxer does not write
+    ["a handler named by the source", mp4({ stream: { tags: { handler_name: "iPhone 15" } } })],
+    ["an encoder that is not libav", mp4({ stream: { tags: { encoder: "Apple ProRes" } } })],
+    ["a language that is not a code", mp4({ stream: { tags: { language: "Istanbul" } } })],
+    ["a brand that is not one", mp4({ format: { tags: { major_brand: "+41.0082" } } })],
     ["31 seconds", mp4({ format: { duration: "31.000000" } })],
     ["an odd side", mp4({ stream: { width: 1279 } })],
     ["a short edge past 720", mp4({ stream: { width: 1920, height: 1080 } })],
@@ -124,6 +134,32 @@ describe("the failure classes", () => {
       expect(classifyFailure(error)).toEqual({ kind: "infra", code: PROCESSING_FAILED })
     }
     expect(infraError("x")).toBeInstanceOf(VideoJobError)
+  })
+
+  it("tries again a re-probe stopped by its time; fails one ffprobe refused (review S7)", async () => {
+    const slots = () =>
+      createSlots({ concurrency: 2, maxWaiting: 1, waitTimeoutMs: 1000, busy: () => new Error() })
+    const env = { FFPROBE_PATH: "ffprobe" }
+    const hung = fakeSpawn(() => ({ hang: true }))
+    const stopped = await probeVideo("/tmp/qt-video-x/source", "mov", {
+      spawn: hung.spawn,
+      slots: slots(),
+      env,
+      timeoutMs: 30,
+    }).catch((error: unknown) => error)
+    expect(stopped).toBeInstanceOf(ProbeStoppedError)
+    // To an upload it is the same refusal as before
+    expect((stopped as ValidationError).safeMessage).toBe("video.unreadable")
+    expect(classifyFailure(stopped)).toEqual({ kind: "infra", code: PROCESSING_FAILED })
+
+    const refusing = fakeSpawn(() => ({ code: 1 }))
+    const refused = await probeVideo("/tmp/qt-video-x/source", "mov", {
+      spawn: refusing.spawn,
+      slots: slots(),
+      env,
+    }).catch((error: unknown) => error)
+    expect(refused).not.toBeInstanceOf(ProbeStoppedError)
+    expect(classifyFailure(refused)).toEqual({ kind: "input", code: "video.unreadable" })
   })
 
   it("fails an input error on its first try", () => {

@@ -1,5 +1,3 @@
-import { Readable } from "node:stream"
-import { pipeline } from "node:stream/promises"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import mediaVideoQueue from "../../src/jobs/media-video-queue"
@@ -21,8 +19,10 @@ import {
   clipMaker,
   holdVideoQueueLock,
   lavfi,
+  linkedVideo,
   probeStored,
   stored,
+  storedFile,
   videoToolsPresent,
 } from "../helpers/video"
 
@@ -80,31 +80,9 @@ medusaIntegrationTestRunner({
       return answer.data.video?.id ?? ""
     }
 
-    /** A file in private storage, as an upload leaves its source. */
-    async function privateFile(bytes: Buffer): Promise<string> {
-      const file = await getContainer()
-        .resolve(Modules.FILE)
-        .getUploadStream({ filename: "video-kaynak.mp4", mimeType: "video/mp4", access: "private" })
-      await pipeline(Readable.from([bytes]), file.writeStream)
-      await file.promise
-      return file.fileKey
-    }
-
-    async function linked(fields: Record<string, unknown>) {
-      const video = await media().createMediaVideos({
-        kind: "upload",
-        source_format: "mp4",
-        stored_bytes: 0,
-        ...fields,
-      })
-      await getContainer()
-        .resolve(ContainerRegistrationKeys.LINK)
-        .create({
-          [Modules.PRODUCT]: { product_id: productId },
-          [MEDIA_MODULE]: { media_video_id: video.id },
-        })
-      return video
-    }
+    const privateFile = (bytes: Buffer) => storedFile(getContainer(), bytes)
+    const linked = (fields: Record<string, unknown>) =>
+      linkedVideo(getContainer(), productId, fields)
 
     beforeEach(async () => {
       await setPlanLimits(getContainer(), {})

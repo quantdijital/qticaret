@@ -1,5 +1,6 @@
 import { isValidationError } from "../../errors"
 import { MAX_ATTEMPTS } from "./limits"
+import { ProbeStoppedError } from "./probe"
 import type { VideoStatus } from "./status"
 
 /**
@@ -49,6 +50,10 @@ export interface Failure {
 export function classifyFailure(error: unknown): Failure {
   if (error instanceof VideoJobError) {
     return { kind: error.kind, code: error.code }
+  }
+  // A probe stopped by its time or a signal: the machine's, tried again (review S7)
+  if (error instanceof ProbeStoppedError) {
+    return { kind: "infra", code: PROCESSING_FAILED }
   }
   if (isValidationError(error) && error.safeMessage.startsWith("video.")) {
     return { kind: "input", code: error.safeMessage }

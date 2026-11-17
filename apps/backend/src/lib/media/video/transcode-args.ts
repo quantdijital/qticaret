@@ -1,5 +1,11 @@
 import { isAbsolute } from "node:path"
-import { ENCODE_THREADS, OUTPUT_MAX_FPS, OUTPUT_SECONDS, OUTPUT_SHORT_EDGE } from "./limits"
+import {
+  ENCODE_THREADS,
+  OUTPUT_MAX_FPS,
+  OUTPUT_SECONDS,
+  OUTPUT_SHORT_EDGE,
+  PASS_TIMEOUT_MS,
+} from "./limits"
 import { inputBounds } from "./probe-args"
 import type { VideoDemuxer } from "./signature"
 
@@ -61,7 +67,22 @@ export function scaleFilter(shortEdge: number = OUTPUT_SHORT_EDGE): string {
   return `scale=w='if(lte(iw,ih),${edge("iw")},-2)':h='if(lte(iw,ih),-2,${edge("ih")})'`
 }
 
-const HEAD = ["-hide_banner", "-loglevel", "error", "-nostdin", "-y"]
+/**
+ * ffmpeg's own stop (security review S5), behind our SIGKILL: CPU seconds
+ * in user time, so a pass using its two encoder threads in full reaches it
+ * when the 4-minute wall clock limit does. Our kill stays the first line.
+ */
+export const FFMPEG_CPU_LIMIT_S = (ENCODE_THREADS * PASS_TIMEOUT_MS) / 1000
+
+const HEAD = [
+  "-hide_banner",
+  "-loglevel",
+  "error",
+  "-nostdin",
+  "-timelimit",
+  String(FFMPEG_CPU_LIMIT_S),
+  "-y",
+]
 
 /** What every output shares (adr/0069 §4 step 5). */
 export const COMMON_OUTPUT_ARGS: readonly string[] = [
@@ -100,6 +121,9 @@ export const MP4_ENCODER_ARGS: readonly string[] = [
   "4M",
   "-profile:v",
   "high",
+  // No closed captions carried over from the source into the H.264 stream (review S6)
+  "-a53cc",
+  "0",
   "-pix_fmt",
   "yuv420p",
   "-movflags",
@@ -192,7 +216,7 @@ export function posterArgs(input: string, output: string, atSeconds = 0): string
 
 // What the check of an output reads: its streams, length and every tag
 const OUTPUT_ENTRIES = [
-  "stream=index,codec_type,codec_name,width,height,duration",
+  "stream=index,codec_type,codec_name,width,height,duration,closed_captions",
   "stream_tags",
   "format=format_name,duration,nb_streams",
   "format_tags",

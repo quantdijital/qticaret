@@ -37,7 +37,7 @@ export interface TranscodeNextResult {
  * One clip off the queue (adr/0069 §4): the shop-wide lock (`media:video`)
  * taken at once or the run leaves; the oldest `uploaded` clip made
  * `processing`, made fit for the web, written `ready` (or a failed try),
- * its source removed, `media.video_ready` emitted; the lock let go. One
+ * `media.video_ready` emitted, the lock let go, its source removed. One
  * clip a run: `runVideoQueue` runs it again for the next.
  */
 export const transcodeNextVideoWorkflow = createWorkflow(
@@ -53,7 +53,6 @@ export const transcodeNextVideoWorkflow = createWorkflow(
     const settled = settleVideoStep(
       transform({ video, outcome }, ({ video, outcome }) => ({ video, outcome }))
     )
-    removeVideoSourceStep(settled)
     when("media-video-ready-event", { settled }, ({ settled }) => settled?.status === "ready").then(
       () => {
         emitEventStep({
@@ -63,6 +62,9 @@ export const transcodeNextVideoWorkflow = createWorkflow(
       }
     )
     releaseVideoQueueStep(owner)
+    // Last (review M1): once the source is gone `ready` cannot be taken back, so nothing
+    // that can fail comes after it
+    removeVideoSourceStep(settled)
     return new WorkflowResponse(
       transform({ owner, video, settled }, ({ owner, video, settled }): TranscodeNextResult => ({
         busy: owner === null,

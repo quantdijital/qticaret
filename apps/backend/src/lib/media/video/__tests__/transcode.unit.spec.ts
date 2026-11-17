@@ -73,7 +73,7 @@ function healthy(overrides: (args: readonly string[]) => FakeProgram | null = ()
       return override
     }
     const target = (args[args.length - 1] ?? "").replace(/^file:/, "")
-    if (command === "ffmpeg") {
+    if (command === "ffmpeg" || command.endsWith("/nice")) {
       writeFileSync(target, target.endsWith(".png") ? png : Buffer.alloc(1000, 1))
       return {}
     }
@@ -105,7 +105,7 @@ describe("a clip through the job", () => {
     const priority = jest.spyOn(os, "setPriority").mockImplementation(() => undefined)
     const { spawn, calls } = healthy()
     const source = join(dir, "source")
-    const clip = await transcodeClip(source, "mov", dir, { spawn, env, slots: slots() })
+    const clip = await transcodeClip(source, "mov", dir, { spawn, env, slots: slots(), nice: null })
     expect(calls.map((call) => `${call.command} ${call.args.at(-1) ?? ""}`)).toEqual([
       `ffprobe file:${source}`,
       `ffmpeg file:${join(dir, "output.mp4")}`,
@@ -123,6 +123,21 @@ describe("a clip through the job", () => {
     expect(priority.mock.calls.every(([, value]) => value === 19)).toBe(true)
   })
 
+  it("starts ffmpeg under nice -n 19 where there is one, and ffprobe as it is", async () => {
+    const { spawn, calls } = healthy()
+    await transcodeClip(join(dir, "source"), "mov", dir, {
+      spawn,
+      env,
+      slots: slots(),
+      nice: "/usr/bin/nice",
+    })
+    const encodes = calls.filter((call) => call.command === "/usr/bin/nice")
+    expect(encodes).toHaveLength(3)
+    expect(encodes.every((call) => call.args.slice(0, 3).join(" ") === "-n 19 ffmpeg")).toBe(true)
+    expect(calls.filter((call) => call.command === "ffprobe")).toHaveLength(3)
+    expect(calls.filter((call) => call.command === "ffmpeg")).toEqual([])
+  })
+
   it("fails the clip at once when ffprobe refuses it", async () => {
     const { spawn, calls } = healthy((args) =>
       args.at(-1)?.endsWith("source")
@@ -130,7 +145,7 @@ describe("a clip through the job", () => {
         : null
     )
     const { failure } = await failureOf(
-      transcodeClip(join(dir, "source"), "mov", dir, { spawn, env, slots: slots() })
+      transcodeClip(join(dir, "source"), "mov", dir, { spawn, env, slots: slots(), nice: null })
     )
     expect(failure).toEqual({ kind: "input", code: "video.unreadable" })
     expect(calls.filter((call) => call.command === "ffmpeg")).toEqual([])
@@ -145,6 +160,7 @@ describe("a clip through the job", () => {
             spawn: crashed.spawn,
             env,
             slots: slots(),
+            nice: null,
           })
         )
       ).failure
@@ -158,6 +174,7 @@ describe("a clip through the job", () => {
             spawn: missing.spawn,
             env,
             slots: slots(),
+            nice: null,
           })
         )
       ).failure
@@ -171,6 +188,7 @@ describe("a clip through the job", () => {
         spawn: slow.spawn,
         env,
         slots: slots(),
+        nice: null,
         passTimeoutMs: 50,
       })
     )
@@ -186,6 +204,7 @@ describe("a clip through the job", () => {
       spawn: stopped.spawn,
       env,
       slots: slots(),
+      nice: null,
       signal: controller.signal,
     })
     setTimeout(() => {
@@ -220,6 +239,7 @@ describe("a clip through the job", () => {
         spawn: leaky.spawn,
         env,
         slots: slots(),
+        nice: null,
       })
     )
     expect(failure.kind).toBe("infra")

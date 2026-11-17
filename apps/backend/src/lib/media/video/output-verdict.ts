@@ -17,22 +17,29 @@ import { infraError } from "./transcode-errors"
 
 const CODEC: Readonly<Record<OutputKind, string>> = { mp4: "h264", webm: "vp9" }
 
+const libav = (value: string) => value.startsWith("Lavf") || value.startsWith("Lavc")
+
 /**
- * The tags MP4 and WebM muxers write of themselves even under `bitexact`
- * (the brand, the track's handler and language, an encoder name without
- * its version, WebM's per-track length). Anything else is refused.
+ * The tags MP4 and WebM muxers write of themselves even under `bitexact`,
+ * each with the values they write (review, INFO): the brand, the track's
+ * handler and language, an encoder name (libav's, without its version),
+ * WebM's per-track length. Any other tag, or one of these with another
+ * value, is refused. The patterns are short and anchored on short text.
  */
-export const STRUCTURAL_TAGS: ReadonlySet<string> = new Set([
-  "major_brand",
-  "minor_version",
-  "compatible_brands",
-  "handler_name",
-  "vendor_id",
-  "language",
-  "encoder",
-  "ENCODER",
-  "DURATION",
-])
+const STRUCTURAL: Readonly<Record<string, (value: string) => boolean>> = {
+  major_brand: (value) => /^[A-Za-z0-9 ]{4}$/.test(value),
+  minor_version: (value) => /^\d{1,10}$/.test(value),
+  compatible_brands: (value) => /^(?:[A-Za-z0-9 ]{4}){1,16}$/.test(value),
+  handler_name: (value) => value === "VideoHandler",
+  vendor_id: (value) => value === "[0][0][0][0]" || value === "FFMP",
+  language: (value) => /^[a-z]{3}$/.test(value),
+  encoder: libav,
+  ENCODER: libav,
+  DURATION: (value) => /^\d{2}:\d{2}:\d{2}\.\d{1,9}$/.test(value),
+}
+
+/** The tag names an output may carry. */
+export const STRUCTURAL_TAGS: ReadonlySet<string> = new Set(Object.keys(STRUCTURAL))
 
 const tags = z.record(z.string().max(64), z.string().max(256)).optional()
 
@@ -46,6 +53,7 @@ const outputSchema = z.object({
         width: z.number().int().optional(),
         height: z.number().int().optional(),
         duration: z.string().max(32).optional(),
+        closed_captions: z.number().int().optional(),
         tags,
       })
     )
@@ -66,9 +74,14 @@ export interface OutputVerdict {
 const refuse = (kind: OutputKind, rule: string) =>
   infraError(`video output ${kind} failed its check: ${rule}`)
 
-/** The tags beyond the structural ones, by name only (their values are never logged). */
+/**
+ * The tags beyond the structural ones, or a structural one with a value
+ * its muxer does not write; by name only (their values are never logged).
+ */
 export function strayTags(found: Record<string, string> | undefined): string[] {
-  return Object.keys(found ?? {}).filter((key) => !STRUCTURAL_TAGS.has(key))
+  return Object.entries(found ?? {})
+    .filter(([key, value]) => !Object.hasOwn(STRUCTURAL, key) || !STRUCTURAL[key]?.(value))
+    .map(([key]) => key)
 }
 
 export function assessOutput(raw: unknown, kind: OutputKind): OutputVerdict {
@@ -86,6 +99,10 @@ export function assessOutput(raw: unknown, kind: OutputKind): OutputVerdict {
   }
   if (stream.codec_name !== CODEC[kind]) {
     throw refuse(kind, "codec")
+  }
+  // Closed captions ride inside the video stream (H.264 A53 data): none may (review S6)
+  if (stream.closed_captions === 1) {
+    throw refuse(kind, "closed captions")
   }
   const { width = 0, height = 0 } = stream
   if (

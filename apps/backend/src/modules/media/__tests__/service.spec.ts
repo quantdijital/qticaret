@@ -82,7 +82,7 @@ moduleIntegrationTestRunner<MediaModuleService>({
         output_file_ids: ["cikti-02J.mp4"],
         poster_file_ids: null,
       })
-      await service.forgetVideoFiles(video.id)
+      await service.forgetVideoFiles(video.id, ["video-kaynak-02J.mp4", "cikti-02J.mp4"])
       expect((await service.videosWithFilesLeft()).map((row) => row.id)).not.toContain(video.id)
 
       // Undone removal: the record comes back as it was
@@ -130,10 +130,44 @@ moduleIntegrationTestRunner<MediaModuleService>({
       expect(await service.claimNextVideo()).toBeNull()
     })
 
+    it("forgets only the files storage took from a removed video (review M2)", async () => {
+      const video = await service.createMediaVideos({
+        kind: "upload",
+        source_file_id: "kaynak-m2.mov",
+        output_file_ids: ["o1.mp4", "o2.webm"],
+        poster_file_ids: ["p1.jpg"],
+        stored_bytes: 5000,
+      })
+      // Live: nothing is forgotten
+      await service.forgetVideoFiles(video.id, ["kaynak-m2.mov"])
+      expect((await service.videoFiles(video.id))?.source_file_id).toBe("kaynak-m2.mov")
+
+      await service.softDeleteMediaVideos([video.id])
+      await service.forgetVideoFiles(video.id, ["kaynak-m2.mov", "o1.mp4"])
+      expect(await service.videoFiles(video.id)).toEqual({
+        id: video.id,
+        status: "uploaded",
+        removed: true,
+        source_file_id: null,
+        // Not every output was taken: the list stays for the sweep
+        output_file_ids: ["o1.mp4", "o2.webm"],
+        poster_file_ids: ["p1.jpg"],
+      })
+      expect((await service.videosWithFilesLeft()).map((row) => row.id)).toContain(video.id)
+      await service.forgetVideoFiles(video.id, ["o1.mp4", "o2.webm", "p1.jpg"])
+      expect(await service.videoFiles(video.id)).toMatchObject({
+        output_file_ids: null,
+        poster_file_ids: null,
+      })
+      const [row] = await service.listMediaVideos({ id: video.id }, { withDeleted: true })
+      expect(row?.stored_bytes).toBe(0)
+      expect(await service.videoFiles("mvid_yok")).toBeNull()
+    })
+
     it("writes ready only while the job holds the video, and can take it back", async () => {
       const video = await waiting("r1")
       await service.claimNextVideo()
-      expect(await service.beatVideo(video.id)).toBe(true)
+      expect(await service.beatVideo(video.id, 0)).toBe(true)
       const ready = {
         width: 1280,
         height: 720,
@@ -144,7 +178,9 @@ moduleIntegrationTestRunner<MediaModuleService>({
         poster_file_ids: ["a.jpg"],
         stored_bytes: 1600,
       }
-      expect(await service.markVideoReady(video.id, ready)).toBe(true)
+      // Another claim's token: not written
+      expect(await service.markVideoReady(video.id, 1, ready)).toBe(false)
+      expect(await service.markVideoReady(video.id, 0, ready)).toBe(true)
       const [done] = await service.listMediaVideos({ id: video.id })
       expect(done).toMatchObject({
         status: "ready",
@@ -156,11 +192,11 @@ moduleIntegrationTestRunner<MediaModuleService>({
       })
       expect(done?.processed_at).not.toBeNull()
       // Not the job's any more: no heartbeat, no second write
-      expect(await service.beatVideo(video.id)).toBe(false)
-      expect(await service.markVideoReady(video.id, ready)).toBe(false)
+      expect(await service.beatVideo(video.id, 0)).toBe(false)
+      expect(await service.markVideoReady(video.id, 0, ready)).toBe(false)
 
       // Taken back (a later step failed): processing, its outputs forgotten, the source counted
-      await service.unmarkVideoReady(video.id)
+      expect(await service.unmarkVideoReady(video.id)).toBe(true)
       const [back] = await service.listMediaVideos({ id: video.id })
       expect(back).toMatchObject({
         status: "processing",
@@ -170,19 +206,22 @@ moduleIntegrationTestRunner<MediaModuleService>({
       })
 
       // Ready again, then its source is gone: no longer named nor counted
-      await service.markVideoReady(video.id, ready)
+      await service.markVideoReady(video.id, 0, ready)
       await service.forgetVideoSource(video.id)
       const [clean] = await service.listMediaVideos({ id: video.id })
       expect(clean).toMatchObject({ source_file_id: null, stored_bytes: 600 })
+      // Without its source a ready video is never taken back (review M1)
+      expect(await service.unmarkVideoReady(video.id)).toBe(false)
+      expect((await service.listMediaVideos({ id: video.id }))[0]?.status).toBe("ready")
 
       // A video removed while it was processed is not written
       const gone = await waiting("r2")
       await service.claimNextVideo()
       await service.softDeleteMediaVideos([gone.id])
-      expect(await service.beatVideo(gone.id)).toBe(false)
-      expect(await service.markVideoReady(gone.id, ready)).toBe(false)
+      expect(await service.beatVideo(gone.id, 0)).toBe(false)
+      expect(await service.markVideoReady(gone.id, 0, ready)).toBe(false)
       expect(
-        await service.markVideoTried(gone.id, { status: "failed", attempts: 1, error_code: "x" })
+        await service.markVideoTried(gone.id, 0, { status: "failed", attempts: 1, error_code: "x" })
       ).toBe(false)
     })
 
@@ -215,10 +254,15 @@ moduleIntegrationTestRunner<MediaModuleService>({
         error_code: "video.processing_failed",
       })
 
-      // A failed try written by the job itself
+      // Taken again: the job taken for dead (its claim saw 1) can no longer write (review S2)
       await service.claimNextVideo()
+      expect(await service.beatVideo(video.id, 1)).toBe(false)
+      const stale = { status: "failed" as const, attempts: 2, error_code: "video.unreadable" }
+      expect(await service.markVideoTried(video.id, 1, stale)).toBe(false)
+      // The new claim writes its failed try
+      expect(await service.beatVideo(video.id, 2)).toBe(true)
       expect(
-        await service.markVideoTried(video.id, {
+        await service.markVideoTried(video.id, 2, {
           status: "failed",
           attempts: 3,
           error_code: "video.unreadable",

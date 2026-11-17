@@ -33,6 +33,17 @@ const probeSlots: Slots = createSlots({
 
 const unreadable = () => new ValidationError("video.unreadable", { field: "file" })
 
+/**
+ * ffprobe ran past its time or was killed by a signal: to an upload the
+ * same `video.unreadable`, but the transcoding job tries such a clip again
+ * (security review S7): a busy machine, not the shop's file.
+ */
+export class ProbeStoppedError extends ValidationError {
+  constructor() {
+    super("video.unreadable", { field: "file" })
+  }
+}
+
 export interface ProbeOptions {
   /** A stand-in for Node's spawn (tests). */
   spawn?: Spawner
@@ -72,7 +83,9 @@ export async function probeVideo(
         code: run.code,
         signal: run.signal,
       })
-      throw unreadable()
+      throw run.timedOut || (run.signal !== null && !run.overflow)
+        ? new ProbeStoppedError()
+        : unreadable()
     }
     output = run.stdout
   } catch (error) {

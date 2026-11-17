@@ -158,20 +158,30 @@ export const softDeleteVideoStep = createStep(
 
 /**
  * The removed video's files go (adr/0069 §11), the last step: nothing can
- * be undone after it, and it does not fail. Storage refusing, or the
- * record not marked, leaves the removed record naming its files: the
- * nightly sweep tries again.
+ * be undone after it, and it does not fail. The files are read again after
+ * the soft delete (security review M2): the transcoding job may have
+ * written `ready` with new outputs between the removal's first read and
+ * its soft delete, and cannot write after it. Only the files storage took
+ * are forgotten; the rest stay named for the nightly sweep.
  */
 export const removeVideoFilesStep = createStep(
   "media-video-remove-files",
   async (video: MediaVideoRecord, { container }) => {
-    const removed = await removeFiles(container, videoFileIds(video))
-    if (!removed) {
+    let ids = videoFileIds(video)
+    try {
+      const now = await media(container).videoFiles(video.id)
+      if (now) {
+        ids = [...new Set([...ids, ...videoFileIds(now)])]
+      }
+    } catch (error) {
+      logger.warn({ event: "media.video_files_not_read", err: errorSummary(error) })
+    }
+    if (!(await removeFiles(container, ids))) {
       logger.warn({ event: "media.video_files_kept", video_id: video.id })
       return new StepResponse(false)
     }
     try {
-      await media(container).forgetVideoFiles(video.id)
+      await media(container).forgetVideoFiles(video.id, ids)
     } catch (error) {
       logger.warn({ event: "media.video_files_not_forgotten", err: errorSummary(error) })
     }

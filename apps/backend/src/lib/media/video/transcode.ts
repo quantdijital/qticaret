@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs"
 import { readFile, stat, statfs } from "node:fs/promises"
 import { setPriority } from "node:os"
 import { join } from "node:path"
@@ -45,6 +46,29 @@ export interface TranscodeOptions {
   /** Another limiter (tests). */
   slots?: Slots
   passTimeoutMs?: number
+  /** The `nice` ffmpeg is started through; null: none (then `setPriority` alone). Default: the system's. */
+  nice?: string | null
+}
+
+// `nice` where the system has one: it execs ffmpeg, so the pid (and our kill) stays ffmpeg's
+const NICE_PATHS = ["/usr/bin/nice", "/bin/nice"]
+let niceFound: string | null | undefined
+
+/** The system's `nice`, looked for once; null when there is none. */
+export function systemNice(): string | null {
+  niceFound ??= NICE_PATHS.find((path) => existsSync(path)) ?? null
+  return niceFound
+}
+
+/** ffmpeg's command and arguments: under `nice -n 19` when there is one (review, INFO). */
+export function niced(
+  ffmpeg: string,
+  args: readonly string[],
+  nice: string | null
+): { command: string; args: string[] } {
+  return nice === null
+    ? { command: ffmpeg, args: [...args] }
+    : { command: nice, args: ["-n", String(ENCODE_PRIORITY), ffmpeg, ...args] }
 }
 
 export interface MadeOutput extends OutputVerdict {
@@ -209,12 +233,15 @@ export async function transcodeClip(
   })
   const release = await (options.slots ?? encodeSlots).take()
   try {
-    const ffmpeg = (args: string[], what: string) =>
-      runProgram(videoToolPaths(options.env).ffmpeg, args, what, {
+    const nice = options.nice === undefined ? systemNice() : options.nice
+    const ffmpeg = (args: string[], what: string) => {
+      const run = niced(videoToolPaths(options.env).ffmpeg, args, nice)
+      return runProgram(run.command, run.args, what, {
         ...options,
         timeoutMs: options.passTimeoutMs ?? PASS_TIMEOUT_MS,
         ffmpeg: true,
       })
+    }
     const made = {} as Record<OutputKind, MadeOutput>
     for (const kind of ["mp4", "webm"] as const) {
       const path = join(dir, `output.${kind}`)

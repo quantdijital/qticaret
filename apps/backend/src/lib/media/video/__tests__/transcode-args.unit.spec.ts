@@ -62,7 +62,8 @@ const COMMON = [
   "2",
 ]
 
-const HEAD = ["-hide_banner", "-loglevel", "error", "-nostdin", "-y"]
+// ffmpeg's own CPU limit (review S5): two threads × the 4-minute pass
+const HEAD = ["-hide_banner", "-loglevel", "error", "-nostdin", "-timelimit", "480", "-y"]
 
 describe("the transcoding arguments", () => {
   it("reads the input with the upload's bounds", () => {
@@ -90,6 +91,8 @@ describe("the transcoding arguments", () => {
       "4M",
       "-profile:v",
       "high",
+      "-a53cc",
+      "0",
       "-pix_fmt",
       "yuv420p",
       "-movflags",
@@ -179,6 +182,7 @@ describe("the transcoding arguments", () => {
     const args = outputProbeArgs("webm", "/a/output.webm")
     expect(args).toContain("matroska")
     expect(args[args.indexOf("-show_entries") + 1]).toContain("stream_tags")
+    expect(args[args.indexOf("-show_entries") + 1]).toContain("closed_captions")
     expect(args[args.indexOf("-show_entries") + 1]).toContain("format_tags")
     expect(args.slice(-2)).toEqual(["-i", "file:/a/output.webm"])
   })

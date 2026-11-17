@@ -39,15 +39,15 @@ function byteCap(max: number): Transform {
 export async function downloadSource(
   container: MedusaContainer,
   fileId: string,
-  path: string
+  path: string,
+  signal?: AbortSignal
 ): Promise<void> {
   try {
     const stream = await container.resolve(Modules.FILE).getDownloadStream(fileId)
-    await pipeline(
-      stream,
-      byteCap(VIDEO_MAX_BYTES),
-      createWriteStream(path, { mode: 0o600, flags: "wx" })
-    )
+    const file = createWriteStream(path, { mode: 0o600, flags: "wx" })
+    await pipeline(stream, byteCap(VIDEO_MAX_BYTES), file, {
+      signal: signal ?? new AbortController().signal,
+    })
   } catch (error) {
     if (isMissingFile(error)) {
       throw inputError("video.unreadable", "video source: not in storage")
@@ -64,14 +64,20 @@ async function storeVideoFile(
   container: MedusaContainer,
   filename: string,
   output: MadeOutput,
-  kind: keyof typeof VIDEO_MIME
+  kind: keyof typeof VIDEO_MIME,
+  signal?: AbortSignal
 ): Promise<StoredFile> {
   const upload = await container
     .resolve(Modules.FILE)
     .getUploadStream({ filename, mimeType: VIDEO_MIME[kind], access: "public" })
+  // A transfer cut short may settle the provider's promise later: never as an unhandled rejection
+  const finished = upload.promise
+  finished.catch(() => undefined)
   try {
-    await pipeline(createReadStream(output.path), upload.writeStream)
-    await upload.promise
+    await pipeline(createReadStream(output.path), upload.writeStream, {
+      signal: signal ?? new AbortController().signal,
+    })
+    await finished
   } catch {
     await removeFiles(container, [upload.fileKey])
     throw infraError(`video output: storage refused the ${kind}`)
@@ -97,13 +103,17 @@ export async function storeOutputs(
   base: string,
   outputs: Record<keyof typeof VIDEO_MIME, MadeOutput>,
   poster: PosterImages,
-  onStored: (fileId: string) => void
+  onStored: (fileId: string) => void,
+  signal?: AbortSignal
 ): Promise<StoredOutputs> {
-  const mp4 = await storeVideoFile(container, `${base}.mp4`, outputs.mp4, "mp4")
+  const mp4 = await storeVideoFile(container, `${base}.mp4`, outputs.mp4, "mp4", signal)
   onStored(mp4.id)
-  const webm = await storeVideoFile(container, `${base}.webm`, outputs.webm, "webm")
+  const webm = await storeVideoFile(container, `${base}.webm`, outputs.webm, "webm", signal)
   onStored(webm.id)
   const store = async (name: string, mime: string, buffer: Buffer) => {
+    if (signal?.aborted) {
+      throw infraError("video poster: the job was stopped")
+    }
     try {
       const file = await storePublicFile(container, name, mime, buffer)
       onStored(file.id)

@@ -9,6 +9,7 @@ import {
   makePoster,
   resetEncodeActivity,
   scaledSize,
+  systemNice,
   transcodeClip,
   videoToolPaths,
 } from ".."
@@ -197,6 +198,29 @@ describeReal("the real transcoding (adr/0069 §4)", () => {
     ])
     const { channels } = await sharp(clip.poster).stats()
     expect(channels[0]?.mean ?? 0).toBeGreaterThan(30)
+  })
+
+  it("kills ffmpeg itself when started through nice (the pid is ffmpeg's)", async () => {
+    expect(systemNice()).not.toBeNull()
+    const source = join(dir, "uzun.mp4")
+    ffmpeg([
+      ...lavfi("testsrc2=size=1920x1080:rate=30:duration=20"),
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "-f",
+      "mp4",
+      source,
+    ])
+    const work = await mkdtemp(join(dir, "kill-"))
+    const failure: unknown = await transcodeClip(source, "mov", work, {
+      passTimeoutMs: 300,
+    }).catch((error: unknown) => error)
+    expect((failure as Error).message).toContain("past its time")
+    // No ffmpeg left reading or writing in that directory
+    const left = answers("pgrep", ["-f", work])
+    expect(left.stdout.trim()).toBe("")
   })
 
   it("never runs two ffmpeg processes at once", async () => {
