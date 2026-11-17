@@ -272,6 +272,14 @@ export type StoreProductSection =
 /** A section of every category page: above the product grid (`top`) or below it. */
 export type StoreCategorySection = StorePageSection & { placement: "top" | "bottom" }
 
+/**
+ * A section of the footer group (adr/0070 §4): drawn above the shop's
+ * footer on every page but the checkout's, as a page's section.
+ */
+export type StoreFooterSection =
+  | StoreNewsletterSection
+  | Extract<StoreLayoutSection, { type: "rich_text" | "trust_badges" | "marquee" }>
+
 /** A section of the header group: drawn above the shop's header on every page but the checkout's. */
 export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection
 
@@ -291,7 +299,12 @@ export interface StoreLayout {
   /** The announcement bar and the scrolling strip, each at most once (adr/0049 §10 karar 9). */
   header: StoreHeaderSection[]
   home: StoreLayoutSection[]
-  footer: StoreNewsletterSection[]
+  /**
+   * The footer group above the shop's footer, in its order (adr/0070 §4):
+   * the newsletter box, a rich text, trust badges, a scrolling strip, each
+   * at most once. A backend before the group sends the box alone.
+   */
+  footer: StoreFooterSection[]
   product: StoreProductSection[]
   category: StoreCategorySection[]
   /**

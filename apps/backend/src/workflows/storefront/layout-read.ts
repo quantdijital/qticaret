@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
-import { isBody, isShowing, readStoredLayout } from "../../lib/storefront/layout"
+import { footerBody, isBody, isShowing, readStoredLayout } from "../../lib/storefront/layout"
 import { mainSectionsOf, withMainSections } from "../../lib/storefront/layout-main"
 import { fillShopDoc, fillShopText, fillShopTextWhole } from "../../lib/shop/tokens"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
@@ -68,16 +68,20 @@ export async function storeLayout(
     home: showing(doc.home),
     product: showing(doc.product).filter(isBody),
     category: showing(doc.category).filter(isBody),
+    // The footer group's rich text, badges and strip, drawn as a page's (adr/0070 §4)
+    footer: footer.filter(footerBody),
   }
   const keepLive = await liveRecords(container, [
     ...pages.home,
     ...pages.product,
     ...pages.category,
+    ...pages.footer,
   ])
   const home = keepLive(pages.home)
   const product = keepLive(pages.product)
   const category = keepLive(pages.category)
-  const body: BodySection[] = [...home, ...product, ...category]
+  const footerBodies = keepLive(pages.footer)
+  const body: BodySection[] = [...home, ...product, ...category, ...footerBodies]
   // The header's scrolling strip links like a body section (adr/0049 Ek 2026-11-14 §4.1),
   // the catalog header bar's highlighted link too (it always shows)
   const bar = doc.header.filter((section) => section.type === "header_bar")
@@ -89,7 +93,9 @@ export async function storeLayout(
   ]
   const urls = [
     ...body.flatMap(imageUrls),
-    ...footer.flatMap(newsletterImages),
+    ...footer.flatMap((section) =>
+      section.type === "newsletter" ? newsletterImages(section) : []
+    ),
     ...footerRowImages(blocks),
   ]
   const [values, resolved, assets, picks, bands] = await Promise.all([
@@ -153,6 +159,11 @@ export async function storeLayout(
     ),
   }
   const resolve = (link: MenuLinkInput) => at.links.get(link) ?? null
+  // A footer group section as a page's, once the live filter kept it
+  const keptFooter = (id: string) => {
+    const kept = footerBodies.find((section) => section.id === id)
+    return kept ? hydrateSection(kept, at) : Promise.resolve(null)
+  }
   return {
     header: header.map((section) =>
       section.type === "marquee"
@@ -172,15 +183,22 @@ export async function storeLayout(
           }
     ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),
-    // The footer's box as a page's (adr/0049 Ek 2026-11-17 e-bülten): each new field off its default
-    footer: footer.map((section) =>
-      printedNewsletter(
-        section,
-        (text) => fill(text, values),
-        (url, alt) =>
-          at.images.get(url) ?? { url, alt, width: null, height: null, derivatives: null }
+    // The footer group in its order (adr/0070 §4): the box as a page's (adr/0049 Ek 2026-11-17
+    // e-bülten, each new field off its default), the others hydrated as a page's sections
+    footer: await Promise.all(
+      footer.map((section) =>
+        section.type === "newsletter"
+          ? Promise.resolve(
+              printedNewsletter(
+                section,
+                (text) => fill(text, values),
+                (url, alt) =>
+                  at.images.get(url) ?? { url, alt, width: null, height: null, derivatives: null }
+              )
+            )
+          : keptFooter(section.id)
       )
-    ),
+    ).then((shown) => shown.filter((section) => section !== null)),
     product: await Promise.all(product.map((section) => hydrateSection(section, at))),
     category: await Promise.all(
       category.map(async (section) => ({

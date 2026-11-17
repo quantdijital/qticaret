@@ -1,17 +1,19 @@
 import { useState } from "react"
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
-import type { BodySection, Placement } from "@/features/storefront/api/layout"
+import type { BodySection, FooterSection, Placement } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { isScheduled } from "@/features/storefront/layout/sections"
-import { SECTION_ICONS, sectionLabel } from "./section-meta"
+import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { SectionRow } from "./section-row"
 import type { DropPlace, RowDrag } from "./section-row"
 
-interface SectionListProps {
+interface SectionListProps<S extends BodySection | FooterSection> {
   /** The list's name for screen readers: the page, or its side of a category's products. */
   label: string
-  sections: readonly BodySection[]
+  sections: readonly S[]
+  /** The footer group's sections above its bar (adr/0070 §4): its newsletter box named as the footer's. */
+  inFooter?: boolean
   /** The page holds as many as it may: nothing is copied. */
   full: boolean
   /** A category page's side: each row may move to the other one. */
@@ -20,7 +22,7 @@ interface SectionListProps {
   problems: ReadonlySet<string>
   dispatch: Dispatch<EditorAction>
   onOpen: (id: string) => void
-  onRemove: (section: BodySection) => void
+  onRemove: (section: S) => void
 }
 
 /** Where a section dropped before or after `target` lands, as an index among the others. */
@@ -40,17 +42,18 @@ function dropIndex(
   return to === from ? null : to
 }
 
-/** A page's sections in order: dragged by their handles or moved by their buttons. */
-export function SectionList({
+/** A page's (or the footer group's) sections in order: dragged by their handles or moved by their buttons. */
+export function SectionList<S extends BodySection | FooterSection>({
   label,
   sections,
+  inFooter = false,
   full,
   placement,
   problems,
   dispatch,
   onOpen,
   onRemove,
-}: SectionListProps) {
+}: SectionListProps<S>) {
   const { t } = useTranslation()
   const [dragged, setDragged] = useState<string | null>(null)
   const [over, setOver] = useState<{ id: string; place: DropPlace } | null>(null)
@@ -87,7 +90,7 @@ export function SectionList({
   return (
     <ol aria-label={label} className="flex flex-col gap-0.5">
       {sections.map((section, index) => {
-        const { name, detail } = sectionLabel(t, section)
+        const { name, detail } = sectionLabel(t, section, inFooter)
         const move = (to: number) => () => {
           dispatch({ type: "move", id: section.id, to })
         }
@@ -95,7 +98,7 @@ export function SectionList({
           <SectionRow
             key={section.id}
             id={section.id}
-            icon={SECTION_ICONS[section.type]}
+            icon={SECTION_ICONS[kindOf(section, inFooter)]}
             name={name}
             detail={detail}
             visible={section.visible}

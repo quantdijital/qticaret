@@ -9,14 +9,17 @@ import {
 import type { BodyGroup, BodySectionType, Placement } from "@/features/storefront/api/layout"
 import { MARQUEE_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
 import { GROUP_TYPES } from "@/features/storefront/layout/sections"
+import type { FooterAddType } from "@/features/storefront/layout/footer-group"
 import { SECTION_ICONS } from "./section-meta"
 
 const A = "storefront.editor.add"
 
 interface AddSectionDialogProps {
   open: boolean
-  /** The page the section is for. */
-  page: BodyGroup
+  /** The page the section is for, or the footer group (adr/0070 §4). */
+  page: BodyGroup | "footer"
+  /** The footer group's types it does not hold yet: each at most once. */
+  footerTypes?: readonly FooterAddType[]
   /** A category page's side of its products. */
   placement: Placement
   /** The page already shows its scrolling strips (adr/0049 Ek 2026-11-14 §4.1): no other is offered. */
@@ -27,10 +30,11 @@ interface AddSectionDialogProps {
   onPick: (type: BodySectionType) => void
 }
 
-/** The section types the page takes, each with what it shows in one line. */
+/** The section types the page (or the footer group) takes, each with what it shows in one line. */
 export function AddSectionDialog({
   open,
   page,
+  footerTypes = [],
   placement,
   marqueeFull,
   priceBandsFull = false,
@@ -38,6 +42,7 @@ export function AddSectionDialog({
   onPick,
 }: AddSectionDialogProps) {
   const { t } = useTranslation()
+  const types: readonly BodySectionType[] = page === "footer" ? footerTypes : GROUP_TYPES[page]
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="lg">
@@ -48,8 +53,10 @@ export function AddSectionDialog({
           </DialogDescription>
         </DialogHeader>
         <ul className="grid gap-2 sm:grid-cols-2">
-          {GROUP_TYPES[page].map((type) => {
-            const Icon = SECTION_ICONS[type]
+          {types.map((type) => {
+            // The footer's newsletter box has its own name (adr/0049 Ek 2026-11-17)
+            const kind = page === "footer" && type === "newsletter" ? "footer_newsletter" : type
+            const Icon = SECTION_ICONS[kind]
             const full =
               type === "marquee"
                 ? marqueeFull &&
@@ -73,10 +80,10 @@ export function AddSectionDialog({
                   />
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="text-sm font-medium">
-                      {t(`storefront.editor.types.${type}.name`)}
+                      {t(`storefront.editor.types.${kind}.name`)}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {full || t(`storefront.editor.types.${type}.description`)}
+                      {full || t(`storefront.editor.types.${kind}.description`)}
                     </span>
                   </span>
                 </button>
