@@ -3983,7 +3983,7 @@
         "done": "İade edildi",
         "pending": "Sürüyor",
         "failed": "Yapılamadı",
-        "incomplete": "Kaydı yarım: sağlayıcıda kontrol edin"
+        "incomplete": "Doğrulanıyor: kaydı yarım"
       }
     },
     "chargeback": {
@@ -6794,7 +6794,11 @@
       },
       "refund_incomplete": {
         "title": "{{provider}} iadesi yapıldı, kaydı yarım kaldı",
-        "description": "Sipariş {{cart}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. {{provider}} panelinden kontrol edin; aynı iadeyi yeniden yapmayın."
+        "description": "Sipariş {{cart}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. Kayıt otomatik olarak denetleniyor; bir saat sonra hâlâ yarımsa {{provider}} panelinden kontrol edin. Aynı iadeyi yeniden yapmayın."
+      },
+      "refund_unresolved": {
+        "title": "Bir iade bir saattir doğrulanamadı",
+        "description": "Sipariş {{cart}} için {{amount}} iadenin ({{reference}}, {{provider}}) kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın."
       }
     },
     "markAllRead": "Tümünü okundu say",

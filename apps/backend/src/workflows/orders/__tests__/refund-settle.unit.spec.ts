@@ -2,8 +2,9 @@ import { asValue } from "@medusajs/framework/awilix"
 import { Modules, createMedusaContainer } from "@medusajs/framework/utils"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
+import { settleFailedEntry } from "../refund-settle"
 import { refundMade, refundTraceOf } from "../refund-trace"
-import { settleFailedEntry } from "../steps/order-refund"
+import type { TracedRefund } from "../refund-trace"
 
 const queryStatus = jest.fn()
 jest.mock("../../../lib/payments/paytr", () => ({
@@ -16,13 +17,13 @@ jest.mock("../../payments/issue-alert", () => ({
 }))
 
 const OID = "payses01JABCDEFGHJKMNPQRSTVWXYZ0"
-const REFERENCE = "refund-0000-0000-01"
-const SENT_AS = "refund0000000001"
+const REFERENCE = "0123456789abcdef0123456789abcdef"
 const paytrPayment = (data: Record<string, unknown> = {}) => ({
   id: "pay_01",
   provider_id: "pp_paytr_paytr",
   data: { merchant_oid: OID, ...data },
 })
+const madeData = { refunds: [{ reference_no: REFERENCE, amount: 1000 }] }
 
 function containerWith(
   payment: unknown,
@@ -55,67 +56,60 @@ function containerWith(
   return { container, updateOrderRefunds }
 }
 
-const traced = { reference: REFERENCE, payment_id: "pay_01", parts: 0 }
+const traced: TracedRefund = { reference: REFERENCE, payment_id: "pay_01", amount: 1000, parts: [] }
+const traceIn = async (payment: unknown, entry: TracedRefund = traced) =>
+  (await refundTraceOf(containerWith(payment).container, entry)).trace
 
 beforeEach(() => {
   jest.resetAllMocks()
 })
 
 describe("an order refund's trace once a step after the provider failed (review 2026-11-17)", () => {
-  it("is made when the payment's data records it: provider and Medusa both did", async () => {
-    const { container } = containerWith(
-      paytrPayment({ refunds: [{ reference_no: SENT_AS, amount: 1000 }] })
-    )
+  it("is made when the payment's data records this amount under the reference", async () => {
+    const { container } = containerWith(paytrPayment(madeData))
 
     expect(await refundTraceOf(container, traced)).toEqual({ trace: "made", provider: "paytr" })
     expect(await refundMade(container, traced)).toBe(true)
+    // Another amount under the reference is not this refund (review D5)
+    expect(await refundMade(container, { ...traced, amount: 500 })).toBe(false)
     expect(queryStatus).not.toHaveBeenCalled()
   })
 
-  it("is sent when PayTR shows a refund under the reference its answer never brought back", async () => {
-    const { container } = containerWith(paytrPayment())
-    queryStatus.mockResolvedValue({ refunds: [{ amount: 1000, referenceNo: SENT_AS }] })
+  it("is shown when PayTR lists this amount under the reference its answer never brought", async () => {
+    queryStatus.mockResolvedValue({ refunds: [{ amount: 1000, referenceNo: REFERENCE }] })
 
-    expect(await refundTraceOf(container, traced)).toEqual({ trace: "sent", provider: "paytr" })
-    expect(queryStatus).toHaveBeenCalledWith({ merchantId: "1" }, OID)
-    expect(await refundMade(container, traced)).toBe(false)
+    expect(await traceIn(paytrPayment())).toBe("shown")
+    queryStatus.mockResolvedValue({ refunds: [{ amount: 500, referenceNo: REFERENCE }] })
+    expect(await traceIn(paytrPayment())).toBe("none")
   })
 
-  it("is none when PayTR shows no such refund, or the provider could not have sent it", async () => {
-    queryStatus.mockResolvedValue({ refunds: [{ amount: 1000, referenceNo: "otherref" }] })
-
-    expect((await refundTraceOf(containerWith(paytrPayment()).container, traced)).trace).toBe(
-      "none"
-    )
-    // No account: PayTR's provider refused before sending (not_configured)
-    const unconfigured = containerWith(paytrPayment(), { account: null }).container
-    expect((await refundTraceOf(unconfigured, traced)).trace).toBe("none")
-    const bank = { id: "pay_01", provider_id: "pp_bank-transfer_bank-transfer", data: {} }
-    expect(await refundTraceOf(containerWith(bank).container, traced)).toEqual({
-      trace: "none",
-      provider: "bank-transfer",
-    })
-  })
-
-  it("is sent for a part iyzico sent, and whenever nothing can be read: fails closed", async () => {
+  it("reads iyzico's parts: all answered for the whole is shown, anything less partial", async () => {
     const iyzico = { id: "pay_01", provider_id: "pp_iyzico_iyzico", data: {} }
-    expect(
-      (await refundTraceOf(containerWith(iyzico).container, { ...traced, parts: 1 })).trace
-    ).toBe("sent")
+    const done = { amount: 1000, state: "done" }
 
-    queryStatus.mockRejectedValue(new Error("connection reset"))
-    expect((await refundTraceOf(containerWith(paytrPayment()).container, traced)).trace).toBe(
-      "sent"
+    expect(await traceIn(iyzico, { ...traced, parts: [done] })).toBe("shown")
+    expect(await traceIn(iyzico, { ...traced, parts: [{ ...done, state: "sending" }] })).toBe(
+      "partial"
     )
-    const unread = containerWith(new Error("database gone")).container
-    expect((await refundTraceOf(unread, traced)).trace).toBe("sent")
+    expect(await traceIn(iyzico, { ...traced, parts: [{ ...done, amount: 400 }] })).toBe("partial")
+  })
+
+  it("is unknown when the payment or PayTR cannot be read, none when nothing shows", async () => {
+    queryStatus.mockRejectedValue(new Error("connection reset"))
+    expect(await traceIn(paytrPayment())).toBe("unknown")
+    expect(await traceIn(new Error("database gone"))).toBe("unknown")
+
+    queryStatus.mockResolvedValue({ refunds: [] })
+    expect(await traceIn(paytrPayment())).toBe("none")
+    const bank = { id: "pay_01", provider_id: "pp_bank-transfer_bank-transfer", data: {} }
+    expect(await traceIn(bank)).toBe("none")
   })
 })
 
-describe("a failed refund's ledger entry keeps money that left counted (review 2026-11-17)", () => {
+describe("a failed refund's ledger entry (review 2026-11-17, O2, D6)", () => {
   it("keeps a refund PayTR made pending as incomplete, and tells the shop", async () => {
     const { container, updateOrderRefunds } = containerWith(paytrPayment())
-    queryStatus.mockResolvedValue({ refunds: [{ amount: 1000, referenceNo: SENT_AS }] })
+    queryStatus.mockResolvedValue({ refunds: [{ amount: 1000, referenceNo: REFERENCE }] })
 
     await settleFailedEntry(container, "oref_01")
 
@@ -133,9 +127,23 @@ describe("a failed refund's ledger entry keeps money that left counted (review 2
     })
   })
 
-  it("fails a refund surely not sent, as before, with no alert", async () => {
+  it("keeps a refund PayTR shows nothing of yet unconfirmed, counted, with no alert", async () => {
     const { container, updateOrderRefunds } = containerWith(paytrPayment())
     queryStatus.mockResolvedValue({ refunds: [] })
+
+    await settleFailedEntry(container, "oref_01")
+
+    expect(updateOrderRefunds).toHaveBeenCalledWith({
+      id: "oref_01",
+      status: "pending",
+      error_code: "refund_unconfirmed",
+    })
+    expect(alertPaymentIssue).not.toHaveBeenCalled()
+  })
+
+  it("fails a refund nothing was sent for where nothing shown is proof", async () => {
+    const iyzico = { id: "pay_01", provider_id: "pp_iyzico_iyzico", data: {} }
+    const { container, updateOrderRefunds } = containerWith(iyzico)
 
     await settleFailedEntry(container, "oref_01")
 
@@ -144,6 +152,17 @@ describe("a failed refund's ledger entry keeps money that left counted (review 2
       status: "failed",
       error_code: "refund_failed",
     })
+  })
+
+  it("tells no shop to check a panel a transfer or cash refund has none of (D6)", async () => {
+    const bank = { id: "pay_01", provider_id: "pp_bank-transfer_bank-transfer", data: madeData }
+    const { container, updateOrderRefunds } = containerWith(bank)
+
+    await settleFailedEntry(container, "oref_01")
+
+    expect(updateOrderRefunds).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "pending", error_code: "refund_incomplete" })
+    )
     expect(alertPaymentIssue).not.toHaveBeenCalled()
   })
 })

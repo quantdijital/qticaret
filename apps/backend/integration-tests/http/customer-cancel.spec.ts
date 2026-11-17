@@ -142,7 +142,7 @@ medusaIntegrationTestRunner({
         .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
         .createOrderRefunds({
           order_id: orderId,
-          reference: cancelRefundReference(orderId),
+          reference: cancelRefundReference("pay_cancelled"),
           payment_id: "pay_cancelled",
           amount: 21_000,
           status: "done",

@@ -22,8 +22,11 @@ import { alertStaff } from "../messaging/staff"
  *   own; the shop checks whether the shopper paid twice;
  * - `refund_incomplete`: an order refund whose money left, or may have,
  *   while a step after failed (review 2026-11-17): its record is kept
- *   pending, never given back again on its own; the shop checks the
- *   provider. The reference is the refund's, `cart_id` carries the order.
+ *   pending, never given back again on its own, and checked by the
+ *   settling job; at a provider with a panel only. The reference is the
+ *   refund's, `cart_id` carries the order;
+ * - `refund_unresolved`: such a refund still open an hour on: the shop
+ *   checks it by hand.
  */
 export type PaymentIssue =
   | "completion_stuck"
@@ -32,6 +35,7 @@ export type PaymentIssue =
   | "wholesale_price_check"
   | "payment_beside_order"
   | "refund_incomplete"
+  | "refund_unresolved"
 
 export interface PaymentIssueInput {
   issue: PaymentIssue

@@ -32,18 +32,22 @@ export const refundRecordsOf = (
 const providerForm = (reference: string) => reference.replace(/[^A-Za-z0-9]/g, "").slice(0, 64)
 
 /**
- * Whether the payment's data records a refund under our order refund's
- * `reference`, as sent or as PayTR takes it. Medusa writes the data a
- * provider returns only once the refund went through, along with its own
- * refund record (2.21.2 `refundPaymentFromProvider_`): recorded, the money
- * left and Medusa knows it; only our ledger can lag behind.
+ * Whether the payment's data records a refund of `amount` kuruş under our
+ * order refund's `reference`, as sent or as PayTR takes it. Medusa writes
+ * the data a provider returns only once the refund went through, along
+ * with its own refund record (2.21.2 `refundPaymentFromProvider_`):
+ * recorded, the money left and Medusa knows it; only our ledger can lag.
+ * Another amount under the reference is not this refund (review D5).
  */
 export function refundRecorded(
   data: Record<string, unknown> | null | undefined,
-  reference: string
+  reference: string,
+  amount: number
 ): boolean {
   const forms = new Set([reference, providerForm(reference)])
-  return refundRecordsOf(data).some((record) => forms.has(record.reference_no))
+  return refundRecordsOf(data).some(
+    (record) => forms.has(record.reference_no) && record.amount === amount
+  )
 }
 
 /**

@@ -3,7 +3,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { LIFECYCLE_FIELDS, ORDER_STATE_FIELDS, orderState } from "../../../lib/dashboard"
 import type { ShipmentPlan, StateOrder } from "../../../lib/dashboard"
 import { ValidationError } from "../../../lib/errors"
-import { cancelRefundReference } from "../../../lib/orders/locks"
+import { isCancelRefundReference } from "../../../lib/orders/locks"
 import { SHIPPING_PAYMENT_FIELDS, shippingBlock } from "../../../lib/payments/shippable"
 import { shipsWithTestCarrier } from "../test-shipping"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
@@ -80,13 +80,13 @@ export const planShipmentStep = createStep(
     ) {
       throw new ValidationError(blocked)
     }
-    const [cancelRefund] = await container
+    const refunds = await container
       .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
       .listOrderRefunds(
-        { reference: cancelRefundReference(input.order_id), status: ["pending", "done"] },
-        { take: 1, select: ["id"] }
+        { order_id: input.order_id, status: ["pending", "done"] },
+        { select: ["reference"] }
       )
-    if (cancelRefund) {
+    if (refunds.some((refund) => isCancelRefundReference(refund.reference))) {
       throw new ValidationError("orders.ship_canceled_refund")
     }
     const [awaited] = await container

@@ -1123,6 +1123,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.refund_mode": "Choose lines and shipping, or enter an amount.",
   "orders.refund_amount_kurus": "The amount takes at most two decimals.",
   "orders.refund_reference_invalid": "The refund key is not valid; start the refund again.",
+  "orders.refund_unsettled":
+    "A refund of this order is still being checked with the provider; try again in a few minutes.",
   "payments.use_order_refund": "This payment is refunded from the order's refund step.",
   "payments.max_installment_invalid": "The most installments is 2 to 12 (0: what PayTR allows).",
   "payments.installments_unknown": "No product or cart found for the installment table.",

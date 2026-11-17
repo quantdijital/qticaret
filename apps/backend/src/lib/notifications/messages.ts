@@ -74,7 +74,12 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.refund_incomplete": {
       title: "{{provider}} iadesi yapıldı, kaydı yarım kaldı",
       description:
-        "Sipariş {{cart}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. {{provider}} panelinden kontrol edin; aynı iadeyi yeniden yapmayın.",
+        "Sipariş {{cart}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. Kayıt otomatik olarak denetleniyor; bir saat sonra hâlâ yarımsa {{provider}} panelinden kontrol edin. Aynı iadeyi yeniden yapmayın.",
+    },
+    "payments.refund_unresolved": {
+      title: "Bir iade bir saattir doğrulanamadı",
+      description:
+        "Sipariş {{cart}} için {{amount}} iadenin ({{reference}}, {{provider}}) kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın.",
     },
     "payments.shelf_restored": {
       title: "Geçici stok düzeltmesi geri alındı",
@@ -243,7 +248,12 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.refund_incomplete": {
       title: "A {{provider}} refund was made, its record is incomplete",
       description:
-        "The {{amount}} refund ({{reference}}) for order {{cart}} was, or may have been, made at {{provider}}, but its record could not be completed. Check {{provider}}'s panel; do not make the same refund again.",
+        "The {{amount}} refund ({{reference}}) for order {{cart}} was, or may have been, made at {{provider}}, but its record could not be completed. It is checked automatically; if it is still incomplete in an hour, check {{provider}}'s panel. Do not make the same refund again.",
+    },
+    "payments.refund_unresolved": {
+      title: "A refund could not be confirmed for an hour",
+      description:
+        "The record of the {{amount}} refund ({{reference}}, {{provider}}) for order {{cart}} could not be completed by the automatic check. Compare the refund on the order page with the payment provider's record; do not make the same refund again.",
     },
     "payments.shelf_restored": {
       title: "A temporary stock raise was taken back",

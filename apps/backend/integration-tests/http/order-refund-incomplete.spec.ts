@@ -113,7 +113,10 @@ medusaIntegrationTestRunner({
     it("keeps a refund PayTR made counted when its record fails, and closes it once", async () => {
       const { orderId, reference } = await paidOrder()
       const item = await itemOf(orderId)
-      const body = { items: [{ id: item, quantity: 2 }], reference: "refund0000000031" }
+      const body = {
+        items: [{ id: item, quantity: 2 }],
+        reference: "f0000000000000000000000000000031",
+      }
       // The ledger cannot close the entry once: PayTR has given the money back by then
       const service = ledger()
       const update = service.updateOrderRefunds.bind(service) as (data: unknown) => Promise<unknown>
@@ -132,7 +135,7 @@ medusaIntegrationTestRunner({
       // Its units stay counted: a new request cannot give them back again
       const twice = await refund(orderId, {
         items: [{ id: item, quantity: 1 }],
-        reference: "refund0000000032",
+        reference: "f0000000000000000000000000000032",
       })
       const details = await http.get<{ refunds: { reference: string; incomplete: boolean }[] }>(
         `/admin/orders/${orderId}/payment-details`,
@@ -161,7 +164,7 @@ medusaIntegrationTestRunner({
       expect(closed).toMatchObject({ status: "done", error_code: null })
       // One refund at PayTR, one in Medusa's record
       expect(fake.payments.get(reference)?.refunds).toEqual([
-        { amount: 24000, referenceNo: "refund0000000031" },
+        { amount: 24000, referenceNo: "f0000000000000000000000000000031" },
       ])
       expect((payments[0] as { refunds: unknown[] }).refunds).toHaveLength(1)
       // Closed, the payment names no refund under way
@@ -171,7 +174,7 @@ medusaIntegrationTestRunner({
     it("leaves no payment naming a refund once a cancel's refunds are through", async () => {
       const { orderId, reference } = await paidOrder()
       // All given back already: the cancel's own refunds have nothing to name, or to clear
-      await refund(orderId, { amount: 330, reference: "refund0000000034" })
+      await refund(orderId, { amount: 330, reference: "f0000000000000000000000000000034" })
       const payment = await paymentOf(orderId)
       // A name a crash left behind
       await getContainer()
@@ -180,7 +183,7 @@ medusaIntegrationTestRunner({
           id: payment?.id ?? "",
           data: {
             ...payment?.data,
-            pending_refund: { reference_no: "refund0000000033", amount: 33000 },
+            pending_refund: { reference_no: "f0000000000000000000000000000033", amount: 33000 },
           },
         } as never)
 
@@ -193,7 +196,7 @@ medusaIntegrationTestRunner({
       expect((await paymentOf(orderId))?.data).toHaveProperty("pending_refund", null)
       // Nothing more given back: the one refund made before the cancel
       expect(fake.payments.get(reference)?.refunds).toEqual([
-        { amount: 33000, referenceNo: "refund0000000034" },
+        { amount: 33000, referenceNo: "f0000000000000000000000000000034" },
       ])
     })
   },

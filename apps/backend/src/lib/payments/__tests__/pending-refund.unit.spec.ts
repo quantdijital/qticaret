@@ -5,12 +5,14 @@ describe("a refund recorded in the payment's data, as our ledger reads it (revie
   it("finds our order refund's reference as sent, or as PayTR takes it", () => {
     const data = { refunds: [{ reference_no: "refund0000000001", amount: 1000 }] }
 
-    expect(refundRecorded(data, "refund0000000001")).toBe(true)
+    expect(refundRecorded(data, "refund0000000001", 1000)).toBe(true)
     // PayTR takes letters and digits only: the panel's key arrives stripped
-    expect(refundRecorded(data, "refund-0000-0000-01")).toBe(true)
-    expect(refundRecorded(data, "refund0000000002")).toBe(false)
-    expect(refundRecorded({}, "refund0000000001")).toBe(false)
-    expect(refundRecorded(null, "refund0000000001")).toBe(false)
+    expect(refundRecorded(data, "refund-0000-0000-01", 1000)).toBe(true)
+    expect(refundRecorded(data, "refund0000000002", 1000)).toBe(false)
+    // Another amount under the reference is not this refund (review D5)
+    expect(refundRecorded(data, "refund0000000001", 500)).toBe(false)
+    expect(refundRecorded({}, "refund0000000001", 1000)).toBe(false)
+    expect(refundRecorded(null, "refund0000000001", 1000)).toBe(false)
   })
 
   it("records a refund once under its reference, keeping the rest of the data", () => {

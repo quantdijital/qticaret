@@ -1132,6 +1132,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "orders.refund_mode": "Ya kalem ve kargo seçin ya da bir tutar girin.",
   "orders.refund_amount_kurus": "Tutar en çok iki ondalık basamak içerebilir.",
   "orders.refund_reference_invalid": "İade anahtarı geçersiz; iadeyi yeniden başlatın.",
+  "orders.refund_unsettled":
+    "Bu siparişin bir iadesi sağlayıcıyla henüz doğrulanıyor; birkaç dakika sonra yeniden deneyin.",
   "payments.use_order_refund": "Bu ödemenin iadesi siparişin iade adımından yapılır.",
   "payments.max_installment_invalid":
     "En çok taksit 2 ile 12 arasında olmalı (0: PayTR'nin izin verdiği en çok).",

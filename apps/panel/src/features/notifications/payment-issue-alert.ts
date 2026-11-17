@@ -13,6 +13,8 @@ const ISSUES = [
   "wholesale_price_check",
   // An order refund whose money left while its record could not be closed: `cart` is the order
   "refund_incomplete",
+  // Such a refund the automatic check could not settle in an hour
+  "refund_unresolved",
 ] as const
 type Issue = (typeof ISSUES)[number]
 
@@ -47,7 +49,8 @@ export function paymentIssueAlert(t: TFunction, data: Record<string, unknown>) {
     amount: money(data["amount"]),
   }
   const shelf = issue === "shelf_restored"
-  const order = issue === "refund_incomplete" ? text(data["cart_id"]) : ""
+  const order =
+    issue === "refund_incomplete" || issue === "refund_unresolved" ? text(data["cart_id"]) : ""
   return {
     title: t(`notifications.paymentIssue.${issue}.title`, values),
     description: t(`notifications.paymentIssue.${issue}.description`, values),

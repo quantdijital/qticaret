@@ -19,6 +19,7 @@ import {
 } from "./steps/order-refund"
 import type { RefundOrderInput } from "./steps/order-refund"
 import { namePendingRefundStep } from "./steps/pending-refund"
+import { restoreRefundTransactionsStep } from "./steps/refund-transactions"
 
 /**
  * Gives money back on an order, line by line (F5 V5, adr/0010), under the
@@ -28,8 +29,9 @@ import { namePendingRefundStep } from "./steps/pending-refund"
  * same reference, a refund is made once: the provider is given that
  * reference, one already made is only reported, and one the provider made
  * and Medusa recorded, its entry left open by a later failure, is only
- * closed (`made`, review 2026-11-17). One whose money may have left is
- * kept pending for the shop to check, never failed (`settleFailedEntry`).
+ * closed (`made`, review 2026-11-17), its order money moves written if
+ * missing. One whose money may have left is kept pending, never failed
+ * on a guess (`settleFailedEntry`); the settling job closes it.
  */
 export const refundOrderWorkflow = createWorkflow(
   "orders-refund-order",
@@ -49,6 +51,15 @@ export const refundOrderWorkflow = createWorkflow(
           ...(input.note ? { note: input.note } : {}),
         })),
       })
+    })
+    // Made before, Medusa's money moves may not have been written then (review D1)
+    when("orders-refund-made", { plan }, ({ plan }) => plan.made).then(() => {
+      restoreRefundTransactionsStep(
+        transform({ input, plan }, ({ input, plan }) => ({
+          order_id: input.order_id,
+          payment_id: plan.payment_id,
+        }))
+      )
     })
     closeRefundEntryStep({ entry_id: entryId, plan })
     releaseLockStep({ key: lockKey })

@@ -69,12 +69,28 @@ PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendir
 - **Medusa'nın kendi iadesi** (sepet tamamlanamayınca geri verme; `pending_refund` yok, 2026-11-17): referans Medusa'nın denemeye özgü anahtarı değil; ödemenin, tutarın ve sırasınındır: `M<merchant_oid>A<kuruş>N<k>`. `k`, ödeme verisinin (`refunds`; Medusa sağlayıcının döndürdüğü veriyi ödemeye yazar) bu tutar için henüz kaydetmediği ilk sıradır. En çok 64 harf/rakam; uzarsa `merchant_oid`'nin sonu kısalır, tutar ve sıra kısalmaz. Veri yazılmadan tekrarlanan adım ya da ikinci çalıştırma aynı `N<k>`'yı PayTR'nin `returns[]` listesinde bulur, yeniden göndermez. Yanıtı yolda kaybolmuş iade de böyle kaydedilir. Veri yazıldıktan sonraki aynı tutarlı gerçek ikinci iade `N<k+1>` olur ve gönderilir. Kurtarma işinin (`payment-recovery`, `R<merchant_oid>`) aynı tutardaki iadesi bir kez yapılmış sayılır: bir PayTR iadesi en çok bir kayda karşılık gelir, veride zaten kayıtlı bir iade yeni isteğin kanıtı sayılmaz. Her iki yolda da PayTR'nin gösterdiği iadelerle birlikte ödenen tutarı aşacak iade hiç gönderilmez (`paytr.refund_exceeds_payment`); farklı tutarlı kısmi iadeler gönderilir.
 - **Sipariş iadesi:** `POST /admin/orders/:id/refunds` (kalemlerin adetleri + kargo ya da serbest tutar, `reference`, not) ve `POST /admin/orders/:id/refunds/preview`. Tutar sunucuda: F4.7 payları ve `order-refunds` defteri; kalem adedi ve ödenen tutar aşılamaz, serbest tutar kalemlerin kalanını düşürür. Sipariş kilidi altında, Medusa'nın `refundPaymentWorkflow`'u ile. Denetim kaydında önce/sonra iade edilen ve iade edilebilir tutar.
 - **Yarım kalan iade** (2026-11-17): İade akışı sağlayıcıdan sonraki bir adımda düşerse defter kaydı hemen `failed` yapılmaz; önce paranın gidip gitmediğine bakılır (`workflows/orders/refund-trace.ts`):
-  - Ödeme verisindeki `refunds` kaydı bu referansı tutuyorsa sağlayıcı iadeyi yaptı ve Medusa kaydetti.
-  - PayTR durum sorgusunun `returns[]` listesi referansı gösteriyorsa para gitti ama yanıt yolda kayboldu.
-  - iyzico'da gönderilmiş bir parça varsa ya da hiçbir şey okunamazsa para gitmiş sayılır.
+  - Ödeme verisindeki `refunds` kaydı bu referansı ve tutarı tutuyorsa sağlayıcı iadeyi yaptı ve Medusa kaydetti (`made`).
+  - PayTR durum sorgusunun `returns[]` listesi referansı ve tutarı gösteriyorsa para gitti ama yanıt yolda kayboldu (`shown`). iyzico'da tüm parçalar yanıtlanmış ve toplamı tutara eşitse de `shown` sayılır.
+  - iyzico'da yanıtlanmamış bir parça varsa (`partial`) ya da hiçbir şey okunamazsa (`unknown`) para gitmiş sayılır.
 
-  Bu durumlarda kayıt `pending` / `refund_incomplete` kalır: kalemleri iade edilmiş sayılır, yeni anahtarla aynı kalemler ikinci kez iade edilemez. Mağazaya zilde ve e-postada `payments.refund_incomplete` uyarısı gider; panelde iade "Kaydı yarım: sağlayıcıda kontrol edin" görünür. Aynı referansla yeniden deneme yeni iade göndermez: veride kayıtlıysa yalnız defteri kapatır, değilse sağlayıcı iadeyi `returns[]` listesinde bulup kaydeder. iyzico, havale ve kapıda ödeme sağlayıcıları da iadeyi ödeme verisine aynı biçimde yazar.
-- **İptal:** Medusa'nın iptali iade başarısız olsa da siparişi iptal ediyor (hata loglanıp yutuluyor). Çekirdek `POST /admin/orders/:id/cancel` önünde: Medusa'nın iptal edeceği ödemeli sipariş önce bizim akışımızla, siparişe özgü sabit referansla iade edilir; iade başarısızsa iptal yapılmaz. Ardından, iade kilidi altında, siparişin hiçbir ödemesinde `pending_refund` bırakılmaz: bir çöküşten kalan ad, Medusa'nın iptaldeki aynı tutarlı kendi iadesine geçmez. Medusa'nın `POST /admin/payments/:id/refund` ucu PayTR ödemelerine kapalı.
+  Bu durumlarda kayıt `pending` / `refund_incomplete` kalır: kalemleri iade edilmiş sayılır, yeni anahtarla aynı kalemler ikinci kez iade edilemez. Paneli olan sağlayıcıda (PayTR, iyzico) zile ve e-postaya `payments.refund_incomplete` uyarısı gider; havale ve kapıda ödemede uyarı gitmez, çünkü onların kaydı iş tarafından kapatılır. Panelde iade "Doğrulanıyor: kaydı yarım" görünür.
+
+  PayTR hiçbir şey göstermiyorsa bu henüz kanıt değildir, çünkü kaydı kaybolan bir yanıtın gerisinde kalabilir: kayıt `pending` / `refund_unconfirmed` olur ve uyarı gitmez. Başka sağlayıcıda hiçbir şey görünmüyorsa iade gönderilmemiştir; kayıt `failed` olur.
+
+  `order-refund-settle` işi (5 dakikada bir, `workflows/orders/settle-open-refunds.ts`) bu kayıtları yeniden okur ve hiçbir zaman iade göndermez:
+  - `made` ya da `shown` ise aynı referansla kapatır. `made` yolunda Medusa'nın eksik kalmış sipariş hareketleri (`refund` işlemleri) de yazılır.
+  - PayTR iki ayrı okumada, en az 15 dakika arayla hiçbir şey göstermezse kayıt `failed` olur ve kalemler serbest kalır.
+  - Okunamıyorsa kayda dokunmaz. Kayıt bir saattir açıksa `payments.refund_unresolved` uyarısı gider.
+
+  Aynı referansla yeniden deneme yeni iade göndermez: veride kayıtlıysa yalnız defteri kapatır, değilse sağlayıcı iadeyi `returns[]` listesinde bulup kaydeder. iyzico, havale ve kapıda ödeme sağlayıcıları da iadeyi ödeme verisine aynı biçimde yazar.
+- **Ödeme verisinde ad:** Medusa ödeme verisini günceller ama birleştirerek yazar (`mergeObjectProperties`). Bu yüzden `pending_refund` anahtarı silinemez; iade bitince `null` yazılır.
+- **Panel anahtarı:** `POST /admin/orders/:id/refunds` yalnız panelin ürettiği 32 küçük hex karakterlik anahtarı kabul eder. İptalin, iadenin, Medusa'nın ve kurtarma işinin referansları bu uçtan verilemez.
+- **İptal:** Medusa'nın iptali iade başarısız olsa da siparişi iptal ediyor (hata loglanıp yutuluyor). Bu yüzden çekirdek `POST /admin/orders/:id/cancel` ucunun önünde ödemeli sipariş önce bizim akışımızla iade edilir (`workflows/orders/cancel-refunds.ts`); iade başarısızsa iptal yapılmaz.
+  - Siparişin açık iadeleri önce kapatılır. Önceki iptal denemesinden kalan bir iade aynı referansla yeniden denenir. Başka bir açık iade para kesin geri döndüyse kapatılır; değilse iptal `orders.refund_unsettled` ile bekler.
+  - Ardından para kalan her ödeme kendi referansıyla iade edilir: `cancel<ödeme kimliği>`. Yeniden denenen iptal her ödemeyi bir kez iade eder (güvenlik incelemesi Y1). Bir referans başka bir ödemenin kaydını kapatamaz.
+  - Son olarak iade kilidi altında siparişin hiçbir ödemesinde `pending_refund` bırakılmaz.
+
+  Medusa'nın `POST /admin/payments/:id/refund` ucu PayTR ödemelerine kapalı.
 - **Panel:** sipariş detayında "Para iadesi" (ürün seçerek ya da tutar girerek; tutar önizlemeden, her açılışta yeni anahtar).
 
 ## Taksit (F5 V6, 2026-10-27)

@@ -13,6 +13,7 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-creden
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
+import { UNSETTLED } from "../orders/refund-settle"
 import { iyzicoDetails } from "./iyzico-details"
 import { paytrDetails } from "./paytr-details"
 
@@ -169,7 +170,9 @@ export async function orderPaymentDetails(
       reference: refund.reference,
       amount: refund.amount,
       status: refund.status,
-      incomplete: refund.status === "pending" && refund.error_code === "refund_incomplete",
+      incomplete:
+        refund.status === "pending" &&
+        (UNSETTLED as readonly (string | null)[]).includes(refund.error_code),
       note: refund.note,
       created_by: refund.created_by,
       created_at: new Date(refund.created_at).toISOString(),

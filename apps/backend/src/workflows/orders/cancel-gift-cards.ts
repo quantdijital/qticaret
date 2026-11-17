@@ -19,14 +19,14 @@ import type { CardDebit } from "../../lib/orders/gift-returns"
 import { giftIssueLockKey, returnsLockKey } from "../../lib/orders/locks"
 import { giftLinesOf } from "../returns/gift-lines"
 import { closeWaitingRequestsStep } from "../returns/steps/cancel"
-import { refundOrderWorkflow } from "./refund-order"
-import type { RefundOrderInput } from "./steps/order-refund"
+import { refundForCancel } from "./cancel-refunds"
+import type { CancelRefundInput } from "./cancel-refunds"
 import { clearPendingRefundsStep } from "./steps/pending-refund"
 
 export interface CancelGiftCardsInput {
   order_id: string
-  /** The cancel's refunds, one per payment, each under its own reference (`cancelRefundReference`). */
-  refunds: RefundOrderInput[]
+  /** Who cancels, and the note the cancel's refunds carry (`refundForCancel`). */
+  refund: Omit<CancelRefundInput, "order_id">
 }
 
 /**
@@ -61,19 +61,16 @@ const planCancelVoidStep = createStep(
 )
 
 /**
- * The cancel's money back, once its cards are void: each refund in turn
- * through ours (tried again under the same reference, made once). Money
- * given back is not taken again, so nothing to undo here; a refund that
- * fails undoes the void before it, and the cards are the recipient's again.
+ * The cancel's money back, once its cards are void (`refundForCancel`):
+ * refunds still open settled first, then one per payment, each under the
+ * payment's own reference (tried again, made once). Money given back is
+ * not taken again, so nothing to undo here; a refund that fails undoes the
+ * void before it, and the cards are the recipient's again.
  */
 const cancelRefundsStep = createStep(
   "orders-cancel-refunds",
-  async (refunds: RefundOrderInput[], { container }) => {
-    for (const refund of refunds) {
-      await refundOrderWorkflow(container).run({ input: refund })
-    }
-    return new StepResponse(refunds.length)
-  }
+  async (input: CancelRefundInput, { container }) =>
+    new StepResponse(await refundForCancel(container, input))
 )
 
 /**
@@ -110,7 +107,9 @@ export const cancelGiftCardsWorkflow = createWorkflow(
         debitAccountsWorkflow.runAsStep({ input: debits })
       }
     )
-    cancelRefundsStep(input.refunds)
+    cancelRefundsStep(
+      transform({ input }, ({ input }) => ({ order_id: input.order_id, ...input.refund }))
+    )
     // Before Medusa's own cancel refunds anything left: no payment names one of ours (review D1)
     clearPendingRefundsStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
     releaseLockStep({ key: lockKeys })

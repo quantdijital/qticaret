@@ -24,11 +24,18 @@ export const returnsLockKey = (orderId: string): string => `returns:${orderId}`
 export const giftIssueLockKey = (orderId: string): string => `gift-cards:${orderId}`
 
 /**
- * The reference a cancel's refund is made under: tried again, refunded
- * once (F5 V5). A cancel refunding several payments (an edit's collected
- * difference) numbers the later ones.
+ * The reference a cancel's refund of one payment is made under: the
+ * payment's own, so a cancel tried again refunds each payment once, under
+ * the same reference, whichever of them were refunded before (security
+ * review 2026-11-17, Y1). At most 40 letters and digits.
  */
-export const cancelRefundReference = (orderId: string, part = 0): string => {
-  const base = `cancel${orderId.replace(/[^A-Za-z0-9]/g, "")}`
-  return part === 0 ? base.slice(0, 40) : `${base.slice(0, 37)}p${String(part)}`
-}
+export const cancelRefundReference = (paymentId: string): string =>
+  `cancel${paymentId.replace(/[^A-Za-z0-9]/g, "")}`.slice(0, 40)
+
+/**
+ * A cancel's refund, by its reference: this form, or the order's own that
+ * cancels before 2026-11-17 used (`cancel<order>`, `…p<n>`). No refund the
+ * panel names starts so (its key is 32 hex digits).
+ */
+export const isCancelRefundReference = (reference: string): boolean =>
+  reference.startsWith("cancel")

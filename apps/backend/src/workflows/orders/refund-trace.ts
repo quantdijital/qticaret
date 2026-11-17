@@ -8,27 +8,36 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-creden
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 
 /**
- * What became of an order refund's money, its ledger entry not closed:
- * - `made`: the payment's data records it (`refundRecorded`): the provider
- *   gave it back and Medusa recorded its refund; only the ledger lags.
- * - `sent`: the money left, or may have (PayTR shows a refund under the
- *   reference, a part was sent, or the payment or PayTR could not be
- *   read): never sent again under another reference, the shop checks it.
- * - `none`: surely not sent.
+ * What became of an order refund's money, its ledger entry not closed
+ * (review 2026-11-17):
+ * - `made`: the payment's data records it, this amount under this
+ *   reference: the provider gave it back and Medusa recorded its refund.
+ * - `shown`: the provider shows it given back (PayTR's `returns[]`, every
+ *   iyzico part answered) though our data does not: the same reference
+ *   records it without sending again.
+ * - `partial`: iyzico parts were sent, not all answered or not the whole.
+ * - `unknown`: the payment or the provider could not be read.
+ * - `none`: read, and nothing shows it; at PayTR not yet proof (its
+ *   record can lag a lost answer), elsewhere nothing was sent.
  */
-export type RefundTrace = "made" | "sent" | "none"
+export type RefundTrace = "made" | "shown" | "partial" | "unknown" | "none"
 
 export interface TracedRefund {
   reference: string
   payment_id: string
+  /** Kuruş. */
+  amount: number
   /** Parts a provider refunding in parts sent (iyzico, `provider_parts`). */
-  parts: number
+  parts: readonly { amount: number; state: string }[]
 }
+
+// As our PayTR provider sends a reference: letters and digits, at most 64
+const paytrForm = (reference: string) => reference.replace(/[^A-Za-z0-9]/g, "").slice(0, 64)
 
 const paytrShows = async (
   container: Pick<MedusaContainer, "resolve">,
   data: Record<string, unknown> | null | undefined,
-  reference: string
+  entry: TracedRefund
 ): Promise<boolean> => {
   const account = paytrCredentialsOf(
     await container
@@ -36,33 +45,36 @@ const paytrShows = async (
       .read("paytr")
   )
   const merchantOid = data?.["merchant_oid"]
-  // Read right after the failure: without either the provider refused before sending (not_configured,
-  // session_invalid)
+  // Without either our provider refused before sending (not_configured, session_invalid)
   if (!account || typeof merchantOid !== "string") {
     return false
   }
   const paid = await paytrApi().queryStatus(account, merchantOid)
-  // As our PayTR provider sends it: letters and digits, at most 64
-  const sentAs = reference.replace(/[^A-Za-z0-9]/g, "").slice(0, 64)
-  return paid?.refunds.some((refund) => refund.referenceNo === sentAs) ?? false
+  const sentAs = paytrForm(entry.reference)
+  return (
+    paid?.refunds.some(
+      (refund) => refund.referenceNo === sentAs && refund.amount === entry.amount
+    ) ?? false
+  )
 }
 
 /** Whether the payment's data records the refund: read for a retry under the same reference. */
 export async function refundMade(
   container: Pick<MedusaContainer, "resolve">,
-  entry: Pick<TracedRefund, "reference" | "payment_id">
+  entry: Pick<TracedRefund, "reference" | "payment_id" | "amount">
 ): Promise<boolean> {
   const [payment] = await container
     .resolve(Modules.PAYMENT)
     .listPayments({ id: entry.payment_id }, { select: ["id", "data"] })
-  return refundRecorded(payment?.data, entry.reference)
+  return refundRecorded(payment?.data, entry.reference, entry.amount)
 }
 
-/**
- * The refund's trace, read when its ledger entry would be closed as failed
- * (a step after the provider's failed, review 2026-11-17). Fails closed:
- * what cannot be read is `sent`.
- */
+const partsTrace = (entry: TracedRefund): RefundTrace => {
+  const whole = entry.parts.reduce((sum, part) => sum + part.amount, 0) === entry.amount
+  return whole && entry.parts.every((part) => part.state === "done") ? "shown" : "partial"
+}
+
+/** The refund's trace, read when its entry would fail, by a cancel, and by the settling job. */
 export async function refundTraceOf(
   container: Pick<MedusaContainer, "resolve">,
   entry: TracedRefund
@@ -73,23 +85,23 @@ export async function refundTraceOf(
       .resolve(Modules.PAYMENT)
       .listPayments({ id: entry.payment_id }, { select: ["id", "provider_id", "data"] })
     provider = providerNameOf(payment?.provider_id)
-    if (refundRecorded(payment?.data, entry.reference)) {
+    if (refundRecorded(payment?.data, entry.reference, entry.amount)) {
       return { trace: "made", provider }
     }
-    if (entry.parts > 0) {
-      return { trace: "sent", provider }
+    if (entry.parts.length > 0) {
+      return { trace: partsTrace(entry), provider }
     }
     const shown =
       payment?.provider_id === PAYTR_PAYMENT_PROVIDER_ID &&
-      (await paytrShows(container, payment.data, entry.reference))
-    return { trace: shown ? "sent" : "none", provider }
+      (await paytrShows(container, payment.data, entry))
+    return { trace: shown ? "shown" : "none", provider }
   } catch (error) {
     logger.warn({
       event: "orders.refund_trace_failed",
       reference: entry.reference,
       err: errorSummary(error),
     })
-    return { trace: "sent", provider }
+    return { trace: "unknown", provider }
   }
 }
 

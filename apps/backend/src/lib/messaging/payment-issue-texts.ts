@@ -25,7 +25,11 @@ export const PAYMENT_ISSUE_TEXTS: Readonly<Record<string, string>> = {
   "staff_payment_issue.refund_incomplete.subject":
     "İade yapıldı, kaydı yarım kaldı ({{reference}})",
   "staff_payment_issue.refund_incomplete.intro":
-    'Sipariş {{cart}} için bu iade {{provider}} tarafında yapıldı ya da yapılmış olabilir, ancak kaydı tamamlanamadı. İade kaydı "sürüyor" durumunda tutuldu ve kalemleri iade edilmiş sayılıyor, böylece aynı para yeniden gönderilmez. {{provider}} panelinden iadeyi kontrol edin; aynı iadeyi yeniden yapmayın.',
+    'Sipariş {{cart}} için bu iade {{provider}} tarafında yapıldı ya da yapılmış olabilir, ancak kaydı tamamlanamadı. İade kaydı "sürüyor" durumunda tutuldu ve kalemleri iade edilmiş sayılıyor, böylece aynı para yeniden gönderilmez. Kayıt otomatik olarak denetleniyor; bir saat sonra hâlâ yarımsa {{provider}} panelinden iadeyi kontrol edin. Aynı iadeyi yeniden yapmayın.',
+  "staff_payment_issue.refund_unresolved.subject":
+    "Bir iade bir saattir doğrulanamadı ({{reference}})",
+  "staff_payment_issue.refund_unresolved.intro":
+    "Sipariş {{cart}} için bu iadenin kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın.",
   "staff_payment_issue.preheader": "Ödeme: {{provider}}, referans {{reference}}.",
   "staff_payment_issue.heading": "Bir ödeme ilgi bekliyor",
   "staff_payment_issue.provider": "Ödeme kuruluşu",

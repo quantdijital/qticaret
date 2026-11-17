@@ -3983,7 +3983,7 @@
         "done": "Refunded",
         "pending": "In progress",
         "failed": "Failed",
-        "incomplete": "Record incomplete: check at the provider"
+        "incomplete": "Being checked: record incomplete"
       }
     },
     "chargeback": {
@@ -6794,7 +6794,11 @@
       },
       "refund_incomplete": {
         "title": "A {{provider}} refund was made, its record is incomplete",
-        "description": "The {{amount}} refund ({{reference}}) for order {{cart}} was, or may have been, made at {{provider}}, but its record could not be completed. Check {{provider}}'s panel; do not make the same refund again."
+        "description": "The {{amount}} refund ({{reference}}) for order {{cart}} was, or may have been, made at {{provider}}, but its record could not be completed. It is checked automatically; if it is still incomplete in an hour, check {{provider}}'s panel. Do not make the same refund again."
+      },
+      "refund_unresolved": {
+        "title": "A refund could not be confirmed for an hour",
+        "description": "The record of the {{amount}} refund ({{reference}}, {{provider}}) for order {{cart}} could not be completed by the automatic check. Compare the refund on the order page with the payment provider's record; do not make the same refund again."
       }
     },
     "markAllRead": "Mark all read",
