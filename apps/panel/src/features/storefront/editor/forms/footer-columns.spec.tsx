@@ -47,8 +47,8 @@ describe("the brand columns footer's settings", () => {
     )
     expect(screen.getByRole("radio", { name: /Standart/ })).toBeChecked()
     expect(container.querySelectorAll("svg [data-sketch-frame]")).toHaveLength(3)
-    // adr/0070: the free rows footer is listed, not offered, until its drawing and editor land
-    expect(screen.getByRole("radio", { name: /Serbest düzen/ })).toBeDisabled()
+    // adr/0070: the free rows footer is offered now that its editor has landed
+    expect(screen.getByRole("radio", { name: /Serbest düzen/ })).toBeEnabled()
     await userEvent.click(screen.getByRole("radio", { name: /Marka ve sütunlar/ }))
     expect(picked).toEqual(["brand_columns"])
   })

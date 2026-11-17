@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@qticaret/admin-ui/ui/dropdown-menu"
+import { FR } from "./footer-rows-fields"
 import type { FooterDrag } from "./footer-drag"
 import { placeOf } from "./footer-drag"
 
@@ -146,7 +147,7 @@ export function PartRow({
             variant="ghost"
             size="icon-sm"
             disabled={!moves.up}
-            aria-label={t(`${R}.moveUpOf`, { name })}
+            aria-label={t(`${FR}.moveUpOf`, { name })}
             onClick={() => moves.up?.()}
           >
             <ArrowUp />
@@ -156,7 +157,7 @@ export function PartRow({
             variant="ghost"
             size="icon-sm"
             disabled={!moves.down}
-            aria-label={t(`${R}.moveDownOf`, { name })}
+            aria-label={t(`${FR}.moveDownOf`, { name })}
             onClick={() => moves.down?.()}
           >
             <ArrowDown />

@@ -180,7 +180,7 @@ export function FooterColumnNode({
             rows={rows}
             row={row}
             column={column}
-            label={t(`${FR}.add.blockTo`, { column: name })}
+            label={t(`${FR}.add.blockTo`, { row: row + 1, column: name })}
             onPick={(type) => {
               const block = newBlock(type, newId())
               if (onChange(addBlock(rows, { row: line.id, column }, block))) {

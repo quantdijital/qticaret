@@ -9781,7 +9781,7 @@
         },
         "add": {
           "block": "Blok ekle",
-          "blockTo": "{{column}}: blok ekle",
+          "blockTo": "Satır {{row}}, {{column}}: blok ekle",
           "title": "Blok türü",
           "typeFull_one": "Alt bilgide yalnız {{count}} tane olabilir.",
           "typeFull_other": "Alt bilgide en çok {{count}} tane olabilir.",
@@ -9993,7 +9993,9 @@
           "title": "Satır düzeni kaldırılsın mı?",
           "description": "Başka bir biçime geçince satırlar ve bloklar kaldırılır. Geri al ile ya da sürüm geçmişinden geri getirebilirsiniz.",
           "confirm": "Biçimi değiştir"
-        }
+        },
+        "moveUpOf": "{{name}}: yukarı taşı",
+        "moveDownOf": "{{name}}: aşağı taşı"
       }
     },
     "maintenance": {

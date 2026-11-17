@@ -9781,7 +9781,7 @@
         },
         "add": {
           "block": "Add block",
-          "blockTo": "{{column}}: add block",
+          "blockTo": "Row {{row}}, {{column}}: add block",
           "title": "Block type",
           "typeFull_one": "A footer takes only {{count}}.",
           "typeFull_other": "A footer takes at most {{count}}.",
@@ -9993,7 +9993,9 @@
           "title": "Remove the row layout?",
           "description": "Switching to another variant removes the rows and blocks. Undo or the revision history brings them back.",
           "confirm": "Change variant"
-        }
+        },
+        "moveUpOf": "Move {{name}} up",
+        "moveDownOf": "Move {{name}} down"
       }
     },
     "maintenance": {
