@@ -22,7 +22,8 @@ export interface DecideSuggestionInput {
 /**
  * Records a staff member's decision on a suggestion of the AI core
  * (adr/0071 §11): only one still open, and only the core's own (adr/0005's
- * drafts are decided on their routes), by a role the task allows. Accepting returns the text and
+ * old F10.13 drafts stay in the table with no route to decide them), by a
+ * role the task allows. Accepting returns the text and
  * writes no field: the panel puts it in the form, and the form's own save
  * is the change. Undone by opening the suggestion again.
  */
