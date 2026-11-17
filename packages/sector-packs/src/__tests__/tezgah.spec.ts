@@ -24,7 +24,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(tezgah).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 8,
+      version: 9,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -182,6 +182,15 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     const about = (footer?.[0] as { about?: string } | undefined)?.about ?? ""
     expect(about.length).toBeGreaterThan(0)
     expect(about.length).toBeLessThanOrEqual(240)
+    // The box is the side-by-side band; `text` stays the consent sentence, so it is the shop's own
+    for (const code of CODES) {
+      const box = read(code).layout.footer?.[1] as
+        { text?: string | null; description?: string; note?: string } | undefined
+      expect(box).toMatchObject({ id: "ebultenkutusu", variant: "split", show_note: true })
+      expect(box?.text).toBeNull()
+      expect(box?.description?.length).toBeLessThanOrEqual(240)
+      expect(box?.note?.length).toBeLessThanOrEqual(80)
+    }
   })
 
   it("fills the product and category pages with sections every shop draws", () => {
@@ -277,9 +286,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
   })
 
-  it("raised the cutlery pack's version with them (tezgah's eighth)", () => {
-    expect(sectorPack("cutlery")?.version).toBe(11)
-    expect(CODES.map((code) => read(code).version)).toEqual([8, 8, 8])
+  it("raised the cutlery pack's version with them (tezgah's ninth)", () => {
+    expect(sectorPack("cutlery")?.version).toBe(12)
+    expect(CODES.map((code) => read(code).version)).toEqual([9, 9, 9])
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",
       ...CODES,
