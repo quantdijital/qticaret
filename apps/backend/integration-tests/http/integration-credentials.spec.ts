@@ -133,6 +133,15 @@ medusaIntegrationTestRunner({
           state: "not_configured",
           secrets: { client_secret: false },
         }),
+        // adr/0071 §3: the AI services, a key each; the fake one under NODE_ENV=test only
+        ...["deepseek", "minimax", "gemini", "fake"].map(
+          (provider) =>
+            expect.objectContaining({
+              provider,
+              state: "not_configured",
+              secrets: { api_key: false },
+            }) as unknown
+        ),
       ])
     })
 

@@ -955,6 +955,7 @@
     },
     "names": {
       "catalog_product_videos": "Ürün videoları",
+      "ai_own_keys": "Yapay zekâ: kendi anahtarıyla (BYOK)",
       "test_platform_sample": "Örnek platform özelliği"
     }
   },
