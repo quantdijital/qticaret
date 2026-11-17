@@ -3,6 +3,7 @@ import { textOf } from "../../../workflows/seo/highlight"
 import type { HighlightValue } from "../../../workflows/seo/highlight"
 import { plainText } from "../../seo/text"
 import { aiValidationError } from "../errors"
+import { shownCategory } from "./category"
 import type { FactsContainer, RecordFacts } from "./types"
 
 interface ProductRow {
@@ -10,7 +11,8 @@ interface ProductRow {
   subtitle?: string | null
   description?: string | null
   brand?: { name: string } | null
-  categories?: ({ name: string; is_internal?: boolean | null } | null)[] | null
+  categories?:
+    ({ name: string; is_internal?: boolean | null; is_active?: boolean | null } | null)[] | null
   attribute_values?: (HighlightValue | null)[] | null
 }
 
@@ -22,6 +24,7 @@ export const PRODUCT_FACT_FIELDS = [
   "brand.name",
   "categories.name",
   "categories.is_internal",
+  "categories.is_active",
   "attribute_values.*",
   "attribute_values.definition.*",
 ] as const
@@ -31,7 +34,7 @@ export const PRODUCT_FACT_FIELDS = [
  * `productFacts`'s filter (workflows/content/drafts.ts): its own published
  * fields, public attributes only and the description as plain text. No
  * price, stock, order, customer or staff field is read at all; a category
- * the shop keeps to itself is left out too.
+ * the shop keeps to itself or has closed is left out too.
  */
 export async function productFacts(container: FactsContainer, id: string): Promise<RecordFacts> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
@@ -47,8 +50,7 @@ export async function productFacts(container: FactsContainer, id: string): Promi
     name: product.title,
     subtitle: product.subtitle ?? null,
     brand: product.brand?.name ?? null,
-    category:
-      product.categories?.find((each) => each !== null && each.is_internal !== true)?.name ?? null,
+    category: product.categories?.find(shownCategory)?.name ?? null,
     // Written for shoppers: the shop's own attributes stay out (adr/0005 T5)
     attributes: (product.attribute_values ?? []).flatMap((value) => {
       const text = value && value.definition?.is_public !== false ? textOf(value) : ""

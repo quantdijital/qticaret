@@ -14,9 +14,51 @@ export const SHORT_EXCERPT = 140
 // `<` inside, so many `<` without a `>` cost one pass, not one pass each
 const TAG = /<\/?[a-z][^<>]*>/gi
 
-/** Text as one line: tags dropped, spaces collapsed. Descriptions may hold simple HTML. */
+// The end of a block whose content is never text; searched from a set index, so one pass each
+const HIDDEN_ENDS: Readonly<Record<string, RegExp>> = {
+  comment: /-->/g,
+  script: /<\/script\s*>/gi,
+  style: /<\/style\s*>/gi,
+}
+
+function hiddenAt(text: string, at: number): string | null {
+  const head = text.slice(at, at + 8).toLowerCase()
+  if (head.startsWith("<!--")) {
+    return "comment"
+  }
+  return /^<(script|style)[\s>/]/.exec(head)?.[1] ?? null
+}
+
+/**
+ * The text without comments and `<script>`/`<style>` blocks (an old
+ * platform's `<!-- iç not -->` is no description). One scan: each block's
+ * end is searched once from its start, and an unclosed block drops the
+ * rest, so a long input of openings costs one pass, not one each.
+ */
+export function withoutHiddenBlocks(text: string): string {
+  let out = ""
+  let from = 0
+  for (let lt = text.indexOf("<"); lt !== -1; lt = text.indexOf("<", lt + 1)) {
+    const kind = hiddenAt(text, lt)
+    const end = kind ? HIDDEN_ENDS[kind] : undefined
+    if (!end) {
+      continue
+    }
+    end.lastIndex = lt + (kind === "comment" ? 4 : 1)
+    const found = end.exec(text)
+    out += `${text.slice(from, lt)} `
+    if (!found) {
+      return out
+    }
+    from = found.index + found[0].length
+    lt = from - 1
+  }
+  return out + text.slice(from)
+}
+
+/** Text as one line: comments, scripts, styles and tags dropped, spaces collapsed. Descriptions may hold simple HTML. */
 export function plainText(text: string | null | undefined): string {
-  return (text ?? "")
+  return withoutHiddenBlocks(text ?? "")
     .replace(TAG, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/\s+/g, " ")

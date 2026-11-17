@@ -312,6 +312,26 @@ describe("text helpers", () => {
     expect(plainText("<p>Bir&nbsp;iki</p>\n<p>üç</p>")).toBe("Bir iki üç")
   })
 
+  it("drops comments, scripts and styles with their content", () => {
+    expect(plainText("Bir <!-- iç not: maliyet --> iki<!---->üç")).toBe("Bir iki üç")
+    expect(plainText("Bir<SCRIPT type=x>alert(1)</script >iki<style>p{}</STYLE>üç")).toBe(
+      "Bir iki üç"
+    )
+    expect(plainText("<p>Bir</p><scripted>iki</scripted>")).toBe("Bir iki")
+    // An unclosed block drops the rest: its content is never text
+    expect(plainText("Bir <!-- iç not iki üç")).toBe("Bir")
+    expect(plainText("Bir <script>gizli")).toBe("Bir")
+    expect(plainText("3 < 5 ve 5 > 3")).toBe("3 < 5 ve 5 > 3")
+  })
+
+  it("reads a long run of openings in one pass", () => {
+    const started = performance.now()
+    plainText("<!-- ".repeat(50_000))
+    plainText("<script>".repeat(50_000))
+    plainText(`${"<!-- a --> ".repeat(50_000)}<style `.repeat(2))
+    expect(performance.now() - started).toBeLessThan(1000)
+  })
+
   it("says one price or where a range starts", () => {
     expect(priceSentence([899, 899])).toBe("899,00 TL.")
     expect(priceSentence([1250, 999.5, 0])).toBe("999,50 TL'den başlayan fiyatlarla.")

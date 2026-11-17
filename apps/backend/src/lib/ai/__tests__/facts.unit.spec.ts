@@ -57,6 +57,7 @@ describe("AI record facts (adr/0071 §10)", () => {
         brand: { name: "Marka" },
         categories: [
           { name: "Gizli Toptan", is_internal: true },
+          { name: "Kapalı Sezon", is_internal: false, is_active: false },
           { name: "Gömlekler", is_internal: false },
         ],
         attribute_values: [
@@ -80,6 +81,7 @@ describe("AI record facts (adr/0071 §10)", () => {
     })
     expect(sent).not.toContain("Tedarikçi")
     expect(sent).not.toContain("Gizli Toptan")
+    expect(sent).not.toContain("Kapalı Sezon")
     expect(sent).not.toContain("<p>")
     for (const leak of ["ayse.yilmaz", "123 45 67", "12345678901", "1978 6457"]) {
       expect(sent).not.toContain(leak)
@@ -96,6 +98,7 @@ describe("AI record facts (adr/0071 §10)", () => {
         category_children: [
           { name: "Keten", is_internal: false },
           { name: "Stok Fazlası", is_internal: true },
+          { name: "Hazırlanan Seri", is_internal: false, is_active: false },
           null,
         ],
       },
@@ -107,9 +110,30 @@ describe("AI record facts (adr/0071 §10)", () => {
     expect(asked[0]).toMatchObject({ entity: "product_category", filters: { id: "pcat_1" } })
     expect(facts).toMatchObject({ name: "Gömlekler", parent: "Giyim", subcategories: "Keten" })
     expect(sent).not.toContain("Stok Fazlası")
+    expect(sent).not.toContain("Hazırlanan Seri")
     for (const leak of ["ayse.yilmaz", "123 45 67", "12345678901"]) {
       expect(sent).not.toContain(leak)
     }
+  })
+
+  it("readies a closed category, naming no closed parent", async () => {
+    const { container } = containerWith([
+      {
+        name: "Yeni Sezon",
+        is_internal: false,
+        is_active: false,
+        parent_category: { name: "Gizli Kampanya", is_internal: false, is_active: false },
+        category_children: [],
+      },
+    ])
+
+    const facts = await categoryFacts(container, "pcat_1")
+
+    expect(facts).toMatchObject({ name: "Yeni Sezon", parent: null, subcategories: null })
+    expect(CATEGORY_FACT_FIELDS).toEqual(
+      expect.arrayContaining(["parent_category.is_active", "category_children.is_active"])
+    )
+    expect(PRODUCT_FACT_FIELDS).toContain("categories.is_active")
   })
 
   it("answers an internal category or a missing record as unknown", async () => {
