@@ -9,6 +9,7 @@ import { GoogleRatingForm } from "./forms/google-rating-form"
 import { HeroForm } from "./forms/hero-form"
 import { HeroSliderForm } from "./forms/hero-slider-form"
 import { MarqueeForm } from "./forms/marquee-form"
+import { NewsletterForm } from "./forms/newsletter-form"
 import { PriceBandsForm } from "./forms/price-bands-form"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
@@ -102,6 +103,7 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
         />
       )
     case "newsletter":
+      return <NewsletterForm section={section} {...props} />
     case "help":
       return <WordedForm section={section} {...props} />
     case "footer_bar":

@@ -1,3 +1,4 @@
+import { newsletterHasNote } from "@qticaret/types"
 import type { AnySection, HeroSection, ProductsSection } from "@/features/storefront/api/layout"
 import { slidesOf } from "./catalog-slides"
 import { HEADER_CATALOG_GROUPS } from "./field-registry"
@@ -130,13 +131,35 @@ function heroField(section: HeroSection, parts: readonly string[]): PreviewField
 const ownMore = (section: AnySection): boolean =>
   (section.type === "products" || section.type === "categories") && Boolean(section.more)
 
+/**
+ * The newsletter box's own words the theme marks, while its form shows
+ * their fields (adr/0049 Ek 2026-11-17): the line on the new variants,
+ * the promise line while on, the card's picture.
+ */
+function newsletterShows(
+  section: Extract<AnySection, { type: "newsletter" }>,
+  word: string
+): boolean {
+  switch (word) {
+    case "description":
+      return section.variant !== "standard"
+    case "note":
+      return newsletterHasNote(section.variant) && section.show_note !== false
+    case "image":
+      return section.variant === "image_card"
+    default:
+      return false
+  }
+}
+
 /** A field of one word (`title`, `text`, `body`, `more`, a catalog header's own). */
 function wordField(section: AnySection, word: string): PreviewField | null {
   if (
     (word === "title" && TITLED.has(section.type)) ||
     (word === "text" && TEXTED.has(section.type)) ||
     (word === "body" && section.type === "rich_text") ||
-    (word === "more" && ownMore(section))
+    (word === "more" && ownMore(section)) ||
+    (section.type === "newsletter" && newsletterShows(section, word))
   ) {
     return content(PREVIEW_IDS.text(section.id, word))
   }

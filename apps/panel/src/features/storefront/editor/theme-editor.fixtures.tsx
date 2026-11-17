@@ -106,7 +106,15 @@ export const DOC: LayoutDocument = {
       ...FOOTER_BAR_DEFAULTS,
       payment_badges: [],
     },
-    { id: "ebultenkutusu", type: "newsletter", ...ALWAYS, title: null, text: null },
+    {
+      id: "ebultenkutusu",
+      type: "newsletter",
+      ...ALWAYS,
+      title: null,
+      text: null,
+      variant: "standard",
+      description: null,
+    },
   ],
   product: [
     { id: "mainproduct", type: "product_main", ...MAIN, variant: "standard" },

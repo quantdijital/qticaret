@@ -14,6 +14,7 @@ import type {
   ShelfColumns,
   ShelfPhoneColumns,
   SliderSettings,
+  NewsletterVariant,
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
@@ -213,11 +214,35 @@ export interface TrustBadgesSection extends BodySectionBase {
   variant: TrustBadgesVariant
 }
 
-export interface WordedSection extends BodySectionBase {
-  type: "newsletter" | "help"
+export interface HelpSection extends BodySectionBase {
+  type: "help"
   title: string | null
   text: string | null
 }
+
+/**
+ * The newsletter box's variant and words (adr/0049 Ek 2026-11-17 e-bülten),
+ * on a page or in the footer: `text` the consent sentence as before,
+ * `description` every variant's, the promise line `split`'s and
+ * `image_card`'s, the picture `image_card`'s (the server fills each
+ * variant's own on reading).
+ */
+export interface NewsletterFields {
+  variant: NewsletterVariant
+  description: string | null
+  note?: string | null
+  show_note?: boolean
+  image?: LayoutImage | null
+}
+
+export interface NewsletterSection extends BodySectionBase, NewsletterFields {
+  type: "newsletter"
+  title: string | null
+  text: string | null
+}
+
+/** A box of a title and a line: the help box, the newsletter box. */
+export type WordedSection = HelpSection | NewsletterSection
 
 export interface FaqItem {
   /** Plain text. */
@@ -327,7 +352,7 @@ export type AnnouncementBar = SectionBase & {
   lines: string[]
 } & Partial<AnnouncementSettings>
 
-export interface FooterNewsletter extends SectionBase {
+export interface FooterNewsletter extends SectionBase, NewsletterFields {
   type: "newsletter"
   title: string | null
   text: string | null

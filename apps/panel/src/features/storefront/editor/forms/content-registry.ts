@@ -1,4 +1,8 @@
-import { FEATURED_PRODUCT_SETTINGS, STRIP_GALLERY_SETTINGS } from "@qticaret/types"
+import {
+  FEATURED_PRODUCT_SETTINGS,
+  STRIP_GALLERY_SETTINGS,
+  newsletterHasNote,
+} from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
 import { scrollerFields, sliderFields } from "./shelf-registry"
@@ -40,6 +44,7 @@ export type ContentField =
   | "single_open"
   | "gallery"
   | "strips_layout"
+  | "show_note"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -194,6 +199,11 @@ export function contentFields(section: AnySection): RegistryField[] {
         ),
         ...(section.gallery === "strips" ? stripsFields(section) : []),
       ]
+    // The promise line's switch, where the variant draws one (adr/0049 Ek 2026-11-17)
+    case "newsletter":
+      return newsletterHasNote(section.variant)
+        ? [entry(section, "show_note", `${E}.newsletter.showNote`)]
+        : []
     case "strip_gallery":
       return stripGalleryFields(section)
     // No count or switch in their content, or their own register (the band, the strip, the header)
@@ -205,7 +215,6 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "header_bar":
     case "help":
     case "marquee":
-    case "newsletter":
     case "product_main":
     case "rich_text":
     case "trust_badges":

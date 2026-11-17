@@ -17,14 +17,17 @@ export function VariantField<T extends VariantSectionType>({
   type,
   value,
   onChange,
+  offered,
 }: {
   id: string
   type: T
   value: SectionVariant<T>
   onChange: (next: SectionVariant<T>) => void
+  /** The choices where the section stands (`offeredVariants`); none: the type's whole list. */
+  offered?: readonly SectionVariant<T>[] | undefined
 }) {
   const { t } = useTranslation()
-  const variants: readonly SectionVariant<T>[] = SECTION_VARIANTS[type]
+  const variants: readonly SectionVariant<T>[] = offered ?? SECTION_VARIANTS[type]
   // What a variant does is in its group's (i); that the one picked is not drawn yet shows
   const kept = isUnbuilt(type, value)
   return (

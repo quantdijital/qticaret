@@ -9,7 +9,9 @@ import {
   SHELF_RANKED_LAYOUT_DEFAULT,
   SHELF_STAGE_DEFAULTS,
   SHELF_STRIPS_DEFAULTS,
+  SECTION_VARIANTS,
   hasVariants,
+  newsletterOnPage,
 } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import type { AnySection, HeaderCatalogFields } from "@/features/storefront/api/layout"
@@ -87,6 +89,15 @@ export const VARIANT_FIELDS: {
   header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
   // Ek 2026-11-17: the strip on, no line about the shop, the steel well, the marks on cards
   footer_bar: { ledger: {}, brand_columns: FOOTER_COLUMNS_DEFAULTS },
+  // Ek 2026-11-17 e-bülten: the promise line shown in the storefront's words, no picture yet;
+  // the line beside the heading is every variant's and stays as written
+  newsletter: {
+    standard: {},
+    split: { note: null, show_note: true },
+    image_card: { note: null, show_note: true, image: null },
+    strip: {},
+    in_footer: {},
+  },
   product_main: { standard: {} },
   category_main: { standard: {} },
 }
@@ -116,6 +127,21 @@ export const UNBUILT_VARIANTS: {
 
 export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: SectionVariant<T>) =>
   (UNBUILT_VARIANTS[type] as ReadonlySet<string> | undefined)?.has(variant) ?? false
+
+/**
+ * The variants the "Biçim" offers the section where it stands: its type's
+ * list, a page's newsletter box without the footer column one (adr/0049
+ * Ek 2026-11-17: a page has no footer column to sit in).
+ */
+export function offeredVariants<S extends VariantSection>(
+  section: S,
+  inFooter: boolean
+): readonly SectionVariant<S["type"]>[] {
+  const listed: readonly SectionVariant<S["type"]>[] = SECTION_VARIANTS[section.type]
+  return section.type === "newsletter" && !inFooter
+    ? listed.filter((each) => newsletterOnPage(each as SectionVariant<"newsletter">))
+    : listed
+}
 
 /** Whether the panel offers the section's "Biçim": its type is drawn more than one way. */
 export const offersVariants = (section: AnySection): section is VariantSection =>
