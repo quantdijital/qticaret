@@ -15,7 +15,12 @@ export interface SeoIssue {
   category: AdvisorCategory
   params: Record<string, string | number>
   fix?: { kind: "auto" | "suggest" | "manual"; action: string }
+  /** The AI task that fixes it (backend `lib/ai/registry/advisor-fixes.ts`); absent: none does. */
+  ai?: { task: string; field: AdvisorAiField; option?: string }
 }
+
+/** Where an AI fix's suggestion goes: the SEO card's two fields, a product's long description. */
+export type AdvisorAiField = "seo_title" | "seo_description" | "description"
 
 export interface Assessment {
   score: number

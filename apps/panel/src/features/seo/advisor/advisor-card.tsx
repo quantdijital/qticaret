@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useEffect } from "react"
 import { ArrowDown, ChevronRight, Loader2, Sparkles } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -10,7 +11,9 @@ import { assessmentQuery, useApplyFix } from "@/features/seo/api/advisor"
 import type { AdvisorKind, SeoIssue } from "@/features/seo/api/advisor"
 import { errorText } from "@/lib/errors"
 import { cn } from "@qticaret/admin-ui/lib/utils"
+import { clearAiFills } from "./ai-fill"
 import { GRADE_TEXT, SEVERITY_TONES } from "./grades"
+import { IssueAiFix } from "./issue-ai-fix"
 import { ScoreRing } from "./score-ring"
 import { scrollToTarget } from "./scroll-to-target"
 
@@ -64,6 +67,35 @@ function Issue({ issue, kind, id, targets, onTarget }: IssueProps) {
         <p className="mt-1.5 leading-5">{t(`${key}.why`, params)}</p>
         <p className="mt-1 leading-5">{t(`${key}.how`, params)}</p>
       </details>
+      <div className="flex flex-wrap items-center gap-2 empty:hidden">
+        <IssueFixButton issue={issue} apply={apply} target={target} onTarget={onTarget} />
+        <IssueAiFix
+          issue={issue}
+          kind={kind}
+          id={id}
+          finding={t(`${key}.title`, params)}
+          targets={targets}
+          onTarget={onTarget}
+        />
+      </div>
+    </li>
+  )
+}
+
+function IssueFixButton({
+  issue,
+  apply,
+  target,
+  onTarget,
+}: {
+  issue: SeoIssue
+  apply: ReturnType<typeof useApplyFix>
+  target: string | undefined
+  onTarget: (target: string) => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <>
       {issue.fix?.kind === "auto" ? (
         <Button
           size="sm"
@@ -93,7 +125,7 @@ function Issue({ issue, kind, id, targets, onTarget }: IssueProps) {
           {t("seo.advisor.goToField")}
         </Button>
       ) : null}
-    </li>
+    </>
   )
 }
 
@@ -121,6 +153,13 @@ export function AdvisorCard({
 }) {
   const { t } = useTranslation()
   const query = useQuery(assessmentQuery(kind, id, version))
+  // A suggestion no form took (the page was left first) is not kept for the next visit
+  useEffect(
+    () => () => {
+      clearAiFills(kind, id)
+    },
+    [kind, id]
+  )
   const data = query.data
   return (
     <SectionCard
