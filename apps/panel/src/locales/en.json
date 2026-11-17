@@ -5744,7 +5744,9 @@
       "canonical": "Canonical address",
       "canonicalHint": "A path on this site only. Empty uses the page's own address.",
       "saved": "SEO fields saved.",
-      "duplicates": "Same as other pages: the title on {{title}}, the description on {{description}}. Saved, but unique texts do better in search results."
+      "duplicates": "Same as other pages: the title on {{title}}, the description on {{description}}. Saved, but unique texts do better in search results.",
+      "aiTitle": "Suggest a title with AI",
+      "aiDescription": "Suggest a description with AI"
     },
     "redirectsCard": {
       "title": "Redirects and 404s",

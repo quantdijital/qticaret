@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
-import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { ROBOTS_OVERRIDES, seoMetaQuery, useSaveSeoMeta } from "@/features/seo/api/seo-meta"
 import type { SeoEntityType, SeoMeta } from "@/features/seo/api/seo-meta"
 import { sectionQuery } from "@/features/settings/api/sections"
@@ -25,14 +24,14 @@ import { useStoreName } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 import { cn } from "@qticaret/admin-ui/lib/utils"
+import { DESCRIPTION_LIMIT, SEO_MAX, TITLE_LIMIT } from "./seo-limits"
 import { seoSummary } from "./seo-summary"
 import type { SeoCollapse } from "./seo-summary"
+import { SeoTextFields } from "./seo-text-fields"
 
-// What search results show before cutting (docs/13 §3)
-const TITLE_LIMIT = 60
-const DESCRIPTION_LIMIT = 155
-// The longest the server keeps (SEO_META_LIMITS): typing stops there, the save is never refused
-const MAX = { title: 150, description: 320, keyword: 100 } as const
+// Other cards measure their texts the same way
+export { Counter } from "./seo-text-fields"
+
 const DEFAULT_ROBOTS = "__default__"
 
 interface Values {
@@ -50,20 +49,6 @@ export interface SeoContext {
   tokens: Record<string, string>
   /** The description to show when there is no override nor template (a category's text). */
   fallbackDescription: string
-}
-
-/** A length against what search results show; past it, in the warning colour. */
-export function Counter({ length, limit }: { length: number; limit: number }) {
-  return (
-    <span
-      className={cn(
-        "text-xs tabular-nums",
-        length > limit ? "text-warning-text" : "text-muted-foreground"
-      )}
-    >
-      {length}/{limit}
-    </span>
-  )
 }
 
 function SeoForm({
@@ -113,6 +98,11 @@ function SeoForm({
       ? renderSample(settings.values.description_templates.product, storeName, context.tokens)
       : context.fallbackDescription)
   const host = settings?.values.canonical_host ?? t("seo.sampleHost")
+
+  // An accepted suggestion is the person's change: the preview and the counters follow, Save writes it
+  const use = (name: "seo_title" | "seo_description", text: string) => {
+    form.setValue(name, text, { shouldDirty: true })
+  }
 
   const submit = form.handleSubmit((next) => {
     const { dirtyFields } = form.formState
@@ -187,41 +177,15 @@ function SeoForm({
           })}
         </p>
       ) : null}
-      <Field
-        label={t("seo.card.seoTitle")}
-        htmlFor={`seo-title-${id}`}
-        hint={t("seo.card.seoTitleHint")}
-      >
-        <div className="flex flex-col gap-1">
-          <Input
-            id={`seo-title-${id}`}
-            maxLength={MAX.title}
-            placeholder={renderSample(titleTemplate, storeName, context.tokens)}
-            {...form.register("seo_title")}
-          />
-          <div className="flex justify-end">
-            <Counter length={shownTitle.length} limit={TITLE_LIMIT} />
-          </div>
-        </div>
-      </Field>
-      <Field
-        label={t("seo.card.seoDescription")}
-        htmlFor={`seo-description-${id}`}
-        hint={t("seo.card.seoDescriptionHint")}
-      >
-        <div className="flex flex-col gap-1">
-          <Textarea
-            id={`seo-description-${id}`}
-            // Grows with the text, up to a few lines; longer scrolls inside
-            className="max-h-60 min-h-20"
-            maxLength={MAX.description}
-            {...form.register("seo_description")}
-          />
-          <div className="flex justify-end">
-            <Counter length={shownDescription.length} limit={DESCRIPTION_LIMIT} />
-          </div>
-        </div>
-      </Field>
+      <SeoTextFields
+        type={type}
+        id={id}
+        title={form.register("seo_title")}
+        description={form.register("seo_description")}
+        titlePlaceholder={renderSample(titleTemplate, storeName, context.tokens)}
+        shown={{ title: shownTitle, description: shownDescription }}
+        onUse={use}
+      />
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
           label={t("seo.card.focusKeyword")}
@@ -230,7 +194,7 @@ function SeoForm({
         >
           <Input
             id={`seo-keyword-${id}`}
-            maxLength={MAX.keyword}
+            maxLength={SEO_MAX.keyword}
             {...form.register("focus_keyword")}
           />
         </Field>

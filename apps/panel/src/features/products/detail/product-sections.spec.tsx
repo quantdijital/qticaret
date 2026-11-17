@@ -204,6 +204,10 @@ function answer(
   if (url === "/admin/features") {
     return { features: features ?? [] }
   }
+  // The SEO card's AI buttons: no task offered here
+  if (url === "/admin/ai/services") {
+    return { services: [], tasks: [], flags: { own_keys: true } }
+  }
   return {}
 }
 
