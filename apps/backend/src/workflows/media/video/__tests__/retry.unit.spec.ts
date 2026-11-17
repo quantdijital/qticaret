@@ -66,7 +66,7 @@ describe("which videos may be retried", () => {
     status: "failed" as const,
     error_code: PROCESSING_FAILED,
     source_file_id: "video-kaynak.mov",
-    updated_at: new Date(now - 60_000),
+    failed_at: new Date(now - 60_000) as Date | null,
   }
 
   it("takes a clip the infrastructure failed while its source is kept", () => {
@@ -79,13 +79,15 @@ describe("which videos may be retried", () => {
     expect(canRetryVideo({ ...failed, status: "processing" }, now)).toBe(false)
     expect(canRetryVideo({ ...failed, kind: "youtube" }, now)).toBe(false)
     expect(canRetryVideo({ ...failed, source_file_id: null }, now)).toBe(false)
+    // A failure without its time is never retried on a guess
+    expect(canRetryVideo({ ...failed, failed_at: null }, now)).toBe(false)
   })
 
   it("stops an hour before the sweep may remove a week-old failure's source", () => {
     expect(retryKeptSince(now).getTime()).toBe(now - FAILED_SOURCE_KEPT_MS + RETRY_MARGIN_MS)
     const edge = now - FAILED_SOURCE_KEPT_MS + RETRY_MARGIN_MS
-    expect(canRetryVideo({ ...failed, updated_at: new Date(edge + 1) }, now)).toBe(true)
-    expect(canRetryVideo({ ...failed, updated_at: new Date(edge) }, now)).toBe(false)
+    expect(canRetryVideo({ ...failed, failed_at: new Date(edge + 1) }, now)).toBe(true)
+    expect(canRetryVideo({ ...failed, failed_at: new Date(edge) }, now)).toBe(false)
   })
 
   it("names why a refused retry was refused", () => {

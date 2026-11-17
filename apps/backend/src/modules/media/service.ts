@@ -6,6 +6,7 @@ import { MediaVideo } from "./models/media-video"
 import * as queue from "./video-queue"
 import type { ClaimedVideo, FailedTry, ReadyVideo, VideoFiles } from "./video-queue"
 import * as retry from "./video-retry"
+import * as sources from "./video-sources"
 import type { RetriedVideo } from "./video-retry"
 
 export type MediaAssetRecord = InferTypeOf<typeof MediaAsset>
@@ -164,6 +165,33 @@ class MediaModuleService extends MediaServiceBase {
     @MedusaContext() sharedContext: Context = {}
   ): Promise<RetriedVideo | null> {
     return await retry.retryVideo(managerOf(sharedContext), id, failedCode, keptSince)
+  }
+
+  /** The sweep's release of a week-old failed source, checked again (`video-sources.ts`). */
+  @InjectManager()
+  async releaseFailedSource(
+    id: string,
+    sourceFileId: string,
+    failedBefore: Date,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return await sources.releaseFailedSource(
+      managerOf(sharedContext),
+      id,
+      sourceFileId,
+      failedBefore
+    )
+  }
+
+  /** The sweep's release of a ready clip's left-over source, checked again. */
+  @InjectManager()
+  async releaseReadySource(
+    id: string,
+    sourceFileId: string,
+    readyBefore: Date,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return await sources.releaseReadySource(managerOf(sharedContext), id, sourceFileId, readyBefore)
   }
 
   /** The retry undone while no job has taken the clip since. */

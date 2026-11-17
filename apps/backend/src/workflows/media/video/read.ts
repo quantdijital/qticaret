@@ -67,10 +67,11 @@ export function adminVideoView(video: MediaVideoRecord) {
 
 /**
  * Whether "Yeniden dene" would take the video (slice 3): a clip the
- * infrastructure failed, its source still kept (`retryVideo`'s own terms).
+ * infrastructure failed, its source still kept (`retryVideo`'s own terms),
+ * counted from when it failed (a title change does not move `failed_at`).
  */
 export function canRetryVideo(
-  video: Pick<MediaVideoRecord, "kind" | "status" | "error_code" | "source_file_id" | "updated_at">,
+  video: Pick<MediaVideoRecord, "kind" | "status" | "error_code" | "source_file_id" | "failed_at">,
   now: number = Date.now()
 ): boolean {
   return (
@@ -78,7 +79,8 @@ export function canRetryVideo(
     video.status === "failed" &&
     video.error_code === PROCESSING_FAILED &&
     video.source_file_id !== null &&
-    new Date(video.updated_at).getTime() > retryKeptSince(now).getTime()
+    video.failed_at !== null &&
+    new Date(video.failed_at).getTime() > retryKeptSince(now).getTime()
   )
 }
 

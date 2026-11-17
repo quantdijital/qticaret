@@ -68,7 +68,13 @@ medusaIntegrationTestRunner({
         ...fields,
       })
     const failedClip = (fields: Record<string, unknown> = {}) =>
-      clip({ status: "failed", error_code: PROCESSING_FAILED, attempts: MAX_ATTEMPTS, ...fields })
+      clip({
+        status: "failed",
+        error_code: PROCESSING_FAILED,
+        attempts: MAX_ATTEMPTS,
+        failed_at: new Date(),
+        ...fields,
+      })
     const auditOf = (id: string, count: number) =>
       eventually(
         async () =>
@@ -195,15 +201,14 @@ medusaIntegrationTestRunner({
       expect(refused.data.message).toBe("video.source_gone")
 
       // A week-old failure: the nightly sweep may be removing its source now
-      const old = await failedClip()
-      await getContainer()
-        .resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
-        .raw("UPDATE media_video SET updated_at = ? WHERE id = ?", [
-          new Date(Date.now() - 7 * DAY_MS + 30 * 60 * 1000),
-          old.id,
-        ])
+      const old = await failedClip({ failed_at: new Date(Date.now() - 7 * DAY_MS + 30 * 60_000) })
       const listed = await settle(http.get<{ videos: VideoBody["video"][] }>(base(), owner))
       expect(listed.data.videos.find((video) => video?.id === old.id)?.retryable).toBe(false)
+      // A title change does not make it new again (review S1): the window counts from the failure
+      expect((await rename(old.id, "Yakın çekim")).status).toBe(200)
+      expect((await row(old.id))?.failed_at).toEqual(old.failed_at)
+      const renamed = await settle(http.get<{ videos: VideoBody["video"][] }>(base(), owner))
+      expect(renamed.data.videos.find((video) => video?.id === old.id)?.retryable).toBe(false)
       expect((await retry(old.id)).data.message).toBe("video.source_gone")
       expect((await row(old.id))?.status).toBe("failed")
     })

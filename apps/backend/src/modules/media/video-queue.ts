@@ -108,11 +108,12 @@ export async function requeueStaleVideos(
     `UPDATE media_video SET
        status = CASE WHEN attempts + 1 - retry_from >= ? THEN 'failed' ELSE 'uploaded' END,
        error_code = CASE WHEN attempts + 1 - retry_from >= ? THEN ? ELSE NULL END,
+       failed_at = CASE WHEN attempts + 1 - retry_from >= ? THEN now() ELSE NULL END,
        attempts = attempts + 1, heartbeat_at = NULL, updated_at = now()
      WHERE status = 'processing' AND deleted_at IS NULL
        AND COALESCE(heartbeat_at, updated_at) < ?
      RETURNING id, status`,
-    [maxAttempts, maxAttempts, failedCode, before]
+    [maxAttempts, maxAttempts, failedCode, maxAttempts, before]
   )
 }
 
@@ -173,9 +174,9 @@ export async function markVideoTried(
 ): Promise<boolean> {
   const rows = await manager.execute<{ id: string }[]>(
     `UPDATE media_video SET status = ?, attempts = ?, error_code = ?, heartbeat_at = NULL,
-       updated_at = now()
+       failed_at = CASE WHEN ? = 'failed' THEN now() ELSE NULL END, updated_at = now()
      WHERE ${HELD} RETURNING id`,
-    [next.status, next.attempts, next.error_code, id, claimed]
+    [next.status, next.attempts, next.error_code, next.status, id, claimed]
   )
   return rows.length > 0
 }

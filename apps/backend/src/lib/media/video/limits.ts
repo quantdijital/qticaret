@@ -130,7 +130,13 @@ export const FAILED_SOURCE_KEPT_MS = 7 * 24 * 60 * 60 * 1000
  */
 export const RETRY_MARGIN_MS = 60 * 60 * 1000
 
-/** The oldest last change a failed clip may have and still be retried. */
+/**
+ * A ready clip's source the job left (storage refused it) is swept once the
+ * clip has been ready this long: a clip just made is the job's own to tidy.
+ */
+export const READY_SOURCE_GRACE_MS = 60 * 60 * 1000
+
+/** The oldest failure (`failed_at`) a clip may have and still be retried. */
 export const retryKeptSince = (now: number): Date =>
   new Date(now - (FAILED_SOURCE_KEPT_MS - RETRY_MARGIN_MS))
 
