@@ -14,7 +14,7 @@ import { orderRefundLockKey } from "../../lib/orders/locks"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import type { ProviderPart } from "../../modules/order-refunds/service"
-import { keepMadePart, madeInPart } from "./made-in-part"
+import { CHECKED_MADE_IN_PART, PANEL_REFUND_KEY, keepMadePart, madeInPart } from "./made-in-part"
 import { assertRecordable, recordMadeRefund } from "./made-refund-record"
 import { tracedOf } from "./refund-settle"
 import type { LedgerEntry } from "./refund-settle"
@@ -37,7 +37,7 @@ export interface SettleRefundByHandInput {
 /** Checked at the provider by staff: the codes say so in the ledger (the audit log says who). */
 export const CHECKED_MADE = "checked_made"
 export const CHECKED_NOT_MADE = "checked_not_made"
-export const CHECKED_MADE_IN_PART = "checked_made_in_part"
+export { CHECKED_MADE_IN_PART }
 
 /** A provider's parts (iyzico), as the ledger keeps them: kuruş, and whether its answer came. */
 const partsOf = (entry: { provider_parts?: unknown }): ProviderPart[] =>
@@ -163,6 +163,10 @@ async function settleMadeInPart(
   actorId: string
 ): Promise<{ reference: string; status: "done" }> {
   const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+  // A cancel's, a return's or an edit's refund: its own flow finishes it (S1)
+  if (!PANEL_REFUND_KEY.test(entry.reference)) {
+    throw new ConflictError("orders.refund_in_part_flow_owned")
+  }
   const { done, remainder } = madeInPart(entry.amount, partsOf(entry))
   // Past what the payment can give back: refused before the entry is touched
   await assertRecordable(container, entry.payment_id, done)
@@ -197,7 +201,8 @@ export const settleRefundByHandWorkflow = createWorkflow(
   "orders-settle-refund-by-hand",
   (input: SettleRefundByHandInput) => {
     const lockKey = transform({ input }, ({ input }) => orderRefundLockKey(input.order_id))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+    // The refund workflow's TTL (review D4-1, L3): never let go while its records are written
+    acquireLockStep({ key: lockKey, timeout: 10, ttl: 600 })
     const settled = settleRefundByHandStep(input)
     releaseLockStep({ key: lockKey })
     return new WorkflowResponse(settled)

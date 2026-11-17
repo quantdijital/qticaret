@@ -2,7 +2,12 @@ import { container } from "@medusajs/framework"
 import { ValidationError, isProviderError } from "../../lib/errors"
 import { kurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
-import { iyzicoApi, isIyzicoRefusal, nothingDone } from "../../lib/payments/iyzico"
+import {
+  iyzicoApi,
+  isIyzicoRefusal,
+  nothingDone,
+  refundPartNotMade,
+} from "../../lib/payments/iyzico"
 import type { IyzicoCredentials } from "../../lib/payments/iyzico"
 import { withRefundRecord } from "../../lib/payments/pending-refund"
 import { NEVER_LEFT, markRefused } from "../../lib/payments/refund-refusal"
@@ -83,12 +88,15 @@ async function ledgerOf(reference: string) {
 /**
  * Sends one part, written `sending` first and `done` once iyzico's signed
  * answer is for exactly it. Only a part iyzico surely did not make is
- * taken off again; any other failure leaves it `sending`: never sent again.
+ * taken off again (`notMade`: for an item transaction's part, a refusal
+ * known to make nothing, review D4-1 S2); any other failure leaves it
+ * `sending`: never sent again.
  */
 async function sendPart(
   ledger: Awaited<ReturnType<typeof ledgerOf>>,
   part: Part,
-  call: () => Promise<boolean>
+  call: () => Promise<boolean>,
+  notMade: (error: unknown) => boolean = refundPartNotMade
 ): Promise<void> {
   ledger.parts.push({ ...part, state: "sending" })
   await ledger.save()
@@ -96,7 +104,7 @@ async function sendPart(
   try {
     matches = await call()
   } catch (error) {
-    if (!nothingDone(error)) {
+    if (!notMade(error)) {
       throw unknown(error)
     }
     ledger.parts.pop()
@@ -168,13 +176,19 @@ export async function refundIyzicoPayment(
     if (!whole || !sameDay) {
       throw error
     }
-    await sendPart(ledger, { transaction_id: CANCEL, amount }, async () => {
-      const answer = await iyzicoApi().cancelPayment(account, {
-        paymentId,
-        conversationId: reference,
-      })
-      return answer.amount >= amount
-    })
+    // The whole payment's cancel: any refusal of iyzico's makes nothing, as before
+    await sendPart(
+      ledger,
+      { transaction_id: CANCEL, amount },
+      async () => {
+        const answer = await iyzicoApi().cancelPayment(account, {
+          paymentId,
+          conversationId: reference,
+        })
+        return answer.amount >= amount
+      },
+      nothingDone
+    )
   }
   // Recorded for our ledger: a step failing after this finds the refund made (`refundRecorded`)
   return withRefundRecord(data, reference, amount, refundId)

@@ -1197,6 +1197,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     'Bu iadenin bir kısmı yapılmış, tamamı değil; "para gitti" ya da "para gitmedi" seçilemez. Yapılan kısmı kaydedin; kalanı yeni bir iadeyle geri verebilirsiniz.',
   "orders.refund_check_part_unknown":
     "iyzico bu iadenin bir parçasına yanıt vermedi; o parça yapılmış olabilir. Kısmen kapatmadan önce iyzico panelinde kontrol edin ya da destek ekibine yazın.",
+  "orders.refund_in_part_flow_owned":
+    "Bu iade siparişin iptaline, bir iade talebine ya da sipariş düzenlemesine ait; buradan kısmen kapatılamaz. Kalanı o akıştan tamamlayın; akış ilerlemiyorsa destek ekibine yazın.",
   "orders.refund_check_not_partial":
     "Bu iade kısmen yapılmış görünmüyor; kaydı diğer seçeneklerle sonuçlandırın.",
   "orders.refund_check_shown": 'Sağlayıcı bu iadeyi yapılmış gösteriyor; "para gitmedi" seçilemez.',

@@ -4045,11 +4045,13 @@
         "hint": "Buradan para gönderilmez. \"Para gitti\" kaydı kapatır; \"Para gitmedi\" kaydı başarısız yapar ve kalemler yeniden iade edilebilir. Seçiminiz denetim kaydına yazılır.",
         "made": "Para gitti",
         "not_made": "Para gitmedi",
-        "made_in_part": "Yapılan kısmı kaydet",
+        "made_in_part": "Doğruladım, yapılan kısmı kaydet",
         "in_part": {
           "title": "Bu iade kısmen yapıldı",
-          "question": "iyzico {{amount}} iadenin {{done}} tutarındaki kısmını geri verdi; {{rest}} geri verilmedi.",
-          "hint": "Buradan para gönderilmez. Kayıt, iyzico'nun yanıtladığı parçalarla {{done}} olarak kapanır. Kalan {{rest}}, siparişin iade adımından tutar girilerek yeniden iade edilebilir. Seçiminiz denetim kaydına yazılır."
+          "question": "iyzico'nun yanıtlarına göre {{amount}} iadenin {{done}} tutarındaki kısmı geri verildi; {{rest}} geri verilmedi.",
+          "hint": "Buradan para gönderilmez. iyzico panelinde bu iade için tam olarak {{done}} geri verildiğini doğrulayın. Tutuyorsa kayıt {{done}} olarak kapanır; kalan {{rest}}, siparişin iade adımından tutar girilerek yeniden iade edilebilir. Tutmuyorsa kaydı açık bırakın ve iyzico destek ekibine yazın. Seçiminiz denetim kaydına yazılır.",
+          "flow_owned": "Bu iade siparişin iptaline, bir iade talebine ya da sipariş düzenlemesine ait; buradan kısmen kapatılamaz. Kalanı o akıştan tamamlayın; akış ilerlemiyorsa destek ekibine yazın.",
+          "keep_open": "Tutmuyor, açık bırak"
         },
         "provider": "Ödeme kuruluşu",
         "reference": "Referans",

@@ -50,7 +50,13 @@ export interface RefundPlan {
   payment_id: string
   amount: number
   lines: PlannedLine[]
+  /** A staff check's code on the entry (`checked_*`), kept when it is closed (review D4-1, L1). */
+  checked_code?: string | null
 }
+
+/** The entry's code when a staff check wrote it, kept as the refund closes; null otherwise. */
+export const checkedCodeOf = (code: string | null | undefined): string | null =>
+  code?.startsWith("checked_") ? code : null
 
 type Amount = MedusaAmount | null | undefined
 interface PaymentRow {
@@ -176,6 +182,7 @@ export const planOrderRefundStep = createStep(
         payment_id: existing.payment_id,
         amount: existing.amount,
         lines: existing.lines as unknown as PlannedLine[],
+        checked_code: checkedCodeOf(existing.error_code),
       })
     }
     const money = await readOrderMoney(container, input.order_id)
@@ -210,7 +217,7 @@ export const openRefundEntryStep = createStep(
       await ledger.updateOrderRefunds({
         id: plan.entry_id,
         status: "pending",
-        error_code: null,
+        error_code: plan.checked_code ?? null,
         payment_id: plan.payment_id,
         amount: plan.amount,
         lines: plan.lines as unknown as Record<string, unknown>,
@@ -251,7 +258,7 @@ export async function closeRefundEntry(
   const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
   const [entry] = await ledger.listOrderRefunds(
     { id: entryId },
-    { select: ["reference", "provider_parts"] }
+    { select: ["reference", "provider_parts", "error_code"] }
   )
   const parts = (entry?.provider_parts as ProviderPart[] | null) ?? []
   if (entry && parts.some((part) => part.state === "sending")) {
@@ -261,7 +268,12 @@ export async function closeRefundEntry(
     )
   }
   await dropPendingRefund(container, paymentId)
-  await ledger.updateOrderRefunds({ id: entryId, status: "done", error_code: null })
+  // A staff check's code kept (L1): a refund closed in part stays so, though the job closed it
+  await ledger.updateOrderRefunds({
+    id: entryId,
+    status: "done",
+    error_code: checkedCodeOf(entry?.error_code),
+  })
 }
 
 export const closeRefundEntryStep = createStep(

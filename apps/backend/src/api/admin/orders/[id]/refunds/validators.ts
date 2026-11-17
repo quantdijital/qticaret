@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { PANEL_REFUND_KEY } from "../../../../../workflows/orders/made-in-part"
 import { CHECKED_NOTE_PREFIX } from "../../../../../workflows/orders/made-refund-record"
 import { liraAmount } from "../../../../validation/lira"
 
@@ -38,7 +39,7 @@ export const AdminPostOrderRefund = z
     // The panel's key for this refund (`newRefundReference`: a UUID's 32 hex digits): tried
     // again, it is made once. No other form: a cancel's, a return's, Medusa's own or the
     // recovery job's reference can never be named here (security review D4)
-    reference: z.string().regex(/^[0-9a-f]{32}$/, "orders.refund_reference_invalid"),
+    reference: z.string().regex(PANEL_REFUND_KEY, "orders.refund_reference_invalid"),
     // Never a staff check's own note: it names the check's Medusa record (sixth round D-1)
     note: z
       .string()

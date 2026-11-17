@@ -17,6 +17,7 @@ import {
 } from "./refund-settle"
 import type { LedgerEntry } from "./refund-settle"
 import { refundTraceOf } from "./refund-trace"
+import { checkedCodeOf } from "./steps/order-refund"
 
 // An entry this fresh may be a refund under way: left to the next round
 const QUIET_MS = 2 * 60 * 1000
@@ -101,11 +102,11 @@ async function settleEntry(
   container: MedusaContainer,
   entry: Entry,
   now: number
-): Promise<"closed" | "failed" | "open"> {
+): Promise<keyof SettleRound | "none"> {
   const { trace, provider } = await refundTraceOf(container, tracedOf(entry))
   if (trace === "made" || trace === "shown") {
     const orderOpen = await uncanceledByCancel(container, entry)
-    await refundOrderWorkflow(container).run({
+    const { result } = await refundOrderWorkflow(container).run({
       input: {
         order_id: entry.order_id,
         reference: entry.reference,
@@ -114,6 +115,10 @@ async function settleEntry(
         close_only: true,
       },
     })
+    // Closed meanwhile (by staff, under the lock): nothing done this round, nothing told (L2)
+    if (result.closed_before) {
+      return "none"
+    }
     // The money is back, the goods must not go: the shop cancels the order (once per refund)
     if (orderOpen) {
       await alertPaymentIssue(container, {
@@ -142,7 +147,11 @@ async function settleEntry(
     if (entry.error_code !== REFUND_UNCONFIRMED) {
       await mark(container, entry, { status: "pending", error_code: REFUND_UNCONFIRMED })
     }
-  } else if (!(UNSETTLED as readonly (string | null)[]).includes(entry.error_code)) {
+  } else if (
+    !(UNSETTLED as readonly (string | null)[]).includes(entry.error_code) &&
+    // A staff check's mark kept (L1): a cut check closed in part reads shown, never marked over
+    !checkedCodeOf(entry.error_code)
+  ) {
     await mark(container, entry, { status: "pending", error_code: REFUND_INCOMPLETE })
   }
   if (timeOf(entry.created_at) <= now - ESCALATE_MS) {
@@ -186,7 +195,10 @@ export async function settleOpenRefunds(
     )) as unknown as Entry[]
     for (const entry of entries.filter((each) => settleable(each, now))) {
       try {
-        round[await settleEntry(container, entry, now)] += 1
+        const outcome = await settleEntry(container, entry, now)
+        if (outcome !== "none") {
+          round[outcome] += 1
+        }
       } catch (error) {
         round.open += 1
         logger.warn({

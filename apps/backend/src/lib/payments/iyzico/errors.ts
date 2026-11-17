@@ -70,3 +70,23 @@ const NEVER_SENT = new Set(["network_error", "circuit_open"])
  */
 export const nothingDone = (error: unknown): boolean =>
   isIyzicoRefusal(error) || (error instanceof ProviderError && NEVER_SENT.has(error.providerCode))
+
+// iyzico's refusals of a refund part known to leave it unmade (5093 and 10245: past what is left
+// of its line; 10223: the payment's own day; 10237: a bank that takes no refunds)
+const PART_REFUSALS: ReadonlySet<string> = new Set([
+  "refund_exceeds_line",
+  "refund_same_day",
+  "refund_not_supported",
+])
+
+/**
+ * Whether a refund part surely was not made (review D4-1, S2): a call that
+ * never left, or iyzico refusing it with a code known to make nothing.
+ * Its ledger part is then taken off. Any other `failure` answer may hide a
+ * part made (iyzico keeps no refund list to read back), so the part stays
+ * without an answer until the shop checks iyzico's panel.
+ */
+export const refundPartNotMade = (error: unknown): boolean =>
+  error instanceof ProviderError &&
+  (NEVER_SENT.has(error.providerCode) ||
+    (isIyzicoRefusal(error) && PART_REFUSALS.has(error.providerCode)))

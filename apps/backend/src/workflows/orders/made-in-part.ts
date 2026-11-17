@@ -58,12 +58,24 @@ export function linesMadeInPart(lines: readonly RefundLine[], done: number): Ref
     .filter((line) => line.net > 0 || line.quantity > 0)
 }
 
+/** A refund staff closed at the part iyzico made: kept on the entry once it is done. */
+export const CHECKED_MADE_IN_PART = "checked_made_in_part"
+
 /**
- * The entry rewritten to what was made, still open: its amount the `done`
- * parts, its lines spread to match. Cut short after this, every part is
- * done and adds up to the amount, so the refund reads `shown` and the
- * settling job closes it under its reference, sending nothing (iyzico's
- * provider finds nothing left to send). Under the order's refund lock.
+ * Only the panel's own refunds (its key: 32 hex digits) are closed in part
+ * (review D4-1, S1). A cancel's, a return's or an edit's refund is its
+ * flow's: tried again under its reference, a refund closed in part would
+ * read done at the made part, and the flow would take that for the whole.
+ */
+export const PANEL_REFUND_KEY = /^[0-9a-f]{32}$/
+
+/**
+ * The entry rewritten to what was made, still open, marked so (review
+ * D4-1, L1): its amount the `done` parts, its lines spread to match. Cut
+ * short after this, every part is done and adds up to the amount, so the
+ * refund reads `shown` and the settling job closes it under its reference,
+ * sending nothing (iyzico's provider finds nothing left to send) and
+ * keeping the mark. Under the order's refund lock.
  */
 export async function keepMadePart(
   container: Pick<MedusaContainer, "resolve">,
@@ -75,5 +87,6 @@ export async function keepMadePart(
     id: entry.id,
     amount: done,
     lines: lines as unknown as Record<string, unknown>,
+    error_code: CHECKED_MADE_IN_PART,
   })
 }

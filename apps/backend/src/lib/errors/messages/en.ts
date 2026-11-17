@@ -1185,6 +1185,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     'Only part of this refund was made, not all of it; "money went back" or "money did not go back" cannot be chosen. Record the part made; the rest can be given back with a new refund.',
   "orders.refund_check_part_unknown":
     "iyzico did not answer for a part of this refund; that part may have been made. Check iyzico's panel or write to its support team before closing it in part.",
+  "orders.refund_in_part_flow_owned":
+    "This refund belongs to the order's cancel, a return request or an order edit; it cannot be closed in part here. Finish the rest from that flow; if it does not move on, write to the support team.",
   "orders.refund_check_not_partial":
     "This refund does not look made in part; settle it with the other choices.",
   "orders.refund_check_shown":

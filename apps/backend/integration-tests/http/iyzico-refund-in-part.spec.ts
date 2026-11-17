@@ -8,8 +8,11 @@ import { ORDER_REFUNDS_MODULE } from "../../src/modules/order-refunds"
 import type OrderRefundsModuleService from "../../src/modules/order-refunds/service"
 import { keepMadePart } from "../../src/workflows/orders/made-in-part"
 import { checkedNote } from "../../src/workflows/orders/made-refund-record"
-import { ESCALATE_MS, settleOpenRefunds } from "../../src/workflows/orders/settle-open-refunds"
-import { createAdminUser } from "../helpers/admin"
+import {
+  ESCALATE_MS,
+  STRANDED_MS,
+  settleOpenRefunds,
+} from "../../src/workflows/orders/settle-open-refunds"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -27,17 +30,17 @@ jest.setTimeout(120 * 1000)
 const account = fakeIyzicoAccount()
 const REFUND = "/payment/refund"
 const MINUTE = 60 * 1000
-// iyzico's own refusal of one part: nothing done for it
+// iyzico's refusal of one part with a code known to make nothing (5093: past its line's rest)
 const refused = {
-  body: { status: "failure", errorCode: "99", errorMessage: "x", locale: "tr", systemTime: 0 },
+  body: { status: "failure", errorCode: "5093", errorMessage: "x", locale: "tr", systemTime: 0 },
 }
 
 /**
  * D4-1 (follow-up of PR #153): an iyzico refund made in part (one item
  * transaction's part answered done, the next refused) is closed by staff
  * at exactly what iyzico confirmed, read from the ledger; the rest is
- * refunded anew under a new key, never past what is left. A part whose
- * answer was lost stops it; only owner and admin may; one record only.
+ * refunded anew under a new key, never past what is left; one record
+ * only. What is refused is in `iyzico-refund-in-part-refusals.spec.ts`.
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -225,46 +228,6 @@ medusaIntegrationTestRunner({
       expect((await recordsOf(orderId, reference)).refunded).toBe(300)
     })
 
-    it("refuses while a part's answer was lost: it may have been made", async () => {
-      const { orderId } = await paidOrder()
-      const reference = "d0000000000000000000000000000011"
-      fake.queue(REFUND, { pass: true })
-      fake.queue(REFUND, { drop: true })
-      await refund(orderId, { amount: 300, reference })
-
-      const checked = await check(orderId, reference)
-      const open = await entryOf(reference)
-
-      expect(checked.status).toBe(409)
-      expect(checked.data.message).toBe("orders.refund_check_part_unknown")
-      expect(open).toMatchObject({ status: "pending", amount: 30000 })
-      expect(open.provider_parts).toEqual([
-        expect.objectContaining({ amount: 24000, state: "done" }),
-        expect.objectContaining({ amount: 6000, state: "sending" }),
-      ])
-    })
-
-    it("is for owner and admin only", async () => {
-      const { orderId } = await paidOrder()
-      const reference = "d0000000000000000000000000000021"
-      await madeInPart(orderId, reference)
-      const container = getContainer()
-      const operations = await createAdminUser(http, container, "operations")
-      const readonly = await createAdminUser(http, container, "readonly")
-      const shopAdmin = await createAdminUser(http, container, "admin")
-
-      const denied = [
-        await check(orderId, reference, operations.headers),
-        await check(orderId, reference, readonly.headers),
-      ]
-      const untouched = await entryOf(reference)
-      const allowed = await check(orderId, reference, shopAdmin.headers)
-
-      expect(denied.map(({ status }) => status)).toEqual([403, 403])
-      expect(untouched).toMatchObject({ status: "pending", amount: 30000 })
-      expect(allowed.data.refund).toMatchObject({ status: "done" })
-    })
-
     it("writes one record with the job and a second check at once", async () => {
       const { orderId } = await paidOrder()
       const reference = "d0000000000000000000000000000031"
@@ -277,11 +240,16 @@ medusaIntegrationTestRunner({
       ])
       const closed = await entryOf(reference)
 
-      // One check wins; the other finds it closed, the job never closes it twice
+      // One check wins; the other finds it closed. The job may read it before or after: never
+      // failed, and the records say once (review L2: what the job counts is not the proof)
       expect([first.status, second.status].sort()).toEqual([200, 400])
       expect([first.data.message, second.data.message]).toContain("orders.refund_not_open")
-      expect(round.closed + round.failed).toBe(0)
-      expect(closed).toMatchObject({ status: "done", amount: 24000 })
+      expect(round.failed).toBe(0)
+      expect(closed).toMatchObject({
+        status: "done",
+        amount: 24000,
+        error_code: "checked_made_in_part",
+      })
       expect(await recordsOf(orderId, reference)).toEqual({
         refunds: [{ amount: 240, note: checkedNote(reference) }],
         refunded: 240,
@@ -296,16 +264,31 @@ medusaIntegrationTestRunner({
       // The check's first write, as a crash leaves it: the entry at the made part, still open
       await keepMadePart(getContainer(), entry, 24000)
 
-      const round = await settleOpenRefunds(getContainer(), Date.now() + 3 * MINUTE)
+      const cut = await entryOf(reference)
+      // Marked by the check, not by a failure: read once surely no check is under way
+      const round = await settleOpenRefunds(getContainer(), Date.now() + STRANDED_MS + MINUTE)
       const closed = await entryOf(reference)
       const records = await recordsOf(orderId, reference)
+      const details = await http.get<{ refunds: { reference: string; made_in_part: boolean }[] }>(
+        `/admin/orders/${orderId}/payment-details`,
+        { headers: admin.headers }
+      )
       const rest = await refund(orderId, {
         amount: 60,
         reference: "d0000000000000000000000000000042",
       })
 
-      expect(round).toMatchObject({ closed: 1 })
-      expect(closed).toMatchObject({ status: "done", amount: 24000 })
+      expect(cut).toMatchObject({ status: "pending", error_code: "checked_made_in_part" })
+      expect(round).toMatchObject({ closed: 1, failed: 0 })
+      // The mark kept though the job closed it (review L1)
+      expect(closed).toMatchObject({
+        status: "done",
+        amount: 24000,
+        error_code: "checked_made_in_part",
+      })
+      expect(details.data.refunds).toEqual([
+        expect.objectContaining({ reference, made_in_part: true }),
+      ])
       expect(records.refunds.map(({ amount }) => amount)).toEqual([240])
       expect(records.moves).toEqual([-240])
       // Nothing more sent under the refund's reference: its two parts only

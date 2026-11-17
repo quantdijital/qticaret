@@ -4045,11 +4045,13 @@
         "hint": "No money is sent from here. \"Money went back\" closes the record; \"Money did not go back\" fails it and its lines can be refunded again. Your choice is written to the audit log.",
         "made": "Money went back",
         "not_made": "Money did not go back",
-        "made_in_part": "Record the part made",
+        "made_in_part": "Checked, record the part made",
         "in_part": {
           "title": "This refund was made in part",
-          "question": "iyzico gave back {{done}} of the {{amount}} refund; {{rest}} was not given back.",
-          "hint": "No money is sent from here. The record closes at {{done}}, the parts iyzico answered. The remaining {{rest}} can be refunded again from the order's refund step by entering an amount. Your choice is written to the audit log."
+          "question": "By iyzico's answers, {{done}} of the {{amount}} refund was given back; {{rest}} was not.",
+          "hint": "No money is sent from here. Check in iyzico's panel that exactly {{done}} was given back for this refund. If it matches, the record closes at {{done}}; the remaining {{rest}} can be refunded again from the order's refund step by entering an amount. If it does not, leave the record open and write to iyzico's support team. Your choice is written to the audit log.",
+          "flow_owned": "This refund belongs to the order's cancel, a return request or an order edit; it cannot be closed in part here. Finish the rest from that flow; if it does not move on, write to the support team.",
+          "keep_open": "Does not match, leave open"
         },
         "provider": "Payment provider",
         "reference": "Reference",

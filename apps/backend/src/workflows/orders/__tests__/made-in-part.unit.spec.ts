@@ -9,6 +9,7 @@ import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import { linesMadeInPart, madeInPart } from "../made-in-part"
 import { checkedNote } from "../made-refund-record"
 import { settleRefundByHand } from "../settle-refund-by-hand"
+import { closeRefundEntry } from "../steps/order-refund"
 
 const done = (amount: number, id = "t1"): ProviderPart => ({
   transaction_id: id,
@@ -188,6 +189,8 @@ describe("staff close an iyzico refund made in part, sending nothing (D4-1)", ()
         expect.objectContaining({ id: "item_1", quantity: 2 }),
         expect.objectContaining({ id: "ship_1", quantity: 0 }),
       ],
+      // Marked with the rewrite: a check cut short keeps it (L1)
+      error_code: "checked_made_in_part",
     })
     expect(shop.updateOrderRefunds).toHaveBeenLastCalledWith({
       id: "oref_01",
@@ -208,6 +211,38 @@ describe("staff close an iyzico refund made in part, sending nothing (D4-1)", ()
     })
     expect(shop.createRefunds).not.toHaveBeenCalled()
     expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
+  })
+
+  it.each(["cancelpay01JABC", "returnrreq01JABC", "editordch01JABC"])(
+    "leaves a flow's own refund (%s) to its flow, writing nothing (S1)",
+    async (reference) => {
+      const shop = shopWith({ ...open, reference })
+
+      await expect(
+        settleRefundByHand(shop.container, { ...input, reference })
+      ).rejects.toMatchObject({ safeMessage: "orders.refund_in_part_flow_owned" })
+      expect(shop.createRefunds).not.toHaveBeenCalled()
+      expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
+    }
+  )
+
+  it("keeps the mark when the job closes a check cut short, and only a check's (L1)", async () => {
+    const cut = shopWith({ ...open, amount: 24000, error_code: "checked_made_in_part" })
+    const plain = shopWith({ ...open, error_code: "refund_incomplete" })
+
+    await closeRefundEntry(cut.container, "oref_01", "pay_01")
+    await closeRefundEntry(plain.container, "oref_01", "pay_01")
+
+    expect(cut.updateOrderRefunds).toHaveBeenCalledWith({
+      id: "oref_01",
+      status: "done",
+      error_code: "checked_made_in_part",
+    })
+    expect(plain.updateOrderRefunds).toHaveBeenCalledWith({
+      id: "oref_01",
+      status: "done",
+      error_code: null,
+    })
   })
 
   it("refuses a refund that is no iyzico refund made in part", async () => {

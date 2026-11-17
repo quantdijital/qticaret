@@ -14,7 +14,7 @@ import type IntegrationCredentialsModuleService from "../../modules/integration-
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { UNSETTLED } from "../orders/refund-settle"
-import { CHECKED_MADE_IN_PART } from "../orders/settle-refund-by-hand"
+import { CHECKED_MADE_IN_PART } from "../orders/made-in-part"
 import { iyzicoDetails } from "./iyzico-details"
 import { paytrDetails } from "./paytr-details"
 

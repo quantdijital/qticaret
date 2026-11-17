@@ -29,6 +29,9 @@ const PROVIDERS: Readonly<Record<string, string>> = {
 
 const kurusOf = (lira: string) => Math.round(Number(lira) * 100)
 
+// The panel's own refund key (`newRefundReference`): only such a refund is closed in part
+const PANEL_REFUND_KEY = /^[0-9a-f]{32}$/
+
 /**
  * An iyzico refund made in part (D4-1): every part answered, together
  * short of the amount; what was given back and what was not, in kuruş.
@@ -84,9 +87,11 @@ function RefundFacts({ refund, currency }: { refund: ShopRefund; currency: strin
  * A refund whose record stayed incomplete, checked by staff in the
  * provider's panel (review 2026-11-17, O2, D-4): what to look for is
  * shown; the two answers weigh the same, and the one chosen is asked once
- * more before it is sent. An iyzico refund made in part has one answer
- * (D4-1): its record closed at the part made, what is left shown to be
- * refunded anew. Nothing is refunded from here.
+ * more before it is sent. An iyzico refund made in part (D4-1) is checked
+ * against iyzico's panel: its record closed at the part made, what is left
+ * shown to be refunded anew, or left open when the figures do not match; a
+ * cancel's, a return's or an edit's is left to its flow. Nothing is
+ * refunded from here.
  */
 export function SettleRefundDialog({
   orderId,
@@ -108,7 +113,13 @@ export function SettleRefundDialog({
     done: inPart ? formatMoney(inPart.done / 100, currency) : "",
     rest: inPart ? formatMoney(inPart.rest / 100, currency) : "",
   }
-  const outcomes: readonly SettleOutcome[] = inPart ? ["made_in_part"] : ["not_made", "made"]
+  // A cancel's, a return's or an edit's refund is finished by its flow, never closed in part here
+  const flowOwned = refund !== null && !PANEL_REFUND_KEY.test(refund.reference)
+  const outcomes: readonly SettleOutcome[] = inPart
+    ? flowOwned
+      ? []
+      : ["made_in_part"]
+    : ["not_made", "made"]
   const close = (open: boolean) => {
     if (!open) {
       setChosen(null)
@@ -131,6 +142,7 @@ export function SettleRefundDialog({
     )
   }
   const ask = inPart ? `${S}.in_part` : S
+  const hint = inPart && flowOwned ? `${ask}.flow_owned` : `${ask}.hint`
   return (
     <Dialog open={refund !== null} onOpenChange={close}>
       <DialogContent>
@@ -143,7 +155,7 @@ export function SettleRefundDialog({
         <DialogBody>
           {refund ? <RefundFacts refund={refund} currency={currency} /> : null}
           {chosen ? null : (
-            <p className="mt-3 text-[13px] text-muted-foreground">{t(`${ask}.hint`, values)}</p>
+            <p className="mt-3 text-[13px] text-muted-foreground">{t(hint, values)}</p>
           )}
         </DialogBody>
         <DialogFooter>
@@ -164,17 +176,30 @@ export function SettleRefundDialog({
               </Button>
             </>
           ) : (
-            outcomes.map((outcome) => (
-              <Button
-                key={outcome}
-                variant="outline"
-                onClick={() => {
-                  setChosen(outcome)
-                }}
-              >
-                {t(`${S}.${outcome}`)}
-              </Button>
-            ))
+            <>
+              {/* Made in part, but not as iyzico's panel shows it: left open, nothing written */}
+              {inPart && !flowOwned ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    close(false)
+                  }}
+                >
+                  {t(`${S}.in_part.keep_open`)}
+                </Button>
+              ) : null}
+              {outcomes.map((outcome) => (
+                <Button
+                  key={outcome}
+                  variant="outline"
+                  onClick={() => {
+                    setChosen(outcome)
+                  }}
+                >
+                  {t(`${S}.${outcome}`)}
+                </Button>
+              ))}
+            </>
           )}
         </DialogFooter>
       </DialogContent>
