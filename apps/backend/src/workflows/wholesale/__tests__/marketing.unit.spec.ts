@@ -93,12 +93,34 @@ describe("wholesalersPhones", () => {
     filters: Record<string, unknown>
     pagination: { skip: number }
   }
-  const scope = (answer: (args: Graph) => unknown[]) => {
+  /** The orders' table as `orderIdsByEmail` reads it: its ids by lower-cased address. */
+  const ordersTable = (byEmail: Record<string, string[]>) => {
+    const asked: { sql: string; values: string[] }[] = []
+    const knex = () => ({
+      select: () => ({
+        whereNull: () => ({
+          whereRaw: (sql: string, values: string[]) => {
+            asked.push({ sql, values })
+            return Promise.resolve(
+              values.flatMap((email) => byEmail[email] ?? []).map((id) => ({ id }))
+            )
+          },
+        }),
+      }),
+    })
+    return { knex, asked }
+  }
+  const scope = (answer: (args: Graph) => unknown[], byEmail: Record<string, string[]> = {}) => {
     const graph = jest.fn((args: Graph) => Promise.resolve({ data: answer(args) }))
+    const table = ordersTable(byEmail)
     return {
       graph,
+      asked: table.asked,
       container: {
         resolve: (key: string) => {
+          if (key === (ContainerRegistrationKeys.PG_CONNECTION as string)) {
+            return table.knex
+          }
           if (key !== (ContainerRegistrationKeys.QUERY as string)) {
             throw new Error(`unexpected ${key}`)
           }
@@ -114,19 +136,22 @@ describe("wholesalersPhones", () => {
   }
 
   it("reads the record's, the address book's and the orders' phones, signed in or out", async () => {
-    const { container, graph } = scope(({ entity, filters }) => {
-      if (entity === "customer") {
-        return [
-          {
-            phone: "+905321234567",
-            addresses: [{ phone: "0532 765 43 21" }, { phone: null }, { phone: "  " }],
-          },
-        ]
-      }
-      return "customer_id" in filters
-        ? [{ shipping_address: { phone: "05551112233" }, billing_address: { phone: null } }]
-        : [{ shipping_address: { phone: "+90 544 000 11 22" }, billing_address: null }]
-    })
+    const { container, graph, asked } = scope(
+      ({ entity, filters }) => {
+        if (entity === "customer") {
+          return [
+            {
+              phone: "+905321234567",
+              addresses: [{ phone: "0532 765 43 21" }, { phone: null }, { phone: "  " }],
+            },
+          ]
+        }
+        return "customer_id" in filters
+          ? [{ shipping_address: { phone: "05551112233" }, billing_address: { phone: null } }]
+          : [{ shipping_address: { phone: "+90 544 000 11 22" }, billing_address: null }]
+      },
+      { "toptan@example.com": ["order_guest"] }
+    )
 
     const phones = await wholesalersPhones(container, wholesalers)
 
@@ -136,8 +161,16 @@ describe("wholesalersPhones", () => {
     expect(graph.mock.calls.map(([args]) => [args.entity, args.filters])).toEqual([
       ["customer", { id: ["cus_1"] }],
       ["order", { customer_id: ["cus_1"] }],
-      ["order", { email: ["toptan@example.com"] }],
+      ["order", { id: ["order_guest"] }],
     ])
+    // However the guest typed it ("Toptan@Example.com"): the address is compared lower-cased
+    expect(asked).toEqual([{ sql: "lower(btrim(email)) in (?)", values: ["toptan@example.com"] }])
+  })
+
+  it("reads no signed-out order when none was placed under their address", async () => {
+    const { container, graph } = scope(() => [])
+    await wholesalersPhones(container, wholesalers)
+    expect(graph.mock.calls.map(([args]) => args.entity)).toEqual(["customer", "order"])
   })
 
   it("reads every page of a wholesaler's orders", async () => {
@@ -153,7 +186,7 @@ describe("wholesalersPhones", () => {
     const phones = await wholesalersPhones(container, wholesalers)
 
     expect(phones.sort()).toEqual(["05551112233", "05559998877"])
-    expect(graph).toHaveBeenCalledTimes(4)
+    expect(graph).toHaveBeenCalledTimes(3)
   })
 
   it("reads nothing while there is no wholesaler", async () => {

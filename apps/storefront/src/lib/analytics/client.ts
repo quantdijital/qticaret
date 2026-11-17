@@ -137,17 +137,20 @@ export function track(event: AnalyticsEvent, once: string | null = null, amounts
 }
 
 /**
- * The server's latest word on whether this visitor's events carry amounts
- * (ADR-0068 slice 5 review L1). The frame said it when it was last drawn,
- * and a soft navigation does not draw it again: each page with events of
- * its own says it too, asked on that page's request (`TrackEvents`). A
- * customer made a wholesaler since sends their next events, the page's
- * and those after it, without amounts; whichever answer came last wins.
- * Before the frame has spoken it is the frame's own request: nothing to do.
+ * A page's word that this visitor's events carry no amounts (ADR-0068
+ * slice 5 review L1). The frame said it when it was last drawn, and a soft
+ * navigation does not draw it again: each page with events of its own
+ * says it too, asked on that page's request (`TrackEvents`). A customer
+ * made a wholesaler since sends their next events, the page's and those
+ * after it, without amounts. A page only ever takes amounts away: one the
+ * router shows again may be older than the frame (drawn before the cookie
+ * answer, say), so only the frame, drawn fresh by the server
+ * (`configureAnalytics`), or a reload gives them back. Before the frame
+ * has spoken it is the frame's own request: nothing to do.
  */
 export function noteAmounts(amounts: boolean): void {
-  if (allowed !== null && allowed.amounts !== amounts) {
-    allowed = { ...allowed, amounts }
+  if (allowed !== null && !amounts && allowed.amounts) {
+    allowed = { ...allowed, amounts: false }
   }
 }
 

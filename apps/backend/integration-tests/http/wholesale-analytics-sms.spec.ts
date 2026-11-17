@@ -1,5 +1,5 @@
 import { randomInt, randomUUID } from "node:crypto"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { orderAccessKey, orderAccessToken } from "../../src/lib/orders"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
@@ -41,12 +41,45 @@ medusaIntegrationTestRunner({
     const wholesaler = async () => {
       const staff = wholesaleApi(http, f.admin.headers)
       await staff.flag(true)
+      const email = `toptanci-${randomUUID().slice(0, 8)}@example.com`
       const account = await accountApi(http, f.admin.headers).made({
-        email: `toptanci-${randomUUID().slice(0, 8)}@example.com`,
+        email,
         contact_name: "Ali Kaya",
         company_name: "Kaya Bıçak Ltd",
+        // A price source of its own, as `wholesale-marketing.spec.ts` makes theirs
+        own_prices: true,
       })
-      return { staff, customerId: account.customer?.id ?? "" }
+      return { staff, email, customerId: account.customer?.id ?? "" }
+    }
+    /** A granted text consent no customer record stands behind, told to İYS. */
+    const guestConsent = async (phone: string) => {
+      const { id } = await f.messaging().recordConsent({
+        channel: "sms",
+        address: phone,
+        status: "granted",
+        source: "checkout",
+        customer_id: null,
+        evidence: { text_version: "test" },
+      })
+      await f.messaging().updateMessageConsents({ id, iys_status: "sent" })
+    }
+    /** A text campaign to the consents with no record, and its audience count now. */
+    const textCampaign = async () => {
+      await f.settings().saveSection("marketing", { sms_opt_out_text: "Ret için RET 4600" }, null)
+      const created = await f.post<{ campaign: { id: string } }>("", {
+        name: "Kış indirimi",
+        channel: "sms",
+        audience: [{ kind: "newsletter" }],
+        sms_text: "Kış indirimi başladı",
+      })
+      expect(created.status).toBe(201)
+      const id = created.data.campaign.id
+      return {
+        id,
+        preview: async () =>
+          (await f.post<{ audience: number; eligible: number }>(`/${id}/audience-preview`, {}))
+            .data,
+      }
     }
 
     it("tells the order's own holder whether it was a wholesale order, and nobody else", async () => {
@@ -102,35 +135,13 @@ medusaIntegrationTestRunner({
 
     it("leaves a wholesaler's phone out of a text campaign wherever it turns up, a retail one in", async () => {
       const container = getContainer()
-      await f.settings().saveSection("marketing", { sms_opt_out_text: "Ret için RET 4600" }, null)
       const theirs = mobile()
       const retail = mobile()
       // A guest order's consent and an imported number: no customer record behind either
-      for (const phone of [theirs.e164, retail.e164]) {
-        const { id } = await f.messaging().recordConsent({
-          channel: "sms",
-          address: phone,
-          status: "granted",
-          source: "checkout",
-          customer_id: null,
-          evidence: { text_version: "test" },
-        })
-        await f.messaging().updateMessageConsents({ id, iys_status: "sent" })
-      }
-      const created = await f.post<{ campaign: { id: string } }>("", {
-        name: "Kış indirimi",
-        channel: "sms",
-        audience: [{ kind: "newsletter" }],
-        sms_text: "Kış indirimi başladı",
-      })
-      expect(created.status).toBe(201)
-      const preview = async () =>
-        (
-          await f.post<{ audience: number; eligible: number }>(
-            `/${created.data.campaign.id}/audience-preview`,
-            {}
-          )
-        ).data
+      await guestConsent(theirs.e164)
+      await guestConsent(retail.e164)
+      const campaign = await textCampaign()
+      const { preview } = campaign
       const before = await preview()
 
       // The wholesaler's phone only in their address book, written as a shopper types it
@@ -147,7 +158,7 @@ medusaIntegrationTestRunner({
       const frozen = await resolveAudience(container, {
         channel: "sms",
         sources: [{ kind: "newsletter" }],
-        campaign_id: created.data.campaign.id,
+        campaign_id: campaign.id,
       })
       await staff.flag(false)
       const flagOff = await preview()
@@ -162,6 +173,47 @@ medusaIntegrationTestRunner({
       expect(eligible).toContain(hashOf(retail.e164))
       // Retail again: the number reaches the campaign as before
       expect(flagOff).toMatchObject({ audience: before.audience, eligible: before.eligible })
+    })
+
+    it("knows a wholesaler's guest order under their address however its case was typed", async () => {
+      const container = getContainer()
+      await loadTrAddressFixture(container)
+      const shop = await stockShop(container)
+      const { variantId } = await stockedProduct(
+        container,
+        shop,
+        `toptan-l4-${String(Date.now())}`,
+        10,
+        120
+      )
+      const theirs = mobile()
+      await guestConsent(theirs.e164)
+      const { preview } = await textCampaign()
+      const before = await preview()
+
+      const { email } = await wholesaler()
+      // Signed out, the address typed in another case; the phone only on this order
+      const orderId = await placeOrder(container, {
+        regionId: shop.regionId,
+        salesChannelId: shop.salesChannelId,
+        shippingOptionId: shop.shippingOptionId,
+        items: [{ variant_id: variantId, quantity: 2 }],
+        address: { ...PAYTR_ADDRESS, phone: theirs.typed },
+        email: email.replace(/^t/, "T").replace("@example.com", "@Example.COM"),
+      })
+      const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: "order",
+        fields: ["email"],
+        filters: { id: orderId },
+      })
+      const during = await preview()
+
+      // Kept as typed: an exact match would have missed it
+      expect((data[0] as { email: string }).email).not.toBe(email)
+      expect(during).toMatchObject({
+        audience: before.audience - 1,
+        eligible: before.eligible - 1,
+      })
     })
   },
 })

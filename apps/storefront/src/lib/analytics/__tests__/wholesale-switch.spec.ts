@@ -59,13 +59,26 @@ describe("the server's word on amounts, page by page", () => {
     client.track(viewed)
     client.noteAmounts(false)
     client.track(viewed)
+
+    const values = ga4Sent(win).map((call) => (call[2] as { value?: number }).value)
+    expect(values).toEqual([612.5, undefined])
+    const meta = metaTracked(win).map((call) => (call[2] as { value?: number }).value)
+    expect(meta).toEqual([612.5, undefined])
+  })
+
+  it("keeps the amounts off when a page the router shows again says yes; the frame alone gives them back", () => {
+    const { win } = fakeBrowser()
+    client.configureAnalytics(RETAIL, undefined)
+    client.noteAmounts(false)
+    // Back to a page drawn earlier (before the cookie answer, say): its word is older
     client.noteAmounts(true)
+    client.track(viewed)
+    // The frame drawn fresh by the server: the customer is retail again
+    client.configureAnalytics(RETAIL, undefined)
     client.track(viewed)
 
     const values = ga4Sent(win).map((call) => (call[2] as { value?: number }).value)
-    expect(values).toEqual([612.5, undefined, 612.5])
-    const meta = metaTracked(win).map((call) => (call[2] as { value?: number }).value)
-    expect(meta).toEqual([612.5, undefined, 612.5])
+    expect(values).toEqual([undefined, 612.5])
   })
 
   it("does not let an event's own yes put back the amounts a wholesaler's session takes out", () => {

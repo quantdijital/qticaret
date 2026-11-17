@@ -1,3 +1,4 @@
+import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { chunksOf } from "../../lib/catalog"
@@ -133,10 +134,29 @@ export async function wholesalersPhones(
       ...(await readAll("order", orderFields, { customer_id: chunk }))
     )
   }
-  for (const chunk of chunksOf(emails)) {
-    rows.push(...(await readAll("order", orderFields, { email: chunk })))
+  const signedOut = await orderIdsByEmail(container, emails)
+  for (const chunk of chunksOf(signedOut)) {
+    rows.push(...(await readAll("order", orderFields, { id: chunk })))
   }
   return [...new Set(rows.flatMap(phonesOf))]
+}
+
+/**
+ * The orders placed under these addresses (lower case, `normalizeEmail`),
+ * however the shopper typed theirs: an order keeps its e-mail as typed
+ * ("Ali@Firma.com"), and Medusa's filters match it exactly (review of L4).
+ */
+async function orderIdsByEmail(container: Container, emails: string[]): Promise<string[]> {
+  const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+  const ids: string[] = []
+  for (const chunk of chunksOf(emails)) {
+    const found = await knex<{ id: string }>("order")
+      .select("id")
+      .whereNull("deleted_at")
+      .whereRaw(`lower(btrim(email)) in (${chunk.map(() => "?").join(", ")})`, chunk)
+    ids.push(...found.map((row) => row.id))
+  }
+  return ids
 }
 
 /** Whether a cart is a wholesaler's: by its customer, or by its address (one signed out). */

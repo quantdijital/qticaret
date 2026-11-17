@@ -63,4 +63,12 @@ describe("orderSoldAtRetail", () => {
     answer({})
     await expect(orderSoldAtRetail(ORDER, null)).resolves.toBe(false)
   })
+
+  it("is a no on a network failure too, and the confirmation page still shows", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.reject(new TypeError("fetch failed")))
+    )
+    await expect(orderSoldAtRetail(ORDER, TOKEN)).resolves.toBe(false)
+  })
 })
