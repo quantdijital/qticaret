@@ -38,6 +38,7 @@ import type { MediaRow } from "./payload-sources"
 import type { CategoryRow, SeoMetaRow } from "./payload-sources"
 import { markedCategories } from "../catalog/restrictions"
 import { returnPolicy } from "../returns/policy"
+import { productVideoFacts } from "./video-facts"
 
 /**
  * Loads what a page's `seo` object needs (adr/0015) and builds it with
@@ -128,10 +129,11 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     (product.variants ?? []).flatMap((variant) => (variant ? [variant.id] : [])),
     "try"
   )
-  const [shipping, returns, restricted] = await Promise.all([
+  const [shipping, returns, restricted, videos] = await Promise.all([
     shippingFactsOf(container),
     returnPolicy(container),
     markedCategories(container),
+    productVideoFacts(container, product.id),
   ])
   const facts = {
     ...productFacts(
@@ -150,6 +152,8 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
           .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
           .ratingsOf([product.id])
       ).get(product.id) ?? null,
+    // adr/0069 §9: the ready videos the page shows, a `VideoObject` each
+    videos,
   }
   const subject: SeoSubject = {
     kind: "product",

@@ -6,6 +6,8 @@ import { SCHEMA, compact } from "./jsonld-base"
 import type { JsonLd } from "./jsonld-base"
 import { shippingDetailsOf } from "./jsonld-shipping"
 import type { DeliveryFacts } from "./jsonld-shipping"
+import { withVideos } from "./jsonld-video"
+import type { VideoFacts } from "./jsonld-video"
 
 export const AVAILABILITIES = ["InStock", "OutOfStock", "BackOrder", "PreOrder"] as const
 export type Availability = (typeof AVAILABILITIES)[number]
@@ -77,6 +79,8 @@ export interface ProductFacts {
   returnPolicy?: ReturnPolicyFacts | null
   /** Sold to adults only (F13.4): schema.org's consideration, `hasAdultConsideration`. */
   adultConsideration?: string | null
+  /** Its ready videos in gallery order (adr/0069 §9): a `VideoObject` each, in one `@graph`. */
+  videos?: VideoFacts[]
 }
 
 export interface ReturnPolicyFacts {
@@ -185,8 +189,15 @@ function variantProduct(
  * A product page's block: `Product` for one variant, `ProductGroup` with
  * a `Product` per variant otherwise, each with its own `Offer`. A variant
  * is preselected by `?variant=` (docs/13 §2.3), so its offer URL says so.
+ * With ready videos the product's node and theirs share one `@graph`;
+ * their description is the page's meta description, else the product's.
  */
-export function productJsonLd(facts: ProductFacts, url: string): JsonLd {
+export function productJsonLd(facts: ProductFacts, url: string, metaDescription = ""): JsonLd {
+  const description = metaDescription.trim() || facts.description.trim() || facts.name.trim()
+  return withVideos(productBlock(facts, url), facts.videos, { url, name: facts.name, description })
+}
+
+function productBlock(facts: ProductFacts, url: string): JsonLd {
   const [only] = facts.variants
   if (facts.variants.length === 1 && only) {
     return variantProduct(facts, only, url, true)

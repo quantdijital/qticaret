@@ -20,7 +20,9 @@ export const MediaVideo = model
     // The upload as sent, private; removed once the outputs are made
     source_file_id: model.text().nullable(),
     source_bytes: model.number().nullable(),
-    // What the bytes are (never the name or MIME type it came with)
+    // What the bytes are (never the name or MIME type it came with). `gif` is never
+    // written (GIF is not uploaded, adr/0069 Kararlar 11); it stays in the enum only
+    // because dropping it changes the column's check constraint (a migration)
     source_format: model.enum(["mp4", "mov", "webm", "gif"]).nullable(),
     // The 11-character id only; the address the shop pasted is not kept
     youtube_id: model.text().nullable(),

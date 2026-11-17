@@ -268,7 +268,7 @@ function structuredData(
       ? { ...author, url: url(author.url) }
       : author
   const page = subject.product
-    ? productJsonLd(subject.product, canonical)
+    ? productJsonLd(subject.product, canonical, description)
     : subject.article
       ? articleJsonLd(
           { ...subject.article, author: person ?? null, description, publisher: shop },

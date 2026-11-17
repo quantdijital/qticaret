@@ -83,9 +83,9 @@ describe("a video file's kind, by its first bytes (adr/0069 §3)", () => {
     expect(videoSignature(bytes([0x1a, 0x45, 0xdf, 0xa3, 0x84, 0x42, 0x82, 0x88, 0x77]))).toBeNull()
   })
 
-  it("reads GIF (refused later until slice 7) and nothing else", () => {
-    expect(videoSignature(bytes("GIF89a", [1, 0, 1, 0]))).toEqual({ format: "gif", demuxer: "gif" })
-    expect(videoSignature(bytes("GIF87a", [1, 0, 1, 0]))).toEqual({ format: "gif", demuxer: "gif" })
+  it("does not read GIF as a video (never uploaded, adr/0069 Kararlar 11)", () => {
+    expect(videoSignature(bytes("GIF89a", [1, 0, 1, 0]))).toBeNull()
+    expect(videoSignature(bytes("GIF87a", [1, 0, 1, 0]))).toBeNull()
   })
 
   it.each([

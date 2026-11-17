@@ -1115,7 +1115,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   // adr/0069: product videos
   "video.too_large": "A video can be 50 MB at most.",
   "video.too_long": "A video can be 30 seconds long at most.",
-  "video.unsupported_type": "This file type cannot be uploaded. Upload MP4, MOV, WebM or GIF.",
+  "video.unsupported_type": "This file type cannot be uploaded. Upload MP4, MOV or WebM.",
   "video.dimensions_too_large": "The video's resolution is too high (4K at most).",
   "video.frame_rate_too_high": "The video's frame rate is too high (120 frames a second at most).",
   "video.unreadable": "The video could not be read; the file may be damaged.",

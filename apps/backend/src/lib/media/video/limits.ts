@@ -28,7 +28,7 @@ export const VIDEO_MAX_FRAMES = Math.floor((VIDEO_MAX_DURATION_MS / 1000) * VIDE
 /** Streams in one file at most (video, audio, data, subtitles together). */
 export const VIDEO_MAX_STREAMS = 16
 
-/** Codecs a clip's video may be in (iPhone HEVC/MOV included); GIF waits for slice 7. */
+/** Codecs a clip's video may be in (iPhone HEVC/MOV included); never GIF (owner 2026-11-17). */
 export const VIDEO_CODECS: ReadonlySet<string> = new Set([
   "h264",
   "hevc",

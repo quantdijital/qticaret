@@ -30,7 +30,6 @@ const SHOW_ENTRIES = [
 const DEMUXER_OPTIONS: Readonly<Record<VideoDemuxer, readonly string[]>> = {
   mov: ["-enable_drefs", "0", "-use_absolute_path", "0"],
   matroska: [],
-  gif: [],
 }
 
 /** The input bounds both programs take before `-i` (slice 2 reuses them for ffmpeg). */

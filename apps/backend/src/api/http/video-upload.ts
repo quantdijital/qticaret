@@ -91,8 +91,8 @@ export async function withCheckedVideo<T>(
     reading = true
     const received = await receiveVideo(req, dir)
     const signature = videoSignature(await readHead(received.path))
-    // GIF waits for slice 7: refused as any other type until then
-    if (!signature || signature.format === "gif") {
+    // MP4, MOV and WebM only: GIF and anything else are refused (adr/0069 Kararlar 11)
+    if (!signature) {
       throw new ValidationError("video.unsupported_type", { field: "file" })
     }
     const verdict = await probeVideo(received.path, signature.demuxer)

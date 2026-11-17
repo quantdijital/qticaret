@@ -457,7 +457,7 @@ medusaIntegrationTestRunner({
       ],
       ["a concat: path", "concat:/etc/passwd|/etc/hosts", "video.unsupported_type"],
       [
-        "a GIF (slice 7)",
+        "a GIF, never taken as a video (adr/0069 Kararlar 11)",
         Buffer.from("GIF89a\x01\x00\x01\x00", "latin1"),
         "video.unsupported_type",
       ],

@@ -1128,7 +1128,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   // adr/0069: product videos
   "video.too_large": "Video en çok 50 MB olabilir.",
   "video.too_long": "Video en çok 30 saniye olabilir.",
-  "video.unsupported_type": "Bu dosya türü yüklenemez. MP4, MOV, WebM ya da GIF yükleyin.",
+  "video.unsupported_type": "Bu dosya türü yüklenemez. MP4, MOV ya da WebM yükleyin.",
   "video.dimensions_too_large": "Videonun çözünürlüğü çok yüksek (en çok 4K).",
   "video.frame_rate_too_high": "Videonun kare hızı çok yüksek (en çok saniyede 120 kare).",
   "video.unreadable": "Video okunamadı; dosya bozuk olabilir.",

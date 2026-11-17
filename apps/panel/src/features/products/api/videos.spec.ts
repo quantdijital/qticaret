@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 import { videoTileLabel } from "@/features/products/video-facts"
 import {
+  VIDEO_ACCEPT,
   VIDEO_POLL_MS,
   isVideoFile,
   productVideosQuery,
@@ -52,8 +53,10 @@ describe("routing a picked file", () => {
     expect(isVideoFile(file("resim.mp4", "image/png"))).toBe(false)
   })
 
-  it("keeps a GIF, any picture and any other video on the image route (GIF: slice 7)", () => {
+  it("keeps a GIF, any picture and any other video on the image route (GIF: never a video)", () => {
     expect(isVideoFile(file("hareketli.gif", "image/gif"))).toBe(false)
+    expect(isVideoFile(file("hareketli.gif", ""))).toBe(false)
+    expect(VIDEO_ACCEPT).not.toMatch(/gif/i)
     expect(isVideoFile(file("kapak.jpg", "image/jpeg"))).toBe(false)
     expect(isVideoFile(file("film.mkv", "video/x-matroska"))).toBe(false)
     expect(isVideoFile(file("film.avi", "video/x-msvideo"))).toBe(false)
