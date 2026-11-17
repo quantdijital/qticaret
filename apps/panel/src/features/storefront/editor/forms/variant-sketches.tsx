@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import { CategoriesCollage, CategoriesLinked, CategoriesTiles } from "./category-sketches"
-import { FooterBrandColumns, FooterLedger } from "./footer-sketches"
+import { FooterBrandColumns, FooterFreeRows, FooterLedger } from "./footer-sketches"
 import {
   NewsletterImageCard,
   NewsletterInFooter,
@@ -182,7 +182,11 @@ const SKETCHES: {
   hero: { standard: HeroStandard, category_list: HeroCategoryList },
   categories: { tiles: CategoriesTiles, linked: CategoriesLinked, collage: CategoriesCollage },
   header_bar: { standard: HeaderStandard, centered: HeaderCentered, catalog: HeaderCatalog },
-  footer_bar: { ledger: FooterLedger, brand_columns: FooterBrandColumns },
+  footer_bar: {
+    ledger: FooterLedger,
+    brand_columns: FooterBrandColumns,
+    free_rows: FooterFreeRows,
+  },
   newsletter: {
     standard: NewsletterStandard,
     split: NewsletterSplit,

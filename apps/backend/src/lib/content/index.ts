@@ -1,5 +1,6 @@
 export { DOC_LIMITS, EMPTY_DOC, contentDoc, isSafeHref } from "./doc"
 export type { Block, ContentDoc, Inline, Mark } from "./doc"
+export { FOOTER_DOC_LIMITS, fitsFooter, footerDoc } from "./footer-doc"
 export { NO_CARDS, escapeHtml, renderDoc } from "./render"
 export type { CardTarget, CardTargets, ImageSize } from "./render"
 export { countWords, docStats, summaryOf } from "./stats"

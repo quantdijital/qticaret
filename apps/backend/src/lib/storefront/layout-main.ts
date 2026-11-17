@@ -1,6 +1,8 @@
 import type { LayoutDocument } from "./layout"
 import type { MenuLinkInput } from "./menus"
 import { footerBarDefaults, footerColumnsOf, footerSettingsOf } from "./sections/footer-bar"
+import { footerRowsOf, plainRowTools } from "./sections/footer-rows-print"
+import type { FooterRowTools } from "./sections/footer-rows-print"
 import { hasLook } from "./sections/look"
 import type { SectionLook } from "./sections/look"
 import { MAIN_SECTION_IDS } from "./sections/main"
@@ -110,12 +112,15 @@ const lookOf = (section: { look?: SectionLook | undefined }) =>
  * set a step, as a body section prints it; the catalog header with its
  * own settings, its highlighted link placed by `resolve` (a broken one
  * null); the footer with the settings the shop changed (the brand
- * columns footer with all of its own, `columns`). Read off a
- * document `withMainSections` filled; one somehow missing is its default.
+ * columns footer with all of its own, `columns`; the free rows footer
+ * with its ground, marks and rows, printed with `rows`' tools, adr/0070
+ * §2.2). Read off a document `withMainSections` filled; one somehow
+ * missing is its default.
  */
 export function mainSectionsOf<L>(
   doc: LayoutDocument,
-  resolve: (link: MenuLinkInput) => L | null = () => null
+  resolve: (link: MenuLinkInput) => L | null = () => null,
+  rows: FooterRowTools<L> = plainRowTools(resolve)
 ) {
   const header = mainOf(doc.header, "header_bar") ?? defaultHeaderBar(DEFAULT_THEME_HEADER)
   const footer = mainOf(doc.footer, "footer_bar") ?? FOOTER_BAR
@@ -138,6 +143,7 @@ export function mainSectionsOf<L>(
       variant: footer.variant,
       ...footerSettingsOf(footer),
       ...(footer.variant === "brand_columns" ? { columns: footerColumnsOf(footer) } : {}),
+      ...(footer.variant === "free_rows" ? footerRowsOf(footer, rows) : {}),
     },
     product_main: {
       id: product.id,

@@ -1,0 +1,73 @@
+import { z } from "@medusajs/framework/zod"
+import { contentDoc } from "./doc"
+import type { ContentDoc } from "./doc"
+
+/**
+ * A footer text block's document (adr/0070 §2): the content document
+ * (adr/0019) narrowed to what a footer column carries. Only paragraphs,
+ * line breaks and lists (bold, italic and links as marks); a heading (the
+ * block's own title is the footer's heading level), a card, a picture, a
+ * quote or a table is refused. Small, since every page draws it.
+ *
+ * `FOOTER_DOC_LIMITS` mirrors `@qticaret/types`' `FOOTER_ROWS_LIMITS`
+ * (`textNodes`, `textChars`, `textDepth`); a unit test keeps them equal.
+ */
+export const FOOTER_DOC_LIMITS = { nodes: 200, textLength: 1500, depth: 4 } as const
+
+const FOOTER_NODES: ReadonlySet<string> = new Set([
+  "doc",
+  "paragraph",
+  "text",
+  "hardBreak",
+  "bulletList",
+  "orderedList",
+  "listItem",
+])
+
+interface Node {
+  type?: unknown
+  text?: unknown
+  content?: unknown
+}
+
+/**
+ * Whether a checked document fits a footer column: every node on the
+ * list, and the whole within the bounds (the document itself is depth 0,
+ * so a one-level list's text sits at 4). A loop with its own stack, as
+ * the content document's own bounds.
+ */
+export function fitsFooter(doc: ContentDoc): boolean {
+  const stack: [Node, number][] = [[doc, 0]]
+  let nodes = 0
+  let text = 0
+  for (let item = stack.pop(); item; item = stack.pop()) {
+    const [node, depth] = item
+    nodes += 1
+    text += typeof node.text === "string" ? node.text.length : 0
+    if (
+      typeof node.type !== "string" ||
+      !FOOTER_NODES.has(node.type) ||
+      nodes > FOOTER_DOC_LIMITS.nodes ||
+      text > FOOTER_DOC_LIMITS.textLength ||
+      depth > FOOTER_DOC_LIMITS.depth
+    ) {
+      return false
+    }
+    if (Array.isArray(node.content)) {
+      for (const child of node.content as Node[]) {
+        stack.push([child, depth + 1])
+      }
+    }
+  }
+  return true
+}
+
+/** A footer text block's body as the editor sent it: a content document that fits a column. */
+export const footerDoc = z.unknown().transform((value, ctx): ContentDoc => {
+  const parsed = contentDoc.safeParse(value)
+  if (!parsed.success || !fitsFooter(parsed.data)) {
+    ctx.addIssue({ code: "custom", message: "storefront_layout.footer_block_invalid" })
+    return z.NEVER
+  }
+  return parsed.data
+})

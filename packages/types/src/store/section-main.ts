@@ -1,4 +1,5 @@
 import type { StoreFooterBarSettings, StoreFooterColumns } from "./section-footer.js"
+import type { StoreFooterRows } from "./section-footer-rows.js"
 import type { StoreLayoutLink } from "./layout.js"
 import type { SectionLook } from "./section-look.js"
 import type {
@@ -92,7 +93,9 @@ export interface StoreMainSections {
     variant: FooterBarVariant
     /** The `brand_columns` variant's own settings (adr/0049 Ek 2026-11-17); absent on the others. */
     columns?: StoreFooterColumns
-  } & Partial<StoreFooterBarSettings>
+  } & Partial<StoreFooterBarSettings> &
+    /** The `free_rows` variant's own settings and rows (adr/0070), all of them; absent on the others. */
+    Partial<StoreFooterRows>
   product_main: {
     id: string
     type: "product_main"

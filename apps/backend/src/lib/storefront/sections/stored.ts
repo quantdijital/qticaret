@@ -1,4 +1,5 @@
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
+import { storedFooterRows } from "./footer-rows-stored"
 import { storedLook } from "./look"
 import { MAIN_BRANCHES, storedByVariant, storedMenuImages } from "./main"
 import { PRODUCTS_BRANCHES, storedCardVariant } from "./products"
@@ -35,14 +36,18 @@ const ALWAYS_KEPT = ["placement"]
  * so is a category grid's settings of a variant off its list
  * (`storedByVariant`), a product rail's card variant off its list too
  * (`storedCardVariant`), a header bar's menus' pictures or the catalog
- * header's layout choices off their lists (`storedMenuImages`). No variant at all is the default's to fill (the schema). A save is still
+ * header's layout choices off their lists (`storedMenuImages`), a free rows
+ * footer's blocks today's schema does not read or its bounds do not take
+ * (`storedFooterRows`). No variant at all is the default's to fill (the schema). A save is still
  * held to the lists.
  */
 export function storedSection(stored: unknown): unknown {
   if (!isPlainObject(stored)) {
     return stored
   }
-  const section = storedMenuImages(storedCardVariant(storedByVariant(storedLook(stored))))
+  const section = storedFooterRows(
+    storedMenuImages(storedCardVariant(storedByVariant(storedLook(stored))))
+  )
   const type = section["type"]
   if (!isVariantType(type)) {
     return section

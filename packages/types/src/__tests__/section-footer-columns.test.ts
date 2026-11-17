@@ -8,7 +8,7 @@ import { SECTION_VARIANTS, defaultVariant, variantOf } from "../store/section-va
 
 describe("the brand columns footer (adr/0049 Ek 2026-11-17)", () => {
   it("is a second variant: today's ledger stays the default", () => {
-    expect(SECTION_VARIANTS.footer_bar).toEqual(["ledger", "brand_columns"])
+    expect(SECTION_VARIANTS.footer_bar).toEqual(["ledger", "brand_columns", "free_rows"])
     expect(defaultVariant("footer_bar")).toBe("ledger")
     expect(variantOf("footer_bar", "brand_columns")).toBe("brand_columns")
     expect(variantOf("footer_bar", "dark_rich")).toBe("ledger")

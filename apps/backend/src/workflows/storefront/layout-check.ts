@@ -4,6 +4,12 @@ import { ValidationError } from "../../lib/errors"
 import { bodySections } from "../../lib/storefront/layout"
 import type { BodySection, HeaderSection, LayoutDocument } from "../../lib/storefront/layout"
 import { bannerImages, bannerLinks } from "../../lib/storefront/sections/banner"
+import { freeBlocksOf } from "../../lib/storefront/sections/footer-rules"
+import {
+  footerRowDocs,
+  footerRowImages,
+  footerRowLinks,
+} from "../../lib/storefront/sections/footer-rows-print"
 import { newsletterImages } from "../../lib/storefront/sections/newsletter"
 import { catalogSlides } from "../../lib/storefront/sections/hero"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
@@ -167,9 +173,14 @@ export async function checkLayout(
     linksOf(section).flatMap((link) =>
       isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
     )
+  // A free rows footer's blocks (adr/0070): their pictures' links, pictures and words, hidden ones too
+  const blocks = freeBlocksOf(doc.footer)
   const targets = [
     ...sections.flatMap((section) => [...recordsOf(section), ...recordLinks(section)]),
     ...headerLinked(doc).flatMap(recordLinks),
+    ...footerRowLinks(blocks).flatMap((link) =>
+      isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
+    ),
   ]
   const menuTargets = (doc.settings.menus ?? []).flatMap((menu) =>
     menu.items
@@ -197,9 +208,16 @@ export async function checkLayout(
       await assertCards(container, section.body)
     }
   }
+  if (footerRowDocs(blocks).some((body) => unknownDocTokens(body).length > 0)) {
+    throw new ValidationError("storefront_layout.token_unknown", { field: "document" })
+  }
   // The footer's newsletter box's picture is one of the shop's uploads too (adr/0049 Ek 2026-11-17)
   const footerImages = doc.footer.flatMap((section) =>
     section.type === "newsletter" ? newsletterImages(section) : []
   )
-  return mediaOf(container, [...sections.flatMap(imagesOf), ...footerImages], "document")
+  return mediaOf(
+    container,
+    [...sections.flatMap(imagesOf), ...footerImages, ...footerRowImages(blocks)],
+    "document"
+  )
 }

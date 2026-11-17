@@ -42,6 +42,11 @@ export type Problem =
   | "marqueeLimit"
   | "bandsOrder"
   | "bandsLimit"
+  | "footerRowsLimit"
+  | "footerBlocksLimit"
+  | "footerColumnsMismatch"
+  | "footerBlockInvalid"
+  | "footerNewsletterTwice"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
 export type SectionProblems = Record<string, Problem>

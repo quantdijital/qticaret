@@ -2,6 +2,7 @@ import {
   CATEGORY_CARD_DEFAULTS,
   CATEGORY_COLLAGE_DEFAULTS,
   FOOTER_COLUMNS_DEFAULTS,
+  FOOTER_ROWS_DEFAULTS,
   HERO_CATALOG_LIMITS,
   SCROLLER_DEFAULTS,
   SHELF_LIMITS,
@@ -88,7 +89,12 @@ export const VARIANT_FIELDS: {
   },
   header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
   // Ek 2026-11-17: the strip on, no line about the shop, the steel well, the marks on cards
-  footer_bar: { ledger: {}, brand_columns: FOOTER_COLUMNS_DEFAULTS },
+  // adr/0070: the free rows footer's ground and marks; its rows are the backend's starting row
+  footer_bar: {
+    ledger: {},
+    brand_columns: FOOTER_COLUMNS_DEFAULTS,
+    free_rows: FOOTER_ROWS_DEFAULTS,
+  },
   // Ek 2026-11-17 e-bülten: the promise line shown in the storefront's words, no picture yet;
   // the line beside the heading is every variant's and stays as written
   newsletter: {
@@ -118,12 +124,12 @@ const OPTIONAL_FIELDS: {
 /**
  * Variants on the list the theme does not draw yet: shown, not offered
  * (as the theme settings' "Ortada" was, adr/0062 karar 6). A section saved
- * with one keeps it; the storefront draws the default meanwhile. None
- * today: the header bar's `centered` is drawn since 2026-11-15.
+ * with one keeps it; the storefront draws the default meanwhile. The
+ * footer's `free_rows` (adr/0070) until its drawing and its editor land.
  */
 export const UNBUILT_VARIANTS: {
   readonly [T in VariantSectionType]?: ReadonlySet<SectionVariant<T>>
-} = {}
+} = { footer_bar: new Set(["free_rows"]) }
 
 export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: SectionVariant<T>) =>
   (UNBUILT_VARIANTS[type] as ReadonlySet<string> | undefined)?.has(variant) ?? false

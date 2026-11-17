@@ -8127,7 +8127,8 @@
         },
         "footer_bar": {
           "ledger": "Standart",
-          "brand_columns": "Marka ve sütunlar"
+          "brand_columns": "Marka ve sütunlar",
+          "free_rows": "Serbest düzen"
         },
         "product_main": {
           "standard": "Standart"
@@ -8582,6 +8583,11 @@
         "marqueeLimit": "Aynı sayfada en çok {{max}} kayan yazı olabilir (üst bilgideki her sayfada sayılır); birini kaldırın.",
         "bandsOrder": "Üst sınırlar sırayla artmalı; sınırı olmayan bant yalnız en sonda olabilir.",
         "bandsLimit": "Ana sayfada en çok {{max}} fiyat bandı bölümü olabilir (gizli olanlar da sayılır); birini kaldırın.",
+        "footerRowsLimit": "Alt bilgide en az bir, en çok {{max}} satır olabilir.",
+        "footerBlocksLimit": "Çok fazla blok var: bir sütunda en çok 6, alt bilgide en çok 24 blok olabilir; bazı blok türleri yalnız bir kez eklenebilir.",
+        "footerColumnsMismatch": "Satırın sütun sayısı seçilen düzenle uyuşmuyor.",
+        "footerBlockInvalid": "Bu blok kaydedilemez; alanlarını kontrol edin.",
+        "footerNewsletterTwice": "Alt bilgide iki bülten formu olamaz; bülten bloğunu ya da bülten bölümünü kaldırın.",
         "stripsTwo": "En az iki şerit ekleyin.",
         "brandRequired": "Bir marka seçin.",
         "imageRequired": "Bir görsel seçin."
