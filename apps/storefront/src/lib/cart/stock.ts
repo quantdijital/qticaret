@@ -21,7 +21,9 @@ export const OUT_OF_STOCK = "cart.out_of_stock"
  */
 export async function cartShortLines(cartId: string): Promise<ShortLine[]> {
   try {
-    const { short } = await storeGet<{ short: ShortLine[] }>(`/store/carts/${cartId}/stock`)
+    const { short } = await storeGet<{ short: ShortLine[] }>(
+      `/store/carts/${encodeURIComponent(cartId)}/stock`
+    )
     return Array.isArray(short) ? short : []
   } catch (error) {
     if (isStoreApiError(error)) {

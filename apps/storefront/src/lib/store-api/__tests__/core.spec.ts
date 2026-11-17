@@ -9,7 +9,7 @@ vi.mock("../../env", () => ({
 }))
 vi.mock("../publishable-key", () => ({ publishableKey: () => Promise.resolve("pk_test1234") }))
 
-const { storeRequest } = await import("../core")
+const { StorePathError, storeRequest, storeUrl } = await import("../core")
 
 const answer = (body: string, status: number, type = "application/json") => {
   vi.stubGlobal(
@@ -48,5 +48,129 @@ describe("storeRequest's failures", () => {
     await expect(storeRequest("/store/storefront", { visitorIp: null })).rejects.toThrow(
       SyntaxError
     )
+  })
+})
+
+describe("storeRequest stays on the backend", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const sent = () => {
+    const fetch = vi.fn<(url: URL) => Promise<Response>>(() =>
+      Promise.resolve(new Response("{}", { status: 200 }))
+    )
+    vi.stubGlobal("fetch", fetch)
+    return fetch
+  }
+
+  it.each([
+    ["an absolute URL", "https://evil.example/store/products"],
+    ["an absolute URL on the backend's own scheme", "http://evil.example/store/products"],
+    ["a protocol-relative URL", "//evil.example/store/products"],
+    ["a backslash after the slash", "/\\evil.example/store/products"],
+    ["two backslashes", "\\\\evil.example/store/products"],
+    ["a backslash further in", "/store/..\\..\\admin/users"],
+    ["a scheme", "javascript:alert(1)"],
+    ["a scheme with no slashes", "http:evil.example/store/products"],
+    ["a data URL", "data:text/plain,store"],
+    ["an encoded double slash", "%2F%2Fevil.example/store/products"],
+    ["an encoded double slash after one slash", "/%2F%2Fevil.example/store/products"],
+    ["a tab the parser drops", "/\t/evil.example/store/products"],
+    ["a newline the parser drops", "/\n/evil.example/store/products"],
+    ["no leading slash", "store/products"],
+    ["nothing", ""],
+    ["a dot-dot walk out of the Store API", "/store/../admin/users"],
+    ["an encoded dot-dot walk", "/store/%2e%2E/admin/users"],
+    ["a dot-dot inside the Store API", "/store/carts/../customers/me"],
+    ["a prefix the storefront does not use", "/admin/users"],
+    ["a prefix that only starts the same", "/storefront/x"],
+    ["the backend's dev key route", "/dev/storefront-key"],
+    ["an encoded slash in a segment", "/store/products/a%2Fb/reviews"],
+    ["a lower-case encoded slash", "/store/products/a%2fb"],
+    ["an encoded backslash", "/store/products/a%5Cb"],
+    ["a lower-case encoded backslash", "/store/products/a%5cb"],
+    ["the admin's sign-in", "/auth/user/emailpass"],
+    ["the session route", "/auth/session"],
+    ["a route that only starts as the token refresh", "/auth/token/refresh-all"],
+    ["the token route's parent", "/auth/token/"],
+    ["the bare auth prefix", "/auth/"],
+  ])("refuses %s and sends nothing", async (_name, path) => {
+    const fetch = sent()
+    await expect(storeRequest(path, { visitorIp: null, method: "POST", body: {} })).rejects.toThrow(
+      StorePathError
+    )
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it("refuses a path that is not a string", async () => {
+    const fetch = sent()
+    await expect(
+      storeRequest({ toString: () => "/store/x" } as unknown as string, { visitorIp: null })
+    ).rejects.toThrow(StorePathError)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it.each(["//evil.example/x?token=secret-token-value", "/admin/x?token=secret-token-value"])(
+    "never names the refused path %#",
+    (path) => {
+      const failure = (() => {
+        try {
+          storeUrl(path)
+          return null
+        } catch (error) {
+          return error as Error
+        }
+      })()
+      expect(failure).toBeInstanceOf(StorePathError)
+      expect(failure?.message).not.toContain("secret-token-value")
+      expect(failure?.message).not.toContain("/x")
+    }
+  )
+
+  it("sends a Store API path with its own query and the request's", async () => {
+    const fetch = sent()
+    await storeRequest("/store/products?limit=2", { visitorIp: null, query: { offset: 4 } })
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(String(fetch.mock.calls[0]?.[0])).toBe(
+      "http://backend.test/store/products?limit=2&offset=4"
+    )
+  })
+
+  it("refuses an encoded slug with ../ (its slashes arrive as %2F) and sends nothing", async () => {
+    const fetch = sent()
+    const slug = "../../admin/users?all=1#x"
+    await expect(
+      storeRequest(`/store/products/${encodeURIComponent(slug)}/reviews`, { visitorIp: null })
+    ).rejects.toThrow(StorePathError)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it("keeps an encoded ? and # inside their segment", async () => {
+    const fetch = sent()
+    await storeRequest(`/store/products/${encodeURIComponent("a?all=1#x")}/reviews`, {
+      visitorIp: null,
+    })
+    const url = fetch.mock.calls[0]?.[0]
+    expect(url?.origin).toBe("http://backend.test")
+    expect(url?.pathname).toBe("/store/products/a%3Fall%3D1%23x/reviews")
+    expect(url?.search).toBe("")
+  })
+
+  it.each(["/auth/customer/emailpass", "/auth/token/refresh", "/auth/verification/confirm"])(
+    "sends the sign-in route %s",
+    async (path) => {
+      const fetch = sent()
+      await storeRequest(path, { visitorIp: null, method: "POST" })
+      expect(String(fetch.mock.calls[0]?.[0])).toBe(`http://backend.test${path}`)
+    }
+  )
+
+  it("refuses an id that is only dots, which encoding leaves as it is", async () => {
+    const fetch = sent()
+    await expect(
+      storeRequest(`/store/carts/${encodeURIComponent("..")}/line-items`, { visitorIp: null })
+    ).rejects.toThrow(StorePathError)
+    expect(fetch).not.toHaveBeenCalled()
   })
 })

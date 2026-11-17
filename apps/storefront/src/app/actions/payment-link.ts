@@ -47,7 +47,7 @@ export async function openPaymentLink(form: FormData): Promise<void> {
   let cartId: string
   try {
     const { cart_id } = await storePost<StorePaymentLinkCart>(
-      `/store/payment-links/${token}/cart`,
+      `/store/payment-links/${encodeURIComponent(token)}/cart`,
       {}
     )
     cartId = cart_id

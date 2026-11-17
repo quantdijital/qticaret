@@ -29,8 +29,82 @@ export interface StoreAnswer<T> {
 
 const REQUEST_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/
 
+/**
+ * The backend routes the storefront calls: the Store API and the
+ * customer's sign-in (`/auth/customer/…`, `/auth/token/refresh`,
+ * `/auth/verification/…`). Nothing else gets the key and the session.
+ * An entry ending in `/` is a prefix; any other is the one exact path.
+ */
+const ALLOWED_ROUTES = [
+  "/store/",
+  "/auth/customer/",
+  "/auth/token/refresh",
+  "/auth/verification/",
+] as const
+
+const isAllowedRoute = (pathname: string): boolean =>
+  ALLOWED_ROUTES.some((route) =>
+    route.endsWith("/") ? pathname.startsWith(route) : pathname === route
+  )
+
+/** An encoded `/` or `\`: no caller's id or token holds one, and a backend may decode it into a route. */
+const ENCODED_SLASH = /%(?:2f|5c)/i
+
+/**
+ * One slash, then a path: no `//` or `/\` (another host), no backslash
+ * anywhere (the URL parser reads it as a slash), no whitespace or control
+ * character (the parser drops tabs and newlines, so `/\t/x` is `//x`).
+ */
+const SINGLE_SLASH = /^\/(?![/\\])/
+
+const BACKSLASH = 0x5c
+const DELETE = 0x7f
+
+function hasUnsafeCharacter(path: string): boolean {
+  for (let index = 0; index < path.length; index++) {
+    const code = path.charCodeAt(index)
+    if (code <= 0x20 || code === DELETE || code === BACKSLASH) {
+      return true
+    }
+  }
+  return false
+}
+
+/** `.` or `..`, plain or percent-encoded: the parser walks it, an id of ".." would change the route. */
+const DOT_SEGMENT = /^(?:\.|%2e){1,2}$/i
+
+const hasDotSegment = (path: string): boolean =>
+  (path.split(/[?#]/, 1)[0] ?? "").split("/").some((segment) => DOT_SEGMENT.test(segment))
+
+/** A path the storefront would not send to the backend; the request never leaves. */
+export class StorePathError extends Error {
+  override readonly name = "StorePathError"
+}
+
+/**
+ * The backend's URL for a path, or `StorePathError`: it must stay on the
+ * backend's origin and on an allowed route, whatever the path holds
+ * (an absolute URL, `//host`, `..`, `%2F`). The error names the origin it would
+ * have gone to at most, never the path (it can carry a token).
+ */
 export function storeUrl(path: string, query: Record<string, QueryValue> = {}): URL {
-  const url = new URL(path, storefrontEnv().MEDUSA_BACKEND_URL)
+  const backend = new URL(storefrontEnv().MEDUSA_BACKEND_URL)
+  if (
+    typeof path !== "string" ||
+    !SINGLE_SLASH.test(path) ||
+    hasUnsafeCharacter(path) ||
+    ENCODED_SLASH.test(path) ||
+    hasDotSegment(path)
+  ) {
+    throw new StorePathError("Store API path refused: not a backend path")
+  }
+  const url = new URL(path, backend)
+  if (url.origin !== backend.origin) {
+    throw new StorePathError(`Store API path refused: it leaves the backend (${url.origin})`)
+  }
+  if (!isAllowedRoute(url.pathname)) {
+    throw new StorePathError("Store API path refused: not an allowed route")
+  }
   for (const [key, value] of Object.entries(query)) {
     if (value === undefined || value === null) {
       continue
@@ -54,6 +128,8 @@ export async function storeRequest<T>(
   path: string,
   request: StoreRequest
 ): Promise<StoreAnswer<T>> {
+  // Checked first: a refused path costs no key lookup and sends nothing
+  const url = storeUrl(path, request.query)
   const env = storefrontEnv()
   const method = request.method ?? "GET"
   const headers: Record<string, string> = {
@@ -73,7 +149,7 @@ export async function storeRequest<T>(
   } else if (request.body !== undefined) {
     headers["content-type"] = "application/json"
   }
-  const response = await fetch(storeUrl(path, request.query), {
+  const response = await fetch(url, {
     method,
     headers,
     body: request.rawBody

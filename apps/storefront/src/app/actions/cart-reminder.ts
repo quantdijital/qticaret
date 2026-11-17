@@ -31,16 +31,19 @@ export async function restoreCart(form: FormData): Promise<void> {
     const { cart_id } = await storePost<{ cart_id: string }>("/store/cart-reminders/redeem", {
       token,
     })
-    const { cart } = await storeGet<{ cart: ReminderCart }>(`/store/carts/${cart_id}`, {
-      fields: "items.variant_id,items.quantity",
-    })
+    const { cart } = await storeGet<{ cart: ReminderCart }>(
+      `/store/carts/${encodeURIComponent(cart_id)}`,
+      {
+        fields: "items.variant_id,items.quantity",
+      }
+    )
     const { id: region_id } = await liraRegion()
     const made = await storePost<{ cart: { id: string } }>("/store/carts", { region_id })
     fresh = made.cart.id
     for (const line of cart.items) {
       if (line.variant_id && line.quantity > 0) {
         // A variant gone from sale since is left out, not the whole cart
-        await storePost(`/store/carts/${fresh}/line-items`, {
+        await storePost(`/store/carts/${encodeURIComponent(fresh)}/line-items`, {
           variant_id: line.variant_id,
           quantity: Math.min(line.quantity, 99),
         }).catch((error: unknown) => {

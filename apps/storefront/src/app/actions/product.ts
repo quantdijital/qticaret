@@ -58,7 +58,7 @@ export async function writeReview(_state: ActionResult, form: FormData): Promise
     const photoIds: string[] = []
     for (const photo of photos) {
       const { photo: uploaded } = await storeCall<{ photo: { id: string } }>(
-        `/store/products/${product_id}/reviews/photos`,
+        `/store/products/${encodeURIComponent(product_id)}/reviews/photos`,
         {
           method: "POST",
           rawBody: { bytes: await photo.arrayBuffer(), type: photo.type },
@@ -67,7 +67,7 @@ export async function writeReview(_state: ActionResult, form: FormData): Promise
       )
       photoIds.push(uploaded.id)
     }
-    await storePost(`/store/products/${product_id}/reviews`, {
+    await storePost(`/store/products/${encodeURIComponent(product_id)}/reviews`, {
       ...rest,
       ...(title?.trim() ? { title: title.trim() } : {}),
       ...(photoIds.length > 0 ? { photo_ids: photoIds } : {}),
@@ -87,7 +87,7 @@ export async function askQuestion(_state: ActionResult, form: FormData): Promise
     return { ok: false, error: "product.question_too_short" }
   }
   try {
-    await storePost(`/store/products/${parsed.data.product_id}/questions`, {
+    await storePost(`/store/products/${encodeURIComponent(parsed.data.product_id)}/questions`, {
       body: parsed.data.body,
     })
   } catch (error) {

@@ -16,11 +16,13 @@ export async function removeAddress(form: FormData): Promise<void> {
     .regex(/^cuaddr_[0-9A-Za-z]{10,64}$/)
     .safeParse(form.get("id"))
   if (parsed.success) {
-    await storeDelete(`/store/customers/me/addresses/${parsed.data}`).catch((error: unknown) => {
-      if (!isStoreApiError(error)) {
-        throw error
+    await storeDelete(`/store/customers/me/addresses/${encodeURIComponent(parsed.data)}`).catch(
+      (error: unknown) => {
+        if (!isStoreApiError(error)) {
+          throw error
+        }
       }
-    })
+    )
   }
   revalidatePath("/hesap/adresler")
 }

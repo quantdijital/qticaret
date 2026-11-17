@@ -41,11 +41,13 @@ export async function removeFavorite(form: FormData): Promise<void> {
     .regex(/^[\w-]{1,80}$/)
     .safeParse(form.get("id"))
   if (parsed.success) {
-    await storeDelete(`/store/customers/me/wishlist/${parsed.data}`).catch((error: unknown) => {
-      if (!isStoreApiError(error)) {
-        throw error
+    await storeDelete(`/store/customers/me/wishlist/${encodeURIComponent(parsed.data)}`).catch(
+      (error: unknown) => {
+        if (!isStoreApiError(error)) {
+          throw error
+        }
       }
-    })
+    )
   }
   revalidatePath("/hesap/favoriler")
 }
