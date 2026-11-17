@@ -81,20 +81,22 @@ export const recordUsageStep = createStep(
 )
 
 /**
- * Fails the workflow after a failed call has been recorded, so the quota
- * claimed for it is given back (`claim-quota`'s compensation) and the
- * panel hears the mapped `ai.*` key with the failed service's id. A
+ * Fails the workflow after a failed call has been recorded (and its quota
+ * given back when the service never took it, `releaseUntakenStep`): the
+ * panel hears the mapped `ai.*` key, the failed service's id and the
+ * other usable services to try (adr/0071 §4). A
  * refused suggestion is no failure here: the service did the work.
  */
 export const failOnCallErrorStep = createStep(
   "ai-fail-on-call-error",
-  (input: { service: string; outcome: CallOutcome }) => {
+  (input: { service: string; outcome: CallOutcome; alternatives: string[] }) => {
     const { outcome } = input
     if (outcome.error_key !== null) {
       throw aiProviderError({
         service: input.service,
         key: outcome.error_key,
         code: outcome.error_code ?? "unexpected",
+        alternatives: input.alternatives,
         ...(outcome.retry_after_ms === null ? {} : { retryAfterMs: outcome.retry_after_ms }),
       })
     }

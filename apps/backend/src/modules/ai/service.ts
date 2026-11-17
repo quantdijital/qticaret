@@ -157,6 +157,21 @@ class AiModuleService extends MedusaService({ AiUsage, AiPreference, AiDailyUsag
     return shop?.service ?? null
   }
 
+  /**
+   * A staff member left (docs/kvkk-envanter.md §4): their remembered
+   * choices are deleted and their id is emptied from the usage rows; the
+   * rows themselves stay, as the shop's record of calls and cost.
+   */
+  @InjectTransactionManager()
+  async forgetStaff(userId: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
+    const manager = managerOf(sharedContext)
+    await manager.execute(`DELETE FROM ai_preference WHERE user_id = ?`, [userId])
+    await manager.execute(
+      `UPDATE ai_usage SET requested_by = NULL, updated_at = now() WHERE requested_by = ?`,
+      [userId]
+    )
+  }
+
   /** Records one attempt; returns its id. */
   @InjectManager()
   async recordUsage(

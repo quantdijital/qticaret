@@ -65,3 +65,28 @@ export function failureOf(error: unknown): AiFailure {
     answered: ANSWERED.has(key),
   }
 }
+
+// The service said no before doing anything: it holds no work to charge for
+const NOT_TAKEN_KEYS: ReadonlySet<AiErrorKey> = new Set([
+  "ai.key_rejected",
+  "ai.provider_balance",
+  "ai.provider_busy",
+  // Ours, before any call: no readable key, or a service this instance does not list
+  "ai.service_unavailable",
+])
+
+// No connection, an open circuit, or a 5xx (adr/0071 §8: the service did not take the job)
+const notConnected = (code: string): boolean =>
+  code === "circuit_open" || code === "dns_failed" || /^http_5\d\d$/.test(code)
+
+/**
+ * Whether a failed call never became work at the service (adr/0071 §8.4),
+ * so the quota claimed for it is given back. A timeout, a cut answer, a
+ * blocked content or an invalid answer may have been charged: they stay.
+ */
+export function notTakenByService(key: AiErrorKey, code: string | null): boolean {
+  if (NOT_TAKEN_KEYS.has(key)) {
+    return true
+  }
+  return key === "ai.provider_unavailable" && code !== null && notConnected(code)
+}

@@ -1,7 +1,7 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import { authorizeTaskStep } from "./steps/authorize-task"
 import { callServiceStep } from "./steps/call-service"
-import { claimQuotaStep } from "./steps/claim-quota"
+import { claimQuotaStep, releaseUntakenStep } from "./steps/claim-quota"
 import { failOnCallErrorStep, recordUsageStep } from "./steps/record-usage"
 import { saveSuggestionStep } from "./steps/save-suggestion"
 import { selectServiceStep } from "./steps/select-service"
@@ -20,7 +20,8 @@ export interface SuggestTextInput {
 /**
  * A text suggestion for a record (adr/0071 §8): authorised, a service
  * chosen, the record read on the server, the call counted, made and
- * gated, the suggestion kept for a decision and the attempt recorded.
+ * gated (the claim given back only when the service never took the job),
+ * the suggestion kept for a decision and the attempt recorded.
  * Nothing reaches the record here: "Kullan" fills the panel's form.
  *
  * Neither `store` nor a retention may be turned on: the steps carry no
@@ -49,7 +50,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       entity_id: input.entity_id,
     }))
   )
-  claimQuotaStep(
+  const claimed = claimQuotaStep(
     transform({ authorized }, ({ authorized }) => ({ capability: authorized.capability }))
   )
   const outcome = callServiceStep(
@@ -60,6 +61,10 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       system: prompt.system,
       data: prompt.data,
     }))
+  )
+  // Straight after the call: a later failure neither skips it nor undoes a call the service did
+  releaseUntakenStep(
+    transform({ claimed, outcome }, ({ claimed, outcome }) => ({ claimed, outcome }))
   )
   const suggestion = saveSuggestionStep(
     transform({ input, chosen, prompt, outcome }, ({ input, chosen, prompt, outcome }) => ({
@@ -94,6 +99,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
     transform({ chosen, outcome }, ({ chosen, outcome }) => ({
       service: chosen.service,
       outcome,
+      alternatives: chosen.alternatives,
     }))
   )
   return new WorkflowResponse(

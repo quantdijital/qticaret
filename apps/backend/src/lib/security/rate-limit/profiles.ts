@@ -91,13 +91,13 @@ export const RATE_LIMIT_PROFILES = {
   ai_text: {
     name: "ai_text",
     perIp: { max: 30, windowMs: 10 * MINUTE },
-    perIdentity: { max: 20, windowMs: 10 * MINUTE },
+    perIdentityAnyIp: { max: 20, windowMs: 10 * MINUTE },
   },
   // adr/0071 §8: image and video work, dearer and slower than text: narrower
   ai_media: {
     name: "ai_media",
     perIp: { max: 10, windowMs: 10 * MINUTE },
-    perIdentity: { max: 10, windowMs: 10 * MINUTE },
+    perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
   // The media library bringing in an image by its address: each is a fetch from the internet
   media_import: { name: "media_import", perIp: { max: 60, windowMs: 10 * MINUTE } },

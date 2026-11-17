@@ -64,6 +64,8 @@ export interface AiProviderFailure {
   /** A short code of ours for logs: `http_429`, `body_1004`, `timeout`. Never the service's text. */
   code: string
   retryAfterMs?: number | undefined
+  /** The usable services but the failed one, for "try with another service" (§4). */
+  alternatives?: readonly string[] | undefined
 }
 
 /**
@@ -78,6 +80,7 @@ export function aiProviderError(failure: AiProviderFailure): ProviderError {
     retryable: false,
     safeMessage: failure.key,
     ...(failure.retryAfterMs === undefined ? {} : { retryAfterMs: failure.retryAfterMs }),
+    ...(failure.alternatives === undefined ? {} : { alternatives: failure.alternatives }),
   })
 }
 
