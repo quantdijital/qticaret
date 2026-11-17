@@ -1,7 +1,9 @@
 import { useTranslation } from "react-i18next"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import type { ShelfColumns } from "@/features/storefront/api/layout"
 import { SHELF_COLUMNS } from "@/features/storefront/api/layout"
+import { HintedName } from "./field-hint"
 import { F } from "./fields"
 
 /** The rows a wide screen shows of a rail: two. */
@@ -28,19 +30,23 @@ export function ColumnsField({
 }) {
   const { t } = useTranslation()
   const full = value * ROWS
+  const hint = t(`${F}.columnsHint.${String(value)}`, { total: full })
+  const short = limit < full
   return (
     <div className="flex flex-col gap-2">
-      <span id={`${id}-label`} className="text-sm font-medium">
-        {t(`${F}.columns`)}{" "}
-        <small className="text-[11px] font-normal text-muted-foreground">
-          {t(`${F}.columnsTerm`)}
-        </small>
-      </span>
+      <HintedName name={t(`${F}.columns`)} hint={hint} hintId={`${id}-hint`}>
+        <span id={`${id}-label`} className="text-sm font-medium">
+          {t(`${F}.columns`)}{" "}
+          <small className="text-[11px] font-normal text-muted-foreground">
+            {t(`${F}.columnsTerm`)}
+          </small>
+        </span>
+      </HintedName>
       <ToggleGroup
         type="single"
         variant="outline"
         aria-labelledby={`${id}-label`}
-        aria-describedby={`${id}-hint`}
+        aria-describedby={short ? `${id}-hint ${id}-short` : `${id}-hint`}
         value={String(value)}
         onValueChange={(next) => {
           if (next) {
@@ -65,10 +71,13 @@ export function ColumnsField({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-        {t(`${F}.columnsHint.${String(value)}`, { total: full })}
-        {limit < full ? ` ${t(`${F}.columnsShort`, { total: full })}` : null}
-      </p>
+      <HiddenHint id={`${id}-hint`}>{hint}</HiddenHint>
+      {/* What the shop has to change stays in sight */}
+      {short ? (
+        <p id={`${id}-short`} className="text-xs text-muted-foreground">
+          {t(`${F}.columnsShort`, { total: full })}
+        </p>
+      ) : null}
     </div>
   )
 }

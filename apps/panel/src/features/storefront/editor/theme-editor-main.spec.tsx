@@ -15,7 +15,7 @@ import {
   serve,
 } from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
-import { openTab } from "./settings-groups.fixtures"
+import { openGroup, openTab } from "./settings-groups.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 const admin = vi.hoisted<AdminMock>(() => ({
@@ -128,6 +128,7 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     await user.click(within(tree).getByRole("button", { name: "Alt bilgi" }))
     await user.click(await screen.findByRole("radio", { name: "Simgeyle" }))
     await user.click(screen.getByRole("checkbox", { name: "Havale / EFT" }))
+    await openGroup(user, "Yukarı çık düğmesi")
     await user.click(screen.getByRole("switch", { name: /Yukarı çık düğmesi/ }))
     expect(screen.getByRole("radio", { name: "Sağda" })).toBeChecked()
     await pass(AUTOSAVE_MS)

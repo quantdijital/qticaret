@@ -1,0 +1,100 @@
+[
+  {
+    "title": "Ana menü",
+    "location": "main",
+    "items": [
+      {
+        "label": "Çakılar",
+        "href": "/kategori/cakilar",
+        "children": [
+          { "label": "Kilitli çakılar", "href": "/kategori/cakilar/kilitli-cakilar" },
+          { "label": "Çok amaçlı çakılar", "href": "/kategori/cakilar/cok-amacli-cakilar" }
+        ]
+      },
+      { "label": "Av bıçakları", "href": "/kategori/av-bicaklari" },
+      {
+        "label": "Outdoor ve kamp",
+        "href": "/kategori/outdoor-ve-kamp",
+        "children": [
+          { "label": "Kamp bıçakları", "href": "/kategori/outdoor-ve-kamp/kamp-bicaklari" },
+          { "label": "Kamp baltaları", "href": "/kategori/outdoor-ve-kamp/kamp-baltalari" },
+          { "label": "Multitool", "href": "/kategori/outdoor-ve-kamp/multitool" }
+        ]
+      },
+      {
+        "label": "Mutfak ve şef",
+        "href": "/kategori/mutfak-ve-sef-bicaklari",
+        "children": [
+          { "label": "Şef bıçakları", "href": "/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari" },
+          {
+            "label": "Santoku bıçakları",
+            "href": "/kategori/mutfak-ve-sef-bicaklari/santoku-bicaklari"
+          },
+          {
+            "label": "Ekmek bıçakları",
+            "href": "/kategori/mutfak-ve-sef-bicaklari/ekmek-bicaklari"
+          },
+          {
+            "label": "Soyma ve sebze bıçakları",
+            "href": "/kategori/mutfak-ve-sef-bicaklari/soyma-bicaklari"
+          },
+          {
+            "label": "Mutfak bıçak setleri",
+            "href": "/kategori/mutfak-ve-sef-bicaklari/mutfak-bicak-setleri"
+          }
+        ]
+      },
+      { "label": "Kasap bıçakları", "href": "/kategori/kasap-bicaklari" },
+      { "label": "Kılıçlar", "href": "/kategori/kiliclar" },
+      {
+        "label": "Bakım ve aksesuar",
+        "href": "/kategori/bakim-ve-aksesuar",
+        "children": [
+          { "label": "Bileme ve bakım", "href": "/kategori/bakim-ve-aksesuar/bileme-ve-bakim" },
+          { "label": "Kılıf ve taşıma", "href": "/kategori/bakim-ve-aksesuar/kiliflar" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Üst bağlantılar",
+    "location": "top",
+    "items": [
+      { "label": "Sipariş takibi", "href": "/siparis" },
+      { "label": "Markalar", "href": "/markalar" },
+      { "label": "Yorumlar", "href": "/yorumlar" }
+    ]
+  },
+  {
+    "title": "Kategoriler",
+    "location": "footer",
+    "items": [
+      { "label": "Çakılar", "href": "/kategori/cakilar" },
+      { "label": "Av bıçakları", "href": "/kategori/av-bicaklari" },
+      { "label": "Outdoor ve kamp", "href": "/kategori/outdoor-ve-kamp" },
+      { "label": "Mutfak ve şef bıçakları", "href": "/kategori/mutfak-ve-sef-bicaklari" },
+      { "label": "Kasap bıçakları", "href": "/kategori/kasap-bicaklari" },
+      { "label": "Bakım ve aksesuar", "href": "/kategori/bakim-ve-aksesuar" }
+    ]
+  },
+  {
+    "title": "Alışveriş",
+    "location": "footer",
+    "items": [
+      { "label": "Tüm ürünler", "href": "/magaza" },
+      { "label": "İndirimdekiler", "href": "/kampanyalar" },
+      { "label": "Markalar", "href": "/markalar" },
+      { "label": "Tüm kategoriler", "href": "/kategoriler" }
+    ]
+  },
+  {
+    "title": "Hesap ve yardım",
+    "location": "footer",
+    "items": [
+      { "label": "Hesabım", "href": "/hesap" },
+      { "label": "Sipariş takibi", "href": "/siparis" },
+      { "label": "Sepetim", "href": "/sepet" },
+      { "label": "Müşteri yorumları", "href": "/yorumlar" }
+    ]
+  }
+]

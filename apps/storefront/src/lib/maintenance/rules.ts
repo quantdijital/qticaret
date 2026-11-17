@@ -25,6 +25,17 @@ const BYPASS_TOKEN = /^mnb_[\w-]{16}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 export const isBypassToken = (value: string | null | undefined): value is string =>
   typeof value === "string" && BYPASS_TOKEN.test(value)
 
+/**
+ * The header a bypass cookie's token reaches the backend in (its
+ * `MAINTENANCE_BYPASS_HEADER`): a dark shop's Store API takes writes only
+ * from a link it signed (adr/0053 Ek 2026-11-17). The backend checks it;
+ * a cookie not shaped like a token is never sent.
+ */
+export const BYPASS_HEADER = "x-maintenance-bypass"
+
+export const bypassHeaderOf = (cookie: string | undefined): Record<string, string> =>
+  isBypassToken(cookie) ? { [BYPASS_HEADER]: cookie } : {}
+
 /** `__Host-qt_bypass` over HTTPS, `qt_bypass` on a developer's http://localhost. */
 export const bypassCookieName = (production: boolean): string =>
   production ? `__Host-${BYPASS_COOKIE}` : BYPASS_COOKIE

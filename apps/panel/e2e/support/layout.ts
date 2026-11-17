@@ -10,7 +10,8 @@ import type { Page } from "@playwright/test"
  *   row with different heights.
  *
  * A sticky summary column (`data-layout-free`) follows the scroll and is
- * left out, as are tables, dialogs and the sidebar.
+ * left out, as are tables, dialogs and the sidebar, and info tips (i): a tip
+ * labels a field, it is not one of the row's controls.
  */
 export function layoutIssues(page: Page): Promise<string[]> {
   return page.evaluate(() => {
@@ -79,10 +80,16 @@ export function layoutIssues(page: Page): Promise<string[]> {
         if (child.closest("[aria-hidden=true]") || child.getBoundingClientRect().height <= 2) {
           return []
         }
+        // An info tip (i) beside a label is a hint, not a control of the row
+        if (child.matches("[data-info-tip]")) {
+          return []
+        }
         if (child.matches(CONTROL)) {
           return [{ el: child, height: child.getBoundingClientRect().height }]
         }
-        const inner = Array.from(child.querySelectorAll(CONTROL)).filter(visible)
+        const inner = Array.from(child.querySelectorAll(CONTROL))
+          .filter((el) => !el.matches("[data-info-tip]"))
+          .filter(visible)
         const only = inner.length === 1 ? inner[0] : undefined
         const height = child.getBoundingClientRect().height
         return only && Math.abs(only.getBoundingClientRect().height - height) <= 1

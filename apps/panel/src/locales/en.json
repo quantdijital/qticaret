@@ -4988,6 +4988,7 @@
       },
       "block": {
         "no_email": "The cart has no e-mail address; no reminder can be sent.",
+        "wholesale": "This cart is a wholesaler's. A reminder shows retail prices; wholesalers get none.",
         "reminded": "A reminder was already sent for this cart; each cart gets one.",
         "no_consent": "The customer has not consented to commercial e-mail. A reminder is a commercial message; it goes only to those who consented (İYS).",
         "suppressed": "Nothing is sent to this address (it is on the block list).",
@@ -8177,6 +8178,16 @@
           "marked": "some settings are off their defaults"
         },
         "groups": {
+          "buttons": "Buttons",
+          "categoryList": "Category list",
+          "tiles": "Tiles beside it",
+          "chips": "Quick links",
+          "picks": "Small products",
+          "cards": "Cards",
+          "thumbs": "Product pictures",
+          "opening": "How the questions open",
+          "options": "Options",
+          "backToTop": "Back to top button",
           "search": "Search",
           "topBar": "Top strip",
           "menu": "Menu bar",
@@ -9152,7 +9163,7 @@
         "strip_note": {
           "label": "Strip note",
           "term": "strip note",
-          "hint": "A short announcement or offer. Example: Free shipping over 1500 TL."
+          "hint": "A short announcement or offer. Shop details work too: free shipping over {ücretsiz_kargo_eşiği} (the note hides while no threshold is set)."
         },
         "strip_note_link": {
           "label": "Note link",

@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
+import { HintedName } from "./forms/field-hint"
 import { isHexColor } from "@/features/settings/storefront"
 import { BACKGROUNDS } from "@/features/storefront/api/theme"
 import { STOREFRONT_BACKGROUNDS } from "@/theme/storefront"
@@ -89,9 +91,15 @@ export function BackgroundField({
   const { t } = useTranslation()
   return (
     <div id={id} className="flex flex-col gap-2">
-      <span id="theme-background-label" className="text-sm font-medium">
-        {t(`${C}.background`)}
-      </span>
+      <HintedName
+        name={t(`${C}.background`)}
+        hint={t(`${C}.backgroundHint`)}
+        hintId="theme-background-hint"
+      >
+        <span id="theme-background-label" className="text-sm font-medium">
+          {t(`${C}.background`)}
+        </span>
+      </HintedName>
       {/* Side by side once each gets 160 px; one under another below that */}
       <RadioGroup
         aria-labelledby="theme-background-label"
@@ -117,9 +125,7 @@ export function BackgroundField({
           </label>
         ))}
       </RadioGroup>
-      <p id="theme-background-hint" className="text-xs text-muted-foreground">
-        {t(`${C}.backgroundHint`)}
-      </p>
+      <HiddenHint id="theme-background-hint">{t(`${C}.backgroundHint`)}</HiddenHint>
     </div>
   )
 }
@@ -136,6 +142,11 @@ interface ChoiceSelectProps<T extends string> {
   render: (option: T) => ReactNode
   /** What the choice changes on the storefront, and what to know about the chosen one. */
   hint?: string | undefined
+  /**
+   * What to know about the chosen option, shown under it rather than in
+   * the (i): a warning the shop owner acts on now (docs/18 §7.1).
+   */
+  note?: string | undefined
   /** Options shown but not offered (not drawn by the theme yet). */
   unavailable?: ReadonlySet<T> | undefined
 }
@@ -150,8 +161,10 @@ export function ChoiceSelect<T extends string>({
   onChange,
   render,
   hint,
+  note,
   unavailable,
 }: ChoiceSelectProps<T>) {
+  const noteId = `${id}-note`
   return (
     <Field label={label} term={term} htmlFor={id} hint={hint}>
       <Select
@@ -160,7 +173,7 @@ export function ChoiceSelect<T extends string>({
           onChange(next as T)
         }}
       >
-        <SelectTrigger id={id} className="w-full">
+        <SelectTrigger id={id} aria-describedby={note ? noteId : undefined} className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -171,39 +184,67 @@ export function ChoiceSelect<T extends string>({
           ))}
         </SelectContent>
       </Select>
+      {note ? (
+        <p id={noteId} className="text-xs text-muted-foreground">
+          {note}
+        </p>
+      ) : null}
     </Field>
   )
 }
 
-/** A yes-or-no choice with what it does; a technical term, when given, small beside its name. */
+/**
+ * A yes-or-no choice with what it does in its (i); a technical term, when
+ * given, small beside its name. `note` is what the switch does here and
+ * now (the rails it joins), shown under its name rather than in the (i).
+ */
 export function SwitchRow({
   id,
   label,
   term,
   hint,
+  note,
   checked,
   onChange,
 }: {
   id: string
   label: string
   term?: string | undefined
-  hint: string
+  hint?: string | undefined
+  note?: string | undefined
   checked: boolean
   onChange: (checked: boolean) => void
 }) {
+  const hintId = `${id}-hint`
+  const noteId = `${id}-note`
+  const described = [hint ? hintId : null, note ? noteId : null].filter(Boolean).join(" ")
   return (
     <div className="flex items-start justify-between gap-4">
-      <label htmlFor={id} className="flex flex-col gap-0.5 text-sm">
-        {term ? (
-          <span>
-            {label} <small className="text-[11px] text-muted-foreground">{term}</small>
-          </span>
-        ) : (
-          label
-        )}
-        <span className="text-xs text-muted-foreground">{hint}</span>
-      </label>
-      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+      <div className="flex min-w-0 flex-col gap-1">
+        <HintedName name={label} hint={hint} hintId={hintId}>
+          <label htmlFor={id} className="text-sm">
+            {label}
+            {term ? (
+              <>
+                {" "}
+                <small className="text-[11px] text-muted-foreground">{term}</small>
+              </>
+            ) : null}
+          </label>
+        </HintedName>
+        {note ? (
+          <p id={noteId} className="text-xs text-muted-foreground">
+            {note}
+          </p>
+        ) : null}
+      </div>
+      {hint ? <HiddenHint id={hintId}>{hint}</HiddenHint> : null}
+      <Switch
+        id={id}
+        aria-describedby={described || undefined}
+        checked={checked}
+        onCheckedChange={onChange}
+      />
     </div>
   )
 }

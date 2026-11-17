@@ -1,5 +1,6 @@
 import path from "node:path"
 import { headerLinked, linksOf } from "../../../workflows/storefront/layout-check"
+import { withShopNote } from "../../../workflows/storefront/layout-read"
 import { layoutDocument, readStoredLayout } from "../layout"
 import { mainSectionsOf, withMainSections } from "../layout-main"
 import {
@@ -160,6 +161,47 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
       for (const strip_note of ["a".repeat(81), "   ", "Kargo\u0007", 3, true, ["x"]]) {
         expect(issues({ header: [catalog({ strip_note })] }).length).toBeGreaterThan(0)
       }
+    })
+
+    it("takes the shop's details as tokens and refuses an unknown one", () => {
+      const note = "{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava"
+      expect(issues({ header: [catalog({ strip_note: note })] })).toEqual([])
+      expect(issues({ header: [catalog({ strip_note: "{kargo_eşiği} üzeri bedava" })] })).toEqual([
+        "storefront_layout.token_unknown",
+      ])
+    })
+
+    it("is read filled, and not shown when a detail it names is not given", () => {
+      const note = "{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava"
+      const read = withMainSections(
+        layoutDocument.parse({ header: [catalog({ strip_note: note, strip_note_link: sale })] }),
+        LEFT
+      )
+      const main = mainSectionsOf(read)
+      const values = {
+        mağaza_adı: "Örnek",
+        telefon: null,
+        e_posta: null,
+        adres: null,
+        whatsapp: null,
+        ücretsiz_kargo_eşiği: "₺1.500",
+      }
+      expect(withShopNote(main, values).header_bar.catalog?.strip_note).toBe(
+        "₺1.500 üzeri siparişlerde kargo bedava"
+      )
+      // No threshold: no half sentence ("üzeri siparişlerde kargo bedava"), no note
+      for (const threshold of [null, "", " ​ "]) {
+        const none = withShopNote(main, { ...values, ücretsiz_kargo_eşiği: threshold })
+        expect(none.header_bar.catalog?.strip_note).toBeNull()
+      }
+      // A note without tokens and the other headers are left as they are
+      const plain = mainSectionsOf(
+        withMainSections(
+          layoutDocument.parse({ header: [catalog({ strip_note: "Yeni sezon" })] }),
+          LEFT
+        )
+      )
+      expect(withShopNote(plain, values).header_bar.catalog?.strip_note).toBe("Yeni sezon")
     })
 
     it("refuses a link that is not a safe one, as the highlighted link does", () => {

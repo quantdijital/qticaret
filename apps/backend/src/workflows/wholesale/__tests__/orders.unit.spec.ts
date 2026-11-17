@@ -1,4 +1,10 @@
-import { stampWholesaleOrder, wholesaleAt, wholesaleOrders, wholesalerNames } from "../orders"
+import {
+  isWholesaleOrder,
+  stampWholesaleOrder,
+  wholesaleAt,
+  wholesaleOrders,
+  wholesalerNames,
+} from "../orders"
 import { assertAllRepriced } from "../steps/carts"
 
 // A link is defined against the running app's modules; its query name is all that is read here
@@ -98,6 +104,23 @@ describe("a wholesale order's stamp (ADR-0068 Ek 2026-11-15 (2))", () => {
     })
     expect(await stampWholesaleOrder(fake.container, "order_1")).toBeNull()
     expect(fake.link.create).not.toHaveBeenCalled()
+  })
+
+  it("knows a wholesale order by its stamp, or before the stamp by who placed it (I2)", async () => {
+    const stamped = fakeContainer({
+      links: [{ order_id: "order_1", wholesale_account_id: "wacc_1" }],
+    })
+    const unstamped = fakeContainer({
+      order: { customer_id: "cus_1", created_at: PLACED },
+      accounts: [active()],
+    })
+    const retail = fakeContainer({ order: { customer_id: "cus_1", created_at: PLACED } })
+
+    expect(await isWholesaleOrder(stamped.container, "order_1")).toBe(true)
+    expect(await isWholesaleOrder(unstamped.container, "order_1")).toBe(true)
+    expect(await isWholesaleOrder(retail.container, "order_1")).toBe(false)
+    // Reading writes nothing: the stamp is the subscriber's
+    expect(unstamped.link.create).not.toHaveBeenCalled()
   })
 
   it("reads which orders are wholesale, and by whom; none asked, none read", async () => {

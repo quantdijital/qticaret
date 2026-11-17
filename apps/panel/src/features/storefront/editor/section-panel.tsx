@@ -109,15 +109,13 @@ export function SectionPanel({
         >
           {/* İçerik */}
           {hasContent(section) ? (
-            <PanelGroup name="content" title={t(`${P}.content`)} reveal={reveal("content")}>
-              <FormOf
-                section={section}
-                problems={problems}
-                onChange={onChange}
-                badges={badges}
-                onBadges={onBadges}
-              />
-            </PanelGroup>
+            <FormOf
+              section={section}
+              problems={problems}
+              onChange={onChange}
+              badges={badges}
+              onBadges={onBadges}
+            />
           ) : null}
           {section.type === "header_bar" ? (
             <HeaderGroups
@@ -129,7 +127,12 @@ export function SectionPanel({
           ) : null}
           {/* Stil: the variant first, open */}
           {offersVariants(section) ? (
-            <PanelGroup name="variant" title={t(`${P}.variant`)} reveal={reveal("variant")}>
+            <PanelGroup
+              name="variant"
+              title={t(`${P}.variant`)}
+              hint={t(`${P}.variantHint`)}
+              reveal={reveal("variant")}
+            >
               <VariantField
                 id={FIELD_IDS.variant(section.id)}
                 type={section.type}

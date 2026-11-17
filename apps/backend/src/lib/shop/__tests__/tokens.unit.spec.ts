@@ -1,5 +1,11 @@
 import type { ContentDoc } from "../../content"
-import { fillShopDoc, fillShopText, unknownDocTokens, unknownShopTokens } from "../tokens"
+import {
+  fillShopDoc,
+  fillShopText,
+  fillShopTextWhole,
+  unknownDocTokens,
+  unknownShopTokens,
+} from "../tokens"
 import type { ShopInfoValues } from "../tokens"
 
 const values: ShopInfoValues = {
@@ -21,6 +27,18 @@ describe("shop info tokens", () => {
     )
     // A detail not given leaves nothing; an unknown name is not touched
     expect(fillShopText("[{whatsapp}] {indirim}", values)).toBe("[] {indirim}")
+  })
+
+  it("fills a line only whole: none when a detail it names is not given", () => {
+    expect(fillShopTextWhole("{ücretsiz_kargo_eşiği} üzeri kargo bedava", values)).toBe(
+      "₺1.500 üzeri kargo bedava"
+    )
+    expect(fillShopTextWhole("{whatsapp} ile yazın", values)).toBeNull()
+    expect(
+      fillShopTextWhole("{ücretsiz_kargo_eşiği} üzeri", { ...values, ücretsiz_kargo_eşiği: "​" })
+    ).toBeNull()
+    // No token, or a name that is no shop detail: the line as it is
+    expect(fillShopTextWhole("Yeni sezon {indirim}", values)).toBe("Yeni sezon {indirim}")
   })
 
   it("names the tokens that are no shop detail", () => {

@@ -132,7 +132,7 @@ describe("the featured product's strips look", () => {
     expect(within(fieldOf("strips_line")).getByRole("radio", { name: "İnce" })).toBeChecked()
     expect(fieldOf("strips_overlap")).toHaveAttribute("aria-checked", "false")
     expect(fieldOf("strips_dim")).toHaveAttribute("aria-checked", "true")
-    expect(screen.getByLabelText(/Üst üste bindir/)).toBe(fieldOf("strips_overlap"))
+    expect(screen.getByRole("switch", { name: /Üst üste bindir/ })).toBe(fieldOf("strips_overlap"))
   })
 
   it("saves each step and switch, the wide layout saying how it stands", async () => {

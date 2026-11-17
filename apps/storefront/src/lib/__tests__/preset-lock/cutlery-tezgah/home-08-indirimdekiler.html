@@ -13,21 +13,18 @@
             Tüm indirimler
           </a>
         </div>
-        <ul
-          class="grid gap-x-(--gap-columns) gap-y-4 md:grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))]"
-        >
-          <li class="min-w-0">
-            <article
-              class="group gf-card @container relative flex h-full items-center gap-3 md:gap-4"
-            >
-              <div
-                class="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-media md:w-24"
-              >
+        <ol role="list" class="gf-ranked" data-layout="lead" data-count="3">
+          <li class="gf-rank" data-size="lead">
+            <article class="group gf-card gf-rank-card @container">
+              <span class="gf-rank-n" aria-hidden="true">
+                1
+              </span>
+              <div class="gf-rank-photo">
                 <picture>
                   <source
                     type="image/webp"
                     srcSet="https://cdn.example.com/p/02-400.webp 400w, https://cdn.example.com/p/02-800.webp 800w"
-                    sizes="(min-width: 768px) 96px, 80px"
+                    sizes="(min-width: 1440px) 440px, (min-width: 768px) 34vw, 78vw"
                   />
                   <img
                     src="https://cdn.example.com/p/02.webp"
@@ -40,10 +37,7 @@
                     class="h-full w-full object-cover"
                   />
                 </picture>
-                <p
-                  class="absolute top-1 left-1 rounded-pill px-1.5 py-0.5 text-[0.6875rem] leading-none font-extrabold data-[tone=deal]:bg-deal data-[tone=deal]:text-deal-ink data-[tone=out]:bg-text data-[tone=out]:text-paper"
-                  data-tone="deal"
-                >
+                <p class="gf-rank-pill" data-tone="deal">
                   <span aria-hidden="true">
                     %16
                   </span>
@@ -52,11 +46,14 @@
                   </span>
                 </p>
               </div>
-              <div class="flex min-w-0 flex-1 flex-col gap-1">
-                <p class="truncate text-xs text-text-3">
+              <div class="gf-rank-text">
+                <p class="gf-rank-brand">
                   Yaman Bıçak
                 </p>
-                <h3 class="text-sm leading-snug font-semibold tracking-normal">
+                <h3 class="gf-rank-title">
+                  <span class="sr-only">
+                    1.
+                  </span>
                   <a
                     href="/urun/yaman-n690-katlanir-caki"
                     class="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
@@ -78,20 +75,49 @@
                   </s>
                 </p>
               </div>
+              <div class="gf-rank-acts">
+                <form
+                  class="relative z-(--z-raised) flex shrink-0"
+                  action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
+                >
+                  <input type="hidden" name="variant_id" value="variant_02"/>
+                  <input type="hidden" name="quantity" value="1"/>
+                  <button
+                    type="submit"
+                    class="gf-icon-btn size-11 border border-rule bg-field text-text hover:bg-paper-2"
+                    aria-label="N690 Katlanır Çakı ürününü sepete ekle"
+                    aria-busy="false"
+                    aria-disabled="false"
+                  >
+                    <svg
+                      width="24"
+                      height="24"
+                      stroke-width="1.75"
+                      class="lucide lucide-plus size-5 shrink-0"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <span
+                    id="«id»"
+                    role="alert"
+                    class="absolute right-0 bottom-full z-(--z-raised) mb-2 w-64 max-w-[calc(100vw-2rem)]"
+                  >
+                  </span>
+                </form>
+              </div>
             </article>
           </li>
-          <li class="min-w-0">
-            <article
-              class="group gf-card @container relative flex h-full items-center gap-3 md:gap-4"
-            >
-              <div
-                class="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-media md:w-24"
-              >
+          <li class="gf-rank" data-size="line">
+            <article class="group gf-card gf-rank-card @container">
+              <span class="gf-rank-n" aria-hidden="true">
+                2
+              </span>
+              <div class="gf-rank-photo">
                 <picture>
                   <source
                     type="image/webp"
                     srcSet="https://cdn.example.com/p/05-400.webp 400w, https://cdn.example.com/p/05-800.webp 800w"
-                    sizes="(min-width: 768px) 96px, 80px"
+                    sizes="(min-width: 1024px) 120px, (min-width: 768px) 96px, 72px"
                   />
                   <img
                     src="https://cdn.example.com/p/05.webp"
@@ -104,10 +130,7 @@
                     class="h-full w-full object-cover"
                   />
                 </picture>
-                <p
-                  class="absolute top-1 left-1 rounded-pill px-1.5 py-0.5 text-[0.6875rem] leading-none font-extrabold data-[tone=deal]:bg-deal data-[tone=deal]:text-deal-ink data-[tone=out]:bg-text data-[tone=out]:text-paper"
-                  data-tone="deal"
-                >
+                <p class="gf-rank-pill" data-tone="deal">
                   <span aria-hidden="true">
                     %16
                   </span>
@@ -116,11 +139,14 @@
                   </span>
                 </p>
               </div>
-              <div class="flex min-w-0 flex-1 flex-col gap-1">
-                <p class="truncate text-xs text-text-3">
+              <div class="gf-rank-text">
+                <p class="gf-rank-brand">
                   Yaman Bıçak
                 </p>
-                <h3 class="text-sm leading-snug font-semibold tracking-normal">
+                <h3 class="gf-rank-title">
+                  <span class="sr-only">
+                    2.
+                  </span>
                   <a
                     href="/urun/yaman-elmax-caki"
                     class="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
@@ -190,20 +216,49 @@
                   </s>
                 </p>
               </div>
+              <div class="gf-rank-acts">
+                <form
+                  class="relative z-(--z-raised) flex shrink-0"
+                  action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
+                >
+                  <input type="hidden" name="variant_id" value="variant_05"/>
+                  <input type="hidden" name="quantity" value="1"/>
+                  <button
+                    type="submit"
+                    class="gf-icon-btn size-11 border border-rule bg-field text-text hover:bg-paper-2"
+                    aria-label="Elmax Gravürlü Çakı ürününü sepete ekle"
+                    aria-busy="false"
+                    aria-disabled="false"
+                  >
+                    <svg
+                      width="24"
+                      height="24"
+                      stroke-width="1.75"
+                      class="lucide lucide-plus size-5 shrink-0"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <span
+                    id="«id»"
+                    role="alert"
+                    class="absolute right-0 bottom-full z-(--z-raised) mb-2 w-64 max-w-[calc(100vw-2rem)]"
+                  >
+                  </span>
+                </form>
+              </div>
             </article>
           </li>
-          <li class="min-w-0">
-            <article
-              class="group gf-card @container relative flex h-full items-center gap-3 md:gap-4"
-            >
-              <div
-                class="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-media md:w-24"
-              >
+          <li class="gf-rank" data-size="line">
+            <article class="group gf-card gf-rank-card @container">
+              <span class="gf-rank-n" aria-hidden="true">
+                3
+              </span>
+              <div class="gf-rank-photo">
                 <picture>
                   <source
                     type="image/webp"
                     srcSet="https://cdn.example.com/p/08-400.webp 400w, https://cdn.example.com/p/08-800.webp 800w"
-                    sizes="(min-width: 768px) 96px, 80px"
+                    sizes="(min-width: 1024px) 120px, (min-width: 768px) 96px, 72px"
                   />
                   <img
                     src="https://cdn.example.com/p/08.webp"
@@ -216,10 +271,7 @@
                     class="h-full w-full object-cover"
                   />
                 </picture>
-                <p
-                  class="absolute top-1 left-1 rounded-pill px-1.5 py-0.5 text-[0.6875rem] leading-none font-extrabold data-[tone=deal]:bg-deal data-[tone=deal]:text-deal-ink data-[tone=out]:bg-text data-[tone=out]:text-paper"
-                  data-tone="deal"
-                >
+                <p class="gf-rank-pill" data-tone="deal">
                   <span aria-hidden="true">
                     %16
                   </span>
@@ -228,11 +280,14 @@
                   </span>
                 </p>
               </div>
-              <div class="flex min-w-0 flex-1 flex-col gap-1">
-                <p class="truncate text-xs text-text-3">
+              <div class="gf-rank-text">
+                <p class="gf-rank-brand">
                   Yaman Bıçak
                 </p>
-                <h3 class="text-sm leading-snug font-semibold tracking-normal">
+                <h3 class="gf-rank-title">
+                  <span class="sr-only">
+                    3.
+                  </span>
                   <a
                     href="/urun/yaman-kemik-sapli-caki"
                     class="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
@@ -254,9 +309,39 @@
                   </s>
                 </p>
               </div>
+              <div class="gf-rank-acts">
+                <form
+                  class="relative z-(--z-raised) flex shrink-0"
+                  action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
+                >
+                  <input type="hidden" name="variant_id" value="variant_08"/>
+                  <input type="hidden" name="quantity" value="1"/>
+                  <button
+                    type="submit"
+                    class="gf-icon-btn size-11 border border-rule bg-field text-text hover:bg-paper-2"
+                    aria-label="Kemik Saplı Çakı ürününü sepete ekle"
+                    aria-busy="false"
+                    aria-disabled="false"
+                  >
+                    <svg
+                      width="24"
+                      height="24"
+                      stroke-width="1.75"
+                      class="lucide lucide-plus size-5 shrink-0"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <span
+                    id="«id»"
+                    role="alert"
+                    class="absolute right-0 bottom-full z-(--z-raised) mb-2 w-64 max-w-[calc(100vw-2rem)]"
+                  >
+                  </span>
+                </form>
+              </div>
             </article>
           </li>
-        </ul>
+        </ol>
       </section>
     </div>
   </div>

@@ -435,6 +435,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "customers.note_too_long": "A note can be at most 2000 characters.",
   "abandoned_carts.unknown": "The cart was not found or became an order.",
   "abandoned_carts.no_email": "This cart has no e-mail address.",
+  "abandoned_carts.wholesale": "This cart is a wholesaler's; wholesalers get no cart reminders.",
   "abandoned_carts.no_consent":
     "The customer has not consented to commercial e-mail; reminders go to those who did.",
   "abandoned_carts.suppressed": "Nothing is sent to this address (it is on the block list).",
@@ -461,6 +462,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "maintenance.not_enabled":
     "Maintenance mode is off. This link can only be made while the shop is in maintenance.",
   "maintenance.bypass_unknown": "The maintenance link is not valid or has expired.",
+  "maintenance.shop_closed":
+    "The shop is closed for maintenance and is not taking orders or forms right now. Please try again a little later.",
   "consents.link_invalid":
     "This link is invalid, expired or already used. You can give your consent from your account or by subscribing again.",
   "stock_alerts.link_invalid":

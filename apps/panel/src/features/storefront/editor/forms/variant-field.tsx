@@ -25,6 +25,8 @@ export function VariantField<T extends VariantSectionType>({
 }) {
   const { t } = useTranslation()
   const variants: readonly SectionVariant<T>[] = SECTION_VARIANTS[type]
+  // What a variant does is in its group's (i); that the one picked is not drawn yet shows
+  const kept = isUnbuilt(type, value)
   return (
     <div id={id} className="flex flex-col gap-2">
       <ToggleGroup
@@ -33,7 +35,7 @@ export function VariantField<T extends VariantSectionType>({
         // Apart, each choice keeps its whole edge (joined, a third one alone on its row lost its left side)
         spacing={2}
         aria-label={t("storefront.editor.panel.variant")}
-        aria-describedby={`${id}-hint`}
+        aria-describedby={kept ? `${id}-kept` : undefined}
         value={value}
         onValueChange={(next) => {
           if (next && next !== value) {
@@ -58,9 +60,11 @@ export function VariantField<T extends VariantSectionType>({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-        {t(isUnbuilt(type, value) ? `${V}.kept` : "storefront.editor.panel.variantHint")}
-      </p>
+      {kept ? (
+        <p id={`${id}-kept`} className="text-xs text-muted-foreground">
+          {t(`${V}.kept`)}
+        </p>
+      ) : null}
     </div>
   )
 }

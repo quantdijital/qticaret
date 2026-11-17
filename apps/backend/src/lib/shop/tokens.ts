@@ -44,6 +44,20 @@ export function fillShopText(text: string, values: ShopInfoValues): string {
     )
 }
 
+/**
+ * The text with the shop's details in place, or null when one it names is
+ * not given: a short line that reads only whole (the header's strip note,
+ * "{ücretsiz_kargo_eşiği} üzeri kargo bedava") is not shown as half a sentence.
+ */
+export function fillShopTextWhole(text: string, values: ShopInfoValues): string | null {
+  for (const [, name = ""] of text.normalize("NFC").matchAll(TOKEN)) {
+    if (KNOWN.has(name) && !(values[name as ShopInfoToken] ?? "").replace(INVISIBLE, "").trim()) {
+      return null
+    }
+  }
+  return fillShopText(text, values)
+}
+
 function fillBlocks(blocks: readonly Block[], values: ShopInfoValues): Block[] {
   return blocks.map((block) => {
     const content = (block as { content?: unknown }).content

@@ -103,7 +103,7 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
               onChange({ ...theme, typography: { ...typography, heading: value } })
             }}
             render={(font) => <FontName font={font} />}
-            hint={headingNote(typography.heading)}
+            note={headingNote(typography.heading)}
           />
           <ChoiceSelect
             id={THEME_IDS["typography.body"]}
