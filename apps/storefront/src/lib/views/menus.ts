@@ -27,7 +27,9 @@ const SYSTEM_PATHS: Readonly<Record<string, string>> = {
  * A menu link as the theme prints it: a record's live path or the address
  * from the backend, a storefront page's or legal text's address from here,
  * a storefront page's name in the storefront's words. Without both a name
- * and an address, no link.
+ * and an address, no link. The backend checks a menu's addresses when it
+ * is saved; the storefront checks them again before printing one: only a
+ * path of its own (`/…`, not `//…`) or a secure address (`https://…`).
  */
 export function menuLink(link: StoreMenuLink, t: Translate): LinkView | null {
   const target = link.target ?? ""
@@ -39,8 +41,15 @@ export function menuLink(link: StoreMenuLink, t: Translate): LinkView | null {
         ? legalPath(target)
         : undefined)
   const label = link.label ?? (link.kind === "system" ? t(`menu.system.${target}`) : null)
-  return path && label ? { label, path } : null
+  return path && label && isSafeHref(path) ? { label, path } : null
 }
+
+const OWN_PATH = /^\/(?![/\\])/
+const SECURE_ADDRESS = /^https:\/\/[^\s/\\]/i
+
+/** A path of the storefront's own or a secure address; never `//host`, `\`, a script or a blank. */
+export const isSafeHref = (href: string): boolean =>
+  !/[\s\\]/.test(href) && (OWN_PATH.test(href) || SECURE_ADDRESS.test(href))
 
 export const menuLinks = (links: readonly StoreMenuLink[], t: Translate): LinkView[] =>
   links.flatMap((link) => {
