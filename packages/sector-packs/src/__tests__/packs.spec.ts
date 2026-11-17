@@ -28,7 +28,7 @@ describe("the packs in this package (adr/0061 C12)", () => {
       categories: 0,
       flags: 0,
       seo_templates: 0,
-      presets: 1,
+      presets: 0,
     })
     const cutlery = sectorPack("cutlery")
     expect(cutlery && summaryOf(cutlery)).toMatchObject({
@@ -54,8 +54,8 @@ describe("the packs in this package (adr/0061 C12)", () => {
     expect(packItemKey.template("bicak-seti")).toBe("attribute_template:bicak-seti")
     expect(packItemKey.attribute("bicak-seti", "sertlik")).toBe("attribute:bicak-seti/sertlik")
     expect(packItemKey.seo("title_templates", "brand")).toBe("seo:title_templates.brand")
-    expect(packItemKey.presetImage("grafit", "images/hero.webp", "ab12")).toBe(
-      "preset_image:grafit/images/hero.webp@ab12"
+    expect(packItemKey.presetImage("katalog", "images/hero.webp", "ab12")).toBe(
+      "preset_image:katalog/images/hero.webp@ab12"
     )
   })
 })

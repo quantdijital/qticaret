@@ -4,11 +4,14 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import sharp from "sharp"
 import { createAdminUser } from "../helpers/admin"
 import {
+  LOOK,
+  SCHEDULE,
   clearDesigns,
   designService,
   helpBox,
   staffClient,
   storedDesigns,
+  withCutlery,
 } from "../helpers/designs"
 import type { AdminLayout, DesignCard, Draft } from "../helpers/designs"
 import type { HttpClient } from "../helpers/http"
@@ -31,6 +34,7 @@ medusaIntegrationTestRunner({
     async function ownerWithDraft() {
       const container = getContainer()
       await clearDesigns(container)
+      await withCutlery(container)
       const owner = await createAdminUser(http, container)
       const staff = staffClient(http, owner.headers)
       const opened = await staff.layout()
@@ -49,19 +53,19 @@ medusaIntegrationTestRunner({
       const id = saved.data.design?.id ?? ""
       expect(saved.data.design).toMatchObject({ kind: "saved", in_draft: false, applied_at: null })
 
-      // Grafit applied, then the shop changes its badges (its own data, not the look)
-      await staff.applyPreset("general", "grafit")
-      const grafit = await staff.layout()
+      // A ready-made look applied, then the shop changes its badges (its own data, not the look)
+      await staff.applyPreset(LOOK.pack, LOOK.code)
+      const look = await staff.layout()
       await staff.saveDraft({
-        ...grafit.draft,
-        settings: { ...grafit.draft.settings, trust_badges: NEW_BADGES },
+        ...look.draft,
+        settings: { ...look.draft.settings, trust_badges: NEW_BADGES },
       })
 
       const applied = await staff.applyDesign(id)
       expect(applied.status).toBe(200)
       expect(applied.data.result).toEqual({
         design: { id, kind: "saved", name: "Benim" },
-        // Only the badges changed since Grafit: nothing new to keep
+        // Only the badges changed since the look: nothing new to keep
         auto_saved: null,
         skipped: [],
         dropped: [],
@@ -96,7 +100,7 @@ medusaIntegrationTestRunner({
 
     it("names an automatic save into a named one, removes for good, and finds no other id", async () => {
       const { staff } = await ownerWithDraft()
-      const applied = await staff.applyPreset("general", "grafit")
+      const applied = await staff.applyPreset(LOOK.pack, LOOK.code)
       const auto = applied.data.result.auto_saved?.id ?? ""
       expect(auto).toMatch(/^sfd_/)
 
@@ -208,12 +212,12 @@ medusaIntegrationTestRunner({
       const [category] = await container
         .resolve(Modules.PRODUCT)
         .createProductCategories([{ name: "Çakılar", handle: "cakilar-gecici", is_active: true }])
-      const grafit = (await staff.applyPreset("general", "grafit")).data.layout.draft
+      const look = (await staff.applyPreset(LOOK.pack, LOOK.code)).data.layout.draft
+      // A categories section of its own, naming the category (not the look's, whose shape may differ)
+      const tiles = { id: "kategoriler", type: "categories", ...SCHEDULE, title: null }
       const withCategory = {
-        ...grafit,
-        home: grafit.home.map((section) =>
-          section.type === "categories" ? { ...section, category_ids: [category?.id] } : section
-        ),
+        ...look,
+        home: [...look.home, { ...tiles, category_ids: [category?.id] }],
       }
       expect((await staff.saveDraft(withCategory)).status).toBe(200)
       const saved = await staff.saveDesign({ name: "Kategorili" })
@@ -221,7 +225,7 @@ medusaIntegrationTestRunner({
       await container.resolve(Modules.PRODUCT).deleteProductCategories([category?.id ?? ""])
 
       // Something new in the draft, which an apply would keep first
-      await staff.saveDraft({ ...grafit, home: [helpBox("yardimkutusu", "Yeni")] })
+      await staff.saveDraft({ ...look, home: [helpBox("yardimkutusu", "Yeni")] })
       const before = await staff.layout()
       const looks = await storedDesigns(container)
 

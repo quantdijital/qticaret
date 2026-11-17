@@ -103,7 +103,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       low_stock: { enabled: false, threshold: 7 },
       theme: { ...GRAFIT, radius: "sharp" as const },
       menus: null,
-      preset: { pack: "general", code: "grafit", version: 1 },
+      preset: { pack: "cutlery", code: "katalog", version: 1 },
       design: null,
     }
     expect(withLegacy(own, LEGACY)).toEqual(own)
@@ -148,7 +148,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       })
     ).toEqual({ ...UNSET_SETTINGS, color_swatches: [] })
     // The applied preset (adr/0063 §2): kept as written, unset when it no longer reads
-    const preset = { pack: "general", code: "grafit", version: 1 }
+    const preset = { pack: "cutlery", code: "katalog", version: 1 }
     expect(storedSettings({ settings: { preset } }).preset).toEqual(preset)
     expect(storedSettings({ settings: { preset: { pack: "general" } } }).preset).toBeNull()
     // An empty menu set is none: the publication leaves the shop's menus alone

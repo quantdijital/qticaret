@@ -1,8 +1,26 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { sectorPack } from "@qticaret/sector-packs"
+import { applySectorPack } from "../../src/lib/sector-packs/apply"
 import { STOREFRONT_LAYOUT_MODULE } from "../../src/modules/storefront-layout"
 import type StorefrontLayoutModuleService from "../../src/modules/storefront-layout/service"
 import type { HttpClient, HttpResponse } from "./http"
 import { settle } from "./http"
+
+/**
+ * The ready-made look these tests apply: the cutlery pack's plainest, no
+ * menus, no images. `general` has none since Grafit was removed (owner,
+ * 2026-11-17), so the shop is given the cutlery pack first (`withCutlery`).
+ */
+export const LOOK = { pack: "cutlery", code: "katalog", name: "Katalog" } as const
+
+/** The cutlery pack applied to this shop: its ready-made looks are then the shop's. */
+export async function withCutlery(container: MedusaContainer): Promise<void> {
+  const cutlery = sectorPack("cutlery")
+  if (!cutlery) {
+    throw new Error("no cutlery pack")
+  }
+  await applySectorPack(container, cutlery)
+}
 
 /** The saved looks' answers as the panel reads them (adr/0064 Ek 2026-11-17). */
 export interface DesignSummary {

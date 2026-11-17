@@ -82,7 +82,7 @@ describe("PresetCard", () => {
   it("draws a look of its own without a colour choice, and holds apply while another runs", () => {
     render(
       <PresetCard
-        family={{ key: "general/grafit", name: "Grafit", members: [preset("grafit")] }}
+        family={{ key: "general/sade", name: "Sade", members: [preset("sade")] }}
         busy
         onApply={vi.fn()}
         onPreview={vi.fn()}
@@ -90,9 +90,7 @@ describe("PresetCard", () => {
     )
 
     expect(screen.queryByRole("radiogroup")).toBeNull()
-    expect(
-      screen.getByRole("button", { name: "‘Grafit’ görünümünü taslağa uygula" })
-    ).toBeDisabled()
-    expect(screen.getByRole("button", { name: "‘Grafit’ görünümünü önizle" })).toBeEnabled()
+    expect(screen.getByRole("button", { name: "‘Sade’ görünümünü taslağa uygula" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "‘Sade’ görünümünü önizle" })).toBeEnabled()
   })
 })

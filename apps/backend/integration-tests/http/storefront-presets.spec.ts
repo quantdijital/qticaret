@@ -1,9 +1,9 @@
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { copyFileSync, cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { DEFAULT_PACKS_DIR } from "@qticaret/sector-packs"
+import { DEFAULT_PACKS_DIR, storefrontPreset } from "@qticaret/sector-packs"
 import sharp from "sharp"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
@@ -17,7 +17,9 @@ import { layoutRow } from "../../src/workflows/storefront/layout-row"
 import { applyPresetWorkflow } from "../../src/workflows/storefront/preset-apply"
 import applyPreset from "../../src/scripts/apply-preset"
 import { readTenantResult } from "@qticaret/types/control-plane"
+import { FIXTURE_PACKS_DIR } from "../../src/lib/storefront/presets/__tests__/fixture-packs"
 import { createAdminUser } from "../helpers/admin"
+import { LOOK, withCutlery } from "../helpers/designs"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 
@@ -50,7 +52,11 @@ interface Applied {
 
 const SCHEDULE = { visible: true, starts_at: null, ends_at: null }
 
-/** A `general` pack beside the repository's, with one preset that has an image and handles. */
+/**
+ * A `general` pack beside the repository's: the tests' plain `sade` (no
+ * header of its own), one preset that has an image and handles, and one
+ * with menus.
+ */
 async function fixturePacks(): Promise<string> {
   const root = mkdtempSync(join(tmpdir(), "presets-"))
   const preset = join(root, "general", "presets", "vitrin")
@@ -59,10 +65,9 @@ async function fixturePacks(): Promise<string> {
     join(DEFAULT_PACKS_DIR, "general", "manifest.json"),
     join(root, "general", "manifest.json")
   )
-  copyFileSync(
-    join(DEFAULT_PACKS_DIR, "general", "presets", "grafit", "theme.json"),
-    join(preset, "theme.json")
-  )
+  const sade = join(FIXTURE_PACKS_DIR, "general", "presets", "sade")
+  cpSync(sade, join(root, "general", "presets", "sade"), { recursive: true })
+  copyFileSync(join(sade, "theme.json"), join(preset, "theme.json"))
   const png = await sharp({
     create: { width: 96, height: 64, channels: 3, background: { r: 40, g: 44, b: 52 } },
   })
@@ -152,7 +157,7 @@ medusaIntegrationTestRunner({
       rmSync(packs, { recursive: true, force: true })
     })
 
-    it("applies grafit to the draft twice alike, leaving the live design alone", async () => {
+    it("applies a ready-made look to the draft twice alike, leaving the live design alone", async () => {
       const container = getContainer()
       const owner = await createAdminUser(http, container)
       const asOwner = { headers: owner.headers }
@@ -160,7 +165,14 @@ medusaIntegrationTestRunner({
         (await settle(http.get<AdminLayout>("/admin/storefront-layout", asOwner))).data.layout
       const apply = (pack: string, code: string, body: object = {}) =>
         settle(http.post<Applied>(`/admin/storefront-presets/${pack}/${code}/apply`, body, asOwner))
+      const katalog = storefrontPreset(LOOK.pack, LOOK.code)
+      if (!katalog) {
+        throw new Error("no katalog preset")
+      }
 
+      // Before the cutlery pack: its looks are neither listed nor applied
+      expect((await apply(LOOK.pack, LOOK.code)).status).toBe(400)
+      await withCutlery(container)
       const gallery = await settle(
         http.get<{ presets: { pack: string; code: string; in_draft: number | null }[] }>(
           "/admin/storefront-presets",
@@ -168,11 +180,11 @@ medusaIntegrationTestRunner({
         )
       )
       expect(gallery.data.presets).toEqual(
-        expect.arrayContaining([expect.objectContaining({ pack: "general", code: "grafit" })])
+        expect.arrayContaining([expect.objectContaining({ pack: LOOK.pack, code: LOOK.code })])
       )
 
-      // The shop's own design, live, with its own trust badges, an announcement bar and a
-      // home page of one section
+      // The shop's own design, live, with its own trust badges, an announcement bar, a
+      // footer of its own and a home page of one section
       const opened = await admin()
       const badges = [{ icon: "truck", title: "Aynı gün kargo", text: null }]
       const bar = {
@@ -194,60 +206,44 @@ medusaIntegrationTestRunner({
         (await settle(http.post("/admin/storefront-layout/publish", {}, asOwner))).status
       ).toBe(200)
       const live = (await layoutRow(container))?.published
+      const ownFooter = (await admin()).draft.footer ?? []
 
-      const first = await apply("general", "grafit")
+      const first = await apply(LOOK.pack, LOOK.code)
       expect(first.status).toBe(200)
       expect(first.data.result).toEqual({
-        pack: "general",
-        preset: "grafit",
-        version: 1,
-        skipped: [],
-        dropped: [],
-        // Grafit writes no header: the shop's announcement bar stays, and the answer says so
-        kept: ["header.duyurular"],
+        pack: LOOK.pack,
+        preset: LOOK.code,
+        version: katalog.version,
+        skipped: expect.any(Array) as unknown,
+        dropped: expect.any(Array) as unknown,
+        // Katalog writes no footer: the shop's stays, and the answer says so
+        kept: ownFooter.map((section) => `footer.${section.id}`),
         images: { added: 0, kept: 0 },
         demo: { added: 0, kept: 0 },
         // The shop's own draft kept first (adr/0064 Ek 2026-11-17)
         auto_saved: { id: expect.stringMatching(/^sfd_/) as unknown, kind: "auto", name: null },
       })
+      expect(ownFooter.length).toBeGreaterThan(0)
       const draft = first.data.layout.draft
-      // The header bar read in from grafit's theme header (adr/0049 Ek 2026-11-14 §5)
-      expect(draft.header).toEqual([
-        {
-          ...bar,
-          mode: "first",
-          interval: "medium",
-          pause_button: "always",
-          hover_pause: "on",
-          align: "auto",
-          size: "medium",
-        },
-        {
-          id: "mainheader",
-          type: "header_bar",
-          visible: true,
-          starts_at: null,
-          ends_at: null,
-          variant: "standard",
-          sticky: true,
-          menu_images: "submenus",
-          search_style: "field",
-        },
-      ])
-      // Grafit fills the footer: its own stands (after the footer, read in)
-      expect(draft.footer?.map((section) => section.id)).toEqual(["mainfooter", "ebultenkutusu"])
-      expect(draft.home.map((section) => section.id)).toEqual([
-        "girisbolumu",
-        "kategoriler",
-        "yeniurunler",
-        "yardimkutusu",
-        "blogyazilari",
-      ])
-      expect(draft.settings.preset).toEqual({ pack: "general", code: "grafit", version: 1 })
-      // The shop's badges stay; the theme is grafit's, written into the design
+      // Katalog fills the header: its own catalog bar stands, the shop's announcement goes
+      expect(draft.header?.map((section) => section.type)).toEqual(["header_bar"])
+      expect(draft.header?.[0]).toMatchObject({ id: "mainheader", variant: "catalog" })
+      expect(draft.footer).toEqual(ownFooter)
+      const dropped = new Set(first.data.result.dropped)
+      expect(draft.home.map((section) => section.id)).toEqual(
+        (katalog.layout.home ?? [])
+          .map((section) => section.id)
+          .filter((id) => !dropped.has(`home.${id}`))
+      )
+      expect(draft.home.length).toBeGreaterThan(0)
+      expect(draft.settings.preset).toEqual({
+        pack: LOOK.pack,
+        code: LOOK.code,
+        version: katalog.version,
+      })
+      // The shop's badges stay; the theme is the look's, written into the design
       expect(draft.settings.trust_badges).toEqual(badges)
       expect(draft.settings["theme"]).toEqual(
-        // Grafit's own steps (2026-11-16, adr/0067 Ek): gentle corners, compact sections, balanced room
         expect.objectContaining({
           theme: "atolye",
           radius: "gentle",
@@ -259,7 +255,7 @@ medusaIntegrationTestRunner({
       expect(first.data.layout.has_changes).toBe(true)
       expect((await layoutRow(container))?.published).toEqual(live)
 
-      const second = await apply("general", "grafit")
+      const second = await apply(LOOK.pack, LOOK.code)
       expect(second.status).toBe(200)
       expect(second.data.layout.draft).toEqual(draft)
       expect((await layoutRow(container))?.published).toEqual(live)
@@ -278,7 +274,7 @@ medusaIntegrationTestRunner({
       expect(entries).toHaveLength(2)
       expect(entries[0]).toMatchObject({
         resource_type: "storefront_layout",
-        resource_id: "general/grafit",
+        resource_id: `${LOOK.pack}/${LOOK.code}`,
       })
       const codes = entries.map(
         (entry) =>
@@ -287,19 +283,21 @@ medusaIntegrationTestRunner({
           ]?.after
       )
       // The first named the preset in the draft; the second changed nothing
-      expect(codes).toContain("grafit")
+      expect(codes).toContain(LOOK.code)
       expect(await audit.listAuditEntries({ action: "storefront_layout.preset_applied" })).toEqual(
         []
       )
 
-      // Unknown, refused demo, and not for operations
+      // Unknown (a removed look too: general/grafit, owner 2026-11-17), refused demo,
+      // and not for operations
       expect((await apply("general", "yok")).status).toBe(404)
-      expect((await apply("general", "grafit", { demo: true })).status).toBe(400)
-      expect((await apply("general", "grafit", { other: 1 })).status).toBe(400)
+      expect((await apply("general", "grafit")).status).toBe(404)
+      expect((await apply(LOOK.pack, LOOK.code, { demo: true })).status).toBe(400)
+      expect((await apply(LOOK.pack, LOOK.code, { other: 1 })).status).toBe(400)
       const operations = await createAdminUser(http, container, "operations")
       const refused = await settle(
         http.post(
-          "/admin/storefront-presets/general/grafit/apply",
+          `/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/apply`,
           {},
           { headers: operations.headers }
         )
@@ -439,7 +437,7 @@ medusaIntegrationTestRunner({
       const container = getContainer()
       const run = () =>
         applyPresetWorkflow(container).run({
-          input: { pack: "general", code: "grafit", demo: false, actor: null },
+          input: { pack: "general", code: "sade", demo: false, actor: null, packs_dir: packs },
         })
       await run()
       const locking = container.resolve(Modules.LOCKING)
@@ -477,10 +475,13 @@ medusaIntegrationTestRunner({
       const out = jest.spyOn(process.stdout, "write").mockImplementation(() => true)
       const exec = (args: string[]) => applyPreset({ container, args })
       let lines: unknown[]
+      await withCutlery(container)
+      const katalog = storefrontPreset(LOOK.pack, LOOK.code)
       try {
+        await exec([`pack=${LOOK.pack}`, `preset=${LOOK.code}`])
+        await exec([`pack=${LOOK.pack}`, `preset=${LOOK.code}`])
+        // A removed look (owner, 2026-11-17) is unknown
         await exec(["pack=general", "preset=grafit"])
-        await exec(["pack=general", "preset=grafit"])
-        await exec(["pack=general", "preset=yok"])
         // Only the result lines: the logger writes to stdout too
         lines = out.mock.calls
           .map(([line]) => readTenantResult(String(line)))
@@ -489,15 +490,13 @@ medusaIntegrationTestRunner({
         out.mockRestore()
       }
       expect(lines).toEqual([
-        {
+        expect.objectContaining({
           status: "applied",
-          pack: "general",
-          preset: "grafit",
-          version: 1,
-          skipped: 0,
-          dropped: 0,
+          pack: LOOK.pack,
+          preset: LOOK.code,
+          version: katalog?.version,
           published: fresh,
-        },
+        }),
         // Live now: the second stays in the draft
         expect.objectContaining({ status: "applied", published: false }),
         { status: "unknown_preset" },
@@ -513,8 +512,8 @@ medusaIntegrationTestRunner({
         { select: ["action", "actor_type", "resource_id"] }
       )
       expect(entries.filter((each) => each.action === "storefront_layout.preset_applied")).toEqual([
-        expect.objectContaining({ actor_type: "system", resource_id: "general/grafit" }),
-        expect.objectContaining({ actor_type: "system", resource_id: "general/grafit" }),
+        expect.objectContaining({ actor_type: "system", resource_id: "cutlery/katalog" }),
+        expect.objectContaining({ actor_type: "system", resource_id: "cutlery/katalog" }),
       ])
       expect(entries.filter((each) => each.action === "storefront_layout.published").length).toBe(
         fresh ? 1 : 0

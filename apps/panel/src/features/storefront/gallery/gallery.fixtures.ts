@@ -4,8 +4,8 @@ import type { DesignCard, DesignGallery, DesignSummary, PresetCard } from "./api
 export function summary(overrides: Partial<DesignSummary> = {}): DesignSummary {
   return {
     source: "preset",
-    source_name: "Grafit",
-    preset: { pack: "general", code: "grafit", version: 1 },
+    source_name: "Sade",
+    preset: { pack: "general", code: "sade", version: 1 },
     // The theme's own colours (`thumbColors`): no colour written here (house rules)
     colors: { primary: null, accent: null, background: null },
     fonts: { heading: "Inter", body: "Inter" },
@@ -23,7 +23,7 @@ export function preset(code: string, overrides: Partial<PresetCard> = {}): Prese
     code,
     version: 1,
     theme: "atolye",
-    name: code === "grafit" ? "Grafit" : code,
+    name: code === "sade" ? "Sade" : code,
     description: `${code} görünümü`,
     tone: "light",
     family: code,
@@ -64,13 +64,13 @@ export function gallery(designs: DesignCard[], overrides: Partial<DesignGallery>
     limits: { saved: 10, auto: 5 },
     current: {
       draft: {
-        preset: { pack: "general", code: "grafit", version: 1 },
+        preset: { pack: "general", code: "sade", version: 1 },
         design_id: null,
         edited: false,
         has_changes: false,
       },
       live: {
-        preset: { pack: "general", code: "grafit", version: 1 },
+        preset: { pack: "general", code: "sade", version: 1 },
         design_id: null,
         revision: 1,
         published_at: "2026-11-01T09:00:00.000Z",

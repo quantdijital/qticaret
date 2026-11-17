@@ -25,9 +25,9 @@ describe("the provisioner's preset script (adr/0063 §7)", () => {
   })
 
   it("reads its arguments", () => {
-    expect(presetArgs(["pack=general", "preset=grafit"])).toEqual({
-      pack: "general",
-      preset: "grafit",
+    expect(presetArgs(["pack=cutlery", "preset=katalog"])).toEqual({
+      pack: "cutlery",
+      preset: "katalog",
       demo: false,
     })
     expect(() => presetArgs(["pack=general"])).toThrow(/required/)

@@ -157,4 +157,22 @@ describe("the preset gallery (adr/0063 §7)", () => {
       error.mockRestore()
     }
   })
+
+  it("lists the cards when the draft and live name a look this build no longer has", async () => {
+    // A shop given general/grafit before it was removed (owner, 2026-11-17)
+    const error = quiet()
+    const gone = { pack: "general", code: "grafit", version: 1 }
+    try {
+      mockRow = { draft: { settings: { preset: gone } }, published: { settings: { preset: gone } } }
+      const gallery = await presetGallery(container)
+      expect(gallery.map((each) => `${each.pack}/${each.code}`)).toEqual([
+        "general/general-1",
+        "kahve/kahve-1",
+        "kahve/kahve-2",
+      ])
+      expect(gallery.every((each) => each.in_draft === null && each.live === null)).toBe(true)
+    } finally {
+      error.mockRestore()
+    }
+  })
 })

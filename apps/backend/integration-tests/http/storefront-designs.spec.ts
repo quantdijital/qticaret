@@ -2,11 +2,20 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
 import { createAdminUser } from "../helpers/admin"
-import { clearDesigns, helpBox, staffClient, storedDesigns } from "../helpers/designs"
-import type { DesignCard } from "../helpers/designs"
+import {
+  LOOK,
+  clearDesigns,
+  designService,
+  helpBox,
+  staffClient,
+  storedDesigns,
+  withCutlery,
+} from "../helpers/designs"
+import type { DesignCard, Draft } from "../helpers/designs"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { layoutRow } from "../../src/workflows/storefront/layout-row"
 
 jest.setTimeout(240 * 1000)
 
@@ -21,9 +30,13 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
 
-    async function ownerWithDraft() {
+    /** The owner, a draft of the shop's own and, unless told otherwise, the cutlery pack. */
+    async function ownerWithDraft(cutlery = true) {
       const container = getContainer()
       await clearDesigns(container)
+      if (cutlery) {
+        await withCutlery(container)
+      }
       const owner = await createAdminUser(http, container)
       const staff = staffClient(http, owner.headers)
       const opened = await staff.layout()
@@ -41,8 +54,8 @@ medusaIntegrationTestRunner({
       const empty = await staff.gallery()
       expect(empty).toMatchObject({ designs: [], limits: { saved: 10, auto: 5 } })
 
-      // The shop's own design, replaced by Grafit: kept
-      const first = await staff.applyPreset("general", "grafit")
+      // The shop's own design, replaced by the look: kept
+      const first = await staff.applyPreset(LOOK.pack, LOOK.code)
       expect(first.status).toBe(200)
       expect(first.data.result.auto_saved).toEqual({
         id: expect.stringMatching(/^sfd_/) as unknown,
@@ -62,38 +75,35 @@ medusaIntegrationTestRunner({
         summary: { source: "own", source_name: null, edited: false, reason: "preset_apply" },
       })
       expect(gallery.current.draft).toMatchObject({
-        preset: { pack: "general", code: "grafit" },
+        preset: { pack: LOOK.pack, code: LOOK.code },
         design_id: null,
         edited: false,
         has_changes: true,
       })
 
-      // Grafit unchanged, applied again: nothing new to keep
-      const again = await staff.applyPreset("general", "grafit")
+      // The look unchanged, applied again: nothing new to keep
+      const again = await staff.applyPreset(LOOK.pack, LOOK.code)
       expect(again.data.result.auto_saved).toBeNull()
 
-      // Edited, then replaced: kept, named after Grafit and marked edited
-      const edited = {
-        ...again.data.layout.draft,
-        home: again.data.layout.draft.home.filter((section) => section.id !== "blogyazilari"),
-      }
+      // Edited, then replaced: kept, named after the look and marked edited
+      const edited = { ...again.data.layout.draft, home: again.data.layout.draft.home.slice(1) }
       await staff.saveDraft(edited)
       expect((await staff.gallery()).current.draft.edited).toBe(true)
-      const replaced = await staff.applyPreset("general", "grafit")
+      const replaced = await staff.applyPreset(LOOK.pack, LOOK.code)
       expect(replaced.data.result.auto_saved).toMatchObject({ kind: "auto" })
       gallery = await staff.gallery()
       expect(gallery.designs).toHaveLength(2)
       expect(gallery.designs[0]?.summary).toMatchObject({
         source: "preset",
-        source_name: "Grafit",
-        preset: { pack: "general", code: "grafit" },
+        source_name: LOOK.name,
+        preset: { pack: LOOK.pack, code: LOOK.code },
         edited: true,
         reason: "preset_apply",
       })
 
       // The same edit made again: a saved look already holds it
       await staff.saveDraft(edited)
-      expect((await staff.applyPreset("general", "grafit")).data.result.auto_saved).toBeNull()
+      expect((await staff.applyPreset(LOOK.pack, LOOK.code)).data.result.auto_saved).toBeNull()
       expect((await staff.gallery()).designs).toHaveLength(2)
 
       // No document in any answer, and none kept with a menu set or a label
@@ -117,7 +127,7 @@ medusaIntegrationTestRunner({
           ...own,
           home: [helpBox("yardimkutusu", `Bize yazın ${String(round)}`)],
         })
-        const applied = await staff.applyPreset("general", "grafit")
+        const applied = await staff.applyPreset(LOOK.pack, LOOK.code)
         expect(applied.status).toBe(200)
         autos.push(applied.data.result.auto_saved?.id ?? "none")
       }
@@ -157,7 +167,7 @@ medusaIntegrationTestRunner({
       }
 
       // The tenth, named while applying: the draft kept by name, no automatic save
-      const tenth = await staff.applyPreset("general", "grafit", { save_as: "Önceki hâli" })
+      const tenth = await staff.applyPreset(LOOK.pack, LOOK.code, { save_as: "Önceki hâli" })
       expect(tenth.status).toBe(200)
       expect(tenth.data.result.auto_saved).toMatchObject({ kind: "saved", name: "Önceki hâli" })
       let gallery = await staff.gallery()
@@ -171,7 +181,7 @@ medusaIntegrationTestRunner({
       // Past the ten, save_as refuses the apply whole: the draft is as it was
       await staff.saveDraft({ ...own, home: [helpBox("yardimkutusu", "Değişti")] })
       const before = await staff.layout()
-      const refused = await staff.applyPreset("general", "grafit", { save_as: "Bir daha" })
+      const refused = await staff.applyPreset(LOOK.pack, LOOK.code, { save_as: "Bir daha" })
       expect(refused.status).toBe(409)
       expect(refused.data.message).toBe("storefront_design.limit_reached")
       expect((await staff.layout()).draft).toEqual(before.draft)
@@ -235,42 +245,45 @@ medusaIntegrationTestRunner({
     })
 
     it("serves a ready-made look's picture only for the gallery's looks, and widens its cards", async () => {
-      const { staff } = await ownerWithDraft()
+      const { staff } = await ownerWithDraft(false)
       const container = getContainer()
+      const picturePath = `/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/preview`
+      // A pack not applied here: neither card nor picture
+      expect((await staff.get(picturePath)).status).toBe(404)
+      await withCutlery(container)
+
       const presets = await staff.get<{ presets: Record<string, unknown>[] }>(
         "/admin/storefront-presets"
       )
-      const grafit = presets.data.presets.find((each) => each["code"] === "grafit")
-      expect(grafit).toMatchObject({
-        family: "grafit",
+      const look = presets.data.presets.find((each) => each["code"] === LOOK.code)
+      expect(look).toMatchObject({
+        family: LOOK.code,
         swatch: null,
-        has_header: false,
-        has_footer: true,
+        has_header: true,
+        has_footer: false,
         has_preview: true,
         summary: {
           source: "preset",
-          source_name: "Grafit",
-          preset: { pack: "general", code: "grafit" },
+          source_name: LOOK.name,
+          preset: { pack: LOOK.pack, code: LOOK.code },
           edited: false,
           reason: null,
         },
       })
-      expect(grafit?.["preview_url"]).toMatch(
-        /^\/admin\/storefront-presets\/general\/grafit\/preview\?v=\d+$/
+      expect(look?.["preview_url"]).toMatch(
+        /^\/admin\/storefront-presets\/cutlery\/katalog\/preview\?v=\d+$/
       )
-      expect(grafit).not.toHaveProperty("layout")
+      expect(look).not.toHaveProperty("layout")
 
       // Its picture (`pnpm preset:previews`), sent as an image only
-      const picture = await staff.get("/admin/storefront-presets/general/grafit/preview")
+      const picture = await staff.get(picturePath)
       expect(picture.status).toBe(200)
       expect(picture.headers["content-type"]).toMatch(/^image\/webp/)
       expect(picture.headers["x-content-type-options"]).toBe("nosniff")
 
-      // Signed out; a pack not applied here; a code no pack writes
-      expect(
-        (await settle(http.get("/admin/storefront-presets/general/grafit/preview"))).status
-      ).toBe(401)
-      for (const path of ["cutlery/tezgah", "general/Grafit", "general/..%2Fgrafit", "yok/yok"]) {
+      // Signed out; a removed look (general/grafit, owner 2026-11-17); a code no pack writes
+      expect((await settle(http.get(picturePath))).status).toBe(401)
+      for (const path of ["general/grafit", "cutlery/Katalog", "cutlery/..%2Fkatalog", "yok/yok"]) {
         expect((await staff.get(`/admin/storefront-presets/${path}/preview`)).status).toBe(404)
       }
       // A read, as the gallery's list is: any staff member's (operations reads all but the private)
@@ -278,9 +291,57 @@ medusaIntegrationTestRunner({
         http,
         (await createAdminUser(http, container, "operations")).headers
       )
+      expect((await operations.get(picturePath)).status).toBe(200)
+    })
+
+    it("opens a draft and a live design naming a removed look as the shop's own work", async () => {
+      // A shop given general/grafit before it was removed (owner, 2026-11-17)
+      const container = getContainer()
+      const { staff } = await ownerWithDraft()
+      expect((await staff.post("/admin/storefront-layout/publish")).status).toBe(200)
+      const gone = { pack: "general", code: "grafit", version: 1 }
+      const row = await layoutRow(container)
+      const named = (stored: unknown): Record<string, unknown> => {
+        const doc = stored as Record<string, unknown> & { settings: Record<string, unknown> }
+        return { ...doc, settings: { ...doc.settings, preset: gone, design: null } }
+      }
+      await designService(container).updateStorefrontLayouts({
+        id: row?.id ?? "",
+        draft: named(row?.draft),
+        published: named(row?.published),
+      })
+
+      // The editor opens it, the label kept as written
+      const layout = await staff.get<{ layout: { draft: Draft } }>("/admin/storefront-layout")
+      expect(layout.status).toBe(200)
+      expect(layout.data.layout.draft.settings["preset"]).toEqual(gone)
+      // The gallery lists the looks there are, none of them in the draft or live
+      const presets = await staff.get<{ presets: Record<string, unknown>[] }>(
+        "/admin/storefront-presets"
+      )
+      expect(presets.status).toBe(200)
       expect(
-        (await operations.get("/admin/storefront-presets/general/grafit/preview")).status
-      ).toBe(200)
+        presets.data.presets.map((each) => `${String(each["pack"])}/${String(each["code"])}`)
+      ).not.toContain("general/grafit")
+      for (const card of presets.data.presets) {
+        expect(card).toMatchObject({ in_draft: null, live: null })
+      }
+      const gallery = await staff.gallery()
+      expect(gallery.current.draft).toMatchObject({ preset: gone, design_id: null })
+      expect(gallery.current.live).toMatchObject({ preset: gone, design_id: null })
+
+      // Kept by name, and kept first when another look replaces it: no name to give it
+      const saved = await staff.saveDesign({ name: "Eski görünüm" })
+      expect(saved.status).toBe(200)
+      expect(saved.data.design?.summary).toMatchObject({ source: "preset", source_name: null })
+      const applied = await staff.applyPreset(LOOK.pack, LOOK.code)
+      expect(applied.status).toBe(200)
+      // The draft equals the saved look just made: nothing new to keep
+      expect(applied.data.result.auto_saved).toBeNull()
+      // Applying the removed look itself is unknown
+      const refused = await staff.applyPreset("general", "grafit")
+      expect(refused.status).toBe(404)
+      expect(refused.data.message).toBe("storefront_preset.unknown")
     })
   },
 })
