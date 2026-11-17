@@ -716,12 +716,6 @@
             "description": "Müşteri ödemeyi teslimatta kuryeye yapabilir. Ücret, üst tutar ve kapıda tahsilat yapan kargo seçenekleri Ayarlar > Ödeme > Kapıda ödeme'de."
           }
         },
-        "content": {
-          "ai_drafts": {
-            "label": "Yapay zekâ içerik taslakları",
-            "description": "Ürün açıklaması ve arama metinleri için bir model taslak yazar; taslaklar onaylanmadan sayfaya çıkmaz. Ürünlerin kişisel veri içermeyen bilgileri sağlayıcıya gider; sağlayıcı platform tarafından tanımlanınca çalışır."
-          }
-        },
         "compliance": {
           "age_verification": {
             "label": "Yaş doğrulama",
@@ -3357,6 +3351,7 @@
       },
       "description": "Açıklama",
       "descriptionHint": "Başlık, liste, alıntı ve tabloyla yazın. Arama motorları için en az {{suggested}} kelime önerilir.",
+      "aiDescription": "Açıklama için yapay zekâ ile öner",
       "shortDescription": "Kısa açıklama",
       "shortDescriptionHint": "Ürün adının altında, fiyatın üstünde yazdığınız gibi görünür. İsteğe bağlı, en çok 1.500 karakter. SEO açıklaması yazılmamışsa arama sonucundaki açıklama da buradan alınır.",
       "shortDescriptionPlaceholder": "Örn. Ürünü birkaç cümleyle tanıtın: malzeme, ölçü, kullanım.",
@@ -3385,12 +3380,7 @@
       "struckIn_one": "{{count}} varyantta indirim üstü çizili gösteriliyor",
       "struckIn_other": "{{count}} varyantta indirim üstü çizili gösteriliyor",
       "blockedIn_one": "{{count}} varyantta indirim üstü çizili gösterilmiyor",
-      "blockedIn_other": "{{count}} varyantta indirim üstü çizili gösterilmiyor",
-      "draftsWaiting_one": "{{count}} taslak onay bekliyor",
-      "draftsWaiting_other": "{{count}} taslak onay bekliyor",
-      "noneWaiting": "Onay bekleyen taslak yok",
-      "noDrafts": "Henüz taslak yok",
-      "draftsQuota": "Bu ay {{used}}/{{limit}} taslak"
+      "blockedIn_other": "{{count}} varyantta indirim üstü çizili gösterilmiyor"
     },
     "catalog": {
       "card": "Katalog bilgileri",
@@ -3696,41 +3686,6 @@
       "wishlist": "Favorisine ekleyen",
       "waiting": "Stok bekleyen",
       "waitingFor": "Stok bekleyen · {{variant}}"
-    },
-    "drafts": {
-      "title": "İçerik taslakları",
-      "description": "Modelle yazılan taslaklar; onaylamadan sayfaya çıkmaz. Bu ay {{used}}/{{limit}} taslak.",
-      "ask": {
-        "product_description": "Açıklama taslağı",
-        "seo_title": "Arama başlığı taslağı",
-        "seo_description": "Arama açıklaması taslağı"
-      },
-      "kinds": {
-        "product_description": "Ürün açıklaması",
-        "seo_title": "Arama başlığı",
-        "seo_description": "Arama açıklaması"
-      },
-      "status": {
-        "draft": "Onay bekliyor",
-        "approved": "Onaylandı",
-        "rejected": "Reddedildi",
-        "refused": "Kurallardan geçmedi"
-      },
-      "source": "AI taslağı",
-      "problems": {
-        "length": "Uzunluk arama sonucuna uymuyor",
-        "too_short": "Açıklama çok kısa",
-        "noise": "Büyük harf, tekrar ya da işaret kalabalığı",
-        "link": "Bağlantı içeriyor",
-        "personal_data": "Kişisel veriye benzeyen bilgi içeriyor"
-      },
-      "refused": "Taslak SEO kurallarından geçmedi; önerilmedi.",
-      "approve": "Onayla ve uygula",
-      "reject": "Reddet",
-      "decided": {
-        "approve": "Taslak onaylandı ve sayfaya uygulandı.",
-        "reject": "Taslak reddedildi."
-      }
     },
     "giftCardBadge": "Hediye kartı",
     "side": {
@@ -11328,7 +11283,8 @@
       "seo_description": "Arama açıklaması"
     },
     "options": {
-      "short": "Kısa"
+      "short": "Kısa",
+      "detailed": "Ayrıntılı"
     },
     "card": {
       "capabilities": "Yapabildikleri",

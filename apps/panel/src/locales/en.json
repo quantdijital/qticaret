@@ -716,12 +716,6 @@
             "description": "Shoppers can pay the courier on delivery. The fee, the limit and the couriers that collect are under Settings > Payment > Cash on delivery."
           }
         },
-        "content": {
-          "ai_drafts": {
-            "label": "AI content drafts",
-            "description": "A model drafts product descriptions and search texts; drafts reach the page only once approved. Only the products' facts, without personal data, go to the provider; it works once the platform has set one up."
-          }
-        },
         "compliance": {
           "age_verification": {
             "label": "Age verification",
@@ -3357,6 +3351,7 @@
       },
       "description": "Description",
       "descriptionHint": "Write with headings, lists, quotes and tables. Search engines favour at least {{suggested}} words.",
+      "aiDescription": "Suggest a description with AI",
       "shortDescription": "Short description",
       "shortDescriptionHint": "Shows as written under the product name, above the price. Optional, at most 1,500 characters. Without an SEO description of its own, the search result’s description is taken from it too.",
       "shortDescriptionPlaceholder": "E.g. Introduce the product in a few sentences: material, size, use.",
@@ -3385,12 +3380,7 @@
       "struckIn_one": "Discount struck through on {{count}} variant",
       "struckIn_other": "Discount struck through on {{count}} variants",
       "blockedIn_one": "Discount not struck through on {{count}} variant",
-      "blockedIn_other": "Discount not struck through on {{count}} variants",
-      "draftsWaiting_one": "{{count}} draft waiting for approval",
-      "draftsWaiting_other": "{{count}} drafts waiting for approval",
-      "noneWaiting": "No draft waiting for approval",
-      "noDrafts": "No drafts yet",
-      "draftsQuota": "{{used}}/{{limit}} drafts this month"
+      "blockedIn_other": "Discount not struck through on {{count}} variants"
     },
     "catalog": {
       "card": "Catalog details",
@@ -3696,41 +3686,6 @@
       "wishlist": "Saved by",
       "waiting": "Waiting for stock",
       "waitingFor": "Waiting for stock · {{variant}}"
-    },
-    "drafts": {
-      "title": "Content drafts",
-      "description": "Drafts written by a model; nothing reaches the page until approved. {{used}}/{{limit}} drafts this month.",
-      "ask": {
-        "product_description": "Draft a description",
-        "seo_title": "Draft a search title",
-        "seo_description": "Draft a search description"
-      },
-      "kinds": {
-        "product_description": "Product description",
-        "seo_title": "Search title",
-        "seo_description": "Search description"
-      },
-      "status": {
-        "draft": "Awaiting approval",
-        "approved": "Approved",
-        "rejected": "Rejected",
-        "refused": "Failed the rules"
-      },
-      "source": "AI draft",
-      "problems": {
-        "length": "Length does not fit a search result",
-        "too_short": "Description too short",
-        "noise": "Capitals, repeats or piled-up symbols",
-        "link": "Contains a link",
-        "personal_data": "Contains what reads as personal data"
-      },
-      "refused": "The draft failed the SEO rules; it is not offered.",
-      "approve": "Approve and apply",
-      "reject": "Reject",
-      "decided": {
-        "approve": "Draft approved and applied to the page.",
-        "reject": "Draft rejected."
-      }
     },
     "giftCardBadge": "Gift card",
     "side": {
@@ -11328,7 +11283,8 @@
       "seo_description": "Search description"
     },
     "options": {
-      "short": "Short"
+      "short": "Short",
+      "detailed": "Detailed"
     },
     "card": {
       "capabilities": "What it can do",

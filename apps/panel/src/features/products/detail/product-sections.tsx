@@ -1,10 +1,8 @@
 import { AttributesCard } from "@/features/attributes/components/attributes-card"
 import { useSectionFindings } from "@/features/content/section-findings"
-import { useDraftsShown } from "@/features/products/api/content-drafts"
 import type { ProductDetail } from "@/features/products/api/products"
 import { AddonsCard } from "./addons-card"
 import { CatalogCard } from "./catalog-card"
-import { ContentDraftsCard } from "./content-drafts-card"
 import { OrganizeCard } from "./organize-card"
 import { PriceHistoryCard } from "./price-history-card"
 import { ProductSeoCard } from "./product-seo-card"
@@ -25,14 +23,13 @@ function useProductFindings(product: ProductDetail) {
 /**
  * What a product's page holds under its main cards (docs/06 "Ürün
  * sayfası"), each folded to a line that says what is in it: its search
- * appearance, attributes, add-ons, price history and content drafts. A
+ * appearance, attributes, add-ons and price history. A
  * part the shop does not use is left out. Closed parts keep their
  * fields, so an edit not yet saved survives; each saves on its own.
  */
 export function ProductSections({ product }: { product: ProductDetail }) {
   const findings = useProductFindings(product)
   const addons = useAddonsShown(product.id) === true
-  const drafts = useDraftsShown(product.id)
   return (
     <>
       <ProductSeoCard product={product} fold={findings(S.seo)} />
@@ -40,7 +37,6 @@ export function ProductSections({ product }: { product: ProductDetail }) {
       {/* adr/0052: shown while the shop's add-ons are on or the product still has some */}
       {addons ? <AddonsCard productId={product.id} fold={findings(S.addons)} /> : null}
       <PriceHistoryCard productId={product.id} fold={findings(S.priceHistory)} />
-      {drafts ? <ContentDraftsCard productId={product.id} fold={findings(S.drafts)} /> : null}
     </>
   )
 }

@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/react"
+import type { ReactNode } from "react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -28,6 +29,12 @@ interface DocumentCardProps {
   maxChars?: number
   /** The empty editor's hint. */
   placeholder?: string
+  /**
+   * Right of the title: an action that may put a whole new text in the
+   * editor (an AI suggestion, adr/0071 §13). The text is a change like any
+   * typed one: the card's Save writes it, Undo drops it.
+   */
+  action?: (put: (doc: JSONContent) => void) => ReactNode
 }
 
 /**
@@ -45,6 +52,7 @@ export function DocumentCard({
   short = false,
   maxChars,
   placeholder,
+  action,
 }: DocumentCardProps) {
   const { t } = useTranslation()
   const [draft, setDraft] = useState<JSONContent | null>(null)
@@ -53,6 +61,7 @@ export function DocumentCard({
     <CardForm
       title={title}
       description={description}
+      action={action?.(setDraft)}
       dirty={dirty}
       saving={saving}
       onSubmit={() => {
