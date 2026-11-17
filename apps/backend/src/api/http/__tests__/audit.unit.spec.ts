@@ -186,6 +186,33 @@ describe("audit registry", () => {
     expect(match?.resource.resourceId(match.params)).toBe("general/grafit")
   })
 
+  it.each([
+    ["POST", "/admin/storefront-designs", "POST /admin/storefront-designs", null],
+    ["POST", "/admin/storefront-designs/sfd_01A", "POST /admin/storefront-designs/:id", "sfd_01A"],
+    [
+      "DELETE",
+      "/admin/storefront-designs/sfd_01A",
+      "DELETE /admin/storefront-designs/:id",
+      "sfd_01A",
+    ],
+    [
+      "POST",
+      "/admin/storefront-designs/sfd_01A/apply",
+      "POST /admin/storefront-designs/:id/apply",
+      "sfd_01A",
+    ],
+  ])("records a saved look's %s %s (adr/0064 Ek 2026-11-17)", (method, path, route, id) => {
+    const match = matchAuditedResource(method, path)
+    expect(match).toMatchObject({ resource: { route, resourceType: "storefront_design" } })
+    expect(match?.resource.resourceId(match.params)).toBe(id)
+  })
+
+  it("leaves a saved look's read and a foreign id to the generic entry", () => {
+    expect(matchAuditedResource("GET", "/admin/storefront-designs")).toBeNull()
+    expect(matchAuditedResource("POST", "/admin/storefront-designs/prod_01A")).toBeNull()
+    expect(matchAuditedResource("POST", "/admin/storefront-designs/sfd_01A/publish")).toBeNull()
+  })
+
   it("leaves other routes to the generic entry", () => {
     expect(matchAuditedResource("POST", "/admin/regions/reg_01ABC")).toBeNull()
   })

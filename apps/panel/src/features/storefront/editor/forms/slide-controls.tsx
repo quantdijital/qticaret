@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Button } from "@qticaret/admin-ui/ui/button"
+import { HintedName } from "./field-hint"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 
 const S = "storefront.editor.slider"
@@ -26,15 +28,17 @@ export function Choice<T extends string>({
 }) {
   return (
     <div id={id} className="flex flex-col gap-2">
-      <span id={`${id}-label`} className="text-sm font-medium">
-        {label}
-        {term ? (
-          <>
-            {" "}
-            <small className="text-[11px] font-normal text-muted-foreground">{term}</small>
-          </>
-        ) : null}
-      </span>
+      <HintedName name={label} hint={hint} hintId={`${id}-hint`}>
+        <span id={`${id}-label`} className="text-sm font-medium">
+          {label}
+          {term ? (
+            <>
+              {" "}
+              <small className="text-[11px] font-normal text-muted-foreground">{term}</small>
+            </>
+          ) : null}
+        </span>
+      </HintedName>
       <ToggleGroup
         type="single"
         variant="outline"
@@ -58,11 +62,7 @@ export function Choice<T extends string>({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      {hint ? (
-        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-          {hint}
-        </p>
-      ) : null}
+      {hint ? <HiddenHint id={`${id}-hint`}>{hint}</HiddenHint> : null}
     </div>
   )
 }

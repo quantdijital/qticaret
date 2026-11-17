@@ -64,6 +64,9 @@ function StepsField<S extends MarqueeSetting>({
         type="single"
         variant="outline"
         aria-labelledby={`${id}-label`}
+        aria-describedby={
+          t(`${M}.${setting}.hint`, { defaultValue: "" }) ? `${id}-hint` : undefined
+        }
         value={value}
         onValueChange={(next) => {
           // Picking the chosen step again keeps it: a strip always has one
@@ -82,7 +85,7 @@ function StepsField<S extends MarqueeSetting>({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <SettingHint setting={setting} />
+      <SettingHint id={id} setting={setting} />
     </div>
   )
 }

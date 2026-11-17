@@ -1,32 +1,57 @@
 import { RotateCcw } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { MARQUEE_SETTINGS } from "@qticaret/types"
 import type { MarqueeSetting, MarqueeStep } from "@qticaret/types"
 import { useOffDefault } from "../group-mark"
+import { HintedName } from "./field-hint"
 
 const M = "storefront.editor.marquee"
 
-/** A setting's name: its everyday Turkish word with the technical term small beside it. */
-export function SettingName({ id, setting }: { id: string; setting: MarqueeSetting }) {
+/**
+ * A setting's name: its everyday Turkish word with the technical term
+ * small beside it, its short hint behind an (i) when it has one; the
+ * label of the control `htmlFor` names (a switch), else the span its
+ * group is labelled by.
+ */
+export function SettingName({
+  id,
+  setting,
+  htmlFor,
+}: {
+  id: string
+  setting: MarqueeSetting
+  htmlFor?: string
+}) {
   const { t } = useTranslation()
-  return (
+  const label = t(`${M}.${setting}.label`)
+  const name = (
     <span id={`${id}-label`} className="text-sm font-medium">
-      {t(`${M}.${setting}.label`)}{" "}
+      {label}{" "}
       <small className="text-[11px] font-normal text-muted-foreground">
         {t(`${M}.${setting}.term`)}
       </small>
     </span>
   )
+  return (
+    <HintedName
+      name={label}
+      hint={t(`${M}.${setting}.hint`, { defaultValue: "" })}
+      hintId={`${id}-hint`}
+    >
+      {htmlFor ? <label htmlFor={htmlFor}>{name}</label> : name}
+    </HintedName>
+  )
 }
 
-/** The setting's short hint, when it has one. */
-export function SettingHint({ setting }: { setting: MarqueeSetting }) {
+/** The setting's short hint, when it has one: hidden, the (i) beside its name shows it. */
+export function SettingHint({ id, setting }: { id: string; setting: MarqueeSetting }) {
   const { t } = useTranslation()
   const hint = t(`${M}.${setting}.hint`, { defaultValue: "" })
-  return hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null
+  return hint ? <HiddenHint id={`${id}-hint`}>{hint}</HiddenHint> : null
 }
 
 /** "Varsayılana dön", once the setting differs from its default: it counts on its group's title. */
@@ -53,14 +78,16 @@ export function SwitchField({
   value: string
   onChange: (step: "on" | "off") => void
 }) {
+  const { t } = useTranslation()
   return (
     <div id={id} className="flex items-start justify-between gap-4">
-      <label htmlFor={`${id}-input`} className="flex flex-col gap-0.5">
-        <SettingName id={id} setting={setting} />
-        <SettingHint setting={setting} />
-      </label>
+      <SettingName id={id} setting={setting} htmlFor={`${id}-input`} />
+      <SettingHint id={id} setting={setting} />
       <Switch
         id={`${id}-input`}
+        aria-describedby={
+          t(`${M}.${setting}.hint`, { defaultValue: "" }) ? `${id}-hint` : undefined
+        }
         checked={value === "on"}
         onCheckedChange={(checked) => {
           onChange(checked ? "on" : "off")

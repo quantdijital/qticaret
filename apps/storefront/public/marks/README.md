@@ -2,14 +2,17 @@
 
 Alt bilgideki ödeme ve kargo işaretleri (`lib/views/card-extras.ts` `MARK_LOGOS`), dosya adı backend'in anahtarıdır (`workflows/storefront/shop-marks.ts`). Her dosya sağlayıcının kendi sitesinden, olduğu gibi indirildi (2026-11-05); elle çizilmedi, değiştirilmedi. SVG'lerde betik, dış bağlantı ya da gömülü görsel yok (indirirken bakıldı; yeni dosyada yine bakılır).
 
-| Dosya | Kaynak |
-| --- | --- |
-| `visa.png` | https://cdn.visa.com/v2/assets/images/logos/visa/blue/logo.png (visa.com.tr'nin Organization JSON-LD'sindeki logo) |
-| `mastercard.svg` | https://www.mastercard.com/content/dam/brandcenter/assets/images/logos/mclogo-for-footer.svg (Mastercard Brand Center) |
-| `troy.svg` | https://www.troyodeme.com/upload/cmspagefile/file/medya-merkezi/TROY-Logolar.zip → `SVG/TROY Logo.svg` (TROY Medya Merkezi) |
-| `paytr.png` | https://www.paytr.com/wp-content/uploads/logo-1.png (paytr.com üst bilgi logosu) |
-| `iyzico.svg` | https://www.iyzico.com/assets/uploads/zip/BeyazZemindeKullanim.zip → `iyzico-white-bg.svg` (iyzico Marka Kılavuzu) |
-| `aras.svg` | https://www.araskargo.com.tr/aras-nav-logo.svg (araskargo.com.tr üst bilgi logosu) |
-| `yurtici.svg` | https://www.yurticikargo.com/web_files/yurtici-kargo/assets/img/logo.svg (yurticikargo.com üst bilgi logosu) |
+| Dosya            | Kaynak                                                                                                                                                                                                                                                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `visa.png`       | https://cdn.visa.com/v2/assets/images/logos/visa/blue/logo.png (visa.com.tr'nin Organization JSON-LD'sindeki logo)                                                                                                                                                                                             |
+| `mastercard.svg` | https://www.mastercard.com/content/dam/brandcenter/assets/images/logos/mclogo-for-footer.svg (Mastercard Brand Center)                                                                                                                                                                                         |
+| `troy.svg`       | https://www.troyodeme.com/upload/cmspagefile/file/medya-merkezi/TROY-Logolar.zip → `SVG/TROY Logo.svg` (TROY Medya Merkezi)                                                                                                                                                                                    |
+| `paytr.png`      | https://www.paytr.com/wp-content/uploads/logo-1.png (paytr.com üst bilgi logosu)                                                                                                                                                                                                                               |
+| `iyzico.svg`     | https://www.iyzico.com/assets/uploads/zip/BeyazZemindeKullanim.zip → `iyzico-white-bg.svg` (iyzico Marka Kılavuzu)                                                                                                                                                                                             |
+| `aras.svg`       | https://www.araskargo.com.tr/aras-nav-logo.svg (araskargo.com.tr üst bilgi logosu)                                                                                                                                                                                                                             |
+| `yurtici.svg`    | https://www.yurticikargo.com/web_files/yurtici-kargo/assets/img/logo.svg (yurticikargo.com üst bilgi logosu)                                                                                                                                                                                                   |
+| `amex.svg`       | `simple-icons` 16.34.0 npm paketi → `icons/americanexpress.svg` (simple-icons'un çizimi CC0 1.0; kaynağı American Express'in 2018 "Blue Box" logosu). Yalnız `<svg>` etiketine simple-icons'un `hex` değeri olan marka rengi `#2E77BC` ve 24 px boyut yazıldı, `role` kaldırıldı; çizim değişmedi (2026-11-17) |
 
-Havale/EFT ve kapıda ödeme bir şirketin işareti değildir: tema simgesiyle ve adıyla çizer.
+Havale/EFT, kapıda ödeme ve taksit bir şirketin işareti değildir: tema simgesiyle ve adıyla çizer.
+
+**Kullanım kuralları.** İşaretler markaların tescilli işaretidir; dosyanın lisansı (CC0 dahil) markayı kullanma hakkı vermez, yalnız mağazanın gerçekten kabul ettiği ödeme yolunu göstermek için kullanılır. Oranı bozulmaz, rengi değiştirilmez, kesilmez, döndürülmez, filtre (gri ton, tek renk) uygulanmaz; tema her işareti kendi boyunda, kart ağlarının istediği gibi açık zeminde (beyaz kart) ya da açık sayfa zemininde çizer, koyu zeminde her zaman beyaz kartta. Okunur kalması için temanın kendi alt sınırı 16 px yüksekliktir (markaların güncel en küçük boy kuralı kendi yönergelerinden doğrulanmalı). Troy için TROY Medya Merkezi'nin logo paketi kullanıldı; simple-icons'ta Troy yok.

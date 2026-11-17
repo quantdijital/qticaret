@@ -127,6 +127,13 @@ export const presetManifestSchema = z.strictObject({
   /** Turkish, as the gallery shows it. */
   name: plain(80),
   description: plain(400),
+  /**
+   * Colour siblings shown as one gallery card (adr/0064 Ek 2026-11-17 §7):
+   * the family's code (its base look's) and this one's short colour name.
+   * Labels only: changing them changes no look, so no version is raised.
+   */
+  family: z.string().regex(PRESET_CODE).optional(),
+  swatch: plain(40).optional(),
   /** The gallery's label only: the page's ground stays the theme's. */
   tone: z.enum(["light", "dark"]),
   /** Where each image comes from and under what licence (adr/0063, owner's decision 7). */
@@ -208,7 +215,11 @@ export type PresetMenu = z.infer<typeof presetMenuSchema>
 export type PresetDemo = z.infer<typeof presetDemoSchema>
 
 /** A preset as read: its manifest, its files' data with references unresolved, its images. */
-export interface StorefrontPreset extends Omit<PresetManifest, "format"> {
+export interface StorefrontPreset extends Omit<PresetManifest, "format" | "family" | "swatch"> {
+  /** Its colour family's code; null: a family of its own. */
+  family: string | null
+  /** Its short colour name within the family; null when it has none. */
+  swatch: string | null
   /** The pack it belongs to. */
   pack: string
   /** Its folder on disk: image and preview paths are relative to it. */

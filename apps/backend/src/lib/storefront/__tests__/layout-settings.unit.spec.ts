@@ -45,6 +45,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       theme: null,
       menus: null,
       preset: null,
+      design: null,
     })
     // Written empty is not unset: the shop chose none
     expect(layoutSettings.parse({ trust_badges: [], color_swatches: [] })).toMatchObject({
@@ -94,6 +95,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       theme: GRAFIT,
       menus: null,
       preset: null,
+      design: null,
     })
     const own = {
       trust_badges: [],
@@ -102,6 +104,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       theme: { ...GRAFIT, radius: "sharp" as const },
       menus: null,
       preset: { pack: "general", code: "grafit", version: 1 },
+      design: null,
     }
     expect(withLegacy(own, LEGACY)).toEqual(own)
     expect(withLegacy({ ...UNSET_SETTINGS, trust_badges: [] }, LEGACY).trust_badges).toEqual([])
@@ -195,6 +198,44 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
     expect(read.settings).toEqual(storedSettings(stored))
     expect(read.settings.theme).toBeNull()
     expect(read.settings.low_stock).toEqual({ enabled: true, threshold: 3 })
+  })
+})
+
+describe("the applied saved look's label in the design (adr/0064 Ek 2026-11-17 §2)", () => {
+  const digest = "a".repeat(64)
+
+  it("keeps a saved look's id and digest, or a ready-made look's null id", () => {
+    const saved = { id: "sfd_01JABCDEF", digest }
+    expect(layoutSettings.parse({ design: saved }).design).toEqual(saved)
+    expect(layoutSettings.parse({ design: { id: null, digest } }).design).toEqual({
+      id: null,
+      digest,
+    })
+    expect(layoutSettings.parse({}).design).toBeNull()
+  })
+
+  it("refuses a label that is not one: a foreign id, a short digest, an extra key", () => {
+    for (const wrong of [
+      { id: "prod_01JABCDEF", digest },
+      { id: "sfd_", digest },
+      { id: "sfd_01J;drop", digest },
+      { id: null, digest: "A".repeat(64) },
+      { id: null, digest: "a".repeat(63) },
+      { id: null, digest, name: "Kış" },
+    ]) {
+      expect(parses({ design: wrong })).toBe(false)
+    }
+  })
+
+  it("reads a stored label alone, an unreadable one unset, and fills nothing from the old fields", () => {
+    const label = { id: "sfd_01JABCDEF", digest }
+    expect(storedSettings({ settings: { design: label } }).design).toEqual(label)
+    expect(storedSettings({ settings: { design: { id: 7 }, color_swatches: [] } })).toEqual({
+      ...UNSET_SETTINGS,
+      color_swatches: [],
+    })
+    expect(withLegacy({ ...UNSET_SETTINGS, design: label }, LEGACY).design).toEqual(label)
+    expect(withLegacy({ ...UNSET_SETTINGS }, LEGACY).design).toBeNull()
   })
 })
 

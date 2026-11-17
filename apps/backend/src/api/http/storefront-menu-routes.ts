@@ -18,6 +18,14 @@ const PRESET_APPLY: RateLimitProfile = {
   perIdentityAnyIp: { max: 20, windowMs: 60 * 60 * 1000 },
 }
 
+/** The draft replaced (discarded, a revision restored): as a look applied, per staff member. */
+const draftReplaced = [
+  requireUserActor,
+  rateLimit(() => RATE_LIMIT_PROFILES.storefront_draft_replace, {
+    identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+  }),
+]
+
 /** The storefront's menus and theme editor (adr/0049): written whole, checked by one schema. */
 export const STOREFRONT_MENU_ROUTES = [
   {
@@ -35,15 +43,18 @@ export const STOREFRONT_MENU_ROUTES = [
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostStorefrontLayout)],
   },
-  ...[
-    "/admin/storefront-layout/publish",
-    "/admin/storefront-layout/discard",
-    "/admin/storefront-layout/preview",
-  ].map((matcher) => ({
+  ...["/admin/storefront-layout/publish", "/admin/storefront-layout/preview"].map((matcher) => ({
     matcher,
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostStorefrontLayoutAction)],
   })),
+  // adr/0064 Ek 2026-11-17: each keeps the draft first as an automatic save
+  // (its author recorded), so people only, rate limited per staff member
+  {
+    matcher: "/admin/storefront-layout/discard",
+    methods: ["POST" as const],
+    middlewares: [...draftReplaced, validateAndTransformBody(AdminPostStorefrontLayoutAction)],
+  },
   // adr/0065: the theme editor's live preview session, a person's from their panel session
   {
     matcher: "/admin/storefront-layout/editor-session",
@@ -70,7 +81,7 @@ export const STOREFRONT_MENU_ROUTES = [
   {
     matcher: "/admin/storefront-layout/revisions/:revision/restore",
     methods: ["POST" as const],
-    middlewares: [validateAndTransformBody(AdminPostStorefrontLayoutRestore)],
+    middlewares: [...draftReplaced, validateAndTransformBody(AdminPostStorefrontLayoutRestore)],
   },
   {
     matcher: "/admin/storefront-presets/:pack/:code/apply",

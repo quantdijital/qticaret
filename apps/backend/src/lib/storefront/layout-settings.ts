@@ -54,6 +54,23 @@ const appliedPreset = z
   })
   .strict()
 
+/**
+ * The saved look this design was last given (adr/0064 Ek 2026-11-17 §2):
+ * its id (null: a ready-made look, `preset` names it) and the digest of
+ * the design as applied (`lib/storefront/designs/digest.ts`), so the
+ * panel can say "Yayında", "Taslakta" and "düzenlenmiş". A label only:
+ * drafted and published with the sections, never shown to shoppers.
+ */
+const appliedDesign = z
+  .object({
+    id: z
+      .string()
+      .regex(/^sfd_[0-9A-Za-z]{1,40}$/)
+      .nullable(),
+    digest: z.string().regex(/^[0-9a-f]{64}$/),
+  })
+  .strict()
+
 const trustBadge = z
   .object({
     icon: z.enum(TRUST_ICONS),
@@ -101,6 +118,7 @@ export const UNSET_SETTINGS = {
   theme: null,
   menus: null,
   preset: null,
+  design: null,
 } as const
 
 /** Each part's own schema: a stored document is read part by part (`storedSettings`). */
@@ -111,6 +129,7 @@ const PARTS = {
   theme: layoutTheme,
   menus: menuSet.nullable().default(null),
   preset: appliedPreset.nullable().default(null),
+  design: appliedDesign.nullable().default(null),
 }
 
 export const layoutSettings = z
@@ -165,6 +184,7 @@ export function withLegacy(settings: LayoutSettings, legacy: Legacy): LayoutSett
     // Nothing to fill: an unset set leaves the live menus alone
     menus: settings.menus,
     preset: settings.preset,
+    design: settings.design,
   }
 }
 
@@ -202,5 +222,6 @@ export function storedSettings(document: unknown): LayoutSettings {
     theme: read("theme"),
     menus: read("menus"),
     preset: read("preset"),
+    design: read("design"),
   }
 }

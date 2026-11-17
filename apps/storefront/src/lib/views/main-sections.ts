@@ -26,6 +26,8 @@ import type {
   SectionLookView,
   Translate,
 } from "@qticaret/ui"
+import { shopMarks } from "./card-extras"
+import { footerColumnsOf } from "./footer-columns"
 import { headerCatalogOf } from "./header-catalog"
 
 /**
@@ -105,14 +107,22 @@ export function footerBarOf(
   const bar = main?.footer_bar
   const social = footerStep("social", bar?.social)
   const badges = [...new Set((bar?.payment_badges ?? []).filter(isBadge))]
+  const variant = variantOf("footer_bar", bar?.variant)
+  // The brand columns footer draws a card network by its own mark; the ledger writes its name
+  const columns = variant === "brand_columns"
   return {
     id: bar?.id ?? "mainfooter",
-    variant: variantOf("footer_bar", bar?.variant),
+    variant,
     ...(social !== FOOTER_BAR_DEFAULTS.social ? { social } : {}),
     ...(logo ? { logo } : {}),
     ...(badges.length > 0
-      ? { paymentBadges: badges.map((key) => ({ key, label: t(`marks.${key}`) })) }
+      ? {
+          paymentBadges: columns
+            ? shopMarks(badges, t)
+            : badges.map((key) => ({ key, label: t(`marks.${key}`) })),
+        }
       : {}),
+    ...(columns ? { columns: footerColumnsOf(bar?.columns) } : {}),
     ...(bar?.back_to_top === true
       ? {
           backToTop: {

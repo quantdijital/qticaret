@@ -4989,6 +4989,7 @@
       },
       "block": {
         "no_email": "The cart has no e-mail address; no reminder can be sent.",
+        "wholesale": "This cart is a wholesaler's. A reminder shows retail prices; wholesalers get none.",
         "reminded": "A reminder was already sent for this cart; each cart gets one.",
         "no_consent": "The customer has not consented to commercial e-mail. A reminder is a commercial message; it goes only to those who consented (İYS).",
         "suppressed": "Nothing is sent to this address (it is on the block list).",
@@ -8040,7 +8041,8 @@
           "catalog": "Classic catalogue"
         },
         "footer_bar": {
-          "ledger": "Standard"
+          "ledger": "Standard",
+          "brand_columns": "Brand and columns"
         },
         "product_main": {
           "standard": "Standard"
@@ -8181,6 +8183,16 @@
           "marked": "some settings are off their defaults"
         },
         "groups": {
+          "buttons": "Buttons",
+          "categoryList": "Category list",
+          "tiles": "Tiles beside it",
+          "chips": "Quick links",
+          "picks": "Small products",
+          "cards": "Cards",
+          "thumbs": "Product pictures",
+          "opening": "How the questions open",
+          "options": "Options",
+          "backToTop": "Back to top button",
           "search": "Search",
           "topBar": "Top strip",
           "menu": "Menu bar",
@@ -9156,7 +9168,7 @@
         "strip_note": {
           "label": "Strip note",
           "term": "strip note",
-          "hint": "A short announcement or offer. Example: Free shipping over 1500 TL."
+          "hint": "A short announcement or offer. Shop details work too: free shipping over {ücretsiz_kargo_eşiği} (the note hides while no threshold is set)."
         },
         "strip_note_link": {
           "label": "Note link",
@@ -9281,7 +9293,7 @@
         "payment_badges": {
           "label": "Payment badges",
           "term": "payment badges",
-          "hint": "The ones you pick show as written badges in this order. With none picked, your payment providers' marks show.",
+          "hint": "The ones you pick show in this order: as written badges in the Standard footer, as the card networks' own logos (Visa, Mastercard, Troy, American Express) in Brand and columns. With none picked, your payment providers' marks show.",
           "visa": "Visa",
           "mastercard": "Mastercard",
           "troy": "Troy",
@@ -9313,6 +9325,30 @@
           "label": "Show on phones too",
           "term": "mobile",
           "hint": "When off, the button shows only on wide screens."
+        },
+        "top_strip": {
+          "label": "Top strip",
+          "term": "top strip",
+          "hint": "The newsletter box with your phone, WhatsApp and e-mail above the columns. When off, the phone and e-mail stand in the brand block with the newsletter under them."
+        },
+        "about": {
+          "label": "Short introduction",
+          "term": "about",
+          "hint": "A short paragraph under your logo: what you sell, your shipping or returns promise. Hidden when empty."
+        },
+        "ground": {
+          "label": "Background",
+          "term": "background",
+          "well": "Light tint",
+          "page": "Page",
+          "stage": "Dark"
+        },
+        "badge_style": {
+          "label": "Payment logos",
+          "term": "payment marks",
+          "hint": "On the dark background the logos always stand on white cards; card networks want their logos on a light field.",
+          "card": "On cards",
+          "plain": "Plain"
         }
       },
       "main": {
@@ -10380,6 +10416,7 @@
       "none": "Not used anywhere.",
       "unnamed": "Unnamed record",
       "storefrontLink": "Storefront design",
+      "autoSavedLook": "Automatic save",
       "logoLink": "Shop logo",
       "shareImageLink": "The shop's share image",
       "seoPage": "Share image: {{page}}",
@@ -10399,6 +10436,7 @@
         "category": "Category image",
         "etbis_qr": "ETBİS QR code",
         "collection": "Collection picture",
+        "storefront_design": "Saved look",
         "favicon": "Site icon"
       },
       "seoTypes": {

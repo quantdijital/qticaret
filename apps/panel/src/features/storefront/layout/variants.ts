@@ -1,6 +1,7 @@
 import {
   CATEGORY_CARD_DEFAULTS,
   CATEGORY_COLLAGE_DEFAULTS,
+  FOOTER_COLUMNS_DEFAULTS,
   HERO_CATALOG_LIMITS,
   SCROLLER_DEFAULTS,
   SHELF_LIMITS,
@@ -84,7 +85,8 @@ export const VARIANT_FIELDS: {
     carousel: { scroller: SCROLLER_DEFAULTS },
   },
   header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
-  footer_bar: { ledger: {} },
+  // Ek 2026-11-17: the strip on, no line about the shop, the steel well, the marks on cards
+  footer_bar: { ledger: {}, brand_columns: FOOTER_COLUMNS_DEFAULTS },
   product_main: { standard: {} },
   category_main: { standard: {} },
 }

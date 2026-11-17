@@ -43,12 +43,17 @@ const slide = (links: LayoutLink[]) => ({
 /** The preview's field register (adr/0065 §9, Faz 2b): known keys only, part by part. */
 describe("the preview's field register", () => {
   it("places the opening's own words, buttons and picture", () => {
-    for (const key of ["eyebrow", "heading", "text", "image", "links.0"]) {
+    for (const key of ["eyebrow", "heading", "text", "image"]) {
       expect(previewField(hero(), key)).toEqual({
         target: PREVIEW_IDS.text("giris00001", key),
         group: "content",
       })
     }
+    // Its buttons stand in their own group, "Düğmeler"
+    expect(previewField(hero(), "links.0")).toEqual({
+      target: PREVIEW_IDS.text("giris00001", "links.0"),
+      group: "buttons",
+    })
     expect(PREVIEW_IDS.text("giris00001", "links.0")).toBe("giris00001-links-0")
   })
 

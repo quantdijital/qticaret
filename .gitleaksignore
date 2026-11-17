@@ -33,6 +33,8 @@ da2b7469cd411a891ea54fc4c18200baaedb9071:apps/control-plane-panel/src/features/e
 # backend wholesale (branch deniz/toptanci-2-panel): test password, Turkish words + year, commented as made for the test
 872376e9076def07c585b6b67dbbbab9bf1fb454:apps/backend/src/workflows/wholesale/__tests__/account-login.unit.spec.ts:generic-api-key:17
 e77f82da13498ff7a6153ff4e839cc4710ff8403:apps/panel/src/features/wholesale/components/new-wholesaler-dialog.spec.tsx:generic-api-key:18
+# backend maintenance guard test (PR #141, #144): registration password, a made-up dash-separated phrase with a number; replaced by randomUUID() in 0d88306d
+06cc67d9378f9582a48f6b8e5fb195e9283ea2b1:apps/backend/integration-tests/http/maintenance-store-guard.spec.ts:generic-api-key:107
 # docs: Turkish prose in the roadmap (F16.11, closing a shop); the word the rule took for a value is a DNS note
 ce4a7847aa47be21cf9229ae76fcd8a99599cf35:docs/03-yol-haritasi.md:generic-api-key:458
 # storefront e2e: the env variable's name in a doc comment, not a value

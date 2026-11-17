@@ -207,6 +207,8 @@ medusaIntegrationTestRunner({
         kept: ["header.duyurular"],
         images: { added: 0, kept: 0 },
         demo: { added: 0, kept: 0 },
+        // The shop's own draft kept first (adr/0064 Ek 2026-11-17)
+        auto_saved: { id: expect.stringMatching(/^sfd_/) as unknown, kind: "auto", name: null },
       })
       const draft = first.data.layout.draft
       // The header bar read in from grafit's theme header (adr/0049 Ek 2026-11-14 §5)

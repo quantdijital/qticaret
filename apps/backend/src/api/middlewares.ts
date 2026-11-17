@@ -53,9 +53,11 @@ import { CONTACT_ROUTES } from "./http/contact-routes"
 import { ALERT_ROUTES } from "./http/alert-routes"
 import { EMAIL_LINK_ROUTES } from "./http/email-link-routes"
 import { STOREFRONT_MENU_ROUTES } from "./http/storefront-menu-routes"
+import { STOREFRONT_DESIGN_ROUTES } from "./http/storefront-design-routes"
 import { STOREFRONT_CARD_ROUTES } from "./http/storefront-card-routes"
 import { LEGAL_ROUTES } from "./http/legal-routes"
 import { MAINTENANCE_ROUTES } from "./http/maintenance-routes"
+import { refuseWritesInMaintenance } from "./http/maintenance-guard"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
 import { GOOGLE_ROUTES } from "./http/google-routes"
 import { EINVOICE_ROUTES } from "./http/einvoice-routes"
@@ -159,6 +161,8 @@ export default defineMiddlewares({
       middlewares: [
         rateLimit(storeProfileOf),
         storeLimitGuard,
+        // adr/0053 Ek 2026-11-17: a dark shop's Store API takes no sale or form
+        refuseWritesInMaintenance,
         rejectSensitiveFields,
         restrictStoreAttributeFields,
         rejectStoreVariantExtension,
@@ -352,6 +356,7 @@ export default defineMiddlewares({
     ...CONTACT_ROUTES,
     ...EMAIL_LINK_ROUTES,
     ...STOREFRONT_MENU_ROUTES,
+    ...STOREFRONT_DESIGN_ROUTES,
     // adr/0053: maintenance mode's bypass link
     ...MAINTENANCE_ROUTES,
     ...MARKETING_ROUTES,

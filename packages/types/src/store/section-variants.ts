@@ -59,7 +59,13 @@ export const SECTION_VARIANTS = {
    * a filled menu bar with a "Kategoriler" button.
    */
   header_bar: ["standard", "centered", "catalog"],
-  footer_bar: ["ledger"],
+  /**
+   * `ledger`: today's steel-well ledger; `brand_columns` (adr/0049 Ek
+   * 2026-11-17): a brand block beside the link columns, an optional strip
+   * above (newsletter, contact), one bottom line with the ways to pay as
+   * their marks (`FOOTER_COLUMNS_SETTINGS`).
+   */
+  footer_bar: ["ledger", "brand_columns"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>

@@ -37,7 +37,7 @@ export const SECTION_VARIANTS = {
   // `centered` is the theme setting's centred header (`header.layout`), read
   // into the bar; its drawing stays on adr/0062 karar 6's branch. `catalog` is N14
   header_bar: ["standard", "centered", "catalog"],
-  footer_bar: ["ledger"],
+  footer_bar: ["ledger", "brand_columns"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>

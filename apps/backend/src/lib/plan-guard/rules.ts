@@ -231,6 +231,7 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   "/admin/storefront-layout*",
   "/admin/storefront-menus*",
   "/admin/storefront-presets*",
+  "/admin/storefront-designs*",
   "/admin/seo*",
   "/admin/search*",
   "/admin/search-indexes*",

@@ -1,6 +1,7 @@
 import type {
   CategoryMainVariant,
   FooterBarStep,
+  FooterColumnsStep,
   FooterBarVariant,
   HeaderBarVariant,
   HeaderMenuGround,
@@ -12,6 +13,7 @@ import type {
   ProductMainVariant,
 } from "@qticaret/types"
 import type { SectionLookView } from "./content-views"
+import type { ShopMarkView } from "./card-views"
 import type { ImageView, LinkView, NavCategoryView } from "./views"
 
 /**
@@ -104,10 +106,14 @@ export interface FooterBarView {
   social?: FooterBarStep<"social">
   /**
    * The ways to pay the shop names, in its order, each its key and words:
-   * drawn as the words in a small framed box, never a company's mark.
-   * None (or absent): the providers' marks, as before.
+   * the ledger draws the words in a small framed box; the brand columns
+   * footer draws a card network's own mark (`logo`, the storefront's
+   * `/marks/` file) and the others' words. None (or absent): the
+   * providers' marks, as before.
    */
-  paymentBadges?: { key: string; label: string }[]
+  paymentBadges?: ShopMarkView[]
+  /** The `brand_columns` footer's own settings (adr/0049 Ek 2026-11-17); absent on the others. */
+  columns?: FooterColumnsView
   /** The floating "back to top" button; none (or absent): not drawn. */
   backToTop?: BackToTopView | null
   /**
@@ -115,6 +121,16 @@ export interface FooterBarView {
    * header's does (owner 2026-11-16); absent (no logo): its name.
    */
   logo?: ImageView
+}
+
+/** The brand columns footer's own settings, each read forgivingly (a step off its list: the default). */
+export interface FooterColumnsView {
+  /** The strip above the columns: the newsletter box and the shop's ways to reach it. */
+  topStrip: boolean
+  /** A short line about the shop under its name; null: none. */
+  about: string | null
+  ground: FooterColumnsStep<"ground">
+  badgeStyle: FooterColumnsStep<"badge_style">
 }
 
 export interface BackToTopView {

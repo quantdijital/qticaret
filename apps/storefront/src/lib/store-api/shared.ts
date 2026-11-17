@@ -1,4 +1,5 @@
 import "server-only"
+import { isPersonalPath, personalPriceIn } from "./personal"
 import { storeCaches } from "./registry"
 
 /**
@@ -32,13 +33,36 @@ function prune(now: number): void {
   }
 }
 
+/**
+ * Kept for every shopper, so never a person's (ADR-0068 §7, review I3): a
+ * customer's own route is refused before it is asked, and an answer
+ * holding a wholesaler's price fails for every caller waiting on it (a
+ * bug to fix, not a page to show to the next shopper). One too large to
+ * look through is answered but not kept.
+ */
 export function shared<T>(key: string, load: () => Promise<T>, ttlMs = SHARED_TTL_MS): Promise<T> {
+  if (isPersonalPath(pathOf(key))) {
+    return Promise.reject(new Error(`shared cache: ${pathOf(key)} is a customer's own route`))
+  }
   const now = Date.now()
   const hit = entries.get(key)
   if (hit && hit.until > now) {
     return hit.value as Promise<T>
   }
-  const value = load()
+  const value = load().then((answer) => {
+    const personal = personalPriceIn(answer)
+    if (personal === "yes") {
+      throw new Error(`shared cache: ${pathOf(key)} answered a wholesaler's price`)
+    }
+    if (personal === "unknown") {
+      queueMicrotask(() => {
+        if (entries.get(key)?.value === value) {
+          entries.delete(key)
+        }
+      })
+    }
+    return answer
+  })
   entries.set(key, { until: now + ttlMs, value })
   value.catch(() => {
     if (entries.get(key)?.value === value) {

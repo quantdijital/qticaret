@@ -4,15 +4,33 @@ import type { LayoutDocument } from "../../../lib/storefront/layout"
 import { STOREFRONT_LAYOUT_MODULE } from "../../../modules/storefront-layout"
 import type StorefrontLayoutModuleService from "../../../modules/storefront-layout/service"
 import { layoutRow } from "../../../workflows/storefront/layout"
+import type { LayoutRow } from "../../../workflows/storefront/layout-row"
 import { defaultLayout } from "../../../workflows/storefront/layout-default"
 import { storedSettings } from "../../../lib/storefront/layout-settings"
 import { legacySettings, withLegacySettings } from "../../../workflows/storefront/layout-shared"
 
 // A document as today's schema reads it (a group added since is there, empty);
 // one it no longer reads is given as it is stored
-const current = (stored: unknown): LayoutDocument => {
+export const current = (stored: unknown): LayoutDocument => {
   const parsed = layoutDocument.safeParse(storedDocument(stored))
   return parsed.success ? parsed.data : (stored as LayoutDocument)
+}
+
+/**
+ * Whether the draft (as the editor opens it, `draft`) differs from what is
+ * live, both as today's schema reads them: a group added since is no change.
+ * Never saved: no change.
+ */
+export function draftChanged(
+  row: LayoutRow | null,
+  draft: LayoutDocument,
+  legacy: Awaited<ReturnType<typeof legacySettings>>
+): boolean {
+  if (!row) {
+    return false
+  }
+  const live = row.published === null ? null : withLegacySettings(current(row.published), legacy)
+  return JSON.stringify(draft) !== JSON.stringify(live)
 }
 
 /**
@@ -45,13 +63,7 @@ export async function adminLayout(container: MedusaContainer) {
     draft,
     /** The design has never been saved: the draft is the default one. */
     is_default: row === null,
-    // Compared as today's schema reads both: a group added since is no change
-    has_changes: row
-      ? JSON.stringify(draft) !==
-        JSON.stringify(
-          row.published === null ? null : withLegacySettings(current(row.published), legacy)
-        )
-      : false,
+    has_changes: draftChanged(row, draft, legacy),
     revision: row?.revision ?? 0,
     published_at: row?.published_at ?? null,
     revisions,

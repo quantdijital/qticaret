@@ -43,15 +43,11 @@ export function wholesaleAt(
   return closed === null || closed > placed
 }
 
-/**
- * The order linked to the wholesaler its customer was when it was placed;
- * null for a retail order. A second run (a repeated event) finds the link
- * and writes nothing.
- */
-export async function stampWholesaleOrder(
+/** The wholesaler the order's customer was when it was placed; null for a retail order. */
+async function wholesalerAtPlacing(
   container: Container,
   orderId: string
-): Promise<{ order_id: string; account_id: string } | null> {
+): Promise<{ id: string } | null> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
     fields: ["id", "customer_id", "created_at"],
@@ -75,6 +71,19 @@ export async function stampWholesaleOrder(
         }
       )
     ).filter((each) => wholesaleAt(each, placedAt))
+  return account ?? null
+}
+
+/**
+ * The order linked to the wholesaler its customer was when it was placed;
+ * null for a retail order. A second run (a repeated event) finds the link
+ * and writes nothing.
+ */
+export async function stampWholesaleOrder(
+  container: Container,
+  orderId: string
+): Promise<{ order_id: string; account_id: string } | null> {
+  const account = await wholesalerAtPlacing(container, orderId)
   if (!account) {
     return null
   }
@@ -86,6 +95,18 @@ export async function stampWholesaleOrder(
     [WHOLESALE_MODULE]: { wholesale_account_id: account.id },
   })
   return { order_id: orderId, account_id: account.id }
+}
+
+/**
+ * Whether the order is a wholesale order: stamped, or placed by a
+ * wholesaler and not stamped yet (the stamp's subscriber hears the same
+ * `order.placed` as the caller, in no set order).
+ */
+export async function isWholesaleOrder(container: Container, orderId: string): Promise<boolean> {
+  if ((await wholesaleOrders(container, { order_ids: [orderId] })).size > 0) {
+    return true
+  }
+  return (await wholesalerAtPlacing(container, orderId)) !== null
 }
 
 /**

@@ -71,9 +71,13 @@ const SAMPLES: [string, LayoutGroup, AnySection][] = [
       "header",
       section,
     ]),
-  ...[...DOC.footer, newFooterNewsletter("altbulten1")].map(
-    (section): [string, LayoutGroup, AnySection] => [`footer: ${name(section)}`, "footer", section]
-  ),
+  ...[...DOC.footer, newFooterNewsletter("altbulten1")]
+    .flatMap(withVariants)
+    .map((section): [string, LayoutGroup, AnySection] => [
+      `footer: ${name(section)}`,
+      "footer",
+      section,
+    ]),
   ...[...DOC.product, ...DOC.category]
     .filter((section) => section.type === "product_main" || section.type === "category_main")
     .map((section): [string, LayoutGroup, AnySection] => [

@@ -21,6 +21,8 @@ const ID_FIELD = /^[a-z]+_(ids?)$/
 /** A list's items that go with their one record (resolve.ts `DROPPED_IN_ITEMS`). */
 const DROPPED_IN_ITEMS: Readonly<Record<string, { field: string; min: number }>> = {
   bands: { field: "category_id", min: 2 },
+  picks: { field: "product_id", min: 0 },
+  tiles: { field: "category_id", min: 0 },
 }
 
 /** The storefront's own pages a preset links to, by address (the backend's `menu-hrefs`). */

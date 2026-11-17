@@ -44,6 +44,21 @@ moduleIntegrationTestRunner<WebhookEventsModuleService>({
       expect([paytr.state, iyzico.state]).toEqual(["new", "new"])
     })
 
+    it("counts every take of a result without a notice, two at once included", async () => {
+      const first = await service.countTake("iyzico", "payses_01E:paid")
+      const racing = await Promise.all([
+        service.countTake("iyzico", "payses_01E:paid"),
+        service.countTake("iyzico", "payses_01E:paid"),
+      ])
+      const other = await service.countTake("iyzico", "payses_01F:paid")
+      const [stored] = await service.listWebhookEvents({ event_key: "payses_01E:paid" })
+
+      expect(first).toBe(1)
+      expect(racing.sort()).toEqual([2, 3])
+      expect(other).toBe(1)
+      expect(stored).toMatchObject({ provider: "iyzico", attempts: 3 })
+    })
+
     it("gives a failed event to one of two racing retries", async () => {
       const first = await service.claim("paytr", "payses01D:success", {})
       await service.markFailed(first.id, "processing_failed")

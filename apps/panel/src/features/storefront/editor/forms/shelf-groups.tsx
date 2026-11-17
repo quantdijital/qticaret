@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import {
   SHELF_LIMITS,
@@ -13,6 +14,7 @@ import type { ProductsSection } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
 import { CardVariantField } from "./card-variant-field"
 import { ColumnsField } from "./columns-field"
+import { HintedName } from "./field-hint"
 import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { PhoneColumnsField } from "./phone-columns-field"
@@ -47,9 +49,11 @@ function CountChoice<N extends number>({
 }) {
   return (
     <div id={id} className="flex flex-col gap-2">
-      <span id={`${id}-label`} className="text-sm font-medium">
-        {label} <small className="text-[11px] font-normal text-muted-foreground">{term}</small>
-      </span>
+      <HintedName name={label} hint={hint} hintId={`${id}-hint`}>
+        <span id={`${id}-label`} className="text-sm font-medium">
+          {label} <small className="text-[11px] font-normal text-muted-foreground">{term}</small>
+        </span>
+      </HintedName>
       <ToggleGroup
         type="single"
         variant="outline"
@@ -72,9 +76,7 @@ function CountChoice<N extends number>({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-        {hint}
-      </p>
+      <HiddenHint id={`${id}-hint`}>{hint}</HiddenHint>
     </div>
   )
 }

@@ -73,6 +73,7 @@ describe("isSensitiveKey", () => {
     "PII_HASH_KEY",
     "sid",
     "otp",
+    "x-maintenance-bypass",
   ])("treats %s as sensitive", (key) => {
     expect(isSensitiveKey(key)).toBe(true)
   })
@@ -337,6 +338,11 @@ describe("redactText", () => {
       "design preview token in a storefront address",
       `GET /onizleme/sfl_01ABC.mabc12.${"b-".repeat(21)}c?sayfa=%2F 200`,
       `GET /onizleme/sfl_${REDACTED}?sayfa=%2F 200`,
+    ],
+    [
+      "maintenance bypass token in its address (base64url random part)",
+      `GET /store/maintenance/bypass/mnb_Ab-dEf_hIjKlMnOp.mhx0v3k0.${"A".repeat(43)} 429`,
+      `GET /store/maintenance/bypass/mnb_${REDACTED} 429`,
     ],
   ])("masks a %s", (_label, input, expected) => {
     expect(redactText(input)).toBe(expected)

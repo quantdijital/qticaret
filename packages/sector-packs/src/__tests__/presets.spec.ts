@@ -282,6 +282,33 @@ describe("a preset's folder", () => {
     expect(() => readPreset(dir, "deneme", "x2")).toThrow("is a link")
   })
 
+  it("reads a colour family and its colour's name, none as null (adr/0064 Ek 2026-11-17)", () => {
+    const plain = readPreset(write("x1", minimal("x1")), "deneme", "x1")
+    expect(plain).toMatchObject({ family: null, swatch: null })
+    const sibling = readPreset(
+      write(
+        "x2",
+        minimal("x2", {
+          "preset.json": preset("x2", { family: "x1", swatch: "Lacivert ve çelik" }),
+        })
+      ),
+      "deneme",
+      "x2"
+    )
+    expect(sibling).toMatchObject({ family: "x1", swatch: "Lacivert ve çelik" })
+  })
+
+  it("refuses a family that is no preset code and a colour name past 40 characters", () => {
+    refused(
+      minimal("x1", { "preset.json": preset("x1", { family: "../x" }) }),
+      "preset.json family"
+    )
+    refused(
+      minimal("x1", { "preset.json": preset("x1", { swatch: "x".repeat(41) }) }),
+      "preset.json swatch"
+    )
+  })
+
   it("refuses a folder whose name is no preset code", () => {
     const dir = write("X_1", minimal("X_1"))
     expect(() => readPreset(dir, "deneme", "X_1")).toThrow("is not a preset code")
