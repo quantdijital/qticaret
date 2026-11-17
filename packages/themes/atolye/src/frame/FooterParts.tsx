@@ -206,13 +206,19 @@ export function BrandBlock({
   )
 }
 
+const OUTSIDE = /^https?:\/\//i
+
+/** An address that leaves the shop carries no opener and no referrer; the shop's own, no `rel`. */
+export const outsideRel = (href: string): string | undefined =>
+  OUTSIDE.test(href) ? "noopener noreferrer" : undefined
+
 /** A link column's list: each a 44 px row (32 px under a fine pointer from 1024 px). */
 export function LinkList({ links }: { links: readonly (LinkView & { title?: string })[] }) {
   return (
     <ul className="flex flex-col">
       {links.map((link) => (
         <li key={link.path}>
-          <a href={link.path} title={link.title} className={LINK}>
+          <a href={link.path} title={link.title} rel={outsideRel(link.path)} className={LINK}>
             {link.label}
           </a>
         </li>
