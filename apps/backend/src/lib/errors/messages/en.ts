@@ -679,6 +679,29 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content_drafts.quota_reached": "This month's drafts are used up; they renew next month.",
   "content_drafts.not_open": "This draft is no longer waiting for approval.",
   "content_drafts.unknown_product": "Product not found.",
+  // adr/0071 §12: the AI core; a service's own words are never shown
+  "ai.no_service": "No connected AI service can do this. Connect a service under Settings > AI.",
+  "ai.service_unavailable":
+    "The chosen service is not connected or cannot do this. Pick another service from the list.",
+  "ai.own_keys_not_in_plan":
+    "Your plan does not include using AI with your own service key (BYOK).",
+  "ai.key_rejected": "The service did not accept the API key. Check the key under Settings > AI.",
+  "ai.provider_balance":
+    "Your account at the service has no balance or quota left. Check your account in the service's own dashboard.",
+  "ai.provider_busy": "The service is too busy right now (rate limit). Try again in a moment.",
+  "ai.provider_unavailable":
+    "The service cannot be reached right now. Try again, or try with another service.",
+  "ai.timeout": "The service did not answer in time. Try again, or try with another service.",
+  "ai.content_blocked":
+    "The service refused to write a suggestion for this content (content filter).",
+  "ai.suggestion_refused": "No suitable suggestion came out. Try again.",
+  "ai.provider_response_invalid": "The service gave an unexpected answer. Try again.",
+  "ai.input_unsupported": "This image's type or size does not suit this task.",
+  "ai.daily_limit_reached": "Today's AI usage limit has been reached. Try again tomorrow.",
+  "ai.credits_exhausted": "You are out of AI credits. Add credits to continue.",
+  "ai.unknown_entity": "The record the suggestion was asked for was not found.",
+  "ai.unknown_task": "There is no such AI task.",
+  "ai.suggestion_not_open": "This suggestion is no longer waiting for a decision.",
   "meta.pixel_id_invalid": "The pixel id is digits only.",
   "meta.test_event_code_invalid": "The test event code is letters and digits only.",
   "meta.merchant_invalid": "Meta does not know this pixel, or the token cannot reach it.",

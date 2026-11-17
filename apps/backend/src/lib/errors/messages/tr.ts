@@ -682,6 +682,30 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content_drafts.quota_reached": "Bu ayın taslak hakkı doldu; gelecek ay yenilenir.",
   "content_drafts.not_open": "Bu taslak artık onay beklemiyor.",
   "content_drafts.unknown_product": "Ürün bulunamadı.",
+  // adr/0071 §12: the AI core; a service's own words are never shown
+  "ai.no_service":
+    "Bu işi yapabilecek bağlı bir yapay zekâ servisi yok. Ayarlar > Yapay zekâ sayfasından bir servis bağlayın.",
+  "ai.service_unavailable":
+    "Seçilen servis bağlı değil ya da bu işi yapamıyor. Listeden başka bir servis seçin.",
+  "ai.own_keys_not_in_plan":
+    "Paketiniz kendi servis anahtarınızla (BYOK) yapay zekâ kullanımını kapsamıyor.",
+  "ai.key_rejected":
+    "Servis anahtarı (API key) kabul etmedi. Ayarlar > Yapay zekâ sayfasından anahtarı kontrol edin.",
+  "ai.provider_balance":
+    "Servis hesabınızda bakiye ya da kullanım hakkı kalmamış. Servisin kendi panelinden hesabınızı kontrol edin.",
+  "ai.provider_busy": "Servis şu anda çok yoğun (rate limit). Biraz sonra yeniden deneyin.",
+  "ai.provider_unavailable":
+    "Servise şu anda ulaşılamıyor. Yeniden deneyin ya da başka bir servisle deneyin.",
+  "ai.timeout": "Servis zamanında yanıt vermedi. Yeniden deneyin ya da başka bir servisle deneyin.",
+  "ai.content_blocked": "Servis bu içerik için öneri üretmeyi reddetti (içerik süzgeci).",
+  "ai.suggestion_refused": "Uygun bir öneri çıkmadı. Yeniden deneyin.",
+  "ai.provider_response_invalid": "Servisten beklenmeyen bir yanıt geldi. Yeniden deneyin.",
+  "ai.input_unsupported": "Bu görselin türü ya da boyutu bu iş için uygun değil.",
+  "ai.daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyin.",
+  "ai.credits_exhausted": "Yapay zekâ krediniz bitti. Devam etmek için kredi yükleyin.",
+  "ai.unknown_entity": "Öneri istenen kayıt bulunamadı.",
+  "ai.unknown_task": "Böyle bir yapay zekâ işi yok.",
+  "ai.suggestion_not_open": "Bu öneri artık karar beklemiyor.",
   "meta.pixel_id_invalid": "Piksel numarası yalnızca rakamlardan oluşur.",
   "meta.test_event_code_invalid": "Test olayı kodu yalnızca harf ve rakamdan oluşur.",
   "meta.merchant_invalid":
