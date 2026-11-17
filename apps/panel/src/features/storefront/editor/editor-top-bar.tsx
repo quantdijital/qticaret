@@ -1,4 +1,12 @@
-import { ArrowLeft, Eye, PencilLine, Redo2, Undo2 } from "lucide-react"
+import {
+  ArrowLeft,
+  Eye,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PencilLine,
+  Redo2,
+  Undo2,
+} from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
@@ -14,6 +22,7 @@ import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group
 import type { BodyGroup } from "@/features/storefront/api/layout"
 import { BarButton } from "./bar-button"
 import type { EditorLayout, EditorView } from "./editor-layout"
+import { SIDEBAR_ID } from "./editor-sidebar"
 import { Hint } from "./shared/hint"
 
 const E = "storefront.editor"
@@ -30,6 +39,9 @@ interface EditorTopBarProps {
   /** The narrow editor's view: the settings or the preview. */
   view: EditorView
   onView: (view: EditorView) => void
+  /** Whether the side panel is shown (1024 px and up; below, the view switch stands for it). */
+  sidebar: boolean
+  onSidebar: () => void
   canUndo: boolean
   canRedo: boolean
   onUndo: () => void
@@ -81,6 +93,29 @@ function UndoRedo({
   )
 }
 
+/** Folds the side panel away for a bigger preview, and back (⌘\ / Ctrl+\). */
+function SidebarToggle({ shown, onToggle }: { shown: boolean; onToggle: () => void }) {
+  const { t } = useTranslation()
+  const label = t(shown ? `${E}.sidebar.hide` : `${E}.sidebar.show`)
+  return (
+    <Hint label={label} side="bottom" wrap>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className="shrink-0"
+        aria-label={label}
+        aria-expanded={shown}
+        aria-controls={SIDEBAR_ID}
+        aria-keyshortcuts="Control+Backslash Meta+Backslash"
+        onClick={onToggle}
+      >
+        {shown ? <PanelLeftClose /> : <PanelLeftOpen />}
+      </Button>
+    </Hint>
+  )
+}
+
 /**
  * The editor's bar (Shopify's customizer), on show at every width: out
  * and the page being edited on the left; undo, redo and where the draft
@@ -96,6 +131,8 @@ export function EditorTopBar({
   onPage,
   view,
   onView,
+  sidebar,
+  onSidebar,
   canUndo,
   canRedo,
   onUndo,
@@ -119,6 +156,7 @@ export function EditorTopBar({
           onClick={onExit}
         />
         <Separator orientation="vertical" className="h-5 max-md:hidden" />
+        {narrow ? null : <SidebarToggle shown={sidebar} onToggle={onSidebar} />}
         <h1 className="shrink-0 text-sm font-semibold max-md:sr-only">{t(`${E}.title`)}</h1>
         <Select
           value={page}

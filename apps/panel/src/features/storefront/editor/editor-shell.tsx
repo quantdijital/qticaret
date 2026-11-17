@@ -10,6 +10,7 @@ import {
 } from "@qticaret/admin-ui/ui/sheet"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { EditorChromeContext } from "./editor-layout"
+import { SIDEBAR_ID } from "./editor-sidebar"
 import type { EditorLayout, EditorView } from "./editor-layout"
 
 const E = "storefront.editor"
@@ -21,6 +22,8 @@ interface EditorShellProps {
   layout: EditorLayout
   /** The narrow editor's choice between the settings and the preview. */
   view: EditorView
+  /** Whether the side panel (the parts and the settings) is shown; folded, the preview takes its room. */
+  sidebar: boolean
   /** The page's parts. */
   tree: ReactNode
   /** The open part's settings (a section's, or the theme's). */
@@ -38,7 +41,15 @@ interface EditorShellProps {
  * the two at a time on a tablet or phone. What is hidden stays mounted, so
  * a half-filled form survives a look at the preview.
  */
-export function EditorShell({ layout, view, tree, form, formKey, preview }: EditorShellProps) {
+export function EditorShell({
+  layout,
+  view,
+  sidebar,
+  tree,
+  form,
+  formKey,
+  preview,
+}: EditorShellProps) {
   const { t } = useTranslation()
   const [drawer, setDrawer] = useState(false)
   // A part picked (from the drawer or elsewhere) closes the drawer
@@ -61,36 +72,49 @@ export function EditorShell({ layout, view, tree, form, formKey, preview }: Edit
     [wide, open]
   )
   const narrow = layout === "narrow"
+  // Folded, the columns stay mounted (hidden): a half-filled form survives it
+  const folded = !sidebar && !narrow
   return (
     <EditorChromeContext.Provider value={chrome}>
       <main className="flex min-h-0 flex-1">
-        {wide ? (
-          <div
-            data-editor-column="parts"
-            className={cn(COLUMN, "w-[clamp(17rem,20vw,20rem)] border-r")}
-          >
-            {tree}
-          </div>
-        ) : null}
-        {wide && open ? (
-          <div
-            key={formKey}
-            data-editor-column="settings"
-            className={cn(COLUMN, "w-[clamp(24rem,30vw,30rem)] border-r")}
-          >
-            {form}
-          </div>
-        ) : null}
-        {wide ? null : (
-          <div
-            key={formKey ?? "parts"}
-            data-editor-column="settings"
-            hidden={narrow && view === "preview"}
-            className={cn(COLUMN, narrow ? "w-full" : "w-[clamp(22rem,36vw,26rem)] border-r")}
-          >
-            {open ? form : tree}
-          </div>
-        )}
+        <div
+          id={SIDEBAR_ID}
+          data-editor-sidebar={folded ? "hidden" : "shown"}
+          hidden={folded || (narrow && view === "preview")}
+          className={cn(
+            "flex min-h-0",
+            narrow
+              ? "w-full"
+              : "shrink-0 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-left-4 motion-safe:duration-150"
+          )}
+        >
+          {wide ? (
+            <div
+              data-editor-column="parts"
+              className={cn(COLUMN, "w-[clamp(17rem,20vw,20rem)] border-r")}
+            >
+              {tree}
+            </div>
+          ) : null}
+          {wide && open ? (
+            <div
+              key={formKey}
+              data-editor-column="settings"
+              className={cn(COLUMN, "w-[clamp(24rem,30vw,30rem)] border-r")}
+            >
+              {form}
+            </div>
+          ) : null}
+          {wide ? null : (
+            <div
+              key={formKey ?? "parts"}
+              data-editor-column="settings"
+              className={cn(COLUMN, narrow ? "w-full" : "w-[clamp(22rem,36vw,26rem)] border-r")}
+            >
+              {open ? form : tree}
+            </div>
+          )}
+        </div>
         <div
           data-editor-column="preview"
           hidden={narrow && view === "edit"}

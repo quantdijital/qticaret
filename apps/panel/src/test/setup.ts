@@ -7,6 +7,8 @@ afterEach(() => {
   cleanup()
   // The theme editor remembers the groups a shop opened (`settings-layout-state.ts`): each test starts afresh
   window.localStorage.removeItem("qticaret.editor.groups.v1")
+  // ... and whether its side panel was folded (`editor-sidebar.ts`)
+  window.localStorage.removeItem("qticaret.editor.sidebar.v1")
 })
 
 // jsdom has no ResizeObserver; Radix measures some controls with it (Switch).
