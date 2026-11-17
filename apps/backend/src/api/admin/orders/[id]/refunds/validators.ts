@@ -52,9 +52,14 @@ export const AdminPostOrderRefund = z
   .strict()
   .refine(oneWay, { message: "orders.refund_mode", path: ["amount"] })
 
-/** An open refund checked at the provider by staff: the money went back, or it did not. */
+/**
+ * An open refund checked at the provider by staff: the money went back, or
+ * it did not; or an iyzico refund made in part is closed at what its
+ * answered parts gave back (D4-1). No amount: the server reads it from the
+ * ledger's parts.
+ */
 export const AdminPostOrderRefundSettle = z
-  .object({ outcome: z.enum(["made", "not_made"]) })
+  .object({ outcome: z.enum(["made", "not_made", "made_in_part"]) })
   .strict()
 
 // A ledger reference as the ledger keeps them: the panel's key, a cancel's, a return's, an edit's

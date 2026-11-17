@@ -1182,7 +1182,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.refund_unsettled":
     "The record of a refund of this order is incomplete; no money was sent again. It is checked automatically. If you would rather not wait, check the provider's panel and settle the record from the Refunds tab of the order page.",
   "orders.refund_check_partial":
-    "Only part of this refund was made, not all of it; it cannot be settled by hand. Check the provider's panel and with its support team.",
+    'Only part of this refund was made, not all of it; "money went back" or "money did not go back" cannot be chosen. Record the part made; the rest can be given back with a new refund.',
+  "orders.refund_check_part_unknown":
+    "iyzico did not answer for a part of this refund; that part may have been made. Check iyzico's panel or write to its support team before closing it in part.",
+  "orders.refund_check_not_partial":
+    "This refund does not look made in part; settle it with the other choices.",
   "orders.refund_check_shown":
     'The provider shows this refund made; "money did not go back" cannot be chosen.',
   "payments.use_order_refund": "This payment is refunded from the order's refund step.",

@@ -23,8 +23,13 @@ import type { IyzicoAccount } from "./signing"
 
 export type { FakeCheckoutForm, PayOutcome } from "./checkout-form"
 
-/** An answer queued for the next request to a path: a body, a stall, or a dropped connection. */
-export type FakeIyzicoAnswer = { status?: number; body: unknown } | { hang: true } | { drop: true }
+/**
+ * An answer queued for the next request to a path: a body, a stall, a
+ * dropped connection, or the fake's own answer (`pass`: a later request,
+ * the second part of a refund say, gets the queued one after it).
+ */
+export type FakeIyzicoAnswer =
+  { status?: number; body: unknown } | { hang: true } | { drop: true } | { pass: true }
 
 export interface FakeIyzico {
   url: string
@@ -162,7 +167,10 @@ export async function startFakeIyzico(account: IyzicoAccount, port = 0): Promise
         req.socket.destroy()
         return
       }
-      send(res, next ?? answer(account, handlers, reads, req, path, text))
+      send(
+        res,
+        next && !("pass" in next) ? next : answer(account, handlers, reads, req, path, text)
+      )
     })().catch(() => {
       // A body that is not JSON: iyzico's own 500
       send(res, { status: 500, body: "error" })

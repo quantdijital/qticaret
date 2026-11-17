@@ -1,0 +1,235 @@
+import { asValue } from "@medusajs/framework/awilix"
+import {
+  ContainerRegistrationKeys,
+  Modules,
+  createMedusaContainer,
+} from "@medusajs/framework/utils"
+import type { ProviderPart, RefundLine } from "../../../modules/order-refunds/service"
+import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
+import { linesMadeInPart, madeInPart } from "../made-in-part"
+import { checkedNote } from "../made-refund-record"
+import { settleRefundByHand } from "../settle-refund-by-hand"
+
+const done = (amount: number, id = "t1"): ProviderPart => ({
+  transaction_id: id,
+  amount,
+  state: "done",
+})
+const sending = (amount: number, id = "t2"): ProviderPart => ({
+  transaction_id: id,
+  amount,
+  state: "sending",
+})
+
+// The key a refund with these parts is refused with; undefined when it is one made in part
+const refusalOf = (amount: number, parts: readonly ProviderPart[]): string | undefined => {
+  try {
+    madeInPart(amount, parts)
+    return undefined
+  } catch (error) {
+    return (error as { safeMessage?: string }).safeMessage
+  }
+}
+
+describe("an iyzico refund made in part: what was made and what is left (D4-1)", () => {
+  it("is the sum of the answered parts, the rest what is left", () => {
+    expect(madeInPart(30000, [done(24000)])).toEqual({ done: 24000, remainder: 6000 })
+    expect(madeInPart(30000, [done(10000, "t1"), done(5000, "t2")])).toEqual({
+      done: 15000,
+      remainder: 15000,
+    })
+  })
+
+  it("never counts a part without an answer as not made", () => {
+    expect(refusalOf(30000, [done(24000), sending(3000)])).toBe("orders.refund_check_part_unknown")
+    expect(refusalOf(30000, [sending(3000)])).toBe("orders.refund_check_part_unknown")
+  })
+
+  it.each([
+    ["no parts", []],
+    ["parts made whole", [done(24000), done(6000, "t2")]],
+    ["parts past the amount", [done(31000)]],
+    ["nothing given back", [done(0)]],
+  ])("is no refund made in part with %s", (_, parts: ProviderPart[]) => {
+    expect(refusalOf(30000, parts)).toBe("orders.refund_check_not_partial")
+  })
+
+  it("spreads the made part over the lines by what each was to give back, units kept", () => {
+    const lines: RefundLine[] = [
+      { id: "item_1", kind: "item", quantity: 2, net: 21818 },
+      { id: "ship_1", kind: "shipping", quantity: 0, net: 8182 },
+    ]
+
+    const made = linesMadeInPart(lines, 24000)
+
+    expect(made.reduce((sum, line) => sum + line.net, 0)).toBe(24000)
+    expect(made.map((line) => line.quantity)).toEqual([2, 0])
+    // No line gives back more than it was to: the rest of each is free again
+    made.forEach((line, index) => {
+      expect(line.net).toBeLessThanOrEqual(lines[index]?.net ?? 0)
+    })
+  })
+
+  it("drops a line left with nothing and no units; keeps none for a refund of no lines", () => {
+    const lines: RefundLine[] = [
+      { id: "item_1", kind: "item", quantity: 0, net: 9999 },
+      { id: "ship_1", kind: "shipping", quantity: 0, net: 1 },
+    ]
+
+    expect(linesMadeInPart(lines, 1)).toHaveLength(1)
+    expect(linesMadeInPart([], 5000)).toEqual([])
+  })
+})
+
+const REFERENCE = "0123456789abcdef0123456789abcdef"
+const raw = (lira: number) => ({ value: String(lira), precision: 20 })
+
+function shopWith(entry: Record<string, unknown>, refunded = 0) {
+  const calls: string[] = []
+  const track =
+    <T>(name: string, value?: T) =>
+    () => {
+      calls.push(name)
+      return Promise.resolve(value)
+    }
+  const createRefunds = jest.fn<Promise<{ id: string }>, [{ amount: string }]>()
+  const updateOrderRefunds = jest.fn(track("updateOrderRefunds"))
+  const updatePayment = jest.fn<Promise<undefined>, [{ data?: Record<string, unknown> }]>()
+  const addOrderTransactions = jest.fn(track("addOrderTransactions"))
+  const payment = {
+    id: "pay_01",
+    currency_code: "try",
+    payment_collection_id: "paycol_01",
+    data: { refunds: [] } as Record<string, unknown>,
+    captures: [{ raw_amount: raw(330) }],
+    refunds: (refunded ? [{ id: "ref_00", raw_amount: raw(refunded) }] : []) as {
+      id: string
+      raw_amount: ReturnType<typeof raw>
+    }[],
+  }
+  // Medusa's record written: the payment holds it, and its data then names it (`keepRecord`)
+  createRefunds.mockImplementation((data: { amount: string }) => {
+    calls.push("createRefunds")
+    payment.refunds.push({ id: "ref_NEW", raw_amount: raw(Number(data.amount)) })
+    return Promise.resolve({ id: "ref_NEW" })
+  })
+  updatePayment.mockImplementation((update: { data?: Record<string, unknown> }) => {
+    calls.push("updatePayment")
+    payment.data = { ...payment.data, ...update.data }
+    return Promise.resolve(undefined)
+  })
+  const container = createMedusaContainer()
+  container.register({
+    [ContainerRegistrationKeys.QUERY]: asValue({
+      graph: ({ entity }: { entity: string }) =>
+        Promise.resolve({ data: [entity === "payment" ? payment : { payments: [payment] }] }),
+    }),
+    [Modules.ORDER]: asValue({
+      listOrderTransactions: () => Promise.resolve([]),
+      addOrderTransactions,
+    }),
+    [Modules.PAYMENT]: asValue({
+      listPayments: () => Promise.resolve([payment]),
+      createRefunds,
+      updatePayment,
+      updatePaymentCollections: jest.fn(),
+    }),
+    [ORDER_REFUNDS_MODULE]: asValue({
+      listOrderRefunds: () => Promise.resolve([entry]),
+      updateOrderRefunds,
+      saveProviderParts: jest.fn(),
+    }),
+  })
+  return { container, calls, createRefunds, updateOrderRefunds, addOrderTransactions }
+}
+
+describe("staff close an iyzico refund made in part, sending nothing (D4-1)", () => {
+  const open = {
+    id: "oref_01",
+    order_id: "order_01",
+    payment_id: "pay_01",
+    reference: REFERENCE,
+    status: "pending",
+    amount: 30000,
+    lines: [
+      { id: "item_1", kind: "item", quantity: 2, net: 21818 },
+      { id: "ship_1", kind: "shipping", quantity: 0, net: 8182 },
+    ],
+    provider_parts: [done(24000)],
+  }
+  const input = {
+    order_id: "order_01",
+    reference: REFERENCE,
+    actor_id: "user_01",
+    outcome: "made_in_part" as const,
+  }
+
+  it("records exactly the answered parts in Medusa, then closes the entry at that amount", async () => {
+    const shop = shopWith(open)
+
+    expect(await settleRefundByHand(shop.container, input)).toEqual({
+      reference: REFERENCE,
+      status: "done",
+    })
+    expect(shop.createRefunds).toHaveBeenCalledWith({
+      payment: "pay_01",
+      amount: "240.00",
+      created_by: "user_01",
+      note: checkedNote(REFERENCE),
+    })
+    expect(shop.addOrderTransactions).toHaveBeenCalledWith(
+      expect.objectContaining({ reference_id: "ref_NEW", currency_code: "try" })
+    )
+    // The entry first rewritten to what was made (cut short, it reads shown), closed last
+    expect(shop.updateOrderRefunds).toHaveBeenNthCalledWith(1, {
+      id: "oref_01",
+      amount: 24000,
+      lines: [
+        expect.objectContaining({ id: "item_1", quantity: 2 }),
+        expect.objectContaining({ id: "ship_1", quantity: 0 }),
+      ],
+    })
+    expect(shop.updateOrderRefunds).toHaveBeenLastCalledWith({
+      id: "oref_01",
+      status: "done",
+      error_code: "checked_made_in_part",
+    })
+    expect(shop.calls.indexOf("updateOrderRefunds")).toBeLessThan(
+      shop.calls.indexOf("createRefunds")
+    )
+    expect(shop.calls.at(-1)).toBe("updateOrderRefunds")
+  })
+
+  it("refuses a part without an answer, writing nothing", async () => {
+    const shop = shopWith({ ...open, provider_parts: [done(24000), sending(3000)] })
+
+    await expect(settleRefundByHand(shop.container, input)).rejects.toMatchObject({
+      safeMessage: "orders.refund_check_part_unknown",
+    })
+    expect(shop.createRefunds).not.toHaveBeenCalled()
+    expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
+  })
+
+  it("refuses a refund that is no iyzico refund made in part", async () => {
+    const paytr = shopWith({ ...open, provider_parts: null })
+    const whole = shopWith({ ...open, provider_parts: [done(24000), done(6000, "t2")] })
+
+    for (const shop of [paytr, whole]) {
+      await expect(settleRefundByHand(shop.container, input)).rejects.toMatchObject({
+        safeMessage: "orders.refund_check_not_partial",
+      })
+      expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
+    }
+  })
+
+  it("refuses a made part past what the payment can still give back", async () => {
+    const shop = shopWith(open, 100)
+
+    await expect(settleRefundByHand(shop.container, input)).rejects.toMatchObject({
+      safeMessage: "orders.refund_exceeds_paid",
+    })
+    expect(shop.createRefunds).not.toHaveBeenCalled()
+    // Refused before the entry is rewritten: it stays as it was, open
+    expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
+  })
+})

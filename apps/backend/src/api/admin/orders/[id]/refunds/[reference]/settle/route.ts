@@ -7,7 +7,9 @@ import type { AdminPostOrderRefundSettleType } from "../../validators"
 /**
  * A refund left open, checked by staff at the provider (review
  * 2026-11-17, O2): `made` closes it with its records, `not_made` fails it
- * and frees its lines. Sends no refund; the audit log keeps who and when.
+ * and frees its lines, `made_in_part` closes an iyzico refund made in part
+ * at its answered parts and frees the rest (D4-1). Sends no refund; the
+ * audit log keeps who and when, and the amount before and after.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostOrderRefundSettleType>,
