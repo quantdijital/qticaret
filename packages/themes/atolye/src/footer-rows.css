@@ -1,0 +1,270 @@
+/*
+ * The free rows footer (`frame/FooterRows.tsx`, adr/0070 §5). The footer
+ * itself is the brand columns' (`gf-footer-cols`: its ground, its stage
+ * tokens, its marks); here only the rows. CSP: no inline style, every
+ * choice a `data-*` attribute.
+ *
+ * - Row ground (`data-ground`): `inherit` the footer's; the others the
+ *   look's names, each with its own inks, as a page section's ground in
+ *   `look.css` (the stage's and the shop's colour turn the text, the rule,
+ *   the field and the focus ring to their foreground).
+ * - Room (`data-space`): the row's own, smaller than a page section's.
+ * - Grid (`data-layout`): one column (or two, `data-phone-columns`) on a
+ *   phone, two side by side from 768 px, the split from 1024 px. DOM order
+ *   is the reading order: no `order`.
+ */
+@layer components {
+  /*
+   * The footer's ground, the brand columns' names. On the stage only the
+   * parts on its ground turn dark (`gf-stage` on each: a row that inherits
+   * it, the newsletter band, the legal strip and the bottom line), so a
+   * light row in a dark footer keeps the page's inks.
+   */
+  .gf-footer-rows[data-ground="well"] {
+    background: var(--color-paper-2);
+  }
+  .gf-footer-rows[data-ground="page"] {
+    border-top: 1px solid var(--color-rule);
+    background: var(--color-paper);
+  }
+  .gf-footer-rows[data-ground="stage"] {
+    background: var(--color-stage);
+  }
+  .gf-footer-rows > :is(.gf-stage:not([data-ground="primary"]), .gf-frow[data-ground="stage"]) > * {
+    --color-text: var(--color-stage-text);
+    --color-text-2: var(--color-stage-text-2);
+    --color-text-3: var(--color-stage-text-2);
+    --color-placeholder: var(--color-stage-text-2);
+    --color-rule: var(--color-stage-rule);
+    --color-edge: var(--color-stage-text-2);
+    --color-paper: var(--color-stage);
+    --color-paper-2: var(--color-stage-2);
+    --color-paper-3: var(--color-stage-rule);
+    --color-field: var(--color-stage-2);
+    --color-ok: var(--color-ok-on-stage);
+    --color-error: var(--color-error-on-stage);
+    --color-focus: var(--color-signal-on-stage);
+  }
+  /* The ways to pay straight on a light ground (`plain`); on a dark part always on their cards */
+  .gf-footer-rows[data-badges="plain"] .gf-pay > li[data-logo] {
+    min-width: 0;
+    padding-inline: 0.25rem;
+    border-color: transparent;
+    background: transparent;
+  }
+  .gf-footer-rows[data-badges="plain"]
+    :is(.gf-stage, .gf-frow[data-ground="primary"])
+    .gf-pay
+    > li[data-logo] {
+    min-width: 3.25rem;
+    padding-inline: 0.5rem;
+    border-color: color-mix(in oklab, var(--color-rule) 70%, transparent);
+    background: #fff;
+  }
+
+  .gf-frow {
+    --frow-space: 2.5rem;
+  }
+  .gf-frow[data-space="none"] {
+    --frow-space: 0px;
+  }
+  .gf-frow[data-space="small"] {
+    --frow-space: 1.5rem;
+  }
+  .gf-frow[data-space="large"] {
+    --frow-space: 4rem;
+  }
+  @media (min-width: 64rem) {
+    .gf-frow {
+      --frow-space: 3.5rem;
+    }
+    .gf-frow[data-space="none"] {
+      --frow-space: 0px;
+    }
+    .gf-frow[data-space="small"] {
+      --frow-space: 2rem;
+    }
+    .gf-frow[data-space="large"] {
+      --frow-space: 5rem;
+    }
+  }
+  .gf-frow > .gf-frow-grid {
+    padding-block: var(--frow-space);
+  }
+  .gf-frow[data-divider] {
+    border-top: 1px solid var(--color-rule);
+  }
+  /* A row on its own ground needs no line: the colour parts it */
+  .gf-frow[data-divider]:not([data-ground="inherit"]) {
+    border-top-color: transparent;
+  }
+
+  .gf-frow[data-ground="page"] {
+    background: var(--color-paper);
+    color: var(--color-text);
+  }
+  .gf-frow[data-ground="well"] {
+    background: var(--color-paper-2);
+    color: var(--color-text);
+  }
+  .gf-frow[data-ground="primary"] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  .gf-frow[data-ground="primary"] > * {
+    --color-text: var(--primary-foreground);
+    --color-text-2: var(--primary-foreground);
+    --color-text-3: var(--primary-foreground);
+    --color-placeholder: var(--primary-foreground);
+    --color-rule: color-mix(in oklab, var(--primary-foreground) 35%, var(--primary));
+    --color-edge: var(--primary-foreground);
+    --color-paper: var(--primary);
+    --color-paper-2: color-mix(in oklab, var(--primary-foreground) 12%, var(--primary));
+    --color-paper-3: color-mix(in oklab, var(--primary-foreground) 22%, var(--primary));
+    --color-field: color-mix(in oklab, var(--primary-foreground) 8%, var(--primary));
+    --color-signal: var(--primary-foreground);
+    --color-signal-ink: var(--primary);
+    --color-signal-deep: color-mix(in oklab, var(--primary-foreground) 85%, var(--primary));
+    --color-focus: var(--primary-foreground);
+  }
+  .gf-frow[data-ground="primary"] :focus-visible {
+    outline-color: var(--primary-foreground);
+  }
+
+  .gf-frow-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem var(--gap-columns);
+  }
+  .gf-frow-grid[data-phone-columns="2"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (min-width: 48rem) {
+    .gf-frow-grid:not([data-layout="1"]) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .gf-frow-grid[data-layout="1-1"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .gf-frow-grid[data-layout="2-1"] {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+    .gf-frow-grid[data-layout="1-2"] {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    }
+    .gf-frow-grid[data-layout="1-1-1"] {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .gf-frow-grid[data-layout="2-1-1"] {
+      grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+    }
+    .gf-frow-grid[data-layout="1-2-1"] {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+    }
+    .gf-frow-grid[data-layout="1-1-2"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 2fr);
+    }
+    .gf-frow-grid[data-layout="1-1-1-1"] {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .gf-frow-grid[data-layout="2-1-1-1"] {
+      grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+    }
+  }
+  /* An empty column keeps its place on the wide grid, and takes no room when stacked */
+  @media (max-width: 63.999rem) {
+    .gf-fcol:empty {
+      display: none;
+    }
+  }
+
+  .gf-fcol {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .gf-frow[data-align="center"] .gf-fcol {
+    align-items: center;
+    text-align: center;
+  }
+  .gf-frow[data-align="center"] :is(.gf-pay, .gf-reach, [data-layout="inline"]) {
+    justify-content: center;
+  }
+  /* A centred list keeps its marks beside its words */
+  .gf-frow[data-align="center"] .gf-foot-prose :is(ul, ol) {
+    padding-left: 0;
+    list-style-position: inside;
+  }
+
+  /* The screens a block shows on: a phone and a tablet below 1024 px, a computer from it */
+  @media (min-width: 64rem) {
+    .gf-fblock[data-device="mobile"] {
+      display: none;
+    }
+  }
+  @media (max-width: 63.999rem) {
+    .gf-fblock[data-device="desktop"] {
+      display: none;
+    }
+  }
+
+  /*
+   * Closed menus one after another (`data-fold-join`, `fold-joins.ts`): one
+   * list below 1024 px, as the brand columns' accordion, no room between
+   * and one rule (each fold's top rule over the one before's bottom). In a
+   * column always; across columns only while they stack (a phone, one column).
+   */
+  @media (max-width: 63.999rem) {
+    .gf-fblock[data-fold-join="block"] {
+      margin-top: calc(-2rem - 1px);
+    }
+  }
+  @media (max-width: 47.999rem) {
+    .gf-frow-grid:not([data-phone-columns="2"]) .gf-fblock[data-fold-join="column"] {
+      margin-top: calc(-2.5rem - 1px);
+    }
+  }
+
+  /* The text block's words in the footer's small measure; a link is a 44 px target */
+  .gf-foot-prose {
+    display: flex;
+    max-width: 52ch;
+    flex-direction: column;
+    gap: 0.75rem;
+    color: var(--color-text-2);
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  .gf-foot-prose a {
+    padding-block: 0.75rem;
+    color: var(--color-text);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .gf-foot-prose strong {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+  .gf-foot-prose ul {
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+  .gf-foot-prose ol {
+    padding-left: 1.25rem;
+    list-style: decimal;
+  }
+
+  .gf-foot-image {
+    width: 100%;
+  }
+  .gf-foot-image[data-width="small"] {
+    max-width: 10rem;
+  }
+  .gf-foot-image[data-width="medium"] {
+    max-width: 16rem;
+  }
+}
