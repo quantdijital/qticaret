@@ -1,0 +1,161 @@
+import { entityFacts } from "../facts"
+import { CATEGORY_FACT_FIELDS, categoryFacts } from "../facts/category"
+import { PAGE_FACT_FIELDS, pageFacts } from "../facts/page"
+import { PRODUCT_FACT_FIELDS, productFacts } from "../facts/product"
+import type { FactsContainer } from "../facts/types"
+import { buildPrompt } from "../prompt"
+
+/**
+ * adr/0071 §10, adr/0005 (PR 1-1): what leaves the shop of a product, a
+ * category and a content page. Read by id on the server, public fields
+ * only, and every value through the personal data filter on its way out.
+ */
+
+const PERSONAL =
+  "Bilgi için ayse.yilmaz@example.com ya da 0532 123 45 67; TC 12345678901, IBAN TR33 0006 1005 1978 6457 8413 26."
+
+interface Asked {
+  entity: string
+  fields: string[]
+  filters: Record<string, unknown>
+}
+
+function containerWith(rows: unknown[]): { container: FactsContainer; asked: Asked[] } {
+  const asked: Asked[] = []
+  const query = {
+    graph: (request: Asked) => {
+      asked.push(request)
+      return Promise.resolve({ data: rows })
+    },
+  }
+  return { container: { resolve: () => query }, asked }
+}
+
+// No reader may even ask for these (adr/0071 §10)
+const FORBIDDEN = /price|stock|inventory|order|customer|cart|cost|author|created_by|metadata/i
+
+const dataOf = (fields: Record<string, unknown>) =>
+  JSON.parse(buildPrompt({ instruction: "x", fields: fields as never }).data) as {
+    data: Record<string, unknown>
+  }
+
+describe("AI record facts (adr/0071 §10)", () => {
+  it("asks only for named public fields of each record", () => {
+    for (const fields of [PRODUCT_FACT_FIELDS, CATEGORY_FACT_FIELDS, PAGE_FACT_FIELDS]) {
+      for (const field of fields) {
+        expect(field).not.toMatch(FORBIDDEN)
+      }
+    }
+  })
+
+  it("sends a product's public attributes only, and no internal category", async () => {
+    const { container, asked } = containerWith([
+      {
+        title: "Keten Gömlek",
+        subtitle: null,
+        description: `<p>Yazlık gömlek.</p> ${PERSONAL}`,
+        brand: { name: "Marka" },
+        categories: [
+          { name: "Gizli Toptan", is_internal: true },
+          { name: "Gömlekler", is_internal: false },
+        ],
+        attribute_values: [
+          { value_text: "Keten", definition: { label: "Malzeme", type: "text", is_public: true } },
+          {
+            value_text: "Tedarikçi X",
+            definition: { label: "Tedarikçi", type: "text", is_public: false },
+          },
+        ],
+      },
+    ])
+
+    const facts = await productFacts(container, "prod_1")
+    const sent = JSON.stringify(dataOf(facts))
+
+    expect(asked[0]).toMatchObject({ entity: "product", filters: { id: "prod_1" } })
+    expect(facts).toMatchObject({
+      name: "Keten Gömlek",
+      category: "Gömlekler",
+      attributes: [{ label: "Malzeme", value: "Keten" }],
+    })
+    expect(sent).not.toContain("Tedarikçi")
+    expect(sent).not.toContain("Gizli Toptan")
+    expect(sent).not.toContain("<p>")
+    for (const leak of ["ayse.yilmaz", "123 45 67", "12345678901", "1978 6457"]) {
+      expect(sent).not.toContain(leak)
+    }
+  })
+
+  it("sends a category's name, description and shown relatives only", async () => {
+    const { container, asked } = containerWith([
+      {
+        name: "Gömlekler",
+        description: `Yazlık ve kışlık gömlekler. ${PERSONAL}`,
+        is_internal: false,
+        parent_category: { name: "Giyim", is_internal: false },
+        category_children: [
+          { name: "Keten", is_internal: false },
+          { name: "Stok Fazlası", is_internal: true },
+          null,
+        ],
+      },
+    ])
+
+    const facts = await categoryFacts(container, "pcat_1")
+    const sent = JSON.stringify(dataOf(facts))
+
+    expect(asked[0]).toMatchObject({ entity: "product_category", filters: { id: "pcat_1" } })
+    expect(facts).toMatchObject({ name: "Gömlekler", parent: "Giyim", subcategories: "Keten" })
+    expect(sent).not.toContain("Stok Fazlası")
+    for (const leak of ["ayse.yilmaz", "123 45 67", "12345678901"]) {
+      expect(sent).not.toContain(leak)
+    }
+  })
+
+  it("answers an internal category or a missing record as unknown", async () => {
+    await expect(
+      categoryFacts(containerWith([{ name: "Gizli", is_internal: true }]).container, "pcat_1")
+    ).rejects.toThrow("ai.unknown_entity")
+    await expect(productFacts(containerWith([]).container, "prod_1")).rejects.toThrow(
+      "ai.unknown_entity"
+    )
+    await expect(pageFacts(containerWith([]).container, "cnt_1")).rejects.toThrow(
+      "ai.unknown_entity"
+    )
+  })
+
+  it("sends a page's title and summaries, read as a page and never as a post", async () => {
+    const { container, asked } = containerWith([
+      {
+        title: "Hakkımızda",
+        excerpt: "Atölyemizin hikâyesi.",
+        body_summary: `Yirmi yıldır üretiyoruz. ${PERSONAL}`,
+        author_name: "Ayşe Yılmaz",
+      },
+    ])
+
+    const facts = await pageFacts(container, "cnt_1")
+    const sent = JSON.stringify(dataOf(facts))
+
+    expect(asked[0]).toMatchObject({
+      entity: "content_entry",
+      filters: { id: "cnt_1", kind: "page" },
+    })
+    expect(Object.keys(facts)).toEqual(["name", "summary", "body"])
+    expect(sent).not.toContain("Ayşe Yılmaz")
+    for (const leak of ["ayse.yilmaz", "123 45 67", "12345678901"]) {
+      expect(sent).not.toContain(leak)
+    }
+  })
+
+  it("turns away an id of another kind before reading anything", async () => {
+    const { container, asked } = containerWith([{ title: "x" }])
+
+    await expect(entityFacts(container, "category", "prod_1")).rejects.toThrow("ai.unknown_entity")
+    await expect(entityFacts(container, "page", "pcat_1")).rejects.toThrow("ai.unknown_entity")
+    await expect(entityFacts(container, "order" as never, "order_1")).rejects.toThrow(
+      "ai.unknown_entity"
+    )
+    expect(asked).toEqual([])
+  })
+})

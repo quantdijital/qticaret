@@ -1,3 +1,4 @@
+import { SERP_TEXT_LENGTH } from "../../seo/pixel-width"
 import type { StaffRole } from "../../staff/permissions"
 import type { AiCapability } from "./capabilities"
 
@@ -43,8 +44,35 @@ export const TEST_TASK: AiTask = {
   maxLength: 500,
 }
 
-// Real tasks (`seo_title`, `seo_description`) are added in Aşama 1
-const TASKS: readonly AiTask[] = []
+/**
+ * A page's search result title and description (Aşama 1, docs/22 PR 1-1),
+ * for a product, a category or a content page. The gate is the advisor's
+ * own rules for the field (P-TITLE-01, P-META-01 and their noise rules),
+ * so the longest suggestion is the field's character target.
+ */
+export const SEO_TITLE_TASK: AiTask = {
+  id: "seo_title",
+  capability: "text",
+  mode: "sync",
+  options: [],
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "seo_title",
+  maxLength: SERP_TEXT_LENGTH.title.max,
+}
+
+export const SEO_DESCRIPTION_TASK: AiTask = {
+  id: "seo_description",
+  capability: "text",
+  mode: "sync",
+  options: ["short"],
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "seo_description",
+  maxLength: SERP_TEXT_LENGTH.description.max,
+}
+
+const TASKS: readonly AiTask[] = [SEO_TITLE_TASK, SEO_DESCRIPTION_TASK]
 
 /** The tasks of this instance, in registry order. */
 export function aiTasks(nodeEnv: string | undefined = process.env["NODE_ENV"]): readonly AiTask[] {

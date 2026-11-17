@@ -11008,7 +11008,12 @@
       "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
     },
     "tasks": {
-      "test_text": "Deneme metni"
+      "test_text": "Deneme metni",
+      "seo_title": "Arama başlığı",
+      "seo_description": "Arama açıklaması"
+    },
+    "options": {
+      "short": "Kısa"
     },
     "card": {
       "capabilities": "Yapabildikleri",

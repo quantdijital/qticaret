@@ -11008,7 +11008,12 @@
       "fake": "A fake service for development: it writes its answer from the data itself and connects nowhere."
     },
     "tasks": {
-      "test_text": "Test text"
+      "test_text": "Test text",
+      "seo_title": "Search title",
+      "seo_description": "Search description"
+    },
+    "options": {
+      "short": "Short"
     },
     "card": {
       "capabilities": "What it can do",
