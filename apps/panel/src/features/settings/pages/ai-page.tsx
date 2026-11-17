@@ -48,7 +48,7 @@ export function AiPage() {
               </AlertAction>
             </Alert>
           )}
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="flex flex-col gap-4">
             {data.services.map((service) => (
               <AiServiceCard
                 key={service.id}

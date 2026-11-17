@@ -19,7 +19,13 @@ function Ceiling({ label, ceiling }: { label: string; ceiling: AiCeiling }) {
   return (
     <div className="flex items-baseline justify-between gap-3 text-sm">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className={full ? "font-medium text-destructive-text" : "font-medium"}>
+      <dd
+        className={
+          full
+            ? "font-medium whitespace-nowrap text-destructive-text"
+            : "font-medium whitespace-nowrap"
+        }
+      >
         {ceiling.limit === null
           ? t(`${U}.unlimited`, { used: formatCount(ceiling.used) })
           : t(`${U}.ofLimit`, { used: formatCount(ceiling.used), max: formatCount(ceiling.limit) })}
@@ -40,8 +46,14 @@ function Lines({
 }) {
   const { t } = useTranslation()
   return (
-    <table className="w-full text-sm">
+    // Fixed columns on wider screens, so the service and task tables line up
+    <table className="w-full text-sm sm:table-fixed">
       <caption className="pb-1.5 text-left text-[13px] font-medium">{title}</caption>
+      <colgroup>
+        <col />
+        <col className="sm:w-48" />
+        <col className="sm:w-28" />
+      </colgroup>
       <thead className="sr-only">
         <tr>
           <th scope="col">{t(`${U}.name`)}</th>
@@ -97,7 +109,7 @@ export function AiUsageCard({ className }: { className?: string }) {
       ) : !data ? (
         <Skeleton className="h-24" />
       ) : (
-        <div className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div className="flex min-w-0 flex-col gap-5">
             {empty ? (
               <p className="text-[13px] text-muted-foreground">{t(`${U}.empty`)}</p>

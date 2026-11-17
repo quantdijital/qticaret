@@ -61,28 +61,41 @@ export function AiServiceCard({
       className={className}
     >
       <div className="flex h-full flex-col gap-4">
-        <ul className="flex flex-wrap gap-1.5" aria-label={t(`${C}.capabilities`)}>
-          {service.capabilities.map((capability) => (
-            <li key={capability}>
-              <Badge variant="secondary">{t(`ai.capabilities.${capability}`)}</Badge>
-            </li>
-          ))}
-        </ul>
-        {ownKeys ? (
-          <AccountAlert provider={service.id} state={state} keyConfigured={keyConfigured} ns={NS} />
-        ) : stored ? (
-          <p className="text-[13px] text-muted-foreground">{t(`${C}.keptUnused`)}</p>
-        ) : null}
-        <AiDataNote dataNoteKey={service.data_note_key} name={name} />
-        {mayChange ? null : (
-          <p className="text-[13px] text-muted-foreground">{t(`${C}.ownerConnects`)}</p>
-        )}
+        {/* Wide: what it does and its state beside where the data goes */}
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="flex min-w-0 flex-col gap-3">
+            <ul className="flex flex-wrap gap-1.5" aria-label={t(`${C}.capabilities`)}>
+              {service.capabilities.map((capability) => (
+                <li key={capability}>
+                  <Badge variant="secondary">{t(`ai.capabilities.${capability}`)}</Badge>
+                </li>
+              ))}
+            </ul>
+            {ownKeys ? (
+              <AccountAlert
+                provider={service.id}
+                state={state}
+                keyConfigured={keyConfigured}
+                ns={NS}
+              />
+            ) : stored ? (
+              <p className="text-[13px] text-muted-foreground">{t(`${C}.keptUnused`)}</p>
+            ) : null}
+            {mayChange ? null : (
+              <p className="text-[13px] text-muted-foreground">{t(`${C}.ownerConnects`)}</p>
+            )}
+          </div>
+          <AiDataNote dataNoteKey={service.data_note_key} name={name} />
+        </div>
         {actions.failure && !editing ? (
           <p role="alert" className="text-sm text-destructive-text">
             {actions.failure}
           </p>
         ) : null}
-        <div className="mt-auto flex flex-wrap items-center justify-end gap-2 border-t pt-4">
+        {/* Nothing to press (not the owner, nothing stored): no empty footer */}
+        <div
+          className={`mt-auto flex flex-wrap items-center justify-end gap-2 border-t pt-4 ${mayChange || stored ? "" : "hidden"}`}
+        >
           {mayChange && state !== "not_configured" ? (
             <Button
               variant="ghost"
