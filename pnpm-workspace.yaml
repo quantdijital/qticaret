@@ -25,7 +25,7 @@ overrides:
   # GHSA-27r3-jxmh-p828 (CVE-2026-111181, decompression stream left piped),
   # express 4's body-parser (~1.20.5) under Medusa; 1.20.9 is in that range.
   # express 5's body-parser 2.x is not affected.
-  "body-parser@<1.20.9": 1.20.9
+  "body-parser@>=1.0.0 <1.20.9": 1.20.9
   # GHSA-q7qp-rjg7-q26m, @medusajs/medusa's multer (^2.3.0); 2.5.0 is in that
   # range. Our size gate runs before multer (api/http/request-limits.ts).
   "multer@>=2.0.0 <2.5.0": 2.5.0
@@ -43,13 +43,13 @@ overrides:
   "seroval@>=1.5.5 <1.6.11": 1.6.11
   # GHSA-rj75-hqrm-r3gf, tailwindcss 3 and postcss-nested (^6.1.x) in Medusa's
   # admin bundler; 6.1.5 is in that range. shadcn's 7.x is not affected.
-  "postcss-selector-parser@<6.1.5": 6.1.5
+  "postcss-selector-parser@>=6.0.0 <6.1.5": 6.1.5
   # GHSA-2g4f-4pwh-qvx6, ajv 8 below 8.18: @rushstack/node-core-library pins
   # ~8.13.0 (mikro-orm migrations via umzug), the rest declare ^8.x; 8.20.0 is
   # a minor of the same major and the version already in the tree, so no
   # package that had it (MCP SDK, @hookform/resolvers) is lowered to 8.18.
-  # eslint's ajv 6 is not affected.
-  "ajv@>=7.0.0-alpha.0 <8.18.0": 8.20.0
+  # The advisory also lists ajv 6 below 6.14.0; eslint's 6.15.0 is above that.
+  "ajv@>=8.0.0 <8.18.0": 8.20.0
 
 # Dependency build/postinstall scripts are blocked unless listed here.
 # Add an entry only after reviewing the package's install script.
