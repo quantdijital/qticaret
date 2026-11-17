@@ -54,8 +54,9 @@ const SOURCE_NAME = "source"
 
 const refuse = (code: string) => new ValidationError(code, { field: "file" })
 
-// C0 and C1 controls, and the line and paragraph separators, are not a title's
-function cleanTitle(value: string): string | null {
+// A title trimmed, empty as none (adr/0069 §1); C0 and C1 controls and the line and
+// paragraph separators are not a title's: `video.title_invalid`
+export function cleanVideoTitle(value: string): string | null {
   const title = value.trim()
   if (title.length > VIDEO_TITLE_MAX) {
     throw new ValidationError("video.title_invalid", { field: "title" })
@@ -271,7 +272,7 @@ export function receiveVideo(
         return
       }
       try {
-        title = cleanTitle(value)
+        title = cleanVideoTitle(value)
       } catch (error) {
         fail(error)
       }

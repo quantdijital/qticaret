@@ -1,6 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+// adr/0069 §1: a failed clip's source is kept a week for "Yeniden dene"
+import { FAILED_SOURCE_KEPT_MS } from "../../../lib/media/video/limits"
 import { forgetUsage } from "../../../lib/plan-limits"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
@@ -9,8 +11,6 @@ import { videoFileIds } from "./read"
 
 const PAGE = 500
 const DAY_MS = 24 * 60 * 60 * 1000
-// adr/0069 §1: a failed clip's source is kept a week for "Yeniden dene"
-const FAILED_SOURCE_KEPT_MS = 7 * DAY_MS
 
 interface VideoRow {
   id: string

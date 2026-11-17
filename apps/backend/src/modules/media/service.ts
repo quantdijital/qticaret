@@ -5,10 +5,13 @@ import { MediaAsset } from "./models/media-asset"
 import { MediaVideo } from "./models/media-video"
 import * as queue from "./video-queue"
 import type { ClaimedVideo, FailedTry, ReadyVideo, VideoFiles } from "./video-queue"
+import * as retry from "./video-retry"
+import type { RetriedVideo } from "./video-retry"
 
 export type MediaAssetRecord = InferTypeOf<typeof MediaAsset>
 export type MediaVideoRecord = InferTypeOf<typeof MediaVideo>
 export type { ClaimedVideo, FailedTry, ReadyVideo, VideoFiles } from "./video-queue"
+export type { RetriedVideo } from "./video-retry"
 
 const managerOf = (sharedContext: Context): EntityManager => {
   const manager = sharedContext.manager as EntityManager | undefined
@@ -150,6 +153,28 @@ class MediaModuleService extends MediaServiceBase {
   @InjectManager()
   async forgetVideoSource(id: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
     await queue.forgetVideoSource(managerOf(sharedContext), id)
+  }
+
+  /** "Yeniden dene": a clip failed by the infrastructure back in the queue (`video-retry.ts`). */
+  @InjectManager()
+  async retryVideo(
+    id: string,
+    failedCode: string,
+    keptSince: Date,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<RetriedVideo | null> {
+    return await retry.retryVideo(managerOf(sharedContext), id, failedCode, keptSince)
+  }
+
+  /** The retry undone while no job has taken the clip since. */
+  @InjectManager()
+  async unretryVideo(
+    id: string,
+    failedCode: string,
+    retried: RetriedVideo,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return await retry.unretryVideo(managerOf(sharedContext), id, failedCode, retried)
   }
 
   /**

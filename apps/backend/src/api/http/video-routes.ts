@@ -4,9 +4,14 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
+import { validateAndTransformBody } from "@medusajs/framework/http"
 import { VIDEO_MAX_REQUEST_BYTES } from "../../lib/media/video/limits"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { PRODUCT_VIDEOS } from "../../modules/platform-settings/features"
+import {
+  AdminRetryProductVideo,
+  AdminUpdateProductVideo,
+} from "../admin/products/[id]/videos/validators"
 import { requireUserActor } from "./actor"
 import { drainLimitFor, refuse } from "./drain-body"
 import { rateLimit } from "./rate-limit"
@@ -83,5 +88,25 @@ export const VIDEO_ROUTES = [
     matcher: "/admin/products/:id/videos/:video_id",
     methods: ["DELETE" as const],
     middlewares: [requireFeature(PRODUCT_VIDEOS)],
+  },
+  // Slice 3: a video's title
+  {
+    matcher: "/admin/products/:id/videos/:video_id",
+    methods: ["POST" as const],
+    middlewares: [
+      requireFeature(PRODUCT_VIDEOS),
+      validateAndTransformBody(AdminUpdateProductVideo),
+    ],
+  },
+  // Slice 3: "Yeniden dene", another run of the job: from the upload's own budget
+  {
+    matcher: "/admin/products/:id/videos/:video_id/retry",
+    methods: ["POST" as const],
+    middlewares: [
+      requireFeature(PRODUCT_VIDEOS),
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.media_video, { identity: staffOf }),
+      validateAndTransformBody(AdminRetryProductVideo),
+    ],
   },
 ]

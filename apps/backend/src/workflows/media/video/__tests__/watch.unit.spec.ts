@@ -14,6 +14,7 @@ const video = {
   source_format: "mov" as const,
   source_bytes: 1000,
   attempts: 0,
+  retry_from: 0,
 }
 
 /** A media service whose heartbeat answers as `beatVideo` does; `beat` records the calls. */

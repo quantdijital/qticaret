@@ -76,7 +76,7 @@ export const claimNextVideoStep = createStep(
   },
   async (video, { container }) => {
     if (video) {
-      const next = afterFailure(video.attempts, { kind: "infra", code: "" })
+      const next = afterFailure(video.attempts, { kind: "infra", code: "" }, video.retry_from)
       await media(container).markVideoTried(video.id, video.attempts, next)
     }
   }
@@ -187,7 +187,7 @@ export const settleVideoStep = createStep(
     if ("gone" in outcome) {
       return new StepResponse(settled("gone"), null)
     }
-    const next = afterFailure(video.attempts, outcome.failure)
+    const next = afterFailure(video.attempts, outcome.failure, video.retry_from)
     const written = await media(container).markVideoTried(video.id, video.attempts, next)
     return new StepResponse(settled(written ? next.status : "gone"), null)
   },

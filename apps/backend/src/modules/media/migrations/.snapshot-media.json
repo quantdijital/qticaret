@@ -667,6 +667,22 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "retry_from": {
+          "name": "retry_from",
+          "type": "integer",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "0",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "heartbeat_at": {
           "name": "heartbeat_at",
           "type": "timestamptz",

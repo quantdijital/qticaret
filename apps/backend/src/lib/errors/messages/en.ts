@@ -1089,6 +1089,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "video.upload_timeout": "The video upload took too long. Check your connection and try again.",
   "video.title_invalid": "A video's title can be 200 characters at most, on one line.",
   "video.unknown": "Video not found.",
+  "video.retry_unavailable": "This video cannot be tried again.",
+  "video.source_gone":
+    "The video's uploaded file is no longer kept. Remove the video and upload it again.",
   "media.svg_logo_only":
     "SVG can be used only as the shop's logo and site icon. Choose a PNG, JPEG, WebP or AVIF image for this field.",
   "cart.completed": "An order was already placed with this cart.",

@@ -174,6 +174,20 @@ describe("audit registry", () => {
     expect(matchAuditedResource("GET", "/admin/products/prod_01A/videos")).toBeNull()
   })
 
+  it("records a video's title and its retry, each by the video (adr/0069 §10)", () => {
+    const titled = matchAuditedResource("POST", "/admin/products/prod_01A/videos/mvid_01B")
+    expect(titled).toMatchObject({
+      resource: { route: "POST /admin/products/:id/videos/:video_id", resourceType: "media_video" },
+      params: { id: "prod_01A", video_id: "mvid_01B" },
+    })
+    const retried = matchAuditedResource("POST", "/admin/products/prod_01A/videos/mvid_01B/retry")
+    expect(retried).toMatchObject({
+      resource: { route: "POST /admin/products/:id/videos/:video_id/retry" },
+      params: { id: "prod_01A", video_id: "mvid_01B" },
+    })
+    expect(retried?.resource.resourceId(retried.params)).toBe("mvid_01B")
+  })
+
   it("records a preset applied as a change of the design, by its pack and code", () => {
     const match = matchAuditedResource("POST", "/admin/storefront-presets/general/grafit/apply")
     expect(match).toMatchObject({
