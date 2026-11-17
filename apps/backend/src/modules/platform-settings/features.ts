@@ -64,6 +64,9 @@ export const CUSTOMERS_WHOLESALE = "customers.wholesale"
 /** Product videos: clips the shop uploads and YouTube links (adr/0069). */
 export const PRODUCT_VIDEOS = "catalog.product_videos"
 
+/** AI with the shop's own service key, "bring your own key" (adr/0071 §6). */
+export const AI_OWN_KEYS = "ai.own_keys"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -165,6 +168,14 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "platform",
     labelKey: "qticaret.features.catalog_product_videos.label",
     descriptionKey: "qticaret.features.catalog_product_videos.description",
+  },
+  // adr/0071 §6: a package's feature, on by default; off, AI services can be neither
+  // connected nor checked, and stored keys stay but are not used
+  [AI_OWN_KEYS]: {
+    default: true,
+    owner: "platform",
+    labelKey: "qticaret.features.ai_own_keys.label",
+    descriptionKey: "qticaret.features.ai_own_keys.description",
   },
 })
 

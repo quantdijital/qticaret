@@ -18,6 +18,7 @@ jest.setTimeout(240 * 1000)
 const FLAG = "test.platform_sample"
 // adr/0069: the first business flag, on by default
 const VIDEOS = "catalog.product_videos"
+const AI_OWN_KEYS = "ai.own_keys"
 
 interface Detail {
   features: { key: string; value: boolean; package?: boolean; override?: boolean }[]
@@ -132,10 +133,12 @@ medusaIntegrationTestRunner({
       // adr/0069: the product videos flag is listed first, at its default
       expect(detail.features).toEqual([
         expect.objectContaining({ key: VIDEOS, value: true }),
+        expect.objectContaining({ key: AI_OWN_KEYS, value: true }),
         expect.objectContaining({ key: FLAG, package: false, override: true, value: true }),
       ])
       expect(detail.platform_flags).toEqual([
         { key: VIDEOS, default: true },
+        { key: AI_OWN_KEYS, default: true },
         { key: FLAG, default: true },
       ])
 

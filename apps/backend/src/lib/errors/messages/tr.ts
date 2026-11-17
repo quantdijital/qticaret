@@ -103,6 +103,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bulk_edit.stock_out_of_range": "Yeni stok üst sınırı aşar.",
   "bulk_edit.stock_untracked": "Bu ürünün stoğu takip edilmiyor.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
+  "cart.insufficient_stock": "Bu üründen stokta istediğiniz kadar yok.",
   "cart.out_of_stock":
     "Bu ürün az önce tükendi: {{name}}. Sepetinizden çıkarın ya da adedini azaltın.",
   "cart.shipping_changed":
@@ -706,6 +707,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.unknown_entity": "Öneri istenen kayıt bulunamadı.",
   "ai.unknown_task": "Böyle bir yapay zekâ işi yok.",
   "ai.suggestion_not_open": "Bu öneri artık karar beklemiyor.",
+  // adr/0071 §3: "Bağlantıyı dene" refused the key of an AI service
+  "deepseek.secret_invalid":
+    "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",
+  "minimax.secret_invalid":
+    "MiniMax bu API anahtarını kabul etmedi. Anahtarı MiniMax platformundaki API anahtarları sayfasından yeniden kopyalayın.",
+  "gemini.secret_invalid":
+    "Gemini bu API anahtarını kabul etmedi. Anahtarı Google AI Studio'daki API anahtarları sayfasından yeniden kopyalayın.",
   "meta.pixel_id_invalid": "Piksel numarası yalnızca rakamlardan oluşur.",
   "meta.test_event_code_invalid": "Test olayı kodu yalnızca harf ve rakamdan oluşur.",
   "meta.merchant_invalid":

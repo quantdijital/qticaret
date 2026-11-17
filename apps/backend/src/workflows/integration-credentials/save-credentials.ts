@@ -3,6 +3,7 @@ import { trackingScopes } from "../../lib/conversions/tracking"
 import type { CredentialDraft } from "../../modules/integration-credentials/service"
 import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { checkDraftStep } from "./steps/check-draft"
+import { guardAiOwnKeysStep } from "./steps/guard-ai-own-keys"
 import { notifyAccountChangeStep } from "./steps/notify-account-change"
 import { storeCredentialsStep } from "./steps/store-credentials"
 
@@ -25,6 +26,8 @@ export interface SaveCredentialsInput {
 export const saveIntegrationCredentialsWorkflow = createWorkflow(
   "integration-credentials-save",
   (input: SaveCredentialsInput) => {
+    // adr/0071 §6: an AI service only while the package allows the shop's own key
+    guardAiOwnKeysStep(transform({ input }, ({ input }) => input.draft.provider))
     const checked = checkDraftStep(input.draft)
     const stored = transform({ input, checked }, ({ input, checked }) => ({
       draft: input.draft,

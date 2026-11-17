@@ -13,6 +13,7 @@ import { googleApi } from "../google/client"
 import { googleClientOf } from "../google/oauth"
 import { checkShopify, shopifyCredentialsOf } from "../migration/shopify/client"
 import { checkSmtp } from "../messaging/email/smtp-check"
+import { aiAccountChecker } from "../ai/account-check"
 
 /**
  * Asks a provider whether the shop's account details work (adr/0027 §4).
@@ -143,6 +144,11 @@ const CHECKERS = {
   // adr/0036 Ek 2026-11-10: a sign-in, nothing sent. `secret_invalid`: the login refused;
   // `merchant_invalid`: no TLS the server and we agree on
   smtp: (account, signal) => checkSmtp(account, signal),
+  // adr/0071 §3: the model list, nothing generated (lib/ai/account-check.ts)
+  deepseek: aiAccountChecker("deepseek"),
+  minimax: aiAccountChecker("minimax"),
+  gemini: aiAccountChecker("gemini"),
+  fake: aiAccountChecker("fake"),
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -178,4 +184,9 @@ export const CHECK_FIELDS = {
   // Another organization's store is the domain's; a refused token, the secret
   shopify: { merchant_invalid: "settings.shop_domain", secret_invalid: "secrets.client_secret" },
   smtp: { merchant_invalid: "settings.security", secret_invalid: "secrets.password" },
+  // One key: whatever an AI service refuses is the key
+  deepseek: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
+  minimax: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
+  gemini: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
+  fake: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

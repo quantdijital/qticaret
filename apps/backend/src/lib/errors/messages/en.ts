@@ -98,6 +98,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bulk_edit.stock_out_of_range": "The new stock would pass the limit.",
   "bulk_edit.stock_untracked": "This product's stock is not tracked.",
   "cart.address_required": "An address is needed to complete the order.",
+  "cart.insufficient_stock": "There are not as many of this item in stock as you asked for.",
   "cart.out_of_stock":
     "This item just sold out: {{name}}. Remove it from your cart or lower its quantity.",
   "cart.shipping_changed":
@@ -702,6 +703,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.unknown_entity": "The record the suggestion was asked for was not found.",
   "ai.unknown_task": "There is no such AI task.",
   "ai.suggestion_not_open": "This suggestion is no longer waiting for a decision.",
+  // adr/0071 §3: "Test the connection" refused the key of an AI service
+  "deepseek.secret_invalid":
+    "DeepSeek did not accept this API key. Copy it again from the API keys page of the DeepSeek platform.",
+  "minimax.secret_invalid":
+    "MiniMax did not accept this API key. Copy it again from the API keys page of the MiniMax platform.",
+  "gemini.secret_invalid":
+    "Gemini did not accept this API key. Copy it again from the API keys page of Google AI Studio.",
   "meta.pixel_id_invalid": "The pixel id is digits only.",
   "meta.test_event_code_invalid": "The test event code is letters and digits only.",
   "meta.merchant_invalid": "Meta does not know this pixel, or the token cannot reach it.",
