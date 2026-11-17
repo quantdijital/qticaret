@@ -20,7 +20,8 @@ import type { MediaAsset } from "@/features/media/api/media"
 import { MediaGrid } from "@/features/media/components/media-grid"
 import { UploadZone } from "@/features/media/components/upload-zone"
 import type { UploadZoneHandle } from "@/features/media/components/upload-zone"
-import type { VideoIntake } from "@/features/media/video-intake"
+import { looksLikeYoutube } from "@/features/media/video-intake"
+import type { VideoIntake, YoutubeIntake } from "@/features/media/video-intake"
 import { errorText } from "@/lib/errors"
 
 const P = "media.picker"
@@ -163,8 +164,17 @@ export function UploadTab({
   )
 }
 
-/** An outside address: the server fetches the image into the library, then it is chosen. */
-export function AddressTab({ onChoose }: Pick<TabProps, "onChoose">) {
+/**
+ * An outside address: the server fetches the image into the library, then
+ * it is chosen. In a product's gallery (`youtube`, adr/0069 §10) a YouTube
+ * link goes to the product as a video instead and the dialog closes; which
+ * it is, is only guessed here (`looksLikeYoutube`): the server decides.
+ */
+export function AddressTab({
+  onChoose,
+  youtube,
+  onDone,
+}: Pick<TabProps, "onChoose"> & { youtube?: YoutubeIntake | undefined; onDone?: () => void }) {
   const { t } = useTranslation()
   const changed = useMediaChanged()
   const [url, setUrl] = useState("")
@@ -179,20 +189,38 @@ export function AddressTab({ onChoose }: Pick<TabProps, "onChoose">) {
       setError(errorText(t, failure))
     },
   })
+  const link = useMutation({
+    mutationFn: (address: string) => youtube?.add(address) ?? Promise.resolve(),
+    onSuccess: () => {
+      onDone?.()
+    },
+    onError: (failure) => {
+      setError(errorText(t, failure))
+    },
+  })
+  const asVideo = youtube !== undefined && looksLikeYoutube(url)
+  const pending = bring.isPending || link.isPending
   return (
     <form
       className="flex min-h-0 flex-1 flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
         setError(null)
-        bring.mutate(url.trim())
+        const address = url.trim()
+        if (!asVideo) {
+          bring.mutate(address)
+        } else if (youtube.refusal) {
+          setError(youtube.refusal)
+        } else {
+          link.mutate(address)
+        }
       }}
     >
       <DialogBody list>
         <Field
-          label={t(`${P}.address`)}
+          label={t(youtube ? `${P}.addressVideo` : `${P}.address`)}
           htmlFor="media-picker-address"
-          hint={t(`${P}.addressHint`)}
+          hint={t(youtube ? `${P}.addressHintVideo` : `${P}.addressHint`)}
           error={error ?? undefined}
         >
           <Input
@@ -210,9 +238,9 @@ export function AddressTab({ onChoose }: Pick<TabProps, "onChoose">) {
         </Field>
       </DialogBody>
       <DialogFooter>
-        <Button type="submit" disabled={url.trim() === "" || bring.isPending}>
-          {bring.isPending ? <Loader2 className="animate-spin" /> : null}
-          {t(`${P}.import`)}
+        <Button type="submit" disabled={url.trim() === "" || pending}>
+          {pending ? <Loader2 className="animate-spin" /> : null}
+          {t(asVideo ? `${P}.addYoutube` : `${P}.import`)}
         </Button>
       </DialogFooter>
     </form>

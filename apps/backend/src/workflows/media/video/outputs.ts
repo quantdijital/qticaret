@@ -110,6 +110,42 @@ export async function storeOutputs(
   onStored(mp4.id)
   const webm = await storeVideoFile(container, `${base}.webm`, outputs.webm, "webm", signal)
   onStored(webm.id)
+  const stored = await storePosterImages(container, base, poster, onStored, signal)
+  return {
+    outputs: {
+      mp4: { url: mp4.url, bytes: outputs.mp4.bytes },
+      webm: { url: webm.url, bytes: outputs.webm.bytes },
+    },
+    output_file_ids: [mp4.id, webm.id],
+    poster: stored.poster,
+    poster_file_ids: stored.poster_file_ids,
+    bytes: outputs.mp4.bytes + outputs.webm.bytes + stored.bytes,
+  }
+}
+
+export interface StoredPoster {
+  poster: {
+    url: string
+    width: number
+    height: number
+    derivatives: ReturnType<typeof describeDerivatives>
+  }
+  poster_file_ids: string[]
+  bytes: number
+}
+
+/**
+ * A video's poster stored public (a clip's first frame, a YouTube video's
+ * cover, adr/0069 §4, §8): `{base}.jpg` and `{base}-{width}.webp|avif`
+ * (`versionName`). Each file reported as it is written (`onStored`).
+ */
+export async function storePosterImages(
+  container: MedusaContainer,
+  base: string,
+  poster: PosterImages,
+  onStored: (fileId: string) => void,
+  signal?: AbortSignal
+): Promise<StoredPoster> {
   const store = async (name: string, mime: string, buffer: Buffer) => {
     if (signal?.aborted) {
       throw infraError("video poster: the job was stopped")
@@ -132,15 +168,7 @@ export async function storeOutputs(
     )
     versions.push({ derivative, file })
   }
-  const posterBytes =
-    poster.master.buffer.length +
-    poster.derivatives.reduce((sum, derivative) => sum + derivative.buffer.length, 0)
   return {
-    outputs: {
-      mp4: { url: mp4.url, bytes: outputs.mp4.bytes },
-      webm: { url: webm.url, bytes: outputs.webm.bytes },
-    },
-    output_file_ids: [mp4.id, webm.id],
     poster: {
       url: master.url,
       width: poster.master.width,
@@ -148,7 +176,9 @@ export async function storeOutputs(
       derivatives: describeDerivatives(versions),
     },
     poster_file_ids: [master.id, ...versions.map(({ file }) => file.id)],
-    bytes: outputs.mp4.bytes + outputs.webm.bytes + posterBytes,
+    bytes:
+      poster.master.buffer.length +
+      poster.derivatives.reduce((sum, derivative) => sum + derivative.buffer.length, 0),
   }
 }
 

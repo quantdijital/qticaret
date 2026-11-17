@@ -3182,6 +3182,9 @@
       "removeDescription": "The video comes off the product and the storefront, and its files are deleted. This cannot be undone.",
       "removed": "Video removed.",
       "sourceGone": "The uploaded file is no longer kept; remove the video and upload it again.",
+      "youtube": "YouTube",
+      "youtubeOpen": "Open on YouTube",
+      "youtubeAdded": "YouTube video added.",
       "errors": {
         "too_large": "A video can be 50 MB at most.",
         "too_long": "A video can be 30 seconds long at most.",
@@ -3191,7 +3194,9 @@
         "unreadable": "The video could not be read; the file may be damaged.",
         "limit_per_product": "A product can have 2 videos at most.",
         "processing_failed": "The video could not be prepared. Try again; if it fails again, upload another file.",
-        "upload_unavailable": "Videos cannot be uploaded right now."
+        "upload_unavailable": "Videos cannot be uploaded right now.",
+        "youtube_invalid": "Enter a valid YouTube link.",
+        "youtube_unavailable": "This video cannot be embedded or is not public."
       }
     },
     "wizard": {
@@ -10499,7 +10504,10 @@
       "chooseUploaded_other": "Choose the {{count}} uploaded images",
       "address": "Image address",
       "addressHint": "The image is copied from this address into the library; pages show the shop's own copy. JPG, PNG, WebP or AVIF, 10 MB at most.",
-      "import": "Bring in and choose"
+      "import": "Bring in and choose",
+      "addressVideo": "Address of the image or the YouTube video",
+      "addressHintVideo": "An image is copied from this address into the library (JPG, PNG, WebP or AVIF, 10 MB at most). A YouTube link is added to the product as a video; the storefront shows only its cover until a visitor plays it.",
+      "addYoutube": "Add the video"
     },
     "field": {
       "empty": "No image chosen",

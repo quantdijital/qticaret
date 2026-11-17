@@ -17,6 +17,7 @@ const NOTE = draftNote([
   "İnternet sitesi trafik kayıtlarının 5651 sayılı Kanun kapsamında tutulma yükümlülüğü (yorum ve soru-cevap gibi kullanıcı içerikleri nedeniyle yer sağlayıcılık).",
   "Kapıda ödeme ve havale iadeleri için alınan banka hesap bilgisi (IBAN) platformda bir alanda tutulmuyor; personelin bu bilgiyi nasıl alacağı ve ne kadar saklayacağı.",
   "Yaş sınırlı ürünlerde yaş beyanının hukuki sebebi (sektörünüze özgü mevzuat).",
+  "Ürün sayfasındaki YouTube videosu oynatıldığında Google'a (yurt dışı) aktarımın dayanağı: ziyaretçinin oynatma eylemiyle başlayan aktarımın md. 9/6 arızi aktarım hallerinden birine girip girmediği, yoksa açık rıza ya da standart sözleşme gerekip gerekmediği.",
 ])
 
 const DATA: Block = table(
@@ -211,6 +212,7 @@ export const privacyNotice: { title: string; content: Block[] } = {
       "E-posta gönderim hizmeti: e-posta adresiniz ve size gönderilen iletinin içeriği.",
       "İzin verdiyseniz ölçüm ve reklam hizmetleri (Google, Meta): 5. maddede sayılan bilgiler.",
       "Sosyal hesapla giriş seçtiyseniz Google veya Apple: girişin doğrulanması için gerekli bilgiler.",
+      "Bir ürün sayfasındaki YouTube videosunu oynattığınızda YouTube (Google): IP adresiniz, tarayıcı bilgileriniz ve YouTube'un kendi çerez ve yerel depolama tanımlayıcıları. Video oynatılmadan önce YouTube'a hiçbir bilgi gönderilmez; aktarım, videoyu oynatma eyleminizle ve yalnızca oynatıcının çalışması için gereken ölçüde gerçekleşir.",
     ]),
     p(
       "Bu aktarımlar KVKK md. 9'a uygun olarak; yeterlilik kararı bulunan hallerde bu karara, bulunmayan hallerde Kişisel Verileri Koruma Kurulunca ilan edilen standart sözleşme gibi uygun güvencelerden birine ya da md. 9/6'da sayılan arızi aktarım hallerine dayanılarak yapılır."

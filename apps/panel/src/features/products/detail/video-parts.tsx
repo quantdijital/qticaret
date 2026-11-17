@@ -1,4 +1,4 @@
-import { Film } from "lucide-react"
+import { ExternalLink, Film } from "lucide-react"
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
-import { useVideoTitle } from "@/features/products/api/videos"
+import { useVideoTitle, youtubeWatchUrl } from "@/features/products/api/videos"
 import type { ProductVideo } from "@/features/products/api/videos"
 import { VIDEO_TITLE_MAX } from "@/features/products/video-facts"
 import { errorText } from "@/lib/errors"
@@ -51,6 +51,32 @@ export function VideoPreview({ video }: { video: ProductVideo }) {
         <Film className="size-8 text-muted-foreground" aria-hidden="true" />
       )}
     </div>
+  )
+}
+
+/**
+ * A YouTube video's link (adr/0069 §10): its page on YouTube, built from
+ * its id, read only, and "YouTube'da aç" in a new tab. The panel never
+ * frames the player.
+ */
+export function YoutubeLink({ id }: { id: string | null }) {
+  const { t } = useTranslation()
+  const href = youtubeWatchUrl(id)
+  if (!href) {
+    return null
+  }
+  return (
+    <Field label={t(`${V}.youtube`)} htmlFor="video-youtube">
+      <div className="flex gap-2">
+        <Input id="video-youtube" value={href} readOnly className="min-w-0 flex-1" />
+        <Button variant="outline" asChild>
+          <a href={href} target="_blank" rel="noopener noreferrer">
+            <ExternalLink aria-hidden="true" />
+            {t(`${V}.youtubeOpen`)}
+          </a>
+        </Button>
+      </div>
+    </Field>
   )
 }
 

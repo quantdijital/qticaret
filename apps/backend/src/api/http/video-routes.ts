@@ -9,6 +9,7 @@ import { VIDEO_MAX_REQUEST_BYTES } from "../../lib/media/video/limits"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { PRODUCT_VIDEOS } from "../../modules/platform-settings/features"
 import {
+  AdminAddYoutubeVideo,
   AdminRetryProductVideo,
   AdminUpdateProductVideo,
 } from "../admin/products/[id]/videos/validators"
@@ -96,6 +97,18 @@ export const VIDEO_ROUTES = [
     middlewares: [
       requireFeature(PRODUCT_VIDEOS),
       validateAndTransformBody(AdminUpdateProductVideo),
+    ],
+  },
+  // Slice 5: a YouTube link (adr/0069 §8): a person's, from the upload's own budget (each
+  // asks YouTube and copies its cover)
+  {
+    matcher: "/admin/products/:id/videos/youtube",
+    methods: ["POST" as const],
+    middlewares: [
+      requireFeature(PRODUCT_VIDEOS),
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.media_video, { identity: staffOf }),
+      validateAndTransformBody(AdminAddYoutubeVideo),
     ],
   },
   // Slice 3: "Yeniden dene", another run of the job: from the upload's own budget

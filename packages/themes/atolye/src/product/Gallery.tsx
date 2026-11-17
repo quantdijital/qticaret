@@ -7,6 +7,7 @@ import type { ImageView, ProductVideoView } from "@qticaret/ui"
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
 import { gallerySlides, slideOfPlace } from "./gallery-slides"
 import { GalleryVideo } from "./GalleryVideo"
+import { GalleryYoutube } from "./GalleryYoutube"
 import { Thumbs } from "./Thumbs"
 import { VARIANT_CHOSEN_EVENT, chosenVariant, pictureOrder } from "./variant-pictures"
 import type { GalleryWords } from "./words"
@@ -32,7 +33,8 @@ const smooth = () =>
  * (`variant-pictures.ts`) brings them to the front, the counter, the
  * thumbnails and the zoom following; the square keeps its size. The
  * shop's videos (adr/0069 §7) sit among them after as many photographs as
- * each says (`GalleryVideo`), a play mark on their thumbnails; the zoom
+ * each says (`GalleryVideo`; a YouTube video `GalleryYoutube`), a play
+ * mark on their thumbnails; the zoom
  * shows the photographs alone. Without videos the gallery is as it was.
  */
 export function Gallery({
@@ -171,14 +173,24 @@ export function Gallery({
                 data-index={n}
                 className="relative aspect-square w-full shrink-0"
               >
-                {/* Without photographs its poster is the first picture: it never starts by itself */}
-                <GalleryVideo
-                  video={slide.video}
-                  sizes={SIZES}
-                  priority={n === 0}
-                  autoplay={images.length > 0}
-                  words={words}
-                />
+                {slide.video.youtube ? (
+                  // A YouTube video: its cover until pressed, nothing of YouTube's before
+                  <GalleryYoutube
+                    video={slide.video}
+                    sizes={SIZES}
+                    priority={n === 0}
+                    words={words}
+                  />
+                ) : (
+                  // Without photographs its poster is the first picture: it never starts by itself
+                  <GalleryVideo
+                    video={slide.video}
+                    sizes={SIZES}
+                    priority={n === 0}
+                    autoplay={images.length > 0}
+                    words={words}
+                  />
+                )}
               </li>
             )
           )}
