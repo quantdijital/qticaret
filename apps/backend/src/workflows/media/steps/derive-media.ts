@@ -27,7 +27,9 @@ interface Previous {
   derived_at: Date | null
 }
 
-function describe(stored: { derivative: Derivative; file: StoredFile }[]): MediaDerivatives {
+export function describeDerivatives(
+  stored: { derivative: Derivative; file: StoredFile }[]
+): MediaDerivatives {
   const described: MediaDerivatives = { srcset: { webp: [], avif: [] }, og: null }
   for (const { derivative, file } of stored) {
     if (derivative.kind === "og") {
@@ -131,7 +133,7 @@ export const deriveMediaStep = createStep(
       })
       await media.updateMediaAssets({
         id: asset.id,
-        derivatives: describe(made) as unknown as Record<string, unknown>,
+        derivatives: describeDerivatives(made) as unknown as Record<string, unknown>,
         derivative_file_ids: made.map(({ file }) => file.id),
         derived_for: target.derivedFor,
         derived_at: new Date(),

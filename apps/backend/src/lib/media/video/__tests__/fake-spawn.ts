@@ -34,6 +34,7 @@ export function fakeSpawn(program: (command: string, args: readonly string[]) =>
       stderr: PassThrough
       kill: jest.Mock
     }
+    Object.assign(child, { pid: 40_000 + calls.length })
     child.stdout = new PassThrough()
     child.stderr = new PassThrough()
     let exited = false
