@@ -22,6 +22,32 @@ overrides:
   # ours and @medusajs/framework's (exact 4.2.0). The 3.x copy is only the
   # shadcn CLI's (development), with no 3.x fix.
   "zod@>=4.0.0 <4.6.6": 4.6.6
+  # GHSA-27r3-jxmh-p828 (CVE-2026-111181, decompression stream left piped),
+  # express 4's body-parser (~1.20.5) under Medusa; 1.20.9 is in that range.
+  # express 5's body-parser 2.x is not affected.
+  "body-parser@<1.20.9": 1.20.9
+  # GHSA-q7qp-rjg7-q26m, @medusajs/medusa's multer (^2.3.0); 2.5.0 is in that
+  # range. Our size gate runs before multer (api/http/request-limits.ts).
+  "multer@>=2.0.0 <2.5.0": 2.5.0
+  # GHSA-mrwp-f3q8-3g9p, axios' follow-redirects (^1.16.0) via
+  # @medusajs/telemetry; 1.16.2 is in that range
+  "follow-redirects@>=1.16.0 <1.16.2": 1.16.2
+  # GHSA-6pq8-jhm2-2vcw, qs under express 4 and body-parser (~6.16.0), Medusa
+  # and stripe (^6.x); 6.16.1 is in every one of those ranges
+  "qs@>=6.7.0 <6.16.1": 6.16.1
+  # GHSA-w74x-v6f9-j3xg, GHSA-wjr9-j795-jxcr, GHSA-xhq7-xmqj-769h,
+  # GHSA-333x-w4r6-6crp: ajv's fast-uri (^3.0.1); 3.1.9 is in that range
+  "fast-uri@>=3.0.0 <3.1.9": 3.1.9
+  # GHSA-9wx9-5pv9-3349, GHSA-f86p-h4j2-7qgj: @tanstack/router-core's seroval
+  # (^1.6.7) in both panels; 1.6.11 is in that range (seroval-plugins peers ^1.0)
+  "seroval@>=1.5.5 <1.6.11": 1.6.11
+  # GHSA-rj75-hqrm-r3gf, tailwindcss 3 and postcss-nested (^6.1.x) in Medusa's
+  # admin bundler; 6.1.5 is in that range. shadcn's 7.x is not affected.
+  "postcss-selector-parser@<6.1.5": 6.1.5
+  # GHSA-2g4f-4pwh-qvx6, ajv 8 below 8.18: @rushstack/node-core-library pins
+  # ~8.13.0 (mikro-orm migrations via umzug), the rest declare ^8.x; 8.18.0 is
+  # a minor of the same major. eslint's ajv 6 is not affected.
+  "ajv@>=7.0.0-alpha.0 <8.18.0": 8.18.0
 
 # Dependency build/postinstall scripts are blocked unless listed here.
 # Add an entry only after reviewing the package's install script.
