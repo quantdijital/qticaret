@@ -587,8 +587,12 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
+      "variant": "split",
       "title": "Yeni modeller e-postanızda",
-      "text": "Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz."
+      "text": null,
+      "description": "Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz.",
+      "note": "Ayda birkaç e-posta. İstediğiniz an ayrılırsınız.",
+      "show_note": true
     }
   ],
   "product": [

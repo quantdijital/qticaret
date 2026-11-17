@@ -95,6 +95,26 @@ function hydrated(section: Section): Section {
   return out
 }
 
+/**
+ * The footer's newsletter box as the store API prints it (`printedNewsletter`):
+ * today's words, then each new field only off its default. No preset gives
+ * the box a picture, so `image` is not answered here.
+ */
+function footerNewsletter(box: Section) {
+  const variant = typeof box["variant"] === "string" ? box["variant"] : "standard"
+  const promise = variant === "split" || variant === "image_card"
+  return {
+    id: box.id,
+    type: box.type,
+    title: box["title"],
+    text: box["text"],
+    ...(variant === "standard" ? {} : { variant }),
+    ...(box["description"] ? { description: box["description"] } : {}),
+    ...(promise && box["note"] ? { note: box["note"] } : {}),
+    ...(promise && box["show_note"] === false ? { show_note: false } : {}),
+  }
+}
+
 /** A footer bar's settings, only those set apart from the defaults (`footerSettingsOf`). */
 function footerBar(bar: Section | undefined) {
   if (!bar) {
@@ -191,9 +211,7 @@ export function presetAnswer(preset: StorefrontPreset): PresetAnswer {
   const layout = {
     header: header.filter((each) => each.type !== "header_bar").map(printed),
     home: group("home").map(hydrated),
-    footer: footer
-      .filter((each) => each.type === "newsletter")
-      .map((each) => ({ id: each.id, type: each.type, title: each["title"], text: each["text"] })),
+    footer: footer.filter((each) => each.type === "newsletter").map(footerNewsletter),
     product: product.filter((each) => each.type !== "product_main").map(hydrated),
     category: category
       .filter((each) => each.type !== "category_main")

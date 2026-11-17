@@ -1152,18 +1152,30 @@
     class="gf-footer-cols mt-(--footer-gap)"
   >
     <div class="border-b border-rule">
-      <div
-        class="mx-auto w-full max-w-(--container) px-(--gutter) grid gap-8 py-10 lg:grid-cols-12 lg:items-center lg:gap-x-(--gap-columns) lg:py-12"
-      >
-        <section aria-labelledby="bulten" class="flex flex-col gap-4 lg:col-span-6">
-          <h2 id="bulten" class="max-w-[28ch] text-title">
-            Yeni modeller e-postanızda
-          </h2>
-          <form class="flex flex-col gap-3 gf-news">
-            <label for="bulten-alt-eposta" class="text-sm font-semibold">
+      <div class="mx-auto w-full max-w-(--container) px-(--gutter) py-8 lg:py-10">
+        <section
+          aria-labelledby="bulten"
+          data-news="split"
+          class="grid gap-5 lg:grid-cols-12 lg:items-center lg:gap-x-(--gap-columns)"
+        >
+          <div class="lg:col-span-6">
+            <div class="flex min-w-0 flex-col gap-1.5">
+              <h2 id="bulten" class="text-title">
+                Yeni modeller e-postanızda
+              </h2>
+              <p class="max-w-[52ch] text-text-2 text-sm">
+                Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz.
+              </p>
+              <p class="text-xs font-semibold text-text-2">
+                Ayda birkaç e-posta. İstediğiniz an ayrılırsınız.
+              </p>
+            </div>
+          </div>
+          <form class="flex flex-col gap-2 gf-news lg:col-span-5 lg:col-start-8">
+            <label for="bulten-alt-eposta" class="sr-only">
               E-posta adresiniz
             </label>
-            <div class="flex flex-col gap-2 sm:flex-row">
+            <div class="gf-join">
               <input
                 id="bulten-alt-eposta"
                 type="email"
@@ -1190,18 +1202,26 @@
                   value="1"
                 />
                 <span>
-                  Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz.
-                  <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
-                    KVKK aydınlatma metni
-                  </a>
+                  Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak Örnek Atölye Ltd. Şti. tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.
                 </span>
               </label>
               <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold">
               </p>
             </div>
+            <p class="gf-news-privacy text-xs">
+              <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
+                KVKK aydınlatma metni
+              </a>
+            </p>
           </form>
         </section>
-        <ul aria-label="Bize ulaşın" class="gf-reach lg:col-span-5 lg:col-start-8">
+      </div>
+    </div>
+    <div class="border-b border-rule">
+      <div
+        class="mx-auto w-full max-w-(--container) px-(--gutter) grid gap-8 py-10 lg:grid-cols-12 lg:items-center lg:gap-x-(--gap-columns) lg:py-12"
+      >
+        <ul aria-label="Bize ulaşın" class="gf-reach lg:col-span-12">
           <li class="min-w-0">
             <a
               href="tel:+905320000000"
