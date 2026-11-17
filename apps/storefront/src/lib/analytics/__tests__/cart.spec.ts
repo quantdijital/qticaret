@@ -118,7 +118,7 @@ describe("the cart and the cards in the browser", () => {
 
   it("watches nothing and keeps nothing for a visitor who allowed no tag", () => {
     const { storage } = fakeBrowser()
-    client.configureAnalytics({ ga4: null, meta: null, adSignals: false }, undefined)
+    client.configureAnalytics({ ga4: null, meta: null, adSignals: false, amounts: true }, undefined)
     client.watchCart(NO_CART)
     client.watchCart(cart([shirt]))
     expect(storage.size).toBe(0)
@@ -126,7 +126,10 @@ describe("the cart and the cards in the browser", () => {
 
   it("tells what went in or out between the frame's looks, to GA4 and Meta, with the page's brand", () => {
     const { win } = fakeBrowser()
-    client.configureAnalytics({ ga4: "G-ABC123", meta: "1234567890", adSignals: true }, undefined)
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: "1234567890", adSignals: true, amounts: true },
+      undefined
+    )
     client.setPageContext({ items: { variant_m: { ...shirt, brand: "Marka" } } })
     client.watchCart(NO_CART)
     client.watchCart(cart([shirt]))
@@ -149,12 +152,18 @@ describe("the cart and the cards in the browser", () => {
 
   it("takes another tab's later look at the same cart, so nothing is told twice", async () => {
     const { win } = fakeBrowser()
-    client.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+      undefined
+    )
     client.watchCart(cart([shirt]))
     // Another tab (another page's memory, the same browser) adds a cup and sees it
     vi.resetModules()
     const other = await import("../client")
-    other.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+    other.configureAnalytics(
+      { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+      undefined
+    )
     other.watchCart(cart([shirt]))
     other.watchCart(cart([shirt, cup]))
     // This tab refreshes and sees the cup too: already told
@@ -164,14 +173,20 @@ describe("the cart and the cards in the browser", () => {
 
   it("starts from a first look at a cart it never saw (a restored cart is not an add)", () => {
     const { win } = fakeBrowser()
-    client.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+      undefined
+    )
     client.watchCart(cart([shirt, cup], "cart_9"))
     expect(ga4Events(win)).toEqual([])
   })
 
   it("tells the card chosen from the page's list, and nothing for any other link", () => {
     const { win } = fakeBrowser("https://shop.test/gomlekler")
-    client.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+      undefined
+    )
     const list = {
       id: "product_category",
       name: "Gömlekler",

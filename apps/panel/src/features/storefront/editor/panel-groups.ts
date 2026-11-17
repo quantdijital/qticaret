@@ -28,8 +28,10 @@ export interface GroupPlace {
 /**
  * Every section panel group, in the order it stands in its tab:
  * - İçerik: what the section says and shows (words, pictures, links, its
- *   items, which products or categories and how many); the catalog
- *   header's by the part of the bar they fill.
+ *   items, which products or categories and how many); a long one split
+ *   by its parts (the opening's buttons, the cards, how the questions
+ *   open), `content` first; the catalog header's by the part of the bar
+ *   they fill.
  * - Stil: how it is drawn, the variant first and open, then how it stands,
  *   scrolls and moves, its words' and ground's look.
  * - Gelişmiş: the space around it, when and where it shows, and the
@@ -37,6 +39,16 @@ export interface GroupPlace {
  */
 export const PANEL_GROUPS: Readonly<Record<FieldGroupName, GroupPlace>> = {
   content: { tab: "content", title: `${P}.content` },
+  buttons: { tab: "content", title: `${P}.groups.buttons` },
+  categoryList: { tab: "content", title: `${P}.groups.categoryList` },
+  tiles: { tab: "content", title: `${P}.groups.tiles` },
+  chips: { tab: "content", title: `${P}.groups.chips` },
+  picks: { tab: "content", title: `${P}.groups.picks` },
+  cards: { tab: "content", title: `${P}.groups.cards` },
+  thumbs: { tab: "content", title: `${P}.groups.thumbs` },
+  opening: { tab: "content", title: `${P}.groups.opening` },
+  options: { tab: "content", title: `${P}.groups.options` },
+  backToTop: { tab: "content", title: `${P}.groups.backToTop` },
   search: { tab: "content", title: `${P}.groups.search` },
   topBar: { tab: "content", title: `${P}.groups.topBar` },
   menu: { tab: "content", title: `${P}.groups.menu` },
@@ -53,8 +65,14 @@ export const PANEL_GROUPS: Readonly<Record<FieldGroupName, GroupPlace>> = {
   look: { tab: "advanced", title: "storefront.editor.look.title" },
 }
 
-/** The groups that stand open at first: the variant, the first thing one picks. */
-export const OPEN_AT_FIRST: ReadonlySet<string> = new Set<string>(["variant"])
+/**
+ * The groups that stand open at first (docs/18 §7.1): each tab's first,
+ * the one a shop comes for. "İçerik" opens at the section's main content
+ * (`content`, the header's search), "Stil" at the variant; the rest stand
+ * closed down to their titles until opened, and a group alone in its tab
+ * is always open. A shop's own opening or closing is remembered over this.
+ */
+export const OPEN_AT_FIRST: ReadonlySet<string> = new Set<string>(["content", "search", "variant"])
 
 /** A group's tab; a group not listed sits in "İçerik". */
 export const tabOfGroup = (name: string): SettingsTab =>

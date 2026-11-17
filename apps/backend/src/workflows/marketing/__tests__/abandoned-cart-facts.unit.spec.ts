@@ -3,6 +3,7 @@ import type { EmailReminderFacts } from "../abandoned-cart-facts"
 
 const ready: EmailReminderFacts = {
   email: "ayse@example.com",
+  wholesale: false,
   consent: "granted",
   suppressed: false,
   reminded: false,
@@ -17,6 +18,8 @@ describe("abandoned cart actions (İYS)", () => {
 
   it.each([
     [{ email: null }, "no_email"],
+    // ADR-0068 decision 16: never to a wholesaler, consent or not
+    [{ wholesale: true }, "wholesale"],
     [{ reminded: true }, "reminded"],
     [{ consent: null }, "no_consent"],
     [{ consent: "revoked" }, "no_consent"],

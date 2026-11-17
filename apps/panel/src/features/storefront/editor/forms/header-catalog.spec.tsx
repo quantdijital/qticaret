@@ -92,11 +92,12 @@ describe("the catalog header's settings", () => {
     expect(headerCatalogIn("icons")).toEqual(["phone", "tools_place", "account_text", "cart_total"])
     expect(headerCatalogIn("content")).toEqual([])
     expect(headerCatalogIn("look")).toEqual([])
-    // In the panel: four closed groups under "İçerik", no "İçerik" group of its own
+    // In the panel: four groups under "İçerik", the first open, no "İçerik" group of its own
     const user = userEvent.setup()
     renderBar(switchVariant(standard, "catalog"))
     await openTab(user, "content")
-    for (const title of ["Arama", "Üst şerit", "Menü çubuğu", "Simgeler ve iletişim"]) {
+    expect(screen.getByRole("button", { name: "Arama" })).toHaveAttribute("aria-expanded", "true")
+    for (const title of ["Üst şerit", "Menü çubuğu", "Simgeler ve iletişim"]) {
       expect(screen.getByRole("button", { name: title })).toHaveAttribute("aria-expanded", "false")
     }
     expect(screen.queryByRole("button", { name: "İçerik" })).toBeNull()
@@ -149,7 +150,7 @@ describe("the catalog header's settings", () => {
       )
     )
     expect(screen.getByRole("switch", { name: /Üst yardımcı şerit/ })).toBeInTheDocument()
-    expect(screen.getByLabelText(/Şerit notu/)).toBeInTheDocument()
+    expect(screen.getByRole("textbox", { name: /Şerit notu/ })).toBeInTheDocument()
   })
 
   it("offers the strip's note and its link right under the strip, only while it is on", async () => {
@@ -167,8 +168,12 @@ describe("the catalog header's settings", () => {
       "mainheader-header-strip_note_link",
       "mainheader-header-top_links",
     ])
-    expect(screen.getByText(/Örnek: 1500 TL üzeri kargo bedava/)).toBeInTheDocument()
-    const note = screen.getByLabelText(/Şerit notu/)
+    expect(
+      screen.getByText(
+        /\{ücretsiz_kargo_eşiği\} üzeri kargo bedava \(eşik girilmemişse not görünmez\)/
+      )
+    ).toBeInTheDocument()
+    const note = screen.getByRole("textbox", { name: /Şerit notu/ })
     expect(note).toHaveAttribute("maxLength", "80")
     await user.type(note, "Kargo bedava")
     expect(changes.at(-1)).toMatchObject({ strip_note: "Kargo bedava" })
@@ -180,7 +185,7 @@ describe("the catalog header's settings", () => {
     // The strip off: its note and link go with it
     await user.click(screen.getByRole("switch", { name: /Üst yardımcı şerit/ }))
     expect(changes.at(-1)).toMatchObject({ utility_bar: false })
-    expect(screen.queryByLabelText(/Şerit notu/)).toBeNull()
+    expect(screen.queryByRole("textbox", { name: /Şerit notu/ })).toBeNull()
     expect(document.getElementById("mainheader-header-strip_note_link")).toBeNull()
   })
 
@@ -194,7 +199,8 @@ describe("the catalog header's settings", () => {
     await openTab(user, "content")
     expect(
       screen.getAllByRole("button", { expanded: false }).map((each) => each.textContent)
-    ).toEqual(["Arama", "Menü çubuğu"])
+    ).toEqual(["Menü çubuğu"])
+    expect(screen.getByRole("button", { name: "Arama" })).toHaveAttribute("aria-expanded", "true")
     await openGroup(user, "Menü çubuğu")
     const steps = screen.getByRole("radiogroup", {
       name: /Menüde kategori resimleri/,
@@ -254,9 +260,9 @@ describe("the catalog header's settings", () => {
     expect(changes.at(-1)).toMatchObject({ phone: false })
     await user.click(screen.getByRole("radio", { name: "Ana renk" }))
     expect(changes.at(-1)).toMatchObject({ menu_ground: "primary" })
-    await user.type(screen.getByLabelText(/Arama kutusundaki yazı/), "Kod ara")
+    await user.type(screen.getByRole("textbox", { name: /Arama kutusundaki yazı/ }), "Kod ara")
     expect(changes.at(-1)).toMatchObject({ search_placeholder: "Kod ara" })
-    await user.clear(screen.getByLabelText(/Arama kutusundaki yazı/))
+    await user.clear(screen.getByRole("textbox", { name: /Arama kutusundaki yazı/ }))
     expect(changes.at(-1)).toMatchObject({ search_placeholder: null })
     // The finer switches stand with the part of the bar they change
     await user.click(screen.getByRole("switch", { name: /Sepette tutarı göster/ }))

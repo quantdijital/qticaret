@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { escapeHtml, expectedLine, maintenanceHtml, maintenanceResponse } from "../page"
 import {
   bypassCookieName,
+  bypassHeaderOf,
   isAllowedPath,
   isBypassToken,
   isOpenDuringMaintenance,
@@ -180,6 +181,16 @@ describe("the bypass link", () => {
   it("keeps its cookie under `__Host-` over HTTPS", () => {
     expect(bypassCookieName(true)).toBe("__Host-qt_bypass")
     expect(bypassCookieName(false)).toBe("qt_bypass")
+  })
+
+  it("goes to the backend's Store API calls only shaped as a token (adr/0053 Ek 2026-11-17)", () => {
+    const token = `mnb_AbCdEfGhIjKlMnOp.mhx0v3k0.${MAC}`
+    expect(bypassHeaderOf(token)).toEqual({ "x-maintenance-bypass": token })
+    expect(bypassHeaderOf(undefined)).toEqual({})
+    expect(bypassHeaderOf("")).toEqual({})
+    expect(bypassHeaderOf("bozuk")).toEqual({})
+    // A line break never reaches a header
+    expect(bypassHeaderOf(`${token}\nx-other: 1`)).toEqual({})
   })
 })
 

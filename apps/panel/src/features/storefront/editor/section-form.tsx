@@ -16,21 +16,46 @@ import { RichTextForm } from "./forms/rich-text-form"
 import { StripGalleryForm } from "./forms/strip-gallery-form"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { TrustBadgeList } from "./shared/trust-badge-list"
+import { NamedGroup } from "./named-group"
 
-/** The form for one section type. */
-export function FormOf({
-  section,
-  problems,
-  onChange,
-  badges,
-  onBadges,
-}: {
+interface FormOfProps {
   section: AnySection
   problems: SectionProblems
   onChange: (section: AnySection, field?: string) => void
   badges: TrustBadge[]
   onBadges: (badges: TrustBadge[], field?: string) => void
-}) {
+}
+
+/**
+ * The sections whose content is long enough to split (docs/18 §7.1): their
+ * forms draw their own groups, "İçerik" first and open, the rest closed
+ * (the opening's buttons, the catalogue opening's parts, the cards, the
+ * bands' pictures, how the questions open, the footer's button).
+ */
+const ownsGroups = (section: AnySection): boolean =>
+  section.type === "hero" ||
+  section.type === "hero_slider" ||
+  section.type === "price_bands" ||
+  section.type === "faq" ||
+  section.type === "footer_bar" ||
+  (section.type === "categories" && section.variant !== "tiles")
+
+/**
+ * A section's content in the panel's "İçerik" tab: its form inside the
+ * one "İçerik" group, or the form's own groups when it splits its content.
+ */
+export function FormOf(props: FormOfProps) {
+  return ownsGroups(props.section) ? (
+    <FormBody {...props} />
+  ) : (
+    <NamedGroup name="content">
+      <FormBody {...props} />
+    </NamedGroup>
+  )
+}
+
+/** The form for one section type. */
+function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps) {
   const props = { problems, onChange }
   switch (section.type) {
     case "announcement_bar":

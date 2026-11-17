@@ -85,6 +85,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           ga4={preview ? null : tags.ga4}
           meta={preview ? null : tags.meta}
           adSignals={tags.adSignals}
+          amounts={tags.amounts}
           nonce={nonce}
           cart={cart}
         />

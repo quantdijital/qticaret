@@ -1,5 +1,7 @@
+import { useId } from "react"
 import type { ReactNode } from "react"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { HiddenHint, InfoTip } from "@qticaret/admin-ui/patterns/info-tip"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Textarea } from "@qticaret/admin-ui/ui/textarea"
@@ -145,7 +147,10 @@ export function CountField({
   )
 }
 
-/** A titled group of fields in the side panel. */
+/**
+ * A titled list inside a panel group (a section's slides, strips, bands):
+ * what it holds behind a small (i) beside its title (docs/18 §7.1).
+ */
 export function FieldGroup({
   title,
   hint,
@@ -155,11 +160,17 @@ export function FieldGroup({
   hint?: string | undefined
   children: ReactNode
 }) {
+  const hintId = `${useId()}-hint`
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-0.5">
+      <div className="flex items-start gap-1.5">
         <h3 className="text-sm font-medium">{title}</h3>
-        {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+        {hint ? (
+          <>
+            <InfoTip name={title} hint={hint} hintId={hintId} />
+            <HiddenHint id={hintId}>{hint}</HiddenHint>
+          </>
+        ) : null}
       </div>
       {children}
     </div>

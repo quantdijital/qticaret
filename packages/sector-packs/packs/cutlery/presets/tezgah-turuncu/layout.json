@@ -9,6 +9,7 @@
       "variant": "catalog",
       "sticky": true,
       "menu_images": "all",
+      "search_style": "icon",
       "search_placeholder": "Model, çelik ya da kategori ara",
       "search_label": false,
       "account_text": true,
@@ -17,7 +18,12 @@
       "utility_bar": true,
       "phone": true,
       "categories_button": true,
-      "menu_ground": "stage"
+      "menu_ground": "stage",
+      "tools_place": "row",
+      "top_links": "strip",
+      "search_width": "narrow",
+      "strip_note": "{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava",
+      "strip_note_link": { "$href": "/kampanyalar" }
     }
   ],
   "home": [
@@ -28,18 +34,101 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "category_list",
-      "eyebrow": null,
+      "eyebrow": "Atölyeden tezgâha",
       "heading": "Bıçak, çakı ve kamp aletleri",
       "text": "Her modelin çeliği, namlu boyu ve sertliği ürün sayfasında yazılı. Kategoriden seçin ya da aramaya model adını yazın.",
-      "links": [{ "$href": "/magaza", "label": "Tüm ürünler" }],
+      "links": [
+        { "$href": "/magaza", "label": "Tüm ürünler" },
+        { "$href": "/kategoriler", "label": "Kategoriler" }
+      ],
       "image": null,
       "list": { "kind": "top" },
-      "list_limit": 8,
+      "list_limit": 9,
       "show_count": true,
-      "tiles": [],
-      "chips": [],
-      "picks": [],
-      "show_price": true
+      "tiles": [
+        { "category_id": { "$handle": "category:av-bicaklari" }, "image": null },
+        { "category_id": { "$handle": "category:bakim-ve-aksesuar" }, "image": null }
+      ],
+      "chips": [
+        { "$href": "/kategori/av-bicaklari", "label": "Av bıçakları" },
+        { "$href": "/kategori/mutfak-ve-sef-bicaklari/santoku-bicaklari", "label": "Santoku" },
+        { "$href": "/kategori/outdoor-ve-kamp/multitool", "label": "Multitool" },
+        { "$href": "/markalar", "label": "Markalar" }
+      ],
+      "picks": [
+        {
+          "product_id": { "$handle": "product:miras-sam-celigi-gyuto-21-cm" },
+          "label": "Şef bıçağı"
+        },
+        {
+          "product_id": { "$handle": "product:karacelik-doruk-n690-av-bicagi" },
+          "label": "Av bıçağı"
+        },
+        {
+          "product_id": { "$handle": "product:demirhan-bozkurt-d2-kilitli-caki" },
+          "label": "Çakı"
+        },
+        {
+          "product_id": { "$handle": "product:yoruk-usta-18-fonksiyonlu-multitool" },
+          "label": "Multitool"
+        }
+      ],
+      "show_price": true,
+      "slides": [
+        {
+          "heading": "Bıçak, çakı ve kamp aletleri",
+          "text": "Her modelin çeliği, namlu boyu ve sertliği ürün sayfasında yazılı. Kategoriden seçin ya da aramaya model adını yazın.",
+          "links": [
+            { "$href": "/magaza", "label": "Tüm ürünler" },
+            { "$href": "/kategoriler", "label": "Kategoriler" }
+          ],
+          "image": {
+            "$image": "images/acilis-sef-bicaklari.webp",
+            "alt": "Kesme tahtası üstünde üç şef bıçağı"
+          },
+          "link": { "$href": "/magaza" }
+        },
+        {
+          "heading": "Doğada güvenilir ağızlar",
+          "text": "Kamp bıçakları, baltalar ve multitool: kılıfı, ağırlığı ve bakım bilgisiyle.",
+          "links": [{ "$href": "/kategori/outdoor-ve-kamp", "label": "Outdoor ve kamp" }],
+          "image": {
+            "$image": "images/acilis-kamp.webp",
+            "alt": "Kesilmiş odunların üstünde kırmızı saplı kamp bıçağı"
+          },
+          "link": { "$href": "/kategori/outdoor-ve-kamp" }
+        },
+        {
+          "heading": "İndirimdeki modeller",
+          "text": "Av, kamp ve mutfak bıçaklarında seçili modeller indirimde. İndirimli fiyat ürün sayfasında, eski fiyatın yanında.",
+          "links": [{ "$href": "/kampanyalar", "label": "İndirimdekiler" }],
+          "image": {
+            "$image": "images/acilis-indirim.webp",
+            "alt": "Ağaç kütüğü üstünde geniş namlulu av bıçağı"
+          },
+          "link": { "$href": "/kampanyalar" }
+        },
+        {
+          "heading": "Keskinlik bakımla kalır",
+          "text": "Bileme taşları, yağ taşı ve kılıflar: bıçağınız ilk günkü gibi kessin.",
+          "links": [
+            { "$href": "/kategori/bakim-ve-aksesuar/bileme-ve-bakim", "label": "Bileme ve bakım" }
+          ],
+          "image": {
+            "$image": "images/acilis-bileme.webp",
+            "alt": "Su taşında bilenen mutfak bıçağı"
+          },
+          "link": { "$href": "/kategori/bakim-ve-aksesuar/bileme-ve-bakim" }
+        }
+      ],
+      "scroller": {
+        "autoplay": "on",
+        "speed": "medium",
+        "loop": "on",
+        "arrows": "always",
+        "arrow_style": "round",
+        "dots": "on"
+      }
     },
     {
       "id": "guvenseridi",
@@ -62,24 +151,59 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "carousel",
+      "variant": "stage_list",
       "title": "Yeni gelenler",
       "source": { "kind": "newest" },
       "limit": 12,
       "more": { "$href": "/magaza", "label": "Tüm ürünler" },
       "card_variant": null,
-      "scroller": {
-        "desktop": "four",
-        "mobile": "peek",
-        "arrows": "always",
-        "arrow_style": "square",
-        "arrow_position": "head",
-        "dots": "off",
-        "autoplay": "off",
-        "speed": "medium",
-        "loop": "off",
-        "drag": "off"
-      }
+      "stage_count": 4,
+      "stage_side": "start",
+      "stage_ground": "stage",
+      "stage_follow": "on"
+    },
+    {
+      "id": "kullanimagore",
+      "type": "categories",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "collage",
+      "look": {
+        "space_outer": null,
+        "space_inner": "medium",
+        "ground": "well",
+        "align": null,
+        "width": null
+      },
+      "title": "Kullanıma göre",
+      "category_ids": [
+        { "$handle": "category:outdoor-ve-kamp" },
+        { "$handle": "category:mutfak-ve-sef-bicaklari" },
+        { "$handle": "category:cakilar" }
+      ],
+      "columns": 4,
+      "height": "medium",
+      "lead": "on",
+      "links": 5,
+      "show_count": true,
+      "more": { "$href": "/kategoriler", "label": "Tüm kategoriler" }
+    },
+    {
+      "id": "yakinplan",
+      "type": "featured_product",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "text": "Katmanlı Şam çeliği namlu. Çeliği, ölçüleri ve bakımı ürün sayfasında yazılı.",
+      "product_id": { "$handle": "product:karacelik-alageyik-sam-celigi-av-bicagi" },
+      "gallery": "strips",
+      "strips_layout": "side",
+      "strips_slant": "medium",
+      "strips_line": "thin",
+      "strips_overlap": "off",
+      "strips_dim": "on"
     },
     {
       "id": "avrafi",
@@ -163,16 +287,6 @@
       }
     },
     {
-      "id": "yakinplan",
-      "type": "featured_product",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "title": null,
-      "text": "Katmanlı Şam çeliği namlu. Çeliği, ölçüleri ve bakımı ürün sayfasında yazılı.",
-      "product_id": { "$handle": "product:karacelik-alageyik-sam-celigi-av-bicagi" }
-    },
-    {
       "id": "fiyatbantlari",
       "type": "price_bands",
       "visible": true,
@@ -192,83 +306,75 @@
       "thumbs": 0
     },
     {
-      "id": "coksatanlar",
-      "type": "products",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "variant": "featured",
-      "title": "Çok satanlar",
-      "source": { "kind": "best_sellers", "days": 90 },
-      "limit": 7,
-      "more": null,
-      "card_variant": null
-    },
-    {
-      "id": "kullanimagore",
-      "type": "categories",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "variant": "collage",
-      "look": {
-        "space_outer": null,
-        "space_inner": "medium",
-        "ground": "well",
-        "align": null,
-        "width": null
-      },
-      "title": "Kullanıma göre",
-      "category_ids": [
-        { "$handle": "category:outdoor-ve-kamp" },
-        { "$handle": "category:mutfak-ve-sef-bicaklari" },
-        { "$handle": "category:kasap-bicaklari" }
-      ],
-      "columns": 4,
-      "height": "medium",
-      "lead": "on",
-      "links": 5,
-      "show_count": true,
-      "more": { "$href": "/kategoriler", "label": "Tüm kategoriler" }
-    },
-    {
       "id": "indirimdekiler",
       "type": "products",
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "compact",
+      "variant": "ranked",
       "title": "İndirimdekiler",
       "source": { "kind": "on_sale" },
       "limit": 6,
       "more": { "$href": "/kampanyalar", "label": "Tüm indirimler" },
       "card_variant": null,
-      "rows": 2
+      "ranked_count": 5,
+      "ranked_layout": "lead"
     },
     {
-      "id": "yazilar",
-      "type": "posts",
+      "id": "seritgaleri",
+      "type": "strip_gallery",
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": null,
-      "limit": 3
-    },
-    {
-      "id": "markalar",
-      "type": "brands",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "look": {
-        "space_outer": null,
-        "space_inner": "medium",
-        "ground": "well",
-        "align": null,
-        "width": null
-      },
-      "title": null,
-      "brand_ids": []
+      "title": "Tezgâhtan seçmeler",
+      "text": "Bir kategoriye ya da bir markaya tek dokunuşla geçin.",
+      "items": [
+        {
+          "source": { "kind": "custom" },
+          "image": { "$image": "images/serit-cakilar.webp", "alt": "Kum rengi saplı kilitli çakı" },
+          "title": "Çakılar",
+          "note": "Kilitli ve çok amaçlı, her gün cepte",
+          "link": { "$href": "/kategori/cakilar" }
+        },
+        {
+          "source": { "kind": "custom" },
+          "image": {
+            "$image": "images/serit-santoku.webp",
+            "alt": "Çekiç izli namlulu santoku bıçağı"
+          },
+          "title": "Santoku",
+          "note": "İnce namlu, dengeli tutuş",
+          "link": { "$href": "/kategori/mutfak-ve-sef-bicaklari/santoku-bicaklari" }
+        },
+        {
+          "source": { "kind": "custom" },
+          "image": { "$image": "images/serit-av-bicagi.webp", "alt": "Dövme çelik bowie bıçağı" },
+          "title": "Karaçelik",
+          "note": "El işi av ve kamp bıçakları",
+          "link": { "$href": "/marka/karacelik" }
+        },
+        {
+          "source": { "kind": "custom" },
+          "image": { "$image": "images/serit-kiliclar.webp", "alt": "Kını yanında katana" },
+          "title": "Kılıçlar",
+          "note": "Koleksiyon ve tören parçaları",
+          "link": { "$href": "/kategori/kiliclar" }
+        },
+        {
+          "source": { "kind": "custom" },
+          "image": { "$image": "images/serit-multitool.webp", "alt": "Açılmış çok amaçlı pense" },
+          "title": "Multitool",
+          "note": "Kampta ve atölyede her iş için",
+          "link": { "$href": "/kategori/outdoor-ve-kamp/multitool" }
+        }
+      ],
+      "width": "full",
+      "height": "medium",
+      "captions": "on",
+      "strips_slant": "medium",
+      "strips_line": "thin",
+      "strips_overlap": "off",
+      "strips_dim": "on"
     },
     {
       "id": "kisalisteler",
@@ -298,6 +404,142 @@
       ]
     },
     {
+      "id": "setbandi",
+      "type": "banner",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "slides": [
+        {
+          "image": {
+            "$image": "images/bant-bicak-setleri.webp",
+            "alt": "Mıknatıslı askıda üç mutfak bıçağı"
+          },
+          "mobile_image": null,
+          "heading": "Mutfak için tam takım",
+          "text": "Şef, ekmek ve soyma bıçağı bir arada; bloklu ve çantalı setler.",
+          "link": {
+            "$href": "/kategori/mutfak-ve-sef-bicaklari/mutfak-bicak-setleri",
+            "label": "Bıçak setleri"
+          },
+          "second_link": {
+            "$href": "/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari",
+            "label": "Şef bıçakları"
+          },
+          "tone": "light"
+        }
+      ],
+      "width": "boxed",
+      "height": "medium",
+      "text_position": "middle_left",
+      "overlay": "strong",
+      "button_style": "solid"
+    },
+    {
+      "id": "coksatanlar",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "strips",
+      "title": "Çok satanlar",
+      "source": { "kind": "best_sellers", "days": 90 },
+      "limit": 8,
+      "more": null,
+      "card_variant": null,
+      "strips_count": 8,
+      "strips_height": "low",
+      "strips_slant": "medium",
+      "strips_line": "thin",
+      "strips_overlap": "off",
+      "strips_dim": "on"
+    },
+    {
+      "id": "markalar",
+      "type": "brands",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "look": {
+        "space_outer": null,
+        "space_inner": "medium",
+        "ground": "well",
+        "align": null,
+        "width": null
+      },
+      "title": "Markalar",
+      "brand_ids": []
+    },
+    {
+      "id": "kategoriseridi",
+      "type": "marquee",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "items": [
+        {
+          "icon": null,
+          "text": "Çakılar",
+          "subtext": null,
+          "link": { "$href": "/kategori/cakilar" }
+        },
+        {
+          "icon": null,
+          "text": "Av bıçakları",
+          "subtext": null,
+          "link": { "$href": "/kategori/av-bicaklari" }
+        },
+        {
+          "icon": null,
+          "text": "Kamp bıçakları",
+          "subtext": null,
+          "link": { "$href": "/kategori/outdoor-ve-kamp/kamp-bicaklari" }
+        },
+        {
+          "icon": null,
+          "text": "Şef bıçakları",
+          "subtext": null,
+          "link": { "$href": "/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari" }
+        },
+        {
+          "icon": null,
+          "text": "Santoku",
+          "subtext": null,
+          "link": { "$href": "/kategori/mutfak-ve-sef-bicaklari/santoku-bicaklari" }
+        },
+        {
+          "icon": null,
+          "text": "Ekmek bıçakları",
+          "subtext": null,
+          "link": { "$href": "/kategori/mutfak-ve-sef-bicaklari/ekmek-bicaklari" }
+        },
+        {
+          "icon": null,
+          "text": "Kasap bıçakları",
+          "subtext": null,
+          "link": { "$href": "/kategori/kasap-bicaklari" }
+        },
+        {
+          "icon": null,
+          "text": "Bileme taşları",
+          "subtext": null,
+          "link": { "$href": "/kategori/bakim-ve-aksesuar/bileme-ve-bakim" }
+        }
+      ],
+      "speed": "slow",
+      "direction": "left",
+      "hover_pause": "on",
+      "pause_button": "hover",
+      "size": "medium",
+      "ground": "stage",
+      "separator": "star",
+      "weight": "bold",
+      "uppercase": "on",
+      "gap": "wide",
+      "outline": "off",
+      "closable": "off"
+    },
+    {
       "id": "musteriyorumlari",
       "type": "reviews",
       "visible": true,
@@ -305,6 +547,42 @@
       "ends_at": null,
       "title": "Müşteri yorumları",
       "limit": 3
+    },
+    {
+      "id": "sikcasorulanlar",
+      "type": "faq",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Sık sorulanlar",
+      "items": [
+        {
+          "question": "Siparişim ne zaman kargoya verilir?",
+          "answer": "Siparişiniz hazırlanıp kargoya verildiğinde takip numarası e-postanıza gelir. Tahmini teslim tarihi ürün sayfasında ve sepette yazılıdır; siparişinizi Sipariş takibi sayfasından da izleyebilirsiniz."
+        },
+        {
+          "question": "Kargo ücreti ne kadar?",
+          "answer": "Kargo ücreti sepette, ödemeden önce gösterilir. Ücretsiz kargo eşiği olan siparişlerde sepet, eşiğe ne kadar kaldığını yazar."
+        },
+        {
+          "question": "Bıçak almak için yaş sınırı var mı?",
+          "answer": "Yaş sınırı olan ürünlerin sayfasında bu yazılıdır; bu ürünlerde ödeme sırasında 18 yaşını doldurduğunuzu beyan etmeniz istenir."
+        },
+        {
+          "question": "İade ve değişim nasıl yapılır?",
+          "answer": "Teslimattan sonra 14 gün içinde cayma hakkınızı kullanabilirsiniz. Hesabım sayfasındaki siparişinizden iade talebi oluşturun; ürün kullanılmamış ve kutusuyla gönderilmelidir."
+        },
+        {
+          "question": "Bıçağımı nasıl bilerim?",
+          "answer": "Çoğu bıçak için iki yüzlü bir bileme taşı yeterlidir: önce kaba yüzde, sonra ince yüzde, namluyu 15–20 derece açıyla tutarak bileyin. Her ürünün bakım bilgisi kendi sayfasında yazılıdır."
+        },
+        {
+          "question": "Hangi ödeme yollarını kullanabilirim?",
+          "answer": "Ödeme adımında mağazanın sunduğu yollar listelenir: kredi ve banka kartı, havale/EFT ya da kapıda ödeme. Kart bilgileriniz mağazada saklanmaz."
+        }
+      ],
+      "open_first": "on",
+      "single_open": "on"
     }
   ],
   "footer": [
@@ -329,10 +607,26 @@
       "starts_at": null,
       "ends_at": null,
       "title": "Yeni modeller e-postanızda",
-      "text": "Yeni gelen modelleri ve indirimleri e-postayla haber veririz."
+      "text": "Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz."
     }
   ],
   "product": [
+    {
+      "id": "mainproduct",
+      "type": "product_main",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard"
+    },
+    {
+      "id": "urunguvence",
+      "type": "trust_badges",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "lined"
+    },
     {
       "id": "benzerurunler",
       "type": "related_products",
@@ -356,9 +650,46 @@
         "loop": "off",
         "drag": "off"
       }
+    },
+    {
+      "id": "urunsorulari",
+      "type": "faq",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Bu ürünle ilgili sık sorulanlar",
+      "items": [
+        {
+          "question": "Bıçak kutusunda ne gelir?",
+          "answer": "Ürün sayfasında yazanlar gelir: bıçak, varsa kılıfı ya da kutusu ve bakım kartı. Kılıf yoksa açıklamada ayrıca belirtilir."
+        },
+        {
+          "question": "Bulaşık makinesinde yıkanır mı?",
+          "answer": "Önermeyiz: deterjan ve sıcak su namlunun ağzını köreltir, ahşap ve deri sapı yorar. Ilık suyla elde yıkayıp hemen kurulayın."
+        },
+        {
+          "question": "Garanti süresi ne kadar?",
+          "answer": "Garanti süresi ürün sayfasındaki özellikler arasında yazılıdır. Üretim hatasında Hesabım sayfasındaki siparişinizden bize yazın."
+        },
+        {
+          "question": "Teslimattan sonra iade edebilir miyim?",
+          "answer": "Teslimattan sonra 14 gün içinde cayma hakkınızı kullanabilirsiniz; ürün kullanılmamış ve kutusuyla gönderilmelidir."
+        }
+      ],
+      "open_first": "off",
+      "single_open": "on"
     }
   ],
   "category": [
+    {
+      "id": "maincategory",
+      "type": "category_main",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "by_variant": {}
+    },
     {
       "id": "kategoriguvence",
       "type": "trust_badges",

@@ -33,7 +33,11 @@ async function accountsOf(container: Container, records: string[]): Promise<Acco
     service.listWholesaleAccounts({ customer_id: records }, { take: null, withDeleted: true }),
     emails.length === 0
       ? Promise.resolve([])
-      : service.listWholesaleAccounts({ email: emails, status: "pending" }, { take: null }),
+      : // Unbound only: one bound to another customer is theirs (slice 5 review I3)
+        service.listWholesaleAccounts(
+          { email: emails, status: "pending", customer_id: null },
+          { take: null }
+        ),
   ])
   return [...new Map([...bound, ...invited].map((account) => [account.id, account])).values()]
 }

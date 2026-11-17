@@ -14,6 +14,7 @@ import { CART_REMINDERS_MODULE } from "../../modules/cart-reminders"
 import type CartRemindersModuleService from "../../modules/cart-reminders/service"
 import { deliver } from "../messaging/deliver"
 import { loadCartReminder } from "../messaging/loaders/cart-reminder"
+import { activeWholesalers, isWholesalersCart } from "../wholesale/marketing"
 
 // Medusa's filter types leave out fields its tables have (an order's e-mail)
 // and type a cart's `completed_at` as text; the database takes null and dates
@@ -27,6 +28,7 @@ const OLDEST_MS = 7 * 24 * 60 * MINUTE
 export interface CandidateCart {
   id: string
   email: string | null
+  customer_id?: string | null
   updated_at: string | Date
   items?: unknown[] | null
 }
@@ -65,13 +67,26 @@ export async function remindedLately(container: Container, cart: CandidateCart, 
   return recent !== undefined
 }
 
+/** Whether the cart is an active wholesaler's now, by its customer or its address. */
+export async function isWholesaleCart(container: Container, cartId: string): Promise<boolean> {
+  const wholesalers = await activeWholesalers(container)
+  if (wholesalers.customerIds.size === 0) {
+    return false
+  }
+  const [cart] = await container
+    .resolve(Modules.CART)
+    .listCarts({ id: cartId }, { select: ["id", "email", "customer_id"], take: 1 })
+  return cart ? isWholesalersCart(wholesalers, cart) : false
+}
+
 /**
  * Carts left behind (adr/0038 §1): with an e-mail and lines, unchanged
  * for the shop's delay but not for a week, not reminded yet, and whose
  * shopper has placed no order since. Read page by page until the run's
  * limit is filled, so carts that do not qualify cannot crowd out those
  * that do; one cart an address, and none for an address reminded within
- * the week.
+ * the week. A wholesaler's cart is never reminded of (ADR-0068 decision
+ * 16): by its customer, or by its address when they left it signed out.
  */
 const findAbandonedCartsStep = createStep(
   "marketing-find-abandoned-carts",
@@ -80,6 +95,7 @@ const findAbandonedCartsStep = createStep(
     const carts = container.resolve(Modules.CART)
     const orders = container.resolve(Modules.ORDER)
     const reminders = container.resolve<CartRemindersModuleService>(CART_REMINDERS_MODULE)
+    const wholesalers = await activeWholesalers(container)
     const ids: string[] = []
     const addresses = new Set<string>()
     for (let skip = 0; ids.length < input.limit && skip < SCAN_MAX; skip += SCAN_PAGE) {
@@ -93,14 +109,17 @@ const findAbandonedCartsStep = createStep(
           },
         }),
         {
-          select: ["id", "email", "updated_at"],
+          select: ["id", "email", "customer_id", "updated_at"],
           relations: ["items"],
           take: SCAN_PAGE,
           skip,
           order: { updated_at: "ASC" },
         }
       )) as CandidateCart[]
-      const withLines = page.filter((cart) => (cart.items?.length ?? 0) > 0 && cart.email)
+      const withLines = page.filter(
+        (cart) =>
+          (cart.items?.length ?? 0) > 0 && cart.email && !isWholesalersCart(wholesalers, cart)
+      )
       const reminded = new Set(
         (
           await reminders.listCartReminders(
@@ -148,11 +167,16 @@ export const findAbandonedCartsWorkflow = createWorkflow(
  * Claims the cart's one reminder and sends it through deliver(), which
  * checks consent and suppression (KK3); what it came to is recorded. An
  * e-mail cannot be called back: when sending throws, the claim goes so a
- * later run tries again, and nothing else is left to undo.
+ * later run tries again, and nothing else is left to undo. A cart whose
+ * shopper is a wholesaler now (one since it was found, or staff's button)
+ * is not claimed and nothing goes (ADR-0068 decision 16).
  */
 export const remindCartStep = createStep(
   "marketing-remind-cart",
   async (input: { cart_id: string }, { container }) => {
+    if (await isWholesaleCart(container, input.cart_id)) {
+      return new StepResponse({ outcome: "wholesale" })
+    }
     const reminders = container.resolve<CartRemindersModuleService>(CART_REMINDERS_MODULE)
     const claimed = await reminders.claim(input.cart_id)
     if (!claimed) {

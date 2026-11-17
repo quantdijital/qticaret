@@ -71,14 +71,15 @@ const stepsOf = (prefix: string, field: string): readonly string[] => {
 
 /**
  * The fields the section's form shows for these settings: the linked
- * cards' (the frame with the look, closed), and the footer's (the
- * button's place, face and phones only while the button is on).
+ * cards' and the collage's in "Kartlar" (the frame with the look), and
+ * the footer's (the button in its own group, its place, face and phones
+ * only while it is on).
  */
 export function cardFooterFields(section: AnySection): RegistryField[] {
   if (section.type === "categories" && section.variant === "linked") {
     return CARD_FIELDS.map((field) => ({
       key: `cards.${field}`,
-      group: field === "frame" ? "frame" : "content",
+      group: field === "frame" ? "frame" : "cards",
       label: `${CARDS}.${field}.label`,
       term: `${CARDS}.${field}.term`,
       options: stepsOf(CARDS, field),
@@ -88,7 +89,7 @@ export function cardFooterFields(section: AnySection): RegistryField[] {
   if (section.type === "categories" && section.variant === "collage") {
     return COLLAGE_FIELDS.map((field) => ({
       key: `cards.${field}`,
-      group: "content",
+      group: "cards",
       label: `${CARDS}.${field}.label`,
       term: `${CARDS}.${field}.term`,
       options: stepsOf(CARDS, field),
@@ -100,7 +101,7 @@ export function cardFooterFields(section: AnySection): RegistryField[] {
       (field) => section.back_to_top || !field.startsWith("back_to_top_")
     ).map((field) => ({
       key: `footer.${field}`,
-      group: "content" as const,
+      group: field.startsWith("back_to_top") ? ("backToTop" as const) : ("content" as const),
       label: `${FOOTER}.${field}.label`,
       term: `${FOOTER}.${field}.term`,
       options: stepsOf(FOOTER, field),

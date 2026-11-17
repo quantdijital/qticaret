@@ -32,7 +32,7 @@ describe("the tags in the browser", () => {
   it("loads nothing and sends nothing without an allowed tag", () => {
     const { scripts, win } = fakeBrowser()
     client.track(view)
-    client.configureAnalytics({ ga4: null, meta: null, adSignals: false }, "n0nce")
+    client.configureAnalytics({ ga4: null, meta: null, adSignals: false, amounts: true }, "n0nce")
     client.track(view)
     expect(scripts).toEqual([])
     expect(win["gtag"]).toBeUndefined()
@@ -44,7 +44,10 @@ describe("the tags in the browser", () => {
     const { scripts, win } = fakeBrowser()
     client.track(view)
     expect(scripts).toEqual([])
-    client.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, "n0nce")
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+      "n0nce"
+    )
     expect(scripts).toEqual([
       { src: "https://www.googletagmanager.com/gtag/js?id=G-ABC123", nonce: "n0nce", async: true },
     ])
@@ -74,7 +77,10 @@ describe("the tags in the browser", () => {
     expect(event?.[1]).toBe("view_item")
     expect(event?.[2]).toMatchObject({ send_to: "G-ABC123", currency: "TRY", value: 10 })
     // Loaded once, whatever re-renders the frame
-    client.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: true }, "n0nce")
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: null, adSignals: true, amounts: true },
+      "n0nce"
+    )
     expect(scripts).toHaveLength(1)
     expect(layer(win).at(-1)).toEqual([
       "consent",
@@ -90,7 +96,10 @@ describe("the tags in the browser", () => {
 
   it("tells GA4 the address without its keys", () => {
     const { win } = fakeBrowser("https://shop.test/siparis/order_1?token=abc.def&yeni=1")
-    client.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+      undefined
+    )
     client.track(purchase)
     const set = layer(win).find((call) => call[0] === "set")
     expect(set?.[1]).toEqual({
@@ -105,7 +114,10 @@ describe("the tags in the browser", () => {
 
   it("loads Meta's pixel with the nonce; a purchase carries the order's id as its event id", () => {
     const { scripts, win } = fakeBrowser("https://shop.test/siparis/order_1?yeni=1")
-    client.configureAnalytics({ ga4: null, meta: "1234567890", adSignals: true }, "n0nce")
+    client.configureAnalytics(
+      { ga4: null, meta: "1234567890", adSignals: true, amounts: true },
+      "n0nce"
+    )
     expect(scripts).toEqual([
       { src: "https://connect.facebook.net/en_US/fbevents.js", nonce: "n0nce", async: true },
     ])
@@ -123,7 +135,10 @@ describe("the tags in the browser", () => {
 
   it("keeps Meta's pixel silent on an address of ours holding a key, or coming from one", () => {
     const { win, doc } = fakeBrowser("https://shop.test/siparis/order_1?token=abc.def&yeni=1")
-    client.configureAnalytics({ ga4: null, meta: "1234567890", adSignals: true }, undefined)
+    client.configureAnalytics(
+      { ga4: null, meta: "1234567890", adSignals: true, amounts: true },
+      undefined
+    )
     client.track(purchase)
     expect(metaCalls(win).some((call) => call[0] === "track")).toBe(false)
 
@@ -140,8 +155,11 @@ describe("the tags in the browser", () => {
 
   it("stops a withdrawn tag and forgets its cookies", () => {
     const { win, written } = fakeBrowser()
-    client.configureAnalytics({ ga4: "G-ABC123", meta: "1234567890", adSignals: true }, undefined)
-    client.configureAnalytics({ ga4: null, meta: null, adSignals: false }, undefined)
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: "1234567890", adSignals: true, amounts: true },
+      undefined
+    )
+    client.configureAnalytics({ ga4: null, meta: null, adSignals: false, amounts: true }, undefined)
     expect(layer(win).at(-1)).toEqual([
       "consent",
       "update",
@@ -166,7 +184,10 @@ describe("the tags in the browser", () => {
 
   it("forgets what it kept once the visitor withdraws every tag", () => {
     const { storage } = fakeBrowser()
-    client.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+      undefined
+    )
     client.track(purchase, "purchase:order_1")
     client.watchCart({ id: "cart_1", locked: false, items: [] })
     storage.set("someone_else", "1")
@@ -175,13 +196,16 @@ describe("the tags in the browser", () => {
       "qt_event:purchase:order_1",
       "someone_else",
     ])
-    client.configureAnalytics({ ga4: null, meta: null, adSignals: false }, undefined)
+    client.configureAnalytics({ ga4: null, meta: null, adSignals: false, amounts: true }, undefined)
     expect([...storage.keys()]).toEqual(["someone_else"])
   })
 
   it("loads the scripts only once the page has loaded, the events queued meanwhile", () => {
     const { scripts, win, load } = fakeBrowser("https://shop.test/", { loading: true })
-    client.configureAnalytics({ ga4: "G-ABC123", meta: "1234567890", adSignals: false }, "n0nce")
+    client.configureAnalytics(
+      { ga4: "G-ABC123", meta: "1234567890", adSignals: false, amounts: true },
+      "n0nce"
+    )
     client.track(view)
     expect(scripts).toEqual([])
     expect(layer(win).some((call) => call[1] === "view_item")).toBe(true)
@@ -196,19 +220,25 @@ describe("the tags in the browser", () => {
   it("sends a once-only event once in the browser, and writes nothing for a visitor who allowed nothing", () => {
     const { storage, win } = fakeBrowser()
     client.track(purchase, "purchase:order_1")
-    client.configureAnalytics({ ga4: null, meta: null, adSignals: false }, undefined)
+    client.configureAnalytics({ ga4: null, meta: null, adSignals: false, amounts: true }, undefined)
     expect(storage.size).toBe(0)
 
     vi.resetModules()
     return import("../client").then(async (fresh) => {
-      fresh.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+      fresh.configureAnalytics(
+        { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+        undefined
+      )
       fresh.track(purchase, "purchase:order_1")
       fresh.track(purchase, "purchase:order_1")
       expect(storage.get("qt_event:purchase:order_1")).toBe("1")
       // A reload, or the order's page in another tab: the browser remembers
       vi.resetModules()
       const reloaded = await import("../client")
-      reloaded.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+      reloaded.configureAnalytics(
+        { ga4: "G-ABC123", meta: null, adSignals: false, amounts: true },
+        undefined
+      )
       reloaded.track(purchase, "purchase:order_1")
       expect(layer(win).filter((call) => call[1] === "purchase")).toHaveLength(1)
     })

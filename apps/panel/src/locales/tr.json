@@ -4988,6 +4988,7 @@
       },
       "block": {
         "no_email": "Sepette e-posta adresi yok; hatırlatma gönderilemez.",
+        "wholesale": "Bu sepet bir toptancının. Hatırlatma perakende fiyat gösterir; toptancılara gönderilmez.",
         "reminded": "Bu sepet için hatırlatma zaten gönderildi; her sepete bir kez gider.",
         "no_consent": "Müşterinin ticari e-posta izni yok. Hatırlatma ticari ileti sayılır; yalnızca izin verenlere gider (İYS).",
         "suppressed": "Bu adrese e-posta gönderilmiyor (engelleme listesinde).",
@@ -8178,6 +8179,16 @@
           "marked": "varsayılandan farklı ayar var"
         },
         "groups": {
+          "buttons": "Düğmeler",
+          "categoryList": "Kategori listesi",
+          "tiles": "Yandaki karolar",
+          "chips": "Hızlı bağlantılar",
+          "picks": "Küçük ürünler",
+          "cards": "Kartlar",
+          "thumbs": "Ürün görselleri",
+          "opening": "Soruların açılışı",
+          "options": "Seçenekler",
+          "backToTop": "Yukarı çık düğmesi",
           "search": "Arama",
           "topBar": "Üst şerit",
           "menu": "Menü çubuğu",
@@ -9153,7 +9164,7 @@
         "strip_note": {
           "label": "Şerit notu",
           "term": "strip note",
-          "hint": "Kısa bir duyuru ya da kampanya cümlesi. Örnek: 1500 TL üzeri kargo bedava."
+          "hint": "Kısa bir duyuru ya da kampanya cümlesi. Mağaza bilgisi de yazılabilir: {ücretsiz_kargo_eşiği} üzeri kargo bedava (eşik girilmemişse not görünmez)."
         },
         "strip_note_link": {
           "label": "Not bağlantısı",

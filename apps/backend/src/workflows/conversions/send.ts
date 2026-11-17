@@ -20,6 +20,7 @@ import type IntegrationCredentialsModuleService from "../../modules/integration-
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
 import { heldToCookieConsent } from "../../lib/legal/visitor"
+import { isWholesaleOrder } from "../wholesale/orders"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -29,8 +30,12 @@ type Container = Pick<MedusaContainer, "resolve">
  */
 export type ConversionOutcome = string
 
-/** Outcomes that leave nothing to send again. */
-const SETTLED = new Set(["sent", "duplicate", "no_consent", "not_connected"])
+/**
+ * Outcomes that leave nothing to send again. `wholesale`: a wholesaler's
+ * order, whose prices are theirs alone (ADR-0068 §7, slice 3 review I2):
+ * no amount of it reaches Meta or GA4, so its events are not sent at all.
+ */
+const SETTLED = new Set(["sent", "duplicate", "no_consent", "not_connected", "wholesale"])
 
 interface OrderRow {
   id: string
@@ -173,6 +178,11 @@ const sendPurchaseConversionsStep = createStep(
     if (found.cartId) {
       await conversions.moveToOrder(found.cartId, found.order.id)
     }
+    if (await isWholesaleOrder(container, found.order.id)) {
+      // Nothing will go: the browser's IP and details are not kept for it
+      await conversions.forgetClients([found.order.id])
+      return new StepResponse({ meta: "wholesale", ga4: "wholesale" })
+    }
     const consent = await heldToCurrentAnswer(container, await conversions.ofOrder(found.order.id))
     if (consent) {
       // The answer in force when the order was placed is the order's from now on: a later refund reads it
@@ -237,6 +247,10 @@ const sendRefundConversionStep = createStep(
     const clientId = consent?.analytics ? consent.gaClientId : null
     if (!consent || !clientId) {
       return new StepResponse({ ga4: "no_consent" })
+    }
+    // Its purchase never went (above): a refund of it has nothing to be told against
+    if (await isWholesaleOrder(container, input.order_id)) {
+      return new StepResponse({ ga4: "wholesale" })
     }
     const { ga4 } = await accounts(container)
     if (!ga4) {
