@@ -24,11 +24,14 @@ export function Panel({
   icon: Icon,
   title,
   onBack,
+  back,
   children,
 }: {
   icon?: LucideIcon
   title: string
   onBack: () => void
+  /** Where the back button goes, when not to the page's parts (a part's panel back to its section). */
+  back?: string
   children: ReactNode
 }) {
   const { t } = useTranslation()
@@ -54,12 +57,12 @@ export function Panel({
             {t(`${P}.sections`)}
           </Button>
         ) : (
-          <Hint label={t(`${P}.back`)} side="bottom" align="start">
+          <Hint label={back ?? t(`${P}.back`)} side="bottom" align="start">
             <Button
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label={t(`${P}.back`)}
+              aria-label={back ?? t(`${P}.back`)}
               onClick={onBack}
             >
               <ArrowLeft />

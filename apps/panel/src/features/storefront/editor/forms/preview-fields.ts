@@ -3,6 +3,8 @@ import type { AnySection, HeroSection, ProductsSection } from "@/features/storef
 import { slidesOf } from "./catalog-slides"
 import { HEADER_CATALOG_GROUPS } from "./field-registry"
 import type { FieldGroupName } from "./field-registry"
+import { footerPreviewField } from "../footer-rows/footer-rows-fields"
+import type { FooterPart } from "../footer-rows/footer-rows-fields"
 import { STRIP_PARTS, listField, placeOf, row, tabRail } from "./preview-lists"
 
 /**
@@ -26,6 +28,8 @@ export interface PreviewField {
   slide?: number
   /** Another section's field (a shelf's pill names the rail beside it): that section opens. */
   section?: string
+  /** A free rows footer's row or block (adr/0070 §6): its own panel opens. */
+  part?: FooterPart
 }
 
 /** What the register reads beside the section: the document around it. */
@@ -189,6 +193,9 @@ export function previewField(
   const [first, second] = parts
   if (section.type === "hero") {
     return heroField(section, parts)
+  }
+  if (section.type === "footer_bar" && section.variant === "free_rows") {
+    return footerPreviewField(section, parts)
   }
   if (section.type === "hero_slider") {
     const slide = first === "slides" ? placeOf(second, section.slides.length) : null

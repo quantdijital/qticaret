@@ -65,6 +65,8 @@ interface ToolbarProps {
   extraTokens?: readonly ExtraToken[] | undefined
   /** A short text (a product's short description): h3–h4, no quotes or tables. */
   short?: boolean
+  /** A bare text (a footer block's): no headings, quotes or tables either. */
+  bare?: boolean
 }
 
 /** The editor's actions, each one the server allows (adr/0019). */
@@ -77,6 +79,7 @@ export function Toolbar({
   tokens = false,
   extraTokens,
   short = false,
+  bare = false,
 }: ToolbarProps) {
   const blocks = short ? SHORT_BLOCKS : BLOCKS
   const { t } = useTranslation()
@@ -101,27 +104,29 @@ export function Toolbar({
     action(editor.chain().focus()).run()
   return (
     <div className="sticky top-14 z-10 flex flex-wrap items-center gap-0.5 border-b bg-card px-2 py-1.5">
-      <Select
-        value={state.block}
-        onValueChange={(value) => {
-          // Radix calls with "" while the value has no item yet
-          if (blocks.includes(value as BlockKind)) {
-            setBlock(editor, value as BlockKind)
-          }
-        }}
-      >
-        <SelectTrigger size="sm" className="h-8 w-32" aria-label={label("block")}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {blocks.map((block) => (
-            <SelectItem key={block} value={block}>
-              {t(`content.editor.blocks.${block}`)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Separator orientation="vertical" className="mx-1 h-5" />
+      {bare ? null : (
+        <Select
+          value={state.block}
+          onValueChange={(value) => {
+            // Radix calls with "" while the value has no item yet
+            if (blocks.includes(value as BlockKind)) {
+              setBlock(editor, value as BlockKind)
+            }
+          }}
+        >
+          <SelectTrigger size="sm" className="h-8 w-32" aria-label={label("block")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {blocks.map((block) => (
+              <SelectItem key={block} value={block}>
+                {t(`content.editor.blocks.${block}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      {bare ? null : <Separator orientation="vertical" className="mx-1 h-5" />}
       <ToolButton
         icon={Bold}
         label={label("bold")}
@@ -148,7 +153,7 @@ export function Toolbar({
         active={state.orderedList}
         onClick={run((c) => c.toggleOrderedList())}
       />
-      {short ? null : (
+      {short || bare ? null : (
         <>
           <ToolButton
             icon={Quote}

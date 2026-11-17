@@ -5,7 +5,7 @@ import {
   FOOTER_COLUMNS_SETTINGS,
 } from "@qticaret/types"
 import { Input } from "@qticaret/admin-ui/ui/input"
-import type { FooterColumnsSection } from "@/features/storefront/api/layout"
+import type { FooterColumnsSection, FooterRowsSection } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { PANEL_GROUPS } from "../panel-groups"
 import { PanelGroup } from "../panel-header"
@@ -80,15 +80,18 @@ export function FooterColumnsContent({
   )
 }
 
-/** How the brand columns footer is drawn, under "Stil": its ground and its payment logos. */
-export function FooterStyleGroup({
+/**
+ * How the brand columns footer is drawn, under "Stil": its ground and its
+ * payment logos; the free rows footer's alike (adr/0070 §2, the same names).
+ */
+export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSection>({
   section,
   reveal,
   onChange,
 }: {
-  section: FooterColumnsSection
+  section: S
   reveal: number | null
-  onChange: Change
+  onChange: (section: S, field?: string) => void
 }) {
   const { t } = useTranslation()
   const set =

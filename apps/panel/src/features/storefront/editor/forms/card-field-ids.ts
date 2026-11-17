@@ -49,7 +49,16 @@ const FOOTER_COLUMNS_GROUPS = {
   badge_style: "appearance",
 } as const satisfies Record<FooterColumnsField, string>
 
-export type FooterField = (typeof FOOTER_FIELDS)[number] | FooterColumnsField
+/** The free rows footer's own (adr/0070): the marks in the bottom line, its look as the brand columns'. */
+export const FOOTER_ROWS_OWN = ["bottom_badges", "ground", "badge_style"] as const
+export type FooterRowsOwnField = (typeof FOOTER_ROWS_OWN)[number]
+const FOOTER_ROWS_OWN_GROUPS = {
+  bottom_badges: "content",
+  ground: "appearance",
+  badge_style: "appearance",
+} as const satisfies Record<FooterRowsOwnField, string>
+
+export type FooterField = (typeof FOOTER_FIELDS)[number] | FooterColumnsField | FooterRowsOwnField
 
 export const CARD_FIELD_IDS = {
   card: (sectionId: string, field: CardField | CollageField) => `${sectionId}-cards-${field}`,
@@ -107,17 +116,20 @@ export function cardFooterFields(section: AnySection): RegistryField[] {
       options: stepsOf(FOOTER, field),
       target: CARD_FIELD_IDS.footer(section.id, field),
     }))
-    const own =
+    const groups: Readonly<Partial<Record<FooterField, "content" | "appearance">>> =
       section.variant === "brand_columns"
-        ? FOOTER_COLUMNS_FIELDS.map((field) => ({
-            key: `footer.${field}`,
-            group: FOOTER_COLUMNS_GROUPS[field],
-            label: `${FOOTER}.${field}.label`,
-            term: `${FOOTER}.${field}.term`,
-            options: stepsOf(FOOTER, field),
-            target: CARD_FIELD_IDS.footer(section.id, field),
-          }))
-        : []
+        ? FOOTER_COLUMNS_GROUPS
+        : section.variant === "free_rows"
+          ? FOOTER_ROWS_OWN_GROUPS
+          : {}
+    const own = (Object.keys(groups) as FooterField[]).map((field) => ({
+      key: `footer.${field}`,
+      group: groups[field] ?? ("content" as const),
+      label: `${FOOTER}.${field}.label`,
+      term: `${FOOTER}.${field}.term`,
+      options: stepsOf(FOOTER, field),
+      target: CARD_FIELD_IDS.footer(section.id, field),
+    }))
     return [...common, ...own]
   }
   return []

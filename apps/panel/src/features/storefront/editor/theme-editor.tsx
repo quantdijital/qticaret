@@ -127,7 +127,9 @@ export function ThemeEditor({
       // A field's label (Faz 2b): its group opens and the field is shown, as a search hit's
       picks.current += 1
       const focus = field ? { ...field, nonce: picks.current } : undefined
-      setOpened({ kind: "section", id, ...(focus ? { focus } : {}) })
+      // A free rows footer's block or row opens its own panel (adr/0070 §6)
+      const part = field?.part
+      setOpened({ kind: "section", id, ...(focus ? { focus } : {}), ...(part ? { part } : {}) })
       // On a phone the preview hides the form: the edit label brings the form up
       setView("edit")
       // Folded, the side panel comes back with the settings asked for
@@ -193,6 +195,9 @@ export function ThemeEditor({
       onClose={() => {
         setOpened(null)
       }}
+      onOpenSection={(id) => {
+        setOpened({ kind: "section", id })
+      }}
     />
   )
   const formKey = formKeyOf(opened, found ? found.section.id : null)
@@ -220,7 +225,13 @@ export function ThemeEditor({
           const focus = field
             ? { target: field.target, group: field.group, nonce: picks.current }
             : undefined
-          setOpened({ kind: "section", id: section.id, ...(focus ? { focus } : {}) })
+          const part = field?.part
+          setOpened({
+            kind: "section",
+            id: section.id,
+            ...(focus ? { focus } : {}),
+            ...(part ? { part } : {}),
+          })
         }}
       >
         <SectionTree
@@ -249,6 +260,12 @@ export function ThemeEditor({
           )}
           onPreferences={() => {
             setOpened({ kind: "preferences" })
+          }}
+          fieldProblems={problems}
+          openedPart={opened?.kind === "section" ? (opened.part?.id ?? null) : null}
+          onOpenPart={(id, part) => {
+            setOpened({ kind: "section", id, part })
+            sidebar.show()
           }}
         />
       </SettingsSearch>

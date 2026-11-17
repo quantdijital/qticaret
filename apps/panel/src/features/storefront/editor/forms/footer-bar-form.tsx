@@ -60,6 +60,21 @@ export function FooterBarForm({ section, problems, onChange }: SectionFormProps<
         {section.variant === "brand_columns" ? (
           <FooterColumnsContent section={section} problems={problems} onChange={onChange} />
         ) : null}
+        {section.variant === "free_rows" ? (
+          <>
+            <SwitchRow
+              id={id("bottom_badges")}
+              label={t(`${F}.bottom_badges.label`)}
+              term={t(`${F}.bottom_badges.term`)}
+              hint={t(`${F}.bottom_badges.hint`)}
+              checked={section.bottom_badges}
+              onChange={(bottom_badges) => {
+                onChange({ ...section, bottom_badges })
+              }}
+            />
+            <p className="text-xs text-muted-foreground">{t(`${F}.freeRowsNote`)}</p>
+          </>
+        ) : null}
       </NamedGroup>
       <NamedGroup name="backToTop">
         <SwitchRow

@@ -7,6 +7,7 @@ import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
 import { listProblems } from "./shelf-problems"
 import { stripGalleryProblems } from "./strip-problems"
 import { marqueeLimitIds } from "./page-limits"
+import { footerBandProblem, footerRowsProblems } from "./footer-rows-problems"
 import { allSections } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
@@ -47,6 +48,7 @@ export type Problem =
   | "footerColumnsMismatch"
   | "footerBlockInvalid"
   | "footerNewsletterTwice"
+  | "footerNewsletterBand"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
 export type SectionProblems = Record<string, Problem>
@@ -264,6 +266,15 @@ export function documentProblems(
     const found: SectionProblems = {
       ...sectionProblems(section),
       ...(section.type === "trust_badges" ? badges : {}),
+      // The free rows footer's rows and blocks, and a newsletter box with no place beside it (adr/0070)
+      ...(section.type === "footer_bar" && section.variant === "free_rows"
+        ? footerRowsProblems(section, doc.footer)
+        : {}),
+      ...(section.type === "newsletter" &&
+      doc.footer.some((each) => each === section) &&
+      footerBandProblem(section, doc.footer)
+        ? { variant: "footerNewsletterBand" as const }
+        : {}),
       ...(overLimit.has(section.id)
         ? {
             limit:

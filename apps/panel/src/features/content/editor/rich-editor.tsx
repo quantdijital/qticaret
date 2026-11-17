@@ -48,6 +48,7 @@ export function RichEditor({
   short = false,
   maxChars,
   placeholder,
+  bare = false,
 }: {
   value: JSONContent
   onChange: (doc: JSONContent) => void
@@ -68,6 +69,8 @@ export function RichEditor({
   maxChars?: number | undefined
   /** The empty editor's hint; the content editor's own by default. */
   placeholder?: string | undefined
+  /** Paragraphs, lists, bold, italic and links only (a footer block's text, adr/0070 §2). */
+  bare?: boolean
 }) {
   const { t } = useTranslation()
   const [linking, setLinking] = useState(false)
@@ -77,8 +80,9 @@ export function RichEditor({
   const seen = useRef(value)
   const editor = useEditor({
     extensions: contentExtensions(placeholder ?? t("content.editor.placeholder"), {
-      media: media && !short,
+      media: media && !short && !bare,
       short,
+      bare,
     }),
     content: value,
     editorProps: {
@@ -121,10 +125,11 @@ export function RichEditor({
           setImaging(true)
         }}
         onCard={setCarding}
-        media={media && !short}
+        media={media && !short && !bare}
         tokens={shopTokens}
         extraTokens={extraTokens}
         short={short}
+        bare={bare}
       />
       {/* A long text scrolls inside, under a toolbar that stays in reach; the page beside keeps its height */}
       <EditorContent editor={editor} className="max-h-[min(70vh,48rem)] overflow-y-auto" />
@@ -139,7 +144,7 @@ export function RichEditor({
           : t("content.editor.chars", { count: formatCount(chars), max: formatCount(maxChars) })}
       </div>
       <LinkDialog editor={editor} open={linking} onOpenChange={setLinking} short={short} />
-      {media && !short ? (
+      {media && !short && !bare ? (
         <>
           <ImageDialog editor={editor} open={imaging} onOpenChange={setImaging} />
           <CardDialog

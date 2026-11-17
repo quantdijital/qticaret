@@ -7871,7 +7871,8 @@
         "required": "This field cannot be empty.",
         "tooLong": "At most {{max}} characters.",
         "textInvalid": "Contains a character that cannot be used."
-      }
+      },
+      "footerOrderHint": "When the footer uses \"Free layout\", its menu blocks are tied to the footer menus by their place in this order (1st, 2nd, 3rd menu). Change the order and the footer changes which menu shows where too."
     },
     "editor": {
       "title": "Theme editor",
@@ -8297,7 +8298,9 @@
           "topBar": "Top strip",
           "menu": "Menu bar",
           "icons": "Icons and contact",
-          "frame": "Look"
+          "frame": "Look",
+          "columns": "Column layout",
+          "phone": "On phones"
         },
         "marked_one": "{{count}} setting differs from the default",
         "marked_other": "{{count}} settings differ from the default"
@@ -8597,7 +8600,8 @@
         "footerNewsletterTwice": "The footer cannot show two newsletter forms; remove the newsletter block or the newsletter section.",
         "stripsTwo": "Add at least two strips.",
         "brandRequired": "Choose a brand.",
-        "imageRequired": "Choose a picture."
+        "imageRequired": "Choose a picture.",
+        "footerNewsletterBand": "While the footer uses \"Free layout\", the newsletter section cannot use \"In the footer\"; pick another variant or use a newsletter block."
       },
       "theme": {
         "title": "Theme settings",
@@ -9475,7 +9479,13 @@
           "hint": "On the dark background the logos always stand on white cards; card networks want their logos on a light field.",
           "card": "On cards",
           "plain": "Plain"
-        }
+        },
+        "bottom_badges": {
+          "label": "Payment logos in the bottom line",
+          "term": "payment badges",
+          "hint": "The fixed line at the very bottom shows the payment methods' logos, from the \"Payment logos\" choice above."
+        },
+        "freeRowsNote": "Edit the rows and blocks in the page list on the left, under Footer. The legal strip and the bottom line always stay at the bottom."
       },
       "main": {
         "fixed": "This section is a fixed part of the page; it cannot be hidden, moved, copied or removed."
@@ -9722,7 +9732,279 @@
         "save": "Save this look",
         "all": "All looks"
       },
-      "keptDraft": "The previous draft was saved to 'My saved looks' automatically."
+      "keptDraft": "The previous draft was saved to 'My saved looks' automatically.",
+      "footerRows": {
+        "tree": {
+          "rows": "Footer rows",
+          "row_one": "Row {{place}} · {{count}} column",
+          "row_other": "Row {{place}} · {{count}} columns",
+          "column": "Column {{place}}",
+          "columnWide": "Column {{place}} · wide",
+          "slot": "Menu {{slot}}",
+          "empty": "Empty column; drag or add a block here.",
+          "fixed": "Legal strip and bottom line (fixed)"
+        },
+        "types": {
+          "text": {
+            "name": "Text",
+            "description": "A title and a short text: shipping notes, a shop note."
+          },
+          "menu": {
+            "name": "Menu",
+            "description": "One of the footer menus on the Menus screen, by its order."
+          },
+          "brand": {
+            "name": "Logo and intro",
+            "description": "The shop's logo, a short intro and social icons."
+          },
+          "newsletter": {
+            "name": "Newsletter form",
+            "description": "An email sign-up box; one per footer."
+          },
+          "contact": {
+            "name": "Contact and opening hours",
+            "description": "Address, phone, WhatsApp, email and hours, from the store details."
+          },
+          "social": {
+            "name": "Social media",
+            "description": "The social accounts in the store details."
+          },
+          "payments": {
+            "name": "Payment logos",
+            "description": "Logos of the payment methods you accept."
+          },
+          "image": {
+            "name": "Image",
+            "description": "An image from the media library, optionally linked."
+          },
+          "app_badges": {
+            "name": "App store badges",
+            "description": "Links to your app on the App Store and Google Play."
+          },
+          "trust": {
+            "name": "Trust badges",
+            "description": "The first few of the design's shared trust badges."
+          }
+        },
+        "add": {
+          "block": "Add block",
+          "blockTo": "Row {{row}}, {{column}}: add block",
+          "title": "Block type",
+          "typeFull_one": "A footer takes only {{count}}.",
+          "typeFull_other": "A footer takes at most {{count}}.",
+          "columnFull": "A column takes at most {{max}} blocks.",
+          "footerFull": "A footer takes at most {{max}} blocks.",
+          "row": "Add row"
+        },
+        "actions": {
+          "open": "Open settings",
+          "move": "Move…",
+          "duplicate": "Duplicate",
+          "remove": "Remove block",
+          "removeRow": "Remove row"
+        },
+        "moved": "{{name}} moved to {{place}}.",
+        "rowMoved": "Row moved to place {{place}}.",
+        "rowRemoved": "Row {{place}} removed.",
+        "move": {
+          "title": "Move {{name}}",
+          "description": "Pick the row and column the block goes to; it is added at the end of that column.",
+          "target": "Target column",
+          "place": "Row {{row}} · Column {{column}}",
+          "confirm": "Move"
+        },
+        "row": {
+          "description": "The row's column layout, background and spacing. Its blocks are in the list on the left, under its columns.",
+          "merged": "Fewer columns: the blocks of the removed columns were added to the last column.",
+          "layout": {
+            "label": "Column split",
+            "term": "columns",
+            "hint": "The row's columns and their widths: 2·1 means two columns, the first twice as wide. Tablets show at most two columns side by side."
+          },
+          "ground": {
+            "label": "Background",
+            "term": "background",
+            "hint": "The row's background. \"Same as footer\" uses the footer's.",
+            "inherit": "Same as footer",
+            "page": "Page",
+            "well": "Light",
+            "stage": "Dark",
+            "primary": "Brand colour"
+          },
+          "space": {
+            "label": "Row spacing",
+            "term": "padding",
+            "none": "None",
+            "small": "Small",
+            "medium": "Medium",
+            "large": "Large"
+          },
+          "align": {
+            "label": "Alignment",
+            "term": "align",
+            "start": "Left",
+            "center": "Centre"
+          },
+          "divider": {
+            "label": "Thin line above",
+            "term": "divider"
+          },
+          "phone_columns": {
+            "1": "Stacked",
+            "2": "Two by two",
+            "label": "Side by side on phones",
+            "term": "mobile columns",
+            "hint": "On phones the columns stack; pick 2 to show them two by two."
+          }
+        },
+        "fields": {
+          "title": {
+            "label": "Title",
+            "term": "heading",
+            "hint": "Leave it empty for a block without a title.",
+            "menuHint": "Leave it empty to use the menu's name."
+          },
+          "body": {
+            "label": "Text",
+            "term": "text",
+            "hint": "Paragraphs, lists, bold, italic and links; no headings, the block's title is enough.",
+            "empty": "No text yet.",
+            "edit": "Edit text",
+            "description": "Keep it short: the footer shows on every page.",
+            "done": "Done"
+          },
+          "slot": {
+            "label": "Which menu",
+            "term": "menu slot",
+            "hint": "The block is tied to the footer menus on the Menus screen by their order. Change the order there and the menu shown here changes too.",
+            "option": "Menu {{slot}} · {{name}}",
+            "none": "no menu",
+            "missing": "No footer menu at this place; the block does not show.",
+            "menus": "Menus"
+          },
+          "collapse_phone": {
+            "label": "Collapsible on phones",
+            "term": "accordion",
+            "hint": "On phones, tapping the menu's title opens its links. Wide screens always show them."
+          },
+          "logo": {
+            "label": "Logo",
+            "term": "logo",
+            "hint": "The store profile's logo; without one, the shop's name."
+          },
+          "about": {
+            "label": "Short intro",
+            "term": "about"
+          },
+          "social": {
+            "label": "Social icons",
+            "term": "social",
+            "hint": "Accounts from the store details; their look from the footer's social setting."
+          },
+          "description": {
+            "label": "Short description",
+            "term": "description"
+          },
+          "text": {
+            "label": "Consent sentence",
+            "term": "consent",
+            "hint": "The consent line under the form. Leave it empty for the storefront's own."
+          },
+          "variant": {
+            "label": "Variant",
+            "term": "variant",
+            "standard": "Box",
+            "in_footer": "Plain"
+          },
+          "address": {
+            "label": "Address",
+            "term": "address"
+          },
+          "phone": {
+            "label": "Phone",
+            "term": "phone"
+          },
+          "whatsapp": {
+            "label": "WhatsApp",
+            "term": "WhatsApp"
+          },
+          "email": {
+            "label": "Email",
+            "term": "email"
+          },
+          "hours": {
+            "label": "Opening hours",
+            "term": "hours"
+          },
+          "carriers": {
+            "label": "Carrier logos too",
+            "term": "carriers"
+          },
+          "image": {
+            "label": "Image",
+            "term": "image"
+          },
+          "link": {
+            "label": "Link",
+            "term": "link"
+          },
+          "width": {
+            "label": "Width",
+            "term": "width",
+            "medium": "Medium",
+            "small": "Small",
+            "full": "Column width"
+          },
+          "app_store": {
+            "label": "App Store address",
+            "term": "URL",
+            "placeholder": "https://apps.apple.com/…",
+            "hint": "Only an apps.apple.com address; at least one store address is needed."
+          },
+          "google_play": {
+            "label": "Google Play address",
+            "term": "URL",
+            "placeholder": "https://play.google.com/…",
+            "hint": "Only a play.google.com address; at least one store address is needed."
+          },
+          "limit": {
+            "label": "How many",
+            "term": "limit"
+          },
+          "layout": {
+            "label": "Layout",
+            "term": "layout",
+            "list": "Stacked",
+            "inline": "In a line"
+          },
+          "visible": {
+            "label": "Shown",
+            "term": "visible"
+          },
+          "device": {
+            "label": "On which screens",
+            "term": "device",
+            "hint": "Show the block only on phones or only on wide screens.",
+            "all": "All",
+            "mobile": "Phone",
+            "desktop": "Wide screen"
+          }
+        },
+        "source": {
+          "contact": "The details come from Settings › Store details.",
+          "social": "Accounts from Settings › Store details, their look from the footer's social setting.",
+          "payments": "The logos come from the footer's \"Payment logos\" choice.",
+          "trust": "The badges come from the design's shared trust list (edited in a trust strip section)."
+        },
+        "leave": {
+          "title": "Remove the row layout?",
+          "description": "Switching to another variant removes the rows and blocks. Undo or the revision history brings them back.",
+          "confirm": "Change variant"
+        },
+        "moveUpOf": "Move {{name}} up",
+        "moveDownOf": "Move {{name}} down",
+        "backToFooter": "Back to the footer"
+      }
     },
     "maintenance": {
       "status": {

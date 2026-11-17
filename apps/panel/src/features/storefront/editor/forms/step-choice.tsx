@@ -12,6 +12,9 @@ const COLUMNS: Readonly<Record<number, string>> = {
   4: "grid-cols-4",
 }
 
+/** A grid asked for by name (`columns`): five steps on one line, ten on two. */
+const GRID: Readonly<Record<number, string>> = { 3: "grid-cols-3", 5: "grid-cols-5" }
+
 /**
  * A setting's steps side by side (adr/0049 Ek 2026-11-14 §6): its
  * everyday Turkish name with the technical term small beside it, the
@@ -30,6 +33,7 @@ export function StepChoice<T extends string | number>({
   nameOf,
   drawOf,
   onChange,
+  columns,
 }: {
   id: string
   label: string
@@ -41,6 +45,8 @@ export function StepChoice<T extends string | number>({
   nameOf: (step: T) => string
   drawOf?: ((step: T) => ReactNode) | undefined
   onChange: (step: T) => void
+  /** Steps a line where there are more than four (a footer row's five grounds, ten splits). */
+  columns?: 3 | 5 | undefined
 }) {
   const group = useRef<HTMLDivElement>(null)
   return (
@@ -71,7 +77,7 @@ export function StepChoice<T extends string | number>({
           const step = steps.find((each) => String(each) === next)
           if (step !== undefined) onChange(step)
         }}
-        className={cn("grid w-full", COLUMNS[steps.length])}
+        className={cn("grid w-full", columns ? GRID[columns] : COLUMNS[steps.length])}
       >
         {steps.map((step) => (
           <ToggleGroupItem

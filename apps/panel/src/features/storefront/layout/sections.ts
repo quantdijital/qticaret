@@ -123,7 +123,20 @@ export const placed = (
   )
 
 export const idsOf = (doc: LayoutDocument): Set<string> =>
-  new Set(allSections(doc).map((section) => section.id))
+  new Set(
+    allSections(doc).flatMap((section) =>
+      // The free rows footer's rows and blocks share the sections' ids (adr/0070 §2)
+      section.type === "footer_bar" && section.variant === "free_rows"
+        ? [
+            section.id,
+            ...section.rows.flatMap((row) => [
+              row.id,
+              ...row.columns.flatMap((column) => column.blocks.map((block) => block.id)),
+            ]),
+          ]
+        : [section.id]
+    )
+  )
 
 /** A section by its id, with the group it sits in. */
 export function findSection(

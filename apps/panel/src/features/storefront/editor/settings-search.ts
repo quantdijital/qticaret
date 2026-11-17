@@ -6,6 +6,7 @@ import type {
 } from "@/features/storefront/api/layout"
 import { sectionFields } from "./forms/field-registry"
 import type { RegistryField } from "./forms/field-registry"
+import { footerRowsFields } from "./footer-rows/footer-rows-fields"
 import type { ThemeChoices } from "@/features/storefront/api/theme"
 import { THEME_FIELDS, THEME_GROUP_TITLES } from "./forms/theme-registry"
 import type { CardVariantsInUse, ThemeRegistryField } from "./forms/theme-registry"
@@ -82,7 +83,8 @@ export function searchSettings(
     if (has(name, words)) {
       hits.push({ section, group, field: null, option: null })
     }
-    for (const field of sectionFields(section, group)) {
+    // A free rows footer's rows and blocks are found too, each opening its own panel (adr/0070 §7)
+    for (const field of [...sectionFields(section, group), ...footerRowsFields(section)]) {
       const found = fieldMatch(words, name, field, t)
       if (found) {
         hits.push({ section, group, field, option: found.option })

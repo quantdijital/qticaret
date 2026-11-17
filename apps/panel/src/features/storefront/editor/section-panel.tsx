@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import type { FooterBarVariant } from "@qticaret/types"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type {
   AnySection,
@@ -62,6 +63,8 @@ interface SectionPanelProps {
   shelfMates?: readonly ProductsSection[]
   /** The field the settings search or the preview picked: its tab and group open, it is focused. */
   focus?: (FieldFocus & { group: FieldGroupName }) | null
+  /** The footer drawn another way: free rows fill from the footer group (adr/0070 §2.4). */
+  onFooterVariant?: ((next: FooterBarVariant) => void) | undefined
 }
 
 /**
@@ -88,6 +91,7 @@ export function SectionPanel({
   onBadges,
   shelfMates = [],
   focus = null,
+  onFooterVariant,
 }: SectionPanelProps) {
   const { t } = useTranslation()
   const kind = kindOf(section, group === "footer")
@@ -145,7 +149,11 @@ export function SectionPanel({
                 offered={offeredVariants(section, group === "footer")}
                 onChange={(next) => {
                   // Its own step in the history: "Geri al" brings the old variant back
-                  onChange(switchVariant(section, next))
+                  if (section.type === "footer_bar" && onFooterVariant) {
+                    onFooterVariant(next as FooterBarVariant)
+                  } else {
+                    onChange(switchVariant(section, next))
+                  }
                 }}
               />
             </PanelGroup>
@@ -176,7 +184,7 @@ export function SectionPanel({
           ) : null}
           {slider ? <SliderGroups section={slider} reveal={reveal} onChange={onChange} /> : null}
           {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
-          {section.type === "footer_bar" && section.variant === "brand_columns" ? (
+          {section.type === "footer_bar" && section.variant !== "ledger" ? (
             <FooterStyleGroup section={section} reveal={reveal("appearance")} onChange={onChange} />
           ) : null}
           {section.type === "announcement_bar" ? (

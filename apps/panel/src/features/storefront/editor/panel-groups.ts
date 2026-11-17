@@ -53,6 +53,8 @@ export const PANEL_GROUPS: Readonly<Record<FieldGroupName, GroupPlace>> = {
   topBar: { tab: "content", title: `${P}.groups.topBar` },
   menu: { tab: "content", title: `${P}.groups.menu` },
   icons: { tab: "content", title: `${P}.groups.icons` },
+  // adr/0070: a free rows footer row's split; how a row or a block behaves on a phone
+  columns: { tab: "content", title: `${P}.groups.columns` },
   variant: { tab: "style", title: `${P}.variant` },
   placement: { tab: "style", title: `${P}.placement` },
   layout: { tab: "style", title: `${P}.layout` },
@@ -60,6 +62,7 @@ export const PANEL_GROUPS: Readonly<Record<FieldGroupName, GroupPlace>> = {
   motion: { tab: "style", title: `${P}.motion` },
   appearance: { tab: "style", title: `${P}.appearance` },
   frame: { tab: "style", title: `${P}.groups.frame` },
+  phone: { tab: "style", title: `${P}.groups.phone` },
   spacing: { tab: "advanced", title: "storefront.editor.look.spacing.title" },
   visibility: { tab: "advanced", title: `${P}.visibility` },
   look: { tab: "advanced", title: "storefront.editor.look.title" },
@@ -72,7 +75,12 @@ export const PANEL_GROUPS: Readonly<Record<FieldGroupName, GroupPlace>> = {
  * closed down to their titles until opened, and a group alone in its tab
  * is always open. A shop's own opening or closing is remembered over this.
  */
-export const OPEN_AT_FIRST: ReadonlySet<string> = new Set<string>(["content", "search", "variant"])
+export const OPEN_AT_FIRST: ReadonlySet<string> = new Set<string>([
+  "content",
+  "search",
+  "variant",
+  "columns",
+])
 
 /** A group's tab; a group not listed sits in "İçerik". */
 export const tabOfGroup = (name: string): SettingsTab =>

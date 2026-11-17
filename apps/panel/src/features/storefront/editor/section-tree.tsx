@@ -20,6 +20,9 @@ import {
 } from "@/features/storefront/layout/sections"
 import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
 import { mainOf } from "@/features/storefront/layout/main-sections"
+import type { SectionProblems } from "@/features/storefront/layout/problems"
+import { FooterRowsTree } from "./footer-rows/footer-rows-tree"
+import type { FooterPart } from "./footer-rows/footer-rows-fields"
 import { PageSections } from "./page-sections"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { SectionRow } from "./section-row"
@@ -44,6 +47,11 @@ interface SectionTreeProps {
   looksProblem: boolean
   /** How the storefront behaves (contact and info pages), saved at once apart from the draft. */
   onPreferences: () => void
+  /** Each section's problems by field: a free rows footer marks its rows and blocks (adr/0070). */
+  fieldProblems?: ReadonlyMap<string, SectionProblems>
+  /** The free rows footer's row or block whose panel is open. */
+  openedPart?: string | null
+  onOpenPart?: (section: string, part: FooterPart) => void
 }
 
 /**
@@ -66,6 +74,9 @@ export function SectionTree({
   onLooks,
   looksProblem,
   onPreferences,
+  fieldProblems = new Map(),
+  openedPart = null,
+  onOpenPart = () => undefined,
 }: SectionTreeProps) {
   const { t } = useTranslation()
   const store = t(`${T}.storeProfile`)
@@ -110,6 +121,10 @@ export function SectionTree({
   // A strip in the header shows on every page: not while a page already has its two
   const stripFull = BODY_GROUPS.some((body) => marqueesOn(doc, body) >= MARQUEE_LIMITS.perPage)
   const newsletter = doc.footer.find((section) => section.type === "newsletter")
+  // The free rows footer opens its rows and blocks under its line (adr/0070 §7)
+  const footerBar = mainOf(doc, "footer_bar")
+  const freeRows =
+    footerBar?.type === "footer_bar" && footerBar.variant === "free_rows" ? footerBar : null
   // The header's bar and the footer: main sections, fixed rows (adr/0049 Ek 2026-11-14 §5)
   const mainRow = (type: "header_bar" | "footer_bar") => {
     const section = mainOf(doc, type)
@@ -180,6 +195,20 @@ export function SectionTree({
       <TreeGroup title={t(`${T}.footer`)}>
         <ul className="flex flex-col gap-0.5">
           {mainRow("footer_bar")}
+          {freeRows ? (
+            <li>
+              <FooterRowsTree
+                section={freeRows}
+                doc={doc}
+                problems={fieldProblems.get(freeRows.id) ?? {}}
+                dispatch={dispatch}
+                openedPart={openedPart}
+                onOpenPart={(part) => {
+                  onOpenPart(freeRows.id, part)
+                }}
+              />
+            </li>
+          ) : null}
           {newsletter ? (
             row(newsletter, true)
           ) : (
