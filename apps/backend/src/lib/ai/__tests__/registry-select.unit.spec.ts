@@ -83,9 +83,13 @@ describe("AI registries (adr/0071 §2)", () => {
     for (const service of aiServices("test")) {
       expect(service.credentialProvider).toBe(service.id)
     }
-    // The credential records come in PR 0b-2; none may exist under another meaning today
-    for (const service of aiServices("production")) {
-      expect(Object.keys(CREDENTIAL_PROVIDERS)).not.toContain(service.credentialProvider)
+    // PR 0b-2: each service is connected as a credential provider of its own name, a key alone
+    for (const service of aiServices("test")) {
+      expect(CREDENTIAL_PROVIDERS).toHaveProperty(service.credentialProvider)
+      expect(
+        CREDENTIAL_PROVIDERS[service.credentialProvider as keyof typeof CREDENTIAL_PROVIDERS]
+          .secrets
+      ).toEqual(["api_key"])
     }
   })
 

@@ -69,6 +69,10 @@ describe("staff roles", () => {
   it.each([
     ["POST", "/admin/integrations/credentials/paytr"],
     ["DELETE", "/admin/integrations/credentials/iyzico"],
+    // adr/0071 §6: connecting, replacing and removing an AI service key
+    ["POST", "/admin/integrations/credentials/deepseek"],
+    ["POST", "/admin/integrations/credentials/gemini"],
+    ["DELETE", "/admin/integrations/credentials/minimax"],
     ["GET", "/admin/api-access"],
     ["POST", "/admin/api-access/key_1/revoke"],
     ["DELETE", "/admin/api-access/key_1"],
@@ -108,6 +112,7 @@ describe("staff roles", () => {
   it.each([
     ["POST", "/admin/platform-settings/store"],
     ["POST", "/admin/integrations/credentials/paytr/check"],
+    ["POST", "/admin/integrations/credentials/deepseek/check"],
     ["POST", "/admin/einvoice/parasut/check"],
     ["GET", "/admin/einvoice/parasut"],
     ["GET", "/admin/integrations/credentials"],
@@ -120,6 +125,19 @@ describe("staff roles", () => {
     ["POST", "/admin/some-route-medusa-adds-later"],
   ] as const)("lets an admin %s %s", (method, path) => {
     expect(allowed("admin", method, path)).toBe(true)
+  })
+
+  it("keeps AI service keys from operations and readonly, checks included (adr/0071 §6)", () => {
+    for (const role of ["operations", "readonly"] as const) {
+      for (const [method, path] of [
+        ["POST", "/admin/integrations/credentials/deepseek"],
+        ["POST", "/admin/integrations/credentials/gemini/check"],
+        ["DELETE", "/admin/integrations/credentials/minimax"],
+        ["GET", "/admin/integrations/credentials"],
+      ] as const) {
+        expect(allowed(role, method, path)).toBe(false)
+      }
+    }
   })
 
   it("lets operations read and run the day, never change the shop's settings (KK1)", () => {

@@ -955,6 +955,7 @@
     },
     "names": {
       "catalog_product_videos": "Product videos",
+      "ai_own_keys": "AI with own service key (BYOK)",
       "test_platform_sample": "Sample platform feature"
     }
   },

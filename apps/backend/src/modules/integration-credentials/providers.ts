@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { isArasServiceUrl } from "../../lib/shipping/aras/client"
 import { smtpSettings } from "../../lib/messaging/email/smtp-settings"
+import { AI_CREDENTIAL_PROVIDERS, LOCAL_ONLY_PROVIDERS, offersLocalProviders } from "./providers-ai"
 
 /**
  * Which providers the shop can connect and what each one asks for
@@ -239,14 +240,20 @@ export const CREDENTIAL_PROVIDERS = {
     identity: ["shop_domain", "client_id"],
     optional: [],
   },
+  // adr/0071 §3: the AI services, one key each (providers-ai.ts)
+  ...AI_CREDENTIAL_PROVIDERS,
 } as const satisfies Record<string, CredentialProvider>
 
 export type CredentialProviderName = keyof typeof CREDENTIAL_PROVIDERS
 
+// The fake AI service's account is no provider of a live shop
+const offered = (value: string): boolean =>
+  offersLocalProviders() || !LOCAL_ONLY_PROVIDERS.includes(value)
+
 // Own keys only: `in` would also accept "toString"
 export const isCredentialProvider = (value: string): value is CredentialProviderName =>
-  Object.hasOwn(CREDENTIAL_PROVIDERS, value)
+  Object.hasOwn(CREDENTIAL_PROVIDERS, value) && offered(value)
 
-export const CREDENTIAL_PROVIDER_NAMES = Object.keys(
-  CREDENTIAL_PROVIDERS
-) as CredentialProviderName[]
+export const CREDENTIAL_PROVIDER_NAMES = (
+  Object.keys(CREDENTIAL_PROVIDERS) as CredentialProviderName[]
+).filter(offered)
