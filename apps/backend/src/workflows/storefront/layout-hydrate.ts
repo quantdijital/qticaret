@@ -10,6 +10,7 @@ import type {
 import type { MenuLinkInput, RecordLinkKind } from "../../lib/storefront/menus"
 import type { RailPick } from "../../lib/storefront/rails"
 import { FEATURED_STRIPS_SETTINGS } from "../../lib/storefront/sections/featured-product"
+import { printedNewsletter } from "../../lib/storefront/sections/newsletter"
 import { hasLook } from "../../lib/storefront/sections/look"
 import { shownDevice } from "../../lib/storefront/layout-fields"
 import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
@@ -217,6 +218,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         ...(section.single_open === "on" ? { single_open: "on" } : {}),
       }
     case "newsletter":
+      // Each new field only off its default (adr/0049 Ek 2026-11-17 e-bülten)
+      return printedNewsletter(section, (text) => fill(text, at.values), image)
     case "help":
       return { id, type, title: section.title, text: fill(section.text, at.values) }
     case "categories":
