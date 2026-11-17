@@ -69,6 +69,7 @@ export function BlockContent({
               onChange({ ...block, about }, "about")
             }}
           />
+          <BlockSwitch {...own(block)} field="address" hint={t(`${FR}.fields.address.brandHint`)} />
           <BlockSwitch {...own(block)} field="social" hint={t(`${FR}.fields.social.hint`)} />
         </>
       )

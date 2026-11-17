@@ -36,7 +36,7 @@ import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
 import { footerLogoOf } from "./footer-logo"
-import { footerNewsletterOf, footerSectionsOf } from "./footer-group"
+import { footerNewsletterOf, footerSectionsOf, joinedBand } from "./footer-group"
 import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
 
@@ -62,6 +62,8 @@ function newsletterOf(layout: StoreLayout, shop: string, editing: boolean): Shop
         text: section.text ?? t("newsletter.text", { shop }),
         // How it is drawn in the footer (adr/0049 Ek 2026-11-17 e-bülten)
         ...newsletterLookOf(section, t, "footer"),
+        // Its band on the free rows footer's ground (adr/0070 §4 Ek)
+        ...(joinedBand(section) ? { joined: true } : {}),
         // The editor's live session marks the box as its own section (adr/0065 Faz 2b)
         ...(editing ? { mark: section.id } : {}),
       }

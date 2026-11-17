@@ -46,6 +46,8 @@ export interface FooterBrandBlock extends FooterBlockBase {
   logo: boolean
   about: string | null
   social: boolean
+  /** The shop's address (its store details) under its line. */
+  address: boolean
 }
 
 export interface FooterNewsletterBlock extends FooterBlockBase {

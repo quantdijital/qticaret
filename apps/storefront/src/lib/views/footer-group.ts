@@ -9,9 +9,11 @@ import { sectionViews } from "./sections"
  * the group's order, as a page's sections (adr/0070 §4): a rich text, trust
  * badges, a scrolling strip. The newsletter box joins them only under the
  * free rows footer, as a band drawn its own way (`standard`, `split`,
- * `image_card`, `strip`); the ledger and the brand columns draw it inside
- * the footer as today (`ShopView.newsletter`), and an `in_footer` box has a
- * column there, never a band. Nothing to draw: no request.
+ * `image_card`, `strip`), unless the shop set its band on the footer's
+ * ground (`joined`, adr/0070 §4 Ek: the free rows footer draws it as its
+ * top band); the ledger and the brand columns draw it inside the footer as
+ * today (`ShopView.newsletter`), and an `in_footer` box has a column
+ * there, never a band. Nothing to draw: no request.
  */
 export async function footerSectionsOf(
   layout: StoreLayout,
@@ -26,8 +28,14 @@ function drawnAbove(section: StoreFooterSection, free: boolean): boolean {
   if (section.type !== "newsletter") {
     return true
   }
-  return free && variantOf("newsletter", section.variant) !== "in_footer"
+  return free && variantOf("newsletter", section.variant) !== "in_footer" && !joinedBand(section)
 }
+
+/** The box's band drawn on the free rows footer's ground (adr/0070 §4 Ek): a band variant set so. */
+export const joinedBand = (section: Extract<StoreFooterSection, { type: "newsletter" }>) =>
+  section.joined === true && JOINED_VARIANTS.includes(variantOf("newsletter", section.variant))
+
+const JOINED_VARIANTS: readonly string[] = ["split", "image_card", "strip"]
 
 /** The footer group's newsletter box, wherever it stands in the group; none: the shop took it out. */
 export const footerNewsletterOf = (layout: StoreLayout) =>

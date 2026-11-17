@@ -45,6 +45,7 @@ export type ContentField =
   | "gallery"
   | "strips_layout"
   | "show_note"
+  | "joined"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {

@@ -54,6 +54,14 @@ describe("the footer group's sections above the footer (adr/0070 §4)", () => {
     expect(await ids(layout([box("in_footer"), text], "free_rows"))).toEqual(["altmetin01"])
   })
 
+  it("leaves a band set on the free rows footer's ground to the footer (adr/0070 §4 Ek)", async () => {
+    const joined = (variant: string) => ({ ...box(variant), joined: true }) as StoreFooterSection
+    expect(await ids(layout([joined("split"), text], "free_rows"))).toEqual(["altmetin01"])
+    expect(await ids(layout([joined("strip")], "free_rows"))).toEqual([])
+    // Not a band: the setting means nothing, the box stays where it was
+    expect(await ids(layout([joined("standard")], "free_rows"))).toEqual(["altbulten1"])
+  })
+
   it("asks for nothing when there is nothing to draw", async () => {
     vi.mocked(sectionViews).mockClear()
     expect(await ids(layout([box()]))).toEqual([])

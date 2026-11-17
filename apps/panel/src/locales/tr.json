@@ -8547,7 +8547,10 @@
         "imageHint": "Ortam kütüphanesinden bir görsel; kartın solunda durur. Görsel seçilmezse kutu yan yana bant olarak çizilir.",
         "consent": "Onay metni",
         "consentTerm": "İYS",
-        "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır."
+        "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
+        "joined": "Alt bilgiyle birleşik",
+        "joinedTerm": "footer band",
+        "joinedHint": "Açıkken bant, Serbest düzen alt bilginin kendi zemininde, en üst şerit olarak çizilir. Kapalıyken alt bilginin üstünde ayrı bir kutu olarak durur. Öteki alt bilgi biçimleri bandı zaten kendi içinde çizer."
       },
       "announcement": {
         "line": "{{number}}. duyuru",
@@ -9951,7 +9954,8 @@
           },
           "address": {
             "label": "Adres",
-            "term": "address"
+            "term": "address",
+            "brandHint": "Mağaza bilgilerindeki adres, kısa tanıtımın altında görünür."
           },
           "phone": {
             "label": "Telefon",

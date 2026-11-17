@@ -233,6 +233,12 @@ export interface NewsletterFields {
   note?: string | null
   show_note?: boolean
   image?: LayoutImage | null
+  /**
+   * The footer box's bands (`split`, `image_card`, `strip`): true draws
+   * the band on the free rows footer's ground (adr/0070 §4 Ek); absent:
+   * above the footer. A page's box never has it.
+   */
+  joined?: boolean
 }
 
 export interface NewsletterSection extends BodySectionBase, NewsletterFields {

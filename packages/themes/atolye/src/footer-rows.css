@@ -144,6 +144,19 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+  /*
+   * A tablet's `2-1-1-1`: the wide column (the brand, say) over the whole
+   * width, the three narrow ones side by side under it, as the brand columns
+   * stack; two by two the first narrow one stood beside the tall wide one.
+   */
+  @media (min-width: 48rem) and (max-width: 63.999rem) {
+    .gf-frow-grid[data-layout="2-1-1-1"] {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .gf-frow-grid[data-layout="2-1-1-1"] > .gf-fcol:first-child {
+      grid-column: 1 / -1;
+    }
+  }
   @media (min-width: 64rem) {
     .gf-frow-grid[data-layout="1-1"] {
       grid-template-columns: repeat(2, minmax(0, 1fr));
