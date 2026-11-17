@@ -111,7 +111,10 @@ export function collectFields(root: HTMLElement): PanelField[] {
       groupTitle: textOf(group.querySelector("[data-panel-group-title]")),
       label,
       term,
-      hint: [inner, ...[...described, ...hints].map(textOf)].join(" ").trim(),
+      // The (i)'s hidden words are both the control's description and a `p` in its block: once
+      hint: [...new Set([inner, ...[...described, ...hints].map(textOf)].filter(Boolean))].join(
+        " "
+      ),
       options: [...control.querySelectorAll('[role="radio"], button')]
         .map((option) => option.getAttribute("aria-label") ?? textOf(option))
         .filter(Boolean),

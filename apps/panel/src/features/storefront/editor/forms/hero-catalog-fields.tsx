@@ -12,7 +12,8 @@ import { HERO_CATALOG_LIMITS as H, LAYOUT_LIMITS as L } from "@/features/storefr
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { SwitchRow } from "../theme-fields"
 import { FIELD_IDS } from "./field-registry"
-import { CountField, FieldGroup, TextField } from "./fields"
+import { NamedGroup } from "../named-group"
+import { CountField, TextField } from "./fields"
 import { ImageField } from "./image-field"
 import { AddLinkButton, LinkCard } from "./link-field"
 import { useProblemText } from "./problem-text"
@@ -60,8 +61,8 @@ export function HeroCatalogFields({
   })
   const { list } = section
   return (
-    <div className="flex flex-col gap-5 border-t pt-5">
-      <FieldGroup title={t(`${C}.list`)} hint={t(`${C}.listHint`)}>
+    <>
+      <NamedGroup name="categoryList" hint={t(`${C}.listHint`)}>
         <Field label={t(`${C}.listSource`)}>
           <RadioGroup
             aria-label={t(`${C}.listSource`)}
@@ -120,8 +121,8 @@ export function HeroCatalogFields({
             }}
           />
         </div>
-      </FieldGroup>
-      <FieldGroup title={t(`${C}.tiles`)} hint={t(`${C}.tilesHint`, { max: H.tiles })}>
+      </NamedGroup>
+      <NamedGroup name="tiles" hint={t(`${C}.tilesHint`, { max: H.tiles })}>
         <RecordListField
           kind="category"
           label={t("storefront.editor.records.categories")}
@@ -148,8 +149,8 @@ export function HeroCatalogFields({
             }}
           />
         ))}
-      </FieldGroup>
-      <FieldGroup title={t(`${C}.chips`)} hint={t(`${C}.chipsHint`, { max: H.chips })}>
+      </NamedGroup>
+      <NamedGroup name="chips" hint={t(`${C}.chipsHint`, { max: H.chips })}>
         {section.chips.map((chip, index) => (
           <LinkCard
             key={`${String(index)}-${chip.kind}`}
@@ -189,8 +190,9 @@ export function HeroCatalogFields({
             picker.open(null)
           }}
         />
-      </FieldGroup>
-      <FieldGroup title={t(`${C}.picks`)} hint={t(`${C}.picksHint`, { max: H.picks })}>
+        {picker.dialog}
+      </NamedGroup>
+      <NamedGroup name="picks" hint={t(`${C}.picksHint`, { max: H.picks })}>
         <RecordListField
           kind="product"
           label={t("storefront.editor.products.products")}
@@ -236,8 +238,7 @@ export function HeroCatalogFields({
             }}
           />
         </div>
-      </FieldGroup>
-      {picker.dialog}
-    </div>
+      </NamedGroup>
+    </>
   )
 }

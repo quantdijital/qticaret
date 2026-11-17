@@ -8177,6 +8177,16 @@
           "marked": "varsayılandan farklı ayar var"
         },
         "groups": {
+          "buttons": "Düğmeler",
+          "categoryList": "Kategori listesi",
+          "tiles": "Yandaki karolar",
+          "chips": "Hızlı bağlantılar",
+          "picks": "Küçük ürünler",
+          "cards": "Kartlar",
+          "thumbs": "Ürün görselleri",
+          "opening": "Soruların açılışı",
+          "options": "Seçenekler",
+          "backToTop": "Yukarı çık düğmesi",
           "search": "Arama",
           "topBar": "Üst şerit",
           "menu": "Menü çubuğu",

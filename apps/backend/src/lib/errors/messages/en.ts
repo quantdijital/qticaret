@@ -461,6 +461,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "maintenance.not_enabled":
     "Maintenance mode is off. This link can only be made while the shop is in maintenance.",
   "maintenance.bypass_unknown": "The maintenance link is not valid or has expired.",
+  "maintenance.shop_closed":
+    "The shop is closed for maintenance and is not taking orders or forms right now. Please try again a little later.",
   "consents.link_invalid":
     "This link is invalid, expired or already used. You can give your consent from your account or by subscribing again.",
   "stock_alerts.link_invalid":

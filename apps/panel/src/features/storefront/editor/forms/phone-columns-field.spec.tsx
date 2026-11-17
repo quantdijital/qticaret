@@ -112,6 +112,8 @@ describe("the phone's columns", () => {
     const tiles = newHomeSection("categories", "kategori01")
     if (tiles.type !== "categories") throw new Error("not categories")
     const changes = renderPanel(switchVariant(tiles, "linked"))
+    // The cards' own settings stand in "Kartlar", closed under the content
+    await openGroup(userEvent.setup(), "Kartlar")
     const field = steps(CARD_FIELD_IDS.card("kategori01", "columns_mobile"))
 
     expect(field.checked).toBe("1 kart")

@@ -1,6 +1,7 @@
 import "server-only"
-import { headers } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { storefrontEnv } from "../env"
+import { bypassCookieName, bypassHeaderOf } from "../maintenance/rules"
 import type { QueryValue, StoreRequest } from "./core"
 import { storeRequest } from "./core"
 import { isNotFound } from "./errors"
@@ -12,16 +13,24 @@ import { visitorIp } from "./visitor"
  * The current request's shopper address and id (server components and
  * actions), and the signed-in customer's key when there is one: every
  * Store API call is then the customer's (their carts, orders, prices).
+ * A visitor holding a maintenance bypass cookie sends its token too: a
+ * dark shop's backend refuses Store API writes but for a link it signed
+ * itself (adr/0053 Ek 2026-11-17), checked there, not here.
  */
 async function visit(): Promise<Pick<StoreRequest, "visitorIp" | "requestId" | "headers">> {
-  const [incoming, stored] = await Promise.all([headers(), sessionToken()])
+  const env = storefrontEnv()
+  const [incoming, stored, jar] = await Promise.all([headers(), sessionToken(), cookies()])
   // A token past its end is not sent: the page goes on as a guest's
   const exp = stored ? claimsOf(stored).exp : undefined
   const token = stored && (exp === undefined || exp * 1000 > Date.now()) ? stored : null
+  const own: Record<string, string> = {
+    ...(token ? { authorization: `Bearer ${token}` } : {}),
+    ...bypassHeaderOf(jar.get(bypassCookieName(env.NODE_ENV === "production"))?.value),
+  }
   return {
-    visitorIp: visitorIp(incoming, storefrontEnv().STOREFRONT_TRUSTED_PROXY_HOPS ?? 0),
+    visitorIp: visitorIp(incoming, env.STOREFRONT_TRUSTED_PROXY_HOPS ?? 0),
     requestId: incoming.get("x-request-id"),
-    ...(token ? { headers: { authorization: `Bearer ${token}` } } : {}),
+    ...(Object.keys(own).length > 0 ? { headers: own } : {}),
   }
 }
 

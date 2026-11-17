@@ -12,7 +12,9 @@ export interface FieldFocus {
 }
 
 const HIGHLIGHT_MS = 2400
-const FOCUSABLE = '[role="radio"], input, textarea, button[role="switch"], button'
+// Not a field's (i) (`InfoTip`): it stands before the control, beside the name
+const FOCUSABLE =
+  '[role="radio"], input, textarea, button[role="switch"], button:not([data-info-tip])'
 
 /**
  * Brings the field picked into view (adr/0049 Ek 2026-11-14 §6: the hit
