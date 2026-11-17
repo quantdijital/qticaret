@@ -12,6 +12,7 @@ import { subscribeNewsletter } from "@/app/actions/newsletter"
 import type { AnalyticsEvent } from "@/lib/analytics/events"
 import { listContext, listEvent, listItems } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
+import { visitorAmounts } from "@/lib/analytics/tags"
 import { currentWholesale } from "@/lib/account/wholesale"
 import { t } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
@@ -236,7 +237,11 @@ export async function ListingContent({
     },
   ]
   // The colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
-  const [shared, options] = await Promise.all([currentShared(), cardOptions()])
+  const [shared, options, amounts] = await Promise.all([
+    currentShared(),
+    cardOptions(),
+    visitorAmounts(),
+  ])
   const facets = filterViews(
     url.pathname,
     state,
@@ -264,6 +269,7 @@ export async function ListingContent({
     <>
       <TrackEvents
         events={measured}
+        visitorAmounts={amounts}
         context={
           list
             ? {

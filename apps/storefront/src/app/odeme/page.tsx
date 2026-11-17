@@ -4,6 +4,7 @@ import { currentCustomer, customerAddresses } from "@/lib/account/auth"
 import { shippingInfoEvents } from "@/lib/analytics/cart-payloads"
 import { checkoutEvents } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
+import { visitorAmounts } from "@/lib/analytics/tags"
 import { shopperGiftLines } from "@/lib/cart/gift"
 import { OUT_OF_STOCK, cartShortLines } from "@/lib/cart/stock"
 import { checkoutCart } from "@/lib/checkout/cart"
@@ -48,11 +49,12 @@ export default async function CheckoutPage({
   const asked = typeof query["adim"] === "string" ? query["adim"] : undefined
   const failed = typeof query["hata"] === "string" ? query["hata"] : null
   const error = failed && RETURN_ERRORS.has(failed) ? t(failed) : null
-  const [[saved], billing, gifts, short] = await Promise.all([
+  const [[saved], billing, gifts, short, amounts] = await Promise.all([
     customer ? customerAddresses() : Promise.resolve([]),
     customer ? billingOf() : Promise.resolve(null),
     shopperGiftLines(cart.id),
     cartShortLines(cart.id),
+    visitorAmounts(),
   ])
   // A unit another order took since it was put in the cart: seen in the cart, before paying
   // (adr/0026 Ek 2026-11-06); the payment's start checks again
@@ -88,8 +90,13 @@ export default async function CheckoutPage({
         events={measured.events}
         context={measured.context}
         once={`begin_checkout:${cart.id}`}
+        visitorAmounts={amounts}
       />
-      <TrackEvents events={shipping} once={`add_shipping_info:${cart.id}:${option}`} />
+      <TrackEvents
+        events={shipping}
+        once={`add_shipping_info:${cart.id}:${option}`}
+        visitorAmounts={amounts}
+      />
       <theme.CheckoutPage view={shown} t={t} actions={checkoutActions} />
     </>
   )
