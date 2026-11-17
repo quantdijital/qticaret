@@ -172,7 +172,7 @@ describe("staff roles", () => {
     for (const path of [
       "/admin/platform-settings/store",
       "/admin/platform-settings/seo",
-      "/admin/features/content.ai_drafts",
+      "/admin/features/stock.preorder",
       "/admin/stores/store_1",
       "/admin/products/prod_1",
       "/admin/orders/order_1/refunds",
@@ -500,9 +500,6 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/fraud/blocks/:id": false,
   "POST /admin/chargebacks/:id": false,
   "POST /admin/chargebacks": false,
-  "POST /admin/content-drafts/:id/approve": false,
-  "POST /admin/content-drafts/:id/reject": false,
-  "POST /admin/content-drafts": false,
   // adr/0071 §6: AI suggestions; operations gets only its own area's tasks (Aşama 9)
   "POST /admin/ai/suggestions": false,
   "POST /admin/ai/suggestions/:id/accept": false,

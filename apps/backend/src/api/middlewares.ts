@@ -72,7 +72,6 @@ import { MESSAGING_ROUTES } from "./http/messaging-routes"
 import { CONTROL_PLANE_ROUTES } from "./http/control-plane-routes"
 import { SHIPPING_ROUTES } from "./http/shipping-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
-import { CONTENT_DRAFT_ROUTES } from "./http/content-draft-routes"
 import { AI_ROUTES } from "./http/ai-routes"
 import { DEV_ROUTES } from "./http/dev-routes"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
@@ -385,7 +384,6 @@ export default defineMiddlewares({
     // adr/0007 Ek 2026-11-04: the KDV rates
     ...VAT_ROUTES,
     ...CONTENT_ROUTES,
-    ...CONTENT_DRAFT_ROUTES,
     // adr/0071: the AI core's services, suggestions and usage
     ...AI_ROUTES,
     // F3.9: product sheets

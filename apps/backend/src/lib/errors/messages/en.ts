@@ -676,10 +676,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This day cannot be checked: yesterday at the latest, a year back at most.",
   "statements.account_missing":
     "This payment provider is not connected; connect the account first.",
-  "content_drafts.no_provider": "No draft provider is set up yet.",
-  "content_drafts.quota_reached": "This month's drafts are used up; they renew next month.",
-  "content_drafts.not_open": "This draft is no longer waiting for approval.",
-  "content_drafts.unknown_product": "Product not found.",
   // adr/0071 §12: the AI core; a service's own words are never shown
   "ai.no_service": "No connected AI service can do this. Connect a service under Settings > AI.",
   "ai.service_unavailable":

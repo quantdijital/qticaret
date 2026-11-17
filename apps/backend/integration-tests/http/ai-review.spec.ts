@@ -1,4 +1,3 @@
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakeSecret } from "@qticaret/testing"
 import { resetAiBreakers } from "../../src/lib/ai/breaker"
@@ -16,8 +15,8 @@ import { settle } from "../helpers/http"
 jest.setTimeout(120 * 1000)
 
 /**
- * The security review of PR 170 (adr/0071): an AI suggestion stays off the
- * adr/0005 draft routes (O1), a removed member is forgotten (O2), the
+ * The security review of PR 170 (adr/0071): a removed member is forgotten
+ * (O2; O1, the old adr/0005 draft routes, went with them in docs/22 PR 2-2), the
  * quota is kept when the service may have done the work (D3), and a
  * failure after the day's claim gives the day back (D4). Only the fake
  * service is ever called.
@@ -30,16 +29,6 @@ medusaIntegrationTestRunner({
     const ask = askFor(http)
     const records = () => aiRecords(getContainer())
     const ai = () => getContainer().resolve<AiModuleService>(AI_MODULE)
-    const page = async (productId: string) => {
-      const { data } = await getContainer()
-        .resolve(ContainerRegistrationKeys.QUERY)
-        .graph({
-          entity: "product",
-          fields: ["description", "seo_meta.seo_title"],
-          filters: { id: productId },
-        })
-      return data[0] as { description: string | null; seo_meta?: { seo_title?: string | null } }
-    }
 
     managedForThisFile()
 
@@ -51,37 +40,6 @@ medusaIntegrationTestRunner({
 
     afterEach(() => {
       jest.restoreAllMocks()
-    })
-
-    it("keeps an AI suggestion off the adr/0005 draft routes (O1)", async () => {
-      await connectFake(http, owner.headers, key)
-      const productId = await aiProduct(getContainer())
-      const before = await page(productId)
-
-      const asked = await ask(owner.headers, {
-        task: "test_text",
-        entity_type: "product",
-        entity_id: productId,
-      })
-      const [draft] = await records().drafts()
-      const approved = await settle(
-        http.post<{ message?: string }>(
-          `/admin/content-drafts/${draft?.id ?? ""}/approve`,
-          {},
-          { headers: owner.headers }
-        )
-      )
-      const listed = await http.get<{ drafts: { id: string }[] }>(
-        `/admin/content-drafts?entity_type=product&entity_id=${productId}`,
-        { headers: owner.headers }
-      )
-
-      expect(asked.status).toBe(201)
-      expect(draft).toMatchObject({ source: "ai_suggestion", status: "draft" })
-      expect([approved.status, approved.data.message]).toEqual([400, "content_drafts.not_open"])
-      expect(await page(productId)).toEqual(before)
-      expect(listed.data.drafts).toEqual([])
-      expect((await records().drafts())[0]?.status).toBe("draft")
     })
 
     it("forgets a removed member's choices and name on the usage report (O2)", async () => {
