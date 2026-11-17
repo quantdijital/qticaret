@@ -1,6 +1,6 @@
 # ADR-0005: İçerik ve SEO önerileri — kural motoru önce, LLM opsiyonel
 
-- **Durum:** Kabul edildi (kural motoru F3.13'te uygulandı ve LLM'siz çalışıyor; LLM taslakları isteğe bağlı ve kapalı başlar, kullanıcı 2026-10-31'de "LLM kapalı" seçti)
+- **Durum:** Kabul edildi (kural motoru F3.13'te uygulandı ve LLM'siz çalışıyor; LLM taslakları isteğe bağlı ve kapalı başlar, kullanıcı 2026-10-31'de "LLM kapalı" seçti). **Ek (2026-11-17):** §3'ün sağlayıcı kısmı (tek `ContentDraftProvider`, `ai_content_drafts` bayrağı) adr/0071 ile genişletildi ve yerini servis kaydına bırakıyor; §1, §2 ve §3'ün ilkeleri (yalnız ürün verisi, çıktı taslaktır, kural motorundan geçer, sektör nötr istem) yürürlükte.
 - **Tarih:** 2026-10-22
 
 ## Bağlam

@@ -76,3 +76,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0068 | [Toptancı müşteriler ve toptan fiyat](0068-toptanci-musteriler-ve-toptan-fiyat.md) | — |
 | 0069 | [Ürün videoları: yükleme, dönüştürme, depolama ve vitrinde gösterim](0069-urun-videolari.md) | — |
 | 0070 | [Serbest düzen alt bilgi: satır, sütun ve bloklar; alt bilgi grubu](0070-serbest-duzen-alt-bilgi.md) | — |
+| 0071 | [Yapay zekâ çekirdeği: servis ve yetenek kaydı, kendi anahtarım, platform kredisi](0071-yapay-zeka-cekirdegi.md) | — |
