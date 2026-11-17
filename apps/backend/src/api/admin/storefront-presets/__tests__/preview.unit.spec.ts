@@ -53,7 +53,7 @@ describe("a ready-made look's picture (adr/0063 §7)", () => {
 
   it("serves general's looks without asking whether the pack is applied", async () => {
     const { container, list } = containerWith([])
-    await expect(presetPreview(container, "general", "grafit")).resolves.toBe(IMAGE)
+    await expect(presetPreview(container, "general", "vitrin")).resolves.toBe(IMAGE)
     expect(list).not.toHaveBeenCalled()
   })
 

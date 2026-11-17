@@ -1,13 +1,11 @@
-import { storefrontPreset } from "@qticaret/sector-packs"
 import { presetDocument, presetTheme, withShopFrame } from "../document"
 import { resolvePreset } from "../resolve"
 import { ANNOUNCEMENT_DEFAULTS } from "../../sections/announcement-bar"
 import type { PresetGroups, PresetLookups } from "../resolve"
+import { fixturePreset } from "./fixture-packs"
 
-const grafit = storefrontPreset("general", "grafit")
-if (!grafit) {
-  throw new Error("no grafit preset")
-}
+// A test-local look shaped as Atölye's default: the mechanism, not a shipped look
+const preset = fixturePreset()
 
 const lookups: PresetLookups = {
   records: new Map(),
@@ -15,7 +13,7 @@ const lookups: PresetLookups = {
   images: new Map(),
 }
 const KEPT = { trust_badges: null, color_swatches: null, low_stock: null }
-const APPLIED = { pack: "general", code: "grafit", version: grafit.version }
+const APPLIED = { pack: "general", code: "sade", version: preset.version }
 const ALWAYS = { visible: true, starts_at: null, ends_at: null }
 
 const announcements = {
@@ -53,13 +51,13 @@ describe("the shop's header and footer under a preset (adr/0063 §4)", () => {
     expect(out.kept).toEqual(["footer.magazabulteni"])
   })
 
-  it("writes grafit (no header of its own) with the shop's announcement bar kept", () => {
-    const resolved = resolvePreset(grafit.layout, grafit.menus, lookups)
+  it("writes a preset with no header of its own with the shop's announcement bar kept", () => {
+    const resolved = resolvePreset(preset.layout, preset.menus, lookups)
     const frame = withShopFrame(resolved.groups, { header: [announcements], footer: [newsletter] })
 
     const doc = presetDocument(
       { groups: frame.groups, menus: resolved.menus },
-      presetTheme(grafit.theme_settings),
+      presetTheme(preset.theme_settings),
       APPLIED,
       KEPT
     )

@@ -7,7 +7,7 @@
 
 ## Bağlam
 
-Tema tektir (Atölye). İçinde birden çok hazır görünüm yaşar: Grafit (genel), Katalog ve Tezgâh ×3 (bıçak paketi). Görünümler ayrı `layout.json` dosyalarıdır ama bileşenler ortaktır. İki geliştirici aynı bileşene farklı tasarım yönleriyle girdiğinde birinin çizimi ötekinin görünümünü habersiz değiştirir. Somut olay (2026-11-15): `deniz/katalog-ust-sade` dalı `catalog` üst bilgi biçimini yerinde yeniden çizdi; bu biçimi yalnız Tezgâh kullanıyordu. Aynı gün "Kategoriler" paneline küçük resimler iki dalda ayrı ayrı eklendi.
+Tema tektir (Atölye). İçinde birden çok hazır görünüm yaşar: Grafit (genel; hazır görünüm olarak kaldırıldı, sahip 2026-11-17, adr/0063 Ek 2026-11-17), Katalog ve Tezgâh ×3 (bıçak paketi). Görünümler ayrı `layout.json` dosyalarıdır ama bileşenler ortaktır. İki geliştirici aynı bileşene farklı tasarım yönleriyle girdiğinde birinin çizimi ötekinin görünümünü habersiz değiştirir. Somut olay (2026-11-15): `deniz/katalog-ust-sade` dalı `catalog` üst bilgi biçimini yerinde yeniden çizdi; bu biçimi yalnız Tezgâh kullanıyordu. Aynı gün "Kategoriler" paneline küçük resimler iki dalda ayrı ayrı eklendi.
 
 Sorunun kökü: bazı tasarım kararları (gölge, kenarlık, menü öğesi stili, arama genişliği) bileşenin içine sabit yazılı. Farklı bir görünüş isteyen, kararı değiştirmek için bileşeni yeniden çizmek zorunda kalıyor.
 

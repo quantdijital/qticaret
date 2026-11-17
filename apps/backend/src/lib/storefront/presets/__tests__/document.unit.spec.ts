@@ -1,13 +1,11 @@
-import { storefrontPreset } from "@qticaret/sector-packs"
 import { isValidationError } from "../../../errors"
 import { presetDocument, presetTheme } from "../document"
 import { resolvePreset } from "../resolve"
 import type { PresetLookups } from "../resolve"
+import { fixturePreset } from "./fixture-packs"
 
-const grafit = storefrontPreset("general", "grafit")
-if (!grafit) {
-  throw new Error("no grafit preset")
-}
+// A test-local look shaped as Atölye's default: the mechanism, not a shipped look
+const preset = fixturePreset()
 
 const lookups: PresetLookups = {
   records: new Map(),
@@ -20,7 +18,7 @@ const KEPT = {
   color_swatches: null,
   low_stock: { enabled: true, threshold: 5 },
 }
-const APPLIED = { pack: "general", code: "grafit", version: grafit.version }
+const APPLIED = { pack: "general", code: "sade", version: preset.version }
 
 const refusal = (run: () => unknown): { message: string; field: string | undefined } => {
   try {
@@ -35,9 +33,9 @@ const refusal = (run: () => unknown): { message: string; field: string | undefin
 }
 
 describe("the draft a preset makes (adr/0063 §4)", () => {
-  it("writes grafit's sections, theme and name, keeping the shop's badges and Az kaldı", () => {
-    const resolved = resolvePreset(grafit.layout, grafit.menus, lookups)
-    const doc = presetDocument(resolved, presetTheme(grafit.theme_settings), APPLIED, KEPT)
+  it("writes the preset's sections, theme and name, keeping the shop's badges and Az kaldı", () => {
+    const resolved = resolvePreset(preset.layout, preset.menus, lookups)
+    const doc = presetDocument(resolved, presetTheme(preset.theme_settings), APPLIED, KEPT)
     expect(doc.home.map((section) => section.type)).toEqual([
       "hero",
       "categories",
@@ -51,7 +49,7 @@ describe("the draft a preset makes (adr/0063 §4)", () => {
     expect(doc.footer.map((section) => section.id)).toEqual(["ebultenkutusu"])
     const { theme, ...rest } = doc.settings
     expect(rest).toEqual({ ...KEPT, menus: null, preset: APPLIED, design: null })
-    expect(theme).toEqual(presetTheme(grafit.theme_settings))
+    expect(theme).toEqual(presetTheme(preset.theme_settings))
     expect(theme?.buttons).toBe("pill")
     expect(resolved.skipped).toEqual([])
   })
@@ -59,16 +57,16 @@ describe("the draft a preset makes (adr/0063 §4)", () => {
   it("refuses a theme the theme section does not take, naming the field", () => {
     expect(
       refusal(() =>
-        presetTheme({ ...grafit.theme_settings, typography: { heading: "comic", body: "manrope" } })
+        presetTheme({ ...preset.theme_settings, typography: { heading: "comic", body: "manrope" } })
       )
     ).toEqual({ message: "storefront_preset.theme_invalid", field: "theme.typography.heading" })
-    expect(refusal(() => presetTheme({ ...grafit.theme_settings, theme: "baska" })).message).toBe(
+    expect(refusal(() => presetTheme({ ...preset.theme_settings, theme: "baska" })).message).toBe(
       "storefront_preset.theme_invalid"
     )
   })
 
   it("refuses a design the editor's schema does not take", () => {
-    const theme = presetTheme(grafit.theme_settings)
+    const theme = presetTheme(preset.theme_settings)
     const groups = { header: [], home: [], footer: [], product: [], category: [] }
     const unknownType = {
       groups: { ...groups, home: [{ id: "garipbolum", type: "marquee", visible: true }] },
@@ -84,7 +82,7 @@ describe("the draft a preset makes (adr/0063 §4)", () => {
   })
 
   it("takes a section's variant, the default where it names none (adr/0049 Ek 2026-11-14)", () => {
-    const theme = presetTheme(grafit.theme_settings)
+    const theme = presetTheme(preset.theme_settings)
     const groups = { header: [], home: [], footer: [], product: [], category: [] }
     const strip = { id: "guvenserit", type: "trust_badges" }
     const lined = { ...strip, id: "guvencizgi", variant: "lined" }

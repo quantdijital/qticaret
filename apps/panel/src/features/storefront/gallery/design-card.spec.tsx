@@ -45,7 +45,7 @@ describe("DesignCard", () => {
     )
 
     const article = screen.getByRole("article", { name: "Bayram vitrini" })
-    expect(within(article).getByText("17 Kasım 14:20 · Grafit görünümünden")).toBeVisible()
+    expect(within(article).getByText("17 Kasım 14:20 · Sade görünümünden")).toBeVisible()
     expect(within(article).getByText("Yayında")).toBeVisible()
     expect(within(article).getByText("Taslakta, düzenlenmiş")).toBeVisible()
     expect(within(article).queryByText("Otomatik")).toBeNull()
@@ -83,7 +83,7 @@ describe("DesignCard", () => {
     const user = userEvent.setup()
     card(AUTO)
 
-    const name = "Grafit, 17 Kasım 14:20, düzenlenmiş"
+    const name = "Sade, 17 Kasım 14:20, düzenlenmiş"
     expect(screen.getByRole("article", { name })).toContainElement(screen.getByText("Otomatik"))
     await user.click(screen.getByRole("button", { name: `‘${name}’ için işlemler` }))
     await user.click(await screen.findByRole("menuitem", { name: "Adıyla sakla" }))

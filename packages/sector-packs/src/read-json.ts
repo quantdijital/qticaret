@@ -21,7 +21,7 @@ export const pathText = (path: readonly PropertyKey[]): string => path.map(Strin
 
 /**
  * One of a pack's JSON files read and checked with its frame schema;
- * `where` names it in the error (`general/presets/grafit/layout.json`).
+ * `where` names it in the error (`cutlery/presets/katalog/layout.json`).
  */
 export function readJsonFile<S extends z.ZodType>(
   path: string,

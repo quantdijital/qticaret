@@ -26,7 +26,7 @@ describe("GET /admin/storefront-presets/:pack/:code/preview (adr/0063 §7)", () 
   it("sends the picture as an image never read as anything else", async () => {
     const image = Buffer.from("RIFF....WEBP")
     mockPreview.mockResolvedValue(image)
-    const { run, res, headers } = call({ pack: "general", code: "grafit" })
+    const { run, res, headers } = call({ pack: "cutlery", code: "katalog" })
     await run()
     expect(res.send).toHaveBeenCalledWith(image)
     expect(headers).toEqual({
@@ -40,14 +40,14 @@ describe("GET /admin/storefront-presets/:pack/:code/preview (adr/0063 §7)", () 
 
   it("answers not found for no picture, never reading a path no code names", async () => {
     mockPreview.mockResolvedValue(null)
-    await expect(call({ pack: "general", code: "grafit" }).run()).rejects.toMatchObject({
+    await expect(call({ pack: "cutlery", code: "katalog" }).run()).rejects.toMatchObject({
       type: "not_found",
       message: "storefront_preset.unknown",
     })
     for (const params of [
-      { pack: "general", code: "../grafit" },
-      { pack: "../../etc", code: "grafit" },
-      { pack: "general", code: "Grafit" },
+      { pack: "cutlery", code: "../katalog" },
+      { pack: "../../etc", code: "katalog" },
+      { pack: "cutlery", code: "Katalog" },
     ]) {
       const { run, res } = call(params)
       await expect(run()).rejects.toMatchObject({ type: "not_found" })

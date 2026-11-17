@@ -12,10 +12,16 @@ import { expect, pageHeading, test } from "./support/guard"
  * `support/screens.ts` fail until that backend is in `dev`, so the panel's
  * PR is merged after the backend's.
  *
- * CI's shop has one ready-made look, `general/grafit` (seed:demo); nothing
- * here leans on another. The draft is changed and put back; the saved looks
- * this run wrote are deleted at the end. Nothing is published.
+ * The look is `cutlery/katalog`: `general` has no ready-made look since
+ * Grafit was removed (owner, 2026-11-17), so CI gives its demo shop
+ * (seed:demo) the cutlery pack (`tenant:apply-pack pack=cutlery`,
+ * .github/workflows/ci.yml) and the gallery lists that pack's looks. Katalog
+ * has no menus and no images; nothing here leans on another look. The draft
+ * is changed and put back; the saved looks this run wrote are deleted at the
+ * end. Nothing is published.
  */
+
+const LOOK = "Katalog"
 
 const DESIGNS = "/admin/storefront-designs"
 
@@ -53,12 +59,12 @@ test("applies a look, keeps the changed draft automatically and brings it back",
   const before = new Set(await designIds(page))
 
   try {
-    await page.getByRole("button", { name: "‘Grafit’ görünümünü taslağa uygula" }).click()
-    await confirmApply(page, "Grafit")
+    await page.getByRole("button", { name: `‘${LOOK}’ görünümünü taslağa uygula` }).click()
+    await confirmApply(page, LOOK)
 
     // A change in the draft: the home page's first section hidden. Not the
-    // header's: a look that leaves the header empty (Grafit does) keeps the
-    // shop's own, so a hidden announcement would stay hidden after it.
+    // header's: a look that leaves the header empty keeps the shop's own, so
+    // a hidden announcement would stay hidden after it.
     const tree = page
       .getByRole("navigation", { name: "Sayfanın bölümleri" })
       .getByRole("group", { name: "Ana sayfa", exact: true })
@@ -71,16 +77,16 @@ test("applies a look, keeps the changed draft automatically and brings it back",
     await hide.click()
     await expect(row("göster")).toBeVisible()
 
-    // Grafit again: the changed draft is kept before it goes
+    // The look again: the changed draft is kept before it goes
     await toGallery(page)
-    await page.getByRole("button", { name: "‘Grafit’ görünümünü taslağa uygula" }).click()
-    await confirmApply(page, "Grafit")
+    await page.getByRole("button", { name: `‘${LOOK}’ görünümünü taslağa uygula` }).click()
+    await confirmApply(page, LOOK)
     await expect(row("gizle")).toBeVisible()
 
     await toGallery(page)
     const saved = page.getByRole("region", { name: /^Kayıtlı görünümlerim/ })
     const kept = saved.getByRole("button", {
-      name: /^‘Grafit, .+, düzenlenmiş’ görünümünü taslağa al$/,
+      name: new RegExp(`^‘${LOOK}, .+, düzenlenmiş’ görünümünü taslağa al$`),
     })
     await expect(kept.first()).toBeVisible()
     const keptName = ((await kept.first().getAttribute("aria-label")) ?? "").replace(
@@ -91,7 +97,7 @@ test("applies a look, keeps the changed draft automatically and brings it back",
     await confirmApply(page, keptName)
     await expect(row("göster")).toBeVisible()
 
-    // Put the section back as Grafit has it, stored before leaving
+    // Put the section back as the look has it, stored before leaving
     await row("göster").click()
     await toGallery(page)
     await guard.assertHealthy()

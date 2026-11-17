@@ -1,9 +1,0 @@
-{
-  "format": "quant-storefront-preset",
-  "code": "grafit",
-  "version": 1,
-  "theme": "atolye",
-  "name": "Grafit",
-  "description": "Atölye temasının fabrika görünümü: açık çelik zemin, her yerde Manrope, yumuşak köşeler, kare ürün kartları, solda logo ve sabit üst bilgi, hap biçimli düğmeler. Ana sayfada giriş, kategoriler, en yeni ürünler, yardım kutusu ve blog yazıları. Menülere ve ürünlere dokunmaz.",
-  "tone": "light"
-}

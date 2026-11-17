@@ -19,7 +19,7 @@ function notices(report: ApplyReport | null, pendingMenus: unknown[] | null = nu
 }
 
 const REPORT: ApplyReport = {
-  name: "Grafit",
+  name: "Katalog",
   auto_saved: { id: "sfd_kept", kind: "auto", name: null },
   saved_name: null,
   skipped: [
@@ -36,7 +36,7 @@ describe("EditorNotices", () => {
     const client = notices(REPORT)
 
     const note = screen.getByRole("status")
-    expect(note).toHaveTextContent("‘Grafit’ taslağa uygulandı.")
+    expect(note).toHaveTextContent("‘Katalog’ taslağa uygulandı.")
     expect(note).toHaveTextContent(
       "Önceki görünümünüz 'Kayıtlı görünümlerim'e otomatik kaydedildi."
     )

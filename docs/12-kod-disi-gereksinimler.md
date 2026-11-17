@@ -87,26 +87,26 @@ Depoya yalnız sahibin sağladığı ya da lisansı kayıtlı görsel girer. Haz
 
 Demo fotoğraflarının küçük resimde kullanımı sahip kararıdır (2026-11-17). `credits.file` yalnız `images/` altını kabul ettiği için atıf `preset.json`'a değil buraya yazılır. Lisanslar CC BY 2.0, CC BY 4.0, CC BY-SA 3.0, CC BY-SA 4.0 ve kamu malıdır. CC BY-SA içerik bulunduğu için **küçük resimler de CC BY-SA 4.0 ile paylaşılır**: kaynak ve yazar aşağıdadır, fotoğraflar küçültülüp ekran görüntüsünün parçası olarak değiştirilmiştir.
 
-Küçük resimler yeniden üretildiğinde `--pictures <dosya>` her küçük resimde görünen fotoğrafların dosya adlarını yazar; bu tablo onunla güncellenir.
+Küçük resimler yeniden üretildiğinde `--pictures <dosya>` her küçük resimde görünen fotoğrafların dosya adlarını yazar; bu tablo onunla güncellenir. Grafit hazır görünümü kaldırıldı (sahip, 2026-11-17); küçük resmi silindi, tablodan çıkarıldı.
 
 | Eser (Wikimedia Commons) | Yazar | Lisans | Göründüğü küçük resim |
 |---|---|---|---|
-| <https://commons.wikimedia.org/wiki/File:A_classic_bowie_knife_-_7thdragon_knifeworks.jpg> | Bowiemaker | CC BY-SA 4.0 | grafit, katalog, tezgah (üç renk) |
+| <https://commons.wikimedia.org/wiki/File:A_classic_bowie_knife_-_7thdragon_knifeworks.jpg> | Bowiemaker | CC BY-SA 4.0 | katalog, tezgah (üç renk) |
 | <https://commons.wikimedia.org/wiki/File:Axe_in_a_Nomad_Camp.jpg> | Heribertus2 | CC BY-SA 4.0 | katalog |
-| <https://commons.wikimedia.org/wiki/File:Chefs_knifes_on_a_wooden_cutting_board.jpg> | T. Bjornstad | CC BY-SA 4.0 | grafit, katalog, tezgah (üç renk) |
+| <https://commons.wikimedia.org/wiki/File:Chefs_knifes_on_a_wooden_cutting_board.jpg> | T. Bjornstad | CC BY-SA 4.0 | katalog, tezgah (üç renk) |
 | <https://commons.wikimedia.org/wiki/File:Chopping_Board.jpg> | Donovan Govan | CC BY-SA 3.0 | katalog |
-| <https://commons.wikimedia.org/wiki/File:Foster_Cleaver.jpg> | GCNorton | CC BY-SA 4.0 | grafit, katalog, tezgah (üç renk) |
+| <https://commons.wikimedia.org/wiki/File:Foster_Cleaver.jpg> | GCNorton | CC BY-SA 4.0 | katalog, tezgah (üç renk) |
 | <https://commons.wikimedia.org/wiki/File:Hitohira_Kikuchiyo_Ren_Silver_No._3_Gyuto_210mm_Ebony_Handle_(2026)-104A9181.jpg> | Frank Schulenburg | CC BY-SA 4.0 | tezgah (üç renk) |
 | <https://commons.wikimedia.org/wiki/File:Hone_Stone.JPG> | Rosser1954 (Roger Griffith) | Kamu malı | katalog |
 | <https://commons.wikimedia.org/wiki/File:Hunting_and_outdoor_knife_Boker_Integral_Hunter_Thuya.jpg> | Frank Schulenburg | CC BY-SA 4.0 | tezgah (üç renk) |
-| <https://commons.wikimedia.org/wiki/File:Katana,_sword_(AM_1934.316-2).jpg> | Sada, Kane | CC BY 4.0 | grafit, katalog, tezgah (üç renk) |
+| <https://commons.wikimedia.org/wiki/File:Katana,_sword_(AM_1934.316-2).jpg> | Sada, Kane | CC BY 4.0 | katalog, tezgah (üç renk) |
 | <https://commons.wikimedia.org/wiki/File:Leather_knife_case_and_a_set_of_knives_by_Les_Cuirs_d%27Agathe_and_La_Forge_du_Lion_du_Nord_(DSC07517).jpg> | Trougnouf (Benoit Brummer); Les cuirs d'Agathe | CC BY 4.0 | katalog |
-| <https://commons.wikimedia.org/wiki/File:Making_a_hatchet_sheath_11.jpg> | Jomegat | CC BY-SA 3.0 | grafit, katalog |
+| <https://commons.wikimedia.org/wiki/File:Making_a_hatchet_sheath_11.jpg> | Jomegat | CC BY-SA 3.0 | katalog |
 | <https://commons.wikimedia.org/wiki/File:Making_a_knife_sheath_06.jpg> | Jomegat | CC BY-SA 3.0 | katalog |
-| <https://commons.wikimedia.org/wiki/File:Mora_knife_01.jpg> | Wabajack | Kamu malı | grafit, katalog, tezgah (üç renk) |
-| <https://commons.wikimedia.org/wiki/File:Pocket_knive_(penknife)_from_German_bicycle_retailer_Polo.jpg> | Pittigrilli | CC BY 4.0 | grafit, katalog, tezgah (üç renk) |
+| <https://commons.wikimedia.org/wiki/File:Mora_knife_01.jpg> | Wabajack | Kamu malı | katalog, tezgah (üç renk) |
+| <https://commons.wikimedia.org/wiki/File:Pocket_knive_(penknife)_from_German_bicycle_retailer_Polo.jpg> | Pittigrilli | CC BY 4.0 | katalog, tezgah (üç renk) |
 | <https://commons.wikimedia.org/wiki/File:Victorinox_Swiss_Army_Knife_Rescue_Tool_-_black_nylon_pouch_(15367901549).jpg> | Andrew Toskin | CC BY 2.0 | katalog |
-| <https://commons.wikimedia.org/wiki/File:Whetstone_and_knife_Sharpening_tools.jpeg> | Didriks (Cambridge, MA, USA) | CC BY 2.0 | grafit, katalog, tezgah (üç renk) |
+| <https://commons.wikimedia.org/wiki/File:Whetstone_and_knife_Sharpening_tools.jpeg> | Didriks (Cambridge, MA, USA) | CC BY 2.0 | katalog, tezgah (üç renk) |
 
 ## Takip
 Tamamlanan kalemler bu tabloda işaretlenmez; `PROGRESS.md` → "Açık sorular / bloklayıcılar" altında izlenir.
