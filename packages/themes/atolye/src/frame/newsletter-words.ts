@@ -15,6 +15,7 @@ export interface NewsletterWords {
 
 const NEWSLETTER_ERRORS = [
   "newsletter.email_invalid",
+  "newsletter.consent_required",
   "newsletter.rate_limited",
   "errors.challenge_failed",
 ]
