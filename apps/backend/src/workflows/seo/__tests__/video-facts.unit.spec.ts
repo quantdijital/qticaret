@@ -70,6 +70,35 @@ describe("videoFactsOf (adr/0069 §9)", () => {
     })
   })
 
+  it("takes plain HTTP addresses on a developer's machine or in tests only", () => {
+    const plain = row({
+      outputs: { mp4: { url: "http://localhost:9000/static/gomlek-video-1.mp4" } },
+      poster: { url: "http://localhost:9000/static/gomlek-video-1.jpg", derivatives: null },
+    })
+    expect(videoFactsOf([plain], true)[0]).toMatchObject({
+      contentUrl: "http://localhost:9000/static/gomlek-video-1.mp4",
+      thumbnails: ["http://localhost:9000/static/gomlek-video-1.jpg"],
+    })
+    // Live (production, staging, an unset NODE_ENV): HTTPS only, the rest left out
+    expect(videoFactsOf([plain], false)[0]).toMatchObject({ contentUrl: null, thumbnails: [] })
+    expect(videoFactsOf([row()], false)[0]).toMatchObject({
+      contentUrl: "https://cdn.example.com/gomlek-video-1.mp4",
+    })
+  })
+
+  it("decides by NODE_ENV when not told", () => {
+    const plain = row({ outputs: { mp4: { url: "http://cdn.example.com/a.mp4" } } })
+    const saved = process.env["NODE_ENV"]
+    try {
+      process.env["NODE_ENV"] = "production"
+      expect(videoFactsOf([plain])[0]).toMatchObject({ contentUrl: null })
+      process.env["NODE_ENV"] = "development"
+      expect(videoFactsOf([plain])[0]).toMatchObject({ contentUrl: "http://cdn.example.com/a.mp4" })
+    } finally {
+      process.env["NODE_ENV"] = saved
+    }
+  })
+
   it("keeps only ready videos, in gallery order, and drops addresses that are not web ones", () => {
     const facts = videoFactsOf([
       row({ id: "mvid_c", position: 2 }),

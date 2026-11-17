@@ -76,10 +76,11 @@ export async function processVideo(
     }
   }
   try {
+    // An unexpected format is the input's fault at once, before anything else is tried
+    const demuxer = sourceDemuxer(video.source_format)
     if ((await freeDiskBytes(dir)) < MIN_FREE_DISK_BYTES) {
       throw infraError("video job: under 500 MB of free disk")
     }
-    const demuxer = sourceDemuxer(video.source_format)
     const source = join(dir, "source")
     await downloadSource(container, video.source_file_id, source, signal)
     const clip = await transcodeClip(source, demuxer, dir, {

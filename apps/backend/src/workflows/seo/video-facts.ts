@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { isLocalEnv } from "../../lib/env"
 import type { VideoFacts } from "../../lib/seo/jsonld-video"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { PRODUCT_VIDEOS } from "../../modules/platform-settings/features"
@@ -44,28 +45,33 @@ const VIDEO_FIELDS = [
   "media_videos.processed_at",
 ]
 
-/** An absolute web address of our storage; anything else is not printed. */
-function webAddress(value: string | null | undefined): string | null {
+/**
+ * An absolute HTTPS address of our storage, or plain HTTP on a developer's
+ * machine or in tests (`isLocalEnv`: an unset NODE_ENV counts as live);
+ * anything else is not printed.
+ */
+function webAddress(value: string | null | undefined, local: boolean): string | null {
   if (!value) {
     return null
   }
   try {
     const { protocol } = new URL(value)
-    return protocol === "https:" || protocol === "http:" ? value : null
+    return protocol === "https:" || (local && protocol === "http:") ? value : null
   } catch {
     return null
   }
 }
 
 /** The poster's widest WebP and its share crop, else the poster itself. */
-function thumbnailsOf(poster: VideoRow["poster"]): string[] {
+function thumbnailsOf(poster: VideoRow["poster"], local: boolean): string[] {
   const widest = [...(poster?.derivatives?.srcset?.webp ?? [])]
     .filter((each) => each !== null)
     .sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]
-  const versions = [webAddress(widest?.url), webAddress(poster?.derivatives?.og?.url)].filter(
-    (url): url is string => url !== null
-  )
-  const own = webAddress(poster?.url)
+  const versions = [
+    webAddress(widest?.url, local),
+    webAddress(poster?.derivatives?.og?.url, local),
+  ].filter((url): url is string => url !== null)
+  const own = webAddress(poster?.url, local)
   return versions.length > 0 ? [...new Set(versions)] : own ? [own] : []
 }
 
@@ -77,8 +83,14 @@ function isoDate(value: Date | string | null | undefined): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
-/** The ready videos as facts, by their place in the gallery (the record's age breaks a tie). */
-export function videoFactsOf(rows: readonly (VideoRow | null)[] | null | undefined): VideoFacts[] {
+/**
+ * The ready videos as facts, by their place in the gallery (the record's
+ * age breaks a tie). `local`: plain HTTP addresses are taken too.
+ */
+export function videoFactsOf(
+  rows: readonly (VideoRow | null)[] | null | undefined,
+  local: boolean = isLocalEnv(process.env)
+): VideoFacts[] {
   return (rows ?? [])
     .filter((row): row is VideoRow => row !== null && row.status === "ready")
     .sort((a, b) => (a.position ?? 1) - (b.position ?? 1) || a.id.localeCompare(b.id))
@@ -86,14 +98,14 @@ export function videoFactsOf(rows: readonly (VideoRow | null)[] | null | undefin
       const base = {
         id: row.id,
         title: row.title ?? null,
-        thumbnails: thumbnailsOf(row.poster),
+        thumbnails: thumbnailsOf(row.poster, local),
         uploadDate: isoDate(row.processed_at),
       }
       if (row.kind === "youtube") {
         return row.youtube_id ? [{ ...base, kind: "youtube", youtubeId: row.youtube_id }] : []
       }
       if (row.kind === "upload") {
-        const contentUrl = webAddress(row.outputs?.mp4?.url)
+        const contentUrl = webAddress(row.outputs?.mp4?.url, local)
         return [{ ...base, kind: "upload", contentUrl, durationMs: row.duration_ms ?? null }]
       }
       return []

@@ -2,6 +2,8 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { LIMIT_KEYS } from "@qticaret/types/control-plane"
 import type { PlanLimits } from "@qticaret/types/control-plane"
 import { PRODUCT_VIDEOS } from "../../src/modules/platform-settings/features"
+import { SEO_REDIRECTS_MODULE } from "../../src/modules/seo-redirects"
+import type SeoRedirectsModuleService from "../../src/modules/seo-redirects/service"
 import { createAdminUser } from "../helpers/admin"
 import { doc, managedForThisFile, signed } from "../helpers/control-plane"
 import type { HttpClient } from "../helpers/http"
@@ -99,12 +101,24 @@ medusaIntegrationTestRunner({
       expect(pushed.status).toBe(200)
     }
 
-    // Each test its own handle: a resolve answer is kept per path for up to 30 seconds
+    // Each test its own handle: a resolve answer is kept per path for up to 30 seconds.
+    // In a category of a category, as a shop's products are: the page has its breadcrumbs
     async function product(title: string): Promise<string> {
+      const category = async (name: string, parent?: string) =>
+        (
+          await post<{ product_category: { id: string } }>("/admin/product-categories", {
+            name,
+            is_active: true,
+            ...(parent ? { parent_category_id: parent } : {}),
+          })
+        ).data.product_category.id
+      const kitchen = await category("Mutfak")
+      const knives = await category("Bıçaklar", kitchen)
       const { data } = await post<{ product: { id: string } }>("/admin/products", {
         title,
         description: "<p>Dövme çelikten şef bıçağı.</p>",
         status: "published",
+        categories: [{ id: knives }],
         options: [{ title: "Boy", values: ["20 cm"] }],
         variants: [
           {
@@ -117,6 +131,14 @@ medusaIntegrationTestRunner({
       })
       return data.product.id
     }
+
+    const blocksOf = (answer: Answer) => answer.seo?.jsonLd ?? []
+    const typed = (blocks: Node[], type: string) => blocks.find((block) => block["@type"] === type)
+    const graphed = (blocks: Node[]) => blocks.find((block) => "@graph" in block)
+    const forget = () =>
+      getContainer()
+        .resolve<SeoRedirectsModuleService>(SEO_REDIRECTS_MODULE)
+        .invalidateResolutions()
 
     let releaseQueue: () => Promise<void> = () => Promise.resolve()
 
@@ -144,8 +166,11 @@ medusaIntegrationTestRunner({
       // The page's own meta description describes its videos
       const description = answer.seo?.description ?? ""
       expect(description.length).toBeGreaterThan(0)
-      const [block, crumbs] = answer.seo?.jsonLd ?? []
-      expect(crumbs).toMatchObject({ "@type": "BreadcrumbList" })
+      // Every block a video-less page has is still there: the product (now a graph) and the trail
+      const blocks = blocksOf(answer)
+      expect(blocks).toHaveLength(2)
+      expect(typed(blocks, "BreadcrumbList")).toBeDefined()
+      const block = graphed(blocks)
       expect(block?.["@context"]).toBe("https://schema.org")
       const [productNode, ...videos] = (block?.["@graph"] ?? []) as Node[]
       const url = "https://magaza.example.com/urun/sef-bicagi-video"
@@ -155,6 +180,7 @@ medusaIntegrationTestRunner({
       expect((productNode?.["subjectOf"] as Node[]).map((link) => link["@id"]).sort()).toEqual(
         [...ids].sort()
       )
+      expect(videos).toHaveLength(2)
       expect(videos.find((video) => video["@id"] === ids[0])).toEqual({
         "@type": "VideoObject",
         "@id": ids[0],
@@ -179,16 +205,49 @@ medusaIntegrationTestRunner({
       })
     })
 
+    it("drops a removed video once the cached answers are forgotten", async () => {
+      const id = await product("Şef Bıçağı Kaldırma")
+      const clip = await linkedVideo(getContainer(), id, CLIP)
+      const youtube = await linkedVideo(getContainer(), id, YOUTUBE)
+      const path = "/urun/sef-bicagi-kaldirma"
+      const url = `https://magaza.example.com${path}`
+      const remove = async (videoId: string) => {
+        const removed = await settle(
+          http.delete(`/admin/products/${id}/videos/${videoId}`, { headers: admin.headers })
+        )
+        expect(removed.status).toBe(200)
+        await forget()
+      }
+      const both = graphed(blocksOf(await resolve(path)))
+      expect(both?.["@graph"]).toHaveLength(3)
+
+      await remove(clip.id)
+      const one = graphed(blocksOf(await resolve(path)))
+      const [productNode, ...videos] = (one?.["@graph"] ?? []) as Node[]
+      expect(productNode?.["subjectOf"]).toEqual({ "@id": `${url}#video-${youtube.id}` })
+      expect(videos.map((video) => video["@id"])).toEqual([`${url}#video-${youtube.id}`])
+
+      // The last one gone: the product's block is as a video-less product's
+      await remove(youtube.id)
+      const blocks = blocksOf(await resolve(path))
+      expect(graphed(blocks)).toBeUndefined()
+      const plain = typed(blocks, "Product")
+      expect(plain).toMatchObject({ "@context": "https://schema.org", name: "Şef Bıçağı Kaldırma" })
+      expect(plain).not.toHaveProperty("subjectOf")
+      expect(typed(blocks, "BreadcrumbList")).toBeDefined()
+    })
+
     it("writes the product alone while the shop's videos are off", async () => {
       await pushFlag(false)
       try {
         const id = await product("Şef Bıçağı Kapalı")
         await linkedVideo(getContainer(), id, CLIP)
-        const answer = await resolve("/urun/sef-bicagi-kapali")
-        const [block] = answer.seo?.jsonLd ?? []
-        expect(block).toMatchObject({ "@context": "https://schema.org", "@type": "Product" })
-        expect(block).not.toHaveProperty("@graph")
-        expect(block).not.toHaveProperty("subjectOf")
+        const blocks = blocksOf(await resolve("/urun/sef-bicagi-kapali"))
+        expect(graphed(blocks)).toBeUndefined()
+        const plain = typed(blocks, "Product")
+        expect(plain).toMatchObject({ "@context": "https://schema.org" })
+        expect(plain).not.toHaveProperty("subjectOf")
+        expect(typed(blocks, "BreadcrumbList")).toBeDefined()
       } finally {
         await pushFlag(true)
       }
