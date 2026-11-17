@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, TriangleAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { InfoTip } from "@qticaret/admin-ui/patterns/info-tip"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { MENU_LOCATIONS, useOrderFooter } from "@/features/storefront/api/menus"
@@ -45,12 +46,18 @@ export function MenuListCard({ menus, selectedId, onSelect }: MenuListCardProps)
           const headingId = `menus-${location}`
           return (
             <div key={location} className="flex flex-col border-t">
-              <h3
-                id={headingId}
-                className="px-5 pt-3 pb-1.5 text-xs font-medium tracking-wide text-muted-foreground"
-              >
-                {t(`${M}.places.${location}`)}
-              </h3>
+              <div className="flex items-center gap-1.5 px-5 pt-3 pb-1.5">
+                <h3
+                  id={headingId}
+                  className="text-xs font-medium tracking-wide text-muted-foreground"
+                >
+                  {t(`${M}.places.${location}`)}
+                </h3>
+                {location === "footer" ? (
+                  // A free rows footer's menu blocks follow this order (adr/0070 §2.3)
+                  <InfoTip name={t(`${M}.places.footer`)} hint={t(`${M}.footerOrderHint`)} />
+                ) : null}
+              </div>
               {here.length === 0 ? (
                 <p className="px-5 pb-3 text-[13px] text-muted-foreground">
                   {t(`${M}.fallback.${location}`)}

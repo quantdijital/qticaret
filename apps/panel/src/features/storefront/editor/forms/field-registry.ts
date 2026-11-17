@@ -16,6 +16,7 @@ import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { offeredVariants, offersVariants } from "@/features/storefront/layout/variants"
 import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
 import { cardFooterFields } from "./card-field-ids"
+import type { FooterPart } from "../footer-rows/footer-rows-fields"
 import { BANNER_GROUPS } from "./banner-groups"
 import { CONTENT_IDS, contentFields } from "./content-registry"
 import {
@@ -56,6 +57,8 @@ export type FieldGroupName =
   | "topBar"
   | "menu"
   | "icons"
+  | "columns"
+  | "phone"
   | "variant"
   | "placement"
   | "layout"
@@ -79,6 +82,8 @@ export interface RegistryField {
   options: readonly string[]
   /** The element the search scrolls to and marks. */
   target: string
+  /** A free rows footer's row or block: its own panel opens (adr/0070 §7). */
+  part?: FooterPart
 }
 
 const P = "storefront.editor.panel"

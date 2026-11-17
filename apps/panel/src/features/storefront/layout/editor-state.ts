@@ -1,6 +1,7 @@
 import type {
   AnySection,
   CategorySection,
+  FooterSection,
   LayoutDocument,
   LayoutGroup,
   LayoutSettings,
@@ -48,6 +49,11 @@ export type EditorAction =
   | { type: "duplicate"; id: string; copyId?: string }
   | { type: "remove"; id: string }
   | { type: "toggle"; id: string }
+  /**
+   * The footer group replaced whole in one step: the footer switched to free
+   * rows takes the newsletter box into a block (adr/0070 §2.4).
+   */
+  | { type: "footer"; sections: FooterSection[] }
   /**
    * The theme's shared settings (adr/0049 Ek 2026-11-06): the trust badges,
    * the colour names, "Az kaldı"; `merge` names the field being typed in.
@@ -224,6 +230,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
           )
         )
       )
+    case "footer":
+      return commit(state, { ...doc, footer: action.sections })
     case "settings":
       return commit(
         state,

@@ -15,12 +15,16 @@ import { isSafeHref, isShortHref } from "./href"
  * (a product's description, ADR-0055) there are no pictures and no cards.
  * A `short` text (a product's short description, ADR-0055 Ek 2026-11-06)
  * takes h3–h4 only, no quotes, tables, pictures or cards, and links to the
- * shop or https only.
+ * shop or https only. A `bare` text (a footer block's, adr/0070 §2) takes
+ * paragraphs, lists, bold, italic and links only: no headings either.
  */
-export function contentExtensions(placeholder: string, { media = true, short = false } = {}) {
+export function contentExtensions(
+  placeholder: string,
+  { media = true, short = false, bare = false } = {}
+) {
   return [
     StarterKit.configure({
-      heading: { levels: short ? [3, 4] : [2, 3, 4] },
+      heading: bare ? false : { levels: short ? [3, 4] : [2, 3, 4] },
       code: false,
       codeBlock: false,
       strike: false,
@@ -38,7 +42,7 @@ export function contentExtensions(placeholder: string, { media = true, short = f
       },
     }),
     ListItem.extend({ content: "paragraph (bulletList | orderedList)*" }),
-    ...(short
+    ...(short || bare
       ? []
       : [
           Blockquote.extend({ content: "(paragraph | bulletList | orderedList)+" }),
@@ -47,7 +51,7 @@ export function contentExtensions(placeholder: string, { media = true, short = f
           TableHeader.extend({ content: "paragraph+" }),
           TableCell.extend({ content: "paragraph+" }),
         ]),
-    ...(media && !short
+    ...(media && !short && !bare
       ? [Image.configure({ inline: false, allowBase64: false }), ProductCard, CategoryCard]
       : []),
     Placeholder.configure({ placeholder }),

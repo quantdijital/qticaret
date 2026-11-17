@@ -13,6 +13,7 @@ import type {
   SectionLook,
 } from "@qticaret/types"
 import type { FooterBarFields } from "@/features/storefront/api/layout-cards"
+import type { FooterRowsFields } from "./layout-footer-rows"
 import type { LayoutLink } from "./layout-sections"
 
 /**
@@ -98,9 +99,14 @@ export type FooterColumnsSection = FooterBarCommon & {
   variant: "brand_columns"
 } & FooterColumnsFields
 
+/** The free rows footer (adr/0070): its rows of columns of blocks, its ground and marks. */
+export type FooterRowsSection = FooterBarCommon & { variant: "free_rows" } & FooterRowsFields
+
 /** The footer, with its own settings (adr/0049 Ek 2026-11-15) and its variant's. */
 export type FooterBarSection =
-  (FooterBarCommon & { variant: Exclude<FooterBarVariant, "brand_columns"> }) | FooterColumnsSection
+  | (FooterBarCommon & { variant: Exclude<FooterBarVariant, "brand_columns" | "free_rows"> })
+  | FooterColumnsSection
+  | FooterRowsSection
 
 export interface ProductMainSection extends MainBase {
   type: "product_main"

@@ -7864,7 +7864,8 @@
         "required": "Bu alan boş bırakılamaz.",
         "tooLong": "En çok {{max}} karakter olabilir.",
         "textInvalid": "Kullanılamayan bir karakter içeriyor."
-      }
+      },
+      "footerOrderHint": "Alt bilgi \"Serbest düzen\" biçimindeyse menü blokları menülere bu sıradaki yerleriyle bağlıdır (1., 2., 3. menü). Sırayı değiştirirseniz alt bilgide hangi menünün nerede göründüğü de değişir."
     },
     "editor": {
       "title": "Tema düzenleyici",
@@ -8290,7 +8291,9 @@
           "topBar": "Üst şerit",
           "menu": "Menü çubuğu",
           "icons": "Simgeler ve iletişim",
-          "frame": "Görünüm"
+          "frame": "Görünüm",
+          "columns": "Sütun düzeni",
+          "phone": "Telefonda"
         },
         "marked_one": "{{count}} ayar varsayılandan farklı",
         "marked_other": "{{count}} ayar varsayılandan farklı"
@@ -8590,7 +8593,8 @@
         "footerNewsletterTwice": "Alt bilgide iki bülten formu olamaz; bülten bloğunu ya da bülten bölümünü kaldırın.",
         "stripsTwo": "En az iki şerit ekleyin.",
         "brandRequired": "Bir marka seçin.",
-        "imageRequired": "Bir görsel seçin."
+        "imageRequired": "Bir görsel seçin.",
+        "footerNewsletterBand": "Alt bilgi \"Serbest düzen\" biçimindeyken bülten bölümü \"Alt bilgi içinde\" biçiminde olamaz; başka bir biçim seçin ya da bülten bloğu kullanın."
       },
       "theme": {
         "title": "Tema ayarları",
@@ -9468,7 +9472,13 @@
           "hint": "Koyu zeminde logolar her zaman beyaz kartta durur; kart ağları logolarını açık zeminde ister.",
           "card": "Kart içinde",
           "plain": "Yalın"
-        }
+        },
+        "bottom_badges": {
+          "label": "Alt satırda ödeme logoları",
+          "term": "payment badges",
+          "hint": "Sayfanın en altındaki sabit satırda ödeme yöntemlerinin logoları görünür. Liste yukarıdaki \"Ödeme logoları\" seçiminden gelir."
+        },
+        "freeRowsNote": "Satırları ve blokları soldaki sayfa listesinde, Alt bilgi altında düzenleyin. Yasal şerit ve alt satır her zaman en altta durur."
       },
       "main": {
         "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."
@@ -9715,7 +9725,276 @@
         "save": "Bu görünümü kaydet",
         "all": "Tüm görünümler"
       },
-      "keptDraft": "Önceki taslak 'Kayıtlı görünümlerim'e otomatik kaydedildi."
+      "keptDraft": "Önceki taslak 'Kayıtlı görünümlerim'e otomatik kaydedildi.",
+      "footerRows": {
+        "tree": {
+          "rows": "Alt bilgi satırları",
+          "row_one": "Satır {{place}} · {{count}} sütun",
+          "row_other": "Satır {{place}} · {{count}} sütun",
+          "column": "Sütun {{place}}",
+          "columnWide": "Sütun {{place}} · geniş",
+          "slot": "{{slot}}. menü",
+          "empty": "Boş sütun; buraya blok sürükleyin ya da ekleyin.",
+          "fixed": "Yasal şerit ve alt satır (sabit)"
+        },
+        "types": {
+          "text": {
+            "name": "Sabit yazı",
+            "description": "Başlık ve kısa bir yazı: kargo bilgisi, mağaza notu."
+          },
+          "menu": {
+            "name": "Menü",
+            "description": "Menüler ekranındaki alt bilgi menülerinden biri, sırasıyla."
+          },
+          "brand": {
+            "name": "Logo ve tanıtım",
+            "description": "Mağaza logosu, kısa tanıtım ve sosyal medya simgeleri."
+          },
+          "newsletter": {
+            "name": "Bülten formu",
+            "description": "E-posta kayıt kutusu; alt bilgide bir tane olabilir."
+          },
+          "contact": {
+            "name": "İletişim ve çalışma saatleri",
+            "description": "Adres, telefon, WhatsApp, e-posta ve saatler; mağaza bilgilerinden."
+          },
+          "social": {
+            "name": "Sosyal medya",
+            "description": "Mağaza bilgilerindeki sosyal medya hesapları."
+          },
+          "payments": {
+            "name": "Ödeme logoları",
+            "description": "Kabul ettiğiniz ödeme yöntemlerinin logoları."
+          },
+          "image": {
+            "name": "Resim",
+            "description": "Ortam kütüphanesinden bir resim, isterseniz bağlantılı."
+          },
+          "app_badges": {
+            "name": "Uygulama mağazası rozetleri",
+            "description": "App Store ve Google Play'deki uygulamanıza bağlantı."
+          },
+          "trust": {
+            "name": "Güvence maddeleri",
+            "description": "Tasarımın ortak güvence maddelerinden ilk birkaçı."
+          }
+        },
+        "add": {
+          "block": "Blok ekle",
+          "blockTo": "{{column}}: blok ekle",
+          "title": "Blok türü",
+          "typeFull_one": "Alt bilgide yalnız {{count}} tane olabilir.",
+          "typeFull_other": "Alt bilgide en çok {{count}} tane olabilir.",
+          "columnFull": "Sütunda en çok {{max}} blok olabilir.",
+          "footerFull": "Alt bilgide en çok {{max}} blok olabilir.",
+          "row": "Satır ekle"
+        },
+        "actions": {
+          "open": "Ayarları aç",
+          "move": "Taşı…",
+          "duplicate": "Çoğalt",
+          "remove": "Bloğu kaldır",
+          "removeRow": "Satırı kaldır"
+        },
+        "moved": "{{name}}, {{place}} konumuna taşındı.",
+        "rowMoved": "Satır {{place}}. sıraya taşındı.",
+        "rowRemoved": "Satır {{place}} kaldırıldı.",
+        "move": {
+          "title": "{{name}} bloğunu taşı",
+          "description": "Bloğun gideceği satırı ve sütunu seçin; blok o sütunun sonuna eklenir.",
+          "target": "Hedef sütun",
+          "place": "Satır {{row}} · Sütun {{column}}",
+          "confirm": "Taşı"
+        },
+        "row": {
+          "description": "Satırın sütun düzeni, zemini ve aralığı. Bloklar soldaki listede, satırın sütunları altında.",
+          "merged": "Sütun sayısı azaldı; kalkan sütunlardaki bloklar son sütuna eklendi.",
+          "layout": {
+            "label": "Sütun oranı",
+            "term": "columns",
+            "hint": "Satırdaki sütunlar ve genişlikleri: 2·1 ilk sütunun ikinci sütunun iki katı geniş olduğu iki sütun demektir. Tablette en çok iki sütun yan yana durur."
+          },
+          "ground": {
+            "label": "Zemin",
+            "term": "background",
+            "hint": "Satırın arka planı. \"Alt bilgiyle aynı\" alt bilginin zeminini kullanır.",
+            "inherit": "Alt bilgiyle aynı",
+            "page": "Sayfa",
+            "well": "Açık",
+            "stage": "Koyu",
+            "primary": "Ana renk"
+          },
+          "space": {
+            "label": "Satır aralığı",
+            "term": "padding",
+            "none": "Yok",
+            "small": "Az",
+            "medium": "Orta",
+            "large": "Çok"
+          },
+          "align": {
+            "label": "Hiza",
+            "term": "align",
+            "start": "Sola",
+            "center": "Ortaya"
+          },
+          "divider": {
+            "label": "Üstte ince çizgi",
+            "term": "divider"
+          },
+          "phone_columns": {
+            "1": "Alt alta",
+            "2": "İkişer",
+            "label": "Telefonda yan yana",
+            "term": "mobile columns",
+            "hint": "Telefonda sütunlar alt alta dizilir; 2 seçerseniz ikişer ikişer yan yana durur."
+          }
+        },
+        "fields": {
+          "title": {
+            "label": "Başlık",
+            "term": "heading",
+            "hint": "Boş bırakırsanız blok başlıksız görünür.",
+            "menuHint": "Boş bırakırsanız menünün adı başlık olur."
+          },
+          "body": {
+            "label": "Yazı",
+            "term": "text",
+            "hint": "Paragraf, liste, kalın, eğik ve bağlantı kullanılabilir; başlık yok, blok başlığı yeterli.",
+            "empty": "Henüz yazı yok.",
+            "edit": "Yazıyı düzenle",
+            "description": "Kısa tutun: alt bilgi her sayfada görünür.",
+            "done": "Tamam"
+          },
+          "slot": {
+            "label": "Hangi menü",
+            "term": "menu slot",
+            "hint": "Blok, Menüler ekranındaki alt bilgi menülerine sıra numarasıyla bağlıdır. Menüler ekranında sırayı değiştirirseniz bu blokta görünen menü de değişir.",
+            "option": "{{slot}}. menü · {{name}}",
+            "none": "menü yok",
+            "missing": "Bu sırada alt bilgi menüsü yok; blok vitrinde görünmez.",
+            "menus": "Menüler"
+          },
+          "collapse_phone": {
+            "label": "Telefonda açılır kapanır",
+            "term": "accordion",
+            "hint": "Telefonda menü başlığına dokununca bağlantılar açılır. Geniş ekranda her zaman açıktır."
+          },
+          "logo": {
+            "label": "Logo",
+            "term": "logo",
+            "hint": "Mağaza profilindeki logo; logo yoksa mağaza adı yazılır."
+          },
+          "about": {
+            "label": "Kısa tanıtım",
+            "term": "about"
+          },
+          "social": {
+            "label": "Sosyal medya simgeleri",
+            "term": "social",
+            "hint": "Hesaplar mağaza bilgilerinden gelir; görünüşü alt bilginin sosyal medya ayarından."
+          },
+          "description": {
+            "label": "Kısa açıklama",
+            "term": "description"
+          },
+          "text": {
+            "label": "Onay cümlesi",
+            "term": "consent",
+            "hint": "Formun altındaki onay yazısı. Boş bırakırsanız vitrinin kendi cümlesi görünür."
+          },
+          "variant": {
+            "label": "Biçim",
+            "term": "variant",
+            "standard": "Kutu",
+            "in_footer": "Sade"
+          },
+          "address": {
+            "label": "Adres",
+            "term": "address"
+          },
+          "phone": {
+            "label": "Telefon",
+            "term": "phone"
+          },
+          "whatsapp": {
+            "label": "WhatsApp",
+            "term": "WhatsApp"
+          },
+          "email": {
+            "label": "E-posta",
+            "term": "email"
+          },
+          "hours": {
+            "label": "Çalışma saatleri",
+            "term": "hours"
+          },
+          "carriers": {
+            "label": "Kargo logoları da",
+            "term": "carriers"
+          },
+          "image": {
+            "label": "Resim",
+            "term": "image"
+          },
+          "link": {
+            "label": "Bağlantı",
+            "term": "link"
+          },
+          "width": {
+            "label": "Genişlik",
+            "term": "width",
+            "medium": "Orta",
+            "small": "Küçük",
+            "full": "Sütun boyu"
+          },
+          "app_store": {
+            "label": "App Store adresi",
+            "term": "URL",
+            "placeholder": "https://apps.apple.com/…",
+            "hint": "Yalnız apps.apple.com adresi; en az bir mağaza adresi gerekir."
+          },
+          "google_play": {
+            "label": "Google Play adresi",
+            "term": "URL",
+            "placeholder": "https://play.google.com/…",
+            "hint": "Yalnız play.google.com adresi; en az bir mağaza adresi gerekir."
+          },
+          "limit": {
+            "label": "Kaç madde",
+            "term": "limit"
+          },
+          "layout": {
+            "label": "Diziliş",
+            "term": "layout",
+            "list": "Alt alta",
+            "inline": "Yan yana"
+          },
+          "visible": {
+            "label": "Görünsün",
+            "term": "visible"
+          },
+          "device": {
+            "label": "Hangi ekranda",
+            "term": "device",
+            "hint": "Bloğu yalnız telefonda ya da yalnız geniş ekranda gösterebilirsiniz.",
+            "all": "Hepsi",
+            "mobile": "Telefon",
+            "desktop": "Geniş ekran"
+          }
+        },
+        "source": {
+          "contact": "Bilgiler Ayarlar › Mağaza bilgilerinden gelir.",
+          "social": "Hesaplar Ayarlar › Mağaza bilgilerinden, görünüş alt bilginin sosyal medya ayarından gelir.",
+          "payments": "Logolar alt bilgi ayarlarındaki \"Ödeme logoları\" seçiminden gelir.",
+          "trust": "Maddeler tasarımın ortak güvence listesinden gelir (güvence şeridi bölümünde düzenlenir)."
+        },
+        "leave": {
+          "title": "Satır düzeni kaldırılsın mı?",
+          "description": "Başka bir biçime geçince satırlar ve bloklar kaldırılır. Geri al ile ya da sürüm geçmişinden geri getirebilirsiniz.",
+          "confirm": "Biçimi değiştir"
+        }
+      }
     },
     "maintenance": {
       "status": {
