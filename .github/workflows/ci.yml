@@ -240,6 +240,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Chromium for Playwright
         run: pnpm --filter @qticaret/panel exec playwright install --with-deps chromium
+      # Product videos (adr/0069): the backend checks ffmpeg once at start (uploads stay
+      # closed without it) and product-video.e2e.ts makes its clip with it. Ubuntu 24.04's
+      # package is 6.1 (the backend wants 7 and only warns; docs/08)
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Database and demo shop
         run: |
           pnpm --filter @qticaret/backend medusa db:migrate
