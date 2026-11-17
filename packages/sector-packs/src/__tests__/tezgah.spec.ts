@@ -29,7 +29,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       name: "Tezgâh",
       tone: "light",
       demo: null,
-      preview: null,
+      preview: "preview.webp",
     })
     expect(tezgah.description.length).toBeLessThanOrEqual(400)
     expect(tezgah.images.map((image) => image.path)).toEqual(
@@ -265,6 +265,12 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       ["tezgah", "Antrasit ve turuncu"],
     ])
     expect(read("katalog")).toMatchObject({ family: null, swatch: null })
+    // Each colour its own thumbnail (`pnpm preset:previews`)
+    expect(CODES.map((code) => read(code).preview)).toEqual([
+      "preview.webp",
+      "preview.webp",
+      "preview.webp",
+    ])
   })
 
   it("raised the cutlery pack's version with them (tezgah's seventh)", () => {

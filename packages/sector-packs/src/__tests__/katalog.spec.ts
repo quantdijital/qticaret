@@ -15,6 +15,7 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
       menus: null,
       demo: null,
       images: [],
+      preview: "preview.webp",
     })
     // The owner's rule: Grafit's own grounds and signal, no accent of its own
     expect(katalog?.theme_settings).toMatchObject({

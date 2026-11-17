@@ -32,6 +32,7 @@
     "audit:deps": "bash scripts/dependency-report.sh",
     "verify:changed": "node scripts/verify-changed.mjs",
     "lock:presets": "pnpm --filter storefront lock:presets",
+    "preset:previews": "pnpm --filter storefront preset:previews",
     "style:capture": "pnpm --filter storefront style:capture",
     "style:diff": "pnpm --filter storefront style:diff"
   },

@@ -146,10 +146,12 @@ Sahip iki ADR'ı birlikte onayladı ("önerilerle ilerle"). Taslaktaki açık so
 | 2.3 | `applyPresetWorkflow`: gezici, tutamaç ve adres çözümü, görsellerin medyaya alınması, taslağa yazma, defter türleri (migration), uç ve betik | M | 2.1 ve 2.2'den sonra |
 | 2.4 | Demo içerik: `demo.json`, işaretleme, kaldırmanın genişlemesi; bugünkü elle yüklemenin taşınması | M | 2.3'ten sonra |
 | 2.5 | Bölüm biçimleri: `variant` alanı (backend, tipler, görünüm modeli), `hero` / `products` / `categories` çizimleri, düzenleyici formu | M-L | 2.1 ile paralel; çizimler sahip onayıyla |
-| 2.6 | Panelde görünüm galerisi: seç, uygula, önizle, atlananlar özeti | M | 2.3'ten sonra |
+| 2.6 | Panelde görünüm galerisi: seç, uygula, önizle, atlananlar özeti | M | 2.3'ten sonra; **adr/0064'e taşındı** (aşağıda not) |
 | 2.7 | Üst panel: sihirbaz adımı, `tenant.preset`, `preset` kurulum adımı | S | 2.3'ten sonra |
 
 Her iş kendi testleriyle gelir: HTTP (uygulama iki kez aynı taslak; çözülemeyen tutamaç; canlı mağazada demo reddi; yayında menülerin değişmesi ve telafisi; önizlemede taslak tema ve menü), birim (gezici, şema reddi, her görünümün doğrulanması), panel ve e2e (galeriden yayına).
+
+**Not (2026-11-17): iş 2.6 adr/0064'e taşındı.** Görünüm galerisi kayıtlı görünümlerle aynı sayfada yapılır (panel "Görünümler", `/storefront/looks`; adr/0064 Ek 2026-11-17). §7'nin kartı ve "küçük resim panel üzerinden sunulur" kuralı aynen geçerlidir; küçük resimler (`preview.webp`) `pnpm preset:previews` ile üretilir, görünen fotoğrafların atfı docs/12 "Görsel kaynakları ve atıf"tadır.
 
 ## Ek 2026-11-14 (Kabul edildi, 2026-11-14): ilk görünümler ve iş 2.5
 
