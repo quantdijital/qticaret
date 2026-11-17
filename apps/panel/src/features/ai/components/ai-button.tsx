@@ -26,6 +26,8 @@ export interface AiButtonProps {
   label?: string
   /** A visible word beside the icon, a small outlined button (an advisor finding's row); `label` stays its name. */
   text?: string
+  /** The ready option the first ask uses (an advisor finding's `detailed`); left out: the task's default. */
+  option?: string | undefined
 }
 
 /**
@@ -43,6 +45,7 @@ export function AiButton({
   size = "icon-sm",
   label,
   text,
+  option: initialOption,
 }: AiButtonProps) {
   const { t } = useTranslation()
   const name = label ?? t("ai.suggest.button")
@@ -56,7 +59,7 @@ export function AiButton({
   const offered = (options ?? view?.options ?? []).filter((each) =>
     (view?.options ?? []).includes(each)
   )
-  const [option, setOption] = useState<string | undefined>(undefined)
+  const [option, setOption] = useState<string | undefined>(initialOption)
   const [open, setOpen] = useState(false)
   const suggestion = useAiSuggestion(task, entity)
   const [hintGone, setHintGone] = useState(hintClosed)

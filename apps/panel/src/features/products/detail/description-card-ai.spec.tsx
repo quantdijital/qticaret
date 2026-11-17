@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { ProductCatalog } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
+import { clearAiFills, sendAiFill } from "@/features/seo/advisor/ai-fill"
 import { ProductDescriptionCard } from "./description-card"
 
 const sdkFetch = vi.hoisted(() => vi.fn())
@@ -112,6 +113,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  clearAiFills("product", "prod_1")
 })
 
 describe("ProductDescriptionCard's AI button (adr/0071 §13, docs/22 PR 2-2)", () => {
@@ -174,6 +176,29 @@ describe("ProductDescriptionCard's AI button (adr/0071 §13, docs/22 PR 2-2)", (
       expect(netFetch).toHaveBeenCalledTimes(2)
     })
     expect(bodyOf(1)["option"]).toBe("detailed")
+  })
+
+  it("takes an advisor finding's suggestion as plain paragraphs, unsaved (P-CONT-01)", async () => {
+    // Sent before the card is drawn: kept for it, then taken
+    sendAiFill("product", "prod_1", "description", TEXT)
+    setup([task(["deepseek"])])
+    await waitFor(async () => {
+      expect(await shown()).toEqual({
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Keten gömlek yazın serin tutar." }],
+          },
+          { type: "paragraph", content: [{ type: "text", text: "İki renkte, rahat kesim." }] },
+        ],
+      })
+    })
+    expect(saveShown()).toBe(true)
+    expect(netFetch).not.toHaveBeenCalled()
+    expect(
+      sdkFetch.mock.calls.some(([, init]) => (init as { method?: string } | undefined)?.method)
+    ).toBe(false)
   })
 
   it("draws nothing for a role the task does not allow", async () => {

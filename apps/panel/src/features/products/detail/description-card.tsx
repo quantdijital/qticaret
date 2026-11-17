@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import type { JSONContent } from "@tiptap/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
@@ -8,6 +9,7 @@ import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/pro
 import type { ProductDetail } from "@/features/products/api/products"
 import { docOfDescription, docOfParagraphs } from "@/features/products/description-doc"
 import { SUGGESTED_WORDS } from "@/features/products/wizard/readiness"
+import { useAiFill } from "@/features/seo/advisor/ai-fill"
 
 /** The ready lengths the AI core writes a description in (docs/22 PR 2-1); no prompt to write. */
 const AI_OPTIONS = ["short", "detailed"] as const
@@ -46,17 +48,29 @@ export function ProductDescriptionCard({ product }: { product: ProductDetail }) 
       save={async (description_doc) => {
         await save.mutateAsync({ description_doc })
       }}
-      action={(put) => (
-        <AiButton
-          task="product_description"
-          entity={{ type: "product", id: product.id }}
-          options={AI_OPTIONS}
-          label={t("products.detail.aiDescription")}
-          onUse={(text) => {
-            put(docOfParagraphs(text))
-          }}
-        />
-      )}
+      action={(put) => <DescriptionAi productId={product.id} put={put} />}
+    />
+  )
+}
+
+/**
+ * The card's AI button, and the receiver of the one on an advisor finding
+ * (P-CONT-01, docs/22 "Aşama 3"): either way the text goes in as plain
+ * paragraphs, an unsaved change of the editor.
+ */
+function DescriptionAi({ productId, put }: { productId: string; put: (doc: JSONContent) => void }) {
+  const { t } = useTranslation()
+  const fill = (text: string) => {
+    put(docOfParagraphs(text))
+  }
+  useAiFill("product", productId, "description", fill)
+  return (
+    <AiButton
+      task="product_description"
+      entity={{ type: "product", id: productId }}
+      options={AI_OPTIONS}
+      label={t("products.detail.aiDescription")}
+      onUse={fill}
     />
   )
 }
