@@ -6,6 +6,7 @@ import { ORDER_REFUNDS_MODULE } from "../../src/modules/order-refunds"
 import type OrderRefundsModuleService from "../../src/modules/order-refunds/service"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { defined } from "../helpers/refunds"
 import {
   PAYTR_ADDRESS,
   connectPaytr,
@@ -148,7 +149,11 @@ medusaIntegrationTestRunner({
       const [closed] = await service.listOrderRefunds({ reference: body.reference })
       const { data: payments } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
-        .graph({ entity: "payment", fields: ["refunds.id"], filters: { id: entry?.payment_id } })
+        .graph({
+          entity: "payment",
+          fields: ["refunds.id"],
+          filters: { id: defined(entry, "ledger entry").payment_id },
+        })
 
       expect(failed.status).toBeGreaterThanOrEqual(400)
       expect(entry).toMatchObject({ status: "pending", error_code: "refund_incomplete" })

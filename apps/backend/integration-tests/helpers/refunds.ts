@@ -76,3 +76,11 @@ export function failLedgerCloseOnce(ledger: {
     },
   }
 }
+
+/** A value the test needs from here on: missing, the test stops with what it lacked. */
+export function defined<T>(value: T | null | undefined, what: string): T {
+  if (value === null || value === undefined) {
+    throw new Error(`test setup: no ${what}`)
+  }
+  return value
+}

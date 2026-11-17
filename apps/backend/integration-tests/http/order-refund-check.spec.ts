@@ -10,7 +10,7 @@ import { STRANDED_MS, settleOpenRefunds } from "../../src/workflows/orders/settl
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { connectPaytr } from "../helpers/paytr"
-import { paidPaytrOrder, refundOrder } from "../helpers/refunds"
+import { defined, paidPaytrOrder, refundOrder } from "../helpers/refunds"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
@@ -161,7 +161,7 @@ medusaIntegrationTestRunner({
         .graph({
           entity: "payment",
           fields: ["refunds.id", "payment_collection.refunded_amount"],
-          filters: { id: closed?.payment_id },
+          filters: { id: defined(closed, "closed ledger entry").payment_id },
         })
       const payment = data[0] as {
         refunds: unknown[]
@@ -222,7 +222,7 @@ medusaIntegrationTestRunner({
           .graph({
             entity: "payment",
             fields: ["data", "refunds.id"],
-            filters: { id: open?.payment_id },
+            filters: { id: defined(open, "open ledger entry").payment_id },
           })
         return data[0] as { data: Record<string, unknown> | null; refunds: { id: string }[] }
       }
@@ -234,7 +234,7 @@ medusaIntegrationTestRunner({
           createRefunds: (data: Record<string, unknown>) => Promise<{ id: string }>
         }
       ).createRefunds({
-        payment: open?.payment_id,
+        payment: defined(open, "open ledger entry").payment_id,
         amount: 30,
         created_by: "user_check",
         note: checkedNote(body.reference),
