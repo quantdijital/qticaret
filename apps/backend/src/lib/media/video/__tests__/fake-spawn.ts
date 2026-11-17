@@ -34,7 +34,8 @@ export function fakeSpawn(program: (command: string, args: readonly string[]) =>
       stderr: PassThrough
       kill: jest.Mock
     }
-    Object.assign(child, { pid: 40_000 + calls.length })
+    // A pid no system hands out (past Linux's and macOS's highest): renicing it touches nothing
+    Object.assign(child, { pid: 2_000_000_000 + calls.length })
     child.stdout = new PassThrough()
     child.stderr = new PassThrough()
     let exited = false

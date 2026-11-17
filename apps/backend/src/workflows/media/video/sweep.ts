@@ -63,7 +63,8 @@ export interface VideoSweep {
  * a day (its product deleted) is removed, the record first (soft deleted)
  * and then its files, as a removal from the panel; a removed video whose
  * files storage refused has them tried again; a failed clip's source goes
- * after a week. A refusal is tried again the next night.
+ * after a week, a ready clip's left-over source at once (slice 2). A
+ * refusal is tried again the next night.
  */
 export const sweepVideosStep = createStep(
   "media-video-sweep",
@@ -75,6 +76,14 @@ export const sweepVideosStep = createStep(
       if (!video.product?.id && age > DAY_MS) {
         await service.softDeleteMediaVideos([video.id])
         result.removed += 1
+        continue
+      }
+      // A ready clip's source the job could not remove (storage refused): it goes now
+      if (video.status === "ready" && video.source_file_id) {
+        if (await removeFiles(container, [video.source_file_id])) {
+          await service.forgetVideoSource(video.id)
+          result.sources_removed += 1
+        }
         continue
       }
       const idle = now - new Date(video.updated_at).getTime()

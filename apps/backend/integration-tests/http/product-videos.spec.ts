@@ -20,6 +20,7 @@ import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { nextSerial, setPlanLimits, setPlanStatus } from "../helpers/plan-limits"
 import { createStorefront } from "../helpers/storefront"
+import { holdVideoQueueLock } from "../helpers/video"
 
 jest.setTimeout(300 * 1000)
 
@@ -103,7 +104,17 @@ medusaIntegrationTestRunner({
     const flags = () =>
       getContainer().resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
 
+    // The transcoding job (slice 2) is held still: these cases check the upload and the
+    // record it leaves (`uploaded`, the source counted); product-video-transcode.spec.ts
+    // checks what the job makes of it
+    let releaseQueue: () => Promise<void> = () => Promise.resolve()
+
+    afterEach(async () => {
+      await releaseQueue()
+    })
+
     beforeEach(async () => {
+      releaseQueue = await holdVideoQueueLock(getContainer())
       await setPlanLimits(getContainer(), {})
       owner = await createAdminUser(http, getContainer())
       const [product] = await getContainer()

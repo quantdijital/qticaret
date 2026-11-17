@@ -91,5 +91,143 @@ moduleIntegrationTestRunner<MediaModuleService>({
       await service.restoreMediaVideos([again.id])
       expect(await service.listMediaVideos({ id: again.id })).toHaveLength(1)
     })
+
+    const waiting = (name: string, fields: Record<string, unknown> = {}) =>
+      service.createMediaVideos({
+        kind: "upload",
+        source_file_id: `video-kaynak-${name}.mov`,
+        source_bytes: 1000,
+        source_format: "mov",
+        stored_bytes: 1000,
+        ...fields,
+      })
+
+    it("hands the job the oldest waiting clip once, and none it already tried (adr/0069 §4)", async () => {
+      const first = await waiting("q1")
+      const second = await waiting("q2")
+      await service.createMediaVideos({
+        kind: "youtube",
+        youtube_id: "dQw4w9WgXcQ",
+        status: "ready",
+      })
+      const removed = await waiting("q3")
+      await service.softDeleteMediaVideos([removed.id])
+
+      const claimed = await service.claimNextVideo()
+      expect(claimed).toEqual({
+        id: first.id,
+        source_file_id: "video-kaynak-q1.mov",
+        source_format: "mov",
+        source_bytes: 1000,
+        attempts: 0,
+      })
+      const [row] = await service.listMediaVideos({ id: first.id })
+      expect(row?.status).toBe("processing")
+      expect(row?.heartbeat_at).not.toBeNull()
+
+      expect((await service.claimNextVideo([second.id]))?.id).toBeUndefined()
+      expect((await service.claimNextVideo())?.id).toBe(second.id)
+      expect(await service.claimNextVideo()).toBeNull()
+    })
+
+    it("writes ready only while the job holds the video, and can take it back", async () => {
+      const video = await waiting("r1")
+      await service.claimNextVideo()
+      expect(await service.beatVideo(video.id)).toBe(true)
+      const ready = {
+        width: 1280,
+        height: 720,
+        duration_ms: 12_000,
+        outputs: { mp4: { url: "https://cdn.example.com/a.mp4", bytes: 400 } },
+        output_file_ids: ["a.mp4", "a.webm"],
+        poster: { url: "https://cdn.example.com/a.jpg", width: 1280, height: 720 },
+        poster_file_ids: ["a.jpg"],
+        stored_bytes: 1600,
+      }
+      expect(await service.markVideoReady(video.id, ready)).toBe(true)
+      const [done] = await service.listMediaVideos({ id: video.id })
+      expect(done).toMatchObject({
+        status: "ready",
+        width: 1280,
+        output_file_ids: ["a.mp4", "a.webm"],
+        poster_file_ids: ["a.jpg"],
+        stored_bytes: 1600,
+        heartbeat_at: null,
+      })
+      expect(done?.processed_at).not.toBeNull()
+      // Not the job's any more: no heartbeat, no second write
+      expect(await service.beatVideo(video.id)).toBe(false)
+      expect(await service.markVideoReady(video.id, ready)).toBe(false)
+
+      // Taken back (a later step failed): processing, its outputs forgotten, the source counted
+      await service.unmarkVideoReady(video.id)
+      const [back] = await service.listMediaVideos({ id: video.id })
+      expect(back).toMatchObject({
+        status: "processing",
+        outputs: null,
+        output_file_ids: null,
+        stored_bytes: 1000,
+      })
+
+      // Ready again, then its source is gone: no longer named nor counted
+      await service.markVideoReady(video.id, ready)
+      await service.forgetVideoSource(video.id)
+      const [clean] = await service.listMediaVideos({ id: video.id })
+      expect(clean).toMatchObject({ source_file_id: null, stored_bytes: 600 })
+
+      // A video removed while it was processed is not written
+      const gone = await waiting("r2")
+      await service.claimNextVideo()
+      await service.softDeleteMediaVideos([gone.id])
+      expect(await service.beatVideo(gone.id)).toBe(false)
+      expect(await service.markVideoReady(gone.id, ready)).toBe(false)
+      expect(
+        await service.markVideoTried(gone.id, { status: "failed", attempts: 1, error_code: "x" })
+      ).toBe(false)
+    })
+
+    it("puts a silent job's clip back with a try counted, and fails it past three", async () => {
+      const video = await waiting("s1", { attempts: 1 })
+      const tired = await waiting("s2", { attempts: 2 })
+      await service.claimNextVideo()
+      await service.claimNextVideo()
+      // Still beating: left alone
+      expect(await service.requeueStaleVideos(new Date(Date.now() - 60_000), 3, "f")).toEqual([])
+
+      const later = new Date(Date.now() + 60_000)
+      const moved = await service.requeueStaleVideos(later, 3, "video.processing_failed")
+      expect(moved.sort((a, b) => a.id.localeCompare(b.id))).toEqual(
+        [
+          { id: video.id, status: "uploaded" },
+          { id: tired.id, status: "failed" },
+        ].sort((a, b) => a.id.localeCompare(b.id))
+      )
+      const rows = await service.listMediaVideos({ id: [video.id, tired.id] })
+      expect(rows.find((row) => row.id === video.id)).toMatchObject({
+        status: "uploaded",
+        attempts: 2,
+        error_code: null,
+        heartbeat_at: null,
+      })
+      expect(rows.find((row) => row.id === tired.id)).toMatchObject({
+        status: "failed",
+        attempts: 3,
+        error_code: "video.processing_failed",
+      })
+
+      // A failed try written by the job itself
+      await service.claimNextVideo()
+      expect(
+        await service.markVideoTried(video.id, {
+          status: "failed",
+          attempts: 3,
+          error_code: "video.unreadable",
+        })
+      ).toBe(true)
+      const [failed] = await service.listMediaVideos({ id: video.id })
+      expect(failed).toMatchObject({ status: "failed", error_code: "video.unreadable" })
+      // The source of a failed clip is kept (a week, for "Yeniden dene")
+      expect(failed?.source_file_id).toBe("video-kaynak-s1.mov")
+    })
   },
 })
