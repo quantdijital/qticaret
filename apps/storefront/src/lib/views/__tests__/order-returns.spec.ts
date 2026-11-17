@@ -194,6 +194,9 @@ describe("the cancel button", () => {
     )
     expect(view(o, null, [], "iptal-olmadi").notice).toBe(t("order.notice_cancel_refused"))
     expect(view(o, null, [], "bilinmeyen").notice).toBeNull()
+    // A key of the object's prototype is no notice
+    expect(view(o, null, [], "constructor").notice).toBeNull()
+    expect(view(o, null, [], "__proto__").notice).toBeNull()
   })
 })
 

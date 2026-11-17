@@ -216,7 +216,8 @@ export function orderView(
       refused: refusedOf(request, titles, t),
     })),
     shipments: extras.shipments.map((parcel) => shipmentOf(parcel, t)),
-    notice: extras.note && NOTES[extras.note] ? t(NOTES[extras.note] ?? "") : null,
+    // Own keys only: `?durum=constructor` names no notice, never the object's prototype
+    notice: extras.note && Object.hasOwn(NOTES, extras.note) ? t(NOTES[extras.note] ?? "") : null,
     progress: orderProgress(
       order,
       extras.shipments,
