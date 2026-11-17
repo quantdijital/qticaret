@@ -10,7 +10,12 @@ jest.setTimeout(120 * 1000)
 interface Assessment {
   score: number
   grade: string
-  issues: { ruleId: string; severity: string; fix?: { kind: string; action: string } }[]
+  issues: {
+    ruleId: string
+    severity: string
+    fix?: { kind: string; action: string }
+    ai?: { task: string; field: string; option?: string }
+  }[]
 }
 
 const LONG_TEXT = Array.from({ length: 170 }, (_, index) =>
@@ -94,6 +99,49 @@ medusaIntegrationTestRunner({
       )
       expect(rules(fixed.data.assessment)).not.toContain("P-DATA-04")
       expect(fixed.data.assessment.score).toBeGreaterThan(after.score)
+    })
+
+    it("names the AI task a finding can be fixed with, and closes it once the text is saved", async () => {
+      const { data } = await post<{ product: { id: string } }>(
+        "/admin/products",
+        product("Keten Gömlek")
+      )
+      const id = data.product.id
+      await http.put(
+        `/admin/seo/product/${id}`,
+        { seo_title: "Gömlek" },
+        { headers: admin.headers }
+      )
+      const before = await assessment("product", id)
+      const find = (found: Assessment, rule: string) =>
+        found.issues.find(({ ruleId }) => ruleId === rule)
+      expect(find(before, "P-TITLE-01")?.ai).toEqual({ task: "seo_title", field: "seo_title" })
+      expect(find(before, "P-CONT-01")?.ai).toEqual({
+        task: "product_description",
+        field: "description",
+        option: "detailed",
+      })
+      // A finding no task's gate answers has none
+      expect(find(before, "P-IMG-01")?.ai).toBeUndefined()
+
+      // What "Kullan" put in the form, saved as the person's own change (the gate passes it)
+      await http.put(
+        `/admin/seo/product/${id}`,
+        { seo_title: "Keten Gömlek Yazlık Model ve Rahat Kesim | Örnek Mağaza" },
+        { headers: admin.headers }
+      )
+      expect(rules(await assessment("product", id))).not.toContain("P-TITLE-01")
+
+      // A brand is no record the AI core reads: its findings carry no task
+      const brand = await post<{ brand: { id: string } }>("/admin/brands", { name: "Örnek" })
+      await http.put(
+        `/admin/seo/brand/${brand.data.brand.id}`,
+        { seo_title: "Örnek" },
+        { headers: admin.headers }
+      )
+      const found = await assessment("brand", brand.data.brand.id)
+      expect(rules(found)).toContain("B-TITLE-01")
+      expect(found.issues.every((issue) => issue.ai === undefined)).toBe(true)
     })
 
     it("assesses a saved page on its own and sums the shop up", async () => {
