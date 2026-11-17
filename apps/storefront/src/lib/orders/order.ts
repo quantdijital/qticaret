@@ -99,6 +99,26 @@ export function providersOf(order: StoreOrder): string[] {
   )
 }
 
+/**
+ * Whether the order is a retail order, for its purchase event's amounts
+ * (ADR-0068 §7, slice 5 review L2): asked of the order, so a page opened
+ * signed out knows a wholesale order too. Only the backend's plain "not
+ * wholesale" is a yes: a wholesale order, or no answer, a network
+ * failure included, is a no (the safe way: the event goes without
+ * amounts, and the confirmation page still shows).
+ */
+export async function orderSoldAtRetail(id: string, token: string | null): Promise<boolean> {
+  try {
+    const { wholesale } = await storeCall<{ wholesale?: unknown }>(
+      `/store/orders/${encodeURIComponent(id)}/wholesale`,
+      token ? { headers: { "x-order-token": token } } : {}
+    )
+    return wholesale === false
+  } catch {
+    return false
+  }
+}
+
 export interface ReturnRequestRow {
   kind: string
   status: string

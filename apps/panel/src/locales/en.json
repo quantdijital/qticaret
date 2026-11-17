@@ -5965,6 +5965,9 @@
       "why": "Why it matters, how to fix it",
       "goToField": "Go to the field",
       "fixed": "Fix applied.",
+      "aiFix": "Fix with AI",
+      "aiFixLabel": "Fix with AI: {{finding}}",
+      "aiFilled": "The suggestion is in the field; it takes effect once saved.",
       "grades": {
         "excellent": "Excellent",
         "good": "Good",

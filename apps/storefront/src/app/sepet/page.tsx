@@ -5,6 +5,7 @@ import { themeActions } from "@/lib/theme-actions"
 import { ADDON_ERROR_KEYS } from "@/lib/addons/errors"
 import { viewCartEvents } from "@/lib/analytics/cart-payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
+import { visitorAmounts } from "@/lib/analytics/tags"
 import { addonsOfProducts } from "@/lib/cart/addons"
 import { codesOf, currentCart } from "@/lib/cart/cart"
 import { shopperGiftLines } from "@/lib/cart/gift"
@@ -86,7 +87,7 @@ export default async function CartPage({
           : null
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
-  const [gifts, addons, extras, paths, pictures] = await Promise.all([
+  const [gifts, addons, extras, paths, pictures, amounts] = await Promise.all([
     shopperGiftLines(cart?.id),
     // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
     locked
@@ -98,6 +99,7 @@ export default async function CartPage({
     productPathsOf(cart?.items ?? []),
     // Each line's picture in its small versions (the same answer as the paths)
     linePicturesOf(cart?.items ?? []),
+    visitorAmounts(),
   ])
   // A gift card line takes no add-ons (its product page offers none)
   const giftLines = new Set(gifts.map((gift) => gift.line_id))
@@ -118,7 +120,13 @@ export default async function CartPage({
   return (
     <>
       {/* Once per visit to the cart, not again as its lines change (the frame tells those) */}
-      {cart && <TrackEvents events={viewCartEvents(cart)} sendOn={`view_cart:${cart.id}`} />}
+      {cart && (
+        <TrackEvents
+          events={viewCartEvents(cart)}
+          sendOn={`view_cart:${cart.id}`}
+          visitorAmounts={amounts}
+        />
+      )}
       <theme.CartPage
         t={t}
         actions={themeActions}

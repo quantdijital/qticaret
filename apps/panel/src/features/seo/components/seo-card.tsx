@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { useAiFill } from "@/features/seo/advisor/ai-fill"
 import { ROBOTS_OVERRIDES, seoMetaQuery, useSaveSeoMeta } from "@/features/seo/api/seo-meta"
 import type { SeoEntityType, SeoMeta } from "@/features/seo/api/seo-meta"
 import { sectionQuery } from "@/features/settings/api/sections"
@@ -103,6 +104,13 @@ function SeoForm({
   const use = (name: "seo_title" | "seo_description", text: string) => {
     form.setValue(name, text, { shouldDirty: true })
   }
+  // The same from the advisor's "Yapay zekâyla düzelt" on a finding (docs/22 "Aşama 3")
+  useAiFill(type, id, "seo_title", (text) => {
+    use("seo_title", text.slice(0, SEO_MAX.title))
+  })
+  useAiFill(type, id, "seo_description", (text) => {
+    use("seo_description", text.slice(0, SEO_MAX.description))
+  })
 
   const submit = form.handleSubmit((next) => {
     const { dirtyFields } = form.formState

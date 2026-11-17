@@ -68,6 +68,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 | Rakip analizi ve farklılaşma | docs/15-rakip-analizi-ve-farklilasma.md |
 | Platform eksik analizi (Shopify, ikas, TR; gerekli/faydalı/gereksiz) | docs/20-platform-eksik-analizi.md |
 | Vitrin performans ölçümü (Lighthouse, CWV, düzeltme listesi) | docs/21-vitrin-performans-olcumu.md |
+| Yapay zekâ çekirdeği uygulama planı (servisler, işler, PR sırası) | docs/22-yapay-zeka-uygulama-plani.md |
 | Entegrasyonlar | docs/entegrasyonlar/*.md |
 
 ## Ortak çalışma (iki geliştirici: Deniz, Oğuzhan)

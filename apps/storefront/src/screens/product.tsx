@@ -5,6 +5,7 @@ import { themeActions } from "@/lib/theme-actions"
 import { t } from "@/lib/i18n"
 import { productEvents } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
+import { visitorAmounts } from "@/lib/analytics/tags"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
   legalIdentity,
@@ -84,9 +85,10 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   ])
   // The shop's WhatsApp number comes with its contact details (adr/0048); the return
   // policy's page for the shipping card, the frame asked for it already (kept a minute)
-  const [{ whatsapp }, returnPolicy] = await Promise.all([
+  const [{ whatsapp }, returnPolicy, withAmounts] = await Promise.all([
     legalIdentity(),
     legalDocument("return_policy"),
+    visitorAmounts(),
   ])
   const here = `${url.pathname}${url.search}`
   // The badges and colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
@@ -156,7 +158,11 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   const measured = productEvents(product, base.selectedVariantId, displays)
   return (
     <>
-      <TrackEvents events={measured.events} context={measured.context} />
+      <TrackEvents
+        events={measured.events}
+        context={measured.context}
+        visitorAmounts={withAmounts}
+      />
       <JsonLd blocks={page.seo?.jsonLd ?? []} />
       {/* Open Graph's product type and price (React puts these in <head>) */}
       <meta property="og:type" content="product" />

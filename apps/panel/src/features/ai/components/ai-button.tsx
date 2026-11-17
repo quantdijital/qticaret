@@ -24,6 +24,8 @@ export interface AiButtonProps {
   size?: "icon-sm" | "icon"
   /** The button's name when a form has more than one ("Başlık için…"); left out: the shared one. */
   label?: string
+  /** A visible word beside the icon, a small outlined button (an advisor finding's row); `label` stays its name. */
+  text?: string
 }
 
 /**
@@ -33,7 +35,15 @@ export interface AiButtonProps {
  * the task does not allow draws nothing. Nothing is saved: "Kullan" hands
  * the text to `onUse`.
  */
-export function AiButton({ task, entity, onUse, options, size = "icon-sm", label }: AiButtonProps) {
+export function AiButton({
+  task,
+  entity,
+  onUse,
+  options,
+  size = "icon-sm",
+  label,
+  text,
+}: AiButtonProps) {
   const { t } = useTranslation()
   const name = label ?? t("ai.suggest.button")
   const services = useQuery(aiServicesQuery())
@@ -56,9 +66,22 @@ export function AiButton({ task, entity, onUse, options, size = "icon-sm", label
   }
   const trigger = (
     <PopoverTrigger asChild>
-      <Button type="button" variant="ghost" size={size} aria-label={name} title={name}>
-        <Sparkles />
-      </Button>
+      {text ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-7 self-start text-xs"
+          aria-label={name}
+        >
+          <Sparkles />
+          {text}
+        </Button>
+      ) : (
+        <Button type="button" variant="ghost" size={size} aria-label={name} title={name}>
+          <Sparkles />
+        </Button>
+      )}
     </PopoverTrigger>
   )
   // No service: the same button in the same place says how to get one; closed for good, it goes
