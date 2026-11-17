@@ -9,6 +9,11 @@ import { addonsOfProducts } from "@/lib/cart/addons"
 import { codesOf, currentCart } from "@/lib/cart/cart"
 import { shopperGiftLines } from "@/lib/cart/gift"
 import { OUT_OF_STOCK, cartShortLines, outOfStockText } from "@/lib/cart/stock"
+import {
+  INSUFFICIENT_STOCK,
+  STOCK_COUNT_PARAM,
+  insufficientStockText,
+} from "@/lib/cart/stock-refusal"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { storefrontSettings } from "@/lib/store-api/requests"
@@ -73,9 +78,12 @@ export default async function CartPage({
       ? cart
         ? outOfStockText(await cartShortLines(cart.id), t)
         : null
-      : asked && CART_ERRORS.has(asked)
-        ? t(asked)
-        : null
+      : // More units asked than are for sale: the count only as a checked whole number
+        asked === INSUFFICIENT_STOCK
+        ? insufficientStockText(query[STOCK_COUNT_PARAM], t)
+        : asked && CART_ERRORS.has(asked)
+          ? t(asked)
+          : null
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
   const [gifts, addons, extras, paths, pictures] = await Promise.all([

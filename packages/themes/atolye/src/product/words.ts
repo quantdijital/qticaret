@@ -11,6 +11,7 @@ const CART_ERRORS = [
   "cart.add_failed",
   "cart.variant_unavailable",
   "cart.quantity_invalid",
+  "cart.insufficient_stock",
   "errors.too_many_requests",
   "cart.payment_link_locked",
   "gift_card.recipient_email_invalid",

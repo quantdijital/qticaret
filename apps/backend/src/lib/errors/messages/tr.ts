@@ -103,6 +103,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bulk_edit.stock_out_of_range": "Yeni stok üst sınırı aşar.",
   "bulk_edit.stock_untracked": "Bu ürünün stoğu takip edilmiyor.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
+  "cart.insufficient_stock": "Bu üründen stokta istediğiniz kadar yok.",
   "cart.out_of_stock":
     "Bu ürün az önce tükendi: {{name}}. Sepetinizden çıkarın ya da adedini azaltın.",
   "cart.shipping_changed":

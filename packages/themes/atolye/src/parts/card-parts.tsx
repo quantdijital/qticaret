@@ -6,6 +6,7 @@ import { Stars } from "./Stars"
 const QUICK_ADD_ERRORS = [
   "cart.add_failed",
   "cart.quantity_invalid",
+  "cart.insufficient_stock",
   "cart.payment_link_locked",
   "errors.too_many_requests",
 ] as const

@@ -7,6 +7,7 @@ import {
   toHttpError,
 } from "../../lib/errors"
 import { currentRequestId, logger } from "../../lib/logging"
+import { cartLineAskOf, insufficientStockError } from "./cart-line-stock"
 import { forDashboard } from "./dashboard-messages"
 import { INTERNAL_ERROR_BODY, isAdminPath, sanitizeErrorResponse } from "./error-response"
 import type { ErrorBody } from "./error-response"
@@ -18,6 +19,9 @@ import { applySecurityHeaders } from "./security-headers"
 /**
  * Replaces Medusa's error handler (`defineMiddlewares({ errorHandler })`):
  * - the platform's own errors map through `toHttpError` (lib/errors);
+ * - Medusa's "more units than are for sale" on a store line route becomes
+ *   `cart.insufficient_stock` (`cart-line-stock`), the only answer that
+ *   waits for a read;
  * - body-parser's errors and stray ZodErrors get fixed bodies;
  * - everything else takes Medusa's status and body, then `sanitizeErrorResponse`;
  * - every body carries `request_id`, and the error is logged here, redacted,
@@ -175,6 +179,49 @@ export function platformErrorHandler(
     res.destroy()
     return
   }
+  // A line asked for more units than are for sale: said so, with the count when it is small
+  const lineAsk = cartLineAskOf(error, req)
+  if (lineAsk) {
+    void insufficientStockError(req.scope, lineAsk)
+      .then(
+        (refusal) => {
+          answerLater(refusal, req, res, requestId)
+        },
+        () => {
+          answerLater(error, req, res, requestId)
+        }
+      )
+      // Nothing may escape as an unhandled rejection: the answer is cut off instead
+      .catch(() => {
+        cutOff(res)
+      })
+    return
+  }
+  answer(error, req, res, requestId)
+}
+
+/** The answer after a wait: unless something else answered meanwhile (a timeout, a closed socket). */
+function answerLater(
+  error: unknown,
+  req: MedusaRequest,
+  res: MedusaResponse,
+  requestId: string
+): void {
+  if (res.headersSent) {
+    return
+  }
+  answer(error, req, res, requestId)
+}
+
+function cutOff(res: MedusaResponse): void {
+  try {
+    res.destroy()
+  } catch {
+    // The socket is gone already
+  }
+}
+
+function answer(error: unknown, req: MedusaRequest, res: MedusaResponse, requestId: string): void {
   try {
     const resolved = resolveError(error, req.path)
     logError(error, resolved, req, requestId)
