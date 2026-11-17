@@ -29,14 +29,31 @@ export const PRODUCT_FACT_FIELDS = [
   "attribute_values.definition.*",
 ] as const
 
+/** What may leave the shop of a product, before the personal data filter. */
+export interface ProductFacts {
+  name: string
+  subtitle: string | null
+  brand: string | null
+  category: string | null
+  /** Public attributes as the template names them: `{ label: "Malzeme", value: "Keten" }`. */
+  attributes: { label: string; value: string }[]
+  /** The description now, as plain text. */
+  description: string | null
+}
+
 /**
  * What may leave the shop of a product (adr/0071 §10), with
- * `productFacts`'s filter (workflows/content/drafts.ts): its own published
- * fields, public attributes only and the description as plain text. No
- * price, stock, order, customer or staff field is read at all; a category
- * the shop keeps to itself or has closed is left out too.
+ * adr/0005's filter (its draft routes read products through here too, until
+ * docs/22 PR 2-2 removes them): its own published fields, public
+ * attributes only and the description as plain text. No price, stock,
+ * order, customer or staff field is read at all; a category the shop
+ * keeps to itself or has closed is left out too. Null when there is no
+ * such product.
  */
-export async function productFacts(container: FactsContainer, id: string): Promise<RecordFacts> {
+export async function readProductFacts(
+  container: FactsContainer,
+  id: string
+): Promise<ProductFacts | null> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product",
     fields: [...PRODUCT_FACT_FIELDS],
@@ -44,7 +61,7 @@ export async function productFacts(container: FactsContainer, id: string): Promi
   })
   const product = data[0] as ProductRow | undefined
   if (!product) {
-    throw aiValidationError("ai.unknown_entity")
+    return null
   }
   return {
     name: product.title,
@@ -59,4 +76,13 @@ export async function productFacts(container: FactsContainer, id: string): Promi
     }),
     description: product.description ? plainText(product.description) : null,
   }
+}
+
+/** A product's facts for a suggestion; `ai.unknown_entity` when there is none. */
+export async function productFacts(container: FactsContainer, id: string): Promise<RecordFacts> {
+  const facts = await readProductFacts(container, id)
+  if (!facts) {
+    throw aiValidationError("ai.unknown_entity")
+  }
+  return { ...facts }
 }

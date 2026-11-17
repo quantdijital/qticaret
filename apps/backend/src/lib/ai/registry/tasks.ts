@@ -1,5 +1,6 @@
 import { SERP_TEXT_LENGTH } from "../../seo/pixel-width"
 import type { StaffRole } from "../../staff/permissions"
+import type { AiEntityType } from "../facts"
 import type { AiCapability } from "./capabilities"
 
 /**
@@ -11,7 +12,12 @@ import type { AiCapability } from "./capabilities"
 export type AiTaskMode = "sync" | "job"
 
 /** What the output is checked as before it is offered (lib/ai/gate.ts). */
-export const AI_GATES = ["seo_title", "seo_description", "plain_text"] as const
+export const AI_GATES = [
+  "seo_title",
+  "seo_description",
+  "product_description",
+  "plain_text",
+] as const
 export type AiGate = (typeof AI_GATES)[number]
 
 export const MAX_TASK_OPTIONS = 2
@@ -30,6 +36,8 @@ export interface AiTask {
   gate: AiGate
   /** The longest suggestion, in characters; a longer one is refused (`length`). */
   maxLength: number
+  /** The kinds of record it is asked for; every kind when left out. */
+  entities?: readonly AiEntityType[]
 }
 
 /** Tests only: the core is exercised with it until the real tasks come (Aşama 1). */
@@ -72,7 +80,33 @@ export const SEO_DESCRIPTION_TASK: AiTask = {
   maxLength: SERP_TEXT_LENGTH.description.max,
 }
 
-const TASKS: readonly AiTask[] = [SEO_TITLE_TASK, SEO_DESCRIPTION_TASK]
+/** The longest product description suggestion, in characters (the "detailed" option with room). */
+export const PRODUCT_DESCRIPTION_MAX_LENGTH = 5_000
+
+/**
+ * A product's description (Aşama 2, docs/22 PR 2-1; adr/0005's draft,
+ * moved to the core). Plain text paragraphs, never HTML (adr/0071 §9):
+ * the description document (adr/0055) takes them as plain paragraphs.
+ * The gate is the advisor's word count (`MIN_PRODUCT_WORDS`) and what no
+ * suggestion may carry. Two ready-made lengths, nothing typed.
+ */
+export const PRODUCT_DESCRIPTION_TASK: AiTask = {
+  id: "product_description",
+  capability: "text",
+  mode: "sync",
+  options: ["short", "detailed"],
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "product_description",
+  maxLength: PRODUCT_DESCRIPTION_MAX_LENGTH,
+  entities: ["product"],
+}
+
+const TASKS: readonly AiTask[] = [SEO_TITLE_TASK, SEO_DESCRIPTION_TASK, PRODUCT_DESCRIPTION_TASK]
+
+/** Whether a task is asked for this kind of record. */
+export const isTaskEntity = (task: AiTask, type: AiEntityType): boolean =>
+  task.entities === undefined || task.entities.includes(type)
 
 /** The tasks of this instance, in registry order. */
 export function aiTasks(nodeEnv: string | undefined = process.env["NODE_ENV"]): readonly AiTask[] {

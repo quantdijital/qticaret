@@ -1,8 +1,9 @@
 /**
- * What never reaches a draft provider (adr/0005; F10.13 KK8): an
- * address, a phone number, an IBAN, an identity number or a card number
- * a shop may have typed into a product's text. Product data only goes,
- * and what reads as a person's is taken out first.
+ * What never reaches an AI service (adr/0005; F10.13 KK8; adr/0071 §10):
+ * an address, a phone number, an IBAN, an identity number or a card
+ * number a shop may have typed into a product's text. Product data only
+ * goes, and what reads as a person's is taken out first. Moved here from
+ * `lib/content-drafts` (docs/22 PR 2-1); the patterns are unchanged.
  */
 
 const PATTERNS: readonly RegExp[] = [

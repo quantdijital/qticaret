@@ -1,4 +1,4 @@
-import { redactPersonalData } from "../content-drafts/redact"
+import { redactPersonalData } from "./redact"
 
 /**
  * What a service is sent (adr/0071 §9): a fixed instruction as the system
@@ -42,9 +42,12 @@ export const MAX_DATA_CHARS = 30_000
 const clip = (text: string, max: number) =>
   Array.from(text).length > max ? `${Array.from(text).slice(0, max).join("")}…` : text
 
-// A generous first cut bounds the filter's work; then filtered whole and clipped,
-// so a number cut at the final edge cannot slip half through
-function clean(text: string, max: number): string {
+/**
+ * A value as it may leave the shop. A generous first cut bounds the
+ * filter's work; then filtered whole and clipped, so a number cut at the
+ * final edge cannot slip half through. adr/0005's draft facts use it too.
+ */
+export function cleanText(text: string, max: number): string {
   const read = text.trim().slice(0, Math.min(max * 10, MAX_FILTERED_CHARS))
   return clip(redactPersonalData(read), max)
 }
@@ -61,12 +64,12 @@ export function promptData(
     const max = maxLengths[name] ?? MAX_VALUE_LENGTH
     if (typeof value === "string") {
       if (value.trim() !== "") {
-        data[name] = clean(value, max)
+        data[name] = cleanText(value, max)
       }
     } else if (value !== null && value !== undefined) {
       data[name] = value.slice(0, MAX_LIST_ITEMS).map((each) => ({
-        label: clean(each.label, MAX_LABEL_LENGTH),
-        value: clean(each.value, max),
+        label: cleanText(each.label, MAX_LABEL_LENGTH),
+        value: cleanText(each.value, max),
       }))
     }
   }
