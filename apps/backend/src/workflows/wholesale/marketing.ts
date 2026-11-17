@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { chunksOf } from "../../lib/catalog"
 import { normalizeEmail } from "../../lib/wholesale"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -71,6 +71,72 @@ export async function activeWholesalers(container: Container): Promise<Wholesale
     emails: new Set(rows.flatMap((row) => (row.email ? [normalizeEmail(row.email)] : []))),
     phones: rows.flatMap((row) => (row.phone ? [row.phone] : [])),
   }
+}
+
+/** Rows read at a time. */
+const PAGE = 1_000
+
+interface PhoneRow {
+  phone?: string | null
+  addresses?: { phone?: string | null }[] | null
+  shipping_address?: { phone?: string | null } | null
+  billing_address?: { phone?: string | null } | null
+}
+
+const phonesOf = (row: PhoneRow) =>
+  [
+    row.phone,
+    ...(row.addresses ?? []).map((address) => address.phone),
+    row.shipping_address?.phone,
+    row.billing_address?.phone,
+  ].flatMap((phone) => (phone?.trim() ? [phone] : []))
+
+/**
+ * Every phone a wholesaler is known by (ADR-0068 slice 5 review L4): their
+ * record's, their address book's and their orders' (shipping and billing),
+ * the orders placed signed in and those placed signed out under their
+ * address. A text campaign leaves these out wherever they turn up: a guest
+ * order's consent, an imported list's. As written: the caller hashes them
+ * for the channel (`recipientOf`, E.164). Read for a text campaign only: a
+ * cart reminder and an e-mail campaign go by record and address.
+ */
+export async function wholesalersPhones(
+  container: Container,
+  wholesalers: Wholesalers
+): Promise<string[]> {
+  const ids = [...wholesalers.customerIds]
+  const emails = [...wholesalers.emails]
+  if (ids.length === 0) {
+    return []
+  }
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const readAll = async (entity: string, fields: string[], filters: Record<string, unknown>) => {
+    const rows: PhoneRow[] = []
+    for (let skip = 0; ; skip += PAGE) {
+      const { data } = await query.graph({
+        entity,
+        fields,
+        filters,
+        pagination: { skip, take: PAGE, order: { id: "ASC" } },
+      })
+      rows.push(...(data as PhoneRow[]))
+      if (data.length < PAGE) {
+        return rows
+      }
+    }
+  }
+  const orderFields = ["id", "shipping_address.phone", "billing_address.phone"]
+  const rows: PhoneRow[] = []
+  for (const chunk of chunksOf(ids)) {
+    rows.push(
+      ...(await readAll("customer", ["id", "phone", "addresses.phone"], { id: chunk })),
+      ...(await readAll("order", orderFields, { customer_id: chunk }))
+    )
+  }
+  for (const chunk of chunksOf(emails)) {
+    rows.push(...(await readAll("order", orderFields, { email: chunk })))
+  }
+  return [...new Set(rows.flatMap(phonesOf))]
 }
 
 /** Whether a cart is a wholesaler's: by its customer, or by its address (one signed out). */
