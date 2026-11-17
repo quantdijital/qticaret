@@ -4988,6 +4988,7 @@
       },
       "block": {
         "no_email": "Sepette e-posta adresi yok; hatırlatma gönderilemez.",
+        "wholesale": "Bu sepet bir toptancının. Hatırlatma perakende fiyat gösterir; toptancılara gönderilmez.",
         "reminded": "Bu sepet için hatırlatma zaten gönderildi; her sepete bir kez gider.",
         "no_consent": "Müşterinin ticari e-posta izni yok. Hatırlatma ticari ileti sayılır; yalnızca izin verenlere gider (İYS).",
         "suppressed": "Bu adrese e-posta gönderilmiyor (engelleme listesinde).",

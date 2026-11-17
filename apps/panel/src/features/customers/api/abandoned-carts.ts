@@ -30,7 +30,13 @@ export interface AbandonedCart {
 }
 
 export type EmailReminderBlock =
-  "no_email" | "reminded" | "no_consent" | "suppressed" | "reminded_lately" | "no_storefront"
+  | "no_email"
+  | "wholesale"
+  | "reminded"
+  | "no_consent"
+  | "suppressed"
+  | "reminded_lately"
+  | "no_storefront"
 
 export interface AbandonedCartDetail extends AbandonedCart {
   phone: string | null

@@ -444,6 +444,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "customers.note_too_long": "Not en çok 2000 karakter olabilir.",
   "abandoned_carts.unknown": "Sepet bulunamadı ya da siparişe dönüştü.",
   "abandoned_carts.no_email": "Bu sepette e-posta adresi yok.",
+  "abandoned_carts.wholesale":
+    "Bu sepet bir toptancının; toptancılara sepet hatırlatması gönderilmez.",
   "abandoned_carts.no_consent":
     "Müşterinin ticari e-posta izni yok; hatırlatma yalnızca izin verenlere gider.",
   "abandoned_carts.suppressed": "Bu adrese e-posta gönderilmiyor (engelleme listesinde).",

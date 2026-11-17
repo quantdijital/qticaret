@@ -7,10 +7,18 @@ export const ABANDONED_WINDOW_DAYS = 30
 
 /** Why "E-posta ile hatırlat" is off for a cart, as the panel says it. */
 export type EmailReminderBlock =
-  "no_email" | "reminded" | "no_consent" | "suppressed" | "reminded_lately" | "no_storefront"
+  | "no_email"
+  | "wholesale"
+  | "reminded"
+  | "no_consent"
+  | "suppressed"
+  | "reminded_lately"
+  | "no_storefront"
 
 export interface EmailReminderFacts {
   email: string | null
+  /** The shopper is an active wholesaler: no marketing (ADR-0068 decision 16). */
+  wholesale: boolean
   consent: ConsentStatus | null
   suppressed: boolean
   /** The cart has had its one reminder (sent, or used up without consent). */
@@ -25,11 +33,15 @@ export interface EmailReminderFacts {
  * Whether staff may send the cart's reminder by e-mail, and if not why.
  * A cart reminder is a commercial message (İYS): only to an address that
  * consented and is not suppressed; once a cart, and once a week an
- * address, as the job sends it.
+ * address, as the job sends it; never to a wholesaler, whose cart it
+ * would show at retail.
  */
 export function emailReminderBlock(facts: EmailReminderFacts): EmailReminderBlock | null {
   if (!facts.email) {
     return "no_email"
+  }
+  if (facts.wholesale) {
+    return "wholesale"
   }
   if (facts.reminded) {
     return "reminded"
