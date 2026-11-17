@@ -1,49 +1,27 @@
 import { Link } from "@tanstack/react-router"
-import { Sparkles, X } from "lucide-react"
-import { useState } from "react"
+import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { useCan } from "@/features/auth/api/staff"
+import { closeHint } from "@/features/ai/hint-state"
 
-/** Where the browser remembers the tip was closed: once closed, it stays closed on every field. */
-export const AI_HINT_KEY = "qt.panel.ai.hint.dismissed"
-
-function readClosed(): boolean {
-  try {
-    return window.localStorage.getItem(AI_HINT_KEY) === "1"
-  } catch {
-    return false
-  }
+export interface AiConnectHintProps {
+  /** Called once the tip is closed for good (remembered in the browser). */
+  onClose: () => void
 }
 
 /**
- * In place of the AI button when no service can do the task (adr/0071
- * §13): one quiet line, closable, remembered in the browser. The owner
- * gets "Bağla" to Settings › Yapay zekâ; anyone else hears that the
- * store owner can connect one.
+ * What the AI button says when no service can do the task (adr/0071
+ * §13): one quiet sentence, closable for good. The owner gets "Bağla" to
+ * Settings › Yapay zekâ; anyone else hears that the store owner can
+ * connect one.
  */
-export function AiConnectHint() {
+export function AiConnectHint({ onClose }: AiConnectHintProps) {
   const { t } = useTranslation()
   const mayConnect = useCan("accounts")
-  const [closed, setClosed] = useState(readClosed)
-  if (closed) {
-    return null
-  }
-  const close = () => {
-    try {
-      window.localStorage.setItem(AI_HINT_KEY, "1")
-    } catch {
-      // A browser that keeps nothing: closed for this visit only
-    }
-    setClosed(true)
-  }
   return (
-    <p
-      className="flex items-start gap-1.5 text-xs text-muted-foreground"
-      data-slot="ai-connect-hint"
-    >
-      <Sparkles aria-hidden className="mt-0.5 size-3.5 shrink-0" />
-      <span className="min-w-0 flex-1">
+    <div className="flex items-start gap-2 text-sm" data-slot="ai-connect-hint">
+      <p className="min-w-0 flex-1">
         {mayConnect ? t("ai.hint.text") : t("ai.hint.ownerOnly")}
         {mayConnect ? (
           <>
@@ -56,17 +34,19 @@ export function AiConnectHint() {
             </Link>
           </>
         ) : null}
-      </span>
+      </p>
       <Button
         type="button"
         variant="ghost"
         size="icon-xs"
         aria-label={t("ai.hint.close")}
-        onClick={close}
-        className="-my-1"
+        onClick={() => {
+          closeHint()
+          onClose()
+        }}
       >
         <X />
       </Button>
-    </p>
+    </div>
   )
 }

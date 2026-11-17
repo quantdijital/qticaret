@@ -9,6 +9,7 @@ import type { AiEntity } from "@/features/ai/api/suggestions"
 import { AiConnectHint } from "@/features/ai/components/ai-connect-hint"
 import { AiServicePicker } from "@/features/ai/components/ai-service-picker"
 import { AiSuggestionBox } from "@/features/ai/components/ai-suggestion-box"
+import { hintClosed } from "@/features/ai/hint-state"
 import { useAiSuggestion } from "@/features/ai/use-ai-suggestion"
 
 export interface AiButtonProps {
@@ -24,7 +25,7 @@ export interface AiButtonProps {
 /**
  * The AI button beside a field (adr/0071 §13): one click asks for a
  * suggestion in a small layer, no page, no prompt to write. Several usable
- * services add a picker; none puts the connect hint in its place; a role
+ * services add a picker; with none the same button opens the connect hint; a role
  * the task does not allow draws nothing. Nothing is saved: "Kullan" hands
  * the text to `onUse`.
  */
@@ -43,12 +44,43 @@ export function AiButton({ task, entity, onUse, options }: AiButtonProps) {
   const [option, setOption] = useState<string | undefined>(undefined)
   const [open, setOpen] = useState(false)
   const suggestion = useAiSuggestion(task, entity)
+  const [hintGone, setHintGone] = useState(hintClosed)
 
   if (!view?.allowed) {
     return null
   }
+  const trigger = (
+    <PopoverTrigger asChild>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        aria-label={t("ai.suggest.button")}
+        title={t("ai.suggest.button")}
+      >
+        <Sparkles />
+      </Button>
+    </PopoverTrigger>
+  )
+  // No service: the same button in the same place says how to get one; closed for good, it goes
   if (usable.length === 0) {
-    return <AiConnectHint />
+    return hintGone ? null : (
+      <Popover open={open} onOpenChange={setOpen}>
+        {trigger}
+        <PopoverContent
+          align="end"
+          aria-label={t("ai.suggest.button")}
+          className="w-72 max-w-[calc(100vw-2rem)]"
+        >
+          <AiConnectHint
+            onClose={() => {
+              setOpen(false)
+              setHintGone(true)
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    )
   }
 
   const ask = (next: { service?: string; option?: string | undefined }) => {
@@ -86,17 +118,7 @@ export function AiButton({ task, entity, onUse, options }: AiButtonProps) {
 
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("ai.suggest.button")}
-          title={t("ai.suggest.button")}
-        >
-          <Sparkles />
-        </Button>
-      </PopoverTrigger>
+      {trigger}
       <PopoverContent
         align="end"
         aria-label={t("ai.suggest.button")}

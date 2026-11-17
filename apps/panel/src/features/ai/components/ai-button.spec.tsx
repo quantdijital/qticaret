@@ -186,22 +186,26 @@ describe("AiButton", () => {
   })
 })
 
-describe("AiConnectHint in the button's place", () => {
-  it("offers the owner to connect, and stays closed once closed", async () => {
+describe("AiConnectHint behind the same button", () => {
+  it("asks nothing, offers the owner to connect, and stays closed once closed", async () => {
     const { user } = setup(services([]))
+    const button = await screen.findByRole("button", { name: "Yapay zekâ ile öner" })
+    await user.click(button)
     expect(await screen.findByRole("link", { name: "Bağla" })).toHaveAttribute(
       "href",
       "/settings/ai"
     )
-    expect(screen.queryByRole("button", { name: "Yapay zekâ ile öner" })).not.toBeInTheDocument()
+    expect(netFetch).not.toHaveBeenCalled()
     await user.click(screen.getByRole("button", { name: "İpucunu kapat" }))
     expect(screen.queryByRole("link", { name: "Bağla" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Yapay zekâ ile öner" })).not.toBeInTheDocument()
     expect(window.localStorage.getItem("qt.panel.ai.hint.dismissed")).toBe("1")
   })
 
   it("tells anyone else the store owner can connect, with no link", async () => {
     can.owner = false
-    setup(services([]))
+    const { user } = setup(services([]))
+    await user.click(await screen.findByRole("button", { name: "Yapay zekâ ile öner" }))
     expect(await screen.findByText(/mağaza sahibi bağlayabilir/)).toBeInTheDocument()
     expect(screen.queryByRole("link")).not.toBeInTheDocument()
   })
@@ -212,6 +216,6 @@ describe("AiConnectHint in the button's place", () => {
     await waitFor(() => {
       expect(sdkFetch).toHaveBeenCalled()
     })
-    expect(screen.queryByText(/tek tıkla/)).not.toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 })
