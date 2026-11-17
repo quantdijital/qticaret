@@ -83,6 +83,17 @@ medusaIntegrationTestRunner({
         expect(
           await answer([{ id: "altbanner01", type: "banner", ...ALWAYS, slides: [] }])
         ).toEqual([400, "storefront_layout.section_invalid"])
+        // A picture in the rich text comes from the media library, like a page's
+        const stranger = {
+          ...richText("altmetin001", "Atölyemiz"),
+          body: {
+            type: "doc",
+            content: [{ type: "image", attrs: { src: "https://baska.example/atolye.jpg" } }],
+          },
+        }
+        const [status, message] = await answer([stranger])
+        expect(status).toBe(400)
+        expect(message).toContain("content.image_unknown")
 
         const saved = await save([
           strip("altkayan001"),

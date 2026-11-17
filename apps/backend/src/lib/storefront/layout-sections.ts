@@ -119,7 +119,9 @@ export const headerSection = z.discriminatedUnion(
  * The shop's footer (`footer_bar`) and the sections drawn above it on every
  * page (adr/0070 §4, Shopify's footer group): the newsletter box, a rich
  * text, trust badges and a scrolling strip, each at most once. Their
- * schemas are the page sections'; no pictures here (every page's load).
+ * schemas are the page sections'. No picture section here (every page's
+ * load); a picture inside the rich text is allowed, like a page's, and is
+ * held to the media library check (layout-check.ts).
  */
 export const footerSection = z.discriminatedUnion(
   "type",
