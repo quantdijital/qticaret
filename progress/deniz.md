@@ -22,6 +22,11 @@
 5. **Olası takipler:**
    - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
    - D4-1: düzenleme iadesinde referansla sürdürme gerçek bir düzenleme iadesiyle denenmedi.
+6. **Tarihe bağlı bağımlılık işleri (#192'nin takipleri):**
+   - 2026-11-20 ve sonrası: glob 13.0.7, 14 gün kuralıyla uygun olur; uyarının (advisory) onu düzeltilmiş sayıp saymadığına bakılır.
+   - 2026-11-27 ve sonrası: fast-xml-parser 5.12.1.
+   - Kalan yüksekler Medusa yükseltmesini ya da üst projeyi bekliyor: @graphql-tools/utils 12.x ister; picomatch'in henüz düzeltmesi yok.
+   - **Sahip kararı:** Medusa 2.21.2 → 2.22.x yükseltmesi. 2.22.2 bugün yeterince eski; 2.22.3+ yakında olur. Tam testlerle ayrı PR.
 
 Bitenler: ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 test hesabı gelince öne alınır; 2 canlıya çıkışta; 3 ve 4 sahipte.
 
@@ -36,6 +41,10 @@ Bitenler: ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#1
   - #185 (D4-1): kısmen yapılmış iyzico iadesine çıkış yolu; dört güvenlik incelemesi turu. Panel ve düzenleme iadelerinde `made_in_part`; `lost_part` yanıtları; iptal ve iade iadeleri akış yeniden koşunca kaldığı yerden sürer; "Kalanı iyzico panelinden elle iade ettim"; bilinmeyen iyzico ret kodları parçayı bilinmez bırakır.
   - #186: vitrin Store API köken denetimi (istekler backend kökeninde kalır); fatura dosya adı başlığı da düzeldi.
   - #187: toptan analitik L1/L2 + SMS L4 (analitik tutarları sayfa ve sipariş başına karar verilir; toptancının hiçbir telefonu SMS'e girmez).
+  - #192: `pnpm.overrides` ile bağımlılık güvenlik güncellemesi.
+    - body-parser 1.20.9, multer 2.5.0, follow-redirects 1.16.2, qs, fast-uri, seroval, postcss-selector-parser, ajv 8.20.0, fast-xml-parser 5.12.0.
+    - `pnpm audit --prod` 20'den 7'ye indi (3 yüksek, 4 orta).
+    - Eski tarihli "body-parser/multer override'ı" işi kapandı.
 - **Sahibin kararları (2026-11-17):**
   - GIF yükleme yok (dilim 7 iptal).
   - Grafit hazır görünümü kalksın.
