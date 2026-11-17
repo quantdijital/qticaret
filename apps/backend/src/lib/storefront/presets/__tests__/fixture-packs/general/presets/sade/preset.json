@@ -1,0 +1,9 @@
+{
+  "format": "quant-storefront-preset",
+  "code": "sade",
+  "version": 1,
+  "theme": "atolye",
+  "name": "Sade",
+  "description": "Testlerin görünümü: üst bilgiye dokunmaz; ana sayfada giriş, kategoriler, en yeni ürünler, yardım kutusu ve blog yazıları; alt bilgide e-bülten.",
+  "tone": "light"
+}

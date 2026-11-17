@@ -19,7 +19,7 @@ vi.mock("@tanstack/react-router", () => ({
 }))
 
 const PRESETS = [
-  preset("grafit", { in_draft: 1, live: 1 }),
+  preset("sade", { in_draft: 1, live: 1 }),
   preset("tezgah", { family: "tezgah", swatch: "Lacivert ve çelik", name: "Tezgâh" }),
   preset("tezgah-gece", { family: "tezgah", swatch: "Gece", name: "Tezgâh · Gece" }),
 ]
@@ -96,9 +96,7 @@ describe("GalleryPage", () => {
     const looks = await screen.findByRole("region", { name: "Kayıtlı görünümlerim (1/10)" })
     expect(within(looks).getAllByRole("article")).toHaveLength(2)
     expect(within(looks).getByRole("heading", { name: "Bayram vitrini" })).toBeInTheDocument()
-    expect(
-      within(looks).getByRole("heading", { name: "Grafit, 17 Kasım 14:20" })
-    ).toBeInTheDocument()
+    expect(within(looks).getByRole("heading", { name: "Sade, 17 Kasım 14:20" })).toBeInTheDocument()
     expect(within(looks).getByText("Otomatik")).toBeInTheDocument()
     expect(
       within(looks).getByText(
@@ -114,7 +112,7 @@ describe("GalleryPage", () => {
     )
 
     expect(screen.getByRole("heading", { name: "Şu anki görünüm" })).toBeInTheDocument()
-    expect(screen.getByText("Grafit · 1 Kas 2026 tarihinde yayınlandı")).toBeInTheDocument()
+    expect(screen.getByText("Sade · 1 Kas 2026 tarihinde yayınlandı")).toBeInTheDocument()
     expect(screen.getByText("Taslak yayındakiyle aynı")).toBeInTheDocument()
   })
 
@@ -131,7 +129,7 @@ describe("GalleryPage", () => {
     await user.click(screen.getByRole("button", { name: "Şu anki görünümü kaydet" }))
     const dialog = await screen.findByRole("dialog", { name: "Görünümü kaydet" })
     const field = within(dialog).getByRole<HTMLInputElement>("textbox", { name: "Ad" })
-    expect(field.value).toMatch(/^Grafit, \d{1,2} \S+$/)
+    expect(field.value).toMatch(/^Sade, \d{1,2} \S+$/)
 
     await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {
@@ -150,7 +148,7 @@ describe("GalleryPage", () => {
     // No count it could not read
     expect(section("Kayıtlı görünümlerim")).toBeInTheDocument()
     expect(screen.getAllByRole("button", { name: "Tekrar dene" })).toHaveLength(1)
-    expect(await screen.findByRole("heading", { name: "Grafit" })).toBeInTheDocument()
+    expect(await screen.findByRole("heading", { name: "Sade" })).toBeInTheDocument()
   })
 
   it("offers a retry when the ready-made looks cannot load", async () => {
@@ -161,7 +159,7 @@ describe("GalleryPage", () => {
     const retry = await screen.findByRole("button", { name: "Tekrar dene" })
     serve(gallery([]))
     await user.click(retry)
-    expect(await screen.findByRole("heading", { name: "Grafit" })).toBeInTheDocument()
+    expect(await screen.findByRole("heading", { name: "Sade" })).toBeInTheDocument()
   })
 
   it("closes saving when the named looks are full, and says so", async () => {

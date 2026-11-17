@@ -9,10 +9,10 @@ const TEZGAH = [GECE, OWN, KUM]
 
 describe("presetFamilies", () => {
   it("draws a family of colour sets as one card, its own look first", () => {
-    const families = presetFamilies([preset("grafit"), ...TEZGAH])
+    const families = presetFamilies([preset("sade"), ...TEZGAH])
 
     expect(families.map((each) => [each.key, each.name])).toEqual([
-      ["general/grafit", "Grafit"],
+      ["general/sade", "Sade"],
       ["general/tezgah", "Tezgâh"],
     ])
     expect(families[1]?.members.map((each) => each.code)).toEqual([
@@ -30,9 +30,9 @@ describe("presetFamilies", () => {
   })
 
   it("keeps the same family code of two packs apart", () => {
-    const families = presetFamilies([preset("grafit"), preset("grafit", { pack: "cutlery" })])
+    const families = presetFamilies([preset("sade"), preset("sade", { pack: "cutlery" })])
 
-    expect(families.map((each) => each.key)).toEqual(["general/grafit", "cutlery/grafit"])
+    expect(families.map((each) => each.key)).toEqual(["general/sade", "cutlery/sade"])
   })
 })
 
@@ -51,15 +51,15 @@ describe("shownMember", () => {
 
 describe("isLook and hasNewVersion", () => {
   it("knows a look at any version, and a newer one than the draft or live has", () => {
-    const grafit = preset("grafit", { version: 3 })
+    const sade = preset("sade", { version: 3 })
 
-    expect(isLook(grafit, { pack: "general", code: "grafit", version: 1 })).toBe(true)
-    expect(isLook(grafit, { pack: "cutlery", code: "grafit", version: 3 })).toBe(false)
-    expect(isLook(grafit, null)).toBe(false)
+    expect(isLook(sade, { pack: "general", code: "sade", version: 1 })).toBe(true)
+    expect(isLook(sade, { pack: "cutlery", code: "sade", version: 3 })).toBe(false)
+    expect(isLook(sade, null)).toBe(false)
 
-    expect(hasNewVersion(grafit)).toBe(false)
-    expect(hasNewVersion({ ...grafit, in_draft: 3, live: 3 })).toBe(false)
-    expect(hasNewVersion({ ...grafit, in_draft: 3, live: 2 })).toBe(true)
-    expect(hasNewVersion({ ...grafit, in_draft: 1 })).toBe(true)
+    expect(hasNewVersion(sade)).toBe(false)
+    expect(hasNewVersion({ ...sade, in_draft: 3, live: 3 })).toBe(false)
+    expect(hasNewVersion({ ...sade, in_draft: 3, live: 2 })).toBe(true)
+    expect(hasNewVersion({ ...sade, in_draft: 1 })).toBe(true)
   })
 })

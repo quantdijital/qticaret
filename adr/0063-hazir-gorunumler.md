@@ -100,7 +100,7 @@ Girdi: `{ pack, code, demo: boolean, actor }`. Çıktı: `{ preset, version, ski
 
 ### 8. İlk görünümler
 
-- **`grafit`** (`general` paketi): bugünkü görünüm. `theme.json` adr/0062'nin varsayılanları, `layout.json` `defaultLayout`'un karşılığı, menü ve demo yok. Uygulamak mağazayı "fabrika görünümü"ne taslakta döndürür.
+- **`grafit`** (`general` paketi): bugünkü görünüm. `theme.json` adr/0062'nin varsayılanları, `layout.json` `defaultLayout`'un karşılığı, menü ve demo yok. Uygulamak mağazayı "fabrika görünümü"ne taslakta döndürür. **Kaldırıldı (sahip, 2026-11-17; Ek 2026-11-17).**
 - **`cutlery` paketi, iki görünüm** (Faz 6; içerik sahiple): koyu-sert ve açık-temiz. Fark tema ayarlarından (renk, yazı tipi, köşe, düğme, kart oranı), bölüm sırası ve biçimlerinden, menüden ve görsellerden gelir; kod farkı yoktur.
 
 ## Alternatifler
@@ -160,7 +160,7 @@ Her iş kendi testleriyle gelir: HTTP (uygulama iki kez aynı taslak; çözülem
 
   | Kod | Paket | Takım | Maketler |
   | --- | --- | --- | --- |
-  | `grafit` | `general` | Bugünkü görünüm | Değişmez |
+  | `grafit` | `general` | Bugünkü görünüm | Değişmez (kaldırıldı, 2026-11-17) |
   | `koyu-sert` | `cutlery` | Kombinasyon | DY3, N12, M7 (telefonda MT1), H11, KK2, SR1 (kart UK2), FS1, OU2, GS1, GB2, RH3, YR1, MR2, BL2, AB3 |
   | `acik-temiz` | `cutlery` | Klasik katalog | KY3, N14, H17, GB4, UR5 (kart UK5), KY1, KB2, KK4, MR1, YR1, AB1 |
 
@@ -170,3 +170,12 @@ Her iş kendi testleriyle gelir: HTTP (uygulama iki kez aynı taslak; çözülem
   - Sepet, ödeme ve onay maketleri (SC1, SP1, OD1, SO1) görünümlerin parçası değildir; adr/0049 Ek §10 karar 10 (ayrı ADR).
   - Görünümler gelişmiş CSS taşımaz (§1 aynen).
 - **İş 2.5'in kapsamı adr/0049 Ek 2026-11-14'e taşındı.** §6'nın kuralı (alan `variant`, varsayılan bugünkü çizim, tanımayan tema varsayılanı çizer, adlar sektörden bağımsız) aynen geçerlidir; "ilk tur `hero`, `products`, `categories`" sınırı kalkar, biçim listesi ve şema kararı o ektedir. "Uygulama sırası" tablosundaki 2.5 satırı "adr/0049 Ek 2026-11-14 V1–V3" diye okunur; iki görünüm (Faz 6) o ekin A–F işlerinde kullandıkları biçimler ve F1 (kategori başına düzen seçimi) bitince yazılır.
+
+## Ek 2026-11-17: Grafit hazır görünümü kaldırıldı
+
+- Grafit hazır görünümü kaldırıldı (sahip, 2026-11-17): "görünümlerde grafit diye bir şey var, biz yapmadık, bunu kaldırabilirsin." `packs/general/presets/grafit/` (küçük resmi dahil) silindi; `general` paketinin hazır görünümü yok, galeride yalnız mağazaya uygulanmış paketlerin görünümleri listelenir (bugün bıçak paketi: Katalog, Tezgâh ×3). §8'deki ve Ek 2026-11-14 tablosundaki `grafit` satırı bu tarihten sonra geçersizdir.
+- **Yalnız hazır görünüm kalktı.** Temanın varsayılan görünümünün adı Grafit olarak kalır: `design.md`'deki yön, tema ayarlarındaki "Grafit'e dön", "Çelik beyaz (Grafit)" ve tema ayarlarının varsayılanları (adr/0062) değişmez.
+- **Görünümü uygulamış mağazalar etkilenmez.** Uygulama görünümün bölümlerini ve tema ayarını mağazanın taslağına kopyalar (§4); taslakta, yayında ve kayıtlı görünümlerde yalnız etiket kalır (`settings.preset: { pack: "general", code: "grafit", version }`). Bu etiket artık hiçbir karta eşleşmez: galeri ve "Şu anki görünüm" onu "Kendi tasarımınız" diye adlandırır, kayıtlı görünümün kaynağının adı boştur (`source_name: null`), `general/grafit` için uygulama ve küçük resim `404` döner. Düzenleyici açılır, vitrin aynı çizer. Testler: `storefront-designs.spec.ts` ("opens a draft and a live design naming a removed look…"), `read.unit.spec.ts`, `design-shared.unit.spec.ts`, panelde `design-name.spec.ts`.
+- **Testler.** Mekanizmayı sınayan birim ve HTTP testleri test-içi bir görünüm okur (`apps/backend/src/lib/storefront/presets/__tests__/fixture-packs/general/presets/sade`); gerçek bir görünüm gereken uçtan uca testler bıçak paketinin `katalog` görünümünü, mağazaya önce bıçak paketini uygulayarak kullanır. Panelin e2e testi (`apps/panel/e2e/looks.e2e.ts`) Katalog'u uygular; CI'ın demo mağazası (`seed:demo`) bunun için `tenant:apply-pack pack=cutlery` ile bıçak paketini alır (`.github/workflows/ci.yml`). `seed:demo` sektörden bağımsız kalır, paket uygulamaz.
+- **Görünüm kilidi:** `apps/storefront/src/lib/__tests__/preset-lock/general-grafit/` silindi (`pnpm lock:presets`); başka görünümün kilidi ve `styles.lock.json` değişmedi.
+- **Açık:** §7 "Üst panel" maddesindeki "varsayılan Grafit" düşer; kurulum sihirbazının varsayılan görünümü (seçilen paketin bir görünümü ya da hiçbiri) F17'de kararlaştırılır.

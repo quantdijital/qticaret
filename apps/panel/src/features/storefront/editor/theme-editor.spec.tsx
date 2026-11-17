@@ -124,7 +124,7 @@ describe("ThemeEditor", () => {
   })
 
   it("carries the look the draft was given through its saves (adr/0064 Ek 2026-11-17)", async () => {
-    const preset = { pack: "general", code: "grafit", version: 1 }
+    const preset = { pack: "cutlery", code: "katalog", version: 1 }
     const design = { id: "sfd_look1", digest: "a".repeat(64) }
     serve(
       fetchMock,

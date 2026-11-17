@@ -38,16 +38,16 @@ function open(target: ApplyTarget, options: Options = {}) {
         pendingMenus={options.pendingMenus ?? false}
         savedFull={options.savedFull ?? false}
         savedLimit={10}
-        currentName="Grafit"
+        currentName="Sade"
       />
     </QueryClientProvider>
   )
   return { client, onClose }
 }
 
-const grafit = (more: Parameters<typeof preset>[1] = {}): ApplyTarget => ({
+const sade = (more: Parameters<typeof preset>[1] = {}): ApplyTarget => ({
   kind: "preset",
-  preset: preset("grafit", more),
+  preset: preset("sade", more),
 })
 const lines = () =>
   within(screen.getByRole("dialog"))
@@ -62,9 +62,9 @@ describe("ApplyDialog", () => {
   })
 
   it("says what a ready-made look with menus, header and footer changes", () => {
-    open(grafit({ has_menus: true }))
+    open(sade({ has_menus: true }))
 
-    expect(screen.getByRole("dialog", { name: "‘Grafit’ taslağa uygulansın mı?" })).toBeVisible()
+    expect(screen.getByRole("dialog", { name: "‘Sade’ taslağa uygulansın mı?" })).toBeVisible()
     expect(
       screen.getByText(
         "Bu görünüm menü de içerir. Yayınla'ya bastığınızda mağazanın menüleri bu görünümün menüleriyle değişir."
@@ -79,7 +79,7 @@ describe("ApplyDialog", () => {
   })
 
   it("keeps the shop's menus and its footer where the look brings none", () => {
-    open(grafit({ has_footer: false }), { draftChanged: true, pendingMenus: true })
+    open(sade({ has_footer: false }), { draftChanged: true, pendingMenus: true })
 
     expect(screen.queryByText(/Bu görünüm menü de içerir/)).toBeNull()
     expect(lines()).toEqual([
@@ -110,11 +110,11 @@ describe("ApplyDialog", () => {
       result: { auto_saved: KEPT, skipped: [], kept: ["footer"] },
     })
     const user = userEvent.setup()
-    const { client, onClose } = open(grafit())
+    const { client, onClose } = open(sade())
 
     await user.click(screen.getByRole("checkbox", { name: "Şimdiki görünümü adıyla da kaydet" }))
     const field = screen.getByRole<HTMLInputElement>("textbox", { name: "Ad" })
-    expect(field.value).toMatch(/^Grafit, \d{1,2} \S+$/)
+    expect(field.value).toMatch(/^Sade, \d{1,2} \S+$/)
     await user.clear(field)
     await user.type(field, "  Eski vitrin ")
     await user.click(screen.getByRole("button", { name: "Taslağa uygula ve düzenle" }))
@@ -122,12 +122,12 @@ describe("ApplyDialog", () => {
     await waitFor(() => {
       expect(navigate).toHaveBeenCalledWith({ to: "/storefront/editor" })
     })
-    expect(fetchMock).toHaveBeenCalledWith("/admin/storefront-presets/general/grafit/apply", {
+    expect(fetchMock).toHaveBeenCalledWith("/admin/storefront-presets/general/sade/apply", {
       method: "POST",
       body: { save_as: "Eski vitrin" },
     })
     expect(client.getQueryData(REPORT_KEY)).toEqual({
-      name: "Grafit",
+      name: "Sade",
       auto_saved: KEPT,
       saved_name: "Eski vitrin",
       skipped: [],
@@ -156,7 +156,7 @@ describe("ApplyDialog", () => {
   })
 
   it("closes the named save when the named looks are full, and says the automatic one still happens", () => {
-    open(grafit(), { savedFull: true })
+    open(sade(), { savedFull: true })
 
     const keep = screen.getByRole("checkbox", { name: "Şimdiki görünümü adıyla da kaydet" })
     expect(keep).toBeDisabled()
@@ -168,7 +168,7 @@ describe("ApplyDialog", () => {
   it("stays open and says why when the server refuses", async () => {
     fetchMock.mockRejectedValue(new Error("down"))
     const user = userEvent.setup()
-    const { onClose } = open(grafit())
+    const { onClose } = open(sade())
 
     await user.click(screen.getByRole("button", { name: "Taslağa uygula ve düzenle" }))
     await waitFor(() => {

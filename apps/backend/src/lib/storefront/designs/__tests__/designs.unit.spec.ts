@@ -47,7 +47,7 @@ describe("a look's digest (adr/0064 Ek 2026-11-17 §1.3)", () => {
     const digest = designDigest(doc)
     for (const settings of [
       { design: { id: "sfd_01A", digest: "a".repeat(64) } },
-      { preset: { pack: "general", code: "grafit", version: 3 } },
+      { preset: { pack: "cutlery", code: "katalog", version: 3 } },
       { menus: [{ title: "Ana menü", location: "main", rank: 0, items: [] }] },
       { trust_badges: [] },
       { color_swatches: [{ label: "siyah", hex: "#111111" }] },
@@ -72,7 +72,7 @@ describe("a look's digest (adr/0064 Ek 2026-11-17 §1.3)", () => {
 })
 
 describe("a look's card summary", () => {
-  const origin = { source: "preset" as const, source_name: "Grafit", edited: false, reason: null }
+  const origin = { source: "preset" as const, source_name: "Katalog", edited: false, reason: null }
 
   it("reads the colours, faces, section counts and the first home types", () => {
     const home = Array.from({ length: HOME_TYPES_SHOWN + 2 }, (_, at) => ({
@@ -83,13 +83,13 @@ describe("a look's card summary", () => {
       {
         groups: { home, header: [{ type: "announcement" }], footer: "not a list" },
         theme: GRAFIT,
-        preset: { pack: "general", code: "grafit", version: 2 },
+        preset: { pack: "cutlery", code: "katalog", version: 2 },
       },
       origin
     )
     expect(summary).toEqual({
       ...origin,
-      preset: { pack: "general", code: "grafit", version: 2 },
+      preset: { pack: "cutlery", code: "katalog", version: 2 },
       colors: {
         primary: GRAFIT.colors.primary,
         accent: GRAFIT.colors.accent,
@@ -111,7 +111,7 @@ describe("a look's card summary", () => {
     }
     expect(
       designSummary(
-        { groups: {}, theme: null, preset: { pack: "general", code: "grafit", version: "2" } },
+        { groups: {}, theme: null, preset: { pack: "cutlery", code: "katalog", version: "2" } },
         origin
       ).preset
     ).toBeNull()

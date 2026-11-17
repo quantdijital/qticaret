@@ -244,6 +244,9 @@ jobs:
         run: |
           pnpm --filter @qticaret/backend medusa db:migrate
           pnpm --filter @qticaret/backend seed:demo
+          # The cutlery pack, as the provisioner gives it: its ready-made looks are the
+          # gallery's (looks.e2e.ts); general has none since Grafit was removed (2026-11-17)
+          NODE_ENV=development pnpm --filter @qticaret/backend tenant:apply-pack pack=cutlery
           # A few days of orders: the order page's tests open one
           pnpm --filter @qticaret/backend seed:demo-orders days=3
       - name: Start the backend
