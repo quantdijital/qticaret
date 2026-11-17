@@ -31,8 +31,8 @@ function footerGroup(base: StorefrontPreset): StorefrontPreset {
   return { ...base, layout: { ...base.layout, footer } }
 }
 
-/** Every fixture by its key (`fixture-<name>`), on the general pack's first preset. */
+/** Every fixture by its key (`fixture-<name>`), on the first preset found (packs and codes sorted). */
 export function lockFixtures(): { key: string; preset: StorefrontPreset }[] {
-  const base = allPresets().find(({ key }) => key.startsWith("general-"))?.preset
+  const base = allPresets()[0]?.preset
   return base ? [{ key: "fixture-footer-group", preset: footerGroup(base) }] : []
 }
