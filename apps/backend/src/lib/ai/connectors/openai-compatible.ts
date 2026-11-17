@@ -146,6 +146,14 @@ export function openAiCompatibleText(options: OpenAiCompatibleOptions): TextConn
   const send = options.fetch ?? safeFetch
   const wait = options.wait ?? waitFor
   const timeoutMs = options.timeoutMs ?? TEXT_TIMEOUT_MS
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0) {
+    // A wrong option is a bug of ours; it still leaves as the contract's error, not a RangeError
+    throw aiProviderError({
+      service: service.id,
+      key: "ai.provider_response_invalid",
+      code: "invalid_timeout",
+    })
+  }
 
   const refuse = (key: AiErrorKey, code: string) =>
     aiProviderError({ service: service.id, key, code })

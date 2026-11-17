@@ -8,6 +8,16 @@ import type { AiUsage, TextResult } from "./types"
  * message included, is dropped here and goes nowhere (adr/0071 §9).
  */
 
+/**
+ * The longest text a model may give, in characters. Checked before
+ * anything scans the text: an answer may be megabytes of what the model
+ * was told to write by the data.
+ */
+export const MAX_CONTENT_CHARS = 20_000
+
+/** A count above this is not a count; left out, so no estimate is made from it. */
+export const MAX_TOKEN_COUNT = 10_000_000
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
@@ -41,7 +51,9 @@ export function registeredBodyError(
 }
 
 const count = (value: unknown): number | undefined =>
-  typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : undefined
+  typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= MAX_TOKEN_COUNT
+    ? value
+    : undefined
 
 function usageOf(answer: Record<string, unknown>): AiUsage {
   const usage = answer["usage"]
@@ -56,8 +68,31 @@ function usageOf(answer: Record<string, unknown>): AiUsage {
   }
 }
 
-// A model's thinking written into the text; never part of a suggestion
-const THINKING = /<think>[\s\S]*?<\/think>/gi
+const OPEN = "<think>"
+const CLOSE = "</think>"
+
+/**
+ * The text without a model's thinking written into it. One pass with
+ * `indexOf`, never a pattern: a thousand `<think>` that never close cost
+ * one scan, not one each. Thinking that never closes takes the rest.
+ */
+export function withoutThinking(text: string): string {
+  const lower = text.toLowerCase()
+  let kept = ""
+  let at = 0
+  for (;;) {
+    const open = lower.indexOf(OPEN, at)
+    if (open === -1) {
+      return kept + text.slice(at)
+    }
+    kept += text.slice(at, open)
+    const close = lower.indexOf(CLOSE, open + OPEN.length)
+    if (close === -1) {
+      return kept
+    }
+    at = close + CLOSE.length
+  }
+}
 
 export type CompletionRead =
   { ok: true; result: TextResult } | { ok: false; key: AiErrorKey; code: string }
@@ -86,7 +121,10 @@ export function readCompletion(body: Buffer): CompletionRead {
   if (typeof content !== "string") {
     return invalid("no_content")
   }
-  const text = content.replace(THINKING, "").trim()
+  if (content.length > MAX_CONTENT_CHARS) {
+    return invalid("content_too_long")
+  }
+  const text = withoutThinking(content).trim()
   if (text === "") {
     return invalid("empty_content")
   }

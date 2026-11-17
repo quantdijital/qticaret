@@ -34,12 +34,20 @@ export const MAX_VALUE_LENGTH = 300
 export const MAX_LABEL_LENGTH = 100
 export const MAX_LIST_ITEMS = 30
 export const MAX_FIELDS = 40
+/** What the personal data filter reads of one value at most (its patterns are not linear). */
+export const MAX_FILTERED_CHARS = 20_000
+/** The whole data block, as JSON text; fields are dropped from the end until it fits. */
+export const MAX_DATA_CHARS = 30_000
 
 const clip = (text: string, max: number) =>
   Array.from(text).length > max ? `${Array.from(text).slice(0, max).join("")}…` : text
 
-// Filtered whole, then clipped: a number cut at the edge cannot slip half through
-const clean = (text: string, max: number) => clip(redactPersonalData(text.trim()), max)
+// A generous first cut bounds the filter's work; then filtered whole and clipped,
+// so a number cut at the final edge cannot slip half through
+function clean(text: string, max: number): string {
+  const read = text.trim().slice(0, Math.min(max * 10, MAX_FILTERED_CHARS))
+  return clip(redactPersonalData(read), max)
+}
 
 type CleanValue = string | { label: string; value: string }[]
 
@@ -65,10 +73,22 @@ export function promptData(
   return data
 }
 
+/** The block as JSON text, without its last fields while it is longer than the ceiling. */
+function dataBlock(data: Record<string, CleanValue>): string {
+  const entries = Object.entries(data)
+  for (;;) {
+    const text = JSON.stringify({ data: Object.fromEntries(entries) })
+    if (text.length <= MAX_DATA_CHARS || entries.length === 0) {
+      return text
+    }
+    entries.pop()
+  }
+}
+
 /** The two messages of a call: the instruction, and the data on its own. */
 export function buildPrompt(input: PromptInput): PromptMessages {
   return {
     system: `${DATA_RULE}\n\n${input.instruction.trim()}`,
-    data: JSON.stringify({ data: promptData(input.fields, input.maxLengths) }),
+    data: dataBlock(promptData(input.fields, input.maxLengths)),
   }
 }

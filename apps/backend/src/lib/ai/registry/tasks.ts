@@ -27,6 +27,8 @@ export interface AiTask {
   /** Platform credits one run costs (adr/0071 §7); never taken from the client. */
   credits: number
   gate: AiGate
+  /** The longest suggestion, in characters; a longer one is refused (`length`). */
+  maxLength: number
 }
 
 /** Tests only: the core is exercised with it until the real tasks come (Aşama 1). */
@@ -38,6 +40,7 @@ export const TEST_TASK: AiTask = {
   roles: ["owner", "admin"],
   credits: 1,
   gate: "plain_text",
+  maxLength: 500,
 }
 
 // Real tasks (`seo_title`, `seo_description`) are added in Aşama 1
