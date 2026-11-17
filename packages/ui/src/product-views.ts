@@ -17,6 +17,7 @@ import type {
   CardSoldOutRow,
 } from "@qticaret/types"
 import type { HomeSectionView } from "./content-views"
+import type { ProductVideoView } from "./video-views"
 import type { ImageView, LinkView, PriceView, TrustBadgeView } from "./views"
 
 /**
@@ -167,6 +168,8 @@ export interface ProductPageView {
   brand: LinkView | null
   breadcrumbs: BreadcrumbView[]
   images: ImageView[]
+  /** The product's videos (adr/0069), in gallery order; none: no videos. */
+  videos?: ProductVideoView[]
   options: ProductOptionView[]
   variants: VariantView[]
   /** From `?variant=` (docs/13 §2.3), else the first available. */

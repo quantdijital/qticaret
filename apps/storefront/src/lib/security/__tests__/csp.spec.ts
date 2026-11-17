@@ -38,6 +38,19 @@ describe("contentSecurityPolicy", () => {
     expect(directive(policy, "script-src")).toContain("'unsafe-eval'")
   })
 
+  it("plays a product's videos from any HTTPS host, plain HTTP in development only (adr/0069 §5)", () => {
+    const production = contentSecurityPolicy("abc123", false)
+    expect(directive(production, "media-src")).toBe("media-src 'self' https:")
+    expect(directive(production, "media-src")).toBe(
+      directive(production, "img-src")?.replace("img-src 'self' data: blob:", "media-src 'self'")
+    )
+    const development = contentSecurityPolicy("abc123", true)
+    expect(directive(development, "media-src")).toBe("media-src 'self' https: http:")
+    // No YouTube frame yet (slice 5): the frames stay the card providers' alone
+    expect(directive(production, "frame-src")).toBe("frame-src 'none'")
+    expect(production).not.toContain("youtube")
+  })
+
   it("frames only the card providers' forms, and lets the payment return sit in our own frame", () => {
     const closed = contentSecurityPolicy("abc123", false)
     expect(directive(closed, "frame-src")).toBe("frame-src 'none'")

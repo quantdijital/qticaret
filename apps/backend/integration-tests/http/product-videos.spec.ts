@@ -271,15 +271,21 @@ medusaIntegrationTestRunner({
         expect(JSON.stringify(answer.data)).not.toMatch(/video-kaynak|user_01TEST/)
       }
 
-      // The storefront: nothing of a video until slice 4 opens its leaves
+      // The storefront: its own leaves one by one (slice 4, store-product-videos.spec.ts),
+      // never the relation whole or a key
       const { headers } = await createStorefront(getContainer())
-      for (const fields of ["*media_videos", "+media_videos.id", "+media_videos.source_file_id"]) {
+      for (const fields of ["*media_videos", "+media_videos.source_file_id"]) {
         const answer = await settle(
           http.get(`/store/products?fields=${encodeURIComponent(fields)}`, { headers })
         )
         expect(answer.status).toBe(400)
         expect(JSON.stringify(answer.data)).not.toMatch(/video-kaynak|user_01TEST/)
       }
+      const leaf = await settle(
+        http.get(`/store/products?fields=${encodeURIComponent("+media_videos.id")}`, { headers })
+      )
+      expect(leaf.status).toBe(200)
+      expect(JSON.stringify(leaf.data)).not.toMatch(/video-kaynak|user_01TEST/)
     })
 
     it("sweeps only videos without a product: a linked one a day old stays (review D5)", async () => {
