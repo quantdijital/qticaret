@@ -4,7 +4,7 @@ import { entityFacts } from "../../../lib/ai/facts"
 import type { AiEntityType } from "../../../lib/ai/facts"
 import { instructionOf } from "../../../lib/ai/instructions"
 import { buildPrompt } from "../../../lib/ai/prompt"
-import { findAiTask } from "../../../lib/ai/registry/tasks"
+import { factLengthsOf, findAiTask, isTaskEntity } from "../../../lib/ai/registry/tasks"
 
 export { AI_ENTITY_TYPES } from "../../../lib/ai/facts"
 export type { AiEntityType } from "../../../lib/ai/facts"
@@ -30,9 +30,17 @@ export const taskInputStep = createStep(
     if (!task || instruction === null) {
       throw aiValidationError("ai.unknown_task")
     }
+    // A task for one kind of record only (a product's description) is asked for nothing else
+    if (!isTaskEntity(task, input.entity_type)) {
+      throw aiValidationError("ai.unknown_entity")
+    }
     // Read by its type and id alone (lib/ai/facts): the record's text never comes from the client
     const { fields, maxLengths } = await entityFacts(container, input.entity_type, input.entity_id)
-    const prompt = buildPrompt({ instruction, fields, maxLengths })
+    const prompt = buildPrompt({
+      instruction,
+      fields,
+      maxLengths: factLengthsOf(task, maxLengths),
+    })
     return new StepResponse({ system: prompt.system, data: prompt.data })
   }
 )

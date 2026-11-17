@@ -1,5 +1,4 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import {
   StepResponse,
   WorkflowResponse,
@@ -9,71 +8,32 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import { updateProductsWorkflow } from "@medusajs/medusa/core-flows"
-import { draftProblems } from "../../lib/content-drafts/gate"
+import { TEXT_TIMEOUT_MS } from "../../lib/ai/connectors/types"
+import { readProductFacts } from "../../lib/ai/facts/product"
+import { fieldProblems } from "../../lib/ai/field-rules"
 import { draftFacts, draftPrompt } from "../../lib/content-drafts/prompts"
 import type { DraftKind, ProductDraftFacts } from "../../lib/content-drafts/prompts"
 import { contentDraftProvider, draftMonthlyQuota } from "../../lib/content-drafts/provider"
 import { PlanLimitError, ValidationError } from "../../lib/errors"
 import { draftQuotaOf, forgetUsage } from "../../lib/plan-limits"
-import { plainText } from "../../lib/seo/resolve"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
 import { CONTENT_AI_DRAFTS } from "../../modules/platform-settings/features"
 import { setProductCatalogWorkflow } from "../catalog/set-product-catalog"
 import { brandOf } from "../messaging/brand"
 import { assertFeatureEnabledStep } from "../platform-settings/steps/assert-feature-enabled"
-import { textOf } from "../seo/highlight"
-import type { HighlightValue } from "../seo/highlight"
 import { upsertSeoMetaWorkflow } from "../seo/upsert-seo-meta"
 
-/** A provider gets this long to answer. */
-const DRAFT_TIMEOUT_MS = 60_000
-
-interface ProductRow {
-  title: string
-  subtitle?: string | null
-  description?: string | null
-  brand?: { name: string } | null
-  categories?: ({ name: string } | null)[] | null
-  attribute_values?: (HighlightValue | null)[] | null
-}
-
-/** What a draft may know of a product: its own fields and attributes, nothing of anyone. */
+/** What a draft may know of a product: the AI core's reader, so both ways send the same. */
 async function productFacts(
   container: Pick<MedusaContainer, "resolve">,
   productId: string
 ): Promise<ProductDraftFacts> {
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "product",
-    fields: [
-      "title",
-      "subtitle",
-      "description",
-      "brand.name",
-      "categories.name",
-      "attribute_values.*",
-      "attribute_values.definition.*",
-    ],
-    filters: { id: productId },
-  })
-  const product = data[0] as ProductRow | undefined
-  if (!product) {
+  const facts = await readProductFacts(container, productId)
+  if (!facts) {
     throw new ValidationError("content_drafts.unknown_product")
   }
-  return {
-    name: product.title,
-    subtitle: product.subtitle ?? null,
-    brand: product.brand?.name ?? null,
-    category: product.categories?.find((each) => each !== null)?.name ?? null,
-    // A draft is written for shoppers: the shop's own attributes stay out (T5)
-    attributes: (product.attribute_values ?? []).flatMap((value) => {
-      const text = value && value.definition?.is_public !== false ? textOf(value) : ""
-      const label = value?.definition?.label
-      return text && label ? [{ label, value: text }] : []
-    }),
-    description: product.description ? plainText(product.description) : null,
-    shopName: (await brandOf(container)).shopName,
-  }
+  return { ...facts, shopName: (await brandOf(container)).shopName }
 }
 
 interface GenerateInput {
@@ -116,10 +76,10 @@ const generateDraftStep = createStep(
         kind: input.kind,
         prompt,
         facts,
-        signal: AbortSignal.timeout(DRAFT_TIMEOUT_MS),
+        signal: AbortSignal.timeout(TEXT_TIMEOUT_MS),
       })
     ).trim()
-    const problems = draftProblems(input.kind, text)
+    const problems = fieldProblems(input.kind, text)
     const draft = await drafts.createContentDrafts({
       entity_type: input.entity_type,
       entity_id: input.entity_id,

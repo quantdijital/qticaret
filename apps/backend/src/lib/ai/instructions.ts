@@ -1,3 +1,4 @@
+import { MIN_PRODUCT_WORDS } from "../seo/advisor"
 import { SERP_TEXT_LENGTH } from "../seo/pixel-width"
 import type { AiEntityType } from "./facts"
 import type { AiTask } from "./registry/tasks"
@@ -17,6 +18,14 @@ interface TaskInstruction {
 
 const { title, description } = SERP_TEXT_LENGTH
 
+// A description's word targets: never under the advisor's floor (`MIN_PRODUCT_WORDS`, the gate's too)
+const WORDS = {
+  min: MIN_PRODUCT_WORDS,
+  short: Math.round(MIN_PRODUCT_WORDS * 1.4),
+  usual: MIN_PRODUCT_WORDS * 2,
+  detailed: MIN_PRODUCT_WORDS * 3,
+}
+
 // What every search result text keeps to: the shop's own facts, plain, and nothing made up
 const SEO_RULES =
   "Yalnızca verideki bilgileri kullan; veride olmayan özellik, fiyat, indirim, kargo ya da üstünlük iddiası ekleme. Tek satır, düz metin yaz: tırnak, emoji, köşeli ya da açılı ayraç, bağlantı ve tümü büyük harf sözcük kullanma. Türkçe yaz."
@@ -30,6 +39,13 @@ const INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
     base: `Bu sayfa için arama sonuçlarında başlığın altında görünecek bir açıklama yaz. Uzunluğu ${String(description.min)} ile ${String(description.max)} karakter arasında olsun. Bir ya da iki cümleyle sayfada ne bulunacağını anlat ve okuru sayfaya davet et. ${SEO_RULES} Yalnızca açıklamayı yaz.`,
     options: {
       short: `Uzunluğu ${String(description.min)} karaktere yakın tut; tek cümle yeter.`,
+    },
+  },
+  product_description: {
+    base: `Bu ürün için mağazanın ürün sayfasında görünecek özgün bir ürün açıklaması yaz. En az ${String(WORDS.min)}, en çok ${String(WORDS.usual)} sözcük olsun. Ürünün ne olduğunu, öne çıkan özelliklerini ve nasıl kullanıldığını anlat; verideki nitelikleri kullan. Yalnızca verideki bilgileri kullan; veride olmayan özellik, ölçü, malzeme, fiyat, indirim, kargo, garanti ya da üstünlük iddiası ekleme. Düz metin yaz: iki ya da daha fazla paragraf, paragraflar arasında boş satır; başlık, liste imi, HTML, tırnak, emoji, bağlantı ve tümü büyük harf sözcük kullanma. Türkçe yaz. Yalnızca açıklama metnini yaz.`,
+    options: {
+      short: `Kısa tut: en az ${String(WORDS.min)}, en çok ${String(WORDS.short)} sözcük, iki paragraf.`,
+      detailed: `Ayrıntılı yaz: ${String(WORDS.usual)} ile ${String(WORDS.detailed)} sözcük arasında (bu uzunluk yukarıdaki üst sınırın yerine geçer); kullanım ve bakım bilgisini veride varsa ayrı paragrafta anlat.`,
     },
   },
   test_text: {

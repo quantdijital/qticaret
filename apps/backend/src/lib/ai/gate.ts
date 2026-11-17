@@ -1,14 +1,14 @@
-import { draftProblems } from "../content-drafts/gate"
-import { hasPersonalData } from "../content-drafts/redact"
 import { hasSymbolRun, isShouting } from "../seo/advisor/text"
 import { readsAsLink } from "../text/link-like"
+import { fieldProblems } from "./field-rules"
+import { hasPersonalData } from "./redact"
 import type { AiTask } from "./registry/tasks"
 
 /**
  * The output gate, per task (adr/0071 §9). A service's text is plain
  * text: markup is taken out before anything else, and it is never printed
- * as HTML. SEO fields go through the rule engine's own rules
- * (`draftProblems`, used as it is); other text through what no suggestion
+ * as HTML. SEO fields and a product's description go through the rule
+ * engine's own rules (`fieldProblems`); other text through what no suggestion
  * may carry. A suggestion with a problem is recorded as refused and never
  * offered.
  */
@@ -25,6 +25,10 @@ const FENCE = /^```[\w-]*$/
 // Emphasis marks around words, on one line
 const EMPHASIS = /(\*\*|__|`)(.+?)\1/g
 const HEADING = /^#{1,6}\s+/
+// A run of non-space characters no word or number of a description reaches (adr/0071 §9);
+// tested before the link and personal data patterns, whose cost grows with such a run
+export const MAX_UNBROKEN_RUN = 60
+const UNBROKEN = new RegExp(`\\S{${String(MAX_UNBROKEN_RUN + 1)}}`)
 // Quotes a model wraps a whole answer in
 const QUOTES = new Set(['"', "'", "“", "”", "«", "»"])
 
@@ -70,8 +74,17 @@ export function suggestionProblems(task: AiTask, text: string): string[] {
   if (MARKUP_LEFT.test(text)) {
     problems.push("markup")
   }
-  if (task.gate === "seo_title" || task.gate === "seo_description") {
-    return [...problems, ...draftProblems(task.gate, text)]
+  const seo = task.gate === "seo_title" || task.gate === "seo_description"
+  // Long-form text only: an SEO field is short enough for its patterns, and its rules stay as they are
+  if (!seo && UNBROKEN.test(text)) {
+    return [...problems, "noise"]
+  }
+  if (
+    task.gate === "seo_title" ||
+    task.gate === "seo_description" ||
+    task.gate === "product_description"
+  ) {
+    return [...problems, ...fieldProblems(task.gate, text)]
   }
   if (isShouting(text) || hasSymbolRun(text)) {
     problems.push("noise")

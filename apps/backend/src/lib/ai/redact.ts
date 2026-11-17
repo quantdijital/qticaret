@@ -1,8 +1,11 @@
 /**
- * What never reaches a draft provider (adr/0005; F10.13 KK8): an
- * address, a phone number, an IBAN, an identity number or a card number
- * a shop may have typed into a product's text. Product data only goes,
- * and what reads as a person's is taken out first.
+ * What is taken out of a product's text before it reaches an AI service
+ * (adr/0005; F10.13 KK8; adr/0071 §10), by pattern: an e-mail address, a
+ * Turkish phone number, an IBAN, a card number and a Turkish identity
+ * number. A person's name or a postal address has no pattern and is not
+ * caught here: what goes is limited to a product's own published fields,
+ * and that, not this filter, is what keeps customers' data out. Moved here from
+ * `lib/content-drafts` (docs/22 PR 2-1); the patterns are unchanged.
  */
 
 const PATTERNS: readonly RegExp[] = [

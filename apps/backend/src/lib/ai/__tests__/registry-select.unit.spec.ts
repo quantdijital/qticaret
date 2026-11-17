@@ -25,7 +25,11 @@ describe("AI registries (adr/0071 §2)", () => {
 
   it("keeps the test task out of every environment but tests", () => {
     expect(aiTasks("test")).toContain(TEST_TASK)
-    expect(aiTasks("production").map((task) => task.id)).toEqual(["seo_title", "seo_description"])
+    expect(aiTasks("production").map((task) => task.id)).toEqual([
+      "seo_title",
+      "seo_description",
+      "product_description",
+    ])
     expect(findAiTask("test_text", "development")).toBeNull()
   })
 

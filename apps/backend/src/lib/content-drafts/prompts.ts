@@ -1,24 +1,24 @@
-import { redactPersonalData } from "./redact"
+import type { ProductFacts } from "../ai/facts/product"
+import type { AiFieldRule } from "../ai/field-rules"
+import { cleanText } from "../ai/prompt"
 
 /**
- * The prompts a draft is asked with (adr/0005): sector-neutral, fed from
- * the product's own fields and attribute template, never from orders or
- * customers. Every value goes through the personal data filter first.
+ * adr/0005's draft prompts, kept only for its draft routes until docs/22
+ * PR 2-2 removes them (the AI core asks with `lib/ai/instructions.ts` and
+ * `lib/ai/prompt.ts`). The facts come from the core's product reader and
+ * every value goes through the core's personal data filter: nothing here
+ * filters or reads on its own.
  */
 
-export const DRAFT_KINDS = ["product_description", "seo_title", "seo_description"] as const
+export const DRAFT_KINDS = [
+  "product_description",
+  "seo_title",
+  "seo_description",
+] as const satisfies readonly AiFieldRule[]
 export type DraftKind = (typeof DRAFT_KINDS)[number]
 
 /** What a product draft may know of the product: nothing of anyone. */
-export interface ProductDraftFacts {
-  name: string
-  subtitle: string | null
-  brand: string | null
-  category: string | null
-  /** The product's attributes as its template names them: "Malzeme: Keten". */
-  attributes: { label: string; value: string }[]
-  /** Its description now, as plain text; a draft may improve on it. */
-  description: string | null
+export interface ProductDraftFacts extends ProductFacts {
   shopName: string
 }
 
@@ -31,11 +31,7 @@ const ASKS: Record<DraftKind, string> = {
     "Bu ürün sayfası için Türkçe bir arama sonucu açıklaması yaz: 70–155 karakter, ürünün öne çıkan özelliğini söylesin. Yalnızca açıklamayı ver.",
 }
 
-const clip = (text: string, max: number) => (text.length > max ? `${text.slice(0, max)}…` : text)
-
-// Filtered whole, then clipped: a number cut at the edge cannot slip half through
-const clean = (text: string, max: number) => clip(redactPersonalData(text.trim()), max)
-const cleanOrNull = (text: string | null, max: number) => (text ? clean(text, max) : null)
+const cleanOrNull = (text: string | null, max: number) => (text ? cleanText(text, max) : null)
 
 /**
  * The facts as they may leave the shop: every value and label filtered of
@@ -44,15 +40,15 @@ const cleanOrNull = (text: string | null, max: number) => (text ? clean(text, ma
  */
 export function draftFacts(facts: ProductDraftFacts): ProductDraftFacts {
   return {
-    name: clean(facts.name, 300),
+    name: cleanText(facts.name, 300),
     subtitle: cleanOrNull(facts.subtitle, 300),
     brand: cleanOrNull(facts.brand, 300),
     category: cleanOrNull(facts.category, 300),
     attributes: facts.attributes
       .slice(0, 30)
-      .map((each) => ({ label: clean(each.label, 100), value: clean(each.value, 300) })),
+      .map((each) => ({ label: cleanText(each.label, 100), value: cleanText(each.value, 300) })),
     description: cleanOrNull(facts.description, 2000),
-    shopName: clean(facts.shopName, 300),
+    shopName: cleanText(facts.shopName, 300),
   }
 }
 
