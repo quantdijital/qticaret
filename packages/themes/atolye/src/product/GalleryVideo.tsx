@@ -142,9 +142,10 @@ export function GalleryVideo({
     }
   }, [autoplay, sources])
 
+  // A function: the shop's title is put in as written (`$&`, `$'` are not patterns here)
   const named = (playing ? words.videoPauseNamed : words.videoPlayNamed).replace(
     "{title}",
-    video.title
+    () => video.title
   )
   return (
     <div ref={tile} className="absolute inset-0" data-video={video.id}>

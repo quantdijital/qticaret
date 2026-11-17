@@ -136,6 +136,48 @@ describe("productVideos (adr/0069 §6)", () => {
     })
   })
 
+  it.each([
+    ["an MP4 over plain HTTP", { outputs: { mp4: { url: "http://dosya.ornek.com/a.mp4" } } }],
+    [
+      "a WebM over plain HTTP",
+      {
+        outputs: {
+          mp4: { url: `${FILES}/a.mp4` },
+          webm: { url: "http://dosya.ornek.com/a.webm" },
+        },
+      },
+    ],
+    [
+      "a WebM of another scheme",
+      { outputs: { mp4: { url: `${FILES}/a.mp4` }, webm: { url: "data:video/webm;base64,AA" } } },
+    ],
+    ["a relative MP4", { outputs: { mp4: { url: "/media/a.mp4" } } }],
+    ["a script address", { outputs: { mp4: { url: "javascript:alert(1)" } } }],
+    ["a malformed address", { outputs: { mp4: { url: "https//eksik" } } }],
+    [
+      "a poster over plain HTTP",
+      { poster: { url: "http://dosya.ornek.com/a.jpg", width: 1, height: 1, derivatives: null } },
+    ],
+  ] satisfies [string, Partial<StoreMediaVideo>][])(
+    "leaves out a clip with %s outside development",
+    (_, fields) => {
+      expect(productVideos(product([clip("mvid_1", fields)]), false)).toEqual([])
+    }
+  )
+
+  it("takes plain HTTP addresses in development (the local storage), as the policy does", () => {
+    const local = "http://localhost:58333/qticaret"
+    const fields: Partial<StoreMediaVideo> = {
+      outputs: { mp4: { url: `${local}/a.mp4` }, webm: { url: `${local}/a.webm` } },
+      poster: { url: `${local}/a.jpg`, width: 720, height: 1280, derivatives: null },
+    }
+    expect(productVideos(product([clip("mvid_1", fields)]), true)).toHaveLength(1)
+    expect(productVideos(product([clip("mvid_1", fields)]), false)).toEqual([])
+    // Still never another scheme
+    const script = { outputs: { mp4: { url: "javascript:alert(1)" } } }
+    expect(productVideos(product([clip("mvid_2", script)]), true)).toEqual([])
+  })
+
   it("has none for a product the answer gave no videos", () => {
     expect(productVideos(product(undefined))).toEqual([])
     expect(productVideos(product(null))).toEqual([])

@@ -130,6 +130,14 @@ describe("the gallery's first HTML with videos", () => {
     expect(thumbs.filter((match) => match[3]?.includes("data-video-mark"))).toHaveLength(1)
   })
 
+  it("names the video's thumbnail with the shop's title as written, `$` patterns and all (review S2)", () => {
+    const title = "Kesim $& açısı $' ve $` $$"
+    const holder = document.createElement("div")
+    holder.innerHTML = render({ videos: [{ ...video("mvid_1"), title }] })
+    const thumb = holder.querySelector('a[href="#gorsel-2"]')
+    expect(thumb?.getAttribute("aria-label")).toBe(`Video: ${title}`)
+  })
+
   it("shows a product without photographs its poster first, eager, as the only square", () => {
     const html = render({ images: [], own: {}, videos: [video("mvid_1")] })
     expect(squares(html)).toEqual(["video:mvid_1"])

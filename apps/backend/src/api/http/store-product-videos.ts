@@ -56,7 +56,8 @@ export async function storeProductVideos(
   res: MedusaResponse,
   next: MedusaNextFunction
 ): Promise<void> {
-  if (req.method !== "GET" || !asksForVideos(req)) {
+  // A HEAD runs the GET route and sizes its answer: cut down alike (review S1)
+  if (!["GET", "HEAD"].includes(req.method) || !asksForVideos(req)) {
     next()
     return
   }

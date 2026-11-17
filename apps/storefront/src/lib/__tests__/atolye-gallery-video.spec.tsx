@@ -278,4 +278,12 @@ describe("the gallery's video", () => {
     expect(calls.filter((call) => call === "play")).toHaveLength(2)
     expect(button()?.getAttribute("aria-label")).toBe("Videoyu durdur: Yakın çekim")
   })
+
+  it("names its button with the shop's title as written, `$` patterns and all (review S2)", async () => {
+    const title = "Kesim $& açısı $' ve $` $$"
+    await draw({ video: { ...clip, title } })
+    expect(button()?.getAttribute("aria-label")).toBe(`Videoyu oynat: ${title}`)
+    await inView(1)
+    expect(button()?.getAttribute("aria-label")).toBe(`Videoyu durdur: ${title}`)
+  })
 })

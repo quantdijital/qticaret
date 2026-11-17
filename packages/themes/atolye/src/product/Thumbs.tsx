@@ -123,7 +123,8 @@ export function Thumbs({
               aria-label={
                 videos[n] === undefined
                   ? words.show.replace("{n}", String(n + 1))
-                  : words.videoShow.replace("{title}", videos[n])
+                  : // A function: the title as written (`$&`, `$'` are not patterns here)
+                    words.videoShow.replace("{title}", () => videos[n] ?? "")
               }
               onClick={(event) => {
                 event.preventDefault()

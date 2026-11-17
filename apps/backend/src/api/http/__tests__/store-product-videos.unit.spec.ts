@@ -69,6 +69,17 @@ describe("storeProductVideos", () => {
     expect(list.body).toEqual({ products: [{ id: "prod_1", media_videos: [ready] }] })
   })
 
+  it("cuts a HEAD's answer down alike: its size tells nothing (review S1)", async () => {
+    const on = await answer(request(fields, true, "HEAD"), {
+      product: { id: "prod_1", media_videos: [ready, queued] },
+    })
+    expect(on.body).toEqual({ product: { id: "prod_1", media_videos: [ready] } })
+    const off = await answer(request(fields, false, "HEAD"), {
+      product: { id: "prod_1", media_videos: [ready] },
+    })
+    expect(off.body).toEqual({ product: { id: "prod_1" } })
+  })
+
   it("answers without videos while the flag is off, never refusing the request", async () => {
     const page = await answer(request(fields, false), {
       product: { id: "prod_1", media_videos: [ready] },
