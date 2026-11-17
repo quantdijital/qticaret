@@ -273,13 +273,14 @@ medusaIntegrationTestRunner({
       for (const path of ["cutlery/tezgah", "general/Grafit", "general/..%2Fgrafit", "yok/yok"]) {
         expect((await staff.get(`/admin/storefront-presets/${path}/preview`)).status).toBe(404)
       }
+      // A read, as the gallery's list is: any staff member's (operations reads all but the private)
       const operations = staffClient(
         http,
         (await createAdminUser(http, container, "operations")).headers
       )
       expect(
         (await operations.get("/admin/storefront-presets/general/grafit/preview")).status
-      ).toBe(404)
+      ).toBe(200)
     })
   },
 })
