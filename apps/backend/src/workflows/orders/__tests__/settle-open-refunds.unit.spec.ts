@@ -91,6 +91,19 @@ describe("a cancel's refund the job closed, its order still open (review D4-5)",
     })
   })
 
+  it("reads the order before closing: a read that fails leaves the refund open, the shop untold of nothing", async () => {
+    traceIs("made")
+    const { container } = ledgerWith([[cancel()]])
+    container.register({
+      [ContainerRegistrationKeys.QUERY]: asValue({
+        graph: () => Promise.reject(new Error("database gone")),
+      }),
+    })
+
+    expect(await settleOpenRefunds(container, NOW)).toEqual({ closed: 0, failed: 0, open: 1 })
+    expect(refundRun).not.toHaveBeenCalled()
+  })
+
   it("tells nothing for an order canceled, or a refund not a cancel's", async () => {
     traceIs("shown")
     orderStatus = "canceled"

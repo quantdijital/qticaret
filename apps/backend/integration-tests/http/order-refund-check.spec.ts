@@ -208,5 +208,41 @@ medusaIntegrationTestRunner({
       expect(open).toMatchObject({ status: "pending", error_code: "refund_unconfirmed" })
       expect(fake.payments.get(reference)?.refunds).toEqual([])
     })
+
+    it("finishes a staff check cut short after Medusa's record: one record, never two (fifth round)", async () => {
+      const { orderId, reference } = await paid()
+      const body = { amount: 30, reference: key() }
+      await lostRefund(orderId, body)
+      fake.payments.get(reference)?.refunds.push({ amount: 3000, referenceNo: body.reference })
+      const module = getContainer().resolve(Modules.PAYMENT) as unknown as {
+        createRefunds: (...args: unknown[]) => Promise<unknown>
+        updatePayment: (...args: unknown[]) => Promise<unknown>
+      }
+      const created = jest.spyOn(module, "createRefunds")
+      // Medusa's record is written, the payment's data is not
+      const broken = jest
+        .spyOn(module, "updatePayment")
+        .mockRejectedValueOnce(new Error("database gone"))
+
+      const cut = await check(orderId, body.reference, "made")
+      broken.mockRestore()
+      const round = await settleOpenRefunds(getContainer(), Date.now() + 3 * MINUTE)
+      created.mockRestore()
+      const [closed] = await ledger().listOrderRefunds({ reference: body.reference })
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "payment", fields: ["refunds.id"], filters: { id: closed?.payment_id } })
+      const transactions = await getContainer()
+        .resolve(Modules.ORDER)
+        .listOrderTransactions({ order_id: orderId, reference: "refund" })
+
+      expect(cut.status).toBeGreaterThanOrEqual(400)
+      expect(round).toMatchObject({ closed: 1 })
+      expect(closed).toMatchObject({ status: "done" })
+      expect(created).toHaveBeenCalledTimes(1)
+      expect((data[0] as { refunds: unknown[] }).refunds).toHaveLength(1)
+      expect(transactions).toHaveLength(1)
+      expect(refundRequests()).toHaveLength(1)
+    })
   },
 })

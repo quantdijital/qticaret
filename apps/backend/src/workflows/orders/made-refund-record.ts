@@ -82,7 +82,7 @@ async function updateRefundedTotal(
  */
 export async function recordMadeRefund(
   container: Pick<MedusaContainer, "resolve">,
-  entry: { payment_id: string; reference: string; amount: number },
+  entry: CheckedEntry,
   actorId: string
 ): Promise<void> {
   const payment = await readPayment(container, entry.payment_id)
@@ -90,10 +90,7 @@ export async function recordMadeRefund(
     return
   }
   const amount = toMedusaAmount(kurus(entry.amount))
-  const note = checkedNote(entry.reference)
-  let refundId = (payment.refunds ?? []).find(
-    (refund) => refund?.note === note && MathBN.eq(refund.raw_amount ?? 0, amount)
-  )?.id
+  let refundId = checkedRefundOf(payment, entry)
   if (!refundId) {
     const left = MathBN.sub(sum(payment.captures), sum(payment.refunds))
     if (MathBN.lt(left, amount)) {
@@ -104,10 +101,55 @@ export async function recordMadeRefund(
         payment: payment.id,
         amount,
         created_by: actorId,
-        note,
+        note: checkedNote(entry.reference),
       })
     ).id
   }
+  await keepRecord(container, payment, entry, refundId)
+}
+
+/**
+ * A staff check cut short between Medusa's record and the payment's data
+ * (review, fifth round): the record the check wrote is found by its note
+ * and amount, and the data completed with it, so the refund reads as made
+ * and nothing records it a second time. Never creates one; true when the
+ * check's record was there to finish.
+ */
+export async function finishCheckedRecord(
+  container: Pick<MedusaContainer, "resolve">,
+  entry: CheckedEntry
+): Promise<boolean> {
+  const payment = await readPayment(container, entry.payment_id)
+  const refundId = payment ? checkedRefundOf(payment, entry) : undefined
+  if (!payment || !refundId) {
+    return false
+  }
+  await keepRecord(container, payment, entry, refundId)
+  return true
+}
+
+interface CheckedEntry {
+  payment_id: string
+  reference: string
+  amount: number
+}
+
+// The staff check's own Medusa refund for this ledger refund: by its note and its amount
+const checkedRefundOf = (payment: PaymentRow, entry: CheckedEntry): string | undefined => {
+  const amount = toMedusaAmount(kurus(entry.amount))
+  const note = checkedNote(entry.reference)
+  return (payment.refunds ?? []).find(
+    (refund) => refund?.note === note && MathBN.eq(refund.raw_amount ?? 0, amount)
+  )?.id
+}
+
+// The refund recorded in the payment's data under Medusa's refund, the collection's total kept
+async function keepRecord(
+  container: Pick<MedusaContainer, "resolve">,
+  payment: PaymentRow,
+  entry: CheckedEntry,
+  refundId: string
+): Promise<void> {
   const data = withRefundRecord(payment.data ?? {}, entry.reference, kurus(entry.amount), refundId)
   await container.resolve(Modules.PAYMENT).updatePayment({
     id: payment.id,

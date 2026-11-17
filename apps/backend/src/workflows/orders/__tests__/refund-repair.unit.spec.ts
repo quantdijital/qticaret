@@ -5,7 +5,7 @@ import {
   createMedusaContainer,
 } from "@medusajs/framework/utils"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
-import { checkedNote } from "../made-refund-record"
+import { checkedNote, finishCheckedRecord } from "../made-refund-record"
 import { settleRefundByHand } from "../settle-refund-by-hand"
 import { closeRefundEntry } from "../steps/order-refund"
 import { restoreRefundTransaction } from "../steps/refund-transactions"
@@ -121,6 +121,34 @@ describe("a made refund's order money move is mended for its own refund alone (D
     expect(await restoreRefundTransaction(unnamed.container, entry)).toBe(0)
     expect(there.addOrderTransactions).not.toHaveBeenCalled()
     expect(unnamed.addOrderTransactions).not.toHaveBeenCalled()
+  })
+})
+
+describe("a staff check cut short after Medusa's record is finished from it (fifth round)", () => {
+  it("completes the payment's data with the check's own record, creating none", async () => {
+    const shop = containerWith({
+      refunds: [{ id: "ref_TRY", note: checkedNote(REFERENCE), raw_amount: raw(10) }],
+    })
+
+    expect(await finishCheckedRecord(shop.container, entry)).toBe(true)
+    expect(shop.createRefunds).not.toHaveBeenCalled()
+    expect(shop.updatePayment).toHaveBeenCalledWith({
+      id: "pay_01",
+      data: { refunds: [{ reference_no: REFERENCE, amount: 1000, refund_id: "ref_TRY" }] },
+    })
+    expect(shop.updatePaymentCollections).toHaveBeenCalledWith("paycol_01", expect.anything())
+  })
+
+  it("finishes nothing without the check's record: another note, or another amount", async () => {
+    const other = containerWith({ refunds: [{ id: "ref_00", note: "x", raw_amount: raw(10) }] })
+    const amount = containerWith({
+      refunds: [{ id: "ref_00", note: checkedNote(REFERENCE), raw_amount: raw(5) }],
+    })
+
+    expect(await finishCheckedRecord(other.container, entry)).toBe(false)
+    expect(await finishCheckedRecord(amount.container, entry)).toBe(false)
+    expect(other.updatePayment).not.toHaveBeenCalled()
+    expect(amount.createRefunds).not.toHaveBeenCalled()
   })
 })
 

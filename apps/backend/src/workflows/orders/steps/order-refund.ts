@@ -10,6 +10,7 @@ import { HOSTED_FORM_PROVIDERS } from "../../../lib/payments/checkout"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
 import type { ProviderPart } from "../../../modules/order-refunds/service"
+import { finishCheckedRecord } from "../made-refund-record"
 import { readOrderMoney } from "../order-money"
 import { settleFailedEntry, tracedOf } from "../refund-settle"
 import { refundTraceOf } from "../refund-trace"
@@ -147,11 +148,16 @@ export const planOrderRefundStep = createStep(
       existing?.status === "pending"
         ? (await refundTraceOf(container, tracedOf(existing))).trace
         : null
-    const action = existing
+    let action = existing
       ? triedAgain(existing.status, trace, input.close_only === true)
       : input.close_only
         ? "done"
         : "replan"
+    // Shown, and a staff check already wrote Medusa's record: finished from it, never recorded
+    // again through the provider (review, fifth round)
+    if (existing && action === "send" && (await finishCheckedRecord(container, existing))) {
+      action = "made"
+    }
     if (!existing && action === "done") {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.refund_unknown")
     }

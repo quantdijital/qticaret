@@ -70,33 +70,21 @@ async function mark(
 }
 
 /**
- * A cancel's refund closed here, its order still not canceled (the cancel
- * stopped on it, review D4-5): the money is back, the goods must not go.
- * The shop is told to cancel the order, once per refund.
+ * Whether closing this refund leaves an order to cancel: a cancel's refund
+ * whose order is not canceled (the cancel stopped on it, review D4-5).
+ * Read before the refund is closed: a read that fails then leaves it open
+ * for the next round, never closed with the shop untold.
  */
-async function tellOfUncanceledOrder(
-  container: MedusaContainer,
-  entry: Entry,
-  provider: string
-): Promise<void> {
+async function uncanceledByCancel(container: MedusaContainer, entry: Entry): Promise<boolean> {
   if (!isCancelRefundReference(entry.reference)) {
-    return
+    return false
   }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
     fields: ["status"],
     filters: { id: entry.order_id },
   })
-  if ((data[0] as { status?: string } | undefined)?.status === "canceled") {
-    return
-  }
-  await alertPaymentIssue(container, {
-    issue: "cancel_refund_order_open",
-    provider,
-    reference: entry.reference,
-    cart_id: entry.order_id,
-    amount: entry.amount,
-  })
+  return (data[0] as { status?: string } | undefined)?.status !== "canceled"
 }
 
 /**
@@ -116,6 +104,7 @@ async function settleEntry(
 ): Promise<"closed" | "failed" | "open"> {
   const { trace, provider } = await refundTraceOf(container, tracedOf(entry))
   if (trace === "made" || trace === "shown") {
+    const orderOpen = await uncanceledByCancel(container, entry)
     await refundOrderWorkflow(container).run({
       input: {
         order_id: entry.order_id,
@@ -125,7 +114,16 @@ async function settleEntry(
         close_only: true,
       },
     })
-    await tellOfUncanceledOrder(container, entry, provider)
+    // The money is back, the goods must not go: the shop cancels the order (once per refund)
+    if (orderOpen) {
+      await alertPaymentIssue(container, {
+        issue: "cancel_refund_order_open",
+        provider,
+        reference: entry.reference,
+        cart_id: entry.order_id,
+        amount: entry.amount,
+      })
+    }
     return "closed"
   }
   // Refused outright, its undoing cut short by a crash: nothing was made
