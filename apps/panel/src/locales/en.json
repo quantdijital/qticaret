@@ -9163,7 +9163,7 @@
         "strip_note": {
           "label": "Strip note",
           "term": "strip note",
-          "hint": "A short announcement or offer. Example: Free shipping over 1500 TL."
+          "hint": "A short announcement or offer. Shop details work too: free shipping over {ücretsiz_kargo_eşiği} (the note hides while no threshold is set)."
         },
         "strip_note_link": {
           "label": "Note link",
