@@ -8,7 +8,7 @@ import type { SectionVariant, VariantBranch } from "./variants"
  * The newsletter box (adr/0049 Ek 2026-11-17 e-bülten), on a page or in
  * the footer. `text` keeps its meaning: the consent sentence, the box's
  * label (İYS, double opt-in). `description`, the line beside the heading,
- * is every variant's (the standard drawing shows it only once written);
+ * is every variant's, kept across a switch (the standard drawing never shows it);
  * the promise line (`note`, `show_note`) is `split`'s and `image_card`'s,
  * the picture (one of the media library's uploads, checked on saving)
  * `image_card`'s. `in_footer` is the footer's box only: a page has no

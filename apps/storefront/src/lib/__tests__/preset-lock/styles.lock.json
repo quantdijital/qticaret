@@ -70,6 +70,10 @@
       "file": "menu.css"
     },
     {
+      "sha256": "2b8b778046080d29b3bda31326038f157b91295837d8b567f0d52f3025c31550",
+      "file": "newsletter.css"
+    },
+    {
       "sha256": "5b99386caf537145e0b40a4e2850effa589d856c9190b9fadd06cc65f1144638",
       "file": "pages.css"
     },
@@ -110,7 +114,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "8c8bea6ba4aa81a1e053c4354dec71e56e6f35e59ab00361010e4439af9904ce",
+      "sha256": "4f73a81475f21c9e66650add3fcaa90ffcd0ad012b892a22427fa99f7037928f",
       "file": "styles.css"
     },
     {

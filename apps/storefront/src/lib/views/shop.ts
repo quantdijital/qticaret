@@ -18,6 +18,7 @@ import {
 import { categoryCounts, categoryImages } from "@/lib/store-api/extras"
 import { bottomNavOf, isCheckoutPage } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
+import { newsletterLookOf } from "./newsletter"
 import { miniCartOf } from "./cart"
 import { wholesaleCheckoutBlocked } from "./cart-wholesale"
 import { linePicturesOf, productPathsOf } from "./line-paths"
@@ -58,6 +59,8 @@ function newsletterOf(layout: StoreLayout, shop: string, editing: boolean): Shop
     ? {
         title: section.title ?? t("newsletter.title"),
         text: section.text ?? t("newsletter.text", { shop }),
+        // How it is drawn in the footer (adr/0049 Ek 2026-11-17 e-bülten)
+        ...newsletterLookOf(section, t, "footer"),
         // The editor's live session marks the box as its own section (adr/0065 Faz 2b)
         ...(editing ? { mark: section.id } : {}),
       }

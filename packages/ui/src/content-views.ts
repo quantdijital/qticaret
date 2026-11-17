@@ -18,6 +18,7 @@ import type {
 } from "./home-views"
 import type { PaginationView } from "./listing-views"
 import type { MarqueeSectionView } from "./marquee-views"
+import type { NewsletterLookView } from "./newsletter-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ProductsSectionView } from "./shelf-views"
 import type { StripGallerySectionView } from "./strip-views"
@@ -134,7 +135,13 @@ export type HomeSectionView = {
       variant: TrustBadgesVariant
       badges: TrustBadgeView[]
     }
-  | { id: string; type: "newsletter"; title: string; text: string; privacyPath: string | null }
+  | ({
+      id: string
+      type: "newsletter"
+      title: string
+      text: string
+      privacyPath: string | null
+    } & Partial<NewsletterLookView>)
   | { id: string; type: "help"; title: string; text: string; contact: ContactView }
   | {
       id: string

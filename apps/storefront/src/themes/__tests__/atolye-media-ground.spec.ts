@@ -27,6 +27,7 @@ const WELLS: Readonly<Record<string, readonly [number, number]>> = {
   "content/ReviewsPage.tsx": [1, 1],
   "frame/CartSheetLine.tsx": [0, 1],
   "frame/MenuParts.tsx": [0, 1],
+  "frame/NewsletterBox.tsx": [1, 0],
   "frame/QuickViewGallery.tsx": [2, 0],
   "frame/SearchPanel.tsx": [1, 0],
   "order/OrderParts.tsx": [0, 1],
@@ -73,7 +74,7 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
     }
     expect(found).toEqual(WELLS)
     const total = Object.values(WELLS).reduce((sum, [a, b]) => sum + a + b, 0)
-    expect(total).toBe(27)
+    expect(total).toBe(28)
   })
 
   it("leaves the same tones on what is not a photograph's ground", () => {

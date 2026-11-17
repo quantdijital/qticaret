@@ -5,6 +5,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { CookiePreferencesLink } from "./CookiePreferencesLink"
 import { BrandBlock, LinkColumns, MarkList, ReachList } from "./FooterColumnsParts"
+import { FooterNewsletterBox, footerNewsletterVariant } from "./FooterNewsletter"
 import { NewsletterForm } from "./NewsletterForm"
 import { newsletterWords } from "./newsletter-words"
 
@@ -121,7 +122,11 @@ export function FooterColumns({
   subscribe?: Subscribe | undefined
   columns: FooterColumnsView
 }) {
-  const news = subscribe && shop.newsletter ? subscribe : null
+  // The newsletter box's variant (adr/0049 Ek 2026-11-17): today's box in the strip or the
+  // brand block, a band of its own at the top, or small in the brand column
+  const drawn = subscribe ? footerNewsletterVariant(shop) : null
+  const news = subscribe && drawn === "standard" ? subscribe : null
+  const band = drawn === "split" || drawn === "image_card" || drawn === "strip" ? drawn : null
   const { contact } = shop
   const reach = [contact.phoneHref, contact.whatsappHref, contact.email].some(Boolean)
   const strip = columns.topStrip && (news !== null || reach)
@@ -134,6 +139,13 @@ export function FooterColumns({
       data-badges={columns.badgeStyle}
       className={cn("gf-footer-cols mt-(--footer-gap)", columns.ground === "stage" && "gf-stage")}
     >
+      {subscribe && band && (
+        <div className="border-b border-rule">
+          <Container className="py-8 lg:py-10">
+            <FooterNewsletterBox shop={shop} t={t} subscribe={subscribe} variant={band} />
+          </Container>
+        </div>
+      )}
       {strip && (
         <div className="border-b border-rule">
           <Container className="grid gap-8 py-10 lg:grid-cols-12 lg:items-center lg:gap-x-(--gap-columns) lg:py-12">
@@ -149,6 +161,9 @@ export function FooterColumns({
       <Container className="grid gap-10 py-12 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:py-16">
         <BrandBlock shop={shop} t={t} about={columns.about} withContact={!strip}>
           {!strip && news && <Newsletter shop={shop} t={t} subscribe={news} wide={false} />}
+          {subscribe && drawn === "in_footer" && (
+            <FooterNewsletterBox shop={shop} t={t} subscribe={subscribe} variant="in_footer" />
+          )}
         </BrandBlock>
         <LinkColumns groups={shop.footerGroups} shop={shop} t={t} />
       </Container>

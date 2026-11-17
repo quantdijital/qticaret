@@ -16,6 +16,13 @@ import { useChallengeForm } from "./useChallengeForm"
  * footer's) shows the consent once the visitor starts on the form, its
  * field focused or filled (`ui.css` `.gf-news`); before that the field
  * and the button stand alone. Without `:has()` the consent always shows.
+ *
+ * `joined` (the newsletter variants after `standard`, adr/0049 Ek
+ * 2026-11-17): the label read by screen readers only (the heading beside
+ * it names the box), the field and the button one piece (`.gf-join`,
+ * newsletter.css), the privacy notice's link always under it on its own
+ * line (the consent sentence then without it); the sending, the consent
+ * box and the messages as above.
  */
 export function NewsletterForm({
   action,
@@ -23,6 +30,7 @@ export function NewsletterForm({
   words,
   id,
   quiet = false,
+  joined = false,
   marks,
   className,
 }: {
@@ -31,6 +39,7 @@ export function NewsletterForm({
   words: NewsletterWords
   id: string
   quiet?: boolean
+  joined?: boolean
   /** The theme editor's live preview (adr/0065 Faz 2b): the consent sentence carries its field mark (`text`). */
   marks?: boolean | undefined
   className?: string
@@ -50,12 +59,20 @@ export function NewsletterForm({
       </p>
     )
   }
+  const privacy = privacyPath && (
+    <a href={privacyPath} className="font-semibold underline">
+      {words.privacyLink}
+    </a>
+  )
   return (
-    <form onSubmit={onSubmit} className={cn("flex flex-col gap-3", quiet && "gf-news", className)}>
-      <label htmlFor={`${id}-eposta`} className="text-sm font-semibold">
+    <form
+      onSubmit={onSubmit}
+      className={cn("flex flex-col", joined ? "gap-2" : "gap-3", quiet && "gf-news", className)}
+    >
+      <label htmlFor={`${id}-eposta`} className={joined ? "sr-only" : "text-sm font-semibold"}>
         {words.email}
       </label>
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className={joined ? "gf-join" : "flex flex-col gap-2 sm:flex-row"}>
         <input
           id={`${id}-eposta`}
           type="email"
@@ -89,18 +106,16 @@ export function NewsletterForm({
             className="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
           />
           <span {...fieldMark(marks, "text")}>
-            {words.consent}{" "}
-            {privacyPath && (
-              <a href={privacyPath} className="font-semibold underline">
-                {words.privacyLink}
-              </a>
-            )}
+            {words.consent}
+            {joined ? null : " "}
+            {joined ? null : privacy}
           </span>
         </label>
         <p id={`${id}-durum`} role="alert" className="min-h-[1lh] text-sm font-semibold">
           {error ? (words.errors[error] ?? words.fallback) : null}
         </p>
       </div>
+      {joined && privacy ? <p className="gf-news-privacy text-xs">{privacy}</p> : null}
     </form>
   )
 }

@@ -1,0 +1,50 @@
+/*
+ * The newsletter variants after `standard` (`frame/NewsletterBox.tsx`,
+ * adr/0049 Ek 2026-11-17 e-bülten): the field and the button one piece
+ * (`.gf-join`), the field's corners on the outer side only, the button's
+ * too, sharing one edge; the focus ring on the field (`.gf-field`) and the
+ * button (`:focus-visible`, base) as everywhere. The theme's radius
+ * (`--button-radius`) and colours (the field's, the signal's) as the
+ * standard form's; on the graphite stage the field's stage colours
+ * (ui.css). No motion beyond the button's own.
+ */
+@layer components {
+  .gf-join {
+    display: flex;
+    min-width: 0;
+    align-items: stretch;
+  }
+  .gf-join > .gf-field {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+    border-inline-end-width: 0;
+  }
+  .gf-join > .gf-btn {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    padding-inline: var(--space-md);
+  }
+  /* The strip's small form: a step lower */
+  .gf-news-small .gf-join > .gf-field,
+  .gf-news-small .gf-join > .gf-btn {
+    min-height: 2.75rem;
+    font-size: var(--text-sm);
+  }
+  .gf-news-privacy a {
+    display: inline-flex;
+    min-height: 1.5rem;
+    align-items: center;
+    color: var(--color-text-2);
+    font-weight: 600;
+    text-underline-offset: 0.2em;
+  }
+  .gf-news-privacy a:hover {
+    color: var(--color-text);
+  }
+  .gf-stage .gf-news-privacy a {
+    color: var(--color-stage-text-2);
+  }
+  .gf-stage .gf-news-privacy a:hover {
+    color: var(--color-stage-text);
+  }
+}

@@ -5,8 +5,8 @@ import type { NewsletterVariant } from "./section-variants.js"
  * The newsletter box's own fields (adr/0049 Ek 2026-11-17 e-bülten). The
  * meaning of `text` does not change: it stays the consent sentence, the
  * box's label (İYS, double opt-in). What the visitor reads beside the
- * heading is a new field, `description`, common to every variant (the
- * standard drawing shows it only once the shop writes one, so a stored box
+ * heading is a new field, `description`, common to every variant so it
+ * survives a switch (the standard drawing never shows it, so a stored box
  * draws as it did). `note` (a small promise under it, "Ayda birkaç
  * e-posta · İstediğiniz an ayrılın") and its switch are `split`'s and
  * `image_card`'s; `image` (one of the media library's) is `image_card`'s.
@@ -48,7 +48,7 @@ export interface StoreNewsletterSection {
   text: string | null
   /** Absent: `standard`. */
   variant?: NewsletterVariant
-  /** The shop's line beside the heading; absent or null: the theme's own words (none on `standard`). */
+  /** The shop's line beside the heading; absent or null: the theme's own words (none on `standard`, which never draws it). */
   description?: string | null
   /** `split`, `image_card`: the shop's promise line; absent or null: the storefront's. */
   note?: string | null
