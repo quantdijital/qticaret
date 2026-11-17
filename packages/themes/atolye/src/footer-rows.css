@@ -193,6 +193,11 @@
   .gf-frow[data-align="center"] :is(.gf-pay, .gf-reach, [data-layout="inline"]) {
     justify-content: center;
   }
+  /* A centred list keeps its marks beside its words */
+  .gf-frow[data-align="center"] .gf-foot-prose :is(ul, ol) {
+    padding-left: 0;
+    list-style-position: inside;
+  }
 
   /* The screens a block shows on: a phone and a tablet below 1024 px, a computer from it */
   @media (min-width: 64rem) {
