@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto"
 import { join } from "node:path"
 import { request } from "@playwright/test"
 import type { APIRequestContext, APIResponse } from "@playwright/test"
-import { currentStep, totpAt } from "./totp"
+import { currentStep, totpAt } from "./totp.ts"
 
 /**
  * The backend's admin API for a storefront e2e test that needs the shop
@@ -15,7 +15,8 @@ import { currentStep, totpAt } from "./totp"
 
 export const BACKEND_URL = process.env["E2E_BACKEND_URL"] ?? "http://localhost:9000"
 
-const REPO_ROOT = join(import.meta.dirname, "..", "..", "..")
+// The checkout whose backend `.env` names the database (a worktree may have none)
+const REPO_ROOT = process.env["E2E_REPO_ROOT"] ?? join(import.meta.dirname, "..", "..", "..")
 
 // Medusa's CLI in the backend, against its database (its `.env`). The local
 // `.env` points providers at the fake servers, which the backend refuses
