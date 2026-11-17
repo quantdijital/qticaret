@@ -24,7 +24,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(tezgah).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 9,
+      version: 10,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -169,17 +169,26 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       }),
     ])
     expect(footer?.map((each) => each.type)).toEqual(["footer_bar", "newsletter"])
+    // adr/0070 PR-5: the free rows the panel's seed gives (the reach strip, the brand and three menus)
+    const bar = footer?.[0] as {
+      rows?: { columns: { blocks: { type: string; about?: string }[] }[] }[]
+    }
     expect(footer?.[0]).toMatchObject({
-      variant: "brand_columns",
+      variant: "free_rows",
       social: "icons",
-      top_strip: true,
       ground: "well",
       badge_style: "card",
+      bottom_badges: true,
       payment_badges: ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
       back_to_top: true,
       back_to_top_shape: "square",
     })
-    const about = (footer?.[0] as { about?: string } | undefined)?.about ?? ""
+    const blocks = (bar.rows ?? []).map((row) => row.columns.flatMap((each) => each.blocks))
+    expect(blocks.map((row) => row.map((block) => block.type))).toEqual([
+      ["contact"],
+      ["brand", "menu", "menu", "menu"],
+    ])
+    const about = blocks[1]?.[0]?.about ?? ""
     expect(about.length).toBeGreaterThan(0)
     expect(about.length).toBeLessThanOrEqual(240)
     // The box is the side-by-side band; `text` stays the consent sentence, so it is the shop's own
@@ -286,9 +295,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
   })
 
-  it("raised the cutlery pack's version with them (tezgah's ninth)", () => {
-    expect(sectorPack("cutlery")?.version).toBe(12)
-    expect(CODES.map((code) => read(code).version)).toEqual([9, 9, 9])
+  it("raised the cutlery pack's version with them (tezgah's tenth)", () => {
+    expect(sectorPack("cutlery")?.version).toBe(13)
+    expect(CODES.map((code) => read(code).version)).toEqual([10, 10, 10])
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",
       ...CODES,
