@@ -11,7 +11,7 @@ import { useDiscardGuard } from "./use-discard-guard"
 
 /** What may take the caret on opening: a control, never a box around one. */
 const FOCUSABLE =
-  'a[href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  'a[href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]):not([data-info-tip]), [tabindex]:not([tabindex="-1"]):not([data-info-tip])'
 
 interface FormDialogProps {
   open: boolean

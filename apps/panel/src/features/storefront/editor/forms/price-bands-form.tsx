@@ -5,6 +5,7 @@ import { RowActions } from "@/features/settings/components/storefront-rows"
 import type { PriceBand, PriceBandsSection } from "@/features/storefront/api/layout"
 import { PRICE_BANDS_LIMITS as B } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
+import { NamedGroup } from "../named-group"
 import { FIELD_IDS } from "./field-registry"
 import { CountField, FieldGroup, TextField } from "./fields"
 import type { SectionFormProps } from "./form-props"
@@ -52,135 +53,139 @@ export function PriceBandsForm({
         ? t(`${P}.labelOpen`, { amount: LIRA.format(before(index) ?? 0) })
         : t(`${P}.labelCategory`)
   return (
-    <div className="flex flex-col gap-5">
-      {problems["limit"] ? (
-        <p role="alert" className="text-sm text-destructive-text">
-          {t(`storefront.editor.problems.${problems["limit"]}`, { max: B.perPage })}
-        </p>
-      ) : null}
-      <TitleField
-        id={section.id}
-        title={section.title}
-        placeholder={t("storefront.editor.defaults.price_bands")}
-        problem={problems["title"]}
-        onChange={(title) => {
-          set({ title }, "title")
-        }}
-      />
-      <FieldGroup title={t(`${P}.bands`)} hint={t(`${P}.bandsHint`)}>
-        {problems["bands"] ? (
-          <p role="alert" className="text-xs text-destructive-text">
-            {problem(problems["bands"])}
+    <>
+      <NamedGroup name="content">
+        {problems["limit"] ? (
+          <p role="alert" className="text-sm text-destructive-text">
+            {t(`storefront.editor.problems.${problems["limit"]}`, { max: B.perPage })}
           </p>
         ) : null}
-        {section.bands.map((band, index) => {
-          const at = `bands.${String(index)}`
-          const name = t(`${P}.band`, { number: index + 1 })
-          return (
-            <div key={String(index)} className="flex flex-col gap-3 rounded-md border p-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">{name}</span>
-                <RowActions
-                  index={index}
-                  count={section.bands.length}
-                  item={name}
-                  onMove={(to) => {
-                    const next = section.bands.filter((_, each) => each !== index)
-                    next.splice(to, 0, band)
-                    set({ bands: next })
+        <TitleField
+          id={section.id}
+          title={section.title}
+          placeholder={t("storefront.editor.defaults.price_bands")}
+          problem={problems["title"]}
+          onChange={(title) => {
+            set({ title }, "title")
+          }}
+        />
+        <FieldGroup title={t(`${P}.bands`)} hint={t(`${P}.bandsHint`)}>
+          {problems["bands"] ? (
+            <p role="alert" className="text-xs text-destructive-text">
+              {problem(problems["bands"])}
+            </p>
+          ) : null}
+          {section.bands.map((band, index) => {
+            const at = `bands.${String(index)}`
+            const name = t(`${P}.band`, { number: index + 1 })
+            return (
+              <div key={String(index)} className="flex flex-col gap-3 rounded-md border p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">{name}</span>
+                  <RowActions
+                    index={index}
+                    count={section.bands.length}
+                    item={name}
+                    onMove={(to) => {
+                      const next = section.bands.filter((_, each) => each !== index)
+                      next.splice(to, 0, band)
+                      set({ bands: next })
+                    }}
+                    removable={section.bands.length > B.bands.min}
+                    onRemove={() => {
+                      set({ bands: section.bands.filter((_, each) => each !== index) })
+                    }}
+                  />
+                </div>
+                <TextField
+                  id={PREVIEW_IDS.text(section.id, `${at}.label`)}
+                  label={t(`${P}.label`)}
+                  value={band.label}
+                  max={B.label}
+                  tokens
+                  required
+                  placeholder={suggested(band, index)}
+                  error={problem(problems[`${at}.label`], B.label)}
+                  onChange={(label) => {
+                    setBand(index, { label: label ?? "" }, "label")
                   }}
-                  removable={section.bands.length > B.bands.min}
-                  onRemove={() => {
-                    set({ bands: section.bands.filter((_, each) => each !== index) })
+                />
+                <TextField
+                  id={PREVIEW_IDS.text(section.id, `${at}.text`)}
+                  label={t(`${P}.text`)}
+                  value={band.text}
+                  max={B.text}
+                  tokens
+                  placeholder={t(`${P}.textPlaceholder`)}
+                  error={problem(problems[`${at}.text`], B.text)}
+                  onChange={(text) => {
+                    setBand(index, { text }, "text")
+                  }}
+                />
+                <PriceBandRange
+                  id={`${section.id}-${at}`}
+                  band={band}
+                  bands={section.bands}
+                  index={index}
+                  onChange={(next, field) => {
+                    setBand(index, next, field)
                   }}
                 />
               </div>
-              <TextField
-                id={PREVIEW_IDS.text(section.id, `${at}.label`)}
-                label={t(`${P}.label`)}
-                value={band.label}
-                max={B.label}
-                tokens
-                required
-                placeholder={suggested(band, index)}
-                error={problem(problems[`${at}.label`], B.label)}
-                onChange={(label) => {
-                  setBand(index, { label: label ?? "" }, "label")
-                }}
-              />
-              <TextField
-                id={PREVIEW_IDS.text(section.id, `${at}.text`)}
-                label={t(`${P}.text`)}
-                value={band.text}
-                max={B.text}
-                tokens
-                placeholder={t(`${P}.textPlaceholder`)}
-                error={problem(problems[`${at}.text`], B.text)}
-                onChange={(text) => {
-                  setBand(index, { text }, "text")
-                }}
-              />
-              <PriceBandRange
-                id={`${section.id}-${at}`}
-                band={band}
-                bands={section.bands}
-                index={index}
-                onChange={(next, field) => {
-                  setBand(index, next, field)
-                }}
-              />
-            </div>
-          )
-        })}
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          className="self-start"
-          disabled={section.bands.length >= B.bands.max}
-          onClick={() => {
-            // A new price band goes before an open one, so only the last price band stays open
-            const open = section.bands.findIndex((band) => isPriced(band) && band.max === null)
-            const at = open === -1 ? section.bands.length : open
-            const added: PriceBand = {
-              label: "",
-              text: null,
-              max: nextBound(section.bands.slice(0, at)),
-              category_id: null,
-            }
-            set({ bands: section.bands.toSpliced(at, 0, added) })
-          }}
-        >
-          <Plus />
-          {t(`${P}.addBand`)}
-        </Button>
-      </FieldGroup>
-      <div id={FIELD_IDS.content(section.id, "thumbs")}>
-        <SwitchRow
-          id={`${section.id}-thumbs`}
-          label={t(`${P}.thumbs`)}
-          term={t(`${P}.thumbsTerm`)}
-          hint={t(`${P}.thumbsHint`)}
-          checked={section.thumbs > 0}
-          onChange={(checked) => {
-            set({ thumbs: checked ? B.thumbs.default : 0 })
-          }}
-        />
-      </div>
-      {section.thumbs > 0 ? (
-        <div id={FIELD_IDS.content(section.id, "thumbs_count")}>
-          <CountField
-            id={`${section.id}-thumbs-count`}
-            label={t(`${P}.thumbsCount`)}
-            term={t(`${P}.thumbsCountTerm`)}
-            value={section.thumbs}
-            max={B.thumbs.max}
-            onChange={(thumbs) => {
-              set({ thumbs }, "thumbs")
+            )
+          })}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="self-start"
+            disabled={section.bands.length >= B.bands.max}
+            onClick={() => {
+              // A new price band goes before an open one, so only the last price band stays open
+              const open = section.bands.findIndex((band) => isPriced(band) && band.max === null)
+              const at = open === -1 ? section.bands.length : open
+              const added: PriceBand = {
+                label: "",
+                text: null,
+                max: nextBound(section.bands.slice(0, at)),
+                category_id: null,
+              }
+              set({ bands: section.bands.toSpliced(at, 0, added) })
+            }}
+          >
+            <Plus />
+            {t(`${P}.addBand`)}
+          </Button>
+        </FieldGroup>
+      </NamedGroup>
+      <NamedGroup name="thumbs">
+        <div id={FIELD_IDS.content(section.id, "thumbs")}>
+          <SwitchRow
+            id={`${section.id}-thumbs`}
+            label={t(`${P}.thumbs`)}
+            term={t(`${P}.thumbsTerm`)}
+            hint={t(`${P}.thumbsHint`)}
+            checked={section.thumbs > 0}
+            onChange={(checked) => {
+              set({ thumbs: checked ? B.thumbs.default : 0 })
             }}
           />
         </div>
-      ) : null}
-    </div>
+        {section.thumbs > 0 ? (
+          <div id={FIELD_IDS.content(section.id, "thumbs_count")}>
+            <CountField
+              id={`${section.id}-thumbs-count`}
+              label={t(`${P}.thumbsCount`)}
+              term={t(`${P}.thumbsCountTerm`)}
+              value={section.thumbs}
+              max={B.thumbs.max}
+              onChange={(thumbs) => {
+                set({ thumbs }, "thumbs")
+              }}
+            />
+          </div>
+        ) : null}
+      </NamedGroup>
+    </>
   )
 }

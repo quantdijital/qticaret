@@ -4989,6 +4989,7 @@
       },
       "block": {
         "no_email": "Sepette e-posta adresi yok; hatırlatma gönderilemez.",
+        "wholesale": "Bu sepet bir toptancının. Hatırlatma perakende fiyat gösterir; toptancılara gönderilmez.",
         "reminded": "Bu sepet için hatırlatma zaten gönderildi; her sepete bir kez gider.",
         "no_consent": "Müşterinin ticari e-posta izni yok. Hatırlatma ticari ileti sayılır; yalnızca izin verenlere gider (İYS).",
         "suppressed": "Bu adrese e-posta gönderilmiyor (engelleme listesinde).",
@@ -8040,7 +8041,8 @@
           "catalog": "Klasik katalog"
         },
         "footer_bar": {
-          "ledger": "Standart"
+          "ledger": "Standart",
+          "brand_columns": "Marka ve sütunlar"
         },
         "product_main": {
           "standard": "Standart"
@@ -8181,6 +8183,16 @@
           "marked": "varsayılandan farklı ayar var"
         },
         "groups": {
+          "buttons": "Düğmeler",
+          "categoryList": "Kategori listesi",
+          "tiles": "Yandaki karolar",
+          "chips": "Hızlı bağlantılar",
+          "picks": "Küçük ürünler",
+          "cards": "Kartlar",
+          "thumbs": "Ürün görselleri",
+          "opening": "Soruların açılışı",
+          "options": "Seçenekler",
+          "backToTop": "Yukarı çık düğmesi",
           "search": "Arama",
           "topBar": "Üst şerit",
           "menu": "Menü çubuğu",
@@ -9156,7 +9168,7 @@
         "strip_note": {
           "label": "Şerit notu",
           "term": "strip note",
-          "hint": "Kısa bir duyuru ya da kampanya cümlesi. Örnek: 1500 TL üzeri kargo bedava."
+          "hint": "Kısa bir duyuru ya da kampanya cümlesi. Mağaza bilgisi de yazılabilir: {ücretsiz_kargo_eşiği} üzeri kargo bedava (eşik girilmemişse not görünmez)."
         },
         "strip_note_link": {
           "label": "Not bağlantısı",
@@ -9281,7 +9293,7 @@
         "payment_badges": {
           "label": "Ödeme rozetleri",
           "term": "payment badges",
-          "hint": "Seçtikleriniz bu sırayla yazılı rozet olarak görünür. Hiçbirini seçmezseniz bağlı ödeme sağlayıcılarınızın işaretleri görünür.",
+          "hint": "Seçtikleriniz bu sırayla görünür: Standart biçimde yazılı rozet, Marka ve sütunlar biçiminde kart ağlarının kendi logosu (Visa, Mastercard, Troy, American Express). Hiçbirini seçmezseniz bağlı ödeme sağlayıcılarınızın işaretleri görünür.",
           "visa": "Visa",
           "mastercard": "Mastercard",
           "troy": "Troy",
@@ -9313,6 +9325,30 @@
           "label": "Telefonda da göster",
           "term": "mobile",
           "hint": "Kapalıysa düğme yalnız geniş ekranlarda görünür."
+        },
+        "top_strip": {
+          "label": "Üst şerit",
+          "term": "top strip",
+          "hint": "Sütunların üstünde bülten kutusu ile telefon, WhatsApp ve e-posta adresiniz. Kapalıysa telefon ve e-posta marka bloğunda, bülten onların altında durur."
+        },
+        "about": {
+          "label": "Kısa tanıtım",
+          "term": "about",
+          "hint": "Logonuzun altında kısa bir paragraf: ne sattığınız, kargo ya da iade sözünüz. Boşsa görünmez."
+        },
+        "ground": {
+          "label": "Zemin",
+          "term": "background",
+          "well": "Hafif ton",
+          "page": "Sayfa",
+          "stage": "Koyu"
+        },
+        "badge_style": {
+          "label": "Ödeme logoları",
+          "term": "payment marks",
+          "hint": "Koyu zeminde logolar her zaman beyaz kartta durur; kart ağları logolarını açık zeminde ister.",
+          "card": "Kart içinde",
+          "plain": "Yalın"
         }
       },
       "main": {
@@ -10380,6 +10416,7 @@
       "none": "Hiçbir yerde kullanılmıyor.",
       "unnamed": "Adsız kayıt",
       "storefrontLink": "Vitrin tasarımı",
+      "autoSavedLook": "Otomatik kayıt",
       "logoLink": "Mağaza logosu",
       "shareImageLink": "Mağazanın paylaşım görseli",
       "seoPage": "Paylaşım görseli: {{page}}",
@@ -10399,6 +10436,7 @@
         "category": "Kategori görseli",
         "etbis_qr": "ETBİS karekodu",
         "collection": "Koleksiyon görseli",
+        "storefront_design": "Kayıtlı görünüm",
         "favicon": "Site simgesi"
       },
       "seoTypes": {

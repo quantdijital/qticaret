@@ -1,4 +1,5 @@
 import type { ShopEvent } from "@qticaret/ui/lib/shop-events"
+import { ga4EventWithoutAmounts, metaEventWithoutAmounts } from "./amounts"
 import type { CartSnapshot } from "./cart-changes"
 import { cartChanges } from "./cart-changes"
 import type { AnalyticsEvent, PageContext } from "./events"
@@ -18,6 +19,11 @@ import { firstTime, forgetStored, storeCart, storedCart } from "./stored"
 /** The tags for this visitor, and whether ad signals (Consent Mode's `ad_*`) may go with GA4. */
 export interface AllowedTags extends TrackingIds {
   adSignals: boolean
+  /**
+   * Whether events carry prices and values: not in a signed-in wholesaler's
+   * session, whose prices are theirs alone (ADR-0068 §7, `amounts.ts`).
+   */
+  amounts: boolean
 }
 
 const MAX_PENDING = 30
@@ -38,8 +44,10 @@ let seenCart: CartSnapshot | undefined
 const measuring = (): boolean => (allowed?.ga4 ?? allowed?.meta ?? null) !== null
 
 function send(event: AnalyticsEvent): void {
+  // Anything but a plain yes leaves the amounts out
+  const amounts = allowed?.amounts === true
   if (allowed?.ga4 && window.gtag) {
-    const [name, params] = ga4Event(event)
+    const [name, params] = amounts ? ga4Event(event) : ga4EventWithoutAmounts(event)
     // The address GA4 records is ours, its keys taken out (an order's link, a preview's)
     window.gtag("set", {
       page_location: safeLocation(window.location.href),
@@ -49,7 +57,12 @@ function send(event: AnalyticsEvent): void {
   }
   // Meta's pixel reads the address and the referrer itself: on an address of ours holding a key it
   // hears nothing (the order's purchase still reaches it, server to server, adr/0038 §4)
-  const call = allowed?.meta && window.fbq ? metaEvent(event) : null
+  const call =
+    allowed?.meta && window.fbq
+      ? amounts
+        ? metaEvent(event)
+        : metaEventWithoutAmounts(event)
+      : null
   const here = URL.parse(window.location.href)?.origin
   const ownReferrer = URL.parse(document.referrer)?.origin === here ? document.referrer : ""
   if (call && !carriesSecret(window.location.href) && !carriesSecret(ownReferrer)) {

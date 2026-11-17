@@ -1,6 +1,7 @@
 import type {
   CategoryMainVariant,
   FooterBarVariant,
+  FooterColumnsStep,
   HeaderBarVariant,
   HeaderMenuGround,
   HeaderMenuImages,
@@ -77,11 +78,29 @@ export type HeaderCatalogSection = HeaderBarCommon & { variant: "catalog" } & He
 export type HeaderBarSection =
   (HeaderBarCommon & { variant: Exclude<HeaderBarVariant, "catalog"> }) | HeaderCatalogSection
 
-/** The footer, with its own settings (adr/0049 Ek 2026-11-15). */
-export interface FooterBarSection extends MainBase, FooterBarFields {
+interface FooterBarCommon extends MainBase, FooterBarFields {
   type: "footer_bar"
-  variant: FooterBarVariant
 }
+
+/**
+ * The brand columns footer's own settings (adr/0049 Ek 2026-11-17): kept
+ * only while the footer is drawn as it.
+ */
+export interface FooterColumnsFields {
+  top_strip: boolean
+  /** A short line under the shop's name; null: none. */
+  about: string | null
+  ground: FooterColumnsStep<"ground">
+  badge_style: FooterColumnsStep<"badge_style">
+}
+
+export type FooterColumnsSection = FooterBarCommon & {
+  variant: "brand_columns"
+} & FooterColumnsFields
+
+/** The footer, with its own settings (adr/0049 Ek 2026-11-15) and its variant's. */
+export type FooterBarSection =
+  (FooterBarCommon & { variant: Exclude<FooterBarVariant, "brand_columns"> }) | FooterColumnsSection
 
 export interface ProductMainSection extends MainBase {
   type: "product_main"

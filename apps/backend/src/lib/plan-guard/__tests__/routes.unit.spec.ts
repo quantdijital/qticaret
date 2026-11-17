@@ -185,6 +185,8 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/content",
     "POST /admin/storefront-layout/publish",
     "POST /admin/storefront-menus",
+    "POST /admin/storefront-designs",
+    "POST /admin/storefront-designs/:id/apply",
     "PUT /admin/seo/:entity_type/:entity_id",
     "POST /admin/maintenance/bypass",
     "POST /admin/customers/:id",

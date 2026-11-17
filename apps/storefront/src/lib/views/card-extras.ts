@@ -219,6 +219,7 @@ const MARK_LOGOS: Readonly<Record<string, { file: string; width: number; height:
   visa: { file: "visa.png", width: 208, height: 68 },
   mastercard: { file: "mastercard.svg", width: 41, height: 26 },
   troy: { file: "troy.svg", width: 298, height: 137 },
+  amex: { file: "amex.svg", width: 24, height: 24 },
   paytr: { file: "paytr.png", width: 270, height: 48 },
   iyzico: { file: "iyzico.svg", width: 108, height: 38 },
   aras: { file: "aras.svg", width: 148, height: 40 },

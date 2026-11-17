@@ -1,5 +1,5 @@
 import type { StoreLayout } from "@qticaret/types"
-import { FOOTER_BAR_DEFAULTS } from "@qticaret/types/section-footer"
+import { FOOTER_BAR_DEFAULTS, FOOTER_COLUMNS_DEFAULTS } from "@qticaret/types/section-footer"
 import type { StorefrontPreset } from "@qticaret/sector-packs"
 import { BEST_SELLERS, ON_SALE, PRODUCTS } from "./fixture-shop"
 import { resolveGroup } from "./preset-resolve"
@@ -113,6 +113,14 @@ function footerBar(bar: Section | undefined) {
           back_to_top_side: bar["back_to_top_side"],
           back_to_top_shape: bar["back_to_top_shape"],
           back_to_top_mobile: bar["back_to_top_mobile"],
+        }
+      : {}),
+    // The brand columns footer prints all of its own (`footerColumnsOf`), each its default when unset
+    ...(bar["variant"] === "brand_columns"
+      ? {
+          columns: Object.fromEntries(
+            Object.entries(FOOTER_COLUMNS_DEFAULTS).map(([key, value]) => [key, bar[key] ?? value])
+          ),
         }
       : {}),
   }

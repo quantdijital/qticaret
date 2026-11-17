@@ -76,9 +76,9 @@ async function answeredBefore(
  * refund. One its own rules refuse is given back (`will_fail_again`), but
  * never once the cart is an order (read again after the failure: another
  * take may have placed it meanwhile); anything else is tried again with
- * the provider's next notice, and the shop is told when the shelf refuses
- * it even so, or the notice has come many times. A failed read of the
- * cart throws: tried again, never given back.
+ * the provider's next notice, and the shop is told once the notice has
+ * come many times (`STUCK_ATTEMPTS`), the shelf refusing it even so or
+ * not. A failed read of the cart throws: tried again, never given back.
  */
 export async function completePaidCart(
   container: MedusaContainer,
@@ -123,15 +123,16 @@ export async function completePaidCart(
     }
     failure = completionFailureOf(error)
     if (failure !== "refund") {
-      // The shelf refused it even so (no warehouse for the channel, a lock): the shop sees it
+      // The shelf refused it even so (no warehouse for the channel, a lock): logged now, the
+      // shop told once it keeps failing, as any other retry (review Z1: one passing lock pages no one)
       logger.error({
         event: "payments.backorder_failed",
         cartId: verdict.cart_id,
         err: errorSummary(error),
       })
-      await stuck(container, verdict)
     }
-  } else if (failure === "retry" && (verdict.attempts ?? 0) >= STUCK_ATTEMPTS) {
+  }
+  if (failure !== "refund" && (verdict.attempts ?? 0) >= STUCK_ATTEMPTS) {
     await stuck(container, verdict)
   }
   if (failure !== "refund") {

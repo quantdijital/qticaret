@@ -26,6 +26,8 @@ export type MediaUseKind =
   | "etbis_qr"
   // The storefront's site icon (appearance `favicon_url`)
   | "favicon"
+  // adr/0064: a saved look (its id; `label` its name, null for an automatic save)
+  | "storefront_design"
   // A collection's picture (Ürünler > Koleksiyonlar)
   | "collection"
 
@@ -191,7 +193,8 @@ async function collections(container: Container, target: MediaTarget): Promise<M
 
 /**
  * Documents holding the address as one of their values: pages and posts,
- * landing pages, bulk messages, the storefront's design (draft and live)
+ * landing pages, bulk messages, the storefront's design (draft and live), its
+ * saved looks (adr/0064: applying one must find its images)
  * and products' descriptions. Read straight from their tables, read only:
  * no module can search inside a JSON document, and an address is a whole
  * string there (`"https://…"`), so its quoted form matches only itself.
@@ -200,7 +203,7 @@ async function documents(container: Container, target: MediaTarget): Promise<Med
   const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
   const quoted = JSON.stringify(target.url)
   const holds = (column: string) => knex.raw("position(? in ??::text) > 0", [quoted, column])
-  const [entries, landings, messages, layouts, descriptions] = await Promise.all([
+  const [entries, landings, messages, layouts, designs, descriptions] = await Promise.all([
     knex("content_entry")
       .select("id", "title")
       .whereNull("deleted_at")
@@ -224,6 +227,11 @@ async function documents(container: Container, target: MediaTarget): Promise<Med
         [quoted, quoted]
       )
       .limit(1) as Promise<Named[]>,
+    knex("storefront_design")
+      .select("id", "name")
+      .whereNull("deleted_at")
+      .andWhere(holds("document"))
+      .limit(LIMIT) as Promise<Named[]>,
     knex("product_extension")
       .select("id")
       .whereNull("deleted_at")
@@ -235,6 +243,7 @@ async function documents(container: Container, target: MediaTarget): Promise<Med
     ...uses("landing", landings),
     ...uses("bulk_message", messages),
     ...layouts.map(() => ({ kind: "storefront" as const, id: null, label: null })),
+    ...uses("storefront_design", designs),
     ...(await describedProducts(
       container,
       descriptions.map((row) => row.id)

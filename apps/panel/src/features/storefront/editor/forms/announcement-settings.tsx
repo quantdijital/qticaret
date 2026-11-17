@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import {
   ANNOUNCEMENT_DEFAULTS,
@@ -8,6 +9,7 @@ import {
 import type { AnnouncementSetting, AnnouncementStep } from "@qticaret/types"
 import type { AnnouncementBar } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
+import { HintedName } from "./field-hint"
 import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { announcementOffers } from "./announcement-registry"
@@ -90,19 +92,22 @@ export function AnnouncementMotion({
         <StepsOf section={section} setting="interval" onChange={onChange} />
         <StepsOf section={section} setting="pause_button" onChange={onChange} />
         <div id={id} className="flex items-start justify-between gap-4">
-          <label htmlFor={`${id}-input`} className="flex flex-col gap-0.5 text-sm font-medium">
-            <span>
+          <HintedName
+            name={t(`${A}.hover_pause.label`)}
+            hint={t(`${A}.hover_pause.hint`)}
+            hintId={`${id}-hint`}
+          >
+            <label htmlFor={`${id}-input`} className="text-sm font-medium">
               {t(`${A}.hover_pause.label`)}{" "}
               <small className="text-[11px] font-normal text-muted-foreground">
                 {t(`${A}.hover_pause.term`)}
               </small>
-            </span>
-            <span className="text-xs font-normal text-muted-foreground">
-              {t(`${A}.hover_pause.hint`)}
-            </span>
-          </label>
+            </label>
+          </HintedName>
+          <HiddenHint id={`${id}-hint`}>{t(`${A}.hover_pause.hint`)}</HiddenHint>
           <Switch
             id={`${id}-input`}
+            aria-describedby={`${id}-hint`}
             checked={announcementSettingsOf(section).hover_pause === "on"}
             onCheckedChange={(checked) => {
               onChange({ ...section, hover_pause: checked ? "on" : "off" })

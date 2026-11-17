@@ -4,7 +4,9 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { SectorPackError, sectorPack, storefrontPreset } from "@qticaret/sector-packs"
 import type { PresetMenu } from "@qticaret/sector-packs"
 import { ValidationError } from "../../lib/errors"
-import { storedSettings } from "../../lib/storefront/layout-settings"
+import { withDesignMark } from "./design-shared"
+import { shopSettingsOf } from "./design-steps"
+import { legacySettings } from "./layout-shared"
 import { layoutDocument, storedDocument } from "../../lib/storefront/layout"
 import type { LayoutDocument } from "../../lib/storefront/layout"
 import { presetDocument, presetTheme, withShopFrame } from "../../lib/storefront/presets/document"
@@ -30,6 +32,11 @@ export interface ApplyPresetInput {
   actor: string | null
   /** Where the packs are read from; tests only, the route and the script never pass it. */
   packs_dir?: string
+  /**
+   * The draft kept under this name first (adr/0064 Ek 2026-11-17); none: an
+   * automatic save, when the draft holds anything new.
+   */
+  save_as?: string | null
 }
 
 /** A preset as the steps carry it: plain data (a step's result is stored as JSON). */
@@ -86,9 +93,8 @@ async function shopFrame(
  */
 async function keptSettings(container: MedusaContainer) {
   const [row, live] = await Promise.all([layoutRow(container), liveMenus(container)])
-  const { trust_badges, color_swatches, low_stock } = storedSettings(row?.draft ?? null)
   const frame = await shopFrame(container, row)
-  return { settings: { trust_badges, color_swatches, low_stock }, live, frame }
+  return { settings: shopSettingsOf(row?.draft ?? null), live, frame }
 }
 
 /**
@@ -202,7 +208,9 @@ export const resolvePresetStep = createStep(
  * The draft the preset makes, its images now the library's (adr/0063
  * §4.5); with what was left out and the shop's sections kept, for the panel to say. Reads only, run
  * under the design's lock: the draft is written next (`saveDraftSteps`),
- * the shop's kept settings as they are at that moment.
+ * the shop's kept settings as they are at that moment. Labelled as a
+ * ready-made look's (`settings.design`, adr/0064 Ek 2026-11-17 §2), so the
+ * gallery tells it apart once edited.
  */
 export const composePresetDraftStep = createStep(
   "storefront-preset-compose",
@@ -210,12 +218,19 @@ export const composePresetDraftStep = createStep(
     input: { preset: LoadedPreset; resolution: PresetResolution; images: Record<string, string> },
     { container }
   ) => {
-    const { document, skipped, dropped, kept } = documentOf(
+    const [kept, legacy] = await Promise.all([keptSettings(container), legacySettings(container)])
+    const made = documentOf(
       input.preset,
       input.resolution,
       new Map(Object.entries(input.images)),
-      await keptSettings(container)
+      kept
     )
-    return new StepResponse({ document, skipped, dropped, kept })
+    const document = withDesignMark(made.document, null, legacy)
+    return new StepResponse({
+      document,
+      skipped: made.skipped,
+      dropped: made.dropped,
+      kept: made.kept,
+    })
   }
 )

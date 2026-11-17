@@ -1,10 +1,12 @@
 import { z } from "@medusajs/framework/zod"
+import { optional, text } from "../layout-fields"
 
 /**
  * The footer bar's own settings (adr/0049 Ek 2026-11-15), the same in
  * every footer variant: how the shop's profiles show (its store details'
  * `same_as`, checked there: https only), the ways to pay the shop names
- * (written, never a company's mark) and a floating "back to top" button.
+ * (the ledger writes them; `brand_columns` draws a card network's own
+ * mark) and a floating "back to top" button.
  * Each default draws the footer as before, so a stored design reads as it
  * did and prints as it did (`footerSettingsOf`).
  *
@@ -78,6 +80,59 @@ export interface FooterBarSettings {
   back_to_top_shape: (typeof FOOTER_BAR_SETTINGS)["back_to_top_shape"][number]
   back_to_top_mobile: boolean
 }
+
+/**
+ * The `brand_columns` footer's own settings (adr/0049 Ek 2026-11-17):
+ * mirrors `@qticaret/types`' `FOOTER_COLUMNS_SETTINGS`, `FOOTER_COLUMNS_LIMITS`
+ * and `FOOTER_COLUMNS_DEFAULTS` (a unit test keeps them equal). Each list's
+ * first is the default, so a footer switched to it reads whole.
+ */
+export const FOOTER_COLUMNS_SETTINGS = {
+  ground: ["well", "page", "stage"],
+  badge_style: ["card", "plain"],
+} as const
+
+export const FOOTER_COLUMNS_LIMITS = { about: 240 } as const
+
+export const FOOTER_COLUMNS_DEFAULTS = {
+  top_strip: true,
+  about: null,
+  ground: "well",
+  badge_style: "card",
+} as const
+
+type ColumnsSetting = keyof typeof FOOTER_COLUMNS_SETTINGS
+
+const columnsStep = <S extends ColumnsSetting>(setting: S) =>
+  z
+    .custom<(typeof FOOTER_COLUMNS_SETTINGS)[S][number]>(
+      (value) => (FOOTER_COLUMNS_SETTINGS[setting] as readonly unknown[]).includes(value),
+      FOOTER_ERROR
+    )
+    .default(FOOTER_COLUMNS_DEFAULTS[setting])
+
+/** The fields the `brand_columns` branch adds; `about` is plain text, null when none. */
+export const footerColumnsFields = {
+  top_strip: z.boolean().default(FOOTER_COLUMNS_DEFAULTS.top_strip),
+  about: optional(text(FOOTER_COLUMNS_LIMITS.about)),
+  ground: columnsStep("ground"),
+  badge_style: columnsStep("badge_style"),
+}
+
+export interface FooterColumnsSettings {
+  top_strip: boolean
+  about: string | null
+  ground: (typeof FOOTER_COLUMNS_SETTINGS)["ground"][number]
+  badge_style: (typeof FOOTER_COLUMNS_SETTINGS)["badge_style"][number]
+}
+
+/** The `brand_columns` footer's own settings as the storefront draws them: all of them. */
+export const footerColumnsOf = (footer: FooterColumnsSettings): FooterColumnsSettings => ({
+  top_strip: footer.top_strip,
+  about: footer.about,
+  ground: footer.ground,
+  badge_style: footer.badge_style,
+})
 
 /** A footer read in or saved before the settings: the defaults, a list of its own. */
 export const footerBarDefaults = (): FooterBarSettings => ({

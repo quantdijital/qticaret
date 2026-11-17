@@ -1,7 +1,9 @@
 import { useRef } from "react"
 import type { ReactNode } from "react"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { cn } from "@qticaret/admin-ui/lib/utils"
+import { HintedName } from "./field-hint"
 import { Head, ResetButton } from "./marquee-controls"
 
 const COLUMNS: Readonly<Record<number, string>> = {
@@ -44,9 +46,11 @@ export function StepChoice<T extends string | number>({
   return (
     <div id={id} className="flex flex-col gap-2">
       <Head>
-        <span id={`${id}-label`} className="text-sm font-medium">
-          {label} <small className="text-[11px] font-normal text-muted-foreground">{term}</small>
-        </span>
+        <HintedName name={label} hint={hint} hintId={`${id}-hint`}>
+          <span id={`${id}-label`} className="text-sm font-medium">
+            {label} <small className="text-[11px] font-normal text-muted-foreground">{term}</small>
+          </span>
+        </HintedName>
         {value !== fallback ? (
           <ResetButton
             onReset={() => {
@@ -61,6 +65,7 @@ export function StepChoice<T extends string | number>({
         type="single"
         variant="outline"
         aria-labelledby={`${id}-label`}
+        aria-describedby={hint ? `${id}-hint` : undefined}
         value={String(value)}
         onValueChange={(next) => {
           const step = steps.find((each) => String(each) === next)
@@ -79,7 +84,7 @@ export function StepChoice<T extends string | number>({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? <HiddenHint id={`${id}-hint`}>{hint}</HiddenHint> : null}
     </div>
   )
 }

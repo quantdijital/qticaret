@@ -52,6 +52,7 @@
 @import "./collage.css";
 @import "./surface.css";
 @import "./media.css";
+@import "./footer-columns.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

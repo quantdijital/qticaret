@@ -51,14 +51,14 @@ describe("the content fields' register", () => {
     expect(keys({ ...rating, excerpts: 0 })).toEqual(["content:excerpts", "content:profile_link"])
     expect(keys({ ...rating, excerpts: 2 })).toContain("content:excerpt_count")
     const bands = newHomeSection("price_bands", "fiyat00001") as PriceBandsSection
-    expect(keys({ ...bands, thumbs: 0 })).toEqual(["content:thumbs"])
-    expect(keys({ ...bands, thumbs: 3 })).toEqual(["content:thumbs", "content:thumbs_count"])
+    expect(keys({ ...bands, thumbs: 0 })).toEqual(["thumbs:thumbs"])
+    expect(keys({ ...bands, thumbs: 3 })).toEqual(["thumbs:thumbs", "thumbs:thumbs_count"])
   })
 
   it("names the sliding opening's height and its kit settings, the speed only while it turns", () => {
     const slider = newHomeSection("hero_slider", "slayt00001") as HeroSliderSection
     expect(keys(slider)).toEqual([
-      "content:slider_height",
+      "options:slider_height",
       "scroll:scroller.autoplay",
       "look:scroller.loop",
       "scroll:scroller.arrows",
@@ -76,8 +76,8 @@ describe("the content fields' register", () => {
 
   it("names the FAQ's two switches (bilesen-denetimi (b) 8)", () => {
     expect(keys(newHomeSection("faq", "sss0000001"))).toEqual([
-      "content:open_first",
-      "content:single_open",
+      "opening:open_first",
+      "opening:single_open",
     ])
   })
 
@@ -120,9 +120,9 @@ describe("the content fields' register", () => {
     const hero = switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list")
     expect(keys(hero)).toEqual([
       "content:slides",
-      "content:list_limit",
-      "content:show_count",
-      "content:show_price",
+      "categoryList:list_limit",
+      "categoryList:show_count",
+      "picks:show_price",
     ])
     expect(keys(newHomeSection("hero", "giris00002"))).toEqual([])
     expect(keys(newHomeSection("categories", "kategori01"))).toEqual(["content:show_count"])

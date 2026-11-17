@@ -3,43 +3,187 @@
   <section aria-labelledby="bolum-tezgahacilis" data-gf-catalog-hero="" class="pt-3 lg:pt-6">
     <div class="mx-auto w-full max-w-(--container) px-(--gutter)">
       <div class="gf-mosaic">
-        <article class="gf-mosaic-feature">
-          <div class="flex flex-col items-start justify-center gap-4 p-5 sm:p-8 lg:gap-5 lg:p-10">
-            <h1
-              id="bolum-tezgahacilis"
-              class="max-w-[18ch] text-hero leading-[1.08] tracking-(--tracking-display)"
+        <div
+          class="gf-mosaic-stage"
+          role="group"
+          aria-roledescription="carousel"
+          aria-label="Öne çıkan seçkiler"
+        >
+          <div class="gf-stage relative overflow-hidden rounded-tile h-full" data-arrows="always">
+            <div
+              aria-live="polite"
+              tabindex="0"
+              aria-label="Öne çıkan seçkiler"
+              role="group"
+              class="gf-rail flex overflow-x-auto h-full"
             >
-              Bıçak, çakı ve kamp aletleri
-            </h1>
-            <p class="max-w-[44ch] text-lead text-text-2">
-              Her modelin çeliği, namlu boyu ve sertliği ürün sayfasında yazılı. Kategoriden seçin ya da aramaya model adını yazın.
-            </p>
-            <div class="flex flex-wrap gap-2 pt-1">
-              <a href="/magaza" class="gf-btn">
-                Tüm ürünler
-              </a>
+              <div
+                role="group"
+                aria-roledescription="slide"
+                aria-label="1 / 4"
+                class="w-full shrink-0 snap-start snap-always"
+              >
+                <article class="gf-mosaic-feature h-full">
+                  <div
+                    class="flex flex-col items-start justify-center gap-4 p-5 sm:p-8 lg:gap-5 lg:p-10 pb-16 sm:pb-16 lg:pb-16 lg:pl-20"
+                  >
+                    <p class="text-sm font-semibold text-text-2">
+                      Atölyeden tezgâha
+                    </p>
+                    <h1
+                      id="bolum-tezgahacilis"
+                      class="max-w-[18ch] text-hero leading-[1.08] tracking-(--tracking-display)"
+                    >
+                      Bıçak, çakı ve kamp aletleri
+                    </h1>
+                    <p class="max-w-[44ch] text-lead text-text-2">
+                      Her modelin çeliği, namlu boyu ve sertliği ürün sayfasında yazılı. Kategoriden seçin ya da aramaya model adını yazın.
+                    </p>
+                    <div class="flex flex-wrap gap-2 pt-1">
+                      <a href="/magaza" class="gf-btn">
+                        Tüm ürünler
+                      </a>
+                      <a href="/kategoriler" class="gf-btn gf-btn--quiet">
+                        Kategoriler
+                      </a>
+                    </div>
+                  </div>
+                  <div class="gf-mosaic-photo">
+                    <a href="/magaza" class="absolute inset-0" tabindex="-1" aria-hidden="true">
+                      <picture>
+                        <img
+                          src="https://cdn.example.com/preset/cutlery/tezgah-lacivert/images/acilis-sef-bicaklari.webp"
+                          alt="Kesme tahtası üstünde üç şef bıçağı"
+                          loading="eager"
+                          fetchPriority="high"
+                          decoding="sync"
+                          class="absolute inset-0 h-full w-full object-cover"
+                        />
+                      </picture>
+                    </a>
+                  </div>
+                </article>
+              </div>
+              <div
+                role="group"
+                aria-roledescription="slide"
+                aria-label="2 / 4"
+                class="w-full shrink-0 snap-start snap-always"
+              >
+                <article class="gf-mosaic-feature h-full">
+                  <div
+                    class="flex flex-col items-start justify-center gap-4 p-5 sm:p-8 lg:gap-5 lg:p-10 pb-16 sm:pb-16 lg:pb-16 lg:pl-20"
+                  >
+                    <h2 class="max-w-[18ch] text-hero leading-[1.08] tracking-(--tracking-display)">
+                      Doğada güvenilir ağızlar
+                    </h2>
+                    <p class="max-w-[44ch] text-lead text-text-2">
+                      Kamp bıçakları, baltalar ve multitool: kılıfı, ağırlığı ve bakım bilgisiyle.
+                    </p>
+                    <div class="flex flex-wrap gap-2 pt-1">
+                      <a href="/kategori/outdoor-ve-kamp" class="gf-btn">
+                        Outdoor ve kamp
+                      </a>
+                    </div>
+                  </div>
+                  <div class="gf-mosaic-photo">
+                    <a
+                      href="/kategori/outdoor-ve-kamp"
+                      class="absolute inset-0"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      <picture>
+                        <img
+                          src="https://cdn.example.com/preset/cutlery/tezgah-lacivert/images/acilis-kamp.webp"
+                          alt="Kesilmiş odunların üstünde kırmızı saplı kamp bıçağı"
+                          loading="lazy"
+                          fetchPriority="auto"
+                          decoding="async"
+                          class="absolute inset-0 h-full w-full object-cover"
+                        />
+                      </picture>
+                    </a>
+                  </div>
+                </article>
+              </div>
+              <div
+                role="group"
+                aria-roledescription="slide"
+                aria-label="3 / 4"
+                class="w-full shrink-0 snap-start snap-always"
+              >
+                <article class="gf-mosaic-feature h-full">
+                  <div
+                    class="flex flex-col items-start justify-center gap-4 p-5 sm:p-8 lg:gap-5 lg:p-10 pb-16 sm:pb-16 lg:pb-16 lg:pl-20"
+                  >
+                    <h2 class="max-w-[18ch] text-hero leading-[1.08] tracking-(--tracking-display)">
+                      İndirimdeki modeller
+                    </h2>
+                    <p class="max-w-[44ch] text-lead text-text-2">
+                      Av, kamp ve mutfak bıçaklarında seçili modeller indirimde. İndirimli fiyat ürün sayfasında, eski fiyatın yanında.
+                    </p>
+                    <div class="flex flex-wrap gap-2 pt-1">
+                      <a href="/kampanyalar" class="gf-btn">
+                        İndirimdekiler
+                      </a>
+                    </div>
+                  </div>
+                  <div class="gf-mosaic-photo">
+                    <a
+                      href="/kampanyalar"
+                      class="absolute inset-0"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      <picture>
+                        <img
+                          src="https://cdn.example.com/preset/cutlery/tezgah-lacivert/images/acilis-indirim.webp"
+                          alt="Ağaç kütüğü üstünde geniş namlulu av bıçağı"
+                          loading="lazy"
+                          fetchPriority="auto"
+                          decoding="async"
+                          class="absolute inset-0 h-full w-full object-cover"
+                        />
+                      </picture>
+                    </a>
+                  </div>
+                </article>
+              </div>
+              <div
+                role="group"
+                aria-roledescription="slide"
+                aria-label="4 / 4"
+                class="w-full shrink-0 snap-start snap-always"
+              >
+                <article class="gf-mosaic-feature h-full">
+                  <div
+                    class="flex flex-col items-start justify-center gap-4 p-5 sm:p-8 lg:gap-5 lg:p-10 pb-16 sm:pb-16 lg:pb-16 lg:pl-20"
+                  >
+                    <h2 class="max-w-[18ch] text-hero leading-[1.08] tracking-(--tracking-display)">
+                      Keskinlik bakımla kalır
+                    </h2>
+                    <p class="max-w-[44ch] text-lead text-text-2">
+                      Bileme taşları, yağ taşı ve kılıflar: bıçağınız ilk günkü gibi kessin.
+                    </p>
+                  </div>
+                  <div class="gf-mosaic-photo">
+                    <picture>
+                      <img
+                        src="https://cdn.example.com/preset/cutlery/tezgah-lacivert/images/acilis-bileme.webp"
+                        alt="Su taşında bilenen mutfak bıçağı"
+                        loading="lazy"
+                        fetchPriority="auto"
+                        decoding="async"
+                        class="absolute inset-0 h-full w-full object-cover"
+                      />
+                    </picture>
+                  </div>
+                </article>
+              </div>
             </div>
           </div>
-          <div class="gf-mosaic-photo">
-            <picture>
-              <source
-                type="image/webp"
-                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
-                sizes="(min-width: 1440px) 500px, (min-width: 1024px) 35vw, (min-width: 768px) 50vw, 92vw"
-              />
-              <img
-                src="https://cdn.example.com/p/01.webp"
-                alt=""
-                width="1200"
-                height="1200"
-                loading="eager"
-                fetchPriority="high"
-                decoding="sync"
-                class="absolute inset-0 h-full w-full object-cover"
-              />
-            </picture>
-          </div>
-        </article>
+        </div>
         <nav aria-label="Kategoriler" class="gf-mosaic-list">
           <ul>
             <li>
@@ -265,7 +409,70 @@
             Tüm kategoriler
           </a>
         </nav>
+        <div class="gf-mosaic-side">
+          <a href="/kategori/av-bicaklari" class="gf-mosaic-tile group">
+            <picture>
+              <source
+                type="image/webp"
+                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
+                sizes="(min-width: 1024px) 18vw, 50vw"
+              />
+              <img
+                src="https://cdn.example.com/p/01.webp"
+                alt=""
+                width="1200"
+                height="1200"
+                loading="lazy"
+                fetchPriority="auto"
+                decoding="async"
+                class="absolute inset-0 h-full w-full object-cover"
+              />
+            </picture>
+            <span class="relative z-(--z-raised) flex flex-col gap-0.5 p-3 sm:p-4">
+              <span class="leading-tight font-extrabold underline-offset-4 group-hover:underline">
+                Av Bıçakları
+              </span>
+              <span class="text-xs font-semibold text-stage-text-2">
+                8 ürün
+              </span>
+            </span>
+          </a>
+        </div>
       </div>
+      <ul
+        aria-label="Hızlı bağlantılar"
+        class="gf-rail -mx-(--gutter) mt-4 flex gap-2 overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1 lg:mt-6 md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
+      >
+        <li class="shrink-0">
+          <a href="/kategori/av-bicaklari" class="gf-chip pl-2">
+            <span class="block size-7 overflow-hidden rounded-pill">
+              <picture>
+                <source
+                  type="image/webp"
+                  srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
+                  sizes="28px"
+                />
+                <img
+                  src="https://cdn.example.com/p/01.webp"
+                  alt=""
+                  width="1200"
+                  height="1200"
+                  loading="lazy"
+                  fetchPriority="auto"
+                  decoding="async"
+                  class="h-full w-full object-cover"
+                />
+              </picture>
+            </span>
+            Av bıçakları
+          </a>
+        </li>
+        <li class="shrink-0">
+          <a href="/markalar" class="gf-chip">
+            Markalar
+          </a>
+        </li>
+      </ul>
     </div>
   </section>
 </div>

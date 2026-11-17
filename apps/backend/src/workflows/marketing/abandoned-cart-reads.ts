@@ -15,6 +15,7 @@ import {
   whatsappNumber,
 } from "./abandoned-cart-facts"
 import type { AbandonedCartDetail, AbandonedCartRow } from "./abandoned-cart-facts"
+import { activeWholesalers, isWholesalersCart } from "../wholesale/marketing"
 import { remindedLately } from "./cart-reminders"
 
 export type { AbandonedCartDetail, AbandonedCartRow } from "./abandoned-cart-facts"
@@ -239,6 +240,7 @@ export async function abandonedCartDetail(
   }
   const { row, cart, phone, suppressed } = found
   const storefront = (await brandOf(container)).storefrontUrl !== null
+  const wholesale = isWholesalersCart(await activeWholesalers(container), cart)
   const lately =
     cart.email && !row.reminder
       ? await remindedLately(
@@ -253,6 +255,7 @@ export async function abandonedCartDetail(
     actions: {
       email_block: emailReminderBlock({
         email: cart.email,
+        wholesale,
         consent: row.consent.email,
         suppressed: suppressed.email,
         // A pending one is being sent: the cart's one reminder is taken
@@ -260,11 +263,14 @@ export async function abandonedCartDetail(
         remindedLately: lately,
         storefront,
       }),
-      whatsapp: whatsappNumber(
-        phone ? normalizeRecipient("sms", phone) : null,
-        row.consent.sms,
-        suppressed.sms
-      ),
+      // A nudge about the cart too: none to a wholesaler (ADR-0068 decision 16, review I2)
+      whatsapp: wholesale
+        ? null
+        : whatsappNumber(
+            phone ? normalizeRecipient("sms", phone) : null,
+            row.consent.sms,
+            suppressed.sms
+          ),
     },
   }
 }

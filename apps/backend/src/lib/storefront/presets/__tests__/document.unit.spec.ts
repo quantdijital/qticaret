@@ -50,7 +50,7 @@ describe("the draft a preset makes (adr/0063 §4)", () => {
     )
     expect(doc.footer.map((section) => section.id)).toEqual(["ebultenkutusu"])
     const { theme, ...rest } = doc.settings
-    expect(rest).toEqual({ ...KEPT, menus: null, preset: APPLIED })
+    expect(rest).toEqual({ ...KEPT, menus: null, preset: APPLIED, design: null })
     expect(theme).toEqual(presetTheme(grafit.theme_settings))
     expect(theme?.buttons).toBe("pill")
     expect(resolved.skipped).toEqual([])

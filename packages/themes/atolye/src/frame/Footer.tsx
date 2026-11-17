@@ -2,6 +2,7 @@ import { Mail, MapPin, Phone } from "lucide-react"
 import { ResponsiveImage, drawnVariant, fieldMark, sectionMark } from "@qticaret/ui"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
+import { FooterColumns } from "./FooterColumns"
 import { FooterLinks } from "./FooterLinks"
 import { FooterMarks } from "./FooterMarks"
 import { FooterSocial } from "./FooterSocial"
@@ -97,13 +98,17 @@ export function Footer({
   t: Translate
   subscribe?: ((state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>) | undefined
 }) {
-  // The design's footer (adr/0049 Ek 2026-11-14 §5): today's ledger, every variant falls to it
-  const variant = drawnVariant("footer_bar", shop.footerBar?.variant, ["ledger"])
+  // The design's footer (adr/0049 Ek 2026-11-14 §5): today's ledger, or the brand columns (Ek 2026-11-17)
+  const variant = drawnVariant("footer_bar", shop.footerBar?.variant, ["ledger", "brand_columns"])
+  const columns = shop.footerBar?.columns
+  if (variant === "brand_columns" && columns) {
+    return <FooterColumns shop={shop} t={t} subscribe={subscribe} columns={columns} />
+  }
   return (
     <footer
       data-gf-clear=""
       {...sectionMark(shop.footerBar?.id)}
-      data-variant={variant}
+      data-variant="ledger"
       className="mt-(--footer-gap) border-t border-rule bg-paper-2"
     >
       <Container className="grid gap-10 pt-12 pb-8 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:gap-y-12 lg:pt-16">

@@ -444,6 +444,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "customers.note_too_long": "Not en çok 2000 karakter olabilir.",
   "abandoned_carts.unknown": "Sepet bulunamadı ya da siparişe dönüştü.",
   "abandoned_carts.no_email": "Bu sepette e-posta adresi yok.",
+  "abandoned_carts.wholesale":
+    "Bu sepet bir toptancının; toptancılara sepet hatırlatması gönderilmez.",
   "abandoned_carts.no_consent":
     "Müşterinin ticari e-posta izni yok; hatırlatma yalnızca izin verenlere gider.",
   "abandoned_carts.suppressed": "Bu adrese e-posta gönderilmiyor (engelleme listesinde).",
@@ -468,6 +470,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "maintenance.not_enabled":
     "Bakım modu kapalı. Bu bağlantı yalnızca mağaza bakımdayken oluşturulabilir.",
   "maintenance.bypass_unknown": "Bakım bağlantısı geçersiz ya da süresi dolmuş.",
+  "maintenance.shop_closed":
+    "Mağaza kısa bir bakım arasında; şu anda sipariş ve form kabul edilmiyor. Lütfen biraz sonra yeniden deneyin.",
   "consents.link_invalid":
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. İzninizi hesabınızdan ya da yeniden abone olarak verebilirsiniz.",
   "stock_alerts.link_invalid":
@@ -1020,6 +1024,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_preset.theme_invalid": "Hazır görünümün tema ayarları bu mağazada kullanılamıyor.",
   "storefront_preset.layout_invalid": "Hazır görünümün sayfa düzeni bu mağazada kullanılamıyor.",
   "storefront_preset.demo_unavailable": "Demo içerik bu görünümde henüz sunulmuyor.",
+  // adr/0064: saved looks
+  "storefront_design.unknown": "Bu kayıtlı görünüm bulunamadı.",
+  "storefront_design.limit_reached":
+    "En çok 10 görünüm kaydedebilirsiniz. Yenisi için birini silin.",
+  "storefront_design.name_taken": "Bu adla kayıtlı bir görünüm var.",
+  "storefront_design.name_invalid":
+    "Ad 1–60 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "storefront_design.unreadable": "Bu kayıtlı görünüm artık açılamıyor.",
+  "storefront_design.too_large": "Görünüm kaydedilemeyecek kadar büyük.",
   "storefront_menus.text_invalid":
     "Menü adı ve bağlantı adı en fazla 60 karakter olmalı ve kullanılamayan karakter içermemeli.",
   "storefront_menus.target_invalid": "Bağlantının hedefi geçerli değil.",

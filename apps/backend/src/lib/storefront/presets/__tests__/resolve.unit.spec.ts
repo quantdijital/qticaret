@@ -350,6 +350,43 @@ describe("a preset's references resolved for a shop (adr/0063 §4)", () => {
     expect(gone.dropped).toEqual(["home.bantlar"])
   })
 
+  it("drops a catalogue opening's small product or tile the shop lacks, never the opening", () => {
+    const opening = (picks: unknown[], tiles: unknown[]) => ({
+      home: [{ id: "acilis", type: "hero", variant: "category_list", ...SCHEDULE, picks, tiles }],
+    })
+    const pick = (handle: string) => ({ product_id: { $handle: handle }, label: null })
+    const tile = (handle: string) => ({ category_id: { $handle: handle }, image: null })
+    const kept = resolvePreset(
+      opening(
+        [pick("product:av-bicagi"), pick("product:yok")],
+        [tile("category:yok"), tile("category:cakilar")]
+      ),
+      null,
+      lookups
+    )
+    expect(kept.groups.home[0]).toMatchObject({
+      id: "acilis",
+      picks: [{ product_id: "prod_av", label: null }],
+      tiles: [{ category_id: "pcat_cakilar", image: null }],
+    })
+    expect(kept.skipped).toEqual(
+      expect.arrayContaining([
+        { where: "home.acilis", ref: "product:yok" },
+        { where: "home.acilis", ref: "category:yok" },
+      ])
+    )
+    expect(kept.dropped).toEqual([])
+
+    // None of them in the shop: the opening stays, with none
+    const bare = resolvePreset(
+      opening([pick("product:yok")], [tile("category:yok")]),
+      null,
+      lookups
+    )
+    expect(bare.groups.home[0]).toMatchObject({ id: "acilis", picks: [], tiles: [] })
+    expect(bare.dropped).toEqual([])
+  })
+
   it("finds every reference a preset writes, menus' addresses included", () => {
     const found = presetMarkers({
       layout: { home: [hero, { id: "x", category_ids: [{ $handle: "category:cakilar" }] }] },

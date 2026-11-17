@@ -38,6 +38,10 @@
       "file": "density.css"
     },
     {
+      "sha256": "13cb6ef17b71e9a21aa7a1617c3c535a88a55ab7c111f78355522528bab4dd62",
+      "file": "footer-columns.css"
+    },
+    {
       "sha256": "4e80b18c2ae70a66cf28e869772a1e7f4406d9896d30d685a59bf3c477e9a5b2",
       "file": "frame.css"
     },
@@ -106,7 +110,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "b46f9c917d1a3ad7188ac55668a7ab33de4521e65c9f3393ac52d418b485f062",
+      "sha256": "8c8bea6ba4aa81a1e053c4354dec71e56e6f35e59ab00361010e4439af9904ce",
       "file": "styles.css"
     },
     {

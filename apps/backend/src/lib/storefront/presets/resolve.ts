@@ -78,10 +78,14 @@ const ID_FIELD = /^[a-z]+_(ids?)$/
  * a price band whose category the shop lacks (adr/0049, 2026-11-15). The
  * band is dropped, never turned into a whole-shop price band under the
  * category's own label; the list keeps the others while it has at least
- * `min` (a strip has two to four bands), else the section goes.
+ * `min` (a strip has two to four bands), else the section goes. A
+ * catalogue opening's small products and category tiles (H17) are extras
+ * of the opening: one the shop lacks goes alone, the opening stays.
  */
 const DROPPED_IN_ITEMS: Readonly<Record<string, { field: string; min: number }>> = {
   bands: { field: "category_id", min: 2 },
+  picks: { field: "product_id", min: 0 },
+  tiles: { field: "category_id", min: 0 },
 }
 
 const isObject = (value: unknown): value is Record<string, unknown> =>

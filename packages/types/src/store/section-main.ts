@@ -1,4 +1,4 @@
-import type { StoreFooterBarSettings } from "./section-footer.js"
+import type { StoreFooterBarSettings, StoreFooterColumns } from "./section-footer.js"
 import type { StoreLayoutLink } from "./layout.js"
 import type { SectionLook } from "./section-look.js"
 import type {
@@ -90,6 +90,8 @@ export interface StoreMainSections {
     id: string
     type: "footer_bar"
     variant: FooterBarVariant
+    /** The `brand_columns` variant's own settings (adr/0049 Ek 2026-11-17); absent on the others. */
+    columns?: StoreFooterColumns
   } & Partial<StoreFooterBarSettings>
   product_main: {
     id: string

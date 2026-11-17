@@ -2,7 +2,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { StepResponse } from "@medusajs/framework/workflows-sdk"
 import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import { checkoutProblem } from "../../lib/checkout"
-import { ValidationError } from "../../lib/errors"
+import { RetryableError, ValidationError } from "../../lib/errors"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { COD_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
 import { FEE_CART_FIELDS, feeFacts, feeLinesMatch } from "../../lib/payments/cod"
@@ -24,6 +24,8 @@ import {
 } from "../payment-links/cart-guard"
 import type { LinkClaim } from "../payment-links/cart-guard"
 import { assertWholesaleCartCompletes } from "../wholesale/checkout"
+import { overlapsPlacement } from "./completion-overlap"
+import type { HookCart } from "./completion-overlap"
 import { expectedCodFee } from "../payments/steps/payment-fee"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
@@ -33,7 +35,7 @@ type CartRow = Parameters<typeof checkoutProblem>[0] &
   PaymentFacts &
   FeeCart & {
     promotions?: ({ code?: string | null; is_automatic?: boolean | null } | null)[] | null
-    order?: { id: string } | null
+    order?: { id: string; created_at?: Date | string | null } | null
   }
 
 // One handler per hook: the checkout rules of lib/checkout (F3.2), a payment
@@ -42,11 +44,13 @@ type CartRow = Parameters<typeof checkoutProblem>[0] &
 // as published now (F13.2), a restricted product's buyer's age (F13.3) and
 // the wholesale rules (ADR-0068 slice 4), read fresh for the cart being completed.
 // Throwing stops the checkout; a cart already an order is never judged (it
-// answers with that order). Last, a payment link's cart holds its link
-// (adr/0051 §5); a completion failing after the hook lets go of it. The
-// hook's cart is typed loosely: only its id is used
+// answers with that order), unless that order was placed just now by a run
+// Medusa's lock did not hold back (`overlapsPlacement`). Last, a payment link's
+// cart holds its link (adr/0051 §5); a completion failing after the hook lets
+// go of it. The hook's cart is typed loosely: only its id and Medusa's
+// `completed_at` (`completeCartFields`) are used
 completeCartWorkflow.hooks.validate(
-  async ({ cart }: { cart: { id: string } }, { container }) => {
+  async ({ cart }: { cart: HookCart }, { container }) => {
     const query = container.resolve(ContainerRegistrationKeys.QUERY)
     const { data } = await query.graph({
       entity: "cart",
@@ -57,6 +61,7 @@ completeCartWorkflow.hooks.validate(
         "promotions.code",
         "promotions.is_automatic",
         "order.id",
+        "order.created_at",
         ...PAYMENT_FACT_FIELDS,
         ...FEE_CART_FIELDS,
       ],
@@ -67,6 +72,10 @@ completeCartWorkflow.hooks.validate(
     // runs this hook before it answers with that order, so nothing here may refuse it; a
     // refusal would read as a payment without an order and refund a placed order's money
     if (row.order?.id) {
+      if (overlapsPlacement(cart, row.order)) {
+        // Tried again: the next run answers with that order (review N1); never a refusal
+        throw new RetryableError("errors.busy")
+      }
       return new StepResponse<undefined, LinkClaim | null>(undefined, null)
     }
     const problem = checkoutProblem(row)

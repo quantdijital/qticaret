@@ -56,6 +56,7 @@ export interface AdminApi {
    * password, in the request's headers.
    */
   postProved: <T>(path: string, body: unknown) => Promise<T>
+  del: <T>(path: string) => Promise<T>
   dispose: () => Promise<void>
 }
 
@@ -170,6 +171,7 @@ export async function signInAdmin(admin: TemporaryAdmin): Promise<AdminApi> {
         }
         return bodyOf<T>(response, `POST ${path}`)
       },
+      del: async <T>(path: string) => bodyOf<T>(await api.delete(path), `DELETE ${path}`),
       dispose: () => api.dispose(),
     }
   } finally {

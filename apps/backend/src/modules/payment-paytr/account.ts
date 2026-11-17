@@ -38,5 +38,21 @@ export async function isRecordedForRefund(merchantOid: string): Promise<boolean>
   return row !== undefined
 }
 
+/**
+ * The reference the recovery job gives PayTR's payment back under, when it
+ * is recorded (`payment-recovery`), whatever became of it: Medusa's own
+ * refund of the same amount finds it in PayTR's record and is not made a
+ * second time.
+ */
+export async function recoveryRefundReference(merchantOid: string): Promise<string | null> {
+  const [row] = await container
+    .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
+    .listPaymentRecoveries(
+      { provider: "paytr", reference: merchantOid },
+      { take: 1, select: ["refund_reference"] }
+    )
+  return row?.refund_reference ?? null
+}
+
 /** The shop's installment choices (F5 V6), read at the time of the call like the account. */
 export const storedPaymentSettings = (): Promise<PaymentSettings> => paymentSettings(container)

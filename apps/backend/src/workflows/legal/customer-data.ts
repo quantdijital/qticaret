@@ -5,6 +5,7 @@ import { campaignMessagesFor } from "../campaigns/customer-data"
 import { contactMessagesFor } from "../contact/customer-data"
 import { exportedItems } from "../gift-cards/kvkk"
 import { paymentLinksFor } from "../payment-links/retention"
+import { wholesaleDataFor } from "../wholesale/customer-data"
 import type BackInStockModuleService from "../../modules/back-in-stock/service"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -44,8 +45,8 @@ const iso = (value: unknown): string | null =>
  * answer to their request for a copy: their profile and addresses, invoice
  * identity (the tax number's last four digits), orders, consents and the
  * contracts' acceptance, messages sent, returns, reviews, questions, stock
- * alerts and saved products. Sections are named in Turkish: the file is
- * theirs to read.
+ * alerts, saved products and their wholesale account. Sections are named
+ * in Turkish: the file is theirs to read.
  */
 export async function customerData(container: Container, customerId: string) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
@@ -152,6 +153,7 @@ export async function customerData(container: Container, customerId: string) {
   const contact = await contactMessagesFor(container, customerId, email ? [email] : [])
   const campaigns = await campaignMessagesFor(container, customerId, email ? [email] : [])
   const paymentLinks = await paymentLinksFor(container, customerId, email ? [email] : [])
+  const wholesale = await wholesaleDataFor(container, customerId, email ? [email] : [], orderIds)
   // The photos they put on reviews (adr/0037 §4 Ek 2026-11-04), by their addresses
   const reviewPhotos = await container
     .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
@@ -188,5 +190,7 @@ export async function customerData(container: Container, customerId: string) {
     toplu_iletiler: campaigns,
     // adr/0051: the payment links staff made for them
     ödeme_bağlantıları: paymentLinks,
+    // ADR-0068 §10: their wholesale account, if they are or were a wholesaler
+    toptan_hesap: wholesale,
   }
 }

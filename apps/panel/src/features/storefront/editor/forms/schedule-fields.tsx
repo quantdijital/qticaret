@@ -2,11 +2,13 @@ import { useTranslation } from "react-i18next"
 import { Monitor, MonitorSmartphone, Smartphone } from "lucide-react"
 import { SECTION_DEVICES, SECTION_DEVICE_DEFAULT, deviceOf } from "@qticaret/types"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { AnySection, MainSection } from "@/features/storefront/api/layout"
 import type { Problem } from "@/features/storefront/layout/problems"
 import { fromLocalInput, toLocalInput } from "@/features/storefront/layout/schedule"
+import { HintedName } from "./field-hint"
 import { FIELD_IDS } from "./field-registry"
 import { useProblemText } from "./problem-text"
 import { StepChoice } from "./step-choice"
@@ -41,12 +43,21 @@ export function ScheduleFields({
   return (
     <>
       <div className="flex items-start justify-between gap-4">
-        <label htmlFor={FIELD_IDS.visible(section.id)} className="flex flex-col gap-0.5 text-sm">
-          {t(`${P}.visible`)}
-          <span className="text-xs text-muted-foreground">{t(`${P}.visibleHint`)}</span>
-        </label>
+        <HintedName
+          name={t(`${P}.visible`)}
+          hint={t(`${P}.visibleHint`)}
+          hintId={`${FIELD_IDS.visible(section.id)}-hint`}
+        >
+          <label htmlFor={FIELD_IDS.visible(section.id)} className="text-sm">
+            {t(`${P}.visible`)}
+          </label>
+        </HintedName>
+        <HiddenHint id={`${FIELD_IDS.visible(section.id)}-hint`}>
+          {t(`${P}.visibleHint`)}
+        </HiddenHint>
         <Switch
           id={FIELD_IDS.visible(section.id)}
+          aria-describedby={`${FIELD_IDS.visible(section.id)}-hint`}
           checked={section.visible}
           onCheckedChange={(visible) => {
             onChange({ ...section, visible })
