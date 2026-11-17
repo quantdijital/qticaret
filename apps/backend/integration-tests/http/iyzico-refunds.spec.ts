@@ -91,7 +91,10 @@ medusaIntegrationTestRunner({
     it("gives back a unit through its item transaction, once per reference", async () => {
       const { orderId, paymentId } = await paidOrder()
       const item = await firstItem(orderId)
-      const body = { items: [{ id: item?.id, quantity: 1 }], reference: "refund0000000001" }
+      const body = {
+        items: [{ id: item?.id, quantity: 1 }],
+        reference: "f0000000000000000000000000000001",
+      }
 
       const first = await refund(orderId, body)
       const again = await refund(orderId, body)
@@ -99,7 +102,7 @@ medusaIntegrationTestRunner({
       expect(first.data.refund).toMatchObject({ amount: "120.00", made_before: false })
       expect(again.data.refund).toMatchObject({ made_before: true })
       expect(fake.refunds.get(`${paymentId}01`)).toEqual([12000])
-      expect(await partsOf("refund0000000001")).toEqual([
+      expect(await partsOf("f0000000000000000000000000000001")).toEqual([
         { transaction_id: `${paymentId}01`, amount: 12000, state: "done" },
       ])
     })
@@ -107,7 +110,10 @@ medusaIntegrationTestRunner({
     it("splits an amount past one line over the lines, products first", async () => {
       const { orderId, paymentId } = await paidOrder()
 
-      const made = await refund(orderId, { amount: 300, reference: "refund0000000002" })
+      const made = await refund(orderId, {
+        amount: 300,
+        reference: "f0000000000000000000000000000002",
+      })
 
       expect(made.data.refund.amount).toBe("300.00")
       expect(fake.refunds.get(`${paymentId}01`)).toEqual([24000])
@@ -118,17 +124,24 @@ medusaIntegrationTestRunner({
       const { orderId } = await paidOrder()
       fake.queue(REFUND, { drop: true })
 
-      const lost = await refund(orderId, { amount: 50, reference: "refund0000000003" })
-      const again = await refund(orderId, { amount: 50, reference: "refund0000000003" })
+      const lost = await refund(orderId, {
+        amount: 50,
+        reference: "f0000000000000000000000000000003",
+      })
+      const again = await refund(orderId, {
+        amount: 50,
+        reference: "f0000000000000000000000000000003",
+      })
 
       expect(lost.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
       expect(again.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
       expect(
         fake.requests.filter(
-          ({ path, body }) => path === REFUND && body["conversationId"] === "refund0000000003"
+          ({ path, body }) =>
+            path === REFUND && body["conversationId"] === "f0000000000000000000000000000003"
         )
       ).toHaveLength(1)
-      expect(await partsOf("refund0000000003")).toEqual([
+      expect(await partsOf("f0000000000000000000000000000003")).toEqual([
         expect.objectContaining({ amount: 5000, state: "sending" }),
       ])
     })
@@ -136,10 +149,16 @@ medusaIntegrationTestRunner({
     it("cancels the whole payment the day iyzico refuses to refund it, and says so for a part", async () => {
       const { orderId, paymentId } = await paidOrder()
       fake.queue(REFUND, failure("10223"))
-      const part = await refund(orderId, { amount: 50, reference: "refund0000000004" })
+      const part = await refund(orderId, {
+        amount: 50,
+        reference: "f0000000000000000000000000000004",
+      })
       fake.queue(REFUND, failure("10223"))
 
-      const whole = await refund(orderId, { amount: 330, reference: "refund0000000005" })
+      const whole = await refund(orderId, {
+        amount: 330,
+        reference: "f0000000000000000000000000000005",
+      })
 
       expect(part.data).toMatchObject({ message: "iyzico.refund_same_day" })
       expect(whole.data.refund).toMatchObject({ amount: "330.00" })
@@ -148,7 +167,7 @@ medusaIntegrationTestRunner({
 
     it("shows the shop iyzico's record of the payment, and the refunds made", async () => {
       const { orderId, paymentId } = await paidOrder()
-      await refund(orderId, { amount: 30, reference: "refund0000000006" })
+      await refund(orderId, { amount: 30, reference: "f0000000000000000000000000000006" })
 
       const { data } = await http.get<{ payments: Record<string, unknown>[] }>(
         `/admin/orders/${orderId}/payment-details`,
@@ -165,7 +184,12 @@ medusaIntegrationTestRunner({
           card_brand: "MASTER_CARD",
           card_last4: "0008",
           fraud_status: 1,
-          refunds: [expect.objectContaining({ amount: "30.00", reference: "refund0000000006" })],
+          refunds: [
+            expect.objectContaining({
+              amount: "30.00",
+              reference: "f0000000000000000000000000000006",
+            }),
+          ],
         }),
       ])
     })
