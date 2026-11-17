@@ -7,6 +7,10 @@ import { WebhookEvent } from "./models/webhook-event"
 // A run this quiet is taken as stopped (a crash), and the event may be tried again
 const PROCESSING_STALE_MS = 2 * 60 * 1000
 
+interface Executor {
+  execute: (sql: string, params: unknown[]) => Promise<unknown>
+}
+
 /**
  * - `new`: first seen; handle it.
  * - `retry`: seen before and failed (or stopped): handle it again.
@@ -71,6 +75,46 @@ class WebhookEventsModuleService extends MedusaService({ WebhookEvent }) {
       { status: "processing", attempts: attempts + 1, error_code: null, updated_at: new Date() }
     )
     return changed > 0
+  }
+
+  /**
+   * Counts one more take of a result a provider gives no notice id for
+   * (iyzico's paid form, reached by the shopper's browser and the reconcile
+   * job), so a completion that keeps failing reaches the shop as PayTR's
+   * does. No claim: nothing is held, two takes at once both go on. How many
+   * takes there have been, this one included.
+   */
+  async countTake(provider: string, eventKey: string): Promise<number> {
+    try {
+      await this.createWebhookEvents({ provider, event_key: eventKey })
+      return 1
+    } catch (error) {
+      if (!uniqueViolationKeys(error)) {
+        throw error
+      }
+    }
+    return this.addTake_(provider, eventKey)
+  }
+
+  // One statement: of two takes at once neither is lost
+  @InjectTransactionManager()
+  protected async addTake_(
+    provider: string,
+    eventKey: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    const manager = sharedContext.transactionManager as Executor | undefined
+    if (!manager) {
+      throw new Error("webhook_event: a take is counted in a transaction")
+    }
+    const [row] = (await manager.execute(
+      `UPDATE webhook_event SET attempts = attempts + 1, updated_at = now()
+        WHERE provider = ? AND event_key = ? AND deleted_at IS NULL
+       RETURNING attempts`,
+      [provider, eventKey]
+    )) as { attempts?: unknown }[]
+    const attempts = Number(row?.attempts)
+    return Number.isInteger(attempts) ? attempts : 1
   }
 
   async markProcessed(id: string, summary?: Record<string, unknown>): Promise<void> {
