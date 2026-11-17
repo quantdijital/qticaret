@@ -40,7 +40,8 @@ export const ORDER_RESOURCES: readonly AuditedResource[] = [
       const [refund] = await container
         .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
         .listOrderRefunds(
-          { reference: params["reference"] ?? "" },
+          // This order's refund only: another order's reference never reaches its record (D-5)
+          { reference: params["reference"] ?? "", order_id: params["id"] ?? "" },
           { select: ["status", "error_code", "amount"], take: 1 }
         )
       return {

@@ -18,12 +18,14 @@ export const referenceTaken = (
  * money is surely back (`made`: recorded; `send`: shown by the provider,
  * which finds it and sends nothing), and refused otherwise, never sent
  * again; only a failed one is planned anew from the request and sent.
+ * Asked only to close (`closeOnly`, D-3), one not open is left as it is.
  */
 export function triedAgain(
   status: string,
-  trace: RefundTrace | null
+  trace: RefundTrace | null,
+  closeOnly = false
 ): "done" | "made" | "send" | "unsettled" | "replan" {
-  if (status === "done") {
+  if (status === "done" || (closeOnly && status !== "pending")) {
     return "done"
   }
   if (status === "failed") {

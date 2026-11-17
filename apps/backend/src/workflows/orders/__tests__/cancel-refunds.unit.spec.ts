@@ -74,7 +74,12 @@ describe("a cancel refunds each payment once, under the payment's own reference 
     expect(await refundForCancel(container as never, input)).toBe(1)
 
     expect(references()).toEqual([
-      expect.objectContaining({ reference: "cancelorder01", payment_id: "pay_P0" }),
+      // Only closed: settled meanwhile, it is left as it is (D-3)
+      expect.objectContaining({
+        reference: "cancelorder01",
+        payment_id: "pay_P0",
+        close_only: true,
+      }),
       expect.objectContaining({
         reference: cancelRefundReference("pay_P1"),
         payment_id: "pay_P1",
@@ -108,6 +113,10 @@ describe("a cancel refunds each payment once, under the payment's own reference 
     for (const trace of ["none", "unknown", "partial"] as const) {
       expect(triedAgain("pending", trace)).toBe("unsettled")
     }
+    // Asked only to close, one no longer open is left as it is (D-3)
+    expect(triedAgain("failed", null, true)).toBe("done")
+    expect(triedAgain("done", null, true)).toBe("done")
+    expect(triedAgain("pending", "made", true)).toBe("made")
   })
 
   it("refunds each payment with money left, a hosted form's first, up to what is refundable", async () => {

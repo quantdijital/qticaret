@@ -157,7 +157,15 @@ medusaIntegrationTestRunner({
       const [closed] = await ledger().listOrderRefunds({ reference: body.reference })
       const { data } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
-        .graph({ entity: "payment", fields: ["refunds.id"], filters: { id: closed?.payment_id } })
+        .graph({
+          entity: "payment",
+          fields: ["refunds.id", "payment_collection.refunded_amount"],
+          filters: { id: closed?.payment_id },
+        })
+      const payment = data[0] as {
+        refunds: unknown[]
+        payment_collection: { refunded_amount: unknown }
+      }
       const transactions = await getContainer()
         .resolve(Modules.ORDER)
         .listOrderTransactions({ order_id: orderId, reference: "refund" })
@@ -165,10 +173,40 @@ medusaIntegrationTestRunner({
       expect(checked.data.refund).toMatchObject({ status: "done" })
       expect(again.data.message).toBe("orders.refund_not_open")
       expect(closed).toMatchObject({ status: "done", error_code: "checked_made" })
-      expect((data[0] as { refunds: unknown[] }).refunds).toHaveLength(1)
+      expect(payment.refunds).toHaveLength(1)
+      // The collection's refunded total kept as Medusa's own refund keeps it (D-2)
+      expect(Number(payment.payment_collection.refunded_amount)).toBe(30)
       expect(transactions).toHaveLength(1)
       // Nothing more sent: the one lost request
       expect(refundRequests()).toHaveLength(1)
+    })
+
+    it("refuses not made for a refund PayTR shows made (D-1)", async () => {
+      const { orderId, reference } = await paid()
+      const body = { amount: 30, reference: key() }
+      await lostRefund(orderId, body)
+      fake.payments.get(reference)?.refunds.push({ amount: 3000, referenceNo: body.reference })
+
+      const checked = await check(orderId, body.reference, "not_made")
+      const [open] = await ledger().listOrderRefunds({ reference: body.reference })
+
+      expect(checked.status).toBe(409)
+      expect(checked.data.message).toBe("orders.refund_check_shown")
+      expect(open).toMatchObject({ status: "pending" })
+    })
+
+    it("keeps a refund whose answer PayTR sent but did not read open, never failed (O-1)", async () => {
+      const { orderId, reference } = await paid()
+      const body = { amount: 30, reference: key() }
+      // A 2xx PayTR answer of a shape not its own: unread, never a refusal
+      fake.queue("/odeme/iade", { body: { status: "success" } })
+
+      const unread = await refund(orderId, body)
+      const [open] = await ledger().listOrderRefunds({ reference: body.reference })
+
+      expect(unread.status).toBeGreaterThanOrEqual(400)
+      expect(open).toMatchObject({ status: "pending", error_code: "refund_unconfirmed" })
+      expect(fake.payments.get(reference)?.refunds).toEqual([])
     })
   },
 })

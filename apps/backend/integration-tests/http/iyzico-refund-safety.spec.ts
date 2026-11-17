@@ -123,6 +123,9 @@ medusaIntegrationTestRunner({
         amount: 50,
         reference: "e0000000000000000000000000000003",
       })
+      const [open] = await ledger().listOrderRefunds({
+        reference: "e0000000000000000000000000000003",
+      })
       const again = await refund(orderId, {
         amount: 50,
         reference: "e0000000000000000000000000000003",
@@ -130,9 +133,44 @@ medusaIntegrationTestRunner({
       const entry = await ledger().providerParts("e0000000000000000000000000000003")
 
       expect(forged.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
-      expect(again.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
+      // An answer not iyzico's is no refusal: the refund stays open, never failed (review O-1)
+      expect(open).toMatchObject({ status: "pending", error_code: "refund_incomplete" })
+      // Tried again, an open refund is never sent: the shop settles it (review O1)
+      expect(again.status).toBe(409)
+      expect(again.data).toMatchObject({ message: "orders.refund_unsettled" })
       expect(entry?.parts).toEqual([expect.objectContaining({ amount: 5000, state: "sending" })])
       expect(sentFor("e0000000000000000000000000000003")).toBe(1)
+    })
+
+    it("lets staff settle a part whose answer was lost, and the payment refunds again (O-2)", async () => {
+      const { orderId } = await paidOrder()
+      fake.queue(REFUND, { drop: true })
+      const lostRef = "e0000000000000000000000000000006"
+      await refund(orderId, { amount: 50, reference: lostRef })
+      // While that part's answer is unknown, no refund of the payment may go
+      const blocked = await refund(orderId, {
+        amount: 20,
+        reference: "e0000000000000000000000000000007",
+      })
+
+      const checked = await settle(
+        http.post<{ refund?: { status: string } }>(
+          `/admin/orders/${orderId}/refunds/${lostRef}/settle`,
+          { outcome: "not_made" },
+          { headers: admin.headers }
+        )
+      )
+      const next = await refund(orderId, {
+        amount: 20,
+        reference: "e0000000000000000000000000000008",
+      })
+      const [closed] = await ledger().listOrderRefunds({ reference: lostRef })
+
+      expect(blocked.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
+      expect(checked.data.refund).toMatchObject({ status: "failed" })
+      expect(closed).toMatchObject({ status: "failed", provider_parts: [] })
+      expect(next.data.refund).toMatchObject({ amount: "20.00" })
+      expect(sentFor(lostRef)).toBe(1)
     })
 
     it("keeps a refund that went part way pending, its sent part counted, never sent twice", async () => {

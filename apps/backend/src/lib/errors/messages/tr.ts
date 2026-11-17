@@ -1135,7 +1135,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "orders.refund_not_open": "Bu iade artık açık değil; sayfayı yenileyin.",
   "orders.refund_unknown": "Bu iade siparişte bulunamadı.",
   "orders.refund_unsettled":
-    "Bu siparişin bir iadesi sağlayıcıyla henüz doğrulanıyor; birkaç dakika sonra yeniden deneyin.",
+    "Bu siparişin bir iadesinin kaydı yarım; para yeniden gönderilmedi. Kayıt otomatik olarak denetleniyor. Beklemek istemiyorsanız sağlayıcının panelinde kontrol edip sipariş sayfasındaki İadeler sekmesinden kaydı sonuçlandırın.",
+  "orders.refund_check_partial":
+    "Bu iadenin bir kısmı yapılmış, tamamı değil; elle sonuçlandırılamaz. Sağlayıcının panelinde ve destek ekibiyle kontrol edin.",
+  "orders.refund_check_shown": 'Sağlayıcı bu iadeyi yapılmış gösteriyor; "para gitmedi" seçilemez.',
   "payments.use_order_refund": "Bu ödemenin iadesi siparişin iade adımından yapılır.",
   "payments.max_installment_invalid":
     "En çok taksit 2 ile 12 arasında olmalı (0: PayTR'nin izin verdiği en çok).",

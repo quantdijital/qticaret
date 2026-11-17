@@ -75,6 +75,8 @@ describe("the settling job reads open refunds again and never sends one (review 
         reference: entry.reference,
         request: { amount: 1000 },
         payment_id: "pay_01",
+        // Only closed: settled meanwhile, it is left as it is (D-3)
+        close_only: true,
       },
     })
     expect(updateOrderRefunds).not.toHaveBeenCalled()
@@ -108,17 +110,26 @@ describe("the settling job reads open refunds again and never sends one (review 
     traceIs("none", "iyzico")
     const iyzico = ledgerWith([[entryOf()]])
     await settleOpenRefunds(iyzico.container, NOW)
-    traceIs("unknown")
+    traceIs("none")
     const refused = ledgerWith([
       [entryOf({ error_code: "provider_refused", updated_at: ago(STRANDED_MS) })],
     ])
     await settleOpenRefunds(refused.container, NOW)
+    // Refused, yet unreadable: never failed on it, only marked for the shop (O-1)
+    traceIs("unknown")
+    const unread = ledgerWith([
+      [entryOf({ error_code: "provider_refused", updated_at: ago(STRANDED_MS) })],
+    ])
+    await settleOpenRefunds(unread.container, NOW)
 
     for (const { updateOrderRefunds } of [iyzico, refused]) {
       expect(updateOrderRefunds).toHaveBeenCalledWith(
         expect.objectContaining({ status: "failed", error_code: "refund_failed" })
       )
     }
+    expect(unread.updateOrderRefunds).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "pending", error_code: "refund_incomplete" })
+    )
   })
 
   it("reads an entry a crash left unmarked only once it is surely no refund under way (O2)", async () => {

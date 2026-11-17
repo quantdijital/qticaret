@@ -38,6 +38,7 @@ async function settleOpenRefunds(
         reference: entry.reference,
         request: { amount: kurus(entry.amount) },
         payment_id: entry.payment_id,
+        close_only: true,
         note: input.note,
         created_by: input.created_by,
       },

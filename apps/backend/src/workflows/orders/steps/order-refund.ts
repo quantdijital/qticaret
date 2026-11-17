@@ -26,6 +26,11 @@ export interface RefundOrderInput {
    * before for another payment is refused (security review Y1).
    */
   payment_id?: string
+  /**
+   * Only close an open refund (the settling job's, a cancel's settling of
+   * what is open): one no longer open is left as it is, never sent (D-3).
+   */
+  close_only?: boolean
   note?: string | null
   created_by?: string | null
 }
@@ -141,7 +146,14 @@ export const planOrderRefundStep = createStep(
       existing?.status === "pending"
         ? (await refundTraceOf(container, tracedOf(existing))).trace
         : null
-    const action = existing ? triedAgain(existing.status, trace) : "replan"
+    const action = existing
+      ? triedAgain(existing.status, trace, input.close_only === true)
+      : input.close_only
+        ? "done"
+        : "replan"
+    if (!existing && action === "done") {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.refund_unknown")
+    }
     if (action === "unsettled") {
       throw new ConflictError("orders.refund_unsettled")
     }

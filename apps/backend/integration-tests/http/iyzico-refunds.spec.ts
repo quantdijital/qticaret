@@ -128,13 +128,20 @@ medusaIntegrationTestRunner({
         amount: 50,
         reference: "f0000000000000000000000000000003",
       })
+      const [entry] = await getContainer()
+        .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+        .listOrderRefunds({ reference: "f0000000000000000000000000000003" })
       const again = await refund(orderId, {
         amount: 50,
         reference: "f0000000000000000000000000000003",
       })
 
       expect(lost.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
-      expect(again.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
+      // An answer lost is no refusal: the refund stays open, counted, never failed (review O-1)
+      expect(entry).toMatchObject({ status: "pending", error_code: "refund_incomplete" })
+      // Tried again, an open refund is never sent: the shop settles it (review O1)
+      expect(again.status).toBe(409)
+      expect(again.data).toMatchObject({ message: "orders.refund_unsettled" })
       expect(
         fake.requests.filter(
           ({ path, body }) =>

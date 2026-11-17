@@ -92,12 +92,13 @@ async function settleEntry(
         reference: entry.reference,
         request: { amount: kurus(entry.amount) },
         payment_id: entry.payment_id,
+        close_only: true,
       },
     })
     return "closed"
   }
   // Refused outright, its undoing cut short by a crash: nothing was made
-  if (entry.error_code === PROVIDER_REFUSED && (trace === "none" || trace === "unknown")) {
+  if (entry.error_code === PROVIDER_REFUSED && trace === "none") {
     await mark(container, entry, { status: "failed", error_code: "refund_failed" })
     return "failed"
   }
