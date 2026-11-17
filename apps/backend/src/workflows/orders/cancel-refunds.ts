@@ -40,8 +40,11 @@ async function settleOpenRefunds(
         request: { amount: kurus(entry.amount) },
         payment_id: entry.payment_id,
         // This cancel's own refund of the payment is its own to finish: one iyzico made in part,
-        // every part answered, sends what is left (review D4-1 M1); any other is only closed
-        close_only: entry.reference !== cancelRefundReference(entry.payment_id),
+        // every part answered, sends what is left (review D4-1 M1); otherwise only closed, never
+        // planned anew from this read (SF2: the loop below plans a failed one under the lock)
+        ...(entry.reference === cancelRefundReference(entry.payment_id)
+          ? { resume_only: true }
+          : { close_only: true }),
         note: input.note,
         created_by: input.created_by,
       },

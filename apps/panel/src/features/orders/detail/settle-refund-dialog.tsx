@@ -29,8 +29,9 @@ const PROVIDERS: Readonly<Record<string, string>> = {
 
 const kurusOf = (lira: string) => Math.round(Number(lira) * 100)
 
-// The panel's own refund key (`newRefundReference`): only such a refund is closed in part
-const PANEL_REFUND_KEY = /^[0-9a-f]{32}$/
+// A cancel's or a return's refund: run again, its flow sends what is left; never closed in part
+// here (an edit's is: the edit never makes its refund again)
+const isFlowOwned = (reference: string) => /^(cancel|return)/.test(reference)
 
 /**
  * An iyzico refund made in part (D4-1): every part answered, together
@@ -47,15 +48,21 @@ function madeInPartOf(refund: ShopRefund): { done: number; rest: number } | null
   return done > 0 && done < amount ? { done, rest: amount - done } : null
 }
 
-/** Staff's answer: an outcome, or what iyzico's panel shows of a part whose answer was lost. */
-type Choice = SettleOutcome | "lost_made" | "lost_not_made"
+/**
+ * Staff's answer: an outcome, what iyzico's panel shows of a part whose
+ * answer was lost, or a flow's rest given back by hand outside iyzico
+ * (`made_by_hand`: the whole amount recorded as made, nothing sent).
+ */
+type Choice = SettleOutcome | "lost_made" | "lost_not_made" | "made_by_hand"
 
-const bodyOf = (choice: Choice): SettleBody =>
-  choice === "lost_made"
-    ? { lost_part: "made" }
-    : choice === "lost_not_made"
-      ? { lost_part: "not_made" }
-      : { outcome: choice }
+const BODIES: Readonly<Record<Choice, SettleBody>> = {
+  made: { outcome: "made" },
+  not_made: { outcome: "not_made" },
+  made_in_part: { outcome: "made_in_part" },
+  lost_made: { lost_part: "made" },
+  lost_not_made: { lost_part: "not_made" },
+  made_by_hand: { outcome: "made" },
+}
 
 /** What staff look for in the provider's panel: who, which reference, how much, when, its parts. */
 function RefundFacts({ refund, currency }: { refund: ShopRefund; currency: string }) {
@@ -101,8 +108,9 @@ function RefundFacts({ refund, currency }: { refund: ShopRefund; currency: strin
  * first (D4-1 M2); the server works out the rest. An iyzico refund made in
  * part is checked against iyzico's panel: its record closed at the part
  * made, what is left shown to be refunded anew, or left open when the
- * figures do not match; a cancel's, a return's or an edit's is left to its
- * flow. Nothing is refunded from here.
+ * figures do not match; a cancel's or a return's is left to its flow, or
+ * recorded whole once staff gave its rest back by hand. Nothing is
+ * refunded from here.
  */
 export function SettleRefundDialog({
   orderId,
@@ -126,13 +134,12 @@ export function SettleRefundDialog({
     rest: inPart ? formatMoney(inPart.rest / 100, currency) : "",
     part: lost ? formatMoney(lost.amount, currency) : "",
   }
-  // A cancel's, a return's or an edit's refund is finished by its flow, never closed in part here
-  const flowOwned = refund !== null && !PANEL_REFUND_KEY.test(refund.reference)
+  const flowOwned = refund !== null && isFlowOwned(refund.reference)
   const choices: readonly Choice[] = lost
     ? ["lost_not_made", "lost_made"]
     : inPart
       ? flowOwned
-        ? []
+        ? ["made_by_hand"]
         : ["made_in_part"]
       : ["not_made", "made"]
   const close = (open: boolean) => {
@@ -146,7 +153,7 @@ export function SettleRefundDialog({
       return
     }
     settle.mutate(
-      { reference: refund.reference, ...bodyOf(chosen) },
+      { reference: refund.reference, ...BODIES[chosen] },
       {
         onSuccess: (answer) => {
           const done = lost ? `${S}.done.lost.${answer.refund.status}` : `${S}.done.${chosen}`

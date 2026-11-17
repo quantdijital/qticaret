@@ -37,6 +37,7 @@ export async function POST(
     status: result.status,
     ...(outcome ? { outcome } : {}),
     ...(lost_part ? { lost_part } : {}),
+    ...(result.rest_by_hand ? { rest_by_hand: result.rest_by_hand } : {}),
   }
   res.json({ refund: result })
 }

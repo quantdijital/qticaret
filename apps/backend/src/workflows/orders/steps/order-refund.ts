@@ -33,6 +33,12 @@ export interface RefundOrderInput {
    * what is open): one no longer open is left as it is, never sent (D-3).
    */
   close_only?: boolean
+  /**
+   * As `close_only`, but an iyzico refund made in part with every part
+   * answered is sent on (a cancel's own refund, review D4-1 SF2): one no
+   * longer open is never planned anew from what was read before the lock.
+   */
+  resume_only?: boolean
   note?: string | null
   created_by?: string | null
 }
@@ -151,13 +157,12 @@ export const planOrderRefundStep = createStep(
         ? (await refundTraceOf(container, tracedOf(existing))).trace
         : null
     let action = existing
-      ? triedAgain(
-          existing.status,
-          trace,
-          input.close_only === true,
-          allAnswered(existing.provider_parts as ProviderPart[] | null)
-        )
-      : input.close_only
+      ? triedAgain(existing.status, trace, {
+          closeOnly: input.close_only === true,
+          resumeOnly: input.resume_only === true,
+          answered: allAnswered(existing.provider_parts as ProviderPart[] | null),
+        })
+      : input.close_only || input.resume_only
         ? "done"
         : "replan"
     // A staff check already wrote Medusa's record: the payment's data finished from it, and the

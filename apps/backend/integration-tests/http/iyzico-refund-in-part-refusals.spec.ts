@@ -77,6 +77,77 @@ medusaIntegrationTestRunner({
       expect(sentFor(reference)).toBe(3)
     })
 
+    it("records a cancel's rest refused again by iyzico as made by hand; the cancel then completes, sending nothing (SF1)", async () => {
+      const { orderId, paymentId } = await paidOrder()
+      halfway(iyzicoFailure("5093"))
+      const cancel = () =>
+        settle(
+          http.post<{ order?: { status: string } }>(
+            `/admin/orders/${orderId}/cancel`,
+            {},
+            { headers: shop.admin().headers }
+          )
+        )
+      await cancel()
+      const [entry] = await shop.ledger().listOrderRefunds({ order_id: orderId })
+      const reference = defined(entry, "cancel's ledger entry").reference
+      // Run again, the rest is refused too: the line was refunded by hand in iyzico's panel
+      shop.fake().queue("/payment/refund", iyzicoFailure("10245"))
+      const refusedAgain = await cancel()
+      const sentBefore = sentFor(reference)
+
+      const checked = await check(orderId, reference, { outcome: "made" })
+      const again = await cancel()
+      const closed = await entryOf(reference)
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "payment",
+          fields: ["refunds.amount"],
+          filters: { id: closed.payment_id },
+        })
+
+      expect(refusedAgain.status).toBeGreaterThanOrEqual(400)
+      expect(checked.data.refund).toMatchObject({ status: "done", rest_by_hand: 9000 })
+      expect(again.status).toBe(200)
+      expect(again.data.order).toMatchObject({ status: "canceled" })
+      expect(closed).toMatchObject({ status: "done", amount: 33000, error_code: "checked_made" })
+      // The whole amount recorded once, what iyzico made and what was given back by hand
+      expect(
+        (data[0] as { refunds: { amount: unknown }[] }).refunds.map((r) => Number(r.amount))
+      ).toEqual([330])
+      // Nothing more asked of iyzico once staff said so
+      expect(sentFor(reference)).toBe(sentBefore)
+      expect(shop.fake().refunds.get(`${paymentId}01`)).toEqual([24000])
+      expect(shop.fake().refunds.get(`${paymentId}02`)).toBeUndefined()
+    })
+
+    it("closes an edit's refund made in part like the panel's; the rest refunds anew (MF1)", async () => {
+      const { orderId } = await paidOrder()
+      const panelKey = "c0000000000000000000000000000004"
+      halfway(iyzicoFailure("5093"))
+      await refund(orderId, { amount: 300, reference: panelKey })
+      // Under the reference an edit's refund is made with (`edit<change>`): a real iyzico edit
+      // refund spans two item transactions only after an earlier refund, which an edit refuses
+      const reference = "editordch01JTESTEDITREFUNDINPART"
+      await shop.ledger().updateOrderRefunds({ id: (await entryOf(panelKey)).id, reference })
+
+      const checked = await check(orderId, reference, IN_PART)
+      const closed = await entryOf(reference)
+      const rest = await refund(orderId, {
+        amount: 60,
+        reference: "c0000000000000000000000000000005",
+      })
+
+      expect(checked.data.refund).toMatchObject({ status: "done" })
+      expect(closed).toMatchObject({
+        status: "done",
+        amount: 24000,
+        error_code: "checked_made_in_part",
+      })
+      expect(rest.data.refund).toMatchObject({ amount: "60.00" })
+    })
+
     it("leaves a return's refund made in part to the return, which sends only the rest (S1, M1)", async () => {
       const { orderId, paymentId } = await paidOrder()
       const { data } = await getContainer()

@@ -4050,13 +4050,14 @@
           "title": "Bu iade kısmen yapıldı",
           "question": "iyzico'nun yanıtlarına göre {{amount}} iadenin {{done}} tutarındaki kısmı geri verildi; {{rest}} geri verilmedi.",
           "hint": "Buradan para gönderilmez. iyzico panelinde bu iade için tam olarak {{done}} geri verildiğini doğrulayın. Tutuyorsa kayıt {{done}} olarak kapanır; kalan {{rest}}, siparişin iade adımından tutar girilerek yeniden iade edilebilir. Tutmuyorsa kaydı açık bırakın ve iyzico destek ekibine yazın. Seçiminiz denetim kaydına yazılır.",
-          "flow_owned": "Bu iade siparişin iptaline, bir iade talebine ya da sipariş düzenlemesine ait; buradan kısmen kapatılamaz. İptali ya da iadeyi yeniden çalıştırınca yalnız kalan {{rest}} gönderilir."
+          "flow_owned": "Bu iade siparişin iptaline ya da bir iade talebine ait; buradan kısmen kapatılamaz. İptali ya da iadeyi yeniden çalıştırınca yalnız kalan {{rest}} gönderilir. iyzico kalanı kabul etmiyorsa kalanı iyzico panelinden elle iade edin ve aşağıdan bildirin: buradan para gönderilmez, kayıt {{amount}} olarak tamamlanır ve denetim kaydına yazılır."
         },
         "lost": {
           "title": "Bir parçanın yanıtı gelmedi",
           "question": "iyzico panelinde bu {{part}} tutarındaki parça iade edilmiş görünüyor mu?",
           "hint": "Buradan para gönderilmez. Kayıt, yanıtınıza ve iyzico'nun yanıtladığı parçalara göre sonuçlanır; geri verilmeyen bir tutar kalırsa yeniden iade edilebilir. Panelde göremiyorsanız kaydı açık bırakıp iyzico destek ekibine yazın. Seçiminiz denetim kaydına yazılır."
         },
+        "made_by_hand": "Kalanı iyzico panelinden elle iade ettim",
         "lost_made": "Evet, iade edilmiş",
         "lost_not_made": "Hayır, iade edilmemiş",
         "keep_open": "Tutmuyor, açık bırak",
@@ -4073,6 +4074,7 @@
           "made": "Emin misiniz: para müşteriye geri gitti mi?",
           "not_made": "Emin misiniz: para müşteriye geri gitmedi mi?",
           "made_in_part": "Emin misiniz: kayıt {{done}} olarak kapansın mı?",
+          "made_by_hand": "Emin misiniz: kalan {{rest}} müşteriye elle iade edildi mi? Buradan para gönderilmez.",
           "lost_made": "Emin misiniz: {{part}} tutarındaki parça iade edilmiş mi?",
           "lost_not_made": "Emin misiniz: {{part}} tutarındaki parça iade edilmemiş mi?",
           "description": "Bu seçim kaydı kesinleştirir ve denetim kaydına yazılır. Sağlayıcının panelinde yukarıdaki referansla kontrol ettiyseniz onaylayın."
@@ -4083,6 +4085,7 @@
           "made": "İade kaydı tamamlandı.",
           "not_made": "İade kaydı kapatıldı; kalemler yeniden iade edilebilir.",
           "made_in_part": "İade kaydı {{done}} olarak kapatıldı; kalan {{rest}} yeniden iade edilebilir.",
+          "made_by_hand": "İade kaydı {{amount}} olarak tamamlandı; para gönderilmedi. İptali ya da iadeyi yeniden çalıştırabilirsiniz.",
           "lost": {
             "done": "İade kaydı iyzico'nun yaptığı tutarla kapatıldı; kalan bir tutar varsa yeniden iade edilebilir.",
             "failed": "İade kaydı kapatıldı; kalemler yeniden iade edilebilir.",

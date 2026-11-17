@@ -210,6 +210,55 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
     expect(screen.queryByRole("button", { name: "Para gitti" })).toBeNull()
   })
 
+  it("records a cancel's rest given back by hand as made, saying no money is sent (SF1)", async () => {
+    fetchMock.mockResolvedValue({ refund: { status: "done" } })
+    renderCard([
+      refund({
+        reference: "cancelpay01JABCDEFGHJKMNPQRSTVWXYZ0",
+        provider: "iyzico",
+        amount: "300.00",
+        parts: [{ amount: "240.00", state: "done" }],
+      }),
+    ])
+
+    await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Kalanı iyzico panelinden elle iade ettim" })
+    )
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(
+      screen.getByText(/kalan ₺60,00 müşteriye elle iade edildi mi\? Buradan para gönderilmez/)
+    ).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Onayla" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/admin/orders/order_1/refunds/cancelpay01JABCDEFGHJKMNPQRSTVWXYZ0/settle",
+        { method: "POST", body: { outcome: "made" } }
+      )
+    })
+    expect(toast.success).toHaveBeenCalledWith(
+      "İade kaydı ₺300,00 olarak tamamlandı; para gönderilmedi. İptali ya da iadeyi yeniden çalıştırabilirsiniz."
+    )
+  })
+
+  it("closes an edit's refund in part like the panel's own: the edit never makes it again (MF1)", async () => {
+    renderCard([
+      refund({
+        reference: "editordch01JABCDEFGHJKMNPQRSTVWXYZ",
+        provider: "iyzico",
+        amount: "300.00",
+        parts: [{ amount: "240.00", state: "done" }],
+      }),
+    ])
+
+    await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
+
+    expect(
+      await screen.findByRole("button", { name: "Doğruladım, yapılan kısmı kaydet" })
+    ).toBeInTheDocument()
+  })
+
   it("shows a refund closed in part as such", () => {
     renderCard([refund({ status: "done", incomplete: false, made_in_part: true })])
 

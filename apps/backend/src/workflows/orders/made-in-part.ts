@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ConflictError } from "../../lib/errors"
 import { logger } from "../../lib/logging"
 import { kurus, sumKurus } from "../../lib/money"
+import { isFlowOwnedRefund } from "../../lib/orders/locks"
 import { spreadRefund } from "../../lib/orders/refunds"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
@@ -66,12 +67,7 @@ export function linesMadeInPart(lines: readonly RefundLine[], done: number): Ref
 /** A refund staff closed at the part iyzico made: kept on the entry once it is done. */
 export const CHECKED_MADE_IN_PART = "checked_made_in_part"
 
-/**
- * Only the panel's own refunds (its key: 32 hex digits) are closed in part
- * (review D4-1, S1). A cancel's, a return's or an edit's refund is its
- * flow's: tried again under its reference, a refund closed in part would
- * read done at the made part, and the flow would take that for the whole.
- */
+/** The panel's own refund key (`newRefundReference`: a UUID's 32 hex digits). */
 export const PANEL_REFUND_KEY = /^[0-9a-f]{32}$/
 
 /**
@@ -134,8 +130,9 @@ export async function settleMadeInPart(
   lostPart?: "made" | "not_made"
 ): Promise<{ reference: string; status: "done" }> {
   const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-  // A cancel's, a return's or an edit's refund: its own flow sends what is left (S1, M1)
-  if (!PANEL_REFUND_KEY.test(entry.reference)) {
+  // A cancel's or a return's refund: its own flow sends what is left (S1, M1). An edit's
+  // closes here like the panel's: the edit never makes its refund again (MF1)
+  if (isFlowOwnedRefund(entry.reference)) {
     throw new ConflictError("orders.refund_in_part_flow_owned")
   }
   const { done, remainder } = madeInPart(entry.amount, parts)

@@ -10,16 +10,11 @@ import {
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ConflictError, ValidationError } from "../../lib/errors"
 import { logger } from "../../lib/logging"
-import { orderRefundLockKey } from "../../lib/orders/locks"
+import { isFlowOwnedRefund, orderRefundLockKey } from "../../lib/orders/locks"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import type { ProviderPart } from "../../modules/order-refunds/service"
-import {
-  CHECKED_MADE_IN_PART,
-  PANEL_REFUND_KEY,
-  resolveLostPart,
-  settleMadeInPart,
-} from "./made-in-part"
+import { CHECKED_MADE_IN_PART, resolveLostPart, settleMadeInPart } from "./made-in-part"
 import { recordMadeRefund } from "./made-refund-record"
 import { tracedOf } from "./refund-settle"
 import type { LedgerEntry } from "./refund-settle"
@@ -49,6 +44,8 @@ export interface SettledByHand {
   reference: string
   /** `pending`: a flow's refund made in part, its lost part answered, left to its flow (M1). */
   status: "done" | "failed" | "pending"
+  /** Kuruş of a flow's refund staff gave back by hand, outside iyzico (SF1). */
+  rest_by_hand?: number
 }
 
 /** Checked at the provider by staff: the codes say so in the ledger (the audit log says who). */
@@ -68,7 +65,10 @@ const total = (parts: readonly ProviderPart[]) => parts.reduce((sum, part) => su
  * shown by the provider) nor for a refund a part of which iyzico answered;
  * "made" only for the whole amount (the answered parts and the ones whose
  * answer was lost together). A refund made in part is neither: it is
- * closed as made in part (`settleMadeInPart`, D4-1), its rest refunded anew.
+ * closed as made in part (`settleMadeInPart`, D4-1), its rest refunded anew;
+ * a cancel's or a return's, whose rest iyzico keeps refusing, is "made"
+ * once staff gave that rest back by hand (review D4-1, SF1): the whole
+ * amount recorded, nothing sent.
  */
 async function assertSettleable(
   container: Pick<MedusaContainer, "resolve">,
@@ -77,7 +77,9 @@ async function assertSettleable(
 ): Promise<void> {
   const parts = partsOf(entry)
   if (outcome === "made") {
-    if (parts.length > 0 && total(parts) !== entry.amount) {
+    const given = total(parts)
+    const restByHand = isFlowOwnedRefund(entry.reference) && given < entry.amount
+    if (parts.length > 0 && given !== entry.amount && !restByHand) {
       throw new ConflictError("orders.refund_check_partial")
     }
     return
@@ -188,23 +190,26 @@ async function settleWhole(
     status,
     error_code: made ? CHECKED_MADE : CHECKED_NOT_MADE,
   })
+  // A flow's rest given back by hand, outside iyzico (SF1): said so in the log and the audit
+  const byHand = made && parts.length > 0 ? entry.amount - total(parts) : 0
   logger.info({
     event: "orders.refund_checked",
     orderId: entry.order_id,
     reference: entry.reference,
     outcome: made ? "made" : "not_made",
     ...(lostPart ? { lostPart } : {}),
+    ...(byHand > 0 ? { restByHand: byHand } : {}),
   })
-  return { reference: entry.reference, status }
+  return { reference: entry.reference, status, ...(byHand > 0 ? { rest_by_hand: byHand } : {}) }
 }
 
 /**
  * A refund with a part whose answer was lost, staff having looked it up in
  * iyzico's panel (review D4-1, M2): that part done or taken off, then what
  * the ledger's parts add up to decides. The whole amount: made. Nothing:
- * not made (never for money shown back). Part of it: a panel refund closes
- * at that part; a cancel's, a return's or an edit's keeps its answered
- * parts open for its flow, which sends what is left (M1).
+ * not made (never for money shown back). Part of it: a panel or an edit
+ * refund closes at that part (MF1); a cancel's or a return's keeps its
+ * answered parts open for its flow, which sends what is left (M1).
  */
 async function settleLostPart(
   container: Pick<MedusaContainer, "resolve">,
@@ -224,7 +229,7 @@ async function settleLostPart(
     await assertNotShown(container, entry)
     return settleWhole(container, entry, false, parts, actorId, answer)
   }
-  if (PANEL_REFUND_KEY.test(entry.reference)) {
+  if (!isFlowOwnedRefund(entry.reference)) {
     return settleMadeInPart(container, entry, parts, actorId, answer)
   }
   await container

@@ -275,7 +275,7 @@ describe("staff close an iyzico refund made in part, sending nothing (D4-1)", ()
     expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
   })
 
-  it.each(["cancelpay01JABC", "returnrreq01JABC", "editordch01JABC"])(
+  it.each(["cancelpay01JABC", "returnrreq01JABC"])(
     "leaves a flow's own refund (%s) to its flow, writing nothing (S1)",
     async (reference) => {
       const shop = shopWith({ ...open, reference })
@@ -287,6 +287,39 @@ describe("staff close an iyzico refund made in part, sending nothing (D4-1)", ()
       expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
     }
   )
+
+  it("closes an edit's refund in part: the edit never makes it again (MF1)", async () => {
+    const reference = "editordch01JABC"
+    const shop = shopWith({ ...open, reference })
+
+    expect(await settleRefundByHand(shop.container, { ...input, reference })).toEqual({
+      reference,
+      status: "done",
+    })
+    expect(shop.createRefunds).toHaveBeenCalledWith(expect.objectContaining({ amount: "240.00" }))
+  })
+
+  it("records a flow's rest given back by hand as made, sending nothing; never a panel refund's (SF1)", async () => {
+    const reference = "cancelpay01JABC"
+    const cancel = shopWith({ ...open, reference })
+    const panel = shopWith(open)
+    const made = { order_id: "order_01", actor_id: "user_01", outcome: "made" as const }
+
+    expect(await settleRefundByHand(cancel.container, { ...made, reference })).toEqual({
+      reference,
+      status: "done",
+      rest_by_hand: 6000,
+    })
+    // The whole amount recorded: what iyzico made and what staff gave back by hand
+    expect(cancel.createRefunds).toHaveBeenCalledWith(expect.objectContaining({ amount: "300.00" }))
+    expect(cancel.updateOrderRefunds).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "done", error_code: "checked_made" })
+    )
+    await expect(
+      settleRefundByHand(panel.container, { ...made, reference: REFERENCE })
+    ).rejects.toMatchObject({ safeMessage: "orders.refund_check_partial" })
+    expect(panel.createRefunds).not.toHaveBeenCalled()
+  })
 
   it("keeps the mark when the job closes a check cut short, and only a check's (L1)", async () => {
     const cut = shopWith({ ...open, amount: 24000, error_code: "checked_made_in_part" })
