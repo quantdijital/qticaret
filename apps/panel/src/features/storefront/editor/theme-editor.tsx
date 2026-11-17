@@ -37,6 +37,7 @@ import {
 } from "./editor-layout"
 import type { EditorView } from "./editor-layout"
 import { EditorShell } from "./editor-shell"
+import { useEditorSidebar } from "./editor-sidebar"
 import { EditorTopBar } from "./editor-top-bar"
 import { OpenedForm } from "./opened-form"
 import { formKeyOf } from "./opened"
@@ -129,6 +130,8 @@ export function ThemeEditor({
       setOpened({ kind: "section", id, ...(focus ? { focus } : {}) })
       // On a phone the preview hides the form: the edit label brings the form up
       setView("edit")
+      // Folded, the side panel comes back with the settings asked for
+      sidebar.show()
     },
     onVisit: place.visit,
     onLand: place.land,
@@ -193,6 +196,7 @@ export function ThemeEditor({
     />
   )
   const formKey = formKeyOf(opened, found ? found.section.id : null)
+  const sidebar = useEditorSidebar(formKey, shape !== "narrow")
   const pendingMenus = doc.settings.menus
   const tree = (
     <>
@@ -271,6 +275,8 @@ export function ThemeEditor({
         onPage={place.choosePage}
         view={view}
         onView={setView}
+        sidebar={sidebar.shown}
+        onSidebar={sidebar.toggle}
         canUndo={state.past.length > 0}
         canRedo={state.future.length > 0}
         onUndo={undo}
@@ -291,6 +297,7 @@ export function ThemeEditor({
           <EditorShell
             layout={shape}
             view={view}
+            sidebar={sidebar.shown}
             tree={tree}
             form={form}
             formKey={formKey}

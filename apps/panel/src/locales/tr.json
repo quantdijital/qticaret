@@ -8869,6 +8869,10 @@
         "title": "Sayfanın bölümleri",
         "description": "Ayarlarını açmak için bir bölüm seçin."
       },
+      "sidebar": {
+        "hide": "Kenar çubuğunu gizle",
+        "show": "Kenar çubuğunu göster"
+      },
       "slider": {
         "slides": "Slaytlar",
         "slidesHint": "{{min}}–{{max}} slayt; sırayla gösterilir. Düzenlemek için bir slayta tıklayın.",

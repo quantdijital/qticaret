@@ -8869,6 +8869,10 @@
         "title": "The page's sections",
         "description": "Pick a section to open its settings."
       },
+      "sidebar": {
+        "hide": "Hide sidebar",
+        "show": "Show sidebar"
+      },
       "slider": {
         "slides": "Slides",
         "slidesHint": "{{min}}–{{max}} slides, shown in turn. Click a slide to edit it.",
