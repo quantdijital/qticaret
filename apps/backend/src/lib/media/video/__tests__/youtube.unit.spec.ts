@@ -108,6 +108,18 @@ describe("YouTube's title for an untitled video", () => {
     expect(titleFromYoutube("a\u202Eevil\u200B")).toBe("a evil")
     expect(titleFromYoutube("x".repeat(260))).toBe("x".repeat(200))
     expect(titleFromYoutube("   ")).toBeNull()
+  })
+
+  it("cuts a long title with emoji by the 200 units the title rule counts, never mid-emoji", () => {
+    // 150 emoji are 300 UTF-16 units: 100 of them fit, whole
+    const emoji = titleFromYoutube("🔪".repeat(150))
+    expect(emoji).toBe("🔪".repeat(100))
+    // An odd unit left over: the emoji that would be split is left out
+    const odd = titleFromYoutube(`a${"🔪".repeat(150)}`)
+    expect(odd).toBe(`a${"🔪".repeat(99)}`)
+    expect(odd?.length).toBe(199)
+    expect(odd?.endsWith("\uD83D")).toBe(false)
+    expect(titleFromYoutube(`Şef bıçağı ${"😀 ".repeat(120)}`)?.length).toBeLessThanOrEqual(200)
     expect(titleFromYoutube(null)).toBeNull()
   })
 })

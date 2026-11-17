@@ -120,10 +120,26 @@ export function titleFromYoutube(title: string | null): string | null {
     .replace(/\s+/g, " ")
     .trim()
   try {
-    return cleanVideoTitle(Array.from(line).slice(0, VIDEO_TITLE_MAX).join("").trim())
+    return cleanVideoTitle(cutTo(line, VIDEO_TITLE_MAX).trim())
   } catch {
     return null
   }
+}
+
+/**
+ * At most `max` UTF-16 units, as `cleanVideoTitle` counts (security review
+ * S2), never ending on half a surrogate pair: an emoji is kept whole or
+ * left out.
+ */
+function cutTo(text: string, max: number): string {
+  let cut = ""
+  for (const char of text) {
+    if (cut.length + char.length > max) {
+      break
+    }
+    cut += char
+  }
+  return cut
 }
 
 /** The video's cover pictures, the largest first (`maxresdefault` is missing on some). */

@@ -65,9 +65,7 @@ describe("checking a YouTube video", () => {
     await expect(fetchYoutubePoster(ID)).resolves.toBeNull()
   })
 
-  it("goes through the SSRF rules: the real fetch refuses a private address", async () => {
-    await expect(real.poster("https://127.0.0.1/vi/x/hqdefault.jpg")).rejects.toMatchObject({
-      reason: "address_not_allowed",
-    })
+  it("never fetches a cover from anywhere but i.ytimg.com (review S1)", async () => {
+    await expect(real.poster("https://127.0.0.1/vi/x/hqdefault.jpg")).resolves.toBeNull()
   })
 })

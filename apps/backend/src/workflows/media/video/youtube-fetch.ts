@@ -47,14 +47,33 @@ async function getOembed(id: string): Promise<OembedAnswer> {
   return { status: answer.status, body: answer.body }
 }
 
+/** The one host a cover is taken from (`youtubePosterUrls`). */
+export const POSTER_HOST = "i.ytimg.com"
+
+const fromPosterHost = (address: string): boolean => {
+  try {
+    const url = new URL(address)
+    return url.protocol === "https:" && url.hostname === POSTER_HOST
+  } catch {
+    return false
+  }
+}
+
+/**
+ * A cover from `i.ytimg.com` and nowhere else (security review S1): no
+ * redirect is followed (it answers 200, or 404 for a size it lacks, at
+ * once) and the answer must come from that host.
+ */
 async function getPoster(address: string): Promise<PosterAnswer> {
+  if (!fromPosterHost(address)) {
+    return null
+  }
   const answer = await safeFetch(address, {
     timeoutMs: POSTER_TIMEOUT_MS,
     maxResponseBytes: POSTER_MAX_BYTES,
-    maxRedirects: 3,
-    redirect: "follow",
+    redirect: "error",
   })
-  return answer.status === 200 ? answer.body : null
+  return answer.status === 200 && fromPosterHost(answer.url) ? answer.body : null
 }
 
 /**
