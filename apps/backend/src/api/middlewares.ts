@@ -73,6 +73,7 @@ import { CONTROL_PLANE_ROUTES } from "./http/control-plane-routes"
 import { SHIPPING_ROUTES } from "./http/shipping-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
 import { CONTENT_DRAFT_ROUTES } from "./http/content-draft-routes"
+import { AI_ROUTES } from "./http/ai-routes"
 import { DEV_ROUTES } from "./http/dev-routes"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
 import { csrfProtection } from "./http/csrf"
@@ -385,6 +386,8 @@ export default defineMiddlewares({
     ...VAT_ROUTES,
     ...CONTENT_ROUTES,
     ...CONTENT_DRAFT_ROUTES,
+    // adr/0071: the AI core's services, suggestions and usage
+    ...AI_ROUTES,
     // F3.9: product sheets
     ...CATALOG_SHEET_ROUTES,
     ...MIGRATION_ROUTES,

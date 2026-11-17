@@ -25,7 +25,8 @@ export async function GET(
   const drafts = req.scope.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
   const [rows, used, enabled, budget] = await Promise.all([
     drafts.listContentDrafts(
-      { entity_type: query.entity_type, entity_id: query.entity_id },
+      // adr/0005 drafts only; the AI core's suggestions have their own routes (adr/0071 §11)
+      { entity_type: query.entity_type, entity_id: query.entity_id, source: "ai_draft" },
       {
         take: 20,
         order: { created_at: "DESC" },

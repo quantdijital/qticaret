@@ -135,7 +135,10 @@ function failureOfThrown(service: AiService, error: unknown, timedOut: boolean):
   if (reason === "request_failed") {
     const cause = (error as { cause?: { code?: unknown } | null }).cause
     const code = typeof cause?.code === "string" ? cause.code : ""
-    return fail("ai.provider_unavailable", reason, NEVER_CONNECTED.has(code))
+    // `connect_failed`: the request never left, so nothing could be charged for it
+    return NEVER_CONNECTED.has(code)
+      ? fail("ai.provider_unavailable", "connect_failed", true)
+      : fail("ai.provider_unavailable", reason)
   }
   // A refused address, a redirect, an answer too large: not what the registry describes
   return fail("ai.provider_response_invalid", reason)
