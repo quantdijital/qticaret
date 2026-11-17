@@ -92,4 +92,25 @@ describe("content text and links", () => {
     )
     expect(docStats(doc).links).toEqual({ internal: 1, external: 0 })
   })
+
+  it("opens an outside link with neither the opener nor the referrer (adr/0070 §8)", () => {
+    const doc = contentDoc.parse({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "üretici",
+              marks: [{ type: "link", attrs: { href: "https://example.com/a" } }],
+            },
+          ],
+        },
+      ],
+    })
+    expect(renderDoc(doc)).toBe(
+      '<p><a href="https://example.com/a" rel="noopener noreferrer">üretici</a></p>'
+    )
+  })
 })

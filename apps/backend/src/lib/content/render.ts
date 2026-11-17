@@ -56,7 +56,7 @@ export const linkOf = (node: Inline): string | null =>
     : null
 
 const anchor = (href: string, html: string) =>
-  `<a href="${escapeHtml(href)}"${isSitePath(href) ? "" : ' rel="noopener"'}>${html}</a>`
+  `<a href="${escapeHtml(href)}"${isSitePath(href) ? "" : ' rel="noopener noreferrer"'}>${html}</a>`
 
 /** Text with its emphasis; neighbours linking to one address make one link (a partly bold link). */
 function inlines(content: readonly Inline[] | undefined): string {

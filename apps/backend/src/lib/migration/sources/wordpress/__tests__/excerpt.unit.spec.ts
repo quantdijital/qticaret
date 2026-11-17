@@ -40,7 +40,7 @@ describe("a WooCommerce excerpt as the short description, as written (adr/0055 E
       )?.html
     ).toBe(
       "<h3>Özellikler</h3><p>Ömürlük.</p><p>Ölçü: 28 cm<br>Ağırlık: 1,5 kg</p>" +
-        '<p>eski <a href="https://yeni.example.com/a" rel="noopener">yeni</a> <a href="/bakim">bakım</a></p>'
+        '<p>eski <a href="https://yeni.example.com/a" rel="noopener noreferrer">yeni</a> <a href="/bakim">bakım</a></p>'
     )
   })
 
