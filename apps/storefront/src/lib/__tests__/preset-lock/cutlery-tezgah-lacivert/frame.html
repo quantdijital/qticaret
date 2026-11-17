@@ -1150,72 +1150,158 @@
   <footer
     data-gf-clear=""
     data-qs="mainfooter"
-    data-variant="ledger"
-    class="mt-(--footer-gap) border-t border-rule bg-paper-2"
+    data-variant="brand_columns"
+    data-ground="well"
+    data-badges="card"
+    class="gf-footer-cols mt-(--footer-gap)"
   >
-    <div
-      class="mx-auto w-full max-w-(--container) px-(--gutter) grid gap-10 pt-12 pb-8 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:gap-y-12 lg:pt-16"
-    >
-      <section
-        aria-labelledby="bulten"
-        class="grid gap-4 border-b border-rule pb-10 lg:col-span-12 lg:grid-cols-12 lg:items-start lg:gap-(--gap-columns) lg:pb-12"
+    <div class="border-b border-rule">
+      <div
+        class="mx-auto w-full max-w-(--container) px-(--gutter) grid gap-8 py-10 lg:grid-cols-12 lg:items-center lg:gap-x-(--gap-columns) lg:py-12"
       >
-        <h2 id="bulten" class="max-w-[24ch] text-title lg:col-span-4 lg:pt-8">
-          Yeni modeller e-postanızda
-        </h2>
-        <form class="flex flex-col gap-3 gf-news lg:col-span-6">
-          <label for="bulten-alt-eposta" class="text-sm font-semibold">
-            E-posta adresiniz
-          </label>
-          <div class="flex flex-col gap-2 sm:flex-row">
-            <input
-              id="bulten-alt-eposta"
-              type="email"
-              required=""
-              maxLength="254"
-              autoComplete="email"
-              inputMode="email"
-              placeholder="ornek@eposta.com"
-              aria-describedby="bulten-alt-durum"
-              class="gf-field min-w-0 flex-1"
-              name="email"
-            />
-            <button type="submit" class="gf-btn shrink-0">
-              Abone ol
-            </button>
-          </div>
-          <div class="gf-news-more flex flex-col gap-3">
-            <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
-              <input
-                type="checkbox"
-                required=""
-                class="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
-                name="consent"
-                value="1"
-              />
-              <span>
-                Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz.
-                <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
-                  KVKK aydınlatma metni
-                </a>
-              </span>
+        <section aria-labelledby="bulten" class="flex flex-col gap-4 lg:col-span-6">
+          <h2 id="bulten" class="max-w-[28ch] text-title">
+            Yeni modeller e-postanızda
+          </h2>
+          <form class="flex flex-col gap-3 gf-news">
+            <label for="bulten-alt-eposta" class="text-sm font-semibold">
+              E-posta adresiniz
             </label>
-            <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold">
-            </p>
-          </div>
-        </form>
-      </section>
-      <section aria-labelledby="footer-contact" class="flex flex-col gap-4 lg:col-span-4">
+            <div class="flex flex-col gap-2 sm:flex-row">
+              <input
+                id="bulten-alt-eposta"
+                type="email"
+                required=""
+                maxLength="254"
+                autoComplete="email"
+                inputMode="email"
+                placeholder="ornek@eposta.com"
+                aria-describedby="bulten-alt-durum"
+                class="gf-field min-w-0 flex-1"
+                name="email"
+              />
+              <button type="submit" class="gf-btn shrink-0">
+                Abone ol
+              </button>
+            </div>
+            <div class="gf-news-more flex flex-col gap-3">
+              <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
+                <input
+                  type="checkbox"
+                  required=""
+                  class="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
+                  name="consent"
+                  value="1"
+                />
+                <span>
+                  Yeni gelen modelleri, indirimleri ve bakım notlarını ayda birkaç kez e-postayla haber veririz.
+                  <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
+                    KVKK aydınlatma metni
+                  </a>
+                </span>
+              </label>
+              <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold">
+              </p>
+            </div>
+          </form>
+        </section>
+        <ul aria-label="Bize ulaşın" class="gf-reach lg:col-span-5 lg:col-start-8">
+          <li class="min-w-0">
+            <a
+              href="tel:+905320000000"
+              class="group/reach flex min-h-11 items-center gap-3 text-text no-underline"
+            >
+              <span class="gf-reach-sign">
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="2"
+                  class="lucide lucide-phone size-4"
+                  aria-hidden="true"
+                />
+              </span>
+              <span class="flex min-w-0 flex-col">
+                <span class="text-xs text-text-3">
+                  Telefon
+                </span>
+                <span class="truncate font-semibold group-hover/reach:underline underline-offset-4">
+                  0532 000 00 00
+                </span>
+              </span>
+            </a>
+          </li>
+          <li class="min-w-0">
+            <a
+              href="https://wa.me/905320000000"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group/reach flex min-h-11 items-center gap-3 text-text no-underline"
+            >
+              <span class="gf-reach-sign">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                  fill="currentColor"
+                  class="shrink-0 size-4"
+                >
+                  <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
+                  >
+                  </path>
+                </svg>
+              </span>
+              <span class="flex min-w-0 flex-col">
+                <span class="text-xs text-text-3">
+                  WhatsApp
+                </span>
+                <span class="truncate font-semibold group-hover/reach:underline underline-offset-4">
+                  Mesaj gönderin
+                </span>
+              </span>
+            </a>
+          </li>
+          <li class="min-w-0">
+            <a
+              href="mailto:bilgi@example.com"
+              class="group/reach flex min-h-11 items-center gap-3 text-text no-underline"
+            >
+              <span class="gf-reach-sign">
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="2"
+                  class="lucide lucide-mail size-4"
+                  aria-hidden="true"
+                />
+              </span>
+              <span class="flex min-w-0 flex-col">
+                <span class="text-xs text-text-3">
+                  E-posta
+                </span>
+                <span class="truncate font-semibold group-hover/reach:underline underline-offset-4">
+                  bilgi@example.com
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div
+      class="mx-auto w-full max-w-(--container) px-(--gutter) grid gap-10 py-12 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:py-16"
+    >
+      <section aria-labelledby="footer-brand" class="flex flex-col gap-5 lg:col-span-4">
         <h2
-          id="footer-contact"
+          id="footer-brand"
           class="text-wordmark leading-tight font-extrabold tracking-(--tracking-display)"
         >
           Örnek Atölye
         </h2>
+        <p class="max-w-[40ch] text-sm text-text-2">
+          Mutfak bıçaklarından çakılara, kamp aletlerinden bileme ve bakım ürünlerine kadar özenle seçilmiş bir seçki. Ayrıntılar ürün sayfalarında; sorularınız için bize yazabilirsiniz.
+        </p>
         <ul class="flex flex-col text-sm">
-          <li class="pb-1 font-semibold text-text">
-            Örnek Atölye Ltd. Şti.
-          </li>
           <li class="flex items-start gap-3 py-2 text-text-2">
             <svg
               width="24"
@@ -1227,36 +1313,6 @@
             <span class="max-w-[36ch]">
               Örnek Mah. 1. Sok. No: 1, Denizli
             </span>
-          </li>
-          <li>
-            <a
-              href="tel:+905320000000"
-              class="inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-9 tabular"
-            >
-              <svg
-                width="24"
-                height="24"
-                stroke-width="2"
-                class="lucide lucide-phone size-4 shrink-0"
-                aria-hidden="true"
-              />
-              0532 000 00 00
-            </a>
-          </li>
-          <li>
-            <a
-              href="mailto:bilgi@example.com"
-              class="inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-9 break-all"
-            >
-              <svg
-                width="24"
-                height="24"
-                stroke-width="2"
-                class="lucide lucide-mail size-4 shrink-0"
-                aria-hidden="true"
-              />
-              bilgi@example.com
-            </a>
           </li>
         </ul>
         <ul aria-label="Sosyal medya" class="flex flex-wrap gap-2">
@@ -1326,6 +1382,19 @@
             </a>
           </li>
         </ul>
+        <div class="flex items-start gap-4">
+          <ul class="flex flex-col gap-0.5 text-xs text-text-3">
+            <li class="font-semibold text-text-2">
+              Örnek Atölye Ltd. Şti.
+            </li>
+            <li>
+              MERSİS: 0000000000000000
+            </li>
+            <li>
+              Denizli V.D. 0000000000
+            </li>
+          </ul>
+        </div>
       </section>
       <div class="lg:col-span-8">
         <div class="border-t border-rule lg:hidden">
@@ -1347,7 +1416,7 @@
                 <li>
                   <a
                     href="/kategori/av-bicaklari"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Av bıçakları
                   </a>
@@ -1355,7 +1424,7 @@
                 <li>
                   <a
                     href="/kategori/outdoor-ve-kamp"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Outdoor ve kamp
                   </a>
@@ -1363,7 +1432,7 @@
                 <li>
                   <a
                     href="/kategori/mutfak-ve-sef-bicaklari"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Mutfak ve şef bıçakları
                   </a>
@@ -1389,7 +1458,7 @@
                 <li>
                   <a
                     href="/magaza"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Tüm ürünler
                   </a>
@@ -1397,7 +1466,7 @@
                 <li>
                   <a
                     href="/kampanyalar"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     İndirimdekiler
                   </a>
@@ -1405,7 +1474,7 @@
                 <li>
                   <a
                     href="/markalar"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Markalar
                   </a>
@@ -1413,7 +1482,7 @@
                 <li>
                   <a
                     href="/kategoriler"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Tüm kategoriler
                   </a>
@@ -1439,7 +1508,7 @@
                 <li>
                   <a
                     href="/hesap"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Hesabım
                   </a>
@@ -1447,7 +1516,7 @@
                 <li>
                   <a
                     href="/siparis"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Sipariş takibi
                   </a>
@@ -1455,7 +1524,7 @@
                 <li>
                   <a
                     href="/sepet"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Sepetim
                   </a>
@@ -1463,7 +1532,7 @@
                 <li>
                   <a
                     href="/yorumlar"
-                    class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                   >
                     Müşteri yorumları
                   </a>
@@ -1471,8 +1540,59 @@
               </ul>
             </nav>
           </details>
+          <details class="group border-b border-rule">
+            <summary
+              class="flex min-h-13 cursor-pointer items-center justify-between gap-4 font-semibold"
+            >
+              Yasal metinler
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-plus size-5 shrink-0 text-text-3 transition-transform duration-(--dur-short) group-open:rotate-45"
+                aria-hidden="true"
+              />
+            </summary>
+            <nav aria-label="Yasal metinler" class="pb-3">
+              <ul class="flex flex-col">
+                <li>
+                  <a
+                    href="/yasal/mesafeli-satis-sozlesmesi"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+                  >
+                    distance_sales
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/yasal/on-bilgilendirme-formu"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+                  >
+                    pre_information
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/yasal/iade-politikasi"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+                  >
+                    return_policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/yasal/kvkk-aydinlatma-metni"
+                    title="privacy_notice"
+                    class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+                  >
+                    KVKK Aydınlatma Metni
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </details>
         </div>
-        <div class="grid gap-x-(--gap-columns) gap-y-8 max-lg:hidden grid-cols-3">
+        <div class="gf-foot-columns max-lg:hidden">
           <nav aria-label="Kategoriler" class="flex flex-col gap-3">
             <h2 class="text-sm font-semibold tracking-normal text-text">
               Kategoriler
@@ -1481,7 +1601,7 @@
               <li>
                 <a
                   href="/kategori/av-bicaklari"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Av bıçakları
                 </a>
@@ -1489,7 +1609,7 @@
               <li>
                 <a
                   href="/kategori/outdoor-ve-kamp"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Outdoor ve kamp
                 </a>
@@ -1497,7 +1617,7 @@
               <li>
                 <a
                   href="/kategori/mutfak-ve-sef-bicaklari"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Mutfak ve şef bıçakları
                 </a>
@@ -1512,7 +1632,7 @@
               <li>
                 <a
                   href="/magaza"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Tüm ürünler
                 </a>
@@ -1520,7 +1640,7 @@
               <li>
                 <a
                   href="/kampanyalar"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   İndirimdekiler
                 </a>
@@ -1528,7 +1648,7 @@
               <li>
                 <a
                   href="/markalar"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Markalar
                 </a>
@@ -1536,7 +1656,7 @@
               <li>
                 <a
                   href="/kategoriler"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Tüm kategoriler
                 </a>
@@ -1551,7 +1671,7 @@
               <li>
                 <a
                   href="/hesap"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Hesabım
                 </a>
@@ -1559,7 +1679,7 @@
               <li>
                 <a
                   href="/siparis"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Sipariş takibi
                 </a>
@@ -1567,7 +1687,7 @@
               <li>
                 <a
                   href="/sepet"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Sepetim
                 </a>
@@ -1575,76 +1695,22 @@
               <li>
                 <a
                   href="/yorumlar"
-                  class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   Müşteri yorumları
                 </a>
               </li>
             </ul>
           </nav>
-        </div>
-      </div>
-      <div
-        data-footer-bottom=""
-        class="flex flex-col border-t border-rule lg:col-span-12 lg:block max-lg:-mt-10 max-lg:border-t-0"
-      >
-        <div class="flex items-center justify-between gap-6 border-b border-rule py-6">
-          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
-            <ul aria-label="Ödeme seçenekleri" class="flex flex-wrap items-center gap-2">
-              <li
-                class="inline-flex h-7 items-center rounded-inner border border-rule bg-field px-2.5 text-xs font-semibold whitespace-nowrap text-text-2"
-              >
-                Visa
-              </li>
-              <li
-                class="inline-flex h-7 items-center rounded-inner border border-rule bg-field px-2.5 text-xs font-semibold whitespace-nowrap text-text-2"
-              >
-                Mastercard
-              </li>
-              <li
-                class="inline-flex h-7 items-center rounded-inner border border-rule bg-field px-2.5 text-xs font-semibold whitespace-nowrap text-text-2"
-              >
-                Troy
-              </li>
-              <li
-                class="inline-flex h-7 items-center rounded-inner border border-rule bg-field px-2.5 text-xs font-semibold whitespace-nowrap text-text-2"
-              >
-                Havale / EFT
-              </li>
-              <li
-                class="inline-flex h-7 items-center rounded-inner border border-rule bg-field px-2.5 text-xs font-semibold whitespace-nowrap text-text-2"
-              >
-                Kapıda ödeme
-              </li>
-            </ul>
-            <span aria-hidden="true" class="h-6 w-px shrink-0 bg-rule max-lg:hidden">
-            </span>
-            <ul aria-label="Kargo firmaları" class="flex flex-wrap items-center gap-x-6 gap-y-4">
-              <li class="flex h-6 items-center gap-1.5 text-xs font-semibold text-text-2">
-                marks.[object Object]
-              </li>
-            </ul>
-          </div>
-        </div>
-        <details class="group/legal order-first border-b border-rule lg:hidden">
-          <summary
-            class="flex min-h-13 cursor-pointer items-center justify-between gap-4 font-semibold"
-          >
-            Yasal metinler
-            <svg
-              width="24"
-              height="24"
-              stroke-width="1.75"
-              class="lucide lucide-plus size-5 shrink-0 text-text-3 transition-transform duration-(--dur-short) group-open/legal:rotate-45"
-              aria-hidden="true"
-            />
-          </summary>
-          <nav aria-label="Yasal metinler" class="pb-3">
-            <ul class="grid sm:grid-cols-2 sm:gap-x-(--gap-columns)">
+          <nav aria-label="Yasal metinler" class="flex flex-col gap-3">
+            <h2 class="text-sm font-semibold tracking-normal text-text">
+              Yasal metinler
+            </h2>
+            <ul class="flex flex-col">
               <li>
                 <a
                   href="/yasal/mesafeli-satis-sozlesmesi"
-                  class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   distance_sales
                 </a>
@@ -1652,7 +1718,7 @@
               <li>
                 <a
                   href="/yasal/on-bilgilendirme-formu"
-                  class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   pre_information
                 </a>
@@ -1660,7 +1726,7 @@
               <li>
                 <a
                   href="/yasal/iade-politikasi"
-                  class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   return_policy
                 </a>
@@ -1669,85 +1735,89 @@
                 <a
                   href="/yasal/kvkk-aydinlatma-metni"
                   title="privacy_notice"
-                  class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+                  class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
                 >
                   KVKK Aydınlatma Metni
                 </a>
               </li>
-              <li>
-                <a
-                  href="/cerez-tercihleri"
-                  class="flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
-                >
-                  Çerez tercihleri
-                </a>
-              </li>
             </ul>
           </nav>
-        </details>
-        <nav aria-label="Yasal metinler" class="py-6 max-lg:hidden">
-          <ul class="grid grid-cols-4 gap-x-(--gap-columns) gap-y-1">
-            <li>
-              <a
-                href="/yasal/mesafeli-satis-sozlesmesi"
-                class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
-              >
-                distance_sales
-              </a>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-rule">
+      <div class="mx-auto w-full max-w-(--container) px-(--gutter) gf-foot-line py-4 lg:py-5">
+        <p class="gf-foot-copy text-xs text-text-3">
+          © 2026 Örnek Atölye Ltd. Şti.
+        </p>
+        <div class="gf-foot-marks">
+          <ul aria-label="Ödeme seçenekleri" class="gf-pay">
+            <li data-mark="visa" data-logo="">
+              <img
+                src="/marks/visa.png"
+                alt="Visa"
+                width="208"
+                height="68"
+                loading="lazy"
+                decoding="async"
+              />
             </li>
-            <li>
-              <a
-                href="/yasal/on-bilgilendirme-formu"
-                class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
-              >
-                pre_information
-              </a>
+            <li data-mark="mastercard" data-logo="">
+              <img
+                src="/marks/mastercard.svg"
+                alt="Mastercard"
+                width="41"
+                height="26"
+                loading="lazy"
+                decoding="async"
+              />
             </li>
-            <li>
-              <a
-                href="/yasal/iade-politikasi"
-                class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
-              >
-                return_policy
-              </a>
+            <li data-mark="troy" data-logo="">
+              <img
+                src="/marks/troy.svg"
+                alt="Troy"
+                width="298"
+                height="137"
+                loading="lazy"
+                decoding="async"
+              />
             </li>
-            <li>
-              <a
-                href="/yasal/kvkk-aydinlatma-metni"
-                title="privacy_notice"
-                class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
-              >
-                KVKK Aydınlatma Metni
-              </a>
+            <li data-mark="bank_transfer">
+              <svg
+                width="24"
+                height="24"
+                stroke-width="2"
+                class="lucide lucide-landmark size-4 shrink-0"
+                aria-hidden="true"
+              />
+              Havale / EFT
             </li>
-            <li>
-              <a
-                href="/cerez-tercihleri"
-                class="inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
-              >
-                Çerez tercihleri
-              </a>
+            <li data-mark="cash_on_delivery">
+              <svg
+                width="24"
+                height="24"
+                stroke-width="2"
+                class="lucide lucide-banknote size-4 shrink-0"
+                aria-hidden="true"
+              />
+              Kapıda ödeme
             </li>
           </ul>
-        </nav>
-        <div
-          class="flex items-start justify-between gap-4 pt-4 lg:items-center lg:border-t lg:border-rule lg:pt-5"
-        >
-          <div class="min-w-0 overflow-hidden pt-3 lg:pt-0">
-            <ul
-              class="-ml-5 flex flex-wrap gap-y-1 text-xs text-text-3 *:relative *:pl-5 *:before:absolute *:before:top-1/2 *:before:left-2 *:before:size-[3px] *:before:-translate-y-1/2 *:before:rounded-full *:before:bg-current *:before:opacity-60 *:before:content-[&#x27;&#x27;]"
-            >
-              <li>
-                © 2026 Örnek Atölye Ltd. Şti.
-              </li>
-              <li>
-                MERSİS: 0000000000000000
-              </li>
-              <li>
-                Denizli V.D. 0000000000
-              </li>
-            </ul>
-          </div>
+          <span aria-hidden="true" class="h-6 w-px shrink-0 bg-rule max-md:hidden">
+          </span>
+          <ul aria-label="Kargo firmaları" class="gf-pay">
+            <li data-mark="[object Object]">
+              marks.[object Object]
+            </li>
+          </ul>
+        </div>
+        <div class="gf-foot-tools">
+          <a
+            href="/cerez-tercihleri"
+            class="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+          >
+            Çerez tercihleri
+          </a>
         </div>
       </div>
     </div>
