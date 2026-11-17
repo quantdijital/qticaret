@@ -86,6 +86,15 @@ describe("storeRequest stays on the backend", () => {
     ["a prefix the storefront does not use", "/admin/users"],
     ["a prefix that only starts the same", "/storefront/x"],
     ["the backend's dev key route", "/dev/storefront-key"],
+    ["an encoded slash in a segment", "/store/products/a%2Fb/reviews"],
+    ["a lower-case encoded slash", "/store/products/a%2fb"],
+    ["an encoded backslash", "/store/products/a%5Cb"],
+    ["a lower-case encoded backslash", "/store/products/a%5cb"],
+    ["the admin's sign-in", "/auth/user/emailpass"],
+    ["the session route", "/auth/session"],
+    ["a route that only starts as the token refresh", "/auth/token/refresh-all"],
+    ["the token route's parent", "/auth/token/"],
+    ["the bare auth prefix", "/auth/"],
   ])("refuses %s and sends nothing", async (_name, path) => {
     const fetch = sent()
     await expect(storeRequest(path, { visitorIp: null, method: "POST", body: {} })).rejects.toThrow(
@@ -128,21 +137,34 @@ describe("storeRequest stays on the backend", () => {
     )
   })
 
-  it("sends the customer's sign-in routes", async () => {
-    const fetch = sent()
-    await storeRequest("/auth/token/refresh", { visitorIp: null, method: "POST" })
-    expect(String(fetch.mock.calls[0]?.[0])).toBe("http://backend.test/auth/token/refresh")
-  })
-
-  it("keeps an encoded slug with ../ and ? inside its own segment", async () => {
+  it("refuses an encoded slug with ../ (its slashes arrive as %2F) and sends nothing", async () => {
     const fetch = sent()
     const slug = "../../admin/users?all=1#x"
-    await storeRequest(`/store/products/${encodeURIComponent(slug)}/reviews`, { visitorIp: null })
+    await expect(
+      storeRequest(`/store/products/${encodeURIComponent(slug)}/reviews`, { visitorIp: null })
+    ).rejects.toThrow(StorePathError)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it("keeps an encoded ? and # inside their segment", async () => {
+    const fetch = sent()
+    await storeRequest(`/store/products/${encodeURIComponent("a?all=1#x")}/reviews`, {
+      visitorIp: null,
+    })
     const url = fetch.mock.calls[0]?.[0]
     expect(url?.origin).toBe("http://backend.test")
-    expect(url?.pathname).toBe("/store/products/..%2F..%2Fadmin%2Fusers%3Fall%3D1%23x/reviews")
+    expect(url?.pathname).toBe("/store/products/a%3Fall%3D1%23x/reviews")
     expect(url?.search).toBe("")
   })
+
+  it.each(["/auth/customer/emailpass", "/auth/token/refresh", "/auth/verification/confirm"])(
+    "sends the sign-in route %s",
+    async (path) => {
+      const fetch = sent()
+      await storeRequest(path, { visitorIp: null, method: "POST" })
+      expect(String(fetch.mock.calls[0]?.[0])).toBe(`http://backend.test${path}`)
+    }
+  )
 
   it("refuses an id that is only dots, which encoding leaves as it is", async () => {
     const fetch = sent()

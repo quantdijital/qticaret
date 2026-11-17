@@ -216,6 +216,8 @@ export async function backendFileResponse(
       ...signedVisitorHeaders(env.STOREFRONT_IP_SECRET, visitorIp),
     },
     cache: "no-store",
+    // A redirect is not followed with the key: it fails below as any other non-2xx
+    redirect: "manual",
     signal: AbortSignal.timeout(8000),
   })
   const headers = new Headers({ "x-content-type-options": "nosniff" })
