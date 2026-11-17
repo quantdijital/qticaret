@@ -71,14 +71,20 @@ export interface AfterFailure {
  * Where a video goes after a failed try, `attempts` being the tries made
  * before this one: an input error fails now with its own key; an
  * infrastructure error goes back to the queue until the third try, then
- * fails with `video.processing_failed`.
+ * fails with `video.processing_failed`. The three are counted from
+ * `retryFrom` (`attempts` when the shop last pressed "Yeniden dene"):
+ * `attempts` itself only rises, since it fences a job's claim.
  */
-export function afterFailure(attempts: number, failure: Failure): AfterFailure {
+export function afterFailure(attempts: number, failure: Failure, retryFrom = 0): AfterFailure {
   const made = attempts + 1
   if (failure.kind === "input") {
     return { status: "failed", attempts: made, error_code: failure.code }
   }
-  return made >= MAX_ATTEMPTS
+  return triesSinceRetry(made, retryFrom) >= MAX_ATTEMPTS
     ? { status: "failed", attempts: made, error_code: PROCESSING_FAILED }
     : { status: "uploaded", attempts: made, error_code: null }
 }
+
+/** The tries counted against the cap: those made since the last retry (never below 0). */
+export const triesSinceRetry = (attempts: number, retryFrom: number): number =>
+  Math.max(0, attempts - Math.max(0, retryFrom))

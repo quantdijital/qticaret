@@ -1,13 +1,18 @@
+import { useQuery } from "@tanstack/react-query"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { useSaveAlt } from "@/features/products/api/media"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
+import { productVideosQuery } from "@/features/products/api/videos"
 import { ImageGallery, MAX_IMAGES } from "@/features/products/components/image-gallery"
 import type { GalleryImage } from "@/features/products/components/image-gallery"
 import { errorText } from "@/lib/errors"
 import { MEDIA_ALT_TARGET } from "./sections"
+import { useProductVideos } from "./use-product-videos"
+import { VideoDialog } from "./video-dialog"
 
 interface Image {
   id?: string
@@ -17,12 +22,19 @@ interface Image {
 /**
  * The pictures, saved as they change; the first is the product's thumbnail.
  * Each picture's alt text is a click away on its tile, and its versions
- * are made on the server.
+ * are made on the server. With product videos on (adr/0069 §10) it is
+ * "Görseller ve videolar": the same zone and dialog take a clip, whose
+ * tile follows the first picture and opens the "Video" dialog.
  */
 export function MediaCard({ product }: { product: ProductDetail }) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
   const saveAlt = useSaveAlt(product.id)
+  const [openVideo, setOpenVideo] = useState<string | null>(null)
+  const videos = useProductVideos(product.id, setOpenVideo)
+  // The same list the gallery reads (one request): the open video as it is now
+  const listed = useQuery(productVideosQuery(product.id, videos !== null))
+  const shownVideo = listed.data?.videos.find((video) => video.id === openVideo) ?? null
   const images: Image[] = [...(product.images ?? [])]
     .sort((a, b) => a.rank - b.rank)
     .map((image) => ({ id: image.id, url: image.url }))
@@ -52,14 +64,19 @@ export function MediaCard({ product }: { product: ProductDetail }) {
 
   return (
     <SectionCard
-      title={t("products.media.card")}
-      description={t("products.media.hint", { max: MAX_IMAGES })}
+      title={t(videos ? "products.media.cardVideo" : "products.media.card")}
+      description={
+        videos
+          ? t("products.media.hintVideo", { max: MAX_IMAGES })
+          : t("products.media.hint", { max: MAX_IMAGES })
+      }
     >
       <ImageGallery
         images={tiles}
         disabled={update.isPending}
         wide
         altTarget={MEDIA_ALT_TARGET}
+        videos={videos ?? undefined}
         onAdd={(stored) => {
           save([...images, ...stored.map(({ url }) => ({ url }))])
         }}
@@ -94,6 +111,15 @@ export function MediaCard({ product }: { product: ProductDetail }) {
           )
         }}
       />
+      {videos ? (
+        <VideoDialog
+          productId={product.id}
+          video={shownVideo}
+          onClose={() => {
+            setOpenVideo(null)
+          }}
+        />
+      ) : null}
     </SectionCard>
   )
 }

@@ -166,6 +166,8 @@ describe("the plan guard's allow-list", () => {
     // adr/0069 §12: a video added or removed, as an image
     "POST /admin/products/:id/videos",
     "DELETE /admin/products/:id/videos/:video_id",
+    "POST /admin/products/:id/videos/:video_id",
+    "POST /admin/products/:id/videos/:video_id/retry",
     "POST /admin/product-categories",
     "POST /admin/collections",
     "POST /admin/media",

@@ -3146,7 +3146,51 @@
       "noAlt": "No alt text",
       "versions": "Versions",
       "moveEarlier": "Move earlier",
-      "moveLater": "Move later"
+      "moveLater": "Move later",
+      "cardVideo": "Images and videos",
+      "hintVideo": "The first image is the main one; you can add up to {{max}} images and 2 videos. Videos are shown right after the first image.",
+      "addLabelVideo": "Add an image or a video: drag or click (up to {{max}} images, 2 videos)",
+      "typesVideo": "JPG, PNG, WebP or AVIF images; MP4, MOV or WebM videos",
+      "pickerTitleVideo": "Add an image or a video"
+    },
+    "videos": {
+      "numbered": "Video {{number}}",
+      "status": {
+        "processing": "Processing",
+        "failed": "Could not be processed",
+        "ready": "Ready"
+      },
+      "uploading": "Uploading",
+      "uploadingPercent": "Uploading {{percent}}%",
+      "uploaded": "Video uploaded; it will be ready shortly.",
+      "types": "JPG, PNG, WebP or AVIF images; MP4, MOV or WebM videos (up to 30 seconds, 50 MB)",
+      "dialogTitle": "Video",
+      "title": "Title",
+      "titleHint": "Read as the video's name on the storefront; left empty, the product's name is used.",
+      "titlePlaceholder": "For example “A close look at the product”",
+      "saveTitle": "Save title",
+      "titleSaved": "Video title saved.",
+      "state": "Status",
+      "duration": "Length",
+      "dimensions": "Size",
+      "retry": "Try again",
+      "retried": "The video will be prepared again.",
+      "remove": "Remove video",
+      "removeTitle": "Remove the video?",
+      "removeDescription": "The video comes off the product and the storefront, and its files are deleted. This cannot be undone.",
+      "removed": "Video removed.",
+      "sourceGone": "The uploaded file is no longer kept; remove the video and upload it again.",
+      "errors": {
+        "too_large": "A video can be 50 MB at most.",
+        "too_long": "A video can be 30 seconds long at most.",
+        "unsupported_type": "This file type cannot be uploaded. Upload MP4, MOV, WebM or GIF.",
+        "dimensions_too_large": "The video's resolution is too high (4K at most).",
+        "frame_rate_too_high": "The video's frame rate is too high (120 frames a second at most).",
+        "unreadable": "The video could not be read; the file may be damaged.",
+        "limit_per_product": "A product can have 2 videos at most.",
+        "processing_failed": "The video could not be prepared. Try again; if it fails again, upload another file.",
+        "upload_unavailable": "Videos cannot be uploaded right now."
+      }
     },
     "wizard": {
       "pageTitle": "New product",

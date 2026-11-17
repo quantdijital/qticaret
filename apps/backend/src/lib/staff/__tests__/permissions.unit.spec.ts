@@ -599,6 +599,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   // adr/0069: a product's videos are written by those who write its images
   "POST /admin/products/:id/videos": false,
   "DELETE /admin/products/:id/videos/:video_id": false,
+  "POST /admin/products/:id/videos/:video_id": false,
+  "POST /admin/products/:id/videos/:video_id/retry": false,
   "POST /admin/category-restrictions/:category_id": false,
   "POST /admin/category-images/:category_id": false,
   "POST /admin/collections/:id/details": false,

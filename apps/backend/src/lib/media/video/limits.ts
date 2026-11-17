@@ -122,5 +122,23 @@ export const HEARTBEAT_MS = 30 * 1000
 export const STALE_AFTER_MS = 10 * 60 * 1000
 export const MAX_ATTEMPTS = 3
 
+/** A failed clip's source is kept this long for "Yeniden dene" (adr/0069 §1), then swept. */
+export const FAILED_SOURCE_KEPT_MS = 7 * 24 * 60 * 60 * 1000
+/**
+ * A retry is taken until an hour before the sweep may remove the source:
+ * the sweep and the retry never meet on one clip, whatever their clocks.
+ */
+export const RETRY_MARGIN_MS = 60 * 60 * 1000
+
+/**
+ * A ready clip's source the job left (storage refused it) is swept once the
+ * clip has been ready this long: a clip just made is the job's own to tidy.
+ */
+export const READY_SOURCE_GRACE_MS = 60 * 60 * 1000
+
+/** The oldest failure (`failed_at`) a clip may have and still be retried. */
+export const retryKeptSince = (now: number): Date =>
+  new Date(now - (FAILED_SOURCE_KEPT_MS - RETRY_MARGIN_MS))
+
 /** A poster's first frame darker than this (mean of 0–255) gives way to the frame at 1 s. */
 export const DARK_FRAME_MEAN = 12

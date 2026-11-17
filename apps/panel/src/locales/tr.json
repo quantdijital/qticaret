@@ -3146,7 +3146,51 @@
       "noAlt": "Alt metin yok",
       "versions": "Sürümler",
       "moveEarlier": "Öne al",
-      "moveLater": "Geriye al"
+      "moveLater": "Geriye al",
+      "cardVideo": "Görseller ve videolar",
+      "hintVideo": "İlk görsel ana görseldir; en çok {{max}} görsel ve 2 video ekleyebilirsiniz. Videolar ilk görselin ardından gösterilir.",
+      "addLabelVideo": "Görsel ya da video ekle: sürükleyin ya da tıklayın (en çok {{max}} görsel, 2 video)",
+      "typesVideo": "JPG, PNG, WebP ya da AVIF görsel; MP4, MOV ya da WebM video",
+      "pickerTitleVideo": "Görsel ya da video ekle"
+    },
+    "videos": {
+      "numbered": "{{number}}. video",
+      "status": {
+        "processing": "İşleniyor",
+        "failed": "İşlenemedi",
+        "ready": "Hazır"
+      },
+      "uploading": "Yükleniyor",
+      "uploadingPercent": "Yükleniyor %{{percent}}",
+      "uploaded": "Video yüklendi; birazdan hazır olur.",
+      "types": "JPG, PNG, WebP ya da AVIF görsel; MP4, MOV ya da WebM video (en çok 30 saniye, 50 MB)",
+      "dialogTitle": "Video",
+      "title": "Başlık",
+      "titleHint": "Vitrinde videonun adı olarak okunur; boş bırakırsanız ürünün adı kullanılır.",
+      "titlePlaceholder": "Örneğin “Ürünün yakından görünümü”",
+      "saveTitle": "Başlığı kaydet",
+      "titleSaved": "Video başlığı kaydedildi.",
+      "state": "Durum",
+      "duration": "Süre",
+      "dimensions": "Boyut",
+      "retry": "Yeniden dene",
+      "retried": "Video yeniden hazırlanacak.",
+      "remove": "Videoyu kaldır",
+      "removeTitle": "Video kaldırılsın mı?",
+      "removeDescription": "Video üründen ve vitrinden kaldırılır, dosyaları silinir. Bu işlem geri alınamaz.",
+      "removed": "Video kaldırıldı.",
+      "sourceGone": "Yüklenen dosya artık saklanmıyor; videoyu kaldırıp yeniden yükleyin.",
+      "errors": {
+        "too_large": "Video en çok 50 MB olabilir.",
+        "too_long": "Video en çok 30 saniye olabilir.",
+        "unsupported_type": "Bu dosya türü yüklenemez. MP4, MOV, WebM ya da GIF yükleyin.",
+        "dimensions_too_large": "Videonun çözünürlüğü çok yüksek (en çok 4K).",
+        "frame_rate_too_high": "Videonun kare hızı çok yüksek (en çok saniyede 120 kare).",
+        "unreadable": "Video okunamadı; dosya bozuk olabilir.",
+        "limit_per_product": "Bir ürüne en çok 2 video eklenebilir.",
+        "processing_failed": "Video hazırlanamadı. Yeniden deneyin; olmazsa başka bir dosya yükleyin.",
+        "upload_unavailable": "Video şu an yüklenemiyor."
+      }
     },
     "wizard": {
       "pageTitle": "Yeni ürün",

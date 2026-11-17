@@ -119,9 +119,13 @@ medusaIntegrationTestRunner({
       const source = await privateFile(Buffer.from("kaynak"))
       const video = await linked({ status: "ready", source_file_id: source, source_bytes: 6 })
       await media().updateMediaVideos({ id: video.id, stored_bytes: 106 })
-      const { result } = await sweepProductVideosWorkflow(getContainer()).run({
-        input: { now: Date.now() },
-      })
+      const sweep = (now: number) =>
+        sweepProductVideosWorkflow(getContainer()).run({ input: { now } })
+      // Just made: the job's own last step tidies it (review S1)
+      expect((await sweep(Date.now())).result.sources_removed).toBe(0)
+      expect(await stored(getContainer(), source)).toBe(true)
+      // Ready for over an hour: the sweep lets go of it
+      const { result } = await sweep(Date.now() + 2 * 60 * 60 * 1000)
       expect(result.sources_removed).toBe(1)
       expect(await stored(getContainer(), source)).toBe(false)
       expect(await record(video.id)).toMatchObject({ source_file_id: null, stored_bytes: 100 })

@@ -40,7 +40,14 @@ export const MediaVideo = model
     stored_bytes: model.number().default(0),
     // An i18n key (`video.processing_failed`)
     error_code: model.text().nullable(),
+    // Tries made (only ever rises: it fences a job's claim, adr/0069 §4)
     attempts: model.number().default(0),
+    // `attempts` when the shop last pressed "Yeniden dene": the job's three tries
+    // count from here, so a retry never lowers `attempts` (slice 3)
+    retry_from: model.number().default(0),
+    // When it last became `failed` (only the moves into `failed` write it; a title
+    // change does not): the retry window and the week-old source sweep count from it
+    failed_at: model.dateTime().nullable(),
     // The job's sign of life while `processing` (adr/0069 §4)
     heartbeat_at: model.dateTime().nullable(),
     processed_at: model.dateTime().nullable(),

@@ -19,6 +19,8 @@ export interface ClaimedVideo {
   source_bytes: number | null
   /** Tries made before this one; also this claim's fencing token. */
   attempts: number
+  /** `attempts` at the shop's last retry: the cap of tries counts from it (`afterFailure`). */
+  retry_from: number
 }
 
 export interface ReadyVideo {
@@ -68,7 +70,7 @@ export async function claimNextVideo(
          AND source_file_id IS NOT NULL ${skip}
        ORDER BY created_at, id LIMIT 1 FOR UPDATE SKIP LOCKED)
        AND status = 'uploaded'
-     RETURNING id, source_file_id, source_format, source_bytes, attempts`,
+     RETURNING id, source_file_id, source_format, source_bytes, attempts, retry_from`,
     exclude.length > 0 ? [JSON.stringify(exclude)] : []
   )
   return rows[0] ?? null
@@ -93,7 +95,8 @@ export async function beatVideo(
 /**
  * Videos `processing` without a sign of life since `before` (a process
  * killed, a machine restarted): one try more counted, back to the queue,
- * or `failed` with `failedCode` once `maxAttempts` are made.
+ * or `failed` with `failedCode` once `maxAttempts` are made since the
+ * shop's last retry (`retry_from`).
  */
 export async function requeueStaleVideos(
   manager: EntityManager,
@@ -103,13 +106,14 @@ export async function requeueStaleVideos(
 ): Promise<{ id: string; status: string }[]> {
   return await manager.execute<{ id: string; status: string }[]>(
     `UPDATE media_video SET
-       status = CASE WHEN attempts + 1 >= ? THEN 'failed' ELSE 'uploaded' END,
-       error_code = CASE WHEN attempts + 1 >= ? THEN ? ELSE NULL END,
+       status = CASE WHEN attempts + 1 - retry_from >= ? THEN 'failed' ELSE 'uploaded' END,
+       error_code = CASE WHEN attempts + 1 - retry_from >= ? THEN ? ELSE NULL END,
+       failed_at = CASE WHEN attempts + 1 - retry_from >= ? THEN now() ELSE NULL END,
        attempts = attempts + 1, heartbeat_at = NULL, updated_at = now()
      WHERE status = 'processing' AND deleted_at IS NULL
        AND COALESCE(heartbeat_at, updated_at) < ?
      RETURNING id, status`,
-    [maxAttempts, maxAttempts, failedCode, before]
+    [maxAttempts, maxAttempts, failedCode, maxAttempts, before]
   )
 }
 
@@ -170,9 +174,9 @@ export async function markVideoTried(
 ): Promise<boolean> {
   const rows = await manager.execute<{ id: string }[]>(
     `UPDATE media_video SET status = ?, attempts = ?, error_code = ?, heartbeat_at = NULL,
-       updated_at = now()
+       failed_at = CASE WHEN ? = 'failed' THEN now() ELSE NULL END, updated_at = now()
      WHERE ${HELD} RETURNING id`,
-    [next.status, next.attempts, next.error_code, id, claimed]
+    [next.status, next.attempts, next.error_code, next.status, id, claimed]
   )
   return rows.length > 0
 }

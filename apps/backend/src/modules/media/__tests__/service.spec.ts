@@ -120,6 +120,7 @@ moduleIntegrationTestRunner<MediaModuleService>({
         source_format: "mov",
         source_bytes: 1000,
         attempts: 0,
+        retry_from: 0,
       })
       const [row] = await service.listMediaVideos({ id: first.id })
       expect(row?.status).toBe("processing")

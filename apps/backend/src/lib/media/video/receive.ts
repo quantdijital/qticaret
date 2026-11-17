@@ -54,10 +54,15 @@ const SOURCE_NAME = "source"
 
 const refuse = (code: string) => new ValidationError(code, { field: "file" })
 
-// C0 and C1 controls, and the line and paragraph separators, are not a title's
-function cleanTitle(value: string): string | null {
+// Unicode format characters (security review L1): bidi overrides and isolates,
+// zero-width spaces and joiners, the byte order mark
+const FORMAT_CHARACTER = /\p{Cf}/u
+
+// A title trimmed, empty as none (adr/0069 §1); C0 and C1 controls, the line and
+// paragraph separators and format characters are not a title's: `video.title_invalid`
+export function cleanVideoTitle(value: string): string | null {
   const title = value.trim()
-  if (title.length > VIDEO_TITLE_MAX) {
+  if (title.length > VIDEO_TITLE_MAX || FORMAT_CHARACTER.test(title)) {
     throw new ValidationError("video.title_invalid", { field: "title" })
   }
   for (const char of title) {
@@ -271,7 +276,7 @@ export function receiveVideo(
         return
       }
       try {
-        title = cleanTitle(value)
+        title = cleanVideoTitle(value)
       } catch (error) {
         fail(error)
       }

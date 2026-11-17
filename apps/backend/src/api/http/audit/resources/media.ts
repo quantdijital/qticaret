@@ -56,6 +56,27 @@ async function videoOf(scope: Resolver, productId: string, videoId: string): Pro
   return Object.hasOwn(all, videoId) ? { [videoId]: all[videoId] } : {}
 }
 
+/** A video's state and the failure it shows: what "Yeniden dene" changes. */
+async function videoStateOf(
+  scope: Resolver,
+  productId: string,
+  videoId: string
+): Promise<Snapshot> {
+  const query = scope.resolve(ContainerRegistrationKeys.QUERY) as GraphQuery
+  const { data } = await query.graph({
+    entity: "product",
+    fields: ["media_videos.id", "media_videos.status", "media_videos.error_code"],
+    filters: { id: productId },
+  })
+  const videos = (
+    data[0] as
+      | { media_videos?: ({ id: string; status: string; error_code: string | null } | null)[] }
+      | undefined
+  )?.media_videos
+  const video = (videos ?? []).find((each) => each?.id === videoId)
+  return video ? { [videoId]: { status: video.status, error_code: video.error_code } } : {}
+}
+
 export const MEDIA_RESOURCES: readonly AuditedResource[] = [
   ...(["POST", "DELETE"] as const).map((method) => ({
     method,
@@ -74,6 +95,24 @@ export const MEDIA_RESOURCES: readonly AuditedResource[] = [
     resourceType: "media_video",
     resourceId: () => null,
     snapshot: ({ scope, params }) => videosOf(scope, params["id"] ?? ""),
+  },
+  // Slice 3: a title changed (before and after), and "Yeniden dene" (its state, before and after)
+  {
+    method: "POST",
+    route: "POST /admin/products/:id/videos/:video_id",
+    pattern: new RegExp(`^/admin/products/(?<id>${ID})/videos/(?<video_id>${ID})$`, "i"),
+    resourceType: "media_video",
+    resourceId: (params) => params["video_id"] ?? null,
+    snapshot: ({ scope, params }) => videoOf(scope, params["id"] ?? "", params["video_id"] ?? ""),
+  },
+  {
+    method: "POST",
+    route: "POST /admin/products/:id/videos/:video_id/retry",
+    pattern: new RegExp(`^/admin/products/(?<id>${ID})/videos/(?<video_id>${ID})/retry$`, "i"),
+    resourceType: "media_video",
+    resourceId: (params) => params["video_id"] ?? null,
+    snapshot: ({ scope, params }) =>
+      videoStateOf(scope, params["id"] ?? "", params["video_id"] ?? ""),
   },
   {
     method: "DELETE",

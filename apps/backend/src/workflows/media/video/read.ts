@@ -1,5 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { retryKeptSince } from "../../../lib/media/video/limits"
+import { PROCESSING_FAILED } from "../../../lib/media/video/transcode-errors"
 import type { MediaVideoRecord } from "../../../modules/media/service"
 
 type Resolver = Pick<MedusaContainer, "resolve">
@@ -58,8 +60,28 @@ export function adminVideoView(video: MediaVideoRecord) {
     poster: video.poster,
     youtube_id: video.youtube_id,
     error_code: video.error_code,
+    retryable: canRetryVideo(video),
     created_at: video.created_at,
   }
+}
+
+/**
+ * Whether "Yeniden dene" would take the video (slice 3): a clip the
+ * infrastructure failed, its source still kept (`retryVideo`'s own terms),
+ * counted from when it failed (a title change does not move `failed_at`).
+ */
+export function canRetryVideo(
+  video: Pick<MediaVideoRecord, "kind" | "status" | "error_code" | "source_file_id" | "failed_at">,
+  now: number = Date.now()
+): boolean {
+  return (
+    video.kind === "upload" &&
+    video.status === "failed" &&
+    video.error_code === PROCESSING_FAILED &&
+    video.source_file_id !== null &&
+    video.failed_at !== null &&
+    new Date(video.failed_at).getTime() > retryKeptSince(now).getTime()
+  )
 }
 
 export type AdminVideoView = ReturnType<typeof adminVideoView>

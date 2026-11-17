@@ -3,14 +3,10 @@ import { useImperativeHandle, useState } from "react"
 import type { DragEvent, Ref } from "react"
 import { useTranslation } from "react-i18next"
 import { Progress } from "@qticaret/admin-ui/ui/progress"
-import {
-  IMAGE_ACCEPT,
-  SVG_ACCEPT,
-  fileProblem,
-  uploadToLibrary,
-  useMediaChanged,
-} from "@/features/media/api/media"
+import { fileProblem, uploadToLibrary, useMediaChanged } from "@/features/media/api/media"
 import type { MediaAsset } from "@/features/media/api/media"
+import { acceptOf, handOnClips } from "@/features/media/video-intake"
+import type { VideoIntake } from "@/features/media/video-intake"
 import { errorText } from "@/lib/errors"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 
@@ -39,6 +35,8 @@ interface UploadZoneProps {
   ref?: Ref<UploadZoneHandle> | undefined
   /** An SVG is taken too: a logo's or the site icon's picker. */
   svg?: boolean
+  /** Video files go here rather than into the library (a product's gallery). */
+  video?: VideoIntake | undefined
   /**
    * The files that made it into the library, once the drop is through, and
    * how many did not (their reasons stay listed here).
@@ -56,6 +54,7 @@ export function UploadZone({
   fill = false,
   ref,
   svg = false,
+  video,
   onUploaded,
 }: UploadZoneProps) {
   const { t } = useTranslation()
@@ -73,9 +72,18 @@ export function UploadZone({
     )
   }
 
-  const upload = async (files: File[]) => {
+  const upload = async (dropped: File[]) => {
+    if (busy) {
+      return
+    }
+    const files = video ? handOnClips(dropped, video) : dropped
+    // Only clips: they are the gallery's now, nothing is left to choose here
+    if (video && dropped.length > 0 && files.length === 0) {
+      onUploaded([], 0)
+      return
+    }
     const chosen = files.slice(0, multiple ? MAX_FILES_PER_DROP : 1)
-    if (chosen.length === 0 || busy) {
+    if (chosen.length === 0) {
       return
     }
     const stamp = Date.now()
@@ -143,10 +151,12 @@ export function UploadZone({
         <span className="text-sm font-medium">
           {t(multiple ? "media.upload.drop" : "media.upload.dropOne")}
         </span>
-        <span className="text-xs text-muted-foreground">{t("media.upload.types")}</span>
+        <span className="text-xs text-muted-foreground">
+          {video && !video.refusal ? video.types : t("media.upload.types")}
+        </span>
         <input
           type="file"
-          accept={svg ? SVG_ACCEPT : IMAGE_ACCEPT}
+          accept={acceptOf(svg, video)}
           multiple={multiple}
           className="sr-only"
           disabled={busy}

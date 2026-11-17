@@ -1126,6 +1126,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Video yüklemesi çok uzun sürdü. Bağlantınızı kontrol edip yeniden deneyin.",
   "video.title_invalid": "Video başlığı en çok 200 karakter olabilir ve satır sonu içeremez.",
   "video.unknown": "Video bulunamadı.",
+  "video.retry_unavailable": "Bu video yeniden denenemez.",
+  "video.source_gone":
+    "Videonun yüklenen dosyası artık saklanmıyor. Videoyu kaldırıp yeniden yükleyin.",
   "media.svg_logo_only":
     "SVG yalnızca mağaza logosu ve site simgesi olarak kullanılabilir. Bu alan için PNG, JPEG, WebP ya da AVIF görsel seçin.",
   "cart.completed": "Bu sepetle sipariş zaten verildi.",
