@@ -106,6 +106,15 @@ describe("AI account check (adr/0071 §3, §9)", () => {
     expect(await check("minimax", coded(424242)).result).toBe("failed")
   })
 
+  it("calls 401 and 403 a refused key whatever body code comes with them", async () => {
+    for (const status of [401, 403]) {
+      for (const code of [1000, 1002, 1008, 424242]) {
+        const coded = answer(status, { base_resp: { status_code: code } })
+        expect(await check("minimax", coded).result).toBe("secret_invalid")
+      }
+    }
+  })
+
   it("checks the fake service without leaving the machine, and only where it exists", async () => {
     const { calls, result } = check("fake", answer(500, {}))
 

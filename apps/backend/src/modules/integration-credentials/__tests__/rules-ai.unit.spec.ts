@@ -106,6 +106,21 @@ describe("AI service accounts (adr/0071 §3)", () => {
     ).toEqual({ key: "integration_credentials.invalid", field: "secrets.token" })
   })
 
+  it("takes a key of 16 to 256 characters, the route's bound for any secret", () => {
+    const sized = (length: number) => `test-key-${"x".repeat(length - 9)}`
+    for (const length of [16, 256]) {
+      expect(
+        planSave("deepseek", { settings: {}, secrets: { api_key: sized(length) } }, undefined, null)
+          .secrets
+      ).toEqual({ api_key: sized(length) })
+    }
+    expect(
+      reasonOf(() =>
+        planSave("deepseek", { settings: {}, secrets: { api_key: sized(257) } }, undefined, null)
+      )
+    ).toMatchObject({ field: "secrets.api_key" })
+  })
+
   it("refuses a key too short or with spaces", () => {
     for (const bad of ["short", "test key with spaces inside"]) {
       expect(

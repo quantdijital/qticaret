@@ -10,11 +10,12 @@ import type { CredentialProvider } from "./providers"
  * setting once its documentation is verified; none is today.
  */
 
-// Printable ASCII without spaces; some services hand out long signed tokens
+// Printable ASCII without spaces, as a service's console copies it out; at most what the
+// route takes for any secret (`api/admin/integrations/credentials/validators.ts`, 256)
 const apiKey = z
   .string()
   .trim()
-  .regex(/^[\x21-\x7E]{16,2048}$/, "integration_credentials.secret_invalid")
+  .regex(/^[\x21-\x7E]{16,256}$/, "integration_credentials.secret_invalid")
 
 export const AI_CREDENTIAL_PROVIDERS = {
   // DeepSeek platform > API keys

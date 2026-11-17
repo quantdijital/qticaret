@@ -88,15 +88,16 @@ const BODY_VERDICTS: Readonly<Partial<Record<AiErrorKey, AiAccountCheck>>> = {
 }
 
 function verdictOf(service: AiService, response: SafeFetchResponse): [AiAccountCheck, string] {
+  const { status } = response
+  const code = `http_${String(status)}`
+  // A refused key whatever a body code beside it says
+  if (status === 401 || status === 403) {
+    return ["secret_invalid", code]
+  }
   // MiniMax answers some failures with 200 and its own code in the body
   const registered = registeredBodyError(service, response.body)
   if (registered) {
     return [BODY_VERDICTS[registered.key] ?? "failed", `body_${String(registered.code)}`]
-  }
-  const { status } = response
-  const code = `http_${String(status)}`
-  if (status === 401 || status === 403) {
-    return ["secret_invalid", code]
   }
   // Prepaid credit or balance used up: the key itself was accepted
   if (status === 402) {
