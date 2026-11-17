@@ -49,6 +49,8 @@ export interface OrderRefundEntry {
   reference: string
   amount: number
   status: string
+  /** Pending with its money gone, or maybe gone, its record not closed: the shop checks the provider. */
+  incomplete: boolean
   note: string | null
   created_by: string | null
   created_at: string
@@ -134,7 +136,16 @@ export async function orderPaymentDetails(
     container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE).listOrderRefunds(
       { order_id: orderId },
       {
-        select: ["reference", "payment_id", "amount", "status", "note", "created_by", "created_at"],
+        select: [
+          "reference",
+          "payment_id",
+          "amount",
+          "status",
+          "error_code",
+          "note",
+          "created_by",
+          "created_at",
+        ],
         order: { created_at: "ASC" },
       }
     ),
@@ -158,6 +169,7 @@ export async function orderPaymentDetails(
       reference: refund.reference,
       amount: refund.amount,
       status: refund.status,
+      incomplete: refund.status === "pending" && refund.error_code === "refund_incomplete",
       note: refund.note,
       created_by: refund.created_by,
       created_at: new Date(refund.created_at).toISOString(),

@@ -71,6 +71,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "{{amount}} ({{reference}}, sepet {{cart}}) başka bir ödemeyle açılmış siparişin sepetine alındı; otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin.",
     },
+    "payments.refund_incomplete": {
+      title: "{{provider}} iadesi yapıldı, kaydı yarım kaldı",
+      description:
+        "Sipariş {{cart}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. {{provider}} panelinden kontrol edin; aynı iadeyi yeniden yapmayın.",
+    },
     "payments.shelf_restored": {
       title: "Geçici stok düzeltmesi geri alındı",
       description: "Sepet {{cart}} için artırılan stok geri alındı; stok sayılarını kontrol edin.",
@@ -234,6 +239,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "A second {{provider}} payment for a cart already ordered",
       description:
         "{{amount}} ({{reference}}, cart {{cart}}) was taken for a cart whose order another payment opened; it was not refunded automatically. Check whether the customer paid twice.",
+    },
+    "payments.refund_incomplete": {
+      title: "A {{provider}} refund was made, its record is incomplete",
+      description:
+        "The {{amount}} refund ({{reference}}) for order {{cart}} was, or may have been, made at {{provider}}, but its record could not be completed. Check {{provider}}'s panel; do not make the same refund again.",
     },
     "payments.shelf_restored": {
       title: "A temporary stock raise was taken back",

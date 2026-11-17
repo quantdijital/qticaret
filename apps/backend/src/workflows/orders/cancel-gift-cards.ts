@@ -21,6 +21,7 @@ import { giftLinesOf } from "../returns/gift-lines"
 import { closeWaitingRequestsStep } from "../returns/steps/cancel"
 import { refundOrderWorkflow } from "./refund-order"
 import type { RefundOrderInput } from "./steps/order-refund"
+import { clearPendingRefundsStep } from "./steps/pending-refund"
 
 export interface CancelGiftCardsInput {
   order_id: string
@@ -110,6 +111,8 @@ export const cancelGiftCardsWorkflow = createWorkflow(
       }
     )
     cancelRefundsStep(input.refunds)
+    // Before Medusa's own cancel refunds anything left: no payment names one of ours (review D1)
+    clearPendingRefundsStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
     releaseLockStep({ key: lockKeys })
     return new WorkflowResponse(transform({ debits }, ({ debits }) => ({ voided: debits.length })))
   }

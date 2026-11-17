@@ -14,6 +14,7 @@ export interface StaffPaymentIssueVars {
     | "shelf_restored"
     | "wholesale_price_check"
     | "payment_beside_order"
+    | "refund_incomplete"
   provider: string
   reference: string
   cart: string
@@ -26,6 +27,7 @@ export const PAYMENT_ISSUES: readonly StaffPaymentIssueVars["issue"][] = [
   "shelf_restored",
   "wholesale_price_check",
   "payment_beside_order",
+  "refund_incomplete",
 ]
 
 export const staffPaymentIssue: MessageTemplate<StaffPaymentIssueVars> = {

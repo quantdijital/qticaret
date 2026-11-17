@@ -11,12 +11,19 @@ const ISSUES = [
   "payment_beside_order",
   // A wholesaler's cart its prices could not be set for (PR #100): the wholesale roles' alone
   "wholesale_price_check",
+  // An order refund whose money left while its record could not be closed: `cart` is the order
+  "refund_incomplete",
 ] as const
 type Issue = (typeof ISSUES)[number]
 
 const isIssue = (value: unknown): value is Issue => ISSUES.includes(value as Issue)
 
-const PROVIDERS: Readonly<Record<string, string>> = { paytr: "PayTR", iyzico: "iyzico" }
+const PROVIDERS: Readonly<Record<string, string>> = {
+  paytr: "PayTR",
+  iyzico: "iyzico",
+  "bank-transfer": "Havale/EFT",
+  cod: "Kapıda ödeme",
+}
 
 const money = (value: unknown) =>
   typeof value === "number"
@@ -40,6 +47,7 @@ export function paymentIssueAlert(t: TFunction, data: Record<string, unknown>) {
     amount: money(data["amount"]),
   }
   const shelf = issue === "shelf_restored"
+  const order = issue === "refund_incomplete" ? text(data["cart_id"]) : ""
   return {
     title: t(`notifications.paymentIssue.${issue}.title`, values),
     description: t(`notifications.paymentIssue.${issue}.description`, values),
@@ -49,6 +57,8 @@ export function paymentIssueAlert(t: TFunction, data: Record<string, unknown>) {
       ? { to: "/inventory" as const, search: {}, params: {} }
       : issue === "wholesale_price_check"
         ? { to: "/wholesale" as const, search: {}, params: {} }
-        : { to: "/orders" as const, search: {}, params: {} },
+        : order
+          ? { to: "/orders/$id" as const, search: {}, params: { id: order } }
+          : { to: "/orders" as const, search: {}, params: {} },
   }
 }

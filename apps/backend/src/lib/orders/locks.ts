@@ -14,6 +14,9 @@ export const cancelLockKeys = (orderId: string): string[] => [
   shipLockKey(orderId),
 ]
 
+/** An order's refund lock (F5 V5): its refunds, and anything that names one in a payment, one at a time. */
+export const orderRefundLockKey = (orderId: string): string => `orders:refund:${orderId}`
+
 /** An order's returns lock: its requests are opened, decided, received and refunded one at a time. */
 export const returnsLockKey = (orderId: string): string => `returns:${orderId}`
 

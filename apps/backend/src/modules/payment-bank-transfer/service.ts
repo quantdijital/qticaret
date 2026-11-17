@@ -24,6 +24,7 @@ import { AbstractPaymentProvider, PaymentActions } from "@medusajs/framework/uti
 import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
 import { startedByCheckout } from "../../lib/payments/checkout"
+import { recordedRefund } from "../../lib/payments/pending-refund"
 
 const accountOf = (data: Record<string, unknown> | undefined) => {
   const account = data?.["account"] as Record<string, unknown> | undefined
@@ -127,10 +128,11 @@ class BankTransferProviderService extends AbstractPaymentProvider {
 
   /**
    * The shop sends the money back from its own bank: the refund here is the
-   * record of it (our order refund names it; nothing is sent anywhere).
+   * record of it (our order refund names it; nothing is sent anywhere),
+   * kept in the payment's data under our reference for the ledger.
    */
   refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
-    return Promise.resolve({ data: input.data ?? {} })
+    return Promise.resolve({ data: recordedRefund(input) })
   }
 
   getWebhookActionAndData(): Promise<WebhookActionResult> {

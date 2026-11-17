@@ -1,8 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import type { UpdatePaymentDTO } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ValidationError } from "../../../lib/errors"
+import { logger } from "../../../lib/logging"
 import { fromMedusaAmount, kurus, subtractKurus } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
 import { planRefund } from "../../../lib/orders"
@@ -10,7 +10,10 @@ import type { PlannedLine, RefundRequest } from "../../../lib/orders"
 import { HOSTED_FORM_PROVIDERS } from "../../../lib/payments/checkout"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
+import { alertPaymentIssue } from "../../payments/issue-alert"
 import { readOrderMoney } from "../order-money"
+import { refundMade, refundTraceOf } from "../refund-trace"
+import { dropPendingRefund } from "./pending-refund"
 
 export interface RefundOrderInput {
   order_id: string
@@ -24,6 +27,11 @@ export interface RefundOrderInput {
 export interface RefundPlan {
   /** Made already under this reference: nothing to do. */
   done: boolean
+  /**
+   * Made by the provider and recorded by Medusa under this reference, the
+   * ledger not closed (a step after failed): closed now, nothing asked again.
+   */
+  made: boolean
   /** A refund under this reference that did not go through, tried again as it was. */
   entry_id: string | null
   payment_id: string
@@ -103,12 +111,12 @@ async function paymentFor(
   return payment.id
 }
 
-// Medusa's update type leaves `data` out, but the module writes it (the
-// HTTP test checks the provider is given our reference)
-const withData = (id: string, data: Record<string, unknown>) =>
-  ({ id, data }) as unknown as UpdatePaymentDTO
-
-/** What the refund gives back, line by line, and from which payment; read under the order's lock. */
+/**
+ * What the refund gives back, line by line, and from which payment; read
+ * under the order's lock. Tried again under its reference, a refund the
+ * payment's data records already (the provider gave it back and Medusa
+ * recorded it, a later step failed) is only closed (`made`).
+ */
 export const planOrderRefundStep = createStep(
   "orders-plan-refund",
   async (input: RefundOrderInput, { container }) => {
@@ -118,8 +126,10 @@ export const planOrderRefundStep = createStep(
       throw new ValidationError("orders.refund_reference_taken", { field: "reference" })
     }
     if (existing) {
+      const done = existing.status === "done"
       return new StepResponse<RefundPlan>({
-        done: existing.status === "done",
+        done,
+        made: !done && (await refundMade(container, existing)),
         entry_id: existing.id,
         payment_id: existing.payment_id,
         amount: existing.amount,
@@ -135,6 +145,7 @@ export const planOrderRefundStep = createStep(
     )
     return new StepResponse<RefundPlan>({
       done: false,
+      made: false,
       entry_id: null,
       payment_id: await paymentFor(container, input.order_id, plan.total),
       amount: plan.total,
@@ -168,63 +179,64 @@ export const openRefundEntryStep = createStep(
     })
     return new StepResponse(entry.id, entry.id)
   },
+  // The refund failed somewhere: whether its money left decides the entry (review 2026-11-17)
   async (entryId, { container }) => {
-    if (!entryId) {
-      return
+    if (entryId) {
+      await settleFailedEntry(container, entryId)
     }
-    const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-    const [entry] = await ledger.listOrderRefunds({ id: entryId }, { select: ["provider_parts"] })
-    // A provider that refunds in parts sent some (or may have): the money is not
-    // all back, nor surely not. Kept pending, its lines stay counted; the same
-    // reference finishes it (security review 2026-10-27)
-    const sent = ((entry?.provider_parts as unknown[] | null) ?? []).length > 0
-    await ledger.updateOrderRefunds(
-      sent
-        ? { id: entryId, status: "pending", error_code: "refund_incomplete" }
-        : { id: entryId, status: "failed", error_code: "refund_failed" }
-    )
   }
 )
 
 /**
- * Names the refund's reference in the payment's data, for the provider:
- * Medusa gives each try of a refund its own key, ours stays the same.
+ * A refund whose workflow failed. Money that left, or may have (a part
+ * iyzico sent, a refund PayTR shows or the payment's data records under
+ * the reference, nothing readable), keeps the entry pending as
+ * `refund_incomplete`: its lines stay counted, so no new request gives
+ * them back again; the same reference closes it without sending again
+ * (`made`, or the provider finds its refund); the shop is told to check
+ * (security review 2026-10-27, 2026-11-17). Surely none: `failed`.
  */
-export const namePendingRefundStep = createStep(
-  "orders-name-pending-refund",
-  async (input: { plan: RefundPlan; reference: string }, { container }) => {
-    const payments = container.resolve(Modules.PAYMENT)
-    const [payment] = await payments.listPayments(
-      { id: input.plan.payment_id },
-      { select: ["id", "data"] }
-    )
-    const before = payment?.data ?? {}
-    if (input.plan.done || !payment) {
-      return new StepResponse<null, string | null>(null, null)
-    }
-    await payments.updatePayment(
-      withData(payment.id, {
-        ...before,
-        pending_refund: { reference_no: input.reference, amount: input.plan.amount },
-      })
-    )
-    return new StepResponse(null, payment.id)
-  },
-  // Takes the name off again, nothing else: the provider may have written to the data since
-  async (paymentId, { container }) => {
-    if (!paymentId) {
-      return
-    }
-    const payments = container.resolve(Modules.PAYMENT)
-    const [payment] = await payments.listPayments({ id: paymentId }, { select: ["id", "data"] })
-    if (payment?.data && "pending_refund" in payment.data) {
-      const data = Object.fromEntries(
-        Object.entries(payment.data).filter(([key]) => key !== "pending_refund")
-      )
-      await payments.updatePayment(withData(payment.id, data))
-    }
+export async function settleFailedEntry(
+  container: Pick<MedusaContainer, "resolve">,
+  entryId: string
+): Promise<void> {
+  const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+  const [entry] = await ledger.listOrderRefunds(
+    { id: entryId },
+    { select: ["id", "order_id", "reference", "payment_id", "amount", "provider_parts"] }
+  )
+  if (!entry) {
+    return
   }
-)
+  const { trace, provider } = await refundTraceOf(container, {
+    reference: entry.reference,
+    payment_id: entry.payment_id,
+    parts: ((entry.provider_parts as unknown[] | null) ?? []).length,
+  })
+  if (trace === "none") {
+    await ledger.updateOrderRefunds({ id: entryId, status: "failed", error_code: "refund_failed" })
+    return
+  }
+  await ledger.updateOrderRefunds({
+    id: entryId,
+    status: "pending",
+    error_code: "refund_incomplete",
+  })
+  logger.error({
+    event: "orders.refund_incomplete",
+    orderId: entry.order_id,
+    reference: entry.reference,
+    trace,
+  })
+  await alertPaymentIssue(container, {
+    issue: "refund_incomplete",
+    provider,
+    reference: entry.reference,
+    // The order, in the alert's place for a cart: the shop finds the refund there
+    cart_id: entry.order_id,
+    amount: entry.amount,
+  })
+}
 
 /** The refund went through: the entry is done and the payment's data no longer names it. */
 export const closeRefundEntryStep = createStep(
@@ -235,18 +247,8 @@ export const closeRefundEntryStep = createStep(
     }
     await container
       .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-      .updateOrderRefunds({ id: input.entry_id, status: "done" })
-    const payments = container.resolve(Modules.PAYMENT)
-    const [payment] = await payments.listPayments(
-      { id: input.plan.payment_id },
-      { select: ["id", "data"] }
-    )
-    if (payment?.data && "pending_refund" in payment.data) {
-      const data = Object.fromEntries(
-        Object.entries(payment.data).filter(([key]) => key !== "pending_refund")
-      )
-      await payments.updatePayment(withData(payment.id, data))
-    }
+      .updateOrderRefunds({ id: input.entry_id, status: "done", error_code: null })
+    await dropPendingRefund(container, input.plan.payment_id)
     return new StepResponse(null)
   }
 )

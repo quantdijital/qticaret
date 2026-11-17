@@ -19,7 +19,11 @@ import { alertStaff } from "../messaging/staff"
  *   was started; the reference is the cart, so once per cart;
  * - `payment_beside_order`: a payment for a cart already an order through
  *   another payment (finding 2026-11-16, review N2): not given back on its
- *   own; the shop checks whether the shopper paid twice.
+ *   own; the shop checks whether the shopper paid twice;
+ * - `refund_incomplete`: an order refund whose money left, or may have,
+ *   while a step after failed (review 2026-11-17): its record is kept
+ *   pending, never given back again on its own; the shop checks the
+ *   provider. The reference is the refund's, `cart_id` carries the order.
  */
 export type PaymentIssue =
   | "completion_stuck"
@@ -27,6 +31,7 @@ export type PaymentIssue =
   | "shelf_restored"
   | "wholesale_price_check"
   | "payment_beside_order"
+  | "refund_incomplete"
 
 export interface PaymentIssueInput {
   issue: PaymentIssue
@@ -41,6 +46,8 @@ export interface PaymentIssueInput {
 const PROVIDER_NAMES: Readonly<Record<string, string>> = {
   paytr: "PayTR",
   iyzico: "iyzico",
+  "bank-transfer": "Havale/EFT",
+  cod: "Kapıda ödeme",
   stock: "Stok",
   wholesale: "Toptan fiyat denetimi",
 }

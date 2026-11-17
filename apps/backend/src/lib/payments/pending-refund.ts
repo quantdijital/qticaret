@@ -1,3 +1,5 @@
+import type { RefundPaymentInput } from "@medusajs/framework/types"
+import { fromMedusaAmount } from "../money"
 import type { Kurus } from "../money"
 
 /**
@@ -14,4 +16,61 @@ export function pendingReferenceOf(
   return pending?.amount === amount && typeof pending.reference_no === "string"
     ? pending.reference_no
     : undefined
+}
+
+/** A refund a provider recorded in the payment's data: the reference it went under, kuruş. */
+export interface RefundRecord {
+  reference_no: string
+  amount: number
+}
+
+export const refundRecordsOf = (
+  data: Record<string, unknown> | null | undefined
+): RefundRecord[] => (Array.isArray(data?.["refunds"]) ? (data["refunds"] as RefundRecord[]) : [])
+
+// As PayTR takes a reference: letters and digits, at most 64
+const providerForm = (reference: string) => reference.replace(/[^A-Za-z0-9]/g, "").slice(0, 64)
+
+/**
+ * Whether the payment's data records a refund under our order refund's
+ * `reference`, as sent or as PayTR takes it. Medusa writes the data a
+ * provider returns only once the refund went through, along with its own
+ * refund record (2.21.2 `refundPaymentFromProvider_`): recorded, the money
+ * left and Medusa knows it; only our ledger can lag behind.
+ */
+export function refundRecorded(
+  data: Record<string, unknown> | null | undefined,
+  reference: string
+): boolean {
+  const forms = new Set([reference, providerForm(reference)])
+  return refundRecordsOf(data).some((record) => forms.has(record.reference_no))
+}
+
+/**
+ * The payment's data with the refund recorded under `reference` (once), for
+ * a provider that keeps no record of its own we can read back (iyzico, the
+ * shop's own transfer or cash): the ledger then knows the refund went
+ * through even when a later step failed (`refundRecorded`).
+ */
+export function withRefundRecord(
+  data: Record<string, unknown> | undefined,
+  reference: string,
+  amount: Kurus
+): Record<string, unknown> {
+  const records = refundRecordsOf(data)
+  return records.some((record) => record.reference_no === reference)
+    ? { ...data }
+    : { ...data, refunds: [...records, { reference_no: reference, amount }] }
+}
+
+/**
+ * A refund the shop makes by hand (its own transfer, cash at the door):
+ * nothing is sent anywhere, the payment's data records our order refund's
+ * reference; Medusa's own refund (none named) leaves the data as it is.
+ */
+export function recordedRefund(input: RefundPaymentInput): Record<string, unknown> {
+  const data = input.data ?? {}
+  const amount = fromMedusaAmount(input.amount, { allowRounding: true })
+  const reference = pendingReferenceOf(data, amount)
+  return reference ? withRefundRecord(data, reference, amount) : { ...data }
 }

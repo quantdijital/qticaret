@@ -4,6 +4,7 @@ import { kurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import { iyzicoApi, nothingDone } from "../../lib/payments/iyzico"
 import type { IyzicoCredentials } from "../../lib/payments/iyzico"
+import { withRefundRecord } from "../../lib/payments/pending-refund"
 import { ORDER_REFUNDS_MODULE } from "../order-refunds"
 import type OrderRefundsModuleService from "../order-refunds/service"
 import type { ProviderPart } from "../order-refunds/service"
@@ -170,5 +171,6 @@ export async function refundIyzicoPayment(
       return answer.amount >= amount
     })
   }
-  return { ...data }
+  // Recorded for our ledger: a step failing after this finds the refund made (`refundRecorded`)
+  return withRefundRecord(data, reference, amount)
 }

@@ -25,6 +25,7 @@ export const OPEN_ALERTS: readonly string[] = [
   "payments.refunded_before_order",
   "payments.shelf_restored",
   "payments.payment_beside_order",
+  "payments.refund_incomplete",
   "payments.orphan_recorded",
   "payments.orphan_refunded",
   "payments.orphan_refund_failed",

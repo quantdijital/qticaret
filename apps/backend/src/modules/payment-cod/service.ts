@@ -22,6 +22,7 @@ import { AbstractPaymentProvider, PaymentActions } from "@medusajs/framework/uti
 import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
 import { startedByCheckout } from "../../lib/payments/checkout"
+import { recordedRefund } from "../../lib/payments/pending-refund"
 
 /**
  * Cash on delivery as a Medusa payment provider (`pp_cod_cod`, adr/0029).
@@ -91,9 +92,12 @@ class CashOnDeliveryProviderService extends AbstractPaymentProvider {
     return Promise.reject(new ValidationError("payments.restart_checkout"))
   }
 
-  /** The shop pays the customer back itself: the refund here is the record of it. */
+  /**
+   * The shop pays the customer back itself: the refund here is the record of
+   * it, kept in the payment's data under our reference for the ledger.
+   */
   refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
-    return Promise.resolve({ data: input.data ?? {} })
+    return Promise.resolve({ data: recordedRefund(input) })
   }
 
   getWebhookActionAndData(): Promise<WebhookActionResult> {

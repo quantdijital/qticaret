@@ -30,9 +30,13 @@ export function RefundsCard({ refunds, currency }: { refunds: ShopRefund[]; curr
                 {[formatDateTime(refund.created_at), refund.note].filter(Boolean).join(" · ")}
               </span>
             </span>
-            <StatusBadge tone={TONES[refund.status]}>
-              {t(`orders.refunds.states.${refund.status}`)}
-            </StatusBadge>
+            {refund.incomplete ? (
+              <StatusBadge tone="warning">{t("orders.refunds.states.incomplete")}</StatusBadge>
+            ) : (
+              <StatusBadge tone={TONES[refund.status]}>
+                {t(`orders.refunds.states.${refund.status}`)}
+              </StatusBadge>
+            )}
           </li>
         ))}
       </ul>

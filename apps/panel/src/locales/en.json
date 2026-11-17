@@ -3982,7 +3982,8 @@
       "states": {
         "done": "Refunded",
         "pending": "In progress",
-        "failed": "Failed"
+        "failed": "Failed",
+        "incomplete": "Record incomplete: check at the provider"
       }
     },
     "chargeback": {
@@ -6790,6 +6791,10 @@
       "payment_beside_order": {
         "title": "A second {{provider}} payment for a cart already ordered",
         "description": "{{amount}} ({{reference}}, cart {{cart}}) was taken for a cart whose order another payment opened; it was not refunded automatically. Check whether the customer paid twice; if so, refund the extra in the provider's panel."
+      },
+      "refund_incomplete": {
+        "title": "A {{provider}} refund was made, its record is incomplete",
+        "description": "The {{amount}} refund ({{reference}}) for order {{cart}} was, or may have been, made at {{provider}}, but its record could not be completed. Check {{provider}}'s panel; do not make the same refund again."
       }
     },
     "markAllRead": "Mark all read",

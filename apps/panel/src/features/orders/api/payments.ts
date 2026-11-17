@@ -46,6 +46,8 @@ export interface ShopRefund {
   reference: string
   amount: string
   status: "pending" | "done" | "failed"
+  /** Pending with its money gone, or maybe gone, its record not closed: the shop checks the provider. */
+  incomplete?: boolean
   note: string | null
   created_at: string
 }

@@ -3982,7 +3982,8 @@
       "states": {
         "done": "İade edildi",
         "pending": "Sürüyor",
-        "failed": "Yapılamadı"
+        "failed": "Yapılamadı",
+        "incomplete": "Kaydı yarım: sağlayıcıda kontrol edin"
       }
     },
     "chargeback": {
@@ -6790,6 +6791,10 @@
       "payment_beside_order": {
         "title": "Siparişi olan sepete ikinci {{provider}} ödemesi",
         "description": "{{amount}} ({{reference}}, sepet {{cart}}) başka bir ödemeyle açılmış siparişin sepetine alındı; otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin; öyleyse fazlasını sağlayıcının panelinden iade edin."
+      },
+      "refund_incomplete": {
+        "title": "{{provider}} iadesi yapıldı, kaydı yarım kaldı",
+        "description": "Sipariş {{cart}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. {{provider}} panelinden kontrol edin; aynı iadeyi yeniden yapmayın."
       }
     },
     "markAllRead": "Tümünü okundu say",

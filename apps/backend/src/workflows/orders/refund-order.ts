@@ -11,13 +11,14 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { toMedusaAmount } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
+import { orderRefundLockKey } from "../../lib/orders/locks"
 import {
   closeRefundEntryStep,
-  namePendingRefundStep,
   openRefundEntryStep,
   planOrderRefundStep,
 } from "./steps/order-refund"
 import type { RefundOrderInput } from "./steps/order-refund"
+import { namePendingRefundStep } from "./steps/pending-refund"
 
 /**
  * Gives money back on an order, line by line (F5 V5, adr/0010), under the
@@ -25,18 +26,21 @@ import type { RefundOrderInput } from "./steps/order-refund"
  * the ledger, never from the request; the refund itself is Medusa's
  * (`refundPaymentWorkflow`), which asks the provider. Tried again with the
  * same reference, a refund is made once: the provider is given that
- * reference, and one already made is only reported.
+ * reference, one already made is only reported, and one the provider made
+ * and Medusa recorded, its entry left open by a later failure, is only
+ * closed (`made`, review 2026-11-17). One whose money may have left is
+ * kept pending for the shop to check, never failed (`settleFailedEntry`).
  */
 export const refundOrderWorkflow = createWorkflow(
   "orders-refund-order",
   (input: RefundOrderInput) => {
-    const lockKey = transform({ input }, ({ input }) => `orders:refund:${input.order_id}`)
+    const lockKey = transform({ input }, ({ input }) => orderRefundLockKey(input.order_id))
     // A provider refunding in parts makes several calls in a row: the lock outlasts them
     acquireLockStep({ key: lockKey, timeout: 10, ttl: 600 })
     const plan = planOrderRefundStep(input)
     const entryId = openRefundEntryStep({ order: input, plan })
     namePendingRefundStep({ plan, reference: input.reference })
-    when("orders-refund-payment", { plan }, ({ plan }) => !plan.done).then(() => {
+    when("orders-refund-payment", { plan }, ({ plan }) => !plan.done && !plan.made).then(() => {
       refundPaymentWorkflow.runAsStep({
         input: transform({ input, plan }, ({ input, plan }) => ({
           payment_id: plan.payment_id,
@@ -53,7 +57,7 @@ export const refundOrderWorkflow = createWorkflow(
         reference: input.reference,
         amount: plan.amount,
         lines: plan.lines,
-        made_before: plan.done,
+        made_before: plan.done || plan.made,
       }))
     )
   }
