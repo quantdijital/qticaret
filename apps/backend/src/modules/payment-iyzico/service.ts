@@ -169,7 +169,15 @@ class IyzicoProviderService extends AbstractPaymentProvider {
     if (!reference) {
       throw new ValidationError("payments.use_order_refund")
     }
-    return { data: await refundIyzicoPayment(await this.account(), input.data, amount, reference) }
+    return {
+      data: await refundIyzicoPayment(
+        await this.account(),
+        input.data,
+        amount,
+        reference,
+        input.context?.idempotency_key
+      ),
+    }
   }
 
   /**

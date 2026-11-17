@@ -10,6 +10,8 @@ import type { TracedRefund } from "./refund-trace"
 export const REFUND_INCOMPLETE = "refund_incomplete"
 /** Pending, PayTR showing nothing yet (its record can lag a lost answer): the job settles it. */
 export const REFUND_UNCONFIRMED = "refund_unconfirmed"
+/** Refused outright by the provider or before it (`refusedOutright`): nothing was made. */
+export const PROVIDER_REFUSED = "provider_refused"
 /** Both: an entry the settling job (`jobs/order-refund-settle.ts`) reads again. */
 export const UNSETTLED = [REFUND_INCOMPLETE, REFUND_UNCONFIRMED] as const
 
@@ -23,6 +25,7 @@ export interface LedgerEntry {
   payment_id: string
   amount: number
   provider_parts?: unknown
+  error_code?: string | null
 }
 
 export const ENTRY_FIELDS = [
@@ -50,9 +53,10 @@ export const tracedOf = (entry: LedgerEntry): TracedRefund => ({
  * may have (recorded, shown, a part sent, nothing readable): kept pending
  * as `refund_incomplete`, its lines counted so no new request gives them
  * back again, and the shop told at a provider with a panel. PayTR showing
- * nothing yet: kept pending as `refund_unconfirmed`, no alert (a refusal
- * looks the same). The settling job closes either, or fails it once PayTR
- * shows nothing twice. Elsewhere nothing shown is nothing sent: `failed`.
+ * nothing yet after a lost answer: kept pending as `refund_unconfirmed`,
+ * no alert. The settling job closes either, or fails it once PayTR shows
+ * nothing twice. Nothing shown after a refusal outright, or elsewhere:
+ * nothing sent, `failed`.
  */
 export async function settleFailedEntry(
   container: Pick<MedusaContainer, "resolve">,
@@ -64,7 +68,9 @@ export async function settleFailedEntry(
     return
   }
   const { trace, provider } = await refundTraceOf(container, tracedOf(entry))
-  if (trace === "none" && provider !== "paytr") {
+  // Nothing shown is proof where nothing lags; nothing shown or readable, where refused outright
+  const refused = entry.error_code === PROVIDER_REFUSED && (trace === "none" || trace === "unknown")
+  if ((trace === "none" && provider !== "paytr") || refused) {
     await ledger.updateOrderRefunds({ id: entryId, status: "failed", error_code: "refund_failed" })
     return
   }

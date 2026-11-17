@@ -43,5 +43,14 @@ export const AdminPostOrderRefund = z
   .strict()
   .refine(oneWay, { message: "orders.refund_mode", path: ["amount"] })
 
+/** An open refund checked at the provider by staff: the money went back, or it did not. */
+export const AdminPostOrderRefundSettle = z
+  .object({ outcome: z.enum(["made", "not_made"]) })
+  .strict()
+
+// A ledger reference as the ledger keeps them: the panel's key, a cancel's, a return's, an edit's
+export const LEDGER_REFERENCE = /^[A-Za-z0-9]{1,64}$/
+
+export type AdminPostOrderRefundSettleType = z.infer<typeof AdminPostOrderRefundSettle>
 export type AdminPostOrderRefundPreviewType = z.infer<typeof AdminPostOrderRefundPreview>
 export type AdminPostOrderRefundType = z.infer<typeof AdminPostOrderRefund>

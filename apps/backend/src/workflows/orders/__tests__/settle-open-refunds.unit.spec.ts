@@ -1,7 +1,7 @@
 import { asValue } from "@medusajs/framework/awilix"
 import { Modules, createMedusaContainer } from "@medusajs/framework/utils"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
-import { CONFIRM_MS, ESCALATE_MS, settleOpenRefunds } from "../settle-open-refunds"
+import { CONFIRM_MS, ESCALATE_MS, STRANDED_MS, settleOpenRefunds } from "../settle-open-refunds"
 
 const refundRun = jest.fn()
 jest.mock("../refund-order", () => ({
@@ -19,6 +19,7 @@ jest.mock("../../payments/issue-alert", () => ({
 const NOW = Date.parse("2026-11-17T12:00:00Z")
 const ago = (ms: number) => new Date(NOW - ms)
 
+type Entry = ReturnType<typeof entryOf>
 const entryOf = (fields: Record<string, unknown> = {}) => ({
   id: "oref_01",
   order_id: "order_01",
@@ -26,19 +27,24 @@ const entryOf = (fields: Record<string, unknown> = {}) => ({
   payment_id: "pay_01",
   amount: 1000,
   provider_parts: null,
-  error_code: "refund_incomplete",
+  status: "pending",
+  error_code: "refund_incomplete" as string | null,
   created_at: ago(10 * 60 * 1000),
   updated_at: ago(5 * 60 * 1000),
   ...fields,
 })
 
-function ledgerWith(entry: ReturnType<typeof entryOf>) {
+/** The ledger as one round reads it: pages by id, then each entry again under the lock. */
+function ledgerWith(pages: Entry[][], reread?: (entry: Entry) => unknown) {
   const updateOrderRefunds = jest.fn()
-  // The round's list first, then the re-read under the lock
-  const listOrderRefunds = jest
-    .fn()
-    .mockResolvedValueOnce([entry])
-    .mockResolvedValue([{ id: entry.id }])
+  const all = pages.flat()
+  const listOrderRefunds = jest.fn((filters: { id?: unknown; status?: unknown }) => {
+    if (typeof filters.id === "string") {
+      const entry = all.find(({ id }) => id === filters.id)
+      return Promise.resolve(entry ? [reread ? reread(entry) : entry] : [])
+    }
+    return Promise.resolve(pages.shift() ?? [])
+  })
   const container = createMedusaContainer()
   container.register({
     [ORDER_REFUNDS_MODULE]: asValue({ listOrderRefunds, updateOrderRefunds }),
@@ -59,7 +65,7 @@ beforeEach(() => {
 describe("the settling job reads open refunds again and never sends one (review O1/O2)", () => {
   it.each(["made", "shown"])("closes a refund %s under its own reference", async (trace) => {
     const entry = entryOf()
-    const { container, updateOrderRefunds } = ledgerWith(entry)
+    const { container, updateOrderRefunds } = ledgerWith([[entry]])
     traceIs(trace)
 
     expect(await settleOpenRefunds(container, NOW)).toEqual({ closed: 1, failed: 0, open: 0 })
@@ -74,29 +80,22 @@ describe("the settling job reads open refunds again and never sends one (review 
     expect(updateOrderRefunds).not.toHaveBeenCalled()
   })
 
-  it("marks a PayTR refund shown nothing as unconfirmed on the first read", async () => {
-    const { container, updateOrderRefunds } = ledgerWith(entryOf())
+  it("marks a PayTR refund shown nothing as unconfirmed, then fails it long after", async () => {
     traceIs("none")
+    const first = ledgerWith([[entryOf()]])
+    await settleOpenRefunds(first.container, NOW)
+    const recent = ledgerWith([[entryOf({ error_code: "refund_unconfirmed" })]])
+    await settleOpenRefunds(recent.container, NOW)
+    const old = ledgerWith([
+      [entryOf({ error_code: "refund_unconfirmed", updated_at: ago(CONFIRM_MS) })],
+    ])
 
-    expect(await settleOpenRefunds(container, NOW)).toEqual({ closed: 0, failed: 0, open: 1 })
-    expect(updateOrderRefunds).toHaveBeenCalledWith({
+    expect(await settleOpenRefunds(old.container, NOW)).toEqual({ closed: 0, failed: 1, open: 0 })
+    expect(first.updateOrderRefunds).toHaveBeenCalledWith({
       id: "oref_01",
       status: "pending",
       error_code: "refund_unconfirmed",
     })
-    expect(refundRun).not.toHaveBeenCalled()
-  })
-
-  it("fails it, its lines free again, once PayTR shows nothing again long after", async () => {
-    const recent = ledgerWith(entryOf({ error_code: "refund_unconfirmed" }))
-    traceIs("none")
-    await settleOpenRefunds(recent.container, NOW)
-
-    const old = ledgerWith(
-      entryOf({ error_code: "refund_unconfirmed", updated_at: ago(CONFIRM_MS) })
-    )
-    expect(await settleOpenRefunds(old.container, NOW)).toEqual({ closed: 0, failed: 1, open: 0 })
-
     expect(recent.updateOrderRefunds).not.toHaveBeenCalled()
     expect(old.updateOrderRefunds).toHaveBeenCalledWith({
       id: "oref_01",
@@ -105,24 +104,53 @@ describe("the settling job reads open refunds again and never sends one (review 
     })
   })
 
-  it("fails at once where nothing shown is proof (iyzico, nothing sent)", async () => {
-    const { container, updateOrderRefunds } = ledgerWith(entryOf())
+  it("fails at once where nothing shown is proof, or the provider refused outright", async () => {
     traceIs("none", "iyzico")
+    const iyzico = ledgerWith([[entryOf()]])
+    await settleOpenRefunds(iyzico.container, NOW)
+    traceIs("unknown")
+    const refused = ledgerWith([
+      [entryOf({ error_code: "provider_refused", updated_at: ago(STRANDED_MS) })],
+    ])
+    await settleOpenRefunds(refused.container, NOW)
 
-    await settleOpenRefunds(container, NOW)
+    for (const { updateOrderRefunds } of [iyzico, refused]) {
+      expect(updateOrderRefunds).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "failed", error_code: "refund_failed" })
+      )
+    }
+  })
 
-    expect(updateOrderRefunds).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "failed", error_code: "refund_failed" })
-    )
+  it("reads an entry a crash left unmarked only once it is surely no refund under way (O2)", async () => {
+    traceIs("unknown")
+    const young = ledgerWith([[entryOf({ error_code: null, updated_at: ago(STRANDED_MS - 1) })]])
+    const stranded = ledgerWith([[entryOf({ error_code: null, updated_at: ago(STRANDED_MS) })]])
+
+    expect(await settleOpenRefunds(young.container, NOW)).toEqual({
+      closed: 0,
+      failed: 0,
+      open: 0,
+    })
+    expect(await settleOpenRefunds(stranded.container, NOW)).toEqual({
+      closed: 0,
+      failed: 0,
+      open: 1,
+    })
+    expect(refundTraceOf).toHaveBeenCalledTimes(1)
+    expect(stranded.updateOrderRefunds).toHaveBeenCalledWith({
+      id: "oref_01",
+      status: "pending",
+      error_code: "refund_incomplete",
+    })
   })
 
   it("leaves one it cannot read, and tells the shop once it is an hour old", async () => {
-    const young = ledgerWith(entryOf())
     traceIs("unknown")
+    const young = ledgerWith([[entryOf()]])
     await settleOpenRefunds(young.container, NOW)
     expect(alertPaymentIssue).not.toHaveBeenCalled()
 
-    const old = ledgerWith(entryOf({ created_at: ago(ESCALATE_MS) }))
+    const old = ledgerWith([[entryOf({ created_at: ago(ESCALATE_MS) })]])
     expect(await settleOpenRefunds(old.container, NOW)).toEqual({ closed: 0, failed: 0, open: 1 })
 
     expect(old.updateOrderRefunds).not.toHaveBeenCalled()
@@ -135,13 +163,27 @@ describe("the settling job reads open refunds again and never sends one (review 
     })
   })
 
-  it("leaves an entry changed meanwhile (a retry under way) as it is", async () => {
-    const { container, updateOrderRefunds, listOrderRefunds } = ledgerWith(entryOf())
-    listOrderRefunds.mockReset().mockResolvedValueOnce([entryOf()]).mockResolvedValue([])
+  it("leaves an entry written meanwhile as it is, even with the same code (D-1)", async () => {
     traceIs("none")
+    const { container, updateOrderRefunds } = ledgerWith([[entryOf()]], (entry) => ({
+      ...entry,
+      updated_at: new Date(NOW),
+    }))
 
     await settleOpenRefunds(container, NOW)
 
     expect(updateOrderRefunds).not.toHaveBeenCalled()
+  })
+
+  it("reads every page by id, the second after the first (D-5)", async () => {
+    traceIs("unknown")
+    const page = Array.from({ length: 100 }, (_, index) =>
+      entryOf({ id: `oref_${String(index).padStart(3, "0")}` })
+    )
+    const { container, listOrderRefunds } = ledgerWith([page, [entryOf({ id: "oref_100" })]])
+
+    expect(await settleOpenRefunds(container, NOW)).toEqual({ closed: 0, failed: 0, open: 101 })
+    const lists = listOrderRefunds.mock.calls.filter(([filters]) => filters.status === "pending")
+    expect(lists[1]?.[0]).toMatchObject({ id: { $gt: "oref_099" } })
   })
 })

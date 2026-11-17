@@ -171,12 +171,11 @@ medusaIntegrationTestRunner({
       expect((await payments(orderId))[0]?.refunds).toHaveLength(1)
     })
 
-    it("fails a refund PayTR shows nothing of twice, its amount free again (O2)", async () => {
+    it("fails a lost refund PayTR shows nothing of twice, its amount free again (O2)", async () => {
       const { orderId, reference } = await paid()
       const body = { amount: 30, reference: key() }
-      fake.queue("/odeme/iade", {
-        body: { status: "error", err_no: "010", err_msg: "Yetersiz bakiye" },
-      })
+      // The answer lost, and PayTR never made it
+      fake.queue("/odeme/iade", { drop: true })
 
       await refund(orderId, body)
       const soon = await settleOpenRefunds(getContainer(), Date.now() + 3 * MINUTE)

@@ -1128,10 +1128,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "orders.refund_exceeds_paid": "İade tutarı siparişten iade edilebilecek tutarı aşıyor.",
   "orders.refund_empty": "İade edilecek bir tutar yok.",
   "orders.refund_reference_taken":
-    "Bu iade anahtarı başka bir siparişte kullanılmış; iadeyi yeniden başlatın.",
+    "Bu iade anahtarı başka bir siparişte ya da başka bir ödemede kullanılmış; iadeyi yeniden başlatın.",
   "orders.refund_mode": "Ya kalem ve kargo seçin ya da bir tutar girin.",
   "orders.refund_amount_kurus": "Tutar en çok iki ondalık basamak içerebilir.",
   "orders.refund_reference_invalid": "İade anahtarı geçersiz; iadeyi yeniden başlatın.",
+  "orders.refund_not_open": "Bu iade artık açık değil; sayfayı yenileyin.",
+  "orders.refund_unknown": "Bu iade siparişte bulunamadı.",
   "orders.refund_unsettled":
     "Bu siparişin bir iadesi sağlayıcıyla henüz doğrulanıyor; birkaç dakika sonra yeniden deneyin.",
   "payments.use_order_refund": "Bu ödemenin iadesi siparişin iade adımından yapılır.",

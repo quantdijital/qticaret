@@ -1,12 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ConflictError } from "../../lib/errors"
 import { kurus } from "../../lib/money"
-import { cancelRefundReference, isCancelRefundReference } from "../../lib/orders/locks"
+import { cancelRefundReference } from "../../lib/orders/locks"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { readOrderMoney } from "./order-money"
 import { refundOrderWorkflow } from "./refund-order"
-import { refundTraceOf } from "./refund-trace"
 import { paymentRemainders } from "./steps/order-refund"
 
 export interface CancelRefundInput {
@@ -15,15 +13,13 @@ export interface CancelRefundInput {
   created_by: string | null
 }
 
-const settled = new Set(["made", "shown"])
-
 /**
  * The order's refunds still open, before a cancel plans its own (security
- * review 2026-11-17, Y1 c): a cancel's, from a try before, is tried again
- * under its own reference (made once); another one is closed when its
- * money is surely back (recorded, or shown by the provider), and the
- * cancel waits while it is not (`orders.refund_unsettled`): its money is
- * neither counted as given back nor given back a second time.
+ * review 2026-11-17, Y1 c, O1): each tried again under its own reference,
+ * a cancel's from a try before as any other. The refund's plan closes one
+ * whose money is surely back (recorded, or shown by the provider) and
+ * refuses the rest (`orders.refund_unsettled`): the cancel waits, its
+ * money neither counted as given back nor sent a second time.
  */
 async function settleOpenRefunds(
   container: MedusaContainer,
@@ -33,23 +29,9 @@ async function settleOpenRefunds(
     .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
     .listOrderRefunds(
       { order_id: input.order_id, status: "pending" },
-      {
-        select: ["reference", "payment_id", "amount", "provider_parts"],
-        order: { created_at: "ASC" },
-      }
+      { select: ["reference", "payment_id", "amount"], order: { created_at: "ASC" } }
     )
   for (const entry of open) {
-    if (!isCancelRefundReference(entry.reference)) {
-      const { trace } = await refundTraceOf(container, {
-        reference: entry.reference,
-        payment_id: entry.payment_id,
-        amount: entry.amount,
-        parts: (entry.provider_parts as { amount: number; state: string }[] | null) ?? [],
-      })
-      if (!settled.has(trace)) {
-        throw new ConflictError("orders.refund_unsettled")
-      }
-    }
     await refundOrderWorkflow(container).run({
       input: {
         order_id: input.order_id,

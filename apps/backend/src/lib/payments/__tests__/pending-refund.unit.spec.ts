@@ -32,6 +32,13 @@ describe("a refund recorded in the payment's data, as our ledger reads it (revie
       ...named,
       refunds: [{ reference_no: "qtref01A", amount: 1000 }],
     })
+    // Under Medusa's refund of the call, when it names one: the ledger mends its move by it (D-3)
+    expect(
+      recordedRefund({ amount: 10, data: named, context: { idempotency_key: "ref_01" } })
+    ).toEqual({
+      ...named,
+      refunds: [{ reference_no: "qtref01A", amount: 1000, refund_id: "ref_01" }],
+    })
     // Another amount, or Medusa's own refund: the data as it was
     expect(recordedRefund({ amount: 5, data: named })).toEqual(named)
     expect(recordedRefund({ amount: 10, data: {} })).toEqual({})

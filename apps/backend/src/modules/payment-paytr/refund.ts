@@ -9,6 +9,8 @@ import { paytrSession } from "./session"
 interface RefundRecord {
   reference_no: string
   amount: number
+  /** Medusa's refund it went with, when Medusa named one. */
+  refund_id?: string
 }
 
 // PayTR's answers the shop can act on, as messages; the rest stay provider errors
@@ -89,17 +91,20 @@ const sendRefund = async (
  * PayTR shows under this reference (an answer lost on the way,
  * `outcome_unknown`), or of this amount under one of `sameAs` our data
  * does not record yet (the same money given back another way: the
- * recovery job's), is not made again but recorded. A new refund is sent only while what PayTR and our
- * data show given back, with it, stays within what was paid: parts of
- * different amounts all go, never more than the payment. Returns the
- * payment's data with the refund recorded.
+ * recovery job's), is not made again but recorded. A new refund is sent
+ * only while what PayTR and our data show given back, with it, stays
+ * within what was paid: parts of different amounts all go, never more
+ * than the payment. Returns the payment's data with the refund recorded,
+ * under Medusa's refund (`refundId`) when it names one: our ledger finds
+ * that refund's order money move by it (review D-3).
  */
 export async function refundPaytrPayment(
   account: PaytrCredentials,
   data: Record<string, unknown> | undefined,
   amount: Kurus,
   referenceNo: string,
-  sameAs: readonly string[] = []
+  sameAs: readonly string[] = [],
+  refundId?: string
 ): Promise<Record<string, unknown>> {
   const records = recordsOf(data)
   if (records.some((record) => record.reference_no === referenceNo)) {
@@ -138,7 +143,13 @@ export async function refundPaytrPayment(
   }
   return records.some((record) => record.reference_no === recordedAs)
     ? { ...data }
-    : { ...data, refunds: [...records, { reference_no: recordedAs, amount }] }
+    : {
+        ...data,
+        refunds: [
+          ...records,
+          { reference_no: recordedAs, amount, ...(refundId ? { refund_id: refundId } : {}) },
+        ],
+      }
 }
 
 export { pendingReferenceOf } from "../../lib/payments/pending-refund"

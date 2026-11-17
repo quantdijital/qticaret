@@ -22,6 +22,8 @@ export function pendingReferenceOf(
 export interface RefundRecord {
   reference_no: string
   amount: number
+  /** Medusa's refund it went with (its key for the provider call), when recorded since 2026-11-17. */
+  refund_id?: string
 }
 
 export const refundRecordsOf = (
@@ -44,8 +46,17 @@ export function refundRecorded(
   reference: string,
   amount: number
 ): boolean {
+  return refundRecordOf(data, reference, amount) !== undefined
+}
+
+/** The record itself (`refundRecorded`): its Medusa refund names the order money move to mend. */
+export function refundRecordOf(
+  data: Record<string, unknown> | null | undefined,
+  reference: string,
+  amount: number
+): RefundRecord | undefined {
   const forms = new Set([reference, providerForm(reference)])
-  return refundRecordsOf(data).some(
+  return refundRecordsOf(data).find(
     (record) => forms.has(record.reference_no) && record.amount === amount
   )
 }
@@ -59,12 +70,14 @@ export function refundRecorded(
 export function withRefundRecord(
   data: Record<string, unknown> | undefined,
   reference: string,
-  amount: Kurus
+  amount: Kurus,
+  refundId?: string
 ): Record<string, unknown> {
   const records = refundRecordsOf(data)
-  return records.some((record) => record.reference_no === reference)
+  const record = { reference_no: reference, amount, ...(refundId ? { refund_id: refundId } : {}) }
+  return records.some((each) => each.reference_no === reference)
     ? { ...data }
-    : { ...data, refunds: [...records, { reference_no: reference, amount }] }
+    : { ...data, refunds: [...records, record] }
 }
 
 /**
@@ -76,5 +89,7 @@ export function recordedRefund(input: RefundPaymentInput): Record<string, unknow
   const data = input.data ?? {}
   const amount = fromMedusaAmount(input.amount, { allowRounding: true })
   const reference = pendingReferenceOf(data, amount)
-  return reference ? withRefundRecord(data, reference, amount) : { ...data }
+  return reference
+    ? withRefundRecord(data, reference, amount, input.context?.idempotency_key)
+    : { ...data }
 }

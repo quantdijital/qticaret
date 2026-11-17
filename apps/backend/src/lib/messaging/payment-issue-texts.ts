@@ -35,5 +35,6 @@ export const PAYMENT_ISSUE_TEXTS: Readonly<Record<string, string>> = {
   "staff_payment_issue.provider": "Ödeme kuruluşu",
   "staff_payment_issue.reference": "Referans",
   "staff_payment_issue.cart": "Sepet",
+  "staff_payment_issue.order": "Sipariş",
   "staff_payment_issue.amount": "Tutar",
 }

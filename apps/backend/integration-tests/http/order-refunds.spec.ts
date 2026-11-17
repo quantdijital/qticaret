@@ -173,10 +173,8 @@ medusaIntegrationTestRunner({
       expect((await lines(orderId)).refundable).toBe("0.00")
     })
 
-    // PayTR showing no refund right after a failure is not yet proof none was made (its record can
-    // lag a lost answer, review O2): the entry waits, counted, until the settling job or the same
-    // reference settles it
-    it("says why PayTR refused, keeps the entry unconfirmed, and goes through when tried again", async () => {
+    // PayTR answered and refused: nothing was made, the entry fails at once (review 2026-11-17)
+    it("says why PayTR refused, keeps the ledger clean, and goes through when tried again", async () => {
       const { orderId, reference } = await paidOrder()
       fake.queue("/odeme/iade", {
         body: { status: "error", err_no: "010", err_msg: "Yetersiz bakiye" },
@@ -196,7 +194,7 @@ medusaIntegrationTestRunner({
 
       expect(refused.status).toBe(400)
       expect(refused.data).toMatchObject({ message: "paytr.balance_insufficient" })
-      expect(entry).toMatchObject({ status: "pending", error_code: "refund_unconfirmed" })
+      expect(entry).toMatchObject({ status: "failed", error_code: "refund_failed" })
       expect(again.data.refund).toMatchObject({ amount: "30.00", made_before: false })
       expect(fake.payments.get(reference)?.refunds).toHaveLength(1)
     })

@@ -34,39 +34,35 @@ export interface TracedRefund {
 // As our PayTR provider sends a reference: letters and digits, at most 64
 const paytrForm = (reference: string) => reference.replace(/[^A-Za-z0-9]/g, "").slice(0, 64)
 
-const paytrShows = async (
+/**
+ * What PayTR's record says of the refund. Unreadable (no account, no
+ * reference to ask by, or a refund of this amount PayTR lists with no
+ * reference, which ours always carry: one made by hand, or ours under
+ * another form) is `unknown`, never `none` (review D-2).
+ */
+const paytrTrace = async (
   container: Pick<MedusaContainer, "resolve">,
   data: Record<string, unknown> | null | undefined,
   entry: TracedRefund
-): Promise<boolean> => {
+): Promise<RefundTrace> => {
   const account = paytrCredentialsOf(
     await container
       .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
       .read("paytr")
   )
   const merchantOid = data?.["merchant_oid"]
-  // Without either our provider refused before sending (not_configured, session_invalid)
   if (!account || typeof merchantOid !== "string") {
-    return false
+    return "unknown"
   }
   const paid = await paytrApi().queryStatus(account, merchantOid)
   const sentAs = paytrForm(entry.reference)
-  return (
-    paid?.refunds.some(
-      (refund) => refund.referenceNo === sentAs && refund.amount === entry.amount
-    ) ?? false
-  )
-}
-
-/** Whether the payment's data records the refund: read for a retry under the same reference. */
-export async function refundMade(
-  container: Pick<MedusaContainer, "resolve">,
-  entry: Pick<TracedRefund, "reference" | "payment_id" | "amount">
-): Promise<boolean> {
-  const [payment] = await container
-    .resolve(Modules.PAYMENT)
-    .listPayments({ id: entry.payment_id }, { select: ["id", "data"] })
-  return refundRecorded(payment?.data, entry.reference, entry.amount)
+  const refunds = paid?.refunds ?? []
+  if (refunds.some((refund) => refund.referenceNo === sentAs && refund.amount === entry.amount)) {
+    return "shown"
+  }
+  return refunds.some((refund) => refund.referenceNo === null && refund.amount === entry.amount)
+    ? "unknown"
+    : "none"
 }
 
 const partsTrace = (entry: TracedRefund): RefundTrace => {
@@ -91,10 +87,11 @@ export async function refundTraceOf(
     if (entry.parts.length > 0) {
       return { trace: partsTrace(entry), provider }
     }
-    const shown =
-      payment?.provider_id === PAYTR_PAYMENT_PROVIDER_ID &&
-      (await paytrShows(container, payment.data, entry))
-    return { trace: shown ? "shown" : "none", provider }
+    const trace =
+      payment?.provider_id === PAYTR_PAYMENT_PROVIDER_ID
+        ? await paytrTrace(container, payment.data, entry)
+        : "none"
+    return { trace, provider }
   } catch (error) {
     logger.warn({
       event: "orders.refund_trace_failed",

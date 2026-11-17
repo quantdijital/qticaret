@@ -161,3 +161,19 @@ describe("return.canceled (order #691)", () => {
     expect(swap?.subject).toBe("Değişim talebiniz iptal edildi (#1042)")
   })
 })
+
+describe("the shop's payment trouble e-mail (review 2026-11-17)", () => {
+  const template = MESSAGE_TEMPLATES["staff.payment_issue"]
+
+  it("labels an order refund's order as the order, a payment's cart as the cart", () => {
+    const refund = template.email?.(
+      { ...template.sample, issue: "refund_unresolved", cart: "order_01ORNEK" },
+      brand
+    )
+    const payment = template.email?.(template.sample, brand)
+
+    expect(refund?.text).toContain("Sipariş")
+    expect(refund?.text).not.toContain("Sepet")
+    expect(payment?.text).toContain("Sepet")
+  })
+})

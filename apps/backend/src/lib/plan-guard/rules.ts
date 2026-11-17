@@ -63,6 +63,7 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/orders/:id/bank-transfer/confirm",
     "/admin/orders/:id/refunds",
     "/admin/orders/:id/refunds/preview",
+    "/admin/orders/:id/refunds/:reference/settle",
     "/admin/orders/:id/credit-lines",
     "/admin/orders/:id/payment-sessions/authorize",
     "/admin/payments/:id/capture",

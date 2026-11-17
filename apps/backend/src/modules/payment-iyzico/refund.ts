@@ -123,7 +123,8 @@ export async function refundIyzicoPayment(
   account: IyzicoCredentials,
   data: Record<string, unknown> | undefined,
   amount: Kurus,
-  reference: string
+  reference: string,
+  refundId?: string
 ): Promise<Record<string, unknown>> {
   const session = iyzicoSession(data)
   const paymentId = data?.["payment_id"]
@@ -172,5 +173,5 @@ export async function refundIyzicoPayment(
     })
   }
   // Recorded for our ledger: a step failing after this finds the refund made (`refundRecorded`)
-  return withRefundRecord(data, reference, amount)
+  return withRefundRecord(data, reference, amount, refundId)
 }

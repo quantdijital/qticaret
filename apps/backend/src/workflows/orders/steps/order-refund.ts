@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { ValidationError } from "../../../lib/errors"
+import { ConflictError, ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount, kurus, subtractKurus } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
 import { planRefund } from "../../../lib/orders"
@@ -10,9 +10,9 @@ import { HOSTED_FORM_PROVIDERS } from "../../../lib/payments/checkout"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
 import { readOrderMoney } from "../order-money"
-import { settleFailedEntry } from "../refund-settle"
-import { refundMade } from "../refund-trace"
-import { referenceTaken } from "./order-refund-guard"
+import { settleFailedEntry, tracedOf } from "../refund-settle"
+import { refundTraceOf } from "../refund-trace"
+import { referenceTaken, triedAgain } from "./order-refund-guard"
 import { dropPendingRefund } from "./pending-refund"
 
 export interface RefundOrderInput {
@@ -122,7 +122,12 @@ async function paymentFor(
  * What the refund gives back, line by line, and from which payment; read
  * under the order's lock. Tried again under its reference, a refund the
  * payment's data records already (the provider gave it back and Medusa
- * recorded it, a later step failed) is only closed (`made`).
+ * recorded it, a later step failed) is only closed (`made`); one the
+ * provider shows (`shown`) is recorded through the provider, which finds
+ * it and sends nothing. Any other refund still open (its money may have
+ * left, a crash left it) is never sent again (`orders.refund_unsettled`):
+ * the settling job or the shop's check settles it (review 2026-11-17, O1).
+ * Only a failed one is made again, planned anew from the request (D-4).
  */
 export const planOrderRefundStep = createStep(
   "orders-plan-refund",
@@ -132,11 +137,18 @@ export const planOrderRefundStep = createStep(
     if (existing && referenceTaken(existing, input)) {
       throw new ValidationError("orders.refund_reference_taken", { field: "reference" })
     }
-    if (existing) {
-      const done = existing.status === "done"
+    const trace =
+      existing?.status === "pending"
+        ? (await refundTraceOf(container, tracedOf(existing))).trace
+        : null
+    const action = existing ? triedAgain(existing.status, trace) : "replan"
+    if (action === "unsettled") {
+      throw new ConflictError("orders.refund_unsettled")
+    }
+    if (existing && action !== "replan") {
       return new StepResponse<RefundPlan>({
-        done,
-        made: !done && (await refundMade(container, existing)),
+        done: action === "done",
+        made: action === "made",
         entry_id: existing.id,
         payment_id: existing.payment_id,
         amount: existing.amount,
@@ -153,7 +165,7 @@ export const planOrderRefundStep = createStep(
     return new StepResponse<RefundPlan>({
       done: false,
       made: false,
-      entry_id: null,
+      entry_id: existing?.id ?? null,
       payment_id: await paymentFor(container, input.order_id, plan.total, input.payment_id),
       amount: plan.total,
       lines: plan.lines,
@@ -170,8 +182,16 @@ export const openRefundEntryStep = createStep(
     if (plan.done) {
       return new StepResponse(plan.entry_id ?? "", null)
     }
+    // Tried again: a failed refund as planned now, one made or shown as it was
     if (plan.entry_id) {
-      await ledger.updateOrderRefunds({ id: plan.entry_id, status: "pending", error_code: null })
+      await ledger.updateOrderRefunds({
+        id: plan.entry_id,
+        status: "pending",
+        error_code: null,
+        payment_id: plan.payment_id,
+        amount: plan.amount,
+        lines: plan.lines as unknown as Record<string, unknown>,
+      })
       return new StepResponse(plan.entry_id, plan.entry_id)
     }
     const entry = await ledger.createOrderRefunds({

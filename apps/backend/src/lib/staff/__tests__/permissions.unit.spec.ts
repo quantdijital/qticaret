@@ -570,6 +570,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/orders/:id/edit": false,
   "POST /admin/orders/:id/refunds/preview": false,
   "POST /admin/orders/:id/refunds": false,
+  // An open refund settled by hand moves the order's money as a refund does
+  "POST /admin/orders/:id/refunds/:reference/settle": false,
   "POST /admin/orders/:id/ship": true,
   "POST /admin/platform-settings/:section": false,
   "POST /admin/price-lists/:id/discount": false,

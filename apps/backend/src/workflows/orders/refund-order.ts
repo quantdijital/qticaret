@@ -4,11 +4,7 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
-import {
-  acquireLockStep,
-  refundPaymentWorkflow,
-  releaseLockStep,
-} from "@medusajs/medusa/core-flows"
+import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { toMedusaAmount } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import { orderRefundLockKey } from "../../lib/orders/locks"
@@ -20,6 +16,7 @@ import {
 import type { RefundOrderInput } from "./steps/order-refund"
 import { namePendingRefundStep } from "./steps/pending-refund"
 import { restoreRefundTransactionsStep } from "./steps/refund-transactions"
+import { sendRefundStep } from "./steps/send-refund"
 
 /**
  * Gives money back on an order, line by line (F5 V5, adr/0010), under the
@@ -43,21 +40,24 @@ export const refundOrderWorkflow = createWorkflow(
     const entryId = openRefundEntryStep({ order: input, plan })
     namePendingRefundStep({ plan, reference: input.reference })
     when("orders-refund-payment", { plan }, ({ plan }) => !plan.done && !plan.made).then(() => {
-      refundPaymentWorkflow.runAsStep({
-        input: transform({ input, plan }, ({ input, plan }) => ({
+      sendRefundStep(
+        transform({ input, plan, entryId }, ({ input, plan, entryId }) => ({
+          entry_id: entryId,
           payment_id: plan.payment_id,
           amount: toMedusaAmount(plan.amount as Kurus),
           ...(input.created_by ? { created_by: input.created_by } : {}),
           ...(input.note ? { note: input.note } : {}),
-        })),
-      })
+        }))
+      )
     })
-    // Made before, Medusa's money moves may not have been written then (review D1)
+    // Made before, Medusa's money move may not have been written then (review D1)
     when("orders-refund-made", { plan }, ({ plan }) => plan.made).then(() => {
       restoreRefundTransactionsStep(
         transform({ input, plan }, ({ input, plan }) => ({
           order_id: input.order_id,
           payment_id: plan.payment_id,
+          reference: input.reference,
+          amount: plan.amount,
         }))
       )
     })

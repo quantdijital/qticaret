@@ -1119,10 +1119,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.refund_exceeds_paid": "The refund is more than the order can still give back.",
   "orders.refund_empty": "There is nothing to refund.",
   "orders.refund_reference_taken":
-    "This refund key was used on another order; start the refund again.",
+    "This refund key was used on another order or another payment; start the refund again.",
   "orders.refund_mode": "Choose lines and shipping, or enter an amount.",
   "orders.refund_amount_kurus": "The amount takes at most two decimals.",
   "orders.refund_reference_invalid": "The refund key is not valid; start the refund again.",
+  "orders.refund_not_open": "This refund is no longer open; reload the page.",
+  "orders.refund_unknown": "This refund is not on the order.",
   "orders.refund_unsettled":
     "A refund of this order is still being checked with the provider; try again in a few minutes.",
   "payments.use_order_refund": "This payment is refunded from the order's refund step.",

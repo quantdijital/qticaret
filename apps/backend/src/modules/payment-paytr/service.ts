@@ -176,7 +176,14 @@ class PaytrProviderService extends AbstractPaymentProvider {
     const ours = pendingReferenceOf(input.data, amount)
     if (ours) {
       return {
-        data: await refundPaytrPayment(account, input.data, amount, refundReferenceOf(ours)),
+        data: await refundPaytrPayment(
+          account,
+          input.data,
+          amount,
+          refundReferenceOf(ours),
+          [],
+          input.context?.idempotency_key
+        ),
       }
     }
     if (!input.context?.idempotency_key) {
@@ -190,7 +197,8 @@ class PaytrProviderService extends AbstractPaymentProvider {
         input.data,
         amount,
         ownRefundReferenceOf(merchant_oid, amount, input.data),
-        job ? [job] : []
+        job ? [job] : [],
+        input.context.idempotency_key
       ),
     }
   }

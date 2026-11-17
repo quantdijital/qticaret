@@ -13,6 +13,7 @@ import { cancelGiftCardsWorkflow } from "../../workflows/orders/cancel-gift-card
 import {
   AdminPostOrderRefund,
   AdminPostOrderRefundPreview,
+  AdminPostOrderRefundSettle,
 } from "../admin/orders/[id]/refunds/validators"
 import { requireUserActor } from "./actor"
 import { holdCancelLocks } from "./bank-transfer-routes"
@@ -111,6 +112,16 @@ export const ORDER_REFUND_ROUTES = [
     matcher: "/admin/orders/:id/refunds",
     methods: ["POST" as const],
     middlewares: [requireUserActor, refundLimit, validateAndTransformBody(AdminPostOrderRefund)],
+  },
+  // An open refund checked at the provider (review 2026-11-17, O2): staff with the refund's rights
+  {
+    matcher: "/admin/orders/:id/refunds/:reference/settle",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      refundLimit,
+      validateAndTransformBody(AdminPostOrderRefundSettle),
+    ],
   },
   // Card brand and last four digits, asked of PayTR: staff only
   {

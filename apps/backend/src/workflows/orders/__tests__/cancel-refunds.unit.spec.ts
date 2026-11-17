@@ -3,15 +3,12 @@ import { createMedusaContainer } from "@medusajs/framework/utils"
 import { cancelRefundReference, isCancelRefundReference } from "../../../lib/orders/locks"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import { refundForCancel } from "../cancel-refunds"
-import { referenceTaken } from "../steps/order-refund-guard"
+import { ConflictError } from "../../../lib/errors"
+import { referenceTaken, triedAgain } from "../steps/order-refund-guard"
 
 const refundRun = jest.fn()
 jest.mock("../refund-order", () => ({
   refundOrderWorkflow: () => ({ run: refundRun }),
-}))
-const refundTraceOf = jest.fn()
-jest.mock("../refund-trace", () => ({
-  refundTraceOf: (...args: unknown[]) => refundTraceOf(...args) as unknown,
 }))
 const readOrderMoney = jest.fn()
 jest.mock("../order-money", () => ({
@@ -84,32 +81,33 @@ describe("a cancel refunds each payment once, under the payment's own reference 
         request: { amount: 12000 },
       }),
     ])
-    // A cancel's own open refund is tried again as it is, not judged
-    expect(refundTraceOf).not.toHaveBeenCalled()
   })
 
-  it("closes another open refund whose money is surely back, and waits for one that is not", async () => {
+  it("waits on an open refund the plan will not close, sending nothing more (O1)", async () => {
     const panel = {
       reference: "0123456789abcdef0123456789abcdef",
       payment_id: "pay_P0",
       amount: 5000,
-      provider_parts: null,
     }
     readOrderMoney.mockResolvedValue({ refundable: 0 })
     paymentRemainders.mockResolvedValue([])
-    refundTraceOf.mockResolvedValue({ trace: "made", provider: "paytr" })
+    refundRun.mockRejectedValue(new ConflictError("orders.refund_unsettled"))
 
-    await refundForCancel(ledgerWith([panel]) as never, input)
+    await expect(refundForCancel(ledgerWith([panel]) as never, input)).rejects.toMatchObject({
+      safeMessage: "orders.refund_unsettled",
+    })
     expect(references()).toEqual([expect.objectContaining({ reference: panel.reference })])
+    expect(paymentRemainders).not.toHaveBeenCalled()
+  })
 
-    refundRun.mockClear()
-    for (const trace of ["none", "unknown", "partial"]) {
-      refundTraceOf.mockResolvedValue({ trace, provider: "paytr" })
-      await expect(refundForCancel(ledgerWith([panel]) as never, input)).rejects.toMatchObject({
-        safeMessage: "orders.refund_unsettled",
-      })
+  it("tries a refund again only when failed, or closes it when its money is surely back", () => {
+    expect(triedAgain("done", null)).toBe("done")
+    expect(triedAgain("failed", null)).toBe("replan")
+    expect(triedAgain("pending", "made")).toBe("made")
+    expect(triedAgain("pending", "shown")).toBe("send")
+    for (const trace of ["none", "unknown", "partial"] as const) {
+      expect(triedAgain("pending", trace)).toBe("unsettled")
     }
-    expect(refundRun).not.toHaveBeenCalled()
   })
 
   it("refunds each payment with money left, a hosted form's first, up to what is refundable", async () => {
