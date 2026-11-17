@@ -11053,6 +11053,40 @@
       "ofLimit": "{{used}} / {{max}}",
       "unlimited": "{{used}} · sınır yok",
       "ceilingNote": "Sınıra ulaşınca yeni öneri istenemez; günlük sınır gece yarısı sıfırlanır."
+    },
+    "suggest": {
+      "button": "Yapay zekâ ile öner",
+      "from": "Yapay zekâ önerisi · {{name}}",
+      "loading": "Öneri hazırlanıyor…",
+      "use": "Kullan",
+      "retry": "Yeniden dene",
+      "dismiss": "Vazgeç",
+      "otherServices": "Başka servisle dene",
+      "tryWith": "{{name}} ile dene",
+      "service": "Servis",
+      "option": "Seçenek",
+      "refused": "Uygun bir öneri çıkmadı. Yeniden deneyebilirsiniz.",
+      "note": "Kullan yalnız alanı doldurur; kaydetmek size kalır."
+    },
+    "hint": {
+      "text": "Yapay zekâ bağlarsanız bu alanı tek tıkla doldurabilirsiniz.",
+      "connect": "Bağla",
+      "ownerOnly": "Yapay zekâ bağlanırsa bu alan tek tıkla doldurulabilir; mağaza sahibi bağlayabilir.",
+      "close": "İpucunu kapat"
+    },
+    "errors": {
+      "no_service": "Bu işi yapabilen bağlı bir yapay zekâ servisi yok.",
+      "service_unavailable": "Seçilen servis artık bu işi yapamıyor. Listeden başka bir servis seçin.",
+      "own_keys_not_in_plan": "Paketiniz kendi anahtarınızla yapay zekâ kullanmayı kapsamıyor.",
+      "key_rejected": "{{name}} anahtarı kabul etmedi. Anahtarı Ayarlar › Yapay zekâ'dan değiştirin.",
+      "provider_balance": "{{name}} hesabında bakiye ya da kota kalmamış.",
+      "provider_busy": "{{name}} şu an yoğun. Biraz sonra yeniden deneyin.",
+      "provider_unavailable": "{{name}} şu an yanıt vermiyor.",
+      "timeout": "{{name}} zamanında yanıt vermedi.",
+      "content_blocked": "{{name}} bu içerik için öneri vermedi (güvenlik süzgeci).",
+      "provider_response_invalid": "{{name}} beklenmeyen bir yanıt verdi.",
+      "input_unsupported": "Bu içerik servise gönderilemiyor (tür ya da boyut uygun değil).",
+      "daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz."
     }
   }
 }

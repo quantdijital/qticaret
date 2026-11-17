@@ -11053,6 +11053,40 @@
       "ofLimit": "{{used}} / {{max}}",
       "unlimited": "{{used}} · no limit",
       "ceilingNote": "At the limit no new suggestion can be asked for; the daily limit resets at midnight."
+    },
+    "suggest": {
+      "button": "Suggest with AI",
+      "from": "AI suggestion · {{name}}",
+      "loading": "Preparing a suggestion…",
+      "use": "Use",
+      "retry": "Try again",
+      "dismiss": "Cancel",
+      "otherServices": "Try another service",
+      "tryWith": "Try {{name}}",
+      "service": "Service",
+      "option": "Option",
+      "refused": "No suitable suggestion came out. You can try again.",
+      "note": "Use only fills the field; saving is up to you."
+    },
+    "hint": {
+      "text": "Connect an AI service to fill this field in one click.",
+      "connect": "Connect",
+      "ownerOnly": "With an AI service connected this field fills in one click; the store owner can connect one.",
+      "close": "Close the tip"
+    },
+    "errors": {
+      "no_service": "No connected AI service can do this.",
+      "service_unavailable": "The chosen service can no longer do this. Pick another one from the list.",
+      "own_keys_not_in_plan": "Your plan does not include AI with your own key.",
+      "key_rejected": "{{name}} did not accept the key. Change it under Settings › AI.",
+      "provider_balance": "The {{name}} account has no balance or quota left.",
+      "provider_busy": "{{name}} is busy right now. Try again shortly.",
+      "provider_unavailable": "{{name}} is not answering right now.",
+      "timeout": "{{name}} did not answer in time.",
+      "content_blocked": "{{name}} gave no suggestion for this content (safety filter).",
+      "provider_response_invalid": "{{name}} gave an unexpected answer.",
+      "input_unsupported": "This content cannot be sent to the service (type or size not suitable).",
+      "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow."
     }
   }
 }
