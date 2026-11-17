@@ -3,6 +3,7 @@ import { kurus, subtractKurus, sumKurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import { paytrApi } from "../../lib/payments/paytr"
 import type { PaytrCredentials } from "../../lib/payments/paytr"
+import { NEVER_LEFT, markRefused } from "../../lib/payments/refund-refusal"
 import { paytrSession } from "./session"
 
 /** A refund kept in the payment's data: what was given back, under which reference. */
@@ -78,7 +79,8 @@ const sendRefund = async (
     if (isProviderError(error) && SHOP_ACTIONABLE.has(error.providerCode)) {
       throw new ValidationError(`paytr.${error.providerCode}`, { cause: error })
     }
-    throw error
+    // A call that never left gave nothing back either; any other failure may hide a refund
+    throw isProviderError(error) && NEVER_LEFT.has(error.providerCode) ? markRefused(error) : error
   }
 }
 

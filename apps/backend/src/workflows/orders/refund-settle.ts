@@ -68,8 +68,8 @@ export async function settleFailedEntry(
     return
   }
   const { trace, provider } = await refundTraceOf(container, tracedOf(entry))
-  // Nothing shown is proof where nothing lags; nothing shown or readable, where refused outright
-  const refused = entry.error_code === PROVIDER_REFUSED && (trace === "none" || trace === "unknown")
+  // Refused outright and shown nothing: never on a trace that could not be read (review O-1)
+  const refused = entry.error_code === PROVIDER_REFUSED && trace === "none"
   if ((trace === "none" && provider !== "paytr") || refused) {
     await ledger.updateOrderRefunds({ id: entryId, status: "failed", error_code: "refund_failed" })
     return

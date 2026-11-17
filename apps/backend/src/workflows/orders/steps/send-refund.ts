@@ -1,31 +1,10 @@
 import type { BigNumberInput } from "@medusajs/framework/types"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { refundPaymentWorkflow } from "@medusajs/medusa/core-flows"
-import { isProviderError, isValidationError } from "../../../lib/errors"
+import { refusedOutright } from "../../../lib/payments/refund-refusal"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
 import { PROVIDER_REFUSED } from "../refund-settle"
-
-// A provider's answers that are not an answer: the refund may have been made (`http-client.ts`)
-const UNCERTAIN = new Set(["outcome_unknown", "network_error", "response_too_large"])
-
-/**
- * Whether a refund that failed was refused outright, surely not made: our
- * own check or the provider's answer (`ValidationError`, a provider's
- * code), or Medusa's before it called the provider (its own refusal, a
- * `type`). A lost or unreadable answer (`outcome_unknown`, a gateway's
- * `http_*`), or anything else, is not: the money may have left.
- */
-export function refusedOutright(error: unknown): boolean {
-  if (isValidationError(error)) {
-    return true
-  }
-  if (isProviderError(error)) {
-    return !UNCERTAIN.has(error.providerCode) && !error.providerCode.startsWith("http_")
-  }
-  const type = (error as { type?: unknown } | null)?.type
-  return type === "invalid_data" || type === "not_allowed" || type === "not_found"
-}
 
 // A failure as it came back from the workflow, an Error again: its fields (the key, the code) kept
 const asError = (error: unknown): Error => {

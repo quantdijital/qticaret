@@ -2,9 +2,10 @@ import { container } from "@medusajs/framework"
 import { ValidationError, isProviderError } from "../../lib/errors"
 import { kurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
-import { iyzicoApi, nothingDone } from "../../lib/payments/iyzico"
+import { iyzicoApi, isIyzicoRefusal, nothingDone } from "../../lib/payments/iyzico"
 import type { IyzicoCredentials } from "../../lib/payments/iyzico"
 import { withRefundRecord } from "../../lib/payments/pending-refund"
+import { NEVER_LEFT, markRefused } from "../../lib/payments/refund-refusal"
 import { ORDER_REFUNDS_MODULE } from "../order-refunds"
 import type OrderRefundsModuleService from "../order-refunds/service"
 import type { ProviderPart } from "../order-refunds/service"
@@ -103,7 +104,10 @@ async function sendPart(
     if (isProviderError(error) && SHOP_ACTIONABLE.has(error.providerCode)) {
       throw new ValidationError(`iyzico.${error.providerCode}`, { cause: error })
     }
-    throw error
+    // iyzico's own refusal, or a call that surely never left: a refusal outright
+    const outright =
+      isIyzicoRefusal(error) || (isProviderError(error) && NEVER_LEFT.has(error.providerCode))
+    throw outright ? markRefused(error) : error
   }
   if (!matches) {
     throw unknown()

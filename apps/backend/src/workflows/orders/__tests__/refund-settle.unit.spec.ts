@@ -154,18 +154,11 @@ describe("a failed refund's ledger entry (review 2026-11-17, O2, D6)", () => {
     expect(alertPaymentIssue).not.toHaveBeenCalled()
   })
 
-  it.each([
-    ["shows nothing", { refunds: [] }],
-    ["cannot be read", new Error("connection reset")],
-  ])("fails at once a refund PayTR refused outright and %s", async (_, answer) => {
+  it("fails at once a refund PayTR refused outright and shows nothing of", async () => {
     const { container, updateOrderRefunds } = containerWith(paytrPayment(), {
       entry: { error_code: "provider_refused" },
     })
-    if (answer instanceof Error) {
-      queryStatus.mockRejectedValue(answer)
-    } else {
-      queryStatus.mockResolvedValue(answer)
-    }
+    queryStatus.mockResolvedValue({ refunds: [] })
 
     await settleFailedEntry(container, "oref_01")
 
@@ -175,6 +168,21 @@ describe("a failed refund's ledger entry (review 2026-11-17, O2, D6)", () => {
       error_code: "refund_failed",
     })
     expect(alertPaymentIssue).not.toHaveBeenCalled()
+  })
+
+  it("never fails a refused refund whose trace cannot be read (O-1)", async () => {
+    const { container, updateOrderRefunds } = containerWith(paytrPayment(), {
+      entry: { error_code: "provider_refused" },
+    })
+    queryStatus.mockRejectedValue(new Error("connection reset"))
+
+    await settleFailedEntry(container, "oref_01")
+
+    expect(updateOrderRefunds).toHaveBeenCalledWith({
+      id: "oref_01",
+      status: "pending",
+      error_code: "refund_incomplete",
+    })
   })
 
   it("fails a refund nothing was sent for where nothing shown is proof", async () => {
