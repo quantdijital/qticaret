@@ -102,9 +102,13 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   } else {
     await expect(page.locator("#product-variant-codes")).toBeVisible()
   }
-  // The media dialog the gallery's drop zone opens, and a narrow column card's dialog
-  await page.locator('button[aria-label^="Görsel ekle"]').first().click()
-  await expect(page.getByRole("dialog", { name: "Görsel ekle" })).toBeVisible()
+  // The media dialog the gallery's drop zone opens, and a narrow column card's dialog. The
+  // zone and the dialog say "Görsel ya da video ekle" while the product takes a video (adr/0069)
+  await page
+    .getByRole("button", { name: /^Görsel( ya da video)? ekle: / })
+    .first()
+    .click()
+  await expect(page.getByRole("dialog", { name: /^Görsel( ya da video)? ekle$/ })).toBeVisible()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
   await page.keyboard.press("Escape")

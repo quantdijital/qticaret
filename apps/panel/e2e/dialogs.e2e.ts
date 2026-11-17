@@ -116,7 +116,11 @@ const CASES: Case[] = [
     name: "media picker",
     path: "/products",
     open: productAction(async (page) => {
-      await page.locator('button[aria-label^="Görsel ekle"]').first().click()
+      // "Görsel ya da video ekle" while the product takes a video (adr/0069), else "Görsel ekle"
+      await page
+        .getByRole("button", { name: /^Görsel( ya da video)? ekle: / })
+        .first()
+        .click()
     }),
   },
   {
