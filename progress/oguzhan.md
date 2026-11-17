@@ -2,6 +2,21 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-17 – 2026-11-18: serbest düzen alt bilgi, e-bülten biçimleri, yapay zekâ çekirdeği
+
+- **Sıradaki işler:**
+  1. Yapay zekâ Aşama 2-2 (ürün açıklamasında ✨ düğmesi; eski `/admin/content-drafts*` uçları, `content.ai_drafts` bayrağı ve `content_draft` hız profili kalkıyor) ve Aşama 3 (SEO advisor bulgusunda "Yapay zekâyla düzelt"): dallarda sürüyor.
+  2. Sonra Aşama 4 (arka plan temizleme; media modülü, Deniz'in video dilimleriyle aynı modül, migration çakışmasına bakılacak), 5 (görsel alt metni). Aşama 8 (fotoğraftan video) Deniz'in video yükleme hattı bitmeden başlamaz; bizim iş yalnız "üret" adımı olur.
+  3. Kredi aşamasından önce: `product_description` tek kredi ama çıktı tavanı geniş → işe özel `maxTokens` ya da çıktıya göre kredi (#181 notu).
+  4. Düzen okuması bilinmeyen bölüm türünde hata veriyor (geri almada 500 riski); okumada bilinmeyen türü atlamak (#180 notu).
+- **`dev`'e giren PR'lar:**
+  - E-bülten kutusu: dört biçim (`split`, `image_card`, `strip`, `in_footer`) + açıklama/not/görsel alanları; Tezgâh `split` (#161, #163, #164).
+  - Serbest düzen alt bilgi (adr/0070): sözleşme ve backend #166, tema çizimi #169, panel düzenleyici #172, alt bilgi grubu (zengin metin, güven rozetleri, kayan yazı) #180, Tezgâh ×3 serbest düzene geçti #184 (yeni ayarlar: bülten "Alt bilgiyle birleşik", marka bloğunda adres).
+  - Yapay zekâ çekirdeği (adr/0071, docs/22): ADR #160, saf kütüphane #162, servis hesapları ve `ai.own_keys` #167, modül/akış/uçlar #170, Ayarlar › Yapay zekâ #173, ortak bileşenler #175, SEO başlık/açıklama önerisi backend #177 ve panel #182, ürün açıklaması backend #181.
+  - Menü bağlantılarında vitrinde ikinci denetim + alt bilgide dış bağlantıya `rel` (#183).
+- **Kararlar (sahip uzaktayken, sahibe bildirildi):** yapay zekâ tercihi kullanıcı başına + mağaza yedeği; `ai.own_keys` kredi çıkana kadar her pakette açık; günlük tavan metin 500 / görsel 100 / video 10; sahte servis yalnız development'ta. SEO kartında piksel göstergesi yok, karakter sayacı kalıyor. Ürün açıklaması işine mevcut açıklamanın 2.000 karakteri gider (SEO işleri 300).
+- **Sahibe not:** Tezgâh görünümleri değişti; demo mağazada Görünümler'den Tezgâh yeniden Uygulanmalı. Yapay zekâ önerileri gerçek servisle henüz elle denenmedi (CI sahte servisle koşuyor).
+
 ## 2026-11-16 gündüz: raf biçimleri, marka logosu boyutu, panel küçük işleri
 
 - **Sıradaki işler:**
