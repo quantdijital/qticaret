@@ -569,17 +569,108 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "brand_columns",
+      "variant": "free_rows",
       "social": "icons",
       "payment_badges": ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
-      "top_strip": true,
-      "about": "Mutfak bıçaklarından çakılara, kamp aletlerinden bileme ve bakım ürünlerine kadar özenle seçilmiş bir seçki. Ayrıntılar ürün sayfalarında; sorularınız için bize yazabilirsiniz.",
-      "ground": "well",
-      "badge_style": "card",
       "back_to_top": true,
       "back_to_top_side": "right",
       "back_to_top_shape": "square",
-      "back_to_top_mobile": true
+      "back_to_top_mobile": true,
+      "ground": "well",
+      "badge_style": "card",
+      "bottom_badges": true,
+      "rows": [
+        {
+          "id": "footerrow1",
+          "ground": "inherit",
+          "space": "medium",
+          "align": "start",
+          "phone_columns": 1,
+          "divider": false,
+          "layout": "1",
+          "columns": [
+            {
+              "blocks": [
+                {
+                  "id": "footercontact",
+                  "visible": true,
+                  "device": "all",
+                  "type": "contact",
+                  "title": null,
+                  "address": false,
+                  "phone": true,
+                  "whatsapp": true,
+                  "email": true,
+                  "hours": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "footerrow2",
+          "ground": "inherit",
+          "space": "medium",
+          "align": "start",
+          "phone_columns": 1,
+          "divider": false,
+          "layout": "2-1-1-1",
+          "columns": [
+            {
+              "blocks": [
+                {
+                  "id": "footerbrand",
+                  "visible": true,
+                  "device": "all",
+                  "type": "brand",
+                  "logo": true,
+                  "about": "Mutfak bıçaklarından çakılara, kamp aletlerinden bileme ve bakım ürünlerine kadar özenle seçilmiş bir seçki. Ayrıntılar ürün sayfalarında; sorularınız için bize yazabilirsiniz.",
+                  "social": true
+                }
+              ]
+            },
+            {
+              "blocks": [
+                {
+                  "id": "footermenu1",
+                  "visible": true,
+                  "device": "all",
+                  "type": "menu",
+                  "slot": 1,
+                  "title": null,
+                  "collapse_phone": true
+                }
+              ]
+            },
+            {
+              "blocks": [
+                {
+                  "id": "footermenu2",
+                  "visible": true,
+                  "device": "all",
+                  "type": "menu",
+                  "slot": 2,
+                  "title": null,
+                  "collapse_phone": true
+                }
+              ]
+            },
+            {
+              "blocks": [
+                {
+                  "id": "footermenu3",
+                  "visible": true,
+                  "device": "all",
+                  "type": "menu",
+                  "slot": 3,
+                  "title": null,
+                  "collapse_phone": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "ebultenkutusu",
