@@ -119,7 +119,11 @@ export function NewsletterBox(props: NewsletterBoxProps) {
         <div className="flex min-w-0 flex-1 items-start gap-3 lg:items-center">
           <Mail className="mt-0.5 size-5 shrink-0 lg:mt-0" aria-hidden="true" strokeWidth={1.75} />
           <div className="flex min-w-0 flex-col gap-0.5 lg:flex-row lg:items-baseline lg:gap-3">
-            <h2 id={headingId} className="text-md font-semibold" {...fieldMark(marks, "title")}>
+            <h2
+              id={headingId}
+              className="text-md font-semibold lg:shrink-0"
+              {...fieldMark(marks, "title")}
+            >
               {title}
             </h2>
             {look.description && (
