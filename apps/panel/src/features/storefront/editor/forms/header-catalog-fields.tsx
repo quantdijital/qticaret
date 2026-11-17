@@ -3,12 +3,14 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { HEADER_CATALOG_LIMITS, HEADER_MENU_GROUNDS } from "@qticaret/types"
 import type { HeaderMenuGround } from "@qticaret/types"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import type { HeaderCatalogSection } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { HEADER_CATALOG_DEFAULTS } from "@/features/storefront/layout/variants"
+import { HintedName } from "./field-hint"
 import { FIELD_IDS, headerCatalogIn } from "./field-registry"
 import type { FieldGroupName, HeaderCatalogField } from "./field-registry"
 import { HEADER_CATALOG_STEPS, headerCatalogOffers } from "./header-catalog-steps"
@@ -20,22 +22,33 @@ const H = "storefront.editor.headerBar"
 
 type Change = (section: HeaderCatalogSection, field?: string) => void
 
-/** A field's everyday name with its technical term small beside it ("Menü çubuğu zemini" background). */
-function Name({ id, field }: { id: string; field: HeaderCatalogField }) {
+/**
+ * A field's everyday name with its technical term small beside it ("Menü
+ * çubuğu zemini" background) and its hint behind an (i); the label of the
+ * control `htmlFor` names, else the span its steps are labelled by.
+ */
+function Name({ id, field, htmlFor }: { id: string; field: HeaderCatalogField; htmlFor?: string }) {
   const { t } = useTranslation()
-  return (
+  const label = t(`${H}.${field}.label`)
+  const name = (
     <span id={`${id}-label`} className="text-sm font-medium">
-      {t(`${H}.${field}.label`)}{" "}
+      {label}{" "}
       <small className="text-[11px] font-normal text-muted-foreground">
         {t(`${H}.${field}.term`)}
       </small>
     </span>
   )
+  return (
+    <HintedName name={label} hint={t(`${H}.${field}.hint`)} hintId={`${id}-hint`}>
+      {htmlFor ? <label htmlFor={htmlFor}>{name}</label> : name}
+    </HintedName>
+  )
 }
 
-function Hint({ field }: { field: HeaderCatalogField }) {
+/** The field's hint, hidden: the (i) beside its name shows it. */
+function Hint({ id, field }: { id: string; field: HeaderCatalogField }) {
   const { t } = useTranslation()
-  return <p className="text-xs text-muted-foreground">{t(`${H}.${field}.hint`)}</p>
+  return <HiddenHint id={`${id}-hint`}>{t(`${H}.${field}.hint`)}</HiddenHint>
 }
 
 /** One catalog setting as fits it: words, a link, the ground's three steps or a switch. */
@@ -59,27 +72,24 @@ function CatalogField({
     const error = problemText(problems[field], max)
     return (
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={id}>
-          <Name id={id} field={field} />
-        </label>
+        <Name id={id} field={field} htmlFor={id} />
         <Input
           id={id}
           value={section[field] ?? ""}
           maxLength={max}
           aria-invalid={Boolean(error)}
-          aria-describedby={error ? `${id}-error` : undefined}
+          aria-describedby={error ? `${id}-hint ${id}-error` : `${id}-hint`}
           onChange={(event) => {
             const words = event.target.value.replace(/\s*[\r\n\t]+\s*/g, " ")
             onChange({ ...section, [field]: words.trim() === "" ? null : words }, id)
           }}
         />
+        <Hint id={id} field={field} />
         {error ? (
           <p id={`${id}-error`} role="alert" className="text-xs text-destructive-text">
             {error}
           </p>
-        ) : (
-          <Hint field={field} />
-        )}
+        ) : null}
       </div>
     )
   }
@@ -126,6 +136,7 @@ function CatalogField({
           type="single"
           variant="outline"
           aria-labelledby={`${id}-label`}
+          aria-describedby={`${id}-hint`}
           value={section.menu_ground}
           onValueChange={(next) => {
             // Picking the chosen ground again keeps it: the bar always has one
@@ -143,18 +154,17 @@ function CatalogField({
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <Hint field={field} />
+        <Hint id={id} field={field} />
       </div>
     )
   }
   return (
     <div id={id} className="flex items-start justify-between gap-4">
-      <label htmlFor={`${id}-input`} className="flex flex-col gap-0.5">
-        <Name id={id} field={field} />
-        <Hint field={field} />
-      </label>
+      <Name id={id} field={field} htmlFor={`${id}-input`} />
+      <Hint id={id} field={field} />
       <Switch
         id={`${id}-input`}
+        aria-describedby={`${id}-hint`}
         checked={section[field]}
         onCheckedChange={(checked) => {
           onChange({ ...section, [field]: checked })

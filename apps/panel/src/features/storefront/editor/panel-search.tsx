@@ -175,6 +175,10 @@ export function PanelSearchHits({
                 <span className="truncate text-xs text-muted-foreground">
                   {placeOf(field, t(tabTitle(layout.tabOf(field.group)).label), layout.tabbed)}
                 </span>
+                {/* What it does, as its (i) says it: the hit is read before it is picked */}
+                {field.hint ? (
+                  <span className="line-clamp-2 text-xs text-muted-foreground">{field.hint}</span>
+                ) : null}
               </button>
             </li>
           ))}

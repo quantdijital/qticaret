@@ -1,9 +1,12 @@
+import type { TFunction } from "i18next"
 import { useTranslation } from "react-i18next"
+import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { SCROLLER_DEFAULTS, SCROLLER_SETTINGS } from "@qticaret/types"
 import type { ScrollerSetting, ScrollerSettings } from "@qticaret/types"
+import { HintedName } from "./field-hint"
 import { Head, ResetButton } from "./marquee-controls"
 import { scrollerOffers } from "./scroller-groups"
 
@@ -21,29 +24,47 @@ const isSwitch = (setting: ScrollerSetting): boolean => {
   return steps.length === 2 && steps.includes("on")
 }
 
-/** A setting's name: its everyday Turkish word with the technical term small beside it. */
-function Name({ id, setting }: { id: string; setting: ScrollerSetting }) {
+/**
+ * A setting's name: its everyday Turkish word with the technical term
+ * small beside it, its short hint behind an (i) when it has one; the
+ * label of the switch `htmlFor` names, else the span its steps are
+ * labelled by.
+ */
+function Name({
+  id,
+  setting,
+  htmlFor,
+}: {
+  id: string
+  setting: ScrollerSetting
+  htmlFor?: string
+}) {
   const { t } = useTranslation()
-  return (
+  const label = t(`${S}.${setting}.label`)
+  const name = (
     <span id={`${id}-label`} className="text-sm font-medium">
-      {t(`${S}.${setting}.label`)}{" "}
+      {label}{" "}
       <small className="text-[11px] font-normal text-muted-foreground">
         {t(`${S}.${setting}.term`)}
       </small>
     </span>
   )
+  return (
+    <HintedName name={label} hint={hintOf(t, setting)} hintId={`${id}-hint`}>
+      {htmlFor ? <label htmlFor={htmlFor}>{name}</label> : name}
+    </HintedName>
+  )
 }
 
-/** The setting's short hint, when it has one. */
+/** The setting's short hint, when it has one: hidden, the (i) beside its name shows it. */
 function Hint({ id, setting }: { id: string; setting: ScrollerSetting }) {
   const { t } = useTranslation()
-  const hint = t(`${S}.${setting}.hint`, { defaultValue: "" })
-  return hint ? (
-    <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-      {hint}
-    </p>
-  ) : null
+  const hint = hintOf(t, setting)
+  return hint ? <HiddenHint id={`${id}-hint`}>{hint}</HiddenHint> : null
 }
+
+const hintOf = (t: TFunction, setting: ScrollerSetting): string =>
+  t(`${S}.${setting}.hint`, { defaultValue: "" })
 
 /** One setting: a switch for an on/off one, else its steps side by side with "Varsayılana dön". */
 function ScrollerField({
@@ -62,11 +83,10 @@ function ScrollerField({
     return (
       <div id={id} className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor={`${id}-input`}>
-            <Name id={id} setting={setting} />
-          </label>
+          <Name id={id} setting={setting} htmlFor={`${id}-input`} />
           <Switch
             id={`${id}-input`}
+            aria-describedby={hintOf(t, setting) ? `${id}-hint` : undefined}
             checked={value === "on"}
             onCheckedChange={(checked) => {
               onChange(checked ? "on" : "off")
@@ -95,6 +115,7 @@ function ScrollerField({
         type="single"
         variant="outline"
         aria-labelledby={`${id}-label`}
+        aria-describedby={hintOf(t, setting) ? `${id}-hint` : undefined}
         value={value}
         onValueChange={(next) => {
           // Picking the chosen step again keeps it: a row always has one

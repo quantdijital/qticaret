@@ -7,6 +7,7 @@ import { EmptyLine, RowActions } from "@/features/settings/components/storefront
 import type { HeroSlide, HeroSliderSection } from "@/features/storefront/api/layout"
 import { SLIDER_LIMITS } from "@/features/storefront/api/layout"
 import { FIELD_IDS } from "./field-registry"
+import { NamedGroup } from "../named-group"
 import { FieldGroup } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -31,9 +32,10 @@ const slideOf = (image: { url: string; alt: string | null }): HeroSlide => ({
 /**
  * The home page's sliding opening (adr/0049 Ek 2026-11-06): its slides as
  * rows (a small picture and the heading) that open one dialog each, moved
- * and taken off in place; pictures added from the media library; then how
- * tall it stands. How it turns (by itself, arrows, dots, looping) is the
- * scroller kit's, in its own "Kaydırma" group (`SliderGroups`).
+ * and taken off in place; pictures added from the media library ("İçerik");
+ * then how tall it stands ("Seçenekler", closed). How it turns (by
+ * itself, arrows, dots, looping) is the scroller kit's, in its own
+ * "Kaydırma" group (`SliderGroups`).
  */
 export function HeroSliderForm({
   section,
@@ -62,87 +64,89 @@ export function HeroSliderForm({
   const { min, max } = SLIDER_LIMITS.slides
   const full = section.slides.length >= max
   return (
-    <div className="flex flex-col gap-5">
-      <FieldGroup title={t(`${S}.slides`)} hint={t(`${S}.slidesHint`, { min, max })}>
-        {section.slides.length === 0 ? (
-          <EmptyLine text={t(`${S}.empty`, { min })} />
-        ) : (
-          <ol aria-label={t(`${S}.slides`)} className="flex flex-col gap-2">
-            {section.slides.map((slide, index) => {
-              const item = t(`${S}.slide`, { number: index + 1 })
-              const flawed = Object.keys(problems).some((key) =>
-                key.startsWith(`slides.${String(index)}.`)
-              )
-              return (
-                <li
-                  key={`${slide.image.url}-${String(index)}`}
-                  className="flex items-center gap-2 rounded-md border p-1.5"
-                >
-                  <button
-                    ref={rowRef(index)}
-                    type="button"
-                    className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-sm p-1 text-left transition-colors hover:bg-muted/60"
-                    aria-label={t(`${S}.open`, { item })}
-                    onClick={() => {
-                      setEditing(index)
-                    }}
+    <>
+      <NamedGroup name="content">
+        <FieldGroup title={t(`${S}.slides`)} hint={t(`${S}.slidesHint`, { min, max })}>
+          {section.slides.length === 0 ? (
+            <EmptyLine text={t(`${S}.empty`, { min })} />
+          ) : (
+            <ol aria-label={t(`${S}.slides`)} className="flex flex-col gap-2">
+              {section.slides.map((slide, index) => {
+                const item = t(`${S}.slide`, { number: index + 1 })
+                const flawed = Object.keys(problems).some((key) =>
+                  key.startsWith(`slides.${String(index)}.`)
+                )
+                return (
+                  <li
+                    key={`${slide.image.url}-${String(index)}`}
+                    className="flex items-center gap-2 rounded-md border p-1.5"
                   >
-                    <img
-                      src={slide.image.url}
-                      alt=""
-                      className="aspect-[16/9] w-16 shrink-0 rounded-sm bg-muted object-cover"
-                    />
-                    <span className="flex min-w-0 flex-col">
-                      <span className="text-xs text-muted-foreground">{item}</span>
-                      <span className="truncate text-sm font-medium">
-                        {slide.heading ?? t(`${S}.noHeading`)}
-                      </span>
-                      {flawed ? (
-                        <span className="flex items-center gap-1 text-xs text-destructive-text">
-                          <CircleAlert className="size-3" aria-hidden="true" />
-                          {t(`${S}.flawed`)}
+                    <button
+                      ref={rowRef(index)}
+                      type="button"
+                      className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-sm p-1 text-left transition-colors hover:bg-muted/60"
+                      aria-label={t(`${S}.open`, { item })}
+                      onClick={() => {
+                        setEditing(index)
+                      }}
+                    >
+                      <img
+                        src={slide.image.url}
+                        alt=""
+                        className="aspect-[16/9] w-16 shrink-0 rounded-sm bg-muted object-cover"
+                      />
+                      <span className="flex min-w-0 flex-col">
+                        <span className="text-xs text-muted-foreground">{item}</span>
+                        <span className="truncate text-sm font-medium">
+                          {slide.heading ?? t(`${S}.noHeading`)}
                         </span>
-                      ) : null}
-                    </span>
-                  </button>
-                  <RowActions
-                    index={index}
-                    count={section.slides.length}
-                    item={item}
-                    onMove={(to) => {
-                      const next = section.slides.filter((_, at) => at !== index)
-                      next.splice(to, 0, slide)
-                      setSlides(next)
-                    }}
-                    onRemove={() => {
-                      setSlides(section.slides.filter((_, at) => at !== index))
-                    }}
-                  />
-                </li>
-              )
-            })}
-          </ol>
-        )}
-        {problems["slides"] ? (
-          <p role="alert" className="text-xs text-destructive-text">
-            {problem(problems["slides"])}
-          </p>
-        ) : null}
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          className="self-start"
-          disabled={full}
-          onClick={() => {
-            setPicking(true)
-          }}
-        >
-          <ImagePlus />
-          {t(`${S}.add`)}
-        </Button>
-      </FieldGroup>
-      <FieldGroup title={t(`${S}.options`)}>
+                        {flawed ? (
+                          <span className="flex items-center gap-1 text-xs text-destructive-text">
+                            <CircleAlert className="size-3" aria-hidden="true" />
+                            {t(`${S}.flawed`)}
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                    <RowActions
+                      index={index}
+                      count={section.slides.length}
+                      item={item}
+                      onMove={(to) => {
+                        const next = section.slides.filter((_, at) => at !== index)
+                        next.splice(to, 0, slide)
+                        setSlides(next)
+                      }}
+                      onRemove={() => {
+                        setSlides(section.slides.filter((_, at) => at !== index))
+                      }}
+                    />
+                  </li>
+                )
+              })}
+            </ol>
+          )}
+          {problems["slides"] ? (
+            <p role="alert" className="text-xs text-destructive-text">
+              {problem(problems["slides"])}
+            </p>
+          ) : null}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="self-start"
+            disabled={full}
+            onClick={() => {
+              setPicking(true)
+            }}
+          >
+            <ImagePlus />
+            {t(`${S}.add`)}
+          </Button>
+        </FieldGroup>
+      </NamedGroup>
+      <NamedGroup name="options">
         <Choice
           id={FIELD_IDS.content(section.id, "slider_height")}
           label={t(`${S}.height`)}
@@ -157,7 +161,7 @@ export function HeroSliderForm({
             set({ height })
           }}
         />
-      </FieldGroup>
+      </NamedGroup>
       <MediaPicker
         open={picking}
         onOpenChange={setPicking}
@@ -184,6 +188,6 @@ export function HeroSliderForm({
           }}
         />
       ) : null}
-    </div>
+    </>
   )
 }

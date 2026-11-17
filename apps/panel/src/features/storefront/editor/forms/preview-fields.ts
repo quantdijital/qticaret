@@ -116,7 +116,10 @@ function heroField(section: HeroSection, parts: readonly string[]): PreviewField
   }
   const link =
     parts.length === 2 && first === "links" ? placeOf(second, section.links.length) : null
-  return link === null ? null : content(PREVIEW_IDS.text(section.id, `links.${String(link)}`))
+  // The opening's buttons stand in their own group, "Düğmeler"
+  return link === null
+    ? null
+    : { target: PREVIEW_IDS.text(section.id, `links.${String(link)}`), group: "buttons" }
 }
 
 /**

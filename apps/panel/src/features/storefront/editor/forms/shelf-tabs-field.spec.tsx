@@ -94,6 +94,10 @@ describe("the rail's tabs switch", () => {
     const toggle = field.getByRole("switch", { name: /Yanındaki rafla sekmeli birleşsin/ })
     expect(toggle).toBeChecked()
     expect(field.getByText(/«İndirimdekiler»/)).toBeVisible()
+    // What it does now stays in sight under its name, not behind an (i) (docs/18 §7.1)
+    expect(field.getByText(/«İndirimdekiler»/)).not.toHaveClass("sr-only")
+    expect(field.queryByRole("button", { name: /^Bilgi:/ })).toBeNull()
+    expect(toggle).toHaveAccessibleDescription(/«İndirimdekiler»/)
 
     await user.click(toggle)
     expect(changes.at(-1)).toMatchObject({ tabs: "off" })

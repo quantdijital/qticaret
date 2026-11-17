@@ -8,6 +8,7 @@ import type {
 } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import type { Problem } from "@/features/storefront/layout/problems"
+import { NamedGroup } from "../named-group"
 import { CategoryCardsFields } from "./category-cards-fields"
 import { CategoryCollageFields } from "./category-collage-fields"
 import { FIELD_IDS } from "./field-registry"
@@ -50,7 +51,11 @@ export function TitleField({ id, title, placeholder, problem, onChange }: TitleF
   )
 }
 
-/** Categories the shop picks; none, its top categories. */
+/**
+ * Categories the shop picks; none, its top categories. The linked cards'
+ * and the collage's own settings stand in "Kartlar", closed, under the
+ * content (docs/18 §7.1); the tiles have none, their form is one group.
+ */
 export function CategoriesForm({
   section,
   problems,
@@ -58,8 +63,14 @@ export function CategoriesForm({
 }: SectionFormProps<CategoriesSection>) {
   const { t } = useTranslation()
   const text = useProblemText()
-  return (
-    <div className="flex flex-col gap-5">
+  const cards =
+    section.variant === "linked" ? (
+      <CategoryCardsFields section={section} onChange={onChange} />
+    ) : section.variant === "collage" ? (
+      <CategoryCollageFields section={section} onChange={onChange} />
+    ) : null
+  const content = (
+    <>
       <TitleField
         id={section.id}
         title={section.title}
@@ -78,11 +89,6 @@ export function CategoriesForm({
           onChange({ ...section, category_ids })
         }}
       />
-      {section.variant === "linked" ? (
-        <CategoryCardsFields section={section} onChange={onChange} />
-      ) : section.variant === "collage" ? (
-        <CategoryCollageFields section={section} onChange={onChange} />
-      ) : null}
       <div id={FIELD_IDS.content(section.id, "show_count")}>
         <SwitchRow
           id={`${section.id}-show-count`}
@@ -106,7 +112,15 @@ export function CategoriesForm({
           onChange({ ...section, more }, field && "more.label")
         }}
       />
-    </div>
+    </>
+  )
+  return cards ? (
+    <>
+      <NamedGroup name="content">{content}</NamedGroup>
+      <NamedGroup name="cards">{cards}</NamedGroup>
+    </>
+  ) : (
+    <div className="flex flex-col gap-5">{content}</div>
   )
 }
 
