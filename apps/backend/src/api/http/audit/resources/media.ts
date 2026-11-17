@@ -96,6 +96,15 @@ export const MEDIA_RESOURCES: readonly AuditedResource[] = [
     resourceId: () => null,
     snapshot: ({ scope, params }) => videosOf(scope, params["id"] ?? ""),
   },
+  // Slice 5: a YouTube link added; its id comes from the handler as an upload's does
+  {
+    method: "POST",
+    route: "POST /admin/products/:id/videos/youtube",
+    pattern: new RegExp(`^/admin/products/(?<id>${ID})/videos/youtube$`, "i"),
+    resourceType: "media_video",
+    resourceId: () => null,
+    snapshot: ({ scope, params }) => videosOf(scope, params["id"] ?? ""),
+  },
   // Slice 3: a title changed (before and after), and "Yeniden dene" (its state, before and after)
   {
     method: "POST",

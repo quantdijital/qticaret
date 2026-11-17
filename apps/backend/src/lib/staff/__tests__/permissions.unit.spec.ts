@@ -619,6 +619,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/products/:id/videos/:video_id": false,
   "POST /admin/products/:id/videos/:video_id": false,
   "POST /admin/products/:id/videos/:video_id/retry": false,
+  "POST /admin/products/:id/videos/youtube": false,
   "POST /admin/category-restrictions/:category_id": false,
   "POST /admin/category-images/:category_id": false,
   "POST /admin/collections/:id/details": false,

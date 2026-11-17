@@ -1137,6 +1137,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Video hazırlanamadı. Yeniden deneyin; olmazsa başka bir dosya yükleyin.",
   "video.youtube_invalid": "Geçerli bir YouTube bağlantısı girin.",
   "video.youtube_unavailable": "Bu video gömülemiyor ya da herkese açık değil.",
+  "video.youtube_unreachable": "YouTube'a şu an ulaşılamıyor. Birkaç dakika sonra yeniden deneyin.",
   "video.upload_unavailable": "Video şu an yüklenemiyor.",
   "video.upload_busy": "Şu an başka videolar yükleniyor. Birkaç saniye sonra yeniden deneyin.",
   "video.file_required": "Yüklenecek bir video dosyası seçin.",

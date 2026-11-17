@@ -65,6 +65,16 @@ export {
 export { ProbeStoppedError } from "./probe"
 export type { MadeOutput, TranscodeOptions, TranscodedClip } from "./transcode"
 export { makePoster, videoFileBase } from "./poster"
+export {
+  YOUTUBE_ID,
+  YOUTUBE_URL_MAX,
+  titleFromYoutube,
+  youtubeEmbedUrl,
+  youtubeIdOf,
+  youtubeOembedUrl,
+  youtubePosterUrls,
+  youtubeWatchUrl,
+} from "./youtube"
 export type { PosterImages } from "./poster"
 export {
   makeVideoTempDir,
