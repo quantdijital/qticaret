@@ -26,7 +26,10 @@ import { alertStaff } from "../messaging/staff"
  *   settling job; at a provider with a panel only. The reference is the
  *   refund's, `cart_id` carries the order;
  * - `refund_unresolved`: such a refund still open an hour on: the shop
- *   checks it by hand.
+ *   checks it by hand;
+ * - `cancel_refund_order_open`: a cancel's refund the settling job closed,
+ *   its order still not canceled (review D4-5): the shop cancels the order
+ *   and ships nothing.
  */
 export type PaymentIssue =
   | "completion_stuck"
@@ -36,6 +39,7 @@ export type PaymentIssue =
   | "payment_beside_order"
   | "refund_incomplete"
   | "refund_unresolved"
+  | "cancel_refund_order_open"
 
 export interface PaymentIssueInput {
   issue: PaymentIssue

@@ -1,8 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
 import { kurus } from "../../lib/money"
-import { orderRefundLockKey } from "../../lib/orders/locks"
+import { isCancelRefundReference, orderRefundLockKey } from "../../lib/orders/locks"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { alertPaymentIssue } from "../payments/issue-alert"
@@ -70,6 +70,36 @@ async function mark(
 }
 
 /**
+ * A cancel's refund closed here, its order still not canceled (the cancel
+ * stopped on it, review D4-5): the money is back, the goods must not go.
+ * The shop is told to cancel the order, once per refund.
+ */
+async function tellOfUncanceledOrder(
+  container: MedusaContainer,
+  entry: Entry,
+  provider: string
+): Promise<void> {
+  if (!isCancelRefundReference(entry.reference)) {
+    return
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "order",
+    fields: ["status"],
+    filters: { id: entry.order_id },
+  })
+  if ((data[0] as { status?: string } | undefined)?.status === "canceled") {
+    return
+  }
+  await alertPaymentIssue(container, {
+    issue: "cancel_refund_order_open",
+    provider,
+    reference: entry.reference,
+    cart_id: entry.order_id,
+    amount: entry.amount,
+  })
+}
+
+/**
  * One open entry (review 2026-11-17, O1/O2). Its money surely back
  * (recorded, or shown by the provider): closed under its own reference,
  * nothing sent again. PayTR showing nothing: `refund_unconfirmed` on the
@@ -95,6 +125,7 @@ async function settleEntry(
         close_only: true,
       },
     })
+    await tellOfUncanceledOrder(container, entry, provider)
     return "closed"
   }
   // Refused outright, its undoing cut short by a crash: nothing was made

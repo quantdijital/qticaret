@@ -1,6 +1,6 @@
 import { MedusaError } from "@medusajs/framework/utils"
 import { ProviderError, ValidationError } from "../../errors"
-import { markRefused, refusedOutright } from "../refund-refusal"
+import { NEVER_LEFT, markRefused, refusedOutright } from "../refund-refusal"
 
 const provider = (providerCode: string) =>
   new ProviderError({ provider: "paytr", providerCode, retryable: false })
@@ -34,5 +34,8 @@ describe("a refund refused outright, by an allow-list (security review 2026-11-1
     expect(refusedOutright(new MedusaError(MedusaError.Types.NOT_FOUND, "no payment"))).toBe(false)
     expect(refusedOutright(new Error("socket hang up"))).toBe(false)
     expect(refusedOutright(undefined)).toBe(false)
+    // A redirect refused is reported as `url_not_allowed` after the request went (D4-3)
+    expect(NEVER_LEFT.has("url_not_allowed")).toBe(false)
+    expect(NEVER_LEFT.has("circuit_open")).toBe(true)
   })
 })

@@ -81,6 +81,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Sipariş {{cart}} için {{amount}} iadenin ({{reference}}, {{provider}}) kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın.",
     },
+    "payments.cancel_refund_order_open": {
+      title: "İptal iadesi tamamlandı ama sipariş iptal edilmedi",
+      description:
+        "Sipariş {{cart}} için {{amount}} iptal iadesi ({{reference}}, {{provider}}) yapıldı, ancak sipariş hâlâ açık. Siparişi iptal edin; kargolamayın.",
+    },
     "payments.shelf_restored": {
       title: "Geçici stok düzeltmesi geri alındı",
       description: "Sepet {{cart}} için artırılan stok geri alındı; stok sayılarını kontrol edin.",
@@ -254,6 +259,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "A refund could not be confirmed for an hour",
       description:
         "The record of the {{amount}} refund ({{reference}}, {{provider}}) for order {{cart}} could not be completed by the automatic check. Compare the refund on the order page with the payment provider's record; do not make the same refund again.",
+    },
+    "payments.cancel_refund_order_open": {
+      title: "A cancel's refund was made but the order is not canceled",
+      description:
+        "The {{amount}} cancel refund ({{reference}}, {{provider}}) for order {{cart}} was made, but the order is still open. Cancel the order; do not ship it.",
     },
     "payments.shelf_restored": {
       title: "A temporary stock raise was taken back",

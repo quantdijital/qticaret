@@ -6827,6 +6827,10 @@
       "refund_unresolved": {
         "title": "Bir iade bir saattir doğrulanamadı",
         "description": "Sipariş {{cart}} için {{amount}} iadenin ({{reference}}, {{provider}}) kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın."
+      },
+      "cancel_refund_order_open": {
+        "title": "İptal iadesi tamamlandı ama sipariş iptal edilmedi",
+        "description": "Sipariş {{cart}} için {{amount}} iptal iadesi ({{reference}}, {{provider}}) yapıldı, ancak sipariş hâlâ açık. Siparişi iptal edin; kargolamayın."
       }
     },
     "markAllRead": "Tümünü okundu say",

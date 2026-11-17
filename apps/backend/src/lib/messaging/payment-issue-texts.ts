@@ -30,6 +30,10 @@ export const PAYMENT_ISSUE_TEXTS: Readonly<Record<string, string>> = {
     "Bir iade bir saattir doğrulanamadı ({{reference}})",
   "staff_payment_issue.refund_unresolved.intro":
     "Sipariş {{cart}} için bu iadenin kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın.",
+  "staff_payment_issue.cancel_refund_order_open.subject":
+    "İptal iadesi tamamlandı ama sipariş iptal edilmedi ({{cart}})",
+  "staff_payment_issue.cancel_refund_order_open.intro":
+    "Sipariş {{cart}} için iptal iadesi yapıldı ve kaydı otomatik denetimde tamamlandı, ancak sipariş hâlâ iptal edilmedi. Siparişi iptal edin; kargolamayın.",
   "staff_payment_issue.preheader": "Ödeme: {{provider}}, referans {{reference}}.",
   "staff_payment_issue.heading": "Bir ödeme ilgi bekliyor",
   "staff_payment_issue.provider": "Ödeme kuruluşu",

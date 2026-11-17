@@ -6827,6 +6827,10 @@
       "refund_unresolved": {
         "title": "A refund could not be confirmed for an hour",
         "description": "The record of the {{amount}} refund ({{reference}}, {{provider}}) for order {{cart}} could not be completed by the automatic check. Compare the refund on the order page with the payment provider's record; do not make the same refund again."
+      },
+      "cancel_refund_order_open": {
+        "title": "A cancel's refund was made but the order is not canceled",
+        "description": "The {{amount}} cancel refund ({{reference}}, {{provider}}) for order {{cart}} was made, but the order is still open. Cancel the order; do not ship it."
       }
     },
     "markAllRead": "Mark all read",

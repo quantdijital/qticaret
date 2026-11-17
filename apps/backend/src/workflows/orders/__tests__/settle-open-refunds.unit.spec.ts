@@ -1,5 +1,9 @@
 import { asValue } from "@medusajs/framework/awilix"
-import { Modules, createMedusaContainer } from "@medusajs/framework/utils"
+import {
+  ContainerRegistrationKeys,
+  Modules,
+  createMedusaContainer,
+} from "@medusajs/framework/utils"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import { CONFIRM_MS, ESCALATE_MS, STRANDED_MS, settleOpenRefunds } from "../settle-open-refunds"
 
@@ -51,6 +55,9 @@ function ledgerWith(pages: Entry[][], reread?: (entry: Entry) => unknown) {
     [Modules.LOCKING]: asValue({
       execute: (_keys: unknown, job: () => Promise<unknown>) => job(),
     }),
+    [ContainerRegistrationKeys.QUERY]: asValue({
+      graph: () => Promise.resolve({ data: [{ status: orderStatus }] }),
+    }),
   })
   return { container, updateOrderRefunds, listOrderRefunds }
 }
@@ -58,8 +65,41 @@ function ledgerWith(pages: Entry[][], reread?: (entry: Entry) => unknown) {
 const traceIs = (trace: string, provider = "paytr") =>
   refundTraceOf.mockResolvedValue({ trace, provider })
 
+// The order's status as the job reads it after closing a cancel's refund
+let orderStatus = "pending"
+
 beforeEach(() => {
   jest.resetAllMocks()
+  orderStatus = "pending"
+})
+
+describe("a cancel's refund the job closed, its order still open (review D4-5)", () => {
+  const cancel = () => entryOf({ reference: "cancelpay01JABCDEFGHJKMNPQRSTVWXYZ0" })
+
+  it("tells the shop to cancel the order and ship nothing", async () => {
+    traceIs("made")
+    const { container } = ledgerWith([[cancel()]])
+
+    await settleOpenRefunds(container, NOW)
+
+    expect(alertPaymentIssue).toHaveBeenCalledWith(container, {
+      issue: "cancel_refund_order_open",
+      provider: "paytr",
+      reference: "cancelpay01JABCDEFGHJKMNPQRSTVWXYZ0",
+      cart_id: "order_01",
+      amount: 1000,
+    })
+  })
+
+  it("tells nothing for an order canceled, or a refund not a cancel's", async () => {
+    traceIs("shown")
+    orderStatus = "canceled"
+    await settleOpenRefunds(ledgerWith([[cancel()]]).container, NOW)
+    orderStatus = "pending"
+    await settleOpenRefunds(ledgerWith([[entryOf()]]).container, NOW)
+
+    expect(alertPaymentIssue).not.toHaveBeenCalled()
+  })
 })
 
 describe("the settling job reads open refunds again and never sends one (review O1/O2)", () => {

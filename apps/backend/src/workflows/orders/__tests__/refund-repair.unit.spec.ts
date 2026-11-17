@@ -7,6 +7,7 @@ import {
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import { checkedNote } from "../made-refund-record"
 import { settleRefundByHand } from "../settle-refund-by-hand"
+import { closeRefundEntry } from "../steps/order-refund"
 import { restoreRefundTransaction } from "../steps/refund-transactions"
 
 const refundTraceOf = jest.fn()
@@ -214,6 +215,40 @@ describe("staff settle an open refund they checked at the provider (O2), sending
       expect(shop.updateOrderRefunds).not.toHaveBeenCalled()
     }
   )
+
+  it("marks done a part left sending when a made or shown refund is closed (O4-1)", async () => {
+    const sending = { transaction_id: "t1", amount: 1000, state: "sending" }
+    const shop = containerWith({ ledger: [{ ...open, provider_parts: [sending] }] })
+
+    await closeRefundEntry(shop.container, "oref_01", "pay_01")
+
+    expect(shop.saveProviderParts).toHaveBeenCalledWith(REFERENCE, [{ ...sending, state: "done" }])
+    expect(shop.updateOrderRefunds).toHaveBeenCalledWith({
+      id: "oref_01",
+      status: "done",
+      error_code: null,
+    })
+  })
+
+  it("writes the parts first and the entry last: cut short, the job finds it shown (O4-1, D4-4)", async () => {
+    const sending = { transaction_id: "t1", amount: 1000, state: "sending" }
+    const shop = containerWith({
+      ledger: [{ ...open, provider_parts: [sending] }],
+      data: { pending_refund: { reference_no: REFERENCE, amount: 1000 } },
+    })
+
+    await settleRefundByHand(shop.container, { ...input, outcome: "made" })
+
+    const order = (mock: jest.Mock) => mock.mock.invocationCallOrder[0] ?? 0
+    expect(order(shop.saveProviderParts)).toBeLessThan(order(shop.createRefunds))
+    // The refund's name off (null: Medusa merges the data) before the entry is closed
+    expect(shop.updatePayment).toHaveBeenCalledWith({
+      id: "pay_01",
+      data: { pending_refund: null },
+    })
+    const nameOff = shop.updatePayment.mock.invocationCallOrder.at(-1) ?? 0
+    expect(nameOff).toBeLessThan(order(shop.updateOrderRefunds))
+  })
 
   it("settles iyzico's parts whose answer was lost, and refuses a refund made in part (O-2)", async () => {
     const sending = { transaction_id: "t1", amount: 1000, state: "sending" }

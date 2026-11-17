@@ -96,10 +96,8 @@ export async function settleRefundByHand(
   }
   await assertSettleable(container, entry, input.outcome)
   const made = input.outcome === "made"
-  if (made) {
-    await recordMadeRefund(container, entry, input.actor_id)
-    await restoreRefundTransaction(container, entry)
-  }
+  // The parts first (review O4-1): cut short after this, the refund reads `shown` (every part
+  // answered, the whole amount) and the settling job closes it; never a lost part left behind
   const parts = partsOf(entry)
   if (parts.some((part) => part.state === "sending")) {
     await ledger.saveProviderParts(
@@ -107,13 +105,18 @@ export async function settleRefundByHand(
       made ? parts.map((part) => ({ ...part, state: "done" as const })) : []
     )
   }
+  if (made) {
+    await recordMadeRefund(container, entry, input.actor_id)
+    await restoreRefundTransaction(container, entry)
+  }
+  // The name off before the entry is closed (D4-4): a closed refund never leaves one standing
+  await dropPendingRefund(container, entry.payment_id)
   const status = made ? "done" : "failed"
   await ledger.updateOrderRefunds({
     id: entry.id,
     status,
     error_code: made ? CHECKED_MADE : CHECKED_NOT_MADE,
   })
-  await dropPendingRefund(container, entry.payment_id)
   logger.info({
     event: "orders.refund_checked",
     orderId: entry.order_id,

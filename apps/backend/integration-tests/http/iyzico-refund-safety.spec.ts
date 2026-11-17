@@ -1,3 +1,4 @@
+import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakeIyzicoAccount, startFakeIyzico } from "@qticaret/testing"
 import type { FakeIyzico } from "@qticaret/testing"
@@ -6,6 +7,7 @@ import { ORDER_REFUNDS_MODULE } from "../../src/modules/order-refunds"
 import type OrderRefundsModuleService from "../../src/modules/order-refunds/service"
 import { PAYMENT_RECOVERY_MODULE } from "../../src/modules/payment-recovery"
 import type PaymentRecoveryModuleService from "../../src/modules/payment-recovery/service"
+import { settleOpenRefunds } from "../../src/workflows/orders/settle-open-refunds"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { connectIyzico, postIyzicoCallback, startIyzicoPayment } from "../helpers/iyzico"
@@ -170,6 +172,45 @@ medusaIntegrationTestRunner({
       expect(checked.data.refund).toMatchObject({ status: "failed" })
       expect(closed).toMatchObject({ status: "failed", provider_parts: [] })
       expect(next.data.refund).toMatchObject({ amount: "20.00" })
+      expect(sentFor(lostRef)).toBe(1)
+    })
+
+    it("closes a staff 'made' cut short once its parts were written; the payment refunds again (O4-1)", async () => {
+      const { orderId } = await paidOrder()
+      fake.queue(REFUND, { drop: true })
+      const lostRef = "e0000000000000000000000000000009"
+      await refund(orderId, { amount: 50, reference: lostRef })
+      // The check stops after the parts were written: Medusa's record cannot be made
+      const payments = getContainer().resolve(Modules.PAYMENT) as unknown as {
+        createRefunds: (...args: unknown[]) => Promise<unknown>
+      }
+      const broken = jest
+        .spyOn(payments, "createRefunds")
+        .mockRejectedValueOnce(new Error("database gone"))
+      const cut = await settle(
+        http.post(
+          `/admin/orders/${orderId}/refunds/${lostRef}/settle`,
+          { outcome: "made" },
+          { headers: admin.headers }
+        )
+      )
+      broken.mockRestore()
+
+      const round = await settleOpenRefunds(getContainer(), Date.now() + 3 * 60 * 1000)
+      const [closed] = await ledger().listOrderRefunds({ reference: lostRef })
+      const next = await refund(orderId, {
+        amount: 20,
+        reference: "e0000000000000000000000000000010",
+      })
+
+      expect(cut.status).toBeGreaterThanOrEqual(400)
+      expect(round).toMatchObject({ closed: 1 })
+      expect(closed).toMatchObject({
+        status: "done",
+        provider_parts: [expect.objectContaining({ state: "done" })],
+      })
+      expect(next.data.refund).toMatchObject({ amount: "20.00" })
+      // Nothing sent again for the part whose answer was lost
       expect(sentFor(lostRef)).toBe(1)
     })
 

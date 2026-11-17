@@ -10,8 +10,9 @@ import { isValidationError } from "../errors"
  */
 const REFUSED = "refundRefused"
 
-// The platform client's codes for a call that surely never left (`lib/clients/http-client.ts`)
-export const NEVER_LEFT: ReadonlySet<string> = new Set(["circuit_open", "url_not_allowed"])
+// The platform client's code for a call that surely never left (`lib/clients/http-client.ts`).
+// Not `url_not_allowed`: a redirect refused is reported so too, after the request went (D4-3)
+export const NEVER_LEFT: ReadonlySet<string> = new Set(["circuit_open"])
 
 // Our own keys for a refund whose outcome is unknown: never a refusal
 const UNCERTAIN_KEYS: ReadonlySet<string> = new Set(["iyzico.refund_outcome_unknown"])

@@ -9,6 +9,7 @@ import type { PlannedLine, RefundRequest } from "../../../lib/orders"
 import { HOSTED_FORM_PROVIDERS } from "../../../lib/payments/checkout"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
+import type { ProviderPart } from "../../../modules/order-refunds/service"
 import { readOrderMoney } from "../order-money"
 import { settleFailedEntry, tracedOf } from "../refund-settle"
 import { refundTraceOf } from "../refund-trace"
@@ -226,17 +227,39 @@ export const openRefundEntryStep = createStep(
   }
 )
 
-/** The refund went through: the entry is done and the payment's data no longer names it. */
+/**
+ * The refund went through: its iyzico parts all answered, the payment's
+ * data no longer naming it, the entry done. A part left `sending` (its
+ * answer lost, the refund then shown made: review O4-1) is marked done,
+ * so it never blocks the payment's next refunds.
+ */
+export async function closeRefundEntry(
+  container: Pick<MedusaContainer, "resolve">,
+  entryId: string,
+  paymentId: string
+): Promise<void> {
+  const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+  const [entry] = await ledger.listOrderRefunds(
+    { id: entryId },
+    { select: ["reference", "provider_parts"] }
+  )
+  const parts = (entry?.provider_parts as ProviderPart[] | null) ?? []
+  if (entry && parts.some((part) => part.state === "sending")) {
+    await ledger.saveProviderParts(
+      entry.reference,
+      parts.map((part) => ({ ...part, state: "done" as const }))
+    )
+  }
+  await dropPendingRefund(container, paymentId)
+  await ledger.updateOrderRefunds({ id: entryId, status: "done", error_code: null })
+}
+
 export const closeRefundEntryStep = createStep(
   "orders-close-refund-entry",
   async (input: { entry_id: string; plan: RefundPlan }, { container }) => {
-    if (input.plan.done) {
-      return new StepResponse(null)
+    if (!input.plan.done) {
+      await closeRefundEntry(container, input.entry_id, input.plan.payment_id)
     }
-    await container
-      .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-      .updateOrderRefunds({ id: input.entry_id, status: "done", error_code: null })
-    await dropPendingRefund(container, input.plan.payment_id)
     return new StepResponse(null)
   }
 )

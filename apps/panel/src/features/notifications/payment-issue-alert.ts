@@ -15,7 +15,16 @@ const ISSUES = [
   "refund_incomplete",
   // Such a refund the automatic check could not settle in an hour
   "refund_unresolved",
+  // A cancel's refund closed by the automatic check, its order still open: cancel it, ship nothing
+  "cancel_refund_order_open",
 ] as const
+
+// An order refund's issue carries the order where a payment's carries its cart
+const ORDER_ISSUES: ReadonlySet<Issue> = new Set([
+  "refund_incomplete",
+  "refund_unresolved",
+  "cancel_refund_order_open",
+])
 type Issue = (typeof ISSUES)[number]
 
 const isIssue = (value: unknown): value is Issue => ISSUES.includes(value as Issue)
@@ -49,8 +58,7 @@ export function paymentIssueAlert(t: TFunction, data: Record<string, unknown>) {
     amount: money(data["amount"]),
   }
   const shelf = issue === "shelf_restored"
-  const order =
-    issue === "refund_incomplete" || issue === "refund_unresolved" ? text(data["cart_id"]) : ""
+  const order = ORDER_ISSUES.has(issue) ? text(data["cart_id"]) : ""
   return {
     title: t(`notifications.paymentIssue.${issue}.title`, values),
     description: t(`notifications.paymentIssue.${issue}.description`, values),
