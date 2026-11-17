@@ -15,6 +15,7 @@ import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesCollage, StoreCategoriesLinked } from "./section-categories.js"
 import type { StoreStripGallerySection } from "./section-strips.js"
+import type { StoreNewsletterSection } from "./section-newsletter.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
 import type { ScrollerSettings, SliderSettings } from "./section-scroller.js"
@@ -119,7 +120,8 @@ export type StoreLayoutSection = StoreSectionLookPart &
          */
         variant?: TrustBadgesVariant
       }
-    | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
+    | { id: string; type: "help"; title: string | null; text: string | null }
+    | StoreNewsletterSection
     | StoreFaqSection
     | StoreMarqueeSection
     | StorePriceBandsSection
@@ -289,7 +291,7 @@ export interface StoreLayout {
   /** The announcement bar and the scrolling strip, each at most once (adr/0049 §10 karar 9). */
   header: StoreHeaderSection[]
   home: StoreLayoutSection[]
-  footer: { id: string; type: "newsletter"; title: string | null; text: string | null }[]
+  footer: StoreNewsletterSection[]
   product: StoreProductSection[]
   category: StoreCategorySection[]
   /**

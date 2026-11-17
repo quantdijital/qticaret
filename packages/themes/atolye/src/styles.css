@@ -53,6 +53,7 @@
 @import "./surface.css";
 @import "./media.css";
 @import "./footer-columns.css";
+@import "./newsletter.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

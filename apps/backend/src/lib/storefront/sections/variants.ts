@@ -38,6 +38,8 @@ export const SECTION_VARIANTS = {
   // into the bar; its drawing stays on adr/0062 karar 6's branch. `catalog` is N14
   header_bar: ["standard", "centered", "catalog"],
   footer_bar: ["ledger", "brand_columns"],
+  // The newsletter box (Ek 2026-11-17 e-bülten): today's first; `in_footer` the footer's only
+  newsletter: ["standard", "split", "image_card", "strip", "in_footer"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>

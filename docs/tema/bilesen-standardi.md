@@ -202,6 +202,13 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
 - Başlık, metin, düğme yazısı, onay/KVKK metni bağlantısı, başarı ve hata mesajı (i18n).
 - Hız sınırı ve redaksiyon `lib/security`'den (yeniden yazılmaz); alan etiketleri görünür, yalnız
   placeholder değil.
+- Ek 2026-11-17 (e-bülten biçimleri, adr/0049): `standard` (varsayılan, aynen) / `split` "Yan yana bant" /
+  `image_card` "Görselli kart" / `strip` "İnce şerit" / `in_footer` "Alt bilgi sütununda" (yalnız alt
+  bilgi kutusunda; sayfada sunulmaz, backend reddeder). Alanlar: `description` (≤240, her biçimde ortak;
+  `standard` çizmez), `note` (≤80) + `show_note` **on**/off (`split`, `image_card`), `image` (`image_card`;
+  kütüphane kaydı, SVG yok; görselsiz `split` gibi çizilir). `text` açıklama değil **onay (İYS) cümlesidir**:
+  panelde "Onay metni"; yeni formda da açıklama ile onay ayrı alan olur. Yeni biçimlerde alan + düğme tek
+  parça, etiket görsel olarak gizli ama erişilebilir; KVKK bağlantısı hep görünür.
 
 ## 5. Yeni bileşenin teknik denetim listesi
 

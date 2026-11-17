@@ -8115,6 +8115,13 @@
         "related_products": {
           "grid": "Grid",
           "carousel": "Carousel"
+        },
+        "newsletter": {
+          "standard": "Standard",
+          "split": "Side-by-side band",
+          "image_card": "Picture card",
+          "strip": "Slim strip",
+          "in_footer": "In the footer column"
         }
       },
       "look": {
@@ -8436,6 +8443,23 @@
       },
       "help": {
         "contact": "The ways to reach you (phone, e-mail, WhatsApp) come from the store profile; with none, the box does not show."
+      },
+      "newsletter": {
+        "description": "Description",
+        "descriptionTerm": "description",
+        "descriptionPlaceholder": "New products, offers and news in your inbox.",
+        "descriptionHint": "The short line under the heading; it tells visitors why to subscribe. Left empty, the storefront uses its own.",
+        "showNote": "Promise line",
+        "showNoteTerm": "note",
+        "showNoteHint": "A small promise under the description (how often you write, that leaving is easy). Turned off, it does not show.",
+        "note": "Promise line text",
+        "notePlaceholder": "A few e-mails a month · Leave any time",
+        "noteHint": "Write a promise you can keep. Left empty, the storefront uses its own.",
+        "image": "Picture",
+        "imageHint": "A picture from the media library, on the card's left. Without one the box is drawn as the side-by-side band.",
+        "consent": "Consent sentence",
+        "consentTerm": "İYS",
+        "consentHint": "The sentence beside the subscription consent box: ticking it, the visitor agrees to commercial messages. It is not a description; it should name your shop and say a confirmation link will be sent. Left empty, the storefront's legal sentence is used."
       },
       "announcement": {
         "line": "Announcement {{number}}",

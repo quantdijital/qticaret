@@ -19,7 +19,8 @@ import { richText } from "./sections/rich-text"
 import { priceBands } from "./sections/price-bands"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
-import { footerNewsletter, worded } from "./sections/worded"
+import { worded } from "./sections/worded"
+import { footerNewsletter, newsletter, placedNewsletter } from "./sections/newsletter"
 
 /**
  * The storefront design's sections (adr/0049), each a type of its own with
@@ -57,7 +58,7 @@ export const pageSection = z.discriminatedUnion(
     googleRating,
     richText,
     trustBadges,
-    worded("newsletter"),
+    newsletter,
     worded("help"),
     faq,
     marquee,
@@ -78,7 +79,7 @@ export const productSection = z.discriminatedUnion(
     faq,
     trustBadges,
     worded("help"),
-    worded("newsletter"),
+    newsletter,
     marquee,
   ],
   SECTION_TYPE
@@ -97,7 +98,7 @@ export const categorySection = z.discriminatedUnion(
     faq.extend({ placement }),
     placedTrustBadges,
     worded("help").extend({ placement }),
-    worded("newsletter").extend({ placement }),
+    placedNewsletter,
     placedMarquee,
   ],
   SECTION_TYPE

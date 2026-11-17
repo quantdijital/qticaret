@@ -4,6 +4,7 @@ import { ValidationError } from "../../lib/errors"
 import { bodySections } from "../../lib/storefront/layout"
 import type { BodySection, HeaderSection, LayoutDocument } from "../../lib/storefront/layout"
 import { bannerImages, bannerLinks } from "../../lib/storefront/sections/banner"
+import { newsletterImages } from "../../lib/storefront/sections/newsletter"
 import { catalogSlides } from "../../lib/storefront/sections/hero"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
 import { shelfSources } from "../../lib/storefront/sections/products"
@@ -140,6 +141,9 @@ export function imagesOf(section: BodySection): string[] {
   if (section.type === "rich_text") {
     return docStats(section.body).images.map((each) => each.src)
   }
+  if (section.type === "newsletter") {
+    return newsletterImages(section)
+  }
   return []
 }
 
@@ -193,5 +197,9 @@ export async function checkLayout(
       await assertCards(container, section.body)
     }
   }
-  return mediaOf(container, sections.flatMap(imagesOf), "document")
+  // The footer's newsletter box's picture is one of the shop's uploads too (adr/0049 Ek 2026-11-17)
+  const footerImages = doc.footer.flatMap((section) =>
+    section.type === "newsletter" ? newsletterImages(section) : []
+  )
+  return mediaOf(container, [...sections.flatMap(imagesOf), ...footerImages], "document")
 }

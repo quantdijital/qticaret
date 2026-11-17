@@ -5,6 +5,7 @@ import { mainSectionsOf, withMainSections } from "../../lib/storefront/layout-ma
 import { fillShopText, fillShopTextWhole } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { shownSettings } from "../../lib/storefront/layout-settings"
+import { newsletterImages, printedNewsletter } from "../../lib/storefront/sections/newsletter"
 import { MEDIA_MODULE } from "../../modules/media"
 import type MediaModuleService from "../../modules/media/service"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
@@ -78,7 +79,7 @@ export async function storeLayout(
   // the catalog header bar's highlighted link too (it always shows)
   const bar = doc.header.filter((section) => section.type === "header_bar")
   const links = [...body, ...headerLinked({ header: [...header, ...bar] })].flatMap(linksOf)
-  const urls = body.flatMap(imageUrls)
+  const urls = [...body.flatMap(imageUrls), ...footer.flatMap(newsletterImages)]
   const [values, resolved, assets, picks, bands] = await Promise.all([
     shopInfoValues(container),
     resolveLinks(
@@ -158,12 +159,15 @@ export async function storeLayout(
           }
     ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),
-    footer: footer.map((section) => ({
-      id: section.id,
-      type: section.type,
-      title: section.title,
-      text: fill(section.text, values),
-    })),
+    // The footer's box as a page's (adr/0049 Ek 2026-11-17 e-bülten): each new field off its default
+    footer: footer.map((section) =>
+      printedNewsletter(
+        section,
+        (text) => fill(text, values),
+        (url, alt) =>
+          at.images.get(url) ?? { url, alt, width: null, height: null, derivatives: null }
+      )
+    ),
     product: await Promise.all(product.map((section) => hydrateSection(section, at))),
     category: await Promise.all(
       category.map(async (section) => ({

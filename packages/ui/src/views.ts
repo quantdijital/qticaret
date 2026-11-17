@@ -4,6 +4,7 @@ import type { CartLineView, CheckoutBlockedView, FreeShippingView } from "./cart
 import type { BottomNavView, ThemeView } from "./frame-views"
 import type { FooterBarView, HeaderBarView } from "./main-views"
 import type { MarqueeSectionView } from "./marquee-views"
+import type { NewsletterLookView } from "./newsletter-views"
 
 /**
  * What a theme is given to show (adr/0046 §7): ready-made view models.
@@ -15,6 +16,7 @@ import type { MarqueeSectionView } from "./marquee-views"
 export type * from "./product-views"
 export type * from "./listing-views"
 export type * from "./content-views"
+export type * from "./newsletter-views"
 export type * from "./cart-views"
 export type * from "./quick-view-views"
 
@@ -177,12 +179,14 @@ export interface ShopView {
   headerBar?: HeaderBarView
   footerBar?: FooterBarView
   /** The footer's newsletter box in the shop's words; null: the shop took it out (adr/0049). */
-  newsletter: {
-    title: string
-    text: string
-    /** Its section id, only in the theme editor's live preview (`editor`): the box's section mark. */
-    mark?: string
-  } | null
+  newsletter:
+    | ({
+        title: string
+        text: string
+        /** Its section id, only in the theme editor's live preview (`editor`): the box's section mark. */
+        mark?: string
+      } & Partial<NewsletterLookView>)
+    | null
   /** The header's small links (about, contact…). */
   topLinks: LinkView[]
   /** The shop's own columns, or the storefront's (categories, help). */

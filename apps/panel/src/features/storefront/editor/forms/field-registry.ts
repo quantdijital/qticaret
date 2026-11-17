@@ -3,7 +3,6 @@ import {
   HEADER_MENU_IMAGES,
   HEADER_SEARCH_STYLES,
   MARQUEE_SETTINGS,
-  SECTION_VARIANTS,
 } from "@qticaret/types"
 import type { BannerSetting, MarqueeSetting, SectionLookField } from "@qticaret/types"
 import type {
@@ -14,7 +13,7 @@ import type {
 } from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStep, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
-import { offersVariants } from "@/features/storefront/layout/variants"
+import { offeredVariants, offersVariants } from "@/features/storefront/layout/variants"
 import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
 import { cardFooterFields } from "./card-field-ids"
 import { BANNER_GROUPS } from "./banner-groups"
@@ -227,7 +226,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   const id = section.id
   const fields: RegistryField[] = []
   if (offersVariants(section)) {
-    const variants: readonly string[] = SECTION_VARIANTS[section.type]
+    const variants: readonly string[] = offeredVariants(section, group === "footer")
     fields.push({
       key: "variant",
       group: "variant",

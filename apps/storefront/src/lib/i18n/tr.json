@@ -670,6 +670,8 @@
   "newsletter.email_invalid": "Geçerli bir e-posta adresi yazın.",
   "newsletter.rate_limited": "Kısa sürede çok deneme yapıldı. Lütfen daha sonra tekrar deneyin.",
   "newsletter.failed": "Abonelik şu an alınamadı. Lütfen biraz sonra tekrar deneyin.",
+  "newsletter.description": "Yeni ürünler, kampanyalar ve duyurular e-postanıza gelsin.",
+  "newsletter.note": "Ayda birkaç e-posta · İstediğiniz an ayrılın",
   "order.shipments": "Kargo",
   "order.tracking_number": "Takip no: {number}",
   "order.track": "Kargoyu takip et",

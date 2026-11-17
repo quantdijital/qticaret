@@ -213,6 +213,14 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "marquee":
       return { ...base, ...newMarqueeFields() }
     case "newsletter":
+      return {
+        ...base,
+        type,
+        title: null,
+        text: null,
+        variant: defaultVariant(type),
+        description: null,
+      }
     case "help":
       return { ...base, type, title: null, text: null }
   }
@@ -304,6 +312,8 @@ export const newFooterNewsletter = (id: string): FooterNewsletter => ({
   type: "newsletter",
   title: null,
   text: null,
+  variant: "standard",
+  description: null,
 })
 
 /** A copy under a new id, placed right after the section. */

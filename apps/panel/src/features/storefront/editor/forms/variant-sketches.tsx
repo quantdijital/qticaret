@@ -3,6 +3,13 @@ import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import { CategoriesCollage, CategoriesLinked, CategoriesTiles } from "./category-sketches"
 import { FooterBrandColumns, FooterLedger } from "./footer-sketches"
 import {
+  NewsletterImageCard,
+  NewsletterInFooter,
+  NewsletterSplit,
+  NewsletterStandard,
+  NewsletterStrip,
+} from "./newsletter-sketches"
+import {
   ShelfCarousel,
   ShelfColumns,
   ShelfCompact,
@@ -176,6 +183,13 @@ const SKETCHES: {
   categories: { tiles: CategoriesTiles, linked: CategoriesLinked, collage: CategoriesCollage },
   header_bar: { standard: HeaderStandard, centered: HeaderCentered, catalog: HeaderCatalog },
   footer_bar: { ledger: FooterLedger, brand_columns: FooterBrandColumns },
+  newsletter: {
+    standard: NewsletterStandard,
+    split: NewsletterSplit,
+    image_card: NewsletterImageCard,
+    strip: NewsletterStrip,
+    in_footer: NewsletterInFooter,
+  },
   products: {
     grid: ShelfGrid,
     carousel: ShelfCarousel,

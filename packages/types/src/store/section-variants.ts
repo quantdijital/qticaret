@@ -66,6 +66,18 @@ export const SECTION_VARIANTS = {
    * their marks (`FOOTER_COLUMNS_SETTINGS`).
    */
   footer_bar: ["ledger", "brand_columns"],
+  /**
+   * The newsletter box (adr/0049 Ek 2026-11-17 e-bülten): `standard`,
+   * today's heading beside the stacked form; `split`, a low band, the
+   * heading, a line and a small promise on the left, one joined field and
+   * button on the right; `image_card`, a picture beside the heading, line
+   * and form (no picture: drawn as `split`); `strip`, one thin row, an
+   * envelope, the heading and a short line, a small joined form at its
+   * end; `in_footer`, no box of its own: a small "Bültene katıl" in the
+   * footer's brand column (the footer's box only, `NEWSLETTER_FOOTER_ONLY`).
+   * Fields by variant: `section-newsletter`.
+   */
+  newsletter: ["standard", "split", "image_card", "strip", "in_footer"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
@@ -194,6 +206,7 @@ export type ProductsVariant = SectionVariant<"products">
 export type RelatedProductsVariant = SectionVariant<"related_products">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
+export type NewsletterVariant = SectionVariant<"newsletter">
 export type ProductMainVariant = SectionVariant<"product_main">
 export type CategoryMainVariant = SectionVariant<"category_main">
 

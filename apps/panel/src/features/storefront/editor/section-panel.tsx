@@ -9,7 +9,11 @@ import type {
 } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
-import { offersVariants, switchVariant } from "@/features/storefront/layout/variants"
+import {
+  offeredVariants,
+  offersVariants,
+  switchVariant,
+} from "@/features/storefront/layout/variants"
 import { FIELD_IDS, takesLook } from "./forms/field-registry"
 import type { FieldGroupName } from "./forms/field-registry"
 import { SpacingGroup } from "./forms/look-fields"
@@ -138,6 +142,7 @@ export function SectionPanel({
                 id={FIELD_IDS.variant(section.id)}
                 type={section.type}
                 value={section.variant}
+                offered={offeredVariants(section, group === "footer")}
                 onChange={(next) => {
                   // Its own step in the history: "Geri al" brings the old variant back
                   onChange(switchVariant(section, next))

@@ -2,7 +2,9 @@ import { Mail, MapPin, Phone } from "lucide-react"
 import { ResponsiveImage, drawnVariant, fieldMark, sectionMark } from "@qticaret/ui"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
+import type { ReactNode } from "react"
 import { FooterColumns } from "./FooterColumns"
+import { FooterNewsletterBox, footerNewsletterVariant } from "./FooterNewsletter"
 import { FooterLinks } from "./FooterLinks"
 import { FooterMarks } from "./FooterMarks"
 import { FooterSocial } from "./FooterSocial"
@@ -17,9 +19,10 @@ const LINE =
  * How the shop is reached: its logo when the store profile has one
  * (`footerBar.logo`, the header's; the image's alt text the heading's
  * name), else its name; registered title when it differs, address, phone,
- * e-mail, profiles (`FooterSocial`).
+ * e-mail, profiles (`FooterSocial`); `children`, the newsletter box drawn
+ * in the column (`in_footer`, adr/0049 Ek 2026-11-17).
  */
-function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
+function Contact({ shop, t, children }: { shop: ShopView; t: Translate; children?: ReactNode }) {
   const { contact } = shop
   const title = shop.companyTitle ?? shop.name
   const logo = shop.footerBar?.logo
@@ -72,6 +75,7 @@ function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
         style={shop.footerBar?.social ?? "text"}
         label={t("footer.social")}
       />
+      {children}
     </section>
   )
 }
@@ -104,6 +108,8 @@ export function Footer({
   if (variant === "brand_columns" && columns) {
     return <FooterColumns shop={shop} t={t} subscribe={subscribe} columns={columns} />
   }
+  // The newsletter box's variant (adr/0049 Ek 2026-11-17): today's row, a band, or in the contact column
+  const news = subscribe ? footerNewsletterVariant(shop) : null
   return (
     <footer
       data-gf-clear=""
@@ -112,7 +118,12 @@ export function Footer({
       className="mt-(--footer-gap) border-t border-rule bg-paper-2"
     >
       <Container className="grid gap-10 pt-12 pb-8 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:gap-y-12 lg:pt-16">
-        {subscribe && shop.newsletter && (
+        {subscribe && news && news !== "standard" && news !== "in_footer" && (
+          <div className="border-b border-rule pb-10 lg:col-span-12 lg:pb-12">
+            <FooterNewsletterBox shop={shop} t={t} subscribe={subscribe} variant={news} />
+          </div>
+        )}
+        {subscribe && shop.newsletter && news === "standard" && (
           <section
             aria-labelledby="bulten"
             {...sectionMark(shop.newsletter.mark)}
@@ -136,7 +147,13 @@ export function Footer({
             />
           </section>
         )}
-        <Contact shop={shop} t={t} />
+        <Contact shop={shop} t={t}>
+          {subscribe && news === "in_footer" && (
+            <div className="mt-2 border-t border-rule pt-6">
+              <FooterNewsletterBox shop={shop} t={t} subscribe={subscribe} variant="in_footer" />
+            </div>
+          )}
+        </Contact>
         <div className="lg:col-span-8">
           <FooterLinks groups={shop.footerGroups} />
         </div>

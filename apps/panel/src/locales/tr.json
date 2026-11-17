@@ -8115,6 +8115,13 @@
         "related_products": {
           "grid": "Izgara",
           "carousel": "Kayan sıra"
+        },
+        "newsletter": {
+          "standard": "Standart",
+          "split": "Yan yana bant",
+          "image_card": "Görselli kart",
+          "strip": "İnce şerit",
+          "in_footer": "Alt bilgi sütununda"
         }
       },
       "look": {
@@ -8436,6 +8443,23 @@
       },
       "help": {
         "contact": "İletişim yolları (telefon, e-posta, WhatsApp) Mağaza profilinden gelir; hiçbiri yoksa kutu görünmez."
+      },
+      "newsletter": {
+        "description": "Açıklama",
+        "descriptionTerm": "description",
+        "descriptionPlaceholder": "Yeni ürünler, kampanyalar ve duyurular e-postanıza gelsin.",
+        "descriptionHint": "Başlığın altındaki kısa yazı; ziyaretçi neden abone olacağını burada okur. Boş bırakırsanız vitrin kendi metnini kullanır.",
+        "showNote": "Güvence satırı",
+        "showNoteTerm": "note",
+        "showNoteHint": "Açıklamanın altında küçük bir söz satırı (ne sıklıkla e-posta gideceği, ayrılmanın kolay olduğu). Kapatırsanız görünmez.",
+        "note": "Güvence satırı yazısı",
+        "notePlaceholder": "Ayda birkaç e-posta · İstediğiniz an ayrılın",
+        "noteHint": "Tutabileceğiniz bir söz yazın. Boş bırakırsanız vitrin kendi metnini kullanır.",
+        "image": "Görsel",
+        "imageHint": "Ortam kütüphanesinden bir görsel; kartın solunda durur. Görsel seçilmezse kutu yan yana bant olarak çizilir.",
+        "consent": "Onay metni",
+        "consentTerm": "İYS",
+        "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır."
       },
       "announcement": {
         "line": "{{number}}. duyuru",
