@@ -29,6 +29,44 @@ export type { VideoStatus } from "./status"
 export { CLOSE_WAIT_MS, RECEIVE_TIMEOUTS, fileClosed, receiveVideo } from "./receive"
 export type { ReceiveTimeouts, ReceivedVideo } from "./receive"
 export {
+  COMMON_OUTPUT_ARGS,
+  FFMPEG_CPU_LIMIT_S,
+  MP4_ENCODER_ARGS,
+  OUTPUT_DEMUXER,
+  WEBM_ENCODER_ARGS,
+  encodeArgs,
+  filePath,
+  outputProbeArgs,
+  posterArgs,
+  scaleFilter,
+  scaledSize,
+} from "./transcode-args"
+export type { OutputKind } from "./transcode-args"
+export {
+  PROCESSING_FAILED,
+  VideoJobError,
+  afterFailure,
+  classifyFailure,
+  infraError,
+  inputError,
+} from "./transcode-errors"
+export type { AfterFailure, Failure, FailureKind } from "./transcode-errors"
+export { STRUCTURAL_TAGS, assessOutput, strayTags } from "./output-verdict"
+export type { OutputVerdict } from "./output-verdict"
+export {
+  encodeActivity,
+  frameBrightness,
+  freeDiskBytes,
+  niced,
+  resetEncodeActivity,
+  systemNice,
+  transcodeClip,
+} from "./transcode"
+export { ProbeStoppedError } from "./probe"
+export type { MadeOutput, TranscodeOptions, TranscodedClip } from "./transcode"
+export { makePoster, videoFileBase } from "./poster"
+export type { PosterImages } from "./poster"
+export {
   makeVideoTempDir,
   readHead,
   removeVideoTempDir,

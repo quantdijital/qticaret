@@ -1,0 +1,274 @@
+import { existsSync } from "node:fs"
+import { readFile, stat, statfs } from "node:fs/promises"
+import { setPriority } from "node:os"
+import { join } from "node:path"
+import sharp from "sharp"
+import { errorSummary, logger } from "../../logging"
+import {
+  DARK_FRAME_MEAN,
+  ENCODE_PRIORITY,
+  JOB_TIMEOUT_MS,
+  PASS_TIMEOUT_MS,
+  PROBE_MAX_OUTPUT_BYTES,
+  PROBE_TIMEOUT_MS,
+} from "./limits"
+import { assessOutput } from "./output-verdict"
+import type { OutputVerdict } from "./output-verdict"
+import { videoToolPaths } from "./paths"
+import { probeVideo } from "./probe"
+import type { ProbeVerdict } from "./probe-verdict"
+import { ToolStartError, runTool } from "./run-tool"
+import type { Spawner, ToolRun } from "./run-tool"
+import type { VideoDemuxer } from "./signature"
+import { createSlots } from "./slots"
+import type { Slots } from "./slots"
+import { encodeArgs, outputProbeArgs, posterArgs } from "./transcode-args"
+import type { OutputKind } from "./transcode-args"
+import { infraError } from "./transcode-errors"
+
+/**
+ * A checked clip made fit for the web (adr/0069 §4 steps 2–7): ffprobe
+ * again (the stored file may not be the one checked), the MP4 and the
+ * WebM, each read back by ffprobe and held to its rules, and a PNG of the
+ * first frame for the poster. One ffmpeg at a time in this process (the
+ * shop-wide lock keeps it to one across processes), each at the lowest
+ * priority, each pass killed after 4 minutes and every pass once the
+ * caller's signal fires (the whole job's 10 minutes).
+ */
+
+const FFMPEG_OUTPUT_MAX = 64 * 1024
+
+export interface TranscodeOptions {
+  spawn?: Spawner
+  env?: NodeJS.ProcessEnv
+  /** Fired, the running pass is killed and none starts (the job's 10 minutes, a removal). */
+  signal?: AbortSignal
+  /** Another limiter (tests). */
+  slots?: Slots
+  /** Another limiter for the job's ffprobe of the source (tests). */
+  probeSlots?: Slots
+  passTimeoutMs?: number
+  /** The `nice` ffmpeg is started through; null: none (then `setPriority` alone). Default: the system's. */
+  nice?: string | null
+}
+
+// `nice` where the system has one: it execs ffmpeg, so the pid (and our kill) stays ffmpeg's
+const NICE_PATHS = ["/usr/bin/nice", "/bin/nice"]
+let niceFound: string | null | undefined
+
+/** The system's `nice`, looked for once; null when there is none. */
+export function systemNice(): string | null {
+  niceFound ??= NICE_PATHS.find((path) => existsSync(path)) ?? null
+  return niceFound
+}
+
+/** ffmpeg's command and arguments: under `nice -n 19` when there is one (review, INFO). */
+export function niced(
+  ffmpeg: string,
+  args: readonly string[],
+  nice: string | null
+): { command: string; args: string[] } {
+  return nice === null
+    ? { command: ffmpeg, args: [...args] }
+    : { command: nice, args: ["-n", String(ENCODE_PRIORITY), ffmpeg, ...args] }
+}
+
+export interface MadeOutput extends OutputVerdict {
+  path: string
+  bytes: number
+}
+
+export interface TranscodedClip {
+  /** What ffprobe says of the source, again. */
+  source: ProbeVerdict
+  outputs: Record<OutputKind, MadeOutput>
+  /** The poster's frame, a PNG of ours (still to go through the image pipeline). */
+  poster: Buffer
+}
+
+// One encode at a time; those waiting wait for as long as a whole job may take
+const encodeSlots: Slots = createSlots({
+  concurrency: 1,
+  maxWaiting: 8,
+  waitTimeoutMs: JOB_TIMEOUT_MS,
+  busy: () => infraError("video encode: no slot"),
+})
+
+/**
+ * The job's ffprobe runs apart from the uploads' (two at once, eight
+ * waiting): a busy upload pool (`video.upload_busy`) must not cost a clip
+ * one of its three tries. The job works one clip at a time in a process,
+ * so one slot is enough; those waiting wait as long as a job may take.
+ */
+const jobProbeSlots: Slots = createSlots({
+  concurrency: 1,
+  maxWaiting: 8,
+  waitTimeoutMs: JOB_TIMEOUT_MS,
+  busy: () => infraError("video job probe: no slot"),
+})
+
+// How many ffmpeg processes this process runs now, and the most at once (logs, tests)
+const activity = { running: 0, peak: 0 }
+
+/** ffmpeg processes running now and the most ever at once in this process. */
+export const encodeActivity = (): { running: number; peak: number } => ({ ...activity })
+
+/** Tests: forget the peak. */
+export function resetEncodeActivity(): void {
+  activity.peak = activity.running
+}
+
+function lowerPriority(pid: number): void {
+  try {
+    setPriority(pid, ENCODE_PRIORITY)
+  } catch (error) {
+    logger.warn({ event: "media.video_priority_not_set", err: errorSummary(error) })
+  }
+}
+
+/** Free bytes on the disk that holds `dir` (`fs.statfs`). */
+export async function freeDiskBytes(dir: string): Promise<number> {
+  const info = await statfs(dir)
+  return info.bavail * info.bsize
+}
+
+function failed(what: string, run: ToolRun): Error | null {
+  if (run.aborted) {
+    return infraError(`${what}: stopped (job time or removal)`)
+  }
+  if (run.timedOut) {
+    return infraError(`${what}: past its time`)
+  }
+  if (run.overflow || run.code !== 0) {
+    return infraError(`${what}: exit ${String(run.code)} ${String(run.signal)}`)
+  }
+  return null
+}
+
+async function runProgram(
+  command: string,
+  args: string[],
+  what: string,
+  options: TranscodeOptions & { timeoutMs: number; ffmpeg: boolean }
+): Promise<Buffer> {
+  let run: ToolRun
+  if (options.ffmpeg) {
+    activity.running += 1
+    activity.peak = Math.max(activity.peak, activity.running)
+  }
+  try {
+    run = await runTool(command, args, {
+      timeoutMs: options.timeoutMs,
+      maxOutputBytes: options.ffmpeg ? FFMPEG_OUTPUT_MAX : PROBE_MAX_OUTPUT_BYTES,
+      onSpawn: lowerPriority,
+      ...(options.spawn ? { spawn: options.spawn } : {}),
+      ...(options.signal ? { signal: options.signal } : {}),
+    })
+  } catch (error) {
+    if (error instanceof ToolStartError) {
+      throw infraError(`${what}: did not start (${error.code ?? "unknown"})`)
+    }
+    throw error
+  } finally {
+    if (options.ffmpeg) {
+      activity.running -= 1
+    }
+  }
+  const refusal = failed(what, run)
+  if (refusal) {
+    throw refusal
+  }
+  return run.stdout
+}
+
+async function checkOutput(
+  kind: OutputKind,
+  path: string,
+  options: TranscodeOptions
+): Promise<MadeOutput> {
+  const stdout = await runProgram(
+    videoToolPaths(options.env).ffprobe,
+    outputProbeArgs(kind, path),
+    `ffprobe ${kind}`,
+    { ...options, timeoutMs: PROBE_TIMEOUT_MS, ffmpeg: false }
+  )
+  let json: unknown
+  try {
+    json = JSON.parse(stdout.toString("utf8"))
+  } catch {
+    throw infraError(`ffprobe ${kind}: not its JSON`)
+  }
+  const verdict = assessOutput(json, kind)
+  return { ...verdict, path, bytes: (await stat(path)).size }
+}
+
+/** The mean brightness of a frame, 0–255 (the colour channels' means, averaged). */
+export async function frameBrightness(png: Buffer): Promise<number> {
+  const { channels } = await sharp(png).stats()
+  const colour = channels.slice(0, 3)
+  return colour.reduce((sum, channel) => sum + channel.mean, 0) / Math.max(1, colour.length)
+}
+
+/**
+ * The poster's frame (Kararlar 10): the first; when it is all but black
+ * (a fade in) and the clip lasts past a second, the one at 1 s.
+ */
+async function posterFrame(
+  mp4: MadeOutput,
+  dir: string,
+  ffmpeg: (args: string[], what: string) => Promise<Buffer>
+): Promise<Buffer> {
+  const first = join(dir, "poster.png")
+  await ffmpeg(posterArgs(mp4.path, first), "ffmpeg poster")
+  const frame = await readFile(first)
+  if (mp4.durationMs <= 1000 || (await frameBrightness(frame)) >= DARK_FRAME_MEAN) {
+    return frame
+  }
+  const later = join(dir, "poster-1s.png")
+  await ffmpeg(posterArgs(mp4.path, later, 1), "ffmpeg poster at 1 s")
+  return readFile(later)
+}
+
+/**
+ * Steps 2–7 on the source at `source` (a file of ours in the job's
+ * private directory `dir`, read with `demuxer`). Throws `ValidationError`
+ * (`video.*`) when ffprobe refuses the clip (an input error) and
+ * `VideoJobError` for the rest; the files it made stay in `dir`, which the
+ * caller removes.
+ */
+export async function transcodeClip(
+  source: string,
+  demuxer: VideoDemuxer,
+  dir: string,
+  options: TranscodeOptions = {}
+): Promise<TranscodedClip> {
+  // The job's own probe slot (re-review 2): uploads filling theirs is no try lost here
+  const probed = await probeVideo(source, demuxer, {
+    slots: options.probeSlots ?? jobProbeSlots,
+    ...(options.spawn ? { spawn: options.spawn } : {}),
+    ...(options.env ? { env: options.env } : {}),
+    ...(options.signal ? { signal: options.signal } : {}),
+  })
+  const release = await (options.slots ?? encodeSlots).take()
+  try {
+    const nice = options.nice === undefined ? systemNice() : options.nice
+    const ffmpeg = (args: string[], what: string) => {
+      const run = niced(videoToolPaths(options.env).ffmpeg, args, nice)
+      return runProgram(run.command, run.args, what, {
+        ...options,
+        timeoutMs: options.passTimeoutMs ?? PASS_TIMEOUT_MS,
+        ffmpeg: true,
+      })
+    }
+    const made = {} as Record<OutputKind, MadeOutput>
+    for (const kind of ["mp4", "webm"] as const) {
+      const path = join(dir, `output.${kind}`)
+      await ffmpeg(encodeArgs(kind, demuxer, source, path), `ffmpeg ${kind}`)
+      made[kind] = await checkOutput(kind, path, options)
+    }
+    const poster = await posterFrame(made.mp4, dir, ffmpeg)
+    return { source: probed, outputs: made, poster }
+  } finally {
+    release()
+  }
+}

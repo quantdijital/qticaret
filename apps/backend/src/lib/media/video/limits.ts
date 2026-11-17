@@ -98,3 +98,29 @@ export const SIGNATURE_BYTES = 512
 
 /** A clip's title at most (characters). */
 export const VIDEO_TITLE_MAX = 200
+
+/**
+ * The transcoding job (adr/0069 §4): what it makes and the bounds it runs
+ * in. The outputs' short edge, frame rate and length; the threads each
+ * encoder takes (half of the VPS's four cores); one pass's time and the
+ * whole job's before SIGKILL; the free disk it needs to start.
+ */
+export const OUTPUT_SHORT_EDGE = 720
+export const OUTPUT_MAX_FPS = 30
+export const OUTPUT_SECONDS = 30
+// An output may end one frame past 30 s (a frame's length, rounded up): more is refused
+export const OUTPUT_MAX_DURATION_MS = 30_100
+export const ENCODE_THREADS = 2
+export const PASS_TIMEOUT_MS = 4 * 60 * 1000
+export const JOB_TIMEOUT_MS = 10 * 60 * 1000
+export const MIN_FREE_DISK_BYTES = 500 * MB
+/** The lowest priority a process can be given: the shop's requests come first. */
+export const ENCODE_PRIORITY = 19
+
+/** The job's sign of life, how long a silent one is waited for, and its tries at most. */
+export const HEARTBEAT_MS = 30 * 1000
+export const STALE_AFTER_MS = 10 * 60 * 1000
+export const MAX_ATTEMPTS = 3
+
+/** A poster's first frame darker than this (mean of 0–255) gives way to the frame at 1 s. */
+export const DARK_FRAME_MEAN = 12

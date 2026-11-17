@@ -3,9 +3,20 @@ import type { Context, InferTypeOf } from "@medusajs/framework/types"
 import { InjectManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
 import { MediaAsset } from "./models/media-asset"
 import { MediaVideo } from "./models/media-video"
+import * as queue from "./video-queue"
+import type { ClaimedVideo, FailedTry, ReadyVideo, VideoFiles } from "./video-queue"
 
 export type MediaAssetRecord = InferTypeOf<typeof MediaAsset>
 export type MediaVideoRecord = InferTypeOf<typeof MediaVideo>
+export type { ClaimedVideo, FailedTry, ReadyVideo, VideoFiles } from "./video-queue"
+
+const managerOf = (sharedContext: Context): EntityManager => {
+  const manager = sharedContext.manager as EntityManager | undefined
+  if (!manager) {
+    throw new Error("media: the video queue is moved with a manager")
+  }
+  return manager
+}
 
 const MediaServiceBase = MedusaService({ MediaAsset, MediaVideo })
 type Generated = InstanceType<typeof MediaServiceBase>
@@ -55,19 +66,90 @@ class MediaModuleService extends MediaServiceBase {
     )
   }
 
-  /** A removed video's files are gone: its record no longer names them, nor counts them. */
+  /**
+   * A removed video's files that storage took: its record no longer names
+   * those (only those; review M2), nor counts bytes once it names none.
+   */
   @InjectManager()
-  async forgetVideoFiles(id: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
-    const manager = sharedContext.manager as EntityManager | undefined
-    if (!manager) {
-      throw new Error("media: a video's files are forgotten with a manager")
-    }
-    await manager.execute(
-      `UPDATE media_video SET source_file_id = NULL, output_file_ids = NULL,
-         poster_file_ids = NULL, stored_bytes = 0, updated_at = now()
-       WHERE id = ? AND deleted_at IS NOT NULL`,
-      [id]
-    )
+  async forgetVideoFiles(
+    id: string,
+    removed: readonly string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    await queue.forgetVideoFiles(managerOf(sharedContext), id, removed)
+  }
+
+  /** The files a video names now, removed or not. */
+  @InjectManager()
+  async videoFiles(
+    id: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<VideoFiles | null> {
+    return await queue.videoFiles(managerOf(sharedContext), id)
+  }
+
+  /** The transcoding job takes the oldest waiting clip (adr/0069 §4; `video-queue.ts`). */
+  @InjectManager()
+  async claimNextVideo(
+    exclude: readonly string[] = [],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<ClaimedVideo | null> {
+    return await queue.claimNextVideo(managerOf(sharedContext), exclude)
+  }
+
+  /** The job's heartbeat; false once the video is no longer this claim's (`attempts` fences it). */
+  @InjectManager()
+  async beatVideo(
+    id: string,
+    attempts: number,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return await queue.beatVideo(managerOf(sharedContext), id, attempts)
+  }
+
+  /** Silent `processing` videos back to the queue, or failed past their tries. */
+  @InjectManager()
+  async requeueStaleVideos(
+    before: Date,
+    maxAttempts: number,
+    failedCode: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ id: string; status: string }[]> {
+    return await queue.requeueStaleVideos(managerOf(sharedContext), before, maxAttempts, failedCode)
+  }
+
+  @InjectManager()
+  async markVideoReady(
+    id: string,
+    attempts: number,
+    ready: ReadyVideo,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return await queue.markVideoReady(managerOf(sharedContext), id, attempts, ready)
+  }
+
+  /** `ready` taken back; true when it changed the row (only then may the outputs go). */
+  @InjectManager()
+  async unmarkVideoReady(
+    id: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return await queue.unmarkVideoReady(managerOf(sharedContext), id)
+  }
+
+  @InjectManager()
+  async markVideoTried(
+    id: string,
+    claimed: number,
+    next: FailedTry,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return await queue.markVideoTried(managerOf(sharedContext), id, claimed, next)
+  }
+
+  @InjectManager()
+  async forgetVideoSource(id: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
+    await queue.forgetVideoSource(managerOf(sharedContext), id)
   }
 
   /**

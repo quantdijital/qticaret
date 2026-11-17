@@ -23,12 +23,18 @@ export interface ToolRun {
   timedOut: boolean
   /** Killed for answering more than it may. */
   overflow: boolean
+  /** Killed (or never started) because the caller's signal fired: the transcoding job's whole time. */
+  aborted: boolean
 }
 
 export interface ToolOptions {
   timeoutMs: number
   maxOutputBytes: number
   spawn?: Spawner
+  /** Fired, the program is killed (SIGKILL); fired already, it never starts. */
+  signal?: AbortSignal
+  /** Called once with the started program's pid (the transcoding job lowers its priority). */
+  onSpawn?: (pid: number) => void
 }
 
 /** The program could not start at all (not installed, not executable). */
@@ -45,12 +51,25 @@ export class ToolStartError extends Error {
 // What the programs see: where to find their libraries, and no locale surprises
 const toolEnv = (): NodeJS.ProcessEnv => ({ PATH: process.env["PATH"] ?? "", LC_ALL: "C" })
 
+const NOT_STARTED: ToolRun = {
+  code: null,
+  signal: null,
+  stdout: Buffer.alloc(0),
+  timedOut: false,
+  overflow: false,
+  aborted: true,
+}
+
 export function runTool(
   command: string,
   args: readonly string[],
-  { timeoutMs, maxOutputBytes, spawn = nodeSpawn }: ToolOptions
+  { timeoutMs, maxOutputBytes, spawn = nodeSpawn, signal, onSpawn }: ToolOptions
 ): Promise<ToolRun> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      resolve({ ...NOT_STARTED, stdout: Buffer.alloc(0) })
+      return
+    }
     let child: ChildProcess
     try {
       child = spawn(command, args, {
@@ -67,6 +86,7 @@ export function runTool(
     let size = 0
     let timedOut = false
     let overflow = false
+    let aborted = false
     let settled = false
     const kill = () => {
       try {
@@ -80,6 +100,18 @@ export function runTool(
       kill()
     }, timeoutMs)
     timer.unref()
+    const onAbort = () => {
+      aborted = true
+      kill()
+    }
+    signal?.addEventListener("abort", onAbort, { once: true })
+    const finish = () => {
+      clearTimeout(timer)
+      signal?.removeEventListener("abort", onAbort)
+    }
+    if (onSpawn && child.pid !== undefined) {
+      onSpawn(child.pid)
+    }
     child.stdout?.on("data", (chunk: Buffer) => {
       if (overflow) {
         return
@@ -100,17 +132,24 @@ export function runTool(
         return
       }
       settled = true
-      clearTimeout(timer)
+      finish()
       kill()
       reject(new ToolStartError(error.code))
     })
-    child.on("close", (code: number | null, signal: NodeJS.Signals | null) => {
+    child.on("close", (code: number | null, exitSignal: NodeJS.Signals | null) => {
       if (settled) {
         return
       }
       settled = true
-      clearTimeout(timer)
-      resolve({ code, signal, stdout: Buffer.concat(chunks), timedOut, overflow })
+      finish()
+      resolve({
+        code,
+        signal: exitSignal,
+        stdout: Buffer.concat(chunks),
+        timedOut,
+        overflow,
+        aborted,
+      })
     })
   })
 }
