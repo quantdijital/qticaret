@@ -4,15 +4,27 @@
 
 ## Sıradaki işler (güncel tutulur; Oğuzhan başlamadan önce buraya bakar)
 
-1. **PayTR "veritabanı meşgul" testinin yeniden yazımı** (`apps/backend/integration-tests/http/paytr-stock-short.spec.ts`): enjekte edilen hata sipariş satırı rezervasyonlarını hedeflemeli.
-2. **Ödeme bağlantısı takipleri** (#107'den): `cart` üzerinde `metadata ->> 'qt_payment_link'` kısmi dizini (migration); eşzamanlı tamamlamada bağlantı üzerinde DB düzeyinde tek sahiplenme (iki sepetin milisaniyeler içinde birlikte tamamlanması bugün kabul edilen risk); `paid_twice` logunun tekrarı; `settlePaymentLinks`'in 500 sınırı.
-3. **ADR-0069 ürün videoları, dilim 2–8** (dilim 1 #117 ile birleşti): dilim 4 (galeride video karesi, CSP `media-src`/`frame-src`) Oğuzhan'ın alanıyla kesişir, başlamadan haber.
-4. **Toptancı dilim 5** (adr/0068): belgeler, KVKK dışa aktarımı, kampanya e-postalarından hariç tutma, e2e. 3. dilim incelemesinin notları: I2 analitik olaylar toptancının ödediği fiyatı üçüncü taraf etiketlerine (GA4, Meta) taşır (KVKK envanteri, çerez metni); I3 `vat_exclusive` gösterimi paylaşılan önbelleğe girmez (`PriceDisplay`'i önbelleğe alan her yeni kod denetler).
-5. **Bakım modunda backend koruması** (#43 bulgu 2'nin ikinci yarısı, adr/0053): ödeme ve sipariş reddedilir; personelin atlatma çereziyle denemesi vitrinin imzalı başlığıyla geçer. Güvenlik incelemesi şart.
-6. **BirFatura entegrasyonu:** A yolu onaylandı (siparişleri BirFatura çeker); test hesabı gelince ADR → F1/F2 (`docs/entegrasyonlar/plan-basitkargo-birfatura.md`). BasitKargo şimdilik yok.
-7. **Canlıya çıkış listesine eklenecekler:** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); sunucuya ffmpeg (`FFMPEG_PATH` / `FFPROBE_PATH`); BirFatura için gerekirse ayrı alt alan adı.
-8. **Sahibin panelde bakması bekleniyor:** toptancı akışı (şifreyle oluşturma, Yeni şifre, Hesabı devral, Sil); mağaza profili Genel ekranı ve kenar çubuğu simgesi (#123). Bulgu çıkarsa ayrı düzeltme PR'ı.
-9. **Sahibin bekleyen kararları:** ağır testler (HTTP parçaları, e2e) yalnız `dev` ve PR'larda mı koşsun; toptan/perakende ayrımı raporlarda, panoda ve plan sayacında; toptancı "Sil" müşteri kaydını da silsin mi (bugün perakende müşteri olarak kalır); Katalog görünümü menü zemini / duyuru şeridi; `packages/themes/base` (eskimiş); canlı alan adları; ADR-0064.
+1. **ADR-0069 ürün videoları, dilim 2–8** (dilim 1 #117 ile birleşti): dilim 4 (galeride video karesi, CSP `media-src`/`frame-src`) Oğuzhan'ın vitrin alanıyla kesişir, başlamadan ona haber.
+2. **Küçük takipler:**
+   - Kısmen yapılmış iyzico iadesi için çıkış yolu (#153 D4-1): `done` parça var, tutar eksik; elle sonuçlandırılamıyor, kayıt açık kalıyor. Para açısından güvenli.
+   - Vitrin `lib/store-api/core.ts`'te köken denetimi (`new URL(path, MEDUSA_BACKEND_URL)` backend kökeni dışına çıkmasın; #141 incelemesi). Vitrin alanı, Oğuzhan'a not.
+   - Toptan analitik: toptan fiyat GA4/Meta'ya hiçbir yoldan gitmesin (#147'de kabul edilen düşükler: L1 tarama sırasında toptancı yapılan müşterinin olayları sert yenilemeye kadar tutarla gidebilir; L2 sipariş sayfasının satın alma olayı oturuma bakar, oturumsuz `?yeni=1` açılışı). SMS (L4): toptancının müşteri kaydı dışındaki telefonları SMS kitlesinden dışlanmıyor.
+3. **BirFatura entegrasyonu:** A yolu onaylandı (siparişleri BirFatura çeker); test hesabı gelince ADR → F1/F2 (`docs/entegrasyonlar/plan-basitkargo-birfatura.md`). BasitKargo şimdilik yok. Paraşüt canlıdan sonra, ikinci plan.
+4. **Canlıya çıkış listesine eklenecekler:** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); sunucuya ffmpeg (`FFMPEG_PATH` / `FFPROBE_PATH`); BirFatura için gerekirse ayrı alt alan adı.
+5. **Sahibin panelde bakması bekleniyor:** toptancı akışı (şifreyle oluşturma, Yeni şifre, Hesabı devral, Sil); mağaza profili Genel ekranı ve kenar çubuğu simgesi (#123). Bulgu çıkarsa ayrı düzeltme PR'ı.
+6. **Sahibin bekleyen kararları:** ağır testler (HTTP parçaları, e2e) yalnız `dev` ve PR'larda mı koşsun; toptan/perakende ayrımı raporlarda, panoda ve plan sayacında; toptancı "Sil" müşteri kaydını da silsin mi (bugün perakende müşteri olarak kalır); Katalog görünümü menü zemini / duyuru şeridi; `packages/themes/base` (eskimiş); canlı alan adları; ADR-0064.
+
+Sıra: 1 → 2 → 3 (BirFatura test hesabı gelince öne alınır). Eski 1, 2, 4 ve 5 bitti (#132, #134, #138, #141, #147).
+
+## 2026-11-16/17: ödeme ve iade sertleştirme, toptancı dilim 5, bakım modu
+
+- **Birleşenler:** #132 (PayTR "veritabanı meşgul" testi sipariş satırı rezervasyonunu hedefliyor); #134 (ödeme bağlantısı tek sahiplenme, siparişe dönmüş sepet iade edilmez); #138 (bağlantının sepetleri kendi tablomuzdan); #141 (bakım modunda Store API yazmaları kapalı); #147 (toptancı dilim 5: KVKK kopyası, pazarlama dışı, analitik tutarları, e2e); #148 (bakım testi şifresi için tek gitleaks satırı); #149 (ödeme incelemesi takipleri: Z1, N1, PayTR iade tekrar koruması, iyzico takılma uyarısı); #153 (parası çıkmış iade sayılı kalır, açık iadeler güvenle sonuçlanır; 5 dk'lık denetim işi, personelin elle sonuçlandırması).
+- **Açık PR:** #154 Next.js 16.4.5 güvenlik yükseltmesi + panel ⌘K keydown koruması; pnpm'in 14 günlük yaş penceresi dolunca (2026-11-17 21:02 TR) CI yeniden koşulup birleşir.
+- **Sahibin kararları (2026-11-17):**
+  - **PayTR:** PayTR'ye e-posta yok. Test gerçek bir mağazanın PayTR hesabında (My L'arte'ninki ya da yeni açılan mağazanınki) test modunda; sonra aynı hesap canlıya geçer. docs/12 güncellendi.
+  - **Paraşüt:** API başvurusu canlıdan sonra, şirket alan adı hazır olunca. Birinci plan BirFatura.
+- **iyzico sandbox:** sahibin sandbox anahtarlarıyla ödeme denemesi başarılı.
+- **E-postalar:** BirFatura ve iyzico V3 webhook e-postaları taslak olarak sahibe verildi; sahip gönderecek.
 
 ## 2026-11-16 (akşam): ürün videoları dilim 1, Atölye boşlukları, galeri, telefon araması
 

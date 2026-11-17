@@ -29,7 +29,7 @@
 | Kalem | Sorumlu / danışılacak | Etkilediği faz |
 |---|---|---|
 | E-fatura/e-arşiv kuralları: bireysel alıcıda TCKN yoksa uygulama, iade faturası | Mali müşavir | F8 |
-| Paraşüt platform API istemcisi (`destek@parasut.com`; e-posta taslağı 2026-10-31'de kullanıcıya verildi): istemci kimliği ve sırrı; yetki kodu akışının (kodu panele yapıştırma, `urn:ietf:wg:oauth:2.0:oob`) platform istemcisine açılması; GİB'e belge göndermeden deneme yapılabilecek test (staging) ortamı ve test firması; istek sınırları; tekrar önleyici anahtar; e-belge serisinin API'den seçilip seçilemeyeceği (web satışları ayrı seriyle) | Quant Dijital | F8 (ADR-0034) |
+| **Canlıdan sonra** (karar 2026-11-17): başvuru şirket alan adı hazır olunca yapılır; birinci plan BirFatura, Paraşüt ikinci plan. Paraşüt platform API istemcisi (`destek@parasut.com`; e-posta taslağı 2026-10-31'de kullanıcıya verildi): istemci kimliği ve sırrı; yetki kodu akışının (kodu panele yapıştırma, `urn:ietf:wg:oauth:2.0:oob`) platform istemcisine açılması; GİB'e belge göndermeden deneme yapılabilecek test (staging) ortamı ve test firması; istek sınırları; tekrar önleyici anahtar; e-belge serisinin API'den seçilip seçilemeyeceği (web satışları ayrı seriyle) | Quant Dijital | F8 (ADR-0034), canlıdan sonra |
 | Mali müşavir soru listesinin cevapları (`docs/mali-musavir-sorulari.md`) | Mali müşavir | F8 |
 | KDV oran grupları (%20/%10/%1) ve kargo bedelinin KDV oranı; tenant ürün gruplarının hangi orana düştüğü | Mali müşavir | F1.2 (ADR-0007) |
 | Kuruş yuvarlama kuralı (yarım yukarı) ve sepet indiriminin kalemlere dağıtımının faturadaki karşılığı | Mali müşavir | F2.7, F4.7, F8 (ADR-0010) |
@@ -43,7 +43,7 @@
 | Kalem | Muhatap | Etkilediği faz |
 |---|---|---|
 | iyzico / PayTR: tenant hesap açılış süreci, platform referans/iş ortaklığı modeli | Sağlayıcı satış ekibi | F5, F6 |
-| PayTR test hesabı: bildirim adresi hesap başına tek ve test modu canlı anahtarlarla çalışıyor; canlı satış yapan hesapla test edilemez. Ayrı test mağazası ya da canlıya geçmemiş hesap; dev için herkese açık bildirim adresi (tünel) | Kullanıcı + PayTR | F5 (adr/0026) |
+| PayTR testi (karar 2026-11-17): PayTR'ye e-posta ve ayrı test mağazası yok. Test, gerçek bir mağazanın PayTR hesabında (My L'arte'ninki ya da yeni açılan mağazanınki) test modunda yapılır, sonra aynı hesap canlıya geçer. Bildirim adresi hesap başına tek; dev için herkese açık bildirim adresi (tünel). Taksit oranları API'sine erişim (alt satır) o hesapta denenene kadar doğrulanmamış sayılır | Kullanıcı | F5 (adr/0026) |
 | PayTR: yalnızca iFrame kullanan hesabın taksit oranları API'sine erişimi | PayTR | F5.8 |
 | iyzico webhook V3 imzasının açtırılması (entegrasyon@iyzico.com); sandbox hesabı | Kullanıcı + iyzico | F5.11 |
 | Geliver: tenant hesabı, kapıda ödeme desteği, iade kodu süreçleri | Geliver | F6.6, F7 |
