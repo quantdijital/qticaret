@@ -14,18 +14,34 @@ import {
   DialogTitle,
 } from "@qticaret/admin-ui/ui/dialog"
 import { useSettleRefund } from "@/features/orders/api/orders"
+import type { SettleOutcome } from "@/features/orders/api/orders"
 import type { ShopRefund } from "@/features/orders/api/payments"
 import { errorText } from "@/lib/errors"
 
 const S = "orders.refunds.settle"
-
-type Outcome = "made" | "not_made"
 
 const PROVIDERS: Readonly<Record<string, string>> = {
   paytr: "PayTR",
   iyzico: "iyzico",
   "bank-transfer": "Havale/EFT",
   cod: "Kapıda ödeme",
+}
+
+const kurusOf = (lira: string) => Math.round(Number(lira) * 100)
+
+/**
+ * An iyzico refund made in part (D4-1): every part answered, together
+ * short of the amount; what was given back and what was not, in kuruş.
+ * Only shown: the server reads the made part from its own record.
+ */
+function madeInPartOf(refund: ShopRefund): { done: number; rest: number } | null {
+  const parts = refund.parts ?? []
+  if (parts.length === 0 || parts.some((part) => part.state !== "done")) {
+    return null
+  }
+  const done = parts.reduce((sum, part) => sum + kurusOf(part.amount), 0)
+  const amount = kurusOf(refund.amount)
+  return done > 0 && done < amount ? { done, rest: amount - done } : null
 }
 
 /** What staff look for in the provider's panel: who, which reference, how much, when, its parts. */
@@ -68,7 +84,9 @@ function RefundFacts({ refund, currency }: { refund: ShopRefund; currency: strin
  * A refund whose record stayed incomplete, checked by staff in the
  * provider's panel (review 2026-11-17, O2, D-4): what to look for is
  * shown; the two answers weigh the same, and the one chosen is asked once
- * more before it is sent. Nothing is refunded from here.
+ * more before it is sent. An iyzico refund made in part has one answer
+ * (D4-1): its record closed at the part made, what is left shown to be
+ * refunded anew. Nothing is refunded from here.
  */
 export function SettleRefundDialog({
   orderId,
@@ -83,7 +101,14 @@ export function SettleRefundDialog({
 }) {
   const { t } = useTranslation()
   const settle = useSettleRefund(orderId)
-  const [chosen, setChosen] = useState<Outcome | null>(null)
+  const [chosen, setChosen] = useState<SettleOutcome | null>(null)
+  const inPart = refund ? madeInPartOf(refund) : null
+  const values = {
+    amount: refund ? formatMoney(refund.amount, currency) : "",
+    done: inPart ? formatMoney(inPart.done / 100, currency) : "",
+    rest: inPart ? formatMoney(inPart.rest / 100, currency) : "",
+  }
+  const outcomes: readonly SettleOutcome[] = inPart ? ["made_in_part"] : ["not_made", "made"]
   const close = (open: boolean) => {
     if (!open) {
       setChosen(null)
@@ -98,26 +123,27 @@ export function SettleRefundDialog({
       { reference: refund.reference, outcome: chosen },
       {
         onSuccess: () => {
-          toast.success(t(`${S}.done.${chosen}`))
+          toast.success(t(`${S}.done.${chosen}`, values))
           close(false)
         },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )
   }
+  const ask = inPart ? `${S}.in_part` : S
   return (
     <Dialog open={refund !== null} onOpenChange={close}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t(chosen ? `${S}.sure.${chosen}` : `${S}.title`)}</DialogTitle>
+          <DialogTitle>{t(chosen ? `${S}.sure.${chosen}` : `${ask}.title`, values)}</DialogTitle>
           <DialogDescription>
-            {t(chosen ? `${S}.sure.description` : `${S}.question`)}
+            {t(chosen ? `${S}.sure.description` : `${ask}.question`, values)}
           </DialogDescription>
         </DialogHeader>
         <DialogBody>
           {refund ? <RefundFacts refund={refund} currency={currency} /> : null}
           {chosen ? null : (
-            <p className="mt-3 text-[13px] text-muted-foreground">{t(`${S}.hint`)}</p>
+            <p className="mt-3 text-[13px] text-muted-foreground">{t(`${ask}.hint`, values)}</p>
           )}
         </DialogBody>
         <DialogFooter>
@@ -138,7 +164,7 @@ export function SettleRefundDialog({
               </Button>
             </>
           ) : (
-            (["not_made", "made"] as const).map((outcome) => (
+            outcomes.map((outcome) => (
               <Button
                 key={outcome}
                 variant="outline"

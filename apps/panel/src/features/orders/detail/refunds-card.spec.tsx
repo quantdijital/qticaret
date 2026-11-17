@@ -76,6 +76,65 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
     })
   })
 
+  it("closes an iyzico refund made in part at its answered parts, the rest shown (D4-1)", async () => {
+    fetchMock.mockResolvedValue({ refund: { status: "done" } })
+    renderCard([
+      refund({
+        provider: "iyzico",
+        amount: "300.00",
+        parts: [{ amount: "240.00", state: "done" }],
+      }),
+    ])
+
+    await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
+    expect(await screen.findByText("Bu iade kısmen yapıldı")).toBeInTheDocument()
+    // What iyzico gave back and what is left: the record closes at the first
+    expect(
+      screen.getByText(/240,00 tutarındaki kısmını geri verdi; ₺60,00 geri verilmedi/)
+    ).toBeInTheDocument()
+    // One answer only: "money went back" or "did not" would both be refused
+    expect(screen.queryByRole("button", { name: "Para gitti" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Para gitmedi" })).toBeNull()
+    await userEvent.click(screen.getByRole("button", { name: "Yapılan kısmı kaydet" }))
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(screen.getByText(/Emin misiniz: kayıt ₺240,00 olarak kapansın mı/)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Onayla" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(`/admin/orders/order_1/refunds/${REFERENCE}/settle`, {
+        method: "POST",
+        body: { outcome: "made_in_part" },
+      })
+    })
+    expect(toast.success).toHaveBeenCalledWith(
+      "İade kaydı ₺240,00 olarak kapatıldı; kalan ₺60,00 yeniden iade edilebilir."
+    )
+  })
+
+  it("keeps both answers when a part's answer was lost: never taken as made in part", async () => {
+    renderCard([
+      refund({
+        provider: "iyzico",
+        amount: "300.00",
+        parts: [
+          { amount: "240.00", state: "done" },
+          { amount: "30.00", state: "sending" },
+        ],
+      }),
+    ])
+
+    await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
+
+    expect(await screen.findByRole("button", { name: "Para gitti" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Yapılan kısmı kaydet" })).toBeNull()
+  })
+
+  it("shows a refund closed in part as such", () => {
+    renderCard([refund({ status: "done", incomplete: false, made_in_part: true })])
+
+    expect(screen.getByText("Kısmen iade edildi")).toBeInTheDocument()
+  })
+
   it("offers no check for a refund settled already", () => {
     renderCard([refund({ status: "done", incomplete: false })])
 

@@ -84,11 +84,14 @@ export const refundPreviewQuery = (id: string, request: RefundRequest | null) =>
 
 /**
  * An open refund checked at the provider by staff: the money went back
- * (`made`) or it did not (`not_made`). Sends nothing; the server records
- * who and when.
+ * (`made`) or it did not (`not_made`); an iyzico refund made in part is
+ * closed at its answered parts (`made_in_part`, the server reads the
+ * amount). Sends nothing; the server records who and when.
  */
+export type SettleOutcome = "made" | "not_made" | "made_in_part"
+
 export const useSettleRefund = (id: string) =>
-  useOrderMutation(({ reference, outcome }: { reference: string; outcome: "made" | "not_made" }) =>
+  useOrderMutation(({ reference, outcome }: { reference: string; outcome: SettleOutcome }) =>
     sdk.client.fetch(
       `/admin/orders/${encodeURIComponent(id)}/refunds/${encodeURIComponent(reference)}/settle`,
       { method: "POST", body: { outcome } }
