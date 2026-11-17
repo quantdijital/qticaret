@@ -1,6 +1,9 @@
 import { z } from "@medusajs/framework/zod"
 import { MONTH_PATTERN } from "../../../modules/ai/usage-summary"
-import { AI_ENTITY_TYPES } from "../../../workflows/ai/steps/task-input"
+import { AI_ENTITY_TYPES } from "../../../lib/ai/facts"
+
+// A record's id of a kind a suggestion is asked for; its prefix is matched to the type in the workflow
+const ENTITY_ID = /^(prod|pcat|cnt)_[A-Za-z0-9]{1,40}$/
 
 // A registry name: the task, the service and the option are checked against the registry
 const NAME = /^[a-z][a-z0-9_]{0,39}$/
@@ -14,7 +17,7 @@ export const AdminPostAiSuggestion = z
   .object({
     task: z.string().regex(NAME),
     entity_type: z.enum(AI_ENTITY_TYPES),
-    entity_id: z.string().regex(/^prod_[A-Za-z0-9]{1,40}$/),
+    entity_id: z.string().regex(ENTITY_ID),
     service: z.string().regex(NAME).optional(),
     option: z.string().regex(NAME).optional(),
   })
