@@ -232,35 +232,7 @@ describe("PayTR payment provider (adr/0026)", () => {
   const named = (amount: number, data: Record<string, unknown>, reference: string) =>
     own(amount / 100, { ...data, pending_refund: { reference_no: reference, amount } })
 
-  it("sends Medusa's own refund once, whatever key each try or run brings, and records it", async () => {
-    const { data, oid } = await paidSession("payses_01REF")
-
-    const first = await own(10, data)
-    // A retried step, or a second run
-    const again = await own(10, data)
-    // A try after the first's data was kept: answered from it, PayTR not even asked
-    fake.requests.length = 0
-    const kept = await own(10, first.data ?? {})
-
-    const made = [{ reference_no: `M${oid}A1000`, amount: 1000 }]
-    expect([first, again, kept].map((each) => each.data?.["refunds"])).toEqual([made, made, made])
-    expect(fake.requests).toHaveLength(0)
-    expect(fake.payments.get(oid)?.refunds).toEqual([{ amount: 1000, referenceNo: `M${oid}A1000` }])
-  })
-
-  it("takes the recovery job's refund of the same amount as made, and sends nothing", async () => {
-    const { data, oid } = await paidSession("payses_01JOB")
-    fake.payments.get(oid)?.refunds.push({ amount: 3456, referenceNo: `R${oid}` })
-    jest.mocked(recoveryRefundReference).mockResolvedValue(`R${oid}`)
-    fake.requests.length = 0
-
-    const refund = await own(34.56, data)
-
-    expect(refund.data?.["refunds"]).toEqual([{ reference_no: `R${oid}`, amount: 3456 }])
-    expect(recoveryRefundReference).toHaveBeenCalledWith(oid)
-    expect(sentRefunds()).toHaveLength(0)
-  })
-
+  // Medusa's own refunds, try by try and amount by amount: refund.unit.spec.ts
   it("sends parts of different amounts, and never one past what was paid", async () => {
     const { data, oid } = await paidSession("payses_01PRT")
 

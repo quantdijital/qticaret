@@ -164,10 +164,11 @@ class PaytrProviderService extends AbstractPaymentProvider {
    * same when the refund is tried again: the one our refund workflow put in
    * the payment's data (`pending_refund`). A refund Medusa asks for on its
    * own (its cart completion's give-back; it always names a key) goes under
-   * the payment's and the amount's reference, not the key it makes anew
-   * for each try, and counts as made when PayTR shows the recovery job's
-   * refund of that amount: asked twice (a retried step, a second run, the
-   * job before it), it is sent to PayTR once (PR #137 review).
+   * the payment's, the amount's and its count's reference (Medusa keeps
+   * the data this returns), not the key it makes anew for each try, and
+   * counts as made when PayTR shows the recovery job's refund of that
+   * amount: a retried try (a step, a second run, the job before it) is sent
+   * to PayTR once; a second refund of the same amount is sent too.
    */
   async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
     const amount = fromMedusaAmount(input.amount, { allowRounding: true })
@@ -188,7 +189,7 @@ class PaytrProviderService extends AbstractPaymentProvider {
         account,
         input.data,
         amount,
-        ownRefundReferenceOf(merchant_oid, amount),
+        ownRefundReferenceOf(merchant_oid, amount, input.data),
         job ? [job] : []
       ),
     }

@@ -37,14 +37,34 @@ export function refundableOf(data: Record<string, unknown> | undefined): Kurus {
 export const refundReferenceOf = (key: string): string =>
   key.replace(/[^A-Za-z0-9]/g, "").slice(0, 64)
 
+// `M<merchant_oid>A<kuruş>N<k>`, at most 64 letters and digits: a long reference loses the
+// end of its merchant_oid, never its amount or count (PayTR lists refunds per payment)
+const ownReference = (merchantOid: string, amount: Kurus, nth: number): string => {
+  const tail = `A${String(amount)}N${String(nth)}`
+  return refundReferenceOf(`M${merchantOid}`).slice(0, 64 - tail.length) + tail
+}
+
 /**
  * The reference of a refund Medusa asks for on its own (no order refund
- * named one: its cart completion's give-back). Medusa gives each try a new
- * key; this one is the payment's and the amount's, so a retried step, or a
- * second run, finds the first refund and never sends another.
+ * named one: its cart completion's give-back, its refund route). Medusa
+ * gives each try a new key; this one is the payment's, the amount's and
+ * its count's: the first of this amount the payment's data does not record
+ * yet. A retried step (the data not yet written) finds its refund at PayTR
+ * under the same reference and never sends another; a second refund of
+ * the same amount, once the first is recorded, is a new one and is sent.
  */
-export const ownRefundReferenceOf = (merchantOid: string, amount: Kurus): string =>
-  refundReferenceOf(`M${merchantOid}A${String(amount)}`)
+export function ownRefundReferenceOf(
+  merchantOid: string,
+  amount: Kurus,
+  data: Record<string, unknown> | undefined
+): string {
+  const recorded = new Set(recordsOf(data).map((record) => record.reference_no))
+  let nth = 1
+  while (recorded.has(ownReference(merchantOid, amount, nth))) {
+    nth += 1
+  }
+  return ownReference(merchantOid, amount, nth)
+}
 
 const sendRefund = async (
   account: PaytrCredentials,
@@ -63,12 +83,13 @@ const sendRefund = async (
 /**
  * Gives back `amount` of a PayTR payment under `referenceNo` (adr/0026
  * §9), once. A refund our data records under it already is not asked
- * about again. Else PayTR is asked first: the payment must be there, in
- * the test mode it was taken in (test keys never refund a live payment),
- * and a refund PayTR shows under this reference (an answer lost on the
- * way, `outcome_unknown`), or of this amount under one of `sameAs` (the
- * same money given back another way: the recovery job's), is not made
- * again but recorded. A new refund is sent only while what PayTR and our
+ * about again (our order refund's reference names one request). Else
+ * PayTR is asked first: the payment must be there, in the test mode it
+ * was taken in (test keys never refund a live payment), and a refund
+ * PayTR shows under this reference (an answer lost on the way,
+ * `outcome_unknown`), or of this amount under one of `sameAs` our data
+ * does not record yet (the same money given back another way: the
+ * recovery job's), is not made again but recorded. A new refund is sent only while what PayTR and our
  * data show given back, with it, stays within what was paid: parts of
  * different amounts all go, never more than the payment. Returns the
  * payment's data with the refund recorded.
@@ -92,11 +113,14 @@ export async function refundPaytrPayment(
   if (paid.testMode !== session.test_mode) {
     throw new ValidationError("paytr.test_mode_mismatch")
   }
+  // One PayTR refund answers one record at most: one our data holds already proves no new one
+  const recorded = new Set(records.map((record) => record.reference_no))
   const made =
     paid.refunds.find((refund) => refund.referenceNo === referenceNo) ??
     paid.refunds.find(
       (refund) =>
         refund.referenceNo !== null &&
+        !recorded.has(refund.referenceNo) &&
         sameAs.includes(refund.referenceNo) &&
         refund.amount === amount
     )
