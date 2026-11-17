@@ -1,6 +1,6 @@
 import { asValue } from "@medusajs/framework/awilix"
 import { ContainerRegistrationKeys, createMedusaContainer } from "@medusajs/framework/utils"
-import { completePaidCart } from "../steps/complete-paid-cart"
+import { STUCK_ATTEMPTS, completePaidCart } from "../steps/complete-paid-cart"
 
 // Medusa's completion, as this test drives it (its own checks are Medusa's)
 const completeRun = jest.fn()
@@ -146,5 +146,74 @@ describe("completePaidCart never gives back a placed order's money (finding 2026
       will_fail_again: false,
     })
     expect(markStockShortFromShelf).not.toHaveBeenCalled()
+  })
+})
+
+describe("completePaidCart tells the shop only of a completion that keeps failing (review Z1)", () => {
+  // The shelf refuses the cart; its backorder fails on a lock, a passing fault
+  const stockShort = {
+    errors: [{ error: { message: "Not enough stock available for item x at location y" } }],
+  }
+  const lockBusy = { errors: [{ error: { message: "Timed-out acquiring lock: cart_01" } }] }
+
+  it.each([
+    ["the backorder fails on a lock", true],
+    ["the completion fails on a lock", false],
+  ])("below the threshold, %s: tried again, no alert", async (_, short) => {
+    const { container } = containerReading(notOrdered)
+    completeRun.mockResolvedValue(short ? stockShort : lockBusy)
+    backorderRun.mockResolvedValue(lockBusy)
+
+    await expect(
+      completePaidCart(container, { ...verdict, attempts: STUCK_ATTEMPTS - 1 })
+    ).rejects.toMatchObject({ safeMessage: "payments.completion_failed" })
+    expect(backorderRun).toHaveBeenCalledTimes(short ? 1 : 0)
+    expect(alertPaymentIssue).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ["the backorder fails on a lock", true],
+    ["the completion fails on a lock", false],
+  ])("at the threshold, %s: tried again, the shop told", async (_, short) => {
+    const { container } = containerReading(notOrdered)
+    completeRun.mockResolvedValue(short ? stockShort : lockBusy)
+    backorderRun.mockResolvedValue(lockBusy)
+
+    await expect(
+      completePaidCart(container, { ...verdict, attempts: STUCK_ATTEMPTS })
+    ).rejects.toMatchObject({ safeMessage: "payments.completion_failed" })
+    expect(alertPaymentIssue).toHaveBeenCalledTimes(1)
+    expect(alertPaymentIssue).toHaveBeenCalledWith(container, {
+      issue: "completion_stuck",
+      provider: "paytr",
+      reference: verdict.reference,
+      cart_id: "cart_01",
+      amount: 21000,
+    })
+  })
+
+  it("a verdict without a count (none kept) never alerts on its own", async () => {
+    const { container } = containerReading(notOrdered)
+    completeRun.mockResolvedValue(stockShort)
+    backorderRun.mockResolvedValue(lockBusy)
+    const uncounted: Parameters<typeof completePaidCart>[1] = { ...verdict }
+    delete uncounted.attempts
+
+    await expect(completePaidCart(container, uncounted)).rejects.toMatchObject({
+      safeMessage: "payments.completion_failed",
+    })
+    expect(alertPaymentIssue).not.toHaveBeenCalled()
+  })
+
+  it("places a stock-short cart as a backorder at once, with no alert", async () => {
+    const { container } = containerReading(notOrdered)
+    completeRun.mockResolvedValue(stockShort)
+    backorderRun.mockResolvedValue({ result: { order_id: "order_03" }, errors: [] })
+
+    expect(await completePaidCart(container, { ...verdict, attempts: STUCK_ATTEMPTS })).toEqual({
+      order_id: "order_03",
+      will_fail_again: false,
+    })
+    expect(alertPaymentIssue).not.toHaveBeenCalled()
   })
 })
