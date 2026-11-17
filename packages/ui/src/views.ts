@@ -187,6 +187,11 @@ export interface ShopView {
         text: string
         /** Its section id, only in the theme editor's live preview (`editor`): the box's section mark. */
         mark?: string
+        /**
+         * A band drawn on the free rows footer's ground as its top band
+         * (adr/0070 §4 Ek), not above the footer; absent: above it.
+         */
+        joined?: boolean
       } & Partial<NewsletterLookView>)
     | null
   /**

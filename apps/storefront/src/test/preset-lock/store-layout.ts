@@ -113,6 +113,9 @@ function footerNewsletter(box: Section) {
     ...(box["description"] ? { description: box["description"] } : {}),
     ...(promise && box["note"] ? { note: box["note"] } : {}),
     ...(promise && box["show_note"] === false ? { show_note: false } : {}),
+    ...(variant !== "standard" && variant !== "in_footer" && box["joined"] === true
+      ? { joined: true }
+      : {}),
   }
 }
 

@@ -24,7 +24,15 @@ const IMAGE = {
 const at = (n: number) => ({ id: `blok${String(n)}abc`, at: n, device: "all" as const })
 
 const BLOCKS: FooterBlockView[] = [
-  { ...at(0), type: "brand", logo: null, name: "Örnek Atölye", about: "Kısa tanıtım.", social: [] },
+  {
+    ...at(0),
+    type: "brand",
+    logo: null,
+    name: "Örnek Atölye",
+    about: "Kısa tanıtım.",
+    social: [],
+    address: null,
+  },
   {
     ...at(1),
     type: "menu",

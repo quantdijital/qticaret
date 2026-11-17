@@ -20,6 +20,7 @@ import { cardFooterFields } from "./card-field-ids"
 import type { FooterPart } from "../footer-rows/footer-rows-fields"
 import { BANNER_GROUPS } from "./banner-groups"
 import { CONTENT_IDS, contentFields } from "./content-registry"
+import { isFooterBand } from "./newsletter-band"
 import {
   HEADER_CATALOG_STEPS,
   headerCatalogOffers,
@@ -256,6 +257,17 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   }
   // The content's counts and switches (docs/tema/bilesen-denetimi O2)
   fields.push(...contentFields(section))
+  // The footer box's band on the footer's ground, under "Stil" (adr/0070 §4 Ek)
+  if (isFooterBand(section, group)) {
+    fields.push({
+      key: "joined",
+      group: "placement",
+      label: "storefront.editor.newsletter.joined",
+      term: "storefront.editor.newsletter.joinedTerm",
+      options: [],
+      target: CONTENT_IDS.content(id, "joined"),
+    })
+  }
   // How the announcement bar shows several lines, and how they turn
   fields.push(...announcementFields(section))
   if (section.type === "marquee") {

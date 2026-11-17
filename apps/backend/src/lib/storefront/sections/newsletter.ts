@@ -76,10 +76,25 @@ export const placedNewsletter = z.discriminatedUnion(
   VARIANT_ERROR
 )
 
+/**
+ * The footer box's bands' own setting (adr/0070 §4 Ek): under the free rows
+ * footer the band is drawn on the footer's ground as its top band, as the
+ * ledger and the brand columns draw it, instead of a page's box above the
+ * footer. Absent or false: above the footer, as it was; the other footers
+ * draw their band inside them whatever it says. A page's box has no footer.
+ */
+const joined = { joined: z.boolean().optional() }
+
 /** The footer's box: no look of its own (the footer's frame is adr/0049 §9 V3's). */
 export const footerNewsletter = z.discriminatedUnion(
   "variant",
-  [footer.standard, footer.split, footer.image_card, footer.strip, footer.in_footer],
+  [
+    footer.standard,
+    footer.split.extend(joined),
+    footer.image_card.extend(joined),
+    footer.strip.extend(joined),
+    footer.in_footer,
+  ],
   VARIANT_ERROR
 )
 
@@ -117,5 +132,7 @@ export function printedNewsletter<I>(
     ...(section.variant === "image_card" && section.image
       ? { image: { ...picture(section.image.url, section.image.alt), alt: section.image.alt } }
       : {}),
+    // The footer's band on the footer's ground (adr/0070 §4 Ek), only when set
+    ...("joined" in section && section.joined === true ? { joined: true } : {}),
   }
 }

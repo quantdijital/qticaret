@@ -50,7 +50,7 @@ export const ROW_GROUPS = {
 export const BLOCK_FIELDS = {
   text: ["title", "body"],
   menu: ["slot", "title", "collapse_phone"],
-  brand: ["logo", "about", "social"],
+  brand: ["logo", "about", "address", "social"],
   newsletter: ["title", "description", "text", "variant"],
   contact: ["title", "address", "phone", "whatsapp", "email", "hours"],
   social: ["title"],

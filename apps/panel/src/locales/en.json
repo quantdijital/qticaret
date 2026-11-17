@@ -8519,7 +8519,10 @@
         "imageHint": "A picture from the media library, on the card's left. Without one the box is drawn as the side-by-side band.",
         "consent": "Consent sentence",
         "consentTerm": "İYS",
-        "consentHint": "The sentence beside the subscription consent box: ticking it, the visitor agrees to commercial messages. It is not a description; it should name your shop and say a confirmation link will be sent. Left empty, the storefront's legal sentence is used."
+        "consentHint": "The sentence beside the subscription consent box: ticking it, the visitor agrees to commercial messages. It is not a description; it should name your shop and say a confirmation link will be sent. Left empty, the storefront's legal sentence is used.",
+        "joined": "Joined to the footer",
+        "joinedTerm": "footer band",
+        "joinedHint": "On: the band is drawn on the Free rows footer's own ground, as its top strip. Off: it stands above the footer as a box of its own. The other footer variants draw the band inside them anyway."
       },
       "announcement": {
         "line": "Announcement {{number}}",
@@ -9923,7 +9926,8 @@
           },
           "address": {
             "label": "Address",
-            "term": "address"
+            "term": "address",
+            "brandHint": "The address from the store details, under the short line."
           },
           "phone": {
             "label": "Phone",

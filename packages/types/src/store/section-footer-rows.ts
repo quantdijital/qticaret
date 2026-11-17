@@ -170,6 +170,7 @@ export const FOOTER_ROWS_START = [
             logo: true,
             about: null,
             social: false,
+            address: false,
           },
         ],
       },
@@ -242,7 +243,14 @@ export type StoreFooterBlock = StoreFooterBlockBase &
         title: string | null
         collapse_phone: boolean
       }
-    | { type: "brand"; logo: boolean; about: string | null; social: boolean }
+    | {
+        type: "brand"
+        logo: boolean
+        about: string | null
+        social: boolean
+        /** The shop's address under its line, as the brand columns draw it. */
+        address: boolean
+      }
     | {
         type: "newsletter"
         title: string | null

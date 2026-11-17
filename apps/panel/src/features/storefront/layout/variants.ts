@@ -120,6 +120,8 @@ const OPTIONAL_FIELDS: {
   >
 } = {
   hero: { category_list: ["slides", "scroller"] },
+  // The footer box's band on the footer's ground (adr/0070 §4 Ek): the bands' own, set by the shop
+  newsletter: { split: ["joined"], image_card: ["joined"], strip: ["joined"] },
 }
 
 /**
