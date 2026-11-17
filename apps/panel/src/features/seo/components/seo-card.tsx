@@ -25,6 +25,7 @@ import { useStoreName } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 import { cn } from "@qticaret/admin-ui/lib/utils"
+import { SeoAiField } from "./seo-ai"
 import { seoSummary } from "./seo-summary"
 import type { SeoCollapse } from "./seo-summary"
 
@@ -114,6 +115,12 @@ function SeoForm({
       : context.fallbackDescription)
   const host = settings?.values.canonical_host ?? t("seo.sampleHost")
 
+  // An accepted suggestion is the person's change: the preview and the counters follow, Save writes it
+  const use = (name: "seo_title" | "seo_description") => (text: string) => {
+    const kept = name === "seo_title" ? MAX.title : MAX.description
+    form.setValue(name, text.slice(0, kept), { shouldDirty: true })
+  }
+
   const submit = form.handleSubmit((next) => {
     const { dirtyFields } = form.formState
     const body: Partial<SeoMeta> = {
@@ -193,12 +200,14 @@ function SeoForm({
         hint={t("seo.card.seoTitleHint")}
       >
         <div className="flex flex-col gap-1">
-          <Input
-            id={`seo-title-${id}`}
-            maxLength={MAX.title}
-            placeholder={renderSample(titleTemplate, storeName, context.tokens)}
-            {...form.register("seo_title")}
-          />
+          <SeoAiField task="seo_title" type={type} id={id} onUse={use("seo_title")}>
+            <Input
+              id={`seo-title-${id}`}
+              maxLength={MAX.title}
+              placeholder={renderSample(titleTemplate, storeName, context.tokens)}
+              {...form.register("seo_title")}
+            />
+          </SeoAiField>
           <div className="flex justify-end">
             <Counter length={shownTitle.length} limit={TITLE_LIMIT} />
           </div>
@@ -210,13 +219,15 @@ function SeoForm({
         hint={t("seo.card.seoDescriptionHint")}
       >
         <div className="flex flex-col gap-1">
-          <Textarea
-            id={`seo-description-${id}`}
-            // Grows with the text, up to a few lines; longer scrolls inside
-            className="max-h-60 min-h-20"
-            maxLength={MAX.description}
-            {...form.register("seo_description")}
-          />
+          <SeoAiField task="seo_description" type={type} id={id} onUse={use("seo_description")}>
+            <Textarea
+              id={`seo-description-${id}`}
+              // Grows with the text, up to a few lines; longer scrolls inside
+              className="max-h-60 min-h-20"
+              maxLength={MAX.description}
+              {...form.register("seo_description")}
+            />
+          </SeoAiField>
           <div className="flex justify-end">
             <Counter length={shownDescription.length} limit={DESCRIPTION_LIMIT} />
           </div>
