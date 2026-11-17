@@ -20,7 +20,7 @@
 - **Panel:** `apps/panel/src/features/storefront/editor/forms/footer-bar-form.tsx`, `footer-columns-fields.tsx`, `footer-sketches.tsx`, `payment-badges-field.tsx`; alan kimlikleri `card-field-ids.ts`; ağaç `section-tree.tsx` (alt bilgi sabit satır), bölüm sıralama `section-row.tsx` + `section-list.tsx` (yerel HTML5 sürükle-bırak, tutamaç; aynı iş için ok düğmeleri ve menü: WCAG 2.5.7). Ayar sekmeleri ve grupları `panel-groups.ts` (`panel-groups.spec.tsx` denetler), açıklama `field-hint.tsx` → `InfoTip`.
 - **Köprü** (adr/0065 Ek Faz 2b): `fieldMark(on, key)` yalnız canlı oturumda `data-qf` basar; anahtar `BRIDGE_FIELD_KEY` (`packages/types/src/editor-bridge.ts`): en çok 4 parça, parça küçük harfli sözcük ya da 1–2 haneli sayı, 80 karakter. Tekrarlanan parça çizimdeki değil **tasarımdaki yerini** taşır.
 - **Kilit:** `pnpm lock:presets` hazır görünümlerin çerçeve, ana sayfa, ürün ve liste HTML'ini ve tema CSS özetini tutar (adr/0067 §3).
-- **Çakışma kontrolü (2026-11-17):** `origin/deniz/nextjs-guvenlik` (4 dosya) ve `origin/deniz/video-2-donusturme` (ürün videoları, `adr/0069`) alt bilgi dosyalarına dokunmuyor. E-bülten biçimleri işi (`oguzhan/ebulten-bicimleri`) henüz commit'lenmedi; bülten bloğu o işin biçim listesine bağlanır (aşağıda §4).
+- **Çakışma kontrolü (2026-11-17):** `origin/deniz/nextjs-guvenlik` (4 dosya) ve `origin/deniz/video-2-donusturme` (ürün videoları, `adr/0069`) alt bilgi dosyalarına dokunmuyor. E-bülten biçimleri işi (`oguzhan/ebulten-bicimleri`, açık iş) `SECTION_VARIANTS.newsletter = ["standard", "split", "image_card", "strip", "in_footer"]` ve `section-newsletter.ts` ekliyor (`in_footer`: kendi kutusu yok, alt bilginin marka sütununda küçük "Bültene katıl"; `NEWSLETTER_FOOTER_ONLY`); bülten bloğu ve alt bilgi grubundaki bülten bandı bu listeye bağlanır (§2, §4).
 
 ### Başkaları nasıl yapıyor (bilinenle; bu ADR yazılırken web'den doğrulanmadı)
 
@@ -71,7 +71,7 @@ Sütun 768 px altında alt alta (ya da `phone_columns: 2` ise ikişer) dizilir; 
 | `text` | Sabit yazı | `title` (≤60, yok), `body` içerik belgesi (aşağıda) | 8 |
 | `menu` | Menü | `slot` 1–10 (alt bilgi menülerinin sırası), `title` (≤60, yok: menünün adı), `collapse_phone` (telefonda açılır kapanır, `true`) | 10 |
 | `brand` | Logo ve tanıtım | `logo` (`true`; mağaza profilinin logosu, yoksa ad), `about` (≤240, yok), `social` (`false`) | 1 |
-| `newsletter` | Bülten formu | `title` (≤120), `text` (≤240, yok), `variant` (bülten bölümünün biçim listesi; o liste gelene kadar yalnız varsayılan) | 1 |
+| `newsletter` | Bülten formu | `title` (≤120), `text` (≤240, yok), `variant`: sütuna sığan bülten biçimleri `standard` / `in_footer` (bülten bölümünün adları; bant biçimleri `split`, `image_card`, `strip` sütunda değil, alt bilgi grubunun bülten bandında, §4) | 1 |
 | `contact` | İletişim ve çalışma saatleri | `title` (yok), `address`, `phone`, `whatsapp`, `email`, `hours` (hepsi `true`; değerler mağaza bilgilerinden, adr/0048; burada yazılmaz) | 1 |
 | `social` | Sosyal medya | `title` (yok); hesaplar mağaza bilgilerinden (`same_as`), çizim ortak `social` ayarından | 2 |
 | `payments` | Ödeme logoları | `title` (yok), `carriers` (kargo logoları da, `false`); liste ortak `payment_badges`, boşsa sağlayıcıların logoları | 1 |
@@ -182,7 +182,7 @@ Bunlar blok değildir, ağaçta "Alt satır (sabit)" adıyla salt okunur görün
 
 `StoreLayout.footer`'a bülten dışında da bölüm eklenebilir. İzinli türler: `footer_bar` (ana, sabit), `newsletter` (var olan), **`rich_text`**, **`trust_badges`**, **`marquee`**; her tür en çok bir kez (`onlyOnce` korunur), `LAYOUT_LIMITS.footer` 3 → **5**. Bu bölümlerin şeması sayfa bölümlerininkidir (ikinci kez yazılmaz; `footerSection` birliğine eklenir), çizimi de sayfadaki bileşenlerdir.
 
-- **Yer:** grup bölümleri alt bilgi çubuğunun **üstünde**, gruptaki sıralarıyla çizilir; `footer_bar` hep en altta durur (sıralamada yeri yok, kategori ana bölümünün `placement`siz deseni). `newsletter` bölümü `ledger` ve `brand_columns`'da bugünkü gibi çubuğun içinde çizilir (çıktı değişmez); `free_rows`'da ise diğer grup bölümleri gibi çubuğun üstünde ayrı bant olarak çizilir.
+- **Yer:** grup bölümleri alt bilgi çubuğunun **üstünde**, gruptaki sıralarıyla çizilir; `footer_bar` hep en altta durur (sıralamada yeri yok, kategori ana bölümünün `placement`siz deseni). `newsletter` bölümü `ledger` ve `brand_columns`'da bugünkü gibi çubuğun içinde çizilir (çıktı değişmez); `free_rows`'da ise diğer grup bölümleri gibi çubuğun üstünde ayrı bant olarak, kendi biçimiyle (`standard`, `split`, `image_card`, `strip`) çizilir. `in_footer` biçimli bülten bölümü `free_rows`'da bant olmaz: yeri bir sütundur, panel biçim değişiminde onu `in_footer` biçimli bülten bloğuna çevirir (§2.4); kayıtta `free_rows` ile görünür `in_footer` bölümü birlikte gelirse `storefront_layout.section_invalid` döner (yeri belirsiz bölüm).
 - **Kayan şerit:** alt bilgideki `marquee` her sayfada görünür; adr/0049 §4.1'in sayfa başına şerit sınırına başlıktaki gibi sayılır (`tooManyMarquees` alt bilgi grubunu da okur).
 - **Resimli bölümler (`banner`, `hero_slider`) şimdilik yok:** her sayfada görsel yükü ve LCP riski; ihtiyaç doğarsa ayrı ek.
 - **Kilit etkisi:** hazır görünümlerin `layout.json`'ları değişmediği sürece HTML kilidi aynı kalır (grup okuma kodu yeni tür görmez). Kilit testine bir "alt bilgi grubunda metin + güvence + şerit" düzeni **test fikstürü** olarak eklenir (hazır görünüm değil), böylece grup çiziminin HTML'i de kilitlenir. Panel ağacında grup satırı "Bölüm ekle" ile bu türleri sunar (`add-section-dialog.tsx`'e grup filtresi).
@@ -234,7 +234,7 @@ Bunlar blok değildir, ağaçta "Alt satır (sabit)" adıyla salt okunur görün
 - Panelde ilk kez iç içe (üç düzeyli) düzenlenebilir ağaç; sürükle-bırak ve klavye alternatifi ortak bir parça olarak yazılır, ileride başka bölümler (slayt, SSS) de kullanabilir.
 - Menü bloğu sıraya bağlı olduğundan Menüler ekranında sıra değişimi alt bilgiyi etkiler; bu not edilir (§2.3).
 - Alt bilgi grubu açıldığı için grup çizimi kilide fikstürle girer; hazır görünüm kilidi değişmez.
-- Bülten bloğu, e-bülten bölümünün biçimleri dev'e girince onların listesine bağlanır; o zamana kadar varsayılan çizim.
+- Bülten bloğu ve bandı e-bülten bölümünün biçim adlarını kullanır (`standard`, `in_footer` sütunda; `split`, `image_card`, `strip` bantta). PR-1, e-bülten biçimleri `dev`'e girdikten sonra başlar ya da bloğun `variant` alanını o iş girene kadar yalnız `standard` ile açar.
 
 ## Açık kararlar (önerilen varsayılanla ilerler)
 
