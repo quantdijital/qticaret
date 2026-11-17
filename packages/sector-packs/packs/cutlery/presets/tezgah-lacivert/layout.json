@@ -36,11 +36,8 @@
       "variant": "category_list",
       "eyebrow": "Atölyeden tezgâha",
       "heading": "Bıçak, çakı ve kamp aletleri",
-      "text": "Her modelin çeliği, namlu boyu ve sertliği ürün sayfasında yazılı. Kategoriden seçin ya da aramaya model adını yazın.",
-      "links": [
-        { "$href": "/magaza", "label": "Tüm ürünler" },
-        { "$href": "/kategoriler", "label": "Kategoriler" }
-      ],
+      "text": "Çeliği, namlu boyu ve sertliği her ürünün sayfasında yazılı.",
+      "links": [{ "$href": "/magaza", "label": "Tüm ürünler" }],
       "image": null,
       "list": { "kind": "top" },
       "list_limit": 9,
@@ -55,33 +52,13 @@
         { "$href": "/kategori/outdoor-ve-kamp/multitool", "label": "Multitool" },
         { "$href": "/markalar", "label": "Markalar" }
       ],
-      "picks": [
-        {
-          "product_id": { "$handle": "product:miras-sam-celigi-gyuto-21-cm" },
-          "label": "Şef bıçağı"
-        },
-        {
-          "product_id": { "$handle": "product:karacelik-doruk-n690-av-bicagi" },
-          "label": "Av bıçağı"
-        },
-        {
-          "product_id": { "$handle": "product:demirhan-bozkurt-d2-kilitli-caki" },
-          "label": "Çakı"
-        },
-        {
-          "product_id": { "$handle": "product:yoruk-usta-18-fonksiyonlu-multitool" },
-          "label": "Multitool"
-        }
-      ],
+      "picks": [],
       "show_price": true,
       "slides": [
         {
           "heading": "Bıçak, çakı ve kamp aletleri",
-          "text": "Her modelin çeliği, namlu boyu ve sertliği ürün sayfasında yazılı. Kategoriden seçin ya da aramaya model adını yazın.",
-          "links": [
-            { "$href": "/magaza", "label": "Tüm ürünler" },
-            { "$href": "/kategoriler", "label": "Kategoriler" }
-          ],
+          "text": "Çeliği, namlu boyu ve sertliği her ürünün sayfasında yazılı.",
+          "links": [{ "$href": "/magaza", "label": "Tüm ürünler" }],
           "image": {
             "$image": "images/acilis-sef-bicaklari.webp",
             "alt": "Kesme tahtası üstünde üç şef bıçağı"

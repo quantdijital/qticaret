@@ -12,7 +12,7 @@ Ziyaretçi bir alet arıyor. Önce nerede olduğunu (kategori listesi), sonra ne
 
 ## Kurallar
 
-**Yoğunluk.** Sık. İlk ekranda kategori listesi, açılış (iki kategori döşemesi, dört hızlı bağlantı, dört küçük ürün) ve güvence şeridi birlikte görünür. Sekmeli raf iki sıra yerine dört kartlık tek kayan sıra; yeni gelenler sahne ve liste; indirimdekiler sıralı liste (bir büyük + dört); çok satanlar sekiz çapraz şerit; kısa listeler üç sütun.
+**Yoğunluk.** Sık. İlk ekranda kategori listesi, açılış (iki kategori döşemesi, dört hızlı bağlantı) ve güvence şeridi birlikte görünür. Açılış masaüstünde derli toplu kalır (1280–1920 px’te ~570–610 px): slayt metni kısa, tek düğme, küçük ürün yok; slaytın yazı yarısı satırın üçte birinden dar ve oklarla paylaşılır, küçük ürünler ve ikinci düğme açılışı ~900 px’e uzatıp kategori listesinin satırlarını açıyordu (2026-11-17). Sekmeli raf iki sıra yerine dört kartlık tek kayan sıra; yeni gelenler sahne ve liste; indirimdekiler sıralı liste (bir büyük + dört); çok satanlar sekiz çapraz şerit; kısa listeler üç sütun.
 
 **Üst bilgi.** Sade katalog üst bilgisi: arama simge (`search_style: icon`), araçlar menü satırında (`tools_place: row`), ince açık şeritte not + üst menü bağlantıları. Şerit notu mağaza bilgisini yer tutucuyla yazar: "{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava"; vitrin okurken doldurur, mağaza eşik girmemişse not hiç görünmez (yarım cümle yok). Menüler görünümle gelir (`menus.json`): ana menü yedi üst kategori ve çocukları, "Kategoriler" ve menü çubuğu resimli (`menu_images: all`, resim kategorinin kendisinden); üst menü Sipariş takibi, Markalar, Yorumlar; alt bilgide üç sütun. Görünümü uygulayıp yayınlayan mağazanın menüleri bu menülerle değişir (adr/0063 §3).
 
@@ -46,7 +46,7 @@ Lacivert takımın tabanı artık grafitten ayrışan bir mavi (seçili sekme la
 
 | Sıra | Bölüm | Zemin |
 | --- | --- | --- |
-| 1 | Açılış: kategori listesi + dört slaytlı giriş, iki kategori döşemesi, hızlı bağlantılar, küçük ürünler | sayfa (liste kendi kuyusunda) |
+| 1 | Açılış: kategori listesi + dört slaytlı giriş, iki kategori döşemesi, hızlı bağlantılar | sayfa (liste kendi kuyusunda) |
 | 2 | Güvence şeridi | sayfa |
 | 3 | Yeni gelenler: sahne ve liste (`stage_list`) | sayfa, sahnesi grafit |
 | 4 | Kullanıma göre: kategori kolajı | kuyu |
@@ -66,7 +66,7 @@ Lacivert takımın tabanı artık grafitten ayrışan bir mavi (seçili sekme la
 
 **Raflar arasında ayraç.** Tema yan yana duran ürün raflarını tek sekmeli rafa birleştirir; boş kalan bölüm vitrinde düşer. Sekmeli raf bilerek yalnız üç kategori rafıdır (av, kamp, şef). Başka iki ürün bölümü yan yana gelmez: aralarında her mağazada çizilen bir bölüm durur (fiyat bantları, şerit galerisi, kampanya bandı). Yakın plan mağazanın bir ürününe bağlıdır, ayraç sayılmaz. Bilinen sınır: paketin kategorileri yeni mağazada gizli açılır; mağaza onları açana kadar kategoriye bağlı bölümler (kolaj, sekmeli raf, kısa listeler) çizilmez.
 
-**Yeni mağazada.** Görünüm demo kataloğun ürünlerini ve alt kategorilerini anar; olmayan yalnız kendisi düşer (adr/0063 §5): açılışın küçük ürünleri ve döşemeleri tek tek çıkar, açılış kalır; yakın plan ürünü olmayınca bölüm düşer; demo'nun alt kategorilerine (santoku, multitool, bileme) giden bağlantılar temizlenir, öğe bağlantısız kalır; menüde o alt kategoriler çıkar.
+**Yeni mağazada.** Görünüm demo kataloğun ürünlerini ve alt kategorilerini anar; olmayan yalnız kendisi düşer (adr/0063 §5): açılışın döşemeleri tek tek çıkar, açılış kalır; yakın plan ürünü olmayınca bölüm düşer; demo'nun alt kategorilerine (santoku, multitool, bileme) giden bağlantılar temizlenir, öğe bağlantısız kalır; menüde o alt kategoriler çıkar.
 
 **Kart.** Her yerde çerçeveli kart: kare fotoğraf, marka, iki satır ad, puan (yalnız yorumu olanda; boş yıldız yok), fiyat, tek durum satırı (ücretsiz kargo), ayakta tam genişlik düğme ("Sepete ekle" ya da "Seçenekler", ikisi aynı biçim). Çok satanların büyük kartında fotoğraf alanı fotoğrafın kendi oranını alır (geniş fotoğrafın üstünde ve altında gri bant kalmaz; uzun fotoğraf 34rem'de durur), fotoğraf kırpılmaz ve büyütülmez; yanındaki iki sıranın kalanını büyük adlı bilgi bloğu doldurur, düğme ayakta (ikinci denetim Y-01, üçüncü denetim D-4). İkinci fotoğrafa geçiş kapalı (`hover_image: false`): kart kıpırdamaz. Kısa listeler kompakt kart.
 

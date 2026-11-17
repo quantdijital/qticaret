@@ -135,12 +135,8 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
     const { resolved, doc } = draft("tezgah", skeleton)
 
     expect(resolved.dropped).toEqual(["home.yakinplan"])
-    // The opening stays: only its small products the shop lacks go (adr/0063 §5)
+    // The opening names no product (it has no small products), so only the close-up's goes
     expect(resolved.skipped).toEqual([
-      { where: "home.tezgahacilis", ref: "product:miras-sam-celigi-gyuto-21-cm" },
-      { where: "home.tezgahacilis", ref: "product:karacelik-doruk-n690-av-bicagi" },
-      { where: "home.tezgahacilis", ref: "product:demirhan-bozkurt-d2-kilitli-caki" },
-      { where: "home.tezgahacilis", ref: "product:yoruk-usta-18-fonksiyonlu-multitool" },
       { where: "home.yakinplan", ref: "product:karacelik-alageyik-sam-celigi-av-bicagi" },
     ])
     const ids = doc.home.map((section) => section.id)

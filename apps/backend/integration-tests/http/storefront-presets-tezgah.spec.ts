@@ -38,20 +38,11 @@ const at = (where: string, refs: string[]) => refs.map((ref) => ({ where, ref })
 
 /**
  * What a new knife shop (the pack's skeleton, no products, no brands) lacks
- * of the preset: the opening's small products and the links to the demo's
- * subcategories go alone (adr/0063 §5), the close-up's product drops it.
+ * of the preset: the links to the demo's subcategories go alone (adr/0063 §5),
+ * the close-up's product drops it.
  */
 const SKIPPED = [
-  ...at("home.tezgahacilis", [
-    SANTOKU,
-    MULTITOOL,
-    "product:miras-sam-celigi-gyuto-21-cm",
-    "product:karacelik-doruk-n690-av-bicagi",
-    "product:demirhan-bozkurt-d2-kilitli-caki",
-    "product:yoruk-usta-18-fonksiyonlu-multitool",
-    BILEME,
-    BILEME,
-  ]),
+  ...at("home.tezgahacilis", [SANTOKU, MULTITOOL, BILEME, BILEME]),
   ...at("home.yakinplan", ["product:karacelik-alageyik-sam-celigi-av-bicagi"]),
   ...at("home.seritgaleri", [SANTOKU, "/marka/karacelik", MULTITOOL]),
   ...at("home.kategoriseridi", [SANTOKU, EKMEK, BILEME]),
@@ -105,7 +96,7 @@ medusaIntegrationTestRunner({
         draft = applied.data.layout.draft.home
       }
 
-      // The opening stays without the small products the shop lacks, its four slides kept
+      // The opening keeps its four slides, no small products (the preset has none)
       expect(draft[0]).toMatchObject({ id: "tezgahacilis", picks: [] })
       expect(draft[0]?.["slides"]).toHaveLength(4)
       expect(draft.map((section) => section.id)).toEqual([
