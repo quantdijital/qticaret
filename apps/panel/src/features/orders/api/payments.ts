@@ -48,6 +48,12 @@ export interface ShopRefund {
   status: "pending" | "done" | "failed"
   /** Pending with its money gone, or maybe gone, its record not closed: the shop checks the provider. */
   incomplete?: boolean
+  /** Whose payment it gave back: `paytr`, `iyzico`, `bank-transfer`, `cod`. */
+  provider?: string | null
+  /** The reference as the provider was given it: what to look for in its panel. */
+  sent_as?: string
+  /** iyzico's parts, as exact lira: answered (`done`) or answer lost (`sending`). */
+  parts?: { amount: string; state: string }[]
   note: string | null
   created_at: string
 }

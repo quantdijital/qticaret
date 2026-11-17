@@ -3992,6 +3992,22 @@
         "hint": "Buradan para gönderilmez. \"Para gitti\" kaydı kapatır; \"Para gitmedi\" kaydı başarısız yapar ve kalemler yeniden iade edilebilir. Seçiminiz denetim kaydına yazılır.",
         "made": "Para gitti",
         "not_made": "Para gitmedi",
+        "provider": "Ödeme kuruluşu",
+        "reference": "Referans",
+        "amount": "Tutar",
+        "date": "Tarih",
+        "parts": "Parçalar",
+        "part": {
+          "done": "yanıtlandı",
+          "sending": "yanıtı gelmedi"
+        },
+        "sure": {
+          "made": "Emin misiniz: para müşteriye geri gitti mi?",
+          "not_made": "Emin misiniz: para müşteriye geri gitmedi mi?",
+          "description": "Bu seçim kaydı kesinleştirir ve denetim kaydına yazılır. Sağlayıcının panelinde yukarıdaki referansla kontrol ettiyseniz onaylayın."
+        },
+        "back": "Geri",
+        "confirm": "Onayla",
         "done": {
           "made": "İade kaydı tamamlandı.",
           "not_made": "İade kaydı kapatıldı; kalemler yeniden iade edilebilir."

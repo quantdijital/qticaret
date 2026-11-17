@@ -36,12 +36,19 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
     vi.clearAllMocks()
   })
 
-  it("asks whether the money went back, and tells the server what staff saw", async () => {
+  it("shows what to look for, asks once more, then tells the server what staff saw", async () => {
     fetchMock.mockResolvedValue({ refund: { status: "done" } })
-    renderCard([refund()])
+    renderCard([refund({ provider: "paytr", sent_as: REFERENCE })])
 
     await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
-    await userEvent.click(await screen.findByRole("button", { name: "Para gitti" }))
+    // Who, which reference, how much: what the provider's panel is searched by
+    expect(await screen.findByText("PayTR")).toBeInTheDocument()
+    expect(screen.getAllByText(REFERENCE).length).toBeGreaterThan(0)
+    await userEvent.click(screen.getByRole("button", { name: "Para gitti" }))
+    // Chosen, not yet sent: asked once more
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(screen.getByText(/Emin misiniz: para müşteriye geri gitti mi/)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Onayla" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(`/admin/orders/order_1/refunds/${REFERENCE}/settle`, {
@@ -52,12 +59,14 @@ describe("RefundsCard: an incomplete refund checked at the provider (review 2026
     expect(toast.success).toHaveBeenCalledWith("İade kaydı tamamlandı.")
   })
 
-  it("sends `not_made` for money that did not go back", async () => {
+  it("sends `not_made` for money that did not go back, iyzico's parts shown", async () => {
     fetchMock.mockResolvedValue({ refund: { status: "failed" } })
-    renderCard([refund()])
+    renderCard([refund({ provider: "iyzico", parts: [{ amount: "30.00", state: "sending" }] })])
 
     await userEvent.click(screen.getByRole("button", { name: /sağlayıcıda kontrol et/i }))
-    await userEvent.click(await screen.findByRole("button", { name: "Para gitmedi" }))
+    expect(await screen.findByText(/yanıtı gelmedi/)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Para gitmedi" }))
+    await userEvent.click(screen.getByRole("button", { name: "Onayla" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(`/admin/orders/order_1/refunds/${REFERENCE}/settle`, {

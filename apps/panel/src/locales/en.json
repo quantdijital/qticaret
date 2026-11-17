@@ -3992,6 +3992,22 @@
         "hint": "No money is sent from here. \"Money went back\" closes the record; \"Money did not go back\" fails it and its lines can be refunded again. Your choice is written to the audit log.",
         "made": "Money went back",
         "not_made": "Money did not go back",
+        "provider": "Payment provider",
+        "reference": "Reference",
+        "amount": "Amount",
+        "date": "Date",
+        "parts": "Parts",
+        "part": {
+          "done": "answered",
+          "sending": "answer lost"
+        },
+        "sure": {
+          "made": "Are you sure the money went back to the customer?",
+          "not_made": "Are you sure the money did not go back to the customer?",
+          "description": "This choice settles the record and is written to the audit log. Confirm if you checked the provider's panel by the reference above."
+        },
+        "back": "Back",
+        "confirm": "Confirm",
         "done": {
           "made": "The refund's record is complete.",
           "not_made": "The refund's record is closed; its lines can be refunded again."
