@@ -4,17 +4,43 @@
 
 ## Sıradaki işler (güncel tutulur; Oğuzhan başlamadan önce buraya bakar)
 
-1. **ADR-0069 ürün videoları, dilim 2–8** (dilim 1 #117 ile birleşti): dilim 4 (galeride video karesi, CSP `media-src`/`frame-src`) Oğuzhan'ın vitrin alanıyla kesişir, başlamadan ona haber.
-2. **Küçük takipler:**
-   - Kısmen yapılmış iyzico iadesi için çıkış yolu (#153 D4-1): `done` parça var, tutar eksik; elle sonuçlandırılamıyor, kayıt açık kalıyor. Para açısından güvenli.
-   - Vitrin `lib/store-api/core.ts`'te köken denetimi (`new URL(path, MEDUSA_BACKEND_URL)` backend kökeni dışına çıkmasın; #141 incelemesi). Vitrin alanı, Oğuzhan'a not.
-   - Toptan analitik: toptan fiyat GA4/Meta'ya hiçbir yoldan gitmesin (#147'de kabul edilen düşükler: L1 tarama sırasında toptancı yapılan müşterinin olayları sert yenilemeye kadar tutarla gidebilir; L2 sipariş sayfasının satın alma olayı oturuma bakar, oturumsuz `?yeni=1` açılışı). SMS (L4): toptancının müşteri kaydı dışındaki telefonları SMS kitlesinden dışlanmıyor.
-3. **BirFatura entegrasyonu:** A yolu onaylandı (siparişleri BirFatura çeker); test hesabı gelince ADR → F1/F2 (`docs/entegrasyonlar/plan-basitkargo-birfatura.md`). BasitKargo şimdilik yok. Paraşüt canlıdan sonra, ikinci plan.
-4. **Canlıya çıkış listesine eklenecekler:** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); sunucuya ffmpeg (`FFMPEG_PATH` / `FFPROBE_PATH`); BirFatura için gerekirse ayrı alt alan adı.
-5. **Sahibin panelde bakması bekleniyor:** toptancı akışı (şifreyle oluşturma, Yeni şifre, Hesabı devral, Sil); mağaza profili Genel ekranı ve kenar çubuğu simgesi (#123). Bulgu çıkarsa ayrı düzeltme PR'ı.
-6. **Sahibin bekleyen kararları:** ağır testler (HTTP parçaları, e2e) yalnız `dev` ve PR'larda mı koşsun; toptan/perakende ayrımı raporlarda, panoda ve plan sayacında; toptancı "Sil" müşteri kaydını da silsin mi (bugün perakende müşteri olarak kalır); Katalog görünümü menü zemini / duyuru şeridi; `packages/themes/base` (eskimiş); canlı alan adları; ADR-0064.
+1. **BirFatura entegrasyonu:** A yolu onaylandı (siparişleri BirFatura çeker); test hesabı bekleniyor, gelince ADR → F1/F2 (`docs/entegrasyonlar/plan-basitkargo-birfatura.md`). BasitKargo şimdilik yok. Paraşüt canlıdan sonra, ikinci plan.
+2. **Canlıya çıkış listesi (F16, sahiple):** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); imajda ffmpeg ≥ 7 (`FFMPEG_PATH` / `FFPROBE_PATH`; CI'ın apt'si 6.1 veriyor); Cloudflare önde (adr/0003), ayrı depo origin'iyle birlikte; o zaman CSP `img-src`/`media-src` daraltılır. BirFatura için gerekirse ayrı alt alan adı.
+3. **Sahibin tarayıcıda bakması bekleniyor:**
+   - Panelde video yükleme (localhost:5173).
+   - Vitrin galerisinde video ve YouTube karesi (açılışta video baytı inmez; azaltılmış hareket).
+   - Depodan Range 206 denetimi.
+   - Sepette stok mesajı ("Bu üründen stokta yalnız N adet var").
+   - D4-1 pencereleri (kısmen yapılmış iyzico iadesi).
+   - Önceden kalan: toptancı akışı (şifreyle oluşturma, Yeni şifre, Hesabı devral, Sil); mağaza profili Genel ekranı ve kenar çubuğu simgesi (#123).
+4. **Sahibin bekleyen kararları:**
+   - Ağır testler (HTTP parçaları, e2e) yalnız `dev` ve PR'larda mı koşsun.
+   - Toptan/perakende ayrımı raporlarda, panoda ve plan sayacında.
+   - Toptancı "Sil" müşteri kaydını da silsin mi (bugün perakende müşteri olarak kalır).
+   - ADR-0063 "sihirbazda varsayılan Grafit" sorusu (F17; Grafit hazır görünümü #178 ile kalktı, Grafit adlı tema varsayılanı duruyor).
+   - Önceden kalan: Katalog görünümü menü zemini / duyuru şeridi; `packages/themes/base` (eskimiş); canlı alan adları; ADR-0064.
+5. **Olası takipler:**
+   - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
+   - D4-1: düzenleme iadesinde referansla sürdürme gerçek bir düzenleme iadesiyle denenmedi.
 
-Sıra: 1 → 2 → 3 (BirFatura test hesabı gelince öne alınır). Eski 1, 2, 4 ve 5 bitti (#132, #134, #138, #141, #147).
+Bitenler: ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186). Toptan analitik L1/L2 + SMS L4 #187'de, açık (CI bekliyor). Sıra: 1 test hesabı gelince öne alınır; 2 canlıya çıkışta; 3 ve 4 sahipte.
+
+## 2026-11-17 akşam → 2026-11-18 gece: ürün videoları bitti, D4-1, köken denetimi
+
+- **Birleşenler:**
+  - #155: notlar (sıradaki işler, 2026-11-17 kararları).
+  - ADR-0069 ürün videoları: #159 (dilim 2, yüklenen videonun dönüştürülmesi), #165 (dilim 3, panel medya kartında video, başlık ve yeniden deneme uçları), #171 (dilim 4, Atölye galerisinde video, Store API yaprakları, CSP `media-src`), #174 (dilim 5, YouTube videosu, yalnız basınca oynar), #176 (dilim 6, `VideoObject` JSON-LD; GIF video sayılmaz), #179 (dilim 8, panel e2e; güvenlik, panel, devops ve KVKK belgeleri). Video işi bitti: dilim 1–6 ve 8. Dilim 7 (GIF) sahibin kararıyla 2026-11-17'de iptal, ADR'de Karar 11.
+  - #168: sepette stoktan fazla adet artık "Bu üründen stokta yalnız N adet var" der; sahip bildirmişti.
+  - #154: Next.js 16.4.5 güvenlik yükseltmesi (+ panel ⌘K keydown koruması); yaş penceresi dolunca birleşti; `pnpm install` yapıldı, vitrin yeniden başlatıldı.
+  - #178: sahibin isteğiyle "Grafit" hazır görünümü kalktı; Grafit adlı tema varsayılanı duruyor. Görünüm e2e'si için CI cutlery paketini uyguluyor.
+  - #185 (D4-1): kısmen yapılmış iyzico iadesine çıkış yolu; dört güvenlik incelemesi turu. Panel ve düzenleme iadelerinde `made_in_part`; `lost_part` yanıtları; iptal ve iade iadeleri akış yeniden koşunca kaldığı yerden sürer; "Kalanı iyzico panelinden elle iade ettim"; bilinmeyen iyzico ret kodları parçayı bilinmez bırakır.
+  - #186: vitrin Store API köken denetimi (istekler backend kökeninde kalır); fatura dosya adı başlığı da düzeldi.
+- **Açık PR:** #187 toptan analitik L1/L2 + SMS L4 (analitik tutarları sayfa ve sipariş başına karar verilir; toptancının hiçbir telefonu SMS'e girmez); güvenlik denetimleri yeşil, CI sürüyor.
+- **Sahibin kararları (2026-11-17):**
+  - GIF yükleme yok (dilim 7 iptal).
+  - Grafit hazır görünümü kalksın.
+  - CDN: bugün yok; ileride Cloudflare önde (adr/0003), canlıya çıkıştaki "ayrı depo origin'i" maddesiyle birlikte; CSP `img-src`/`media-src` o zaman daraltılabilir.
+- **Yerel ortam:** video işi için Homebrew ile ffmpeg 9.0.2 kuruldu; medya migration'ı `Migration20261117104707` yerel DB'ye uygulandı.
 
 ## 2026-11-16/17: ödeme ve iade sertleştirme, toptancı dilim 5, bakım modu
 
