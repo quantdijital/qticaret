@@ -75,6 +75,7 @@ const NOTES: Record<string, string> = {
   // The backend's own refusals, in its words (`cancelOrder`)
   "iptal-hediye-karti": "orders.gift_card_used",
   "iptal-magaza": "orders.cancel_contact_shop",
+  "iptal-iade-isleniyor": "orders.refund_unsettled",
 }
 
 // The carrier's words for where a parcel is; anything else reads as on its way
