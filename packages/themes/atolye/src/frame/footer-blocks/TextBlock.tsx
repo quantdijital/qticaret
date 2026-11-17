@@ -19,7 +19,10 @@ export function TextBlock({ block, editor }: BlockProps<"text">) {
       )}
       <div
         className="gf-foot-prose"
-        // adr/0019: built by the backend from an allow-listed document schema
+        // adr/0019, adr/0070 §2: the only source is the backend's `renderDoc(footerDoc)`, the
+        // footer's narrowed allow-listed document drawn on the server, every text and address
+        // escaped there. Not `content/Prose`: its article type (`gf-prose`) is not the footer's.
+        // nosemgrep: typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml
         dangerouslySetInnerHTML={{ __html: block.html }}
         {...blockMark(editor, block.at, "body")}
       />
