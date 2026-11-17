@@ -78,26 +78,29 @@ export function CurrentLookCard({ gallery, presets, savedFull }: CurrentLookCard
               <Skeleton className="aspect-[16/10] w-full rounded-md" />
             )}
           </div>
-          <dl className="flex min-w-0 flex-1 flex-col gap-3 text-sm">
-            <div className="flex flex-col gap-0.5">
-              <dt className="text-xs text-muted-foreground">{t(`${G}.liveLabel`)}</dt>
-              <dd className="font-medium">
-                {live.revision > 0 && live.published_at
-                  ? t(`${G}.live`, { name: liveName, date: formatDate(live.published_at) })
-                  : t(`${G}.neverLive`)}
-              </dd>
-            </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-xs text-muted-foreground">{t(`${G}.draftLabel`)}</dt>
-              <dd className="flex flex-col items-start gap-1.5">
-                <span className="font-medium">
-                  {draft.edited ? t(`${G}.draftEdited`, { name: draftName }) : draftName}
-                </span>
-                <StatusBadge tone={draft.has_changes ? "warning" : "success"}>
-                  {t(draft.has_changes ? `${G}.draftChanged` : `${G}.draftSame`)}
-                </StatusBadge>
-              </dd>
-            </div>
+          {/* Only the two name / value pairs are the list: the rest are notes beside it */}
+          <div className="flex min-w-0 flex-1 flex-col gap-3 text-sm">
+            <dl className="flex flex-col gap-3">
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-xs text-muted-foreground">{t(`${G}.liveLabel`)}</dt>
+                <dd className="font-medium">
+                  {live.revision > 0 && live.published_at
+                    ? t(`${G}.live`, { name: liveName, date: formatDate(live.published_at) })
+                    : t(`${G}.neverLive`)}
+                </dd>
+              </div>
+              <div className="flex flex-col gap-1">
+                <dt className="text-xs text-muted-foreground">{t(`${G}.draftLabel`)}</dt>
+                <dd className="flex flex-col items-start gap-1.5">
+                  <span className="font-medium">
+                    {draft.edited ? t(`${G}.draftEdited`, { name: draftName }) : draftName}
+                  </span>
+                  <StatusBadge tone={draft.has_changes ? "warning" : "success"}>
+                    {t(draft.has_changes ? `${G}.draftChanged` : `${G}.draftSame`)}
+                  </StatusBadge>
+                </dd>
+              </div>
+            </dl>
             {newer ? (
               <div className="flex flex-col items-start gap-1">
                 <StatusBadge tone="info">{t("storefront.gallery.badge.newVersion")}</StatusBadge>
@@ -108,7 +111,7 @@ export function CurrentLookCard({ gallery, presets, savedFull }: CurrentLookCard
             ) : null}
             {sketch ? <LookFacts summary={sketch} /> : null}
             {savedFull ? <p className="text-xs text-muted-foreground">{t(`${G}.full`)}</p> : null}
-          </dl>
+          </div>
         </div>
       </div>
       <SaveDesignDialog

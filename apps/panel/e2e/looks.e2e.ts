@@ -56,8 +56,12 @@ test("applies a look, keeps the changed draft automatically and brings it back",
     await page.getByRole("button", { name: "‘Grafit’ görünümünü taslağa uygula" }).click()
     await confirmApply(page, "Grafit")
 
-    // A change in the draft: the first section of the page hidden
-    const tree = page.getByRole("navigation", { name: "Sayfanın bölümleri" })
+    // A change in the draft: the home page's first section hidden. Not the
+    // header's: a look that leaves the header empty (Grafit does) keeps the
+    // shop's own, so a hidden announcement would stay hidden after it.
+    const tree = page
+      .getByRole("navigation", { name: "Sayfanın bölümleri" })
+      .getByRole("group", { name: "Ana sayfa", exact: true })
     const hide = tree.getByRole("button", { name: / bölümünü gizle$/ }).first()
     const hidden = ((await hide.getAttribute("aria-label")) ?? "").replace(/ bölümünü gizle$/, "")
     // The section by its name (two of a kind share one: the first is the one hidden)

@@ -9,9 +9,14 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 /** The page tree's own rows (`SectionTree`): its groups, the frame's parts edited elsewhere, the theme's panels. */
 
 export function TreeGroup({ title, children }: { title: string; children: ReactNode }) {
+  // Named by its heading: a screen reader (and a test) can tell the header's rows from the page's
+  const heading = useId()
   return (
-    <div className="flex flex-col gap-1">
-      <h2 className="px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+    <div role="group" aria-labelledby={heading} className="flex flex-col gap-1">
+      <h2
+        id={heading}
+        className="px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+      >
         {title}
       </h2>
       {children}
