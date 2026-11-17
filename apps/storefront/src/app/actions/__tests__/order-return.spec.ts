@@ -170,6 +170,8 @@ describe("cancelOrder (F7.13; a gift order while its cards are untouched, adr/00
   it.each([
     ["orders.gift_card_used", 409, "iptal-hediye-karti"],
     ["orders.cancel_contact_shop", 400, "iptal-magaza"],
+    // A refund of the order still being settled: wait, it is no refusal
+    ["orders.refund_unsettled", 409, "iptal-iade-isleniyor"],
     ["orders.cancel_after_packing", 400, "iptal-olmadi"],
     [null, 500, "iptal-olmadi"],
   ])("says the backend's %s refusal in its own words", async (key, status, note) => {

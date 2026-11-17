@@ -89,6 +89,11 @@ describe("Medusa's own PayTR refunds: a retried try sent once, a second refund s
       context: { idempotency_key: `ref_01TRY${String(++tries)}` },
     })
   const sent = () => fake.requests.filter((request) => request.path === "/odeme/iade")
+  // The records as references and amounts, Medusa's refund id aside
+  const bare = (data: Record<string, unknown> | undefined) =>
+    ((data?.["refunds"] ?? []) as { reference_no: string; amount: number }[]).map(
+      ({ reference_no, amount }) => ({ reference_no, amount })
+    )
 
   /** A paid session whose notification the shop acknowledged, as PayTR requires for refunds. */
   const paidSession = async (sessionId: string) => {
@@ -139,7 +144,11 @@ describe("Medusa's own PayTR refunds: a retried try sent once, a second refund s
     const again = await own(10, data)
 
     const made = [{ reference_no: `M${oid}A1000N1`, amount: 1000 }]
-    expect([first, again].map((each) => each.data?.["refunds"])).toEqual([made, made])
+    expect([first, again].map((each) => bare(each.data))).toEqual([made, made])
+    // Under Medusa's refund of the try that sent it: the ledger mends its money move by it (D-3)
+    expect(first.data?.["refunds"]).toEqual([
+      expect.objectContaining({ refund_id: expect.stringMatching(/^ref_01TRY/) as unknown }),
+    ])
     expect(sent()).toHaveLength(1)
   })
 
@@ -150,7 +159,7 @@ describe("Medusa's own PayTR refunds: a retried try sent once, a second refund s
     const second = await own(10, first.data ?? {})
 
     expect(sent()).toHaveLength(2)
-    expect(second.data?.["refunds"]).toEqual([
+    expect(bare(second.data)).toEqual([
       { reference_no: `M${oid}A1000N1`, amount: 1000 },
       { reference_no: `M${oid}A1000N2`, amount: 1000 },
     ])
@@ -168,7 +177,7 @@ describe("Medusa's own PayTR refunds: a retried try sent once, a second refund s
 
     const refund = await own(10, kept)
 
-    expect(refund.data?.["refunds"]).toEqual([
+    expect(bare(refund.data)).toEqual([
       { reference_no: `M${oid}A1000N1`, amount: 1000 },
       { reference_no: `M${oid}A1000N2`, amount: 1000 },
     ])
@@ -184,7 +193,7 @@ describe("Medusa's own PayTR refunds: a retried try sent once, a second refund s
     // The job's refund answers the first; a second of the amount would pass the payment
     const second = own(34.56, refund.data ?? {})
 
-    expect(refund.data?.["refunds"]).toEqual([{ reference_no: `R${oid}`, amount: 3456 }])
+    expect(bare(refund.data)).toEqual([{ reference_no: `R${oid}`, amount: 3456 }])
     expect(await reasonOf(second)).toBe("paytr.refund_exceeds_payment")
     expect(recoveryRefundReference).toHaveBeenCalledWith(oid)
     expect(sent()).toHaveLength(0)

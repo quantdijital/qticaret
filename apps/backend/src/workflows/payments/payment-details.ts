@@ -13,6 +13,7 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-creden
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
+import { UNSETTLED } from "../orders/refund-settle"
 import { iyzicoDetails } from "./iyzico-details"
 import { paytrDetails } from "./paytr-details"
 
@@ -49,6 +50,14 @@ export interface OrderRefundEntry {
   reference: string
   amount: number
   status: string
+  /** Pending with its money gone, or maybe gone, its record not closed: the shop checks the provider. */
+  incomplete: boolean
+  /** Whose payment it gave back: `paytr`, `iyzico`, `bank-transfer`, `cod`; null when unknown. */
+  provider: string | null
+  /** The reference as the provider was given it (PayTR: letters and digits, at most 64). */
+  sent_as: string
+  /** iyzico's parts (kuruş), each answered (`done`) or its answer lost (`sending`). */
+  parts: { amount: number; state: string }[]
   note: string | null
   created_by: string | null
   created_at: string
@@ -134,11 +143,27 @@ export async function orderPaymentDetails(
     container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE).listOrderRefunds(
       { order_id: orderId },
       {
-        select: ["reference", "payment_id", "amount", "status", "note", "created_by", "created_at"],
+        select: [
+          "reference",
+          "payment_id",
+          "amount",
+          "status",
+          "error_code",
+          "provider_parts",
+          "note",
+          "created_by",
+          "created_at",
+        ],
         order: { created_at: "ASC" },
       }
     ),
   ])
+  // Every payment's provider, a refund's own included (a transfer, cash at the door)
+  const providerOf = new Map(
+    (order.payment_collections ?? [])
+      .flatMap((collection) => collection.payments ?? [])
+      .flatMap((payment) => (payment ? [[payment.id, payment.provider_id] as const] : []))
+  )
   const payments = await Promise.all(
     hosted.map((payment) =>
       payment.provider_id === IYZICO_PAYMENT_PROVIDER_ID
@@ -156,8 +181,16 @@ export async function orderPaymentDetails(
     bank_transfer: bankTransferState(order),
     refunds: refunds.map((refund) => ({
       reference: refund.reference,
+      provider: providerOf.get(refund.payment_id)?.split("_")[1] ?? null,
+      sent_as: refund.reference.replace(/[^A-Za-z0-9]/g, "").slice(0, 64),
+      parts: ((refund.provider_parts as { amount: number; state: string }[] | null) ?? []).map(
+        ({ amount, state }) => ({ amount, state })
+      ),
       amount: refund.amount,
       status: refund.status,
+      incomplete:
+        refund.status === "pending" &&
+        (UNSETTLED as readonly (string | null)[]).includes(refund.error_code),
       note: refund.note,
       created_by: refund.created_by,
       created_at: new Date(refund.created_at).toISOString(),

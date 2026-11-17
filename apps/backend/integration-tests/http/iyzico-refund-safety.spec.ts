@@ -1,3 +1,4 @@
+import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakeIyzicoAccount, startFakeIyzico } from "@qticaret/testing"
 import type { FakeIyzico } from "@qticaret/testing"
@@ -6,6 +7,7 @@ import { ORDER_REFUNDS_MODULE } from "../../src/modules/order-refunds"
 import type OrderRefundsModuleService from "../../src/modules/order-refunds/service"
 import { PAYMENT_RECOVERY_MODULE } from "../../src/modules/payment-recovery"
 import type PaymentRecoveryModuleService from "../../src/modules/payment-recovery/service"
+import { settleOpenRefunds } from "../../src/workflows/orders/settle-open-refunds"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { connectIyzico, postIyzicoCallback, startIyzicoPayment } from "../helpers/iyzico"
@@ -92,12 +94,18 @@ medusaIntegrationTestRunner({
       const { orderId } = await paidOrder()
       fake.queue(REFUND, { drop: true })
 
-      const lost = await refund(orderId, { amount: 50, reference: "safety0000000001" })
-      const other = await refund(orderId, { amount: 20, reference: "safety0000000002" })
+      const lost = await refund(orderId, {
+        amount: 50,
+        reference: "e0000000000000000000000000000001",
+      })
+      const other = await refund(orderId, {
+        amount: 20,
+        reference: "e0000000000000000000000000000002",
+      })
 
       expect(lost.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
       expect(other.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
-      expect(sentFor("safety0000000002")).toBe(0)
+      expect(sentFor("e0000000000000000000000000000002")).toBe(0)
     })
 
     it("treats an answer that is not iyzico's, or not for the part, as unknown: never sent again", async () => {
@@ -108,19 +116,102 @@ medusaIntegrationTestRunner({
           paymentId,
           price: 50,
           currency: "TRY",
-          conversationId: "safety0000000003",
+          conversationId: "e0000000000000000000000000000003",
           signature: "0".repeat(64),
         },
       })
 
-      const forged = await refund(orderId, { amount: 50, reference: "safety0000000003" })
-      const again = await refund(orderId, { amount: 50, reference: "safety0000000003" })
-      const entry = await ledger().providerParts("safety0000000003")
+      const forged = await refund(orderId, {
+        amount: 50,
+        reference: "e0000000000000000000000000000003",
+      })
+      const [open] = await ledger().listOrderRefunds({
+        reference: "e0000000000000000000000000000003",
+      })
+      const again = await refund(orderId, {
+        amount: 50,
+        reference: "e0000000000000000000000000000003",
+      })
+      const entry = await ledger().providerParts("e0000000000000000000000000000003")
 
       expect(forged.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
-      expect(again.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
+      // An answer not iyzico's is no refusal: the refund stays open, never failed (review O-1)
+      expect(open).toMatchObject({ status: "pending", error_code: "refund_incomplete" })
+      // Tried again, an open refund is never sent: the shop settles it (review O1)
+      expect(again.status).toBe(409)
+      expect(again.data).toMatchObject({ message: "orders.refund_unsettled" })
       expect(entry?.parts).toEqual([expect.objectContaining({ amount: 5000, state: "sending" })])
-      expect(sentFor("safety0000000003")).toBe(1)
+      expect(sentFor("e0000000000000000000000000000003")).toBe(1)
+    })
+
+    it("lets staff settle a part whose answer was lost, and the payment refunds again (O-2)", async () => {
+      const { orderId } = await paidOrder()
+      fake.queue(REFUND, { drop: true })
+      const lostRef = "e0000000000000000000000000000006"
+      await refund(orderId, { amount: 50, reference: lostRef })
+      // While that part's answer is unknown, no refund of the payment may go
+      const blocked = await refund(orderId, {
+        amount: 20,
+        reference: "e0000000000000000000000000000007",
+      })
+
+      const checked = await settle(
+        http.post<{ refund?: { status: string } }>(
+          `/admin/orders/${orderId}/refunds/${lostRef}/settle`,
+          { outcome: "not_made" },
+          { headers: admin.headers }
+        )
+      )
+      const next = await refund(orderId, {
+        amount: 20,
+        reference: "e0000000000000000000000000000008",
+      })
+      const [closed] = await ledger().listOrderRefunds({ reference: lostRef })
+
+      expect(blocked.data).toMatchObject({ message: "iyzico.refund_outcome_unknown" })
+      expect(checked.data.refund).toMatchObject({ status: "failed" })
+      expect(closed).toMatchObject({ status: "failed", provider_parts: [] })
+      expect(next.data.refund).toMatchObject({ amount: "20.00" })
+      expect(sentFor(lostRef)).toBe(1)
+    })
+
+    it("closes a staff 'made' cut short once its parts were written; the payment refunds again (O4-1)", async () => {
+      const { orderId } = await paidOrder()
+      fake.queue(REFUND, { drop: true })
+      const lostRef = "e0000000000000000000000000000009"
+      await refund(orderId, { amount: 50, reference: lostRef })
+      // The check stops after the parts were written: Medusa's record cannot be made
+      const payments = getContainer().resolve(Modules.PAYMENT) as unknown as {
+        createRefunds: (...args: unknown[]) => Promise<unknown>
+      }
+      const broken = jest
+        .spyOn(payments, "createRefunds")
+        .mockRejectedValueOnce(new Error("database gone"))
+      const cut = await settle(
+        http.post(
+          `/admin/orders/${orderId}/refunds/${lostRef}/settle`,
+          { outcome: "made" },
+          { headers: admin.headers }
+        )
+      )
+      broken.mockRestore()
+
+      const round = await settleOpenRefunds(getContainer(), Date.now() + 3 * 60 * 1000)
+      const [closed] = await ledger().listOrderRefunds({ reference: lostRef })
+      const next = await refund(orderId, {
+        amount: 20,
+        reference: "e0000000000000000000000000000010",
+      })
+
+      expect(cut.status).toBeGreaterThanOrEqual(400)
+      expect(round).toMatchObject({ closed: 1 })
+      expect(closed).toMatchObject({
+        status: "done",
+        provider_parts: [expect.objectContaining({ state: "done" })],
+      })
+      expect(next.data.refund).toMatchObject({ amount: "20.00" })
+      // Nothing sent again for the part whose answer was lost
+      expect(sentFor(lostRef)).toBe(1)
     })
 
     it("keeps a refund that went part way pending, its sent part counted, never sent twice", async () => {
@@ -128,9 +219,17 @@ medusaIntegrationTestRunner({
       // The shipping line went back some other way: its part is refused (5093)
       fake.refunds.set(`${paymentId}02`, [9000])
 
-      const halfway = await refund(orderId, { amount: 300, reference: "safety0000000004" })
-      const [entry] = await ledger().listOrderRefunds({ reference: "safety0000000004" })
-      const next = await refund(orderId, { amount: 30, reference: "safety0000000005" })
+      const halfway = await refund(orderId, {
+        amount: 300,
+        reference: "e0000000000000000000000000000004",
+      })
+      const [entry] = await ledger().listOrderRefunds({
+        reference: "e0000000000000000000000000000004",
+      })
+      const next = await refund(orderId, {
+        amount: 30,
+        reference: "e0000000000000000000000000000005",
+      })
 
       expect(halfway.data).toMatchObject({ message: "iyzico.refund_exceeds_line" })
       expect(entry).toMatchObject({ status: "pending", error_code: "refund_incomplete" })

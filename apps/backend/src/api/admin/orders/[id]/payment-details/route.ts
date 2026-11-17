@@ -25,6 +25,10 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
       total: lira(payment.total),
       refunds: payment.refunds.map((refund) => ({ ...refund, amount: lira(refund.amount) })),
     })),
-    refunds: refunds.map((refund) => ({ ...refund, amount: lira(refund.amount) })),
+    refunds: refunds.map((refund) => ({
+      ...refund,
+      amount: lira(refund.amount),
+      parts: refund.parts.map((part) => ({ ...part, amount: lira(part.amount) })),
+    })),
   })
 }

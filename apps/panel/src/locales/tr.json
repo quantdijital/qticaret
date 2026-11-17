@@ -3983,7 +3983,36 @@
       "states": {
         "done": "İade edildi",
         "pending": "Sürüyor",
-        "failed": "Yapılamadı"
+        "failed": "Yapılamadı",
+        "incomplete": "Doğrulanıyor: kaydı yarım"
+      },
+      "settle": {
+        "open": "Kaydı yarım iadeyi sağlayıcıda kontrol et",
+        "title": "Bu iade sağlayıcıda görünüyor mu?",
+        "question": "{{amount}} iadenin kaydı tamamlanamadı. Ödeme kuruluşunun panelinde bu iade müşteriye yapılmış görünüyor mu?",
+        "hint": "Buradan para gönderilmez. \"Para gitti\" kaydı kapatır; \"Para gitmedi\" kaydı başarısız yapar ve kalemler yeniden iade edilebilir. Seçiminiz denetim kaydına yazılır.",
+        "made": "Para gitti",
+        "not_made": "Para gitmedi",
+        "provider": "Ödeme kuruluşu",
+        "reference": "Referans",
+        "amount": "Tutar",
+        "date": "Tarih",
+        "parts": "Parçalar",
+        "part": {
+          "done": "yanıtlandı",
+          "sending": "yanıtı gelmedi"
+        },
+        "sure": {
+          "made": "Emin misiniz: para müşteriye geri gitti mi?",
+          "not_made": "Emin misiniz: para müşteriye geri gitmedi mi?",
+          "description": "Bu seçim kaydı kesinleştirir ve denetim kaydına yazılır. Sağlayıcının panelinde yukarıdaki referansla kontrol ettiyseniz onaylayın."
+        },
+        "back": "Geri",
+        "confirm": "Onayla",
+        "done": {
+          "made": "İade kaydı tamamlandı.",
+          "not_made": "İade kaydı kapatıldı; kalemler yeniden iade edilebilir."
+        }
       }
     },
     "chargeback": {
@@ -6791,6 +6820,18 @@
       "payment_beside_order": {
         "title": "Siparişi olan sepete ikinci {{provider}} ödemesi",
         "description": "{{amount}} ({{reference}}, sepet {{cart}}) başka bir ödemeyle açılmış siparişin sepetine alındı; otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin; öyleyse fazlasını sağlayıcının panelinden iade edin."
+      },
+      "refund_incomplete": {
+        "title": "{{provider}} iadesi yapıldı, kaydı yarım kaldı",
+        "description": "Sipariş {{cart}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. Kayıt otomatik olarak denetleniyor; bir saat sonra hâlâ yarımsa {{provider}} panelinden kontrol edin. Aynı iadeyi yeniden yapmayın."
+      },
+      "refund_unresolved": {
+        "title": "Bir iade bir saattir doğrulanamadı",
+        "description": "Sipariş {{cart}} için {{amount}} iadenin ({{reference}}, {{provider}}) kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın."
+      },
+      "cancel_refund_order_open": {
+        "title": "İptal iadesi tamamlandı ama sipariş iptal edilmedi",
+        "description": "Sipariş {{cart}} için {{amount}} iptal iadesi ({{reference}}, {{provider}}) yapıldı, ancak sipariş hâlâ açık. Siparişi iptal edin; kargolamayın."
       }
     },
     "markAllRead": "Tümünü okundu say",

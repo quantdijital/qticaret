@@ -21,12 +21,14 @@ const back = (orderId: string, token: string | undefined, note: string) =>
 /**
  * The backend's cancel refusals the page says in its own words (`?durum=`):
  * a gift card the order sent was used (adr/0025, 2026-11-03); money taken
- * by hand (a bank transfer) goes back through the shop. Any other refusal
- * is the general one.
+ * by hand (a bank transfer) goes back through the shop; a refund of the
+ * order still being settled waits a few minutes. Any other refusal is the
+ * general one.
  */
 const CANCEL_REFUSALS: Readonly<Record<string, string>> = {
   "orders.gift_card_used": "iptal-hediye-karti",
   "orders.cancel_contact_shop": "iptal-magaza",
+  "orders.refund_unsettled": "iptal-iade-isleniyor",
 }
 
 /**

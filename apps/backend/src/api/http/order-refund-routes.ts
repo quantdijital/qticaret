@@ -7,17 +7,13 @@ import type {
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
-import { kurus } from "../../lib/money"
-import { cancelRefundReference } from "../../lib/orders/locks"
 import { isCheckoutProvider } from "../../lib/payments/checkout"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { cancelGiftCardsWorkflow } from "../../workflows/orders/cancel-gift-cards"
-import { readOrderMoney } from "../../workflows/orders/order-money"
-import { paymentRemainders } from "../../workflows/orders/steps/order-refund"
-import type { RefundOrderInput } from "../../workflows/orders/steps/order-refund"
 import {
   AdminPostOrderRefund,
   AdminPostOrderRefundPreview,
+  AdminPostOrderRefundSettle,
 } from "../admin/orders/[id]/refunds/validators"
 import { requireUserActor } from "./actor"
 import { holdCancelLocks } from "./bank-transfer-routes"
@@ -84,37 +80,20 @@ async function refundBeforeCancel(
       next()
       return
     }
+    // One refund per payment (an edit's collected difference is a payment of its own)
     await cancelGiftCardsWorkflow(req.scope).run({
-      input: { order_id: orderId, refunds: await cancelRefunds(req, orderId) },
+      input: {
+        order_id: orderId,
+        refund: {
+          note: "order canceled",
+          created_by: (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id ?? null,
+        },
+      },
     })
     next()
   } catch (error) {
     next(error)
   }
-}
-
-/** One refund per payment: an edit's collected difference is a payment of its own. */
-async function cancelRefunds(req: MedusaRequest, orderId: string): Promise<RefundOrderInput[]> {
-  let left = (await readOrderMoney(req.scope, orderId)).refundable
-  const payments = (await paymentRemainders(req.scope, orderId)).filter(
-    (payment) => payment.remaining > 0
-  )
-  const refunds: RefundOrderInput[] = []
-  for (const [part, payment] of payments.entries()) {
-    const amount = Math.min(left, payment.remaining)
-    if (amount <= 0) {
-      break
-    }
-    refunds.push({
-      order_id: orderId,
-      reference: cancelRefundReference(orderId, part),
-      request: { amount: kurus(amount) },
-      note: "order canceled",
-      created_by: (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id ?? null,
-    })
-    left = kurus(left - amount)
-  }
-  return refunds
 }
 
 // Each refund asks the provider: a budget per address and per staff member
@@ -133,6 +112,16 @@ export const ORDER_REFUND_ROUTES = [
     matcher: "/admin/orders/:id/refunds",
     methods: ["POST" as const],
     middlewares: [requireUserActor, refundLimit, validateAndTransformBody(AdminPostOrderRefund)],
+  },
+  // An open refund checked at the provider (review 2026-11-17, O2): staff with the refund's rights
+  {
+    matcher: "/admin/orders/:id/refunds/:reference/settle",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      refundLimit,
+      validateAndTransformBody(AdminPostOrderRefundSettle),
+    ],
   },
   // Card brand and last four digits, asked of PayTR: staff only
   {

@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/frame
 import { cancelOrderWorkflow } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
 import { cardsVoidedByCancel } from "../../lib/orders/gift-returns"
-import { cancelLockKeys, cancelRefundReference } from "../../lib/orders/locks"
+import { cancelLockKeys } from "../../lib/orders/locks"
 import { isOfflineProvider } from "../../lib/payments/checkout"
 import { giftLinesOf } from "../returns/gift-lines"
 import { cancelGiftCardsWorkflow } from "./cancel-gift-cards"
@@ -128,21 +128,11 @@ export async function cancelOrderForCustomer(
         throw new ValidationError(refusal)
       }
       const { refundable } = await readOrderMoney(container, input.order_id)
+      // One refund per payment, under the payment's own reference (security review Y1)
       await cancelGiftCardsWorkflow(container).run({
         input: {
           order_id: input.order_id,
-          refunds:
-            refundable > 0
-              ? [
-                  {
-                    order_id: input.order_id,
-                    reference: cancelRefundReference(input.order_id),
-                    request: { amount: refundable },
-                    note: "canceled by the customer",
-                    created_by: null,
-                  },
-                ]
-              : [],
+          refund: { note: "canceled by the customer", created_by: null },
         },
       })
       await cancelOrderWorkflow(container).run({

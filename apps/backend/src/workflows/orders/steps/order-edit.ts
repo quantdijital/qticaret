@@ -3,7 +3,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
-import { cancelRefundReference } from "../../../lib/orders/locks"
+import { isCancelRefundReference } from "../../../lib/orders/locks"
 import { isOfflineProvider } from "../../../lib/payments/checkout"
 import { EINVOICE_MODULE } from "../../../modules/einvoice"
 import type EinvoiceModuleService from "../../../modules/einvoice/service"
@@ -101,7 +101,7 @@ export const checkOrderEditStep = createStep(
         { order_id: input.order_id, status: ["pending", "done"] },
         { select: ["reference"] }
       )
-    if (refunds.some((refund) => refund.reference === cancelRefundReference(input.order_id))) {
+    if (refunds.some((refund) => isCancelRefundReference(refund.reference))) {
       throw new ValidationError("orders.edit_after_packing")
     }
     // A refund outside an edit: Medusa books it as a credit, and an edit taking the same

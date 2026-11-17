@@ -103,7 +103,10 @@ medusaIntegrationTestRunner({
     it("gives back a unit at what it paid, through PayTR, once per reference", async () => {
       const { orderId, reference } = await paidOrder()
       const item = (await lines(orderId)).lines.find((line) => line.kind === "item")
-      const body = { items: [{ id: item?.id, quantity: 1 }], reference: "refund0000000001" }
+      const body = {
+        items: [{ id: item?.id, quantity: 1 }],
+        reference: "f0000000000000000000000000000001",
+      }
 
       const preview = await settle(
         http.post<{ refund: { amount: string } }>(
@@ -119,7 +122,7 @@ medusaIntegrationTestRunner({
       expect(first.data.refund).toMatchObject({ amount: "120.00", made_before: false })
       expect(again.data.refund).toMatchObject({ amount: "120.00", made_before: true })
       expect(fake.payments.get(reference)?.refunds).toEqual([
-        { amount: 12000, referenceNo: "refund0000000001" },
+        { amount: 12000, referenceNo: "f0000000000000000000000000000001" },
       ])
       expect((await lines(orderId)).lines.find((line) => line.id === item?.id)).toMatchObject({
         refunded_units: 1,
@@ -132,14 +135,17 @@ medusaIntegrationTestRunner({
       const item = (await lines(orderId)).lines.find((line) => line.kind === "item")
       await refund(orderId, {
         items: [{ id: item?.id, quantity: 1 }],
-        reference: "refund0000000002",
+        reference: "f0000000000000000000000000000002",
       })
 
       const units = await refund(orderId, {
         items: [{ id: item?.id, quantity: 2 }],
-        reference: "refund0000000003",
+        reference: "f0000000000000000000000000000003",
       })
-      const amount = await refund(orderId, { amount: 300, reference: "refund0000000004" })
+      const amount = await refund(orderId, {
+        amount: 300,
+        reference: "f0000000000000000000000000000004",
+      })
 
       expect(units.data).toMatchObject({ message: "orders.refund_units_exceeded" })
       expect(amount.data).toMatchObject({ message: "orders.refund_exceeds_paid" })
@@ -149,11 +155,14 @@ medusaIntegrationTestRunner({
       const { orderId, reference } = await paidOrder()
       const item = (await lines(orderId)).lines.find((line) => line.kind === "item")
 
-      const free = await refund(orderId, { amount: 50, reference: "refund0000000005" })
+      const free = await refund(orderId, {
+        amount: 50,
+        reference: "f0000000000000000000000000000005",
+      })
       const rest = await refund(orderId, {
         items: [{ id: item?.id, quantity: 2 }],
         shipping: true,
-        reference: "refund0000000006",
+        reference: "f0000000000000000000000000000006",
       })
 
       expect(free.data.refund.amount).toBe("50.00")
@@ -164,21 +173,28 @@ medusaIntegrationTestRunner({
       expect((await lines(orderId)).refundable).toBe("0.00")
     })
 
+    // PayTR answered and refused: nothing was made, the entry fails at once (review 2026-11-17)
     it("says why PayTR refused, keeps the ledger clean, and goes through when tried again", async () => {
       const { orderId, reference } = await paidOrder()
       fake.queue("/odeme/iade", {
         body: { status: "error", err_no: "010", err_msg: "Yetersiz bakiye" },
       })
 
-      const refused = await refund(orderId, { amount: 30, reference: "refund0000000007" })
+      const refused = await refund(orderId, {
+        amount: 30,
+        reference: "f0000000000000000000000000000007",
+      })
       const [entry] = await getContainer()
         .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-        .listOrderRefunds({ reference: "refund0000000007" })
-      const again = await refund(orderId, { amount: 30, reference: "refund0000000007" })
+        .listOrderRefunds({ reference: "f0000000000000000000000000000007" })
+      const again = await refund(orderId, {
+        amount: 30,
+        reference: "f0000000000000000000000000000007",
+      })
 
       expect(refused.status).toBe(400)
       expect(refused.data).toMatchObject({ message: "paytr.balance_insufficient" })
-      expect(entry).toMatchObject({ status: "failed" })
+      expect(entry).toMatchObject({ status: "failed", error_code: "refund_failed" })
       expect(again.data.refund).toMatchObject({ amount: "30.00", made_before: false })
       expect(fake.payments.get(reference)?.refunds).toHaveLength(1)
     })
@@ -237,7 +253,7 @@ medusaIntegrationTestRunner({
 
     it("shows the shop PayTR's record of the payment, and the refunds made", async () => {
       const { orderId, reference } = await paidOrder()
-      await refund(orderId, { amount: 30, reference: "refund0000000009" })
+      await refund(orderId, { amount: 30, reference: "f0000000000000000000000000000009" })
 
       const { data } = await http.get<{
         payments: Record<string, unknown>[]
@@ -253,11 +269,20 @@ medusaIntegrationTestRunner({
           installments: 1,
           card_brand: "WORLD",
           card_last4: "6747",
-          refunds: [expect.objectContaining({ amount: "30.00", reference: "refund0000000009" })],
+          refunds: [
+            expect.objectContaining({
+              amount: "30.00",
+              reference: "f0000000000000000000000000000009",
+            }),
+          ],
         }),
       ])
       expect(data.refunds).toEqual([
-        expect.objectContaining({ reference: "refund0000000009", amount: "30.00", status: "done" }),
+        expect.objectContaining({
+          reference: "f0000000000000000000000000000009",
+          amount: "30.00",
+          status: "done",
+        }),
       ])
       expect(JSON.stringify(data)).not.toMatch(/455359/)
     })

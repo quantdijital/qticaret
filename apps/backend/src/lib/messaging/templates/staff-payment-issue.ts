@@ -14,6 +14,9 @@ export interface StaffPaymentIssueVars {
     | "shelf_restored"
     | "wholesale_price_check"
     | "payment_beside_order"
+    | "refund_incomplete"
+    | "refund_unresolved"
+    | "cancel_refund_order_open"
   provider: string
   reference: string
   cart: string
@@ -26,7 +29,16 @@ export const PAYMENT_ISSUES: readonly StaffPaymentIssueVars["issue"][] = [
   "shelf_restored",
   "wholesale_price_check",
   "payment_beside_order",
+  "refund_incomplete",
+  "refund_unresolved",
+  "cancel_refund_order_open",
 ]
+
+const ORDER_ISSUES: ReadonlySet<StaffPaymentIssueVars["issue"]> = new Set([
+  "refund_incomplete",
+  "refund_unresolved",
+  "cancel_refund_order_open",
+])
 
 export const staffPaymentIssue: MessageTemplate<StaffPaymentIssueVars> = {
   name: "staff.payment_issue",
@@ -48,7 +60,15 @@ export const staffPaymentIssue: MessageTemplate<StaffPaymentIssueVars> = {
           rows: [
             { label: messageText("staff_payment_issue.provider"), value: vars.provider },
             { label: messageText("staff_payment_issue.reference"), value: vars.reference },
-            { label: messageText("staff_payment_issue.cart"), value: vars.cart },
+            {
+              // An order refund's issue carries the order where a payment's carries its cart
+              label: messageText(
+                ORDER_ISSUES.has(vars.issue)
+                  ? "staff_payment_issue.order"
+                  : "staff_payment_issue.cart"
+              ),
+              value: vars.cart,
+            },
             { label: messageText("staff_payment_issue.amount"), value: vars.amount, strong: true },
           ],
         },

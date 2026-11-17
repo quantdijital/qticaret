@@ -22,10 +22,23 @@ export const PAYMENT_ISSUE_TEXTS: Readonly<Record<string, string>> = {
     "Siparişi olan sepete ikinci ödeme ({{reference}})",
   "staff_payment_issue.payment_beside_order.intro":
     "Bu sepet başka bir ödemeyle zaten siparişe dönüşmüştü; {{provider}} bu ödemeyi de aldı. Otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin; öyleyse fazla ödemeyi {{provider}} panelinden iade edin.",
+  "staff_payment_issue.refund_incomplete.subject":
+    "İade yapıldı, kaydı yarım kaldı ({{reference}})",
+  "staff_payment_issue.refund_incomplete.intro":
+    'Sipariş {{cart}} için bu iade {{provider}} tarafında yapıldı ya da yapılmış olabilir, ancak kaydı tamamlanamadı. İade kaydı "sürüyor" durumunda tutuldu ve kalemleri iade edilmiş sayılıyor, böylece aynı para yeniden gönderilmez. Kayıt otomatik olarak denetleniyor; bir saat sonra hâlâ yarımsa {{provider}} panelinden iadeyi kontrol edin. Aynı iadeyi yeniden yapmayın.',
+  "staff_payment_issue.refund_unresolved.subject":
+    "Bir iade bir saattir doğrulanamadı ({{reference}})",
+  "staff_payment_issue.refund_unresolved.intro":
+    "Sipariş {{cart}} için bu iadenin kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın.",
+  "staff_payment_issue.cancel_refund_order_open.subject":
+    "İptal iadesi tamamlandı ama sipariş iptal edilmedi ({{cart}})",
+  "staff_payment_issue.cancel_refund_order_open.intro":
+    "Sipariş {{cart}} için iptal iadesi yapıldı ve kaydı otomatik denetimde tamamlandı, ancak sipariş hâlâ iptal edilmedi. Siparişi iptal edin; kargolamayın.",
   "staff_payment_issue.preheader": "Ödeme: {{provider}}, referans {{reference}}.",
   "staff_payment_issue.heading": "Bir ödeme ilgi bekliyor",
   "staff_payment_issue.provider": "Ödeme kuruluşu",
   "staff_payment_issue.reference": "Referans",
   "staff_payment_issue.cart": "Sepet",
+  "staff_payment_issue.order": "Sipariş",
   "staff_payment_issue.amount": "Tutar",
 }

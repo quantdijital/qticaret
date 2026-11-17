@@ -5,6 +5,7 @@ import { parseEnv } from "../../env"
 import { ProviderError, isProviderError } from "../../errors"
 import type { Kurus } from "../../money"
 import { toPaytrKurus, toPaytrLira } from "./amounts"
+import { markRefused } from "../refund-refusal"
 import { PAYTR_PROVIDER, paytrError, tokenFailureCode } from "./errors"
 import {
   assertMerchantOid,
@@ -173,7 +174,10 @@ export function createPaytrApi(
     })
     if (answer.status !== "success") {
       // A `failed` answer without a number: no such order (dev.paytr.com/iade-api)
-      throw paytrError("refund", answer.err_no ?? (answer.status === "failed" ? "005" : undefined))
+      // PayTR answered and refused it: nothing was given back (a refusal outright)
+      throw markRefused(
+        paytrError("refund", answer.err_no ?? (answer.status === "failed" ? "005" : undefined))
+      )
     }
     return {
       amount: answer.return_amount,

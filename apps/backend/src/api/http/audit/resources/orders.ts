@@ -1,6 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { fromMedusaAmount, sumKurus } from "../../../../lib/money"
+import { ORDER_REFUNDS_MODULE } from "../../../../modules/order-refunds"
+import type OrderRefundsModuleService from "../../../../modules/order-refunds/service"
 import { RETURN_REQUESTS_MODULE } from "../../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../../modules/return-requests/service"
 import { readOrderMoney } from "../../../../workflows/orders/order-money"
@@ -21,6 +23,34 @@ export const ORDER_RESOURCES: readonly AuditedResource[] = [
     snapshot: async ({ scope, params }) => {
       const money = await readOrderMoney(scope as unknown as MedusaContainer, params["id"] ?? "")
       return { refunded: money.refunded, refundable: money.refundable }
+    },
+  },
+  // An open refund checked at the provider by staff (review 2026-11-17, O2): the money and the
+  // refund's own state, before and after
+  {
+    method: "POST",
+    route: "POST /admin/orders/:id/refunds/:reference/settle",
+    pattern:
+      /^\/admin\/orders\/(?<id>order_[A-Za-z0-9]+)\/refunds\/(?<reference>[A-Za-z0-9]{1,64})\/settle$/i,
+    resourceType: "order",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: async ({ scope, params }) => {
+      const container = scope as unknown as MedusaContainer
+      const money = await readOrderMoney(container, params["id"] ?? "")
+      const [refund] = await container
+        .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+        .listOrderRefunds(
+          // This order's refund only: another order's reference never reaches its record (D-5)
+          { reference: params["reference"] ?? "", order_id: params["id"] ?? "" },
+          { select: ["status", "error_code", "amount"], take: 1 }
+        )
+      return {
+        refunded: money.refunded,
+        refundable: money.refundable,
+        refund: refund
+          ? { status: refund.status, error_code: refund.error_code, amount: refund.amount }
+          : null,
+      }
     },
   },
   // F6 W2: a bank transfer's money confirmed; the order's paid total before and after

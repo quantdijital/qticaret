@@ -75,6 +75,7 @@ const NOTES: Record<string, string> = {
   // The backend's own refusals, in its words (`cancelOrder`)
   "iptal-hediye-karti": "orders.gift_card_used",
   "iptal-magaza": "orders.cancel_contact_shop",
+  "iptal-iade-isleniyor": "orders.refund_unsettled",
 }
 
 // The carrier's words for where a parcel is; anything else reads as on its way
@@ -215,7 +216,8 @@ export function orderView(
       refused: refusedOf(request, titles, t),
     })),
     shipments: extras.shipments.map((parcel) => shipmentOf(parcel, t)),
-    notice: extras.note && NOTES[extras.note] ? t(NOTES[extras.note] ?? "") : null,
+    // Own keys only: `?durum=constructor` names no notice, never the object's prototype
+    notice: extras.note && Object.hasOwn(NOTES, extras.note) ? t(NOTES[extras.note] ?? "") : null,
     progress: orderProgress(
       order,
       extras.shipments,

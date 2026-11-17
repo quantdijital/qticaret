@@ -189,8 +189,14 @@ describe("the cancel button", () => {
     expect(view(o, null, [], "iptal-magaza").notice).toBe(
       "Havale/EFT ile ödenmiş sipariş buradan iptal edilemez; iptal ve ücret iadesi için mağazayla iletişime geçin."
     )
+    expect(view(o, null, [], "iptal-iade-isleniyor").notice).toBe(
+      "İadeniz işleniyor; birkaç dakika sonra yeniden deneyin."
+    )
     expect(view(o, null, [], "iptal-olmadi").notice).toBe(t("order.notice_cancel_refused"))
     expect(view(o, null, [], "bilinmeyen").notice).toBeNull()
+    // A key of the object's prototype is no notice
+    expect(view(o, null, [], "constructor").notice).toBeNull()
+    expect(view(o, null, [], "__proto__").notice).toBeNull()
   })
 })
 

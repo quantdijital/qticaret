@@ -211,7 +211,7 @@ medusaIntegrationTestRunner({
       const refunded = await settle(
         http.post(
           `/admin/orders/${orderId}/refunds`,
-          { amount: 50, reference: "refund0000000001" },
+          { amount: 50, reference: "f0000000000000000000000000000001" },
           { headers: admin.headers }
         )
       )

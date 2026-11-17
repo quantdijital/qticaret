@@ -59,8 +59,9 @@ export function iyzicoError(code: string | undefined): ProviderError {
 export const isIyzicoRefusal = (error: unknown): boolean =>
   error instanceof ProviderError && refusals.has(error)
 
-// The platform client's codes for a call that never left (a non-repeatable request)
-const NEVER_SENT = new Set(["network_error", "circuit_open", "url_not_allowed"])
+// The platform client's codes for a call that never left (a non-repeatable request). Not
+// `url_not_allowed`: a refused redirect is reported so too, after the request went (D4-3)
+const NEVER_SENT = new Set(["network_error", "circuit_open"])
 
 /**
  * Whether a call that moves money surely did nothing: iyzico refused it, or

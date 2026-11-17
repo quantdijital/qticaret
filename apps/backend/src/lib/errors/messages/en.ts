@@ -1126,10 +1126,20 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.refund_exceeds_paid": "The refund is more than the order can still give back.",
   "orders.refund_empty": "There is nothing to refund.",
   "orders.refund_reference_taken":
-    "This refund key was used on another order; start the refund again.",
+    "This refund key was used on another order or another payment; start the refund again.",
   "orders.refund_mode": "Choose lines and shipping, or enter an amount.",
   "orders.refund_amount_kurus": "The amount takes at most two decimals.",
   "orders.refund_reference_invalid": "The refund key is not valid; start the refund again.",
+  "orders.refund_note_reserved":
+    "This note is kept for the system's own refund records; change it.",
+  "orders.refund_not_open": "This refund is no longer open; reload the page.",
+  "orders.refund_unknown": "This refund is not on the order.",
+  "orders.refund_unsettled":
+    "The record of a refund of this order is incomplete; no money was sent again. It is checked automatically. If you would rather not wait, check the provider's panel and settle the record from the Refunds tab of the order page.",
+  "orders.refund_check_partial":
+    "Only part of this refund was made, not all of it; it cannot be settled by hand. Check the provider's panel and with its support team.",
+  "orders.refund_check_shown":
+    'The provider shows this refund made; "money did not go back" cannot be chosen.',
   "payments.use_order_refund": "This payment is refunded from the order's refund step.",
   "payments.max_installment_invalid": "The most installments is 2 to 12 (0: what PayTR allows).",
   "payments.installments_unknown": "No product or cart found for the installment table.",
