@@ -5,6 +5,7 @@ import { fakePaytrAccount, startFakePaytr } from "@qticaret/testing"
 import type { FakePaytr } from "@qticaret/testing"
 import { ORDER_REFUNDS_MODULE } from "../../src/modules/order-refunds"
 import type OrderRefundsModuleService from "../../src/modules/order-refunds/service"
+import { checkedNote } from "../../src/workflows/orders/made-refund-record"
 import { STRANDED_MS, settleOpenRefunds } from "../../src/workflows/orders/settle-open-refunds"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -214,34 +215,56 @@ medusaIntegrationTestRunner({
       const body = { amount: 30, reference: key() }
       await lostRefund(orderId, body)
       fake.payments.get(reference)?.refunds.push({ amount: 3000, referenceNo: body.reference })
-      const module = getContainer().resolve(Modules.PAYMENT) as unknown as {
-        createRefunds: (...args: unknown[]) => Promise<unknown>
-        updatePayment: (...args: unknown[]) => Promise<unknown>
+      const [open] = await ledger().listOrderRefunds({ reference: body.reference })
+      const paymentOf = async () => {
+        const { data } = await getContainer()
+          .resolve(ContainerRegistrationKeys.QUERY)
+          .graph({
+            entity: "payment",
+            fields: ["data", "refunds.id"],
+            filters: { id: open?.payment_id },
+          })
+        return data[0] as { data: Record<string, unknown> | null; refunds: { id: string }[] }
       }
-      const created = jest.spyOn(module, "createRefunds")
-      // Medusa's record is written, the payment's data is not
-      const broken = jest
-        .spyOn(module, "updatePayment")
-        .mockRejectedValueOnce(new Error("database gone"))
+      // The staff check's first half, as a crash leaves it: Medusa's record written (as the
+      // check writes it, `recordMadeRefund`), the payment's data never. Made by hand: a spy on
+      // the module does not reach the instance the workflow resolves (`dogrula`, f6a1891c)
+      const record = await (
+        getContainer().resolve(Modules.PAYMENT) as unknown as {
+          createRefunds: (data: Record<string, unknown>) => Promise<{ id: string }>
+        }
+      ).createRefunds({
+        payment: open?.payment_id,
+        amount: 30,
+        created_by: "user_check",
+        note: checkedNote(body.reference),
+      })
+      const [cut] = await ledger().listOrderRefunds({ reference: body.reference })
+      const before = await paymentOf()
 
-      const cut = await check(orderId, body.reference, "made")
-      broken.mockRestore()
       const round = await settleOpenRefunds(getContainer(), Date.now() + 3 * MINUTE)
-      created.mockRestore()
       const [closed] = await ledger().listOrderRefunds({ reference: body.reference })
-      const { data } = await getContainer()
-        .resolve(ContainerRegistrationKeys.QUERY)
-        .graph({ entity: "payment", fields: ["refunds.id"], filters: { id: closed?.payment_id } })
+      const after = await paymentOf()
       const transactions = await getContainer()
         .resolve(Modules.ORDER)
         .listOrderTransactions({ order_id: orderId, reference: "refund" })
 
-      expect(cut.status).toBeGreaterThanOrEqual(400)
+      // The cut really is there: open, Medusa's record alone, nothing in the payment's data
+      expect(cut).toMatchObject({ status: "pending" })
+      expect(before.refunds.map(({ id }) => id)).toEqual([record.id])
+      expect(before.data?.["refunds"] ?? []).toEqual([])
+      // The job finishes it from that record: one Medusa refund, its data, one move, one request
       expect(round).toMatchObject({ closed: 1 })
       expect(closed).toMatchObject({ status: "done" })
-      expect(created).toHaveBeenCalledTimes(1)
-      expect((data[0] as { refunds: unknown[] }).refunds).toHaveLength(1)
-      expect(transactions).toHaveLength(1)
+      expect(after.refunds.map(({ id }) => id)).toEqual([record.id])
+      expect(after.data?.["refunds"]).toEqual([
+        expect.objectContaining({
+          reference_no: body.reference,
+          amount: 3000,
+          refund_id: record.id,
+        }),
+      ])
+      expect(transactions).toEqual([expect.objectContaining({ reference_id: record.id })])
       expect(refundRequests()).toHaveLength(1)
     })
   },
