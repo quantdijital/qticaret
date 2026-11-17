@@ -24,7 +24,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(tezgah).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 7,
+      version: 8,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -96,11 +96,12 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     }
   })
 
-  it("opens on four filled slides that turn by themselves, with tiles, quick links and small products", () => {
+  it("opens on four filled slides that turn by themselves, with tiles and quick links", () => {
     const opening = section("tezgahacilis")
     const slides = opening?.["slides"] as {
       heading: string
       text: string
+      links: unknown[]
       image: { $image: string; alt: string }
     }[]
     expect(slides).toHaveLength(4)
@@ -113,7 +114,14 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(opening?.["scroller"]).toMatchObject({ autoplay: "on", loop: "on", dots: "on" })
     expect(opening?.["tiles"]).toHaveLength(2)
     expect(opening?.["chips"]).toHaveLength(4)
-    expect(opening?.["picks"]).toHaveLength(4)
+    // A compact first screen: the slide's words share a third of the row with the arrows, so
+    // each slide keeps one button and a short line, no small products (they made the whole
+    // opening ~900 px tall on desktop, the category list's rows spread over it)
+    expect(opening?.["picks"]).toEqual([])
+    for (const slide of slides) {
+      expect(slide.links).toHaveLength(1)
+      expect(slide.text.length).toBeLessThanOrEqual(120)
+    }
   })
 
   it("draws top categories as the photo collage with their subcategories", () => {
@@ -227,11 +235,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       "category:mutfak-ve-sef-bicaklari",
       "category:outdoor-ve-kamp",
       "category:sef-bicaklari",
-      "product:demirhan-bozkurt-d2-kilitli-caki",
       "product:karacelik-alageyik-sam-celigi-av-bicagi",
-      "product:karacelik-doruk-n690-av-bicagi",
-      "product:miras-sam-celigi-gyuto-21-cm",
-      "product:yoruk-usta-18-fonksiyonlu-multitool",
     ])
   })
 
@@ -273,9 +277,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
   })
 
-  it("raised the cutlery pack's version with them (tezgah's seventh)", () => {
-    expect(sectorPack("cutlery")?.version).toBe(10)
-    expect(CODES.map((code) => read(code).version)).toEqual([7, 7, 7])
+  it("raised the cutlery pack's version with them (tezgah's eighth)", () => {
+    expect(sectorPack("cutlery")?.version).toBe(11)
+    expect(CODES.map((code) => read(code).version)).toEqual([8, 8, 8])
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",
       ...CODES,
