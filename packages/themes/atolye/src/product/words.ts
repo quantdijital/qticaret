@@ -163,6 +163,10 @@ export const galleryWords = (t: Translate) => ({
   videoPauseNamed: t("product.video_pause_named"),
   /** A video's thumbnail: "Video: {title}". */
   videoShow: t("product.video_show"),
+  /** A YouTube video's line before it is pressed (adr/0069 §7): where it will load from. */
+  videoYoutubeNote: t("product.video_youtube_note"),
+  /** The YouTube player's accessible name once pressed: "YouTube videosu: {title}". */
+  videoYoutubeFrame: t("product.video_youtube_frame"),
 })
 
 export type GalleryWords = ReturnType<typeof galleryWords>

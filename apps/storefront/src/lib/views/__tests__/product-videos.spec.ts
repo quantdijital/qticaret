@@ -106,12 +106,11 @@ describe("productVideos (adr/0069 §6)", () => {
     ])
   })
 
-  it("leaves out a clip with nothing to play or no poster, and a YouTube video (slice 5)", () => {
+  it("leaves out a clip with nothing to play or no poster", () => {
     const videos = productVideos(
       product([
         clip("mvid_no_mp4", { outputs: { webm: { url: `${FILES}/x.webm` } } }),
         clip("mvid_no_poster", { poster: null }),
-        clip("mvid_yt", { kind: "youtube", outputs: null, youtube_id: "dQw4w9WgXcQ" }),
       ])
     )
     expect(videos).toEqual([])
@@ -176,6 +175,84 @@ describe("productVideos (adr/0069 §6)", () => {
     // Still never another scheme
     const script = { outputs: { mp4: { url: "javascript:alert(1)" } } }
     expect(productVideos(product([clip("mvid_2", script)]), true)).toEqual([])
+  })
+
+  describe("a YouTube video (slice 5)", () => {
+    const ID = "dQw4w9WgXcQ"
+    const youtube = (id: string, fields: Partial<StoreMediaVideo> = {}) =>
+      clip(id, {
+        kind: "youtube",
+        outputs: null,
+        width: null,
+        height: null,
+        duration_ms: null,
+        youtube_id: ID,
+        ...fields,
+      })
+
+    it("plays from the privacy-enhanced player, built from its id, its cover our own copy", () => {
+      const [view] = productVideos(product([youtube("mvid_yt", { title: "Bileme" })]))
+      expect(view).toEqual({
+        id: "mvid_yt",
+        after: 1,
+        title: "Bileme",
+        poster: {
+          src: `${FILES}/mvid_yt.jpg`,
+          alt: "Bileme",
+          width: 720,
+          height: 1280,
+          sources: {
+            avif: `${FILES}/mvid_yt-400.avif 400w`,
+            webp: `${FILES}/mvid_yt-400.webp 400w, ${FILES}/mvid_yt-720.webp 720w`,
+          },
+        },
+        width: null,
+        height: null,
+        durationSeconds: null,
+        youtube: { embedUrl: `https://www.youtube-nocookie.com/embed/${ID}` },
+      })
+      expect(view).not.toHaveProperty("sources")
+    })
+
+    it("shows the product's first picture while it has no cover of ours, named after it", () => {
+      const [view] = productVideos(product([youtube("mvid_yt", { poster: null })]))
+      expect(view?.poster).toEqual({
+        src: `${FILES}/sef-bicagi.jpg`,
+        alt: "Şef Bıçağı",
+        width: null,
+        height: null,
+        sources: { avif: null, webp: null },
+      })
+      // A cover outside the web addresses is no cover: the first picture stands in
+      const [plain] = productVideos(
+        product([
+          youtube("mvid_yt", {
+            poster: { url: "http://dosya.ornek.com/a.jpg", width: 1, height: 1, derivatives: null },
+          }),
+        ]),
+        false
+      )
+      expect(plain?.poster.src).toBe(`${FILES}/sef-bicagi.jpg`)
+    })
+
+    it("leaves it out without a valid id, or with no picture at all to show", () => {
+      for (const id of [null, "", "short", `${ID}x`, "../../admin", "dQw4w9WgX?Q"]) {
+        expect(productVideos(product([youtube("mvid_yt", { youtube_id: id })]))).toEqual([])
+      }
+      const bare: StoreProduct = { ...product([youtube("mvid_yt", { poster: null })]), images: [] }
+      expect(productVideos(bare)).toEqual([])
+    })
+
+    it("counts with the clips: two at most, by their place", () => {
+      const videos = productVideos(
+        product([
+          youtube("mvid_yt", { position: 1 }),
+          clip("mvid_clip", { position: 1 }),
+          youtube("mvid_late", { position: 2 }),
+        ])
+      )
+      expect(videos.map((video) => video.id)).toEqual(["mvid_yt", "mvid_clip"])
+    })
   })
 
   it("has none for a product the answer gave no videos", () => {

@@ -1,6 +1,6 @@
-import type { ProductVideoView } from "@qticaret/ui"
+import type { ImageView, ProductVideoView } from "@qticaret/ui"
 import type { StoreMediaVideo, StoreProduct } from "@qticaret/types"
-import { imageView } from "./image"
+import { imageView, productImages } from "./image"
 
 /** The most a product shows (adr/0069 §1: two per product, uploads and YouTube together). */
 export const MAX_PRODUCT_VIDEOS = 2
@@ -73,26 +73,84 @@ function clipView(
   }
 }
 
+/** A YouTube video's id (adr/0069 §1): anything else is not built into an address. */
+const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/
+
 /**
- * The product's videos for its gallery (adr/0069 §6): the ready clips, by
- * their place, at most two. The backend already sends only the ready ones
- * (and none while the shop's videos are off); a YouTube video waits for
- * slice 5, so none is shown yet. `development` decides as the policy does
- * (`NODE_ENV`): plain HTTP addresses only then.
+ * A YouTube video as the gallery draws it (adr/0069 §7, §8): the
+ * privacy-enhanced player's address, built here from the id alone, and
+ * the cover from our own storage, else the product's first picture
+ * (nothing of Google's loads before the visitor presses play). Null
+ * without a valid id, or without any picture to show.
+ */
+function youtubeView(
+  video: StoreMediaVideo,
+  productTitle: string,
+  firstImage: ImageView | undefined,
+  development: boolean
+): ProductVideoView | null {
+  const id = video.youtube_id
+  if (!id || !YOUTUBE_ID.test(id)) {
+    return null
+  }
+  const own = video.title?.trim() ?? ""
+  const title = own.length > 0 ? own : productTitle
+  const poster = video.poster
+  const cover: ImageView | null =
+    poster?.url && webAddress(poster.url, development)
+      ? imageView(
+          {
+            url: poster.url,
+            alt: title,
+            width: sizeOf(poster.width),
+            height: sizeOf(poster.height),
+            derivatives: poster.derivatives,
+          },
+          title
+        )
+      : firstImage
+        ? { ...firstImage, alt: title }
+        : null
+  if (!cover) {
+    return null
+  }
+  return {
+    id: video.id,
+    after: placeOf(video),
+    title,
+    poster: cover,
+    width: null,
+    height: null,
+    durationSeconds: null,
+    youtube: { embedUrl: `https://www.youtube-nocookie.com/embed/${id}` },
+  }
+}
+
+/**
+ * The product's videos for its gallery (adr/0069 §6): the ready clips and
+ * YouTube videos, by their place, at most two. The backend already sends
+ * only the ready ones (and none while the shop's videos are off).
+ * `development` decides as the policy does (`NODE_ENV`): plain HTTP
+ * addresses only then.
  */
 export function productVideos(
   product: StoreProduct,
   development: boolean = process.env.NODE_ENV === "development"
 ): ProductVideoView[] {
   const ready = (product.media_videos ?? []).filter(
-    (video): video is StoreMediaVideo =>
-      Boolean(video) && video.status === "ready" && video.kind === "upload"
+    (video): video is StoreMediaVideo => Boolean(video) && video.status === "ready"
   )
+  const firstImage = ready.some((video) => video.kind === "youtube")
+    ? productImages(product)[0]
+    : undefined
   return ready
     .map((video, order) => ({ video, order }))
     .sort((a, b) => placeOf(a.video) - placeOf(b.video) || a.order - b.order)
     .flatMap(({ video }) => {
-      const view = clipView(video, product.title, development)
+      const view =
+        video.kind === "youtube"
+          ? youtubeView(video, product.title, firstImage, development)
+          : clipView(video, product.title, development)
       return view ? [view] : []
     })
     .slice(0, MAX_PRODUCT_VIDEOS)

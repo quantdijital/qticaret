@@ -46,21 +46,36 @@ describe("contentSecurityPolicy", () => {
     )
     const development = contentSecurityPolicy("abc123", true)
     expect(directive(development, "media-src")).toBe("media-src 'self' https: http:")
-    // No YouTube frame yet (slice 5): the frames stay the card providers' alone
-    expect(directive(production, "frame-src")).toBe("frame-src 'none'")
-    expect(production).not.toContain("youtube")
+  })
+
+  it("frames YouTube's privacy-enhanced player and nothing else of YouTube's (adr/0069 §8)", () => {
+    const production = contentSecurityPolicy("abc123", false)
+    expect(directive(production, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com")
+    expect(contentSecurityPolicy("abc123", true)).toContain(
+      "frame-src https://www.youtube-nocookie.com;"
+    )
+    // The one origin, in the one directive: no scripts, pictures, connections or media of its own
+    expect(production.match(/youtube/g)).toHaveLength(1)
+    expect(production).not.toMatch(/youtube\.com|ytimg|googlevideo|\*\.youtube/)
+    for (const name of ["script-src", "connect-src", "img-src", "media-src", "default-src"]) {
+      expect(directive(production, name)).not.toContain("youtube")
+    }
+    // The page itself is still framed by nobody
+    expect(directive(production, "frame-ancestors")).toBe("frame-ancestors 'none'")
   })
 
   it("frames only the card providers' forms, and lets the payment return sit in our own frame", () => {
     const closed = contentSecurityPolicy("abc123", false)
-    expect(directive(closed, "frame-src")).toBe("frame-src 'none'")
+    expect(directive(closed, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com")
     expect(directive(closed, "frame-ancestors")).toBe("frame-ancestors 'none'")
 
     const checkout = contentSecurityPolicy("abc123", false, {
       frameOrigins: ["https://www.paytr.com"],
       framedBySelf: true,
     })
-    expect(directive(checkout, "frame-src")).toBe("frame-src https://www.paytr.com")
+    expect(directive(checkout, "frame-src")).toBe(
+      "frame-src https://www.youtube-nocookie.com https://www.paytr.com"
+    )
     expect(directive(checkout, "frame-ancestors")).toBe("frame-ancestors 'self'")
   })
 
@@ -84,7 +99,7 @@ describe("contentSecurityPolicy", () => {
       "connect-src 'self' https://connect.facebook.net https://www.facebook.com"
     )
     expect(meta).not.toContain("google")
-    // Nothing else opens: no frames, no other scripts
-    expect(directive(meta, "frame-src")).toBe("frame-src 'none'")
+    // Nothing else opens: no frames but YouTube's player, no other scripts
+    expect(directive(meta, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com")
   })
 })
