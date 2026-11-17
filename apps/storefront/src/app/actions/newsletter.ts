@@ -12,8 +12,13 @@ import { storeCall } from "@/lib/store-api/server"
  */
 const NEWSLETTER_TEXT_VERSION = "bulten-1"
 
+/** What the form's consent box sends once ticked (the theme's `NewsletterForm`). */
+const CONSENT_GIVEN = "1"
+
 const Subscription = z.object({
   email: z.string().trim().toLowerCase().max(254).pipe(z.email()),
+  // The box's `required` is only the browser's word: no tick, no subscription (İYS, adr/0038)
+  consent: z.literal(CONSENT_GIVEN),
   challenge: z
     .string()
     .regex(/^[\w.-]{1,300}$/)
@@ -32,7 +37,12 @@ export async function subscribeNewsletter(
 ): Promise<PlaceOrderResult> {
   const parsed = Subscription.safeParse(Object.fromEntries(form))
   if (!parsed.success) {
-    return { ok: false, error: "newsletter.email_invalid", challenge: null }
+    const unticked = parsed.error.issues.every((issue) => issue.path[0] === "consent")
+    return {
+      ok: false,
+      error: unticked ? "newsletter.consent_required" : "newsletter.email_invalid",
+      challenge: null,
+    }
   }
   const { email, challenge } = parsed.data
   try {

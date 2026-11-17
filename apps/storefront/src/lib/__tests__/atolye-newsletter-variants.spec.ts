@@ -148,3 +148,25 @@ describe("the newsletter box's variants in the footer", () => {
     expect(html).not.toContain(LOOK.description)
   })
 })
+
+/** The action refuses a form without `consent=1` (İYS): every variant's form has to send it. */
+describe("the consent box in every newsletter variant", () => {
+  it.each(["standard", "split", "image_card", "strip", "in_footer"] as const)(
+    "the %s box on a page sends the consent with the address",
+    (variant) => {
+      const html = home(box({ variant, ...LOOK, image: PICTURE }))
+      expect(html.match(/<form/g)).toHaveLength(1)
+      expect(html).toMatch(CONSENT)
+    }
+  )
+
+  it.each(["standard", "split", "in_footer"] as const)(
+    "the %s box in the footer sends the consent with the address",
+    (variant) => {
+      const html = footerOf(
+        shopFixture({ newsletter: { title: "Bülten", text: "Onay metni.", variant, ...LOOK } })
+      )
+      expect(html).toMatch(CONSENT)
+    }
+  )
+})

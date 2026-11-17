@@ -668,6 +668,7 @@
   "newsletter.submit": "Abone ol",
   "newsletter.sent": "Onay bağlantısını e-postanıza gönderdik. Aboneliğiniz bağlantıyı açınca başlar.",
   "newsletter.email_invalid": "Geçerli bir e-posta adresi yazın.",
+  "newsletter.consent_required": "Abone olmak için onay kutusunu işaretleyin.",
   "newsletter.rate_limited": "Kısa sürede çok deneme yapıldı. Lütfen daha sonra tekrar deneyin.",
   "newsletter.failed": "Abonelik şu an alınamadı. Lütfen biraz sonra tekrar deneyin.",
   "newsletter.description": "Yeni ürünler, kampanyalar ve duyurular e-postanıza gelsin.",
