@@ -153,9 +153,13 @@ export const planOrderRefundStep = createStep(
       : input.close_only
         ? "done"
         : "replan"
-    // Shown, and a staff check already wrote Medusa's record: finished from it, never recorded
-    // again through the provider (review, fifth round)
-    if (existing && action === "send" && (await finishCheckedRecord(container, existing))) {
+    // A staff check already wrote Medusa's record: the payment's data finished from it, and the
+    // refund closed as made, never recorded again through the provider (fifth and sixth rounds)
+    if (
+      existing &&
+      (action === "send" || action === "made") &&
+      (await finishCheckedRecord(container, existing))
+    ) {
       action = "made"
     }
     if (!existing && action === "done") {

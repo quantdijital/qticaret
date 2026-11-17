@@ -139,6 +139,20 @@ describe("a staff check cut short after Medusa's record is finished from it (fif
     expect(shop.updatePaymentCollections).toHaveBeenCalledWith("paycol_01", expect.anything())
   })
 
+  it("keeps the collection's total before the data, and never takes a record bound elsewhere (D-1, D-2)", async () => {
+    const note = checkedNote(REFERENCE)
+    const shop = containerWith({ refunds: [{ id: "ref_TRY", note, raw_amount: raw(10) }] })
+    const bound = containerWith({
+      refunds: [{ id: "ref_TRY", note, raw_amount: raw(10) }],
+      data: { refunds: [{ reference_no: "another", amount: 1000, refund_id: "ref_TRY" }] },
+    })
+
+    await finishCheckedRecord(shop.container, entry)
+    const total = shop.updatePaymentCollections.mock.invocationCallOrder[0] ?? 0
+    expect(total).toBeLessThan(shop.updatePayment.mock.invocationCallOrder[0] ?? 0)
+    expect(await finishCheckedRecord(bound.container, entry)).toBe(false)
+  })
+
   it("finishes nothing without the check's record: another note, or another amount", async () => {
     const other = containerWith({ refunds: [{ id: "ref_00", note: "x", raw_amount: raw(10) }] })
     const amount = containerWith({

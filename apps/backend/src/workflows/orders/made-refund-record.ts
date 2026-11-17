@@ -2,7 +2,11 @@ import type { BigNumberInput, MedusaContainer, UpdatePaymentDTO } from "@medusaj
 import { ContainerRegistrationKeys, MathBN, Modules } from "@medusajs/framework/utils"
 import { ConflictError } from "../../lib/errors"
 import { kurus, toMedusaAmount } from "../../lib/money"
-import { refundRecordOf, withRefundRecord } from "../../lib/payments/pending-refund"
+import {
+  refundRecordOf,
+  refundRecordsOf,
+  withRefundRecord,
+} from "../../lib/payments/pending-refund"
 
 type Raw = BigNumberInput | null | undefined
 
@@ -27,8 +31,11 @@ interface RefundRecords {
 const sum = (rows: ({ raw_amount?: Raw } | null)[] | null | undefined) =>
   (rows ?? []).reduce((total, row) => MathBN.add(total, row?.raw_amount ?? 0), MathBN.convert(0))
 
+/** How a staff check's note starts: no refund note of the panel's may (sixth round D-1). */
+export const CHECKED_NOTE_PREFIX = "refund checked at the provider:"
+
 /** The note that names, on Medusa's refund, the ledger refund it was written for. */
-export const checkedNote = (reference: string) => `refund checked at the provider: ${reference}`
+export const checkedNote = (reference: string) => `${CHECKED_NOTE_PREFIX} ${reference}`
 
 async function readPayment(
   container: Pick<MedusaContainer, "resolve">,
@@ -134,26 +141,42 @@ interface CheckedEntry {
   amount: number
 }
 
-// The staff check's own Medusa refund for this ledger refund: by its note and its amount
-const checkedRefundOf = (payment: PaymentRow, entry: CheckedEntry): string | undefined => {
+/**
+ * The staff check's own Medusa refund for this ledger refund: by its note
+ * and its amount, and bound in the payment's data to no other refund
+ * (review, sixth round D-1: a note alone can be written by anyone).
+ */
+export const checkedRefundOf = (
+  payment: Pick<PaymentRow, "data" | "refunds">,
+  entry: CheckedEntry
+): string | undefined => {
   const amount = toMedusaAmount(kurus(entry.amount))
   const note = checkedNote(entry.reference)
+  const elsewhere = new Set(
+    refundRecordsOf(payment.data)
+      .filter((record) => record.refund_id && record.reference_no !== entry.reference)
+      .map((record) => record.refund_id)
+  )
   return (payment.refunds ?? []).find(
-    (refund) => refund?.note === note && MathBN.eq(refund.raw_amount ?? 0, amount)
+    (refund) =>
+      refund?.note === note &&
+      !elsewhere.has(refund.id) &&
+      MathBN.eq(refund.raw_amount ?? 0, amount)
   )?.id
 }
 
-// The refund recorded in the payment's data under Medusa's refund, the collection's total kept
+// The collection's refunded total kept first, then the refund recorded in the payment's data
+// under Medusa's refund: both idempotent, written again on every finish (sixth round D-2)
 async function keepRecord(
   container: Pick<MedusaContainer, "resolve">,
   payment: PaymentRow,
   entry: CheckedEntry,
   refundId: string
 ): Promise<void> {
+  await updateRefundedTotal(container, payment.payment_collection_id)
   const data = withRefundRecord(payment.data ?? {}, entry.reference, kurus(entry.amount), refundId)
   await container.resolve(Modules.PAYMENT).updatePayment({
     id: payment.id,
     data: { refunds: data["refunds"] },
   } as unknown as UpdatePaymentDTO)
-  await updateRefundedTotal(container, payment.payment_collection_id)
 }

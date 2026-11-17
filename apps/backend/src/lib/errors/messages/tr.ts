@@ -1132,6 +1132,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "orders.refund_mode": "Ya kalem ve kargo seçin ya da bir tutar girin.",
   "orders.refund_amount_kurus": "Tutar en çok iki ondalık basamak içerebilir.",
   "orders.refund_reference_invalid": "İade anahtarı geçersiz; iadeyi yeniden başlatın.",
+  "orders.refund_note_reserved":
+    "Bu not sistemin kendi iade kayıtlarına ayrılmıştır; notu değiştirin.",
   "orders.refund_not_open": "Bu iade artık açık değil; sayfayı yenileyin.",
   "orders.refund_unknown": "Bu iade siparişte bulunamadı.",
   "orders.refund_unsettled":

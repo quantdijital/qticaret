@@ -2,6 +2,7 @@ import { asValue } from "@medusajs/framework/awilix"
 import { Modules, createMedusaContainer } from "@medusajs/framework/utils"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
+import { checkedNote } from "../made-refund-record"
 import { settleFailedEntry } from "../refund-settle"
 import { refundTraceOf } from "../refund-trace"
 import type { TracedRefund } from "../refund-trace"
@@ -103,6 +104,33 @@ describe("an order refund's trace once a step after the provider failed (review 
     expect(await traceIn(paytrPayment())).toBe("none")
     const bank = { id: "pay_01", provider_id: "pp_bank-transfer_bank-transfer", data: {} }
     expect(await traceIn(bank)).toBe("none")
+  })
+
+  it("is made for a staff check's Medusa record the payment's data does not hold yet (B-1)", async () => {
+    const checked = {
+      id: "ref_CHK",
+      note: checkedNote(REFERENCE),
+      raw_amount: { value: "10", precision: 20 },
+    }
+    const bank = (data: Record<string, unknown> = {}) => ({
+      id: "pay_01",
+      provider_id: "pp_bank-transfer_bank-transfer",
+      data,
+      refunds: [checked],
+    })
+    queryStatus.mockResolvedValue({ refunds: [] })
+
+    expect(await traceIn(bank())).toBe("made")
+    expect(await traceIn({ ...paytrPayment(), refunds: [checked] })).toBe("made")
+    // Never failed then: kept open for the job to finish it
+    const { container, updateOrderRefunds } = containerWith(bank())
+    await settleFailedEntry(container, "oref_01")
+    expect(updateOrderRefunds).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "pending", error_code: "refund_incomplete" })
+    )
+    // A note alone proves nothing: a record the data binds to another refund is not this one (D-1)
+    const elsewhere = { refunds: [{ reference_no: "other", amount: 1000, refund_id: "ref_CHK" }] }
+    expect(await traceIn(bank(elsewhere))).toBe("none")
   })
 
   it("is unknown, never none, when PayTR cannot be asked or lists a refund it cannot name (D-2)", async () => {

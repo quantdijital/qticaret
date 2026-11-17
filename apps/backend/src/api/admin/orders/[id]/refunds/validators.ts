@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { CHECKED_NOTE_PREFIX } from "../../../../../workflows/orders/made-refund-record"
 import { liraAmount } from "../../../../validation/lira"
 
 const lira = liraAmount(1_000_000_000, "orders.refund_amount_kurus")
@@ -38,7 +39,15 @@ export const AdminPostOrderRefund = z
     // again, it is made once. No other form: a cancel's, a return's, Medusa's own or the
     // recovery job's reference can never be named here (security review D4)
     reference: z.string().regex(/^[0-9a-f]{32}$/, "orders.refund_reference_invalid"),
-    note: z.string().trim().max(500).optional(),
+    // Never a staff check's own note: it names the check's Medusa record (sixth round D-1)
+    note: z
+      .string()
+      .trim()
+      .max(500)
+      .refine((note) => !note.toLowerCase().startsWith(CHECKED_NOTE_PREFIX), {
+        message: "orders.refund_note_reserved",
+      })
+      .optional(),
   })
   .strict()
   .refine(oneWay, { message: "orders.refund_mode", path: ["amount"] })

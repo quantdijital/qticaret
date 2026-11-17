@@ -6,6 +6,7 @@ import { refundRecorded } from "../../lib/payments/pending-refund"
 import { paytrApi, paytrCredentialsOf } from "../../lib/payments/paytr"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
+import { checkedRefundOf } from "./made-refund-record"
 
 /**
  * What became of an order refund's money, its ledger entry not closed
@@ -79,9 +80,15 @@ export async function refundTraceOf(
   try {
     const [payment] = await container
       .resolve(Modules.PAYMENT)
-      .listPayments({ id: entry.payment_id }, { select: ["id", "provider_id", "data"] })
+      .listPayments(
+        { id: entry.payment_id },
+        { select: ["id", "provider_id", "data"], relations: ["refunds"] }
+      )
     provider = providerNameOf(payment?.provider_id)
-    if (refundRecorded(payment?.data, entry.reference, entry.amount)) {
+    // Recorded in the payment's data, or a staff check's Medusa record cut short before the data
+    // (sixth round B-1): made either way, finished where it is closed (`finishCheckedRecord`)
+    const checked = payment && checkedRefundOf(payment, entry)
+    if (refundRecorded(payment?.data, entry.reference, entry.amount) || checked) {
       return { trace: "made", provider }
     }
     if (entry.parts.length > 0) {

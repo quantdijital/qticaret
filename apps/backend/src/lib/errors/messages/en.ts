@@ -1123,6 +1123,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.refund_mode": "Choose lines and shipping, or enter an amount.",
   "orders.refund_amount_kurus": "The amount takes at most two decimals.",
   "orders.refund_reference_invalid": "The refund key is not valid; start the refund again.",
+  "orders.refund_note_reserved":
+    "This note is kept for the system's own refund records; change it.",
   "orders.refund_not_open": "This refund is no longer open; reload the page.",
   "orders.refund_unknown": "This refund is not on the order.",
   "orders.refund_unsettled":
