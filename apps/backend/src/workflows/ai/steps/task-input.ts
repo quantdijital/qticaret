@@ -4,7 +4,7 @@ import { entityFacts } from "../../../lib/ai/facts"
 import type { AiEntityType } from "../../../lib/ai/facts"
 import { instructionOf } from "../../../lib/ai/instructions"
 import { buildPrompt } from "../../../lib/ai/prompt"
-import { findAiTask, isTaskEntity } from "../../../lib/ai/registry/tasks"
+import { factLengthsOf, findAiTask, isTaskEntity } from "../../../lib/ai/registry/tasks"
 
 export { AI_ENTITY_TYPES } from "../../../lib/ai/facts"
 export type { AiEntityType } from "../../../lib/ai/facts"
@@ -36,7 +36,11 @@ export const taskInputStep = createStep(
     }
     // Read by its type and id alone (lib/ai/facts): the record's text never comes from the client
     const { fields, maxLengths } = await entityFacts(container, input.entity_type, input.entity_id)
-    const prompt = buildPrompt({ instruction, fields, maxLengths })
+    const prompt = buildPrompt({
+      instruction,
+      fields,
+      maxLengths: factLengthsOf(task, maxLengths),
+    })
     return new StepResponse({ system: prompt.system, data: prompt.data })
   }
 )

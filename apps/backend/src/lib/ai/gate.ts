@@ -25,6 +25,10 @@ const FENCE = /^```[\w-]*$/
 // Emphasis marks around words, on one line
 const EMPHASIS = /(\*\*|__|`)(.+?)\1/g
 const HEADING = /^#{1,6}\s+/
+// A run of non-space characters no word or number of a description reaches (adr/0071 §9);
+// tested before the link and personal data patterns, whose cost grows with such a run
+export const MAX_UNBROKEN_RUN = 60
+const UNBROKEN = new RegExp(`\\S{${String(MAX_UNBROKEN_RUN + 1)}}`)
 // Quotes a model wraps a whole answer in
 const QUOTES = new Set(['"', "'", "“", "”", "«", "»"])
 
@@ -69,6 +73,11 @@ export function suggestionProblems(task: AiTask, text: string): string[] {
   }
   if (MARKUP_LEFT.test(text)) {
     problems.push("markup")
+  }
+  const seo = task.gate === "seo_title" || task.gate === "seo_description"
+  // Long-form text only: an SEO field is short enough for its patterns, and its rules stay as they are
+  if (!seo && UNBROKEN.test(text)) {
+    return [...problems, "noise"]
   }
   if (
     task.gate === "seo_title" ||
