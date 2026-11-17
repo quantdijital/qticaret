@@ -114,5 +114,19 @@ moduleIntegrationTestRunner<AiModuleService>({
       expect(await service.usedToday("text", late)).toBe(0)
       expect(await service.claimDaily("text", 1, late)).toBe("2026-04-30")
     })
+
+    it("forgets a removed member: choices gone, usage kept without a name (O2)", async () => {
+      await service.rememberChoice({ user_id: "user_gone", task: "test_text", service: "deepseek" })
+      await service.rememberChoice({ user_id: "user_stays", task: "test_text", service: "gemini" })
+      await service.recordUsage(attempt({ requested_by: "user_gone" }))
+      await service.recordUsage(attempt({ requested_by: "user_stays" }))
+
+      await service.forgetStaff("user_gone")
+
+      expect(await service.listAiPreferences({ user_id: "user_gone" })).toEqual([])
+      expect(await service.listAiPreferences({ user_id: "user_stays" })).toHaveLength(1)
+      const usage = await service.listAiUsages({}, { select: ["requested_by"] })
+      expect(usage.map((each) => each.requested_by).sort()).toEqual([null, "user_stays"].sort())
+    })
   },
 })

@@ -76,8 +76,8 @@ const NOT_TAKEN_KEYS: ReadonlySet<AiErrorKey> = new Set([
 ])
 
 // No connection, an open circuit, or a 5xx (adr/0071 §8: the service did not take the job)
-const notConnected = (code: string): boolean =>
-  code === "circuit_open" || code === "dns_failed" || /^http_5\d\d$/.test(code)
+const NO_CONNECTION: ReadonlySet<string> = new Set(["circuit_open", "dns_failed", "connect_failed"])
+const notConnected = (code: string): boolean => NO_CONNECTION.has(code) || /^http_5\d\d$/.test(code)
 
 /**
  * Whether a failed call never became work at the service (adr/0071 §8.4),

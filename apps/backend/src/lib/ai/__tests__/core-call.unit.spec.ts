@@ -5,7 +5,7 @@ import type { TextConnector } from "../connectors/types"
 import { aiProviderError } from "../errors"
 import type { AiErrorKey } from "../errors"
 import { instructionOf, isTaskOption } from "../instructions"
-import { failureOf } from "../outcome"
+import { failureOf, notTakenByService } from "../outcome"
 import { buildPrompt } from "../prompt"
 import { TEST_TASK } from "../registry/tasks"
 import { runTextTask } from "../run-text"
@@ -114,6 +114,42 @@ describe("failureOf", () => {
       unwell: false,
       answered: false,
     })
+  })
+})
+
+describe("notTakenByService (D3)", () => {
+  it("gives the quota back only when the service never took the job", () => {
+    const back: [AiErrorKey, string | null][] = [
+      ["ai.key_rejected", "http_401"],
+      ["ai.provider_balance", "http_402"],
+      ["ai.provider_busy", "http_429"],
+      ["ai.service_unavailable", "no_credentials"],
+      ["ai.service_unavailable", "not_registered"],
+      ["ai.provider_unavailable", "circuit_open"],
+      ["ai.provider_unavailable", "dns_failed"],
+      ["ai.provider_unavailable", "connect_failed"],
+      ["ai.provider_unavailable", "http_500"],
+      ["ai.provider_unavailable", "http_503"],
+    ]
+    for (const [key, code] of back) {
+      expect([key, code, notTakenByService(key, code)]).toEqual([key, code, true])
+    }
+  })
+
+  it("keeps the quota when the service may have done the work", () => {
+    const kept: [AiErrorKey, string | null][] = [
+      ["ai.timeout", "timeout"],
+      ["ai.timeout", "aborted"],
+      ["ai.content_blocked", "content_filter"],
+      ["ai.provider_response_invalid", "empty_content"],
+      ["ai.provider_response_invalid", "unexpected"],
+      // A connection cut after the request left: it may have been charged
+      ["ai.provider_unavailable", "request_failed"],
+      ["ai.provider_unavailable", null],
+    ]
+    for (const [key, code] of kept) {
+      expect([key, code, notTakenByService(key, code)]).toEqual([key, code, false])
+    }
   })
 })
 

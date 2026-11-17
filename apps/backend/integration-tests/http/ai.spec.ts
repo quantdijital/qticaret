@@ -182,7 +182,12 @@ medusaIntegrationTestRunner({
       })
 
       expect(failed.status).toBe(502)
-      expect(failed.data).toMatchObject({ message: "ai.provider_unavailable", provider: "fake" })
+      // Info 7: the other usable services travel with the error (none here)
+      expect(failed.data).toMatchObject({
+        message: "ai.provider_unavailable",
+        provider: "fake",
+        alternatives: [],
+      })
       expect(await records().usages()).toEqual([
         expect.objectContaining({ status: "failed", error_code: "http_503", suggestion_id: null }),
       ])

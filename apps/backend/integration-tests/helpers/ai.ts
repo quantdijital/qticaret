@@ -30,6 +30,8 @@ export interface AiAnswer {
   message?: string
   problems?: string[]
   provider?: string
+  /** A failed call's other usable services (Info 7). */
+  alternatives?: string[]
 }
 
 /**
