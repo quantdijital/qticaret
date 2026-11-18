@@ -1,3 +1,4 @@
+import type { Readable } from "node:stream"
 import { readImage } from "../media"
 import { readImageInfo } from "../security/upload"
 import type { AiImageInput } from "./connectors/types"
@@ -21,9 +22,34 @@ export const VISION_MAX_SIDE = 1024
 export const VISION_MAX_BYTES = 4 * 1024 * 1024
 
 export const VISION_MIME = "image/jpeg"
+/** How long re-encoding may take: a crafted file cannot hold the worker (lib/media/svg-raster.ts). */
+export const VISION_ENCODE_TIMEOUT_SECONDS = 10
 
 const refuse = (service: string, code: string) =>
   aiProviderError({ service, key: "ai.input_unsupported", code })
+
+/**
+ * A stored file read from its download stream, stopped as soon as it
+ * passes `VISION_SOURCE_MAX_BYTES` (null then): a large file is never
+ * held whole in memory (the brand logo's way, workflows/brands/logo-size.ts).
+ */
+export async function readVisionSource(stream: Readable): Promise<Buffer | null> {
+  const chunks: Buffer[] = []
+  let total = 0
+  try {
+    for await (const chunk of stream) {
+      const part = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array)
+      total += part.length
+      if (total > VISION_SOURCE_MAX_BYTES) {
+        return null
+      }
+      chunks.push(part)
+    }
+  } finally {
+    stream.destroy()
+  }
+  return Buffer.concat(chunks, total)
+}
 
 /**
  * The image re-encoded for the call; `ai.input_unsupported` for anything
@@ -49,6 +75,7 @@ export async function visionImage(bytes: Buffer, service: string): Promise<AiIma
       // A transparent PNG reads as a picture on white, as a shop shows it
       .flatten({ background: "#ffffff" })
       .jpeg({ quality: 80 })
+      .timeout({ seconds: VISION_ENCODE_TIMEOUT_SECONDS })
       .toBuffer()
   } catch {
     throw refuse(service, "image_unreadable")

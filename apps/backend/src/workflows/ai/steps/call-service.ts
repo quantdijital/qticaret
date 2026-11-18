@@ -6,7 +6,7 @@ import { textConnectorFor, textTargetOf } from "../../../lib/ai/connector-of"
 import type { AiImageInput } from "../../../lib/ai/connectors/types"
 import { aiProviderError } from "../../../lib/ai/errors"
 import type { AiErrorKey } from "../../../lib/ai/errors"
-import { visionImage } from "../../../lib/ai/image-input"
+import { readVisionSource, visionImage } from "../../../lib/ai/image-input"
 import { failureOf } from "../../../lib/ai/outcome"
 import type { AiCapability } from "../../../lib/ai/registry/capabilities"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
@@ -75,11 +75,15 @@ async function pictureOf(
   if (fileId === null || fileId === "") {
     throw aiProviderError({ service, key: "ai.input_unsupported", code: "image_missing" })
   }
-  let bytes: Buffer
+  let bytes: Buffer | null
   try {
-    bytes = await container.resolve(Modules.FILE).getAsBuffer(fileId)
+    // Streamed and cut at the source limit: a large file is never read whole
+    bytes = await readVisionSource(await container.resolve(Modules.FILE).getDownloadStream(fileId))
   } catch {
     throw aiProviderError({ service, key: "ai.input_unsupported", code: "image_unreadable" })
+  }
+  if (bytes === null) {
+    throw aiProviderError({ service, key: "ai.input_unsupported", code: "image_size" })
   }
   return visionImage(bytes, service)
 }

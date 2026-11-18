@@ -71,6 +71,8 @@ export function errorKeyOf(error: unknown): string {
 export interface BulkAltTextDeps {
   /** The ids worth asking for, in the order given: no alt text, a stored picture, no open suggestion. */
   eligible: (ids: readonly string[]) => Promise<string[]>
+  /** Checked again just before each ask: a suggestion made meanwhile (one by hand, a job queued twice) is not asked for twice. */
+  waiting: (id: string) => Promise<boolean>
   /** One ask; throws the workflow's error. */
   suggest: (id: string) => Promise<"draft" | "refused">
   progress: (percent: number) => Promise<void>
@@ -93,6 +95,11 @@ export async function runBulkAltText(
     stopped: null,
   }
   for (const [index, id] of eligible.entries()) {
+    if (await deps.waiting(id)) {
+      summary.skipped += 1
+      await deps.progress(Math.round(((index + 1) / eligible.length) * 100))
+      continue
+    }
     summary.asked += 1
     try {
       const status = await deps.suggest(id)
@@ -123,11 +130,8 @@ const READABLE_TYPES: ReadonlySet<string> = new Set([
   "image/avif",
 ])
 
-/** The images worth asking for: a stored raster picture, no alt text, no suggestion waiting. */
-async function eligibleImages(container: Container, ids: readonly string[]): Promise<string[]> {
-  const assets = await container
-    .resolve<MediaModuleService>(MEDIA_MODULE)
-    .listMediaAssets({ id: [...ids] }, { select: ["id", "file_id", "mime_type", "alt"] })
+/** Of these images, the ones with an alt text suggestion waiting for a decision. */
+async function waitingFor(container: Container, ids: readonly string[]): Promise<Set<string>> {
   const open = await container
     .resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
     .listContentDrafts(
@@ -139,7 +143,15 @@ async function eligibleImages(container: Container, ids: readonly string[]): Pro
       },
       { select: ["entity_id"] }
     )
-  const waiting = new Set(open.map((draft) => draft.entity_id))
+  return new Set(open.map((draft) => draft.entity_id))
+}
+
+/** The images worth asking for: a stored raster picture, no alt text, no suggestion waiting. */
+async function eligibleImages(container: Container, ids: readonly string[]): Promise<string[]> {
+  const assets = await container
+    .resolve<MediaModuleService>(MEDIA_MODULE)
+    .listMediaAssets({ id: [...ids] }, { select: ["id", "file_id", "mime_type", "alt"] })
+  const waiting = await waitingFor(container, ids)
   const worth = new Set(
     assets
       .filter(
@@ -163,6 +175,7 @@ export function bulkAltText(
   return runBulkAltText(
     {
       eligible: (ids) => eligibleImages(container, ids),
+      waiting: async (id) => (await waitingFor(container, [id])).has(id),
       suggest: async (id) => {
         const { result } = await suggestTextWorkflow(container as MedusaContainer).run({
           input: {

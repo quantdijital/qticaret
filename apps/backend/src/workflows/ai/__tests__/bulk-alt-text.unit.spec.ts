@@ -14,6 +14,7 @@ function depsWith(
   options: {
     eligible?: (ids: readonly string[]) => string[]
     answer?: (id: string) => "draft" | "refused" | Error
+    waiting?: (id: string) => boolean
   } = {}
 ): BulkAltTextDeps & { asked: string[]; seen: string[][]; percents: number[] } {
   const asked: string[] = []
@@ -27,6 +28,7 @@ function depsWith(
       seen.push([...list])
       return Promise.resolve(options.eligible ? options.eligible(list) : [...list])
     },
+    waiting: (id) => Promise.resolve(options.waiting ? options.waiting(id) : false),
     suggest: (id) => {
       asked.push(id)
       const answer = options.answer ? options.answer(id) : "draft"
@@ -103,6 +105,14 @@ describe("bulk alt text run", () => {
     const summary = await runBulkAltText(deps, ids(10))
     expect(deps.asked).toEqual(["media_1", "media_2", "media_3"])
     expect(summary).toMatchObject({ asked: 2, suggested: 2, not_asked: 8, stopped: key })
+  })
+
+  it("skips an image whose suggestion appeared after the job began, without asking", async () => {
+    const deps = depsWith({ waiting: (id) => id === "media_2" })
+    const summary = await runBulkAltText(deps, ids(3))
+    expect(deps.asked).toEqual(["media_1", "media_3"])
+    expect(summary).toMatchObject({ asked: 2, suggested: 2, skipped: 1 })
+    expect(deps.percents.at(-1)).toBe(100)
   })
 
   it("reads the key from any shape a workflow hands back", () => {
