@@ -29,6 +29,7 @@ describe("AI registries (adr/0071 §2)", () => {
       "seo_title",
       "seo_description",
       "product_description",
+      "image_alt_text",
     ])
     expect(findAiTask("test_text", "development")).toBeNull()
   })
@@ -77,9 +78,22 @@ describe("AI registries (adr/0071 §2)", () => {
     }
   })
 
-  it("registers only text for the real services until the other connectors exist", () => {
+  it("registers text and image reading for every real service, image reading on the text endpoint", () => {
     for (const service of aiServices("production")) {
-      expect(Object.keys(service.capabilities)).toEqual(["text"])
+      expect(Object.keys(service.capabilities)).toEqual(expect.arrayContaining(["text", "vision"]))
+      const { text, vision } = service.capabilities
+      // Image reading is the text endpoint with images: same connector, host and path, a size cap
+      expect(vision).toMatchObject({
+        connector: "openai-compatible",
+        baseUrl: text && "baseUrl" in text ? text.baseUrl : "",
+        path: "/chat/completions",
+        imageInput: { maxBytes: expect.any(Number) as number },
+      })
+      expect(service.unitPrices.vision).toBeDefined()
+    }
+    // A text target never takes an image
+    for (const service of aiServices("production")) {
+      expect(service.capabilities.text).not.toHaveProperty("imageInput")
     }
   })
 

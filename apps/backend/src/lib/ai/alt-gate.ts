@@ -18,12 +18,16 @@ const FILLER_WORDS: ReadonlySet<string> = new Set([
 const SUFFIX =
   /^(i|ı|u|ü|si|sı|de|da|te|ta|dir|dır|nde|nda|ndeki|ndaki|deki|daki|inde|ında|indeki|ındaki|ler|lar|leri|ları)?$/u
 
-const wordsOf = (text: string): string[] =>
-  text.toLocaleLowerCase("tr").match(/[\p{L}\p{N}]+/gu) ?? []
+const wordsOf = (text: string): string[] => text.match(/[\p{L}\p{N}]+/gu) ?? []
 
-const isFiller = (word: string): boolean =>
-  FILLER_WORDS.has(word) ||
-  FILLER_STEMS.some((stem) => word.startsWith(stem) && SUFFIX.test(word.slice(stem.length)))
+// In Turkish "Image" lowers to "ımage": the English words are matched in the plain lowering
+const isFiller = (word: string): boolean => {
+  const turkish = word.toLocaleLowerCase("tr")
+  return (
+    FILLER_WORDS.has(word.toLowerCase()) ||
+    FILLER_STEMS.some((stem) => turkish.startsWith(stem) && SUFFIX.test(turkish.slice(stem.length)))
+  )
+}
 
 /** The alt text's own problems; an empty list passes. */
 export function altTextProblems(text: string): string[] {
