@@ -96,7 +96,9 @@ describe("GalleryPage", () => {
     const looks = await screen.findByRole("region", { name: "Kayıtlı görünümlerim (1/10)" })
     expect(within(looks).getAllByRole("article")).toHaveLength(2)
     expect(within(looks).getByRole("heading", { name: "Bayram vitrini" })).toBeInTheDocument()
-    expect(within(looks).getByRole("heading", { name: "Sade, 17 Kasım 14:20" })).toBeInTheDocument()
+    expect(
+      within(looks).getByRole("heading", { name: "Sade, 17 Kas 2026 14:20" })
+    ).toBeInTheDocument()
     expect(within(looks).getByText("Otomatik")).toBeInTheDocument()
     expect(
       within(looks).getByText(
@@ -129,7 +131,7 @@ describe("GalleryPage", () => {
     await user.click(screen.getByRole("button", { name: "Şu anki görünümü kaydet" }))
     const dialog = await screen.findByRole("dialog", { name: "Görünümü kaydet" })
     const field = within(dialog).getByRole<HTMLInputElement>("textbox", { name: "Ad" })
-    expect(field.value).toMatch(/^Sade, \d{1,2} \S+$/)
+    expect(field.value).toMatch(/^Sade, \d{1,2} \S+ \d{4}$/)
 
     await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {

@@ -1,27 +1,9 @@
 import type { TFunction } from "i18next"
+import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 import type { DesignCard, DesignSummary, PresetCard, PresetRef } from "./api"
 import { isLook } from "./families"
 
 const G = "storefront.gallery"
-
-// The shop's dates are Turkey's (admin-ui `lib/format.ts`)
-const DAY_TIME = new Intl.DateTimeFormat("tr-TR", {
-  day: "numeric",
-  month: "long",
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Istanbul",
-})
-const DAY = new Intl.DateTimeFormat("tr-TR", {
-  day: "numeric",
-  month: "long",
-  timeZone: "Europe/Istanbul",
-})
-
-/** "17 Kasım 14:20". */
-export const dayAndTime = (value: string | Date) => DAY_TIME.format(new Date(value))
-/** "17 Kasım". */
-export const dayOf = (value: string | Date) => DAY.format(new Date(value))
 
 /** Where a look came from, in words: a ready-made or saved look's name, or the shop's own work. */
 export function sourceName(t: TFunction, summary: DesignSummary): string {
@@ -30,7 +12,7 @@ export function sourceName(t: TFunction, summary: DesignSummary): string {
 
 /**
  * A saved look's name as the gallery shows it: its own, or for an
- * automatic save "{kaynak}, {17 Kasım 14:20}" and ", düzenlenmiş" when
+ * automatic save "{kaynak}, {17 Kas 2026 14:20}" and ", düzenlenmiş" when
  * it had been changed from what it came from (adr/0064 Ek 2026-11-17).
  */
 export function designName(
@@ -40,7 +22,7 @@ export function designName(
   if (design.name) {
     return design.name
   }
-  const values = { source: sourceName(t, design.summary), date: dayAndTime(design.created_at) }
+  const values = { source: sourceName(t, design.summary), date: formatDateTime(design.created_at) }
   return t(design.summary.edited ? `${G}.auto.nameEdited` : `${G}.auto.name`, values)
 }
 
@@ -62,9 +44,9 @@ export function lookName(
   return preset ? preset.name : t(`${G}.auto.own`)
 }
 
-/** The name offered for keeping the draft: "{kaynak}, 17 Kasım". */
+/** The name offered for keeping the draft: "{kaynak}, 17 Kas 2026". */
 export const suggestedName = (t: TFunction, source: string, now = new Date()) =>
-  t(`${G}.auto.name`, { source, date: dayOf(now) }).slice(0, NAME_MAX)
+  t(`${G}.auto.name`, { source, date: formatDate(now) }).slice(0, NAME_MAX)
 
 /** The server's limit on a saved look's name (backend `DESIGN_LIMITS.name`). */
 export const NAME_MAX = 60

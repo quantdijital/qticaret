@@ -25,7 +25,7 @@ const stateOf = (status: AiServiceView["status"]): AccountState =>
 /**
  * One AI service on Settings > Yapay zekâ (adr/0071 §13): its name, what
  * it can do, its state, where its data goes, and "Bağla" / "Anahtarı
- * değiştir" / "Bağlantıyı dene" / "Kaldır". The owner connects and
+ * değiştir" / "Bağlantıyı test et" / "Kaldır". The owner connects and
  * removes (`accounts`); the admin may test what is stored; everyone on
  * the page sees the state. With the package leaving the shop's own key
  * out, a stored key stays but nothing can be connected or tested.

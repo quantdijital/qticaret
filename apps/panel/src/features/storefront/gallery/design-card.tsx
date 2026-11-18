@@ -13,9 +13,10 @@ import {
   DropdownMenuTrigger,
 } from "@qticaret/admin-ui/ui/dropdown-menu"
 import { errorText } from "@/lib/errors"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { useDeleteDesign, useRenameDesign } from "./api"
 import type { DesignCard as Design } from "./api"
-import { dayAndTime, designName, sourceName } from "./design-name"
+import { designName, sourceName } from "./design-name"
 import { DesignThumb } from "./design-thumb"
 import { LookFacts } from "./look-facts"
 import { NameDialog } from "./name-dialog"
@@ -58,7 +59,7 @@ export function DesignCard({ design, savedFull, busy, onApply }: DesignCardProps
               {name}
             </h3>
             <p className="text-xs text-muted-foreground">
-              {dayAndTime(design.created_at)}
+              {formatDateTime(design.created_at)}
               {from && design.name ? ` · ${t(`${G}.from`, { name: from })}` : null}
             </p>
           </div>
