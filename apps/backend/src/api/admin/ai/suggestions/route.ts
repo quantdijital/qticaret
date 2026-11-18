@@ -7,7 +7,7 @@ import type { AdminPostAiSuggestionType } from "../validators"
  * POST /admin/ai/suggestions (adr/0071 §11): a suggestion for a record's
  * field, never written to it here. 201 with the suggestion; a suggestion
  * the gate turned down is 422 `ai.suggestion_refused` with its problems
- * and no text. Pictures (`entity_type: media`, Aşama 4) are a job: 202
+ * and no text. Several pictures (`entity_ids`, Aşama 4) are a job: 202
  * with its id; its results are suggestions too, decided one by one.
  */
 export async function POST(
@@ -15,7 +15,7 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const body = req.validatedBody
-  if (body.entity_type === "media") {
+  if ("entity_ids" in body) {
     const { result: job } = await requestImageEditWorkflow(req.scope).run({
       input: {
         task: body.task,

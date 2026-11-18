@@ -168,7 +168,16 @@ medusaIntegrationTestRunner({
         400,
         "ai.unknown_entity",
       ])
+      // One picture by `entity_id` is the text path (alt text): the image task is not one there
+      const single = await ask(owner.headers, {
+        task: "image_background",
+        entity_type: "media",
+        entity_id: svg.id,
+        option: "white",
+        service: "fake",
+      })
       expect(wrongEntity.status).toBe(400)
+      expect([single.status, single.data.message]).toEqual([400, "ai.unknown_task"])
       expect(await usages()).toEqual([])
     })
   },

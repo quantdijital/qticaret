@@ -13,7 +13,9 @@ import { findAiTask, isTaskEntity } from "./tasks"
  * (length and noise for the search texts, the word count for a
  * description). A finding no gate answers (a duplicate, a brand or a focus
  * keyword left out, a heading, a link) has no entry; the rule engine
- * itself is not changed.
+ * itself is not changed. P-IMG-02 (images without alt text) has none
+ * either: its subject is many images and `image_alt_text` reads one, so
+ * its manual fix opens the first image's alt field, where the button is.
  */
 
 /** The form field a suggestion goes to: the SEO card's two, a product's long description. */
@@ -44,7 +46,7 @@ const ONLY_FOR: Readonly<Record<string, readonly PageKind[]>> = {
 
 const ruleOf = (ruleId: string): string => ruleId.slice(ruleId.indexOf("-") + 1)
 
-const isAiEntity = (kind: PageKind): kind is AiEntityType =>
+const isAiEntity = (kind: PageKind): kind is Extract<PageKind, AiEntityType> =>
   (AI_ENTITY_TYPES as readonly string[]).includes(kind)
 
 /**

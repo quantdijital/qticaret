@@ -75,6 +75,7 @@ const NOT_TAKEN_KEYS: ReadonlySet<AiErrorKey> = new Set([
   "ai.service_unavailable",
   // Ours, before any call: a picture gone, or one no service reads (SVG, a background it cannot make)
   "ai.unknown_entity",
+  // Ours too: the picture could not be read or sent, so no call was made
   "ai.input_unsupported",
 ])
 

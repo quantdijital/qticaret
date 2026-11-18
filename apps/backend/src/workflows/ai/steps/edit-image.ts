@@ -5,6 +5,7 @@ import { withAiBreaker } from "../../../lib/ai/breaker"
 import { isPlanLimitError } from "../../../lib/errors"
 import { aiProviderError } from "../../../lib/ai/errors"
 import { imageConnectorFor, imageTargetOf } from "../../../lib/ai/image-connector-of"
+import { readVisionSource } from "../../../lib/ai/image-input"
 import { failureOf } from "../../../lib/ai/outcome"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
 import type { ImageBackground } from "../../../lib/ai/registry/services"
@@ -50,7 +51,13 @@ async function originalOf(
   if (!asset?.file_id) {
     throw aiProviderError({ service: serviceId, key: "ai.unknown_entity", code: "no_master" })
   }
-  const bytes = await container.resolve(Modules.FILE).getAsBuffer(asset.file_id)
+  // Streamed and cut at the source limit (lib/ai/image-input.ts): a large file is never read whole
+  const bytes = await readVisionSource(
+    await container.resolve(Modules.FILE).getDownloadStream(asset.file_id)
+  )
+  if (bytes === null) {
+    throw aiProviderError({ service: serviceId, key: "ai.input_unsupported", code: "image_size" })
+  }
   if (looksLikeSvg(bytes)) {
     throw aiProviderError({ service: serviceId, key: "ai.input_unsupported", code: "svg" })
   }

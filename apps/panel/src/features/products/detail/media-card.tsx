@@ -58,6 +58,7 @@ export function MediaCard({ product }: { product: ProductDetail }) {
         value: record?.alt ?? "",
         legacy: !record,
         versions: record?.file_id ? (record.derived_at ? "ready" : "pending") : null,
+        mediaId: record?.file_id ? record.id : null,
       },
     }
   })

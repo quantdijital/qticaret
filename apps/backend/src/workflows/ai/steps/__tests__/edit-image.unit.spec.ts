@@ -1,7 +1,9 @@
+import { Readable } from "node:stream"
 import { asValue } from "@medusajs/framework/awilix"
 import { Modules, createMedusaContainer } from "@medusajs/framework/utils"
 import sharp from "sharp"
 import { resetAiBreakers } from "../../../../lib/ai/breaker"
+import { VISION_SOURCE_MAX_BYTES } from "../../../../lib/ai/image-input"
 import { PlanLimitError } from "../../../../lib/errors"
 import { DIGITAL_SOURCE_TYPES, digitalSourceTypeOf } from "../../../../lib/media"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../../modules/integration-credentials"
@@ -26,7 +28,7 @@ const media = { listMediaAssets: jest.fn() }
 const credentials = { read: jest.fn() }
 const uploads: { filename: string; mimeType: string; bytes: Buffer }[] = []
 const files = {
-  getAsBuffer: jest.fn(),
+  getDownloadStream: jest.fn((): Promise<Readable> => Promise.resolve(Readable.from([original]))),
   deleteFiles: jest.fn(),
   getUploadStream: jest.fn((input: { filename: string; mimeType: string }) => {
     let bytes: Buffer = Buffer.alloc(0)
@@ -84,7 +86,9 @@ beforeEach(() => {
     },
   ])
   credentials.read.mockResolvedValue({ secrets: { api_key: "test-key-fake-service" } })
-  files.getAsBuffer.mockResolvedValue(Buffer.from(original))
+  files.getDownloadStream.mockImplementation(() =>
+    Promise.resolve(Readable.from([Buffer.from(original)]))
+  )
 })
 
 describe("editing one picture's background", () => {
@@ -95,7 +99,7 @@ describe("editing one picture's background", () => {
     expect(outcome.file_id).toBe(uploads[0] ? `stored-${uploads[0].filename}` : "none")
     // One new file; the original's key is only read
     expect(uploads).toHaveLength(1)
-    expect(files.getAsBuffer).toHaveBeenCalledWith("original-key")
+    expect(files.getDownloadStream).toHaveBeenCalledWith("original-key")
     expect(uploads[0]?.filename).toMatch(/^kupa-fotografi-ai.*\.png$/)
     expect(uploads[0]?.bytes.equals(original)).toBe(false)
     const meta = await sharp(uploads[0]?.bytes).metadata()
@@ -144,9 +148,19 @@ describe("editing one picture's background", () => {
     expect(await editImage(container(), INPUT)).toMatchObject({ status: "succeeded", images: 1 })
   })
 
+  it("refuses a stored file past the AI source limit without reading it whole", async () => {
+    const big = Buffer.alloc(VISION_SOURCE_MAX_BYTES / 4)
+    files.getDownloadStream.mockResolvedValueOnce(Readable.from([big, big, big, big, big]))
+    expect(await editImage(container(), INPUT)).toMatchObject({
+      error_key: "ai.input_unsupported",
+      error_code: "image_size",
+    })
+    expect(credentials.read).not.toHaveBeenCalled()
+  })
+
   it("sends no SVG and no picture without a master; the quota claim is given back for both", async () => {
-    files.getAsBuffer.mockResolvedValueOnce(
-      Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>')
+    files.getDownloadStream.mockResolvedValueOnce(
+      Readable.from([Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>')])
     )
     expect(await editImage(container(), INPUT)).toMatchObject({
       error_key: "ai.input_unsupported",

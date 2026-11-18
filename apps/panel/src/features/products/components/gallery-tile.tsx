@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight, Star, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
@@ -7,6 +7,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { cn } from "@qticaret/admin-ui/lib/utils"
+import { AiButton } from "@/features/ai/components/ai-button"
 
 // What screen readers read comfortably; the server allows no more
 const ALT_MAX = 250
@@ -21,6 +22,8 @@ export interface GalleryImage {
     legacy: boolean
     /** Its WebP/AVIF versions and share crop: made, being made, or none (no file). */
     versions: "ready" | "pending" | null
+    /** Its media record when its file is stored: the AI can read it for an alt text suggestion. */
+    mediaId?: string | null
   }
 }
 
@@ -68,30 +71,54 @@ function AltField({
     }
   }
   const id = `gallery-alt-${String(position)}`
+  const field = useRef<HTMLInputElement>(null)
+  const mediaId = image.alt?.legacy ? null : (image.alt?.mediaId ?? null)
+  const input = (
+    <Input
+      ref={field}
+      id={id}
+      value={draft}
+      maxLength={ALT_MAX}
+      disabled={image.alt?.legacy}
+      placeholder={t(
+        image.alt?.legacy ? "products.media.altLegacy" : "products.media.altPlaceholder"
+      )}
+      onChange={(event) => {
+        setDraft(event.target.value)
+      }}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          event.preventDefault()
+          commit()
+        }
+      }}
+    />
+  )
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-[13px] font-medium">
         {t("products.media.altLabel", { position })}
       </label>
-      <Input
-        id={id}
-        value={draft}
-        maxLength={ALT_MAX}
-        disabled={image.alt?.legacy}
-        placeholder={t(
-          image.alt?.legacy ? "products.media.altLegacy" : "products.media.altPlaceholder"
-        )}
-        onChange={(event) => {
-          setDraft(event.target.value)
-        }}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault()
-            commit()
-          }
-        }}
-      />
+      {mediaId ? (
+        <div className="flex items-center gap-1.5">
+          <div className="min-w-0 flex-1">{input}</div>
+          <AiButton
+            task="image_alt_text"
+            entity={{ type: "media", id: mediaId }}
+            size="icon"
+            label={t("products.media.altAi", { position })}
+            note={t("ai.suggest.imageNote")}
+            onUse={(text) => {
+              // Into the field only: it is saved as a typed text is, on Enter or on leaving it
+              setDraft(text)
+              requestAnimationFrame(() => field.current?.focus())
+            }}
+          />
+        </div>
+      ) : (
+        input
+      )}
       <p className="text-xs text-muted-foreground">{t("products.media.altHint")}</p>
     </div>
   )

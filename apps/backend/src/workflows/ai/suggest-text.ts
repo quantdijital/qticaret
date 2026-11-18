@@ -60,6 +60,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       service: chosen.service,
       system: prompt.system,
       data: prompt.data,
+      image_file_id: prompt.image_file_id,
     }))
   )
   // Straight after the call: a later failure neither skips it nor undoes a call the service did

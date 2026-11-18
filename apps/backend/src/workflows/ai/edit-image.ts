@@ -77,7 +77,6 @@ export const editImageWorkflow = createWorkflow(
         suggestion_id: suggestion.id,
         user_id: input.user_id,
         remember: input.remember,
-        images: kept.images,
       }))
     )
     return new WorkflowResponse(

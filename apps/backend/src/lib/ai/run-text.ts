@@ -1,4 +1,4 @@
-import type { AiUsage, TextConnector } from "./connectors/types"
+import type { AiImageInput, AiUsage, TextConnector } from "./connectors/types"
 import { suggestionProblems, suggestionText } from "./gate"
 import type { PromptMessages } from "./prompt"
 import type { AiTask } from "./registry/tasks"
@@ -30,6 +30,8 @@ export async function runTextTask(input: {
   connector: TextConnector
   task: AiTask
   prompt: PromptMessages
+  /** A vision task's picture, prepared (lib/ai/image-input.ts). */
+  images?: readonly AiImageInput[]
   signal?: AbortSignal
 }): Promise<TextTaskResult> {
   const { connector, task, prompt } = input
@@ -37,6 +39,7 @@ export async function runTextTask(input: {
     system: prompt.system,
     data: prompt.data,
     maxTokens: maxTokensOf(task),
+    ...(input.images === undefined ? {} : { images: input.images }),
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   })
   const text = suggestionText(answer.text)

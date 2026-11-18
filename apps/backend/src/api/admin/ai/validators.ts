@@ -6,7 +6,7 @@ import { IMAGE_BACKGROUND_MAX_BATCH } from "../../../lib/ai/registry/tasks"
 import { MEDIA_ID } from "../../../workflows/async-job/types/ai-image-edit"
 
 // A record's id of a kind a suggestion is asked for; its prefix is matched to the type in the workflow
-const ENTITY_ID = /^(prod|pcat|cnt)_[A-Za-z0-9]{1,40}$/
+const ENTITY_ID = /^(prod|pcat|cnt|media)_[A-Za-z0-9]{1,40}$/
 
 // A registry name: the task, the service and the option are checked against the registry
 const NAME = /^[a-z][a-z0-9_]{0,39}$/

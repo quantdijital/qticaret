@@ -768,6 +768,7 @@
         "catalog.bulk_edit": "Bulk edit",
         "customer.data_export": "Customer data export",
         "catalog.description_facts": "Facts from descriptions",
+        "ai.alt_text": "Bulk alt text suggestions",
         "content.link_rewrite": "Fixing links in texts",
         "order.export": "Order export"
       }
@@ -3124,6 +3125,7 @@
       "optional": "You can add images later, but products with images sell better.",
       "registerFailed": "The image was uploaded, but it could not be registered for alt text and versions.",
       "altHint": "Tells people who cannot see the image, and image search, what it shows; for example “White linen shirt, front”. Saved when you leave the field.",
+      "altAi": "AI suggestion for image {{position}}'s alt text",
       "altLabel": "Image {{position}}",
       "altPlaceholder": "What is in the picture?",
       "altLegacy": "Upload this image again to give it an alt text",
@@ -10801,6 +10803,7 @@
       "filenameHint": "The name shown in the library; the image's address does not change.",
       "alt": "Alt text",
       "altHint": "Tells people who cannot see the image, and image search, what it shows; offered to fields that choose this image.",
+      "altAi": "AI suggestion for the alt text",
       "saved": "Image saved.",
       "uploadedBy": "Uploaded by",
       "uploadedAt": "Uploaded",
@@ -11287,7 +11290,8 @@
     "tasks": {
       "test_text": "Test text",
       "seo_title": "Search title",
-      "seo_description": "Search description"
+      "seo_description": "Search description",
+      "image_alt_text": "Alt text"
     },
     "options": {
       "short": "Short",
@@ -11339,6 +11343,7 @@
     },
     "suggest": {
       "button": "Suggest with AI",
+      "imageNote": "The image is sent to the service to write the suggestion. Keep in mind if it shows a person.",
       "from": "AI suggestion · {{name}}",
       "loading": "Preparing a suggestion…",
       "use": "Use",

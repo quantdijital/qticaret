@@ -7,6 +7,7 @@ import { UPLOAD_MEDIA_TYPES, readImageInfo } from "../security/upload"
 import type { ImageEditConnector } from "./connectors/image-types"
 import type { AiImageInput, AiUsage } from "./connectors/types"
 import { MAX_RESULT_BYTES, downloadResult } from "./download"
+import { VISION_ENCODE_TIMEOUT_SECONDS } from "./image-input"
 import type { DownloadOptions } from "./download"
 import { aiProviderError } from "./errors"
 import type { AiService, ImageBackground } from "./registry/services"
@@ -52,6 +53,8 @@ export async function imageInputOf(service: AiService, original: Buffer): Promis
   if (type === "avif") {
     const bytes = await sharp(original, { limitInputPixels: MAX_INPUT_PIXELS, failOn: "error" })
       .png()
+      // The AI path's encode limit (lib/ai/image-input.ts)
+      .timeout({ seconds: VISION_ENCODE_TIMEOUT_SECONDS })
       .toBuffer()
     return { mimeType: "image/png", bytes }
   }

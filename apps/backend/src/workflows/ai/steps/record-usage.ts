@@ -21,8 +21,6 @@ export interface RecordUsageInput {
   user_id: string
   /** The staff member picked the service among several: remember it (adr/0071 §4). */
   remember: boolean
-  /** Images the service gave back (an image edit), whether kept or not: priced by the image. */
-  images?: number | null
 }
 
 /**
@@ -41,7 +39,8 @@ export const recordUsageStep = createStep(
       ? estimateCost(service, input.capability, {
           ...(outcome.input_tokens === null ? {} : { inputTokens: outcome.input_tokens }),
           ...(outcome.output_tokens === null ? {} : { outputTokens: outcome.output_tokens }),
-          ...(typeof input.images === "number" ? { images: input.images } : {}),
+          // Pictures sent (vision, token priced) or given back (an image edit, priced by the image)
+          ...(outcome.images === null ? {} : { images: outcome.images }),
         })
       : null
     const ai = container.resolve<AiModuleService>(AI_MODULE)
@@ -54,7 +53,7 @@ export const recordUsageStep = createStep(
       status: outcome.status,
       input_tokens: outcome.input_tokens,
       output_tokens: outcome.output_tokens,
-      images: input.images ?? null,
+      images: outcome.images,
       estimated_cost_micros: cost?.micros ?? null,
       currency: cost?.currency ?? null,
       entity_type: input.entity_type,
@@ -78,6 +77,7 @@ export const recordUsageStep = createStep(
       duration_ms: outcome.duration_ms,
       input_tokens: outcome.input_tokens,
       output_tokens: outcome.output_tokens,
+      images: outcome.images,
       error_code: outcome.error_code,
     })
     return new StepResponse({ usage_id: id })

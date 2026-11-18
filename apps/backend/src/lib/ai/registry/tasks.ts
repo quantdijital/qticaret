@@ -19,6 +19,7 @@ export const AI_GATES = [
   "seo_title",
   "seo_description",
   "product_description",
+  "image_alt",
   "plain_text",
   // A picture, not a text: read by the upload check (lib/ai/run-image.ts)
   "image",
@@ -59,7 +60,11 @@ export const TEST_TASK: AiTask = {
   credits: 1,
   gate: "plain_text",
   maxLength: 500,
+  entities: ["product", "category", "page"],
 }
+
+// The records with a page of their own; an image is none
+const PAGE_ENTITIES: readonly AiEntityType[] = ["product", "category", "page"]
 
 /**
  * A page's search result title and description (Aşama 1, docs/22 PR 1-1),
@@ -76,6 +81,7 @@ export const SEO_TITLE_TASK: AiTask = {
   credits: 1,
   gate: "seo_title",
   maxLength: SERP_TEXT_LENGTH.title.max,
+  entities: PAGE_ENTITIES,
 }
 
 export const SEO_DESCRIPTION_TASK: AiTask = {
@@ -87,6 +93,7 @@ export const SEO_DESCRIPTION_TASK: AiTask = {
   credits: 1,
   gate: "seo_description",
   maxLength: SERP_TEXT_LENGTH.description.max,
+  entities: PAGE_ENTITIES,
 }
 
 /** How much of the product's description now the task sends (adr/0005's draft sent as much). */
@@ -116,6 +123,35 @@ export const PRODUCT_DESCRIPTION_TASK: AiTask = {
   factMaxLengths: { description: PRODUCT_DESCRIPTION_FACT_LENGTH },
 }
 
+/**
+ * The longest alt text suggested: what a screen reader reads in one go
+ * (docs/13 §8). The field itself takes up to `ALT_MAX` (250); the
+ * advisor's rule (P-IMG-02) asks only that there is one.
+ */
+export const IMAGE_ALT_MAX_LENGTH = 125
+
+/** Images one bulk alt text job asks for at most (`ai.alt_text`, docs/22 "Aşama 5"). */
+export const IMAGE_ALT_BULK_MAX = 50
+
+/**
+ * An image's alt text (Aşama 5, docs/22): the service sees the picture
+ * and, when a product shows it, the product's name and category. One line
+ * of plain text; the gate refuses filler ("görseli", "fotoğrafı"), a
+ * link, personal data and markup. Asked for one image here, for many by
+ * the bulk job; either way it is a suggestion, saved only by the form.
+ */
+export const IMAGE_ALT_TEXT_TASK: AiTask = {
+  id: "image_alt_text",
+  capability: "vision",
+  mode: "sync",
+  options: [],
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "image_alt",
+  maxLength: IMAGE_ALT_MAX_LENGTH,
+  entities: ["media"],
+}
+
 /** The most pictures one background request may name (adr/0071 §8: each its own call and claim). */
 export const IMAGE_BACKGROUND_MAX_BATCH = 20
 
@@ -141,6 +177,7 @@ const TASKS: readonly AiTask[] = [
   SEO_TITLE_TASK,
   SEO_DESCRIPTION_TASK,
   PRODUCT_DESCRIPTION_TASK,
+  IMAGE_ALT_TEXT_TASK,
   IMAGE_BACKGROUND_TASK,
 ]
 

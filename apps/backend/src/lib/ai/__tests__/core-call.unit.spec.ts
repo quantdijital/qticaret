@@ -79,7 +79,11 @@ describe("textConnectorFor", () => {
       thrown = error
     }
     expect(thrown).toMatchObject({ safeMessage: "ai.service_unavailable" })
-    expect(textTargetOf("deepseek", "vision", "test")).toBeNull()
+    expect(textTargetOf("nope", "vision", "test")).toBeNull()
+    expect(textTargetOf("deepseek", "vision", "test")?.target).toMatchObject({
+      connector: "openai-compatible",
+      imageInput: { maxBytes: expect.any(Number) as number },
+    })
     expect(textTargetOf("deepseek", "text", "production")?.target.connector).toBe(
       "openai-compatible"
     )

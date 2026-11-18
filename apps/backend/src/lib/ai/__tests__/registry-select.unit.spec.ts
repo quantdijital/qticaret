@@ -34,6 +34,7 @@ describe("AI registries (adr/0071 §2)", () => {
       "seo_title",
       "seo_description",
       "product_description",
+      "image_alt_text",
       "image_background",
     ])
     expect(findAiTask("test_text", "development")).toBeNull()
@@ -90,19 +91,41 @@ describe("AI registries (adr/0071 §2)", () => {
     }
   })
 
-  it("registers only what has a connector: text, and image editing (Aşama 4)", () => {
+  it("registers only what has a connector: text, image reading, image editing", () => {
     const offered = Object.fromEntries(
       aiServices("production").map((service) => [service.id, Object.keys(service.capabilities)])
     )
     expect(offered).toEqual({
-      deepseek: ["text"],
-      minimax: ["text"],
-      gemini: ["text", "image_edit"],
+      deepseek: ["text", "vision"],
+      minimax: ["text", "vision"],
+      gemini: ["text", "vision", "image_edit"],
       photoroom: ["image_edit"],
     })
     // No result address is fetched from any service yet: both answer with the bytes
     for (const service of aiServices("production")) {
       expect(service.downloadHosts).toEqual([])
+    }
+  })
+
+  it("registers text and image reading for every text service, image reading on the text endpoint", () => {
+    // An image-only service (Photoroom) has neither
+    const textServices = aiServices("production").filter((service) => service.capabilities.text)
+    expect(textServices.length).toBeGreaterThan(0)
+    for (const service of textServices) {
+      expect(Object.keys(service.capabilities)).toEqual(expect.arrayContaining(["text", "vision"]))
+      const { text, vision } = service.capabilities
+      // Image reading is the text endpoint with images: same connector, host and path, a size cap
+      expect(vision).toMatchObject({
+        connector: "openai-compatible",
+        baseUrl: text && "baseUrl" in text ? text.baseUrl : "",
+        path: "/chat/completions",
+        imageInput: { maxBytes: expect.any(Number) as number },
+      })
+      expect(service.unitPrices.vision).toBeDefined()
+    }
+    // A text target never takes an image
+    for (const service of textServices) {
+      expect(service.capabilities.text).not.toHaveProperty("imageInput")
     }
   })
 

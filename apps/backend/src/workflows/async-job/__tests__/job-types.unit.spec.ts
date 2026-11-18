@@ -18,6 +18,7 @@ describe("job types", () => {
   it("knows its types by own key only", () => {
     expect(JOB_TYPE_KEYS).toEqual([
       "accounting.package",
+      "ai.alt_text",
       "ai.image_edit",
       "audit_log.export",
       "catalog.bulk_edit",
