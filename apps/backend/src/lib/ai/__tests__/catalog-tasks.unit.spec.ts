@@ -1,6 +1,6 @@
 import type { TextConnector, TextRequest } from "../connectors/types"
 import { AI_ENTITY_TYPES } from "../facts"
-import { suggestionProblems, suggestionTextFor } from "../gate"
+import { MAX_SUGGESTION_CHARS, suggestionProblems, suggestionTextFor } from "../gate"
 import { instructionOf, isTaskOption } from "../instructions"
 import { buildPrompt } from "../prompt"
 import {
@@ -13,7 +13,7 @@ import {
 } from "../registry/catalog-tasks"
 import { findAiTask, isTaskEntity } from "../registry/tasks"
 import { runTextTask } from "../run-text"
-import { keywordLines, ungroundedWords } from "../short-text-gate"
+import { keywordLines, productTitleText, ungroundedWords } from "../short-text-gate"
 
 /**
  * The product page's short texts (docs/22 "Ürün ekranı genişletme 1"):
@@ -194,5 +194,46 @@ describe("the product name gate", () => {
       status: "succeeded",
       text: "keten gömlek\nyazlık keten gömlek\nbej gömlek",
     })
+  })
+})
+
+/**
+ * A long run of quotes or end marks in the middle of an answer (security
+ * review): the shaping is linear, and an answer far over the task's length
+ * is not shaped at all, so the length check refuses it at once.
+ */
+describe("shaping a long answer", () => {
+  const LONG = MAX_SUGGESTION_CHARS - 2
+  const runs = [
+    `a${'"'.repeat(LONG)}b`,
+    `a${".".repeat(LONG)}b`,
+    `a${"’".repeat(LONG)}b`,
+    `a${"…".repeat(LONG)}b`,
+  ]
+  const fast = (shape: () => unknown) => {
+    const started = performance.now()
+    shape()
+    return performance.now() - started
+  }
+
+  it("cuts quotes and end marks from the ends in linear time", () => {
+    for (const text of runs) {
+      expect(fast(() => keywordLines(text))).toBeLessThan(200)
+      expect(fast(() => productTitleText(text))).toBeLessThan(200)
+    }
+    // Only the ends: a run between words stays
+    expect(productTitleText(`a${'"'.repeat(10)}b`)).toBe(`a${'"'.repeat(10)}b`)
+    expect(productTitleText(`"''Keten Gömlek...`)).toBe("Keten Gömlek")
+  })
+
+  it("leaves an answer far over the task's length unshaped, and refuses it for its length", () => {
+    for (const task of [FOCUS_KEYWORD_TASK, PRODUCT_TITLE_TASK]) {
+      for (const text of runs) {
+        let shaped = ""
+        expect(fast(() => (shaped = suggestionTextFor(task, text)))).toBeLessThan(200)
+        expect(shaped).toBe(text)
+        expect(suggestionProblems(task, shaped, DATA)).toEqual(["length"])
+      }
+    }
   })
 })

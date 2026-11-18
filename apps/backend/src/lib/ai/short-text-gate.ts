@@ -20,8 +20,27 @@ const MASK_LEFT = /\[\s*(?:…|\.{3})\s*\]/
 const LIST_MARK = /^(?:\d{1,2}[.)]|[-*•–—])(?:\s+|$)/u
 // A label before a colon ("Ana anahtar kelime: …"); a keyword holds no colon
 const LABEL = /^[^:]{0,40}:\s*/u
-const QUOTES = /^["'“”«»‘’]+|["'“”«»‘’]+$/gu
-const TRAILING = /[.!?…]+$/u
+// Quotes around a text and marks at its end: cut from the ends by a loop, never by a pattern
+// (a `[…]+$` pattern backtracks on a long run in the middle of a text)
+const QUOTE_CHARS = new Set(['"', "'", "“", "”", "«", "»", "‘", "’"])
+const END_MARKS = new Set([".", "!", "?", "…"])
+
+/** The text without `drop` characters at its start (`start`) and at its end; linear in the text. */
+function cutEnds(text: string, drop: ReadonlySet<string>, start: boolean): string {
+  let from = 0
+  let to = text.length
+  while (start && from < to && drop.has(text.charAt(from))) {
+    from++
+  }
+  while (to > from && drop.has(text.charAt(to - 1))) {
+    to--
+  }
+  return text.slice(from, to)
+}
+
+/** Quotes taken from both ends, then end marks from the end. */
+const unquoted = (text: string): string =>
+  cutEnds(cutEnds(text, QUOTE_CHARS, true), END_MARKS, false)
 // What a search phrase is made of: letters, digits, spaces, a hyphen or an apostrophe
 const KEYWORD_FORM = /^[\p{L}\p{N}][\p{L}\p{N}' -]*$/u
 
@@ -34,12 +53,7 @@ const KEYWORD_FORM = /^[\p{L}\p{N}][\p{L}\p{N}' -]*$/u
 export function keywordLines(text: string): string[] {
   const seen = new Set<string>()
   for (const part of text.split(/[\n,;]/u)) {
-    const keyword = part
-      .trim()
-      .replace(LIST_MARK, "")
-      .replace(LABEL, "")
-      .replace(QUOTES, "")
-      .replace(TRAILING, "")
+    const keyword = unquoted(part.trim().replace(LIST_MARK, "").replace(LABEL, ""))
       .replace(/\s+/gu, " ")
       .trim()
       .toLocaleLowerCase("tr")
@@ -83,8 +97,7 @@ export function focusKeywordProblems(text: string): string[] {
 }
 
 /** A product name as offered: quotes and an end mark dropped. */
-export const productTitleText = (text: string): string =>
-  text.replace(QUOTES, "").replace(TRAILING, "").trim()
+export const productTitleText = (text: string): string => unquoted(text).trim()
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null

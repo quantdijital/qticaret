@@ -70,6 +70,9 @@ export function suggestionText(raw: string): string {
   return text.length >= 2 && QUOTES.has(first) && QUOTES.has(last) ? text.slice(1, -1).trim() : text
 }
 
+/** How far over its length an answer is still shaped (list marks and quotes take some room). */
+export const SHAPE_LENGTH_FACTOR = 4
+
 /**
  * A service's answer as the task offers it: plain text (`suggestionText`),
  * then a short text's own shape, a keyword per line or a name without
@@ -77,6 +80,10 @@ export function suggestionText(raw: string): string {
  */
 export function suggestionTextFor(task: AiTask, raw: string): string {
   const text = suggestionText(raw)
+  // Far over the task's length: left as it is, the length check refuses it before any pattern
+  if (text.length > task.maxLength * SHAPE_LENGTH_FACTOR) {
+    return text
+  }
   if (task.gate === "focus_keyword") {
     return keywordLines(text).join("\n")
   }
