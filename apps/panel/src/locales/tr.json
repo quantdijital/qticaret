@@ -11334,7 +11334,7 @@
   },
   "ai": {
     "title": "Yapay zekâ",
-    "description": "Ürün başlığı, açıklaması gibi metinleri sizin için taslak olarak yazan servisleri buradan bağlarsınız. Kendi hesabınızın anahtarıyla çalışır; ücreti servise siz ödersiniz.",
+    "description": "Kendi anahtarınızla bağladığınız servisler ürün metni ve görsel taslakları hazırlar.",
     "notInPlan": "Paketiniz kendi anahtarınızla yapay zekâ kullanmayı kapsamıyor. Kayıtlı anahtarlar silinmez, paketiniz değişince yeniden çalışır.",
     "capabilities": {
       "text": "Metin yazma",
@@ -11417,7 +11417,16 @@
       "white": "Beyaz zemin"
     },
     "card": {
-      "capabilities": "Yapabildikleri",
+      "servicesTitle": "Servisler",
+      "columns": {
+        "service": "Servis",
+        "capabilities": "Yapabildikleri",
+        "data": "Veri",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "actionsFor": "{{name}} işlemleri",
+      "dataFor": "{{name}} verisi nereye gider",
       "connect": "Bağla",
       "change": "Anahtarı değiştir",
       "test": "Bağlantıyı test et",
@@ -11439,9 +11448,7 @@
     },
     "usage": {
       "title": "Bu ayki kullanım",
-      "description": "Hangi servisle, hangi iş için kaç kez yapay zekâ kullanıldığı.",
       "estimateHint": "Maliyet, servislerin liste fiyatlarından ve kullanılan metin uzunluğundan (token) hesaplanan tahmindir; gerçek tutar servisin faturasındadır.",
-      "estimateNote": "Maliyet tahminidir; kesin tutar servisin faturasında yazar.",
       "empty": "Bu ay yapay zekâ henüz kullanılmadı.",
       "byService": "Servise göre",
       "byTask": "İşe göre",

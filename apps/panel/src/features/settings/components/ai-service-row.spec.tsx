@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { i18next } from "@/lib/i18n"
 import type { AiServiceView } from "@/features/ai/api/ai"
-import { AiServiceCard } from "./ai-service-card"
+import { AiServicesTable } from "./ai-services-table"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 const staff = vi.hoisted(() => ({ accounts: true }))
@@ -23,48 +23,66 @@ vi.mock("@/features/auth/api/staff", () => ({
 
 const service = (status: AiServiceView["status"]): AiServiceView => ({
   id: "deepseek",
-  capabilities: ["text"],
+  capabilities: ["text", "vision"],
   status,
   funding: "own_key",
   data_note_key: "ai.data_note.deepseek",
 })
 
-function renderCard(status: AiServiceView["status"], ownKeys = true) {
+function renderRow(status: AiServiceView["status"], ownKeys = true) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <AiServiceCard service={service(status)} ownKeys={ownKeys} keyConfigured />
+      <AiServicesTable services={[service(status)]} ownKeys={ownKeys} keyConfigured />
     </QueryClientProvider>
   )
 }
 
 const button = (name: string) => screen.queryByRole("button", { name })
+const MENU = "DeepSeek işlemleri"
 
-describe("AiServiceCard", () => {
+async function openMenu() {
+  await userEvent.click(screen.getByRole("button", { name: MENU }))
+  return screen.findByRole("menu")
+}
+
+describe("AiServiceRow", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     staff.accounts = true
     fetchMock.mockResolvedValue({ account: { provider: "deepseek" }, check: "valid" })
   })
 
-  it("not connected: the name, what it does, where the data goes and only Bağla", () => {
-    renderCard("not_connected")
-    expect(screen.getByRole("heading", { name: "DeepSeek" })).toBeInTheDocument()
-    expect(screen.getByText("Bağlı değil")).toBeInTheDocument()
-    expect(screen.getByText("Metin yazma")).toBeInTheDocument()
-    expect(screen.getByText(/Veri Çin'de işlenir/)).toBeInTheDocument()
-    expect(screen.getByText(/Kişisel veri gönderilmez/)).toBeInTheDocument()
-    expect(button("Bağla")).toBeInTheDocument()
-    expect(button("Bağlantıyı test et")).toBeNull()
-    expect(button("Kaldır")).toBeNull()
+  it("not connected: a row with the name, what it does, its state and only Bağla", () => {
+    renderRow("not_connected")
+    const row = screen.getByRole("row", { name: /DeepSeek/ })
+    expect(within(row).getByText("DeepSeek")).toBeInTheDocument()
+    expect(within(row).getByText("Bağlı değil")).toBeInTheDocument()
+    expect(within(row).getByRole("list", { name: "Yapabildikleri" })).toHaveTextContent(
+      /Metin yazma.*Görseli anlama/
+    )
+    expect(within(row).getByRole("button", { name: "Bağla" })).toBeEnabled()
+    expect(button(MENU)).toBeNull()
   })
 
-  it("connected: change the key, test it, remove it", async () => {
-    renderCard("connected")
+  it("where the data goes is behind the (i), named and described for a screen reader", async () => {
+    renderRow("not_connected")
+    const tip = screen.getByRole("button", { name: "Bilgi: DeepSeek verisi nereye gider" })
+    expect(tip).toHaveAccessibleDescription(/Veri Çin'de işlenir.*Kişisel veri gönderilmez/)
+    // Not on the page until asked: the row stays one line
+    expect(screen.queryByRole("tooltip")).toBeNull()
+    tip.focus()
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(/Kişisel veri gönderilmez/)
+  })
+
+  it("connected: change the key, test it, remove it from the menu", async () => {
+    renderRow("connected")
     expect(screen.getByText("Bağlı")).toBeInTheDocument()
-    expect(button("Anahtarı değiştir")).toBeInTheDocument()
-    expect(button("Kaldır")).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("button", { name: "Bağlantıyı test et" }))
+    expect(button("Bağla")).toBeNull()
+    const menu = await openMenu()
+    expect(within(menu).getByRole("menuitem", { name: "Anahtarı değiştir" })).toBeInTheDocument()
+    expect(within(menu).getByRole("menuitem", { name: "Kaldır" })).toBeInTheDocument()
+    await userEvent.click(within(menu).getByRole("menuitem", { name: "Bağlantıyı test et" }))
     expect(fetchMock).toHaveBeenCalledWith(
       "/admin/integrations/credentials/deepseek/check",
       expect.objectContaining({ method: "POST" })
@@ -83,19 +101,25 @@ describe("AiServiceCard", () => {
     }
   })
 
-  it("rejected and unreadable say what to do", () => {
-    const { unmount } = renderCard("rejected")
+  it("rejected and unreadable say what to do in a line under the row", async () => {
+    const { unmount } = renderRow("rejected")
     expect(screen.getByText("DeepSeek reddetti")).toBeInTheDocument()
     expect(screen.getByText(/DeepSeek kayıtlı anahtarı reddetti/)).toBeInTheDocument()
     unmount()
-    renderCard("unreadable")
+    renderRow("unreadable")
     expect(screen.getByText("Yeniden girilmeli")).toBeInTheDocument()
+    expect(screen.getByText(/Gizli bilgileri yeniden girin/)).toBeInTheDocument()
     expect(button("Bağla")).toBeInTheDocument()
+    // Nothing to test, but what is left can be removed
+    const menu = await openMenu()
+    expect(within(menu).queryByRole("menuitem", { name: "Bağlantıyı test et" })).toBeNull()
+    expect(within(menu).getByRole("menuitem", { name: "Kaldır" })).toBeInTheDocument()
   })
 
   it("the key field is never filled back, and the dialog shows where the data goes", async () => {
-    renderCard("connected")
-    await userEvent.click(screen.getByRole("button", { name: "Anahtarı değiştir" }))
+    renderRow("connected")
+    const menu = await openMenu()
+    await userEvent.click(within(menu).getByRole("menuitem", { name: "Anahtarı değiştir" }))
     const dialog = await screen.findByRole("dialog")
     const field = within(dialog).getByLabelText<HTMLInputElement>(/Anahtar/)
     expect(field.type).toBe("password")
@@ -121,22 +145,30 @@ describe("AiServiceCard", () => {
     )
   })
 
-  it("one who is not the owner sees the state, not the buttons that connect", () => {
+  it("one who is not the owner sees the state, not the buttons that connect", async () => {
     staff.accounts = false
-    renderCard("connected")
+    renderRow("connected")
     expect(screen.getByText("Bağlı")).toBeInTheDocument()
-    expect(button("Anahtarı değiştir")).toBeNull()
     expect(button("Bağla")).toBeNull()
-    expect(button("Kaldır")).toBeNull()
     expect(screen.getByText("Servisi mağaza sahibi bağlayabilir.")).toBeInTheDocument()
+    const menu = await openMenu()
+    expect(within(menu).queryByRole("menuitem", { name: "Anahtarı değiştir" })).toBeNull()
+    expect(within(menu).queryByRole("menuitem", { name: "Kaldır" })).toBeNull()
     // The admin may still test what is stored (adr/0071 §6)
-    expect(button("Bağlantıyı test et")).toBeInTheDocument()
+    expect(within(menu).getByRole("menuitem", { name: "Bağlantıyı test et" })).toBeInTheDocument()
   })
 
-  it("with the package leaving the own key out, nothing connects or tests", () => {
-    renderCard("connected", false)
-    expect(button("Anahtarı değiştir")).toBeDisabled()
-    expect(button("Bağlantıyı test et")).toBeDisabled()
+  it("with the package leaving the own key out, nothing connects or tests", async () => {
+    renderRow("connected", false)
     expect(screen.getByText(/paketiniz izin vermediği için kullanılmıyor/)).toBeInTheDocument()
+    const menu = await openMenu()
+    expect(within(menu).getByRole("menuitem", { name: "Anahtarı değiştir" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
+    expect(within(menu).getByRole("menuitem", { name: "Bağlantıyı test et" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
   })
 })
