@@ -18,6 +18,7 @@ import {
   useParasutOffered,
 } from "@/features/settings/api/einvoice"
 import type { InvoicingProvider } from "@/features/settings/api/einvoice"
+import { BirfaturaConnection } from "@/features/settings/components/birfatura-card"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
@@ -248,6 +249,7 @@ function NoProgram({ className }: { className?: string }) {
     >
       <ul className="flex list-disc flex-col gap-2 pl-5 text-[13px] text-muted-foreground">
         {parasut ? <li>{t(`${N}.parasut`)}</li> : null}
+        <li>{t(`${N}.birfatura`)}</li>
         <li>{t(`${N}.external`)}</li>
         <li>{t(`${N}.manual`)}</li>
       </ul>
@@ -265,6 +267,9 @@ export function EinvoiceConnectionCard({
 }) {
   if (provider === "parasut") {
     return <ParasutConnection {...(className ? { className } : {})} />
+  }
+  if (provider === "birfatura") {
+    return <BirfaturaConnection {...(className ? { className } : {})} />
   }
   if (provider === "external") {
     return <ExternalProgram {...(className ? { className } : {})} />

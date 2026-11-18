@@ -56,6 +56,7 @@ describe("EinvoiceProgramCard", () => {
     expect(invoicingProviderOf("fake")).toBe("none")
     expect(invoicingProviderOf("parasut")).toBe("parasut")
     expect(invoicingProviderOf("external")).toBe("external")
+    expect(invoicingProviderOf("birfatura")).toBe("birfatura")
   })
 
   it("shows an old test program as no program, and never offers it", () => {
@@ -70,7 +71,25 @@ describe("EinvoiceProgramCard", () => {
     renderCard("none")
     await settled()
 
-    expect(await options()).toEqual(["Kapalı", "Paraşüt", "Kendi programım (geri yazma)"])
+    expect(await options()).toEqual([
+      "Kapalı",
+      "Paraşüt",
+      "BirFatura",
+      "Kendi programım (geri yazma)",
+    ])
+  })
+
+  it("offers BirFatura, with the web sales series its numbers are held to", async () => {
+    const user = userEvent.setup()
+    renderCard("none")
+    await settled()
+
+    await user.click(screen.getByRole("combobox", { name: "Faturayı kesen" }))
+    await user.click(await screen.findByRole("option", { name: "BirFatura" }))
+
+    expect(screen.getByLabelText("Web satış serisi")).toBeInTheDocument()
+    expect(screen.getByText(/BirFatura siparişleri mağazanızdan çeker/)).toBeInTheDocument()
+    expect(screen.getByText(/bağlantı şifresi silinir/)).toBeInTheDocument()
   })
 
   it("does not offer Paraşüt while the platform has not opened it (docs/06 principle 10)", async () => {
@@ -78,7 +97,7 @@ describe("EinvoiceProgramCard", () => {
     renderCard("none")
     await settled()
 
-    expect(await options()).toEqual(["Kapalı", "Kendi programım (geri yazma)"])
+    expect(await options()).toEqual(["Kapalı", "BirFatura", "Kendi programım (geri yazma)"])
   })
 
   it("keeps a shop already on Paraşüt seeing its choice", () => {

@@ -12,6 +12,7 @@ import {
   useRetryInvoice,
 } from "@/features/orders/api/invoices"
 import type { InvoiceRecord } from "@/features/orders/api/invoices"
+import { BirfaturaNote, RETURN_NEEDED } from "@/features/orders/detail/birfatura-note"
 import { InvoiceDraftDialog } from "@/features/orders/detail/invoice-draft-dialog"
 import { InvoiceEntryDialog } from "@/features/orders/detail/invoice-entry-dialog"
 import { errorText } from "@/lib/errors"
@@ -76,7 +77,9 @@ export function SaleInvoice({
       setOpening(false)
     }
   }
-  const external = invoice.provider === "external"
+  const birfatura = invoice.provider === "birfatura"
+  // Issued outside: staff may read the draft and type the invoice in by hand (BirFatura's too, adr/0072 §2)
+  const external = invoice.provider === "external" || birfatura
   // Gift card lines stay off the invoice: their money is an advance (adr/0025 Ek 2026-11-03)
   const advance = advanceOf(invoice)
   const advanceOnly = invoice.status === "waived" && invoice.waived_reason === ADVANCE_ONLY
@@ -113,10 +116,11 @@ export function SaleInvoice({
           })}
         </p>
       ) : null}
-      {invoice.status === "issued" && invoice.last_error === "einvoice.return_document_needed" ? (
+      {birfatura ? <BirfaturaNote invoice={invoice} /> : null}
+      {!birfatura && invoice.status === "issued" && invoice.last_error === RETURN_NEEDED ? (
         <p className="text-[13px] text-destructive-text">{t(`${V}.returnNeeded`)}</p>
       ) : null}
-      {invoice.status === "pending" && external ? (
+      {invoice.status === "pending" && invoice.provider === "external" ? (
         <p className="text-[13px] text-muted-foreground">{t(`${V}.waitingExternal`)}</p>
       ) : null}
       {invoice.program_difference ? (

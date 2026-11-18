@@ -2605,6 +2605,7 @@
         "providers": {
           "none": "Kapalı",
           "parasut": "Paraşüt",
+          "birfatura": "BirFatura",
           "external": "Kendi programım (geri yazma)"
         },
         "triggers": {
@@ -2614,7 +2615,8 @@
         "hints": {
           "none": "Fatura kesilmez. Faturalarınızı başka yerde (ör. Luca) kesiyorsanız \"Kendi programım\"ı seçin; numarası ve PDF'i siparişin fatura kartından elle girilir.",
           "parasut": "Fatura, Paraşüt hesabınızda kesilir; e-Fatura mı e-Arşiv mi olacağına Paraşüt karar verir.",
-          "external": "Fatura kendi programınızda (ör. BirFatura üzerinden) ya da elle kesilir; numarası ve PDF'i buraya geri yazılır."
+          "birfatura": "BirFatura siparişleri mağazanızdan çeker, faturayı BirFatura hesabınızda kesersiniz; numarası ve PDF'i buraya kendiliğinden gelir. Başka bir programa geçerseniz bağlantı şifresi silinir.",
+          "external": "Fatura kendi programınızda ya da elle kesilir; numarası ve PDF'i buraya geri yazılır."
         },
         "triggerHints": {
           "shipped": "Paket kargoya verildiğinde kesilir; o ana kadar sipariş düzenlenebilir ve iptal faturayı etkilemez. Kapıda ödemeli sipariş teslimden sonra faturalanır.",
@@ -2653,6 +2655,42 @@
         "disconnected": "Paraşüt bağlantısı kaldırıldı.",
         "working": "Faturalar bu Paraşüt hesabında kesilir. Bağlantı sorun çıkarırsa önce deneyin, düzelmezse yeni bir kodla yeniden bağlayın."
       },
+      "birfatura": {
+        "title": "BirFatura bağlantısı",
+        "description": "BirFatura siparişleri bu adresten, bağlantı şifresiyle çeker. BirFatura'daki giriş şifreniz buraya girilmez.",
+        "site": "Site adresi",
+        "siteHint": "BirFatura'da mağazanın site adresi alanına yapıştırın.",
+        "password": {
+          "label": "Bağlantı şifresi",
+          "none": "Henüz oluşturulmadı.",
+          "made": "Oluşturuldu",
+          "since": "{{when}}",
+          "unreadable": "Kayıtlı şifre artık okunamıyor; BirFatura sipariş çekemez. Yenileyip yeni şifreyi BirFatura'ya girin.",
+          "ownerOnly": "Bağlantı şifresini yalnızca mağaza sahibi oluşturabilir.",
+          "make": "Bağlantı şifresi oluştur",
+          "renew": "Yenile"
+        },
+        "lastPull_one": "Son çekme: {{when}} · {{count}} sipariş",
+        "lastPull_other": "Son çekme: {{when}} · {{count}} sipariş",
+        "neverPulled": "BirFatura henüz sipariş çekmedi. Aşağıdaki adımlarla bağlayın; bağlanınca faturaya hazır siparişler BirFatura'ya düşer.",
+        "steps": {
+          "open": "BirFatura'da Ayarlar > Mağaza Ayarları > Özel Entegrasyon > Yeni Mağaza Ekle'yi açın.",
+          "fill": "Mağaza adına istediğiniz adı, API Şifresi'ne bağlantı şifresini, site adresine yukarıdaki adresi yazın.",
+          "save": "Doldur, Test Et ve Kaydet'e basın. Çekilecek sipariş durumu \"Faturaya hazır\"."
+        },
+        "dialog": {
+          "renewTitle": "Bağlantı şifresi yenilensin mi?",
+          "renewHint": "Eski şifre hemen çalışmaz. Yeni şifreyi BirFatura'ya girene kadar BirFatura sipariş çekemez.",
+          "renew": "Yeni şifre oluştur",
+          "madeTitle": "Bağlantı şifresi",
+          "madeHint": "BirFatura'da mağazanın API Şifresi alanına yapıştırın.",
+          "once": "Bu şifre bir daha gösterilmeyecek. Kaybolursa yenilersiniz.",
+          "copy": "Şifreyi kopyala",
+          "copied": "Şifre kopyalandı.",
+          "copyFailed": "Kopyalanamadı; şifreyi seçip kendiniz kopyalayın.",
+          "done": "Kopyaladım, kapat"
+        }
+      },
       "external": {
         "title": "Kendi programınız",
         "description": "Programınız, Ayarlar > Dış API'den açacağınız bir anahtarla bağlanır.",
@@ -2666,7 +2704,8 @@
         "title": "Fatura kesilmiyor",
         "description": "Bir program seçince siparişlerin faturası kendiliğinden kesilir ya da sizi bekler.",
         "parasut": "Paraşüt: fatura Paraşüt hesabınızda kesilir, PDF'i siparişe ve müşteriye gelir.",
-        "external": "Kendi programım: BirFatura gibi bir aracıyla ya da elle kesilir, numarası ve PDF'i buraya yazılır.",
+        "birfatura": "BirFatura: siparişleri BirFatura hesabınız çeker, faturayı orada kesersiniz; numarası ve PDF'i buraya gelir.",
+        "external": "Kendi programım: kendi programınızla ya da elle kesilir, numarası ve PDF'i buraya yazılır.",
         "manual": "Faturalarınızı elle kesiyorsanız (ör. Luca) \"Kendi programım\"ı seçin: her sipariş fatura kartında numarasını ve PDF'ini bekler."
       },
       "carriers": {
@@ -4422,7 +4461,8 @@
       },
       "providers": {
         "parasut": "Paraşüt",
-        "external": "Kendi programınız"
+        "external": "Kendi programınız",
+        "birfatura": "BirFatura"
       },
       "types": {
         "e_archive": "e-Arşiv",
@@ -4477,6 +4517,23 @@
         "total": "Tutar"
       },
       "returnNeeded": "Sipariş iptal edildi ama fatura duruyor. Kendi programınızda kestiyseniz orada iptal edin (e-Arşiv: alıcıya iletildiği günden itibaren 8 gün). Süre geçtiyse ya da e-Fatura ise kaydı uygun belgeyle düzeltin.",
+      "birfatura": {
+        "waiting": "BirFatura'nın siparişi çekip faturayı kesmesi bekleniyor; numarası ve PDF'i buraya kendiliğinden gelir. Gerekirse elle de işleyebilirsiniz.",
+        "canceled": "Sipariş iptal edildi; fatura BirFatura'ya verilmişti. BirFatura'da kontrol edin, kesildiyse iptal edin (e-Arşiv: alıcıya iletildiği günden itibaren 8 gün) ya da iade belgesi düzenleyin.",
+        "problem": "BirFatura'nın bildirimi işlenemedi ({{code}}). BirFatura'daki faturaya bakıp numarasını ve PDF'ini elle girin.",
+        "problems": {
+          "einvoice_phone_missing": "Siparişte cep telefonu yok; BirFatura telefonsuz siparişi kabul etmiyor. Faturayı elle işleyin.",
+          "einvoice_address_missing": "Siparişte fatura adresi yok; BirFatura'ya verilmedi. Faturayı elle işleyin.",
+          "einvoice_number_missing": "BirFatura faturayı kesti ama numarasını göndermedi. Numarayı ve PDF'i elle girin.",
+          "einvoice_pdf_download_failed": "Fatura numarası kaydedildi ama BirFatura'nın PDF'i indirilemedi. PDF'i elle ekleyin.",
+          "einvoice_series_mismatch": "BirFatura'nın gönderdiği numara web satış serisiyle başlamıyor (Ayarlar > E-Fatura). BirFatura'daki seriyi kontrol edin, numarayı elle girin.",
+          "einvoice_already_issued": "BirFatura bu faturayı başka bir numarayla yeniden bildirdi; kayıttaki numara korundu. BirFatura'da çift fatura olup olmadığına bakın.",
+          "einvoice_number_taken": "BirFatura'nın gönderdiği numara başka bir faturada kayıtlı. BirFatura'daki faturaya bakın.",
+          "einvoice_number_invalid": "BirFatura'nın gönderdiği numara GİB biçiminde değil. Numarayı elle girin.",
+          "einvoice_number_year": "BirFatura'nın gönderdiği numaradaki yıl kesim tarihiyle uyuşmuyor. Numarayı elle girin.",
+          "einvoice_issued_at_invalid": "BirFatura'nın gönderdiği kesim tarihi okunamadı. Numarayı ve tarihi elle girin."
+        }
+      },
       "seeDraft": "Taslağı gör",
       "draft": {
         "title": "Fatura taslağı {{number}}",

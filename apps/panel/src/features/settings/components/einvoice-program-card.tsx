@@ -28,7 +28,8 @@ type Values = Pick<InvoicingSettings, "provider" | "trigger"> & { series: string
 
 /**
  * Who issues the shop's invoices and when (F8, adr/0034 §1, §8): Paraşüt,
- * the shop's own program writing them back, or none; when the parcel
+ * BirFatura pulling the orders (adr/0072), the shop's own program writing
+ * them back, or none; when the parcel
  * leaves or once the order is placed and paid. The owner's to change.
  * Paraşüt is offered once the platform has opened it (docs/06 principle
  * 10); a shop already on it keeps seeing its choice.
@@ -54,6 +55,8 @@ export function EinvoiceProgramCard({
   const form = useForm<Values>({ values, resetOptions: { keepDirtyValues: true } })
   const provider = useWatch({ control: form.control, name: "provider" })
   const trigger = useWatch({ control: form.control, name: "trigger" })
+  // Numbers written back from outside are held to the web sales' series
+  const numbered = provider === "external" || provider === "birfatura"
   const submit = form.handleSubmit((next) => {
     const series = next.series.trim().toUpperCase()
     save.mutate(
@@ -128,7 +131,7 @@ export function EinvoiceProgramCard({
             )}
           />
         </Field>
-        {provider === "external" ? (
+        {numbered ? (
           <Field label={t(`${E}.series`)} htmlFor="einvoice-series" className="sm:col-span-2">
             <Input
               id="einvoice-series"
@@ -143,7 +146,7 @@ export function EinvoiceProgramCard({
       <ul className="flex list-disc flex-col gap-1 pl-5 text-[13px] text-muted-foreground">
         <li>{t(`${E}.hints.${provider}`)}</li>
         <li>{t(`${E}.triggerHints.${trigger}`)}</li>
-        {provider === "external" ? <li>{t(`${E}.seriesHint`)}</li> : null}
+        {numbered ? <li>{t(`${E}.seriesHint`)}</li> : null}
         <li>{t(`${E}.listed`)}</li>
       </ul>
     </CardForm>
