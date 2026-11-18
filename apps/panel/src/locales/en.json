@@ -11418,6 +11418,33 @@
         "text": "Connect an AI service to remove backgrounds in one click.",
         "ownerOnly": "With an AI service connected, backgrounds can be removed in one click; the store owner can connect one."
       }
+    },
+    "altReview": {
+      "open": "Alt text suggestions",
+      "title": "Alt text suggestions",
+      "description": "Ask AI to suggest alt text for images that have none; see each suggestion with its image, then use it or dismiss it.",
+      "start": "Suggest for images without alt text",
+      "working": "Preparing suggestions…",
+      "made_one": "{{count}} suggestion ready.",
+      "made_other": "{{count}} suggestions ready.",
+      "left_one": "No suggestion for {{count}} image.",
+      "left_other": "No suggestion for {{count}} images.",
+      "jobFailed": "Suggestions could not be prepared. Try again in a moment.",
+      "nothingMissing": "Every image has alt text.",
+      "background": "Suggestions are being prepared in the background; reopen this window to see them.",
+      "empty": "No suggestions waiting.",
+      "listLabel": "Alt text suggestions waiting",
+      "waiting_one": "{{count}} suggestion waiting for review",
+      "waiting_other": "{{count}} suggestions waiting for review",
+      "useAll": "Use all",
+      "note": "Use saves the text as the image's alt text right away. You can edit the text before using it.",
+      "field": "Alt text for {{name}}",
+      "useOne": "Use the suggestion for {{name}}",
+      "dismissOne": "Dismiss the suggestion for {{name}}",
+      "saved": "Alt text saved for {{name}}.",
+      "savedAll_one": "Alt text saved for {{count}} image.",
+      "savedAll_other": "Alt text saved for {{count}} images.",
+      "saveFailed": "{{name}} could not be saved: {{reason}}"
     }
   }
 }

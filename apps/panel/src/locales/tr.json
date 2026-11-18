@@ -11418,6 +11418,33 @@
         "text": "Yapay zekâ servisi bağlarsanız arka planı tek tıkla temizleyebilirsiniz.",
         "ownerOnly": "Yapay zekâ servisi bağlanırsa arka plan tek tıkla temizlenebilir; mağaza sahibi bağlayabilir."
       }
+    },
+    "altReview": {
+      "open": "Alt metin önerileri",
+      "title": "Alt metin önerileri",
+      "description": "Alt metni boş görseller için yapay zekâdan öneri isteyin; her öneriyi görselle birlikte görüp kullanın ya da vazgeçin.",
+      "start": "Alt metni boş görseller için öner",
+      "working": "Öneriler hazırlanıyor…",
+      "made_one": "{{count}} öneri hazırlandı.",
+      "made_other": "{{count}} öneri hazırlandı.",
+      "left_one": "{{count}} görsel için öneri çıkmadı.",
+      "left_other": "{{count}} görsel için öneri çıkmadı.",
+      "jobFailed": "Öneriler hazırlanamadı. Biraz sonra yeniden deneyin.",
+      "nothingMissing": "Alt metni boş görsel yok.",
+      "background": "Öneriler arka planda hazırlanıyor; bu pencereyi yeniden açınca görürsünüz.",
+      "empty": "Bekleyen öneri yok.",
+      "listLabel": "Bekleyen alt metin önerileri",
+      "waiting_one": "{{count}} öneri onay bekliyor",
+      "waiting_other": "{{count}} öneri onay bekliyor",
+      "useAll": "Tümünü kullan",
+      "note": "Kullan, metni görselin alt metni olarak hemen kaydeder. Metni kullanmadan önce düzenleyebilirsiniz.",
+      "field": "{{name}} için alt metin",
+      "useOne": "{{name}} için öneriyi kullan",
+      "dismissOne": "{{name}} için öneriden vazgeç",
+      "saved": "{{name}} alt metni kaydedildi.",
+      "savedAll_one": "{{count}} görselin alt metni kaydedildi.",
+      "savedAll_other": "{{count}} görselin alt metni kaydedildi.",
+      "saveFailed": "{{name}} kaydedilemedi: {{reason}}"
     }
   }
 }

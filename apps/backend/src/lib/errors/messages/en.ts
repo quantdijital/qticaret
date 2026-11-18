@@ -734,6 +734,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "iyzico.secret_invalid":
     "iyzico did not accept the secret key. Copy it again from the same page as the API key.",
   "media.alt_invalid": "The alt text has characters that cannot be used.",
+  "media.alt_markup": "The alt text cannot contain a link or HTML markup (< >).",
   "media.file_id_invalid": "The file id is not valid.",
   "media.file_unknown": "File not found.",
   "media.filename_invalid": "Write a file name of 1–200 characters, without special characters.",

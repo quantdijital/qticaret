@@ -89,7 +89,13 @@ describe("MediaPage", () => {
 
   it("searches the library from the address and says when nothing matches", async () => {
     search.value = { q: "yok" }
-    fetchMock.mockResolvedValue({ media: [], count: 0 })
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(
+        url === "/admin/ai/services"
+          ? { services: [], tasks: [], flags: { own_keys: true } }
+          : { media: [], count: 0 }
+      )
+    )
     renderPage()
 
     expect(await screen.findByText("Aramaya uyan görsel yok.")).toBeInTheDocument()
@@ -173,5 +179,25 @@ describe("MediaPage", () => {
 
     expect(await screen.findByRole("button", { name: "logo.png" })).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: "Görsel yükle" })).not.toBeInTheDocument()
+  })
+
+  it("offers the alt text suggestions only to a role the task allows", async () => {
+    const { unmount } = renderPage()
+    expect(await screen.findByRole("button", { name: "logo.png" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Alt metin önerileri" })).not.toBeInTheDocument()
+    unmount()
+
+    const base = fetchMock.getMockImplementation()
+    fetchMock.mockImplementation((url: string, init?: unknown) =>
+      url === "/admin/ai/services"
+        ? Promise.resolve({
+            services: [],
+            tasks: [{ id: "image_alt_text", allowed: true, usable: [], options: [] }],
+            flags: { own_keys: true },
+          })
+        : (base?.(url, init) as Promise<unknown>)
+    )
+    renderPage()
+    expect(await screen.findByRole("button", { name: "Alt metin önerileri" })).toBeInTheDocument()
   })
 })
