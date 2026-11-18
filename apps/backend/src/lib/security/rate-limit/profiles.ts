@@ -186,10 +186,12 @@ export const RATE_LIMIT_PROFILES = {
   },
   webhook: { name: "webhook", perIp: { max: 600, windowMs: MINUTE } },
   // adr/0072 §3: BirFatura pulling the shop's orders (buyers' details): per address,
-  // and per shop from any address (counted under one identity)
-  einvoice_pull: {
-    name: "einvoice_pull",
-    perIp: { max: 60, windowMs: MINUTE },
+  // before the token is looked at
+  einvoice_pull: { name: "einvoice_pull", perIp: { max: 60, windowMs: MINUTE } },
+  // adr/0072 §3: the shop's own budget from any address (one identity), counted after
+  // the token only: calls without it never use up BirFatura's
+  einvoice_pull_shop: {
+    name: "einvoice_pull_shop",
     perIdentityAnyIp: { max: 120, windowMs: MINUTE },
   },
   // adr/0072 §3: wrong BirFatura tokens, counted apart and only when wrong; past

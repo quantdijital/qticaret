@@ -37,6 +37,13 @@ const DECISIONS: Record<string, Decision> = {
   "POST /hooks/iyzico/callback": "open",
   "POST /hooks/paytr": "open",
   "POST /hooks/resend": "open",
+  // adr/0072: BirFatura invoicing sales already made; issuing the tax document is a
+  // legal duty (VUK) that outlives a plan suspension, so its pull stays open
+  "POST /hooks/birfatura/api/orderStatus": "open",
+  "POST /hooks/birfatura/api/paymentMethods": "open",
+  "POST /hooks/birfatura/api/orders": "open",
+  "POST /hooks/birfatura/api/orderCargoUpdate": "open",
+  "POST /hooks/birfatura/api/invoiceLinkUpdate": "open",
 }
 
 const API = join(__dirname, "../../../api")
