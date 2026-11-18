@@ -81,7 +81,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["parasut", "external", "fake"],
+          "enumItems": ["parasut", "external", "fake", "birfatura"],
           "mappedType": "enum"
         },
         "status": {
@@ -420,6 +420,38 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "reported_at": {
+          "name": "reported_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "listed_at": {
+          "name": "listed_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "original_invoice_id": {
           "name": "original_invoice_id",
           "type": "text",
@@ -603,6 +635,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_invoice_order_id\" ON \"invoice\" (\"order_id\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_invoice_birfatura_due",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_invoice_birfatura_due\" ON \"invoice\" (\"provider\", \"kind\", \"status\", \"reported_at\", \"created_at\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "IDX_invoice_sale_number_unique",

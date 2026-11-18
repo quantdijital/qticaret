@@ -5,6 +5,7 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import { scopesForSection } from "../../lib/storefront/refresh"
+import { removeIntegrationCredentialsWorkflow } from "../integration-credentials/remove-credentials"
 import { attachMediaStep } from "../media/steps/attach-media"
 import { syncFreeShippingWorkflow } from "../promotions/free-shipping"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
@@ -13,6 +14,13 @@ import { brandImagesStep } from "./steps/brand-images"
 import { saveSettingsSectionStep } from "./steps/save-settings-section"
 import { shareImageMediaStep } from "./steps/share-image"
 import type { SaveSettingsSectionInput } from "./steps/save-settings-section"
+
+const providerOf = (values: unknown): unknown =>
+  (values as Record<string, unknown> | null | undefined)?.["provider"]
+
+/** The invoicing program moved from BirFatura to another (or to none). */
+export const leftBirfatura = (section: string, before: unknown, after: unknown): boolean =>
+  section === "invoicing" && providerOf(before) === "birfatura" && providerOf(after) !== "birfatura"
 
 const thresholdOf = (values: Record<string, unknown> | null | undefined): number | null => {
   const value = values?.["free_shipping_threshold"]
@@ -48,6 +56,18 @@ export const updatePlatformSettingsWorkflow = createWorkflow(
         threshold: thresholdOf(saved.after as Record<string, unknown>),
       }))
       syncFreeShippingWorkflow.runAsStep({ input: threshold })
+    })
+    // adr/0072 §3: BirFatura no longer the program, its token goes: picking it again
+    // asks the owner for a new one (every admin told, as for any account)
+    when({ input, saved }, ({ input, saved }) =>
+      leftBirfatura(input.section, saved.before, saved.after)
+    ).then(() => {
+      removeIntegrationCredentialsWorkflow.runAsStep({
+        input: transform({ input }, ({ input }) => ({
+          provider: "birfatura" as const,
+          actor_id: input.actor_id,
+        })),
+      })
     })
     refreshStorefrontStep(transform({ input }, ({ input }) => scopesForSection(input.section)))
     return new WorkflowResponse(saved)

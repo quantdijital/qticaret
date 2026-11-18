@@ -185,6 +185,18 @@ export const RATE_LIMIT_PROFILES = {
     perIdentity: { max: 3, windowMs: 10 * MINUTE },
   },
   webhook: { name: "webhook", perIp: { max: 600, windowMs: MINUTE } },
+  // adr/0072 §3: BirFatura pulling the shop's orders (buyers' details): per address,
+  // before the token is looked at
+  einvoice_pull: { name: "einvoice_pull", perIp: { max: 60, windowMs: MINUTE } },
+  // adr/0072 §3: the shop's own budget from any address (one identity), counted after
+  // the token only: calls without it never use up BirFatura's
+  einvoice_pull_shop: {
+    name: "einvoice_pull_shop",
+    perIdentityAnyIp: { max: 120, windowMs: MINUTE },
+  },
+  // adr/0072 §3: wrong BirFatura tokens, counted apart and only when wrong; past
+  // this an address is refused before its token is looked at, right or not
+  einvoice_pull_auth: { name: "einvoice_pull_auth", perIp: { max: 10, windowMs: MINUTE } },
   // adr/0061 Ek C9: the control plane's plan document pushes; a handful a day per shop
   control_plane_push: { name: "control_plane_push", perIp: { max: 60, windowMs: MINUTE } },
   // F5 V9: a shopper's browser back from a hosted form (iyzico), once per payment

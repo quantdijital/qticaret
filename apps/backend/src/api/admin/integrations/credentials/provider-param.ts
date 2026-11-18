@@ -10,10 +10,20 @@ import type { CredentialProviderName } from "../../../../modules/integration-cre
  */
 const CONSENT_ONLY: readonly string[] = ["google"]
 
+/**
+ * Accounts the server makes and keeps under their own page, never here:
+ * BirFatura's connection token (adr/0072 §3, `/admin/einvoice/birfatura`).
+ * Neither listed nor written through the accounts routes.
+ */
+const KEPT_ELSEWHERE: readonly string[] = ["birfatura"]
+
+/** Whether the accounts page lists the provider. */
+export const listedHere = (provider: string): boolean => !KEPT_ELSEWHERE.includes(provider)
+
 /** The provider in the path; one the shop cannot connect here is 404. */
 export function providerParam(req: MedusaRequest): CredentialProviderName {
   const provider = req.params["provider"] ?? ""
-  if (!isCredentialProvider(provider) || CONSENT_ONLY.includes(provider)) {
+  if (!isCredentialProvider(provider) || CONSENT_ONLY.includes(provider) || !listedHere(provider)) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "integration_credentials.unknown_provider")
   }
   return provider

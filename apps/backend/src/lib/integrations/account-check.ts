@@ -144,6 +144,8 @@ const CHECKERS = {
   // adr/0036 Ek 2026-11-10: a sign-in, nothing sent. `secret_invalid`: the login refused;
   // `merchant_invalid`: no TLS the server and we agree on
   smtp: (account, signal) => checkSmtp(account, signal),
+  // adr/0072: BirFatura calls us with the token we made; there is nothing to ask it
+  birfatura: () => Promise.resolve("valid"),
   // adr/0071 §3: the model list, nothing generated (lib/ai/account-check.ts)
   deepseek: aiAccountChecker("deepseek"),
   minimax: aiAccountChecker("minimax"),
@@ -185,6 +187,7 @@ export const CHECK_FIELDS = {
   // Another organization's store is the domain's; a refused token, the secret
   shopify: { merchant_invalid: "settings.shop_domain", secret_invalid: "secrets.client_secret" },
   smtp: { merchant_invalid: "settings.security", secret_invalid: "secrets.password" },
+  birfatura: { merchant_invalid: "secrets.token", secret_invalid: "secrets.token" },
   // One key: whatever an AI service refuses is the key
   deepseek: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   minimax: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },

@@ -240,6 +240,21 @@ export const CREDENTIAL_PROVIDERS = {
     identity: ["shop_domain", "client_id"],
     optional: [],
   },
+  // adr/0072 §3: the token BirFatura sends when it pulls the shop's orders. Made by the
+  // server and shown once (`POST /admin/einvoice/birfatura/token`), never typed in: the
+  // accounts route refuses this provider. 128 random bits written as a GUID
+  birfatura: {
+    settings: z.object({}).strict(),
+    secrets: ["token"],
+    secret: z
+      .string()
+      .regex(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+        "integration_credentials.secret_invalid"
+      ),
+    identity: [],
+    optional: [],
+  },
   // adr/0071 §3: the AI services, one key each (providers-ai.ts)
   ...AI_CREDENTIAL_PROVIDERS,
 } as const satisfies Record<string, CredentialProvider>

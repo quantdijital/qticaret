@@ -3,11 +3,12 @@ import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
 import { defineSection, isCleanText } from "./define"
 
 /**
- * Who issues the shop's invoices (adr/0034 §1). `fake` can be picked in
- * tests only (`fakeInvoicingAllowed`); it stays here so a value stored
- * earlier still reads, and then issues nothing.
+ * Who issues the shop's invoices (adr/0034 §1). `birfatura`: BirFatura
+ * pulls the orders and writes the invoice back (adr/0072), as an external
+ * program does. `fake` can be picked in tests only (`fakeInvoicingAllowed`);
+ * it stays here so a value stored earlier still reads, and then issues nothing.
  */
-export const INVOICING_PROVIDERS = ["none", "parasut", "external", "fake"] as const
+export const INVOICING_PROVIDERS = ["none", "parasut", "external", "fake", "birfatura"] as const
 export type InvoicingProvider = (typeof INVOICING_PROVIDERS)[number]
 
 /**

@@ -85,6 +85,13 @@ export const recordInvoiceWriteBackWorkflow = createWorkflow(
   }
 )
 
+export interface AttachPdfInput {
+  invoice_id: string
+  file_id: string
+  /** Refuse (`einvoice.pdf_present`) when it has one: a program's repeated report, never staff's upload. */
+  only_if_empty?: boolean
+}
+
 /**
  * The PDF the route stored, put on the invoice; the one it replaces is
  * removed. Undone by removing the new file, so a refused PDF leaves none
@@ -92,10 +99,10 @@ export const recordInvoiceWriteBackWorkflow = createWorkflow(
  */
 const attachPdfStep = createStep(
   "einvoice-attach-pdf",
-  async (input: { invoice_id: string; file_id: string }, { container }) => {
+  async (input: AttachPdfInput, { container }) => {
     const result = await container
       .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
-      .attachPdf(input.invoice_id, input.file_id)
+      .attachPdf(input.invoice_id, input.file_id, { onlyIfEmpty: input.only_if_empty ?? false })
     if (!result) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "einvoice.unknown")
     }
@@ -150,7 +157,7 @@ const tellCustomerStep = createStep(
 
 export const attachInvoicePdfWorkflow = createWorkflow(
   "einvoice-attach-pdf",
-  (input: { invoice_id: string; file_id: string }) => {
+  (input: AttachPdfInput) => {
     const attached = attachPdfStep(input)
     removePreviousPdfStep(attached)
     tellCustomerStep(

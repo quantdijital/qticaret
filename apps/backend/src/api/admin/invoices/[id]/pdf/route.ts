@@ -4,6 +4,7 @@ import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { ConflictError, ValidationError } from "../../../../../lib/errors"
 import { pdfFilename } from "../../../../../lib/invoicing/filename"
 import { EINVOICE_MODULE } from "../../../../../modules/einvoice"
+import { isWrittenBack } from "../../../../../modules/einvoice/models/invoice"
 import type EinvoiceModuleService from "../../../../../modules/einvoice/service"
 import { attachInvoicePdfWorkflow } from "../../../../../workflows/einvoice/write-back"
 import { readRawBody } from "../../../../http/raw-body"
@@ -28,7 +29,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   if (!row) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "einvoice.unknown")
   }
-  if (row.provider !== "external") {
+  if (!isWrittenBack(row.provider)) {
     throw new ConflictError("einvoice.not_external")
   }
   // A return's PDF is staff's signed scan: a program never replaces it

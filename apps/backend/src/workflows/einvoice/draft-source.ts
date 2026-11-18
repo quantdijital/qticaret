@@ -7,6 +7,7 @@ import {
   exchangeSaleOrder,
   firstSaleOrder,
   invoiceDraft,
+  invoiceItemRefs,
   invoiceLines,
   invoiceTotals,
   returnedOrder,
@@ -47,6 +48,8 @@ const LINE_FIELDS = [
     "product_title",
     "variant_title",
     "variant_id",
+    // A program that names products by code (BirFatura, adr/0072 §5)
+    "variant_sku",
     // A gift card line's product: its money is an advance, not the invoice's
     "product_id",
     "is_custom_price",
@@ -117,16 +120,79 @@ export async function invoiceTotalsOf(container: Container, orderId: string, par
  */
 export async function invoiceDraftFor(
   container: Container,
-  invoice: {
-    id: string
-    order_id: string
-    kind?: string
-    source_id?: string
-    original_invoice_id?: string | null
-    document_type?: string | null
-  },
+  invoice: DraftedInvoice,
   now: Date = new Date()
 ): Promise<DraftResult> {
+  const read = await orderForDraft(container, invoice)
+  if (!read) {
+    return { problems: ["einvoice.no_lines"] }
+  }
+  const { order, settings, profile } = read
+  if (invoice.kind === "return") {
+    const result = await returnDraft(
+      container,
+      order,
+      {
+        source_id: invoice.source_id ?? "",
+        original_invoice_id: invoice.original_invoice_id ?? null,
+        document_type: invoice.document_type ?? null,
+      },
+      { store_url: settings.store_url, profile }
+    )
+    return result ?? { problems: ["einvoice.no_lines"] }
+  }
+  return (await saleDraft(container, invoice, read, now)).result
+}
+
+/**
+ * A sale invoice's draft with what a program naming products by code and
+ * delivering to an address of its own needs besides (BirFatura, adr/0072
+ * §5): each item line's order line, variant and SKU, the delivery address,
+ * the order's number and when it was placed. Personal data, as the draft.
+ */
+export async function saleDraftSource(
+  container: Container,
+  invoice: DraftedInvoice,
+  now: Date = new Date()
+) {
+  const read = await orderForDraft(container, invoice)
+  if (!read) {
+    return null
+  }
+  const { result, sold } = await saleDraft(container, invoice, read, now)
+  const to = read.row.shipping_address
+  const name = [to?.first_name, to?.last_name].filter(Boolean).join(" ")
+  return {
+    result,
+    items: invoiceItemRefs(sold),
+    shipping: to
+      ? {
+          name: name || null,
+          address: [to.address_1, to.address_2].filter(Boolean).join(" ") || null,
+          district: to.city ?? null,
+          city: to.province ?? null,
+          postal_code: to.postal_code ?? null,
+          phone: to.phone ?? null,
+        }
+      : null,
+    display_id: read.row.display_id ?? null,
+    placed_at: new Date(read.row.created_at),
+  }
+}
+
+interface DraftedInvoice {
+  id: string
+  order_id: string
+  kind?: string
+  source_id?: string
+  original_invoice_id?: string | null
+  document_type?: string | null
+}
+
+type DraftRead = NonNullable<Awaited<ReturnType<typeof orderForDraft>>>
+
+/** The order as a draft reads it, its gift card lines taken off, with the settings and the buyer's profile. */
+async function orderForDraft(container: Container, invoice: DraftedInvoice) {
   const { data } = await query(container).graph({
     entity: "order",
     fields: [
@@ -159,7 +225,7 @@ export async function invoiceDraftFor(
   })
   const row = data[0] as OrderRow | undefined
   if (!row) {
-    return { problems: ["einvoice.no_lines"] }
+    return null
   }
   // Its gift card lines are an advance: on no invoice, nor on a return's document
   const { order } = splitAdvance(
@@ -168,42 +234,41 @@ export async function invoiceDraftFor(
   )
   const settings = await settingsOf(container)
   const profile = await profileOf(container, order, invoice.id)
-  if (invoice.kind === "return") {
-    const result = await returnDraft(
-      container,
-      order,
-      {
-        source_id: invoice.source_id ?? "",
-        original_invoice_id: invoice.original_invoice_id ?? null,
-        document_type: invoice.document_type ?? null,
-      },
-      { store_url: settings.store_url, profile }
-    )
-    return result ?? { problems: ["einvoice.no_lines"] }
-  }
+  return { row, order, settings, profile }
+}
+
+/** A sale's draft: the first sale's, or an exchange's new sale; and the lines it was made of. */
+async function saleDraft(
+  container: Container,
+  invoice: DraftedInvoice,
+  { order, settings, profile }: DraftRead,
+  now: Date
+): Promise<{ result: DraftResult; sold: ExchangedOrder }> {
   const exchange =
     invoice.source_id && invoice.source_id !== invoice.order_id
       ? await exchangeOf(container, invoice.source_id)
       : null
   if (invoice.source_id && invoice.source_id !== invoice.order_id && !exchange) {
-    return { problems: ["einvoice.no_lines"] }
+    return { result: { problems: ["einvoice.no_lines"] }, sold: { ...order, items: [] } }
   }
   const sold = partOf(order, exchange ? { exchange_id: exchange.exchange_id } : undefined)
   const lines = new Set((sold.items ?? []).flatMap((item) => (item?.id ? [item.id] : [])))
   const shipment = await shipmentOf(container, order, settings.carriers, now, lines)
   const result = invoiceDraft(sold, profile, { store_url: settings.store_url, shipment })
   // An exchange's new items were paid for by what came back (and what staff collected on approval)
-  return exchange?.received_at && "draft" in result
-    ? {
+  if (exchange?.received_at && "draft" in result) {
+    const paidOn = turkishDay(new Date(exchange.received_at))
+    return {
+      result: {
         draft: {
           ...result.draft,
-          internet_sale: {
-            ...result.draft.internet_sale,
-            paid_on: turkishDay(new Date(exchange.received_at)),
-          },
+          internet_sale: { ...result.draft.internet_sale, paid_on: paidOn },
         },
-      }
-    : result
+      },
+      sold,
+    }
+  }
+  return { result, sold }
 }
 
 /** The exchange a request opened, once its goods came back; null for any other. */

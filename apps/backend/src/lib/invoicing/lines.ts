@@ -29,6 +29,8 @@ export interface InvoiceItem extends TotalledLine {
   product_title?: string | null
   variant_title?: string | null
   variant_id?: string | null
+  /** The variant's stock code, as the order line copied it. */
+  variant_sku?: string | null
   is_custom_price?: boolean | null
   metadata?: Record<string, unknown> | null
 }
@@ -143,6 +145,21 @@ export function invoiceLines(order: {
     })
   const fees = counted.filter((item) => isFeeLine(item))
   return [...items, ...deliveryLines(fees, present(order.shipping_methods))]
+}
+
+/**
+ * Which order line each of `invoiceLines`' item lines is, in its order
+ * (the delivery lines follow them): its id, variant and SKU, for a program
+ * that names products by code (BirFatura, adr/0072 §5).
+ */
+export function invoiceItemRefs(order: { items?: Rows<InvoiceItem> }) {
+  return present(order.items)
+    .filter((item) => quantityOf(item) > 0 && !isFeeLine(item))
+    .map((item) => ({
+      line_id: item.id ?? null,
+      variant_id: item.variant_id ?? null,
+      sku: item.variant_sku ?? null,
+    }))
 }
 
 /** The lines' sums, each from the lines' own rounded amounts. */

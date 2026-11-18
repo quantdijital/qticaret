@@ -3,7 +3,7 @@ import { z } from "@medusajs/framework/zod"
 export const AdminGetInvoices = z
   .object({
     status: z.enum(["pending", "issuing", "issued", "failed", "cancelled"]).optional(),
-    provider: z.enum(["parasut", "external", "fake"]).optional(),
+    provider: z.enum(["parasut", "external", "fake", "birfatura"]).optional(),
     order_id: z
       .string()
       .regex(/^order_[0-9A-Z]{10,40}$/)
@@ -33,7 +33,7 @@ export type AdminPostInvoicesRetryType = z.infer<typeof AdminPostInvoicesRetry>
 /**
  * What an external program issued (adr/0034 §9): GİB's number (three
  * letters or digits, the year, nine digits), its ETTN, e-Fatura or
- * e-Arşiv, and when.
+ * e-Arşiv when it knows, and when.
  */
 // No e-invoice predates the platform; one dated ahead is a typo
 const EARLIEST = Date.parse("2020-01-01T00:00:00Z")
@@ -53,7 +53,8 @@ export const AdminPostInvoiceIssued = z
         "einvoice.uuid_invalid"
       )
       .nullish(),
-    document_type: z.enum(["e_invoice", "e_archive"]),
+    // A program that does not say leaves it unknown (adr/0072 §6, adr/0034 §9 Ek)
+    document_type: z.enum(["e_invoice", "e_archive"]).nullish(),
     issued_at: z.iso
       .datetime({ offset: true })
       .transform((text) => new Date(text))

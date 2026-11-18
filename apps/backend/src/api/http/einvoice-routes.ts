@@ -36,4 +36,11 @@ export const EINVOICE_ROUTES = [
     methods: ["POST" as const],
     middlewares: [parasutCalls],
   },
+  // adr/0072 §3: BirFatura's connection token, made or replaced by the owner proving
+  // it again; the old one stops at once. No body: the server draws the token
+  {
+    matcher: "/admin/einvoice/birfatura/token",
+    methods: ["POST" as const],
+    middlewares: [requireReauth()],
+  },
 ]

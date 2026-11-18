@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { ConflictError } from "../../../../../lib/errors"
 import { EINVOICE_MODULE } from "../../../../../modules/einvoice"
+import { isWrittenBack } from "../../../../../modules/einvoice/models/invoice"
 import type EinvoiceModuleService from "../../../../../modules/einvoice/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../../../../modules/platform-settings"
 import type { InvoicingSettings } from "../../../../../modules/platform-settings/sections"
@@ -22,7 +23,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   if (!row) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "einvoice.unknown")
   }
-  if (row.provider !== "external") {
+  if (!isWrittenBack(row.provider)) {
     throw new ConflictError("einvoice.not_external")
   }
   // A return's document is staff's: its buyer's tax id is not a program's to read

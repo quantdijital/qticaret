@@ -227,6 +227,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "errors.invalid_request": "The request could not be understood.",
   "errors.length_required": "The request size is required.",
   "errors.limit_too_large": "Too many records were asked for at once.",
+  "errors.not_found": "The record was not found.",
   "errors.provider_unavailable": "The connected service cannot be reached; try again shortly.",
   // The admin API's provider failure; the dashboard names the service (messages/provider.ts)
   "provider.failed": "The connected service did not complete the request; try again shortly.",
@@ -637,6 +638,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.carrier_identity_missing":
     "The carrier's registered name and tax id are not entered (Settings > E-invoice).",
   "einvoice.store_url_missing": "The shop has no storefront address.",
+  // adr/0072: BirFatura's pull and write-back
+  "einvoice.phone_missing":
+    "The order has no mobile phone; BirFatura takes no order without one. Enter the invoice by hand.",
+  "einvoice.number_missing":
+    "BirFatura issued the invoice but sent no number. Enter the number and the PDF by hand.",
+  "einvoice.pdf_download_failed":
+    "The invoice number was recorded but BirFatura's PDF could not be downloaded. Upload the PDF by hand.",
   "einvoice.parasut_unavailable": "Paraşüt cannot be connected on this server yet.",
   "einvoice.parasut_not_connected": "No Paraşüt account is connected (Settings > E-invoice).",
   "einvoice.parasut_disconnected":
@@ -652,6 +660,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.rate_limited": "Too many requests went to Paraşüt; it is tried again shortly.",
   "einvoice.unknown": "Invoice not found.",
   "einvoice.not_external": "This invoice is not issued by the shop's own program.",
+  "einvoice.waived": "No invoice is issued for this sale (gift cards alone, an advance).",
+  "einvoice.pdf_present": "This invoice already has its PDF.",
+  "einvoice.birfatura_not_selected":
+    "A BirFatura connection token is made only while BirFatura is the invoicing program (Settings > E-Invoice).",
   "einvoice.cancelled": "This invoice was cancelled.",
   "einvoice.already_issued": "This invoice was issued under another number.",
   "einvoice.number_taken": "This invoice number belongs to another invoice.",
