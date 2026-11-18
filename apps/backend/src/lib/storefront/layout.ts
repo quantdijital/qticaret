@@ -16,6 +16,8 @@ import { storedFreeRowIds } from "./sections/footer-rows-stored"
 import { isMainType } from "./sections/main"
 import { PRICE_BANDS_LIMITS } from "./sections/price-bands"
 import { storedSection } from "./sections/stored"
+import { isPlainObject } from "../../modules/platform-settings/sections/define"
+import { logger } from "../logging"
 
 /**
  * The storefront's design as the theme editor writes it (adr/0049): the
@@ -169,25 +171,57 @@ export function isShowing(
 
 const GROUPS = ["header", "home", "footer", "product", "category"] as const
 
+/** Each group's one section as a save checks it: a stored one it does not read is skipped. */
+const GROUP_SECTION: Record<(typeof GROUPS)[number], z.ZodType> = {
+  header: headerSection,
+  home: pageSection,
+  footer: footerSection,
+  product: productSection,
+  category: categorySection,
+}
+
+/** A skipped section's id or type for the log: a short string, else nothing (never its content). */
+const named = (value: unknown): string | null =>
+  typeof value === "string" ? value.slice(0, 64) : null
+
 /**
  * A stored document (a draft, what is live, a revision) as today's schema
  * reads it: its settings read part by part (`storedSettings`), as the
  * storefront's frame reads them, so a part today's schema no longer reads
  * (a theme from before a rule) is unset rather than failing the whole read,
  * and every reader sees the same settings; a section's variant off today's
- * list reads as its replacement or the default (`storedSection`). A save
- * is still held to the schema.
+ * list reads as its replacement or the default (`storedSection`); a section
+ * its group no longer reads at all (a type taken off since, or written by a
+ * newer build; a broken one) is skipped, the rest of the design still read,
+ * and said once in the log (its group, id and type, not its content). A
+ * document that is not one at all is given as it is, for the schema to
+ * refuse. A save is still held to the schema.
  */
 export function storedDocument(stored: unknown): unknown {
   if (stored === null || typeof stored !== "object" || Array.isArray(stored)) {
     return stored
   }
+  const skipped: { group: string; id: string | null; type: string | null }[] = []
   const groups: Record<string, unknown[]> = Object.fromEntries(
     GROUPS.flatMap((group) => {
       const sections: unknown = (stored as Record<string, unknown>)[group]
-      return Array.isArray(sections) ? [[group, sections.map(storedSection)]] : []
+      if (!Array.isArray(sections)) {
+        return []
+      }
+      const read = sections.map(storedSection).filter((section) => {
+        if (GROUP_SECTION[group].safeParse(section).success) {
+          return true
+        }
+        const fields: Record<string, unknown> = isPlainObject(section) ? section : {}
+        skipped.push({ group, id: named(fields["id"]), type: named(fields["type"]) })
+        return false
+      })
+      return [[group, read]]
     })
   )
+  if (skipped.length > 0) {
+    logger.warn({ event: "storefront.layout_section_skipped", sections: skipped })
+  }
   // A free rows footer's rows and blocks take ids among every group's sections (adr/0070)
   const footer = groups["footer"]
   if (footer) {
