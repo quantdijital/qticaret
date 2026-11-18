@@ -1,6 +1,7 @@
 import { ValidationError, isValidationError } from "../errors"
 import { UPLOAD_MEDIA_TYPES, storedName, validateUpload } from "../security/upload"
 import { sanitizeImage } from "./sanitize"
+import type { SanitizeOptions } from "./sanitize"
 
 export interface PreparedImage {
   buffer: Buffer
@@ -21,7 +22,8 @@ export interface PreparedImage {
 export async function prepareImage(
   bytes: Buffer,
   name: string,
-  field: string
+  field: string,
+  options: SanitizeOptions = {}
 ): Promise<PreparedImage> {
   let type
   try {
@@ -34,7 +36,7 @@ export async function prepareImage(
   }
   let clean
   try {
-    clean = await sanitizeImage(bytes, type.type)
+    clean = await sanitizeImage(bytes, type.type, options)
   } catch {
     throw new ValidationError("upload.unreadable_image", { field })
   }

@@ -1,4 +1,5 @@
 import { toSlug } from "../seo/slug"
+import { digitalSourceTypeOf, digitalSourceXmp } from "./ai-source"
 import { readImage } from "./sanitize"
 
 /**
@@ -45,10 +46,16 @@ export const derivativeName = (slug: string, position: number, derivative: Deriv
 export const libraryVersionBase = (filename: string | null | undefined): string =>
   toSlug((filename ?? "").replace(/\.[^.]*$/, ""), 60) || "gorsel"
 
-// Upright first: a master stored before the cleaning (an import) may carry an orientation
-const upright = (master: Buffer) => readImage(master).rotate()
+// Upright first: a master stored before the cleaning (an import) may carry an orientation.
+// An AI made master hands its IPTC mark on to every version (adr/0071 §10)
+const uprightWith = (xmp: string | null) => (master: Buffer) => {
+  const image = readImage(master).rotate()
+  return xmp === null ? image : image.withXmp(xmp)
+}
 
 export async function deriveImages(master: Buffer): Promise<Derivative[]> {
+  const mark = digitalSourceTypeOf((await readImage(master).metadata()).xmp)
+  const upright = uprightWith(mark === null ? null : digitalSourceXmp(mark))
   const { info } = await upright(master).toBuffer({ resolveWithObject: true })
   const width = info.width
   const derivatives: Derivative[] = []

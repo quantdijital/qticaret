@@ -148,6 +148,7 @@ const CHECKERS = {
   deepseek: aiAccountChecker("deepseek"),
   minimax: aiAccountChecker("minimax"),
   gemini: aiAccountChecker("gemini"),
+  photoroom: aiAccountChecker("photoroom"),
   fake: aiAccountChecker("fake"),
 } satisfies Record<CredentialProviderName, Checker>
 
@@ -188,5 +189,6 @@ export const CHECK_FIELDS = {
   deepseek: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   minimax: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   gemini: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
+  photoroom: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   fake: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

@@ -41,7 +41,7 @@ export interface CallOutcome {
  * part of a step's input or output (`workflow_execution` keeps those), of
  * a log or of an error. A service without a readable key cannot be called.
  */
-async function apiKeyOf(
+export async function apiKeyOf(
   container: Pick<MedusaContainer, "resolve">,
   credentialProvider: string
 ): Promise<string | null> {
@@ -55,7 +55,7 @@ async function apiKeyOf(
   return typeof key === "string" && key !== "" ? key : null
 }
 
-const retryAfterOf = (error: unknown): number | null => {
+export const retryAfterOf = (error: unknown): number | null => {
   const value = (error as { retryAfterMs?: unknown } | null)?.retryAfterMs
   return typeof value === "number" ? value : null
 }

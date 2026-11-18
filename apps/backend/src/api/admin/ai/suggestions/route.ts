@@ -1,4 +1,5 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { requestImageEditWorkflow } from "../../../../workflows/ai/request-image-edit"
 import { suggestTextWorkflow } from "../../../../workflows/ai/suggest-text"
 import type { AdminPostAiSuggestionType } from "../validators"
 
@@ -6,14 +7,29 @@ import type { AdminPostAiSuggestionType } from "../validators"
  * POST /admin/ai/suggestions (adr/0071 §11): a suggestion for a record's
  * field, never written to it here. 201 with the suggestion; a suggestion
  * the gate turned down is 422 `ai.suggestion_refused` with its problems
- * and no text.
+ * and no text. Pictures (`entity_type: media`, Aşama 4) are a job: 202
+ * with its id; its results are suggestions too, decided one by one.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostAiSuggestionType>,
   res: MedusaResponse
 ): Promise<void> {
+  const body = req.validatedBody
+  if (body.entity_type === "media") {
+    const { result: job } = await requestImageEditWorkflow(req.scope).run({
+      input: {
+        task: body.task,
+        background: body.option,
+        media_ids: body.entity_ids,
+        service: body.service,
+        user_id: req.auth_context.actor_id,
+      },
+    })
+    res.status(202).json(job)
+    return
+  }
   const { result } = await suggestTextWorkflow(req.scope).run({
-    input: { ...req.validatedBody, user_id: req.auth_context.actor_id },
+    input: { ...body, user_id: req.auth_context.actor_id },
   })
   if (result.status === "refused") {
     res.status(422).json({

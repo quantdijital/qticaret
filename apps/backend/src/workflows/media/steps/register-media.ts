@@ -19,6 +19,8 @@ export interface RegisterMediaInput {
   library?: boolean
   /** The staff member uploading; null for a job (an import from an old site). */
   uploaded_by?: string | null
+  /** Made by an AI service from another picture (adr/0071 §5): written on a new record only. */
+  origin?: { ai_source: "edited" | "generated"; derived_from_id: string } | null
 }
 
 /** The file's bytes; a file storage does not have is unknown, storage failing is not. */
@@ -130,6 +132,7 @@ export const registerMediaStep = createStep(
           ...described,
           uploaded_by: input.uploaded_by ?? null,
           in_library: input.library ?? false,
+          ...(input.origin ?? {}),
         })
         assets.push(asset)
         undo.created.push(asset.id)

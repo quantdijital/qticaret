@@ -25,6 +25,7 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   deepseek: "DeepSeek",
   minimax: "MiniMax",
   gemini: "Gemini",
+  photoroom: "Photoroom",
   fake: "Fake AI",
 }
 

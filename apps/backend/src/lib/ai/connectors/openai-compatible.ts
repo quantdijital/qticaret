@@ -20,9 +20,9 @@ import type { TextConnector, TextRequest, TextResult } from "./types"
  */
 
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024
-const DEFAULT_RETRY_WAIT_MS = 1_000
+export const DEFAULT_RETRY_WAIT_MS = 1_000
 /** A longer Retry-After is not waited for; the error carries it instead. */
-const MAX_RETRY_WAIT_MS = 10_000
+export const MAX_RETRY_WAIT_MS = 10_000
 
 // The request never reached the service: safe to send again
 const NEVER_CONNECTED: ReadonlySet<string> = new Set([
@@ -45,13 +45,13 @@ export interface OpenAiCompatibleOptions {
   wait?: (ms: number, signal: AbortSignal) => Promise<void>
 }
 
-interface Failure extends AiProviderFailure {
+export interface Failure extends AiProviderFailure {
   retry: boolean
 }
 
 type Attempt = { ok: true; result: TextResult } | { ok: false; failure: Failure }
 
-const waitFor = (ms: number, signal: AbortSignal): Promise<void> =>
+export const waitFor = (ms: number, signal: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
     if (signal.aborted) {
       reject(new Error("aborted"))
@@ -112,7 +112,7 @@ function failureOfResponse(service: AiService, response: SafeFetchResponse): Fai
 }
 
 /** A failure before any answer. Only its kind is kept: the thrown error may quote the request. */
-function failureOfThrown(service: AiService, error: unknown, timedOut: boolean): Failure {
+export function failureOfThrown(service: AiService, error: unknown, timedOut: boolean): Failure {
   const fail = (key: AiErrorKey, code: string, retry = false): Failure => ({
     service: service.id,
     key,

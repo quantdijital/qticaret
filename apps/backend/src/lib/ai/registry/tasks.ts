@@ -3,6 +3,9 @@ import type { StaffRole } from "../../staff/permissions"
 import type { AiEntityType } from "../facts"
 import type { AiCapability } from "./capabilities"
 
+/** What a task is asked for: a text record, or a picture of the media library. */
+export type AiTaskEntity = AiEntityType | "media"
+
 /**
  * A task: one named operation bound to a capability (adr/0071 §2). There
  * is no free prompt: what is asked comes from the task and, at most, one
@@ -17,6 +20,8 @@ export const AI_GATES = [
   "seo_description",
   "product_description",
   "plain_text",
+  // A picture, not a text: read by the upload check (lib/ai/run-image.ts)
+  "image",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -36,8 +41,10 @@ export interface AiTask {
   gate: AiGate
   /** The longest suggestion, in characters; a longer one is refused (`length`). */
   maxLength: number
-  /** The kinds of record it is asked for; every kind when left out. */
-  entities?: readonly AiEntityType[]
+  /** The kinds of record it is asked for; every text kind when left out. */
+  entities?: readonly AiTaskEntity[]
+  /** A job task: the most records one request may name (adr/0071 §8). */
+  maxBatch?: number
   /** Longest text per data block field for this task, over the shared lengths (lib/ai/facts). */
   factMaxLengths?: Readonly<Record<string, number>>
 }
@@ -109,7 +116,33 @@ export const PRODUCT_DESCRIPTION_TASK: AiTask = {
   factMaxLengths: { description: PRODUCT_DESCRIPTION_FACT_LENGTH },
 }
 
-const TASKS: readonly AiTask[] = [SEO_TITLE_TASK, SEO_DESCRIPTION_TASK, PRODUCT_DESCRIPTION_TASK]
+/** The most pictures one background request may name (adr/0071 §8: each its own call and claim). */
+export const IMAGE_BACKGROUND_MAX_BATCH = 20
+
+/**
+ * A picture's background taken away or made white (Aşama 4, docs/22 PR 4-1):
+ * a new picture beside the original, marked as AI edited; the original's
+ * bytes are never changed. A job (`ai.image_edit`), one to twenty pictures.
+ */
+export const IMAGE_BACKGROUND_TASK: AiTask = {
+  id: "image_background",
+  capability: "image_edit",
+  mode: "job",
+  options: ["transparent", "white"],
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "image",
+  maxLength: 0,
+  entities: ["media"],
+  maxBatch: IMAGE_BACKGROUND_MAX_BATCH,
+}
+
+const TASKS: readonly AiTask[] = [
+  SEO_TITLE_TASK,
+  SEO_DESCRIPTION_TASK,
+  PRODUCT_DESCRIPTION_TASK,
+  IMAGE_BACKGROUND_TASK,
+]
 
 /** The data block's field lengths for a task: the shared ones, and the task's own over them. */
 export const factLengthsOf = (
@@ -118,8 +151,8 @@ export const factLengthsOf = (
 ): Readonly<Record<string, number>> => ({ ...shared, ...task.factMaxLengths })
 
 /** Whether a task is asked for this kind of record. */
-export const isTaskEntity = (task: AiTask, type: AiEntityType): boolean =>
-  task.entities === undefined || task.entities.includes(type)
+export const isTaskEntity = (task: AiTask, type: AiTaskEntity): boolean =>
+  task.entities === undefined ? type !== "media" : task.entities.includes(type)
 
 /** The tasks of this instance, in registry order. */
 export function aiTasks(nodeEnv: string | undefined = process.env["NODE_ENV"]): readonly AiTask[] {
