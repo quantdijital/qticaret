@@ -35,9 +35,14 @@ export const apiAccessQuery = () =>
     queryFn: () => sdk.client.fetch<{ keys: ApiKeyRow[] }>("/admin/api-access"),
   })
 
+/**
+ * A new key; its token comes back once. The mutation holding it leaves the
+ * mutation cache as soon as nothing observes it (`gcTime: 0`).
+ */
 export function useCreateApiKey() {
   const client = useQueryClient()
   return useMutation({
+    gcTime: 0,
     mutationFn: (body: { title: string; scopes: ApiScope[] }) =>
       withReauth((extra) =>
         sdk.client.fetch<{ key: ApiKeyRow; token: string }>("/admin/api-access", {

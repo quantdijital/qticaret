@@ -58,10 +58,15 @@ export const webhookQuery = (id: string) =>
       ),
   })
 
-/** A new address for the shop's events: asked to prove oneself again (adr/0040 §3). */
+/**
+ * A new address for the shop's events: asked to prove oneself again
+ * (adr/0040 §3). Its signing secret comes back once; the mutation holding
+ * it leaves the mutation cache as soon as nothing observes it (`gcTime: 0`).
+ */
 export function useSubscribeWebhook() {
   const client = useQueryClient()
   return useMutation({
+    gcTime: 0,
     mutationFn: (body: { url: string; events: WebhookEvent[] }) =>
       withReauth((extra) =>
         sdk.client.fetch<{ subscription: WebhookSubscription; secret: string }>("/admin/webhooks", {
