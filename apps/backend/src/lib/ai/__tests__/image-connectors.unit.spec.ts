@@ -73,7 +73,7 @@ async function failure(run: Promise<unknown>) {
   // Nothing of the key or the service's words, wherever it is written
   expect(JSON.stringify(error)).not.toContain(KEY)
   expect(JSON.stringify(error)).not.toContain(SERVICE_SAID)
-  expect(String(error.stack)).not.toContain(KEY)
+  expect(String((error as unknown as Error).stack)).not.toContain(KEY)
   return { key: error.safeMessage, code: error.providerCode }
 }
 

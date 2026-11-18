@@ -11,12 +11,14 @@ import type { AiCapability } from "./capabilities"
 
 export type AiFunding = "own_key" | "platform_credit"
 
-/** Micro units (a millionth of the currency) per million tokens; an estimate, never an invoice. */
-export interface AiUnitPrice {
-  currency: "USD"
-  inputPerMillionTokens: number
-  outputPerMillionTokens: number
-}
+/**
+ * Micro units (a millionth of the currency) per million tokens, or per
+ * image a call gives back (a service priced by the image); an estimate,
+ * never an invoice.
+ */
+export type AiUnitPrice =
+  | { currency: "USD"; inputPerMillionTokens: number; outputPerMillionTokens: number }
+  | { currency: "USD"; perImage: number }
 
 export interface OpenAiCompatibleTarget {
   connector: "openai-compatible"
@@ -270,8 +272,8 @@ const PHOTOROOM: AiService = {
       backgrounds: ["transparent", "white"],
     },
   },
-  // Priced by the image, which the token table cannot hold: no estimate (ai_usage.images counts)
-  unitPrices: {},
+  // $0.02 a processed image (pricing.md above); billed per image given back
+  unitPrices: { image_edit: { currency: "USD", perImage: 20_000 } },
   dataNoteKey: "ai.data_note.photoroom",
 }
 

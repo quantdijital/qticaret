@@ -1,13 +1,8 @@
-import {
-  WorkflowResponse,
-  createWorkflow,
-  transform,
-  when,
-} from "@medusajs/framework/workflows-sdk"
+import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import type { AiFunding, ImageBackground } from "../../lib/ai/registry/services"
-import { registerMediaStep } from "../media/steps/register-media"
 import { claimQuotaStep, releaseUntakenStep } from "./steps/claim-quota"
 import { editImageStep } from "./steps/edit-image"
+import { keepEditedImageStep } from "./steps/keep-edited-image"
 import { recordUsageStep } from "./steps/record-usage"
 import { saveSuggestionStep } from "./steps/save-suggestion"
 
@@ -30,7 +25,10 @@ export interface EditImageWorkflowInput {
  * `derived_from_id`; counted in the package's storage, out of the library
  * and on no product, so the nightly sweep takes it if nobody uses it), a
  * suggestion waiting for a decision (its text is the new record's id) and
- * the attempt recorded. The original's bytes and records are not written.
+ * the attempt recorded, priced by the image where the service is. A
+ * result that cannot be kept is removed and the attempt still recorded
+ * (`keepEditedImageStep`); a later step failing removes the record and
+ * the file. The original's bytes and records are not written.
  */
 export const editImageWorkflow = createWorkflow(
   "ai-edit-image",
@@ -47,24 +45,13 @@ export const editImageWorkflow = createWorkflow(
     releaseUntakenStep(
       transform({ claimed, outcome }, ({ claimed, outcome }) => ({ claimed, outcome }))
     )
-    const assets = when(
-      "ai-edit-image-stored",
-      { outcome },
-      ({ outcome }) => !!outcome.file_id
-    ).then(() =>
-      registerMediaStep(
-        transform({ input, outcome }, ({ input, outcome }) => ({
-          file_ids: [outcome.file_id ?? ""],
-          library: false,
-          uploaded_by: input.user_id,
-          origin: { ai_source: "edited" as const, derived_from_id: input.media_id },
-        }))
-      )
+    const kept = keepEditedImageStep(
+      transform({ input, outcome }, ({ input, outcome }) => ({
+        outcome,
+        media_id: input.media_id,
+        user_id: input.user_id,
+      }))
     )
-    const kept = transform({ outcome, assets }, ({ outcome, assets }) => ({
-      ...outcome,
-      text: assets?.[0]?.id ?? null,
-    }))
     const suggestion = saveSuggestionStep(
       transform({ input, kept }, ({ input, kept }) => ({
         task: input.task,
@@ -90,6 +77,7 @@ export const editImageWorkflow = createWorkflow(
         suggestion_id: suggestion.id,
         user_id: input.user_id,
         remember: input.remember,
+        images: kept.images,
       }))
     )
     return new WorkflowResponse(

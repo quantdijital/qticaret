@@ -1,7 +1,7 @@
 import { logger } from "../../logging"
 import { SafeFetchError } from "../../security/safe-fetch"
 import type { SafeFetchOptions, SafeFetchResponse } from "../../security/safe-fetch"
-import { aiAccountChecker, checkAiAccount } from "../account-check"
+import { aiAccountChecker, checkAiAccount, replacesUnchecked } from "../account-check"
 
 // Plainly fake: nothing here has the shape of a real key
 const KEY = "test-key-not-a-real-one"
@@ -61,6 +61,43 @@ describe("AI account check (adr/0071 §3, §9)", () => {
       headers: { Authorization: `Bearer ${KEY}` },
     })
     expect(calls[0]?.options.body).toBeUndefined()
+  })
+
+  it("asks Photoroom for its account details with the key in x-api-key alone", async () => {
+    const account = { images: { available: 5, subscription: 100 }, plan: "basic" }
+    const { calls, result } = check("photoroom", answer(200, account))
+
+    expect(await result).toBe("valid")
+    expect(calls).toHaveLength(1)
+    expect(calls[0]?.url).toBe("https://image-api.photoroom.com/v2/account")
+    expect(calls[0]?.options).toMatchObject({
+      method: "GET",
+      redirect: "error",
+      headers: { "x-api-key": KEY },
+    })
+    expect(calls[0]?.options.headers).not.toHaveProperty("Authorization")
+    expect(calls[0]?.options.body).toBeUndefined()
+  })
+
+  it("lets Photoroom refuse a key only with 401 or 403; anything else is no verdict", async () => {
+    expect(await check("photoroom", answer(401, SERVICE_SAID)).result).toBe("secret_invalid")
+    expect(await check("photoroom", answer(403, SERVICE_SAID)).result).toBe("secret_invalid")
+    // Its account endpoint's header is not documented: an odd answer says nothing of the key
+    expect(await check("photoroom", answer(200, MODELS)).result).toBe("unreachable")
+    expect(await check("photoroom", answer(404, {})).result).toBe("unreachable")
+    expect(await check("photoroom", answer(503, SERVICE_SAID)).result).toBe("unreachable")
+    expect(await check("photoroom", new SafeFetchError("timeout")).result).toBe("unreachable")
+    expect(await check("photoroom", new SafeFetchError("redirect_not_allowed")).result).toBe(
+      "unreachable"
+    )
+    expect(JSON.stringify(warn.mock.calls)).not.toContain(KEY)
+  })
+
+  it("lets only Photoroom's key replace a working one unchecked", () => {
+    expect(replacesUnchecked("photoroom")).toBe(true)
+    for (const id of ["deepseek", "minimax", "gemini", "fake", "paytr"]) {
+      expect(replacesUnchecked(id)).toBe(false)
+    }
   })
 
   it("calls a refused key secret_invalid, and never logs the key or what the service said", async () => {

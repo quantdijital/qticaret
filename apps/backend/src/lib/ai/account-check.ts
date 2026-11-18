@@ -42,6 +42,12 @@ interface CheckCall {
   header: "bearer" | "x-api-key"
   /** What a documented answer looks like. */
   answer: "model_list" | "photoroom_account"
+  /**
+   * false: the check itself is not fully documented, so an answer out of the
+   * documentation says nothing about the key: only 401/403 refuse it, and
+   * anything else is no verdict (the key is saved as not checked).
+   */
+  documented?: false
 }
 
 const CHECKS: Readonly<Record<string, CheckCall>> = {
@@ -60,6 +66,7 @@ const CHECKS: Readonly<Record<string, CheckCall>> = {
     url: "https://image-api.photoroom.com/v2/account",
     header: "x-api-key",
     answer: "photoroom_account",
+    documented: false,
   },
 }
 
@@ -192,13 +199,24 @@ export async function checkAiAccount(
   } catch (error) {
     verdict = verdictOfThrown(error)
   }
-  const [outcome, code] = verdict
+  const [checked, code] = verdict
+  // Only a refused key is a verdict where the check's own answer is not documented
+  const outcome = checked === "failed" && call.documented === false ? "unreachable" : checked
   if (outcome !== "valid") {
     // The outcome and a code of ours: never the body, the headers or the address's query
     logger.warn({ event: "ai.account_check_failed", service: service.id, outcome, code })
   }
   return outcome
 }
+
+/**
+ * Whether a key for this service may replace a working one unchecked: its
+ * check is not documented enough to hold a save back (Photoroom). The key
+ * is then kept as "not checked" and the panel warns; a refused key still
+ * stops the save.
+ */
+export const replacesUnchecked = (serviceId: string): boolean =>
+  CHECKS[serviceId]?.documented === false
 
 /** The check `CHECKERS` runs for an AI service: its one secret is the key. */
 export const aiAccountChecker =

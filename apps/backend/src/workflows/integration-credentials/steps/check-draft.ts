@@ -1,4 +1,5 @@
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { replacesUnchecked } from "../../../lib/ai/account-check"
 import { ValidationError } from "../../../lib/errors"
 import { CHECK_FIELDS, checkAccount } from "../../../lib/integrations/account-check"
 import type { AccountCheck } from "../../../lib/integrations/account-check"
@@ -20,7 +21,9 @@ export interface CheckedDraft {
  * the workflow with the field to fix, and so does an answer the provider
  * gives out of its documentation. An unreachable provider lets a first
  * connection be saved as "not checked", but never replaces an account
- * that works: payments would stop on details nobody checked. The draft is
+ * that works: payments would stop on details nobody checked (except a
+ * service whose check is not documented enough, `replacesUnchecked`:
+ * there a refused key alone stops the save). The draft is
  * opened here and nowhere kept.
  */
 export const checkDraftStep = createStep(
@@ -41,7 +44,7 @@ export const checkDraftStep = createStep(
     if (check === "failed") {
       throw new ValidationError("integration_credentials.check_failed")
     }
-    if (check === "unreachable" && draft.connected) {
+    if (check === "unreachable" && draft.connected && !replacesUnchecked(draft.provider)) {
       throw new ValidationError("integration_credentials.provider_unreachable")
     }
     return new StepResponse<CheckedDraft>({

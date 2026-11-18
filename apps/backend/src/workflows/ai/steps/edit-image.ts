@@ -31,6 +31,8 @@ export interface EditImageInput {
 /** How the edit ended, and the stored result file when there is one. */
 export interface EditImageOutcome extends CallOutcome {
   file_id: string | null
+  /** Images the service gave back, kept or not (1 or null): what a per-image price counts. */
+  images: number | null
 }
 
 /** The original's stored bytes: read, never written back (adr/0071 §5). */
@@ -83,7 +85,10 @@ export async function editImage(
     error_code: null,
     retry_after_ms: null,
     file_id: null,
+    images: null,
   }
+  // Set once the service gave a result back: the call is paid for from here on
+  let returned: EditImageOutcome | null = null
   try {
     if (task?.capability !== "image_edit" || !resolved) {
       throw aiProviderError({
@@ -113,6 +118,12 @@ export async function editImage(
         background: input.background,
       })
     )
+    returned = {
+      ...base,
+      input_tokens: done.usage.inputTokens ?? null,
+      output_tokens: done.usage.outputTokens ?? null,
+      images: 1,
+    }
     await assertStorageFits(container, done.image.buffer.length)
     const file = await storePublicFile(
       container,
@@ -121,19 +132,19 @@ export async function editImage(
       done.image.buffer
     )
     const outcome: EditImageOutcome = {
-      ...base,
+      ...returned,
       status: "succeeded",
-      input_tokens: done.usage.inputTokens ?? null,
-      output_tokens: done.usage.outputTokens ?? null,
       duration_ms: Date.now() - started,
       file_id: file.id,
     }
     return outcome
   } catch (error) {
+    // A failure after the answer keeps what the service counted: the usage row prices it
+    const answered = returned ?? base
     if (isPlanLimitError(error)) {
       // The package's storage is full: no AI key says so, the job reports `plan.limit_reached`
       const full: EditImageOutcome = {
-        ...base,
+        ...answered,
         duration_ms: Date.now() - started,
         error_code: STORAGE_FULL,
       }
@@ -141,7 +152,7 @@ export async function editImage(
     }
     const failure = failureOf(error)
     const outcome: EditImageOutcome = {
-      ...base,
+      ...answered,
       status: failure.status,
       duration_ms: Date.now() - started,
       error_key: failure.key,

@@ -29,7 +29,7 @@ const files = {
   getAsBuffer: jest.fn(),
   deleteFiles: jest.fn(),
   getUploadStream: jest.fn((input: { filename: string; mimeType: string }) => {
-    let bytes = Buffer.alloc(0)
+    let bytes: Buffer = Buffer.alloc(0)
     return Promise.resolve({
       fileKey: `stored-${input.filename}`,
       url: `http://files/${input.filename}`,
@@ -116,9 +116,32 @@ describe("editing one picture's background", () => {
   it("calls nothing and keeps nothing when the storage is full", async () => {
     assertStorageFits.mockRejectedValueOnce(new PlanLimitError("storage_mb", 100, 100))
     const outcome = await editImage(container(), INPUT)
-    expect(outcome).toMatchObject({ status: "failed", error_code: STORAGE_FULL, file_id: null })
+    expect(outcome).toMatchObject({
+      status: "failed",
+      error_code: STORAGE_FULL,
+      file_id: null,
+      images: null,
+    })
     expect(credentials.read).not.toHaveBeenCalled()
     expect(uploads).toHaveLength(0)
+  })
+
+  it("counts the image the service gave back when the storage fills after the call", async () => {
+    assertStorageFits
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new PlanLimitError("storage_mb", 100, 100))
+    const outcome = await editImage(container(), INPUT)
+    expect(outcome).toMatchObject({
+      status: "failed",
+      error_code: STORAGE_FULL,
+      file_id: null,
+      images: 1,
+    })
+    expect(uploads).toHaveLength(0)
+  })
+
+  it("counts one image on a kept result", async () => {
+    expect(await editImage(container(), INPUT)).toMatchObject({ status: "succeeded", images: 1 })
   })
 
   it("sends no SVG and no picture without a master; the quota claim is given back for both", async () => {
