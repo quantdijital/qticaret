@@ -30,4 +30,37 @@ describe("Toaster", () => {
     // The text takes the free width, pushing the button to the edge
     expect(toastEl?.querySelector("[data-content]")).toHaveClass("flex-1")
   })
+
+  it.each([
+    ["success", "success"],
+    ["error", "destructive"],
+    ["warning", "warning"],
+    ["info", "info"],
+  ] as const)("paints a %s toast on its status tint", async (type, token) => {
+    render(<Toaster />)
+    act(() => {
+      toast[type]("Sonuç")
+    })
+
+    const toastEl = (await screen.findByText("Sonuç")).closest("[data-sonner-toast]")
+    expect(toastEl).toHaveAttribute("data-type", type)
+    expect(toastEl).toHaveClass(`bg-${token}-soft`, `border-${token}/45`)
+    // The neutral surface would fight the tint: Sonner does not merge classes
+    expect(toastEl).not.toHaveClass("bg-popover")
+    expect(toastEl?.className).toContain(`inset_3px_0_0_var(--${token})`)
+    // The filled icon takes the status colour; the words keep the text colours
+    expect(toastEl?.querySelector("[data-icon]")?.className).toContain(
+      `group-data-[type=${type}]:text-${token}`
+    )
+  })
+
+  it("keeps an untyped toast on the neutral surface", async () => {
+    render(<Toaster />)
+    act(() => {
+      toast("Taslak saklandı")
+    })
+
+    const toastEl = (await screen.findByText("Taslak saklandı")).closest("[data-sonner-toast]")
+    expect(toastEl).toHaveClass("bg-popover", "border-border")
+  })
 })
