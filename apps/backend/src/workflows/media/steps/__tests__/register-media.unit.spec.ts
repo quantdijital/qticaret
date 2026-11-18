@@ -83,4 +83,27 @@ describe("registering uploaded files as media assets", () => {
     expect(errors).toHaveLength(1)
     expect(media.deleteMediaAssets).toHaveBeenCalledWith(["media_a"])
   })
+
+  it("records an AI result beside its original and counts its bytes in the storage (Aşama 4)", async () => {
+    const { assertStorageWithinLimit } = jest.requireMock<{ assertStorageWithinLimit: jest.Mock }>(
+      "../../../../lib/plan-limits"
+    )
+    await workflow(container()).run({
+      input: {
+        file_ids: ["edited"],
+        origin: { ai_source: "edited", derived_from_id: "media_original" },
+      },
+    })
+    expect(media.createMediaAssets).toHaveBeenCalledWith(
+      expect.objectContaining({
+        file_id: "edited",
+        ai_source: "edited",
+        derived_from_id: "media_original",
+        in_library: false,
+      })
+    )
+    expect(assertStorageWithinLimit).toHaveBeenCalledWith(expect.anything(), 5)
+    // The original is not written
+    expect(media.updateMediaAssets).not.toHaveBeenCalled()
+  })
 })
