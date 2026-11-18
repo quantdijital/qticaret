@@ -32,6 +32,32 @@ moduleIntegrationTestRunner<MediaModuleService>({
       })
     })
 
+    it("marks an AI edited copy and finds it by its original (adr/0071 §5)", async () => {
+      const original = await service.createMediaAssets({
+        file_id: "vazo-01J.jpg",
+        url: "https://cdn.example.com/vazo-01J.jpg",
+      })
+      expect(original).toMatchObject({ ai_source: null, derived_from_id: null })
+
+      const copy = await service.createMediaAssets({
+        file_id: "vazo-ai-01J.png",
+        url: "https://cdn.example.com/vazo-ai-01J.png",
+        ai_source: "edited",
+        derived_from_id: original.id,
+      })
+      const found = await service.listMediaAssets({ derived_from_id: original.id })
+      expect(found.map((asset) => asset.id)).toEqual([copy.id])
+      expect(found[0]).toMatchObject({ ai_source: "edited" })
+
+      await expect(
+        service.createMediaAssets({
+          url: "https://cdn.example.com/vazo-x-01J.png",
+          // Not one of the two kinds: what a caller past the types could send
+          ai_source: "painted" as "edited",
+        })
+      ).rejects.toThrow()
+    })
+
     it("opens a video waiting for its job and counts every file it holds (adr/0069)", async () => {
       const before = await service.storedBytes()
       await service.createMediaAssets({
