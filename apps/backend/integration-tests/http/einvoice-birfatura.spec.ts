@@ -129,7 +129,7 @@ medusaIntegrationTestRunner({
         {},
         token
       )
-      const unknownField = await birfatura.call(
+      const extraField = await birfatura.call<{ Orders: unknown[] }>(
         "orders",
         {
           orderStatusId: 1,
@@ -170,7 +170,9 @@ medusaIntegrationTestRunner({
       expect(inQuery.status).toBe(401)
       expect(statuses.data.OrderStatus.map((status) => status.Id)).toEqual([1, 2, 3])
       expect(methods.data.PaymentMethods.map((method) => method.Id)).toEqual([1, 2, 3, 4, 5])
-      expect(unknownField.status).toBe(400)
+      // A field BirFatura adds that its document does not have is ignored, never a 400
+      expect(extraField.status).toBe(200)
+      expect(Array.isArray(extraField.data.Orders)).toBe(true)
       expect(tooWide.status).toBe(400)
       expect(JSON.stringify(view.data)).not.toContain(token)
       expect(view.data.birfatura.token).toMatchObject({ state: "connected" })

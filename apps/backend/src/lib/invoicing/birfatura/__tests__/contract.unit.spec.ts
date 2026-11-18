@@ -91,10 +91,19 @@ describe("BirFatura's documented examples (Özel Entegrasyon API)", () => {
     )
   })
 
-  it("refuses a field the document does not have", () => {
-    expect(BirfaturaOrdersBody.safeParse({ ...examples.orders.request, token: "x" }).success).toBe(
-      false
-    )
+  it("ignores a field the document does not have, and still checks the documented ones", () => {
+    const extra = BirfaturaOrdersBody.safeParse({ ...examples.orders.request, Source: "x" })
+    const link = BirfaturaInvoiceLinkBody.safeParse({
+      ...examples.invoiceLinkUpdate.request,
+      faturaEttn: "x",
+    })
+
+    expect(extra.success && extra.data).toEqual(examples.orders.request)
+    expect(link.success && Object.keys(link.data)).not.toContain("faturaEttn")
+    expect(
+      BirfaturaOrdersBody.safeParse({ ...examples.orders.request, orderStatusId: "x" }).success
+    ).toBe(false)
+    expect(BirfaturaInvoiceLinkBody.safeParse({ orderId: 1 }).success).toBe(false)
   })
 
   it("reads the documented dates and range", () => {

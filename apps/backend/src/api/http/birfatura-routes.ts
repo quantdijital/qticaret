@@ -14,7 +14,7 @@ import { rateLimit } from "./rate-limit"
  * (413 past it); the pull's budget per address and per shop comes first,
  * then the guard (404 while BirFatura is not the shop's program, 429 for
  * an address past its wrong tokens, 401 for a wrong token), then the
- * strict schema (an unknown field is a 400), never before the token.
+ * schema (documented fields checked, others dropped), never before the token.
  */
 const BODY_LIMIT = { sizeLimit: "16kb" }
 const pull = rateLimit(() => RATE_LIMIT_PROFILES.einvoice_pull, {
