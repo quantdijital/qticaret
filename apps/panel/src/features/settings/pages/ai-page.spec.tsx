@@ -10,7 +10,10 @@ import { AiPage } from "./ai-page"
 const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true }))
+vi.mock("@/features/auth/api/staff", () => ({
+  useCan: () => true,
+  useStaff: () => ({ role: "owner" }),
+}))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <a href="/">{children}</a>,
 }))

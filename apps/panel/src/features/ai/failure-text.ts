@@ -16,6 +16,9 @@ const OWN_WORDS = new Set([
   "provider_response_invalid",
   "input_unsupported",
   "daily_limit_reached",
+  // Aşama 9: reviews and questions
+  "reviews_off",
+  "not_enough_reviews",
 ])
 
 /** A service's name in the panel's words (`ai.services.<id>.name`), or its id. */

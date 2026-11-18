@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import type { ReactNode } from "react"
 import { ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
@@ -44,6 +45,7 @@ export function ReviewItem({
   onModerate,
   onOpen,
   busy,
+  aside,
 }: {
   review: ReviewRow
   selected: boolean
@@ -52,6 +54,8 @@ export function ReviewItem({
   /** Opens the review's dialog; only an approved review has one. */
   onOpen: (() => void) | null
   busy: boolean
+  /** Beside the product: its reviews summed up (Aşama 9), on the first row of each product. */
+  aside?: ReactNode
 }) {
   const { t } = useTranslation()
   const id = `review-${review.id}`
@@ -80,6 +84,7 @@ export function ReviewItem({
               {review.product.title}
             </Link>
           ) : null}
+          {aside}
         </div>
         {onOpen ? (
           <button

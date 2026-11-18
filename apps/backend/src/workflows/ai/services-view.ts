@@ -9,7 +9,7 @@ import { AI_MODULE } from "../../modules/ai"
 import type AiModuleService from "../../modules/ai/service"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
-import { aiConnectionsOf, aiFlagsOf } from "./connections"
+import { aiConnectionsOf, aiFlagsOf, taskFlagOpen } from "./connections"
 
 export interface AiServiceView {
   id: string
@@ -27,7 +27,7 @@ export interface AiTaskView {
   capability: AiCapability
   mode: "sync" | "job"
   options: readonly string[]
-  /** Whether the staff member asking may use it (the task's roles). */
+  /** Whether the staff member asking may use it (the task's roles, and its flag when it has one). */
   allowed: boolean
   /** What `usableServices` gives, registry order; the picker shows only with two or more. */
   usable: string[]
@@ -75,7 +75,8 @@ export async function aiServicesView(
       capability: task.capability,
       mode: task.mode,
       options: task.options,
-      allowed: role !== null && task.roles.includes(role),
+      // The task's own flag too (`ai.reviews`): off, the panel draws no button for it
+      allowed: role !== null && task.roles.includes(role) && (await taskFlagOpen(container, task)),
       usable: usableServices(task, connections, flags).map((service) => service.id),
       preference: await ai.preferenceOf(userId, task.id),
     }))

@@ -9,6 +9,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { REVIEW_REPLY_MAX, useReviewReply } from "@/features/reviews/api/reviews"
 import type { ReviewRow } from "@/features/reviews/api/reviews"
+import { AiButton } from "@/features/ai/components/ai-button"
 import { Stars } from "@/features/reviews/components/google-review-item"
 import { ReviewPhotos } from "@/features/reviews/components/review-photos"
 import { errorText } from "@/lib/errors"
@@ -105,14 +106,23 @@ export function ReviewDialog({ review, onClose }: { review: ReviewRow; onClose: 
               setText(event.target.value)
             }}
           />
-          <p className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
-            <span>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span className="flex flex-wrap items-center gap-2">
+              {/* A draft only fills the box (Aşama 9): "Yanıtla" still sends it, or not */}
+              <AiButton
+                task="review_reply"
+                entity={{ type: "review", id: review.id }}
+                text={t("ai.reviews.replyDraft")}
+                label={t("ai.reviews.replyDraftFor", { author: review.author_name })}
+                note={t("ai.reviews.note")}
+                onUse={setText}
+              />
               {review.replied_at ? t(`${R}.at`, { when: formatDateTime(review.replied_at) }) : ""}
             </span>
             <span className={tooLong ? "text-destructive-text" : undefined}>
               {t(`${R}.count`, { used: trimmed.length, max: REVIEW_REPLY_MAX })}
             </span>
-          </p>
+          </div>
         </Field>
       </FormDialog>
       <ConfirmDialog

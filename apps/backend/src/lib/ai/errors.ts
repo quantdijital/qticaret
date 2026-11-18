@@ -26,6 +26,9 @@ export const AI_ERROR_KEYS = [
   "ai.unknown_entity",
   "ai.unknown_task",
   "ai.suggestion_not_open",
+  // Aşama 9: reviews and questions
+  "ai.reviews_off",
+  "ai.not_enough_reviews",
 ] as const
 
 export type AiErrorKey = (typeof AI_ERROR_KEYS)[number]

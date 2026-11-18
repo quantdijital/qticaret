@@ -54,7 +54,9 @@ medusaIntegrationTestRunner({
 
       expect(await statuses(owner.headers)).toEqual([200, 201, 200, 200])
       expect(await statuses(admin.headers)).toEqual([200, 201, 200, 200])
-      expect(await statuses(operations.headers)).toEqual([200, 403, 403, 403])
+      // Aşama 9: a decision passes the route for operations (its review tasks), and the
+      // workflow finds no open suggestion of theirs here
+      expect(await statuses(operations.headers)).toEqual([200, 403, 400, 403])
       expect(await statuses(readonly.headers)).toEqual([200, 403, 403, 403])
       expect((await records().usages()).length).toBe(2)
     })

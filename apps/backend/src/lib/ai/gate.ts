@@ -30,6 +30,8 @@ const HEADING = /^#{1,6}\s+/
 // tested before the link and personal data patterns, whose cost grows with such a run
 export const MAX_UNBROKEN_RUN = 60
 const UNBROKEN = new RegExp(`\\S{${String(MAX_UNBROKEN_RUN + 1)}}`)
+// `NAME_MASK` as sent, or as a model may rewrite its ellipsis
+const MASK_LEFT = /\[\s*(?:…|\.{3})\s*\]/
 // Quotes a model wraps a whole answer in
 const QUOTES = new Set(['"', "'", "“", "”", "«", "»"])
 
@@ -89,6 +91,10 @@ export function suggestionProblems(task: AiTask, text: string): string[] {
   }
   if (task.gate === "image_alt") {
     problems.push(...altTextProblems(text))
+  }
+  // A masked name echoed back (lib/ai/mask-names.ts): a draft with a hole in it, never offered
+  if (task.gate === "plain_text" && MASK_LEFT.test(text)) {
+    problems.push("masked_name")
   }
   if (isShouting(text) || hasSymbolRun(text)) {
     problems.push("noise")

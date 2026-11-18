@@ -703,6 +703,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.unknown_entity": "Öneri istenen kayıt bulunamadı.",
   "ai.unknown_task": "Böyle bir yapay zekâ işi yok.",
   "ai.suggestion_not_open": "Bu öneri artık karar beklemiyor.",
+  // Aşama 9: reviews and questions
+  "ai.reviews_off":
+    "Yorum ve sorularda yapay zekâ kapalı. Ayarlar > Yapay zekâ sayfasından açabilirsiniz.",
+  "ai.not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı.",
   // adr/0071 §3: "Bağlantıyı dene" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",

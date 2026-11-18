@@ -92,6 +92,8 @@ describe("staff roles", () => {
     ["POST", "/admin/platform-settings/%69nvoicing"],
     ["POST", "/admin/einvoice/parasut"],
     ["DELETE", "/admin/einvoice/parasut"],
+    ["POST", "/admin/features/ai.reviews"],
+    ["POST", "/admin/features/ai%2ereviews"],
     ["POST", "/admin/google/connect"],
     ["POST", "/admin/google/reviews/connect"],
     ["DELETE", "/admin/google"],
@@ -154,8 +156,31 @@ describe("staff roles", () => {
 
     expect(table("owner")).toEqual([true, true, true, true, true, true])
     expect(table("admin")).toEqual([true, true, true, true, true, true])
-    expect(table("operations")).toEqual([true, false, false, false, false, false])
+    // Aşama 9: a decision is checked in the workflow against the suggestion's own task
+    expect(table("operations")).toEqual([true, false, true, true, false, false])
     expect(table("readonly")).toEqual([true, false, false, false, false, false])
+  })
+
+  it("opens to operations only the AI tasks on reviews and questions (Aşama 9)", () => {
+    const ask = (role: "operations" | "readonly", aiTask?: string) =>
+      allowed(role, "POST", "/admin/ai/suggestions", { aiTask })
+    for (const task of ["review_summary", "review_reply", "question_answer"]) {
+      expect(ask("operations", task)).toBe(true)
+      expect(ask("readonly", task)).toBe(false)
+    }
+    for (const task of [
+      "seo_title",
+      "seo_description",
+      "product_description",
+      "image_alt_text",
+      "image_background",
+      "test_text",
+      "no_such_task",
+      "__proto__",
+    ]) {
+      expect(ask("operations", task)).toBe(false)
+    }
+    expect(ask("operations")).toBe(false)
   })
 
   it("lets operations read and run the day, never change the shop's settings (KK1)", () => {
@@ -501,10 +526,11 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/fraud/blocks/:id": false,
   "POST /admin/chargebacks/:id": false,
   "POST /admin/chargebacks": false,
-  // adr/0071 §6: AI suggestions; operations gets only its own area's tasks (Aşama 9)
+  // adr/0071 §6: AI suggestions; operations gets only its own area's tasks (Aşama 9): an ask
+  // names its task (none named here: refused), a decision is checked against the suggestion's
   "POST /admin/ai/suggestions": false,
-  "POST /admin/ai/suggestions/:id/accept": false,
-  "POST /admin/ai/suggestions/:id/dismiss": false,
+  "POST /admin/ai/suggestions/:id/accept": true,
+  "POST /admin/ai/suggestions/:id/dismiss": true,
   "POST /admin/content/:id": false,
   "DELETE /admin/content/:id": false,
   "POST /admin/content": false,

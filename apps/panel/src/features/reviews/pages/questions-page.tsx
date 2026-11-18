@@ -18,6 +18,7 @@ import {
 } from "@/features/reviews/api/questions"
 import type { QuestionRow } from "@/features/reviews/api/questions"
 import type { ReviewStatus } from "@/features/reviews/api/reviews"
+import { AiButton } from "@/features/ai/components/ai-button"
 import { ReviewsNav } from "@/features/reviews/components/reviews-nav"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
@@ -178,7 +179,7 @@ function QuestionCard({ question }: { question: QuestionRow }) {
               setAnswer(event.target.value)
             }}
           />
-          <div>
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               type="submit"
               size="sm"
@@ -187,6 +188,15 @@ function QuestionCard({ question }: { question: QuestionRow }) {
             >
               {t(`${Q}.answer`)}
             </Button>
+            {/* A draft only fills the box (Aşama 9): "Yanıtla" still sends it, or not */}
+            <AiButton
+              task="question_answer"
+              entity={{ type: "question", id: question.id }}
+              text={t("ai.reviews.replyDraft")}
+              label={t("ai.reviews.answerDraftFor", { author: question.author_name })}
+              note={t("ai.reviews.note")}
+              onUse={setAnswer}
+            />
           </div>
         </form>
       ) : null}

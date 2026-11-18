@@ -62,6 +62,14 @@ export const PRODUCT_VIDEOS = "catalog.product_videos"
 export const AI_OWN_KEYS = "ai.own_keys"
 
 /**
+ * AI on what customers wrote: a product's reviews summed up, a reply to a
+ * review and an answer to a question drafted (adr/0071 §6, §10; Aşama 9).
+ * The shop's own consent, apart from connecting a service: off until it is
+ * turned on.
+ */
+export const AI_REVIEWS = "ai.reviews"
+
+/**
  * Flags taken out of the registry. A shop may still hold a stored value for
  * one (an override row, a plan document's key); reads skip it as an unknown
  * key and nothing writes it again. `content.ai_drafts`: the drafts of
@@ -170,6 +178,14 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "platform",
     labelKey: "qticaret.features.ai_own_keys.label",
     descriptionKey: "qticaret.features.ai_own_keys.description",
+  },
+  // adr/0071 §6, §10: customers' words go to the service, so the shop turns it on itself;
+  // off, the review and question tasks are refused and their buttons are not drawn
+  [AI_REVIEWS]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.ai_reviews.label",
+    descriptionKey: "qticaret.features.ai_reviews.description",
   },
 })
 

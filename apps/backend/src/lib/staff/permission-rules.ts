@@ -4,6 +4,8 @@
  * writes `operations` and `readonly` are allowed.
  */
 
+import { findAiTask } from "../ai/registry/tasks"
+
 export type Method = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "DELETE"
 
 export interface Rule {
@@ -19,6 +21,8 @@ export interface RequestFacts {
   jobType?: string | undefined
   /** The type of the API key a `DELETE /admin/api-keys/:id` names, when it is one we have. */
   apiKeyType?: string | undefined
+  /** `task` of an AI suggestion's body (`POST /admin/ai/suggestions`), when there is one. */
+  aiTask?: string | undefined
 }
 
 const WRITES: readonly Method[] = ["POST", "PUT", "PATCH", "DELETE"]
@@ -95,6 +99,8 @@ export const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/platform-settings/invoicing" },
   // Connecting the company; checking it stays the admin's, as with provider accounts
   { methods: WRITES, path: "/admin/einvoice/parasut" },
+  // Customers' reviews and questions sent to the AI service (adr/0071 Aşama 9)
+  { methods: WRITES, path: "/admin/features/ai.reviews" },
   { methods: ["POST"], path: "/admin/google/connect" },
   { methods: ["POST"], path: "/admin/google/reviews/connect" },
   { methods: ["DELETE"], path: "/admin/google" },
@@ -172,6 +178,21 @@ const readJob: Rule = {
 // One's own export stopped: the route lets its asker (or the owner) only
 const cancelJob: Rule = { methods: ["POST"], path: "/admin/async-jobs/:id/cancel" }
 
+/**
+ * An AI suggestion of a task whose roles name `operations` (adr/0071 §6;
+ * Aşama 9: a review's summary, a reply and an answer drafted). The route is
+ * shared by every task, so the workflow checks the task's roles again; a
+ * decision on one is checked there against the suggestion's own task.
+ */
+const operationsAiTask = (facts: RequestFacts): boolean =>
+  facts.aiTask !== undefined && (findAiTask(facts.aiTask)?.roles.includes("operations") ?? false)
+
+const aiSuggestion: Rule = {
+  methods: ["POST"],
+  path: "/admin/ai/suggestions",
+  when: operationsAiTask,
+}
+
 /** What `operations` writes: the day's orders, parcels, returns, stock and moderation. */
 export const OPERATIONS_WRITES: readonly Rule[] = [
   // An order's email and addresses (Medusa's update), and shipping it
@@ -224,6 +245,10 @@ export const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/orders/:id/messages/:message_id/resend" },
   // A cart left behind, reminded by e-mail where its shopper consented (2026-11-06)
   { methods: ["POST"], path: "/admin/abandoned-carts/:id/remind" },
+  // AI on reviews and questions only (adr/0071 §6, Aşama 9); the workflow checks the task again
+  aiSuggestion,
+  { methods: ["POST"], path: "/admin/ai/suggestions/:id/accept" },
+  { methods: ["POST"], path: "/admin/ai/suggestions/:id/dismiss" },
   readJob,
   cancelJob,
 ]
