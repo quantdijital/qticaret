@@ -4,10 +4,12 @@ import { Modules, createMedusaContainer } from "@medusajs/framework/utils"
 import sharp from "sharp"
 import { resetAiBreakers } from "../../../../lib/ai/breaker"
 import { VISION_SOURCE_MAX_BYTES } from "../../../../lib/ai/image-input"
-import { PlanLimitError } from "../../../../lib/errors"
+import { PlanLimitError, ValidationError } from "../../../../lib/errors"
+import * as mediaLib from "../../../../lib/media"
 import { DIGITAL_SOURCE_TYPES, digitalSourceTypeOf } from "../../../../lib/media"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../../modules/integration-credentials"
 import { MEDIA_MODULE } from "../../../../modules/media"
+import { SECTOR_PACKS_MODULE } from "../../../../modules/sector-packs"
 import { STORAGE_FULL, editImage } from "../edit-image"
 
 /**
@@ -18,6 +20,11 @@ import { STORAGE_FULL, editImage } from "../edit-image"
  */
 
 jest.mock("../../../../lib/plan-limits", () => ({ assertStorageFits: jest.fn() }))
+// The real upload check, which one test makes refuse the service's result
+jest.mock("../../../../lib/media", () => {
+  const actual = jest.requireActual<typeof mediaLib>("../../../../lib/media")
+  return { ...actual, prepareImage: jest.fn(actual.prepareImage) }
+})
 const { assertStorageFits } = jest.requireMock<{ assertStorageFits: jest.Mock }>(
   "../../../../lib/plan-limits"
 )
@@ -52,6 +59,8 @@ function container() {
     [MEDIA_MODULE]: asValue(media),
     [Modules.FILE]: asValue(files),
     [INTEGRATION_CREDENTIALS_MODULE]: asValue(credentials),
+    // No pack applied: the general pack's scenes are the shop's
+    [SECTOR_PACKS_MODULE]: asValue({ listSectorPackApplications: () => Promise.resolve([]) }),
   })
   return made
 }
@@ -189,5 +198,62 @@ describe("editing one picture's background", () => {
       error_key: "ai.service_unavailable",
     })
     expect(uploads).toHaveLength(0)
+  })
+})
+
+describe("setting one picture in a scene (Aşama 7)", () => {
+  const SCENE = {
+    task: "image_scene",
+    service: "fake",
+    scene: "studio_table",
+    media_id: "media_original",
+  }
+
+  it("reads the scene from the packs, marks the result as the endpoint is recorded", async () => {
+    const outcome = await editImage(container(), SCENE)
+    expect(outcome).toMatchObject({
+      status: "succeeded",
+      model: "fake-scene",
+      ai_source: "generated",
+    })
+    expect(uploads).toHaveLength(1)
+    const meta = await sharp(uploads[0]?.bytes).metadata()
+    expect(digitalSourceTypeOf(meta.xmp)).toBe(DIGITAL_SOURCE_TYPES.generated)
+    // A new picture: the fake scene doubles the canvas; the original is only read
+    expect([meta.width, meta.height]).toEqual([160, 120])
+    expect(files.getDownloadStream).toHaveBeenCalledWith("original-key")
+  })
+
+  it("refuses a scene off the shop's list, and a scene task with none, keeping nothing", async () => {
+    expect(await editImage(container(), { ...SCENE, scene: "made_up" })).toMatchObject({
+      status: "failed",
+      error_key: "ai.unknown_task",
+      error_code: "scene_unknown",
+      images: null,
+    })
+    expect(await editImage(container(), { ...SCENE, scene: null })).toMatchObject({
+      error_code: "scene_unknown",
+    })
+    expect(uploads).toHaveLength(0)
+  })
+
+  it("counts the image when the result's check refuses what the service gave back", async () => {
+    // The service answered (and charged); the upload check said no
+    const check = jest.mocked(mediaLib.prepareImage)
+    for (const input of [SCENE, INPUT]) {
+      check.mockRejectedValueOnce(new ValidationError("upload.too_large"))
+      expect(await editImage(container(), input)).toMatchObject({
+        status: "failed",
+        error_key: "ai.provider_response_invalid",
+        error_code: "result_upload.too_large",
+        file_id: null,
+        images: 1,
+      })
+    }
+    expect(uploads).toHaveLength(0)
+  })
+
+  it("marks a background edit as edited, never generated", async () => {
+    expect(await editImage(container(), INPUT)).toMatchObject({ ai_source: "edited" })
   })
 })

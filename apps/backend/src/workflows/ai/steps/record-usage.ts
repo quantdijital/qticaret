@@ -3,7 +3,7 @@ import { estimateCost } from "../../../lib/ai/cost"
 import { aiProviderError } from "../../../lib/ai/errors"
 import type { AiCapability } from "../../../lib/ai/registry/capabilities"
 import { findAiService } from "../../../lib/ai/registry/services"
-import type { AiFunding } from "../../../lib/ai/registry/services"
+import type { AiFunding, AiUnitPrice } from "../../../lib/ai/registry/services"
 import { logger } from "../../../lib/logging"
 import { AI_MODULE } from "../../../modules/ai"
 import type AiModuleService from "../../../modules/ai/service"
@@ -21,6 +21,8 @@ export interface RecordUsageInput {
   user_id: string
   /** The staff member picked the service among several: remember it (adr/0071 §4). */
   remember: boolean
+  /** The registry's own price for this call where it is not the capability's (a scene). */
+  unit_price?: AiUnitPrice | null | undefined
 }
 
 /**
@@ -36,12 +38,17 @@ export const recordUsageStep = createStep(
     const { outcome } = input
     const service = findAiService(input.service)
     const cost = service
-      ? estimateCost(service, input.capability, {
-          ...(outcome.input_tokens === null ? {} : { inputTokens: outcome.input_tokens }),
-          ...(outcome.output_tokens === null ? {} : { outputTokens: outcome.output_tokens }),
-          // Pictures sent (vision, token priced) or given back (an image edit, priced by the image)
-          ...(outcome.images === null ? {} : { images: outcome.images }),
-        })
+      ? estimateCost(
+          service,
+          input.capability,
+          {
+            ...(outcome.input_tokens === null ? {} : { inputTokens: outcome.input_tokens }),
+            ...(outcome.output_tokens === null ? {} : { outputTokens: outcome.output_tokens }),
+            // Pictures sent (vision, token priced) or given back (an image edit, priced by the image)
+            ...(outcome.images === null ? {} : { images: outcome.images }),
+          },
+          input.unit_price ?? undefined
+        )
       : null
     const ai = container.resolve<AiModuleService>(AI_MODULE)
     const id = await ai.recordUsage({

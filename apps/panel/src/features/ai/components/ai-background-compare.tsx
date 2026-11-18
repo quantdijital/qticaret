@@ -42,6 +42,8 @@ export interface AiBackgroundCompareProps {
   state: AiBackgroundState
   /** The background the result was asked with: a transparent one sits on the checkerboard. */
   transparent: boolean
+  /** The result's alt text; the background's when left out (a scene has its own). */
+  afterAlt?: string
 }
 
 /**
@@ -49,7 +51,12 @@ export interface AiBackgroundCompareProps {
  * shop's picture, "Sonra" the job's progress, then the new picture, on a
  * checkerboard when its background is transparent.
  */
-export function AiBackgroundCompare({ before, state, transparent }: AiBackgroundCompareProps) {
+export function AiBackgroundCompare({
+  before,
+  state,
+  transparent,
+  afterAlt,
+}: AiBackgroundCompareProps) {
   const { t } = useTranslation()
   let after: ReactNode
   if (state.status === "running") {
@@ -64,7 +71,7 @@ export function AiBackgroundCompare({ before, state, transparent }: AiBackground
     after = (
       <img
         src={state.result.url}
-        alt={t(`${B}.afterAlt`)}
+        alt={afterAlt ?? t(`${B}.afterAlt`)}
         className="max-h-full max-w-full object-contain"
       />
     )

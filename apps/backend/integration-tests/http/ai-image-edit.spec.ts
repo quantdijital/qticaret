@@ -245,5 +245,62 @@ medusaIntegrationTestRunner({
         derived_from: null,
       })
     })
+
+    // Aşama 7: a scene of the shop's packs, by its code; a code off the list queues nothing
+    it("sets a picture in one of the shop's scenes and refuses a scene off its list", async () => {
+      const { data: view } = await http.get<{
+        services: { id: string; scene: boolean }[]
+        tasks: { id: string; options: string[]; scenes?: { code: string; name: unknown }[] }[]
+      }>("/admin/ai/services", { headers: owner.headers })
+      const task = view.tasks.find((each) => each.id === "image_scene")
+      // No pack applied: the general pack's two neutral scenes, never a prompt
+      expect(task?.options).toEqual(["studio_table", "daylight_surface"])
+      expect(task?.scenes?.[0]).toEqual({
+        code: "studio_table",
+        name: { tr: "Açık stüdyo masası", en: "Bright studio table" },
+      })
+      expect(JSON.stringify(view)).not.toContain("studio tabletop")
+      expect(view.services.find((each) => each.id === "fake")?.scene).toBe(true)
+      expect(view.services.find((each) => each.id === "deepseek")?.scene).toBe(false)
+
+      const originalId = await upload()
+      const [before] = await media().listMediaAssets({ id: originalId })
+      const body = (option: string) => ({
+        task: "image_scene",
+        entity_type: "media",
+        entity_ids: [originalId],
+        option,
+        service: "fake",
+      })
+
+      const refused = await ask(owner.headers, body("made_up_scene"))
+      expect([refused.status, refused.data.message]).toEqual([400, "ai.unknown_task"])
+      expect(await usages()).toEqual([])
+
+      const asked = await settle(
+        http.post<{ job_id: string }>("/admin/ai/suggestions", body("studio_table"), {
+          headers: owner.headers,
+        })
+      )
+      expect(asked.status).toBe(202)
+      const job = await settled(asked.data.job_id)
+      expect(job.status).toBe("succeeded")
+      const resultId = job.result_summary?.done[0]?.result_id ?? "none"
+      const [copy] = await media().listMediaAssets({ derived_from_id: originalId })
+      // The fake scene endpoint is recorded as drawing the whole picture
+      expect(copy).toMatchObject({ id: resultId, ai_source: "generated", in_library: false })
+      const [after] = await media().listMediaAssets({ id: originalId })
+      expect(after).toMatchObject({ url: before?.url, size: before?.size, ai_source: null })
+      const rows = await usages()
+      expect(rows).toHaveLength(1)
+      expect(rows[0]).toMatchObject({
+        task: "image_scene",
+        capability: "image_edit",
+        service: "fake",
+        status: "succeeded",
+        model: "fake-scene",
+        images: 1,
+      })
+    })
   },
 })

@@ -4,7 +4,8 @@ import { prepareImage } from "../media"
 import type { PreparedImage } from "../media"
 import { MAX_INPUT_PIXELS } from "../media/sanitize"
 import { UPLOAD_MEDIA_TYPES, readImageInfo } from "../security/upload"
-import type { ImageEditConnector } from "./connectors/image-types"
+import type { AiSource } from "../media/ai-source"
+import type { ImageEditConnector, ImageEditResult } from "./connectors/image-types"
 import type { AiImageInput, AiUsage } from "./connectors/types"
 import { MAX_RESULT_BYTES, downloadResult } from "./download"
 import { VISION_ENCODE_TIMEOUT_SECONDS } from "./image-input"
@@ -61,16 +62,42 @@ export async function imageInputOf(service: AiService, original: Buffer): Promis
   return { mimeType: UPLOAD_MEDIA_TYPES[type].mime, bytes: original }
 }
 
-export async function runImageEdit(run: RunImageEdit): Promise<ImageEditDone> {
+/** Failures raised after the service answered, with what it counted: the call is paid for. */
+const answeredCalls = new WeakMap<object, AiUsage>()
+
+/**
+ * The usage of a call the service answered before the failure (the
+ * result's download or check refused it); null: it never answered. The
+ * usage row still counts the image so the cost is recorded.
+ */
+export function answeredUsageOf(error: unknown): AiUsage | null {
+  return typeof error === "object" && error !== null ? (answeredCalls.get(error) ?? null) : null
+}
+
+/** A service's result fetched where it is an address, checked as an upload, marked `source`. */
+async function keptResult(
+  run: Pick<RunImageEdit, "service" | "name" | "signal" | "download">,
+  result: ImageEditResult,
+  source: AiSource
+): Promise<ImageEditDone> {
+  try {
+    return await checkedResult(run, result, source)
+  } catch (error) {
+    if (typeof error === "object" && error !== null) {
+      answeredCalls.set(error, result.usage)
+    }
+    throw error
+  }
+}
+
+async function checkedResult(
+  run: Pick<RunImageEdit, "service" | "name" | "signal" | "download">,
+  result: ImageEditResult,
+  source: AiSource
+): Promise<ImageEditDone> {
   const { service } = run
   const invalid = (code: string) =>
     aiProviderError({ service: service.id, key: "ai.provider_response_invalid", code })
-  const image = await imageInputOf(service, run.original)
-  const result = await run.connector.edit({
-    image,
-    background: run.background,
-    ...(run.signal ? { signal: run.signal } : {}),
-  })
   const bytes =
     result.kind === "url"
       ? await downloadResult(service, result.url, { signal: run.signal, fetch: run.download })
@@ -79,7 +106,7 @@ export async function runImageEdit(run: RunImageEdit): Promise<ImageEditDone> {
     throw invalid("result_size")
   }
   try {
-    const prepared = await prepareImage(bytes, `${run.name}.png`, "image", { aiSource: "edited" })
+    const prepared = await prepareImage(bytes, `${run.name}.png`, "image", { aiSource: source })
     return { image: prepared, usage: result.usage }
   } catch (error) {
     if (isValidationError(error)) {
@@ -88,4 +115,45 @@ export async function runImageEdit(run: RunImageEdit): Promise<ImageEditDone> {
     }
     throw error
   }
+}
+
+export async function runImageEdit(run: RunImageEdit): Promise<ImageEditDone> {
+  const image = await imageInputOf(run.service, run.original)
+  const result = await run.connector.edit({
+    image,
+    background: run.background,
+    ...(run.signal ? { signal: run.signal } : {}),
+  })
+  return keptResult(run, result, "edited")
+}
+
+export interface RunImageScene extends Omit<RunImageEdit, "background"> {
+  /** The scene's description, from the shop's sector pack (lib/ai/scenes.ts). */
+  setting: string
+  /** What the service's scene endpoint is recorded to make (`ImageSceneTarget.source`). */
+  source: AiSource
+}
+
+/**
+ * One scene (Aşama 7): as `runImageEdit`, the original sent as a copy and
+ * the result checked and cleaned as an upload, then marked as the
+ * service's scene endpoint is recorded: `compositeWithTrainedAlgorithmicMedia`
+ * (`edited`) or `trainedAlgorithmicMedia` (`generated`).
+ */
+export async function runImageScene(run: RunImageScene): Promise<ImageEditDone> {
+  const scene = run.connector.scene
+  if (!scene) {
+    throw aiProviderError({
+      service: run.service.id,
+      key: "ai.service_unavailable",
+      code: "scene_unsupported",
+    })
+  }
+  const image = await imageInputOf(run.service, run.original)
+  const result = await scene({
+    image,
+    setting: run.setting,
+    ...(run.signal ? { signal: run.signal } : {}),
+  })
+  return keptResult(run, result, run.source)
 }

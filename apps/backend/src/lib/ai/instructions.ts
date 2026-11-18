@@ -115,6 +115,13 @@ export function instructionOf(
   return [subject, instruction.base, extra].filter((part) => !!part).join(" ")
 }
 
-/** Whether an option is one the task offers (none asked always is). */
+/**
+ * Whether an option is one the task offers (none asked always is). A
+ * scene's option is the shop's to hold: checked against its sector packs
+ * where they are read (`lib/ai/scenes.ts`, the request's image check).
+ */
 export const isTaskOption = (task: AiTask, option: string | null | undefined): boolean =>
-  option === undefined || option === null || task.options.includes(option)
+  option === undefined ||
+  option === null ||
+  task.optionSource === "scenes" ||
+  task.options.includes(option)

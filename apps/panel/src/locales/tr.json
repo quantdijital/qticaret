@@ -11441,7 +11441,8 @@
       "not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı."
     },
     "background": {
-      "button": "Arka planı temizle",
+      "button": "Görseli düzenle",
+      "dialog": "Görseli düzenle",
       "title": "Arka planı temizle",
       "description": "Arka plan şeffaf ya da beyaz yapılır. Asıl görsel değişmez; sonuç yeni bir görsel olarak gelir.",
       "option": "Zemin",
@@ -11468,6 +11469,20 @@
       "hint": {
         "text": "Yapay zekâ servisi bağlarsanız arka planı tek tıkla temizleyebilirsiniz.",
         "ownerOnly": "Yapay zekâ servisi bağlanırsa arka plan tek tıkla temizlenebilir; mağaza sahibi bağlayabilir."
+      }
+    },
+    "scene": {
+      "mode": "Görselle ne yapılsın",
+      "title": "Sahneye yerleştir",
+      "description": "Ürün hazır bir sahneye yerleştirilir. Asıl görsel değişmez; sonuç yeni bir görsel olarak gelir.",
+      "option": "Sahne",
+      "onlyOption": "Sahne: {{option}}.",
+      "start": "Sahneye yerleştir",
+      "afterAlt": "Sahneye yerleştirilmiş ürün",
+      "note": "Görsel, sahne için {{name}} servisine gönderilir. Ürünün şekli, rengi ve yazısının değişmemesi istenir; kullanmadan önce sonuca bakın.",
+      "hint": {
+        "text": "Sahne yapan bir yapay zekâ servisi (Gemini ya da Photoroom) bağlarsanız ürünü tek tıkla sahneye yerleştirebilirsiniz.",
+        "ownerOnly": "Sahne yapan bir yapay zekâ servisi bağlanırsa ürün tek tıkla sahneye yerleştirilebilir; mağaza sahibi bağlayabilir."
       }
     },
     "altReview": {

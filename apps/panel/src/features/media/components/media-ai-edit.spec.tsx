@@ -128,8 +128,8 @@ describe("a library picture's background", () => {
       </QueryClientProvider>
     )
     const user = userEvent.setup()
-    await user.click(await screen.findByRole("button", { name: "Arka planı temizle" }))
-    const dialog = await screen.findByRole("dialog", { name: "Arka planı temizle" })
+    await user.click(await screen.findByRole("button", { name: "Görseli düzenle" }))
+    const dialog = await screen.findByRole("dialog", { name: "Görseli düzenle" })
     await user.click(within(dialog).getByRole("button", { name: "Arka planı temizle" }))
     const use = await within(dialog).findByRole("button", { name: "Kullan" })
     expect(within(dialog).getByText(/yeni görseli kütüphanede tutar/)).toBeInTheDocument()
@@ -159,7 +159,7 @@ describe("a library picture's background", () => {
         <MediaBackgroundAction media={{ ...ORIGINAL, file_id: null }} />
       </QueryClientProvider>
     )
-    expect(screen.queryByRole("button", { name: "Arka planı temizle" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Görseli düzenle" })).not.toBeInTheDocument()
   })
 })
 

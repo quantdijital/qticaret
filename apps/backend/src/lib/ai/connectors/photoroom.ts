@@ -5,7 +5,12 @@ import { aiProviderError } from "../errors"
 import type { AiService, ImageEditTarget } from "../registry/services"
 import { postImageCall } from "./image-call"
 import { IMAGE_TIMEOUT_MS } from "./image-types"
-import type { ImageEditConnector, ImageEditRequest, ImageEditResult } from "./image-types"
+import type {
+  ImageEditConnector,
+  ImageEditRequest,
+  ImageEditResult,
+  ImageSceneRequest,
+} from "./image-types"
 
 /**
  * Photoroom's Remove Background API (Aşama 4; the record and its pages:
@@ -91,9 +96,56 @@ function readAnswer(service: AiService, response: SafeFetchResponse): Buffer {
   throw invalid("not_an_image")
 }
 
+/**
+ * A scene (Aşama 7): AI Backgrounds of the Image Editing API (`/v2/edit`;
+ * the record: `lib/ai/registry/services.ts`). The subject is cut out and
+ * kept as it is; only the setting is made from `background.prompt`, the
+ * sector pack's description. `referenceBox=originalImage`: the product
+ * stays where and as large as it was in the photo.
+ */
+function photoroomScene(options: PhotoroomOptions, url: string) {
+  const { service, apiKey } = options
+  return async (request: ImageSceneRequest): Promise<ImageEditResult> => {
+    const extension = EXTENSIONS[request.image.mimeType]
+    if (extension === undefined) {
+      throw aiProviderError({
+        service: service.id,
+        key: "ai.input_unsupported",
+        code: "image_type_unsupported",
+      })
+    }
+    const { body, contentType } = multipartBody(
+      { "background.prompt": request.setting, referenceBox: "originalImage" },
+      {
+        field: "imageFile",
+        filename: `image.${extension}`,
+        mimeType: request.image.mimeType,
+        bytes: request.image.bytes,
+      }
+    )
+    const response = await postImageCall({
+      service,
+      url,
+      headers: {
+        "x-api-key": apiKey,
+        "Content-Type": contentType,
+        Accept: "image/png, image/jpeg, application/json",
+      },
+      body,
+      timeoutMs: options.timeoutMs ?? IMAGE_TIMEOUT_MS,
+      maxResponseBytes: MAX_RESPONSE_BYTES,
+      signal: request.signal,
+      fetch: options.fetch,
+      wait: options.wait,
+    })
+    return { kind: "bytes", bytes: readAnswer(service, response), usage: {} }
+  }
+}
+
 export function photoroomImageEdit(options: PhotoroomOptions): ImageEditConnector {
   const { service, target, apiKey } = options
   return {
+    ...(target.scene ? { scene: photoroomScene(options, target.scene.url) } : {}),
     async edit(request: ImageEditRequest): Promise<ImageEditResult> {
       if (!target.backgrounds.includes(request.background)) {
         throw aiProviderError({

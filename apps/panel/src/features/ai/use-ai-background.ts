@@ -70,13 +70,14 @@ export type AiBackgroundState =
 const keyed = (key: string | null): Partial<AiFailure> => ({ code: key })
 
 /**
- * One picture's background job (adr/0071 §8, docs/22 Aşama 4): asked for
+ * One picture's background or scene job (adr/0071 §8, docs/22 Aşama 4, 7;
+ * `task`: `image_background` or `image_scene`): asked for
  * (202), followed until it ends, then its result read as a new picture.
  * Nothing is written: `accept()` records the decision and hands the new
  * picture back, the caller adds it where it belongs; `dismiss()` turns
  * the suggestion down, the unused picture goes with the nightly sweep.
  */
-export function useAiBackground(mediaId: string) {
+export function useAiBackground(mediaId: string, task: string = BACKGROUND_TASK) {
   const queryClient = useQueryClient()
   const [ask, setAsk] = useState<
     | { status: "idle" }
@@ -96,12 +97,7 @@ export function useAiBackground(mediaId: string) {
       const mine = ++turn.current
       setAsk({ status: "asking", service: service ?? null })
       try {
-        const queued = await requestImageJob({
-          task: BACKGROUND_TASK,
-          mediaIds: [mediaId],
-          option,
-          service,
-        })
+        const queued = await requestImageJob({ task, mediaIds: [mediaId], option, service })
         if (mine === turn.current) {
           setAsk({ status: "job", jobId: queued.job_id, service: queued.service || null })
         }
@@ -116,7 +112,7 @@ export function useAiBackground(mediaId: string) {
         setAsk({ status: "error", failure, service: service ?? null })
       }
     },
-    [mediaId, queryClient]
+    [mediaId, task, queryClient]
   )
 
   const reset = useCallback(() => {

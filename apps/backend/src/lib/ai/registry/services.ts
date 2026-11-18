@@ -1,3 +1,4 @@
+import type { AiSource } from "../../media/ai-source"
 import type { AiErrorKey } from "../errors"
 import type { AiCapability } from "./capabilities"
 
@@ -50,6 +51,22 @@ export interface FakeTarget {
 export const IMAGE_BACKGROUNDS = ["transparent", "white"] as const
 export type ImageBackground = (typeof IMAGE_BACKGROUNDS)[number]
 
+/**
+ * A scene endpoint (Aşama 7, `image_scene`): the product photo set in one
+ * of the shop's ready-made scenes. `source` is what the result is marked
+ * as (IPTC, lib/media/ai-source.ts): `edited` where the product's own
+ * pixels are kept and only the setting is made (a composite), `generated`
+ * where the service draws the whole picture anew from the photo.
+ */
+export interface ImageSceneTarget {
+  model: string
+  /** `https`, on one of the service's `hosts`; no query. */
+  url: string
+  source: AiSource
+  /** A scene's own price where it differs from the service's `image_edit` one. */
+  unitPrice?: AiUnitPrice
+}
+
 /** An image editing endpoint (Aşama 4): its full address, fixed here. */
 export interface ImageEditTarget {
   connector: "photoroom" | "gemini-image"
@@ -58,15 +75,32 @@ export interface ImageEditTarget {
   url: string
   /** The backgrounds this endpoint is documented to make. */
   backgrounds: readonly ImageBackground[]
+  /** Left out: the service is not documented to set a product in a scene. */
+  scene?: ImageSceneTarget
 }
 
 export interface FakeImageTarget {
   connector: "fake-image"
   model: string
   backgrounds: readonly ImageBackground[]
+  scene?: { model: string; source: AiSource }
 }
 
 export type AiTarget = OpenAiCompatibleTarget | FakeTarget | ImageEditTarget | FakeImageTarget
+
+/** An image target's scene endpoint, or null where it has none (Aşama 7). */
+export function sceneTargetOf(
+  target: AiTarget | undefined
+): ImageSceneTarget | NonNullable<FakeImageTarget["scene"]> | null {
+  if (
+    target?.connector === "photoroom" ||
+    target?.connector === "gemini-image" ||
+    target?.connector === "fake-image"
+  ) {
+    return target.scene ?? null
+  }
+  return null
+}
 
 export interface AiService {
   id: string
@@ -283,6 +317,22 @@ const GEMINI: AiService = {
       model: "gemini-nano-banana-2.1",
       url: "https://generativelanguage.googleapis.com/v1/models/gemini-nano-banana-2.1:generateContent",
       backgrounds: ["white"],
+      /*
+       * A scene (Aşama 7). Verified 2026-11-18 against:
+       *   https://aistudio.google.com/docs/image-generation?generate-content=true ("Image
+       *     editing (text-and-image-to-image)": the same generateContent call, a text part
+       *     and an `inline_data` part; product shots for e-commerce with lighting and
+       *     surface described; critical details kept by describing them with the edit;
+       *     the output matches the input's size unless `image_config` says otherwise;
+       *     "All generated images include a SynthID watermark")
+       * The model draws the whole picture, the product included: marked `generated`. The
+       * Interactions endpoint the page also shows is not used (one endpoint, as Aşama 4).
+       */
+      scene: {
+        model: "gemini-nano-banana-2.1",
+        url: "https://generativelanguage.googleapis.com/v1/models/gemini-nano-banana-2.1:generateContent",
+        source: "generated",
+      },
     },
   },
   unitPrices: {
@@ -316,7 +366,7 @@ const GEMINI: AiService = {
  *   https://docs.photoroom.com/remove-background-api-basic-plan/pricing.md ($0.02 an image)
  *   https://www.photoroom.com/platform/security (servers in the US; an image of a
  *     synchronous call is dropped after the answer)
- * The Image Editing API (/v2/edit: shadows, margins) is a dearer plan and not used.
+ * The Image Editing API (/v2/edit) is a dearer plan, used only for a scene (below).
  * Not verified: which header picks JSON over the bytes (both are read); what 403 means
  * (read as a refused key); whether self-serve images train models (the pages disagree:
  * the note says so). No result address is ever returned: no download host.
@@ -333,6 +383,26 @@ const PHOTOROOM: AiService = {
       model: "segment-v1",
       url: "https://sdk.photoroom.com/v1/segment",
       backgrounds: ["transparent", "white"],
+      /*
+       * A scene (Aşama 7): AI Backgrounds of the Image Editing API. Verified 2026-11-18:
+       *   https://docs.photoroom.com/image-editing-api-plus-plan/ai-backgrounds.md (POST
+       *     https://image-api.photoroom.com/v2/edit, `x-api-key`, multipart `imageFile`,
+       *     `background.prompt`, `referenceBox=originalImage`)
+       *   https://docs.photoroom.com/getting-started/api-reference-openapi.md (multipart
+       *     only; `imageFile` up to 30 MB; 200 is the PNG itself, errors JSON; 400, 402)
+       *   https://docs.photoroom.com/image-editing-api-plus-plan/pricing.md ($0.10 a call,
+       *     every edit option included; sandbox mode)
+       *   https://www.photoroom.com/api/pricing (a Basic key calling the Image Editing API
+       *     is charged the Plus price; AI Backgrounds is a Plus feature)
+       * The subject is cut out and kept; only the setting is made: marked `edited`.
+       * Not verified: a prompt length limit (none documented; ours are at most 400).
+       */
+      scene: {
+        model: "edit-v2-ai-background",
+        url: "https://image-api.photoroom.com/v2/edit",
+        source: "edited",
+        unitPrice: { currency: "USD", perImage: 100_000 },
+      },
     },
   },
   // $0.02 a processed image (pricing.md above); billed per image given back
@@ -360,6 +430,7 @@ export const FAKE_SERVICE: AiService = {
       connector: "fake-image",
       model: "fake-image",
       backgrounds: ["transparent", "white"],
+      scene: { model: "fake-scene", source: "generated" },
     },
   },
   unitPrices: {},

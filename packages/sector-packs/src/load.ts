@@ -38,7 +38,7 @@ const repeated = (values: readonly string[]): string | undefined =>
   values.find((value, index) => values.indexOf(value) !== index)
 
 /** Handles, keys and the category tree's order: what one file's schema cannot see. */
-function checkItems(pack: SectorPack): void {
+function checkItems(pack: SectorPack & Pick<LoadedSectorPack, "scenes">): void {
   const fail = (what: string) => {
     throw new SectorPackError(`${pack.code}: ${what}`)
   }
@@ -66,6 +66,10 @@ function checkItems(pack: SectorPack): void {
   const flag = repeated(pack.flags.map((preset) => preset.key))
   if (flag) {
     fail(`flag ${flag} twice`)
+  }
+  const scene = repeated(pack.scenes.map((each) => each.code))
+  if (scene) {
+    fail(`scene ${scene} twice`)
   }
 }
 
@@ -100,6 +104,7 @@ export function readPack(dir: string, code: string): LoadedSectorPack {
     flags: readFile(dir, code, "flags.json") ?? [],
     seo: readFile(dir, code, "seo.json") ?? {},
     presets: readPresets(dir, code),
+    scenes: readFile(dir, code, "scenes.json") ?? [],
   }
   checkItems(pack)
   return pack

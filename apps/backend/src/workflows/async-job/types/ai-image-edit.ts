@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { IMAGE_BACKGROUNDS } from "../../../lib/ai/registry/services"
-import { IMAGE_BACKGROUND_MAX_BATCH } from "../../../lib/ai/registry/tasks"
+import { IMAGE_BACKGROUND_MAX_BATCH, IMAGE_SCENE_MAX_BATCH } from "../../../lib/ai/registry/tasks"
+import { SCENE_CODE } from "@qticaret/sector-packs"
 import { isPlanLimitError, isValidationError } from "../../../lib/errors"
 import { assertStorageFits } from "../../../lib/plan-limits"
 import { editImageWorkflow } from "../../ai/edit-image"
@@ -15,20 +16,41 @@ export const MEDIA_ID = /^media_[A-Za-z0-9]{1,40}$/
  * background, the pictures. Identifiers only (adr/0071 §8); who asked is
  * the job's own `requested_by`, never a field of the input.
  */
-const input = z
-  .object({
-    task: z.literal("image_background"),
-    service: z.string().regex(/^[a-z][a-z0-9_]{0,39}$/),
-    funding: z.enum(["own_key", "platform_credit"]),
-    background: z.enum(IMAGE_BACKGROUNDS),
-    media_ids: z
-      .array(z.string().regex(MEDIA_ID))
-      .min(1)
-      .max(IMAGE_BACKGROUND_MAX_BATCH)
-      .refine((ids) => new Set(ids).size === ids.length),
-    remember: z.boolean(),
-  })
-  .strict()
+const mediaIds = (max: number) =>
+  z
+    .array(z.string().regex(MEDIA_ID))
+    .min(1)
+    .max(max)
+    .refine((ids) => new Set(ids).size === ids.length)
+
+const common = {
+  service: z.string().regex(/^[a-z][a-z0-9_]{0,39}$/),
+  funding: z.enum(["own_key", "platform_credit"]),
+  remember: z.boolean(),
+}
+
+/**
+ * A scene (Aşama 7) by its code only: its description is read from the
+ * shop's packs when the job runs, so a prompt never sits in a job's input.
+ */
+const input = z.discriminatedUnion("task", [
+  z
+    .object({
+      task: z.literal("image_background"),
+      background: z.enum(IMAGE_BACKGROUNDS),
+      media_ids: mediaIds(IMAGE_BACKGROUND_MAX_BATCH),
+      ...common,
+    })
+    .strict(),
+  z
+    .object({
+      task: z.literal("image_scene"),
+      scene: z.string().regex(SCENE_CODE),
+      media_ids: mediaIds(IMAGE_SCENE_MAX_BATCH),
+      ...common,
+    })
+    .strict(),
+])
 
 type Input = z.infer<typeof input>
 
@@ -72,6 +94,8 @@ export const aiImageEdit: JobType<Input> = {
     if (!userId) {
       throw new Error("ai.image_edit: queued by nobody")
     }
+    const option =
+      data.task === "image_scene" ? { scene: data.scene } : { background: data.background }
     const done: Done[] = []
     const failed: Failed[] = []
     let stoppedBy: string | null = null
@@ -84,7 +108,7 @@ export const aiImageEdit: JobType<Input> = {
             task: data.task,
             service: data.service,
             funding: data.funding,
-            background: data.background,
+            ...option,
             media_id: mediaId,
             user_id: userId,
             remember: data.remember && index === 0,
@@ -120,7 +144,7 @@ export const aiImageEdit: JobType<Input> = {
       summary: {
         task: data.task,
         service: data.service,
-        background: data.background,
+        ...option,
         done,
         failed,
         skipped: data.media_ids.length - done.length - failed.length,

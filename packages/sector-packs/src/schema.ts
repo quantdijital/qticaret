@@ -71,6 +71,30 @@ export const seoTemplateSetSchema = z.strictObject({
   description_templates: templates.optional(),
 })
 
+/** The most scenes a pack offers: the AI core's two ready-made options (adr/0071 §2). */
+export const MAX_SCENES = 2
+
+/** A scene's code: the AI core's option name (`api/admin/ai/validators.ts`). */
+export const SCENE_CODE = /^[a-z][a-z0-9_]{0,39}$/
+
+// One line of plain words: no control character, no markup, no template braces
+const PLAIN_LINE = /^[^\p{Cc}<>{}`\\]+$/u
+
+const sceneName = z.string().trim().min(1).max(60).regex(PLAIN_LINE)
+
+/**
+ * A ready-made scene a product photo can be set in (docs/22 Aşama 7). The
+ * name is what the panel's picker shows (Turkish and English); the prompt
+ * is the setting described in English, which the AI core wraps in its own
+ * fixed instruction (keep the product as it is). Only this text reaches a
+ * service: nothing typed by a shop. Read at run time, never applied.
+ */
+export const sceneSchema = z.strictObject({
+  code: z.string().regex(SCENE_CODE),
+  name: z.strictObject({ tr: sceneName, en: sceneName }),
+  prompt: z.string().trim().min(20).max(400).regex(PLAIN_LINE),
+})
+
 /**
  * The files a pack's folder may hold, and what each is; any other file is
  * refused, but for the `presets/` folder (`PRESETS_DIR`, `preset-load.ts`).
@@ -81,6 +105,7 @@ export const PACK_FILES = {
   "categories.json": z.array(categorySchema).max(200),
   "flags.json": z.array(flagPresetSchema).max(50),
   "seo.json": seoTemplateSetSchema,
+  "scenes.json": z.array(sceneSchema).max(MAX_SCENES),
 } as const
 
 export type PackManifest = z.infer<typeof manifestSchema>
@@ -88,6 +113,7 @@ export type AttributeTemplateData = z.infer<typeof attributeTemplateSchema>
 export type CategoryData = z.infer<typeof categorySchema>
 export type FlagPreset = z.infer<typeof flagPresetSchema>
 export type SeoTemplateSet = z.infer<typeof seoTemplateSetSchema>
+export type SceneData = z.infer<typeof sceneSchema>
 
 /** A pack as read: its manifest and its items (a file left out: none of that kind). */
 export interface SectorPack extends Omit<PackManifest, "format"> {
@@ -104,6 +130,8 @@ export interface SectorPack extends Omit<PackManifest, "format"> {
  */
 export interface LoadedSectorPack extends SectorPack {
   presets: readonly StorefrontPreset[]
+  /** The AI scenes it offers (`scenes.json`, at most two); read where asked, never applied. */
+  scenes: readonly SceneData[]
 }
 
 /** What the control plane's wizard shows of a pack. */

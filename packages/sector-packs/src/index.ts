@@ -1,7 +1,10 @@
 export {
+  MAX_SCENES,
   PACK_CODE,
   PACK_FORMAT,
   PACK_FILES,
+  SCENE_CODE,
+  sceneSchema,
   attributeTemplateSchema,
   categorySchema,
   flagPresetSchema,
@@ -14,6 +17,7 @@ export type {
   FlagPreset,
   LoadedSectorPack,
   PackManifest,
+  SceneData,
   SectorPack,
   SectorPackSummary,
   SeoTemplateSet,

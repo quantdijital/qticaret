@@ -27,6 +27,15 @@ const INPUT = {
   remember: true,
 }
 
+const SCENE = {
+  task: "image_scene",
+  service: "fake",
+  funding: "own_key",
+  scene: "studio_table",
+  media_ids: ["media_1"],
+  remember: true,
+}
+
 const context = (requestedBy: string | null = "user_1") =>
   ({
     container: {},
@@ -70,6 +79,27 @@ describe("the background job's input", () => {
     ]) {
       expect(aiImageEdit.input.safeParse(bad).success).toBe(false)
     }
+  })
+
+  it("takes a scene by its code, one picture, and never a prompt or a background", () => {
+    expect(aiImageEdit.input.safeParse(SCENE).success).toBe(true)
+    for (const bad of [
+      { ...SCENE, media_ids: ids(2) },
+      { ...SCENE, scene: "Studio Table" },
+      { ...SCENE, scene: undefined },
+      { ...SCENE, prompt: "a table" },
+      { ...SCENE, background: "white" },
+    ]) {
+      expect(aiImageEdit.input.safeParse(bad).success).toBe(false)
+    }
+  })
+
+  it("passes the scene on to each picture's run and says it in the summary", async () => {
+    const { summary } = await aiImageEdit.execute(context(), aiImageEdit.input.parse(SCENE))
+    const calls = run.mock.calls as [{ input: Record<string, unknown> }][]
+    expect(calls[0]?.[0].input).toMatchObject({ task: "image_scene", scene: "studio_table" })
+    expect(calls[0]?.[0].input).not.toHaveProperty("background")
+    expect(summary).toMatchObject({ task: "image_scene", scene: "studio_table" })
   })
 })
 

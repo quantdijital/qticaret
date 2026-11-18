@@ -25,7 +25,8 @@ export type KeptImage = EditImageOutcome
 
 /**
  * The stored result becomes a media record beside the original
- * (`ai_source: edited`, `derived_from_id`; out of the library, on no
+ * (`ai_source` as the outcome says, `edited` by default: a scene may be
+ * `generated`; `derived_from_id`; out of the library, on no
  * product, counted in the package's storage). Should that fail (the
  * storage filled meanwhile, the database), the stored file is removed
  * here and the attempt goes on as failed, so its usage row is still
@@ -72,7 +73,8 @@ export async function keepEditedImage(
       file_ids: [outcome.file_id],
       library: false,
       uploaded_by: input.user_id,
-      origin: { ai_source: "edited", derived_from_id: input.media_id },
+      // As the file's IPTC mark says (`runImageEdit` / `runImageScene`)
+      origin: { ai_source: outcome.ai_source ?? "edited", derived_from_id: input.media_id },
     })
     return { kept: { ...outcome, text: assets[0]?.id ?? null }, undo }
   } catch (error) {

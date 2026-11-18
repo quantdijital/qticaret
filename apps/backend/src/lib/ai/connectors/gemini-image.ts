@@ -4,7 +4,12 @@ import type { AiErrorKey } from "../errors"
 import type { AiService, ImageBackground, ImageEditTarget } from "../registry/services"
 import { postImageCall } from "./image-call"
 import { IMAGE_TIMEOUT_MS } from "./image-types"
-import type { ImageEditConnector, ImageEditRequest, ImageEditResult } from "./image-types"
+import type {
+  ImageEditConnector,
+  ImageEditRequest,
+  ImageEditResult,
+  ImageSceneRequest,
+} from "./image-types"
 
 /**
  * Gemini's image editing (Aşama 4; the record and its pages:
@@ -107,8 +112,63 @@ export function readGeminiImage(body: Buffer): Read {
   }
 }
 
+/**
+ * A scene's instruction (Aşama 7): the sector pack's setting inside fixed
+ * words that keep the product as it is (shape, colour, text) and add
+ * nothing to it. The setting is pack data (lib/ai/scenes.ts), one plain
+ * line; nothing typed by anyone.
+ */
+export function sceneInstruction(setting: string): string {
+  return (
+    `Place the product from this photo in the following scene: ${setting}. ` +
+    "Keep the product exactly as it is: the same shape, proportions, colours, materials, " +
+    "text, labels and logos. Do not add, remove or change anything on the product, and " +
+    "add no other product. Light the product to match the scene. No people, no text, " +
+    "no watermark, no frame."
+  )
+}
+
 export function geminiImageEdit(options: GeminiImageOptions): ImageEditConnector {
   const { service, target, apiKey } = options
+  const call = async (
+    url: string,
+    instruction: string,
+    image: ImageEditRequest["image"],
+    signal: AbortSignal | undefined
+  ): Promise<ImageEditResult> => {
+    const body = JSON.stringify({
+      contents: [
+        {
+          parts: [
+            { text: instruction },
+            { inline_data: { mime_type: image.mimeType, data: image.bytes.toString("base64") } },
+          ],
+        },
+      ],
+      generationConfig: { responseModalities: ["IMAGE"] },
+    })
+    const response = await postImageCall({
+      service,
+      url,
+      headers: {
+        "x-goog-api-key": apiKey,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body,
+      timeoutMs: options.timeoutMs ?? IMAGE_TIMEOUT_MS,
+      maxResponseBytes: MAX_RESPONSE_BYTES,
+      signal,
+      fetch: options.fetch,
+      wait: options.wait,
+    })
+    const read = readGeminiImage(response.body)
+    if (!read.ok) {
+      throw aiProviderError({ service: service.id, key: read.key, code: read.code })
+    }
+    return read.result
+  }
+  const sceneTarget = target.scene
   return {
     async edit(request: ImageEditRequest): Promise<ImageEditResult> {
       const instruction = INSTRUCTIONS[request.background]
@@ -119,42 +179,13 @@ export function geminiImageEdit(options: GeminiImageOptions): ImageEditConnector
           code: "background_unsupported",
         })
       }
-      const body = JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: instruction },
-              {
-                inline_data: {
-                  mime_type: request.image.mimeType,
-                  data: request.image.bytes.toString("base64"),
-                },
-              },
-            ],
-          },
-        ],
-        generationConfig: { responseModalities: ["IMAGE"] },
-      })
-      const response = await postImageCall({
-        service,
-        url: target.url,
-        headers: {
-          "x-goog-api-key": apiKey,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body,
-        timeoutMs: options.timeoutMs ?? IMAGE_TIMEOUT_MS,
-        maxResponseBytes: MAX_RESPONSE_BYTES,
-        signal: request.signal,
-        fetch: options.fetch,
-        wait: options.wait,
-      })
-      const read = readGeminiImage(response.body)
-      if (!read.ok) {
-        throw aiProviderError({ service: service.id, key: read.key, code: read.code })
-      }
-      return read.result
+      return call(target.url, instruction, request.image, request.signal)
     },
+    ...(sceneTarget
+      ? {
+          scene: (request: ImageSceneRequest): Promise<ImageEditResult> =>
+            call(sceneTarget.url, sceneInstruction(request.setting), request.image, request.signal),
+        }
+      : {}),
   }
 }

@@ -62,6 +62,12 @@ export interface AiTask {
   keepData?: boolean
   /** The answer is one JSON object: the service's JSON mode is asked for where it has one. */
   json?: boolean
+  /**
+   * `scenes`: the options are the shop's scenes, read from its sector packs
+   * (lib/ai/scenes.ts), not `options`; only a service with a scene endpoint
+   * can run it.
+   */
+  optionSource?: "scenes"
 }
 
 /** A record read another way than by its type (lib/ai/facts). */
@@ -190,6 +196,31 @@ export const IMAGE_BACKGROUND_TASK: AiTask = {
   maxBatch: IMAGE_BACKGROUND_MAX_BATCH,
 }
 
+/** The most pictures one scene request may name: a dearer call, asked for one at a time. */
+export const IMAGE_SCENE_MAX_BATCH = 1
+
+/**
+ * A product photo set in a ready-made scene (Aşama 7, docs/22): a new
+ * picture beside the original, marked as AI made (`edited` or `generated`,
+ * as the service's scene endpoint is recorded); the original's bytes are
+ * never changed. The scenes, two at most, come from the shop's sector
+ * pack as data; nothing typed by anyone reaches the service. A job
+ * (`ai.image_edit`), like the background.
+ */
+export const IMAGE_SCENE_TASK: AiTask = {
+  id: "image_scene",
+  capability: "image_edit",
+  mode: "job",
+  options: [],
+  optionSource: "scenes",
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "image",
+  maxLength: 0,
+  entities: ["media"],
+  maxBatch: IMAGE_SCENE_MAX_BATCH,
+}
+
 // --- Aşama 9: reviews and questions (docs/22) ---
 
 /** The approved reviews one summary reads at most, newest first (the data block's list limit). */
@@ -295,6 +326,7 @@ const TASKS: readonly AiTask[] = [
   REVIEW_REPLY_TASK,
   QUESTION_ANSWER_TASK,
   PRODUCT_FROM_PHOTO_TASK,
+  IMAGE_SCENE_TASK,
 ]
 
 /** The data block's field lengths for a task: the shared ones, and the task's own over them. */

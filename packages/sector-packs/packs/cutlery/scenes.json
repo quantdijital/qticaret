@@ -1,0 +1,12 @@
+[
+  {
+    "code": "workshop_wood",
+    "name": { "tr": "Atölye tezgâhı", "en": "Workshop bench" },
+    "prompt": "a dark oiled walnut workbench in a craftsman's workshop, warm directional light from one side, a softly blurred background of hand tools"
+  },
+  {
+    "code": "outdoor_stone",
+    "name": { "tr": "Doğada taş üstü", "en": "Stone outdoors" },
+    "prompt": "a flat natural slate stone outdoors, soft late afternoon light, a blurred forest background with muted green and brown tones"
+  }
+]
