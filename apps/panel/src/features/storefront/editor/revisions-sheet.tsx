@@ -14,8 +14,7 @@ import {
   SheetTitle,
 } from "@qticaret/admin-ui/ui/sheet"
 import type { LayoutRevision } from "@/features/storefront/api/layout"
-import { formatDateTime } from "@qticaret/admin-ui/lib/format"
-import { dayOf } from "@/features/storefront/gallery/design-name"
+import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { SaveDesignDialog } from "@/features/storefront/gallery/name-dialog"
 
 const V = "storefront.editor.revisions"
@@ -174,7 +173,7 @@ export function RevisionsSheet({
           keeping
             ? t(`${V}.saveAsName`, {
                 revision: keeping.revision,
-                date: dayOf(keeping.published_at),
+                date: formatDate(keeping.published_at),
               })
             : ""
         }

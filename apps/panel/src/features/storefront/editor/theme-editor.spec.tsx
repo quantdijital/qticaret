@@ -255,7 +255,7 @@ describe("ThemeEditor", () => {
     const naming = await screen.findByRole("dialog", { name: "Görünümü kaydet" })
     const field = within(naming).getByRole<HTMLInputElement>("textbox", { name: "Ad" })
     // jest-dom's toHaveValue compares with lodash and ignores asymmetric matchers
-    expect(field.value).toMatch(/^1\. yayın, \d{1,2} \S+$/)
+    expect(field.value).toMatch(/^1\. yayın, \d{1,2} \S+ \d{4}$/)
     await user.clear(field)
     await user.type(field, "Bayram vitrini")
     await user.click(within(naming).getByRole("button", { name: "Kaydet" }))

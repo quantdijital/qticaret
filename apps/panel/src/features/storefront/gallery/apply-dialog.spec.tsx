@@ -114,7 +114,7 @@ describe("ApplyDialog", () => {
 
     await user.click(screen.getByRole("checkbox", { name: "Şimdiki görünümü adıyla da kaydet" }))
     const field = screen.getByRole<HTMLInputElement>("textbox", { name: "Ad" })
-    expect(field.value).toMatch(/^Sade, \d{1,2} \S+$/)
+    expect(field.value).toMatch(/^Sade, \d{1,2} \S+ \d{4}$/)
     await user.clear(field)
     await user.type(field, "  Eski vitrin ")
     await user.click(screen.getByRole("button", { name: "Taslağa uygula ve düzenle" }))

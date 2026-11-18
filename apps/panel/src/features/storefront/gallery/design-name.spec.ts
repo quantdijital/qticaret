@@ -1,14 +1,7 @@
 import { describe, expect, it } from "vitest"
+import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { i18next } from "@/lib/i18n"
-import {
-  NAME_MAX,
-  dayAndTime,
-  dayOf,
-  designName,
-  lookName,
-  sourceName,
-  suggestedName,
-} from "./design-name"
+import { NAME_MAX, designName, lookName, sourceName, suggestedName } from "./design-name"
 import { design, preset, summary } from "./gallery.fixtures"
 
 const t = i18next.t.bind(i18next)
@@ -16,9 +9,12 @@ const t = i18next.t.bind(i18next)
 const AT = "2026-11-17T11:20:00.000Z"
 
 describe("dates", () => {
-  it("reads the shop's day and time in Turkey", () => {
-    expect(dayAndTime(AT)).toBe("17 Kasım 14:20")
-    expect(dayOf("2026-11-17T22:30:00.000Z")).toBe("18 Kasım")
+  it("words a look's date as the rest of the panel does (admin-ui lib/format)", () => {
+    const auto = design("sfd_2", { kind: "auto", name: null, created_at: AT })
+    expect(designName(t, auto)).toBe(`Sade, ${formatDateTime(AT)}`)
+    expect(suggestedName(t, "Sade", new Date(AT))).toBe(`Sade, ${formatDate(AT)}`)
+    // Turkey's day, whatever the machine's zone
+    expect(suggestedName(t, "Sade", new Date("2026-11-17T22:30:00.000Z"))).toBe("Sade, 18 Kas 2026")
   })
 })
 
@@ -30,12 +26,12 @@ describe("designName", () => {
   it("names an automatic save from where it came from, when, and whether it was changed", () => {
     const auto = design("sfd_2", { kind: "auto", name: null, created_at: AT })
 
-    expect(designName(t, auto)).toBe("Sade, 17 Kasım 14:20")
+    expect(designName(t, auto)).toBe("Sade, 17 Kas 2026 14:20")
     expect(designName(t, { ...auto, summary: summary({ edited: true }) })).toBe(
-      "Sade, 17 Kasım 14:20, düzenlenmiş"
+      "Sade, 17 Kas 2026 14:20, düzenlenmiş"
     )
     expect(designName(t, { ...auto, summary: summary({ source: "own", source_name: null }) })).toBe(
-      "Kendi tasarımınız, 17 Kasım 14:20"
+      "Kendi tasarımınız, 17 Kas 2026 14:20"
     )
   })
 
@@ -79,7 +75,7 @@ describe("lookName", () => {
       created_at: AT,
       summary: summary({ source: "preset", source_name: null, preset: gone }),
     })
-    expect(designName(t, auto)).toBe("Kendi tasarımınız, 17 Kasım 14:20")
+    expect(designName(t, auto)).toBe("Kendi tasarımınız, 17 Kas 2026 14:20")
   })
 })
 
@@ -87,7 +83,7 @@ describe("suggestedName", () => {
   it("offers the source and today's date, cut to the server's limit", () => {
     const now = new Date(AT)
 
-    expect(suggestedName(t, "Sade", now)).toBe("Sade, 17 Kasım")
+    expect(suggestedName(t, "Sade", now)).toBe("Sade, 17 Kas 2026")
     expect(suggestedName(t, "x".repeat(80), now)).toHaveLength(NAME_MAX)
   })
 })

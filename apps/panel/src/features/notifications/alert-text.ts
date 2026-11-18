@@ -10,6 +10,7 @@ import {
   Webhook,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { serviceName } from "@/features/ai/failure-text"
 import { isAiService } from "@/features/ai/services"
 import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { paymentIssueAlert } from "@/features/notifications/payment-issue-alert"
@@ -57,12 +58,9 @@ export function useAlertText(data: Record<string, unknown>) {
     const ai = isAiService(provider)
     return {
       title: t("notifications.providerAccount.title", {
-        provider: t(
-          ai ? `ai.services.${provider}.name` : `settings.payments.methods.${provider}.name`,
-          {
-            defaultValue: provider,
-          }
-        ),
+        provider: ai
+          ? serviceName(t, provider)
+          : t(`settings.payments.methods.${provider}.name`, { defaultValue: provider }),
       }),
       description: [
         changes.map((change) => t(`notifications.providerAccount.changes.${change}`)).join(", "),
