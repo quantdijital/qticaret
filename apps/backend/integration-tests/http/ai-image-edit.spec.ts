@@ -24,6 +24,14 @@ interface Job {
   } | null
 }
 
+interface Detail {
+  id: string
+  file_id: string | null
+  ai_source: string | null
+  derived_from_id: string | null
+  derived_from: { id: string; filename: string } | null
+}
+
 const picture = () =>
   sharp({ create: { width: 64, height: 48, channels: 3, background: { r: 40, g: 90, b: 160 } } })
     .png()
@@ -179,6 +187,63 @@ medusaIntegrationTestRunner({
       expect(wrongEntity.status).toBe(400)
       expect([single.status, single.data.message]).toEqual([400, "ai.unknown_task"])
       expect(await usages()).toEqual([])
+    })
+
+    // PR 4-2: what the panel reads to offer the options, show a version and keep it
+    it("shows each service's backgrounds, a version's original until it is gone, and keeps it", async () => {
+      const { data: services } = await http.get<{
+        services: { id: string; backgrounds: string[] }[]
+      }>("/admin/ai/services", { headers: owner.headers })
+      expect(services.services.find((each) => each.id === "fake")?.backgrounds).toEqual([
+        "transparent",
+        "white",
+      ])
+      expect(services.services.find((each) => each.id === "deepseek")?.backgrounds).toEqual([])
+
+      const originalId = await upload()
+      const asked = await settle(
+        http.post<{ job_id: string }>(
+          "/admin/ai/suggestions",
+          {
+            task: "image_background",
+            entity_type: "media",
+            entity_ids: [originalId],
+            option: "transparent",
+            service: "fake",
+          },
+          { headers: owner.headers }
+        )
+      )
+      const job = await settled(asked.data.job_id)
+      const resultId = job.result_summary?.done[0]?.result_id ?? "none"
+
+      const detail = async (id: string) =>
+        (await http.get<{ media: Detail }>(`/admin/media/${id}`, { headers: owner.headers })).data
+          .media
+      const version = await detail(resultId)
+      expect(version).toMatchObject({
+        ai_source: "edited",
+        derived_from_id: originalId,
+        derived_from: { id: originalId },
+      })
+      expect(version.derived_from?.filename).toContain("vazo")
+      expect(await detail(originalId)).toMatchObject({ ai_source: null, derived_from: null })
+
+      // "Kullan" in the library: the version is registered into it, out of the nightly sweep
+      await http.post(
+        "/admin/media",
+        { file_ids: [version.file_id], library: true },
+        { headers: owner.headers }
+      )
+      const [kept] = await media().listMediaAssets({ id: resultId })
+      expect(kept?.in_library).toBe(true)
+
+      // The original deleted: the version keeps its id, the original reads as gone
+      await http.delete(`/admin/media/${originalId}`, { headers: owner.headers })
+      expect(await detail(resultId)).toMatchObject({
+        derived_from_id: originalId,
+        derived_from: null,
+      })
     })
   },
 })

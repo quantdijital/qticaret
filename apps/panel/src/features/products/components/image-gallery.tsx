@@ -204,6 +204,11 @@ export function ImageGallery({
       onAlt={(alt) => {
         onAlt?.(index, alt)
       }}
+      // The AI background's result joins the others, the original stays (docs/22 PR 4-2)
+      onAddImage={(stored) => {
+        onAdd([stored])
+      }}
+      room={{ full: room <= 0, max: MAX_IMAGES }}
     />
   )
   const clips = videos?.items ?? []

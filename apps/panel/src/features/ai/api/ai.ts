@@ -18,6 +18,8 @@ export interface AiServiceView {
   funding: "own_key" | "platform_credit"
   /** A panel i18n key: where the data goes and whether it trains models. */
   data_note_key: string
+  /** The backgrounds its image editing makes (`image_background` options); empty without one. */
+  backgrounds?: string[]
 }
 
 export interface AiTaskView {

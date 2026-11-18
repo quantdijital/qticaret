@@ -45,6 +45,7 @@ export function settingsLinkOf(id: string) {
     case "deepseek":
     case "minimax":
     case "gemini":
+    case "photoroom":
       return linkOptions({ to: "/settings/ai" })
     default:
       return null

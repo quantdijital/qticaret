@@ -23,6 +23,7 @@ import {
   useUpdateMedia,
 } from "@/features/media/api/media"
 import type { MediaDetail } from "@/features/media/api/media"
+import { MediaBackgroundAction, MediaDerivedFact } from "@/features/media/components/media-ai-edit"
 import { MediaUsage } from "@/features/media/components/media-usage"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
@@ -160,12 +161,15 @@ function Detail({
   return (
     <DialogBody>
       <div className="grid gap-6 sm:grid-cols-2">
-        <div className="flex aspect-square items-center justify-center overflow-hidden rounded-md border bg-muted">
-          <img
-            src={media.url}
-            alt={media.alt ?? ""}
-            className="max-h-full max-w-full object-contain"
-          />
+        <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex aspect-square items-center justify-center overflow-hidden rounded-md border bg-muted">
+            <img
+              src={media.url}
+              alt={media.alt ?? ""}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+          {canEdit ? <MediaBackgroundAction media={media} /> : null}
         </div>
         <div className="flex min-w-0 flex-col gap-4">
           <Words
@@ -175,6 +179,7 @@ function Detail({
             onDirtyChange={onDirtyChange}
           />
           <dl className="divide-y">
+            <MediaDerivedFact media={media} />
             <Fact label={t(`${D}.uploadedBy`)}>{media.uploaded_by?.name ?? "—"}</Fact>
             <Fact label={t(`${D}.uploadedAt`)}>{formatDateTime(media.created_at)}</Fact>
             <Fact label={t(`${D}.address`)}>

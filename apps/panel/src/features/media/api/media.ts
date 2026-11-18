@@ -31,6 +31,10 @@ export interface MediaAsset {
   width: number | null
   height: number | null
   alt: string | null
+  /** Made by an AI service (adr/0071 §5): `edited` from a picture of the shop's. */
+  ai_source?: "edited" | "generated" | null
+  /** The picture it was made from; that one may have been deleted since. */
+  derived_from_id?: string | null
   created_at: string
 }
 
@@ -66,6 +70,8 @@ export interface MediaUse {
 export interface MediaDetail extends MediaAsset {
   uploaded_by: { id: string; name: string } | null
   usage: MediaUse[]
+  /** The original of an AI version while it exists; null when deleted (or not a version). */
+  derived_from?: { id: string; url: string; filename: string } | null
 }
 
 export const mediaListQuery = ({

@@ -10,6 +10,8 @@ export interface ProductMedia {
   alt: string | null
   /** When its WebP/AVIF versions and share crop were made; null while they are being made. */
   derived_at: string | null
+  /** Made by an AI service (adr/0071 §5): marked on its tile. */
+  ai_source?: "edited" | "generated" | null
 }
 
 export const MEDIA_FIELDS = [
@@ -18,6 +20,7 @@ export const MEDIA_FIELDS = [
   "media_assets.url",
   "media_assets.alt",
   "media_assets.derived_at",
+  "media_assets.ai_source",
 ]
 
 /** Images just uploaded become product images with an alt text and versions. */

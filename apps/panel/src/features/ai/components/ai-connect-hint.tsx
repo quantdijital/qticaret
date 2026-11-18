@@ -8,6 +8,8 @@ import { closeHint } from "@/features/ai/hint-state"
 export interface AiConnectHintProps {
   /** Called once the tip is closed for good (remembered in the browser). */
   onClose: () => void
+  /** The words for a job that fills no field (`ai.background.hint`): `text` and `ownerOnly` keys under it. */
+  words?: string
 }
 
 /**
@@ -16,13 +18,13 @@ export interface AiConnectHintProps {
  * Settings › Yapay zekâ; anyone else hears that the store owner can
  * connect one.
  */
-export function AiConnectHint({ onClose }: AiConnectHintProps) {
+export function AiConnectHint({ onClose, words = "ai.hint" }: AiConnectHintProps) {
   const { t } = useTranslation()
   const mayConnect = useCan("accounts")
   return (
     <div className="flex items-start gap-2 text-sm" data-slot="ai-connect-hint">
       <p className="min-w-0 flex-1">
-        {mayConnect ? t("ai.hint.text") : t("ai.hint.ownerOnly")}
+        {mayConnect ? t(`${words}.text`) : t(`${words}.ownerOnly`)}
         {mayConnect ? (
           <>
             {" "}

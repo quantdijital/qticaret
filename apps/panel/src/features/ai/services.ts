@@ -4,7 +4,7 @@
  * the development-only one. A service the panel does not know still shows,
  * by its id.
  */
-export const AI_SERVICE_IDS = ["deepseek", "minimax", "gemini", "fake"] as const
+export const AI_SERVICE_IDS = ["deepseek", "minimax", "gemini", "photoroom", "fake"] as const
 
 /** Whether a credential provider is an AI service's account (adr/0071 §3). */
 export const isAiService = (provider: string): boolean =>

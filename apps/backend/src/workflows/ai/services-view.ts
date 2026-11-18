@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { AiCapability } from "../../lib/ai/registry/capabilities"
 import { aiServices } from "../../lib/ai/registry/services"
-import type { AiFunding } from "../../lib/ai/registry/services"
+import type { AiFunding, AiTarget } from "../../lib/ai/registry/services"
 import { aiTasks } from "../../lib/ai/registry/tasks"
 import { usableServices } from "../../lib/ai/select"
 import type { AiConnectionStatus } from "../../lib/ai/select"
@@ -18,6 +18,8 @@ export interface AiServiceView {
   status: AiConnectionStatus | "not_connected"
   funding: AiFunding
   data_note_key: string
+  /** The backgrounds its `image_edit` endpoint makes (`image_background` options); empty without one. */
+  backgrounds: string[]
 }
 
 export interface AiTaskView {
@@ -37,6 +39,9 @@ export interface AiServicesView {
   tasks: AiTaskView[]
   flags: { own_keys: boolean }
 }
+
+const backgroundsOf = (target: AiTarget | undefined): string[] =>
+  target && "backgrounds" in target ? [...target.backgrounds] : []
 
 /**
  * `GET /admin/ai/services` (adr/0071 §3, §11): the registry's services
@@ -62,6 +67,7 @@ export async function aiServicesView(
       "not_connected",
     funding: service.funding,
     data_note_key: service.dataNoteKey,
+    backgrounds: backgroundsOf(service.capabilities.image_edit),
   }))
   const tasks = await Promise.all(
     aiTasks().map(async (task): Promise<AiTaskView> => ({

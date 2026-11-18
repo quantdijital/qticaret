@@ -2,6 +2,7 @@ import { Check } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { AiEditedBadge } from "@/features/ai/components/ai-edited-badge"
 import { mediaFacts } from "@/features/media/api/media"
 import type { MediaAsset } from "@/features/media/api/media"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -85,6 +86,9 @@ export function MediaGrid({
                   loading="lazy"
                   className="aspect-square w-full object-contain"
                 />
+                {asset.ai_source ? (
+                  <AiEditedBadge look="icon" className="absolute top-2 left-2" />
+                ) : null}
                 {chosen ? (
                   <span className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
                     <Check className="size-3.5" aria-hidden="true" />

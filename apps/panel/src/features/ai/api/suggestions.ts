@@ -109,6 +109,36 @@ export async function requestSuggestion(request: AiSuggestionRequest): Promise<A
   }
 }
 
+/** A picture job queued (202): its id and the service it went to. */
+export interface AiImageJob {
+  job_id: string
+  service: string
+}
+
+/**
+ * `POST /admin/ai/suggestions` with `entity_ids` (Aşama 4): an image edit
+ * as a background job (202). Its result is a new picture beside the
+ * original and a suggestion to decide; nothing is written to the original.
+ */
+export async function requestImageJob(request: {
+  task: string
+  mediaIds: string[]
+  option: string
+  service?: string | undefined
+}): Promise<AiImageJob> {
+  const data = (await post("/admin/ai/suggestions", {
+    task: request.task,
+    entity_type: "media",
+    entity_ids: request.mediaIds,
+    option: request.option,
+    ...(request.service === undefined ? {} : { service: request.service }),
+  })) as Record<string, unknown> | null
+  return {
+    job_id: typeof data?.["job_id"] === "string" ? data["job_id"] : "",
+    service: nameOf(data?.["service"]) ?? "",
+  }
+}
+
 const decisionPath = (id: string, decision: "accept" | "dismiss"): string =>
   `/admin/ai/suggestions/${encodeURIComponent(id)}/${decision}`
 
