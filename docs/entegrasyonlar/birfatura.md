@@ -181,7 +181,7 @@ Bu uçlar BirFatura'nın değil **bizim** web kancamızdır ve kişisel veri dö
 
 "Sahteler canlı gibi görünmeli": hiçbir yerde "sahte/demo/test" yazısı yok.
 
-- **A (`packages/testing/src/birfatura`, `pnpm dev:birfatura`):** sahte BirFatura bir **istemci**dir: aralıklarla bizim `/hooks/birfatura/api/orderStatus`, `paymentMethods`, `orders` uçlarımızı token ile çağırır, her sipariş için GİB biçiminde numara üretir (mağazanın serisiyle, ör. `ABC2026000000001`), gerçekçi bir fatura PDF'i (`packages/testing/src/invoice-pdf.ts`) kendi `/dosyagetir?tur=1&guid=<…>.pdf` adresinden sunar ve `invoiceLinkUpdate` ile bize yazar. Token'ı yerel durum dosyasından okur (`packages/testing/src/dev/state-file.ts`). Hata senaryoları: geç çekme, aynı siparişe ikinci bildirim, farklı numara, erişilemeyen PDF.
+- **A: yerel sahte BirFatura yazılmadı** (sahibin kararı, 2026-11-18). F2 planındaki istemci (`packages/testing/src/birfatura`, `pnpm dev:birfatura`) ve token'ı ona geliştirmede taşıyacak bir durum dosyası yolu düşürüldü. Yerel deneme gerçek BirFatura test hesabıyla, geçici tünel üzerinden yapılır (aşağıda "Test hesabıyla deneme adımları"). CI kapsamı HTTP testlerinde kalır: `integration-tests/http/einvoice-birfatura*.spec.ts` BirFatura'nın çağrılarını (`integration-tests/helpers/birfatura.ts`) ve PDF dosya sunucusunu taklit eder; `BIRFATURA_BASE_URL` yalnız bu testlerin dosya sunucusu içindir (development ve test; canlıda ortam denetimi reddeder).
 - **B:** OutEBelgeV2 uçlarının sahtesi (`SendBasicInvoiceFromModel`, `GetUserPK` belgedeki test VKN'sini e-Fatura mükellefi sayar, `GetOutBoxDocumentStatusesWithUUIDs`, `GetPDFLinkByUUID` önce boş sonra bağlantı, `SendDocumentAnswer`, `GetNumberOfCredits`), üç başlık denetimi, zarf `{ Success, Message, Code, Result }`.
 
 ## Test planı
@@ -190,7 +190,8 @@ Bu uçlar BirFatura'nın değil **bizim** web kancamızdır ve kişisel veri dö
 - **HTTP** (`integration-tests/http/einvoice-birfatura.spec.ts`): token yok/yanlış → 401; sağlayıcı kapalı → 404; bekleyen sipariş listede, kesilmiş/iptal/iade listede değil; bekletme kuralı (kapıda ödeme teslimden önce görünmez); `invoiceLinkUpdate` → kayıt `issued`, PDF depoda, müşteri e-postası; aynı numara tekrar → başarı; farklı numara → ret; seri uymazsa ret; PDF alan adı izinli değilse indirilmez; değişim faturası ayrı `OrderId`; denetim kaydı yazılamazsa 503.
 - **Sözleşme:** BirFatura belgesindeki JSON örnekleri test sabiti olarak; yanıtlarımızın alan adları büyük/küçük harf dahil şemayla birebir (belge kuralı).
 - **B için:** Paraşüt testlerinin karşılığı (`einvoice-issue` kalıbı): e-Fatura ve e-Arşiv, sonucu bilinmeyen gönderimde tek belge, PDF gecikmesi, iptal sınırı.
-- Panel: Ayarlar > E-Fatura'da BirFatura seçimi, token oluşturma/yenileme (bir kez gösterim), son çekme bilgisi.
+- Panel (F2, Vitest): Ayarlar > E-Fatura'da BirFatura seçimi ve web satış serisi; BirFatura kartında site adresi ve kopyalama, bağlantı şifresinin yalnız sahibe sunulması, yeniden doğrulama, bir kez gösterim ve kopyalama, yenilemeden önce onay, hiç çekme yoksa uyarı (engel değil), son çekme; sipariş fatura kartında BirFatura faturası (numara, kesim tarihi, PDF, boş belge tipi), bekleme metni, iptal işareti ve bildirim sorunları (`birfatura-card.spec.tsx`, `birfatura-note.spec.tsx`, `einvoice-program-card.spec.tsx`).
+- Yerel sahte BirFatura yok (sahibin kararı, 2026-11-18); uçtan uca deneme test hesabıyla.
 
 ## KVKK
 
@@ -232,8 +233,8 @@ Sahibin kararı: BirFatura'ya soru gönderilmez. Kaynak kısaltmaları: **ÖE** 
 Belgelerdeki adımlar (ÖE "Test ve Doğrulama", PM ve WH rehberlerindeki mağaza ekleme yolu) ve bizim tarafımız. Hiçbir token, şifre ya da adres bu belgeye, sohbete ya da loga yazılmaz.
 
 **Bizim taraf, önce:**
-1. Backend ve panel açık (`pnpm dev`). Ayarlar > E-Fatura'da program olarak **BirFatura** seçilir, web satışı serisi girilir (F2 kartı; F2'den önce aynı işi `POST /admin/platform-settings/invoicing` ve `POST /admin/einvoice/birfatura/token` yapar, ikisi de sahibin oturumu ve yeniden doğrulamasıyla).
-2. "Bağlantı anahtarı oluştur" (yeniden doğrulama). Anahtar **bir kez** görünür; kopyalanır, başka yere yazılmaz.
+1. Backend ve panel açık (`pnpm dev`). Ayarlar > E-Fatura'da program olarak **BirFatura** seçilir, web satışı serisi girilir ve kaydedilir; yanında **BirFatura bağlantısı** kartı açılır (site adresi, bağlantı şifresi, son çekme, BirFatura'daki adımlar).
+2. Kartta "Bağlantı şifresi oluştur" (yalnız sahip, yeniden doğrulama). Şifre **bir kez** görünür; kopyalanır, başka yere yazılmaz. Kartın gösterdiği site adresi panelin adresidir; yerel denemede BirFatura'ya onun yerine tünelin adresi + `/hooks/birfatura` yazılır.
 3. Geçici tünel **yalnız** `/hooks/birfatura/api/*` yollarını açar. Önerilen: yerelde yalnız bu yolları backend'e geçiren küçük bir vekil (ör. Caddy, 9180 portunda: `@bf path_regexp ^/hooks/birfatura/api/(orderStatus|paymentMethods|orders|orderCargoUpdate|invoiceLinkUpdate)$` → `reverse_proxy localhost:9000`, gerisi `respond 404`) ve vekile bir HTTPS tüneli (ör. `cloudflared tunnel --url http://localhost:9180`). Panel, `/admin`, `/store`, `/auth` tünelden erişilemez. Deneme bitince tünel kapatılır ve anahtar yenilenir.
 4. Vitrinden (`localhost:8000`) iki sipariş verilir: biri şahıs (e-Arşiv beklenir), biri şirket fatura profiliyle ve alıcı VKN'si olarak belgedeki test VKN'si `1234567801` (e-Fatura beklenir; OB: "Test hesaplarında e-Fatura işlemleri için hem alıcı hem gönderici VKN olarak" `1234567801`). Ödeme alınır (sipariş "Faturaya hazır" olur; kapıda ödemeli sipariş teslimden önce listede görünmez).
 
