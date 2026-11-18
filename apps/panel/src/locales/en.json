@@ -11334,7 +11334,7 @@
   },
   "ai": {
     "title": "AI",
-    "description": "Connect the services that draft texts such as product titles and descriptions for you. They run on your own account's key; you pay the service.",
+    "description": "Services you connect with your own key draft product texts and images.",
     "notInPlan": "Your plan does not include using AI with your own key. Stored keys are kept and work again once your plan changes.",
     "capabilities": {
       "text": "Writing text",
@@ -11417,7 +11417,16 @@
       "white": "White background"
     },
     "card": {
-      "capabilities": "What it can do",
+      "servicesTitle": "Services",
+      "columns": {
+        "service": "Service",
+        "capabilities": "What it can do",
+        "data": "Data",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actionsFor": "{{name}} actions",
+      "dataFor": "Where {{name}} data goes",
       "connect": "Connect",
       "change": "Change key",
       "test": "Test the connection",
@@ -11439,9 +11448,7 @@
     },
     "usage": {
       "title": "This month's use",
-      "description": "How many times AI was used, with which service and for which task.",
       "estimateHint": "The cost is an estimate from the services' list prices and the length of the text used (tokens); the actual amount is on the service's invoice.",
-      "estimateNote": "Costs are estimates; the exact amount is on the service's invoice.",
       "empty": "AI has not been used this month yet.",
       "byService": "By service",
       "byTask": "By task",

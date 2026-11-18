@@ -9,17 +9,19 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { aiServicesQuery } from "@/features/ai/api/ai"
 import { useCan } from "@/features/auth/api/staff"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
+import { AccountAlert } from "@/features/settings/components/account-form"
 import { AiReviewsCard } from "@/features/settings/components/ai-reviews-card"
-import { AiServiceCard } from "@/features/settings/components/ai-service-card"
+import { AiServicesTable } from "@/features/settings/components/ai-services-table"
 import { AiUsageCard } from "@/features/settings/components/ai-usage-card"
 import { errorText } from "@/lib/errors"
 
 /**
- * Settings > Yapay zekâ (adr/0071 §13): a card for each AI service the
- * shop can connect with its own key, the switch for AI on reviews and
- * questions (Aşama 9), and this month's use under them.
- * Nothing else is set here: which service does which work is the
- * server's, the choice is made where the work is.
+ * Settings > Yapay zekâ (adr/0071 §13): the AI services the shop can
+ * connect with its own key in one compact table, the switch for AI on
+ * reviews and questions (Aşama 9) in a line, and this month's use under
+ * them. The longer words sit behind (i). Nothing else is set here: which
+ * service does which work is the server's, the choice is made where the
+ * work is.
  */
 export function AiPage() {
   const { t } = useTranslation()
@@ -29,6 +31,7 @@ export function AiPage() {
   const accounts = useQuery({ ...providerAccountsQuery(), enabled: mayReadAccounts })
   const data = services.data
   const ownKeys = data?.flags.own_keys ?? true
+  const keyConfigured = accounts.data?.key_configured ?? true
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,16 +53,15 @@ export function AiPage() {
               </AlertAction>
             </Alert>
           )}
-          <div className="flex flex-col gap-4">
-            {data.services.map((service) => (
-              <AiServiceCard
-                key={service.id}
-                service={service}
-                ownKeys={ownKeys}
-                keyConfigured={accounts.data?.key_configured ?? true}
-              />
-            ))}
-          </div>
+          {/* The server cannot seal a key: once for the page, not on every row */}
+          {ownKeys && !keyConfigured ? (
+            <AccountAlert provider="" state="not_configured" keyConfigured={false} />
+          ) : null}
+          <AiServicesTable
+            services={data.services}
+            ownKeys={ownKeys}
+            keyConfigured={keyConfigured}
+          />
           <AiReviewsCard />
           <AiUsageCard />
         </>

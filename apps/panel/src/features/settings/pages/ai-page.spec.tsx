@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, renderHook, screen } from "@testing-library/react"
+import { render, renderHook, screen, waitFor, within } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { AiServicesAnswer, AiUsageAnswer } from "@/features/ai/api/ai"
@@ -53,15 +53,27 @@ const usage: AiUsageAnswer = {
   },
 }
 
-function serve(ownKeys: boolean) {
+const unused: AiUsageAnswer = {
+  ...usage,
+  services: [],
+  tasks: [],
+  monthly: { used: 0, limit: 100 },
+}
+
+function serve(ownKeys: boolean, { used = true, keyConfigured = true } = {}) {
   fetchMock.mockImplementation((url: string) => {
     if (url === "/admin/ai/services") {
       return Promise.resolve(services(ownKeys))
     }
     if (url === "/admin/ai/usage") {
-      return Promise.resolve(usage)
+      return Promise.resolve(used ? usage : unused)
     }
-    return Promise.resolve({ key_configured: true, accounts: [] })
+    if (url === "/admin/features") {
+      return Promise.resolve({
+        features: [{ key: "ai.reviews", default: false, owner: "tenant", enabled: false }],
+      })
+    }
+    return Promise.resolve({ key_configured: keyConfigured, accounts: [] })
   })
 }
 
@@ -79,20 +91,59 @@ describe("AiPage", () => {
     fetchMock.mockReset()
   })
 
-  it("a card for each service, each with its own data note, and the month's use", async () => {
+  it("a row for each service, each with its own data note behind the (i)", async () => {
     serve(true)
     renderPage()
-    expect(await screen.findByRole("heading", { name: "DeepSeek" })).toBeInTheDocument()
-    expect(screen.getByRole("heading", { name: "MiniMax" })).toBeInTheDocument()
-    expect(screen.getByRole("heading", { name: "Gemini" })).toBeInTheDocument()
-    expect(screen.getByText(/Veri Çin'de işlenir/)).toBeInTheDocument()
-    expect(screen.getByText(/ücretli kullanımda kullanmaz/)).toBeInTheDocument()
-    expect(screen.getByText(/belirtilmemiş/)).toBeInTheDocument()
-    expect(screen.getAllByText(/Kişisel veri gönderilmez/)).toHaveLength(3)
-    expect(await screen.findByText("Deneme metni")).toBeInTheDocument()
-    expect(screen.getByText("12 / 100")).toBeInTheDocument()
-    expect(screen.getByText(/Maliyet tahminidir/)).toBeInTheDocument()
+    const table = await screen.findByRole("table", { name: "Servisler" })
+    expect(within(table).getByRole("columnheader", { name: "Servis" })).toBeInTheDocument()
+    for (const name of ["DeepSeek", "MiniMax", "Gemini"]) {
+      expect(within(table).getByRole("row", { name: new RegExp(name) })).toBeInTheDocument()
+    }
+    const note = (name: string) =>
+      screen.getByRole("button", { name: `Bilgi: ${name} verisi nereye gider` })
+    expect(note("DeepSeek")).toHaveAccessibleDescription(/Veri Çin'de işlenir/)
+    expect(note("Gemini")).toHaveAccessibleDescription(/ücretli kullanımda kullanmaz/)
+    expect(note("MiniMax")).toHaveAccessibleDescription(/belirtilmemiş/)
+    for (const name of ["DeepSeek", "MiniMax", "Gemini"]) {
+      expect(note(name)).toHaveAccessibleDescription(/Kişisel veri gönderilmez/)
+    }
+    // Only the connected one has a menu; the others are a Bağla each
+    expect(screen.getByRole("button", { name: "DeepSeek işlemleri" })).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: "Bağla" })).toHaveLength(2)
     expect(screen.queryByText(/Paketiniz kendi anahtarınızla/)).toBeNull()
+  })
+
+  it("the reviews switch is a line, its words behind the (i)", async () => {
+    serve(true)
+    renderPage()
+    const toggle = await screen.findByRole("switch", { name: "Yorum ve sorularda yapay zekâ" })
+    expect(toggle).toHaveAccessibleDescription(/yanıt taslağı hazırlar.*Yazarın adı/)
+    expect(
+      screen.getByRole("button", { name: "Bilgi: Yorum ve sorularda yapay zekâ" })
+    ).toBeInTheDocument()
+    // Kept for a screen reader and the search, not shown
+    expect(screen.getByText(/Taslak siz göndermeden yayımlanmaz/)).toHaveClass("sr-only")
+  })
+
+  it("the month's use: a small table, the ceilings beside the title, the notes behind (i)", async () => {
+    serve(true)
+    renderPage()
+    expect(await screen.findByText("Deneme metni")).toBeInTheDocument()
+    expect(screen.getByRole("rowheader", { name: "DeepSeek" })).toBeInTheDocument()
+    expect(screen.getByText("12 / 100")).toBeInTheDocument()
+    expect(screen.getByText("3 / 500")).toBeInTheDocument()
+    // By service and by task
+    expect(screen.getAllByText("2 tanesi sonuç vermedi")).toHaveLength(2)
+    expect(screen.getByRole("button", { name: "Bilgi: Bu ayki kullanım" })).toBeInTheDocument()
+    expect(screen.queryByText(/Maliyet, servislerin liste fiyatlarından/)).toBeNull()
+  })
+
+  it("the month's use, none yet: one line", async () => {
+    serve(true, { used: false })
+    renderPage()
+    expect(await screen.findByText("Bu ay yapay zekâ henüz kullanılmadı.")).toBeInTheDocument()
+    expect(screen.queryByRole("columnheader", { name: "Tahmini maliyet" })).toBeNull()
+    expect(screen.getByText("0 / 100")).toBeInTheDocument()
   })
 
   it("says when the package leaves the shop's own key out", async () => {
@@ -102,6 +153,18 @@ describe("AiPage", () => {
     for (const connect of screen.getAllByRole("button", { name: "Bağla" })) {
       expect(connect).toBeDisabled()
     }
+  })
+
+  it("says once, above the table, when the server cannot keep a key", async () => {
+    serve(true, { keyConfigured: false })
+    renderPage()
+    expect(await screen.findByText(/şifreleme anahtarı tanımlı değil/)).toBeInTheDocument()
+    await waitFor(() => {
+      for (const connect of screen.getAllByRole("button", { name: "Bağla" })) {
+        expect(connect).toBeDisabled()
+      }
+    })
+    expect(screen.getAllByText(/şifreleme anahtarı tanımlı değil/)).toHaveLength(1)
   })
 })
 
