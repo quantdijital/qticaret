@@ -69,6 +69,8 @@ describe("theme section", () => {
       media_ground: "well",
       // adr/0067 Ek 2026-11-16: today's room
       density: "airy",
+      // adr/0067 Ek 2026-11-18: today's motion
+      motion: "calm",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)

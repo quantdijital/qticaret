@@ -25,6 +25,12 @@ export const STYLE_KIT = {
    * grid's columns and rows and above the footer; `airy` today's.
    */
   density: ["airy", "balanced", "compact"],
+  /**
+   * S7 (adr/0067 Ek 2026-11-18): motion beyond the theme's own small
+   * transitions; `lively` adds the cards' photo zoom and lift, a reveal as
+   * content scrolls in, images fading in and a pressed button; `calm` today's.
+   */
+  motion: ["calm", "lively"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StyleKitField = keyof typeof STYLE_KIT
@@ -33,7 +39,7 @@ export type StyleKitStep<F extends StyleKitField> = (typeof STYLE_KIT)[F][number
 /** The kit as the theme settings keep it: every field present. */
 export type StyleKit = { [F in StyleKitField]: StyleKitStep<F> }
 
-/** The fields in the contract's order (adr/0067 §1, S1 to S4; S6 its Ek 2026-11-16). */
+/** The fields in the contract's order (adr/0067 §1, S1 to S4; S6 its Ek 2026-11-16, S7 Ek 2026-11-18). */
 export const STYLE_KIT_FIELDS = Object.keys(STYLE_KIT) as StyleKitField[]
 
 /** Each field's default, its list's first step: today's drawing. */
@@ -43,6 +49,7 @@ export const STYLE_KIT_DEFAULTS: Readonly<StyleKit> = {
   chip_style: "filled",
   media_ground: "well",
   density: "airy",
+  motion: "calm",
 }
 
 /** The attribute a step off the default is marked with on the theme's root element. */
@@ -53,9 +60,10 @@ export const styleKitAttribute = (field: StyleKitField): `data-${string}` =>
  * The kit's marks (adr/0067 §3b): each field off its default as a `data-*`
  * attribute for the theme's root element (`data-menu-style="plain"`,
  * `data-shadow="none"`, `data-chip-style="lined"`, `data-media-ground=
- * "page"`, `data-density="balanced"`); nothing at a default, so a page at today's drawing prints what
- * it did before the kit. A theme's stylesheet reads a step with an
- * attribute selector over its own (`[data-shadow="none"] .gf-drop`) or sets
+ * "page"`, `data-density="balanced"`, `data-motion="lively"`); nothing at a
+ * default, so a page at today's drawing prints what it did before the kit.
+ * A theme's stylesheet reads a step with an attribute selector over its
+ * own (`[data-shadow="none"] .gf-drop`) or sets
  * a token there (`[data-shadow="none"] { --shadow-float: none }`); the
  * theme gives the same marks to the dialogs and drawers it portals to
  * `body` (adr/0067 Ek 2026-11-15). No kit: every default.

@@ -64,7 +64,7 @@ export const BUTTON_SHAPES = ["pill", "rounded", "square"] as const
 export { SECTION_SPACINGS }
 /** How the theme's boxes stand (Tezgâh audit Z-04): the contract's list, `filled` today's tone. */
 export { SURFACE_STYLES }
-/** The style kit (adr/0067 §1): menu items, shadow, chips, the photos' ground, density; first step the default. */
+/** The style kit (adr/0067 §1): menu items, shadow, chips, the photos' ground, density, motion; first step the default. */
 export { STYLE_KIT }
 
 export type HeadingFont = (typeof HEADING_FONTS)[number]

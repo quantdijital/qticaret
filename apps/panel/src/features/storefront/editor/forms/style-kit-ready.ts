@@ -20,4 +20,6 @@ export const STYLE_KIT_READY: Readonly<Record<StyleKitField, boolean>> = {
   media_ground: true,
   // S6, adr/0067 Ek 2026-11-16: the room around sections' heads and grids (`data-density`)
   density: true,
+  // S7, adr/0067 Ek 2026-11-18: hover, scroll reveal and press motion (`data-motion`)
+  motion: true,
 }

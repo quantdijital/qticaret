@@ -170,6 +170,7 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   shadow: kitField("shadow", "surfaces"),
   media_ground: kitField("media_ground", "surfaces"),
   menu_style: kitField("menu_style", "surfaces"),
+  motion: kitField("motion", "surfaces"),
   "product_card.ratio": {
     group: "card",
     label: `${C}.ratio`,

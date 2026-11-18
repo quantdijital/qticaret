@@ -16,6 +16,7 @@ const ready = vi.hoisted(() => ({
   chip_style: false,
   media_ground: false,
   density: false,
+  motion: false,
 }))
 vi.mock("./forms/style-kit-ready", () => ({ STYLE_KIT_READY: ready }))
 
@@ -35,7 +36,7 @@ const choicesIn = (group: string) =>
     .getAllByRole("combobox")
     .map((box) => box.getAttribute("id"))
 
-const KIT_NAMES = ["Menü stili", "Gölge", "Çip stili", "Fotoğraf zemini", "Yoğunluk"]
+const KIT_NAMES = ["Menü stili", "Gölge", "Çip stili", "Fotoğraf zemini", "Yoğunluk", "Hareket"]
 
 afterEach(() => {
   Object.assign(ready, {
@@ -44,6 +45,7 @@ afterEach(() => {
     chip_style: false,
     media_ground: false,
     density: false,
+    motion: false,
   })
 })
 
@@ -64,6 +66,7 @@ describe("the style kit in the theme panel", () => {
       "shadow",
       "media_ground",
       "menu_style",
+      "motion",
     ])
     // The panel's order: colours, faces, shapes, spacing, surfaces, the card
     expect([...new Set(THEME_FIELDS.map((f) => f.group))]).toEqual([
@@ -103,6 +106,7 @@ describe("the style kit in the theme panel", () => {
       chip_style: true,
       media_ground: true,
       density: true,
+      motion: true,
     })
     const onChange = draw()
     expect(choicesIn("Şekiller")).toEqual(["theme-radius", "theme-buttons", "theme-chip-style"])
@@ -112,6 +116,7 @@ describe("the style kit in the theme panel", () => {
       "theme-shadow",
       "theme-media-ground",
       "theme-menu-style",
+      "theme-motion",
     ])
     expect(screen.getByRole("combobox", { name: "Menü stili" })).toHaveTextContent("Dolu")
     expect(screen.getByRole("combobox", { name: "Yoğunluk" })).toHaveTextContent("Ferah")
@@ -134,6 +139,25 @@ describe("the style kit in the theme panel", () => {
     ])
     await user.click(screen.getByRole("option", { name: "Dengeli" }))
     expect(onChange).toHaveBeenLastCalledWith({ ...THEME, density: "balanced" })
+  })
+
+  it("offers the motion in the surfaces, calm first, and hands the form lively (adr/0067 Ek 2026-11-18)", async () => {
+    ready.motion = true
+    const onChange = draw()
+    const motion = screen.getByRole("combobox", { name: "Hareket" })
+    expect(motion).toHaveTextContent("Sakin")
+    expect(choicesIn("Yüzeyler").at(-1)).toBe("theme-motion")
+    expect(found("hareket")).toEqual(["motion"])
+    expect(found("canlı")).toEqual(["motion"])
+
+    const user = userEvent.setup()
+    await user.click(motion)
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
+      "Sakin",
+      "Canlı",
+    ])
+    await user.click(screen.getByRole("option", { name: "Canlı" }))
+    expect(onChange).toHaveBeenLastCalledWith({ ...THEME, motion: "lively" })
   })
 
   it("finds the spacing by the words a shop owner uses for it (owner 2026-11-16)", () => {

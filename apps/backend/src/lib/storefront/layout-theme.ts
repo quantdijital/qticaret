@@ -52,6 +52,7 @@ const shown = (theme: ThemeSettings): ShownTheme => ({
   chip_style: theme.chip_style,
   media_ground: theme.media_ground,
   density: theme.density,
+  motion: theme.motion,
 })
 
 /**

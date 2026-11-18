@@ -6,8 +6,10 @@
  *
  * - A mouse (hover and a fine pointer): the second sits over the first,
  *   out of the layout (`display: none`, so the browser never fetches it
- *   with the page), and fades in while the card is hovered or anything in
- *   it has focus; at once for a shopper who asks for less motion.
+ *   with the page), and fades in over ~420 ms once its picture is decoded
+ *   while the card is hovered or anything in it has focus, out the same
+ *   way; the first stays under it throughout. At once for a shopper who
+ *   asks for less motion.
  * - A touch screen: the two side by side in a strip that swipes and snaps,
  *   above the card's link so the swipe reaches it (the strip is a link to
  *   the same page, so a tap still opens it). Where the browser drives an
@@ -58,12 +60,21 @@
       display: block;
       opacity: 1;
     }
+    /* Until its picture is loaded and decoded (`frame/ImageCue` marks it), the
+       second waits unseen over the first, then fades in: never a blank frame or
+       a photo popping in after the fade. Before the script runs, as above */
+    html[data-js-img]
+      .gf-card:is(:hover, :focus-within)
+      .gf-card-slide--second:not(:has(img[data-js-loaded])) {
+      opacity: 0;
+    }
   }
+  /* A crossfade, in and out alike (sahip 2026-11-18: the swap was abrupt) */
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
     .gf-card-slide--second {
       transition:
-        opacity var(--dur-short) var(--ease-out),
-        display var(--dur-short) allow-discrete;
+        opacity var(--dur-long) var(--ease-gentle),
+        display var(--dur-long) allow-discrete;
     }
     @starting-style {
       .gf-card:hover .gf-card-slide--second,

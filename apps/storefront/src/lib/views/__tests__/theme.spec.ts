@@ -68,6 +68,7 @@ describe("themeSettings", () => {
       chip_style: "lined",
       media_ground: "page",
       density: "compact",
+      motion: "lively",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -111,6 +112,8 @@ describe("themeSettings", () => {
       media_ground: "well",
       // adr/0067 Ek 2026-11-16: today's room
       density: "airy",
+      // adr/0067 Ek 2026-11-18: today's motion
+      motion: "calm",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -319,6 +322,7 @@ describe("themeView", () => {
         chip_style: "filled",
         media_ground: "well",
         density: "airy",
+        motion: "calm",
       },
     })
     expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")
