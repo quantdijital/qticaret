@@ -267,7 +267,8 @@ describe("a product picture's background", () => {
     services = { ...SERVICES, tasks: [task([])] }
     const first = tile()
     const dialog = await openDialog(first.user)
-    expect(within(dialog).getByText(/Bağla|bağlayabilir/)).toBeInTheDocument()
+    expect(within(dialog).getByText(/arka planı tek tıkla temizleyebilirsiniz/)).toBeInTheDocument()
+    expect(within(dialog).getByRole("link", { name: "Bağla" })).toBeInTheDocument()
     expect(
       within(dialog).queryByRole("button", { name: "Arka planı temizle" })
     ).not.toBeInTheDocument()

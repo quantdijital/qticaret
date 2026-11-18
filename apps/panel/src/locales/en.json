@@ -11413,7 +11413,11 @@
       "edited": "Edited with AI",
       "source": "Source",
       "derivedFrom": "Made from: {{name}}",
-      "originalGone": "Original image is gone (deleted)."
+      "originalGone": "Original image is gone (deleted).",
+      "hint": {
+        "text": "Connect an AI service to remove backgrounds in one click.",
+        "ownerOnly": "With an AI service connected, backgrounds can be removed in one click; the store owner can connect one."
+      }
     }
   }
 }

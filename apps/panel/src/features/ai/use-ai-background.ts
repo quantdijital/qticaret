@@ -1,6 +1,7 @@
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useRef, useState } from "react"
 import { AI_KEY, aiServicesQuery } from "@/features/ai/api/ai"
+import { hintClosed } from "@/features/ai/hint-state"
 import { acceptSuggestion, dismissSuggestion, requestImageJob } from "@/features/ai/api/suggestions"
 import type { AiFailure } from "@/features/ai/api/suggestions"
 import { mediaDetailQuery } from "@/features/media/api/media"
@@ -49,7 +50,9 @@ export function useBackgroundTask(enabled = true) {
     const made = services.data?.services.find((each) => each.id === service)?.backgrounds
     return (view?.options ?? []).filter((each) => made?.includes(each) ?? true)
   }
-  return { allowed: view?.allowed ?? false, view, optionsOf }
+  // No service and the connect tip closed for good: the action goes, as the AI button does
+  const gone = (view?.usable.length ?? 0) === 0 && hintClosed()
+  return { allowed: (view?.allowed ?? false) && !gone, view, optionsOf }
 }
 
 export type AiBackgroundState =

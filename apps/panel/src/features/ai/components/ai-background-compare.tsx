@@ -10,7 +10,7 @@ const B = "ai.background"
 
 /** A checkerboard under a transparent picture, as image editors show "no background". */
 export const CHECKER_CLASS =
-  "bg-[repeating-conic-gradient(var(--color-muted)_0_25%,var(--color-background)_0_50%)] bg-[length:16px_16px]"
+  "bg-[repeating-conic-gradient(var(--color-border)_0_25%,var(--color-background)_0_50%)] bg-[length:16px_16px]"
 
 function Frame({
   caption,
@@ -88,7 +88,7 @@ export function AiBackgroundCompare({ before, state, transparent }: AiBackground
       <Frame
         caption={t(`${B}.after`)}
         className={
-          state.status === "ready" ? (transparent ? CHECKER_CLASS : "bg-white") : "bg-muted"
+          state.status === "ready" ? (transparent ? CHECKER_CLASS : "bg-card") : "bg-muted"
         }
       >
         {after}

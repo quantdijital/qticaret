@@ -34,7 +34,7 @@ export function AiEditedBadge({ look = "full", className }: AiEditedBadgeProps) 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium",
+        "inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium whitespace-nowrap",
         className
       )}
     >

@@ -109,7 +109,7 @@ export function AiBackgroundDialog({
           <DialogDescription>{t(`${B}.description`)}</DialogDescription>
         </DialogHeader>
         {usable.length === 0 ? (
-          <AiConnectHint onClose={close} />
+          <AiConnectHint onClose={close} words="ai.background.hint" />
         ) : (
           <div className="flex min-w-0 flex-col gap-4">
             <div className="flex flex-wrap items-center gap-3">

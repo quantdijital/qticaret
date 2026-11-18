@@ -11413,7 +11413,11 @@
       "edited": "Yapay zekâyla düzenlendi",
       "source": "Kaynak",
       "derivedFrom": "Türetilmiş: {{name}}",
-      "originalGone": "Asıl görsel yok (silinmiş)."
+      "originalGone": "Asıl görsel yok (silinmiş).",
+      "hint": {
+        "text": "Yapay zekâ servisi bağlarsanız arka planı tek tıkla temizleyebilirsiniz.",
+        "ownerOnly": "Yapay zekâ servisi bağlanırsa arka plan tek tıkla temizlenebilir; mağaza sahibi bağlayabilir."
+      }
     }
   }
 }
