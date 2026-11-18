@@ -81,10 +81,13 @@ export function useSubscribeWebhook() {
 
 /**
  * A new signing secret, shown once; the old one signs nothing more. The
- * person proves themselves again: whoever holds it signs as the shop.
+ * person proves themselves again: whoever holds it signs as the shop. The
+ * mutation holding it leaves the mutation cache as soon as nothing
+ * observes it (`gcTime: 0`).
  */
 export function useRotateWebhookSecret() {
   return useMutation({
+    gcTime: 0,
     mutationFn: (id: string) =>
       withReauth((extra) =>
         sdk.client.fetch<{ id: string; secret: string }>(
