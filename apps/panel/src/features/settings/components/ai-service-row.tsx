@@ -27,6 +27,14 @@ const NS = "ai.services"
 /** The columns a note under the row spans (as many as `AiServicesTable` has). */
 const AI_SERVICE_COLUMNS = 5
 
+/**
+ * Below `sm` the row is a small card: the name and what it can do, the
+ * (i) and the button beside them, the state under the name. The table's
+ * columns do not fit a phone without scrolling sideways.
+ */
+const PHONE_ROW =
+  "max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto_auto] max-sm:items-center max-sm:gap-x-3 max-sm:gap-y-1.5 max-sm:px-5 max-sm:py-2.5"
+
 /** The service's state in the words every provider account uses. */
 const stateOf = (status: AiServiceView["status"]): AccountState =>
   status === "not_connected" ? "not_configured" : status
@@ -82,19 +90,19 @@ export function AiServiceRow({
 
   return (
     <>
-      <TableRow className={cn("h-14", below ? "border-b-0" : "")}>
-        <TableCell className="w-full max-w-0 py-2 pl-5">
+      <TableRow className={cn("sm:h-14", PHONE_ROW, below ? "border-b-0" : "")}>
+        <TableCell className="w-full max-w-0 py-2 pl-5 max-sm:col-start-1 max-sm:row-start-1 max-sm:w-auto max-sm:max-w-none max-sm:p-0">
           <div className="truncate font-medium">{name}</div>
-          <div className="hidden truncate text-[13px] text-muted-foreground md:block">
+          <div className="hidden truncate text-[13px] text-muted-foreground xl:block">
             {t(`${NS}.${service.id}.description`, { defaultValue: "" })}
           </div>
-          {/* A phone: what it can do in words, the badges' column is gone */}
-          <div className="truncate text-[13px] text-muted-foreground md:hidden">
+          {/* Narrower: what it can do in words, the badges' column is gone */}
+          <div className="text-[13px] text-muted-foreground max-sm:whitespace-normal sm:truncate xl:hidden">
             {capabilities.join(" · ")}
           </div>
         </TableCell>
-        <TableCell className="hidden py-2 md:table-cell">
-          <ul className="flex flex-wrap gap-1" aria-label={t(`${C}.columns.capabilities`)}>
+        <TableCell className="hidden py-2 xl:table-cell">
+          <ul className="flex gap-1" aria-label={t(`${C}.columns.capabilities`)}>
             {capabilities.map((label) => (
               <li key={label}>
                 <Badge variant="secondary">{label}</Badge>
@@ -102,7 +110,7 @@ export function AiServiceRow({
             ))}
           </ul>
         </TableCell>
-        <TableCell className="py-2 text-center">
+        <TableCell className="py-2 text-center max-sm:col-start-2 max-sm:row-start-1 max-sm:p-0">
           <InfoTip
             name={t(`${C}.dataFor`, { name })}
             hintId={hintId}
@@ -117,12 +125,12 @@ export function AiServiceRow({
             {t(service.data_note_key, { defaultValue: "" })} {t(`${C}.noPersonalData`)}
           </HiddenHint>
         </TableCell>
-        <TableCell className="py-2">
+        <TableCell className="py-2 max-sm:col-start-1 max-sm:row-start-2 max-sm:p-0">
           <div className="flex flex-wrap gap-1">
             <AccountBadges account={{ ...EMPTY, provider: service.id, state }} name={name} />
           </div>
         </TableCell>
-        <TableCell className="py-2 pr-5 text-right">
+        <TableCell className="py-2 pr-5 text-right max-sm:col-start-3 max-sm:row-span-2 max-sm:row-start-1 max-sm:p-0">
           <div className="flex items-center justify-end gap-1">
             {mayChange && !stored ? (
               <Button
@@ -207,10 +215,10 @@ export function AiServiceRow({
         </TableCell>
       </TableRow>
       {below ? (
-        <TableRow className="hover:bg-transparent">
+        <TableRow className="hover:bg-transparent max-sm:block">
           <TableCell
             colSpan={AI_SERVICE_COLUMNS}
-            className="px-5 pt-0 pb-2.5 text-[13px] whitespace-normal"
+            className="px-5 pt-0 pb-2.5 text-[13px] whitespace-normal max-sm:block"
           >
             {note ? <p className="text-muted-foreground">{note}</p> : null}
             {failure ? (

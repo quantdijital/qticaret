@@ -106,7 +106,8 @@ export function AiUsageCard({ className }: { className?: string }) {
       action={
         <>
           {data ? (
-            <dl className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            // A phone: one ceiling a line, so the pair never runs past the card
+            <dl className="flex flex-col gap-y-0.5 sm:flex-row sm:items-baseline sm:gap-x-4">
               <Ceiling label={t(`${U}.monthly`)} ceiling={data.monthly} />
               <Ceiling label={t(`${U}.daily.text`)} ceiling={data.daily.text} />
             </dl>
@@ -132,8 +133,10 @@ export function AiUsageCard({ className }: { className?: string }) {
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="pl-5">{t(`${U}.name`)}</TableHead>
-              <TableHead className="w-40 text-right sm:w-56">{t(`${U}.count`)}</TableHead>
-              <TableHead className="w-28 pr-5 text-right sm:w-36">{t(`${U}.cost`)}</TableHead>
+              <TableHead className="w-32 text-right sm:w-56">{t(`${U}.count`)}</TableHead>
+              <TableHead className="w-24 pr-5 text-right whitespace-normal sm:w-36">
+                {t(`${U}.cost`)}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

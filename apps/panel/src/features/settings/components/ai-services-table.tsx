@@ -10,7 +10,8 @@ const C = "ai.card"
 /**
  * The AI services the shop can connect with its own key, a row each
  * (adr/0071 §13): compact, the longer words behind (i). On a phone the
- * badges' column folds into the name's second line, so nothing scrolls
+ * badges' column folds into the name's second line below `xl`, and each
+ * row is a small card below `sm`, so nothing scrolls
  * sideways.
  */
 export function AiServicesTable({
@@ -30,11 +31,12 @@ export function AiServicesTable({
       {...(mayChange ? {} : { description: t(`${C}.ownerConnects`) })}
       flush
     >
-      <Table aria-label={t(`${C}.servicesTitle`)}>
-        <TableHeader>
+      <Table aria-label={t(`${C}.servicesTitle`)} className="max-sm:block">
+        {/* A phone: each row is a small card, the column names would name nothing */}
+        <TableHeader className="max-sm:hidden">
           <TableRow className="hover:bg-transparent">
             <TableHead className="pl-5">{t(`${C}.columns.service`)}</TableHead>
-            <TableHead className="hidden md:table-cell">{t(`${C}.columns.capabilities`)}</TableHead>
+            <TableHead className="hidden xl:table-cell">{t(`${C}.columns.capabilities`)}</TableHead>
             <TableHead className="w-12 text-center">{t(`${C}.columns.data`)}</TableHead>
             <TableHead>{t(`${C}.columns.status`)}</TableHead>
             <TableHead className="pr-5">
@@ -42,7 +44,7 @@ export function AiServicesTable({
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="max-sm:block">
           {services.map((service) => (
             <AiServiceRow
               key={service.id}
