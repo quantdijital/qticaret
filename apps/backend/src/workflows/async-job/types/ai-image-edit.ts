@@ -3,6 +3,7 @@ import { IMAGE_BACKGROUNDS } from "../../../lib/ai/registry/services"
 import { IMAGE_BACKGROUND_MAX_BATCH, IMAGE_SCENE_MAX_BATCH } from "../../../lib/ai/registry/tasks"
 import { SCENE_CODE } from "@qticaret/sector-packs"
 import { isPlanLimitError } from "../../../lib/errors"
+import { errorSummary, logger } from "../../../lib/logging"
 import { assertStorageFits } from "../../../lib/plan-limits"
 import { errorKeyOf } from "../../ai/bulk-alt-text"
 import { editImageWorkflow } from "../../ai/edit-image"
@@ -71,7 +72,9 @@ interface Failed {
  * quota, the storage, or what each picture's run checks again before it
  * spends anything (adr/0071 §8.1): the asker's role lowered, the package
  * no longer opening a way to pay, the queued service gone or paid
- * another way. The picture refused is not counted as failed.
+ * another way, the task or the scene no longer offered (a scene taken
+ * out of the shop's packs would fail every picture alike). The picture
+ * refused is not counted as failed.
  */
 const STOP_KEYS: ReadonlySet<string> = new Set([
   "plan.limit_reached",
@@ -80,6 +83,7 @@ const STOP_KEYS: ReadonlySet<string> = new Set([
   "ai.own_keys_not_in_plan",
   "ai.no_service",
   "ai.service_unavailable",
+  "ai.unknown_task",
 ])
 
 function stopKeyOf(error: unknown): string | null {
@@ -149,6 +153,8 @@ export const aiImageEdit: JobType<Input> = {
       } catch (error) {
         stoppedBy = stopKeyOf(error)
         if (stoppedBy === null) {
+          // The summary keeps a fixed key only; what went wrong goes to the log, redacted
+          logger.warn({ event: "ai.image_edit_picture_failed", err: errorSummary(error) })
           failed.push({ media_id: mediaId, key: "ai.provider_response_invalid" })
         }
       }

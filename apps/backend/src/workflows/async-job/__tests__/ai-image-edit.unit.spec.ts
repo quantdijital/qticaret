@@ -1,5 +1,6 @@
 import { MedusaError } from "@medusajs/framework/utils"
 import { PlanLimitError, ValidationError } from "../../../lib/errors"
+import { logger } from "../../../lib/logging"
 import { aiImageEdit } from "../types/ai-image-edit"
 import type { JobContext } from "../types"
 
@@ -170,6 +171,7 @@ describe("running the background job", () => {
     ],
     ["the queued service is gone", new ValidationError("ai.service_unavailable")],
     ["no service is left", new ValidationError("ai.no_service")],
+    ["the scene left the shop's packs", new ValidationError("ai.unknown_task")],
   ])("stops before the next picture once %s", async (_, refusal) => {
     run
       .mockImplementationOnce(() => Promise.resolve(succeeded("media_0")))
@@ -189,6 +191,26 @@ describe("running the background job", () => {
     const { summary } = await aiImageEdit.execute(context(), aiImageEdit.input.parse(INPUT))
     expect(run).toHaveBeenCalledTimes(3)
     expect(summary).toMatchObject({ skipped: 0, stopped_by: null })
+  })
+
+  it("logs an unexpected error, redacted, and keeps only a fixed key in the summary", async () => {
+    const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
+    run.mockImplementationOnce(() =>
+      Promise.reject(new Error("relation media_asset at db.internal:5432 does not exist"))
+    )
+    const { summary } = await aiImageEdit.execute(context(), aiImageEdit.input.parse(INPUT))
+    expect(summary).toMatchObject({
+      failed: [{ media_id: "media_0", key: "ai.provider_response_invalid" }],
+      stopped_by: null,
+    })
+    expect(JSON.stringify(summary)).not.toContain("db.internal")
+    expect(warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: "ai.image_edit_picture_failed",
+        err: expect.anything() as unknown,
+      })
+    )
+    warn.mockRestore()
   })
 
   it("refuses a job nobody queued", async () => {

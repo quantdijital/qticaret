@@ -4,7 +4,7 @@ import { findAiTask } from "../../lib/ai/registry/tasks"
 import { authorizeTaskStep } from "./steps/authorize-task"
 import { callServiceStep } from "./steps/call-service"
 import { claimQuotaStep, releaseUntakenStep } from "./steps/claim-quota"
-import { failOnCallErrorStep, recordUsageStep } from "./steps/record-usage"
+import { failOnCallErrorStep, linkUsageSuggestionStep, recordUsageStep } from "./steps/record-usage"
 import { saveSuggestionStep } from "./steps/save-suggestion"
 import { selectServiceStep } from "./steps/select-service"
 import { taskInputStep } from "./steps/task-input"
@@ -25,7 +25,9 @@ export interface SuggestTextInput {
  * A text suggestion for a record (adr/0071 §8): authorised, a service
  * chosen, the record read on the server, the call counted, made and
  * gated (the claim given back only when the service never took the job),
- * the suggestion kept for a decision and the attempt recorded.
+ * the attempt recorded (before the suggestion and never undone, so a
+ * failing suggestion step leaves the paid call's row; the suggestion's
+ * id is linked to it afterwards) and the suggestion kept for a decision.
  * Nothing reaches the record here: "Kullan" fills the panel's form.
  *
  * Neither `store` nor a retention may be turned on: the steps carry no
@@ -73,6 +75,21 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
   releaseUntakenStep(
     transform({ claimed, outcome }, ({ claimed, outcome }) => ({ claimed, outcome }))
   )
+  // Before the suggestion, with no undo: a failing suggestion step cannot roll back a paid call's row
+  const usage = recordUsageStep(
+    transform({ input, authorized, chosen, outcome }, ({ input, authorized, chosen, outcome }) => ({
+      task: authorized.task,
+      capability: authorized.capability,
+      service: chosen.service,
+      funding: chosen.funding,
+      outcome,
+      entity_type: input.entity_type,
+      entity_id: input.entity_id,
+      suggestion_id: null,
+      user_id: input.user_id,
+      remember: chosen.remember,
+    }))
+  )
   const suggestion = saveSuggestionStep(
     transform({ input, chosen, prompt, outcome }, ({ input, chosen, prompt, outcome }) => ({
       task: input.task,
@@ -85,22 +102,11 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       user_id: input.user_id,
     }))
   )
-  recordUsageStep(
-    transform(
-      { input, authorized, chosen, outcome, suggestion },
-      ({ input, authorized, chosen, outcome, suggestion }) => ({
-        task: authorized.task,
-        capability: authorized.capability,
-        service: chosen.service,
-        funding: chosen.funding,
-        outcome,
-        entity_type: input.entity_type,
-        entity_id: input.entity_id,
-        suggestion_id: suggestion.id,
-        user_id: input.user_id,
-        remember: chosen.remember,
-      })
-    )
+  linkUsageSuggestionStep(
+    transform({ usage, suggestion }, ({ usage, suggestion }) => ({
+      usage_id: usage.usage_id,
+      suggestion_id: suggestion.id,
+    }))
   )
   failOnCallErrorStep(
     transform({ chosen, outcome }, ({ chosen, outcome }) => ({

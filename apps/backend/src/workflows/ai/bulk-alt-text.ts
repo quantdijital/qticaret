@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { z } from "@medusajs/framework/zod"
 import { IMAGE_ALT_BULK_MAX, IMAGE_ALT_TEXT_TASK } from "../../lib/ai/registry/tasks"
+import { errorSummary, logger } from "../../lib/logging"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
 import { MEDIA_MODULE } from "../../modules/media"
@@ -113,6 +114,8 @@ export async function runBulkAltText(
         summary.stopped = key
         break
       }
+      // The summary counts it only; what went wrong goes to the log, redacted
+      logger.warn({ event: "ai.alt_text_image_failed", key, err: errorSummary(error) })
       summary.failed += 1
     }
     await deps.progress(Math.round(((index + 1) / eligible.length) * 100))
