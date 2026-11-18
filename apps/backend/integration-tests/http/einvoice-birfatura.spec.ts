@@ -76,16 +76,25 @@ medusaIntegrationTestRunner({
       const { data } = await getContainer()
         .resolve("query")
         .graph({ entity: "order", fields: ["display_id"], filters: { id } })
-      return { id, number: (data[0] as { display_id: number }).display_id }
+      // Read loosely: whatever type the generated graph types give it, it is the order's number
+      return { id, number: Number((data[0] as { display_id?: unknown } | undefined)?.display_id) }
     }
 
+    // The test shop sends no e-mail (the "told" check reads the message kept as skipped),
+    // whatever transport the machine's environment names (as einvoice-issue.spec.ts)
+    const transport = process.env["EMAIL_TRANSPORT"]
+
     beforeAll(async () => {
+      Reflect.deleteProperty(process.env, "EMAIL_TRANSPORT")
       files = await startBirfaturaFiles()
       process.env["BIRFATURA_BASE_URL"] = files.origin
     })
 
     afterAll(async () => {
       Reflect.deleteProperty(process.env, "BIRFATURA_BASE_URL")
+      if (transport !== undefined) {
+        process.env["EMAIL_TRANSPORT"] = transport
+      }
       await files.close()
     })
 

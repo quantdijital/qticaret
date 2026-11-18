@@ -1,4 +1,5 @@
-import type { MedusaRequest } from "@medusajs/framework/http"
+import { validateAndTransformBody } from "@medusajs/framework/http"
+import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { fakeResponse } from "../../../../api/http/__tests__/fakes"
 import { POST as orderStatus } from "../../../../api/hooks/birfatura/api/orderStatus/route"
 import { POST as paymentMethods } from "../../../../api/hooks/birfatura/api/paymentMethods/route"
@@ -104,6 +105,32 @@ describe("BirFatura's documented examples (Özel Entegrasyon API)", () => {
       BirfaturaOrdersBody.safeParse({ ...examples.orders.request, orderStatusId: "x" }).success
     ).toBe(false)
     expect(BirfaturaInvoiceLinkBody.safeParse({ orderId: 1 }).success).toBe(false)
+  })
+
+  it("ignores an extra field through Medusa's own validator too, which makes object schemas strict", async () => {
+    const through = async (
+      schema: Parameters<typeof validateAndTransformBody>[0],
+      body: unknown
+    ) => {
+      const req = { body } as MedusaRequest
+      let failed: unknown = null
+      await validateAndTransformBody(schema)(req, {} as MedusaResponse, (error?: unknown) => {
+        failed = error ?? null
+      })
+      return { failed, body: req.validatedBody }
+    }
+
+    const extra = await through(BirfaturaOrdersBody, { ...examples.orders.request, Source: "x" })
+    const broken = await through(BirfaturaOrdersBody, {
+      ...examples.orders.request,
+      endDateTime: 5,
+    })
+    const missing = await through(BirfaturaInvoiceLinkBody, { orderId: 1, Extra: true })
+
+    expect(extra.failed).toBeNull()
+    expect(extra.body).toEqual(examples.orders.request)
+    expect(broken.failed).not.toBeNull()
+    expect(missing.failed).not.toBeNull()
   })
 
   it("reads the documented dates and range", () => {

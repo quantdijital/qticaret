@@ -36,7 +36,8 @@ export async function findBirfaturaInvoice(
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
     fields: ["id"],
-    filters: { display_id: ref.display_id },
+    // Query takes the number as text, as `store/order-lookup` does
+    filters: { display_id: String(ref.display_id) },
   })
   const orderId = (data[0] as { id?: string } | undefined)?.id
   if (!orderId) {
