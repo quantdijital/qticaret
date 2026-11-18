@@ -2,8 +2,8 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
-/** Who issues the shop's invoices (F8, adr/0034 §1). */
-export const INVOICING_PROVIDERS = ["none", "parasut", "external"] as const
+/** Who issues the shop's invoices (F8, adr/0034 §1; BirFatura pulls them, adr/0072). */
+export const INVOICING_PROVIDERS = ["none", "parasut", "birfatura", "external"] as const
 export type InvoicingProvider = (typeof INVOICING_PROVIDERS)[number]
 
 /**
@@ -85,6 +85,55 @@ export function useDisconnectParasut() {
       ),
     onSuccess: (answer) => {
       client.setQueryData(KEY, answer.parasut)
+    },
+  })
+}
+
+/**
+ * `GET /admin/einvoice/birfatura` (adr/0072): whether a connection password
+ * was made and when, and BirFatura's last pull. Never the password itself.
+ */
+export interface BirfaturaStatus {
+  /** "unreadable": the server's key changed and the password no longer opens; make a new one. */
+  token: { state: string; made_at: string } | null
+  last_pull: { at: string; orders: number } | null
+}
+
+const BIRFATURA_KEY = ["einvoice", "birfatura"] as const
+const BIRFATURA_URL = "/admin/einvoice/birfatura"
+
+export const birfaturaStatusQuery = () =>
+  queryOptions({
+    queryKey: BIRFATURA_KEY,
+    queryFn: async () =>
+      (await sdk.client.fetch<{ birfatura: BirfaturaStatus }>(BIRFATURA_URL)).birfatura,
+    staleTime: 30_000,
+  })
+
+/** The address typed into BirFatura: the backend shares the panel's origin (adr/0022 §4). */
+export const birfaturaSiteUrl = (origin: string): string => `${origin}/hooks/birfatura`
+
+/**
+ * Makes the connection password, or a new one in its place (the old one
+ * stops at once); the owner proves it again. The password comes back in
+ * this answer only and is never put in the query cache. The mutation that
+ * holds it is dropped from the mutation cache as soon as nothing observes
+ * it (`gcTime: 0`): once the dialog closes and resets it, it is gone.
+ */
+export function useMakeBirfaturaToken() {
+  const client = useQueryClient()
+  return useMutation({
+    gcTime: 0,
+    mutationFn: () =>
+      withReauth((extra) =>
+        sdk.client.fetch<{ token: string; birfatura: BirfaturaStatus }>(`${BIRFATURA_URL}/token`, {
+          method: "POST",
+          body: {},
+          ...extra,
+        })
+      ),
+    onSuccess: (answer) => {
+      client.setQueryData(BIRFATURA_KEY, answer.birfatura)
     },
   })
 }

@@ -2605,6 +2605,7 @@
         "providers": {
           "none": "Off",
           "parasut": "Paraşüt",
+          "birfatura": "BirFatura",
           "external": "My own program (write-back)"
         },
         "triggers": {
@@ -2614,7 +2615,8 @@
         "hints": {
           "none": "No invoice is issued. If you issue invoices elsewhere (e.g. Luca), pick \"My own program\"; their number and PDF are entered on the order's invoice card.",
           "parasut": "Invoices are issued in your Paraşüt account; Paraşüt decides e-Fatura or e-Arşiv.",
-          "external": "Invoices are issued in your own program (e.g. through BirFatura) or by hand; their number and PDF are written back here."
+          "birfatura": "BirFatura pulls the orders from your shop and you issue the invoice in your BirFatura account; its number and PDF come back here by themselves. Switching to another program removes the connection password.",
+          "external": "Invoices are issued in your own program or by hand; their number and PDF are written back here."
         },
         "triggerHints": {
           "shipped": "Issued when the parcel leaves; until then the order can be edited and a cancellation leaves no invoice. Cash on delivery is invoiced once delivered.",
@@ -2653,6 +2655,42 @@
         "disconnected": "Paraşüt disconnected.",
         "working": "Invoices are issued in this Paraşüt account. If the connection fails, test it first; if it stays broken, connect again with a new code."
       },
+      "birfatura": {
+        "title": "BirFatura connection",
+        "description": "BirFatura pulls the orders from this address with the connection password. Your BirFatura sign-in password never comes here.",
+        "site": "Site address",
+        "siteHint": "Paste it into the shop's site address field in BirFatura.",
+        "password": {
+          "label": "Connection password",
+          "none": "Not made yet.",
+          "made": "Made",
+          "since": "{{when}}",
+          "unreadable": "The stored password can no longer be read; BirFatura cannot pull orders. Renew it and enter the new one in BirFatura.",
+          "ownerOnly": "Only the shop owner can make the connection password.",
+          "make": "Make connection password",
+          "renew": "Renew"
+        },
+        "lastPull_one": "Last pull: {{when}} · {{count}} order",
+        "lastPull_other": "Last pull: {{when}} · {{count}} orders",
+        "neverPulled": "BirFatura has not pulled any orders yet. Connect it with the steps below; once connected, orders ready to invoice reach BirFatura.",
+        "steps": {
+          "open": "In BirFatura, open Ayarlar > Mağaza Ayarları > Özel Entegrasyon > Yeni Mağaza Ekle.",
+          "fill": "Enter any name as the shop name, the connection password as API Şifresi and the address above as the site address.",
+          "save": "Press Doldur, Test Et and Kaydet. The order state to pull is \"Faturaya hazır\"."
+        },
+        "dialog": {
+          "renewTitle": "Renew the connection password?",
+          "renewHint": "The old password stops working at once. BirFatura cannot pull orders until you enter the new one there.",
+          "renew": "Make a new password",
+          "madeTitle": "Connection password",
+          "madeHint": "Paste it into the shop's API Şifresi field in BirFatura.",
+          "once": "This password will not be shown again. If it is lost, renew it.",
+          "copy": "Copy the password",
+          "copied": "Password copied.",
+          "copyFailed": "Could not copy; select the password and copy it yourself.",
+          "done": "Copied, close"
+        }
+      },
       "external": {
         "title": "Your own program",
         "description": "Your program connects with a key you open in Settings > External API.",
@@ -2666,7 +2704,8 @@
         "title": "No invoices issued",
         "description": "Pick a program and the orders' invoices are issued on their own, or wait for you.",
         "parasut": "Paraşüt: issued in your Paraşüt account; the PDF comes to the order and the customer.",
-        "external": "My own program: issued through BirFatura and the like, or by hand; the number and PDF are written here.",
+        "birfatura": "BirFatura: your BirFatura account pulls the orders and you issue the invoice there; its number and PDF come back here.",
+        "external": "My own program: issued with your own program or by hand; the number and PDF are written here.",
         "manual": "If you issue invoices by hand (e.g. Luca), pick \"My own program\": each order's invoice card waits for its number and PDF."
       },
       "carriers": {
@@ -4422,7 +4461,8 @@
       },
       "providers": {
         "parasut": "Paraşüt",
-        "external": "Your own program"
+        "external": "Your own program",
+        "birfatura": "BirFatura"
       },
       "types": {
         "e_archive": "e-Arşiv",
@@ -4477,6 +4517,23 @@
         "total": "Total"
       },
       "returnNeeded": "The order was canceled but its invoice stands. If your own program issued it, cancel it there (an e-Arşiv within 8 days of reaching the buyer). Past that, or for an e-Fatura, correct the books with the proper document.",
+      "birfatura": {
+        "waiting": "Waiting for BirFatura to pull the order and issue the invoice; its number and PDF come here by themselves. You can also enter it by hand.",
+        "canceled": "The order was canceled; the invoice had been given to BirFatura. Check in BirFatura: if it was issued, cancel it (e-Arşiv: within 8 days of reaching the buyer) or issue a return document.",
+        "problem": "BirFatura's report could not be processed ({{code}}). Look at the invoice in BirFatura and enter its number and PDF by hand.",
+        "problems": {
+          "einvoice_phone_missing": "The order has no mobile number; BirFatura does not take an order without one. Enter the invoice by hand.",
+          "einvoice_address_missing": "The order has no billing address; it was not given to BirFatura. Enter the invoice by hand.",
+          "einvoice_number_missing": "BirFatura issued the invoice but sent no number. Enter the number and the PDF by hand.",
+          "einvoice_pdf_download_failed": "The invoice number was kept but BirFatura's PDF could not be downloaded. Add the PDF by hand.",
+          "einvoice_series_mismatch": "The number BirFatura sent does not start with the web sales series (Settings > E-Fatura). Check the series in BirFatura and enter the number by hand.",
+          "einvoice_already_issued": "BirFatura reported this invoice again under another number; the stored number was kept. Check BirFatura for a double invoice.",
+          "einvoice_number_taken": "The number BirFatura sent belongs to another invoice. Look at the invoice in BirFatura.",
+          "einvoice_number_invalid": "The number BirFatura sent is not in GİB's form. Enter the number by hand.",
+          "einvoice_number_year": "The year in BirFatura's number does not match the issue date. Enter the number by hand.",
+          "einvoice_issued_at_invalid": "BirFatura's issue date could not be read. Enter the number and the date by hand."
+        }
+      },
       "seeDraft": "See the draft",
       "draft": {
         "title": "Invoice draft {{number}}",

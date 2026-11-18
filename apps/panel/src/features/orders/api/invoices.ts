@@ -11,7 +11,7 @@ export interface InvoiceRecord {
   /** A sale of what an exchange sent instead (E6b): its own invoice beside the order's first. */
   for_exchange?: boolean
   /** An invoice a test program issued on a development database may still name it: shown as "—". */
-  provider: "parasut" | "external"
+  provider: "parasut" | "external" | "birfatura"
   status: "pending" | "issuing" | "issued" | "failed" | "cancelled" | "waived"
   /** A sale's e-document; a return's gider pusulası or a company's return invoice. */
   document_type: "e_invoice" | "e_archive" | "expense_voucher" | "return_invoice" | null
