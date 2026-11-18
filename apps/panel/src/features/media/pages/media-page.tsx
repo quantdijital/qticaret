@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi, useNavigate } from "@tanstack/react-router"
-import { Upload } from "lucide-react"
+import { Sparkles, Upload } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -18,8 +18,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@qticaret/admin-ui/ui/dialog"
+import { aiServicesQuery } from "@/features/ai/api/ai"
 import { useCan } from "@/features/auth/api/staff"
+import { ALT_TEXT_TASK } from "@/features/media/api/alt-review"
 import { MEDIA_PAGE_SIZE, mediaListQuery } from "@/features/media/api/media"
+import { AltReviewDialog } from "@/features/media/components/alt-review-dialog"
 import { MediaDetailDialog } from "@/features/media/components/media-detail-dialog"
 import { MediaGrid } from "@/features/media/components/media-grid"
 import { UploadZone } from "@/features/media/components/upload-zone"
@@ -75,6 +78,9 @@ export function MediaPage() {
   const page = (search.page ?? 1) - 1
   const list = useQuery(mediaListQuery({ q, page }))
   const [uploading, setUploading] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
+  // Only for a role the alt text task allows (owner, admin); a quiet button beside upload
+  const altTask = useQuery(aiServicesQuery()).data?.tasks.find((each) => each.id === ALT_TEXT_TASK)
   const walk = useRecordWalk(list.data?.media, (asset) => asset.id)
   const setSearch = (next: { q?: string; page?: number }) => {
     void navigate({
@@ -99,10 +105,32 @@ export function MediaPage() {
       {t("media.uploadAction")}
     </Button>
   ) : null
+  const review = altTask?.allowed ? (
+    <Button
+      variant="outline"
+      onClick={() => {
+        setReviewing(true)
+      }}
+    >
+      <Sparkles />
+      {t("ai.altReview.open")}
+    </Button>
+  ) : null
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t("nav.media")} description={t("media.description")} action={upload} />
+      <PageHeader
+        title={t("nav.media")}
+        description={t("media.description")}
+        action={
+          review || upload ? (
+            <div className="flex flex-wrap gap-2">
+              {review}
+              {upload}
+            </div>
+          ) : null
+        }
+      />
       {/* adr/0061 Ek C14: near or at the package's storage limit */}
       <LimitNotice limit="storage_mb" />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
@@ -147,6 +175,7 @@ export function MediaPage() {
         ) : null}
       </section>
       <UploadDialog open={uploading} onOpenChange={setUploading} />
+      <AltReviewDialog open={reviewing} onOpenChange={setReviewing} />
       <MediaDetailDialog id={walk.open?.id ?? null} steps={walk.steps} onClose={walk.close} />
     </div>
   )

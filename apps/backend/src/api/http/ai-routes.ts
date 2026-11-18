@@ -2,7 +2,11 @@ import type { AuthenticatedMedusaRequest, MedusaRequest } from "@medusajs/framew
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { findAiTask } from "../../lib/ai/registry/tasks"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
-import { AdminGetAiUsage, AdminPostAiSuggestion } from "../admin/ai/validators"
+import {
+  AdminGetAiSuggestions,
+  AdminGetAiUsage,
+  AdminPostAiSuggestion,
+} from "../admin/ai/validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 
@@ -38,6 +42,11 @@ export const AI_ROUTES = [
     matcher: "/admin/ai/usage",
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetAiUsage, {})],
+  },
+  {
+    matcher: "/admin/ai/suggestions",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetAiSuggestions, {})],
   },
   {
     matcher: "/admin/ai/suggestions",

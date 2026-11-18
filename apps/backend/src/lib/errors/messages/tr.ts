@@ -738,6 +738,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "iyzico.secret_invalid":
     "iyzico gizli anahtarı kabul etmedi. Gizli anahtarı API anahtarıyla aynı sayfadan yeniden kopyalayın.",
   "media.alt_invalid": "Alt metinde kullanılamayan karakterler var.",
+  "media.alt_markup": "Alt metin bağlantı ya da HTML işareti (< >) içeremez.",
   "media.file_id_invalid": "Dosya adı geçerli değil.",
   "media.file_unknown": "Dosya bulunamadı.",
   "media.filename_invalid": "Dosya adını 1–200 karakter arasında, özel karakter kullanmadan yazın.",

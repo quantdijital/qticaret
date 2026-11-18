@@ -6,6 +6,9 @@ import { isCleanText } from "../../../lib/security"
 // segment, no way out of the storage folder or into another one
 const FILE_KEY = /^(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._-]{0,199}$/
 
+// An alt text is plain words read aloud: no markup, no address (defence in depth; it is escaped where shown)
+export const ALT_MARKUP_OR_LINK = /[<>]|https?:\/\/|\bwww\./i
+
 /** `?q=&kind=image&offset=&limit=`: the library's files, newest first. */
 export const AdminGetMedia = z
   .object({
@@ -41,6 +44,7 @@ export const AdminUpdateMedia = z
       .trim()
       .max(ALT_MAX)
       .refine((value) => isCleanText(value), "media.alt_invalid")
+      .refine((value) => !ALT_MARKUP_OR_LINK.test(value), "media.alt_markup")
       .transform((value) => value || null)
       .nullable()
       .optional(),

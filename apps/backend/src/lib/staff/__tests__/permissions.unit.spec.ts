@@ -147,14 +147,15 @@ describe("staff roles", () => {
       ["POST", "/admin/ai/suggestions/cdraft_1/accept"],
       ["POST", "/admin/ai/suggestions/cdraft_1/dismiss"],
       ["GET", "/admin/ai/usage"],
+      ["GET", "/admin/ai/suggestions"],
     ] as const
     const table = (role: "owner" | "admin" | "operations" | "readonly") =>
       routes.map(([method, path]) => allowed(role, method, path))
 
-    expect(table("owner")).toEqual([true, true, true, true, true])
-    expect(table("admin")).toEqual([true, true, true, true, true])
-    expect(table("operations")).toEqual([true, false, false, false, false])
-    expect(table("readonly")).toEqual([true, false, false, false, false])
+    expect(table("owner")).toEqual([true, true, true, true, true, true])
+    expect(table("admin")).toEqual([true, true, true, true, true, true])
+    expect(table("operations")).toEqual([true, false, false, false, false, false])
+    expect(table("readonly")).toEqual([true, false, false, false, false, false])
   })
 
   it("lets operations read and run the day, never change the shop's settings (KK1)", () => {
