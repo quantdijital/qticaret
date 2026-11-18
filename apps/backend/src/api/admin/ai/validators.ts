@@ -24,6 +24,17 @@ export const AdminPostAiSuggestion = z
   .strict()
 export type AdminPostAiSuggestionType = z.infer<typeof AdminPostAiSuggestion>
 
+/**
+ * The open suggestions to review (docs/22 "Aşama 5"): only an image's alt
+ * text has a review list so far; another task is refused.
+ */
+export const AdminGetAiSuggestions = z
+  .object({
+    task: z.enum(["image_alt_text"]),
+  })
+  .strict()
+export type AdminGetAiSuggestionsType = z.infer<typeof AdminGetAiSuggestions>
+
 /** A month's usage (`YYYY-MM`, Turkey); this month when left out. */
 export const AdminGetAiUsage = z.object({
   month: z.string().regex(MONTH_PATTERN).optional(),
