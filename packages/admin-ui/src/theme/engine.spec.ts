@@ -111,6 +111,28 @@ describe("resolveTheme", () => {
     }
   })
 
+  // A result notification sits on its status tint (patterns/toaster.tsx)
+  it.each(MODES)("keeps result notifications readable on their status tint in %s mode", (mode) => {
+    for (const preset of THEME_PRESETS) {
+      const { vars } = resolveTheme(settings(preset.brand_color), mode)
+      for (const name of ["success", "warning", "destructive", "info"]) {
+        const tint = color(vars, `--${name}-soft`)
+        const ratios = {
+          title: contrast(color(vars, "--popover-foreground"), tint),
+          description: contrast(color(vars, "--muted-foreground"), tint),
+          icon: contrast(color(vars, `--${name}`), tint),
+        }
+        expect({
+          preset: preset.key,
+          name,
+          title: ratios.title >= AA_TEXT,
+          description: ratios.description >= AA_TEXT,
+          icon: ratios.icon >= AA_LARGE,
+        }).toEqual({ preset: preset.key, name, title: true, description: true, icon: true })
+      }
+    }
+  })
+
   it.each(MODES)("keeps the primary fill apart from the page in %s mode", (mode) => {
     for (const preset of THEME_PRESETS) {
       const { vars } = resolveTheme(settings(preset.brand_color), mode)
