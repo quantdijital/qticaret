@@ -44,14 +44,14 @@ export interface SlideExtras {
 /** The products shown small under the buttons, with the shop's short labels. */
 function Picks({ catalog, t }: { catalog: SlideExtras["catalog"]; t: Translate }) {
   return (
-    <ul aria-label={t("home.hero_picks")} className="flex flex-wrap gap-2 pt-1">
+    <ul aria-label={t("home.hero_picks")} className="gf-mosaic-picks flex flex-wrap gap-2 pt-1">
       {catalog.picks.map((pick) => (
         <li key={pick.path}>
           <a
             href={pick.path}
             className="gf-mosaic-swatch grid w-16 justify-items-center gap-1 text-center text-2xs font-semibold text-text-2 no-underline"
           >
-            <span className="block size-14 overflow-hidden rounded-inner">
+            <span className="gf-mosaic-swatch-image block size-14 overflow-hidden rounded-inner">
               {pick.image && (
                 <ResponsiveImage
                   image={pick.image}
@@ -165,7 +165,7 @@ export function CatalogSlide({
           </p>
         )}
         {extras?.catalog.from && (
-          <p className="flex items-baseline gap-2">
+          <p className="gf-mosaic-from flex items-baseline gap-2">
             <b className="text-price font-extrabold tabular-nums">{extras.catalog.from}</b>
             <span className="text-sm text-text-3">{extras.t("home.hero_from")}</span>
           </p>

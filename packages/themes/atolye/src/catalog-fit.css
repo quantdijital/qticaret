@@ -1,0 +1,140 @@
+/*
+ * The catalogue opening's row from 1024 px (`catalog.css`): the list sets
+ * its height, never a slide. The opening's tile (one slide, or the stage
+ * of a few) is size-contained, so no slide's words (a long line, "from",
+ * two buttons, the products small) stretch the row, the list's rows apart
+ * and the side tiles long; nor is a short slide as tall as the stage's
+ * tallest any more. A floor holds the tile when the list is short; a tile
+ * with neither list nor side tiles keeps its own height (nothing else sets
+ * it). Inside, the words fit the tile:
+ * - a narrow tile's heading and "from" scale to the words' width (`cqi`
+ *   is the words' content width; at 1440 they stay at their tokens);
+ * - words with "from" or the products small (the first slide's extras)
+ *   sit closer, their heading a step smaller and their line two lines;
+ * - the products small show in one row under the buttons only while the
+ *   row fits in the room left;
+ * - last, any line still too long gives way: cut to the room, its last
+ *   line fading where the browser follows its own scrolling (below).
+ * Short words look as they did.
+ *
+ * Out of the layer: the words' spacing and alignment are utilities on the
+ * element (`gap-*`, `justify-center`, `lg:p-10`) which a component rule
+ * would not outrank.
+ */
+@media (min-width: 64rem) {
+  .gf-mosaic:is(:has(> .gf-mosaic-list), :has(> .gf-mosaic-side))
+    > :is(.gf-mosaic-feature, .gf-mosaic-stage) {
+    contain: size;
+    min-height: 28rem;
+  }
+  /* Each slide is a box of the row's height its words are fitted to */
+  .gf-mosaic:is(:has(> .gf-mosaic-list), :has(> .gf-mosaic-side)) .gf-mosaic-feature {
+    container: gf-slide / size;
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+@container gf-slide (width >= 0) {
+  .gf-mosaic-feature > div:not(.gf-mosaic-photo) {
+    container-type: inline-size;
+    min-height: 0;
+    /* Words taller than the tile start at its top: the heading stays in sight */
+    justify-content: safe center;
+  }
+  .gf-mosaic-feature > div:not(.gf-mosaic-photo) > * {
+    flex-shrink: 0;
+  }
+  .gf-mosaic-feature > div:not(.gf-mosaic-photo) > :is(h1, h2):not(.sr-only) {
+    font-size: min(var(--text-hero), 22cqi);
+  }
+  .gf-mosaic-from > b {
+    font-size: min(var(--text-price), 17cqi);
+  }
+  /* The line gives way last: cut to the room left */
+  .gf-mosaic-feature > div:not(.gf-mosaic-photo) > p.text-lead {
+    flex-shrink: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* The first slide's extras: closer, a smaller heading, a line of two lines */
+  .gf-mosaic-feature > div:not(.gf-mosaic-photo):has(> .gf-mosaic-picks, > .gf-mosaic-from) {
+    gap: var(--space-sm);
+  }
+  .gf-mosaic-feature
+    > div:not(.gf-mosaic-photo):has(> .gf-mosaic-picks, > .gf-mosaic-from)
+    > :is(h1, h2):not(.sr-only) {
+    font-size: min(var(--text-hero), 15cqi);
+  }
+  .gf-mosaic-feature
+    > div:not(.gf-mosaic-photo):has(> .gf-mosaic-picks, > .gf-mosaic-from)
+    > p.text-lead {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    /* Its ellipsis says it is cut; no fade over it */
+    animation: none;
+  }
+  /* The products small take the room left under the buttons, one row of
+     them shrunk to the width; none while a row does not fit (below) */
+  .gf-mosaic-picks {
+    container: gf-picks / size;
+    flex: 1 1 0;
+    flex-wrap: nowrap;
+    align-self: stretch;
+    min-height: 0;
+  }
+  .gf-mosaic-picks > li {
+    flex: 0 1 4rem;
+    min-width: 0;
+  }
+  .gf-mosaic-picks .gf-mosaic-swatch {
+    width: 100%;
+  }
+  .gf-mosaic-picks .gf-mosaic-swatch-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+}
+
+/* A narrow tile (1024 px to about 1180): its words a little wider */
+@container gf-slide (width < 36rem) {
+  .gf-mosaic-feature > div:not(.gf-mosaic-photo) {
+    padding-right: var(--space-lg);
+  }
+}
+
+/* A row of the products small no longer fits: none, kept from the tab order too */
+@container gf-picks (height < 5.5rem) {
+  .gf-mosaic-picks > li {
+    display: none;
+  }
+}
+
+/* A line cut to the room fades out at its foot. The timeline of its own
+   scrolling is only active while it overflows, so a whole line is never
+   faded; a browser without scroll timelines cuts it plain */
+@supports (animation-timeline: scroll()) {
+  @container gf-slide (width >= 0) {
+    .gf-mosaic-feature > div:not(.gf-mosaic-photo) > p.text-lead {
+      animation: gf-mosaic-cut linear both;
+      animation-timeline: scroll(self);
+    }
+  }
+}
+@keyframes gf-mosaic-cut {
+  from,
+  to {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5lh), transparent);
+  }
+}
+
+/* "From" keeps its amount on one line; the note goes under it when there is no room beside */
+.gf-mosaic-from {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+.gf-mosaic-from > * {
+  white-space: nowrap;
+}
