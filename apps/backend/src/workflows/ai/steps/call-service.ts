@@ -10,6 +10,8 @@ import { readVisionSource, visionImage } from "../../../lib/ai/image-input"
 import { failureOf } from "../../../lib/ai/outcome"
 import type { AiCapability } from "../../../lib/ai/registry/capabilities"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
+import type { CardAllowed } from "../../../lib/ai/product-card"
+import { runCardTask } from "../../../lib/ai/run-card"
 import { runTextTask } from "../../../lib/ai/run-text"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import { isCredentialProvider } from "../../../modules/integration-credentials/providers"
@@ -23,6 +25,8 @@ export interface CallServiceInput {
   data: string
   /** A vision task's picture: its stored file, read here (never an address, never its bytes in a step). */
   image_file_id?: string | null
+  /** A product card's lists, read on the server (task-input); its answer may name nothing else. */
+  allowed?: CardAllowed | null
 }
 
 /** How the call ended; never the key, the service's own words or its raw answer. */
@@ -143,13 +147,19 @@ export const callServiceStep = createStep(
         capability === "vision"
           ? [await pictureOf(container, input.image_file_id ?? null, input.service)]
           : undefined
+      const prompt = { system: input.system, data: input.data }
+      const withImages = images === undefined ? {} : { images }
+      // A product card is read against its closed schema and the shop's lists, never as free text
       const result = await withAiBreaker(input.service, () =>
-        runTextTask({
-          connector,
-          task,
-          prompt: { system: input.system, data: input.data },
-          ...(images === undefined ? {} : { images }),
-        })
+        task.gate === "product_card"
+          ? runCardTask({
+              connector,
+              task,
+              prompt,
+              allowed: input.allowed ?? { categories: [], attributes: [] },
+              ...withImages,
+            })
+          : runTextTask({ connector, task, prompt, ...withImages })
       )
       const outcome: CallOutcome = {
         ...base,

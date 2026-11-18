@@ -66,6 +66,22 @@ export const fakeTextConnector: TextConnector = {
         aiProviderError({ service: FAKE_SERVICE.id, key: "ai.timeout", code: "aborted" })
       )
     }
+    // A structured task (a product card) gets one JSON object, the same every time
+    if (request.json === true) {
+      const text = JSON.stringify({
+        title: FAKE_SEEN,
+        short_description: `${FAKE_SEEN}, sade bir tasarımla.`,
+        category: null,
+        attributes: {},
+      })
+      return Promise.resolve({
+        text,
+        usage: {
+          inputTokens: tokens(request.system) + tokens(request.data),
+          outputTokens: tokens(text),
+        },
+      })
+    }
     // An image with no text beside it still gets a description, as a real model would write
     const seen = request.images?.length && textsOf(request.data).length === 0 ? [FAKE_SEEN] : []
     const sentence = Array.from([...textsOf(request.data), ...seen].join(", "))

@@ -36,6 +36,7 @@ describe("AI registries (adr/0071 §2)", () => {
       "product_description",
       "image_alt_text",
       "image_background",
+      "product_from_photo",
     ])
     expect(findAiTask("test_text", "development")).toBeNull()
   })

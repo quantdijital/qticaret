@@ -1,4 +1,6 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
+import { readProductCard } from "../../lib/ai/product-card"
+import { findAiTask } from "../../lib/ai/registry/tasks"
 import { authorizeTaskStep } from "./steps/authorize-task"
 import { callServiceStep } from "./steps/call-service"
 import { claimQuotaStep, releaseUntakenStep } from "./steps/claim-quota"
@@ -14,6 +16,8 @@ export interface SuggestTextInput {
   entity_id: string
   service?: string | null | undefined
   option?: string | null | undefined
+  /** A product card's template (Aşama 6): its attributes are the only ones the card may fill. */
+  template_id?: string | null | undefined
   user_id: string
 }
 
@@ -48,6 +52,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       option: input.option,
       entity_type: input.entity_type,
       entity_id: input.entity_id,
+      template_id: input.template_id,
     }))
   )
   const claimed = claimQuotaStep(
@@ -61,6 +66,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       system: prompt.system,
       data: prompt.data,
       image_file_id: prompt.image_file_id,
+      allowed: prompt.allowed,
     }))
   )
   // Straight after the call: a later failure neither skips it nor undoes a call the service did
@@ -110,6 +116,10 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       service: chosen.service,
       status: outcome.status === "succeeded" ? ("draft" as const) : ("refused" as const),
       text: outcome.status === "succeeded" ? outcome.text : null,
+      // A product card (Aşama 6) also as its fields; its text is the same card as JSON
+      ...(findAiTask(input.task)?.gate === "product_card"
+        ? { card: outcome.status === "succeeded" ? readProductCard(outcome.text) : null }
+        : {}),
       problems: outcome.problems,
       alternatives: chosen.alternatives,
     }))

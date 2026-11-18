@@ -12,6 +12,7 @@ import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Wizard } from "@qticaret/admin-ui/patterns/wizard"
 import { Button } from "@qticaret/admin-ui/ui/button"
+import { templatesQuery } from "@/features/attributes/api"
 import { shopDefaultsQuery } from "@/features/products/api/lookups"
 import { LimitNotice } from "@/features/settings/components/limit-notice"
 import { usePlanFailureToast } from "@/features/settings/use-plan-failure"
@@ -25,6 +26,7 @@ import { MediaStep } from "./steps/media-step"
 import { PricingStep } from "./steps/pricing-step"
 import { ReviewStep } from "./steps/review-step"
 import { ShippingStep } from "./steps/shipping-step"
+import { missingRequired, withRequiredSwitches } from "./wizard-template"
 
 const STEP_VIEWS: Record<WizardStepKey, ComponentType> = {
   basics: BasicsStep,
@@ -67,14 +69,40 @@ export function ProductWizardPage() {
     setReached((was) => Math.max(was, index))
     window.scrollTo({ top: 0 })
   }
+  const templates = useQuery(templatesQuery())
+  const templateOf = (templateId: string) =>
+    (templates.data ?? []).find((each) => each.id === templateId) ?? null
+  // The template's required attributes left empty are marked under their fields, before
+  // anything is saved: the product is never made only for its attributes to be refused
+  const attributesComplete = (checked: WizardValues): boolean => {
+    const missing = missingRequired(templateOf(checked.template_id), checked.attributes)
+    for (const key of missing) {
+      form.setError(`attributes.${key}`, {
+        type: "required",
+        message: "products.errors.attributeRequired",
+      })
+    }
+    return missing.length === 0
+  }
   const next = async () => {
-    if (await form.trigger([...STEP_FIELDS[stepKey]])) {
+    const valid = await form.trigger([...STEP_FIELDS[stepKey]])
+    if (valid && (stepKey !== "basics" || attributesComplete(form.getValues()))) {
       goTo(current + 1)
     }
   }
+  const openProduct = (productId: string) =>
+    void navigate({ to: "/products/$id", params: { id: productId }, ignoreBlocker: true })
   const save = (publish: boolean) =>
     form.handleSubmit(
-      (submitted) => {
+      (checked) => {
+        if (!attributesComplete(checked)) {
+          goTo(stepKeys.indexOf("basics"))
+          return
+        }
+        const submitted = {
+          ...checked,
+          attributes: withRequiredSwitches(templateOf(checked.template_id), checked.attributes),
+        }
         if (!defaults.data) {
           // The shop's defaults could not be read: say so instead of doing nothing
           toast.error(t("products.wizard.defaultsFailed"))
@@ -92,8 +120,29 @@ export function ProductWizardPage() {
             },
           },
           {
-            onSuccess: ({ productId, stockProblem }) => {
-              toast.success(t(publish ? "products.wizard.published" : "products.wizard.drafted"))
+            onSuccess: ({ productId, stockProblem, attributesProblem, publishHeld }) => {
+              if (publishHeld) {
+                // Asked to publish, left a draft: said plainly, with the way to the product
+                toast.warning(
+                  `${t(attributesProblem ? "products.wizard.publishHeld" : "products.wizard.publishFailed")} ${errorText(t, publishHeld.reason)}`,
+                  {
+                    duration: 15_000,
+                    action: {
+                      label: t("products.wizard.openProduct"),
+                      onClick: () => {
+                        openProduct(productId)
+                      },
+                    },
+                  }
+                )
+              } else if (attributesProblem) {
+                toast.warning(
+                  `${t("products.wizard.attributesFailed")} ${errorText(t, attributesProblem.reason)}`
+                )
+              }
+              toast.success(
+                t(publish && !publishHeld ? "products.wizard.published" : "products.wizard.drafted")
+              )
               if (stockProblem?.kind === "no_location") {
                 toast.warning(t("products.wizard.stockNoLocation"))
               } else if (stockProblem) {
@@ -102,7 +151,7 @@ export function ProductWizardPage() {
                 )
               }
               // Saved: leaving is no longer a loss, so the guard stands aside
-              void navigate({ to: "/products/$id", params: { id: productId }, ignoreBlocker: true })
+              openProduct(productId)
             },
             onError: planFailure,
           }
