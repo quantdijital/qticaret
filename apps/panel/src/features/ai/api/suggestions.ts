@@ -6,6 +6,9 @@
  * record: accepting returns the text, the form saves it.
  */
 
+import { readProductCard } from "@/features/ai/product-card"
+import type { ProductCard } from "@/features/ai/product-card"
+
 /** The record a suggestion is for; the backend reads its public facts itself. */
 export interface AiEntity {
   /** The backend's `AI_ENTITY_TYPES`: a content page is `page`, a blog post is not one; `media` an image. */
@@ -21,6 +24,8 @@ export interface AiSuggestion {
   status: "draft"
   text: string
   alternatives: string[]
+  /** A product card from a photo (`product_from_photo`): its fields; none for a text. */
+  card?: ProductCard | null
 }
 
 /** A suggestion turned down by the gate (422) or a failed call (4xx/5xx), with what the panel may show. */
@@ -41,6 +46,8 @@ export interface AiSuggestionRequest {
   service?: string | undefined
   /** A ready option of the task (`short`), never free text. */
   option?: string | undefined
+  /** A product card's attribute template (`product_from_photo`): its attributes may be filled. */
+  templateId?: string | undefined
 }
 
 // Our own registry names; anything else from a body is not shown
@@ -97,6 +104,7 @@ export async function requestSuggestion(request: AiSuggestionRequest): Promise<A
       entity_id: request.entity.id,
       ...(request.service === undefined ? {} : { service: request.service }),
       ...(request.option === undefined ? {} : { option: request.option }),
+      ...(request.templateId === undefined ? {} : { template_id: request.templateId }),
     })
   )
   return {
@@ -106,6 +114,7 @@ export async function requestSuggestion(request: AiSuggestionRequest): Promise<A
     status: "draft",
     text: typeof data["text"] === "string" ? data["text"] : "",
     alternatives: namesOf(data["alternatives"]),
+    ...("card" in data ? { card: readProductCard(data["card"]) } : {}),
   }
 }
 

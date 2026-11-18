@@ -92,7 +92,12 @@ export function ProductWizardPage() {
             },
           },
           {
-            onSuccess: ({ productId, stockProblem }) => {
+            onSuccess: ({ productId, stockProblem, attributesProblem }) => {
+              if (attributesProblem) {
+                toast.warning(
+                  `${t("products.wizard.attributesFailed")} ${errorText(t, attributesProblem.reason)}`
+                )
+              }
               toast.success(t(publish ? "products.wizard.published" : "products.wizard.drafted"))
               if (stockProblem?.kind === "no_location") {
                 toast.warning(t("products.wizard.stockNoLocation"))

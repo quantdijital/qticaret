@@ -3315,7 +3315,33 @@
       "defaultValue": "Standard",
       "stockNoLocation": "The product was saved, but the shop has no default location, so its stock was not. Add one in Settings > Locations.",
       "defaultsFailed": "The shop's settings could not be read. Try again shortly.",
-      "kindHint": "Digital products and services skip the shipping step."
+      "kindHint": "Digital products and services skip the shipping step.",
+      "attributesFailed": "The product was saved but its attributes were not; complete them on the product page.",
+      "photo": {
+        "button": "Fill from photo",
+        "title": "Fill from photo",
+        "description": "Pick a product photo; AI suggests a name, short description, category and attributes. Price and stock are never suggested.",
+        "pick": "Choose photo",
+        "change": "Choose another photo",
+        "uploading": "Uploading photo…",
+        "uploadFailed": "The photo could not be uploaded.",
+        "photoAlt": "Chosen product photo",
+        "note": "The photo is sent to {{name}} for the suggestion. Keep in mind if it shows a person. Use fills the form and makes the photo the first picture; the product is created when you save.",
+        "fields": {
+          "title": "Product name",
+          "summary": "Short description",
+          "category": "Category",
+          "attributes": "Attributes"
+        },
+        "noCategory": "No matching category suggested",
+        "yes": "Yes",
+        "no": "No",
+        "used": "The form was filled. Review it before saving.",
+        "hint": {
+          "text": "Connect an AI service to fill the product form from a photo.",
+          "ownerOnly": "With an AI service connected the product form can be filled from a photo; the store owner can connect one."
+        }
+      }
     },
     "detail": {
       "title": "Product",
@@ -11302,7 +11328,8 @@
       "seo_title": "Search title",
       "seo_description": "Search description",
       "image_alt_text": "Alt text",
-      "image_background": "Background removal"
+      "image_background": "Background removal",
+      "product_from_photo": "Product card from a photo"
     },
     "options": {
       "short": "Short",

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
@@ -15,6 +16,8 @@ export interface AiSuggestionBoxProps {
   onRetry: () => void
   onTryWith: (service: string) => void
   onDismiss: () => void
+  /** A structured suggestion (a product card) drawn by its task; left out: the text, line by line. */
+  preview?: ReactNode
 }
 
 /**
@@ -24,7 +27,17 @@ export interface AiSuggestionBoxProps {
  * dene" only when the backend named other services, and only on a click.
  */
 export function AiSuggestionBox(props: AiSuggestionBoxProps) {
-  const { state, options = [], option, onOption, onUse, onRetry, onTryWith, onDismiss } = props
+  const {
+    state,
+    options = [],
+    option,
+    onOption,
+    onUse,
+    onRetry,
+    onTryWith,
+    onDismiss,
+    preview,
+  } = props
   const { t } = useTranslation()
   const busy = state.status === "loading"
   const alternatives =
@@ -74,9 +87,8 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
               tabIndex={0}
               className="flex max-h-[40vh] flex-col gap-2 overflow-y-auto rounded-md border bg-muted/40 px-3 py-2 text-sm break-words focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
-              {state.suggestion.text.split("\n").map((line, index) => (
-                <p key={index}>{line}</p>
-              ))}
+              {preview ??
+                state.suggestion.text.split("\n").map((line, index) => <p key={index}>{line}</p>)}
             </div>
             <p className="text-xs text-muted-foreground">{t("ai.suggest.note")}</p>
           </>

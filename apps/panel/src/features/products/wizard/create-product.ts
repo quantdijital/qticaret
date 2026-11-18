@@ -4,6 +4,7 @@ import { sdk } from "@/lib/sdk"
 import { parseMeasureInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import type { ShopDefaults } from "@/features/products/api/lookups"
 import type { JSONContent } from "@tiptap/react"
+import type { AttributeValue } from "@/features/attributes/types"
 import { hasSummaryText } from "@/features/products/summary-doc"
 import { DEFAULT_VARIANT_KEY } from "./schema"
 import type { WizardValues } from "./schema"
@@ -178,6 +179,26 @@ async function stockLevels(productId: string, values: WizardValues, locationId: 
   }
 }
 
+/**
+ * The new product's attribute template and its filled values (adr/0013),
+ * or null without a template. An empty field is left out: it was never
+ * given. The server checks each value against its definition.
+ */
+export function attributesBody(
+  values: Pick<WizardValues, "template_id" | "attributes">
+): { template_id: string; values: Record<string, AttributeValue> } | null {
+  if (!values.template_id) {
+    return null
+  }
+  const filled = Object.entries(values.attributes).filter(
+    ([, value]) => value !== null && value !== "" && !(Array.isArray(value) && value.length === 0)
+  )
+  return {
+    template_id: values.template_id,
+    values: Object.fromEntries(filled),
+  }
+}
+
 export interface CreateResult {
   productId: string
   /**
@@ -185,17 +206,39 @@ export interface CreateResult {
    * location, or writing the levels failed (with why). The page says so.
    */
   stockProblem: { kind: "no_location" } | { kind: "failed"; reason: unknown } | null
+  /** The product was saved but its attributes were not (a required one empty): why. */
+  attributesProblem: { reason: unknown } | null
 }
 
-/** Creates the product, then its catalog fields (`catalogBody`) and its stock at the default location. */
+type StockProblem = CreateResult["stockProblem"]
+
+// The stock typed, at the shop's default location; a failure leaves the product standing
+async function stockOf(productId: string, input: CreateInput): Promise<StockProblem> {
+  if (!input.values.manage_inventory) {
+    return null
+  }
+  if (!input.defaults.locationId) {
+    return { kind: "no_location" }
+  }
+  try {
+    await stockLevels(productId, input.values, input.defaults.locationId)
+    return null
+  } catch (reason) {
+    // The product stands; its stock is set on its page
+    return { kind: "failed", reason }
+  }
+}
+
+/** Creates the product, then its catalog fields (`catalogBody`), attributes and stock at the default location. */
 export function useCreateProduct() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: async (input: CreateInput): Promise<CreateResult> => {
       const { product } = await sdk.admin.product.create(productBody(input))
+      const path = `/admin/products/${encodeURIComponent(product.id)}`
       const catalog = catalogBody(input.values, idsByRow(input.values, product.variants))
       if (catalog) {
-        await sdk.client.fetch(`/admin/products/${encodeURIComponent(product.id)}/catalog`, {
+        await sdk.client.fetch(`${path}/catalog`, {
           method: "POST",
           body: catalog,
         })
@@ -203,18 +246,23 @@ export function useCreateProduct() {
       if (input.values.kind !== "physical" && input.publish) {
         await sdk.admin.product.update(product.id, { status: "published" })
       }
-      if (!input.values.manage_inventory) {
-        return { productId: product.id, stockProblem: null }
+      let attributesProblem: CreateResult["attributesProblem"] = null
+      const attributes = attributesBody(input.values)
+      if (attributes) {
+        try {
+          await sdk.client.fetch(`${path}/attributes`, {
+            method: "POST",
+            body: attributes,
+          })
+        } catch (reason) {
+          // The product stands; its attributes are filled on its page
+          attributesProblem = { reason }
+        }
       }
-      if (!input.defaults.locationId) {
-        return { productId: product.id, stockProblem: { kind: "no_location" } }
-      }
-      try {
-        await stockLevels(product.id, input.values, input.defaults.locationId)
-        return { productId: product.id, stockProblem: null }
-      } catch (reason) {
-        // The product stands; its stock is set on its page
-        return { productId: product.id, stockProblem: { kind: "failed", reason } }
+      return {
+        productId: product.id,
+        stockProblem: await stockOf(product.id, input),
+        attributesProblem,
       }
     },
     onSuccess: async () => {
