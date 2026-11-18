@@ -55,7 +55,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       ["tezgahacilis", "hero", "category_list"],
       ["guvenseridi", "trust_badges", "lined"],
       ["yenirafi", "products", "stage_list"],
-      ["kullanimagore", "categories", "collage"],
+      ["kullanimagore", "categories", "panels"],
       ["yakinplan", "featured_product", null],
       ["avrafi", "products", "carousel"],
       ["kamprafi", "products", "carousel"],
@@ -77,7 +77,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       home()
         .filter((_, index) => grounds[index] === "well")
         .map((each) => each.id)
-    ).toEqual(["kullanimagore", "markalar"])
+    ).toEqual(["markalar"])
   })
 
   it("joins only the three category rails as tabs: no other product sections side by side", () => {
@@ -124,9 +124,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     }
   })
 
-  it("draws top categories as the photo collage with their subcategories", () => {
+  it("draws top categories as the photo panels with their subcategories", () => {
     const cards = section("kullanimagore")
-    expect(cards).toMatchObject({ columns: 4, height: "medium", lead: "on", links: 5 })
+    expect(cards).toMatchObject({ columns: 3, height: "medium", lead: "on", links: 5 })
     const categories = sectorPack("cutlery")?.categories ?? []
     const named = (cards?.["category_ids"] as { $handle: string }[]).map((each) =>
       each.$handle.replace(/^category:/, "")

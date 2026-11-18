@@ -111,11 +111,13 @@ describe("the category panels' places", () => {
     expect(third?.wide).toEqual(["phone", "lg", "xl"])
   })
 
-  it("keeps at most five beside the lead, the rest in rows under it", () => {
+  it("keeps at most four beside the lead, the rest in rows under it", () => {
     const places = panelPlaces(8, true, 3, 1)
-    expect(places[0]?.rows).toBe(3)
-    expect(places.slice(1, 1 + BESIDE_MAX).map((place) => place.xl)).toEqual([6, 3, 3, 3, 3])
-    expect(places.slice(1 + BESIDE_MAX).map((place) => place.xl)).toEqual([6, 6])
+    expect(places[0]?.rows).toBe(2)
+    expect(places.slice(1, 1 + BESIDE_MAX).map((place) => place.xl)).toEqual([3, 3, 3, 3])
+    expect(places.slice(1 + BESIDE_MAX).map((place) => place.xl)).toEqual([4, 4, 4])
+    // Six: the lead and two rows of two, the sixth across the row under them
+    expect(panelPlaces(6, true, 3, 1).map((place) => place.xl)).toEqual([6, 3, 3, 3, 3, 12])
   })
 
   it("lays out rows without the lead, a phone two a row when asked", () => {

@@ -107,8 +107,8 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
         "/static/images/acilis-bileme.webp",
       ])
       expect(doc.home.find((section) => section.id === "kullanimagore")).toMatchObject({
-        variant: "collage",
-        columns: 4,
+        variant: "panels",
+        columns: 3,
         height: "medium",
         lead: "on",
         links: 5,

@@ -3,7 +3,7 @@
  * the lead on, the first panel stands on the left half, as tall as the
  * rows beside it; the others stack on the right half, one or two to a row
  * (an odd count leaves the first of them alone, across the half), at most
- * `BESIDE_MAX` of them; any more follow in rows filled edge to edge
+ * `BESIDE_MAX` (four) of them; any more follow in rows filled edge to edge
  * (`collageRows`). With the lead off every screen lays out the collage's
  * rows. Under 1024 px: one panel a row on a phone (two when the shop
  * asks), two on a tablet, the lead alone in its row.
@@ -16,8 +16,8 @@
 import { collageRows } from "./collage-rows"
 import type { CollageSpan } from "./collage-rows"
 
-/** The panels laid beside the lead at most; six categories in all fill it. */
-export const BESIDE_MAX = 5
+/** The panels laid beside the lead at most (two rows of two): a third row would stretch the lead past the page. */
+export const BESIDE_MAX = 4
 
 export type PanelScreen = "phone" | "tablet" | "lg" | "xl"
 

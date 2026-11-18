@@ -23,7 +23,7 @@ const XL: Record<PanelPlace["xl"], string> = {
   8: "xl:col-span-8",
   12: "xl:col-span-12",
 }
-const ROWS: Record<number, string> = { 2: "lg:row-span-2", 3: "lg:row-span-3" }
+const ROWS: Record<number, string> = { 2: "lg:row-span-2" }
 
 /** The share of the page a span of twelve shows, for the photo's `sizes`. */
 const vw = (span: number, wide: boolean) =>
