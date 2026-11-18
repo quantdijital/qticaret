@@ -1,0 +1,12 @@
+[
+  {
+    "code": "studio_table",
+    "name": { "tr": "Açık stüdyo masası", "en": "Bright studio table" },
+    "prompt": "a clean light grey studio tabletop with a soft seamless backdrop, even diffused studio lighting and a gentle natural shadow under the product"
+  },
+  {
+    "code": "daylight_surface",
+    "name": { "tr": "Doğal ışıklı yüzey", "en": "Daylight surface" },
+    "prompt": "a plain light wooden surface beside a window, soft natural daylight from the side, a calm out-of-focus neutral background"
+  }
+]
