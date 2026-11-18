@@ -1,27 +1,18 @@
 import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { fakeVkn, seededRandom } from "@qticaret/testing"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
-import { EINVOICE_MODULE } from "../../src/modules/einvoice"
-import type EinvoiceModuleService from "../../src/modules/einvoice/service"
 import { MESSAGING_MODULE } from "../../src/modules/messaging"
 import type MessagingModuleService from "../../src/modules/messaging/service"
-import { advanceOrder } from "../../src/scripts/seed/orders/advance"
-import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
-import { birfaturaClient, gibNumber, startBirfaturaFiles } from "../helpers/birfatura"
-import type { BirfaturaFiles } from "../helpers/birfatura"
+import { birfaturaClient, gibNumber } from "../helpers/birfatura"
+import { birfaturaShop } from "../helpers/birfatura-shop"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
-import { stockShop, stockedProduct } from "../helpers/stock"
-import type { StockShop } from "../helpers/stock"
-import { loadTrAddressFixture } from "../helpers/tr-address"
 
 jest.setTimeout(240 * 1000)
 
-const carrier = { title: "Örnek Kargo A.Ş.", tax_id: fakeVkn(seededRandom(72)) }
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const EXCHANGE_BASE = 1_000_000_000_000
 
@@ -30,87 +21,10 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
     const birfatura = birfaturaClient(http)
-    let shop: StockShop
-    let owner: Awaited<ReturnType<typeof createAdminUser>>
-    let variantId: string
-    let files: BirfaturaFiles
-
-    const einvoice = () => getContainer().resolve<EinvoiceModuleService>(EINVOICE_MODULE)
-    const invoiceOf = async (orderId: string, sourceId = orderId) =>
-      (await einvoice().listInvoices({ order_id: orderId, source_id: sourceId }))[0]
-    const settings = (provider: string) =>
-      http.post(
-        "/admin/platform-settings/invoicing",
-        { provider, trigger: "placed", carriers: { manual: carrier }, series: "ABC" },
-        { headers: owner.headers }
-      )
-    const makeToken = async () =>
-      (
-        await http.post<{ token: string }>(
-          "/admin/einvoice/birfatura/token",
-          {},
-          { headers: owner.headers }
-        )
-      ).data.token
-    /** An order paid and queued for BirFatura; its id and number. */
-    const paidOrder = async (paid = true) => {
-      const id = await placeOrder(getContainer(), {
-        regionId: shop.regionId,
-        salesChannelId: shop.salesChannelId,
-        shippingOptionId: shop.shippingOptionId,
-        items: [{ variant_id: variantId, quantity: 1 }],
-        email: "ayse@example.com",
-        address: {
-          first_name: "Ayşe",
-          last_name: "Yılmaz",
-          address_1: "Demo Sokak 1",
-          province: "İstanbul",
-          city: "Kadıköy",
-          phone: "+905551112233",
-        },
-      })
-      if (paid) {
-        await advanceOrder(getContainer(), id, "to_ship")
-        await eventually(() => invoiceOf(id), Boolean)
-      }
-      const { data } = await getContainer()
-        .resolve("query")
-        .graph({ entity: "order", fields: ["display_id"], filters: { id } })
-      // Read loosely: whatever type the generated graph types give it, it is the order's number
-      return { id, number: Number((data[0] as { display_id?: unknown } | undefined)?.display_id) }
-    }
-
-    // The test shop sends no e-mail (the "told" check reads the message kept as skipped),
-    // whatever transport the machine's environment names (as einvoice-issue.spec.ts)
-    const transport = process.env["EMAIL_TRANSPORT"]
-
-    beforeAll(async () => {
-      Reflect.deleteProperty(process.env, "EMAIL_TRANSPORT")
-      files = await startBirfaturaFiles()
-      process.env["BIRFATURA_BASE_URL"] = files.origin
-    })
-
-    afterAll(async () => {
-      Reflect.deleteProperty(process.env, "BIRFATURA_BASE_URL")
-      if (transport !== undefined) {
-        process.env["EMAIL_TRANSPORT"] = transport
-      }
-      await files.close()
-    })
-
-    beforeEach(async () => {
-      const container = getContainer()
-      await loadTrAddressFixture(container)
-      shop = await stockShop(container)
-      owner = await createAdminUser(http, container)
-      variantId = (await stockedProduct(container, shop, `bf-${String(Date.now())}`, 20, 120))
-        .variantId
-      await http.post(
-        "/admin/platform-settings/seo",
-        { canonical_host: "magaza.example.com" },
-        { headers: owner.headers }
-      )
-    })
+    const bf = birfaturaShop(http, getContainer)
+    const { einvoice, invoiceOf, settings, makeToken } = bf
+    const paidOrder = bf.order
+    bf.hooks()
 
     it("keeps its door shut: 404 until chosen, 401 without the token, the owner alone makes it", async () => {
       await settings("external")
@@ -120,7 +34,7 @@ medusaIntegrationTestRunner({
         http.post("/admin/einvoice/birfatura/token", {}, { headers: admin.headers })
       )
       const noProof = await settle(
-        http.post("/admin/einvoice/birfatura/token", {}, { headers: owner.plain })
+        http.post("/admin/einvoice/birfatura/token", {}, { headers: bf.state.owner.plain })
       )
       const token = await makeToken()
       const notChosen = await birfatura.pull(token)
@@ -158,7 +72,7 @@ medusaIntegrationTestRunner({
         token
       )
       const view = await http.get<{ birfatura: { token: unknown } }>("/admin/einvoice/birfatura", {
-        headers: owner.headers,
+        headers: bf.state.owner.headers,
       })
       const renewed = await makeToken()
       const old = await birfatura.pull(token)
@@ -248,27 +162,27 @@ medusaIntegrationTestRunner({
       const number = gibNumber("ABC", 72_001)
       const issued = await birfatura.link(token, {
         orderId: first.number,
-        faturaUrl: files.link("a"),
+        faturaUrl: bf.state.files.link("a"),
         faturaNo: number,
       })
       const again = await birfatura.link(token, {
         orderId: first.number,
-        faturaUrl: files.link("a"),
+        faturaUrl: bf.state.files.link("a"),
         faturaNo: number,
       })
       const another = await birfatura.link(token, {
         orderId: first.number,
-        faturaUrl: files.link("a"),
+        faturaUrl: bf.state.files.link("a"),
         faturaNo: gibNumber("ABC", 72_002),
       })
       const otherSeries = await birfatura.link(token, {
         orderId: other.number,
-        faturaUrl: files.link("b"),
+        faturaUrl: bf.state.files.link("b"),
         faturaNo: gibNumber("XYZ", 72_003),
       })
       const unknown = await birfatura.link(token, {
         orderId: 987_654_321,
-        faturaUrl: files.link("c"),
+        faturaUrl: bf.state.files.link("c"),
         faturaNo: gibNumber("ABC", 72_004),
       })
       const after = await birfatura.pull(token)
@@ -319,7 +233,7 @@ medusaIntegrationTestRunner({
       })
       const second = await birfatura.link(token, {
         orderId: EXCHANGE_BASE + order.number * 100 + 1,
-        faturaUrl: files.link("d"),
+        faturaUrl: bf.state.files.link("d"),
         faturaNo: gibNumber("ABC", 72_102),
       })
       const record = jest

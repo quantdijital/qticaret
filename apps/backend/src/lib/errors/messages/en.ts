@@ -660,6 +660,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.rate_limited": "Too many requests went to Paraşüt; it is tried again shortly.",
   "einvoice.unknown": "Invoice not found.",
   "einvoice.not_external": "This invoice is not issued by the shop's own program.",
+  "einvoice.waived": "No invoice is issued for this sale (gift cards alone, an advance).",
   "einvoice.cancelled": "This invoice was cancelled.",
   "einvoice.already_issued": "This invoice was issued under another number.",
   "einvoice.number_taken": "This invoice number belongs to another invoice.",

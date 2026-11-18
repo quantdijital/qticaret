@@ -52,6 +52,10 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     if (row.status === "cancelled") {
       throw new ConflictError("einvoice.cancelled")
     }
+    // A sale of gift cards alone: an advance, no invoice is cut for it (security review)
+    if (row.status === "waived") {
+      throw new ConflictError("einvoice.waived")
+    }
     if (row.status === "issued") {
       if (row.number === input.number) {
         return { changed: false }
@@ -259,9 +263,10 @@ export class InvoiceRecordsService extends InvoiceQueueService {
 
   /**
    * The order was canceled (adr/0034 §10). An external program's invoice
-   * not yet issued is cancelled here; one issued (or one BirFatura said it
-   * issued, its number still to come, adr/0072 §6) is left for a return
-   * document, and its id returned for staff to be told. A program's own
+   * not yet issued is cancelled here; one issued, one BirFatura said it
+   * issued, or one BirFatura's pull already handed out (it may be issued
+   * there, adr/0072 §6) is left for staff: marked, kept off the pull, and
+   * its id returned for them to be told. A program's own
    * is marked for the job to undo at the program, due at once unless a
    * worker holds it; a stopped one comes back for it.
    */
@@ -275,18 +280,25 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     const withdrawn = (await manager.execute(
       `UPDATE invoice SET status = 'cancelled', updated_at = now()
         WHERE order_id = ? AND kind = 'sale' AND provider IN ('external', 'birfatura')
-          AND status = 'pending' AND reported_at IS NULL AND deleted_at IS NULL
+          AND status = 'pending' AND reported_at IS NULL AND listed_at IS NULL
+          AND deleted_at IS NULL
        RETURNING id`,
       [orderId]
     )) as { id: string }[]
     // Once: asked again (the hourly sweep), an invoice already marked rings no bell twice
     const issued = (await manager.execute(
-      `UPDATE invoice SET last_error = 'einvoice.return_document_needed', updated_at = now()
+      `UPDATE invoice
+          SET last_error = 'einvoice.return_document_needed',
+              cancel_requested_at = CASE WHEN status = 'pending'
+                                         THEN COALESCE(cancel_requested_at, ?)
+                                         ELSE cancel_requested_at END,
+              updated_at = now()
         WHERE order_id = ? AND kind = 'sale' AND provider IN ('external', 'birfatura')
-          AND (status = 'issued' OR (status = 'pending' AND reported_at IS NOT NULL))
+          AND (status = 'issued'
+               OR (status = 'pending' AND (reported_at IS NOT NULL OR listed_at IS NOT NULL)))
           AND last_error IS DISTINCT FROM 'einvoice.return_document_needed' AND deleted_at IS NULL
        RETURNING id`,
-      [orderId]
+      [now, orderId]
     )) as { id: string }[]
     await manager.execute(
       `UPDATE invoice

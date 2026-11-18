@@ -33,6 +33,8 @@ describe("BirFatura's connection token (adr/0072 §3)", () => {
 
     expect(birfaturaTokenMatches(tokenFromHeader(undefined), stored)).toBe(false)
     expect(birfaturaTokenMatches(tokenFromHeader([stored, stored]), stored)).toBe(false)
+    // Node joins a header sent twice
+    expect(birfaturaTokenMatches(tokenFromHeader(`${stored}, ${stored}`), stored)).toBe(false)
     expect(birfaturaTokenMatches("", "")).toBe(false)
     expect(birfaturaTokenMatches(stored, null)).toBe(false)
   })

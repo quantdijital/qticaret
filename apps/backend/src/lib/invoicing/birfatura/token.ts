@@ -27,9 +27,10 @@ export function newBirfaturaToken(random: (size: number) => Buffer = randomBytes
 }
 
 /**
- * The `token` header as sent: one value, trimmed, lower case (a GUID's
- * letters are a case away from each other's); "" when missing, repeated
- * or not a string. Never read from the query or the body.
+ * The `token` header as sent: trimmed, lower case (a GUID's letters are a
+ * case away from each other's); "" when missing or not a string. Sent twice,
+ * Node joins the values as "a, b": that is no GUID and matches nothing.
+ * Never read from the query or the body.
  */
 export function tokenFromHeader(header: string | string[] | undefined): string {
   return typeof header === "string" ? header.trim().toLowerCase() : ""

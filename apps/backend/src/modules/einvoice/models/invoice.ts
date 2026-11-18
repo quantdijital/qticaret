@@ -109,6 +109,12 @@ export const Invoice = model
      * again, whatever the write-back makes of the rest.
      */
     reported_at: model.dateTime().nullable(),
+    /**
+     * When BirFatura's pull first handed it out (adr/0072 §6): from then on
+     * it may be issued there, so a canceled order's record is flagged for
+     * staff to check at BirFatura, never cancelled here unseen.
+     */
+    listed_at: model.dateTime().nullable(),
     /** A return's invoice: the sale's it returns. */
     original_invoice_id: model.text().nullable(),
     /** Waived: which of the accountant's exceptions applied, or an advance alone. */
@@ -118,6 +124,12 @@ export const Invoice = model
     { on: ["order_id", "kind", "source_id"], unique: true, where: "deleted_at IS NULL" },
     { on: ["status", "next_attempt_at"] },
     { on: ["order_id"] },
+    // BirFatura's due list (adr/0072 §3.10)
+    {
+      name: "IDX_invoice_birfatura_due",
+      on: ["provider", "kind", "status", "reported_at", "created_at"],
+      where: "deleted_at IS NULL",
+    },
     // A number the shop issues names one document: a sale's (GİB number), or
     // its gider pusulası serial. A company's return invoice is numbered in
     // that company's series, so two may share a number (the F15 security review)

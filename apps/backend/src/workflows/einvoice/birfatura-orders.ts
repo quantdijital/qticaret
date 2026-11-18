@@ -74,38 +74,64 @@ async function orderOf(
   return "problem" in mapped ? { code: mapped.problem } : { order: mapped.order }
 }
 
+/** How many pages of due invoices one pull reads at most. */
+export const MAX_PAGES = 5
+
+async function take(
+  container: Container,
+  invoice: PullableInvoice,
+  now: Date,
+  pulled: PulledOrders
+): Promise<void> {
+  let outcome: { order: BirfaturaOrder } | { code: string }
+  try {
+    outcome = await orderOf(container, invoice, now)
+  } catch (error) {
+    // One order that cannot be read never keeps the others from BirFatura
+    logger.warn({
+      event: "birfatura.order_failed",
+      invoice_id: invoice.id,
+      err: errorSummary(error),
+    })
+    outcome = { code: "einvoice.error" }
+  }
+  if ("code" in outcome) {
+    pulled.skipped.push({ invoice_id: invoice.id, code: outcome.code })
+    await serviceOf(container).noteProblem(invoice.id, outcome.code)
+    return
+  }
+  pulled.orders.push(outcome.order)
+  pulled.listed.push({
+    invoice_id: invoice.id,
+    order_id: invoice.order_id,
+    birfatura_id: outcome.order.OrderId,
+  })
+}
+
 export async function birfaturaOrders(
   container: Container,
   range: { start: Date; end: Date },
   now: Date = new Date()
 ): Promise<PulledOrders> {
   const service = serviceOf(container)
-  const due = await service.listBirfaturaDue(range, MAX_ORDERS_PER_PULL)
   const pulled: PulledOrders = { orders: [], listed: [], skipped: [] }
-  for (const invoice of due) {
-    let outcome: { order: BirfaturaOrder } | { code: string }
-    try {
-      outcome = await orderOf(container, invoice, now)
-    } catch (error) {
-      // One order that cannot be read never keeps the others from BirFatura
-      logger.warn({
-        event: "birfatura.order_failed",
-        invoice_id: invoice.id,
-        err: errorSummary(error),
-      })
-      outcome = { code: "einvoice.error" }
+  // Orders that cannot be listed (a phone missing…) never hold back the ones behind them:
+  // the pull reads on, a few pages at most, until it has a full answer
+  for (let page = 0; page < MAX_PAGES && pulled.orders.length < MAX_ORDERS_PER_PULL; page++) {
+    const due = await service.listBirfaturaDue(
+      range,
+      MAX_ORDERS_PER_PULL,
+      page * MAX_ORDERS_PER_PULL
+    )
+    for (const invoice of due) {
+      if (pulled.orders.length >= MAX_ORDERS_PER_PULL) {
+        break
+      }
+      await take(container, invoice, now, pulled)
     }
-    if ("code" in outcome) {
-      pulled.skipped.push({ invoice_id: invoice.id, code: outcome.code })
-      await service.noteProblem(invoice.id, outcome.code)
-      continue
+    if (due.length < MAX_ORDERS_PER_PULL) {
+      break
     }
-    pulled.orders.push(outcome.order)
-    pulled.listed.push({
-      invoice_id: invoice.id,
-      order_id: invoice.order_id,
-      birfatura_id: outcome.order.OrderId,
-    })
   }
   return pulled
 }

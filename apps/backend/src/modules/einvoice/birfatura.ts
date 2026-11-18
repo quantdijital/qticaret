@@ -22,11 +22,13 @@ export class InvoiceBirfaturaService extends InvoiceRecordsService {
   /**
    * Sale invoices BirFatura is to issue, queued (due, the hold rule passed)
    * within the range: not reported, not cancelled or asked to be; the
-   * oldest first, at most `limit`. No return's document ever.
+   * oldest first, `limit` of them after the first `skip` (the pull reads on
+   * past ones it cannot list). No return's document ever.
    */
   async listBirfaturaDue(
     range: { start: Date; end: Date },
-    limit: number
+    limit: number,
+    skip = 0
   ): Promise<PullableInvoice[]> {
     const rows = await this.listInvoices(
       {
@@ -41,6 +43,7 @@ export class InvoiceBirfaturaService extends InvoiceRecordsService {
         select: ["id", "order_id", "source_id", "created_at"],
         order: { created_at: "ASC", id: "ASC" },
         take: limit,
+        skip,
       }
     )
     return rows.map((row) => ({
@@ -73,7 +76,7 @@ export class InvoiceBirfaturaService extends InvoiceRecordsService {
   async birfaturaSale(orderId: string, sourceId: string) {
     const [row] = await this.listInvoices(
       { order_id: orderId, kind: "sale", source_id: sourceId, provider: "birfatura" },
-      { select: ["id", "status", "number", "reported_at"], take: 1 }
+      { select: ["id", "status", "number", "reported_at", "pdf_file_id"], take: 1 }
     )
     return row ?? null
   }
@@ -98,6 +101,30 @@ export class InvoiceBirfaturaService extends InvoiceRecordsService {
       [now, id]
     )) as unknown[]
     return rows.length > 0
+  }
+
+  /**
+   * The pull handed these out (adr/0072 §6): stamped the first time, so a
+   * canceled order's invoice that BirFatura may already have issued is
+   * flagged for staff, never cancelled here unseen (`requestCancel`).
+   */
+  @InjectTransactionManager()
+  async markListed(
+    ids: readonly string[],
+    now: Date = new Date(),
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    if (ids.length === 0) {
+      return
+    }
+    const manager = sharedContext.transactionManager as Executor
+    await manager.execute(
+      `UPDATE invoice SET listed_at = ?, updated_at = now()
+        WHERE id = ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)))
+          AND provider = 'birfatura' AND listed_at IS NULL AND deleted_at IS NULL`,
+      // A JSON list as one parameter, as the search index passes its ids
+      [now, JSON.stringify([...new Set(ids)])]
+    )
   }
 
   /**

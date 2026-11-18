@@ -36,6 +36,7 @@ export async function POST(
         invoice_id: invoice.id,
         issued: "issued" in reading ? reading.issued : null,
         pdf_url: body.faturaUrl,
+        fetch_pdf: invoice.pdf_file_id === null,
       },
     })
     code =

@@ -22,13 +22,14 @@ const serviceOf = (container: Container) =>
 
 /**
  * The BirFatura sale invoice an `OrderId` names (adr/0072 §5): the order by
- * its number, then its first sale or its n-th exchange's. Null for an id we
- * never gave, or for an invoice that is not BirFatura's.
+ * its number, then its first sale or its n-th exchange's, and whether it
+ * has its PDF already. Null for an id we never gave, or for an invoice
+ * that is not BirFatura's.
  */
 export async function findBirfaturaInvoice(
   container: Container,
   birfaturaId: number
-): Promise<{ id: string; status: string } | null> {
+): Promise<{ id: string; status: string; pdf_file_id: string | null } | null> {
   const ref = saleRefOf(birfaturaId)
   if (!ref) {
     return null
@@ -52,7 +53,7 @@ export async function findBirfaturaInvoice(
     sourceId = exchange.source_id
   }
   const sale = await serviceOf(container).birfaturaSale(orderId, sourceId)
-  return sale ? { id: sale.id, status: sale.status } : null
+  return sale ? { id: sale.id, status: sale.status, pdf_file_id: sale.pdf_file_id ?? null } : null
 }
 
 export interface BirfaturaInvoiceLinkInput {
@@ -60,6 +61,12 @@ export interface BirfaturaInvoiceLinkInput {
   /** Null: BirFatura sent no number (`readInvoiceLink`). */
   issued: ReportedInvoice | null
   pdf_url: string
+  /**
+   * False when the invoice has its PDF: a report sent again (a replay, a
+   * retry) never replaces it, whatever link it carries (security review S2).
+   * A PDF that failed to download is fetched again on the next report.
+   */
+  fetch_pdf: boolean
 }
 
 /**
@@ -109,8 +116,8 @@ const fetchPdfStep = createStep(
  * `invoiceLinkUpdate` (adr/0072 §6): marked reported, then, with a number,
  * the write-back every external program uses (series, number, the same
  * number again changes nothing, another is refused) and the PDF attached
- * (the buyer told it is ready). A refused write-back or a PDF that cannot
- * be fetched fails the run; what was kept before it stays.
+ * (the buyer told it is ready), unless it has one. A refused write-back or
+ * a PDF that cannot be fetched fails the run; what was kept before it stays.
  */
 export const recordBirfaturaInvoiceWorkflow = createWorkflow(
   "einvoice-birfatura-invoice-link",
@@ -127,6 +134,8 @@ export const recordBirfaturaInvoiceWorkflow = createWorkflow(
         },
       }))
       recordInvoiceWriteBackWorkflow.runAsStep({ input: writeBack })
+    })
+    when({ input }, ({ input }) => input.issued !== null && input.fetch_pdf).then(() => {
       const pdf = fetchPdfStep(transform({ input }, ({ input }) => ({ url: input.pdf_url })))
       attachInvoicePdfWorkflow.runAsStep({
         input: transform({ input, pdf }, ({ input, pdf }) => ({

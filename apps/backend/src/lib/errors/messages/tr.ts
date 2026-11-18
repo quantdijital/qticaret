@@ -666,6 +666,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.rate_limited": "Paraşüt'e çok sık istek gitti; biraz sonra yeniden denenecek.",
   "einvoice.unknown": "Fatura bulunamadı.",
   "einvoice.not_external": "Bu fatura mağazanın kendi programıyla kesilmiyor.",
+  "einvoice.waived": "Bu satış için fatura kesilmez (yalnız hediye kartı satışı, avans).",
   "einvoice.cancelled": "Bu fatura iptal edildi.",
   "einvoice.already_issued": "Bu fatura başka bir numarayla kesilmiş.",
   "einvoice.number_taken": "Bu fatura numarası başka bir faturada kayıtlı.",
