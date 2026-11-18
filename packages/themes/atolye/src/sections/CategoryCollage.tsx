@@ -99,7 +99,7 @@ function Children({ links }: { links: LinkView[] }) {
         <li key={child.path} className="min-w-0">
           <a
             href={child.path}
-            className="flex min-h-11 items-center text-sm break-words text-text-2 no-underline underline-offset-4 hover:text-text hover:underline lg:pointer-fine:min-h-8"
+            className="flex min-h-11 items-center text-sm break-words text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
           >
             {child.label}
           </a>

@@ -6,7 +6,7 @@ import { CookiePreferencesLink } from "./CookiePreferencesLink"
 import { MarkList } from "./FooterParts"
 
 const TOOL =
-  "inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+  "inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
 
 /**
  * The bottom line (owner 2026-11-17: the year and the cookie choices on

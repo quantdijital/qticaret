@@ -104,30 +104,6 @@
       grid-auto-columns: calc((100% - 2 * var(--space-xs)) / 3);
     }
   }
-  .gf-thumbs-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-block: var(--space-2xs);
-    border-radius: var(--radius-inner);
-    background: var(--color-paper-2);
-    color: var(--color-text);
-    cursor: pointer;
-    transition: background-color var(--dur-micro) var(--ease-out);
-  }
-  .gf-thumbs-arrow:active:not(:disabled) {
-    transform: translateY(1px);
-  }
-  .gf-thumbs-arrow:disabled {
-    color: var(--color-text-3);
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-  @media (hover: hover) {
-    .gf-thumbs-arrow:hover:not(:disabled) {
-      background: var(--color-paper-3);
-    }
-  }
 
   /* A long description closed at about half, fading out over its toggle
      (product/ReadMore); without the script it stays whole, no toggle */

@@ -3,10 +3,9 @@ import type { LinkView, ShopView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CookiePreferencesLink } from "./CookiePreferencesLink"
 
-const PHONE_LINK =
-  "flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+const PHONE_LINK = "flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text"
 const WIDE_LINK =
-  "inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+  "inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text"
 
 /** Legal titles too long for a footer row, shown by their usual short name (the full title stays the link's `title`). */
 const SHORT: Readonly<Record<string, string>> = {
@@ -114,7 +113,7 @@ export function SmallPrint({ shop, t }: { shop: ShopView; t: Translate }) {
             href="#top"
             className={cn(
               floating && "lg:hidden",
-              "-mr-3 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-button px-3 text-xs font-semibold text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+              "-mr-3 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-button px-3 text-xs font-semibold text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
             )}
           >
             <span className="max-sm:sr-only">{t("footer.back_to_top")}</span>

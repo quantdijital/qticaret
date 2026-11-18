@@ -2,7 +2,6 @@ import type { CardVariant, FramedCardView } from "@qticaret/ui"
 import type { CardButtonStyle } from "@qticaret/types"
 import type { PriceDisplay, StoreLayoutSection, StoreProduct } from "@qticaret/types"
 import { CARD_VARIANTS } from "@qticaret/types/section-variants"
-import { productImages } from "./image"
 import { paidAmount } from "./price"
 import { isShipped } from "./product-shipping"
 
@@ -11,7 +10,6 @@ import { isShipped } from "./product-shipping"
  * setting's wherever a framed card is drawn: a rail picks the variant only.
  */
 export interface FramedCardOptions {
-  hoverImage: boolean
   deliveryNote: boolean
   fullButton: boolean
   /** The foot button's look (adr/0049 Ek 2026-11-15). */
@@ -52,7 +50,6 @@ export function framedCard(
     return undefined
   }
   return {
-    secondImage: options.hoverImage ? (productImages(product)[1] ?? null) : null,
     freeShipping: options.deliveryNote && shipsFree(product, displays, options.freeShippingFrom),
     fullButton: options.fullButton,
     buttonStyle: options.buttonStyle,

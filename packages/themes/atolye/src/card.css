@@ -1,7 +1,8 @@
 /*
- * The framed card's photos (UK5 + E5, adr/0049 Ek 2026-11-14 §3.3;
- * `parts/FramedCard.tsx`): the second photo, when the card carries one.
- * No inline style (CSP); both photos fill the well, nothing shifts (CLS).
+ * A card's photos (`parts/CardPhoto.tsx`): the second photo, when the card
+ * carries one, on every variant (sahip 2026-11-18; first the framed card's,
+ * UK5 + E5, adr/0049 Ek 2026-11-14 §3.3). No inline style (CSP); both
+ * photos fill the well, nothing shifts (CLS).
  *
  * - A mouse (hover and a fine pointer): the second sits over the first,
  *   out of the layout (`display: none`, so the browser never fetches it
@@ -13,7 +14,9 @@
  *   animation by scrolling, the second photo's picture stays out of the
  *   layout until the strip first moves (its slide keeps its width, so the
  *   swipe works) and two dots under the photo follow the strip; without
- *   that, no dots and the second loads lazily as any image.
+ *   that, no dots and the second loads lazily as any image. A small photo
+ *   (`gf-card-slides--hover`: the compact card's, a ranked place's) does
+ *   not swipe: the first alone, the second never loaded.
  */
 @layer components {
   .gf-card-slides {
@@ -31,7 +34,7 @@
   .gf-card-dots {
     display: none;
   }
-  .gf-card-framed .gf-card-media > ul {
+  .gf-card .gf-card-media > ul {
     z-index: calc(var(--z-raised) + 1);
     pointer-events: none;
   }
@@ -50,8 +53,8 @@
       display: none;
       opacity: 0;
     }
-    .gf-card-framed:hover .gf-card-slide--second,
-    .gf-card-framed:focus-within .gf-card-slide--second {
+    .gf-card:hover .gf-card-slide--second,
+    .gf-card:focus-within .gf-card-slide--second {
       display: block;
       opacity: 1;
     }
@@ -63,15 +66,18 @@
         display var(--dur-short) allow-discrete;
     }
     @starting-style {
-      .gf-card-framed:hover .gf-card-slide--second,
-      .gf-card-framed:focus-within .gf-card-slide--second {
+      .gf-card:hover .gf-card-slide--second,
+      .gf-card:focus-within .gf-card-slide--second {
         opacity: 0;
       }
     }
   }
 
   @media not ((hover: hover) and (pointer: fine)) {
-    .gf-card-slides {
+    .gf-card-slides--hover .gf-card-slide--second {
+      display: none;
+    }
+    .gf-card-slides:not(.gf-card-slides--hover) {
       position: relative;
       z-index: var(--z-raised);
       display: flex;
@@ -83,7 +89,7 @@
     .gf-card-slides::-webkit-scrollbar {
       display: none;
     }
-    .gf-card-slide {
+    .gf-card-slides:not(.gf-card-slides--hover) > .gf-card-slide {
       flex: 0 0 100%;
       scroll-snap-align: start;
     }
@@ -92,10 +98,10 @@
       .gf-card-media {
         timeline-scope: --gf-card-photos;
       }
-      .gf-card-slides {
+      .gf-card-slides:not(.gf-card-slides--hover) {
         scroll-timeline: --gf-card-photos inline;
       }
-      .gf-card-slide--second picture {
+      .gf-card-slides:not(.gf-card-slides--hover) .gf-card-slide--second picture {
         animation: gf-card-reveal linear both;
         animation-timeline: --gf-card-photos;
       }

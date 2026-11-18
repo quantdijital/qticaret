@@ -73,7 +73,7 @@ function EmptyCart({
                       className="absolute inset-0 h-full w-full object-cover"
                     />
                   )}
-                  <span className="relative z-(--z-raised) px-3 pb-2.5 text-sm leading-tight font-extrabold underline-offset-4 group-hover:underline">
+                  <span className="relative z-(--z-raised) px-3 pb-2.5 text-sm leading-tight font-extrabold transition-colors duration-(--dur-micro) group-hover:text-stage-text-2">
                     {category.label}
                   </span>
                 </a>

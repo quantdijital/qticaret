@@ -14,7 +14,7 @@ import { newsletterWords } from "./newsletter-words"
 import { SmallPrint } from "./SmallPrint"
 
 const LINE =
-  "inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-9"
+  "inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-9"
 
 /**
  * How the shop is reached: its logo when the store profile has one

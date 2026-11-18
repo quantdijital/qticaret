@@ -29,7 +29,7 @@ function Product({ product, t }: { product: NonNullable<Review["product"]>; t: T
       </span>
       <span className="flex min-w-0 flex-col">
         <span className="text-xs text-text-3">{t("reviews.about")}</span>
-        <span className="line-clamp-2 text-sm leading-snug font-semibold underline-offset-4 group-hover:underline">
+        <span className="line-clamp-2 text-sm leading-snug font-semibold transition-colors duration-(--dur-micro) group-hover:text-text-2">
           {product.label}
         </span>
       </span>

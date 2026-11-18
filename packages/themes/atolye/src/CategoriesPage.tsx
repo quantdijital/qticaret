@@ -69,7 +69,10 @@ function Branch({ top, t }: { top: CategoryTreeView; t: Translate }) {
             </span>
           )}
           <span className="flex min-w-0 flex-col">
-            <h2 id={id} className="underline-offset-4 group-hover:underline">
+            <h2
+              id={id}
+              className="transition-colors duration-(--dur-micro) group-hover:text-text-2"
+            >
               {top.label}
             </h2>
             {count && <span className="text-sm text-text-3">{count}</span>}

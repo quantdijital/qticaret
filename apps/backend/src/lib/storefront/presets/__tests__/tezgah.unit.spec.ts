@@ -118,7 +118,7 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
         buttons: "square",
         surface_style: "lined",
         typography: { heading: "inter", body: "inter" },
-        product_card: { variant: "framed", hover_image: false },
+        product_card: { variant: "framed", hover_image: true },
       })
     }
   )

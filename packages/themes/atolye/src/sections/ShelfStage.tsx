@@ -118,7 +118,7 @@ function StagePanel({
         >
           <a
             href={product.path}
-            className="line-clamp-4 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            className="line-clamp-4 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
             {...(echo ? { tabIndex: -1 } : {})}
           >
             {product.title}
@@ -187,7 +187,7 @@ function StageRow({
         <h3 className="text-sm leading-snug font-semibold tracking-normal lg:text-md">
           <a
             href={product.path}
-            className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            className="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
             aria-current={current ? "true" : undefined}
           >
             {product.title}

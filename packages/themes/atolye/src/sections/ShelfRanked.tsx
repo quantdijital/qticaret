@@ -1,7 +1,7 @@
 import { shelfRankedLayoutOf } from "@qticaret/types/section-shelf"
-import { ResponsiveImage } from "@qticaret/ui"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { badgesOf, isOut, quickAddWords } from "../parts/card-parts"
+import { CardPhoto } from "../parts/CardPhoto"
 import { CardQuickView } from "../parts/card-quick-view"
 import { CardPriceRow, CardStars } from "../parts/card-rows"
 import { QuickAdd } from "../parts/QuickAdd"
@@ -50,7 +50,8 @@ function Pill({ product, t }: { product: ProductCardView; t: Translate }) {
  * One place: its figure large beside the photograph (for the eye only:
  * the list and the heading's hidden "1." say it), the brand, the name as
  * the one link over the whole of it, the stars, the price as every card's
- * (the storefront's, a wholesaler's too), and the card's own actions.
+ * (the storefront's, a wholesaler's too), and the card's own actions. The
+ * second photo on hover with a mouse only, as the compact card's.
  */
 function Place({
   product,
@@ -73,13 +74,7 @@ function Place({
           {place}
         </span>
         <div className="gf-rank-photo">
-          {product.image && (
-            <ResponsiveImage
-              image={product.image}
-              sizes={SIZES[size]}
-              className="h-full w-full object-cover"
-            />
-          )}
+          <CardPhoto product={product} sizes={SIZES[size]} swipe={false} />
           <Pill product={product} t={t} />
         </div>
         <div className="gf-rank-text">
@@ -88,7 +83,7 @@ function Place({
             <span className="sr-only">{t("home.rank_place", { n: place })} </span>
             <a
               href={product.path}
-              className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+              className="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
             >
               {product.title}
             </a>

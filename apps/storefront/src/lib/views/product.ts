@@ -28,6 +28,8 @@ export interface CardOptions {
   showRating: boolean
   /** How the cards are drawn (adr/0049 Ek 2026-11-14 §3.3); none: `standard`. */
   variant?: CardVariant
+  /** The second photo on hover, every variant's (`hover_image`, sahip 2026-11-18); none: off. */
+  hoverImage?: boolean
   /** A framed card's own, from the theme setting; none: a framed card shows only today's. */
   framed?: FramedCardOptions
   /** Every card's pills and rows (adr/0049 Ek 2026-11-15); none: today's card. */
@@ -40,7 +42,6 @@ export interface CardOptions {
 const ALL_SHOWN: CardOptions = { showBrand: true, showRating: false }
 
 const NO_FRAMED_EXTRAS: FramedCardOptions = {
-  hoverImage: false,
   deliveryNote: false,
   fullButton: false,
   buttonStyle: "outline",
@@ -58,12 +59,16 @@ export function productCard(
   const variant = options.variant ?? "standard"
   const framed = framedCard(variant, product, displays, options.framed ?? NO_FRAMED_EXTRAS)
   const shown = cardShown(options.shown)
+  const images = productImages(product)
+  // The second photo only beside a first one (one photo: no swap)
+  const second = options.hoverImage && images[0] ? (images[1] ?? null) : null
   return {
     id: product.id,
     title: product.title,
     path,
     brand: options.showBrand ? (product.brand?.name ?? null) : null,
-    image: productImages(product)[0] ?? null,
+    image: images[0] ?? null,
+    ...(second ? { secondImage: second } : {}),
     price: cardPrice(variants, displays),
     available: variants.some(isAvailable),
     // Left out for today's card: its view is as it was; the compact card carries no extras

@@ -9,7 +9,7 @@
     "show_brand": true,
     "show_rating": true,
     "variant": "framed",
-    "hover_image": false,
+    "hover_image": true,
     "delivery_note": true,
     "full_button": true,
     "empty_stars": false

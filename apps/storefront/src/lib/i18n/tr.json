@@ -798,8 +798,6 @@
   "product.image_next": "Sonraki görsel",
   "product.image_position": "{n} / {count}",
   "product.image_show": "Görsel {n}",
-  "product.thumbs_previous": "Önceki görseller",
-  "product.thumbs_next": "Sonraki görseller",
   "product.video_play": "Videoyu oynat",
   "product.video_play_named": "Videoyu oynat: {title}",
   "product.video_pause_named": "Videoyu durdur: {title}",

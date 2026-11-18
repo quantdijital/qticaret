@@ -162,7 +162,7 @@ describe("a card's quick view button", () => {
       ...CARD,
       quickView: "hover",
       variant: "framed",
-      framed: { secondImage: null, freeShipping: false, fullButton: false, buttonStyle: "outline" },
+      framed: { freeShipping: false, fullButton: false, buttonStyle: "outline" },
     })
     expect(host.querySelector(".gf-card-framed button[data-quick-view='hover']")).not.toBeNull()
 

@@ -29,6 +29,8 @@ export async function cardOptions(): Promise<CardOptions> {
     showBrand: card.show_brand,
     showRating: card.show_rating,
     variant: card.variant,
+    // The second photo on hover, on every variant (sahip 2026-11-18)
+    hoverImage: card.hover_image,
     // Every card's pills and rows (adr/0049 Ek 2026-11-15): the no-reviews row only where the stars are shown
     shown: {
       saleBadge: card.sale_badge,
@@ -39,7 +41,6 @@ export async function cardOptions(): Promise<CardOptions> {
     },
     // The framed card's switches (E5)
     framed: {
-      hoverImage: card.hover_image,
       deliveryNote: card.delivery_note,
       fullButton: card.full_button,
       buttonStyle: card.button_style,

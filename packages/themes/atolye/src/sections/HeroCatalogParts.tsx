@@ -65,7 +65,7 @@ function SideTile({ category, t }: { category: CategoryCardView; t: Translate })
         />
       )}
       <span className="relative z-(--z-raised) flex flex-col gap-0.5 p-3 sm:p-4">
-        <span className="leading-tight font-extrabold underline-offset-4 group-hover:underline">
+        <span className="leading-tight font-extrabold transition-colors duration-(--dur-micro) group-hover:text-stage-text-2">
           {category.label}
         </span>
         {typeof category.count === "number" && (

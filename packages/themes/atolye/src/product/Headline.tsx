@@ -24,7 +24,7 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
       {view.brand && (
         <a
           href={view.brand.path}
-          className="-my-3 inline-flex min-h-11 items-center self-start text-sm font-semibold text-text-2 no-underline underline-offset-4 hover:underline"
+          className="-my-3 inline-flex min-h-11 items-center self-start text-sm font-semibold text-text-2 no-underline hover:text-text"
         >
           {view.brand.label}
         </a>

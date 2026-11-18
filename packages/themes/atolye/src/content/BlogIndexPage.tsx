@@ -64,7 +64,7 @@ function Lead({ post }: { post: PostCardView }) {
         <h2 className="text-display">
           <a
             href={post.path}
-            className="no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            className="no-underline transition-colors duration-(--dur-micro) group-hover:text-stage-text-2 after:absolute after:inset-0 after:content-['']"
           >
             {post.title}
           </a>
