@@ -173,7 +173,8 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
           SELECT id FROM invoice
            WHERE (status IN ('pending', 'issuing')
                   OR (status = 'issued' AND cancel_requested_at IS NOT NULL))
-             AND provider <> 'external' AND next_attempt_at <= ? AND deleted_at IS NULL
+             AND provider NOT IN ('external', 'birfatura') AND next_attempt_at <= ?
+             AND deleted_at IS NULL
            ORDER BY next_attempt_at, id LIMIT ?
            FOR UPDATE SKIP LOCKED)
         RETURNING id, order_id, kind, source_id, provider, status, attempts, external_id,

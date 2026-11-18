@@ -81,7 +81,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["parasut", "external", "fake"],
+          "enumItems": ["parasut", "external", "fake", "birfatura"],
           "mappedType": "enum"
         },
         "status": {
@@ -406,6 +406,22 @@
         },
         "cancel_requested_at": {
           "name": "cancel_requested_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "reported_at": {
+          "name": "reported_at",
           "type": "timestamptz",
           "unsigned": false,
           "autoincrement": false,

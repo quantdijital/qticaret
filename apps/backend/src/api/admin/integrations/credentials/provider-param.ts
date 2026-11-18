@@ -6,9 +6,11 @@ import type { CredentialProviderName } from "../../../../modules/integration-cre
 /**
  * Accounts connected through their own consent screen only (OAuth): typed
  * in here they would skip its checks, and removing one here would leave
- * the access granted at Google (security review 2026-10-29).
+ * the access granted at Google (security review 2026-10-29). BirFatura's
+ * token is the server's to make, never typed in (adr/0072 §3):
+ * `/admin/einvoice/birfatura/token`.
  */
-const CONSENT_ONLY: readonly string[] = ["google"]
+const CONSENT_ONLY: readonly string[] = ["google", "birfatura"]
 
 /** The provider in the path; one the shop cannot connect here is 404. */
 export function providerParam(req: MedusaRequest): CredentialProviderName {

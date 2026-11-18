@@ -18,7 +18,7 @@ export async function POST(
       issued: {
         number: body.number,
         uuid: body.uuid ?? null,
-        document_type: body.document_type,
+        document_type: body.document_type ?? null,
         issued_at: body.issued_at,
       },
     },

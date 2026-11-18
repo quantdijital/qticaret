@@ -99,6 +99,8 @@ export const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/platform-settings/invoicing" },
   // Connecting the company; checking it stays the admin's, as with provider accounts
   { methods: WRITES, path: "/admin/einvoice/parasut" },
+  // BirFatura's token hands every waiting buyer's details to whoever holds it (adr/0072 §3)
+  { methods: WRITES, path: "/admin/einvoice/birfatura*" },
   // Customers' reviews and questions sent to the AI service (adr/0071 Aşama 9)
   { methods: WRITES, path: "/admin/features/ai.reviews" },
   { methods: ["POST"], path: "/admin/google/connect" },
@@ -135,6 +137,7 @@ export const PRIVATE: readonly Rule[] = [
   // A test e-mail through the shop's own mail server, as its connection check (adr/0036 Ek 2026-11-10)
   { methods: "*", path: "/admin/messaging/smtp*" },
   { methods: "*", path: "/admin/einvoice/parasut*" },
+  { methods: "*", path: "/admin/einvoice/birfatura*" },
   // An invoice's contents: the buyer and their tax id (adr/0034 §9)
   { methods: "*", path: "/admin/invoices/:id/draft" },
   { methods: "*", path: "/admin/invoices/:id/pdf" },

@@ -1,7 +1,15 @@
 import { model } from "@medusajs/framework/utils"
 
 export const INVOICE_KINDS = ["sale", "return"] as const
-export const INVOICE_PROVIDERS = ["parasut", "external", "fake"] as const
+export const INVOICE_PROVIDERS = ["parasut", "external", "fake", "birfatura"] as const
+/**
+ * Programs that issue the invoice outside and write it back (adr/0034 §9,
+ * adr/0072 §2): the shop's own program, or BirFatura pulling it. The job
+ * never takes theirs; write-back, PDF, draft and cancel rules hold for both.
+ */
+export const WRITTEN_BACK_PROVIDERS = ["external", "birfatura"] as const
+export const isWrittenBack = (provider: string): boolean =>
+  (WRITTEN_BACK_PROVIDERS as readonly string[]).includes(provider)
 /**
  * A sale's e-Fatura or e-Arşiv; a return's document (the accountant,
  * 2026-10-31): the shop's gider pusulası to a person who sent goods back,
@@ -95,6 +103,12 @@ export const Invoice = model
      * late for that, leaves it issued for a return document (adr/0034 §10).
      */
     cancel_requested_at: model.dateTime().nullable(),
+    /**
+     * BirFatura's first word of an invoice it issued (adr/0072 §6), kept
+     * before anything it said is checked: the order is never listed to it
+     * again, whatever the write-back makes of the rest.
+     */
+    reported_at: model.dateTime().nullable(),
     /** A return's invoice: the sale's it returns. */
     original_invoice_id: model.text().nullable(),
     /** Waived: which of the accountant's exceptions applied, or an advance alone. */

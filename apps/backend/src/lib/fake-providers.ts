@@ -17,6 +17,7 @@ export const FAKE_PROVIDER_ADDRESSES = {
   YURTICI_BASE_URL: "Yurtiçi",
   NETGSM_BASE_URL: "Netgsm",
   PARASUT_BASE_URL: "Paraşüt",
+  BIRFATURA_BASE_URL: "BirFatura",
   SHOPIFY_BASE_URL: "Shopify",
   RESEND_BASE_URL: "Resend",
   APPLE_AUTH_BASE_URL: "Apple",

@@ -480,6 +480,7 @@ describe("parseEnv", () => {
     "APPLE_AUTH_BASE_URL",
     "GOOGLE_BASE_URL",
     "PARASUT_BASE_URL",
+    "BIRFATURA_BASE_URL",
     "SHOPIFY_BASE_URL",
     "META_GRAPH_BASE_URL",
     "GA4_BASE_URL",

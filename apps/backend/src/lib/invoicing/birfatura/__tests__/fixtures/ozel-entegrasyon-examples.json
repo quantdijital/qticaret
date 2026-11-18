@@ -1,0 +1,194 @@
+{
+  "_source": "BirFatura Özel Entegrasyon API, the endpoints' `example` fields: https://developers-api.birfatura.com/api/portal/dokumanlar/ozel-entegrasyon-api (read 2026-11-18). Values as the document gives them.",
+  "orderStatus": {
+    "request": null,
+    "response": {
+      "OrderStatus": [
+        { "Id": 1, "Value": "Onaylandı" },
+        { "Id": 2, "Value": "Kargolandı" },
+        { "Id": 3, "Value": "İptal Edildi" }
+      ]
+    }
+  },
+  "paymentMethods": {
+    "request": null,
+    "response": {
+      "PaymentMethods": [
+        { "Id": 1, "Value": "Kredi Kartı" },
+        { "Id": 2, "Value": "Banka EFT-Havale" },
+        { "Id": 3, "Value": "Kapıda Ödeme Nakit" }
+      ]
+    }
+  },
+  "orders": {
+    "request": {
+      "orderStatusId": 1,
+      "startDateTime": "01.07.2026 00:00:00",
+      "endDateTime": "16.07.2026 23:59:59"
+    },
+    "response": {
+      "Orders": [
+        {
+          "OrderId": 41591,
+          "OrderCode": "ORD202607160001",
+          "OrderDate": "16.07.2026 10:30:00",
+          "BillingName": "Örnek Müşteri",
+          "BillingAddress": "Örnek Mah. Örnek Cad. No:1",
+          "BillingTown": "Çankaya",
+          "BillingCity": "Ankara",
+          "BillingMobilePhone": "05000000000",
+          "ShippingName": "Örnek Müşteri",
+          "ShippingAddress": "Örnek Mah. Örnek Cad. No:1",
+          "ShippingTown": "Çankaya",
+          "ShippingCity": "Ankara",
+          "PaymentTypeId": 1,
+          "Currency": "TRY",
+          "TotalPaidTaxExcluding": 1000,
+          "TotalPaidTaxIncluding": 1200,
+          "ProductsTotalTaxExcluding": 1000,
+          "ProductsTotalTaxIncluding": 1200,
+          "DiscountTotalTaxExcluding": 0,
+          "DiscountTotalTaxIncluding": 0,
+          "OrderDetails": [
+            {
+              "ProductId": 101,
+              "ProductCode": "URN-001",
+              "ProductName": "Örnek Ürün",
+              "ProductQuantityType": "Adet",
+              "ProductQuantity": 1,
+              "VatRate": 20,
+              "ProductUnitPriceTaxExcluding": 1000,
+              "ProductUnitPriceTaxIncluding": 1200
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "orderCargoUpdate": {
+    "request": {
+      "orderId": 14948,
+      "orderStatusId": 3,
+      "cargoTrackingCode": "AT27NN805",
+      "updateDateTime": "16.07.2026 14:27:09",
+      "cargoTrackingCodeUrl": "https://kargotakip.example/AT27NN805",
+      "cargoCompany": "Aras"
+    },
+    "response": { "Success": true, "Message": "Kargo bilgisi güncellendi." }
+  },
+  "invoiceLinkUpdate": {
+    "request": {
+      "faturaUrl": "https://uygulama.birfatura.com/dosyagetir?tur=1&guid=ornek.pdf",
+      "orderId": 14948,
+      "faturaTarihi": "16.07.2026 14:27:09",
+      "faturaNo": "ARS2026000000001"
+    },
+    "response": { "Success": true, "Message": "Fatura bağlantısı güncellendi." }
+  },
+  "requiredOrderFields": [
+    "OrderId",
+    "OrderCode",
+    "OrderDate",
+    "BillingName",
+    "BillingAddress",
+    "BillingTown",
+    "BillingCity",
+    "BillingMobilePhone",
+    "ShippingName",
+    "ShippingAddress",
+    "ShippingTown",
+    "ShippingCity",
+    "PaymentTypeId",
+    "Currency",
+    "TotalPaidTaxExcluding",
+    "TotalPaidTaxIncluding",
+    "ProductsTotalTaxExcluding",
+    "ProductsTotalTaxIncluding",
+    "OrderDetails"
+  ],
+  "requiredLineFields": [
+    "ProductId",
+    "ProductCode",
+    "ProductName",
+    "ProductQuantityType",
+    "ProductQuantity",
+    "VatRate",
+    "ProductUnitPriceTaxExcluding",
+    "ProductUnitPriceTaxIncluding"
+  ],
+  "documentedOrderFields": [
+    "OrderId",
+    "OrderCode",
+    "OrderDate",
+    "InvoiceTypeId",
+    "InvoiceDate",
+    "InvoiceExplanation",
+    "EInvoiceProfileId",
+    "EInvoiceId",
+    "ETTN",
+    "CustomerId",
+    "BillingName",
+    "BillingAddress",
+    "BillingTown",
+    "BillingCity",
+    "BillingMobilePhone",
+    "BillingPhone",
+    "TaxOffice",
+    "TaxNo",
+    "SSNTCNo",
+    "Email",
+    "ShippingId",
+    "ShippingName",
+    "ShippingAddress",
+    "ShippingTown",
+    "ShippingCity",
+    "ShippingCountry",
+    "ShippingZipCode",
+    "ShippingPhone",
+    "ShipCompany",
+    "CargoCampaignCode",
+    "SalesChannelWebSite",
+    "PaymentTypeId",
+    "PaymentType",
+    "Currency",
+    "CurrencyRate",
+    "TotalPaidTaxExcluding",
+    "TotalPaidTaxIncluding",
+    "ProductsTotalTaxExcluding",
+    "ProductsTotalTaxIncluding",
+    "CommissionTotalTaxExcluding",
+    "CommissionTotalTaxIncluding",
+    "ShippingChargeTotalTaxExcluding",
+    "ShippingChargeTotalTaxIncluding",
+    "PayingAtTheDoorChargeTotalTaxExcluding",
+    "PayingAtTheDoorChargeTotalTaxIncluding",
+    "DiscountTotalTaxExcluding",
+    "DiscountTotalTaxIncluding",
+    "InstallmentChargeTotalTaxExcluding",
+    "InstallmentChargeTotalTaxIncluding",
+    "BankTransferDiscountTotalTaxExcluding",
+    "BankTransferDiscountTotalTaxIncluding",
+    "ExtraFees",
+    "OrderDetails"
+  ],
+  "documentedLineFields": [
+    "ProductId",
+    "ProductCode",
+    "Barcode",
+    "ProductBrand",
+    "ProductName",
+    "ProductNote",
+    "ProductImage",
+    "Variants",
+    "ProductQuantityType",
+    "ProductQuantity",
+    "VatRate",
+    "ProductUnitPriceTaxExcluding",
+    "ProductUnitPriceTaxIncluding",
+    "CommissionUnitTaxExcluding",
+    "CommissionUnitTaxIncluding",
+    "DiscountUnitTaxExcluding",
+    "DiscountUnitTaxIncluding",
+    "ExtraFeesUnit"
+  ]
+}

@@ -1,13 +1,15 @@
 import type { Context } from "@medusajs/framework/types"
 import { InjectManager, InjectTransactionManager, MedusaContext } from "@medusajs/framework/utils"
 import { ConflictError, uniqueViolationKeys } from "../../lib/errors"
+import { isWrittenBack } from "./models/invoice"
 import { InvoiceQueueService } from "./queue"
 import type { InvoiceStatus } from "./queue"
 
 export interface WrittenBack {
   number: string
   uuid: string | null
-  document_type: "e_invoice" | "e_archive"
+  /** Null when the program does not say (BirFatura, adr/0072 §6): left as it was. */
+  document_type: "e_invoice" | "e_archive" | null
   issued_at: Date
 }
 
@@ -40,7 +42,7 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     if (!row) {
       return null
     }
-    if (row.provider !== "external") {
+    if (!isWrittenBack(row.provider)) {
       throw new ConflictError("einvoice.not_external")
     }
     // A return's document is written back as one (`recordReturnDocument`)
@@ -59,7 +61,8 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     try {
       await manager.execute(
         `UPDATE invoice
-            SET status = 'issued', number = ?, uuid = ?, document_type = ?, issued_at = ?,
+            SET status = 'issued', number = ?, uuid = COALESCE(?, uuid),
+                document_type = COALESCE(?, document_type), issued_at = ?,
                 last_error = NULL, updated_at = now()
           WHERE id = ?`,
         [input.number, input.uuid, input.document_type, input.issued_at, id]
@@ -179,7 +182,7 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     if (!row) {
       return null
     }
-    if (row.provider !== "external") {
+    if (!isWrittenBack(row.provider)) {
       throw new ConflictError("einvoice.not_external")
     }
     if (row.status !== "issued") {
@@ -256,7 +259,8 @@ export class InvoiceRecordsService extends InvoiceQueueService {
 
   /**
    * The order was canceled (adr/0034 §10). An external program's invoice
-   * not yet issued is cancelled here; one issued is left for a return
+   * not yet issued is cancelled here; one issued (or one BirFatura said it
+   * issued, its number still to come, adr/0072 §6) is left for a return
    * document, and its id returned for staff to be told. A program's own
    * is marked for the job to undo at the program, due at once unless a
    * worker holds it; a stopped one comes back for it.
@@ -270,15 +274,16 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     const manager = sharedContext.transactionManager as Executor
     const withdrawn = (await manager.execute(
       `UPDATE invoice SET status = 'cancelled', updated_at = now()
-        WHERE order_id = ? AND kind = 'sale' AND provider = 'external' AND status = 'pending'
-          AND deleted_at IS NULL
+        WHERE order_id = ? AND kind = 'sale' AND provider IN ('external', 'birfatura')
+          AND status = 'pending' AND reported_at IS NULL AND deleted_at IS NULL
        RETURNING id`,
       [orderId]
     )) as { id: string }[]
     // Once: asked again (the hourly sweep), an invoice already marked rings no bell twice
     const issued = (await manager.execute(
       `UPDATE invoice SET last_error = 'einvoice.return_document_needed', updated_at = now()
-        WHERE order_id = ? AND kind = 'sale' AND provider = 'external' AND status = 'issued'
+        WHERE order_id = ? AND kind = 'sale' AND provider IN ('external', 'birfatura')
+          AND (status = 'issued' OR (status = 'pending' AND reported_at IS NOT NULL))
           AND last_error IS DISTINCT FROM 'einvoice.return_document_needed' AND deleted_at IS NULL
        RETURNING id`,
       [orderId]
@@ -289,7 +294,7 @@ export class InvoiceRecordsService extends InvoiceQueueService {
               status = CASE WHEN status = 'failed' THEN 'pending' ELSE status END,
               next_attempt_at = CASE WHEN next_attempt_at <= ? THEN ? ELSE next_attempt_at END,
               updated_at = now()
-        WHERE order_id = ? AND kind = 'sale' AND provider <> 'external'
+        WHERE order_id = ? AND kind = 'sale' AND provider NOT IN ('external', 'birfatura')
           AND status IN ('pending', 'issuing', 'issued', 'failed')
           AND cancel_requested_at IS NULL AND deleted_at IS NULL`,
       [now, now, now, orderId]

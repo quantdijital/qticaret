@@ -233,6 +233,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "errors.invalid_request": "İstek anlaşılamadı.",
   "errors.length_required": "İsteğin boyutu belirtilmeli.",
   "errors.limit_too_large": "Tek seferde bu kadar çok kayıt istenemez.",
+  "errors.not_found": "Aradığınız kayıt bulunamadı.",
   "errors.provider_unavailable": "Bağlı hizmete şu an ulaşılamıyor; biraz sonra tekrar deneyin.",
   // The admin API's provider failure; the dashboard names the service (messages/provider.ts)
   "provider.failed": "Bağlı hizmet işlemi tamamlamadı; biraz sonra tekrar deneyin.",
@@ -643,6 +644,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.carrier_identity_missing":
     "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > E-Fatura).",
   "einvoice.store_url_missing": "Mağazanın vitrin adresi yok.",
+  // adr/0072: BirFatura's pull and write-back
+  "einvoice.phone_missing":
+    "Siparişte cep telefonu yok; BirFatura telefonsuz siparişi kabul etmiyor. Faturayı elle işleyin.",
+  "einvoice.number_missing":
+    "BirFatura faturayı kesti ama numarasını göndermedi. Numarayı ve PDF'i elle girin.",
+  "einvoice.pdf_download_failed":
+    "Fatura numarası kaydedildi ama BirFatura'nın PDF'i indirilemedi. PDF'i elle yükleyin.",
   "einvoice.parasut_unavailable": "Paraşüt bağlantısı bu sunucuda henüz açılmadı.",
   "einvoice.parasut_not_connected": "Paraşüt hesabı bağlı değil (Ayarlar > E-Fatura).",
   "einvoice.parasut_disconnected":

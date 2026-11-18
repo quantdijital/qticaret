@@ -2,10 +2,11 @@ import type { Context } from "@medusajs/framework/types"
 import { InjectTransactionManager, MedusaContext } from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, parseKey } from "@qticaret/server-kit"
 import { isProviderError } from "../../lib/errors"
-import { InvoiceRecordsService } from "./records"
+import { InvoiceBirfaturaService } from "./birfatura"
 
 export { MAX_ATTEMPTS } from "./queue"
 export type { WrittenBack } from "./records"
+export type { PullableInvoice } from "./birfatura"
 export type {
   ClaimedInvoice,
   DocumentType,
@@ -54,7 +55,7 @@ const REVOKED = new Set(["invalid_grant", "unauthorized"])
 const UNSURE = new Set(["outcome_unknown", "invalid_response", "response_too_large"])
 
 /** Orders' invoices (F8, adr/0034), and the shop's Paraşüt connection (§5). */
-class EinvoiceModuleService extends InvoiceRecordsService {
+class EinvoiceModuleService extends InvoiceBirfaturaService {
   private readonly encryptionKey: Buffer
 
   constructor(container: Record<string, unknown>, options: EinvoiceModuleOptions) {
