@@ -82,7 +82,9 @@ describe("iyzico's daily transactions report", () => {
       api = createIyzicoApi({
         sandboxUrl: fake.url,
         liveUrl: fake.url,
-        timeoutMs: 500,
+        // No case here is about the client timeout. At 500 ms a busy CI runner timed a
+        // local answer out and the retry missed the answer a case had queued
+        timeoutMs: 10_000,
         retry: { baseDelayMs: 1 },
         sleep: () => Promise.resolve(),
       })

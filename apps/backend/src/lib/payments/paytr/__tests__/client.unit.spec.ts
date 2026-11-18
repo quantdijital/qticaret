@@ -46,7 +46,11 @@ describe("PayTR client against the fake server", () => {
     fake = await startFakePaytr(account)
     api = createPaytrApi({
       baseUrl: fake.url,
-      timeoutMs: 500,
+      // Only the lost-refund case waits on the timeout and it builds its own short-timeout
+      // client (the hanging check is aborted). At 500 ms a busy CI runner timed a local
+      // answer out: a token or refund failed as outcome_unknown, or a read was asked again
+      // and the retry missed the answer a case had queued
+      timeoutMs: 10_000,
       retry: { baseDelayMs: 1 },
       sleep: () => Promise.resolve(),
     })
@@ -206,9 +210,20 @@ describe("PayTR client against the fake server", () => {
     it("does not send a refund twice when the answer is lost", async () => {
       await paidOrder("SIP013")
       fake.queue("/odeme/iade", { hang: true })
+      // The fake never answers, so a short timeout is the lost answer here
+      const impatient = createPaytrApi({
+        baseUrl: fake.url,
+        timeoutMs: 500,
+        retry: { baseDelayMs: 1 },
+        sleep: () => Promise.resolve(),
+      })
 
       const code = await codeOf(
-        api.refund(credentials, { merchantOid: "SIP013", amount: kurus(100), referenceNo: "r2" })
+        impatient.refund(credentials, {
+          merchantOid: "SIP013",
+          amount: kurus(100),
+          referenceNo: "r2",
+        })
       )
 
       expect(code).toBe("outcome_unknown")
