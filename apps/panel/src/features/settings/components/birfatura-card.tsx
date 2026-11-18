@@ -74,10 +74,20 @@ export function BirfaturaConnection({ className }: { className?: string }) {
   const [confirming, setConfirming] = useState(false)
   const data = status.data
   const token = make.data?.token ?? null
+  const fail = (failure: unknown) => toast.error(errorText(t, failure))
   const run = () => {
-    make.mutate(undefined, {
-      onError: (failure) => toast.error(errorText(t, failure)),
-    })
+    make.mutate(undefined, { onError: fail })
+  }
+  // Read afresh before choosing: a password made meanwhile (another session) is always asked about
+  const start = async () => {
+    const fresh = await status.refetch()
+    if (fresh.isError) {
+      fail(fresh.error)
+    } else if (fresh.data?.token) {
+      setConfirming(true)
+    } else {
+      run()
+    }
   }
   return (
     <SectionCard
@@ -117,16 +127,10 @@ export function BirfaturaConnection({ className }: { className?: string }) {
             <div className="mt-auto grid gap-2 sm:grid-cols-2">
               <Button
                 variant={data.token ? "outline" : "default"}
-                disabled={make.isPending}
-                onClick={() => {
-                  if (data.token) {
-                    setConfirming(true)
-                  } else {
-                    run()
-                  }
-                }}
+                disabled={make.isPending || status.isFetching}
+                onClick={() => void start()}
               >
-                {make.isPending ? (
+                {make.isPending || status.isFetching ? (
                   <Loader2 className="animate-spin" />
                 ) : data.token ? (
                   <RefreshCw />

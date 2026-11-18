@@ -50,13 +50,24 @@ function serve(
 
 const makes = () => fetchMock.mock.calls.filter(([url]) => url === MAKE)
 
-const renderCard = () =>
-  render(
-    <QueryClientProvider
-      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
-    >
+let client: QueryClient
+
+const renderCard = () => {
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={client}>
       <EinvoiceConnectionCard provider="birfatura" />
     </QueryClientProvider>
+  )
+}
+
+/** Every mutation result the client still keeps, as text. */
+const kept = () =>
+  JSON.stringify(
+    client
+      .getMutationCache()
+      .getAll()
+      .map((mutation) => mutation.state.data ?? null)
   )
 
 describe("EinvoiceConnectionCard (BirFatura)", () => {
@@ -174,6 +185,55 @@ describe("EinvoiceConnectionCard (BirFatura)", () => {
 
     expect(await screen.findByText(PASSWORD)).toBeInTheDocument()
     expect(makes()).toHaveLength(1)
+  })
+
+  it("keeps no password in the mutation cache once the dialog closes", async () => {
+    const user = userEvent.setup()
+    serve(NONE)
+    renderCard()
+
+    await user.click(await screen.findByRole("button", { name: "Bağlantı şifresi oluştur" }))
+    const dialog = await screen.findByRole("dialog", { name: "Bağlantı şifresi" })
+    expect(kept()).toContain(PASSWORD)
+
+    await user.click(within(dialog).getByRole("button", { name: "Kopyaladım, kapat" }))
+    await waitFor(() => {
+      expect(client.getMutationCache().getAll()).toEqual([])
+    })
+    expect(kept()).not.toContain(PASSWORD)
+    expect(
+      JSON.stringify(
+        client
+          .getQueryCache()
+          .getAll()
+          .map((q) => q.state.data)
+      )
+    ).not.toContain(PASSWORD)
+  })
+
+  it("reads the status afresh first: a password made meanwhile elsewhere is asked about", async () => {
+    const user = userEvent.setup()
+    let current = NONE
+    fetchMock.mockImplementation((url: string) =>
+      url === STATUS
+        ? Promise.resolve({ birfatura: current })
+        : url === "/admin/staff/me"
+          ? Promise.resolve({ role: "owner", can: {} })
+          : url === MAKE
+            ? Promise.resolve({ token: PASSWORD, birfatura: MADE })
+            : Promise.resolve({})
+    )
+    renderCard()
+    const button = await screen.findByRole("button", { name: "Bağlantı şifresi oluştur" })
+
+    // Another session of the owner made one after this page loaded
+    current = MADE
+    await user.click(button)
+
+    expect(
+      await screen.findByRole("dialog", { name: "Bağlantı şifresi yenilensin mi?" })
+    ).toHaveTextContent("Eski şifre hemen çalışmaz")
+    expect(makes()).toEqual([])
   })
 
   it("says a password the server can no longer read must be renewed", async () => {

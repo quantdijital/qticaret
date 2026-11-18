@@ -116,11 +116,14 @@ export const birfaturaSiteUrl = (origin: string): string => `${origin}/hooks/bir
 /**
  * Makes the connection password, or a new one in its place (the old one
  * stops at once); the owner proves it again. The password comes back in
- * this answer only: it stays in the mutation's result, never in the cache.
+ * this answer only and is never put in the query cache. The mutation that
+ * holds it is dropped from the mutation cache as soon as nothing observes
+ * it (`gcTime: 0`): once the dialog closes and resets it, it is gone.
  */
 export function useMakeBirfaturaToken() {
   const client = useQueryClient()
   return useMutation({
+    gcTime: 0,
     mutationFn: () =>
       withReauth((extra) =>
         sdk.client.fetch<{ token: string; birfatura: BirfaturaStatus }>(`${BIRFATURA_URL}/token`, {
