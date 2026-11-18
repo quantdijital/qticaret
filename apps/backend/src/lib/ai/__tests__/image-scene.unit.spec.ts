@@ -3,6 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import sharp from "sharp"
 import { isProviderError } from "../../errors/errors"
+import { logger } from "../../logging"
 import { DIGITAL_SOURCE_TYPES, digitalSourceTypeOf } from "../../media"
 import type { SafeFetchOptions, SafeFetchResponse } from "../../security/safe-fetch"
 import { fakeImageConnector } from "../connectors/fake-image"
@@ -239,6 +240,21 @@ describe("the shop's scenes (sector pack data)", () => {
   it("skips a pack its loader refuses", () => {
     pack("broken", [scene("a"), scene("b"), scene("c")])
     expect(codes(["broken"])).toEqual(["neutral_a", "neutral_b"])
+  })
+
+  it("reads and logs a refused pack once, then answers from memory", () => {
+    const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+    try {
+      pack("broken", [scene("a"), scene("b"), scene("c")])
+      expect(codes(["broken"])).toEqual(["neutral_a", "neutral_b"])
+      // Gone from disk: still the same answers, nothing read or logged again
+      rmSync(root, { recursive: true, force: true })
+      expect(codes(["broken"])).toEqual(["neutral_a", "neutral_b"])
+      expect(error).toHaveBeenCalledTimes(1)
+      expect(error).toHaveBeenCalledWith({ event: "ai.scene_pack_unreadable", pack: "broken" })
+    } finally {
+      error.mockRestore()
+    }
   })
 })
 

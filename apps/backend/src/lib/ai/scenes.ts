@@ -28,13 +28,29 @@ export type AiScene = SceneData
 /** The pack every shop has: its scenes are the neutral fallback. */
 export const SCENE_FALLBACK_PACK = "general"
 
+/** Each pack's scenes by folder and code, for the life of the process (`packScenes`). */
+const sceneCache = new Map<string, readonly AiScene[]>()
+
 /**
  * A pack's scenes; one its loader refuses has none (logged by its code,
  * never its content). The packs are read together and once: one refused
  * fails the read of all, so each is then read on its own (as the preset
- * gallery does, `api/admin/storefront-presets/read.ts`).
+ * gallery does, `api/admin/storefront-presets/read.ts`). The packs ship
+ * with the build, so each pack's answer (none included) is kept for the
+ * process: a refused pack is read and logged once, not on every request.
  */
 export function packScenes(code: string, dir: string = DEFAULT_PACKS_DIR): readonly AiScene[] {
+  const key = `${dir}\u0000${code}`
+  const known = sceneCache.get(key)
+  if (known) {
+    return known
+  }
+  const scenes = readScenes(code, dir)
+  sceneCache.set(key, scenes)
+  return scenes
+}
+
+function readScenes(code: string, dir: string): readonly AiScene[] {
   try {
     return sectorPack(code, dir)?.scenes ?? []
   } catch (error) {

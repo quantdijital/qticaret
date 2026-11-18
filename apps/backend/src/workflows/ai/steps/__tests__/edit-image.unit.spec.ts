@@ -4,7 +4,8 @@ import { Modules, createMedusaContainer } from "@medusajs/framework/utils"
 import sharp from "sharp"
 import { resetAiBreakers } from "../../../../lib/ai/breaker"
 import { VISION_SOURCE_MAX_BYTES } from "../../../../lib/ai/image-input"
-import { PlanLimitError } from "../../../../lib/errors"
+import { PlanLimitError, ValidationError } from "../../../../lib/errors"
+import * as mediaLib from "../../../../lib/media"
 import { DIGITAL_SOURCE_TYPES, digitalSourceTypeOf } from "../../../../lib/media"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../../modules/integration-credentials"
 import { MEDIA_MODULE } from "../../../../modules/media"
@@ -19,6 +20,11 @@ import { STORAGE_FULL, editImage } from "../edit-image"
  */
 
 jest.mock("../../../../lib/plan-limits", () => ({ assertStorageFits: jest.fn() }))
+// The real upload check, which one test makes refuse the service's result
+jest.mock("../../../../lib/media", () => {
+  const actual = jest.requireActual<typeof mediaLib>("../../../../lib/media")
+  return { ...actual, prepareImage: jest.fn(actual.prepareImage) }
+})
 const { assertStorageFits } = jest.requireMock<{ assertStorageFits: jest.Mock }>(
   "../../../../lib/plan-limits"
 )
@@ -228,6 +234,22 @@ describe("setting one picture in a scene (Aşama 7)", () => {
     expect(await editImage(container(), { ...SCENE, scene: null })).toMatchObject({
       error_code: "scene_unknown",
     })
+    expect(uploads).toHaveLength(0)
+  })
+
+  it("counts the image when the result's check refuses what the service gave back", async () => {
+    // The service answered (and charged); the upload check said no
+    const check = jest.mocked(mediaLib.prepareImage)
+    for (const input of [SCENE, INPUT]) {
+      check.mockRejectedValueOnce(new ValidationError("upload.too_large"))
+      expect(await editImage(container(), input)).toMatchObject({
+        status: "failed",
+        error_key: "ai.provider_response_invalid",
+        error_code: "result_upload.too_large",
+        file_id: null,
+        images: 1,
+      })
+    }
     expect(uploads).toHaveLength(0)
   })
 

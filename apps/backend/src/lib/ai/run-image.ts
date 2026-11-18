@@ -62,8 +62,35 @@ export async function imageInputOf(service: AiService, original: Buffer): Promis
   return { mimeType: UPLOAD_MEDIA_TYPES[type].mime, bytes: original }
 }
 
+/** Failures raised after the service answered, with what it counted: the call is paid for. */
+const answeredCalls = new WeakMap<object, AiUsage>()
+
+/**
+ * The usage of a call the service answered before the failure (the
+ * result's download or check refused it); null: it never answered. The
+ * usage row still counts the image so the cost is recorded.
+ */
+export function answeredUsageOf(error: unknown): AiUsage | null {
+  return typeof error === "object" && error !== null ? (answeredCalls.get(error) ?? null) : null
+}
+
 /** A service's result fetched where it is an address, checked as an upload, marked `source`. */
 async function keptResult(
+  run: Pick<RunImageEdit, "service" | "name" | "signal" | "download">,
+  result: ImageEditResult,
+  source: AiSource
+): Promise<ImageEditDone> {
+  try {
+    return await checkedResult(run, result, source)
+  } catch (error) {
+    if (typeof error === "object" && error !== null) {
+      answeredCalls.set(error, result.usage)
+    }
+    throw error
+  }
+}
+
+async function checkedResult(
   run: Pick<RunImageEdit, "service" | "name" | "signal" | "download">,
   result: ImageEditResult,
   source: AiSource

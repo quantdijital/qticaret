@@ -12,7 +12,7 @@ import { findAiTask } from "../../../lib/ai/registry/tasks"
 import type { AiTask } from "../../../lib/ai/registry/tasks"
 import { sceneTargetOf } from "../../../lib/ai/registry/services"
 import type { ImageBackground } from "../../../lib/ai/registry/services"
-import { runImageEdit, runImageScene } from "../../../lib/ai/run-image"
+import { answeredUsageOf, runImageEdit, runImageScene } from "../../../lib/ai/run-image"
 import type { ImageEditDone } from "../../../lib/ai/run-image"
 import { shopSceneOf } from "../../../lib/ai/scenes"
 import { libraryVersionBase } from "../../../lib/media"
@@ -204,8 +204,19 @@ export async function editImage(
     }
     return outcome
   } catch (error) {
-    // A failure after the answer keeps what the service counted: the usage row prices it
-    const answered = returned ?? base
+    // A failure after the answer keeps what the service counted: the usage row prices it,
+    // also when the result's download or check refused what the service gave back
+    const paid = answeredUsageOf(error)
+    const answered =
+      returned ??
+      (paid
+        ? {
+            ...base,
+            input_tokens: paid.inputTokens ?? null,
+            output_tokens: paid.outputTokens ?? null,
+            images: 1,
+          }
+        : base)
     if (isPlanLimitError(error)) {
       // The package's storage is full: no AI key says so, the job reports `plan.limit_reached`
       const full: EditImageOutcome = {
