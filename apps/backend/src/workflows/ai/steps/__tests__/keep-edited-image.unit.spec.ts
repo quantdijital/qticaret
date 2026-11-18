@@ -69,6 +69,20 @@ describe("keeping an edited picture", () => {
     expect(removeFiles).not.toHaveBeenCalled()
   })
 
+  it("records a generated scene as generated, as its file is marked", async () => {
+    registerMedia.mockResolvedValueOnce({ assets: [{ id: "media_new" }], undo: null })
+    await keepEditedImage(container(), {
+      ...INPUT,
+      outcome: { ...STORED, ai_source: "generated" },
+    })
+    expect(registerMedia).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        origin: { ai_source: "generated", derived_from_id: "media_original" },
+      })
+    )
+  })
+
   it("removes the stored file and goes on as failed when the record cannot be made", async () => {
     registerMedia.mockRejectedValueOnce(new MedusaError(MedusaError.Types.DB_ERROR, "db down"))
 

@@ -1,5 +1,10 @@
 import sharp from "sharp"
-import type { ImageEditConnector, ImageEditRequest, ImageEditResult } from "./image-types"
+import type {
+  ImageEditConnector,
+  ImageEditRequest,
+  ImageEditResult,
+  ImageSceneRequest,
+} from "./image-types"
 
 /**
  * The fake service's image editing (NODE_ENV test and development only;
@@ -15,6 +20,23 @@ export const fakeImageConnector: ImageEditConnector = {
         ? image.flatten({ background: "#ffffff" })
         : image.ensureAlpha()
     )
+      .png()
+      .toBuffer()
+    return { kind: "bytes", bytes, usage: {} }
+  },
+  /** A scene: the picture on a light grey canvas twice its size, so the result differs by size. */
+  async scene(request: ImageSceneRequest): Promise<ImageEditResult> {
+    const image = sharp(request.image.bytes, { failOn: "error" })
+    const { width, height } = await image.metadata()
+    const bytes = await image
+      .flatten({ background: "#ffffff" })
+      .extend({
+        top: Math.ceil(height / 2),
+        bottom: Math.ceil(height / 2),
+        left: Math.ceil(width / 2),
+        right: Math.ceil(width / 2),
+        background: "#e5e5e5",
+      })
       .png()
       .toBuffer()
     return { kind: "bytes", bytes, usage: {} }

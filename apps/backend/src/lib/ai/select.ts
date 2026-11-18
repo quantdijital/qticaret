@@ -1,5 +1,5 @@
 import type { AiErrorKey } from "./errors"
-import { aiServices } from "./registry/services"
+import { aiServices, sceneTargetOf } from "./registry/services"
 import type { AiService } from "./registry/services"
 import type { AiTask } from "./registry/tasks"
 
@@ -28,6 +28,15 @@ export interface AiFlags {
 const fundingOpen = (service: AiService, flags: AiFlags): boolean =>
   service.funding === "own_key" ? flags.ownKeys : flags.platformCredits === true
 
+/** The service has the task's capability, and a scene endpoint where the task sets a scene. */
+export function canRunTask(service: AiService, task: AiTask): boolean {
+  const target = service.capabilities[task.capability]
+  if (target === undefined) {
+    return false
+  }
+  return task.optionSource !== "scenes" || sceneTargetOf(target) !== null
+}
+
 /** Connected and verified ∩ able to do the task ∩ paid in a way that is open; registry order. */
 export function usableServices(
   task: AiTask,
@@ -41,7 +50,7 @@ export function usableServices(
   return services.filter(
     (service) =>
       connected.has(service.credentialProvider) &&
-      service.capabilities[task.capability] !== undefined &&
+      canRunTask(service, task) &&
       fundingOpen(service, flags)
   )
 }

@@ -1,6 +1,6 @@
 import type { AiUsage } from "./connectors/types"
 import type { AiCapability } from "./registry/capabilities"
-import type { AiService } from "./registry/services"
+import type { AiService, AiUnitPrice } from "./registry/services"
 
 /**
  * What a call is estimated to have cost (adr/0071 §5), from the unit
@@ -32,9 +32,11 @@ const isCount = (value: number | undefined): value is number =>
 export function estimateCost(
   service: AiService,
   capability: AiCapability,
-  usage: AiCallUsage
+  usage: AiCallUsage,
+  /** The registry's own price for this call (a scene endpoint's); the capability's when left out. */
+  unitPrice?: AiUnitPrice
 ): AiCostEstimate | null {
-  const price = service.unitPrices[capability]
+  const price = unitPrice ?? service.unitPrices[capability]
   if (price === undefined) {
     return null
   }

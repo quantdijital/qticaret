@@ -2,8 +2,9 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import type { AiCapability } from "../../lib/ai/registry/capabilities"
 import { aiServices } from "../../lib/ai/registry/services"
 import type { AiFunding, AiTarget } from "../../lib/ai/registry/services"
-import { aiTasks } from "../../lib/ai/registry/tasks"
-import { usableServices } from "../../lib/ai/select"
+import { IMAGE_SCENE_TASK, aiTasks } from "../../lib/ai/registry/tasks"
+import { shopScenes } from "../../lib/ai/scenes"
+import { canRunTask, usableServices } from "../../lib/ai/select"
 import type { AiConnectionStatus } from "../../lib/ai/select"
 import { AI_MODULE } from "../../modules/ai"
 import type AiModuleService from "../../modules/ai/service"
@@ -20,6 +21,14 @@ export interface AiServiceView {
   data_note_key: string
   /** The backgrounds its `image_edit` endpoint makes (`image_background` options); empty without one. */
   backgrounds: string[]
+  /** It can set a product photo in a scene (`image_scene`). */
+  scene: boolean
+}
+
+/** A scene as the picker shows it: its code and names; never its prompt. */
+export interface AiSceneView {
+  code: string
+  name: { tr: string; en: string }
 }
 
 export interface AiTaskView {
@@ -32,6 +41,8 @@ export interface AiTaskView {
   /** What `usableServices` gives, registry order; the picker shows only with two or more. */
   usable: string[]
   preference: string | null
+  /** `image_scene`: the shop's scenes (its `options`, by code), from its sector packs. */
+  scenes?: AiSceneView[]
 }
 
 export interface AiServicesView {
@@ -68,13 +79,19 @@ export async function aiServicesView(
     funding: service.funding,
     data_note_key: service.dataNoteKey,
     backgrounds: backgroundsOf(service.capabilities.image_edit),
+    scene: canRunTask(service, IMAGE_SCENE_TASK),
+  }))
+  const scenes: AiSceneView[] = (await shopScenes(container)).map((scene) => ({
+    code: scene.code,
+    name: { tr: scene.name.tr, en: scene.name.en },
   }))
   const tasks = await Promise.all(
     aiTasks().map(async (task): Promise<AiTaskView> => ({
       id: task.id,
       capability: task.capability,
       mode: task.mode,
-      options: task.options,
+      options: task.optionSource === "scenes" ? scenes.map((scene) => scene.code) : task.options,
+      ...(task.optionSource === "scenes" ? { scenes } : {}),
       allowed: role !== null && task.roles.includes(role),
       usable: usableServices(task, connections, flags).map((service) => service.id),
       preference: await ai.preferenceOf(userId, task.id),

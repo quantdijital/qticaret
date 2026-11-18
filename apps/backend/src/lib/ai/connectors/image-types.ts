@@ -17,8 +17,21 @@ export interface ImageEditRequest {
 export type ImageEditResult =
   { kind: "bytes"; bytes: Buffer; usage: AiUsage } | { kind: "url"; url: string; usage: AiUsage }
 
+/**
+ * A product photo set in a scene (Aşama 7). `setting` is a sector pack's
+ * scene description (lib/ai/scenes.ts), read on the server; never text
+ * from a client. The connector wraps it in its own fixed instruction.
+ */
+export interface ImageSceneRequest {
+  image: AiImageInput
+  setting: string
+  signal?: AbortSignal
+}
+
 export interface ImageEditConnector {
   edit: (request: ImageEditRequest) => Promise<ImageEditResult>
+  /** Only where the service's target has a scene endpoint. */
+  scene?: (request: ImageSceneRequest) => Promise<ImageEditResult>
 }
 
 /** Image editing and generation (adr/0071 §8). */

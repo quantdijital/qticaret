@@ -7,10 +7,16 @@ import { aiProviderError } from "../../../lib/ai/errors"
 import { imageConnectorFor, imageTargetOf } from "../../../lib/ai/image-connector-of"
 import { readVisionSource } from "../../../lib/ai/image-input"
 import { failureOf } from "../../../lib/ai/outcome"
+import type { ImageEditConnector } from "../../../lib/ai/connectors/image-types"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
+import type { AiTask } from "../../../lib/ai/registry/tasks"
+import { sceneTargetOf } from "../../../lib/ai/registry/services"
 import type { ImageBackground } from "../../../lib/ai/registry/services"
-import { runImageEdit } from "../../../lib/ai/run-image"
+import { runImageEdit, runImageScene } from "../../../lib/ai/run-image"
+import type { ImageEditDone } from "../../../lib/ai/run-image"
+import { shopSceneOf } from "../../../lib/ai/scenes"
 import { libraryVersionBase } from "../../../lib/media"
+import type { AiSource } from "../../../lib/media/ai-source"
 import { looksLikeSvg } from "../../../lib/media/svg"
 import { assertStorageFits } from "../../../lib/plan-limits"
 import { MEDIA_MODULE } from "../../../modules/media"
@@ -25,7 +31,10 @@ export const STORAGE_FULL = "storage_full"
 export interface EditImageInput {
   task: string
   service: string
-  background: ImageBackground
+  /** `image_background`: what the background becomes. */
+  background?: ImageBackground | null | undefined
+  /** `image_scene`: the shop's scene, by its code; its description is read here. */
+  scene?: string | null | undefined
   media_id: string
 }
 
@@ -34,6 +43,59 @@ export interface EditImageOutcome extends CallOutcome {
   file_id: string | null
   /** Images the service gave back, kept or not (1 or null): what a per-image price counts. */
   images: number | null
+  /** What the stored result is marked as (IPTC and `media_asset.ai_source`); null without one. */
+  ai_source?: AiSource | null
+}
+
+type Resolved = NonNullable<ReturnType<typeof imageTargetOf>>
+
+/** A scene task's scene endpoint, or null: a service without one. */
+const sceneOf = (resolved: Resolved | null) => sceneTargetOf(resolved?.target)
+
+/**
+ * The call this task makes: a background, or the shop's scene read from
+ * its sector packs (the allow-list; a code not among them is refused).
+ */
+async function runFor(
+  container: MedusaContainer,
+  input: EditImageInput,
+  task: AiTask,
+  resolved: Resolved,
+  connector: ImageEditConnector,
+  original: { bytes: Buffer; name: string }
+): Promise<{ done: ImageEditDone; source: AiSource }> {
+  const run = {
+    connector,
+    service: resolved.service,
+    original: original.bytes,
+    name: original.name,
+  }
+  if (task.optionSource !== "scenes") {
+    if (!input.background) {
+      throw aiProviderError({ service: input.service, key: "ai.unknown_task", code: "no_option" })
+    }
+    const background = input.background
+    return {
+      done: await withAiBreaker(input.service, () => runImageEdit({ ...run, background })),
+      source: "edited",
+    }
+  }
+  const target = sceneOf(resolved)
+  const scene = input.scene ? await shopSceneOf(container, input.scene) : null
+  if (!target) {
+    throw aiProviderError({
+      service: input.service,
+      key: "ai.service_unavailable",
+      code: "scene_unsupported",
+    })
+  }
+  if (!scene) {
+    throw aiProviderError({ service: input.service, key: "ai.unknown_task", code: "scene_unknown" })
+  }
+  const done = await withAiBreaker(input.service, () =>
+    runImageScene({ ...run, setting: scene.prompt, source: target.source })
+  )
+  return { done, source: target.source }
 }
 
 /** The original's stored bytes: read, never written back (adr/0071 §5). */
@@ -82,7 +144,10 @@ export async function editImage(
   const resolved = imageTargetOf(input.service)
   const base: EditImageOutcome = {
     status: "failed",
-    model: resolved?.target.model ?? "",
+    model:
+      (task?.optionSource === "scenes" ? sceneOf(resolved)?.model : undefined) ??
+      resolved?.target.model ??
+      "",
     text: null,
     problems: [],
     input_tokens: null,
@@ -116,20 +181,13 @@ export async function editImage(
       })
     }
     const connector = imageConnectorFor(input.service, apiKey)
-    const done = await withAiBreaker(input.service, () =>
-      runImageEdit({
-        connector,
-        service: resolved.service,
-        original: original.bytes,
-        name: original.name,
-        background: input.background,
-      })
-    )
+    const { done, source } = await runFor(container, input, task, resolved, connector, original)
     returned = {
       ...base,
       input_tokens: done.usage.inputTokens ?? null,
       output_tokens: done.usage.outputTokens ?? null,
       images: 1,
+      ai_source: source,
     }
     await assertStorageFits(container, done.image.buffer.length)
     const file = await storePublicFile(

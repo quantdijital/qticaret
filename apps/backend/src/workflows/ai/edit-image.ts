@@ -1,16 +1,27 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
-import type { AiFunding, ImageBackground } from "../../lib/ai/registry/services"
+import { imageTargetOf } from "../../lib/ai/image-connector-of"
+import { sceneTargetOf } from "../../lib/ai/registry/services"
+import type { AiFunding, AiUnitPrice, ImageBackground } from "../../lib/ai/registry/services"
 import { claimQuotaStep, releaseUntakenStep } from "./steps/claim-quota"
 import { editImageStep } from "./steps/edit-image"
 import { keepEditedImageStep } from "./steps/keep-edited-image"
 import { recordUsageStep } from "./steps/record-usage"
 import { saveSuggestionStep } from "./steps/save-suggestion"
 
+/** The scene endpoint's own price, where the registry gives one. */
+function sceneUnitPriceOf(serviceId: string): AiUnitPrice | null {
+  const scene = sceneTargetOf(imageTargetOf(serviceId)?.target)
+  return scene && "unitPrice" in scene ? (scene.unitPrice ?? null) : null
+}
+
 export interface EditImageWorkflowInput {
   task: string
   service: string
   funding: AiFunding
-  background: ImageBackground
+  /** `image_background`. */
+  background?: ImageBackground | null | undefined
+  /** `image_scene`: the shop's scene by its code (checked against its packs in the edit step). */
+  scene?: string | null | undefined
   media_id: string
   user_id: string
   /** The staff member picked the service among several: remember it (adr/0071 §4). */
@@ -18,7 +29,7 @@ export interface EditImageWorkflowInput {
 }
 
 /**
- * One picture of a background job (Aşama 4; adr/0071 §5, §8): its own
+ * One picture of a background or scene job (Aşama 4, 7; adr/0071 §5, §8): its own
  * claim on the day's and the month's quota, the edit, the claim given back
  * when the service never took the job, then the result kept as a new
  * media record beside the original (`ai_source: edited`,
@@ -38,7 +49,8 @@ export const editImageWorkflow = createWorkflow(
       transform({ input }, ({ input }) => ({
         task: input.task,
         service: input.service,
-        background: input.background,
+        background: input.background ?? null,
+        scene: input.scene ?? null,
         media_id: input.media_id,
       }))
     )
@@ -59,7 +71,7 @@ export const editImageWorkflow = createWorkflow(
         entity_type: "media",
         entity_id: input.media_id,
         // No prompt leaves: the task's fixed instruction and the picture
-        system: `${input.task}:${input.background}`,
+        system: `${input.task}:${input.background ?? input.scene ?? ""}`,
         data: "",
         outcome: kept,
         user_id: input.user_id,
@@ -77,6 +89,8 @@ export const editImageWorkflow = createWorkflow(
         suggestion_id: suggestion.id,
         user_id: input.user_id,
         remember: input.remember,
+        // A scene endpoint priced on its own (Photoroom's Image Editing API)
+        unit_price: input.scene ? sceneUnitPriceOf(input.service) : null,
       }))
     )
     return new WorkflowResponse(

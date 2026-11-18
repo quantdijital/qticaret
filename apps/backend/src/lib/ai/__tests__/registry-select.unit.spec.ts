@@ -4,8 +4,15 @@ import { AI_ERROR_KEYS } from "../errors"
 import { AI_CAPABILITIES } from "../registry/capabilities"
 import { FAKE_SERVICE, aiServices, findAiService } from "../registry/services"
 import type { AiService } from "../registry/services"
-import { MAX_TASK_OPTIONS, TEST_TASK, aiTasks, findAiTask } from "../registry/tasks"
-import { alternativesTo, chooseService, usableServices } from "../select"
+import {
+  IMAGE_BACKGROUND_TASK,
+  IMAGE_SCENE_TASK,
+  MAX_TASK_OPTIONS,
+  TEST_TASK,
+  aiTasks,
+  findAiTask,
+} from "../registry/tasks"
+import { alternativesTo, canRunTask, chooseService, usableServices } from "../select"
 import type { AiConnection } from "../select"
 
 const connected = (...providers: string[]): AiConnection[] =>
@@ -37,6 +44,7 @@ describe("AI registries (adr/0071 §2)", () => {
       "image_alt_text",
       "image_background",
       "product_from_photo",
+      "image_scene",
     ])
     expect(findAiTask("test_text", "development")).toBeNull()
   })
@@ -74,6 +82,14 @@ describe("AI registries (adr/0071 §2)", () => {
             expect(service.hosts).toContain(image.hostname)
             expect(image.search).toBe("")
             expect(target.backgrounds.length).toBeGreaterThan(0)
+            if (target.scene) {
+              // A scene endpoint is held to the same host list, and marks its result
+              const scene = new URL(target.scene.url)
+              expect(scene.protocol).toBe("https:")
+              expect(service.hosts).toContain(scene.hostname)
+              expect(scene.search + scene.username + scene.password).toBe("")
+              expect(["edited", "generated"]).toContain(target.scene.source)
+            }
           }
           continue
         }
@@ -178,6 +194,31 @@ describe("service selection (adr/0071 §4)", () => {
   it("leaves out a service without the task's capability", () => {
     const video = { ...TEST_TASK, capability: "video" as const }
     expect(usableServices(video, connected("deepseek", "fake"), OWN_KEYS, services)).toEqual([])
+  })
+
+  it("offers a scene only on a service with a scene endpoint", () => {
+    const gemini = findAiService("gemini", "production")
+    const photoroom = findAiService("photoroom", "production")
+    expect(gemini && canRunTask(gemini, IMAGE_SCENE_TASK)).toBe(true)
+    expect(photoroom && canRunTask(photoroom, IMAGE_SCENE_TASK)).toBe(true)
+    const all = aiServices("test")
+    const ids = (list: AiService[]) => list.map((each) => each.id)
+    expect(
+      ids(usableServices(IMAGE_SCENE_TASK, connected("deepseek", "gemini"), OWN_KEYS, all))
+    ).toEqual(["gemini"])
+    // An image editor without a scene endpoint does backgrounds, never a scene
+    const plain: AiService = {
+      ...FAKE_SERVICE,
+      id: "plain",
+      credentialProvider: "plain",
+      capabilities: {
+        image_edit: { connector: "fake-image", model: "x", backgrounds: ["white"] },
+      },
+    }
+    expect(ids(usableServices(IMAGE_SCENE_TASK, connected("plain"), OWN_KEYS, [plain]))).toEqual([])
+    expect(
+      ids(usableServices(IMAGE_BACKGROUND_TASK, connected("plain"), OWN_KEYS, [plain]))
+    ).toEqual(["plain"])
   })
 
   it("uses no own-key service while the plan closes own keys", () => {

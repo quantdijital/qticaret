@@ -2,7 +2,8 @@ import { z } from "@medusajs/framework/zod"
 import { MONTH_PATTERN } from "../../../modules/ai/usage-summary"
 import { AI_ENTITY_TYPES } from "../../../lib/ai/facts"
 import { IMAGE_BACKGROUNDS } from "../../../lib/ai/registry/services"
-import { IMAGE_BACKGROUND_MAX_BATCH } from "../../../lib/ai/registry/tasks"
+import { IMAGE_BACKGROUND_MAX_BATCH, IMAGE_SCENE_MAX_BATCH } from "../../../lib/ai/registry/tasks"
+import { SCENE_CODE } from "@qticaret/sector-packs"
 import { MEDIA_ID } from "../../../workflows/async-job/types/ai-image-edit"
 
 // A record's id of a kind a suggestion is asked for; its prefix is matched to the type in the workflow
@@ -41,6 +42,21 @@ const MediaSuggestion = z
   .strict()
 
 /**
+ * A picture set in one of the shop's scenes (Aşama 7): one picture, the
+ * scene by its code (checked against the shop's packs in the workflow).
+ * No prompt nor any text is taken: the scene's description is read on the server.
+ */
+const SceneSuggestion = z
+  .object({
+    task: z.literal("image_scene"),
+    entity_type: z.literal("media"),
+    entity_ids: z.array(z.string().regex(MEDIA_ID)).min(1).max(IMAGE_SCENE_MAX_BATCH),
+    service: z.string().regex(NAME).optional(),
+    option: z.string().regex(SCENE_CODE),
+  })
+  .strict()
+
+/**
  * A new product's card from one uploaded photo (Aşama 6): the picture by
  * its media record, and the template whose attributes it may fill (read
  * on the server). No category, attribute or text is taken from the client.
@@ -58,7 +74,12 @@ const PhotoCardSuggestion = z
   })
   .strict()
 
-export const AdminPostAiSuggestion = z.union([TextSuggestion, MediaSuggestion, PhotoCardSuggestion])
+export const AdminPostAiSuggestion = z.union([
+  TextSuggestion,
+  SceneSuggestion,
+  MediaSuggestion,
+  PhotoCardSuggestion,
+])
 export type AdminPostAiSuggestionType = z.infer<typeof AdminPostAiSuggestion>
 
 /**

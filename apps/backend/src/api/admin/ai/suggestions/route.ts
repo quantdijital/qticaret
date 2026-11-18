@@ -21,7 +21,8 @@ export async function GET(
  * field, never written to it here. 201 with the suggestion; a suggestion
  * the gate turned down is 422 `ai.suggestion_refused` with its problems
  * and no text. Several pictures (`entity_ids`, Aşama 4) are a job: 202
- * with its id; its results are suggestions too, decided one by one.
+ * with its id; its results are suggestions too, decided one by one. A
+ * scene (`image_scene`, Aşama 7) is such a job over one picture.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostAiSuggestionType>,
@@ -32,7 +33,7 @@ export async function POST(
     const { result: job } = await requestImageEditWorkflow(req.scope).run({
       input: {
         task: body.task,
-        background: body.option,
+        option: body.option,
         media_ids: body.entity_ids,
         service: body.service,
         user_id: req.auth_context.actor_id,
