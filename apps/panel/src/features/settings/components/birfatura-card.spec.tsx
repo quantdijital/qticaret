@@ -16,8 +16,8 @@ vi.mock("@tanstack/react-router", () => ({ Link: () => null }))
 
 const STATUS = "/admin/einvoice/birfatura"
 const MAKE = "/admin/einvoice/birfatura/token"
-// The shape BirFatura asks for; made up for the test, never a stored value
-const PASSWORD = "0f1e2d3c-4b5a-6978-8796-a5b4c3d2e1f0"
+// The shape BirFatura asks for (a GUID), drawn for each run: never a stored value
+const PASSWORD = crypto.randomUUID()
 
 const NONE: BirfaturaStatus = { token: null, last_pull: null }
 const MADE: BirfaturaStatus = {
