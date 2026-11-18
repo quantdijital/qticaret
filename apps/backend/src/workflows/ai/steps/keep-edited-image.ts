@@ -33,6 +33,32 @@ export type KeptImage = EditImageOutcome
  * step fails, by removing the new record; the file goes with the edit
  * step's own compensation.
  */
+/**
+ * The stored result removed, unless a media record still names it (the
+ * registration's own undo failed part-way): a record must never point at
+ * a file that is gone. Then the file stays and the nightly sweep's rules
+ * apply to the record; only a warning is logged.
+ */
+async function removeUnrecorded(container: MedusaContainer, fileId: string): Promise<void> {
+  let left: number
+  try {
+    left = (
+      await container
+        .resolve<MediaModuleService>(MEDIA_MODULE)
+        .listMediaAssets({ file_id: fileId }, { select: ["id"], take: 1 })
+    ).length
+  } catch (error) {
+    // Unknown whether a record is left: keeping the file is the safe side
+    logger.warn({ event: "ai.image_edit_file_kept", reason: "unchecked", err: errorSummary(error) })
+    return
+  }
+  if (left > 0) {
+    logger.warn({ event: "ai.image_edit_file_kept", reason: "record_left" })
+    return
+  }
+  await removeFiles(container, [fileId])
+}
+
 export async function keepEditedImage(
   container: MedusaContainer,
   input: KeepEditedImageInput
@@ -50,7 +76,7 @@ export async function keepEditedImage(
     })
     return { kept: { ...outcome, text: assets[0]?.id ?? null }, undo }
   } catch (error) {
-    await removeFiles(container, [outcome.file_id])
+    await removeUnrecorded(container, outcome.file_id)
     logger.warn({ event: "ai.image_edit_not_kept", err: errorSummary(error) })
     const kept: KeptImage = {
       ...outcome,

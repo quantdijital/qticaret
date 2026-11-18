@@ -79,9 +79,12 @@ describe("AI account check (adr/0071 §3, §9)", () => {
     expect(calls[0]?.options.body).toBeUndefined()
   })
 
-  it("lets Photoroom refuse a key only with 401 or 403; anything else is no verdict", async () => {
+  it("lets Photoroom refuse a key only with 401; a 403 and anything else are no verdict", async () => {
     expect(await check("photoroom", answer(401, SERVICE_SAID)).result).toBe("secret_invalid")
-    expect(await check("photoroom", answer(403, SERVICE_SAID)).result).toBe("secret_invalid")
+    // Its account endpoint's 403 is not documented: a plan or a scope, not surely the key
+    expect(await check("photoroom", answer(403, SERVICE_SAID)).result).toBe("unreachable")
+    // A documented service's 403 still refuses the key
+    expect(await check("deepseek", answer(403, SERVICE_SAID)).result).toBe("secret_invalid")
     // Its account endpoint's header is not documented: an odd answer says nothing of the key
     expect(await check("photoroom", answer(200, MODELS)).result).toBe("unreachable")
     expect(await check("photoroom", answer(404, {})).result).toBe("unreachable")

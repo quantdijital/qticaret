@@ -44,8 +44,8 @@ interface CheckCall {
   answer: "model_list" | "photoroom_account"
   /**
    * false: the check itself is not fully documented, so an answer out of the
-   * documentation says nothing about the key: only 401/403 refuse it, and
-   * anything else is no verdict (the key is saved as not checked).
+   * documentation says nothing about the key: only 401 refuses it (a 403
+   * and anything else are no verdict: the key is saved as not checked).
    */
   documented?: false
 }
@@ -200,8 +200,12 @@ export async function checkAiAccount(
     verdict = verdictOfThrown(error)
   }
   const [checked, code] = verdict
-  // Only a refused key is a verdict where the check's own answer is not documented
-  const outcome = checked === "failed" && call.documented === false ? "unreachable" : checked
+  // Where the check's own answer is not documented only a 401 refuses the key: a 403 may
+  // mean a plan or a scope this endpoint wants, and anything else is no verdict either
+  const undocumentedNoVerdict =
+    call.documented === false &&
+    (checked === "failed" || (checked === "secret_invalid" && code === "http_403"))
+  const outcome = undocumentedNoVerdict ? "unreachable" : checked
   if (outcome !== "valid") {
     // The outcome and a code of ours: never the body, the headers or the address's query
     logger.warn({ event: "ai.account_check_failed", service: service.id, outcome, code })
@@ -212,7 +216,7 @@ export async function checkAiAccount(
 /**
  * Whether a key for this service may replace a working one unchecked: its
  * check is not documented enough to hold a save back (Photoroom). The key
- * is then kept as "not checked" and the panel warns; a refused key still
+ * is then kept as "not checked" and the panel warns; a 401 still
  * stops the save.
  */
 export const replacesUnchecked = (serviceId: string): boolean =>
