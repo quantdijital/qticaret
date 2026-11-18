@@ -108,6 +108,12 @@ ADR eki + F16 ile birlikte. Kapsam: `ai.platform_credits` bayrağı, `ai_free_cr
 
 - Ayrı kiracı bayrağı, varsayılan kapalı; yazar adı ve iletişim ayıklama; `operations` rolüne yalnız bu işler açılır; yanıt taslağı gönderilmez, forma düşer. **Güvenlik incelemesi:** evet (kişilerin yazdığı metin; KVKK envanteri güncellenir).
 
+## Ürün ekranı genişletme 1 (yapıldı)
+
+- **`focus_keyword`** (`text`; varlık: ürün, kategori, içerik sayfası, yani SEO kartında yapay zekâ olan kayıtlar): kaydın herkese açık bilgilerinden bir ana odak anahtar kelime ve 2–3 alternatif, satır başına bir tane. Yanıt şekillendirilir (liste imi, "Ana anahtar kelime:" gibi etiket, tırnak, nokta atılır; küçük harf; tekrarlar ve dördüncüden sonrası düşer; virgülle yazılmışlar ayrı sayılır), sonra kapı: her satır en çok 60 karakter ve 6 sözcük, yalnız harf, rakam, boşluk, kısa çizgi, kesme; bağlantı, kişisel veri, gizlenmiş ad yok. Panel: SEO kartındaki "Odak anahtar kelime" alanının yanında düğme; her satırın kendi "Kullan"ı alanı doldurur, kayıt kartın Kaydet'i. Koleksiyon, marka, yazı ve açılış sayfalarında olgu okuyucusu olmadığından (SEO başlığı/açıklaması gibi) düğme yok.
+- **`product_title`** (`text`; yalnız ürün; ürünün açıklamasından 1.000 karakter okunur): marka + tür/model + ayırt edici özellik düzeninde daha açık ad; hedef 30–80, üst sınır 120 karakter. Kapı: tek satır, bağırma ya da üç kez geçen sözcük yok, bağlantı ve kişisel veri yok, ve **uydurma yok**: adın her sözcüğü servise gönderilen veri bloğunda bulunmalı (rakamlı sözcük birebir; üç harf ve üstü sözcük ilk beş harfiyle, Türkçe ekler için; "ve", "ile", "için" gibi bağlaçlar serbest), yoksa `ungrounded` ile reddedilir. Panel: genel karttaki "Ürün adı" alanının yanında düğme.
+- Ortak: roller owner/admin, 1 kredi, `ai_text` hız profili, kullanım satırı öneriden önce yazılır; giden veri SEO işleriyle aynı okuyucudan (fiyat, stok, iç kategori, kişisel veri gitmez). Testler: `lib/ai/__tests__/catalog-tasks.unit.spec.ts`, `integration-tests/http/ai-catalog-tasks.spec.ts`, panelde `ai-button-choices.spec.tsx`, `seo-card.spec.tsx`, `general-card.spec.tsx`.
+
 ## Aşama 10–13
 
 Akıllı arama (`embedding`; adr/0056 ile), görünüm asistanı, toplu komut, 3D ve ajan ticareti: her biri kendi ADR'siyle. Bu çekirdek onlara yalnız servis kaydı, seçim, kota ve kullanım kaydını verir.

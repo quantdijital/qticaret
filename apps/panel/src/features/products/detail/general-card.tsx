@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Input } from "@qticaret/admin-ui/ui/input"
+import { AiButton } from "@/features/ai/components/ai-button"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
@@ -13,8 +14,10 @@ import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 import { isValidSlug } from "@/lib/slug"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 
+const TITLE_MAX = 200
+
 const schema = z.object({
-  title: z.string().trim().min(2, { message: "products.errors.title" }).max(200),
+  title: z.string().trim().min(2, { message: "products.errors.title" }).max(TITLE_MAX),
   handle: z.string().trim().refine(isValidSlug, { message: "products.errors.handle" }),
 })
 type Values = z.infer<typeof schema>
@@ -78,7 +81,22 @@ export function GeneralCard({
         required
         error={message(errors.title?.message)}
       >
-        <Input id="detail-title" {...form.register("title")} />
+        <div className="flex items-start gap-1.5">
+          <Input id="detail-title" className="min-w-0 flex-1" {...form.register("title")} />
+          {/* A clearer name from the product's saved facts; "Kullan" fills the field, Save writes it */}
+          <AiButton
+            task="product_title"
+            entity={{ type: "product", id: product.id }}
+            size="icon"
+            label={t("products.detail.aiTitle")}
+            onUse={(text) => {
+              form.setValue("title", text.slice(0, TITLE_MAX), {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }}
+          />
+        </div>
       </Field>
       <Field
         label={t("products.wizard.url")}

@@ -30,6 +30,8 @@ export interface AiButtonProps {
   option?: string | undefined
   /** A line above the suggestion: what goes to the service (a picture may show a person, adr/0071 §10). */
   note?: string
+  /** Each line of the suggestion is a choice with its own "Kullan" (a keyword and its alternatives). */
+  choices?: boolean
 }
 
 /**
@@ -49,6 +51,7 @@ export function AiButton({
   text,
   option: initialOption,
   note,
+  choices = false,
 }: AiButtonProps) {
   const { t } = useTranslation()
   const name = label ?? t("ai.suggest.button")
@@ -125,11 +128,12 @@ export function AiButton({
     }
   }
 
-  const use = async () => {
+  // A choice is one line of the suggestion: the decision is recorded for the whole, the line fills the field
+  const use = async (choice?: string) => {
     const text = await suggestion.accept()
     setOpen(false)
     if (text !== null) {
-      onUse(text)
+      onUse(choice ?? text)
     }
   }
 
@@ -167,6 +171,13 @@ export function AiButton({
             ask({ option: next })
           }}
           onUse={() => void use()}
+          onUseChoice={
+            choices
+              ? (line) => {
+                  void use(line)
+                }
+              : undefined
+          }
           onRetry={() => {
             ask({ option })
           }}

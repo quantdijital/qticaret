@@ -4,6 +4,12 @@ import { altTextProblems } from "./alt-gate"
 import { fieldProblems } from "./field-rules"
 import { hasPersonalData } from "./redact"
 import type { AiTask } from "./registry/tasks"
+import {
+  focusKeywordProblems,
+  keywordLines,
+  productTitleProblems,
+  productTitleText,
+} from "./short-text-gate"
 
 /**
  * The output gate, per task (adr/0071 §9). A service's text is plain
@@ -64,8 +70,25 @@ export function suggestionText(raw: string): string {
   return text.length >= 2 && QUOTES.has(first) && QUOTES.has(last) ? text.slice(1, -1).trim() : text
 }
 
-/** What is wrong with a suggestion for this task; an empty list passes. */
-export function suggestionProblems(task: AiTask, text: string): string[] {
+/**
+ * A service's answer as the task offers it: plain text (`suggestionText`),
+ * then a short text's own shape, a keyword per line or a name without
+ * its quotes (lib/ai/short-text-gate.ts).
+ */
+export function suggestionTextFor(task: AiTask, raw: string): string {
+  const text = suggestionText(raw)
+  if (task.gate === "focus_keyword") {
+    return keywordLines(text).join("\n")
+  }
+  return task.gate === "product_title" ? productTitleText(text) : text
+}
+
+/**
+ * What is wrong with a suggestion for this task; an empty list passes.
+ * `data` is the data block the call was sent: a product name is held
+ * against it (no word it does not hold).
+ */
+export function suggestionProblems(task: AiTask, text: string, data?: string): string[] {
   if (text.trim() === "") {
     return ["empty"]
   }
@@ -88,6 +111,12 @@ export function suggestionProblems(task: AiTask, text: string): string[] {
     task.gate === "product_description"
   ) {
     return [...problems, ...fieldProblems(task.gate, text)]
+  }
+  if (task.gate === "focus_keyword") {
+    return [...problems, ...focusKeywordProblems(text)]
+  }
+  if (task.gate === "product_title") {
+    return [...problems, ...productTitleProblems(text, data)]
   }
   if (task.gate === "image_alt") {
     problems.push(...altTextProblems(text))

@@ -28,7 +28,7 @@ import { cn } from "@qticaret/admin-ui/lib/utils"
 import { DESCRIPTION_LIMIT, SEO_MAX, TITLE_LIMIT } from "./seo-limits"
 import { seoSummary } from "./seo-summary"
 import type { SeoCollapse } from "./seo-summary"
-import { SeoTextFields } from "./seo-text-fields"
+import { FocusKeywordField, SeoTextFields } from "./seo-text-fields"
 
 // Other cards measure their texts the same way
 export { Counter } from "./seo-text-fields"
@@ -195,17 +195,14 @@ function SeoForm({
         onUse={use}
       />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          label={t("seo.card.focusKeyword")}
-          htmlFor={`seo-keyword-${id}`}
-          hint={t("seo.card.focusKeywordHint")}
-        >
-          <Input
-            id={`seo-keyword-${id}`}
-            maxLength={SEO_MAX.keyword}
-            {...form.register("focus_keyword")}
-          />
-        </Field>
+        <FocusKeywordField
+          type={type}
+          id={id}
+          field={form.register("focus_keyword")}
+          onUse={(keyword) => {
+            form.setValue("focus_keyword", keyword, { shouldDirty: true })
+          }}
+        />
         <Field label={t("seo.card.robots")} htmlFor={`seo-robots-${id}`}>
           <Controller
             control={form.control}
