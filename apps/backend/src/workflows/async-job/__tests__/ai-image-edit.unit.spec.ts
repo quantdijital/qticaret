@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 import { PlanLimitError, ValidationError } from "../../../lib/errors"
 import { aiImageEdit } from "../types/ai-image-edit"
 import type { JobContext } from "../types"
@@ -156,6 +157,38 @@ describe("running the background job", () => {
       skipped: 0,
     })
     expect((summary["done"] as unknown[]).length).toBe(2)
+  })
+
+  it.each([
+    [
+      "the asker's role was lowered",
+      new MedusaError(MedusaError.Types.FORBIDDEN, "staff.forbidden"),
+    ],
+    [
+      "ai.own_keys was closed",
+      new MedusaError(MedusaError.Types.FORBIDDEN, "ai.own_keys_not_in_plan"),
+    ],
+    ["the queued service is gone", new ValidationError("ai.service_unavailable")],
+    ["no service is left", new ValidationError("ai.no_service")],
+  ])("stops before the next picture once %s", async (_, refusal) => {
+    run
+      .mockImplementationOnce(() => Promise.resolve(succeeded("media_0")))
+      .mockImplementationOnce(() => Promise.reject(refusal))
+    const { summary } = await aiImageEdit.execute(context(), aiImageEdit.input.parse(INPUT))
+    expect(run).toHaveBeenCalledTimes(2)
+    expect(summary).toMatchObject({
+      failed: [],
+      skipped: 2,
+      stopped_by: (refusal as { safeMessage?: string }).safeMessage ?? refusal.message,
+    })
+    expect((summary["done"] as unknown[]).length).toBe(1)
+  })
+
+  it("goes on past an error that holds for one picture only", async () => {
+    run.mockImplementationOnce(() => Promise.reject(new ValidationError("ai.unknown_entity")))
+    const { summary } = await aiImageEdit.execute(context(), aiImageEdit.input.parse(INPUT))
+    expect(run).toHaveBeenCalledTimes(3)
+    expect(summary).toMatchObject({ skipped: 0, stopped_by: null })
   })
 
   it("refuses a job nobody queued", async () => {
