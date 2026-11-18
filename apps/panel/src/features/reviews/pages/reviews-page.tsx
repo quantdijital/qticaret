@@ -13,6 +13,11 @@ import { REVIEW_PAGE_SIZE, moderateReviews, reviewsQuery } from "@/features/revi
 import type { ReviewRow, ReviewTab } from "@/features/reviews/api/reviews"
 import { ReviewDialog } from "@/features/reviews/components/review-dialog"
 import { ReviewItem } from "@/features/reviews/components/review-item"
+import {
+  ReviewSummaryButton,
+  ReviewSummaryCard,
+} from "@/features/reviews/components/review-summary"
+import type { ReviewSummary } from "@/features/reviews/components/review-summary"
 import { ReviewsNav } from "@/features/reviews/components/reviews-nav"
 import { errorText } from "@/lib/errors"
 
@@ -41,6 +46,7 @@ export function ReviewsPage() {
       .map(({ id, updated_at }) => ({ id, updated_at }))
   const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set())
   const [opened, setOpened] = useState<ReviewRow | null>(null)
+  const [summary, setSummary] = useState<ReviewSummary | null>(null)
   const moderate = useMutation({
     mutationFn: moderateReviews,
     onSuccess: async ({ moderated, changed }, { status: next }) => {
@@ -73,12 +79,29 @@ export function ReviewsPage() {
     })
   }
   const rows = list.data?.reviews ?? []
+  // "Yorumları özetle" once per product on the page, beside its first approved review (Aşama 9)
+  const summarised = new Set<string>()
+  const firstOfProduct = (review: ReviewRow) => {
+    if (review.status !== "approved" || summarised.has(review.product.id)) {
+      return false
+    }
+    summarised.add(review.product.id)
+    return true
+  }
   // The open review as the list reads it now; as opened once a reply took it off "Yanıtsız"
   const shown = opened ? (rows.find((review) => review.id === opened.id) ?? opened) : null
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t(`${R}.title`)} description={t(`${R}.description`)} />
       <ReviewsNav />
+      {summary ? (
+        <ReviewSummaryCard
+          summary={summary}
+          onClose={() => {
+            setSummary(null)
+          }}
+        />
+      ) : null}
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t(`${R}.views`)}
@@ -139,6 +162,15 @@ export function ReviewsPage() {
                   review={review}
                   selected={selected.has(review.id)}
                   busy={moderate.isPending}
+                  aside={
+                    firstOfProduct(review) ? (
+                      <ReviewSummaryButton
+                        productId={review.product.id}
+                        productTitle={review.product.title ?? review.product.id}
+                        onSummary={setSummary}
+                      />
+                    ) : null
+                  }
                   onSelect={(on) => {
                     setSelected((was) => {
                       const next = new Set(was)

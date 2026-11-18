@@ -38,7 +38,8 @@ export const taskInputStep = createStep(
     const { fields, maxLengths, image } = await entityFacts(
       container,
       input.entity_type,
-      input.entity_id
+      input.entity_id,
+      task.reader
     )
     // A vision task reads a picture: a record with none is turned away before any quota is claimed
     if (task.capability === "vision" && image === null) {

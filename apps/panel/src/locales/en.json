@@ -668,6 +668,12 @@
       "empty": "No features to switch yet. Features such as cash on delivery will show up here as they arrive.",
       "locked": "Comes with your plan; cannot be changed here.",
       "flags": {
+        "ai": {
+          "reviews": {
+            "label": "AI on reviews and questions",
+            "description": "Product reviews are summed up; replies to reviews and questions are drafted. What customers wrote goes to the connected service without the author's name and contact details."
+          }
+        },
         "catalog": {
           "non_physical": {
             "label": "Digital and service products",
@@ -11302,7 +11308,10 @@
       "seo_title": "Search title",
       "seo_description": "Search description",
       "image_alt_text": "Alt text",
-      "image_background": "Background removal"
+      "image_background": "Background removal",
+      "review_summary": "Review summary",
+      "review_reply": "Review reply",
+      "question_answer": "Question answer"
     },
     "options": {
       "short": "Short",
@@ -11387,7 +11396,9 @@
       "content_blocked": "{{name}} gave no suggestion for this content (safety filter).",
       "provider_response_invalid": "{{name}} gave an unexpected answer.",
       "input_unsupported": "This content cannot be sent to the service (type or size not suitable).",
-      "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow."
+      "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow.",
+      "reviews_off": "AI on reviews and questions is off. It can be turned on under Settings › AI.",
+      "not_enough_reviews": "A summary needs at least 3 approved reviews of this product."
     },
     "background": {
       "button": "Remove background",
@@ -11445,6 +11456,22 @@
       "savedAll_one": "Alt text saved for {{count}} image.",
       "savedAll_other": "Alt text saved for {{count}} images.",
       "saveFailed": "{{name}} could not be saved: {{reason}}"
+    },
+    "reviews": {
+      "settingTitle": "AI on reviews and questions",
+      "settingDescription": "Sums up product reviews and drafts replies to reviews and questions. A draft is published only when you send it.",
+      "settingDetail": "When on, the text customers wrote in reviews and questions goes to the connected AI service with its rating. The author's name is masked in the text; e-mail, phone, IBAN, card and ID numbers are taken out; order, address and customer details are never sent. Other people named inside the text cannot always be caught.",
+      "summarize": "Summarise reviews",
+      "summarizeFor": "Summarise the reviews of {{product}}",
+      "summaryTitle": "{{product}} · review summary",
+      "summaryNote": "AI suggestion; not shown on the storefront, not saved.",
+      "summaryClose": "Close summary",
+      "copy": "Copy",
+      "copied": "Summary copied.",
+      "replyDraft": "Draft a reply",
+      "replyDraftFor": "Draft a reply to {{author}}'s review",
+      "answerDraftFor": "Draft an answer to {{author}}'s question",
+      "note": "The text goes to the service without the author's name and contact details. The draft fills the form; you send it."
     }
   }
 }

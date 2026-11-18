@@ -117,9 +117,10 @@ export async function guardStaffRoles(
     )
     return
   }
-  const body = req.body as { type?: unknown } | undefined
+  const body = req.body as { type?: unknown; task?: unknown } | undefined
   const decision = decide(role, req.method, routePath(req), {
     jobType: typeof body?.type === "string" ? body.type : undefined,
+    aiTask: typeof body?.task === "string" ? body.task : undefined,
     apiKeyType: await apiKeyTypeOf(req),
   })
   if (!decision.allowed) {

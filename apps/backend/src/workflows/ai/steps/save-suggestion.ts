@@ -1,6 +1,7 @@
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { CONTENT_DRAFTS_MODULE } from "../../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../../modules/content-drafts/service"
+import { findAiTask } from "../../../lib/ai/registry/tasks"
 import type { CallOutcome } from "./call-service"
 
 /** Marks a suggestion of the AI core apart from adr/0005's drafts in the same table. */
@@ -34,12 +35,14 @@ export const saveSuggestionStep = createStep(
     }
     const drafts = container.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
     const refused = outcome.status === "refused"
+    // Customers' words are not copied here (adr/0071 §10): the instruction only, the data left out
+    const keepData = findAiTask(input.task)?.keepData !== false
     const draft = await drafts.createContentDrafts({
       entity_type: input.entity_type,
       entity_id: input.entity_id,
       kind: input.task,
       text: refused ? "" : (outcome.text ?? ""),
-      prompt: `${input.system}\n\n${input.data}`,
+      prompt: keepData ? `${input.system}\n\n${input.data}` : input.system,
       provider: input.service,
       source: AI_SUGGESTION_SOURCE,
       status: refused ? "refused" : "draft",

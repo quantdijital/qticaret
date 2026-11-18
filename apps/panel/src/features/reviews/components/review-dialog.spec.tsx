@@ -10,6 +10,8 @@ const fetchMock = vi.hoisted(() => vi.fn())
 const toastMock = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+// The AI drafts have their own spec (ai-review-drafts.spec.tsx)
+vi.mock("@/features/ai/components/ai-button", () => ({ AiButton: () => null }))
 vi.mock("sonner", () => ({ toast: toastMock }))
 
 const review = (more: Partial<ReviewRow> = {}): ReviewRow => ({
