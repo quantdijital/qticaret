@@ -11,6 +11,9 @@ import type { TextConnector, TextRequest, TextResult } from "./types"
  */
 
 const MAX_FAKE_TEXT = 155
+/** An image's text: one an alt text's gate takes. */
+const MAX_FAKE_ALT = 120
+const FAKE_SEEN = "Açık zemin üzerinde duran tek bir ürün"
 /** From this token budget on a task is long-form, and the fake fills it. */
 const LONG_FORM_TOKENS = 4_000
 /** Characters the fake writes per token of the budget when it fills a long answer. */
@@ -63,9 +66,10 @@ export const fakeTextConnector: TextConnector = {
         aiProviderError({ service: FAKE_SERVICE.id, key: "ai.timeout", code: "aborted" })
       )
     }
-    const seen = request.images?.length ? [`${String(request.images.length)} görsel`] : []
+    // An image with no text beside it still gets a description, as a real model would write
+    const seen = request.images?.length && textsOf(request.data).length === 0 ? [FAKE_SEEN] : []
     const sentence = Array.from([...textsOf(request.data), ...seen].join(", "))
-      .slice(0, MAX_FAKE_TEXT)
+      .slice(0, request.images?.length ? MAX_FAKE_ALT : MAX_FAKE_TEXT)
       .join("")
       .trim()
     if (sentence === "") {

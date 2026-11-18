@@ -6,10 +6,10 @@ import type { AiErrorKey, AiProviderFailure } from "../errors"
 import type { AiService, OpenAiCompatibleTarget } from "../registry/services"
 import { readCompletion, registeredBodyError } from "./openai-response"
 import { TEXT_TIMEOUT_MS } from "./types"
-import type { TextConnector, TextRequest, TextResult } from "./types"
+import type { AiImageInput, TextConnector, TextRequest, TextResult } from "./types"
 
 /**
- * The text connector DeepSeek, MiniMax and Gemini share (adr/0071 §2):
+ * The text and image reading connector DeepSeek, MiniMax and Gemini share (adr/0071 §2):
  * an OpenAI style chat completion. The address comes from the registry
  * alone and must be on the service's host list; redirects are refused;
  * the key goes in the `Authorization` header and nowhere else (§9).
@@ -79,13 +79,45 @@ function endpointOf(service: AiService, target: OpenAiCompatibleTarget): URL | n
   return url.protocol === "https:" && plain && service.hosts.includes(url.hostname) ? url : null
 }
 
+// What an image may be sent as; SVG never (it is a document, not a picture)
+const IMAGE_TYPES: ReadonlySet<string> = new Set(["image/jpeg", "image/png", "image/webp"])
+
+/** Whether every image is of a type and a size the target takes. */
+const imagesFit = (target: OpenAiCompatibleTarget, images: readonly AiImageInput[]): boolean =>
+  target.imageInput !== undefined &&
+  images.every(
+    (image) =>
+      IMAGE_TYPES.has(image.mimeType) &&
+      image.bytes.length > 0 &&
+      image.bytes.length <= (target.imageInput?.maxBytes ?? 0)
+  )
+
+/**
+ * The user message: the data block alone, or, with images, the data block
+ * as a text part and each image as a base64 `data:` URL (adr/0071 §9: the
+ * service is never given an address of the shop's storage).
+ */
+function userContent(request: TextRequest): string | Record<string, unknown>[] {
+  const images = request.images ?? []
+  if (images.length === 0) {
+    return request.data
+  }
+  return [
+    { type: "text", text: request.data },
+    ...images.map((image) => ({
+      type: "image_url",
+      image_url: { url: `data:${image.mimeType};base64,${image.bytes.toString("base64")}` },
+    })),
+  ]
+}
+
 function bodyOf(target: OpenAiCompatibleTarget, request: TextRequest): string {
   return JSON.stringify({
     ...target.body,
     model: target.model,
     messages: [
       { role: "system", content: request.system },
-      { role: "user", content: request.data },
+      { role: "user", content: userContent(request) },
     ],
     stream: false,
     ...(target.maxTokensField === null ? {} : { [target.maxTokensField]: request.maxTokens }),
@@ -205,8 +237,14 @@ export function openAiCompatibleText(options: OpenAiCompatibleOptions): TextConn
       if (url === null) {
         throw refuse("ai.provider_response_invalid", "endpoint_not_registered")
       }
+      // A text target takes no image; a vision target only the types and sizes it documents
       if (request.images !== undefined && request.images.length > 0) {
-        throw refuse("ai.input_unsupported", "images_unsupported")
+        if (target.imageInput === undefined) {
+          throw refuse("ai.input_unsupported", "images_unsupported")
+        }
+        if (!imagesFit(target, request.images)) {
+          throw refuse("ai.input_unsupported", "image_not_accepted")
+        }
       }
       const deadline = AbortSignal.timeout(timeoutMs)
       const signal = request.signal ? AbortSignal.any([deadline, request.signal]) : deadline

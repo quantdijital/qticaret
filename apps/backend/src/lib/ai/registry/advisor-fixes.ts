@@ -44,7 +44,7 @@ const ONLY_FOR: Readonly<Record<string, readonly PageKind[]>> = {
 
 const ruleOf = (ruleId: string): string => ruleId.slice(ruleId.indexOf("-") + 1)
 
-const isAiEntity = (kind: PageKind): kind is AiEntityType =>
+const isAiEntity = (kind: PageKind): kind is Extract<PageKind, AiEntityType> =>
   (AI_ENTITY_TYPES as readonly string[]).includes(kind)
 
 /**

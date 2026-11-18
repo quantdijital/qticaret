@@ -28,6 +28,8 @@ export interface AiUsageInput {
   status: AiUsageStatus
   input_tokens?: number | null
   output_tokens?: number | null
+  /** Pictures sent (a vision task). */
+  images?: number | null
   estimated_cost_micros?: number | null
   currency?: string | null
   entity_type?: string | null

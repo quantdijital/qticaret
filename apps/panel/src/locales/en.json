@@ -768,6 +768,7 @@
         "catalog.bulk_edit": "Bulk edit",
         "customer.data_export": "Customer data export",
         "catalog.description_facts": "Facts from descriptions",
+        "ai.alt_text": "Bulk alt text suggestions",
         "content.link_rewrite": "Fixing links in texts",
         "order.export": "Order export"
       }

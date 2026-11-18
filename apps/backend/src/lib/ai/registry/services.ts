@@ -31,6 +31,12 @@ export interface OpenAiCompatibleTarget {
   jsonMode: boolean
   /** Fixed body fields the service documents (thinking off, reasoning apart from the text). */
   body: Readonly<Record<string, unknown>>
+  /**
+   * `vision` only: images go in the user message as `image_url` parts with
+   * a base64 `data:` URL (never an address of our storage), each at most
+   * `maxBytes` before encoding. Left out: the target takes no image.
+   */
+  imageInput?: { maxBytes: number }
 }
 
 export interface FakeTarget {
@@ -68,8 +74,13 @@ export interface AiService {
  *   https://api-docs.deepseek.com/quick_start/pricing/ (peak prices are used)
  *   https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html (processed and
  *     stored in the People's Republic of China; training is a listed purpose)
- * Not verified: the error body's shape (only the status is read); image input per
- * model (the reference mentions image parts, no model page confirms it): no `vision`.
+ * Not verified: the error body's shape (only the status is read).
+ *
+ * `vision` verified 2026-11-18 against:
+ *   https://api-docs.deepseek.com/guides/vision (`deepseek-flash` accepts images; JPEG,
+ *     PNG, GIF, WebP, told from the content; a base64 `data:` URL in an `image_url` part;
+ *     32 MiB an image, 48 MiB a request; image tokens billed with the text tokens)
+ *   https://api-docs.deepseek.com/api/create-chat-completion (`image_url` content parts)
  */
 const DEEPSEEK: AiService = {
   id: "deepseek",
@@ -88,9 +99,20 @@ const DEEPSEEK: AiService = {
       // Thinking is on unless turned off; a title needs none
       body: { thinking: { type: "disabled" } },
     },
+    vision: {
+      connector: "openai-compatible",
+      model: "deepseek-flash",
+      baseUrl: "https://api.deepseek.com",
+      path: "/chat/completions",
+      maxTokensField: "max_tokens",
+      jsonMode: false,
+      body: { thinking: { type: "disabled" } },
+      imageInput: { maxBytes: 32 * 1024 * 1024 },
+    },
   },
   unitPrices: {
     text: { currency: "USD", inputPerMillionTokens: 300_000, outputPerMillionTokens: 1_200_000 },
+    vision: { currency: "USD", inputPerMillionTokens: 300_000, outputPerMillionTokens: 1_200_000 },
   },
   dataNoteKey: "ai.data_note.deepseek",
 }
@@ -107,8 +129,14 @@ const DEEPSEEK: AiService = {
  * Not verified: a JSON output mode (`response_format` is not documented): off. Which
  * HTTP status goes with a `base_resp` code: both are read. The China address (the pages
  * disagree): not listed. Data processing place and training terms (the platform's
- * privacy policy could not be read): the note says so. Image input is documented but
- * `vision` waits for its connector (Aşama 5).
+ * privacy policy could not be read): the note says so.
+ *
+ * `vision` verified 2026-11-18 against:
+ *   https://platform.minimax.io/docs/api-reference/text-chat-openai (`MiniMax-M3.1-Flash`
+ *     and `MiniMax-M3` take image content parts; `image_url.url` is an image address or a
+ *     base64 data URL; JPEG, PNG, GIF, WEBP; an image at most 10 MB, a request 64 MB)
+ * Not verified: a separate price for image input (the pricing page lists none for the
+ * model): the text prices are used for the estimate, image tokens counted as input.
  */
 const MINIMAX: AiService = {
   id: "minimax",
@@ -127,9 +155,20 @@ const MINIMAX: AiService = {
       // The model always thinks; its thinking goes to its own field, not into the text
       body: { reasoning_split: true, reasoning_effort: "low" },
     },
+    vision: {
+      connector: "openai-compatible",
+      model: "MiniMax-M3.1-Flash",
+      baseUrl: "https://api.minimax.io/v1",
+      path: "/chat/completions",
+      maxTokensField: "max_completion_tokens",
+      jsonMode: false,
+      body: { reasoning_split: true, reasoning_effort: "low" },
+      imageInput: { maxBytes: 10 * 1000 * 1000 },
+    },
   },
   unitPrices: {
     text: { currency: "USD", inputPerMillionTokens: 150_000, outputPerMillionTokens: 600_000 },
+    vision: { currency: "USD", inputPerMillionTokens: 150_000, outputPerMillionTokens: 600_000 },
   },
   dataNoteKey: "ai.data_note.minimax",
   bodyErrors: {
@@ -164,8 +203,16 @@ const MINIMAX: AiService = {
  *     has facilities)
  * Not verified: `response_format: json_object` in a REST body (shown only through the
  * SDK helpers): off. A field that caps the output on this endpoint: none is sent. The
- * error body's shape on this endpoint (only the status is read). Image input is
- * documented but `vision` waits for its connector (Aşama 5).
+ * error body's shape on this endpoint (only the status is read).
+ *
+ * `vision` verified 2026-11-18 against:
+ *   https://aistudio.google.com/docs/openai ("Image understanding": an `image_url` part
+ *     with a base64 `data:image/jpeg;base64,…` URL, model `gemini-4-hydrogen`)
+ *   https://aistudio.google.com/docs/image-understanding (PNG, JPEG, WEBP, HEIC, HEIF;
+ *     inline data keeps the whole request under 20 MB; images are counted in tokens)
+ *   https://aistudio.google.com/docs/pricing (one input price, no split by modality)
+ * Not verified: whether the compatibility endpoint takes a remote image address (every
+ * example is base64): only base64 is sent, as for every service.
  */
 const GEMINI: AiService = {
   id: "gemini",
@@ -184,9 +231,25 @@ const GEMINI: AiService = {
       // Thinking cannot be turned off on this model; the lowest documented effort in the example
       body: { reasoning_effort: "low" },
     },
+    vision: {
+      connector: "openai-compatible",
+      model: "gemini-4-hydrogen",
+      baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
+      path: "/chat/completions",
+      maxTokensField: null,
+      jsonMode: false,
+      body: { reasoning_effort: "low" },
+      // 20 MB is the whole request, base64 and text included: room for the encoding's third
+      imageInput: { maxBytes: 14 * 1000 * 1000 },
+    },
   },
   unitPrices: {
     text: { currency: "USD", inputPerMillionTokens: 1_500_000, outputPerMillionTokens: 7_500_000 },
+    vision: {
+      currency: "USD",
+      inputPerMillionTokens: 1_500_000,
+      outputPerMillionTokens: 7_500_000,
+    },
   },
   dataNoteKey: "ai.data_note.gemini",
 }

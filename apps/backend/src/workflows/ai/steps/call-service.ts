@@ -1,9 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { withAiBreaker } from "../../../lib/ai/breaker"
 import { textConnectorFor, textTargetOf } from "../../../lib/ai/connector-of"
+import type { AiImageInput } from "../../../lib/ai/connectors/types"
 import { aiProviderError } from "../../../lib/ai/errors"
 import type { AiErrorKey } from "../../../lib/ai/errors"
+import { visionImage } from "../../../lib/ai/image-input"
 import { failureOf } from "../../../lib/ai/outcome"
 import type { AiCapability } from "../../../lib/ai/registry/capabilities"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
@@ -18,6 +21,8 @@ export interface CallServiceInput {
   service: string
   system: string
   data: string
+  /** A vision task's picture: its stored file, read here (never an address, never its bytes in a step). */
+  image_file_id?: string | null
 }
 
 /** How the call ended; never the key, the service's own words or its raw answer. */
@@ -30,6 +35,8 @@ export interface CallOutcome {
   problems: string[]
   input_tokens: number | null
   output_tokens: number | null
+  /** Pictures sent; null for a text task. */
+  images: number | null
   duration_ms: number
   error_key: AiErrorKey | null
   error_code: string | null
@@ -53,6 +60,28 @@ async function apiKeyOf(
     .read(credentialProvider)
   const key = account?.secrets["api_key"]
   return typeof key === "string" && key !== "" ? key : null
+}
+
+/**
+ * A vision task's picture from the shop's own file storage, re-encoded
+ * for the call (lib/ai/image-input.ts). Anything unreadable is
+ * `ai.input_unsupported`, before the service is called.
+ */
+async function pictureOf(
+  container: Pick<MedusaContainer, "resolve">,
+  fileId: string | null,
+  service: string
+): Promise<AiImageInput> {
+  if (fileId === null || fileId === "") {
+    throw aiProviderError({ service, key: "ai.input_unsupported", code: "image_missing" })
+  }
+  let bytes: Buffer
+  try {
+    bytes = await container.resolve(Modules.FILE).getAsBuffer(fileId)
+  } catch {
+    throw aiProviderError({ service, key: "ai.input_unsupported", code: "image_unreadable" })
+  }
+  return visionImage(bytes, service)
 }
 
 const retryAfterOf = (error: unknown): number | null => {
@@ -84,6 +113,7 @@ export const callServiceStep = createStep(
       problems: [],
       input_tokens: null,
       output_tokens: null,
+      images: null,
       error_key: null,
       error_code: null,
       retry_after_ms: null,
@@ -105,11 +135,21 @@ export const callServiceStep = createStep(
         })
       }
       const connector = textConnectorFor(input.service, capability, apiKey)
+      const images =
+        capability === "vision"
+          ? [await pictureOf(container, input.image_file_id ?? null, input.service)]
+          : undefined
       const result = await withAiBreaker(input.service, () =>
-        runTextTask({ connector, task, prompt: { system: input.system, data: input.data } })
+        runTextTask({
+          connector,
+          task,
+          prompt: { system: input.system, data: input.data },
+          ...(images === undefined ? {} : { images }),
+        })
       )
       const outcome: CallOutcome = {
         ...base,
+        images: images?.length ?? null,
         status: result.status,
         text: result.status === "succeeded" ? result.text : null,
         problems: result.status === "refused" ? result.problems : [],

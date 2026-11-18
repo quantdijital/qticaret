@@ -73,6 +73,8 @@ const NOT_TAKEN_KEYS: ReadonlySet<AiErrorKey> = new Set([
   "ai.provider_busy",
   // Ours, before any call: no readable key, or a service this instance does not list
   "ai.service_unavailable",
+  // Ours too: the picture could not be read or sent, so no call was made
+  "ai.input_unsupported",
 ])
 
 // No connection, an open circuit, or a 5xx (adr/0071 §8: the service did not take the job)

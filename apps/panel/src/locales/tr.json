@@ -768,6 +768,7 @@
         "catalog.bulk_edit": "Toplu düzenleme",
         "customer.data_export": "Müşteri verisi dışa aktarımı",
         "catalog.description_facts": "Açıklamadan özellik aktarma",
+        "ai.alt_text": "Toplu alt metin önerisi",
         "content.link_rewrite": "Metinlerdeki bağlantıları düzeltme",
         "order.export": "Sipariş dışa aktarımı"
       }

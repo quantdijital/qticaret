@@ -51,6 +51,7 @@ export const recordUsageStep = createStep(
       status: outcome.status,
       input_tokens: outcome.input_tokens,
       output_tokens: outcome.output_tokens,
+      images: outcome.images,
       estimated_cost_micros: cost?.micros ?? null,
       currency: cost?.currency ?? null,
       entity_type: input.entity_type,
@@ -74,6 +75,7 @@ export const recordUsageStep = createStep(
       duration_ms: outcome.duration_ms,
       input_tokens: outcome.input_tokens,
       output_tokens: outcome.output_tokens,
+      images: outcome.images,
       error_code: outcome.error_code,
     })
     return new StepResponse({ usage_id: id })
