@@ -47,6 +47,10 @@ export async function POST(
           : reading.problem
   } catch (error) {
     code = refusalCode(error)
+    // Another report attached the PDF meanwhile: nothing went wrong, nothing to tell staff
+    if (code === "einvoice.pdf_present") {
+      code = null
+    }
     logger.warn({
       event: "birfatura.invoice_link_refused",
       invoice_id: invoice.id,

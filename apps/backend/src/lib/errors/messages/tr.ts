@@ -667,6 +667,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.unknown": "Fatura bulunamadı.",
   "einvoice.not_external": "Bu fatura mağazanın kendi programıyla kesilmiyor.",
   "einvoice.waived": "Bu satış için fatura kesilmez (yalnız hediye kartı satışı, avans).",
+  "einvoice.pdf_present": "Bu faturanın PDF'i zaten kayıtlı.",
+  "einvoice.birfatura_not_selected":
+    "BirFatura bağlantı anahtarı yalnız fatura programı BirFatura seçiliyken oluşturulur (Ayarlar > E-Fatura).",
   "einvoice.cancelled": "Bu fatura iptal edildi.",
   "einvoice.already_issued": "Bu fatura başka bir numarayla kesilmiş.",
   "einvoice.number_taken": "Bu fatura numarası başka bir faturada kayıtlı.",

@@ -107,6 +107,41 @@ describe("BirFatura's documented examples (Özel Entegrasyon API)", () => {
     expect(BirfaturaInvoiceLinkBody.safeParse({ orderId: 1 }).success).toBe(false)
   })
 
+  it("reads ids as numbers or digit text only, never a loose conversion (security review I-3)", () => {
+    const link = (orderId: unknown) =>
+      BirfaturaInvoiceLinkBody.safeParse({ ...examples.invoiceLinkUpdate.request, orderId })
+    const orders = (orderStatusId: unknown) =>
+      BirfaturaOrdersBody.safeParse({ ...examples.orders.request, orderStatusId })
+
+    expect(link(14948).data?.orderId).toBe(14948)
+    expect(link("14948").data?.orderId).toBe(14948)
+    expect(orders("1").data?.orderStatusId).toBe(1)
+    for (const loose of [
+      true,
+      false,
+      [],
+      [1],
+      {},
+      null,
+      "",
+      " ",
+      "0x1f",
+      "1e3",
+      "1.5",
+      "-3",
+      "+3",
+      1.5,
+      Infinity,
+      Number.NaN,
+    ]) {
+      expect(link(loose).success).toBe(false)
+      expect(orders(loose).success).toBe(false)
+    }
+    expect(link(0).success).toBe(false)
+    expect(link(2 ** 53).success).toBe(false)
+    expect(orders(1000).success).toBe(false)
+  })
+
   it("ignores an extra field through Medusa's own validator too, which makes object schemas strict", async () => {
     const through = async (
       schema: Parameters<typeof validateAndTransformBody>[0],

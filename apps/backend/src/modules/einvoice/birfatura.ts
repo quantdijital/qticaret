@@ -1,6 +1,6 @@
 import type { Context } from "@medusajs/framework/types"
 import { InjectTransactionManager, MedusaContext } from "@medusajs/framework/utils"
-import { InvoiceRecordsService } from "./records"
+import { InvoiceCancelService } from "./cancel"
 
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
@@ -18,7 +18,7 @@ export interface PullableInvoice {
  * for it, and its word that it issued one. Kept apart from the records
  * every program shares (`records.ts`).
  */
-export class InvoiceBirfaturaService extends InvoiceRecordsService {
+export class InvoiceBirfaturaService extends InvoiceCancelService {
   /**
    * Sale invoices BirFatura is to issue, queued (due, the hold rule passed)
    * within the range: not reported, not cancelled or asked to be; the
@@ -104,27 +104,33 @@ export class InvoiceBirfaturaService extends InvoiceRecordsService {
   }
 
   /**
-   * The pull handed these out (adr/0072 §6): stamped the first time, so a
-   * canceled order's invoice that BirFatura may already have issued is
-   * flagged for staff, never cancelled here unseen (`requestCancel`).
+   * The pull is about to hand these out (adr/0072 §6): stamped first, in one
+   * statement, and only those still waiting and not asked to be cancelled
+   * are kept; the pull answers those alone. A cancel that came between the
+   * list and the stamp wins (the invoice is not handed out); one that comes
+   * after finds the stamp and flags the invoice for staff (`requestCancel`),
+   * never cancelling it unseen (security review S-1). The ids kept.
    */
   @InjectTransactionManager()
   async markListed(
     ids: readonly string[],
     now: Date = new Date(),
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<void> {
+  ): Promise<string[]> {
     if (ids.length === 0) {
-      return
+      return []
     }
     const manager = sharedContext.transactionManager as Executor
-    await manager.execute(
-      `UPDATE invoice SET listed_at = ?, updated_at = now()
+    const rows = (await manager.execute(
+      `UPDATE invoice SET listed_at = COALESCE(listed_at, ?), updated_at = now()
         WHERE id = ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)))
-          AND provider = 'birfatura' AND listed_at IS NULL AND deleted_at IS NULL`,
+          AND provider = 'birfatura' AND kind = 'sale' AND status = 'pending'
+          AND reported_at IS NULL AND cancel_requested_at IS NULL AND deleted_at IS NULL
+       RETURNING id`,
       // A JSON list as one parameter, as the search index passes its ids
       [now, JSON.stringify([...new Set(ids)])]
-    )
+    )) as { id: string }[]
+    return rows.map((row) => row.id)
   }
 
   /**

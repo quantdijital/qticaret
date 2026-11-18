@@ -18,9 +18,9 @@ interface Executor {
 }
 
 /**
- * What staff and the shop's own program do to invoices (F8, adr/0034 §9,
- * §10): write one back, attach its PDF, start a stopped one again, and
- * ask for a canceled order's invoice to be undone.
+ * What staff and the shop's own program do to invoices (F8, adr/0034 §9):
+ * write one back, attach its PDF, start a stopped one again. A canceled
+ * order's invoices are in `cancel.ts`.
  */
 export class InvoiceRecordsService extends InvoiceQueueService {
   /**
@@ -67,7 +67,9 @@ export class InvoiceRecordsService extends InvoiceQueueService {
         `UPDATE invoice
             SET status = 'issued', number = ?, uuid = COALESCE(?, uuid),
                 document_type = COALESCE(?, document_type), issued_at = ?,
-                last_error = NULL, updated_at = now()
+                -- The order was canceled meanwhile: staff's flag stays (security review S-2)
+                last_error = CASE WHEN cancel_requested_at IS NOT NULL THEN last_error END,
+                updated_at = now()
           WHERE id = ?`,
         [input.number, input.uuid, input.document_type, input.issued_at, id]
       )
@@ -175,6 +177,7 @@ export class InvoiceRecordsService extends InvoiceQueueService {
   async attachPdf(
     id: string,
     fileId: string,
+    options: { onlyIfEmpty?: boolean } = {},
     @MedusaContext() sharedContext: Context = {}
   ): Promise<{ previous: string | null } | null> {
     const manager = sharedContext.transactionManager as Executor
@@ -191,6 +194,10 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     }
     if (row.status !== "issued") {
       throw new ConflictError("einvoice.not_issued")
+    }
+    // A program's report sent twice at once keeps the PDF the first attached (adr/0072 §6)
+    if (options.onlyIfEmpty && row.pdf_file_id) {
+      throw new ConflictError("einvoice.pdf_present")
     }
     await manager.execute(`UPDATE invoice SET pdf_file_id = ?, updated_at = now() WHERE id = ?`, [
       fileId,
@@ -259,61 +266,5 @@ export class InvoiceRecordsService extends InvoiceQueueService {
       [externalId, companyId, id, externalId]
     )) as unknown[]
     return rows.length > 0
-  }
-
-  /**
-   * The order was canceled (adr/0034 §10). An external program's invoice
-   * not yet issued is cancelled here; one issued, one BirFatura said it
-   * issued, or one BirFatura's pull already handed out (it may be issued
-   * there, adr/0072 §6) is left for staff: marked, kept off the pull, and
-   * its id returned for them to be told. A program's own
-   * is marked for the job to undo at the program, due at once unless a
-   * worker holds it; a stopped one comes back for it.
-   */
-  @InjectTransactionManager()
-  async requestCancel(
-    orderId: string,
-    now: Date = new Date(),
-    @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ needs_document: string[]; withdrawn: string[] }> {
-    const manager = sharedContext.transactionManager as Executor
-    const withdrawn = (await manager.execute(
-      `UPDATE invoice SET status = 'cancelled', updated_at = now()
-        WHERE order_id = ? AND kind = 'sale' AND provider IN ('external', 'birfatura')
-          AND status = 'pending' AND reported_at IS NULL AND listed_at IS NULL
-          AND deleted_at IS NULL
-       RETURNING id`,
-      [orderId]
-    )) as { id: string }[]
-    // Once: asked again (the hourly sweep), an invoice already marked rings no bell twice
-    const issued = (await manager.execute(
-      `UPDATE invoice
-          SET last_error = 'einvoice.return_document_needed',
-              cancel_requested_at = CASE WHEN status = 'pending'
-                                         THEN COALESCE(cancel_requested_at, ?)
-                                         ELSE cancel_requested_at END,
-              updated_at = now()
-        WHERE order_id = ? AND kind = 'sale' AND provider IN ('external', 'birfatura')
-          AND (status = 'issued'
-               OR (status = 'pending' AND (reported_at IS NOT NULL OR listed_at IS NOT NULL)))
-          AND last_error IS DISTINCT FROM 'einvoice.return_document_needed' AND deleted_at IS NULL
-       RETURNING id`,
-      [now, orderId]
-    )) as { id: string }[]
-    await manager.execute(
-      `UPDATE invoice
-          SET cancel_requested_at = ?,
-              status = CASE WHEN status = 'failed' THEN 'pending' ELSE status END,
-              next_attempt_at = CASE WHEN next_attempt_at <= ? THEN ? ELSE next_attempt_at END,
-              updated_at = now()
-        WHERE order_id = ? AND kind = 'sale' AND provider NOT IN ('external', 'birfatura')
-          AND status IN ('pending', 'issuing', 'issued', 'failed')
-          AND cancel_requested_at IS NULL AND deleted_at IS NULL`,
-      [now, now, now, orderId]
-    )
-    return {
-      needs_document: issued.map((row) => row.id),
-      withdrawn: withdrawn.map((row) => row.id),
-    }
   }
 }

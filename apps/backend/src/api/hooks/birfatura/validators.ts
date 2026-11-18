@@ -23,18 +23,33 @@ function documentedOnly<T extends z.ZodRawShape>(shape: T) {
   )
 }
 
-const orderId = z.coerce
-  .number()
-  .int()
-  .positive()
-  .refine((value) => Number.isSafeInteger(value))
+/**
+ * A whole number as JSON sends one, or as text of decimal digits only:
+ * never `z.coerce`, which would read `true`, `[]`, `""`, `null`, `"0x1f"` or
+ * `"1e3"` as numbers (security review I-3).
+ */
+const wholeNumber = z.union([
+  z.number().int(),
+  z
+    .string()
+    .regex(/^\d{1,16}$/)
+    .transform(Number),
+])
+const orderId = wholeNumber.pipe(
+  z
+    .number()
+    .int()
+    .positive()
+    .refine((value) => Number.isSafeInteger(value))
+)
+const statusId = wholeNumber.pipe(z.number().int().min(0).max(999))
 // `dd.MM.yyyy HH:mm:ss`; the date itself is checked where it is used
 const date = z.string().trim().max(19)
 const optionalText = (max: number) => z.string().trim().max(max).nullish()
 
 /** `POST /api/orders`: the state asked for and the range, all required. */
 export const BirfaturaOrdersBody = documentedOnly({
-  orderStatusId: z.coerce.number().int().min(0).max(999),
+  orderStatusId: statusId,
   startDateTime: date,
   endDateTime: date,
 })
@@ -43,7 +58,7 @@ export type BirfaturaOrdersBodyType = z.infer<typeof BirfaturaOrdersBody>
 /** `POST /api/orderCargoUpdate`: taken and set aside (adr/0072 §6). */
 export const BirfaturaCargoBody = documentedOnly({
   orderId,
-  orderStatusId: z.coerce.number().int().min(0).max(999),
+  orderStatusId: statusId,
   cargoTrackingCode: z.string().trim().min(1).max(100),
   updateDateTime: date.nullish(),
   cargoTrackingCodeUrl: optionalText(2048),

@@ -3,7 +3,7 @@ import { BIRFATURA_STATUSES, pullRange } from "../../../../../lib/invoicing/birf
 import { errorSummary, logger } from "../../../../../lib/logging"
 import { EINVOICE_MODULE } from "../../../../../modules/einvoice"
 import type EinvoiceModuleService from "../../../../../modules/einvoice/service"
-import { birfaturaOrders } from "../../../../../workflows/einvoice/birfatura-orders"
+import { birfaturaOrders, keptOnly } from "../../../../../workflows/einvoice/birfatura-orders"
 import { rejectRequest } from "../../../../http/reject"
 import { answer, auditBirfatura } from "../../respond"
 import type { BirfaturaOrdersBodyType } from "../../validators"
@@ -11,9 +11,12 @@ import type { BirfaturaOrdersBodyType } from "../../validators"
 /**
  * POST /hooks/birfatura/api/orders (adr/0072 §3, §5): the sale invoices
  * waiting for BirFatura, queued within the range, as its `Orders[]`. Only
- * the "ready" state returns any. Hands out buyers' details: the pull is
+ * the "ready" state returns any. What it is about to hand out is stamped
+ * listed first, and only what the stamp kept goes (a cancel in between
+ * wins; security review S-1). Hands out buyers' details: the pull is
  * recorded (ids only) before the answer, and refused with 503 when the
- * record cannot be written. What it hands out is stamped listed.
+ * record cannot be written; the stamps stay, and only make a later cancel
+ * flag the invoice for staff instead of cancelling it.
  */
 export async function POST(
   req: MedusaRequest<BirfaturaOrdersBodyType>,
@@ -25,10 +28,14 @@ export async function POST(
     answer(res, false, "range_invalid", 400)
     return
   }
-  const pulled =
+  const read =
     body.orderStatusId === BIRFATURA_STATUSES.ready
       ? await birfaturaOrders(req.scope, range)
       : { orders: [], listed: [], skipped: [] }
+  const kept = await req.scope
+    .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+    .markListed(read.listed.map((row) => row.invoice_id))
+  const pulled = keptOnly(read, kept)
   try {
     await auditBirfatura(req, {
       kind: "sensitive_read",
@@ -59,10 +66,6 @@ export async function POST(
     )
     return
   }
-  // Handed out from now on: a canceled order's invoice is flagged for staff, never cancelled here
-  await req.scope
-    .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
-    .markListed(pulled.listed.map((row) => row.invoice_id))
   res.setHeader("Cache-Control", "no-store")
   res.json({ Orders: pulled.orders })
 }

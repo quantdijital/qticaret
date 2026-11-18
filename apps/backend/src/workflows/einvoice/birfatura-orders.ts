@@ -74,6 +74,22 @@ async function orderOf(
   return "problem" in mapped ? { code: mapped.problem } : { order: mapped.order }
 }
 
+/**
+ * The pull narrowed to the invoices its stamp kept (`markListed`): an
+ * invoice canceled between the list and the stamp is not handed out
+ * (security review S-1). Its orders and its listed rows stay in step.
+ */
+export function keptOnly(pulled: PulledOrders, kept: readonly string[]): PulledOrders {
+  const ids = new Set(kept)
+  const listed = pulled.listed.filter((row) => ids.has(row.invoice_id))
+  const handed = new Set(listed.map((row) => row.birfatura_id))
+  return {
+    orders: pulled.orders.filter((order) => handed.has(order.OrderId)),
+    listed,
+    skipped: pulled.skipped,
+  }
+}
+
 /** How many pages of due invoices one pull reads at most. */
 export const MAX_PAGES = 5
 

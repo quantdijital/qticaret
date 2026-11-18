@@ -141,6 +141,8 @@ export const recordBirfaturaInvoiceWorkflow = createWorkflow(
         input: transform({ input, pdf }, ({ input, pdf }) => ({
           invoice_id: input.invoice_id,
           file_id: pdf.file_id,
+          // Two reports at once: the PDF the first attached stays (checked under its lock)
+          only_if_empty: true,
         })),
       })
     })
