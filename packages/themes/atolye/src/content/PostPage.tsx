@@ -23,7 +23,7 @@ function Facts({ meta, t }: { meta: PostMetaView; t: Translate }) {
             {t("blog.author_label")}{" "}
             <a
               href={meta.authorPath}
-              className="font-semibold text-text underline-offset-4 hover:underline"
+              className="font-semibold text-text transition-colors duration-(--dur-micro) hover:text-text-2"
             >
               {meta.author}
             </a>

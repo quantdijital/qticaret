@@ -37,8 +37,12 @@ export const RADII = RADIUS_STEPS
 export const CARD_RATIOS = ["4:5", "1:1", "3:4"] as const
 /** How cards are drawn (adr/0049 Ek 2026-11-14 §3.3): the contract's list; a rail may pick its own. */
 export { CARD_VARIANTS }
-/** The framed card's switches (E5), each the theme setting's wherever a framed card shows. */
-export const FRAMED_CARD_SWITCHES = ["hover_image", "delivery_note", "full_button"] as const
+/**
+ * The framed card's switches (E5), each the theme setting's wherever a
+ * framed card shows. The second photo on hover (`hover_image`) was one;
+ * every card's since sahip 2026-11-18.
+ */
+export const FRAMED_CARD_SWITCHES = ["delivery_note", "full_button"] as const
 /** The pills on every card's photo (adr/0049 Ek 2026-11-15, decision a), each on or off. */
 export const CARD_BADGE_SWITCHES = ["sale_badge", "low_stock_badge", "sold_out_badge"] as const
 /**
@@ -88,6 +92,8 @@ export interface ThemeSettings extends StyleKit {
     show_brand: boolean
     show_rating: boolean
     variant: (typeof CARD_VARIANTS)[number]
+    /** The product's second photo on hover, every card's (sahip 2026-11-18). */
+    hover_image: boolean
     sold_out_row: (typeof CARD_SOLD_OUT_ROWS)[number]
     no_reviews: (typeof CARD_NO_REVIEWS)[number]
     button_style: (typeof CARD_BUTTON_STYLES)[number]

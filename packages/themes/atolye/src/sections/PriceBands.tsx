@@ -47,7 +47,7 @@ export function PriceBands({ section }: { section: Of<"price_bands"> }) {
                 className="group flex h-full flex-col gap-2 rounded-tile border border-rule bg-field p-5 no-underline transition-colors hover:border-signal lg:p-6"
               >
                 <span
-                  className="text-display leading-[1.15] font-extrabold tracking-(--tracking-head) text-text group-hover:underline group-hover:underline-offset-4"
+                  className="text-display leading-[1.15] font-extrabold tracking-(--tracking-head) text-text"
                   {...fieldMark(section.editor, fieldKey("bands", band.at ?? drawn, "label"))}
                 >
                   {band.label}

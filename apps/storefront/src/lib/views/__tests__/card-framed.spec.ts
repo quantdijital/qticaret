@@ -34,7 +34,6 @@ const product = (over: Partial<StoreProduct> = {}): StoreProduct => ({
 })
 
 const SWITCHES: NonNullable<CardOptions["framed"]> = {
-  hoverImage: true,
   deliveryNote: true,
   fullButton: true,
   buttonStyle: "solid",
@@ -45,6 +44,7 @@ const FRAMED: CardOptions = {
   showBrand: true,
   showRating: true,
   variant: "framed",
+  hoverImage: true,
   framed: SWITCHES,
   // adr/0049 Ek 2026-11-15: empty stars without reviews, every card's choice now
   shown: {
@@ -72,8 +72,8 @@ describe("a framed card (adr/0049 Ek 2026-11-14 §3.3)", () => {
     expect(framed.image?.src).toBe("https://cdn.example/on.jpg")
     expect(framed).toMatchObject({
       variant: "framed",
+      secondImage: { src: "https://cdn.example/arka.jpg" },
       framed: {
-        secondImage: { src: "https://cdn.example/arka.jpg" },
         freeShipping: true,
         fullButton: true,
         buttonStyle: "solid",
@@ -82,12 +82,20 @@ describe("a framed card (adr/0049 Ek 2026-11-14 §3.3)", () => {
     })
   })
 
-  it("has no second photo with one photo or with the switch off", () => {
+  it("has no second photo with one photo, with the switch off, or without the shop's settings", () => {
     expect(
-      card({ images: [{ id: "img_1", url: "https://cdn.example/on.jpg" }] }).framed
-    ).toMatchObject({ secondImage: null })
-    const off = { ...FRAMED, framed: { ...SWITCHES, hoverImage: false } }
-    expect(card({}, off).framed?.secondImage).toBeNull()
+      card({ images: [{ id: "img_1", url: "https://cdn.example/on.jpg" }] })
+    ).not.toHaveProperty("secondImage")
+    expect(card({}, { ...FRAMED, hoverImage: false })).not.toHaveProperty("secondImage")
+    expect(card({}, { showBrand: true, showRating: false })).not.toHaveProperty("secondImage")
+  })
+
+  it("carries the second photo on every variant while the shop has it on (sahip 2026-11-18)", () => {
+    for (const each of ["standard", "framed", "compact"] as const) {
+      expect(card({}, { ...FRAMED, variant: each }).secondImage?.src).toBe(
+        "https://cdn.example/arka.jpg"
+      )
+    }
   })
 
   it("says free shipping only when every price reaches the threshold, for a shipped product", () => {

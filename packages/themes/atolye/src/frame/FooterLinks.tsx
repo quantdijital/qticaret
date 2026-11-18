@@ -5,13 +5,12 @@ import { outsideRel } from "./FooterParts"
 
 type FooterGroup = FooterGroupView
 
-const PHONE_LINK =
-  "flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+const PHONE_LINK = "flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text"
 // From 1024 px one column a group, four at most a row
 const COLUMNS = ["grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4"]
 
 const WIDE_LINK =
-  "inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+  "inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text"
 
 function Links({ group, className }: { group: FooterGroup; className: string }) {
   return (

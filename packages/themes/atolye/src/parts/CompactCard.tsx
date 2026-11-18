@@ -1,6 +1,6 @@
-import { ResponsiveImage } from "@qticaret/ui"
 import type { ProductCardView, Translate } from "@qticaret/ui"
 import { badgesOf, isOut } from "./card-parts"
+import { CardPhoto } from "./CardPhoto"
 import { CardPriceRow, CardStars } from "./card-rows"
 import { CardQuickView } from "./card-quick-view"
 
@@ -12,7 +12,8 @@ const SIZES = "(min-width: 768px) 96px, 80px"
  * in a rounded well at the shop's ratio, beside it the name on two lines
  * at most, the stars when the card carries them and the price (struck
  * through before a discount). A small pill on the photo for a discount or
- * "Tükendi". No add button: the whole card is one link. A `compact` or
+ * "Tükendi". No add button: the whole card is one link. The second photo
+ * on hover with a mouse only (too small to swipe). A `compact` or
  * `columns` rail draws its cards so; the theme setting may draw every card
  * so too.
  */
@@ -31,15 +32,8 @@ export function CompactCard({
   const out = isOut(product) && badges.soldOut
   return (
     <article className="group gf-card @container relative flex h-full items-center gap-3 md:gap-4">
-      <div className="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-media md:w-24">
-        {product.image && (
-          <ResponsiveImage
-            image={product.image}
-            sizes={SIZES}
-            priority={priority}
-            className="h-full w-full object-cover"
-          />
-        )}
+      <div className="gf-card-media relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-media md:w-24">
+        <CardPhoto product={product} sizes={SIZES} priority={priority} swipe={false} />
         {(discount !== null || out) && (
           <p
             className="absolute top-1 left-1 rounded-pill px-1.5 py-0.5 text-[0.6875rem] leading-none font-extrabold data-[tone=deal]:bg-deal data-[tone=deal]:text-deal-ink data-[tone=out]:bg-text data-[tone=out]:text-paper"
@@ -63,7 +57,7 @@ export function CompactCard({
         <h3 className="text-sm leading-snug font-semibold tracking-normal">
           <a
             href={product.path}
-            className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            className="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
           >
             {product.title}
           </a>

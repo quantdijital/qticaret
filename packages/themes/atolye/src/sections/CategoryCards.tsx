@@ -39,7 +39,7 @@ const sizesOf = (view: CategoryCardsView): string =>
   view.phoneColumns === 2 ? SIZES[view.columns].replace(/90vw$/, "45vw") : SIZES[view.columns]
 
 const LINK =
-  "flex min-h-11 items-center text-sm text-text-2 no-underline underline-offset-4 hover:text-text hover:underline lg:pointer-fine:min-h-8"
+  "flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
 
 function Card({
   card,
@@ -86,7 +86,7 @@ function Card({
           <a
             href={card.path}
             className={cn(
-              "no-underline underline-offset-4 hover:underline",
+              "no-underline transition-colors duration-(--dur-micro) hover:text-text-2",
               leaf
                 ? "after:absolute after:inset-0 after:content-['']"
                 : // A touch target of 44 px where only the name links (Tezgâh audit K-32)

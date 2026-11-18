@@ -107,7 +107,10 @@ export interface StoreThemeSettings extends StyleKit {
     show_rating: boolean
     /** How cards are drawn; a product rail may draw its own (`card_variant`). */
     variant: CardVariant
-    /** A framed card's second photo on hover, swiped on a touch screen (E5). */
+    /**
+     * Every card's second photo on hover, swiped on a large card on a touch
+     * screen (sahip 2026-11-18; the framed card's E5 before).
+     */
     hover_image: boolean
     /** A framed card's "free shipping" line, from its price and the shop's threshold (E5). */
     delivery_note: boolean

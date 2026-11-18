@@ -8807,7 +8807,7 @@
         "framed": "Framed card",
         "framedHint": "Applies wherever a card is drawn framed: as the shop's style or on a rail set to framed.",
         "hover_image": "Second photo on hover",
-        "hover_imageHint": "The product's second photo shows when the pointer is over the card; on a phone the photos swipe sideways. No effect on a product with one photo.",
+        "hover_imageHint": "The product's second photo shows when the pointer is over the card; on a phone the photos of a large card swipe sideways. Applies to every card style; no effect on a product with one photo.",
         "delivery_note": "Free shipping note",
         "delivery_noteHint": "\"Free shipping\" under the price of a product whose price reaches the free shipping threshold. The threshold is set on the Promotions page.",
         "full_button": "Full-width button",

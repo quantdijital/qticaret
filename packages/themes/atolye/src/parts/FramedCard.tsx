@@ -1,62 +1,11 @@
 import { Truck } from "lucide-react"
-import { ResponsiveImage } from "@qticaret/ui"
-import type {
-  FormAction,
-  FramedCardView,
-  ImageView,
-  ProductCardView,
-  Translate,
-} from "@qticaret/ui"
+import type { FormAction, FramedCardView, ProductCardView, Translate } from "@qticaret/ui"
 import { CardBadges, isOut, quickAddWords } from "./card-parts"
 import { CardPriceRow, CardStars } from "./card-rows"
 import { cardButtonClass } from "./card-button"
 import { CardQuickView } from "./card-quick-view"
+import { CardPhoto } from "./CardPhoto"
 import { QuickAdd } from "./QuickAdd"
-
-/**
- * The photo of a framed card with a second one (`card.css`): with a
- * mouse the second fades in over the first on hover, and on keyboard focus
- * anywhere in the card; on a touch screen the two sit side by side and
- * swipe, a link to the product so a tap still opens it (the eye's
- * duplicate of the name's link: hidden from a screen reader, no tab stop).
- * The second loads lazily, never with the first paint; both fill the
- * well, so nothing shifts.
- */
-function Photos({
-  first,
-  second,
-  path,
-  sizes,
-  priority,
-}: {
-  first: ImageView
-  second: ImageView
-  path: string
-  sizes: string
-  priority: boolean
-}) {
-  return (
-    <>
-      <a href={path} tabIndex={-1} aria-hidden="true" className="gf-card-slides">
-        <span className="gf-card-slide">
-          <ResponsiveImage
-            image={first}
-            sizes={sizes}
-            priority={priority}
-            className="h-full w-full object-cover"
-          />
-        </span>
-        <span className="gf-card-slide gf-card-slide--second">
-          <ResponsiveImage image={second} sizes={sizes} className="h-full w-full object-cover" />
-        </span>
-      </a>
-      <span className="gf-card-dots" aria-hidden="true">
-        <i />
-        <i />
-      </span>
-    </>
-  )
-}
 
 /** The button across a framed card's foot: in the cart for one variant, else to its page. */
 function FootButton({
@@ -103,9 +52,9 @@ function FootButton({
  * the add button across the box ("Sepete ekle" for one variant,
  * "Seçenekler" to its page), or the round "+" on the photo while the shop
  * turns the button off, in the look the shop chose (`buttonStyle`). The
- * second photo, the line and the button are the shop's E5 switches, each
- * read by the storefront into the card's `framed`; the pills and the
- * rows every card's (`shown`, adr/0049 Ek 2026-11-15).
+ * line and the button are the shop's E5 switches, each read by the
+ * storefront into the card's `framed`; the second photo, the pills and the
+ * rows every card's (`CardPhoto`; `shown`, adr/0049 Ek 2026-11-15).
  */
 export function FramedCard({
   product,
@@ -126,28 +75,10 @@ export function FramedCard({
   }
   const out = isOut(product)
   const round = !framed.fullButton && quickAdd && product.quickAdd && !out ? product.quickAdd : null
-  const second = product.image ? framed.secondImage : null
   return (
     <article className="group gf-card gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5">
       <div className="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media">
-        {product.image && second ? (
-          <Photos
-            first={product.image}
-            second={second}
-            path={product.path}
-            sizes={sizes}
-            priority={priority}
-          />
-        ) : (
-          product.image && (
-            <ResponsiveImage
-              image={product.image}
-              sizes={sizes}
-              priority={priority}
-              className="h-full w-full object-cover"
-            />
-          )
-        )}
+        <CardPhoto product={product} sizes={sizes} priority={priority} />
         <CardBadges product={product} t={t} />
         <CardQuickView product={product} t={t} />
         {round && quickAdd && (
@@ -164,7 +95,7 @@ export function FramedCard({
         <h3 className="text-sm leading-snug font-semibold tracking-normal">
           <a
             href={product.path}
-            className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            className="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
           >
             {product.title}
           </a>

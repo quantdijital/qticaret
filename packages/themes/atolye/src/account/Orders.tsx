@@ -92,7 +92,7 @@ export function OrderRow({ order, t }: { order: AccountOrderView; t: Translate }
         <span className="flex items-center gap-4">
           <Thumbs images={order.images ?? []} />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-md font-extrabold underline-offset-4 group-hover:underline">
+            <span className="text-md font-extrabold">
               {t("order.title", { id: order.displayId })}
             </span>
             <span className="text-sm text-text-2">

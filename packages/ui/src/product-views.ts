@@ -31,6 +31,14 @@ export interface ProductCardView {
   path: string
   brand: string | null
   image: ImageView | null
+  /**
+   * The product's second photo, on every variant while the shop has
+   * `hover_image` on (sahip 2026-11-18): shown over the first on hover or
+   * focus, swiped to on a touch screen where the card is large enough.
+   * Loaded lazily, never with the first paint. None: one photo, or the shop
+   * turned it off.
+   */
+  secondImage?: ImageView | null
   price: PriceView | null
   available: boolean
   /** The product's reviews in short, when the storefront has them for a card; shown when the shop asks. */
@@ -77,12 +85,6 @@ export interface CardShownView {
 
 /** A framed card's own (adr/0049 Ek 2026-11-14 §3.3, E5), each as the shop set it. */
 export interface FramedCardView {
-  /**
-   * The product's second photo, shown over the first on hover or focus and
-   * swiped to on a touch screen; null: one photo, or the shop turned it off.
-   * Loaded lazily, never with the first paint.
-   */
-  secondImage: ImageView | null
   /** "Ücretsiz kargo" under the price: a shipped product whose lowest price reaches the threshold. */
   freeShipping: boolean
   /** The add button across the card's foot ("Sepete ekle", or "Seçenekler" to its page). */

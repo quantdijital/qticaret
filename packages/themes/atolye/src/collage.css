@@ -88,12 +88,14 @@
     transform: scale(1.04);
   }
 }
-/* The name underlined while the card is hovered: a touch leaves no hover behind */
+/* The name a step quieter while the card is hovered, never underlined (sahip 2026-11-18):
+   a touch leaves no hover behind */
+.gf-collage-link {
+  transition: color var(--dur-micro) var(--ease-out);
+}
 @media (hover: hover) {
   .gf-collage-card:hover .gf-collage-link {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.18em;
+    color: var(--color-text-2);
   }
 }
 
