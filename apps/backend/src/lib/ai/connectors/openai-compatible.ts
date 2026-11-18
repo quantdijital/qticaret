@@ -1,10 +1,11 @@
 import { parseRetryAfter } from "../../clients/retry"
 import { isSafeFetchError, safeFetch } from "../../security/safe-fetch"
 import type { SafeFetchResponse } from "../../security/safe-fetch"
-import { aiErrorForStatus, aiProviderError, isRetryableAiError } from "../errors"
+import { aiProviderError, isRetryableAiError } from "../errors"
 import type { AiErrorKey, AiProviderFailure } from "../errors"
 import type { AiService, OpenAiCompatibleTarget } from "../registry/services"
 import { readCompletion, registeredBodyError } from "./openai-response"
+import { statusFailure } from "./status-failure"
 import { TEXT_TIMEOUT_MS } from "./types"
 import type { AiImageInput, TextConnector, TextRequest, TextResult } from "./types"
 
@@ -15,8 +16,9 @@ import type { AiImageInput, TextConnector, TextRequest, TextResult } from "./typ
  * the key goes in the `Authorization` header and nowhere else (§9).
  *
  * Tried again once, only when the service said it did not take the job
- * (429, 5xx, no connection), after its Retry-After. A timeout or an
+ * (429 for a rate, 5xx, no connection), after its Retry-After. A timeout or an
  * answer cut half way is never tried again: it may have been charged (§8).
+ * A used-up quota is not either: the next call fails the same way.
  */
 
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024
@@ -129,15 +131,18 @@ function bodyOf(target: OpenAiCompatibleTarget, request: TextRequest): string {
 
 function failureOfResponse(service: AiService, response: SafeFetchResponse): Failure | null {
   const registered = registeredBodyError(service, response.body)
-  const key: AiErrorKey | null = registered?.key ?? aiErrorForStatus(response.status)
-  if (key === null) {
+  const failed = registered
+    ? { key: registered.key, code: `body_${String(registered.code)}` }
+    : statusFailure(service, response.status, response.body)
+  if (failed === null) {
     return null
   }
+  const { key, code } = failed
   const header = response.headers["retry-after"]
   return {
     service: service.id,
     key,
-    code: registered ? `body_${String(registered.code)}` : `http_${String(response.status)}`,
+    code,
     retryAfterMs: parseRetryAfter(typeof header === "string" ? header : null),
     retry: isRetryableAiError(key),
   }

@@ -703,6 +703,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.provider_balance":
     "Servis hesabınızda bakiye ya da kullanım hakkı kalmamış. Servisin kendi panelinden hesabınızı kontrol edin.",
   "ai.provider_busy": "Servis şu anda çok yoğun (rate limit). Biraz sonra yeniden deneyin.",
+  "ai.provider_quota":
+    "Servis hesabınızın kotası (quota) bu iş için yetmiyor. Ücretsiz kullanım bu işi kapsamıyor olabilir; servisin faturalandırmasını açın ya da başka bir servisle deneyin.",
   "ai.provider_unavailable":
     "Servise şu anda ulaşılamıyor. Yeniden deneyin ya da başka bir servisle deneyin.",
   "ai.timeout": "Servis zamanında yanıt vermedi. Yeniden deneyin ya da başka bir servisle deneyin.",

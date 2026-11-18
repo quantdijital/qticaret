@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
+import { AiTryOthers } from "@/features/ai/components/ai-try-others"
 import { aiFailureText, serviceName } from "@/features/ai/failure-text"
 import type { AiSuggestionState } from "@/features/ai/use-ai-suggestion"
 
@@ -115,30 +116,7 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
         </Button>
       </div>
 
-      {alternatives.length > 0 ? (
-        <div
-          role="group"
-          aria-label={t("ai.suggest.otherServices")}
-          className="flex flex-col gap-2 border-t pt-3"
-        >
-          <p className="text-xs text-muted-foreground">{t("ai.suggest.otherServices")}</p>
-          <div className="flex flex-wrap gap-2">
-            {alternatives.map((id) => (
-              <Button
-                key={id}
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  onTryWith(id)
-                }}
-              >
-                {t("ai.suggest.tryWith", { name: serviceName(t, id) })}
-              </Button>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <AiTryOthers services={alternatives} onTryWith={onTryWith} className="border-t pt-3" />
     </div>
   )
 }
