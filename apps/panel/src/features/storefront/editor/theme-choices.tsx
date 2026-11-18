@@ -74,7 +74,8 @@ interface ThemeChoicesProps {
 /**
  * The theme's fixed-list choices: faces, shapes (corners, buttons, chips),
  * spacing (between sections, the density), surfaces (boxes, shadow, the
- * photos' ground, menu items; adr/0067 §2.7 and its Ek 2026-11-16), the
+ * photos' ground, menu items, motion; adr/0067 §2.7 and its Ek 2026-11-16
+ * and 2026-11-18), the
  * product card. The header's layout and stickiness are the header bar's now
  * (adr/0049 Ek 2026-11-14 §5), in the tree under "Üst bilgi".
  */
@@ -184,6 +185,7 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
           <KitChoice field="shadow" {...kit} />
           <KitChoice field="media_ground" {...kit} />
           <KitChoice field="menu_style" {...kit} />
+          <KitChoice field="motion" {...kit} />
         </Pair>
       </PanelGroup>
       <ThemeCardGroups theme={theme} variants={variants} reveal={reveal} onChange={onChange} />

@@ -23,6 +23,7 @@ const OFF_DEFAULT = {
   chip_style: "lined",
   media_ground: "page",
   density: "balanced",
+  motion: "lively",
 } as const
 
 /** The frame's root element: the first tag the theme's Layout prints. */
@@ -40,6 +41,7 @@ describe("the style kit in the storefront (adr/0067)", () => {
       chip_style: "filled",
       media_ground: "well",
       density: "airy",
+      motion: "calm",
     })
     const odd = themeSettings(
       {
@@ -48,6 +50,7 @@ describe("the style kit in the storefront (adr/0067)", () => {
         chip_style: 1,
         media_ground: null,
         density: "12px",
+        motion: "bouncy",
       },
       null
     )
@@ -57,6 +60,7 @@ describe("the style kit in the storefront (adr/0067)", () => {
       chip_style: "filled",
       media_ground: "well",
       density: "airy",
+      motion: "calm",
     })
   })
 
@@ -78,6 +82,7 @@ describe("the style kit in the storefront (adr/0067)", () => {
       'data-chip-style="lined"',
       'data-media-ground="page"',
       'data-density="balanced"',
+      'data-motion="lively"',
     ]) {
       expect(all).toContain(mark)
     }

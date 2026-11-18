@@ -668,6 +668,12 @@
       "empty": "Şu an açıp kapatılabilecek bir özellik yok. Kapıda ödeme gibi özellikler eklendikçe burada görünecek.",
       "locked": "Paketinizle birlikte gelir; buradan değiştirilemez.",
       "flags": {
+        "ai": {
+          "reviews": {
+            "label": "Yorum ve sorularda yapay zekâ",
+            "description": "Ürün yorumları özetlenir; yorumlara ve sorulara yanıt taslağı hazırlanır. Müşterilerin yazdığı metin, yazar adı ve iletişim bilgisi ayıklanarak bağlı servise gider."
+          }
+        },
         "catalog": {
           "non_physical": {
             "label": "Dijital ve hizmet ürünleri",
@@ -8771,6 +8777,15 @@
               "compact": "Sıkı"
             },
             "hint": "Bölüm başlığı ile içeriği, ürün ızgarasının sütun ve satır araları ve alt bilgiye kalan boşluk birlikte değişir; bölümler arası boşluk Bölüm aralığı'ndadır. Ferah, temanın kendi ölçüsüdür (geniş ekranda başlık altı 40 px, ızgara 24 × 40 px, alt bilgiye 64 px); Dengeli bunları 24 px, 20 × 28 px ve 48 px'e, Sıkı 16 px, 16 × 20 px ve 32 px'e indirir."
+          },
+          "motion": {
+            "label": "Hareket",
+            "term": "motion",
+            "steps": {
+              "calm": "Sakin",
+              "lively": "Canlı"
+            },
+            "hint": "Sakin, temanın kendi kısa geçişleridir. Canlı'da ürün kartının fotoğrafı üzerine gelince hafifçe büyür ve kart yükselir, bölümler ve ürünler sayfa kaydıkça yumuşakça belirir, görseller yüklenince süzülerek gelir, düğmeler basılınca hafifçe çöker. Hareketi azaltmayı seçmiş ziyaretçide hiçbiri oynamaz."
           }
         },
         "card": "Ürün kartı",
@@ -11333,6 +11348,9 @@
       "seo_description": "Arama açıklaması",
       "image_alt_text": "Alt metin",
       "image_background": "Arka plan temizleme",
+      "review_summary": "Yorum özeti",
+      "review_reply": "Yorum yanıtı",
+      "question_answer": "Soru yanıtı",
       "product_from_photo": "Fotoğraftan ürün kartı"
     },
     "options": {
@@ -11418,7 +11436,9 @@
       "content_blocked": "{{name}} bu içerik için öneri vermedi (güvenlik süzgeci).",
       "provider_response_invalid": "{{name}} beklenmeyen bir yanıt verdi.",
       "input_unsupported": "Bu içerik servise gönderilemiyor (tür ya da boyut uygun değil).",
-      "daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz."
+      "daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz.",
+      "reviews_off": "Yorum ve sorularda yapay zekâ kapalı. Ayarlar › Yapay zekâ sayfasından açılabilir.",
+      "not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı."
     },
     "background": {
       "button": "Görseli düzenle",
@@ -11491,6 +11511,23 @@
       "savedAll_one": "{{count}} görselin alt metni kaydedildi.",
       "savedAll_other": "{{count}} görselin alt metni kaydedildi.",
       "saveFailed": "{{name}} kaydedilemedi: {{reason}}"
+    },
+    "reviews": {
+      "settingTitle": "Yorum ve sorularda yapay zekâ",
+      "settingDescription": "Ürün yorumlarını özetler, yorumlara ve sorulara yanıt taslağı hazırlar. Taslak siz göndermeden yayımlanmaz.",
+      "settingDetail": "Açıkken müşterilerin yazdığı yorum ve soru metinleri, puanıyla birlikte bağlı yapay zekâ servisine gider. Yazarın adı metinden maskelenir; e-posta, telefon, IBAN, kart ve kimlik numarası ayıklanır; sipariş, adres ve müşteri bilgisi hiç gönderilmez. Metnin içinde geçen başka kişi adları her zaman yakalanamaz.",
+      "ownerOnly": "Müşteri metni dış servise gittiği için bu ayarı yalnız mağaza sahibi açıp kapatabilir.",
+      "summarize": "Yorumları özetle",
+      "summarizeFor": "{{product}} yorumlarını özetle",
+      "summaryTitle": "{{product}} · yorum özeti",
+      "summaryNote": "Yapay zekâ önerisi; vitrinde gösterilmez, kaydedilmez.",
+      "summaryClose": "Özeti kapat",
+      "copy": "Kopyala",
+      "copied": "Özet kopyalandı.",
+      "replyDraft": "Yanıt taslağı",
+      "replyDraftFor": "{{author}} yorumu için yanıt taslağı",
+      "answerDraftFor": "{{author}} sorusu için yanıt taslağı",
+      "note": "Metin, yazar adı ve iletişim bilgisi ayıklanarak servise gider. Taslak forma düşer; siz gönderirsiniz."
     }
   }
 }

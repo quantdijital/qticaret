@@ -58,6 +58,16 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     expect(katalogVersion()).toBe(3)
   })
 
+  it("asks for the lively motion, the only look that does (adr/0067 Ek 2026-11-18, S7)", () => {
+    expect(storefrontPreset("cutlery", "katalog")?.theme_settings).toMatchObject({
+      motion: "lively",
+    })
+    // Every other look keeps today's calm motion by leaving the field out
+    const others = (sectorPack("cutlery")?.presets ?? []).filter((each) => each.code !== "katalog")
+    expect(others.length).toBeGreaterThan(0)
+    expect(others.filter((each) => Object.hasOwn(each.theme_settings, "motion"))).toEqual([])
+  })
+
   it("names the shop's categories by handle, never by id", () => {
     const katalog = storefrontPreset("cutlery", "katalog")
     expect([...(katalog?.handles ?? [])].sort()).toEqual([

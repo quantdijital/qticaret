@@ -250,6 +250,7 @@ medusaIntegrationTestRunner({
           buttons: "pill",
           section_spacing: "compact",
           density: "balanced",
+          motion: "lively",
         })
       )
       expect(first.data.layout.has_changes).toBe(true)

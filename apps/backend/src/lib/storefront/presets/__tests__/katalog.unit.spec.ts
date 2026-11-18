@@ -45,6 +45,8 @@ describe("the katalog preset's draft (adr/0049 Ek 2026-11-14, Katalog ana sayfas
     const doc = presetDocument(resolved, presetTheme(katalog.theme_settings), APPLIED, KEPT)
 
     expect(resolved.skipped).toEqual([])
+    // adr/0067 Ek 2026-11-18: the look's lively motion passes the theme section's schema
+    expect(presetTheme(katalog.theme_settings)).toMatchObject({ motion: "lively" })
     expect(doc.home.map((section) => section.type)).toEqual([
       "hero",
       "products",

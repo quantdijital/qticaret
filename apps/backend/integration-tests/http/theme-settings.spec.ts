@@ -25,6 +25,7 @@ interface Frame {
     chip_style: string
     media_ground: string
     density: string
+    motion: string
   }
 }
 
@@ -35,6 +36,7 @@ const KIT = {
   chip_style: "filled",
   media_ground: "well",
   density: "airy",
+  motion: "calm",
 }
 
 /** The card's variant and the framed card's switches at their defaults (adr/0049 Ek 2026-11-14 §3.3). */

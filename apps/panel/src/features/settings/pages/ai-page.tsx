@@ -9,13 +9,15 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { aiServicesQuery } from "@/features/ai/api/ai"
 import { useCan } from "@/features/auth/api/staff"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
+import { AiReviewsCard } from "@/features/settings/components/ai-reviews-card"
 import { AiServiceCard } from "@/features/settings/components/ai-service-card"
 import { AiUsageCard } from "@/features/settings/components/ai-usage-card"
 import { errorText } from "@/lib/errors"
 
 /**
  * Settings > Yapay zekâ (adr/0071 §13): a card for each AI service the
- * shop can connect with its own key, and this month's use under them.
+ * shop can connect with its own key, the switch for AI on reviews and
+ * questions (Aşama 9), and this month's use under them.
  * Nothing else is set here: which service does which work is the
  * server's, the choice is made where the work is.
  */
@@ -58,6 +60,7 @@ export function AiPage() {
               />
             ))}
           </div>
+          <AiReviewsCard />
           <AiUsageCard />
         </>
       )}

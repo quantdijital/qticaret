@@ -9,5 +9,6 @@
   "buttons": "pill",
   "section_spacing": "compact",
   "menu_style": "plain",
-  "density": "balanced"
+  "density": "balanced",
+  "motion": "lively"
 }

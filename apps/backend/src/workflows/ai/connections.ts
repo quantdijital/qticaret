@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import type { AiTask } from "../../lib/ai/registry/tasks"
 import type { AiConnection, AiFlags } from "../../lib/ai/select"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -25,6 +26,18 @@ export async function aiConnectionsOf(container: Resolver): Promise<AiConnection
       ? [{ provider: status.provider, status: status.state }]
       : []
   )
+}
+
+/** Whether the task's own tenant flag (`AiTask.flag`) is on; a task without one always is. */
+export async function taskFlagOpen(
+  container: Resolver,
+  task: Pick<AiTask, "flag">
+): Promise<boolean> {
+  return task.flag === undefined
+    ? true
+    : container
+        .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+        .isFeatureEnabled(task.flag)
 }
 
 export async function aiFlagsOf(container: Resolver): Promise<AiFlags> {

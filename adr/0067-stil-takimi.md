@@ -176,3 +176,31 @@ Gerçek değerler (px, masaüstü / tablet / telefon; tablet 640–1023 px):
 **Değerlendirilen seçenekler.** (a) Yoğunluğu tema ayarı olarak (`theme.density`, kit dışında) eklemek: kitin işaret ve portal altyapısını yeniden yazmak gerekirdi; reddedildi. (b) Yoğunluğu `--section-scale` gibi bir çarpanla basmak: başlık, ızgara ve kenar boşluğu farklı oranlarda küçülmeli (24 → 16 ama 12 → 12) ve serbest sayıya kayar; reddedildi. (c) Bölüm aralığını yoğunluğa bağlamak: kayıtlı `section_spacing` değerlerinin anlamı değişirdi (K6); reddedildi.
 
 **Açık kalan.** Çözülmüş stil denetimi (`style:capture` / `style:diff`) bu dalda koşulmadı (sunucu ister): taşıma commit'i için "aynı", hazır görünüm commit'i için Grafit ve Katalog'da beklenen fark; ana oturum koşar.
+
+## Ek 2026-11-18: S7 `motion` (Hareket)
+
+**Dayanak.** Sahip (2026-11-18): site "ölü" duruyor, biraz canlılık istiyor; önce Katalog görünümü için.
+
+**Nereye yazılır (adr/0066 §2).** Hareket bütün temaya yayılan bir görünüş farkıdır (kartlar, bölümler, düğmeler, görseller): stil takımında basamak, yoğunluk (S6) gibi. Yeni ADR gerekmedi.
+
+**Karar.**
+
+| Alan | Basamaklar (ilk varsayılan; panel adı) | Nasıl basılır |
+| --- | --- | --- |
+| S7 `motion` | `calm` Sakin · `lively` Canlı | `lively`'de tema kökünde `data-motion="lively"`; çizim yalnız `motion.css`'te |
+
+`lively` şunları ekler; hepsi yalnız `prefers-reduced-motion: no-preference` altında, üzerine gelme etkileri yalnız fare ile (`hover: hover` ve `pointer: fine`), yalnız `transform`/`translate`/`scale`/`opacity` hareket eder (kaldırmanın gölgesi boyanır), yerleşim kaymaz, yeni bağımlılık yok:
+
+1. **Ürün kartı:** iki fotoğraf da kuyunun içinde 600 ms'de (`--dur-slow`) 1,04'e büyür (taşma kırpılır); kuyu (çerçeveli kartta kartın kendisi) 3 px yükselir, yumuşak `--shadow-lift` gölgesiyle (`shadow: none`'da gölgesiz); üzerine gelince görünen hızlı bakış düğmesi belirirken 6 px yukarı kayar.
+2. **Kaydırınca belirme:** kart içermeyen bölümler (`gf-section`, ince şeritler hariç) ve her ürün kartı görünüme girerken belirir ve 14 px yükselir (`animation-timeline: view()`, `@supports` içinde; desteklemeyen tarayıcıda hareketsiz görünür). Etki sayfanın kendi kaydırmasıyla çarpılır (`scroll(root)`, ilk 160 px): sayfa en üstteyken her şey tam görünür, yani ilk ekran ve LCP görseli hiçbir zaman gizli ya da soluk başlamaz. Sayfanın açılışı `gf-section` değildir; öncelikli ya da hemen yüklenen görsel taşıyan hiçbir şey hedeflenmez. Satırdaki kartlar sütun başına 24 px kaydırma farkıyla sırayla gelir (CSS `nth-child`, betik yok).
+3. **Düğmeler:** `.gf-btn`, `.gf-icon-btn`, `.gf-chip` renk geçişi yumuşar, basılınca %97'ye çöker.
+4. **Görseller:** tembel yüklenen görsel çözülünce 420 ms'de süzülerek gelir (`frame/ImageCue`); öncelikli görsel hiç beklemez.
+5. **Üst bilgi:** yapışkan üst bilgi, sayfa onu geçince hafif bir gölge alır.
+
+- **Hazır görünümler:** Katalog `motion: lively` seçer; Tezgâh ×3 alanı yazmaz, sakin kalır. Kilit: Katalog'un `frame.html`'i (ve Katalog'dan kurulan alt bilgi fikstürü) `data-motion="lively"` işaretini taşır; stil özeti `motion.css` ile değişti.
+- **Ayna ve okuma:** sözleşme `STYLE_KIT.motion`, backend aynası ve eşitlik testi, vitrin okuması (bilinmeyen basamak `calm`), panelde "Yüzeyler" grubunda "Hareket". Ayar JSON'dadır: migration ve `settings_version` artışı yok.
+- **Betik:** `frame/ImageCue` tek bir yakalama dinleyicisi ve bağlanışta bir geçiştir; yerleşim okumaz. Kartın ikinci fotoğrafının geçişi (adr/0049 Ek 2026-11-18 düzeltmesi) de ona dayanır, bu yüzden her görünümde çalışır; `<html>`'de `data-js-img` yokken hiçbir şey beklemez.
+
+**Değerlendirilen seçenekler.** (a) Yalnız `view()` ile belirme: öğenin konumuna bağlıdır, ilk ekranın altındaki şeritte duran öğe yarı soluk başlardı; reddedildi, kaydırma kapısı eklendi. (b) IntersectionObserver ile belirme: ana iş parçacığında betik; reddedildi. (c) Bölüm ayarı: hareket bütün temanın kimliğidir; reddedildi.
+
+**Açık kalan.** Tarayıcıda gözle doğrulama ve çözülmüş stil denetimi (`style:capture` / `style:diff`) bu dalda koşulmadı (sunucu ister); ana oturum koşar. Next derlemesi (lightningcss) `@property` ve `animation-range`'i korumalı; derleme ana oturumda doğrulanır.

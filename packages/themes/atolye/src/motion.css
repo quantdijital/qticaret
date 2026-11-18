@@ -1,0 +1,195 @@
+/*
+ * The shop's motion (theme setting `motion`, adr/0067 S7, Ek 2026-11-18).
+ * `calm`, the default and today's drawing, marks nothing and nothing here
+ * applies. `lively` marks the theme's root `data-motion="lively"` and adds,
+ * all of it only for a visitor who has not asked for less motion, and only
+ * `transform`, `translate`, `scale` and `opacity` moving, and the lift's
+ * shadow painting (no layout shift):
+ *
+ * - A product card under a mouse (hover and a fine pointer): its photos
+ *   zoom to 1.04 inside the well over 600 ms, beside the second photo's
+ *   crossfade (`card.css`); the well (a framed card: the whole card) lifts
+ *   3 px with a soft shadow (none where the shop's `shadow` is `none`); a
+ *   hover-only quick view button rises 6 px into place as it fades in.
+ * - Scroll reveal: a section without cards, and each product card, fades
+ *   in and rises 14 px as it enters the viewport (a scroll-driven
+ *   animation; where the browser has none, everything simply shows). The
+ *   reveal is gated by the page's own scroll: at the top of the page
+ *   (nothing scrolled yet) every element is fully shown, so the first
+ *   screen and the LCP picture never start hidden or faded; the gate opens
+ *   over the first 160 px scrolled. A page's opening is never a
+ *   `gf-section`, and nothing holding an eager, high-priority picture is
+ *   revealed. Cards in a row stagger by 24 px of scroll per column.
+ * - Buttons, chips and icon buttons: their colour change eases and a press
+ *   sinks them to 97 %.
+ * - A lazy image fades in over 420 ms once decoded (`frame/ImageCue`);
+ *   an eager one (the LCP) never waits.
+ * - The sticky header casts a faint shadow once the page has scrolled past
+ *   it (`frame/ScrollCue`).
+ */
+
+/* The reveal's two numbers (scroll-driven, so they need a type to move smoothly):
+   how far the element has entered (1: in), and how far the page has scrolled
+   from its top (0: not yet, nothing hides) */
+@property --gf-seen {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@property --gf-gate {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Cards under the pointer */
+    @media (hover: hover) and (pointer: fine) {
+      /* Both photos zoom together; the lazy fade below keeps its transition here */
+      [data-motion="lively"] .gf-card-media img {
+        transition:
+          scale var(--dur-slow) var(--ease-gentle),
+          opacity var(--dur-long) var(--ease-gentle);
+      }
+      [data-motion="lively"] .gf-card:hover .gf-card-media img {
+        scale: 1.04;
+      }
+      [data-motion="lively"] :is(.gf-card:not(.gf-card-framed) .gf-card-media, .gf-card-framed) {
+        transition:
+          transform var(--dur-short) var(--ease-gentle),
+          box-shadow var(--dur-short) var(--ease-gentle);
+      }
+      [data-motion="lively"]
+        :is(.gf-card:not(.gf-card-framed):hover .gf-card-media, .gf-card-framed:hover) {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lift);
+      }
+      [data-motion="lively"][data-shadow="none"]
+        :is(.gf-card:not(.gf-card-framed):hover .gf-card-media, .gf-card-framed:hover) {
+        box-shadow: none;
+      }
+      [data-motion="lively"] .gf-quick-view[data-quick-view="hover"] {
+        translate: 0 0.375rem;
+        transition:
+          opacity var(--dur-short) var(--ease-gentle),
+          translate var(--dur-short) var(--ease-gentle);
+      }
+      [data-motion="lively"]
+        .gf-card:is(:hover, :focus-within)
+        .gf-quick-view[data-quick-view="hover"] {
+        translate: none;
+      }
+    }
+
+    /* Buttons: the colour eases, a press sinks the button a little */
+    [data-motion="lively"] .gf-btn {
+      transition:
+        background-color var(--dur-micro) var(--ease-out),
+        color var(--dur-micro) var(--ease-out),
+        border-color var(--dur-micro) var(--ease-out),
+        transform var(--dur-micro) var(--ease-out),
+        scale var(--dur-micro) var(--ease-out);
+    }
+    [data-motion="lively"] :is(.gf-icon-btn, .gf-chip) {
+      transition:
+        background-color var(--dur-micro) var(--ease-out),
+        color var(--dur-micro) var(--ease-out),
+        scale var(--dur-micro) var(--ease-out);
+    }
+    [data-motion="lively"]
+      :is(.gf-btn, .gf-icon-btn, .gf-chip):active:not(:disabled, [aria-disabled="true"]) {
+      scale: 0.97;
+    }
+
+    /* A lazy image fades in once decoded; until the script runs, as always */
+    [data-motion="lively"] main :where(img[loading="lazy"]) {
+      transition: opacity var(--dur-long) var(--ease-gentle);
+    }
+    html[data-js-img] [data-motion="lively"] main img[loading="lazy"]:not([data-js-loaded]) {
+      opacity: 0;
+    }
+
+    /* The sticky header's shadow once the page has scrolled past it */
+    [data-motion="lively"] .gf-head::after {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      height: 0.75rem;
+      background: linear-gradient(oklch(20% 0.012 255 / 0.07), transparent);
+      content: "";
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--dur-short) var(--ease-gentle);
+    }
+    html[data-js-scroll] [data-motion="lively"]:not([data-shadow="none"]) .gf-head::after {
+      opacity: 1;
+    }
+
+    /* Scroll reveal */
+    @supports (animation-timeline: view()) {
+      [data-motion="lively"]
+        main
+        :is(.gf-section:not([data-thin], :has(.gf-card)), .gf-card):not(
+          :has(img[fetchpriority="high"], img[loading="eager"])
+        ) {
+        opacity: calc(1 - var(--gf-gate) * (1 - var(--gf-seen)));
+        translate: 0 calc(var(--gf-gate) * (1 - var(--gf-seen)) * 0.875rem);
+        animation:
+          gf-seen linear both,
+          gf-gate linear both;
+        animation-timeline: view(), scroll(root);
+        animation-range:
+          entry calc(var(--gf-step, 0) * 1.5rem) entry calc(var(--gf-step, 0) * 1.5rem + 8rem),
+          0 10rem;
+      }
+      /* A row's cards one after another: the column's place at each width */
+      [data-motion="lively"] main li:nth-child(2n) > .gf-card {
+        --gf-step: 1;
+      }
+      @media (width >= 48rem) {
+        [data-motion="lively"] main li:nth-child(3n + 1) > .gf-card {
+          --gf-step: 0;
+        }
+        [data-motion="lively"] main li:nth-child(3n + 2) > .gf-card {
+          --gf-step: 1;
+        }
+        [data-motion="lively"] main li:nth-child(3n) > .gf-card {
+          --gf-step: 2;
+        }
+      }
+      @media (width >= 64rem) {
+        [data-motion="lively"] main li:nth-child(4n + 1) > .gf-card {
+          --gf-step: 0;
+        }
+        [data-motion="lively"] main li:nth-child(4n + 2) > .gf-card {
+          --gf-step: 1;
+        }
+        [data-motion="lively"] main li:nth-child(4n + 3) > .gf-card {
+          --gf-step: 2;
+        }
+        [data-motion="lively"] main li:nth-child(4n) > .gf-card {
+          --gf-step: 3;
+        }
+      }
+    }
+  }
+}
+
+@keyframes gf-seen {
+  from {
+    --gf-seen: 0;
+  }
+  to {
+    --gf-seen: 1;
+  }
+}
+@keyframes gf-gate {
+  from {
+    --gf-gate: 0;
+  }
+  to {
+    --gf-gate: 1;
+  }
+}
