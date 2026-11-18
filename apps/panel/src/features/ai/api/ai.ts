@@ -20,6 +20,14 @@ export interface AiServiceView {
   data_note_key: string
   /** The backgrounds its image editing makes (`image_background` options); empty without one. */
   backgrounds?: string[]
+  /** It can set a product photo in a scene (`image_scene`). */
+  scene?: boolean
+}
+
+/** A scene of the shop's sector pack as the picker shows it; never its prompt. */
+export interface AiSceneView {
+  code: string
+  name: { tr: string; en: string }
 }
 
 export interface AiTaskView {
@@ -30,6 +38,8 @@ export interface AiTaskView {
   allowed: boolean
   usable: string[]
   preference: string | null
+  /** `image_scene`: the shop's scenes, two at most (its `options`, by code). */
+  scenes?: AiSceneView[]
 }
 
 export interface AiServicesAnswer {

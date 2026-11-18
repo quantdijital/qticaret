@@ -11450,6 +11450,20 @@
         "ownerOnly": "With an AI service connected, backgrounds can be removed in one click; the store owner can connect one."
       }
     },
+    "scene": {
+      "mode": "What to do with the image",
+      "title": "Place in a scene",
+      "description": "The product is set in a ready-made scene. The original image does not change; the result arrives as a new image.",
+      "option": "Scene",
+      "onlyOption": "Scene: {{option}}.",
+      "start": "Place in scene",
+      "afterAlt": "Product placed in a scene",
+      "note": "The image is sent to {{name}} to make the scene. The product's shape, colour and text are asked to stay as they are; check the result before using it.",
+      "hint": {
+        "text": "Connect an AI service that makes scenes (Gemini or Photoroom) to place a product in a scene in one click.",
+        "ownerOnly": "With an AI service that makes scenes connected, a product can be placed in a scene in one click; the store owner can connect one."
+      }
+    },
     "altReview": {
       "open": "Alt text suggestions",
       "title": "Alt text suggestions",
