@@ -8249,7 +8249,8 @@
         "categories": {
           "tiles": "Picture tiles",
           "linked": "Cards with subcategories",
-          "collage": "Photo collage"
+          "collage": "Photo collage",
+          "panels": "Photo panels"
         },
         "related_products": {
           "grid": "Grid",
@@ -9464,12 +9465,14 @@
           "label": "Cards in a row",
           "term": "columns",
           "hint": "How many cards side by side on a wide screen; the theme shows fewer on narrow screens.",
-          "hintCollage": "At most this many cards in a row on a wide screen; the featured first card counts as two. Rows always fill edge to edge."
+          "hintCollage": "At most this many cards in a row on a wide screen; the featured first card counts as two. Rows always fill edge to edge.",
+          "hintPanels": "While the first category is not featured, at most this many panels in a row on a wide screen; rows fill edge to edge."
         },
         "lead": {
           "label": "Feature the first category",
           "term": "featured",
           "hint": "The first card twice as wide, its row taller; on a phone it stands large at the top.",
+          "hintPanels": "The first panel runs down the left on a wide screen, the others stacked beside it; on a phone it stands large at the top.",
           "off": "Off",
           "on": "On"
         },
@@ -9477,6 +9480,7 @@
           "label": "Photo height",
           "term": "height",
           "hint": "The cards' photo area; the featured card's row a little taller.",
+          "hintPanels": "The panels' least height; when the lines under the name grow, the photo grows with them.",
           "low": "Low",
           "medium": "Medium",
           "high": "High"
@@ -9499,7 +9503,8 @@
           "label": "Subcategories shown",
           "term": "links",
           "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more.",
-          "hintCollage": "At most this many subcategories under each name; 0 shows only the photo and the name. The whole card goes to the category."
+          "hintCollage": "At most this many subcategories under each name; 0 shows only the photo and the name. The whole card goes to the category.",
+          "hintPanels": "At most this many subcategories under each name; 0 shows only the photo and the name. The whole panel goes to the category."
         },
         "columns_mobile": {
           "1": "1 card",

@@ -1,6 +1,7 @@
 import {
   CATEGORY_CARD_DEFAULTS,
   CATEGORY_COLLAGE_DEFAULTS,
+  CATEGORY_PANELS_DEFAULTS,
   FOOTER_COLUMNS_DEFAULTS,
   FOOTER_ROWS_DEFAULTS,
   FOOTER_ROWS_START,
@@ -62,7 +63,12 @@ export const VARIANT_FIELDS: {
     },
   },
   // The linked cards start from the contract's defaults (adr/0049 Ek 2026-11-15)
-  categories: { tiles: {}, linked: CATEGORY_CARD_DEFAULTS, collage: CATEGORY_COLLAGE_DEFAULTS },
+  categories: {
+    tiles: {},
+    linked: CATEGORY_CARD_DEFAULTS,
+    collage: CATEGORY_COLLAGE_DEFAULTS,
+    panels: CATEGORY_PANELS_DEFAULTS,
+  },
   // A rail's own by variant (Ek 2026-11-15): a columns rail starts one more list, the newest
   products: {
     grid: { columns: 3, columns_mobile: SHELF_PHONE_DEFAULT },

@@ -27,7 +27,7 @@ export const CARD_FIELDS = [
 ] as const
 export type CardField = (typeof CARD_FIELDS)[number]
 
-/** The collage's fields, in its form's order (adr/0049 Ek 2026-11-15). */
+/** The collage's fields, in its form's order (adr/0049 Ek 2026-11-15); the panels' too (Ek 2026-11-19). */
 export const COLLAGE_FIELDS = ["lead", "columns", "columns_mobile", "height", "links"] as const
 export type CollageField = (typeof COLLAGE_FIELDS)[number]
 
@@ -95,8 +95,15 @@ export function cardFooterFields(section: AnySection): RegistryField[] {
       target: CARD_FIELD_IDS.card(section.id, field),
     }))
   }
-  if (section.type === "categories" && section.variant === "collage") {
-    return COLLAGE_FIELDS.map((field) => ({
+  if (
+    section.type === "categories" &&
+    (section.variant === "collage" || section.variant === "panels")
+  ) {
+    // The panels' row count has no say while the lead stands beside the others (Ek 2026-11-19)
+    const shown = COLLAGE_FIELDS.filter(
+      (field) => !(section.variant === "panels" && section.lead === "on" && field === "columns")
+    )
+    return shown.map((field) => ({
       key: `cards.${field}`,
       group: "cards",
       label: `${CARDS}.${field}.label`,
