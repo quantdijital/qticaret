@@ -37,7 +37,11 @@ describe("Geliver client against the fake server (adr/0031)", () => {
     fake = await startFakeGeliver()
     api = createGeliverApi({
       baseUrl: fake.url,
-      timeoutMs: 500,
+      // No case here is about the client timeout. With 500 ms a busy CI runner timed
+      // a local answer out (a cold first POST took 613 ms): the create then failed as
+      // outcome_unknown, or a read was asked again and the retry missed the answer a
+      // case had queued ("no error" instead of error_LIMIT)
+      timeoutMs: 10_000,
       retry: { baseDelayMs: 1 },
       sleep: () => Promise.resolve(),
     })
