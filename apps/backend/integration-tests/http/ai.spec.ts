@@ -66,7 +66,7 @@ medusaIntegrationTestRunner({
 
       expect(listed.services.find((each) => each.id === "fake")).toMatchObject({
         status: "not_connected",
-        capabilities: ["text", "vision"],
+        capabilities: ["text", "vision", "image_edit"],
       })
       expect(await testTask()).toMatchObject({ usable: [], preference: null, allowed: true })
       expect([refused.status, refused.data.message]).toEqual([400, "ai.no_service"])

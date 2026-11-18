@@ -19,6 +19,7 @@ describe("job types", () => {
     expect(JOB_TYPE_KEYS).toEqual([
       "accounting.package",
       "ai.alt_text",
+      "ai.image_edit",
       "audit_log.export",
       "catalog.bulk_edit",
       "catalog.description_facts",
@@ -75,7 +76,14 @@ describe("job types", () => {
       managersOnly: true,
       containsPersonalData: false,
     })
-    expect(MANAGER_JOB_TYPES).toEqual(["wholesale.carts", "wholesale.sync"])
+    // Aşama 4: a background edit job, queued by its route and seen by the owner and admin
+    expect(jobType("ai.image_edit")).toMatchObject({
+      singleton: true,
+      internal: true,
+      managersOnly: true,
+      containsPersonalData: false,
+    })
+    expect(MANAGER_JOB_TYPES).toEqual(["ai.image_edit", "wholesale.carts", "wholesale.sync"])
   })
 
   it("syncs the address data one run at a time, never through the jobs route", () => {

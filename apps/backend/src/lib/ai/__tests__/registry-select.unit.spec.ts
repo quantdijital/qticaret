@@ -18,7 +18,12 @@ describe("AI registries (adr/0071 §2)", () => {
     expect(aiServices("test").map((each) => each.id)).toContain("fake")
     expect(aiServices("development").map((each) => each.id)).toContain("fake")
     for (const env of ["production", "staging"]) {
-      expect(aiServices(env).map((each) => each.id)).toEqual(["deepseek", "minimax", "gemini"])
+      expect(aiServices(env).map((each) => each.id)).toEqual([
+        "deepseek",
+        "minimax",
+        "gemini",
+        "photoroom",
+      ])
       expect(findAiService("fake", env)).toBeNull()
     }
   })
@@ -30,6 +35,7 @@ describe("AI registries (adr/0071 §2)", () => {
       "seo_description",
       "product_description",
       "image_alt_text",
+      "image_background",
     ])
     expect(findAiTask("test_text", "development")).toBeNull()
   })
@@ -59,8 +65,15 @@ describe("AI registries (adr/0071 §2)", () => {
     for (const service of aiServices("production")) {
       expect(service.hosts.length).toBeGreaterThan(0)
       for (const [capability, target] of Object.entries(service.capabilities)) {
-        expect(target.connector).toBe("openai-compatible")
+        expect(["openai-compatible", "photoroom", "gemini-image"]).toContain(target.connector)
         if (target.connector !== "openai-compatible") {
+          if (target.connector === "photoroom" || target.connector === "gemini-image") {
+            const image = new URL(target.url)
+            expect(image.protocol).toBe("https:")
+            expect(service.hosts).toContain(image.hostname)
+            expect(image.search).toBe("")
+            expect(target.backgrounds.length).toBeGreaterThan(0)
+          }
           continue
         }
         const url = new URL(`${target.baseUrl}${target.path}`)
@@ -78,8 +91,27 @@ describe("AI registries (adr/0071 §2)", () => {
     }
   })
 
-  it("registers text and image reading for every real service, image reading on the text endpoint", () => {
+  it("registers only what has a connector: text, image reading, image editing", () => {
+    const offered = Object.fromEntries(
+      aiServices("production").map((service) => [service.id, Object.keys(service.capabilities)])
+    )
+    expect(offered).toEqual({
+      deepseek: ["text", "vision"],
+      minimax: ["text", "vision"],
+      gemini: ["text", "vision", "image_edit"],
+      photoroom: ["image_edit"],
+    })
+    // No result address is fetched from any service yet: both answer with the bytes
     for (const service of aiServices("production")) {
+      expect(service.downloadHosts).toEqual([])
+    }
+  })
+
+  it("registers text and image reading for every text service, image reading on the text endpoint", () => {
+    // An image-only service (Photoroom) has neither
+    const textServices = aiServices("production").filter((service) => service.capabilities.text)
+    expect(textServices.length).toBeGreaterThan(0)
+    for (const service of textServices) {
       expect(Object.keys(service.capabilities)).toEqual(expect.arrayContaining(["text", "vision"]))
       const { text, vision } = service.capabilities
       // Image reading is the text endpoint with images: same connector, host and path, a size cap
@@ -92,7 +124,7 @@ describe("AI registries (adr/0071 §2)", () => {
       expect(service.unitPrices.vision).toBeDefined()
     }
     // A text target never takes an image
-    for (const service of aiServices("production")) {
+    for (const service of textServices) {
       expect(service.capabilities.text).not.toHaveProperty("imageInput")
     }
   })

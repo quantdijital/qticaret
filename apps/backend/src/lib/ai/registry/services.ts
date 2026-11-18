@@ -11,12 +11,14 @@ import type { AiCapability } from "./capabilities"
 
 export type AiFunding = "own_key" | "platform_credit"
 
-/** Micro units (a millionth of the currency) per million tokens; an estimate, never an invoice. */
-export interface AiUnitPrice {
-  currency: "USD"
-  inputPerMillionTokens: number
-  outputPerMillionTokens: number
-}
+/**
+ * Micro units (a millionth of the currency) per million tokens, or per
+ * image a call gives back (a service priced by the image); an estimate,
+ * never an invoice.
+ */
+export type AiUnitPrice =
+  | { currency: "USD"; inputPerMillionTokens: number; outputPerMillionTokens: number }
+  | { currency: "USD"; perImage: number }
 
 export interface OpenAiCompatibleTarget {
   connector: "openai-compatible"
@@ -44,7 +46,27 @@ export interface FakeTarget {
   model: string
 }
 
-export type AiTarget = OpenAiCompatibleTarget | FakeTarget
+/** What an `image_edit` service is asked to do with the background (`image_background`). */
+export const IMAGE_BACKGROUNDS = ["transparent", "white"] as const
+export type ImageBackground = (typeof IMAGE_BACKGROUNDS)[number]
+
+/** An image editing endpoint (Aşama 4): its full address, fixed here. */
+export interface ImageEditTarget {
+  connector: "photoroom" | "gemini-image"
+  model: string
+  /** `https`, on one of the service's `hosts`; no query. */
+  url: string
+  /** The backgrounds this endpoint is documented to make. */
+  backgrounds: readonly ImageBackground[]
+}
+
+export interface FakeImageTarget {
+  connector: "fake-image"
+  model: string
+  backgrounds: readonly ImageBackground[]
+}
+
+export type AiTarget = OpenAiCompatibleTarget | FakeTarget | ImageEditTarget | FakeImageTarget
 
 export interface AiService {
   id: string
@@ -242,6 +264,26 @@ const GEMINI: AiService = {
       // 20 MB is the whole request, base64 and text included: room for the encoding's third
       imageInput: { maxBytes: 14 * 1000 * 1000 },
     },
+    /*
+     * Image editing (Aşama 4), native API only. Verified 2026-11-18 against:
+     *   https://aistudio.google.com/docs/image-generation?generate-content=true (the
+     *     generateContent REST example: POST .../v1/models/{model}:generateContent,
+     *     `x-goog-api-key`, `inline_data` + text parts, `responseModalities`, the image
+     *     back as base64 `inlineData`, no address; "All generated images include a
+     *     SynthID watermark")
+     *   https://aistudio.google.com/api-reference/generate-content (`promptFeedback.blockReason`,
+     *     `finishReason` IMAGE_SAFETY / NO_IMAGE…, `usageMetadata`)
+     *   https://aistudio.google.com/docs/openai (no image editing on the compatibility endpoint)
+     *   https://aistudio.google.com/docs/pricing (gemini-nano-banana-2.1)
+     * Not verified: the v1beta path with image models (the reference says v1beta, the
+     * example v1: the example's is used). A transparent result: white only.
+     */
+    image_edit: {
+      connector: "gemini-image",
+      model: "gemini-nano-banana-2.1",
+      url: "https://generativelanguage.googleapis.com/v1/models/gemini-nano-banana-2.1:generateContent",
+      backgrounds: ["white"],
+    },
   },
   unitPrices: {
     text: { currency: "USD", inputPerMillionTokens: 1_500_000, outputPerMillionTokens: 7_500_000 },
@@ -250,8 +292,52 @@ const GEMINI: AiService = {
       inputPerMillionTokens: 1_500_000,
       outputPerMillionTokens: 7_500_000,
     },
+    image_edit: {
+      currency: "USD",
+      inputPerMillionTokens: 1_500_000,
+      outputPerMillionTokens: 30_000_000,
+    },
   },
   dataNoteKey: "ai.data_note.gemini",
+}
+
+/*
+ * Photoroom (Remove Background API). Verified 2026-11-18 against:
+ *   https://docs.photoroom.com/remove-background-api-basic-plan/quickstart-guide.md
+ *     (POST https://sdk.photoroom.com/v1/segment, multipart `image_file`, `x-api-key`)
+ *   https://docs.photoroom.com/remove-background-api-basic-plan/background-color-size-and-crop.md
+ *     (`bg_color` hex or an HTML colour name, `format` png | jpg | webp, `size`, `crop`)
+ *   https://docs.photoroom.com/getting-started/api-reference-openapi.md (200: the image,
+ *     or JSON `base64img`; 400 / 402 `{detail, status_code, type}`; 403; /v2/account)
+ *   https://docs.photoroom.com/remove-background-api-basic-plan/file-size-resolution-and-format.md
+ *     (input up to 50 MB and 6000 px; PNG, JPEG, WEBP, HEIC in; PNG, JPEG, WEBP out)
+ *   https://docs.photoroom.com/remove-background-api-basic-plan/sandbox-mode.md (a
+ *     `sandbox_` key: free, watermarked)
+ *   https://docs.photoroom.com/remove-background-api-basic-plan/pricing.md ($0.02 an image)
+ *   https://www.photoroom.com/platform/security (servers in the US; an image of a
+ *     synchronous call is dropped after the answer)
+ * The Image Editing API (/v2/edit: shadows, margins) is a dearer plan and not used.
+ * Not verified: which header picks JSON over the bytes (both are read); what 403 means
+ * (read as a refused key); whether self-serve images train models (the pages disagree:
+ * the note says so). No result address is ever returned: no download host.
+ */
+const PHOTOROOM: AiService = {
+  id: "photoroom",
+  credentialProvider: "photoroom",
+  funding: "own_key",
+  hosts: ["sdk.photoroom.com", "image-api.photoroom.com"],
+  downloadHosts: [],
+  capabilities: {
+    image_edit: {
+      connector: "photoroom",
+      model: "segment-v1",
+      url: "https://sdk.photoroom.com/v1/segment",
+      backgrounds: ["transparent", "white"],
+    },
+  },
+  // $0.02 a processed image (pricing.md above); billed per image given back
+  unitPrices: { image_edit: { currency: "USD", perImage: 20_000 } },
+  dataNoteKey: "ai.data_note.photoroom",
 }
 
 /**
@@ -270,12 +356,17 @@ export const FAKE_SERVICE: AiService = {
   capabilities: {
     text: { connector: "fake", model: "fake-text" },
     vision: { connector: "fake", model: "fake-vision" },
+    image_edit: {
+      connector: "fake-image",
+      model: "fake-image",
+      backgrounds: ["transparent", "white"],
+    },
   },
   unitPrices: {},
   dataNoteKey: "ai.data_note.fake",
 }
 
-const SERVICES: readonly AiService[] = [DEEPSEEK, MINIMAX, GEMINI]
+const SERVICES: readonly AiService[] = [DEEPSEEK, MINIMAX, GEMINI, PHOTOROOM]
 
 /** The services of this instance, in registry order (the order a choice falls back to). */
 export function aiServices(

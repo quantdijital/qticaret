@@ -35,7 +35,7 @@ export interface CallOutcome {
   problems: string[]
   input_tokens: number | null
   output_tokens: number | null
-  /** Pictures sent; null for a text task. */
+  /** Pictures sent (vision) or given back (an image edit); null for a text task. */
   images: number | null
   duration_ms: number
   error_key: AiErrorKey | null
@@ -48,7 +48,7 @@ export interface CallOutcome {
  * part of a step's input or output (`workflow_execution` keeps those), of
  * a log or of an error. A service without a readable key cannot be called.
  */
-async function apiKeyOf(
+export async function apiKeyOf(
   container: Pick<MedusaContainer, "resolve">,
   credentialProvider: string
 ): Promise<string | null> {
@@ -88,7 +88,7 @@ async function pictureOf(
   return visionImage(bytes, service)
 }
 
-const retryAfterOf = (error: unknown): number | null => {
+export const retryAfterOf = (error: unknown): number | null => {
   const value = (error as { retryAfterMs?: unknown } | null)?.retryAfterMs
   return typeof value === "number" ? value : null
 }

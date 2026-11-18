@@ -13,24 +13,41 @@ export interface AiCostEstimate {
   currency: string
 }
 
+/** What a call used: the service's token counts, and the images it gave back. */
+export interface AiCallUsage extends AiUsage {
+  images?: number
+}
+
 const TOKENS_PER_UNIT = 1_000_000
 
 const isCount = (value: number | undefined): value is number =>
   value !== undefined && Number.isSafeInteger(value) && value >= 0
 
 /**
- * Null when the service gave no counts, a count is not a whole number of
- * tokens, the registry has no price for the capability, or the sum would
- * leave the range a number holds exactly.
+ * Null when the registry has no price for the capability, the call used
+ * nothing the price counts (no tokens said, no image given back), a count
+ * is not a whole number, or the sum would leave the range a number holds
+ * exactly.
  */
 export function estimateCost(
   service: AiService,
   capability: AiCapability,
-  usage: AiUsage
+  usage: AiCallUsage
 ): AiCostEstimate | null {
   const price = service.unitPrices[capability]
+  if (price === undefined) {
+    return null
+  }
+  if ("perImage" in price) {
+    const { images } = usage
+    if (!isCount(images) || images === 0) {
+      return null
+    }
+    const micros = images * price.perImage
+    return Number.isSafeInteger(micros) ? { micros, currency: price.currency } : null
+  }
   const { inputTokens, outputTokens } = usage
-  if (price === undefined || (inputTokens === undefined && outputTokens === undefined)) {
+  if (inputTokens === undefined && outputTokens === undefined) {
     return null
   }
   if (

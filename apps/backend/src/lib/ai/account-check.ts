@@ -9,8 +9,9 @@ import type { AiService } from "./registry/services"
 /**
  * "Test the connection" for an AI service (adr/0071 §3): the cheapest call
  * that proves the key, one that generates nothing and costs nothing: the
- * model list. The address is fixed here and must be on the service's host
- * list; the key goes in the `Authorization` header only; redirects are
+ * model list (Photoroom, which has none: its account details). The address
+ * is fixed here and must be on the service's host list; the key goes in a
+ * header only (the service's own); redirects are
  * refused; nothing of the answer but its status (and a registered code)
  * is read, logged or kept (§9).
  *
@@ -35,10 +36,38 @@ export type AiAccountCheck = "valid" | "secret_invalid" | "unreachable" | "faile
  * Not documented on these pages: their error statuses; the chat endpoint's documented
  * meanings (lib/ai/registry/services.ts) are taken for the same key.
  */
-const MODEL_LISTS: Readonly<Record<string, string>> = {
-  deepseek: "https://api.deepseek.com/models",
-  minimax: "https://api.minimax.io/v1/models",
-  gemini: "https://generativelanguage.googleapis.com/v1beta/openai/models",
+interface CheckCall {
+  url: string
+  /** Where the key goes: `Authorization: Bearer`, or the service's own header. */
+  header: "bearer" | "x-api-key"
+  /** What a documented answer looks like. */
+  answer: "model_list" | "photoroom_account"
+  /**
+   * false: the check itself is not fully documented, so an answer out of the
+   * documentation says nothing about the key: only 401 refuses it (a 403
+   * and anything else are no verdict: the key is saved as not checked).
+   */
+  documented?: false
+}
+
+const CHECKS: Readonly<Record<string, CheckCall>> = {
+  deepseek: { url: "https://api.deepseek.com/models", header: "bearer", answer: "model_list" },
+  minimax: { url: "https://api.minimax.io/v1/models", header: "bearer", answer: "model_list" },
+  gemini: {
+    url: "https://generativelanguage.googleapis.com/v1beta/openai/models",
+    header: "bearer",
+    answer: "model_list",
+  },
+  // Verified 2026-11-18: https://docs.photoroom.com/getting-started/api-reference-openapi.md
+  // ("Get current account details, including remaining image edits and monthly quota";
+  // `images.available`, `images.subscription`, `plan`). The page shows no header for it;
+  // `x-api-key` is the one every other Photoroom endpoint documents
+  photoroom: {
+    url: "https://image-api.photoroom.com/v2/account",
+    header: "x-api-key",
+    answer: "photoroom_account",
+    documented: false,
+  },
 }
 
 // A person waits at the panel (lib/integrations/account-check.ts gives 8 s in all)
@@ -56,8 +85,8 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
 /** The registered address, or null: nothing but this table names where a check goes. */
-function modelListOf(service: AiService): URL | null {
-  const raw = MODEL_LISTS[service.id]
+function checkUrlOf(service: AiService): URL | null {
+  const raw = CHECKS[service.id]?.url
   if (raw === undefined || !URL.canParse(raw)) {
     return null
   }
@@ -68,10 +97,15 @@ function modelListOf(service: AiService): URL | null {
 }
 
 /** A model list as documented: `{ object: "list", data: [...] }`. */
-function isModelList(body: Buffer): boolean {
+function isDocumentedAnswer(answer: CheckCall["answer"], body: Buffer): boolean {
   try {
     const parsed: unknown = JSON.parse(body.toString("utf8"))
-    return isRecord(parsed) && parsed["object"] === "list" && Array.isArray(parsed["data"])
+    if (!isRecord(parsed)) {
+      return false
+    }
+    return answer === "model_list"
+      ? parsed["object"] === "list" && Array.isArray(parsed["data"])
+      : isRecord(parsed["images"])
   } catch {
     return false
   }
@@ -107,7 +141,10 @@ function verdictOf(service: AiService, response: SafeFetchResponse): [AiAccountC
     return ["unreachable", code]
   }
   if (status >= 200 && status < 300) {
-    return isModelList(response.body) ? ["valid", code] : ["failed", "not_a_model_list"]
+    const answer = CHECKS[service.id]?.answer ?? "model_list"
+    return isDocumentedAnswer(answer, response.body)
+      ? ["valid", code]
+      : ["failed", "not_a_documented_answer"]
   }
   return ["failed", code]
 }
@@ -124,7 +161,9 @@ function verdictOfThrown(error: unknown): [AiAccountCheck, string] {
 /** Whether the service is one that never leaves the machine (the fake, in tests). */
 const isLocal = (service: AiService): boolean =>
   service.hosts.length === 0 &&
-  Object.values(service.capabilities).every((target) => target.connector === "fake")
+  Object.values(service.capabilities).every(
+    (target) => target.connector === "fake" || target.connector === "fake-image"
+  )
 
 export async function checkAiAccount(
   serviceId: string,
@@ -139,15 +178,18 @@ export async function checkAiAccount(
   if (isLocal(service)) {
     return "valid"
   }
-  const url = modelListOf(service)
-  if (url === null) {
+  const url = checkUrlOf(service)
+  const call = CHECKS[service.id]
+  if (url === null || call === undefined) {
     return "failed"
   }
+  const auth: Record<string, string> =
+    call.header === "bearer" ? { Authorization: `Bearer ${apiKey}` } : { "x-api-key": apiKey }
   let verdict: [AiAccountCheck, string]
   try {
     const response = await (options.fetch ?? safeFetch)(url, {
       method: "GET",
-      headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
+      headers: { ...auth, Accept: "application/json" },
       redirect: "error",
       timeoutMs: CHECK_TIMEOUT_MS,
       maxResponseBytes: MAX_RESPONSE_BYTES,
@@ -157,13 +199,28 @@ export async function checkAiAccount(
   } catch (error) {
     verdict = verdictOfThrown(error)
   }
-  const [outcome, code] = verdict
+  const [checked, code] = verdict
+  // Where the check's own answer is not documented only a 401 refuses the key: a 403 may
+  // mean a plan or a scope this endpoint wants, and anything else is no verdict either
+  const undocumentedNoVerdict =
+    call.documented === false &&
+    (checked === "failed" || (checked === "secret_invalid" && code === "http_403"))
+  const outcome = undocumentedNoVerdict ? "unreachable" : checked
   if (outcome !== "valid") {
     // The outcome and a code of ours: never the body, the headers or the address's query
     logger.warn({ event: "ai.account_check_failed", service: service.id, outcome, code })
   }
   return outcome
 }
+
+/**
+ * Whether a key for this service may replace a working one unchecked: its
+ * check is not documented enough to hold a save back (Photoroom). The key
+ * is then kept as "not checked" and the panel warns; a 401 still
+ * stops the save.
+ */
+export const replacesUnchecked = (serviceId: string): boolean =>
+  CHECKS[serviceId]?.documented === false
 
 /** The check `CHECKERS` runs for an AI service: its one secret is the key. */
 export const aiAccountChecker =

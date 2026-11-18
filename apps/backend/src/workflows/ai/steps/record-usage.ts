@@ -39,6 +39,8 @@ export const recordUsageStep = createStep(
       ? estimateCost(service, input.capability, {
           ...(outcome.input_tokens === null ? {} : { inputTokens: outcome.input_tokens }),
           ...(outcome.output_tokens === null ? {} : { outputTokens: outcome.output_tokens }),
+          // Pictures sent (vision, token priced) or given back (an image edit, priced by the image)
+          ...(outcome.images === null ? {} : { images: outcome.images }),
         })
       : null
     const ai = container.resolve<AiModuleService>(AI_MODULE)

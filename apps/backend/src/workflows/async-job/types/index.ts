@@ -1,5 +1,6 @@
 import { accountingPackage } from "./accounting-package"
 import { aiAltText } from "./ai-alt-text"
+import { aiImageEdit } from "./ai-image-edit"
 import { auditLogExport } from "./audit-log-export"
 import { catalogBulkEdit } from "./catalog-bulk-edit"
 import { catalogDescriptionFacts } from "./catalog-description-facts"
@@ -32,6 +33,7 @@ const erase = <Input>(type: JobType<Input>): JobType => type as unknown as JobTy
 const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "accounting.package": erase(accountingPackage),
   "ai.alt_text": erase(aiAltText),
+  "ai.image_edit": erase(aiImageEdit),
   "audit_log.export": erase(auditLogExport),
   "catalog.bulk_edit": erase(catalogBulkEdit),
   "catalog.description_facts": erase(catalogDescriptionFacts),

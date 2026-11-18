@@ -260,6 +260,38 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "ai_source": {
+          "name": "ai_source",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": ["edited", "generated"],
+          "mappedType": "enum"
+        },
+        "derived_from_id": {
+          "name": "derived_from_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -347,6 +379,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_media_asset_created_at\" ON \"media_asset\" (\"created_at\") WHERE deleted_at IS NULL AND file_id IS NOT NULL"
+        },
+        {
+          "keyName": "IDX_media_asset_derived_from_id",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_media_asset_derived_from_id\" ON \"media_asset\" (\"derived_from_id\") WHERE deleted_at IS NULL AND derived_from_id IS NOT NULL"
         },
         {
           "keyName": "media_asset_pkey",

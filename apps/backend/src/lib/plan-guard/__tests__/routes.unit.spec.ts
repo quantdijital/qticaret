@@ -100,6 +100,8 @@ describe("every admin write route has a plan decision", () => {
     // A new job type is a decision too: it is listed here or in PLAN_OPEN_JOBS
     const closedJobs = [
       "ai.alt_text",
+      // Writes new media records and pays a service: never while the plan is closed
+      "ai.image_edit",
       "catalog.bulk_edit",
       "catalog.description_facts",
       "catalog.import",

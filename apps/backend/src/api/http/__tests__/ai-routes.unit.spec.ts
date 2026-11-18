@@ -14,6 +14,10 @@ describe("aiSuggestionProfile", () => {
 
   it("counts an image task against the narrower media budget", () => {
     expect(aiSuggestionProfile(ask({ task: "image_alt_text" }))).toBe(RATE_LIMIT_PROFILES.ai_media)
+    // An image edit job (Aşama 4): its capability is image_edit
+    expect(
+      aiSuggestionProfile(ask({ task: "image_background", entity_type: "media", option: "white" }))
+    ).toBe(RATE_LIMIT_PROFILES.ai_media)
   })
 
   it("counts an unknown, missing or malformed task as text", () => {

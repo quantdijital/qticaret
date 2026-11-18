@@ -50,5 +50,8 @@ export function textConnectorFor(
   if (target.connector === "fake") {
     return fakeTextConnector
   }
+  if (target.connector !== "openai-compatible") {
+    throw aiProviderError({ service: serviceId, key: "ai.service_unavailable", code: "not_text" })
+  }
   return openAiCompatibleText({ service, target, apiKey })
 }
