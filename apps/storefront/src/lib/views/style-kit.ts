@@ -25,4 +25,5 @@ export const styleKitView = (settings: StyleKit): StyleKit => ({
   chip_style: settings.chip_style,
   media_ground: settings.media_ground,
   density: settings.density,
+  motion: settings.motion,
 })

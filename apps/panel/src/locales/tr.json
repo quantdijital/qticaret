@@ -8741,6 +8741,15 @@
               "compact": "Sıkı"
             },
             "hint": "Bölüm başlığı ile içeriği, ürün ızgarasının sütun ve satır araları ve alt bilgiye kalan boşluk birlikte değişir; bölümler arası boşluk Bölüm aralığı'ndadır. Ferah, temanın kendi ölçüsüdür (geniş ekranda başlık altı 40 px, ızgara 24 × 40 px, alt bilgiye 64 px); Dengeli bunları 24 px, 20 × 28 px ve 48 px'e, Sıkı 16 px, 16 × 20 px ve 32 px'e indirir."
+          },
+          "motion": {
+            "label": "Hareket",
+            "term": "motion",
+            "steps": {
+              "calm": "Sakin",
+              "lively": "Canlı"
+            },
+            "hint": "Sakin, temanın kendi kısa geçişleridir. Canlı'da ürün kartının fotoğrafı üzerine gelince hafifçe büyür ve kart yükselir, bölümler ve ürünler sayfa kaydıkça yumuşakça belirir, görseller yüklenince süzülerek gelir, düğmeler basılınca hafifçe çöker. Hareketi azaltmayı seçmiş ziyaretçide hiçbiri oynamaz."
           }
         },
         "card": "Ürün kartı",

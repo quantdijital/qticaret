@@ -7,7 +7,7 @@ import {
   styleKitAttributes,
 } from "./style-kit.js"
 
-/** adr/0067 §1 and its Ek 2026-11-16 (S6): the kit's steps; the backend mirrors them (`theme-style-kit.unit.spec.ts`). */
+/** adr/0067 §1 and its Ek 2026-11-16 (S6) and 2026-11-18 (S7): the kit's steps; the backend mirrors them (`theme-style-kit.unit.spec.ts`). */
 describe("the style kit", () => {
   it("names each field's steps as adr/0067 §1 does, today's drawing first", () => {
     expect(STYLE_KIT).toEqual({
@@ -16,6 +16,7 @@ describe("the style kit", () => {
       chip_style: ["filled", "lined"],
       media_ground: ["well", "page"],
       density: ["airy", "balanced", "compact"],
+      motion: ["calm", "lively"],
     })
     expect(STYLE_KIT_FIELDS).toEqual([
       "menu_style",
@@ -23,6 +24,7 @@ describe("the style kit", () => {
       "chip_style",
       "media_ground",
       "density",
+      "motion",
     ])
   })
 
@@ -41,6 +43,7 @@ describe("the style kit", () => {
       "data-chip-style",
       "data-media-ground",
       "data-density",
+      "data-motion",
     ])
   })
 
@@ -61,6 +64,7 @@ describe("the style kit", () => {
         chip_style: "lined",
         media_ground: "page",
         density: "compact",
+        motion: "lively",
       })
     ).toEqual({
       "data-menu-style": "underline",
@@ -68,9 +72,15 @@ describe("the style kit", () => {
       "data-chip-style": "lined",
       "data-media-ground": "page",
       "data-density": "compact",
+      "data-motion": "lively",
     })
     expect(styleKitAttributes({ ...STYLE_KIT_DEFAULTS, density: "balanced" })).toEqual({
       "data-density": "balanced",
     })
+    // S7: only the lively step is marked; calm, today's, prints nothing
+    expect(styleKitAttributes({ ...STYLE_KIT_DEFAULTS, motion: "lively" })).toEqual({
+      "data-motion": "lively",
+    })
+    expect(styleKitAttributes({ ...STYLE_KIT_DEFAULTS, motion: "calm" })).toEqual({})
   })
 })
