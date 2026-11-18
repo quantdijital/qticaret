@@ -55,6 +55,7 @@
 @import "./footer-columns.css";
 @import "./footer-rows.css";
 @import "./newsletter.css";
+@import "./motion.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

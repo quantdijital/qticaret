@@ -14,7 +14,7 @@
       "file": "buy.css"
     },
     {
-      "sha256": "4bac33e1fcbfe99970988faa38fbedc592d60e6e0dbde6952c49584f6ab1fb48",
+      "sha256": "aa4510b945d7dc37c82adc39973066108c27236a520698a646279aba99c5ba27",
       "file": "card.css"
     },
     {
@@ -74,6 +74,10 @@
       "file": "menu.css"
     },
     {
+      "sha256": "73c62fd4bc7e971cc6def7057efa4d3d0539615274985aea272b98a038d709bb",
+      "file": "motion.css"
+    },
+    {
       "sha256": "2b8b778046080d29b3bda31326038f157b91295837d8b567f0d52f3025c31550",
       "file": "newsletter.css"
     },
@@ -118,7 +122,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "db6ba9983724750117c248b1a47b0080bb184308be806df2a1d530ba6e3ba9e1",
+      "sha256": "528f45e6c75af5ee6e71f9f5a7619d58ea989005f4853128ad518df5cd7d3f5e",
       "file": "styles.css"
     },
     {
@@ -138,7 +142,7 @@
       "file": "thin.css"
     },
     {
-      "sha256": "fd4388ca46b87a25b817da6bbace66208112578bd98a33a8fdd78225384e0a92",
+      "sha256": "e83dc0f868ba940621260120006f5288ec78689330e826d3ee56bc00fb006020",
       "file": "tokens.css"
     },
     {
