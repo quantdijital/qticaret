@@ -37,9 +37,12 @@ export const aiImageJobQuery = (id: string | null) =>
     refetchInterval: (query) => (moving(query.state.data) ? 1000 : false),
   })
 
-/** The task's view: whether the role may run it, its services and options. */
-export function useBackgroundTask() {
-  const services = useQuery(aiServicesQuery())
+/**
+ * The task's view: whether the role may run it, its services and options;
+ * read only where a picture could be edited (`enabled`).
+ */
+export function useBackgroundTask(enabled = true) {
+  const services = useQuery({ ...aiServicesQuery(), enabled })
   const view = services.data?.tasks.find((each) => each.id === BACKGROUND_TASK)
   /** The options the service makes: Gemini only white, so "Şeffaf" is not offered with it. */
   const optionsOf = (service: string): string[] => {

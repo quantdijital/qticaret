@@ -84,8 +84,8 @@ export function GalleryTile({
   const { t } = useTranslation()
   const position = index + 1
   const [cleaning, setCleaning] = useState(false)
-  const background = useBackgroundTask()
   const mediaId = image.alt?.legacy ? null : (image.alt?.mediaId ?? null)
+  const background = useBackgroundTask(Boolean(onAddImage && mediaId))
   const canClean = Boolean(onAddImage && mediaId && background.allowed)
   // An old picture added by address has none either; its popover says how to give it one
   const noAlt = withAlt && !image.alt?.value.trim()
