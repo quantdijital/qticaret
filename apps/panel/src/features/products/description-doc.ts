@@ -7,9 +7,23 @@ import type { JSONContent } from "@tiptap/react"
  * unchanged is no change: the server's text of it is the same text.
  */
 export function docOfDescription(text: string | null | undefined): JSONContent {
+  return docOf(text, /\n[ \t]*\n/)
+}
+
+/**
+ * An AI suggestion's text as the editor's document (adr/0071 §9, docs/22
+ * PR 2-2): plain paragraphs apart by a line break each, every one a plain
+ * paragraph; no marks, no headings, no hard breaks.
+ */
+export function docOfParagraphs(text: string | null | undefined): JSONContent {
+  return docOf(text, /\n/)
+}
+
+// Paragraphs apart by `between`; a line break left inside one is a hard break
+function docOf(text: string | null | undefined, between: RegExp): JSONContent {
   const paragraphs = (text ?? "")
     .replace(/\r\n?/g, "\n")
-    .split(/\n[ \t]*\n/)
+    .split(between)
     .map((paragraph) =>
       paragraph
         .split("\n")

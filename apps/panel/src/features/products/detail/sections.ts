@@ -6,7 +6,7 @@ import type { SectionFindings } from "@/features/content/section-findings"
 /**
  * The product page's parts beyond its main cards (docs/06 "Ürün
  * sayfası"), by their element id: the folded sections under the main
- * column (search appearance, attributes, add-ons, price history, drafts)
+ * column (search appearance, attributes, add-ons, price history)
  * and the narrow column's cards (categories, catalog, parcel). The SEO
  * advisor's "go to field" lands on them and opens a closed section or a
  * card's dialog (`revealSection`).
@@ -19,7 +19,6 @@ export const PRODUCT_SECTIONS = {
   catalog: "product-catalog",
   addons: "product-addons",
   priceHistory: "product-price-history",
-  drafts: "product-drafts",
 } as const
 
 export type ProductSection = keyof typeof PRODUCT_SECTIONS

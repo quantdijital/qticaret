@@ -145,12 +145,6 @@ const envSchema = z.object({
   // shop; each shop connects its Google account with it. Off until both are set
   GOOGLE_OAUTH_CLIENT_ID: z.string().max(200).optional(),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string().max(200).optional(),
-  // F10.13 (adr/0005): which content draft provider writes drafts. Only "fake"
-  // so far (no model, development and tests); refused when deployed until a real
-  // provider and its data processing agreement are chosen (docs/12)
-  CONTENT_DRAFT_PROVIDER: z.enum(["fake"]).optional(),
-  // How many drafts a month the shop may ask for
-  CONTENT_DRAFT_MONTHLY_QUOTA: z.coerce.number().int().min(0).max(100_000).optional(),
   // adr/0071 §8: the AI core's daily abuse ceiling per shop, by kind of work. Unset:
   // lib/ai/limits.ts' default (text 500, image 100, video 10); a value may only lower it
   AI_DAILY_LIMIT_TEXT: z.coerce.number().int().min(0).max(100_000).optional(),
@@ -355,7 +349,6 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "META_GRAPH_BASE_URL",
     "GA4_BASE_URL",
     "TURKIYEAPI_BASE_URL",
-    "CONTENT_DRAFT_PROVIDER",
   ] as const) {
     if (env[name] !== undefined && !isLocalEnv(env)) {
       ctx.addIssue({

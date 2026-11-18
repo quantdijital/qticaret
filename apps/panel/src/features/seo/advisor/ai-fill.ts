@@ -17,8 +17,12 @@ const keyOf = (type: string, id: string, field: AdvisorAiField) => `${type}:${id
 const receivers = new Map<string, Receiver>()
 const pending = new Map<string, string>()
 
-/** The fields a page's form takes today: the SEO card's two (a description's editor has none yet). */
-export const FILLABLE_FIELDS: readonly AdvisorAiField[] = ["seo_title", "seo_description"]
+/** The fields a page's form takes today: the SEO card's two and a product's description editor. */
+export const FILLABLE_FIELDS: readonly AdvisorAiField[] = [
+  "seo_title",
+  "seo_description",
+  "description",
+]
 
 /** The records the AI core reads (`AI_ENTITY_TYPES`); a blog post, a brand… have no button. */
 export const aiEntityOf = (kind: AdvisorKind, id: string): AiEntity | null =>

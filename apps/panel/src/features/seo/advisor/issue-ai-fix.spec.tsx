@@ -6,7 +6,7 @@ import "@/lib/i18n"
 import type { AdvisorKind, Assessment, SeoIssue } from "@/features/seo/api/advisor"
 import { SeoCard } from "@/features/seo/components/seo-card"
 import { AdvisorCard } from "./advisor-card"
-import { clearAiFills, sendAiFill } from "./ai-fill"
+import { clearAiFills, sendAiFill, useAiFill } from "./ai-fill"
 
 /**
  * "Yapay zekâyla düzelt" on an advisor finding (docs/22 "Aşama 3"): the
@@ -86,7 +86,11 @@ function renderPage(issues: SeoIssue[], kind: AdvisorKind = "product", withForm 
       <AdvisorCard
         kind={kind}
         id="prod_1"
-        targets={{ edit_title: "product-seo", edit_description: "product-seo" }}
+        targets={{
+          edit_title: "product-seo",
+          edit_description: "product-seo",
+          edit_body: "product-description",
+        }}
         onTarget={onTarget}
       />
       {withForm ? (
@@ -167,8 +171,19 @@ describe("IssueAiFix", () => {
     expect(screen.getByRole("button", { name: "Kaydet" })).toBeEnabled()
   })
 
-  it("draws nothing for a field no form takes yet (a product description)", async () => {
-    renderPage(
+  it("asks for a detailed product description and hands it to the description editor", async () => {
+    ai.tasks = [
+      {
+        id: "product_description",
+        capability: "text",
+        mode: "sync",
+        options: ["short", "detailed"],
+        allowed: true,
+        usable: ["deepseek"],
+        preference: null,
+      },
+    ]
+    const { user, onTarget } = renderPage(
       [
         issue("P-CONT-01", {
           category: "content",
@@ -178,8 +193,29 @@ describe("IssueAiFix", () => {
       "product",
       false
     )
-    await screen.findByText("Metin 2 kelime; en az 30 önerilir.")
-    expect(screen.queryByRole("button", { name: /Yapay zekâyla düzelt/ })).not.toBeInTheDocument()
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Yapay zekâyla düzelt: Metin 2 kelime; en az 30 önerilir.",
+      })
+    )
+    await user.click(await screen.findByRole("button", { name: "Kullan" }))
+    const body = JSON.parse((net.mock.calls[0]?.[1] as { body: string }).body) as unknown
+    expect(body).toEqual({
+      task: "product_description",
+      entity_type: "product",
+      entity_id: "prod_1",
+      option: "detailed",
+    })
+    expect(onTarget).toHaveBeenCalledWith("product-description")
+    // The editor drawn later takes it (description-card-ai.spec.tsx draws the card itself)
+    const taken = vi.fn()
+    function Editor() {
+      useAiFill("product", "prod_1", "description", taken)
+      return null
+    }
+    render(<Editor />)
+    expect(taken).toHaveBeenCalledWith(SUGGESTED)
+    expect(saves()).toEqual([])
   })
 
   it("draws nothing on a brand's finding, even one a task names", async () => {

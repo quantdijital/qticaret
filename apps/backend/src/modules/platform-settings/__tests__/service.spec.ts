@@ -121,6 +121,22 @@ moduleIntegrationTestRunner<PlatformSettingsModuleService>({
         expect(await service.readFeature("nope")).toBeNull()
       })
 
+      it("skips a retired flag's stored row on every read (content.ai_drafts)", async () => {
+        // Left from before the flag was taken out (docs/22 PR 2-2)
+        await service.createFeatureOverrides({ key: "content.ai_drafts", enabled: true })
+
+        const listed = await service.listFeatures()
+        expect(listed.map(({ key }) => key)).not.toContain("content.ai_drafts")
+        expect(listed.find(({ key }) => key === "test.sample")?.enabled).toBe(false)
+        expect(await service.isFeatureEnabled("content.ai_drafts")).toBe(false)
+        expect(await service.readFeature("content.ai_drafts")).toBeNull()
+        expect(await reasonOf(service.setFeature("content.ai_drafts", false, null))).toBe(
+          "features.unknown"
+        )
+        await service.restoreFeature("content.ai_drafts", null)
+        expect(await service.listFeatureOverrides({ key: "content.ai_drafts" })).toHaveLength(1)
+      })
+
       it("restores an override as it was", async () => {
         const change = await service.setFeature("test.sample", true, null)
         await service.restoreFeature("test.sample", change.previousOverride)

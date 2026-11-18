@@ -8,6 +8,8 @@ import { FILLABLE_FIELDS, aiEntityOf, sendAiFill } from "./ai-fill"
 const FIELD_ACTIONS: Partial<Record<AdvisorAiField, string>> = {
   seo_title: "edit_title",
   seo_description: "edit_description",
+  // A product's description editor (its card's anchor)
+  description: "edit_body",
 }
 
 /** The SEO card's own element ids for its fields (`SeoTextFields`). */
@@ -72,6 +74,7 @@ export function IssueAiFix({
       task={ai.task}
       entity={entity}
       onUse={use}
+      option={ai.option}
       label={t("seo.advisor.aiFixLabel", { finding })}
       text={t("seo.advisor.aiFix")}
     />

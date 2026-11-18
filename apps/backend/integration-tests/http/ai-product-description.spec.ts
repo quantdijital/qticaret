@@ -177,7 +177,7 @@ medusaIntegrationTestRunner({
       expect(draft).toMatchObject({ status: "refused", text: "", source: "ai_suggestion" })
     })
 
-    it("returns the text on Kullan and writes nothing, nor lets the old routes publish it", async () => {
+    it("returns the text on Kullan and writes nothing", async () => {
       const { productId } = await product()
       const before = await descriptionOf(productId)
 
@@ -188,18 +188,10 @@ medusaIntegrationTestRunner({
         option: "short",
       })
       const id = asked.data.suggestion?.id ?? ""
-      const viaOld = await settle(
-        http.post<{ message?: string }>(
-          `/admin/content-drafts/${id}/approve`,
-          {},
-          { headers: owner.headers }
-        )
-      )
       const accepted = await settle(
         http.post<AiAnswer>(`/admin/ai/suggestions/${id}/accept`, {}, { headers: owner.headers })
       )
 
-      expect([viaOld.status, viaOld.data.message]).toEqual([400, "content_drafts.not_open"])
       expect(accepted.status).toBe(200)
       expect(accepted.data.suggestion).toMatchObject({
         status: "accepted",

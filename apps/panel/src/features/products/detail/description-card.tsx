@@ -1,12 +1,18 @@
 import { useQuery } from "@tanstack/react-query"
+import type { JSONContent } from "@tiptap/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { AiButton } from "@/features/ai/components/ai-button"
 import { DocumentCard } from "@/features/content/components/document-card"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
-import { docOfDescription } from "@/features/products/description-doc"
+import { docOfDescription, docOfParagraphs } from "@/features/products/description-doc"
 import { SUGGESTED_WORDS } from "@/features/products/wizard/readiness"
+import { useAiFill } from "@/features/seo/advisor/ai-fill"
+
+/** The ready lengths the AI core writes a description in (docs/22 PR 2-1); no prompt to write. */
+const AI_OPTIONS = ["short", "detailed"] as const
 
 /**
  * The product's long description in the content editor (ADR-0055):
@@ -14,7 +20,9 @@ import { SUGGESTED_WORDS } from "@/features/products/wizard/readiness"
  * cards (the gallery shows the product) and no shop details. A product with
  * plain text only opens as its paragraphs. Saved as a whole through the
  * catalog fields; the server writes the plain text the meta description,
- * structured data, feeds and search use.
+ * structured data, feeds and search use. The AI button beside the title
+ * (adr/0071 §13) puts a suggestion in as plain paragraphs, a change the
+ * card's Save writes; nothing is written before.
  */
 export function ProductDescriptionCard({ product }: { product: ProductDetail }) {
   const { t } = useTranslation()
@@ -40,6 +48,29 @@ export function ProductDescriptionCard({ product }: { product: ProductDetail }) 
       save={async (description_doc) => {
         await save.mutateAsync({ description_doc })
       }}
+      action={(put) => <DescriptionAi productId={product.id} put={put} />}
+    />
+  )
+}
+
+/**
+ * The card's AI button, and the receiver of the one on an advisor finding
+ * (P-CONT-01, docs/22 "Aşama 3"): either way the text goes in as plain
+ * paragraphs, an unsaved change of the editor.
+ */
+function DescriptionAi({ productId, put }: { productId: string; put: (doc: JSONContent) => void }) {
+  const { t } = useTranslation()
+  const fill = (text: string) => {
+    put(docOfParagraphs(text))
+  }
+  useAiFill("product", productId, "description", fill)
+  return (
+    <AiButton
+      task="product_description"
+      entity={{ type: "product", id: productId }}
+      options={AI_OPTIONS}
+      label={t("products.detail.aiDescription")}
+      onUse={fill}
     />
   )
 }

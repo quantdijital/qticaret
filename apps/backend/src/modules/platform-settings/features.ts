@@ -34,12 +34,6 @@ export const GIFT_CARDS = "promotions.gift_cards"
 export const CASH_ON_DELIVERY = "payments.cash_on_delivery"
 
 /**
- * Content drafts from a model (F10.13, adr/0005): the platform's to turn on,
- * once a provider and its data processing agreement are chosen.
- */
-export const CONTENT_AI_DRAFTS = "content.ai_drafts"
-
-/**
  * Marking products and categories as sold to adults only (F13.4, adr/0041
  * §4): marked products name their adult consideration in JSON-LD and stay
  * out of the feeds.
@@ -66,6 +60,14 @@ export const PRODUCT_VIDEOS = "catalog.product_videos"
 
 /** AI with the shop's own service key, "bring your own key" (adr/0071 §6). */
 export const AI_OWN_KEYS = "ai.own_keys"
+
+/**
+ * Flags taken out of the registry. A shop may still hold a stored value for
+ * one (an override row, a plan document's key); reads skip it as an unknown
+ * key and nothing writes it again. `content.ai_drafts`: the drafts of
+ * F10.13, replaced by the AI core (adr/0071, docs/22 Aşama 2).
+ */
+export const RETIRED_FEATURES: readonly string[] = Object.freeze(["content.ai_drafts"])
 
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
@@ -109,14 +111,6 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.payments_cash_on_delivery.label",
     descriptionKey: "qticaret.features.payments_cash_on_delivery.description",
-  },
-  // F10.13: off; the shop turns it on, and it works only once the platform has
-  // set a provider and its data processing agreement (CONTENT_DRAFT_PROVIDER)
-  [CONTENT_AI_DRAFTS]: {
-    default: false,
-    owner: "tenant",
-    labelKey: "qticaret.features.content_ai_drafts.label",
-    descriptionKey: "qticaret.features.content_ai_drafts.description",
   },
   // F13.4: off until the shop sells something to adults only
   [RESTRICTED_PRODUCTS]: {

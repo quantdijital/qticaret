@@ -68,9 +68,16 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
             <p className="text-xs text-muted-foreground">
               {t("ai.suggest.from", { name: serviceName(t, state.suggestion.service) })}
             </p>
-            <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm break-words whitespace-pre-wrap">
-              {state.suggestion.text}
-            </p>
+            {/* A long text (a product description) scrolls inside, reachable by keyboard;
+                its lines are paragraphs, shown apart as the editor will show them */}
+            <div
+              tabIndex={0}
+              className="flex max-h-[40vh] flex-col gap-2 overflow-y-auto rounded-md border bg-muted/40 px-3 py-2 text-sm break-words focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            >
+              {state.suggestion.text.split("\n").map((line, index) => (
+                <p key={index}>{line}</p>
+              ))}
+            </div>
             <p className="text-xs text-muted-foreground">{t("ai.suggest.note")}</p>
           </>
         ) : null}

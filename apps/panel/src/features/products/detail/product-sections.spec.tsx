@@ -138,13 +138,9 @@ interface Answers {
   issues?: SeoIssue[]
   history?: PriceHistory
   features?: { key: string; enabled: boolean }[]
-  drafts?: unknown
 }
 
-function answer(
-  url: string,
-  { catalog, attributes, issues, history, features, drafts }: Answers
-): unknown {
+function answer(url: string, { catalog, attributes, issues, history, features }: Answers): unknown {
   if (url.endsWith("/catalog")) {
     return catalog ?? CATALOG
   }
@@ -195,11 +191,6 @@ function answer(
   }
   if (url === "/admin/staff/me") {
     return { can: { catalog: true } }
-  }
-  if (url === "/admin/content-drafts") {
-    return (
-      drafts ?? { enabled: false, provider_ready: false, quota: { used: 0, limit: 0 }, drafts: [] }
-    )
   }
   if (url === "/admin/features") {
     return { features: features ?? [] }
@@ -276,7 +267,7 @@ describe("ProductSections", () => {
     ).toBeInTheDocument()
   })
 
-  it("adds the parts the shop uses: add-ons and drafts, each with its line", async () => {
+  it("adds the parts the shop uses: add-ons, with its line", async () => {
     // The other variant's discount is not shown: its price was lower in the days before
     const unsold = { ...SALE, on_sale: false, before: null }
     renderSections(
@@ -298,14 +289,6 @@ describe("ProductSections", () => {
           ],
         },
         features: [{ key: "catalog.addons", enabled: true }],
-        drafts: {
-          enabled: true,
-          provider_ready: true,
-          quota: { used: 3, limit: 20 },
-          drafts: [
-            { id: "d_1", kind: "seo_title", text: "Yatağan Çakı", status: "draft", problems: null },
-          ],
-        },
         history: {
           ...HISTORY,
           variants: [SARI, { ...SARI, id: "variant_2", title: "Mor", display: unsold }],
@@ -316,11 +299,6 @@ describe("ProductSections", () => {
         variants: [...(PRODUCT.variants ?? []), { id: "variant_2", title: "Mor", prices: [] }],
       } as unknown as ProductDetail
     )
-    await waitFor(() => {
-      expect(part("İçerik taslakları")).toHaveAccessibleDescription(
-        "1 taslak onay bekliyor · Bu ay 3/20 taslak"
-      )
-    })
     await waitFor(() => {
       expect(part("Ek seçenekler")).toHaveAccessibleDescription("1 ek seçenek · İsim yazdırma")
     })

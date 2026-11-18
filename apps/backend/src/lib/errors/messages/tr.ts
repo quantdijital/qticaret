@@ -679,10 +679,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.cost_invalid": "Maliyet 0 ile 10.000.000 TL arasında, en çok iki ondalıkla olmalı.",
   "statements.day_invalid": "Bu gün denetlenemez: en geç dün, en fazla bir yıl öncesi olabilir.",
   "statements.account_missing": "Bu ödeme sağlayıcısı bağlı değil; önce hesabı bağlayın.",
-  "content_drafts.no_provider": "Taslak sağlayıcısı henüz tanımlı değil.",
-  "content_drafts.quota_reached": "Bu ayın taslak hakkı doldu; gelecek ay yenilenir.",
-  "content_drafts.not_open": "Bu taslak artık onay beklemiyor.",
-  "content_drafts.unknown_product": "Ürün bulunamadı.",
   // adr/0071 §12: the AI core; a service's own words are never shown
   "ai.no_service":
     "Bu işi yapabilecek bağlı bir yapay zekâ servisi yok. Ayarlar > Yapay zekâ sayfasından bir servis bağlayın.",

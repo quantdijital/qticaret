@@ -80,12 +80,6 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: 15 * MINUTE },
     perIdentity: { max: 5, windowMs: HOUR },
   },
-  // F10.13 (adr/0005): staff asking a provider for drafts; each costs the shop, beside its monthly quota
-  content_draft: {
-    name: "content_draft",
-    perIp: { max: 30, windowMs: 10 * MINUTE },
-    perIdentity: { max: 20, windowMs: 10 * MINUTE },
-  },
   // adr/0071 §8: staff asking the AI core for a text suggestion; each is a call to a
   // service at the shop's cost, beside the daily ceiling and the monthly limit
   ai_text: {
