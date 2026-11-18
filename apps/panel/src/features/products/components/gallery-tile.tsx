@@ -1,16 +1,15 @@
-import { ArrowLeft, ArrowRight, Star, Trash2 } from "lucide-react"
-import { useRef, useState } from "react"
+import { ArrowLeft, ArrowRight, Star, Trash2, Wand2 } from "lucide-react"
+import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { Input } from "@qticaret/admin-ui/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { cn } from "@qticaret/admin-ui/lib/utils"
-import { AiButton } from "@/features/ai/components/ai-button"
-
-// What screen readers read comfortably; the server allows no more
-const ALT_MAX = 250
+import { useBackgroundTask } from "@/features/ai/use-ai-background"
+import { AiEditedBadge } from "@/features/ai/components/ai-edited-badge"
+import { AltField } from "./gallery-alt-field"
+import { TileBackground } from "./tile-background"
 
 export interface GalleryImage {
   key: string
@@ -25,6 +24,8 @@ export interface GalleryImage {
     /** Its media record when its file is stored: the AI can read it for an alt text suggestion. */
     mediaId?: string | null
   }
+  /** Made by an AI service from one of the shop's pictures: a small mark on the tile. */
+  aiEdited?: boolean
 }
 
 interface TileDrag {
@@ -50,78 +51,10 @@ interface GalleryTileProps {
   onMove: (to: number) => void
   onRemove: () => void
   onAlt: (alt: string) => void
-}
-
-/** The alt text in the tile's popover: saved on Enter, on leaving the field, on closing. */
-function AltField({
-  image,
-  position,
-  onAlt,
-}: {
-  image: GalleryImage
-  position: number
-  onAlt: (alt: string) => void
-}) {
-  const { t } = useTranslation()
-  const stored = image.alt?.value ?? ""
-  const [draft, setDraft] = useState(stored)
-  const commit = () => {
-    if (draft.trim() !== stored.trim()) {
-      onAlt(draft.trim())
-    }
-  }
-  const id = `gallery-alt-${String(position)}`
-  const field = useRef<HTMLInputElement>(null)
-  const mediaId = image.alt?.legacy ? null : (image.alt?.mediaId ?? null)
-  const input = (
-    <Input
-      ref={field}
-      id={id}
-      value={draft}
-      maxLength={ALT_MAX}
-      disabled={image.alt?.legacy}
-      placeholder={t(
-        image.alt?.legacy ? "products.media.altLegacy" : "products.media.altPlaceholder"
-      )}
-      onChange={(event) => {
-        setDraft(event.target.value)
-      }}
-      onBlur={commit}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          event.preventDefault()
-          commit()
-        }
-      }}
-    />
-  )
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-medium">
-        {t("products.media.altLabel", { position })}
-      </label>
-      {mediaId ? (
-        <div className="flex items-center gap-1.5">
-          <div className="min-w-0 flex-1">{input}</div>
-          <AiButton
-            task="image_alt_text"
-            entity={{ type: "media", id: mediaId }}
-            size="icon"
-            label={t("products.media.altAi", { position })}
-            note={t("ai.suggest.imageNote")}
-            onUse={(text) => {
-              // Into the field only: it is saved as a typed text is, on Enter or on leaving it
-              setDraft(text)
-              requestAnimationFrame(() => field.current?.focus())
-            }}
-          />
-        </div>
-      ) : (
-        input
-      )}
-      <p className="text-xs text-muted-foreground">{t("products.media.altHint")}</p>
-    </div>
-  )
+  /** Adds a picture to the product (the AI background's result); left out: no such action. */
+  onAddImage?: ((stored: { id: string; url: string }) => void) | undefined
+  /** The product's picture limit, and whether it is reached. */
+  room?: { full: boolean; max: number }
 }
 
 /**
@@ -145,9 +78,15 @@ export function GalleryTile({
   onMove,
   onRemove,
   onAlt,
+  onAddImage,
+  room = { full: false, max: 0 },
 }: GalleryTileProps) {
   const { t } = useTranslation()
   const position = index + 1
+  const [cleaning, setCleaning] = useState(false)
+  const background = useBackgroundTask()
+  const mediaId = image.alt?.legacy ? null : (image.alt?.mediaId ?? null)
+  const canClean = Boolean(onAddImage && mediaId && background.allowed)
   // An old picture added by address has none either; its popover says how to give it one
   const noAlt = withAlt && !image.alt?.value.trim()
   const action = (label: string, icon: ReactNode, run: () => void, off = false) => (
@@ -218,6 +157,9 @@ export function GalleryTile({
                 {t("products.media.main")}
               </span>
             ) : null}
+            {image.aiEdited ? (
+              <AiEditedBadge look="icon" className="absolute top-1.5 right-1.5" />
+            ) : null}
             {noAlt ? (
               <span className="absolute bottom-1.5 left-1.5 rounded-full bg-warning-soft px-2 py-0.5 text-[11px] font-medium text-warning-text">
                 {t("products.media.noAlt")}
@@ -244,6 +186,12 @@ export function GalleryTile({
               ? action(t("products.media.makeMain"), <Star />, () => {
                   onMakeMain()
                   onOpenChange(false)
+                })
+              : null}
+            {canClean
+              ? action(t("ai.background.button"), <Wand2 />, () => {
+                  onOpenChange(false)
+                  setCleaning(true)
                 })
               : null}
             {action(
@@ -276,6 +224,17 @@ export function GalleryTile({
           </div>
         </PopoverContent>
       </Popover>
+      {cleaning && mediaId && onAddImage ? (
+        <TileBackground
+          source={{ id: mediaId, url: image.url }}
+          full={room.full}
+          max={room.max}
+          onAdd={onAddImage}
+          onClose={() => {
+            setCleaning(false)
+          }}
+        />
+      ) : null}
     </li>
   )
 }

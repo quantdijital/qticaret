@@ -11266,6 +11266,14 @@
           "secret_invalid": "Gemini did not accept the key. Copy it again and enter it."
         }
       },
+      "photoroom": {
+        "name": "Photoroom",
+        "description": "Background removal and white background service.",
+        "rejected": "Photoroom refused the stored key. Change the key or check for credit in your Photoroom account.",
+        "checks": {
+          "secret_invalid": "Photoroom did not accept the key. Copy the key again and enter it."
+        }
+      },
       "fake": {
         "name": "Test service",
         "description": "Shown in development only; connects to no real service.",
@@ -11279,23 +11287,28 @@
       "deepseek": "Data is processed and stored in China. DeepSeek's privacy policy lists training its models as a use of the data.",
       "minimax": "Where data is processed and whether it trains models is not stated.",
       "gemini": "On the free tier Google uses the content sent to improve its products; on the paid tier it does not.",
+      "photoroom": "Data is processed in the USA; the image is deleted after the answer. Whether it trains models is not clear in the documents.",
       "fake": "Data never leaves this computer."
     },
     "data_detail": {
       "deepseek": "DeepSeek processes and stores the text sent on servers in the People's Republic of China. Its privacy policy lists improving (training) its models among the uses of the data. Only content published on your storefront, such as products, categories and pages, is sent.",
       "minimax": "MiniMax's international platform is used. Where data is processed and whether it trains models could not be verified from the service's documentation; we suggest reading MiniMax's own terms before connecting. Only content published on your storefront is sent.",
       "gemini": "Under Google's terms, content sent on the free tier is used to improve Google's products and may be read by people at Google; on the paid tier (billing on) it is not. Data may be processed in any country where Google has facilities. Only content published on your storefront is sent.",
+      "photoroom": "Photoroom processes the image on its servers in the USA and deletes it after answering. Photoroom's pages differ on whether images are used to train models; we suggest reading its own terms before connecting. Only the image to edit leaves your shop.",
       "fake": "A fake service for development: it writes its answer from the data itself and connects nowhere."
     },
     "tasks": {
       "test_text": "Test text",
       "seo_title": "Search title",
       "seo_description": "Search description",
-      "image_alt_text": "Alt text"
+      "image_alt_text": "Alt text",
+      "image_background": "Background removal"
     },
     "options": {
       "short": "Short",
-      "detailed": "Detailed"
+      "detailed": "Detailed",
+      "transparent": "Transparent",
+      "white": "White background"
     },
     "card": {
       "capabilities": "What it can do",
@@ -11375,6 +11388,32 @@
       "provider_response_invalid": "{{name}} gave an unexpected answer.",
       "input_unsupported": "This content cannot be sent to the service (type or size not suitable).",
       "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow."
+    },
+    "background": {
+      "button": "Remove background",
+      "title": "Remove background",
+      "description": "The background is made transparent or white. The original stays as it is; the result comes as a new image.",
+      "option": "Background",
+      "onlyOption": "{{name}} makes only this background: {{option}}.",
+      "start": "Remove background",
+      "running": "Preparing the image…",
+      "progress": "Progress",
+      "before": "Before",
+      "after": "After",
+      "beforeAlt": "Original image",
+      "afterAlt": "Image with the background removed",
+      "afterEmpty": "The result shows here.",
+      "note": "The image is sent to {{name}} to be edited.",
+      "useProduct": "Use adds the new image to the product; the original stays on it.",
+      "useLibrary": "Use keeps the new image in the library; the original stays as it is.",
+      "full": "No room on the product (at most {{max}} images). Remove one first to add the new image.",
+      "kept": "New image added to the library: {{name}}",
+      "limit": "The package limit is reached (storage or monthly AI use).",
+      "failed": "The image could not be edited. You can try again.",
+      "edited": "Edited with AI",
+      "source": "Source",
+      "derivedFrom": "Made from: {{name}}",
+      "originalGone": "Original image is gone (deleted)."
     }
   }
 }

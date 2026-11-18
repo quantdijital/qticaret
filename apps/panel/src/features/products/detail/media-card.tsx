@@ -60,6 +60,7 @@ export function MediaCard({ product }: { product: ProductDetail }) {
         versions: record?.file_id ? (record.derived_at ? "ready" : "pending") : null,
         mediaId: record?.file_id ? record.id : null,
       },
+      aiEdited: Boolean(record?.ai_source),
     }
   })
 

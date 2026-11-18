@@ -11266,6 +11266,14 @@
           "secret_invalid": "Gemini anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
         }
       },
+      "photoroom": {
+        "name": "Photoroom",
+        "description": "Arka plan temizleme ve beyaz zemin servisi.",
+        "rejected": "Photoroom kayıtlı anahtarı reddetti. Anahtarı değiştirin ya da Photoroom hesabınızda kredi olup olmadığına bakın.",
+        "checks": {
+          "secret_invalid": "Photoroom anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
+        }
+      },
       "fake": {
         "name": "Deneme servisi",
         "description": "Yalnız geliştirme ortamında görünür; gerçek bir servise bağlanmaz.",
@@ -11279,23 +11287,28 @@
       "deepseek": "Veri Çin'de işlenir ve saklanır. DeepSeek, gizlilik metninde verinin model eğitiminde kullanılabileceğini yazar.",
       "minimax": "Verinin nerede işlendiği ve model eğitiminde kullanılıp kullanılmadığı belirtilmemiş.",
       "gemini": "Ücretsiz kullanımda Google gönderilen içeriği kendi ürünlerini geliştirmek için kullanır; ücretli kullanımda kullanmaz.",
+      "photoroom": "Veri ABD'de işlenir; görsel yanıttan sonra silinir. Model eğitiminde kullanılıp kullanılmadığı belgelerde açık değil.",
       "fake": "Veri bu bilgisayardan çıkmaz."
     },
     "data_detail": {
       "deepseek": "DeepSeek gönderilen metni Çin Halk Cumhuriyeti'ndeki sunucularında işler ve saklar. Gizlilik metninde modellerini geliştirmek (eğitmek) de verinin kullanım amaçları arasında sayılır. Mağazanızdan yalnız ürün, kategori, sayfa gibi vitrinde yayımlanan içerik gider.",
       "minimax": "MiniMax'ın uluslararası platformu kullanılır. Verinin hangi ülkede işlendiği ve model eğitiminde kullanılıp kullanılmadığı servisin belgelerinden doğrulanamadı; bağlamadan önce MiniMax'ın kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
       "gemini": "Google'ın şartlarına göre ücretsiz katmanda gönderilen içerik Google ürünlerini geliştirmede kullanılır ve Google çalışanlarınca okunabilir; ücretli katmanda (faturalandırma açık) kullanılmaz. Veri, Google'ın tesisi olan herhangi bir ülkede işlenebilir. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
+      "photoroom": "Photoroom görseli ABD'deki sunucularında işler ve yanıtı verdikten sonra siler. Görsellerin model eğitiminde kullanılıp kullanılmadığı Photoroom'un sayfalarında çelişkili anlatılıyor; bağlamadan önce kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız düzenlenecek görsel gider.",
       "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
     },
     "tasks": {
       "test_text": "Deneme metni",
       "seo_title": "Arama başlığı",
       "seo_description": "Arama açıklaması",
-      "image_alt_text": "Alt metin"
+      "image_alt_text": "Alt metin",
+      "image_background": "Arka plan temizleme"
     },
     "options": {
       "short": "Kısa",
-      "detailed": "Ayrıntılı"
+      "detailed": "Ayrıntılı",
+      "transparent": "Şeffaf",
+      "white": "Beyaz zemin"
     },
     "card": {
       "capabilities": "Yapabildikleri",
@@ -11375,6 +11388,32 @@
       "provider_response_invalid": "{{name}} beklenmeyen bir yanıt verdi.",
       "input_unsupported": "Bu içerik servise gönderilemiyor (tür ya da boyut uygun değil).",
       "daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz."
+    },
+    "background": {
+      "button": "Arka planı temizle",
+      "title": "Arka planı temizle",
+      "description": "Arka plan şeffaf ya da beyaz yapılır. Asıl görsel değişmez; sonuç yeni bir görsel olarak gelir.",
+      "option": "Zemin",
+      "onlyOption": "{{name}} yalnız şu zemini yapar: {{option}}.",
+      "start": "Arka planı temizle",
+      "running": "Görsel hazırlanıyor…",
+      "progress": "İlerleme",
+      "before": "Önce",
+      "after": "Sonra",
+      "beforeAlt": "Asıl görsel",
+      "afterAlt": "Arka planı temizlenmiş görsel",
+      "afterEmpty": "Sonuç burada görünür.",
+      "note": "Görsel, düzenlenmesi için {{name}} servisine gönderilir.",
+      "useProduct": "Kullan, yeni görseli ürüne ekler; asıl görsel üründe kalır.",
+      "useLibrary": "Kullan, yeni görseli kütüphanede tutar; asıl görsel olduğu gibi kalır.",
+      "full": "Üründe yer yok (en çok {{max}} görsel). Yeni görseli eklemek için önce birini kaldırın.",
+      "kept": "Yeni görsel kütüphaneye eklendi: {{name}}",
+      "limit": "Paket sınırına ulaşıldı (depolama ya da aylık yapay zekâ kullanımı).",
+      "failed": "Görsel düzenlenemedi. Yeniden deneyebilirsiniz.",
+      "edited": "Yapay zekâyla düzenlendi",
+      "source": "Kaynak",
+      "derivedFrom": "Türetilmiş: {{name}}",
+      "originalGone": "Asıl görsel yok (silinmiş)."
     }
   }
 }
