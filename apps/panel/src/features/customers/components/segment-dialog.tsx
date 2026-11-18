@@ -193,7 +193,7 @@ export function SegmentDialog({
             ) : null}
           </DialogBody>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="cancel" onClick={onClose}>
               {t(`${S}.cancel`)}
             </Button>
             <Button type="submit" disabled={save.isPending}>

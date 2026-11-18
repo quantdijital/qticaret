@@ -16,6 +16,10 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary-text underline-offset-4 hover:underline",
+        // "Vazgeç": red text so backing out reads at a glance; filled red stays for
+        // destructive actions (docs/18). Text keeps AA on every surface and hover.
+        cancel:
+          "border border-destructive/40 bg-transparent text-destructive-text hover:bg-destructive-soft hover:text-destructive-text",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

@@ -138,7 +138,7 @@ function LocationFormBody({ location, onDone }: { location: Location | null; onD
         ) : null}
       </DialogBody>
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onDone}>
+        <Button type="button" variant="cancel" onClick={onDone}>
           {t("common.cancel")}
         </Button>
         <Button type="submit" disabled={isBusy}>

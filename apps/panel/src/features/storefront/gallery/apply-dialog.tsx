@@ -152,7 +152,7 @@ function ApplyContent({
         </div>
       </DialogBody>
       <DialogFooter>
-        <Button type="button" variant="outline" disabled={apply.isPending} onClick={onClose}>
+        <Button type="button" variant="cancel" disabled={apply.isPending} onClick={onClose}>
           {t("common.cancel")}
         </Button>
         <Button

@@ -72,7 +72,7 @@ export function HideReviewDialog({
         <p className="text-[13px] text-muted-foreground">{t(`${G}.hideRule`)}</p>
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="cancel"
             onClick={() => {
               setReason(null)
               onOpenChange(false)

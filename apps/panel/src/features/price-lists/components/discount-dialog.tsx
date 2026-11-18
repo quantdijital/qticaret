@@ -155,7 +155,7 @@ export function DiscountDialog({ listId, products, open, onOpenChange }: Discoun
           </Field>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={close}>
+          <Button variant="cancel" onClick={close}>
             {t("common.cancel")}
           </Button>
           <Button disabled={discount.isPending || ids.length === 0} onClick={apply}>

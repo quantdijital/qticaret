@@ -122,7 +122,7 @@ export function ReauthHost() {
           <DialogFooter>
             <Button
               type="button"
-              variant="outline"
+              variant="cancel"
               onClick={() => {
                 close(null)
               }}
