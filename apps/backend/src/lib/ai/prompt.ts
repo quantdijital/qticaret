@@ -22,6 +22,8 @@ export interface PromptInput {
   fields: Readonly<Record<string, PromptValue>>
   /** Longest text per field, where it differs from `MAX_VALUE_LENGTH`. */
   maxLengths?: Readonly<Record<string, number>>
+  /** Most items of a list field, where it differs from `MAX_LIST_ITEMS`. */
+  maxItems?: Readonly<Record<string, number>>
 }
 
 export interface PromptMessages {
@@ -57,7 +59,8 @@ type CleanValue = string | { label: string; value: string }[]
 /** The fields as they may leave the shop: personal data taken out, each value clipped. */
 export function promptData(
   fields: Readonly<Record<string, PromptValue>>,
-  maxLengths: Readonly<Record<string, number>> = {}
+  maxLengths: Readonly<Record<string, number>> = {},
+  maxItems: Readonly<Record<string, number>> = {}
 ): Record<string, CleanValue> {
   const data: Record<string, CleanValue> = Object.create(null) as Record<string, CleanValue>
   for (const [name, value] of Object.entries(fields).slice(0, MAX_FIELDS)) {
@@ -67,7 +70,7 @@ export function promptData(
         data[name] = cleanText(value, max)
       }
     } else if (value !== null && value !== undefined) {
-      data[name] = value.slice(0, MAX_LIST_ITEMS).map((each) => ({
+      data[name] = value.slice(0, maxItems[name] ?? MAX_LIST_ITEMS).map((each) => ({
         label: cleanText(each.label, MAX_LABEL_LENGTH),
         value: cleanText(each.value, max),
       }))
@@ -92,6 +95,6 @@ function dataBlock(data: Record<string, CleanValue>): string {
 export function buildPrompt(input: PromptInput): PromptMessages {
   return {
     system: `${DATA_RULE}\n\n${input.instruction.trim()}`,
-    data: dataBlock(promptData(input.fields, input.maxLengths)),
+    data: dataBlock(promptData(input.fields, input.maxLengths, input.maxItems)),
   }
 }
