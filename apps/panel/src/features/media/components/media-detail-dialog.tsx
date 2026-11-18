@@ -14,6 +14,7 @@ import { useDiscardGuard } from "@qticaret/admin-ui/patterns/use-discard-guard"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { DialogBody, DialogSection } from "@qticaret/admin-ui/ui/dialog"
 import { Input } from "@qticaret/admin-ui/ui/input"
+import { AiButton } from "@/features/ai/components/ai-button"
 import { useCan } from "@/features/auth/api/staff"
 import {
   mediaDetailQuery,
@@ -30,6 +31,11 @@ const D = "media.detail"
 // The server's limits (alt text docs/13 §8; the library's names)
 const ALT_MAX = 250
 const NAME_MAX = 200
+
+// What the AI can read for an alt text: a stored raster picture (an SVG logo is a document)
+const READABLE = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"])
+const readable = (media: MediaDetail) =>
+  media.file_id !== null && READABLE.has(media.mime_type ?? "")
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -86,15 +92,31 @@ function Words({ media, canEdit, onDirtyChange }: WordsProps) {
         />
       </Field>
       <Field label={t(`${D}.alt`)} htmlFor="media-alt" hint={t(`${D}.altHint`)}>
-        <Input
-          id="media-alt"
-          value={alt}
-          maxLength={ALT_MAX}
-          disabled={!canEdit}
-          onChange={(event) => {
-            setAlt(event.target.value)
-          }}
-        />
+        <div className="flex items-center gap-1.5">
+          <Input
+            id="media-alt"
+            className="min-w-0 flex-1"
+            value={alt}
+            maxLength={ALT_MAX}
+            disabled={!canEdit}
+            onChange={(event) => {
+              setAlt(event.target.value)
+            }}
+          />
+          {canEdit && readable(media) ? (
+            <AiButton
+              task="image_alt_text"
+              entity={{ type: "media", id: media.id }}
+              size="icon"
+              label={t(`${D}.altAi`)}
+              note={t("ai.suggest.imageNote")}
+              onUse={(text) => {
+                // Into the field only: the form's Save writes it
+                setAlt(text)
+              }}
+            />
+          ) : null}
+        </div>
       </Field>
       {canEdit && dirty ? (
         <div className="flex justify-end gap-2">

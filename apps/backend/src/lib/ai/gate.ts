@@ -1,5 +1,6 @@
 import { hasSymbolRun, isShouting } from "../seo/advisor/text"
 import { readsAsLink } from "../text/link-like"
+import { altTextProblems } from "./alt-gate"
 import { fieldProblems } from "./field-rules"
 import { hasPersonalData } from "./redact"
 import type { AiTask } from "./registry/tasks"
@@ -85,6 +86,9 @@ export function suggestionProblems(task: AiTask, text: string): string[] {
     task.gate === "product_description"
   ) {
     return [...problems, ...fieldProblems(task.gate, text)]
+  }
+  if (task.gate === "image_alt") {
+    problems.push(...altTextProblems(text))
   }
   if (isShouting(text) || hasSymbolRun(text)) {
     problems.push("noise")

@@ -35,12 +35,25 @@ export const taskInputStep = createStep(
       throw aiValidationError("ai.unknown_entity")
     }
     // Read by its type and id alone (lib/ai/facts): the record's text never comes from the client
-    const { fields, maxLengths } = await entityFacts(container, input.entity_type, input.entity_id)
+    const { fields, maxLengths, image } = await entityFacts(
+      container,
+      input.entity_type,
+      input.entity_id
+    )
+    // A vision task reads a picture: a record with none is turned away before any quota is claimed
+    if (task.capability === "vision" && image === null) {
+      throw aiValidationError("ai.input_unsupported")
+    }
     const prompt = buildPrompt({
       instruction,
       fields,
       maxLengths: factLengthsOf(task, maxLengths),
     })
-    return new StepResponse({ system: prompt.system, data: prompt.data })
+    // The picture goes by its file id alone; its bytes are read in the call step, never kept here
+    return new StepResponse({
+      system: prompt.system,
+      data: prompt.data,
+      image_file_id: task.capability === "vision" ? (image?.file_id ?? null) : null,
+    })
   }
 )

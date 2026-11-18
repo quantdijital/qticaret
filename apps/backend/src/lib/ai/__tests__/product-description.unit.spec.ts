@@ -53,8 +53,12 @@ describe("product description task (docs/22 PR 2-1)", () => {
       maxLength: PRODUCT_DESCRIPTION_MAX_LENGTH,
     })
     expect(AI_ENTITY_TYPES.filter((type) => isTaskEntity(task, type))).toEqual(["product"])
-    // The tasks of Aşama 1 stay open to every kind of record
-    expect(AI_ENTITY_TYPES.every((type) => isTaskEntity(SEO_TITLE_TASK, type))).toBe(true)
+    // The tasks of Aşama 1 stay open to every record with a page; an image is none
+    expect(AI_ENTITY_TYPES.filter((type) => isTaskEntity(SEO_TITLE_TASK, type))).toEqual([
+      "product",
+      "category",
+      "page",
+    ])
   })
 
   it("offers only the two ready-made lengths, no free prompt", () => {
