@@ -48,6 +48,7 @@
 | iyzico webhook V3 imzasının açtırılması (entegrasyon@iyzico.com); sandbox hesabı | Kullanıcı + iyzico | F5.11 |
 | Geliver: tenant hesabı, kapıda ödeme desteği, iade kodu süreçleri | Geliver | F6.6, F7 |
 | E-fatura entegratörü seçimi ve fiyatlandırma | Entegratörler | F8 |
+| BirFatura canlıya çıkmadan önce: mağaza ile BirFatura arasında veri işleme (veri işleyen) sözleşmesi; alıcı verisinin (ad, adres, telefon, e-posta, TCKN/VKN) yalnız Türkiye'de işlenip saklandığının yazılı teyidi (KVKK md. 9; `docs/kvkk-envanter.md` BirFatura satırında "yurt içi" doğrulanmadı) | Mağaza + BirFatura (+ KVKK danışmanı) | F16 (ADR-0072) |
 | SMS sağlayıcısı (başlık onayı, İYS entegrasyonu) | SMS sağlayıcısı | F9 |
 | E-posta gönderim servisi: tenant başına ayrı Resend hesabı/takımı (adr/0036 ek), alan adı doğrulama, hacim | Resend | F9.6, F16 |
 | Hosting, CDN/WAF sağlayıcıları | Sağlayıcılar | ADR-0003, F15.7, F16 |

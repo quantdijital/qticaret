@@ -26,6 +26,8 @@ Portalın açtığı dört belge 2026-11-18'de tam okundu; on açık sorunun bel
 - Ayarlar > E-Fatura'ya yeni değer: `birfatura` (`INVOICING_PROVIDERS`). Davranışı `external`'dır; ek olarak gelen uçları açar ve `invoice.requested` web kancası gitmez (BirFatura yoklar).
 - Fatura kaydının sağlayıcısı da `birfatura` olur (migration, `invoice.provider`). Böylece mağaza programını değiştirirse eski programın bekleyen kayıtları BirFatura'nın listesine düşmez (çift fatura riski). "Dışarıda kesilen" sağlayıcılar (`external`, `birfatura`) tek listede tutulur: iş onları almaz, geri yazma, PDF, taslak ve iptal kuralları ikisine de uygulanır; panelde personel BirFatura faturasını da elle işleyebilir (yedek yol).
 - Kayda yeni sütun `reported_at`: BirFatura'nın bir sipariş için fatura bildirdiği ilk an. Bildirim gelir gelmez, geri yazma denetimlerinden **önce** ve ayrı yazılır; dolu kayıt bir daha listelenmez (§6).
+- Kayda yeni sütun `listed_at`: `orders` cevabının kaydı BirFatura'ya ilk verdiği an. O andan sonra fatura BirFatura'da kesilmiş olabilir; sipariş iptalinde kayıt sessizce iptal edilmez (§6). Bekleme listesi için dizin `IDX_invoice_birfatura_due` (sağlayıcı, tür, durum, `reported_at`, `created_at`).
+- **Paket askısı:** beş uç plan korumasında **açıktır** (`lib/plan-guard`, `outside-admin` kararı `open`): yapılmış satışın faturası VUK yükümlülüğüdür, askıdan bağımsız sürer.
 
 ### 3. Gelen ucun güvenlik modeli
 
@@ -35,10 +37,11 @@ Bu uçlar BirFatura'nın değil bizim web kancamızdır ve **alıcının adını
 2. **Saklama:** `integration-credentials` içinde `birfatura` sağlayıcısı, gizli alan `token`, ADR-0027'nin zarf şifrelemesiyle (AES-256-GCM, KEK halkası). Genel sağlayıcı hesabı ucu bu sağlayıcıyı kabul etmez (404, Google gibi): elle yazılmış bir token sunucunun ürettiği değer olmaz.
    - **HMAC özeti yerine şifreli tutulma nedeni:** hesap altyapısı (anahtar döndürme, yeniden şifreleme, geri alma, bildirim) olduğu gibi kullanılır; token her istekte zaten açılıp karşılaştırılır. Özet daha az şey sızdırırdı ama ikinci bir saklama yolu açardı; sızan bir veritabanı yedeği KEK olmadan token vermez.
 3. **Yalnız sahip ve yeniden doğrulamayla** (ADR-0040, `OWNER_ONLY` ve `requireReauth`). Oluşturmak ile yenilemek aynı çağrıdır: yenisi kaydedilince eskisi hemen geçersizdir. Her değişiklik **bütün yöneticilere** bildirilir (ADR-0027 §6; zil, "BirFatura hesabı değişti").
+   - **Program değişince token silinir:** fatura programı BirFatura'dan başka birine (ya da "yok"a) alınınca kayıtlı token aynı iş akışında silinir (`updatePlatformSettingsWorkflow`, `leftBirfatura`; yöneticiler bilgilendirilir). BirFatura yeniden seçilirse sahip yeni token üretir; eski token hiçbir zaman kendiliğinden geri gelmez. Genel sağlayıcı hesapları listesinde de görünmez, yalnız `/admin/einvoice/birfatura`'da.
 4. **Karşılaştırma sabit zamanlıdır** (`lib/security` `safeEqual`: iki tarafın SHA-256 özeti `timingSafeEqual` ile). Başlık eksikse de karşılaştırma yapılır; eksik ve yanlış aynı cevabı (401, gövde boş) aynı sürede alır.
 5. **Token yalnız `token` başlığında** kabul edilir; sorgu dizgisinde ya da gövdede aranmaz. Hiçbir yanıtta, logda ya da denetim kaydında yer almaz (yalnız oluşturma cevabında bir kez). Loglarda gövde de yoktur.
 6. **Sağlayıcı `birfatura` değilse ya da token hiç oluşturulmadıysa** beş uç da **404** döner: uç var olduğunu söylemez.
-7. **Hız sınırı (`einvoice_pull`):** IP başına dakikada 60, mağaza başına (bütün IP'ler) dakikada 120. Ayrıca **başarısız token** IP başına ayrı sayılır: dakikada 10 yanlıştan sonra o IP, doğru token'la bile, pencere bitene kadar 429 alır (`einvoice_pull_auth`).
+7. **Hız sınırı:** token'a bakılmadan önce IP başına dakikada 60 (`einvoice_pull`); koruyucudan **sonra**, yalnız token'ı doğru istekler sayılarak mağaza başına (bütün IP'ler) dakikada 120 (`einvoice_pull_shop`): token'sız bir sel BirFatura'nın payını tüketemez (güvenlik incelemesi S1). Ayrıca **başarısız token** IP başına ayrı sayılır: dakikada 10 yanlıştan sonra o IP, doğru token'la bile, pencere bitene kadar 429 alır (`einvoice_pull_auth`).
 8. **Gövde en çok 16 KB**, Zod şeması (`validateAndTransformBody`): belgelenen alanlar zorunluluk ve tipiyle denetlenir; belgede olmayan alan yok sayılır (okunmaz, 400 değil: dış çağıranın eklediği bir alan faturalamayı durdurmasın). Tarih aralığı en çok 31 gün, yanıt en çok 100 sipariş (fazlası sonraki çekmede).
 9. **Her çekme denetim kaydına yazılır** (`sensitive_read`, aktör `system`/`birfatura`, IP, istek kimliği; kaç sipariş, hangi fatura ve sipariş kimlikleri; kişisel veri yok). Kayıt yazılamazsa çekme **503** ile reddedilir (F2 kuralı: kişisel veri izsiz verilmez). `invoiceLinkUpdate` de `mutation` olarak kaydedilir.
 10. **Yalnız satış faturası bekleyen siparişler** döner: tür `sale`, sağlayıcı `birfatura`, durum `pending`, iptal istenmemiş, bildirilmemiş. İade belgeleri ve faturası istenmeyen siparişler (bekletme kuralı: test ödemesi, TL dışı, ödeme/kargo/teslim bekleyen, yalnız hediye kartı) hiç kuyruğa girmediği için hiç dönmez.
@@ -64,17 +67,17 @@ Bu uçlar BirFatura'nın değil bizim web kancamızdır ve **alıcının adını
 
 - Belge: `orderId` ve `faturaUrl` zorunlu, `faturaNo` ve `faturaTarihi` isteğe bağlı ("PDF bağlantısı ve varsa fatura numarası/tarihi"). ETTN ve belge tipi hiç gelmez.
 - **ADR-0034 §9 değişir:** geri yazma (`recordWriteBack`, `POST /admin/invoices/:id/issued`) **boş belge tipini** kabul eder; belge tipi ve ETTN "öğrenilene kadar boş" kalır (§2'deki kural). Var olan değer boş gelenle silinmez.
-- Akış (`workflows/einvoice/birfatura-link.ts`): sipariş `orderId`'den bulunur → `reported_at` yazılır (önce, ayrı) → numara geldiyse mevcut geri yazma iş akışı çalışır (seri denetimi `einvoice.series_mismatch`, numara biçimi ve yılı, aynı numara: değişiklik yok, farklı numara: ret) → PDF izinli adresten indirilir, özel depoya yazılır, mevcut PDF iş akışıyla kayda bağlanır ve müşteriye "faturanız hazır" gider.
+- Akış (`workflows/einvoice/birfatura-link.ts`): sipariş `orderId`'den bulunur → `reported_at` yazılır (önce, ayrı) → numara geldiyse mevcut geri yazma iş akışı çalışır (seri denetimi `einvoice.series_mismatch`, numara biçimi ve yılı, aynı numara: değişiklik yok, farklı numara: ret) → PDF izinli adresten indirilir, özel depoya yazılır, mevcut PDF iş akışıyla kayda bağlanır ve müşteriye "faturanız hazır" gider. Kaydın PDF'i zaten varsa yeniden gelen bildirim (tekrar ya da başka bağlantıyla) PDF'i indirmez ve değiştirmez (güvenlik incelemesi S2); yalnız indirmesi başarısız olmuş PDF sonraki bildirimde yeniden denenir.
 - Cevaplar: işlenen bildirim `{ Success: true }`; iş kuralı reddi (bilinmeyen sipariş, farklı numara, seri uyuşmazlığı, geçersiz numara) HTTP 200 ve `{ Success: false, Message }` (belgede yalnız 200 örneği var; `Success` onların bayrağı), sorun kodu kayda yazılır, panelde görünür.
 - PDF indirilemezse numara yine yazılır, cevap `Success: false` olur: BirFatura aynı bildirimi yeniden gönderirse aynı numara değişiklik saymaz ve PDF yeniden denenir. Yeniden göndermezse (belgede yazmıyor) personel PDF'i panelden yükler (kayıtta `einvoice.pdf_download_failed`).
 - Numara gelmezse kayıt kesilmiş sayılmaz: `reported_at` yazılır, kayda `einvoice.number_missing`, cevap `Success: true`; personel numarayı ve PDF'i panelden girer.
 - **Çift fatura önlemi:** `reported_at` dolu kayıt bir daha listelenmez; geri yazma sonradan reddedilse de (seri, numara çakışması, veritabanı) sipariş BirFatura'nın önüne ikinci kez düşmez, personelin önüne düşer.
 - `orderCargoUpdate` kabul edilip yok sayılır (`Success: true`): kargo bizim taşıyıcılarımızla gider, ikinci bir takip kaynağı durumları bozmasın. Kimlikler dışında hiçbir şey loglanmaz.
-- **Sipariş iptali:** bildirilmemiş bekleyen kayıt `cancelled` olur ve listeden düşer; kesilmiş ya da bildirilmiş kayıt "iade belgesi gerekiyor" işaretini alır, personel BirFatura'da e-Arşiv'i 8 gün içinde iptal eder ya da iade belgesi düzenler (ADR-0034 Ek 4, `external` gibi).
+- **Sipariş iptali:** BirFatura'ya hiç verilmemiş (`listed_at` boş) ve bildirilmemiş bekleyen kayıt `cancelled` olur ve listeden düşer. Kesilmiş, bildirilmiş ya da **listelenmiş ama bildirilmemiş** kayıt sessizce iptal edilmez: "iade belgesi gerekiyor" işaretini alır (bekleyen kayıtta ayrıca `cancel_requested_at`, böylece bir daha listelenmez), personele bildirilir ve BirFatura'da faturanın kesilip kesilmediğine bakar (güvenlik incelemesi S3); personel BirFatura'da e-Arşiv'i 8 gün içinde iptal eder ya da iade belgesi düzenler (ADR-0034 Ek 4, `external` gibi).
 
 ### 7. Telafi
 
-- `orders` yan etkisiz okumadır; telafi gerekmez. Okumanın izi yazılamazsa okuma olmaz (§3.9).
+- `orders` okumadır; yalnız verdiği kayıtlara `listed_at` damgalar (ilk sefer, geri alınmaz: veri BirFatura'ya gitmiştir); telafi gerekmez. Okumanın izi yazılamazsa okuma olmaz (§3.9).
 - Token oluşturma: kayıt adımı önceki hesabı saklar, bildirim yazılamazsa eski token geri konur (mevcut `integration-credentials` adımları).
 - PDF: indirme ve depoya yazma tek adımdır; sonraki adım düşerse dosya silinir. `reported_at` ve yazılmış numara geri alınmaz: BirFatura'da kesilmiş bir vergi belgesinin izidir (ADR-0034 §7'nin bilinçli istisnasıyla aynı gerekçe).
 
@@ -107,6 +110,6 @@ Belgelerin söylemedikleri; cevapları ve alıntıları `birfatura.md` "Açık s
 
 ## Sonuçlar
 
-- F1: uçlar, eşleme, token, hız profili, denetim kaydı, PDF indirme, migration (`invoice.provider` + `reported_at`), birim, HTTP ve sözleşme testleri. F2: sahte BirFatura (bizi çeken istemci + PDF sunucusu), panel kartı (seçim, adres, token bir kez gösterim, son çekme). F3 koşullu.
+- F1: uçlar, eşleme, token, hız profili, denetim kaydı, PDF indirme, migration (`invoice.provider`, `reported_at`, `listed_at`, `IDX_invoice_birfatura_due`), birim, HTTP ve sözleşme testleri. F2: sahte BirFatura (bizi çeken istemci + PDF sunucusu), panel kartı (seçim, adres, token bir kez gösterim, son çekme). F3 koşullu.
 - Güvenlik incelemesi zorunlu (kişisel veri veren gelen uç, kimlik doğrulama); bulgular PR'a yazılır.
 - `BIRFATURA_BASE_URL` yeni ortam değişkeni (yalnız development ve test).
