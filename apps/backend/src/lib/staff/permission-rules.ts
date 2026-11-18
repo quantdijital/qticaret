@@ -150,6 +150,8 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/plan" },
   // The AI core's use and estimated cost (adr/0071 §6): owner and admin; the services list is everyone's
   { methods: "*", path: "/admin/ai/usage" },
+  // The open suggestions to review (docs/22 "Aşama 5"): the task's roles; the route checks them too
+  { methods: ["GET"], path: "/admin/ai/suggestions" },
   // Wholesalers, their levels and prices (ADR-0068 §9): owner and admin; operations sees orders
   { methods: "*", path: "/admin/wholesale*" },
 ]
