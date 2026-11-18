@@ -28,6 +28,8 @@ export interface AiButtonProps {
   text?: string
   /** The ready option the first ask uses (an advisor finding's `detailed`); left out: the task's default. */
   option?: string | undefined
+  /** A line above the suggestion: what goes to the service (a picture may show a person, adr/0071 §10). */
+  note?: string
 }
 
 /**
@@ -46,6 +48,7 @@ export function AiButton({
   label,
   text,
   option: initialOption,
+  note,
 }: AiButtonProps) {
   const { t } = useTranslation()
   const name = label ?? t("ai.suggest.button")
@@ -145,6 +148,7 @@ export function AiButton({
         aria-label={name}
         className="flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-3"
       >
+        {note ? <p className="text-xs text-muted-foreground">{note}</p> : null}
         <AiServicePicker
           services={usable}
           value={service}

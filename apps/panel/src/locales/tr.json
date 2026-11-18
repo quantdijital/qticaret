@@ -3125,6 +3125,7 @@
       "optional": "Görseli şimdi eklemeyebilirsiniz, ama görselli ürünler daha çok satar.",
       "registerFailed": "Görsel yüklendi ama alt metin ve sürümler için kaydedilemedi.",
       "altHint": "Görseli göremeyenlere ve görsel aramasına ne gösterdiğini anlatır; örneğin “Beyaz keten gömlek, önden”. Alandan çıkınca kaydedilir.",
+      "altAi": "{{position}}. görselin alt metni için yapay zekâ önerisi",
       "altLabel": "{{position}}. görsel",
       "altPlaceholder": "Görselde ne var?",
       "altLegacy": "Bu görsel yeniden yüklenirse alt metin eklenebilir",
@@ -10802,6 +10803,7 @@
       "filenameHint": "Kütüphanede görünen ad; görselin adresi değişmez.",
       "alt": "Alt metin",
       "altHint": "Görseli göremeyenlere ve görsel aramasına ne gösterdiğini anlatır; bu görseli seçen alanlara önerilir.",
+      "altAi": "Alt metin için yapay zekâ önerisi",
       "saved": "Görsel kaydedildi.",
       "uploadedBy": "Yükleyen",
       "uploadedAt": "Yüklenme",
@@ -11288,7 +11290,8 @@
     "tasks": {
       "test_text": "Deneme metni",
       "seo_title": "Arama başlığı",
-      "seo_description": "Arama açıklaması"
+      "seo_description": "Arama açıklaması",
+      "image_alt_text": "Alt metin"
     },
     "options": {
       "short": "Kısa",
@@ -11340,6 +11343,7 @@
     },
     "suggest": {
       "button": "Yapay zekâ ile öner",
+      "imageNote": "Görsel, önerinin yazılması için servise gönderilir. Görselde kişi varsa bunu göz önünde bulundurun.",
       "from": "Yapay zekâ önerisi · {{name}}",
       "loading": "Öneri hazırlanıyor…",
       "use": "Kullan",

@@ -30,6 +30,10 @@ const LIST = [
 
 function serve(details: Record<string, MediaDetail>) {
   fetchMock.mockImplementation((url: string, init?: { method?: string; body?: unknown }) => {
+    // The alt text's AI button (alt-text-ai.spec.tsx): no task usable here
+    if (url === "/admin/ai/services") {
+      return Promise.resolve({ services: [], tasks: [], flags: { own_keys: true } })
+    }
     if (url === "/admin/media") {
       return Promise.resolve(
         init?.method === "POST"

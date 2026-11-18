@@ -8,8 +8,8 @@
 
 /** The record a suggestion is for; the backend reads its public facts itself. */
 export interface AiEntity {
-  /** The backend's `AI_ENTITY_TYPES`: a content page is `page`, a blog post is not one. */
-  type: "product" | "category" | "page"
+  /** The backend's `AI_ENTITY_TYPES`: a content page is `page`, a blog post is not one; `media` an image. */
+  type: "product" | "category" | "page" | "media"
   id: string
 }
 
