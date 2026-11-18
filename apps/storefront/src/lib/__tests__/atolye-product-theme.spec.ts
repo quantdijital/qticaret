@@ -168,16 +168,17 @@ describe("the theme's product page", () => {
     expect(html).toContain('href="#gorsel-2"')
     expect(html).toContain('id="gorsel-3"')
     expect(html).toContain("1 / 3")
-    // Buttons that need the script are not in the first HTML; three thumbnails never slide
+    // Buttons that need the script are not in the first HTML
     expect(html).not.toContain("Görseli büyüt")
-    expect(html).not.toContain("grid-cols-[2rem_minmax(0,1fr)_2rem]")
   })
 
-  it("lets more than four thumbnails slide, their arrows only with the script", () => {
+  it("lets more than four thumbnails slide in one row with no arrows of their own", () => {
     const html = page({ images: [1, 2, 3, 4, 5, 6].map((n) => picture(`foto-${String(n)}`)) })
     expect(html.match(/<a href="#gorsel-\d"/g)).toHaveLength(6)
-    expect(html).toContain("grid-cols-[2rem_minmax(0,1fr)_2rem]")
+    expect(html).toMatch(/<ul id="gorsel-kucukleri" class="gf-thumbs">/)
+    expect(html).not.toContain("gf-thumbs-arrow")
     expect(html).not.toContain("Sonraki görseller")
+    expect(html).not.toContain("Önceki görseller")
   })
 
   it("links the stars to the reviews and shows the shop's headline facts", () => {

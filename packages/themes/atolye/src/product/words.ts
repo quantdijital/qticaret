@@ -154,8 +154,6 @@ export const galleryWords = (t: Translate) => ({
   position: t("product.image_position"),
   /** "Görsel {n}". */
   show: t("product.image_show"),
-  thumbsPrevious: t("product.thumbs_previous"),
-  thumbsNext: t("product.thumbs_next"),
   /** A video's own button (adr/0069 §7): "Videoyu oynat", shown while it does not play. */
   videoPlay: t("product.video_play"),
   /** Its accessible name, playing or not: "Videoyu oynat: {title}", "Videoyu durdur: {title}". */
