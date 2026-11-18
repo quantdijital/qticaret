@@ -5,6 +5,8 @@ import {
   CATEGORY_CARD_SETTINGS,
   CATEGORY_COLLAGE_DEFAULTS,
   CATEGORY_COLLAGE_SETTINGS,
+  CATEGORY_PANELS_DEFAULTS,
+  CATEGORY_PANELS_SETTINGS,
 } from "../store/section-categories.js"
 import {
   FOOTER_BAR_DEFAULTS,
@@ -16,10 +18,11 @@ import { SECTION_VARIANTS, defaultVariant, variantOf } from "../store/section-va
 
 describe("the category cards' linked variant", () => {
   it("draws today's tiles by default, the linked cards on request", () => {
-    expect(SECTION_VARIANTS.categories).toEqual(["tiles", "linked", "collage"])
+    expect(SECTION_VARIANTS.categories).toEqual(["tiles", "linked", "collage", "panels"])
     expect(defaultVariant("categories")).toBe("tiles")
     expect(variantOf("categories", "linked")).toBe("linked")
     expect(variantOf("categories", "collage")).toBe("collage")
+    expect(variantOf("categories", "panels")).toBe("panels")
     expect(variantOf("categories", "bento")).toBe("tiles")
   })
 
@@ -49,6 +52,25 @@ describe("the category cards' collage variant", () => {
     expect(CATEGORY_COLLAGE_SETTINGS.height).toEqual(["low", "medium", "high"])
     expect(CATEGORY_COLLAGE_DEFAULTS).toMatchObject({ height: "medium", lead: "on", links: 4 })
     expect(CATEGORY_COLLAGE_DEFAULTS.links).toBeLessThanOrEqual(CATEGORY_CARD_LIMITS.links.max)
+  })
+})
+
+describe("the category cards' panels variant (Ek 2026-11-19)", () => {
+  it("reads the collage's lists, every own default on them, three a row and the lead on", () => {
+    expect(CATEGORY_PANELS_SETTINGS).toBe(CATEGORY_COLLAGE_SETTINGS)
+    for (const [setting, steps] of Object.entries(CATEGORY_PANELS_SETTINGS)) {
+      const listed: readonly unknown[] = steps
+      expect(listed).toContain(
+        CATEGORY_PANELS_DEFAULTS[setting as keyof typeof CATEGORY_PANELS_SETTINGS]
+      )
+    }
+    expect(CATEGORY_PANELS_DEFAULTS).toEqual({
+      columns: 3,
+      columns_mobile: 1,
+      height: "medium",
+      lead: "on",
+      links: 4,
+    })
   })
 })
 

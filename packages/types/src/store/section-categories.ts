@@ -83,6 +83,33 @@ export interface StoreCategoriesCollage {
   links: number
 }
 
+/**
+ * The `panels` variant (adr/0049 Ek 2026-11-19): each category a graphite
+ * panel led by its photograph, no frame round it; the name, count and
+ * first subcategories on the panel's graphite, never on the photo. While
+ * `lead` is on the first panel stands tall on the left from 1024 px and
+ * the others stack beside it; `columns` then has no say (it lays out the
+ * rows while `lead` is off). The steps are the collage's own lists (one
+ * concept, one list); the defaults are this variant's.
+ */
+export const CATEGORY_PANELS_SETTINGS = CATEGORY_COLLAGE_SETTINGS
+
+/** A section switched to `panels`, and what a reader takes for a field it lacks. */
+export const CATEGORY_PANELS_DEFAULTS = {
+  columns: 3,
+  columns_mobile: 1,
+  height: "medium",
+  lead: "on",
+  links: 4,
+} as const satisfies {
+  [S in CategoryCollageSetting]: CategoryCollageStep<S>
+} & { links: number }
+
+/** `panels`' own fields as `GET /store/storefront-layout` prints them (the collage's, renamed). */
+export interface StoreCategoriesPanels extends Omit<StoreCategoriesCollage, "variant"> {
+  variant: "panels"
+}
+
 /** `linked`'s own fields as `GET /store/storefront-layout` prints them. */
 export interface StoreCategoriesLinked {
   variant: "linked"

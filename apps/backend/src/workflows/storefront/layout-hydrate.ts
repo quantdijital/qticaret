@@ -243,7 +243,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
               links: section.links,
             }
           : {}),
-        ...(section.variant === "collage"
+        // The panels print the collage's fields under their own name (Ek 2026-11-19)
+        ...(section.variant === "collage" || section.variant === "panels"
           ? {
               variant: section.variant,
               columns: section.columns,

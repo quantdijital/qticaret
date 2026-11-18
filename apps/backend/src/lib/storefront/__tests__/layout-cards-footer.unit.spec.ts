@@ -9,6 +9,8 @@ import {
   CATEGORY_CARD_SETTINGS,
   CATEGORY_COLLAGE_DEFAULTS,
   CATEGORY_COLLAGE_SETTINGS,
+  CATEGORY_PANELS_DEFAULTS,
+  CATEGORY_PANELS_SETTINGS,
   categories,
 } from "../sections/categories"
 import { FOOTER_BAR_DEFAULTS, FOOTER_BAR_SETTINGS, PAYMENT_BADGES } from "../sections/footer-bar"
@@ -126,6 +128,8 @@ describe("the category cards' linked variant (adr/0049 Ek 2026-11-15)", () => {
     expect(CATEGORY_CARD_DEFAULTS).toEqual(own["CATEGORY_CARD_DEFAULTS"])
     expect(CATEGORY_COLLAGE_SETTINGS).toEqual(own["CATEGORY_COLLAGE_SETTINGS"])
     expect(CATEGORY_COLLAGE_DEFAULTS).toEqual(own["CATEGORY_COLLAGE_DEFAULTS"])
+    expect(CATEGORY_PANELS_SETTINGS).toEqual(own["CATEGORY_PANELS_SETTINGS"])
+    expect(CATEGORY_PANELS_DEFAULTS).toEqual(own["CATEGORY_PANELS_DEFAULTS"])
   })
 })
 
@@ -169,6 +173,35 @@ describe("the category cards' collage variant (adr/0049 Ek 2026-11-15)", () => {
       links: 4,
     })
     expect(await hydrateSection(two, at)).toMatchObject({ columns_mobile: 2 })
+  })
+})
+
+describe("the category cards' panels variant (adr/0049 Ek 2026-11-19)", () => {
+  it("fills the panels' settings with their own defaults and refuses steps off the lists", () => {
+    const [filled] = layoutDocument.parse({ home: [cards({ variant: "panels" })] }).home
+    expect(filled).toMatchObject({ variant: "panels", ...CATEGORY_PANELS_DEFAULTS })
+    const panels = (more: Record<string, unknown>) => ({
+      home: [cards({ variant: "panels", ...more })],
+    })
+    expect(issues(panels({ height: "tall" }))).toEqual(["storefront_layout.section_invalid"])
+    expect(issues(panels({ lead: true }))).toEqual(["storefront_layout.section_invalid"])
+    expect(issues(panels({ frame: "lined" }))).toHaveLength(1)
+    expect(issues(panels({ columns: 2, columns_mobile: 2, lead: "off", links: 0 }))).toEqual([])
+  })
+
+  it("prints the panels with the collage's fields under their own name", async () => {
+    const one = categories.parse(cards({ ...ALWAYS, variant: "panels" }))
+    expect(await hydrateSection(one, at)).toEqual({
+      id: "kategori01",
+      type: "categories",
+      title: null,
+      category_ids: [],
+      variant: "panels",
+      columns: 3,
+      height: "medium",
+      lead: "on",
+      links: 4,
+    })
   })
 })
 

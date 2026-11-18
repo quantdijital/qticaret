@@ -1,0 +1,187 @@
+/*
+ * The category panels (sections/CategoryPanels.tsx, adr/0049 Ek
+ * 2026-11-19). A panel is the graphite stage itself, no frame: its photo
+ * fades into the graphite where the words begin. Tall (the default): the
+ * photo over the words, taking whatever height the words leave, never
+ * less than the `height` step. Wide (`data-wide` names the screens): the
+ * words beside the photo, the photo on the right. From 1024 px the rows
+ * have the step's height at least, and the lead runs down the rows beside
+ * it. Heights are set before the photo loads, so nothing moves.
+ */
+@layer components {
+  .gf-panels {
+    --panel-photo: 11rem;
+    --panel-wide: 8.5rem;
+  }
+  .gf-panels[data-height="low"] {
+    --panel-photo: 9rem;
+    --panel-wide: 7rem;
+  }
+  .gf-panels[data-height="high"] {
+    --panel-photo: 14rem;
+    --panel-wide: 10rem;
+  }
+  @media (min-width: 64rem) {
+    .gf-panels {
+      --panel-row: 15rem;
+      grid-auto-rows: minmax(var(--panel-row), auto);
+    }
+    .gf-panels[data-height="low"] {
+      --panel-row: 12rem;
+    }
+    .gf-panels[data-height="high"] {
+      --panel-row: 18rem;
+    }
+  }
+
+  /* Tall: the photo over the words, growing into the room the words leave */
+  .gf-panel {
+    display: flex;
+    flex-direction: column;
+  }
+  .gf-panel-photo {
+    flex: 1 1 auto;
+    min-height: var(--panel-photo);
+  }
+  .gf-panel[data-lead] .gf-panel-photo {
+    min-height: calc(var(--panel-photo) * 1.34);
+  }
+  .gf-panel-words {
+    padding: 0 var(--space-md) var(--space-sm);
+  }
+  /* The photo melts into the graphite under it */
+  .gf-panel-photo::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--color-stage), transparent 45%);
+    content: "";
+  }
+  @media (min-width: 40rem) {
+    .gf-panel-words {
+      padding: 0 var(--space-lg) var(--space-md);
+    }
+  }
+  @media (min-width: 64rem) {
+    /* The row sets the height from here; the lead's own photo needs no more than the rows */
+    .gf-panel[data-lead] .gf-panel-photo {
+      min-height: var(--panel-photo);
+    }
+  }
+}
+
+/*
+ * Wide, by screen: the words on the left at the panel's foot, the photo on
+ * the right fading leftwards into the graphite (a phone and a tablet give
+ * the wide panel its own least height; from 1024 px the row does).
+ * Unlayered, as `collage.css`'s phone rows: these outrank the tall rules.
+ */
+@media (max-width: 39.99rem) {
+  .gf-panel[data-wide~="phone"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40%;
+    min-height: var(--panel-wide);
+  }
+  .gf-panel[data-wide~="phone"] > .gf-panel-photo {
+    grid-row: 1;
+    grid-column: 2;
+    min-height: 0;
+  }
+  .gf-panel[data-wide~="phone"] > .gf-panel-photo::after {
+    background: linear-gradient(to right, var(--color-stage), transparent 50%);
+  }
+  .gf-panel[data-wide~="phone"] > .gf-panel-words {
+    grid-row: 1;
+    grid-column: 1;
+    justify-content: flex-end;
+    padding-top: var(--space-md);
+  }
+}
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .gf-panel[data-wide~="tablet"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 46%;
+    min-height: var(--panel-wide);
+  }
+  .gf-panel[data-wide~="tablet"] > .gf-panel-photo {
+    grid-row: 1;
+    grid-column: 2;
+    min-height: 0;
+  }
+  .gf-panel[data-wide~="tablet"] > .gf-panel-photo::after {
+    background: linear-gradient(to right, var(--color-stage), transparent 45%);
+  }
+  .gf-panel[data-wide~="tablet"] > .gf-panel-words {
+    grid-row: 1;
+    grid-column: 1;
+    justify-content: flex-end;
+    padding-top: var(--space-md);
+  }
+}
+@media (min-width: 64rem) and (max-width: 79.99rem) {
+  .gf-panel[data-wide~="lg"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 50%;
+  }
+  .gf-panel[data-wide~="lg"] > .gf-panel-photo {
+    grid-row: 1;
+    grid-column: 2;
+    min-height: 0;
+  }
+  .gf-panel[data-wide~="lg"] > .gf-panel-photo::after {
+    background: linear-gradient(to right, var(--color-stage), transparent 40%);
+  }
+  .gf-panel[data-wide~="lg"] > .gf-panel-words {
+    grid-row: 1;
+    grid-column: 1;
+    justify-content: flex-end;
+    padding-top: var(--space-md);
+  }
+}
+@media (min-width: 80rem) {
+  .gf-panel[data-wide~="xl"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52%;
+  }
+  .gf-panel[data-wide~="xl"] > .gf-panel-photo {
+    grid-row: 1;
+    grid-column: 2;
+    min-height: 0;
+  }
+  .gf-panel[data-wide~="xl"] > .gf-panel-photo::after {
+    background: linear-gradient(to right, var(--color-stage), transparent 40%);
+  }
+  .gf-panel[data-wide~="xl"] > .gf-panel-words {
+    grid-row: 1;
+    grid-column: 1;
+    justify-content: flex-end;
+    padding-top: var(--space-md);
+  }
+}
+
+/* The one movement: the photo eases in a little under a pointer that hovers */
+.gf-panel-photo img {
+  transition: transform var(--dur-long) var(--ease-out);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gf-panel:hover .gf-panel-photo img {
+    transform: scale(1.04);
+  }
+}
+/* The name a step quieter while the panel is hovered, never underlined */
+.gf-panel-link {
+  transition: color var(--dur-micro) var(--ease-out);
+}
+@media (hover: hover) {
+  .gf-panel:hover .gf-panel-link {
+    color: var(--color-stage-text-2);
+  }
+}
+
+/* The panel is the link's face: the focus ring goes round the panel, not round the name's words */
+.gf-panel-link:focus-visible {
+  outline: none;
+}
+.gf-panel:has(.gf-panel-link:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}

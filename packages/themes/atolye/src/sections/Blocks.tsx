@@ -11,6 +11,7 @@ import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
 import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
 import { CategoryCollage } from "./CategoryCollage"
+import { CategoryPanels } from "./CategoryPanels"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
 import { GoogleRating } from "./GoogleRating"
@@ -116,6 +117,19 @@ function BlockView({
             id={headingId(section.id)}
             title={section.title}
             view={section.collage}
+            all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+            ownAll={Boolean(section.more)}
+            t={t}
+            marks={section.editor}
+          />
+        )
+      }
+      if (drawn === "panels" && section.panels) {
+        return (
+          <CategoryPanels
+            id={headingId(section.id)}
+            title={section.title}
+            view={section.panels}
             all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
             ownAll={Boolean(section.more)}
             t={t}
