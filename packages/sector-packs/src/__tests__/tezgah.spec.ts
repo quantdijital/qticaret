@@ -24,7 +24,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(tezgah).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 10,
+      version: 11,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -304,9 +304,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
   })
 
-  it("raised the cutlery pack's version with them (tezgah's tenth)", () => {
-    expect(sectorPack("cutlery")?.version).toBe(13)
-    expect(CODES.map((code) => read(code).version)).toEqual([10, 10, 10])
+  it("raised the cutlery pack's version with them (tezgah's eleventh)", () => {
+    expect(sectorPack("cutlery")?.version).toBe(14)
+    expect(CODES.map((code) => read(code).version)).toEqual([11, 11, 11])
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",
       ...CODES,
