@@ -163,6 +163,8 @@ export async function cardedCategoriesView(
     case undefined:
       return null
   }
+  // A variant this storefront does not know yet is read as the tiles.
+  return null
 }
 
 /** The named categories (or the top ones), their subcategories' paths and the shop's counts. */
