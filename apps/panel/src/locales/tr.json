@@ -11421,7 +11421,8 @@
       "daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz."
     },
     "background": {
-      "button": "Arka planı temizle",
+      "button": "Görseli düzenle",
+      "dialog": "Görseli düzenle",
       "title": "Arka planı temizle",
       "description": "Arka plan şeffaf ya da beyaz yapılır. Asıl görsel değişmez; sonuç yeni bir görsel olarak gelir.",
       "option": "Zemin",

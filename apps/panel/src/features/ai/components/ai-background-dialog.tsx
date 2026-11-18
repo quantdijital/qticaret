@@ -47,7 +47,8 @@ export interface AiBackgroundDialogProps {
 }
 
 /**
- * "Arka planı temizle" (docs/22 Aşama 4, adr/0071 §13): the background
+ * "Görseli düzenle", two modes: "Arka planı temizle" (docs/22 Aşama 4,
+ * adr/0071 §13): the background
  * made transparent or white by a service, as a new picture beside the
  * original; or "Sahneye yerleştir" (Aşama 7): the product set in one of
  * the shop's two ready-made scenes (its sector pack's; nothing typed).
@@ -122,7 +123,7 @@ export function AiBackgroundDialog({
     >
       <DialogContent size="lg">
         <DialogHeader>
-          <DialogTitle>{t(`${P}.title`)}</DialogTitle>
+          <DialogTitle>{t(`${B}.dialog`)}</DialogTitle>
           <DialogDescription>{t(`${P}.description`)}</DialogDescription>
         </DialogHeader>
         {sceneOffered ? (

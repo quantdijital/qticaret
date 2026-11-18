@@ -125,11 +125,13 @@ const body = (at = 0): unknown =>
   JSON.parse((netFetch.mock.calls[at]?.[1] as { body: string }).body)
 
 async function openScene(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(await screen.findByRole("button", { name: "Arka planı temizle" }))
-  const dialog = await screen.findByRole("dialog", { name: "Arka planı temizle" })
+  await user.click(await screen.findByRole("button", { name: "Görseli düzenle" }))
+  const dialog = await screen.findByRole("dialog", { name: "Görseli düzenle" })
   const modes = within(dialog).getByRole("radiogroup", { name: "Görselle ne yapılsın" })
+  // Two modes in the one window: cleaning first (as before), the scene beside it
+  expect(within(modes).getByRole("radio", { name: "Arka planı temizle" })).toBeChecked()
   await user.click(within(modes).getByRole("radio", { name: "Sahneye yerleştir" }))
-  return screen.findByRole("dialog", { name: "Sahneye yerleştir" })
+  return dialog
 }
 
 beforeEach(() => {
@@ -223,8 +225,8 @@ describe("placing a product picture in a scene", () => {
     ]) {
       services = viewWith(scene)
       const { user } = tile()
-      await user.click(await screen.findByRole("button", { name: "Arka planı temizle" }))
-      const dialog = await screen.findByRole("dialog", { name: "Arka planı temizle" })
+      await user.click(await screen.findByRole("button", { name: "Görseli düzenle" }))
+      const dialog = await screen.findByRole("dialog", { name: "Görseli düzenle" })
       expect(
         within(dialog).queryByRole("radiogroup", { name: "Görselle ne yapılsın" })
       ).not.toBeInTheDocument()

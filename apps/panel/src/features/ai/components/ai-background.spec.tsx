@@ -118,8 +118,8 @@ const body = (at = 0): unknown =>
   JSON.parse((netFetch.mock.calls[at]?.[1] as { body: string }).body)
 
 async function openDialog(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(await screen.findByRole("button", { name: "Arka planı temizle" }))
-  return screen.findByRole("dialog", { name: "Arka planı temizle" })
+  await user.click(await screen.findByRole("button", { name: "Görseli düzenle" }))
+  return screen.findByRole("dialog", { name: "Görseli düzenle" })
 }
 
 beforeEach(() => {
@@ -184,7 +184,7 @@ describe("a product picture's background", () => {
     })
     expect(posted()).toEqual(["/admin/ai/suggestions", "/admin/ai/suggestions/sug_1/accept"])
     await waitFor(() => {
-      expect(screen.queryByRole("dialog", { name: "Arka planı temizle" })).not.toBeInTheDocument()
+      expect(screen.queryByRole("dialog", { name: "Görseli düzenle" })).not.toBeInTheDocument()
     })
   })
 
@@ -278,6 +278,6 @@ describe("a product picture's background", () => {
     services = { ...SERVICES, tasks: [task(["photoroom"], false)] }
     tile()
     expect(await screen.findByLabelText("1. görsel")).toBeInTheDocument()
-    expect(screen.queryByRole("button", { name: "Arka planı temizle" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Görseli düzenle" })).not.toBeInTheDocument()
   })
 })
