@@ -39,6 +39,40 @@ export const shownCategory = (
   category: NamedCategory | null | undefined
 ): category is NamedCategory => ownPage(category) && category.is_active !== false
 
+/** A category row as a tree walk reads it: its own flags and its parent's id. */
+export interface TreeCategory extends NamedCategory {
+  id: string
+  parent_category_id?: string | null
+}
+
+// Deeper than any shop's tree: a longer walk is a loop, and the category is not shown
+const MAX_CATEGORY_DEPTH = 32
+
+/**
+ * The category and its ancestors, nearest first, when every one of them
+ * is shown (`shownCategory`); null when any is internal or closed, or an
+ * ancestor is not among `byId` (unknown is not shown).
+ */
+export function shownLineage<T extends TreeCategory>(
+  category: T,
+  byId: ReadonlyMap<string, T>
+): T[] | null {
+  const lineage: T[] = []
+  let current: T | undefined = category
+  while (current) {
+    if (!shownCategory(current) || lineage.length >= MAX_CATEGORY_DEPTH) {
+      return null
+    }
+    lineage.push(current)
+    const parentId: string | null | undefined = current.parent_category_id
+    if (!parentId) {
+      return lineage
+    }
+    current = byId.get(parentId)
+  }
+  return null
+}
+
 /**
  * What may leave the shop of a category (adr/0071 §10): its name and
  * description, and the names of the parent and sub-categories shoppers

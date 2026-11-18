@@ -1,8 +1,8 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { aiValidationError } from "../errors"
 import type { CardAllowed, CardAttribute, CardAttributeType, CardOption } from "../product-card"
-import { shownCategory } from "./category"
-import type { NamedCategory } from "./category"
+import { shownLineage } from "./category"
+import type { TreeCategory } from "./category"
 import { mediaFacts } from "./media"
 import type { AiImageRef } from "./media"
 import type { FactsContainer, RecordFacts } from "./types"
@@ -20,17 +20,14 @@ import type { FactsContainer, RecordFacts } from "./types"
 
 /** Shown categories named in one prompt at most; the data block keeps its own ceiling too. */
 export const MAX_CARD_CATEGORIES = 150
+// Category rows read to walk their trees: far more than any shop keeps
+const MAX_CATEGORY_ROWS = 2000
 /** Product attributes of one template named at most. */
 export const MAX_CARD_ATTRIBUTES = 40
 /** Options of one attribute named at most. */
 const MAX_CARD_OPTIONS = 40
 // Room for an attribute's line with its options
 const ATTRIBUTE_LINE_LENGTH = 900
-
-interface CategoryRow extends NamedCategory {
-  id: string
-  parent_category?: NamedCategory | null
-}
 
 interface DefinitionRow {
   key: string
@@ -52,35 +49,31 @@ export interface ProductCardFacts {
 
 const TEMPLATE_ID = /^atpl_[A-Za-z0-9]{1,40}$/
 
-/** The shop's shown categories, "Üst > Alt" when the parent is shown too, under codes `k1`, `k2`… */
+/**
+ * The shop's shown categories, "Üst > Alt" under a parent, under codes
+ * `k1`, `k2`…: one with an internal or closed ancestor anywhere up its
+ * tree is not shown, nor one whose ancestors were not all read.
+ */
 async function shownCategories(container: FactsContainer): Promise<CardAllowed["categories"]> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product_category",
-    fields: [
-      "id",
-      "name",
-      "is_active",
-      "is_internal",
-      "parent_category.name",
-      "parent_category.is_active",
-      "parent_category.is_internal",
-    ],
-    pagination: { take: MAX_CARD_CATEGORIES * 2 },
+    fields: ["id", "name", "is_active", "is_internal", "parent_category_id"],
+    pagination: { take: MAX_CATEGORY_ROWS },
   })
-  return (
-    (data as CategoryRow[])
-      // Under a parent shoppers cannot see, a category is not shown either
-      .filter(
-        (row) => shownCategory(row) && (!row.parent_category || shownCategory(row.parent_category))
-      )
-      .map((row) => ({
-        id: row.id,
-        name: row.parent_category ? `${row.parent_category.name} > ${row.name}` : row.name,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name, "tr"))
-      .slice(0, MAX_CARD_CATEGORIES)
-      .map((row, index) => ({ code: `k${String(index + 1)}`, ...row }))
-  )
+  const rows = data as TreeCategory[]
+  const byId = new Map(rows.map((row) => [row.id, row]))
+  return rows
+    .flatMap((row) => {
+      const lineage = shownLineage(row, byId)
+      if (!lineage) {
+        return []
+      }
+      const parent = lineage[1]
+      return [{ id: row.id, name: parent ? `${parent.name} > ${row.name}` : row.name }]
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, "tr"))
+    .slice(0, MAX_CARD_CATEGORIES)
+    .map((row, index) => ({ code: `k${String(index + 1)}`, ...row }))
 }
 
 /** The template's product attributes in its order; none without a template. */

@@ -1,4 +1,4 @@
-import { jsonObjectOf, productCardOf, readProductCard } from "../product-card"
+import { MAX_NUMBER_DIGITS, jsonObjectOf, productCardOf, readProductCard } from "../product-card"
 import type { CardAllowed } from "../product-card"
 
 /**
@@ -164,7 +164,24 @@ describe("the shop's own lists", () => {
         attributes: { length: Number.MAX_VALUE, finish: "<b>Parlak</b>\nikinci satır" },
       })
     )
-    expect(more.attributes).toEqual({ length: Number.MAX_VALUE })
+    expect(more.attributes).toEqual({})
+  })
+
+  it("takes a number within twelve significant digits, finite and written out plainly", () => {
+    const lengthOf = (length: unknown) =>
+      cardOf(answer({ title: "Kesme tahtası", attributes: { length } })).attributes["length"]
+    expect(MAX_NUMBER_DIGITS).toBe(12)
+    expect(lengthOf(42)).toBe(42)
+    expect(lengthOf("12,5")).toBe(12.5)
+    expect(lengthOf("0,000123456789012")).toBe(0.000123456789012)
+    expect(lengthOf(123456789012)).toBe(123456789012)
+    // Thirteen digits, an exponent form, a huge or an endless number: dropped
+    expect(lengthOf(1234567890123)).toBeUndefined()
+    expect(lengthOf("1234567890,123")).toBeUndefined()
+    expect(lengthOf(1e21)).toBeUndefined()
+    expect(lengthOf("9".repeat(400))).toBeUndefined()
+    expect(lengthOf(Number.MAX_VALUE)).toBeUndefined()
+    expect(lengthOf(0.1 + 0.2)).toBeUndefined()
   })
 })
 

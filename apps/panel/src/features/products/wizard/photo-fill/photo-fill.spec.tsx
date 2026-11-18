@@ -209,6 +209,13 @@ describe("Fotoğraftan doldur", () => {
       .filter((call) => (call[1] as { method?: string } | undefined)?.method === "POST")
       .map(([url]) => String(url))
     expect(writes).toEqual(["/admin/media"])
+    // Registered outside the media library: a photo dropped or swapped, which no product
+    // takes, goes with the nightly sweep's abandoned uploads (jobs/media-sweep.ts)
+    const registered = sdkFetch.mock.calls.find(([url]) => url === "/admin/media")?.[1] as {
+      body: Record<string, unknown>
+    }
+    expect(registered.body).toEqual({ file_ids: ["file_1"] })
+    expect(registered.body).not.toHaveProperty("library")
     expect(netFetch.mock.calls.map(([url]) => String(url))).toEqual([
       "/admin/ai/suggestions",
       "/admin/ai/suggestions/sug_1/accept",

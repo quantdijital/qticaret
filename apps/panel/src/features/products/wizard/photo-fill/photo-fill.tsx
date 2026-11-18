@@ -43,7 +43,11 @@ interface Photo {
   url: string
 }
 
-/** A file from this computer as a product image (F3.3), as the gallery uploads one. */
+/**
+ * A file from this computer as a product image (F3.3), as the gallery
+ * uploads one: outside the media library, so a photo dropped or swapped
+ * that no product takes goes with the nightly sweep after a day.
+ */
 async function uploadPhoto(file: File): Promise<Photo> {
   const { files } = await sdk.admin.upload.create({ files: [file] })
   const stored = files[0]

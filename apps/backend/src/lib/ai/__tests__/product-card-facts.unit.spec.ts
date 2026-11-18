@@ -1,5 +1,6 @@
 import { fakeTextConnector } from "../connectors/fake"
 import type { TextConnector, TextRequest } from "../connectors/types"
+import { shownLineage } from "../facts/category"
 import { MAX_CARD_CATEGORIES, attributeLine, productCardFacts } from "../facts/product-card"
 import type { FactsContainer } from "../facts/types"
 import { instructionOf } from "../instructions"
@@ -29,24 +30,28 @@ const MEDIA = {
   product: null,
 }
 
+const category = (id: string, name: string, parent: string | null, flags = {}) => ({
+  id,
+  name,
+  is_active: true,
+  is_internal: false,
+  parent_category_id: parent,
+  ...flags,
+})
+
 const CATEGORIES = [
-  { id: "pcat_1", name: "Mutfak", is_active: true, is_internal: false, parent_category: null },
-  {
-    id: "pcat_2",
-    name: "Kupalar",
-    is_active: true,
-    is_internal: false,
-    parent_category: { name: "Mutfak", is_active: true, is_internal: false },
-  },
-  { id: "pcat_3", name: "Gizli stok", is_active: true, is_internal: true, parent_category: null },
-  { id: "pcat_4", name: "Kapalı", is_active: false, is_internal: false, parent_category: null },
-  {
-    id: "pcat_5",
-    name: "Alt",
-    is_active: true,
-    is_internal: false,
-    parent_category: { name: "Kapalı", is_active: false, is_internal: false },
-  },
+  category("pcat_1", "Mutfak", null),
+  category("pcat_2", "Kupalar", "pcat_1"),
+  category("pcat_3", "Gizli stok", null, { is_internal: true }),
+  category("pcat_4", "Kapalı", null, { is_active: false }),
+  category("pcat_5", "Alt", "pcat_4"),
+  // Shown itself and under a shown parent, but a closed or internal grandparent hides it
+  category("pcat_6", "Ara", "pcat_4"),
+  category("pcat_7", "Torun", "pcat_6"),
+  category("pcat_8", "İç ara", "pcat_3"),
+  category("pcat_9", "İç torun", "pcat_8"),
+  // An ancestor not read is not taken as shown
+  category("pcat_10", "Yetim", "pcat_404"),
 ]
 
 const TEMPLATE = {
@@ -112,6 +117,23 @@ describe("what a product card is asked with", () => {
     await expect(productCardFacts(containerWith().container, "media_01", "pcat_1")).rejects.toThrow(
       "ai.unknown_entity"
     )
+  })
+
+  it("walks the whole tree: a shown ancestry is named nearest first, any hidden one drops it", () => {
+    const deep = [...CATEGORIES, category("pcat_11", "Fincan", "pcat_2")]
+    const byId = new Map(deep.map((row) => [row.id, row]))
+    const named = (id: string) =>
+      shownLineage(byId.get(id) ?? category(id, id, null), byId)?.map((row) => row.name) ?? null
+    expect(named("pcat_11")).toEqual(["Fincan", "Kupalar", "Mutfak"])
+    expect(named("pcat_7")).toBeNull()
+    expect(named("pcat_9")).toBeNull()
+    expect(named("pcat_10")).toBeNull()
+    // A loop is never shown
+    const loop = new Map([
+      ["a", category("a", "A", "b")],
+      ["b", category("b", "B", "a")],
+    ])
+    expect(shownLineage(loop.get("a") ?? category("a", "A", null), loop)).toBeNull()
   })
 
   it("lists a hundred and fifty categories at most", () => {

@@ -143,6 +143,10 @@ const optionOf = (attribute: CardAttribute, raw: unknown): string | null => {
 }
 
 const NUMBER = /^-?\d+(?:[.,]\d+)?$/
+/** Significant digits a number attribute's value has at most; more drops it. */
+export const MAX_NUMBER_DIGITS = 12
+// Its digits past the sign, the separator and any leading zeros
+const significantDigits = (text: string) => text.replace(/\D/g, "").replace(/^0+/, "").length
 const YES = new Set(["true", "evet", "var", "yes"])
 const NO = new Set(["false", "hayır", "hayir", "yok", "no"])
 
@@ -157,11 +161,14 @@ function valueOf(attribute: CardAttribute, raw: unknown): CardValue | null {
       return "text" in result && !result.text.includes("\n") ? result.text : null
     }
     case "number": {
-      if (typeof raw === "number") {
-        return Number.isFinite(raw) ? raw : null
+      // A number written out plainly (an exponent form like 1e+21 is not), within
+      // `MAX_NUMBER_DIGITS` significant digits and finite
+      const text = typeof raw === "number" ? String(raw) : typeof raw === "string" ? raw.trim() : ""
+      if (!NUMBER.test(text) || significantDigits(text) > MAX_NUMBER_DIGITS) {
+        return null
       }
-      const text = typeof raw === "string" ? raw.trim() : ""
-      return NUMBER.test(text) ? Number(text.replace(",", ".")) : null
+      const value = Number(text.replace(",", "."))
+      return Number.isFinite(value) ? value : null
     }
     case "boolean": {
       if (typeof raw === "boolean") {

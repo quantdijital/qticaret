@@ -98,13 +98,24 @@ medusaIntegrationTestRunner({
       return id
     }
 
-    function answering(text: string): TextRequest[] {
+    // The fake answer, fixed or written from the request (a category code read off its data)
+    function answering(text: string | ((request: TextRequest) => string)): TextRequest[] {
       const seen: TextRequest[] = []
       jest.spyOn(fakeTextConnector, "complete").mockImplementation((request) => {
         seen.push(request)
-        return Promise.resolve({ text, usage: { inputTokens: 10, outputTokens: 10 } })
+        return Promise.resolve({
+          text: typeof text === "string" ? text : text(request),
+          usage: { inputTokens: 10, outputTokens: 10 },
+        })
       })
       return seen
+    }
+
+    // The short code the prompt's category list gave a category name: the
+    // list is sorted by name, so other shown categories may move it
+    const codeOf = (request: TextRequest, name: string) => {
+      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      return new RegExp(`"label":"(k\\d+)","value":"${escaped}"`).exec(request.data)?.[1] ?? "k0"
     }
 
     const productCount = async () =>
@@ -136,11 +147,11 @@ medusaIntegrationTestRunner({
         }
       )
       const before = await productCount()
-      const seen = answering(
+      const seen = answering((request) =>
         JSON.stringify({
           title: "Kırmızı porselen kupa",
           short_description: "Kulplu, parlak sırlı bir kupa.",
-          category: "k1",
+          category: codeOf(request, "Kupalar"),
           attributes: { material: "Porselen", weight: 300 },
           price: 1,
           status: "published",

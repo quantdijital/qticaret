@@ -3109,6 +3109,7 @@
       "optionTitle": "Seçeneğe bir ad verin.",
       "optionValues": "Her seçeneğe en az bir değer ekleyin.",
       "tooManyVariants": "Bir üründe en çok 100 varyant olabilir.",
+      "attributeRequired": "Bu özellik şablonda zorunlu; doldurun ya da şablonu kaldırın.",
       "optionRequired": "En az bir seçenek ekleyin ya da seçenekleri kapatın.",
       "optionDuplicate": "Bu adla bir seçenek zaten var.",
       "cost": "Maliyet 0 ile 10.000.000 ₺ arasında olmalı.",
@@ -3317,6 +3318,9 @@
       "defaultsFailed": "Mağaza ayarları okunamadı. Biraz sonra tekrar deneyin.",
       "kindHint": "Dijital ürün ve hizmette kargo adımı atlanır.",
       "attributesFailed": "Ürün kaydedildi ama özellikleri kaydedilemedi; ürün sayfasından tamamlayın.",
+      "publishHeld": "Ürün taslak olarak kaydedildi, yayınlanmadı: özellikleri kaydedilemedi. Ürün sayfasında tamamlayıp yayınlayın.",
+      "publishFailed": "Ürün taslak olarak kaydedildi, yayınlanamadı. Ürün sayfasından yayınlayın.",
+      "openProduct": "Ürüne git",
       "photo": {
         "button": "Fotoğraftan doldur",
         "title": "Fotoğraftan doldur",

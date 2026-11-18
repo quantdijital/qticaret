@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useFormContext, useWatch } from "react-hook-form"
+import { useFormContext, useFormState, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
@@ -24,7 +24,10 @@ const NONE = "__none__"
  */
 export function AttributesSection({ className }: { className?: string }) {
   const { t } = useTranslation()
-  const { control, setValue } = useFormContext<WizardValues>()
+  const { control, setValue, clearErrors } = useFormContext<WizardValues>()
+  // A required field left empty, marked when saving (`missingRequired`)
+  const { errors } = useFormState({ control, name: "attributes" })
+  const fieldErrors = errors.attributes as Record<string, { message?: string }> | undefined
   const templates = useQuery(templatesQuery())
   const [templateId, values] = useWatch({ control, name: ["template_id", "attributes"] })
   const template = useWizardTemplate()
@@ -49,6 +52,7 @@ export function AttributesSection({ className }: { className?: string }) {
               // Another template's fields are other fields: what was filled goes
               setValue("template_id", next === NONE ? "" : next, { shouldDirty: true })
               setValue("attributes", {}, { shouldDirty: true })
+              clearErrors("attributes")
             }}
           >
             <SelectTrigger id="wizard-attributes-template" className="w-full sm:w-80">
@@ -71,7 +75,13 @@ export function AttributesSection({ className }: { className?: string }) {
                 key={definition.key}
                 definition={definition}
                 value={values[definition.key]}
+                error={
+                  fieldErrors?.[definition.key]?.message
+                    ? t(fieldErrors[definition.key]?.message ?? "")
+                    : undefined
+                }
                 onChange={(next) => {
+                  clearErrors(`attributes.${definition.key}`)
                   setValue(
                     "attributes",
                     { ...values, [definition.key]: next },

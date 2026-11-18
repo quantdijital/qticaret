@@ -3109,6 +3109,7 @@
       "optionTitle": "Give the option a name.",
       "optionValues": "Add at least one value to each option.",
       "tooManyVariants": "A product can have at most 100 variants.",
+      "attributeRequired": "The template requires this attribute; fill it in or remove the template.",
       "optionRequired": "Add at least one option, or turn options off.",
       "optionDuplicate": "An option with this name already exists.",
       "cost": "The cost must be between 0 and 10,000,000 ₺.",
@@ -3317,6 +3318,9 @@
       "defaultsFailed": "The shop's settings could not be read. Try again shortly.",
       "kindHint": "Digital products and services skip the shipping step.",
       "attributesFailed": "The product was saved but its attributes were not; complete them on the product page.",
+      "publishHeld": "The product was saved as a draft, not published: its attributes could not be saved. Complete them on the product page and publish.",
+      "publishFailed": "The product was saved as a draft but could not be published. Publish it from the product page.",
+      "openProduct": "Open product",
       "photo": {
         "button": "Fill from photo",
         "title": "Fill from photo",
