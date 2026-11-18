@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { EMPTY_SUMMARY } from "@/features/products/summary-doc"
-import { catalogBody, productBody } from "./create-product"
+import { attributesBody, catalogBody, productBody } from "./create-product"
 import { BLANK_VARIANT, defaultWizardValues } from "./schema"
 import type { WizardValues } from "./schema"
 
@@ -113,5 +113,30 @@ describe("catalogBody with variants", () => {
     })
     // A variant the save did not answer for is left to its page
     expect(catalogBody(values, [undefined, "variant_yesil"])).toBeNull()
+  })
+})
+
+describe("attributesBody", () => {
+  it("writes nothing without a template", () => {
+    expect(attributesBody({ template_id: "", attributes: { material: "wood" } })).toBeNull()
+  })
+
+  it("sends the template and its filled values only", () => {
+    expect(
+      attributesBody({
+        template_id: "atpl_1",
+        attributes: {
+          material: "wood",
+          colors: [],
+          finish: "",
+          length: 0,
+          handmade: false,
+          x: null,
+        },
+      })
+    ).toEqual({
+      template_id: "atpl_1",
+      values: { material: "wood", length: 0, handmade: false },
+    })
   })
 })

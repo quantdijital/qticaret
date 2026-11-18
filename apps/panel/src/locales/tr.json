@@ -3115,6 +3115,7 @@
       "optionTitle": "Seçeneğe bir ad verin.",
       "optionValues": "Her seçeneğe en az bir değer ekleyin.",
       "tooManyVariants": "Bir üründe en çok 100 varyant olabilir.",
+      "attributeRequired": "Bu özellik şablonda zorunlu; doldurun ya da şablonu kaldırın.",
       "optionRequired": "En az bir seçenek ekleyin ya da seçenekleri kapatın.",
       "optionDuplicate": "Bu adla bir seçenek zaten var.",
       "cost": "Maliyet 0 ile 10.000.000 ₺ arasında olmalı.",
@@ -3321,7 +3322,36 @@
       "defaultValue": "Standart",
       "stockNoLocation": "Ürün kaydedildi ama mağazanın varsayılan deposu olmadığı için stok girilemedi. Ayarlar > Depolar'dan bir depo ekleyin.",
       "defaultsFailed": "Mağaza ayarları okunamadı. Biraz sonra tekrar deneyin.",
-      "kindHint": "Dijital ürün ve hizmette kargo adımı atlanır."
+      "kindHint": "Dijital ürün ve hizmette kargo adımı atlanır.",
+      "attributesFailed": "Ürün kaydedildi ama özellikleri kaydedilemedi; ürün sayfasından tamamlayın.",
+      "publishHeld": "Ürün taslak olarak kaydedildi, yayınlanmadı: özellikleri kaydedilemedi. Ürün sayfasında tamamlayıp yayınlayın.",
+      "publishFailed": "Ürün taslak olarak kaydedildi, yayınlanamadı. Ürün sayfasından yayınlayın.",
+      "openProduct": "Ürüne git",
+      "photo": {
+        "button": "Fotoğraftan doldur",
+        "title": "Fotoğraftan doldur",
+        "description": "Bir ürün fotoğrafı seçin; yapay zekâ ad, kısa açıklama, kategori ve özellik önerir. Fiyat ve stok önerilmez.",
+        "pick": "Fotoğraf seç",
+        "change": "Başka fotoğraf seç",
+        "uploading": "Fotoğraf yükleniyor…",
+        "uploadFailed": "Fotoğraf yüklenemedi.",
+        "photoAlt": "Seçilen ürün fotoğrafı",
+        "note": "Fotoğraf, öneri için {{name}} servisine gönderilir. Fotoğrafta kişi varsa bunu göz önünde bulundurun. Fotoğraf ürünün ilk görseli olur.",
+        "fields": {
+          "title": "Ürün adı",
+          "summary": "Kısa açıklama",
+          "category": "Kategori",
+          "attributes": "Özellikler"
+        },
+        "noCategory": "Uygun kategori önerilmedi",
+        "yes": "Evet",
+        "no": "Hayır",
+        "used": "Form dolduruldu. Kaydetmeden önce gözden geçirin.",
+        "hint": {
+          "text": "Yapay zekâ servisi bağlarsanız ürün formunu bir fotoğraftan doldurabilirsiniz.",
+          "ownerOnly": "Yapay zekâ servisi bağlanırsa ürün formu bir fotoğraftan doldurulabilir; mağaza sahibi bağlayabilir."
+        }
+      }
     },
     "detail": {
       "title": "Ürün",
@@ -11311,7 +11341,8 @@
       "image_background": "Arka plan temizleme",
       "review_summary": "Yorum özeti",
       "review_reply": "Yorum yanıtı",
-      "question_answer": "Soru yanıtı"
+      "question_answer": "Soru yanıtı",
+      "product_from_photo": "Fotoğraftan ürün kartı"
     },
     "options": {
       "short": "Kısa",

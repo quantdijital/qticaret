@@ -40,7 +40,25 @@ const MediaSuggestion = z
   })
   .strict()
 
-export const AdminPostAiSuggestion = z.union([TextSuggestion, MediaSuggestion])
+/**
+ * A new product's card from one uploaded photo (Aşama 6): the picture by
+ * its media record, and the template whose attributes it may fill (read
+ * on the server). No category, attribute or text is taken from the client.
+ */
+const PhotoCardSuggestion = z
+  .object({
+    task: z.literal("product_from_photo"),
+    entity_type: z.literal("media"),
+    entity_id: z.string().regex(MEDIA_ID),
+    template_id: z
+      .string()
+      .regex(/^atpl_[A-Za-z0-9]{1,40}$/)
+      .optional(),
+    service: z.string().regex(NAME).optional(),
+  })
+  .strict()
+
+export const AdminPostAiSuggestion = z.union([TextSuggestion, MediaSuggestion, PhotoCardSuggestion])
 export type AdminPostAiSuggestionType = z.infer<typeof AdminPostAiSuggestion>
 
 /**

@@ -19,10 +19,12 @@ interface AttributeInputProps {
   definition: AttributeDefinition
   value: AttributeValue | undefined
   onChange: (value: AttributeValue) => void
+  /** An i18n'd error sentence under the field (a required one left empty). */
+  error?: string | undefined
 }
 
 /** The field for one attribute, by its type; an empty field means "no value" (null). */
-export function AttributeInput({ definition, value, onChange }: AttributeInputProps) {
+export function AttributeInput({ definition, value, onChange, error }: AttributeInputProps) {
   const { t } = useTranslation()
   const id = `attribute-${definition.key}`
   const options = definition.options ?? []
@@ -48,7 +50,7 @@ export function AttributeInput({ definition, value, onChange }: AttributeInputPr
   if (definition.type === "multi_select") {
     const selected = Array.isArray(value) ? value : []
     return (
-      <Field label={label} required={definition.is_required}>
+      <Field label={label} required={definition.is_required} error={error}>
         <div role="group" aria-label={label} className="flex flex-wrap gap-2">
           {options.map((option) => (
             <label
@@ -73,7 +75,7 @@ export function AttributeInput({ definition, value, onChange }: AttributeInputPr
     )
   }
   return (
-    <Field label={label} htmlFor={id} required={definition.is_required}>
+    <Field label={label} htmlFor={id} required={definition.is_required} error={error}>
       {definition.type === "select" ? (
         <Select
           value={typeof value === "string" ? value : NONE}

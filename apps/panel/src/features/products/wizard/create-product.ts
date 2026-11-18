@@ -4,6 +4,7 @@ import { sdk } from "@/lib/sdk"
 import { parseMeasureInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import type { ShopDefaults } from "@/features/products/api/lookups"
 import type { JSONContent } from "@tiptap/react"
+import type { AttributeValue } from "@/features/attributes/types"
 import { hasSummaryText } from "@/features/products/summary-doc"
 import { DEFAULT_VARIANT_KEY } from "./schema"
 import type { WizardValues } from "./schema"
@@ -53,7 +54,7 @@ export function variantImages(
   })
 }
 
-export function productBody({ values, publish, defaults, defaultOption }: CreateInput) {
+export function productBody({ values, defaults, defaultOption }: CreateInput) {
   const options =
     values.has_options && values.options.length > 0
       ? values.options.map((option) => ({ title: option.title, values: option.values }))
@@ -67,9 +68,9 @@ export function productBody({ values, publish, defaults, defaultOption }: Create
     title: values.title.trim(),
     ...(values.handle.trim() ? { handle: values.handle.trim() } : {}),
     description: values.description.trim(),
-    // A digital or service product is published after its kind is set (F3.2): as a
-    // physical one it would need measurements first
-    status: publish && values.kind === "physical" ? ("published" as const) : ("draft" as const),
+    // Always a draft first: it is published last, once its kind (F3.2) and
+    // attributes are written, so a failed step never leaves it live half-made
+    status: "draft" as const,
     images: values.images.map((image) => ({ url: image.url })),
     ...(values.images[0] ? { thumbnail: values.images[0].url } : {}),
     categories: values.category_ids.map((id) => ({ id })),
@@ -178,6 +179,26 @@ async function stockLevels(productId: string, values: WizardValues, locationId: 
   }
 }
 
+/**
+ * The new product's attribute template and its filled values (adr/0013),
+ * or null without a template. An empty field is left out: it was never
+ * given. The server checks each value against its definition.
+ */
+export function attributesBody(
+  values: Pick<WizardValues, "template_id" | "attributes">
+): { template_id: string; values: Record<string, AttributeValue> } | null {
+  if (!values.template_id) {
+    return null
+  }
+  const filled = Object.entries(values.attributes).filter(
+    ([, value]) => value !== null && value !== "" && !(Array.isArray(value) && value.length === 0)
+  )
+  return {
+    template_id: values.template_id,
+    values: Object.fromEntries(filled),
+  }
+}
+
 export interface CreateResult {
   productId: string
   /**
@@ -185,38 +206,82 @@ export interface CreateResult {
    * location, or writing the levels failed (with why). The page says so.
    */
   stockProblem: { kind: "no_location" } | { kind: "failed"; reason: unknown } | null
+  /** The product was saved but its attributes were not (a required one empty): why. */
+  attributesProblem: { reason: unknown } | null
+  /**
+   * Publishing was asked but the product stays a draft: its attributes were
+   * not written (`attributesProblem`), or publishing itself failed (why).
+   */
+  publishHeld: { reason: unknown } | null
 }
 
-/** Creates the product, then its catalog fields (`catalogBody`) and its stock at the default location. */
+type StockProblem = CreateResult["stockProblem"]
+
+/**
+ * Creates the product as a draft, then writes its catalog fields and
+ * attributes, and publishes it last when asked: an attribute write that
+ * fails keeps it a draft (`publishHeld`). Stock follows; its failure leaves
+ * the product as it is.
+ */
+export async function createProduct(input: CreateInput): Promise<CreateResult> {
+  const { product } = await sdk.admin.product.create(productBody(input))
+  const path = `/admin/products/${encodeURIComponent(product.id)}`
+  const catalog = catalogBody(input.values, idsByRow(input.values, product.variants))
+  if (catalog) {
+    await sdk.client.fetch(`${path}/catalog`, { method: "POST", body: catalog })
+  }
+  let attributesProblem: CreateResult["attributesProblem"] = null
+  const attributes = attributesBody(input.values)
+  if (attributes) {
+    try {
+      await sdk.client.fetch(`${path}/attributes`, { method: "POST", body: attributes })
+    } catch (reason) {
+      // The product stands as a draft; its attributes are filled on its page
+      attributesProblem = { reason }
+    }
+  }
+  let publishHeld: CreateResult["publishHeld"] = null
+  if (input.publish) {
+    if (attributesProblem) {
+      publishHeld = attributesProblem
+    } else {
+      try {
+        await sdk.admin.product.update(product.id, { status: "published" })
+      } catch (reason) {
+        publishHeld = { reason }
+      }
+    }
+  }
+  return {
+    productId: product.id,
+    stockProblem: await stockOf(product.id, input),
+    attributesProblem,
+    publishHeld,
+  }
+}
+
+// The stock typed, at the shop's default location; a failure leaves the product standing
+async function stockOf(productId: string, input: CreateInput): Promise<StockProblem> {
+  if (!input.values.manage_inventory) {
+    return null
+  }
+  if (!input.defaults.locationId) {
+    return { kind: "no_location" }
+  }
+  try {
+    await stockLevels(productId, input.values, input.defaults.locationId)
+    return null
+  } catch (reason) {
+    // The product stands; its stock is set on its page
+    return { kind: "failed", reason }
+  }
+}
+
+/** `createProduct` as a mutation; the product lists are read again after it. */
 export function useCreateProduct() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: async (input: CreateInput): Promise<CreateResult> => {
-      const { product } = await sdk.admin.product.create(productBody(input))
-      const catalog = catalogBody(input.values, idsByRow(input.values, product.variants))
-      if (catalog) {
-        await sdk.client.fetch(`/admin/products/${encodeURIComponent(product.id)}/catalog`, {
-          method: "POST",
-          body: catalog,
-        })
-      }
-      if (input.values.kind !== "physical" && input.publish) {
-        await sdk.admin.product.update(product.id, { status: "published" })
-      }
-      if (!input.values.manage_inventory) {
-        return { productId: product.id, stockProblem: null }
-      }
-      if (!input.defaults.locationId) {
-        return { productId: product.id, stockProblem: { kind: "no_location" } }
-      }
-      try {
-        await stockLevels(product.id, input.values, input.defaults.locationId)
-        return { productId: product.id, stockProblem: null }
-      } catch (reason) {
-        // The product stands; its stock is set on its page
-        return { productId: product.id, stockProblem: { kind: "failed", reason } }
-      }
-    },
+    mutationFn: createProduct,
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["products"] })
       await client.invalidateQueries({ queryKey: ["dashboard"] })

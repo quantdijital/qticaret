@@ -4,6 +4,7 @@ import { parseMeasureInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money
 import { isValidSlug } from "@/lib/slug"
 import type { JSONContent } from "@tiptap/react"
 import { EMPTY_SUMMARY, SUMMARY_TEXT_MAX, docTextLength } from "@/features/products/summary-doc"
+import type { AttributeValue } from "@/features/attributes/types"
 
 /**
  * The new-product form across its steps. Inputs stay text while typing
@@ -107,6 +108,9 @@ export const wizardSchema = z
       }),
     category_ids: z.array(z.string()),
     type_id: z.string(),
+    // The attribute template (adr/0013) and its product values, written after the product; "" none
+    template_id: z.string(),
+    attributes: z.record(z.string(), z.custom<AttributeValue>()),
     images: z.array(z.object({ id: z.string(), url: z.string() })).max(20),
     has_options: z.boolean(),
     options: z.array(optionSchema).max(3),
@@ -169,6 +173,8 @@ export const defaultWizardValues = (): WizardValues => ({
   summary_doc: EMPTY_SUMMARY,
   category_ids: [],
   type_id: "",
+  template_id: "",
+  attributes: {},
   images: [],
   has_options: false,
   options: [],

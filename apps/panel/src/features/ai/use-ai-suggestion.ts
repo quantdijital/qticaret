@@ -19,6 +19,10 @@ export type AiSuggestionState =
 export interface AiAsk {
   service?: string | undefined
   option?: string | undefined
+  /** The record, when it is known only at the ask (a photo just uploaded); left out: the hook's. */
+  entity?: AiEntity | undefined
+  /** A product card's attribute template (`product_from_photo`). */
+  templateId?: string | undefined
 }
 
 // The services the backend no longer offers for the task: the picker and the hint read them again (§12)
@@ -47,7 +51,7 @@ export function useAiSuggestion(task: string, entity: AiEntity) {
       const mine = ++turn.current
       setState({ status: "loading", service: ask.service ?? null })
       try {
-        const suggestion = await requestSuggestion({ task, entity, ...ask })
+        const suggestion = await requestSuggestion({ task, ...ask, entity: ask.entity ?? entity })
         if (mine === turn.current) {
           setState({ status: "suggestion", suggestion })
         }

@@ -17,7 +17,9 @@ import { RichEditor } from "@/features/content/editor/rich-editor"
 import { useFeature } from "@/features/settings/api/features"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { toSlug } from "@/lib/slug"
+import { PhotoFillButton } from "../photo-fill/photo-fill"
 import { SUGGESTED_WORDS, wordCount } from "../readiness"
+import { AttributesSection } from "./attributes-section"
 import type { WizardValues } from "../schema"
 
 function UrlField() {
@@ -177,7 +179,11 @@ export function BasicsStep() {
   const titleError = formState.errors.title?.message
   return (
     <div className="grid gap-[var(--grid-gap)] xl:grid-cols-12">
-      <SectionCard title={t("products.wizard.basics.card")} className="xl:col-span-8">
+      <SectionCard
+        title={t("products.wizard.basics.card")}
+        action={<PhotoFillButton />}
+        className="xl:col-span-8"
+      >
         <div className="flex flex-col gap-5">
           <Field
             label={t("products.wizard.title")}
@@ -217,6 +223,7 @@ export function BasicsStep() {
           <VatPicker />
         </div>
       </SectionCard>
+      <AttributesSection className="xl:col-span-8" />
     </div>
   )
 }

@@ -24,6 +24,8 @@ export const AI_GATES = [
   "plain_text",
   // A picture, not a text: read by the upload check (lib/ai/run-image.ts)
   "image",
+  // A structured answer: a closed schema and allow-lists (lib/ai/product-card.ts)
+  "product_card",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -58,6 +60,8 @@ export interface AiTask {
    * (customers' words are not copied into `content_draft`, adr/0071 §10).
    */
   keepData?: boolean
+  /** The answer is one JSON object: the service's JSON mode is asked for where it has one. */
+  json?: boolean
 }
 
 /** A record read another way than by its type (lib/ai/facts). */
@@ -257,6 +261,30 @@ export const QUESTION_ANSWER_TASK: AiTask = {
   factMaxLengths: { question: REVIEW_REPLY_MAX_LENGTH, description: 1_000 },
 }
 
+/** The longest answer read for a product card, in characters: its JSON, all fields together. */
+export const PRODUCT_CARD_MAX_LENGTH = 4_000
+
+/**
+ * A new product's card from one photo (Aşama 6, docs/22): its name, a
+ * short description, one of the shop's shown categories and values for
+ * the chosen template's attributes, as one JSON object read against a
+ * closed schema and the shop's own lists (lib/ai/product-card.ts). No
+ * price, stock, status or code is asked for or taken. Nothing is saved:
+ * the result fills the new product form.
+ */
+export const PRODUCT_FROM_PHOTO_TASK: AiTask = {
+  id: "product_from_photo",
+  capability: "vision",
+  mode: "sync",
+  options: [],
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "product_card",
+  maxLength: PRODUCT_CARD_MAX_LENGTH,
+  entities: ["media"],
+  json: true,
+}
+
 const TASKS: readonly AiTask[] = [
   SEO_TITLE_TASK,
   SEO_DESCRIPTION_TASK,
@@ -266,6 +294,7 @@ const TASKS: readonly AiTask[] = [
   REVIEW_SUMMARY_TASK,
   REVIEW_REPLY_TASK,
   QUESTION_ANSWER_TASK,
+  PRODUCT_FROM_PHOTO_TASK,
 ]
 
 /** The data block's field lengths for a task: the shared ones, and the task's own over them. */
