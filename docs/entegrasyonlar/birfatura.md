@@ -169,7 +169,7 @@ Bu uçlar BirFatura'nın değil **bizim** web kancamızdır ve kişisel veri dö
 
 - `token` başlığı zorunlu; kayıtlı değerle sabit zamanlı karşılaştırma. Eksik ya da yanlış: 401, gövde boş, aynı süre. Token sorgu dizgisinde kabul edilmez.
 - Hız sınırı: yeni profil (`einvoice_pull`, IP başına dakikada 60, mağaza başına dakikada 120); başarısız token denemesi IP başına ayrı ve sıkı (dakikada 10) sayılır.
-- Gövde en çok 16 KB, katı Zod şeması (`validateAndTransformBody`), bilinmeyen alan 400.
+- Gövde en çok 16 KB, Zod şeması (`validateAndTransformBody`): belgelenen alanlar zorunluluk ve tipiyle denetlenir; belgede olmayan alan yok sayılır (400 değil).
 - Tarih aralığı en çok 31 gün; yanıt en çok 100 sipariş.
 - Yalnızca satış faturası bekleyen siparişler; iade belgeleri ve faturası istenmeyen siparişler hiçbir zaman dönmez (`api/admin/invoices/reach.ts` kuralı).
 - IP listesi savunma sayılmaz: API belgesinde IP yok; altyapı rehberleri farklı listeler veriyor (soru 2). İlk sürümde IP listesi yok; test hesabıyla gelen adresler loglardan görülür, kararlı çıkarsa F16'da nginx'te isteğe bağlı izin listesi.
