@@ -18,7 +18,7 @@ import { legalLabel } from "./SmallPrint"
 type Subscribe = (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
 
 const LEGAL_LINK =
-  "inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+  "inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
 
 /** Each column's share of its row: `2-1-1` gives 0.5, 0.25, 0.25. */
 const sharesOf = (layout: FooterRowView["layout"]) => {

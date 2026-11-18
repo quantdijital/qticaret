@@ -87,6 +87,7 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
     name:
       | "show_brand"
       | "show_rating"
+      | "hover_image"
       | (typeof CARD_BADGE_SWITCHES)[number]
       | (typeof FRAMED_CARD_SWITCHES)[number]
       | "quick_view"
@@ -118,6 +119,7 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
         {toggle("show_brand")}
         {toggle("show_rating")}
         {choice("no_reviews")}
+        {toggle("hover_image")}
         <p className="pt-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
           {t(`${C}.badges`)}
         </p>

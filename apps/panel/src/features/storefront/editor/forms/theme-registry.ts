@@ -220,7 +220,8 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   "product_card.quick_view_rating": quickViewSwitch("quick_view_rating"),
   "product_card.quick_view_summary": quickViewSwitch("quick_view_summary"),
   "product_card.quick_view_quantity": quickViewSwitch("quick_view_quantity"),
-  "product_card.hover_image": framedSwitch("hover_image"),
+  // Every card's since sahip 2026-11-18 (the framed card's before)
+  "product_card.hover_image": { group: "card", label: `${C}.hover_image` },
   "product_card.delivery_note": framedSwitch("delivery_note"),
   "product_card.full_button": framedSwitch("full_button"),
   "product_card.button_style": {

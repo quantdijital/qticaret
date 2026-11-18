@@ -32,7 +32,10 @@ export function LineName({ path, title }: { path?: string | null | undefined; ti
     return title
   }
   return (
-    <a href={path} className="no-underline underline-offset-4 hover:underline">
+    <a
+      href={path}
+      className="no-underline transition-colors duration-(--dur-micro) hover:text-text-2"
+    >
       {title}
     </a>
   )

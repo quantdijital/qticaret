@@ -8813,7 +8813,7 @@
         "framed": "Çerçeveli kart",
         "framedHint": "Kart çerçeveli çizildiği her yerde geçer: genel biçimde ya da çerçeveli seçilmiş bir rafta.",
         "hover_image": "Üstüne gelince ikinci fotoğraf",
-        "hover_imageHint": "Fare kartın üstüne gelince ürünün ikinci fotoğrafı görünür; telefonda fotoğraflar yana kaydırılır. Tek fotoğraflı üründe etkisi yok.",
+        "hover_imageHint": "Fare kartın üstüne gelince ürünün ikinci fotoğrafı görünür; telefonda büyük kartlarda fotoğraflar yana kaydırılır. Bütün kart biçimlerinde geçer; tek fotoğraflı üründe etkisi yok.",
         "delivery_note": "Ücretsiz kargo notu",
         "delivery_noteHint": "Fiyatı ücretsiz kargo eşiğine ulaşan üründe fiyatın altında \"Ücretsiz kargo\" yazar. Eşik Kampanyalar sayfasındaki ayardan gelir.",
         "full_button": "Tam genişlik düğme",

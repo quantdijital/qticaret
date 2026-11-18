@@ -84,7 +84,7 @@ export function OutlineAside({
         <Links
           outline={outline}
           itemClass="py-1.5 text-sm leading-snug"
-          linkClass="text-text-2 no-underline underline-offset-4 hover:text-text hover:underline"
+          linkClass="text-text-2 no-underline hover:text-text"
         />
       </div>
     </aside>

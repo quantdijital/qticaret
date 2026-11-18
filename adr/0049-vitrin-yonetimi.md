@@ -899,3 +899,11 @@ Sahip 4, 5, 6 ve 11'i kendisi seçti; teknik ve küçük kararlarda "önerilerle
 - **Panel:** Stil › Biçim'de küçük çizimleriyle beş biçim (sayfada dört); İçerik'te Başlık, Açıklama, Güvence satırı (aç/kapat + yazısı; yalnız `split` ve `image_card`), Görsel (yalnız `image_card`), Onay metni. Biçim ve güvence satırı ayar aramasında.
 - **Bilerek konmayanlar:** kutuya özel zemin, köşe ya da gölge ayarı yok; görünüş stil takımından ve bölümün sayfa ayarından (`look`) gelir.
 - **Doğrulama:** beş biçim 1440 ve 390 px, Chromium + WebKit (bileşen düzeyi, sunucu çizimi): taşma yok, telefonda yığılma düzgün, odakta onay kutusu görünüyor. Backend http testi yerelde koşulmadı, CI'da koşar.
+
+### Ek 2026-11-18 (Deniz): üstüne gelince ikinci fotoğraf her ürün kartında
+
+- **Dayanak:** sahip kararı (2026-11-18): ürün kartında üstüne gelince ürünün ikinci fotoğrafı her görünümde görünür (klasik e-ticaret davranışı).
+- **Karar:** `product_card.hover_image` artık yalnız çerçeveli kartın (E5, Ek 2026-11-14 §3.3) değil, bütün ürün kartı biçimlerinindir: `standard`, `framed`, `compact` ve sıralı listenin (`products` variant `ranked`) yerleri. Fare ile kartın üstüne gelince ya da kartın içindeki bir öğe odaktayken ikinci fotoğraf birincinin üstünde belirir (hareket azaltmada geçişsiz). Dokunmatik ekranda `standard` ve `framed` kartta iki fotoğraf yana kaydırılır (dokunuş yine ürünü açar); `compact` kart ve sıralı listenin yerleri yalnız ilk fotoğrafı gösterir, ikincisi yüklenmez. Tek fotoğraflı üründe değişiklik yoktur.
+- **Hazır görünümler:** ayar her görünümde açık; `cutlery-tezgah`, `cutlery-tezgah-lacivert` ve `cutlery-tezgah-turuncu` `false`'tan `true`'ya alındı, varsayılan zaten `true`. Mağazaların kayıtlı ayarına dokunulmadı: kapatmış mağaza kapalı kalır, kapattığı ayar artık her kart biçimini kapsar.
+- **Panel:** anahtar "Çerçeveli kart" grubundan "Ürün kartı" grubuna taşındı.
+- **§7:** sahibin açık kararıyla yerinde değişti; kilitler `pnpm lock:presets` ile yeniden yazıldı (dal `deniz/vitrin-hover-duzeni`).

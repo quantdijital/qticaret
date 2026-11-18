@@ -18,12 +18,12 @@ export interface ProductCardSettings {
   show_rating: boolean
   /** Everywhere's card; a product rail may draw its own (`card_variant`). */
   variant: (typeof PRODUCT_CARD_VARIANTS)[number]
+  /** The second photo on hover, every card variant's (sahip 2026-11-18; the framed card's E5 before). */
+  hover_image: boolean
   /**
    * The framed card's own (E5), read wherever a framed card is drawn: the
-   * second photo on hover, the free shipping line, the add button across
-   * its foot, empty stars without reviews.
+   * free shipping line, the add button across its foot.
    */
-  hover_image: boolean
   delivery_note: boolean
   full_button: boolean
   /** The pills on the photo, each the shop's (adr/0049 Ek 2026-11-15, decision a). */

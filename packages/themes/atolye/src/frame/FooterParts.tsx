@@ -23,7 +23,7 @@ import { FooterSocial } from "./FooterSocial"
  */
 
 const LINK =
-  "inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+  "inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
 
 /**
  * One way to reach the shop in the strip: its kind small above, the
@@ -52,7 +52,7 @@ function Reach({
         <span className="gf-reach-sign">{icon}</span>
         <span className="flex min-w-0 flex-col">
           <span className="text-xs text-text-3">{kind}</span>
-          <span className="truncate font-semibold group-hover/reach:underline underline-offset-4">
+          <span className="truncate font-semibold transition-colors duration-(--dur-micro) group-hover/reach:text-text-2">
             {value}
           </span>
         </span>

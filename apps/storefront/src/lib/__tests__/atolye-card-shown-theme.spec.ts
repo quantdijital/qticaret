@@ -61,7 +61,6 @@ const textOf = (product: ProductCardView) =>
 const FRAMED = {
   variant: "framed" as const,
   framed: {
-    secondImage: null,
     freeShipping: false,
     fullButton: true,
     buttonStyle: "outline" as const,

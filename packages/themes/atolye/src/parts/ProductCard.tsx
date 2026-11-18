@@ -1,8 +1,8 @@
 import type { ShelfColumns, ShelfPhoneColumns } from "@qticaret/types"
-import { ResponsiveImage } from "@qticaret/ui"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CardBadges, drawnCardVariant, isOut, quickAddWords } from "./card-parts"
+import { CardPhoto } from "./CardPhoto"
 import { CardPriceRow, CardStars } from "./card-rows"
 import { CompactCard } from "./CompactCard"
 import { FramedCard } from "./FramedCard"
@@ -31,7 +31,8 @@ const SIZES = {
  * reader hears "%30 indirim"), "Tükendi" or "Az kaldı" (a stock bucket,
  * never a number); the brand small, the name on two lines, the stars when
  * the card carries them, the price heavy. One link over the whole card;
- * the quick add is a round "+" on the photo's corner, above the link.
+ * the quick add is a round "+" on the photo's corner, above the link. The
+ * product's second photo on hover when the shop has it on (`CardPhoto`).
  * The name and price take their larger size from 1024 px only on a card
  * 256 px wide or more (a container query): five across at 1440 px, or a
  * listing's four at 1024, keep the smaller one. A card the storefront
@@ -66,15 +67,8 @@ export function ProductCard({
   const add = quickAdd && product.quickAdd && !out ? product.quickAdd : null
   return (
     <article className="group gf-card @container relative flex h-full flex-col gap-3">
-      <div className="relative aspect-card overflow-hidden rounded-media bg-media">
-        {product.image && (
-          <ResponsiveImage
-            image={product.image}
-            sizes={sizes}
-            priority={priority}
-            className="h-full w-full object-cover"
-          />
-        )}
+      <div className="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media">
+        <CardPhoto product={product} sizes={sizes} priority={priority} />
         <CardBadges product={product} t={t} />
         <CardQuickView product={product} t={t} />
         {add && quickAdd && (
@@ -92,7 +86,7 @@ export function ProductCard({
           {/* Clamped on the link itself: its box ends with the two lines shown, over nothing else */}
           <a
             href={product.path}
-            className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            className="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
           >
             {product.title}
           </a>

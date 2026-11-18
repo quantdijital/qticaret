@@ -65,7 +65,7 @@ export function CheckoutHeader({ shop, t }: { shop: ShopView; t: Translate }) {
         <Help shop={shop} t={t} />
         <a
           href="/sepet"
-          className={`${ROUND} underline-offset-4 max-sm:-mr-2 max-sm:hover:bg-paper-2 sm:hover:underline`}
+          className={`${ROUND} max-sm:-mr-2 max-sm:hover:bg-paper-2 sm:transition-colors sm:duration-(--dur-micro) sm:hover:text-text-2`}
         >
           <ShoppingBag className="size-6 sm:hidden" aria-hidden="true" strokeWidth={1.75} />
           <ArrowLeft className="size-4 max-sm:hidden" aria-hidden="true" strokeWidth={2} />

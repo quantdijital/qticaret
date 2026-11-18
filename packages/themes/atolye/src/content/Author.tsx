@@ -74,7 +74,10 @@ export function AuthorBox({ author, t }: { author: AuthorView; t: Translate }) {
             {t("blog.author_about")}
           </h2>
           <p className="text-md font-extrabold">
-            <a href={author.path} className="underline-offset-4 hover:underline">
+            <a
+              href={author.path}
+              className="transition-colors duration-(--dur-micro) hover:text-text-2"
+            >
               {author.name}
             </a>
           </p>

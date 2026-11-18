@@ -22,7 +22,7 @@ function PlainCard({ item }: { item: Favorite }) {
       <h3 className="text-sm leading-snug font-semibold tracking-normal lg:text-md">
         <a
           href={item.path}
-          className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+          className="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
         >
           {item.title}
         </a>
