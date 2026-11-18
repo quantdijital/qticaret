@@ -3326,7 +3326,7 @@
         "uploading": "Uploading photo…",
         "uploadFailed": "The photo could not be uploaded.",
         "photoAlt": "Chosen product photo",
-        "note": "The photo is sent to {{name}} for the suggestion. Keep in mind if it shows a person. Use fills the form and makes the photo the first picture; the product is created when you save.",
+        "note": "The photo is sent to {{name}} for the suggestion. Keep in mind if it shows a person. The photo becomes the first picture of the product.",
         "fields": {
           "title": "Product name",
           "summary": "Short description",

@@ -3326,7 +3326,7 @@
         "uploading": "Fotoğraf yükleniyor…",
         "uploadFailed": "Fotoğraf yüklenemedi.",
         "photoAlt": "Seçilen ürün fotoğrafı",
-        "note": "Fotoğraf, öneri için {{name}} servisine gönderilir. Fotoğrafta kişi varsa bunu göz önünde bulundurun. Kullan formu doldurur ve fotoğrafı ilk görsel yapar; ürün siz kaydedince oluşur.",
+        "note": "Fotoğraf, öneri için {{name}} servisine gönderilir. Fotoğrafta kişi varsa bunu göz önünde bulundurun. Fotoğraf ürünün ilk görseli olur.",
         "fields": {
           "title": "Ürün adı",
           "summary": "Kısa açıklama",

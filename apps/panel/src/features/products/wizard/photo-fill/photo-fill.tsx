@@ -128,7 +128,7 @@ function PhotoFillDialog(props: {
       new Set((categories.data ?? []).map((each) => each.id))
     )
     for (const key of Object.keys(next) as (keyof typeof next)[]) {
-      form.setValue(key, next[key], { shouldDirty: true })
+      form.setValue(key, next[key], { shouldDirty: true, shouldValidate: true })
     }
     toast.success(t(`${P}.used`))
     onClose()
