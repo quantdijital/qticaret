@@ -211,3 +211,8 @@ Varsayımların çoğu doğrulandı. Değişenler (kod; her biri testle):
 - **Sorun:** geliştirmede PayTR test modunda ödenen sipariş faturalanmadı; kural doğru ama fatura kartı boş kaldı, mağaza nedenini göremedi.
 - **Tek kural:** kesim kararı `lib/invoicing/hold.ts` `saleInvoiceHold`'dadır (program kapalı, iptal, test ödemesi, TL dışı, ödeme/kargo/teslim beklemesi). Kuyruk (`queueSaleInvoice`) ve sipariş sayfası (`GET /admin/invoices?order_id=` → `sale_hold`) aynı kuralı okur; panel nedeni bilgi notu olarak gösterir (engel değil).
 - **Geliştirmede test ödemesi faturalanır:** `NODE_ENV` development ya da test ve mağazanın programı bu makinedeki sahte Paraşüt ise (`PARASUT_BASE_URL` loopback; `testPaymentsInvoiced`). Staging ve production'da asla. Faturada "test" ibaresi yoktur.
+
+## Ek: BirFatura çekme (2026-11-18, ADR-0072)
+- **§1:** sağlayıcı listesine `birfatura` eklendi: davranışı `external`'dır, ek olarak BirFatura'nın çektiği beş gelen ucu açar; `invoice.requested` gitmez. Fatura kaydının sağlayıcısı da `birfatura` olur; "dışarıda kesilen" kayıtlar (`external`, `birfatura`) iş tarafından alınmaz, geri yazma, PDF, taslak ve iptal kuralları ikisine de uygulanır.
+- **§9:** geri yazma **boş belge tipini** kabul eder (BirFatura ETTN ve belge tipini göndermez; §2'deki "öğrenilene kadar boş"). Var olan değer boş gelenle silinmez.
+- Ayrıntı, güvenlik modeli ve açık sorular: ADR-0072.
