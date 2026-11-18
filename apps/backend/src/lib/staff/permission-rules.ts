@@ -99,6 +99,8 @@ export const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/platform-settings/invoicing" },
   // Connecting the company; checking it stays the admin's, as with provider accounts
   { methods: WRITES, path: "/admin/einvoice/parasut" },
+  // Customers' reviews and questions sent to the AI service (adr/0071 Aşama 9)
+  { methods: WRITES, path: "/admin/features/ai.reviews" },
   { methods: ["POST"], path: "/admin/google/connect" },
   { methods: ["POST"], path: "/admin/google/reviews/connect" },
   { methods: ["DELETE"], path: "/admin/google" },

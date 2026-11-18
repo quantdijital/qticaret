@@ -92,6 +92,8 @@ describe("staff roles", () => {
     ["POST", "/admin/platform-settings/%69nvoicing"],
     ["POST", "/admin/einvoice/parasut"],
     ["DELETE", "/admin/einvoice/parasut"],
+    ["POST", "/admin/features/ai.reviews"],
+    ["POST", "/admin/features/ai%2ereviews"],
     ["POST", "/admin/google/connect"],
     ["POST", "/admin/google/reviews/connect"],
     ["DELETE", "/admin/google"],

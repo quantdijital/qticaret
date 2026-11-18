@@ -21,6 +21,7 @@ const AUTHOR = "Gülşen T."
 const EMAIL = "gulsen.test@example.com"
 const PHONE = "0532 765 43 21"
 const PENDING = "Bu yorum henüz onay bekliyor"
+const DRAFT = "Yorumunuz için teşekkür ederiz; dikiş konusunu inceleyip size dönüş yapacağız."
 
 const unique = () => `${String(Date.now())}${String(Math.floor(Math.random() * 1e6))}`
 
@@ -56,12 +57,12 @@ medusaIntegrationTestRunner({
       jest.restoreAllMocks()
     })
 
+    // A fixed draft: the fake's echo of the data would carry its masks, which the gate refuses
     function watching(): TextRequest[] {
       const seen: TextRequest[] = []
-      const complete = fakeTextConnector.complete.bind(fakeTextConnector)
       jest.spyOn(fakeTextConnector, "complete").mockImplementation((request) => {
         seen.push(request)
-        return complete(request)
+        return Promise.resolve({ text: DRAFT, usage: { inputTokens: 10, outputTokens: 10 } })
       })
       return seen
     }
@@ -223,6 +224,7 @@ medusaIntegrationTestRunner({
       const reviewId = await review(productId, reviewText)
       const operations = await createAdminUser(http, getContainer(), "operations")
       const readonly = await createAdminUser(http, getContainer(), "readonly")
+      watching()
 
       const reply = await ask(operations.headers, {
         task: "review_reply",

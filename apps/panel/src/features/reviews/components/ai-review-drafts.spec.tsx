@@ -20,10 +20,13 @@ import { AiReviewsCard } from "@/features/settings/components/ai-reviews-card"
  */
 
 const sdkFetch = vi.hoisted(() => vi.fn())
-const can = vi.hoisted(() => ({ value: true }))
+const can = vi.hoisted(() => ({ value: true, role: "owner" }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: sdkFetch } } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => can.value }))
+vi.mock("@/features/auth/api/staff", () => ({
+  useCan: () => can.value,
+  useStaff: () => ({ role: can.role }),
+}))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -107,6 +110,7 @@ const bodyOf = (index: number) =>
 
 beforeEach(() => {
   can.value = true
+  can.role = "owner"
   sdkFetch.mockReset()
   netFetch.mockReset()
   vi.stubGlobal("fetch", netFetch)
@@ -240,19 +244,24 @@ describe("the switch for AI on reviews (Settings › Yapay zekâ)", () => {
     })
   })
 
-  it("leaves it to the owner and admins", async () => {
-    can.value = false
-    sdkFetch.mockImplementation(flagged(true))
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-    render(
-      <QueryClientProvider client={client}>
-        <AiReviewsCard />
-      </QueryClientProvider>
-    )
-    const toggle = await screen.findByRole("switch", { name: "Yorum ve sorularda yapay zekâ" })
-    await waitFor(() => {
-      expect(toggle).toBeChecked()
-    })
-    expect(toggle).toBeDisabled()
-  })
+  // Customers' words go out with it on: the owner's alone, as the backend's `OWNER_ONLY`
+  it.each(["admin", "operations"])(
+    "shows %s its state and why it cannot change it",
+    async (role) => {
+      can.role = role
+      sdkFetch.mockImplementation(flagged(true))
+      const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      render(
+        <QueryClientProvider client={client}>
+          <AiReviewsCard />
+        </QueryClientProvider>
+      )
+      const toggle = await screen.findByRole("switch", { name: "Yorum ve sorularda yapay zekâ" })
+      await waitFor(() => {
+        expect(toggle).toBeChecked()
+      })
+      expect(toggle).toBeDisabled()
+      expect(screen.getByText(/yalnız mağaza sahibi açıp kapatabilir/)).toBeInTheDocument()
+    }
+  )
 })

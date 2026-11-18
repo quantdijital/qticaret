@@ -11461,6 +11461,7 @@
       "settingTitle": "AI on reviews and questions",
       "settingDescription": "Sums up product reviews and drafts replies to reviews and questions. A draft is published only when you send it.",
       "settingDetail": "When on, the text customers wrote in reviews and questions goes to the connected AI service with its rating. The author's name is masked in the text; e-mail, phone, IBAN, card and ID numbers are taken out; order, address and customer details are never sent. Other people named inside the text cannot always be caught.",
+      "ownerOnly": "Customers' words go to an outside service, so only the shop's owner turns this on or off.",
       "summarize": "Summarise reviews",
       "summarizeFor": "Summarise the reviews of {{product}}",
       "summaryTitle": "{{product}} · review summary",

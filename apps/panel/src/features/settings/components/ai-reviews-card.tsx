@@ -5,7 +5,7 @@ import { InfoTip } from "@qticaret/admin-ui/patterns/info-tip"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { AI_KEY } from "@/features/ai/api/ai"
-import { useCan } from "@/features/auth/api/staff"
+import { useStaff } from "@/features/auth/api/staff"
 import { useFeatureState, useSetFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 
@@ -17,14 +17,15 @@ const R = "ai.reviews"
 /**
  * Settings › Yapay zekâ: AI on reviews and questions, off until the shop
  * turns it on (Aşama 9). What customers wrote goes to the service, so the
- * (i) says what goes and what is taken out. The owner and an admin switch
- * it; others see its state. On or off, the review screens' buttons follow.
+ * (i) says what goes and what is taken out. Only the owner switches it, as
+ * with the service's connection (backend `OWNER_ONLY`); others see its state
+ * and why. On or off, the review screens' buttons follow.
  */
 export function AiReviewsCard() {
   const { t } = useTranslation()
   const client = useQueryClient()
   const enabled = useFeatureState(AI_REVIEWS_FLAG)
-  const mayChange = useCan("settings")
+  const mayChange = useStaff()?.role === "owner"
   const toggle = useSetFeature()
   return (
     <SectionCard
@@ -55,6 +56,7 @@ export function AiReviewsCard() {
       }
     >
       <p className="text-[13px] text-muted-foreground">{t(`${R}.note`)}</p>
+      {!mayChange && <p className="mt-1 text-xs text-muted-foreground">{t(`${R}.ownerOnly`)}</p>}
     </SectionCard>
   )
 }

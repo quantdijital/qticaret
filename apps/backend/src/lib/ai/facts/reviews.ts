@@ -53,14 +53,15 @@ export async function productReviewFacts(
   if (rows.length < REVIEW_SUMMARY_MIN_REVIEWS) {
     throw aiValidationError("ai.not_enough_reviews")
   }
-  // Every author's name is masked in every review: one may name another
+  // Every author's name is masked in every review: one may name another. Its
+  // own author first, as the list of all of them is cut at `nameVariants`' cap
   const authors = rows.map((row) => row.author_name)
   return {
     product: name,
     review_count: String(count),
     reviews: rows.map((row) => ({
       label: stars(row.rating),
-      value: maskNames(reviewWords(row.title, row.body), authors),
+      value: maskNames(maskNames(reviewWords(row.title, row.body), [row.author_name]), authors),
     })),
   }
 }

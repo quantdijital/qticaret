@@ -4,6 +4,7 @@ import {
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
+import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { aiValidationError } from "../../lib/ai/errors"
 import { findAiTask } from "../../lib/ai/registry/tasks"
@@ -11,12 +12,33 @@ import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
+import { taskFlagOpen } from "./connections"
 import { AI_SUGGESTION_SOURCE } from "./steps/save-suggestion"
 
 export interface DecideSuggestionInput {
   id: string
   decision: "accept" | "dismiss"
   user_id: string
+}
+
+/**
+ * Who may decide a suggestion of `kind`: a role the task allows, as when it
+ * was asked for (adr/0071 §6), and its own flag still on: a reply drafted
+ * before the shop turned `ai.reviews` off is not taken into the form after.
+ */
+export async function authorizeDecision(
+  container: Pick<MedusaContainer, "resolve">,
+  kind: string,
+  userId: string
+): Promise<void> {
+  const task = findAiTask(kind)
+  const role = await container.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).roleOf(userId)
+  if (!task || role === null || !task.roles.includes(role)) {
+    throw new MedusaError(MedusaError.Types.FORBIDDEN, "staff.forbidden")
+  }
+  if (!(await taskFlagOpen(container, task))) {
+    throw new MedusaError(MedusaError.Types.FORBIDDEN, "ai.reviews_off")
+  }
 }
 
 /**
@@ -38,14 +60,7 @@ const decideSuggestionStep = createStep(
     if (draft?.status !== "draft") {
       throw aiValidationError("ai.suggestion_not_open")
     }
-    // The task's own roles, as when it was asked for (adr/0071 §6)
-    const task = findAiTask(draft.kind)
-    const role = await container
-      .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
-      .roleOf(input.user_id)
-    if (!task || role === null || !task.roles.includes(role)) {
-      throw new MedusaError(MedusaError.Types.FORBIDDEN, "staff.forbidden")
-    }
+    await authorizeDecision(container, draft.kind, input.user_id)
     const accepted = input.decision === "accept"
     await drafts.updateContentDrafts({
       id: draft.id,

@@ -11461,6 +11461,7 @@
       "settingTitle": "Yorum ve sorularda yapay zekâ",
       "settingDescription": "Ürün yorumlarını özetler, yorumlara ve sorulara yanıt taslağı hazırlar. Taslak siz göndermeden yayımlanmaz.",
       "settingDetail": "Açıkken müşterilerin yazdığı yorum ve soru metinleri, puanıyla birlikte bağlı yapay zekâ servisine gider. Yazarın adı metinden maskelenir; e-posta, telefon, IBAN, kart ve kimlik numarası ayıklanır; sipariş, adres ve müşteri bilgisi hiç gönderilmez. Metnin içinde geçen başka kişi adları her zaman yakalanamaz.",
+      "ownerOnly": "Müşteri metni dış servise gittiği için bu ayarı yalnız mağaza sahibi açıp kapatabilir.",
       "summarize": "Yorumları özetle",
       "summarizeFor": "{{product}} yorumlarını özetle",
       "summaryTitle": "{{product}} · yorum özeti",
