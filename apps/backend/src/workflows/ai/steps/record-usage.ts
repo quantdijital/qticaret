@@ -30,7 +30,8 @@ export interface RecordUsageInput {
  * with the registry's cost estimate, and the `ai.call` log line (§14):
  * counts and codes only, never the prompt, the output or the key. A
  * service that answered and was picked from several is remembered for
- * the task. Not undone: an attempt made stays recorded, failed ones too.
+ * the task. Not undone: an attempt made stays recorded, failed ones too,
+ * and when a later step fails the workflow's rollback leaves the row.
  */
 export const recordUsageStep = createStep(
   "ai-record-usage",
@@ -88,6 +89,24 @@ export const recordUsageStep = createStep(
       error_code: outcome.error_code,
     })
     return new StepResponse({ usage_id: id })
+  }
+)
+
+/**
+ * Names the suggestion on a usage row written before it (an image edit
+ * records its attempt straight after the paid call, so a failing
+ * suggestion cannot undo the row). The row is updated, never written
+ * again; should this fail, the row stays without the link. Nothing to undo.
+ */
+export const linkUsageSuggestionStep = createStep(
+  "ai-link-usage-suggestion",
+  async (input: { usage_id: string; suggestion_id: string | null }, { container }) => {
+    if (input.suggestion_id !== null) {
+      await container
+        .resolve<AiModuleService>(AI_MODULE)
+        .updateAiUsages({ id: input.usage_id, suggestion_id: input.suggestion_id })
+    }
+    return new StepResponse(true)
   }
 )
 

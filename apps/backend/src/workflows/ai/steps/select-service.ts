@@ -46,3 +46,27 @@ export const selectServiceStep = createStep(
     })
   }
 )
+
+/**
+ * A queued job's picture asks for the service it was queued with, paid
+ * the same way: when the shop's accounts or the package's flags changed
+ * meanwhile (`ai.own_keys` closed, the key removed) the choice made now
+ * differs, and the job stops rather than spend on another service or
+ * another way of paying than the one the staff member agreed to.
+ * Nothing to undo.
+ */
+export const keepQueuedServiceStep = createStep(
+  "ai-keep-queued-service",
+  (input: {
+    queued: { service: string; funding: string }
+    chosen: { service: string; funding: string }
+  }) => {
+    if (
+      input.chosen.service !== input.queued.service ||
+      input.chosen.funding !== input.queued.funding
+    ) {
+      throw aiValidationError("ai.service_unavailable")
+    }
+    return new StepResponse(true)
+  }
+)

@@ -6,6 +6,10 @@ import { AI_MODULE } from "../../src/modules/ai"
 import type AiModuleService from "../../src/modules/ai/service"
 import { MEDIA_MODULE } from "../../src/modules/media"
 import type MediaModuleService from "../../src/modules/media/service"
+import { STAFF_ROLES_MODULE } from "../../src/modules/staff-roles"
+import type StaffRolesModuleService from "../../src/modules/staff-roles/service"
+import type { JobContext } from "../../src/workflows/async-job/types"
+import { aiImageEdit } from "../../src/workflows/async-job/types/ai-image-edit"
 import { createAdminUser } from "../helpers/admin"
 import { askFor, connectFake, pushPlan } from "../helpers/ai"
 import { managedForThisFile } from "../helpers/control-plane"
@@ -301,6 +305,53 @@ medusaIntegrationTestRunner({
         model: "fake-scene",
         images: 1,
       })
+    })
+
+    it("stops a queued job when its asker's role was lowered or ai.own_keys closed", async () => {
+      const originalId = await upload()
+      // The job as the worker runs it, after it was queued: each picture checks again
+      const runAs = async (userId: string) =>
+        (
+          await aiImageEdit.execute(
+            {
+              container: getContainer(),
+              job: { id: "job_test", requested_by: userId },
+              progress: () => Promise.resolve(),
+              resultFile: () => Promise.reject(new Error("no file")),
+            } as unknown as JobContext,
+            aiImageEdit.input.parse({
+              task: "image_background",
+              service: "fake",
+              funding: "own_key",
+              background: "white",
+              media_ids: [originalId],
+              remember: false,
+            })
+          )
+        ).summary
+
+      const admin = await createAdminUser(http, getContainer(), "admin")
+      await getContainer()
+        .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
+        .setRole(admin.userId, "readonly", owner.userId)
+      expect(await runAs(admin.userId)).toMatchObject({
+        done: [],
+        failed: [],
+        skipped: 1,
+        stopped_by: "staff.forbidden",
+      })
+
+      await pushPlan(http, false)
+      expect(await runAs(owner.userId)).toMatchObject({
+        done: [],
+        failed: [],
+        skipped: 1,
+        stopped_by: "ai.own_keys_not_in_plan",
+      })
+
+      // Nothing was claimed, called or kept
+      expect(await usages()).toEqual([])
+      expect(await media().listMediaAssets({ derived_from_id: originalId })).toEqual([])
     })
   },
 })

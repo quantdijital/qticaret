@@ -2,8 +2,10 @@ import { z } from "@medusajs/framework/zod"
 import { IMAGE_BACKGROUNDS } from "../../../lib/ai/registry/services"
 import { IMAGE_BACKGROUND_MAX_BATCH, IMAGE_SCENE_MAX_BATCH } from "../../../lib/ai/registry/tasks"
 import { SCENE_CODE } from "@qticaret/sector-packs"
-import { isPlanLimitError, isValidationError } from "../../../lib/errors"
+import { isPlanLimitError } from "../../../lib/errors"
+import { errorSummary, logger } from "../../../lib/logging"
 import { assertStorageFits } from "../../../lib/plan-limits"
+import { errorKeyOf } from "../../ai/bulk-alt-text"
 import { editImageWorkflow } from "../../ai/edit-image"
 import { STORAGE_FULL } from "../../ai/steps/edit-image"
 import type { JobType } from "./types"
@@ -65,21 +67,40 @@ interface Failed {
   key: string
 }
 
-/** A refusal that holds for every picture left: the day's or the month's quota, the storage. */
+/**
+ * A refusal that holds for every picture left: the day's or the month's
+ * quota, the storage, or what each picture's run checks again before it
+ * spends anything (adr/0071 §8.1): the asker's role lowered, the package
+ * no longer opening a way to pay, the queued service gone or paid
+ * another way, the task or the scene no longer offered (a scene taken
+ * out of the shop's packs would fail every picture alike). The picture
+ * refused is not counted as failed.
+ */
+const STOP_KEYS: ReadonlySet<string> = new Set([
+  "plan.limit_reached",
+  "ai.daily_limit_reached",
+  "staff.forbidden",
+  "ai.own_keys_not_in_plan",
+  "ai.no_service",
+  "ai.service_unavailable",
+  "ai.unknown_task",
+])
+
 function stopKeyOf(error: unknown): string | null {
   if (isPlanLimitError(error)) {
     return "plan.limit_reached"
   }
-  if (isValidationError(error) && error.safeMessage === "ai.daily_limit_reached") {
-    return "ai.daily_limit_reached"
-  }
-  return null
+  const key = errorKeyOf(error)
+  return STOP_KEYS.has(key) ? key : null
 }
 
 /**
  * `ai.image_edit` (adr/0071 §8): each picture its own call, quota claim
- * and usage row, one after another. When the quota or the storage runs
- * out the rest are skipped and the job ends with what it did. Results are
+ * and usage row, one after another, each asked as the staff member who
+ * queued it (`editImageWorkflow` checks the role, the flags and the
+ * service again before every picture). When the quota or the storage runs
+ * out, or such a check refuses, the rest are skipped and the job ends
+ * with what it did. Results are
  * suggestions: nothing reaches a product here (docs/22 PR 4-2).
  */
 export const aiImageEdit: JobType<Input> = {
@@ -132,6 +153,8 @@ export const aiImageEdit: JobType<Input> = {
       } catch (error) {
         stoppedBy = stopKeyOf(error)
         if (stoppedBy === null) {
+          // The summary keeps a fixed key only; what went wrong goes to the log, redacted
+          logger.warn({ event: "ai.image_edit_picture_failed", err: errorSummary(error) })
           failed.push({ media_id: mediaId, key: "ai.provider_response_invalid" })
         }
       }
