@@ -7,10 +7,10 @@
  * tallest any more. A floor holds the tile when the list is short; a tile
  * with neither list nor side tiles keeps its own height (nothing else sets
  * it). Inside, the words fit the tile:
- * - a narrow tile's heading and "from" scale to the words' width (`cqi`
- *   is the words' content width; at 1440 they stay at their tokens);
  * - words with "from" or the products small (the first slide's extras)
  *   sit closer, their heading a step smaller and their line two lines;
+ *   their heading and "from" scale to the words' width (`cqi`: the words'
+ *   content width), a narrow tile's words a little wider;
  * - the products small show in one row under the buttons only while the
  *   row fits in the room left;
  * - last, any line still too long gives way: cut to the room, its last
@@ -43,9 +43,6 @@
   }
   .gf-mosaic-feature > div:not(.gf-mosaic-photo) > * {
     flex-shrink: 0;
-  }
-  .gf-mosaic-feature > div:not(.gf-mosaic-photo) > :is(h1, h2):not(.sr-only) {
-    font-size: min(var(--text-hero), 22cqi);
   }
   .gf-mosaic-from > b {
     font-size: min(var(--text-price), 17cqi);
@@ -98,9 +95,9 @@
   }
 }
 
-/* A narrow tile (1024 px to about 1180): its words a little wider */
+/* A narrow tile (1024 px to about 1180): the extras' words a little wider */
 @container gf-slide (width < 36rem) {
-  .gf-mosaic-feature > div:not(.gf-mosaic-photo) {
+  .gf-mosaic-feature > div:not(.gf-mosaic-photo):has(> .gf-mosaic-picks, > .gf-mosaic-from) {
     padding-right: var(--space-lg);
   }
 }
