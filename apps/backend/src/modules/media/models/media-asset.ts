@@ -42,10 +42,18 @@ export const MediaAsset = model
     // its master is kept even if the product drops it. Never attached, an
     // upload left behind is removed after a day.
     attached_at: model.dateTime().nullable(),
+    // Made by an AI service (adr/0071 §5, §10): `edited` from a picture of the
+    // shop's, `generated` from nothing; null for a picture people made. The
+    // master carries the matching IPTC DigitalSourceType (lib/media/ai-source.ts)
+    ai_source: model.enum(["edited", "generated"]).nullable(),
+    // The picture it was made from; that one's bytes are never changed
+    derived_from_id: model.text().nullable(),
   })
   .indexes([
     { on: ["url"], unique: true, where: "deleted_at IS NULL" },
     { on: ["file_id"], where: "deleted_at IS NULL AND file_id IS NOT NULL" },
     // The library's pages: stored files, newest first
     { on: ["created_at"], where: "deleted_at IS NULL AND file_id IS NOT NULL" },
+    // A picture's AI versions, beside it
+    { on: ["derived_from_id"], where: "deleted_at IS NULL AND derived_from_id IS NOT NULL" },
   ])
