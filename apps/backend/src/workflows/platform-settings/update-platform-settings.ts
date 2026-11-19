@@ -11,6 +11,7 @@ import { syncFreeShippingWorkflow } from "../promotions/free-shipping"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
 import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { brandImagesStep } from "./steps/brand-images"
+import { pageRolesStep } from "./steps/page-roles"
 import { saveSettingsSectionStep } from "./steps/save-settings-section"
 import { shareImageMediaStep } from "./steps/share-image"
 import type { SaveSettingsSectionInput } from "./steps/save-settings-section"
@@ -39,9 +40,11 @@ const thresholdOf = (values: Record<string, unknown> | null | undefined): number
 export const updatePlatformSettingsWorkflow = createWorkflow(
   "platform-settings-update-section",
   (input: SaveSettingsSectionInput) => {
+    // The storefront's page roles by id (adr/0073 Açık kararlar 3); other sections as sent
+    const roled = pageRolesStep(input)
     const shareImage = shareImageMediaStep(input)
     const brand = brandImagesStep(input)
-    const saved = saveSettingsSectionStep(input)
+    const saved = saveSettingsSectionStep(roled)
     // Kept like a page's cover: the nightly sweep leaves a used upload alone
     attachMediaStep(
       transform({ shareImage, brand }, ({ shareImage, brand }) => ({

@@ -904,6 +904,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.timezone_invalid": "Geçerli bir saat dilimi seçin.",
   "platform_settings.unknown_section": "Böyle bir ayar bölümü yok.",
   "platform_settings.url_invalid": "Adres https:// ile ya da / ile başlamalı.",
+  "platform_settings.page_unknown":
+    "Seçilen sayfa bulunamadı. İçerik'teki sayfalarınızdan birini seçin.",
   "platform_settings.favicon_unknown":
     "Site simgesi ortam kütüphanenizden seçilmeli. Görseli kütüphaneye yükleyip yeniden seçin.",
   "platform_settings.logo_unknown":

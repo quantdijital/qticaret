@@ -23,6 +23,15 @@ interface Frame {
   }
 }
 
+const NO_ROLES = {
+  contact_page_id: null,
+  payment_page_id: null,
+  shipping_page_id: null,
+  contact_form_path: null,
+  payment_info_path: null,
+  shipping_info_path: null,
+}
+
 /** F18 D3 (docs/19 §4): the shop writes the storefront's frame; the storefront reads it. */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -49,9 +58,6 @@ medusaIntegrationTestRunner({
       const saved = await save({
         announcements: ["{ücretsiz_kargo_eşiği} ve üzeri kargo bedava"],
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
-        // The payment page by the shop's own address, no shipping page (adr/0046 Ek 2026-11-05)
-        payment_info_path: "/Taksit-Secenekleri",
-        shipping_info_path: null,
       })
       await settle(
         http.post(
@@ -71,9 +77,8 @@ medusaIntegrationTestRunner({
         trust_badges: [],
         primary_color: null,
         hero: null,
-        contact_form_path: "/iletisim",
-        payment_info_path: "/odeme-secenekleri",
-        shipping_info_path: "/kargo-ve-teslimat",
+        // No content page yet at the addresses the roles start from (storefront-page-roles.spec.ts)
+        ...NO_ROLES,
         color_swatches: [],
       })
       expect(before.data.free_shipping_threshold).toBeNull()
@@ -91,9 +96,7 @@ medusaIntegrationTestRunner({
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
         primary_color: null,
         hero: null,
-        contact_form_path: "/iletisim",
-        payment_info_path: "/taksit-secenekleri",
-        shipping_info_path: null,
+        ...NO_ROLES,
         color_swatches: [],
       })
       expect(after.data.free_shipping_threshold).toBe(1500)
