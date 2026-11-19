@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
-import { footerBody, isBody, isShowing, readStoredLayout } from "../../lib/storefront/layout"
+import { footerBody, isBody, isShowing } from "../../lib/storefront/layout"
 import { mainSectionsOf, withMainSections } from "../../lib/storefront/layout-main"
 import { fillShopDoc, fillShopText, fillShopTextWhole } from "../../lib/shop/tokens"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
@@ -11,7 +11,8 @@ import { shownSettings } from "../../lib/storefront/layout-settings"
 import { newsletterImages, printedNewsletter } from "../../lib/storefront/sections/newsletter"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
 import type { shopInfoValues } from "../shop/info-values"
-import { layoutRow } from "./layout"
+import { layoutEdition } from "./layout-row"
+import { publishedDocument } from "./layout-published"
 import { legacySettings } from "./layout-shared"
 import { defaultLayout } from "./layout-default"
 import { headerLinked, imagesOf, linksOf } from "./layout-check"
@@ -219,11 +220,14 @@ export async function publishedLayout(
   container: MedusaContainer,
   channels: readonly string[] | null = null
 ): Promise<Shown> {
-  const row = await layoutRow(container)
-  const doc = row?.published ? `revision:${String(row.revision)}` : "default"
+  // The revision only: the documents are read on a miss (security review 2026-11-19, S2)
+  const edition = await layoutEdition(container)
+  const doc = edition?.published ? `revision:${String(edition.revision)}` : "default"
   const key = `${doc}|${channels ? [...new Set(channels)].sort().join(",") : "*"}`
   return shownCache(key, async () => {
-    const shown = row?.published ? readStoredLayout(row.published) : await defaultLayout(container)
+    const shown = edition?.published
+      ? await publishedDocument(container, edition)
+      : await defaultLayout(container)
     return storeLayout(container, shown, channels)
   })
 }

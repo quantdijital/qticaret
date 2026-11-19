@@ -61,6 +61,11 @@ describe("the storefront's draft-replacing routes", () => {
     expect(own?.middlewares).toHaveLength(1)
   })
 
+  it("limits a content page's signed design link read (security review 2026-11-19, I3)", () => {
+    const page = routeOf("GET", "/store/storefront-layout/preview/:token/pages/:id")
+    expect(page?.middlewares).toHaveLength(1)
+  })
+
   it("never lists discard twice (one middleware set per route)", () => {
     const discards = ROUTES.filter((route) => route.matcher === "/admin/storefront-layout/discard")
     expect(discards).toHaveLength(1)

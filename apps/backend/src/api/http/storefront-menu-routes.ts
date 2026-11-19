@@ -87,6 +87,13 @@ export const STOREFRONT_MENU_ROUTES = [
     methods: ["GET" as const],
     middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.layout_session)],
   },
+  // A content page through the signed design link (adr/0073 §6; security review
+  // 2026-11-19, I3): limited as a draft's signed preview; a guessed token finds nothing
+  {
+    matcher: "/store/storefront-layout/preview/:token/pages/:id",
+    methods: ["GET" as const],
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.content_preview)],
+  },
   {
     matcher: "/admin/storefront-layout/revisions/:revision/restore",
     methods: ["POST" as const],

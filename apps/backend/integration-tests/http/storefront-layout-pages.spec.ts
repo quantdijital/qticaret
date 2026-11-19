@@ -114,10 +114,17 @@ medusaIntegrationTestRunner({
       )
       const whole = await read("/store/storefront-layout")
       expect(whole.data).not.toHaveProperty("layout.pages")
-      // A draft page is not live: no layout leaves through the public read
-      expect((await read(`/store/storefront-layout/pages/${fresh}`)).data.page).toBeNull()
-      expect((await read(`/store/storefront-layout/pages/${post}`)).status).toBe(404)
-      expect((await read("/store/storefront-layout/pages/hakkimizda")).status).toBe(404)
+      // A draft page is not live: no layout leaves through the public read, and every page
+      // not to be seen answers alike (security review 2026-11-19, S1): no existence oracle
+      const answerOf = async (path: string) => {
+        const got = await read(path)
+        return { status: got.status, body: got.data }
+      }
+      const hidden = await answerOf(`/store/storefront-layout/pages/${fresh}`)
+      expect(hidden).toEqual({ status: 200, body: { page: null } })
+      for (const id of [post, "cnt_01KNOSUCHPAGE0000000000", "hakkimizda"]) {
+        expect(await answerOf(`/store/storefront-layout/pages/${id}`)).toEqual(hidden)
+      }
 
       // The signed design link: the draft's layout of a live page, never a draft page's
       const link = await settle(
@@ -128,9 +135,19 @@ medusaIntegrationTestRunner({
       expect(previewed.status).toBe(200)
       expect(previewed.headers["cache-control"]).toBe("private, no-store")
       expect(previewed.data.page?.sections).toHaveLength(2)
-      expect(
-        (await read(`/store/storefront-layout/preview/${token}/pages/${fresh}`)).data.page
-      ).toBeNull()
+      const hiddenByLink = await answerOf(
+        `/store/storefront-layout/preview/${token}/pages/${fresh}`
+      )
+      expect(hiddenByLink).toEqual({ status: 200, body: { page: null } })
+      for (const id of [post, "cnt_01KNOSUCHPAGE0000000000", "hakkimizda"]) {
+        expect(await answerOf(`/store/storefront-layout/preview/${token}/pages/${id}`)).toEqual(
+          hiddenByLink
+        )
+      }
+      // A design link is no live session (security review 2026-11-19, S3)
+      expect((await read(`/store/storefront-layout/session/${token}/pages/${about}`)).status).toBe(
+        404
+      )
       expect(
         (await read(`/store/storefront-layout/preview/${token.slice(0, -2)}xx/pages/${about}`))
           .status
@@ -145,6 +162,9 @@ medusaIntegrationTestRunner({
       expect(again.status).toBe(200)
       expect(again.data.dropped_pages).toBe(1)
       expect(again.data.layout.draft.pages.map((page) => page.page_id)).toEqual([about])
+
+      // Deleted, it answers as a page that never was
+      expect(await answerOf(`/store/storefront-layout/pages/${fresh}`)).toEqual(hidden)
 
       // Restoring the first publication brings back only the pages still there
       const restored = await settle(
@@ -218,6 +238,13 @@ medusaIntegrationTestRunner({
         })
       )
       expect(unknown.status).toBe(404)
+      // A live session is no design link (security review 2026-11-19, S3)
+      const asLink = await settle(
+        http.get(`/store/storefront-layout/preview/${token}/pages/${draftPage}`, {
+          headers: store.headers,
+        })
+      )
+      expect(asLink.status).toBe(404)
     })
   },
 })

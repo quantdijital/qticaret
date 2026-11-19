@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { isShowing, readStoredLayout } from "../../lib/storefront/layout"
+import { isShowing } from "../../lib/storefront/layout"
 import type { LayoutDocument } from "../../lib/storefront/layout"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
 import { CONTENT_MODULE } from "../../modules/content"
@@ -9,7 +9,8 @@ import { hydrateContext } from "./layout-context"
 import { hydrateSection } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
 import { imageUrls } from "./layout-read"
-import { layoutRow } from "./layout-row"
+import { publishedDocument } from "./layout-published"
+import { layoutEdition } from "./layout-row"
 
 /**
  * A content page's own layout as the storefront shows it at a moment
@@ -68,26 +69,32 @@ export async function contentPageOf(
 
 // A live page's layout, hydrated once a minute per process at most (as the whole
 // design's, security review 2026-11-02 L2): keyed by the revision, the page and the
-// publishable key's sales channels (the shop's keys, never the visitor's words)
-const pageCache = createTtlCache<ShownPage>({ ttlMs: 60_000, maxEntries: 64 })
+// publishable key's sales channels (the shop's keys, never the visitor's words). Only
+// a page the design lays out takes an entry (security review 2026-11-19, I1): twenty
+// at most, a few sales channel sets each
+const pageCache = createTtlCache<ShownPage>({ ttlMs: 60_000, maxEntries: 40 })
 
 /**
  * A live content page's layout as published, shown now in these sales
  * channels; a new publication is seen at once. None published yet (the
- * default design has no page layouts) or a page with none: null.
+ * default design has no page layouts) or a page with none: null. The
+ * revision is looked up alone; the published design is parsed once per
+ * revision (`publishedDocument`), each page read from it.
  */
 export async function publishedPageLayout(
   container: MedusaContainer,
   pageId: string,
   channels: readonly string[] | null = null
 ): Promise<ShownPage> {
-  const row = await layoutRow(container)
-  if (!row?.published) {
+  const edition = await layoutEdition(container)
+  if (!edition?.published) {
+    return null
+  }
+  const doc = await publishedDocument(container, edition)
+  if (!doc.pages.some((page) => page.page_id === pageId)) {
     return null
   }
   const shop = channels ? [...new Set(channels)].sort().join(",") : "*"
-  const key = `revision:${String(row.revision)}|${pageId}|${shop}`
-  return pageCache(key, () =>
-    storePageLayout(container, readStoredLayout(row.published), pageId, channels)
-  )
+  const key = `revision:${String(edition.revision)}|${pageId}|${shop}`
+  return pageCache(key, () => storePageLayout(container, doc, pageId, channels))
 }

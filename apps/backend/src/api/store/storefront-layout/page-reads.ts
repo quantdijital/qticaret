@@ -8,9 +8,21 @@ import type { ShownPage } from "../../../workflows/storefront/layout-page-read"
 type Row = NonNullable<Awaited<ReturnType<typeof layoutRow>>>
 
 /**
- * The content page a per-page read names (adr/0073 §6): a page's id
- * (`cnt_…`), never a post's. A malformed one, or none such, is a 404.
- * `live` says whether the page is published now.
+ * The live content page a public or signed-link read names (adr/0073 §6),
+ * else null. Every page not to be seen reads alike (security review
+ * 2026-11-19, S1): a draft, a deleted one, a post, a malformed id or none
+ * such are one answer, so the read tells no one which pages exist.
+ */
+export async function livePageId(req: MedusaStoreRequest): Promise<string | null> {
+  const id = req.params["id"] ?? ""
+  const page = PAGE_ID.test(id) ? await contentPageOf(req.scope, id) : null
+  return page?.live ? page.id : null
+}
+
+/**
+ * The content page the editor's live session names (adr/0073 §5): a
+ * page's id (`cnt_…`), in draft or live, never a post's. A malformed one,
+ * or none such, is a 404 (the session is staff's own).
  */
 export async function namedPage(req: MedusaStoreRequest): Promise<{ id: string; live: boolean }> {
   const id = req.params["id"] ?? ""
