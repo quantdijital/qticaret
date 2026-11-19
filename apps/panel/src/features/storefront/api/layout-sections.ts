@@ -30,6 +30,7 @@ import type { StripGallerySection } from "@/features/storefront/api/layout-strip
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
+import type { ContentPageSection, PageLayout } from "@/features/storefront/api/layout-pages"
 import type {
   CategoryMainSection,
   FooterBarSection,
@@ -422,14 +423,23 @@ export interface LayoutDocument {
   footer: FooterSection[]
   product: (ProductMainSection | ProductSection)[]
   category: (CategoryMainSection | CategorySection)[]
+  /** The content pages' own layouts, by page (adr/0073 §1); none: every page drawn as before. */
+  pages: PageLayout[]
   settings: LayoutSettings
 }
 
-/** The document's section groups (its settings are not one). */
+/**
+ * The document's section groups (its settings are not one); a section of
+ * a content page is in `pages`, under its page.
+ */
 export type LayoutGroup = Exclude<keyof LayoutDocument, "settings">
+/** The groups held as one list of sections (all but the content pages'). */
+export type ListGroup = Exclude<LayoutGroup, "pages">
 /** The groups that make a page's body: sections are added, moved and copied in them. */
 export type BodyGroup = "home" | "product" | "category"
-export type BodySection = HomeSection | ProductSection | CategorySection
+/** A page's body: one of the page templates' or a content page's own (adr/0073). */
+export type PageGroup = BodyGroup | "pages"
+export type BodySection = HomeSection | ProductSection | CategorySection | ContentPageSection
 export type BodySectionType = BodySection["type"]
 export type AnySection = HeaderSection | BodySection | FooterSection | MainSection
 /** What takes a look (adr/0049 Ek 2026-11-14 §6): a page's body section and its main one. */

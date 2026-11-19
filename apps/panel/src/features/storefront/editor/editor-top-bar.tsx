@@ -19,23 +19,23 @@ import {
 } from "@qticaret/admin-ui/ui/select"
 import { Separator } from "@qticaret/admin-ui/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
-import type { BodyGroup } from "@/features/storefront/api/layout"
 import { BarButton } from "./bar-button"
+import { EDITOR_PAGES } from "./editor-page"
+import type { EditorPage } from "./editor-page"
 import type { EditorLayout, EditorView } from "./editor-layout"
 import { SIDEBAR_ID } from "./editor-sidebar"
 import { Hint } from "./shared/hint"
 
 const E = "storefront.editor"
 
-// The page templates the editor covers (adr/0049 §6.3); one not ready yet is not offered
-const EDITOR_PAGES: readonly BodyGroup[] = ["home", "product", "category"]
-
 interface EditorTopBarProps {
   layout: EditorLayout
   onExit: () => void
-  /** The page being edited. */
-  page: BodyGroup
-  onPage: (page: BodyGroup) => void
+  /** The page being edited (adr/0049 §6.3; a content page, adr/0073 §5). */
+  page: EditorPage
+  onPage: (page: EditorPage) => void
+  /** Beside the page choice: which content page (`page: "content"`). */
+  pagePicker?: ReactNode
   /** The narrow editor's view: the settings or the preview. */
   view: EditorView
   onView: (view: EditorView) => void
@@ -129,6 +129,7 @@ export function EditorTopBar({
   onExit,
   page,
   onPage,
+  pagePicker = null,
   view,
   onView,
   sidebar,
@@ -161,7 +162,7 @@ export function EditorTopBar({
         <Select
           value={page}
           onValueChange={(next) => {
-            onPage(next as BodyGroup)
+            onPage(next as EditorPage)
           }}
         >
           <SelectTrigger size="sm" aria-label={t(`${E}.page.label`)} className="w-40 shrink-0">
@@ -175,6 +176,7 @@ export function EditorTopBar({
             ))}
           </SelectContent>
         </Select>
+        {pagePicker}
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2 lg:justify-center">
           {narrow ? null : <UndoRedo {...history} />}
           {status}

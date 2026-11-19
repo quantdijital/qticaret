@@ -29,6 +29,12 @@ export interface LivePreviewOptions {
   /** The page shown with the draft; null: the home page. */
   page: string | null
   /**
+   * A content page in draft shown (adr/0073 §5): its id goes with the
+   * address (`?icerik=`), and the live frame is loaded on it again, since
+   * the bridge's `navigate` names a path only.
+   */
+  draftPage?: string | null
+  /**
    * The page asked for is still looked up (its first sample): the frame
    * stays on the page it shows until `page` names it.
    */

@@ -33,6 +33,7 @@ export function useLivePreview({
   ready,
   round,
   page,
+  draftPage = null,
   holding = false,
   selected,
   onKey,
@@ -54,14 +55,22 @@ export function useLivePreview({
   const [frameKey, setFrameKey] = useState(0)
   const [left, setLeft] = useState(0)
   const [base, setBase] = useState<{ address: string; key: number } | null>(null)
-  const sessionAddress = session.data ? previewAddress(session.data, undefined, page) : null
+  // A content page in draft is opened by the address alone (`?icerik=`): the frame loads again
+  const [draftShown, setDraftShown] = useState(draftPage)
+  if (draftShown !== draftPage) {
+    setDraftShown(draftPage)
+    setFrameKey((was) => was + 1)
+  }
+  const sessionAddress = session.data
+    ? previewAddress(session.data, undefined, page, draftPage)
+    : null
   if (live && sessionAddress && base?.key !== frameKey) {
     setBase({ address: sessionAddress, key: frameKey })
   }
   const address = live
     ? (base?.address ?? null)
     : legacy.data
-      ? previewAddress(legacy.data, undefined, page)
+      ? previewAddress(legacy.data, undefined, page, draftPage)
       : null
   const origin = frameOrigin(address)
 

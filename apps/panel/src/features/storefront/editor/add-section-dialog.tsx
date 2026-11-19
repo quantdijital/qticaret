@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@qticaret/admin-ui/ui/dialog"
-import type { BodyGroup, BodySectionType, Placement } from "@/features/storefront/api/layout"
+import type { BodySectionType, PageGroup, Placement } from "@/features/storefront/api/layout"
 import { MARQUEE_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
 import { GROUP_TYPES } from "@/features/storefront/layout/sections"
 import type { FooterAddType } from "@/features/storefront/layout/footer-group"
@@ -16,8 +16,8 @@ const A = "storefront.editor.add"
 
 interface AddSectionDialogProps {
   open: boolean
-  /** The page the section is for, or the footer group (adr/0070 §4). */
-  page: BodyGroup | "footer"
+  /** The page the section is for (a content page's: `pages`), or the footer group (adr/0070 §4). */
+  page: PageGroup | "footer"
   /** The footer group's types it does not hold yet: each at most once. */
   footerTypes?: readonly FooterAddType[]
   /** A category page's side of its products. */
@@ -49,7 +49,15 @@ export function AddSectionDialog({
         <DialogHeader>
           <DialogTitle>{t(`${A}.title`)}</DialogTitle>
           <DialogDescription>
-            {t(`${A}.description.${page === "category" ? placement : page}`)}
+            {t(
+              `${A}.description.${
+                page === "category"
+                  ? placement
+                  : page === "pages"
+                    ? `page${placement === "top" ? "Top" : "Bottom"}`
+                    : page
+              }`
+            )}
           </DialogDescription>
         </DialogHeader>
         <ul className="grid gap-2 sm:grid-cols-2">

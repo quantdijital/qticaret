@@ -18,6 +18,8 @@ interface SectionListProps<S extends BodySection | FooterSection> {
   full: boolean
   /** A category page's side: each row may move to the other one. */
   placement?: Placement
+  /** What moving to the other side is called, when not a category page's ("Metnin altına taşı"). */
+  placeLabel?: (to: Placement) => string
   /** The ids of sections with a mistake to fix. */
   problems: ReadonlySet<string>
   dispatch: Dispatch<EditorAction>
@@ -49,6 +51,7 @@ export function SectionList<S extends BodySection | FooterSection>({
   inFooter = false,
   full,
   placement,
+  placeLabel,
   problems,
   dispatch,
   onOpen,
@@ -132,6 +135,7 @@ export function SectionList<S extends BodySection | FooterSection>({
                     run: () => {
                       dispatch({ type: "place", id: section.id, placement: other })
                     },
+                    ...(placeLabel ? { label: placeLabel(other) } : {}),
                   }
                 : undefined
             }

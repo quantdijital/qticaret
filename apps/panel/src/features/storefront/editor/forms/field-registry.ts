@@ -13,7 +13,7 @@ import type {
 } from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStep, lookStepsFor } from "@/features/storefront/layout/look"
 import { isFooterBody } from "@/features/storefront/layout/footer-group"
-import { isBodyGroup } from "@/features/storefront/layout/sections"
+import { isPageGroup } from "@/features/storefront/layout/sections"
 import { offeredVariants, offersVariants } from "@/features/storefront/layout/variants"
 import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
 import { cardFooterFields } from "./card-field-ids"
@@ -228,7 +228,7 @@ export const FIELD_IDS = {
  * header's parts, the footer's bar or its newsletter box.
  */
 export const takesLook = (section: AnySection, group: LayoutGroup): section is LookedSection =>
-  (isBodyGroup(group) && section.type !== "announcement_bar") ||
+  (isPageGroup(group) && section.type !== "announcement_bar") ||
   (group === "footer" && isFooterBody(section))
 
 /** The fields the section's panel shows, in its order, as the search finds them. */

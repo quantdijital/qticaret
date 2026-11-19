@@ -1,6 +1,6 @@
 import { SECTION_DEVICES } from "@qticaret/types"
 import type { AnySection, LayoutGroup } from "@/features/storefront/api/layout"
-import { isBodyGroup } from "@/features/storefront/layout/sections"
+import { isPageGroup } from "@/features/storefront/layout/sections"
 import { isMain } from "@/features/storefront/layout/main-sections"
 import type { RegistryField } from "./field-registry"
 
@@ -27,7 +27,7 @@ export const VISIBILITY_IDS = {
  * announcement bar, the footer's box or a main section (always shown).
  */
 export const takesDevice = (section: AnySection, group: LayoutGroup): boolean =>
-  !isMain(section) && (isBodyGroup(group) || section.type === "marquee")
+  !isMain(section) && (isPageGroup(group) || section.type === "marquee")
 
 /** The group's fields as the section shows them; a main section has none (it always shows). */
 export function visibilityFields(section: AnySection, group: LayoutGroup): RegistryField[] {

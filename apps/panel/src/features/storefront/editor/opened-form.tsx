@@ -7,18 +7,21 @@ import { useTranslation } from "react-i18next"
 import {
   groupLimit,
   isBodyGroup,
+  isPageGroup,
   marqueesOn,
   priceBandsOn,
 } from "@/features/storefront/layout/sections"
 import { MARQUEE_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
 import type { findSection } from "@/features/storefront/layout/sections"
 import type { AnySection, FooterBarSection } from "@/features/storefront/api/layout"
-import { bodyOf, isMain } from "@/features/storefront/layout/main-sections"
+import { isMain } from "@/features/storefront/layout/main-sections"
+import { bodyAround, pageMarqueesFull } from "@/features/storefront/layout/page-layouts"
 import { tabMates } from "@/features/storefront/layout/shelf-tabs"
 import type { Opened } from "./opened"
 import { SectionPanel } from "./section-panel"
 import { LooksPanel } from "./shared/looks-panel"
 import { PreferencesPanel } from "./shared/preferences-panel"
+import { PageTextPanel } from "./page-text-panel"
 import { ThemePanel } from "./theme-panel"
 import { cardVariantsInUse } from "./forms/theme-registry"
 import { FooterPartPanel } from "./footer-rows/footer-part-panel"
@@ -90,12 +93,15 @@ export function OpenedForm({
     // A page shows two scrolling strips at most (the header's counted) and two price bands strips
     const stripsFull =
       found.section.type === "marquee" &&
-      isBodyGroup(found.group) &&
-      marqueesOn(doc, found.group) >= MARQUEE_LIMITS.perPage
+      (isBodyGroup(found.group)
+        ? marqueesOn(doc, found.group) >= MARQUEE_LIMITS.perPage
+        : found.page !== null && pageMarqueesFull(doc, found.page))
     const bandsFull =
       found.section.type === "price_bands" &&
       isBodyGroup(found.group) &&
       priceBandsOn(doc, found.group) >= PRICE_BANDS_LIMITS.perPage
+    // A page body's own sections, the found one among them (a content page's: its page's)
+    const around = bodyAround(doc, found)
     return (
       <>
         {footer.dialog}
@@ -104,9 +110,9 @@ export function OpenedForm({
           group={found.group}
           problems={problems.get(found.section.id) ?? {}}
           canDuplicate={
-            isBodyGroup(found.group) &&
+            isPageGroup(found.group) &&
             !isMain(found.section) &&
-            bodyOf(doc, found.group).length < groupLimit(found.group) &&
+            around.length < groupLimit(found.group) &&
             !stripsFull &&
             !bandsFull
           }
@@ -142,11 +148,7 @@ export function OpenedForm({
                 }
               : undefined
           }
-          shelfMates={
-            found.section.type === "products" && isBodyGroup(found.group)
-              ? tabMates(bodyOf(doc, found.group), found.section.id)
-              : []
-          }
+          shelfMates={found.section.type === "products" ? tabMates(around, found.section.id) : []}
           badges={doc.settings.trust_badges}
           onBadges={(trust_badges, field) => {
             dispatch({
@@ -161,6 +163,9 @@ export function OpenedForm({
   }
   if (opened?.kind === "preferences") {
     return <PreferencesPanel onBack={onClose} />
+  }
+  if (opened?.kind === "page-text") {
+    return <PageTextPanel pageId={opened.page} contact={opened.contact} onBack={onClose} />
   }
   if (opened?.kind === "looks") {
     return (

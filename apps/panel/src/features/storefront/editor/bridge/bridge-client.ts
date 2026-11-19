@@ -1,7 +1,9 @@
 import { readToPanel } from "@qticaret/types/editor-bridge"
 import type { ToPanelMessage } from "@qticaret/types/editor-bridge"
-import type { AnySection, BodyGroup, LayoutGroup } from "@/features/storefront/api/layout"
+import type { AnySection, LayoutGroup } from "@/features/storefront/api/layout"
 import { STOREFRONT_ORIGIN } from "@/features/storefront/layout/preview-url"
+import { onShownPage } from "../editor-page"
+import type { ShownPage } from "../editor-page"
 
 /**
  * The panel's side of the theme editor's bridge (adr/0065 §2, Faz 1), as
@@ -109,8 +111,8 @@ export type MissingReason = "hidden" | "scheduled" | "other_page" | "timeout"
  * page's group (the header and footer show on every page). Null: it should.
  */
 export function whyNotShown(
-  found: { group: LayoutGroup; section: AnySection },
-  page: BodyGroup,
+  found: { group: LayoutGroup; section: AnySection; page?: string | null },
+  page: ShownPage,
   now = new Date()
 ): MissingReason | null {
   const { group, section } = found
@@ -128,7 +130,8 @@ export function whyNotShown(
   if ((starts !== null && starts > at) || (ends !== null && ends <= at)) {
     return "scheduled"
   }
-  if (group !== "header" && group !== "footer" && group !== page) {
+  // A content page's section shows on its own page only (adr/0073)
+  if (group !== "header" && group !== "footer" && !onShownPage(page, group, found.page)) {
     return "other_page"
   }
   return null

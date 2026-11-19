@@ -2,11 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
+import type { ShownPage } from "./editor-page"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import {
   findSection,
   idsOf,
-  isBodyGroup,
+  isPageGroup,
   newSectionId,
 } from "@/features/storefront/layout/sections"
 import { isDiscrete } from "@/features/storefront/layout/use-autosave"
@@ -22,10 +23,12 @@ const NO_PROBLEMS: ReadonlyMap<string, unknown> = new Map()
 
 interface Options {
   doc: LayoutDocument
-  /** The page group being edited. */
-  page: BodyGroup
+  /** The page being edited (a content page: the one picked). */
+  page: ShownPage
   /** The page shown with the draft; null: the home page. */
   path: string | null
+  /** A content page in draft shown (adr/0073 §5): its id goes with the address (`?icerik=`). */
+  draftPage?: string | null
   /** The page's first sample is still looked up: `path` does not name it yet. */
   finding?: boolean
   opened: Opened
@@ -41,7 +44,7 @@ interface Options {
   /** Faz 2: a link followed in the frame. */
   onVisit?: (path: string) => void
   /** Faz 2: the page the frame drew and whose sections it has. */
-  onLand?: (path: string, group: BodyGroup | null) => void
+  onLand?: (path: string, group: BodyGroup | null, page: string | null) => void
   /** The draft's problems by section id: a part with one is not saved, so not drawn yet. */
   problems?: ReadonlyMap<string, unknown>
 }
@@ -59,6 +62,7 @@ export function useEditorPreview({
   doc,
   page,
   path,
+  draftPage = null,
   finding = false,
   opened,
   ready,
@@ -102,6 +106,7 @@ export function useEditorPreview({
     ready,
     round,
     page: path,
+    draftPage,
     holding: finding,
     selected,
     onKey: (key) => {
@@ -145,12 +150,14 @@ export function useEditorPreview({
   const found = selected ? findSection(doc, selected) : null
   // On a page reached in the frame (the cart, a brand) only the header and footer show
   const reason = found
-    ? visited !== null && isBodyGroup(found.group)
+    ? visited !== null && isPageGroup(found.group)
       ? "other_page"
       : whyNotShown(found, page)
     : null
   // The opened section, shown in the frame; once per opening, not on every keystroke
   const shownReason = useRef(reason)
+  // The page by value: a content page's is a new object each time
+  const pageKey = typeof page === "string" ? page : `content:${page.content ?? ""}`
   useEffect(() => {
     shownReason.current = reason
   }, [reason])
@@ -164,7 +171,7 @@ export function useEditorPreview({
     }
     const isNew = fresh.current.delete(selected)
     select(selected, isNew ? "always" : "if_hidden", true)
-  }, [selected, connected, page, select])
+  }, [selected, connected, pageKey, select])
 
   // The frame looked for it and gave up: why, as far as the draft tells (a new empty one is no error)
   const lostWhy =

@@ -56,14 +56,20 @@ export function storefrontHome(
  * the signed path, else the server's absolute link; null when neither is
  * known (no canonical host set and no origin configured). With `page`, the
  * storefront shows that page (a product's, a category's) with the draft
- * instead of the home page (`?sayfa=`).
+ * instead of the home page (`?sayfa=`); with `draftPage`, that content page
+ * in draft, which only the editor's own session shows (`&icerik=`, adr/0073 §5).
  */
 export function previewAddress(
   preview: Pick<LayoutPreview, "url" | "path">,
   origin: string | null = STOREFRONT_ORIGIN,
-  page: string | null = null
+  page: string | null = null,
+  draftPage: string | null = null
 ): string | null {
-  const query = page ? `?sayfa=${encodeURIComponent(page)}` : ""
+  const params = [
+    ...(page ? [`sayfa=${encodeURIComponent(page)}`] : []),
+    ...(draftPage ? [`icerik=${encodeURIComponent(draftPage)}`] : []),
+  ]
+  const query = params.length > 0 ? `?${params.join("&")}` : ""
   if (origin) {
     return `${origin}${preview.path}${query}`
   }

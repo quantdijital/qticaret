@@ -4,6 +4,7 @@ import { useSaveLayout } from "@/features/storefront/api/layout"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { errorText } from "@/lib/errors"
 import type { EditorAction } from "./editor-state"
+import { droppedPages } from "./page-layouts"
 
 /** How long the editor waits after the last change before it saves the draft. */
 export const AUTOSAVE_MS = 1500
@@ -30,6 +31,11 @@ interface AutosaveOptions {
   /** The draft has a problem the server would refuse: it waits until it is fixed. */
   blocked: boolean
   delay?: number
+  /**
+   * The server left out the layouts of content pages deleted since (adr/0073
+   * §1): their ids, as the document sent had them, and how many it says.
+   */
+  onDropped?: (ids: string[], count: number) => void
 }
 
 /**
@@ -39,7 +45,13 @@ interface AutosaveOptions {
  * made meanwhile is saved after it. A refused save keeps the local
  * document as it is and says why; the next change, or "retry", sends again.
  */
-export function useAutosave({ doc, stored, blocked, delay = AUTOSAVE_MS }: AutosaveOptions) {
+export function useAutosave({
+  doc,
+  stored,
+  blocked,
+  delay = AUTOSAVE_MS,
+  onDropped,
+}: AutosaveOptions) {
   const { t } = useTranslation()
   const save = useSaveLayout()
   const [saved, setSaved] = useState(() => (stored ? JSON.stringify(stored) : ""))
@@ -52,20 +64,25 @@ export function useAutosave({ doc, stored, blocked, delay = AUTOSAVE_MS }: Autos
   const live = useRef({ doc, saved, running: null as Promise<boolean> | null })
   // The next save goes without waiting (a change made in one go)
   const urgent = useRef(false)
+  const dropping = useRef(onDropped)
   useEffect(() => {
     live.current.doc = doc
-  }, [doc])
+    dropping.current = onDropped
+  }, [doc, onDropped])
 
   const send = useCallback(
     (document: LayoutDocument): Promise<boolean> => {
       const sent = JSON.stringify(document)
       setStatus({ kind: "saving" })
       const run = save.mutateAsync(document).then(
-        () => {
+        ({ layout, dropped }) => {
           live.current.saved = sent
           setSaved(sent)
           setStatus({ kind: "saved", at: new Date() })
           setRound((was) => was + 1)
+          if (dropped > 0) {
+            dropping.current?.(droppedPages(document, layout.draft), dropped)
+          }
           return true
         },
         (failure: unknown) => {

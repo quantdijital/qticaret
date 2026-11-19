@@ -7313,7 +7313,9 @@
       "noneFound": "No author by that name.",
       "legacy": "Old author name: {{name}}. Choose from the list or",
       "legacyAdd": "add it as a new author"
-    }
+    },
+    "designInEditor": "Design in the theme editor",
+    "designed": "Has its own layout"
   },
   "priceLists": {
     "sections": "Kinds of offer",
@@ -7969,7 +7971,8 @@
         "label": "Page being edited",
         "home": "Home page",
         "product": "Product page",
-        "category": "Category page"
+        "category": "Category page",
+        "content": "Content page"
       },
       "device": {
         "label": "Preview width",
@@ -8106,7 +8109,9 @@
           "product": "It is added on every product page, under the product's own details.",
           "top": "It is added on every category page, above the product grid.",
           "bottom": "It is added on every category page, below the product grid.",
-          "footer": "Shown above the footer on every page but checkout; each section is added once, then drag to change their order."
+          "footer": "Shown above the footer on every page but checkout; each section is added once, then drag to change their order.",
+          "pageTop": "Added on this page, above the page's text; drag it or use the arrows to move it later.",
+          "pageBottom": "Added on this page, below the page's text; drag it or use the arrows to move it later."
         }
       },
       "types": {
@@ -10150,6 +10155,44 @@
         "moveUpOf": "Move {{name}} up",
         "moveDownOf": "Move {{name}} down",
         "backToFooter": "Back to the footer"
+      },
+      "contentPage": {
+        "label": "Content page being edited",
+        "none": "Choose a page",
+        "search": "Search pages (title or address)",
+        "empty": "No pages in Content yet.",
+        "noMatch": "No page by that name.",
+        "designed": "Has its own layout",
+        "pagesFull": "At most {{max}} pages can have their own layout. To add sections to another page, first remove one page's sections.",
+        "sectionsFull": "A page holds at most {{max}} sections.",
+        "pick": "To add sections, create a page in Content; then choose it above.",
+        "missing": {
+          "none": "The preview needs a page in Content; once one exists it shows here.",
+          "gone": "This page was not found; it may have been deleted. Choose another page above."
+        },
+        "sides": {
+          "top": "Above",
+          "bottom": "Below"
+        },
+        "placements": {
+          "top": "Above the page's text",
+          "bottom": "Below the page's text"
+        },
+        "place": {
+          "top": "Move above the text",
+          "bottom": "Move below the text"
+        },
+        "text": {
+          "page": "The page's text",
+          "contact": "Contact details and form",
+          "about": {
+            "page": "The page's title, cover, text and search appearance are written in Content. The storefront shows them here, between the sections above and below; this row is not moved or removed.",
+            "contact": "The contact page's text, contact details and form show here, between the sections above and below. The text changes in Content, the contact details in Store profile, and the page that shows the form in Storefront preferences; this row is not moved or removed."
+          },
+          "edit": "Edit in Content"
+        },
+        "dropped_one": "The layout of {{count}} deleted page was removed.",
+        "dropped_other": "The layouts of {{count}} deleted pages were removed."
       }
     },
     "maintenance": {

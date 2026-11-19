@@ -1,23 +1,19 @@
 import { Columns3, Contact, Palette, SlidersHorizontal, Store, SwatchBook } from "lucide-react"
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
-import type {
-  AnySection,
-  BodyGroup,
-  LayoutDocument,
-  Placement,
-} from "@/features/storefront/api/layout"
+import type { AnySection, LayoutDocument, Placement } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import {
-  BODY_GROUPS,
   idsOf,
   isScheduled,
-  marqueesOn,
   newAnnouncementBar,
   newHeaderMarquee,
   newSectionId,
 } from "@/features/storefront/layout/sections"
 import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
+import { anyPageMarqueesFull } from "@/features/storefront/layout/page-layouts"
+import { ContentPageSections } from "./content-page-sections"
+import type { EditorPage } from "./editor-page"
 import { footerAbove, footerTypesLeft } from "@/features/storefront/layout/footer-group"
 import { mainOf } from "@/features/storefront/layout/main-sections"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
@@ -33,7 +29,14 @@ const T = "storefront.editor.tree"
 
 interface SectionTreeProps {
   /** The page being edited: its own sections between the header and the footer. */
-  page: BodyGroup
+  page: EditorPage
+  /**
+   * The content page picked (`page: "content"`, adr/0073 §5): its id (null:
+   * none yet), its title for the group's heading, and whether it is the
+   * contact page; opening its text says where that is written.
+   */
+  contentPage?: { id: string | null; title: string | null; contact: boolean }
+  onOpenText?: () => void
   doc: LayoutDocument
   problems: ReadonlySet<string>
   dispatch: Dispatch<EditorAction>
@@ -66,6 +69,8 @@ interface SectionTreeProps {
  */
 export function SectionTree({
   page,
+  contentPage = { id: null, title: null, contact: false },
+  onOpenText = () => undefined,
   doc,
   problems,
   dispatch,
@@ -119,7 +124,7 @@ export function SectionTree({
   const bar = doc.header.find((section) => section.type === "announcement_bar")
   const strip = doc.header.find((section) => section.type === "marquee")
   // A strip in the header shows on every page: not while a page already has its two
-  const stripFull = BODY_GROUPS.some((body) => marqueesOn(doc, body) >= MARQUEE_LIMITS.perPage)
+  const stripFull = anyPageMarqueesFull(doc)
   // The footer group's sections above its bar, in their order (adr/0070 §4); the bar stays last
   const above = footerAbove(doc)
   // The free rows footer opens its rows and blocks under its line (adr/0070 §7)
@@ -182,16 +187,36 @@ export function SectionTree({
           />
         </ul>
       </TreeGroup>
-      <TreeGroup title={t(`storefront.editor.page.${page}`)}>
-        <PageSections
-          page={page}
-          doc={doc}
-          problems={problems}
-          dispatch={dispatch}
-          onOpen={onOpen}
-          onRemove={onRemove}
-          onAdd={onAddSection}
-        />
+      <TreeGroup
+        title={
+          page === "content" && contentPage.title
+            ? contentPage.title
+            : t(`storefront.editor.page.${page}`)
+        }
+      >
+        {page === "content" ? (
+          <ContentPageSections
+            doc={doc}
+            pageId={contentPage.id}
+            contact={contentPage.contact}
+            problems={problems}
+            dispatch={dispatch}
+            onOpen={onOpen}
+            onRemove={onRemove}
+            onAdd={onAddSection}
+            onOpenText={onOpenText}
+          />
+        ) : (
+          <PageSections
+            page={page}
+            doc={doc}
+            problems={problems}
+            dispatch={dispatch}
+            onOpen={onOpen}
+            onRemove={onRemove}
+            onAdd={onAddSection}
+          />
+        )}
       </TreeGroup>
       <TreeGroup title={t(`${T}.footer`)}>
         <ul className="flex flex-col gap-0.5">

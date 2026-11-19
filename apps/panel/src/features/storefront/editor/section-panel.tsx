@@ -9,7 +9,7 @@ import type {
   TrustBadge,
 } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
-import { isBodyGroup } from "@/features/storefront/layout/sections"
+import { isPageGroup } from "@/features/storefront/layout/sections"
 import {
   offeredVariants,
   offersVariants,
@@ -174,7 +174,9 @@ export function SectionPanel({
                 {(["top", "bottom"] as const).map((placement) => (
                   <label key={placement} className="flex items-center gap-2 text-sm">
                     <RadioGroupItem value={placement} />
-                    {t(`storefront.editor.tree.placements.${placement}`)}
+                    {t(
+                      `${group === "pages" ? "storefront.editor.contentPage" : "storefront.editor.tree"}.placements.${placement}`
+                    )}
                   </label>
                 ))}
               </RadioGroup>
@@ -235,7 +237,7 @@ export function SectionPanel({
           </p>
         ) : (
           <SectionActions
-            canCopy={isBodyGroup(group)}
+            canCopy={isPageGroup(group)}
             canDuplicate={canDuplicate}
             note={duplicateNote}
             onDuplicate={onDuplicate}

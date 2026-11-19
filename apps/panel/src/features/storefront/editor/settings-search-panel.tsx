@@ -4,7 +4,8 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
-import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
+import type { LayoutDocument } from "@/features/storefront/api/layout"
+import type { ShownPage } from "./editor-page"
 import type { FieldGroupName } from "./forms/field-registry"
 import { PANEL_GROUPS, tabTitle } from "./panel-groups"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
@@ -112,7 +113,7 @@ export function SettingsSearch({
   children,
 }: {
   doc: LayoutDocument
-  page: BodyGroup
+  page: ShownPage
   onPick: (hit: SearchHit | ThemeHit) => void
   /** The page's parts, shown while nothing is typed. */
   children: ReactNode

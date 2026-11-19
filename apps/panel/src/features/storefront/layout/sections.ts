@@ -11,21 +11,29 @@ import type {
   HomeSectionType,
   LayoutDocument,
   LayoutGroup,
+  ListGroup,
+  PageGroup,
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
 import {
   ANNOUNCEMENT_DEFAULTS,
   BANNER_DEFAULTS,
+  CONTENT_PAGE_SECTION_TYPES,
   MARQUEE_DEFAULTS,
+  PAGE_LAYOUT_LIMITS,
   SLIDER_DEFAULTS,
   STRIP_GALLERY_DEFAULTS,
   defaultVariant,
 } from "@qticaret/types"
 import { LAYOUT_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
 
-/** The groups in the order the storefront draws them (a page's body between header and footer). */
-export const LAYOUT_GROUPS: readonly LayoutGroup[] = [
+/**
+ * The groups held as one list, in the order the storefront draws them (a
+ * page's body between header and footer); the content pages' own layouts
+ * are `pages`, page by page (adr/0073).
+ */
+export const LAYOUT_GROUPS: readonly ListGroup[] = [
   "header",
   "home",
   "product",
@@ -35,6 +43,10 @@ export const LAYOUT_GROUPS: readonly LayoutGroup[] = [
 
 export const isBodyGroup = (group: LayoutGroup): group is BodyGroup =>
   group === "home" || group === "product" || group === "category"
+
+/** A page's body: a page template's or a content page's own (adr/0073); not the header or footer. */
+export const isPageGroup = (group: LayoutGroup): group is PageGroup =>
+  group === "pages" || isBodyGroup(group)
 
 /** The home page's section types, in the order the chooser offers them. */
 export const HOME_TYPES: readonly HomeSectionType[] = [
@@ -84,15 +96,26 @@ export const CATEGORY_TYPES: readonly CategorySectionType[] = [
   "newsletter",
 ]
 
-/** Each body group's section types, as its chooser offers them. */
-export const GROUP_TYPES: Readonly<Record<BodyGroup, readonly BodySectionType[]>> = {
+/**
+ * What a content page takes, above or below its text (adr/0073 §3): the
+ * contract's list, in the home page's order (no opening, no price bands,
+ * nothing of the header or the footer).
+ */
+export const PAGE_TYPES: readonly HomeSectionType[] = HOME_TYPES.filter((type) =>
+  (CONTENT_PAGE_SECTION_TYPES as readonly string[]).includes(type)
+)
+
+/** Each page body's section types, as its chooser offers them. */
+export const GROUP_TYPES: Readonly<Record<PageGroup, readonly BodySectionType[]>> = {
   home: HOME_TYPES,
   product: PRODUCT_TYPES,
   category: CATEGORY_TYPES,
+  pages: PAGE_TYPES,
 }
 
-/** The sections a group holds at most. */
-export const groupLimit = (group: BodyGroup): number => LAYOUT_LIMITS[group]
+/** The sections a page body holds at most (a content page: each page's own). */
+export const groupLimit = (group: PageGroup): number =>
+  group === "pages" ? PAGE_LAYOUT_LIMITS.sections : LAYOUT_LIMITS[group]
 
 const ID_LENGTH = 12
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -108,19 +131,25 @@ export function newSectionId(taken: ReadonlySet<string> = new Set()): string {
   }
 }
 
-/** Every section of the document, group by group. */
-export const allSections = (doc: LayoutDocument): AnySection[] =>
-  LAYOUT_GROUPS.flatMap((group): readonly AnySection[] => doc[group])
+/** Every section of the document, group by group, the content pages' last (page by page). */
+export const allSections = (doc: LayoutDocument): AnySection[] => [
+  ...LAYOUT_GROUPS.flatMap((group): readonly AnySection[] => doc[group]),
+  ...doc.pages.flatMap((page) => page.sections),
+]
 
-/** A category page's sections in one place: above the grid or below it, in order (the grid in neither). */
-export const placed = (
-  sections: readonly LayoutDocument["category"][number][],
+/**
+ * A category page's (or a content page's) sections in one place: above
+ * the grid (the text) or below it, in order (the grid in neither).
+ */
+export function placed<S extends AnySection>(
+  sections: readonly S[],
   placement: Placement
-): CategorySection[] =>
-  sections.filter(
-    (section): section is CategorySection =>
+): Extract<S, { placement: Placement }>[] {
+  return sections.filter(
+    (section): section is Extract<S, { placement: Placement }> =>
       "placement" in section && section.placement === placement
   )
+}
 
 export const idsOf = (doc: LayoutDocument): Set<string> =>
   new Set(
@@ -138,17 +167,31 @@ export const idsOf = (doc: LayoutDocument): Set<string> =>
     )
   )
 
+/** Where a section is: its group and place there; a content page's (`pages`) names its page. */
+export interface FoundSection {
+  group: LayoutGroup
+  section: AnySection
+  /** Its place in its group's list (a content page's: in that page's sections). */
+  index: number
+  /** The content page it is on (`group: "pages"`); null elsewhere. */
+  page: string | null
+}
+
 /** A section by its id, with the group it sits in. */
-export function findSection(
-  doc: LayoutDocument,
-  id: string
-): { group: LayoutGroup; section: AnySection; index: number } | null {
+export function findSection(doc: LayoutDocument, id: string): FoundSection | null {
   for (const group of LAYOUT_GROUPS) {
     const sections: readonly AnySection[] = doc[group]
     const index = sections.findIndex((section) => section.id === id)
     const section = sections[index]
     if (section) {
-      return { group, section, index }
+      return { group, section, index, page: null }
+    }
+  }
+  for (const page of doc.pages) {
+    const index = page.sections.findIndex((section) => section.id === id)
+    const section = page.sections[index]
+    if (section) {
+      return { group: "pages", section, index, page: page.page_id }
     }
   }
   return null
@@ -240,11 +283,12 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
 }
 
 /**
- * A section of a body group as its chooser adds it; a category page's
- * goes where it was added (below the products unless said otherwise).
+ * A section of a page body as its chooser adds it; a category page's (or
+ * a content page's) goes where it was added (below the products, or the
+ * page's text, unless said otherwise).
  */
 export function newBodySection(
-  group: BodyGroup,
+  group: PageGroup,
   type: BodySectionType,
   id: string,
   placement: Placement = "bottom"
@@ -262,7 +306,9 @@ export function newBodySection(
     }
   }
   const section = newHomeSection(type, id)
-  return group === "category" ? ({ ...section, placement } as CategorySection) : section
+  return group === "category" || group === "pages"
+    ? ({ ...section, placement } as CategorySection)
+    : section
 }
 
 /**

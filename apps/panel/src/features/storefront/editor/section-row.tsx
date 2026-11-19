@@ -60,8 +60,8 @@ interface SectionRowProps {
   moves?: { up: (() => void) | null; down: (() => void) | null }
   onDuplicate?: (() => void) | null
   drag?: RowDrag
-  /** A category page's section: to the other side of the products. */
-  onPlace?: { to: "top" | "bottom"; run: () => void } | undefined
+  /** A category (or content) page's section: to the other side of the products (its text); `label` says so. */
+  onPlace?: { to: "top" | "bottom"; run: () => void; label?: string } | undefined
 }
 
 // The upper half of a row drops before it, the lower half after
@@ -261,7 +261,7 @@ export function SectionRow({
             {onPlace ? (
               <DropdownMenuItem onSelect={onPlace.run}>
                 {onPlace.to === "bottom" ? <ArrowDownToLine /> : <ArrowUpToLine />}
-                {t(`${R}.place.${onPlace.to}`)}
+                {onPlace.label ?? t(`${R}.place.${onPlace.to}`)}
               </DropdownMenuItem>
             ) : null}
             {onDuplicate !== undefined ? (

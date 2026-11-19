@@ -105,6 +105,7 @@ describe("sectionProblems", () => {
       footer: [],
       product: [newBodySection("product", "faq", "urunsss") as ProductSection],
       category: [newBodySection("category", "rich_text", "kategorimetni") as CategorySection],
+      pages: [],
       settings: {
         trust_badges: [],
         color_swatches: [],
@@ -122,6 +123,7 @@ describe("sectionProblems", () => {
       footer: [],
       product: [],
       category: [],
+      pages: [],
       settings: {
         trust_badges: [
           { icon: "truck", title: "", text: null },
@@ -165,6 +167,7 @@ describe("sectionProblems", () => {
       footer: [],
       product: [newBodySection("product", "trust_badges", "urunguven") as ProductSection],
       category: [],
+      pages: [],
       settings: {
         trust_badges: [{ icon: "truck", title: "", text: null }],
         color_swatches: [{ label: "", hex: "#000000" }],
