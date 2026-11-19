@@ -8269,6 +8269,10 @@
           "image_card": "Picture card",
           "strip": "Slim strip",
           "in_footer": "In the footer column"
+        },
+        "rich_text": {
+          "pane": "Text only",
+          "with_image": "Text with image"
         }
       },
       "look": {
@@ -8589,7 +8593,16 @@
         "body": "Text",
         "empty": "No text written yet.",
         "description": "What you write is saved to the draft by itself; you can add product and category cards and shop details.",
-        "done": "Done"
+        "done": "Done",
+        "image": "Image",
+        "imageHint": "From the media library; on phones it shows above the text.",
+        "imageSide": "Image side",
+        "imageSideTerm": "image side",
+        "imageSideHint": "The side the image stands on wide screens; on phones it is always on top.",
+        "imageSides": {
+          "start": "Left",
+          "end": "Right"
+        }
       },
       "help": {
         "contact": "The ways to reach you (phone, e-mail, WhatsApp) come from the store profile; with none, the box does not show."

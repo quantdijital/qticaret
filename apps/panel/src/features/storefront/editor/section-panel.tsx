@@ -137,7 +137,7 @@ export function SectionPanel({
             />
           ) : null}
           {/* Stil: the variant first, open */}
-          {offersVariants(section) ? (
+          {offersVariants(section, group === "footer") ? (
             <PanelGroup
               name="variant"
               title={t(`${P}.variant`)}

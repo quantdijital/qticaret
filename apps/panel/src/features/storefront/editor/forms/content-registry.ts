@@ -1,5 +1,6 @@
 import {
   FEATURED_PRODUCT_SETTINGS,
+  RICH_TEXT_IMAGE_SIDES,
   STRIP_GALLERY_SETTINGS,
   newsletterHasNote,
 } from "@qticaret/types"
@@ -46,6 +47,7 @@ export type ContentField =
   | "strips_layout"
   | "show_note"
   | "joined"
+  | "image_side"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -207,6 +209,18 @@ export function contentFields(section: AnySection): RegistryField[] {
         : []
     case "strip_gallery":
       return stripGalleryFields(section)
+    // The picture's side beside the text, while the variant has one (adr/0073 §3)
+    case "rich_text":
+      return section.variant === "with_image"
+        ? [
+            entry(
+              section,
+              "image_side",
+              `${E}.richText.imageSide`,
+              RICH_TEXT_IMAGE_SIDES.map((side) => `${E}.richText.imageSides.${side}`)
+            ),
+          ]
+        : []
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":
@@ -217,7 +231,6 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "help":
     case "marquee":
     case "product_main":
-    case "rich_text":
     case "trust_badges":
       return []
   }

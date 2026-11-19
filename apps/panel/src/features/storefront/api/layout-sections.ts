@@ -15,6 +15,8 @@ import type {
   ShelfPhoneColumns,
   SliderSettings,
   NewsletterVariant,
+  RichTextImageSide,
+  RichTextVariant,
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
@@ -208,6 +210,16 @@ export interface RichTextSection extends BodySectionBase {
   title: string | null
   /** The content editor's document (adr/0019). */
   body: JSONContent
+  /**
+   * How it is drawn (adr/0073 §3): `pane`, today's; `with_image`, a picture
+   * beside it (the footer group's is the pane only). The server fills the
+   * default on reading.
+   */
+  variant: RichTextVariant
+  /** `with_image`: the media library's picture; null only while the shop has not picked one (`imageRequired`). */
+  image?: LayoutImage | null
+  /** `with_image`: the picture's side from 1024 px. */
+  image_side?: RichTextImageSide
 }
 
 export interface TrustBadgesSection extends BodySectionBase {

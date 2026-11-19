@@ -163,6 +163,8 @@ function wordField(section: AnySection, word: string): PreviewField | null {
     (word === "title" && TITLED.has(section.type)) ||
     (word === "text" && TEXTED.has(section.type)) ||
     (word === "body" && section.type === "rich_text") ||
+    // The picture beside the text (adr/0073 §3), while the variant shows its field
+    (word === "image" && section.type === "rich_text" && section.variant === "with_image") ||
     (word === "more" && ownMore(section)) ||
     (section.type === "newsletter" && newsletterShows(section, word))
   ) {

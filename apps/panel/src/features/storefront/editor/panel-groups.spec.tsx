@@ -4,7 +4,6 @@ import type { ReactNode } from "react"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { SECTION_VARIANTS } from "@qticaret/types"
 import type { AnySection, LayoutGroup } from "@/features/storefront/api/layout"
 import {
   CATEGORY_TYPES,
@@ -16,7 +15,12 @@ import {
   newHeaderMarquee,
   newHomeSection,
 } from "@/features/storefront/layout/sections"
-import { offersVariants, switchVariant } from "@/features/storefront/layout/variants"
+import { newFooterSection } from "@/features/storefront/layout/footer-group"
+import {
+  offeredVariants,
+  offersVariants,
+  switchVariant,
+} from "@/features/storefront/layout/variants"
 import { sectionFields } from "./forms/field-registry"
 import { PANEL_GROUPS, tabOfGroup } from "./panel-groups"
 import { PanelGroup } from "./panel-header"
@@ -28,12 +32,15 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
 }))
 
-/** Each variant of a section that has more than one, else the section itself. */
-function withVariants(section: AnySection): AnySection[] {
-  if (!offersVariants(section)) {
+/**
+ * Each variant of a section that has more than one where it stands, else
+ * the section itself (the footer group's rich text is the pane only, adr/0073 §3).
+ */
+function withVariants(section: AnySection, inFooter = false): AnySection[] {
+  if (!offersVariants(section, inFooter)) {
     return [section]
   }
-  const variants: readonly string[] = SECTION_VARIANTS[section.type]
+  const variants: readonly string[] = offeredVariants(section, inFooter)
   return variants.map((variant) => switchVariant(section, variant as never))
 }
 
@@ -70,14 +77,14 @@ const SAMPLES: [string, LayoutGroup, AnySection][] = [
     (section): [string, LayoutGroup, AnySection] => [`pages: ${name(section)}`, "pages", section]
   ),
   ...[...DOC.header, newHeaderMarquee("ustkayan01")]
-    .flatMap(withVariants)
+    .flatMap((section) => withVariants(section))
     .map((section): [string, LayoutGroup, AnySection] => [
       `header: ${name(section)}`,
       "header",
       section,
     ]),
-  ...[...DOC.footer, newFooterNewsletter("altbulten1")]
-    .flatMap(withVariants)
+  ...[...DOC.footer, newFooterNewsletter("altbulten1"), newFooterSection("rich_text", "altmetin01")]
+    .flatMap((section) => withVariants(section, true))
     .map((section): [string, LayoutGroup, AnySection] => [
       `footer: ${name(section)}`,
       "footer",
@@ -121,6 +128,33 @@ describe("every section panel's groups", { timeout: 60_000 }, () => {
       expect(holder, `${field.key} drawn in "${String(holder)}"`).toBe(field.group)
     }
     unmount()
+  })
+})
+
+/** The rich text's "Biçim" where it stands (adr/0073 §3): the footer group's has no picture. */
+describe("the rich text's variants", () => {
+  it("offers the picture on a page, and no choice in the footer group", () => {
+    const page = newBodySection("pages", "rich_text", "sayfametin1")
+    const { unmount } = renderPanel(page, "pages")
+    expect(groupsDrawn()).toContain("variant")
+    expect(screen.getByRole("radio", { name: "Görselli metin", hidden: true })).toBeInTheDocument()
+    unmount()
+
+    renderPanel(newFooterSection("rich_text", "altmetin01"), "footer")
+    expect(groupsDrawn()).not.toContain("variant")
+    expect(screen.queryByRole("radio", { name: "Görselli metin", hidden: true })).toBeNull()
+  })
+
+  it("lists the picture's side in the search while the variant is chosen", () => {
+    const pane = newHomeSection("rich_text", "anametin01")
+    const keys = (section: AnySection, group: LayoutGroup) =>
+      sectionFields(section, group).map((field) => field.key)
+    expect(keys(pane, "home")).toContain("variant")
+    expect(keys(pane, "home")).not.toContain("image_side")
+    expect(keys(switchVariant(pane as never, "with_image" as never), "home")).toContain(
+      "image_side"
+    )
+    expect(keys(newFooterSection("rich_text", "altmetin01"), "footer")).not.toContain("variant")
   })
 })
 
