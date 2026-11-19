@@ -85,8 +85,9 @@ describe("POST /api/yenile", () => {
 
 describe("the scopes' caches (adr/0048 Ek 2026-11-03)", () => {
   it("drops each scope's Store paths, and the edge's site only for `site`", () => {
+    // The content pages' own layouts go with the design (adr/0073 §6)
     expect(refreshPlan(["layout"])).toEqual({
-      paths: ["/store/storefront-layout"],
+      paths: ["/store/storefront-layout", "/store/storefront-layout/pages/"],
       edgeSite: false,
     })
     expect(refreshPlan(["settings"])).toEqual({

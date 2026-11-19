@@ -7,7 +7,8 @@ import {
   ABOUT_PAGE,
   CONTACT_PAGE,
   CONTENT_FIXTURE,
-  contentAnswer,
+  STORY_PAGE,
+  contentAnswerOf,
   contentEntity,
 } from "@/test/preset-lock/fixture-content"
 import { htmlLines } from "@/test/preset-lock/html-lines"
@@ -17,8 +18,9 @@ import { store } from "@/test/preset-lock/store-mock"
 
 /**
  * The preset lock's content pages (docs/tema/bilesen-standardi.md §7;
- * adr/0073 §2, S3): a page of the shop's own words with its cover and the
- * contact page with its form, drawn in the fixed shop through the
+ * adr/0073 §2, S3): a page of the shop's own words with its cover, the
+ * contact page with its form, and a page with its own sections above and
+ * below its text, drawn in the fixed shop through the
  * storefront's own screen (`ContentScreen`) and the theme, kept in
  * `preset-lock/fixture-content-pages/`. A page with no layout of its own
  * is drawn as it was before content pages took sections: these files are
@@ -40,8 +42,11 @@ async function contentHtml(page: typeof ABOUT_PAGE): Promise<string> {
 }
 
 const PAGES = [
+  // Written before content pages took sections (adr/0073 S3): never again to let a change through
   { file: "page.html", page: ABOUT_PAGE },
   { file: "contact.html", page: CONTACT_PAGE },
+  // A page with its own sections: a rich text above its text, three sections below it
+  { file: "page-sections.html", page: STORY_PAGE },
 ]
 
 beforeAll(() => {
@@ -54,7 +59,7 @@ beforeAll(() => {
   }
   store.layout = presetAnswer(base).layout
   store.menus = menusOf(base.menus)
-  store.answer = contentAnswer
+  store.answer = contentAnswerOf(base)
 })
 
 afterAll(() => {

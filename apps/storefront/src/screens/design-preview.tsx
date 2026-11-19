@@ -5,9 +5,11 @@ import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { resolvePath } from "@/lib/store-api/requests"
 import { homeSections } from "@/lib/views/home"
+import { draftContentPage } from "@/lib/views/page-sections"
 import type { PreviewPage } from "@/lib/views/preview"
 import { theme } from "@/theme"
 import { BlogIndexScreen } from "./blog"
+import { ContentScreen } from "./content"
 import { EntityScreen } from "./entity"
 import { SearchScreen } from "./search"
 import { queryOf, ShopScreen } from "./shop"
@@ -30,7 +32,9 @@ async function DraftHome({ layout }: { layout: StoreLayout }) {
  * The theme editor's draft on one storefront page (adr/0049): the page
  * drawn as it is live, with the draft's header, footer and sections
  * (`currentLayout()` reads the draft on this address). A path that names
- * no record, or a redirect, shows the draft's home page instead.
+ * no record, or a redirect, shows the draft's home page instead. The
+ * live session also opens a content page by its id, a draft one too
+ * (adr/0073 §5); one it does not open shows the draft's home page.
  */
 export async function DesignPreviewScreen({
   layout,
@@ -51,6 +55,15 @@ export async function DesignPreviewScreen({
       return <CartPage searchParams={Promise.resolve(queryOf(target.url.searchParams))} />
     case "search":
       return <SearchScreen query={queryOf(target.url.searchParams)} />
+    // A content page by its id, in draft too (the live session only; adr/0073 §5)
+    case "content": {
+      const draft = await draftContentPage(target.id)
+      return draft ? (
+        <ContentScreen page={draft.page} entry={draft.entry} />
+      ) : (
+        <DraftHome layout={layout} />
+      )
+    }
     case "resolve": {
       const page = await resolvePath(`${target.url.pathname}${target.url.search}`)
       return page.type === "entity" ? (

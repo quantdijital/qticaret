@@ -11,6 +11,7 @@ describe("forgetting by scope", () => {
       "/store/storefront?{}",
       "/store/seo/site?{}",
       "/store/storefront-layout?{}",
+      "/store/storefront-layout/pages/cnt_01KABC?{}",
       "/store/product-categories?{}",
     ]) {
       await shared(key, () => Promise.resolve(1))
@@ -19,6 +20,7 @@ describe("forgetting by scope", () => {
     expect(caches.edge.has("site")).toBe(true)
     expect([...caches.shared.keys()].sort()).toEqual([
       "/store/product-categories?{}",
+      "/store/storefront-layout/pages/cnt_01KABC?{}",
       "/store/storefront-layout?{}",
     ])
     forgetScopes(["site", "layout"])
