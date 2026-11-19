@@ -1,12 +1,15 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
+import { shipmentPollInterval } from "../lib/shipping/poll-interval"
 import { SHIPMENT_TRACKING_MODULE } from "../modules/shipment-tracking"
 import type ShipmentTrackingModuleService from "../modules/shipment-tracking/service"
 import { pollReturnHandovers } from "../workflows/returns/handover"
 import { refreshShipmentWorkflow } from "../workflows/shipping/refresh-shipment"
 
-// Asked again at most this often by the job; a notification can ask sooner
-const RECHECK_MS = 25 * 60 * 1000
+// Every 30 minutes; shorter locally with SHIPMENT_POLL_MINUTES (lib/shipping/poll-interval)
+const INTERVAL = shipmentPollInterval()
+// Asked again at most this often by the job (25 minutes); a notification can ask sooner
+const RECHECK_MS = INTERVAL.recheckMs
 // A run asks about this many parcels at most, the least recently checked first
 const BATCH = 50
 const OPEN = ["created", "picked_up", "in_transit", "out_for_delivery"] as const
@@ -66,5 +69,5 @@ export default async function shipmentTracking(container: MedusaContainer) {
 
 export const config = {
   name: "shipment-tracking",
-  schedule: "*/30 * * * *",
+  schedule: INTERVAL.schedule,
 }
