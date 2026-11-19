@@ -10,7 +10,7 @@ import { hydrateSection } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
 import { imageUrls } from "./layout-read"
 import { publishedDocument } from "./layout-published"
-import { layoutEdition } from "./layout-row"
+import { editionKey, layoutEdition } from "./layout-row"
 
 /**
  * A content page's own layout as the storefront shows it at a moment
@@ -95,6 +95,6 @@ export async function publishedPageLayout(
     return null
   }
   const shop = channels ? [...new Set(channels)].sort().join(",") : "*"
-  const key = `revision:${String(edition.revision)}|${pageId}|${shop}`
+  const key = `${editionKey(edition)}|${pageId}|${shop}`
   return pageCache(key, () => storePageLayout(container, doc, pageId, channels))
 }

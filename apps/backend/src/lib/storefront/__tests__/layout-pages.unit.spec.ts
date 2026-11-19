@@ -189,4 +189,22 @@ describe("a stored design's page layouts (adr/0073 §1)", () => {
       { group: `pages.${OTHER}`, id: "acilis001", type: "hero" },
     ])
   })
+
+  it("reads a page stored past today's limits: the first pages and sections, never a failure", () => {
+    // As a design saved under a higher limit, a lower one since
+    const sections = Array.from({ length: LAYOUT_LIMITS.page + 3 }, (_, n) =>
+      help(`yardim${String(n + 100)}`)
+    )
+    const pages = Array.from({ length: LAYOUT_LIMITS.pages + 2 }, (_, n) =>
+      page(
+        `cnt_01KOLD${String(n).padStart(3, "0")}`,
+        n === 0 ? sections : [help(`tek${String(n + 100)}x`)]
+      )
+    )
+    const doc = readStoredLayout({ pages })
+    expect(doc.pages).toHaveLength(LAYOUT_LIMITS.pages)
+    expect(doc.pages[0]?.sections.map((section) => section.id)).toEqual(
+      sections.slice(0, LAYOUT_LIMITS.page).map((section) => section.id)
+    )
+  })
 })

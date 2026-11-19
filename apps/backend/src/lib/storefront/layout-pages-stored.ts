@@ -19,8 +19,9 @@ const named = (value: unknown): string | null =>
  * through today's variant lists (`storedSection`), one the pages no longer
  * take (a type taken off since, a newer build's, a broken one) skipped and
  * named in `skipped`; a page left with none, or whose id is not a content
- * page's, is left out, so the rest of the design still reads. A page's
- * sections past its limit are left as they are for the schema to judge.
+ * page's, is left out, so the rest of the design still reads. Pages past
+ * the group's limit and a page's sections past its own are left out too,
+ * so a limit lowered later never stops an older live design reading.
  * None stored (a design from before pages): null, the schema's default.
  */
 export function storedPages(
@@ -40,14 +41,19 @@ export function storedPages(
       return []
     }
     const group = `pages.${pageId}`
-    const read = sections.map(storedSection).filter((section) => {
-      if (contentPageSection.safeParse(section).success) {
-        return true
-      }
-      const fields: Record<string, unknown> = isPlainObject(section) ? section : {}
-      skipped.push({ group, id: named(fields["id"]), type: named(fields["type"]) })
-      return false
-    })
+    // Past the page's limit (a limit lowered since): the first ones read, the rest left out,
+    // so a live design never stops reading (second security review 2026-11-19)
+    const read = sections
+      .slice(0, LAYOUT_LIMITS.page)
+      .map(storedSection)
+      .filter((section) => {
+        if (contentPageSection.safeParse(section).success) {
+          return true
+        }
+        const fields: Record<string, unknown> = isPlainObject(section) ? section : {}
+        skipped.push({ group, id: named(fields["id"]), type: named(fields["type"]) })
+        return false
+      })
     return read.length > 0 ? [{ page_id: pageId, sections: read }] : []
   })
 }

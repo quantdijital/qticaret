@@ -11,7 +11,7 @@ import { shownSettings } from "../../lib/storefront/layout-settings"
 import { newsletterImages, printedNewsletter } from "../../lib/storefront/sections/newsletter"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
 import type { shopInfoValues } from "../shop/info-values"
-import { layoutEdition } from "./layout-row"
+import { editionKey, layoutEdition } from "./layout-row"
 import { publishedDocument } from "./layout-published"
 import { legacySettings } from "./layout-shared"
 import { defaultLayout } from "./layout-default"
@@ -222,7 +222,7 @@ export async function publishedLayout(
 ): Promise<Shown> {
   // The revision only: the documents are read on a miss (security review 2026-11-19, S2)
   const edition = await layoutEdition(container)
-  const doc = edition?.published ? `revision:${String(edition.revision)}` : "default"
+  const doc = edition?.published ? editionKey(edition) : "default"
   const key = `${doc}|${channels ? [...new Set(channels)].sort().join(",") : "*"}`
   return shownCache(key, async () => {
     const shown = edition?.published
