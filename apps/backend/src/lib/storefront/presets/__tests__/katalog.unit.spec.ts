@@ -118,6 +118,7 @@ describe("the katalog preset's draft (adr/0049 Ek 2026-11-14, Katalog ana sayfas
       where: "pages",
       ref: "page:hakkimizda",
       name: "Hakkımızda",
+      reason: "missing",
     })
     expect(doc.pages).toEqual([])
   })

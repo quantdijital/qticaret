@@ -106,8 +106,10 @@ export interface SkippedRef {
   where: string
   /** `category:cakilar`; for a page, `page:hakkimizda`. */
   ref: string
-  /** A page the shop lacks: its usual name (`Hakkımızda`), when the look gives one. */
+  /** A page left out: its usual name (`Hakkımızda`), when the look gives one. */
   name?: string
+  /** Why a page's layout was left out: no such page, or no room for another page's layout. */
+  reason?: "missing" | "limit"
 }
 
 /** What an apply did, for the editor's note. */

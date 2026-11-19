@@ -1,3 +1,4 @@
+import { LAYOUT_LIMITS } from "../layout-fields"
 import type { MenuInput, MenuLinkInput } from "../menus"
 import { resolveMenus } from "./resolve-menus"
 import type { PresetMenuInput } from "./resolve-menus"
@@ -19,8 +20,9 @@ import { isObject, resolveSection, text } from "./resolve-section"
  * category (`OPTIONAL_IN_ITEMS`) are cleared; a menu
  * whose every link is gone leaves the set, the shop's live menu kept in its
  * place (`resolveMenus`), never an empty menu put live; a content page's
- * layout (adr/0073 §4) whose page the shop has not made is left out whole:
- * a preset never makes a page. Each is named in `skipped`.
+ * layout (adr/0073 §4) whose page the shop has not made, or that the
+ * design has no room for, is left out whole: a preset never makes a page.
+ * Each is named in `skipped`.
  */
 
 /** A link resolved without its wording: the preset's label goes on it. */
@@ -35,6 +37,12 @@ export interface PresetLookups {
   images: ReadonlyMap<string, string>
   /** The shop's menus now, as a set writes them: kept where the preset leaves a place (`resolveMenus`). */
   live?: readonly MenuInput[]
+  /**
+   * The content pages the draft lays out now, by id (kept unless the preset
+   * replaces them, `withShopPages`): a page the preset would add past
+   * `LAYOUT_LIMITS.pages` is left out, never the whole look refused.
+   */
+  laid_out?: readonly string[]
 }
 
 export interface SkippedRef {
@@ -48,8 +56,10 @@ export interface SkippedRef {
   ref: string
   /** A menu left out: the shop's live menu in its place was kept. */
   kept_live?: boolean
-  /** A content page the shop lacks: its usual name as the preset gives it (`Hakkımızda`), for the panel to say. */
+  /** A content page left out: its usual name as the preset gives it (`Hakkımızda`), for the panel to say. */
   name?: string
+  /** Why a content page's layout was left out: the shop has no such page, or no room for another layout. */
+  reason?: "missing" | "limit"
 }
 
 export interface PresetGroups {
@@ -112,24 +122,41 @@ function standing(sections: readonly unknown[], where: string, report: Report): 
 }
 
 /**
- * The content pages' layouts on the shop's own pages (adr/0073 §4): a
- * page the shop has not made (`page:hakkimizda`; a draft page counts as
- * made) is left out with its sections, named in `skipped` under `pages`;
- * one whose every section went is left out too (a page has no empty layout).
+ * The content pages' layouts on the shop's own pages (adr/0073 §4), each
+ * left out with its sections and named in `skipped` under `pages` when the
+ * shop has not made the page (`missing`; a draft page counts as made) or
+ * the design has no room for another page's layout (`limit`: the draft's
+ * own layouts stay, warn don't block). One whose every section went is
+ * left out too (a page has no empty layout).
  */
 function resolvePages(pages: readonly unknown[], report: Report): PresetPage[] {
+  const laidOut = new Set(report.lookups.laid_out ?? [])
+  let room = LAYOUT_LIMITS.pages - laidOut.size
   return pages.flatMap((page) => {
     const entry = isObject(page) ? page : {}
     const ref = text(isObject(entry["page_id"]) ? entry["page_id"]["$handle"] : null) ?? "?"
+    const name = text(entry["name"])
+    const leftOut = (reason: "missing" | "limit") => {
+      report.skipped.push({ where: "pages", ref, ...(name === null ? {} : { name }), reason })
+      return []
+    }
     const id = report.lookups.records.get(ref)
     if (id === undefined) {
-      const name = text(entry["name"])
-      report.skipped.push({ where: "pages", ref, ...(name === null ? {} : { name }) })
-      return []
+      return leftOut("missing")
+    }
+    const added = !laidOut.has(id)
+    if (added && room <= 0) {
+      return leftOut("limit")
     }
     const listed = Array.isArray(entry["sections"]) ? entry["sections"] : []
     const sections = standing(listed, `pages.${ref.slice(ref.indexOf(":") + 1)}`, report)
-    return sections.length > 0 ? [{ page_id: id, sections }] : []
+    if (sections.length === 0) {
+      return []
+    }
+    if (added) {
+      room -= 1
+    }
+    return [{ page_id: id, sections }]
   })
 }
 

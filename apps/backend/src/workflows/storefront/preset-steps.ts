@@ -169,6 +169,7 @@ function documentOf(
     links: new Map(Object.entries(resolution.links)),
     images,
     live: kept.live,
+    laid_out: kept.frame.pages.map((page) => page.page_id),
   })
   const frame = withShopFrame(resolved.groups, kept.frame)
   const pages = withShopPages(resolved.pages, kept.frame.pages)

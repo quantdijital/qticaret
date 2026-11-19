@@ -89,6 +89,28 @@ describe("EditorNotices", () => {
     expect(note).not.toHaveTextContent("Üst/alt bilginiz korundu.")
   })
 
+  it("says a page layout was not added when twenty pages have their own (warn, don't block)", () => {
+    notices({
+      ...REPORT,
+      skipped: [
+        { where: "pages", ref: "page:hakkimizda", name: "Hakkımızda", reason: "limit" },
+        { where: "pages", ref: "page:sss", reason: "limit" },
+        { where: "pages", ref: "page:hikayemiz", name: "Hikâyemiz", reason: "missing" },
+      ],
+      kept: [],
+    })
+
+    const note = screen.getByRole("status")
+    expect(note).toHaveTextContent(
+      "Hakkımızda sayfasının düzeni eklenmedi: kendi düzeni olan en çok 20 sayfa olabilir."
+    )
+    expect(note).toHaveTextContent(
+      "Adresi ‘sss’ olan sayfanın düzeni eklenmedi: kendi düzeni olan en çok 20 sayfa olabilir."
+    )
+    expect(note).toHaveTextContent("Hikâyemiz sayfası olmadığı için sayfa düzeni eklenmedi.")
+    expect(note).not.toHaveTextContent("bölüm eklenmedi")
+  })
+
   it("draws no note without a report, and the waiting menus beside one", () => {
     notices(null, [{}, {}])
 

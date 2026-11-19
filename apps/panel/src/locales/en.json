@@ -10386,6 +10386,8 @@
         "kept": "Your header/footer was kept.",
         "pageMissing": "The page layout was not added because there is no {{name}} page. Create a page at the address ‘{{handle}}’ and apply the look again.",
         "pageMissingAddress": "The page layout was not added because there is no page at the address ‘{{handle}}’. Create a page at that address and apply the look again.",
+        "pageLimit": "The {{name}} page's layout was not added: at most {{max}} pages can have their own layout.",
+        "pageLimitAddress": "The layout of the page at ‘{{handle}}’ was not added: at most {{max}} pages can have their own layout.",
         "keptPages": "The layouts you set up on your pages were kept."
       },
       "history": {

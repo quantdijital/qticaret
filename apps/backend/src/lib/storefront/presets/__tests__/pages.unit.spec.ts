@@ -61,12 +61,76 @@ describe("a preset's content page layouts (adr/0073 §4)", () => {
     expect(resolved.pages).toEqual([])
     expect(resolved.groups.home).toEqual([help("anayardim1")])
     expect(resolved.skipped).toEqual([
-      { where: "pages", ref: "page:hakkimizda", name: "Hakkımızda" },
+      { where: "pages", ref: "page:hakkimizda", name: "Hakkımızda", reason: "missing" },
       // No name in the preset: the panel says the address alone
-      { where: "pages", ref: "page:sss" },
+      { where: "pages", ref: "page:sss", reason: "missing" },
     ])
     // The page is not a section: nothing is named dropped
     expect(resolved.dropped).toEqual([])
+  })
+
+  it("leaves out a page the design has no room for, keeping the rest of the look (warn, don't block)", () => {
+    // Twenty pages laid out already, the Hakkımızda page among them
+    const laidOut = [
+      ABOUT,
+      ...Array.from({ length: 19 }, (_, index) => `cnt_01KPAGE${String(index).padStart(2, "0")}`),
+    ]
+    const resolved = resolvePreset(
+      {
+        home: [help("anayardim1")],
+        pages: [
+          page("hakkimizda", [help("hkyardim01")], "Hakkımızda"),
+          page("hikayemiz", [help("hikyardim1")], "Hikâyemiz"),
+          page("sss", [help("sssyardim1")]),
+        ],
+      },
+      null,
+      {
+        ...lookups([
+          ["page:hakkimizda", ABOUT],
+          ["page:hikayemiz", STORY],
+          ["page:sss", CONTACT],
+        ]),
+        laid_out: laidOut,
+      }
+    )
+
+    // A page with a layout already is replaced; a new one past twenty is left out, named
+    expect(resolved.pages).toEqual([{ page_id: ABOUT, sections: [help("hkyardim01")] }])
+    expect(resolved.groups.home).toEqual([help("anayardim1")])
+    expect(resolved.skipped).toEqual([
+      { where: "pages", ref: "page:hikayemiz", name: "Hikâyemiz", reason: "limit" },
+      { where: "pages", ref: "page:sss", reason: "limit" },
+    ])
+    expect(resolved.dropped).toEqual([])
+  })
+
+  it("adds new pages while there is room, the one past twenty left out", () => {
+    const laidOut = Array.from({ length: 19 }, (_, index) => `cnt_01KPAGE${String(index)}`)
+    const resolved = resolvePreset(
+      {
+        pages: [
+          page("hakkimizda", [help("hkyardim01")], "Hakkımızda"),
+          page("hikayemiz", [help("hikyardim1")], "Hikâyemiz"),
+        ],
+      },
+      null,
+      {
+        ...lookups([
+          ["page:hakkimizda", ABOUT],
+          ["page:hikayemiz", STORY],
+        ]),
+        laid_out: laidOut,
+      }
+    )
+
+    expect(resolved.pages.map((each) => each.page_id)).toEqual([ABOUT])
+    expect(resolved.skipped).toEqual([
+      { where: "pages", ref: "page:hikayemiz", name: "Hikâyemiz", reason: "limit" },
+    ])
+    // Merged with the draft's own, the design holds twenty
+    const shop = laidOut.map((id) => ({ page_id: id, sections: [help("eskiyardim")] }))
+    expect(withShopPages(resolved.pages, shop).pages).toHaveLength(20)
   })
 
   it("drops a page's section whose record the shop lacks, and a page left with none", () => {

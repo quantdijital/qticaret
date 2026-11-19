@@ -129,10 +129,60 @@ medusaIntegrationTestRunner({
         where: "pages",
         ref: "page:hakkimizda",
         name: "Hakkımızda",
+        reason: "missing",
       })
       // The deleted page's old layout leaves with the save (adr/0073 §1)
       expect(third.data.result.dropped_pages).toBe(1)
       expect(third.data.layout.draft.pages).toEqual([ownContact])
+    })
+
+    it("applies the look without the Hakkımızda layout when twenty pages have their own", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const asOwner = { headers: owner.headers }
+      await withCutlery(container)
+      const content = async (body: Record<string, unknown>) =>
+        (await settle(http.post<{ entry: { id: string } }>("/admin/content", body, asOwner))).data
+          .entry.id
+      await content({ kind: "page", title: "Hakkımızda", handle: "hakkimizda", body: doc("Biz.") })
+      const own: PageLayout[] = []
+      for (let index = 0; index < 20; index++) {
+        const id = await content({
+          kind: "page",
+          title: `Sayfa ${String(index + 1)}`,
+          handle: `sayfa-${String(index + 1)}`,
+          body: doc("Metin."),
+        })
+        own.push({
+          page_id: id,
+          sections: [{ id: `sayfayardim${String(index)}`, type: "help", title: "Bize yazın" }],
+        })
+      }
+      const saved = await settle(
+        http.post<{ layout: { draft: Draft } }>(
+          "/admin/storefront-layout",
+          { document: { header: [], home: [], footer: [], pages: own } },
+          asOwner
+        )
+      )
+      expect(saved.status).toBe(200)
+      const before = saved.data.layout.draft.pages
+
+      const applied = await settle(
+        http.post<Applied>(`/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/apply`, {}, asOwner)
+      )
+      // Warn, don't block: the look is applied, the page's layout left out and named
+      expect(applied.status).toBe(200)
+      expect(applied.data.result.skipped).toContainEqual({
+        where: "pages",
+        ref: "page:hakkimizda",
+        name: "Hakkımızda",
+        reason: "limit",
+      })
+      expect(applied.data.layout.draft.pages).toEqual(before)
+      expect(applied.data.result.kept.filter((each) => each.startsWith("pages."))).toEqual(
+        own.map((page) => `pages.${page.page_id}`)
+      )
     })
   },
 })

@@ -1,5 +1,7 @@
+import type { TFunction } from "i18next"
 import { CircleCheck } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { PAGE_LAYOUT_LIMITS } from "@qticaret/types"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { ApplyReport as Report, SkippedRef } from "./api"
 
@@ -14,6 +16,17 @@ const refsOf = (skipped: readonly SkippedRef[]) =>
 
 /** `page:hakkimizda` → `hakkimizda`: the address the shop opens the page at. */
 const handleOf = (ref: string) => ref.slice(ref.indexOf(":") + 1)
+
+/**
+ * Why a page's layout was not added: no such page (open it at this
+ * address), or no room for another page's own layout; by the page's name
+ * when the look gives one, else by its address.
+ */
+function pageNote(t: TFunction, each: SkippedRef): string {
+  const values = { name: each.name, handle: handleOf(each.ref), max: PAGE_LAYOUT_LIMITS.pages }
+  const key = each.reason === "limit" ? "pageLimit" : "pageMissing"
+  return t(`${R}.${key}${each.name ? "" : "Address"}`, values)
+}
 
 /**
  * What the last apply did, said in the editor beside the draft it made
@@ -50,11 +63,7 @@ export function ApplyReport({ report, onClose }: { report: Report; onClose: () =
             <p>{t(`${R}.skipped`, { count: sections, refs: refsOf(skipped) })}</p>
           ) : null}
           {pages.map((each) => (
-            <p key={each.ref}>
-              {each.name
-                ? t(`${R}.pageMissing`, { name: each.name, handle: handleOf(each.ref) })
-                : t(`${R}.pageMissingAddress`, { handle: handleOf(each.ref) })}
-            </p>
+            <p key={each.ref}>{pageNote(t, each)}</p>
           ))}
           {keptFrame ? <p>{t(`${R}.kept`)}</p> : null}
           {keptPages ? <p>{t(`${R}.keptPages`)}</p> : null}
