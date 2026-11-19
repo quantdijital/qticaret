@@ -11547,6 +11547,7 @@
       "key_rejected": "{{name}} did not accept the key. Change it under Settings › AI.",
       "provider_balance": "The {{name}} account has no balance or quota left.",
       "provider_busy": "{{name}} is busy right now. Try again shortly.",
+      "provider_quota": "Your {{name}} account's quota does not cover this job. Free use may not include it; turn on billing at {{name}}, or try with another service.",
       "provider_unavailable": "{{name}} is not answering right now.",
       "timeout": "{{name}} did not answer in time.",
       "content_blocked": "{{name}} gave no suggestion for this content (safety filter).",

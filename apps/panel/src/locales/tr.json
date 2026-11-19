@@ -11547,6 +11547,7 @@
       "key_rejected": "{{name}} anahtarı kabul etmedi. Anahtarı Ayarlar › Yapay zekâ'dan değiştirin.",
       "provider_balance": "{{name}} hesabında bakiye ya da kota kalmamış.",
       "provider_busy": "{{name}} şu an yoğun. Biraz sonra yeniden deneyin.",
+      "provider_quota": "{{name}} hesabınızın kotası bu iş için yetmiyor. Ücretsiz kullanım bu işi kapsamıyor olabilir; servisin faturalandırmasını açın ya da başka bir servisle deneyin.",
       "provider_unavailable": "{{name}} şu an yanıt vermiyor.",
       "timeout": "{{name}} zamanında yanıt vermedi.",
       "content_blocked": "{{name}} bu içerik için öneri vermedi (güvenlik süzgeci).",

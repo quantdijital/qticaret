@@ -117,6 +117,12 @@ export interface AiService {
   dataNoteKey: string
   /** Error codes the service writes in the body (`base_resp.status_code`), by what they mean. */
   bodyErrors?: Readonly<Record<number, AiErrorKey>>
+  /**
+   * How a 429's body tells a used-up quota from a rate
+   * (`connectors/status-failure.ts`): `google-rpc`, the Google error with
+   * `google.rpc.QuotaFailure` details. Left out: every 429 is a rate.
+   */
+  quotaErrors?: "google-rpc"
 }
 
 /*
@@ -128,6 +134,8 @@ export interface AiService {
  *   https://api-docs.deepseek.com/quick_start/error_codes (401 wrong key, 402 no balance,
  *     429 rate limit, 500 server error, 503 overloaded)
  *   https://api-docs.deepseek.com/quick_start/pricing/ (peak prices are used)
+ *   Checked again 2026-11-19: error_codes keeps balance (402) and rate (429) apart by
+ *     status alone; no body field adds to it, so nothing more is read.
  *   https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html (processed and
  *     stored in the People's Republic of China; training is a listed purpose)
  * Not verified: the error body's shape (only the status is read).
@@ -193,6 +201,13 @@ const DEEPSEEK: AiService = {
  *     base64 data URL; JPEG, PNG, GIF, WEBP; an image at most 10 MB, a request 64 MB)
  * Not verified: a separate price for image input (the pricing page lists none for the
  * model): the text prices are used for the estimate, image tokens counted as input.
+ *
+ * Quota and plan codes verified 2026-11-19 against:
+ *   https://platform.minimax.io/docs/api-reference/errorcode (2053 insufficient credit;
+ *     2056 usage limit exceeded, wait for the next 5-hour window; 2061 the token plan
+ *     does not support the model; 2067 usage limit reached and credit auto consumption
+ *     off; 2068 the plan tier does not support the model)
+ * 2062 ("M Plan rate limit", or no active plan when querying usage) says either: left out.
  */
 const MINIMAX: AiService = {
   id: "minimax",
@@ -241,7 +256,12 @@ const MINIMAX: AiService = {
     1039: "ai.provider_busy",
     2013: "ai.provider_response_invalid",
     2049: "ai.key_rejected",
+    2053: "ai.provider_balance",
+    2056: "ai.provider_quota",
+    2061: "ai.provider_quota",
     2064: "ai.provider_unavailable",
+    2067: "ai.provider_quota",
+    2068: "ai.provider_quota",
   },
 }
 
@@ -269,6 +289,28 @@ const MINIMAX: AiService = {
  *   https://aistudio.google.com/docs/pricing (one input price, no split by modality)
  * Not verified: whether the compatibility endpoint takes a remote image address (every
  * example is base64): only base64 is sent, as for every service.
+ *
+ * A used-up quota apart from a rate on 429 (`quotaErrors`). Verified 2026-11-19 against:
+ *   https://aistudio.google.com/docs/api-errors (429 `rate_limit_exceeded`: the per-minute
+ *     or per-second limit; `quota_exceeded`: the daily quota, wait for the reset or ask
+ *     for more; `too_many_requests`)
+ *   https://aistudio.google.com/docs/rate-limits (limits per project in RPM, TPM, RPD and,
+ *     for image models, IPM; RPD resets at midnight Pacific time; tiers Free, Tier 1 with
+ *     a billing account, Tier 2, Tier 3; any limit passed is a 429 RESOURCE_EXHAUSTED)
+ *   https://aistudio.google.com/docs/pricing (every image generating model, Nano Banana
+ *     2.1 among them: "Not available" on the free tier)
+ *   https://google.aip.dev/193 (`error.code` the HTTP status, `error.status`,
+ *     `error.details[]` by `@type`)
+ *   https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto
+ *     (`QuotaFailure.violations[]`: `quotaMetric`, `quotaId`, `quotaValue` the enforced
+ *     value; `RetryInfo.retryDelay`)
+ * What a free tier 429 for an image model carries is seen in the developer forum, not
+ * on a documentation page (discuss.ai.google.dev, "Gemini Flash Image … RPM limit
+ * errors"): `limit: 0` in the message and three `-FreeTier` violations, the per-minute
+ * one included, with a RetryInfo. So a violation counts as a used-up quota when its
+ * value is zero or its id is a daily or monthly one, never for `-FreeTier` alone.
+ * Not verified: the compatibility endpoint's error body (read the same way; any other
+ * shape is a rate, as before).
  */
 const GEMINI: AiService = {
   id: "gemini",
@@ -349,6 +391,7 @@ const GEMINI: AiService = {
     },
   },
   dataNoteKey: "ai.data_note.gemini",
+  quotaErrors: "google-rpc",
 }
 
 /*
@@ -370,6 +413,8 @@ const GEMINI: AiService = {
  * Not verified: which header picks JSON over the bytes (both are read); what 403 means
  * (read as a refused key); whether self-serve images train models (the pages disagree:
  * the note says so). No result address is ever returned: no download host.
+ * Checked again 2026-11-19 (the OpenAPI page above): no 429 and no rate limit are
+ * documented, 402 is the only payment answer; nothing more is read.
  */
 const PHOTOROOM: AiService = {
   id: "photoroom",

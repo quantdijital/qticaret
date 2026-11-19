@@ -1,8 +1,7 @@
 import { parseRetryAfter } from "../../clients/retry"
 import { safeFetch } from "../../security/safe-fetch"
 import type { SafeFetchResponse } from "../../security/safe-fetch"
-import { aiErrorForStatus, aiProviderError, isRetryableAiError } from "../errors"
-import type { AiErrorKey } from "../errors"
+import { aiProviderError, isRetryableAiError } from "../errors"
 import type { AiService } from "../registry/services"
 import {
   DEFAULT_RETRY_WAIT_MS,
@@ -11,13 +10,14 @@ import {
   waitFor,
 } from "./openai-compatible"
 import type { Failure } from "./openai-compatible"
+import { statusFailure } from "./status-failure"
 
 /**
  * One POST to an image endpoint under the text connector's rules
  * (adr/0071 §8, §9): the registry's address on the service's host list,
  * redirects refused, the key in a header only, tried again once only
- * when the service said it did not take the job (429, 5xx, no
- * connection), never after a timeout. Gives back a 2xx answer; any other
+ * when the service said it did not take the job (429 for a rate, 5xx, no
+ * connection), never after a timeout or a used-up quota. Gives back a 2xx answer; any other
  * end is a `ProviderError` with our key and code alone.
  */
 
@@ -46,15 +46,16 @@ export function registeredEndpoint(service: AiService, raw: string): URL | null 
 }
 
 function failureOfStatus(service: AiService, response: SafeFetchResponse): Failure | null {
-  const key: AiErrorKey | null = aiErrorForStatus(response.status)
-  if (key === null) {
+  const failed = statusFailure(service, response.status, response.body)
+  if (failed === null) {
     return null
   }
+  const { key, code } = failed
   const header = response.headers["retry-after"]
   return {
     service: service.id,
     key,
-    code: `http_${String(response.status)}`,
+    code,
     retryAfterMs: parseRetryAfter(typeof header === "string" ? header : null),
     retry: isRetryableAiError(key),
   }

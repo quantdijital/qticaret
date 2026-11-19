@@ -698,6 +698,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.provider_balance":
     "Your account at the service has no balance or quota left. Check your account in the service's own dashboard.",
   "ai.provider_busy": "The service is too busy right now (rate limit). Try again in a moment.",
+  "ai.provider_quota":
+    "Your account's quota at the service does not cover this job. Free use may not include it; turn on billing at the service, or try with another service.",
   "ai.provider_unavailable":
     "The service cannot be reached right now. Try again, or try with another service.",
   "ai.timeout": "The service did not answer in time. Try again, or try with another service.",

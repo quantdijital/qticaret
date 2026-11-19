@@ -116,6 +116,7 @@ const BODY_VERDICTS: Readonly<Partial<Record<AiErrorKey, AiAccountCheck>>> = {
   "ai.key_rejected": "secret_invalid",
   // The key was taken; what is left on the account is the service's own matter
   "ai.provider_balance": "valid",
+  "ai.provider_quota": "valid",
   "ai.provider_busy": "unreachable",
   "ai.provider_unavailable": "unreachable",
   "ai.timeout": "unreachable",

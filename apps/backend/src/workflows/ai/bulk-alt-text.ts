@@ -54,6 +54,7 @@ const STOP_KEYS: ReadonlySet<string> = new Set([
   "ai.own_keys_not_in_plan",
   "ai.key_rejected",
   "ai.provider_balance",
+  "ai.provider_quota",
   "staff.forbidden",
 ])
 

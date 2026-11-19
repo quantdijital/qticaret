@@ -10,6 +10,7 @@ const OWN_WORDS = new Set([
   "key_rejected",
   "provider_balance",
   "provider_busy",
+  "provider_quota",
   "provider_unavailable",
   "timeout",
   "content_blocked",
