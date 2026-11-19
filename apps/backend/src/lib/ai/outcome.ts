@@ -30,6 +30,7 @@ const ANSWERED: ReadonlySet<AiErrorKey> = new Set([
   "ai.key_rejected",
   "ai.provider_balance",
   "ai.provider_busy",
+  "ai.provider_quota",
   "ai.content_blocked",
 ])
 
@@ -71,6 +72,7 @@ const NOT_TAKEN_KEYS: ReadonlySet<AiErrorKey> = new Set([
   "ai.key_rejected",
   "ai.provider_balance",
   "ai.provider_busy",
+  "ai.provider_quota",
   // Ours, before any call: no readable key, or a service this instance does not list
   "ai.service_unavailable",
   // Ours, before any call: a picture gone, or one no service reads (SVG, a background it cannot make)

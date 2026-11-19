@@ -16,6 +16,7 @@ import { AiBackgroundCompare } from "@/features/ai/components/ai-background-comp
 import { AiConnectHint } from "@/features/ai/components/ai-connect-hint"
 import { AiSceneCustom } from "@/features/ai/components/ai-scene-custom"
 import { AiServicePicker } from "@/features/ai/components/ai-service-picker"
+import { AiTryOthers } from "@/features/ai/components/ai-try-others"
 import { aiFailureText, serviceName } from "@/features/ai/failure-text"
 import { useAiBackground } from "@/features/ai/use-ai-background"
 import { useAiImageModes } from "@/features/ai/use-ai-image-modes"
@@ -116,6 +117,20 @@ export function AiBackgroundDialog({
         void job.start("", picked, ask.prompt)
       }
     })
+  }
+  // After a failure, the other services that can do the job (adr/0071 §4): asked only on a click
+  const others =
+    state.status === "error" ? usable.filter((id) => id !== (state.service ?? service)) : []
+  const tryWith = (id: string) => {
+    const made = current.optionsOf(id)
+    const next = made.includes(option) ? option : made[0]
+    if (next === undefined) {
+      return
+    }
+    setPicked(id)
+    setChosen(next)
+    setRanWith(next)
+    void job.start(next, id)
   }
   const switchMode = (next: AiImageMode) => {
     // A result of the other mode is turned down; its picture goes with the sweep
@@ -227,6 +242,7 @@ export function AiBackgroundDialog({
                 {failureText(t, state.failure, state.service)}
               </p>
             ) : null}
+            <AiTryOthers services={others} onTryWith={tryWith} />
             <p className="text-xs text-muted-foreground">
               {state.status === "ready"
                 ? (blocked ?? useNote)

@@ -221,7 +221,8 @@ Sunucu hata anahtarları `lib/errors/messages/{tr,en}.ts`, panel metinleri `apps
 | `ai.own_keys_not_in_plan` | paket "Kendi anahtarım"ı kapatmış | paket notu |
 | `ai.key_rejected` | servis anahtarı reddetti (401/403) | "Anahtar kabul edilmedi" + Ayarlar bağlantısı |
 | `ai.provider_balance` | servis hesabında bakiye ya da kota yok | servis adıyla açıklama |
-| `ai.provider_busy` | 429 | "Biraz sonra yeniden dene" |
+| `ai.provider_busy` | 429 (hız sınırı; gövde kota tükenmesi demiyorsa) | "Biraz sonra yeniden dene" |
+| `ai.provider_quota` | 429 ama gövde kotanın bittiğini ya da bu planda sıfır olduğunu söylüyor (Gemini: `QuotaFailure` değeri 0 ya da günlük/aylık kota, `limit: 0`, `quota_exceeded`; MiniMax plan kodları); yeniden denenmez (2026-11-19) | "Faturalandırmayı aç" / "Başka servisle dene" |
 | `ai.provider_unavailable` | 5xx, ağ, devre açık | "Başka servisle dene" |
 | `ai.timeout` | süre doldu | "Yeniden dene" / "Başka servisle dene" |
 | `ai.content_blocked` | servisin güvenlik süzgeci reddetti | açıklama |

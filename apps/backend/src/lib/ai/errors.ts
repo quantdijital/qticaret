@@ -15,6 +15,8 @@ export const AI_ERROR_KEYS = [
   "ai.key_rejected",
   "ai.provider_balance",
   "ai.provider_busy",
+  // A 429 whose body says the account's quota for this job is used up or zero, not a rate
+  "ai.provider_quota",
   "ai.provider_unavailable",
   "ai.timeout",
   "ai.content_blocked",
