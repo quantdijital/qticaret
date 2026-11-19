@@ -271,3 +271,143 @@ Sıra bağımlılığa göre. Her dilim kendi PR'ıdır; `pnpm verify:changed` v
 - **Vitrin.** `GET /store/storefront` her rolün sayfa kimliğini ve yayındaki adresini verir (taslak ya da silinmiş sayfa: adres `null`). `ContentScreen` rolü kimlikle tanır (`lib/views/page-roles.ts`; kimlik alanı olmayan eski arka uçta adresle). Ürün sayfasının "kargo hakkında" bağlantısı canlı adresi kullanır; içerik kaydı (`content` kapsamı) çerçeveyi de tazeler.
 - **Panel.** Vitrin tercihlerinde yol kutuları yerine aranabilir sayfa seçici (`shared/page-role-picker.tsx`; düzenleyicinin sayfa seçicisiyle aynı arama); silinmiş sayfa uyarı verir, kaydı engellemez. Düzenleyicide iletişim sayfasının sabit satırı da kimlikle tanınır.
 - **SEO.** Adres değişince 301 bugünkü gibi `workflows/content/paths.ts`'te; rol artık adrese bağlı olmadığından 301'in yanında form ve canlı bilgiler de yeni adreste kalır.
+
+## Ek 2026-11-19 (2): Sayfalar tema düzenleyicinin
+
+- **Dayanak:** sahip (2026-11-19): "sayfalardaki o altta üstte içerik mantığı olmasın direkt mevcut içerikler gelsin hakkımızdaya bu sayfaları direkt içinden oluşturmasın direkt tema düzenleyicide oluştursun. blog içeriği değil bu"
+- **Anlamı:** üst/alt yerleşimi yok; sayfanın bugünkü metni sayfanın tek bölüm listesinde bölüm olarak görünür; sayfa tema düzenleyicide açılır ve düzenlenir, İçerik'te değil; İçerik yalnız blog yazılarınındır.
+- **Geçersiz kılınanlar:** §1 `placement` ve "sayfa başı ve sayfanın metni bölüm değildir, saklanmaz"; §1 sınır tablosunda sayfa sayısı (20); §2'nin tamamı (sabit metin, rol gövdeleri, `sections: { top, bottom }`); §3'te "başka yeni tür ya da biçim yok"; §4'te "görünüm sayfa oluşturmaz", Katalog düzeninin `bottom` yerleşimi ve "sayfanın kendi metni İçerik'te"; §5'te üst/alt listeler, sabit "Sayfanın metni" satırı, "İçerik'te düzenle" ve İçerik'teki "Tema düzenleyicide tasarla"; §6'da `byPlacement` ve "düzen gelmezse bölümsüz çizilir"; §7'de "bölüm metinleri sayılmaz" ve "düzen yayını `lastmod`'u değiştirmez"; Alternatifler'de "`placement` üst/alt, metin sabit" seçimi ve formun "Sonraya" bırakılması; Açık kararlar 2. Ek 2026-11-19'daki roller kalır, anlamı daralır (K10).
+- **Çakışma kontrolü (2026-11-19, `git fetch --prune`):** `origin`'de `dev` ve `main` dışında dal yok, açık PR yok; `progress/oguzhan.md` sıradaki işleri yapay zekâ genişletme 2 ve panel küçük işleri. Örtüşme: Atölye `content/*` Oğuzhan'ın tema alanı (S8 PR'ında not); yapay zekâ SEO önerisi kartı sayfa ayarları paneline taşınır (S7; `lib/ai/facts/page.ts` değişmez); "SSS taslağı" adayı sayfaya yazacaksa K2'deki türleri kullanır.
+
+### K1. Sayfa başına tek sıralı liste
+
+- `pages[].sections` tek listedir; sıra çizim sırasıdır. `placement` şemadan çıkar (`lib/storefront/layout-pages.ts:82-124`, `sections/rich-text.ts:46-51` `placedRichText`, `packages/types` `StoreContentPageSection`).
+- **Okuma kuralı (migration yok, JSON sütunu):** `storedPages` (`layout-pages-stored.ts:28`) `placement` taşıyan ögeyi eski biçim sayar: önce `top`'lar, sonra sayfanın metin bölümleri, sonra `bottom`'lar (her grupta saklanan sıra); `placement` atılır. Eski biçimde metin bölümü yoktur; okuyucu metnin yerini (`text_at`: üstlerin sayısı) döner, metni K3'teki dönüşüm ya da K6'daki geri yükleme yerleştirir.
+- **Sınırlar:** `LAYOUT_LIMITS.pages` 20 → **50** (artık metni olan her sayfanın bir ögesi var; 20 "kendi tasarımı olan sayfa" içindi). `page` 12 kalır, metin bölümleri dahil. Belge 1 MB ve rota `sizeLimit: "1mb"` kalır (`api/http/storefront-menu-routes.ts:46`, `designs/limits.ts:10`). Aynalar: `PAGE_LAYOUT_LIMITS` (types; panel `layout/page-layouts.ts:32`).
+- **Ögesi olmayan sayfa** (sınır dolu, içe aktarma, eski sürüm geri yüklemesi): metni K2'deki `body` aynasından **sentezlenir**. `GET /store/storefront-layout/pages/:id` (ve `preview`, `session` uçları) ögesi olmayan sayfaya `[article(body)]` ve rol sayfasıysa rol bölümünü (K3 tablosu) `synthesized: true` ile döner. Düzenleyici aynı sentezi gösterir; ilk değişiklik ögeyi oluşturur (yer varsa).
+
+### K2. Sayfanın metni bölümdür, düzen belgesinde saklanır
+
+- Taslak, yayın, sürüm, önizleme, geri al/yinele ve tek "Yayınla" belgeyle gelir.
+- **İçerik kaydında kalanlar:** başlık, adres (301/410, `workflows/content/paths.ts`), SEO alanları, durum, kapak. Sayfa başı (iz, tek h1 = başlık, kapak) bölüm değildir, sabit üsttedir (tek h1, docs/13). Başlık ve kapak sayfa ayarları panelinde düzenlenir (K5).
+- **Yeni metin bölümleri:**
+
+| Bölüm | Şema | Çizim (Atölye) | Neden |
+| --- | --- | --- | --- |
+| `rich_text` biçimi **`article`** ("Sayfa metni") | Ortak alanlar (`title` isteğe bağlı, `body: contentDoc`); ayarlar `outline: auto \| off` (içindekiler), `questions: auto \| off` (soru-cevap okuma); varsayılan `auto` = bugünkü davranış | Bugünkü `InfoBody` / `FaqBody` (`ContentPage.tsx:23-80`): okuma ölçüsü, uzun metinde içindekiler (`OUTLINE_MIN`), soru-cevap metninde gruplu açılırlar ve yanında iletişim yolları | `pane` (`Story`: başlık solda, gölgeli zemin) bugünkü sayfa görünümü değil; adr/0066 K4: eksik olan biçimdir. `pane` ve `with_image` çizimi değişmez. Yalnız `pages` grubunda (içindekiler ve soru-cevap sayfa kavramı; ileride açmak eklemedir) |
+| **`contact`** ("İletişim") | `body: contentDoc` (bölümün kendi metni), `form: on \| off`, `imprint: on \| off` (varsayılan açık); sayfa başına en çok 1, yalnız `pages` | Bugünkü `ContactBody` birebir: metin ve "Bize ulaşın" sahnesi solda, form sağda, künye altta | Sahip beğendi; sabit `id`'ler (`bize-ulasin`, `kunye`) sayfada tek olmayı ister |
+| **`payment_facts`** ("Ödeme seçenekleri"), **`shipping_facts`** ("Kargo bilgileri") | Alan yok (canlı veri); sayfa başına her biri en çok 1, yalnız `pages` | Bir `article`'ın hemen ardından: bugünkü gibi metnin yanında (7/5 ızgara, taksit tablosu altta; `Blocks.tsx:50`'deki SSS + yardım birleşmesi deseni). Tek başına: tam genişlikte | Bugün rol sayfasında metnin yanında çiziliyor; bölüm olunca istenen sayfaya da konur, yan yana kuralı bugünkü görünümü korur |
+
+- **İçerik belgesi `rich_text`'e sığar:** ikisi de `contentDoc` (`lib/content/doc.ts:245`, `sections/rich-text.ts:29`): başlık h2–h4, listeler, bağlantılar, tablolar, görseller, ürün/kategori kartları, `{belirteç}`ler; sınırlar (`DOC_LIMITS`) aynı. Şema genişletmesi gerekmez.
+- **SSS `faq` bölümüne taşınmaz:** `faq` en çok 12 soru, 600 karakter düz metin yanıt, grup yok (`sections/faq.ts:37-48`); SSS sayfası gruplu ve biçimli yanıtlı. `article` + `questions: auto` bugünkü çizimi verir; `faq` kısa SSS için kalır.
+- **Hidrasyon:** `article` ve `contact` içerik okumasının yaptığını yapar (`api/store/content/read.ts:188-211`): belirteçler, kartlar, görsel sürümleri (`images`, vitrin `withPictures`), tablolar. `layout-hydrate.ts:198-215`'in `rich_text` dalı genişler.
+- **`body` sütunu yayındaki metnin türetilmiş kopyasıdır (ayna).** Brief "sonra sayfa için kimse okumasın" diyordu; kodda okuyan çok (K7) ve geri dönüş için güncel kalması gerek (Açık kararlar 1):
+  - Sayfanın (`kind: page`) `body`'sini yalnız sistem yazar: düzen yayını, K3 dönüşümü, K4 yazıcıları. `POST /admin/content(/:id)` sayfaya `body` gönderirse `content.page_text_in_editor` (400); yazılar değişmez.
+  - Ayna = sayfanın yayındaki metin bölümlerinin (`rich_text` bütün biçimleri, `contact`) belgeleri sırayla birleşik; başlığı olan bölümün başlığı önce h2 olarak. Tek, başlıksız bölümde ayna = o bölümün `body`'si (dönüşümde `revised_at` oynamaz).
+  - Yayın adımı yalnız aynası değişen sayfaları yazar (`canonical`, `workflows/content/rules.ts:105`): `body`, `body_summary`, `word_count`, yayındaki sayfada `revised_at`; `content.saved` olayı (advisor yeniden değerlendirir) ve `content` yenileme kapsamı. Kart ve görsel denetimi yapmaz (bölüm kaydında yapıldı; silinmiş ürünün kartı çizimde düşer). Telafi: önceki aynalar geri yazılır.
+- **`checkLayout` kart kuralı:** bugün her taslak kaydı bütün `rich_text` kartlarını denetliyor (`layout-check.ts:206-210`); silinmiş ürünü anan eski sayfa metni düzenleyiciyi kilitlerdi. Kural içerik kaydınınkine döner (`rules.ts:16-24`): yalnız bu kayıtta yeni eklenen kart reddedilir ("engel değil uyarı"). Belirteç ve görsel denetimi aynen, `contact` gövdesi dahil.
+
+### K3. Var olan sayfalar bir kez dönüştürülür
+
+- **Yer:** repo deseni `apps/backend/src/migration-scripts/` (docs/02:73, `db:migrate`'te mağaza başına bir kez; örn. `storefront-menus-from-settings.ts`, `store-whatsapp-phone.ts`). Dosya `content-pages-into-layout.ts`; iş dışa aktarılan `movePageTexts(container)`'da, HTTP testi onu doğrudan çağırır (`storefront-menus.spec.ts` deseni). Context7 kotası bu yazımda doluydu; S6'da Context7 ile yeniden doğrulanır.
+- **Her sayfa için metin bölümleri** (`kind: page`, silinmemiş):
+
+| Sayfa | Bölümler (sırayla) |
+| --- | --- |
+| Rolü yok, metni var (SSS dahil) | `article(body)` |
+| İletişim rolü (`contact_page_id`, yoksa `contact_form_path`) | `contact(body)` |
+| Ödeme / kargo rolü | `article(body)`, `payment_facts` / `shipping_facts` |
+| Metni boş, rolü yok | Öge yok (bugün de yalnız sayfa başı) |
+
+- Var olan ögenin `top`'ları önce, metin bölümleri, `bottom`'lar sonra. Bölüm kimlikleri sayfa kimliğinden türetilir (yeniden koşuda aynı), belgede tekil.
+- **Taslak ve yayın ayrı ayrı:** taslak belgeye; yayında belge varsa ona da (yayındaki sayfa görünümünü hemen korur), yeni sürüm satırıyla (`reason: "conversion"`, aktör sistem, denetim kaydı). İçerikte taslak/yayın metin ayrımı yoktu; iki belgeye aynı metin gider.
+- **Eşgüçlü:** metin bölümü (`article`, `contact`) olan ya da `placement` taşımayan öge atlanır; iki koşu aynı belgeyi verir.
+- **Sınır (uyarı, engel değil):** sıra yayındaki sayfalar (`published_at`), sonra taslaklar (`created_at`). Öge sayısı 50'ye ya da belge 1 MB'a varınca kalan sayfalar ögesiz kalır, K1 sentezi metinlerini çizer; log `storefront.pages_converted` (`converted`, `left`, `bytes`; metin ve başlık yok). Düzenleyici o sayfalarda "Sayfa sınırı dolu: bu sayfanın metni yalnız gösteriliyor" der. 12 bölüm sınırı aşılırsa fazla `bottom` bölümleri düşer ve aynı logda sayılır.
+- **Sonra `body`'yi okuyan:** yalnız aynanın okuyucuları (K7) ve K1 sentezi. Sütun silinmez.
+- **Sıra:** `movePageTexts` ve testleri S6'da; `db:migrate`'in koşturduğu dosya **S8'de** eklenir (vitrin ve panel yeni biçimi okurken), ara `dev`'de metin iki kez çizilmesin.
+
+### K4. Sayfa metnini yazan diğer yollar
+
+- **`replacePageTextWorkflow(page_id, doc)`:** ögesi varsa ilk `article`'ın (yoksa `contact`'ın; ikisi de yoksa başa yeni `article`) gövdesini taslakta ve yayında değiştirir (yeni sürüm satırı), aynayı yazar; ögesi yoksa aynayı yazar (sentez çizer) ve yer varsa K3 kuralıyla öge açar.
+- Kullananlar: eski siteden içe aktarma (`workflows/migration/content.ts:222-235`), mağaza profili (`scripts/shop-profile/apply.ts:37-58`). Başlık, adres, durum için `saveContentWorkflow` aynen, `body`'siz.
+
+### K5. Sayfa tema düzenleyicide açılır ve yönetilir
+
+- **Sayfa seçici** (`content-page-picker.tsx`): en üstte "Yeni sayfa": başlık → adres başlıktan (düzenlenebilir; boşsa `freeHandleFrom`). `POST /admin/content { kind: "page" }` taslak sayfa açar; düzenleyici onu seçer, taslağa boş bir `article` ekler.
+- **Ağaç** (`content-page-sections.tsx:65-104`): ana sayfadaki gibi tek liste; sabit satır ve üst/alt listeler kalkar. "Bölüm ekle" `GROUP_TYPES.pages`'e eklenen `article`, `contact`, `payment_facts`, `shipping_facts`'ı sunar; tekil tür sayfada varsa kapalı.
+- **Sayfa ayarları paneli** (yeni; `page-text-panel.tsx` kalkar): başlık, adres ("eski adres 301 ile yeni adrese gider"), SEO başlığı ve açıklaması (bugünkü SEO kartı, yapay zekâ önerisi dahil), kapak (medya kütüphanesi), Taslak/Yayında, sil (onaylı; yayında olmuş sayfada "adres 410 verir" notu).
+- **Hemen kaydedilir (öneri), yayınla gitmez.** Gerekçe: 301/410 ve yol kaydı içerik iş akışının kilitli, telafili adımları (`workflows/content/workflows.ts:39-82`); site haritası `revised_at`/`published_at`'ten okur; yayın bir belge kopyasıdır ve sürüm geri yükleme ad değişikliğini ya da silmeyi geri alamaz; taslak sayfa `sfs_` oturumunda zaten görünür. Panel "Sayfa ayarları hemen kaydedilir" der.
+- **Tek adım hissi:** "Yayınla" penceresi taslakta değişikliği olan **taslak durumdaki** sayfaları "Sayfayı da yayına al" kutusuyla listeler (düzenlenen sayfa işaretli). Yayın isteği `pages_live: cnt_…[]` alır; yayın iş akışı belgeyi yayınlar, sonra bu sayfaları içerik iş akışıyla `published` yapar (telafi: eski durum).
+- **İçerik:** gezinmede Sayfalar sekmesi kalkar, varsayılan sekme yazılar (`content-list-page.tsx:38`). `/content?kind=page` → `/storefront/editor?sayfa=icerik`; `/content/$id` sayfaysa → `/storefront/editor?icerik=<id>&ayar=sayfa` (`routes/_auth/content/$id.tsx`). Sayfaya giden diğer bağlantılar da düzenleyiciye: SEO denetimi (`seo/audit/audit-item.tsx:126`), medya kullanımı (`media/components/media-usage.tsx:30`). "Tema düzenleyicide tasarla" (`content-design-link`) kalkar.
+
+### K6. Geri yükleme, kitaplık, hazır görünüm
+
+- **Sürüm geri yükleme ve kayıtlı görünüm (adr/0064):** belge neyse o gelir, metinler de o günkü hâline döner (taslağa; pencere "Sayfa metinleri de bu sürümdeki hâline döner" der). Eski biçimli ögede (K1 `text_at`) o sayfanın taslaktaki bugünkü metin bölümleri (yoksa aynadan sentez) `text_at`'e yerleşir: dönüşüm öncesi bir sürüm metni silmez. Belgede ögesi olmayan sayfa sentezle görünür.
+- **Hazır görünüm (adr/0063) mağazanın metnini korur (öneri):** görünüm bir sayfanın düzenini değiştirirken mağazanın o sayfada metin bölümü (`article`, `contact`) varsa görünümün metin bölümleri düşer, mağazanınkiler görünümün ilk metin bölümünün yerine (kendi sıralarıyla) konur; `kept`'te `{ where: "pages", ref, reason: "text" }`. Metni yoksa görünümün metni gelir. Gerekçe: görünüm metni geneldir, mağazanın hikâyesi kendinindir (§4'ün amacı). Ana sayfadaki `rich_text`'ler bugünkü gibi değişir.
+- **Görünüm eksik sayfayı taslak açar (öneri; §4'ün "oluşturmaz" kuralını değiştirir):** sayfalar artık düzenleyicinin nesnesidir. Tutamaç (`page:hakkimizda`) mağazada yoksa `name` başlığıyla ve tutamacın adresiyle **taslak** sayfa açılır; yanıtta `made_pages`, panel "Hakkımızda sayfası taslak olarak açıldı; yayına almak için sayfa ayarlarından Yayında'yı seçin" der. Taslak sayfa herkese kapalıdır (404); adr/0063 §5'in "canlıda görünen demo içerik" kaygısı doğmaz. Adres alınamazsa öge eskisi gibi `skipped`. Adım telafilidir (sayfa silinir). Taslak atılırsa sayfa boş taslak kalır (zararsız, silinebilir).
+
+### K7. `body` okuyucuları ve sonrası
+
+| Okuyucu | Yer | Sonra |
+| --- | --- | --- |
+| Vitrin sayfa çizimi | `api/store/content/read.ts:188-211` (`html`); `screens/content.tsx:119-168` | Metin bölümlerden (`/store/storefront-layout/pages/:id`). `html` (ayna) yalnız uç hata verirse tek `article` olarak çizilir |
+| Meta açıklama yedeği | `workflows/seo/payload-content.ts:90` (`excerpt ?? body_summary`) | Aynanın `body_summary`'si; kod değişmez |
+| JSON-LD `WebPage` `dateModified` | `payload-content.ts:96-99` | Ayna yazımındaki `revised_at`; metin bölümü yayında değişince ilerler |
+| Site haritası `lastmod` | `workflows/seo/sitemap-build.ts:87-93, 144` | Aynı (`revised_at`); metin dışı bölümler ilerletmez (docs/13 §6) |
+| SEO advisor (kelime, başlık, iç bağlantı, alt metin; docs/14) | `seo/advisor/facts-content.ts:41, 84-120`; `jobs/seo-advisor-nightly.ts`; `seo/audit/records.ts` | Ayna; artık sayfanın bütün metin bölümleri sayılır (§7'deki "sayılmaz" kalkar); `content.saved` yeniden değerlendirir |
+| Yapay zekâ olguları | `lib/ai/facts/page.ts:23-37` (`body_summary`) | Ayna; kod değişmez |
+| Bağlantı raporu ve yeniden yazma (adr/0042 Ek 2026-11-05) | `workflows/content/link-plan.ts:16, 131`; `steps/rewrite-links.ts:28`; `scripts/content-links.ts` | Sayfalarda kaynak düzen belgesi: rapor taslaktaki metin bölümlerini okur; yeniden yazma taslak ve yayındaki metin bölümlerini değiştirir (yeni sürüm satırı, sistem), sonra aynayı yazar. Yazılar ve ürünler değişmez |
+| Medya kullanımı | `workflows/media/usage.ts:207-222` (`content_entry.body` ve `storefront_layout`) | İkisi de görseli tutar; değişmez |
+| İçerik denetim kaydı | `api/http/audit/resources/content.ts:25-37` | Panel sayfa `body`'si yazmaz; ayna yazımı ayrı denetlenmez (yayının denetimi var) |
+| İçe aktarma, mağaza profili | `workflows/migration/content.ts:230`, `scripts/shop-profile/apply.ts:53` | K4 |
+| Belirteçler | `rules.ts:85-97` (`unknownDocTokens`) | `checkLayout`'ta metin bölümlerine aynısı (`contact` dahil) |
+| url-registry, 301/410 | `workflows/content/paths.ts`, `workflows/seo/redirects/*` | Adrese bağlı; değişmez |
+| Site araması | `modules/search-index` | İçerik sayfası dizinlenmiyor; değişmez |
+
+### K8. Tema sözleşmesi ve vitrin
+
+- `ContentPageView.sections?: HomeSectionView[]` tek liste (`packages/ui/src/content-views.ts:293`); `HomeSectionView`'e `article`, `contact`, `payment_facts`, `shipping_facts` görünümleri. `html` kalır (yazı ve yedek çizim). `contact` görünümü formu, iletişim yollarını ve künyeyi taşır; müşterinin adı ve e-postası vitrinde istek anında doldurulur, arka ucun sayfa önbelleğine (`layout-page-read.ts:75` `pageCache`) girmez.
+- `screens/content.tsx`: `contactOfPage` (38-68) ve `pageExtras` (75-96) rolden değil bölümden çalışır; `lib/views/page-roles.ts` `isContactPage` ve `infoPageOf` çizimde kullanılmaz (bağlantılar için `namesPage` kalır). `lib/views/page-sections.ts` `byPlacement` kalkar.
+- Atölye `ContentPage`: sayfa başı ve baştaki metin bölümleri bugünkü tek `Container`'da (`ContentPage.tsx:126-131` aralıkları), kalanlar `Blocks`; dönüşmüş, başka bölümü olmayan sayfa bugünkü gibi çizilir. Tek h1 sayfa başınındır; yeni türler h2 basar.
+- **Kilitler (adr/0066):** `fixture-content-pages/page.html`, `contact.html`, `page-sections.html` bir kez yeniden yazılır. Kanıt: yeni HTML'den metin bölümlerinin bölüm işareti sarmalayıcıları (`data-qs`, adr/0065 §4) çıkarılınca eski dosyayla birebir eşit (test) ve `pnpm style:diff` 390 ile 1440 px'te fark sıfır. Çizim değişmediği için izinli (iç düzenleme); `preset-lock-content.spec.tsx`'teki "never written again" notu bu Ek'i anar. `cutlery-katalog/about.html` görünüm verisi değiştiği için `pnpm lock:presets` ile yazılır, PR'da etkilenen görünüm yazılır.
+
+### K9. Katalog Hakkımızda
+
+- `layout.json` `pages[0].sections` tek liste, `placement` yok; ilk bölüm görünümün kendi metni, ardından var olan altı bölüm aynı sırada. `preset.json` sürümü artar.
+- Metin bölümü: `rich_text` `article`, başlıksız, `outline: auto`, `questions: auto`:
+
+> **Köklerimizden geleceğe.** {mağaza_adı}, el işçiliğini günlük kullanımla buluşturan bir bıçak mağazasıdır. Çakıdan av bıçağına, şef bıçağından koleksiyon parçalarına kadar her ürünü kullanılmak için seçer; kutusundan sunumuna kadar özenle hazırlarız.
+>
+> Dövme çelik geleneğinden ve desenli çeliğin ustalığından aldığımız ilhamı, bugünün paslanmaz çelikleri ve elinize oturan saplarla birleştiriyoruz.
+
+- Mağazanın Hakkımızda metni varsa K6 gereği o kalır (geliştirme mağazasındaki metin korunur).
+
+### K10. Güvenlik
+
+- Metin bölümleri aynı şemadan (`.strict()`, `contentDoc` izin listesi, HTML sunucuda) ve aynı `checkLayout`'tan geçer; HTML, CSS, betik yazılmaz (adr/0019, adr/0049 §2).
+- **İletişim formu bölümün olduğu her sayfada çalışır.** `/store/contact-messages` sayfadan bağımsızdır: e-posta başına hız sınırı (`contact_message`), saatte birden sonra doğrulama, e-posta alan adı denetimi (`api/http/contact-routes.ts:30-35`). "Yalnız yayındaki, bölümü taşıyan sayfadan kabul" denetimi koruma sağlamaz (uç doğrudan çağrılabilir), yazılmaz. Yüzey dar tutulur: bölüm yalnız `pages` grubunda, sayfa başına bir. `contact_page_id` "mağazanın iletişim sayfası" olarak bağlantılar ve dönüşüm için kalır; rol sayfasında `contact` bölümü yoksa vitrin tercihleri uyarır, engellemez. Ödeme ve kargo rolü de çizimi değil yalnız bağlantıyı belirler (ürün sayfasının kargo bağlantısı, `screens/product.tsx:141`).
+- Taslak sayfa metni yalnız `sfs_` oturumunda okunur; `sfl_` ve yayındaki uçlar yayında olmayan sayfaya `null` döner (§8); sentez de aynı kuralla.
+- `POST /admin/content(/:id)` sayfa `body`'sini reddeder; ayna yalnız sistem adımlarıyla yazılır. Görünümün açtığı sayfa taslaktır, adımı telafilidir.
+- Dönüşüm gizli bilgi okumaz; logu yalnız sayı ve kimlik taşır.
+- Veri dönüşümü ve herkese açık uç değiştiği için S6 ve S8 birleşmeden önce `security-reviewer`; bulgular ve kapanışları PR'a.
+
+### K11. Dilimler
+
+| Dilim | Kapsam | Testler | Kabul ölçütü |
+| --- | --- | --- | --- |
+| **S6: sözleşme + backend** | types: tek liste, yeni türler ve biçim, `PAGE_LAYOUT_LIMITS.pages = 50`. Backend: `placement`'sız şema ve okuma kuralı (`text_at`); `article`/`contact`/`*_facts` şemaları, hidrasyonu, tekillik; sentez (üç uç); yayında ayna ve `pages_live`; `checkLayout` kart kuralı; admin'de sayfa `body`'si reddi; `replacePageTextWorkflow`, içe aktarma ve profil; geri yüklemede `text_at`; bağlantı yeniden yazmanın düzen kaynağı; `movePageTexts` (migration dosyası S8'de) | `layout.unit.spec.ts` (eski biçim sırası, türler, tekillik, 50), `page-mirror.unit.spec.ts` (tek başlıksız bölüm → ayna = `body`, `revised_at` oynamaz), `storefront-layout-pages.spec.ts` (sentez, rol bölümü, `sfl_` taslak vermez, yayın aynayı ve `content.saved`'i yazar, `pages_live`), yeni `content-pages-conversion.spec.ts` (düz, SSS, iletişim, ödeme, kargo, boş, üst/alt ögeli, taslak sayfa; iki koşu aynı; taslak + yayın + sürüm satırı; 50 ve 1 MB'ta kalanlar sentezle; silinmiş kart koşuyu durdurmaz), `content.spec.ts` (sayfa `body`'si 400, yazı aynen), `content-links.spec.ts`, `migration-old-site.spec.ts`, `storefront-layout-unknown-section.spec.ts` | Eski belge değişmeden okunur; dönüşüm eşgüçlü; ayna yalnız değişende yazılır; sınır aşımı kaydı ve yayını engellemez |
+| **S7: panel** | Sayfa seçicide "Yeni sayfa"; tek liste ağaç; yeni türlerin formları; sayfa ayarları paneli (hemen kayıt, SEO kartı, kapak, durum, onaylı silme); "Yayınla"da "Sayfayı da yayına al"; İçerik'ten Sayfalar sekmesi ve yönlendirmeler; sınır ve sentez uyarıları; i18n anahtarları | `theme-editor-pages.spec.tsx` (yeni sayfa, ayarlar, silme, durum), `theme-editor-page-layouts.spec.tsx` (tek liste, tekil türler, sentezden ilk değişiklik), `section-forms.spec.tsx`, `panel-groups.spec.tsx`, `content-list-page.spec.tsx` (sekme yok, yönlendirme), yayın penceresi testi | Sahip sayfayı düzenleyicide açar, metnini bölüm olarak taşır ve düzenler; İçerik'te sayfa kalmaz |
+| **S8: vitrin + tema + kilit + dönüşüm** | `ContentPageView.sections` tek liste; Atölye yeni türler, `article` + facts yan yana kuralı, baştaki metin bölümleri sayfa başıyla tek kapta; `ContentScreen` bölümden; yedek çizim; `migration-scripts/content-pages-into-layout.ts` | `atolye-content-theme.spec.ts` (tek h1, facts yan yana ve tek başına, `contact` = `ContactBody`, `questions`/`outline`), `page-sections.spec.ts`, `preview.spec.ts`, `preset-lock-content.spec.tsx` (sarmalayıcısız eşitlik, sonra kilit yazımı), `pnpm style:capture`/`style:diff` 390 ve 1440 | Dönüşmüş her sayfa, iletişim dahil, bugünkü gibi çizilir (stil farkı sıfır) |
+| **S9: Katalog** | `preset-schema.ts:172-176` `placement`'sız; `presets/resolve.ts:132` ve `preset-steps.ts:175`'te metin koruma ve taslak sayfa açma (`made_pages`, telafi); Katalog `layout.json` (K9), `preset.json` sürümü; `pnpm lock:presets` | preset şema testi (bütün görünümler), `storefront-presets-pages.spec.ts` (eksik sayfa taslak açılır; mağazanın metni kalır; metinsiz sayfaya görünümün metni gelir), kilit testi | Katalog uygulanınca Hakkımızda tek listeyle görünür; mağazanın metni silinmez |
+
+- `main`'e sürüm S9'dan sonra. S6–S7 boyunca dönüşüm dosyası olmadığından `dev` vitrini bugünkü gibi çalışır.
+
+### Açık kararlar (sahip; önerilenle ilerlenir)
+
+1. **`body` ayna olarak yaşar** (brief: "sonra sayfa için kimse okumasın"). Okuyucular çok ve geri dönüş güncel metin ister; öneri ayna (K2).
+2. **Sınırlar:** 50 sayfa, belge 1 MB. Otomatik kayıt 1,5 sn'de bir bütün belgeyi gönderir (`apps/panel/src/features/storefront/layout/use-autosave.ts:10`); sayfa metinleriyle belge yüzlerce kB olabilir. Dönüşüm logundaki `bytes` ile ölçülür; gerekirse ayrı işte grup bazında kayıt.
+3. **Görünüm eksik sayfayı taslak açar** (K6; §4'ü değiştirir). Alternatif: eskisi gibi düşür ve söyle.
+4. **Görünüm mağazanın metnini korur** (K6). Alternatif: ana sayfadaki gibi görünümün metni geçer.
+5. **Sayfa ayarları hemen kaydedilir**, yayın penceresinde "sayfayı da yayına al" (K5). Alternatif: durum, ad ve adres yayınla gider (301 kaydı ve geri yükleme yüzünden önerilmez).
+6. **Eski sürüm ya da kayıtlı görünüm metni de geri getirir** (K6). Alternatif: geri yüklemede metin bölümlerini korumak.
+7. **Roller:** iletişim ve ödeme rolünün çizimde işi kalmaz, bağlantı ve dönüşüm için durur. Rol seçimi sayfa ayarlarına ("Bu sayfa: İletişim / Ödeme / Kargo sayfası") taşınabilir; ayrı küçük iş.
