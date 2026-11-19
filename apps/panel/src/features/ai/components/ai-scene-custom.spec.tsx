@@ -31,6 +31,7 @@ const netFetch = vi.fn()
 let services: unknown = viewWith(sceneTask(["gemini"]))
 let stored: { id: string; name: string; prompt: string }[] = []
 const saves: unknown[] = []
+let job: unknown = DONE
 
 const body = (at = 0): unknown =>
   JSON.parse((netFetch.mock.calls[at]?.[1] as { body: string }).body)
@@ -39,6 +40,7 @@ beforeEach(() => {
   services = viewWith(sceneTask(["gemini"]))
   stored = []
   saves.length = 0
+  job = DONE
   netFetch.mockReset()
   netFetch.mockImplementation(() =>
     json(202, { job_id: "job_1", service: "gemini", alternatives: [] })
@@ -60,7 +62,7 @@ beforeEach(() => {
       return Promise.resolve({ section: "ai_scenes", values, version: 1 })
     }
     if (url.startsWith("/admin/async-jobs/")) {
-      return Promise.resolve({ async_job: DONE })
+      return Promise.resolve({ async_job: job })
     }
     return Promise.resolve({ media: RESULT })
   })
@@ -86,6 +88,8 @@ describe("a scene typed once", () => {
     const box = within(dialog).getByRole("textbox", { name: "Sahneyi tarif edin" })
     expect(box).toHaveAttribute("maxlength", "200")
     expect(box).toHaveAttribute("placeholder", "pembe battaniye üstünde, yumuşak gün ışığı")
+    // Under the box: what to write, and no personal details (only patterns are taken out)
+    expect(box).toHaveAccessibleDescription(expect.stringContaining("Kişisel bilgi yazmayın."))
     await user.type(box, "taş zemin, sabah ışığı")
     expect(within(dialog).getByText("22/200")).toBeInTheDocument()
     // The name only once "Sahnelerime kaydet" is ticked
@@ -149,6 +153,32 @@ describe("a scene typed once", () => {
     )
     expect(saves).toEqual([])
     expect(netFetch).not.toHaveBeenCalled()
+  })
+
+  it("sends the same words to the other service after a used-up quota", async () => {
+    services = viewWith(sceneTask(["gemini", "photoroom"], { preference: "gemini" }))
+    job = {
+      ...DONE,
+      result_summary: {
+        done: [],
+        failed: [{ media_id: "media_01", key: "ai.provider_quota" }],
+        skipped: 0,
+      },
+    }
+    const { user } = tile()
+    const dialog = await chooseCustom(user)
+    await user.type(
+      within(dialog).getByRole("textbox", { name: "Sahneyi tarif edin" }),
+      "taş zemin, sabah ışığı"
+    )
+    await user.click(within(dialog).getByRole("button", { name: "Sahneye yerleştir" }))
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(/Gemini hesabınızın kotası/)
+    await user.click(within(dialog).getByRole("button", { name: "Photoroom ile dene" }))
+    await waitFor(() => {
+      expect(body(1)).toMatchObject({ prompt: "taş zemin, sabah ışığı", service: "photoroom" })
+    })
+    // Never a pack scene in place of the words typed
+    expect(body(1)).not.toHaveProperty("option")
   })
 
   it("is offered on its own when the shop shows no scene", async () => {

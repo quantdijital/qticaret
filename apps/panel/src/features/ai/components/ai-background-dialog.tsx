@@ -122,6 +122,12 @@ export function AiBackgroundDialog({
   const others =
     state.status === "error" ? usable.filter((id) => id !== (state.service ?? service)) : []
   const tryWith = (id: string) => {
+    if (typing) {
+      // The words typed once go to the other service as they are (a kept scene is asked by its id)
+      setPicked(id)
+      void job.start("", id, custom.text.trim())
+      return
+    }
     const made = current.optionsOf(id)
     const next = made.includes(option) ? option : made[0]
     if (next === undefined) {
