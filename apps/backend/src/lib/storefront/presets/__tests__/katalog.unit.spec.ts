@@ -15,9 +15,17 @@ const KEPT = {
 }
 const APPLIED = { pack: "cutlery", code: "katalog", version: katalog.version }
 
+/** The shop's Hakkımızda page (adr/0073 §4). */
+const ABOUT = "cnt_01KABOUT0000000000000000"
+
 /** Every handle the preset names, as a shop that has them all would answer. */
 const everything: PresetLookups = {
-  records: new Map([...katalog.handles].map((ref, index) => [ref, `pcat_${String(index)}`])),
+  records: new Map(
+    [...katalog.handles].map((ref, index) => [
+      ref,
+      ref === "page:hakkimizda" ? ABOUT : `pcat_${String(index)}`,
+    ])
+  ),
   links: new Map([
     ["/magaza", { kind: "system" as const, target: "shop" as const }],
     [
@@ -36,7 +44,7 @@ const everything: PresetLookups = {
     ["/kategori/mutfak-sef-serisi", { kind: "category" as const, target: "pcat_e" }],
     ["/kategori/el-yapimi-caki", { kind: "category" as const, target: "pcat_f" }],
   ]),
-  images: new Map(),
+  images: new Map([["images/acilis-bileme.webp", "/media/acilis-bileme.webp"]]),
 }
 
 describe("the katalog preset's draft (adr/0049 Ek 2026-11-14, Katalog ana sayfası)", () => {
@@ -105,5 +113,53 @@ describe("the katalog preset's draft (adr/0049 Ek 2026-11-14, Katalog ana sayfas
       "musteriyorumlari",
     ])
     expect(doc.home[0]).toMatchObject({ chips: [] })
+    // No Hakkımızda page yet: its layout is left out, the page named for the panel
+    expect(resolved.skipped).toContainEqual({
+      where: "pages",
+      ref: "page:hakkimizda",
+      name: "Hakkımızda",
+      reason: "missing",
+    })
+    expect(doc.pages).toEqual([])
+  })
+})
+
+describe("the katalog preset's Hakkımızda page (adr/0073 §4)", () => {
+  it("lays out the shop's page below its text, as the editor's schema takes it", () => {
+    const resolved = resolvePreset(katalog.layout, katalog.menus, everything)
+    const doc = presetDocument(resolved, presetTheme(katalog.theme_settings), APPLIED, KEPT)
+
+    expect(resolved.images).toEqual(["images/acilis-bileme.webp"])
+    expect(doc.pages.map((page) => page.page_id)).toEqual([ABOUT])
+    const sections = doc.pages[0]?.sections ?? []
+    expect(sections.map((section) => [section.type, section.placement])).toEqual([
+      ["rich_text", "bottom"],
+      ["rich_text", "bottom"],
+      ["trust_badges", "bottom"],
+      ["products", "bottom"],
+      ["reviews", "bottom"],
+      ["help", "bottom"],
+    ])
+    expect(sections[0]).toMatchObject({
+      variant: "with_image",
+      image_side: "end",
+      image: { url: "/media/acilis-bileme.webp", alt: "Su taşında bilenen mutfak bıçağı" },
+      title: "Ateşten doğan karakter",
+    })
+    // The second text keeps today's drawing
+    expect(sections[1]).toMatchObject({ variant: "pane", title: "Neye inanıyoruz" })
+    expect(sections[2]).toMatchObject({ variant: "lined" })
+    expect(sections[3]).toMatchObject({
+      source: { kind: "best_sellers", days: 90 },
+      columns: 4,
+      limit: 8,
+    })
+    expect(sections[4]).toMatchObject({ limit: 6 })
+  })
+
+  it("names no record or link inside the page: a shop with the page gets every section", () => {
+    const page = katalog.layout.pages?.[0]
+    expect(JSON.stringify(page?.sections)).not.toContain("$handle")
+    expect(JSON.stringify(page?.sections)).not.toContain("$href")
   })
 })

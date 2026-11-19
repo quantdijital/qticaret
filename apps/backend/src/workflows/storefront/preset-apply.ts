@@ -37,8 +37,11 @@ const PRESET_LOCK = { timeout: 30, ttl: 120 }
  * the same preset again writes the same draft and uploads nothing.
  *
  * What the shop has no record for is left out and named in `skipped`,
- * never stood in for; a header or footer the preset leaves empty keeps the
- * shop's sections, named in `kept`. The draft it replaces is kept first as
+ * never stood in for: a content page the preset lays out and the shop has
+ * not made (adr/0073 §4) too, the preset never making it. A header or
+ * footer the preset leaves empty keeps the shop's sections, and every
+ * content page the preset does not lay out keeps the shop's layout, named
+ * in `kept`. The draft it replaces is kept first as
  * a saved look (adr/0064 Ek 2026-11-17 §1: `save_as` names it, else an
  * automatic one unless nothing new would be kept), named in `auto_saved`.
  * Any step failing undoes the uploads, their records, that save and the
@@ -152,7 +155,11 @@ export const applyPresetWorkflow = createWorkflow(
           version: preset.version,
           skipped: draft.skipped,
           dropped: draft.dropped,
-          /** The shop's header or footer sections kept where the preset leaves the group empty. */
+          /**
+           * The shop's header or footer sections kept where the preset leaves the
+           * group empty (`footer.<id>`), its content pages' layouts the preset
+           * does not replace (`pages.<page id>`).
+           */
           kept: draft.kept,
           images: { added: recorded.added, kept: recorded.kept },
           // Demo records come with work item 2.4 (adr/0063 §5)

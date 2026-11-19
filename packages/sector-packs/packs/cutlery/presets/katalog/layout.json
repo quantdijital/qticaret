@@ -159,5 +159,126 @@
   ],
   "footer": [],
   "product": [],
-  "category": []
+  "category": [],
+  "pages": [
+    {
+      "page_id": { "$handle": "page:hakkimizda" },
+      "name": "Hakkımızda",
+      "sections": [
+        {
+          "id": "hakkimizdahikaye",
+          "type": "rich_text",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "placement": "bottom",
+          "variant": "with_image",
+          "title": "Ateşten doğan karakter",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Bir bıçağın karakteri çeliğinde, ısıl işleminde ve elinize oturan sapında saklıdır. {mağaza_adı} olarak sunduğumuz her ürünü bu üç ölçüyle seçiyor, ağzını ve dengesini kendimiz deniyoruz. Mutfakta her gün kullanacağınız bir şef bıçağı da doğada yanınızdan ayırmadığınız bir çakı da aynı özeni hak eder."
+                  }
+                ]
+              }
+            ]
+          },
+          "image": {
+            "$image": "images/acilis-bileme.webp",
+            "alt": "Su taşında bilenen mutfak bıçağı"
+          },
+          "image_side": "end"
+        },
+        {
+          "id": "hakkimizdainanc",
+          "type": "rich_text",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "placement": "bottom",
+          "title": "Neye inanıyoruz",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "heading",
+                "attrs": { "level": 3 },
+                "content": [{ "type": "text", "text": "Misyonumuz: güven ve dayanıklılık" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Doğada, mutfakta ve atölyede gönül rahatlığıyla kullanacağınız; uzun ömürlü, işlevli ve güvenilir bıçaklar sunmak."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 3 },
+                "content": [{ "type": "text", "text": "Vizyonumuz: dünyada tanınan bir marka" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Dövme çelik geleneğinden aldığımız güçle, Türkiye'den çıkan ve dünyada tanınan bir bıçak ve outdoor markası olmak."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "hakkimizdavaat",
+          "type": "trust_badges",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "placement": "bottom",
+          "variant": "lined"
+        },
+        {
+          "id": "hakkimizdaraf",
+          "type": "products",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "placement": "bottom",
+          "title": "Atölyeden seçtiklerimiz",
+          "source": { "kind": "best_sellers", "days": 90 },
+          "limit": 8,
+          "columns": 4,
+          "more": null
+        },
+        {
+          "id": "hakkimizdayorum",
+          "type": "reviews",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "placement": "bottom",
+          "title": "Müşterilerimiz ne diyor",
+          "limit": 6
+        },
+        {
+          "id": "hakkimizdayardim",
+          "type": "help",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "placement": "bottom",
+          "title": "Hangi bıçak size uygun?",
+          "text": "Çelik, sap ya da bakım konusunda sorunuz varsa yazın; size uygun bıçağı birlikte seçelim."
+        }
+      ]
+    }
+  ]
 }

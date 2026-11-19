@@ -9,7 +9,12 @@ import { shopSettingsOf } from "./design-steps"
 import { legacySettings } from "./layout-shared"
 import { layoutDocument, storedDocument } from "../../lib/storefront/layout"
 import type { LayoutDocument } from "../../lib/storefront/layout"
-import { presetDocument, presetTheme, withShopFrame } from "../../lib/storefront/presets/document"
+import {
+  presetDocument,
+  presetTheme,
+  withShopFrame,
+  withShopPages,
+} from "../../lib/storefront/presets/document"
 import type { ShopFrame } from "../../lib/storefront/presets/document"
 import { presetMarkers, resolvePreset } from "../../lib/storefront/presets/resolve"
 import type { PresetLink, SkippedRef } from "../../lib/storefront/presets/resolve"
@@ -67,7 +72,9 @@ const placeholders = (paths: Iterable<string>): Map<string, string> =>
 /**
  * The draft's header and footer as the editor shows them (the default
  * design's before the first save): kept where the preset leaves the group
- * empty (`withShopFrame`). A draft today's schema no longer reads keeps none.
+ * empty (`withShopFrame`); with its content pages' layouts, kept on every
+ * page the preset does not lay out (`withShopPages`). A draft today's
+ * schema no longer reads keeps none.
  */
 async function shopFrame(
   container: MedusaContainer,
@@ -78,7 +85,6 @@ async function shopFrame(
     return { header, footer, pages: [] }
   }
   const parsed = layoutDocument.safeParse(storedDocument(row.draft))
-  // The shop's content page layouts stay: a preset names no page yet (adr/0073 §4)
   return parsed.success
     ? { header: parsed.data.header, footer: parsed.data.footer, pages: parsed.data.pages }
     : { header: [], footer: [], pages: [] }
@@ -163,10 +169,12 @@ function documentOf(
     links: new Map(Object.entries(resolution.links)),
     images,
     live: kept.live,
+    laid_out: kept.frame.pages.map((page) => page.page_id),
   })
   const frame = withShopFrame(resolved.groups, kept.frame)
+  const pages = withShopPages(resolved.pages, kept.frame.pages)
   const document = presetDocument(
-    { groups: frame.groups, menus: resolved.menus, pages: kept.frame.pages },
+    { groups: frame.groups, menus: resolved.menus, pages: pages.pages },
     preset.theme,
     { pack: preset.pack, code: preset.code, version: preset.version },
     kept.settings
@@ -175,7 +183,7 @@ function documentOf(
     document,
     skipped: resolved.skipped,
     dropped: resolved.dropped,
-    kept: frame.kept,
+    kept: [...frame.kept, ...pages.kept],
     images: resolved.images,
   }
 }

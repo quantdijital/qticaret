@@ -11,6 +11,7 @@ import {
   contentAnswerOf,
   contentEntity,
 } from "@/test/preset-lock/fixture-content"
+import { presetContentPages } from "@/test/preset-lock/fixture-content-presets"
 import { htmlLines } from "@/test/preset-lock/html-lines"
 import { LOCK_DIR, UPDATE_HINT, UPDATING, allPresets, header } from "@/test/preset-lock/presets"
 import { presetAnswer } from "@/test/preset-lock/store-layout"
@@ -24,7 +25,9 @@ import { store } from "@/test/preset-lock/store-mock"
  * storefront's own screen (`ContentScreen`) and the theme, kept in
  * `preset-lock/fixture-content-pages/`. A page with no layout of its own
  * is drawn as it was before content pages took sections: these files are
- * that proof, never written again to let a change through.
+ * that proof, never written again to let a change through. A preset that
+ * lays out one of these pages (Katalog's Hakkımızda, adr/0073 §4) has it
+ * drawn with its sections in its own folder (`cutlery-katalog/about.html`).
  */
 
 vi.mock("@/lib/store-api/server", () => import("@/test/preset-lock/store-mock"))
@@ -81,4 +84,36 @@ describe("the preset lock's content pages (docs/tema/bilesen-standardi.md §7, a
       `the content page is drawn differently (preset-lock/${CONTENT_FIXTURE}/${file}). ${UPDATE_HINT}`
     ).toMatchFileSnapshot(`./preset-lock/${CONTENT_FIXTURE}/${file}`)
   })
+})
+
+/** Each preset's own content page layouts on the fixture's pages (adr/0073 §4, S5). */
+const PRESET_PAGES = allPresets().flatMap(({ key, preset }) => {
+  const own = presetContentPages(preset)
+  return own.pages.map(({ file, page }) => ({ key, file, page, preset, own }))
+})
+
+describe("the preset lock's content page layouts (docs/tema/bilesen-standardi.md §7, adr/0073)", () => {
+  it("finds a preset laying out a fixture page", () => {
+    expect(PRESET_PAGES.length).toBeGreaterThan(0)
+  })
+
+  it.each(PRESET_PAGES)(
+    "draws $key's $file as locked",
+    async ({ key, file, page, preset, own }) => {
+      store.layout = presetAnswer(preset).layout
+      store.menus = menusOf(preset.menus)
+      store.answer = contentAnswerOf(preset, own.layouts)
+      if (!UPDATING) {
+        expect(
+          existsSync(join(LOCK_DIR, key, file)),
+          `preset ${key} has no ${file} snapshot. ${UPDATE_HINT}`
+        ).toBe(true)
+      }
+      const html = header(key, own.notes) + htmlLines(await contentHtml(page))
+      await expect(
+        html,
+        `preset ${key}'s page is drawn differently (preset-lock/${key}/${file}). ${UPDATE_HINT}`
+      ).toMatchFileSnapshot(`./preset-lock/${key}/${file}`)
+    }
+  )
 })

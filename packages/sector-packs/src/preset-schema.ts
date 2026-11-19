@@ -157,7 +157,23 @@ const sectionFrame = z.looseObject({
   id: z.string().regex(/^[a-z0-9]{6,24}$/),
   type: z.string().regex(/^[a-z][a-z_]{0,39}$/),
 })
-const group = z.array(sectionFrame).max(PRESET_LIMITS.sections).optional()
+const sections = z.array(sectionFrame).max(PRESET_LIMITS.sections)
+const group = sections.optional()
+
+/**
+ * A content page's own layout (adr/0073 §4): the page by its handle
+ * (`{ "$handle": "page:hakkimizda" }`, checked with the other references),
+ * its sections as the frame goes. The preset never makes the page: a shop
+ * without one is told by the page's usual `name` (a label, never written
+ * into the design). Which types a page takes and how many pages and
+ * sections a design holds are the backend's design schema's to judge, as
+ * for every group.
+ */
+const pageLayout = z.strictObject({
+  page_id: handleRef,
+  name: plain(60).optional(),
+  sections: sections.min(1),
+})
 
 /**
  * The design document's page groups. Its `settings` are not the preset's:
@@ -171,6 +187,7 @@ export const presetLayoutSchema = z.strictObject({
   footer: group,
   product: group,
   category: group,
+  pages: z.array(pageLayout).optional(),
 })
 
 const menuLink = { label: plain(60), href: presetHref }

@@ -112,6 +112,60 @@ describe("a preset's folder", () => {
     })
   })
 
+  it("reads a content page's own layout, the page named by its handle (adr/0073 §4)", () => {
+    const about = {
+      page_id: { $handle: "page:hakkimizda" },
+      name: "Hakkımızda",
+      sections: [
+        section("hikaye01", {
+          type: "rich_text",
+          placement: "bottom",
+          image: { $image: "images/hero.webp", alt: "Atölye" },
+        }),
+      ],
+    }
+    const dir = write(
+      "sayfali",
+      minimal("sayfali", {
+        "preset.json": preset("sayfali", { credits: [credit("images/hero.webp")] }),
+        "layout.json": { home: [section("girisbolumu")], pages: [about] },
+        "images/hero.webp": image("webp"),
+      })
+    )
+    const read = readPreset(dir, "deneme", "sayfali")
+    expect(read.layout.pages).toEqual([about])
+    expect(read.handles).toEqual(["page:hakkimizda"])
+    expect(read.images).toEqual([{ path: "images/hero.webp", bytes: 64 }])
+  })
+
+  it.each([
+    ["a page by its id", { page_id: "cnt_01JABCDEFGHJKMNPQRSTVWXYZ0" }, "pages.0.page_id"],
+    ["a page of another kind", { page_id: { $handle: "category:av" } }, "pages.0.page_id"],
+    ["a page with no section", { sections: [] }, "pages.0.sections"],
+    ["a field the page does not have", { title: "Hakkımızda" }, "pages.0"],
+    ["a name that is no plain text", { name: "Hakkımızda\u0007" }, "pages.0.name"],
+    ["a section id a group has", { sections: [section("girisbolumu")] }, "girisbolumu twice"],
+  ])("refuses %s", (_what, fields, message) => {
+    const page = { page_id: { $handle: "page:hakkimizda" }, sections: [section("sayfa01")] }
+    refused(
+      minimal("x1", {
+        "layout.json": { home: [section("girisbolumu")], pages: [{ ...page, ...fields }] },
+      }),
+      message
+    )
+  })
+
+  it("refuses a page laid out twice", () => {
+    const page = (id: string) => ({
+      page_id: { $handle: "page:hakkimizda" },
+      sections: [section(id)],
+    })
+    refused(
+      minimal("x1", { "layout.json": { pages: [page("sayfa01"), page("sayfa02")] } }),
+      "page:hakkimizda laid out twice"
+    )
+  })
+
   it("is read with its pack, and counted for the wizard", () => {
     writeFileSync(
       join(root, "manifest.json"),

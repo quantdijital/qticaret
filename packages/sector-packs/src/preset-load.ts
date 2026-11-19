@@ -103,12 +103,24 @@ function readImages(dir: string, where: string): { path: string; bytes: number }
   return images.sort((a, b) => a.path.localeCompare(b.path))
 }
 
-/** Section ids are fixed in the file and unique across the groups: a re-apply writes the same document. */
+/**
+ * Section ids are fixed in the file and unique across the groups, the
+ * content pages' included: a re-apply writes the same document. A page is
+ * named once.
+ */
 function checkSectionIds(layout: PresetLayout, where: string): void {
-  const ids = Object.values(layout).flatMap((sections) => sections?.map((each) => each.id) ?? [])
+  const { pages = [], ...groups } = layout
+  const ids = [...Object.values(groups), ...pages.map((page) => page.sections)].flatMap(
+    (sections) => sections?.map((each) => each.id) ?? []
+  )
   const twice = ids.find((id, index) => ids.indexOf(id) !== index)
   if (twice) {
     throw new SectorPackError(`${where}/layout.json: section ${twice} twice`)
+  }
+  const handles = pages.map((page) => page.page_id.$handle)
+  const named = handles.find((handle, index) => handles.indexOf(handle) !== index)
+  if (named) {
+    throw new SectorPackError(`${where}/layout.json: ${named} laid out twice`)
   }
 }
 

@@ -63,6 +63,54 @@ describe("EditorNotices", () => {
     expect(note).not.toHaveTextContent("korundu")
   })
 
+  it("says a page layout was not added for a page the shop has not made, and how to add it", () => {
+    notices({
+      ...REPORT,
+      skipped: [
+        { where: "home.0", ref: "kategoriler" },
+        { where: "pages", ref: "page:hakkimizda", name: "Hakkımızda" },
+        { where: "pages", ref: "page:sss" },
+      ],
+      kept: ["pages.cnt_contact"],
+    })
+
+    const note = screen.getByRole("status")
+    expect(note).toHaveTextContent(
+      "Hakkımızda sayfası olmadığı için sayfa düzeni eklenmedi. Adresi ‘hakkimizda’ olan bir sayfa açıp görünümü yeniden uygulayın."
+    )
+    // A look that gives no name: the address alone
+    expect(note).toHaveTextContent(
+      "Adresi ‘sss’ olan sayfa olmadığı için sayfa düzeni eklenmedi. Bu adresle bir sayfa açıp görünümü yeniden uygulayın."
+    )
+    // The page is not counted among the sections left out
+    expect(note).toHaveTextContent("1 bölüm eklenmedi: mağazada kategoriler yok.")
+    // The shop's own page layouts kept, the header and footer not named
+    expect(note).toHaveTextContent("Sayfalarınıza kendi kurduğunuz düzenler korundu.")
+    expect(note).not.toHaveTextContent("Üst/alt bilginiz korundu.")
+  })
+
+  it("says a page layout was not added when twenty pages have their own (warn, don't block)", () => {
+    notices({
+      ...REPORT,
+      skipped: [
+        { where: "pages", ref: "page:hakkimizda", name: "Hakkımızda", reason: "limit" },
+        { where: "pages", ref: "page:sss", reason: "limit" },
+        { where: "pages", ref: "page:hikayemiz", name: "Hikâyemiz", reason: "missing" },
+      ],
+      kept: [],
+    })
+
+    const note = screen.getByRole("status")
+    expect(note).toHaveTextContent(
+      "Hakkımızda sayfasının düzeni eklenmedi: kendi düzeni olan en çok 20 sayfa olabilir."
+    )
+    expect(note).toHaveTextContent(
+      "Adresi ‘sss’ olan sayfanın düzeni eklenmedi: kendi düzeni olan en çok 20 sayfa olabilir."
+    )
+    expect(note).toHaveTextContent("Hikâyemiz sayfası olmadığı için sayfa düzeni eklenmedi.")
+    expect(note).not.toHaveTextContent("bölüm eklenmedi")
+  })
+
   it("draws no note without a report, and the waiting menus beside one", () => {
     notices(null, [{}, {}])
 

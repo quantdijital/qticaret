@@ -1,9 +1,16 @@
 {
   "format": "quant-storefront-preset",
   "code": "katalog",
-  "version": 3,
+  "version": 4,
   "theme": "atolye",
   "name": "Katalog",
-  "description": "Sık bir mağaza ana sayfası, Grafit görünümünde: tek satırlık sade katalog üst bilgisi (dar arama, telefon, adlarıyla Hesabım, Favoriler, Sepet), solda ürün sayılarıyla kategori listesi, ortada giriş, yanında iki kategori karosu; sekmeli raflar, fiyat bantları, mutfak rafı, çeliğe ve sapa göre kategori karoları, müşteri yorumları. Alt bilgiye, menülere ve ürünlere dokunmaz.",
-  "tone": "light"
+  "description": "Sık bir mağaza ana sayfası, Grafit görünümünde: tek satırlık sade katalog üst bilgisi (dar arama, telefon, adlarıyla Hesabım, Favoriler, Sepet), solda ürün sayılarıyla kategori listesi, ortada giriş, yanında iki kategori karosu; sekmeli raflar, fiyat bantları, mutfak rafı, çeliğe ve sapa göre kategori karoları, müşteri yorumları; Hakkımızda sayfası düzeni. Alt bilgiye, menülere, ürünlere dokunmaz.",
+  "tone": "light",
+  "credits": [
+    {
+      "file": "images/acilis-bileme.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Whetstone_Knife_Sharpening,_2015-(01).jpg",
+      "license": "CC BY 2.0, Didriks (küçültülüp WebP'ye çevrildi)"
+    }
+  ]
 }
