@@ -2,13 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import {
-  URL,
-  answer,
-  form as card,
-  posts,
-  renderPanel as renderPage,
-} from "./preferences-panel.fixtures"
+import { URL, answer, form as card, renderPanel as renderPage } from "./preferences-panel.fixtures"
 import type { Init } from "./preferences-panel.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
@@ -20,63 +14,65 @@ const TITLE = "Ödeme ve kargo sayfaları"
 const PAYMENT = "Ödeme seçenekleri sayfası"
 const SHIPPING = "Kargo ve teslimat sayfası"
 
+const picker = (name: string) => screen.getByRole("combobox", { name })
+
 describe("the editor's storefront preferences: payment and shipping pages (adr/0046 Ek 2026-11-05)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     answer(fetchMock)
   })
 
-  it("points the facts at the shop's own pages, lower-cased as the server keeps them", async () => {
+  it("points the facts at the shop's own pages, kept by their ids", async () => {
     renderPage()
-    const payment = await screen.findByRole("textbox", { name: PAYMENT })
-    const pages = card(TITLE)
-
-    expect(payment).toHaveValue("/odeme-secenekleri")
-    expect(within(pages).getByRole("textbox", { name: SHIPPING })).toHaveValue("/kargo-ve-teslimat")
-    await userEvent.clear(payment)
-    await userEvent.type(payment, " /Taksit-Secenekleri ")
-    await userEvent.click(within(pages).getByRole("button", { name: "Kaydet" }))
-
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(URL, {
-        method: "POST",
-        body: {
-          payment_info_path: "/taksit-secenekleri",
-          shipping_info_path: "/kargo-ve-teslimat",
-        },
-      })
+      expect(picker(PAYMENT)).toHaveTextContent("Ödeme seçenekleri")
     })
-  })
+    expect(picker(SHIPPING)).toHaveTextContent("Kargo ve teslimat")
 
-  it("saves a field left empty as no page", async () => {
-    renderPage()
-    const shipping = await screen.findByRole("textbox", { name: SHIPPING })
-
-    await userEvent.clear(shipping)
+    await userEvent.click(picker(PAYMENT))
+    await userEvent.click(await screen.findByRole("option", { name: /^Destek/ }))
     await userEvent.click(within(card(TITLE)).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(URL, {
         method: "POST",
-        body: { payment_info_path: "/odeme-secenekleri", shipping_info_path: null },
+        body: { payment_page_id: "cnt_destek", shipping_page_id: "cnt_kargo" },
       })
     })
   })
 
-  it("refuses the home page and an address elsewhere before saving", async () => {
+  it("saves none as no page", async () => {
     renderPage()
-    const payment = await screen.findByRole("textbox", { name: PAYMENT })
-    const pages = card(TITLE)
+    await waitFor(() => {
+      expect(picker(SHIPPING)).toHaveTextContent("Kargo ve teslimat")
+    })
 
-    for (const wrong of ["/", "https://example.com/odeme", "/odeme secenekleri"]) {
-      await userEvent.clear(payment)
-      await userEvent.type(payment, wrong)
-      await userEvent.click(within(pages).getByRole("button", { name: "Kaydet" }))
-      expect(await within(pages).findByRole("alert")).toHaveTextContent(
-        "Sayfa / ile başlayan bir mağaza sayfası olmalı"
-      )
-    }
-    expect(payment).toHaveAttribute("aria-invalid", "true")
-    expect(posts(fetchMock)).toEqual([])
+    await userEvent.click(picker(SHIPPING))
+    await userEvent.click(await screen.findByRole("option", { name: "Hiçbiri" }))
+    expect(picker(SHIPPING)).toHaveTextContent("Hiçbiri")
+    await userEvent.click(within(card(TITLE)).getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(URL, {
+        method: "POST",
+        body: { payment_page_id: "cnt_odeme", shipping_page_id: null },
+      })
+    })
+  })
+
+  it("reads a section saved before the ids as the pages at the old addresses", async () => {
+    answer(fetchMock, {
+      payment_page_id: null,
+      shipping_page_id: null,
+      payment_info_path: "/odeme-secenekleri",
+      shipping_info_path: "/yok-boyle-sayfa",
+    })
+    renderPage()
+
+    await waitFor(() => {
+      expect(picker(PAYMENT)).toHaveTextContent("Ödeme seçenekleri")
+    })
+    // No page at that address: none to show
+    expect(picker(SHIPPING)).toHaveTextContent("Hiçbiri")
   })
 })

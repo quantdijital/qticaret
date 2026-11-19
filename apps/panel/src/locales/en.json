@@ -394,23 +394,32 @@
         "description": "Messages from the form are read and answered under Customers > Contact messages.",
         "enabled": "Show the contact form on the storefront",
         "hint": "The contact form shows below this page's text. Turn it off and the storefront shows no form.",
-        "path": "Page the form shows on",
-        "pathHint": "The address of a content page on the storefront, for example /iletisim."
+        "page": "Page the form shows on",
+        "pageHint": "One of your pages in Content. The form stays on it even if you change the page's address."
       },
       "infoPages": {
         "title": "Payment and shipping pages",
         "description": "Beside these pages' text the storefront shows what is current: your ways to pay and installment rates on the payment page, your carriers and promises on the shipping page.",
         "payment": "Payment options page",
-        "paymentHint": "The ways to pay and the installment table show beside this page, for example /odeme-secenekleri.",
+        "paymentHint": "The ways to pay and the installment table show beside this page.",
         "shipping": "Shipping and delivery page",
-        "shippingHint": "The carriers and promises show beside this page, for example /kargo-ve-teslimat.",
-        "empty": "Information left empty shows on no page; the page's own text still shows."
+        "shippingHint": "The carriers and promises show beside this page; the product page links to it too.",
+        "none": "None",
+        "empty": "Information set to none shows on no page; the pages' own text still shows."
+      },
+      "rolePage": {
+        "choose": "Choose a page",
+        "search": "Search by page name or address",
+        "empty": "There are no pages in Content yet.",
+        "noMatch": "No page matches this search.",
+        "deleted": "Deleted page",
+        "missing": "The chosen page was deleted; the storefront does not show it. Choose another page."
       },
       "errors": {
         "required": "Fill in this field.",
         "tooLong": "Write {{max}} characters at most.",
         "textInvalid": "The text cannot contain invisible control characters.",
-        "pathInvalid": "The page must be a shop page starting with / (like /iletisim); not the home page, and no spaces.",
+        "pageRequired": "Choose a page.",
         "phoneInvalid": "Enter a valid Turkish phone number.",
         "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99).",
         "colorDuplicate": "Each colour name can be written once.",
