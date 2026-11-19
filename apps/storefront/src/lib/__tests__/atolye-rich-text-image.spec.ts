@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
+import { SECTION_VARIANTS } from "@qticaret/types/section-variants"
 import type { HomeSectionView, ImageView, PlaceOrderResult } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 
@@ -87,5 +88,12 @@ describe("the rich text's picture variant (adr/0073 §3)", () => {
     expect(pane).toContain(
       "grid gap-6 rounded-tile gf-pane p-6 sm:p-10 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-16"
     )
+  })
+
+  it("draws each variant on the contract's list its own way", () => {
+    const drawn = SECTION_VARIANTS.rich_text.map((variant) =>
+      sectionOf(home([story({ variant, image: PHOTO })]))
+    )
+    expect(new Set(drawn).size).toBe(SECTION_VARIANTS.rich_text.length)
   })
 })
