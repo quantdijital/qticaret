@@ -167,7 +167,7 @@ export function ChargebackDialog({
         />
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="cancel"
             onClick={() => {
               onOpenChange(false)
             }}

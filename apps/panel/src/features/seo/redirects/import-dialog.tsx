@@ -182,7 +182,7 @@ export function ImportDialog({
         </DialogBody>
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="cancel"
             disabled={run.isPending}
             onClick={() => {
               onOpenChange(false)

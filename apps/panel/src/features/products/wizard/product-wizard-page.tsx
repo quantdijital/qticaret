@@ -199,7 +199,7 @@ export function ProductWizardPage() {
             footer={
               <>
                 {current === 0 ? (
-                  <Button variant="ghost" asChild>
+                  <Button variant="cancel" asChild>
                     <Link to="/products">{t("common.cancel")}</Link>
                   </Button>
                 ) : (

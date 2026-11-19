@@ -219,7 +219,7 @@ function RedirectFormBody({
         ) : null}
       </DialogBody>
       <DialogFooter>
-        <Button type="button" variant="outline" disabled={save.isPending} onClick={onDone}>
+        <Button type="button" variant="cancel" disabled={save.isPending} onClick={onDone}>
           {t("common.cancel")}
         </Button>
         <Button type="submit" disabled={save.isPending}>

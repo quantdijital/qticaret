@@ -190,7 +190,7 @@ export function InvoiceEntryDialog({
           </Field>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={busy}>
+          <Button variant="cancel" onClick={onClose} disabled={busy}>
             {t("common.cancel")}
           </Button>
           <Button onClick={() => void submit()} disabled={busy || (numbered && !file)}>

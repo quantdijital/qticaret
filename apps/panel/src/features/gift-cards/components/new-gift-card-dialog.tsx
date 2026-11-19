@@ -144,7 +144,7 @@ function NewCardForm({
         />
       </DialogBody>
       <DialogFooter>
-        <Button type="button" variant="outline" disabled={create.isPending} onClick={onCancel}>
+        <Button type="button" variant="cancel" disabled={create.isPending} onClick={onCancel}>
           {t("common.cancel")}
         </Button>
         <Button type="submit" disabled={create.isPending}>

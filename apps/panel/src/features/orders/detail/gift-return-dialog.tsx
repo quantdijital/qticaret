@@ -81,7 +81,7 @@ export function ApproveGiftReturnDialog({
           <GiftReturnNote />
         </DialogBody>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="cancel" onClick={onClose}>
             {t("common.cancel")}
           </Button>
           <Button

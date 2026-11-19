@@ -235,7 +235,7 @@ function PhotoFillDialog(props: {
         )}
         {photo && state.status !== "idle" && usable.length > 0 ? null : (
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={close}>
+            <Button type="button" variant="cancel" onClick={close}>
               {t("ai.suggest.dismiss")}
             </Button>
           </DialogFooter>

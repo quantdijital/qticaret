@@ -209,7 +209,7 @@ export function ShippingOptionDialog({
         </div>
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="cancel"
             onClick={() => {
               onOpenChange(false)
             }}
