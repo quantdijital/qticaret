@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest",
-    "lock:presets": "PRESET_LOCK=update vitest run src/lib/__tests__/preset-lock.spec.tsx src/lib/__tests__/preset-lock-pages.spec.tsx -u",
+    "lock:presets": "PRESET_LOCK=update vitest run src/lib/__tests__/preset-lock.spec.tsx src/lib/__tests__/preset-lock-pages.spec.tsx src/lib/__tests__/preset-lock-content.spec.tsx -u",
     "test:e2e": "playwright test -c e2e/playwright.config.ts",
     "style:capture": "node e2e/resolved-style/capture.ts",
     "style:diff": "node e2e/resolved-style/diff-cli.ts",

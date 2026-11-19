@@ -245,10 +245,15 @@ export async function sectionViews(
   })
 }
 
-/** A category page's sections by where they go: above the product grid, or below it. */
-export function byPlacement(sections: readonly StoreCategorySection[]): {
-  top: StoreCategorySection[]
-  bottom: StoreCategorySection[]
+/**
+ * A page's sections by where they go: a category page's above the product
+ * grid or below it, a content page's above its text or below it (adr/0073).
+ */
+export function byPlacement<S extends { placement?: "top" | "bottom" }>(
+  sections: readonly S[]
+): {
+  top: S[]
+  bottom: S[]
 } {
   return {
     top: sections.filter((section) => section.placement === "top"),

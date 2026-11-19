@@ -267,6 +267,16 @@ export interface ContentPageView {
   payments?: PaymentFactsView | null
   /** The shipping page: the carriers the shop connected and its own promises. */
   shipping?: ShippingFactsView | null
+  /**
+   * A content page's own sections (adr/0073 §2), from the theme editor:
+   * above the page's text (`top`) and below it (`bottom`), each section
+   * in its own container. The page's head (trail, its one h1, its cover)
+   * and its text with its role's parts (the contact page's form, a FAQ,
+   * the payment and shipping facts) stay between them. Absent, or both
+   * empty: the page is drawn as it was before pages took sections; a
+   * theme that does not read it draws it so too. Never on a post.
+   */
+  sections?: { top: HomeSectionView[]; bottom: HomeSectionView[] }
 }
 
 /** A blog post's facts beside its title: when, how long a read, who wrote it. */

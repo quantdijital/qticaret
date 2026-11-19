@@ -16,6 +16,7 @@ import {
   header,
   styleDigests,
 } from "@/test/preset-lock/presets"
+import { CONTENT_FIXTURE } from "@/test/preset-lock/fixture-content"
 import { lockFixtures } from "@/test/preset-lock/fixtures"
 import { presetAnswer } from "@/test/preset-lock/store-layout"
 import { store } from "@/test/preset-lock/store-mock"
@@ -120,7 +121,8 @@ describe("the preset lock (docs/tema/bilesen-standardi.md §7)", () => {
   })
 
   it("keeps a snapshot for every preset and none for a preset that is gone", () => {
-    const keys = new Set([...PRESETS, ...FIXTURES].map(({ key }) => key))
+    // The content pages' folder is kept by its own spec (`preset-lock-content.spec.tsx`)
+    const keys = new Set([...[...PRESETS, ...FIXTURES].map(({ key }) => key), CONTENT_FIXTURE])
     const stale = folders(LOCK_DIR).filter((name) => !keys.has(name))
     if (UPDATING) {
       stale.forEach((name) => {

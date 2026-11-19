@@ -95,7 +95,7 @@ export default async function PreviewPage({
     if (!session) {
       notFound()
     }
-    const { sayfa } = await searchParams
+    const { sayfa, icerik } = await searchParams
     // The panel's exact origin, as frame-ancestors names it; none set: no bridge
     const [panelOrigin] = panelOrigins(storefrontEnv())
     const nonce = (await headers()).get("x-nonce") ?? undefined
@@ -103,8 +103,9 @@ export default async function PreviewPage({
       <>
         <DesignPreviewScreen
           layout={session.layout}
-          // The cart and the search too (adr/0065 Ek 2026-11-15); a shared link keeps today's pages
-          target={previewPage(sayfa, { system: true })}
+          // The cart and the search too (adr/0065 Ek 2026-11-15), a content page in draft by its
+          // id (adr/0073 §5); a shared link keeps today's pages
+          target={previewPage(sayfa, { system: true, content: icerik })}
         />
         {panelOrigin && (
           <EditorBridgeLoader panelOrigin={panelOrigin} edition={session.edition} nonce={nonce} />

@@ -3,7 +3,11 @@ import { previewPage } from "../preview"
 
 const shown = (raw: string | string[] | undefined) => {
   const page = previewPage(raw)
-  return page.kind === "home" ? "home" : `${page.kind} ${page.url.pathname}${page.url.search}`
+  return page.kind === "home"
+    ? "home"
+    : page.kind === "content"
+      ? `content ${page.id}`
+      : `${page.kind} ${page.url.pathname}${page.url.search}`
 }
 
 describe("previewPage (?sayfa= of a design preview)", () => {
@@ -55,6 +59,41 @@ describe("previewPage (?sayfa= of a design preview)", () => {
     for (const raw of ["/Odeme", "/ODEME", "/sepet/../odeme", "/%6fdeme", "/sepet/%2e%2e/odeme"]) {
       expect(previewPage(raw, { system: true }).kind).not.toBe("cart")
       expect(previewPage(raw, { system: true }).kind).not.toBe("search")
+    }
+  })
+
+  it("opens a content page by its id (`?icerik=`) on a live session only (adr/0073 §5)", () => {
+    // The panel sends a draft page's path and its id; the id names it, in draft too
+    expect(previewPage("/iade-kosullari", { system: true, content: "cnt_01KABC" })).toEqual({
+      kind: "content",
+      id: "cnt_01KABC",
+    })
+    expect(previewPage(undefined, { system: true, content: "cnt_iade" })).toEqual({
+      kind: "content",
+      id: "cnt_iade",
+    })
+    // A shared design link (`sfl_`) never shows a draft page: the id is not read
+    const shared = previewPage("/iade-kosullari", { content: "cnt_01KABC" })
+    expect(shared.kind).toBe("resolve")
+    expect(previewPage(undefined, { content: "cnt_01KABC" }).kind).toBe("home")
+    expect(previewPage("/iade-kosullari", { system: false, content: "cnt_01KABC" }).kind).toBe(
+      "resolve"
+    )
+  })
+
+  it("reads only a content page's id of the one form (`cnt_…`)", () => {
+    for (const content of [
+      undefined,
+      "",
+      "cnt_",
+      "cnt_../x",
+      "cnt_a b",
+      "prod_01KABC",
+      "CNT_01KABC",
+      `cnt_${"a".repeat(41)}`,
+      ["cnt_01KABC", "cnt_02KABC"],
+    ]) {
+      expect(previewPage("/iade-kosullari", { system: true, content }).kind).toBe("resolve")
     }
   })
 })
