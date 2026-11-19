@@ -239,7 +239,7 @@ export function ShipDialog({
         </DialogBody>
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="cancel"
             disabled={busy}
             onClick={() => {
               onOpenChange(false)

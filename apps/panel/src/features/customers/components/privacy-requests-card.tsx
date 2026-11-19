@@ -136,7 +136,7 @@ function RecordDialog({ customerId, onClose }: { customerId: string; onClose: ()
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="cancel" onClick={onClose}>
               {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={!received || record.isPending}>

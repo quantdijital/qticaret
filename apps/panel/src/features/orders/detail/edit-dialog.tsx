@@ -218,7 +218,7 @@ export function EditOrderDialog({ order, onClose }: { order: OrderDetail; onClos
           ) : null}
         </DialogBody>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="cancel" onClick={onClose}>
             {t("common.cancel")}
           </Button>
           {current === null ? (

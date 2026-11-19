@@ -83,7 +83,7 @@ export function BirfaturaTokenDialog({
             <Button onClick={onClose}>{t(`${B}.done`)}</Button>
           ) : (
             <>
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="cancel" onClick={onClose}>
                 {t("common.cancel")}
               </Button>
               <Button variant="destructive" disabled={pending} onClick={onConfirm}>

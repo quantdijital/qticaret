@@ -130,7 +130,7 @@ export function FormDialog({
             {children}
             <DialogFooter>
               {footerStart ? <div className="flex sm:mr-auto">{footerStart}</div> : null}
-              <Button type="button" variant="outline" disabled={saving} onClick={close}>
+              <Button type="button" variant="cancel" disabled={saving} onClick={close}>
                 {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={!dirty || !canSubmit || saving}>

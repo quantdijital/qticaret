@@ -132,7 +132,7 @@ function MakeCodesDialog({
             <Button onClick={close}>{t("common.close")}</Button>
           ) : (
             <>
-              <Button variant="outline" disabled={running} onClick={close}>
+              <Button variant="cancel" disabled={running} onClick={close}>
                 {t("common.cancel")}
               </Button>
               <Button disabled={running} onClick={() => void start()}>

@@ -69,7 +69,7 @@ function TurnOffDialog({
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="cancel" onClick={onClose}>
             {t("common.cancel")}
           </Button>
           <Button

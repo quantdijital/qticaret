@@ -70,7 +70,7 @@ export function ThemePreview({ mode }: { mode: ResolvedMode }) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="text-base font-semibold">{t("nav.orders")}</span>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" variant="outline" tabIndex={-1}>
+            <Button type="button" size="sm" variant="cancel" tabIndex={-1}>
               {t("common.cancel")}
             </Button>
             <Button type="button" size="sm" tabIndex={-1}>
