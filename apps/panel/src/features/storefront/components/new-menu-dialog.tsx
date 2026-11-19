@@ -159,7 +159,7 @@ export function NewMenuDialog({ menus, onClose, onCreated }: NewMenuDialogProps)
             </Field>
           </DialogBody>
           <DialogFooter>
-            <Button type="button" variant="outline" disabled={create.isPending} onClick={onClose}>
+            <Button type="button" variant="cancel" disabled={create.isPending} onClick={onClose}>
               {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={create.isPending}>

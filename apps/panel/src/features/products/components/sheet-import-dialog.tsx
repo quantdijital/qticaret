@@ -126,7 +126,7 @@ export function SheetImportDialog({
           ) : null}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={close}>
+          <Button variant={summary?.mode === "apply" ? "outline" : "cancel"} onClick={close}>
             {t(summary?.mode === "apply" ? "products.sheets.done" : "common.cancel")}
           </Button>
           {canApply ? (

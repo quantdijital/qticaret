@@ -76,7 +76,7 @@ export function AltReviewRow({
         <Button
           type="button"
           size="sm"
-          variant="ghost"
+          variant="cancel"
           disabled={busy}
           aria-label={t(`${R}.dismissOne`, { name })}
           onClick={onDismiss}

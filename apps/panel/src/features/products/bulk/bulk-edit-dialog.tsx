@@ -115,7 +115,7 @@ export function BulkEditDialog({ action, productIds, onClose, onDone }: BulkEdit
             </Button>
           ) : (
             <>
-              <Button variant="outline" onClick={close}>
+              <Button variant="cancel" onClick={close}>
                 {t("common.cancel")}
               </Button>
               <Button disabled={sending} onClick={() => void apply()}>

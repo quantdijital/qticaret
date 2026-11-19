@@ -113,7 +113,7 @@ export function NewContentDialog({
             ) : null}
           </DialogBody>
           <DialogFooter>
-            <Button type="button" variant="outline" disabled={create.isPending} onClick={close}>
+            <Button type="button" variant="cancel" disabled={create.isPending} onClick={close}>
               {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={create.isPending || title.trim() === ""}>

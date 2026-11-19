@@ -132,7 +132,7 @@ export function WebhookDialog({
           ) : (
             <>
               <Button
-                variant="outline"
+                variant="cancel"
                 onClick={() => {
                   close(false)
                 }}

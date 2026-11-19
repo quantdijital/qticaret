@@ -135,12 +135,16 @@ export function StockFields({
     )
   }
   return (
-    <DialogSection
-      title={t(`${D}.stock`)}
-      description={t(locationId ? `${D}.stockHint` : "products.detail.variantsNoLocation")}
-    >
+    // The location's note sits under the count, as the price's does under the price: a
+    // section description would push the stock fields below the price fields beside them
+    <DialogSection title={t(`${D}.stock`)}>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t(`${D}.onHand`)} htmlFor={`${idPrefix}-stock`} error={error("stock")}>
+        <Field
+          label={t(`${D}.onHand`)}
+          htmlFor={`${idPrefix}-stock`}
+          error={error("stock")}
+          hint={t(locationId ? `${D}.stockHint` : "products.detail.variantsNoLocation")}
+        >
           <NumberField
             id={`${idPrefix}-stock`}
             min={0}

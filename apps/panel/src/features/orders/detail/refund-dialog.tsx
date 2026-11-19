@@ -182,7 +182,7 @@ export function RefundDialog({ order, money, open, onOpenChange }: RefundDialogP
         </DialogBody>
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="cancel"
             disabled={refund.isPending}
             onClick={() => {
               onOpenChange(false)

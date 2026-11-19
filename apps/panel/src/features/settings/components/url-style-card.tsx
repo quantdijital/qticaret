@@ -164,7 +164,7 @@ export function UrlStyleCard({ saved }: { saved: UrlStyles }) {
         {changed && !moving ? (
           <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
             <Button
-              variant="outline"
+              variant="cancel"
               onClick={() => {
                 setStyles(saved)
                 setCheck(null)

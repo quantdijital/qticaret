@@ -79,7 +79,7 @@ function CloseForm({ card, onDone }: { card: GiftCard; onDone: () => void }) {
         </Field>
       </DialogBody>
       <DialogFooter>
-        <Button type="button" variant="outline" disabled={close.isPending} onClick={onDone}>
+        <Button type="button" variant="cancel" disabled={close.isPending} onClick={onDone}>
           {t("common.cancel")}
         </Button>
         <Button type="submit" variant="destructive" disabled={close.isPending}>

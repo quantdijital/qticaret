@@ -156,7 +156,7 @@ function LocationPicker({
         </Select>
       </div>
       {onCancel ? (
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="cancel" onClick={onCancel}>
           {t("common.cancel")}
         </Button>
       ) : null}

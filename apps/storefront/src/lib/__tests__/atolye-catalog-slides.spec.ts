@@ -122,4 +122,29 @@ describe("the catalogue opening's slides", () => {
     // A picture alone takes the tile's width, never the ratio's (it overflowed, cropped off-centre)
     expect(rule(".gf-mosaic-feature--whole .gf-mosaic-photo")).toContain("width: 100%")
   })
+
+  it("lets the list set the row from 1024 px, never a slide's words (#157 came back on a saved layout)", () => {
+    const css = readFileSync(
+      path.resolve(
+        import.meta.dirname,
+        "../../../../../packages/themes/atolye/src/catalog-fit.css"
+      ),
+      "utf8"
+    )
+    const at = (selector: string) =>
+      css.slice(css.indexOf(selector), css.indexOf("}", css.indexOf(selector)))
+
+    // Found in the browser: a long first slide grew the row to ~900 px at 1440, and every
+    // slide of the stage (a flex row) was as tall as that one
+    const tile = at("> :is(.gf-mosaic-feature, .gf-mosaic-stage) {")
+    expect(tile).toContain("contain: size")
+    expect(tile).toContain("min-height:")
+    expect(at(".gf-mosaic-feature {")).toContain("container: gf-slide / size")
+    // The products small: a row of them in the room left, none when it does not fit
+    expect(at(".gf-mosaic-picks {")).toContain("container: gf-picks / size")
+    expect(at("@container gf-picks (height <")).toContain("display: none")
+    const html = home([opening({ slides: [own, { ...own, heading: "Kamp" }], slider })])
+    expect(html).toContain("gf-mosaic-picks")
+    expect(html).toContain("gf-mosaic-from")
+  })
 })

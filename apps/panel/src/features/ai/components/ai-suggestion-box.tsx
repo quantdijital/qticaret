@@ -111,7 +111,7 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
         <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onRetry}>
           {t("ai.suggest.retry")}
         </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={onDismiss}>
+        <Button type="button" size="sm" variant="cancel" onClick={onDismiss}>
           {t("ai.suggest.dismiss")}
         </Button>
       </div>
