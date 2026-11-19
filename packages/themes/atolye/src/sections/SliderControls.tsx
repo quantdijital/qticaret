@@ -259,7 +259,7 @@ export function SliderDots({
             aria-label={playing ? words.pause : words.play}
             className={cn(
               "inline-flex size-11 items-center justify-center rounded-button",
-              !playShown && "sr-only focus-visible:not-sr-only"
+              !playShown && "sr-only focus-visible:not-sr-only focus-visible:size-11"
             )}
             onClick={onPlay}
             {...fieldMark(marks && playShown, "scroller.play_button")}

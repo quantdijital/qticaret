@@ -189,7 +189,9 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
       ["frame/Aisle.tsx", 1],
       ["frame/WhatsApp.tsx", 1],
       ["product/AskOnWhatsApp.tsx", 1],
-      ["sections/SliderControls.tsx", 3],
+      // The pill and its pause button; a round arrow is a circle whatever the button shape
+      // (the kit's `arrow_style` asks for it; adr/0049 Ek 2026-11-19)
+      ["sections/SliderControls.tsx", 2],
       ["account/AccountNav.tsx", 1],
     ] as const) {
       expect(classes(file).split("rounded-button").length - 1, file).toBe(count)
