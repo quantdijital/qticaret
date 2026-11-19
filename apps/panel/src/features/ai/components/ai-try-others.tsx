@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -8,6 +9,11 @@ export interface AiTryOthersProps {
   services: readonly string[]
   onTryWith: (service: string) => void
   className?: string
+  /**
+   * Scrolled into sight when it appears: in a dialog whose body scrolls under a
+   * fixed footer, the offer can fall below the fold after a long message.
+   */
+  reveal?: boolean
 }
 
 /**
@@ -15,16 +21,25 @@ export interface AiTryOthersProps {
  * a service that could do the job instead. Never tried on its own: only
  * on a click.
  */
-export function AiTryOthers({ services, onTryWith, className }: AiTryOthersProps) {
+export function AiTryOthers({ services, onTryWith, className, reveal = false }: AiTryOthersProps) {
   const { t } = useTranslation()
+  const ref = useRef<HTMLDivElement>(null)
+  const shown = services.length > 0
+  useEffect(() => {
+    if (reveal && shown) {
+      ref.current?.scrollIntoView({ block: "nearest" })
+    }
+  }, [reveal, shown])
   if (services.length === 0) {
     return null
   }
   return (
     <div
+      ref={ref}
       role="group"
       aria-label={t("ai.suggest.otherServices")}
-      className={cn("flex flex-col gap-2", className)}
+      // Clear of a dialog's sticky footer (two stacked buttons on a phone) when scrolled to
+      className={cn("flex scroll-mb-36 flex-col gap-2", className)}
     >
       <p className="text-xs text-muted-foreground">{t("ai.suggest.otherServices")}</p>
       <div className="flex flex-wrap gap-2">

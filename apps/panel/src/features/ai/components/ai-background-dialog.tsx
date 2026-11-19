@@ -248,7 +248,7 @@ export function AiBackgroundDialog({
                 {failureText(t, state.failure, state.service)}
               </p>
             ) : null}
-            <AiTryOthers services={others} onTryWith={tryWith} />
+            <AiTryOthers services={others} onTryWith={tryWith} reveal />
             <p className="text-xs text-muted-foreground">
               {state.status === "ready"
                 ? (blocked ?? useNote)

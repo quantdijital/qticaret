@@ -114,6 +114,17 @@ describe("a used-up quota in the picture dialog", () => {
     expect(within(box).queryByRole("group", { name: "Başka servisle dene" })).toBeNull()
   })
 
+  it("brings the offer into sight: the dialog's body scrolls under its footer", async () => {
+    const scrolled = vi.spyOn(Element.prototype, "scrollIntoView")
+    const user = dialog()
+    const box = await screen.findByRole("dialog", { name: "Görseli düzenle" })
+    await user.click(await within(box).findByRole("button", { name: "Arka planı temizle" }))
+    const others = await within(box).findByRole("group", { name: "Başka servisle dene" })
+    expect(scrolled).toHaveBeenCalledWith({ block: "nearest" })
+    expect(scrolled.mock.contexts).toContain(others)
+    scrolled.mockRestore()
+  })
+
   it("offers the other service for a busy one too", async () => {
     job = failedWith("ai.provider_busy")
     const user = dialog()
