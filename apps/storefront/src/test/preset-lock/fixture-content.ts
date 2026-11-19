@@ -146,11 +146,14 @@ export const contentEntity = (page: FixtureEntry): Entity => ({
 })
 
 /**
- * The answer to a GET of these pages, in a shop with `base` applied; any
- * other as the frame's and the home page's.
+ * The answer to a GET of these pages, in a shop with `base` applied (each
+ * page's own layout as `layouts` gives it, by page id; the story page's
+ * when none is given); any other as the frame's and the home page's.
  */
-export const contentAnswerOf = (base: StorefrontPreset) => {
-  const layouts = pageLayouts(base)
+export const contentAnswerOf = (
+  base: StorefrontPreset,
+  layouts: Record<string, unknown> = pageLayouts(base)
+) => {
   return (layout: StoreLayout, menus: StoreMenu[], path: string, query: Query): unknown => {
     const own = /^\/store\/storefront-layout\/pages\/(cnt_\w+)$/.exec(path)
     return own?.[1] ? { page: layouts[own[1]] ?? null } : contentAnswer(layout, menus, path, query)
