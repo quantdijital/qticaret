@@ -107,6 +107,7 @@ varsayılan değer ayarın nasıl kullanılacağını gösterir, deneme metni (l
 | Düğme stili | `button_style` | Düğme stili <small>button</small> | solid/outline/text → Dolu/Çerçeveli/Yazı |
 | Görünen kart | `desktop`, `mobile` (kayan); `columns`, `columns_mobile` (ızgara) | Görünen kart / Satırda ürün (masaüstü, telefon) <small>per view / columns</small> | Masaüstü 3–6, telefon 1 / 1,5 (`peek`) / 2 |
 | Oklar | `arrows`, `arrow_style`, `arrow_position` | Oklar, Ok biçimi, Okların yeri | always/hover/hidden; round/square/plain; head/sides |
+| Slayt denetimleri (açılış slaytları) | `play_button`, `dot_style`, `controls_place`, `arrow_size`, `controls_tone` | Durdur düğmesi, Nokta biçimi, Noktaların yeri, Ok boyutu, Zemin rengi | on/off; dots/lines/count/progress → Nokta/Çizgi/Sayı (1/4)/İlerleme; center/start/end → Ortada/Solda/Sağda; small/medium/large; dark/light/brand → Koyu/Açık/Mağaza rengi (adr/0049 Ek 2026-11-19) |
 | Aç/kapat | — | Etiket olumlu cümle ("Noktaları göster") | `off`/`on` → Kapalı/Açık; anahtar düğmesiyle çizilir |
 | Cihaz | `device` | Cihaz <small>device</small> | all/mobile/desktop → Her yerde/Yalnız telefonda/Yalnız masaüstünde |
 | Fotoğraf düzeni (öne çıkan ürün) | `gallery` | Fotoğraf düzeni <small>gallery</small> | collage/strips → Kolaj/Çapraz şeritler |

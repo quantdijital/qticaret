@@ -65,6 +65,7 @@ export type FieldGroupName =
   | "placement"
   | "layout"
   | "scroll"
+  | "controls"
   | "motion"
   | "appearance"
   | "frame"

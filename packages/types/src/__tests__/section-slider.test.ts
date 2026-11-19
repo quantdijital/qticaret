@@ -11,7 +11,19 @@ import {
 
 describe("the hero slider's kit settings (bilesen-denetimi (b) 4)", () => {
   it("takes the kit's settings a slider has use for, each default on the kit's list", () => {
-    expect(SLIDER_SCROLLER).toEqual(["autoplay", "speed", "loop", "arrows", "arrow_style", "dots"])
+    expect(SLIDER_SCROLLER).toEqual([
+      "autoplay",
+      "speed",
+      "loop",
+      "arrows",
+      "arrow_style",
+      "dots",
+      "play_button",
+      "dot_style",
+      "controls_place",
+      "arrow_size",
+      "controls_tone",
+    ])
     for (const name of SLIDER_SCROLLER) {
       expect(SCROLLER_SETTINGS[name]).toContain(SLIDER_DEFAULTS[name])
     }
@@ -23,6 +35,12 @@ describe("the hero slider's kit settings (bilesen-denetimi (b) 4)", () => {
       arrows: "always",
       arrow_style: "round",
       dots: "on",
+      // The controls as they were drawn: a pause button, dots in the middle, graphite, 48 px arrows
+      play_button: "on",
+      dot_style: "dots",
+      controls_place: "center",
+      arrow_size: "medium",
+      controls_tone: "dark",
     })
   })
 

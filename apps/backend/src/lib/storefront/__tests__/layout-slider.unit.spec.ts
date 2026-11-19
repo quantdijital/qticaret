@@ -40,6 +40,12 @@ describe("the home page's hero slider (adr/0049 Ek 2026-11-06)", () => {
         arrows: "always",
         arrow_style: "round",
         dots: "on",
+        // The controls as they were drawn (adr/0049 Ek 2026-11-19)
+        play_button: "on",
+        dot_style: "dots",
+        controls_place: "center",
+        arrow_size: "medium",
+        controls_tone: "dark",
       },
     })
   })

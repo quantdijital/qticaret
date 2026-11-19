@@ -95,6 +95,16 @@
   }
 }
 
+/* A short tile (the list's height, about 1100 to 1400 px) whose words the
+   arrows' room leaves narrow: any slide's heading scales to their width, so
+   the line under it is not cut. A taller tile (1024 px, the list wraps) keeps
+   the full size, and from 1440 the words are wide enough for it */
+@container gf-slide (height < 32rem) {
+  .gf-mosaic-feature > div:not(.gf-mosaic-photo) > :is(h1, h2):not(.sr-only) {
+    font-size: clamp(1.625rem, 19.5cqi, var(--text-hero));
+  }
+}
+
 /* A narrow tile (1024 px to about 1180): the extras' words a little wider */
 @container gf-slide (width < 36rem) {
   .gf-mosaic-feature > div:not(.gf-mosaic-photo):has(> .gf-mosaic-picks, > .gf-mosaic-from) {

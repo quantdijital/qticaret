@@ -78,6 +78,17 @@ describe("a field's edit label", () => {
     expect(layer.shown()).toBeNull()
   })
 
+  it("names a control without words by its own name (a slider's arrow)", () => {
+    section().insertAdjacentHTML(
+      "beforeend",
+      '<button data-qf="scroller.arrows" id="arrow" aria-label="Sonraki slayt"><svg aria-hidden="true"></svg></button>'
+    )
+    const layer = createFieldLayer({ root, onEdit: vi.fn() })
+    layer.setWord("Düzenle")
+    layer.show({ id: "giris1", key: "scroller.arrows", element: el("arrow") })
+    expect(label().getAttribute("aria-label")).toBe("Düzenle: Sonraki slayt")
+  })
+
   it("shows nothing before the panel sent its word", () => {
     const layer = createFieldLayer({ root, onEdit: vi.fn() })
     layer.show({ id: "giris1", key: "heading", element: el("heading") })

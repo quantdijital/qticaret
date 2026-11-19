@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { HERO_CATALOG_SLIDER_DEFAULTS as asKitDefaults } from "@qticaret/types"
 import type {
   AnySection,
   HeroSection,
@@ -108,6 +109,39 @@ describe("the preview's field register", () => {
     expect(previewField(slider(), "slides.1.heading")).toBeNull()
     expect(previewField(slider(), "slides.0.links.0")).toBeNull()
     expect(previewField(slider(), "heading")).toBeNull()
+  })
+
+  it("opens a slider's controls at their settings: what they do, then their look", () => {
+    const two = catalog({ slides: [slide([]), slide([])] })
+    expect(previewField(two, "scroller.arrows")).toEqual({
+      target: "giris00001-scroller-arrows",
+      group: "scroll",
+    })
+    expect(previewField(two, "scroller.dots")).toEqual({
+      target: "giris00001-scroller-dots",
+      group: "scroll",
+    })
+    expect(previewField(two, "scroller.dot_style")).toEqual({
+      target: "giris00001-scroller-dot_style",
+      group: "controls",
+    })
+    // The pause button's setting stands only while the slides turn by themselves
+    expect(previewField(two, "scroller.play_button")).toBeNull()
+    const playing = { ...two, scroller: { ...asKitDefaults, autoplay: "on" as const } }
+    expect(previewField(playing, "scroller.play_button")).toEqual({
+      target: "giris00001-scroller-play_button",
+      group: "scroll",
+    })
+    expect(previewField(slider(), "scroller.arrows")).toEqual({
+      target: "kayan00001-scroller-arrows",
+      group: "scroll",
+    })
+    // One slide never turns, a setting a slider has not, a key longer than one
+    expect(previewField(catalog({ slides: [slide([])] }), "scroller.arrows")).toBeNull()
+    expect(previewField(two, "scroller.desktop")).toBeNull()
+    expect(previewField(two, "scroller.loop")).toBeNull()
+    expect(previewField(two, "scroller.arrows.0")).toBeNull()
+    expect(previewField(hero(), "scroller.arrows")).toBeNull()
   })
 
   it("places an announcement's line, and a section's title where the theme marks it", () => {

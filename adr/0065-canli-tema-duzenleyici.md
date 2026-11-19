@@ -403,6 +403,7 @@ KRİTİK, YÜKSEK ya da ORTA bulgu yok. Düşük ve bilgi bulguları:
   - Açılış (`hero`, standart): `heading`, `text`, `links.0`, `image`.
   - Katalog açılışı (`category_list`): `eyebrow`; slaytsız kayıtta `heading`, `text`, `links.0`, `links.1`, `image`; slaytlıda `slides.N.heading|text|links.M|image`.
   - Kayan açılış (`hero_slider`): `slides.N.image|heading|text|link`.
+  - Slayt denetimleri (2026-11-19; katalog açılışı iki ve üstü slaytta, kayan açılış): oklar `scroller.arrows`, noktalar `scroller.dots`, görünür durdur düğmesi `scroller.play_button`; panelde ilgili kaydırma ayarı açılır (adr/0049 Ek 2026-11-19).
   - Ortak başlıklı bölümlerin başlığı (`SectionHead`): `title` (ürün rafı sekmesizken, kategoriler, markalar, yazılar, yorumlar, Google puanı, fiyat bantları).
   - Duyuru şeridi: önizlemede şeride `data-qs` ve satırlara `lines.N`.
   - Yayılım (kalan bölümler): SSS `title`, `items.N.question|answer`; yardım `title`, `text` (SSS'ye bağlıysa başlık görünmediği için işaretsiz); bülten (sayfa ve alt bilgi) `title`, `text`; metin `title`, `body`; öne çıkan ürün `title`, `text`; güven rozetleri `badges.N.title|text`; bant `slides.N.image`, `heading`, `text`, `link`, `second_link`; kayan yazı `items.N.text|subtext` (yalnız ilk tur, kopyalar işaretsiz); fiyat bantları `bands.N.label|text`; katalog üst bilgisi `search_placeholder`, `highlight_link`.

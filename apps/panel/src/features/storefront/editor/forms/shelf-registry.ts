@@ -1,4 +1,5 @@
 import {
+  ROW_SCROLLER,
   SCROLLER_DEFAULTS,
   SCROLLER_SETTINGS,
   SHELF_RANKED_LAYOUTS,
@@ -14,12 +15,13 @@ import type {
   ScrollerSettings,
   ShelfStageSetting,
   ShelfStripsSetting,
+  SliderSetting,
   SliderSettings,
   SliderSource,
 } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
-import type { RegistryField } from "./field-registry"
-import { SCROLLER_MAIN, SLIDER_MAIN, scrollerOffers } from "./scroller-groups"
+import type { FieldGroupName, RegistryField } from "./field-registry"
+import { SCROLLER_MAIN, SLIDER_LOOK, SLIDER_MAIN, scrollerOffers } from "./scroller-groups"
 
 // A product rail's fields for the settings search (adr/0049 Ek 2026-11-15), beside
 // `field-registry.ts`'s, built from what `ShelfGroups` and `ScrollerFields` show
@@ -195,13 +197,16 @@ function stageFields(id: string): RegistryField[] {
  * the related products'): what is in view and the arrows open, the rest closed.
  */
 export function scrollerFields(id: string, scroller: unknown): RegistryField[] {
-  return kitFields(id, scrollerSettingsOf(scroller), Object.keys(SCROLLER_SETTINGS), SCROLLER_MAIN)
+  return kitFields(id, scrollerSettingsOf(scroller), ROW_SCROLLER, (setting) =>
+    SCROLLER_MAIN.includes(setting) ? "scroll" : "look"
+  )
 }
 
 /**
  * The sliding opening's kit settings as the panel shows them
- * (bilesen-denetimi (b) 4, `SliderGroups`): turning, speed, arrows and
- * dots open, looping closed.
+ * (bilesen-denetimi (b) 4, `SliderGroups`): turning, speed, the pause
+ * button, arrows and dots in "Kaydırma", the controls' look in its own
+ * group, looping closed.
  */
 export function sliderFields(
   id: string,
@@ -209,21 +214,27 @@ export function sliderFields(
   defaults?: SliderSettings
 ): RegistryField[] {
   const settings = { ...SCROLLER_DEFAULTS, ...sliderSettingsOf(section, defaults) }
-  return kitFields(id, settings, SLIDER_SCROLLER, SLIDER_MAIN)
+  return kitFields(id, settings, SLIDER_SCROLLER, (setting) =>
+    SLIDER_MAIN.includes(setting as SliderSetting)
+      ? "scroll"
+      : SLIDER_LOOK.includes(setting as SliderSetting)
+        ? "controls"
+        : "look"
+  )
 }
 
-/** Some of the kit's settings the row offers as it stands, open ones in "Kaydırma". */
+/** Some of the kit's settings the row offers as it stands, each in its panel group. */
 function kitFields(
   id: string,
   settings: ScrollerSettings,
-  names: readonly string[],
-  open: readonly ScrollerSetting[]
+  names: readonly ScrollerSetting[],
+  groupOf: (setting: ScrollerSetting) => FieldGroupName
 ): RegistryField[] {
-  return (names as ScrollerSetting[])
+  return names
     .filter((setting) => scrollerOffers(settings, setting))
     .map((setting) => ({
       key: `scroller.${setting}`,
-      group: open.includes(setting) ? "scroll" : "look",
+      group: groupOf(setting),
       label: `${SCROLLER}.${setting}.label`,
       term: `${SCROLLER}.${setting}.term`,
       options: SCROLLER_SETTINGS[setting].map((step) => `${SCROLLER}.${setting}.${step}`),

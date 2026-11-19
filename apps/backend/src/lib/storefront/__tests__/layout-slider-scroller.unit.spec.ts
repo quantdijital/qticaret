@@ -65,6 +65,34 @@ describe("the hero slider on the scroller kit (bilesen-denetimi (b) 4)", () => {
     expect(issues({ scroller: { desktop: "four" } })).not.toEqual([])
   })
 
+  it("keeps the controls' own steps, today's look where none is saved, and refuses one off the list", () => {
+    const controls = {
+      play_button: "off",
+      dot_style: "progress",
+      controls_place: "end",
+      arrow_size: "large",
+      controls_tone: "brand",
+    }
+    expect(read({ scroller: controls })).toMatchObject({
+      scroller: { ...SLIDER_DEFAULTS, ...controls },
+    })
+    expect(read({ scroller: { dots: "off" } })).toMatchObject({
+      scroller: {
+        play_button: "on",
+        dot_style: "dots",
+        controls_place: "center",
+        arrow_size: "medium",
+        controls_tone: "dark",
+      },
+    })
+    expect(issues({ scroller: { dot_style: "stars" } })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    expect(issues({ scroller: { controls_tone: "#ff0000" } })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+  })
+
   it("mirrors the contract's slider settings: a step goes there first", () => {
     const scroller = jest.requireActual<Record<string, unknown>>(`${CONTRACT}/section-scroller.ts`)
     expect(SLIDER_SCROLLER).toEqual(scroller["SLIDER_SCROLLER"])
