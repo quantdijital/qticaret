@@ -1,10 +1,13 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { CONTENT_PAGE_SECTION_TYPES } from "@qticaret/types"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
+import { PAGE_TYPES } from "@/features/storefront/layout/sections"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
+import { AddSectionDialog } from "./add-section-dialog"
 import {
   PRODUCTS,
   holdClock,
@@ -282,5 +285,45 @@ describe("the section forms", HEAVY, () => {
         "Aynı gün kargo",
       ])
     })
+  })
+})
+
+describe("a content page's section chooser (adr/0073 §3)", () => {
+  it("offers the home page's types but its opening and price bands, on the page's side", () => {
+    render(
+      <AddSectionDialog
+        open
+        page="pages"
+        placement="top"
+        marqueeFull={false}
+        onOpenChange={vi.fn()}
+        onPick={vi.fn()}
+      />
+    )
+    const chooser = screen.getByRole("dialog", { name: "Bölüm ekle" })
+    expect(chooser).toHaveTextContent("sayfanın metninin üstüne eklenir")
+    expect(
+      within(chooser)
+        .getAllByRole("button")
+        .map((button) => button.querySelector(".font-medium")?.textContent)
+        .filter(Boolean)
+    ).toEqual([
+      "Görsel bant",
+      "Çapraz şeritler",
+      "Kategoriler",
+      "Ürün listesi",
+      "Öne çıkan ürün",
+      "Markalar",
+      "Blog yazıları",
+      "Müşteri yorumları",
+      "Google puanı",
+      "Metin",
+      "Sık sorulan sorular",
+      "Güven rozetleri",
+      "Kayan yazı",
+      "E-bülten",
+      "Yardım kutusu",
+    ])
+    expect([...PAGE_TYPES].sort()).toEqual([...CONTENT_PAGE_SECTION_TYPES].sort())
   })
 })

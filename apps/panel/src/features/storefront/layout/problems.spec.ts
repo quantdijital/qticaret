@@ -264,4 +264,10 @@ describe("previewAddress", () => {
       "https://ornek.com/onizleme/sfl_abc?sayfa=%2Fkategori%2Fmutfak"
     )
   })
+
+  it("names a content page in draft beside its path (adr/0073 §5)", () => {
+    expect(previewAddress(preview, "http://localhost:8000", "/iade", "cnt_iade")).toBe(
+      "http://localhost:8000/onizleme/sfl_abc?sayfa=%2Fiade&icerik=cnt_iade"
+    )
+  })
 })

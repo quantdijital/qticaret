@@ -21,8 +21,8 @@ import type {
   ThemeChoices,
 } from "@/features/storefront/api/theme"
 import type { CardVariant, StyleKitField } from "@qticaret/types"
-import type { AnySection, LayoutDocument } from "@/features/storefront/api/layout"
-import { LAYOUT_GROUPS } from "@/features/storefront/layout/sections"
+import type { LayoutDocument } from "@/features/storefront/api/layout"
+import { allSections } from "@/features/storefront/layout/sections"
 import { STYLE_KIT_READY } from "./style-kit-ready"
 
 /**
@@ -290,8 +290,9 @@ export const THEME_FIELD = Object.fromEntries(
 
 /** The card variants the draft draws: the theme's, and every product rail's own. */
 export function cardVariantsInUse(doc: LayoutDocument): CardVariantsInUse {
-  const rails = LAYOUT_GROUPS.flatMap((group) => doc[group] as readonly AnySection[]).flatMap(
-    (section) => ("card_variant" in section && section.card_variant ? [section.card_variant] : [])
+  // A content page's rails too (adr/0073)
+  const rails = allSections(doc).flatMap((section) =>
+    "card_variant" in section && section.card_variant ? [section.card_variant] : []
   )
   return new Set([doc.settings.theme.product_card.variant, ...rails])
 }
