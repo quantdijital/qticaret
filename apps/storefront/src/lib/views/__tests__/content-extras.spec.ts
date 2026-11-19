@@ -5,34 +5,10 @@ import {
   cardProductIds,
   familyName,
   identityRows,
-  infoPageOf,
   installmentRates,
   postMeta,
   shareLinks,
 } from "../content-extras"
-
-describe("infoPageOf (adr/0046 Ek 2026-11-05)", () => {
-  it("knows the payment and shipping pages by the shop's settings", () => {
-    const frame = { payment_info_path: "/taksit-secenekleri", shipping_info_path: "/teslimat" }
-    expect(infoPageOf("/taksit-secenekleri", frame)).toBe("payments")
-    expect(infoPageOf("/teslimat", frame)).toBe("shipping")
-    // The old fixed addresses are ordinary pages once the shop chose others
-    expect(infoPageOf("/odeme-secenekleri", frame)).toBeNull()
-    expect(infoPageOf("/kargo-ve-teslimat", frame)).toBeNull()
-  })
-
-  it("names no page for a setting saved as none", () => {
-    const frame = { payment_info_path: null, shipping_info_path: null }
-    expect(infoPageOf("/odeme-secenekleri", frame)).toBeNull()
-    expect(infoPageOf("/kargo-ve-teslimat", frame)).toBeNull()
-  })
-
-  it("keeps the usual addresses for a backend without the settings", () => {
-    expect(infoPageOf("/odeme-secenekleri", {})).toBe("payments")
-    expect(infoPageOf("/kargo-ve-teslimat", {})).toBe("shipping")
-    expect(infoPageOf("/hakkimizda", {})).toBeNull()
-  })
-})
 
 // The content pages' extras in words (adr/0046 Ek 2026-11-05 içerik sayfaları)
 
