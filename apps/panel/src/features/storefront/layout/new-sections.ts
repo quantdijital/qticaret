@@ -91,7 +91,13 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "google_rating":
       return { ...base, type, title: null, excerpts: 0, profile_link: true }
     case "rich_text":
-      return { ...base, type, title: null, body: { type: "doc", content: [] } }
+      return {
+        ...base,
+        type,
+        title: null,
+        body: { type: "doc", content: [] },
+        variant: defaultVariant(type),
+      }
     case "trust_badges":
       return { ...base, type, variant: defaultVariant(type) }
     case "marquee":

@@ -82,6 +82,15 @@ export const SECTION_VARIANTS = {
    * Fields by variant: `section-newsletter`.
    */
   newsletter: ["standard", "split", "image_card", "strip", "in_footer"],
+  /**
+   * The shop's own text (adr/0073 §3): `pane`, today's heading beside the
+   * text on the shadowed pane; `with_image` ("Görselli metin"), the same
+   * pane with one of the media library's pictures on one side (5/12) and
+   * the heading and text on the other (7/12), the picture on top on a
+   * phone. The footer group takes `pane` only (adr/0070 §4: no picture
+   * section there). Fields by variant: `section-rich-text`.
+   */
+  rich_text: ["pane", "with_image"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
@@ -211,6 +220,7 @@ export type RelatedProductsVariant = SectionVariant<"related_products">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type NewsletterVariant = SectionVariant<"newsletter">
+export type RichTextVariant = SectionVariant<"rich_text">
 export type ProductMainVariant = SectionVariant<"product_main">
 export type CategoryMainVariant = SectionVariant<"category_main">
 

@@ -29,6 +29,7 @@ import {
   reviewViews,
 } from "./section-data"
 import { relatedView } from "./related"
+import { richTextView } from "./rich-text"
 import { shelfView } from "./shelf"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
@@ -152,7 +153,7 @@ async function sectionView(
         t
       )
     case "rich_text":
-      return { id, type: "rich_text", title: section.title, html: section.html }
+      return richTextView(section)
     case "faq":
       return section.items.length > 0
         ? {

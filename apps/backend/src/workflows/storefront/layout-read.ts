@@ -9,6 +9,7 @@ import { footerRowImages, footerRowLinks } from "../../lib/storefront/sections/f
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { shownSettings } from "../../lib/storefront/layout-settings"
 import { newsletterImages, printedNewsletter } from "../../lib/storefront/sections/newsletter"
+import { richTextImages } from "../../lib/storefront/sections/rich-text"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
 import type { shopInfoValues } from "../shop/info-values"
 import { editionKey, layoutEdition } from "./layout-row"
@@ -21,9 +22,12 @@ import { fill, hydrateMarquee, hydrateSection } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
 import type { StoreMenu } from "./menus-read"
 
-/** The addresses of the images shown with their sizes: openings, slides, strips (not rich text's). */
+/**
+ * The addresses of the images shown with their sizes: openings, slides,
+ * strips, the picture beside a rich text (not the pictures in its text).
+ */
 export const imageUrls = (section: BodySection): string[] =>
-  section.type === "rich_text" ? [] : imagesOf(section)
+  section.type === "rich_text" ? richTextImages(section) : imagesOf(section)
 
 /**
  * The design as the storefront shows it at a moment (adr/0049): only the

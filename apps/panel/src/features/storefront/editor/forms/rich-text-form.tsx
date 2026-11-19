@@ -18,6 +18,7 @@ import { F, FieldGroup, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { PREVIEW_IDS } from "./preview-fields"
+import { RichTextPicture } from "./rich-text-picture"
 
 const T = "storefront.editor.richText"
 // The panel shows the text's start; the editor holds the whole
@@ -27,6 +28,7 @@ const EXCERPT = 160
  * A title and a text written in the content editor (adr/0019), which may
  * hold product and category cards and the shop's details. The editor
  * opens wide in a dialog: the side panel is too narrow for its toolbar.
+ * "Görselli metin" (adr/0073 §3) adds its picture and side under the title.
  */
 export function RichTextForm({ section, problems, onChange }: SectionFormProps<RichTextSection>) {
   const { t } = useTranslation()
@@ -52,6 +54,9 @@ export function RichTextForm({ section, problems, onChange }: SectionFormProps<R
           onChange({ ...section, title: next }, "title")
         }}
       />
+      {section.variant === "with_image" ? (
+        <RichTextPicture section={section} problems={problems} onChange={onChange} />
+      ) : null}
       <FieldGroup title={t(`${T}.body`)}>
         <p className="line-clamp-4 rounded-md border px-3 py-2 text-[13px] text-muted-foreground">
           {text === "" ? t(`${T}.empty`) : text.slice(0, EXCERPT)}

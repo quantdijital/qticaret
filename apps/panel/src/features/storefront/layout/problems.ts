@@ -199,11 +199,23 @@ function fieldsOf(section: AnySection): Found[] {
         ["title", textProblem(section.title, L.title)],
         ["more", linkProblem(section.more)],
       ]
+    case "rich_text":
+      // The picture beside it (adr/0073 §3): the draft waits for one
+      return [
+        ["title", textProblem(section.title, L.title)],
+        [
+          "image",
+          section.variant !== "with_image"
+            ? null
+            : section.image
+              ? textProblem(section.image.alt, L.alt)
+              : "imageRequired",
+        ],
+      ]
     case "brands":
     case "posts":
     case "reviews":
     case "google_rating":
-    case "rich_text":
       return [["title", textProblem(section.title, L.title)]]
     case "header_bar":
       // The catalog header's words and highlighted link (adr/0049 Ek 2026-11-15)

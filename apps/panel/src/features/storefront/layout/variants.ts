@@ -12,9 +12,11 @@ import {
   SHELF_RANKED_LAYOUT_DEFAULT,
   SHELF_STAGE_DEFAULTS,
   SHELF_STRIPS_DEFAULTS,
+  RICH_TEXT_IMAGE_SIDE_DEFAULT,
   SECTION_VARIANTS,
   hasVariants,
   newsletterOnPage,
+  richTextInFooter,
 } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import type { AnySection, HeaderCatalogFields } from "@/features/storefront/api/layout"
@@ -111,6 +113,11 @@ export const VARIANT_FIELDS: {
     strip: {},
     in_footer: {},
   },
+  // adr/0073 §3: no picture yet (the draft waits for one), on the left; title and text stay
+  rich_text: {
+    pane: {},
+    with_image: { image: null, image_side: RICH_TEXT_IMAGE_SIDE_DEFAULT },
+  },
   product_main: { standard: {} },
   category_main: { standard: {} },
 }
@@ -146,21 +153,28 @@ export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: Sectio
 /**
  * The variants the "Biçim" offers the section where it stands: its type's
  * list, a page's newsletter box without the footer column one (adr/0049
- * Ek 2026-11-17: a page has no footer column to sit in).
+ * Ek 2026-11-17: a page has no footer column to sit in), the footer
+ * group's rich text without the picture (adr/0073 §3, adr/0070 §4).
  */
 export function offeredVariants<S extends VariantSection>(
   section: S,
   inFooter: boolean
 ): readonly SectionVariant<S["type"]>[] {
   const listed: readonly SectionVariant<S["type"]>[] = SECTION_VARIANTS[section.type]
-  return section.type === "newsletter" && !inFooter
-    ? listed.filter((each) => newsletterOnPage(each as SectionVariant<"newsletter">))
+  if (section.type === "newsletter" && !inFooter) {
+    return listed.filter((each) => newsletterOnPage(each as SectionVariant<"newsletter">))
+  }
+  return section.type === "rich_text" && inFooter
+    ? listed.filter((each) => richTextInFooter(each as SectionVariant<"rich_text">))
     : listed
 }
 
-/** Whether the panel offers the section's "Biçim": its type is drawn more than one way. */
-export const offersVariants = (section: AnySection): section is VariantSection =>
-  hasVariants(section.type) && "variant" in section
+/**
+ * Whether the panel offers the section's "Biçim" where it stands: its type
+ * is drawn more than one way there (the footer group's rich text is not).
+ */
+export const offersVariants = (section: AnySection, inFooter = false): section is VariantSection =>
+  hasVariants(section.type) && "variant" in section && offeredVariants(section, inFooter).length > 1
 
 /**
  * The section drawn another way (§2.4, option B): its common fields carried

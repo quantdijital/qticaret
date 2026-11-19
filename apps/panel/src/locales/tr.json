@@ -8269,6 +8269,10 @@
           "image_card": "Görselli kart",
           "strip": "İnce şerit",
           "in_footer": "Alt bilgi sütununda"
+        },
+        "rich_text": {
+          "pane": "Yalnız metin",
+          "with_image": "Görselli metin"
         }
       },
       "look": {
@@ -8589,7 +8593,16 @@
         "body": "Metin",
         "empty": "Henüz metin yazılmadı.",
         "description": "Yazdıklarınız taslağa kendiliğinden kaydedilir; ürün ve kategori kartı, mağaza bilgisi ekleyebilirsiniz.",
-        "done": "Tamam"
+        "done": "Tamam",
+        "image": "Görsel",
+        "imageHint": "Medya kütüphanesinden; telefonda metnin üstünde görünür.",
+        "imageSide": "Görselin yeri",
+        "imageSideTerm": "image side",
+        "imageSideHint": "Geniş ekranda görselin durduğu yan; telefonda görsel her zaman üstte.",
+        "imageSides": {
+          "start": "Solda",
+          "end": "Sağda"
+        }
       },
       "help": {
         "contact": "İletişim yolları (telefon, e-posta, WhatsApp) Mağaza profilinden gelir; hiçbiri yoksa kutu görünmez."

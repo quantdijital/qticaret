@@ -59,7 +59,8 @@ const MOVED: Record<string, [pane: number, inner: number]> = {
   "sections/Guides.tsx": [1, 0],
   "sections/ShelfRack.tsx": [1, 0],
   "sections/Signup.tsx": [1, 0],
-  "sections/Story.tsx": [1, 0],
+  // adr/0073 §3: the pane and "Görselli metin"'s pane
+  "sections/Story.tsx": [2, 0],
 }
 
 /** The at-rules around a rule, outermost first, and its body. */
