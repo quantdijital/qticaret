@@ -4,14 +4,34 @@
 
 ## Sıradaki işler (güncel tutulur; Oğuzhan başlamadan önce buraya bakar)
 
-1. **ADR-0073 kapanışı (içerik sayfalarında bölümler):**
-   - İçerik sayfası bölümleri ve Katalog Hakkımızda'ya tarayıcıda 390 ve 1440 px'te bakılır.
-   - Dev mağazada Hakkımızda'nın metni, kapak görseli ve vaatleri ADR-0073 §4'teki metinle girilir, Katalog yeniden uygulanır.
-   - Sayfanın metniyle bölümler arasındaki boşluk denetlenir.
+1. **ADR-0073 Ek 2026-11-19 (2): sayfalar tema düzenleyicinin** (karar #232'yle birleşti; `adr/0073-icerik-sayfalarinda-bolumler.md` "Ek 2026-11-19 (2)", K1–K11). Üst/alt yerleşimi kalkar; sayfanın metni sayfanın tek bölüm listesinde bölüm olur; sayfa tema düzenleyicide açılır ve yönetilir; İçerik yalnız blog yazılarının.
+   - **Dilimler (K11):** S6 sözleşme + backend; S7 panel; S8 vitrin + tema + kilitler + dönüşüm dosyası `migration-scripts/content-pages-into-layout.ts`; S9 Katalog hazır görünümü. S6 ve S8 birleşmeden önce `security-reviewer`. `main`'e S9'dan sonra.
+   - **Tarayıcı denetimi:** S1–S5'in üst/alt modeline eski bakış eskidi; S8/S9'dan sonra Hakkımızda ve İletişim'e 390 ve 1440 px'te bakılır.
+   - **S6 durumu:** dal `deniz/sayfalar-tema-duzenleyici-s6` origin'de; iki commit: `b352318cb` (types) ve `7a58bd5e2` (geri kalan yarım iş; eski Mac'ten taşınmadan önce olduğu gibi kaydedildi). Dal `dev`'e birleşmez: yeni HTTP testleri yazılmadı, sayfaya `body` gönderen eski HTTP testleri kırık.
+   - **Dalda yazılanlar:**
+     - types: `placement` kalktı; `contact` / `payment_facts` / `shipping_facts`; `rich_text` `article` biçimi; sayfa sınırı 50; `synthesized`.
+     - `layout-pages.ts` tek liste + `sections/page-text.ts`; eski biçim okuması `readStoredPages` / `text_at`.
+     - Mağaza okumasında sentez: `layout-page-read.ts` + `layout-hydrate-text.ts`.
+     - Yayın `layout-publish.ts`'e bölündü: `page-mirror.ts` (`body` aynası, telafi, `content.saved`) ve `pages-live.ts`.
+     - Admin içerik rotası sayfa `body`'sini reddeder (`content.page_text_in_editor`).
+     - `checkLayout` yalnız yeni kartları denetler (`lib/content/cards.ts`).
+     - `replacePageTextWorkflow` (`page-text-replace.ts`, `layout-system.ts`); içe aktarma ve mağaza profili bunu kullanır.
+     - Geri yüklemede `text_at` (`page-texts-placed.ts`); bağlantı raporu/yeniden yazma düzende (`content/link-layout.ts`); `movePageTexts` (`page-text-convert.ts`).
+     - Küçük uyum düzeltmeleri: vitrin `page-sections.ts` `aroundText`; panel `article` biçim alanları ve `placed()` varsayılanı.
+   - **S6'da kalanlar:**
+     - `page-mirror.unit.spec.ts`'te iki `toBe(body)` → `toEqual(body)`.
+     - `checkLayout` kart kuralına birim testi.
+     - Yeni HTTP testleri: `content-pages-conversion.spec.ts`; ayna + `pages_live`; sentez; geri yüklemede `text_at`; `replacePageTextWorkflow`; sayfa `body`'si 400.
+     - Sayfa `body`'si gönderen ~10 HTTP testinin güncellenmesi: `content`, `storefront-layout-pages`, `seo-contract`, `storefront-page-roles`, `ai-catalog-tasks`, `storefront-presets-pages`, `content-links`, `media-library`, `content-saves`, `ai-seo`.
+     - Commit + PR + güvenlik incelemesi.
+   - **Kaydedilecek sapmalar (S6 PR'ı):**
+     - `reason: "conversion"` sütunu yok: dönüşüm `published_by: null` sistem sürümü + denetim kaydı; migration yok.
+     - `POST /admin/storefront-layout` eski `placement`'ı geçici kabul edip katlar (S7'de kalkar).
+     - `presetDocument` Katalog'un `placement`'ını S9'a kadar katlar.
+     - Sayfa okuma önbelleği 40 → 100.
 2. **Test sunucusu ve BirFatura:** test sunucusuna kurulum planı; kurulumdan sonra BirFatura gerçek testi test alan adında (F1 #209 + F2 #210 birleşti, yerel sahte yok).
 3. **Canlıya çıkış listesi (F16, sahiple):** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); imajda ffmpeg ≥ 7 (`FFMPEG_PATH` / `FFPROBE_PATH`; CI'ın apt'si 6.1 veriyor); Cloudflare önde (adr/0003), ayrı depo origin'iyle birlikte; o zaman CSP `img-src`/`media-src` daraltılır. BirFatura için gerekirse ayrı alt alan adı.
 4. **Küçük işler ve takipler:**
-   - İletişim, ödeme ve kargo sayfalarının rolü `contact_form_path` yerine sayfa kimliğiyle tanınsın (küçük düzeltme).
    - Panelde görünüm özeti (`gallery/draft-summary.ts`) sayfa düzenlerini henüz saymıyor.
    - Etiketi oluşmuş siparişler için "Kurye bekliyor" gösterim durumu (önerildi, sahibin cevabı bekleniyor).
    - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
@@ -33,9 +53,34 @@
    - 2026-11-27 ve sonrası: fast-xml-parser 5.12.1.
    - Kalan yüksekler Medusa yükseltmesini ya da üst projeyi bekliyor: @graphql-tools/utils 12.x ister; picomatch'in henüz düzeltmesi yok.
    - **Sahip kararı:** Medusa 2.21.2 → 2.22.x yükseltmesi. 2.22.2 bugün yeterince eski; 2.22.3+ yakında olur. Tam testlerle ayrı PR.
-   - `PROGRESS.md`'deki "body-parser/multer override'ı 2026-11-05'ten sonra" satırı eskidi (#192 ile yapıldı); bir sonraki `PROGRESS.md` güncellemesinde düzeltilir.
 
-Bitenler: ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
+Bitenler: #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
+
+## 2026-11-19 (akşam): sayfa rolleri, sayfalar tema düzenleyiciye (ADR-0073 Ek 2), bilgisayar değişikliği
+
+- **Birleşenler:**
+  - #230: notlar.
+  - #231: iletişim, ödeme ve kargo rolleri içerik sayfasının kimliğiyle tutulur (`contact_page_id`, `payment_page_id`, `shipping_page_id`; eski yol alanları yalnız kimlik boşken okunur). `GET /store/storefront` sayfası olmayan (taslak ya da silinmiş) rolün adresini `null` döner. Panelde yol kutuları yerine sayfa seçici. ADR-0073 "Ek 2026-11-19".
+  - #232: ADR-0073 "Ek 2026-11-19 (2)" kararı. Sahip: "sayfalardaki o altta üstte içerik mantığı olmasın direkt mevcut içerikler gelsin hakkımızdaya bu sayfaları direkt içinden oluşturmasın direkt tema düzenleyicide oluştursun. blog içeriği değil bu". S1–S5'in üst/alt modeli geçersiz; dilimler S6–S9.
+- **S6 başladı, bitmedi:** durum ve kalanlar sıradaki işler 1'de (dalda `b352318cb` ve yarım işin kaydı `7a58bd5e2`).
+- **Kesinti:** ~22:02'de macOS bu sürecin Masaüstü klasörü erişimini geri aldı; süren iş durdu. Vitrin dev sunucusu da aynı nedenle Turbopack önbelleğinde EPERM ile çöktü.
+- **Bilgisayar değişikliği:** sahip: "macbook yetersiz kalıyor geliştirmeyi diğer bilgisayarımda devam edeceğim". Geliştirme öbür bilgisayarda sürer; bu not ondan önceki son durumdur.
+
+### Yeni bilgisayarda kurulum
+
+Kaynaklar: `README.md` ("Gereksinimler", "Kurulum", "Geliştirme servisleri", "Komutlar", "Tedarik zinciri güvenliği", "Claude Code"), `docs/09-claude-code-is-akisi.md` ("MCP sunucuları", "Yerel demo verisi", "Sahte sağlayıcılar"), `docs/08-devops.md` ("Local"), `apps/backend/env.example` yorumları, `pnpm-workspace.yaml`, `.mcp.json`.
+
+1. **Araçlar (README "Gereksinimler"):** Node.js 24 LTS (`.nvmrc` 24; `engines` `>=24.11.0 <25`, `engineStrict`); pnpm 11.17.0 (`packageManager`; `corepack enable`); Docker (Docker Desktop ya da OrbStack); `openssl`; `jq` (Claude Code prettier hook'u); `gitleaks` (yoksa commit reddedilir). Ürün videoları için isteğe bağlı ffmpeg ≥ 7 (bu Mac'te Homebrew 9.0.2 vardı; yoksa video yükleme kapalı kalır, docs/08).
+2. **Klon:** `git clone https://github.com/quantdijital/qticaret.git`, `dev` dalı.
+3. **Paketler:** `pnpm install --frozen-lockfile` (CI'ın komutu; README'de `pnpm install`). Husky hook'larını da kurar. 14 günden genç sürüm kurulmaz (`minimumReleaseAge`).
+4. **Env dosyaları:** sahip kendi terminalinde `pnpm env:init` çalıştırır: `env.example` şablonlarından `infra/docker/.env`, `apps/backend/.env(.test)`, `apps/control-plane/.env(.test)`, `apps/storefront/.env.local`; secret'lar rastgele üretilir, ekrana yazılmaz. Gerçek değerler git'e, sohbete ve Claude'a girmez (Claude `.env*` okumaz). Sahte sağlayıcı adresleri dev dosyasına şablondan gelir; Paraşüt'ün `PARASUT_CLIENT_ID` / `PARASUT_CLIENT_SECRET`'i gibi eksikler elle (docs/09 tablo). Sağlayıcı hesapları (iyzico sandbox, PayTR, BirFatura) panelden girilir.
+5. **Servisler:** `pnpm db:up`: Postgres 16 `localhost:55432` (DB `qticaret`), Redis 7 `56379`, Mailpit SMTP `51025` / arayüz `http://localhost:58025`, SeaweedFS (S3) `http://localhost:58333`. Sıfırlamak: `pnpm db:down -v` (volume'ları siler).
+6. **Veritabanı:** `pnpm --filter @qticaret/backend medusa db:migrate`; üst panel kullanılacaksa bir kez `pnpm --filter control-plane db:setup`. Yönetici hesabı README'deki `read -rs … medusa user -e EPOSTA -p "$PW"` komutuyla (şifre ekrana ve geçmişe düşmez).
+7. **Demo veri:** `pnpm --filter @qticaret/backend seed:demo` (katalog, kargo seçenekleri, vitrin anahtarı); pano siparişleri için `seed:demo-orders`. Vitrinde elle deneme müşterisi: `NODE_ENV=development pnpm --filter @qticaret/backend customer:test <e-posta> <şifre>` (docs/09 "Yerel demo verisi").
+8. **Çalıştırma:** `pnpm dev` (üst panel hariç hepsi) ya da tek tek: `pnpm --filter backend dev` (`:9000`), `pnpm --filter panel dev` (`:5173`), `pnpm --filter storefront dev` (`localhost:8000`; tema boşken Atölye). Sahteler ayrı terminallerde: `pnpm dev:paytr`, `dev:aras`, `dev:yurtici`, `dev:netgsm`, `dev:geliver`, `dev:parasut`, `dev:shopify`; her biri panelde girilecek hesap bilgisini yazar. Kargo takibi dakikada bir: backend `.env`'e `SHIPMENT_POLL_MINUTES=1` (docs/09 "Sahte sağlayıcılar").
+9. **Tarayıcılar:** panel e2e için bir kez `pnpm --filter @qticaret/panel exec playwright install chromium` (README). Claude Code'un Playwright MCP'si (`.mcp.json`: `@playwright/mcp`, chromium, headless) için tarayıcı kurulu değil; kurarken 14 gün kuralına uyulur (en az 14 günlük sürüm, `@latest` değil).
+10. **Claude Code:** ilk komut `/oturum-baslat` (README); Context7 ve Playwright MCP `.mcp.json`'da (docs/09 "MCP sunucuları").
+- **Git'le gelmeyenler:** dev veritabanı (My L'arte taslağı, cutlery paketi ve Katalog uygulanmış görünüm, içerik sayfaları, test siparişleri) ve SeaweedFS'teki yüklenmiş medya. Yeni bilgisayarda `seed:demo` ile yeniden kurulur; aynısı istenirse sahip eski Mac'ten Postgres dökümü alıp geri yükler (araçlar `infra/backup/`, `docs/runbooks/yedek-ve-geri-yukleme.md`). Döküm taşınırsa eski `apps/backend/.env`'in anahtarları da sahip eliyle taşınır: `PII_ENCRYPTION_KEY` / `PII_HASH_KEY` olmadan saklı vergi numaraları okunmaz, `CREDENTIALS_ENCRYPTION_KEY` olmadan paneldeki sağlayıcı hesapları yeniden girilir, `AUTH_MFA_ENCRYPTION_KEY` olmadan 2FA yeniden kurulur (`apps/backend/env.example` yorumları).
 
 ## 2026-11-18 → 2026-11-19: içerik sayfalarında bölümler (ADR-0073), BirFatura F1 + F2, vitrin kartları
 

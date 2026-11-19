@@ -7,7 +7,7 @@
 
 **F18 — Vitrin ve çoklu tema: BAŞLADI (2026-11-01; D1–D2 bitti, D3 çerçeve bitti, D4–D6 başladı; tasarım shadcn/ui, kurallar docs/19; ilk müşteri sitesinin envanteri `docs/gecis/mylarte/`).** Kullanıcı: "kodlamaya başla f18i bana bir şey sorma bi yedek al mevcuttan ben dönüğümde kontrol edicem beğenmezsem geri alırız. kalan adımları tamamla ve bir arayüz işine giriş bakalım." F16'dan önce. Dal `f18-storefront` (`f15-hardening` üzerinden), push yok (kullanıcı 2026-11-01: "şimdilik push yok"). **Yedek:** etiket `pre-f18-2026-11-01` ve dal `backup/pre-f18-2026-11-01` (F18'den önceki son commit `6a68475`); tam depo paketi `~/Desktop/qticaret-yedek-pre-f18-2026-11-01.bundle` (doğrulandı). Geri almak için `git switch f15-hardening` yeter; F18 dalı silinmeden durur. Mimari ADR-0046 (otonom kabul, gözden geçir); plan aşağıda "F18 görev planı".
 
-**F15 — Sertleştirme: BİTTİ (2026-10-31 akşam; H1–H9).** Dal `f15-hardening`, push yok (2026-11-01'e kadar). Kalan yalnızca sunucuyla gelenler: dış pentest, staging yük ölçümü, `SECURITY_CONTACT`, canlı yedek takvimi (F16); body-parser/multer override'ı 2026-11-05'ten, Medusa 2.22 2026-11-06'dan sonra. Bu fazla birlikte kodlama tarafında açık backend/panel işi kalmadı; arayüze ve sunucuya bırakılanlar "Son oturum özeti"nde (iyimser kilit, F17). Sıradaki: F16 (barındırma ve canlıya çıkış) kullanıcıyla birlikte.
+**F15 — Sertleştirme: BİTTİ (2026-10-31 akşam; H1–H9).** Dal `f15-hardening`, push yok (2026-11-01'e kadar). Kalan yalnızca sunucuyla gelenler: dış pentest, staging yük ölçümü, `SECURITY_CONTACT`, canlı yedek takvimi (F16); body-parser/multer override'ı yapıldı (#192), Medusa 2.22 yükseltmesi bekliyor. Bu fazla birlikte kodlama tarafında açık backend/panel işi kalmadı; arayüze ve sunucuya bırakılanlar "Son oturum özeti"nde (iyimser kilit, F17). Sıradaki: F16 (barındırma ve canlıya çıkış) kullanıcıyla birlikte.
 
 **F14 — Veri taşıma ve geçiş araçları: BİTTİ (2026-10-31; G1–G9, KK1–KK4 işaretli).** Dal `f14-migration` (`f8-einvoice` üzerinden), push yok. Plan aşağıda "F14 görev planı"; ADR-0042 (otonom öneri, uygulama notları ve kapanış incelemesiyle; gözden geçir). Kaynaklar: geçiş paketi (JSON), Shopify (Dev Dashboard uygulaması, toplu sorgu), Google Merchant akışı (Ticimax, ikas, IdeaSoft, T-Soft), müşteri listesi (xlsx/CSV). Panel: Ayarlar > Taşıma. Runbook: `docs/runbooks/gecis.md`. **Vitrin (F18) için açık iş:** `/hesap/kayit?davet=` sayfası giriş/kayıt sonrası `POST /store/customers/me/migration-claim` çağırmalı. Sıradaki faz: F15 (plan aşağıda).
 
@@ -66,7 +66,7 @@ Kişi başına: `progress/deniz.md`, `progress/oguzhan.md`. 2026-11-14 öncesini
   - ADR-0046 ve ADR-0047'nin gözden geçirilmesi.
 - Kullanıcı dönünce: vitrini beğenip beğenmediği. Geri almak için `git switch f15-hardening`; yedek etiketi `pre-f18-2026-11-01`.
 - F16 (barındırma) ve F17 kararları bekliyor.
-- Tarihe bağlı işler: body-parser/multer override'ı 2026-11-05'ten sonra, Medusa 2.22 2026-11-06'dan sonra.
+- Tarihe bağlı işler: body-parser/multer override'ı yapıldı (#192); Medusa 2.22.x yükseltmesi sahip kararı bekliyor (`progress/deniz.md` sıradaki işler 7).
 
 ### F18 görev planı (2026-11-01; Next.js 16 API'leri Context7 `/vercel/next.js/v16.2.9`'dan doğrulandı: `proxy.ts`, `generateMetadata` ve akıtılan metadata, `htmlLimitedBots`, nonce'lu CSP, JSON-LD; Store API envanteri alt ajanla çıkarıldı; mimari ADR-0046)
 
