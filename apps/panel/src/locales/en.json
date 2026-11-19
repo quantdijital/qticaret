@@ -10383,7 +10383,10 @@
         "savedAuto": "Your previous look was saved to 'My saved looks' automatically.",
         "skipped_one": "{{count}} section was left out: the shop has no {{refs}}.",
         "skipped_other": "{{count}} sections were left out: the shop has no {{refs}}.",
-        "kept": "Your header/footer was kept."
+        "kept": "Your header/footer was kept.",
+        "pageMissing": "The page layout was not added because there is no {{name}} page. Create a page at the address ‘{{handle}}’ and apply the look again.",
+        "pageMissingAddress": "The page layout was not added because there is no page at the address ‘{{handle}}’. Create a page at that address and apply the look again.",
+        "keptPages": "The layouts you set up on your pages were kept."
       },
       "history": {
         "lead": "Older publications:",

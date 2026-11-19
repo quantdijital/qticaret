@@ -10383,7 +10383,10 @@
         "savedAuto": "Önceki görünümünüz 'Kayıtlı görünümlerim'e otomatik kaydedildi.",
         "skipped_one": "{{count}} bölüm eklenmedi: mağazada {{refs}} yok.",
         "skipped_other": "{{count}} bölüm eklenmedi: mağazada {{refs}} yok.",
-        "kept": "Üst/alt bilginiz korundu."
+        "kept": "Üst/alt bilginiz korundu.",
+        "pageMissing": "{{name}} sayfası olmadığı için sayfa düzeni eklenmedi. Adresi ‘{{handle}}’ olan bir sayfa açıp görünümü yeniden uygulayın.",
+        "pageMissingAddress": "Adresi ‘{{handle}}’ olan sayfa olmadığı için sayfa düzeni eklenmedi. Bu adresle bir sayfa açıp görünümü yeniden uygulayın.",
+        "keptPages": "Sayfalarınıza kendi kurduğunuz düzenler korundu."
       },
       "history": {
         "lead": "Daha eski yayınlar:",

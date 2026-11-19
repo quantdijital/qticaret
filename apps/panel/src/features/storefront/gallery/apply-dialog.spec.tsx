@@ -137,6 +137,26 @@ describe("ApplyDialog", () => {
     expect(onClose).toHaveBeenCalled()
   })
 
+  it("carries a content page the shop has not made into the editor's note (adr/0073 §4)", async () => {
+    const missing = { where: "pages", ref: "page:hakkimizda", name: "Hakkımızda" }
+    fetchMock.mockResolvedValue({
+      layout: layoutOf(),
+      result: { auto_saved: null, skipped: [missing], kept: ["pages.cnt_contact"] },
+    })
+    const user = userEvent.setup()
+    const { client } = open(sade())
+
+    await user.click(screen.getByRole("button", { name: "Taslağa uygula ve düzenle" }))
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith({ to: "/storefront/editor" })
+    })
+    expect(client.getQueryData(REPORT_KEY)).toMatchObject({
+      skipped: [missing],
+      kept: ["pages.cnt_contact"],
+    })
+  })
+
   it("keeps the draft automatically unless asked, and sends a saved look to its own address", async () => {
     fetchMock.mockResolvedValue({ layout: layoutOf(), result: { auto_saved: null, skipped: [] } })
     const user = userEvent.setup()

@@ -102,8 +102,12 @@ export interface PresetCard extends PresetRef {
 export type DesignRef = KeptDraft
 
 export interface SkippedRef {
+  /** `home.kategoriler`; `pages`: a content page's layout, the shop having no such page (adr/0073 §4). */
   where: string
+  /** `category:cakilar`; for a page, `page:hakkimizda`. */
   ref: string
+  /** A page the shop lacks: its usual name (`Hakkımızda`), when the look gives one. */
+  name?: string
 }
 
 /** What an apply did, for the editor's note. */
@@ -114,7 +118,7 @@ export interface ApplyReport {
   /** The name the panel showed the kept draft under. */
   saved_name: string | null
   skipped: SkippedRef[]
-  /** The shop's header or footer sections kept. */
+  /** The shop's header or footer sections kept (`footer.<id>`), its own page layouts (`pages.<id>`). */
   kept: string[]
 }
 
