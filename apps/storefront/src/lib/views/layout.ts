@@ -27,6 +27,13 @@ const LAYOUT_TOKEN = /^sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 const SESSION_TOKEN = /^sfs_[0-9a-f]{32}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 
 /**
+ * Which preview a token's form is: the theme editor's live session, a
+ * signed design link, or neither (the backend checks the token itself).
+ */
+export const previewTokenKind = (token: string): "session" | "link" | null =>
+  SESSION_TOKEN.test(token) ? "session" : LAYOUT_TOKEN.test(token) ? "link" : null
+
+/**
  * The design this request shows: the draft on a signed preview address
  * or the theme editor's live session (its header and footer too), else
  * the published one. A preview that no longer opens falls back to what is

@@ -1,23 +1,21 @@
-import type {
-  MediaDerivatives,
-  Resolution,
-  StoreBodyImage,
-  StoreContentAuthorDetail,
-  StoreContentTerm,
-} from "@qticaret/types"
+import type { Resolution } from "@qticaret/types"
 import type { ContactFormView, ContactView, ContentPageView, IdentityRowView } from "@qticaret/ui"
+import { addToCart } from "@/app/actions/cart"
 import { sendContact } from "@/app/actions/contact"
+import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { currentCustomer } from "@/lib/account/auth"
 import { t } from "@/lib/i18n"
 import { legalDocument, legalPath } from "@/lib/views/legal"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { legalIdentity, storefrontSettings } from "@/lib/store-api/requests"
 import { authorView } from "@/lib/views/authors"
+import type { ContentEntry } from "@/lib/store-api/content-entry"
 import { storeGet } from "@/lib/store-api/server"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { identityRows, infoPageOf, postMeta, shareLinks } from "@/lib/views/content-extras"
 import { faqOf } from "@/lib/views/faq"
 import { withOutline } from "@/lib/views/legal-outline"
+import { contentSections } from "@/lib/views/page-sections"
 import { coverOf, postTerms } from "@/lib/views/posts"
 import { withPictures } from "@/lib/views/prose-images"
 import { breadcrumbsOf } from "@/lib/views/product"
@@ -26,28 +24,6 @@ import { theme } from "@/theme"
 import { paymentFacts, relatedPosts, shippingFacts, textProducts } from "./content-data"
 
 type Entity = Extract<Resolution, { type: "entity" }>
-
-interface ContentEntry {
-  id: string
-  kind: "page" | "post"
-  title: string
-  html: string
-  published_at: string | null
-  image_url: string | null
-  image_alt: string | null
-  image_width?: number | null
-  image_height?: number | null
-  image_derivatives?: MediaDerivatives | null
-  /** The text's library pictures with their size and versions. */
-  images?: StoreBodyImage[]
-  author_name: string | null
-  /** The chosen author (adr/0060); null: none, the old written name alone if any. */
-  author?: StoreContentAuthorDetail | null
-  reading_minutes: number
-  /** A post's, at their archives (adr/0019 ek 2026-11-03); a page has none. */
-  category?: StoreContentTerm | null
-  tags?: StoreContentTerm[]
-}
 
 // `kvkk`: a guest's data request (adr/0047 Ek 2026-11-02); a customer asks from the account too
 const SUBJECTS = ["order", "product", "return", "payment", "kvkk", "other"] as const
@@ -128,11 +104,27 @@ async function postExtras(entry: ContentEntry, page: Entity): Promise<Partial<Co
   }
 }
 
-/** A content page or blog post (F3.16): the backend's sanitised HTML (adr/0019), a post's category and tags. */
-export async function ContentScreen({ page }: { page: Entity }) {
-  const [{ entry: read }, contact] = await Promise.all([
-    storeGet<{ entry: ContentEntry }>(`/store/content/${encodeURIComponent(page.entity_id)}`),
+/**
+ * A content page or blog post (F3.16): the backend's sanitised HTML
+ * (adr/0019), a post's category and tags; a page with its own sections
+ * from the theme editor (adr/0073), read beside it. `entry`: the page
+ * already read (the theme editor's live session's page in draft).
+ */
+export async function ContentScreen({
+  page,
+  entry: given,
+}: {
+  page: Entity
+  entry?: ContentEntry
+}) {
+  const [read, contact, sections] = await Promise.all([
+    given ??
+      storeGet<{ entry: ContentEntry }>(
+        `/store/content/${encodeURIComponent(page.entity_id)}`
+      ).then((answer) => answer.entry),
     contactOfPage(page),
+    // A post takes no layout (adr/0073 §6)
+    page.entity_type === "page" ? contentSections(page.entity_id, t) : undefined,
   ])
   // The text's library pictures in their versions; the opening one eager without a cover above it
   const entry = {
@@ -147,6 +139,9 @@ export async function ContentScreen({ page }: { page: Entity }) {
       <theme.ContentPage
         t={t}
         actions={{ sendContact }}
+        subscribe={subscribeNewsletter}
+        // As on the home page: a one-variant card says "Sepete ekle"
+        quickAdd={addToCart}
         view={{
           title: entry.title,
           html: entry.html,
@@ -158,6 +153,7 @@ export async function ContentScreen({ page }: { page: Entity }) {
           image: coverOf(entry),
           ...(contact ? { identity: contact.identity } : {}),
           ...extras,
+          ...(sections ? { sections } : {}),
         }}
       />
     </>

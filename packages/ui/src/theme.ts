@@ -221,7 +221,15 @@ export interface StorefrontTheme {
       quickAdd?: FormAction
     }
   >
-  ContentPage: ComponentType<Page<ContentPageView> & { actions?: ContactActions }>
+  ContentPage: ComponentType<
+    Page<ContentPageView> & {
+      actions?: ContactActions
+      /** A newsletter section's box among the page's own sections (adr/0073). */
+      subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+      /** A card's quick add among the page's own sections: `addToCart`'s fields, quantity 1. */
+      quickAdd?: FormAction
+    }
+  >
   /** `/yasal/{tür}`: one legal text with its table of contents and the others beside it. */
   LegalPage: ComponentType<Page<LegalPageView>>
   BlogIndexPage: ComponentType<Page<BlogIndexPageView>>
