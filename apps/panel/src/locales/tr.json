@@ -11591,7 +11591,7 @@
     "scene": {
       "mode": "Görselle ne yapılsın",
       "title": "Sahneye yerleştir",
-      "description": "Ürün hazır bir sahneye yerleştirilir. Asıl görsel değişmez; sonuç yeni bir görsel olarak gelir.",
+      "description": "Ürün seçtiğiniz ya da tarif ettiğiniz sahneye yerleştirilir. Asıl görsel değişmez; sonuç yeni bir görsel olarak gelir.",
       "option": "Sahne",
       "onlyOption": "Sahne: {{option}}.",
       "start": "Sahneye yerleştir",
@@ -11600,7 +11600,41 @@
       "hint": {
         "text": "Sahne yapan bir yapay zekâ servisi (Gemini ya da Photoroom) bağlarsanız ürünü tek tıkla sahneye yerleştirebilirsiniz.",
         "ownerOnly": "Sahne yapan bir yapay zekâ servisi bağlanırsa ürün tek tıkla sahneye yerleştirilebilir; mağaza sahibi bağlayabilir."
+      },
+      "custom": {
+        "chip": "Özel",
+        "label": "Sahneyi tarif edin",
+        "placeholder": "pembe battaniye üstünde, yumuşak gün ışığı",
+        "hint": "Yalnız arka planı yazın; ürün olduğu gibi kalır.",
+        "privacy": "Kişisel bilgi yazmayın.",
+        "count": "{{count}}/{{max}}",
+        "keep": "Sahnelerime kaydet",
+        "name": "Sahne adı",
+        "namePlaceholder": "Sahne adı (boşsa ilk sözcükler)",
+        "full": "En çok {{count}} sahne kaydedilebilir. Ayarlar > Yapay zekâ sayfasından birini silin ya da kaydetmeden deneyin."
       }
+    },
+    "scenes": {
+      "title": "Sahneler",
+      "description": "Görseli sahneye yerleştirirken önce bu sahneler sunulur ({{count}}/{{max}}).",
+      "readOnly": "Görseli sahneye yerleştirirken önce bu sahneler sunulur. Mağaza sahibi ya da yönetici değiştirir.",
+      "empty": "Kayıtlı sahne yok. Sahne ekleyin ya da görseli düzenlerken \"Özel\" sahneyi kaydedin.",
+      "add": "Sahne ekle",
+      "addTitle": "Sahne ekle",
+      "editTitle": "Sahneyi düzenle",
+      "dialogDescription": "Ürünün arkasındaki ortamı kısaca tarif edin. Ürün olduğu gibi kalır.",
+      "name": "Ad",
+      "namePlaceholder": "Boşsa tarifin ilk sözcükleri",
+      "prompt": "Tarif",
+      "promptRequired": "Sahneyi tarif edin.",
+      "edit": "Düzenle",
+      "remove": "Sil",
+      "actionsFor": "{{name}} için işlemler",
+      "removeTitle": "{{name}} silinsin mi?",
+      "removeDescription": "Sahne listeden kalkar. Bu sahneyle üretilmiş görseller etkilenmez.",
+      "full": "En çok {{max}} sahne kaydedilebilir.",
+      "showPacks": "Hazır sahneleri göster",
+      "showPacksHint": "Mağazanızın sektörüne uygun başlangıç sahneleri (yoksa iki sade stüdyo sahnesi), kendi sahnelerinizden sonra sunulur."
     },
     "altReview": {
       "open": "Alt metin önerileri",

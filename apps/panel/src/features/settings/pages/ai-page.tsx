@@ -11,6 +11,7 @@ import { useCan } from "@/features/auth/api/staff"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import { AccountAlert } from "@/features/settings/components/account-form"
 import { AiReviewsCard } from "@/features/settings/components/ai-reviews-card"
+import { AiScenesCard } from "@/features/settings/components/ai-scenes-card"
 import { AiServicesTable } from "@/features/settings/components/ai-services-table"
 import { AiUsageCard } from "@/features/settings/components/ai-usage-card"
 import { errorText } from "@/lib/errors"
@@ -18,7 +19,8 @@ import { errorText } from "@/lib/errors"
 /**
  * Settings > Yapay zekâ (adr/0071 §13): the AI services the shop can
  * connect with its own key in one compact table, the switch for AI on
- * reviews and questions (Aşama 9) in a line, and this month's use under
+ * reviews and questions (Aşama 9) in a line, the shop's own scenes for
+ * "Sahneye yerleştir" (Aşama 7), and this month's use under
  * them. The longer words sit behind (i). Nothing else is set here: which
  * service does which work is the server's, the choice is made where the
  * work is.
@@ -63,6 +65,7 @@ export function AiPage() {
             keyConfigured={keyConfigured}
           />
           <AiReviewsCard />
+          <AiScenesCard />
           <AiUsageCard />
         </>
       )}

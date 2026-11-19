@@ -716,6 +716,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   // Aşama 9: reviews and questions
   "ai.reviews_off": "AI on reviews and questions is off. You can turn it on under Settings > AI.",
   "ai.not_enough_reviews": "A summary needs at least 3 approved reviews of this product.",
+  // Aşama 7: a scene the shop wrote
+  "ai.scene_text_invalid":
+    "A scene must be plain text: 200 characters at most (its name 40); no links, HTML or quotes.",
+  "ai.scenes_full": "At most 12 scenes can be saved. Delete one to add another.",
   // adr/0071 §3: "Test the connection" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek did not accept this API key. Copy it again from the API keys page of the DeepSeek platform.",

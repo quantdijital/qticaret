@@ -72,7 +72,8 @@ const keyed = (key: string | null): Partial<AiFailure> => ({ code: key })
 /**
  * One picture's background or scene job (adr/0071 §8, docs/22 Aşama 4, 7;
  * `task`: `image_background` or `image_scene`): asked for
- * (202), followed until it ends, then its result read as a new picture.
+ * (202), followed until it ends, then its result read as a new picture;
+ * a scene typed once goes as `prompt` (`start(option, service, prompt)`).
  * Nothing is written: `accept()` records the decision and hands the new
  * picture back, the caller adds it where it belongs; `dismiss()` turns
  * the suggestion down, the unused picture goes with the nightly sweep.
@@ -93,11 +94,16 @@ export function useAiBackground(mediaId: string, task: string = BACKGROUND_TASK)
   const result = useQuery({ ...mediaDetailQuery(done?.result_id ?? ""), enabled: Boolean(done) })
 
   const start = useCallback(
-    async (option: string, service?: string) => {
+    async (option: string, service?: string, prompt?: string) => {
       const mine = ++turn.current
       setAsk({ status: "asking", service: service ?? null })
       try {
-        const queued = await requestImageJob({ task, mediaIds: [mediaId], option, service })
+        const queued = await requestImageJob({
+          task,
+          mediaIds: [mediaId],
+          ...(prompt === undefined ? { option } : { prompt }),
+          service,
+        })
         if (mine === turn.current) {
           setAsk({ status: "job", jobId: queued.job_id, service: queued.service || null })
         }

@@ -132,8 +132,10 @@ export function instructionOf(
 
 /**
  * Whether an option is one the task offers (none asked always is). A
- * scene's option is the shop's to hold: checked against its sector packs
- * where they are read (`lib/ai/scenes.ts`, the request's image check).
+ * scene's option is the shop's to hold: checked against its own scenes
+ * and its sector packs' where they are read (`lib/ai/scenes.ts`, the
+ * request's image check, `ai.unknown_task` for any other), and again
+ * before the call.
  */
 export const isTaskOption = (task: AiTask, option: string | null | undefined): boolean =>
   option === undefined ||

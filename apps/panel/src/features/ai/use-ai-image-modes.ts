@@ -20,9 +20,9 @@ export interface AiImageModeView {
 
 /**
  * The picture dialog's two modes (docs/22 Aşama 4, 7). The scenes come
- * from the shop's sector pack through `GET /admin/ai/services`, two at
- * most, with their Turkish and English names; the mode is offered only
- * when the role may run it and the shop has a scene.
+ * through `GET /admin/ai/services`: the shop's own saved ones, then its
+ * sector pack's, with their Turkish and English names; one can also be
+ * typed once, so the mode is offered whenever the role may run it.
  */
 export function useAiImageModes(enabled = true) {
   const { t, i18n } = useTranslation()
@@ -49,5 +49,6 @@ export function useAiImageModes(enabled = true) {
       },
     },
   }
-  return { modes, sceneOffered: (sceneView?.allowed ?? false) && scenes.length > 0 }
+  // A scene can always be typed: the mode needs no saved or pack scene
+  return { modes, sceneOffered: sceneView?.allowed ?? false }
 }

@@ -1,3 +1,4 @@
+import { CUSTOM_SCENE_CODE } from "../../../lib/ai/scene-text"
 import { serverErrorMessage } from "../../../lib/errors/messages"
 import type { AsyncJobRecord } from "../../../modules/async-job/service"
 
@@ -12,15 +13,22 @@ function originOf(value: unknown): unknown {
 
 // A file the job reads (an import's sheet) stays out like its result's key; a
 // list of records (a bulk edit's thousand products) is shown by its length;
-// an address by its site
-export function publicInput(input: unknown): unknown {
+// an address by its site. A picture job's one-off scene (`custom`, words the
+// shop typed) is shown as the mark `scene: "custom"` only: the words stay in
+// the job record for its run, not in what the API hands out (adr/0071 Ek 2026-11-19)
+export function publicInput(input: unknown, type?: string): unknown {
   if (input === null || typeof input !== "object" || Array.isArray(input)) {
     return input
   }
+  const typedScene =
+    type === "ai.image_edit" && typeof (input as { custom?: unknown }).custom === "string"
   return Object.fromEntries(
     Object.entries(input).flatMap(([key, value]): [string, unknown][] => {
       if (key.endsWith("_file_id")) {
         return []
+      }
+      if (typedScene && key === "custom") {
+        return [["scene", CUSTOM_SCENE_CODE]]
       }
       if (key.endsWith("_url")) {
         return [[key, originOf(value)]]
@@ -46,7 +54,7 @@ export function serializeJob(job: AsyncJobRecord) {
     attempt: job.attempt,
     progress: job.progress,
     progress_key: job.progress_key,
-    input: publicInput(job.input),
+    input: publicInput(job.input, job.type),
     result_summary: job.result_summary,
     error_code: job.error_code,
     // The sentence for the code, as the panel shows API errors (adr/0021)

@@ -33,7 +33,8 @@ export async function POST(
     const { result: job } = await requestImageEditWorkflow(req.scope).run({
       input: {
         task: body.task,
-        option: body.option,
+        // A scene typed for this once (`image_scene`), held in the workflow
+        ...("prompt" in body ? { custom: body.prompt } : { option: body.option }),
         media_ids: body.entity_ids,
         service: body.service,
         user_id: req.auth_context.actor_id,

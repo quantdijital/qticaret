@@ -24,10 +24,12 @@ export interface AiServiceView {
   scene?: boolean
 }
 
-/** A scene of the shop's sector pack as the picker shows it; never its prompt. */
+/** A scene as the picker shows it (the shop's own first, then its pack's); never its prompt. */
 export interface AiSceneView {
   code: string
   name: { tr: string; en: string }
+  /** The shop saved it (Settings > Yapay zekâ). */
+  own?: boolean
 }
 
 export interface AiTaskView {
@@ -38,7 +40,7 @@ export interface AiTaskView {
   allowed: boolean
   usable: string[]
   preference: string | null
-  /** `image_scene`: the shop's scenes, two at most (its `options`, by code). */
+  /** `image_scene`: the shop's scenes, its own (twelve at most) then its pack's (two at most). */
   scenes?: AiSceneView[]
 }
 

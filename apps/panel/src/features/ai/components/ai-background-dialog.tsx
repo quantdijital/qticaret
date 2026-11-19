@@ -14,11 +14,13 @@ import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group
 import type { AiFailure } from "@/features/ai/api/suggestions"
 import { AiBackgroundCompare } from "@/features/ai/components/ai-background-compare"
 import { AiConnectHint } from "@/features/ai/components/ai-connect-hint"
+import { AiSceneCustom } from "@/features/ai/components/ai-scene-custom"
 import { AiServicePicker } from "@/features/ai/components/ai-service-picker"
 import { AiTryOthers } from "@/features/ai/components/ai-try-others"
 import { aiFailureText, serviceName } from "@/features/ai/failure-text"
 import { useAiBackground } from "@/features/ai/use-ai-background"
 import { useAiImageModes } from "@/features/ai/use-ai-image-modes"
+import { CUSTOM_SCENE, useCustomScene } from "@/features/ai/use-custom-scene"
 import type { AiImageMode } from "@/features/ai/use-ai-image-modes"
 import type { MediaDetail } from "@/features/media/api/media"
 
@@ -52,7 +54,8 @@ export interface AiBackgroundDialogProps {
  * adr/0071 §13): the background
  * made transparent or white by a service, as a new picture beside the
  * original; or "Sahneye yerleştir" (Aşama 7): the product set in one of
- * the shop's two ready-made scenes (its sector pack's; nothing typed).
+ * the shop's scenes (its own saved ones, then its sector pack's), or one
+ * typed once under "Özel" (`AiSceneCustom`), kept among its own if asked.
  * The job runs in the background (202, then followed); the result is
  * shown beside the original. Nothing is written until "Kullan";
  * "Vazgeç" turns the suggestion down and the unused picture is swept.
@@ -76,9 +79,15 @@ export function AiBackgroundDialog({
   const remembered = preference && usable.includes(preference) ? preference : null
   const [picked, setPicked] = useState<string | null>(null)
   const service = picked && usable.includes(picked) ? picked : (remembered ?? usable[0] ?? "")
-  const offered = current.optionsOf(service)
+  const scene = mode === "scene"
+  // A scene can also be typed once: "Özel" closes the chips
+  const offered = [...current.optionsOf(service), ...(scene ? [CUSTOM_SCENE] : [])]
   const [chosen, setChosen] = useState<string | null>(null)
   const option = chosen && offered.includes(chosen) ? chosen : (offered[0] ?? "")
+  const typing = scene && option === CUSTOM_SCENE
+  const custom = useCustomScene()
+  const labelOf = (id: string) =>
+    id === CUSTOM_SCENE ? t(`${S}.custom.chip`) : current.labelOf(id)
   const [ranWith, setRanWith] = useState(option)
   const [using, setUsing] = useState(false)
   const job = useAiBackground(source.id, current.task)
@@ -91,12 +100,34 @@ export function AiBackgroundDialog({
   }
   const start = () => {
     setRanWith(option)
-    void job.start(option, usable.length > 1 ? service : undefined)
+    const picked = usable.length > 1 ? service : undefined
+    if (!typing) {
+      void job.start(option, picked)
+      return
+    }
+    // Typed once, or kept first among the shop's scenes and then asked for by its id
+    void custom.submit().then((ask) => {
+      if (ask === null) {
+        return
+      }
+      if ("option" in ask) {
+        setChosen(ask.option)
+        void job.start(ask.option, picked)
+      } else {
+        void job.start("", picked, ask.prompt)
+      }
+    })
   }
   // After a failure, the other services that can do the job (adr/0071 §4): asked only on a click
   const others =
     state.status === "error" ? usable.filter((id) => id !== (state.service ?? service)) : []
   const tryWith = (id: string) => {
+    if (typing) {
+      // The words typed once go to the other service as they are (a kept scene is asked by its id)
+      setPicked(id)
+      void job.start("", id, custom.text.trim())
+      return
+    }
     const made = current.optionsOf(id)
     const next = made.includes(option) ? option : made[0]
     if (next === undefined) {
@@ -165,11 +196,14 @@ export function AiBackgroundDialog({
         ) : (
           <div className="flex min-w-0 flex-col gap-4">
             <div className="flex flex-wrap items-center gap-3">
-              {offered.length > 1 ? (
+              {offered.length > 1 || scene ? (
                 <ToggleGroup
                   type="single"
                   variant="outline"
                   size="sm"
+                  // Scenes are chips apart that wrap: twelve of the shop's own and "Özel"
+                  spacing={scene ? 1.5 : 0}
+                  className={scene ? "flex-wrap" : undefined}
                   value={option}
                   disabled={running}
                   aria-label={t(`${P}.option`)}
@@ -181,7 +215,7 @@ export function AiBackgroundDialog({
                 >
                   {offered.map((id) => (
                     <ToggleGroupItem key={id} value={id}>
-                      {current.labelOf(id)}
+                      {labelOf(id)}
                     </ToggleGroupItem>
                   ))}
                 </ToggleGroup>
@@ -202,6 +236,7 @@ export function AiBackgroundDialog({
                 />
               </div>
             </div>
+            {typing ? <AiSceneCustom scene={custom} disabled={running || custom.saving} /> : null}
             <AiBackgroundCompare
               before={source.url}
               state={state}
@@ -213,7 +248,7 @@ export function AiBackgroundDialog({
                 {failureText(t, state.failure, state.service)}
               </p>
             ) : null}
-            <AiTryOthers services={others} onTryWith={tryWith} />
+            <AiTryOthers services={others} onTryWith={tryWith} reveal />
             <p className="text-xs text-muted-foreground">
               {state.status === "ready"
                 ? (blocked ?? useNote)
@@ -242,7 +277,11 @@ export function AiBackgroundDialog({
               </Button>
             </>
           ) : (
-            <Button type="button" disabled={running || option === ""} onClick={start}>
+            <Button
+              type="button"
+              disabled={running || option === "" || (typing && (!custom.ready || custom.saving))}
+              onClick={start}
+            >
               {state.status === "error" ? t("ai.suggest.retry") : t(`${P}.start`)}
             </Button>
           )}

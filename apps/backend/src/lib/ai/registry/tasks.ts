@@ -207,9 +207,10 @@ export const IMAGE_SCENE_MAX_BATCH = 1
  * A product photo set in a ready-made scene (Aşama 7, docs/22): a new
  * picture beside the original, marked as AI made (`edited` or `generated`,
  * as the service's scene endpoint is recorded); the original's bytes are
- * never changed. The scenes, two at most, come from the shop's sector
- * pack as data; nothing typed by anyone reaches the service. A job
- * (`ai.image_edit`), like the background.
+ * never changed. The scenes are the shop's own saved ones (twelve at
+ * most) and its sector pack's (two at most), or one typed for this once;
+ * a typed one is held (`lib/ai/scene-text.ts`) and sent only behind the
+ * server's fixed words. A job (`ai.image_edit`), like the background.
  */
 export const IMAGE_SCENE_TASK: AiTask = {
   id: "image_scene",

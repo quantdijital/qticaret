@@ -259,9 +259,12 @@ describe("the shop's scenes (sector pack data)", () => {
 })
 
 describe("the shop's scenes in this build", () => {
+  // The shop's settings as a new shop has them: no saved scene, the packs' shown
   const containerWith = (packs: string[]) => ({
     resolve: () => ({
       listSectorPackApplications: () => Promise.resolve(packs.map((pack) => ({ pack }))),
+      readSection: () =>
+        Promise.resolve({ values: { show_pack_scenes: true, scenes: [] }, version: 0 }),
     }),
   })
 

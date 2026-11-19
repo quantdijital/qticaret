@@ -31,6 +31,9 @@ export const AI_ERROR_KEYS = [
   // Aşama 9: reviews and questions
   "ai.reviews_off",
   "ai.not_enough_reviews",
+  // Aşama 7: a scene the shop wrote (lib/ai/scene-text.ts)
+  "ai.scene_text_invalid",
+  "ai.scenes_full",
 ] as const
 
 export type AiErrorKey = (typeof AI_ERROR_KEYS)[number]

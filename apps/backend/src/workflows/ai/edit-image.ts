@@ -1,6 +1,7 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import { imageTargetOf } from "../../lib/ai/image-connector-of"
 import { sceneTargetOf } from "../../lib/ai/registry/services"
+import { CUSTOM_SCENE_CODE } from "../../lib/ai/scene-text"
 import type { AiFunding, AiUnitPrice, ImageBackground } from "../../lib/ai/registry/services"
 import { authorizeTaskStep } from "./steps/authorize-task"
 import { claimQuotaStep, releaseUntakenStep } from "./steps/claim-quota"
@@ -22,8 +23,10 @@ export interface EditImageWorkflowInput {
   funding: AiFunding
   /** `image_background`. */
   background?: ImageBackground | null | undefined
-  /** `image_scene`: the shop's scene by its code (checked against its packs in the edit step). */
+  /** `image_scene`: the shop's scene by its code (checked against its scenes in the edit step). */
   scene?: string | null | undefined
+  /** `image_scene`: a scene typed once, cleaned when queued and again in the edit step. */
+  custom?: string | null | undefined
   media_id: string
   user_id: string
   /** The staff member picked the service among several: remember it (adr/0071 §4). */
@@ -55,7 +58,7 @@ export const editImageWorkflow = createWorkflow(
     authorizeTaskStep(
       transform({ input }, ({ input }) => ({
         task: input.task,
-        option: input.background ?? input.scene ?? null,
+        option: input.background ?? input.scene ?? (input.custom ? CUSTOM_SCENE_CODE : null),
         user_id: input.user_id,
       }))
     )
@@ -79,6 +82,7 @@ export const editImageWorkflow = createWorkflow(
         service: input.service,
         background: input.background ?? null,
         scene: input.scene ?? null,
+        custom: input.custom ?? null,
         media_id: input.media_id,
       }))
     )
@@ -106,7 +110,7 @@ export const editImageWorkflow = createWorkflow(
         user_id: input.user_id,
         remember: input.remember,
         // A scene endpoint priced on its own (Photoroom's Image Editing API)
-        unit_price: input.scene ? sceneUnitPriceOf(input.service) : null,
+        unit_price: input.scene || input.custom ? sceneUnitPriceOf(input.service) : null,
       }))
     )
     const suggestion = saveSuggestionStep(
@@ -115,8 +119,8 @@ export const editImageWorkflow = createWorkflow(
         service: input.service,
         entity_type: "media",
         entity_id: input.media_id,
-        // No prompt leaves: the task's fixed instruction and the picture
-        system: `${input.task}:${input.background ?? input.scene ?? ""}`,
+        // No prompt leaves (a typed scene is recorded as `custom`, never its words)
+        system: `${input.task}:${input.background ?? input.scene ?? (input.custom ? CUSTOM_SCENE_CODE : "")}`,
         data: "",
         outcome: kept,
         user_id: input.user_id,

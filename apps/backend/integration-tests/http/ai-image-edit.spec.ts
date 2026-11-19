@@ -262,6 +262,7 @@ medusaIntegrationTestRunner({
       expect(task?.scenes?.[0]).toEqual({
         code: "studio_table",
         name: { tr: "Açık stüdyo masası", en: "Bright studio table" },
+        own: false,
       })
       expect(JSON.stringify(view)).not.toContain("studio tabletop")
       expect(view.services.find((each) => each.id === "fake")?.scene).toBe(true)

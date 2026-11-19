@@ -128,18 +128,22 @@ export interface AiImageJob {
  * `POST /admin/ai/suggestions` with `entity_ids` (Aşama 4): an image edit
  * as a background job (202). Its result is a new picture beside the
  * original and a suggestion to decide; nothing is written to the original.
+ * A scene typed once (`image_scene`) goes as `prompt` in place of `option`.
  */
 export async function requestImageJob(request: {
   task: string
   mediaIds: string[]
-  option: string
+  /** The background, or the scene by its code (a saved scene's id). */
+  option?: string | undefined
+  /** A scene typed for this once; the server cleans it and sends it behind its own words. */
+  prompt?: string | undefined
   service?: string | undefined
 }): Promise<AiImageJob> {
   const data = (await post("/admin/ai/suggestions", {
     task: request.task,
     entity_type: "media",
     entity_ids: request.mediaIds,
-    option: request.option,
+    ...(request.prompt === undefined ? { option: request.option } : { prompt: request.prompt }),
     ...(request.service === undefined ? {} : { service: request.service }),
   })) as Record<string, unknown> | null
   return {
