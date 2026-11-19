@@ -12,7 +12,9 @@ import { authorView } from "@/lib/views/authors"
 import type { ContentEntry } from "@/lib/store-api/content-entry"
 import { storeGet } from "@/lib/store-api/server"
 import { isStoreApiError } from "@/lib/store-api/errors"
-import { identityRows, infoPageOf, postMeta, shareLinks } from "@/lib/views/content-extras"
+import { identityRows, postMeta, shareLinks } from "@/lib/views/content-extras"
+import { infoPageOf, isContactPage } from "@/lib/views/page-roles"
+import type { RolePage } from "@/lib/views/page-roles"
 import { faqOf } from "@/lib/views/faq"
 import { withOutline } from "@/lib/views/legal-outline"
 import { contentSections } from "@/lib/views/page-sections"
@@ -39,7 +41,11 @@ async function contactOfPage(page: Entity): Promise<{
   identity: IdentityRowView[]
 } | null> {
   const { storefront } = await storefrontSettings()
-  if (page.entity_type !== "page" || storefront.contact_form_path !== page.path) {
+  // By the page's id: a page whose address changed keeps the form (adr/0073 Açık kararlar 3)
+  if (
+    page.entity_type !== "page" ||
+    !isContactPage({ id: page.entity_id, path: page.path }, storefront)
+  ) {
     return null
   }
   const [customer, notice, identity] = await Promise.all([
@@ -66,7 +72,7 @@ async function contactOfPage(page: Entity): Promise<{
  * the payment page's ways to pay and installment rates, the shipping
  * page's carriers and promises; else its headings for a table of contents.
  */
-async function pageExtras(entry: ContentEntry, path: string): Promise<Partial<ContentPageView>> {
+async function pageExtras(entry: ContentEntry, page: RolePage): Promise<Partial<ContentPageView>> {
   const faq = faqOf(entry.html)
   if (faq) {
     return { faq, help: contactOf(await legalIdentity(), t) }
@@ -76,11 +82,11 @@ async function pageExtras(entry: ContentEntry, path: string): Promise<Partial<Co
     .then((answer) => answer.storefront)
     .catch((error: unknown) => {
       if (isStoreApiError(error)) {
-        return { payment_info_path: null, shipping_info_path: null }
+        return { payment_page_id: null, shipping_page_id: null }
       }
       throw error
     })
-  const role = infoPageOf(path, frame)
+  const role = infoPageOf(page, frame)
   const [payments, shipping] = await Promise.all([
     role === "payments" ? paymentFacts() : null,
     role === "shipping" ? shippingFacts() : null,
@@ -132,7 +138,9 @@ export async function ContentScreen({
     html: withPictures(read.html, read.images, { cover: Boolean(read.image_url) }),
   }
   const extras =
-    entry.kind === "post" ? await postExtras(entry, page) : await pageExtras(entry, page.path)
+    entry.kind === "post"
+      ? await postExtras(entry, page)
+      : await pageExtras(entry, { id: page.entity_id, path: page.path })
   return (
     <>
       <JsonLd blocks={page.seo?.jsonLd ?? []} />

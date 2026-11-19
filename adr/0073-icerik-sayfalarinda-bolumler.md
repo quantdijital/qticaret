@@ -162,7 +162,7 @@ Kapak: atölye fotoğrafı (mağazanın kendi görseli). Vaat şeridi geliştirm
   - "Üstte" listesi ve "Üste bölüm ekle";
   - sabit satır "Sayfanın metni": taşınmaz, silinmez; açılınca kısa açıklama ve "İçerik'te düzenle" bağlantısı (başlık, kapak, metin ve SEO orada);
   - "Altta" listesi ve "Alta bölüm ekle".
-  - İletişim sayfasında sabit satırın adı "İletişim bilgileri ve form"dur (rol `contact_form_path`'ten okunur).
+  - İletişim sayfasında sabit satırın adı "İletişim bilgileri ve form"dur (rol `contact_page_id`'den okunur; Ek 2026-11-19).
 - **Bölüm ekle** sayfanın türlerini sunar (`GROUP_TYPES.pages`). İlk bölüm eklenince öge belgeye girer; son bölüm silinince çıkar. Sayfa sınırı (20) dolunca seçicide "Kendi düzeni olan en çok 20 sayfa" uyarısı, ekleme düğmesi kapalı.
 - **İçerik ekranı.** Sayfa düzenleme ekranında "Tema düzenleyicide tasarla" düğmesi düzenleyiciyi o sayfa seçili açar. Sayfa listesinde kendi düzeni olanlarda küçük işaret.
 - **Önizleme.** Yayındaki sayfa için köprü `navigate { page: "/<handle>" }` gönderir (bugünkü `resolve`). Önizlemede bir içerik sayfasına tıklanınca panel yolu kendi sayfa listesinden tanır ve o sayfayı seçer; köprü mesajı değişmez.
@@ -260,6 +260,14 @@ Sıra bağımlılığa göre. Her dilim kendi PR'ıdır; `pnpm verify:changed` v
 
 1. **Taslak sayfayı düzenleyicide görmek** (§5). Öneri: evet, yalnız canlı oturumda. Alternatif: yalnız yayındaki sayfalar.
 2. **İletişim formunu başka sayfaya koymak.** Öneri: şimdilik hayır; form iletişim sayfasının gövdesinde kalır.
-3. **İletişim rolünün yolla seçilmesi** (önceden var olan durum). `contact_form_path` bir yoldur: iletişim sayfasının adresi değişirse form, ayarlar güncellenene kadar görünmez (`screens/content.tsx` `contactOfPage`). Öneri: ayrı küçük işte rolleri (iletişim, ödeme, kargo) sayfa kimliğiyle tutmak. Bu ADR'yi beklemez.
+3. **İletişim rolünün yolla seçilmesi** (önceden var olan durum). `contact_form_path` bir yoldur: iletişim sayfasının adresi değişirse form, ayarlar güncellenene kadar görünmez (`screens/content.tsx` `contactOfPage`). Öneri: ayrı küçük işte rolleri (iletişim, ödeme, kargo) sayfa kimliğiyle tutmak. Bu ADR'yi beklemez. **Yapıldı (Ek 2026-11-19).**
 4. **`AboutPage` / `ContactPage` JSON-LD.** Öneri: hayır (zengin sonuç yok); istenirse içerik sayfasına "sayfa türü" seçimi olarak ayrı iş.
 5. **Hakkımızda metni.** §4'teki metinler mylarte.com'un anlatımından yeniden yazıldı (birebir alıntı değil). Sahip görüp düzeltir; vaat şeridi ve kapak mağazanın verisidir.
+
+## Ek 2026-11-19: sayfa rolleri kimlikle (Açık kararlar 3)
+
+- **Ayar.** `storefront` bölümüne `contact_page_id`, `payment_page_id`, `shipping_page_id` (`cnt_…` ya da `null`) geldi. Eski `contact_form_path`, `payment_info_path`, `shipping_info_path` alanları yalnız rolün kimliği boşken okunur: o adresteki içerik sayfası (`kind: page`) rolü taşır. Bölüm JSON sütunundadır; migration yok.
+- **Kayıt.** `updatePlatformSettingsWorkflow`'un ilk adımı (`steps/page-roles.ts`, kural `lib/storefront/page-roles.ts`): gönderilen yeni kimlik mağazanın içerik sayfası değilse (yazı ya da yok) `platform_settings.page_unknown` ile reddedilir; kayıtlı kimlik aynen gönderilirse (sayfası silinmiş olsa da) kayıt sürer. Rol kimlikle yazılınca eski yolu `null` yazılır. Kimliği olmayan rolün eski yolu bir sayfa bulursa, bölümün sonraki her kaydında kimliği yazılır; bulamazsa yol kalır (sayfa sonra açılabilir). Yalnız yol gönderen eski istemci rolü yeniden adresle seçer, ardından aynı dönüşüm uygulanır.
+- **Vitrin.** `GET /store/storefront` her rolün sayfa kimliğini ve yayındaki adresini verir (taslak ya da silinmiş sayfa: adres `null`). `ContentScreen` rolü kimlikle tanır (`lib/views/page-roles.ts`; kimlik alanı olmayan eski arka uçta adresle). Ürün sayfasının "kargo hakkında" bağlantısı canlı adresi kullanır; içerik kaydı (`content` kapsamı) çerçeveyi de tazeler.
+- **Panel.** Vitrin tercihlerinde yol kutuları yerine aranabilir sayfa seçici (`shared/page-role-picker.tsx`; düzenleyicinin sayfa seçicisiyle aynı arama); silinmiş sayfa uyarı verir, kaydı engellemez. Düzenleyicide iletişim sayfasının sabit satırı da kimlikle tanınır.
+- **SEO.** Adres değişince 301 bugünkü gibi `workflows/content/paths.ts`'te; rol artık adrese bağlı olmadığından 301'in yanında form ve canlı bilgiler de yeni adreste kalır.

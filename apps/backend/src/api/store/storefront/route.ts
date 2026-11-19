@@ -14,6 +14,9 @@ import { shopInfoValues } from "../../../workflows/shop/info-values"
 import type { ShownSettings } from "../../../lib/storefront/layout-settings"
 import { storefrontDelivery } from "../../../workflows/storefront/delivery"
 import { liveSettings } from "../../../workflows/storefront/layout-shared"
+import { roleAnswer } from "../../../lib/storefront/page-roles"
+import type { PageRole, RolePage } from "../../../lib/storefront/page-roles"
+import { storefrontRolePages } from "../../../workflows/storefront/page-roles"
 import { shopMarks } from "../../../workflows/storefront/shop-marks"
 import type { ShopMarks } from "../../../workflows/storefront/shop-marks"
 
@@ -40,17 +43,16 @@ import type { ShopMarks } from "../../../workflows/storefront/shop-marks"
 function filled(
   storefront: StorefrontSettings,
   shared: ShownSettings,
-  values: ShopInfoValues
+  values: ShopInfoValues,
+  roles: Record<PageRole, RolePage | null>
 ): Omit<StorefrontSettings, "low_stock_threshold"> {
   const fill = (text: string) => fillShopText(text, values)
   const fillOrNull = (text: string | null) => (text === null ? null : fill(text))
   const { hero } = storefront
   return {
     primary_color: storefront.primary_color,
-    contact_form_path: storefront.contact_form_path,
-    // The pages the storefront shows the live payment and shipping facts beside
-    payment_info_path: storefront.payment_info_path,
-    shipping_info_path: storefront.shipping_info_path,
+    // The contact page, and the pages the live payment and shipping facts stand beside
+    ...roleAnswer(roles),
     color_swatches: shared.color_swatches,
     announcements: storefront.announcements.map(fill),
     trust_badges: shared.trust_badges.map((badge) => ({
@@ -93,10 +95,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       ShopMarks,
       ShownSettings,
     ]
+  // By id, so a page whose address changed keeps its role (adr/0073 Açık kararlar 3)
+  const roles = await storefrontRolePages(
+    req.scope,
+    storefront as unknown as Record<string, unknown>
+  )
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
   res.vary("x-publishable-api-key")
   res.json({
-    storefront: filled(storefront, shared, values),
+    storefront: filled(storefront, shared, values, roles),
     // The theme's choices (F18 D11, adr/0053) as the published design holds them, else the
     // theme section with the old main colour (adr/0063 §3); its version stays inside
     theme: shared.theme,

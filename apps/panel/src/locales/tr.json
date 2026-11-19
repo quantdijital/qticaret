@@ -394,23 +394,32 @@
         "description": "Formdan gelen mesajlar Müşteriler > İletişim mesajları'nda okunur ve yanıtlanır.",
         "enabled": "Vitrinde iletişim formu göster",
         "hint": "İletişim formu bu sayfanın metninin altında görünür. Kapatırsanız vitrinde form çıkmaz.",
-        "path": "Formun gösterildiği sayfa",
-        "pathHint": "Vitrindeki bir içerik sayfasının adresi, örneğin /iletisim."
+        "page": "Formun gösterildiği sayfa",
+        "pageHint": "İçerik'teki sayfalarınızdan biri. Sayfanın adresini değiştirseniz de form bu sayfada kalır."
       },
       "infoPages": {
         "title": "Ödeme ve kargo sayfaları",
         "description": "Vitrin bu sayfaların metninin yanında güncel bilgileri gösterir: ödeme sayfasında ödeme yollarınızı ve taksit oranlarını, kargo sayfasında kargo firmalarınızı ve güvencelerinizi.",
         "payment": "Ödeme seçenekleri sayfası",
-        "paymentHint": "Ödeme yolları ve taksit tablosu bu sayfanın yanında görünür, örneğin /odeme-secenekleri.",
+        "paymentHint": "Ödeme yolları ve taksit tablosu bu sayfanın yanında görünür.",
         "shipping": "Kargo ve teslimat sayfası",
-        "shippingHint": "Kargo firmaları ve güvenceler bu sayfanın yanında görünür, örneğin /kargo-ve-teslimat.",
-        "empty": "Boş bıraktığınız bilgi hiçbir sayfada gösterilmez; sayfanın metni yine görünür."
+        "shippingHint": "Kargo firmaları ve güvenceler bu sayfanın yanında görünür; ürün sayfası da bu sayfaya bağlantı verir.",
+        "none": "Hiçbiri",
+        "empty": "Hiçbiri seçtiğiniz bilgi hiçbir sayfada gösterilmez; sayfaların metni yine görünür."
+      },
+      "rolePage": {
+        "choose": "Sayfa seçin",
+        "search": "Sayfa adı ya da adresiyle arayın",
+        "empty": "İçerik'te henüz sayfa yok.",
+        "noMatch": "Bu aramayla eşleşen sayfa yok.",
+        "deleted": "Silinmiş sayfa",
+        "missing": "Seçili sayfa silinmiş; vitrinde gösterilmiyor. Başka bir sayfa seçin."
       },
       "errors": {
         "required": "Bu alanı doldurun.",
         "tooLong": "En çok {{max}} karakter yazın.",
         "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
-        "pathInvalid": "Sayfa / ile başlayan bir mağaza sayfası olmalı (/iletisim gibi); ana sayfa ve boşluk olamaz.",
+        "pageRequired": "Bir sayfa seçin.",
         "phoneInvalid": "Geçerli bir Türkiye telefon numarası girin.",
         "colorInvalid": "Renk, # ile başlayan 6 haneli bir kod olmalı (#0b5c99 gibi).",
         "colorDuplicate": "Her renk adı bir kez yazılabilir.",

@@ -10,12 +10,29 @@ describe("storefront section", () => {
       trust_badges: [],
       primary_color: null,
       hero: null,
+      contact_page_id: null,
+      payment_page_id: null,
+      shipping_page_id: null,
       contact_form_path: "/iletisim",
       payment_info_path: "/odeme-secenekleri",
       shipping_info_path: "/kargo-ve-teslimat",
       color_swatches: [],
       low_stock_threshold: 3,
     })
+  })
+
+  it("names a role's page by a content page id, or none (adr/0073 Açık kararlar 3)", () => {
+    expect(patch.parse({ contact_page_id: " cnt_01JD8ZK3 " }).contact_page_id).toBe("cnt_01JD8ZK3")
+    expect(patch.parse({ shipping_page_id: null }).shipping_page_id).toBeNull()
+    for (const key of ["contact_page_id", "payment_page_id", "shipping_page_id"]) {
+      for (const bad of ["", "/iletisim", "prod_01JD8ZK3", "cnt_", "cnt_01 JD", "cnt_01;drop"]) {
+        const parsed = patch.safeParse({ [key]: bad })
+        expect(parsed.success).toBe(false)
+      }
+    }
+    expect(JSON.stringify(patch.safeParse({ contact_page_id: "/iletisim" }).error)).toContain(
+      "platform_settings.page_unknown"
+    )
   })
 
   it("names the payment and shipping pages as the contact page is: a shop path or none", () => {
@@ -70,6 +87,9 @@ describe("storefront section", () => {
     const parsed = full.parse({
       announcements: ["1500 TL ve üzeri kargo bedava", "16:00'ya kadar aynı gün kargo"],
       trust_badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1500 TL ve üzeri" }],
+      contact_page_id: "cnt_01JD8ZK3",
+      payment_page_id: null,
+      shipping_page_id: null,
       contact_form_path: "/iletisim",
       payment_info_path: "/odeme-secenekleri",
       shipping_info_path: "/kargo-ve-teslimat",

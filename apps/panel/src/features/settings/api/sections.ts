@@ -240,13 +240,19 @@ export interface StorefrontSettings {
   primary_color: string | null
   /** The home page's opening; none: the shop's name and its first two categories. */
   hero: StorefrontHero | null
-  /** The shop page that carries the contact form below its text (adr/0047); none: no form. */
-  contact_form_path: string | null
   /**
-   * The shop pages the storefront shows its live payment facts (ways to
-   * pay, installment rates) and shipping facts (carriers, promises) beside
-   * (adr/0046 Ek 2026-11-05); none: no page.
+   * The content page that carries the contact form below its text
+   * (adr/0047), and the pages the storefront shows its live payment facts
+   * (ways to pay, installment rates) and shipping facts (carriers,
+   * promises) beside (adr/0046 Ek 2026-11-05): by the page's id, so a page
+   * whose address changes keeps its role (adr/0073 Açık kararlar 3).
+   * None: the old path below names it, if it does; else no page.
    */
+  contact_page_id: string | null
+  payment_page_id: string | null
+  shipping_page_id: string | null
+  /** The roles by path, from before the ids: read only while the role's id is none. */
+  contact_form_path: string | null
   payment_info_path: string | null
   shipping_info_path: string | null
   /** The shop's colour names: an option or filter value that reads as one shows as a swatch. */

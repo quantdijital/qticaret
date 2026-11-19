@@ -898,6 +898,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.timezone_invalid": "Choose a valid time zone.",
   "platform_settings.unknown_section": "There is no such settings section.",
   "platform_settings.url_invalid": "The address must start with https:// or /.",
+  "platform_settings.page_unknown":
+    "The chosen page was not found. Choose one of your pages in Content.",
   "platform_settings.favicon_unknown":
     "The site icon must come from your media library. Upload the image there and choose it again.",
   "platform_settings.logo_unknown":

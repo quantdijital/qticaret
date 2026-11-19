@@ -5,33 +5,37 @@ import type { z } from "zod"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
-import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { contactFormSchema, errorLine, useSaveStorefront } from "@/features/settings/storefront"
 import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 import { HintedName } from "../forms/field-hint"
+import { rolePageId } from "../page-roles"
+import { useContentPages } from "../use-content-pages"
+import type { ContentPageOption } from "../use-content-pages"
+import { PageRolePicker } from "./page-role-picker"
 
 const C = "settings.storefront.contactForm"
-// What the field offers when the form is turned back on: the server's own default
-const DEFAULT_PATH = "/iletisim"
 
 type Values = z.infer<typeof contactFormSchema>
 
-const valuesOf = (saved: StorefrontSettings): Values => ({
-  enabled: saved.contact_form_path !== null,
-  path: saved.contact_form_path ?? DEFAULT_PATH,
-})
+// A section saved before the ids: its old path read as the page at that address
+const valuesOf = (saved: StorefrontSettings, pages: readonly ContentPageOption[] | undefined) => {
+  const page = rolePageId(saved, "contact", pages)
+  return { enabled: page !== null, page }
+}
 
 /**
  * The page the storefront's contact form shows on, below its text
- * (adr/0047); turned off, the storefront shows no form and the path is
- * saved as none. Saved at once to the storefront section, not the draft.
+ * (adr/0047): one of İçerik's pages, kept by its id so a renamed page keeps
+ * the form (adr/0073 Açık kararlar 3); turned off, the storefront shows no
+ * form. Saved at once to the storefront section, not the draft.
  */
 export function ContactFormFields({ saved }: { saved: StorefrontSettings }) {
   const { t } = useTranslation()
   const { save, saving } = useSaveStorefront()
-  const values = valuesOf(saved)
+  const pages = useContentPages().data?.pages
+  const values: Values = valuesOf(saved, pages)
   const form = useForm<Values>({
     resolver: zodResolver(contactFormSchema),
     values,
@@ -39,11 +43,11 @@ export function ContactFormFields({ saved }: { saved: StorefrontSettings }) {
   })
   const enabled = useWatch({ control: form.control, name: "enabled" })
   const submit = form.handleSubmit((next) => {
-    save({ contact_form_path: next.enabled ? next.path : null }, (stored) => {
-      form.reset(valuesOf(stored), FULL_RESET)
+    save({ contact_page_id: next.enabled ? next.page : null }, (stored) => {
+      form.reset(valuesOf(stored, pages), FULL_RESET)
     })
   })
-  const error = errorLine(t, form.formState.errors.path)
+  const error = errorLine(t, form.formState.errors.page)
   return (
     <CardForm
       bare
@@ -81,17 +85,22 @@ export function ContactFormFields({ saved }: { saved: StorefrontSettings }) {
       </div>
       {enabled ? (
         <Field
-          label={t(`${C}.path`)}
-          htmlFor="storefront-contact-path"
-          hint={t(`${C}.pathHint`)}
+          label={t(`${C}.page`)}
+          htmlFor="storefront-contact-page"
+          hint={t(`${C}.pageHint`)}
           error={error}
         >
-          <Input
-            id="storefront-contact-path"
-            autoComplete="off"
-            placeholder={DEFAULT_PATH}
-            aria-invalid={Boolean(error)}
-            {...form.register("path")}
+          <Controller
+            control={form.control}
+            name="page"
+            render={({ field }) => (
+              <PageRolePicker
+                id="storefront-contact-page"
+                value={field.value}
+                onChange={field.onChange}
+                invalid={Boolean(error)}
+              />
+            )}
           />
         </Field>
       ) : null}

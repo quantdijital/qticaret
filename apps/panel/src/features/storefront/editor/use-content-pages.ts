@@ -4,6 +4,8 @@ import type { ContentEntry } from "@/features/content/api/content"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { sdk } from "@/lib/sdk"
+import { roleRef } from "./page-roles"
+import type { RoleRef } from "./page-roles"
 
 /**
  * The shop's content pages as the theme editor knows them (adr/0073 §5):
@@ -94,8 +96,11 @@ export function useContentPage(id: string | null) {
   }
 }
 
-/** The page the contact form shows on (Vitrin tercihleri; adr/0047): its path, when on. */
-export function useContactPath(enabled: boolean): string | null {
+/**
+ * The page the contact form shows on (Vitrin tercihleri; adr/0047): its
+ * id, or a section's old path from before the ids (adr/0073 Açık kararlar 3).
+ */
+export function useContactRole(enabled: boolean): RoleRef {
   const settings = useQuery({ ...sectionQuery<StorefrontSettings>("storefront"), enabled })
-  return settings.data?.values.contact_form_path ?? null
+  return roleRef(settings.data?.values ?? {}, "contact")
 }

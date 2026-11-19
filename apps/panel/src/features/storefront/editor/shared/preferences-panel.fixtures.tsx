@@ -13,12 +13,23 @@ export const SAVED: StorefrontSettings = {
   trust_badges: [{ icon: "truck", title: "Aynı gün kargo", text: null }],
   primary_color: null,
   hero: null,
-  contact_form_path: "/iletisim",
-  payment_info_path: "/odeme-secenekleri",
-  shipping_info_path: "/kargo-ve-teslimat",
+  contact_page_id: "cnt_iletisim",
+  payment_page_id: "cnt_odeme",
+  shipping_page_id: "cnt_kargo",
+  contact_form_path: null,
+  payment_info_path: null,
+  shipping_info_path: null,
   color_swatches: [],
   low_stock_threshold: 3,
 }
+
+/** The shop's content pages in İçerik, as the role pickers list them. */
+export const PAGES = [
+  { id: "cnt_iletisim", title: "İletişim", handle: "iletisim", status: "published" },
+  { id: "cnt_odeme", title: "Ödeme seçenekleri", handle: "odeme-secenekleri", status: "published" },
+  { id: "cnt_kargo", title: "Kargo ve teslimat", handle: "kargo-ve-teslimat", status: "published" },
+  { id: "cnt_destek", title: "Destek", handle: "destek", status: "draft" },
+].map((page) => ({ ...page, kind: "page", path: `/${page.handle}` }))
 
 export interface Init {
   method?: string
@@ -27,15 +38,31 @@ export interface Init {
 
 export type FetchMock = Mock<(url: string, init?: Init) => Promise<unknown>>
 
-/** The server answers every call with `stored` over the saved section, and a save over both. */
-export function answer(fetchMock: FetchMock, stored: Partial<StorefrontSettings> = {}) {
-  fetchMock.mockImplementation((_url: string, init?: Init) =>
-    Promise.resolve({
+/**
+ * İçerik answers with `pages` (a page by its id: 404 when none); every
+ * other call with `stored` over the saved section, and a save over both.
+ */
+export function answer(
+  fetchMock: FetchMock,
+  stored: Partial<StorefrontSettings> = {},
+  pages: typeof PAGES = PAGES
+) {
+  fetchMock.mockImplementation((url: string, init?: Init) => {
+    if (url === "/admin/content") {
+      return Promise.resolve({ entries: pages, count: pages.length })
+    }
+    if (url.startsWith("/admin/content/")) {
+      const found = pages.find((page) => url === `/admin/content/${page.id}`)
+      return found
+        ? Promise.resolve({ entry: found })
+        : Promise.reject(Object.assign(new Error("not found"), { status: 404 }))
+    }
+    return Promise.resolve({
       section: "storefront",
       values: { ...SAVED, ...stored, ...init?.body },
       version: 2,
     })
-  )
+  })
 }
 
 export const posts = (fetchMock: FetchMock) =>

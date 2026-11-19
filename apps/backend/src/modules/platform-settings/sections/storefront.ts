@@ -37,15 +37,27 @@ export interface StorefrontSettings {
   primary_color: string | null
   /** The home page's opening; none: the shop's name and its first two categories. */
   hero: StorefrontHero | null
-  /** The shop page that carries the contact form below its text (adr/0047); none: no form. */
-  contact_form_path: string | null
   /**
-   * The shop page about its ways to pay: beside its text the storefront
-   * shows the ways the shop offers now and the card families' installment
-   * rates (adr/0046 Ek 2026-11-05). None: no page shows them.
+   * The content page that carries the contact form below its text
+   * (adr/0047), by its id: a page whose address changes keeps the form.
+   * None: the old path below names it, if it does; else no form.
    */
+  contact_page_id: string | null
+  /**
+   * The content page about the shop's ways to pay: beside its text the
+   * storefront shows the ways the shop offers now and the card families'
+   * installment rates (adr/0046 Ek 2026-11-05). None: as `contact_page_id`.
+   */
+  payment_page_id: string | null
+  /** The content page about shipping: its carriers and promises beside the text. */
+  shipping_page_id: string | null
+  /**
+   * The roles by path, from before the ids (adr/0073 Açık kararlar 3): read
+   * only while the role's id is none, as the page at that address. A save
+   * that names the role writes none here (`lib/storefront/page-roles.ts`).
+   */
+  contact_form_path: string | null
   payment_info_path: string | null
-  /** The shop page about shipping: its carriers and promises beside the text; none: no page. */
   shipping_info_path: string | null
   /**
    * The shop's colour names and their colours (F18 D5): an option value or
@@ -112,6 +124,13 @@ const pagePath = z
   })
   .nullable()
 
+// A content page by its id (`cnt_…`); that it is one of the shop's pages is the save's check
+const pageId = z
+  .string()
+  .trim()
+  .regex(/^cnt_[0-9A-Za-z]{1,64}$/, { message: "platform_settings.page_unknown" })
+  .nullable()
+
 /** The storefront's frame, as the shop writes it (F18 D3, docs/19 §4). */
 export const storefrontSection = defineSection<StorefrontSettings>(
   "storefront",
@@ -159,6 +178,9 @@ export const storefrontSection = defineSection<StorefrontSettings>(
           swatches.length,
         { message: "platform_settings.color_duplicate" }
       ),
+    contact_page_id: pageId,
+    payment_page_id: pageId,
+    shipping_page_id: pageId,
     contact_form_path: pagePath,
     payment_info_path: pagePath,
     shipping_info_path: pagePath,
@@ -169,8 +191,11 @@ export const storefrontSection = defineSection<StorefrontSettings>(
     trust_badges: [],
     primary_color: null,
     hero: null,
+    contact_page_id: null,
+    payment_page_id: null,
+    shipping_page_id: null,
+    // The addresses Turkish shops give these pages: a shop that chose none finds its pages there
     contact_form_path: "/iletisim",
-    // The addresses Turkish shops give these pages, as the storefront knew them before
     payment_info_path: "/odeme-secenekleri",
     shipping_info_path: "/kargo-ve-teslimat",
     color_swatches: [],

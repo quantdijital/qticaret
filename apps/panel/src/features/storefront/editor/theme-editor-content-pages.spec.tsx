@@ -133,8 +133,9 @@ describe("the theme editor's content pages", () => {
   })
 
   it("opens on the page the address names, the contact page's text named with its form", async () => {
+    // By the page's id: its address may change (adr/0073 Açık kararlar 3)
     const tree = await open(DOC_WITH_PAGES, "cnt_iletisim", {
-      storefront: { contact_form_path: "/iletisim" },
+      storefront: { contact_page_id: "cnt_iletisim", contact_form_path: null },
     })
 
     expect(await within(tree).findByRole("group", { name: "İletişim" })).toBeVisible()
@@ -163,6 +164,16 @@ describe("the theme editor's content pages", () => {
       "href",
       "/content/cnt_iletisim"
     )
+  })
+
+  it("names the contact page's text by a section's old path from before the ids", async () => {
+    const tree = await open(DOC_WITH_PAGES, "cnt_iletisim", {
+      storefront: { contact_page_id: null, contact_form_path: "/iletisim" },
+    })
+
+    expect(
+      await within(tree).findByRole("button", { name: "İletişim bilgileri ve form" })
+    ).toBeVisible()
   })
 
   it("makes the page's layout with its first section and takes it away with its last", async () => {

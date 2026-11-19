@@ -20,7 +20,7 @@ interface ContentPageSectionsProps {
   doc: LayoutDocument
   /** The content page picked; null: none yet (none in İçerik). */
   pageId: string | null
-  /** The contact page (`contact_form_path`): its text stands with the form. */
+  /** The contact page (`contact_page_id`): its text stands with the form. */
   contact: boolean
   problems: ReadonlySet<string>
   dispatch: Dispatch<EditorAction>

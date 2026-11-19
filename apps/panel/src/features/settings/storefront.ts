@@ -105,28 +105,21 @@ export const optionalLineSchema = (max: number) =>
   z.string().trim().max(max, `${E}.tooLong`).refine(isCleanText, `${E}.textInvalid`)
 
 /**
- * Where the contact form shows (adr/0047): a shop page other than the home
- * page, lower-cased as the server stores it; turned off, the path is not read.
+ * Where the contact form shows (adr/0047): one of İçerik's pages, by its
+ * id (adr/0073 Açık kararlar 3); turned off, the page is not read.
  */
 export const contactFormSchema = z
-  .object({ enabled: z.boolean(), path: z.string().trim().toLowerCase() })
-  .refine(
-    ({ enabled, path }) => !enabled || (isCleanText(path) && isShopPath(path) && path !== "/"),
-    { path: ["path"], message: `${E}.pathInvalid` }
-  )
+  .object({ enabled: z.boolean(), page: z.string().nullable() })
+  .refine(({ enabled, page }) => !enabled || page !== null, {
+    path: ["page"],
+    message: `${E}.pageRequired`,
+  })
 
-// A shop page other than the home page, or empty for none (saved as none)
-const optionalPagePath = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .refine(
-    (path) => path === "" || (isCleanText(path) && isShopPath(path) && path !== "/"),
-    `${E}.pathInvalid`
-  )
-
-/** The payment and shipping pages (adr/0046 Ek 2026-11-05): a shop page each, or none. */
-export const infoPagesSchema = z.object({ payment: optionalPagePath, shipping: optionalPagePath })
+/** The payment and shipping pages (adr/0046 Ek 2026-11-05): one of İçerik's pages each, or none. */
+export const infoPagesSchema = z.object({
+  payment: z.string().nullable(),
+  shipping: z.string().nullable(),
+})
 
 /** `#rrggbb` as the server keeps it. */
 export const isHexColor = (value: string): boolean => HEX_COLOR.test(value)

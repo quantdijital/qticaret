@@ -19,64 +19,87 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 const PAGE = "Formun gösterildiği sayfa"
 const SHOW = "Vitrinde iletişim formu göster"
 
+const picker = () => screen.getByRole("combobox", { name: PAGE })
+
 describe("the editor's storefront preferences: contact form (adr/0047)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     answer(fetchMock)
   })
 
-  it("moves the form to another page, lower-cased as the server keeps it", async () => {
+  it("moves the form to another of İçerik's pages, kept by its id (adr/0073 Açık kararlar 3)", async () => {
     renderPage()
-    const path = await screen.findByRole("textbox", { name: PAGE })
+    await waitFor(() => {
+      expect(picker()).toHaveTextContent("İletişim")
+    })
     const contact = card("İletişim formu")
-
-    expect(path).toHaveValue("/iletisim")
     expect(within(contact).getByRole("switch", { name: SHOW })).toBeChecked()
-    await userEvent.clear(path)
-    await userEvent.type(path, " /Destek ")
+
+    await userEvent.click(picker())
+    await userEvent.click(await screen.findByRole("option", { name: /^Destek/ }))
     await userEvent.click(within(contact).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(URL, {
         method: "POST",
-        body: { contact_form_path: "/destek" },
+        body: { contact_page_id: "cnt_destek" },
       })
     })
   })
 
-  it("refuses the home page and an address elsewhere before saving", async () => {
+  it("reads a section saved before the ids as the page at its old address", async () => {
+    answer(fetchMock, { contact_page_id: null, contact_form_path: "/iletisim" })
     renderPage()
-    const path = await screen.findByRole("textbox", { name: PAGE })
-    const contact = card("İletişim formu")
 
-    for (const wrong of ["/", "https://example.com/iletisim", "/ile tisim"]) {
-      await userEvent.clear(path)
-      await userEvent.type(path, wrong)
-      await userEvent.click(within(contact).getByRole("button", { name: "Kaydet" }))
-      expect(await within(contact).findByRole("alert")).toHaveTextContent(
-        "Sayfa / ile başlayan bir mağaza sayfası olmalı"
+    await waitFor(() => {
+      expect(picker()).toHaveTextContent("İletişim")
+    })
+    expect(within(card("İletişim formu")).getByRole("switch", { name: SHOW })).toBeChecked()
+  })
+
+  it("says the page was deleted, without refusing the card", async () => {
+    answer(fetchMock, { contact_page_id: "cnt_silindi" })
+    renderPage()
+
+    expect(
+      await screen.findByText(
+        "Seçili sayfa silinmiş; vitrinde gösterilmiyor. Başka bir sayfa seçin."
       )
-    }
-    expect(path).toHaveAttribute("aria-invalid", "true")
+    ).toBeVisible()
+    expect(picker()).toHaveTextContent("Silinmiş sayfa")
+  })
+
+  it("turned off, saves no page and hides the picker; on again, asks for a page", async () => {
+    answer(fetchMock, { contact_page_id: null, contact_form_path: null })
+    renderPage()
+    const contact = await waitFor(() => card("İletişim formu"))
+    const show = within(contact).getByRole("switch", { name: SHOW })
+    expect(show).not.toBeChecked()
+    expect(within(contact).queryByRole("combobox", { name: PAGE })).not.toBeInTheDocument()
+
+    await userEvent.click(show)
+    await userEvent.click(within(contact).getByRole("button", { name: "Kaydet" }))
+
+    expect(await within(contact).findByRole("alert")).toHaveTextContent("Bir sayfa seçin.")
     expect(posts(fetchMock)).toEqual([])
   })
 
-  it("turned off, saves no page and hides the field; turned on again, offers the default", async () => {
+  it("turned off, saves the role as none", async () => {
     renderPage()
-    await screen.findByRole("textbox", { name: PAGE })
+    await waitFor(() => {
+      expect(picker()).toHaveTextContent("İletişim")
+    })
     const contact = card("İletişim formu")
 
     await userEvent.click(within(contact).getByRole("switch", { name: SHOW }))
-    expect(within(contact).queryByRole("textbox", { name: PAGE })).not.toBeInTheDocument()
+    expect(within(contact).queryByRole("combobox", { name: PAGE })).not.toBeInTheDocument()
     await userEvent.click(within(contact).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(URL, {
         method: "POST",
-        body: { contact_form_path: null },
+        body: { contact_page_id: null },
       })
     })
-    await userEvent.click(within(contact).getByRole("switch", { name: SHOW }))
-    expect(within(contact).getByRole("textbox", { name: PAGE })).toHaveValue("/iletisim")
   })
 })

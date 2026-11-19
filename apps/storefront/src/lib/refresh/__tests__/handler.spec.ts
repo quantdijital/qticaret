@@ -105,6 +105,8 @@ describe("the scopes' caches (adr/0048 Ek 2026-11-03)", () => {
       "/store/storefront-menus",
     ])
     expect(refreshPlan(["content"]).paths).toEqual([
+      // The frame gives the role pages' live addresses (adr/0073 Açık kararlar 3)
+      "/store/storefront",
       "/store/content/terms",
       "/store/seo/paths",
       "/store/storefront-menus",

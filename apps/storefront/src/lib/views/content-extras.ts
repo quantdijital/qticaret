@@ -1,4 +1,4 @@
-import type { LegalIdentity, StorefrontFrame } from "@qticaret/types"
+import type { LegalIdentity } from "@qticaret/types"
 import type {
   IdentityRowView,
   InstallmentRatesView,
@@ -148,32 +148,4 @@ export function installmentRates(
       }))
     return options.length > 0 ? [{ family: familyName(family.family), options }] : []
   })
-}
-
-/** What a backend without the two settings meant: the addresses Turkish shops give these pages. */
-const DEFAULT_INFO_PAGES = {
-  payment_info_path: "/odeme-secenekleri",
-  shipping_info_path: "/kargo-ve-teslimat",
-} as const
-
-/**
- * Whether a page is the shop's payment or shipping page: the pages the
- * shop chose in its storefront settings, as it chooses its contact page
- * (`payment_info_path`, `shipping_info_path`; adr/0046 Ek 2026-11-05). A
- * setting saved as none names no page.
- */
-export function infoPageOf(
-  path: string,
-  frame: Pick<StorefrontFrame, "payment_info_path" | "shipping_info_path">
-): "payments" | "shipping" | null {
-  const payments =
-    frame.payment_info_path ??
-    (frame.payment_info_path === undefined ? DEFAULT_INFO_PAGES.payment_info_path : null)
-  const shipping =
-    frame.shipping_info_path ??
-    (frame.shipping_info_path === undefined ? DEFAULT_INFO_PAGES.shipping_info_path : null)
-  if (payments === path) {
-    return "payments"
-  }
-  return shipping === path ? "shipping" : null
 }

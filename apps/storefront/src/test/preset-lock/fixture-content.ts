@@ -73,7 +73,7 @@ export const ABOUT_PAGE = entry({
   image_height: 900,
 })
 
-/** The page the shop's contact form is on (`contact_form_path`). */
+/** The page the shop's contact form is on (`contact_page_id`). */
 export const CONTACT_PAGE = entry({
   id: "cnt_fixcontact",
   title: "İletişim",
@@ -174,6 +174,10 @@ function contentAnswer(
       ...shop,
       storefront: {
         ...shop.storefront,
+        // By the page's id, as the backend gives the roles (adr/0073 Açık kararlar 3)
+        contact_page_id: CONTACT_PAGE.id,
+        payment_page_id: null,
+        shipping_page_id: null,
         contact_form_path: CONTACT_PAGE.path,
         payment_info_path: null,
         shipping_info_path: null,

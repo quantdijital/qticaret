@@ -26,8 +26,10 @@ export const SCOPE_PATHS: Record<RefreshScope, readonly string[]> = {
   menus: ["/store/storefront-menus", "/store/category-images", "/store/category-counts"],
   // A legal text's link shows in the menus only while it is published
   legal: ["/store/legal/", "/store/legal-identity", "/store/storefront-menus"],
-  // A page going live drops its kept "no layout" answer at once (adr/0073 §6)
+  // A page going live drops its kept "no layout" answer at once (adr/0073 §6); the frame
+  // gives the role pages' live addresses (adr/0073 Açık kararlar 3)
   content: [
+    "/store/storefront",
     "/store/content/terms",
     "/store/seo/paths",
     "/store/storefront-menus",

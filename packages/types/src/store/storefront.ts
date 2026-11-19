@@ -28,12 +28,21 @@ export interface StorefrontFrame {
     text: string | null
     links: StorefrontLink[]
   } | null
-  /** The shop page that carries the contact form (adr/0047); null: no form. */
+  /**
+   * The content pages with a role, by id (adr/0073 Açık kararlar 3): the
+   * contact page carries the contact form (adr/0047), the payment and
+   * shipping pages the live facts (adr/0046 Ek 2026-11-05); null: none.
+   * Absent from a backend before the ids: the paths below name them.
+   */
+  contact_page_id?: string | null
+  payment_page_id?: string | null
+  shipping_page_id?: string | null
+  /** The contact page's address while it is live; null: none. */
   contact_form_path: string | null
   /**
-   * The shop pages the live payment and shipping facts stand beside
-   * (adr/0046 Ek 2026-11-05); null: none. Absent from a backend before
-   * them: `/odeme-secenekleri` and `/kargo-ve-teslimat`.
+   * The payment and shipping pages' addresses while they are live (the
+   * product page links to the shipping page); null: none. Absent from a
+   * backend before them: `/odeme-secenekleri` and `/kargo-ve-teslimat`.
    */
   payment_info_path?: string | null
   shipping_info_path?: string | null
