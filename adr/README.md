@@ -78,3 +78,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0070 | [Serbest düzen alt bilgi: satır, sütun ve bloklar; alt bilgi grubu](0070-serbest-duzen-alt-bilgi.md) | — |
 | 0071 | [Yapay zekâ çekirdeği: servis ve yetenek kaydı, kendi anahtarım, platform kredisi](0071-yapay-zeka-cekirdegi.md) | — |
 | 0072 | [BirFatura çekme entegrasyonu: siparişleri BirFatura çeker, güvenli giriş noktası](0072-birfatura-cekme-entegrasyonu.md) | — |
+| 0073 | [İçerik sayfalarında bölümler: tema düzenleyiciden sayfa düzeni](0073-icerik-sayfalarinda-bolumler.md) | — |
