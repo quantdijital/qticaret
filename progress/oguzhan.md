@@ -2,6 +2,21 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-18 – 2026-11-19: gerçek serviste yapay zekâ denemesi, panel görünümü, Tezgâh rötuşları
+
+- **Sıradaki işler:**
+  1. Yapay zekâ genişletme 2 adayları (sahiple seçilecek): ürün özellik değerlerini açıklama/fotoğraftan doldurma, etiket ve kategori önerisi, kategori/koleksiyon açıklaması, koleksiyon/marka/yazı SEO kartlarında öneriler, SSS taslağı, varyant adları, kısa açıklama.
+  2. Koyu temada dolu kırmızı "Sil" düğmesinin yazısı soluk (önceden de böyle; #216 sırasında görüldü).
+  3. Hata bildirimi 4 sn'de kayboluyor, docs/18 "kalıcı" diyor; sahip "şimdilik kalsın" dedi.
+  4. Kredi aşaması notları sürüyor (`product_description` çıktı tavanı, `image_scene` maliyeti).
+- **`dev`'e giren PR'lar:**
+  - Panel: Ayarlar › Yapay zekâ sıkı tablo (#211), sonucun renginde bildirimler (#212), ürün fiyat/stok hizası (#213), Vazgeç düğmeleri `cancel` türü ve denetim testi (#216).
+  - Yapay zekâ: odak anahtar kelime ve ürün adı önerisi (#217), kota tükenmesi ile yoğunluk ayrımı + görsel penceresinde "başka servisle dene" (#215), özel sahne tarifi ve mağazanın kayıtlı sahneleri (#220).
+  - Tema: açılış slaytı satırı germiyor (#214), slayt denetim ayarları + yuvarlak ok düzeltmesi + dar karoda başlık ölçekleme (#219), kategoriler bölümüne "Fotoğraf panoları" biçimi ve Tezgâh ×3 geçişi (#218).
+- **Gerçek servis denemesi (sahip):** MiniMax anahtarı geçerli ama bakiye 0 (402/1008); Gemini AI Studio ücretsiz anahtarıyla metin önerileri çalıştı, görsel düzenleme ücretsiz katmanda yok (429 → artık `ai.provider_quota`); Photoroom sandbox ile sahneye yerleştirme çalıştı (filigranlı).
+- **Kararlar:** Vazgeç kırmızı metin/çerçeve, dolu kırmızı yalnız yıkıcı eylem; yapay zekâ araçları gelişmiş ama arayüz sade (işin yerinde tek düğme, ileri seçenek ikinci planda); sahneler sektör paketinden gelir, mağaza kendi sahnelerini kaydeder (ayar deposu `ai_scenes`, en çok 12, migration yok).
+- **Sahibe not:** Tezgâh görünümleri yine değişti (Fotoğraf panoları); demo mağazada Görünümler'den Tezgâh yeniden Uygulanmalı.
+
 ## 2026-11-17 – 2026-11-18: serbest düzen alt bilgi, e-bülten biçimleri, yapay zekâ çekirdeği
 
 - **Sıradaki işler:**
