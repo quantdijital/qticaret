@@ -35,7 +35,7 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
         resource_type: "async_job",
         resource_id: job.id,
         // What was exported, never the link
-        changes: { type: job.type, input: publicInput(job.input) },
+        changes: { type: job.type, input: publicInput(job.input, job.type) },
         ...auditContext(req),
       })
     } catch (error) {

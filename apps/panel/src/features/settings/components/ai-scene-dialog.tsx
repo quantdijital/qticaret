@@ -86,7 +86,9 @@ export function AiSceneDialog({
             className="flex items-start justify-between gap-3 text-xs text-muted-foreground"
           >
             <span className={errors.prompt ? "text-destructive" : undefined}>
-              {errors.prompt ? t(`${C}.promptRequired`) : t("ai.scene.custom.hint")}
+              {errors.prompt
+                ? t(`${C}.promptRequired`)
+                : `${t("ai.scene.custom.hint")} ${t("ai.scene.custom.privacy")}`}
             </span>
             <span className="shrink-0 tabular-nums">
               {t("ai.scene.custom.count", { count: sceneLength(prompt), max: SCENE_TEXT_MAX })}

@@ -11606,6 +11606,7 @@
         "label": "Describe the scene",
         "placeholder": "on a pink blanket, soft daylight",
         "hint": "Describe the background only; the product stays as it is.",
+        "privacy": "Do not write personal details.",
         "count": "{{count}}/{{max}}",
         "keep": "Save to my scenes",
         "name": "Scene name",

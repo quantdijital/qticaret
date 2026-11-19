@@ -35,7 +35,9 @@ export function AiSceneCustom({ scene, disabled }: { scene: CustomScene; disable
         }}
       />
       <div className="flex items-start justify-between gap-3 text-xs text-muted-foreground">
-        <span id={`${id}-hint`}>{t(`${S}.hint`)}</span>
+        <span id={`${id}-hint`}>
+          {t(`${S}.hint`)} {t(`${S}.privacy`)}
+        </span>
         <span id={`${id}-count`} className="shrink-0 tabular-nums">
           {t(`${S}.count`, { count, max: SCENE_TEXT_MAX })}
         </span>

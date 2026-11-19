@@ -11606,6 +11606,7 @@
         "label": "Sahneyi tarif edin",
         "placeholder": "pembe battaniye üstünde, yumuşak gün ışığı",
         "hint": "Yalnız arka planı yazın; ürün olduğu gibi kalır.",
+        "privacy": "Kişisel bilgi yazmayın.",
         "count": "{{count}}/{{max}}",
         "keep": "Sahnelerime kaydet",
         "name": "Sahne adı",

@@ -30,16 +30,54 @@ export const CUSTOM_SCENE_CODE = "custom"
 // (`< > { } [ ] \` | \\`), no quotes that could close the server's own words
 const ALLOWED = /^[\p{L}\p{M}\p{N} .,;:!?'’()&/%+\-–…]*$/u
 
-// An address of any kind: a scheme, `www.` or a host with a common top-level domain
-const LINK =
-  /(?:[a-z][a-z0-9+.-]*:\/\/|\bwww\.|\b[\p{L}\p{N}-]+\.(?:com|net|org|info|biz|io|co|me|ai|app|dev|shop|store|site|online|xyz|tr)\b)/iu
+// Characters that draw nothing yet count as letters or marks: every default-ignorable
+// code point (variation selectors U+FE00–FE0F and U+E0100–E01EF, the grapheme joiner
+// U+034F, the Hangul fillers U+115F, U+1160, U+3164 and U+FFA0, zero-width and bidi
+// controls, tags) and the blank Braille pattern U+2800
+const INVISIBLE = /[\p{Default_Ignorable_Code_Point}\u2800]/u
+
+// A mark with no letter before it, or more than three marks on one letter: Turkish and
+// other Latin letters need one or two, a heap of them only covers the text around it
+const MARK_HEAP = /(?:^|[^\p{L}\p{M}])\p{M}|\p{M}{4,}/u
+
+// An address, read on the NFKC form (full-width letters and dots fold to plain ones):
+// - a scheme (`https://`);
+// - letters or digits, a dot and two letters or more, with no space after the dot, of
+//   any script (`ğüş.com`, `evil.de`, `x.ru`, `www.example`);
+// - the same with spaces before the dot (`evil . com`), which prose never writes;
+// - a sentence-like dot followed by a well-known top-level domain alone (`evil. com`);
+// - four dotted numbers (an IP address).
+// A sentence's own full stop, a dot then a space then words ("yumuşak ışık. arka
+// plan", "örn. ahşap"), is not an address; neither is a decimal ("1.5 m").
+const LINK = new RegExp(
+  [
+    String.raw`[a-z][a-z0-9+.-]*:\/\/`,
+    String.raw`[\p{L}\p{N}]\.\p{L}{2}`,
+    String.raw`[\p{L}\p{N}]\s+\.\s*\p{L}{2}`,
+    String.raw`[\p{L}\p{N}]\.\s*(?:com|org|io|ru|biz|info|xyz)(?![\p{L}\p{N}])`,
+    String.raw`\d{1,3}(?:\s*\.\s*\d{1,3}){3}`,
+  ].join("|"),
+  "iu"
+)
+
+/** Whether the text holds something that reads as an address (see LINK). */
+export function looksLikeLink(text: string): boolean {
+  return LINK.test(text.normalize("NFKC"))
+}
+
+/** Whether the text holds a character that draws nothing or a heap of marks. */
+export function hidesCharacters(text: string): boolean {
+  return INVISIBLE.test(text) || MARK_HEAP.test(text) || INVISIBLE.test(text.normalize("NFKC"))
+}
 
 /**
  * The text as it may be kept and sent, or null when it may not: spaces
- * folded, at most `max` characters, no control character, no link, no
- * markup. Personal data (an e-mail, a phone, an IBAN, a card or identity
- * number) is taken out and left as "…", so the result passes this check
- * again unchanged.
+ * folded, at most `max` characters, no control character, nothing that
+ * reads as an address, no character that draws nothing, no heap of marks,
+ * no markup. Patterns of personal data (an e-mail, a phone, an IBAN, a card
+ * or identity number) are taken out and left as "…", so the result passes
+ * this check again unchanged; names and street addresses are not caught,
+ * so the panel asks for none.
  */
 export function cleanSceneText(raw: unknown, max: number = SCENE_TEXT_MAX): string | null {
   if (typeof raw !== "string") {
@@ -49,7 +87,7 @@ export function cleanSceneText(raw: unknown, max: number = SCENE_TEXT_MAX): stri
   if (folded === "" || Array.from(folded).length > max || !isCleanText(folded)) {
     return null
   }
-  if (LINK.test(folded)) {
+  if (looksLikeLink(folded) || hidesCharacters(folded)) {
     return null
   }
   const redacted = redactPersonalData(folded).replaceAll("[…]", "…")
