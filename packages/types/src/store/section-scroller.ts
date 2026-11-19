@@ -38,6 +38,20 @@ export const SCROLLER_SETTINGS = {
   loop: ["off", "on"],
   /** A mouse may drag the row on a wide screen (touch always swipes). */
   drag: ["off", "on"],
+  // The slider's own controls (a slide stage: the openings' sliders); a row does not draw them yet
+  /**
+   * The pause button while it turns by itself: shown, or hidden until the
+   * keyboard reaches it (the pointer and the focus still hold the slides).
+   */
+  play_button: ["on", "off"],
+  /** How the dots tell the slides: a dot each, a line each, "2 / 4", or a bar filled to the slide. */
+  dot_style: ["dots", "lines", "count", "progress"],
+  /** Where the dots and the pause button stand under the slides. */
+  controls_place: ["center", "start", "end"],
+  /** The arrows' size (from 1024 px). */
+  arrow_size: ["small", "medium", "large"],
+  /** The arrows' and the dots' ground: the graphite, a light one, or the shop's colour. */
+  controls_tone: ["dark", "light", "brand"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type ScrollerSetting = keyof typeof SCROLLER_SETTINGS
@@ -59,10 +73,29 @@ export const SCROLLER_DEFAULTS: { readonly [S in ScrollerSetting]: ScrollerStep<
   speed: "medium",
   loop: "off",
   drag: "off",
+  play_button: "on",
+  dot_style: "dots",
+  controls_place: "center",
+  arrow_size: "medium",
+  controls_tone: "dark",
 }
 
 /** The settings in the order the panel offers them. */
 export const SCROLLER_SETTING_NAMES = Object.keys(SCROLLER_SETTINGS) as ScrollerSetting[]
+
+/** The settings a row of cards (a product rail's carousel) draws: not the slider's own controls. */
+export const ROW_SCROLLER = [
+  "desktop",
+  "mobile",
+  "arrows",
+  "arrow_style",
+  "arrow_position",
+  "dots",
+  "autoplay",
+  "speed",
+  "loop",
+  "drag",
+] as const satisfies readonly ScrollerSetting[]
 
 /** A setting's step as a reader takes it: one this build does not know reads as the default. */
 export function scrollerStepOf<S extends ScrollerSetting>(
@@ -94,7 +127,8 @@ export function scrollerSettingsOf(value: unknown): ScrollerSettings {
  * cards in view (always one), the arrows' place (always either side of the
  * slide) and dragging (a slide swipes on touch). Its defaults are the
  * slider's look before it took the kit: still, looping, its dots and
- * round arrows showing.
+ * round arrows showing; the controls' own (the pause button, the dots'
+ * style and place, the arrows' size, the ground) as they were drawn.
  */
 export const SLIDER_SCROLLER = [
   "autoplay",
@@ -103,6 +137,11 @@ export const SLIDER_SCROLLER = [
   "arrows",
   "arrow_style",
   "dots",
+  "play_button",
+  "dot_style",
+  "controls_place",
+  "arrow_size",
+  "controls_tone",
 ] as const satisfies readonly ScrollerSetting[]
 
 export type SliderSetting = (typeof SLIDER_SCROLLER)[number]
@@ -117,6 +156,11 @@ export const SLIDER_DEFAULTS: SliderSettings = {
   arrows: "always",
   arrow_style: "round",
   dots: "on",
+  play_button: "on",
+  dot_style: "dots",
+  controls_place: "center",
+  arrow_size: "medium",
+  controls_tone: "dark",
 }
 
 /**

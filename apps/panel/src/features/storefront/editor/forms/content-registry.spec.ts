@@ -62,12 +62,22 @@ describe("the content fields' register", () => {
       "scroll:scroller.autoplay",
       "look:scroller.loop",
       "scroll:scroller.arrows",
-      "scroll:scroller.arrow_style",
+      "controls:scroller.arrow_style",
       "scroll:scroller.dots",
+      "controls:scroller.dot_style",
+      "controls:scroller.controls_place",
+      "controls:scroller.arrow_size",
+      "controls:scroller.controls_tone",
     ])
-    expect(keys({ ...slider, scroller: { ...SLIDER_DEFAULTS, autoplay: "on" } })).toContain(
-      "scroll:scroller.speed"
-    )
+    const playing = keys({ ...slider, scroller: { ...SLIDER_DEFAULTS, autoplay: "on" } })
+    expect(playing).toContain("scroll:scroller.speed")
+    expect(playing).toContain("scroll:scroller.play_button")
+    // Nothing drawn under the slides: neither the dots' style nor their place
+    const bare = keys({
+      ...slider,
+      scroller: { ...SLIDER_DEFAULTS, dots: "off", arrows: "hidden" },
+    })
+    expect(bare.filter((key) => key.startsWith("controls:"))).toEqual([])
     // A slider saved before the kit: its switches read as the kit's steps
     const old: HeroSliderSection = { ...slider, autoplay: true }
     delete old.scroller

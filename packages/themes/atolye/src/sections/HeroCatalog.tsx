@@ -12,7 +12,8 @@ import { type Of, headingId } from "./plan"
 import { CatalogChips, CatalogList, CatalogTiles } from "./HeroCatalogParts"
 import { CatalogSlide, PHOTO_SIZES, WHOLE_SIZES, pictureOnly } from "./HeroCatalogSlide"
 import type { Mark, SlideExtras, SlidePlace } from "./HeroCatalogSlide"
-import { SliderStage, type SliderWords } from "./SliderStage"
+import { SliderStage } from "./SliderStage"
+import { sliderWords } from "./slider-words"
 
 /** The opening's variants this theme draws (`drawnVariant`): today's and the category list. */
 export const HERO_VARIANTS = ["standard", "category_list"] as const
@@ -41,16 +42,7 @@ function Slides({
   markOf: (index: number) => Mark
   t: Translate
 }) {
-  const total = slides.length
-  const words: SliderWords = {
-    label: t("home.slider"),
-    previous: t("home.slider_previous"),
-    next: t("home.slider_next"),
-    play: t("home.slider_play"),
-    pause: t("home.slider_pause"),
-    slides: slides.map((_, index) => t("home.slider_slide", { n: index + 1, total })),
-    goTo: slides.map((_, index) => t("home.slider_go", { n: index + 1 })),
-  }
+  const words = sliderWords(t, slides.length)
   const { settings } = slider
   const arrows = settings.arrows !== "hidden"
   return (
@@ -67,6 +59,8 @@ function Slides({
         dots={settings.dots === "on"}
         arrows={settings.arrows}
         arrowStyle={settings.arrow_style}
+        look={settings}
+        marks={extras.marks}
         loop={settings.loop === "on"}
         focusable={slides.some((slide) => slide.actions.length === 0 && !slide.link)}
         fill

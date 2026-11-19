@@ -59,6 +59,7 @@ export const PANEL_GROUPS: Readonly<Record<FieldGroupName, GroupPlace>> = {
   placement: { tab: "style", title: `${P}.placement` },
   layout: { tab: "style", title: `${P}.layout` },
   scroll: { tab: "style", title: `${P}.scroll` },
+  controls: { tab: "style", title: `${P}.groups.controls` },
   motion: { tab: "style", title: `${P}.motion` },
   appearance: { tab: "style", title: `${P}.appearance` },
   frame: { tab: "style", title: `${P}.groups.frame` },

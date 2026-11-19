@@ -1,6 +1,7 @@
 import { newsletterHasNote } from "@qticaret/types"
 import type { AnySection, HeroSection, ProductsSection } from "@/features/storefront/api/layout"
 import { slidesOf } from "./catalog-slides"
+import { sliderControlField, turnsAsSlider } from "./slider-kit"
 import { HEADER_CATALOG_GROUPS } from "./field-registry"
 import type { FieldGroupName } from "./field-registry"
 import { footerPreviewField } from "../footer-rows/footer-rows-fields"
@@ -191,6 +192,10 @@ export function previewField(
   }
   const parts = key.split(".")
   const [first, second] = parts
+  // A slider's arrows, dots and pause button: their settings in its panel
+  if (first === "scroller") {
+    return turnsAsSlider(section) ? sliderControlField(section, parts) : null
+  }
   if (section.type === "hero") {
     return heroField(section, parts)
   }

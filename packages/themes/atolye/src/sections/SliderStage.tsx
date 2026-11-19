@@ -12,10 +12,10 @@ import {
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
 import type { ScrollerStep } from "@qticaret/types"
 import { cn } from "@qticaret/ui/lib/utils"
-import { SliderArrows, SliderDots, type SliderWords } from "./SliderControls"
+import { SliderArrows, SliderDots, type SliderLook, type SliderWords } from "./SliderControls"
 import { type PlayChoice, isPlaying, wrapIndex } from "./slider-play"
 
-export type { SliderWords } from "./SliderControls"
+export type { SliderLook, SliderWords } from "./SliderControls"
 
 const REDUCED = "(prefers-reduced-motion: reduce)"
 const reduced = () => window.matchMedia(REDUCED).matches
@@ -49,6 +49,8 @@ export function SliderStage({
   dots,
   arrows,
   arrowStyle,
+  look,
+  marks,
   loop,
   focusable,
   fill = false,
@@ -62,6 +64,10 @@ export function SliderStage({
   /** When the arrows show (from 1024 px): always, while the pointer is over the stage, never. */
   arrows: ScrollerStep<"arrows">
   arrowStyle: ScrollerStep<"arrow_style">
+  /** The controls' own look: the pause button, the dots' style and place, the arrows' size, the ground. */
+  look: SliderLook
+  /** The theme editor's preview: the controls carry their field marks (adr/0065 Faz 2b). */
+  marks?: boolean | undefined
   /** Past the last slide is the first. */
   loop: boolean
   /** A slide without a link: the rail itself takes the focus so its keys scroll it. */
@@ -266,6 +272,8 @@ export function SliderStage({
         <SliderArrows
           words={words}
           shape={arrowStyle}
+          look={look}
+          marks={marks}
           atStart={!loop && index === 0}
           atEnd={atEnd}
           onStep={(by) => {
@@ -279,6 +287,8 @@ export function SliderStage({
           count={count}
           index={index}
           dots={dots}
+          look={look}
+          marks={marks}
           playControl={autoplay}
           playing={playing && !atEnd}
           onPick={step}
