@@ -8380,6 +8380,7 @@
           "opening": "Soruların açılışı",
           "options": "Seçenekler",
           "backToTop": "Yukarı çık düğmesi",
+          "controls": "Ok ve nokta görünümü",
           "search": "Arama",
           "topBar": "Üst şerit",
           "menu": "Menü çubuğu",
@@ -9812,6 +9813,45 @@
           "off": "Kapalı",
           "on": "Açık",
           "hint": "Masaüstünde fareyle tutup sürükleyerek kaydırılır."
+        },
+        "play_button": {
+          "label": "Durdur düğmesi",
+          "term": "pause button",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Otomatik geçişi durduran düğme. Kapalıyken görünmez ama klavyeyle ulaşılınca yine çıkar; fare üzerindeyken slaytlar zaten durur."
+        },
+        "dot_style": {
+          "label": "Nokta biçimi",
+          "term": "pagination",
+          "dots": "Nokta",
+          "lines": "Çizgi",
+          "count": "Sayı (1/4)",
+          "progress": "İlerleme",
+          "hint": "İlerleme: görülen slaytlara kadar dolan bir çubuk."
+        },
+        "controls_place": {
+          "label": "Noktaların yeri",
+          "term": "position",
+          "center": "Ortada",
+          "start": "Solda",
+          "end": "Sağda",
+          "hint": "Noktalar ve durdur düğmesi slaytın altında bu yanda durur."
+        },
+        "arrow_size": {
+          "label": "Ok boyutu",
+          "term": "size",
+          "small": "Küçük",
+          "medium": "Orta",
+          "large": "Büyük"
+        },
+        "controls_tone": {
+          "label": "Zemin rengi",
+          "term": "tone",
+          "dark": "Koyu",
+          "light": "Açık",
+          "brand": "Mağaza rengi",
+          "hint": "Okların ve noktaların zemini. Yalın oklarda yalnız noktalara uygulanır."
         }
       },
       "panelSearch": {

@@ -8380,6 +8380,7 @@
           "opening": "How the questions open",
           "options": "Options",
           "backToTop": "Back to top button",
+          "controls": "Arrows and dots look",
           "search": "Search",
           "topBar": "Top strip",
           "menu": "Menu bar",
@@ -9812,6 +9813,45 @@
           "off": "Off",
           "on": "On",
           "hint": "Scrolls by dragging with a mouse on a wide screen."
+        },
+        "play_button": {
+          "label": "Pause button",
+          "term": "pause button",
+          "off": "Off",
+          "on": "On",
+          "hint": "The button that stops autoplay. When off it is out of sight but appears when reached with the keyboard; the slides already stop under the mouse."
+        },
+        "dot_style": {
+          "label": "Dot style",
+          "term": "pagination",
+          "dots": "Dots",
+          "lines": "Lines",
+          "count": "Count (1/4)",
+          "progress": "Progress",
+          "hint": "Progress: a bar that fills up to the slide in view."
+        },
+        "controls_place": {
+          "label": "Dots position",
+          "term": "position",
+          "center": "Centre",
+          "start": "Left",
+          "end": "Right",
+          "hint": "The dots and the pause button stand on this side under the slide."
+        },
+        "arrow_size": {
+          "label": "Arrow size",
+          "term": "size",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large"
+        },
+        "controls_tone": {
+          "label": "Ground colour",
+          "term": "tone",
+          "dark": "Dark",
+          "light": "Light",
+          "brand": "Shop colour",
+          "hint": "The ground of the arrows and the dots. Plain arrows take it on the dots only."
         }
       },
       "panelSearch": {

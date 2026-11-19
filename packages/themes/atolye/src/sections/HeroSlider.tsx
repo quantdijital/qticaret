@@ -4,7 +4,8 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { Preload } from "../parts/Preload"
 import { type Of, headingId } from "./plan"
-import { SliderStage, type SliderWords } from "./SliderStage"
+import { SliderStage } from "./SliderStage"
+import { sliderWords } from "./slider-words"
 
 /** The stage fills the container: 1344 px at most (1440 less its gutters). */
 const SIZES = "(min-width: 1440px) 1344px, 100vw"
@@ -176,15 +177,7 @@ export function HeroSlider({
     return null
   }
   const total = slides.length
-  const words: SliderWords = {
-    label: t("home.slider"),
-    previous: t("home.slider_previous"),
-    next: t("home.slider_next"),
-    play: t("home.slider_play"),
-    pause: t("home.slider_pause"),
-    slides: slides.map((_, index) => t("home.slider_slide", { n: index + 1, total })),
-    goTo: slides.map((_, index) => t("home.slider_go", { n: index + 1 })),
-  }
+  const words = sliderWords(t, total)
   const compact = section.height === "compact"
   // The kit's settings a slider has use for (bilesen-denetimi (b) 4)
   const { settings } = section
@@ -214,6 +207,8 @@ export function HeroSlider({
           dots={settings.dots === "on"}
           arrows={arrows ? settings.arrows : "hidden"}
           arrowStyle={settings.arrow_style}
+          look={settings}
+          marks={section.editor}
           loop={settings.loop === "on"}
           focusable={slides.some((slide) => !slide.link)}
         >

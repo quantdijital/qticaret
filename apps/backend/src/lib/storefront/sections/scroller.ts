@@ -21,6 +21,12 @@ export const SCROLLER_SETTINGS = {
   speed: ["slow", "medium", "fast"],
   loop: ["off", "on"],
   drag: ["off", "on"],
+  // The slider's own controls (the openings' sliders); a row does not draw them yet
+  play_button: ["on", "off"],
+  dot_style: ["dots", "lines", "count", "progress"],
+  controls_place: ["center", "start", "end"],
+  arrow_size: ["small", "medium", "large"],
+  controls_tone: ["dark", "light", "brand"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof SCROLLER_SETTINGS
@@ -38,6 +44,11 @@ export const SCROLLER_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   speed: "medium",
   loop: "off",
   drag: "off",
+  play_button: "on",
+  dot_style: "dots",
+  controls_place: "center",
+  arrow_size: "medium",
+  controls_tone: "dark",
 }
 
 const SETTING_NAMES = Object.keys(SCROLLER_SETTINGS) as Setting[]
@@ -84,6 +95,11 @@ export const SLIDER_SCROLLER = [
   "arrows",
   "arrow_style",
   "dots",
+  "play_button",
+  "dot_style",
+  "controls_place",
+  "arrow_size",
+  "controls_tone",
 ] as const satisfies readonly Setting[]
 
 type SliderSetting = (typeof SLIDER_SCROLLER)[number]
@@ -95,6 +111,11 @@ export const SLIDER_DEFAULTS: { readonly [S in SliderSetting]: Step<S> } = {
   arrows: "always",
   arrow_style: "round",
   dots: "on",
+  play_button: "on",
+  dot_style: "dots",
+  controls_place: "center",
+  arrow_size: "medium",
+  controls_tone: "dark",
 }
 
 /**

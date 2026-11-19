@@ -7,7 +7,8 @@ import {
 } from "@qticaret/types"
 import type { ScrollerSettings, SliderSettings } from "@qticaret/types"
 import type { AnySection, HeroSection, HeroSliderSection } from "@/features/storefront/api/layout"
-import { SLIDER_OTHER } from "./scroller-groups"
+import { SLIDER_LOOK, SLIDER_MAIN, SLIDER_OTHER, scrollerOffers } from "./scroller-groups"
+import { SHELF_IDS } from "./shelf-registry"
 
 /** H17's opening (`category_list`), whose slides turn on the slider's settings (adr/0049 Ek 2026-11-15). */
 export type CatalogHero = Extract<HeroSection, { variant: "category_list" }>
@@ -69,4 +70,27 @@ export const sliderOtherCount = (section: KitSection): number => {
   const settings = kitSettingsOf(section)
   const defaults = kitDefaultsOf(section)
   return SLIDER_OTHER.filter((name) => settings[name] !== defaults[name]).length
+}
+
+/**
+ * A slider control the live preview named (adr/0065 Faz 2b): the theme
+ * marks the arrows `scroller.arrows`, the dots `scroller.dots` and the
+ * pause button `scroller.play_button`. Its kit field and the group it
+ * stands in; null for a setting the section does not offer as it stands.
+ */
+export function sliderControlField(
+  section: KitSection,
+  parts: readonly string[]
+): { target: string; group: "scroll" | "controls" } | null {
+  const [first, setting, ...rest] = parts
+  const name = SLIDER_SCROLLER.find((each) => each === setting)
+  if (first !== "scroller" || rest.length > 0 || !name || !scrollerOffers(asKit(section), name)) {
+    return null
+  }
+  if (SLIDER_MAIN.includes(name)) {
+    return { target: SHELF_IDS.scroller(section.id, name), group: "scroll" }
+  }
+  return SLIDER_LOOK.includes(name)
+    ? { target: SHELF_IDS.scroller(section.id, name), group: "controls" }
+    : null
 }

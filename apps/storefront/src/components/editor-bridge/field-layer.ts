@@ -39,11 +39,15 @@ export const FIELD_CSS = `.fbox{position:absolute;top:0;left:0;box-sizing:border
 /** The label's size before it is drawn, in CSS pixels at scale 1. */
 const LABEL = { width: 64, height: 22 }
 
-/** What a field says to a screen reader: its own words, else its picture's, cut short. */
+/**
+ * What a field says to a screen reader: its own words, else its picture's,
+ * else its own name (a slider's arrow or dots, which have no words), cut short.
+ */
 function fieldName(element: Element): string {
   const words = element.textContent.replace(/\s+/g, " ").trim()
   const alt = element.querySelector("img")?.getAttribute("alt") ?? ""
-  const name = words || alt.trim()
+  const label = element.getAttribute("aria-label") ?? ""
+  const name = words || alt.trim() || label.trim()
   return name.length > 60 ? `${name.slice(0, 59)}…` : name
 }
 
