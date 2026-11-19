@@ -1,7 +1,7 @@
 "use client"
 
-import { CircleCheck } from "lucide-react"
-import { useState } from "react"
+import { ChevronDown, CircleCheck } from "lucide-react"
+import { type ComponentProps, useState } from "react"
 import type { OrderActions, OrderPageView, ReturnableLineView } from "@qticaret/ui"
 import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { ChoiceRow, FieldError, SelectField } from "../checkout/fields"
@@ -25,8 +25,25 @@ export interface ReturnWords {
   fallback: string
 }
 
-/** A line's small select beside its words: the native picker in the theme's pill. */
-const SMALL = "gf-field w-auto min-w-20 py-2 pr-4 pl-4 text-md"
+/**
+ * A line's small select beside its words: the native picker in the theme's pill,
+ * its arrow drawn like the checkout's (SelectField), with room so no text runs under it.
+ */
+function SmallSelect(props: ComponentProps<"select">) {
+  return (
+    <span className="relative">
+      <select
+        {...props}
+        className="gf-field w-auto min-w-20 appearance-none py-2 pr-11 pl-4 text-md"
+      />
+      <ChevronDown
+        aria-hidden="true"
+        strokeWidth={2}
+        className="pointer-events-none absolute top-1/2 right-4 size-4.5 -translate-y-1/2 text-text-2"
+      />
+    </span>
+  )
+}
 
 /**
  * Asks to send lines back (F7.9): a quantity per line, a reason, a note.
@@ -123,7 +140,7 @@ export function ReturnForm({
               {chosenKind === "exchange" && line.quantity > 0 && (
                 <label className="flex items-center gap-2">
                   <span className="text-text-2">{words.variant}</span>
-                  <select name={`variant_${line.id}`} defaultValue="" className={SMALL}>
+                  <SmallSelect name={`variant_${line.id}`} defaultValue="">
                     <option value="" disabled>
                       —
                     </option>
@@ -132,13 +149,13 @@ export function ReturnForm({
                         {variant.label}
                       </option>
                     ))}
-                  </select>
+                  </SmallSelect>
                 </label>
               )}
               {line.quantity > 0 && (
                 <label className="flex items-center gap-2">
                   <span className="text-text-2">{words.quantity}</span>
-                  <select
+                  <SmallSelect
                     name={`qty_${line.id}`}
                     defaultValue="0"
                     aria-describedby={line.note ? `note_${line.id}` : undefined}
@@ -154,14 +171,13 @@ export function ReturnForm({
                         setExcluded(next)
                       }
                     }}
-                    className={SMALL}
                   >
                     {Array.from({ length: line.quantity + 1 }, (_, index) => (
                       <option key={index} value={index}>
                         {index}
                       </option>
                     ))}
-                  </select>
+                  </SmallSelect>
                 </label>
               )}
             </span>
