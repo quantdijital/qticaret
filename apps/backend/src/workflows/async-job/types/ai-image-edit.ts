@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { IMAGE_BACKGROUNDS } from "../../../lib/ai/registry/services"
 import { IMAGE_BACKGROUND_MAX_BATCH, IMAGE_SCENE_MAX_BATCH } from "../../../lib/ai/registry/tasks"
 import { SCENE_CODE } from "@qticaret/sector-packs"
+import { CUSTOM_SCENE_CODE, SCENE_TEXT_MAX } from "../../../lib/ai/scene-text"
 import { isPlanLimitError } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
 import { assertStorageFits } from "../../../lib/plan-limits"
@@ -32,8 +33,11 @@ const common = {
 }
 
 /**
- * A scene (Aşama 7) by its code only: its description is read from the
- * shop's packs when the job runs, so a prompt never sits in a job's input.
+ * A scene (Aşama 7) by its code (a saved scene's id) only: its
+ * description is read from the shop's scenes when the job runs. A scene
+ * typed once (`custom`) has no record to read, so its words sit here,
+ * cleaned by the route's workflow (`cleanSceneText`: no personal data, no
+ * link) and cleaned again before the call. Exactly one of the two.
  */
 const input = z.discriminatedUnion("task", [
   z
@@ -47,12 +51,24 @@ const input = z.discriminatedUnion("task", [
   z
     .object({
       task: z.literal("image_scene"),
-      scene: z.string().regex(SCENE_CODE),
+      scene: z.string().regex(SCENE_CODE).optional(),
+      custom: z.string().min(1).max(SCENE_TEXT_MAX).optional(),
       media_ids: mediaIds(IMAGE_SCENE_MAX_BATCH),
       ...common,
     })
-    .strict(),
+    .strict()
+    .refine((value) => (value.scene === undefined) !== (value.custom === undefined)),
 ])
+
+/** The option a picture's run is asked with: never a typed scene's words in the summary. */
+function optionOf(data: Input) {
+  if (data.task !== "image_scene") {
+    return { run: { background: data.background }, summary: { background: data.background } }
+  }
+  return data.custom !== undefined
+    ? { run: { custom: data.custom }, summary: { scene: CUSTOM_SCENE_CODE } }
+    : { run: { scene: data.scene ?? null }, summary: { scene: data.scene ?? null } }
+}
 
 type Input = z.infer<typeof input>
 
@@ -115,8 +131,7 @@ export const aiImageEdit: JobType<Input> = {
     if (!userId) {
       throw new Error("ai.image_edit: queued by nobody")
     }
-    const option =
-      data.task === "image_scene" ? { scene: data.scene } : { background: data.background }
+    const option = optionOf(data)
     const done: Done[] = []
     const failed: Failed[] = []
     let stoppedBy: string | null = null
@@ -129,7 +144,7 @@ export const aiImageEdit: JobType<Input> = {
             task: data.task,
             service: data.service,
             funding: data.funding,
-            ...option,
+            ...option.run,
             media_id: mediaId,
             user_id: userId,
             remember: data.remember && index === 0,
@@ -167,7 +182,7 @@ export const aiImageEdit: JobType<Input> = {
       summary: {
         task: data.task,
         service: data.service,
-        ...option,
+        ...option.summary,
         done,
         failed,
         skipped: data.media_ids.length - done.length - failed.length,

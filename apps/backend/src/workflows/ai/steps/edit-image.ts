@@ -14,7 +14,7 @@ import { sceneTargetOf } from "../../../lib/ai/registry/services"
 import type { ImageBackground } from "../../../lib/ai/registry/services"
 import { answeredUsageOf, runImageEdit, runImageScene } from "../../../lib/ai/run-image"
 import type { ImageEditDone } from "../../../lib/ai/run-image"
-import { shopSceneOf } from "../../../lib/ai/scenes"
+import { customScene, settingOf, shopSceneOf } from "../../../lib/ai/scenes"
 import { libraryVersionBase } from "../../../lib/media"
 import type { AiSource } from "../../../lib/media/ai-source"
 import { looksLikeSvg } from "../../../lib/media/svg"
@@ -35,6 +35,8 @@ export interface EditImageInput {
   background?: ImageBackground | null | undefined
   /** `image_scene`: the shop's scene, by its code; its description is read here. */
   scene?: string | null | undefined
+  /** `image_scene`: a scene typed once (client words, cleaned again here before the call). */
+  custom?: string | null | undefined
   media_id: string
 }
 
@@ -54,7 +56,7 @@ const sceneOf = (resolved: Resolved | null) => sceneTargetOf(resolved?.target)
 
 /**
  * The call this task makes: a background, or the shop's scene read from
- * its sector packs (the allow-list; a code not among them is refused).
+ * its own and its packs' (the allow-list; a code not among them is refused), or one typed once.
  */
 async function runFor(
   container: MedusaContainer,
@@ -81,7 +83,12 @@ async function runFor(
     }
   }
   const target = sceneOf(resolved)
-  const scene = input.scene ? await shopSceneOf(container, input.scene) : null
+  // A typed scene is cleaned again here: the job's input is not taken on trust
+  const scene = input.custom
+    ? customScene(input.custom)
+    : input.scene
+      ? await shopSceneOf(container, input.scene)
+      : null
   if (!target) {
     throw aiProviderError({
       service: input.service,
@@ -93,7 +100,7 @@ async function runFor(
     throw aiProviderError({ service: input.service, key: "ai.unknown_task", code: "scene_unknown" })
   }
   const done = await withAiBreaker(input.service, () =>
-    runImageScene({ ...run, setting: scene.prompt, source: target.source })
+    runImageScene({ ...run, setting: settingOf(scene), source: target.source })
   )
   return { done, source: target.source }
 }

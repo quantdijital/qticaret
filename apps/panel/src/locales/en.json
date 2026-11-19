@@ -11590,7 +11590,7 @@
     "scene": {
       "mode": "What to do with the image",
       "title": "Place in a scene",
-      "description": "The product is set in a ready-made scene. The original image does not change; the result arrives as a new image.",
+      "description": "The product is set in the scene you pick or describe. The original image does not change; the result arrives as a new image.",
       "option": "Scene",
       "onlyOption": "Scene: {{option}}.",
       "start": "Place in scene",
@@ -11599,7 +11599,40 @@
       "hint": {
         "text": "Connect an AI service that makes scenes (Gemini or Photoroom) to place a product in a scene in one click.",
         "ownerOnly": "With an AI service that makes scenes connected, a product can be placed in a scene in one click; the store owner can connect one."
+      },
+      "custom": {
+        "chip": "Custom",
+        "label": "Describe the scene",
+        "placeholder": "on a pink blanket, soft daylight",
+        "hint": "Describe the background only; the product stays as it is.",
+        "count": "{{count}}/{{max}}",
+        "keep": "Save to my scenes",
+        "name": "Scene name",
+        "namePlaceholder": "Scene name (first words if empty)",
+        "full": "At most {{count}} scenes can be saved. Delete one in Settings > AI, or try without saving."
       }
+    },
+    "scenes": {
+      "title": "Scenes",
+      "description": "These scenes are offered first when placing an image in a scene ({{count}}/{{max}}).",
+      "readOnly": "These scenes are offered first when placing an image in a scene. The store owner or an admin changes them.",
+      "empty": "No saved scenes. Add one, or save a \"Custom\" scene while editing an image.",
+      "add": "Add scene",
+      "addTitle": "Add scene",
+      "editTitle": "Edit scene",
+      "dialogDescription": "Briefly describe the setting behind the product. The product stays as it is.",
+      "name": "Name",
+      "namePlaceholder": "First words of the description if empty",
+      "prompt": "Description",
+      "promptRequired": "Describe the scene.",
+      "edit": "Edit",
+      "remove": "Delete",
+      "actionsFor": "Actions for {{name}}",
+      "removeTitle": "Delete {{name}}?",
+      "removeDescription": "The scene leaves the list. Images already made with it are not affected.",
+      "full": "At most {{max}} scenes can be saved.",
+      "showPacks": "Show ready-made scenes",
+      "showPacksHint": "Starting scenes for your store's sector (or two plain studio scenes) are offered after your own."
     },
     "altReview": {
       "open": "Alt text suggestions",

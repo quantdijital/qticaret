@@ -103,6 +103,23 @@ describe("the background job's input", () => {
     expect(calls[0]?.[0].input).not.toHaveProperty("background")
     expect(summary).toMatchObject({ task: "image_scene", scene: "studio_table" })
   })
+
+  it("takes a typed scene instead of a code, never both, and keeps its words out of the summary", async () => {
+    const typed = { ...SCENE, scene: undefined, custom: "pembe battaniye üstünde" }
+    expect(aiImageEdit.input.safeParse(typed).success).toBe(true)
+    for (const bad of [
+      { ...SCENE, custom: "pembe battaniye üstünde" },
+      { ...typed, custom: "" },
+      { ...typed, custom: "x".repeat(201) },
+    ]) {
+      expect(aiImageEdit.input.safeParse(bad).success).toBe(false)
+    }
+    const { summary } = await aiImageEdit.execute(context(), aiImageEdit.input.parse(typed))
+    const calls = run.mock.calls as [{ input: Record<string, unknown> }][]
+    expect(calls[0]?.[0].input).toMatchObject({ custom: "pembe battaniye üstünde" })
+    expect(summary).toMatchObject({ scene: "custom" })
+    expect(JSON.stringify(summary)).not.toContain("battaniye")
+  })
 })
 
 describe("running the background job", () => {

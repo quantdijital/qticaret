@@ -5,6 +5,7 @@ import { IMAGE_BACKGROUNDS } from "../../../lib/ai/registry/services"
 import { IMAGE_BACKGROUND_MAX_BATCH, IMAGE_SCENE_MAX_BATCH } from "../../../lib/ai/registry/tasks"
 import { SCENE_CODE } from "@qticaret/sector-packs"
 import { MEDIA_ID } from "../../../workflows/async-job/types/ai-image-edit"
+import { SCENE_TEXT_MAX, cleanSceneText } from "../../../lib/ai/scene-text"
 
 // A record's id of a kind a suggestion is asked for; its prefix is matched to the type in the workflow
 const ENTITY_ID = /^(prod|pcat|cnt|media|prev|pq)_[A-Za-z0-9]{1,40}$/
@@ -43,8 +44,8 @@ const MediaSuggestion = z
 
 /**
  * A picture set in one of the shop's scenes (Aşama 7): one picture, the
- * scene by its code (checked against the shop's packs in the workflow).
- * No prompt nor any text is taken: the scene's description is read on the server.
+ * scene by its code or a saved scene's id (checked against the shop's
+ * own in the workflow); its description is read on the server.
  */
 const SceneSuggestion = z
   .object({
@@ -53,6 +54,25 @@ const SceneSuggestion = z
     entity_ids: z.array(z.string().regex(MEDIA_ID)).min(1).max(IMAGE_SCENE_MAX_BATCH),
     service: z.string().regex(NAME).optional(),
     option: z.string().regex(SCENE_CODE),
+  })
+  .strict()
+
+/**
+ * A picture set in a scene typed for this once (Aşama 7): the words are
+ * client data, held in the workflow (`cleanSceneText`: one line, at most
+ * 200 characters, no link, no markup, personal data taken out) and sent
+ * behind the server's fixed words. Never a price or a credit.
+ */
+const CustomSceneSuggestion = z
+  .object({
+    task: z.literal("image_scene"),
+    entity_type: z.literal("media"),
+    entity_ids: z.array(z.string().regex(MEDIA_ID)).min(1).max(IMAGE_SCENE_MAX_BATCH),
+    service: z.string().regex(NAME).optional(),
+    prompt: z
+      .string()
+      .min(1)
+      .max(SCENE_TEXT_MAX * 4),
   })
   .strict()
 
@@ -74,12 +94,30 @@ const PhotoCardSuggestion = z
   })
   .strict()
 
-export const AdminPostAiSuggestion = z.union([
-  TextSuggestion,
-  SceneSuggestion,
-  MediaSuggestion,
-  PhotoCardSuggestion,
-])
+/**
+ * A typed scene is cleaned here, before anything runs or is stored
+ * (`cleanSceneText`); one that does not pass is 400 `ai.scene_text_invalid`.
+ * The workflow cleans it again.
+ */
+export const AdminPostAiSuggestion = z
+  .union([
+    TextSuggestion,
+    SceneSuggestion,
+    CustomSceneSuggestion,
+    MediaSuggestion,
+    PhotoCardSuggestion,
+  ])
+  .transform((body, ctx) => {
+    if (!("prompt" in body)) {
+      return body
+    }
+    const prompt = cleanSceneText(body.prompt)
+    if (prompt === null) {
+      ctx.addIssue({ code: "custom", message: "ai.scene_text_invalid", input: body.prompt })
+      return z.NEVER
+    }
+    return { ...body, prompt }
+  })
 export type AdminPostAiSuggestionType = z.infer<typeof AdminPostAiSuggestion>
 
 /**

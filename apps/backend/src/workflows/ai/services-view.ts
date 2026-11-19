@@ -25,10 +25,12 @@ export interface AiServiceView {
   scene: boolean
 }
 
-/** A scene as the picker shows it: its code and names; never its prompt. */
+/** A scene as the picker shows it: its code (a saved one's id) and names; never its prompt. */
 export interface AiSceneView {
   code: string
   name: { tr: string; en: string }
+  /** The shop saved it itself (Settings > Yapay zekâ); else its sector pack's. */
+  own: boolean
 }
 
 export interface AiTaskView {
@@ -41,7 +43,7 @@ export interface AiTaskView {
   /** What `usableServices` gives, registry order; the picker shows only with two or more. */
   usable: string[]
   preference: string | null
-  /** `image_scene`: the shop's scenes (its `options`, by code), from its sector packs. */
+  /** `image_scene`: the shop's scenes (its `options`, by code): its own, then its packs'. */
   scenes?: AiSceneView[]
 }
 
@@ -84,6 +86,7 @@ export async function aiServicesView(
   const scenes: AiSceneView[] = (await shopScenes(container)).map((scene) => ({
     code: scene.code,
     name: { tr: scene.name.tr, en: scene.name.en },
+    own: scene.own,
   }))
   const tasks = await Promise.all(
     aiTasks().map(async (task): Promise<AiTaskView> => ({

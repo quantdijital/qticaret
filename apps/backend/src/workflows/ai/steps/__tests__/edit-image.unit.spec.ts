@@ -9,6 +9,9 @@ import * as mediaLib from "../../../../lib/media"
 import { DIGITAL_SOURCE_TYPES, digitalSourceTypeOf } from "../../../../lib/media"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../../modules/integration-credentials"
 import { MEDIA_MODULE } from "../../../../modules/media"
+import { fakeImageConnector } from "../../../../lib/ai/connectors/fake-image"
+import { ownSceneSetting } from "../../../../lib/ai/scene-text"
+import { PLATFORM_SETTINGS_MODULE } from "../../../../modules/platform-settings"
 import { SECTOR_PACKS_MODULE } from "../../../../modules/sector-packs"
 import { STORAGE_FULL, editImage } from "../edit-image"
 
@@ -61,6 +64,17 @@ function container() {
     [INTEGRATION_CREDENTIALS_MODULE]: asValue(credentials),
     // No pack applied: the general pack's scenes are the shop's
     [SECTOR_PACKS_MODULE]: asValue({ listSectorPackApplications: () => Promise.resolve([]) }),
+    // The shop's own scenes (`ai_scenes`): one saved, the packs' shown
+    [PLATFORM_SETTINGS_MODULE]: asValue({
+      readSection: () =>
+        Promise.resolve({
+          values: {
+            show_pack_scenes: true,
+            scenes: [{ id: "own_abcdefgh", name: "Battaniye", prompt: "pembe battaniye üstünde" }],
+          },
+          version: 1,
+        }),
+    }),
   })
   return made
 }
@@ -235,6 +249,40 @@ describe("setting one picture in a scene (Aşama 7)", () => {
       error_code: "scene_unknown",
     })
     expect(uploads).toHaveLength(0)
+  })
+
+  it("sends a saved or a typed scene behind the server's fixed words, a pack's as it is", async () => {
+    const scene = jest.spyOn(fakeImageConnector, "scene")
+    try {
+      await editImage(container(), { ...SCENE, scene: "own_abcdefgh" })
+      await editImage(container(), { ...SCENE, scene: null, custom: "taş zemin, sabah ışığı" })
+      await editImage(container(), SCENE)
+      const settings = scene.mock.calls.map(([request]) => request.setting)
+      expect(settings[0]).toBe(ownSceneSetting("pembe battaniye üstünde"))
+      expect(settings[1]).toBe(ownSceneSetting("taş zemin, sabah ışığı"))
+      expect(settings[0]?.startsWith("Background only, with no people")).toBe(true)
+      expect(settings[2]).toContain("studio tabletop")
+      expect(settings[2]).not.toContain("Background only")
+    } finally {
+      scene.mockRestore()
+    }
+  })
+
+  it("cleans a typed scene again before the call: one that does not pass calls nothing", async () => {
+    const scene = jest.spyOn(fakeImageConnector, "scene")
+    try {
+      for (const custom of ["see https://example.com", "<b>tezgâh</b>", "x".repeat(201)]) {
+        expect(await editImage(container(), { ...SCENE, scene: null, custom })).toMatchObject({
+          status: "failed",
+          error_key: "ai.unknown_task",
+          error_code: "scene_unknown",
+        })
+      }
+      expect(scene).not.toHaveBeenCalled()
+      expect(uploads).toHaveLength(0)
+    } finally {
+      scene.mockRestore()
+    }
   })
 
   it("counts the image when the result's check refuses what the service gave back", async () => {

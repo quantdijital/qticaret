@@ -1,4 +1,5 @@
 import { accountingSection } from "./accounting"
+import { aiScenesSection } from "./ai-scenes"
 import { appearanceSection } from "./appearance"
 import { bankTransferSection } from "./bank-transfer"
 import { cashOnDeliverySection } from "./cash-on-delivery"
@@ -23,6 +24,7 @@ import { themeSection } from "./theme"
 
 export { DEFAULT_ROBOTS_TXT } from "./seo"
 export type { AccountingSettings } from "./accounting"
+export type { AiScenesSettings, OwnScene } from "./ai-scenes"
 export type { AppearanceSettings } from "./appearance"
 export type { BankTransferSettings } from "./bank-transfer"
 export type { CashOnDeliverySettings } from "./cash-on-delivery"
@@ -76,6 +78,7 @@ export const SECTIONS = {
   maintenance: maintenanceSection,
   theme: themeSection,
   payment_links: paymentLinksSection,
+  ai_scenes: aiScenesSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

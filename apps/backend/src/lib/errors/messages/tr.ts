@@ -719,6 +719,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.reviews_off":
     "Yorum ve sorularda yapay zekâ kapalı. Ayarlar > Yapay zekâ sayfasından açabilirsiniz.",
   "ai.not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı.",
+  // Aşama 7: a scene the shop wrote
+  "ai.scene_text_invalid":
+    "Sahne tarifi düz metin olmalı: en çok 200 karakter (adı en çok 40); bağlantı, HTML ya da tırnak içeremez.",
+  "ai.scenes_full": "En çok 12 sahne kaydedilebilir. Yenisi için birini silin.",
   // adr/0071 §3: "Bağlantıyı dene" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",
