@@ -1,5 +1,5 @@
 import type { AiImageInput, AiUsage, TextConnector } from "./connectors/types"
-import { suggestionProblems, suggestionText } from "./gate"
+import { suggestionProblems, suggestionTextFor } from "./gate"
 import type { PromptMessages } from "./prompt"
 import type { AiTask } from "./registry/tasks"
 
@@ -42,8 +42,8 @@ export async function runTextTask(input: {
     ...(input.images === undefined ? {} : { images: input.images }),
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   })
-  const text = suggestionText(answer.text)
-  const problems = suggestionProblems(task, text)
+  const text = suggestionTextFor(task, answer.text)
+  const problems = suggestionProblems(task, text, prompt.data)
   return problems.length > 0
     ? { status: "refused", problems, usage: answer.usage }
     : { status: "succeeded", text: text as GatedText, usage: answer.usage }

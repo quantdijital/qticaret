@@ -3435,7 +3435,8 @@
       "organize": "Kategori, marka ve KDV",
       "viewOnStore": "Vitrinde gör",
       "preview": "Önizle",
-      "previewReady": "Önizleme yeni sekmede açıldı ve bağlantısı kopyalandı. Bağlantı 24 saat ya da ürün yeniden kaydedilene kadar geçerli."
+      "previewReady": "Önizleme yeni sekmede açıldı ve bağlantısı kopyalandı. Bağlantı 24 saat ya da ürün yeniden kaydedilene kadar geçerli.",
+      "aiTitle": "Ürün adı için yapay zekâ ile öner"
     },
     "sections": {
       "noTemplate": "Şablon seçilmedi",
@@ -5824,7 +5825,8 @@
       "saved": "SEO alanları kaydedildi.",
       "duplicates": "Başka sayfalarla aynı: başlık {{title}}, açıklama {{description}} sayfada. Kayıt yapıldı, ama benzersiz metinler arama sonuçlarında daha iyi görünür.",
       "aiTitle": "Başlık için yapay zekâ ile öner",
-      "aiDescription": "Açıklama için yapay zekâ ile öner"
+      "aiDescription": "Açıklama için yapay zekâ ile öner",
+      "aiKeyword": "Odak anahtar kelime için yapay zekâ ile öner"
     },
     "redirectsCard": {
       "title": "Yönlendirmeler ve 404",
@@ -11453,7 +11455,9 @@
       "review_summary": "Yorum özeti",
       "review_reply": "Yorum yanıtı",
       "question_answer": "Soru yanıtı",
-      "product_from_photo": "Fotoğraftan ürün kartı"
+      "product_from_photo": "Fotoğraftan ürün kartı",
+      "focus_keyword": "Odak anahtar kelime",
+      "product_title": "Ürün adı"
     },
     "options": {
       "short": "Kısa",
@@ -11525,7 +11529,10 @@
       "service": "Servis",
       "option": "Seçenek",
       "refused": "Uygun bir öneri çıkmadı. Yeniden deneyebilirsiniz.",
-      "note": "Kullan yalnız alanı doldurur; kaydetmek size kalır."
+      "note": "Kullan yalnız alanı doldurur; kaydetmek size kalır.",
+      "choices": "Öneriler",
+      "mainChoice": "ana öneri",
+      "useChoice": "Kullan: {{text}}"
     },
     "hint": {
       "text": "Yapay zekâ bağlarsanız bu alanı tek tıkla doldurabilirsiniz.",

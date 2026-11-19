@@ -3435,7 +3435,8 @@
       "organize": "Categories, brand and VAT",
       "viewOnStore": "View on storefront",
       "preview": "Preview",
-      "previewReady": "The preview opened in a new tab and its link was copied. It works for 24 hours or until the product is saved again."
+      "previewReady": "The preview opened in a new tab and its link was copied. It works for 24 hours or until the product is saved again.",
+      "aiTitle": "Suggest a product name with AI"
     },
     "sections": {
       "noTemplate": "No template chosen",
@@ -5824,7 +5825,8 @@
       "saved": "SEO fields saved.",
       "duplicates": "Same as other pages: the title on {{title}}, the description on {{description}}. Saved, but unique texts do better in search results.",
       "aiTitle": "Suggest a title with AI",
-      "aiDescription": "Suggest a description with AI"
+      "aiDescription": "Suggest a description with AI",
+      "aiKeyword": "Suggest a focus keyword with AI"
     },
     "redirectsCard": {
       "title": "Redirects and 404s",
@@ -11453,7 +11455,9 @@
       "review_summary": "Review summary",
       "review_reply": "Review reply",
       "question_answer": "Question answer",
-      "product_from_photo": "Product card from a photo"
+      "product_from_photo": "Product card from a photo",
+      "focus_keyword": "Focus keyword",
+      "product_title": "Product name"
     },
     "options": {
       "short": "Short",
@@ -11525,7 +11529,10 @@
       "service": "Service",
       "option": "Option",
       "refused": "No suitable suggestion came out. You can try again.",
-      "note": "Use only fills the field; saving is up to you."
+      "note": "Use only fills the field; saving is up to you.",
+      "choices": "Suggestions",
+      "mainChoice": "main suggestion",
+      "useChoice": "Use: {{text}}"
     },
     "hint": {
       "text": "Connect an AI service to fill this field in one click.",

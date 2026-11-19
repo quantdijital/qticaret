@@ -176,6 +176,8 @@ describe("staff roles", () => {
       "product_description",
       "image_alt_text",
       "image_background",
+      "focus_keyword",
+      "product_title",
       "test_text",
       "no_such_task",
       "__proto__",

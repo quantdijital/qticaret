@@ -133,7 +133,7 @@ describe("SeoCard", () => {
     const SUGGESTED = "Kupa seçme rehberi ve bakım ipuçları"
     const net = vi.fn()
     const offer = (usable: string[]) => {
-      ai.answer.tasks = ["seo_title", "seo_description"].map((id) => ({
+      ai.answer.tasks = ["seo_title", "seo_description", "focus_keyword"].map((id) => ({
         id,
         capability: "text",
         mode: "sync",
@@ -273,6 +273,41 @@ describe("SeoCard", () => {
       expect(field("seo-title-cent_1")).toHaveValue("")
       expect(JSON.parse((net.mock.calls[0]?.[1] as { body: string }).body)).toMatchObject({
         task: "seo_description",
+      })
+    })
+
+    it("fills the focus keyword with the choice picked among its alternatives", async () => {
+      offer(["deepseek"])
+      net.mockImplementation(() =>
+        json(201, {
+          suggestion: {
+            id: "sug_1",
+            task: "focus_keyword",
+            service: "deepseek",
+            text: "keten gömlek\nyazlık keten gömlek",
+          },
+        })
+      )
+      const user = userEvent.setup()
+      renderCard()
+
+      await user.click(
+        await screen.findByRole("button", { name: "Odak anahtar kelime için yapay zekâ ile öner" })
+      )
+      await user.click(await screen.findByRole("button", { name: "Kullan: yazlık keten gömlek" }))
+      await waitFor(() => {
+        expect(field("seo-keyword-cent_1")).toHaveValue("yazlık keten gömlek")
+      })
+      expect(JSON.parse((net.mock.calls[0]?.[1] as { body: string }).body)).toEqual({
+        task: "focus_keyword",
+        entity_type: "page",
+        entity_id: "cent_1",
+      })
+      expect(seoWrites()).toEqual([])
+      await user.click(screen.getByRole("button", { name: "Kaydet" }))
+      expect(fetchMock).toHaveBeenCalledWith("/admin/seo/page/cent_1", {
+        method: "PUT",
+        body: { focus_keyword: "yazlık keten gömlek" },
       })
     })
 

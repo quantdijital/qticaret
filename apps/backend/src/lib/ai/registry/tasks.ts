@@ -3,6 +3,7 @@ import { SERP_TEXT_LENGTH } from "../../seo/pixel-width"
 import type { StaffRole } from "../../staff/permissions"
 import type { AiEntityType } from "../facts"
 import type { AiCapability } from "./capabilities"
+import { FOCUS_KEYWORD_TASK, PRODUCT_TITLE_TASK } from "./catalog-tasks"
 
 /** What a task is asked for: a text record, or a picture of the media library. */
 export type AiTaskEntity = AiEntityType | "media"
@@ -26,6 +27,9 @@ export const AI_GATES = [
   "image",
   // A structured answer: a closed schema and allow-lists (lib/ai/product-card.ts)
   "product_card",
+  // Short texts of the product page (registry/catalog-tasks.ts, lib/ai/short-text-gate.ts)
+  "focus_keyword",
+  "product_title",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -327,6 +331,8 @@ const TASKS: readonly AiTask[] = [
   QUESTION_ANSWER_TASK,
   PRODUCT_FROM_PHOTO_TASK,
   IMAGE_SCENE_TASK,
+  FOCUS_KEYWORD_TASK,
+  PRODUCT_TITLE_TASK,
 ]
 
 /** The data block's field lengths for a task: the shared ones, and the task's own over them. */

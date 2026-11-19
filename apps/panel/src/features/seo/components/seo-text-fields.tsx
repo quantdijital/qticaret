@@ -60,6 +60,56 @@ function WithAi({
 }
 
 /**
+ * The focus keyword with, where the AI core writes for the record, its
+ * button: the main keyword and its alternatives, each with its own
+ * "Kullan" that puts it in the field as a change (the card's Save writes it).
+ */
+export function FocusKeywordField({
+  type,
+  id,
+  field,
+  onUse,
+}: {
+  type: SeoEntityType
+  id: string
+  field: UseFormRegisterReturn
+  onUse: (keyword: string) => void
+}) {
+  const { t } = useTranslation()
+  const entity = aiEntityOf(type, id)
+  return (
+    <Field
+      label={t("seo.card.focusKeyword")}
+      htmlFor={`seo-keyword-${id}`}
+      hint={t("seo.card.focusKeywordHint")}
+    >
+      {entity ? (
+        <div className="flex items-start gap-1.5">
+          <Input
+            id={`seo-keyword-${id}`}
+            maxLength={SEO_MAX.keyword}
+            className="min-w-0 flex-1"
+            {...field}
+          />
+          <AiButton
+            task="focus_keyword"
+            entity={entity}
+            choices
+            size="icon"
+            label={t("seo.card.aiKeyword")}
+            onUse={(keyword) => {
+              onUse(keyword.slice(0, SEO_MAX.keyword))
+            }}
+          />
+        </div>
+      ) : (
+        <Input id={`seo-keyword-${id}`} maxLength={SEO_MAX.keyword} {...field} />
+      )}
+    </Field>
+  )
+}
+
+/**
  * The SEO card's title and description with their counters and AI
  * buttons (adr/0071 §13). "Kullan" hands the text to `onUse`, which puts
  * it in the form as a change: the card's own Save writes it, leaving drops it.
