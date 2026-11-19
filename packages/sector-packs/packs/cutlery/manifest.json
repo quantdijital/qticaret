@@ -1,7 +1,7 @@
 {
   "format": "quant-sector-pack",
   "code": "cutlery",
-  "version": 14,
+  "version": 15,
   "name": "Bıçak ve çatal-bıçak",
   "description": "Çakı, av, kamp, mutfak ve kasap bıçağı satan mağazalar için: namlu çeliği, sertlik, namlu boyu, sap malzemesi ve kilit sistemi alanlarıyla iki özellik şablonu, vitrinde gizli eklenen önerilen kategori iskeleti, yaş sınırlı ürün ve yaş beyanı ayarları, marka sayfaları için başlık şablonu."
 }
