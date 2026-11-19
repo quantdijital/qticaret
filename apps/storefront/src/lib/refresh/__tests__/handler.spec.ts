@@ -108,6 +108,7 @@ describe("the scopes' caches (adr/0048 Ek 2026-11-03)", () => {
       "/store/content/terms",
       "/store/seo/paths",
       "/store/storefront-menus",
+      "/store/storefront-layout/pages/",
     ])
     expect(refreshPlan(["site"])).toEqual({ paths: ["/store/seo/site"], edgeSite: true })
     // Each path once, whatever the scopes share

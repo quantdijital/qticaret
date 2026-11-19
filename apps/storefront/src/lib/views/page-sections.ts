@@ -58,7 +58,9 @@ export async function contentSections(
  * A content page the theme editor's live session names by its id
  * (`?icerik=`, adr/0073 §5): the page in draft or live, as resolve would
  * have found a live one. Only the live session opens one; on any other
- * request, or when the session does not name such a page: null.
+ * request, when the session does not name such a page, or when the
+ * backend does not answer (the editor's preview then shows the draft's
+ * home page, not an error): null.
  */
 export async function draftContentPage(
   id: string
@@ -67,7 +69,12 @@ export async function draftContentPage(
   if (!token || previewTokenKind(token) !== "session") {
     return null
   }
-  const found = await sessionPage(token, id)
+  const found = await sessionPage(token, id).catch((error: unknown) => {
+    if (isStoreApiError(error)) {
+      return null
+    }
+    throw error
+  })
   if (found?.entry.kind !== "page") {
     return null
   }

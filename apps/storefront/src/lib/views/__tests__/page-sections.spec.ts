@@ -148,4 +148,15 @@ describe("a content page in draft (`?icerik=`)", () => {
     reads.sessionPage.mockResolvedValue({ page: null, entry: { ...ENTRY, kind: "post" } })
     expect(await draftContentPage(ID)).toBeNull()
   })
+
+  it("opens nothing when the backend does not answer, so the preview shows the draft's home", async () => {
+    on(SESSION)
+    for (const status of [500, 503, 429]) {
+      reads.sessionPage.mockRejectedValueOnce(new StoreApiError(status, null, null))
+      expect(await draftContentPage(ID)).toBeNull()
+    }
+    // A bug is not an answer: it is not hidden
+    reads.sessionPage.mockRejectedValueOnce(new TypeError("boom"))
+    await expect(draftContentPage(ID)).rejects.toThrow("boom")
+  })
 })
