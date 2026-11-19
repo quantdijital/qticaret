@@ -208,6 +208,13 @@ describe("the theme editor's content pages", () => {
     expect(within(list).getByText(/Kendi düzeni olan en çok 20 sayfa/)).toBeVisible()
   })
 
+  it("says so when the address names a page İçerik no longer has, adding nothing to it", async () => {
+    const tree = await open(DOC, "cnt_silindi")
+    expect(await screen.findByText(/Bu sayfa bulunamadı/)).toBeVisible()
+    expect(tree).toHaveTextContent("Bölüm eklemek için yukarıdan bir sayfa seçin")
+    expect(within(tree).queryByRole("button", { name: "Üste bölüm ekle" })).toBeNull()
+  })
+
   it("adds no thirteenth section to a page", async () => {
     const twelve = Array.from({ length: 12 }, (_, at) =>
       pageSection("help", `yardim${String(at).padStart(4, "0")}`)

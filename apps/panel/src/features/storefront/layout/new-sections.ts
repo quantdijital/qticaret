@@ -1,0 +1,190 @@
+import type {
+  AnnouncementBar,
+  BodySection,
+  BodySectionType,
+  CategorySection,
+  FooterNewsletter,
+  HeaderMarquee,
+  HomeSection,
+  HomeSectionType,
+  PageGroup,
+  Placement,
+} from "@/features/storefront/api/layout"
+import {
+  ANNOUNCEMENT_DEFAULTS,
+  BANNER_DEFAULTS,
+  MARQUEE_DEFAULTS,
+  SLIDER_DEFAULTS,
+  STRIP_GALLERY_DEFAULTS,
+  defaultVariant,
+} from "@qticaret/types"
+import { PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
+
+/**
+ * The sections the editor adds (adr/0049): each in the storefront's own
+ * words until the shop writes its own (`sections.ts` re-exports them).
+ */
+
+const ALWAYS = { visible: true, starts_at: null, ends_at: null } as const
+
+/** A section as the chooser adds it: the storefront's own words until the shop writes its own. */
+export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
+  const base = { id, ...ALWAYS }
+  switch (type) {
+    case "faq":
+      return { ...base, type, title: null, items: [{ question: "", answer: "" }] }
+    case "hero":
+      return {
+        ...base,
+        type,
+        variant: defaultVariant(type),
+        eyebrow: null,
+        heading: null,
+        text: null,
+        links: [],
+        image: null,
+      }
+    case "price_bands":
+      return { ...base, type, ...newPriceBands() }
+    case "hero_slider":
+      return {
+        ...base,
+        type,
+        slides: [],
+        height: "regular",
+        scroller: SLIDER_DEFAULTS,
+      }
+    case "banner":
+      return { ...base, type, slides: [], ...BANNER_DEFAULTS }
+    case "strip_gallery":
+      // No strip yet: the shop adds two to eight, each from a record or its own picture
+      return { ...base, type, title: null, text: null, items: [], ...STRIP_GALLERY_DEFAULTS }
+    case "categories":
+      return {
+        ...base,
+        type,
+        title: null,
+        category_ids: [],
+        show_count: false,
+        more: null,
+        variant: defaultVariant(type),
+      }
+    case "products":
+      return {
+        ...base,
+        type,
+        title: null,
+        variant: "grid",
+        source: { kind: "newest" },
+        limit: 12,
+        columns: 3,
+        more: { kind: "system", target: "shop", label: null },
+      }
+    case "featured_product":
+      return { ...base, type, title: null, text: null, product_id: "" }
+    case "brands":
+      return { ...base, type, title: null, brand_ids: [] }
+    case "posts":
+      return { ...base, type, title: null, limit: 3 }
+    case "reviews":
+      return { ...base, type, title: null, limit: 6 }
+    case "google_rating":
+      return { ...base, type, title: null, excerpts: 0, profile_link: true }
+    case "rich_text":
+      return { ...base, type, title: null, body: { type: "doc", content: [] } }
+    case "trust_badges":
+      return { ...base, type, variant: defaultVariant(type) }
+    case "marquee":
+      return { ...base, ...newMarqueeFields() }
+    case "newsletter":
+      return {
+        ...base,
+        type,
+        title: null,
+        text: null,
+        variant: defaultVariant(type),
+        description: null,
+      }
+    case "help":
+      return { ...base, type, title: null, text: null }
+  }
+}
+
+/**
+ * A section of a page body as its chooser adds it; a category page's (or
+ * a content page's) goes where it was added (below the products, or the
+ * page's text, unless said otherwise).
+ */
+export function newBodySection(
+  group: PageGroup,
+  type: BodySectionType,
+  id: string,
+  placement: Placement = "bottom"
+): BodySection {
+  if (type === "related_products") {
+    const base = { id, ...ALWAYS }
+    return {
+      ...base,
+      type,
+      title: null,
+      variant: "grid",
+      source: { kind: "same_category" },
+      limit: 8,
+      columns: 3,
+    }
+  }
+  const section = newHomeSection(type, id)
+  return group === "category" || group === "pages"
+    ? ({ ...section, placement } as CategorySection)
+    : section
+}
+
+/**
+ * A new price bands strip's fields: three bands to start from, each an
+ * upper bound in whole lira, the last without one ("and up"), and a label
+ * to write (the form suggests one from the bound, as a strip's first
+ * item); the contract's default products shown small.
+ */
+const newPriceBands = () => ({
+  title: null,
+  bands: [
+    { label: "", text: null, max: 500, category_id: null },
+    { label: "", text: null, max: 1000, category_id: null },
+    { label: "", text: null, max: null, category_id: null },
+  ],
+  thumbs: PRICE_BANDS_LIMITS.thumbs.default,
+})
+
+/** The announcement bar, with one line to write. */
+export const newAnnouncementBar = (id: string): AnnouncementBar => ({
+  id,
+  ...ALWAYS,
+  type: "announcement_bar",
+  lines: [""],
+  ...ANNOUNCEMENT_DEFAULTS,
+})
+
+/** A new scrolling strip's fields: one item to write, the contract's default steps. */
+const newMarqueeFields = () => ({
+  type: "marquee" as const,
+  items: [{ icon: null, text: "", subtext: null, link: null }],
+  ...MARQUEE_DEFAULTS,
+})
+
+/** The header group's scrolling strip, above the shop's header (adr/0049 Ek 2026-11-14 §10 karar 9). */
+export const newHeaderMarquee = (id: string): HeaderMarquee => ({
+  id,
+  ...ALWAYS,
+  ...newMarqueeFields(),
+})
+
+/** The footer's newsletter box, in the storefront's own words. */
+export const newFooterNewsletter = (id: string): FooterNewsletter => ({
+  id,
+  ...ALWAYS,
+  type: "newsletter",
+  title: null,
+  text: null,
+  variant: "standard",
+  description: null,
+})

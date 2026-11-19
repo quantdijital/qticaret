@@ -57,7 +57,15 @@ export function useEditorPlace({
     shown,
     /** The content page picked, as İçerik lists it; null: none (yet). */
     picked: onContent ? picked : null,
-    contentPage: { id: place.content, title: onContent ? (picked?.title ?? null) : null, contact },
+    /**
+     * The content page worked on, once known among İçerik's pages (an id
+     * the address names that is none, or no longer one, takes no section).
+     */
+    contentPage: {
+      id: onContent && picked ? picked.id : null,
+      title: onContent ? (picked?.title ?? null) : null,
+      contact,
+    },
     /** A content page in draft shown: only the editor's own session shows it (`?icerik=`). */
     draftPage: onContent && picked?.status === "draft" ? picked.id : null,
   }

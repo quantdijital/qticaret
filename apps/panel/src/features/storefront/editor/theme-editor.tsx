@@ -289,7 +289,7 @@ export function ThemeEditor({
       <SectionChooser
         doc={doc}
         page={page}
-        content={place.content}
+        content={place.contentPage.id}
         adding={adding}
         act={act}
         onClose={() => {

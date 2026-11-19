@@ -10165,7 +10165,7 @@
         "designed": "Kendi düzeni var",
         "pagesFull": "Kendi düzeni olan en çok {{max}} sayfa olabilir. Başka bir sayfaya bölüm eklemek için önce birinin bölümlerini kaldırın.",
         "sectionsFull": "Bir sayfada en çok {{max}} bölüm olabilir.",
-        "pick": "Bölüm eklemek için İçerik'te bir sayfa açın; sonra yukarıdan seçin.",
+        "pick": "Bölüm eklemek için yukarıdan bir sayfa seçin; İçerik'te henüz sayfa yoksa önce orada açın.",
         "missing": {
           "none": "Önizleme için İçerik'te bir sayfa gerekli; bir sayfa açınca burada görünür.",
           "gone": "Bu sayfa bulunamadı, silinmiş olabilir. Yukarıdan başka bir sayfa seçin."

@@ -10165,7 +10165,7 @@
         "designed": "Has its own layout",
         "pagesFull": "At most {{max}} pages can have their own layout. To add sections to another page, first remove one page's sections.",
         "sectionsFull": "A page holds at most {{max}} sections.",
-        "pick": "To add sections, create a page in Content; then choose it above.",
+        "pick": "To add sections, choose a page above; if Content has none yet, create one there first.",
         "missing": {
           "none": "The preview needs a page in Content; once one exists it shows here.",
           "gone": "This page was not found; it may have been deleted. Choose another page above."

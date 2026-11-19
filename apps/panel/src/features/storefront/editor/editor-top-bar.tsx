@@ -176,7 +176,7 @@ export function EditorTopBar({
             ))}
           </SelectContent>
         </Select>
-        {pagePicker}
+        {narrow ? null : pagePicker}
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2 lg:justify-center">
           {narrow ? null : <UndoRedo {...history} />}
           {status}
@@ -212,6 +212,12 @@ export function EditorTopBar({
           </ToggleGroup>
           <UndoRedo {...history} />
           <div className="flex shrink-0 items-center gap-1">{tools}</div>
+        </div>
+      ) : null}
+      {/* On a phone the content page's choice takes a row of its own, the whole width */}
+      {narrow && pagePicker ? (
+        <div className="flex h-12 items-center border-t px-3 [&>button]:max-w-none [&>button]:flex-1">
+          {pagePicker}
         </div>
       ) : null}
     </header>
