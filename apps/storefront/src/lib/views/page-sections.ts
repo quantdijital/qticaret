@@ -1,11 +1,11 @@
 import "server-only"
-import type { Resolution, StorePageLayout } from "@qticaret/types"
+import type { Resolution, StoreContentPageSection, StorePageLayout } from "@qticaret/types"
 import type { ContentPageView, Translate } from "@qticaret/ui"
 import type { ContentEntry } from "@/lib/store-api/content-entry"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { previewPageLayout, publishedPageLayout, sessionPage } from "@/lib/store-api/page-layout"
 import { layoutPreviewToken, previewTokenKind } from "./layout"
-import { byPlacement, sectionViews } from "./sections"
+import { sectionViews } from "./sections"
 
 type Entity = Extract<Resolution, { type: "entity" }>
 
@@ -35,11 +35,44 @@ export async function pageLayoutOf(id: string): Promise<StorePageLayout | null> 
   }
 }
 
+/** A page's section the theme draws around its text: one of the home page's types. */
+type AroundText = Exclude<
+  StoreContentPageSection,
+  { type: "contact" | "payment_facts" | "shipping_facts" }
+>
+
+/** Whether a section is some of the page's own text or a role page's part (adr/0073 Ek 2026-11-19 (2) K2). */
+const isPageText = (section: StoreContentPageSection): boolean =>
+  section.type === "contact" ||
+  section.type === "payment_facts" ||
+  section.type === "shipping_facts" ||
+  (section.type === "rich_text" && section.variant === "article")
+
+/**
+ * A page's sections around its text, until the theme draws the text as
+ * sections (adr/0073 Ek 2026-11-19 (2), S8): the ones before its first
+ * text section above the text, the others below it, the text sections
+ * themselves left out (the page's text and its contact, payment and
+ * shipping parts are drawn from the page as before). A page whose answer
+ * is its text alone (`synthesized`) has none around it.
+ */
+export function aroundText(sections: readonly StoreContentPageSection[]): {
+  top: AroundText[]
+  bottom: AroundText[]
+} {
+  const first = sections.findIndex(isPageText)
+  const others = (list: readonly StoreContentPageSection[]) =>
+    list.filter((section): section is AroundText => !isPageText(section))
+  return first < 0
+    ? { top: [], bottom: others(sections) }
+    : { top: others(sections.slice(0, first)), bottom: others(sections.slice(first)) }
+}
+
 /**
  * A content page's sections as the theme draws them, above its text and
- * below it, read as the home page's and the category page's are
- * (`sectionViews`). None, or none left to show: undefined, so the page's
- * view is as it was before pages took sections.
+ * below it (`aroundText`), read as the home page's and the category
+ * page's are (`sectionViews`). None, or none left to show: undefined, so
+ * the page's view is as it was before pages took sections.
  */
 export async function contentSections(
   id: string,
@@ -49,7 +82,7 @@ export async function contentSections(
   if (!layout || layout.sections.length === 0) {
     return undefined
   }
-  const { top, bottom } = byPlacement(layout.sections)
+  const { top, bottom } = aroundText(layout.sections)
   const [above, below] = await Promise.all([sectionViews(top, t), sectionViews(bottom, t)])
   return above.length > 0 || below.length > 0 ? { top: above, bottom: below } : undefined
 }

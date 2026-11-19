@@ -8281,7 +8281,8 @@
         },
         "rich_text": {
           "pane": "Yalnız metin",
-          "with_image": "Görselli metin"
+          "with_image": "Görselli metin",
+          "article": "Sayfa metni"
         }
       },
       "look": {

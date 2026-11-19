@@ -1,3 +1,4 @@
+import { LAYOUT_LIMITS } from "../../layout-fields"
 import { presetDocument, presetTheme, withShopPages } from "../document"
 import { resolvePreset } from "../resolve"
 import type { PresetLookups } from "../resolve"
@@ -70,10 +71,13 @@ describe("a preset's content page layouts (adr/0073 §4)", () => {
   })
 
   it("leaves out a page the design has no room for, keeping the rest of the look (warn, don't block)", () => {
-    // Twenty pages laid out already, the Hakkımızda page among them
+    // The design's pages laid out already (fifty since Ek 2026-11-19 (2) K1), Hakkımızda among them
     const laidOut = [
       ABOUT,
-      ...Array.from({ length: 19 }, (_, index) => `cnt_01KPAGE${String(index).padStart(2, "0")}`),
+      ...Array.from(
+        { length: LAYOUT_LIMITS.pages - 1 },
+        (_, index) => `cnt_01KPAGE${String(index).padStart(2, "0")}`
+      ),
     ]
     const resolved = resolvePreset(
       {
@@ -95,7 +99,7 @@ describe("a preset's content page layouts (adr/0073 §4)", () => {
       }
     )
 
-    // A page with a layout already is replaced; a new one past twenty is left out, named
+    // A page with a layout already is replaced; a new one past the limit is left out, named
     expect(resolved.pages).toEqual([{ page_id: ABOUT, sections: [help("hkyardim01")] }])
     expect(resolved.groups.home).toEqual([help("anayardim1")])
     expect(resolved.skipped).toEqual([
@@ -105,8 +109,11 @@ describe("a preset's content page layouts (adr/0073 §4)", () => {
     expect(resolved.dropped).toEqual([])
   })
 
-  it("adds new pages while there is room, the one past twenty left out", () => {
-    const laidOut = Array.from({ length: 19 }, (_, index) => `cnt_01KPAGE${String(index)}`)
+  it("adds new pages while there is room, the one past the limit left out", () => {
+    const laidOut = Array.from(
+      { length: LAYOUT_LIMITS.pages - 1 },
+      (_, index) => `cnt_01KPAGE${String(index)}`
+    )
     const resolved = resolvePreset(
       {
         pages: [
@@ -128,9 +135,9 @@ describe("a preset's content page layouts (adr/0073 §4)", () => {
     expect(resolved.skipped).toEqual([
       { where: "pages", ref: "page:hikayemiz", name: "Hikâyemiz", reason: "limit" },
     ])
-    // Merged with the draft's own, the design holds twenty
+    // Merged with the draft's own, the design holds its limit
     const shop = laidOut.map((id) => ({ page_id: id, sections: [help("eskiyardim")] }))
-    expect(withShopPages(resolved.pages, shop).pages).toHaveLength(20)
+    expect(withShopPages(resolved.pages, shop).pages).toHaveLength(LAYOUT_LIMITS.pages)
   })
 
   it("drops a page's section whose record the shop lacks, and a page left with none", () => {
@@ -216,9 +223,8 @@ describe("the shop's content page layouts under a preset (adr/0073 §4)", () => 
       [CONTACT, ["iletisim01"]],
       [ABOUT, ["hkyardim01"]],
     ])
-    // No place written: below the page's text
-    expect(doc.pages[1]?.sections[0]).toMatchObject({ placement: "bottom" })
-    expect(doc.pages[0]?.sections[0]).toMatchObject({ placement: "top" })
+    // One list since Ek 2026-11-19 (2) K1: an older place is read away, as a stored design's
+    expect(doc.pages.flatMap((each) => each.sections).some((s) => "placement" in s)).toBe(false)
   })
 
   it("writes nothing for a page section the editor's schema refuses (the page's own types)", () => {

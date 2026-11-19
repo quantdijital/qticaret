@@ -217,6 +217,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.too_large":
     "The content is too long or too deeply nested; a page can hold at most 200,000 characters and a few levels of nested lists.",
   "content.unknown": "Content not found.",
+  "content.page_text_in_editor":
+    "A page's text is edited in the theme editor, in the page's sections; only its title, address, cover and status are saved here.",
   "errors.busy": "The record is being updated by another action; try again in a few seconds.",
   "errors.conflict": "The record changed meanwhile; reload and try again.",
   "errors.csrf_rejected": "The request failed a security check; reload the page and try again.",
@@ -1064,7 +1066,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The page given sections was not recognised; only the pages under Content can be laid out. Reload the page and try again.",
   "storefront_layout.page_duplicate":
     "The same page's layout was sent twice; reload the page and try again.",
-  "storefront_layout.pages_limit": "At most 20 pages can have a layout of their own.",
+  "storefront_layout.pages_limit": "At most 50 pages can have a layout of their own.",
   "storefront_layout.page_sections_limit": "A page holds at least one and at most 12 sections.",
   "storefront_layout.too_large":
     "The design has grown too large to save; shorten some sections or long texts.",

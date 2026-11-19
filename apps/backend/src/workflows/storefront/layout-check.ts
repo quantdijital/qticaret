@@ -19,7 +19,8 @@ import { stripGalleryImages, stripRecord } from "../../lib/storefront/sections/s
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
-import { assertCards, mediaOf } from "../content/rules"
+import { cardKeys } from "../../lib/content/cards"
+import { assertCardIds, mediaOf } from "../content/rules"
 import { existingRecords, isRecordKind } from "./menu-links"
 
 /** Every link a section holds: buttons, slides, "see all", a scrolling strip's items. */
@@ -152,13 +153,29 @@ export function imagesOf(section: BodySection): string[] {
   if (section.type === "newsletter") {
     return newsletterImages(section)
   }
+  // The contact page's own text (adr/0073 Ek 2026-11-19 (2) K2): its pictures
+  if (section.type === "contact") {
+    return docStats(section.body).images.map((each) => each.src)
+  }
   return []
 }
+
+/** The cards a design's rich texts and contact sections hold, by `kind:id`. */
+const cardsOf = (sections: readonly BodySection[]) =>
+  sections.flatMap((section) => {
+    if (section.type !== "rich_text" && section.type !== "contact") {
+      return []
+    }
+    const { product, category } = docStats(section.body).cards
+    return [...product.map((id) => `product:${id}`), ...category.map((id) => `category:${id}`)]
+  })
 
 /**
  * What a saved design must hold (adr/0049): records that exist (a draft
  * one counts: it shows once live), images the shop uploaded, rich text
- * whose cards exist and whose `{belirteç}`s are the shop's details. The
+ * (and a content page's contact text) whose `{belirteç}`s are the shop's
+ * details and whose cards exist, the cards `before` (the stored design the
+ * save replaces) did not hold only (adr/0073 Ek 2026-11-19 (2) K2). The
  * home, product and category pages' sections go through the same checks
  * (the plain lines' `{belirteç}`s, a FAQ's answers among them, are the
  * schema's); the header's scrolling strip links only records that exist
@@ -168,7 +185,8 @@ export function imagesOf(section: BodySection): string[] {
  */
 export async function checkLayout(
   container: MedusaContainer,
-  doc: LayoutDocument
+  doc: LayoutDocument,
+  before: unknown = null
 ): Promise<string[]> {
   const sections = bodySections(doc)
   const recordLinks = (section: BodySection | HeaderSection) =>
@@ -203,13 +221,20 @@ export async function checkLayout(
     throw new ValidationError("storefront_menus.target_unknown", { field: "document" })
   }
   for (const section of sections) {
-    if (section.type === "rich_text") {
-      if (unknownDocTokens(section.body).length > 0) {
-        throw new ValidationError("storefront_layout.token_unknown", { field: "document" })
-      }
-      await assertCards(container, section.body)
+    if (
+      (section.type === "rich_text" || section.type === "contact") &&
+      unknownDocTokens(section.body).length > 0
+    ) {
+      throw new ValidationError("storefront_layout.token_unknown", { field: "document" })
     }
   }
+  // Only the cards this save adds (adr/0073 Ek 2026-11-19 (2) K2, as a content save checks):
+  // a card saved before whose record went since is left out when drawn, never a lock
+  const known = cardKeys(before)
+  const added = [...new Set(cardsOf(sections))].filter((key) => !known.has(key))
+  const idsOf = (kind: string) =>
+    added.flatMap((key) => (key.startsWith(`${kind}:`) ? [key.slice(kind.length + 1)] : []))
+  await assertCardIds(container, { product: idsOf("product"), category: idsOf("category") })
   if (footerRowDocs(blocks).some((body) => unknownDocTokens(body).length > 0)) {
     throw new ValidationError("storefront_layout.token_unknown", { field: "document" })
   }

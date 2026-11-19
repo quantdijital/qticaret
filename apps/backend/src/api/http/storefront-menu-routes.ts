@@ -3,6 +3,7 @@ import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
 import {
   AdminPostStorefrontLayout,
   AdminPostStorefrontLayoutAction,
+  AdminPostStorefrontLayoutPublish,
   AdminPostStorefrontLayoutRestore,
 } from "../admin/storefront-layout/validators"
 import { AdminPostStorefrontMenu } from "../admin/storefront-menus/validators"
@@ -46,11 +47,17 @@ export const STOREFRONT_MENU_ROUTES = [
     bodyParser: { sizeLimit: "1mb" },
     middlewares: [validateAndTransformBody(AdminPostStorefrontLayout)],
   },
-  ...["/admin/storefront-layout/publish", "/admin/storefront-layout/preview"].map((matcher) => ({
-    matcher,
+  // adr/0073 Ek 2026-11-19 (2) K5: the content pages in draft that go live with it
+  {
+    matcher: "/admin/storefront-layout/publish",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostStorefrontLayoutPublish)],
+  },
+  {
+    matcher: "/admin/storefront-layout/preview",
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostStorefrontLayoutAction)],
-  })),
+  },
   // adr/0064 Ek 2026-11-17: each keeps the draft first as an automatic save
   // (its author recorded), so people only, rate limited per staff member
   {

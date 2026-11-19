@@ -26,7 +26,7 @@ import { assertHandleFree, freeHandleFrom, handleOf } from "./handle"
 
 export const CONTENT_LIMITS = { title: 200, excerpt: 500, author: 120, imageAlt: 300 } as const
 // The body's opening kept for lists and descriptions
-const SUMMARY_LENGTH = 300
+export const SUMMARY_LENGTH = 300
 
 export interface ContentInput {
   title?: string | undefined
@@ -129,9 +129,19 @@ export async function mediaOf(container: MedusaContainer, urls: string[], field:
 }
 
 export async function assertCards(container: MedusaContainer, doc: ContentDoc): Promise<void> {
-  const { product, category } = docStats(doc).cards
-  const products = [...new Set(product)]
-  const categories = [...new Set(category)]
+  await assertCardIds(container, docStats(doc).cards)
+}
+
+/** The cards' products and categories exist; one that does not refuses the save. */
+export async function assertCardIds(
+  container: MedusaContainer,
+  cards: { product: readonly string[]; category: readonly string[] }
+): Promise<void> {
+  const products = [...new Set(cards.product)]
+  const categories = [...new Set(cards.category)]
+  if (products.length === 0 && categories.length === 0) {
+    return
+  }
   const service = container.resolve(Modules.PRODUCT)
   const [foundProducts, foundCategories] = await Promise.all([
     products.length ? service.listProducts({ id: products }, { select: ["id"] }) : [],
@@ -210,6 +220,11 @@ export async function contentPlan(
   input: ContentInput,
   current: ContentEntryRecord | null
 ): Promise<ContentPlan> {
+  // A page's text is its sections' in the theme editor (adr/0073 Ek 2026-11-19 (2) K2): its
+  // `body` is their mirror, written by the system only; posts keep theirs
+  if (kind === "page" && input.body !== undefined) {
+    throw new ValidationError("content.page_text_in_editor", { field: "body" })
+  }
   const text = textFields(input, current)
   const body =
     input.body === undefined

@@ -11,7 +11,12 @@ import { adminLayout } from "../read"
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const source = await draftSource(req.scope, null)
   const { result } = await replaceDraftWorkflow(req.scope).run({
-    input: { source, actor: req.auth_context.actor_id, reason: "discard" },
+    input: {
+      source: source.document,
+      text_at: source.text_at,
+      actor: req.auth_context.actor_id,
+      reason: "discard",
+    },
   })
   res.json({
     layout: await adminLayout(req.scope),

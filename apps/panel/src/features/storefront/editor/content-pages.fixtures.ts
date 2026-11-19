@@ -1,3 +1,4 @@
+import { PAGE_LAYOUT_LIMITS } from "@qticaret/types"
 import type { ContentEntry } from "@/features/content/api/content"
 import type {
   ContentPageSection,
@@ -71,10 +72,13 @@ export const PAGE_LAYOUTS: PageLayout[] = [
 export const DOC_WITH_PAGES: LayoutDocument = { ...DOC, pages: PAGE_LAYOUTS }
 
 /** As many pages as may have a layout of their own, none of them the shop's three. */
-export const FULL_PAGES: PageLayout[] = Array.from({ length: 20 }, (_, index) => ({
-  page_id: `cnt_dolu${String(index)}`,
-  sections: [pageSection("help", `doluyardim${String(index).padStart(2, "0")}`)],
-}))
+export const FULL_PAGES: PageLayout[] = Array.from(
+  { length: PAGE_LAYOUT_LIMITS.pages },
+  (_, index) => ({
+    page_id: `cnt_dolu${String(index)}`,
+    sections: [pageSection("help", `doluyardim${String(index).padStart(2, "0")}`)],
+  })
+)
 
 /**
  * İçerik's answers over the editor's server (`serve`): the pages list (all

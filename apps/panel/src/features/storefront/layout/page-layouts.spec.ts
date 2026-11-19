@@ -79,7 +79,7 @@ describe("a content page's layout in the editor", () => {
     ])
   })
 
-  it("holds twelve sections on a page and twenty pages with a layout", () => {
+  it("holds twelve sections on a page and fifty pages with a layout", () => {
     const twelve = Array.from({ length: 12 }, (_, at) =>
       pageSection("help", `yardim${String(at).padStart(4, "0")}`)
     )

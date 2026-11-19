@@ -1,6 +1,6 @@
 import type { MedusaStoreRequest } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
-import { PAGE_ID, readStoredLayout } from "../../../lib/storefront/layout"
+import { PAGE_ID, readStoredLayoutTexts } from "../../../lib/storefront/layout"
 import type { layoutRow } from "../../../workflows/storefront/layout"
 import { contentPageOf, storePageLayout } from "../../../workflows/storefront/layout-page-read"
 import type { ShownPage } from "../../../workflows/storefront/layout-page-read"
@@ -41,7 +41,7 @@ export const draftPageLayout = (
 ): Promise<ShownPage> =>
   storePageLayout(
     req.scope,
-    readStoredLayout(row.draft),
+    readStoredLayoutTexts(row.draft),
     id,
     req.publishable_key_context.sales_channel_ids
   )

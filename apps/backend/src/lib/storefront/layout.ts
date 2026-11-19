@@ -12,7 +12,7 @@ import {
 import type { BodySection, PageMain } from "./layout-sections"
 import { layoutSettings, storedSettings } from "./layout-settings"
 import { pageSections, pagesGroup } from "./layout-pages"
-import { storedPages } from "./layout-pages-stored"
+import { legacyTextAt, storedPages } from "./layout-pages-stored"
 import { DESIGN_LIMITS } from "./designs/limits"
 import { freeRowIds, freeRowsConflict } from "./sections/footer-rules"
 import { storedFreeRowIds } from "./sections/footer-rows-stored"
@@ -167,6 +167,27 @@ export const bodySections = (doc: LayoutDocument): BodySection[] => [
   ...pageSections(doc.pages),
   ...doc.footer.filter(footerBody),
 ]
+
+/** Every id the design's sections (and a free rows footer's rows and blocks) hold. */
+export const sectionIds = (doc: LayoutDocument): Set<string> =>
+  new Set([
+    ...[...doc.header, ...doc.home, ...doc.footer, ...doc.product, ...doc.category].map(
+      (section) => section.id
+    ),
+    ...pageSections(doc.pages).map((section) => section.id),
+    ...freeRowIds(doc.footer),
+  ])
+
+/**
+ * A stored document read through today's schema with where each older
+ * page's text stands (`legacyTextAt`, adr/0073 Ek 2026-11-19 (2) K1).
+ */
+export const readStoredLayoutTexts = (
+  stored: unknown
+): { document: LayoutDocument; text_at: Record<string, number> } => ({
+  document: readStoredLayout(stored),
+  text_at: legacyTextAt(stored),
+})
 
 /** Whether a page's section is one of its body's, not its main one. */
 export const isBody = <S extends { type: string }>(section: S): section is Exclude<S, PageMain> =>

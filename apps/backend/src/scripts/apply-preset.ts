@@ -7,7 +7,7 @@ import { isValidationError } from "../lib/errors"
 import { AUDIT_LOG_MODULE } from "../modules/audit-log"
 import type AuditLogModuleService from "../modules/audit-log/service"
 import { layoutRow } from "../workflows/storefront/layout-row"
-import { publishLayoutWorkflow } from "../workflows/storefront/layout"
+import { publishLayoutWorkflow } from "../workflows/storefront/layout-publish"
 import { applyPresetWorkflow } from "../workflows/storefront/preset-apply"
 
 export interface PresetArgs {
@@ -80,7 +80,9 @@ export default async function applyPreset({ container, args }: ExecArgs): Promis
     return
   }
   if (fresh) {
-    const { result: published } = await publishLayoutWorkflow(container).run({ input: null })
+    const { result: published } = await publishLayoutWorkflow(container).run({
+      input: { actor: null },
+    })
     // No staff member, no request: the admin log does not see it
     await container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE).record({
       kind: "system",

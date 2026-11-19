@@ -42,8 +42,9 @@ export const SECTION_VARIANTS = {
   footer_bar: ["ledger", "brand_columns", "free_rows"],
   // The newsletter box (Ek 2026-11-17 e-bülten): today's first; `in_footer` the footer's only
   newsletter: ["standard", "split", "image_card", "strip", "in_footer"],
-  // The shop's own text (adr/0073 §3): today's pane first; `with_image` a picture beside it
-  rich_text: ["pane", "with_image"],
+  // The shop's own text (adr/0073 §3): today's pane first; `with_image` a picture beside it;
+  // `article` a content page's own text (Ek 2026-11-19 (2) K2), the pages' only
+  rich_text: ["pane", "with_image", "article"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
