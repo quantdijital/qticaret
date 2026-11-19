@@ -173,7 +173,7 @@ export function VatRateDialog({ rate, onClose }: VatRateDialogProps) {
             ) : null}
           </DialogBody>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="cancel" onClick={onClose}>
               {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={pending}>

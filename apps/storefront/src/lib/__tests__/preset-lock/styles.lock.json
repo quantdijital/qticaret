@@ -18,6 +18,10 @@
       "file": "card.css"
     },
     {
+      "sha256": "42de2e83b204af91e1b7a0e51ff7ffa37f719e359fe3ff833ac6cff0ccb199ab",
+      "file": "catalog-fit.css"
+    },
+    {
       "sha256": "506aa24d5ec194c74236fc67d1645481e55ba6fa9b0e6dffab1cc9869c490f6f",
       "file": "catalog.css"
     },
@@ -126,7 +130,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "1c528e5c599c4733d18a5891969c4f844e60fce269c175bc0ba58de7acfd4f4e",
+      "sha256": "500aa4975f151f5fe12c8f2da53c0ea5567824946609b833eeed2747c0803ee2",
       "file": "styles.css"
     },
     {

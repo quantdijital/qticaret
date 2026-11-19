@@ -327,4 +327,36 @@ describe("a product of one variant", () => {
       })
     })
   })
+
+  /** The owner, 2026-11-19: the stock count stood ~40 px below the price beside it. */
+  it("keeps the location's note under the stock count, not above the stock fields", async () => {
+    renderCard({
+      ...PRODUCT,
+      variants: [
+        {
+          ...variant("variant_1", "Varsayılan"),
+          manage_inventory: true,
+          inventory_items: [
+            {
+              inventory_item_id: "iitem_1",
+              inventory: {
+                location_levels: [
+                  { location_id: "sloc_1", stocked_quantity: 12, reserved_quantity: 3 },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    } as unknown as ProductDetail)
+    const count = await screen.findByLabelText("Stok adedi")
+    const note = await screen.findByText("Mağazanın varsayılan depo adresindeki adet.")
+    // The note closes the count's own field, as the price's note does its field
+    expect(note.parentElement).toContainElement(count)
+    expect(note.previousElementSibling).toContainElement(count)
+    const heading = screen.getByRole("heading", { name: "Stok" })
+    // Nothing between the group's name and its fields: the same rows as "Fiyat"
+    expect(heading.parentElement?.children).toHaveLength(1)
+    expect(screen.getByText("Siparişe ayrılan")).toBeVisible()
+  })
 })

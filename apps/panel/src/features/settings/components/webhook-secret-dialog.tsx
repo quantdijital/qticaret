@@ -54,7 +54,7 @@ export function WebhookSecretDialog({
             <Button onClick={onClose}>{t("settings.api.create.done")}</Button>
           ) : (
             <>
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="cancel" onClick={onClose}>
                 {t("common.cancel")}
               </Button>
               <Button

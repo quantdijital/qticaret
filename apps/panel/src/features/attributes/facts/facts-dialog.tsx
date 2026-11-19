@@ -173,7 +173,7 @@ export function FactsDialog({ productIds, onClose, onDone }: FactsDialogProps) {
             </Button>
           ) : (
             <>
-              <Button variant="outline" onClick={close}>
+              <Button variant="cancel" onClick={close}>
                 {t("common.cancel")}
               </Button>
               <Button

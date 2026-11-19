@@ -87,7 +87,7 @@ function EvidenceDialog({
             </Field>
           </DialogBody>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="cancel" onClick={onClose}>
               {t(`${C}.cancel`)}
             </Button>
             <Button type="submit" disabled={pending}>

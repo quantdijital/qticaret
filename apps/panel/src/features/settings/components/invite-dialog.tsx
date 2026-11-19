@@ -134,7 +134,7 @@ export function InviteDialog({
           ) : (
             <>
               <Button
-                variant="outline"
+                variant="cancel"
                 onClick={() => {
                   close(false)
                 }}

@@ -206,7 +206,7 @@ export function AiBackgroundDialog({
           </div>
         )}
         <DialogFooter>
-          <Button type="button" variant="ghost" onClick={close}>
+          <Button type="button" variant="cancel" onClick={close}>
             {t("ai.suggest.dismiss")}
           </Button>
           {usable.length === 0 ? null : state.status === "ready" ? (

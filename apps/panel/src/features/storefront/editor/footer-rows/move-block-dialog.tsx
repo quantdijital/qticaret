@@ -85,7 +85,7 @@ export function MoveBlockDialog({
           )}
         </RadioGroup>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={close}>
+          <Button type="button" variant="cancel" onClick={close}>
             {t("common.cancel")}
           </Button>
           <Button

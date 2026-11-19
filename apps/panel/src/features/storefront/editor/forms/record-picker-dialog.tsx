@@ -139,7 +139,7 @@ export function RecordPickerDialog({
         </DialogBody>
         {multiple && done ? (
           <DialogFooter>
-            <Button type="button" variant="outline" disabled={done.busy} onClick={onClose}>
+            <Button type="button" variant="cancel" disabled={done.busy} onClick={onClose}>
               {t("common.cancel")}
             </Button>
             <Button

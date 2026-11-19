@@ -77,7 +77,7 @@ export function AddonCopyDialog({
         description={t(`${C}.description`)}
         footer={
           <>
-            <Button type="button" variant="outline" disabled={saving} onClick={onClose}>
+            <Button type="button" variant="cancel" disabled={saving} onClick={onClose}>
               {t("common.cancel")}
             </Button>
             <Button type="button" disabled={values.length === 0 || saving} onClick={copy}>
