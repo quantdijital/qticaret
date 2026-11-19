@@ -19,7 +19,8 @@ export const SECTION_VARIANTS = {
   hero: ["standard", "category_list"],
   // Today's picture tiles; `linked` each category a card with its subcategories' links;
   // `collage` photo-led cards filling each row, the first wider
-  categories: ["tiles", "linked", "collage"],
+  // `panels` (Ek 2026-11-19) frameless graphite panels, the first tall beside the others
+  categories: ["tiles", "linked", "collage", "panels"],
   // The product rail (adr/0049 Ek 2026-11-15): today's grid first; `strips`, `ranked`, `stage_list` Ek 2026-11-16
   products: [
     "grid",

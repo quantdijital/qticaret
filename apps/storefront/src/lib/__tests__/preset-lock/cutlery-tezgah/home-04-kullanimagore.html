@@ -1,5 +1,5 @@
 <!-- preset lock: cutlery-tezgah (docs/tema/bilesen-standardi.md §7) -->
-<div class="group/look gf-look" data-inner="medium" data-ground="well" data-qs="kullanimagore">
+<div class="group/look gf-look" data-inner="medium" data-qs="kullanimagore">
   <section aria-labelledby="bolum-kullanimagore" class="gf-section">
     <div class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-(--head-gap)">
       <div
@@ -12,17 +12,13 @@
           Tüm kategoriler
         </a>
       </div>
-      <ul
-        class="gf-collage grid grid-cols-12 gap-(--gap-columns)"
-        data-height="medium"
-        data-phone-rows=""
-      >
-        <li class="min-w-0 col-span-12 sm:col-span-12 lg:col-span-8 xl:col-span-8">
+      <ul class="gf-panels grid grid-cols-12 gap-(--gap-columns)" data-height="medium">
+        <li class="min-w-0 col-span-12 sm:col-span-12 lg:col-span-6 xl:col-span-6">
           <article
-            class="gf-collage-card gf-pane relative flex h-full min-w-0 flex-col rounded-tile p-2"
+            class="gf-panel relative h-full min-w-0 overflow-hidden rounded-tile bg-stage text-stage-text"
             data-lead=""
           >
-            <div class="gf-collage-photo overflow-hidden rounded-media bg-media">
+            <div class="gf-panel-photo relative overflow-hidden bg-stage-2">
               <picture>
                 <img
                   src="https://cdn.example.com/c/outdoor-ve-kamp.webp"
@@ -32,57 +28,56 @@
                   loading="lazy"
                   fetchPriority="auto"
                   decoding="async"
-                  class="h-full w-full object-cover"
+                  class="absolute inset-0 h-full w-full object-cover"
                 />
               </picture>
             </div>
-            <div class="gf-collage-words flex min-w-0 flex-col px-2 pt-3 pb-1 sm:px-3 sm:pt-4">
+            <div class="gf-panel-words relative flex min-w-0 flex-col">
               <h3
                 class="leading-tight font-extrabold tracking-[-0.015em] break-words text-balance text-section lg:text-display"
               >
                 <a
                   href="/kategori/outdoor-ve-kamp"
-                  class="gf-collage-link no-underline after:absolute after:inset-0 after:rounded-tile after:content-[&#x27;&#x27;]"
+                  class="gf-panel-link no-underline after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
                 >
                   Outdoor ve Kamp
                 </a>
               </h3>
-              <p class="mt-1 text-sm font-semibold text-text-3 tabular-nums">
+              <p class="mt-1 text-sm font-semibold text-stage-text-2 tabular-nums">
                 4 ürün
               </p>
+              <ul class="relative z-[1] mt-2 flex flex-wrap gap-x-4">
+                <li class="min-w-0">
+                  <a
+                    href="/kategori/outdoor-ve-kamp/kamp-bicaklari"
+                    class="flex min-h-11 items-center text-sm break-words text-stage-text-2 no-underline hover:text-stage-text lg:pointer-fine:min-h-8"
+                  >
+                    Kamp Bıçakları
+                  </a>
+                </li>
+                <li class="min-w-0">
+                  <a
+                    href="/kategori/outdoor-ve-kamp/kamp-baltalari"
+                    class="flex min-h-11 items-center text-sm break-words text-stage-text-2 no-underline hover:text-stage-text lg:pointer-fine:min-h-8"
+                  >
+                    Kamp Baltaları
+                  </a>
+                </li>
+              </ul>
             </div>
-            <ul
-              class="gf-collage-links relative z-[1] flex flex-wrap gap-x-4 px-2 pb-1 sm:mt-1 sm:px-3"
-            >
-              <li class="min-w-0">
-                <a
-                  href="/kategori/outdoor-ve-kamp/kamp-bicaklari"
-                  class="flex min-h-11 items-center text-sm break-words text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  Kamp Bıçakları
-                </a>
-              </li>
-              <li class="min-w-0">
-                <a
-                  href="/kategori/outdoor-ve-kamp/kamp-baltalari"
-                  class="flex min-h-11 items-center text-sm break-words text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  Kamp Baltaları
-                </a>
-              </li>
-            </ul>
           </article>
         </li>
-        <li class="min-w-0 col-span-12 sm:col-span-12 lg:col-span-4 xl:col-span-4">
+        <li class="min-w-0 col-span-12 sm:col-span-12 lg:col-span-6 xl:col-span-6">
           <article
-            class="gf-collage-card gf-pane relative flex h-full min-w-0 flex-col rounded-tile p-2"
+            class="gf-panel relative h-full min-w-0 overflow-hidden rounded-tile bg-stage text-stage-text"
+            data-wide="phone tablet lg xl"
           >
-            <div class="gf-collage-photo overflow-hidden rounded-media bg-media">
+            <div class="gf-panel-photo relative overflow-hidden bg-stage-2">
               <picture>
                 <source
                   type="image/webp"
                   srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
-                  sizes="(min-width: 1280px) 31vw, (min-width: 1024px) 31vw, (min-width: 640px) 92vw, 92vw"
+                  sizes="(min-width: 1280px) 21vw, (min-width: 1024px) 21vw, (min-width: 640px) 42vw, 42vw"
                 />
                 <img
                   src="https://cdn.example.com/p/01.webp"
@@ -92,53 +87,51 @@
                   loading="lazy"
                   fetchPriority="auto"
                   decoding="async"
-                  class="h-full w-full object-cover"
+                  class="absolute inset-0 h-full w-full object-cover"
                 />
               </picture>
             </div>
-            <div class="gf-collage-words flex min-w-0 flex-col px-2 pt-3 pb-1 sm:px-3 sm:pt-4">
+            <div class="gf-panel-words relative flex min-w-0 flex-col">
               <h3
                 class="leading-tight font-extrabold tracking-[-0.015em] break-words text-balance text-title"
               >
                 <a
                   href="/kategori/mutfak-ve-sef-bicaklari"
-                  class="gf-collage-link no-underline after:absolute after:inset-0 after:rounded-tile after:content-[&#x27;&#x27;]"
+                  class="gf-panel-link no-underline after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
                 >
                   Mutfak ve Şef Bıçakları
                 </a>
               </h3>
-              <p class="mt-1 text-sm font-semibold text-text-3 tabular-nums">
+              <p class="mt-1 text-sm font-semibold text-stage-text-2 tabular-nums">
                 3 ürün
               </p>
+              <ul class="relative z-[1] mt-2 flex flex-wrap gap-x-4">
+                <li class="min-w-0">
+                  <a
+                    href="/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari"
+                    class="flex min-h-11 items-center text-sm break-words text-stage-text-2 no-underline hover:text-stage-text lg:pointer-fine:min-h-8"
+                  >
+                    Şef Bıçakları
+                  </a>
+                </li>
+                <li class="min-w-0">
+                  <a
+                    href="/kategori/mutfak-ve-sef-bicaklari/mutfak-bicak-setleri"
+                    class="flex min-h-11 items-center text-sm break-words text-stage-text-2 no-underline hover:text-stage-text lg:pointer-fine:min-h-8"
+                  >
+                    Mutfak Bıçak Setleri
+                  </a>
+                </li>
+                <li class="min-w-0">
+                  <a
+                    href="/kategori/mutfak-ve-sef-bicaklari/kasap-bicaklari"
+                    class="flex min-h-11 items-center text-sm break-words text-stage-text-2 no-underline hover:text-stage-text lg:pointer-fine:min-h-8"
+                  >
+                    Kasap Bıçakları
+                  </a>
+                </li>
+              </ul>
             </div>
-            <ul
-              class="gf-collage-links relative z-[1] flex flex-wrap gap-x-4 px-2 pb-1 sm:mt-1 sm:px-3"
-            >
-              <li class="min-w-0">
-                <a
-                  href="/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari"
-                  class="flex min-h-11 items-center text-sm break-words text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  Şef Bıçakları
-                </a>
-              </li>
-              <li class="min-w-0">
-                <a
-                  href="/kategori/mutfak-ve-sef-bicaklari/mutfak-bicak-setleri"
-                  class="flex min-h-11 items-center text-sm break-words text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  Mutfak Bıçak Setleri
-                </a>
-              </li>
-              <li class="min-w-0">
-                <a
-                  href="/kategori/mutfak-ve-sef-bicaklari/kasap-bicaklari"
-                  class="flex min-h-11 items-center text-sm break-words text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  Kasap Bıçakları
-                </a>
-              </li>
-            </ul>
           </article>
         </li>
       </ul>

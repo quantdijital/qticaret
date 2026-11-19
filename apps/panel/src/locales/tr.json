@@ -8249,7 +8249,8 @@
         "categories": {
           "tiles": "Görselli karo",
           "linked": "Alt kategorili kart",
-          "collage": "Fotoğraflı kolaj"
+          "collage": "Fotoğraflı kolaj",
+          "panels": "Fotoğraf panoları"
         },
         "related_products": {
           "grid": "Izgara",
@@ -9465,12 +9466,14 @@
           "label": "Bir sıradaki kart",
           "term": "columns",
           "hint": "Geniş ekranda yan yana kaç kart; dar ekranda tema kendiliğinden azaltır.",
-          "hintCollage": "Geniş ekranda bir sırada en çok kaç kart; öne çıkan ilk kart iki kart sayılır. Sıralar her zaman uçtan uca dolar."
+          "hintCollage": "Geniş ekranda bir sırada en çok kaç kart; öne çıkan ilk kart iki kart sayılır. Sıralar her zaman uçtan uca dolar.",
+          "hintPanels": "İlk kategori öne çıkmıyorken geniş ekranda bir sırada en çok kaç pano; sıralar uçtan uca dolar."
         },
         "lead": {
           "label": "İlk kategoriyi öne çıkar",
           "term": "featured",
           "hint": "İlk kart iki kat geniş, sırası daha yüksek; telefonda en üstte büyük durur.",
+          "hintPanels": "İlk pano geniş ekranda solda boydan boya durur, diğerleri yanında üst üste; telefonda en üstte büyük.",
           "off": "Kapalı",
           "on": "Açık"
         },
@@ -9478,6 +9481,7 @@
           "label": "Fotoğraf yüksekliği",
           "term": "height",
           "hint": "Kartların fotoğraf alanı; öne çıkan kartın sırası biraz daha yüksek.",
+          "hintPanels": "Panoların en az yüksekliği; adın altındaki satırlar uzarsa fotoğraf da uzar.",
           "low": "Alçak",
           "medium": "Orta",
           "high": "Yüksek"
@@ -9500,7 +9504,8 @@
           "label": "Alt kategori sayısı",
           "term": "links",
           "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar.",
-          "hintCollage": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız fotoğraf ve ad. Kartın tamamı kategoriye gider."
+          "hintCollage": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız fotoğraf ve ad. Kartın tamamı kategoriye gider.",
+          "hintPanels": "Her panoda adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız fotoğraf ve ad. Panonun tamamı kategoriye gider."
         },
         "columns_mobile": {
           "1": "1 kart",

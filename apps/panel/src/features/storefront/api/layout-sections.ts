@@ -21,6 +21,7 @@ import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import type {
   CategoriesCollageFields,
+  CategoriesPanelsFields,
   CategoriesLinkedFields,
 } from "@/features/storefront/api/layout-cards"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
@@ -156,9 +157,9 @@ interface CategoriesBase extends BodySectionBase {
   more: LayoutLink | null
 }
 
-/** Today's picture tiles, the linked cards or the collage, each with its own fields (adr/0049 Ek 2026-11-15). */
+/** Today's picture tiles, the linked cards, the collage or the panels, each with its own fields (adr/0049). */
 export type CategoriesSection = CategoriesBase &
-  ({ variant: "tiles" } | CategoriesLinkedFields | CategoriesCollageFields)
+  ({ variant: "tiles" } | CategoriesLinkedFields | CategoriesCollageFields | CategoriesPanelsFields)
 
 /**
  * One product up close (adr/0046 Ek 2026-11-05): the storefront adds its

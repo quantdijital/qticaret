@@ -47,6 +47,17 @@ export const CATEGORY_COLLAGE_DEFAULTS = {
   links: 4,
 } as const
 
+/** The panels' settings (Ek 2026-11-19): the collage's lists, its own defaults; mirrors `@qticaret/types`. */
+export const CATEGORY_PANELS_SETTINGS = CATEGORY_COLLAGE_SETTINGS
+
+export const CATEGORY_PANELS_DEFAULTS = {
+  columns: 3,
+  columns_mobile: 1,
+  height: "medium",
+  lead: "on",
+  links: 4,
+} as const
+
 type Lists = Readonly<Record<string, readonly (string | number)[]>>
 
 /** A step on the setting's list; another is a stale or forged editor, as a variant off its list is. */
@@ -62,6 +73,7 @@ const stepOn =
 
 const step = stepOn(CATEGORY_CARD_SETTINGS, CATEGORY_CARD_DEFAULTS)
 const collageStep = stepOn(CATEGORY_COLLAGE_SETTINGS, CATEGORY_COLLAGE_DEFAULTS)
+const panelsStep = stepOn(CATEGORY_PANELS_SETTINGS, CATEGORY_PANELS_DEFAULTS)
 
 /** Subcategory links under each card's name, the variant's own default. */
 const links = (fallback: number) =>
@@ -122,13 +134,36 @@ const collage = z
   })
   .strict()
 
+/**
+ * Each category a frameless graphite panel led by its photograph, its
+ * name, count and first `links` subcategories on the graphite; the first
+ * tall beside the others stacked while `lead` is on, else rows of at most
+ * `columns` (Ek 2026-11-19).
+ */
+const panels = z
+  .object({
+    ...common,
+    variant: z.literal("panels"),
+    columns: panelsStep("columns"),
+    columns_mobile: panelsStep("columns_mobile"),
+    height: panelsStep("height"),
+    lead: panelsStep("lead"),
+    links: links(CATEGORY_PANELS_DEFAULTS.links),
+  })
+  .strict()
+
 export const CATEGORIES_BRANCHES: Readonly<Record<SectionVariant<"categories">, VariantBranch>> = {
   tiles,
   linked,
   collage,
+  panels,
 }
 
 /** The shop's categories as cards. */
-export const categories = z.discriminatedUnion("variant", [tiles, linked, collage], VARIANT_ERROR)
+export const categories = z.discriminatedUnion(
+  "variant",
+  [tiles, linked, collage, panels],
+  VARIANT_ERROR
+)
 
 export type CategoriesSection = z.infer<typeof categories>

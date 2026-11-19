@@ -2,6 +2,7 @@ import "server-only"
 import type {
   StoreCategoriesCollage,
   StoreCategoriesLinked,
+  StoreCategoriesPanels,
   StoreCategoriesSection,
 } from "@qticaret/types"
 import {
@@ -10,10 +11,12 @@ import {
   CATEGORY_CARD_SETTINGS,
   CATEGORY_COLLAGE_DEFAULTS,
   CATEGORY_COLLAGE_SETTINGS,
+  CATEGORY_PANELS_DEFAULTS,
 } from "@qticaret/types/section-categories"
 import type {
   CategoryCardsView,
   CategoryCollageView,
+  CategoryPanelsView,
   LinkedCategoryCardView,
   Translate,
 } from "@qticaret/ui"
@@ -40,24 +43,42 @@ const linksOf = (value: unknown, fallback: number): number =>
     ? Math.min(Math.max(value, CATEGORY_CARD_LIMITS.links.min), CATEGORY_CARD_LIMITS.links.max)
     : fallback
 
-/** The collage's settings as this build reads them (forgiving: off the list, the default). */
-export function collageSettings(section: Partial<StoreCategoriesCollage>): StoreCategoriesCollage {
+type PhotoSettings = Omit<StoreCategoriesCollage, "variant">
+
+/** The collage's lists read against a variant's own defaults (forgiving: off the list, the default). */
+function photoSettings(
+  section: Partial<PhotoSettings>,
+  defaults: typeof CATEGORY_COLLAGE_DEFAULTS | typeof CATEGORY_PANELS_DEFAULTS
+): PhotoSettings {
   const step = <S extends keyof typeof CATEGORY_COLLAGE_SETTINGS>(
     setting: S,
     value: unknown
   ): (typeof CATEGORY_COLLAGE_SETTINGS)[S][number] =>
     (CATEGORY_COLLAGE_SETTINGS[setting] as readonly unknown[]).includes(value)
       ? (value as (typeof CATEGORY_COLLAGE_SETTINGS)[S][number])
-      : CATEGORY_COLLAGE_DEFAULTS[setting]
+      : defaults[setting]
   return {
-    variant: "collage",
     columns: step("columns", section.columns),
     columns_mobile: step("columns_mobile", section.columns_mobile),
     height: step("height", section.height),
     lead: step("lead", section.lead),
-    links: linksOf(section.links, CATEGORY_COLLAGE_DEFAULTS.links),
+    links: linksOf(section.links, defaults.links),
   }
 }
+
+/** The collage's settings as this build reads them (forgiving: off the list, the default). */
+export const collageSettings = (
+  section: Partial<StoreCategoriesCollage>
+): StoreCategoriesCollage => ({
+  variant: "collage",
+  ...photoSettings(section, CATEGORY_COLLAGE_DEFAULTS),
+})
+
+/** The panels' settings as this build reads them: the collage's lists, the panels' defaults. */
+export const panelsSettings = (section: Partial<StoreCategoriesPanels>): StoreCategoriesPanels => ({
+  variant: "panels",
+  ...photoSettings(section, CATEGORY_PANELS_DEFAULTS),
+})
 
 /** The linked settings as this build reads them (forgiving: off the list, the default). */
 export function linkedSettings(section: Partial<StoreCategoriesLinked>): StoreCategoriesLinked {
@@ -100,6 +121,50 @@ export async function collageCategoriesView(
   const settings = collageSettings(section)
   const cards = await fetchedCards(section, { ...settings, image_position: "top" }, home, t)
   return { cards, collage: collageView(settings, cards) }
+}
+
+/** The panels' cards fetched as the collage's, always with their pictures (Ek 2026-11-19). */
+export async function panelsCategoriesView(
+  section: StoreCategoriesSection & StoreCategoriesPanels,
+  t: Translate,
+  home: boolean
+): Promise<{ cards: LinkedCategoryCardView[]; panels: CategoryPanelsView }> {
+  const settings = panelsSettings(section)
+  const cards = await fetchedCards(section, { ...settings, image_position: "top" }, home, t)
+  return { cards, panels: collageView(settings, cards) }
+}
+
+/** A carded variant's own part of the section's view, beside the cards. */
+export type CardedPart =
+  | { variant: "linked"; linked: CategoryCardsView }
+  | { variant: "collage"; collage: CategoryCollageView }
+  | { variant: "panels"; panels: CategoryPanelsView }
+
+/** The cards and the variant's own part for `linked`, `collage` and `panels`; null for the tiles. */
+export async function cardedCategoriesView(
+  section: StoreCategoriesSection,
+  t: Translate,
+  home: boolean
+): Promise<{ cards: LinkedCategoryCardView[]; part: CardedPart } | null> {
+  switch (section.variant) {
+    case "linked": {
+      const { cards, linked } = await linkedCategoriesView(section, t, home)
+      return { cards, part: { variant: "linked", linked } }
+    }
+    case "collage": {
+      const { cards, collage } = await collageCategoriesView(section, t, home)
+      return { cards, part: { variant: "collage", collage } }
+    }
+    case "panels": {
+      const { cards, panels } = await panelsCategoriesView(section, t, home)
+      return { cards, part: { variant: "panels", panels } }
+    }
+    case "tiles":
+    case undefined:
+      return null
+  }
+  // A variant this storefront does not know yet is read as the tiles.
+  return null
 }
 
 /** The named categories (or the top ones), their subcategories' paths and the shop's counts. */

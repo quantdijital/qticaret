@@ -145,11 +145,11 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "collage",
+      "variant": "panels",
       "look": {
         "space_outer": null,
         "space_inner": "medium",
-        "ground": "well",
+        "ground": null,
         "align": null,
         "width": null
       },
@@ -159,7 +159,7 @@
         { "$handle": "category:mutfak-ve-sef-bicaklari" },
         { "$handle": "category:cakilar" }
       ],
-      "columns": 4,
+      "columns": 3,
       "height": "medium",
       "lead": "on",
       "links": 5,

@@ -13,7 +13,11 @@ import type { FaqSettings } from "./section-faq.js"
 import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
-import type { StoreCategoriesCollage, StoreCategoriesLinked } from "./section-categories.js"
+import type {
+  StoreCategoriesCollage,
+  StoreCategoriesLinked,
+  StoreCategoriesPanels,
+} from "./section-categories.js"
 import type { StoreStripGallerySection } from "./section-strips.js"
 import type { StoreNewsletterSection } from "./section-newsletter.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
@@ -84,7 +88,8 @@ export interface StoreSectionLookPart {
  * The category cards: today's picture tiles (`tiles`, and absent from a
  * backend before variants) or, as `linked` (adr/0049 Ek 2026-11-15), each
  * category a card with its first subcategories as links, or as `collage`,
- * photo-led cards filling each row. A reader takes a
+ * photo-led cards filling each row, or as `panels`, frameless graphite
+ * panels led by their photos. A reader takes a
  * variant it does not know as `tiles` and leaves the other's fields unread.
  */
 export type StoreCategoriesSection = {
@@ -96,7 +101,7 @@ export type StoreCategoriesSection = {
   show_count?: boolean
   /** The link beside the title; none (or absent): the storefront's "every category". */
   more?: StoreLayoutLink | null
-} & ({ variant?: "tiles" } | StoreCategoriesLinked | StoreCategoriesCollage)
+} & ({ variant?: "tiles" } | StoreCategoriesLinked | StoreCategoriesCollage | StoreCategoriesPanels)
 
 export type StoreLayoutSection = StoreSectionLookPart &
   (

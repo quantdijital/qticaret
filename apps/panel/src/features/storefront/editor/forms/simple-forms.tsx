@@ -52,9 +52,9 @@ export function TitleField({ id, title, placeholder, problem, onChange }: TitleF
 }
 
 /**
- * Categories the shop picks; none, its top categories. The linked cards'
- * and the collage's own settings stand in "Kartlar", closed, under the
- * content (docs/18 §7.1); the tiles have none, their form is one group.
+ * Categories the shop picks; none, its top categories. The linked cards',
+ * the collage's and the panels' own settings stand in "Kartlar", closed,
+ * under the content (docs/18 §7.1); the tiles have none, their form is one group.
  */
 export function CategoriesForm({
   section,
@@ -66,7 +66,7 @@ export function CategoriesForm({
   const cards =
     section.variant === "linked" ? (
       <CategoryCardsFields section={section} onChange={onChange} />
-    ) : section.variant === "collage" ? (
+    ) : section.variant === "collage" || section.variant === "panels" ? (
       <CategoryCollageFields section={section} onChange={onChange} />
     ) : null
   const content = (

@@ -90,6 +90,10 @@
       "file": "pages.css"
     },
     {
+      "sha256": "0a85457c810898e87215c7758c915c4abcfb6bd27d09769c052ee09296742e1a",
+      "file": "panels.css"
+    },
+    {
       "sha256": "a988f42bba5585770460c50878c40a621a5c83bb500994a875dc4472d9f0ef47",
       "file": "ranked.css"
     },
@@ -126,7 +130,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "401cc67f0e1086fd2f3c7220a13b7cc3c3efb421d8e8b8ac73043097c2474aca",
+      "sha256": "500aa4975f151f5fe12c8f2da53c0ea5567824946609b833eeed2747c0803ee2",
       "file": "styles.css"
     },
     {

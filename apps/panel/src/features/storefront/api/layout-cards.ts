@@ -32,6 +32,11 @@ export interface CategoriesCollageFields {
   links: number
 }
 
+/** The panels' own fields (`panels`, adr/0049 Ek 2026-11-19): the collage's, under their own name. */
+export interface CategoriesPanelsFields extends Omit<CategoriesCollageFields, "variant"> {
+  variant: "panels"
+}
+
 /** The footer's settings, the same in every footer variant. */
 export interface FooterBarFields {
   social: FooterBarStep<"social">

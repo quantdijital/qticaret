@@ -58,7 +58,7 @@ describe("the category collage's settings", () => {
     render(
       <VariantField id="v" type="categories" value="tiles" onChange={(next) => picked.push(next)} />
     )
-    expect(screen.getAllByRole("radio")).toHaveLength(3)
+    expect(screen.getAllByRole("radio")).toHaveLength(4)
     await userEvent.click(screen.getByRole("radio", { name: /Fotoğraflı kolaj/ }))
     expect(picked).toEqual(["collage"])
   })

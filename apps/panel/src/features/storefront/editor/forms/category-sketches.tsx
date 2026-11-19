@@ -50,6 +50,50 @@ export function CategoriesCollage() {
   )
 }
 
+/**
+ * The panels (Ek 2026-11-19): a tall dark panel on the left, its photo over
+ * its name; two wide ones stacked beside it, each name beside its photo.
+ */
+export function CategoriesPanels() {
+  return (
+    <>
+      <rect x={1} y={1} width={54} height={30} rx={2} className="fill-current opacity-75" />
+      <rect x={1} y={1} width={54} height={19} rx={2} className="fill-current opacity-30" />
+      <rect x={4} y={23} width={22} height={3} rx={1} className="fill-background opacity-90" />
+      <rect
+        x={4}
+        y={27.5}
+        width={30}
+        height={1.5}
+        rx={0.75}
+        className="fill-background opacity-60"
+      />
+      {[1, 17].map((y) => (
+        <g key={y}>
+          <rect x={57} y={y} width={54} height={14} rx={2} className="fill-current opacity-75" />
+          <rect x={84} y={y} width={27} height={14} rx={2} className="fill-current opacity-30" />
+          <rect
+            x={60}
+            y={y + 7}
+            width={15}
+            height={2.5}
+            rx={1}
+            className="fill-background opacity-90"
+          />
+          <rect
+            x={60}
+            y={y + 10.5}
+            width={20}
+            height={1.5}
+            rx={0.75}
+            className="fill-background opacity-60"
+          />
+        </g>
+      ))}
+    </>
+  )
+}
+
 /** The linked cards: three framed cards, a small picture beside the name and its links. */
 export function CategoriesLinked() {
   return (

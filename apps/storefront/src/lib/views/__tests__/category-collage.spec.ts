@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import type { StoreCategory } from "@qticaret/types"
 import type { CategoryCardView } from "@qticaret/ui"
 import { collageView, linkedCards } from "../category-cards"
-import { collageSettings } from "../category-cards-data"
+import { collageSettings, panelsSettings } from "../category-cards-data"
 
 vi.mock("server-only", () => ({}))
 vi.mock("@/lib/store-api/requests", () => ({ allCategories: vi.fn(), pathsOf: vi.fn() }))
@@ -37,6 +37,29 @@ describe("the category collage's view (adr/0049 Ek 2026-11-15)", () => {
       height: "low",
       lead: "off",
       links: 0,
+    })
+  })
+
+  it("reads the panels on the collage's lists with their own defaults (Ek 2026-11-19)", () => {
+    expect(panelsSettings({})).toEqual({
+      variant: "panels",
+      columns: 3,
+      columns_mobile: 1,
+      height: "medium",
+      lead: "on",
+      links: 4,
+    })
+    expect(panelsSettings({ columns: 5 as never, lead: "off", links: 9 })).toMatchObject({
+      columns: 3,
+      lead: "off",
+      links: 8,
+    })
+    expect(collageView(panelsSettings({ columns_mobile: 2 }), [])).toEqual({
+      columns: 3,
+      phoneColumns: 2,
+      height: "medium",
+      lead: true,
+      cards: [],
     })
   })
 

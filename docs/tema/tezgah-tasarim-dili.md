@@ -42,14 +42,14 @@ Ziyaretçi bir alet arıyor. Önce nerede olduğunu (kategori listesi), sonra ne
 
 Lacivert takımın tabanı artık grafitten ayrışan bir mavi (seçili sekme lacivert okunur); eylem mavisi sayacı çubukta 3:1'in üstüne çıkacak kadar açıldı, sayfada 4,5:1'in üstünde kaldı. Turuncu, sayfada metin bağlantısı olarak rahat okunacak kadar koyulaştı. Grafit çubukta sepet sayacı artık takımın renginde değil: sahnenin açık mürekkebi üstünde grafit rakam (her takımda yaklaşık 16:1; üçüncü denetim C). Tablodaki "Çubukta" sütunu sayfadaki sayaçlar ve telefon alt çubuğu içindir.
 
-**Zemin sırası.** Sayfa zemini çelik beyazı (`steel`). Ritim: açık bölümler arasına iki kuyu bandı (`look.ground: well`) ve grafit sahneler (sahne ve listenin sahnesi, yakın plan, kayan şerit). Kuyu bandının iç boşluğu `medium`. Kuyu bandı iki kez üst üste gelmez, alt bilginin kuyusuna da yapışmaz. Sıra 2026-11-17'den beri (sahibin taslaktaki seçimleri + dolu standart):
+**Zemin sırası.** Sayfa zemini çelik beyazı (`steel`). Ritim: açık bölümler arasına bir kuyu bandı (`look.ground: well`, markalar) ve grafit sahneler (sahne ve listenin sahnesi, kategori panoları, yakın plan, kayan şerit). 2026-11-19'dan beri "Kullanıma göre" kuyuda değil: panoların grafiti onu üstteki ve alttaki sahnelere bağlar. Kuyu bandının iç boşluğu `medium`. Kuyu bandı iki kez üst üste gelmez, alt bilginin kuyusuna da yapışmaz. Sıra 2026-11-17'den beri (sahibin taslaktaki seçimleri + dolu standart):
 
 | Sıra | Bölüm | Zemin |
 | --- | --- | --- |
 | 1 | Açılış: kategori listesi + dört slaytlı giriş, iki kategori döşemesi, hızlı bağlantılar | sayfa (liste kendi kuyusunda) |
 | 2 | Güvence şeridi | sayfa |
 | 3 | Yeni gelenler: sahne ve liste (`stage_list`) | sayfa, sahnesi grafit |
-| 4 | Kullanıma göre: kategori kolajı | kuyu |
+| 4 | Kullanıma göre: fotoğraf panoları (`panels`) | sayfa, panolar grafit |
 | 5 | Yakın plan, şeritli galeri yanda (`gallery: strips`, `strips_layout: side`) | grafit sahne |
 | 6 | Sekmeli raf: av, kamp, şef bıçakları | sayfa |
 | 7 | Fiyata göre: dört etiketli bant, görselsiz | sayfa |
@@ -64,13 +64,13 @@ Lacivert takımın tabanı artık grafitten ayrışan bir mavi (seçili sekme la
 | 16 | Sık sorulanlar: altı soru | sayfa |
 | - | Alt bilgi (marka ve sütunlar; e-bülten bandı en üstte) | Hafif ton (`well`) |
 
-**Raflar arasında ayraç.** Tema yan yana duran ürün raflarını tek sekmeli rafa birleştirir; boş kalan bölüm vitrinde düşer. Sekmeli raf bilerek yalnız üç kategori rafıdır (av, kamp, şef). Başka iki ürün bölümü yan yana gelmez: aralarında her mağazada çizilen bir bölüm durur (fiyat bantları, şerit galerisi, kampanya bandı). Yakın plan mağazanın bir ürününe bağlıdır, ayraç sayılmaz. Bilinen sınır: paketin kategorileri yeni mağazada gizli açılır; mağaza onları açana kadar kategoriye bağlı bölümler (kolaj, sekmeli raf, kısa listeler) çizilmez.
+**Raflar arasında ayraç.** Tema yan yana duran ürün raflarını tek sekmeli rafa birleştirir; boş kalan bölüm vitrinde düşer. Sekmeli raf bilerek yalnız üç kategori rafıdır (av, kamp, şef). Başka iki ürün bölümü yan yana gelmez: aralarında her mağazada çizilen bir bölüm durur (fiyat bantları, şerit galerisi, kampanya bandı). Yakın plan mağazanın bir ürününe bağlıdır, ayraç sayılmaz. Bilinen sınır: paketin kategorileri yeni mağazada gizli açılır; mağaza onları açana kadar kategoriye bağlı bölümler (kategori panoları, sekmeli raf, kısa listeler) çizilmez.
 
 **Yeni mağazada.** Görünüm demo kataloğun ürünlerini ve alt kategorilerini anar; olmayan yalnız kendisi düşer (adr/0063 §5): açılışın döşemeleri tek tek çıkar, açılış kalır; yakın plan ürünü olmayınca bölüm düşer; demo'nun alt kategorilerine (santoku, multitool, bileme) giden bağlantılar temizlenir, öğe bağlantısız kalır; menüde o alt kategoriler çıkar.
 
 **Kart.** Her yerde çerçeveli kart: kare fotoğraf, marka, iki satır ad, puan (yalnız yorumu olanda; boş yıldız yok), fiyat, tek durum satırı (ücretsiz kargo), ayakta tam genişlik düğme ("Sepete ekle" ya da "Seçenekler", ikisi aynı biçim). Çok satanların büyük kartında fotoğraf alanı fotoğrafın kendi oranını alır (geniş fotoğrafın üstünde ve altında gri bant kalmaz; uzun fotoğraf 34rem'de durur), fotoğraf kırpılmaz ve büyütülmez; yanındaki iki sıranın kalanını büyük adlı bilgi bloğu doldurur, düğme ayakta (ikinci denetim Y-01, üçüncü denetim D-4). İkinci fotoğrafa geçiş kapalı (`hover_image: false`): kart kıpırdamaz. Kısa listeler kompakt kart.
 
-**Kategori kartları.** 2026-11-15'ten beri fotoğraflı kolaj (`categories.variant: collage`, adr/0049 Ek 2026-11-15): ilk kategori öne çıkar (`lead: on`, iki kat geniş), sırada en çok dört kart (`columns: 4`), fotoğraf orta yükseklikte, adın altında en çok beş alt kategori (`links: 5`), sayılar açık. Yalnız üst kategoriler: Outdoor ve Kamp, Mutfak ve Şef Bıçakları, Çakılar (2026-11-17'den beri; demo katalogda Kasap Bıçakları'nın alt kategorisi yok, Çakılar'ınki var). Aynı sıradaki kartlar eşit yükseklikte; içerik üstte hizalı, alt kategorisi olmayan kartın altında kart zemini kalır. Kartın tamamı kategoriye gider, kart başına "Tümünü gör" yok (bölüm başlığındaki "Tüm kategoriler" var).
+**Kategori kartları.** 2026-11-19'dan beri fotoğraf panoları (`categories.variant: panels`, adr/0049 Ek 2026-11-19): her kategori kenarlıksız bir grafit pano; fotoğraf yazının başladığı yerde grafite erir, yazı hep düz grafitte (açılış karolarıyla aynı dil). İlk kategori öne çıkar (`lead: on`): 1024 px'ten sol yarıda dikey, diğerleri sağda üst üste; yarım sayfa ve üstü genişlikteki pano yazı solda, fotoğraf sağda. Fotoğraf orta yükseklikte, adın altında en çok beş alt kategori (`links: 5`), sayılar açık; `columns: 3` yalnız öne çıkan kapatılınca kullanılır. Yalnız üst kategoriler: Outdoor ve Kamp, Mutfak ve Şef Bıçakları, Çakılar (2026-11-17'den beri; demo katalogda Kasap Bıçakları'nın alt kategorisi yok, Çakılar'ınki var). Kartın tamamı kategoriye gider, kart başına "Tümünü gör" yok (bölüm başlığındaki "Tüm kategoriler" var). Önceki hâl (2026-11-15–19) kuyu bandında fotoğraflı kolajdı (`collage`, adr/0049 Ek 2026-11-15); biçim olarak duruyor, panelde seçilebilir.
 
 Önceki hâl (biçim olarak duruyor, başka görünümler seçebilir): alt kategori bağlantılı kart (`categories.variant: linked`), üç sütun, görsel yanda, 1 px çizgili çerçeve (`frame: lined`), adın altında en çok beş alt kategori. Vitrinde gösterilecek alt kategorisi kalmayan kart tek bağlantıdır: görsel, ad ve ürün sayısı kadar yüksek, satırın üstüne hizalı; komşularının listesine gerilmez, boş alan kalmaz (ikinci denetim K-08). "Tümünü gör" kartın ayağında, oksuz.
 

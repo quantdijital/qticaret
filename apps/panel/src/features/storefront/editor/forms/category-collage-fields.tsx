@@ -3,8 +3,13 @@ import {
   CATEGORY_CARD_LIMITS,
   CATEGORY_COLLAGE_DEFAULTS,
   CATEGORY_COLLAGE_SETTINGS,
+  CATEGORY_PANELS_DEFAULTS,
 } from "@qticaret/types"
-import type { CategoriesCollageFields, CategoriesSection } from "@/features/storefront/api/layout"
+import type {
+  CategoriesCollageFields,
+  CategoriesPanelsFields,
+  CategoriesSection,
+} from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
 import { CARD_FIELD_IDS } from "./card-field-ids"
 import { CountField } from "./fields"
@@ -13,7 +18,7 @@ import { StepChoice } from "./step-choice"
 
 const C = "storefront.editor.categoryCards"
 
-type Collage = CategoriesSection & CategoriesCollageFields
+type Photo = CategoriesSection & (CategoriesCollageFields | CategoriesPanelsFields)
 
 /** The photo's height drawn in small: a block over a line, lower or taller. */
 function Height({ step }: { step: CategoriesCollageFields["height"] }) {
@@ -27,19 +32,25 @@ function Height({ step }: { step: CategoriesCollageFields["height"] }) {
 }
 
 /**
- * The collage's settings in the section's content (adr/0049 Ek
- * 2026-11-15), all open: the lead first (it shapes the rows), cards in a
- * row on a wide screen and on a phone, the photo's height and how many
- * subcategory links each card shows.
+ * The collage's and the panels' settings in the section's content (adr/0049
+ * Ek 2026-11-15, Ek 2026-11-19), the same lists: the lead first (it shapes
+ * the rows), cards in a row on a wide screen (the panels' only while the
+ * lead is off: beside it the others stack) and on a phone, the photo's
+ * height and how many subcategory links each shows. Each variant starts
+ * from its own defaults and words its own hints.
  */
 export function CategoryCollageFields({
   section,
   onChange,
 }: {
-  section: Collage
+  section: Photo
   onChange: (section: CategoriesSection, field?: string) => void
 }) {
   const { t } = useTranslation()
+  const panels = section.variant === "panels"
+  const defaults = panels ? CATEGORY_PANELS_DEFAULTS : CATEGORY_COLLAGE_DEFAULTS
+  const hint = (setting: "columns" | "lead" | "height" | "links", collage: string) =>
+    t(`${C}.${setting}.${panels ? "hintPanels" : collage}`)
   return (
     <>
       <div id={CARD_FIELD_IDS.card(section.id, "lead")}>
@@ -47,31 +58,33 @@ export function CategoryCollageFields({
           id={`${section.id}-cards-lead-switch`}
           label={t(`${C}.lead.label`)}
           term={t(`${C}.lead.term`)}
-          hint={t(`${C}.lead.hint`)}
+          hint={hint("lead", "hint")}
           checked={section.lead === "on"}
           onChange={(on) => {
             onChange({ ...section, lead: on ? "on" : "off" })
           }}
         />
       </div>
-      <StepChoice
-        id={CARD_FIELD_IDS.card(section.id, "columns")}
-        label={t(`${C}.columns.label`)}
-        term={t(`${C}.columns.term`)}
-        hint={t(`${C}.columns.hintCollage`)}
-        steps={CATEGORY_COLLAGE_SETTINGS.columns}
-        value={section.columns}
-        fallback={CATEGORY_COLLAGE_DEFAULTS.columns}
-        nameOf={(step) => String(step)}
-        drawOf={(step) => <Columns count={step} />}
-        onChange={(columns) => {
-          onChange({ ...section, columns })
-        }}
-      />
+      {!(panels && section.lead === "on") && (
+        <StepChoice
+          id={CARD_FIELD_IDS.card(section.id, "columns")}
+          label={t(`${C}.columns.label`)}
+          term={t(`${C}.columns.term`)}
+          hint={hint("columns", "hintCollage")}
+          steps={CATEGORY_COLLAGE_SETTINGS.columns}
+          value={section.columns}
+          fallback={defaults.columns}
+          nameOf={(step) => String(step)}
+          drawOf={(step) => <Columns count={step} />}
+          onChange={(columns) => {
+            onChange({ ...section, columns })
+          }}
+        />
+      )}
       <PhoneColumnsField
         id={CARD_FIELD_IDS.card(section.id, "columns_mobile")}
-        value={section.columns_mobile ?? CATEGORY_COLLAGE_DEFAULTS.columns_mobile}
-        fallback={CATEGORY_COLLAGE_DEFAULTS.columns_mobile}
+        value={section.columns_mobile ?? defaults.columns_mobile}
+        fallback={defaults.columns_mobile}
         hint={t(`${C}.columns_mobile.hint`)}
         onChange={(columns_mobile) => {
           onChange({ ...section, columns_mobile })
@@ -81,10 +94,10 @@ export function CategoryCollageFields({
         id={CARD_FIELD_IDS.card(section.id, "height")}
         label={t(`${C}.height.label`)}
         term={t(`${C}.height.term`)}
-        hint={t(`${C}.height.hint`)}
+        hint={hint("height", "hint")}
         steps={CATEGORY_COLLAGE_SETTINGS.height}
         value={section.height}
-        fallback={CATEGORY_COLLAGE_DEFAULTS.height}
+        fallback={defaults.height}
         nameOf={(step) => t(`${C}.height.${step}`)}
         drawOf={(step) => <Height step={step} />}
         onChange={(height) => {
@@ -94,7 +107,7 @@ export function CategoryCollageFields({
       <CountField
         id={CARD_FIELD_IDS.card(section.id, "links")}
         label={`${t(`${C}.links.label`)} (${t(`${C}.links.term`)})`}
-        hint={t(`${C}.links.hintCollage`)}
+        hint={hint("links", "hintCollage")}
         min={CATEGORY_CARD_LIMITS.links.min}
         max={CATEGORY_CARD_LIMITS.links.max}
         value={section.links}

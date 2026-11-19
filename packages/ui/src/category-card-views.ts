@@ -45,3 +45,11 @@ export interface CategoryCollageView {
   lead: boolean
   cards: LinkedCategoryCardView[]
 }
+
+/**
+ * The category cards' `panels` variant as a theme draws it (adr/0049 Ek
+ * 2026-11-19): the collage's settings, read as frameless graphite panels
+ * (the first tall beside the others stacked while `lead` is on; `columns`
+ * lays out the rows while it is off). The cards are the linked ones.
+ */
+export type CategoryPanelsView = CategoryCollageView
