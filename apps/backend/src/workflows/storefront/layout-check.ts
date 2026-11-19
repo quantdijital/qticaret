@@ -11,6 +11,7 @@ import {
   footerRowLinks,
 } from "../../lib/storefront/sections/footer-rows-print"
 import { newsletterImages } from "../../lib/storefront/sections/newsletter"
+import { richTextImages } from "../../lib/storefront/sections/rich-text"
 import { catalogSlides } from "../../lib/storefront/sections/hero"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
 import { shelfSources } from "../../lib/storefront/sections/products"
@@ -145,7 +146,8 @@ export function imagesOf(section: BodySection): string[] {
     return stripGalleryImages(section)
   }
   if (section.type === "rich_text") {
-    return docStats(section.body).images.map((each) => each.src)
+    // The text's own pictures and the one beside it (adr/0073 §3, `with_image`)
+    return [...docStats(section.body).images.map((each) => each.src), ...richTextImages(section)]
   }
   if (section.type === "newsletter") {
     return newsletterImages(section)

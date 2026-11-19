@@ -16,7 +16,7 @@ import type { MainSectionType } from "./sections/main"
 import { headerMarquee, marquee, placedMarquee } from "./sections/marquee"
 import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
-import { richText } from "./sections/rich-text"
+import { footerRichText, placedRichText, richText } from "./sections/rich-text"
 import { priceBands } from "./sections/price-bands"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
@@ -94,7 +94,7 @@ export const categorySection = z.discriminatedUnion(
   "type",
   [
     categoryMain,
-    richText.extend({ placement }),
+    placedRichText,
     banner.extend({ placement }),
     faq.extend({ placement }),
     placedTrustBadges,
@@ -121,12 +121,13 @@ export const headerSection = z.discriminatedUnion(
  * page (adr/0070 §4, Shopify's footer group): the newsletter box, a rich
  * text, trust badges and a scrolling strip, each at most once. Their
  * schemas are the page sections'. No picture section here (every page's
- * load); a picture inside the rich text is allowed, like a page's, and is
- * held to the media library check (layout-check.ts).
+ * load): the rich text is the pane only, not `with_image` (adr/0073 §3); a
+ * picture inside its text is allowed, like a page's, and is held to the
+ * media library check (layout-check.ts).
  */
 export const footerSection = z.discriminatedUnion(
   "type",
-  [footerNewsletter, footerBar, richText, trustBadges, marquee],
+  [footerNewsletter, footerBar, footerRichText, trustBadges, marquee],
   SECTION_TYPE
 )
 

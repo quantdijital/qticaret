@@ -10,7 +10,7 @@ import { googleRating } from "./sections/google-rating"
 import { placedMarquee } from "./sections/marquee"
 import { placedNewsletter } from "./sections/newsletter"
 import { products } from "./sections/products"
-import { richText } from "./sections/rich-text"
+import { placedRichText } from "./sections/rich-text"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges } from "./sections/trust-badges"
 import { VARIANT_ERROR } from "./sections/variants"
@@ -82,7 +82,7 @@ const placedProducts = z.discriminatedUnion(
 export const contentPageSection = z.discriminatedUnion(
   "type",
   [
-    richText.extend({ placement }),
+    placedRichText,
     banner.extend({ placement }),
     stripGallery.extend({ placement }),
     faq.extend({ placement }),

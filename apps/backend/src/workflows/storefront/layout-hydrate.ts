@@ -197,11 +197,21 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
       })
     case "rich_text": {
       const body = fillShopDoc(section.body, at.values)
+      const html = renderDoc(body, await cardTargets(at.container, body))
+      // The pane prints as it did before variants
+      if (section.variant !== "with_image") {
+        return { id, type, title: section.title, html }
+      }
+      // The picture beside it (adr/0073 §3): its alt the shop's, else the media library's
+      const known = image(section.image.url, section.image.alt)
       return {
         id,
         type,
         title: section.title,
-        html: renderDoc(body, await cardTargets(at.container, body)),
+        html,
+        variant: section.variant,
+        image: { ...known, alt: section.image.alt ?? known.alt },
+        image_side: section.image_side,
       }
     }
     case "faq":
