@@ -1057,6 +1057,15 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "A footer block could not be saved; check its fields (a text block takes no headings, pictures or tables; app links must be App Store or Google Play addresses).",
   "storefront_layout.footer_newsletter_twice":
     "The footer cannot show two newsletter forms; remove or hide the newsletter block or the footer group's newsletter section.",
+  // adr/0073: content pages' own sections
+  "storefront_layout.page_invalid":
+    "The page given sections was not recognised; only the pages under Content can be laid out. Reload the page and try again.",
+  "storefront_layout.page_duplicate":
+    "The same page's layout was sent twice; reload the page and try again.",
+  "storefront_layout.pages_limit": "At most 20 pages can have a layout of their own.",
+  "storefront_layout.page_sections_limit": "A page holds at least one and at most 12 sections.",
+  "storefront_layout.too_large":
+    "The design has grown too large to save; shorten some sections or long texts.",
   "storefront_layout.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "storefront_layout.color_duplicate": "Each colour name can be listed once.",
   "storefront_layout.schedule_invalid": "The section must end after it starts.",

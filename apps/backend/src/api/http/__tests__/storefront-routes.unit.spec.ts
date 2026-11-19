@@ -48,6 +48,19 @@ describe("the storefront's draft-replacing routes", () => {
     }
   })
 
+  it("takes the whole design up to a megabyte (adr/0073 §1), past Express's 100 kB", () => {
+    const save = routeOf("POST", "/admin/storefront-layout") as
+      (Route & { bodyParser?: { sizeLimit?: string } }) | undefined
+    expect(save?.bodyParser?.sizeLimit).toBe("1mb")
+  })
+
+  it("limits a content page's live session read as the session's own (adr/0073 §5)", () => {
+    const own = routeOf("GET", "/store/storefront-layout/session/:token")
+    const page = routeOf("GET", "/store/storefront-layout/session/:token/pages/:id")
+    expect(page?.middlewares).toHaveLength(1)
+    expect(own?.middlewares).toHaveLength(1)
+  })
+
   it("never lists discard twice (one middleware set per route)", () => {
     const discards = ROUTES.filter((route) => route.matcher === "/admin/storefront-layout/discard")
     expect(discards).toHaveLength(1)

@@ -38,9 +38,12 @@ export const STOREFRONT_MENU_ROUTES = [
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostStorefrontMenu)],
   },
+  // The whole design, content pages' layouts included (adr/0073 §1): past Express's 100 kB
+  // default; the schema holds the document itself to a megabyte (`storefront_layout.too_large`)
   {
     matcher: "/admin/storefront-layout",
     methods: ["POST" as const],
+    bodyParser: { sizeLimit: "1mb" },
     middlewares: [validateAndTransformBody(AdminPostStorefrontLayout)],
   },
   ...["/admin/storefront-layout/publish", "/admin/storefront-layout/preview"].map((matcher) => ({
@@ -75,6 +78,12 @@ export const STOREFRONT_MENU_ROUTES = [
   // Its draft, read by the storefront after every save; a guessed token finds nothing
   {
     matcher: "/store/storefront-layout/session/:token",
+    methods: ["GET" as const],
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.layout_session)],
+  },
+  // A content page in the same session (adr/0073 §5): read after every save as the draft is
+  {
+    matcher: "/store/storefront-layout/session/:token/pages/:id",
     methods: ["GET" as const],
     middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.layout_session)],
   },

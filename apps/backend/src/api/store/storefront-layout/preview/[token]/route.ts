@@ -1,9 +1,6 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
-import { MedusaError } from "@medusajs/framework/utils"
-import { layoutPreview } from "../../../../../lib/content/preview-token"
-import { orderAccessKey } from "../../../../../lib/orders/access-token"
-import { layoutRow } from "../../../../../workflows/storefront/layout"
 import { draftLayout } from "../../draft"
+import { previewRow } from "../../access"
 
 /**
  * GET /store/storefront-layout/preview/:token (adr/0049): the draft as the
@@ -15,14 +12,6 @@ import { draftLayout } from "../../draft"
 export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
   // A draft is no one's to keep, whatever the answer
   res.setHeader("Cache-Control", "private, no-store")
-  const parts = layoutPreview.parts(req.params["token"] ?? "")
-  const row = parts ? await layoutRow(req.scope) : null
-  const updated = (row as unknown as { updated_at?: Date } | null)?.updated_at
-  if (!parts || row?.id !== parts.entryId || !updated) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.preview_unknown")
-  }
-  if (!layoutPreview.opens(orderAccessKey(), parts, updated)) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.preview_unknown")
-  }
+  const row = await previewRow(req)
   res.json({ layout: await draftLayout(req, row) })
 }

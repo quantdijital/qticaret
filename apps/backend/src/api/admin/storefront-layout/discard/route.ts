@@ -13,5 +13,9 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
   const { result } = await replaceDraftWorkflow(req.scope).run({
     input: { source, actor: req.auth_context.actor_id, reason: "discard" },
   })
-  res.json({ layout: await adminLayout(req.scope), auto_saved: result.auto_saved })
+  res.json({
+    layout: await adminLayout(req.scope),
+    auto_saved: result.auto_saved,
+    dropped_pages: result.dropped_pages,
+  })
 }

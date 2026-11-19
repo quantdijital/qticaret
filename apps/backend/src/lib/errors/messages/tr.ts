@@ -1066,6 +1066,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Alt bilgideki bir blok kaydedilemedi; alanlarını kontrol edin (yazı bloğunda başlık, resim ve tablo kullanılamaz; uygulama bağlantıları yalnız App Store ve Google Play adresi olabilir).",
   "storefront_layout.footer_newsletter_twice":
     "Alt bilgide iki bülten formu olamaz; bülten bloğunu ya da alt bilgi grubundaki bülten bölümünü kaldırın ya da gizleyin.",
+  // adr/0073: content pages' own sections
+  "storefront_layout.page_invalid":
+    "Bölüm eklenen sayfa tanınmadı; yalnız İçerik'teki sayfalar düzenlenebilir. Sayfayı yenileyip yeniden deneyin.",
+  "storefront_layout.page_duplicate":
+    "Aynı sayfanın düzeni iki kez gönderildi; sayfayı yenileyip yeniden deneyin.",
+  "storefront_layout.pages_limit": "Kendi düzeni olan en çok 20 sayfa olabilir.",
+  "storefront_layout.page_sections_limit": "Bir sayfada en az bir, en çok 12 bölüm olabilir.",
+  "storefront_layout.too_large":
+    "Tasarım kaydedilemeyecek kadar büyüdü; bazı bölümleri ya da uzun metinleri kısaltın.",
   "storefront_layout.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "storefront_layout.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "storefront_layout.schedule_invalid": "Bölümün bitiş zamanı başlangıçtan sonra olmalı.",

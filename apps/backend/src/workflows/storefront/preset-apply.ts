@@ -109,7 +109,7 @@ export const applyPresetWorkflow = createWorkflow(
         images: recorded.images,
       }))
     )
-    saveDraftSteps(transform({ draft }, ({ draft }) => draft.document))
+    const saved = saveDraftSteps(transform({ draft }, ({ draft }) => draft.document))
     releaseLockStep({ key: LAYOUT_LOCK.key })
     // Held until the draft names the images: an apply waiting on it then finds them recorded
     releaseLockStep(
@@ -145,8 +145,8 @@ export const applyPresetWorkflow = createWorkflow(
     })
     return new WorkflowResponse(
       transform(
-        { preset, draft, recorded, autoSaved },
-        ({ preset, draft, recorded, autoSaved }) => ({
+        { preset, draft, recorded, autoSaved, saved },
+        ({ preset, draft, recorded, autoSaved, saved }) => ({
           pack: preset.pack,
           preset: preset.code,
           version: preset.version,
@@ -159,6 +159,8 @@ export const applyPresetWorkflow = createWorkflow(
           demo: { added: 0, kept: 0 },
           /** The draft kept before (adr/0064 Ek 2026-11-17); null: nothing new to keep. */
           auto_saved: autoSaved,
+          /** The shop's content page layouts left out for pages deleted since (adr/0073 §1). */
+          dropped_pages: saved.dropped_pages,
         })
       )
     )
