@@ -7,8 +7,8 @@
 1. **ADR-0073 Ek 2026-11-19 (2): sayfalar tema düzenleyicinin** (karar #232'yle birleşti; `adr/0073-icerik-sayfalarinda-bolumler.md` "Ek 2026-11-19 (2)", K1–K11). Üst/alt yerleşimi kalkar; sayfanın metni sayfanın tek bölüm listesinde bölüm olur; sayfa tema düzenleyicide açılır ve yönetilir; İçerik yalnız blog yazılarının.
    - **Dilimler (K11):** S6 sözleşme + backend; S7 panel; S8 vitrin + tema + kilitler + dönüşüm dosyası `migration-scripts/content-pages-into-layout.ts`; S9 Katalog hazır görünümü. S6 ve S8 birleşmeden önce `security-reviewer`. `main`'e S9'dan sonra.
    - **Tarayıcı denetimi:** S1–S5'in üst/alt modeline eski bakış eskidi; S8/S9'dan sonra Hakkımızda ve İletişim'e 390 ve 1440 px'te bakılır.
-   - **S6 durumu:** dal `deniz/sayfalar-tema-duzenleyici-s6` origin'de; içinde yalnız `b352318cb feat(types): lay content pages out as one list with their text`. Geri kalanı yazıldı ama eski Mac'te ajan worktree'sinde (`.claude/worktrees/agent-ac045d966b0530306`) commit'lenmemiş; itildiyse dalda, itilmediyse S6 ADR'den yeniden yapılır.
-   - **Worktree'de yazılanlar:**
+   - **S6 durumu:** dal `deniz/sayfalar-tema-duzenleyici-s6` origin'de; iki commit: `b352318cb` (types) ve `7a58bd5e2` (geri kalan yarım iş; eski Mac'ten taşınmadan önce olduğu gibi kaydedildi). Dal `dev`'e birleşmez: yeni HTTP testleri yazılmadı, sayfaya `body` gönderen eski HTTP testleri kırık.
+   - **Dalda yazılanlar:**
      - types: `placement` kalktı; `contact` / `payment_facts` / `shipping_facts`; `rich_text` `article` biçimi; sayfa sınırı 50; `synthesized`.
      - `layout-pages.ts` tek liste + `sections/page-text.ts`; eski biçim okuması `readStoredPages` / `text_at`.
      - Mağaza okumasında sentez: `layout-page-read.ts` + `layout-hydrate-text.ts`.
@@ -62,7 +62,7 @@ Bitenler: #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 k
   - #230: notlar.
   - #231: iletişim, ödeme ve kargo rolleri içerik sayfasının kimliğiyle tutulur (`contact_page_id`, `payment_page_id`, `shipping_page_id`; eski yol alanları yalnız kimlik boşken okunur). `GET /store/storefront` sayfası olmayan (taslak ya da silinmiş) rolün adresini `null` döner. Panelde yol kutuları yerine sayfa seçici. ADR-0073 "Ek 2026-11-19".
   - #232: ADR-0073 "Ek 2026-11-19 (2)" kararı. Sahip: "sayfalardaki o altta üstte içerik mantığı olmasın direkt mevcut içerikler gelsin hakkımızdaya bu sayfaları direkt içinden oluşturmasın direkt tema düzenleyicide oluştursun. blog içeriği değil bu". S1–S5'in üst/alt modeli geçersiz; dilimler S6–S9.
-- **S6 başladı, bitmedi:** durum ve kalanlar sıradaki işler 1'de (dalda yalnız `b352318cb`; geri kalanı eski Mac'in ajan worktree'sinde commit'lenmemiş).
+- **S6 başladı, bitmedi:** durum ve kalanlar sıradaki işler 1'de (dalda `b352318cb` ve yarım işin kaydı `7a58bd5e2`).
 - **Kesinti:** ~22:02'de macOS bu sürecin Masaüstü klasörü erişimini geri aldı; süren iş durdu. Vitrin dev sunucusu da aynı nedenle Turbopack önbelleğinde EPERM ile çöktü.
 - **Bilgisayar değişikliği:** sahip: "macbook yetersiz kalıyor geliştirmeyi diğer bilgisayarımda devam edeceğim". Geliştirme öbür bilgisayarda sürer; bu not ondan önceki son durumdur.
 
