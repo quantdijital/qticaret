@@ -2,6 +2,8 @@ import type {
   CategoriesVariant,
   FaqSettings,
   HeroVariant,
+  RichTextImageSide,
+  RichTextVariant,
   SectionDevice,
   SectionLook,
   TrustBadgesVariant,
@@ -133,7 +135,19 @@ export type HomeSectionView = {
       /** The shop's average, count and stars' spread (adr/0046 Ek 2026-11-05); none: not drawn. */
       summary?: ShopRatingView | null
     }
-  | { id: string; type: "rich_text"; title: string | null; html: string }
+  | {
+      id: string
+      type: "rich_text"
+      title: string | null
+      html: string
+      /**
+       * `with_image` (adr/0073 §3, "Görselli metin"): the picture beside the
+       * text and its side from 1024 px; absent (or without a picture): the pane.
+       */
+      variant?: RichTextVariant
+      image?: ImageView | null
+      imageSide?: RichTextImageSide
+    }
   | {
       id: string
       type: "trust_badges"
