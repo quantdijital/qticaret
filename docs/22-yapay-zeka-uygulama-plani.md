@@ -99,6 +99,7 @@ ADR eki + F16 ile birlikte. Kapsam: `ai.platform_credits` bayrağı, `ai_free_cr
 ## Aşama 7: sahne görseli
 
 - `image_scene` (`image_edit` / `image_generate`): en çok iki hazır sahne seçeneği, sektör paketinden gelir (koda sektör girmez). `ai_source: generated` ya da `edited`, IPTC buna göre.
+- **Kendi sahneleri (2026-11-19; adr/0071 Ek 2026-11-19):** diyalogdaki çipler sırasıyla mağazanın kayıtlı sahneleri (en çok 12), paket sahneleri (Ayarlar › Yapay zekâ › Sahneler'de "Hazır sahneleri göster" ile gizlenebilir) ve "Özel". "Özel" tek seferlik bir arka plan tarifi alır (en çok 200 karakter, sayaçlı); "Sahnelerime kaydet" işaretliyse ad (en çok 40, boşsa tarifin ilk sözcükleri) ile listeye eklenir. Saklama: `platform_settings` bölümü `ai_scenes` (`show_pack_scenes`, `scenes[{id, name, prompt}]`); migration yok, yazma owner/admin. Güvenlik: metin sunucuda üç kez (doğrulayıcı, workflow, servis çağrısından önce) `cleanSceneText`'ten geçer (NFC, boşluk, uzunluk, bağlantı ve işaretleme karakteri reddi, kişisel veri ayıklama); istemde sunucunun sabit metni önde (kişi, el, marka, logo, yazı yok), Gemini talimatında koruma kuralları önce, sahne en sonda; iş özeti metni değil `scene: "custom"` taşır; kayıtlı sahne kimliği yalnız bu mağazanın listesinden çözülür. Sınır: liste bütün yazılır, eşzamanlı iki düzenlemede son kaydeden kazanır. Testler: `lib/ai/__tests__/own-scenes.unit.spec.ts`, `integration-tests/http/ai-scenes.spec.ts`, panelde `ai-scene-custom.spec.tsx`, `ai-scenes-card.spec.tsx`.
 
 ## Aşama 8: fotoğraftan kısa video
 
