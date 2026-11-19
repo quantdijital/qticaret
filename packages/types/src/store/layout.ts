@@ -20,6 +20,7 @@ import type {
 } from "./section-categories.js"
 import type { StoreStripGallerySection } from "./section-strips.js"
 import type { StoreNewsletterSection } from "./section-newsletter.js"
+import type { StoreRichTextSection } from "./section-rich-text.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
 import type { ScrollerSettings, SliderSettings } from "./section-scroller.js"
@@ -114,7 +115,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
     | { id: string; type: "posts" | "reviews"; title: string | null; limit: number }
     | StoreGoogleRatingSection
-    | { id: string; type: "rich_text"; title: string | null; html: string }
+    | StoreRichTextSection
     | {
         id: string
         type: "trust_badges"
