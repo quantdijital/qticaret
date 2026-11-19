@@ -49,6 +49,34 @@ export function withShopFrame(
   return { groups: out, kept }
 }
 
+/** A content page's layout as the draft holds it: the page's id and its sections. */
+export interface ShopPage {
+  page_id: string
+  sections: readonly unknown[]
+}
+
+/**
+ * The content pages' layouts under a preset (adr/0073 §4, as the header
+ * and footer under §4 of adr/0063): a page the preset lays out takes the
+ * preset's layout, in the shop's place for it when it had one; every
+ * other page keeps the shop's own, named in `kept` (`pages.cnt_…`).
+ * Applying a look never takes away the contact page the shop laid out.
+ */
+export function withShopPages(
+  preset: readonly ShopPage[],
+  shop: readonly ShopPage[]
+): { pages: ShopPage[]; kept: string[] } {
+  const named = new Map(preset.map((page) => [page.page_id, page]))
+  const had = new Set(shop.map((page) => page.page_id))
+  return {
+    pages: [
+      ...shop.map((page) => named.get(page.page_id) ?? page),
+      ...preset.filter((page) => !had.has(page.page_id)),
+    ],
+    kept: shop.filter((page) => !named.has(page.page_id)).map((page) => `pages.${page.page_id}`),
+  }
+}
+
 /**
  * The preset's theme settings through the theme section's own schema, its
  * contrast rule included (adr/0063 §2); a theme this build does not draw is
@@ -73,7 +101,7 @@ export function presetTheme(raw: unknown): ThemeSettings {
  */
 export function presetDocument(
   resolved: Pick<ResolvedPreset, "groups" | "menus"> & {
-    /** The shop's content page layouts, kept: a preset names no page yet (adr/0073 §4). */
+    /** The content pages' layouts, the preset's with the shop's kept (`withShopPages`, adr/0073 §4). */
     pages?: readonly unknown[]
   },
   theme: ThemeSettings,
