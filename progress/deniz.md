@@ -4,31 +4,57 @@
 
 ## Sıradaki işler (güncel tutulur; Oğuzhan başlamadan önce buraya bakar)
 
-1. **BirFatura entegrasyonu:** A yolu onaylandı (siparişleri BirFatura çeker); test hesabı bekleniyor, gelince ADR → F1/F2 (`docs/entegrasyonlar/plan-basitkargo-birfatura.md`). BasitKargo şimdilik yok. Paraşüt canlıdan sonra, ikinci plan.
-2. **Canlıya çıkış listesi (F16, sahiple):** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); imajda ffmpeg ≥ 7 (`FFMPEG_PATH` / `FFPROBE_PATH`; CI'ın apt'si 6.1 veriyor); Cloudflare önde (adr/0003), ayrı depo origin'iyle birlikte; o zaman CSP `img-src`/`media-src` daraltılır. BirFatura için gerekirse ayrı alt alan adı.
-3. **Sahibin tarayıcıda bakması bekleniyor:**
-   - Panelde video yükleme (localhost:5173).
-   - Vitrin galerisinde video ve YouTube karesi (açılışta video baytı inmez; azaltılmış hareket).
-   - Depodan Range 206 denetimi.
-   - Sepette stok mesajı ("Bu üründen stokta yalnız N adet var").
-   - D4-1 pencereleri (kısmen yapılmış iyzico iadesi).
+1. **ADR-0073 kapanışı (içerik sayfalarında bölümler):**
+   - İçerik sayfası bölümleri ve Katalog Hakkımızda'ya tarayıcıda 390 ve 1440 px'te bakılır.
+   - Dev mağazada Hakkımızda'nın metni, kapak görseli ve vaatleri ADR-0073 §4'teki metinle girilir, Katalog yeniden uygulanır.
+   - Sayfanın metniyle bölümler arasındaki boşluk denetlenir.
+2. **Test sunucusu ve BirFatura:** test sunucusuna kurulum planı; kurulumdan sonra BirFatura gerçek testi test alan adında (F1 #209 + F2 #210 birleşti, yerel sahte yok).
+3. **Canlıya çıkış listesi (F16, sahiple):** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); imajda ffmpeg ≥ 7 (`FFMPEG_PATH` / `FFPROBE_PATH`; CI'ın apt'si 6.1 veriyor); Cloudflare önde (adr/0003), ayrı depo origin'iyle birlikte; o zaman CSP `img-src`/`media-src` daraltılır. BirFatura için gerekirse ayrı alt alan adı.
+4. **Küçük işler ve takipler:**
+   - İletişim, ödeme ve kargo sayfalarının rolü `contact_form_path` yerine sayfa kimliğiyle tanınsın (küçük düzeltme).
+   - Panelde görünüm özeti (`gallery/draft-summary.ts`) sayfa düzenlerini henüz saymıyor.
+   - Etiketi oluşmuş siparişler için "Kurye bekliyor" gösterim durumu (önerildi, sahibin cevabı bekleniyor).
+   - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
+   - D4-1: düzenleme iadesinde referansla sürdürme gerçek bir düzenleme iadesiyle denenmedi.
+5. **Sahibin tarayıcıda bakması bekleniyor:**
+   - Kart görselinin üzerine gelince değişmesi, hover alt çizgisinin kalkması, küçük görsel oklarının kalkması (#201); Katalog'da "Canlı" hareket (#203).
+   - İade formunda seçim kutusu okunun boşluğu (#223).
+   - Panelde video yükleme (localhost:5173); vitrin galerisinde video ve YouTube karesi; depodan Range 206 denetimi.
+   - Sepette stok mesajı ("Bu üründen stokta yalnız N adet var"); D4-1 pencereleri (kısmen yapılmış iyzico iadesi).
    - Önceden kalan: toptancı akışı (şifreyle oluşturma, Yeni şifre, Hesabı devral, Sil); mağaza profili Genel ekranı ve kenar çubuğu simgesi (#123).
-4. **Sahibin bekleyen kararları:**
+6. **Sahibin bekleyen kararları:**
    - Ağır testler (HTTP parçaları, e2e) yalnız `dev` ve PR'larda mı koşsun.
    - Toptan/perakende ayrımı raporlarda, panoda ve plan sayacında.
    - Toptancı "Sil" müşteri kaydını da silsin mi (bugün perakende müşteri olarak kalır).
    - ADR-0063 "sihirbazda varsayılan Grafit" sorusu (F17; Grafit hazır görünümü #178 ile kalktı, Grafit adlı tema varsayılanı duruyor).
    - Önceden kalan: Katalog görünümü menü zemini / duyuru şeridi; `packages/themes/base` (eskimiş); canlı alan adları; ADR-0064.
-5. **Olası takipler:**
-   - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
-   - D4-1: düzenleme iadesinde referansla sürdürme gerçek bir düzenleme iadesiyle denenmedi.
-6. **Tarihe bağlı bağımlılık işleri (#192'nin takipleri):**
+7. **Bağımlılık işleri (#192'nin takipleri):**
    - 2026-11-20 ve sonrası: glob 13.0.7, 14 gün kuralıyla uygun olur; uyarının (advisory) onu düzeltilmiş sayıp saymadığına bakılır.
    - 2026-11-27 ve sonrası: fast-xml-parser 5.12.1.
    - Kalan yüksekler Medusa yükseltmesini ya da üst projeyi bekliyor: @graphql-tools/utils 12.x ister; picomatch'in henüz düzeltmesi yok.
    - **Sahip kararı:** Medusa 2.21.2 → 2.22.x yükseltmesi. 2.22.2 bugün yeterince eski; 2.22.3+ yakında olur. Tam testlerle ayrı PR.
+   - `PROGRESS.md`'deki "body-parser/multer override'ı 2026-11-05'ten sonra" satırı eskidi (#192 ile yapıldı); bir sonraki `PROGRESS.md` güncellemesinde düzeltilir.
 
-Bitenler: ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 test hesabı gelince öne alınır; 2 canlıya çıkışta; 3 ve 4 sahipte.
+Bitenler: ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
+
+## 2026-11-18 → 2026-11-19: içerik sayfalarında bölümler (ADR-0073), BirFatura F1 + F2, vitrin kartları
+
+- **2026-11-18'de birleşenler (notu düşülmemişti):**
+  - #201: Atölye'de fareyle üzerine gelince ikinci görsel artık bütün kart tiplerinde (`parts/CardPhoto.tsx`); bağlantılarda hover alt çizgisi kalktı (düz yazıdaki bağlantılar WCAG 1.4.1 gereği çizgili kaldı; `atolye-hover-cues` testi korur); ürün sayfasında küçük görsel okları kalktı. Sahip isteği; kilitler bilerek yeniden yazıldı.
+  - #203: görsel geçişi bütün görünümlerde yumuşadı (420 ms, ikinci görsel çözülmeden görünmez); yeni stil takımı basamağı **Hareket** (`calm` varsayılan / `lively`), Katalog "Canlı"ya geçti. Sahip vitrini "ölü gibi" bulmuştu; hareket yalnız `prefers-reduced-motion: no-preference`'ta, LCP görselleri beklemez.
+  - #207: ADR-0072 numarası BirFatura çekme entegrasyonuna ayrıldı.
+  - #209 (BirFatura F1, ADR-0072 Kabul): siparişleri BirFatura bizden çeker, faturayı kesip numara ve PDF'i geri yazar (`/hooks/birfatura/api/*`, jetonla; jeton yalnız sahipte, yeniden doğrulamayla). Çekilmiş siparişin iptali personele uyarı düşer. Migration `Migration20261118093012`; iki tur güvenlik incelemesi, zorunlu açık yok.
+  - #210 (BirFatura F2): Ayarlar > E-Fatura'da BirFatura kartı (site adresi, bağlantı şifresi, son çekme), sipariş fatura kartında BirFatura satırları. Sahip kararı: yerel sahte BirFatura yok; deneme gerçek test hesabıyla.
+- **2026-11-19'da birleşenler:**
+  - #222: kargo takip sıklığı `SHIPMENT_POLL_MINUTES` (1–30) ile ayarlanır; yalnız yerelde ve testte, staging ve canlıda hep 30 dk. Sahte Aras/Yurtiçi'de ilerletilen gönderi panele 1 dakikada gelir.
+  - #223: vitrin iade formunda seçim kutularının oku kenara yapışıktı; ödeme sayfasındaki `SelectField` yöntemiyle boşluk verildi (sahip bildirdi).
+  - #224: ADR-0073 yazıldı: içerik sayfaları (Hakkımızda, İletişim, mağazanın her sayfası) tema düzenleyicide kendi bölümlerini alır. Belgede durum "Önerildi" (otonom; önerilenle ilerlendi, sahip görüp revize eder).
+  - #225 (S1, backend): düzen belgesinde `pages` grubu (en çok 20 sayfa, sayfa başına 12 bölüm, belge 1 MB); herkese açık, önizleme ve oturum okumaları; silinen sayfanın düzeni her yazımda düşer (`dropped_pages`). Güvenlik incelemesi iki tur, zorunlu yok; taslak/silinmiş sayfa ayırt edilemiyor (tek tip `{page:null}`), önbellek `revision@published_at` ile anahtarlı.
+  - #226 (S2, panel): tema düzenleyicide dördüncü sayfa seçimi "İçerik sayfası"; ağaçta "Üstte" / "Sayfanın metni" / "Altta", 15 bölüm türü; İçerik ekranında "Tema düzenleyicide tasarla".
+  - #227 (S3, vitrin + tema): Atölye içerik sayfası bölümlerini metnin üstüne ve altına çizer; düzeni olmayan sayfa ve İletişim bayt bayt aynı (kilit önce yazıldı). Taslak sayfa yalnız personel oturumunda görünür; güvenlik incelemesinde bulgu yok.
+  - #228 (S4): `rich_text` için yeni biçim `with_image` ("Görselli metin"): bir yanda görsel, öbür yanda başlık ve metin; ana sayfa, ürün, kategori ve içerik sayfalarında kullanılabilir. Eski `rich_text` `pane` olarak aynı çizilir, kilitler değişmedi.
+  - #229 (S5): hazır görünüm `pages` taşıyabilir; Katalog "Hakkımızda" düzeni getirir (görselli metin, inanç metni, vaatler, çok satanlar, yorumlar, yardım). Görünüm sayfa açmaz; sayfa yoksa ya da 20 sayfa sınırı doluysa reddetmek yerine o sayfayı atlar ve panel nedenini yazar.
+- **Açık kalanlar:** sıradaki işler 1 ve 4 (tarayıcı denetimi, dev Hakkımızda içeriği, sayfa rollerinin kimlikle tanınması, görünüm özeti).
 
 ## 2026-11-17 akşam → 2026-11-18 gece: ürün videoları bitti, D4-1, köken denetimi
 
