@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
-import { footerBody, isBody, isShowing, readStoredLayout } from "../../lib/storefront/layout"
+import { footerBody, isBody, isShowing } from "../../lib/storefront/layout"
 import { mainSectionsOf, withMainSections } from "../../lib/storefront/layout-main"
 import { fillShopDoc, fillShopText, fillShopTextWhole } from "../../lib/shop/tokens"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
@@ -9,24 +9,20 @@ import { footerRowImages, footerRowLinks } from "../../lib/storefront/sections/f
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { shownSettings } from "../../lib/storefront/layout-settings"
 import { newsletterImages, printedNewsletter } from "../../lib/storefront/sections/newsletter"
-import { MEDIA_MODULE } from "../../modules/media"
-import type MediaModuleService from "../../modules/media/service"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
-import { shopInfoValues } from "../shop/info-values"
-import { layoutRow } from "./layout"
+import type { shopInfoValues } from "../shop/info-values"
+import { editionKey, layoutEdition } from "./layout-row"
+import { publishedDocument } from "./layout-published"
 import { legacySettings } from "./layout-shared"
 import { defaultLayout } from "./layout-default"
 import { headerLinked, imagesOf, linksOf } from "./layout-check"
+import { hydrateContext } from "./layout-context"
 import { fill, hydrateMarquee, hydrateSection } from "./layout-hydrate"
-import type { HydrateContext } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
-import { resolveLinks } from "./menu-links"
 import type { StoreMenu } from "./menus-read"
-import { bandPicks } from "./price-bands"
-import { railPicks } from "./rails"
 
 /** The addresses of the images shown with their sizes: openings, slides, strips (not rich text's). */
-const imageUrls = (section: BodySection): string[] =>
+export const imageUrls = (section: BodySection): string[] =>
   section.type === "rich_text" ? [] : imagesOf(section)
 
 /**
@@ -98,66 +94,15 @@ export async function storeLayout(
     ),
     ...footerRowImages(blocks),
   ]
-  const [values, resolved, assets, picks, bands] = await Promise.all([
-    shopInfoValues(container),
-    resolveLinks(
-      container,
-      links.map((each, index) => ({
-        id: String(index),
-        parent_id: null,
-        rank: index,
-        label: each.label,
-        kind: each.kind,
-        target: "target" in each ? each.target : null,
-        url: "url" in each ? each.url : null,
-      }))
-    ),
-    urls.length
-      ? container
-          .resolve<MediaModuleService>(MEDIA_MODULE)
-          .listMediaAssets(
-            { url: [...new Set(urls)] },
-            { select: ["url", "alt", "width", "height", "derivatives"] }
-          )
-      : Promise.resolve([]),
-    railPicks(container, home, channels),
-    bandPicks(container, home, channels),
-  ])
-  const at: HydrateContext = {
-    values,
-    container,
-    picks,
-    bands,
+  // The sale and best-seller rails and the price bands are the home page's
+  const at = await hydrateContext(container, {
+    links,
+    urls,
+    picked: home,
+    channels,
     live: keepLive.live,
-    images: new Map(
-      assets.map((asset) => [
-        asset.url,
-        {
-          url: asset.url,
-          alt: asset.alt ?? null,
-          width: asset.width ?? null,
-          height: asset.height ?? null,
-          derivatives: asset.derivatives ?? null,
-        },
-      ])
-    ),
-    links: new Map(
-      links.map((each, index) => {
-        const shown = resolved.get(String(index))
-        return [
-          each,
-          !shown || shown.broken
-            ? null
-            : {
-                label: each.label ?? shown.name,
-                kind: each.kind,
-                target: "target" in each ? each.target : null,
-                path: shown.path,
-              },
-        ]
-      })
-    ),
-  }
+  })
+  const { values } = at
   const resolve = (link: MenuLinkInput) => at.links.get(link) ?? null
   // A footer group section as a page's, once the live filter kept it
   const keptFooter = (id: string) => {
@@ -275,11 +220,14 @@ export async function publishedLayout(
   container: MedusaContainer,
   channels: readonly string[] | null = null
 ): Promise<Shown> {
-  const row = await layoutRow(container)
-  const doc = row?.published ? `revision:${String(row.revision)}` : "default"
+  // The revision only: the documents are read on a miss (security review 2026-11-19, S2)
+  const edition = await layoutEdition(container)
+  const doc = edition?.published ? editionKey(edition) : "default"
   const key = `${doc}|${channels ? [...new Set(channels)].sort().join(",") : "*"}`
   return shownCache(key, async () => {
-    const shown = row?.published ? readStoredLayout(row.published) : await defaultLayout(container)
+    const shown = edition?.published
+      ? await publishedDocument(container, edition)
+      : await defaultLayout(container)
     return storeLayout(container, shown, channels)
   })
 }

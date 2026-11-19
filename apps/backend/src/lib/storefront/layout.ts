@@ -11,6 +11,9 @@ import {
 } from "./layout-sections"
 import type { BodySection, PageMain } from "./layout-sections"
 import { layoutSettings, storedSettings } from "./layout-settings"
+import { pageSections, pagesGroup } from "./layout-pages"
+import { storedPages } from "./layout-pages-stored"
+import { DESIGN_LIMITS } from "./designs/limits"
 import { freeRowIds, freeRowsConflict } from "./sections/footer-rules"
 import { storedFreeRowIds } from "./sections/footer-rows-stored"
 import { isMainType } from "./sections/main"
@@ -22,11 +25,14 @@ import { logger } from "../logging"
 /**
  * The storefront's design as the theme editor writes it (adr/0049): the
  * header's, the home page's, the product and category pages' and the
- * footer's sections (`layout-sections.ts`), and the theme's shared
- * settings (`layout-settings.ts`), checked as one document.
+ * footer's sections (`layout-sections.ts`), the content pages' own
+ * (`layout-pages.ts`, adr/0073) and the theme's shared settings
+ * (`layout-settings.ts`), checked as one document.
  */
 
 export { LAYOUT_LIMITS } from "./layout-sections"
+export { PAGE_ID, contentPageSection, pageSections } from "./layout-pages"
+export type { ContentPageSection, PageLayout } from "./layout-pages"
 export type {
   BodySection,
   CategorySection,
@@ -61,8 +67,9 @@ const tooManyMarquees = (doc: {
   home: readonly { type: string }[]
   product: readonly { type: string }[]
   category: readonly { type: string }[]
+  pages: readonly { sections: readonly { type: string }[] }[]
 }) =>
-  [doc.home, doc.product, doc.category].some(
+  [doc.home, doc.product, doc.category, ...doc.pages.map((page) => page.sections)].some(
     (page) => marquees(doc.header) + marquees(doc.footer) + marquees(page) > MARQUEE_PER_PAGE
   )
 
@@ -85,6 +92,8 @@ export const layoutDocument = z
       .array(categorySection)
       .max(LAYOUT_LIMITS.category + 1)
       .default([]),
+    /** Content pages' own sections, by page (adr/0073 §1). */
+    pages: pagesGroup,
     /** What several pages draw alike: trust badges, colour swatches, "Az kaldı". */
     settings: layoutSettings,
   })
@@ -96,6 +105,7 @@ export const layoutDocument = z
       ...doc.footer,
       ...doc.product,
       ...doc.category,
+      ...pageSections(doc.pages),
     ]
     // A free rows footer's rows and blocks take ids among the sections' (adr/0070 §2)
     const ids = [...all.map((section) => section.id), ...freeRowIds(doc.footer)]
@@ -133,6 +143,10 @@ export const layoutDocument = z
     if (backwards) {
       ctx.addIssue({ code: "custom", message: "storefront_layout.schedule_invalid" })
     }
+    // The whole design as the editor sends it and every revision keeps it (adr/0073 §1)
+    if (Buffer.byteLength(JSON.stringify(doc)) > DESIGN_LIMITS.bytes) {
+      ctx.addIssue({ code: "custom", message: "storefront_layout.too_large" })
+    }
   })
 
 export type LayoutDocument = z.infer<typeof layoutDocument>
@@ -144,11 +158,13 @@ export const footerBody = <S extends { type: string }>(
   (FOOTER_BODY_TYPES as readonly string[]).includes(section.type)
 
 /**
- * Every page's body sections (home, product, category) and the footer
- * group's drawn alike (adr/0070 §4): checked and shown alike.
+ * Every page's body sections (home, product, category, the content pages'
+ * own, adr/0073) and the footer group's drawn alike (adr/0070 §4): checked
+ * and shown alike.
  */
 export const bodySections = (doc: LayoutDocument): BodySection[] => [
   ...[...doc.home, ...doc.product, ...doc.category].filter(isBody),
+  ...pageSections(doc.pages),
   ...doc.footer.filter(footerBody),
 ]
 
@@ -219,18 +235,26 @@ export function storedDocument(stored: unknown): unknown {
       return [[group, read]]
     })
   )
+  // Content pages' layouts (adr/0073): each page's sections read alike, an emptied page left out
+  const pages = storedPages((stored as Record<string, unknown>)["pages"], skipped)
   if (skipped.length > 0) {
     logger.warn({ event: "storefront.layout_section_skipped", sections: skipped })
   }
   // A free rows footer's rows and blocks take ids among every group's sections (adr/0070)
   const footer = groups["footer"]
   if (footer) {
-    const others = GROUPS.filter((group) => group !== "footer").flatMap(
-      (group) => groups[group] ?? []
-    )
+    const others = [
+      ...GROUPS.filter((group) => group !== "footer").flatMap((group) => groups[group] ?? []),
+      ...(pages ?? []).flatMap((page) => page.sections),
+    ]
     groups["footer"] = storedFreeRowIds([...others, ...footer]).slice(others.length)
   }
-  return { ...stored, ...groups, settings: storedSettings(stored) }
+  return {
+    ...stored,
+    ...groups,
+    ...(pages ? { pages } : {}),
+    settings: storedSettings(stored),
+  }
 }
 
 /** A stored document read through today's schema (see `storedDocument`); throws if it does not read. */

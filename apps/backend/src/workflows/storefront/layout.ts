@@ -20,6 +20,7 @@ import { checkLayout } from "./layout-check"
 import { defaultLayout } from "./layout-default"
 import { json, layoutRow, layouts } from "./layout-row"
 import type { LayoutRow } from "./layout-row"
+import { prunePagesStep } from "./layout-pages"
 import { checkThemeStep, clearDraftMenusStep } from "./layout-steps"
 import { MENUS_LOCK } from "./menus"
 import { replaceMenusStep } from "./menus-replace"
@@ -94,11 +95,17 @@ export const saveLayoutDraftWorkflow = createWorkflow(
  * `saveLayoutDraftWorkflow.runAsStep` and be covered.
  */
 export function saveDraftSteps(draft: LayoutDocument | WorkflowData<LayoutDocument>) {
-  const media = checkLayoutStep(draft)
-  checkThemeStep(draft)
-  const saved = writeDraftStep(draft)
+  // A content page deleted since takes its layout with it (adr/0073 §1)
+  const pruned = prunePagesStep(draft)
+  const document = transform({ pruned }, ({ pruned }) => pruned.document)
+  const media = checkLayoutStep(document)
+  checkThemeStep(document)
+  const saved = writeDraftStep(document)
   attachMediaStep(transform({ media }, ({ media }) => ({ link: media, record: [] })))
-  return saved
+  return transform({ saved, pruned }, ({ saved, pruned }) => ({
+    ...saved,
+    dropped_pages: pruned.dropped_pages,
+  }))
 }
 
 /** The draft to publish, read through today's schema; none saved yet: nothing to publish. */
@@ -206,7 +213,9 @@ export const publishLayoutWorkflow = createWorkflow(
     // The design's and the menus' locks at once: the Menüler screen waits for a set going live
     const locks = { ...LAYOUT_LOCK, key: [LAYOUT_LOCK.key, MENUS_LOCK.key] }
     acquireLockStep(locks)
-    const draft = loadDraftStep()
+    // A content page deleted since the save goes live without its layout (adr/0073 §1)
+    const pruned = prunePagesStep(loadDraftStep())
+    const draft = transform({ pruned }, ({ pruned }) => pruned.document)
     checkLayoutStep(draft)
     const published = publishStep(transform({ draft, actor }, (data) => data))
     const set = transform({ draft }, ({ draft }) => draft.settings.menus)
@@ -217,7 +226,12 @@ export const publishLayoutWorkflow = createWorkflow(
     refreshStorefrontStep(
       transform({ menus }, ({ menus }) => (menus.replaced ? ["menus" as const] : []))
     )
-    return new WorkflowResponse(published)
+    return new WorkflowResponse(
+      transform({ published, pruned }, ({ published, pruned }) => ({
+        ...published,
+        dropped_pages: pruned.dropped_pages,
+      }))
+    )
   }
 )
 

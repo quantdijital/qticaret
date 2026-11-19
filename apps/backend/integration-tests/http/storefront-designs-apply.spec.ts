@@ -69,6 +69,8 @@ medusaIntegrationTestRunner({
         auto_saved: null,
         skipped: [],
         dropped: [],
+        // No content page laid out, none deleted (adr/0073 §1)
+        dropped_pages: 0,
       })
       const draft = applied.data.layout.draft
       expect(draft.home.map((section) => section.id)).toEqual(["yardimkutusu"])

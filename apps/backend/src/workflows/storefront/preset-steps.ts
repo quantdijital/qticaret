@@ -72,15 +72,16 @@ const placeholders = (paths: Iterable<string>): Map<string, string> =>
 async function shopFrame(
   container: MedusaContainer,
   row: Awaited<ReturnType<typeof layoutRow>>
-): Promise<ShopFrame> {
+): Promise<ShopFrame & { pages: LayoutDocument["pages"] }> {
   if (!row) {
     const { header, footer } = await defaultLayout(container)
-    return { header, footer }
+    return { header, footer, pages: [] }
   }
   const parsed = layoutDocument.safeParse(storedDocument(row.draft))
+  // The shop's content page layouts stay: a preset names no page yet (adr/0073 §4)
   return parsed.success
-    ? { header: parsed.data.header, footer: parsed.data.footer }
-    : { header: [], footer: [] }
+    ? { header: parsed.data.header, footer: parsed.data.footer, pages: parsed.data.pages }
+    : { header: [], footer: [], pages: [] }
 }
 
 /**
@@ -165,7 +166,7 @@ function documentOf(
   })
   const frame = withShopFrame(resolved.groups, kept.frame)
   const document = presetDocument(
-    { groups: frame.groups, menus: resolved.menus },
+    { groups: frame.groups, menus: resolved.menus, pages: kept.frame.pages },
     preset.theme,
     { pack: preset.pack, code: preset.code, version: preset.version },
     kept.settings

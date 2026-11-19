@@ -104,7 +104,13 @@ export function staffClient(http: HttpClient, headers: Record<string, string>) {
       ),
     applyDesign: (id: string, body: object = {}) =>
       post<{
-        result: { design: DesignRef; auto_saved: DesignRef | null; skipped: []; dropped: [] }
+        result: {
+          design: DesignRef
+          auto_saved: DesignRef | null
+          skipped: []
+          dropped: []
+          dropped_pages: number
+        }
         layout: AdminLayout["layout"]
       }>(`/admin/storefront-designs/${id}/apply`, body),
     saveDesign: (body: object) =>

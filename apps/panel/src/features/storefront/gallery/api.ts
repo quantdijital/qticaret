@@ -144,6 +144,8 @@ interface ApplyAnswer extends LayoutAnswer {
     auto_saved: DesignRef | null
     skipped: SkippedRef[]
     kept?: string[]
+    /** Content page layouts left out for pages deleted since (adr/0073 §1); absent before them. */
+    dropped_pages?: number
   }
 }
 

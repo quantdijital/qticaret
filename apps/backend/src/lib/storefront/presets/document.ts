@@ -72,13 +72,17 @@ export function presetTheme(raw: unknown): ThemeSettings {
  * to the editor's schema as a whole: one the schema refuses writes nothing.
  */
 export function presetDocument(
-  resolved: Pick<ResolvedPreset, "groups" | "menus">,
+  resolved: Pick<ResolvedPreset, "groups" | "menus"> & {
+    /** The shop's content page layouts, kept: a preset names no page yet (adr/0073 §4). */
+    pages?: readonly unknown[]
+  },
   theme: ThemeSettings,
   preset: AppliedPreset,
   kept: Pick<LayoutSettings, "trust_badges" | "color_swatches" | "low_stock">
 ): LayoutDocument {
   const parsed = layoutDocument.safeParse({
     ...resolved.groups,
+    pages: resolved.pages ?? [],
     settings: {
       trust_badges: kept.trust_badges,
       color_swatches: kept.color_swatches,

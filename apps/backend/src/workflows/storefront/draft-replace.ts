@@ -29,10 +29,14 @@ export const replaceDraftWorkflow = createWorkflow(
         reason: input.reason,
       }))
     )
-    saveDraftSteps(transform({ input }, ({ input }) => input.source))
+    const saved = saveDraftSteps(transform({ input }, ({ input }) => input.source))
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(
-      transform({ autoSaved }, ({ autoSaved }) => ({ auto_saved: autoSaved }))
+      transform({ autoSaved, saved }, ({ autoSaved, saved }) => ({
+        auto_saved: autoSaved,
+        // Content pages deleted since that revision, their layouts left out (adr/0073 §1)
+        dropped_pages: saved.dropped_pages,
+      }))
     )
   }
 )

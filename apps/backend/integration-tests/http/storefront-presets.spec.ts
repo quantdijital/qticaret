@@ -222,6 +222,8 @@ medusaIntegrationTestRunner({
         demo: { added: 0, kept: 0 },
         // The shop's own draft kept first (adr/0064 Ek 2026-11-17)
         auto_saved: { id: expect.stringMatching(/^sfd_/) as unknown, kind: "auto", name: null },
+        // No content page laid out, none deleted (adr/0073 §1)
+        dropped_pages: 0,
       })
       expect(ownFooter.length).toBeGreaterThan(0)
       const draft = first.data.layout.draft

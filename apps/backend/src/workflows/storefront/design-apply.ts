@@ -118,13 +118,15 @@ export const applyDesignWorkflow = createWorkflow(
       }))
     )
     const draft = composeDesignDraftStep(design)
-    saveDraftSteps(draft)
+    const saved = saveDraftSteps(draft)
     markAppliedStep(transform({ design }, ({ design }) => design.id))
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(
-      transform({ design, autoSaved }, ({ design, autoSaved }) => ({
+      transform({ design, autoSaved, saved }, ({ design, autoSaved, saved }) => ({
         design: { id: design.id, kind: design.kind, name: design.name },
         auto_saved: autoSaved,
+        // Content pages deleted since the look was saved, their layouts left out (adr/0073 §1)
+        dropped_pages: saved.dropped_pages,
         // Pruning a look's missing records comes later (adr/0064 §5): a gone one refuses it
         skipped: [] as { where: string; ref: string }[],
         dropped: [] as string[],

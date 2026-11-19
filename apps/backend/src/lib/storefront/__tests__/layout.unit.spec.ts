@@ -34,6 +34,8 @@ describe("storefront layout document (adr/0049)", () => {
       footer: [],
       product: [],
       category: [],
+      // No content page has a layout of its own yet (adr/0073)
+      pages: [],
       // The theme's shared settings: unset until written (adr/0049 Ek 2026-11-06)
       settings: {
         trust_badges: null,

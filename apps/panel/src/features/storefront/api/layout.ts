@@ -134,7 +134,13 @@ export const usePublishLayout = () =>
  * the gallery reads again, and `kept` names it for the toast.
  */
 function useDraftReplace<T>(
-  call: (input: T) => Promise<Answer & { auto_saved?: KeptDraft | null }>
+  call: (input: T) => Promise<
+    Answer & {
+      auto_saved?: KeptDraft | null
+      /** Content page layouts left out for pages deleted since (adr/0073 §1). */
+      dropped_pages?: number
+    }
+  >
 ) {
   const client = useQueryClient()
   return useMutation({

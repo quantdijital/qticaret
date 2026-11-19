@@ -1,19 +1,6 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
-import { MedusaError } from "@medusajs/framework/utils"
-import { errorSummary, logger } from "../../../../../lib/logging"
-import { orderAccessKey } from "../../../../../lib/orders/access-token"
-import { editorSessionOf, editorSessionStore } from "../../../../../lib/storefront/editor-session"
-import { STAFF_ROLES_MODULE } from "../../../../../modules/staff-roles"
-import type StaffRolesModuleService from "../../../../../modules/staff-roles/service"
-import { layoutRow } from "../../../../../workflows/storefront/layout"
-import { sessionHolds } from "../../../../http/staff-sessions"
 import { draftLayout } from "../../draft"
-
-/** The roles that write the design (adr/0049 §5, adr/0040); the session dies with the role. */
-const DESIGNERS = new Set(["owner", "admin"])
-
-const unknown = () =>
-  new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.session_unknown")
+import { sessionRow } from "../../access"
 
 /**
  * GET /store/storefront-layout/session/:token (adr/0065 §1): the draft as
@@ -27,33 +14,6 @@ const unknown = () =>
  */
 export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
   res.setHeader("Cache-Control", "private, no-store")
-  let session
-  try {
-    session = await editorSessionOf(
-      editorSessionStore(),
-      orderAccessKey(),
-      req.params["token"] ?? ""
-    )
-  } catch (error) {
-    // The store out of reach: no session opens; the token itself is never logged
-    logger.warn({ event: "editor_session.unreadable", err: errorSummary(error) })
-    throw unknown()
-  }
-  if (!session || !(await sessionHolds(req, session.sid, session.user_id))) {
-    throw unknown()
-  }
-  // A plain read: `roleOf` may make a first user owner, which no unsigned request may set off
-  const roles = await req.scope
-    .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
-    .rolesOf([session.user_id])
-  const role = roles.get(session.user_id)
-  if (!role || !DESIGNERS.has(role)) {
-    throw unknown()
-  }
-  const row = await layoutRow(req.scope)
-  const updated = (row as unknown as { updated_at?: Date } | null)?.updated_at
-  if (!row || !updated) {
-    throw unknown()
-  }
-  res.json({ layout: await draftLayout(req, row), edition: new Date(updated).toISOString() })
+  const { row, edition } = await sessionRow(req)
+  res.json({ layout: await draftLayout(req, row), edition })
 }

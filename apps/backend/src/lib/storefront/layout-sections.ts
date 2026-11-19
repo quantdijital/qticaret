@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { placement } from "./layout-fields"
+import type { ContentPageSection } from "./layout-pages"
 import { announcementBar } from "./sections/announcement-bar"
 import { banner } from "./sections/banner"
 import { brands } from "./sections/brands"
@@ -137,8 +138,12 @@ export type ProductSection = z.infer<typeof productSection>
 export type CategorySection = z.infer<typeof categorySection>
 /** A page's main section (adr/0049 Ek 2026-11-14 §7): the product's block, the category's grid. */
 export type PageMain = Extract<ProductSection | CategorySection, { type: MainSectionType }>
-/** A section of a page's body, its main one aside: the home, product or category page's. */
-export type BodySection = Exclude<PageSection | ProductSection | CategorySection, PageMain>
+/**
+ * A section of a page's body, its main one aside: the home, product or
+ * category page's, or a content page's own (adr/0073).
+ */
+export type BodySection =
+  Exclude<PageSection | ProductSection | CategorySection, PageMain> | ContentPageSection
 export type HeaderSection = z.infer<typeof headerSection>
 export type FooterSection = z.infer<typeof footerSection>
 export type LayoutSection = BodySection | HeaderSection
