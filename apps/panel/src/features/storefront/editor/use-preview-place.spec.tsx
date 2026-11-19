@@ -9,6 +9,18 @@ vi.mock("./use-preview-sample", () => ({
     isPending: false,
   }),
 }))
+// The shop's content pages (adr/0073 §5): a live one and a draft
+const PAGES = [
+  { id: "cnt_hakkimizda", title: "Hakkımızda", handle: "hakkimizda", path: "/hakkimizda" },
+  { id: "cnt_iade", title: "İade", handle: "iade", path: "/iade", status: "draft" },
+].map((page) => ({ status: "published", ...page }))
+vi.mock("./use-content-pages", () => ({
+  useContentPages: () => ({ data: { pages: PAGES, count: PAGES.length }, isPending: false }),
+  useContentPage: (id: string | null) => ({
+    page: PAGES.find((page) => page.id === id) ?? null,
+    finding: false,
+  }),
+}))
 
 /** The page worked on and shown, as links in the preview change it (adr/0065 Faz 2). */
 describe("the preview's place", () => {
@@ -73,5 +85,48 @@ describe("the preview's place", () => {
     })
     expect(hook.result.current.page).toBe("home")
     expect(hook.result.current.target.path).toBeNull()
+  })
+
+  it("works on the shop's first content page until another is picked", () => {
+    const { hook, onPageChange } = setup()
+    act(() => {
+      hook.result.current.choosePage("content")
+    })
+    expect(hook.result.current.content).toBe("cnt_hakkimizda")
+    expect(hook.result.current.target.path).toBe("/hakkimizda")
+    expect(hook.result.current.target.draft).toBe(false)
+    act(() => {
+      hook.result.current.chooseContent("cnt_iade")
+    })
+    expect(hook.result.current.content).toBe("cnt_iade")
+    expect(hook.result.current.target).toMatchObject({ path: "/iade", draft: true })
+    expect(onPageChange).toHaveBeenCalledTimes(2)
+  })
+
+  it("opens on the content page the address names", () => {
+    const hook = renderHook(() => usePreviewPlace({ onPageChange: vi.fn(), content: "cnt_iade" }))
+    expect(hook.result.current.page).toBe("content")
+    expect(hook.result.current.target.path).toBe("/iade")
+  })
+
+  it("takes a content page reached in the frame, by its address, for that page", () => {
+    const { hook } = setup()
+    act(() => {
+      hook.result.current.visit("/hakkimizda?ref=menu")
+    })
+    expect(hook.result.current.page).toBe("content")
+    expect(hook.result.current.content).toBe("cnt_hakkimizda")
+    expect(hook.result.current.visited).toBeNull()
+    // One with a layout of its own is told by its sections, whatever its address
+    act(() => {
+      hook.result.current.land("/iade", null, "cnt_iade")
+    })
+    expect(hook.result.current.content).toBe("cnt_iade")
+    // A page that is none of the shop's content pages is shown as it is
+    act(() => {
+      hook.result.current.land("/sepet", null)
+    })
+    expect(hook.result.current.visited).toBe("/sepet")
+    expect(hook.result.current.content).toBe("cnt_iade")
   })
 })

@@ -159,7 +159,7 @@ describe("picking in the preview", () => {
     if (!one || !two) throw new Error("no rails")
     const rails = [one, two]
     const doc: LayoutDocument = { ...DOC, home: rails }
-    const found = { group: "home" as const, section: one, index: 0 }
+    const found = { group: "home" as const, section: one, index: 0, page: null }
     expect(fieldContext(doc, found).shelf?.map((rail) => rail.id)).toEqual(rails.map((r) => r.id))
     expect(fieldContext(doc, found).badges).toBe(DOC.settings.trust_badges.length)
     const { hook, onOpen } = setup(true, doc)
@@ -207,6 +207,6 @@ describe("picking in the preview", () => {
         pickOf("location", { path: "/urun/a", sections: ["mainheader", "mainproduct"] })
       )
     })
-    expect(onLand).toHaveBeenCalledWith("/urun/a", "product")
+    expect(onLand).toHaveBeenCalledWith("/urun/a", "product", null)
   })
 })

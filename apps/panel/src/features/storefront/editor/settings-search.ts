@@ -10,6 +10,8 @@ import { footerRowsFields } from "./footer-rows/footer-rows-fields"
 import type { ThemeChoices } from "@/features/storefront/api/theme"
 import { THEME_FIELDS, THEME_GROUP_TITLES } from "./forms/theme-registry"
 import type { CardVariantsInUse, ThemeRegistryField } from "./forms/theme-registry"
+import { pageSectionsOf } from "@/features/storefront/layout/page-layouts"
+import type { ShownPage } from "./editor-page"
 
 /**
  * The theme editor's settings search (adr/0049 Ek 2026-11-14 §6): over the
@@ -163,17 +165,25 @@ export const allHits = (
   theme: readonly ThemeHit[]
 ): (SearchHit | ThemeHit)[] => [...sections, ...theme].slice(0, SEARCH_LIMIT)
 
-/** The page's parts the search looks through, named as the list names them. */
+/**
+ * The page's parts the search looks through, named as the list names
+ * them; a content page's own sections between the header and the footer
+ * (adr/0073 §5).
+ */
 export function searchedSections(
   doc: LayoutDocument,
-  page: BodyGroup,
+  page: ShownPage,
   namesOf: (section: AnySection, group: LayoutGroup) => readonly string[]
 ): SearchedSection[] {
-  return searchedGroups(page).flatMap((group) =>
-    (doc[group] as readonly AnySection[]).map((section) => ({
-      section,
-      group,
-      names: namesOf(section, group),
-    }))
-  )
+  const groups: readonly LayoutGroup[] =
+    typeof page === "string" ? searchedGroups(page) : ["header", "pages", "footer"]
+  return groups.flatMap((group) => {
+    const sections: readonly AnySection[] =
+      group !== "pages"
+        ? doc[group]
+        : typeof page === "string" || page.content === null
+          ? []
+          : pageSectionsOf(doc, page.content)
+    return sections.map((section) => ({ section, group, names: namesOf(section, group) }))
+  })
 }

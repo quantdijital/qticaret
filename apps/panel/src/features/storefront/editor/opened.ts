@@ -19,6 +19,8 @@ export type Opened =
   | { kind: "looks" }
   /** How the storefront behaves (contact and info pages): saved at once, not drafted. */
   | { kind: "preferences" }
+  /** A content page's own text (adr/0073 §5): written in İçerik; the contact page's with its form. */
+  | { kind: "page-text"; page: string; contact: boolean }
   | null
 
 /** What names the open panel, so the column starts at its top when another opens. */

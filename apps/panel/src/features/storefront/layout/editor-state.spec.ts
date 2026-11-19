@@ -42,6 +42,7 @@ const DOC: LayoutDocument = {
     category("faq", "altsss", "bottom"),
     category("help", "altyardim", "bottom"),
   ],
+  pages: [],
   settings: {
     trust_badges: [],
     color_swatches: [],

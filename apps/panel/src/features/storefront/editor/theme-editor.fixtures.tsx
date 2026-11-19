@@ -148,6 +148,8 @@ export const DOC: LayoutDocument = {
     },
     { id: "kategoriyardim", type: "help", ...ALWAYS, placement: "bottom", title: null, text: null },
   ],
+  // No content page has a layout of its own yet (adr/0073)
+  pages: [],
   // The theme's shared settings (adr/0049 Ek 2026-11-06), as the server fills them
   settings: {
     trust_badges: [{ icon: "truck", title: "Aynı gün kargo", text: null }],

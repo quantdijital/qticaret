@@ -2,10 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BRIDGE_MAX_NAME, BRIDGE_MAX_SECTIONS } from "@qticaret/types/editor-bridge"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
-import { allSections, findSection, isBodyGroup } from "@/features/storefront/layout/sections"
+import {
+  allSections,
+  findSection,
+  isBodyGroup,
+  isPageGroup,
+} from "@/features/storefront/layout/sections"
 import { previewField } from "../forms/preview-fields"
 import type { PreviewContext, PreviewField } from "../forms/preview-fields"
-import { bodyOf } from "@/features/storefront/layout/main-sections"
+import { bodyAround } from "@/features/storefront/layout/page-layouts"
 import { shelfRun } from "@/features/storefront/layout/shelf-tabs"
 import { sectionLabel } from "../section-meta"
 import type { LivePreview, PickMessage } from "./use-live-preview"
@@ -26,8 +31,11 @@ interface Options {
   onOpen: (id: string, focus?: PreviewField) => void
   /** A link followed in the frame: that page is shown. */
   onVisit: (path: string) => void
-  /** The frame drew `path`, with `group`'s sections (null: none of the editor's pages). */
-  onLand: (path: string, group: BodyGroup | null) => void
+  /**
+   * The frame drew `path`, with `group`'s sections (null: none of the
+   * editor's pages); `page`: the content page whose own sections it drew.
+   */
+  onLand: (path: string, group: BodyGroup | null, page: string | null) => void
   /** The ids of the sections the frame has drawn, after each redraw or page shown. */
   onSections?: (ids: readonly string[]) => void
 }
@@ -43,6 +51,17 @@ export function groupOf(doc: LayoutDocument, ids: readonly string[]): BodyGroup 
   return null
 }
 
+/** The content page whose own sections the frame shows (adr/0073); null for none. */
+export function contentPageOf(doc: LayoutDocument, ids: readonly string[]): string | null {
+  for (const id of ids) {
+    const found = findSection(doc, id)
+    if (found?.group === "pages") {
+      return found.page
+    }
+  }
+  return null
+}
+
 /** What the field register reads beside a section (Faz 2b): a rail's shelf, the badges' count. */
 export function fieldContext(
   doc: LayoutDocument,
@@ -51,8 +70,8 @@ export function fieldContext(
   const { group, section } = found
   return {
     badges: doc.settings.trust_badges.length,
-    ...(section.type === "products" && isBodyGroup(group)
-      ? { shelf: shelfRun(bodyOf(doc, group), section.id) }
+    ...(section.type === "products" && isPageGroup(group)
+      ? { shelf: shelfRun(bodyAround(doc, found), section.id) }
       : {}),
   }
 }
@@ -161,7 +180,11 @@ export function usePreviewPicking({
         }
         return
       case "location":
-        onLand(message.payload.path, groupOf(doc, message.payload.sections))
+        onLand(
+          message.payload.path,
+          groupOf(doc, message.payload.sections),
+          contentPageOf(doc, message.payload.sections)
+        )
         onSections?.(message.payload.sections)
         return
       case "left":

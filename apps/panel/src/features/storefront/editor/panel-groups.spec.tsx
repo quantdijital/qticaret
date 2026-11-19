@@ -9,6 +9,7 @@ import type { AnySection, LayoutGroup } from "@/features/storefront/api/layout"
 import {
   CATEGORY_TYPES,
   HOME_TYPES,
+  PAGE_TYPES,
   PRODUCT_TYPES,
   newBodySection,
   newFooterNewsletter,
@@ -63,6 +64,10 @@ const SAMPLES: [string, LayoutGroup, AnySection][] = [
       "category",
       section,
     ]
+  ),
+  // A content page's own sections (adr/0073): the home page's types, with their side of the text
+  ...PAGE_TYPES.flatMap((type) => withVariants(newBodySection("pages", type, "sayfabolum1"))).map(
+    (section): [string, LayoutGroup, AnySection] => [`pages: ${name(section)}`, "pages", section]
   ),
   ...[...DOC.header, newHeaderMarquee("ustkayan01")]
     .flatMap(withVariants)

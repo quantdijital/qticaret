@@ -12,6 +12,7 @@ import { Dialog, DialogBody, DialogContent, DialogFooter } from "@qticaret/admin
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Label } from "@qticaret/admin-ui/ui/label"
 import { errorText } from "@/lib/errors"
+import { sayDroppedPages } from "@/features/storefront/editor/dropped-pages"
 import { REPORT_KEY, useApplyLook } from "./api"
 import type { ApplyReport, ApplyTarget } from "./api"
 import { applyLines } from "./apply-lines"
@@ -91,6 +92,7 @@ function ApplyContent({
             kept: result.kept ?? [],
           }
           client.setQueryData(REPORT_KEY, report)
+          sayDroppedPages(t, result.dropped_pages ?? 0)
           onClose()
           void navigate({ to: "/storefront/editor" })
         },

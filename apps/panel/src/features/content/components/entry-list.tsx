@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
-import { FileText } from "lucide-react"
+import { FileText, LayoutTemplate } from "lucide-react"
+import { useMemo } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
@@ -11,10 +12,21 @@ import { CONTENT_PAGE_SIZE, contentListQuery } from "@/features/content/api/cont
 import type { ContentEntry, ContentKind } from "@/features/content/api/content"
 import { ContentStatusBadge } from "@/features/content/components/content-status"
 import { TermBadges } from "@/features/content/components/term-badges"
+import { layoutQuery } from "@/features/storefront/api/layout"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
 
-function useColumns(): Column<ContentEntry>[] {
+/**
+ * The pages with a layout of their own in the theme editor's draft
+ * (adr/0073 §5): marked beside their title. Read for the pages' list only.
+ */
+function useDesignedPages(kind: ContentKind): ReadonlySet<string> {
+  const layout = useQuery({ ...layoutQuery(), enabled: kind === "page" })
+  const pages = layout.data?.draft.pages
+  return useMemo(() => new Set((pages ?? []).map((page) => page.page_id)), [pages])
+}
+
+function useColumns(designed: ReadonlySet<string>): Column<ContentEntry>[] {
   const { t } = useTranslation()
   return [
     {
@@ -22,16 +34,25 @@ function useColumns(): Column<ContentEntry>[] {
       header: t("content.columns.title"),
       cell: (entry) => (
         <div className="flex min-w-0 flex-col">
-          <Link
-            to="/content/$id"
-            params={{ id: entry.id }}
-            className="truncate font-medium hover:underline"
-            onClick={(event) => {
-              event.stopPropagation()
-            }}
-          >
-            {entry.title}
-          </Link>
+          <span className="flex min-w-0 items-center gap-1.5">
+            <Link
+              to="/content/$id"
+              params={{ id: entry.id }}
+              className="truncate font-medium hover:underline"
+              onClick={(event) => {
+                event.stopPropagation()
+              }}
+            >
+              {entry.title}
+            </Link>
+            {designed.has(entry.id) ? (
+              <LayoutTemplate
+                role="img"
+                aria-label={t("content.designed")}
+                className="size-3.5 shrink-0 text-muted-foreground"
+              />
+            ) : null}
+          </span>
           <span className="truncate font-mono text-xs text-muted-foreground">{entry.path}</span>
           {entry.kind === "post" ? (
             <TermBadges category={entry.category} tags={entry.tags} />
@@ -73,7 +94,7 @@ export function EntryList({
   const { t } = useTranslation()
   const navigate = useNavigate()
   const list = useQuery(contentListQuery({ kind, q, page }))
-  const columns = useColumns()
+  const columns = useColumns(useDesignedPages(kind))
   if (list.isError) {
     return (
       <div className="p-5">

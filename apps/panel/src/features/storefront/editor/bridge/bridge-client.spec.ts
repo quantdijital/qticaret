@@ -120,6 +120,14 @@ describe("the panel's bridge client (adr/0065 §2, §7)", () => {
       )
     ).toBe("scheduled")
     expect(whyNotShown({ group: "product", section: section({}) }, "home", now)).toBe("other_page")
+    // A content page's section shows on its own page only (adr/0073)
+    const onPage = { group: "pages" as const, section: section({}), page: "cnt_hakkimizda" }
+    expect(whyNotShown(onPage, { content: "cnt_hakkimizda" }, now)).toBeNull()
+    expect(whyNotShown(onPage, { content: "cnt_iletisim" }, now)).toBe("other_page")
+    expect(whyNotShown(onPage, "home", now)).toBe("other_page")
+    expect(whyNotShown({ group: "home", section: section({}) }, { content: null }, now)).toBe(
+      "other_page"
+    )
   })
 
   it("renews the session well inside its idle time, not too often", () => {

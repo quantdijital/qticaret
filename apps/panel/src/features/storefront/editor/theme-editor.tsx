@@ -8,9 +8,10 @@ import { LAYOUT_ACTION_KEY, layoutQuery } from "@/features/storefront/api/layout
 import type { AdminLayout, AnySection, LayoutDocument } from "@/features/storefront/api/layout"
 import { editorReducer, initialEditorState } from "@/features/storefront/layout/editor-state"
 import { documentProblems } from "@/features/storefront/layout/problems"
-import { SETTINGS_KEY, partOf } from "@/features/storefront/layout/settings-problems"
 import { findSection } from "@/features/storefront/layout/sections"
 import { useAutosave } from "@/features/storefront/layout/use-autosave"
+import { ContentPagePicker } from "./content-page-picker"
+import { sayDroppedPages } from "./dropped-pages"
 import {
   OpenedSectionContext,
   SectionHoverContext,
@@ -19,6 +20,7 @@ import {
 } from "./editor-layout"
 import type { EditorView } from "./editor-layout"
 import { EditorShell } from "./editor-shell"
+import { EditorTree } from "./editor-tree"
 import { SectionChooser } from "./section-chooser"
 import type { Adding } from "./section-chooser"
 import { useEditorSidebar } from "./editor-sidebar"
@@ -27,18 +29,15 @@ import { OpenedForm } from "./opened-form"
 import { formKeyOf } from "./opened"
 import type { Opened } from "./opened"
 import type { Device } from "./preview-fit"
-import { EditorNotices } from "./editor-notices"
 import { PreviewFrame } from "./preview-frame"
 import { DraftTools, PublishButton } from "./publish-controls"
 import { LooksMenu } from "./looks-menu"
 import { SamplePicker } from "./sample-picker"
 import { SaveStatus } from "./save-status"
 import { sectionLabel } from "./section-meta"
-import { SectionTree } from "./section-tree"
-import { SettingsSearch } from "./settings-search-panel"
 import { useEditorActions } from "./use-editor-actions"
+import { useEditorPlace } from "./use-editor-place"
 import { useEditorPreview } from "./use-editor-preview"
-import { usePreviewPlace } from "./use-preview-place"
 import { useUndoKeys } from "./use-undo-keys"
 
 const E = "storefront.editor"
@@ -54,10 +53,13 @@ const E = "storefront.editor"
 export function ThemeEditor({
   layout,
   openAtFirst = null,
+  content = null,
 }: {
   layout: AdminLayout
   /** A panel the address asks for (`?open=preferences`: the old preferences page's links). */
   openAtFirst?: "preferences" | null
+  /** A content page the address asks for (`?icerik=`, adr/0073 §5). */
+  content?: string | null
 }) {
   const { t } = useTranslation()
   const router = useRouter()
@@ -76,12 +78,18 @@ export function ThemeEditor({
     // Never saved: the default design is saved at once, so the preview has a draft
     stored: layout.is_default ? null : layout.draft,
     blocked: problems.size > 0 || acting,
+    // Content pages deleted since: their layouts leave the editor too (adr/0073 §1)
+    onDropped: (ids, count) => {
+      dispatch({ type: "drop-pages", ids })
+      sayDroppedPages(t, count)
+    },
   })
   const [opened, setOpened] = useState<Opened>(() => (openAtFirst ? { kind: openAtFirst } : null))
   // Each pick of the settings search a fresh number: the same field picked again is shown again
   const picks = useRef(0)
   // The page worked on and shown; a link followed in the preview may change it (adr/0065 Faz 2)
-  const place = usePreviewPlace({
+  const place = useEditorPlace({
+    content,
     onPageChange: () => {
       setOpened(null)
     },
@@ -97,8 +105,9 @@ export function ThemeEditor({
   )
   const { preview, act, notice, markNew, hover, announce } = useEditorPreview({
     doc,
-    page,
+    page: place.shown,
     path: target.path,
+    draftPage: place.draftPage,
     finding: target.finding,
     opened,
     ready: !layout.is_default || autosave.round > 0,
@@ -125,6 +134,7 @@ export function ThemeEditor({
   const actions = useEditorActions({
     flush: autosave.flush,
     page: target.path,
+    draftPage: place.draftPage,
     onLoaded: (next: LayoutDocument) => {
       dispatch({ type: "load", doc: next })
       autosave.reset(next)
@@ -186,77 +196,24 @@ export function ThemeEditor({
   )
   const formKey = formKeyOf(opened, found ? found.section.id : null)
   const sidebar = useEditorSidebar(formKey, shape !== "narrow")
-  const pendingMenus = doc.settings.menus
   const tree = (
-    <>
-      <EditorNotices
-        pendingMenus={pendingMenus}
-        onDropMenus={() => {
-          act({ type: "settings", settings: { ...doc.settings, menus: null } })
-        }}
-      />
-      <SettingsSearch
-        doc={doc}
-        page={page}
-        onPick={(hit) => {
-          picks.current += 1
-          if ("theme" in hit) {
-            const { target, group } = hit.field
-            setOpened({ kind: "theme", focus: { target, group, nonce: picks.current } })
-            return
-          }
-          const { section, field } = hit
-          const focus = field
-            ? { target: field.target, group: field.group, nonce: picks.current }
-            : undefined
-          const part = field?.part
-          setOpened({
-            kind: "section",
-            id: section.id,
-            ...(focus ? { focus } : {}),
-            ...(part ? { part } : {}),
-          })
-        }}
-      >
-        <SectionTree
-          page={page}
-          doc={doc}
-          problems={new Set(problems.keys())}
-          dispatch={act}
-          onOpen={(id) => {
-            setOpened({ kind: "section", id })
-          }}
-          onRemove={remove}
-          onAddSection={(placement) => {
-            setAdding(placement ?? "bottom")
-          }}
-          onAddFooterSection={() => {
-            setAdding("footer")
-          }}
-          onTheme={() => {
-            setOpened({ kind: "theme" })
-          }}
-          themeProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
-            (field) => partOf(field) === "theme"
-          )}
-          onLooks={() => {
-            setOpened({ kind: "looks" })
-          }}
-          looksProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
-            (field) => partOf(field) === "looks"
-          )}
-          onPreferences={() => {
-            setOpened({ kind: "preferences" })
-          }}
-          fieldProblems={problems}
-          openedPart={opened?.kind === "section" ? (opened.part?.id ?? null) : null}
-          onOpenPart={(id, part) => {
-            setOpened({ kind: "section", id, part })
-            sidebar.show()
-          }}
-        />
-      </SettingsSearch>
-    </>
+    <EditorTree
+      doc={doc}
+      page={page}
+      shown={place.shown}
+      contentPage={place.contentPage}
+      problems={problems}
+      act={act}
+      opened={opened}
+      setOpened={setOpened}
+      nextPick={() => {
+        picks.current += 1
+        return picks.current
+      }}
+      onRemove={remove}
+      onAdding={setAdding}
+      showSidebar={sidebar.show}
+    />
   )
   const tools = (
     <>
@@ -277,6 +234,11 @@ export function ThemeEditor({
         onExit={() => void exit()}
         page={page}
         onPage={place.choosePage}
+        pagePicker={
+          page === "content" ? (
+            <ContentPagePicker doc={doc} page={place.picked} onChange={place.chooseContent} />
+          ) : null
+        }
         view={view}
         onView={setView}
         sidebar={sidebar.shown}
@@ -311,7 +273,7 @@ export function ThemeEditor({
                 device={device}
                 onDevice={setDevice}
                 sample={
-                  page === "home" ? null : (
+                  page === "home" || page === "content" ? null : (
                     <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
                   )
                 }
@@ -327,6 +289,7 @@ export function ThemeEditor({
       <SectionChooser
         doc={doc}
         page={page}
+        content={place.contentPage.id}
         adding={adding}
         act={act}
         onClose={() => {

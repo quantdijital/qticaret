@@ -4,8 +4,8 @@ import type {
   FooterSection,
   LayoutDocument,
 } from "@/features/storefront/api/layout"
-import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
-import { BODY_GROUPS, marqueesOn, newFooterNewsletter, newHomeSection } from "./sections"
+import { newFooterNewsletter, newHomeSection } from "./sections"
+import { anyPageMarqueesFull } from "./page-layouts"
 
 /**
  * The footer group (adr/0070 §4, Shopify's footer group): the shop's
@@ -38,8 +38,7 @@ export const footerTypesLeft = (doc: LayoutDocument): FooterAddType[] =>
  * A strip in the footer shows on every page, as the header's does
  * (adr/0049 Ek 2026-11-14 §4.1): not while a page already has its two.
  */
-export const footerMarqueeFull = (doc: LayoutDocument): boolean =>
-  BODY_GROUPS.some((page) => marqueesOn(doc, page) >= MARQUEE_LIMITS.perPage)
+export const footerMarqueeFull = (doc: LayoutDocument): boolean => anyPageMarqueesFull(doc)
 
 /** A new footer group section: the storefront's own words until the shop writes its own. */
 export function newFooterSection(type: FooterAddType, id: string): FooterSection {

@@ -105,6 +105,7 @@ describe("sectionProblems", () => {
       footer: [],
       product: [newBodySection("product", "faq", "urunsss") as ProductSection],
       category: [newBodySection("category", "rich_text", "kategorimetni") as CategorySection],
+      pages: [],
       settings: {
         trust_badges: [],
         color_swatches: [],
@@ -122,6 +123,7 @@ describe("sectionProblems", () => {
       footer: [],
       product: [],
       category: [],
+      pages: [],
       settings: {
         trust_badges: [
           { icon: "truck", title: "", text: null },
@@ -165,6 +167,7 @@ describe("sectionProblems", () => {
       footer: [],
       product: [newBodySection("product", "trust_badges", "urunguven") as ProductSection],
       category: [],
+      pages: [],
       settings: {
         trust_badges: [{ icon: "truck", title: "", text: null }],
         color_swatches: [{ label: "", hex: "#000000" }],
@@ -259,6 +262,12 @@ describe("previewAddress", () => {
     const absolute = { ...preview, url: "https://ornek.com/onizleme/sfl_abc" }
     expect(previewAddress(absolute, null, "/kategori/mutfak")).toBe(
       "https://ornek.com/onizleme/sfl_abc?sayfa=%2Fkategori%2Fmutfak"
+    )
+  })
+
+  it("names a content page in draft beside its path (adr/0073 §5)", () => {
+    expect(previewAddress(preview, "http://localhost:8000", "/iade", "cnt_iade")).toBe(
+      "http://localhost:8000/onizleme/sfl_abc?sayfa=%2Fiade&icerik=cnt_iade"
     )
   })
 })

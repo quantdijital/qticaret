@@ -17,6 +17,7 @@ export type * from "@/features/storefront/api/layout-catalog"
 export type * from "@/features/storefront/api/layout-cards"
 export type * from "@/features/storefront/api/layout-shelf"
 export type * from "@/features/storefront/api/layout-strips"
+export type * from "@/features/storefront/api/layout-pages"
 
 export interface LayoutRevision {
   revision: number
@@ -59,8 +60,8 @@ export const GALLERY_KEY = ["storefront-gallery"] as const
 /** The layout as the server answers; an older backend may leave the page groups out. */
 export interface LayoutAnswer {
   layout: Omit<AdminLayout, "draft"> & {
-    draft: Omit<LayoutDocument, "product" | "category"> &
-      Partial<Pick<LayoutDocument, "product" | "category">>
+    draft: Omit<LayoutDocument, "product" | "category" | "pages"> &
+      Partial<Pick<LayoutDocument, "product" | "category" | "pages">>
   }
 }
 type Answer = LayoutAnswer
@@ -72,13 +73,18 @@ export interface KeptDraft {
   name: string | null
 }
 
-/** A draft from before the product and category pages had sections reads with both empty. */
+/**
+ * A draft from before the product and category pages had sections reads
+ * with both empty; one from before content pages had layouts, with none
+ * (adr/0073 §1).
+ */
 export const withAllGroups = (layout: Answer["layout"]): AdminLayout => ({
   ...layout,
   draft: {
     ...layout.draft,
     product: layout.draft.product ?? [],
     category: layout.draft.category ?? [],
+    pages: layout.draft.pages ?? [],
   },
 })
 
@@ -90,17 +96,32 @@ export const layoutQuery = () =>
     staleTime: Infinity,
   })
 
-/** Each change answers with the layout as stored: it replaces the cache at once. */
+/**
+ * Content page layouts the server left out of a save, a publish, a discard
+ * or a restore: their pages were deleted since (adr/0073 §1). None from a
+ * backend before content page layouts.
+ */
+interface Dropped {
+  dropped_pages?: number
+}
+
+/**
+ * Each change answers with the layout as stored: it replaces the cache at
+ * once; `dropped` counts the content pages' layouts left out.
+ */
 function useLayoutAction<T>(
-  call: (input: T) => Promise<Answer>,
+  call: (input: T) => Promise<Answer & Dropped>,
   action = true,
   after?: (client: ReturnType<typeof useQueryClient>) => void
 ) {
   const client = useQueryClient()
   return useMutation({
     mutationKey: action ? LAYOUT_ACTION_KEY : [...LAYOUT_KEY, "save"],
-    mutationFn: async (input: T) => withAllGroups((await call(input)).layout),
-    onSuccess: (layout) => {
+    mutationFn: async (input: T) => {
+      const answer = await call(input)
+      return { layout: withAllGroups(answer.layout), dropped: answer.dropped_pages ?? 0 }
+    },
+    onSuccess: ({ layout }) => {
       client.setQueryData(LAYOUT_KEY, layout)
       after?.(client)
     },
@@ -108,7 +129,7 @@ function useLayoutAction<T>(
 }
 
 const post = (path: string, body: object = {}) =>
-  sdk.client.fetch<Answer>(path, { method: "POST", body })
+  sdk.client.fetch<Answer & Dropped>(path, { method: "POST", body })
 
 /** The draft saved whole; nothing reaches shoppers until it is published. */
 export const useSaveLayout = () =>
@@ -134,20 +155,18 @@ export const usePublishLayout = () =>
  * the gallery reads again, and `kept` names it for the toast.
  */
 function useDraftReplace<T>(
-  call: (input: T) => Promise<
-    Answer & {
-      auto_saved?: KeptDraft | null
-      /** Content page layouts left out for pages deleted since (adr/0073 §1). */
-      dropped_pages?: number
-    }
-  >
+  call: (input: T) => Promise<Answer & Dropped & { auto_saved?: KeptDraft | null }>
 ) {
   const client = useQueryClient()
   return useMutation({
     mutationKey: LAYOUT_ACTION_KEY,
     mutationFn: async (input: T) => {
       const answer = await call(input)
-      return { layout: withAllGroups(answer.layout), kept: answer.auto_saved ?? null }
+      return {
+        layout: withAllGroups(answer.layout),
+        kept: answer.auto_saved ?? null,
+        dropped: answer.dropped_pages ?? 0,
+      }
     },
     onSuccess: ({ layout }) => {
       client.setQueryData(LAYOUT_KEY, layout)

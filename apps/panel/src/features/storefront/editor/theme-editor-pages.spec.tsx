@@ -54,7 +54,7 @@ describe("the theme editor's pages", () => {
     releaseClock()
   })
 
-  it("offers the home, product and category pages, never one that is not ready", async () => {
+  it("offers the home, product, category and content pages, never one that is not ready", async () => {
     renderEditor()
     await opened()
 
@@ -64,6 +64,7 @@ describe("the theme editor's pages", () => {
       "Ana sayfa",
       "Ürün sayfası",
       "Kategori sayfası",
+      "İçerik sayfası",
     ])
     expect(screen.queryByText(/yakında/)).toBeNull()
   })

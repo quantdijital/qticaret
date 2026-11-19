@@ -51,7 +51,7 @@ function MainRow({
   ) : null
 }
 
-function AddButton({
+export function AddButton({
   label,
   disabled,
   onClick,

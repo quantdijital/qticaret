@@ -65,12 +65,13 @@ async function samplesOf(
  * found by name; with nothing typed, the first is the preview's sample
  * until another is picked.
  */
-export function usePreviewSamples(page: BodyGroup, q = "", enabled = true) {
+export function usePreviewSamples(page: BodyGroup | "content", q = "", enabled = true) {
   const client = useQueryClient()
   return useQuery({
     queryKey: ["storefront-layout", "samples", page, q],
     queryFn: () => samplesOf(client, page as SamplePage, q),
-    enabled: enabled && page !== "home",
+    // A content page is its own sample (`use-content-pages.ts`)
+    enabled: enabled && page !== "home" && page !== "content",
     staleTime: KEEP_MS,
   })
 }
