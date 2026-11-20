@@ -4,8 +4,11 @@ import { model } from "@medusajs/framework/utils"
  * What Medusa's product collection has no column for (Ürünler >
  * Koleksiyonlar), linked one to one to the collection
  * (`links/collection-catalog-extension.ts`):
- * - `description`: the collection page's intro, plain paragraphs as a
- *   category's and a brand's; the meta description's fallback;
+ * - `description`: the collection page's text, plain paragraphs as a
+ *   category's and a brand's; the meta description's fallback. With a
+ *   document, its plain text;
+ * - `description_doc`: the text as a content document (adr/0075,
+ *   `lib/catalog/listing-description`); null: plain text only;
  * - `is_active`: whether its page is public. A hidden collection is as an
  *   inactive category (docs/13 §2.4): its page answers 404 with its path
  *   kept, it leaves the sitemap, menu links and storefront sections that
@@ -18,6 +21,7 @@ export const CollectionExtension = model
   .define("collection_extension", {
     id: model.id({ prefix: "colx" }).primaryKey(),
     description: model.text().nullable(),
+    description_doc: model.json().nullable(),
     is_active: model.boolean().default(true),
     image_url: model.text().nullable(),
     image_alt: model.text().nullable(),

@@ -272,6 +272,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Sepetteki bazı ürünlerin fiyatı değişti. Yeni tutarı kontrol edip ödemeyi yeniden başlatın.",
   "catalog.description_blocks":
     "Ürün açıklamasında görsel ve ürün ya da kategori kartı kullanılamaz; görselleri ürünün görsellerine ekleyin.",
+  "catalog.description_one_of":
+    "Açıklama ya düz metin ya da biçimli metin olarak gönderilir; ikisi birlikte gönderilemez.",
+  "catalog.listing_description_blocks":
+    "Açıklamada görsel ve ürün ya da kategori kartı kullanılamaz; başlık, paragraf, liste, tablo ve bağlantı kullanılabilir.",
   "catalog.summary_blocks":
     "Kısa açıklamada paragraf, küçük başlık (H3, H4), liste, kalın, italik ve bağlantı kullanılabilir; büyük başlık, alıntı, tablo ve görsel kullanılamaz.",
   "catalog.summary_too_long": "Kısa açıklama en çok 1.500 karakter olabilir.",

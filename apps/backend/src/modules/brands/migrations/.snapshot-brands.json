@@ -68,6 +68,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "description_doc": {
+          "name": "description_doc",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
         "logo_file_id": {
           "name": "logo_file_id",
           "type": "text",
