@@ -2,9 +2,9 @@ import { Migration } from "@medusajs/framework/mikro-orm/migrations"
 
 /**
  * adr/0074 §4 (security review of PR 237, B2): which candidate of an AI
- * suggestion was accepted. Written by hand (no env in the agent's
- * worktree) in the form `db:generate` gives; nullable, so rows decided
- * before it read as they did.
+ * suggestion was accepted. Written by hand; `db:generate content_drafts`
+ * gives the same SQL and, with the snapshot updated, reports no changes.
+ * Nullable, so rows decided before it read as they did.
  */
 export class Migration20261121090000 extends Migration {
   override async up(): Promise<void> {

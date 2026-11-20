@@ -3,6 +3,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakeSecret } from "@qticaret/testing"
 import { resetAiBreakers } from "../../src/lib/ai/breaker"
 import { fakeTextConnector } from "../../src/lib/ai/connectors/fake"
+import { aiProviderError } from "../../src/lib/ai/errors"
 import type { TextRequest } from "../../src/lib/ai/connectors/types"
 import { GUIDANCE_END, GUIDANCE_HEADING } from "../../src/lib/ai/guidance"
 import { RULES_HEADING } from "../../src/lib/ai/instructions"
@@ -158,6 +159,29 @@ medusaIntegrationTestRunner({
         })
       )
       expect(stored.data.values.guide).not.toBe("Kısa cümleler kur.")
+    })
+
+    it("does not make the second call when the service fails the first", async () => {
+      const productId = await aiProduct(getContainer())
+      const complete = jest
+        .spyOn(fakeTextConnector, "complete")
+        .mockRejectedValueOnce(
+          aiProviderError({ service: "fake", key: "ai.provider_unavailable", code: "http_503" })
+        )
+
+      const answer = await preview(owner.headers, {
+        task: "seo_title",
+        product_id: productId,
+        guidance: { tone: "plain" },
+      })
+
+      expect(answer.status).toBe(502)
+      expect(answer.data.message).toBe("ai.provider_unavailable")
+      expect(complete).toHaveBeenCalledTimes(1)
+      const usages = (await records().usages()).filter((row) => row.entity_id === productId)
+      expect(usages).toEqual([
+        expect.objectContaining({ status: "failed", error_code: "http_503" }),
+      ])
     })
 
     it("lets owner and admin try the guidance only, and refuses a guidance a save would refuse", async () => {

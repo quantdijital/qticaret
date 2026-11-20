@@ -100,7 +100,8 @@ function previewCall(
  * only); each call counts as a suggestion would (the day's ceiling and
  * the month's operations), is recorded in `ai_usage` and passes the gate.
  * Neither answer is kept as a suggestion nor written to the product. A
- * call that failed fails the workflow after both were recorded.
+ * call the service failed fails the workflow once it is recorded; when it
+ * is the first, the second is never made.
  */
 export const previewGuidanceWorkflow = createWorkflow(
   "ai-preview-guidance",
@@ -115,12 +116,7 @@ export const previewGuidanceWorkflow = createWorkflow(
         service: input.service,
       }))
     )
-    const plain = previewCall("plain", input, authorized, chosen)
-    const guided = previewCall("guided", input, authorized, chosen)
-    for (const [name, outcome] of [
-      ["plain", plain],
-      ["guided", guided],
-    ] as const) {
+    const failOn = (name: "plain" | "guided", outcome: ReturnType<typeof previewCall>) =>
       failOnCallErrorStep(
         transform({ chosen, outcome }, ({ chosen, outcome }) => ({
           service: chosen.service,
@@ -128,7 +124,12 @@ export const previewGuidanceWorkflow = createWorkflow(
           alternatives: chosen.alternatives,
         }))
       ).config({ name: `ai-preview-fail-${name}` })
-    }
+    // Steps run in the order composed: a first call the service failed
+    // (recorded above) stops the workflow before the second is made.
+    const plain = previewCall("plain", input, authorized, chosen)
+    failOn("plain", plain)
+    const guided = previewCall("guided", input, authorized, chosen)
+    failOn("guided", guided)
     return new WorkflowResponse(
       transform({ input, chosen, plain, guided }, ({ input, chosen, plain, guided }) => ({
         task: input.task,
