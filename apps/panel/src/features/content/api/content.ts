@@ -10,11 +10,16 @@ export const CONTENT_KINDS = ["page", "post"] as const
 export type ContentKind = (typeof CONTENT_KINDS)[number]
 
 /**
- * The Content screen's tabs: pages, posts, the blog's categories, tags and
- * authors (adr/0019 ek 2026-11-03) and the facet landing pages (F3.16).
+ * The Content screen's tabs: the blog's posts, categories, tags and authors
+ * (adr/0019 ek 2026-11-03) and the facet landing pages (F3.16). The shop's
+ * pages are opened and managed in the theme editor (adr/0073 Ek 2026-11-19
+ * (2) K5); the address's old `kind=page` is still read, to send it there.
  */
-export const CONTENT_TABS = ["page", "post", "category", "tag", "author", "landing"] as const
+export const CONTENT_TABS = ["post", "category", "tag", "author", "landing"] as const
 export type ContentTab = (typeof CONTENT_TABS)[number]
+
+/** What the address's `kind` takes: the tabs, and the old pages tab (sent to the theme editor). */
+export const CONTENT_KIND_SEARCH = ["page", ...CONTENT_TABS] as const
 export type ContentStatus = "draft" | "published"
 
 export const CONTENT_PAGE_SIZE = 25

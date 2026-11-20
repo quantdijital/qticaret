@@ -1,5 +1,5 @@
-import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
-import { Plus, Scale } from "lucide-react"
+import { Navigate, getRouteApi, useNavigate } from "@tanstack/react-router"
+import { Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
@@ -21,21 +21,29 @@ import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const route = getRouteApi("/_auth/content/")
 
-const entryKindOf = (tab: ContentTab): ContentKind | null =>
-  tab === "page" || tab === "post" ? tab : null
+const entryKindOf = (tab: ContentTab): ContentKind | null => (tab === "post" ? tab : null)
 const termKindOf = (tab: ContentTab): TermKind | null =>
   tab === "category" || tab === "tag" ? tab : null
 
 /**
- * Content pages and blog posts (F3.16, docs/06): the shop's own pages, its
- * blog with its categories, tags (adr/0019 ek 2026-11-03) and authors, and
- * the filter pages.
+ * The blog and the filter pages (F3.16, docs/06): the posts with their
+ * categories, tags (adr/0019 ek 2026-11-03) and authors, and the filter
+ * pages. The shop's own pages are the theme editor's (adr/0073 Ek
+ * 2026-11-19 (2) K5): the old pages tab's address opens them there.
  */
 export function ContentListPage() {
+  const search = route.useSearch()
+  return search.kind === "page" ? (
+    <Navigate to="/storefront/editor" search={{ sayfa: "icerik" }} replace />
+  ) : (
+    <ContentTabs tab={search.kind ?? "post"} />
+  )
+}
+
+function ContentTabs({ tab }: { tab: ContentTab }) {
   const { t } = useTranslation()
   const search = route.useSearch()
   const navigate = useNavigate()
-  const tab: ContentTab = search.kind ?? "page"
   const entryKind = entryKindOf(tab)
   const termKind = termKindOf(tab)
   const authors = tab === "author"
@@ -47,7 +55,7 @@ export function ContentListPage() {
     void navigate({
       to: "/content",
       search: {
-        kind: merged.kind === "page" ? undefined : merged.kind,
+        kind: merged.kind === "post" ? undefined : merged.kind,
         q: merged.q === "" ? undefined : merged.q,
         page: merged.page > 1 ? merged.page : undefined,
       },
@@ -94,20 +102,6 @@ export function ContentListPage() {
               setSearch({ q: text, page: 1 })
             }}
           />
-          {tab === "page" ? (
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Scale className="size-4 shrink-0" aria-hidden="true" />
-              <span>
-                {t("content.legal.hint")}{" "}
-                <Link
-                  to="/settings/legal"
-                  className="font-medium text-foreground underline underline-offset-4"
-                >
-                  {t("content.legal.link")}
-                </Link>
-              </span>
-            </p>
-          ) : null}
           {termKind ? <NewTermForm key={termKind} kind={termKind} /> : null}
         </div>
         {termKind ? (
