@@ -1,5 +1,7 @@
 import type { ContentDoc } from "../../content"
+import { descriptionTextOf } from "../description"
 import {
+  currentListingDoc,
   listingDescriptionChanges,
   listingDescriptionDoc,
   listingDescriptionHtml,
@@ -133,5 +135,23 @@ describe("a stored listing description", () => {
     expect(storedListingDoc(PASTED)).toEqual(PASTED)
     expect(storedListingDoc(null)).toBeNull()
     expect(storedListingDoc({ type: "nope" })).toBeNull()
+  })
+
+  it("never renders a picture or a card written past the editor (an import, a hand edit)", () => {
+    const withPicture = doc(paragraph("Metin"), {
+      type: "image",
+      attrs: { src: "https://evil.example.com/a.jpg" },
+    })
+    expect(listingDescriptionHtml(withPicture)).toBeNull()
+    expect(storedListingDoc(withPicture)).toBeNull()
+    expect(currentListingDoc(withPicture, "Metin")).toBeNull()
+  })
+
+  it("reads as current only while the record's text is still the document's", () => {
+    const text = descriptionTextOf(PASTED)
+    expect(currentListingDoc(PASTED, text)).toEqual(PASTED)
+    expect(currentListingDoc(PASTED, "Medusa'dan değişti")).toBeNull()
+    expect(currentListingDoc(PASTED, null)).toBeNull()
+    expect(currentListingDoc(null, text)).toBeNull()
   })
 })

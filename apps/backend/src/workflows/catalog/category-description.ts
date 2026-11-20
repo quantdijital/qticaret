@@ -14,12 +14,15 @@ import {
   updateProductCategoriesWorkflow,
 } from "@medusajs/medusa/core-flows"
 import type { DescriptionDoc } from "../../lib/catalog/description"
-import { listingDescriptionChanges, storedListingDoc } from "../../lib/catalog/listing-description"
+import { currentListingDoc, listingDescriptionChanges } from "../../lib/catalog/listing-description"
 import type { ContentDoc } from "../../lib/content"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import type CatalogExtensionModuleService from "../../modules/catalog-extension/service"
 
 type Container = Pick<MedusaContainer, "resolve">
+
+/** The lock a category's description is written under, by the save and the stale-document drop. */
+export const categoryDescriptionLockKey = (categoryId: string) => `catalog:category:${categoryId}`
 
 const catalog = (container: Container) =>
   container.resolve<CatalogExtensionModuleService>(CATALOG_EXTENSION_MODULE)
@@ -46,7 +49,7 @@ interface CategoryRow {
   is_internal?: boolean | null
 }
 
-async function categoryOf(container: Container, id: string): Promise<CategoryRow | null> {
+export async function categoryOf(container: Container, id: string): Promise<CategoryRow | null> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product_category",
     fields: ["id", "description", "is_active", "is_internal"],
@@ -55,7 +58,7 @@ async function categoryOf(container: Container, id: string): Promise<CategoryRow
   return (data[0] as CategoryRow | undefined) ?? null
 }
 
-async function storedDocOf(container: Container, categoryId: string): Promise<unknown> {
+export async function storedDocOf(container: Container, categoryId: string): Promise<unknown> {
   const [row] = await catalog(container).listCategoryExtensions(
     { category_id: categoryId },
     { select: ["description_doc"], take: 1 }
@@ -63,7 +66,11 @@ async function storedDocOf(container: Container, categoryId: string): Promise<un
   return row?.description_doc ?? null
 }
 
-/** A category's text and document for the panel; an unknown category is not found. */
+/**
+ * A category's text and document for the panel; an unknown category is
+ * not found. A document whose text is no longer the category's (changed
+ * through Medusa's own route) is none: the editor opens the text.
+ */
 export async function readCategoryDescription(
   container: Container,
   categoryId: string
@@ -75,21 +82,28 @@ export async function readCategoryDescription(
   return {
     category_id: category.id,
     description: category.description ?? "",
-    description_doc: storedListingDoc(await storedDocOf(container, categoryId)),
+    description_doc: currentListingDoc(
+      await storedDocOf(container, categoryId),
+      category.description ?? ""
+    ),
   }
 }
 
 /**
- * A shown category's document as HTML (adr/0075), for the foot of its
- * page; null without one. A hidden or internal category is not found, as
- * its page is not.
+ * A shown category's document (adr/0075), for the foot of its page; null
+ * without one or with one its text no longer matches (Medusa's own route
+ * changed the text: the plain text shows). A hidden or internal category
+ * is not found, as its page is not.
  */
-export async function storeCategoryDoc(container: Container, categoryId: string): Promise<unknown> {
+export async function storeCategoryDoc(
+  container: Container,
+  categoryId: string
+): Promise<ContentDoc | null> {
   const category = await categoryOf(container, categoryId)
   if (!category || category.is_active === false || category.is_internal === true) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "catalog.category_unknown")
   }
-  return storedDocOf(container, categoryId)
+  return currentListingDoc(await storedDocOf(container, categoryId), category.description ?? "")
 }
 
 interface Plan {
@@ -180,7 +194,9 @@ const writeCategoryDocStep = createStep(
 export const setCategoryDescriptionWorkflow = createWorkflow(
   "catalog-set-category-description",
   (input: SetCategoryDescriptionInput) => {
-    const lockKey = transform({ input }, ({ input }) => `catalog:category:${input.category_id}`)
+    const lockKey = transform({ input }, ({ input }) =>
+      categoryDescriptionLockKey(input.category_id)
+    )
     acquireLockStep({ key: lockKey, timeout: 10, ttl: 30 })
 
     const plan = planCategoryDescriptionStep(input)

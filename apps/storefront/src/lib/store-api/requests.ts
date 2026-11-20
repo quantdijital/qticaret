@@ -7,7 +7,7 @@ import type {
   Resolution,
   SeoPayload,
   SiteSeo,
-  StoreBrandSummary,
+  StoreBrand,
   StoreCategory,
   StoreProduct,
   StoreProductReviews,
@@ -305,13 +305,13 @@ const MAX_BRANDS = 1000
 const BRANDS_PAGE = 100
 
 /** Every active brand, by name (F3.11), a hundred at a time: `/markalar`. */
-export const allBrands = cache(async (): Promise<StoreBrandSummary[]> => {
-  const brands: StoreBrandSummary[] = []
+export const allBrands = cache(async (): Promise<StoreBrand[]> => {
+  const brands: StoreBrand[] = []
   for (let offset = 0; offset < MAX_BRANDS; offset += BRANDS_PAGE) {
-    const page = await storePublicGet<{ brands: StoreBrandSummary[]; count: number }>(
-      "/store/brands",
-      { limit: BRANDS_PAGE, offset }
-    )
+    const page = await storePublicGet<{ brands: StoreBrand[]; count: number }>("/store/brands", {
+      limit: BRANDS_PAGE,
+      offset,
+    })
     brands.push(...page.brands)
     if (page.brands.length < BRANDS_PAGE || offset + BRANDS_PAGE >= page.count) {
       break

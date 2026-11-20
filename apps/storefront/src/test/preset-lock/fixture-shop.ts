@@ -1,4 +1,4 @@
-import type { StoreBrandSummary, StoreCategory, StoreProduct } from "@qticaret/types"
+import type { StoreBrand, StoreCategory, StoreProduct } from "@qticaret/types"
 
 /**
  * The one shop every preset is drawn in (docs/tema/bilesen-standardi §7,
@@ -52,7 +52,7 @@ export const CATEGORY_PATHS: Readonly<Record<string, string>> = Object.fromEntri
   ])
 )
 
-export const BRANDS: StoreBrandSummary[] = [
+export const BRANDS: StoreBrand[] = [
   ["brand_karacelik", "Karaçelik", "karacelik"],
   ["brand_yaman", "Yaman Bıçak", "yaman-bicak"],
   ["brand_demirhan", "Demirhan", "demirhan"],
@@ -61,7 +61,6 @@ export const BRANDS: StoreBrandSummary[] = [
   name: name ?? "",
   handle: handle ?? "",
   logo_url: null,
-  description: null,
 }))
 
 const PRODUCT_NAMES: readonly [handle: string, title: string][] = [

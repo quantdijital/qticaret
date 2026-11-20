@@ -1,4 +1,6 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { CATALOG_EXTENSION_MODULE } from "../../src/modules/catalog-extension"
+import type CatalogExtensionModuleService from "../../src/modules/catalog-extension/service"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
@@ -73,6 +75,11 @@ medusaIntegrationTestRunner({
           ).data.audit_entries,
         (found) => found.some((entry) => entry.action === action)
       )
+
+    const storedDocRows = (categoryId: string) =>
+      getContainer()
+        .resolve<CatalogExtensionModuleService>(CATALOG_EXTENSION_MODULE)
+        .listCategoryExtensions({ category_id: categoryId }, { select: ["id", "description_doc"] })
 
     beforeEach(async () => {
       admin = await createAdminUser(http, getContainer())
@@ -164,6 +171,71 @@ medusaIntegrationTestRunner({
       })
     })
 
+    it("drops a category's document when Medusa's own route changes its text, keeps it for ours", async () => {
+      const id = (
+        await post<{ product_category: { id: string } }>("/admin/product-categories", {
+          name: "Av Bıçakları",
+          is_active: true,
+        })
+      ).data.product_category.id
+      await post(`/admin/category-descriptions/${id}`, { description_doc: DOC })
+      const storeText = () =>
+        storeGet<{ description_html: string | null }>(`/store/category-descriptions/${id}`)
+      const panelText = () =>
+        adminGet<{ description: { description: string; description_doc: unknown } }>(
+          `/admin/category-descriptions/${id}`
+        )
+
+      // A rename through Medusa's route leaves the text, so the document stays
+      await post(`/admin/product-categories/${id}`, { name: "Av ve Kamp Bıçakları" })
+      const renamed = await eventually(
+        () => storedDocRows(id),
+        (rows) => rows[0]?.description_doc === null,
+        10
+      )
+      expect(renamed[0]?.description_doc).toEqual(DOC)
+      expect((await storeText()).data.description_html).toBe(HTML)
+
+      // Its text changed there: the plain text is shown at once, the stored document goes
+      await post(`/admin/product-categories/${id}`, { description: "Yeni düz metin." })
+      const plainStore = await storeText()
+      const plainPanel = await panelText()
+      const category = await storeGet<{ product_category: { description: string } }>(
+        `/store/product-categories/${id}?fields=description`
+      )
+      expect(plainStore.data.description_html).toBeNull()
+      expect(plainPanel.data.description).toEqual({
+        category_id: id,
+        description: "Yeni düz metin.",
+        description_doc: null,
+      })
+      expect(category.data.product_category.description).toBe("Yeni düz metin.")
+      const dropped = await eventually(
+        () => storedDocRows(id),
+        (rows) => rows[0]?.description_doc === null
+      )
+      expect(dropped[0]?.description_doc).toBeNull()
+
+      // Our own route writes the document and its text together: its event never drops it
+      await post(`/admin/category-descriptions/${id}`, { description_doc: DOC })
+      const resaved = await eventually(
+        () => storedDocRows(id),
+        (rows) => rows[0]?.description_doc === null,
+        10
+      )
+      expect(resaved[0]?.description_doc).toEqual(DOC)
+      expect((await storeText()).data.description_html).toBe(HTML)
+      expect((await panelText()).data.description.description_doc).toEqual(DOC)
+
+      // A deleted category takes its row
+      await settle(http.delete(`/admin/product-categories/${id}`, { headers: admin.headers }))
+      const gone = await eventually(
+        () => storedDocRows(id),
+        (rows) => rows.length === 0
+      )
+      expect(gone).toHaveLength(0)
+    })
+
     it("saves a brand's document with its plain text, and shows it on the brand's answer", async () => {
       interface Brand {
         id: string
@@ -190,6 +262,11 @@ medusaIntegrationTestRunner({
       expect(both.data.message).toBe("catalog.description_one_of")
       expect(read.data.brand).toMatchObject({ description: TEXT, description_doc: DOC })
       expect(shown.data.brand).toMatchObject({ description: TEXT, description_html: HTML })
+      // The list leaves the text out: only the brand's page reads it
+      const listed = await storeGet<{ brands: Record<string, unknown>[] }>("/store/brands")
+      expect(listed.data.brands.find((brand) => brand["id"] === id)).not.toHaveProperty(
+        "description"
+      )
       await audited(id, "POST /admin/brands/:id")
 
       // A plain text written as an import does drops the document, so the two never differ
