@@ -10,10 +10,12 @@ import { aiServicesQuery } from "@/features/ai/api/ai"
 import { useCan } from "@/features/auth/api/staff"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import { AccountAlert } from "@/features/settings/components/account-form"
+import { AiGuidanceTab } from "@/features/settings/components/ai-guidance-tab"
 import { AiReviewsCard } from "@/features/settings/components/ai-reviews-card"
 import { AiScenesCard } from "@/features/settings/components/ai-scenes-card"
 import { AiServicesTable } from "@/features/settings/components/ai-services-table"
 import { AiUsageCard } from "@/features/settings/components/ai-usage-card"
+import { SettingsTabs } from "@/features/settings/components/settings-tabs"
 import { errorText } from "@/lib/errors"
 
 /**
@@ -21,11 +23,28 @@ import { errorText } from "@/lib/errors"
  * connect with its own key in one compact table, the switch for AI on
  * reviews and questions (Aşama 9) in a line, the shop's own scenes for
  * "Sahneye yerleştir" (Aşama 7), and this month's use under
- * them. The longer words sit behind (i). Nothing else is set here: which
- * service does which work is the server's, the choice is made where the
- * work is.
+ * them. The longer words sit behind (i). Which service does which work
+ * is the server's, the choice is made where the work is. A second tab
+ * holds the shop's writing guidance (adr/0074 §2).
  */
 export function AiPage() {
+  const { t } = useTranslation()
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader title={t("ai.title")} description={t("ai.description")} />
+      <SettingsTabs
+        label={t("ai.title")}
+        tabs={[
+          { key: "services", label: t("ai.tabs.services"), content: <AiServicesTab /> },
+          { key: "writing", label: t("ai.tabs.writing"), content: <AiGuidanceTab /> },
+        ]}
+      />
+    </div>
+  )
+}
+
+/** The services, the reviews switch, the scenes and this month's use. */
+function AiServicesTab() {
   const { t } = useTranslation()
   const services = useQuery(aiServicesQuery())
   // Whether the server can seal a key; one that may not read the accounts is not stopped by it
@@ -37,7 +56,6 @@ export function AiPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t("ai.title")} description={t("ai.description")} />
       {services.isError ? (
         <ErrorState text={errorText(t, services.error)} onRetry={() => void services.refetch()} />
       ) : !data ? (
