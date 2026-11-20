@@ -1,5 +1,5 @@
 /*
- * The catalogue opening's row from 1024 px (`catalog.css`): the list sets
+ * The catalogue opening's row from 1280 px (`catalog.css`): the list sets
  * its height, never a slide. The opening's tile (one slide, or the stage
  * of a few) is size-contained, so no slide's words (a long line, "from",
  * two buttons, the products small) stretch the row, the list's rows apart
@@ -21,7 +21,7 @@
  * element (`gap-*`, `justify-center`, `lg:p-10`) which a component rule
  * would not outrank.
  */
-@media (min-width: 64rem) {
+@media (min-width: 80rem) {
   .gf-mosaic:is(:has(> .gf-mosaic-list), :has(> .gf-mosaic-side))
     > :is(.gf-mosaic-feature, .gf-mosaic-stage) {
     contain: size;
@@ -95,17 +95,17 @@
   }
 }
 
-/* A short tile (the list's height, about 1100 to 1400 px) whose words the
+/* A short tile (the list's height, about 1280 to 1400 px) whose words the
    arrows' room leaves narrow: any slide's heading scales to their width, so
-   the line under it is not cut. A taller tile (1024 px, the list wraps) keeps
-   the full size, and from 1440 the words are wide enough for it */
+   the line under it is not cut. A taller tile (the list wraps) keeps the
+   full size, and from 1440 the words are wide enough for it */
 @container gf-slide (height < 32rem) {
   .gf-mosaic-feature > div:not(.gf-mosaic-photo) > :is(h1, h2):not(.sr-only) {
     font-size: clamp(1.625rem, 19.5cqi, var(--text-hero));
   }
 }
 
-/* A narrow tile (1024 px to about 1180): the extras' words a little wider */
+/* A narrow tile (beside both the list and the tiles): the extras' words a little wider */
 @container gf-slide (width < 36rem) {
   .gf-mosaic-feature > div:not(.gf-mosaic-photo):has(> .gf-mosaic-picks, > .gf-mosaic-from) {
     padding-right: var(--space-lg);
