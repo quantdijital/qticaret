@@ -1285,6 +1285,20 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Görsel adresi reddedildi: iç ağa ya da izin verilmeyen bir adrese gidiyor.",
   "migration.image_too_large": "Görsel 10 MB'tan büyük; taşınmadı.",
   "migration.image_unreachable": "Görsele ulaşılamadı; taşınmadı. Ürüne elle ekleyebilirsiniz.",
+  "migration.image_unreachable_not_found":
+    "Görsel eski sitede bulunamadı (404); taşınmadı. Ürüne elle ekleyebilirsiniz.",
+  "migration.image_unreachable_forbidden":
+    "Eski site görseli vermeyi reddetti (401/403); taşınmadı. Taşımayı yeniden çalıştırın ya da elle ekleyin.",
+  "migration.image_unreachable_throttled":
+    "Eski site çok sık istek nedeniyle yanıt vermedi (429); birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_server":
+    "Eski sitenin sunucusu hata verdi (5xx); birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_timeout":
+    "Eski site zamanında yanıt vermedi; birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_network":
+    "Eski siteye bağlanılamadı; birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_status":
+    "Eski site görsel yerine beklenmeyen bir yanıt verdi; taşınmadı. Ürüne elle ekleyebilirsiniz.",
   "migration.image_not_accepted":
     "Dosya kabul edilen bir görsel değil (JPEG, PNG, WebP, AVIF) ya da okunamadı.",
   "migration.url_path_taken": "Bu eski adres sitede başka bir kayda ait; yönlendirilmedi.",
@@ -1334,6 +1348,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.wordpress_options_too_many":
     "Ürünün üçten fazla varyasyon özelliği var; ilk üçü seçenek oldu.",
   "migration.wordpress_variation_disabled": "Varyasyon WordPress'te kapalı; taşınmadı.",
+  "migration.wordpress_stock_shared":
+    "Stok WordPress'te ürünün ortak stoğuydu; burada ortak stok olmadığından bu varyanta ürünün stok sayısı yazıldı. Varyantların stoğunu panelden düzeltin.",
   "migration.wordpress_variation_no_price": "Varyasyonun fiyatı yok; taşınmadı.",
   "migration.wordpress_variation_unread": "Varyasyonun seçenek değerleri okunamadı; taşınmadı.",
   "migration.wordpress_variation_orphan": "Varyasyonun ana ürünü dosyada yok; taşınmadı.",

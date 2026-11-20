@@ -1276,6 +1276,20 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "migration.image_too_large": "The picture is over 10 MB; it did not move.",
   "migration.image_unreachable":
     "The picture could not be reached; it did not move. You can add it by hand.",
+  "migration.image_unreachable_not_found":
+    "The old site does not have the picture (404); it did not move. You can add it by hand.",
+  "migration.image_unreachable_forbidden":
+    "The old site refused the picture (401/403); it did not move. Run the migration again or add it by hand.",
+  "migration.image_unreachable_throttled":
+    "The old site turned requests away as too many (429); after several tries it did not move. Run the migration again.",
+  "migration.image_unreachable_server":
+    "The old site's server failed (5xx); after several tries it did not move. Run the migration again.",
+  "migration.image_unreachable_timeout":
+    "The old site did not answer in time; after several tries it did not move. Run the migration again.",
+  "migration.image_unreachable_network":
+    "The old site could not be reached; after several tries it did not move. Run the migration again.",
+  "migration.image_unreachable_status":
+    "The old site answered with something other than the picture; it did not move. You can add it by hand.",
   "migration.image_not_accepted": "Not an accepted picture (JPEG, PNG, WebP, AVIF), or unreadable.",
   "migration.url_path_taken":
     "This old address belongs to another record here; it was not redirected.",
@@ -1328,6 +1342,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The product (or every variation of it) has no price; it was not moved.",
   "migration.wordpress_options_too_many":
     "The product has more than three variation attributes; the first three became options.",
+  "migration.wordpress_stock_shared":
+    "The stock was the product's shared stock in WordPress; with no shared stock here, this variant took the product's count. Correct the variants' stock in the panel.",
   "migration.wordpress_variation_disabled":
     "The variation is disabled in WordPress; it was not moved.",
   "migration.wordpress_variation_no_price": "The variation has no price; it was not moved.",

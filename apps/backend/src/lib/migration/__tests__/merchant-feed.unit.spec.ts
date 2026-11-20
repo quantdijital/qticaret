@@ -33,7 +33,8 @@ describe("a Google Merchant feed as the common records (F14.3)", () => {
         variant.barcode,
       ])
     ).toEqual([
-      ["TAVA-24", "899.90", "1099.90", null, { Beden: "24 cm" }, 1500, "8690000000011"],
+      // In stock with no count: sold uncounted, always sellable (adr/0042 Ek 2026-11-20)
+      ["TAVA-24", "899.90", "1099.90", "untracked", { Beden: "24 cm" }, 1500, "8690000000011"],
       ["TAVA-28", "1299.90", null, 0, { Beden: "28 cm" }, 1500, null],
     ])
     // A page's extension is no part of the handle; the old path keeps it for the 301

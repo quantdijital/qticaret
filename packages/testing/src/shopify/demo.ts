@@ -20,7 +20,7 @@ const variant = (n: number, size: string, price: string, grams: number): FakeSho
   compareAtPrice: null,
   inventoryQuantity: 7,
   selectedOptions: [{ name: "Boyut", value: `${size} cm` }],
-  inventoryItem: { measurement: { weight: { unit: "GRAMS", value: grams } } },
+  inventoryItem: { tracked: true, measurement: { weight: { unit: "GRAMS", value: grams } } },
 })
 
 export const DEMO_SHOPIFY: FakeShopifyData = {
@@ -76,7 +76,10 @@ export const DEMO_SHOPIFY: FakeShopifyData = {
           compareAtPrice: "199.00",
           inventoryQuantity: -2,
           selectedOptions: [{ name: "Title", value: "Default Title" }],
-          inventoryItem: { measurement: { weight: { unit: "KILOGRAMS", value: 0.05 } } },
+          inventoryItem: {
+            tracked: true,
+            measurement: { weight: { unit: "KILOGRAMS", value: 0.05 } },
+          },
         },
       ],
     },

@@ -80,6 +80,7 @@ const existing: ExistingProduct = {
         { id: "p_eur", currency_code: "eur", amount: 4, isBase: true },
       ],
       inventoryItemId: "iitem_s",
+      manageInventory: true,
       levels: { sloc_1: 2 },
       cost: null,
     },
@@ -90,6 +91,7 @@ const existing: ExistingProduct = {
       options: { beden: "M" },
       prices: [],
       inventoryItemId: null,
+      manageInventory: false,
       levels: {},
       cost: null,
     },
@@ -212,6 +214,43 @@ describe("import plan", () => {
     expect(untracked.problems.map((problem) => problem.key)).toEqual([
       "catalog_import.stock_untracked",
     ])
+  })
+
+  it("makes a `Takipsiz` variant untracked (always sellable), the rest tracked (adr/0018 Ek)", () => {
+    const { plan, problems } = planImport(
+      product({
+        variants: [
+          { line: 2, options: [["Beden", "S"]], price: 100, untracked: true },
+          { line: 3, options: [["Beden", "M"]], price: 100, stock: 0 },
+          { line: 4, options: [["Beden", "L"]], price: 100 },
+        ],
+      }),
+      refs()
+    )
+    expect(problems).toEqual([])
+    expect(plan?.variantCreates.map((variant) => variant["manage_inventory"])).toEqual([
+      false,
+      true,
+      true,
+    ])
+    // Only the counted one gets a level: 0 out of stock
+    expect(plan?.stock).toEqual([expect.objectContaining({ variantId: null, quantity: 0 })])
+  })
+
+  it("stops counting a matched variant's stock on `Takipsiz`, and adds untracked ones", () => {
+    const { plan, problems } = planImport(
+      product({
+        variants: [
+          { line: 2, options: [["Beden", "S"]], untracked: true },
+          { line: 3, options: [["Beden", "M"]], untracked: true },
+        ],
+      }),
+      withExisting()
+    )
+    expect(problems).toEqual([])
+    // M keeps none already: no change
+    expect(plan?.variantUpdates).toEqual([{ id: "var_s", manage_inventory: false }])
+    expect(plan?.stock).toEqual([])
   })
 
   it("takes a product live without measurements, noting it (adr/0054)", () => {

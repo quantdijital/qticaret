@@ -27,6 +27,8 @@ export interface ExistingVariant {
   options: Record<string, string>
   prices: ExistingPrice[]
   inventoryItemId: string | null
+  /** Whether it counts its stock; one that does not is always sellable. */
+  manageInventory: boolean
   /** Stocked quantity by location. */
   levels: Record<string, number>
   /** Unit cost in kuruş (F11.4); null when none was entered. */
@@ -86,6 +88,7 @@ interface ProductRow extends Omit<
         id: string
         sku: string | null
         ean: string | null
+        manage_inventory?: boolean | null
         options?: { value: string; option_id: string }[] | null
         prices?: PriceRow[] | null
         variant_extension?: { cost?: number | null } | null
@@ -138,6 +141,7 @@ const FIELDS = [
   "variants.id",
   "variants.sku",
   "variants.ean",
+  "variants.manage_inventory",
   "variants.options.value",
   "variants.options.option_id",
   ...PRICE_FIELDS,
@@ -225,6 +229,7 @@ function existingOf(row: ProductRow): ExistingProduct {
         variant.inventory_items?.length === 1
           ? (variant.inventory_items[0]?.inventory_item_id ?? null)
           : null,
+      manageInventory: variant.manage_inventory !== false,
       levels: Object.fromEntries(
         (variant.inventory_items?.[0]?.inventory?.location_levels ?? []).map((level) => [
           level.location_id,

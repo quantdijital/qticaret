@@ -196,7 +196,8 @@ export function feedRecords(xml: string): FeedRecords {
           barcode: first(item, "gtin", 14),
           price: price.amount,
           compare_at_price: sale && regular ? regular.amount : null,
-          stock: first(item, "availability") === "out_of_stock" ? 0 : null,
+          // A feed gives no count: one on sale is sold uncounted, always sellable here
+          stock: first(item, "availability") === "out_of_stock" ? 0 : "untracked",
           options: Object.fromEntries(
             varying.map(([name, label]) => [label, first(item, name, 100) ?? "-"])
           ),

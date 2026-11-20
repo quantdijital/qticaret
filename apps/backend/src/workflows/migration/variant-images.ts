@@ -12,6 +12,76 @@ interface Found {
     { id: string; options?: { value: string; option_id?: string | null }[] | null }[] | null
 }
 
+/** A product's picture as read before a save, with the variants it is tied to. */
+export interface ImageWithTies {
+  id: string
+  url: string
+  variants?: ({ id: string } | null)[] | null
+}
+
+const tiedIds = (image: ImageWithTies) =>
+  (image.variants ?? []).flatMap((each) => (each ? [each.id] : []))
+
+/**
+ * The ties to put back after a save of the product's pictures: each
+ * picture's variants before it, by its address, that it lacks after.
+ * Pure: `keepImageTies` reads and writes.
+ */
+export function lostTies(
+  before: readonly ImageWithTies[],
+  after: readonly ImageWithTies[]
+): Map<string, string[]> {
+  const had = new Map<string, Set<string>>()
+  for (const image of before) {
+    for (const id of tiedIds(image)) {
+      had.set(image.url, (had.get(image.url) ?? new Set()).add(id))
+    }
+  }
+  const lost = new Map<string, string[]>()
+  for (const image of after) {
+    const wanted = had.get(image.url)
+    if (!wanted) {
+      continue
+    }
+    const now = new Set(tiedIds(image))
+    const missing = [...wanted].filter((id) => !now.has(id))
+    if (missing.length > 0) {
+      lost.set(image.id, missing)
+    }
+  }
+  return lost
+}
+
+/**
+ * A run that adds pictures to a product moved before keeps the variant
+ * ties its pictures had (the shop's own, or a run's before): Medusa's
+ * save of the image list may make the kept pictures anew, without their
+ * ties, so any a picture lost is put back. How many pictures were tied
+ * again comes back.
+ */
+export async function keepImageTies(
+  container: Container,
+  productId: string,
+  before: readonly ImageWithTies[]
+): Promise<number> {
+  if (!before.some((image) => tiedIds(image).length > 0)) {
+    return 0
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "product",
+    fields: ["images.id", "images.url", "images.variants.id"],
+    filters: { id: productId },
+  })
+  const after = ((data[0] as Found | undefined)?.images ?? []) as ImageWithTies[]
+  const lost = lostTies(before, after)
+  for (const [imageId, variantIds] of lost) {
+    await batchImageVariantsWorkflow(container as MedusaContainer).run({
+      input: { image_id: imageId, add: variantIds },
+    })
+  }
+  return lost.size
+}
+
 /** A variant's option values as "title=value" pairs, in a fixed order: the same key as a source's. */
 const pick = (options: Readonly<Record<string, string>>) =>
   Object.entries(options)

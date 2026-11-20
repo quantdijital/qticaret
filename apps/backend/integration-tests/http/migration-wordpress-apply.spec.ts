@@ -88,7 +88,7 @@ medusaIntegrationTestRunner({
         seo_meta: { seo_description: "Ağır döküm tava & kapak.", focus_keyword: "döküm tava" },
       })
       expect(pan?.categories.map((category) => category.handle).sort()).toEqual([
-        "mutfak-sef",
+        "mutfak",
         "tavalar",
       ])
       expect(pan?.variants.map((variant) => variant.sku).sort()).toEqual(["TAVA-K-24", "TAVA-M-28"])
@@ -128,7 +128,7 @@ medusaIntegrationTestRunner({
           "seo_meta.seo_description",
           "seo_meta.focus_keyword",
         ],
-        filters: { handle: ["mutfak-sef", "tavalar"] },
+        filters: { handle: ["mutfak", "tavalar"] },
       })
       const categorySeo = new Map(
         (
@@ -143,7 +143,7 @@ medusaIntegrationTestRunner({
         seo_description: "Her ocağa uygun döküm tavalar.",
         focus_keyword: "döküm tava",
       })
-      expect(categorySeo.get("mutfak-sef")).toBeNull()
+      expect(categorySeo.get("mutfak")).toBeNull()
 
       const content = getContainer().resolve<ContentModuleService>(CONTENT_MODULE)
       const [post] = await content.listContentEntries({ kind: "post", handle: "tava-bakimi" })

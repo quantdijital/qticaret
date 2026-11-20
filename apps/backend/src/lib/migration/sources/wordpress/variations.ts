@@ -1,7 +1,7 @@
 import { decodeEntities } from "../../text"
 import type { SourceVariant } from "../../types"
 import type { WordpressContext } from "./context"
-import { gramsOf, note, priceOf, stockOf } from "./context"
+import { gramsOf, note, priceOf, sharesParentStock, stockOf } from "./context"
 import { textOf, unserialize } from "./php"
 import type { WxrItem } from "./reader"
 import { attributeLabel } from "./terms"
@@ -158,6 +158,15 @@ export function variantsOf(
     }
     const sku = (variation.meta.get("_sku") ?? "").trim().slice(0, SKU_TEXT) || null
     const image = imageOf(context, variation)
+    const stock = stockOf(variation.meta, product.meta)
+    // One count several variants here sell from: each takes it whole, the report says so
+    if (
+      typeof stock === "number" &&
+      stock > 0 &&
+      (sharesParentStock(variation.meta, product.meta) || picks.length > 1)
+    ) {
+      note(context, "product", key, "migration.wordpress_stock_shared")
+    }
     for (const [index, pick] of picks.entries()) {
       const id = JSON.stringify(pick)
       if (seen.has(id) || variants.length >= MAX_VARIANTS) {
@@ -171,7 +180,7 @@ export function variantsOf(
         barcode: barcodeOf(variation.meta),
         price: price.price,
         compare_at_price: price.compare_at_price,
-        stock: picks.length > 1 ? null : stockOf(variation.meta, product.meta),
+        stock,
         options: Object.fromEntries(options.map((option, at) => [option.name, pick[at] ?? ""])),
         weight: gramsOf(variation.meta.get("_weight")) ?? gramsOf(product.meta.get("_weight")),
         ...(image ? { image } : {}),
