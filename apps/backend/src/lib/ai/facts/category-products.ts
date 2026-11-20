@@ -75,7 +75,7 @@ export async function categoryProductFacts(
     fields: [...CATEGORY_BRAND_FIELDS],
     filters: { id: rows.map((row) => row.id) },
   })
-  const brands = topBrands(data as BrandRow[])
+  const brands = topBrands(data)
   return {
     products: names.slice(0, CATEGORY_PRODUCT_EXAMPLES).join(", ") || null,
     brands: brands.length > 0 ? brands.join(", ") : null,
