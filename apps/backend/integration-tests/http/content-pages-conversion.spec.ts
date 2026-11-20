@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import contentPagesIntoLayout from "../../src/migration-scripts/content-pages-into-layout"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
 import { CONTENT_MODULE } from "../../src/modules/content"
@@ -158,6 +159,17 @@ medusaIntegrationTestRunner({
           (entryOf(stored, faq)?.sections[0]?.["body"] as { content: unknown[] }).content
         ).toEqual(expect.arrayContaining([gone]))
       }
+      // The text sections as the storefront reads them: untitled, today's reading on
+      for (const stored of [draftDoc, liveDoc]) {
+        expect(entryOf(stored, about)?.sections[1]).toMatchObject({
+          type: "rich_text",
+          variant: "article",
+          title: null,
+          outline: "auto",
+          questions: "auto",
+        })
+        expect(entryOf(stored, contact)?.sections[0]).toMatchObject({ form: "on", imprint: "on" })
+      }
       // The same ids in both: made from the page's
       expect(entryOf(draftDoc, about)?.sections.map((s) => s.id)).toEqual(
         entryOf(liveDoc, about)?.sections.map((s) => s.id)
@@ -204,6 +216,23 @@ medusaIntegrationTestRunner({
       expect(still?.draft).toEqual(row.draft)
       expect(still?.published).toEqual(row.published)
       expect(await audit.listAuditEntries({ action: "storefront.pages_converted" })).toHaveLength(1)
+
+      // The `db:migrate` script on a converted design: nothing written, no page touched
+      await contentPagesIntoLayout({ container, args: [] })
+      const script = await layoutRow(container)
+      expect(script?.revision).toBe(row.revision)
+      expect(script?.draft).toEqual(row.draft)
+      expect(script?.published).toEqual(row.published)
+      expect(await audit.listAuditEntries({ action: "storefront.pages_converted" })).toHaveLength(1)
+      const [untouched] = await content.listContentEntries(
+        { id: about },
+        { select: ["body", "updated_at", "revised_at"] }
+      )
+      expect(untouched).toMatchObject({
+        body: doc("Atölyemiz Denizli'de."),
+        updated_at: before?.updated_at,
+        revised_at: before?.revised_at,
+      })
     })
 
     it("leaves the pages past the design's room to their mirror, in the order they went live", async () => {

@@ -55,7 +55,7 @@ describe("moving the pages' texts into the design", () => {
       [ABOUT, ["help", "rich_text:article", "help"]],
       [CONTACT, ["contact"]],
     ])
-    expect(count).toEqual({ converted: 2, left: 0, dropped: 0 })
+    expect(count).toEqual({ converted: 2, left: 0, dropped: 0, failed: 0 })
     // The whole design is held to the editor's schema, no older place left
     expect(JSON.stringify(document)).not.toContain("placement")
   })
@@ -66,7 +66,7 @@ describe("moving the pages' texts into the design", () => {
     const once = convertPages(stored, sources).document
     const twice = convertPages(once, sources)
     expect(twice.document).toBe(once)
-    expect(twice.count).toEqual({ converted: 0, left: 0, dropped: 0 })
+    expect(twice.count).toEqual({ converted: 0, left: 0, dropped: 0, failed: 0 })
   })
 
   it("passes over an entry holding text or laid out as one list", () => {
@@ -96,7 +96,14 @@ describe("moving the pages' texts into the design", () => {
       source(CONTACT, "Yazın.", ["contact"]),
     ])
     expect(document).toEqual({ pages: full })
-    expect(count).toEqual({ converted: 0, left: 2, dropped: 0 })
+    expect(count).toEqual({ converted: 0, left: 2, dropped: 0, failed: 0 })
+  })
+
+  it("passes over a page whose conversion throws, the others still moving", () => {
+    const broken = { id: EMPTY, body: doc("Bozuk."), roles: null } as unknown as PageTextSource
+    const { document, count } = convertPages({ pages: [] }, [broken, source(ABOUT, "Biz.")])
+    expect(shape(document)).toEqual([[ABOUT, ["rich_text:article"]]])
+    expect(count).toEqual({ converted: 1, left: 0, dropped: 0, failed: 1 })
   })
 
   it("drops the last sections past a page's twelve, counted", () => {
@@ -109,7 +116,7 @@ describe("moving the pages' texts into the design", () => {
     const [page] = readStoredLayout(document).pages
     expect(page?.sections).toHaveLength(LAYOUT_LIMITS.page)
     expect(page?.sections[0]).toMatchObject({ type: "rich_text", variant: "article" })
-    expect(count).toEqual({ converted: 1, left: 0, dropped: 1 })
+    expect(count).toEqual({ converted: 1, left: 0, dropped: 1, failed: 0 })
   })
 })
 

@@ -30,7 +30,14 @@ export interface PagesConverted extends ConversionCount {
   live: boolean
 }
 
-const NOTHING: PagesConverted = { converted: 0, left: 0, dropped: 0, bytes: 0, live: false }
+const NOTHING: PagesConverted = {
+  converted: 0,
+  left: 0,
+  dropped: 0,
+  failed: 0,
+  bytes: 0,
+  live: false,
+}
 
 /**
  * Every content page (never a post, never a deleted one) with its text
@@ -125,8 +132,8 @@ export const movePageTextsWorkflow = createWorkflow("storefront-move-page-texts"
 
 /**
  * The content pages' texts moved into the theme editor's design, once
- * (adr/0073 Ek 2026-11-19 (2) K3; the `db:migrate` script that runs it
- * comes with the storefront that draws it, S8). Logged with counts only.
+ * (adr/0073 Ek 2026-11-19 (2) K3; run by the `db:migrate` script
+ * `migration-scripts/content-pages-into-layout.ts`). Logged with counts only.
  */
 export async function movePageTexts(container: MedusaContainer): Promise<PagesConverted> {
   const { result } = await movePageTextsWorkflow(container).run()
@@ -135,6 +142,7 @@ export async function movePageTexts(container: MedusaContainer): Promise<PagesCo
     converted: result.converted,
     left: result.left,
     dropped: result.dropped,
+    failed: result.failed,
     bytes: result.bytes,
   })
   return result
