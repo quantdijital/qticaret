@@ -41,6 +41,12 @@
   inherits: false;
   initial-value: 0;
 }
+/* The header's shadow's strength (0: none, 1: drawn), a type so it fades */
+@property --gf-head-shade {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
 
 @layer components {
   @media (prefers-reduced-motion: no-preference) {
@@ -110,21 +116,32 @@
       opacity: 0;
     }
 
-    /* The sticky header's shadow once the page has scrolled past it */
+    /*
+     * The sticky header's shadow once the page has scrolled past it. It fades
+     * by its gradient's strength (`--gf-head-shade`), never by `opacity`: an
+     * opacity transition gives this 12 px, nearly clear strip under the
+     * header a compositor layer of its own while it fades, and Chrome could
+     * show a stale piece of the page in it (a strip of a photo or a card's
+     * words under the menu, 2026-11-20). A custom property's fade is painted
+     * with the header's own layer.
+     */
     [data-motion="lively"] .gf-head::after {
+      --gf-head-shade: 0;
       position: absolute;
       top: 100%;
       right: 0;
       left: 0;
       height: 0.75rem;
-      background: linear-gradient(oklch(20% 0.012 255 / 0.07), transparent);
+      background: linear-gradient(
+        oklch(20% 0.012 255 / calc(0.07 * var(--gf-head-shade))),
+        transparent
+      );
       content: "";
-      opacity: 0;
       pointer-events: none;
-      transition: opacity var(--dur-short) var(--ease-gentle);
+      transition: --gf-head-shade var(--dur-short) var(--ease-gentle);
     }
     html[data-js-scroll] [data-motion="lively"]:not([data-shadow="none"]) .gf-head::after {
-      opacity: 1;
+      --gf-head-shade: 1;
     }
 
     /* Scroll reveal */
