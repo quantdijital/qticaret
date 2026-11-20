@@ -6,7 +6,7 @@ import { entityFacts } from "../facts"
 import { productReviewFacts, questionFacts, reviewFacts } from "../facts/reviews"
 import type { FactsContainer } from "../facts/types"
 import { suggestionProblems } from "../gate"
-import { instructionOf } from "../instructions"
+import { systemOf } from "../instructions"
 import { NAME_MASK, maskNames } from "../mask-names"
 import { buildPrompt } from "../prompt"
 import {
@@ -209,7 +209,7 @@ describe("the review tasks in the registry (Aşama 9)", () => {
       expect(task.flag).toBe(AI_REVIEWS)
       expect(task.keepData).toBe(false)
       expect(task.gate).toBe("plain_text")
-      expect(instructionOf(task)).toEqual(expect.any(String))
+      expect(systemOf(task)).toEqual(expect.any(String))
     }
   })
 

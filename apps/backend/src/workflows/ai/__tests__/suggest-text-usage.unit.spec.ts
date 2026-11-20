@@ -86,6 +86,8 @@ const ai = { recordUsage: jest.fn(), rememberChoice: jest.fn(), updateAiUsages: 
 const ANSWERED = {
   status: "succeeded",
   text: "Başlık",
+  candidates: ["Başlık"],
+  correction: null,
   model: "fake-text",
   input_tokens: 10,
   output_tokens: 5,
@@ -141,6 +143,38 @@ describe("a text suggestion's usage row", () => {
       expect.objectContaining({ status: "succeeded", output_tokens: 5 })
     )
     expect(ai.updateAiUsages).not.toHaveBeenCalled()
+  })
+
+  it("is written twice after a correction, the first refused, both naming the suggestion", async () => {
+    mockSteps.call.mockResolvedValue({
+      ...ANSWERED,
+      text: "Aday bir",
+      candidates: ["Aday bir", "Aday iki"],
+      correction: {
+        status: "succeeded",
+        input_tokens: 30,
+        output_tokens: 7,
+        images: null,
+        duration_ms: 4,
+        error_code: null,
+      },
+    })
+    ai.recordUsage.mockResolvedValueOnce("aiusage_1").mockResolvedValueOnce("aiusage_2")
+    const { result, error } = await run()
+
+    expect(error).toBeNull()
+    expect(result).toMatchObject({ text: "Aday bir", candidates: ["Aday bir", "Aday iki"] })
+    expect(ai.recordUsage).toHaveBeenCalledTimes(2)
+    expect(ai.recordUsage).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ status: "refused", input_tokens: 10 })
+    )
+    expect(ai.recordUsage).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ status: "succeeded", input_tokens: 30, duration_ms: 4 })
+    )
+    expect(ai.updateAiUsages).toHaveBeenCalledWith({ id: "aiusage_1", suggestion_id: "cdraft_1" })
+    expect(ai.updateAiUsages).toHaveBeenCalledWith({ id: "aiusage_2", suggestion_id: "cdraft_1" })
   })
 
   it("is written once for a failed call, which still fails the workflow", async () => {

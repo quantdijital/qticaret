@@ -4,7 +4,7 @@ import { textConnectorFor, textTargetOf } from "../connector-of"
 import type { TextConnector } from "../connectors/types"
 import { aiProviderError } from "../errors"
 import type { AiErrorKey } from "../errors"
-import { instructionOf, isTaskOption } from "../instructions"
+import { systemOf, isTaskOption } from "../instructions"
 import { failureOf, notTakenByService } from "../outcome"
 import { buildPrompt } from "../prompt"
 import { TEST_TASK } from "../registry/tasks"
@@ -32,7 +32,9 @@ describe("runTextTask", () => {
     expect(result).toEqual({
       status: "succeeded",
       text: "Keten gömlek , yazlık",
+      candidates: ["Keten gömlek , yazlık"],
       usage: { inputTokens: 10, outputTokens: 5 },
+      correction: null,
     })
   })
 
@@ -195,11 +197,12 @@ describe("withAiBreaker", () => {
 
 describe("task instructions", () => {
   it("adds an option's sentence and refuses an option the task does not offer", () => {
-    expect(instructionOf(TEST_TASK)).toEqual(expect.any(String))
-    expect(instructionOf(TEST_TASK, "detailed")).toContain(instructionOf(TEST_TASK) ?? "-")
+    expect(systemOf(TEST_TASK)).toEqual(expect.any(String))
+    expect(systemOf(TEST_TASK, "detailed")).toContain("Ürünün özelliklerini de an.")
+    expect(systemOf(TEST_TASK, "shout")).toBe(systemOf(TEST_TASK))
     expect(isTaskOption(TEST_TASK, "plain")).toBe(true)
     expect(isTaskOption(TEST_TASK, undefined)).toBe(true)
     expect(isTaskOption(TEST_TASK, "shout")).toBe(false)
-    expect(instructionOf({ ...TEST_TASK, id: "unknown" })).toBeNull()
+    expect(systemOf({ ...TEST_TASK, id: "unknown" })).toBeNull()
   })
 })

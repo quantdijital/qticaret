@@ -5,6 +5,7 @@ import { fieldProblems } from "./field-rules"
 import { hasPersonalData } from "./redact"
 import type { AiTask } from "./registry/tasks"
 import {
+  candidateLine,
   focusKeywordProblems,
   keywordLines,
   productTitleProblems,
@@ -88,6 +89,35 @@ export function suggestionTextFor(task: AiTask, raw: string): string {
     return keywordLines(text).join("\n")
   }
   return task.gate === "product_title" ? productTitleText(text) : text
+}
+
+/**
+ * A service's answer as the candidates it offers (adr/0074 §4): one per
+ * line, each shaped as the task offers it, repeats dropped, no more than
+ * the task asks for. A task of one suggestion gives its one text.
+ */
+export function suggestionCandidates(task: AiTask, raw: string): string[] {
+  const count = task.candidates ?? 1
+  if (count <= 1) {
+    return [suggestionTextFor(task, raw)]
+  }
+  const text = suggestionText(raw)
+  // Far over every candidate's length: left whole, the length check refuses it before any pattern
+  if (text.length > task.maxLength * SHAPE_LENGTH_FACTOR * count) {
+    return [text]
+  }
+  if (task.gate === "focus_keyword") {
+    return keywordLines(text).slice(0, count)
+  }
+  const seen = new Set<string>()
+  for (const line of text.split("\n")) {
+    const shaped = candidateLine(line)
+    const candidate = task.gate === "product_title" ? productTitleText(shaped) : shaped
+    if (candidate !== "") {
+      seen.add(candidate)
+    }
+  }
+  return [...seen].slice(0, count)
 }
 
 /**

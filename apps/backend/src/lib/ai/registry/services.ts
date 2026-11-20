@@ -35,6 +35,12 @@ export interface OpenAiCompatibleTarget {
   /** Fixed body fields the service documents (thinking off, reasoning apart from the text). */
   body: Readonly<Record<string, unknown>>
   /**
+   * `temperature` (0 to 2) is documented for this endpoint and model, with
+   * thinking as set in `body` (adr/0074 §4). Left out: the task's
+   * temperature is never sent. Set only after checking the service's page.
+   */
+  temperature?: true
+  /**
    * `vision` only: images go in the user message as `image_url` parts with
    * a base64 `data:` URL (never an address of our storage), each at most
    * `maxBytes` before encoding. Left out: the target takes no image.

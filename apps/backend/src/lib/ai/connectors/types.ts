@@ -23,6 +23,11 @@ export interface TextRequest {
   maxTokens: number
   /** Ask for a JSON object where the service documents such a mode. */
   json?: boolean
+  /**
+   * The task's sampling temperature (adr/0074 §4); sent only where the
+   * service's target is documented to take one (`temperature`), else left out.
+   */
+  temperature?: number
   /** `vision` only. */
   images?: readonly AiImageInput[]
   signal?: AbortSignal

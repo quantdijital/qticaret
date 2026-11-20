@@ -3,7 +3,7 @@ import { aiValidationError } from "../../../lib/ai/errors"
 import { AI_ENTITY_ID_PREFIX, entityFacts } from "../../../lib/ai/facts"
 import type { AiEntityType } from "../../../lib/ai/facts"
 import { productCardFacts } from "../../../lib/ai/facts/product-card"
-import { instructionOf } from "../../../lib/ai/instructions"
+import { systemOf } from "../../../lib/ai/instructions"
 import type { CardAllowed } from "../../../lib/ai/product-card"
 import { buildPrompt } from "../../../lib/ai/prompt"
 import { factLengthsOf, findAiTask, isTaskEntity } from "../../../lib/ai/registry/tasks"
@@ -35,7 +35,7 @@ async function cardInput(
   task: AiTask,
   input: TaskInputInput
 ): Promise<TaskInput> {
-  const instruction = instructionOf(task, input.option)
+  const instruction = systemOf(task, input.option)
   if (instruction === null) {
     throw aiValidationError("ai.unknown_task")
   }
@@ -68,7 +68,7 @@ export const taskInputStep = createStep(
   "ai-task-input",
   async (input: TaskInputInput, { container }) => {
     const task = findAiTask(input.task)
-    const instruction = task ? instructionOf(task, input.option, input.entity_type) : null
+    const instruction = task ? systemOf(task, input.option, input.entity_type) : null
     if (!task || instruction === null) {
       throw aiValidationError("ai.unknown_task")
     }

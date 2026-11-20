@@ -13,6 +13,7 @@ import { findAiTask } from "../../../lib/ai/registry/tasks"
 import type { CardAllowed } from "../../../lib/ai/product-card"
 import { runCardTask } from "../../../lib/ai/run-card"
 import { runTextTask } from "../../../lib/ai/run-text"
+import { correctionClaim, correctionUsageOf } from "./correction-claim"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import { isCredentialProvider } from "../../../modules/integration-credentials/providers"
 import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
@@ -33,8 +34,17 @@ export interface CallServiceInput {
 export interface CallOutcome {
   status: "succeeded" | "refused" | "failed" | "timeout" | "cancelled"
   model: string
-  /** The gated suggestion; only when `succeeded`. */
+  /** The gated suggestion; only when `succeeded`. The first candidate when there are several. */
   text: string | null
+  /** Every gated candidate in order (adr/0074 §4); `[text]` for a one-text task, empty unless `succeeded`. */
+  candidates: string[]
+  /**
+   * The correction call (adr/0074 §4), when the first answer had no
+   * candidate through the gate: recorded as its own usage row. The fields
+   * above then describe the first call's usage (it was refused) and the
+   * suggestion as offered (the correction's, when it passed).
+   */
+  correction: CorrectionUsage | null
   /** The gate's problems; only when `refused`. */
   problems: string[]
   input_tokens: number | null
@@ -45,6 +55,16 @@ export interface CallOutcome {
   error_key: AiErrorKey | null
   error_code: string | null
   retry_after_ms: number | null
+}
+
+/** The correction call's usage row: how it ended and what it counted. */
+export interface CorrectionUsage {
+  status: CallOutcome["status"]
+  input_tokens: number | null
+  output_tokens: number | null
+  images: number | null
+  duration_ms: number
+  error_code: string | null
 }
 
 /**
@@ -118,6 +138,8 @@ export const callServiceStep = createStep(
     const base = {
       model: resolved?.target.model ?? "",
       text: null,
+      candidates: [],
+      correction: null,
       problems: [],
       input_tokens: null,
       output_tokens: null,
@@ -149,6 +171,8 @@ export const callServiceStep = createStep(
           : undefined
       const prompt = { system: input.system, data: input.data }
       const withImages = images === undefined ? {} : { images }
+      // A second call, when no candidate passed, takes a place under the day's ceiling only
+      const claim = correctionClaim(container, input.capability)
       // A product card is read against its closed schema and the shop's lists, never as free text
       const result = await withAiBreaker(input.service, () =>
         task.gate === "product_card"
@@ -159,17 +183,22 @@ export const callServiceStep = createStep(
               allowed: input.allowed ?? { categories: [], attributes: [] },
               ...withImages,
             })
-          : runTextTask({ connector, task, prompt, ...withImages })
+          : runTextTask({ connector, task, prompt, mayCorrect: claim.mayCorrect, ...withImages })
       )
+      await claim.settle(result.correction)
+      const correction = correctionUsageOf(result.correction, images?.length ?? null)
       const outcome: CallOutcome = {
         ...base,
         images: images?.length ?? null,
         status: result.status,
         text: result.status === "succeeded" ? result.text : null,
+        candidates: result.status === "succeeded" ? result.candidates : [],
+        correction,
         problems: result.status === "refused" ? result.problems : [],
         input_tokens: result.usage.inputTokens ?? null,
         output_tokens: result.usage.outputTokens ?? null,
-        duration_ms: Date.now() - started,
+        // The first call's own time; the correction's is on its row
+        duration_ms: Date.now() - started - (correction?.duration_ms ?? 0),
       }
       return new StepResponse(outcome)
     } catch (error) {

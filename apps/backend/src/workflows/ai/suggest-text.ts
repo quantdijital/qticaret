@@ -105,6 +105,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
   linkUsageSuggestionStep(
     transform({ usage, suggestion }, ({ usage, suggestion }) => ({
       usage_id: usage.usage_id,
+      usage_ids: usage.usage_ids,
       suggestion_id: suggestion.id,
     }))
   )
@@ -121,7 +122,9 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       task: input.task,
       service: chosen.service,
       status: outcome.status === "succeeded" ? ("draft" as const) : ("refused" as const),
+      // The first candidate, as before candidates (adr/0074 §4); the panel offers them all
       text: outcome.status === "succeeded" ? outcome.text : null,
+      candidates: outcome.status === "succeeded" ? outcome.candidates : [],
       // A product card (Aşama 6) also as its fields; its text is the same card as JSON
       ...(findAiTask(input.task)?.gate === "product_card"
         ? { card: outcome.status === "succeeded" ? readProductCard(outcome.text) : null }

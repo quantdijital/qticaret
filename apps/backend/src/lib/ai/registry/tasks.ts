@@ -3,7 +3,13 @@ import { SERP_TEXT_LENGTH } from "../../seo/pixel-width"
 import type { StaffRole } from "../../staff/permissions"
 import type { AiEntityType } from "../facts"
 import type { AiCapability } from "./capabilities"
-import { FOCUS_KEYWORD_TASK, PRODUCT_TITLE_TASK } from "./catalog-tasks"
+import {
+  AI_CANDIDATE_COUNT,
+  AI_TEMPERATURE,
+  FOCUS_KEYWORD_TASK,
+  PRODUCT_TITLE_TASK,
+  SEO_FACT_DESCRIPTION_LENGTH,
+} from "./catalog-tasks"
 
 /** What a task is asked for: a text record, or a picture of the media library. */
 export type AiTaskEntity = AiEntityType | "media"
@@ -72,6 +78,14 @@ export interface AiTask {
    * can run it.
    */
   optionSource?: "scenes"
+  /**
+   * Candidates asked for in one call, one per line (adr/0074 §4): each is
+   * gated on its own (`maxLength` is one candidate's), those that pass
+   * are offered in order. Left out: one suggestion.
+   */
+  candidates?: number
+  /** The sampling temperature asked for, where the service's target documents one (`AI_TEMPERATURE`). */
+  temperature?: number
 }
 
 /** A record read another way than by its type (lib/ai/facts). */
@@ -109,6 +123,9 @@ export const SEO_TITLE_TASK: AiTask = {
   gate: "seo_title",
   maxLength: SERP_TEXT_LENGTH.title.max,
   entities: PAGE_ENTITIES,
+  candidates: AI_CANDIDATE_COUNT,
+  temperature: AI_TEMPERATURE.short,
+  factMaxLengths: { description: SEO_FACT_DESCRIPTION_LENGTH },
 }
 
 export const SEO_DESCRIPTION_TASK: AiTask = {
@@ -121,6 +138,9 @@ export const SEO_DESCRIPTION_TASK: AiTask = {
   gate: "seo_description",
   maxLength: SERP_TEXT_LENGTH.description.max,
   entities: PAGE_ENTITIES,
+  candidates: AI_CANDIDATE_COUNT,
+  temperature: AI_TEMPERATURE.short,
+  factMaxLengths: { description: SEO_FACT_DESCRIPTION_LENGTH },
 }
 
 /** How much of the product's description now the task sends (adr/0005's draft sent as much). */
@@ -146,8 +166,9 @@ export const PRODUCT_DESCRIPTION_TASK: AiTask = {
   gate: "product_description",
   maxLength: PRODUCT_DESCRIPTION_MAX_LENGTH,
   entities: ["product"],
-  // The description it improves on goes nearly whole; the SEO tasks keep the shared 300
+  // The description it improves on goes nearly whole; the SEO tasks read less of it
   factMaxLengths: { description: PRODUCT_DESCRIPTION_FACT_LENGTH },
+  temperature: AI_TEMPERATURE.long,
 }
 
 /**
@@ -177,6 +198,7 @@ export const IMAGE_ALT_TEXT_TASK: AiTask = {
   gate: "image_alt",
   maxLength: IMAGE_ALT_MAX_LENGTH,
   entities: ["media"],
+  temperature: AI_TEMPERATURE.factual,
 }
 
 /** The most pictures one background request may name (adr/0071 §8: each its own call and claim). */
@@ -269,6 +291,7 @@ export const REVIEW_SUMMARY_TASK: AiTask = {
   entities: ["product"],
   reader: "product_reviews",
   factMaxLengths: { reviews: REVIEW_SUMMARY_REVIEW_LENGTH },
+  temperature: AI_TEMPERATURE.factual,
 }
 
 /**
@@ -282,6 +305,7 @@ export const REVIEW_REPLY_TASK: AiTask = {
   maxLength: REVIEW_REPLY_MAX_LENGTH,
   entities: ["review"],
   factMaxLengths: { review: REVIEW_REPLY_MAX_LENGTH },
+  temperature: AI_TEMPERATURE.long,
 }
 
 /**
@@ -295,6 +319,7 @@ export const QUESTION_ANSWER_TASK: AiTask = {
   maxLength: REVIEW_REPLY_MAX_LENGTH,
   entities: ["question"],
   factMaxLengths: { question: REVIEW_REPLY_MAX_LENGTH, description: 1_000 },
+  temperature: AI_TEMPERATURE.factual,
 }
 
 /** The longest answer read for a product card, in characters: its JSON, all fields together. */
@@ -319,6 +344,7 @@ export const PRODUCT_FROM_PHOTO_TASK: AiTask = {
   maxLength: PRODUCT_CARD_MAX_LENGTH,
   entities: ["media"],
   json: true,
+  temperature: AI_TEMPERATURE.structured,
 }
 
 const TASKS: readonly AiTask[] = [

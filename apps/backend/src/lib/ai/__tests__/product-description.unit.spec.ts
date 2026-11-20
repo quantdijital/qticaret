@@ -3,7 +3,7 @@ import { wordCount } from "../../seo/advisor/text"
 import { fakeTextConnector } from "../connectors/fake"
 import { AI_ENTITY_TYPES, AI_FACT_MAX_LENGTHS } from "../facts"
 import { suggestionProblems, suggestionText } from "../gate"
-import { instructionOf, isTaskOption } from "../instructions"
+import { systemOf, isTaskOption } from "../instructions"
 import { MAX_VALUE_LENGTH, buildPrompt } from "../prompt"
 import {
   PRODUCT_DESCRIPTION_FACT_LENGTH,
@@ -15,6 +15,7 @@ import {
   factLengthsOf,
   isTaskEntity,
 } from "../registry/tasks"
+import { SEO_FACT_DESCRIPTION_LENGTH } from "../registry/catalog-tasks"
 import { runTextTask } from "../run-text"
 
 /**
@@ -74,12 +75,12 @@ describe("product description task (docs/22 PR 2-1)", () => {
   })
 
   it("instructs plain text over the advisor's word floor, with no price and the data bound", () => {
-    const base = instructionOf(PRODUCT_DESCRIPTION_TASK, null, "product") ?? ""
-    const short = instructionOf(PRODUCT_DESCRIPTION_TASK, "short", "product") ?? ""
-    const detailed = instructionOf(PRODUCT_DESCRIPTION_TASK, "detailed", "product") ?? ""
+    const base = systemOf(PRODUCT_DESCRIPTION_TASK, null, "product") ?? ""
+    const short = systemOf(PRODUCT_DESCRIPTION_TASK, "short", "product") ?? ""
+    const detailed = systemOf(PRODUCT_DESCRIPTION_TASK, "detailed", "product") ?? ""
 
     expect(base).toContain("ürün sayfası")
-    expect(base).toContain(`En az ${String(MIN_PRODUCT_WORDS)}`)
+    expect(base).toContain(`en az ${String(MIN_PRODUCT_WORDS)}`)
     expect(base).toContain("Düz metin")
     expect(short).toContain("Kısa tut")
     expect(detailed).toContain("Ayrıntılı yaz")
@@ -115,7 +116,7 @@ describe("product description task (docs/22 PR 2-1)", () => {
   it("has the fake service write a description that passes, from the filtered data alone", async () => {
     for (const option of [null, "short", "detailed"]) {
       const prompt = buildPrompt({
-        instruction: instructionOf(PRODUCT_DESCRIPTION_TASK, option, "product") ?? "",
+        instruction: systemOf(PRODUCT_DESCRIPTION_TASK, option, "product") ?? "",
         fields: facts,
       })
       const result = await runTextTask({
@@ -133,7 +134,7 @@ describe("product description task (docs/22 PR 2-1)", () => {
     }
   })
 
-  it("sends the product's description now nearly whole, while the SEO tasks keep the shared length", () => {
+  it("sends the product's description now nearly whole, the SEO tasks a long part of it", () => {
     const long = "Keten kumaş, rahat kesim. ".repeat(100)
     const sent = (task: typeof PRODUCT_DESCRIPTION_TASK) => {
       const { data } = JSON.parse(
@@ -147,9 +148,13 @@ describe("product description task (docs/22 PR 2-1)", () => {
     }
 
     expect(sent(PRODUCT_DESCRIPTION_TASK)).toBe(PRODUCT_DESCRIPTION_FACT_LENGTH)
-    expect(sent(SEO_TITLE_TASK)).toBe(MAX_VALUE_LENGTH)
-    expect(sent(SEO_DESCRIPTION_TASK)).toBe(MAX_VALUE_LENGTH)
-    expect(factLengthsOf(SEO_TITLE_TASK, AI_FACT_MAX_LENGTHS)).toEqual(AI_FACT_MAX_LENGTHS)
+    expect(sent(SEO_TITLE_TASK)).toBe(SEO_FACT_DESCRIPTION_LENGTH)
+    expect(sent(SEO_DESCRIPTION_TASK)).toBe(SEO_FACT_DESCRIPTION_LENGTH)
+    expect(sent({ ...SEO_TITLE_TASK, factMaxLengths: {} })).toBe(MAX_VALUE_LENGTH)
+    expect(factLengthsOf(SEO_TITLE_TASK, AI_FACT_MAX_LENGTHS)).toEqual({
+      ...AI_FACT_MAX_LENGTHS,
+      description: SEO_FACT_DESCRIPTION_LENGTH,
+    })
   })
 
   it("turns down a long unbroken run as noise before any pattern, in linear time", () => {

@@ -17,7 +17,10 @@ export const DATA_RULE =
 export type PromptValue = string | null | undefined | readonly { label: string; value: string }[]
 
 export interface PromptInput {
-  /** The task's fixed instruction (and its chosen option's), from the registry. */
+  /**
+   * The task's system message (lib/ai/instructions.ts `systemOf`), or a bare
+   * instruction: either way the message starts with `DATA_RULE`.
+   */
   instruction: string
   fields: Readonly<Record<string, PromptValue>>
   /** Longest text per field, where it differs from `MAX_VALUE_LENGTH`. */
@@ -93,8 +96,9 @@ function dataBlock(data: Record<string, CleanValue>): string {
 
 /** The two messages of a call: the instruction, and the data on its own. */
 export function buildPrompt(input: PromptInput): PromptMessages {
+  const instruction = input.instruction.trim()
   return {
-    system: `${DATA_RULE}\n\n${input.instruction.trim()}`,
+    system: instruction.startsWith(DATA_RULE) ? instruction : `${DATA_RULE}\n\n${instruction}`,
     data: dataBlock(promptData(input.fields, input.maxLengths, input.maxItems)),
   }
 }

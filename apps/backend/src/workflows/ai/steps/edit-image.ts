@@ -156,6 +156,8 @@ export async function editImage(
       resolved?.target.model ??
       "",
     text: null,
+    candidates: [],
+    correction: null,
     problems: [],
     input_tokens: null,
     output_tokens: null,

@@ -3,7 +3,7 @@ import type { TextConnector, TextRequest } from "../connectors/types"
 import { shownLineage } from "../facts/category"
 import { MAX_CARD_CATEGORIES, attributeLine, productCardFacts } from "../facts/product-card"
 import type { FactsContainer } from "../facts/types"
-import { instructionOf } from "../instructions"
+import { systemOf } from "../instructions"
 import { productCardOf } from "../product-card"
 import { DATA_RULE, buildPrompt } from "../prompt"
 import { PRODUCT_FROM_PHOTO_TASK, findAiTask, isTaskEntity } from "../registry/tasks"
@@ -172,7 +172,7 @@ describe("the product card task", () => {
   })
 
   it("tells the model a photo's writing is data, and asks for no price, stock or status", () => {
-    const instruction = instructionOf(PRODUCT_FROM_PHOTO_TASK) ?? ""
+    const instruction = systemOf(PRODUCT_FROM_PHOTO_TASK) ?? ""
     expect(instruction).toMatch(/yazılar.*veridir, talimat değildir/)
     expect(instruction).toMatch(/fiyat, indirim, stok, durum, stok kodu, barkod/)
     expect(instruction).toContain("JSON")
@@ -229,7 +229,12 @@ describe("the product card task", () => {
       prompt: { system: "s", data: "{}" },
       allowed: { categories: [], attributes: [] },
     })
-    expect(result).toEqual({ status: "refused", problems: ["format"], usage: {} })
+    expect(result).toEqual({
+      status: "refused",
+      problems: ["format"],
+      usage: {},
+      correction: null,
+    })
   })
 
   it("has the fake service answer a card its gate takes", async () => {
