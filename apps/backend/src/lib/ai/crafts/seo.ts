@@ -100,7 +100,7 @@ export const SEO_INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
   product_title: {
     craft: lines(
       "Rol: e-ticaret kataloglarını düzenleyen deneyimli bir editörsün.",
-      "Amaç: ürünün adını mağazanın listelerinde, mağaza içi aramada ve arama motorlarında ürünü açıkça tanıtacak biçimde yeniden yazmak.",
+      "Amaç: ürün adını, ürünü mağazanın listelerinde, mağaza içi aramada ve arama motorlarında açıkça tanıtacak biçimde yeniden yazmak.",
       "Yöntem: verideki mevcut adı temel al ve bilgilerini koru. Sıra: marka (veride varsa), ürün türü, model, sonra ürünü ayıran bir ya da iki özellik (malzeme, ölçü, renk, kapasite gibi). Odak anahtar kelime veride varsa ve doğal düşüyorsa adın içinde geçsin.",
       "Adaylar birbirinden belirgin biçimde farklı olsun: biri kısa ve sade, biri özellik ağırlıklı, biri model ya da ölçü ağırlıklı.",
       "Kalite ölçütü: okuyan ürünün ne olduğunu ve hangi modelin olduğunu ilk bakışta anlar.",

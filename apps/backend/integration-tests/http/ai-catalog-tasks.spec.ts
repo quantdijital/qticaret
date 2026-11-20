@@ -131,7 +131,9 @@ medusaIntegrationTestRunner({
           task: "focus_keyword",
           service: "fake",
           status: "draft",
-          text: KEYWORDS_SHAPED,
+          // adr/0074 §4: each keyword a candidate, the main one as the text
+          text: KEYWORDS_SHAPED.split("\n")[0],
+          candidates: KEYWORDS_SHAPED.split("\n"),
         })
       }
       expect(seen.map((request) => request.system)).toEqual([
@@ -198,7 +200,9 @@ medusaIntegrationTestRunner({
       const [draft] = await records().drafts()
       expect(draft).toMatchObject({ status: "refused", text: "", source: "ai_suggestion" })
       const usages = await records().usages()
+      // adr/0074 §4: asked once more with the gate's reasons; both calls are recorded
       expect(usages.map((usage) => [usage.task, usage.status])).toEqual([
+        ["product_title", "refused"],
         ["product_title", "refused"],
       ])
     })

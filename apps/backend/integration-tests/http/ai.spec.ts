@@ -210,12 +210,17 @@ medusaIntegrationTestRunner({
       expect(refused.data).toMatchObject({ message: "ai.suggestion_refused" })
       expect(refused.data.problems).toContain("link")
       expect(JSON.stringify(refused.data)).not.toContain("ornek-magaza")
-      expect(await records().usages()).toEqual([expect.objectContaining({ status: "refused" })])
+      // adr/0074 §4: asked once more with the gate's reasons; both calls are recorded
+      expect(await records().usages()).toEqual([
+        expect.objectContaining({ status: "refused" }),
+        expect.objectContaining({ status: "refused" }),
+      ])
       expect(await records().drafts()).toEqual([
         expect.objectContaining({ status: "refused", text: "" }),
       ])
-      // The service did the work: it counts
+      // The service did the work: it counts, the month once, the day's ceiling for each call
       expect(await records().monthly()).toBe(1)
+      expect(await records().today()).toBe(2)
     })
 
     it("stops at the package's monthly operations and at the daily ceiling", async () => {
