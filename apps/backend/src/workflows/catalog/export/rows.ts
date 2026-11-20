@@ -1,4 +1,10 @@
-import { OPTION_KEYS, SHEET_COLUMNS, attributeHeader, headerOf } from "../../../lib/catalog-sheet"
+import {
+  OPTION_KEYS,
+  SHEET_COLUMNS,
+  UNTRACKED_STOCK,
+  attributeHeader,
+  headerOf,
+} from "../../../lib/catalog-sheet"
 import type { ColumnKey, SheetUnits } from "../../../lib/catalog-sheet"
 import type { SheetCell } from "../../../lib/sheets"
 import { storedSummaryText } from "../../../lib/catalog/summary"
@@ -46,6 +52,7 @@ export const EXPORT_FIELDS = [
   "variants.sku",
   "variants.ean",
   "variants.variant_rank",
+  "variants.manage_inventory",
   "variants.options.value",
   "variants.options.option_id",
   "variants.prices.currency_code",
@@ -71,6 +78,7 @@ interface VariantRow {
   sku?: string | null
   ean?: string | null
   variant_rank?: number | null
+  manage_inventory?: boolean | null
   options?: { value: string; option_id: string }[] | null
   prices?:
     | {
@@ -234,7 +242,13 @@ function variantCells(product: ExportProductRow, variant: VariantRow, locationId
     barcode: variant.ean ?? null,
     price: price ? Number(price.amount) : null,
     cost: costInLira(variant.variant_extension?.cost ?? null),
-    stock: level ? Number(level.stocked_quantity) : null,
+    // One that does not count its stock reads back as such (adr/0018 Ek 2026-11-20)
+    stock:
+      variant.manage_inventory === false
+        ? UNTRACKED_STOCK
+        : level
+          ? Number(level.stocked_quantity)
+          : null,
   }
 }
 

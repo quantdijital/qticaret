@@ -144,6 +144,11 @@ export interface FixtureOptions {
    * category, Kaşıklar, naming an attachment the media library lacks.
    */
   covers?: boolean
+  /**
+   * The pan counts one stock (9) its variations share (`_manage_stock`
+   * "parent"; adr/0042 Ek 2026-11-20): the blue one no longer out of stock.
+   */
+  pooledStock?: boolean
 }
 
 /** The export of an old shop at `site`: its media on the same host. */
@@ -242,6 +247,7 @@ export function wxrFixture(
         _length: "30",
         _width: "30",
         _height: "8",
+        ...(options.pooledStock ? { _manage_stock: "yes", _stock: "9" } : {}),
       },
       comments: [
         comment(901, "1", "5", "Çok <b>iyi</b> tava."),
@@ -285,6 +291,7 @@ export function wxrFixture(
         _manage_stock: "no",
         _stock_status: "outofstock",
         _weight: "1.8",
+        ...(options.pooledStock ? { _manage_stock: "parent", _stock_status: "instock" } : {}),
       },
     },
     {

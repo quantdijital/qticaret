@@ -26,7 +26,12 @@ type Owner = Awaited<ReturnType<typeof createAdminUser>>
 export function wordpressFixture(http: HttpClient, getContainer: () => MedusaContainer) {
   let owner: Owner | undefined
   let server: Server | undefined
-  const state = { site: "", pictures: [] as string[] }
+  const state = {
+    site: "",
+    pictures: [] as string[],
+    // A picture's file name to the answers the old site gives it before the picture
+    refusals: new Map<string, { status: number; headers: Record<string, string> }[]>(),
+  }
   const headers = () => {
     if (!owner) {
       throw new Error("wordpress fixture: no owner yet")
@@ -82,8 +87,15 @@ export function wordpressFixture(http: HttpClient, getContainer: () => MedusaCon
       .toBuffer()
     server = createServer((req, res) => {
       const path = req.url ?? ""
+      const name = path.split("/").pop() ?? ""
+      const refusal = state.refusals.get(name)?.shift()
+      if (refusal) {
+        res.writeHead(refusal.status, refusal.headers)
+        res.end()
+        return
+      }
       if (path.startsWith("/wp-content/uploads/") && path.endsWith(".png")) {
-        state.pictures.push(path.split("/").pop() ?? "")
+        state.pictures.push(name)
         res.writeHead(200, { "content-type": "image/png" })
         res.end(png)
         return
@@ -112,6 +124,20 @@ export function wordpressFixture(http: HttpClient, getContainer: () => MedusaCon
     site: () => state.site,
     /** The pictures the old site served, by file name, in order. */
     pictures: state.pictures,
+    /**
+     * The old site turns a picture (by file name) away with these answers
+     * first, in turn (a 429, a 503, a 404), then serves it.
+     */
+    refuse: (name: string, ...answers: (number | { status: number; retryAfter: string })[]) => {
+      state.refusals.set(
+        name,
+        answers.map((answer) =>
+          typeof answer === "number"
+            ? { status: answer, headers: {} }
+            : { status: answer.status, headers: { "retry-after": answer.retryAfter } }
+        )
+      )
+    },
     /** The owner's headers, for the suite's own admin calls. */
     headers,
     start,

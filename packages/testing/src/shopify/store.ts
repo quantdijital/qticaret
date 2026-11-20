@@ -131,7 +131,10 @@ function product(spec: ProductSpec, n: number, origin: string, codes: string[]):
         compareAtPrice,
         inventoryQuantity: stock,
         selectedOptions: [{ name: option, value }],
-        inventoryItem: { measurement: { weight: { unit: "GRAMS", value: spec.grams } } },
+        inventoryItem: {
+          tracked: true,
+          measurement: { weight: { unit: "GRAMS", value: spec.grams } },
+        },
       })),
     ],
   }

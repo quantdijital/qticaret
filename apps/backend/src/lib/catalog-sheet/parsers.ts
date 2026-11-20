@@ -1,7 +1,7 @@
 import { SUMMARY_TEXT_MAX } from "../catalog/summary"
 import { SEO_META_LIMITS } from "../seo/meta"
 import { VAT_NAME_MAX } from "../tax"
-import { decimalCell, handleCell, handleListCell, statusCell, textCell } from "./cells"
+import { decimalCell, handleCell, handleListCell, statusCell, stockCell, textCell } from "./cells"
 import type { Cell } from "./cells"
 import type { ColumnKey } from "./columns"
 
@@ -55,5 +55,6 @@ export const VARIANT_PARSERS = {
   price: decimal(2, "catalog_import.price_invalid"),
   cost: (raw: string) =>
     decimalCell(raw, { max: MAX_COST, decimals: 2, key: "catalog_import.cost_invalid" }),
-  stock: decimal(0, "catalog_import.stock_invalid"),
+  // A quantity, or `Takipsiz`: not counted, always sellable (adr/0018 Ek 2026-11-20)
+  stock: (raw: string) => stockCell(raw, MAX_AMOUNT),
 } as const

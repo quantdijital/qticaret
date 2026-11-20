@@ -20,7 +20,7 @@ export const PRODUCTS_QUERY = `{
     variants { edges { node {
       id sku barcode price compareAtPrice inventoryQuantity
       selectedOptions { name value }
-      inventoryItem { measurement { weight { unit value } } }
+      inventoryItem { tracked measurement { weight { unit value } } }
     } } }
   } } }
 }`

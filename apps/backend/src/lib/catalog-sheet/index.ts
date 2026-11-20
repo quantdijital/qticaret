@@ -1,4 +1,12 @@
-export { decimalCell, handleCell, handleListCell, statusCell, textCell } from "./cells"
+export {
+  UNTRACKED_STOCK,
+  decimalCell,
+  handleCell,
+  handleListCell,
+  statusCell,
+  stockCell,
+  textCell,
+} from "./cells"
 export type { Cell } from "./cells"
 export {
   ATTRIBUTE_PREFIX,

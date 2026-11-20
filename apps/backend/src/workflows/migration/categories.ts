@@ -6,6 +6,8 @@ import type { SourceCategory, StepProblem, StepProgress } from "../../lib/migrat
 import { toSlug } from "../../lib/seo/slug"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
+import type { CategoryRecord } from "./demo-category"
+import { isMatchable, takeFromDemo } from "./demo-category"
 import { writeSeo } from "./post-terms"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -35,16 +37,18 @@ export interface CategoryTree {
   problems: StepProblem[]
 }
 
-interface Known {
-  id: string
-  handle: string
+interface Known extends CategoryRecord {
   parent_category_id: string | null
   name: string
 }
 
-/** A handle no other category holds: the name's slug, numbered when taken. */
-function freeHandle(name: string, taken: ReadonlySet<string>): string {
-  const base = toSlug(name) || "kategori"
+/** The handle a category wants: the source's own (its old slug), else its name's slug. */
+export function wantedHandle(category: Pick<SourceCategory, "handle"> | undefined, name: string) {
+  return toSlug(category?.handle ?? "") || toSlug(name) || "kategori"
+}
+
+/** A handle no other category holds: the wanted one, numbered when taken. */
+export function freeHandle(base: string, taken: ReadonlySet<string>): string {
   let handle = base
   for (let n = 2; taken.has(handle); n++) {
     handle = `${base}-${String(n)}`
@@ -55,7 +59,9 @@ function freeHandle(name: string, taken: ReadonlySet<string>): string {
 /**
  * The source's categories as a tree here (F14, adr/0042 §2): every path's
  * parents first; a category met before (by the migration's record of it,
- * else by its name under the same parent) kept, the rest made. A new one
+ * else by its name under the same parent, only a live one of the shop's
+ * own: adr/0042 Ek 2026-11-20) kept, the rest made, each on the source's
+ * own slug where it gives one (its name's otherwise), numbered when taken. A new one
  * gets the source's own SEO title, description and focus keyword through
  * the SEO workflow (adr/0015); one the source has none for gets nothing
  * written, so the shop's templates give it its title and description as
@@ -74,17 +80,24 @@ export async function migrateCategories(
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   const existing = (await products.listProductCategories(
     {},
-    { select: ["id", "handle", "parent_category_id", "name"], take: null }
+    {
+      select: ["id", "handle", "parent_category_id", "name", "is_active", "metadata"],
+      take: null,
+    }
   )) as Known[]
   const taken = new Set(existing.map((category) => category.handle))
   const byId = new Map(existing.map((category) => [category.id, category]))
+  const byHandle = new Map(existing.map((category) => [category.handle, category]))
   const before = await migration.targetsOf(
     source,
     "category",
     categories.map((category) => category.source_key)
   )
+  // By name only a live category of the shop's own: never a switched-off or demo one
   const byParent = new Map(
-    existing.map((category) => [`${category.parent_category_id ?? ""}/${category.name}`, category])
+    existing
+      .filter(isMatchable)
+      .map((category) => [`${category.parent_category_id ?? ""}/${category.name}`, category])
   )
   const handles = new Map<string, string>()
   const ids = new Map<string, string>()
@@ -124,7 +137,14 @@ export async function migrateCategories(
       ids.set(key, found.id)
       counts.found += 1
     } else if (apply && (path.length === 1 || parentId)) {
-      const handle = freeHandle(name, taken)
+      const wanted = wantedHandle(own, name)
+      const holder = taken.has(wanted) ? byHandle.get(wanted) : undefined
+      // A switched-off, empty demo category gives its handle up (demo-category.ts)
+      if (holder && (await takeFromDemo(container, holder))) {
+        taken.delete(wanted)
+        byHandle.delete(wanted)
+      }
+      const handle = freeHandle(wanted, taken)
       taken.add(handle)
       const { result } = await createProductCategoriesWorkflow(container as MedusaContainer).run({
         input: {

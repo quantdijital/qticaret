@@ -146,7 +146,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog_import.sku_repeated": "Bu SKU dosyada daha önce kullanıldı.",
   "catalog_import.sku_taken": "Bu SKU başka bir ürünün varyantında kullanılıyor.",
   "catalog_import.status_invalid": 'Durum "Taslak" ya da "Yayında" olmalı.',
-  "catalog_import.stock_invalid": "Stok sıfır ya da pozitif bir tam sayı olmalı.",
+  "catalog_import.stock_invalid":
+    "Stok sıfır ya da pozitif bir tam sayı olmalı; stoğu sayılmayan varyant için Takipsiz yazın.",
+  "catalog_import.stock_untracked": "Bu varyantın stoğu takip edilmiyor; stok adedi yazılamaz.",
+  "catalog_import.stock_untracked_reserved":
+    "Bu varyantın açık siparişlerde ayrılmış stoğu var; siparişler tamamlanmadan stok takibi kapatılamaz.",
   "catalog_import.template_change": "Ürünün özellik şablonu farklı; şablonu panelden değiştirin.",
   "catalog_import.template_required": "Özellik girmek için bir özellik şablonu seçin.",
   "catalog_import.template_unknown": "Bu tanıtıcıyla bir özellik şablonu yok.",
@@ -1289,6 +1293,22 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Görsel adresi reddedildi: iç ağa ya da izin verilmeyen bir adrese gidiyor.",
   "migration.image_too_large": "Görsel 10 MB'tan büyük; taşınmadı.",
   "migration.image_unreachable": "Görsele ulaşılamadı; taşınmadı. Ürüne elle ekleyebilirsiniz.",
+  "migration.image_unreachable_not_found":
+    "Görsel eski sitede bulunamadı (404); taşınmadı. Ürüne elle ekleyebilirsiniz.",
+  "migration.image_unreachable_forbidden":
+    "Eski site görseli vermeyi reddetti (401/403); taşınmadı. Taşımayı yeniden çalıştırın ya da elle ekleyin.",
+  "migration.image_unreachable_throttled":
+    "Eski site çok sık istek nedeniyle yanıt vermedi (429); birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_server":
+    "Eski sitenin sunucusu hata verdi (5xx); birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_timeout":
+    "Eski site zamanında yanıt vermedi; birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_network":
+    "Eski siteye bağlanılamadı; birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_deferred":
+    "Görsellerin süresi doldu; bu görsel denenmedi. Taşımayı yeniden çalıştırın, kalanlar alınır.",
+  "migration.image_unreachable_status":
+    "Eski site görsel yerine beklenmeyen bir yanıt verdi; taşınmadı. Ürüne elle ekleyebilirsiniz.",
   "migration.image_not_accepted":
     "Dosya kabul edilen bir görsel değil (JPEG, PNG, WebP, AVIF) ya da okunamadı.",
   "migration.url_path_taken": "Bu eski adres sitede başka bir kayda ait; yönlendirilmedi.",
@@ -1311,6 +1331,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.feed_currency":
     "Ürün Türk lirası dışında bir para birimiyle; fiyat çevrilmeden taşınmadı.",
   "migration.feed_item_invalid": "Ürünün adı, adresi ya da fiyatı okunamadı; taşınmadı.",
+  "migration.feed_stock_untracked":
+    "Akış stok adedi vermiyor: stokta yok olmayan varyantlar (stokta, ön sipariş, sonradan tedarik) stok takibi olmadan, her zaman satılabilir taşındı. Stok sayacaksanız panelden adet girin.",
   "migration.customers_sheet_invalid":
     'Müşteri listesi okunamadı; xlsx ya da CSV olmalı ve bir e-posta sütunu ("E-posta") içermeli.',
   "migration.claim_invalid":
@@ -1338,6 +1360,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.wordpress_options_too_many":
     "Ürünün üçten fazla varyasyon özelliği var; ilk üçü seçenek oldu.",
   "migration.wordpress_variation_disabled": "Varyasyon WordPress'te kapalı; taşınmadı.",
+  "migration.wordpress_stock_shared":
+    "Stok WordPress'te ürünün ortak stoğuydu; burada ortak stok olmadığından bu varyanta ürünün stok sayısı yazıldı. Varyantların stoğunu panelden düzeltin.",
   "migration.wordpress_variation_no_price": "Varyasyonun fiyatı yok; taşınmadı.",
   "migration.wordpress_variation_unread": "Varyasyonun seçenek değerleri okunamadı; taşınmadı.",
   "migration.wordpress_variation_orphan": "Varyasyonun ana ürünü dosyada yok; taşınmadı.",

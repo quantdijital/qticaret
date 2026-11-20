@@ -55,6 +55,12 @@ export interface SheetVariant {
   /** Unit cost in lira, VAT excluded (F11.4). */
   cost?: number
   stock?: number
+  /**
+   * `Takipsiz` in `Stok`: the variant's stock is not counted, so it is
+   * always sellable (`manage_inventory: false`; adr/0018 Ek 2026-11-20).
+   * Never set together with `stock`.
+   */
+  untracked?: true
 }
 
 export interface SheetProduct {
@@ -152,6 +158,8 @@ function variantOf(row: SheetRow, layout: SheetLayout, problems: SheetProblem[])
     const cell = raw ? parse(raw) : null
     if (cell && !cell.ok) {
       problems.push({ line: row.line, key: cell.key, column: at?.header })
+    } else if (cell?.value === "untracked") {
+      variant.untracked = true
     } else if (cell) {
       Object.assign(variant, { [key]: cell.value })
     }
