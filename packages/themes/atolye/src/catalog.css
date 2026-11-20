@@ -40,10 +40,7 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
   }
-  /* An odd last row on two columns takes both, not half a row alone */
-  .gf-mosaic-list > ul > li:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-  }
+  /* An odd last row keeps its own cell: stretched across, its count sat out of line with the column above */
   .gf-mosaic-row {
     display: grid;
     grid-template-columns: 2rem minmax(0, 1fr) auto;
@@ -215,13 +212,10 @@
       min-height: 12rem;
     }
   }
-  /* A wide tablet (1024 to 1279 px): the list across in three columns, an odd last row in its own cell */
+  /* A wide tablet (1024 to 1279 px): the list across in three columns, a short last row in its own cells */
   @media (64rem <= width < 80rem) {
     .gf-mosaic:not(:has(> .gf-mosaic-side)) > .gf-mosaic-list > ul {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    .gf-mosaic:not(:has(> .gf-mosaic-side)) > .gf-mosaic-list > ul > li:last-child:nth-child(odd) {
-      grid-column: auto;
     }
   }
 

@@ -139,6 +139,9 @@ describe("the catalogue opening's slides", () => {
     )
     expect(tablet).toContain(".gf-mosaic:not(:has(> .gf-mosaic-list)) > .gf-mosaic-side")
     expect(block("@media (64rem <= width < 80rem)")).toContain("repeat(3, minmax(0, 1fr))")
+    // Found in the browser: an odd last row stretched across two columns put its count out of
+    // line with the column above; a short last row keeps its own cells at every width
+    expect(css).not.toMatch(/\.gf-mosaic-list > ul > li[^{]*\{[^}]*grid-column/)
     // The side by side row starts where the column holds a long name
     expect(css).toContain("/* From 1280 px: the list, the opening and the tiles side by side")
     expect(css).not.toContain("@media (min-width: 64rem)")
