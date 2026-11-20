@@ -42,7 +42,7 @@ export function SearchToggle({
   // Opened, the cursor goes in the field (shown before this runs: the style says so at once)
   useEffect(() => {
     if (open) {
-      document.getElementById(box.id)?.focus()
+      document.getElementById(box.id)?.focus({ preventScroll: true })
     }
   }, [open, box.id])
 
@@ -103,7 +103,7 @@ export function SearchToggle({
           {...box}
           onLeave={() => {
             setOpen(false)
-            button.current?.focus()
+            button.current?.focus({ preventScroll: true })
           }}
         />
       </div>

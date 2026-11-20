@@ -29,6 +29,22 @@ export function panelPlace({ box, edge, wanted }: PanelFrame): { x: number; widt
   return { x: left - box.left, width }
 }
 
+/**
+ * The option the arrow keys are on brought into the panel's own view: only
+ * the panel scrolls, never the page (`scrollIntoView` scrolls every
+ * scroller up to the window, and the window keeps its top padding clear of
+ * the sticky header the panel hangs from, so it moved the page).
+ */
+export function keepInPanel(panel: HTMLElement, option: HTMLElement): void {
+  const view = panel.getBoundingClientRect()
+  const item = option.getBoundingClientRect()
+  if (item.top < view.top) {
+    panel.scrollTop -= view.top - item.top
+  } else if (item.bottom > view.bottom) {
+    panel.scrollTop += item.bottom - view.bottom
+  }
+}
+
 const WIDE = "(width >= 64rem)"
 
 /** The panel's left and width from the box and the header row's content (its gutters off). */

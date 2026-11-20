@@ -9,7 +9,7 @@ import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
 import { cn } from "@qticaret/ui/lib/utils"
 import { SearchPanel, panelOf, statusOf } from "./SearchPanel"
 import type { SearchPanelWords } from "./SearchPanel"
-import { usePanelFit } from "./search-panel-fit"
+import { keepInPanel, usePanelFit } from "./search-panel-fit"
 
 export interface SearchWords extends SearchPanelWords {
   label: string
@@ -129,10 +129,11 @@ export function SearchBox({
   // Wide, the panel opens wider than the box within the header; on a phone it ends above the keyboard
   usePanelFit(form, panel, shown)
 
-  // The option the arrow keys are on stays in the panel's view
+  // The option the arrow keys are on stays in the panel's view; the page stays where it is
   useEffect(() => {
-    if (activeId) {
-      document.getElementById(activeId)?.scrollIntoView({ block: "nearest" })
+    const option = activeId ? document.getElementById(activeId) : null
+    if (option && panel.current) {
+      keepInPanel(panel.current, option)
     }
   }, [activeId])
 
@@ -148,7 +149,7 @@ export function SearchBox({
     setText("")
     close()
     suggester?.ask("")
-    field.current?.focus()
+    field.current?.focus({ preventScroll: true })
   }
 
   const change = (event: ChangeEvent<HTMLInputElement>) => {
