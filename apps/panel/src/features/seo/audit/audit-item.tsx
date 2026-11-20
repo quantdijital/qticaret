@@ -98,7 +98,7 @@ function EntityLink({ entity }: { entity: NonNullable<AuditItem["entity"]> }) {
     case "category":
       return (
         <GoTo>
-          <Link to="/categories" search={{ selected: entity.id }}>
+          <Link to="/categories/$id" params={{ id: entity.id }}>
             <ActionLabel action="openPage" />
           </Link>
         </GoTo>

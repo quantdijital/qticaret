@@ -33,7 +33,7 @@ function Place({ use }: { use: MediaUse }) {
       )
     case "category":
       return (
-        <Link to="/categories" search={{ selected: id }} className={LINK}>
+        <Link to="/categories/$id" params={{ id }} className={LINK}>
           {name}
         </Link>
       )

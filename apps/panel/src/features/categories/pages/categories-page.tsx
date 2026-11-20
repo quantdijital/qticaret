@@ -1,116 +1,90 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi, useNavigate } from "@tanstack/react-router"
-import { FolderPlus, MousePointerClick } from "lucide-react"
+import { FolderTree, Plus } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { PageColumn, PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { categoryTreeQuery } from "@/features/categories/api/categories"
-import { CategoryEditor } from "@/features/categories/components/category-editor"
-import { CategoryImageCard } from "@/features/categories/components/category-image-card"
-import { CategoryRestrictionCard } from "@/features/categories/components/category-restriction-card"
-import { CategorySeoCard } from "@/features/categories/components/category-seo-card"
-import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
-import { CategoryTreeCard } from "@/features/categories/components/category-tree-card"
+import { CategoryTable } from "@/features/categories/components/category-table"
+import { NewCategoryDialog } from "@/features/categories/components/new-category-dialog"
 import { errorText } from "@/lib/errors"
 
-const route = getRouteApi("/_auth/categories")
+const route = getRouteApi("/_auth/categories/")
 
 /**
- * Categories (docs/06 §4): the tree on the left, the chosen one (or a new
- * one) on the right. The choice lives in the URL, so a link opens it.
+ * Categories (docs/06 §4), laid out as brands are: the tree as a list, a
+ * search over it, and each category on its own page. `?selected=new` (the
+ * command menu's "add a category") opens the new category's dialog.
  */
 export function CategoriesPage() {
   const { t } = useTranslation()
+  const search = route.useSearch()
   const navigate = useNavigate()
-  const { selected } = route.useSearch()
+  const q = search.q ?? ""
   const tree = useQuery(categoryTreeQuery())
-  const categories = tree.data ?? []
-  const current = categories.find((category) => category.id === selected) ?? null
-  const select = (id: string | undefined) => {
-    void navigate({ to: "/categories", search: id ? { selected: id } : {}, replace: true })
+  const [adding, setAdding] = useState(false)
+  const setQuery = (text: string) => {
+    void navigate({
+      to: "/categories",
+      search: text === "" ? {} : { q: text },
+      replace: true,
+    })
   }
+  const add = (
+    <Button
+      onClick={() => {
+        setAdding(true)
+      }}
+    >
+      <Plus />
+      {t("categories.add")}
+    </Button>
+  )
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={t("nav.categories")}
         description={t("categories.description")}
-        action={
-          <Button
-            onClick={() => {
-              select("new")
-            }}
-          >
-            <FolderPlus />
-            {t("categories.add")}
-          </Button>
-        }
+        action={add}
       />
-      {tree.isError ? (
-        <ErrorState text={errorText(t, tree.error)} onRetry={() => void tree.refetch()} />
-      ) : tree.isPending ? (
-        <div className="grid gap-[var(--grid-gap)] xl:grid-cols-12">
-          <Skeleton className="h-96 rounded-lg xl:col-span-5" />
-          <Skeleton className="h-96 rounded-lg xl:col-span-7" />
+      <section className="overflow-hidden rounded-lg border bg-card shadow-card">
+        <div className="flex flex-wrap items-center gap-3 border-b px-5 py-3">
+          <SearchInput value={q} placeholder={t("categories.search")} onChange={setQuery} />
         </div>
-      ) : (
-        <PageGrid>
-          <PageColumn span={5}>
-            <CategoryTreeCard
-              categories={categories}
-              selectedId={current?.id ?? null}
-              onSelect={select}
-            />
-          </PageColumn>
-          <PageColumn span={7}>
-            {selected === "new" || current ? (
-              <>
-                <CategoryEditor
-                  key={current?.id ?? "new"}
-                  categories={categories}
-                  category={current}
-                  onSaved={select}
-                  onDeleted={() => {
-                    select(undefined)
-                  }}
-                />
-                {current ? (
-                  <>
-                    <CategoryImageCard categoryId={current.id} />
-                    <AdvisorCard
-                      key={`advisor-${current.id}`}
-                      kind="category"
-                      id={current.id}
-                      version={current.updated_at}
-                      targets={{
-                        edit_title: "category-seo",
-                        edit_description: "category-seo",
-                        edit_robots: "category-seo",
-                      }}
-                    />
-                    <div id="category-seo" className="scroll-mt-20">
-                      <CategorySeoCard
-                        key={`seo-${current.id}`}
-                        category={current}
-                        categories={categories}
-                      />
-                    </div>
-                    <CategoryRestrictionCard categoryId={current.id} />
-                  </>
-                ) : null}
-              </>
-            ) : (
-              <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed px-6 py-16 text-center">
-                <MousePointerClick className="size-8 text-muted-foreground" aria-hidden="true" />
-                <p className="max-w-sm text-sm text-muted-foreground">{t("categories.pick")}</p>
+        {tree.isError ? (
+          <div className="p-5">
+            <ErrorState text={errorText(t, tree.error)} onRetry={() => void tree.refetch()} />
+          </div>
+        ) : (
+          <CategoryTable
+            categories={tree.data}
+            loading={tree.isPending}
+            query={q}
+            empty={
+              <div className="flex flex-col items-center gap-3 text-center">
+                <FolderTree className="size-8 text-muted-foreground" aria-hidden="true" />
+                <p className="max-w-sm text-sm text-muted-foreground">
+                  {q ? t("categories.noMatch") : t("categories.empty")}
+                </p>
+                {q ? null : add}
               </div>
-            )}
-          </PageColumn>
-        </PageGrid>
-      )}
+            }
+          />
+        )}
+      </section>
+      <NewCategoryDialog
+        open={adding || search.selected === "new"}
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open && search.selected) {
+            void navigate({ to: "/categories", search: q ? { q } : {}, replace: true })
+          }
+        }}
+      />
     </div>
   )
 }
