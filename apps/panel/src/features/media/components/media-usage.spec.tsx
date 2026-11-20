@@ -4,18 +4,24 @@ import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { MediaUsage } from "./media-usage"
 
-// A link shows where it goes: the page and its search
+// A link shows where it goes: the page, its id and its search
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
     to,
+    params,
     search,
     children,
   }: {
     to: string
+    params?: { id: string }
     search?: Record<string, string>
     children: ReactNode
   }) => (
-    <a href={`${to}${search ? `?${new URLSearchParams(search).toString()}` : ""}`}>{children}</a>
+    <a
+      href={`${params ? to.replace("$id", params.id) : to}${search ? `?${new URLSearchParams(search).toString()}` : ""}`}
+    >
+      {children}
+    </a>
   ),
 }))
 
@@ -32,7 +38,7 @@ describe("MediaUsage", () => {
 
     expect(screen.getByRole("link", { name: "Mutfak" })).toHaveAttribute(
       "href",
-      "/categories?selected=pcat_1"
+      "/categories/pcat_1"
     )
     expect(screen.getByText("Kategori görseli")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Mağazanın ETBİS karekodu" })).toHaveAttribute(
