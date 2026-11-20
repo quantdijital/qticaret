@@ -4,7 +4,7 @@ import { deviceOf } from "@qticaret/types/section-device"
 import { faqSettingsOf } from "@qticaret/types/section-faq"
 import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
-import type { HomeSectionView, Translate } from "@qticaret/ui"
+import type { HomeSectionView, PageTextSectionView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
@@ -214,10 +214,13 @@ async function sectionView(
  * screens beside (docs/tema/bilesen-standardi §2), only when not everywhere
  * (`deviceOf`: none or a newer backend's step, everywhere).
  */
-function withLook(view: HomeSectionView, section: BodySection): HomeSectionView {
+export function withLook<V extends HomeSectionView | PageTextSectionView>(
+  view: V,
+  section: { look?: unknown; device?: unknown }
+): V {
   const look = lookOf(section.look)
   const device = deviceOf(section.device)
-  const shown: HomeSectionView = Object.keys(look).length > 0 ? { ...view, look } : view
+  const shown: V = Object.keys(look).length > 0 ? { ...view, look } : view
   return device === "all" ? shown : { ...shown, device }
 }
 
@@ -247,8 +250,8 @@ export async function sectionViews(
 }
 
 /**
- * A page's sections by where they go: a category page's above the product
- * grid or below it, a content page's above its text or below it (adr/0073).
+ * A category page's sections by where they go: above the product grid or
+ * below it. A content page's are one list (adr/0073 Ek 2026-11-19 (2) K1).
  */
 export function byPlacement<S extends { placement?: "top" | "bottom" }>(
   sections: readonly S[]
