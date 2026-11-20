@@ -110,6 +110,36 @@ describe("sheet products", () => {
     })
   })
 
+  it("reads `Takipsiz` in Stok as untracked; an empty cell says nothing; other words are refused", () => {
+    const { products, problems } = productsOf(header, [
+      row(2, {
+        handle: "kupa",
+        title: "Kupa",
+        option1_name: "Renk",
+        option1_value: "Mavi",
+        stock: "Takipsiz",
+      }),
+      row(3, {
+        handle: "kupa",
+        option1_name: "Renk",
+        option1_value: "Kırmızı",
+        stock: "untracked",
+      }),
+      row(4, { handle: "kupa", option1_name: "Renk", option1_value: "Yeşil", stock: "0" }),
+      row(5, { handle: "kupa", option1_name: "Renk", option1_value: "Sarı" }),
+      row(6, { handle: "tava", title: "Tava", stock: "sınırsız" }),
+    ])
+    expect(products[0]?.variants.map(({ stock, untracked }) => [stock, untracked])).toEqual([
+      [undefined, true],
+      [undefined, true],
+      [0, undefined],
+      [undefined, undefined],
+    ])
+    expect(problems).toEqual([
+      expect.objectContaining({ line: 6, key: "catalog_import.stock_invalid" }),
+    ])
+  })
+
   it("reads a unit cost in lira, and refuses one past the product page's bound", () => {
     const { products, problems } = productsOf(header, [
       row(2, { handle: "kupa", title: "Kupa", cost: "42,50" }),

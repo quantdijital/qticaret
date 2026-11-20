@@ -6,25 +6,24 @@ import { assertStorageFits } from "../../lib/plan-limits"
 import { sanitizeImage, suggestedAlts } from "../../lib/media"
 import { fakeOrigin } from "../../lib/migration/fetch"
 import type { SourceProduct, StepProblem, StepProgress } from "../../lib/migration/types"
-import { isSafeFetchError, safeFetch } from "../../lib/security/safe-fetch"
-import {
-  DEFAULT_UPLOAD_LIMITS,
-  UPLOAD_MEDIA_TYPES,
-  storedName,
-  validateUpload,
-} from "../../lib/security/upload"
+import { FetchPace, PACE_MAX } from "../../lib/migration/fetch-pace"
+import { ImageRefused, downloadImage } from "../../lib/migration/image-fetch"
+import { UPLOAD_MEDIA_TYPES, storedName, validateUpload } from "../../lib/security/upload"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
 import type { RememberedItem } from "../../modules/migration/service"
 import { removeFiles, storePublicFile } from "../media/files"
 import { registerMediaWorkflow, setProductAltsWorkflow } from "../media/workflows"
-import { tieVariantImages } from "./variant-images"
+import { THUMBNAIL_KIND, standInKeyOf, thumbnailChange } from "./thumbnail"
+import { keepImageTies, tieVariantImages } from "./variant-images"
+import type { ImageWithTies } from "./variant-images"
 
 type Container = Pick<MedusaContainer, "resolve">
 
-const FETCH_TIMEOUT_MS = 20_000
-// Pictures fetched side by side: kind to the old site, quick enough for a shop
-const CONCURRENCY = 4
+export { ImageRefused }
+
+// Pictures handled side by side; their fetches keep to the run's pace (FetchPace)
+const CONCURRENCY = PACE_MAX
 
 export interface ImageCounts {
   read: number
@@ -35,68 +34,6 @@ export interface ImageCounts {
 
 /** A picture's key: the product's and its address (one picture may serve two products). */
 const keyOf = (product: SourceProduct, url: string) => `${product.source_key} ${url}`
-
-/** A picture not taken, and why (an error key for the report). */
-export class ImageRefused extends Error {
-  constructor(readonly key: string) {
-    super(key)
-  }
-}
-
-const REFUSALS: Readonly<Record<string, string>> = {
-  address_not_allowed: "migration.image_address_refused",
-  protocol_not_allowed: "migration.image_address_refused",
-  credentials_in_url: "migration.image_address_refused",
-  port_not_allowed: "migration.image_address_refused",
-  invalid_url: "migration.image_address_refused",
-  redirect_not_allowed: "migration.image_address_refused",
-  response_too_large: "migration.image_too_large",
-}
-
-/**
- * A picture's bytes from the old site, under the SSRF rules (docs/04,
- * adr/0042 §7, KK4): public addresses only, every redirect checked again,
- * the upload size cap. A fake provider's own origin (development, tests)
- * is reached directly, without redirects.
- */
-async function download(address: string, fake: string | undefined): Promise<Buffer> {
-  let url: URL
-  try {
-    url = new URL(address)
-  } catch {
-    throw new ImageRefused("migration.image_address_refused")
-  }
-  try {
-    if (fake && new URL(fake).origin === url.origin) {
-      const answer = await fetch(url, {
-        redirect: "error",
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      })
-      if (answer.status !== 200) {
-        throw new ImageRefused("migration.image_unreachable")
-      }
-      return Buffer.from(await answer.arrayBuffer())
-    }
-    const answer = await safeFetch(url, {
-      timeoutMs: FETCH_TIMEOUT_MS,
-      maxResponseBytes: DEFAULT_UPLOAD_LIMITS.maxBytes,
-      maxRedirects: 3,
-      redirect: "follow",
-    })
-    if (answer.status !== 200) {
-      throw new ImageRefused("migration.image_unreachable")
-    }
-    return answer.body
-  } catch (error) {
-    if (error instanceof ImageRefused) {
-      throw error
-    }
-    if (isSafeFetchError(error)) {
-      throw new ImageRefused(REFUSALS[error.reason] ?? "migration.image_unreachable")
-    }
-    throw new ImageRefused("migration.image_unreachable")
-  }
-}
 
 /**
  * A picture as a product image: checked by its bytes as an upload is (a
@@ -109,9 +46,9 @@ export async function storeImage(
   container: Container,
   address: string,
   fake: string | undefined = fakeOrigin(),
-  { versions = false }: { versions?: boolean } = {}
+  { versions = false, pace }: { versions?: boolean; pace?: FetchPace } = {}
 ) {
-  const bytes = await download(address, fake)
+  const bytes = await downloadImage(address, fake, pace)
   const last = new URL(address).pathname.split("/").pop() ?? ""
   let name = "gorsel"
   try {
@@ -190,11 +127,14 @@ async function inTurns<T, R>(items: readonly T[], work: (item: T) => Promise<R>)
 /**
  * The moved products' pictures here (F14.4, adr/0042 §7): each fetched
  * once (a run again fetches only the ones it had not), added after the
- * product's own in the source's order, the first its thumbnail when it
- * had none, each with the old site's alt text or one from the product's name, a
- * variation's own tied to its variant (`variant-images.ts`). A picture
- * refused or out of reach is named in the report; its product stays. A
- * dry run counts the pictures it would fetch.
+ * product's own in the source's order (theirs kept with their variant
+ * ties), the first its thumbnail when it had none (`thumbnail.ts`: the
+ * featured picture replaces a stand-in on a later run), each with the old
+ * site's alt text or one from the product's name, a variation's own tied
+ * to its variant (`variant-images.ts`). A host that turns fetches away is
+ * tried again, slower (`lib/migration/image-fetch.ts`, adr/0042 Ek
+ * 2026-11-20). A picture refused or out of reach is named in the report
+ * with why; its product stays. A dry run counts the pictures it would fetch.
  */
 export async function migrateImages(
   container: Container,
@@ -213,6 +153,8 @@ export async function migrateImages(
     "product",
     products.map((product) => product.source_key)
   )
+  // One pace for the run: the old site answers all of its fetches
+  const pace = new FetchPace()
   for (const [index, product] of products.entries()) {
     const urls = [...new Set(product.images)]
     counts.read += urls.length
@@ -231,7 +173,7 @@ export async function migrateImages(
     }
     const outcomes = await inTurns(fresh, async (url): Promise<Outcome> => {
       try {
-        return { url, asset: await storeImage(container, url, fake) }
+        return { url, asset: await storeImage(container, url, fake, { pace }) }
       } catch (error) {
         if (error instanceof ImageRefused) {
           return { url, key: error.key }
@@ -242,20 +184,41 @@ export async function migrateImages(
     const stored = outcomes.flatMap((outcome) => ("asset" in outcome ? [outcome] : []))
     const { data } = await query.graph({
       entity: "product",
-      fields: ["title", "thumbnail", "images.url"],
+      fields: ["title", "thumbnail", "images.id", "images.url", "images.variants.id"],
       filters: { id: productId },
     })
     const current = data[0] as
-      { title: string; thumbnail: string | null; images: { url: string }[] | null } | undefined
+      | {
+          title: string
+          thumbnail: string | null
+          images: ImageWithTies[] | null
+        }
+      | undefined
     if (stored.length > 0 && current) {
       const kept = (current.images ?? []).map((image) => image.url)
       const urlsAfter = [...kept, ...stored.map(({ asset }) => asset.url)]
+      const featured = product.images[0]
+      const standInKey = standInKeyOf(product.source_key)
+      const standIn = (await migration.targetsOf(source, THUMBNAIL_KIND, [standInKey])).get(
+        standInKey
+      )
+      const change = thumbnailChange({
+        current,
+        standIn: standIn?.status === "done" ? (standIn.target_id ?? null) : null,
+        first: urlsAfter[0] ?? null,
+        featured: stored.find(({ url }) => url === featured)?.asset.url ?? null,
+        featuredFailed: outcomes.some((each) => each.url === featured && "key" in each),
+      })
       await updateProductsWorkflow(container as MedusaContainer).run({
         input: {
           selector: { id: productId },
           update: {
-            images: urlsAfter.map((url) => ({ url })),
-            ...(current.thumbnail ? {} : { thumbnail: urlsAfter[0] }),
+            // The product's own kept as they are (by id), the new ones after them
+            images: [
+              ...(current.images ?? []).map(({ id, url }) => ({ id, url })),
+              ...stored.map(({ asset }) => ({ url: asset.url })),
+            ],
+            ...(change.thumbnail ? { thumbnail: change.thumbnail } : {}),
           },
         },
       })
@@ -274,6 +237,18 @@ export async function migrateImages(
           })),
         },
       })
+      if (change.standIn !== undefined) {
+        // "skipped": the stand-in record cleared, the featured picture in its place
+        await migration.remember(source, THUMBNAIL_KIND, [
+          {
+            source_key: standInKey,
+            target_id: change.standIn,
+            status: change.standIn ? "done" : "skipped",
+          },
+        ])
+      }
+      // The ties the product's pictures had stay, whatever the save rebuilt
+      await keepImageTies(container, productId, current.images ?? [])
       // A variation's own picture shows when its variant is chosen
       await tieVariantImages(
         container,

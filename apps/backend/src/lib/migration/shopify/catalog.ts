@@ -24,6 +24,8 @@ export function categoriesOf(nodes: readonly BulkNode[]): SourceCategory[] {
       {
         source_key: node.id,
         path: [title],
+        // The collection's own handle, so its address stays alike
+        handle: toSlug(handle ?? "") || null,
         description,
         old_url: handle ? `/collections/${encodeURIComponent(handle)}` : null,
       },
@@ -79,7 +81,13 @@ function variantOf(node: BulkNode): SourceVariant | null {
     barcode: text(node, "barcode", 64),
     price,
     compare_at_price: amount(node, "compareAtPrice"),
-    stock: typeof stock === "number" && Number.isInteger(stock) ? Math.max(0, stock) : null,
+    // Shopify sells an item it does not track whatever its count: always sellable here
+    stock:
+      at(node, "inventoryItem.tracked") === false
+        ? "untracked"
+        : typeof stock === "number" && Number.isInteger(stock)
+          ? Math.max(0, stock)
+          : null,
     options,
     weight: typeof weight === "number" && unit && weight > 0 ? Math.round(weight * unit) : null,
   }

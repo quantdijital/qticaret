@@ -13,12 +13,14 @@ describe("Shopify's bulk files as the common records (F14.2)", () => {
       {
         source_key: "gid://shopify/Collection/1",
         path: ["Tavalar"],
+        handle: "tavalar",
         description: "Döküm ve çelik tavalar.",
         old_url: "/collections/tavalar",
       },
       {
         source_key: "gid://shopify/Collection/2",
         path: ["İndirimdekiler"],
+        handle: "indirimdekiler",
         description: null,
         old_url: "/collections/indirimdekiler",
       },
@@ -75,6 +77,16 @@ describe("Shopify's bulk files as the common records (F14.2)", () => {
     expect(brandsOf(productsOf(file("products")))).toEqual([
       { source_key: "vendor:demirci", name: "Demirci", old_url: null },
     ])
+  })
+
+  it("moves a variant Shopify does not track as untracked, always sellable (adr/0042 Ek 2026-11-20)", () => {
+    const products = structuredClone(DEMO_SHOPIFY.products)
+    const tava = products[0]?.children?.find((child) => child["sku"] === "DEMO-TAVA-28")
+    if (tava) {
+      tava["inventoryItem"] = { tracked: false }
+    }
+    const [pan] = productsOf(nodesOf(Buffer.from(jsonlOf(products), "utf8")))
+    expect(pan?.variants.map((variant) => variant.stock)).toEqual([7, "untracked"])
   })
 
   it("keeps customers' Turkish addresses and only dated consent", () => {

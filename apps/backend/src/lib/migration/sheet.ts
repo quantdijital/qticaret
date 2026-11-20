@@ -1,3 +1,4 @@
+import { UNTRACKED_STOCK } from "../catalog-sheet/cells"
 import { OPTION_COUNT, OPTION_KEYS, SHEET_COLUMNS, headerOf } from "../catalog-sheet/columns"
 import type { ColumnKey, SheetUnits } from "../catalog-sheet/columns"
 import type { SheetCell } from "../sheets"
@@ -122,7 +123,8 @@ function variantCells(
     sku: variant.sku,
     barcode: variant.barcode,
     price: amount(variant.price),
-    stock: variant.stock,
+    // Not counted at the source: always sellable here (adr/0018 Ek 2026-11-20)
+    stock: variant.stock === "untracked" ? UNTRACKED_STOCK : variant.stock,
   }
   product.options.slice(0, OPTION_COUNT).forEach((option, index) => {
     const keys = OPTION_KEYS[index]

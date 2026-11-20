@@ -39,7 +39,7 @@ medusaIntegrationTestRunner({
         .graph({
           entity: "product_category",
           fields: ["id", "handle"],
-          filters: { handle: ["mutfak-sef", "tavalar", "kasiklar"] },
+          filters: { handle: ["mutfak", "tavalar", "kasiklar"] },
         })
       return new Map((data as { id: string; handle: string }[]).map((row) => [row.handle, row.id]))
     }
@@ -86,8 +86,8 @@ medusaIntegrationTestRunner({
         .listMediaAssets({ alt: "Döküm tava önden" })
       expect(pictures.get("tavalar")).toMatchObject({ url: pan?.url, alt: "Döküm tava önden" })
       // Titled as its file: the category's name
-      expect(pictures.get("mutfak-sef")).toMatchObject({ alt: "Mutfak & Şef" })
-      expect(pictures.get("mutfak-sef")?.url.startsWith(wp.site())).toBe(false)
+      expect(pictures.get("mutfak")).toMatchObject({ alt: "Mutfak & Şef" })
+      expect(pictures.get("mutfak")?.url.startsWith(wp.site())).toBe(false)
       // Its attachment missing from the media library: no picture, the run goes on
       expect(pictures.has("kasiklar")).toBe(false)
 
@@ -102,7 +102,7 @@ medusaIntegrationTestRunner({
       )
       expect(old.resolution).toMatchObject({
         type: "redirect",
-        location: pictures.get("mutfak-sef")?.url,
+        location: pictures.get("mutfak")?.url,
       })
 
       const again = await wp.run("apply", { covers: true })
@@ -180,7 +180,7 @@ medusaIntegrationTestRunner({
 
       const pictures = await picturesOf()
       expect(pictures.get("tavalar")).toMatchObject({ url: thumbnail, alt: "Mağazanın görseli" })
-      expect(pictures.get("mutfak-sef")).toMatchObject({ alt: "Mutfak & Şef" })
+      expect(pictures.get("mutfak")).toMatchObject({ alt: "Mutfak & Şef" })
       expect(
         await getContainer()
           .resolve<MigrationModuleService>(MIGRATION_MODULE)

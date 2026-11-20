@@ -74,6 +74,23 @@ export function statusCell(raw: string): Cell<"draft" | "published"> {
   return status ? ok(status) : fail("catalog_import.status_invalid")
 }
 
+/**
+ * What the `Stok` column writes for a variant whose stock is not counted
+ * (adr/0018 Ek 2026-11-20): it is always sellable (`manage_inventory:
+ * false`). An empty cell still means "no change" (a new variant: tracked,
+ * no quantity yet).
+ */
+export const UNTRACKED_STOCK = "Takipsiz"
+const UNTRACKED_WORDS = new Set(["takipsiz", "untracked"])
+
+/** A whole quantity at or above zero, or `Takipsiz` (`untracked`, any case). */
+export function stockCell(raw: string, max: number): Cell<number | "untracked"> {
+  if (UNTRACKED_WORDS.has(toSlug(raw))) {
+    return ok("untracked")
+  }
+  return decimalCell(raw, { max, decimals: 0, key: "catalog_import.stock_invalid" })
+}
+
 /** A handle (a product's, a category's, a brand's): a slug, lower-cased. */
 export function handleCell(raw: string): Cell<string> {
   const handle = raw.trim().toLowerCase()

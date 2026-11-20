@@ -16,6 +16,11 @@ export interface SourceCategory {
   source_key: string
   /** From the top: ["Mutfak", "Tavalar"]. */
   path: string[]
+  /**
+   * The handle wanted: the old slug where the source keeps one, so the
+   * address stays alike; none: made from the name.
+   */
+  handle?: string | null | undefined
   description: string | null
   old_url: OldPath | null
 }
@@ -26,6 +31,9 @@ export interface SourceBrand {
   old_url: OldPath | null
 }
 
+/** A variant's stock at the source (see `SourceVariant.stock`). */
+export type SourceStock = number | "untracked" | null
+
 export interface SourceVariant {
   source_key: string
   sku: string | null
@@ -34,7 +42,13 @@ export interface SourceVariant {
   price: string
   /** The crossed-out price, when the source had one. */
   compare_at_price: string | null
-  stock: number | null
+  /**
+   * The count the source kept; `"untracked"` where it counted none and
+   * sold it (always sellable here: `manage_inventory: false`, written
+   * `Takipsiz` in the sheet); null where it is unknown (counted here from
+   * nothing). One shown out of stock is 0.
+   */
+  stock: SourceStock
   /** Option name to value, in the product's option order. */
   options: Record<string, string>
   /** Grams. */

@@ -135,6 +135,8 @@ export function categoriesOf(
         ...coverOf(term, sourceKey),
         source_key: sourceKey,
         path: taxonomies.categoryPath(term.slug).map((name) => name.slice(0, 255)),
+        // Its own slug, so its address stays alike (adr/0042 Ek 2026-11-20)
+        handle: toSlug(term.slug) || null,
         description: taxonomies.textOf(term, MAX_CATEGORY_TEXT),
         seo_title: seo.seo_title,
         seo_description: seo.seo_description,

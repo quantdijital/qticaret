@@ -196,7 +196,9 @@ export function feedRecords(xml: string): FeedRecords {
           barcode: first(item, "gtin", 14),
           price: price.amount,
           compare_at_price: sale && regular ? regular.amount : null,
-          stock: first(item, "availability") === "out_of_stock" ? 0 : null,
+          // A feed gives no count: one not out of stock (in stock, preorder, backorder) is
+          // sold uncounted, always sellable here (adr/0042 Ek 2026-11-20); the report says so
+          stock: first(item, "availability") === "out_of_stock" ? 0 : "untracked",
           options: Object.fromEntries(
             varying.map(([name, label]) => [label, first(item, name, 100) ?? "-"])
           ),
@@ -206,6 +208,13 @@ export function feedRecords(xml: string): FeedRecords {
     })
     if (variants.length === 0) {
       continue
+    }
+    if (variants.some((variant) => variant.stock === "untracked")) {
+      notes.push({
+        kind: "product",
+        source_key: `group:${group}`,
+        key: "migration.feed_stock_untracked",
+      })
     }
     const paths = values(lead, "product_type").map((type) =>
       type

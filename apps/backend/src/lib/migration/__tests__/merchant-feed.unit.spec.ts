@@ -33,7 +33,8 @@ describe("a Google Merchant feed as the common records (F14.3)", () => {
         variant.barcode,
       ])
     ).toEqual([
-      ["TAVA-24", "899.90", "1099.90", null, { Beden: "24 cm" }, 1500, "8690000000011"],
+      // In stock with no count: sold uncounted, always sellable (adr/0042 Ek 2026-11-20)
+      ["TAVA-24", "899.90", "1099.90", "untracked", { Beden: "24 cm" }, 1500, "8690000000011"],
       ["TAVA-28", "1299.90", null, 0, { Beden: "28 cm" }, 1500, null],
     ])
     // A page's extension is no part of the handle; the old path keeps it for the 301
@@ -52,6 +53,9 @@ describe("a Google Merchant feed as the common records (F14.3)", () => {
     expect(records.brands.map((brand) => brand.name)).toEqual(["Demirci & Oğulları"])
     expect(records.notes).toEqual([
       { kind: "product", source_key: "DOLAR", key: "migration.feed_currency" },
+      // Moved without a count, always sellable: the shop is told (adr/0042 Ek 2026-11-20)
+      { kind: "product", source_key: "group:TAVA", key: "migration.feed_stock_untracked" },
+      { kind: "product", source_key: "group:KASIK", key: "migration.feed_stock_untracked" },
       { kind: "product", source_key: "FIYATSIZ", key: "migration.feed_item_invalid" },
     ])
   })

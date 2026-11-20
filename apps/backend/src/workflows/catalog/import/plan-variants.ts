@@ -12,6 +12,10 @@ import type { ExistingProduct, ExistingVariant, ImportReferences } from "./refer
  * product's options already have (new values are added in the panel).
  * Prices: the TRY price is replaced, the others kept, as the panel does.
  * Unit costs (F11.4) go through the catalog save once the variants exist.
+ * Stock: a quantity is set at the default warehouse; `Takipsiz` makes the
+ * variant one whose stock is not counted, always sellable
+ * (`manage_inventory: false`, adr/0018 Ek 2026-11-20); an empty cell
+ * leaves a variant as it is (a new one counts its stock, from nothing).
  */
 
 // What the panel's wizard gives a product without options (Medusa needs one)
@@ -68,7 +72,8 @@ const isEmptyRow = (variant: SheetVariant) =>
   !variant.barcode &&
   variant.price === undefined &&
   variant.cost === undefined &&
-  variant.stock === undefined
+  variant.stock === undefined &&
+  !variant.untracked
 
 const codes = (variant: SheetVariant) => ({
   ...(variant.sku ? { sku: variant.sku } : {}),
@@ -103,7 +108,7 @@ function newProduct(sheet: SheetProduct): VariantsPlan {
           : sheet.fields.title,
       variant_rank: index,
       ...codes(variant),
-      manage_inventory: true,
+      manage_inventory: !variant.untracked,
       prices:
         variant.price === undefined ? [] : [{ currency_code: CURRENCY, amount: variant.price }],
       options: optionsOf(variant),
@@ -197,11 +202,24 @@ function matchedRow(
     problems.push({ line: variant.line, key: "catalog_import.options_mismatch" })
     return
   }
+  // Open orders hold its stock: it stops counting only once they are settled
+  if (variant.untracked && match.manageInventory && match.reserved > 0) {
+    problems.push({
+      line: variant.line,
+      key: "catalog_import.stock_untracked_reserved",
+      column: "Stok",
+    })
+    return
+  }
   if (variant.stock !== undefined && !match.inventoryItemId) {
     problems.push({ line: variant.line, key: "catalog_import.stock_untracked", column: "Stok" })
     return
   }
-  const changes = variantChanges(variant, match)
+  const changes = {
+    ...variantChanges(variant, match),
+    // `Takipsiz`: a variant that counts its stock stops counting it, always sellable
+    ...(variant.untracked && match.manageInventory ? { manage_inventory: false } : {}),
+  }
   if (Object.keys(changes).length > 0) {
     plan.variantUpdates.push({ id: match.id, ...changes })
   }
@@ -259,7 +277,7 @@ function existingProduct(
         product_id: product.id,
         title: Object.values(options).join(" / "),
         ...codes(variant),
-        manage_inventory: true,
+        manage_inventory: !variant.untracked,
         prices:
           variant.price === undefined ? [] : [{ currency_code: CURRENCY, amount: variant.price }],
         options,

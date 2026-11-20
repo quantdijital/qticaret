@@ -1,4 +1,4 @@
-import type { MigrationKind, StepProblem } from "../../types"
+import type { MigrationKind, SourceStock, StepProblem } from "../../types"
 import type { Wxr, WxrItem } from "./reader"
 import type { Taxonomies } from "./terms"
 
@@ -88,23 +88,47 @@ export function priceOf(
 
 const MAX_STOCK = 10_000_000
 
+const counts = (meta: ReadonlyMap<string, string> | undefined) =>
+  meta?.get("_manage_stock") === "yes"
+
+// An empty count is none on hand, as WooCommerce reads it
+function countOf(meta: ReadonlyMap<string, string>): number | null {
+  const count = Math.floor(Number(meta.get("_stock") ?? ""))
+  return Number.isFinite(count) ? Math.min(Math.max(count, 0), MAX_STOCK) : null
+}
+
 /**
- * The stock the shop counted, when it counted one; 0 for one shown out of
- * stock; else unknown. A variation that leaves its stock to its product
- * takes the product's state.
+ * Whether a variation leaves its stock to its product, which counts one
+ * (`_manage_stock` "parent", or not its own while the product's is on):
+ * WooCommerce sells its variations from one pool, which has no form here,
+ * so each takes the pool's count and the report says so.
+ */
+export const sharesParentStock = (
+  meta: ReadonlyMap<string, string>,
+  parent: ReadonlyMap<string, string> | undefined
+): boolean => !counts(meta) && counts(parent)
+
+/**
+ * An item's stock (adr/0042 §9, Ek 2026-11-20): the count the shop kept
+ * where it counted one (a variation under a counting product: the
+ * product's); 0 for one shown out of stock; else `"untracked"`, as
+ * WooCommerce sells an item whose stock it does not count (always
+ * sellable here, whatever the business).
  */
 export function stockOf(
   meta: ReadonlyMap<string, string>,
   parent?: ReadonlyMap<string, string>
-): number | null {
-  if (meta.get("_manage_stock") === "yes") {
-    const count = Math.floor(Number(meta.get("_stock") ?? ""))
-    return Number.isFinite(count) ? Math.min(Math.max(count, 0), MAX_STOCK) : null
+): SourceStock {
+  if (counts(meta)) {
+    return countOf(meta)
+  }
+  if (parent && sharesParentStock(meta, parent)) {
+    return countOf(parent)
   }
   if (meta.get("_stock_status") === "outofstock") {
     return 0
   }
-  return parent?.get("_stock_status") === "outofstock" ? 0 : null
+  return parent?.get("_stock_status") === "outofstock" ? 0 : "untracked"
 }
 
 /** A weight in grams from WooCommerce's kg. */

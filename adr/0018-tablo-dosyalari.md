@@ -70,3 +70,10 @@ Medusa 2.21.2'nin yerleşik ürün içe aktarması (F3 araştırması):
 - **Dışa aktarma:** `catalog.export` işi (xlsx ya da `;`+BOM CSV), içe aktarmayla aynı sütunlar; dışa aktarılan dosya olduğu gibi geri yüklenebiliyor (testli).
 - KK: 1000 satırlık Excel worker'da tamamlanıyor, hatalı satırlar raporda (HTTP testi); dışa aktarılan Excel'de formülle başlayan hücre kaçışlı (HTTP testi).
 
+
+## Ek (2026-11-20): `Stok` sütununda `Takipsiz`
+
+- `Stok` hücresi bir tam sayı ya da `Takipsiz` (büyük-küçük harf fark etmez; `untracked` de kabul) alır. `Takipsiz`: varyantın stoğu sayılmaz, her zaman satılabilir (`manage_inventory: false`). Yeni varyant takipsiz açılır; var olan takipli varyant takipsiz olur (stok seviyesi silinmez). Açık siparişlerde ayrılmış stoğu olan varyantta satır reddedilir (`catalog_import.stock_untracked_reserved`); takibi kapatılanlar uygulamanın denetim kaydında kimlik ve sayıyla yazar.
+- **Boş hücre anlamını korur:** var olan varyantta değişiklik yok; yeni varyant takipli, seviyesiz açılır (eski davranış).
+- Dışa aktarma takipsiz varyantın `Stok` hücresine `Takipsiz` yazar; dosya geri yüklenince değişiklik olmaz.
+- Taşıma (ADR-0042 Ek 2026-11-20) kaynağın saymadığı kalemleri bu değerle yazar.

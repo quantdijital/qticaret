@@ -33,6 +33,8 @@ const image = z.url({ protocol: /^https?$/ }).max(2048)
 const category = z.strictObject({
   source_key: key,
   path: z.array(text(255)).min(1).max(10),
+  // The old slug, made a handle where it can be one; none: from the name
+  handle: optional(text(255)),
   description: optional(z.string().max(20_000)),
   old_url: optional(oldPath),
 })
@@ -45,7 +47,8 @@ const variant = z.strictObject({
   barcode: optional(text(64)),
   price,
   compare_at_price: optional(amount),
-  stock: optional(z.number().int().min(0).max(10_000_000)),
+  // A count; "untracked" for one sold uncounted (always sellable); none: unknown
+  stock: optional(z.union([z.number().int().min(0).max(10_000_000), z.literal("untracked")])),
   options: z.record(text(255), text(255)).default({}),
   weight: optional(z.number().int().min(0).max(10_000_000)),
 })

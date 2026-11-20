@@ -31,6 +31,7 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
       {
         source_key: "product_cat:mutfak",
         path: ["Mutfak & Şef"],
+        handle: "mutfak",
         description: "Mutfak için her şey.",
         // A title of the plugin's variables only: the shop's templates give it one, as the panel's
         seo_title: null,
@@ -41,6 +42,7 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
       {
         source_key: "product_cat:tavalar",
         path: ["Mutfak & Şef", "Tavalar"],
+        handle: "tavalar",
         description: "Döküm tavalar.",
         // The SEO plugin's own, its variables filled in
         seo_title: "Tavalar Modelleri - Örnek Ev & Mutfak",
@@ -52,6 +54,19 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
     expect(records.brands).toEqual([
       { source_key: "product_brand:demirci", name: "Demirci", old_url: "/marka/demirci/" },
     ])
+  })
+
+  it("decodes a percent-encoded Turkish slug before making it a handle; a broken one stays as written", () => {
+    const encoded = wordpressRecords(wxrFixture().replaceAll("tavalar", "%c3%a7akilar"))
+    expect(encoded.categories[1]).toMatchObject({
+      source_key: "product_cat:çakilar",
+      handle: "cakilar",
+    })
+    const broken = wordpressRecords(wxrFixture().replaceAll("tavalar", "%e0tavalar"))
+    expect(broken.categories[1]).toMatchObject({
+      source_key: "product_cat:%e0tavalar",
+      handle: "e0tavalar",
+    })
   })
 
   it("makes a variable product's attributes options and its variations variants", () => {
@@ -177,7 +192,8 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
         content: [{ type: "paragraph", content: [{ type: "text", text: "El yapımı kaşık." }] }],
       },
       options: [],
-      variants: [{ source_key: "variant:20", sku: "KASIK-1", price: "149.90", stock: null }],
+      // Not counted, on sale: always sellable here (adr/0042 Ek 2026-11-20)
+      variants: [{ source_key: "variant:20", sku: "KASIK-1", price: "149.90", stock: "untracked" }],
     })
     expect(byKey.get("product:30")?.status).toBe("draft")
     expect(byKey.get("product:31")).toMatchObject({ status: "draft", old_url: null })
