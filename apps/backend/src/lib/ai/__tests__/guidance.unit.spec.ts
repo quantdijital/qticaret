@@ -15,7 +15,13 @@ describe("guidanceText", () => {
   })
 
   it("is null for a task when only another task has guidance", () => {
-    const only = settings({ tasks: { product_title: { extra: "Kısa tut", examples: [] } } })
+    const only = settings({
+      tasks: {
+        product_title: { extra: "Kısa tut", examples: [] },
+        // A cleared task is kept empty and says nothing
+        seo_title: { extra: null, examples: [] },
+      },
+    })
     expect(guidanceText(only, "seo_title")).toBeNull()
     expect(guidanceText(only, "product_title")).toContain("Kısa tut")
   })

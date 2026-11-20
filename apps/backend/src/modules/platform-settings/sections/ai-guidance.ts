@@ -189,25 +189,19 @@ const taskGuidance = z
     examples: value.examples ?? [],
   }))
 
-const isEmpty = (entry: AiTaskGuidance) => entry.extra === null && entry.examples.length === 0
-
 /**
- * The tasks' guidance: only the registry's text tasks; one left empty is
- * dropped, so sending it empty takes it away (a save merges the record
- * one level deep, `mergePatch`).
+ * The tasks' guidance: only the registry's text tasks. A task cleared is
+ * kept as an empty entry (no note, no example), not left out: the store
+ * merges a section's JSON into the row, so a key left out would keep its
+ * old value. An empty entry says nothing (lib/ai/guidance.ts).
  */
-const tasks = z
-  .record(z.string().max(64), taskGuidance)
-  .superRefine((record, ctx) => {
-    for (const id of Object.keys(record)) {
-      if (!isGuidanceTask(id)) {
-        ctx.addIssue({ code: "custom", message: UNKNOWN_TASK, path: [id], input: id })
-      }
+const tasks = z.record(z.string().max(64), taskGuidance).superRefine((record, ctx) => {
+  for (const id of Object.keys(record)) {
+    if (!isGuidanceTask(id)) {
+      ctx.addIssue({ code: "custom", message: UNKNOWN_TASK, path: [id], input: id })
     }
-  })
-  .transform((record): Partial<Record<string, AiTaskGuidance>> =>
-    Object.fromEntries(Object.entries(record).filter(([, entry]) => !isEmpty(entry)))
-  )
+  }
+})
 
 /**
  * A stored row's tasks a deploy no longer knows are left out on read, so

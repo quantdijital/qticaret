@@ -88,13 +88,16 @@ describe("ai_guidance section", () => {
     expect(result?.tasks["seo_description"]?.examples).toEqual(["IBAN […] değil"])
   })
 
-  it("drops empty words, the same word twice and empty task entries", () => {
+  it("drops empty words and the same word twice; keeps a cleared task empty", () => {
     const result = parse({
       prefer: ["El yapımı", " ", "el yapımı", "<i></i>", "dayanıklı"],
       tasks: { seo_title: { extra: "  ", examples: [""] }, product_title: { extra: "Kısa" } },
     }).data
     expect(result?.prefer).toEqual(["El yapımı", "dayanıklı"])
-    expect(result?.tasks).toEqual({ product_title: { extra: "Kısa", examples: [] } })
+    expect(result?.tasks).toEqual({
+      seo_title: { extra: null, examples: [] },
+      product_title: { extra: "Kısa", examples: [] },
+    })
     expect(parse({ audience: "   " }).data?.audience).toBeNull()
   })
 
