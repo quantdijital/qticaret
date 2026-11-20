@@ -98,7 +98,7 @@ function EntityLink({ entity }: { entity: NonNullable<AuditItem["entity"]> }) {
     case "category":
       return (
         <GoTo>
-          <Link to="/categories" search={{ selected: entity.id }}>
+          <Link to="/categories/$id" params={{ id: entity.id }}>
             <ActionLabel action="openPage" />
           </Link>
         </GoTo>
@@ -119,7 +119,15 @@ function EntityLink({ entity }: { entity: NonNullable<AuditItem["entity"]> }) {
           </Link>
         </GoTo>
       )
+    // A content page is the theme editor's, its settings open (adr/0073 Ek 2026-11-19 (2) K5)
     case "page":
+      return (
+        <GoTo>
+          <Link to="/storefront/editor" search={{ icerik: entity.id, ayar: "sayfa" }}>
+            <ActionLabel action="openPage" />
+          </Link>
+        </GoTo>
+      )
     case "post":
       return (
         <GoTo>

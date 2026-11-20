@@ -18,8 +18,6 @@ interface Roles {
   shipping_info_path: string | null
 }
 
-const doc = { type: "doc", content: [] }
-
 /**
  * The storefront's page roles by the page's id (adr/0073 Açık kararlar 3):
  * a page whose address changes keeps its role; a section saved before the
@@ -58,7 +56,7 @@ medusaIntegrationTestRunner({
           await settle(
             http.post<{ entry: { id: string } }>(
               id ? `/admin/content/${id}` : "/admin/content",
-              { body: doc, ...body },
+              body,
               { headers: owner.headers }
             )
           )
@@ -123,7 +121,7 @@ medusaIntegrationTestRunner({
       await settle(
         http.post(
           "/admin/content",
-          { kind: "page", title: "İletişim", handle: "iletisim", status: "published", body: doc },
+          { kind: "page", title: "İletişim", handle: "iletisim", status: "published" },
           { headers: owner.headers }
         )
       )

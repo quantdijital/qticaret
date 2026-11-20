@@ -10,6 +10,9 @@ import type { ContentDoc } from "../../src/lib/content/doc"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { writePageText } from "../helpers/pages"
+import { readStoredLayout } from "../../src/lib/storefront/layout"
+import { layoutRow } from "../../src/workflows/storefront/layout-row"
 import { sheetClient } from "../helpers/sheets"
 import type { SheetJob } from "../helpers/sheets"
 import { stockShop, stockedProduct } from "../helpers/stock"
@@ -66,6 +69,17 @@ medusaIntegrationTestRunner({
         .listContentEntries({ id: pageId }, { select: ["body"] })
       return docHrefs(page?.body as unknown as ContentDoc)
     }
+    /** The links of the page's text sections in the draft and in the live design. */
+    const layoutLinks = async () => {
+      const row = await layoutRow(getContainer())
+      const linksIn = (stored: unknown) =>
+        readStoredLayout(stored)
+          .pages.find((each) => each.page_id === pageId)
+          ?.sections.flatMap((section) =>
+            section.type === "rich_text" || section.type === "contact" ? docHrefs(section.body) : []
+          ) ?? null
+      return { draft: linksIn(row?.draft), live: linksIn(row?.published) }
+    }
     const productLinks = async () => {
       const { data } = await http.get<{ description_doc: ContentDoc | null }>(
         `/admin/products/${productId}/catalog`,
@@ -90,28 +104,29 @@ medusaIntegrationTestRunner({
       await rule({ source: "/kaldirilan-sayfa", status: 410 })
       const made = await http.post<{ entry: { id: string } }>(
         "/admin/content",
-        {
-          kind: "page",
-          title: "Kupa rehberi",
-          status: "published",
-          body: {
-            type: "doc",
-            content: [
-              paragraphOf(
-                linked("eski adres", "/eski-kupa/"),
-                linked("tam adres", `https://www.magaza.example.com/urun/${handle}?renk=mavi`),
-                linked("dışarısı", "https://example.org/eski-kupa"),
-                linked("kaldırılan", "/kaldirilan-sayfa"),
-                linked("hiç olmayan", "/hic-olmayan-sayfa"),
-                linked("sepet", "/sepet"),
-                linked("ürün", `/urun/${handle}`)
-              ),
-            ],
-          },
-        },
+        { kind: "page", title: "Kupa rehberi", status: "published" },
         { headers: owner.headers }
       )
       pageId = made.data.entry.id
+      // A live design: the page's text is its sections' in the draft and the live design
+      // (adr/0073 Ek 2026-11-19 (2) K4, K7), its `body` their mirror
+      const design = { header: [], home: [], footer: [], pages: [] }
+      await http.post("/admin/storefront-layout", { document: design }, { headers: owner.headers })
+      await http.post("/admin/storefront-layout/publish", {}, { headers: owner.headers })
+      await writePageText(container, pageId, {
+        type: "doc",
+        content: [
+          paragraphOf(
+            linked("eski adres", "/eski-kupa/"),
+            linked("tam adres", `https://www.magaza.example.com/urun/${handle}?renk=mavi`),
+            linked("dışarısı", "https://example.org/eski-kupa"),
+            linked("kaldırılan", "/kaldirilan-sayfa"),
+            linked("hiç olmayan", "/hic-olmayan-sayfa"),
+            linked("sepet", "/sepet"),
+            linked("ürün", `/urun/${handle}`)
+          ),
+        ],
+      })
       await http.post(
         `/admin/products/${productId}/catalog`,
         {
@@ -129,8 +144,11 @@ medusaIntegrationTestRunner({
       const checked = await run({ dry_run: true })
       const unchanged = await pageLinks()
 
+      const unchangedLayout = await layoutLinks()
+
       const applied = await run({})
       const page = await pageLinks()
+      const layout = await layoutLinks()
       const product = await productLinks()
       const again = await run({})
       const [entry] = await getContainer()
@@ -161,6 +179,23 @@ medusaIntegrationTestRunner({
         "/hic-olmayan-sayfa",
         "/sepet",
       ])
+      // The page's text sections changed alike, in the draft and live (adr/0073 Ek 2026-11-19 (2) K7)
+      expect(unchangedLayout).toEqual({ draft: before, live: before })
+      expect(layout).toEqual({ draft: page, live: page })
+      // The system's write to the live design recorded: the page by id and the revision only
+      const writes = await getContainer()
+        .resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+        .listAuditEntries({ action: "storefront.layout_system_write" })
+      const rewrite = writes.find((each) => each.changes?.["reason"] === "link_rewrite")
+      expect(rewrite).toMatchObject({
+        kind: "system",
+        actor_type: "system",
+        resource_type: "storefront_layout",
+        changes: { reason: "link_rewrite", pages: [pageId] },
+      })
+      expect(rewrite?.changes?.["revision"]).toEqual(expect.any(Number))
+      // The dry run and the run with nothing left to change: no record of their own
+      expect(writes.filter((each) => each.changes?.["reason"] === "link_rewrite")).toHaveLength(1)
       expect(product).toEqual([`/urun/${handle}#bakim`])
       // Run again, nothing is left to change; the unanswered are still reported
       expect(again.result_summary).toMatchObject({ rewritten: 0, changed: 0, unresolved: 2 })

@@ -1,39 +1,47 @@
-import { MARQUEE_PER_PAGE, PAGE_LAYOUT_LIMITS } from "@qticaret/types"
+import { MARQUEE_PER_PAGE, PAGE_LAYOUT_LIMITS, isPageOnlyType } from "@qticaret/types"
 import type {
   BodySection,
   ContentPageSection,
   LayoutDocument,
   PageLayout,
-  Placement,
 } from "@/features/storefront/api/layout"
 import type { FoundSection } from "./sections"
 import { bodyOf } from "./main-sections"
-import { BODY_GROUPS, marqueesOn, placed } from "./sections"
+import { BODY_GROUPS, marqueesOn } from "./sections"
 
 /**
- * The content pages' own layouts in the editor (adr/0073 §1): one entry
- * per page that has sections, keyed by the page's id. The first section
- * added to a page makes its entry; the last one taken away removes it (a
- * page has no empty layout and frees its place among the twenty). A
- * page's sections stand above its text first, then below it, as a
- * category page's stand around its products.
+ * The content pages' own layouts in the editor (adr/0073 §1, Ek
+ * 2026-11-19 (2) K1): one entry per page that has sections, keyed by the
+ * page's id, its sections one ordered list with the page's text among
+ * them. The first section added to a page makes its entry; the last one
+ * taken away removes it (its text is then drawn from its mirror). Fifty
+ * pages have an entry at most; the contact section and the facts stand
+ * once on a page.
  */
 
-/** A content page's own layout; none: the page is drawn as before. */
+/** A content page's own layout; none: its text drawn from its mirror. */
 export const pageLayoutOf = (doc: LayoutDocument, pageId: string): PageLayout | undefined =>
   doc.pages.find((page) => page.page_id === pageId)
 
-/** A content page's sections, above its text first; none without a layout. */
+/** A content page's sections in the order the page draws them; none without a layout. */
 export const pageSectionsOf = (doc: LayoutDocument, pageId: string): ContentPageSection[] =>
   pageLayoutOf(doc, pageId)?.sections ?? []
 
-/** The page has no layout and twenty pages already have one: none can be added to it. */
+/** The page has no layout and fifty pages already have one: none can be added to it. */
 export const pagesFull = (doc: LayoutDocument, pageId: string): boolean =>
   !pageLayoutOf(doc, pageId) && doc.pages.length >= PAGE_LAYOUT_LIMITS.pages
 
 /** The page holds its twelve sections. */
 export const pageSectionsFull = (doc: LayoutDocument, pageId: string): boolean =>
   pageSectionsOf(doc, pageId).length >= PAGE_LAYOUT_LIMITS.sections
+
+/** A page's text section: its document is some of the page's text (K2). */
+export const isPageText = (section: { type: string }): boolean =>
+  section.type === "rich_text" || section.type === "contact"
+
+/** The page's own types it already holds (contact, the facts): each stands once. */
+export const pageOnlyTaken = (sections: readonly { type: string }[]): Set<string> =>
+  new Set(sections.filter((section) => isPageOnlyType(section.type)).map((each) => each.type))
 
 /** Scrolling strips the page would show: the header's and the footer group's with its own. */
 export const marqueesOnPage = (doc: LayoutDocument, pageId: string): number =>
@@ -53,12 +61,6 @@ export const anyPageMarqueesFull = (doc: LayoutDocument): boolean =>
   BODY_GROUPS.some((page) => marqueesOn(doc, page) >= MARQUEE_PER_PAGE) ||
   doc.pages.some((page) => pageMarqueesFull(doc, page.page_id))
 
-/** Above the text first, then below it: the order the page draws and the server keeps. */
-const inOrder = (sections: readonly ContentPageSection[]): ContentPageSection[] => [
-  ...placed(sections, "top"),
-  ...placed(sections, "bottom"),
-]
-
 /**
  * The document with a page's sections replaced: none removes the page's
  * entry; a page without one gets it at the end of the group.
@@ -72,7 +74,7 @@ export function withPageSections(
   if (sections.length === 0) {
     return others.length === doc.pages.length ? doc : { ...doc, pages: others }
   }
-  const entry: PageLayout = { page_id: pageId, sections: inOrder(sections) }
+  const entry: PageLayout = { page_id: pageId, sections: [...sections] }
   const at = doc.pages.findIndex((page) => page.page_id === pageId)
   if (at < 0) {
     return { ...doc, pages: [...doc.pages, entry] }
@@ -81,8 +83,24 @@ export function withPageSections(
 }
 
 /**
- * A section added to a content page at `at` (else at the end of its side):
- * not past the page's twelve, nor onto a twenty-first page.
+ * A page shown with its text made into sections (K1, `synthesized`): its
+ * entry made of them, so a first change lands on them; not onto a
+ * fifty-first page, nor over an entry it has.
+ */
+export function seededPage(
+  doc: LayoutDocument,
+  pageId: string,
+  sections: readonly ContentPageSection[]
+): LayoutDocument {
+  return pageLayoutOf(doc, pageId) || pagesFull(doc, pageId) || sections.length === 0
+    ? doc
+    : withPageSections(doc, pageId, sections.slice(0, PAGE_LAYOUT_LIMITS.sections))
+}
+
+/**
+ * A section added to a content page at `at` (else last): not past the
+ * page's twelve, nor onto a fifty-first page, nor a second contact
+ * section or facts block.
  */
 export function addToPage(
   doc: LayoutDocument,
@@ -90,10 +108,14 @@ export function addToPage(
   section: ContentPageSection,
   at?: number
 ): LayoutDocument {
-  if (pagesFull(doc, pageId) || pageSectionsFull(doc, pageId)) {
+  const sections = [...pageSectionsOf(doc, pageId)]
+  if (
+    pagesFull(doc, pageId) ||
+    pageSectionsFull(doc, pageId) ||
+    pageOnlyTaken(sections).has(section.type)
+  ) {
     return doc
   }
-  const sections = [...pageSectionsOf(doc, pageId)]
   const place = at === undefined ? sections.length : Math.max(0, Math.min(at, sections.length))
   sections.splice(place, 0, section)
   return withPageSections(doc, pageId, sections)
@@ -113,26 +135,6 @@ export function inPageOf(
     found.page,
     change([...pageSectionsOf(doc, found.page)], found.index)
   )
-}
-
-/** The list a section moves in: its page's on its side of the text. */
-export function sideOf(doc: LayoutDocument, found: FoundSection): ContentPageSection[] {
-  const section = found.section as ContentPageSection
-  return found.page === null ? [] : placed(pageSectionsOf(doc, found.page), section.placement)
-}
-
-/** A content page's section moved to the other side of the page's text, last there. */
-export function placeOnPage(
-  doc: LayoutDocument,
-  found: FoundSection,
-  placement: Placement
-): LayoutDocument {
-  const section = found.section as ContentPageSection
-  if (found.page === null || section.placement === placement) {
-    return doc
-  }
-  const others = pageSectionsOf(doc, found.page).filter((each) => each.id !== section.id)
-  return withPageSections(doc, found.page, [...others, { ...section, placement }])
 }
 
 /** The sections beside a found one in its page body (a rail's tab mates, the limit counted). */

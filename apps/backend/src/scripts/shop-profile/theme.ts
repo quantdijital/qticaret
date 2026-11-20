@@ -43,7 +43,7 @@ export async function carryProfileTheme(
   const { theme } = await legacySettings(container)
   const draft = readStoredLayout(row.draft)
   await saveLayoutDraftWorkflow(container).run({
-    input: { ...draft, settings: { ...draft.settings, theme } },
+    input: { document: { ...draft, settings: { ...draft.settings, theme } } },
   })
   logger.warn(
     { event: "shop_profile.theme_drafted", live_theme: live !== null },

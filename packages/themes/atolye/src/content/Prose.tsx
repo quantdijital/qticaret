@@ -22,17 +22,21 @@ export function Prose({
   html,
   className,
   tableLabel,
+  mark,
 }: {
   html: string
   className?: string
   /** The name of the text's n-th table's scrolling box; given, each table gets one. */
   tableLabel?: (n: number) => string
+  /** Its field mark in the theme editor's preview (`fieldMark`, adr/0065 Faz 2b); none elsewhere. */
+  mark?: { "data-qf"?: string } | undefined
 }) {
   return html ? (
     <div
       className={`gf-prose ${className ?? ""}`}
       // adr/0019: built by the backend from an allow-listed document schema
       dangerouslySetInnerHTML={{ __html: tableLabel ? withTableBoxes(html, tableLabel) : html }}
+      {...mark}
     />
   ) : null
 }

@@ -101,5 +101,52 @@ medusaIntegrationTestRunner({
         "menus.footer_1.links": { after: 2 },
       })
     })
+
+    it("records the pages a publication takes live, by id, draft to live", async () => {
+      const owner = await createAdminUser(http, getContainer())
+      const asOwner = { headers: owner.headers }
+      const made = await settle(
+        http.post<{ entry: { id: string } }>(
+          "/admin/content",
+          { kind: "page", title: "Yeni sayfa" },
+          asOwner
+        )
+      )
+      const page = made.data.entry.id
+      const pages = [
+        { page_id: page, sections: [{ id: "yardim001", type: "help", title: "Bize yazın" }] },
+      ]
+      await settle(
+        http.post(
+          "/admin/storefront-layout",
+          { document: { header: [], home: [], footer: [], pages } },
+          asOwner
+        )
+      )
+      const published = await settle(
+        http.post("/admin/storefront-layout/publish", { pages_live: [page] }, asOwner)
+      )
+      expect(published.status).toBe(200)
+
+      let publication: AuditEntry | undefined
+      for (let attempt = 0; attempt < 30 && !publication; attempt++) {
+        const { data } = await http.get<{ audit_entries: AuditEntry[] }>(
+          "/admin/audit-log?resource_type=storefront_layout&limit=100",
+          asOwner
+        )
+        publication = data.audit_entries.find(
+          (each) => each.action === "POST /admin/storefront-layout/publish"
+        )
+        if (!publication) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+      }
+      // adr/0073 Ek 2026-11-19 (2) K5: the page's id and status only, never its title or text
+      expect(publication?.changes?.diff?.[`pages_live.${page}.status`]).toEqual({
+        before: "draft",
+        after: "published",
+      })
+      expect(JSON.stringify(publication?.changes)).not.toContain("Yeni sayfa")
+    })
   },
 })

@@ -1,3 +1,4 @@
+import type { MediaDerivatives } from "./catalog.js"
 import type { StoreLayoutImage } from "./layout.js"
 import type { RichTextVariant } from "./section-variants.js"
 
@@ -27,6 +28,44 @@ export const RICH_TEXT_FOOTER_VARIANTS = ["pane"] as const satisfies readonly Ri
 export const richTextInFooter = (variant: RichTextVariant): boolean =>
   (RICH_TEXT_FOOTER_VARIANTS as readonly string[]).includes(variant)
 
+/**
+ * The variants only a content page's rich text takes (adr/0073 Ek
+ * 2026-11-19 (2) K2): `article`, the page's own text. The home, product,
+ * category and footer groups take the others.
+ */
+export const RICH_TEXT_PAGE_VARIANTS = ["article"] as const satisfies readonly RichTextVariant[]
+
+/** Whether a rich text outside the content pages may take the variant. */
+export const richTextOffPages = (variant: RichTextVariant): boolean =>
+  !(RICH_TEXT_PAGE_VARIANTS as readonly string[]).includes(variant)
+
+/**
+ * The page text's two switches (`article`): `auto`, the drawing from
+ * before the text was a section (an outline beside a long text, grouped
+ * questions in a questions-and-answers text) and the default; `off`.
+ */
+export const PAGE_TEXT_SWITCHES = ["auto", "off"] as const
+
+export type PageTextSwitch = (typeof PAGE_TEXT_SWITCHES)[number]
+
+/** A switch as a reader takes it: absent or off the list, `auto`. */
+export const pageTextSwitchOf = (value: unknown): PageTextSwitch =>
+  PAGE_TEXT_SWITCHES.find((each) => each === value) ?? "auto"
+
+/** A picture inside a text, with its size and versions (as `GET /store/content/:id` gives them). */
+export interface StoreTextImage {
+  url: string
+  width: number | null
+  height: number | null
+  derivatives: MediaDerivatives | null
+}
+
+/** A heading of a text, for its outline. */
+export interface StoreTextHeading {
+  level: 2 | 3 | 4
+  text: string
+}
+
 /** The picture's side as a reader takes it: absent or off the list, the default. */
 export const richTextImageSideOf = (value: unknown): RichTextImageSide =>
   RICH_TEXT_IMAGE_SIDES.find((each) => each === value) ?? RICH_TEXT_IMAGE_SIDE_DEFAULT
@@ -49,4 +88,12 @@ export interface StoreRichTextSection {
   image?: StoreLayoutImage | null
   /** `with_image`: the picture's side from 1024 px; absent: `start`. */
   image_side?: RichTextImageSide
+  /** `article`: the outline beside a long text; absent: `auto`. */
+  outline?: PageTextSwitch
+  /** `article`: a questions-and-answers text read as grouped questions; absent: `auto`. */
+  questions?: PageTextSwitch
+  /** `article`: the text's library pictures, their size and versions. */
+  images?: StoreTextImage[]
+  /** `article`: the text's headings, for the outline. */
+  headings?: StoreTextHeading[]
 }

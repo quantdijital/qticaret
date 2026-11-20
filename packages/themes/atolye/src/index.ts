@@ -63,4 +63,5 @@ export const atolyeTheme: StorefrontTheme = {
 }
 
 export { ATOLYE_SECTION_SCALE, ATOLYE_TONES, TONE_SURFACES } from "./tones"
+export { PAGE_FIXED_IDS } from "./content/page-ids"
 export type { ToneSet, ToneSurface } from "./tones"

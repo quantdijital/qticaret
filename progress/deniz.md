@@ -7,32 +7,11 @@
 1. **ADR-0073 Ek 2026-11-19 (2): sayfalar tema düzenleyicinin** (karar #232'yle birleşti; `adr/0073-icerik-sayfalarinda-bolumler.md` "Ek 2026-11-19 (2)", K1–K11). Üst/alt yerleşimi kalkar; sayfanın metni sayfanın tek bölüm listesinde bölüm olur; sayfa tema düzenleyicide açılır ve yönetilir; İçerik yalnız blog yazılarının.
    - **Dilimler (K11):** S6 sözleşme + backend; S7 panel; S8 vitrin + tema + kilitler + dönüşüm dosyası `migration-scripts/content-pages-into-layout.ts`; S9 Katalog hazır görünümü. S6 ve S8 birleşmeden önce `security-reviewer`. `main`'e S9'dan sonra.
    - **Tarayıcı denetimi:** S1–S5'in üst/alt modeline eski bakış eskidi; S8/S9'dan sonra Hakkımızda ve İletişim'e 390 ve 1440 px'te bakılır.
-   - **S6 durumu:** dal `deniz/sayfalar-tema-duzenleyici-s6` origin'de; iki commit: `b352318cb` (types) ve `7a58bd5e2` (geri kalan yarım iş; eski Mac'ten taşınmadan önce olduğu gibi kaydedildi). Dal `dev`'e birleşmez: yeni HTTP testleri yazılmadı, sayfaya `body` gönderen eski HTTP testleri kırık.
-   - **Dalda yazılanlar:**
-     - types: `placement` kalktı; `contact` / `payment_facts` / `shipping_facts`; `rich_text` `article` biçimi; sayfa sınırı 50; `synthesized`.
-     - `layout-pages.ts` tek liste + `sections/page-text.ts`; eski biçim okuması `readStoredPages` / `text_at`.
-     - Mağaza okumasında sentez: `layout-page-read.ts` + `layout-hydrate-text.ts`.
-     - Yayın `layout-publish.ts`'e bölündü: `page-mirror.ts` (`body` aynası, telafi, `content.saved`) ve `pages-live.ts`.
-     - Admin içerik rotası sayfa `body`'sini reddeder (`content.page_text_in_editor`).
-     - `checkLayout` yalnız yeni kartları denetler (`lib/content/cards.ts`).
-     - `replacePageTextWorkflow` (`page-text-replace.ts`, `layout-system.ts`); içe aktarma ve mağaza profili bunu kullanır.
-     - Geri yüklemede `text_at` (`page-texts-placed.ts`); bağlantı raporu/yeniden yazma düzende (`content/link-layout.ts`); `movePageTexts` (`page-text-convert.ts`).
-     - Küçük uyum düzeltmeleri: vitrin `page-sections.ts` `aroundText`; panel `article` biçim alanları ve `placed()` varsayılanı.
-   - **S6'da kalanlar:**
-     - `page-mirror.unit.spec.ts`'te iki `toBe(body)` → `toEqual(body)`.
-     - `checkLayout` kart kuralına birim testi.
-     - Yeni HTTP testleri: `content-pages-conversion.spec.ts`; ayna + `pages_live`; sentez; geri yüklemede `text_at`; `replacePageTextWorkflow`; sayfa `body`'si 400.
-     - Sayfa `body`'si gönderen ~10 HTTP testinin güncellenmesi: `content`, `storefront-layout-pages`, `seo-contract`, `storefront-page-roles`, `ai-catalog-tasks`, `storefront-presets-pages`, `content-links`, `media-library`, `content-saves`, `ai-seo`.
-     - Commit + PR + güvenlik incelemesi.
-   - **Kaydedilecek sapmalar (S6 PR'ı):**
-     - `reason: "conversion"` sütunu yok: dönüşüm `published_by: null` sistem sürümü + denetim kaydı; migration yok.
-     - `POST /admin/storefront-layout` eski `placement`'ı geçici kabul edip katlar (S7'de kalkar).
-     - `presetDocument` Katalog'un `placement`'ını S9'a kadar katlar.
-     - Sayfa okuma önbelleği 40 → 100.
+   - **Durum (2026-11-20):** S6 + S7 + S8 + Sayfalar listesi + dönüşüm dosyası `deniz/sayfalar-tema-duzenleyici-s6` dalında, PR açık (aşağıdaki oturum notu). Kalan: **S9** (Katalog hazır görünümü K6 metin koruması; o gelene kadar Katalog yeniden uygulanmaz, Hakkımızda metni boş kalır) ve sahibin tarayıcı denetimi (Hakkımızda, İletişim 390/1440 px; `pnpm style:diff`).
+   - **Takip:** çok anahtarlı kilitte (`acquireLockStep` `[storefront-layout, content]`) bir anahtar alınamazsa diğeri test ortamında TTL'e (60 sn) kadar tutulu kalıyor; Redis kilit sağlayıcısında doğrulanacak (yayın üç anahtar kilitliyor). Ev bölümü başlık id'leri (`bolum-<id>`) ayrılmış id listesinde değil (çok düşük olasılık). Panelin sentezlediği bölüm id'leri backend'in sha id'lerinden farklı (dönüşümden sonra önemsiz). `POST /admin/storefront-layout` `placement` katlaması hâlâ duruyor (eski açık sekmeler için; S9'da kaldırılabilir).
 2. **Test sunucusu ve BirFatura:** test sunucusuna kurulum planı; kurulumdan sonra BirFatura gerçek testi test alan adında (F1 #209 + F2 #210 birleşti, yerel sahte yok).
 3. **Canlıya çıkış listesi (F16, sahiple):** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); imajda ffmpeg ≥ 7 (`FFMPEG_PATH` / `FFPROBE_PATH`; CI'ın apt'si 6.1 veriyor); Cloudflare önde (adr/0003), ayrı depo origin'iyle birlikte; o zaman CSP `img-src`/`media-src` daraltılır. BirFatura için gerekirse ayrı alt alan adı.
 4. **Küçük işler ve takipler:**
-   - Panelde görünüm özeti (`gallery/draft-summary.ts`) sayfa düzenlerini henüz saymıyor.
    - Etiketi oluşmuş siparişler için "Kurye bekliyor" gösterim durumu (önerildi, sahibin cevabı bekleniyor).
    - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
    - D4-1: düzenleme iadesinde referansla sürdürme gerçek bir düzenleme iadesiyle denenmedi.
@@ -55,6 +34,18 @@
    - **Sahip kararı:** Medusa 2.21.2 → 2.22.x yükseltmesi. 2.22.2 bugün yeterince eski; 2.22.3+ yakında olur. Tam testlerle ayrı PR.
 
 Bitenler: #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
+
+## 2026-11-20 — Ubuntu'ya taşınma, sayfalar tema düzenleyicinin (S6–S8)
+
+- **Makine:** Ubuntu (20 çekirdek, 30 GB); repo `~/Desktop/qticaret`, Node 24 `~/.local/opt/node24`. Docker + `pnpm env:init` + `db:up` + migrate + `seed:demo` (+ siparişler). Mac'in dev veritabanı taşınmadı; `tenant:apply-pack pack=cutlery`, `shop:profile ../../docs/gecis/mylarte/profil`, `tenant:apply-preset pack=cutlery preset=katalog` ile yeniden kuruldu (yüklenmiş medya yok). Repoda yerel git kimliği tanımlandı.
+- **S6 (backend):** yeni HTTP testleri (dönüşüm, ayna, `pages_live`, sentez, `text_at` geri yükleme, `replacePageTextWorkflow`, sayfa `body` 400), ~10 eski spec yeni yola. Bulunan hatalar: `placement` katlaması metni kaybediyordu (artık yerinde kalır); `replacePageTextWorkflow` değişmeyen metinde sürüm yazıyordu.
+- **Güvenlik incelemesi S6** (kritik/yüksek yok) kapatıldı: ayna zamanlanmış bölümleri almaz; `pages_live` ve sistem yazmaları denetim kaydında (yalnız id); sayfa içe aktarma tek iş akışı, metin düşerse sayfa geri alınır; aynadan taşınan metindeki eski kart/görsel kaydı kilitlemez; bütün tasarım okuması `pages` taşımaz.
+- **S7 (panel):** sayfa seçicide "Yeni sayfa", tek liste ağaç, "Sayfa metni"/İletişim/Ödeme/Kargo bölümleri, Sayfa ayarları paneli, Yayınla'da "Sayfayı da yayına al", İçerik yalnız blog; sahip isteğiyle **Vitrin > Sayfalar** listesi (adr/0073 "Ek not 2026-11-20").
+- **S8 (vitrin + tema):** sayfa tek bölüm listesinden çizilir; `article` biçimi; kilitlerde yalnız metin bölümü kutusu değişti (`cutlery-katalog/about.html` etkilendi). Dönüşüm dosyası `content-pages-into-layout.ts` dev'de koştu (2 sayfa).
+- **Güvenlik incelemesi S7+S8** (kritik/yüksek yok) kapatıldı: `?yeni=1` artık yok sayılır (yeni sayfa bellekte işaretlenir, yalnız boş taslağa metin eklenir); sayfa çapında benzersiz id'ler.
+- **Kaydedilen sapmalar:** PR açıklamasında (1–10).
+- **Doğrulama:** backend HTTP 24 spec/81 + dönüşüm 5, birim 1875; panel 2126; vitrin 2109; tsc/eslint/prettier temiz.
+- **Çalışma düzeni:** bu makinede en çok 3 ağır ajan aynı anda (sahip kararı).
 
 ## 2026-11-19 (akşam): sayfa rolleri, sayfalar tema düzenleyiciye (ADR-0073 Ek 2), bilgisayar değişikliği
 

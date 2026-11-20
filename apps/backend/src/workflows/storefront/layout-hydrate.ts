@@ -17,6 +17,7 @@ import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
 import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
+import { hydrateArticle, hydrateContact } from "./layout-hydrate-text"
 import { hydrateShelf } from "./layout-hydrate-shelf"
 import { hydrateStrips } from "./layout-hydrate-strips"
 import type { BandPick } from "./price-bands"
@@ -196,6 +197,10 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         live: at.live,
       })
     case "rich_text": {
+      // A content page's own text (adr/0073 Ek 2026-11-19 (2) K2), as the page printed it
+      if (section.variant === "article") {
+        return hydrateArticle(section, at)
+      }
       const body = fillShopDoc(section.body, at.values)
       const html = renderDoc(body, await cardTargets(at.container, body))
       // The pane prints as it did before variants
@@ -284,5 +289,11 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
       return { id, type, variant: section.variant }
     case "marquee":
       return hydrateMarquee(section, at)
+    case "contact":
+      return hydrateContact(section, at)
+    case "payment_facts":
+    case "shipping_facts":
+      // The live facts are the storefront's to read; the section says where they stand
+      return { id, type }
   }
 }

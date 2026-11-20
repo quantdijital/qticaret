@@ -1,32 +1,16 @@
 import { describe, expect, it } from "vitest"
-import { atolyeTheme } from "@qticaret/theme-atolye"
-import type { ContentPageView, HomeSectionView } from "@qticaret/ui"
-import { renderPage } from "@/test/theme-render"
+import type { HomeSectionView } from "@qticaret/ui"
+import { article, contactSection, page, shipping } from "@/test/content-page"
 
 /**
- * The Grafit theme's content pages with their own sections (adr/0073 §2,
- * S3): the page's head, the sections above its text, the text with its
- * role's parts, the sections below it, as siblings; one h1, the head's. A
- * page with none is drawn as before (the preset lock keeps that whole page:
- * `preset-lock/fixture-content-pages`).
+ * The Grafit theme's content pages as one list of sections (adr/0073 Ek
+ * 2026-11-19 (2) K8): the page's head, then its sections in the shop's
+ * order, its own text sections among them; one h1, the head's. The text
+ * sections that open the page stand in the head's container (a page of
+ * its text alone is drawn as before: the preset lock keeps that whole
+ * page, `preset-lock/fixture-content-pages`); a later run of them in a
+ * container of its own; the home page's types each in their own.
  */
-
-const view = (over: Partial<ContentPageView> = {}): ContentPageView => ({
-  title: "Hakkımızda",
-  breadcrumbs: [
-    { label: "Ana sayfa", path: "/" },
-    { label: "Hakkımızda", path: null },
-  ],
-  html: "<p>Atölye mağazası.</p>",
-  publishedAt: null,
-  ...over,
-})
-
-const page = (over: Partial<ContentPageView> = {}) =>
-  renderPage(atolyeTheme, "ContentPage", {
-    view: view(over),
-    actions: { sendContact: () => Promise.resolve({ ok: true, error: null, challenge: null }) },
-  })
 
 const story: HomeSectionView = {
   id: "ustmetin",
@@ -58,39 +42,23 @@ const badges: HomeSectionView = {
   variant: "lined",
 }
 
-const contact: Partial<ContentPageView> = {
-  title: "İletişim",
-  html: "<p>Bize yazın.</p>",
-  contact: {
-    email: "bilgi@example.com",
-    phone: "0532 000 00 00",
-    phoneHref: "tel:+905320000000",
-    whatsappHref: null,
-    address: "Örnek Mah. 1. Sok. No: 1, Denizli",
-    hours: [],
-    mapHref: null,
-  },
-  identity: [{ label: "Unvan", value: "Örnek Atölye Ltd. Şti." }],
-  contactForm: {
-    subjects: [{ value: "order", label: "Siparişim" }],
-    name: null,
-    email: null,
-    privacyPath: null,
-  },
-}
+const HEAD = '<div class="mx-auto w-full max-w-(--container) px-(--gutter)'
 
 /** Where each marker first stands in the page, in the order given; -1 for one missing. */
 const at = (html: string, ...markers: string[]) => markers.map((marker) => html.indexOf(marker))
 
-describe("the theme's content page with its own sections (adr/0073)", () => {
-  it("draws a page whose sections are both empty as a page with none", () => {
-    for (const over of [{}, contact, { outline: [] }]) {
-      expect(page({ ...over, sections: { top: [], bottom: [] } })).toBe(page(over))
-    }
+describe("the theme's content page as one list of sections (adr/0073 Ek 2026-11-19 (2))", () => {
+  it("sets a text that opens the page in the head's container, the sections after it on their own", () => {
+    const html = page({ sections: [article(), help] })
+    expect(html.startsWith(`${HEAD} flex flex-col gap-8 pt-6 lg:gap-12 lg:pt-10">`)).toBe(true)
+    // The text's box inside the head's container, the help after it closes
+    expect(html).toMatch(
+      /<\/nav>[\s\S]*<div data-qs="metin">[\s\S]*<\/div><\/div><div data-qs="altyardim">/
+    )
   })
 
-  it("sets the head, the sections above, the text and the sections below as siblings", () => {
-    const html = page({ sections: { top: [story], bottom: [help] } })
+  it("sets the head, the sections before the text, the text and the sections after as siblings", () => {
+    const html = page({ sections: [story, article(), help] })
     const [h1 = -1, above = -1, text = -1, below = -1] = at(
       html,
       "<h1",
@@ -102,29 +70,39 @@ describe("the theme's content page with its own sections (adr/0073)", () => {
     expect(above).toBeGreaterThan(h1)
     expect(text).toBeGreaterThan(above)
     expect(below).toBeGreaterThan(text)
-    // Each section in its own container: none inside the head's or the text's
-    expect(
-      html.startsWith('<div class="mx-auto w-full max-w-(--container) px-(--gutter) pt-6')
-    ).toBe(true)
+    // The head alone in its container; the text in one of its own, as far below as in the head's
+    expect(html.startsWith(`${HEAD} pt-6 lg:pt-10">`)).toBe(true)
     expect(html).toMatch(/<\/div><div data-qs="ustmetin">/)
+    expect(html).toContain(`${HEAD} pt-8 lg:pt-12"><div data-qs="metin">`)
     expect(html).toMatch(/<\/div><div data-qs="altyardim">/)
   })
 
+  it("spaces a later run of text sections as the head's container spaces them", () => {
+    const html = page({ sections: [story, article(), contactSection()] })
+    expect(html).toContain(
+      `${HEAD} flex flex-col gap-8 pt-8 lg:gap-12 lg:pt-12"><div data-qs="metin">`
+    )
+    // A text with the facts beside it is one part: one box in the container
+    const paired = page({ sections: [story, article(), shipping] })
+    expect(paired).toContain(`${HEAD} pt-8 lg:pt-12"><div data-qs="metin">`)
+  })
+
   it("prints one h1, the head's; the sections' titles are h2s", () => {
-    const html = page({ sections: { top: [story], bottom: [help, badges] } })
+    const html = page({ sections: [story, article({ title: "Biz kimiz" }), help, badges] })
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html).toMatch(/<h1[^>]*>Hakkımızda<\/h1>/)
     expect(html).toMatch(/<h2[^>]*>Neye inanıyoruz<\/h2>/)
+    expect(html).toMatch(/<h2[^>]*>Biz kimiz<\/h2>/)
     expect(html).toMatch(/<h2[^>]*>Hangi bıçak size uygun\?<\/h2>/)
   })
 
-  it("keeps the contact page's body as it is, the sections above and below it", () => {
-    const plain = page(contact)
-    // The contact body as drawn today: everything in the one container after the head
+  it("keeps the contact page's body as it is wherever it stands, the sections around it", () => {
+    const plain = page({ title: "İletişim", sections: [contactSection()] })
     const start = plain.indexOf('<div class="grid gap-(--gap-columns) lg:grid-cols-12')
-    const body = plain.slice(start, plain.length - "</div>".length)
+    const end = plain.lastIndexOf("</div></div>")
     expect(start).toBeGreaterThan(-1)
-    const html = page({ ...contact, sections: { top: [badges], bottom: [help] } })
+    const body = plain.slice(start, end)
+    const html = page({ title: "İletişim", sections: [badges, contactSection(), help] })
     expect(html).toContain(body)
     expect(html.match(/id="iletisim-formu"/g)).toHaveLength(1)
     expect(html.match(/<h1/g)).toHaveLength(1)
@@ -138,35 +116,20 @@ describe("the theme's content page with its own sections (adr/0073)", () => {
     expect(below).toBeGreaterThan(form)
   })
 
-  it("draws no text area on a page built of sections alone, the head and the sections kept", () => {
-    for (const html of ["", "<p></p>", " <p> </p> "]) {
-      const drawn = page({ html, sections: { top: [], bottom: [story, help] } })
+  it("draws no text area on a page without text sections, the head and the sections kept", () => {
+    for (const sections of [[], [story, help]]) {
+      const drawn = page({ html: "<p>Ayna.</p>", sections })
       expect(drawn).not.toContain("gf-prose")
       expect(drawn).not.toContain("<article")
       expect(drawn.match(/<h1/g)).toHaveLength(1)
-      expect(drawn).toContain('data-qs="ustmetin"')
-      expect(drawn).toContain('data-qs="altyardim"')
     }
-    // Without sections an empty page is drawn as before, its text area there
-    expect(page({ html: "" })).toContain("<article")
-  })
-
-  it("keeps the role's parts of a page with no text: the shipping page's facts", () => {
-    const html = page({
-      html: "",
-      shipping: {
-        carriers: [],
-        promises: [{ icon: "truck", title: "Aynı gün kargo", text: null }],
-      },
-      sections: { top: [], bottom: [help] },
-    })
-    expect(html).toContain("Aynı gün kargo")
+    expect(page({ sections: [story, help] })).toContain('data-qs="altyardim"')
   })
 
   it("draws a post as before: a post takes no sections", () => {
     const post = {
       post: { date: null, dateTime: null, reading: "1 dk okuma", author: null },
     }
-    expect(page({ ...post, sections: { top: [story], bottom: [help] } })).toBe(page(post))
+    expect(page({ ...post, sections: [story, help] })).toBe(page(post))
   })
 })

@@ -1,9 +1,10 @@
 import { Mail, MapPin, Phone } from "lucide-react"
+import { fieldMark } from "@qticaret/ui"
 import type {
   ContactActions,
   ContactView,
-  ContentPageView,
   IdentityRowView,
+  PageContactView,
   Translate,
 } from "@qticaret/ui"
 import { placeholderWords } from "../parts/placeholders"
@@ -45,13 +46,13 @@ const contactWords = (t: Translate): ContactWords => ({
  * stage's own light button), the phone and the e-mail as pills, the
  * address with its map, the hours. Each only when the shop gave it.
  */
-function Reach({ contact, t }: { contact: ContactView; t: Translate }) {
+function Reach({ contact, t, suffix }: { contact: ContactView; t: Translate; suffix: string }) {
   return (
     <section
-      aria-labelledby="bize-ulasin"
+      aria-labelledby={`bize-ulasin${suffix}`}
       className="gf-stage flex flex-col gap-6 rounded-tile p-6 sm:p-8"
     >
-      <h2 id="bize-ulasin" className="text-title">
+      <h2 id={`bize-ulasin${suffix}`} className="text-title">
         {t("content.reach")}
       </h2>
       <ul className="flex flex-col gap-2">
@@ -128,17 +129,19 @@ function Imprint({
   rows,
   t,
   wide,
+  suffix,
 }: {
   rows: readonly IdentityRowView[]
   t: Translate
   wide: boolean
+  suffix: string
 }) {
   return (
     <section
-      aria-labelledby="kunye"
+      aria-labelledby={`kunye${suffix}`}
       className="flex flex-col gap-4 rounded-tile gf-pane p-5 sm:p-6 lg:gap-5 lg:p-8"
     >
-      <h2 id="kunye" className="text-title">
+      <h2 id={`kunye${suffix}`} className="text-title">
         {t("content.identity")}
       </h2>
       <dl
@@ -165,37 +168,46 @@ function Imprint({
 }
 
 /**
- * The shop's contact page (adr/0047, adr/0048): its own words first, the
- * ways to reach it on a graphite stage, the form, then its imprint; from
- * 1024 px the words and the stage in a column beside the form, the
- * imprint one compact card across the page under both (beside the stage
- * when there is no form).
+ * The shop's contact page (adr/0047, adr/0048; the `contact` section,
+ * adr/0073 Ek 2026-11-19 (2) K2): its own words first, the ways to reach
+ * it on a graphite stage, the form, then its imprint; from 1024 px the
+ * words and the stage in a column beside the form, the imprint one
+ * compact card across the page under both (beside the stage when there is
+ * no form).
  */
 export function ContactBody({
-  view,
+  section,
   t,
   actions,
+  suffix = "",
 }: {
-  view: ContentPageView
+  section: PageContactView
   t: Translate
   actions?: ContactActions | undefined
+  /** Added to its ids when another contact section on the page has them (`idSuffixes`). */
+  suffix?: string
 }) {
-  const identity = view.identity ?? []
-  const form = view.contactForm && actions ? view.contactForm : null
+  const identity = section.identity
+  const form = section.form && actions ? section.form : null
   return (
     <div className="grid gap-(--gap-columns) lg:grid-cols-12 lg:items-start">
       <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:col-span-5">
-        <Prose html={view.html} className="mb-4" />
-        {view.contact && <Reach contact={view.contact} t={t} />}
+        <Prose html={section.html} className="mb-4" mark={fieldMark(section.editor, "body")} />
+        {section.contact && <Reach contact={section.contact} t={t} suffix={suffix} />}
       </div>
       {form && actions && (
         <div className="min-w-0 lg:col-span-7">
-          <ContactForm view={form} action={actions.sendContact} words={contactWords(t)} />
+          <ContactForm
+            view={form}
+            action={actions.sendContact}
+            words={contactWords(t)}
+            suffix={suffix}
+          />
         </div>
       )}
       {identity.length > 0 && (
         <div className={form ? "min-w-0 lg:col-span-12" : "min-w-0 lg:col-span-7"}>
-          <Imprint rows={identity} t={t} wide={form !== null} />
+          <Imprint rows={identity} t={t} wide={form !== null} suffix={suffix} />
         </div>
       )}
     </div>

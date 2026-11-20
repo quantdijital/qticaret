@@ -67,11 +67,22 @@ test("opens each section from the collapsed menu's icons", async ({ page, guard 
       )
       .toBe(true)
   }
+  // Folded and taller than the window, the menu scrolls: its last items are not cut off
+  const scrolls = await sidebar
+    .locator('[data-sidebar="content"]')
+    .evaluate(
+      (element) =>
+        element.scrollHeight <= element.clientHeight ||
+        ["auto", "scroll"].includes(getComputedStyle(element).overflowY)
+    )
+  expect(scrolls, "the folded menu scrolls to its last items").toBe(true)
   // The theme editor opens full screen, without this menu: its own test opens it
   for (const { href, name } of links.filter((each) => each.href !== "/storefront/editor")) {
     await test.step(href, async () => {
       await settle()
       const link = sidebar.getByRole("link", { name, exact: true })
+      // A menu taller than the window scrolls to its last items (checked above)
+      await link.scrollIntoViewIfNeeded()
       // Folded, the icon's own point is the link's: no hidden label lies over it
       const ownsItsIcon = await link.evaluate((element) => {
         const box = (element.querySelector("svg") ?? element).getBoundingClientRect()

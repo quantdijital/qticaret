@@ -60,7 +60,7 @@ function SideTile({ category, t }: { category: CategoryCardView; t: Translate })
       {category.image && (
         <ResponsiveImage
           image={{ ...category.image, alt: "" }}
-          sizes="(min-width: 1024px) 18vw, 50vw"
+          sizes="(min-width: 1280px) 18vw, 50vw"
           className="absolute inset-0 h-full w-full object-cover"
         />
       )}

@@ -5,6 +5,7 @@ import {
   FULL_PAGES,
   PAGE_LAYOUTS,
   pageSection,
+  pageText,
 } from "@/features/storefront/editor/content-pages.fixtures"
 import { DOC } from "@/features/storefront/editor/theme-editor.fixtures"
 import { editorReducer, initialEditorState } from "./editor-state"
@@ -18,7 +19,7 @@ const run = (doc: LayoutDocument, ...actions: EditorAction[]) =>
 
 const ids = (doc: LayoutDocument, page: string) => pageSectionsOf(doc, page).map((s) => s.id)
 
-/** The content pages' own layouts in the editor's document (adr/0073 §1, §5). */
+/** The content pages' own layouts in the editor's document (adr/0073 §1, Ek 2026-11-19 (2) K1). */
 describe("a content page's layout in the editor", () => {
   it("makes the page's entry with its first section and takes it away with its last", () => {
     const added = run(DOC, {
@@ -48,38 +49,89 @@ describe("a content page's layout in the editor", () => {
     expect(allSections(DOC_WITH_PAGES).map((s) => s.id)).toContain("hakkimizdayardim")
 
     const state = run(DOC_WITH_PAGES, { type: "toggle", id: "yorumlar" })
-    expect(pageSectionsOf(state.doc, "cnt_hakkimizda")[1]).toMatchObject({ visible: false })
+    expect(pageSectionsOf(state.doc, "cnt_hakkimizda")[2]).toMatchObject({ visible: false })
     expect(state.doc.pages[1]).toBe(PAGE_LAYOUTS[1])
     expect(state.doc.home).toBe(DOC_WITH_PAGES.home)
   })
 
-  it("keeps the sections above the text first, moving and placing within the page", () => {
-    const top = pageSection("banner", "ustbant", "top")
+  it("keeps a page's sections one list, its text among them, with no place sent", () => {
     const state = run(DOC_WITH_PAGES, {
       type: "add",
       group: "pages",
       page: "cnt_hakkimizda",
-      section: top,
+      section: pageSection("banner", "ustbant"),
+      at: 0,
     })
-    expect(ids(state.doc, "cnt_hakkimizda")).toEqual(["ustbant", "hakkimizdayardim", "yorumlar"])
-
-    const moved = editorReducer(state, { type: "move", id: "yorumlar", to: 0 })
-    expect(ids(moved.doc, "cnt_hakkimizda")).toEqual(["ustbant", "yorumlar", "hakkimizdayardim"])
-
-    const placed = editorReducer(moved, { type: "place", id: "yorumlar", placement: "top" })
-    expect(ids(placed.doc, "cnt_hakkimizda")).toEqual(["ustbant", "yorumlar", "hakkimizdayardim"])
-    expect(pageSectionsOf(placed.doc, "cnt_hakkimizda")[1]).toMatchObject({ placement: "top" })
-
-    const copied = editorReducer(placed, { type: "duplicate", id: "ustbant", copyId: "ustbant2" })
-    expect(ids(copied.doc, "cnt_hakkimizda")).toEqual([
+    expect(ids(state.doc, "cnt_hakkimizda")).toEqual([
       "ustbant",
-      "ustbant2",
-      "yorumlar",
+      "hakkimizdametin",
       "hakkimizdayardim",
+      "yorumlar",
     ])
+
+    // The page's text moves past the others as any section does
+    const moved = editorReducer(state, { type: "move", id: "hakkimizdametin", to: 3 })
+    expect(ids(moved.doc, "cnt_hakkimizda")).toEqual([
+      "ustbant",
+      "hakkimizdayardim",
+      "yorumlar",
+      "hakkimizdametin",
+    ])
+    const copied = editorReducer(moved, { type: "duplicate", id: "ustbant", copyId: "ustbant2" })
+    expect(ids(copied.doc, "cnt_hakkimizda").slice(0, 2)).toEqual(["ustbant", "ustbant2"])
+    expect(
+      copied.doc.pages.flatMap((page) => page.sections).some((section) => "placement" in section)
+    ).toBe(false)
   })
 
-  it("holds twelve sections on a page and twenty pages with a layout", () => {
+  it("holds one contact section and one of each facts on a page", () => {
+    const facts = run(
+      DOC_WITH_PAGES,
+      {
+        type: "add",
+        group: "pages",
+        page: "cnt_iletisim",
+        section: pageSection("contact", "ikinciform"),
+      },
+      { type: "duplicate", id: "iletisimform", copyId: "formkopya1" }
+    )
+    expect(facts.doc).toBe(DOC_WITH_PAGES)
+
+    const shipping = run(DOC_WITH_PAGES, {
+      type: "add",
+      group: "pages",
+      page: "cnt_iletisim",
+      section: pageSection("shipping_facts", "kargobilgi"),
+    })
+    expect(ids(shipping.doc, "cnt_iletisim")).toEqual(["iletisimsss", "iletisimform", "kargobilgi"])
+  })
+
+  it("makes a synthesized page's entry with its first change, in one step", () => {
+    const text = pageText("sentezmetin", "Sıkça sorulanlar.")
+    const seeded = run(DOC, {
+      type: "seed",
+      page: "cnt_sss",
+      sections: [text],
+      then: { type: "update", section: { ...text, title: "SSS" } },
+    })
+    expect(seeded.doc.pages).toEqual([
+      { page_id: "cnt_sss", sections: [{ ...text, title: "SSS" }] },
+    ])
+    expect(seeded.past).toHaveLength(1)
+    expect(editorReducer(seeded, { type: "undo" }).doc.pages).toEqual([])
+
+    // No room for a fifty-first page: the change does not land
+    const full: LayoutDocument = { ...DOC, pages: FULL_PAGES }
+    const refused = run(full, {
+      type: "seed",
+      page: "cnt_sss",
+      sections: [text],
+      then: { type: "toggle", id: "sentezmetin" },
+    })
+    expect(refused.doc).toBe(full)
+  })
+
+  it("holds twelve sections on a page and fifty pages with a layout", () => {
     const twelve = Array.from({ length: 12 }, (_, at) =>
       pageSection("help", `yardim${String(at).padStart(4, "0")}`)
     )
@@ -96,18 +148,18 @@ describe("a content page's layout in the editor", () => {
     expect(more.doc).toBe(full)
     expect(run(full, { type: "duplicate", id: "yardim0000" }).doc).toBe(full)
 
-    const twenty: LayoutDocument = { ...DOC, pages: FULL_PAGES }
-    expect(pagesFull(twenty, "cnt_hakkimizda")).toBe(true)
-    expect(pagesFull(twenty, "cnt_dolu3")).toBe(false)
-    const refused = run(twenty, {
+    const fifty: LayoutDocument = { ...DOC, pages: FULL_PAGES }
+    expect(pagesFull(fifty, "cnt_hakkimizda")).toBe(true)
+    expect(pagesFull(fifty, "cnt_dolu3")).toBe(false)
+    const refused = run(fifty, {
       type: "add",
       group: "pages",
       page: "cnt_hakkimizda",
-      section: pageSection("help", "yirmibir"),
+      section: pageSection("help", "ellibir"),
     })
-    expect(refused.doc).toBe(twenty)
+    expect(refused.doc).toBe(fifty)
     // A page that has its layout still takes another section
-    const taken = run(twenty, {
+    const taken = run(fifty, {
       type: "add",
       group: "pages",
       page: "cnt_dolu3",

@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { writePageText } from "../helpers/pages"
 import { adminOrigin, sessionCookie } from "../helpers/staff-account"
 import { createStorefront } from "../helpers/storefront"
 
@@ -12,6 +13,7 @@ type Section = Record<string, unknown> & { id: string; type: string }
 interface PageLayout {
   page_id: string
   sections: Section[]
+  synthesized?: true
 }
 
 interface AdminAnswer {
@@ -58,16 +60,16 @@ medusaIntegrationTestRunner({
       const content = async (body: Record<string, unknown>) =>
         (await settle(http.post<{ entry: { id: string } }>("/admin/content", body, asOwner))).data
           .entry.id
-      const about = await content({
-        kind: "page",
-        title: "Hakkımızda",
-        body: doc("Atölyemiz Denizli'de."),
-      })
+      const about = await content({ kind: "page", title: "Hakkımızda" })
+      // A page's text is the system's to write (adr/0073 Ek 2026-11-19 (2) K4): no design yet,
+      // only its mirror
+      await writePageText(container, about, doc("Atölyemiz Denizli'de."))
       const publishedPage = await settle(
         http.post(`/admin/content/${about}`, { status: "published" }, asOwner)
       )
       expect(publishedPage.status).toBe(200)
-      const fresh = await content({ kind: "page", title: "Yeni sayfa", body: doc("Taslak.") })
+      const fresh = await content({ kind: "page", title: "Yeni sayfa" })
+      await writePageText(container, fresh, doc("Taslak."))
       const post = await content({ kind: "post", title: "Bıçak bakımı", body: doc("Yağlayın.") })
       const save = (pages: unknown[]) =>
         settle(
@@ -93,9 +95,23 @@ medusaIntegrationTestRunner({
       expect(saved.status).toBe(200)
       expect(saved.data.dropped_pages).toBe(0)
       expect(saved.data.layout.draft.pages.map((page) => page.page_id)).toEqual([about, fresh])
+      // An older editor's `placement` folds into one list, the page's text where it stood
+      // (adr/0073 Ek 2026-11-19 (2) K1): the sections above it first
+      const [aboutDraft, freshDraft] = saved.data.layout.draft.pages
+      expect(aboutDraft?.sections.map((section) => [section.type, section["variant"]])).toEqual([
+        ["help", undefined],
+        ["rich_text", "article"],
+        ["help", undefined],
+      ])
+      expect(aboutDraft?.sections[0]).not.toHaveProperty("placement")
+      expect(aboutDraft?.sections[1]?.["body"]).toEqual(doc("Atölyemiz Denizli'de."))
+      expect(freshDraft?.sections.map((section) => section.id)).toEqual(["yardim003"])
 
-      // Nothing published yet: the live page has no layout, the design's answer carries none
-      expect((await read(`/store/storefront-layout/pages/${about}`)).data.page).toBeNull()
+      // Nothing published yet: the live page is its text alone, made from its mirror (K1)
+      const before = await read(`/store/storefront-layout/pages/${about}`)
+      expect(before.data.page).toMatchObject({ page_id: about, synthesized: true })
+      expect(before.data.page?.sections.map((section) => section["variant"])).toEqual(["article"])
+      expect(before.data.page?.sections[0]?.["html"]).toContain("Atölyemiz Denizli")
       const published = await settle(
         http.post<AdminAnswer>("/admin/storefront-layout/publish", {}, asOwner)
       )
@@ -106,12 +122,17 @@ medusaIntegrationTestRunner({
       expect(live.status).toBe(200)
       expect(live.headers["cache-control"]).toContain("public")
       expect(live.data.page?.page_id).toBe(about)
-      expect(live.data.page?.sections.map((section) => [section.id, section["placement"]])).toEqual(
-        [
-          ["yardim001", "top"],
-          ["yardim002", "bottom"],
-        ]
-      )
+      expect(live.data.page).not.toHaveProperty("synthesized")
+      expect(live.data.page?.sections.map((section) => section.type)).toEqual([
+        "help",
+        "rich_text",
+        "help",
+      ])
+      expect(live.data.page?.sections.map((section) => section["placement"])).toEqual([
+        undefined,
+        undefined,
+        undefined,
+      ])
       const whole = await read("/store/storefront-layout")
       expect(whole.data).not.toHaveProperty("layout.pages")
       // A draft page is not live: no layout leaves through the public read, and every page
@@ -134,7 +155,7 @@ medusaIntegrationTestRunner({
       const previewed = await read(`/store/storefront-layout/preview/${token}/pages/${about}`)
       expect(previewed.status).toBe(200)
       expect(previewed.headers["cache-control"]).toBe("private, no-store")
-      expect(previewed.data.page?.sections).toHaveLength(2)
+      expect(previewed.data.page?.sections).toHaveLength(3)
       const hiddenByLink = await answerOf(
         `/store/storefront-layout/preview/${token}/pages/${fresh}`
       )
@@ -183,11 +204,12 @@ medusaIntegrationTestRunner({
       const made = await settle(
         http.post<{ entry: { id: string } }>(
           "/admin/content",
-          { kind: "page", title: "Yeni sayfa", body: doc("Henüz yayında değil.") },
+          { kind: "page", title: "Yeni sayfa" },
           asOwner
         )
       )
       const draftPage = made.data.entry.id
+      await writePageText(container, draftPage, doc("Henüz yayında değil."))
       const saved = await settle(
         http.post(
           "/admin/storefront-layout",

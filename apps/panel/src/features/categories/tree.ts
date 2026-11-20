@@ -77,3 +77,32 @@ export function siblingFor(
   const siblings = childrenOf(categories).get(category.parent_category_id ?? null) ?? []
   return siblings[siblings.findIndex((item) => item.id === category.id) + step]
 }
+
+/** Names from the root down to the category's parent, for a flat search row. */
+export function ancestorNames(categories: Category[], category: Category): string[] {
+  const byId = new Map(categories.map((item) => [item.id, item]))
+  const names: string[] = []
+  const seen = new Set<string>([category.id])
+  let current = category.parent_category_id ? byId.get(category.parent_category_id) : undefined
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id)
+    names.unshift(current.name)
+    current = current.parent_category_id ? byId.get(current.parent_category_id) : undefined
+  }
+  return names
+}
+
+const fold = (text: string) => text.toLocaleLowerCase("tr").trim()
+
+/** Categories whose name or address holds the words, in the tree's order. */
+export function matchingCategories(categories: Category[], query: string): Category[] {
+  const words = fold(query)
+  if (!words) {
+    return []
+  }
+  return treeRows(categories, new Set())
+    .map((row) => row.category)
+    .filter(
+      (category) => fold(category.name).includes(words) || fold(category.handle).includes(words)
+    )
+}

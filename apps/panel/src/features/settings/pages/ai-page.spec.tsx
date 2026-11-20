@@ -15,6 +15,9 @@ vi.mock("@/features/auth/api/staff", () => ({
   useStaff: () => ({ role: "owner" }),
 }))
 vi.mock("@tanstack/react-router", () => ({
+  // The page's first tab (the services) opens; the writing guidance is the second
+  useSearch: () => ({}),
+  useNavigate: () => vi.fn(),
   Link: ({ children }: { children: React.ReactNode }) => <a href="/">{children}</a>,
 }))
 

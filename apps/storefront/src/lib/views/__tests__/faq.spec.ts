@@ -20,6 +20,17 @@ const BOLD =
   "<p><strong>Taksit var mı?</strong></p><ul><li>Evet</li></ul>"
 
 describe("faqOf", () => {
+  it("keeps its groups' anchors clear of the ids the page has already", () => {
+    const taken = new Set(["odeme", "yardim"])
+    const faq = faqOf(BOLD, taken)
+    expect(faq?.groups.map((group) => group.id)).toEqual(["nasil-satin-alirim", "odeme-2"])
+    // The same text again on the page: none of its anchors met twice
+    expect(faqOf(BOLD, taken)?.groups.map((group) => group.id)).toEqual([
+      "nasil-satin-alirim-2",
+      "odeme-3",
+    ])
+  })
+
   it("reads bold questions under their groups, a group heading ending in ? still a group", () => {
     const faq = faqOf(BOLD)
     expect(faq?.intro).toBe("<p>Giriş metni.</p>")

@@ -123,7 +123,31 @@ describe("the catalogue opening's slides", () => {
     expect(rule(".gf-mosaic-feature--whole .gf-mosaic-photo")).toContain("width: 100%")
   })
 
-  it("lets the list set the row from 1024 px, never a slide's words (#157 came back on a saved layout)", () => {
+  it("stacks the list under the opening on a tablet, nothing left half empty", () => {
+    const css = readFileSync(
+      path.resolve(import.meta.dirname, "../../../../../packages/themes/atolye/src/catalog.css"),
+      "utf8"
+    )
+    const block = (query: string) =>
+      css.slice(css.indexOf(query), css.indexOf("@media", css.indexOf(query) + 1))
+
+    // Found in the browser: at 820 px the list took half the row, the other half empty; at
+    // 1024 px the side column was too narrow (names on two lines, the words cramped)
+    const tablet = block("@media (48rem <= width < 80rem)")
+    expect(tablet).toContain(
+      ".gf-mosaic:not(:has(> .gf-mosaic-side)) > .gf-mosaic-list {\n      grid-column: 1 / -1;"
+    )
+    expect(tablet).toContain(".gf-mosaic:not(:has(> .gf-mosaic-list)) > .gf-mosaic-side")
+    expect(block("@media (64rem <= width < 80rem)")).toContain("repeat(3, minmax(0, 1fr))")
+    // Found in the browser: an odd last row stretched across two columns put its count out of
+    // line with the column above; a short last row keeps its own cells at every width
+    expect(css).not.toMatch(/\.gf-mosaic-list > ul > li[^{]*\{[^}]*grid-column/)
+    // The side by side row starts where the column holds a long name
+    expect(css).toContain("/* From 1280 px: the list, the opening and the tiles side by side")
+    expect(css).not.toContain("@media (min-width: 64rem)")
+  })
+
+  it("lets the list set the row from 1280 px, never a slide's words (#157 came back on a saved layout)", () => {
     const css = readFileSync(
       path.resolve(
         import.meta.dirname,

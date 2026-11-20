@@ -105,7 +105,6 @@ medusaIntegrationTestRunner({
             status: "draft",
             excerpt: `Keten nasıl yıkanır. ${PERSONAL}`,
             author_name: "Ayşe Yılmaz",
-            body: { type: "doc", content: [] },
           },
           { headers: owner.headers }
         )

@@ -8,9 +8,12 @@ import {
 } from "@qticaret/admin-ui/ui/dialog"
 import type { BodySectionType, PageGroup, Placement } from "@/features/storefront/api/layout"
 import { MARQUEE_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
-import { GROUP_TYPES } from "@/features/storefront/layout/sections"
+import { GROUP_TYPES, PAGE_TYPES } from "@/features/storefront/layout/sections"
 import type { FooterAddType } from "@/features/storefront/layout/footer-group"
 import { SECTION_ICONS } from "./section-meta"
+
+/** What the chooser adds: a type, or a content page's own text (`rich_text` as `article`). */
+export type AddKind = BodySectionType | "article"
 
 const A = "storefront.editor.add"
 
@@ -22,12 +25,14 @@ interface AddSectionDialogProps {
   footerTypes?: readonly FooterAddType[]
   /** A category page's side of its products. */
   placement: Placement
+  /** A content page's own types it holds already (contact, the facts): each stands once. */
+  taken?: ReadonlySet<string>
   /** The page already shows its scrolling strips (adr/0049 Ek 2026-11-14 §4.1): no other is offered. */
   marqueeFull: boolean
   /** The page already shows its price bands strips: no other is offered. */
   priceBandsFull?: boolean
   onOpenChange: (open: boolean) => void
-  onPick: (type: BodySectionType) => void
+  onPick: (kind: AddKind) => void
 }
 
 /** The section types the page (or the footer group) takes, each with what it shows in one line. */
@@ -36,28 +41,27 @@ export function AddSectionDialog({
   page,
   footerTypes = [],
   placement,
+  taken = new Set(),
   marqueeFull,
   priceBandsFull = false,
   onOpenChange,
   onPick,
 }: AddSectionDialogProps) {
   const { t } = useTranslation()
-  const types: readonly BodySectionType[] = page === "footer" ? footerTypes : GROUP_TYPES[page]
+  // A content page's text first (adr/0073 Ek 2026-11-19 (2) K5)
+  const types: readonly AddKind[] =
+    page === "footer"
+      ? footerTypes
+      : page === "pages"
+        ? ["article", ...PAGE_TYPES]
+        : GROUP_TYPES[page]
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="lg">
         <DialogHeader>
           <DialogTitle>{t(`${A}.title`)}</DialogTitle>
           <DialogDescription>
-            {t(
-              `${A}.description.${
-                page === "category"
-                  ? placement
-                  : page === "pages"
-                    ? `page${placement === "top" ? "Top" : "Bottom"}`
-                    : page
-              }`
-            )}
+            {t(`${A}.description.${page === "category" ? placement : page}`)}
           </DialogDescription>
         </DialogHeader>
         <ul className="grid gap-2 sm:grid-cols-2">
@@ -65,8 +69,9 @@ export function AddSectionDialog({
             // The footer's newsletter box has its own name (adr/0049 Ek 2026-11-17)
             const kind = page === "footer" && type === "newsletter" ? "footer_newsletter" : type
             const Icon = SECTION_ICONS[kind]
-            const full =
-              type === "marquee"
+            const full = taken.has(type)
+              ? t(`${A}.once`)
+              : type === "marquee"
                 ? marqueeFull &&
                   t("storefront.editor.marquee.full", { max: MARQUEE_LIMITS.perPage })
                 : type === "price_bands" &&

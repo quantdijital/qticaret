@@ -16,6 +16,8 @@ interface SectionListProps<S extends BodySection | FooterSection> {
   inFooter?: boolean
   /** The page holds as many as it may: nothing is copied. */
   full: boolean
+  /** Whether a section may be copied when the page has room (a content page's contact section stands once). */
+  copies?: (section: S) => boolean
   /** A category page's side: each row may move to the other one. */
   placement?: Placement
   /** What moving to the other side is called, when not a category page's ("Metnin altına taşı"). */
@@ -50,6 +52,7 @@ export function SectionList<S extends BodySection | FooterSection>({
   sections,
   inFooter = false,
   full,
+  copies = () => true,
   placement,
   placeLabel,
   problems,
@@ -121,7 +124,7 @@ export function SectionList<S extends BodySection | FooterSection>({
               down: index < sections.length - 1 ? move(index + 1) : null,
             }}
             onDuplicate={
-              full
+              full || !copies(section)
                 ? null
                 : () => {
                     dispatch({ type: "duplicate", id: section.id })

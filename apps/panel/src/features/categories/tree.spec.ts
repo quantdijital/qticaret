@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest"
 import type { Category } from "./api/categories"
-import { ancestorHandles, descendantsOf, siblingFor, treeRows } from "./tree"
+import {
+  ancestorHandles,
+  ancestorNames,
+  descendantsOf,
+  matchingCategories,
+  siblingFor,
+  treeRows,
+} from "./tree"
 
 const category = (id: string, parent: string | null, rank: number, handle = id) =>
   ({ id, name: id, handle, parent_category_id: parent, rank }) as unknown as Category
@@ -36,5 +43,20 @@ describe("category tree", () => {
   it("finds the sibling to swap with, none at the ends", () => {
     expect(siblingFor(all, giyim, -1)?.id).toBe("ev")
     expect(siblingFor(all, ev, -1)).toBeUndefined()
+  })
+
+  it("finds categories by name or address in the tree's order, with their parents' names", () => {
+    const keten = all.find((item) => item.id === "keten")
+    if (!keten) {
+      throw new Error("no keten")
+    }
+    expect(matchingCategories(all, "  E ").map((item) => item.id)).toEqual([
+      "ev",
+      "gomlek",
+      "keten",
+    ])
+    expect(matchingCategories(all, " ")).toEqual([])
+    expect(ancestorNames(all, keten)).toEqual(["giyim", "gomlek"])
+    expect(ancestorNames(all, giyim)).toEqual([])
   })
 })

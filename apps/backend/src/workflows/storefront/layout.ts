@@ -8,23 +8,18 @@ import {
   transform,
 } from "@medusajs/framework/workflows-sdk"
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
-import { ValidationError } from "../../lib/errors"
-import { readStoredLayout } from "../../lib/storefront/layout"
-import type { LayoutDocument } from "../../lib/storefront/layout"
-import type StorefrontLayoutModuleService from "../../modules/storefront-layout/service"
-import { KEPT_REVISIONS } from "../../modules/storefront-layout/service"
+import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { readStoredLayoutTexts } from "../../lib/storefront/layout"
+import type { ContentPageSection, LayoutDocument } from "../../lib/storefront/layout"
 import { attachMediaStep } from "../media/steps/attach-media"
 import { keepDesignMarkStep } from "./design-steps"
 import { checkLayout } from "./layout-check"
 import { defaultLayout } from "./layout-default"
 import { json, layoutRow, layouts } from "./layout-row"
-import type { LayoutRow } from "./layout-row"
 import { prunePagesStep } from "./layout-pages"
-import { checkThemeStep, clearDraftMenusStep } from "./layout-steps"
-import { MENUS_LOCK } from "./menus"
-import { replaceMenusStep } from "./menus-replace"
-import { refreshStorefrontStep } from "./steps/refresh-storefront"
+import { checkThemeStep } from "./layout-steps"
+import { keepPageTextsStep } from "./page-texts-placed"
+import type { TextedDesign } from "./page-texts-placed"
 
 export { layoutRow } from "./layout-row"
 
@@ -63,12 +58,31 @@ const writeDraftStep = createStep(
   }
 )
 
-/** Checks what the design points at and returns the media it uses. */
-const checkLayoutStep = createStep(
+/**
+ * Checks what the design points at and returns the media it uses. The
+ * cards checked are those the stored draft did not hold (`stored`), or
+ * none new when it is the draft itself going live (`self`).
+ */
+export const checkLayoutStep = createStep(
   "storefront-layout-check",
-  async (draft: LayoutDocument, { container }) =>
-    new StepResponse(await checkLayout(container, draft))
+  async (
+    {
+      draft,
+      known,
+      carried = [],
+    }: { draft: LayoutDocument; known: "stored" | "self"; carried?: ContentPageSection[] },
+    { container }
+  ) => {
+    const before = known === "self" ? draft : ((await layoutRow(container))?.draft ?? null)
+    return new StepResponse(await checkLayout(container, draft, before, carried))
+  }
 )
+
+/** A draft to save, and where an older editor's pages keep their text (`placement`, K1). */
+export interface SaveDraftInput {
+  document: LayoutDocument
+  text_at?: Record<string, number>
+}
 
 /**
  * Saves the theme editor's draft (adr/0049), as the editor saves while
@@ -79,9 +93,14 @@ const checkLayoutStep = createStep(
  */
 export const saveLayoutDraftWorkflow = createWorkflow(
   "storefront-layout-save-draft",
-  (draft: LayoutDocument) => {
+  (input: SaveDraftInput) => {
     acquireLockStep(LAYOUT_LOCK)
-    const saved = saveDraftSteps(keepDesignMarkStep(draft))
+    // An older page's text kept where it stood (adr/0073 Ek 2026-11-19 (2) K1)
+    const kept = keepPageTextsStep(input)
+    const saved = saveDraftSteps(
+      keepDesignMarkStep(transform({ kept }, ({ kept }) => kept.document)),
+      transform({ kept }, ({ kept }) => kept.carried)
+    )
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(saved)
   }
@@ -94,11 +113,21 @@ export const saveLayoutDraftWorkflow = createWorkflow(
  * workflow run as another's step is skipped, so such a caller cannot use
  * `saveLayoutDraftWorkflow.runAsStep` and be covered.
  */
-export function saveDraftSteps(draft: LayoutDocument | WorkflowData<LayoutDocument>) {
+export function saveDraftSteps(
+  draft: LayoutDocument | WorkflowData<LayoutDocument>,
+  carried: ContentPageSection[] | WorkflowData<ContentPageSection[]> = []
+) {
   // A content page deleted since takes its layout with it (adr/0073 §1)
   const pruned = prunePagesStep(draft)
   const document = transform({ pruned }, ({ pruned }) => pruned.document)
-  const media = checkLayoutStep(document)
+  // A page's text placed from what it was (`carried`) is not the save's new work (K2)
+  const media = checkLayoutStep(
+    transform({ document, carried }, ({ document, carried }) => ({
+      draft: document,
+      known: "stored" as const,
+      carried,
+    }))
+  )
   checkThemeStep(document)
   const saved = writeDraftStep(document)
   attachMediaStep(transform({ media }, ({ media }) => ({ link: media, record: [] })))
@@ -108,143 +137,17 @@ export function saveDraftSteps(draft: LayoutDocument | WorkflowData<LayoutDocume
   }))
 }
 
-/** The draft to publish, read through today's schema; none saved yet: nothing to publish. */
-const loadDraftStep = createStep(
-  "storefront-layout-load-draft",
-  async (_: undefined, { container }) => {
-    const row = await layoutRow(container)
-    if (!row) {
-      throw new ValidationError("storefront_layout.nothing_to_publish", { field: "document" })
-    }
-    return new StepResponse(readStoredLayout(row.draft))
-  }
-)
-
-interface PublishUndo {
-  row: LayoutRow
-  made: string | null
-  pruned: Record<string, unknown>[]
-}
-
-/** The live design and revisions as they were before a publication. */
-async function unpublish(service: StorefrontLayoutModuleService, undo: PublishUndo) {
-  const { row } = undo
-  await service.updateStorefrontLayouts({
-    id: row.id,
-    published: row.published as Record<string, unknown> | null,
-    published_at: row.published_at,
-    published_by: row.published_by,
-    revision: row.revision,
-  })
-  if (undo.made) {
-    await service.deleteStorefrontLayoutRevisions(undo.made)
-  }
-  if (undo.pruned.length > 0) {
-    await service.createStorefrontLayoutRevisions(undo.pruned)
-  }
-}
-
-/**
- * Publishes the checked draft as the next revision; undone, the live
- * design and revisions are as they were. Its writes failing part-way are
- * put back here (the workflow undoes only a step that finished).
- */
-const publishStep = createStep(
-  "storefront-layout-publish",
-  async ({ draft, actor }: { draft: LayoutDocument; actor: string | null }, { container }) => {
-    const row = await layoutRow(container)
-    if (!row) {
-      throw new ValidationError("storefront_layout.nothing_to_publish", { field: "document" })
-    }
-    const service = layouts(container)
-    const revision = row.revision + 1
-    const now = new Date()
-    const undo: PublishUndo = { row, made: null, pruned: [] }
-    // The live copy holds no menu set: the live menus are the module's from now on, and a
-    // draft going back to what is live brings none (adr/0063 §3). The revision keeps it
-    const live: LayoutDocument = { ...draft, settings: { ...draft.settings, menus: null } }
-    try {
-      await service.updateStorefrontLayouts({
-        id: row.id,
-        published: json(live),
-        published_at: now,
-        published_by: actor,
-        revision,
-      })
-      const made = await service.createStorefrontLayoutRevisions({
-        revision,
-        document: json(draft),
-        published_at: now,
-        published_by: actor,
-      })
-      undo.made = made.id
-      const old = await service.listStorefrontLayoutRevisions(
-        { revision: { $lte: revision - KEPT_REVISIONS } },
-        { select: ["id", "revision", "document", "published_at", "published_by"] }
-      )
-      if (old.length > 0) {
-        await service.deleteStorefrontLayoutRevisions(old.map((each) => each.id))
-        undo.pruned = old
-      }
-    } catch (error) {
-      await unpublish(service, undo)
-      throw error
-    }
-    return new StepResponse({ revision, published_at: now }, undo)
-  },
-  async (undo, { container }) => {
-    if (undo) {
-      await unpublish(layouts(container), undo)
-    }
-  }
-)
-
-/**
- * Takes the draft live (adr/0049), checked again first: a record or an
- * image it names may have gone since it was saved. The storefront shows it
- * within its cache's minute; the theme's settings with it (adr/0063 §3).
- * A menu set the draft carries replaces the shop's menus under the menus'
- * lock and is then cleared from the draft; any step failing puts the
- * design, the menus and the draft back as they were.
- */
-export const publishLayoutWorkflow = createWorkflow(
-  "storefront-layout-publish",
-  (actor: string | null) => {
-    // The design's and the menus' locks at once: the Menüler screen waits for a set going live
-    const locks = { ...LAYOUT_LOCK, key: [LAYOUT_LOCK.key, MENUS_LOCK.key] }
-    acquireLockStep(locks)
-    // A content page deleted since the save goes live without its layout (adr/0073 §1)
-    const pruned = prunePagesStep(loadDraftStep())
-    const draft = transform({ pruned }, ({ pruned }) => pruned.document)
-    checkLayoutStep(draft)
-    const published = publishStep(transform({ draft, actor }, (data) => data))
-    const set = transform({ draft }, ({ draft }) => draft.settings.menus)
-    const menus = replaceMenusStep(set)
-    clearDraftMenusStep(draft)
-    emitEventStep({ eventName: LAYOUT_PUBLISHED, data: published })
-    releaseLockStep({ key: locks.key })
-    refreshStorefrontStep(
-      transform({ menus }, ({ menus }) => (menus.replaced ? ["menus" as const] : []))
-    )
-    return new WorkflowResponse(
-      transform({ published, pruned }, ({ published, pruned }) => ({
-        ...published,
-        dropped_pages: pruned.dropped_pages,
-      }))
-    )
-  }
-)
-
 /**
  * What the draft goes back to: a revision, else what is live, else the
- * default design. A revision brings the menus it put live (adr/0063 §3)
- * unless `menus` is false.
+ * default design, with where its older pages' text stands (`text_at`,
+ * adr/0073 Ek 2026-11-19 (2) K6). A revision brings the menus it put live
+ * (adr/0063 §3) unless `menus` is false.
  */
 export async function draftSource(
   container: MedusaContainer,
   revision: number | null,
   menus = true
-): Promise<LayoutDocument> {
+): Promise<TextedDesign> {
   if (revision !== null) {
     const [kept] = await layouts(container).listStorefrontLayoutRevisions(
       { revision },
@@ -254,9 +157,14 @@ export async function draftSource(
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.revision_unknown")
     }
     // Through today's schema: a document kept under an older one is checked again
-    const doc = readStoredLayout(kept.document)
-    return menus ? doc : { ...doc, settings: { ...doc.settings, menus: null } }
+    const { document: doc, text_at } = readStoredLayoutTexts(kept.document)
+    return {
+      document: menus ? doc : { ...doc, settings: { ...doc.settings, menus: null } },
+      text_at,
+    }
   }
   const row = await layoutRow(container)
-  return row?.published ? readStoredLayout(row.published) : defaultLayout(container)
+  return row?.published
+    ? readStoredLayoutTexts(row.published)
+    : { document: await defaultLayout(container), text_at: {} }
 }

@@ -1,4 +1,7 @@
+import { PAGE_ID, LAYOUT_LIMITS } from "../../../../lib/storefront/layout"
 import { storedSettings } from "../../../../lib/storefront/layout-settings"
+import { CONTENT_MODULE } from "../../../../modules/content"
+import type ContentModuleService from "../../../../modules/content/service"
 import type { MenuSet } from "../../../../lib/storefront/layout-menus"
 import { STOREFRONT_LAYOUT_MODULE } from "../../../../modules/storefront-layout"
 import type StorefrontLayoutModuleService from "../../../../modules/storefront-layout/service"
@@ -106,6 +109,32 @@ export async function presetSnapshot(scope: Resolver): Promise<Snapshot> {
   return { ...(await draftSnapshot(scope)), ...flatten(preset, "preset", {}) }
 }
 
+/**
+ * The content pages a publication takes live with it (`pages_live`,
+ * adr/0073 Ek 2026-11-19 (2) K5): each named page's status by its id, so
+ * the record says which went from draft to live. Ids only, never a
+ * page's title or text; a malformed id (refused by the route) is left out.
+ */
+export async function pagesLiveSnapshot(scope: Resolver, body: unknown): Promise<Snapshot> {
+  const named =
+    body !== null &&
+    typeof body === "object" &&
+    Array.isArray((body as Record<string, unknown>)["pages_live"])
+      ? ((body as Record<string, unknown>)["pages_live"] as unknown[])
+      : []
+  const ids = [
+    ...new Set(named.filter((id): id is string => typeof id === "string" && PAGE_ID.test(id))),
+  ].slice(0, LAYOUT_LIMITS.pages)
+  if (ids.length === 0) {
+    return {}
+  }
+  const entries = await (scope.resolve(CONTENT_MODULE) as ContentModuleService).listContentEntries(
+    { id: ids, kind: "page" },
+    { select: ["id", "status"], take: null }
+  )
+  return Object.fromEntries(entries.map((entry) => [`pages_live.${entry.id}.status`, entry.status]))
+}
+
 export const STOREFRONT_LAYOUT_RESOURCES: readonly AuditedResource[] = [
   {
     method: "POST",
@@ -113,7 +142,10 @@ export const STOREFRONT_LAYOUT_RESOURCES: readonly AuditedResource[] = [
     pattern: /^\/admin\/storefront-layout\/publish$/i,
     resourceType: "storefront_layout",
     resourceId: () => null,
-    snapshot: ({ scope }) => liveSnapshot(scope),
+    snapshot: async ({ scope, body }) => ({
+      ...(await liveSnapshot(scope)),
+      ...(await pagesLiveSnapshot(scope, body)),
+    }),
   },
   {
     method: "POST",

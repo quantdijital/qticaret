@@ -23,8 +23,11 @@ export const LAYOUT_LIMITS = {
   header: 5,
   /** The bar and above it a box, a rich text, trust badges, a strip (adr/0070 §4). */
   footer: 5,
-  /** Content pages with a layout of their own, and sections on one (adr/0073 §1). */
-  pages: 20,
+  /**
+   * Content pages with an entry in the design, and sections on one, its
+   * text sections among them (adr/0073 Ek 2026-11-19 (2) K1).
+   */
+  pages: 50,
   page: 12,
   items: 24,
   slides: 6,

@@ -6,6 +6,7 @@ import { CATALOG_ENTITY_TYPES } from "../../src/workflows/catalog/entity-paths"
 import { upsertSeoMetaWorkflow } from "../../src/workflows/seo/upsert-seo-meta"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import type { HttpClient } from "../helpers/http"
+import { writePageText } from "../helpers/pages"
 import { doc, landingKit, words } from "../helpers/landings"
 import type { LandingKit } from "../helpers/landings"
 
@@ -125,12 +126,17 @@ medusaIntegrationTestRunner({
           values: { seo_description: "Yaz için seçtiğimiz ürünler." },
         },
       })
-      const page = await kit.post<{ entry: { path: string } }>("/admin/content", {
+      const page = await kit.post<{ entry: { id: string; path: string } }>("/admin/content", {
         kind: "page",
         title: "Hakkımızda",
         status: "published",
-        body: doc("Biz kimiz, ne yaparız ve neden yaparız."),
       })
+      // A page's text is the system's to write (adr/0073 Ek 2026-11-19 (2) K4)
+      await writePageText(
+        getContainer(),
+        page.data.entry.id,
+        doc("Biz kimiz, ne yaparız ve neden yaparız.")
+      )
       // A blog category and a tag (adr/0019 ek 2026-11-03): one with its own text, one without
       const category = await kit.post<{ term: { id: string; path: string } }>(
         "/admin/content/terms",

@@ -2,6 +2,7 @@ import {
   BadgePercent,
   ChartColumnBig,
   FileText,
+  Files,
   FolderTree,
   Images,
   Layers,
@@ -96,7 +97,10 @@ export const NAV_GROUPS: NavGroup[] = [
       { key: "looks", to: "/storefront/looks", icon: LayoutTemplate },
       // The storefront's preferences are a panel of it (the owner, 2026-11-16)
       { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
+      // The shop's own pages, found here and written in the theme editor (adr/0073 Ek not 2026-11-20)
+      { key: "pages", to: "/storefront/pages", icon: Files },
       { key: "menus", to: "/storefront/menus", icon: ListTree },
+      // The blog: its posts, categories, tags and authors, and the filter pages
       { key: "content", to: "/content", icon: FileText },
       // Every picture the shop uploaded; the pickers of every image field open it too
       { key: "media", to: "/media", icon: Images },

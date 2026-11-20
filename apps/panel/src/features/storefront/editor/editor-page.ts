@@ -42,3 +42,16 @@ export const barePath = (path: string): string => {
   const [bare = ""] = path.split(/[?#]/)
   return bare.length > 1 ? bare.replace(/\/+$/, "") : bare
 }
+
+/**
+ * The content page picked as the tree shows it (adr/0073 Ek 2026-11-19 (2)
+ * K5): its id (null: none yet), its title for the group's heading, and
+ * whether its sections are its text made into them (`synthesized`, K1),
+ * only shown while the design has no room for its entry (`shownOnly`).
+ */
+export interface TreeContentPage {
+  id: string | null
+  title: string | null
+  synthesized: boolean
+  shownOnly: boolean
+}

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import type { ContentEntry } from "@/lib/store-api/content-entry"
 import { StoreApiError } from "@/lib/store-api/errors"
+import type * as PageText from "../page-text"
 import type * as Sections from "../sections"
 
 const state = vi.hoisted(() => ({ headers: new Headers() }))
@@ -20,21 +22,38 @@ vi.mock("../sections", async (actual) => ({
   ...(await actual<typeof Sections>()),
   sectionViews: views.sectionViews,
 }))
+// The text sections' own reading is `page-text.spec.ts`'s: here, where each opens
+const text = vi.hoisted(() => ({
+  pageTextView: vi.fn(),
+}))
+vi.mock("../page-text", async (actual) => ({
+  ...(await actual<typeof PageText>()),
+  pageTextView: text.pageTextView,
+}))
 
 const { contentSections, draftContentPage, pageLayoutOf } = await import("../page-sections")
 
 const LINK = `sfl_01ABC.to51q5.${"a".repeat(43)}`
 const SESSION = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
 const ID = "cnt_01KABC"
+// One list since adr/0073 Ek 2026-11-19 (2) K1, the page's text among its sections
 const LAYOUT = {
   page_id: ID,
   sections: [
-    { id: "ust", type: "rich_text", placement: "top" },
-    { id: "alt", type: "help", placement: "bottom" },
-    { id: "alt2", type: "faq", placement: "bottom" },
+    { id: "ust", type: "rich_text" },
+    { id: "metin", type: "rich_text", variant: "article" },
+    { id: "alt", type: "help" },
+    { id: "alt2", type: "faq" },
   ],
 }
-const ENTRY = { id: ID, kind: "page", title: "İade", path: "/iade-kosullari", html: "" }
+const ENTRY = {
+  id: ID,
+  kind: "page",
+  title: "İade",
+  path: "/iade-kosullari",
+  html: "",
+  image_url: null,
+} as unknown as ContentEntry
 
 const on = (token: string | null) => {
   state.headers = new Headers(token ? { "x-qt-layout-preview": token } : {})
@@ -47,6 +66,10 @@ describe("a content page's layout", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     on(null)
+    text.pageTextView.mockImplementation(
+      (section: { id: string; type: string }, _t: unknown, place: { opens: boolean }) =>
+        Promise.resolve({ id: section.id, type: section.type, opens: place.opens })
+    )
   })
 
   it("reads the published layout for a shopper", async () => {
@@ -90,26 +113,69 @@ describe("a content page's layout", () => {
     await expect(pageLayoutOf(ID)).rejects.toThrow("boom")
   })
 
-  it("gives the sections above the text and below it, read as every page's", async () => {
+  it("gives the page's sections as one list in its order, its text sections read as the page's", async () => {
     reads.publishedPageLayout.mockResolvedValue(LAYOUT)
-    expect(await contentSections(ID, t)).toEqual({
-      top: [{ id: "ust", type: "help" }],
-      bottom: [
-        { id: "alt", type: "help" },
-        { id: "alt2", type: "help" },
-      ],
-    })
-    expect(views.sectionViews).toHaveBeenCalledTimes(2)
+    expect(await contentSections(ID, ENTRY, t)).toEqual([
+      { id: "ust", type: "help" },
+      { id: "metin", type: "rich_text", opens: false },
+      { id: "alt", type: "help" },
+      { id: "alt2", type: "help" },
+    ])
+    expect(views.sectionViews).toHaveBeenCalledTimes(3)
+    expect(text.pageTextView).toHaveBeenCalledTimes(1)
   })
 
-  it("gives none for a page without a layout or with nothing left to show", async () => {
-    reads.publishedPageLayout.mockResolvedValue(null)
-    expect(await contentSections(ID, t)).toBeUndefined()
+  it("lets only a text that opens a page without a cover load its picture at once", async () => {
+    reads.publishedPageLayout.mockResolvedValue({
+      page_id: ID,
+      sections: [
+        { id: "iletisim", type: "contact" },
+        { id: "kargo", type: "shipping_facts" },
+      ],
+    })
+    expect(await contentSections(ID, ENTRY, t)).toEqual([
+      { id: "iletisim", type: "contact", opens: true },
+      { id: "kargo", type: "shipping_facts", opens: false },
+    ])
+    const covered = { ...ENTRY, image_url: "https://cdn.example.com/kapak.jpg" }
+    expect(await contentSections(ID, Promise.resolve(covered), t)).toEqual([
+      { id: "iletisim", type: "contact", opens: false },
+      { id: "kargo", type: "shipping_facts", opens: false },
+    ])
+  })
+
+  it("keeps a text section's look and screens, and leaves out one with nothing to show", async () => {
+    reads.publishedPageLayout.mockResolvedValue({
+      page_id: ID,
+      sections: [
+        { id: "metin", type: "rich_text", variant: "article", device: "mobile", look: {} },
+        { id: "odeme", type: "payment_facts" },
+      ],
+    })
+    text.pageTextView.mockImplementation((section: { id: string; type: string }) =>
+      Promise.resolve(
+        section.type === "payment_facts" ? null : { id: section.id, type: section.type }
+      )
+    )
+    expect(await contentSections(ID, ENTRY, t)).toEqual([
+      { id: "metin", type: "rich_text", device: "mobile" },
+    ])
+  })
+
+  it("draws the page's text alone, unmarked, when its layout does not come (K7)", async () => {
+    reads.publishedPageLayout.mockRejectedValue(new StoreApiError(503, null, null))
+    const entry = { ...ENTRY, html: "<p>Ayna.</p>" }
+    expect(await contentSections(ID, entry, t)).toEqual([
+      { id: "", type: "rich_text", opens: true },
+    ])
+    expect(text.pageTextView).toHaveBeenCalledWith(
+      { id: "", type: "rich_text", variant: "article", title: null, html: "<p>Ayna.</p>" },
+      t,
+      { opens: true, anchors: expect.any(Set) as Set<string> }
+    )
+    // An empty answer is a page of no sections, not a failure
     reads.publishedPageLayout.mockResolvedValue({ page_id: ID, sections: [] })
-    expect(await contentSections(ID, t)).toBeUndefined()
-    reads.publishedPageLayout.mockResolvedValue(LAYOUT)
-    views.sectionViews.mockResolvedValue([])
-    expect(await contentSections(ID, t)).toBeUndefined()
+    expect(await contentSections(ID, ENTRY, t)).toEqual([])
   })
 })
 

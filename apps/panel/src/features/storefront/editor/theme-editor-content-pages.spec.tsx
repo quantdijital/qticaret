@@ -1,18 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, waitFor, within } from "@testing-library/react"
 import type { UserEvent } from "@testing-library/user-event"
+import type { JSONContent } from "@tiptap/react"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
-import {
-  DOC_WITH_PAGES,
-  FULL_PAGES,
-  PAGE_LAYOUTS,
-  pageSection,
-  serveContent,
-} from "./content-pages.fixtures"
+import { DOC_WITH_PAGES, FULL_PAGES, pageSection, serveContent } from "./content-pages.fixtures"
 import type { EditorSearch } from "./editor-search"
 import { ThemeEditorPage } from "./theme-editor-page"
 import {
@@ -38,15 +33,7 @@ const admin = vi.hoisted<AdminMock>(() => ({
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock }, admin } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    to,
-    params,
-    children,
-  }: {
-    to: string
-    params?: { id: string }
-    children: ReactNode
-  }) => <a href={params ? to.replace("$id", params.id) : to}>{children}</a>,
+  Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
   useRouter: () => ({ history: { back: vi.fn() } }),
   useCanGoBack: () => true,
   useNavigate: () => navigate,
@@ -55,10 +42,20 @@ vi.mock("@tanstack/react-router", () => ({
 
 let user: UserEvent
 
+const TEXT: JSONContent = {
+  type: "doc",
+  content: [{ type: "paragraph", content: [{ type: "text", text: "İade on dört gün içinde." }] }],
+}
+
 /** The editor on the shop's design, opened on `content` as a reload of `?icerik=` would. */
-function open(doc: LayoutDocument, content: string | null = null, options: ServeOptions = {}) {
+function open(
+  doc: LayoutDocument,
+  content: string | null = null,
+  options: ServeOptions = {},
+  bodies: Record<string, JSONContent> = {}
+) {
   serve(fetchMock, admin, layoutOf({ draft: doc }), options)
-  serveContent(fetchMock)
+  serveContent(fetchMock, undefined, bodies)
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={client}>
@@ -77,13 +74,17 @@ const inAddress = () => {
 
 const picker = () => screen.getByRole("combobox", { name: "Düzenlenen içerik sayfası" })
 const frame = () => screen.getByTitle("Vitrin önizlemesi")
+const rows = (tree: HTMLElement) =>
+  within(within(tree).getByRole("list", { name: "Sayfadaki bölümler" }))
+    .getAllByRole("listitem")
+    .map((row) => row.textContent)
 
 async function chooseContentPage() {
   await user.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
   await user.click(await screen.findByRole("option", { name: "İçerik sayfası" }))
 }
 
-/** adr/0073 §5: a content page's own layout, picked beside the page choice. */
+/** adr/0073 Ek 2026-11-19 (2) K1, K5: a content page is the theme editor's, one list of sections. */
 describe("the theme editor's content pages", () => {
   beforeEach(() => {
     user = holdClock()
@@ -94,7 +95,7 @@ describe("the theme editor's content pages", () => {
     releaseClock()
   })
 
-  it("picks a page beside the page choice, drafts tagged, own layouts marked, kept in the address", async () => {
+  it("picks a page beside the page choice, a new one first, drafts tagged, kept in the address", async () => {
     await open(DOC_WITH_PAGES)
     await chooseContentPage()
 
@@ -106,13 +107,13 @@ describe("the theme editor's content pages", () => {
     await user.click(picker())
     const options = await screen.findAllByRole("option")
     expect(options.map((option) => option.textContent)).toEqual([
+      "Yeni sayfa",
       "Hakkımızda/hakkimizda",
       "İletişim/iletisim",
       "İade koşulları/iade-kosullariTaslak",
     ])
-    const [about, , refund] = options
-    if (!about || !refund) throw new Error("no pages listed")
-    expect(within(about).getByRole("img", { name: "Kendi düzeni var" })).toBeTruthy()
+    const refund = options[3]
+    if (!refund) throw new Error("no pages listed")
     expect(within(refund).queryByRole("img", { name: "Kendi düzeni var" })).toBeNull()
 
     await user.click(refund)
@@ -125,105 +126,107 @@ describe("the theme editor's content pages", () => {
         expect.stringContaining("?sayfa=%2Fiade-kosullari&icerik=cnt_iade") as string
       )
     })
-
-    // Back on a template, the address names no page
-    await user.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
-    await user.click(await screen.findByRole("option", { name: "Ana sayfa" }))
-    expect(inAddress()).toEqual({ open: "preferences" })
   })
 
-  it("opens on the page the address names, the contact page's text named with its form", async () => {
-    // By the page's id: its address may change (adr/0073 Açık kararlar 3)
-    const tree = await open(DOC_WITH_PAGES, "cnt_iletisim", {
-      storefront: { contact_page_id: "cnt_iletisim", contact_form_path: null },
-    })
+  it("lists the page's sections as one list, its contact section among them, edited in place", async () => {
+    const tree = await open(DOC_WITH_PAGES, "cnt_iletisim")
 
     expect(await within(tree).findByRole("group", { name: "İletişim" })).toBeVisible()
-    expect(screen.getByRole("combobox", { name: "Düzenlenen sayfa" })).toHaveTextContent(
-      "İçerik sayfası"
-    )
-    const side = (name: string) =>
-      within(screen.getByRole("list", { name }))
-        .getAllByRole("listitem")
-        .map((row) => row.textContent)
-    expect(side("Üstte")).toEqual(["Sık sorulan sorular"])
-    expect(within(tree).queryByRole("list", { name: "Altta" })).toBeNull()
+    expect(rows(tree)).toEqual(["Sık sorulan sorular", "İletişim"])
+    expect(within(tree).queryByRole("list", { name: "Üstte" })).toBeNull()
+    expect(within(tree).getByRole("button", { name: "Sayfa ayarları" })).toBeVisible()
+
+    await user.click(within(tree).getByRole("button", { name: "İletişim" }))
+    await screen.findByRole("region", { name: "İletişim" })
+    const form = screen.getByRole("switch", { name: "İletişim formu" })
+    expect(form).toBeChecked()
+    await user.click(form)
+    await pass(AUTOSAVE_MS)
     await waitFor(() => {
-      expect(frame()).toHaveAttribute(
-        "src",
-        expect.stringContaining("?sayfa=%2Filetisim") as string
-      )
+      expect(lastSaved(fetchMock)?.pages[1]?.sections[1]).toMatchObject({
+        type: "contact",
+        form: "off",
+        imprint: "on",
+      })
     })
-    expect(frame().getAttribute("src")).not.toContain("icerik=")
-
-    await user.click(
-      await within(tree).findByRole("button", { name: "İletişim bilgileri ve form" })
-    )
-    expect(await screen.findByText(/iletişim bilgileri Mağaza profilinde/)).toBeVisible()
-    expect(screen.getByRole("link", { name: "İçerik'te düzenle" })).toHaveAttribute(
-      "href",
-      "/content/cnt_iletisim"
-    )
+    // One list: nothing of the old places goes to the server
+    expect(JSON.stringify(lastSaved(fetchMock)?.pages)).not.toContain("placement")
   })
 
-  it("names the contact page's text by a section's old path from before the ids", async () => {
-    const tree = await open(DOC_WITH_PAGES, "cnt_iletisim", {
-      storefront: { contact_page_id: null, contact_form_path: "/iletisim" },
-    })
+  it("shows a page with no layout its text as sections, made the page's with the first change", async () => {
+    const tree = await open(DOC, "cnt_iade", {}, { cnt_iade: TEXT })
 
-    expect(
-      await within(tree).findByRole("button", { name: "İletişim bilgileri ve form" })
-    ).toBeVisible()
+    expect(await within(tree).findByRole("button", { name: "Sayfa metni" })).toBeVisible()
+    await pass(AUTOSAVE_MS)
+    expect(lastSaved(fetchMock)?.pages ?? []).toEqual([])
+
+    await user.click(within(tree).getByRole("button", { name: "Sayfa metni" }))
+    await screen.findByRole("heading", { level: 2, name: "Sayfa metni" })
+    await user.click(screen.getByRole("switch", { name: "İçindekiler" }))
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(lastSaved(fetchMock)?.pages).toMatchObject([
+        {
+          page_id: "cnt_iade",
+          sections: [{ type: "rich_text", variant: "article", outline: "off", body: TEXT }],
+        },
+      ])
+    })
   })
 
-  it("makes the page's layout with its first section and takes it away with its last", async () => {
-    const tree = await open(DOC_WITH_PAGES, "cnt_iade")
-    expect(await within(tree).findByRole("button", { name: "Sayfanın metni" })).toBeVisible()
+  it("shows the contact page with no layout as its contact section, by the page's id", async () => {
+    const tree = await open(
+      DOC,
+      "cnt_iletisim",
+      { storefront: { contact_page_id: "cnt_iletisim" } },
+      { cnt_iletisim: TEXT }
+    )
+    await within(tree).findByRole("list", { name: "Sayfadaki bölümler" })
+    expect(rows(tree)).toEqual(["İletişim"])
+  })
 
-    await user.click(within(tree).getByRole("button", { name: "Üste bölüm ekle" }))
+  it("adds a section after the page's last, without a place", async () => {
+    const tree = await open(DOC_WITH_PAGES, "cnt_hakkimizda")
+    await within(tree).findByRole("list", { name: "Sayfadaki bölümler" })
+
+    await user.click(within(tree).getByRole("button", { name: "Bölüm ekle" }))
     const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
-    expect(chooser).toHaveTextContent("sayfanın metninin üstüne eklenir")
+    expect(chooser).toHaveTextContent("Bu sayfaya, bölümlerin sonuna eklenir")
     expect(within(chooser).queryByRole("button", { name: /Giriş/ })).toBeNull()
     await user.click(within(chooser).getByRole("button", { name: /Yardım kutusu/ }))
     await pass(AUTOSAVE_MS)
     await waitFor(() => {
-      expect(lastSaved(fetchMock)?.pages.map((page) => page.page_id)).toEqual([
-        "cnt_hakkimizda",
-        "cnt_iletisim",
-        "cnt_iade",
+      expect(lastSaved(fetchMock)?.pages[0]?.sections.map((each) => each.type)).toEqual([
+        "rich_text",
+        "help",
+        "reviews",
+        "help",
       ])
     })
-    expect(lastSaved(fetchMock)?.pages[2]?.sections).toMatchObject([
-      { type: "help", placement: "top" },
-    ])
-    expect(lastSaved(fetchMock)?.pages.slice(0, 2)).toEqual(PAGE_LAYOUTS)
-
-    await user.click(await screen.findByRole("button", { name: "Bölümlere dön" }))
-    await user.click(within(tree).getByRole("button", { name: "Yardım kutusu için işlemler" }))
-    await user.click(await screen.findByRole("menuitem", { name: "Kaldır" }))
-    await pass(AUTOSAVE_MS)
-    await waitFor(() => {
-      expect(lastSaved(fetchMock)?.pages).toEqual(PAGE_LAYOUTS)
-    })
+    expect(lastSaved(fetchMock)?.pages[0]?.sections[3]).not.toHaveProperty("placement")
   })
 
-  it("says no other page takes a layout while twenty have one", async () => {
+  it("says no other page takes a layout while fifty have one, its text only shown", async () => {
     const tree = await open({ ...DOC, pages: FULL_PAGES }, "cnt_hakkimizda")
-    const add = await within(tree).findByRole("button", { name: "Alta bölüm ekle" })
-    expect(add).toBeDisabled()
-    expect(within(tree).getByRole("button", { name: "Üste bölüm ekle" })).toBeDisabled()
-    expect(tree).toHaveTextContent("Kendi düzeni olan en çok 20 sayfa olabilir.")
-
+    expect(await within(tree).findByRole("button", { name: "Bölüm ekle" })).toBeDisabled()
+    expect(tree).toHaveTextContent("Kendi düzeni olan en çok 50 sayfa olabilir.")
     await user.click(picker())
     const list = await screen.findByRole("dialog")
-    expect(within(list).getByText(/Kendi düzeni olan en çok 20 sayfa/)).toBeVisible()
+    expect(within(list).getByText(/Kendi düzeni olan en çok 50 sayfa/)).toBeVisible()
   })
 
-  it("says so when the address names a page İçerik no longer has, adding nothing to it", async () => {
+  it("says a page with text and no room is only shown", async () => {
+    const tree = await open({ ...DOC, pages: FULL_PAGES }, "cnt_iade", {}, { cnt_iade: TEXT })
+    expect(await within(tree).findByRole("button", { name: "Sayfa metni" })).toBeVisible()
+    expect(tree).toHaveTextContent("Sayfa sınırı dolu: bu sayfanın metni yalnız gösteriliyor.")
+    expect(within(tree).getByRole("button", { name: "Bölüm ekle" })).toBeDisabled()
+  })
+
+  it("says so when the address names a page the shop no longer has, adding nothing to it", async () => {
     const tree = await open(DOC, "cnt_silindi")
     expect(await screen.findByText(/Bu sayfa bulunamadı/)).toBeVisible()
     expect(tree).toHaveTextContent("Bölüm eklemek için yukarıdan bir sayfa seçin")
-    expect(within(tree).queryByRole("button", { name: "Üste bölüm ekle" })).toBeNull()
+    expect(within(tree).queryByRole("button", { name: "Bölüm ekle" })).toBeNull()
   })
 
   it("adds no thirteenth section to a page", async () => {
@@ -234,7 +237,7 @@ describe("the theme editor's content pages", () => {
       { ...DOC, pages: [{ page_id: "cnt_hakkimizda", sections: twelve }] },
       "cnt_hakkimizda"
     )
-    expect(await within(tree).findByRole("button", { name: "Alta bölüm ekle" })).toBeDisabled()
+    expect(await within(tree).findByRole("button", { name: "Bölüm ekle" })).toBeDisabled()
     expect(tree).toHaveTextContent("Bir sayfada en çok 12 bölüm olabilir.")
   })
 })

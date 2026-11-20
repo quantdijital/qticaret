@@ -21,7 +21,7 @@ import type { Opened } from "./opened"
 import { SectionPanel } from "./section-panel"
 import { LooksPanel } from "./shared/looks-panel"
 import { PreferencesPanel } from "./shared/preferences-panel"
-import { PageTextPanel } from "./page-text-panel"
+import { PageSettingsPanel } from "./page-settings-panel"
 import { ThemePanel } from "./theme-panel"
 import { cardVariantsInUse } from "./forms/theme-registry"
 import { FooterPartPanel } from "./footer-rows/footer-part-panel"
@@ -39,6 +39,8 @@ interface OpenedFormProps {
   onClose: () => void
   /** A section's own panel (a free rows footer's, back from one of its rows or blocks). */
   onOpenSection?: (id: string) => void
+  /** A content page deleted from its settings (adr/0073 Ek 2026-11-19 (2) K5). */
+  onPageDeleted?: (id: string) => void
 }
 
 /**
@@ -57,6 +59,7 @@ export function OpenedForm({
   onRemove,
   onClose,
   onOpenSection = () => undefined,
+  onPageDeleted = () => undefined,
 }: OpenedFormProps) {
   const { t } = useTranslation()
   const footer = useFooterVariant(doc, dispatch)
@@ -164,8 +167,8 @@ export function OpenedForm({
   if (opened?.kind === "preferences") {
     return <PreferencesPanel onBack={onClose} />
   }
-  if (opened?.kind === "page-text") {
-    return <PageTextPanel pageId={opened.page} contact={opened.contact} onBack={onClose} />
+  if (opened?.kind === "page-settings") {
+    return <PageSettingsPanel pageId={opened.page} onBack={onClose} onDeleted={onPageDeleted} />
   }
   if (opened?.kind === "looks") {
     return (

@@ -14,7 +14,7 @@ import {
   NewsletterStandard,
   NewsletterStrip,
 } from "./newsletter-sketches"
-import { RichTextPane, RichTextWithImage } from "./rich-text-sketches"
+import { RichTextArticle, RichTextPane, RichTextWithImage } from "./rich-text-sketches"
 import {
   ShelfCarousel,
   ShelfColumns,
@@ -205,7 +205,7 @@ const SKETCHES: {
     strip: NewsletterStrip,
     in_footer: NewsletterInFooter,
   },
-  rich_text: { pane: RichTextPane, with_image: RichTextWithImage },
+  rich_text: { pane: RichTextPane, with_image: RichTextWithImage, article: RichTextArticle },
   products: {
     grid: ShelfGrid,
     carousel: ShelfCarousel,
