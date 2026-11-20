@@ -102,13 +102,66 @@ describe("an old site's picture (adr/0042 Ek 2026-11-20)", () => {
   })
 
   it.each([
-    [new SafeFetchError("timeout"), "migration.image_unreachable_timeout"],
     [new SafeFetchError("dns_failed"), "migration.image_unreachable_network"],
     [new SafeFetchError("request_failed"), "migration.image_unreachable_network"],
   ])("tries a failing connection again and names it (%s)", async (error, key) => {
     const { deps, safeFetch } = host(error, error, error, error)
     await expect(refusal(downloadImage(ADDRESS, undefined, undefined, deps))).resolves.toBe(key)
     expect(safeFetch).toHaveBeenCalledTimes(IMAGE_ATTEMPTS)
+  })
+
+  it("tries a timed-out picture again once only", async () => {
+    const slow = new SafeFetchError("timeout")
+    const { deps, safeFetch } = host(slow, slow, slow, slow)
+    await expect(refusal(downloadImage(ADDRESS, undefined, undefined, deps))).resolves.toBe(
+      "migration.image_unreachable_timeout"
+    )
+    expect(safeFetch).toHaveBeenCalledTimes(2)
+  })
+
+  it("gives a host up after ten refusals in a row, its other pictures refused at once", async () => {
+    const pace = new FetchPace(4, () => 0, noWait)
+    const failing = Array.from({ length: 20 }, () => answer(503))
+    const { deps, safeFetch } = host(...failing)
+    // Three pictures at four tries each: the tenth refusal gives the host up
+    for (let n = 0; n < 3; n++) {
+      await expect(refusal(downloadImage(ADDRESS, undefined, pace, deps))).resolves.toBe(
+        "migration.image_unreachable_server"
+      )
+    }
+    expect(safeFetch).toHaveBeenCalledTimes(10)
+    await expect(refusal(downloadImage(ADDRESS, undefined, pace, deps))).resolves.toBe(
+      "migration.image_unreachable_server"
+    )
+    expect(safeFetch).toHaveBeenCalledTimes(10)
+    // Another host is still tried
+    await expect(
+      downloadImage("https://cdn.example.com/tava.webp", undefined, pace, {
+        ...deps,
+        safeFetch: () => Promise.resolve(answer(200)),
+      })
+    ).resolves.toEqual(BYTES)
+  })
+
+  it("forgives a host its refusals once it answers", async () => {
+    const pace = new FetchPace(4, () => 0, noWait)
+    const { deps } = host(...Array.from({ length: 9 }, () => answer(503)), answer(200))
+    await refusal(downloadImage(ADDRESS, undefined, pace, deps))
+    await refusal(downloadImage(ADDRESS, undefined, pace, deps))
+    await expect(downloadImage(ADDRESS, undefined, pace, deps)).resolves.toEqual(BYTES)
+    expect(pace.trippedBy("eski.example.com")).toBeNull()
+  })
+
+  it("leaves every picture for a later run once the time budget is spent", async () => {
+    let now = 0
+    const pace = new FetchPace(4, () => now, noWait, 1_000)
+    const { deps, safeFetch } = host()
+    await expect(downloadImage(ADDRESS, undefined, pace, deps)).resolves.toEqual(BYTES)
+    now = 1_000
+    await expect(refusal(downloadImage(ADDRESS, undefined, pace, deps))).resolves.toBe(
+      "migration.image_unreachable_deferred"
+    )
+    expect(safeFetch).toHaveBeenCalledTimes(1)
   })
 
   it.each([

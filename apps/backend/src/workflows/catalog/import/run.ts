@@ -59,6 +59,19 @@ export type ImportAudit = (
 // The handles an audit entry names, within its size budget
 const MAX_AUDITED_HANDLES = 500
 
+/**
+ * The variants a written plan stops counting the stock of (`Takipsiz`,
+ * adr/0018 Ek 2026-11-20): existing ones by id, new ones counted.
+ */
+export function untrackedOf(plan: ImportPlan): { ids: string[]; created: number } {
+  return {
+    ids: plan.variantUpdates.flatMap((update) =>
+      update["manage_inventory"] === false && typeof update["id"] === "string" ? [update["id"]] : []
+    ),
+    created: plan.variantCreates.filter((create) => create["manage_inventory"] === false).length,
+  }
+}
+
 /** What a run reports to, and where its writes come from (the job, its requester). */
 export interface ImportHooks {
   progress: (percent: number) => Promise<void>
@@ -93,6 +106,8 @@ async function applyPlans(
   const counts = { create: 0, update: 0, failed: 0, limited: 0 }
   const written: string[] = []
   const limited: string[] = []
+  // Tracking turned off: in the audit entry by id and count (adr/0018 Ek 2026-11-20)
+  const untracked = { ids: [] as string[], created: 0 }
   const isBlocked = await publishGate(container)
   // New products the package still allows; changes to existing ones are never held back
   let allowance = await productAllowance(container)
@@ -121,6 +136,9 @@ async function applyPlans(
             allowance -= 1
           }
           written.push(plan.handle)
+          const off = untrackedOf(plan)
+          untracked.ids.push(...off.ids)
+          untracked.created += off.created
           rows.push(
             productRow(plan.line, plan.handle, isNew ? "created" : "updated", measuresNote(plan))
           )
@@ -146,7 +164,19 @@ async function applyPlans(
     }
   } finally {
     // What was written, however the run ended
-    await context.audit("finished", { ...counts, handles: written.slice(0, MAX_AUDITED_HANDLES) })
+    await context.audit("finished", {
+      ...counts,
+      handles: written.slice(0, MAX_AUDITED_HANDLES),
+      ...(untracked.ids.length + untracked.created > 0
+        ? {
+            stock_untracked: {
+              updated: untracked.ids.length,
+              created: untracked.created,
+              variant_ids: untracked.ids.slice(0, MAX_AUDITED_HANDLES),
+            },
+          }
+        : {}),
+    })
   }
   return { rows, counts, limited }
 }

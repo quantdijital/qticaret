@@ -1,5 +1,6 @@
 import type { SheetProduct } from "../../../../lib/catalog-sheet"
 import { planImport } from "../plan"
+import { untrackedOf } from "../run"
 import type { ExistingProduct, ImportReferences } from "../references"
 
 const refs = (overrides: Partial<ImportReferences> = {}): ImportReferences => ({
@@ -81,6 +82,7 @@ const existing: ExistingProduct = {
       ],
       inventoryItemId: "iitem_s",
       manageInventory: true,
+      reserved: 0,
       levels: { sloc_1: 2 },
       cost: null,
     },
@@ -92,6 +94,7 @@ const existing: ExistingProduct = {
       prices: [],
       inventoryItemId: null,
       manageInventory: false,
+      reserved: 0,
       levels: {},
       cost: null,
     },
@@ -251,6 +254,41 @@ describe("import plan", () => {
     // M keeps none already: no change
     expect(plan?.variantUpdates).toEqual([{ id: "var_s", manage_inventory: false }])
     expect(plan?.stock).toEqual([])
+  })
+
+  it("refuses `Takipsiz` for a variant whose stock open orders hold", () => {
+    const reserved = {
+      ...existing,
+      variants: existing.variants.map((variant) =>
+        variant.id === "var_s" ? { ...variant, reserved: 1 } : variant
+      ),
+    }
+    const { plan, problems } = planImport(
+      product({ variants: [{ line: 2, options: [["Beden", "S"]], untracked: true }] }),
+      refs({ products: new Map([["kupa", reserved]]) })
+    )
+    expect(problems).toEqual([
+      { line: 2, key: "catalog_import.stock_untracked_reserved", column: "Stok" },
+    ])
+    expect(plan?.variantUpdates ?? []).toEqual([])
+  })
+
+  it("names the variants a plan stops counting, for the audit entry", () => {
+    const { plan } = planImport(
+      product({
+        variants: [
+          { line: 2, options: [["Beden", "S"]], untracked: true },
+          { line: 3, options: [["Beden", "M"]], untracked: true },
+        ],
+      }),
+      withExisting()
+    )
+    expect(plan && untrackedOf(plan)).toEqual({ ids: ["var_s"], created: 0 })
+    const fresh = planImport(
+      product({ variants: [{ line: 2, options: [], price: 10, untracked: true }] }),
+      refs()
+    )
+    expect(fresh.plan && untrackedOf(fresh.plan)).toEqual({ ids: [], created: 1 })
   })
 
   it("takes a product live without measurements, noting it (adr/0054)", () => {

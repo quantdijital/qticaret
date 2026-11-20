@@ -53,6 +53,9 @@ describe("a Google Merchant feed as the common records (F14.3)", () => {
     expect(records.brands.map((brand) => brand.name)).toEqual(["Demirci & Oğulları"])
     expect(records.notes).toEqual([
       { kind: "product", source_key: "DOLAR", key: "migration.feed_currency" },
+      // Moved without a count, always sellable: the shop is told (adr/0042 Ek 2026-11-20)
+      { kind: "product", source_key: "group:TAVA", key: "migration.feed_stock_untracked" },
+      { kind: "product", source_key: "group:KASIK", key: "migration.feed_stock_untracked" },
       { kind: "product", source_key: "FIYATSIZ", key: "migration.feed_item_invalid" },
     ])
   })

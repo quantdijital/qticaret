@@ -14,7 +14,7 @@ import type MigrationModuleService from "../../modules/migration/service"
 import type { RememberedItem } from "../../modules/migration/service"
 import { removeFiles, storePublicFile } from "../media/files"
 import { registerMediaWorkflow, setProductAltsWorkflow } from "../media/workflows"
-import { thumbnailChange } from "./thumbnail"
+import { THUMBNAIL_KIND, standInKeyOf, thumbnailChange } from "./thumbnail"
 import { keepImageTies, tieVariantImages } from "./variant-images"
 import type { ImageWithTies } from "./variant-images"
 
@@ -184,14 +184,13 @@ export async function migrateImages(
     const stored = outcomes.flatMap((outcome) => ("asset" in outcome ? [outcome] : []))
     const { data } = await query.graph({
       entity: "product",
-      fields: ["title", "thumbnail", "metadata", "images.id", "images.url", "images.variants.id"],
+      fields: ["title", "thumbnail", "images.id", "images.url", "images.variants.id"],
       filters: { id: productId },
     })
     const current = data[0] as
       | {
           title: string
           thumbnail: string | null
-          metadata: Record<string, unknown> | null
           images: ImageWithTies[] | null
         }
       | undefined
@@ -199,6 +198,17 @@ export async function migrateImages(
       const kept = (current.images ?? []).map((image) => image.url)
       const urlsAfter = [...kept, ...stored.map(({ asset }) => asset.url)]
       const featured = product.images[0]
+      const standInKey = standInKeyOf(product.source_key)
+      const standIn = (await migration.targetsOf(source, THUMBNAIL_KIND, [standInKey])).get(
+        standInKey
+      )
+      const change = thumbnailChange({
+        current,
+        standIn: standIn?.status === "done" ? (standIn.target_id ?? null) : null,
+        first: urlsAfter[0] ?? null,
+        featured: stored.find(({ url }) => url === featured)?.asset.url ?? null,
+        featuredFailed: outcomes.some((each) => each.url === featured && "key" in each),
+      })
       await updateProductsWorkflow(container as MedusaContainer).run({
         input: {
           selector: { id: productId },
@@ -208,12 +218,7 @@ export async function migrateImages(
               ...(current.images ?? []).map(({ id, url }) => ({ id, url })),
               ...stored.map(({ asset }) => ({ url: asset.url })),
             ],
-            ...thumbnailChange({
-              current,
-              first: urlsAfter[0] ?? null,
-              featured: stored.find(({ url }) => url === featured)?.asset.url ?? null,
-              featuredFailed: outcomes.some((each) => each.url === featured && "key" in each),
-            }),
+            ...(change.thumbnail ? { thumbnail: change.thumbnail } : {}),
           },
         },
       })
@@ -232,6 +237,16 @@ export async function migrateImages(
           })),
         },
       })
+      if (change.standIn !== undefined) {
+        // "skipped": the stand-in record cleared, the featured picture in its place
+        await migration.remember(source, THUMBNAIL_KIND, [
+          {
+            source_key: standInKey,
+            target_id: change.standIn,
+            status: change.standIn ? "done" : "skipped",
+          },
+        ])
+      }
       // The ties the product's pictures had stay, whatever the save rebuilt
       await keepImageTies(container, productId, current.images ?? [])
       // A variation's own picture shows when its variant is chosen

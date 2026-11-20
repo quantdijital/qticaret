@@ -29,6 +29,8 @@ export interface ExistingVariant {
   inventoryItemId: string | null
   /** Whether it counts its stock; one that does not is always sellable. */
   manageInventory: boolean
+  /** Units reserved for open orders, every location together. */
+  reserved: number
   /** Stocked quantity by location. */
   levels: Record<string, number>
   /** Unit cost in kuruş (F11.4); null when none was entered. */
@@ -97,7 +99,12 @@ interface ProductRow extends Omit<
               inventory_item_id: string
               inventory?: {
                 location_levels?:
-                  { location_id: string; stocked_quantity: number | string }[] | null
+                  | {
+                      location_id: string
+                      stocked_quantity: number | string
+                      reserved_quantity?: number | string | null
+                    }[]
+                  | null
               } | null
             }[]
           | null
@@ -148,6 +155,7 @@ const FIELDS = [
   "variants.inventory_items.inventory_item_id",
   "variants.inventory_items.inventory.location_levels.location_id",
   "variants.inventory_items.inventory.location_levels.stocked_quantity",
+  "variants.inventory_items.inventory.location_levels.reserved_quantity",
   "variants.variant_extension.cost",
   "attribute_template.handle",
   "attribute_values.value_text",
@@ -230,6 +238,10 @@ function existingOf(row: ProductRow): ExistingProduct {
           ? (variant.inventory_items[0]?.inventory_item_id ?? null)
           : null,
       manageInventory: variant.manage_inventory !== false,
+      reserved: (variant.inventory_items?.[0]?.inventory?.location_levels ?? []).reduce(
+        (sum, level) => sum + Number(level.reserved_quantity ?? 0),
+        0
+      ),
       levels: Object.fromEntries(
         (variant.inventory_items?.[0]?.inventory?.location_levels ?? []).map((level) => [
           level.location_id,

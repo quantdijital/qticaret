@@ -3,7 +3,7 @@ import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { MIGRATION_MODULE } from "../../src/modules/migration"
 import type MigrationModuleService from "../../src/modules/migration/service"
-import { THUMBNAIL_STAND_IN } from "../../src/workflows/migration/thumbnail"
+import { THUMBNAIL_KIND } from "../../src/workflows/migration/thumbnail"
 import type { HttpClient } from "../helpers/http"
 import { wordpressFixture } from "../helpers/wordpress"
 
@@ -12,7 +12,7 @@ jest.setTimeout(600 * 1000)
 interface ProductRow {
   handle: string
   thumbnail: string | null
-  metadata: Record<string, unknown> | null
+  metadata?: Record<string, unknown> | null
   images: { url: string; variants?: { sku: string | null }[] | null }[]
   variants: {
     sku: string | null
@@ -156,7 +156,17 @@ medusaIntegrationTestRunner({
       const before = await pan()
       const standIn = before?.thumbnail ?? null
       expect(standIn).not.toBeNull()
-      expect(before?.metadata?.[THUMBNAIL_STAND_IN]).toBe(standIn)
+      // Recorded by the migration, never in the product's metadata (which the store API may return)
+      const standIns = () =>
+        getContainer()
+          .resolve<MigrationModuleService>(MIGRATION_MODULE)
+          .listMigrationItems({ kind: THUMBNAIL_KIND })
+      expect((await standIns()).map((item) => [item.status, item.target_id])).toEqual([
+        ["done", standIn],
+      ])
+      expect(Object.keys(before?.metadata ?? {}).some((key) => key.startsWith("migration"))).toBe(
+        false
+      )
       const tiedBefore = before?.images.filter((image) => (image.variants ?? []).length > 0)
       expect(tiedBefore?.map((image) => image.variants?.map((variant) => variant.sku))).toEqual([
         ["TAVA-K-24"],
@@ -169,7 +179,7 @@ medusaIntegrationTestRunner({
       expect(after?.images).toHaveLength(3)
       expect(after?.thumbnail).not.toBe(standIn)
       expect(after?.images.map((image) => image.url)).toContain(after?.thumbnail)
-      expect(after?.metadata?.[THUMBNAIL_STAND_IN] ?? null).toBeNull()
+      expect((await standIns()).map((item) => item.status)).toEqual(["skipped"])
       expect(
         after?.images
           .filter((image) => (image.variants ?? []).length > 0)

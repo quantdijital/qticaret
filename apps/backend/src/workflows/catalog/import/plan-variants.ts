@@ -202,6 +202,15 @@ function matchedRow(
     problems.push({ line: variant.line, key: "catalog_import.options_mismatch" })
     return
   }
+  // Open orders hold its stock: it stops counting only once they are settled
+  if (variant.untracked && match.manageInventory && match.reserved > 0) {
+    problems.push({
+      line: variant.line,
+      key: "catalog_import.stock_untracked_reserved",
+      column: "Stok",
+    })
+    return
+  }
   if (variant.stock !== undefined && !match.inventoryItemId) {
     problems.push({ line: variant.line, key: "catalog_import.stock_untracked", column: "Stok" })
     return

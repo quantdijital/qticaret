@@ -162,17 +162,29 @@ export async function downloadImage(
     throw new ImageRefused("migration.image_address_refused")
   }
   const sleep = deps.sleep ?? pause
+  const host = url.host
+  let timeouts = 0
   for (let attempt = 0; ; attempt++) {
+    // A host given up for the run, or a spent budget: left for a later run, at once
+    const tripped = pace.trippedBy(host)
+    if (tripped) {
+      throw new ImageRefused(tripped)
+    }
+    if (pace.expired()) {
+      throw new ImageRefused(unreachable("deferred"))
+    }
     try {
       const body = await pace.run(() => fetchOnce(url, fake, deps))
-      pace.succeeded()
+      pace.succeeded(host)
       return body
     } catch (error) {
       if (!(error instanceof ImageRefused) || !error.retryable) {
         throw error
       }
-      pace.refused(error.retryAfterMs)
-      if (attempt + 1 >= IMAGE_ATTEMPTS) {
+      pace.refused(error.retryAfterMs, host, error.key)
+      // A slow answer costs the whole timeout: tried again once only
+      timeouts += error.key === unreachable("timeout") ? 1 : 0
+      if (attempt + 1 >= IMAGE_ATTEMPTS || timeouts > 1) {
         throw error
       }
       await sleep(Math.max(backoffMs(attempt, deps.random), error.retryAfterMs ?? 0))

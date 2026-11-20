@@ -146,7 +146,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog_import.sku_repeated": "Bu SKU dosyada daha önce kullanıldı.",
   "catalog_import.sku_taken": "Bu SKU başka bir ürünün varyantında kullanılıyor.",
   "catalog_import.status_invalid": 'Durum "Taslak" ya da "Yayında" olmalı.',
-  "catalog_import.stock_invalid": "Stok sıfır ya da pozitif bir tam sayı olmalı.",
+  "catalog_import.stock_invalid":
+    "Stok sıfır ya da pozitif bir tam sayı olmalı; stoğu sayılmayan varyant için Takipsiz yazın.",
+  "catalog_import.stock_untracked": "Bu varyantın stoğu takip edilmiyor; stok adedi yazılamaz.",
+  "catalog_import.stock_untracked_reserved":
+    "Bu varyantın açık siparişlerde ayrılmış stoğu var; siparişler tamamlanmadan stok takibi kapatılamaz.",
   "catalog_import.template_change": "Ürünün özellik şablonu farklı; şablonu panelden değiştirin.",
   "catalog_import.template_required": "Özellik girmek için bir özellik şablonu seçin.",
   "catalog_import.template_unknown": "Bu tanıtıcıyla bir özellik şablonu yok.",
@@ -1297,6 +1301,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Eski site zamanında yanıt vermedi; birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
   "migration.image_unreachable_network":
     "Eski siteye bağlanılamadı; birkaç denemeden sonra taşınmadı. Taşımayı yeniden çalıştırın.",
+  "migration.image_unreachable_deferred":
+    "Görsellerin süresi doldu; bu görsel denenmedi. Taşımayı yeniden çalıştırın, kalanlar alınır.",
   "migration.image_unreachable_status":
     "Eski site görsel yerine beklenmeyen bir yanıt verdi; taşınmadı. Ürüne elle ekleyebilirsiniz.",
   "migration.image_not_accepted":
@@ -1321,6 +1327,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.feed_currency":
     "Ürün Türk lirası dışında bir para birimiyle; fiyat çevrilmeden taşınmadı.",
   "migration.feed_item_invalid": "Ürünün adı, adresi ya da fiyatı okunamadı; taşınmadı.",
+  "migration.feed_stock_untracked":
+    "Akış stok adedi vermiyor: stokta yok olmayan varyantlar (stokta, ön sipariş, sonradan tedarik) stok takibi olmadan, her zaman satılabilir taşındı. Stok sayacaksanız panelden adet girin.",
   "migration.customers_sheet_invalid":
     'Müşteri listesi okunamadı; xlsx ya da CSV olmalı ve bir e-posta sütunu ("E-posta") içermeli.',
   "migration.claim_invalid":

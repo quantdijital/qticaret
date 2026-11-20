@@ -1,17 +1,26 @@
 /**
  * A moved product's thumbnail (adr/0042 §7, Ek 2026-11-20). A product
  * without one takes its first picture. When the old site's featured
- * picture could not be fetched, another stands in, and the product's
- * metadata names the stand-in: a later run that fetches the featured one
- * puts it in its place, only while the thumbnail is still that stand-in.
- * One the shop chose since is never replaced.
+ * picture could not be fetched, another stands in, and the migration's
+ * own record (kind `thumbnail`, never the product's metadata, which the
+ * store API may return) names the stand-in: a later run that fetches the
+ * featured one puts it in its place, only while the thumbnail is still
+ * that stand-in. One the shop chose since is never replaced.
  */
 
-/** Product metadata: the thumbnail the migration set in the featured picture's place. */
-export const THUMBNAIL_STAND_IN = "migration_thumbnail_stand_in"
+/** The migration record's kind that names a product's stand-in thumbnail. */
+export const THUMBNAIL_KIND = "thumbnail"
+
+/**
+ * The record's key: the product's own and a word, never the product's key
+ * alone (the old site's `?p=` lookups read records by it).
+ */
+export const standInKeyOf = (productKey: string) => `${productKey} thumbnail`
 
 export interface ThumbnailInput {
-  current: { thumbnail: string | null; metadata: Record<string, unknown> | null }
+  current: { thumbnail: string | null }
+  /** The stand-in a run before set, while its record holds. */
+  standIn: string | null
   /** The product's first picture once this run's are added. */
   first: string | null
   /** The featured picture's stored address, when this run stored it. */
@@ -20,22 +29,31 @@ export interface ThumbnailInput {
   featuredFailed: boolean
 }
 
-export function thumbnailChange({ current, first, featured, featuredFailed }: ThumbnailInput): {
+export interface ThumbnailChange {
+  /** The product's new thumbnail; none: left as it is. */
   thumbnail?: string
-  metadata?: Record<string, unknown>
-} {
-  const metadata = current.metadata ?? {}
+  /** The stand-in to record (an address), or null to clear the record; none: unchanged. */
+  standIn?: string | null
+}
+
+export function thumbnailChange({
+  current,
+  standIn,
+  first,
+  featured,
+  featuredFailed,
+}: ThumbnailInput): ThumbnailChange {
   if (!current.thumbnail) {
     if (!first) {
       return {}
     }
     return featuredFailed && first !== featured
-      ? { thumbnail: first, metadata: { ...metadata, [THUMBNAIL_STAND_IN]: first } }
+      ? { thumbnail: first, standIn: first }
       : { thumbnail: first }
   }
-  const standIn = metadata[THUMBNAIL_STAND_IN]
-  if (featured && typeof standIn === "string" && standIn === current.thumbnail) {
-    return { thumbnail: featured, metadata: { ...metadata, [THUMBNAIL_STAND_IN]: null } }
+  if (featured && standIn !== null && standIn === current.thumbnail) {
+    return { thumbnail: featured, standIn: null }
   }
-  return {}
+  // The shop chose another since: the record has nothing left to stand for
+  return standIn !== null && standIn !== current.thumbnail && featured ? { standIn: null } : {}
 }

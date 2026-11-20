@@ -142,7 +142,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog_import.sku_repeated": "This SKU was used earlier in the file.",
   "catalog_import.sku_taken": "Another product's variant uses this SKU.",
   "catalog_import.status_invalid": 'The status is "Taslak" or "Yayında".',
-  "catalog_import.stock_invalid": "Stock is zero or a positive whole number.",
+  "catalog_import.stock_invalid":
+    "Stock is zero or a positive whole number; write Takipsiz for a variant whose stock is not counted.",
+  "catalog_import.stock_untracked":
+    "This variant does not track its stock; no quantity can be set.",
+  "catalog_import.stock_untracked_reserved":
+    "Open orders hold this variant's stock; its tracking cannot be turned off until they are settled.",
   "catalog_import.template_change":
     "The product has another attribute template; change it in the panel.",
   "catalog_import.template_required": "Choose an attribute template to fill attributes.",
@@ -1288,6 +1293,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The old site did not answer in time; after several tries it did not move. Run the migration again.",
   "migration.image_unreachable_network":
     "The old site could not be reached; after several tries it did not move. Run the migration again.",
+  "migration.image_unreachable_deferred":
+    "The pictures' time ran out; this one was not tried. Run the migration again to fetch the rest.",
   "migration.image_unreachable_status":
     "The old site answered with something other than the picture; it did not move. You can add it by hand.",
   "migration.image_not_accepted": "Not an accepted picture (JPEG, PNG, WebP, AVIF), or unreadable.",
@@ -1312,6 +1319,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This address cannot be fetched: it leads inside the network or somewhere not allowed.",
   "migration.feed_currency":
     "The item is priced in a currency other than lira; prices are never converted.",
+  "migration.feed_stock_untracked":
+    "The feed gives no stock count: its variants not out of stock (in stock, preorder, backorder) moved without stock tracking, always sellable. Enter quantities in the panel to count them.",
   "migration.feed_item_invalid":
     "The item's title, address or price could not be read; it did not move.",
   "migration.customers_sheet_invalid":

@@ -56,6 +56,19 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
     ])
   })
 
+  it("decodes a percent-encoded Turkish slug before making it a handle; a broken one stays as written", () => {
+    const encoded = wordpressRecords(wxrFixture().replaceAll("tavalar", "%c3%a7akilar"))
+    expect(encoded.categories[1]).toMatchObject({
+      source_key: "product_cat:çakilar",
+      handle: "cakilar",
+    })
+    const broken = wordpressRecords(wxrFixture().replaceAll("tavalar", "%e0tavalar"))
+    expect(broken.categories[1]).toMatchObject({
+      source_key: "product_cat:%e0tavalar",
+      handle: "e0tavalar",
+    })
+  })
+
   it("makes a variable product's attributes options and its variations variants", () => {
     const [pan] = records.products
     expect(pan).toMatchObject({
