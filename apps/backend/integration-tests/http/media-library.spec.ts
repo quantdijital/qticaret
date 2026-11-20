@@ -168,10 +168,6 @@ medusaIntegrationTestRunner({
         kind: "page",
         title: "Hakkımızda",
         image_url: onPage.url,
-        body: {
-          type: "doc",
-          content: [{ type: "paragraph", content: [{ type: "text", text: "Biz kimiz." }] }],
-        },
       })
       expect(page.status).toBe(201)
       // A brand's logo is held by the file's storage key

@@ -10,7 +10,7 @@ import {
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { readStoredLayoutTexts } from "../../lib/storefront/layout"
-import type { LayoutDocument } from "../../lib/storefront/layout"
+import type { ContentPageSection, LayoutDocument } from "../../lib/storefront/layout"
 import { attachMediaStep } from "../media/steps/attach-media"
 import { keepDesignMarkStep } from "./design-steps"
 import { checkLayout } from "./layout-check"
@@ -18,6 +18,7 @@ import { defaultLayout } from "./layout-default"
 import { json, layoutRow, layouts } from "./layout-row"
 import { prunePagesStep } from "./layout-pages"
 import { checkThemeStep } from "./layout-steps"
+import { keepPageTextsStep } from "./page-texts-placed"
 import type { TextedDesign } from "./page-texts-placed"
 
 export { layoutRow } from "./layout-row"
@@ -64,11 +65,24 @@ const writeDraftStep = createStep(
  */
 export const checkLayoutStep = createStep(
   "storefront-layout-check",
-  async ({ draft, known }: { draft: LayoutDocument; known: "stored" | "self" }, { container }) => {
+  async (
+    {
+      draft,
+      known,
+      carried = [],
+    }: { draft: LayoutDocument; known: "stored" | "self"; carried?: ContentPageSection[] },
+    { container }
+  ) => {
     const before = known === "self" ? draft : ((await layoutRow(container))?.draft ?? null)
-    return new StepResponse(await checkLayout(container, draft, before))
+    return new StepResponse(await checkLayout(container, draft, before, carried))
   }
 )
+
+/** A draft to save, and where an older editor's pages keep their text (`placement`, K1). */
+export interface SaveDraftInput {
+  document: LayoutDocument
+  text_at?: Record<string, number>
+}
 
 /**
  * Saves the theme editor's draft (adr/0049), as the editor saves while
@@ -79,9 +93,14 @@ export const checkLayoutStep = createStep(
  */
 export const saveLayoutDraftWorkflow = createWorkflow(
   "storefront-layout-save-draft",
-  (draft: LayoutDocument) => {
+  (input: SaveDraftInput) => {
     acquireLockStep(LAYOUT_LOCK)
-    const saved = saveDraftSteps(keepDesignMarkStep(draft))
+    // An older page's text kept where it stood (adr/0073 Ek 2026-11-19 (2) K1)
+    const kept = keepPageTextsStep(input)
+    const saved = saveDraftSteps(
+      keepDesignMarkStep(transform({ kept }, ({ kept }) => kept.document)),
+      transform({ kept }, ({ kept }) => kept.carried)
+    )
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(saved)
   }
@@ -94,12 +113,20 @@ export const saveLayoutDraftWorkflow = createWorkflow(
  * workflow run as another's step is skipped, so such a caller cannot use
  * `saveLayoutDraftWorkflow.runAsStep` and be covered.
  */
-export function saveDraftSteps(draft: LayoutDocument | WorkflowData<LayoutDocument>) {
+export function saveDraftSteps(
+  draft: LayoutDocument | WorkflowData<LayoutDocument>,
+  carried: ContentPageSection[] | WorkflowData<ContentPageSection[]> = []
+) {
   // A content page deleted since takes its layout with it (adr/0073 §1)
   const pruned = prunePagesStep(draft)
   const document = transform({ pruned }, ({ pruned }) => pruned.document)
+  // A page's text placed from what it was (`carried`) is not the save's new work (K2)
   const media = checkLayoutStep(
-    transform({ document }, ({ document }) => ({ draft: document, known: "stored" as const }))
+    transform({ document, carried }, ({ document, carried }) => ({
+      draft: document,
+      known: "stored" as const,
+      carried,
+    }))
   )
   checkThemeStep(document)
   const saved = writeDraftStep(document)

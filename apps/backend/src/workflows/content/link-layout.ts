@@ -7,7 +7,7 @@ import type { ContentPageSection } from "../../lib/storefront/layout"
 import { isPageText } from "../../lib/storefront/page-text"
 import { designFits, storedPage, withStoredPage } from "../../lib/storefront/page-text-stored"
 import { layoutRow } from "../storefront/layout-row"
-import { undoSystemLayout, writeSystemLayout } from "../storefront/layout-system"
+import { systemWriteOf, undoSystemLayout, writeSystemLayout } from "../storefront/layout-system"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -44,11 +44,15 @@ export async function draftPageTexts(container: Container): Promise<Map<string, 
   )
 }
 
-/** A stored design with the named pages' text sections' links rewritten; unchanged: null. */
+/**
+ * A stored design with the named pages' text sections' links rewritten,
+ * the pages it changed added to `changedPages`; unchanged: null.
+ */
 function rewritten(
   stored: Record<string, unknown>,
   ids: readonly string[],
-  next: ReadonlyMap<string, string>
+  next: ReadonlyMap<string, string>,
+  changedPages: Set<string>
 ): Record<string, unknown> | null {
   let doc = stored
   for (const id of ids) {
@@ -63,11 +67,14 @@ function rewritten(
       }
       const out = rewriteDocHrefs(section.body, next)
       changed += out.changed
-      return out.changed > 0 ? ({ ...section, body: out.doc } as ContentPageSection) : section
+      return out.changed > 0 ? { ...section, body: out.doc } : section
     })
     if (changed > 0) {
       const candidate = withStoredPage(doc, id, sections)
-      doc = designFits(candidate) ? candidate : doc
+      if (designFits(candidate)) {
+        doc = candidate
+        changedPages.add(id)
+      }
     }
   }
   return doc === stored ? null : doc
@@ -75,29 +82,35 @@ function rewritten(
 
 /**
  * The pages' text sections' links rewritten in the draft and the live
- * design (under the design's lock): how many pages' design changed.
- * Undone, the design is as it was.
+ * design (under the design's lock): whether the design changed, and what
+ * to record of it (the pages by id, the live revision made). Undone, the
+ * design is as it was.
  */
 export const rewriteLayoutLinksStep = createStep(
   "content-rewrite-layout-links",
   async (input: { ids: string[]; next: Record<string, string> }, { container }) => {
     const row = input.ids.length > 0 ? await layoutRow(container) : null
+    const none = { changed: false, written: systemWriteOf(null), pages: [] as string[] }
     if (!row) {
-      return new StepResponse(false, null)
+      return new StepResponse(none, null)
     }
     const next = new Map(Object.entries(input.next))
-    const draft = rewritten(row.draft as Record<string, unknown>, input.ids, next)
+    const pages = new Set<string>()
+    const draft = rewritten(row.draft as Record<string, unknown>, input.ids, next, pages)
     const live = row.published
-      ? rewritten(row.published as Record<string, unknown>, input.ids, next)
+      ? rewritten(row.published as Record<string, unknown>, input.ids, next, pages)
       : null
     if (!draft && !live) {
-      return new StepResponse(false, null)
+      return new StepResponse(none, null)
     }
     const undo = await writeSystemLayout(container, row, {
       draft: draft ?? (row.draft as Record<string, unknown>),
       published: live,
     })
-    return new StepResponse(true, undo)
+    return new StepResponse(
+      { changed: true, written: systemWriteOf(undo), pages: [...pages] },
+      undo
+    )
   },
   async (undo, { container }) => {
     if (undo) {

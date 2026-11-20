@@ -20,9 +20,11 @@ const help = (id: string) => section({ id, type: "help" })
 describe("a page's mirror (adr/0073 Ek 2026-11-19 (2) K2)", () => {
   it("is one untitled section's text as it is: a converted page's text does not change", () => {
     const body = doc("Biz kimiz.", "Nereden geliyoruz.")
-    expect(pageMirror([help("yardim001"), article("metin0001", body)])).toBe(body)
+    expect(pageMirror([help("yardim001"), article("metin0001", body)])).toEqual(body)
     const contact = section({ id: "iletisim01", type: "contact", body })
-    expect(pageMirror([contact, section({ id: "odeme00001", type: "payment_facts" })])).toBe(body)
+    expect(pageMirror([contact, section({ id: "odeme00001", type: "payment_facts" })])).toEqual(
+      body
+    )
   })
 
   it("joins the shown text sections in order, a titled one's title first as an h2", () => {
@@ -48,6 +50,19 @@ describe("a page's mirror (adr/0073 Ek 2026-11-19 (2) K2)", () => {
       type: "doc",
       content: [],
     })
+  })
+
+  it("leaves out text on a schedule, before it starts and after it ends alike", () => {
+    const always = article("metin0001", doc("Her zaman."))
+    const later = article("sonra0001", doc("Kampanya."), { starts_at: "2099-01-01T00:00:00.000Z" })
+    const over = article("bitti0001", doc("Eski duyuru."), { ends_at: "2000-01-01T00:00:00.000Z" })
+    // Not yet shown, or shown no more: never in the page's description, dates or advisor
+    expect(pageMirror([always, later])).toEqual(doc("Her zaman."))
+    expect(pageMirror([over, always])).toEqual(doc("Her zaman."))
+    expect(pageMirror([later, over])).toEqual({ type: "doc", content: [] })
+    // Shown now but scheduled to end: left out too, the mirror does not follow the clock
+    const ending = article("bitecek01", doc("Bu hafta."), { ends_at: "2099-01-01T00:00:00.000Z" })
+    expect(pageMirror([ending])).toEqual({ type: "doc", content: [] })
   })
 
   it("is written for pages holding text, and for a page whose text was taken off", () => {

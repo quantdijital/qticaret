@@ -39,7 +39,10 @@ export const replaceDraftWorkflow = createWorkflow(
         text_at: input.text_at ?? {},
       }))
     )
-    const saved = saveDraftSteps(source)
+    const saved = saveDraftSteps(
+      transform({ source }, ({ source }) => source.document),
+      transform({ source }, ({ source }) => source.carried)
+    )
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(
       transform({ autoSaved, saved }, ({ autoSaved, saved }) => ({

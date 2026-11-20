@@ -20,6 +20,7 @@ import { clearDraftMenusStep } from "./layout-steps"
 import { MENUS_LOCK } from "./menus"
 import { replaceMenusStep } from "./menus-replace"
 import { mirrorsOf, textPages, writeMirrorsStep } from "./page-mirror"
+import { keepPageTexts } from "./page-texts-placed"
 import { pagesLiveStep } from "./pages-live"
 import { refreshStorefrontStep } from "./steps/refresh-storefront"
 
@@ -50,7 +51,9 @@ const loadDraftStep = createStep(
       // A live design that no longer reads holds no page text to keep
       live = null
     }
-    return new StepResponse({ draft: readStoredLayout(row.draft), text_pages: textPages(live) })
+    // A draft never saved since a page's text became a section keeps that text (K1)
+    const { document: draft, carried } = await keepPageTexts(container, readStoredLayout(row.draft))
+    return new StepResponse({ draft, carried, text_pages: textPages(live) })
   }
 )
 
@@ -157,7 +160,13 @@ export const publishLayoutWorkflow = createWorkflow(
     // A content page deleted since the save goes live without its layout (adr/0073 §1)
     const pruned = prunePagesStep(transform({ loaded }, ({ loaded }) => loaded.draft))
     const draft = transform({ pruned }, ({ pruned }) => pruned.document)
-    checkLayoutStep(transform({ draft }, ({ draft }) => ({ draft, known: "self" as const })))
+    checkLayoutStep(
+      transform({ draft, loaded }, ({ draft, loaded }) => ({
+        draft,
+        known: "self" as const,
+        carried: loaded.carried,
+      }))
+    )
     const published = publishStep(
       transform({ draft, input }, ({ draft, input }) => ({ draft, actor: input.actor }))
     )

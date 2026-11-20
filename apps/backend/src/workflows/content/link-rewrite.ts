@@ -12,6 +12,7 @@ import { planContentLinks } from "./link-plan"
 import type { LinkPlan, LinkRow, LinkScope } from "./link-plan"
 import { rewriteEntryLinksStep, rewriteProductLinksStep } from "./steps/rewrite-links"
 import { LAYOUT_LOCK } from "../storefront/layout"
+import { recordSystemLayoutStep } from "../storefront/layout-system"
 import { rewriteLayoutLinksStep } from "./link-layout"
 import { CONTENT_LOCK } from "./workflows"
 
@@ -75,12 +76,20 @@ export const rewriteContentLinksWorkflow = createWorkflow(
     const products = rewriteProductLinksStep(
       transform({ plan }, ({ plan }) => ({ products: plan.writes.products, next: plan.next }))
     )
+    // Recorded last: a failing record undoes the writes (ids and the revision only)
+    recordSystemLayoutStep(
+      transform({ layout }, ({ layout }) => ({
+        reason: "link_rewrite" as const,
+        ...layout.written,
+        pages: layout.pages,
+      }))
+    )
     releaseLockStep({ key })
     // Pages and posts the storefront shows (its menus and lists); a product's text is read fresh
     refreshStorefrontStep(
       transform({ entries, layout }, ({ entries, layout }) => [
         ...(entries > 0 ? ["content" as const] : []),
-        ...(layout ? ["layout" as const] : []),
+        ...(layout.changed ? ["layout" as const] : []),
       ])
     )
     return new WorkflowResponse(

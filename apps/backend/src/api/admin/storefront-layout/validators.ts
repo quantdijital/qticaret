@@ -1,7 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { LAYOUT_LIMITS, layoutDocument } from "../../../lib/storefront/layout"
-import { unplacedPages } from "../../../lib/storefront/layout-pages-stored"
+import { legacyTextAt, unplacedPages } from "../../../lib/storefront/layout-pages-stored"
 import { pageId } from "../../../lib/storefront/layout-pages"
 
 /**
@@ -16,10 +16,25 @@ const withoutPlaces = (value: unknown): unknown =>
     ? { ...value, pages: unplacedPages(value["pages"]) }
     : value
 
+/**
+ * The draft as today's schema reads it, with where each page laid out by
+ * such an editor keeps its text (`text_at`, the sections it put above it):
+ * the save puts the page's text there, so folding the places never takes
+ * a page's text away (K1, K6).
+ */
+const placedDraft = z.unknown().transform((raw, ctx) => {
+  const parsed = layoutDocument.safeParse(withoutPlaces(raw))
+  if (!parsed.success) {
+    for (const issue of parsed.error.issues) {
+      ctx.addIssue({ code: "custom", message: issue.message, path: issue.path })
+    }
+    return z.NEVER
+  }
+  return { document: parsed.data, text_at: legacyTextAt(raw) }
+})
+
 /** The theme editor's draft, saved whole as staff work (adr/0049). */
-export const AdminPostStorefrontLayout = z
-  .object({ document: z.preprocess(withoutPlaces, layoutDocument) })
-  .strict()
+export const AdminPostStorefrontLayout = z.object({ document: placedDraft }).strict()
 export type AdminPostStorefrontLayoutType = z.output<typeof AdminPostStorefrontLayout>
 
 /** Discard and preview take no body. */

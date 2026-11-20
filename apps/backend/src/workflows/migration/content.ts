@@ -13,8 +13,7 @@ import type MigrationModuleService from "../../modules/migration/service"
 import type { RememberedItem } from "../../modules/migration/service"
 import type { PostTermsInput } from "../content/term-rules"
 import { saveContentWorkflow } from "../content/workflows"
-import { assertCards, bodyOf } from "../content/rules"
-import { replacePageTextWorkflow } from "../storefront/page-text-replace"
+import { importPage } from "./content-page"
 import { ImageRefused, storeImage } from "./images"
 import { migratePostTerms, refusalOf, writeSeo } from "./post-terms"
 import type { TermCounts } from "./post-terms"
@@ -222,32 +221,24 @@ async function writeEntry(
   }
   let id: string
   try {
-    // A page's text is its sections' (adr/0073 Ek 2026-11-19 (2) K4): checked first, as the
-    // content save checked it, so a text refused makes no page; written after it
-    if (kind === "page") {
-      await assertCards(container as MedusaContainer, bodyOf(content.body))
+    const values = {
+      title,
+      handle: content.handle,
+      status: content.status,
+      excerpt: content.excerpt,
+      author_name: content.author,
+      image_url: cover?.url ?? null,
+      image_alt: cover?.alt ?? null,
     }
-    const { result } = await saveContentWorkflow(container as MedusaContainer).run({
-      input: {
-        kind,
-        values: {
-          title,
-          handle: content.handle,
-          status: content.status,
-          ...(kind === "page" ? {} : { body: content.body }),
-          excerpt: content.excerpt,
-          author_name: content.author,
-          image_url: cover?.url ?? null,
-          image_alt: cover?.alt ?? null,
-        },
-        ...(terms ? { terms } : {}),
-      },
-    })
-    id = result.id
     if (kind === "page") {
-      await replacePageTextWorkflow(container as MedusaContainer).run({
-        input: { page_id: id, doc: content.body },
+      // A page's text is its sections' (adr/0073 Ek 2026-11-19 (2) K4): checked before the
+      // page is made, written before it goes live; a page whose text fails is not left behind
+      id = await importPage(container as MedusaContainer, values, content.body)
+    } else {
+      const { result } = await saveContentWorkflow(container as MedusaContainer).run({
+        input: { kind, values: { ...values, body: content.body }, ...(terms ? { terms } : {}) },
       })
+      id = result.id
     }
   } catch (error) {
     return { id: null, problems: [refusalOf(error), ...problems] }

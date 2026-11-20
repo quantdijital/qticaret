@@ -41,3 +41,33 @@ export function cardKeys(value: unknown): Set<string> {
   }
   return keys
 }
+
+/**
+ * Every picture a text holds anywhere in a stored value (an image node's
+ * `src`), read without a schema like `cardKeys`: what a save already held,
+ * so a picture saved before is not a new one.
+ */
+export function docImageSrcs(value: unknown): Set<string> {
+  const srcs = new Set<string>()
+  const stack: unknown[] = [value]
+  while (stack.length > 0) {
+    const node = stack.pop()
+    if (Array.isArray(node)) {
+      stack.push(...(node as unknown[]))
+      continue
+    }
+    if (!isObject(node)) {
+      continue
+    }
+    const attrs = node["attrs"]
+    if (node["type"] === "image" && isObject(attrs) && typeof attrs["src"] === "string") {
+      srcs.add(attrs["src"])
+    }
+    for (const child of Object.values(node)) {
+      if (child !== null && typeof child === "object") {
+        stack.push(child)
+      }
+    }
+  }
+  return srcs
+}

@@ -1,5 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { AUDIT_LOG_MODULE } from "../../modules/audit-log"
+import type AuditLogModuleService from "../../modules/audit-log/service"
 import { KEPT_REVISIONS } from "../../modules/storefront-layout/service"
 import { layoutRow, layouts } from "./layout-row"
 import type { LayoutRow } from "./layout-row"
@@ -133,3 +135,44 @@ export const systemLayoutStep = <I>(name: string, change: SystemChange<I>) =>
       }
     }
   )
+
+/** A system write to record: why, the design, the live revision it made (none: null), the pages. */
+export interface SystemWrite {
+  reason: "import" | "link_rewrite"
+  /** The design's id; null: nothing was written, nothing is recorded. */
+  layout_id: string | null
+  revision: number | null
+  pages: string[]
+}
+
+/** What a system write's undo says of it, for its record. */
+export const systemWriteOf = (
+  undo: SystemUndo | null
+): { layout_id: string | null; revision: number | null } => ({
+  layout_id: undo?.row.id ?? null,
+  revision: undo?.made ? undo.row.revision + 1 : null,
+})
+
+/**
+ * The system's write to the design recorded (security review S6), as the
+ * conversion's is: why, the pages by id, the live revision it made; never
+ * a page's text or title. Run as a workflow's last write, so a failing
+ * record undoes the writes before it.
+ */
+export const recordSystemLayoutStep = createStep(
+  "storefront-layout-system-record",
+  async (write: SystemWrite, { container }) => {
+    if (write.layout_id === null) {
+      return new StepResponse(false)
+    }
+    await container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE).record({
+      kind: "system",
+      action: "storefront.layout_system_write",
+      actor_type: "system",
+      resource_type: "storefront_layout",
+      resource_id: write.layout_id,
+      changes: { reason: write.reason, revision: write.revision, pages: write.pages },
+    })
+    return new StepResponse(true)
+  }
+)

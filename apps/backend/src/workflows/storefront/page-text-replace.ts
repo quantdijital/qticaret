@@ -19,7 +19,12 @@ import { assertCards, bodyOf, mediaOf } from "../content/rules"
 import { CONTENT_LOCK, CONTENT_SAVED } from "../content/workflows"
 import { LAYOUT_LOCK } from "./layout"
 import { layoutRow } from "./layout-row"
-import { undoSystemLayout, writeSystemLayout } from "./layout-system"
+import {
+  recordSystemLayoutStep,
+  systemWriteOf,
+  undoSystemLayout,
+  writeSystemLayout,
+} from "./layout-system"
 import type { SystemUndo } from "./layout-system"
 import { writeMirrorsStep } from "./page-mirror"
 import { pageRoles } from "./page-text-source"
@@ -70,23 +75,32 @@ const replaceLayoutTextStep = createStep(
     const roles = (await pageRoles(container))(input.page_id)
     const source = { id: input.page_id, body: input.doc, roles }
     const draft = row ? withPageText(row.draft as Record<string, unknown>, source) : null
-    const live =
-      row?.published && draft
-        ? withPageText(row.published as Record<string, unknown>, source)
-        : null
+    // Each written where it changes: the live design may hold an older text than the draft
+    const live = row?.published
+      ? withPageText(row.published as Record<string, unknown>, source)
+      : null
     let undo: SystemUndo | null = null
-    if (row && draft) {
-      undo = await writeSystemLayout(container, row, { draft, published: live })
+    if (row && (draft || live)) {
+      undo = await writeSystemLayout(container, row, {
+        draft: draft ?? (row.draft as Record<string, unknown>),
+        published: live,
+      })
     }
     let mirror: ContentDoc = input.doc
-    const shown = live
-      ? readStoredLayout(live).pages.find((p) => p.page_id === input.page_id)
+    // The mirror is the live text: the design as now written, else as it stood (unchanged)
+    const liveNow = live ?? (row?.published as Record<string, unknown> | null | undefined) ?? null
+    const shown = liveNow
+      ? readStoredLayout(liveNow).pages.find((p) => p.page_id === input.page_id)
       : null
     if (shown && hasPageText(shown.sections)) {
       mirror = pageMirror(shown.sections)
     }
     return new StepResponse(
-      { mirror: [{ id: input.page_id, doc: mirror }], live: undo?.made != null },
+      {
+        mirror: [{ id: input.page_id, doc: mirror }],
+        live: (undo?.made ?? null) !== null,
+        written: systemWriteOf(undo),
+      },
       undo
     )
   },
@@ -117,6 +131,14 @@ export const replacePageTextWorkflow = createWorkflow(
     )
     const mirrored = writeMirrorsStep(transform({ layout }, ({ layout }) => layout.mirror))
     attachMediaStep(transform({ checked }, ({ checked }) => ({ link: checked.media, record: [] })))
+    // Recorded last: a failing record undoes the writes (ids and the revision only)
+    recordSystemLayoutStep(
+      transform({ checked, layout }, ({ checked, layout }) => ({
+        reason: "import" as const,
+        ...layout.written,
+        pages: [checked.page_id],
+      }))
+    )
     emitEventStep({ eventName: CONTENT_SAVED, data: mirrored }).config({
       name: "storefront-page-text-content-saved",
     })

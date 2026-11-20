@@ -42,7 +42,7 @@ describe("a shop profile's theme and the design (adr/0063 §3)", () => {
       carryProfileTheme(container, profile({ theme: { radius: "sharp" } }))
     ).resolves.toBe(true)
     expect(save).toHaveBeenCalledWith({
-      input: { home: [], settings: { theme: THEME, menus: null } },
+      input: { document: { home: [], settings: { theme: THEME, menus: null } } },
     })
   })
 

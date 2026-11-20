@@ -19,7 +19,9 @@ import { stripGalleryImages, stripRecord } from "../../lib/storefront/sections/s
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
-import { cardKeys } from "../../lib/content/cards"
+import { cardKeys, docImageSrcs } from "../../lib/content/cards"
+import { MEDIA_MODULE } from "../../modules/media"
+import type MediaModuleService from "../../modules/media/service"
 import { assertCardIds, mediaOf } from "../content/rules"
 import { existingRecords, isRecordKind } from "./menu-links"
 
@@ -186,7 +188,8 @@ const cardsOf = (sections: readonly BodySection[]) =>
 export async function checkLayout(
   container: MedusaContainer,
   doc: LayoutDocument,
-  before: unknown = null
+  before: unknown = null,
+  carried: readonly BodySection[] = []
 ): Promise<string[]> {
   const sections = bodySections(doc)
   const recordLinks = (section: BodySection | HeaderSection) =>
@@ -230,7 +233,8 @@ export async function checkLayout(
   }
   // Only the cards this save adds (adr/0073 Ek 2026-11-19 (2) K2, as a content save checks):
   // a card saved before whose record went since is left out when drawn, never a lock
-  const known = cardKeys(before)
+  // A page's text placed from what it was (`carried`) adds no card of its own either
+  const known = new Set([...cardKeys(before), ...cardKeys(carried)])
   const added = [...new Set(cardsOf(sections))].filter((key) => !known.has(key))
   const idsOf = (kind: string) =>
     added.flatMap((key) => (key.startsWith(`${kind}:`) ? [key.slice(kind.length + 1)] : []))
@@ -242,9 +246,42 @@ export async function checkLayout(
   const footerImages = doc.footer.flatMap((section) =>
     section.type === "newsletter" ? newsletterImages(section) : []
   )
-  return mediaOf(
-    container,
-    [...sections.flatMap(imagesOf), ...footerImages, ...footerRowImages(blocks)],
-    "document"
+  const images = [...sections.flatMap(imagesOf), ...footerImages, ...footerRowImages(blocks)]
+  // A text's pictures already saved (`before`) or placed from what the page's text was
+  // (`carried`): kept when still in the library, never a refusal, as its cards (adr/0073 Ek
+  // 2026-11-19 (2) K2); a picture anywhere else, or new in a text, is checked as always
+  const knownText = new Set([...docImageSrcs(before), ...docImageSrcs(carried)])
+  const elsewhere = new Set([
+    ...sections.flatMap((section) => {
+      const text = new Set(textImages(section))
+      return imagesOf(section).filter((url) => !text.has(url))
+    }),
+    ...footerImages,
+    ...footerRowImages(blocks),
+  ])
+  const lenient = new Set(
+    sections.flatMap(textImages).filter((url) => knownText.has(url) && !elsewhere.has(url))
   )
+  const strict = images.filter((url) => !lenient.has(url))
+  return [
+    ...(await mediaOf(container, strict, "document")),
+    ...(await libraryIds(container, [...lenient])),
+  ]
+}
+
+/** The pictures inside a section's text (a rich text's, a contact section's). */
+const textImages = (section: BodySection): string[] =>
+  section.type === "rich_text" || section.type === "contact"
+    ? docStats(section.body).images.map((each) => each.src)
+    : []
+
+/** The library's records behind these addresses, those that are there; none refused. */
+async function libraryIds(container: MedusaContainer, urls: readonly string[]): Promise<string[]> {
+  if (urls.length === 0) {
+    return []
+  }
+  const assets = await container
+    .resolve<MediaModuleService>(MEDIA_MODULE)
+    .listMediaAssets({ url: [...urls], file_id: { $ne: null } }, { select: ["id"] })
+  return assets.map((asset) => asset.id)
 }

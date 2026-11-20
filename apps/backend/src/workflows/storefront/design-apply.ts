@@ -135,7 +135,10 @@ export const applyDesignWorkflow = createWorkflow(
         text_at: design.text_at,
       }))
     )
-    const saved = saveDraftSteps(draft)
+    const saved = saveDraftSteps(
+      transform({ draft }, ({ draft }) => draft.document),
+      transform({ draft }, ({ draft }) => draft.carried)
+    )
     markAppliedStep(transform({ design }, ({ design }) => design.id))
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(

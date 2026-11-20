@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util"
 import { isPlainObject } from "../../modules/platform-settings/sections/define"
 import type { ContentDoc } from "../content"
 import { LAYOUT_LIMITS } from "./layout-fields"
@@ -105,6 +106,10 @@ export function withPageText(doc: Stored, source: PageTextSource): Stored | null
   }
   const sections = replacedText(page.sections, source.body)
   const placed = sections ?? placedText(page, source, storedIds(doc))
+  // The same text again (an import run twice) writes nothing: no revision, none pruned
+  if (page.text_at === null && isDeepStrictEqual(placed, page.sections)) {
+    return null
+  }
   const next = withStoredPage(doc, source.id, placed)
   return designFits(next) ? next : null
 }
@@ -122,7 +127,7 @@ function replacedText(
     return null
   }
   return sections.map((each, index) =>
-    index === at && isPageText(each) ? ({ ...each, body } as ContentPageSection) : each
+    index === at && isPageText(each) ? { ...each, body } : each
   )
 }
 

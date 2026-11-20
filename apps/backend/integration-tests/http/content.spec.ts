@@ -6,6 +6,7 @@ import type PlatformSettingsModuleService from "../../src/modules/platform-setti
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { writePageText } from "../helpers/pages"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
@@ -95,12 +96,10 @@ medusaIntegrationTestRunner({
     })
 
     it("keeps a page out of sight while a draft, and gives it its path and SEO when live", async () => {
-      const made = await save({
-        kind: "page",
-        title: "Hakkımızda",
-        body: doc(p(text("Biz kimiz."))),
-      })
+      const made = await save({ kind: "page", title: "Hakkımızda" })
       expect(made.status).toBe(201)
+      // A page's text is the system's to write (adr/0073 Ek 2026-11-19 (2) K4)
+      await writePageText(getContainer(), made.data.entry.id, doc(p(text("Biz kimiz."))))
       expect(made.data.entry).toMatchObject({
         handle: "hakkimizda",
         path: "/hakkimizda",
@@ -128,8 +127,9 @@ medusaIntegrationTestRunner({
     })
 
     it("shows a draft through its signed preview link only, for a day", async () => {
-      const made = await save({ kind: "page", title: "Taslak", body: doc(p(text("Henüz değil."))) })
+      const made = await save({ kind: "page", title: "Taslak" })
       const id = made.data.entry.id
+      await writePageText(getContainer(), id, doc(p(text("Henüz değil."))))
       const link = await post<{ url: string; path: string; expires_at: string }>(
         `/admin/content/${id}/preview`,
         {}
@@ -238,15 +238,16 @@ medusaIntegrationTestRunner({
         { body: doc({ type: "productCard", attrs: { id: "prod_01NOTAPRODUCT0000000000000" } }) },
         "content.card_unknown",
       ],
-      ["a page taking a reserved path", { handle: "blog" }, "seo.path_reserved"],
+      ["a page taking a reserved path", { kind: "page", handle: "blog" }, "seo.path_reserved"],
     ])("refuses %s", async (_label, fields, message) => {
-      const refused = await save({ kind: "page", title: "Deneme", ...fields })
+      // A text is a post's here: a page's is written in the theme editor (adr/0073 Ek 2026-11-19 (2))
+      const refused = await save({ kind: "post", title: "Deneme", ...fields })
       expect([refused.status, refused.data.message]).toEqual([400, message])
     })
 
     it("refuses markup that is not on the allowlist", async () => {
       const refused = await save({
-        kind: "page",
+        kind: "post",
         title: "Deneme",
         body: doc({ type: "html", html: "<script>alert(1)</script>" }),
       })
@@ -293,7 +294,7 @@ medusaIntegrationTestRunner({
 
     it("names each unknown detail in a text, so it is fixed in one go", async () => {
       const refused = await save({
-        kind: "page",
+        kind: "post",
         title: "Deneme",
         body: doc(p(text("Bize {telefon} ya da {faks} ve {uydurma} ile ulaşın."))),
       })
@@ -301,6 +302,30 @@ medusaIntegrationTestRunner({
       expect((refused.data as { values?: unknown }).values).toEqual({
         tokens: "{faks}, {uydurma}",
       })
+    })
+
+    it("takes no page text from staff: a page's text is its sections' (adr/0073 Ek 2026-11-19 (2) K2)", async () => {
+      const body = doc(p(text("Biz kimiz.")))
+      const made = await save({ kind: "page", title: "Hakkımızda", body })
+      expect([made.status, made.data.message]).toEqual([400, "content.page_text_in_editor"])
+      const page = await save({ kind: "page", title: "Hakkımızda" })
+      expect(page.status).toBe(201)
+      const edited = await save({ title: "Biz kimiz", body }, page.data.entry.id)
+      expect([edited.status, edited.data.message]).toEqual([400, "content.page_text_in_editor"])
+      // Nothing of a refused edit is written
+      const read = await settle(
+        http.get<{ entry: { title: string; body: unknown } }>(
+          `/admin/content/${page.data.entry.id}`,
+          admin
+        )
+      )
+      expect(read.data.entry.title).toBe("Hakkımızda")
+      expect(read.data.entry.body).toEqual({ type: "doc", content: [] })
+      // A post keeps its text
+      const blog = await save({ kind: "post", title: "Bıçak bakımı", body })
+      expect(blog.status).toBe(201)
+      const again = await save({ body: doc(p(text("Yağlayın."))) }, blog.data.entry.id)
+      expect(again.status).toBe(200)
     })
 
     it("uses the page's own SEO title", async () => {

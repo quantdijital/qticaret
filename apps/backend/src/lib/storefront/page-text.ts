@@ -105,14 +105,19 @@ const heading = (title: string): Block => ({
 const fits = (doc: ContentDoc): boolean => contentDoc.safeParse(doc).success
 
 /**
- * The page's `body` mirror (K2): its shown text sections' documents in
- * order, a titled one's title first as an h2. One untitled section's
+ * The page's `body` mirror (K2): its text sections shown at all times
+ * (visible, unscheduled) in order, their documents joined, a titled
+ * one's title first as an h2. One untitled section's
  * mirror is its document as it is (a converted page's mirror is its
  * text: nothing to write). Sections past the document's bounds are left
  * out of the mirror. None: the empty document.
  */
 export function pageMirror(sections: readonly ContentPageSection[]): ContentDoc {
-  const texts = sections.filter(isPageText).filter((section) => section.visible)
+  // Only text shown at all times: a scheduled section (`starts_at`/`ends_at`) would reach the
+  // page's description, dates and advisor before it shows, or after it ends (security review S6)
+  const texts = sections
+    .filter(isPageText)
+    .filter((section) => section.visible && !section.starts_at && !section.ends_at)
   const [only] = texts
   if (texts.length === 1 && only && (only.type === "contact" || only.title === null)) {
     return only.body
