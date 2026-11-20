@@ -115,7 +115,7 @@ describe("the content screen without pages", () => {
   })
 
   it("opens on the blog's posts, with no pages tab", () => {
-    search.kind = undefined
+    Reflect.deleteProperty(search, "kind")
     renderPage()
     const tabs = screen.getAllByRole("tab").map((tab) => tab.textContent)
     expect(tabs[0]).toBe("Blog yazıları")

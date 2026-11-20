@@ -5,6 +5,7 @@ import type {
   ContentPageSection,
   LayoutDocument,
   PageLayout,
+  RichTextSection,
 } from "@/features/storefront/api/layout"
 import { newBodySection, newPageText } from "@/features/storefront/layout/sections"
 import { DOC } from "./theme-editor.fixtures"
@@ -51,7 +52,7 @@ export const pageSection = (type: ContentPageSection["type"], id: string) =>
   newBodySection("pages", type, id) as ContentPageSection
 
 /** A content page's own text ("Sayfa metni", K2) with a line written. */
-export const pageText = (id: string, text: string): ContentPageSection =>
+export const pageText = (id: string, text: string): RichTextSection =>
   newPageText(id, {
     type: "doc",
     content: [{ type: "paragraph", content: [{ type: "text", text }] }],

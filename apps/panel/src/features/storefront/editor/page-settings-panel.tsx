@@ -79,13 +79,14 @@ function DeletePage({ entry, onDeleted }: { entry: ContentDetail; onDeleted: () 
         destructive
         onConfirm={() => {
           setAsking(false)
-          remove.mutate(entry.id, {
-            onSuccess: () => {
+          // Awaited, not `mutate`'s callbacks: the panel reads the page again and is gone by then
+          void remove.mutateAsync(entry.id).then(
+            () => {
               toast.success(t("content.deleted"))
               onDeleted()
             },
-            onError: (failure) => toast.error(errorText(t, failure)),
-          })
+            (failure: unknown) => toast.error(errorText(t, failure))
+          )
         }}
       />
     </>
