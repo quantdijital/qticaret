@@ -44,7 +44,7 @@ medusaIntegrationTestRunner({
       await connectFake(http, owner.headers, key)
       jest.spyOn(fakeTextConnector, "complete").mockImplementation((request) =>
         Promise.resolve({
-          text: request.system.includes("görünecek bir başlık") ? TITLE : DRAFT,
+          text: request.system.includes("arama sonuçlarındaki başlığını") ? TITLE : DRAFT,
           usage: { inputTokens: 10, outputTokens: 10 },
         })
       )

@@ -26,6 +26,8 @@ const STORED: EditImageOutcome = {
   status: "succeeded",
   model: "segment-v1",
   text: null,
+  candidates: [],
+  correction: null,
   problems: [],
   input_tokens: null,
   output_tokens: null,

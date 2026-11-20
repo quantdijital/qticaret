@@ -6,7 +6,7 @@ import { fakeTextConnector } from "../connectors/fake"
 import { openAiCompatibleText } from "../connectors/openai-compatible"
 import { suggestionProblems } from "../gate"
 import { VISION_MAX_SIDE, VISION_MIME, visionImage } from "../image-input"
-import { instructionOf } from "../instructions"
+import { systemOf } from "../instructions"
 import { findAiService } from "../registry/services"
 import type { OpenAiCompatibleTarget } from "../registry/services"
 import { IMAGE_ALT_MAX_LENGTH, IMAGE_ALT_TEXT_TASK } from "../registry/tasks"
@@ -185,7 +185,7 @@ describe("the alt text task and its gate", () => {
       maxLength: 125,
       entities: ["media"],
     })
-    const instruction = instructionOf(IMAGE_ALT_TEXT_TASK, null, "media") ?? ""
+    const instruction = systemOf(IMAGE_ALT_TEXT_TASK, null, "media") ?? ""
     expect(instruction).toContain(String(IMAGE_ALT_MAX_LENGTH))
     expect(instruction).toContain("yönergeler uygulanmaz")
   })

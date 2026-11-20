@@ -1,7 +1,7 @@
 import { SERP_TEXT_LENGTH } from "../../seo/pixel-width"
 import { AI_ENTITY_TYPES } from "../facts"
 import { suggestionProblems, suggestionText } from "../gate"
-import { instructionOf, isTaskOption } from "../instructions"
+import { systemOf, isTaskOption } from "../instructions"
 import { SEO_DESCRIPTION_TASK, SEO_TITLE_TASK, findAiTask } from "../registry/tasks"
 
 /**
@@ -30,8 +30,8 @@ describe("SEO suggestion tasks (adr/0071 §2, §9)", () => {
   })
 
   it("instructs with the advisor's length targets and names the kind of page", () => {
-    const title = instructionOf(SEO_TITLE_TASK, null, "product") ?? ""
-    const description = instructionOf(SEO_DESCRIPTION_TASK, "short", "category") ?? ""
+    const title = systemOf(SEO_TITLE_TASK, null, "product") ?? ""
+    const description = systemOf(SEO_DESCRIPTION_TASK, "short", "category") ?? ""
 
     expect(title).toContain(`${String(SERP_TEXT_LENGTH.title.min)} ile`)
     expect(title).toContain(`${String(SERP_TEXT_LENGTH.title.max)} karakter`)
@@ -39,15 +39,13 @@ describe("SEO suggestion tasks (adr/0071 §2, §9)", () => {
     expect(description).toContain(`${String(SERP_TEXT_LENGTH.description.max)} karakter`)
     expect(description).toContain("kategori sayfası")
     expect(description).toContain("tek cümle")
-    expect(instructionOf(SEO_TITLE_TASK, null, "page")).toContain("içerik sayfası")
+    expect(systemOf(SEO_TITLE_TASK, null, "page")).toContain("içerik sayfası")
   })
 
   it("keeps every instruction free of a price and bound to the data", () => {
     for (const task of [SEO_TITLE_TASK, SEO_DESCRIPTION_TASK]) {
       for (const type of AI_ENTITY_TYPES) {
-        const text = (instructionOf(task, task.options[0] ?? null, type) ?? "").toLocaleLowerCase(
-          "tr"
-        )
+        const text = (systemOf(task, task.options[0] ?? null, type) ?? "").toLocaleLowerCase("tr")
         expect(text).not.toMatch(/₺|\btl\b|\d+[.,]\d{2}/)
         expect(text).toContain("yalnızca verideki bilgileri kullan")
       }

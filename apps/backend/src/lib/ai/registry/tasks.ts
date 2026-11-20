@@ -1,9 +1,21 @@
-import { AI_REVIEWS } from "../../../modules/platform-settings/features"
 import { SERP_TEXT_LENGTH } from "../../seo/pixel-width"
 import type { StaffRole } from "../../staff/permissions"
 import type { AiEntityType } from "../facts"
 import type { AiCapability } from "./capabilities"
-import { FOCUS_KEYWORD_TASK, PRODUCT_TITLE_TASK } from "./catalog-tasks"
+import {
+  AI_CANDIDATE_COUNT,
+  AI_TEMPERATURE,
+  FOCUS_KEYWORD_TASK,
+  PRODUCT_TITLE_TASK,
+  SEO_FACT_DESCRIPTION_LENGTH,
+} from "./catalog-tasks"
+import {
+  IMAGE_ALT_TEXT_TASK,
+  IMAGE_BACKGROUND_TASK,
+  IMAGE_SCENE_TASK,
+  PRODUCT_FROM_PHOTO_TASK,
+} from "./image-tasks"
+import { QUESTION_ANSWER_TASK, REVIEW_REPLY_TASK, REVIEW_SUMMARY_TASK } from "./review-tasks"
 
 /** What a task is asked for: a text record, or a picture of the media library. */
 export type AiTaskEntity = AiEntityType | "media"
@@ -72,6 +84,14 @@ export interface AiTask {
    * can run it.
    */
   optionSource?: "scenes"
+  /**
+   * Candidates asked for in one call, one per line (adr/0074 §4): each is
+   * gated on its own (`maxLength` is one candidate's), those that pass
+   * are offered in order. Left out: one suggestion.
+   */
+  candidates?: number
+  /** The sampling temperature asked for, where the service's target documents one (`AI_TEMPERATURE`). */
+  temperature?: number
 }
 
 /** A record read another way than by its type (lib/ai/facts). */
@@ -109,6 +129,9 @@ export const SEO_TITLE_TASK: AiTask = {
   gate: "seo_title",
   maxLength: SERP_TEXT_LENGTH.title.max,
   entities: PAGE_ENTITIES,
+  candidates: AI_CANDIDATE_COUNT,
+  temperature: AI_TEMPERATURE.short,
+  factMaxLengths: { description: SEO_FACT_DESCRIPTION_LENGTH },
 }
 
 export const SEO_DESCRIPTION_TASK: AiTask = {
@@ -121,6 +144,9 @@ export const SEO_DESCRIPTION_TASK: AiTask = {
   gate: "seo_description",
   maxLength: SERP_TEXT_LENGTH.description.max,
   entities: PAGE_ENTITIES,
+  candidates: AI_CANDIDATE_COUNT,
+  temperature: AI_TEMPERATURE.short,
+  factMaxLengths: { description: SEO_FACT_DESCRIPTION_LENGTH },
 }
 
 /** How much of the product's description now the task sends (adr/0005's draft sent as much). */
@@ -146,180 +172,13 @@ export const PRODUCT_DESCRIPTION_TASK: AiTask = {
   gate: "product_description",
   maxLength: PRODUCT_DESCRIPTION_MAX_LENGTH,
   entities: ["product"],
-  // The description it improves on goes nearly whole; the SEO tasks keep the shared 300
+  // The description it improves on goes nearly whole; the SEO tasks read less of it
   factMaxLengths: { description: PRODUCT_DESCRIPTION_FACT_LENGTH },
+  temperature: AI_TEMPERATURE.long,
 }
 
-/**
- * The longest alt text suggested: what a screen reader reads in one go
- * (docs/13 §8). The field itself takes up to `ALT_MAX` (250); the
- * advisor's rule (P-IMG-02) asks only that there is one.
- */
-export const IMAGE_ALT_MAX_LENGTH = 125
-
-/** Images one bulk alt text job asks for at most (`ai.alt_text`, docs/22 "Aşama 5"). */
-export const IMAGE_ALT_BULK_MAX = 50
-
-/**
- * An image's alt text (Aşama 5, docs/22): the service sees the picture
- * and, when a product shows it, the product's name and category. One line
- * of plain text; the gate refuses filler ("görseli", "fotoğrafı"), a
- * link, personal data and markup. Asked for one image here, for many by
- * the bulk job; either way it is a suggestion, saved only by the form.
- */
-export const IMAGE_ALT_TEXT_TASK: AiTask = {
-  id: "image_alt_text",
-  capability: "vision",
-  mode: "sync",
-  options: [],
-  roles: ["owner", "admin"],
-  credits: 1,
-  gate: "image_alt",
-  maxLength: IMAGE_ALT_MAX_LENGTH,
-  entities: ["media"],
-}
-
-/** The most pictures one background request may name (adr/0071 §8: each its own call and claim). */
-export const IMAGE_BACKGROUND_MAX_BATCH = 20
-
-/**
- * A picture's background taken away or made white (Aşama 4, docs/22 PR 4-1):
- * a new picture beside the original, marked as AI edited; the original's
- * bytes are never changed. A job (`ai.image_edit`), one to twenty pictures.
- */
-export const IMAGE_BACKGROUND_TASK: AiTask = {
-  id: "image_background",
-  capability: "image_edit",
-  mode: "job",
-  options: ["transparent", "white"],
-  roles: ["owner", "admin"],
-  credits: 1,
-  gate: "image",
-  maxLength: 0,
-  entities: ["media"],
-  maxBatch: IMAGE_BACKGROUND_MAX_BATCH,
-}
-
-/** The most pictures one scene request may name: a dearer call, asked for one at a time. */
-export const IMAGE_SCENE_MAX_BATCH = 1
-
-/**
- * A product photo set in a ready-made scene (Aşama 7, docs/22): a new
- * picture beside the original, marked as AI made (`edited` or `generated`,
- * as the service's scene endpoint is recorded); the original's bytes are
- * never changed. The scenes are the shop's own saved ones (twelve at
- * most) and its sector pack's (two at most), or one typed for this once;
- * a typed one is held (`lib/ai/scene-text.ts`) and sent only behind the
- * server's fixed words. A job (`ai.image_edit`), like the background.
- */
-export const IMAGE_SCENE_TASK: AiTask = {
-  id: "image_scene",
-  capability: "image_edit",
-  mode: "job",
-  options: [],
-  optionSource: "scenes",
-  roles: ["owner", "admin"],
-  credits: 1,
-  gate: "image",
-  maxLength: 0,
-  entities: ["media"],
-  maxBatch: IMAGE_SCENE_MAX_BATCH,
-}
-
-// --- Aşama 9: reviews and questions (docs/22) ---
-
-/** The approved reviews one summary reads at most, newest first (the data block's list limit). */
-export const REVIEW_SUMMARY_MAX_REVIEWS = 30
-
-/** Fewer approved reviews than this leave nothing to sum up (`ai.not_enough_reviews`). */
-export const REVIEW_SUMMARY_MIN_REVIEWS = 3
-
-/** How much of one review a summary reads (title and text together). */
-export const REVIEW_SUMMARY_REVIEW_LENGTH = 400
-
-/** The longest review summary suggested: a few sentences of pros and cons. */
-export const REVIEW_SUMMARY_MAX_LENGTH = 1_200
-
-/** The longest reply or answer suggested: the reply's own limit (`REVIEW_REPLY_MAX`, `qaText`). */
-export const REVIEW_REPLY_MAX_LENGTH = 1_000
-
-// Customers' own words: the shop's flag, a reply's roles (moderation is `operations`' too)
-const REVIEW_TASK_BASE = {
-  capability: "text",
-  mode: "sync",
-  options: [],
-  roles: ["owner", "admin", "operations"],
-  credits: 1,
-  gate: "plain_text",
-  flag: AI_REVIEWS,
-  keepData: false,
-} as const satisfies Partial<AiTask>
-
-/**
- * A product's approved reviews summed up (Aşama 9, adr/0071 §6, §10): what
- * buyers praise and what they miss, shown on the review screen as a
- * suggestion and never put on the storefront here. Only the reviews'
- * ratings and words go, each author's name masked in them; no name,
- * contact, order or customer field is read.
- */
-export const REVIEW_SUMMARY_TASK: AiTask = {
-  ...REVIEW_TASK_BASE,
-  id: "review_summary",
-  maxLength: REVIEW_SUMMARY_MAX_LENGTH,
-  entities: ["product"],
-  reader: "product_reviews",
-  factMaxLengths: { reviews: REVIEW_SUMMARY_REVIEW_LENGTH },
-}
-
-/**
- * A reply to one approved review, drafted (Aşama 9): it fills the reply
- * form and is sent only when a person sends it. The review's rating,
- * title and words go, its author's name masked; the product's name too.
- */
-export const REVIEW_REPLY_TASK: AiTask = {
-  ...REVIEW_TASK_BASE,
-  id: "review_reply",
-  maxLength: REVIEW_REPLY_MAX_LENGTH,
-  entities: ["review"],
-  factMaxLengths: { review: REVIEW_REPLY_MAX_LENGTH },
-}
-
-/**
- * The shop's answer to a product question, drafted (Aşama 9) from the
- * product's published fields: it fills the answer box and is sent only by
- * a person. The question's words go, its author's name masked.
- */
-export const QUESTION_ANSWER_TASK: AiTask = {
-  ...REVIEW_TASK_BASE,
-  id: "question_answer",
-  maxLength: REVIEW_REPLY_MAX_LENGTH,
-  entities: ["question"],
-  factMaxLengths: { question: REVIEW_REPLY_MAX_LENGTH, description: 1_000 },
-}
-
-/** The longest answer read for a product card, in characters: its JSON, all fields together. */
-export const PRODUCT_CARD_MAX_LENGTH = 4_000
-
-/**
- * A new product's card from one photo (Aşama 6, docs/22): its name, a
- * short description, one of the shop's shown categories and values for
- * the chosen template's attributes, as one JSON object read against a
- * closed schema and the shop's own lists (lib/ai/product-card.ts). No
- * price, stock, status or code is asked for or taken. Nothing is saved:
- * the result fills the new product form.
- */
-export const PRODUCT_FROM_PHOTO_TASK: AiTask = {
-  id: "product_from_photo",
-  capability: "vision",
-  mode: "sync",
-  options: [],
-  roles: ["owner", "admin"],
-  credits: 1,
-  gate: "product_card",
-  maxLength: PRODUCT_CARD_MAX_LENGTH,
-  entities: ["media"],
-  json: true,
-}
+export * from "./image-tasks"
+export * from "./review-tasks"
 
 const TASKS: readonly AiTask[] = [
   SEO_TITLE_TASK,

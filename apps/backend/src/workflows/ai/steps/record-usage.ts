@@ -7,7 +7,7 @@ import type { AiFunding, AiUnitPrice } from "../../../lib/ai/registry/services"
 import { logger } from "../../../lib/logging"
 import { AI_MODULE } from "../../../modules/ai"
 import type AiModuleService from "../../../modules/ai/service"
-import type { CallOutcome } from "./call-service"
+import type { CallOutcome, CorrectionUsage } from "./call-service"
 
 export interface RecordUsageInput {
   task: string
@@ -38,59 +38,90 @@ export const recordUsageStep = createStep(
   async (input: RecordUsageInput, { container }) => {
     const { outcome } = input
     const service = findAiService(input.service)
-    const cost = service
-      ? estimateCost(
-          service,
-          input.capability,
-          {
-            ...(outcome.input_tokens === null ? {} : { inputTokens: outcome.input_tokens }),
-            ...(outcome.output_tokens === null ? {} : { outputTokens: outcome.output_tokens }),
-            // Pictures sent (vision, token priced) or given back (an image edit, priced by the image)
-            ...(outcome.images === null ? {} : { images: outcome.images }),
-          },
-          input.unit_price ?? undefined
-        )
-      : null
     const ai = container.resolve<AiModuleService>(AI_MODULE)
-    const id = await ai.recordUsage({
-      task: input.task,
-      capability: input.capability,
-      service: input.service,
-      model: outcome.model,
-      funding: input.funding,
-      status: outcome.status,
-      input_tokens: outcome.input_tokens,
-      output_tokens: outcome.output_tokens,
-      images: outcome.images,
-      estimated_cost_micros: cost?.micros ?? null,
-      currency: cost?.currency ?? null,
-      entity_type: input.entity_type,
-      entity_id: input.entity_id,
-      suggestion_id: input.suggestion_id,
-      duration_ms: outcome.duration_ms,
-      error_code: outcome.error_code,
-      requested_by: input.user_id,
-    })
+    const { correction } = outcome
+    // With a correction the first call was refused; the outcome's status is the suggestion's
+    const rows: UsageCall[] = [
+      {
+        status: correction ? "refused" : outcome.status,
+        input_tokens: outcome.input_tokens,
+        output_tokens: outcome.output_tokens,
+        images: outcome.images,
+        duration_ms: outcome.duration_ms,
+        error_code: outcome.error_code,
+      },
+      ...(correction ? [correction] : []),
+    ]
+    const ids: string[] = []
+    for (const call of rows) {
+      const cost = costOf(service, input, call)
+      ids.push(
+        await ai.recordUsage({
+          task: input.task,
+          capability: input.capability,
+          service: input.service,
+          model: outcome.model,
+          funding: input.funding,
+          status: call.status,
+          input_tokens: call.input_tokens,
+          output_tokens: call.output_tokens,
+          images: call.images,
+          estimated_cost_micros: cost?.micros ?? null,
+          currency: cost?.currency ?? null,
+          entity_type: input.entity_type,
+          entity_id: input.entity_id,
+          suggestion_id: input.suggestion_id,
+          duration_ms: call.duration_ms,
+          error_code: call.error_code,
+          requested_by: input.user_id,
+        })
+      )
+      logger.info({
+        event: "ai.call",
+        task: input.task,
+        capability: input.capability,
+        service: input.service,
+        funding: input.funding,
+        status: call.status,
+        correction: call !== rows[0],
+        duration_ms: call.duration_ms,
+        input_tokens: call.input_tokens,
+        output_tokens: call.output_tokens,
+        images: call.images,
+        error_code: call.error_code,
+      })
+    }
     const answered = outcome.status === "succeeded" || outcome.status === "refused"
     if (input.remember && answered) {
       await ai.rememberChoice({ user_id: input.user_id, task: input.task, service: input.service })
     }
-    logger.info({
-      event: "ai.call",
-      task: input.task,
-      capability: input.capability,
-      service: input.service,
-      funding: input.funding,
-      status: outcome.status,
-      duration_ms: outcome.duration_ms,
-      input_tokens: outcome.input_tokens,
-      output_tokens: outcome.output_tokens,
-      images: outcome.images,
-      error_code: outcome.error_code,
-    })
-    return new StepResponse({ usage_id: id })
+    // The last row is the call the suggestion came from; every row names it afterwards
+    return new StepResponse({ usage_id: ids[ids.length - 1] ?? "", usage_ids: ids })
   }
 )
+
+/** One call's row: the first, or the correction's. */
+type UsageCall = Omit<CorrectionUsage, "status"> & { status: CallOutcome["status"] }
+
+function costOf(
+  service: ReturnType<typeof findAiService>,
+  input: RecordUsageInput,
+  call: UsageCall
+) {
+  return service
+    ? estimateCost(
+        service,
+        input.capability,
+        {
+          ...(call.input_tokens === null ? {} : { inputTokens: call.input_tokens }),
+          ...(call.output_tokens === null ? {} : { outputTokens: call.output_tokens }),
+          // Pictures sent (vision, token priced) or given back (an image edit, priced by the image)
+          ...(call.images === null ? {} : { images: call.images }),
+        },
+        input.unit_price ?? undefined
+      )
+    : null
+}
 
 /**
  * Names the suggestion on a usage row written before it (an image edit
@@ -100,11 +131,17 @@ export const recordUsageStep = createStep(
  */
 export const linkUsageSuggestionStep = createStep(
   "ai-link-usage-suggestion",
-  async (input: { usage_id: string; suggestion_id: string | null }, { container }) => {
-    if (input.suggestion_id !== null) {
-      await container
-        .resolve<AiModuleService>(AI_MODULE)
-        .updateAiUsages({ id: input.usage_id, suggestion_id: input.suggestion_id })
+  async (
+    input: { usage_id: string; usage_ids?: string[] | undefined; suggestion_id: string | null },
+    { container }
+  ) => {
+    const { suggestion_id } = input
+    if (suggestion_id !== null) {
+      const ai = container.resolve<AiModuleService>(AI_MODULE)
+      // A correction's row names the suggestion too: both calls were made for it
+      for (const id of input.usage_ids ?? [input.usage_id]) {
+        await ai.updateAiUsages({ id, suggestion_id })
+      }
     }
     return new StepResponse(true)
   }

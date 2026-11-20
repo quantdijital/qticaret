@@ -27,6 +27,8 @@ function containerWith(rows: unknown[]): { container: FactsContainer; asked: Ask
       asked.push(request)
       return Promise.resolve({ data: rows })
     },
+    // A category's listing (facts/category-products.ts): none here
+    listAndCountProducts: () => Promise.resolve([[], 0]),
   }
   return { container: { resolve: () => query }, asked }
 }

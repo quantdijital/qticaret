@@ -123,6 +123,10 @@ function bodyOf(target: OpenAiCompatibleTarget, request: TextRequest): string {
     ],
     stream: false,
     ...(target.maxTokensField === null ? {} : { [target.maxTokensField]: request.maxTokens }),
+    // Only where the target is documented to take it; a reasoning model may refuse the field
+    ...(target.temperature === true && request.temperature !== undefined
+      ? { temperature: request.temperature }
+      : {}),
     ...(request.json === true && target.jsonMode
       ? { response_format: { type: "json_object" } }
       : {}),

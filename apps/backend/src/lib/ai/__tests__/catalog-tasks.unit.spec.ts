@@ -1,9 +1,10 @@
 import type { TextConnector, TextRequest } from "../connectors/types"
 import { AI_ENTITY_TYPES } from "../facts"
 import { MAX_SUGGESTION_CHARS, suggestionProblems, suggestionTextFor } from "../gate"
-import { instructionOf, isTaskOption } from "../instructions"
+import { systemOf, isTaskOption } from "../instructions"
 import { buildPrompt } from "../prompt"
 import {
+  AI_CANDIDATE_COUNT,
   FOCUS_KEYWORD_MAX_COUNT,
   FOCUS_KEYWORD_MAX_LENGTH,
   FOCUS_KEYWORD_TASK,
@@ -70,14 +71,14 @@ describe("the product page's short text tasks: registry and instruction", () => 
   })
 
   it("instructs in Turkish, bound to the data, with no price, and names the page", () => {
-    const keyword = instructionOf(FOCUS_KEYWORD_TASK, null, "category") ?? ""
-    const title = instructionOf(PRODUCT_TITLE_TASK, null, "product") ?? ""
+    const keyword = systemOf(FOCUS_KEYWORD_TASK, null, "category") ?? ""
+    const title = systemOf(PRODUCT_TITLE_TASK, null, "product") ?? ""
 
     expect(keyword).toContain("kategori sayfası")
-    expect(keyword).toContain("ana anahtar kelime")
+    expect(keyword).toContain("ana ifade")
     expect(keyword).toContain(`${String(FOCUS_KEYWORD_MAX_LENGTH)} karakter`)
     expect(title).toContain("ürün sayfası")
-    expect(title).toContain(`${String(PRODUCT_TITLE_MAX_LENGTH)} karakteri asla geçmesin`)
+    expect(title).toContain(`${String(PRODUCT_TITLE_MAX_LENGTH)} karakteri asla geçme`)
     for (const text of [keyword, title]) {
       const lower = text.toLocaleLowerCase("tr")
       expect(lower).toContain("yalnızca verideki")
@@ -161,7 +162,7 @@ describe("the product name gate", () => {
   it("holds the answer against the data block the call was sent, in the call itself", async () => {
     const seen: TextRequest[] = []
     const prompt = buildPrompt({
-      instruction: instructionOf(PRODUCT_TITLE_TASK, null, "product") ?? "",
+      instruction: systemOf(PRODUCT_TITLE_TASK, null, "product") ?? "",
       fields: FACTS,
     })
     const offered = await runTextTask({
@@ -181,10 +182,10 @@ describe("the product name gate", () => {
     })
     expect(invented).toMatchObject({ status: "refused", problems: ["ungrounded"] })
     expect(seen[0]?.data).not.toContain("ayse@example.com")
-    expect(seen[0]?.maxTokens).toBe(PRODUCT_TITLE_MAX_LENGTH * 2)
+    expect(seen[0]?.maxTokens).toBe(PRODUCT_TITLE_MAX_LENGTH * 2 * AI_CANDIDATE_COUNT)
   })
 
-  it("offers a keyword list cleaned, as the panel splits it", async () => {
+  it("offers a keyword list cleaned, one candidate per keyword, the main one as the text", async () => {
     const result = await runTextTask({
       connector: answering("1. Keten Gömlek\n2. Yazlık Keten Gömlek\n3. Bej Gömlek"),
       task: FOCUS_KEYWORD_TASK,
@@ -192,7 +193,8 @@ describe("the product name gate", () => {
     })
     expect(result).toMatchObject({
       status: "succeeded",
-      text: "keten gömlek\nyazlık keten gömlek\nbej gömlek",
+      text: "keten gömlek",
+      candidates: ["keten gömlek", "yazlık keten gömlek", "bej gömlek"],
     })
   })
 })

@@ -28,15 +28,15 @@ export async function runCardTask(input: {
     data: prompt.data,
     maxTokens: maxTokensOf(task),
     json: true,
+    ...(task.temperature === undefined ? {} : { temperature: task.temperature }),
     ...(input.images === undefined ? {} : { images: input.images }),
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   })
   const result = productCardOf(answer.text, input.allowed)
-  return "problems" in result
-    ? { status: "refused", problems: result.problems, usage: answer.usage }
-    : {
-        status: "succeeded",
-        text: JSON.stringify(result.card) as GatedText,
-        usage: answer.usage,
-      }
+  if ("problems" in result) {
+    return { status: "refused", problems: result.problems, usage: answer.usage, correction: null }
+  }
+  const text = JSON.stringify(result.card) as GatedText
+  // A card is one answer, never candidates, and is not corrected (its schema refuses, not its words)
+  return { status: "succeeded", text, candidates: [text], usage: answer.usage, correction: null }
 }

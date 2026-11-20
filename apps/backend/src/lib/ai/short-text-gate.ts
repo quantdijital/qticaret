@@ -99,6 +99,14 @@ export function focusKeywordProblems(text: string): string[] {
 /** A product name as offered: quotes and an end mark dropped. */
 export const productTitleText = (text: string): string => unquoted(text).trim()
 
+/**
+ * One line of a candidate list (adr/0074 §4) as offered: a list mark at
+ * its start and quotes around it dropped; its own end mark stays (a
+ * description ends its sentence).
+ */
+export const candidateLine = (line: string): string =>
+  cutEnds(line.trim().replace(LIST_MARK, ""), QUOTE_CHARS, true).trim()
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null
 

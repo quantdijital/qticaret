@@ -11686,8 +11686,7 @@
       "refused": "No suitable suggestion came out. You can try again.",
       "note": "Use only fills the field; saving is up to you.",
       "choices": "Suggestions",
-      "mainChoice": "main suggestion",
-      "useChoice": "Use: {{text}}"
+      "mainChoice": "main suggestion"
     },
     "hint": {
       "text": "Connect an AI service to fill this field in one click.",

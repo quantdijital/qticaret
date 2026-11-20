@@ -22,7 +22,13 @@ export interface AiSuggestion {
   task: string
   service: string
   status: "draft"
+  /** The first candidate (the strongest), or the one text of a task with no candidates. */
   text: string
+  /**
+   * Every candidate the gate let through, the strongest first (adr/0074 §4):
+   * a short search text comes as several; otherwise `[text]`.
+   */
+  candidates: string[]
   alternatives: string[]
   /** A product card from a photo (`product_from_photo`): its fields; none for a text. */
   card?: ProductCard | null
@@ -95,6 +101,15 @@ const suggestionOf = (data: unknown): Record<string, unknown> => {
     : {}
 }
 
+/** The candidates as texts, repeats dropped; none given (an older backend): the text alone. */
+function candidatesOf(value: unknown, text: string): string[] {
+  const texts = Array.isArray(value)
+    ? value.filter((each): each is string => typeof each === "string" && each.trim() !== "")
+    : []
+  const unique = [...new Set(texts)]
+  return unique.length > 0 ? unique : text === "" ? [] : [text]
+}
+
 /** `POST /admin/ai/suggestions`: a suggestion for a record's field, never written to it. */
 export async function requestSuggestion(request: AiSuggestionRequest): Promise<AiSuggestion> {
   const data = suggestionOf(
@@ -107,12 +122,14 @@ export async function requestSuggestion(request: AiSuggestionRequest): Promise<A
       ...(request.templateId === undefined ? {} : { template_id: request.templateId }),
     })
   )
+  const text = typeof data["text"] === "string" ? data["text"] : ""
   return {
     id: typeof data["id"] === "string" ? data["id"] : "",
     task: typeof data["task"] === "string" ? data["task"] : request.task,
     service: nameOf(data["service"]) ?? "",
     status: "draft",
-    text: typeof data["text"] === "string" ? data["text"] : "",
+    text,
+    candidates: candidatesOf(data["candidates"], text),
     alternatives: namesOf(data["alternatives"]),
     ...("card" in data ? { card: readProductCard(data["card"]) } : {}),
   }
