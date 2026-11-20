@@ -1,6 +1,6 @@
 import type { StoreLayout, StoreMenu } from "@qticaret/types"
 import { storeAnswer } from "./fake-store-api"
-import { PAGE_LISTING, PAGE_PRODUCT, pagePriceDisplay } from "./fixture-pages"
+import { PAGE_CATEGORY, PAGE_LISTING, PAGE_PRODUCT, pagePriceDisplay } from "./fixture-pages"
 
 /**
  * The fixed shop's Store API for the product and category pages (preset
@@ -52,6 +52,22 @@ const QUESTIONS = {
   count: 1,
 }
 
+/**
+ * The category's own text as the shop formatted it (adr/0075): a heading,
+ * paragraphs and a list, long enough to open folded at the page's foot.
+ */
+const CATEGORY_TEXT = {
+  category_id: PAGE_CATEGORY,
+  description_html: [
+    "<h2>El yapımı çakı seçerken</h2>",
+    "<p>Her çakı atölyede tek tek dövülür, ısıl işlemden geçer ve elde bilenir. Çeliğin cinsi, sapın malzemesi ve kilit düzeni günlük kullanımda nasıl bir yol arkadaşı olacağını belirler.</p>",
+    "<h3>Çelik</h3>",
+    "<p><strong>N690</strong> paslanmaya dayanıklıdır ve kolay bilenir; Damascus desenli çelik hem dayanıklı hem göz alıcıdır; Elmax ağzını uzun süre korur.</p>",
+    "<ul><li>Ceviz, kemik ya da geyik boynuzu sap</li><li>Bitkisel tabaklanmış deri kılıf</li><li>Ömür boyu bileme hizmeti</li></ul>",
+    '<p>Bakım önerilerimiz için <a href="/sayfa/bakim">bakım rehberine</a> göz atın.</p>',
+  ].join(""),
+}
+
 /** The shop's installments for any price: two card families up to six. */
 function installments(query: Query) {
   const variant = list(query?.["variant_id"])[0] ?? ""
@@ -95,6 +111,8 @@ export function pageAnswer(
       return installments(query)
     case "/store/listings/products":
       return PAGE_LISTING
+    case `/store/category-descriptions/${PAGE_CATEGORY}`:
+      return CATEGORY_TEXT
     case "/store/price-display": {
       const shop = storeAnswer(layout, menus, path, query) as {
         price_display: Record<string, unknown>

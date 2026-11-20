@@ -25,7 +25,7 @@ import {
   pathsOf,
   priceDisplays,
 } from "@/lib/store-api/requests"
-import { cardFacts, collectionDetails } from "@/lib/store-api/extras"
+import { cardFacts, categoryDescription, collectionDetails } from "@/lib/store-api/extras"
 import { listingPage } from "@/lib/store-api/listings"
 import type { ListingAnswer, ListingType } from "@/lib/store-api/listings"
 import { withCardFacts } from "@/lib/views/card-extras"
@@ -46,7 +46,9 @@ import {
 import { breadcrumbsOf, productCards, variantIdsOf } from "@/lib/views/product"
 import { categoryMainOf } from "@/lib/views/main-sections"
 import { byPlacement, sectionViews } from "@/lib/views/sections"
-import { cardOptions } from "@/lib/views/theme-settings"
+import { listingTextView } from "@/lib/views/listing-text"
+import type { ListingTextSource } from "@/lib/views/listing-text"
+import { cardOptions, currentTheme } from "@/lib/views/theme-settings"
 import { paragraphsOf } from "@/lib/views/text"
 import { theme } from "@/theme"
 
@@ -54,7 +56,10 @@ type Entity = Extract<Resolution, { type: "entity" }>
 
 interface Heading {
   title: string
+  /** The intro under the title: a landing page's only (adr/0075 §5 leaves it there). */
   description: string[]
+  /** A category's, brand's or collection's own text, drawn at the foot of the first page (adr/0075). */
+  text?: ListingTextSource
   subcategories: CategoryCardView[]
   /** The listing's own picture (a collection's). */
   image?: ImageView | null
@@ -70,22 +75,35 @@ async function productsByIds(ids: string[]): Promise<StoreProduct[]> {
   return ids.flatMap((id) => byId.get(id) ?? [])
 }
 
-/** The listing's own name, words and subcategories. */
-async function headingOf(page: Entity): Promise<Heading> {
+/**
+ * The listing's own name, words and subcategories. A category's formatted
+ * text is one more read, asked beside the tree and only for the first page
+ * (`first`), where its text is drawn (adr/0075 §5).
+ */
+async function headingOf(page: Entity, first: boolean): Promise<Heading> {
   switch (page.entity_type) {
     case "product_category": {
-      const categories = await allCategories()
+      const [categories, html] = await Promise.all([
+        allCategories(),
+        first ? categoryDescription(page.entity_id) : null,
+      ])
       const category = categories.find((each) => each.id === page.entity_id)
       return {
         title: category?.name ?? "",
-        description: paragraphsOf(category?.description),
+        description: [],
+        text: { html, plain: category?.description },
         // Each with its picture: the shop's own, else its newest product's photo (adr/0046 Ek 2026-11-05)
         subcategories: await subcategoryTiles(categories, page.entity_id),
       }
     }
     case "brand": {
       const { brand } = await brandById(page.entity_id)
-      return { title: brand.name, description: paragraphsOf(brand.description), subcategories: [] }
+      return {
+        title: brand.name,
+        description: [],
+        text: { html: brand.description_html, plain: brand.description },
+        subcategories: [],
+      }
     }
     case "landing": {
       const { landing } = await landingById(page.entity_id)
@@ -99,7 +117,8 @@ async function headingOf(page: Entity): Promise<Heading> {
       ])
       return {
         title: collection.title,
-        description: paragraphsOf(details.description),
+        description: [],
+        text: { html: details.description_html, plain: details.description },
         subcategories: [],
         image: details.image ? imageView(details.image, collection.title) : null,
       }
@@ -130,13 +149,14 @@ async function headingOf(page: Entity): Promise<Heading> {
  */
 export function ListingScreen({ page, url }: { page: Entity; url: URL }) {
   const type = page.entity_type as ListingType
+  const state = stateOf(page.listing)
   return (
     <ListingContent
       type={type}
       load={(query) => listingPage(type, page.entity_id, query)}
-      state={stateOf(page.listing)}
+      state={state}
       url={url}
-      heading={() => headingOf(page)}
+      heading={() => headingOf(page, state.page === 1)}
       breadcrumbs={(title) => breadcrumbsOf(page.seo, t("home.label"), title)}
       jsonLd={page.seo?.jsonLd ?? []}
       extra={type === "sale" ? { empty: t("sale.empty") } : {}}
@@ -237,10 +257,11 @@ export async function ListingContent({
     },
   ]
   // The colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
-  const [shared, options, amounts] = await Promise.all([
+  const [shared, options, amounts, settings] = await Promise.all([
     currentShared(),
     cardOptions(),
     visitorAmounts(),
+    currentTheme(),
   ])
   const facets = filterViews(
     url.pathname,
@@ -287,6 +308,8 @@ export async function ListingContent({
         view={{
           title: heading.title,
           description: first ? heading.description : [],
+          // The record's own text after its products, on its first page, filtered or not (adr/0075 §5)
+          footText: isSearch ? null : listingTextView(heading.text, settings.listing_text, current),
           image: first ? (heading.image ?? null) : null,
           sectionsTop: sections.top,
           sectionsBottom: sections.bottom,

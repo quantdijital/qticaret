@@ -3,6 +3,7 @@ import { cache } from "react"
 import type {
   StoreCardFacts,
   StoreCategoryCounts,
+  StoreCategoryDescription,
   StoreCategoryImage,
   StoreCollectionDetails,
   StoreGoogleReviews,
@@ -10,7 +11,7 @@ import type {
   StoreReviewSummary,
 } from "@qticaret/types"
 import { isStoreApiError } from "./errors"
-import { storeGet, storePublicGet } from "./server"
+import { storeGet, storePublicFind, storePublicGet } from "./server"
 
 /**
  * The Store API calls behind the theme contract's optional fields
@@ -65,10 +66,28 @@ export const collectionDetails = cache(
           storeGet<{ details: StoreCollectionDetails }>(
             `/store/collections/${encodeURIComponent(id)}/details`
           ),
-        { details: { description: null, image: null } }
+        { details: { description: null, description_html: null, image: null } }
       )
     ).details
 )
+
+/**
+ * A live category's text as the shop formatted it (adr/0075 §4), the
+ * backend's HTML of its document, for the foot of its first page: shop-wide,
+ * kept a minute as the backend's answer is. Null for a category without
+ * one (its plain text shows), a hidden one (404), a backend before it, or a
+ * failed call: the page never fails for its text.
+ */
+export const categoryDescription = cache(async (id: string): Promise<string | null> => {
+  try {
+    const answer = await storePublicFind<StoreCategoryDescription>(
+      `/store/category-descriptions/${encodeURIComponent(id)}`
+    )
+    return answer?.description_html ?? null
+  } catch {
+    return null
+  }
+})
 
 // The card facts route takes a hundred products at a time
 const FACTS_CHUNK = 100

@@ -320,10 +320,17 @@ export const allBrands = cache(async (): Promise<StoreBrandSummary[]> => {
   return brands
 })
 
+/** A brand with its text: plain, and as the shop formatted it (adr/0075; absent from a backend before it). */
 export const brandById = cache((id: string) =>
-  storeGet<{ brand: { id: string; name: string; handle: string; description: string | null } }>(
-    `/store/brands/${encodeURIComponent(id)}`
-  )
+  storeGet<{
+    brand: {
+      id: string
+      name: string
+      handle: string
+      description: string | null
+      description_html?: string | null
+    }
+  }>(`/store/brands/${encodeURIComponent(id)}`)
 )
 
 export function productIdsOf(
