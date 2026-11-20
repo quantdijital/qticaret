@@ -52,49 +52,57 @@ export async function authorizeDecision(
  * suggestion offered (else 400 `ai.candidate_unknown`), keeps its place
  * (`accepted_index`, for the acceptance rate, adr/0074 §4) and returns
  * its text; no field is written: the panel puts it in the form, and the
- * form's own save is the change. Undone by opening the suggestion again.
+ * form's own save is the change. The decision is written only while the
+ * suggestion is still open (one statement): a second decision at once is
+ * 400 `ai.suggestion_not_open`, never a second write. Undone by opening
+ * the suggestion again (the step failed before writing: nothing to undo).
  */
+export async function decideSuggestion(
+  container: Pick<MedusaContainer, "resolve">,
+  input: DecideSuggestionInput
+) {
+  const drafts = container.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
+  const [draft] = await drafts.listContentDrafts(
+    { id: input.id, source: AI_SUGGESTION_SOURCE },
+    { take: 1, select: ["id", "status", "text", "kind", "provider"] }
+  )
+  if (draft?.status !== "draft") {
+    throw aiValidationError("ai.suggestion_not_open")
+  }
+  await authorizeDecision(container, draft.kind, input.user_id)
+  const accepted = input.decision === "accept"
+  // Only a candidate this suggestion offered: never a text from the client
+  const taken = accepted
+    ? acceptedCandidate(draftCandidates(findAiTask(draft.kind), draft.text), input.candidate_index)
+    : null
+  if (accepted && taken === null) {
+    throw aiValidationError("ai.candidate_unknown")
+  }
+  // Only while still open (#247 D3): of two decisions at once, the second changes nothing
+  const decided = await drafts.decideOpen(draft.id, {
+    status: accepted ? "approved" : "rejected",
+    decided_by: input.user_id,
+    decided_at: new Date(),
+    accepted_index: taken?.index ?? null,
+  })
+  if (!decided) {
+    throw aiValidationError("ai.suggestion_not_open")
+  }
+  return {
+    id: draft.id,
+    task: draft.kind,
+    service: draft.provider,
+    status: accepted ? ("accepted" as const) : ("dismissed" as const),
+    text: taken?.text ?? null,
+    candidate_index: taken?.index ?? null,
+  }
+}
+
 const decideSuggestionStep = createStep(
   "ai-decide-suggestion",
   async (input: DecideSuggestionInput, { container }) => {
-    const drafts = container.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
-    const [draft] = await drafts.listContentDrafts(
-      { id: input.id, source: AI_SUGGESTION_SOURCE },
-      { take: 1, select: ["id", "status", "text", "kind", "provider"] }
-    )
-    if (draft?.status !== "draft") {
-      throw aiValidationError("ai.suggestion_not_open")
-    }
-    await authorizeDecision(container, draft.kind, input.user_id)
-    const accepted = input.decision === "accept"
-    // Only a candidate this suggestion offered: never a text from the client
-    const taken = accepted
-      ? acceptedCandidate(
-          draftCandidates(findAiTask(draft.kind), draft.text),
-          input.candidate_index
-        )
-      : null
-    if (accepted && taken === null) {
-      throw aiValidationError("ai.candidate_unknown")
-    }
-    await drafts.updateContentDrafts({
-      id: draft.id,
-      status: accepted ? "approved" : "rejected",
-      decided_by: input.user_id,
-      decided_at: new Date(),
-      accepted_index: taken?.index ?? null,
-    })
-    return new StepResponse(
-      {
-        id: draft.id,
-        task: draft.kind,
-        service: draft.provider,
-        status: accepted ? ("accepted" as const) : ("dismissed" as const),
-        text: taken?.text ?? null,
-        candidate_index: taken?.index ?? null,
-      },
-      draft.id
-    )
+    const decided = await decideSuggestion(container, input)
+    return new StepResponse(decided, decided.id)
   },
   async (id, { container }) => {
     if (id) {

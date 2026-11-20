@@ -66,7 +66,10 @@ describe("ai_guidance section", () => {
         "ai.guidance_unknown_task"
       )
     }
-    expect(parse({ tasks: { seo_title: { extra: "kısa", craft: "x" } } }).success).toBe(false)
+    // A task's own craft is a field of its own (adr/0074 §3); anything else stays refused
+    expect(parse({ tasks: { seo_title: { extra: "kısa", craft: "x" } } }).success).toBe(true)
+    expect(parse({ tasks: { seo_title: { craft_base: "nope" } } }).success).toBe(false)
+    expect(parse({ tasks: { seo_title: { prompt: "x" } } }).success).toBe(false)
   })
 
   it("takes markup, invisible and control characters out and folds spaces", () => {

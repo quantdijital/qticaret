@@ -79,6 +79,30 @@ class ContentDraftsModuleService extends MedusaService({ ContentDraft, DraftUsag
     return row?.count ?? 0
   }
 
+  /**
+   * A decision on a draft still open (#247 D3): the status is part of the
+   * update, so of two decisions at once only one lands; false when the
+   * draft was no longer open (decided meanwhile, or gone).
+   */
+  @InjectTransactionManager()
+  async decideOpen(
+    id: string,
+    decision: DraftDecision,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const manager = sharedContext.transactionManager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("content_drafts: a decision is written in a transaction")
+    }
+    // The entity as Medusa registers the DML model (as `async_job`'s transitions)
+    const changed = await manager.nativeUpdate(
+      "ContentDraft",
+      { id, status: "draft", deleted_at: null },
+      { ...decision, updated_at: new Date() }
+    )
+    return changed > 0
+  }
+
   /** Drafts counted in a month's row (`YYYY-MM`): the usage report's LLM use (adr/0061 §5.4). */
   @InjectManager()
   async usedIn(month: string, @MedusaContext() sharedContext: Context = {}): Promise<number> {
@@ -122,6 +146,14 @@ class ContentDraftsModuleService extends MedusaService({ ContentDraft, DraftUsag
       accepted: Number(row.accepted),
     }))
   }
+}
+
+/** What a decision writes on an open draft. */
+export interface DraftDecision {
+  status: "approved" | "rejected"
+  decided_by: string
+  decided_at: Date
+  accepted_index: number | null
 }
 
 /** One kind's suggestions over a period: offered and accepted. */

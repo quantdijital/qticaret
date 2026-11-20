@@ -7,7 +7,11 @@ import {
   type AiTone,
 } from "../../modules/platform-settings/sections/ai-guidance"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
-import type { AiTask } from "./registry/tasks"
+import { indented } from "./crafts/types"
+import { isCraftTask } from "./instructions"
+import { quoted, unquoted } from "./quote"
+
+export { takesGuidance } from "./instructions"
 
 /**
  * The shop's writing guidance as a part of a task's system message
@@ -22,8 +26,9 @@ export const GUIDANCE_HEADING = "Mağazanın yazım yönergesi:"
 /** Where the shop's part ends: what follows is the system's again. */
 export const GUIDANCE_END = "Mağazanın yazım yönergesinin sonu."
 
-// Each word quoted: a word from the API carrying a comma or a colon stays one word, not a sentence
-const quotedWords = (list: readonly string[]) => list.map((word) => `“${word}”`).join(", ")
+// Each word quoted, its own quote marks out: a word carrying a comma, a colon or a
+// quote mark stays one word, not a sentence (lib/ai/quote.ts)
+const kept = (list: readonly string[]) => list.filter((word) => unquoted(word) !== "")
 
 const TONES: Record<AiTone, string> = {
   warm: "Samimi ama ölçülü yaz: sıcak ve içten, abartısız; laubali olma.",
@@ -41,20 +46,13 @@ const ADDRESSES: Record<AiAddress, string> = {
   none: "Okura doğrudan hitap etme; ürünü ve faydasını üçüncü kişi diliyle anlat.",
 }
 
-/** A text the shop typed, each line under its label, so it cannot pass for a heading of ours. */
-const indented = (text: string) =>
-  text
-    .split("\n")
-    .map((line) => `  ${line}`)
-    .join("\n")
-
 const sameAsDefaults = (settings: AiGuidanceSettings) =>
   settings.tone === AI_GUIDANCE_DEFAULTS.tone &&
   settings.address === AI_GUIDANCE_DEFAULTS.address &&
   !settings.audience &&
   !settings.guide &&
-  settings.prefer.length === 0 &&
-  settings.avoid.length === 0
+  kept(settings.prefer).length === 0 &&
+  kept(settings.avoid).length === 0
 
 /**
  * The guidance for one task, as the system message's part, or null when
@@ -80,11 +78,11 @@ export function guidanceText(settings: AiGuidanceSettings, taskId: string): stri
   if (settings.guide) {
     lines.push("- Mağazanın notu:", indented(settings.guide))
   }
-  if (settings.prefer.length > 0) {
-    lines.push(`- Uygun düştüğünde tercih edilecek sözcükler: ${quotedWords(settings.prefer)}`)
+  if (kept(settings.prefer).length > 0) {
+    lines.push(`- Uygun düştüğünde tercih edilecek sözcükler: ${quoted(settings.prefer)}`)
   }
-  if (settings.avoid.length > 0) {
-    lines.push(`- Hiç kullanılmayacak sözcükler: ${quotedWords(settings.avoid)}`)
+  if (kept(settings.avoid).length > 0) {
+    lines.push(`- Hiç kullanılmayacak sözcükler: ${quoted(settings.avoid)}`)
   }
   if (extra) {
     lines.push("- Bu iş için ek yönerge:", indented(extra))
@@ -100,13 +98,15 @@ export function guidanceText(settings: AiGuidanceSettings, taskId: string): stri
 }
 
 /**
- * Whether a task takes the shop's guidance: a text task that writes prose
- * for a shopper (adr/0074 §2). A picture's alt text (vision) describes what
- * it shows, not in the shop's voice, and a product card from a photo
- * (vision, one JSON object) is structured data: neither takes it.
+ * The owner's own craft for a task (adr/0074 §3), in the default craft's
+ * place; null when none is set or the task takes none (a stored craft of
+ * a task that no longer does is left unread, not refused).
  */
-export const takesGuidance = (task: Pick<AiTask, "capability" | "json" | "gate">): boolean =>
-  task.capability === "text" && task.json !== true && task.gate !== "product_card"
+export function craftText(settings: AiGuidanceSettings, taskId: string): string | null {
+  const task = Object.hasOwn(settings.tasks, taskId) ? settings.tasks[taskId] : undefined
+  const craft = task?.craft?.trim()
+  return craft && isCraftTask(taskId) ? craft : null
+}
 
 /** The shop's guidance, defaults filled in (the settings cache). */
 export async function readGuidance(

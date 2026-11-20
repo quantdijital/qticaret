@@ -2,6 +2,7 @@ import { MIN_PRODUCT_WORDS } from "../seo/advisor"
 import { wordCount } from "../seo/advisor/text"
 import { SERP_TEXT_LENGTH } from "../seo/pixel-width"
 import { RULES_HEADING } from "./instructions"
+import { quoted } from "./quote"
 import { FOCUS_KEYWORD_MAX_LENGTH, FOCUS_KEYWORD_MAX_WORDS } from "./registry/catalog-tasks"
 import type { AiTask } from "./registry/tasks"
 import { ungroundedWords } from "./short-text-gate"
@@ -24,12 +25,8 @@ export interface RefusedCandidate {
 const MAX_NAMED_WORDS = 5
 const MAX_NAMED_WORD_LENGTH = 30
 
-// A word with a quote mark of its own cannot close ours early: marks taken out first
-const QUOTE_MARKS = /["“”„«»'‘’`]/g
-
-/** Each word in quotes: “ayna”, “altın”. */
-export const quoted = (words: readonly string[]): string =>
-  words.map((word) => `“${word.replace(QUOTE_MARKS, "")}”`).join(", ")
+// A word with a quote mark of its own cannot close ours early: marks taken out first (lib/ai/quote.ts)
+export { quoted }
 
 function lengthReason(task: AiTask, text: string): string {
   const chars = Array.from(text).length
