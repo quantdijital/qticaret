@@ -5,8 +5,9 @@
  * the category aisle slides behind the top row (wordmark, search, account,
  * cart stay); on a phone the top row, the whole header, slides away, the
  * bottom bar keeping the menu, the search, the cart and the account. Turning back
- * opens it again; it stays open while anything in it has the focus or a
- * category panel is open. The WhatsApp button steps aside while the page
+ * opens it again; it stays open while anything in it has the focus (but
+ * its search, which stays in sight folded: typing there never unfolds it)
+ * or a category panel is open. The WhatsApp button steps aside while the page
  * scrolls down and while a field is being typed in. Only transform and
  * opacity move (no layout shift); reduced motion stops the slide (base.css).
  */
@@ -18,7 +19,9 @@
 }
 /* Folded, the header is its folding part shorter: the column starts under what
    is left of it, not where the whole header ended (Tezgâh audit Y-08) */
-html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state="open"])) {
+html[data-js-scroll="down"]:not(
+    :has(.gf-head :focus:not([role="search"] *), .gf-head [data-state="open"])
+  ) {
   --gf-stick-top: calc(var(--gf-head-h, 8.3125rem) - var(--gf-head-fold, 0px) + 1rem);
 }
 
@@ -72,18 +75,23 @@ html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state
   }
 }
 
-html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state="open"]))
+html[data-js-scroll="down"]:not(
+    :has(.gf-head :focus:not([role="search"] *), .gf-head [data-state="open"])
+  )
   .gf-head {
   transform: translateY(calc(-1 * var(--gf-head-fold, 0px)));
 }
 @media (width >= 64rem) {
-  html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state="open"]))
+  html[data-js-scroll="down"]:not(
+      :has(.gf-head :focus:not([role="search"] *), .gf-head [data-state="open"])
+    )
     .gf-head-row {
     transform: translateY(var(--gf-head-fold, 0px));
   }
 }
 @media (width < 64rem) {
-  html[data-js-scroll="down"]:not(:has(.gf-head:focus-within)) .gf-listbar[data-js-stuck] {
+  html[data-js-scroll="down"]:not(:has(.gf-head :focus:not([role="search"] *)))
+    .gf-listbar[data-js-stuck] {
     transform: translateY(calc(-1 * var(--gf-head-fold, 0px)));
   }
 }
@@ -118,6 +126,14 @@ body:has(
   )
   [data-whatsapp] {
   display: none;
+}
+
+/* Typing in the header's search (or the phone's dropping one) never moves the
+   page: the browser keeps the caret below the room the padding above holds for
+   the sticky header, and a field inside that header (or a fixed layer) never
+   gets there, so each key scrolled the page up a step until the top */
+html:has(:is([data-gf-head], [data-search-drop]) [role="search"] :focus) {
+  scroll-padding-top: 0;
 }
 
 /* The checkout's header does not stick: a step or a field scrolled to stands

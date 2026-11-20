@@ -59,7 +59,7 @@ export function SearchDrop({
           onOpenAutoFocus={(event) => {
             // The field first, not the close button: the keyboard opens on it
             event.preventDefault()
-            document.getElementById(PHONE_SEARCH)?.focus()
+            document.getElementById(PHONE_SEARCH)?.focus({ preventScroll: true })
           }}
           onEscapeKeyDown={(event) => {
             // Heard before the field (Radix listens on the document's capture): the field decides
@@ -69,7 +69,7 @@ export function SearchDrop({
           }}
           onCloseAutoFocus={(event) => {
             event.preventDefault()
-            opener.current?.focus()
+            opener.current?.focus({ preventScroll: true })
             opener.current = null
           }}
           className="fixed inset-x-0 top-0 z-(--z-modal) flex items-center gap-2 rounded-b-tile bg-paper px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 text-text shadow-float outline-none duration-(--dur-short) data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=open]:animate-in data-[state=open]:slide-in-from-top lg:hidden"
