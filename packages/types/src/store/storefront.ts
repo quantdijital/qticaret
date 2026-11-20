@@ -4,6 +4,7 @@
  * backend's build does not compile workspace TypeScript (adr/0046 §8).
  */
 import type { MediaDerivatives, StoreImage } from "./catalog.js"
+import type { ListingTextSettings } from "./listing-text.js"
 import type { CardVariant } from "./section-variants.js"
 import type { StyleKit } from "./style-kit.js"
 
@@ -152,6 +153,12 @@ export interface StoreThemeSettings extends StyleKit {
   section_spacing: SectionSpacing
   /** How the theme's boxes stand on the page (`SURFACE_STYLES`); `filled` is today's tone. */
   surface_style: SurfaceStyle
+  /**
+   * How a category, brand or collection page's own text looks at the foot
+   * of the page (adr/0075, `listing-text.ts`). Absent from a backend before
+   * it: `LISTING_TEXT_DEFAULTS` (`listingTextOf`).
+   */
+  listing_text?: ListingTextSettings
 }
 
 /**

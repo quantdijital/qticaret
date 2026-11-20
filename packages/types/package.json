@@ -9,6 +9,7 @@
     "./catalog": "./src/store/catalog.ts",
     "./storefront": "./src/store/storefront.ts",
     "./style-kit": "./src/store/style-kit.ts",
+    "./listing-text": "./src/store/listing-text.ts",
     "./section-variants": "./src/store/section-variants.ts",
     "./section-look": "./src/store/section-look.ts",
     "./section-device": "./src/store/section-device.ts",

@@ -1,9 +1,11 @@
+import { z } from "@medusajs/framework/zod"
 import { isPlainObject } from "../../modules/platform-settings/sections/define"
 import {
   THEME_SETTINGS_VERSION,
   primaryReadable,
   themeSection,
   withCardDefaults,
+  withListingTextDefaults,
 } from "../../modules/platform-settings/sections/theme"
 import type { ThemeSettings } from "../../modules/platform-settings/sections"
 
@@ -15,7 +17,11 @@ import type { ThemeSettings } from "../../modules/platform-settings/sections"
  * then take the `theme` settings section (adr/0053, adr/0062), so a shop
  * sees the same storefront without a migration.
  */
-export const layoutTheme = themeSection.full.nullable().default(null)
+export const layoutTheme = z
+  // A save from a panel before adr/0075 sends no listing text: its defaults stand
+  .preprocess(withListingTextDefaults, themeSection.full)
+  .nullable()
+  .default(null)
 
 /**
  * A stored design's theme read with today's meaning: one written without
@@ -46,6 +52,8 @@ const shown = (theme: ThemeSettings): ShownTheme => ({
   buttons: theme.buttons,
   section_spacing: theme.section_spacing,
   surface_style: theme.surface_style,
+  // A category, brand or collection page's own text at its foot (adr/0075)
+  listing_text: theme.listing_text,
   // The style kit (adr/0067 §1)
   menu_style: theme.menu_style,
   shadow: theme.shadow,

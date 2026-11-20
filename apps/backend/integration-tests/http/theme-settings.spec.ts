@@ -26,6 +26,7 @@ interface Frame {
     media_ground: string
     density: string
     motion: string
+    listing_text: { size: string; align: string; width: string; collapse: boolean }
   }
 }
 
@@ -38,6 +39,9 @@ const KIT = {
   density: "airy",
   motion: "calm",
 }
+
+/** A listing page's own text at its foot, at its defaults (adr/0075). */
+const LISTING_TEXT = { size: "md", align: "start", width: "narrow", collapse: true }
 
 /** The card's variant and the framed card's switches at their defaults (adr/0049 Ek 2026-11-14 §3.3). */
 const CARD = {
@@ -102,6 +106,8 @@ medusaIntegrationTestRunner({
         surface_style: "lined",
         menu_style: "plain",
         shadow: "none",
+        // adr/0075: one field of the group; the others keep theirs
+        listing_text: { size: "lg" },
       })
       const after = await frame()
 
@@ -120,6 +126,8 @@ medusaIntegrationTestRunner({
         surface_style: "filled",
         // and before the style kit, today's drawing (adr/0067)
         ...KIT,
+        // and before the listing text, its defaults (adr/0075)
+        listing_text: LISTING_TEXT,
       })
       expect(fallback.data.theme.colors.primary).toBe("#0b5c99")
       expect(pale.status).toBe(400)
@@ -141,6 +149,7 @@ medusaIntegrationTestRunner({
         ...KIT,
         menu_style: "plain",
         shadow: "none",
+        listing_text: { ...LISTING_TEXT, size: "lg" },
       })
       // The old field stays until the storefront and the panel move over
       expect(after.data.storefront.primary_color).toBe("#0b5c99")
@@ -181,6 +190,7 @@ medusaIntegrationTestRunner({
         section_spacing: "normal",
         surface_style: "filled",
         ...KIT,
+        listing_text: LISTING_TEXT,
       }
 
       const read = await section()
