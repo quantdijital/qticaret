@@ -13,6 +13,19 @@ import { errorText } from "@/lib/errors"
 type ShopPart = Omit<AiGuidanceSettings, "tasks">
 
 /**
+ * The saved tasks' notes and examples, without an instruction: until the
+ * tasks card reports, "Dene" sends no instruction (the owner's alone to
+ * send; left out, the server tries the stored one).
+ */
+const notesOf = (tasks: AiGuidanceSettings["tasks"]): AiGuidanceSettings["tasks"] =>
+  Object.fromEntries(
+    Object.entries(tasks).map(([id, entry]) => [
+      id,
+      entry ? { extra: entry.extra, examples: entry.examples } : entry,
+    ])
+  )
+
+/**
  * Settings › Yapay zekâ › Yazım yönergesi (adr/0074 §2): the shop-wide
  * guidance on top, the tasks' own below in closed rows, and "Dene" last,
  * which tries the guidance as both cards hold it, saved or not. Owner and
@@ -32,7 +45,7 @@ export function AiGuidanceTab() {
   if (!saved) {
     return <LoadingRows />
   }
-  const current: AiGuidanceSettings = { ...saved, ...shop, tasks: tasks ?? saved.tasks }
+  const current: AiGuidanceSettings = { ...saved, ...shop, tasks: tasks ?? notesOf(saved.tasks) }
   return (
     <div className="flex flex-col gap-6">
       <AiGuidanceCard saved={saved} mayChange={mayChange} onDraft={setShop} />
