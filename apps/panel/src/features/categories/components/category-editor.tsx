@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -18,14 +17,10 @@ import {
 } from "@qticaret/admin-ui/ui/select"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { Textarea } from "@qticaret/admin-ui/ui/textarea"
-import {
-  useCreateCategory,
-  useDeleteCategory,
-  useUpdateCategory,
-} from "@/features/categories/api/categories"
+import { useDeleteCategory, useUpdateCategory } from "@/features/categories/api/categories"
 import type { Category } from "@/features/categories/api/categories"
 import { ancestorHandles, descendantsOf, treeRows } from "@/features/categories/tree"
-import { seoSettingsQuery } from "@/features/settings/api/seo"
+import { useCategoryPathPrefix } from "@/features/categories/use-category-path"
 import { errorText } from "@/lib/errors"
 import { isValidSlug, toSlug } from "@/lib/slug"
 
@@ -42,27 +37,24 @@ interface Values {
 
 interface CategoryEditorProps {
   categories: Category[]
-  /** Null to add a new category. */
-  category: Category | null
-  onSaved: (id: string) => void
+  category: Category
   onDeleted: () => void
 }
 
-/** One category's name, address, story, place in the tree and visibility. */
-export function CategoryEditor({ categories, category, onSaved, onDeleted }: CategoryEditorProps) {
+/** One category's name, address, story, place in the tree and visibility; deleting it too. */
+export function CategoryEditor({ categories, category, onDeleted }: CategoryEditorProps) {
   const { t } = useTranslation()
-  const create = useCreateCategory()
   const update = useUpdateCategory()
   const remove = useDeleteCategory()
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const { data: seo } = useQuery(seoSettingsQuery())
+  const prefix = useCategoryPathPrefix()
   const saved: Values = {
-    name: category?.name ?? "",
-    handle: category?.handle ?? "",
-    description: category?.description ?? "",
-    parent: category?.parent_category_id ?? ROOT,
-    is_active: category?.is_active ?? true,
-    is_internal: category?.is_internal ?? false,
+    name: category.name,
+    handle: category.handle,
+    description: category.description,
+    parent: category.parent_category_id ?? ROOT,
+    is_active: category.is_active,
+    is_internal: category.is_internal,
   }
   const form = useForm<Values>({ values: saved })
   const [name, handle, parent] = useWatch({
@@ -70,12 +62,9 @@ export function CategoryEditor({ categories, category, onSaved, onDeleted }: Cat
     name: ["name", "handle", "parent"],
   })
   const { errors, isDirty } = form.formState
-  const blocked = category
-    ? descendantsOf(categories, category.id).add(category.id)
-    : new Set<string>()
+  const blocked = descendantsOf(categories, category.id).add(category.id)
   const parents = treeRows(categories, new Set()).filter((row) => !blocked.has(row.category.id))
   const slug = handle.trim() || toSlug(name)
-  const flat = seo?.values.url_style.category === "flat"
   const path = [...ancestorHandles(categories, parent === ROOT ? null : parent), slug || "…"].join(
     "/"
   )
@@ -89,37 +78,21 @@ export function CategoryEditor({ categories, category, onSaved, onDeleted }: Cat
       is_active: values.is_active,
       is_internal: values.is_internal,
     }
-    const done = (id: string) => {
-      toast.success(t(category ? "categories.saved" : "categories.created"))
-      onSaved(id)
-    }
-    const failed = (failure: unknown) => toast.error(errorText(t, failure))
-    if (category) {
-      update.mutate(
-        { id: category.id, ...input },
-        {
-          onSuccess: () => {
-            done(category.id)
-          },
-          onError: failed,
-        }
-      )
-    } else {
-      create.mutate(input, {
-        onSuccess: (created) => {
-          done(created.id)
-        },
-        onError: failed,
-      })
-    }
+    update.mutate(
+      { id: category.id, ...input },
+      {
+        onSuccess: () => toast.success(t("categories.saved")),
+        onError: (failure) => toast.error(errorText(t, failure)),
+      }
+    )
   })
 
   return (
     <CardForm
-      title={category ? category.name : t("categories.new")}
-      description={t(category ? "categories.editHint" : "categories.newHint")}
-      dirty={isDirty || !category}
-      saving={create.isPending || update.isPending}
+      title={t("categories.general")}
+      description={t("categories.editHint")}
+      dirty={isDirty}
+      saving={update.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
         form.reset(saved)
@@ -152,7 +125,7 @@ export function CategoryEditor({ categories, category, onSaved, onDeleted }: Cat
           })}
         />
         <p className="font-mono text-xs text-muted-foreground">
-          {flat ? "/" : "/kategori/"}
+          {prefix}
           {path}
         </p>
       </Field>
@@ -215,39 +188,37 @@ export function CategoryEditor({ categories, category, onSaved, onDeleted }: Cat
           </label>
         ))}
       </div>
-      {category ? (
-        <div className="flex justify-start">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-destructive-text"
-            onClick={() => {
-              setConfirmDelete(true)
-            }}
-          >
-            <Trash2 />
-            {t("categories.delete")}
-          </Button>
-          <ConfirmDialog
-            open={confirmDelete}
-            onOpenChange={setConfirmDelete}
-            title={t("categories.deleteTitle", { name: category.name })}
-            description={t("categories.deleteDescription")}
-            confirmLabel={t("categories.delete")}
-            destructive
-            onConfirm={() => {
-              remove.mutate(category.id, {
-                onSuccess: () => {
-                  toast.success(t("categories.deleted"))
-                  onDeleted()
-                },
-                onError: (failure) => toast.error(errorText(t, failure)),
-              })
-            }}
-          />
-        </div>
-      ) : null}
+      <div className="flex justify-start">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-destructive-text"
+          onClick={() => {
+            setConfirmDelete(true)
+          }}
+        >
+          <Trash2 />
+          {t("categories.delete")}
+        </Button>
+        <ConfirmDialog
+          open={confirmDelete}
+          onOpenChange={setConfirmDelete}
+          title={t("categories.deleteTitle", { name: category.name })}
+          description={t("categories.deleteDescription")}
+          confirmLabel={t("categories.delete")}
+          destructive
+          onConfirm={() => {
+            remove.mutate(category.id, {
+              onSuccess: () => {
+                toast.success(t("categories.deleted"))
+                onDeleted()
+              },
+              onError: (failure) => toast.error(errorText(t, failure)),
+            })
+          }}
+        />
+      </div>
     </CardForm>
   )
 }

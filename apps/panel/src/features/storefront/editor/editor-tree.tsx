@@ -3,7 +3,7 @@ import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { SETTINGS_KEY, partOf } from "@/features/storefront/layout/settings-problems"
 import { EditorNotices } from "./editor-notices"
-import type { EditorPage, ShownPage } from "./editor-page"
+import type { EditorPage, ShownPage, TreeContentPage } from "./editor-page"
 import type { Opened } from "./opened"
 import type { Adding } from "./section-chooser"
 import { SectionTree } from "./section-tree"
@@ -14,8 +14,8 @@ interface EditorTreeProps {
   page: EditorPage
   /** The page shown, as the settings search tells its sections from others'. */
   shown: ShownPage
-  /** The content page picked (`page: "content"`, adr/0073 §5). */
-  contentPage: { id: string | null; title: string | null; contact: boolean }
+  /** The content page picked (`page: "content"`, adr/0073 Ek 2026-11-19 (2) K5). */
+  contentPage: TreeContentPage
   problems: Map<string, SectionProblems>
   act: (action: EditorAction) => void
   opened: Opened
@@ -80,9 +80,9 @@ export function EditorTree({
         <SectionTree
           page={page}
           contentPage={contentPage}
-          onOpenText={() => {
+          onPageSettings={() => {
             if (contentPage.id !== null) {
-              setOpened({ kind: "page-text", page: contentPage.id, contact: contentPage.contact })
+              setOpened({ kind: "page-settings", page: contentPage.id })
             }
           }}
           doc={doc}

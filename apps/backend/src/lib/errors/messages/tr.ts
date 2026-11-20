@@ -223,6 +223,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.too_large":
     "İçerik çok uzun ya da iç içe; bir sayfa en fazla 200.000 karakter ve birkaç seviye iç içe liste olabilir.",
   "content.unknown": "İçerik bulunamadı.",
+  "content.page_text_in_editor":
+    "Sayfanın metni tema düzenleyicide, sayfanın bölümlerinde düzenlenir; buradan yalnız başlık, adres, kapak ve durum kaydedilir.",
   "errors.busy": "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin.",
   "errors.conflict": "Kayıt bu arada değişti; sayfayı yenileyip tekrar deneyin.",
   "errors.csrf_rejected": "İstek güvenlik kontrolünden geçemedi; sayfayı yenileyip tekrar deneyin.",
@@ -729,6 +731,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.scene_text_invalid":
     "Sahne tarifi düz metin olmalı: en çok 200 karakter (adı en çok 40); bağlantı, HTML ya da tırnak içeremez.",
   "ai.scenes_full": "En çok 12 sahne kaydedilebilir. Yenisi için birini silin.",
+  // adr/0074 §2: the shop's writing guidance
+  "ai.guidance_too_long":
+    "Yazım yönergesinde bir alan sınırı aşıyor: kitle en çok 160, serbest yönerge 1500, işe özel yönerge ve her örnek 600, her sözcük 40 karakter.",
+  "ai.guidance_words_full": "Tercih edilen ve kaçınılacak sözcüklerin her biri en çok 20 öğe alır.",
+  "ai.guidance_examples_full": "Bir iş için en çok 3 örnek eklenebilir.",
+  "ai.guidance_unknown_task":
+    "Yazım yönergesi yalnız yapay zekânın metin yazdığı işler için verilebilir.",
   // adr/0071 §3: "Bağlantıyı dene" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",
@@ -1077,7 +1086,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bölüm eklenen sayfa tanınmadı; yalnız İçerik'teki sayfalar düzenlenebilir. Sayfayı yenileyip yeniden deneyin.",
   "storefront_layout.page_duplicate":
     "Aynı sayfanın düzeni iki kez gönderildi; sayfayı yenileyip yeniden deneyin.",
-  "storefront_layout.pages_limit": "Kendi düzeni olan en çok 20 sayfa olabilir.",
+  "storefront_layout.pages_limit": "Kendi düzeni olan en çok 50 sayfa olabilir.",
   "storefront_layout.page_sections_limit": "Bir sayfada en az bir, en çok 12 bölüm olabilir.",
   "storefront_layout.too_large":
     "Tasarım kaydedilemeyecek kadar büyüdü; bazı bölümleri ya da uzun metinleri kısaltın.",

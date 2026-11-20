@@ -13,6 +13,7 @@ import type MigrationModuleService from "../../modules/migration/service"
 import type { RememberedItem } from "../../modules/migration/service"
 import type { PostTermsInput } from "../content/term-rules"
 import { saveContentWorkflow } from "../content/workflows"
+import { importPage } from "./content-page"
 import { ImageRefused, storeImage } from "./images"
 import { migratePostTerms, refusalOf, writeSeo } from "./post-terms"
 import type { TermCounts } from "./post-terms"
@@ -220,23 +221,25 @@ async function writeEntry(
   }
   let id: string
   try {
-    const { result } = await saveContentWorkflow(container as MedusaContainer).run({
-      input: {
-        kind,
-        values: {
-          title,
-          handle: content.handle,
-          status: content.status,
-          body: content.body,
-          excerpt: content.excerpt,
-          author_name: content.author,
-          image_url: cover?.url ?? null,
-          image_alt: cover?.alt ?? null,
-        },
-        ...(terms ? { terms } : {}),
-      },
-    })
-    id = result.id
+    const values = {
+      title,
+      handle: content.handle,
+      status: content.status,
+      excerpt: content.excerpt,
+      author_name: content.author,
+      image_url: cover?.url ?? null,
+      image_alt: cover?.alt ?? null,
+    }
+    if (kind === "page") {
+      // A page's text is its sections' (adr/0073 Ek 2026-11-19 (2) K4): checked before the
+      // page is made, written before it goes live; a page whose text fails is not left behind
+      id = await importPage(container as MedusaContainer, values, content.body)
+    } else {
+      const { result } = await saveContentWorkflow(container as MedusaContainer).run({
+        input: { kind, values: { ...values, body: content.body }, ...(terms ? { terms } : {}) },
+      })
+      id = result.id
+    }
   } catch (error) {
     return { id: null, problems: [refusalOf(error), ...problems] }
   }

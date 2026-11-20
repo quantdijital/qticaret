@@ -1,11 +1,8 @@
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { contentQuery } from "@/features/content/api/content"
 import type { ContentEntry } from "@/features/content/api/content"
-import { sectionQuery } from "@/features/settings/api/sections"
-import type { StorefrontSettings } from "@/features/settings/api/sections"
+import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { sdk } from "@/lib/sdk"
-import { roleRef } from "./page-roles"
-import type { RoleRef } from "./page-roles"
 
 /**
  * The shop's content pages as the theme editor knows them (adr/0073 §5):
@@ -97,10 +94,13 @@ export function useContentPage(id: string | null) {
 }
 
 /**
- * The page the contact form shows on (Vitrin tercihleri; adr/0047): its
- * id, or a section's old path from before the ids (adr/0073 Açık kararlar 3).
+ * The content pages in draft the design lays out (adr/0073 Ek 2026-11-19
+ * (2) K5): "Yayınla" offers to put them live with it ("Sayfayı da yayına
+ * al"), so a new page goes live in one step. A page's status is saved at
+ * once in its settings; this is the shortcut beside the design.
  */
-export function useContactRole(enabled: boolean): RoleRef {
-  const settings = useQuery({ ...sectionQuery<StorefrontSettings>("storefront"), enabled })
-  return roleRef(settings.data?.values ?? {}, "contact")
+export function useDraftPages(doc: LayoutDocument): ContentPageOption[] {
+  const pages = useContentPages().data?.pages ?? []
+  const laidOut = new Set(doc.pages.map((page) => page.page_id))
+  return pages.filter((page) => page.status === "draft" && laidOut.has(page.id))
 }

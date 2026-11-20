@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react"
-import type { ContentPageView, FaqGroupView, FaqView, Translate } from "@qticaret/ui"
+import type { ContactView, FaqGroupView, FaqView, Translate } from "@qticaret/ui"
 import { Reach } from "../sections/Help"
 import { Prose } from "./Prose"
 
@@ -31,9 +31,19 @@ function Questions({ group }: { group: FaqGroupView }) {
  * are a row of pills above, the help closes the page. Each group's
  * questions are rounded disclosures (the home page's), closed.
  */
-export function FaqBody({ view, faq, t }: { view: ContentPageView; faq: FaqView; t: Translate }) {
+export function FaqBody({
+  faq,
+  help,
+  t,
+  suffix = "",
+}: {
+  faq: FaqView
+  help: ContactView | null
+  t: Translate
+  /** Added to its ids when another text of questions on the page has them (`idSuffixes`). */
+  suffix?: string
+}) {
   const titled = faq.groups.filter((group) => group.title !== null)
-  const help = view.help ?? null
   return (
     <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
       <aside className="max-lg:contents lg:col-span-4">
@@ -53,10 +63,10 @@ export function FaqBody({ view, faq, t }: { view: ContentPageView; faq: FaqView;
           )}
           {help && (
             <section
-              aria-labelledby="yardim"
+              aria-labelledby={`yardim${suffix}`}
               className="flex flex-col gap-4 rounded-tile border border-rule p-6 max-lg:order-3"
             >
-              <h2 id="yardim" className="text-title">
+              <h2 id={`yardim${suffix}`} className="text-title">
                 {t("content.help_title")}
               </h2>
               <p className="text-text-2">{t("content.help_text")}</p>

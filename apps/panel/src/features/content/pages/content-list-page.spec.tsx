@@ -20,6 +20,8 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 // Rendered without a router: the address's tab as each test sets it
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
+  // Where a redirect goes, as a line to read
+  Navigate: ({ to }: { to: string }) => <p role="note">{to}</p>,
   getRouteApi: () => ({ useSearch: () => search }),
   useNavigate: () => navigate,
 }))
@@ -95,5 +97,40 @@ describe("the content screen's authors tab", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     })
+  })
+})
+
+/** adr/0073 Ek 2026-11-19 (2) K5: the shop's pages are the theme editor's, İçerik the blog's. */
+describe("the content screen without pages", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    navigate.mockReset()
+    fetchMock.mockImplementation((url: string) =>
+      url === "/admin/content"
+        ? Promise.resolve({ entries: [], count: 0 })
+        : Promise.reject(Object.assign(new Error(`unexpected ${url}`), { status: 404 }))
+    )
+  })
+
+  it("opens on the blog's posts, with no pages tab", () => {
+    Reflect.deleteProperty(search, "kind")
+    renderPage()
+    const tabs = screen.getAllByRole("tab").map((tab) => tab.textContent)
+    expect(tabs[0]).toBe("Blog yazıları")
+    expect(tabs).not.toContain("Sayfalar")
+    expect(screen.getByRole("tab", { name: "Blog yazıları" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    )
+    expect(fetchMock).toHaveBeenCalledWith("/admin/content", {
+      query: { kind: "post", offset: 0, limit: 25 },
+    })
+  })
+
+  it("sends the old pages tab's address to Vitrin > Sayfalar", () => {
+    search.kind = "page"
+    renderPage()
+    expect(screen.getByRole("note")).toHaveTextContent("/storefront/pages")
+    expect(screen.queryByRole("tab")).toBeNull()
   })
 })

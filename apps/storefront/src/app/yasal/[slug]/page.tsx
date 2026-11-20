@@ -4,6 +4,7 @@ import { t } from "@/lib/i18n"
 import { siteSeo } from "@/lib/store-api/requests"
 import { isLegalSlug, LEGAL_PAGES, legalDocument, publishedLegalLinks } from "@/lib/views/legal"
 import { withOutline } from "@/lib/views/legal-outline"
+import { pageAnchors } from "@/lib/views/page-anchors"
 import { theme } from "@/theme"
 
 type Params = Promise<{ slug: string }>
@@ -47,7 +48,7 @@ export default async function LegalPage({ params }: { params: Params }) {
   if (!document) {
     notFound()
   }
-  const { html, outline } = withOutline(document.html)
+  const { html, outline } = withOutline(document.html, pageAnchors())
   const published = document.published_at ? new Date(document.published_at) : null
   return (
     <theme.LegalPage

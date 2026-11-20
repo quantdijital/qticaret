@@ -5,7 +5,9 @@ import { draftPageLayout, livePageId } from "../../../../page-reads"
 /**
  * GET /store/storefront-layout/preview/:token/pages/:id (adr/0073 §6): a
  * live content page's layout in the draft, for the signed design link
- * (adr/0049). A link may be passed on, so every page not live (a draft, a
+ * (adr/0049), a page with no entry answered with its text as sections
+ * (adr/0073 Ek 2026-11-19 (2) K1). A link may be passed on, so every page
+ * not live (a draft, a
  * deleted one, a post, none such) answers `null` alike: a draft page never
  * leaves through it (the editor's live session shows one). A link that
  * does not open is a 404, as the design link's own read.

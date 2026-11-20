@@ -9,7 +9,9 @@ import type {
   HomeSectionType,
   PageGroup,
   Placement,
+  RichTextSection,
 } from "@/features/storefront/api/layout"
+import type { JSONContent } from "@tiptap/react"
 import {
   ANNOUNCEMENT_DEFAULTS,
   BANNER_DEFAULTS,
@@ -26,6 +28,8 @@ import { PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
  */
 
 const ALWAYS = { visible: true, starts_at: null, ends_at: null } as const
+
+const emptyBody = (): JSONContent => ({ type: "doc", content: [] })
 
 /** A section as the chooser adds it: the storefront's own words until the shop writes its own. */
 export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
@@ -117,9 +121,9 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
 }
 
 /**
- * A section of a page body as its chooser adds it; a category page's (or
- * a content page's) goes where it was added (below the products, or the
- * page's text, unless said otherwise).
+ * A section of a page body as its chooser adds it; a category page's goes
+ * where it was added (below the products unless said otherwise). A content
+ * page's sections are one list (adr/0073 Ek 2026-11-19 (2) K1): no place.
  */
 export function newBodySection(
   group: PageGroup,
@@ -127,8 +131,8 @@ export function newBodySection(
   id: string,
   placement: Placement = "bottom"
 ): BodySection {
+  const base = { id, ...ALWAYS }
   if (type === "related_products") {
-    const base = { id, ...ALWAYS }
     return {
       ...base,
       type,
@@ -139,11 +143,28 @@ export function newBodySection(
       columns: 3,
     }
   }
+  if (type === "contact") {
+    // The contact page's body: its text beside the form, the imprint below (K2)
+    return { ...base, type, body: emptyBody(), form: "on", imprint: "on" }
+  }
+  if (type === "payment_facts" || type === "shipping_facts") {
+    return { ...base, type }
+  }
   const section = newHomeSection(type, id)
-  return group === "category" || group === "pages"
-    ? ({ ...section, placement } as CategorySection)
-    : section
+  return group === "category" ? ({ ...section, placement } as CategorySection) : section
 }
+
+/** A content page's own text (K2, "Sayfa metni"): its outline and questions drawn as before. */
+export const newPageText = (id: string, body: JSONContent = emptyBody()): RichTextSection => ({
+  id,
+  ...ALWAYS,
+  type: "rich_text",
+  title: null,
+  body,
+  variant: "article",
+  outline: "auto",
+  questions: "auto",
+})
 
 /**
  * A new price bands strip's fields: three bands to start from, each an

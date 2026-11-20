@@ -14,6 +14,7 @@ import { PriceBandsForm } from "./forms/price-bands-form"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
+import { ContactForm, FactsNote } from "./forms/page-text-fields"
 import { StripGalleryForm } from "./forms/strip-gallery-form"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { TrustBadgeList } from "./shared/trust-badge-list"
@@ -106,6 +107,12 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
       return <NewsletterForm section={section} {...props} />
     case "help":
       return <WordedForm section={section} {...props} />
+    // A content page's own (adr/0073 Ek 2026-11-19 (2) K2)
+    case "contact":
+      return <ContactForm section={section} {...props} />
+    case "payment_facts":
+    case "shipping_facts":
+      return <FactsNote section={section} />
     case "footer_bar":
       return <FooterBarForm section={section} {...props} />
     // The header's settings stand in their own groups (`HeaderGroups`); the other main

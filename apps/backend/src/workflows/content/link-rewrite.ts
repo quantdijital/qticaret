@@ -11,6 +11,9 @@ import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { planContentLinks } from "./link-plan"
 import type { LinkPlan, LinkRow, LinkScope } from "./link-plan"
 import { rewriteEntryLinksStep, rewriteProductLinksStep } from "./steps/rewrite-links"
+import { LAYOUT_LOCK } from "../storefront/layout"
+import { recordSystemLayoutStep } from "../storefront/layout-system"
+import { rewriteLayoutLinksStep } from "./link-layout"
 import { CONTENT_LOCK } from "./workflows"
 
 /**
@@ -43,9 +46,13 @@ const planContentLinksStep = createStep(
     new StepResponse(await planContentLinks(container, input))
 )
 
-/** Every document written takes the lock its own saves take: content's, each product's. */
+/**
+ * Every document written takes the lock its own saves take: content's, the
+ * design's (a page's text is its sections', adr/0073 Ek 2026-11-19 (2)
+ * K7), each product's.
+ */
 const lockKeys = (plan: LinkPlan): string[] => [
-  ...(plan.writes.entries.length > 0 ? [CONTENT_LOCK.key] : []),
+  ...(plan.writes.entries.length > 0 ? [LAYOUT_LOCK.key, CONTENT_LOCK.key] : []),
   ...plan.writes.products.map((product) => `catalog:${product.product_id}`),
 ]
 
@@ -59,16 +66,31 @@ export const rewriteContentLinksWorkflow = createWorkflow(
       return keys.length > 0 ? keys : ["content-links"]
     })
     acquireLockStep({ key, timeout: 30, ttl: 300 })
+    const layout = rewriteLayoutLinksStep(
+      transform({ plan }, ({ plan }) => ({ ids: plan.writes.entries, next: plan.next }))
+    )
+    // A page's `body` is its text sections' mirror: its links rewritten alike
     const entries = rewriteEntryLinksStep(
       transform({ plan }, ({ plan }) => ({ ids: plan.writes.entries, next: plan.next }))
     )
     const products = rewriteProductLinksStep(
       transform({ plan }, ({ plan }) => ({ products: plan.writes.products, next: plan.next }))
     )
+    // Recorded last: a failing record undoes the writes (ids and the revision only)
+    recordSystemLayoutStep(
+      transform({ layout }, ({ layout }) => ({
+        reason: "link_rewrite" as const,
+        ...layout.written,
+        pages: layout.pages,
+      }))
+    )
     releaseLockStep({ key })
     // Pages and posts the storefront shows (its menus and lists); a product's text is read fresh
     refreshStorefrontStep(
-      transform({ entries }, ({ entries }) => (entries > 0 ? ["content" as const] : []))
+      transform({ entries, layout }, ({ entries, layout }) => [
+        ...(entries > 0 ? ["content" as const] : []),
+        ...(layout.changed ? ["layout" as const] : []),
+      ])
     )
     return new WorkflowResponse(
       transform({ plan, entries, products }, ({ plan, entries, products }) => ({

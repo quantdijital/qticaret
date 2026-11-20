@@ -1,5 +1,5 @@
 import type { FaqGroupView } from "@qticaret/ui"
-import { anchorOf, wordsOf } from "./legal-outline"
+import { anchorOf, freeAnchor, wordsOf } from "./legal-outline"
 
 /**
  * A questions-and-answers page read from the shop's own text (adr/0019
@@ -96,9 +96,13 @@ const MIN_QUESTIONS = 3
  * when the page does not read as questions and answers. Bold questions
  * win where there are enough of them (then every heading is a group's,
  * even one ending in "?"); else asking headings are the questions and
- * the rest name the groups.
+ * the rest name the groups. `taken`: the ids the page has already
+ * (`withOutline`'s), the groups' anchors kept clear of them.
  */
-export function faqOf(html: string): { intro: string; groups: FaqGroupView[] } | null {
+export function faqOf(
+  html: string,
+  taken: Set<string> = new Set<string>()
+): { intro: string; groups: FaqGroupView[] } | null {
   const blocks = blocksOf(html)
   const bold = blocks.filter((block) => boldQuestion(block) !== null).length
   const questionOf = bold >= MIN_QUESTIONS ? boldQuestion : headingQuestion
@@ -107,16 +111,10 @@ export function faqOf(html: string): { intro: string; groups: FaqGroupView[] } |
   }
   let intro = ""
   const groups: FaqGroupView[] = []
-  const taken = new Set<string>()
   const group = (title: string | null): FaqGroupView => {
     // A heading of no letters or digits still gets an anchor
     const anchor = title ? anchorOf(title) : ""
-    const base = anchor !== "" ? anchor : `sorular-${String(groups.length + 1)}`
-    let id = base
-    for (let n = 2; taken.has(id); n++) {
-      id = `${base}-${String(n)}`
-    }
-    taken.add(id)
+    const id = freeAnchor(anchor !== "" ? anchor : `sorular-${String(groups.length + 1)}`, taken)
     const made: FaqGroupView = { id, title, lead: "", items: [] }
     groups.push(made)
     return made

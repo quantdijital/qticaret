@@ -235,8 +235,12 @@ export const takesLook = (section: AnySection, group: LayoutGroup): section is L
 export function sectionFields(section: AnySection, group: LayoutGroup): RegistryField[] {
   const id = section.id
   const fields: RegistryField[] = []
-  if (offersVariants(section, group === "footer")) {
-    const variants: readonly string[] = offeredVariants(section, group === "footer")
+  if (offersVariants(section, group === "footer", group === "pages")) {
+    const variants: readonly string[] = offeredVariants(
+      section,
+      group === "footer",
+      group === "pages"
+    )
     fields.push({
       key: "variant",
       group: "variant",

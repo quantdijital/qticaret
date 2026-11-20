@@ -56,13 +56,22 @@ const countsOf = (families: readonly InstallmentRatesView[]): number[] =>
   )
 
 /** The ways to pay the shop offers now, on a filled well beside the payment page's text. */
-export function PaymentMarks({ marks, t }: { marks: readonly ShopMarkView[]; t: Translate }) {
+export function PaymentMarks({
+  marks,
+  t,
+  suffix = "",
+}: {
+  marks: readonly ShopMarkView[]
+  t: Translate
+  /** Added to its ids when another payment facts section on the page has them (`idSuffixes`). */
+  suffix?: string
+}) {
   return (
     <section
-      aria-labelledby="odeme-yontemleri"
+      aria-labelledby={`odeme-yontemleri${suffix}`}
       className="flex flex-col gap-4 rounded-tile gf-pane p-6 lg:p-8"
     >
-      <h2 id="odeme-yontemleri" className="text-title">
+      <h2 id={`odeme-yontemleri${suffix}`} className="text-title">
         {t("content.payments")}
       </h2>
       <Marks marks={marks} />
@@ -76,14 +85,23 @@ export function PaymentMarks({ marks, t }: { marks: readonly ShopMarkView[]; t: 
  * today; the count stays in view while a phone scrolls the families
  * sideways (the box is one tab stop, docs/19 §6.9).
  */
-export function InstallmentTable({ facts, t }: { facts: PaymentFactsView; t: Translate }) {
+export function InstallmentTable({
+  facts,
+  t,
+  suffix = "",
+}: {
+  facts: PaymentFactsView
+  t: Translate
+  /** Added to its ids when another payment facts section on the page has them (`idSuffixes`). */
+  suffix?: string
+}) {
   const families = facts.installments
   const counts = countsOf(families)
   return (
     <section className="flex flex-col gap-5">
       <div className="flex max-w-[68ch] flex-col gap-2">
         <h2
-          id="taksit-secenekleri"
+          id={`taksit-secenekleri${suffix}`}
           className="text-[calc(var(--text-title)*1.2)] tracking-[-0.02em]"
         >
           {t("content.installments")}
@@ -96,7 +114,7 @@ export function InstallmentTable({ facts, t }: { facts: PaymentFactsView; t: Tra
       </div>
       <div
         role="region"
-        aria-labelledby="taksit-secenekleri"
+        aria-labelledby={`taksit-secenekleri${suffix}`}
         tabIndex={0}
         className="-mx-(--gutter) overflow-x-auto px-(--gutter) lg:mx-0 lg:px-0"
       >
@@ -143,15 +161,24 @@ export function InstallmentTable({ facts, t }: { facts: PaymentFactsView; t: Tra
 }
 
 /** The shipping page's facts beside its text: the shop's promises, then its carriers' own marks. */
-export function ShippingFacts({ facts, t }: { facts: ShippingFactsView; t: Translate }) {
+export function ShippingFacts({
+  facts,
+  t,
+  suffix = "",
+}: {
+  facts: ShippingFactsView
+  t: Translate
+  /** Added to its ids when another shipping facts section on the page has them (`idSuffixes`). */
+  suffix?: string
+}) {
   return (
     <div className="flex flex-col gap-(--gap-columns)">
       {facts.promises.length > 0 && (
         <section
-          aria-labelledby="guvencelerimiz"
+          aria-labelledby={`guvencelerimiz${suffix}`}
           className="flex flex-col gap-4 rounded-tile gf-pane p-6 lg:p-8"
         >
-          <h2 id="guvencelerimiz" className="text-title">
+          <h2 id={`guvencelerimiz${suffix}`} className="text-title">
             {t("content.promises")}
           </h2>
           <ul className="flex flex-col gap-4">
@@ -171,10 +198,10 @@ export function ShippingFacts({ facts, t }: { facts: ShippingFactsView; t: Trans
       )}
       {facts.carriers.length > 0 && (
         <section
-          aria-labelledby="kargo-firmalari"
+          aria-labelledby={`kargo-firmalari${suffix}`}
           className="flex flex-col gap-4 rounded-tile gf-pane p-6 lg:p-8"
         >
-          <h2 id="kargo-firmalari" className="text-title">
+          <h2 id={`kargo-firmalari${suffix}`} className="text-title">
             {t("content.carriers")}
           </h2>
           <Marks marks={facts.carriers} />

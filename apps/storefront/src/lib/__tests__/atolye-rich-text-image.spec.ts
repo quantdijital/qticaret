@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
+import { richTextOffPages } from "@qticaret/types/section-rich-text"
 import { SECTION_VARIANTS } from "@qticaret/types/section-variants"
 import type { HomeSectionView, ImageView, PlaceOrderResult } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
@@ -91,9 +92,11 @@ describe("the rich text's picture variant (adr/0073 §3)", () => {
   })
 
   it("draws each variant on the contract's list its own way", () => {
-    const drawn = SECTION_VARIANTS.rich_text.map((variant) =>
-      sectionOf(home([story({ variant, image: PHOTO })]))
+    // `article` is a content page's own text, drawn by the page (`atolye-content-page-text.spec.ts`)
+    const variants = SECTION_VARIANTS.rich_text.filter(
+      (variant): variant is Exclude<typeof variant, "article"> => richTextOffPages(variant)
     )
-    expect(new Set(drawn).size).toBe(SECTION_VARIANTS.rich_text.length)
+    const drawn = variants.map((variant) => sectionOf(home([story({ variant, image: PHOTO })])))
+    expect(new Set(drawn).size).toBe(variants.length)
   })
 })

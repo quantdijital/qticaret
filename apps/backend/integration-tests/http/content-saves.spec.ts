@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { pageTextRefusal, writePageText } from "../helpers/pages"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
@@ -48,7 +49,8 @@ medusaIntegrationTestRunner({
 
     it("dates a text's first going live and its real changes only", async () => {
       const body = doc(p("Kargo üç iş gününde."), p("İade on dört gün."))
-      const made = await save({ kind: "page", title: "Kargo", status: "published", body })
+      // A post's text is its own save's; a page's is its sections' (adr/0073 Ek 2026-11-19 (2))
+      const made = await save({ kind: "post", title: "Kargo", status: "published", body })
       const { id, published_at } = made.data.entry
       expect(published_at).not.toBeNull()
 
@@ -114,16 +116,24 @@ medusaIntegrationTestRunner({
 
     it("shows the shop's details where a text names them, and refuses a misspelt one", async () => {
       const misspelt = await save({
-        kind: "page",
+        kind: "post",
         title: "Yanlış",
         body: doc(p("Bize {telfon} numarasından ulaşın.")),
       })
-      const made = await save({
-        kind: "page",
-        title: "Bize ulaşın",
-        status: "published",
-        body: doc(p("Bize {telefon} numarasından ulaşın.")),
-      })
+      // A page's text, written as the system writes it (adr/0073 Ek 2026-11-19 (2) K4), is
+      // checked alike
+      const made = await save({ kind: "page", title: "Bize ulaşın", status: "published" })
+      const refused = await pageTextRefusal(
+        getContainer(),
+        made.data.entry.id,
+        doc(p("Bize {telfon} ulaşın."))
+      )
+      expect(refused).toContain("content.token_unknown")
+      await writePageText(
+        getContainer(),
+        made.data.entry.id,
+        doc(p("Bize {telefon} numarasından ulaşın."))
+      )
       const read = async () =>
         (
           await settle(

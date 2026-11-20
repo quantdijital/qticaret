@@ -11,18 +11,23 @@ import {
   newFooterSection,
 } from "@/features/storefront/layout/footer-group"
 import type { FooterAddType } from "@/features/storefront/layout/footer-group"
-import { pageMarqueesFull } from "@/features/storefront/layout/page-layouts"
+import {
+  pageMarqueesFull,
+  pageOnlyTaken,
+  pageSectionsOf,
+} from "@/features/storefront/layout/page-layouts"
 import {
   idsOf,
   marqueesOn,
   newBodySection,
+  newPageText,
   newSectionId,
   priceBandsOn,
 } from "@/features/storefront/layout/sections"
 import { AddSectionDialog } from "./add-section-dialog"
 import type { EditorPage } from "./editor-page"
 
-/** Where the chooser adds: a side of the page's sections, or the footer group (adr/0070 §4). */
+/** Where the chooser adds: a side of a category page's sections, or the footer group (adr/0070 §4). */
 export type Adding = Placement | "footer"
 
 /**
@@ -60,6 +65,11 @@ export function SectionChooser({
       page={footer ? "footer" : page === "content" ? "pages" : page}
       footerTypes={footerTypesLeft(doc)}
       placement={adding === null || footer ? "bottom" : adding}
+      taken={
+        page === "content" && content !== null && !footer
+          ? pageOnlyTaken(pageSectionsOf(doc, content))
+          : new Set<string>()
+      }
       marqueeFull={marqueeFull}
       priceBandsFull={page !== "content" && priceBandsOn(doc, page) >= PRICE_BANDS_LIMITS.perPage}
       onOpenChange={(open) => {
@@ -84,10 +94,13 @@ export function SectionChooser({
               type: "add",
               group: "pages",
               page: content,
-              section: newBodySection("pages", type, id, placement) as ContentPageSection,
+              section:
+                type === "article"
+                  ? newPageText(id)
+                  : (newBodySection("pages", type, id) as ContentPageSection),
             })
           }
-        } else {
+        } else if (type !== "article") {
           act({
             type: "add",
             group: page,

@@ -230,10 +230,14 @@ function fieldsOf(section: AnySection): Found[] {
             ["strip_note_link", linkProblem(section.strip_note_link)],
           ]
         : []
+    // A content page's own: the contact text is checked on the server, the facts have no fields
     case "footer_bar":
     case "product_main":
     case "category_main":
     case "trust_badges":
+    case "contact":
+    case "payment_facts":
+    case "shipping_facts":
       return []
     case "marquee":
       return section.items.flatMap((item, index): Found[] => {

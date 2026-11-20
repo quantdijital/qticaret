@@ -21,41 +21,34 @@ const issues = (doc: Record<string, unknown>) =>
   layoutDocument.safeParse(doc).error?.issues.map((issue) => issue.message) ?? []
 
 describe("content pages' own sections (adr/0073 §1)", () => {
-  it("reads a design from before pages with none, and a page's sections with their place", () => {
+  it("reads a design from before pages with none, and a page's sections in their order", () => {
     expect(layoutDocument.parse({}).pages).toEqual([])
     const doc = layoutDocument.parse({
       pages: [
         page(PAGE, [
-          help("ustyardim", { placement: "top" }),
+          help("ustyardim"),
           { id: "yazilar01", type: "posts" },
           { id: "guvence01", type: "trust_badges", variant: "lined" },
         ]),
       ],
     })
+    // One list since Ek 2026-11-19 (2) K1: no place above or below the text
     expect(doc.pages).toEqual([
       {
         page_id: PAGE,
         sections: [
-          { id: "ustyardim", type: "help", ...ALWAYS, title: null, text: null, placement: "top" },
-          // No place saved: below the page's text
-          {
-            id: "yazilar01",
-            type: "posts",
-            ...ALWAYS,
-            title: null,
-            limit: 3,
-            placement: "bottom",
-          },
-          {
-            id: "guvence01",
-            type: "trust_badges",
-            ...ALWAYS,
-            variant: "lined",
-            placement: "bottom",
-          },
+          { id: "ustyardim", type: "help", ...ALWAYS, title: null, text: null },
+          { id: "yazilar01", type: "posts", ...ALWAYS, title: null, limit: 3 },
+          { id: "guvence01", type: "trust_badges", ...ALWAYS, variant: "lined" },
         ],
       },
     ])
+  })
+
+  it("refuses a section's old place on a save (Ek 2026-11-19 (2) K1)", () => {
+    expect(issues({ pages: [page(PAGE, [help("ustyardim", { placement: "top" })])] })).not.toEqual(
+      []
+    )
   })
 
   it("takes every type the contract lists, and the contract's list is the backend's", () => {
@@ -98,7 +91,7 @@ describe("content pages' own sections (adr/0073 §1)", () => {
     ).toContain("storefront_layout.page_duplicate")
   })
 
-  it("holds a page to one to twelve sections and the design to twenty pages", () => {
+  it("holds a page to one to twelve sections and the design to fifty pages", () => {
     expect(issues({ pages: [page(PAGE, [])] })).toContain("storefront_layout.page_sections_limit")
     const many = Array.from({ length: LAYOUT_LIMITS.page + 1 }, (_, n) =>
       help(`yardim${String(n + 100)}`)
@@ -155,7 +148,7 @@ describe("content pages' own sections (adr/0073 §1)", () => {
   it("checks a page's sections as every body section (records, images, rich text)", () => {
     const doc = layoutDocument.parse({
       home: [help("anayardim")],
-      pages: [page(PAGE, [help("sayfayardim", { placement: "top" })])],
+      pages: [page(PAGE, [help("sayfayardim")])],
     })
     expect(bodySections(doc).map((section) => section.id)).toEqual(["anayardim", "sayfayardim"])
   })

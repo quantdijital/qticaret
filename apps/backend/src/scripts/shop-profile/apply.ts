@@ -12,6 +12,7 @@ import { isConflictError } from "../../lib/errors"
 import { ASYNC_JOB_MODULE } from "../../modules/async-job"
 import type AsyncJobModuleService from "../../modules/async-job/service"
 import { deleteContentWorkflow, saveContentWorkflow } from "../../workflows/content/workflows"
+import { replacePageTextWorkflow } from "../../workflows/storefront/page-text-replace"
 import { menuInput } from "../../lib/storefront/menus"
 import { STOREFRONT_MENUS_MODULE } from "../../modules/storefront-menus"
 import type StorefrontMenusModuleService from "../../modules/storefront-menus/service"
@@ -34,7 +35,10 @@ async function applySections(container: MedusaContainer, loaded: LoadedProfile):
   }
 }
 
-/** Each page by its handle: made the first time, its title and text replaced after. */
+/**
+ * Each page by its handle: made the first time, its title replaced after;
+ * its text written into its sections (adr/0073 Ek 2026-11-19 (2) K4).
+ */
 async function applyPages(container: MedusaContainer, loaded: LoadedProfile): Promise<void> {
   const content = container.resolve<ContentModuleService>(CONTENT_MODULE)
   for (const page of loaded.profile.pages) {
@@ -47,12 +51,13 @@ async function applyPages(container: MedusaContainer, loaded: LoadedProfile): Pr
       { kind: "page", handle: page.handle },
       { select: ["id"], take: 1 }
     )
-    await saveContentWorkflow(container).run({
+    const { result } = await saveContentWorkflow(container).run({
       input: {
         ...(existing ? { id: existing.id } : { kind: "page" as const }),
-        values: { title: page.title, handle: page.handle, status: page.status, body },
+        values: { title: page.title, handle: page.handle, status: page.status },
       },
     })
+    await replacePageTextWorkflow(container).run({ input: { page_id: result.id, doc: body } })
     logger.info(
       { event: "shop_profile.page_saved", handle: page.handle, made: !existing },
       "content page saved"

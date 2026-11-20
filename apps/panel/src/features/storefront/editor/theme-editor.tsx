@@ -1,5 +1,4 @@
 import { useIsMutating, useQuery } from "@tanstack/react-query"
-import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useMemo, useReducer, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -10,7 +9,6 @@ import { editorReducer, initialEditorState } from "@/features/storefront/layout/
 import { documentProblems } from "@/features/storefront/layout/problems"
 import { findSection } from "@/features/storefront/layout/sections"
 import { useAutosave } from "@/features/storefront/layout/use-autosave"
-import { ContentPagePicker } from "./content-page-picker"
 import { sayDroppedPages } from "./dropped-pages"
 import {
   OpenedSectionContext,
@@ -26,7 +24,8 @@ import type { Adding } from "./section-chooser"
 import { useEditorSidebar } from "./editor-sidebar"
 import { EditorTopBar } from "./editor-top-bar"
 import { OpenedForm } from "./opened-form"
-import { formKeyOf } from "./opened"
+import { formKeyOf, openedAtFirst } from "./opened"
+import type { OpenAtFirst } from "./opened"
 import type { Opened } from "./opened"
 import type { Device } from "./preview-fit"
 import { PreviewFrame } from "./preview-frame"
@@ -35,7 +34,9 @@ import { LooksMenu } from "./looks-menu"
 import { SamplePicker } from "./sample-picker"
 import { SaveStatus } from "./save-status"
 import { sectionLabel } from "./section-meta"
+import { useContentPageEditing } from "./use-content-page-editing"
 import { useEditorActions } from "./use-editor-actions"
+import { useEditorExit } from "./use-editor-exit"
 import { useEditorPlace } from "./use-editor-place"
 import { useEditorPreview } from "./use-editor-preview"
 import { useUndoKeys } from "./use-undo-keys"
@@ -54,17 +55,17 @@ export function ThemeEditor({
   layout,
   openAtFirst = null,
   content = null,
+  onContent = content !== null,
 }: {
   layout: AdminLayout
-  /** A panel the address asks for (`?open=preferences`: the old preferences page's links). */
-  openAtFirst?: "preferences" | null
+  /** A panel the address asks for (`?open=preferences`; the content page's settings or new text). */
+  openAtFirst?: OpenAtFirst
   /** A content page the address asks for (`?icerik=`, adr/0073 §5). */
   content?: string | null
+  /** Opened on the content pages (`?sayfa=icerik`). */
+  onContent?: boolean
 }) {
   const { t } = useTranslation()
-  const router = useRouter()
-  const navigate = useNavigate()
-  const canGoBack = useCanGoBack()
   const [state, dispatch] = useReducer(editorReducer, layout.draft, initialEditorState)
   const { doc } = state
   const live = useQuery(layoutQuery()).data ?? layout
@@ -84,12 +85,13 @@ export function ThemeEditor({
       sayDroppedPages(t, count)
     },
   })
-  const [opened, setOpened] = useState<Opened>(() => (openAtFirst ? { kind: openAtFirst } : null))
+  const [opened, setOpened] = useState<Opened>(() => openedAtFirst(openAtFirst, content))
   // Each pick of the settings search a fresh number: the same field picked again is shown again
   const picks = useRef(0)
   // The page worked on and shown; a link followed in the preview may change it (adr/0065 Faz 2)
   const place = useEditorPlace({
     content,
+    onContent,
     onPageChange: () => {
       setOpened(null)
     },
@@ -131,6 +133,10 @@ export function ThemeEditor({
     onVisit: place.visit,
     onLand: place.land,
   })
+  // A content page shown with its text as sections when the design has none for it (adr/0073 Ek 2)
+  const fresh = openAtFirst === "new-page" ? content : null
+  const pages = useContentPageEditing({ doc, place, act, setOpened, fresh })
+  const shownDoc = pages.view
   const actions = useEditorActions({
     flush: autosave.flush,
     page: target.path,
@@ -156,34 +162,26 @@ export function ThemeEditor({
     }
   }, [layout.is_default, autosave])
 
-  const exit = async () => {
-    // What waits is stored first; a draft that cannot be is asked about by the guard
-    const stored = await autosave.flush()
-    if (canGoBack) {
-      router.history.back({ ignoreBlocker: stored })
-    } else {
-      void navigate({ to: "/storefront/menus", ignoreBlocker: stored })
-    }
-  }
+  const exit = useEditorExit(autosave.flush)
   const remove = (section: AnySection) => {
-    const inFooter = findSection(doc, section.id)?.group === "footer"
+    const inFooter = findSection(shownDoc, section.id)?.group === "footer"
     const { name } = sectionLabel(t, section, inFooter)
-    act({ type: "remove", id: section.id })
+    pages.act({ type: "remove", id: section.id })
     setOpened(null)
     toast.success(t(`${E}.row.removed`, { name }), {
       action: { label: t(`${E}.undo`), onClick: undo },
     })
   }
-  const found = opened?.kind === "section" ? findSection(doc, opened.id) : null
+  const found = opened?.kind === "section" ? findSection(shownDoc, opened.id) : null
   const changed = live.has_changes || autosave.dirty
 
   const form = (
     <OpenedForm
       opened={opened}
       found={found}
-      doc={doc}
+      doc={shownDoc}
       problems={problems}
-      dispatch={act}
+      dispatch={pages.act}
       onUndo={undo}
       onRemove={remove}
       onClose={() => {
@@ -192,18 +190,19 @@ export function ThemeEditor({
       onOpenSection={(id) => {
         setOpened({ kind: "section", id })
       }}
+      onPageDeleted={pages.onPageDeleted}
     />
   )
   const formKey = formKeyOf(opened, found ? found.section.id : null)
   const sidebar = useEditorSidebar(formKey, shape !== "narrow")
   const tree = (
     <EditorTree
-      doc={doc}
+      doc={shownDoc}
       page={page}
       shown={place.shown}
-      contentPage={place.contentPage}
+      contentPage={pages.contentPage}
       problems={problems}
-      act={act}
+      act={pages.act}
       opened={opened}
       setOpened={setOpened}
       nextPick={() => {
@@ -234,11 +233,7 @@ export function ThemeEditor({
         onExit={() => void exit()}
         page={page}
         onPage={place.choosePage}
-        pagePicker={
-          page === "content" ? (
-            <ContentPagePicker doc={doc} page={place.picked} onChange={place.chooseContent} />
-          ) : null
-        }
+        pagePicker={pages.picker}
         view={view}
         onView={setView}
         sidebar={sidebar.shown}
@@ -256,7 +251,14 @@ export function ThemeEditor({
           />
         }
         tools={tools}
-        publish={<PublishButton actions={actions} changed={changed} />}
+        publish={
+          <PublishButton
+            actions={actions}
+            changed={changed}
+            doc={doc}
+            editing={place.contentPage.id}
+          />
+        }
       />
       <OpenedSectionContext.Provider value={found ? found.section.id : null}>
         <SectionHoverContext.Provider value={hover}>
@@ -287,11 +289,11 @@ export function ThemeEditor({
         </SectionHoverContext.Provider>
       </OpenedSectionContext.Provider>
       <SectionChooser
-        doc={doc}
+        doc={shownDoc}
         page={page}
         content={place.contentPage.id}
         adding={adding}
-        act={act}
+        act={pages.act}
         onClose={() => {
           setAdding(null)
         }}

@@ -48,6 +48,10 @@ export type ContentField =
   | "show_note"
   | "joined"
   | "image_side"
+  | "outline"
+  | "questions"
+  | "form"
+  | "imprint"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -220,7 +224,18 @@ export function contentFields(section: AnySection): RegistryField[] {
               RICH_TEXT_IMAGE_SIDES.map((side) => `${E}.richText.imageSides.${side}`)
             ),
           ]
-        : []
+        : section.variant === "article"
+          ? [
+              entry(section, "outline", `${E}.pageText.outline`),
+              entry(section, "questions", `${E}.pageText.questions`),
+            ]
+          : []
+    // A content page's contact section: its form and imprint switches (adr/0073 Ek 2026-11-19 (2) K2)
+    case "contact":
+      return [
+        entry(section, "form", `${E}.pageText.form`),
+        entry(section, "imprint", `${E}.pageText.imprint`),
+      ]
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":
@@ -232,6 +247,8 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "marquee":
     case "product_main":
     case "trust_badges":
+    case "payment_facts":
+    case "shipping_facts":
       return []
   }
 }
