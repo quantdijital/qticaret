@@ -63,6 +63,7 @@ describe("themeSettings", () => {
       buttons: "square",
       section_spacing: "compact",
       surface_style: "lined",
+      listing_text: { size: "lg", align: "center", width: "wide", collapse: false },
       menu_style: "underline",
       shadow: "none",
       chip_style: "lined",
@@ -105,6 +106,8 @@ describe("themeSettings", () => {
       buttons: "pill",
       section_spacing: "normal",
       surface_style: "filled",
+      // adr/0075 §6: the listing text's defaults
+      listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
       // adr/0067 §1: the style kit at today's drawing
       menu_style: "filled",
       shadow: "float",

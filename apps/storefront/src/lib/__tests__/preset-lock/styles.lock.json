@@ -58,6 +58,10 @@
       "file": "header-catalog.css"
     },
     {
+      "sha256": "d5a34f54e1df549be38dafb4b452a6fb021d71de6e4120c699cd14c9a6db5728",
+      "file": "listing-text.css"
+    },
+    {
       "sha256": "b717743da0f872a4506c70261f1f938fb6b1347bde9b5ef8cd2c3c7b3ab050f3",
       "file": "look.css"
     },
@@ -130,7 +134,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "500aa4975f151f5fe12c8f2da53c0ea5567824946609b833eeed2747c0803ee2",
+      "sha256": "b0fdca1fe15b08e420daf86bb840f61f0cb641b65c61359247bc12851a6e4a7a",
       "file": "styles.css"
     },
     {

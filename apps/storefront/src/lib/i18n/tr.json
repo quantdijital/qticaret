@@ -784,6 +784,8 @@
   "listing.clear_short": "Temizle",
   "listing.clear_filters": "Filtreleri temizle",
   "listing.browse_all": "Tüm ürünlere göz atın",
+  "listing.text_more": "Devamını oku",
+  "listing.text_less": "Daha az göster",
   "product.buy_bar": "Satın alma çubuğu",
   "product.installments_up_to": "{count} aya varan taksit",
   "product.installments_short": "{count} taksit",
