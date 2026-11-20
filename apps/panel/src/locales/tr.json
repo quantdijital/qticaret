@@ -11527,7 +11527,8 @@
       "question_answer": "Soru yanıtı",
       "product_from_photo": "Fotoğraftan ürün kartı",
       "focus_keyword": "Odak anahtar kelime",
-      "product_title": "Ürün adı"
+      "product_title": "Ürün adı",
+      "product_description": "Ürün açıklaması"
     },
     "options": {
       "short": "Kısa",
@@ -11749,6 +11750,66 @@
       "replyDraftFor": "{{author}} yorumu için yanıt taslağı",
       "answerDraftFor": "{{author}} sorusu için yanıt taslağı",
       "note": "Metin, yazar adı ve iletişim bilgisi ayıklanarak servise gider. Taslak forma düşer; siz gönderirsiniz."
+    },
+    "tabs": {
+      "services": "Servisler",
+      "writing": "Yazım yönergesi"
+    },
+    "guidance": {
+      "title": "Yazım yönergesi",
+      "description": "Yapay zekânın mağazanız için yazdığı her metne eklenir. Uydurma bilgi yasağı, biçim ve uzunluk kuralları her zaman geçerlidir.",
+      "readOnly": "Yazım yönergesini mağaza sahibi ya da yönetici değiştirir.",
+      "tone": "Ton",
+      "tones": {
+        "warm": "Samimi ama ölçülü",
+        "professional": "Profesyonel",
+        "expert": "Uzman",
+        "premium": "Seçkin",
+        "plain": "Sade"
+      },
+      "toneHints": {
+        "warm": "Sıcak ve içten, abartısız.",
+        "professional": "Net, güven veren, kurumsal.",
+        "expert": "Bilgili; teknik terimi açıklar.",
+        "premium": "Sakin, özenli; kaliteyi öne çıkarır.",
+        "plain": "Kısa cümleler, gündelik sözcükler."
+      },
+      "address": "Hitap",
+      "addresses": {
+        "siz": "Siz",
+        "sen": "Sen",
+        "none": "Hitap yok"
+      },
+      "addressHint": "Metinler okura nasıl seslensin? “Hitap yok” seçilirse ürün üçüncü kişi diliyle anlatılır.",
+      "audience": "Hedef kitle",
+      "audiencePlaceholder": "örn. ev aşçıları ve kamp severler",
+      "guide": "Serbest yönerge",
+      "guidePlaceholder": "örn. Ürünlerimiz el yapımıdır; “ucuz” deme, “uygun fiyatlı” de; teknik terimleri açıkla.",
+      "guideHint": "Yalnız üslubu belirler; veride olmayan bir bilgiyi yazdırmaz.",
+      "prefer": "Tercih edilen sözcükler",
+      "avoid": "Kaçınılacak sözcükler",
+      "wordsPlaceholder": "Yazıp Enter'a basın",
+      "wordsHint": "En çok {{max}} sözcük, her biri en çok {{length}} karakter.",
+      "wordTooLong": "Bir sözcük en çok {{max}} karakter olabilir.",
+      "wordsFull": "En çok {{max}} sözcük eklenebilir.",
+      "removeWord": "{{label}} sözcüğünü kaldır",
+      "count": "{{count}}/{{max}}",
+      "tooLong": "En çok {{max}} karakter.",
+      "privacy": "Telefon, e-posta gibi kişisel bilgi yazmayın; kaydederken çıkarılır.",
+      "tasks": {
+        "title": "İşlere göre",
+        "description": "Bir işe özel ek yönerge ve beğendiğiniz örnek metinler. Örnekler ton ve yapı için verilir, içerikleri kopyalanmaz.",
+        "none": "Ayar yok",
+        "hasExtra": "Ek yönerge",
+        "examplesCount": "Örnek: {{count}}",
+        "extra": "Ek yönerge",
+        "extraPlaceholder": "örn. Marka adını sona koy; ölçüyü başlıkta ver.",
+        "examples": "Örnek metinler",
+        "examplesHint": "En çok {{max}} örnek, her biri en çok {{length}} karakter. Müşteri adı ya da bilgisi yazmayın; örnek her istekte servise gider.",
+        "example": "Örnek {{n}}",
+        "addExample": "Örnek ekle",
+        "removeExample": "Örnek {{n}} kaldır"
+      }
     }
   }
 }

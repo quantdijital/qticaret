@@ -28,6 +28,7 @@ const SECTION_VALIDATORS = {
   theme: validateAndTransformBody(SECTIONS.theme.patch),
   payment_links: validateAndTransformBody(SECTIONS.payment_links.patch),
   ai_scenes: validateAndTransformBody(SECTIONS.ai_scenes.patch),
+  ai_guidance: validateAndTransformBody(SECTIONS.ai_guidance.patch),
   // The fake programs are for the tests only: never a live shop, nor an owner trying it locally
   accounting: validateAndTransformBody(
     SECTIONS.accounting.patch.refine((body) => body.adapter !== "fake" || fakeAccountingAllowed(), {

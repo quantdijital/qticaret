@@ -725,6 +725,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.scene_text_invalid":
     "Sahne tarifi düz metin olmalı: en çok 200 karakter (adı en çok 40); bağlantı, HTML ya da tırnak içeremez.",
   "ai.scenes_full": "En çok 12 sahne kaydedilebilir. Yenisi için birini silin.",
+  // adr/0074 §2: the shop's writing guidance
+  "ai.guidance_too_long":
+    "Yazım yönergesinde bir alan sınırı aşıyor: kitle en çok 160, serbest yönerge 1500, işe özel yönerge ve her örnek 600, her sözcük 40 karakter.",
+  "ai.guidance_words_full": "Tercih edilen ve kaçınılacak sözcüklerin her biri en çok 20 öğe alır.",
+  "ai.guidance_examples_full": "Bir iş için en çok 3 örnek eklenebilir.",
+  "ai.guidance_unknown_task":
+    "Yazım yönergesi yalnız yapay zekânın metin yazdığı işler için verilebilir.",
   // adr/0071 §3: "Bağlantıyı dene" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",

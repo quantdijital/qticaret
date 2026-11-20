@@ -11527,7 +11527,8 @@
       "question_answer": "Question answer",
       "product_from_photo": "Product card from a photo",
       "focus_keyword": "Focus keyword",
-      "product_title": "Product name"
+      "product_title": "Product name",
+      "product_description": "Product description"
     },
     "options": {
       "short": "Short",
@@ -11749,6 +11750,66 @@
       "replyDraftFor": "Draft a reply to {{author}}'s review",
       "answerDraftFor": "Draft an answer to {{author}}'s question",
       "note": "The text goes to the service without the author's name and contact details. The draft fills the form; you send it."
+    },
+    "tabs": {
+      "services": "Services",
+      "writing": "Writing guidance"
+    },
+    "guidance": {
+      "title": "Writing guidance",
+      "description": "Added to every text AI writes for your shop. The rules against made-up facts, on format and on length always apply.",
+      "readOnly": "The shop owner or an admin changes the writing guidance.",
+      "tone": "Tone",
+      "tones": {
+        "warm": "Warm but measured",
+        "professional": "Professional",
+        "expert": "Expert",
+        "premium": "Premium",
+        "plain": "Plain"
+      },
+      "toneHints": {
+        "warm": "Warm and sincere, never overdone.",
+        "professional": "Clear, trustworthy, businesslike.",
+        "expert": "Knowledgeable; explains technical terms.",
+        "premium": "Calm, careful; brings quality forward.",
+        "plain": "Short sentences, everyday words."
+      },
+      "address": "Address",
+      "addresses": {
+        "siz": "Formal (siz)",
+        "sen": "Informal (sen)",
+        "none": "No address"
+      },
+      "addressHint": "How texts speak to the reader. With “No address” the product is described in the third person.",
+      "audience": "Audience",
+      "audiencePlaceholder": "e.g. home cooks and campers",
+      "guide": "Free guidance",
+      "guidePlaceholder": "e.g. Our products are handmade; don't say “cheap”, say “affordable”; explain technical terms.",
+      "guideHint": "Sets the style only; it never makes AI write facts the data does not hold.",
+      "prefer": "Preferred words",
+      "avoid": "Words to avoid",
+      "wordsPlaceholder": "Type and press Enter",
+      "wordsHint": "Up to {{max}} words, each {{length}} characters at most.",
+      "wordTooLong": "A word can be {{max}} characters at most.",
+      "wordsFull": "Up to {{max}} words can be added.",
+      "removeWord": "Remove {{label}}",
+      "count": "{{count}}/{{max}}",
+      "tooLong": "{{max}} characters at most.",
+      "privacy": "Don't write personal details such as a phone or e-mail; they are taken out on save.",
+      "tasks": {
+        "title": "By task",
+        "description": "An extra note for one task and example texts you like. Examples are given for tone and shape; their content is not copied.",
+        "none": "Not set",
+        "hasExtra": "Extra note",
+        "examplesCount": "Examples: {{count}}",
+        "extra": "Extra note",
+        "extraPlaceholder": "e.g. Put the brand name last; give the size in the title.",
+        "examples": "Example texts",
+        "examplesHint": "Up to {{max}} examples, each {{length}} characters at most. Do not write customer names or details; an example is sent to the service with every request.",
+        "example": "Example {{n}}",
+        "addExample": "Add example",
+        "removeExample": "Remove example {{n}}"
+      }
     }
   }
 }
