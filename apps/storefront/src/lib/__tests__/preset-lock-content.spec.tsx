@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { renderToStaticMarkup } from "react-dom/server"
@@ -10,6 +10,7 @@ import {
   STORY_PAGE,
   contentAnswerOf,
   contentEntity,
+  pageTextSections,
 } from "@/test/preset-lock/fixture-content"
 import { presetContentPages } from "@/test/preset-lock/fixture-content-presets"
 import { htmlLines } from "@/test/preset-lock/html-lines"
@@ -20,14 +21,19 @@ import { store } from "@/test/preset-lock/store-mock"
 /**
  * The preset lock's content pages (docs/tema/bilesen-standardi.md §7;
  * adr/0073 §2, S3): a page of the shop's own words with its cover, the
- * contact page with its form, and a page with its own sections above and
- * below its text, drawn in the fixed shop through the
- * storefront's own screen (`ContentScreen`) and the theme, kept in
- * `preset-lock/fixture-content-pages/`. A page with no layout of its own
- * is drawn as it was before content pages took sections: these files are
- * that proof, never written again to let a change through. A preset that
- * lays out one of these pages (Katalog's Hakkımızda, adr/0073 §4) has it
- * drawn with its sections in its own folder (`cutlery-katalog/about.html`).
+ * contact page with its form, and a page with its own sections around its
+ * text, drawn in the fixed shop through the storefront's own screen
+ * (`ContentScreen`) and the theme, kept in
+ * `preset-lock/fixture-content-pages/`. These files are the proof that a
+ * page is drawn as it was before content pages took sections, never
+ * written again to let a change through. Written once more when the
+ * page's text became a section (adr/0073 Ek 2026-11-19 (2) K8): its text
+ * sections gained their section mark's box (`data-qs`, adr/0065 §4) and
+ * nothing else, which the files from before (`before-text-sections/`)
+ * prove: without those boxes the pages are those files to the byte. A
+ * preset that lays out one of these pages (Katalog's Hakkımızda, adr/0073
+ * §4) has it drawn with its sections in its own folder
+ * (`cutlery-katalog/about.html`).
  */
 
 vi.mock("@/lib/store-api/server", () => import("@/test/preset-lock/store-mock"))
@@ -48,9 +54,42 @@ const PAGES = [
   // Written before content pages took sections (adr/0073 S3): never again to let a change through
   { file: "page.html", page: ABOUT_PAGE },
   { file: "contact.html", page: CONTACT_PAGE },
-  // A page with its own sections: a rich text above its text, three sections below it
+  // A page with its own sections: a rich text before its text, three sections after it
   { file: "page-sections.html", page: STORY_PAGE },
 ]
+
+/** The pages as drawn before their text was a section (adr/0073 Ek 2026-11-19 (2) K8). */
+const BEFORE = join(LOCK_DIR, CONTENT_FIXTURE, "before-text-sections")
+
+/**
+ * The page's markup without its text sections' mark boxes: each
+ * `<div data-qs="<id>">` of a text section (no look, no screens: a plain
+ * box) taken out with its closing tag, its content left where it was.
+ */
+function withoutTextBoxes(markup: string, page: (typeof PAGES)[number]["page"]): string {
+  let out = markup
+  for (const { id } of pageTextSections(page)) {
+    const open = `<div data-qs="${String(id)}">`
+    const start = out.indexOf(open)
+    if (start < 0) {
+      throw new Error(`preset lock: no box for the text section ${String(id)}`)
+    }
+    const tags = /<div[\s>]|<\/div>/g
+    tags.lastIndex = start + open.length
+    let depth = 1
+    let end = -1
+    for (let tag = tags.exec(out); tag; tag = tags.exec(out)) {
+      depth += tag[0] === "</div>" ? -1 : 1
+      if (depth === 0) {
+        end = tag.index
+        break
+      }
+    }
+    out =
+      out.slice(0, start) + out.slice(start + open.length, end) + out.slice(end + "</div>".length)
+  }
+  return out
+}
 
 beforeAll(() => {
   vi.stubEnv("MEDUSA_BACKEND_URL", "http://backend.test")
@@ -84,6 +123,15 @@ describe("the preset lock's content pages (docs/tema/bilesen-standardi.md §7, a
       `the content page is drawn differently (preset-lock/${CONTENT_FIXTURE}/${file}). ${UPDATE_HINT}`
     ).toMatchFileSnapshot(`./preset-lock/${CONTENT_FIXTURE}/${file}`)
   })
+
+  it.each(PAGES)(
+    "draws the $file content page as before its text was a section, its text boxes aside",
+    async ({ file, page }) => {
+      const html =
+        header(CONTENT_FIXTURE, []) + htmlLines(withoutTextBoxes(await contentHtml(page), page))
+      expect(html).toBe(readFileSync(join(BEFORE, file), "utf8"))
+    }
+  )
 })
 
 /** Each preset's own content page layouts on the fixture's pages (adr/0073 §4, S5). */

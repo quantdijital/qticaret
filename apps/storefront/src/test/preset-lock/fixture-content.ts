@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import type { Resolution, StoreLayout, StoreMenu } from "@qticaret/types"
 import type { StorefrontPreset } from "@qticaret/sector-packs"
 import { StoreApiError } from "@/lib/store-api/errors"
@@ -8,8 +9,10 @@ import { presetAnswer } from "./store-layout"
  * The fixed shop's content pages for the preset lock (adr/0073 §2, S3):
  * a plain page with its cover and the contact page the shop chose for its
  * form (adr/0047), each drawn through `ContentScreen` and the theme. The
- * Store API calls only these pages make are answered here; the rest as
- * the frame's and the home page's (`fake-store-api.ts`).
+ * Store API calls only these pages make are answered here, a page's
+ * sections as the store read gives them since its text is a section
+ * (`storePage`, adr/0073 Ek 2026-11-19 (2) K1); the rest as the frame's
+ * and the home page's (`fake-store-api.ts`).
  */
 
 export const CONTENT_FIXTURE = "fixture-content-pages"
@@ -126,14 +129,78 @@ const STORY_SECTIONS = [
 ]
 
 /**
- * Each page's own layout as `GET /store/storefront-layout/pages/:id`
- * answers it: the story page's sections read as the backend reads a
- * group's (`presetAnswer`, the category group's placement kept); every
- * other page has none.
+ * Each page's own layout as the design keeps it: the story page's sections
+ * read as the backend reads a group's (`presetAnswer`, the category group's
+ * placement kept: a design from before the page's text was a section);
+ * every other page has none.
  */
 function pageLayouts(base: StorefrontPreset): Record<string, unknown> {
   const read = presetAnswer({ ...base, layout: { ...base.layout, category: STORY_SECTIONS } })
   return { [STORY_PAGE.id]: { page_id: STORY_PAGE.id, sections: read.layout.category } }
+}
+
+/** A page's text section's id, as the backend makes it from the page's (`pageSectionId`). */
+const pageSectionId = (pageId: string, kind: string): string =>
+  `p${createHash("sha256").update(`${pageId}:${kind}`).digest("hex").slice(0, 16)}`
+
+/**
+ * The page's text as the store read prints its sections (adr/0073 Ek
+ * 2026-11-19 (2) K1, K3; `hydrateArticle`, `hydrateContact`): the contact
+ * page's `contact`, any other page's text an `article`.
+ */
+export function pageTextSections(page: FixtureEntry): Record<string, unknown>[] {
+  const printed = { html: page.html, images: [], headings: [] }
+  return page.id === CONTACT_PAGE.id
+    ? [
+        {
+          id: pageSectionId(page.id, "contact"),
+          type: "contact",
+          ...printed,
+          form: "on",
+          imprint: "on",
+        },
+      ]
+    : [
+        {
+          id: pageSectionId(page.id, "article"),
+          type: "rich_text",
+          title: null,
+          variant: "article",
+          ...printed,
+          outline: "auto",
+          questions: "auto",
+        },
+      ]
+}
+
+type Placed = Record<string, unknown> & { placement?: unknown }
+
+/**
+ * A page as `GET /store/storefront-layout/pages/:id` answers it (adr/0073
+ * Ek 2026-11-19 (2) K1): no entry in the design, its text as sections
+ * (`synthesized`); an entry from before the text was a section (its
+ * sections carry `placement`), the text between the ones above it and the
+ * ones below (`text_at`), `placement` gone; any other entry as it is.
+ */
+function storePage(page: FixtureEntry, layout: unknown): unknown {
+  const texts = pageTextSections(page)
+  if (!layout) {
+    return { page_id: page.id, sections: texts, synthesized: true }
+  }
+  const sections = (layout as { sections: Placed[] }).sections
+  if (!sections.some((section) => "placement" in section)) {
+    return layout
+  }
+  const unplaced = (section: Placed) =>
+    Object.fromEntries(Object.entries(section).filter(([key]) => key !== "placement"))
+  return {
+    page_id: page.id,
+    sections: [
+      ...sections.filter((section) => section.placement === "top").map(unplaced),
+      ...texts,
+      ...sections.filter((section) => section.placement !== "top").map(unplaced),
+    ],
+  }
 }
 
 /** A content page as resolve finds it, with no SEO payload (the trail the theme's own). */
@@ -156,7 +223,10 @@ export const contentAnswerOf = (
 ) => {
   return (layout: StoreLayout, menus: StoreMenu[], path: string, query: Query): unknown => {
     const own = /^\/store\/storefront-layout\/pages\/(cnt_\w+)$/.exec(path)
-    return own?.[1] ? { page: layouts[own[1]] ?? null } : contentAnswer(layout, menus, path, query)
+    const page = own && CONTENT_ENTRIES.find((each) => each.id === own[1])
+    return page
+      ? { page: storePage(page, layouts[page.id]) }
+      : contentAnswer(layout, menus, path, query)
   }
 }
 
