@@ -6,6 +6,7 @@ import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { EmptyState, ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { categoryTreeQuery } from "@/features/categories/api/categories"
+import { CategoryDescriptionCard } from "@/features/categories/components/category-description-card"
 import { CategoryEditor } from "@/features/categories/components/category-editor"
 import { CategoryImageCard } from "@/features/categories/components/category-image-card"
 import { CategoryRestrictionCard } from "@/features/categories/components/category-restriction-card"
@@ -18,8 +19,9 @@ const route = getRouteApi("/_auth/categories/$id")
 
 /**
  * A category (brands' layout): its name, address, place in the tree and
- * visibility, its picture and search appearance in the main column; the
- * SEO advisor and the age limit beside them. Each card saves on its own.
+ * visibility, its text and search appearance in the main column; the SEO
+ * advisor, the picture and the age limit beside them, following the
+ * scroll (a long text leaves them in sight). Each card saves on its own.
  */
 export function CategoryPage() {
   const { t } = useTranslation()
@@ -74,14 +76,14 @@ export function CategoryPage() {
               }}
             />
           </div>
-          <div id="category-image" className="scroll-mt-20">
-            <CategoryImageCard categoryId={category.id} />
+          <div id="category-description" className="scroll-mt-20">
+            <CategoryDescriptionCard key={category.id} categoryId={category.id} />
           </div>
           <div id="category-seo" className="scroll-mt-20">
             <CategorySeoCard key={category.id} category={category} categories={categories} />
           </div>
         </PageColumn>
-        <PageColumn span={4}>
+        <PageColumn span={4} sticky>
           <AdvisorCard
             key={category.id}
             kind="category"
@@ -91,11 +93,14 @@ export function CategoryPage() {
               edit_title: "category-seo",
               edit_description: "category-seo",
               edit_robots: "category-seo",
-              edit_body: "category-general",
+              edit_body: "category-description",
               edit_handle: "category-general",
               add_image: "category-image",
             }}
           />
+          <div id="category-image" className="scroll-mt-20">
+            <CategoryImageCard categoryId={category.id} />
+          </div>
           <CategoryRestrictionCard categoryId={category.id} />
         </PageColumn>
       </PageGrid>

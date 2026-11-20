@@ -17,6 +17,8 @@ export const COLLECTION_ROUTES = [
   {
     matcher: "/admin/collections/:id/details",
     methods: ["POST" as const],
+    // adr/0075: a long document is past Express's 100 kB default; its own bounds stay
+    bodyParser: { sizeLimit: "1mb" },
     middlewares: [validateAndTransformBody(AdminPostCollectionDetails)],
   },
 ]

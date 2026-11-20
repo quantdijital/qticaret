@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@qticaret/admin-ui/ui/dropdown-menu"
 import { collectionQuery, useDeleteCollection } from "@/features/collections/api/collections"
+import { CollectionDescriptionCard } from "@/features/collections/components/collection-description-card"
 import { CollectionGeneralCard } from "@/features/collections/components/collection-general-card"
 import { CollectionImageCard } from "@/features/collections/components/collection-image-card"
 import { CollectionProductsCard } from "@/features/collections/components/collection-products-card"
@@ -29,7 +30,11 @@ import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const route = getRouteApi("/_auth/collections/$id")
 
-/** A collection: its page's text and address, its products, picture and search appearance. */
+/**
+ * A collection: its page's address, text, products and search appearance
+ * in the main column; the SEO advisor and the picture beside them,
+ * following the scroll (a long text leaves them in sight).
+ */
 export function CollectionPage() {
   const { t } = useTranslation()
   const { id } = route.useParams()
@@ -87,6 +92,9 @@ export function CollectionPage() {
           <div id="collection-general" className="scroll-mt-20">
             <CollectionGeneralCard collection={data} />
           </div>
+          <div id="collection-description" className="scroll-mt-20">
+            <CollectionDescriptionCard key={data.id} collection={data} />
+          </div>
           <CollectionProductsCard collection={data} />
           <div id="collection-seo" className="scroll-mt-20">
             <SeoCard
@@ -100,7 +108,7 @@ export function CollectionPage() {
             />
           </div>
         </PageColumn>
-        <PageColumn span={4}>
+        <PageColumn span={4} sticky>
           <AdvisorCard
             kind="collection"
             id={data.id}
@@ -109,7 +117,7 @@ export function CollectionPage() {
               edit_title: "collection-seo",
               edit_description: "collection-seo",
               edit_robots: "collection-seo",
-              edit_body: "collection-general",
+              edit_body: "collection-description",
               edit_handle: "collection-general",
             }}
           />

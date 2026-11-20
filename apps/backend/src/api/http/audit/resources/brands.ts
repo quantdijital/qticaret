@@ -5,6 +5,7 @@ import type BrandsModuleService from "../../../../modules/brands/service"
 import type { BrandRecord } from "../../../../modules/brands/service"
 import type { AuditedResource, GraphQuery, Resolver, Snapshot } from "../types"
 import { ID } from "../types"
+import { docDigest } from "./catalog"
 
 /**
  * Brands and a product's brand (F3.11, adr/0011): name, handle, text,
@@ -20,6 +21,8 @@ const brandSnapshot = (brand: BrandRecord | undefined): Snapshot =>
         name: brand.name,
         handle: brand.handle,
         description: brand.description,
+        // adr/0075: the document by its digest; its text shows as `description`
+        description_doc: docDigest(brand.description_doc),
         logo_file_id: brand.logo_file_id,
         is_active: brand.is_active,
       }

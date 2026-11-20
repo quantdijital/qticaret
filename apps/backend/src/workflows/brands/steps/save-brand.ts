@@ -36,6 +36,7 @@ export const saveBrandStep = createStep(
       name: current.name,
       handle: current.handle,
       description: current.description,
+      description_doc: (current.description_doc ?? null) as BrandFields["description_doc"],
       logo_file_id: current.logo_file_id,
       logo_url: current.logo_url,
       logo_width: current.logo_width,

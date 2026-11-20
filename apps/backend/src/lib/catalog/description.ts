@@ -22,21 +22,28 @@ export const DESCRIPTION_TEXT_MAX = 20_000
 
 const NOT_IN_A_DESCRIPTION: ReadonlySet<string> = new Set(["image", "productCard", "categoryCard"])
 
-/** A description document as the panel's editor sends it: the content checks, then no picture or card. */
-export const productDescriptionDoc = z.unknown().transform((value, ctx): ContentDoc => {
-  const parsed = contentDoc.safeParse(value)
-  if (!parsed.success) {
-    for (const issue of parsed.error.issues) {
-      ctx.addIssue({ code: "custom", message: issue.message, path: issue.path })
+/**
+ * A description document as the panel's editor sends it: the content
+ * checks, then no picture or card (`blocksMessage` the refusal's key).
+ */
+export const descriptionDocSchema = (blocksMessage: string) =>
+  z.unknown().transform((value, ctx): ContentDoc => {
+    const parsed = contentDoc.safeParse(value)
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        ctx.addIssue({ code: "custom", message: issue.message, path: issue.path })
+      }
+      return z.NEVER
     }
-    return z.NEVER
-  }
-  if (parsed.data.content.some((block) => NOT_IN_A_DESCRIPTION.has(block.type))) {
-    ctx.addIssue({ code: "custom", message: "catalog.description_blocks" })
-    return z.NEVER
-  }
-  return parsed.data
-})
+    if (parsed.data.content.some((block) => NOT_IN_A_DESCRIPTION.has(block.type))) {
+      ctx.addIssue({ code: "custom", message: blocksMessage })
+      return z.NEVER
+    }
+    return parsed.data
+  })
+
+/** A product's description document: its pictures are its gallery. */
+export const productDescriptionDoc = descriptionDocSchema("catalog.description_blocks")
 
 /** The plain text a product keeps for its document. */
 export const descriptionTextOf = (doc: ContentDoc): string =>

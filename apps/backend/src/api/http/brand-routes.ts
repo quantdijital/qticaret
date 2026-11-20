@@ -18,14 +18,17 @@ export const BRAND_ROUTES = [
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(AdminGetBrands, {})],
   },
+  // adr/0075: a long description document is past Express's 100 kB default; its own bounds stay
   {
     matcher: "/admin/brands",
     methods: ["POST" as const],
+    bodyParser: { sizeLimit: "1mb" },
     middlewares: [validateAndTransformBody(AdminPostBrand)],
   },
   {
     matcher: "/admin/brands/:id",
     methods: ["POST" as const],
+    bodyParser: { sizeLimit: "1mb" },
     middlewares: [validateAndTransformBody(AdminUpdateBrand)],
   },
   {

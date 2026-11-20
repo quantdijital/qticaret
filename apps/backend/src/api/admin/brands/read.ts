@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import ProductBrandLink from "../../../links/product-brand"
+import { storedListingDoc } from "../../../lib/catalog/listing-description"
 import { containsPattern } from "../../../lib/security"
 import { BRANDS_MODULE } from "../../../modules/brands"
 import type BrandsModuleService from "../../../modules/brands/service"
@@ -12,6 +13,8 @@ export const presentBrand = (brand: BrandRecord, products = 0) => ({
   name: brand.name,
   handle: brand.handle,
   description: brand.description,
+  // adr/0075: the panel's editor opens it; null: plain text only (the editor opens its paragraphs)
+  description_doc: storedListingDoc(brand.description_doc),
   logo_file_id: brand.logo_file_id,
   logo_url: brand.logo_url,
   logo_width: brand.logo_width,

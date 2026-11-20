@@ -7,7 +7,7 @@ import type {
   Resolution,
   SeoPayload,
   SiteSeo,
-  StoreBrandSummary,
+  StoreBrand,
   StoreCategory,
   StoreProduct,
   StoreProductReviews,
@@ -305,13 +305,13 @@ const MAX_BRANDS = 1000
 const BRANDS_PAGE = 100
 
 /** Every active brand, by name (F3.11), a hundred at a time: `/markalar`. */
-export const allBrands = cache(async (): Promise<StoreBrandSummary[]> => {
-  const brands: StoreBrandSummary[] = []
+export const allBrands = cache(async (): Promise<StoreBrand[]> => {
+  const brands: StoreBrand[] = []
   for (let offset = 0; offset < MAX_BRANDS; offset += BRANDS_PAGE) {
-    const page = await storePublicGet<{ brands: StoreBrandSummary[]; count: number }>(
-      "/store/brands",
-      { limit: BRANDS_PAGE, offset }
-    )
+    const page = await storePublicGet<{ brands: StoreBrand[]; count: number }>("/store/brands", {
+      limit: BRANDS_PAGE,
+      offset,
+    })
     brands.push(...page.brands)
     if (page.brands.length < BRANDS_PAGE || offset + BRANDS_PAGE >= page.count) {
       break
@@ -320,10 +320,17 @@ export const allBrands = cache(async (): Promise<StoreBrandSummary[]> => {
   return brands
 })
 
+/** A brand with its text: plain, and as the shop formatted it (adr/0075; absent from a backend before it). */
 export const brandById = cache((id: string) =>
-  storeGet<{ brand: { id: string; name: string; handle: string; description: string | null } }>(
-    `/store/brands/${encodeURIComponent(id)}`
-  )
+  storeGet<{
+    brand: {
+      id: string
+      name: string
+      handle: string
+      description: string | null
+      description_html?: string | null
+    }
+  }>(`/store/brands/${encodeURIComponent(id)}`)
 )
 
 export function productIdsOf(

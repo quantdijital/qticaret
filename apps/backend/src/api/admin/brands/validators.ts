@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { listingDescriptionDoc } from "../../../lib/catalog/listing-description"
 
 const page = {
   q: z.string().trim().max(200).optional(),
@@ -27,14 +28,26 @@ const fields = {
   name: z.string().max(500),
   handle: z.string().max(200).optional(),
   description: z.string().max(20_000).nullable().optional(),
+  // adr/0075: the description as a content document; the server writes its plain text
+  description_doc: listingDescriptionDoc.nullable().optional(),
   logo_file_id: fileKey.nullable().optional(),
   is_active: z.boolean().optional(),
 }
 
-export const AdminPostBrand = z.object(fields).strict()
+// One description per save: the plain text (an import) or the document (the panel)
+const oneDescription = (body: { description?: unknown; description_doc?: unknown }) =>
+  body.description === undefined || body.description_doc === undefined
+
+export const AdminPostBrand = z
+  .object(fields)
+  .strict()
+  .refine(oneDescription, { message: "catalog.description_one_of", path: ["description_doc"] })
 export type AdminPostBrandType = z.infer<typeof AdminPostBrand>
 
-export const AdminUpdateBrand = z.object({ ...fields, name: fields.name.optional() }).strict()
+export const AdminUpdateBrand = z
+  .object({ ...fields, name: fields.name.optional() })
+  .strict()
+  .refine(oneDescription, { message: "catalog.description_one_of", path: ["description_doc"] })
 export type AdminUpdateBrandType = z.infer<typeof AdminUpdateBrand>
 
 /** A product's brand; null takes it off. */

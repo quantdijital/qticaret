@@ -91,11 +91,6 @@ export function brandLogoSize(
   return isSide(width) && isSide(height) ? { width, height } : null
 }
 
-/** `GET /store/brands`: an active brand as a brands page lists it (F3.11). */
-export interface StoreBrandSummary extends StoreBrand {
-  description: string | null
-}
-
 /** Medusa's calculated price: amounts in lira as numbers, KDV included. */
 export interface StoreCalculatedPrice {
   calculated_amount: number | null
@@ -175,7 +170,23 @@ export interface StoreImage {
 export interface StoreCollectionDetails {
   /** Plain paragraphs, a blank line between them; null: none. */
   description: string | null
+  /**
+   * The text as the shop formatted it (adr/0075), rendered on the server
+   * from its content document, for the foot of the page; null: plain text
+   * only (`description`). Absent from a backend before it: null.
+   */
+  description_html?: string | null
   image: StoreImage | null
+}
+
+/**
+ * `GET /store/category-descriptions/:id` (adr/0075): a live category's
+ * text as the shop formatted it, rendered on the server, for the foot of
+ * its page; null: plain text only (Medusa's `description`).
+ */
+export interface StoreCategoryDescription {
+  category_id: string
+  description_html: string | null
 }
 
 /** `GET /store/category-images` (adr/0046 Ek 2026-11-04): a live category's picture. */

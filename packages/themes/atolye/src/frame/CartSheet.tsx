@@ -6,6 +6,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, MiniCartView } from "@qticaret/ui"
 import { CheckoutLink } from "../cart/CheckoutLink"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
+import { answersCartAdded, mountCartTrigger } from "./cart-sheet-owner"
 import { CartSheetLine, type SheetLineWords } from "./CartSheetLine"
 import {
   CART_ADDED_EVENT,
@@ -197,9 +198,14 @@ export function CartSheet({
     setOpen(true)
   }
   useEffect(() => {
+    const link = trigger.current
+    if (!link) {
+      return
+    }
+    const leave = mountCartTrigger(link)
     const show = (event: Event) => {
-      // A header may hold one cart a screen width (the catalog's): only the one shown opens
-      if (trigger.current?.getClientRects().length === 0) {
+      // One sheet opens, the shown cart's, or the first one's when none is shown (a phone's bottom bar)
+      if (!answersCartAdded(link)) {
         return
       }
       setSaid(cartAddedMessage(event))
@@ -210,6 +216,7 @@ export function CartSheet({
     window.addEventListener(CART_ADDED_EVENT, show)
     return () => {
       window.removeEventListener(CART_ADDED_EVENT, show)
+      leave()
     }
   }, [])
   return (

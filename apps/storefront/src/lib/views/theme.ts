@@ -14,6 +14,7 @@ import {
   SURFACE_STYLES,
 } from "@qticaret/types/storefront"
 import type { ThemeView } from "@qticaret/ui"
+import { LISTING_TEXT_DEFAULTS, listingTextOf } from "@qticaret/types/listing-text"
 import { cardVariantOf } from "@qticaret/types/section-variants"
 import { STYLE_KIT_DEFAULTS } from "@qticaret/types/style-kit"
 import { brandDeclarations, isHexColor, readableOn } from "./color"
@@ -61,6 +62,7 @@ export const DEFAULT_THEME: StoreThemeSettings = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  listing_text: { ...LISTING_TEXT_DEFAULTS },
   ...STYLE_KIT_DEFAULTS,
 }
 
@@ -242,6 +244,8 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
     buttons: oneOf(at(raw, "buttons"), ["pill", "rounded", "square"], d.buttons),
     section_spacing: oneOf(at(raw, "section_spacing"), SECTION_SPACINGS, d.section_spacing),
     surface_style: oneOf(at(raw, "surface_style"), SURFACE_STYLES, d.surface_style),
+    // A listing's text at its foot (adr/0075 §6): each value checked, a backend before it the defaults
+    listing_text: listingTextOf(at(raw, "listing_text") as Parameters<typeof listingTextOf>[0]),
     ...styleKitOf(raw),
   }
 }

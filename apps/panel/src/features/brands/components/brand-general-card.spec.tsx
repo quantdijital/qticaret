@@ -16,6 +16,7 @@ const BRAND: Brand = {
   name: "Ada",
   handle: "ada",
   description: null,
+  description_doc: null,
   logo_file_id: null,
   logo_url: null,
   is_active: true,

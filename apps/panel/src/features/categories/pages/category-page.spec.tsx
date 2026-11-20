@@ -30,6 +30,11 @@ vi.mock("@/features/seo/components/seo-card", () => ({
 vi.mock("@/features/categories/components/category-image-card", () => ({
   CategoryImageCard: ({ categoryId }: { categoryId: string }) => <p>image {categoryId}</p>,
 }))
+vi.mock("@/features/categories/components/category-description-card", () => ({
+  CategoryDescriptionCard: ({ categoryId }: { categoryId: string }) => (
+    <p>description {categoryId}</p>
+  ),
+}))
 vi.mock("@/features/categories/components/category-restriction-card", () => ({
   CategoryRestrictionCard: ({ categoryId }: { categoryId: string }) => (
     <p>restriction {categoryId}</p>
@@ -85,6 +90,20 @@ describe("CategoryPage", () => {
     expect(screen.getByText("seo /kategori/mutfak/sef")).toBeInTheDocument()
     expect(screen.getByText("advisor sef")).toBeInTheDocument()
     expect(screen.getByText("restriction sef")).toBeInTheDocument()
+    expect(screen.getByText("description sef")).toBeInTheDocument()
+  })
+
+  // The owner (2026-11-20): a long text on the left leaves the side cards in sight
+  it("keeps the advisor, picture and age limit in the side column that follows the scroll", async () => {
+    renderPage()
+    const advisor = await screen.findByText("advisor sef")
+    const side = advisor.closest("[data-layout-free]")
+
+    expect(side).not.toBeNull()
+    expect(side).toContainElement(screen.getByText("image sef"))
+    expect(side).toContainElement(screen.getByText("restriction sef"))
+    expect(side).not.toContainElement(screen.getByText("description sef"))
+    expect(side).not.toContainElement(screen.getByText("seo /kategori/mutfak/sef"))
   })
 
   it("saves the general card's changes to the category", async () => {
@@ -101,6 +120,8 @@ describe("CategoryPage", () => {
         expect.objectContaining({ name: "Şef ve santoku", parent_category_id: "mutfak" })
       )
     })
+    // The text is written through its own route only (adr/0075 §9): Medusa's would stale its document
+    expect(admin.productCategory.update.mock.calls[0]?.[1]).not.toHaveProperty("description")
   })
 
   it("deletes the category once confirmed and goes back to the list", async () => {

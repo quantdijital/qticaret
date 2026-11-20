@@ -9,6 +9,7 @@ import { ATOLYE_COLORS } from "@/theme/atolye"
 import { useProblemText } from "./forms/problem-text"
 import { PanelGroup } from "./panel-header"
 import { ThemeChoices } from "./theme-choices"
+import { ListingTextGroup } from "./theme-listing-text-fields"
 import { BackgroundField, ColorInput } from "./theme-fields"
 import { ThemeSample } from "./theme-sample"
 import { Hint } from "./shared/hint"
@@ -39,7 +40,8 @@ const orNull = (value: string): string | null => (value === "" ? null : value)
 
 /**
  * The theme's settings (adr/0053 §B, adr/0062): colours, faces, corners,
- * the product card and the header, from the server's fixed lists; the
+ * the product card, the header and the listing pages' text, from the
+ * server's fixed lists; the
  * sample draws them as the theme does. Part of the draft (adr/0063 §3):
  * each change is saved with the design, shown in the preview, undone with
  * it and put live by "Yayınla". "Grafit'e dön" puts the theme's defaults
@@ -107,6 +109,13 @@ export function ThemeForm({
         theme={theme}
         variants={variants}
         reveal={reveal}
+        onChange={(next) => {
+          onChange(next)
+        }}
+      />
+      <ListingTextGroup
+        theme={theme}
+        reveal={reveal("listingText")}
         onChange={(next) => {
           onChange(next)
         }}

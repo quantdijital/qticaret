@@ -123,8 +123,27 @@ describe("the motion setting (adr/0067 Ek 2026-11-18, S7)", () => {
         "background-color",
         "color",
         "border-color",
+        "--gf-head-shade",
       ]).toContain(property)
     }
+  })
+
+  it("fades the header's shadow by its gradient, never by opacity (no layer of its own)", () => {
+    // An opacity fade gave the 12 px strip under the sticky header its own
+    // compositor layer, where Chrome could show a stale piece of the page (2026-11-20)
+    expect(ruleBody(MOTION, "@property --gf-head-shade")).toContain("initial-value: 0;")
+    const shadow = rules(MOTION).filter((rule) => rule.selector.endsWith(".gf-head::after"))
+    expect(shadow).toHaveLength(2)
+    for (const rule of shadow) {
+      expect(rule.body).not.toMatch(/opacity|will-change|transform/)
+    }
+    const [drawn, scrolled] = shadow
+    expect(drawn?.body).toMatch(/transition:\s*--gf-head-shade var\(--dur-short\)/)
+    expect(drawn?.body).toContain("oklch(20% 0.012 255 / calc(0.07 * var(--gf-head-shade)))")
+    expect(scrolled?.selector).toBe(
+      'html[data-js-scroll] [data-motion="lively"]:not([data-shadow="none"]) .gf-head::after'
+    )
+    expect(scrolled?.body).toMatch(/--gf-head-shade:\s*1;/)
   })
 })
 
@@ -160,10 +179,8 @@ describe("the scroll reveal never hides the first screen or the LCP picture", ()
   })
 
   it("fades lazy images only, never an eager (LCP) one", () => {
-    // What starts unseen: the waiting images, and the header's shadow before the page scrolls
-    const hide = rules(MOTION).filter(
-      (rule) => /opacity:\s*0;/.test(rule.body) && !rule.selector.endsWith(".gf-head::after")
-    )
+    // What starts unseen: only the waiting images
+    const hide = rules(MOTION).filter((rule) => /opacity:\s*0;/.test(rule.body))
     expect(hide.map((rule) => rule.selector)).toEqual([
       'html[data-js-img] [data-motion="lively"] main img[loading="lazy"]:not([data-js-loaded])',
     ])
@@ -192,6 +209,8 @@ describe("the built stylesheet", () => {
   it("keeps the motion's property types, its gate and its reveal through Tailwind", async () => {
     const css = (await buildAtolyeCss([])).replace(/\s+/g, " ")
     expect(css).toContain("@property --gf-gate")
+    expect(css).toContain("@property --gf-head-shade")
+    expect(css).toContain("transition: --gf-head-shade")
     expect(css).toContain("@keyframes gf-seen")
     expect(css).toContain("animation-timeline: view(), scroll(root)")
     expect(css).toContain("--ease-gentle: cubic-bezier(0.4, 0, 0.2, 1)")

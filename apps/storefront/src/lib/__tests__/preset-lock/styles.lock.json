@@ -14,7 +14,7 @@
       "file": "buy.css"
     },
     {
-      "sha256": "aa4510b945d7dc37c82adc39973066108c27236a520698a646279aba99c5ba27",
+      "sha256": "2bdbdae95ff5119d88a6e66df7156d5ee25a2bbba7b530d7e2536e157d9e7598",
       "file": "card.css"
     },
     {
@@ -50,12 +50,16 @@
       "file": "footer-rows.css"
     },
     {
-      "sha256": "4e80b18c2ae70a66cf28e869772a1e7f4406d9896d30d685a59bf3c477e9a5b2",
+      "sha256": "1ae828a3614c51bb74a4bbe6758284800e6330bea9c43964f2465c360ac65cd0",
       "file": "frame.css"
     },
     {
       "sha256": "a4325631494c4c9bb5d57212117f6ebb2846cf32aba28d3dfb4b8e09e9abcf72",
       "file": "header-catalog.css"
+    },
+    {
+      "sha256": "d5a34f54e1df549be38dafb4b452a6fb021d71de6e4120c699cd14c9a6db5728",
+      "file": "listing-text.css"
     },
     {
       "sha256": "b717743da0f872a4506c70261f1f938fb6b1347bde9b5ef8cd2c3c7b3ab050f3",
@@ -78,7 +82,7 @@
       "file": "menu.css"
     },
     {
-      "sha256": "73c62fd4bc7e971cc6def7057efa4d3d0539615274985aea272b98a038d709bb",
+      "sha256": "9bf7ca0d951c70a0958648a7bb89d58b7329a74f468dbf292628ea2d97524811",
       "file": "motion.css"
     },
     {
@@ -130,7 +134,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "500aa4975f151f5fe12c8f2da53c0ea5567824946609b833eeed2747c0803ee2",
+      "sha256": "b0fdca1fe15b08e420daf86bb840f61f0cb641b65c61359247bc12851a6e4a7a",
       "file": "styles.css"
     },
     {

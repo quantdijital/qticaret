@@ -40,6 +40,23 @@
     z-index: calc(var(--z-raised) + 1);
     pointer-events: none;
   }
+  /*
+   * The photo's well is a layer of its own above the card's link (the
+   * name's `after:inset-0`), so its controls (the quick add, the quick
+   * view, the touch strip) are always reached: the well's lift under a
+   * mouse (`motion.css`, a `transform`) makes it a stacking context, and
+   * without a z-index of its own it painted under the link, which then
+   * took every click on its buttons (fix 2026-11-20). The well itself lets
+   * a click through, so the photo still opens the product; only what is
+   * interactive in it takes the pointer back.
+   */
+  .gf-card .gf-card-media {
+    z-index: 1;
+    pointer-events: none;
+  }
+  .gf-card .gf-card-media :is(a, button, input, select, textarea, label, summary) {
+    pointer-events: auto;
+  }
 
   /* One height for "Sepete ekle" (with its icon) and "Seçenekler", so a row's buttons line up */
   .gf-card-btn {
