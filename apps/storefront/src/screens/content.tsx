@@ -10,6 +10,7 @@ import type { ContentEntry } from "@/lib/store-api/content-entry"
 import { storeGet } from "@/lib/store-api/server"
 import { postMeta, shareLinks } from "@/lib/views/content-extras"
 import { withOutline } from "@/lib/views/legal-outline"
+import { pageAnchors } from "@/lib/views/page-anchors"
 import { contentSections } from "@/lib/views/page-sections"
 import { coverOf, postTerms } from "@/lib/views/posts"
 import { withPictures } from "@/lib/views/prose-images"
@@ -26,7 +27,7 @@ type Entity = Extract<Resolution, { type: "entity" }>
 async function postExtras(entry: ContentEntry, page: Entity): Promise<Partial<ContentPageView>> {
   const [products, related] = await Promise.all([textProducts(entry.html), relatedPosts(entry)])
   return {
-    ...withOutline(entry.html),
+    ...withOutline(entry.html, pageAnchors()),
     post: postMeta(entry, t),
     author: entry.author ? authorView(entry.author, t) : null,
     products,

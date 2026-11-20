@@ -9,3 +9,5 @@ import type { StorefrontTheme } from "@qticaret/ui"
 export const theme: StorefrontTheme = entry.theme
 export const themeFontPreloads = entry.fontPreloads
 export const themeSettingsStyle = entry.style
+/** The ids the theme writes fixed on a content, legal or post page (`pageAnchors`). */
+export const themePageIds = entry.pageIds

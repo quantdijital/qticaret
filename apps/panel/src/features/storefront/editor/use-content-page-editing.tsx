@@ -1,10 +1,13 @@
+import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
+import { contentQuery } from "@/features/content/api/content"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { pageLayoutOf } from "@/features/storefront/layout/page-layouts"
 import { idsOf, newPageText, newSectionId } from "@/features/storefront/layout/sections"
 import type { TreeContentPage } from "./editor-page"
 import { ContentPagePicker } from "./content-page-picker"
+import { forgetJustMade } from "./just-made-page"
 import { NewPageDialog } from "./new-page-dialog"
 import type { Opened } from "./opened"
 import { usePageSynth } from "./page-synth"
@@ -17,7 +20,9 @@ import type { useEditorPlace } from "./use-editor-place"
  * design has none for it (`view`, `act`, K1), a new page opened from the
  * picker (picked, an empty page text added), a page deleted from its
  * settings let go of (its layout out of the draft, the next page picked).
- * A page made on the Sayfalar list (`fresh`) gets its empty text once known.
+ * A page made on the Sayfalar list (`fresh`) gets its empty text once
+ * known, and only while it is still new: a draft with no text and no layout
+ * entry (never an existing page's text emptied).
  */
 export function useContentPageEditing({
   doc,
@@ -30,7 +35,7 @@ export function useContentPageEditing({
   place: ReturnType<typeof useEditorPlace>
   act: (action: EditorAction) => void
   setOpened: (opened: Opened) => void
-  /** A page just made elsewhere (`?yeni=1`): its empty text added once, if it has no layout. */
+  /** A page just made on the Sayfalar list (`just-made-page`): its empty text added once. */
   fresh?: string | null
 }) {
   const synth = usePageSynth(doc, place.contentPage.id, act)
@@ -38,18 +43,23 @@ export function useContentPageEditing({
   const pages = useContentPages(place.page === "content").data?.pages ?? []
   // Its text, empty, as its first section: written in place
   const addText = (id: string) => {
-    const sectionId = newSectionId(idsOf(doc))
-    act({ type: "add", group: "pages", page: id, section: newPageText(sectionId) })
+    const sectionId = newSectionId(idsOf(synth.view))
+    synth.act({ type: "add", group: "pages", page: id, section: newPageText(sectionId) })
     setOpened({ kind: "section", id: sectionId })
   }
   const added = useRef(false)
   const picked = place.contentPage.id
+  const detail = useQuery({ ...contentQuery(fresh ?? ""), enabled: fresh !== null })
+  const page = detail.data
   useEffect(() => {
-    if (fresh === null || added.current || picked !== fresh) {
+    if (fresh === null || added.current || picked !== fresh || page?.id !== fresh) {
       return
     }
     added.current = true
-    if (!pageLayoutOf(doc, fresh)) {
+    forgetJustMade(fresh)
+    // Still new: a draft page, no text written, no layout of its own
+    const blank = page.kind === "page" && (page.body.content?.length ?? 0) === 0
+    if (page.status === "draft" && blank && !pageLayoutOf(doc, fresh)) {
       addText(fresh)
     }
   })

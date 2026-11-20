@@ -16,6 +16,7 @@ import { CONTENT_PAGE_SIZE, contentListQuery } from "@/features/content/api/cont
 import type { ContentEntry } from "@/features/content/api/content"
 import { ContentStatusBadge } from "@/features/content/components/content-status"
 import { layoutQuery } from "@/features/storefront/api/layout"
+import { markJustMade } from "@/features/storefront/editor/just-made-page"
 import { NewPageDialog } from "@/features/storefront/editor/new-page-dialog"
 import { errorText } from "@/lib/errors"
 
@@ -155,7 +156,9 @@ export function ContentPagesPage() {
         open={adding}
         onOpenChange={setAdding}
         onCreated={(id) => {
-          void navigate({ to: "/storefront/editor", search: { icerik: id, yeni: "1" } })
+          // Told in memory, not by the address (a written address must not empty a page)
+          markJustMade(id)
+          void navigate({ to: "/storefront/editor", search: { icerik: id } })
         }}
       />
     </div>

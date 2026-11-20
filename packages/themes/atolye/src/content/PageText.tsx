@@ -95,10 +95,18 @@ function Titled({ article, children }: { article: PageArticleView; children: Rea
 }
 
 /** The payment facts' box beside a text: the ways to pay (their mark there, when there are any). */
-function PaymentsBeside({ facts, t }: { facts: PagePaymentFactsView; t: Translate }) {
+function PaymentsBeside({
+  facts,
+  t,
+  suffix,
+}: {
+  facts: PagePaymentFactsView
+  t: Translate
+  suffix: string
+}) {
   return facts.payments.marks.length > 0 ? (
     <Look id={facts.id} look={facts.look} device={facts.device}>
-      <PaymentMarks marks={facts.payments.marks} t={t} />
+      <PaymentMarks marks={facts.payments.marks} t={t} suffix={suffix} />
     </Look>
   ) : null
 }
@@ -115,15 +123,18 @@ function Article({
   article,
   beside,
   t,
+  ids,
 }: {
   article: PageArticleView
   beside: Beside
   t: Translate
+  ids: Suffixes
 }) {
+  const suffix = ids.get(article) ?? ""
   if (article.faq) {
     return (
       <Titled article={article}>
-        <FaqBody faq={article.faq} help={article.help} t={t} />
+        <FaqBody faq={article.faq} help={article.help} t={t} suffix={suffix} />
       </Titled>
     )
   }
@@ -143,13 +154,19 @@ function Article({
       <Titled article={article}>
         <div className={`grid gap-8 ${reading.grid}`}>
           <OutlineWell outline={outline} t={t} />
-          <OutlineAside id="icindekiler" outline={outline} t={t} className={reading.side} />
+          <OutlineAside
+            id={`icindekiler${suffix}`}
+            outline={outline}
+            t={t}
+            className={reading.side}
+          />
           <article className={`min-w-0 ${reading.column}`}>{prose}</article>
         </div>
       </Titled>
     )
   }
   const installments = payments && payments.payments.installments.length > 0 ? payments : null
+  const paySuffix = installments ? (ids.get(installments) ?? "") : ""
   return (
     <Titled article={article}>
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
@@ -158,10 +175,10 @@ function Article({
         </article>
         {facts && (
           <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:sticky lg:top-(--gf-stick-top) lg:col-span-5 lg:self-start">
-            {payments && <PaymentsBeside facts={payments} t={t} />}
+            {payments && <PaymentsBeside facts={payments} t={t} suffix={ids.get(payments) ?? ""} />}
             {shipping && (
               <Look id={shipping.id} look={shipping.look} device={shipping.device}>
-                <ShippingFacts facts={shipping.shipping} t={t} />
+                <ShippingFacts facts={shipping.shipping} t={t} suffix={ids.get(shipping) ?? ""} />
               </Look>
             )}
           </div>
@@ -170,10 +187,10 @@ function Article({
           <div className="min-w-0 pt-(--space-xl) lg:col-span-12">
             {/* The payment facts' mark here when there were no ways to pay beside the text */}
             {installments.payments.marks.length > 0 ? (
-              <InstallmentTable facts={installments.payments} t={t} />
+              <InstallmentTable facts={installments.payments} t={t} suffix={paySuffix} />
             ) : (
               <Look id={installments.id} look={installments.look} device={installments.device}>
-                <InstallmentTable facts={installments.payments} t={t} />
+                <InstallmentTable facts={installments.payments} t={t} suffix={paySuffix} />
               </Look>
             )}
           </div>
@@ -188,24 +205,26 @@ function Alone({
   section,
   t,
   actions,
+  suffix,
 }: {
   section: Exclude<PageTextSectionView, PageArticleView>
   t: Translate
   actions?: ContactActions | undefined
+  suffix: string
 }) {
   switch (section.type) {
     case "contact":
-      return <ContactBody section={section} t={t} actions={actions} />
+      return <ContactBody section={section} t={t} actions={actions} suffix={suffix} />
     case "shipping_facts":
-      return <ShippingFacts facts={section.shipping} t={t} />
+      return <ShippingFacts facts={section.shipping} t={t} suffix={suffix} />
     case "payment_facts":
       return (
         <div className="flex flex-col gap-(--gap-columns)">
           {section.payments.marks.length > 0 && (
-            <PaymentMarks marks={section.payments.marks} t={t} />
+            <PaymentMarks marks={section.payments.marks} t={t} suffix={suffix} />
           )}
           {section.payments.installments.length > 0 && (
-            <InstallmentTable facts={section.payments} t={t} />
+            <InstallmentTable facts={section.payments} t={t} suffix={suffix} />
           )}
         </div>
       )
@@ -215,24 +234,40 @@ function Alone({
 /** A drawn part's section: the text's for a text with facts beside it. */
 const partSection = (part: TextPart) => (part.kind === "article" ? part.article : part.section)
 
-/** A run of the page's text sections, each part in its look's box with its mark. */
+/** What each of a page's text sections adds to its fixed ids (`idSuffixes`). */
+type Suffixes = ReadonlyMap<PageTextSectionView, string>
+
+const NONE: Suffixes = new Map()
+
+/**
+ * A run of the page's text sections, each part in its look's box with its
+ * mark; `ids` from all the page's text sections (`idSuffixes`), so two of
+ * a kind across runs do not share their fixed ids.
+ */
 export function PageTexts({
   parts,
   t,
   actions,
+  ids = NONE,
 }: {
   parts: readonly TextPart[]
   t: Translate
   actions?: ContactActions | undefined
+  ids?: Suffixes
 }) {
   return parts.map((part) => {
     const section = partSection(part)
     return (
       <Look key={section.id} id={section.id} look={section.look} device={section.device}>
         {part.kind === "article" ? (
-          <Article article={part.article} beside={part.beside} t={t} />
+          <Article article={part.article} beside={part.beside} t={t} ids={ids} />
         ) : (
-          <Alone section={part.section} t={t} actions={actions} />
+          <Alone
+            section={part.section}
+            t={t}
+            actions={actions}
+            suffix={ids.get(part.section) ?? ""}
+          />
         )}
       </Look>
     )

@@ -46,13 +46,13 @@ const contactWords = (t: Translate): ContactWords => ({
  * stage's own light button), the phone and the e-mail as pills, the
  * address with its map, the hours. Each only when the shop gave it.
  */
-function Reach({ contact, t }: { contact: ContactView; t: Translate }) {
+function Reach({ contact, t, suffix }: { contact: ContactView; t: Translate; suffix: string }) {
   return (
     <section
-      aria-labelledby="bize-ulasin"
+      aria-labelledby={`bize-ulasin${suffix}`}
       className="gf-stage flex flex-col gap-6 rounded-tile p-6 sm:p-8"
     >
-      <h2 id="bize-ulasin" className="text-title">
+      <h2 id={`bize-ulasin${suffix}`} className="text-title">
         {t("content.reach")}
       </h2>
       <ul className="flex flex-col gap-2">
@@ -129,17 +129,19 @@ function Imprint({
   rows,
   t,
   wide,
+  suffix,
 }: {
   rows: readonly IdentityRowView[]
   t: Translate
   wide: boolean
+  suffix: string
 }) {
   return (
     <section
-      aria-labelledby="kunye"
+      aria-labelledby={`kunye${suffix}`}
       className="flex flex-col gap-4 rounded-tile gf-pane p-5 sm:p-6 lg:gap-5 lg:p-8"
     >
-      <h2 id="kunye" className="text-title">
+      <h2 id={`kunye${suffix}`} className="text-title">
         {t("content.identity")}
       </h2>
       <dl
@@ -177,10 +179,13 @@ export function ContactBody({
   section,
   t,
   actions,
+  suffix = "",
 }: {
   section: PageContactView
   t: Translate
   actions?: ContactActions | undefined
+  /** Added to its ids when another contact section on the page has them (`idSuffixes`). */
+  suffix?: string
 }) {
   const identity = section.identity
   const form = section.form && actions ? section.form : null
@@ -188,16 +193,21 @@ export function ContactBody({
     <div className="grid gap-(--gap-columns) lg:grid-cols-12 lg:items-start">
       <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:col-span-5">
         <Prose html={section.html} className="mb-4" mark={fieldMark(section.editor, "body")} />
-        {section.contact && <Reach contact={section.contact} t={t} />}
+        {section.contact && <Reach contact={section.contact} t={t} suffix={suffix} />}
       </div>
       {form && actions && (
         <div className="min-w-0 lg:col-span-7">
-          <ContactForm view={form} action={actions.sendContact} words={contactWords(t)} />
+          <ContactForm
+            view={form}
+            action={actions.sendContact}
+            words={contactWords(t)}
+            suffix={suffix}
+          />
         </div>
       )}
       {identity.length > 0 && (
         <div className={form ? "min-w-0 lg:col-span-12" : "min-w-0 lg:col-span-7"}>
-          <Imprint rows={identity} t={t} wide={form !== null} />
+          <Imprint rows={identity} t={t} wide={form !== null} suffix={suffix} />
         </div>
       )}
     </div>

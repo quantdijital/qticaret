@@ -50,28 +50,43 @@ export function anchorOf(words: string): string {
     .replace(/-+$/, "")
 }
 
-export function withOutline(html: string): { html: string; outline: OutlineItemView[] } {
+/** `base`, or `base-2`, `base-3`… when the page already has it: kept as the page's. */
+export function freeAnchor(base: string, taken: Set<string>): string {
+  let id = base
+  for (let n = 2; taken.has(id); n++) {
+    id = `${base}-${String(n)}`
+  }
+  taken.add(id)
+  return id
+}
+
+/**
+ * The text's `h2`s anchored and listed. `taken`: the ids the page has
+ * already (the theme's own fixed ones, `pageAnchors`, and the anchors of
+ * the page's texts before this one), so no two meet on one page; a
+ * heading's own id the page already has, or one with the theme's `--`
+ * (its later sections' ids), is made anew.
+ */
+export function withOutline(
+  html: string,
+  taken: Set<string> = new Set<string>()
+): { html: string; outline: OutlineItemView[] } {
   const outline: OutlineItemView[] = []
-  const taken = new Set<string>()
   const anchored = html.replace(H2, (whole, attributes: string | undefined, inner: string) => {
     const label = wordsOf(inner)
     if (!label) {
       return whole
     }
     const own = attributes ? ID.exec(attributes)?.[1] : undefined
-    if (own) {
+    if (own && !taken.has(own) && !own.includes("--")) {
       taken.add(own)
       outline.push({ id: own, label })
       return whole
     }
-    const base = anchorOf(label) || `bolum-${String(outline.length + 1)}`
-    let id = base
-    for (let n = 2; taken.has(id); n++) {
-      id = `${base}-${String(n)}`
-    }
-    taken.add(id)
+    const id = freeAnchor(anchorOf(label) || `bolum-${String(outline.length + 1)}`, taken)
     outline.push({ id, label })
-    return `<h2 id="${id}"${attributes ?? ""}>${inner}</h2>`
+    const rest = attributes?.replace(ID, "") ?? ""
+    return `<h2 id="${id}"${rest}>${inner}</h2>`
   })
   return { html: anchored, outline }
 }

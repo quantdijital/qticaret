@@ -11,6 +11,7 @@ import {
   PAGE_LAYOUTS,
 } from "@/features/storefront/editor/content-pages.fixtures"
 import { DOC, layoutOf } from "@/features/storefront/editor/theme-editor.fixtures"
+import { forgetJustMade, isJustMade } from "@/features/storefront/editor/just-made-page"
 import type { PageLayout } from "@/features/storefront/api/layout"
 import { ContentPagesPage } from "./content-pages-page"
 
@@ -115,9 +116,12 @@ describe("the storefront's pages list", () => {
     await waitFor(() => {
       expect(navigate).toHaveBeenCalledWith({
         to: "/storefront/editor",
-        search: { icerik: "cnt_yeni", yeni: "1" },
+        search: { icerik: "cnt_yeni" },
       })
     })
+    // Told to the editor in memory, never by the address
+    expect(isJustMade("cnt_yeni")).toBe(true)
+    forgetJustMade("cnt_yeni")
     expect(fetchMock).toHaveBeenCalledWith("/admin/content", {
       method: "POST",
       body: { kind: "page", title: "SSS" },

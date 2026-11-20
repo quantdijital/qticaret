@@ -171,7 +171,7 @@ describe("a content page's layout", () => {
     expect(text.pageTextView).toHaveBeenCalledWith(
       { id: "", type: "rich_text", variant: "article", title: null, html: "<p>Ayna.</p>" },
       t,
-      { opens: true }
+      { opens: true, anchors: expect.any(Set) as Set<string> }
     )
     // An empty answer is a page of no sections, not a failure
     reads.publishedPageLayout.mockResolvedValue({ page_id: ID, sections: [] })

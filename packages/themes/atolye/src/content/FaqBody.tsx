@@ -35,10 +35,13 @@ export function FaqBody({
   faq,
   help,
   t,
+  suffix = "",
 }: {
   faq: FaqView
   help: ContactView | null
   t: Translate
+  /** Added to its ids when another text of questions on the page has them (`idSuffixes`). */
+  suffix?: string
 }) {
   const titled = faq.groups.filter((group) => group.title !== null)
   return (
@@ -60,10 +63,10 @@ export function FaqBody({
           )}
           {help && (
             <section
-              aria-labelledby="yardim"
+              aria-labelledby={`yardim${suffix}`}
               className="flex flex-col gap-4 rounded-tile border border-rule p-6 max-lg:order-3"
             >
-              <h2 id="yardim" className="text-title">
+              <h2 id={`yardim${suffix}`} className="text-title">
                 {t("content.help_title")}
               </h2>
               <p className="text-text-2">{t("content.help_text")}</p>

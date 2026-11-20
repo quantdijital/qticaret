@@ -49,6 +49,11 @@ const SUBJECTS = ["order", "product", "return", "payment", "kvkk", "other"] as c
 interface TextPlace {
   /** The section opens the page with no cover above it. */
   opens: boolean
+  /**
+   * The page's anchors so far (`pageAnchors`, then each text's in the
+   * page's order): a heading's anchor never meets another on the page.
+   */
+  anchors: Set<string>
 }
 
 /**
@@ -68,12 +73,15 @@ async function articleView(
     variant: "article",
     title: section.title,
   } as const
-  const faq = pageTextSwitchOf(section.questions) === "auto" ? faqOf(html) : null
+  // Read before any wait, so the page's texts take their anchors in its order
+  const faq = pageTextSwitchOf(section.questions) === "auto" ? faqOf(html, place.anchors) : null
   if (faq) {
     return { ...head, html, outline: [], faq, help: contactOf(await legalIdentity(), t) }
   }
   const read =
-    pageTextSwitchOf(section.outline) === "auto" ? withOutline(html) : { html, outline: [] }
+    pageTextSwitchOf(section.outline) === "auto"
+      ? withOutline(html, place.anchors)
+      : { html, outline: [] }
   return { ...head, ...read, faq: null, help: null }
 }
 

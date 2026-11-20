@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, waitFor, within } from "@testing-library/react"
 import type { UserEvent } from "@testing-library/user-event"
+import type { JSONContent } from "@tiptap/react"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
@@ -10,6 +11,7 @@ import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
 import { DOC_WITH_PAGES, pageText, serveContent } from "./content-pages.fixtures"
 import { ThemeEditorPage } from "./theme-editor-page"
 import {
+  DOC,
   PATH,
   holdClock,
   lastSaved,
@@ -45,6 +47,11 @@ vi.mock("@/features/seo/components/seo-card", async (original) => ({
 }))
 
 let user: UserEvent
+
+const TEXT: JSONContent = {
+  type: "doc",
+  content: [{ type: "paragraph", content: [{ type: "text", text: "Köklerimizden geleceğe." }] }],
+}
 
 /** A draft that lays out İade koşulları (a draft page) too. */
 const WITH_DRAFT_PAGE: LayoutDocument = {
@@ -114,7 +121,7 @@ describe("a content page's own settings in the theme editor", () => {
     })
   })
 
-  it("gives a page just made on the Sayfalar list its empty text, opened (`?yeni=1`)", async () => {
+  it("gives a page just made on the Sayfalar list its empty text, opened (told in memory)", async () => {
     serve(fetchMock, admin, layoutOf({ draft: DOC_WITH_PAGES }))
     serveContent(fetchMock)
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -132,6 +139,32 @@ describe("a content page's own settings in the theme editor", () => {
         sections: [{ type: "rich_text", variant: "article" }],
       })
     })
+  })
+
+  it.each([
+    ["a live page whose text is shown from its body", "cnt_hakkimizda"],
+    ["a draft page with text written", "cnt_iade"],
+    ["a live page with no text", "cnt_iletisim"],
+  ])("empties nothing when told a page is new that is not: %s", async (_, page) => {
+    serve(fetchMock, admin, layoutOf({ draft: DOC }))
+    serveContent(fetchMock, undefined, page === "cnt_iletisim" ? {} : { [page]: TEXT })
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <ThemeEditorPage content={page} open="new-page" />
+      </QueryClientProvider>
+    )
+    const tree = await opened()
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(`/admin/content/${page}`)
+    })
+    if (page !== "cnt_iletisim") {
+      // Its text shown as the storefront draws it, as before
+      expect(await within(tree).findByRole("button", { name: "Sayfa metni" })).toBeVisible()
+    }
+    await pass(AUTOSAVE_MS)
+    expect(screen.queryByRole("region", { name: "Sayfa metni" })).toBeNull()
+    expect(postsTo(fetchMock)).toHaveLength(0)
   })
 
   it("saves the page's title and status at once, apart from the draft", async () => {

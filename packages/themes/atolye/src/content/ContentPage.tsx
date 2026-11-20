@@ -10,6 +10,7 @@ import type {
 import { Container } from "../parts/Container"
 import { Blocks, type Subscribe } from "../sections/Blocks"
 import { PageHead } from "./PageHead"
+import { idSuffixes } from "./page-ids"
 import { isHomeSection, isPageText, PageTexts, textParts, type TextPart } from "./PageText"
 import { PostPage } from "./PostPage"
 
@@ -76,7 +77,10 @@ export function ContentPage({
   if (view.post) {
     return <PostPage view={view} t={t} />
   }
-  const runs = runsOf(view.sections ?? textAlone(view))
+  const sections = view.sections ?? textAlone(view)
+  const runs = runsOf(sections)
+  // Two text sections of a kind on the page: the later one's fixed ids apart
+  const ids = idSuffixes(sections.filter(isPageText))
   const [first] = runs
   const lead = first?.text ? first : null
   const rest = lead ? runs.slice(1) : runs
@@ -84,7 +88,7 @@ export function ContentPage({
     <>
       <Container className={lead ? "flex flex-col gap-8 pt-6 lg:gap-12 lg:pt-10" : "pt-6 lg:pt-10"}>
         <PageHead view={view} t={t} />
-        {lead && <PageTexts parts={lead.parts} t={t} actions={actions} />}
+        {lead && <PageTexts parts={lead.parts} t={t} actions={actions} ids={ids} />}
       </Container>
       {rest.map((run, index) =>
         run.text ? (
@@ -94,7 +98,7 @@ export function ContentPage({
               run.parts.length > 1 ? "flex flex-col gap-8 pt-8 lg:gap-12 lg:pt-12" : "pt-8 lg:pt-12"
             }
           >
-            <PageTexts parts={run.parts} t={t} actions={actions} />
+            <PageTexts parts={run.parts} t={t} actions={actions} ids={ids} />
           </Container>
         ) : (
           <Blocks

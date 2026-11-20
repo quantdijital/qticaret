@@ -5,6 +5,7 @@ import type { ContentEntry } from "@/lib/store-api/content-entry"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { previewPageLayout, publishedPageLayout, sessionPage } from "@/lib/store-api/page-layout"
 import { isEditorSession, layoutPreviewToken, previewTokenKind } from "./layout"
+import { pageAnchors } from "./page-anchors"
 import { isStorePageText, pageTextView, type StorePageArticle } from "./page-text"
 import { sectionViews, withLook } from "./sections"
 
@@ -68,12 +69,15 @@ export async function contentSections(
   const [layout, entry, editing] = await Promise.all([pageLayoutOf(id), read, isEditorSession()])
   const cover = Boolean(entry.image_url)
   const sections: readonly StoreContentPageSection[] = layout ? layout.sections : [textAlone(entry)]
+  // One set for the page: each text's anchors clear of the theme's ids and of the texts before it
+  // (each text takes them before its first wait, so in the page's order)
+  const anchors = pageAnchors()
   const views = await Promise.all(
     sections.map(async (section, index): Promise<ContentPageSectionView[]> => {
       if (!isStorePageText(section)) {
         return sectionViews([section], t)
       }
-      const view = await pageTextView(section, t, { opens: !cover && index === 0 })
+      const view = await pageTextView(section, t, { opens: !cover && index === 0, anchors })
       if (!view) {
         return []
       }
