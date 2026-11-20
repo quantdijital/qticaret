@@ -7051,7 +7051,6 @@
     "legal": {
       "title": "Yasal metinler burada yazılmaz",
       "text": "Sözleşmeler, KVKK ve çerez metinleri, iade ve kargo politikaları Ayarlar > Yasal'da mağaza bilgilerinizden üretilir ve kendi adresleriyle yayınlanır. Burada ayrıca yazılırsa aynı metnin iki farklı hali yayında olur.",
-      "hint": "Sözleşmeler, KVKK, çerez, iade ve kargo metinleri burada değil:",
       "link": "Ayarlar > Yasal"
     },
     "create": "Oluştur",
@@ -7322,9 +7321,7 @@
       "noneFound": "Bu adla bir yazar yok.",
       "legacy": "Eski yazar adı: {{name}}. Listeden seçin ya da",
       "legacyAdd": "yeni yazar olarak ekleyin"
-    },
-    "designInEditor": "Tema düzenleyicide tasarla",
-    "designed": "Kendi düzeni var"
+    }
   },
   "priceLists": {
     "sections": "Kampanya türleri",
@@ -8055,9 +8052,11 @@
       "publish": {
         "open": "Yayınla",
         "title": "Tasarım yayınlansın mı?",
-        "text": "Taslaktaki üst bilgi, ana sayfa, ürün ve kategori sayfaları ile alt bilgi birlikte yayına girer. Vitrinde en geç bir dakikada görünür.",
+        "text": "Taslaktaki üst bilgi, ana sayfa, ürün, kategori ve içerik sayfaları ile alt bilgi birlikte yayına girer. Vitrinde en geç bir dakikada görünür.",
         "confirm": "Yayınla",
-        "done": "Yayınlandı; vitrinde en geç bir dakikada görünür."
+        "done": "Yayınlandı; vitrinde en geç bir dakikada görünür.",
+        "pages": "Taslaktaki sayfalar",
+        "pageLive": "{{title}} sayfasını da yayına al"
       },
       "tree": {
         "label": "Sayfanın bölümleri",
@@ -8119,9 +8118,9 @@
           "top": "Bütün kategori sayfalarında, ürün ızgarasının üstüne eklenir.",
           "bottom": "Bütün kategori sayfalarında, ürün ızgarasının altına eklenir.",
           "footer": "Bütün sayfalarda, ödeme sayfası dışında, alt bilginin üstünde görünür; her bölüm bir kez eklenir, sonra sürükleyerek sırasını değiştirebilirsiniz.",
-          "pageTop": "Bu sayfada, sayfanın metninin üstüne eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz.",
-          "pageBottom": "Bu sayfada, sayfanın metninin altına eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
-        }
+          "pages": "Bu sayfaya, bölümlerin sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
+        },
+        "once": "Bu sayfada zaten var."
       },
       "types": {
         "announcement_bar": {
@@ -8223,6 +8222,22 @@
         "price_bands": {
           "name": "Fiyat bantları",
           "description": "Fiyat aralıklarına göre 2–4 kart; her kart mağazayı o aralıkla süzer ve aralıktaki birkaç ürünü küçük gösterir."
+        },
+        "article": {
+          "name": "Sayfa metni",
+          "description": "Sayfanın kendi metni; uzun metinde içindekiler, soru-cevap metninde açılır sorular."
+        },
+        "contact": {
+          "name": "İletişim",
+          "description": "Metin ve iletişim yolları yanında iletişim formu, altta mağazanın künyesi."
+        },
+        "payment_facts": {
+          "name": "Ödeme seçenekleri",
+          "description": "Mağazanın ödeme yöntemleri ve taksit tablosu, güncel hâliyle."
+        },
+        "shipping_facts": {
+          "name": "Kargo bilgileri",
+          "description": "Kargo firmaları, ücretsiz kargo sınırı ve teslim süreleri, güncel hâliyle."
         }
       },
       "variants": {
@@ -10183,39 +10198,57 @@
         "label": "Düzenlenen içerik sayfası",
         "none": "Sayfa seçin",
         "search": "Sayfalarda ara (başlık ya da adres)",
-        "empty": "İçerik'te henüz sayfa yok.",
+        "empty": "Henüz sayfa yok; “Yeni sayfa” ile açabilirsiniz.",
         "noMatch": "Bu adla bir sayfa yok.",
         "designed": "Kendi düzeni var",
         "pagesFull": "Kendi düzeni olan en çok {{max}} sayfa olabilir. Başka bir sayfaya bölüm eklemek için önce birinin bölümlerini kaldırın.",
         "sectionsFull": "Bir sayfada en çok {{max}} bölüm olabilir.",
-        "pick": "Bölüm eklemek için yukarıdan bir sayfa seçin; İçerik'te henüz sayfa yoksa önce orada açın.",
+        "pick": "Bölüm eklemek için yukarıdan bir sayfa seçin ya da “Yeni sayfa” ile açın.",
         "missing": {
-          "none": "Önizleme için İçerik'te bir sayfa gerekli; bir sayfa açınca burada görünür.",
+          "none": "Önizleme için bir sayfa gerekli; yukarıdan “Yeni sayfa” ile açınca burada görünür.",
           "gone": "Bu sayfa bulunamadı, silinmiş olabilir. Yukarıdan başka bir sayfa seçin."
         },
-        "sides": {
-          "top": "Üstte",
-          "bottom": "Altta"
-        },
-        "placements": {
-          "top": "Sayfanın metninin üstü",
-          "bottom": "Sayfanın metninin altı"
-        },
-        "place": {
-          "top": "Metnin üstüne taşı",
-          "bottom": "Metnin altına taşı"
-        },
-        "text": {
-          "page": "Sayfanın metni",
-          "contact": "İletişim bilgileri ve form",
-          "about": {
-            "page": "Sayfanın başlığı, kapağı, metni ve arama görünümü İçerik'te yazılır. Vitrin onları burada, üstteki ve alttaki bölümlerin arasında gösterir; bu satır taşınmaz ve kaldırılmaz.",
-            "contact": "İletişim sayfasının metni, iletişim bilgileri ve formu burada, üstteki ve alttaki bölümlerin arasında görünür. Metin İçerik'te, iletişim bilgileri Mağaza profilinde, formun gösterildiği sayfa Vitrin tercihlerinde değişir; bu satır taşınmaz ve kaldırılmaz."
-          },
-          "edit": "İçerik'te düzenle"
-        },
         "dropped_one": "Silinmiş {{count}} sayfanın düzeni kaldırıldı.",
-        "dropped_other": "Silinmiş {{count}} sayfanın düzeni kaldırıldı."
+        "dropped_other": "Silinmiş {{count}} sayfanın düzeni kaldırıldı.",
+        "sections": "Sayfadaki bölümler",
+        "noSections": "Bu sayfada henüz bölüm yok.",
+        "shownOnly": "Sayfa sınırı dolu: bu sayfanın metni yalnız gösteriliyor. Değiştirmek için önce başka bir sayfanın bölümlerini kaldırın.",
+        "new": {
+          "open": "Yeni sayfa",
+          "title": "Yeni sayfa",
+          "description": "Sayfa taslak olarak açılır; metnini ve bölümlerini burada yazarsınız.",
+          "handleHint": "Boş bırakırsanız başlıktan oluşur.",
+          "created": "Sayfa taslak olarak açıldı."
+        },
+        "settings": {
+          "open": "Sayfa ayarları",
+          "title": "Sayfa ayarları",
+          "savedAtOnce": "Sayfa ayarları hemen kaydedilir; tasarımın yayınlanmasını beklemez.",
+          "live": "Yayında",
+          "liveOn": "Sayfa vitrinde görünüyor.",
+          "liveOff": "Sayfa taslak; yalnız düzenleyicinin önizlemesinde görünür.",
+          "delete": "Sayfayı sil"
+        }
+      },
+      "pageText": {
+        "outline": "İçindekiler",
+        "outlineTerm": "outline",
+        "outlineHint": "Uzun metnin yanında başlıklardan oluşan içindekiler gösterilir.",
+        "questions": "Soru-cevap okuma",
+        "questionsTerm": "questions",
+        "questionsHint": "Soru ve cevaplardan oluşan metin, gruplu açılır sorular olarak gösterilir.",
+        "contactBody": "Metin",
+        "form": "İletişim formu",
+        "formTerm": "form",
+        "formHint": "Metnin yanında ziyaretçinin mesaj bırakabileceği form.",
+        "imprint": "Künye",
+        "imprintTerm": "imprint",
+        "imprintHint": "Altta mağazanın unvanı, adresi ve iletişim bilgileri.",
+        "storeProfile": "İletişim bilgileri ve künye Mağaza profilinde değişir.",
+        "facts": {
+          "payment_facts": "Mağazanın ödeme yöntemleri ve taksit seçenekleri buraya kendiliğinden gelir; ödeme ayarlarında değişir. Sayfa metninin hemen ardından konunca metnin yanında görünür.",
+          "shipping_facts": "Kargo firmaları, ücretler ve teslim süreleri buraya kendiliğinden gelir; kargo ayarlarında değişir. Sayfa metninin hemen ardından konunca metnin yanında görünür."
+        }
       }
     },
     "maintenance": {
@@ -10403,7 +10436,9 @@
       "history": {
         "lead": "Daha eski yayınlar:",
         "link": "Tema düzenleyici › Görünümler › Yayın geçmişi"
-      }
+      },
+      "pages_one": "{{count}} sayfa",
+      "pages_other": "{{count}} sayfa"
     }
   },
   "bulkMessages": {

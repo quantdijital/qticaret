@@ -3,7 +3,7 @@ import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { CONTENT_PAGE_SECTION_TYPES, isPageOnlyType } from "@qticaret/types"
+import { CONTENT_PAGE_SECTION_TYPES } from "@qticaret/types"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { PAGE_TYPES } from "@/features/storefront/layout/sections"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
@@ -288,26 +288,29 @@ describe("the section forms", HEAVY, () => {
   })
 })
 
-describe("a content page's section chooser (adr/0073 §3)", () => {
-  it("offers the home page's types but its opening and price bands, on the page's side", () => {
+describe("a content page's section chooser (adr/0073 §3, Ek 2026-11-19 (2) K5)", () => {
+  it("offers the page's text first, the home page's types but its opening and price bands, then the page's own", () => {
+    const pick = vi.fn()
     render(
       <AddSectionDialog
         open
         page="pages"
-        placement="top"
+        placement="bottom"
+        taken={new Set(["contact"])}
         marqueeFull={false}
         onOpenChange={vi.fn()}
-        onPick={vi.fn()}
+        onPick={pick}
       />
     )
     const chooser = screen.getByRole("dialog", { name: "Bölüm ekle" })
-    expect(chooser).toHaveTextContent("sayfanın metninin üstüne eklenir")
+    expect(chooser).toHaveTextContent("Bu sayfaya, bölümlerin sonuna eklenir")
     expect(
       within(chooser)
         .getAllByRole("button")
         .map((button) => button.querySelector(".font-medium")?.textContent)
         .filter(Boolean)
     ).toEqual([
+      "Sayfa metni",
       "Görsel bant",
       "Çapraz şeritler",
       "Kategoriler",
@@ -323,11 +326,15 @@ describe("a content page's section chooser (adr/0073 §3)", () => {
       "Kayan yazı",
       "E-bülten",
       "Yardım kutusu",
+      "İletişim",
+      "Ödeme seçenekleri",
+      "Kargo bilgileri",
     ])
-    // The page's own types (its text, contact, the facts) come with their forms in S7
-    // (adr/0073 Ek 2026-11-19 (2) K5)
-    expect([...PAGE_TYPES].sort()).toEqual(
-      CONTENT_PAGE_SECTION_TYPES.filter((type) => !isPageOnlyType(type)).sort()
-    )
+    expect([...PAGE_TYPES].sort()).toEqual([...CONTENT_PAGE_SECTION_TYPES].sort())
+    // The contact section stands once on a page: taken, it is not offered again
+    const contact = within(chooser).getByRole("button", { name: /^İletişim/ })
+    expect(contact).toBeDisabled()
+    expect(contact).toHaveTextContent("Bu sayfada zaten var.")
+    expect(within(chooser).getByRole("button", { name: /^Kargo bilgileri/ })).toBeEnabled()
   })
 })

@@ -18,7 +18,14 @@ import {
 } from "./sections"
 import { bodyOf, isMain } from "./main-sections"
 import { move, place } from "./editor-moves"
-import { addToPage, bodyAround, inPageOf, withoutPages } from "./page-layouts"
+import {
+  addToPage,
+  bodyAround,
+  inPageOf,
+  pageOnlyTaken,
+  seededPage,
+  withoutPages,
+} from "./page-layouts"
 
 /**
  * The theme editor's working document with its history: every change is
@@ -44,11 +51,10 @@ export type EditorAction =
   | { type: "update"; section: AnySection; merge?: string | undefined }
   /**
    * A page's section to a new place in its list: the home or product page's
-   * sections, or those on its side of a category page's products (a
-   * content page's text).
+   * sections, a content page's, or those on its side of a category page's products.
    */
   | { type: "move"; id: string; to: number }
-  /** A category (or content) page's section to the other side of its products (its text). */
+  /** A category page's section to the other side of its products. */
   | { type: "place"; id: string; placement: Placement }
   /** `copyId`: the copy's id, chosen beforehand so the preview can scroll to it (else a new one). */
   | { type: "duplicate"; id: string; copyId?: string }
@@ -69,6 +75,12 @@ export type EditorAction =
    * save (adr/0073 §1): out of the document and its history, no step.
    */
   | { type: "drop-pages"; ids: readonly string[] }
+  /**
+   * A content page shown with its text made into sections (adr/0073 Ek
+   * 2026-11-19 (2) K1, no entry in the design): its first change, `then`,
+   * makes its entry of them in the same step.
+   */
+  | { type: "seed"; page: string; sections: ContentPageSection[]; then: EditorAction }
   | { type: "undo" }
   | { type: "redo" }
 
@@ -153,7 +165,9 @@ function duplicate(doc: LayoutDocument, id: string, copyId?: string): LayoutDocu
     !found ||
     !isPageGroup(found.group) ||
     isMain(found.section) ||
-    bodyAround(doc, found).length >= groupLimit(found.group)
+    bodyAround(doc, found).length >= groupLimit(found.group) ||
+    // A page's contact section and facts stand once (K2)
+    pageOnlyTaken([found.section]).size > 0
   ) {
     return doc
   }
@@ -223,6 +237,15 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
             past: state.past.map((each) => withoutPages(each, action.ids)),
             future: state.future.map((each) => withoutPages(each, action.ids)),
           }
+    }
+    case "seed": {
+      if (action.then.type === "seed") {
+        return state
+      }
+      const seeded = seededPage(doc, action.page, action.sections)
+      const next = editorReducer({ ...state, doc: seeded }, action.then)
+      // One step: undo goes back to the page without its entry
+      return next.doc === seeded ? state : commit(state, next.doc, next.merge)
     }
     case "undo": {
       const previous = state.past.at(-1)

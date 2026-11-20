@@ -2,6 +2,7 @@ import { Columns3, Contact, Palette, SlidersHorizontal, Store, SwatchBook } from
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
 import type { AnySection, LayoutDocument, Placement } from "@/features/storefront/api/layout"
+import type { TreeContentPage } from "./editor-page"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import {
   idsOf,
@@ -27,16 +28,20 @@ import { AddRow, ElsewhereRow, ThemeRow, TreeGroup } from "./tree-rows"
 
 const T = "storefront.editor.tree"
 
+const NO_CONTENT_PAGE: TreeContentPage = {
+  id: null,
+  title: null,
+  synthesized: false,
+  shownOnly: false,
+}
+
 interface SectionTreeProps {
   /** The page being edited: its own sections between the header and the footer. */
   page: EditorPage
-  /**
-   * The content page picked (`page: "content"`, adr/0073 §5): its id (null:
-   * none yet), its title for the group's heading, and whether it is the
-   * contact page; opening its text says where that is written.
-   */
-  contentPage?: { id: string | null; title: string | null; contact: boolean }
-  onOpenText?: () => void
+  /** The content page picked (`page: "content"`, adr/0073 Ek 2026-11-19 (2) K5). */
+  contentPage?: TreeContentPage
+  /** Opens the content page's own settings. */
+  onPageSettings?: () => void
   doc: LayoutDocument
   problems: ReadonlySet<string>
   dispatch: Dispatch<EditorAction>
@@ -69,8 +74,8 @@ interface SectionTreeProps {
  */
 export function SectionTree({
   page,
-  contentPage = { id: null, title: null, contact: false },
-  onOpenText = () => undefined,
+  contentPage = NO_CONTENT_PAGE,
+  onPageSettings = () => undefined,
   doc,
   problems,
   dispatch,
@@ -198,13 +203,16 @@ export function SectionTree({
           <ContentPageSections
             doc={doc}
             pageId={contentPage.id}
-            contact={contentPage.contact}
+            synthesized={contentPage.synthesized}
+            shownOnly={contentPage.shownOnly}
             problems={problems}
             dispatch={dispatch}
             onOpen={onOpen}
             onRemove={onRemove}
-            onAdd={onAddSection}
-            onOpenText={onOpenText}
+            onAdd={() => {
+              onAddSection()
+            }}
+            onSettings={onPageSettings}
           />
         ) : (
           <PageSections

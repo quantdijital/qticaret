@@ -2,7 +2,10 @@ import { ExternalLink, Loader2, Rocket, RotateCcw } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { BarButton } from "./bar-button"
+import { PublishPages } from "./publish-pages"
+import { useDraftPages } from "./use-content-pages"
 import type { useEditorActions } from "./use-editor-actions"
 
 const E = "storefront.editor"
@@ -53,10 +56,25 @@ export function DraftTools({ actions, changed }: PublishControlsProps) {
   )
 }
 
-/** Put the draft live, once asked. */
-export function PublishButton({ actions, changed }: PublishControlsProps) {
+/**
+ * Put the draft live, once asked; the content pages in draft it lays out
+ * may go live with it (adr/0073 Ek 2026-11-19 (2) K5), the one being
+ * edited ticked.
+ */
+export function PublishButton({
+  actions,
+  changed,
+  doc,
+  editing = null,
+}: PublishControlsProps & {
+  doc: LayoutDocument
+  /** The content page being edited, ticked to go live with the design. */
+  editing?: string | null
+}) {
   const { t } = useTranslation()
   const [asking, setAsking] = useState(false)
+  const pages = useDraftPages(doc)
+  const [chosen, setChosen] = useState<Set<string>>(new Set())
   return (
     <>
       <BarButton
@@ -65,6 +83,9 @@ export function PublishButton({ actions, changed }: PublishControlsProps) {
         label={t(`${E}.publish.open`)}
         disabled={!changed || actions.busy}
         onClick={() => {
+          setChosen(
+            new Set(editing !== null && pages.some((page) => page.id === editing) ? [editing] : [])
+          )
           setAsking(true)
         }}
       />
@@ -76,9 +97,11 @@ export function PublishButton({ actions, changed }: PublishControlsProps) {
         confirmLabel={t(`${E}.publish.confirm`)}
         onConfirm={() => {
           setAsking(false)
-          void actions.publish()
+          void actions.publish(pages.filter((page) => chosen.has(page.id)).map((page) => page.id))
         }}
-      />
+      >
+        <PublishPages pages={pages} chosen={chosen} onChange={setChosen} />
+      </ConfirmDialog>
     </>
   )
 }

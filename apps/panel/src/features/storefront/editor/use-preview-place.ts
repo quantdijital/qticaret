@@ -23,6 +23,8 @@ interface PlaceOptions {
   onPageChange: () => void
   /** The content page the editor's address names (`?icerik=`): opened on it. */
   content?: string | null
+  /** Opened on the content pages (`?sayfa=icerik`), the shop's first if none is named. */
+  onContent?: boolean
 }
 
 /**
@@ -35,8 +37,12 @@ interface PlaceOptions {
  * brand, the blog) is shown as it is, the picked page's tree kept, until
  * a page or sample is picked again.
  */
-export function usePreviewPlace({ onPageChange, content: opened = null }: PlaceOptions) {
-  const [page, setPage] = useState<EditorPage>(opened ? "content" : "home")
+export function usePreviewPlace({
+  onPageChange,
+  content: opened = null,
+  onContent = opened !== null,
+}: PlaceOptions) {
+  const [page, setPage] = useState<EditorPage>(onContent ? "content" : "home")
   // The content page picked; none yet: the shop's first (as a template's first sample)
   const [picked, setPicked] = useState<string | null>(opened)
   // A page reached in the frame that is none of the editor's pages: shown until one is picked

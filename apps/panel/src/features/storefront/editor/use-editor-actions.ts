@@ -54,12 +54,13 @@ export function useEditorActions({
     store: flush,
     busy: publish.isPending || discard.isPending || restore.isPending,
     publishing: publish.isPending,
-    publish: async () => {
+    /** `pagesLive`: content pages in draft to put live with the design (adr/0073 Ek 2026-11-19 (2) K5). */
+    publish: async (pagesLive: readonly string[] = []) => {
       if (!(await flush())) {
         unsaved()
         return
       }
-      publish.mutate(undefined, {
+      publish.mutate(pagesLive, {
         onSuccess: ({ layout, dropped }) => {
           onLoaded(layout.draft)
           toast.success(t(`${E}.publish.done`))
