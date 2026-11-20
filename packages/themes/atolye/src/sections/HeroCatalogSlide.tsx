@@ -2,11 +2,11 @@ import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
 import type { HeroCatalogSlideView, HeroCatalogView, ImageView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
-// The photo as drawn: about a third of the width from 1024 px (495 px at 1440), half a tablet, a phone across (K-28)
+// The photo as drawn: about a third of the width from 1280 px (495 px at 1440), half a tablet, a phone across (K-28)
 export const PHOTO_SIZES =
-  "(min-width: 1440px) 500px, (min-width: 1024px) 35vw, (min-width: 768px) 50vw, 92vw"
-// A slide that is its picture alone: the opening's whole tile (about 1000 px at 1440)
-export const WHOLE_SIZES = "(min-width: 1440px) 1000px, (min-width: 1024px) 70vw, 92vw"
+  "(min-width: 1440px) 500px, (min-width: 1280px) 35vw, (min-width: 768px) 50vw, 92vw"
+// A slide that is its picture alone: the opening's whole tile (about 1000 px at 1440), a tablet's width under it
+export const WHOLE_SIZES = "(min-width: 1440px) 1000px, (min-width: 1280px) 70vw, 92vw"
 
 const WORDS = "flex flex-col items-start justify-center gap-4 p-5 sm:p-8 lg:gap-5 lg:p-10"
 

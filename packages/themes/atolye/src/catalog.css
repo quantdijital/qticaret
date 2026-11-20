@@ -3,10 +3,14 @@
  * 2026-11-14 §3.2, the owner's mockup "B, Katalog"): the opening as a tile
  * (its words beside its picture), the shop's category list in a steel
  * well, two category tiles, quick links under them. On a phone the
- * opening first (picture over words), then the list in two columns, the
- * tiles two by two, the quick links one row that scrolls; from 768 px the
- * opening on its own row over the list and the tiles; from 1024 px three
- * columns, the list on the left. The opening comes first in the HTML (its
+ * opening first (picture over words), then the list in one column (two
+ * from 576 px, where a long name still fits its cell), the tiles two by
+ * two, the quick links one row that scrolls; from 768 px the opening on
+ * its own row over the list and the tiles (the list across in two columns,
+ * three from 1024 px, when there are no tiles; the tiles one over the
+ * other beside it when there are); from 1280 px three columns, the list on
+ * the left (narrower, its names wrapped and the words cramped, below that).
+ * The opening comes first in the HTML (its
  * heading is the page's h1). Light grounds only: the opening's tile is the
  * deeper steel well, never cream (owner, 2026-11-14).
  */
@@ -27,8 +31,14 @@
     display: grid;
     flex: 1;
     grid-auto-rows: 1fr;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     column-gap: var(--space-2xs);
+  }
+  /* From 576 px a phone's cell holds a long name ("Mutfak & Şef Serisi") on one line */
+  @media (min-width: 36rem) {
+    .gf-mosaic-list > ul {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
   }
   /* An odd last row on two columns takes both, not half a row alone */
   .gf-mosaic-list > ul > li:last-child:nth-child(odd) {
@@ -179,8 +189,44 @@
     }
   }
 
-  /* From 1024 px: the list, the opening and the tiles side by side, as tall as each other */
-  @media (min-width: 64rem) {
+  /* A tablet (768 to 1279 px): under the opening, nothing left half empty */
+  @media (48rem <= width < 80rem) {
+    /* No tiles: the list across, its rows in two columns */
+    .gf-mosaic:not(:has(> .gf-mosaic-side)) > .gf-mosaic-list {
+      grid-column: 1 / -1;
+    }
+    .gf-mosaic:not(:has(> .gf-mosaic-side)) > .gf-mosaic-list > ul {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    /* No list: the tiles across, wide */
+    .gf-mosaic:not(:has(> .gf-mosaic-list)) > .gf-mosaic-side {
+      grid-column: 1 / -1;
+    }
+    .gf-mosaic:not(:has(> .gf-mosaic-list)) .gf-mosaic-tile {
+      aspect-ratio: 16 / 10;
+    }
+    /* Both: the tiles one over the other beside the list, as tall as it */
+    .gf-mosaic:has(> .gf-mosaic-list) > .gf-mosaic-side {
+      grid-template-columns: minmax(0, 1fr);
+      grid-auto-rows: 1fr;
+    }
+    .gf-mosaic:has(> .gf-mosaic-list) .gf-mosaic-tile {
+      aspect-ratio: auto;
+      min-height: 12rem;
+    }
+  }
+  /* A wide tablet (1024 to 1279 px): the list across in three columns, an odd last row in its own cell */
+  @media (64rem <= width < 80rem) {
+    .gf-mosaic:not(:has(> .gf-mosaic-side)) > .gf-mosaic-list > ul {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .gf-mosaic:not(:has(> .gf-mosaic-side)) > .gf-mosaic-list > ul > li:last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+  }
+
+  /* From 1280 px: the list, the opening and the tiles side by side, as tall as each other */
+  @media (min-width: 80rem) {
     .gf-mosaic {
       grid-template-columns: minmax(0, 3fr) minmax(0, 6.5fr) minmax(0, 2.5fr);
       grid-template-areas: "list feature side";
