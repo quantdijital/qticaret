@@ -97,7 +97,9 @@ async function attempt(
  * connector's error. When nothing passed and `mayCorrect` says yes (it
  * claims the second call's place under the day's ceiling), the service
  * is asked once more with the reasons; that call's failure is returned,
- * never thrown, and the first refusal stands.
+ * never thrown, and the first refusal stands. Being inside the first
+ * call's breaker permit, a failed correction is the caller's to count
+ * (`recordAiFailure`, lib/ai/breaker.ts; the call step does).
  */
 export async function runTextTask(
   input: CallInput & {

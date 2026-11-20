@@ -1,13 +1,17 @@
 import { redactPersonalData } from "./redact"
 
 /**
- * What a service is sent (adr/0071 §9): a fixed instruction as the system
- * message, and the shop's data as a separate message, one JSON block.
- * The instruction comes from the task registry alone; nothing typed by a
- * person is ever part of it. The real defence against an instruction
- * hidden in the data is the structure around it (no tools, the output
- * only fills a suggestion box, passes the gate and waits for a person);
- * the sentence below only tells the model which part is which.
+ * What a service is sent (adr/0071 §9, as adr/0074 §1 and §6 widen it):
+ * the task's instruction as the system message, and the shop's data as a
+ * separate message, one JSON block. The instruction is the registry's
+ * layers; nothing is typed into it at the ask. One layer is a setting
+ * the shop's owner or admin wrote beforehand (its writing guidance,
+ * `lib/ai/guidance.ts`): labelled as the shop's, cleaned of markup and
+ * personal data when saved, and followed by the fixed rules, which come
+ * last and win. The real defence against an instruction hidden in the
+ * data (or in that setting) is the structure around it (no tools, the
+ * output only fills a suggestion box, passes the gate and waits for a
+ * person); the sentence below only tells the model which part is which.
  */
 
 export const DATA_RULE =
@@ -82,7 +86,25 @@ export function promptData(
   return data
 }
 
-/** The block as JSON text, without its last fields while it is longer than the ceiling. */
+/** A long text clipped to fit is kept at least this long; a shorter one is not cut further. */
+export const MIN_CLIPPED_LENGTH = MAX_VALUE_LENGTH
+
+/** The longest text field, when it can still give up characters. */
+function longestText(entries: [string, CleanValue][]): [string, string] | null {
+  let longest: [string, string] | null = null
+  for (const [name, value] of entries) {
+    if (typeof value === "string" && (longest === null || value.length > longest[1].length)) {
+      longest = [name, value]
+    }
+  }
+  return longest !== null && Array.from(longest[1]).length > MIN_CLIPPED_LENGTH + 1 ? longest : null
+}
+
+/**
+ * The block as JSON text, under its ceiling: the longest text (a long
+ * description) is clipped first, never below `MIN_CLIPPED_LENGTH`; then
+ * the last fields are left out while it is still too long.
+ */
 function dataBlock(data: Record<string, CleanValue>): string {
   const entries = Object.entries(data)
   for (;;) {
@@ -90,7 +112,17 @@ function dataBlock(data: Record<string, CleanValue>): string {
     if (text.length <= MAX_DATA_CHARS || entries.length === 0) {
       return text
     }
-    entries.pop()
+    const longest = longestText(entries)
+    if (longest === null) {
+      entries.pop()
+      continue
+    }
+    const [name, value] = longest
+    const chars = Array.from(value)
+    // At least one character a turn; escapes make the JSON longer than the text
+    const keep = Math.max(MIN_CLIPPED_LENGTH, chars.length - (text.length - MAX_DATA_CHARS) - 1)
+    const at = entries.findIndex(([each]) => each === name)
+    entries[at] = [name, `${chars.slice(0, Math.min(keep, chars.length - 2)).join("")}…`]
   }
 }
 

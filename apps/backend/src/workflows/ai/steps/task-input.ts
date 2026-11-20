@@ -3,6 +3,8 @@ import { aiValidationError } from "../../../lib/ai/errors"
 import { AI_ENTITY_ID_PREFIX, entityFacts } from "../../../lib/ai/facts"
 import type { AiEntityType } from "../../../lib/ai/facts"
 import { productCardFacts } from "../../../lib/ai/facts/product-card"
+import { guidanceFor, guidanceText, takesGuidance } from "../../../lib/ai/guidance"
+import type { AiGuidanceSettings } from "../../../modules/platform-settings/sections/ai-guidance"
 import { systemOf } from "../../../lib/ai/instructions"
 import type { CardAllowed } from "../../../lib/ai/product-card"
 import { buildPrompt } from "../../../lib/ai/prompt"
@@ -19,6 +21,31 @@ export interface TaskInputInput {
   entity_id: string
   /** A product card's template (Aşama 6): whose attributes it may fill; read on the server. */
   template_id?: string | null | undefined
+  /** Which writing guidance goes in; the shop's stored one when left out. */
+  guidance?: GuidanceSource | undefined
+}
+
+/**
+ * The writing guidance a call is built with (adr/0074 §2): the shop's
+ * stored setting (every suggestion), none, or settings not yet saved that
+ * the settings page's "Dene" sent, held by the section's own schema
+ * before they reach here (`api/admin/ai/validators.ts`).
+ */
+export type GuidanceSource =
+  { use: "stored" } | { use: "none" } | { use: "given"; settings: AiGuidanceSettings }
+
+/** The guidance part of a task's system message, or null: none set, or a task that takes none. */
+async function guidanceOf(
+  container: Parameters<typeof guidanceFor>[0],
+  task: AiTask,
+  source: GuidanceSource | undefined
+): Promise<string | null> {
+  if (!takesGuidance(task) || source?.use === "none") {
+    return null
+  }
+  return source?.use === "given"
+    ? guidanceText(source.settings, task.id)
+    : guidanceFor(container, task.id)
 }
 
 export interface TaskInput {
@@ -59,16 +86,19 @@ async function cardInput(
 }
 
 /**
- * The call's two messages (adr/0071 §8.3, §9): the task's fixed
- * instruction, and the record read on the server (no text is taken from
- * the client), each value filtered of personal data and clipped. Nothing
- * to undo.
+ * The call's two messages (adr/0071 §8.3, §9; adr/0074 §1): the task's
+ * instruction with the shop's writing guidance in its labelled place (a
+ * text task only), and the record read on the server (no text of it is
+ * taken from the client), each value filtered of personal data and
+ * clipped. Nothing to undo.
  */
 export const taskInputStep = createStep(
   "ai-task-input",
   async (input: TaskInputInput, { container }) => {
     const task = findAiTask(input.task)
-    const instruction = task ? systemOf(task, input.option, input.entity_type) : null
+    // The shop's writing guidance, a setting (adr/0074 §2): read here, never from the ask
+    const guidance = task ? await guidanceOf(container, task, input.guidance) : null
+    const instruction = task ? systemOf(task, input.option, input.entity_type, guidance) : null
     if (!task || instruction === null) {
       throw aiValidationError("ai.unknown_task")
     }

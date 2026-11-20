@@ -12,7 +12,7 @@ interface ProductRow {
   title: string
   subtitle?: string | null
   description?: string | null
-  brand?: { name: string } | null
+  brand?: { name: string; is_active?: boolean | null } | null
   categories?:
     ({ name: string; is_internal?: boolean | null; is_active?: boolean | null } | null)[] | null
   attribute_values?: (HighlightValue | null)[] | null
@@ -30,6 +30,7 @@ export const PRODUCT_FACT_FIELDS = [
   "subtitle",
   "description",
   "brand.name",
+  "brand.is_active",
   "categories.name",
   "categories.is_internal",
   "categories.is_active",
@@ -110,7 +111,8 @@ function factsOf(product: ProductRow): ProductFacts {
   return {
     name: product.title,
     subtitle: product.subtitle ?? null,
-    brand: product.brand?.name ?? null,
+    // A brand the shop closed is not named (as a category it closed)
+    brand: product.brand?.is_active === false ? null : (product.brand?.name ?? null),
     category: product.categories?.find(shownCategory)?.name ?? null,
     collection: present(product.collection?.title) ? product.collection.title : null,
     tags: tagsOf(product),
@@ -131,7 +133,8 @@ function factsOf(product: ProductRow): ProductFacts {
  * docs/22 PR 2-2 removes them): its own published fields, its options,
  * collection and tags, public attributes only and the description as
  * plain text. No price, stock, order, customer or staff field is read at
- * all; a category the shop keeps to itself or has closed is left out too.
+ * all; a category the shop keeps to itself or has closed is left out too,
+ * as a brand it closed.
  * Null when there is no such product.
  */
 export async function readProductFacts(

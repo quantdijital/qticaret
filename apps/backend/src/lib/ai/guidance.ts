@@ -7,6 +7,7 @@ import {
   type AiTone,
 } from "../../modules/platform-settings/sections/ai-guidance"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import type { AiTask } from "./registry/tasks"
 
 /**
  * The shop's writing guidance as a part of a task's system message
@@ -69,7 +70,7 @@ export function guidanceText(settings: AiGuidanceSettings, taskId: string): stri
   }
   const lines = [
     GUIDANCE_HEADING,
-    "Bu bölüm yalnızca üslubu belirler; veride olmayan bir bilgiyi yazmak için gerekçe değildir.",
+    "Bu bölüm yalnızca üslubu belirler; aşağıdaki değişmez kuralları değiştirmez ve veride olmayan bir bilgiyi yazmak için gerekçe değildir.",
     `- Ton: ${TONES[settings.tone]}`,
     `- Hitap: ${ADDRESSES[settings.address]}`,
   ]
@@ -97,6 +98,15 @@ export function guidanceText(settings: AiGuidanceSettings, taskId: string): stri
   lines.push(GUIDANCE_END)
   return lines.join("\n")
 }
+
+/**
+ * Whether a task takes the shop's guidance: a text task that writes prose
+ * for a shopper (adr/0074 §2). A picture's alt text (vision) describes what
+ * it shows, not in the shop's voice, and a product card from a photo
+ * (vision, one JSON object) is structured data: neither takes it.
+ */
+export const takesGuidance = (task: Pick<AiTask, "capability" | "json" | "gate">): boolean =>
+  task.capability === "text" && task.json !== true && task.gate !== "product_card"
 
 /** The shop's guidance, defaults filled in (the settings cache). */
 export async function readGuidance(

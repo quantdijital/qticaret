@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { withAiBreaker } from "../../../lib/ai/breaker"
+import { DEFAULT_CIRCUIT_BREAKER } from "../../../lib/clients/circuit-breaker"
+import { correctionFailure, withAiBreaker } from "../../../lib/ai/breaker"
 import { textConnectorFor, textTargetOf } from "../../../lib/ai/connector-of"
 import type { AiImageInput } from "../../../lib/ai/connectors/types"
 import { aiProviderError } from "../../../lib/ai/errors"
@@ -174,16 +175,21 @@ export const callServiceStep = createStep(
       // A second call, when no candidate passed, takes a place under the day's ceiling only
       const claim = correctionClaim(container, input.capability)
       // A product card is read against its closed schema and the shop's lists, never as free text
-      const result = await withAiBreaker(input.service, () =>
-        task.gate === "product_card"
-          ? runCardTask({
-              connector,
-              task,
-              prompt,
-              allowed: input.allowed ?? { categories: [], attributes: [] },
-              ...withImages,
-            })
-          : runTextTask({ connector, task, prompt, mayCorrect: claim.mayCorrect, ...withImages })
+      const result = await withAiBreaker(
+        input.service,
+        () =>
+          task.gate === "product_card"
+            ? runCardTask({
+                connector,
+                task,
+                prompt,
+                allowed: input.allowed ?? { categories: [], attributes: [] },
+                ...withImages,
+              })
+            : runTextTask({ connector, task, prompt, mayCorrect: claim.mayCorrect, ...withImages }),
+        DEFAULT_CIRCUIT_BREAKER,
+        // The correction's own failure, returned inside the first call's permit, counts too
+        correctionFailure
       )
       await claim.settle(result.correction)
       const correction = correctionUsageOf(result.correction, images?.length ?? null)
