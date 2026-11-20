@@ -25,6 +25,7 @@ import type {
 import type { PaginationView } from "./listing-views"
 import type { MarqueeSectionView } from "./marquee-views"
 import type { NewsletterLookView } from "./newsletter-views"
+import type { ContentPageSectionView } from "./page-text-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ProductsSectionView } from "./shelf-views"
 import type { StripGallerySectionView } from "./strip-views"
@@ -143,8 +144,9 @@ export type HomeSectionView = {
       /**
        * `with_image` (adr/0073 §3, "Görselli metin"): the picture beside the
        * text and its side from 1024 px; absent (or without a picture): the pane.
+       * A content page's own text (`article`) is a `PageArticleView`.
        */
-      variant?: RichTextVariant
+      variant?: Exclude<RichTextVariant, "article">
       image?: ImageView | null
       imageSide?: RichTextImageSide
     }
@@ -236,13 +238,13 @@ export interface AuthorView {
 export interface ContentPageView {
   title: string
   breadcrumbs: BreadcrumbView[]
-  /** The backend's own HTML from its allow-listed schema (adr/0019): safe to print as it is. */
+  /**
+   * The backend's own HTML from its allow-listed schema (adr/0019): safe to
+   * print as it is. A post's text; on a page its text whole, which a theme
+   * draws only when the page came without `sections`.
+   */
   html: string
   publishedAt: string | null
-  /** The contact form below the text, on the page the shop chose for it (adr/0047). */
-  contactForm?: ContactFormView | null
-  /** How to reach the shop, from its store details, on that same page (adr/0048). */
-  contact?: ContactView | null
   /** A line above the page, in words: a draft's preview says it is one. */
   notice?: string | null
   /** A post's category and tags, at their archives (adr/0019 ek 2026-11-03). */
@@ -255,7 +257,7 @@ export interface ContentPageView {
    */
   /** The page's or post's cover picture; none: no picture. */
   image?: ImageView | null
-  /** The text's `h2`s in order, `html` carrying their ids, for a table of contents. */
+  /** A post's `h2`s in order, `html` carrying their ids, for a table of contents. */
   outline?: OutlineItemView[]
   /** A blog post's date, reading time and author; null on a page. */
   post?: PostMetaView | null
@@ -268,29 +270,15 @@ export interface ContentPageView {
   /** The page's address on the networks a reader shares with, each its own share link. */
   share?: SocialLinkView[]
   /**
-   * A questions-and-answers page read from its text (each question a bold
-   * line or a heading ending in "?", under its group's heading); `html`
-   * stays the whole text for a theme that draws it as it is.
+   * A content page's sections (adr/0073 Ek 2026-11-19 (2) K8), from the
+   * theme editor, as one list in the shop's order: the page's own text
+   * among them (`PageTextSectionView`: its text, the contact page's body,
+   * the payment and shipping facts), the home page's types around it. The
+   * page's head (trail, its one h1, its cover) is not a section and stands
+   * above them. Absent (a storefront before it): `html` is the page's text,
+   * drawn alone. Never on a post.
    */
-  faq?: FaqView | null
-  /** The ways to reach the shop beside its questions. */
-  help?: ContactView | null
-  /** The contact page's imprint (künye): the shop's registered identity, in words, as set. */
-  identity?: IdentityRowView[]
-  /** The payment page: the ways to pay the shop offers now and its card families' rates. */
-  payments?: PaymentFactsView | null
-  /** The shipping page: the carriers the shop connected and its own promises. */
-  shipping?: ShippingFactsView | null
-  /**
-   * A content page's own sections (adr/0073 §2), from the theme editor:
-   * above the page's text (`top`) and below it (`bottom`), each section
-   * in its own container. The page's head (trail, its one h1, its cover)
-   * and its text with its role's parts (the contact page's form, a FAQ,
-   * the payment and shipping facts) stay between them. Absent, or both
-   * empty: the page is drawn as it was before pages took sections; a
-   * theme that does not read it draws it so too. Never on a post.
-   */
-  sections?: { top: HomeSectionView[]; bottom: HomeSectionView[] }
+  sections?: ContentPageSectionView[]
 }
 
 /** A blog post's facts beside its title: when, how long a read, who wrote it. */

@@ -1,9 +1,10 @@
 import { Mail, MapPin, Phone } from "lucide-react"
+import { fieldMark } from "@qticaret/ui"
 import type {
   ContactActions,
   ContactView,
-  ContentPageView,
   IdentityRowView,
+  PageContactView,
   Translate,
 } from "@qticaret/ui"
 import { placeholderWords } from "../parts/placeholders"
@@ -165,28 +166,29 @@ function Imprint({
 }
 
 /**
- * The shop's contact page (adr/0047, adr/0048): its own words first, the
- * ways to reach it on a graphite stage, the form, then its imprint; from
- * 1024 px the words and the stage in a column beside the form, the
- * imprint one compact card across the page under both (beside the stage
- * when there is no form).
+ * The shop's contact page (adr/0047, adr/0048; the `contact` section,
+ * adr/0073 Ek 2026-11-19 (2) K2): its own words first, the ways to reach
+ * it on a graphite stage, the form, then its imprint; from 1024 px the
+ * words and the stage in a column beside the form, the imprint one
+ * compact card across the page under both (beside the stage when there is
+ * no form).
  */
 export function ContactBody({
-  view,
+  section,
   t,
   actions,
 }: {
-  view: ContentPageView
+  section: PageContactView
   t: Translate
   actions?: ContactActions | undefined
 }) {
-  const identity = view.identity ?? []
-  const form = view.contactForm && actions ? view.contactForm : null
+  const identity = section.identity
+  const form = section.form && actions ? section.form : null
   return (
     <div className="grid gap-(--gap-columns) lg:grid-cols-12 lg:items-start">
       <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:col-span-5">
-        <Prose html={view.html} className="mb-4" />
-        {view.contact && <Reach contact={view.contact} t={t} />}
+        <Prose html={section.html} className="mb-4" mark={fieldMark(section.editor, "body")} />
+        {section.contact && <Reach contact={section.contact} t={t} />}
       </div>
       {form && actions && (
         <div className="min-w-0 lg:col-span-7">
