@@ -11805,7 +11805,7 @@
         "extra": "Ek yönerge",
         "extraPlaceholder": "örn. Marka adını sona koy; ölçüyü başlıkta ver.",
         "examples": "Örnek metinler",
-        "examplesHint": "En çok {{max}} örnek, her biri en çok {{length}} karakter.",
+        "examplesHint": "En çok {{max}} örnek, her biri en çok {{length}} karakter. Müşteri adı ya da bilgisi yazmayın; örnek her istekte servise gider.",
         "example": "Örnek {{n}}",
         "addExample": "Örnek ekle",
         "removeExample": "Örnek {{n}} kaldır"

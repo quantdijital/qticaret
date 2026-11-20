@@ -18,6 +18,11 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
  */
 
 export const GUIDANCE_HEADING = "Mağazanın yazım yönergesi:"
+/** Where the shop's part ends: what follows is the system's again. */
+export const GUIDANCE_END = "Mağazanın yazım yönergesinin sonu."
+
+// Each word quoted: a word from the API carrying a comma or a colon stays one word, not a sentence
+const quotedWords = (list: readonly string[]) => list.map((word) => `“${word}”`).join(", ")
 
 const TONES: Record<AiTone, string> = {
   warm: "Samimi ama ölçülü yaz: sıcak ve içten, abartısız; laubali olma.",
@@ -56,7 +61,7 @@ const sameAsDefaults = (settings: AiGuidanceSettings) =>
  * task): the task's own craft speaks alone then, as before the setting.
  */
 export function guidanceText(settings: AiGuidanceSettings, taskId: string): string | null {
-  const task = settings.tasks[taskId]
+  const task = Object.hasOwn(settings.tasks, taskId) ? settings.tasks[taskId] : undefined
   const extra = task?.extra ?? null
   const examples = task?.examples ?? []
   if (sameAsDefaults(settings) && !extra && examples.length === 0) {
@@ -75,10 +80,10 @@ export function guidanceText(settings: AiGuidanceSettings, taskId: string): stri
     lines.push("- Mağazanın notu:", indented(settings.guide))
   }
   if (settings.prefer.length > 0) {
-    lines.push(`- Uygun düştüğünde tercih edilecek sözcükler: ${settings.prefer.join(", ")}`)
+    lines.push(`- Uygun düştüğünde tercih edilecek sözcükler: ${quotedWords(settings.prefer)}`)
   }
   if (settings.avoid.length > 0) {
-    lines.push(`- Hiç kullanılmayacak sözcükler: ${settings.avoid.join(", ")}`)
+    lines.push(`- Hiç kullanılmayacak sözcükler: ${quotedWords(settings.avoid)}`)
   }
   if (extra) {
     lines.push("- Bu iş için ek yönerge:", indented(extra))
@@ -89,6 +94,7 @@ export function guidanceText(settings: AiGuidanceSettings, taskId: string): stri
       indented(example)
     )
   })
+  lines.push(GUIDANCE_END)
   return lines.join("\n")
 }
 

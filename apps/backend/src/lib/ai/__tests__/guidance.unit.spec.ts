@@ -2,7 +2,13 @@ import {
   AI_GUIDANCE_DEFAULTS,
   type AiGuidanceSettings,
 } from "../../../modules/platform-settings/sections/ai-guidance"
-import { GUIDANCE_HEADING, guidanceFor, guidanceText, readGuidance } from "../guidance"
+import {
+  GUIDANCE_END,
+  GUIDANCE_HEADING,
+  guidanceFor,
+  guidanceText,
+  readGuidance,
+} from "../guidance"
 
 const settings = (values: Partial<AiGuidanceSettings> = {}): AiGuidanceSettings => ({
   ...AI_GUIDANCE_DEFAULTS,
@@ -55,12 +61,14 @@ describe("guidanceText", () => {
       "- Hitap:",
       "- Hedef kitle: ev aşçıları",
       "- Mağazanın notu:\n  El yapımıdır.\n  Terimleri açıkla.",
-      "tercih edilecek sözcükler: el yapımı, dayanıklı",
-      "Hiç kullanılmayacak sözcükler: ucuz",
+      "tercih edilecek sözcükler: “el yapımı”, “dayanıklı”",
+      "Hiç kullanılmayacak sözcükler: “ucuz”",
       "- Bu iş için ek yönerge:\n  Faydayı öne al",
       "- Örnek 1 (ton ve yapı örneği; içeriğini kopyalama):\n  Birinci örnek",
       "- Örnek 2 (ton ve yapı örneği; içeriğini kopyalama):\n  İkinci",
+      GUIDANCE_END,
     ].map((part) => text.indexOf(part))
+    expect(text.endsWith(GUIDANCE_END)).toBe(true)
     expect(order.every((at) => at >= 0)).toBe(true)
     expect([...order].sort((a, b) => a - b)).toEqual(order)
   })

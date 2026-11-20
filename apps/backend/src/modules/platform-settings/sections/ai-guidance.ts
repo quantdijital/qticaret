@@ -195,13 +195,17 @@ const taskGuidance = z
  * merges a section's JSON into the row, so a key left out would keep its
  * old value. An empty entry says nothing (lib/ai/guidance.ts).
  */
-const tasks = z.record(z.string().max(64), taskGuidance).superRefine((record, ctx) => {
-  for (const id of Object.keys(record)) {
-    if (!isGuidanceTask(id)) {
-      ctx.addIssue({ code: "custom", message: UNKNOWN_TASK, path: [id], input: id })
+// Unknown keys turned away before their values are cleaned
+const tasks = z
+  .record(z.string().max(64), z.unknown())
+  .superRefine((record, ctx) => {
+    for (const id of Object.keys(record)) {
+      if (!isGuidanceTask(id)) {
+        ctx.addIssue({ code: "custom", message: UNKNOWN_TASK, path: [id], input: id })
+      }
     }
-  }
-})
+  })
+  .pipe(z.record(z.string(), taskGuidance))
 
 /**
  * A stored row's tasks a deploy no longer knows are left out on read, so

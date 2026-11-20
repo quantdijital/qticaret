@@ -11805,7 +11805,7 @@
         "extra": "Extra note",
         "extraPlaceholder": "e.g. Put the brand name last; give the size in the title.",
         "examples": "Example texts",
-        "examplesHint": "Up to {{max}} examples, each {{length}} characters at most.",
+        "examplesHint": "Up to {{max}} examples, each {{length}} characters at most. Do not write customer names or details; an example is sent to the service with every request.",
         "example": "Example {{n}}",
         "addExample": "Add example",
         "removeExample": "Remove example {{n}}"
