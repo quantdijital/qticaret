@@ -284,7 +284,8 @@ describe("SeoCard", () => {
             id: "sug_1",
             task: "focus_keyword",
             service: "deepseek",
-            text: "keten gömlek\nyazlık keten gömlek",
+            text: "keten gömlek",
+            candidates: ["keten gömlek", "yazlık keten gömlek"],
           },
         })
       )
@@ -294,7 +295,8 @@ describe("SeoCard", () => {
       await user.click(
         await screen.findByRole("button", { name: "Odak anahtar kelime için yapay zekâ ile öner" })
       )
-      await user.click(await screen.findByRole("button", { name: "Kullan: yazlık keten gömlek" }))
+      await user.click(await screen.findByLabelText("yazlık keten gömlek"))
+      await user.click(screen.getByRole("button", { name: "Kullan" }))
       await waitFor(() => {
         expect(field("seo-keyword-cent_1")).toHaveValue("yazlık keten gömlek")
       })

@@ -94,7 +94,6 @@ export function FocusKeywordField({
           <AiButton
             task="focus_keyword"
             entity={entity}
-            choices
             size="icon"
             label={t("seo.card.aiKeyword")}
             onUse={(keyword) => {

@@ -1,8 +1,10 @@
+import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
+import { AiCandidates } from "@/features/ai/components/ai-candidates"
 import { AiTryOthers } from "@/features/ai/components/ai-try-others"
 import { aiFailureText, serviceName } from "@/features/ai/failure-text"
 import type { AiSuggestionState } from "@/features/ai/use-ai-suggestion"
@@ -13,58 +15,22 @@ export interface AiSuggestionBoxProps {
   options?: readonly string[] | undefined
   option?: string | undefined
   onOption?: ((option: string) => void) | undefined
-  onUse: () => void
+  /** "Kullan": with several candidates, the picked one is handed over; otherwise nothing. */
+  onUse: (candidate?: string) => void
   onRetry: () => void
   onTryWith: (service: string) => void
   onDismiss: () => void
   /** A structured suggestion (a product card) drawn by its task; left out: the text, line by line. */
   preview?: ReactNode
-  /**
-   * Each line is a choice of its own (a focus keyword and its alternatives):
-   * every line gets its own "Kullan", which hands that line to `onUseChoice`.
-   */
-  onUseChoice?: ((line: string) => void) | undefined
-}
-
-/** The lines of a choice suggestion, the main one first. */
-function Choices({ text, onUse }: { text: string; onUse: (line: string) => void }) {
-  const { t } = useTranslation()
-  const lines = text.split("\n").filter((line) => line.trim() !== "")
-  return (
-    <ul aria-label={t("ai.suggest.choices")} className="flex flex-col gap-1.5">
-      {lines.map((line, index) => (
-        <li key={line} className="flex items-center gap-2">
-          <span className="min-w-0 flex-1 break-words">
-            {line}
-            {index === 0 ? (
-              <span className="ml-1.5 text-xs whitespace-nowrap text-muted-foreground">
-                {t("ai.suggest.mainChoice")}
-              </span>
-            ) : null}
-          </span>
-          <Button
-            type="button"
-            size="sm"
-            variant={index === 0 ? "default" : "outline"}
-            className="h-7 shrink-0 text-xs"
-            aria-label={t("ai.suggest.useChoice", { text: line })}
-            onClick={() => {
-              onUse(line)
-            }}
-          >
-            {t("ai.suggest.use")}
-          </Button>
-        </li>
-      ))}
-    </ul>
-  )
 }
 
 /**
  * A suggestion and what to do with it (adr/0071 §13): the text, whose it
  * is ("Yapay zekâ önerisi · DeepSeek"), and Kullan / Yeniden dene /
- * Vazgeç. A refusal or a failure says why in a sentence; "Başka servisle
- * dene" only when the backend named other services, and only on a click.
+ * Vazgeç. Several candidates (adr/0074 §4) are a radio list, the first
+ * picked; "Kullan" takes the picked one. A refusal or a failure says why
+ * in a sentence; "Başka servisle dene" only when the backend named other
+ * services, and only on a click.
  */
 export function AiSuggestionBox(props: AiSuggestionBoxProps) {
   const {
@@ -77,12 +43,20 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
     onTryWith,
     onDismiss,
     preview,
-    onUseChoice,
   } = props
   const { t } = useTranslation()
+  // The pick belongs to one suggestion: a new one starts at its first candidate
+  const [picked, setPicked] = useState<{ id: string; text: string } | null>(null)
   const busy = state.status === "loading"
   const alternatives =
     state.status === "refused" || state.status === "error" ? state.alternatives : []
+  const suggestion = state.status === "suggestion" ? state.suggestion : null
+  const candidates = suggestion?.candidates ?? []
+  const several = candidates.length > 1
+  const chosen =
+    suggestion && picked?.id === suggestion.id && candidates.includes(picked.text)
+      ? picked.text
+      : (candidates[0] ?? "")
 
   return (
     <div className="flex flex-col gap-3" data-slot="ai-suggestion-box">
@@ -128,8 +102,14 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
               tabIndex={0}
               className="flex max-h-[40vh] flex-col gap-2 overflow-y-auto rounded-md border bg-muted/40 px-3 py-2 text-sm break-words focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
-              {onUseChoice ? (
-                <Choices text={state.suggestion.text} onUse={onUseChoice} />
+              {several ? (
+                <AiCandidates
+                  candidates={candidates}
+                  value={chosen}
+                  onChange={(text) => {
+                    setPicked({ id: state.suggestion.id, text })
+                  }}
+                />
               ) : (
                 (preview ??
                 state.suggestion.text.split("\n").map((line, index) => <p key={index}>{line}</p>))
@@ -147,8 +127,18 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {state.status === "suggestion" && !onUseChoice ? (
-          <Button type="button" size="sm" onClick={onUse}>
+        {state.status === "suggestion" ? (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => {
+              if (several) {
+                onUse(chosen)
+              } else {
+                onUse()
+              }
+            }}
+          >
             {t("ai.suggest.use")}
           </Button>
         ) : null}
