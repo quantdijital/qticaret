@@ -29,7 +29,7 @@ interface ProductRow {
 }
 
 // A description document (adr/0055; the short one too) by its digest: the text stays out of the log
-const docDigest = (doc: unknown): string | null =>
+export const docDigest = (doc: unknown): string | null =>
   doc === null || doc === undefined
     ? null
     : createHash("sha256").update(JSON.stringify(doc)).digest("hex").slice(0, 16)
@@ -111,13 +111,45 @@ async function collectionDetailsSnapshot(scope: Resolver, collectionId: string):
     ?.collection_extension
   return {
     description: docDigest(own?.description ?? null),
+    // adr/0075: its document, by its digest as the text's
+    description_doc: docDigest(own?.description_doc),
     is_active: own?.is_active !== false,
     image_url: own?.image_url ?? null,
     image_alt: own?.image_alt ?? null,
   }
 }
 
+/** A category's text (adr/0075): Medusa's plain text and the document, each by its digest. */
+async function categoryDescriptionSnapshot(scope: Resolver, categoryId: string): Promise<Snapshot> {
+  const query = scope.resolve(ContainerRegistrationKeys.QUERY) as GraphQuery
+  const [{ data }, [row]] = await Promise.all([
+    query.graph({
+      entity: "product_category",
+      fields: ["description"],
+      filters: { id: categoryId },
+    }),
+    (
+      scope.resolve(CATALOG_EXTENSION_MODULE) as CatalogExtensionModuleService
+    ).listCategoryExtensions({ category_id: categoryId }, { take: 1, select: ["description_doc"] }),
+  ])
+  const category = data[0] as { description?: string | null } | undefined
+  return {
+    // Medusa keeps "" for none: no text reads as none
+    description: docDigest(category?.description === "" ? null : category?.description),
+    description_doc: docDigest(row?.description_doc),
+  }
+}
+
 export const CATALOG_RESOURCES: readonly AuditedResource[] = [
+  {
+    method: "POST",
+    route: "POST /admin/category-descriptions/:category_id",
+    pattern: new RegExp(`^/admin/category-descriptions/(?<category_id>${ID})$`, "i"),
+    resourceType: "product_category",
+    resourceId: (params) => params["category_id"] ?? null,
+    snapshot: ({ scope, params }) =>
+      categoryDescriptionSnapshot(scope, params["category_id"] ?? ""),
+  },
   {
     method: "POST",
     route: "POST /admin/collections/:id/details",

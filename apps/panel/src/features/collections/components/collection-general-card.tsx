@@ -5,7 +5,6 @@ import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
-import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import {
   useSetCollectionDetails,
   useUpdateCollection,
@@ -21,21 +20,19 @@ const C = "collections"
 interface Values {
   title: string
   handle: string
-  description: string
   is_active: boolean
 }
 
 const valuesOf = (collection: Collection): Values => ({
   title: collection.title,
   handle: collection.handle,
-  description: collection.description ?? "",
   is_active: collection.is_active,
 })
 
 /**
- * The collection's name, page address, intro and whether its page is
- * public. Name and address are Medusa's fields, the rest ours: one save
- * sends each what changed.
+ * The collection's name, page address and whether its page is public.
+ * Name and address are Medusa's fields, the visibility ours: one save
+ * sends each what changed. Its text is a card of its own (adr/0075).
  */
 export function CollectionGeneralCard({ collection }: { collection: Collection }) {
   const { t } = useTranslation()
@@ -54,11 +51,8 @@ export function CollectionGeneralCard({ collection }: { collection: Collection }
           ...(dirtyFields.handle ? { handle: values.handle.trim() } : {}),
         })
       }
-      if (dirtyFields.description || dirtyFields.is_active) {
-        await details.mutateAsync({
-          ...(dirtyFields.description ? { description: values.description } : {}),
-          ...(dirtyFields.is_active ? { is_active: values.is_active } : {}),
-        })
+      if (dirtyFields.is_active) {
+        await details.mutateAsync({ is_active: values.is_active })
       }
       form.reset(values, FULL_RESET)
       toast.success(t(`${C}.saved`))
@@ -106,18 +100,6 @@ export function CollectionGeneralCard({ collection }: { collection: Collection }
             {...form.register("handle", { validate: (text) => isValidSlug(text.trim()) })}
           />
         </div>
-      </Field>
-      <Field
-        label={t(`${C}.descriptionLabel`)}
-        htmlFor="collection-description"
-        hint={t(`${C}.descriptionHint`)}
-      >
-        <Textarea
-          id="collection-description"
-          className="min-h-32"
-          maxLength={20_000}
-          {...form.register("description")}
-        />
       </Field>
       <Controller
         control={form.control}

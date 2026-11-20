@@ -1,0 +1,22 @@
+/*
+ * A category, brand or collection page's own text at its foot (adr/0075,
+ * listing/ListingText): a long one folded to six of its own lines, the
+ * last two fading out over its toggle (listing/TextMore). Every word stays
+ * in the page: the fold only limits the height. Without the script the
+ * text stays whole and the toggle is not drawn.
+ */
+@layer components {
+  @media (scripting: enabled) {
+    .gf-ltext[data-open="false"] > .gf-ltext-body {
+      max-height: 10.5em;
+      max-height: 6lh;
+      overflow: hidden;
+      mask-image: linear-gradient(to bottom, #000 calc(100% - 2lh), transparent);
+    }
+  }
+  @media (scripting: none) {
+    .gf-ltext-toggle {
+      display: none;
+    }
+  }
+}

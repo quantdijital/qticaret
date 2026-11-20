@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@qticaret/admin-ui/ui/dropdown-menu"
 import { brandQuery, useDeleteBrand } from "@/features/brands/api/brands"
+import { BrandDescriptionCard } from "@/features/brands/components/brand-description-card"
 import { BrandGeneralCard } from "@/features/brands/components/brand-general-card"
 import { BrandLogoCard } from "@/features/brands/components/brand-logo-card"
 import { useBrandPathPrefix } from "@/features/brands/use-brand-path"
@@ -28,7 +29,11 @@ import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const route = getRouteApi("/_auth/brands/$id")
 
-/** A brand (F3.11): its page's text and address, its logo and its search appearance. */
+/**
+ * A brand (F3.11): its page's address, text and search appearance in the
+ * main column; the SEO advisor and the logo beside them, following the
+ * scroll (a long text leaves them in sight).
+ */
 export function BrandPage() {
   const { t } = useTranslation()
   const { id } = route.useParams()
@@ -85,6 +90,9 @@ export function BrandPage() {
           <div id="brand-general" className="scroll-mt-20">
             <BrandGeneralCard brand={data} />
           </div>
+          <div id="brand-description" className="scroll-mt-20">
+            <BrandDescriptionCard key={data.id} brand={data} />
+          </div>
           <div id="brand-seo" className="scroll-mt-20">
             <SeoCard
               type="brand"
@@ -97,7 +105,7 @@ export function BrandPage() {
             />
           </div>
         </PageColumn>
-        <PageColumn span={4}>
+        <PageColumn span={4} sticky>
           <AdvisorCard
             kind="brand"
             id={data.id}
@@ -106,7 +114,7 @@ export function BrandPage() {
               edit_title: "brand-seo",
               edit_description: "brand-seo",
               edit_robots: "brand-seo",
-              edit_body: "brand-general",
+              edit_body: "brand-description",
               edit_handle: "brand-general",
               add_logo: "brand-logo",
             }}

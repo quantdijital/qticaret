@@ -265,6 +265,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The price of some items in the cart changed. Check the new total and start the payment again.",
   "catalog.description_blocks":
     "A product description takes no pictures or product and category cards; add pictures to the product's images.",
+  "catalog.description_one_of":
+    "Send the description either as plain text or as formatted text, not both.",
+  "catalog.listing_description_blocks":
+    "A description takes no pictures or product and category cards; headings, paragraphs, lists, tables and links are fine.",
   "catalog.summary_blocks":
     "A short description takes paragraphs, small headings (H3, H4), lists, bold, italic and links; no large headings, quotes, tables or pictures.",
   "catalog.summary_too_long": "A short description has 1,500 characters at most.",

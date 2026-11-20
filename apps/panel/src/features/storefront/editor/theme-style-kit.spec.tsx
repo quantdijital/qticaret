@@ -68,7 +68,7 @@ describe("the style kit in the theme panel", () => {
       "menu_style",
       "motion",
     ])
-    // The panel's order: colours, faces, shapes, spacing, surfaces, the card
+    // The panel's order: colours, faces, shapes, spacing, surfaces, the card, the listing text
     expect([...new Set(THEME_FIELDS.map((f) => f.group))]).toEqual([
       "colors",
       "fonts",
@@ -77,6 +77,7 @@ describe("the style kit in the theme panel", () => {
       "surfaces",
       "card",
       "framed",
+      "listingText",
     ])
   })
 

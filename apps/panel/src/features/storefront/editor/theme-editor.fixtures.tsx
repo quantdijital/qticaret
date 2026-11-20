@@ -51,6 +51,7 @@ export const THEME: ThemeSettings = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
   menu_style: "filled",
   shadow: "float",
   chip_style: "filled",

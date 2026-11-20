@@ -2,6 +2,7 @@ import path from "node:path"
 import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
+  LISTING_TEXT_DEFAULTS,
   RADIUS_STEPS,
   SECTION_SPACINGS,
   STYLE_KIT_DEFAULTS,
@@ -62,6 +63,8 @@ describe("theme section", () => {
       buttons: "pill",
       section_spacing: "normal",
       surface_style: "filled",
+      // adr/0075: a listing page's own text at its foot, normal size, a reading measure, folded
+      listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
       // adr/0067 §1: the style kit at today's drawing
       menu_style: "filled",
       shadow: "float",
@@ -280,10 +283,13 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       surface_style: "filled",
       // and before the style kit (adr/0067): today's drawing
       ...STYLE_KIT_DEFAULTS,
+      // and before the listing text (adr/0075): its defaults
+      listing_text: LISTING_TEXT_DEFAULTS,
     })
     const framed = {
       ...stored,
       ...STYLE_KIT_DEFAULTS,
+      listing_text: { ...LISTING_TEXT_DEFAULTS, size: "lg" },
       section_spacing: "compact",
       surface_style: "lined",
       product_card: { ...defaults.product_card, variant: "framed" },

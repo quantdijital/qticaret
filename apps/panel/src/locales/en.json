@@ -5205,7 +5205,6 @@
     "urlHint": "Made from the name when left empty.",
     "parent": "Parent category",
     "root": "None (top level)",
-    "descriptionHint": "Shown above the products on the category page; helps search engines too.",
     "flags": {
       "is_active": {
         "title": "Show in the shop",
@@ -5222,7 +5221,6 @@
     "deleteTitle": "Delete {{name}}?",
     "deleteDescription": "The category is deleted; products stay and only leave this category. A category with subcategories cannot be deleted.",
     "deleted": "Category deleted.",
-    "descriptionLabel": "Description",
     "image": {
       "title": "Category image",
       "hint": "Shown on the storefront's category cards and in the menu. Without one, the newest product photo in the category is used.",
@@ -6756,8 +6754,6 @@
     "name": "Brand name",
     "handle": "Page address",
     "handleHint": "If you change it, the old address redirects permanently to the new one.",
-    "descriptionLabel": "Description",
-    "descriptionHint": "Shown on the brand page; also in search results when the SEO description is empty.",
     "activeLabel": "Brand page is live",
     "activeHint": "When off, the page answers 404 and the brand leaves store lists; products keep the brand name.",
     "saved": "Brand saved.",
@@ -6798,8 +6794,6 @@
     "nameRequired": "Enter the collection's name.",
     "handle": "Page address",
     "handleHint": "If you change it, the old address redirects to the new one for good.",
-    "descriptionLabel": "Description",
-    "descriptionHint": "Shown at the top of the collection page; used in search results when the SEO description is empty. Separate paragraphs with a blank line.",
     "activeLabel": "Collection page is live",
     "activeHint": "While off, the page answers 404 and leaves the sitemap; menu links and storefront sections that name it are hidden. Products and promotions are untouched.",
     "saved": "Collection saved.",
@@ -7330,6 +7324,10 @@
       "noneFound": "No author by that name.",
       "legacy": "Old author name: {{name}}. Choose from the list or",
       "legacyAdd": "add it as a new author"
+    },
+    "listingDescription": {
+      "title": "Description",
+      "hint": "Shown at the bottom of the page on the storefront, after the products. Headings and paragraphs you paste from elsewhere are kept; Theme settings > Listing text sets how it looks."
     }
   },
   "priceLists": {
@@ -8982,6 +8980,40 @@
           "action": "Back to Grafit",
           "hint": "Sets every field to the theme's default look (Grafit). The change goes into the draft; the storefront does not change until you publish.",
           "done": "Theme settings are back to Grafit."
+        },
+        "listingTextTitle": "Listing text",
+        "listingTextHint": "The description at the bottom of category, brand and collection pages. Its face is the body face.",
+        "listingText": {
+          "size": {
+            "label": "Text size",
+            "hint": "The description's text size.",
+            "steps": {
+              "sm": "Small",
+              "md": "Normal",
+              "lg": "Large"
+            }
+          },
+          "align": {
+            "label": "Alignment",
+            "hint": "Text aligned to the start or centred.",
+            "steps": {
+              "start": "Start",
+              "center": "Centred"
+            }
+          },
+          "width": {
+            "label": "Width",
+            "hint": "Narrow: an easy reading measure. Wide: the page's content width.",
+            "steps": {
+              "narrow": "Narrow",
+              "wide": "Wide"
+            }
+          },
+          "collapse": {
+            "label": "Fold long text behind 'Read more'",
+            "hint": "A long text shows its first lines, the rest opens with a button. The whole text stays in the page; search engines read all of it."
+          },
+          "words": "description text category brand collection read more fold"
         }
       },
       "faq": {

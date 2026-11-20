@@ -1,4 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import type { DescriptionDoc } from "../../lib/catalog/description"
+import { listingDescriptionChanges } from "../../lib/catalog/listing-description"
+import type { ContentDoc } from "../../lib/content"
 import { ConflictError, ValidationError } from "../../lib/errors"
 import { libraryImage } from "../../lib/media/library-image"
 import { refuseSvgImages } from "../../lib/media/svg-use"
@@ -22,6 +25,8 @@ export interface BrandInput {
   name?: string | undefined
   handle?: string | undefined
   description?: string | null | undefined
+  /** adr/0075: the description as a checked document; null drops it and keeps the text. */
+  description_doc?: ContentDoc | null | undefined
   /** An upload's id; null removes the logo. */
   logo_file_id?: string | null | undefined
   is_active?: boolean | undefined
@@ -31,6 +36,8 @@ export interface BrandFields {
   name: string
   handle: string
   description: string | null
+  /** The description as a document (adr/0075); `description` then holds its plain text. */
+  description_doc: DescriptionDoc | null
   logo_file_id: string | null
   logo_url: string | null
   /** The logo's size in pixels, read on the server; null when unknown. */
@@ -68,6 +75,39 @@ function descriptionOf(raw: string | null): string | null {
     throw new ValidationError("brands.description_invalid", { field: "description" })
   }
   return text === "" ? null : text
+}
+
+/**
+ * The brand's text as stored (adr/0075): a document and its plain text
+ * as `listingDescriptionChanges` says, or plain text checked as before
+ * (an import), which drops a document the brand had.
+ */
+function describedAs(
+  input: BrandInput,
+  current: BrandRecord | null
+): Pick<BrandFields, "description" | "description_doc"> {
+  const before = {
+    description: current?.description ?? null,
+    description_doc: (current?.description_doc ?? null) as DescriptionDoc | null,
+  }
+  const text =
+    input.description === undefined || input.description_doc !== undefined
+      ? undefined
+      : descriptionOf(input.description)
+  const changes = listingDescriptionChanges(
+    { doc: input.description_doc, text },
+    { doc: before.description_doc, description: before.description },
+    null
+  )
+  return {
+    description:
+      text !== undefined
+        ? text
+        : changes.description !== undefined
+          ? changes.description
+          : before.description,
+    description_doc: changes.doc === undefined ? before.description_doc : changes.doc,
+  }
 }
 
 /** Another brand with this name (any case) or handle refuses the save. */
@@ -112,10 +152,7 @@ export async function brandFields(
   const fields: BrandFields = {
     name,
     handle: input.handle === undefined && current ? current.handle : handleOf(input.handle, name),
-    description:
-      input.description === undefined
-        ? (current?.description ?? null)
-        : descriptionOf(input.description),
+    ...describedAs(input, current),
     logo_file_id: current?.logo_file_id ?? null,
     logo_url: current?.logo_url ?? null,
     logo_width: current?.logo_width ?? null,

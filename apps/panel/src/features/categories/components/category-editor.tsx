@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
-import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { useDeleteCategory, useUpdateCategory } from "@/features/categories/api/categories"
 import type { Category } from "@/features/categories/api/categories"
 import { ancestorHandles, descendantsOf, treeRows } from "@/features/categories/tree"
@@ -29,7 +28,6 @@ const ROOT = "__root__"
 interface Values {
   name: string
   handle: string
-  description: string
   parent: string
   is_active: boolean
   is_internal: boolean
@@ -41,7 +39,11 @@ interface CategoryEditorProps {
   onDeleted: () => void
 }
 
-/** One category's name, address, story, place in the tree and visibility; deleting it too. */
+/**
+ * One category's name, address, place in the tree and visibility; deleting
+ * it too. Its text is a card of its own (adr/0075): Medusa's category route
+ * never gets it from here, or the text's document would go stale.
+ */
 export function CategoryEditor({ categories, category, onDeleted }: CategoryEditorProps) {
   const { t } = useTranslation()
   const update = useUpdateCategory()
@@ -51,7 +53,6 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
   const saved: Values = {
     name: category.name,
     handle: category.handle,
-    description: category.description,
     parent: category.parent_category_id ?? ROOT,
     is_active: category.is_active,
     is_internal: category.is_internal,
@@ -73,7 +74,6 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
     const input = {
       name: values.name.trim(),
       ...(values.handle.trim() ? { handle: values.handle.trim() } : {}),
-      description: values.description.trim(),
       parent_category_id: values.parent === ROOT ? null : values.parent,
       is_active: values.is_active,
       is_internal: values.is_internal,
@@ -148,17 +148,6 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
               </SelectContent>
             </Select>
           )}
-        />
-      </Field>
-      <Field
-        label={t("categories.descriptionLabel")}
-        htmlFor="category-description"
-        hint={t("categories.descriptionHint")}
-      >
-        <Textarea
-          id="category-description"
-          className="min-h-32"
-          {...form.register("description")}
         />
       </Field>
       <div className="flex flex-col divide-y rounded-md border">

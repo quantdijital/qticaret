@@ -1,3 +1,4 @@
+import type { ListingTextSettings } from "@qticaret/types"
 import type { CategoryCardView } from "./card-views"
 import type { HomeSectionView } from "./content-views"
 import type { CategoryMainView } from "./main-views"
@@ -63,9 +64,38 @@ export interface PriceFilterView {
   keep: { name: string; value: string }[]
 }
 
+/**
+ * A category, brand or collection page's own text (adr/0075), drawn at
+ * the foot of its first page: after the products and their pages, before
+ * the category group's bottom sections. The shop's description as the
+ * backend renders its content document, else its plain text.
+ */
+export interface ListingTextView {
+  /**
+   * The backend's own HTML from the allow-listed document schema (adr/0019,
+   * adr/0075 §2: h2–h4, paragraphs, lists, quotes, tables, bold, italic,
+   * safe links): safe to print as it is. Null: show `paragraphs`.
+   */
+  html: string | null
+  /** The plain text in paragraphs while the record has no document; a theme prints them as text. */
+  paragraphs: string[]
+  /** The shop's one look for these texts (`StoreThemeSettings.listing_text`), every value checked. */
+  look: ListingTextSettings
+}
+
 export interface ListingPageView {
   title: string
+  /**
+   * The short intro under the title: a landing page's (its own text as
+   * paragraphs). A category, brand or collection gives its text as
+   * `footText` instead (adr/0075 §5); a search and the sale page none.
+   */
   description: string[]
+  /**
+   * The page's own text at its foot (adr/0075): a category, brand or
+   * collection page's, on its first page only; none or absent: nothing there.
+   */
+  footText?: ListingTextView | null
   /**
    * The listing's own picture, shown with its title and intro on its
    * first page (a collection's); none: the theme shows no picture.

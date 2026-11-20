@@ -1,4 +1,5 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { JSONContent } from "@tiptap/react"
 import { sdk } from "@/lib/sdk"
 
 /**
@@ -19,7 +20,10 @@ export interface Collection {
   id: string
   title: string
   handle: string
+  /** The plain text: the server's mirror of the document (adr/0075). */
   description: string | null
+  /** The text as written (adr/0075); null: plain text only, opened as its paragraphs. */
+  description_doc: JSONContent | null
   is_active: boolean
   image: CollectionImage | null
   product_count: number
@@ -28,7 +32,8 @@ export interface Collection {
 }
 
 export interface CollectionDetailsInput {
-  description?: string | null
+  /** The panel writes the document only; the server mirrors its plain text (adr/0075). */
+  description_doc?: JSONContent | null
   is_active?: boolean
   image?: CollectionImage | null
 }

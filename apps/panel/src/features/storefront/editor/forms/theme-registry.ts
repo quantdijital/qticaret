@@ -9,6 +9,9 @@ import {
   CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
   HEADING_FONTS,
+  LISTING_TEXT_ALIGNS,
+  LISTING_TEXT_SIZES,
+  LISTING_TEXT_WIDTHS,
   RADII,
   SECTION_SPACINGS,
   STYLE_KIT,
@@ -38,7 +41,7 @@ const C = "storefront.editor.theme"
 
 /** The theme panel's groups, in its order. */
 export type ThemeGroupName =
-  "colors" | "fonts" | "shapes" | "spacing" | "surfaces" | "card" | "framed"
+  "colors" | "fonts" | "shapes" | "spacing" | "surfaces" | "card" | "framed" | "listingText"
 
 /** Each group's title (i18n key), as the panel and a hit's second line show it. */
 export const THEME_GROUP_TITLES: Readonly<Record<ThemeGroupName, string>> = {
@@ -49,11 +52,12 @@ export const THEME_GROUP_TITLES: Readonly<Record<ThemeGroupName, string>> = {
   surfaces: `${C}.surfaces`,
   card: `${C}.card`,
   framed: `${C}.framed`,
+  listingText: `${C}.listingTextTitle`,
 }
 
 /** Every field of the theme's choices by its path: `colors.primary`, `product_card.variant`, `radius`. */
 export type ThemeField = {
-  [G in keyof ThemeChoices]: ThemeChoices[G] extends Record<string, unknown>
+  [G in keyof ThemeChoices]: ThemeChoices[G] extends object
     ? `${G}.${keyof ThemeChoices[G] & string}`
     : G
 }[keyof ThemeChoices]
@@ -111,6 +115,20 @@ const kitField = (field: StyleKitField, group: ThemeGroupName): FieldMeta => ({
   term: `${C}.styleKit.${field}.term`,
   options: named(STYLE_KIT[field], `styleKit.${field}.steps`),
   shown: () => STYLE_KIT_READY[field],
+})
+
+/**
+ * The listing pages' text (adr/0075 §6): "açıklama", "devamını oku" find
+ * every one of its fields.
+ */
+const listingText = (
+  field: "size" | "align" | "width" | "collapse",
+  steps: readonly string[] = []
+): FieldMeta => ({
+  group: "listingText",
+  label: `${C}.listingText.${field}.label`,
+  options: named(steps, `listingText.${field}.steps`),
+  keywords: `${C}.listingText.words`,
 })
 
 /**
@@ -233,6 +251,10 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
     // Only the button across the foot has a look; the round "+" has none
     shown: (theme) => theme.product_card.full_button,
   },
+  "listing_text.size": listingText("size", LISTING_TEXT_SIZES),
+  "listing_text.align": listingText("align", LISTING_TEXT_ALIGNS),
+  "listing_text.width": listingText("width", LISTING_TEXT_WIDTHS),
+  "listing_text.collapse": listingText("collapse"),
   "header.layout": null,
   "header.sticky": null,
 }

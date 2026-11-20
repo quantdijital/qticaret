@@ -5,7 +5,6 @@ import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
-import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { useUpdateBrand } from "@/features/brands/api/brands"
 import type { Brand } from "@/features/brands/api/brands"
 import { useBrandPathPrefix } from "@/features/brands/use-brand-path"
@@ -15,18 +14,16 @@ import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 interface Values {
   name: string
   handle: string
-  description: string
   is_active: boolean
 }
 
 const valuesOf = (brand: Brand): Values => ({
   name: brand.name,
   handle: brand.handle,
-  description: brand.description ?? "",
   is_active: brand.is_active,
 })
 
-/** The brand's name, page address, text and whether its page is live. */
+/** The brand's name, page address and whether its page is live; its text is a card of its own. */
 export function BrandGeneralCard({ brand }: { brand: Brand }) {
   const { t } = useTranslation()
   const update = useUpdateBrand(brand.id)
@@ -39,7 +36,6 @@ export function BrandGeneralCard({ brand }: { brand: Brand }) {
       {
         ...(dirtyFields.name ? { name: values.name } : {}),
         ...(dirtyFields.handle ? { handle: values.handle.trim() } : {}),
-        ...(dirtyFields.description ? { description: values.description } : {}),
         ...(dirtyFields.is_active ? { is_active: values.is_active } : {}),
       },
       {
@@ -74,13 +70,6 @@ export function BrandGeneralCard({ brand }: { brand: Brand }) {
             {...form.register("handle")}
           />
         </div>
-      </Field>
-      <Field
-        label={t("brands.descriptionLabel")}
-        htmlFor="brand-description"
-        hint={t("brands.descriptionHint")}
-      >
-        <Textarea id="brand-description" className="min-h-32" {...form.register("description")} />
       </Field>
       <Controller
         control={form.control}

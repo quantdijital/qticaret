@@ -3,6 +3,7 @@ import type { FormAction, ListingPageView, Translate } from "@qticaret/ui"
 import { TileRail } from "./listing/CategoryTiles"
 import { FilterPanel, hasFilters } from "./listing/FilterPanel"
 import { FilterSheet } from "./listing/FilterSheet"
+import { ListingText } from "./listing/ListingText"
 import { Pager, hasPages } from "./listing/Pager"
 import { Empty, SearchHelp } from "./listing/SearchHelp"
 import { Toolbar } from "./listing/Toolbar"
@@ -19,14 +20,16 @@ const RESULTS = "sonuclar"
 /**
  * A category, brand, collection or landing page, `/magaza`, the sale
  * page or a site search (docs/tema/yon-2026-11-05.md, Grafit): the trail,
- * the title with the shop's short intro under it (a collection's picture
+ * the title (a landing page's short intro under it, a collection's picture
  * wide beneath them), the
  * subcategories (or a search's related categories) as one row of picture
  * tiles, then the list: from 1024 px the filters in filled wells on the
  * left, on a phone in a sheet from the bottom; the count and the sort
  * over the grid, the filters on as dark pills; the home page's cards, the
- * pages under them. An empty list says why and offers a way on. The
- * shop's category page sections (adr/0049) sit above the list and below it.
+ * pages under them. An empty list says why and offers a way on. A
+ * category's, brand's or collection's own text follows its first page's
+ * list (adr/0075). The shop's category page sections (adr/0049) sit above
+ * the list and below it, under that text.
  */
 export function ListingPage({
   view,
@@ -148,6 +151,9 @@ export function ListingPage({
           )}
         </Container>
       </Look>
+
+      {/* The record's own text: right after its products, before the group's bottom sections (adr/0075 §5) */}
+      {!search && view.footText && <ListingText text={view.footText} t={t} />}
 
       {bottom.length > 0 && (
         <Blocks sections={bottom} t={t} subscribe={subscribe} quickAdd={quickAdd} />

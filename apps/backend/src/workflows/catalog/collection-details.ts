@@ -13,6 +13,9 @@ import {
   emitEventStep,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
+import type { DescriptionDoc } from "../../lib/catalog/description"
+import { listingDescriptionChanges } from "../../lib/catalog/listing-description"
+import type { ContentDoc } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
 import { libraryImage } from "../../lib/media/library-image"
 import { refuseSvgImages } from "../../lib/media/svg-use"
@@ -25,8 +28,10 @@ import type { CollectionExtensionRow } from "./collection-fields"
 
 export interface SetCollectionDetailsInput {
   collection_id: string
-  /** Plain paragraphs; null or "" clears it. */
+  /** Plain paragraphs; null or "" clears it. A document the collection had goes with it. */
   description?: string | null | undefined
+  /** adr/0075: the text as a checked document; its plain text becomes `description`. */
+  description_doc?: ContentDoc | null | undefined
   is_active?: boolean | undefined
   /** A media library image by its address; null takes it off. */
   image?: { url: string; alt: string | null } | null | undefined
@@ -34,6 +39,7 @@ export interface SetCollectionDetailsInput {
 
 interface Values {
   description: string | null
+  description_doc: DescriptionDoc | null
   is_active: boolean
   image_url: string | null
   image_alt: string | null
@@ -74,10 +80,21 @@ const planCollectionDetailsStep = createStep(
       }
     }
     const own = row.collection_extension ?? null
+    const text =
+      input.description === undefined || input.description_doc !== undefined
+        ? undefined
+        : input.description?.trim()
+          ? input.description.trim()
+          : null
+    const described = listingDescriptionChanges(
+      { doc: input.description_doc, text },
+      { doc: own?.description_doc ?? null, description: own?.description ?? null },
+      null
+    )
     const set: Partial<Values> = {
-      ...(input.description !== undefined
-        ? { description: input.description?.trim() ? input.description.trim() : null }
-        : {}),
+      ...(text !== undefined ? { description: text } : {}),
+      ...(described.description !== undefined ? { description: described.description } : {}),
+      ...(described.doc !== undefined ? { description_doc: described.doc } : {}),
       ...(input.is_active !== undefined ? { is_active: input.is_active } : {}),
       ...(input.image !== undefined
         ? { image_url: input.image?.url ?? null, image_alt: input.image?.alt ?? null }
@@ -89,6 +106,7 @@ const planCollectionDetailsStep = createStep(
       set,
       previous: {
         description: own?.description ?? null,
+        description_doc: (own?.description_doc ?? null) as DescriptionDoc | null,
         is_active: own?.is_active ?? true,
         image_url: own?.image_url ?? null,
         image_alt: own?.image_alt ?? null,

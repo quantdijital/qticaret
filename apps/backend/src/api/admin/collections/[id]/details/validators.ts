@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { listingDescriptionDoc } from "../../../../../lib/catalog/listing-description"
 import { ALT_MAX } from "../../../../../lib/media"
 import { isStorageUrl } from "../../../../../lib/security/https-url"
 import { isCleanText } from "../../../../../lib/security/text"
@@ -20,6 +21,8 @@ export const AdminPostCollectionDetails = z
       })
       .nullable()
       .optional(),
+    // adr/0075: the text as a content document; the server writes its plain text
+    description_doc: listingDescriptionDoc.nullable().optional(),
     is_active: z.boolean().optional(),
     image: z
       .object({
@@ -43,4 +46,9 @@ export const AdminPostCollectionDetails = z
       .optional(),
   })
   .strict()
+  // One text per save: the plain one (an import, a script) or the document (the panel)
+  .refine((body) => body.description === undefined || body.description_doc === undefined, {
+    message: "catalog.description_one_of",
+    path: ["description_doc"],
+  })
 export type AdminPostCollectionDetailsType = z.infer<typeof AdminPostCollectionDetails>
