@@ -6,6 +6,7 @@ export const collectionFixture = (more: Partial<Collection> = {}): Collection =>
   title: "Yaz Seçkisi",
   handle: "yaz-seckisi",
   description: "Yazın en sevilenleri.",
+  description_doc: null,
   is_active: true,
   image: null,
   product_count: 2,

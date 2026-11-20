@@ -4,13 +4,17 @@ import {
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
+  LISTING_TEXT_ALIGNS,
+  LISTING_TEXT_DEFAULTS,
+  LISTING_TEXT_SIZES,
+  LISTING_TEXT_WIDTHS,
   RADIUS_STEPS,
   SECTION_SPACINGS,
   STYLE_KIT,
   STYLE_KIT_DEFAULTS,
   SURFACE_STYLES,
 } from "@qticaret/types"
-import type { StyleKit } from "@qticaret/types"
+import type { ListingTextSettings, StyleKit } from "@qticaret/types"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontBackground } from "@/theme/storefront"
 
@@ -66,6 +70,12 @@ export { SECTION_SPACINGS }
 export { SURFACE_STYLES }
 /** The style kit (adr/0067 §1): menu items, shadow, chips, the photos' ground, density, motion; first step the default. */
 export { STYLE_KIT }
+/**
+ * A category, brand or collection page's text at its foot (adr/0075 §6):
+ * its size, alignment and measure, the contract's lists; whether a long
+ * one folds is a switch.
+ */
+export { LISTING_TEXT_ALIGNS, LISTING_TEXT_SIZES, LISTING_TEXT_WIDTHS }
 
 export type HeadingFont = (typeof HEADING_FONTS)[number]
 export type BodyFont = (typeof BODY_FONTS)[number]
@@ -110,6 +120,8 @@ export interface ThemeSettings extends StyleKit {
   buttons: (typeof BUTTON_SHAPES)[number]
   section_spacing: (typeof SECTION_SPACINGS)[number]
   surface_style: (typeof SURFACE_STYLES)[number]
+  /** The listing pages' text at their foot (adr/0075 §6); the server fills a missing group. */
+  listing_text: ListingTextSettings
 }
 
 export const THEME_SECTION = "theme"
@@ -159,6 +171,7 @@ export const GRAFIT_THEME: ThemeChoices = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  listing_text: { ...LISTING_TEXT_DEFAULTS },
   ...STYLE_KIT_DEFAULTS,
 }
 

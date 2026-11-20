@@ -1,4 +1,5 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { JSONContent } from "@tiptap/react"
 import { sdk } from "@/lib/sdk"
 
 /** Brands (F3.11, `/admin/brands`). */
@@ -9,7 +10,10 @@ export interface Brand {
   id: string
   name: string
   handle: string
+  /** The plain text: the server's mirror of the document (adr/0075). */
   description: string | null
+  /** The text as written (adr/0075); null: plain text only, opened as its paragraphs. */
+  description_doc: JSONContent | null
   logo_file_id: string | null
   logo_url: string | null
   is_active: boolean
@@ -21,7 +25,8 @@ export interface Brand {
 export interface BrandInput {
   name?: string
   handle?: string
-  description?: string | null
+  /** The panel writes the document only; the server mirrors its plain text (adr/0075). */
+  description_doc?: JSONContent | null
   logo_file_id?: string | null
   is_active?: boolean
 }

@@ -24,6 +24,7 @@ export const themeValuesOf = (saved: ThemeChoices): ThemeValues => ({
   buttons: saved.buttons,
   section_spacing: saved.section_spacing,
   surface_style: saved.surface_style,
+  listing_text: { ...saved.listing_text },
   menu_style: saved.menu_style,
   shadow: saved.shadow,
   chip_style: saved.chip_style,
@@ -48,6 +49,9 @@ export function isGrafit(values: ThemeValues): boolean {
     values.buttons === g.buttons &&
     values.section_spacing === g.section_spacing &&
     values.surface_style === g.surface_style &&
+    (Object.keys(g.listing_text) as (keyof ThemeValues["listing_text"])[]).every(
+      (key) => values.listing_text[key] === g.listing_text[key]
+    ) &&
     STYLE_KIT_FIELDS.every((field) => values[field] === g[field]) &&
     (Object.keys(g.product_card) as (keyof ThemeValues["product_card"])[]).every(
       (key) => values.product_card[key] === g.product_card[key]

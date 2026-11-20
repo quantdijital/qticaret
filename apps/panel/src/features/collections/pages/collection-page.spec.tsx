@@ -20,7 +20,7 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => navigate,
 }))
 // Each has its own spec; here the page's own parts
-vi.mock("@/features/seo/advisor/advisor-card", () => ({ AdvisorCard: () => null }))
+vi.mock("@/features/seo/advisor/advisor-card", () => ({ AdvisorCard: () => <p>advisor</p> }))
 vi.mock("@/features/seo/components/seo-card", () => ({
   SeoCard: ({ context }: { context: { path: string; fallbackDescription: string } }) => (
     <p>
@@ -32,7 +32,11 @@ vi.mock("@/features/collections/components/collection-products-card", () => ({
   CollectionProductsCard: () => null,
 }))
 vi.mock("@/features/collections/components/collection-image-card", () => ({
-  CollectionImageCard: () => null,
+  CollectionImageCard: () => <p>picture</p>,
+}))
+// The text's card has its own spec (listing-description-card.spec.tsx)
+vi.mock("@/features/collections/components/collection-description-card", () => ({
+  CollectionDescriptionCard: () => <p>description</p>,
 }))
 
 function renderPage() {
@@ -68,14 +72,22 @@ describe("CollectionPage", () => {
     expect(screen.getByRole("textbox", { name: /Sayfa adresi/ })).toHaveValue("yaz-seckisi")
   })
 
-  it("saves the name and address through Medusa and the text and visibility as its details", async () => {
+  // The owner (2026-11-20): a long text on the left leaves the side cards in sight
+  it("keeps the advisor and picture in the side column that follows the scroll", async () => {
+    renderPage()
+    const side = (await screen.findByText("advisor")).closest("[data-layout-free]")
+
+    expect(side).not.toBeNull()
+    expect(side).toContainElement(screen.getByText("picture"))
+    expect(side).not.toContainElement(screen.getByText("description"))
+  })
+
+  it("saves the name and address through Medusa and the visibility as its details", async () => {
     renderPage()
     const handle = await screen.findByRole("textbox", { name: /Sayfa adresi/ })
 
     await userEvent.clear(handle)
     await userEvent.type(handle, "yaz-2026")
-    await userEvent.clear(screen.getByRole("textbox", { name: /Açıklama/ }))
-    await userEvent.type(screen.getByRole("textbox", { name: /Açıklama/ }), "Yeni metin.")
     await userEvent.click(screen.getByRole("switch"))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
@@ -86,7 +98,7 @@ describe("CollectionPage", () => {
     })
     expect(fetchMock).toHaveBeenCalledWith("/admin/collections/pcol_1/details", {
       method: "POST",
-      body: { description: "Yeni metin.", is_active: false },
+      body: { is_active: false },
     })
   })
 

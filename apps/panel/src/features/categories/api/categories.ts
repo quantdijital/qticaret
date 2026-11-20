@@ -18,7 +18,12 @@ export type Category = Awaited<
 export interface CategoryInput {
   name: string
   handle?: string
-  description: string
+  /**
+   * Only a new category's empty text: the text is written through
+   * `/admin/category-descriptions` (adr/0075), never here, or its document
+   * would go stale.
+   */
+  description?: string
   parent_category_id: string | null
   is_active: boolean
   is_internal: boolean
