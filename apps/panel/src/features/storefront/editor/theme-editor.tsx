@@ -25,6 +25,7 @@ import { useEditorSidebar } from "./editor-sidebar"
 import { EditorTopBar } from "./editor-top-bar"
 import { OpenedForm } from "./opened-form"
 import { formKeyOf, openedAtFirst } from "./opened"
+import type { OpenAtFirst } from "./opened"
 import type { Opened } from "./opened"
 import type { Device } from "./preview-fit"
 import { PreviewFrame } from "./preview-frame"
@@ -57,8 +58,8 @@ export function ThemeEditor({
   onContent = content !== null,
 }: {
   layout: AdminLayout
-  /** A panel the address asks for (`?open=preferences`; `page-settings`: the content page's). */
-  openAtFirst?: "preferences" | "page-settings" | null
+  /** A panel the address asks for (`?open=preferences`; the content page's settings or new text). */
+  openAtFirst?: OpenAtFirst
   /** A content page the address asks for (`?icerik=`, adr/0073 §5). */
   content?: string | null
   /** Opened on the content pages (`?sayfa=icerik`). */
@@ -133,7 +134,8 @@ export function ThemeEditor({
     onLand: place.land,
   })
   // A content page shown with its text as sections when the design has none for it (adr/0073 Ek 2)
-  const pages = useContentPageEditing({ doc, place, act, setOpened })
+  const fresh = openAtFirst === "new-page" ? content : null
+  const pages = useContentPageEditing({ doc, place, act, setOpened, fresh })
   const shownDoc = pages.view
   const actions = useEditorActions({
     flush: autosave.flush,

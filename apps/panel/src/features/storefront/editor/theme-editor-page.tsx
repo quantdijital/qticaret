@@ -8,6 +8,7 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { layoutQuery } from "@/features/storefront/api/layout"
 import { errorText } from "@/lib/errors"
 import { HintProvider } from "./shared/hint"
+import type { OpenAtFirst } from "./opened"
 import { ThemeEditor } from "./theme-editor"
 import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 
@@ -19,7 +20,7 @@ export function ThemeEditorPage({
   content = null,
   onContent = content !== null,
 }: {
-  open?: "preferences" | "page-settings" | null
+  open?: OpenAtFirst
   /** The content page the address names (`?icerik=`, adr/0073 §5). */
   content?: string | null
   /** Opens on the content pages (`?sayfa=icerik`, or a page named). */

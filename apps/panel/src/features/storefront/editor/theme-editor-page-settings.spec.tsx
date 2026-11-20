@@ -114,6 +114,26 @@ describe("a content page's own settings in the theme editor", () => {
     })
   })
 
+  it("gives a page just made on the Sayfalar list its empty text, opened (`?yeni=1`)", async () => {
+    serve(fetchMock, admin, layoutOf({ draft: DOC_WITH_PAGES }))
+    serveContent(fetchMock)
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <ThemeEditorPage content="cnt_iade" open="new-page" />
+      </QueryClientProvider>
+    )
+    await opened()
+    expect(await screen.findByRole("region", { name: "Sayfa metni" })).toBeVisible()
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(lastSaved(fetchMock)?.pages.at(-1)).toMatchObject({
+        page_id: "cnt_iade",
+        sections: [{ type: "rich_text", variant: "article" }],
+      })
+    })
+  })
+
   it("saves the page's title and status at once, apart from the draft", async () => {
     const tree = await open(DOC_WITH_PAGES, "cnt_iade")
     const panel = await openSettings(tree)

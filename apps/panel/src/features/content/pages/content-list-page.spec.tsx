@@ -21,9 +21,7 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
   // Where a redirect goes, as a line to read
-  Navigate: ({ to, search: query }: { to: string; search: Record<string, string> }) => (
-    <p role="note">{`${to}?${new URLSearchParams(query).toString()}`}</p>
-  ),
+  Navigate: ({ to }: { to: string }) => <p role="note">{to}</p>,
   getRouteApi: () => ({ useSearch: () => search }),
   useNavigate: () => navigate,
 }))
@@ -129,10 +127,10 @@ describe("the content screen without pages", () => {
     })
   })
 
-  it("sends the old pages tab's address to the theme editor's pages", () => {
+  it("sends the old pages tab's address to Vitrin > Sayfalar", () => {
     search.kind = "page"
     renderPage()
-    expect(screen.getByRole("note")).toHaveTextContent("/storefront/editor?sayfa=icerik")
+    expect(screen.getByRole("note")).toHaveTextContent("/storefront/pages")
     expect(screen.queryByRole("tab")).toBeNull()
   })
 })

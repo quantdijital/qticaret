@@ -34,7 +34,7 @@ const termKindOf = (tab: ContentTab): TermKind | null =>
 export function ContentListPage() {
   const search = route.useSearch()
   return search.kind === "page" ? (
-    <Navigate to="/storefront/editor" search={{ sayfa: "icerik" }} replace />
+    <Navigate to="/storefront/pages" replace />
   ) : (
     <ContentTabs tab={search.kind ?? "post"} />
   )

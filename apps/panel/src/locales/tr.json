@@ -67,7 +67,7 @@
     "seo": "SEO",
     "reports": "Raporlar",
     "brands": "Markalar",
-    "content": "Sayfalar ve blog",
+    "content": "Blog",
     "reviews": "Yorumlar ve sorular",
     "menus": "Menüler",
     "themeEditor": "Tema düzenleyici",
@@ -75,7 +75,8 @@
     "paymentLinks": "Ödeme bağlantıları",
     "media": "Ortam kütüphanesi",
     "collections": "Koleksiyonlar",
-    "looks": "Görünümler"
+    "looks": "Görünümler",
+    "pages": "Sayfalar"
   },
   "login": {
     "title": "Giriş yap",
@@ -10439,6 +10440,13 @@
       },
       "pages_one": "{{count}} sayfa",
       "pages_other": "{{count}} sayfa"
+    },
+    "pages": {
+      "description": "Hakkımızda, İletişim gibi mağazanın kendi sayfaları. Bir sayfaya tıklayınca tema düzenleyicide açılır; metni, bölümleri ve ayarları orada düzenlenir.",
+      "add": "Yeni sayfa",
+      "search": "Başlıkta ara",
+      "empty": "Henüz sayfa yok. İlk sayfayı açın; tema düzenleyicide yazarsınız.",
+      "full": "Kendi düzeni olan en çok {{max}} sayfa olabilir; yeni sayfanın metni bölüm olarak eklenemez, yalnız gösterilir."
     }
   },
   "bulkMessages": {

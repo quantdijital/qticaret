@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
+import { pageLayoutOf } from "@/features/storefront/layout/page-layouts"
 import { idsOf, newPageText, newSectionId } from "@/features/storefront/layout/sections"
 import type { TreeContentPage } from "./editor-page"
 import { ContentPagePicker } from "./content-page-picker"
@@ -16,21 +17,42 @@ import type { useEditorPlace } from "./use-editor-place"
  * design has none for it (`view`, `act`, K1), a new page opened from the
  * picker (picked, an empty page text added), a page deleted from its
  * settings let go of (its layout out of the draft, the next page picked).
+ * A page made on the Sayfalar list (`fresh`) gets its empty text once known.
  */
 export function useContentPageEditing({
   doc,
   place,
   act,
   setOpened,
+  fresh = null,
 }: {
   doc: LayoutDocument
   place: ReturnType<typeof useEditorPlace>
   act: (action: EditorAction) => void
   setOpened: (opened: Opened) => void
+  /** A page just made elsewhere (`?yeni=1`): its empty text added once, if it has no layout. */
+  fresh?: string | null
 }) {
   const synth = usePageSynth(doc, place.contentPage.id, act)
   const [adding, setAdding] = useState(false)
   const pages = useContentPages(place.page === "content").data?.pages ?? []
+  // Its text, empty, as its first section: written in place
+  const addText = (id: string) => {
+    const sectionId = newSectionId(idsOf(doc))
+    act({ type: "add", group: "pages", page: id, section: newPageText(sectionId) })
+    setOpened({ kind: "section", id: sectionId })
+  }
+  const added = useRef(false)
+  const picked = place.contentPage.id
+  useEffect(() => {
+    if (fresh === null || added.current || picked !== fresh) {
+      return
+    }
+    added.current = true
+    if (!pageLayoutOf(doc, fresh)) {
+      addText(fresh)
+    }
+  })
   const contentPage: TreeContentPage = {
     ...place.contentPage,
     synthesized: synth.synthesized,
@@ -59,10 +81,7 @@ export function useContentPageEditing({
             onOpenChange={setAdding}
             onCreated={(id) => {
               place.chooseContent(id)
-              // Its text, empty, as its first section: written in place
-              const sectionId = newSectionId(idsOf(doc))
-              act({ type: "add", group: "pages", page: id, section: newPageText(sectionId) })
-              setOpened({ kind: "section", id: sectionId })
+              addText(id)
             }}
           />
         </>

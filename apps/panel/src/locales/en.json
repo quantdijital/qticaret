@@ -67,7 +67,7 @@
     "seo": "SEO",
     "reports": "Reports",
     "brands": "Brands",
-    "content": "Pages and blog",
+    "content": "Blog",
     "reviews": "Reviews and questions",
     "menus": "Menus",
     "themeEditor": "Theme editor",
@@ -75,7 +75,8 @@
     "paymentLinks": "Payment links",
     "media": "Media library",
     "collections": "Collections",
-    "looks": "Looks"
+    "looks": "Looks",
+    "pages": "Pages"
   },
   "login": {
     "title": "Sign in",
@@ -10439,6 +10440,13 @@
       },
       "pages_one": "{{count}} page",
       "pages_other": "{{count}} pages"
+    },
+    "pages": {
+      "description": "The shop's own pages, such as About us and Contact. Click one to open it in the theme editor, where its text, sections and settings are edited.",
+      "add": "New page",
+      "search": "Search titles",
+      "empty": "No pages yet. Open the first one; you write it in the theme editor.",
+      "full": "At most {{max}} pages can have their own layout; a new page's text cannot be added as a section, only shown."
     }
   },
   "bulkMessages": {

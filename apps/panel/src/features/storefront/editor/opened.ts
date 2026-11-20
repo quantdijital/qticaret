@@ -31,11 +31,18 @@ export function formKeyOf(opened: Opened, sectionId: string | null): string | nu
   return opened && opened.kind !== "section" ? opened.kind : null
 }
 
-/** The panel the address opens at first: the preferences, or the content page's settings. */
-export function openedAtFirst(
-  which: "preferences" | "page-settings" | null,
-  content: string | null
-): Opened {
+/**
+ * What the address opens at first: the preferences, the content page's
+ * settings, or a page just made (`new-page`: its empty text is added and
+ * opened once the page is known, `useContentPageEditing`).
+ */
+export type OpenAtFirst = "preferences" | "page-settings" | "new-page" | null
+
+/** The panel the address opens at first (a new page's text is opened once it is added). */
+export function openedAtFirst(which: OpenAtFirst, content: string | null): Opened {
+  if (which === "new-page") {
+    return null
+  }
   if (which === "page-settings") {
     return content === null ? null : { kind: which, page: content }
   }

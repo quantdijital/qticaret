@@ -8,6 +8,8 @@ export interface EditorSearch {
   sayfa?: "icerik"
   /** Opens the content page's own settings at first (İçerik's old page address). */
   ayar?: "sayfa"
+  /** The page was just made (the Sayfalar list's "Yeni sayfa"): its empty text is added and opened. */
+  yeni?: "1"
 }
 
 /**
@@ -25,5 +27,6 @@ export const editorSearch = (search: Record<string, unknown>): EditorSearch => {
     ...(typeof icerik === "string" && CONTENT_PAGE_ID.test(icerik) ? { icerik } : {}),
     ...(search["sayfa"] === "icerik" ? { sayfa: "icerik" as const } : {}),
     ...(search["ayar"] === "sayfa" ? { ayar: "sayfa" as const } : {}),
+    ...(search["yeni"] === "1" || search["yeni"] === 1 ? { yeni: "1" as const } : {}),
   }
 }

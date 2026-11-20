@@ -411,3 +411,7 @@ Sıra bağımlılığa göre. Her dilim kendi PR'ıdır; `pnpm verify:changed` v
 5. **Sayfa ayarları hemen kaydedilir**, yayın penceresinde "sayfayı da yayına al" (K5). Alternatif: durum, ad ve adres yayınla gider (301 kaydı ve geri yükleme yüzünden önerilmez).
 6. **Eski sürüm ya da kayıtlı görünüm metni de geri getirir** (K6). Alternatif: geri yüklemede metin bölümlerini korumak.
 7. **Roller:** iletişim ve ödeme rolünün çizimde işi kalmaz, bağlantı ve dönüşüm için durur. Rol seçimi sayfa ayarlarına ("Bu sayfa: İletişim / Ödeme / Kargo sayfası") taşınabilir; ayrı küçük iş.
+
+### Ek not 2026-11-20
+
+Sahip isteğiyle Vitrin altında "Sayfalar" listesi eklendi (`/storefront/pages`); düzenleme tema düzenleyicide kalır, liste yalnız bulma ve açma içindir. `/content?kind=page` bu listeye gider; tek sayfa bağlantıları düzenleyiciye.
