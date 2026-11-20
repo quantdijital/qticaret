@@ -5204,7 +5204,6 @@
     "urlHint": "Boş bırakırsanız addan oluşur.",
     "parent": "Üst kategori",
     "root": "Yok (ana kategori)",
-    "descriptionHint": "Kategori sayfasında ürünlerin üstünde görünür; arama motorları için de yararlıdır.",
     "flags": {
       "is_active": {
         "title": "Mağazada görünsün",
@@ -5221,7 +5220,6 @@
     "deleteTitle": "{{name}} silinsin mi?",
     "deleteDescription": "Kategori silinir; ürünler silinmez, yalnızca bu kategoriden çıkar. Alt kategorisi olan bir kategori silinemez.",
     "deleted": "Kategori silindi.",
-    "descriptionLabel": "Açıklama",
     "image": {
       "title": "Kategori görseli",
       "hint": "Vitrinde kategori kartlarında ve menüde gösterilir. Görsel seçmezseniz kategorideki en yeni ürünün fotoğrafı kullanılır.",
@@ -6755,8 +6753,6 @@
     "name": "Marka adı",
     "handle": "Sayfa adresi",
     "handleHint": "Değiştirirseniz eski adres kalıcı yönlendirmeyle yenisine gider.",
-    "descriptionLabel": "Açıklama",
-    "descriptionHint": "Marka sayfasında görünür; SEO açıklaması boşsa arama sonucunda da kullanılır.",
     "activeLabel": "Marka sayfası yayında",
     "activeHint": "Kapalıyken sayfa 404 verir ve marka mağaza listelerinde görünmez; ürünlerdeki marka adı kalır.",
     "saved": "Marka kaydedildi.",
@@ -6797,8 +6793,6 @@
     "nameRequired": "Koleksiyonun adını girin.",
     "handle": "Sayfa adresi",
     "handleHint": "Değiştirirseniz eski adres kalıcı yönlendirmeyle yenisine gider.",
-    "descriptionLabel": "Açıklama",
-    "descriptionHint": "Koleksiyon sayfasının üstünde görünür; SEO açıklaması boşsa arama sonucunda da kullanılır. Paragrafları boş satırla ayırın.",
     "activeLabel": "Koleksiyon sayfası yayında",
     "activeHint": "Kapalıyken sayfa 404 verir, site haritasından çıkar; menülerdeki bağlantısı ve vitrin bölümleri gizlenir. Ürünler ve kampanyalar etkilenmez.",
     "saved": "Koleksiyon kaydedildi.",
@@ -7332,7 +7326,11 @@
       "legacyAdd": "yeni yazar olarak ekleyin"
     },
     "designInEditor": "Tema düzenleyicide tasarla",
-    "designed": "Kendi düzeni var"
+    "designed": "Kendi düzeni var",
+    "listingDescription": {
+      "title": "Açıklama",
+      "hint": "Vitrinde sayfanın altında, ürünlerden sonra görünür. Başka yerden yapıştırdığınız başlıklar ve paragraflar korunur; görünüşünü Tema ayarları > Liste metni belirler."
+    }
   },
   "priceLists": {
     "sections": "Kampanya türleri",
@@ -8965,6 +8963,40 @@
           "action": "Grafit'e dön",
           "hint": "Bütün alanları temanın varsayılan görünümüne (Grafit) çeker. Değişiklik taslağa yazılır; Yayınla'ya basana kadar vitrin değişmez.",
           "done": "Tema ayarları Grafit'e döndü."
+        },
+        "listingTextTitle": "Liste metni",
+        "listingTextHint": "Kategori, marka ve koleksiyon sayfalarının altındaki açıklama metni. Yazı tipi gövde yazısından gelir.",
+        "listingText": {
+          "size": {
+            "label": "Yazı boyu",
+            "hint": "Açıklama metninin yazı boyu.",
+            "steps": {
+              "sm": "Küçük",
+              "md": "Normal",
+              "lg": "Büyük"
+            }
+          },
+          "align": {
+            "label": "Hizalama",
+            "hint": "Metin sola yaslı ya da ortalı.",
+            "steps": {
+              "start": "Sola yaslı",
+              "center": "Ortalı"
+            }
+          },
+          "width": {
+            "label": "Genişlik",
+            "hint": "Dar: rahat okunan satır uzunluğu. Geniş: sayfanın içerik genişliği.",
+            "steps": {
+              "narrow": "Dar",
+              "wide": "Geniş"
+            }
+          },
+          "collapse": {
+            "label": "Uzun metni 'Devamını oku' ile katla",
+            "hint": "Uzun metnin ilk satırları görünür, gerisi düğmeyle açılır. Metnin tamamı sayfada kalır; arama motorları hepsini okur."
+          },
+          "words": "açıklama metin yazı kategori marka koleksiyon devamını oku katla"
         }
       },
       "faq": {
