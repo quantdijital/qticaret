@@ -16,7 +16,6 @@ import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
-import { Route as AuthCategoriesRouteImport } from './routes/_auth/categories'
 import { Route as AuthInventoryRouteImport } from './routes/_auth/inventory'
 import { Route as AuthMediaRouteImport } from './routes/_auth/media'
 import { Route as AuthNotificationsRouteImport } from './routes/_auth/notifications'
@@ -27,6 +26,8 @@ import { Route as AuthBrandsIndexRouteImport } from './routes/_auth/brands/index
 import { Route as AuthBrandsIdRouteImport } from './routes/_auth/brands/$id'
 import { Route as AuthBulkMessagesIndexRouteImport } from './routes/_auth/bulk-messages/index'
 import { Route as AuthBulkMessagesIdRouteImport } from './routes/_auth/bulk-messages/$id'
+import { Route as AuthCategoriesIndexRouteImport } from './routes/_auth/categories/index'
+import { Route as AuthCategoriesIdRouteImport } from './routes/_auth/categories/$id'
 import { Route as AuthCollectionsIndexRouteImport } from './routes/_auth/collections/index'
 import { Route as AuthCollectionsIdRouteImport } from './routes/_auth/collections/$id'
 import { Route as AuthContentIndexRouteImport } from './routes/_auth/content/index'
@@ -151,11 +152,6 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthCategoriesRoute = AuthCategoriesRouteImport.update({
-  id: '/categories',
-  path: '/categories',
-  getParentRoute: () => AuthRoute,
-} as any)
 const AuthInventoryRoute = AuthInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
@@ -204,6 +200,16 @@ const AuthBulkMessagesIndexRoute = AuthBulkMessagesIndexRouteImport.update({
 const AuthBulkMessagesIdRoute = AuthBulkMessagesIdRouteImport.update({
   id: '/bulk-messages/$id',
   path: '/bulk-messages/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCategoriesIndexRoute = AuthCategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCategoriesIdRoute = AuthCategoriesIdRouteImport.update({
+  id: '/categories/$id',
+  path: '/categories/$id',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthCollectionsIndexRoute = AuthCollectionsIndexRouteImport.update({
@@ -684,7 +690,6 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/categories': typeof AuthCategoriesRoute
   '/inventory': typeof AuthInventoryRoute
   '/media': typeof AuthMediaRoute
   '/notifications': typeof AuthNotificationsRoute
@@ -693,6 +698,7 @@ export interface FileRoutesByFullPath {
   '/security/setup': typeof SecuritySetupRoute
   '/brands/$id': typeof AuthBrandsIdRoute
   '/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
+  '/categories/$id': typeof AuthCategoriesIdRoute
   '/collections/$id': typeof AuthCollectionsIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
@@ -752,6 +758,7 @@ export interface FileRoutesByFullPath {
   '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands/': typeof AuthBrandsIndexRoute
   '/bulk-messages/': typeof AuthBulkMessagesIndexRoute
+  '/categories/': typeof AuthCategoriesIndexRoute
   '/collections/': typeof AuthCollectionsIndexRoute
   '/content/': typeof AuthContentIndexRoute
   '/customers/': typeof AuthCustomersIndexRoute
@@ -792,13 +799,13 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/categories': typeof AuthCategoriesRoute
   '/inventory': typeof AuthInventoryRoute
   '/media': typeof AuthMediaRoute
   '/notifications': typeof AuthNotificationsRoute
   '/security/setup': typeof SecuritySetupRoute
   '/brands/$id': typeof AuthBrandsIdRoute
   '/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
+  '/categories/$id': typeof AuthCategoriesIdRoute
   '/collections/$id': typeof AuthCollectionsIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
@@ -858,6 +865,7 @@ export interface FileRoutesByTo {
   '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands': typeof AuthBrandsIndexRoute
   '/bulk-messages': typeof AuthBulkMessagesIndexRoute
+  '/categories': typeof AuthCategoriesIndexRoute
   '/collections': typeof AuthCollectionsIndexRoute
   '/content': typeof AuthContentIndexRoute
   '/customers': typeof AuthCustomersIndexRoute
@@ -900,7 +908,6 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/_auth/categories': typeof AuthCategoriesRoute
   '/_auth/inventory': typeof AuthInventoryRoute
   '/_auth/media': typeof AuthMediaRoute
   '/_auth/notifications': typeof AuthNotificationsRoute
@@ -910,6 +917,7 @@ export interface FileRoutesById {
   '/_auth/': typeof AuthIndexRoute
   '/_auth/brands/$id': typeof AuthBrandsIdRoute
   '/_auth/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
+  '/_auth/categories/$id': typeof AuthCategoriesIdRoute
   '/_auth/collections/$id': typeof AuthCollectionsIdRoute
   '/_auth/content/$id': typeof AuthContentIdRoute
   '/_auth/customers/$id': typeof AuthCustomersIdRoute
@@ -969,6 +977,7 @@ export interface FileRoutesById {
   '/_fullscreen/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/_auth/brands/': typeof AuthBrandsIndexRoute
   '/_auth/bulk-messages/': typeof AuthBulkMessagesIndexRoute
+  '/_auth/categories/': typeof AuthCategoriesIndexRoute
   '/_auth/collections/': typeof AuthCollectionsIndexRoute
   '/_auth/content/': typeof AuthContentIndexRoute
   '/_auth/customers/': typeof AuthCustomersIndexRoute
@@ -1011,7 +1020,6 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
-    | '/categories'
     | '/inventory'
     | '/media'
     | '/notifications'
@@ -1020,6 +1028,7 @@ export interface FileRouteTypes {
     | '/security/setup'
     | '/brands/$id'
     | '/bulk-messages/$id'
+    | '/categories/$id'
     | '/collections/$id'
     | '/content/$id'
     | '/customers/$id'
@@ -1079,6 +1088,7 @@ export interface FileRouteTypes {
     | '/storefront/editor'
     | '/brands/'
     | '/bulk-messages/'
+    | '/categories/'
     | '/collections/'
     | '/content/'
     | '/customers/'
@@ -1119,13 +1129,13 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
-    | '/categories'
     | '/inventory'
     | '/media'
     | '/notifications'
     | '/security/setup'
     | '/brands/$id'
     | '/bulk-messages/$id'
+    | '/categories/$id'
     | '/collections/$id'
     | '/content/$id'
     | '/customers/$id'
@@ -1185,6 +1195,7 @@ export interface FileRouteTypes {
     | '/storefront/editor'
     | '/brands'
     | '/bulk-messages'
+    | '/categories'
     | '/collections'
     | '/content'
     | '/customers'
@@ -1226,7 +1237,6 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
-    | '/_auth/categories'
     | '/_auth/inventory'
     | '/_auth/media'
     | '/_auth/notifications'
@@ -1236,6 +1246,7 @@ export interface FileRouteTypes {
     | '/_auth/'
     | '/_auth/brands/$id'
     | '/_auth/bulk-messages/$id'
+    | '/_auth/categories/$id'
     | '/_auth/collections/$id'
     | '/_auth/content/$id'
     | '/_auth/customers/$id'
@@ -1295,6 +1306,7 @@ export interface FileRouteTypes {
     | '/_fullscreen/storefront/editor'
     | '/_auth/brands/'
     | '/_auth/bulk-messages/'
+    | '/_auth/categories/'
     | '/_auth/collections/'
     | '/_auth/content/'
     | '/_auth/customers/'
@@ -1391,13 +1403,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/categories': {
-      id: '/_auth/categories'
-      path: '/categories'
-      fullPath: '/categories'
-      preLoaderRoute: typeof AuthCategoriesRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/_auth/inventory': {
       id: '/_auth/inventory'
       path: '/inventory'
@@ -1466,6 +1471,20 @@ declare module '@tanstack/react-router' {
       path: '/bulk-messages/$id'
       fullPath: '/bulk-messages/$id'
       preLoaderRoute: typeof AuthBulkMessagesIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/categories/': {
+      id: '/_auth/categories/'
+      path: '/categories'
+      fullPath: '/categories/'
+      preLoaderRoute: typeof AuthCategoriesIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/categories/$id': {
+      id: '/_auth/categories/$id'
+      path: '/categories/$id'
+      fullPath: '/categories/$id'
+      preLoaderRoute: typeof AuthCategoriesIdRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/collections/': {
@@ -2202,7 +2221,6 @@ const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(
 )
 
 interface AuthRouteChildren {
-  AuthCategoriesRoute: typeof AuthCategoriesRoute
   AuthInventoryRoute: typeof AuthInventoryRoute
   AuthMediaRoute: typeof AuthMediaRoute
   AuthNotificationsRoute: typeof AuthNotificationsRoute
@@ -2211,6 +2229,7 @@ interface AuthRouteChildren {
   AuthIndexRoute: typeof AuthIndexRoute
   AuthBrandsIdRoute: typeof AuthBrandsIdRoute
   AuthBulkMessagesIdRoute: typeof AuthBulkMessagesIdRoute
+  AuthCategoriesIdRoute: typeof AuthCategoriesIdRoute
   AuthCollectionsIdRoute: typeof AuthCollectionsIdRoute
   AuthContentIdRoute: typeof AuthContentIdRoute
   AuthCustomersIdRoute: typeof AuthCustomersIdRoute
@@ -2240,6 +2259,7 @@ interface AuthRouteChildren {
   AuthWholesaleOrdersRoute: typeof AuthWholesaleOrdersRoute
   AuthBrandsIndexRoute: typeof AuthBrandsIndexRoute
   AuthBulkMessagesIndexRoute: typeof AuthBulkMessagesIndexRoute
+  AuthCategoriesIndexRoute: typeof AuthCategoriesIndexRoute
   AuthCollectionsIndexRoute: typeof AuthCollectionsIndexRoute
   AuthContentIndexRoute: typeof AuthContentIndexRoute
   AuthCustomersIndexRoute: typeof AuthCustomersIndexRoute
@@ -2264,7 +2284,6 @@ interface AuthRouteChildren {
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthCategoriesRoute: AuthCategoriesRoute,
   AuthInventoryRoute: AuthInventoryRoute,
   AuthMediaRoute: AuthMediaRoute,
   AuthNotificationsRoute: AuthNotificationsRoute,
@@ -2273,6 +2292,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthIndexRoute: AuthIndexRoute,
   AuthBrandsIdRoute: AuthBrandsIdRoute,
   AuthBulkMessagesIdRoute: AuthBulkMessagesIdRoute,
+  AuthCategoriesIdRoute: AuthCategoriesIdRoute,
   AuthCollectionsIdRoute: AuthCollectionsIdRoute,
   AuthContentIdRoute: AuthContentIdRoute,
   AuthCustomersIdRoute: AuthCustomersIdRoute,
@@ -2302,6 +2322,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthWholesaleOrdersRoute: AuthWholesaleOrdersRoute,
   AuthBrandsIndexRoute: AuthBrandsIndexRoute,
   AuthBulkMessagesIndexRoute: AuthBulkMessagesIndexRoute,
+  AuthCategoriesIndexRoute: AuthCategoriesIndexRoute,
   AuthCollectionsIndexRoute: AuthCollectionsIndexRoute,
   AuthContentIndexRoute: AuthContentIndexRoute,
   AuthCustomersIndexRoute: AuthCustomersIndexRoute,
