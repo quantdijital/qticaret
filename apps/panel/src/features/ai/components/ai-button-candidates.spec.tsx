@@ -32,8 +32,9 @@ const SERVICES = {
 }
 
 const CANDIDATES = ["keten gömlek", "yazlık keten gömlek", "bej keten gömlek"]
-// As the backend keeps them: the candidates one per line; `text` is the first
-const KEPT = CANDIDATES.join("\n")
+// The backend answers an accept with the candidate taken (`candidate_index`, the first when left out)
+const takenOf = (body: string | undefined) =>
+  CANDIDATES[(JSON.parse(body ?? "{}") as { candidate_index?: number }).candidate_index ?? 0]
 
 const json = (status: number, body: unknown) =>
   Promise.resolve(new Response(JSON.stringify(body), { status }))
@@ -55,14 +56,14 @@ function setup() {
 beforeEach(() => {
   netFetch.mockReset()
   vi.stubGlobal("fetch", netFetch)
-  netFetch.mockImplementation((url: string) =>
+  netFetch.mockImplementation((url: string, init?: { body?: string }) =>
     json(url.endsWith("/accept") ? 200 : 201, {
       suggestion: {
         id: "sug_1",
         task: "focus_keyword",
         service: "deepseek",
         status: url.endsWith("/accept") ? "accepted" : "draft",
-        text: url.endsWith("/accept") ? KEPT : CANDIDATES[0],
+        text: url.endsWith("/accept") ? takenOf(init?.body) : CANDIDATES[0],
         ...(url.endsWith("/accept") ? {} : { candidates: CANDIDATES }),
         problems: [],
         alternatives: [],
@@ -121,6 +122,10 @@ describe("AiButton with candidates", () => {
       task: "focus_keyword",
       entity_type: "category",
       entity_id: "pcat_1",
+    })
+    // The pick recorded by its place among those offered (adr/0074 §4, B2)
+    expect(JSON.parse((netFetch.mock.calls[1]?.[1] as { body: string }).body)).toEqual({
+      candidate_index: 1,
     })
     expect(screen.queryByRole("radiogroup", { name: "Öneriler" })).not.toBeInTheDocument()
   })

@@ -86,17 +86,25 @@ export function useAiSuggestion(task: string, entity: AiEntity) {
     setState({ status: "idle" })
   }, [])
 
-  /** The text to put in the form; the decision is recorded, the record is not written. */
-  const accept = useCallback(async (): Promise<string | null> => {
-    if (state.status !== "suggestion") {
-      return null
-    }
-    const { id, text } = state.suggestion
-    reset()
-    // The text is already here: a decision that could not be recorded does not hold up the form
-    const accepted = await acceptSuggestion(id).catch(() => null)
-    return accepted ?? text
-  }, [state, reset])
+  /**
+   * The text to put in the form: the candidate picked (the first when none
+   * is named); the decision and the pick are recorded, the record is not written.
+   */
+  const accept = useCallback(
+    async (candidate?: string): Promise<string | null> => {
+      if (state.status !== "suggestion") {
+        return null
+      }
+      const { id, text, candidates } = state.suggestion
+      const at = candidate === undefined ? -1 : candidates.indexOf(candidate)
+      const picked = at === -1 ? text : candidate
+      reset()
+      // The text is already here: a decision that could not be recorded does not hold up the form
+      const accepted = await acceptSuggestion(id, at === -1 ? undefined : at).catch(() => null)
+      return accepted ?? picked ?? text
+    },
+    [state, reset]
+  )
 
   const dismiss = useCallback(() => {
     if (state.status === "suggestion") {

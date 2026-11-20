@@ -23,6 +23,12 @@ export const ContentDraft = model
     problems: model.json().nullable(),
     created_by: model.text(),
     decided_by: model.text().nullable(),
+    /**
+     * Which candidate was taken when it was accepted (adr/0074 §4: one per
+     * line of `text`, the first 0); null: not accepted, or decided before
+     * candidates were recorded.
+     */
+    accepted_index: model.number().nullable(),
     decided_at: model.dateTime().nullable(),
   })
   .indexes([{ on: ["entity_type", "entity_id"], where: "deleted_at IS NULL" }])

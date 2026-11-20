@@ -1,4 +1,4 @@
-import { useId, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
@@ -34,6 +34,16 @@ interface Draft {
   avoid: string[]
 }
 
+/** The card's part of the setting as a save sends it (and "Dene" tries it). */
+const sentOf = (draft: Draft): Pick<AiGuidanceSettings, keyof Draft> => ({
+  tone: draft.tone,
+  address: draft.address,
+  audience: draft.audience.trim() || null,
+  guide: draft.guide.trim() || null,
+  prefer: draft.prefer,
+  avoid: draft.avoid,
+})
+
 const draftOf = (saved: AiGuidanceSettings): Draft => ({
   tone: saved.tone,
   address: saved.address,
@@ -53,9 +63,12 @@ const draftOf = (saved: AiGuidanceSettings): Draft => ({
 export function AiGuidanceCard({
   saved,
   mayChange,
+  onDraft,
 }: {
   saved: AiGuidanceSettings
   mayChange: boolean
+  /** The card's values as they stand, saved or not (for "Dene"). */
+  onDraft?: ((values: Pick<AiGuidanceSettings, keyof Draft>) => void) | undefined
 }) {
   const { t } = useTranslation()
   const save = useSaveAiGuidance()
@@ -70,6 +83,9 @@ export function AiGuidanceCard({
     }
   }
   const dirty = JSON.stringify(draft) !== JSON.stringify(draftOf(saved))
+  useEffect(() => {
+    onDraft?.(sentOf(draft))
+  }, [draft, onDraft])
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => {
     setDraft((current) => ({ ...current, [key]: value }))
   }
@@ -82,24 +98,14 @@ export function AiGuidanceCard({
     ) {
       return
     }
-    save.mutate(
-      {
-        tone: draft.tone,
-        address: draft.address,
-        audience: draft.audience.trim() || null,
-        guide: draft.guide.trim() || null,
-        prefer: draft.prefer,
-        avoid: draft.avoid,
+    save.mutate(sentOf(draft), {
+      // As the server kept it (personal data taken out, spaces folded)
+      onSuccess: (result) => {
+        setDraft(draftOf(result.values))
+        toast.success(t("settings.saved"))
       },
-      {
-        // As the server kept it (personal data taken out, spaces folded)
-        onSuccess: (result) => {
-          setDraft(draftOf(result.values))
-          toast.success(t("settings.saved"))
-        },
-        onError: (failure) => toast.error(errorText(t, failure)),
-      }
-    )
+      onError: (failure) => toast.error(errorText(t, failure)),
+    })
   }
 
   return (

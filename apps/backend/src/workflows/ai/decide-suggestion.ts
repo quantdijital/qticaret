@@ -7,6 +7,7 @@ import {
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { aiValidationError } from "../../lib/ai/errors"
+import { acceptedCandidate, draftCandidates } from "../../lib/ai/draft-candidates"
 import { findAiTask } from "../../lib/ai/registry/tasks"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
@@ -18,6 +19,8 @@ import { AI_SUGGESTION_SOURCE } from "./steps/save-suggestion"
 export interface DecideSuggestionInput {
   id: string
   decision: "accept" | "dismiss"
+  /** The candidate taken, by its place among those offered (adr/0074 §4); the first when left out. */
+  candidate_index?: number | undefined
   user_id: string
 }
 
@@ -45,9 +48,11 @@ export async function authorizeDecision(
  * Records a staff member's decision on a suggestion of the AI core
  * (adr/0071 §11): only one still open, and only the core's own (adr/0005's
  * old F10.13 drafts stay in the table with no route to decide them), by a
- * role the task allows. Accepting returns the text and
- * writes no field: the panel puts it in the form, and the form's own save
- * is the change. Undone by opening the suggestion again.
+ * role the task allows. Accepting names the candidate taken, one the
+ * suggestion offered (else 400 `ai.candidate_unknown`), keeps its place
+ * (`accepted_index`, for the acceptance rate, adr/0074 §4) and returns
+ * its text; no field is written: the panel puts it in the form, and the
+ * form's own save is the change. Undone by opening the suggestion again.
  */
 const decideSuggestionStep = createStep(
   "ai-decide-suggestion",
@@ -62,11 +67,22 @@ const decideSuggestionStep = createStep(
     }
     await authorizeDecision(container, draft.kind, input.user_id)
     const accepted = input.decision === "accept"
+    // Only a candidate this suggestion offered: never a text from the client
+    const taken = accepted
+      ? acceptedCandidate(
+          draftCandidates(findAiTask(draft.kind), draft.text),
+          input.candidate_index
+        )
+      : null
+    if (accepted && taken === null) {
+      throw aiValidationError("ai.candidate_unknown")
+    }
     await drafts.updateContentDrafts({
       id: draft.id,
       status: accepted ? "approved" : "rejected",
       decided_by: input.user_id,
       decided_at: new Date(),
+      accepted_index: taken?.index ?? null,
     })
     return new StepResponse(
       {
@@ -74,7 +90,8 @@ const decideSuggestionStep = createStep(
         task: draft.kind,
         service: draft.provider,
         status: accepted ? ("accepted" as const) : ("dismissed" as const),
-        text: accepted ? draft.text : null,
+        text: taken?.text ?? null,
+        candidate_index: taken?.index ?? null,
       },
       draft.id
     )
@@ -83,7 +100,13 @@ const decideSuggestionStep = createStep(
     if (id) {
       await container
         .resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
-        .updateContentDrafts({ id, status: "draft", decided_by: null, decided_at: null })
+        .updateContentDrafts({
+          id,
+          status: "draft",
+          decided_by: null,
+          decided_at: null,
+          accepted_index: null,
+        })
     }
   }
 )

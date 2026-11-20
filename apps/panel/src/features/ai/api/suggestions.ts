@@ -68,7 +68,8 @@ const namesOf = (value: unknown): string[] =>
 const nameOf = (value: unknown): string | null =>
   typeof value === "string" && NAME.test(value) ? value : null
 
-async function post(path: string, body: unknown): Promise<unknown> {
+/** A POST to the AI core's routes; a failure keeps the key and the services to try (`AiFailure`). */
+export async function postAi(path: string, body: unknown): Promise<unknown> {
   const response = await fetch(path, {
     method: "POST",
     credentials: "same-origin",
@@ -113,7 +114,7 @@ function candidatesOf(value: unknown, text: string): string[] {
 /** `POST /admin/ai/suggestions`: a suggestion for a record's field, never written to it. */
 export async function requestSuggestion(request: AiSuggestionRequest): Promise<AiSuggestion> {
   const data = suggestionOf(
-    await post("/admin/ai/suggestions", {
+    await postAi("/admin/ai/suggestions", {
       task: request.task,
       entity_type: request.entity.type,
       entity_id: request.entity.id,
@@ -156,7 +157,7 @@ export async function requestImageJob(request: {
   prompt?: string | undefined
   service?: string | undefined
 }): Promise<AiImageJob> {
-  const data = (await post("/admin/ai/suggestions", {
+  const data = (await postAi("/admin/ai/suggestions", {
     task: request.task,
     entity_type: "media",
     entity_ids: request.mediaIds,
@@ -172,13 +173,21 @@ export async function requestImageJob(request: {
 const decisionPath = (id: string, decision: "accept" | "dismiss"): string =>
   `/admin/ai/suggestions/${encodeURIComponent(id)}/${decision}`
 
-/** `POST …/accept`: records the decision and returns the text; the record is not touched. */
-export async function acceptSuggestion(id: string): Promise<string | null> {
-  const text = suggestionOf(await post(decisionPath(id, "accept"), {}))["text"]
+/**
+ * `POST …/accept`: records the decision and the candidate taken (by its
+ * place among those offered, adr/0074 §4; the first when left out) and
+ * returns that candidate's text; the record is not touched.
+ */
+export async function acceptSuggestion(
+  id: string,
+  candidateIndex?: number
+): Promise<string | null> {
+  const body = candidateIndex === undefined ? {} : { candidate_index: candidateIndex }
+  const text = suggestionOf(await postAi(decisionPath(id, "accept"), body))["text"]
   return typeof text === "string" ? text : null
 }
 
 /** `POST …/dismiss`: the suggestion was not used. */
 export async function dismissSuggestion(id: string): Promise<void> {
-  await post(decisionPath(id, "dismiss"), {})
+  await postAi(decisionPath(id, "dismiss"), {})
 }

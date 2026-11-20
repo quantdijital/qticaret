@@ -1,5 +1,5 @@
 import { ChevronRight, Plus, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
@@ -35,6 +35,10 @@ const sent = (draft: TaskDraft): AiTaskGuidance => ({
   examples: draft.examples.map((each) => each.trim()).filter(Boolean),
 })
 
+/** Every task's guidance as a save sends it: an emptied one empty, which clears it. */
+const tasksOf = (draft: Draft): Record<string, AiTaskGuidance> =>
+  Object.fromEntries(GUIDANCE_TASKS.map((task) => [task, sent(draft[task])]))
+
 const overAny = (draft: Draft) =>
   GUIDANCE_TASKS.some(
     (task) =>
@@ -51,9 +55,12 @@ const overAny = (draft: Draft) =>
 export function AiGuidanceTasksCard({
   saved,
   mayChange,
+  onDraft,
 }: {
   saved: AiGuidanceSettings
   mayChange: boolean
+  /** The tasks' guidance as it stands, saved or not (for "Dene"). */
+  onDraft?: ((tasks: AiGuidanceSettings["tasks"]) => void) | undefined
 }) {
   const { t } = useTranslation()
   const save = useSaveAiGuidance()
@@ -66,6 +73,9 @@ export function AiGuidanceTasksCard({
     }
   }
   const dirty = JSON.stringify(draft) !== JSON.stringify(draftOf(saved))
+  useEffect(() => {
+    onDraft?.(tasksOf(draft))
+  }, [draft, onDraft])
   const off = !mayChange || save.isPending
   const change = (task: GuidanceTask, next: Partial<TaskDraft>) => {
     setDraft((current) => ({ ...current, [task]: { ...current[task], ...next } }))
@@ -75,9 +85,8 @@ export function AiGuidanceTasksCard({
     if (overAny(draft)) {
       return
     }
-    const tasks = Object.fromEntries(GUIDANCE_TASKS.map((task) => [task, sent(draft[task])]))
     save.mutate(
-      { tasks },
+      { tasks: tasksOf(draft) },
       {
         onSuccess: (result) => {
           setDraft(draftOf(result.values))

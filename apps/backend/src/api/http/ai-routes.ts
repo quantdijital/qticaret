@@ -5,6 +5,8 @@ import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
   AdminGetAiSuggestions,
   AdminGetAiUsage,
+  AdminPostAiAccept,
+  AdminPostAiGuidancePreview,
   AdminPostAiSuggestion,
 } from "../admin/ai/validators"
 import { requireUserActor } from "./actor"
@@ -59,9 +61,32 @@ export const AI_ROUTES = [
       validateAndTransformBody(AdminPostAiSuggestion),
     ],
   },
-  ...["/admin/ai/suggestions/:id/accept", "/admin/ai/suggestions/:id/dismiss"].map((matcher) => ({
-    matcher,
+  {
+    matcher: "/admin/ai/suggestions/:id/accept",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostAiAccept)],
+  },
+  {
+    matcher: "/admin/ai/suggestions/:id/dismiss",
     methods: ["POST" as const],
     middlewares: [requireUserActor],
-  })),
+  },
+  // "Dene" on the guidance page (adr/0074 §2): two text calls, within the text budget
+  {
+    matcher: "/admin/ai/guidance/preview",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.ai_text, {
+        identity: (req) => (req as AuthenticatedMedusaRequest).auth_context.actor_id,
+      }),
+      validateAndTransformBody(AdminPostAiGuidancePreview),
+    ],
+  },
+  // The acceptance rate by task (adr/0074 §4): counts only
+  {
+    matcher: "/admin/ai/acceptance",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
 ]

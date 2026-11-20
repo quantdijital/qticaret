@@ -2,6 +2,14 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-21: yazım yönergesinin bağlanması, "Dene", kabul oranı (adr/0074 K2 sonu)
+
+- **Sıradaki işler:**
+  1. K3: gelişmiş talimat (`craft` düzenleme, sürüm etiketi, varsayılana dön).
+  2. Sıcaklık servis kayıtlarında hâlâ kapalı (servis sayfaları doğrulanınca açılacak).
+  3. Bu PR birleşmeden önce `security-reviewer` (migration + istem değişikliği).
+- **Dal:** `oguzhan/ai-yonerge-baglama`. Yönerge metin işlerinin sistem iletisine giriyor (görsel/JSON işlerine değil), `POST /admin/ai/guidance/preview`, `GET /admin/ai/acceptance`, `content_draft.accepted_index` (migration), #237 bulguları D1/D2/B1–B4 kapandı.
+
 ## 2026-11-18 – 2026-11-19: gerçek serviste yapay zekâ denemesi, panel görünümü, Tezgâh rötuşları
 
 - **Sıradaki işler:**

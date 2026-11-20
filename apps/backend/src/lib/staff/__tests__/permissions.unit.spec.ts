@@ -152,15 +152,18 @@ describe("staff roles", () => {
       ["POST", "/admin/ai/suggestions/cdraft_1/dismiss"],
       ["GET", "/admin/ai/usage"],
       ["GET", "/admin/ai/suggestions"],
+      // adr/0074: "Dene" with the guidance not saved, and the acceptance rate
+      ["POST", "/admin/ai/guidance/preview"],
+      ["GET", "/admin/ai/acceptance"],
     ] as const
     const table = (role: "owner" | "admin" | "operations" | "readonly") =>
       routes.map(([method, path]) => allowed(role, method, path))
 
-    expect(table("owner")).toEqual([true, true, true, true, true, true])
-    expect(table("admin")).toEqual([true, true, true, true, true, true])
+    expect(table("owner")).toEqual([true, true, true, true, true, true, true, true])
+    expect(table("admin")).toEqual([true, true, true, true, true, true, true, true])
     // Aşama 9: a decision is checked in the workflow against the suggestion's own task
-    expect(table("operations")).toEqual([true, false, true, true, false, false])
-    expect(table("readonly")).toEqual([true, false, false, false, false, false])
+    expect(table("operations")).toEqual([true, false, true, true, false, false, false, false])
+    expect(table("readonly")).toEqual([true, false, false, false, false, false, false, false])
   })
 
   it("opens to operations only the AI tasks on reviews and questions (Aşama 9)", () => {
@@ -536,6 +539,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/ai/suggestions": false,
   "POST /admin/ai/suggestions/:id/accept": true,
   "POST /admin/ai/suggestions/:id/dismiss": true,
+  "POST /admin/ai/guidance/preview": false,
   "POST /admin/content/:id": false,
   "DELETE /admin/content/:id": false,
   "POST /admin/content": false,

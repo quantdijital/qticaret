@@ -45,6 +45,9 @@ beforeEach(() => {
   })
 })
 
+// A task's row in "İşlere göre" (the "Dene" card's task picker names the same tasks)
+const taskRow = (name: string) => screen.getByText(name, { selector: "summary *" })
+
 function renderTab() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
@@ -68,7 +71,7 @@ describe("AiGuidanceTab", () => {
       expect(save.parentElement).toHaveClass("hidden")
     }
 
-    const row = screen.getByText("Arama başlığı").closest("details")
+    const row = taskRow("Arama başlığı").closest("details")
     expect(row).not.toHaveAttribute("open")
     expect(row?.querySelector("summary")).toHaveTextContent("Arama başlığıEk yönerge")
     expect(screen.getByText("Ürün açıklaması")).toBeInTheDocument()
@@ -113,8 +116,8 @@ describe("AiGuidanceTab", () => {
     const row = screen.getByText("Arama açıklaması").closest("details") as HTMLElement
     await user.click(within(row).getByRole("button", { name: "Örnek ekle" }))
     await user.type(within(row).getByLabelText("Örnek 1"), "Kısa ve net bir örnek.")
-    await user.click(screen.getByText("Arama başlığı"))
-    const title = screen.getByText("Arama başlığı").closest("details") as HTMLElement
+    await user.click(taskRow("Arama başlığı"))
+    const title = taskRow("Arama başlığı").closest("details") as HTMLElement
     await user.clear(within(title).getByLabelText("Ek yönerge"))
     const card = row.closest("form") as HTMLElement
     await user.click(within(card).getByRole("button", { name: "Kaydet" }))

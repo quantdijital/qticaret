@@ -11892,7 +11892,30 @@
         "example": "Example {{n}}",
         "addExample": "Add example",
         "removeExample": "Remove example {{n}}"
+      },
+      "try": {
+        "title": "Try",
+        "description": "See what the guidance changes before you save it: two suggestions for the product you pick, side by side, one without guidance and one with the values above.",
+        "product": "Product",
+        "productPlaceholder": "Search products",
+        "noProducts": "No products found.",
+        "task": "Task",
+        "run": "Try",
+        "running": "Trying…",
+        "cost": "Each try counts as two AI operations. The suggestions are not saved or written to the product.",
+        "plain": "Without guidance",
+        "guided": "With guidance",
+        "refused": "This suggestion did not pass the check; try again."
       }
+    },
+    "acceptance": {
+      "title": "Acceptance in the last {{days}} days",
+      "hint": "How many of the AI's suggestions you used. Suggestions that failed the check are not counted; this is where a change to the writing guidance shows.",
+      "empty": "No suggestions in the last 30 days.",
+      "task": "Task",
+      "offered": "Offered",
+      "accepted": "Accepted",
+      "rate": "Rate"
     }
   }
 }

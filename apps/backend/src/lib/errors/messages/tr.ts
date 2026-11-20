@@ -723,6 +723,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.unknown_entity": "Öneri istenen kayıt bulunamadı.",
   "ai.unknown_task": "Böyle bir yapay zekâ işi yok.",
   "ai.suggestion_not_open": "Bu öneri artık karar beklemiyor.",
+  "ai.candidate_unknown": "Bu önerinin böyle bir adayı yok.",
   // Aşama 9: reviews and questions
   "ai.reviews_off":
     "Yorum ve sorularda yapay zekâ kapalı. Ayarlar > Yapay zekâ sayfasından açabilirsiniz.",

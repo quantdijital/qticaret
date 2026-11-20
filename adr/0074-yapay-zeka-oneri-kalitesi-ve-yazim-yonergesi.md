@@ -103,3 +103,10 @@ adr/0071 §2 "serbest istem yok" kuralı korunur: **istek anında** kullanıcı 
 - Mağaza ayarı olarak talimat düzenlenebilir; güvenlik kuralları ve kapı değişmez.
 - Yeni yerler liste sayfalarının SEO boşluğunu kapatır.
 - Bedel: sistem iletisi uzar (belirteç maliyeti küçük artar); düzeltme çağrısı nadiren ikinci çağrı yapar.
+
+## Ek 2026-11-21: bağlama, "Dene" ve kabul oranı
+
+- **Yönerge kimin:** yalnız düzyazı yazan metin işleri (`capability: text`, JSON değil). Görsel alt metni (görüneni tarif eder, mağaza sesiyle değil) ve fotoğraftan ürün kartı (katı şemalı yapılandırılmış veri) yönerge almaz (`takesGuidance`, `lib/ai/guidance.ts`).
+- **Başlık tek kaynaktan:** yönerge bölümünün başlığı ve bitiş satırı `guidanceText`'in; `systemOf` bölümü olduğu gibi yerine koyar. Sıra birim testiyle kilitli: veri kuralı → sayfa → zanaat → yönerge → seçilen ayar → (düzeltme notu) → değişmez kurallar.
+- **"Dene":** `POST /admin/ai/guidance/preview` (owner/admin, `ai_text` hız profili). Kaydedilmemiş yönerge `ai_guidance` bölüm şemasıyla temizlenir; aynı ürün ve iş için iki çağrı (yönergesiz, yönergeyle) yapılır, ikisi de günlük tavandan ve aylık işlemden düşer ve `ai_usage`'a yazılır; öneri kaydı açılmaz, ürüne bir şey yazılmaz. İşler: arama başlığı, arama açıklaması, ürün açıklaması.
+- **Kabul oranı:** kabulde seçilen aday `content_draft.accepted_index`'e yazılır (istek `candidate_index`; önerinin adaylarından biri değilse 400 `ai.candidate_unknown`). `GET /admin/ai/acceptance` son 30 gün iş başına sunulan (kapıdan geçen) ve kabul edilen öneri sayısını ve oranı verir; Ayarlar › Yapay zekâ'da küçük tablo.

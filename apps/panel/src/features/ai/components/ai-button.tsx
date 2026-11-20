@@ -127,10 +127,10 @@ export function AiButton({
 
   // A candidate picked among several (adr/0074 §4): the decision is recorded for the suggestion, the pick fills the field
   const use = async (choice?: string) => {
-    const text = await suggestion.accept()
+    const text = await suggestion.accept(choice)
     setOpen(false)
     if (text !== null) {
-      onUse(choice ?? text)
+      onUse(text)
     }
   }
 
