@@ -103,6 +103,73 @@ describe("the header's cart drawer", () => {
     rects.mockRestore()
   })
 
+  // A phone under the catalog header: every header cart hidden, the bottom bar's "Sepet" a plain link
+  it("opens a sheet for a line that went in though no cart link is shown", () => {
+    // jsdom lays nothing out: no element is shown here
+    act(() => {
+      root.render(
+        <CartSheet cart={null} count={0} categories={[]} buttonClass="gf-icon-btn" words={WORDS} />
+      )
+    })
+    act(() => {
+      announceCartAdded("Sepete eklendi")
+    })
+    const dialogs = document.querySelectorAll("[role=dialog]")
+    expect(dialogs).toHaveLength(1)
+    expect(dialogs[0]?.textContent).toContain("Sepete eklendi")
+  })
+
+  it("opens one sheet only when two are mounted and none is shown", () => {
+    act(() => {
+      root.render(
+        <>
+          <CartSheet cart={null} count={0} categories={[]} buttonClass="a" words={WORDS} />
+          <CartSheet cart={null} count={0} categories={[]} buttonClass="b" words={WORDS} />
+        </>
+      )
+    })
+    act(() => {
+      announceCartAdded("Sepete eklendi")
+    })
+    expect(document.querySelectorAll("[role=dialog]")).toHaveLength(1)
+  })
+
+  it("opens the shown cart's sheet only when two are mounted (a cart a screen width)", () => {
+    // Only the second link is laid out
+    const rects = vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(function (
+      this: HTMLElement
+    ) {
+      return (this.classList.contains("shown") ? [{}] : []) as unknown as DOMRectList
+    })
+    act(() => {
+      root.render(
+        <>
+          <CartSheet
+            cart={null}
+            count={0}
+            categories={[]}
+            buttonClass="hidden-one"
+            words={{ ...WORDS, title: "Birinci" }}
+          />
+          <CartSheet
+            cart={null}
+            count={0}
+            categories={[]}
+            buttonClass="shown"
+            words={{ ...WORDS, title: "İkinci" }}
+          />
+        </>
+      )
+    })
+    act(() => {
+      announceCartAdded("Sepete eklendi")
+    })
+    const dialogs = document.querySelectorAll("[role=dialog]")
+    expect(dialogs).toHaveLength(1)
+    expect(dialogs[0]?.textContent).toContain("İkinci")
+    rects.mockRestore()
+  })
+
   // The product page's and the quick view's words end in a stop: never "Sepete eklendi.. Sepet"
   it("says what came with the line and the cart's name with one stop between", () => {
     expect(sheetDescription("Sepete eklendi.", "Sepet, 2 ürün")).toBe(
