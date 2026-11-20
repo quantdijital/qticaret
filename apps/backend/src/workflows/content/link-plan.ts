@@ -18,10 +18,12 @@ import type MigrationModuleService from "../../modules/migration/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { followPath } from "../seo/redirects/resolve"
+import { draftPageTexts } from "./link-layout"
 
 /**
  * What a link rewrite would do (adr/0042 Ek 2026-11-05): every content
- * document read (pages, posts, products' descriptions), each link to the
+ * document read (pages, as their text sections stand in the theme
+ * editor's draft; posts; products' descriptions), each link to the
  * shop resolved once as the storefront would resolve it, the links that
  * move and those that answer nothing listed. Reads only.
  */
@@ -125,6 +127,8 @@ async function* contentDocuments(
   if (ids?.length === 0) {
     return
   }
+  // A page's text is its sections' in the draft (adr/0073 Ek 2026-11-19 (2) K7)
+  const texts = await draftPageTexts(container)
   const service = container.resolve<ContentModuleService>(CONTENT_MODULE)
   for (let skip = 0; ; skip += PAGE) {
     const rows = await service.listContentEntries(ids ? { id: [...ids] } : {}, {
@@ -138,7 +142,9 @@ async function* contentDocuments(
         kind: row.kind,
         id: row.id,
         title: row.title,
-        doc: row.body as unknown as ContentDoc | null,
+        doc:
+          (row.kind === "page" ? texts.get(row.id) : undefined) ??
+          (row.body as unknown as ContentDoc | null),
       }
     }
     if (rows.length < PAGE) {

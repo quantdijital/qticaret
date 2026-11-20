@@ -13,6 +13,8 @@ import type MigrationModuleService from "../../modules/migration/service"
 import type { RememberedItem } from "../../modules/migration/service"
 import type { PostTermsInput } from "../content/term-rules"
 import { saveContentWorkflow } from "../content/workflows"
+import { assertCards, bodyOf } from "../content/rules"
+import { replacePageTextWorkflow } from "../storefront/page-text-replace"
 import { ImageRefused, storeImage } from "./images"
 import { migratePostTerms, refusalOf, writeSeo } from "./post-terms"
 import type { TermCounts } from "./post-terms"
@@ -220,6 +222,11 @@ async function writeEntry(
   }
   let id: string
   try {
+    // A page's text is its sections' (adr/0073 Ek 2026-11-19 (2) K4): checked first, as the
+    // content save checked it, so a text refused makes no page; written after it
+    if (kind === "page") {
+      await assertCards(container as MedusaContainer, bodyOf(content.body))
+    }
     const { result } = await saveContentWorkflow(container as MedusaContainer).run({
       input: {
         kind,
@@ -227,7 +234,7 @@ async function writeEntry(
           title,
           handle: content.handle,
           status: content.status,
-          body: content.body,
+          ...(kind === "page" ? {} : { body: content.body }),
           excerpt: content.excerpt,
           author_name: content.author,
           image_url: cover?.url ?? null,
@@ -237,6 +244,11 @@ async function writeEntry(
       },
     })
     id = result.id
+    if (kind === "page") {
+      await replacePageTextWorkflow(container as MedusaContainer).run({
+        input: { page_id: id, doc: content.body },
+      })
+    }
   } catch (error) {
     return { id: null, problems: [refusalOf(error), ...problems] }
   }

@@ -8281,7 +8281,8 @@
         },
         "rich_text": {
           "pane": "Text only",
-          "with_image": "Text with image"
+          "with_image": "Text with image",
+          "article": "Page text"
         }
       },
       "look": {

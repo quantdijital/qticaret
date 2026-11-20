@@ -15,6 +15,8 @@ import type { DesignRef } from "./design-shared"
 import { autoSaveDraftStep, keptShopSettings } from "./design-steps"
 import { LAYOUT_LOCK, saveDraftSteps } from "./layout"
 import { layouts } from "./layout-row"
+import { placePageTextsStep } from "./page-texts-placed"
+import { legacyTextAt } from "../../lib/storefront/layout-pages-stored"
 import { legacySettings } from "./layout-shared"
 
 export interface ApplyDesignInput {
@@ -27,6 +29,8 @@ export interface ApplyDesignInput {
 
 interface LoadedDesign extends DesignRef {
   document: LayoutDocument
+  /** Where its pages from before their text was a section keep it (adr/0073 Ek 2026-11-19 (2) K6). */
+  text_at: Record<string, number>
 }
 
 /** The saved look, read through today's schema: gone is unknown, one that no longer reads says so. */
@@ -44,7 +48,13 @@ const loadDesignStep = createStep(
     if (!document) {
       throw new ValidationError("storefront_design.unreadable", { field: "id" })
     }
-    const loaded: LoadedDesign = { id: row.id, kind: row.kind, name: row.name ?? null, document }
+    const loaded: LoadedDesign = {
+      id: row.id,
+      kind: row.kind,
+      name: row.name ?? null,
+      document,
+      text_at: legacyTextAt(row.document),
+    }
     return new StepResponse(loaded)
   }
 )
@@ -117,7 +127,14 @@ export const applyDesignWorkflow = createWorkflow(
         keep: input.id,
       }))
     )
-    const draft = composeDesignDraftStep(design)
+    const composed = composeDesignDraftStep(design)
+    // A look saved before a page's text was a section keeps today's text there (K6)
+    const draft = placePageTextsStep(
+      transform({ composed, design }, ({ composed, design }) => ({
+        document: composed,
+        text_at: design.text_at,
+      }))
+    )
     const saved = saveDraftSteps(draft)
     markAppliedStep(transform({ design }, ({ design }) => design.id))
     releaseLockStep({ key: LAYOUT_LOCK.key })

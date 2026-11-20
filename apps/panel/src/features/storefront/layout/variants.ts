@@ -17,6 +17,7 @@ import {
   hasVariants,
   newsletterOnPage,
   richTextInFooter,
+  richTextOffPages,
 } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import type { AnySection, HeaderCatalogFields } from "@/features/storefront/api/layout"
@@ -117,6 +118,8 @@ export const VARIANT_FIELDS: {
   rich_text: {
     pane: {},
     with_image: { image: null, image_side: RICH_TEXT_IMAGE_SIDE_DEFAULT },
+    // A content page's own text (adr/0073 Ek 2026-11-19 (2) K2): its outline and questions as today
+    article: { outline: "auto", questions: "auto" },
   },
   product_main: { standard: {} },
   category_main: { standard: {} },
@@ -154,7 +157,9 @@ export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: Sectio
  * The variants the "Biçim" offers the section where it stands: its type's
  * list, a page's newsletter box without the footer column one (adr/0049
  * Ek 2026-11-17: a page has no footer column to sit in), the footer
- * group's rich text without the picture (adr/0073 §3, adr/0070 §4).
+ * group's rich text without the picture (adr/0073 §3, adr/0070 §4), a
+ * rich text without the page text (`article`) until the content pages'
+ * editor offers it (adr/0073 Ek 2026-11-19 (2), S7).
  */
 export function offeredVariants<S extends VariantSection>(
   section: S,
@@ -164,9 +169,13 @@ export function offeredVariants<S extends VariantSection>(
   if (section.type === "newsletter" && !inFooter) {
     return listed.filter((each) => newsletterOnPage(each as SectionVariant<"newsletter">))
   }
-  return section.type === "rich_text" && inFooter
-    ? listed.filter((each) => richTextInFooter(each as SectionVariant<"rich_text">))
-    : listed
+  if (section.type === "rich_text") {
+    const variants = listed.filter((each) => richTextOffPages(each as SectionVariant<"rich_text">))
+    return inFooter
+      ? variants.filter((each) => richTextInFooter(each as SectionVariant<"rich_text">))
+      : variants
+  }
+  return listed
 }
 
 /**

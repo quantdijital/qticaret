@@ -88,9 +88,13 @@ export const SECTION_VARIANTS = {
    * pane with one of the media library's pictures on one side (5/12) and
    * the heading and text on the other (7/12), the picture on top on a
    * phone. The footer group takes `pane` only (adr/0070 §4: no picture
-   * section there). Fields by variant: `section-rich-text`.
+   * section there). `article` ("Sayfa metni", adr/0073 Ek 2026-11-19 (2)
+   * K2): a content page's own text as the page draws it today, at reading
+   * measure, an outline beside a long one and grouped questions in a
+   * questions-and-answers text; a content page's only. Fields by variant:
+   * `section-rich-text`.
    */
-  rich_text: ["pane", "with_image"],
+  rich_text: ["pane", "with_image", "article"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>

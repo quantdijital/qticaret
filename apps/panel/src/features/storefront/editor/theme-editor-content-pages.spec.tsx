@@ -207,16 +207,16 @@ describe("the theme editor's content pages", () => {
     })
   })
 
-  it("says no other page takes a layout while twenty have one", async () => {
+  it("says no other page takes a layout while fifty have one", async () => {
     const tree = await open({ ...DOC, pages: FULL_PAGES }, "cnt_hakkimizda")
     const add = await within(tree).findByRole("button", { name: "Alta bölüm ekle" })
     expect(add).toBeDisabled()
     expect(within(tree).getByRole("button", { name: "Üste bölüm ekle" })).toBeDisabled()
-    expect(tree).toHaveTextContent("Kendi düzeni olan en çok 20 sayfa olabilir.")
+    expect(tree).toHaveTextContent("Kendi düzeni olan en çok 50 sayfa olabilir.")
 
     await user.click(picker())
     const list = await screen.findByRole("dialog")
-    expect(within(list).getByText(/Kendi düzeni olan en çok 20 sayfa/)).toBeVisible()
+    expect(within(list).getByText(/Kendi düzeni olan en çok 50 sayfa/)).toBeVisible()
   })
 
   it("says so when the address names a page İçerik no longer has, adding nothing to it", async () => {

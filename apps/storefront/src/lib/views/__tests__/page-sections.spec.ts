@@ -26,12 +26,14 @@ const { contentSections, draftContentPage, pageLayoutOf } = await import("../pag
 const LINK = `sfl_01ABC.to51q5.${"a".repeat(43)}`
 const SESSION = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
 const ID = "cnt_01KABC"
+// One list since adr/0073 Ek 2026-11-19 (2) K1, the page's text among its sections
 const LAYOUT = {
   page_id: ID,
   sections: [
-    { id: "ust", type: "rich_text", placement: "top" },
-    { id: "alt", type: "help", placement: "bottom" },
-    { id: "alt2", type: "faq", placement: "bottom" },
+    { id: "ust", type: "rich_text" },
+    { id: "metin", type: "rich_text", variant: "article" },
+    { id: "alt", type: "help" },
+    { id: "alt2", type: "faq" },
   ],
 }
 const ENTRY = { id: ID, kind: "page", title: "İade", path: "/iade-kosullari", html: "" }
@@ -102,7 +104,31 @@ describe("a content page's layout", () => {
     expect(views.sectionViews).toHaveBeenCalledTimes(2)
   })
 
+  it("leaves the page's text sections to the page, all below it without a text section", async () => {
+    reads.publishedPageLayout.mockResolvedValue({
+      page_id: ID,
+      sections: [
+        { id: "iletisim", type: "contact" },
+        { id: "alt", type: "help" },
+        { id: "kargo", type: "shipping_facts" },
+      ],
+    })
+    expect(await contentSections(ID, t)).toEqual({ top: [], bottom: [{ id: "alt", type: "help" }] })
+    reads.publishedPageLayout.mockResolvedValue({
+      page_id: ID,
+      sections: [{ id: "alt", type: "help" }],
+    })
+    expect(await contentSections(ID, t)).toEqual({ top: [], bottom: [{ id: "alt", type: "help" }] })
+  })
+
   it("gives none for a page without a layout or with nothing left to show", async () => {
+    // A page answered with its text alone (no entry in the design)
+    reads.publishedPageLayout.mockResolvedValue({
+      page_id: ID,
+      sections: [{ id: "metin", type: "rich_text", variant: "article" }],
+      synthesized: true,
+    })
+    expect(await contentSections(ID, t)).toBeUndefined()
     reads.publishedPageLayout.mockResolvedValue(null)
     expect(await contentSections(ID, t)).toBeUndefined()
     reads.publishedPageLayout.mockResolvedValue({ page_id: ID, sections: [] })

@@ -125,15 +125,19 @@ export const allSections = (doc: LayoutDocument): AnySection[] => [
 
 /**
  * A category page's (or a content page's) sections in one place: above
- * the grid (the text) or below it, in order (the grid in neither).
+ * the grid (the text) or below it, in order (the grid in neither). A
+ * content page's section read without a place (one list since adr/0073
+ * Ek 2026-11-19 (2) K1, until this editor shows it so in S7) is below.
  */
 export function placed<S extends AnySection>(
   sections: readonly S[],
   placement: Placement
 ): Extract<S, { placement: Placement }>[] {
-  return sections.filter(
-    (section): section is Extract<S, { placement: Placement }> =>
-      "placement" in section && section.placement === placement
+  return sections.filter((section): section is Extract<S, { placement: Placement }> =>
+    "placement" in section
+      ? section.placement === placement
+      : placement === "bottom" &&
+        (CONTENT_PAGE_SECTION_TYPES as readonly string[]).includes(section.type)
   )
 }
 

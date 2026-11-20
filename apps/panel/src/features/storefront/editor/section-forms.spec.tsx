@@ -3,7 +3,7 @@ import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { CONTENT_PAGE_SECTION_TYPES } from "@qticaret/types"
+import { CONTENT_PAGE_SECTION_TYPES, isPageOnlyType } from "@qticaret/types"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { PAGE_TYPES } from "@/features/storefront/layout/sections"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
@@ -324,6 +324,10 @@ describe("a content page's section chooser (adr/0073 §3)", () => {
       "E-bülten",
       "Yardım kutusu",
     ])
-    expect([...PAGE_TYPES].sort()).toEqual([...CONTENT_PAGE_SECTION_TYPES].sort())
+    // The page's own types (its text, contact, the facts) come with their forms in S7
+    // (adr/0073 Ek 2026-11-19 (2) K5)
+    expect([...PAGE_TYPES].sort()).toEqual(
+      CONTENT_PAGE_SECTION_TYPES.filter((type) => !isPageOnlyType(type)).sort()
+    )
   })
 })
