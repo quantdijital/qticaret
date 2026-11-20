@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "@tanstack/react-router"
-import { ExternalLink, Eye, EyeOff, LayoutTemplate, MoreHorizontal, Trash2 } from "lucide-react"
+import { useNavigate } from "@tanstack/react-router"
+import { ExternalLink, Eye, EyeOff, MoreHorizontal, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -58,15 +58,6 @@ export function ContentActions({ entry }: { entry: ContentDetail }) {
   }
   return (
     <div className="flex items-center gap-2">
-      {entry.kind === "page" ? (
-        // The page's own layout in the theme editor, that page picked (adr/0073 §5)
-        <Button asChild variant="outline">
-          <Link to="/storefront/editor" search={{ icerik: entry.id }}>
-            <LayoutTemplate />
-            {t("content.designInEditor")}
-          </Link>
-        </Button>
-      ) : null}
       <Button variant="outline" disabled={preview.isPending} onClick={openPreview}>
         <ExternalLink />
         {t("content.preview")}
@@ -107,7 +98,7 @@ export function ContentActions({ entry }: { entry: ContentDetail }) {
               toast.success(t("content.deleted"))
               void navigate({
                 to: "/content",
-                search: entry.kind === "post" ? { kind: "post" } : {},
+                search: {},
               })
             },
             onError: (failure) => toast.error(errorText(t, failure)),

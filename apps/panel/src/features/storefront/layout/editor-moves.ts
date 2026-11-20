@@ -6,13 +6,13 @@ import type {
 } from "@/features/storefront/api/layout"
 import { findSection, isBodyGroup, placed } from "./sections"
 import { bodyOf, categoryBody, isMain, withBody } from "./main-sections"
-import { pageSectionsOf, placeOnPage, sideOf, withPageSections } from "./page-layouts"
+import { pageSectionsOf, withPageSections } from "./page-layouts"
 
 /**
  * A section moved in its list or to the other side of a page's middle
  * (`editorReducer`'s `move` and `place`): the home and product pages'
  * lists, a category page's two sides of its products, a content page's
- * two sides of its text (adr/0073), the footer group's above its bar.
+ * one list (adr/0073 Ek 2026-11-19 (2) K1), the footer group's above its bar.
  */
 
 /** The list with one item moved to `to` (held within it); the same list when nothing moves. */
@@ -37,14 +37,10 @@ export function move(doc: LayoutDocument, id: string, to: number): LayoutDocumen
     return moved === list ? doc : { ...doc, footer: withBody(doc.footer, moved) }
   }
   if (found?.group === "pages" && found.page !== null) {
-    // Above and below the page's text are two lists, as a category page's
-    const list = sideOf(doc, found)
+    // A content page's sections are one list, its text among them (adr/0073 Ek 2026-11-19 (2) K1)
+    const list = pageSectionsOf(doc, found.page)
     const moved = reorder(list, id, to)
-    if (moved === list) {
-      return doc
-    }
-    const others = pageSectionsOf(doc, found.page).filter((each) => !list.includes(each))
-    return withPageSections(doc, found.page, [...moved, ...others])
+    return moved === list ? doc : withPageSections(doc, found.page, moved)
   }
   if (!found || !isBodyGroup(found.group) || isMain(found.section)) {
     return doc
@@ -70,10 +66,6 @@ export function move(doc: LayoutDocument, id: string, to: number): LayoutDocumen
 }
 
 export function place(doc: LayoutDocument, id: string, placement: Placement): LayoutDocument {
-  const found = findSection(doc, id)
-  if (found?.group === "pages") {
-    return placeOnPage(doc, found, placement)
-  }
   const section = categoryBody(doc).find((each) => each.id === id)
   if (!section || section.placement === placement) {
     return doc

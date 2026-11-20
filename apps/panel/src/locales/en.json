@@ -7051,7 +7051,6 @@
     "legal": {
       "title": "Legal texts are not written here",
       "text": "Contracts, the KVKK and cookie notices, the return and shipping policies are made from your shop's details under Settings > Legal and published at their own addresses. Written here as well, two versions of the same text would be live.",
-      "hint": "Contracts, KVKK, cookie, return and shipping texts are not here:",
       "link": "Settings > Legal"
     },
     "create": "Create",
@@ -7322,9 +7321,7 @@
       "noneFound": "No author by that name.",
       "legacy": "Old author name: {{name}}. Choose from the list or",
       "legacyAdd": "add it as a new author"
-    },
-    "designInEditor": "Design in the theme editor",
-    "designed": "Has its own layout"
+    }
   },
   "priceLists": {
     "sections": "Kinds of offer",
@@ -8008,11 +8005,11 @@
         "restore": "Load into draft",
         "restoreOf": "Load publication {{revision}} into the draft",
         "confirmTitle": "Load publication {{revision}} into the draft?",
-        "confirmText": "The draft's changes are replaced by this publication; the current draft is saved to 'My saved looks' automatically. The storefront does not change until you publish.",
+        "confirmText": "The draft's changes are replaced by this publication; the current draft is saved to 'My saved looks' automatically. Page texts return to how they were in it too. The storefront does not change until you publish.",
         "confirm": "Load into draft",
         "restored": "Publication {{revision}} is in the draft.",
         "menusBadge": "With menus",
-        "confirmKeep": "This publication is loaded into the draft. The storefront does not change until you publish.",
+        "confirmKeep": "This publication is loaded into the draft. Page texts return to how they were in it too. The storefront does not change until you publish.",
         "menusText": "When this publication went live it changed the menus too. The menus come into the draft as well: publish it again and that day's menus replace today's.",
         "skipMenus": "Leave the menus out, keep today's",
         "saveAs": "Add to saved looks",
@@ -8055,9 +8052,11 @@
       "publish": {
         "open": "Publish",
         "title": "Publish the design?",
-        "text": "The draft's header, home page, product and category pages and footer go live together. They show on the storefront within a minute.",
+        "text": "The draft's header, home page, product, category and content pages and footer go live together. The storefront shows them within a minute.",
         "confirm": "Publish",
-        "done": "Published; it shows on the storefront within a minute."
+        "done": "Published; it shows on the storefront within a minute.",
+        "pages": "Pages in draft",
+        "pageLive": "Also put the {{title}} page live"
       },
       "tree": {
         "label": "The page's sections",
@@ -8119,9 +8118,9 @@
           "top": "It is added on every category page, above the product grid.",
           "bottom": "It is added on every category page, below the product grid.",
           "footer": "Shown above the footer on every page but checkout; each section is added once, then drag to change their order.",
-          "pageTop": "Added on this page, above the page's text; drag it or use the arrows to move it later.",
-          "pageBottom": "Added on this page, below the page's text; drag it or use the arrows to move it later."
-        }
+          "pages": "Added to this page, after its sections; then drag it or use the arrows to move it."
+        },
+        "once": "Already on this page."
       },
       "types": {
         "announcement_bar": {
@@ -8223,6 +8222,22 @@
         "price_bands": {
           "name": "Price bands",
           "description": "2–4 cards by price range; each card filters the shop by its range and shows a few products in it."
+        },
+        "article": {
+          "name": "Page text",
+          "description": "The page's own text; an outline beside a long one, collapsible questions in a Q&A text."
+        },
+        "contact": {
+          "name": "Contact",
+          "description": "Text and ways to reach you beside the contact form, the shop's imprint below."
+        },
+        "payment_facts": {
+          "name": "Payment options",
+          "description": "The shop's payment methods and instalment table, kept current."
+        },
+        "shipping_facts": {
+          "name": "Shipping details",
+          "description": "Carriers, the free shipping threshold and delivery times, kept current."
         }
       },
       "variants": {
@@ -10183,39 +10198,57 @@
         "label": "Content page being edited",
         "none": "Choose a page",
         "search": "Search pages (title or address)",
-        "empty": "No pages in Content yet.",
+        "empty": "No pages yet; open one with “New page”.",
         "noMatch": "No page by that name.",
         "designed": "Has its own layout",
         "pagesFull": "At most {{max}} pages can have their own layout. To add sections to another page, first remove one page's sections.",
         "sectionsFull": "A page holds at most {{max}} sections.",
-        "pick": "To add sections, choose a page above; if Content has none yet, create one there first.",
+        "pick": "Pick a page above, or open one with “New page”, to add sections.",
         "missing": {
-          "none": "The preview needs a page in Content; once one exists it shows here.",
-          "gone": "This page was not found; it may have been deleted. Choose another page above."
-        },
-        "sides": {
-          "top": "Above",
-          "bottom": "Below"
-        },
-        "placements": {
-          "top": "Above the page's text",
-          "bottom": "Below the page's text"
-        },
-        "place": {
-          "top": "Move above the text",
-          "bottom": "Move below the text"
-        },
-        "text": {
-          "page": "The page's text",
-          "contact": "Contact details and form",
-          "about": {
-            "page": "The page's title, cover, text and search appearance are written in Content. The storefront shows them here, between the sections above and below; this row is not moved or removed.",
-            "contact": "The contact page's text, contact details and form show here, between the sections above and below. The text changes in Content, the contact details in Store profile, and the page that shows the form in Storefront preferences; this row is not moved or removed."
-          },
-          "edit": "Edit in Content"
+          "none": "The preview needs a page; open one with “New page” above and it shows here.",
+          "gone": "This page was not found; it may have been deleted. Pick another page above."
         },
         "dropped_one": "The layout of {{count}} deleted page was removed.",
-        "dropped_other": "The layouts of {{count}} deleted pages were removed."
+        "dropped_other": "The layouts of {{count}} deleted pages were removed.",
+        "sections": "Sections on the page",
+        "noSections": "This page has no sections yet.",
+        "shownOnly": "The page limit is reached: this page's text is only shown. Remove another page's sections first to change it.",
+        "new": {
+          "open": "New page",
+          "title": "New page",
+          "description": "The page opens as a draft; you write its text and sections here.",
+          "handleHint": "Left empty, it is made from the title.",
+          "created": "The page was opened as a draft."
+        },
+        "settings": {
+          "open": "Page settings",
+          "title": "Page settings",
+          "savedAtOnce": "Page settings are saved at once; they do not wait for the design to be published.",
+          "live": "Live",
+          "liveOn": "The page shows on the storefront.",
+          "liveOff": "The page is a draft; only the editor's preview shows it.",
+          "delete": "Delete page"
+        }
+      },
+      "pageText": {
+        "outline": "Outline",
+        "outlineTerm": "içindekiler",
+        "outlineHint": "A long text shows an outline of its headings beside it.",
+        "questions": "Questions and answers",
+        "questionsTerm": "soru-cevap",
+        "questionsHint": "A text of questions and answers shows as grouped collapsible questions.",
+        "contactBody": "Text",
+        "form": "Contact form",
+        "formTerm": "iletişim formu",
+        "formHint": "A form beside the text for visitors to leave a message.",
+        "imprint": "Imprint",
+        "imprintTerm": "künye",
+        "imprintHint": "The shop's legal name, address and contact details below.",
+        "storeProfile": "Contact details and the imprint change in the store profile.",
+        "facts": {
+          "payment_facts": "The shop's payment methods and instalments come here by themselves; they change in the payment settings. Right after the page text, they stand beside it.",
+          "shipping_facts": "Carriers, fees and delivery times come here by themselves; they change in the shipping settings. Right after the page text, they stand beside it."
+        }
       }
     },
     "maintenance": {
@@ -10403,7 +10436,9 @@
       "history": {
         "lead": "Older publications:",
         "link": "Theme editor › Looks › Publication history"
-      }
+      },
+      "pages_one": "{{count}} page",
+      "pages_other": "{{count}} pages"
     }
   },
   "bulkMessages": {

@@ -157,20 +157,22 @@ export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: Sectio
  * The variants the "Biçim" offers the section where it stands: its type's
  * list, a page's newsletter box without the footer column one (adr/0049
  * Ek 2026-11-17: a page has no footer column to sit in), the footer
- * group's rich text without the picture (adr/0073 §3, adr/0070 §4), a
- * rich text without the page text (`article`) until the content pages'
- * editor offers it (adr/0073 Ek 2026-11-19 (2), S7).
+ * group's rich text without the picture (adr/0073 §3, adr/0070 §4), the
+ * page text (`article`) on a content page only (adr/0073 Ek 2026-11-19 (2) K2).
  */
 export function offeredVariants<S extends VariantSection>(
   section: S,
-  inFooter: boolean
+  inFooter: boolean,
+  onContentPage = false
 ): readonly SectionVariant<S["type"]>[] {
   const listed: readonly SectionVariant<S["type"]>[] = SECTION_VARIANTS[section.type]
   if (section.type === "newsletter" && !inFooter) {
     return listed.filter((each) => newsletterOnPage(each as SectionVariant<"newsletter">))
   }
   if (section.type === "rich_text") {
-    const variants = listed.filter((each) => richTextOffPages(each as SectionVariant<"rich_text">))
+    const variants = onContentPage
+      ? listed
+      : listed.filter((each) => richTextOffPages(each as SectionVariant<"rich_text">))
     return inFooter
       ? variants.filter((each) => richTextInFooter(each as SectionVariant<"rich_text">))
       : variants
@@ -182,8 +184,14 @@ export function offeredVariants<S extends VariantSection>(
  * Whether the panel offers the section's "Biçim" where it stands: its type
  * is drawn more than one way there (the footer group's rich text is not).
  */
-export const offersVariants = (section: AnySection, inFooter = false): section is VariantSection =>
-  hasVariants(section.type) && "variant" in section && offeredVariants(section, inFooter).length > 1
+export const offersVariants = (
+  section: AnySection,
+  inFooter = false,
+  onContentPage = false
+): section is VariantSection =>
+  hasVariants(section.type) &&
+  "variant" in section &&
+  offeredVariants(section, inFooter, onContentPage).length > 1
 
 /**
  * The section drawn another way (§2.4, option B): its common fields carried
