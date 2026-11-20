@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
+import { listingDescriptionHtml } from "../../../../../lib/catalog/listing-description"
 import { MEDIA_MODULE } from "../../../../../modules/media"
 import type MediaModuleService from "../../../../../modules/media/service"
 import {
@@ -37,6 +38,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   res.json({
     details: {
       description: own?.description ?? null,
+      // adr/0075: its document as HTML for the foot of its page; null: plain text only
+      description_html: listingDescriptionHtml(own?.description_doc),
       image: url
         ? {
             url,

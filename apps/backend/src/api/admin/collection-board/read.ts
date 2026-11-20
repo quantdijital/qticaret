@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
+import { storedListingDoc } from "../../../lib/catalog/listing-description"
 import { containsPattern } from "../../../lib/security"
 import { COLLECTION_EXTENSION_FIELDS } from "../../../workflows/catalog/collection-fields"
 import type { CollectionExtensionRow } from "../../../workflows/catalog/collection-fields"
@@ -39,6 +40,8 @@ export const presentCollection = (row: CollectionRow, products: number) => {
     title: row.title,
     handle: row.handle,
     description: own?.description ?? null,
+    // adr/0075: the panel's editor opens it; null: plain text only (the editor opens its paragraphs)
+    description_doc: storedListingDoc(own?.description_doc),
     is_active: own?.is_active !== false,
     image: own?.image_url ? { url: own.image_url, alt: own.image_alt ?? null } : null,
     product_count: products,

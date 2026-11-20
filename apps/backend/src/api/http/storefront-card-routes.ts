@@ -1,4 +1,5 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import { AdminPostCategoryDescription } from "../admin/category-descriptions/validators"
 import { AdminPostCategoryImage } from "../admin/category-images/validators"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { StoreGetCardFacts } from "../store/card-facts/validators"
@@ -24,6 +25,24 @@ export const STOREFRONT_CARD_ROUTES = [
   },
   {
     matcher: "/store/category-images",
+    methods: ["GET" as const],
+    middlewares: [noQuery],
+  },
+  // adr/0075: a category's text as a document, written by staff, shown by anyone
+  {
+    matcher: "/admin/category-descriptions/:category_id",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, noQuery],
+  },
+  {
+    matcher: "/admin/category-descriptions/:category_id",
+    methods: ["POST" as const],
+    // A long document is past Express's 100 kB default; its own bounds stay (adr/0055)
+    bodyParser: { sizeLimit: "1mb" },
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostCategoryDescription)],
+  },
+  {
+    matcher: "/store/category-descriptions/:id",
     methods: ["GET" as const],
     middlewares: [noQuery],
   },
