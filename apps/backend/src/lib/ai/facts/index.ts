@@ -94,6 +94,17 @@ const TASK_READERS: Readonly<
   product_reviews: { type: "product", read: fieldsOnly(productReviewFacts) },
 }
 
+// The long texts of a record: the shop's name goes before them, so a block too long keeps it
+const LONG_FIELDS: ReadonlySet<string> = new Set(["description", "body"])
+
+/** The fields with the shop's name before the first long text (at the end when there is none). */
+export function withShop(fields: RecordFacts, shop: string): RecordFacts {
+  const entries = Object.entries(fields)
+  const at = entries.findIndex(([name]) => LONG_FIELDS.has(name))
+  entries.splice(at === -1 ? entries.length : at, 0, ["shop", shop])
+  return Object.fromEntries(entries)
+}
+
 /**
  * A record's fields (and the shop's name for a page), as they go to the
  * data block; read by the task's own reader when it names one.
@@ -113,9 +124,9 @@ export async function entityFacts(
     throw aiValidationError("ai.unknown_entity")
   }
   const read = await (byTask ? byTask.read : READERS[type])(container, id)
-  const shop = WITH_SHOP.has(type) ? { shop: (await brandOf(container)).shopName } : {}
+  const shop = WITH_SHOP.has(type) ? (await brandOf(container)).shopName : null
   return {
-    fields: { ...read.fields, ...shop },
+    fields: shop === null ? read.fields : withShop(read.fields, shop),
     maxLengths: AI_FACT_MAX_LENGTHS,
     image: read.image ?? null,
   }

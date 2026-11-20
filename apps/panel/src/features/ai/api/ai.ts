@@ -89,3 +89,23 @@ export const aiUsageQuery = () =>
     queryKey: [...AI_KEY, "usage"],
     queryFn: () => sdk.client.fetch<AiUsageAnswer>("/admin/ai/usage"),
   })
+
+/** One task's suggestions of the last days: offered, accepted and the rate (adr/0074 §4). */
+export interface AiAcceptanceLine {
+  task: string
+  offered: number
+  accepted: number
+  /** Accepted of offered, 0–1; null with none offered. */
+  rate: number | null
+}
+
+export interface AiAcceptanceAnswer {
+  days: number
+  tasks: AiAcceptanceLine[]
+}
+
+export const aiAcceptanceQuery = () =>
+  queryOptions({
+    queryKey: [...AI_KEY, "acceptance"],
+    queryFn: () => sdk.client.fetch<AiAcceptanceAnswer>("/admin/ai/acceptance"),
+  })

@@ -6,6 +6,11 @@ import { IMAGE_BACKGROUND_MAX_BATCH, IMAGE_SCENE_MAX_BATCH } from "../../../lib/
 import { SCENE_CODE } from "@qticaret/sector-packs"
 import { MEDIA_ID } from "../../../workflows/async-job/types/ai-image-edit"
 import { SCENE_TEXT_MAX, cleanSceneText } from "../../../lib/ai/scene-text"
+import {
+  AI_GUIDANCE_DEFAULTS,
+  aiGuidanceSection,
+} from "../../../modules/platform-settings/sections/ai-guidance"
+import type { AiGuidanceSettings } from "../../../modules/platform-settings/sections/ai-guidance"
 
 // A record's id of a kind a suggestion is asked for; its prefix is matched to the type in the workflow
 const ENTITY_ID = /^(prod|pcat|cnt|media|prev|pq)_[A-Za-z0-9]{1,40}$/
@@ -130,6 +135,47 @@ export const AdminGetAiSuggestions = z
   })
   .strict()
 export type AdminGetAiSuggestionsType = z.infer<typeof AdminGetAiSuggestions>
+
+/**
+ * A suggestion accepted (adr/0074 §4): the candidate taken by its place
+ * among those offered, the first when left out. Never a text: the server
+ * returns the candidate's own.
+ */
+export const AdminPostAiAccept = z
+  .object({
+    candidate_index: z.number().int().min(0).max(9).optional(),
+  })
+  .strict()
+export type AdminPostAiAcceptType = z.infer<typeof AdminPostAiAccept>
+
+/** The tasks the guidance page's "Dene" compares (adr/0074 §2): a product's prose. */
+export const GUIDANCE_PREVIEW_TASKS = [
+  "seo_title",
+  "seo_description",
+  "product_description",
+] as const
+
+/**
+ * "Dene" on Settings › Yapay zekâ › Yazım yönergesi (adr/0074 §2): one
+ * product, one task and the guidance as the form holds it, not saved.
+ * The guidance goes through the `ai_guidance` section's own schema
+ * (markup, invisible characters and personal data taken out, lengths and
+ * task ids held), exactly as a save would; fields left out are the
+ * defaults. The product's text is read on the server.
+ */
+export const AdminPostAiGuidancePreview = z
+  .object({
+    task: z.enum(GUIDANCE_PREVIEW_TASKS),
+    product_id: z.string().regex(/^prod_[A-Za-z0-9]{1,40}$/),
+    service: z.string().regex(NAME).optional(),
+    guidance: aiGuidanceSection.patch,
+  })
+  .strict()
+  .transform((body) => ({
+    ...body,
+    guidance: { ...AI_GUIDANCE_DEFAULTS, ...body.guidance } as AiGuidanceSettings,
+  }))
+export type AdminPostAiGuidancePreviewType = z.infer<typeof AdminPostAiGuidancePreview>
 
 /** A month's usage (`YYYY-MM`, Turkey); this month when left out. */
 export const AdminGetAiUsage = z.object({

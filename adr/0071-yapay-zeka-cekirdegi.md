@@ -187,6 +187,7 @@ Her iş aynı adımlardan geçer (`workflows/ai/steps/`); iş akışları bunlar
 - **Yetki:** §6; uçlar `requireUserActor`, hız sınırı, Zod doğrulaması (bugünkü `content-draft-routes.ts` deseni).
 - **Denetim kaydı:** servis bağlama, kaldırma ve anahtar değişimi zaten kayıtlı (adr/0027). Öneri isteği denetim kaydına değil `ai_usage`'a yazılır; önerinin **uygulanması** ilgili varlığın kendi kaydıyla görünür.
 - **Güvenlik incelemesi:** kimlik bilgisi, yetki, dış çağrı ya da migration dokunan her PR (planda işaretli) `security-reviewer`'dan geçer ve ana oturum birleştirir.
+- **Ek 2026-11-21 (adr/0074):** "talimat sabittir" maddesi daraldı. Sistem iletisinde mağazanın **yazım yönergesi** (ayar olarak, yalnız owner/admin yazar; HTML, görünmez karakter ve kişisel veri kayıtta ayıklanır) etiketli bir bölüm olarak yer alır; istek anında yine kimse talimat yazmaz. Sıra: veri kuralı → sayfa → zanaat → yönerge → seçilen ayar → (düzeltme notu) → **değişmez kurallar en sonda** ("yukarıdakiyle çelişirse bu kurallar geçerlidir"). Kapı, roller, kota ve veri sınırı değişmedi. Ayrıntı: adr/0074 §1, §2, §6.
 
 ### 10. KVKK ve veri
 

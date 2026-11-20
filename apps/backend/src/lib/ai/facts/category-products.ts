@@ -5,7 +5,8 @@ import type { FactsContainer, RecordFacts } from "./types"
  * What a category page lists (adr/0074 §4): a few of its published
  * products' names, its most frequent brands and how many products it has,
  * as a range. Names only: no price, stock, variant or sales figure is
- * read; a draft or hidden product is never named, nor a closed brand.
+ * read; a draft or hidden product is never named, nor a closed brand,
+ * nor a product in no sales channel (the storefront shows it nowhere).
  */
 
 /** Product names named at most, newest first. */
@@ -18,10 +19,16 @@ export const CATEGORY_BRAND_SAMPLE = 100
 /** Only names and a link's names: nothing priced, stocked or counted per sale. */
 export const CATEGORY_PRODUCT_FIELDS = ["id", "title"] as const
 export const CATEGORY_BRAND_FIELDS = ["id", "brand.name", "brand.is_active"] as const
+/**
+ * Whether a product is in a sales channel at all: the link's ids only
+ * (as `api/store/reviews/visible.ts` reads it), never the channel's data.
+ */
+export const CATEGORY_CHANNEL_FIELD = "sales_channels.id"
 
-interface BrandRow {
+interface ListedRow {
   id: string
   brand?: { name?: string | null; is_active?: boolean | null } | null
+  sales_channels?: ({ id?: string | null } | null)[] | null
 }
 
 /** "40+ ürün": a range, never the exact count of a large listing. */
@@ -38,7 +45,7 @@ export function productCountLabel(count: number): string | null {
 }
 
 /** The most frequent names first; a tie keeps the alphabetical order. */
-function topBrands(rows: readonly BrandRow[]): string[] {
+function topBrands(rows: readonly ListedRow[]): string[] {
   const counts = new Map<string, number>()
   for (const row of rows) {
     const name = row.brand?.is_active === false ? null : row.brand?.name?.trim()
@@ -51,6 +58,22 @@ function topBrands(rows: readonly BrandRow[]): string[] {
     .slice(0, CATEGORY_TOP_BRANDS)
     .map(([name]) => name)
 }
+
+/** The products in at least one sales channel. */
+const shownRows = (rows: readonly ListedRow[]): ListedRow[] =>
+  rows.filter((row) =>
+    (row.sales_channels ?? []).some((channel) => typeof channel?.id === "string")
+  )
+
+/**
+ * How many the storefront lists: exact when the sample is the whole
+ * category, else the category's count in the sample's proportion (only
+ * shown as a range, `productCountLabel`).
+ */
+const shownCount = (count: number, sampled: number, shown: number): number =>
+  sampled >= count ? shown : Math.floor((count * shown) / Math.max(1, sampled))
+
+const NONE: RecordFacts = { products: null, brands: null, product_count: null }
 
 /** The category's listing as the data block takes it; empty fields for a category with none. */
 export async function categoryProductFacts(
@@ -66,19 +89,32 @@ export async function categoryProductFacts(
     }
   )
   if (rows.length === 0) {
-    return { products: null, brands: null, product_count: null }
+    return NONE
   }
-  const names = [...new Set(rows.map((row) => row.title.trim()).filter((title) => title !== ""))]
-  // Through the product's side of the brand link (links/product-brand.ts)
+  // Through the product's side of the brand and sales channel links (links/product-brand.ts)
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product",
-    fields: [...CATEGORY_BRAND_FIELDS],
+    fields: [...CATEGORY_BRAND_FIELDS, CATEGORY_CHANNEL_FIELD],
     filters: { id: rows.map((row) => row.id) },
   })
-  const brands = topBrands(data)
+  const listed = shownRows(data)
+  const shown = new Set(listed.map((row) => row.id))
+  if (shown.size === 0) {
+    return NONE
+  }
+  // Newest first, as listed: the query's own order is not the listing's
+  const names = [
+    ...new Set(
+      rows
+        .filter((row) => shown.has(row.id))
+        .map((row) => row.title.trim())
+        .filter((title) => title !== "")
+    ),
+  ]
+  const brands = topBrands(listed)
   return {
     products: names.slice(0, CATEGORY_PRODUCT_EXAMPLES).join(", ") || null,
     brands: brands.length > 0 ? brands.join(", ") : null,
-    product_count: productCountLabel(count),
+    product_count: productCountLabel(shownCount(count, rows.length, shown.size)),
   }
 }

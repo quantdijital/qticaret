@@ -11892,7 +11892,30 @@
         "example": "Örnek {{n}}",
         "addExample": "Örnek ekle",
         "removeExample": "Örnek {{n}} kaldır"
+      },
+      "try": {
+        "title": "Dene",
+        "description": "Kaydetmeden önce yönergenin etkisini görün: seçtiğiniz ürün için iki öneri yan yana gelir, biri yönergesiz, biri yukarıdaki değerlerle.",
+        "product": "Ürün",
+        "productPlaceholder": "Ürün arayın",
+        "noProducts": "Ürün bulunamadı.",
+        "task": "İş",
+        "run": "Dene",
+        "running": "Deneniyor…",
+        "cost": "Her deneme iki yapay zekâ işlemi sayılır. Öneriler kaydedilmez, ürüne yazılmaz.",
+        "plain": "Yönergesiz",
+        "guided": "Yönergeyle",
+        "refused": "Bu öneri denetimden geçmedi; yeniden deneyin."
       }
+    },
+    "acceptance": {
+      "title": "Son {{days}} günde kabul oranı",
+      "hint": "Yapay zekânın önerdiği ve sizin kullandığınız metinlerin oranı. Denetimden geçmeyen öneriler sayılmaz; yazım yönergesindeki bir değişikliğin işe yarayıp yaramadığı burada görünür.",
+      "empty": "Son 30 günde öneri yok.",
+      "task": "İş",
+      "offered": "Öneri",
+      "accepted": "Kabul",
+      "rate": "Oran"
     }
   }
 }

@@ -1,6 +1,7 @@
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { CONTENT_DRAFTS_MODULE } from "../../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../../modules/content-drafts/service"
+import { draftText } from "../../../lib/ai/draft-candidates"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
 import type { CallOutcome } from "./call-service"
 
@@ -41,12 +42,8 @@ export const saveSuggestionStep = createStep(
       entity_type: input.entity_type,
       entity_id: input.entity_id,
       kind: input.task,
-      // Candidates (adr/0074 §4) kept as offered, one per line; each is a single line
-      text: refused
-        ? ""
-        : outcome.candidates.length > 1
-          ? outcome.candidates.join("\n")
-          : (outcome.text ?? ""),
+      // Candidates (adr/0074 §4) kept as offered, one per line (lib/ai/draft-candidates.ts)
+      text: refused ? "" : draftText(outcome.candidates, outcome.text),
       prompt: keepData ? `${input.system}\n\n${input.data}` : input.system,
       provider: input.service,
       source: AI_SUGGESTION_SOURCE,

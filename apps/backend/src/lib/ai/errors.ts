@@ -28,6 +28,8 @@ export const AI_ERROR_KEYS = [
   "ai.unknown_entity",
   "ai.unknown_task",
   "ai.suggestion_not_open",
+  // A candidate the suggestion never offered (adr/0074 §4)
+  "ai.candidate_unknown",
   // Aşama 9: reviews and questions
   "ai.reviews_off",
   "ai.not_enough_reviews",

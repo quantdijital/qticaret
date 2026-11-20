@@ -2,6 +2,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { categoryFacts } from "../facts/category"
 import {
   CATEGORY_BRAND_FIELDS,
+  CATEGORY_CHANNEL_FIELD,
   CATEGORY_PRODUCT_EXAMPLES,
   CATEGORY_PRODUCT_FIELDS,
   productCountLabel,
@@ -90,6 +91,16 @@ describe("a product's richer facts", () => {
     }
   })
 
+  it("names no brand the shop closed (B4)", async () => {
+    const { container, asked } = containerWith([
+      [{ ...PRODUCT, brand: { name: "Kapalı Marka", is_active: false } }],
+      [{ ...PRODUCT, brand: { name: "Açık Marka", is_active: true } }],
+    ])
+    expect((await productFacts(container, "prod_1"))["brand"]).toBeNull()
+    expect(asked[0]?.fields).toContain("brand.is_active")
+    expect((await productFacts(container, "prod_1"))["brand"]).toBe("Açık Marka")
+  })
+
   it("leaves the search fields out where another task reads the product (a review, an image)", async () => {
     const { container, asked } = containerWith([[PRODUCT]])
     const facts = await readProductFacts(container, "prod_1")
@@ -111,6 +122,7 @@ describe("what a category lists", () => {
   }))
   const brands = rows.map((row, index) => ({
     id: row.id,
+    sales_channels: [{ id: "sc_1" }],
     brand:
       index < 8
         ? { name: "Alfa", is_active: true }
@@ -145,6 +157,47 @@ describe("what a category lists", () => {
     for (const field of [...CATEGORY_PRODUCT_FIELDS, ...CATEGORY_BRAND_FIELDS]) {
       expect(field).not.toMatch(FORBIDDEN)
     }
+    // The channel link's ids alone, to tell a product the storefront shows (B4)
+    expect(asked[1]?.fields).toEqual([...CATEGORY_BRAND_FIELDS, CATEGORY_CHANNEL_FIELD])
+    expect(CATEGORY_CHANNEL_FIELD).toBe("sales_channels.id")
+  })
+
+  it("names no product in no sales channel, nor its brand, and counts only the shown (B4)", async () => {
+    const hidden = brands.map((row, index) =>
+      index < 5
+        ? { ...row, sales_channels: [] }
+        : index < 8
+          ? { ...row, sales_channels: null }
+          : row
+    )
+    const { container } = containerWith([[CATEGORY], hidden], { rows, count: 20 })
+    const facts = await categoryFacts(container, "pcat_1")
+    const productNames = facts["products"]
+    const names = typeof productNames === "string" ? productNames.split(", ") : []
+    expect(names[0]).toBe("Gömlek 8")
+    expect(names).not.toContain("Gömlek 0")
+    expect(names).not.toContain("Gömlek 7")
+    // Alfa's eight products are all hidden
+    expect(facts).toMatchObject({ brands: "Beta, Gama", product_count: "10+ ürün" })
+
+    const none = containerWith(
+      [[CATEGORY], brands.map((row) => ({ ...row, sales_channels: [] }))],
+      { rows, count: 20 }
+    )
+    expect(await categoryFacts(none.container, "pcat_1")).toMatchObject({
+      products: null,
+      brands: null,
+      product_count: null,
+    })
+  })
+
+  it("estimates a large category's shown count from its sample", async () => {
+    const half = brands.map((row, index) =>
+      index % 2 === 0 ? row : { ...row, sales_channels: [] }
+    )
+    const { container } = containerWith([[CATEGORY], half], { rows, count: 300 })
+    // 300 listed, half of the sample shown: about 150
+    expect((await categoryFacts(container, "pcat_1"))["product_count"]).toBe("100+ ürün")
   })
 
   it("names nothing for a category with no published product", async () => {

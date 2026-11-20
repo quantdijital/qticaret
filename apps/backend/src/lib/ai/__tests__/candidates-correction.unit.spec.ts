@@ -1,6 +1,6 @@
 import { fakeTextConnector } from "../connectors/fake"
 import type { TextConnector, TextRequest } from "../connectors/types"
-import { correctionNote, withCorrection } from "../correction"
+import { correctionNote, quoted, withCorrection } from "../correction"
 import { aiProviderError } from "../errors"
 import { suggestionCandidates } from "../gate"
 import { RULES_HEADING, systemOf } from "../instructions"
@@ -171,7 +171,10 @@ describe("the one correction (adr/0074 §4)", () => {
       [{ text: "Keten Gömlek Ultra", problems: ["ungrounded"] }],
       data
     )
-    expect(named).toContain("(ultra)")
+    // Quoted and labelled as the check's finding (security review of PR 237, D2)
+    expect(named).toContain("(otomatik denetimin bulduğu sözcükler: “ultra”)")
+    // A word's own quote marks cannot close the quote early
+    expect(quoted(['a"b', "x”y", "‘z’"])).toBe("“ab”, “xy”, “z”")
     expect(named).not.toContain("1. aday")
     const quiet = correctionNote(
       PRODUCT_TITLE_TASK,

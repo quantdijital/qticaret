@@ -89,6 +89,46 @@ class ContentDraftsModuleService extends MedusaService({ ContentDraft, DraftUsag
     )
     return row?.count ?? 0
   }
+
+  /**
+   * By kind, the suggestions of `source` made since `since`: those offered
+   * (not refused by the gate) and those accepted (adr/0074 §4, the
+   * acceptance rate). Counts only, no text.
+   */
+  @InjectManager()
+  async decisionsSince(
+    source: string,
+    since: Date,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<DraftDecisions[]> {
+    const manager = sharedContext.manager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("content_drafts: decisions are read with a manager")
+    }
+    const rows: { kind: string; offered: string | number; accepted: string | number }[] =
+      await manager.execute(
+        `SELECT kind,
+                count(*) FILTER (WHERE status <> 'refused') AS offered,
+                count(*) FILTER (WHERE status = 'approved') AS accepted
+         FROM content_draft
+         WHERE source = ? AND created_at >= ? AND deleted_at IS NULL
+         GROUP BY kind
+         ORDER BY kind`,
+        [source, since]
+      )
+    return rows.map((row) => ({
+      kind: row.kind,
+      offered: Number(row.offered),
+      accepted: Number(row.accepted),
+    }))
+  }
+}
+
+/** One kind's suggestions over a period: offered and accepted. */
+export interface DraftDecisions {
+  kind: string
+  offered: number
+  accepted: number
 }
 
 export default ContentDraftsModuleService

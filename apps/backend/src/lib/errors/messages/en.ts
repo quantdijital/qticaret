@@ -724,6 +724,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.unknown_entity": "The record the suggestion was asked for was not found.",
   "ai.unknown_task": "There is no such AI task.",
   "ai.suggestion_not_open": "This suggestion is no longer waiting for a decision.",
+  "ai.candidate_unknown": "This suggestion has no such candidate.",
   // Aşama 9: reviews and questions
   "ai.reviews_off": "AI on reviews and questions is off. You can turn it on under Settings > AI.",
   "ai.not_enough_reviews": "A summary needs at least 3 approved reviews of this product.",

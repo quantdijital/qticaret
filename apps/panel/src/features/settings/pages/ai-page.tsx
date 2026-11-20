@@ -10,6 +10,7 @@ import { aiServicesQuery } from "@/features/ai/api/ai"
 import { useCan } from "@/features/auth/api/staff"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import { AccountAlert } from "@/features/settings/components/account-form"
+import { AiAcceptanceCard } from "@/features/settings/components/ai-acceptance-card"
 import { AiGuidanceTab } from "@/features/settings/components/ai-guidance-tab"
 import { AiReviewsCard } from "@/features/settings/components/ai-reviews-card"
 import { AiScenesCard } from "@/features/settings/components/ai-scenes-card"
@@ -85,6 +86,7 @@ function AiServicesTab() {
           <AiReviewsCard />
           <AiScenesCard />
           <AiUsageCard />
+          <AiAcceptanceCard />
         </>
       )}
     </div>

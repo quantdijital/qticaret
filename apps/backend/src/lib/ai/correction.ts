@@ -11,7 +11,8 @@ import { ungroundedWords } from "./short-text-gate"
  * the service is asked once more with the gate's reasons, in our own
  * words ("82 karakter; 30 ile 60 karakter arası olmalı"). A refused text
  * is never echoed back (it may hold what the gate caught); only its
- * length and, for an invented word, the word itself.
+ * length and, for an invented word, the word itself (quoted, labelled as
+ * what the automatic check found).
  */
 
 export interface RefusedCandidate {
@@ -22,6 +23,13 @@ export interface RefusedCandidate {
 /** Invented words named back at most, each cut to a search word's length. */
 const MAX_NAMED_WORDS = 5
 const MAX_NAMED_WORD_LENGTH = 30
+
+// A word with a quote mark of its own cannot close ours early: marks taken out first
+const QUOTE_MARKS = /["“”„«»'‘’`]/g
+
+/** Each word in quotes: “ayna”, “altın”. */
+export const quoted = (words: readonly string[]): string =>
+  words.map((word) => `“${word.replace(QUOTE_MARKS, "")}”`).join(", ")
 
 function lengthReason(task: AiTask, text: string): string {
   const chars = Array.from(text).length
@@ -59,8 +67,9 @@ function reasonOf(task: AiTask, candidate: RefusedCandidate, problem: string, da
     const named = (quiet ? [] : ungroundedWords(candidate.text, data))
       .slice(0, MAX_NAMED_WORDS)
       .map((word) => Array.from(word).slice(0, MAX_NAMED_WORD_LENGTH).join(""))
+    // The model's own words, each quoted and labelled as the check's finding, never as an instruction
     return named.length > 0
-      ? `veride olmayan sözcük var (${named.join(", ")}); yalnızca verideki sözcükleri kullan`
+      ? `veride olmayan sözcük var (otomatik denetimin bulduğu sözcükler: ${quoted(named)}); yalnızca verideki sözcükleri kullan`
       : "veride olmayan sözcük var; yalnızca verideki sözcükleri kullan"
   }
   return REASONS[problem] ?? "kurallara uymuyor"

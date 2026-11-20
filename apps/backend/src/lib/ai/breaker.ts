@@ -28,11 +28,23 @@ export const resetAiBreakers = (): void => {
   breakers.clear()
 }
 
-/** Runs one call through the service's breaker. */
+/** A text or card task's correction that failed, as `withAiBreaker`'s `laterFailure` reads it. */
+export const correctionFailure = (result: {
+  correction: { status: string; error?: unknown } | null
+}): unknown => (result.correction?.status === "failed" ? result.correction.error : null)
+
+/**
+ * Runs one call through the service's breaker. `laterFailure` names a
+ * failure the call returned instead of throwing (the one correction,
+ * adr/0074 §4, made after the first call answered): the service's last
+ * word, so an unwell one is recorded as the permit's failure, not its
+ * success, and corrections that keep failing open the circuit.
+ */
 export async function withAiBreaker<T>(
   serviceId: string,
   call: () => Promise<T>,
-  options: CircuitBreakerOptions = DEFAULT_CIRCUIT_BREAKER
+  options: CircuitBreakerOptions = DEFAULT_CIRCUIT_BREAKER,
+  laterFailure?: (result: T) => unknown
 ): Promise<T> {
   const breaker = breakerOf(serviceId, options)
   const permit = breaker.acquire()
@@ -45,7 +57,12 @@ export async function withAiBreaker<T>(
   }
   try {
     const result = await call()
-    breaker.recordSuccess()
+    const later = laterFailure?.(result)
+    if (later !== undefined && later !== null && failureOf(later).unwell) {
+      breaker.recordFailure()
+    } else {
+      breaker.recordSuccess()
+    }
     return result
   } catch (error) {
     const failure = failureOf(error)
