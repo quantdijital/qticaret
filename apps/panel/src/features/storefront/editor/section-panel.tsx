@@ -137,7 +137,7 @@ export function SectionPanel({
             />
           ) : null}
           {/* Stil: the variant first, open */}
-          {offersVariants(section, group === "footer") ? (
+          {offersVariants(section, group === "footer", group === "pages") ? (
             <PanelGroup
               name="variant"
               title={t(`${P}.variant`)}
@@ -148,7 +148,7 @@ export function SectionPanel({
                 id={FIELD_IDS.variant(section.id)}
                 type={section.type}
                 value={section.variant}
-                offered={offeredVariants(section, group === "footer")}
+                offered={offeredVariants(section, group === "footer", group === "pages")}
                 onChange={(next) => {
                   // Its own step in the history: "Geri al" brings the old variant back
                   if (section.type === "footer_bar" && onFooterVariant) {
@@ -174,9 +174,7 @@ export function SectionPanel({
                 {(["top", "bottom"] as const).map((placement) => (
                   <label key={placement} className="flex items-center gap-2 text-sm">
                     <RadioGroupItem value={placement} />
-                    {t(
-                      `${group === "pages" ? "storefront.editor.contentPage" : "storefront.editor.tree"}.placements.${placement}`
-                    )}
+                    {t(`storefront.editor.tree.placements.${placement}`)}
                   </label>
                 ))}
               </RadioGroup>

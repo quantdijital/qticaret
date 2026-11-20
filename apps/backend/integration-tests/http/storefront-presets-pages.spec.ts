@@ -4,6 +4,8 @@ import { createAdminUser } from "../helpers/admin"
 import { LOOK, withCutlery } from "../helpers/designs"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { writePageText } from "../helpers/pages"
+import { LAYOUT_LIMITS } from "../../src/lib/storefront/layout"
 
 jest.setTimeout(240 * 1000)
 
@@ -66,18 +68,11 @@ medusaIntegrationTestRunner({
         )
 
       // Hakkımızda still a draft; İletişim live, laid out by the shop
-      const aboutId = await content({
-        kind: "page",
-        title: "Hakkımızda",
-        handle: "hakkimizda",
-        body: doc("Atölyemiz Denizli'de."),
-      })
-      const contactId = await content({
-        kind: "page",
-        title: "İletişim",
-        handle: "iletisim",
-        body: doc("Bize yazın."),
-      })
+      const aboutId = await content({ kind: "page", title: "Hakkımızda", handle: "hakkimizda" })
+      const contactId = await content({ kind: "page", title: "İletişim", handle: "iletisim" })
+      // A page's text is the system's to write (adr/0073 Ek 2026-11-19 (2) K4)
+      await writePageText(container, aboutId, doc("Atölyemiz Denizli'de."))
+      await writePageText(container, contactId, doc("Bize yazın."))
       expect(
         (await settle(http.post(`/admin/content/${contactId}`, { status: "published" }, asOwner)))
           .status
@@ -136,7 +131,7 @@ medusaIntegrationTestRunner({
       expect(third.data.layout.draft.pages).toEqual([ownContact])
     })
 
-    it("applies the look without the Hakkımızda layout when twenty pages have their own", async () => {
+    it("applies the look without the Hakkımızda layout when fifty pages have their own", async () => {
       const container = getContainer()
       const owner = await createAdminUser(http, container)
       const asOwner = { headers: owner.headers }
@@ -144,14 +139,16 @@ medusaIntegrationTestRunner({
       const content = async (body: Record<string, unknown>) =>
         (await settle(http.post<{ entry: { id: string } }>("/admin/content", body, asOwner))).data
           .entry.id
-      await content({ kind: "page", title: "Hakkımızda", handle: "hakkimizda", body: doc("Biz.") })
+      const aboutId = await content({ kind: "page", title: "Hakkımızda", handle: "hakkimizda" })
+      await writePageText(container, aboutId, doc("Biz."))
       const own: PageLayout[] = []
-      for (let index = 0; index < 20; index++) {
+      // The group's limit: fifty pages since every page with text has an entry (adr/0073 Ek
+      // 2026-11-19 (2) K1)
+      for (let index = 0; index < LAYOUT_LIMITS.pages; index++) {
         const id = await content({
           kind: "page",
           title: `Sayfa ${String(index + 1)}`,
           handle: `sayfa-${String(index + 1)}`,
-          body: doc("Metin."),
         })
         own.push({
           page_id: id,

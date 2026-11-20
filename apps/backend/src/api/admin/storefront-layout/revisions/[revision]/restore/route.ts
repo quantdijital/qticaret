@@ -23,7 +23,12 @@ export async function POST(
   }
   const source = await draftSource(req.scope, revision, req.validatedBody.menus)
   const { result } = await replaceDraftWorkflow(req.scope).run({
-    input: { source, actor: req.auth_context.actor_id, reason: "restore" },
+    input: {
+      source: source.document,
+      text_at: source.text_at,
+      actor: req.auth_context.actor_id,
+      reason: "restore",
+    },
   })
   res.json({
     layout: await adminLayout(req.scope),

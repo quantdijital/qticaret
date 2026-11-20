@@ -24,10 +24,14 @@ import type { StoreMenu } from "./menus-read"
 
 /**
  * The addresses of the images shown with their sizes: openings, slides,
- * strips, the picture beside a rich text (not the pictures in its text).
+ * strips, the picture beside a rich text (not the pictures in its text),
+ * a content page's own text's pictures (adr/0073 Ek 2026-11-19 (2) K2,
+ * printed with their versions as the page's text was).
  */
 export const imageUrls = (section: BodySection): string[] =>
-  section.type === "rich_text" ? richTextImages(section) : imagesOf(section)
+  section.type === "rich_text" && section.variant !== "article"
+    ? richTextImages(section)
+    : imagesOf(section)
 
 /**
  * The design as the storefront shows it at a moment (adr/0049): only the

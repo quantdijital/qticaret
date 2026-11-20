@@ -125,21 +125,24 @@ describe("the katalog preset's draft (adr/0049 Ek 2026-11-14, Katalog ana sayfas
 })
 
 describe("the katalog preset's Hakkımızda page (adr/0073 §4)", () => {
-  it("lays out the shop's page below its text, as the editor's schema takes it", () => {
+  it("lays out the shop's page in one list, as the editor's schema takes it", () => {
     const resolved = resolvePreset(katalog.layout, katalog.menus, everything)
     const doc = presetDocument(resolved, presetTheme(katalog.theme_settings), APPLIED, KEPT)
 
     expect(resolved.images).toEqual(["images/acilis-bileme.webp"])
     expect(doc.pages.map((page) => page.page_id)).toEqual([ABOUT])
     const sections = doc.pages[0]?.sections ?? []
-    expect(sections.map((section) => [section.type, section.placement])).toEqual([
-      ["rich_text", "bottom"],
-      ["rich_text", "bottom"],
-      ["trust_badges", "bottom"],
-      ["products", "bottom"],
-      ["reviews", "bottom"],
-      ["help", "bottom"],
+    // One list since adr/0073 Ek 2026-11-19 (2) K1: the preset's older `placement` read as
+    // the stored rule reads it, every section below the page's text, in its order
+    expect(sections.map((section) => section.type)).toEqual([
+      "rich_text",
+      "rich_text",
+      "trust_badges",
+      "products",
+      "reviews",
+      "help",
     ])
+    expect(sections.some((section) => "placement" in section)).toBe(false)
     expect(sections[0]).toMatchObject({
       variant: "with_image",
       image_side: "end",

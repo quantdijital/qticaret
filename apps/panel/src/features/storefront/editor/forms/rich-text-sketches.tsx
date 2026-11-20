@@ -40,3 +40,14 @@ export function RichTextWithImage() {
     </>
   )
 }
+
+/** "Sayfa metni": a content page's text at reading measure, no pane (adr/0073 Ek 2026-11-19 (2)). */
+export function RichTextArticle() {
+  return (
+    <>
+      <rect x={28} y={4} width={40} height={4} rx={1} className="fill-current opacity-80" />
+      <Lines x={28} y={12} w={56} />
+      <rect x={28} y={27} width={44} height={2} rx={1} className="fill-current opacity-45" />
+    </>
+  )
+}

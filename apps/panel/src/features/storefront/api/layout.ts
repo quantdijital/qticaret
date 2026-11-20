@@ -137,15 +137,19 @@ export const useSaveLayout = () =>
 
 /**
  * A menu set the draft carried is live now (adr/0063 §3): the Menüler
- * screen reads again; so does the gallery ("Yayında").
+ * screen reads again; so does the gallery ("Yayında"). `pages_live`:
+ * the content pages in draft that go live with it (adr/0073 Ek 2026-11-19
+ * (2) K5), read again too.
  */
 export const usePublishLayout = () =>
   useLayoutAction(
-    () => post(`${PATH}/publish`),
+    (pagesLive: readonly string[] = []) =>
+      post(`${PATH}/publish`, pagesLive.length > 0 ? { pages_live: pagesLive } : {}),
     true,
     (client) => {
       void client.invalidateQueries({ queryKey: MENUS_KEY })
       void client.invalidateQueries({ queryKey: GALLERY_KEY })
+      void client.invalidateQueries({ queryKey: ["content"] })
     }
   )
 

@@ -11,7 +11,7 @@ import type {
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
-import { CONTENT_PAGE_SECTION_TYPES, PAGE_LAYOUT_LIMITS } from "@qticaret/types"
+import { CONTENT_PAGE_SECTION_TYPES, PAGE_LAYOUT_LIMITS, PAGE_ONLY_TYPES } from "@qticaret/types"
 import { LAYOUT_LIMITS } from "@/features/storefront/api/layout"
 
 /**
@@ -83,13 +83,16 @@ export const CATEGORY_TYPES: readonly CategorySectionType[] = [
 ]
 
 /**
- * What a content page takes, above or below its text (adr/0073 §3): the
- * contract's list, in the home page's order (no opening, no price bands,
- * nothing of the header or the footer).
+ * What a content page takes (adr/0073 §3, Ek 2026-11-19 (2) K5): the
+ * contract's list, the home page's types in their order (no opening, no
+ * price bands, nothing of the header or the footer), then the page's own
+ * (contact, the payment and shipping facts, each once on a page). The
+ * page's text (`rich_text` as `article`) is offered first by the chooser.
  */
-export const PAGE_TYPES: readonly HomeSectionType[] = HOME_TYPES.filter((type) =>
-  (CONTENT_PAGE_SECTION_TYPES as readonly string[]).includes(type)
-)
+export const PAGE_TYPES: readonly BodySectionType[] = [
+  ...HOME_TYPES.filter((type) => (CONTENT_PAGE_SECTION_TYPES as readonly string[]).includes(type)),
+  ...PAGE_ONLY_TYPES,
+]
 
 /** Each page body's section types, as its chooser offers them. */
 export const GROUP_TYPES: Readonly<Record<PageGroup, readonly BodySectionType[]>> = {
@@ -123,10 +126,7 @@ export const allSections = (doc: LayoutDocument): AnySection[] => [
   ...doc.pages.flatMap((page) => page.sections),
 ]
 
-/**
- * A category page's (or a content page's) sections in one place: above
- * the grid (the text) or below it, in order (the grid in neither).
- */
+/** A category page's sections in one place: above the grid or below it, in order (the grid in neither). */
 export function placed<S extends AnySection>(
   sections: readonly S[],
   placement: Placement
@@ -189,6 +189,7 @@ export {
   newFooterNewsletter,
   newHeaderMarquee,
   newHomeSection,
+  newPageText,
 } from "./new-sections"
 
 /**

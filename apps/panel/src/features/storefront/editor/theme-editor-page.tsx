@@ -8,6 +8,7 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { layoutQuery } from "@/features/storefront/api/layout"
 import { errorText } from "@/lib/errors"
 import { HintProvider } from "./shared/hint"
+import type { OpenAtFirst } from "./opened"
 import { ThemeEditor } from "./theme-editor"
 import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 
@@ -17,10 +18,13 @@ const E = "storefront.editor"
 export function ThemeEditorPage({
   open = null,
   content = null,
+  onContent = content !== null,
 }: {
-  open?: "preferences" | null
+  open?: OpenAtFirst
   /** The content page the address names (`?icerik=`, adr/0073 §5). */
   content?: string | null
+  /** Opens on the content pages (`?sayfa=icerik`, or a page named). */
+  onContent?: boolean
 }) {
   const { t } = useTranslation()
   useDocumentTitle(t(`${E}.title`))
@@ -29,7 +33,12 @@ export function ThemeEditorPage({
     // One tooltip clock for the whole editor: the next hint along opens at once
     return (
       <HintProvider>
-        <ThemeEditor layout={query.data} openAtFirst={open} content={content} />
+        <ThemeEditor
+          layout={query.data}
+          openAtFirst={open}
+          content={content}
+          onContent={onContent}
+        />
       </HintProvider>
     )
   }

@@ -1,6 +1,7 @@
 import {
   ATOLYE_SECTION_SCALE,
   ATOLYE_TONES,
+  PAGE_FIXED_IDS,
   TONE_SURFACES,
   atolyeTheme,
 } from "@qticaret/theme-atolye"
@@ -71,4 +72,5 @@ export const entry: ThemeEntry = {
   theme: atolyeTheme,
   fontPreloads,
   style: (settings) => themeStyle(settings, atolyeDeclarations(settings)),
+  pageIds: PAGE_FIXED_IDS,
 }

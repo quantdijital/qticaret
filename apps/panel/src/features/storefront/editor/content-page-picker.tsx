@@ -1,14 +1,15 @@
-import { Check, ChevronsUpDown, LayoutTemplate, Loader2 } from "lucide-react"
+import { Check, ChevronsUpDown, LayoutTemplate, Loader2, Plus } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { PAGE_LAYOUT_LIMITS } from "@qticaret/types"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Command,
-  CommandEmpty,
+  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@qticaret/admin-ui/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -21,20 +22,24 @@ const C = "storefront.editor.contentPage"
 const DELAY_MS = 250
 
 /**
- * Which content page the editor works on (adr/0073 §5), beside the page
- * choice: İçerik's pages by title or address, drafts marked "Taslak", the
- * ones with a layout of their own marked; while twenty have one, it says
- * no other can have one (the pages that have one stay open to edit).
+ * Which content page the editor works on (adr/0073 §5, Ek 2026-11-19 (2)
+ * K5), beside the page choice: "Yeni sayfa" first, then the shop's pages
+ * by title or address, drafts marked "Taslak", the ones with a layout of
+ * their own marked; while fifty have one, it says no other can have one
+ * (the pages that have one stay open to edit).
  */
 export function ContentPagePicker({
   doc,
   page,
   onChange,
+  onNew,
 }: {
   doc: LayoutDocument
   /** The page picked; null: none yet. */
   page: ContentPageOption | null
   onChange: (id: string) => void
+  /** Opens the new page's dialog. */
+  onNew: () => void
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -76,13 +81,30 @@ export function ContentPagePicker({
             </p>
           ) : null}
           <CommandList>
+            <CommandGroup>
+              <CommandItem
+                value="__new__"
+                className="text-primary-text"
+                onSelect={() => {
+                  setOpen(false)
+                  onNew()
+                }}
+              >
+                <Plus className="size-4" aria-hidden="true" />
+                {t(`${C}.new.open`)}
+              </CommandItem>
+            </CommandGroup>
+            <CommandSeparator />
             {found.loading ? (
               <div className="flex justify-center py-6">
                 <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />
               </div>
-            ) : (
-              <CommandEmpty>{t(q ? `${C}.noMatch` : `${C}.empty`)}</CommandEmpty>
-            )}
+            ) : found.pages.length === 0 ? (
+              // "Yeni sayfa" stays listed: the list is never empty to the command
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                {t(q ? `${C}.noMatch` : `${C}.empty`)}
+              </p>
+            ) : null}
             {found.pages.map((option) => (
               <CommandItem
                 key={option.id}

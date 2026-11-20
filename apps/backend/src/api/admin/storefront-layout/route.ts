@@ -14,6 +14,7 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const { result } = await saveLayoutDraftWorkflow(req.scope).run({
+    // The draft, and where an older editor's pages keep their text (adr/0073 Ek 2026-11-19 (2) K1)
     input: req.validatedBody.document,
   })
   // Content pages deleted since, their layouts left out of the draft (adr/0073 §1)

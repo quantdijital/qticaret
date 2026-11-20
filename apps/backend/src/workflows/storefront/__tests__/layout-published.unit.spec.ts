@@ -13,6 +13,16 @@ import type { LayoutEdition } from "../layout-row"
  * never serves that publication's document.
  */
 
+// A page the design has no entry for is answered with its text as sections (adr/0073 Ek
+// 2026-11-19 (2) K1): here a page with no text and no role, so nothing to hydrate
+jest.mock("../page-text-source", () => ({
+  pageTextSources: jest.fn((_: unknown, ids: string[]) =>
+    Promise.resolve(
+      new Map(ids.map((id) => [id, { id, body: { type: "doc", content: [] }, roles: [] }]))
+    )
+  ),
+}))
+
 jest.mock("../layout-row", () => ({
   ...jest.requireActual<Record<string, unknown>>("../layout-row"),
   layoutEdition: jest.fn(),
@@ -66,17 +76,22 @@ describe("the published design read once per revision", () => {
     expect(next.home[0]).toMatchObject({ title: "Yayındaki" })
   })
 
-  it("answers a page the live design does not lay out without hydrating or a second read", async () => {
+  it("answers a page the live design does not lay out from its text, with no second read", async () => {
     edition.mockResolvedValue(live(201))
     row.mockResolvedValue(published(201) as never)
-    expect(await publishedPageLayout(container, PAGE, null)).toBeNull()
-    expect(await publishedPageLayout(container, PAGE, ["sc_1"])).toBeNull()
+    const made = { page_id: PAGE, sections: [], synthesized: true }
+    expect(await publishedPageLayout(container, PAGE, null)).toEqual(made)
+    expect(await publishedPageLayout(container, PAGE, ["sc_1"])).toEqual(made)
     expect(row).toHaveBeenCalledTimes(1)
   })
 
   it("reads nothing more than the revision while nothing is published", async () => {
     edition.mockResolvedValue(live(0, null))
-    expect(await publishedPageLayout(container, PAGE, null)).toBeNull()
+    expect(await publishedPageLayout(container, PAGE, null)).toEqual({
+      page_id: PAGE,
+      sections: [],
+      synthesized: true,
+    })
     expect(row).not.toHaveBeenCalled()
   })
 })

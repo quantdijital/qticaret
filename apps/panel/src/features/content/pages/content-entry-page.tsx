@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getRouteApi } from "@tanstack/react-router"
+import { Navigate, getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
@@ -71,7 +71,8 @@ function SeoSection({ data }: { data: ContentDetail }) {
 }
 
 /**
- * A content page or blog post (F3.16, docs/06 "Metin sayfaları"): its
+ * A blog post (F3.16, docs/06 "Metin sayfaları"; a content page opens in
+ * the theme editor, adr/0073 Ek 2026-11-19 (2) K5): its
  * title and text first, its search appearance folded under them; beside
  * them, as the product page's column has its own, its dates, the SEO
  * advisor, the cover, the summary and a post's category and tags. Below `xl` one column: the text, the dates, the cover, the
@@ -88,12 +89,16 @@ export function ContentEntryPage() {
     return <LoadingRows rows={8} />
   }
   const data = entry.data
+  // A content page is opened and managed in the theme editor (adr/0073 Ek 2026-11-19 (2) K5)
+  if (data.kind === "page") {
+    return <Navigate to="/storefront/editor" search={{ icerik: data.id, ayar: "sayfa" }} replace />
+  }
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
       <PageHeader
         back={{
           to: "/content",
-          search: data.kind === "post" ? { kind: "post" } : {},
+          search: {},
           label: t(`content.tabs.${data.kind}`),
         }}
         title={data.title}

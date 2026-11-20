@@ -15,6 +15,7 @@ import type {
   ShelfPhoneColumns,
   SliderSettings,
   NewsletterVariant,
+  PageTextSwitch,
   RichTextImageSide,
   RichTextVariant,
   TrustBadgesVariant,
@@ -212,14 +213,19 @@ export interface RichTextSection extends BodySectionBase {
   body: JSONContent
   /**
    * How it is drawn (adr/0073 §3): `pane`, today's; `with_image`, a picture
-   * beside it (the footer group's is the pane only). The server fills the
-   * default on reading.
+   * beside it (the footer group's is the pane only); `article`, a content
+   * page's own text (Ek 2026-11-19 (2) K2, the pages' only). The server
+   * fills the default on reading.
    */
   variant: RichTextVariant
   /** `with_image`: the media library's picture; null only while the shop has not picked one (`imageRequired`). */
   image?: LayoutImage | null
   /** `with_image`: the picture's side from 1024 px. */
   image_side?: RichTextImageSide
+  /** `article`: the outline beside a long text (`auto`, the default) or none. */
+  outline?: PageTextSwitch
+  /** `article`: a questions-and-answers text read as grouped questions (`auto`) or not. */
+  questions?: PageTextSwitch
 }
 
 export interface TrustBadgesSection extends BodySectionBase {

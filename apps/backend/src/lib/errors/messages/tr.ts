@@ -223,6 +223,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.too_large":
     "İçerik çok uzun ya da iç içe; bir sayfa en fazla 200.000 karakter ve birkaç seviye iç içe liste olabilir.",
   "content.unknown": "İçerik bulunamadı.",
+  "content.page_text_in_editor":
+    "Sayfanın metni tema düzenleyicide, sayfanın bölümlerinde düzenlenir; buradan yalnız başlık, adres, kapak ve durum kaydedilir.",
   "errors.busy": "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin.",
   "errors.conflict": "Kayıt bu arada değişti; sayfayı yenileyip tekrar deneyin.",
   "errors.csrf_rejected": "İstek güvenlik kontrolünden geçemedi; sayfayı yenileyip tekrar deneyin.",
@@ -1080,7 +1082,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bölüm eklenen sayfa tanınmadı; yalnız İçerik'teki sayfalar düzenlenebilir. Sayfayı yenileyip yeniden deneyin.",
   "storefront_layout.page_duplicate":
     "Aynı sayfanın düzeni iki kez gönderildi; sayfayı yenileyip yeniden deneyin.",
-  "storefront_layout.pages_limit": "Kendi düzeni olan en çok 20 sayfa olabilir.",
+  "storefront_layout.pages_limit": "Kendi düzeni olan en çok 50 sayfa olabilir.",
   "storefront_layout.page_sections_limit": "Bir sayfada en az bir, en çok 12 bölüm olabilir.",
   "storefront_layout.too_large":
     "Tasarım kaydedilemeyecek kadar büyüdü; bazı bölümleri ya da uzun metinleri kısaltın.",

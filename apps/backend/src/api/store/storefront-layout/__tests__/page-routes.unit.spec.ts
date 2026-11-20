@@ -17,7 +17,7 @@ const LIVE = "cnt_01KLIVE00000000000000000"
 const DRAFT = "cnt_01KDRAFT0000000000000000"
 const POST = "cnt_01KPOST00000000000000000"
 const MISSING = "cnt_01KMISSING00000000000000"
-const LAYOUT = { page_id: LIVE, sections: [{ id: "yardim001", type: "help", placement: "top" }] }
+const LAYOUT = { page_id: LIVE, sections: [{ id: "yardim001", type: "help" }] }
 
 jest.mock("../../../../workflows/storefront/layout-page-read", () => ({
   // A post is not a page: the lookup asks for pages only and finds none
@@ -32,7 +32,7 @@ jest.mock("../access", () => ({
 }))
 jest.mock("../../../../lib/storefront/layout", () => ({
   PAGE_ID: /^cnt_[0-9A-Za-z]{1,40}$/,
-  readStoredLayout: jest.fn((doc: unknown) => doc),
+  readStoredLayoutTexts: jest.fn((doc: unknown) => ({ document: doc, text_at: {} })),
 }))
 
 async function call(route: typeof livePage, id: string) {

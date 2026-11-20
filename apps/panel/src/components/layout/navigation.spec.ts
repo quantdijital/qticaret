@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { itemFor, navItem } from "./navigation"
+import { NAV_GROUPS, itemFor, navItem } from "./navigation"
 
 describe("itemFor: the menu item a page lights", () => {
   it.each(["/customers", "/customers/groups", "/customers/abandoned-carts", "/customers/cus_1"])(
@@ -21,6 +21,17 @@ describe("itemFor: the menu item a page lights", () => {
 
   it("lights none on the alerts page, which belongs to the top bar's bell", () => {
     expect(itemFor("/notifications")).toBeUndefined()
+  })
+})
+
+describe("the Sayfalar item (adr/0073 Ek not 2026-11-20)", () => {
+  it("stands in Vitrin before the blog, lit on its list", () => {
+    expect(navItem("pages")).toMatchObject({ to: "/storefront/pages" })
+    expect(itemFor("/storefront/pages")?.key).toBe("pages")
+    expect(itemFor("/content")?.key).toBe("content")
+    const storefront = NAV_GROUPS.find((group) => group.key === "storefront")
+    const keys = storefront?.items.map((item) => item.key) ?? []
+    expect(keys.indexOf("pages")).toBeLessThan(keys.indexOf("content"))
   })
 })
 

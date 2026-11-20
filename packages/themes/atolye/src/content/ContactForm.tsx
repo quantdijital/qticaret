@@ -37,10 +37,13 @@ export function ContactForm({
   view,
   action,
   words,
+  suffix = "",
 }: {
   view: ContactFormView
   action: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   words: ContactWords
+  /** Added to its ids when another contact section on the page has them (`idSuffixes`). */
+  suffix?: string
 }) {
   const [sent, setSent] = useState(false)
   const { error, checking, pending, onSubmit } = useChallengeForm(async (state, form) => {
@@ -54,10 +57,10 @@ export function ContactForm({
   const ph = words.placeholders
   return (
     <section
-      aria-labelledby="iletisim-formu"
+      aria-labelledby={`iletisim-formu${suffix}`}
       className="flex flex-col gap-6 rounded-tile gf-pane p-6 sm:p-8 lg:p-10"
     >
-      <h2 id="iletisim-formu" className="text-section">
+      <h2 id={`iletisim-formu${suffix}`} className="text-section">
         {words.title}
       </h2>
       {sent ? (
@@ -68,7 +71,7 @@ export function ContactForm({
       ) : (
         <form onSubmit={onSubmit} className="grid gap-5 sm:grid-cols-2">
           <TextField
-            id="iletisim-ad"
+            id={`iletisim-ad${suffix}`}
             name="name"
             label={words.name}
             placeholder={ph.nameExample}
@@ -79,7 +82,7 @@ export function ContactForm({
             defaultValue={view.name ?? ""}
           />
           <TextField
-            id="iletisim-eposta"
+            id={`iletisim-eposta${suffix}`}
             type="email"
             name="email"
             label={words.email}
@@ -90,7 +93,7 @@ export function ContactForm({
             defaultValue={view.email ?? ""}
           />
           <TextField
-            id="iletisim-telefon"
+            id={`iletisim-telefon${suffix}`}
             type="tel"
             name="phone"
             label={optional(words.phone)}
@@ -100,7 +103,7 @@ export function ContactForm({
             inputMode="tel"
           />
           <SelectField
-            id="iletisim-konu"
+            id={`iletisim-konu${suffix}`}
             name="subject"
             label={words.subject}
             required
@@ -116,7 +119,7 @@ export function ContactForm({
             ))}
           </SelectField>
           <TextField
-            id="iletisim-siparis"
+            id={`iletisim-siparis${suffix}`}
             name="order_number"
             label={optional(words.orderNumber)}
             placeholder={ph.orderNumber}
@@ -126,11 +129,11 @@ export function ContactForm({
             className="sm:col-span-2 sm:max-w-xs"
           />
           <div className="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
-            <label htmlFor="iletisim-mesaj" className="text-sm font-semibold">
+            <label htmlFor={`iletisim-mesaj${suffix}`} className="text-sm font-semibold">
               {words.body}
             </label>
             <textarea
-              id="iletisim-mesaj"
+              id={`iletisim-mesaj${suffix}`}
               name="body"
               required
               minLength={10}
@@ -150,7 +153,10 @@ export function ContactForm({
           </p>
           <div role="alert" className="empty:hidden sm:col-span-2">
             {error && (
-              <FieldError id="iletisim-hata" message={words.errors[error] ?? words.fallback} />
+              <FieldError
+                id={`iletisim-hata${suffix}`}
+                message={words.errors[error] ?? words.fallback}
+              />
             )}
           </div>
           <div className="sm:col-span-2">

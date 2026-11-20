@@ -90,6 +90,7 @@ import { Route as AuthSettingsSubscriptionRouteImport } from './routes/_auth/set
 import { Route as AuthSettingsTeamRouteImport } from './routes/_auth/settings/team'
 import { Route as AuthStorefrontLooksRouteImport } from './routes/_auth/storefront/looks'
 import { Route as AuthStorefrontMenusRouteImport } from './routes/_auth/storefront/menus'
+import { Route as AuthStorefrontPagesRouteImport } from './routes/_auth/storefront/pages'
 import { Route as AuthStorefrontPreferencesRouteImport } from './routes/_auth/storefront/preferences'
 import { Route as AuthWholesaleIndexRouteImport } from './routes/_auth/wholesale/index'
 import { Route as AuthWholesaleIdRouteImport } from './routes/_auth/wholesale/$id'
@@ -526,6 +527,11 @@ const AuthStorefrontMenusRoute = AuthStorefrontMenusRouteImport.update({
   path: '/storefront/menus',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthStorefrontPagesRoute = AuthStorefrontPagesRouteImport.update({
+  id: '/storefront/pages',
+  path: '/storefront/pages',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthStorefrontPreferencesRoute =
   AuthStorefrontPreferencesRouteImport.update({
     id: '/storefront/preferences',
@@ -745,6 +751,7 @@ export interface FileRoutesByFullPath {
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/looks': typeof AuthStorefrontLooksRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/storefront/pages': typeof AuthStorefrontPagesRoute
   '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
   '/wholesale/$id': typeof AuthWholesaleIdRoute
   '/wholesale/orders': typeof AuthWholesaleOrdersRoute
@@ -851,6 +858,7 @@ export interface FileRoutesByTo {
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/looks': typeof AuthStorefrontLooksRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/storefront/pages': typeof AuthStorefrontPagesRoute
   '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
   '/wholesale/$id': typeof AuthWholesaleIdRoute
   '/wholesale/orders': typeof AuthWholesaleOrdersRoute
@@ -962,6 +970,7 @@ export interface FileRoutesById {
   '/_auth/settings/team': typeof AuthSettingsTeamRoute
   '/_auth/storefront/looks': typeof AuthStorefrontLooksRoute
   '/_auth/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/_auth/storefront/pages': typeof AuthStorefrontPagesRoute
   '/_auth/storefront/preferences': typeof AuthStorefrontPreferencesRoute
   '/_auth/wholesale/$id': typeof AuthWholesaleIdRoute
   '/_auth/wholesale/orders': typeof AuthWholesaleOrdersRoute
@@ -1072,6 +1081,7 @@ export interface FileRouteTypes {
     | '/settings/team'
     | '/storefront/looks'
     | '/storefront/menus'
+    | '/storefront/pages'
     | '/storefront/preferences'
     | '/wholesale/$id'
     | '/wholesale/orders'
@@ -1178,6 +1188,7 @@ export interface FileRouteTypes {
     | '/settings/team'
     | '/storefront/looks'
     | '/storefront/menus'
+    | '/storefront/pages'
     | '/storefront/preferences'
     | '/wholesale/$id'
     | '/wholesale/orders'
@@ -1288,6 +1299,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/team'
     | '/_auth/storefront/looks'
     | '/_auth/storefront/menus'
+    | '/_auth/storefront/pages'
     | '/_auth/storefront/preferences'
     | '/_auth/wholesale/$id'
     | '/_auth/wholesale/orders'
@@ -1909,6 +1921,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthStorefrontMenusRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/storefront/pages': {
+      id: '/_auth/storefront/pages'
+      path: '/storefront/pages'
+      fullPath: '/storefront/pages'
+      preLoaderRoute: typeof AuthStorefrontPagesRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/storefront/preferences': {
       id: '/_auth/storefront/preferences'
       path: '/storefront/preferences'
@@ -2235,6 +2254,7 @@ interface AuthRouteChildren {
   AuthSeoSearchRoute: typeof AuthSeoSearchRoute
   AuthStorefrontLooksRoute: typeof AuthStorefrontLooksRoute
   AuthStorefrontMenusRoute: typeof AuthStorefrontMenusRoute
+  AuthStorefrontPagesRoute: typeof AuthStorefrontPagesRoute
   AuthStorefrontPreferencesRoute: typeof AuthStorefrontPreferencesRoute
   AuthWholesaleIdRoute: typeof AuthWholesaleIdRoute
   AuthWholesaleOrdersRoute: typeof AuthWholesaleOrdersRoute
@@ -2297,6 +2317,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthSeoSearchRoute: AuthSeoSearchRoute,
   AuthStorefrontLooksRoute: AuthStorefrontLooksRoute,
   AuthStorefrontMenusRoute: AuthStorefrontMenusRoute,
+  AuthStorefrontPagesRoute: AuthStorefrontPagesRoute,
   AuthStorefrontPreferencesRoute: AuthStorefrontPreferencesRoute,
   AuthWholesaleIdRoute: AuthWholesaleIdRoute,
   AuthWholesaleOrdersRoute: AuthWholesaleOrdersRoute,

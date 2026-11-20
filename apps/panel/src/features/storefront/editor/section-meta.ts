@@ -6,6 +6,9 @@ import {
   Boxes,
   CircleHelp,
   Columns3,
+  Contact,
+  CreditCard,
+  FileText,
   GalleryHorizontal,
   GalleryHorizontalEnd,
   LayoutGrid,
@@ -22,14 +25,18 @@ import {
   Star,
   Tags,
   Text,
+  Truck,
   Wallet,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { AnySection, BodySectionType, MainSectionType } from "@/features/storefront/api/layout"
 
-/** What a section is called: `storefront.editor.types.<type>` (the footer's box is its own). */
+/**
+ * What a section is called: `storefront.editor.types.<type>` (the footer's
+ * box is its own, so is a content page's text, adr/0073 Ek 2026-11-19 (2) K2).
+ */
 export type SectionKind =
-  BodySectionType | MainSectionType | "announcement_bar" | "footer_newsletter"
+  BodySectionType | MainSectionType | "announcement_bar" | "footer_newsletter" | "article"
 
 export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   announcement_bar: Megaphone,
@@ -45,6 +52,10 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   reviews: MessageSquareQuote,
   google_rating: Star,
   rich_text: Text,
+  article: FileText,
+  contact: Contact,
+  payment_facts: CreditCard,
+  shipping_facts: Truck,
   faq: CircleHelp,
   related_products: Boxes,
   trust_badges: BadgeCheck,
@@ -59,9 +70,13 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   category_main: LayoutGrid,
 }
 
-/** The section's kind; the newsletter box is the footer's when it sits there. */
+/** The section's kind; the newsletter box is the footer's when it sits there, a page's text its own. */
 export const kindOf = (section: AnySection, inFooter = false): SectionKind =>
-  inFooter && section.type === "newsletter" ? "footer_newsletter" : section.type
+  inFooter && section.type === "newsletter"
+    ? "footer_newsletter"
+    : section.type === "rich_text" && section.variant === "article"
+      ? "article"
+      : section.type
 
 /** The title the shop gave it, if the type has one. */
 function ownTitle(section: AnySection): string | null {
@@ -91,6 +106,9 @@ function ownTitle(section: AnySection): string | null {
     case "marquee":
       return section.items.find((item) => item.text.trim() !== "")?.text ?? null
     case "trust_badges":
+    case "contact":
+    case "payment_facts":
+    case "shipping_facts":
     case "header_bar":
     case "footer_bar":
     case "product_main":

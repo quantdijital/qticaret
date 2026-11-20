@@ -11,6 +11,7 @@ import { aiProduct, aiRecords, askFor, connectFake, pushPlan } from "../helpers/
 import { managedForThisFile } from "../helpers/control-plane"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { writePageText } from "../helpers/pages"
 
 jest.setTimeout(120 * 1000)
 
@@ -100,17 +101,18 @@ medusaIntegrationTestRunner({
             status: "draft",
             excerpt: `Mağazamızın hikâyesi. ${PERSONAL}`,
             author_name: "Ayşe Yılmaz",
-            body: {
-              type: "doc",
-              content: [
-                { type: "paragraph", content: [{ type: "text", text: "Yıllardır üretiyoruz." }] },
-              ],
-            },
           },
           { headers: owner.headers }
         )
       )
       expect(page.status).toBe(201)
+      // A page's text is the system's to write (adr/0073 Ek 2026-11-19 (2) K4)
+      await writePageText(container, page.data.entry.id, {
+        type: "doc",
+        content: [
+          { type: "paragraph", content: [{ type: "text", text: "Yıllardır üretiyoruz." }] },
+        ],
+      })
       return { product: productId, category: categoryId, page: page.data.entry.id }
     }
 
