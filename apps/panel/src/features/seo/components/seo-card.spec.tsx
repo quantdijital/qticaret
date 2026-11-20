@@ -278,16 +278,28 @@ describe("SeoCard", () => {
 
     it("fills the focus keyword with the choice picked among its alternatives", async () => {
       offer(["deepseek"])
-      net.mockImplementation(() =>
-        json(201, {
-          suggestion: {
-            id: "sug_1",
-            task: "focus_keyword",
-            service: "deepseek",
-            text: "keten gömlek",
-            candidates: ["keten gömlek", "yazlık keten gömlek"],
-          },
-        })
+      const candidates = ["keten gömlek", "yazlık keten gömlek"]
+      // The backend answers an accept with the candidate taken (`candidate_index`)
+      net.mockImplementation((url: string, init?: { body?: string }) =>
+        url.endsWith("/accept")
+          ? json(200, {
+              suggestion: {
+                id: "sug_1",
+                text: candidates[
+                  (JSON.parse(init?.body ?? "{}") as { candidate_index?: number })
+                    .candidate_index ?? 0
+                ],
+              },
+            })
+          : json(201, {
+              suggestion: {
+                id: "sug_1",
+                task: "focus_keyword",
+                service: "deepseek",
+                text: candidates[0],
+                candidates,
+              },
+            })
       )
       const user = userEvent.setup()
       renderCard()
