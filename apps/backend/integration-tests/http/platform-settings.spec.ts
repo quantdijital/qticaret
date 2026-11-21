@@ -176,6 +176,34 @@ medusaIntegrationTestRunner({
       })
     })
 
+    it("keeps both of two saves sent at once, each with its own audit entry (review L2)", async () => {
+      const save = (body: Record<string, unknown>) =>
+        http.post<{ version: number }>("/admin/platform-settings/store", body, {
+          headers: admin.headers,
+        })
+      const saved = await Promise.all([
+        save({ contact_email: "destek@example.com" }),
+        save({ weight_unit: "kg" }),
+      ])
+      const after = await http.get<{ version: number; values: Record<string, unknown> }>(
+        "/admin/platform-settings/store",
+        { headers: admin.headers }
+      )
+      const entries = await auditEntries("store", (each) => each.length >= 2)
+
+      expect(saved.map(({ data }) => data.version).sort()).toEqual([1, 2])
+      expect(after.data.version).toBe(2)
+      expect(after.data.values).toMatchObject({
+        contact_email: "destek@example.com",
+        weight_unit: "kg",
+      })
+      // Each entry says only its own field: neither save merged over a stale row
+      expect(entries.map((entry) => Object.keys(entry.changes?.diff ?? {})).sort()).toEqual([
+        ["contact_email"],
+        ["weight_unit"],
+      ])
+    })
+
     it("refuses an unknown token, an unknown field and an unknown section", async () => {
       const post = (path: string, body: unknown) =>
         settle(http.post<{ message?: string }>(path, body, { headers: admin.headers }))

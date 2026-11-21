@@ -14,6 +14,7 @@ import type Redis from "ioredis"
 import { featureDefinition, featureRegistry } from "./features"
 import { PlatformFlagStore, effectiveValue, managedOnly } from "./service-platform-flags"
 import type { PlatformFlagSync } from "./service-platform-flags"
+import { lockSection } from "./section-lock"
 import { SECTIONS, mergePatch, sectionOf } from "./sections"
 import { parseStored, toValidationError } from "./sections/stored"
 import type { SectionName } from "./sections"
@@ -123,7 +124,8 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
     try {
       change = await this.saveSectionInTransaction_(name, patch, actorId)
     } catch (error) {
-      // A first save racing another inserts the same section twice; the second retries
+      // Saves take the section's lock first (section-lock.ts); a row inserted
+      // past it (a script's createSettingsSections) still gets one retry
       if (!uniqueViolationKeys(error)?.includes("section")) {
         throw error
       }
@@ -141,6 +143,8 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
     @MedusaContext() sharedContext: Context = {}
   ): Promise<SectionChange> {
     const section = sectionOf(name)
+    // Another save of this section waits here: the merge below is over the latest row
+    await lockSection(sharedContext, name)
     const [row] = await this.listSettingsSections({ section: name }, { take: 1 }, sharedContext)
     const before = parseStored(name, row?.values)
     let after: SectionValues
@@ -183,6 +187,7 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
     previous: StoredSection | null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
+    await lockSection(sharedContext, name)
     const [row] = await this.listSettingsSections({ section: name }, { take: 1 }, sharedContext)
     if (!row) {
       return
