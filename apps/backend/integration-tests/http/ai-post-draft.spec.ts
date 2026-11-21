@@ -1,3 +1,4 @@
+import { createProductsWorkflow, createSalesChannelsWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakeSecret } from "@qticaret/testing"
 import { resetAiBreakers } from "../../src/lib/ai/breaker"
@@ -8,6 +9,7 @@ import { aiRecords, connectFake, pushPlan } from "../helpers/ai"
 import { managedForThisFile } from "../helpers/control-plane"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { createStorefront } from "../helpers/storefront"
 
 jest.setTimeout(120 * 1000)
 
@@ -42,6 +44,9 @@ const BODY_MARK = "Gövdedeki eski cümle yalnız burada durur."
 const SHOWN = "Keten Gömlek Bakım Ürünleri"
 const INTERNAL = "Toptan Gizli Liste"
 const CLOSED = "Kapalı Raf Gömlekleri"
+const SHOWN_PRODUCT = "Keten Gömlek Vitrin Ürünü"
+const DRAFT_PRODUCT = "Keten Gömlek Taslak Ürünü"
+const OTHER_CHANNEL_PRODUCT = "Keten Gömlek Toptan Kanal Ürünü"
 
 // Texts that keep to the advisor's length targets (SERP_TEXT_LENGTH)
 const TITLE = "Keten Gömlek Nasıl Yıkanır? Adım Adım Bakım Rehberi"
@@ -205,6 +210,56 @@ medusaIntegrationTestRunner({
       expect(request?.data).toContain("keten gömlek yıkama")
       expect(request?.data).toContain("çekmeden yıkamanın")
       for (const leak of [AUTHOR, BODY_MARK, INTERNAL, CLOSED, shownId]) {
+        expect(request?.data).not.toContain(leak)
+      }
+    })
+
+    /** A product with a path of its own (the create hook claims one, whatever its status). */
+    async function product(title: string, status: "draft" | "published", channelId: string) {
+      await createProductsWorkflow(getContainer()).run({
+        input: {
+          products: [
+            {
+              title,
+              handle: `ai-post-${unique()}`,
+              status,
+              options: [{ title: "Seçenek", values: ["Standart"] }],
+              variants: [
+                {
+                  title: "Standart",
+                  options: { Seçenek: "Standart" },
+                  manage_inventory: false,
+                  prices: [{ currency_code: "try", amount: 100 }],
+                },
+              ],
+              sales_channels: [{ id: channelId }],
+            },
+          ],
+        },
+      })
+    }
+
+    it("names no draft product and none outside the storefront's channels", async () => {
+      const storefront = await createStorefront(getContainer())
+      const { result: channels } = await createSalesChannelsWorkflow(getContainer()).run({
+        input: { salesChannelsData: [{ name: `Toptan kanal ${unique()}` }] },
+      })
+      const otherChannel = channels[0]?.id ?? ""
+      expect(otherChannel).not.toBe("")
+      // Names near the post's subject: a leak would rank first, not fall off the list
+      await product(SHOWN_PRODUCT, "published", storefront.salesChannelId)
+      await product(DRAFT_PRODUCT, "draft", storefront.salesChannelId)
+      await product(OTHER_CHANNEL_PRODUCT, "published", otherChannel)
+      const postId = await content("post", "Keten Gömlek Nasıl Yıkanır")
+      const seen = answering()
+
+      const answer = await draftOf(owner.headers, postId)
+
+      expect(answer.status).toBe(201)
+      const [request] = seen
+      // The shown one is listed: the leave-outs below are the filters' doing, not an empty list
+      expect(choicesOf(request).map((each) => each.value)).toContain(`Ürün: ${SHOWN_PRODUCT}`)
+      for (const leak of [DRAFT_PRODUCT, OTHER_CHANNEL_PRODUCT]) {
         expect(request?.data).not.toContain(leak)
       }
     })
