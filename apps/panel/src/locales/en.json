@@ -3446,7 +3446,9 @@
       "viewOnStore": "View on storefront",
       "preview": "Preview",
       "previewReady": "The preview opened in a new tab and its link was copied. It works for 24 hours or until the product is saved again.",
-      "aiTitle": "Suggest a product name with AI"
+      "aiTitle": "Suggest a product name with AI",
+      "aiShortDescription": "Suggest a short description with AI",
+      "aiCategories": "Suggest categories"
     },
     "sections": {
       "noTemplate": "No template chosen",
@@ -3886,6 +3888,13 @@
       },
       "clear": "Clear filters",
       "limited": "This filter looks at the newest 5,000 products; older ones are not listed."
+    },
+    "tags": {
+      "field": "Tags",
+      "hint": "Group products and help search within the shop. A new tag is created when you save.",
+      "none": "No tags",
+      "remove": "Remove the tag {{name}}",
+      "ai": "Suggest tags"
     }
   },
   "orders": {
@@ -11616,7 +11625,10 @@
       "product_description": "Product description",
       "category_description": "Category description",
       "collection_description": "Collection description",
-      "brand_description": "Brand description"
+      "brand_description": "Brand description",
+      "short_description": "Short description",
+      "product_tags": "Tag suggestion",
+      "product_category": "Category suggestion"
     },
     "options": {
       "short": "Short",
@@ -11937,6 +11949,15 @@
       "offered": "Offered",
       "accepted": "Accepted",
       "rate": "Rate"
+    },
+    "picks": {
+      "button": "Suggest",
+      "new": "new",
+      "newNamed": "{{name}} (new)",
+      "add": "Add {{name}}",
+      "added": "{{name}} added",
+      "note": "A suggestion you click is added to the field; saving is up to you.",
+      "close": "Close suggestions"
     }
   }
 }

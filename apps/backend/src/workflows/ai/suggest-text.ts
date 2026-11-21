@@ -1,5 +1,6 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import { readProductCard } from "../../lib/ai/product-card"
+import { isPickTask, readProductPicks } from "../../lib/ai/product-picks"
 import { findAiTask } from "../../lib/ai/registry/tasks"
 import { authorizeTaskStep } from "./steps/authorize-task"
 import { callServiceStep } from "./steps/call-service"
@@ -128,6 +129,10 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       // A product card (Aşama 6) also as its fields; its text is the same card as JSON
       ...(findAiTask(input.task)?.gate === "product_card"
         ? { card: outcome.status === "succeeded" ? readProductCard(outcome.text) : null }
+        : {}),
+      // A pick (a product's tags or categories) also as its records; its text is the same as JSON
+      ...(isPickTask(findAiTask(input.task) ?? { gate: "plain_text" })
+        ? { picks: outcome.status === "succeeded" ? readProductPicks(outcome.text) : null }
         : {}),
       problems: outcome.problems,
       alternatives: chosen.alternatives,

@@ -35,6 +35,7 @@ export const GUIDANCE_TASKS = [
   "seo_description",
   "focus_keyword",
   "product_title",
+  "short_description",
   "product_description",
   "category_description",
   "collection_description",

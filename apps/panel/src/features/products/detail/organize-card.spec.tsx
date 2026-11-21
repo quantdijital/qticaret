@@ -67,7 +67,16 @@ function renderCard(product: ProductDetail = PRODUCT) {
 
 describe("OrganizeCard's collection", () => {
   beforeEach(() => {
-    fetchMock.mockReset().mockResolvedValue({ rates: [], default: null })
+    // No AI task offered: the picks beside categories and tags draw nothing
+    fetchMock
+      .mockReset()
+      .mockImplementation((url: string) =>
+        Promise.resolve(
+          url === "/admin/ai/services"
+            ? { services: [], tasks: [], flags: { own_keys: true } }
+            : { rates: [], default: null }
+        )
+      )
     admin.product.update.mockReset().mockResolvedValue({ product: PRODUCT })
   })
 

@@ -4,6 +4,7 @@ import { SERP_TEXT_LENGTH } from "../seo/pixel-width"
 import { RULES_HEADING } from "./instructions"
 import { quoted } from "./quote"
 import { FOCUS_KEYWORD_MAX_LENGTH, FOCUS_KEYWORD_MAX_WORDS } from "./registry/catalog-tasks"
+import { SHORT_DESCRIPTION_MAX_SENTENCES } from "./registry/product-page-tasks"
 import type { AiTask } from "./registry/tasks"
 import { ungroundedWords } from "./short-text-gate"
 
@@ -49,6 +50,7 @@ const REASONS: Readonly<Record<string, string>> = {
   lines: "birden çok satıra bölünmüş",
   filler: "görsel, fotoğraf, resim gibi dolgu sözcüğü var",
   masked_name: "gizlenmiş bir ad yeri ([…]) var",
+  sentences: `${String(SHORT_DESCRIPTION_MAX_SENTENCES)} cümleden uzun; bir ya da iki cümle olmalı`,
 }
 
 function reasonOf(task: AiTask, candidate: RefusedCandidate, problem: string, data: string) {

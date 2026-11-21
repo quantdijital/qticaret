@@ -1,4 +1,5 @@
 import { aiProviderError } from "../errors"
+import { CATEGORY_CHOICES_FIELD, TAG_CHOICES_FIELD } from "../facts/product-picks"
 import { FAKE_SERVICE } from "../registry/services"
 import type { TextConnector, TextRequest, TextResult } from "./types"
 
@@ -56,6 +57,42 @@ function textsOf(data: string): string[] {
   })
 }
 
+/** A list field's first codes in the data block (a pick task's choices); none when it has no such list. */
+function codesOf(data: string, field: string, count: number): string[] | null {
+  try {
+    const block = JSON.parse(data) as unknown
+    const fields = isRecord(block) && isRecord(block["data"]) ? block["data"] : {}
+    const list = fields[field]
+    return Array.isArray(list)
+      ? list
+          .slice(0, count)
+          .flatMap((each: unknown) =>
+            isRecord(each) && typeof each["label"] === "string" ? [each["label"]] : []
+          )
+      : null
+  } catch {
+    return null
+  }
+}
+
+/** A structured task's one JSON object: picks from the named list, or a product card. */
+function structuredAnswer(data: string): string {
+  const tags = codesOf(data, TAG_CHOICES_FIELD, 2)
+  if (tags !== null) {
+    return JSON.stringify({ existing: tags, new: tags.length === 0 ? ["örnek etiket"] : [] })
+  }
+  const categories = codesOf(data, CATEGORY_CHOICES_FIELD, 1)
+  if (categories !== null) {
+    return JSON.stringify({ categories })
+  }
+  return JSON.stringify({
+    title: FAKE_SEEN,
+    short_description: `${FAKE_SEEN}, sade bir tasarımla.`,
+    category: null,
+    attributes: {},
+  })
+}
+
 // A rough count, the same every time: four characters a token
 const tokens = (text: string) => Math.ceil(text.length / 4)
 
@@ -66,14 +103,9 @@ export const fakeTextConnector: TextConnector = {
         aiProviderError({ service: FAKE_SERVICE.id, key: "ai.timeout", code: "aborted" })
       )
     }
-    // A structured task (a product card) gets one JSON object, the same every time
+    // A structured task (a product card, a pick) gets one JSON object, the same every time
     if (request.json === true) {
-      const text = JSON.stringify({
-        title: FAKE_SEEN,
-        short_description: `${FAKE_SEEN}, sade bir tasarımla.`,
-        category: null,
-        attributes: {},
-      })
+      const text = structuredAnswer(request.data)
       return Promise.resolve({
         text,
         usage: {

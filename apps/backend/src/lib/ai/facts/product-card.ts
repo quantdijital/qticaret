@@ -52,9 +52,13 @@ const TEMPLATE_ID = /^atpl_[A-Za-z0-9]{1,40}$/
 /**
  * The shop's shown categories, "Üst > Alt" under a parent, under codes
  * `k1`, `k2`…: one with an internal or closed ancestor anywhere up its
- * tree is not shown, nor one whose ancestors were not all read.
+ * tree is not shown, nor one whose ancestors were not all read. Those in
+ * `leaveOut` (a product's own) are not named, and the codes count without them.
  */
-async function shownCategories(container: FactsContainer): Promise<CardAllowed["categories"]> {
+export async function shownCategories(
+  container: FactsContainer,
+  leaveOut: ReadonlySet<string> = new Set()
+): Promise<CardAllowed["categories"]> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product_category",
     fields: ["id", "name", "is_active", "is_internal", "parent_category_id"],
@@ -64,7 +68,7 @@ async function shownCategories(container: FactsContainer): Promise<CardAllowed["
   const byId = new Map(rows.map((row) => [row.id, row]))
   return rows
     .flatMap((row) => {
-      const lineage = shownLineage(row, byId)
+      const lineage = leaveOut.has(row.id) ? null : shownLineage(row, byId)
       if (!lineage) {
         return []
       }

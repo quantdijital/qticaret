@@ -6,6 +6,8 @@
  * record: accepting returns the text, the form saves it.
  */
 
+import { readPicks } from "@/features/ai/picks"
+import type { AiPicks } from "@/features/ai/picks"
 import { readProductCard } from "@/features/ai/product-card"
 import type { ProductCard } from "@/features/ai/product-card"
 
@@ -32,6 +34,8 @@ export interface AiSuggestion {
   alternatives: string[]
   /** A product card from a photo (`product_from_photo`): its fields; none for a text. */
   card?: ProductCard | null
+  /** A product's tags or categories (`product_tags`, `product_category`): records from the shop's lists. */
+  picks?: AiPicks | null
 }
 
 /** A suggestion turned down by the gate (422) or a failed call (4xx/5xx), with what the panel may show. */
@@ -133,6 +137,7 @@ export async function requestSuggestion(request: AiSuggestionRequest): Promise<A
     candidates: candidatesOf(data["candidates"], text),
     alternatives: namesOf(data["alternatives"]),
     ...("card" in data ? { card: readProductCard(data["card"]) } : {}),
+    ...("picks" in data ? { picks: readPicks(data["picks"]) } : {}),
   }
 }
 

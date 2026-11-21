@@ -73,9 +73,13 @@ const WORDS_FULL = "ai.guidance_words_full"
 const EXAMPLES_FULL = "ai.guidance_examples_full"
 const UNKNOWN_TASK = "ai.guidance_unknown_task"
 
-/** Whether the guidance may be given for this task: a text task of the registry. */
+/**
+ * Whether the guidance may be given for this task: a text task of the
+ * registry that writes prose; one answered as JSON (a product's tags or
+ * categories) takes none (`takesGuidance`).
+ */
 export const isGuidanceTask = (id: string): boolean =>
-  aiTasks().some((task) => task.id === id && task.capability === "text")
+  aiTasks().some((task) => task.id === id && task.capability === "text" && task.json !== true)
 
 // Markup goes whole; a stray angle bracket with it
 const TAG = /<[^>]*>|[<>]/g

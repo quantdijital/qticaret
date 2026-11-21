@@ -728,6 +728,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.unknown_task": "Böyle bir yapay zekâ işi yok.",
   "ai.suggestion_not_open": "Bu öneri artık karar beklemiyor.",
   "ai.candidate_unknown": "Bu önerinin böyle bir adayı yok.",
+  "ai.no_choices":
+    "Önerilecek kategori yok: mağazanın vitrinde görünen ve ürünün henüz bulunmadığı bir kategorisi olmalı.",
   // Aşama 9: reviews and questions
   "ai.reviews_off":
     "Yorum ve sorularda yapay zekâ kapalı. Ayarlar > Yapay zekâ sayfasından açabilirsiniz.",

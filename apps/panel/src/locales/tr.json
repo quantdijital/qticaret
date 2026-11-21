@@ -3446,7 +3446,9 @@
       "viewOnStore": "Vitrinde gör",
       "preview": "Önizle",
       "previewReady": "Önizleme yeni sekmede açıldı ve bağlantısı kopyalandı. Bağlantı 24 saat ya da ürün yeniden kaydedilene kadar geçerli.",
-      "aiTitle": "Ürün adı için yapay zekâ ile öner"
+      "aiTitle": "Ürün adı için yapay zekâ ile öner",
+      "aiShortDescription": "Kısa açıklama için yapay zekâ ile öner",
+      "aiCategories": "Kategori öner"
     },
     "sections": {
       "noTemplate": "Şablon seçilmedi",
@@ -3886,6 +3888,13 @@
       },
       "clear": "Filtreleri temizle",
       "limited": "Bu filtre en yeni 5.000 ürüne bakar; daha eskiler listede görünmüyor."
+    },
+    "tags": {
+      "field": "Etiketler",
+      "hint": "Ürünleri mağaza içinde gruplamaya ve aramaya yarar. Yeni etiket, kaydettiğinizde oluşturulur.",
+      "none": "Etiket yok",
+      "remove": "{{name}} etiketini kaldır",
+      "ai": "Etiket öner"
     }
   },
   "orders": {
@@ -11616,7 +11625,10 @@
       "product_description": "Ürün açıklaması",
       "category_description": "Kategori açıklaması",
       "collection_description": "Koleksiyon açıklaması",
-      "brand_description": "Marka açıklaması"
+      "brand_description": "Marka açıklaması",
+      "short_description": "Kısa açıklama",
+      "product_tags": "Etiket önerisi",
+      "product_category": "Kategori önerisi"
     },
     "options": {
       "short": "Kısa",
@@ -11937,6 +11949,15 @@
       "offered": "Öneri",
       "accepted": "Kabul",
       "rate": "Oran"
+    },
+    "picks": {
+      "button": "Öner",
+      "new": "yeni",
+      "newNamed": "{{name}} (yeni)",
+      "add": "{{name}} ekle",
+      "added": "{{name}} eklendi",
+      "note": "Tıkladığınız öneri alana eklenir; kaydetmek size kalır.",
+      "close": "Önerileri kapat"
     }
   }
 }

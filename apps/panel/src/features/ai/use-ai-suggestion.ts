@@ -37,6 +37,7 @@ const asFailure = (error: unknown): Partial<AiFailure> =>
  * `tryWith(service)` asks another service, only when the person chose it
  * (never on its own). `accept()` records the decision and returns the
  * text for the form, which saves it as its own change; `dismiss()` closes.
+ * `reset()` forgets the suggestion with no decision sent (one decided already).
  */
 export function useAiSuggestion(task: string, entity: AiEntity) {
   const queryClient = useQueryClient()
@@ -113,5 +114,5 @@ export function useAiSuggestion(task: string, entity: AiEntity) {
     reset()
   }, [state, reset])
 
-  return { state, request, retry, tryWith, accept, dismiss }
+  return { state, request, retry, tryWith, accept, dismiss, reset }
 }

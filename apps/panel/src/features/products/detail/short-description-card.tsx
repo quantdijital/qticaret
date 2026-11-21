@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { AiButton } from "@/features/ai/components/ai-button"
 import { DocumentCard } from "@/features/content/components/document-card"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
+import { docOfParagraphs } from "@/features/products/description-doc"
 import { EMPTY_SUMMARY, SUMMARY_TEXT_MAX } from "@/features/products/summary-doc"
 
 /**
@@ -15,6 +17,9 @@ import { EMPTY_SUMMARY, SUMMARY_TEXT_MAX } from "@/features/products/summary-doc
  * the shop or https; no quotes, tables or pictures (they would crowd the
  * slot above the price). Characters counted against the server's 1,500.
  * Optional; saved through the catalog fields, an emptied one clears it.
+ * The AI button beside the title (adr/0074 §5 madde 2) offers three short
+ * ones; the one taken goes in as a paragraph, a change the card's Save
+ * writes.
  */
 export function ProductShortDescriptionCard({ product }: { product: ProductDetail }) {
   const { t } = useTranslation()
@@ -37,6 +42,16 @@ export function ProductShortDescriptionCard({ product }: { product: ProductDetai
       save={async (summary_doc) => {
         await save.mutateAsync({ summary_doc })
       }}
+      action={(put) => (
+        <AiButton
+          task="short_description"
+          entity={{ type: "product", id: product.id }}
+          label={t("products.detail.aiShortDescription")}
+          onUse={(text) => {
+            put(docOfParagraphs(text))
+          }}
+        />
+      )}
     />
   )
 }
