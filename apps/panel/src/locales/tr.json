@@ -11891,7 +11891,24 @@
         "examplesHint": "En çok {{max}} örnek, her biri en çok {{length}} karakter. Müşteri adı ya da bilgisi yazmayın; örnek her istekte servise gider.",
         "example": "Örnek {{n}}",
         "addExample": "Örnek ekle",
-        "removeExample": "Örnek {{n}} kaldır"
+        "removeExample": "Örnek {{n}} kaldır",
+        "hasCraft": "Özel talimat",
+        "craft": {
+          "title": "Gelişmiş",
+          "default": "Varsayılan talimat",
+          "edited": "Düzenlendi",
+          "hint": "Görev talimatı yapay zekâya bu işi nasıl yapacağını anlatır. Yazdığınız metin varsayılanın yerine geçer; aşağıdaki kurallar her zaman eklenir. Yalnız mağaza sahibi değiştirebilir.",
+          "label": "Görev talimatı",
+          "reset": "Varsayılana dön",
+          "outdated": "Varsayılan talimat güncellendi; farka bakın.",
+          "showNew": "Yeni varsayılanı göster",
+          "hideNew": "Yeni varsayılanı gizle",
+          "newDefault": "Yeni varsayılan talimat",
+          "useNew": "Yeni varsayılanı kullan",
+          "keep": "Talimatımı koru",
+          "rules": "Her zaman eklenen kurallar",
+          "rulesHint": "Talimatınız ne derse desin bunlar başa ve sona eklenir: uydurma bilgi yasağı, biçim, uzunluk ve yanıt kuralları değişmez."
+        }
       },
       "try": {
         "title": "Dene",

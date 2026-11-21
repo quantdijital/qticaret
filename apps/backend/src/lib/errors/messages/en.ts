@@ -734,11 +734,15 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.scenes_full": "At most 12 scenes can be saved. Delete one to add another.",
   // adr/0074 §2: the shop's writing guidance
   "ai.guidance_too_long":
-    "A writing guidance field is too long: audience 160 characters at most, the free note 1500, a task's note and each example 600, each word 40.",
+    "A writing guidance field is too long: audience 160 characters at most, the free note 1500, a task's note and each example 600, each word 40, a task's own instruction 3000.",
   "ai.guidance_words_full": "The preferred and avoided word lists take 20 items each at most.",
   "ai.guidance_examples_full": "A task takes at most 3 examples.",
   "ai.guidance_unknown_task":
     "Writing guidance can only be given for the tasks where AI writes text.",
+  // adr/0074 §3: a task's own instruction
+  "ai.guidance_craft_owner_only": "Only the store owner can change a task's instruction.",
+  "ai.guidance_craft_base_unknown":
+    "The default instruction has changed meanwhile. Reload the page and try again.",
   // adr/0071 §3: "Test the connection" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek did not accept this API key. Copy it again from the API keys page of the DeepSeek platform.",

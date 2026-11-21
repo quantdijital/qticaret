@@ -3,7 +3,7 @@ import { aiValidationError } from "../../../lib/ai/errors"
 import { AI_ENTITY_ID_PREFIX, entityFacts } from "../../../lib/ai/facts"
 import type { AiEntityType } from "../../../lib/ai/facts"
 import { productCardFacts } from "../../../lib/ai/facts/product-card"
-import { guidanceFor, guidanceText, takesGuidance } from "../../../lib/ai/guidance"
+import { craftText, guidanceText, readGuidance, takesGuidance } from "../../../lib/ai/guidance"
 import type { AiGuidanceSettings } from "../../../modules/platform-settings/sections/ai-guidance"
 import { systemOf } from "../../../lib/ai/instructions"
 import type { CardAllowed } from "../../../lib/ai/product-card"
@@ -34,18 +34,36 @@ export interface TaskInputInput {
 export type GuidanceSource =
   { use: "stored" } | { use: "none" } | { use: "given"; settings: AiGuidanceSettings }
 
-/** The guidance part of a task's system message, or null: none set, or a task that takes none. */
+interface Guided {
+  guidance: string | null
+  craft: string | null
+}
+
+/**
+ * The guidance part of a task's system message and the owner's craft in
+ * its default's place (adr/0074 §2, §3), or null for either: none set, or
+ * a task that takes none. "Dene"'s settings without a craft for the task
+ * try the stored one, so a try shows what the shop's tasks really use.
+ */
 async function guidanceOf(
-  container: Parameters<typeof guidanceFor>[0],
+  container: Parameters<typeof readGuidance>[0],
   task: AiTask,
   source: GuidanceSource | undefined
-): Promise<string | null> {
+): Promise<Guided> {
   if (!takesGuidance(task) || source?.use === "none") {
-    return null
+    return { guidance: null, craft: null }
   }
-  return source?.use === "given"
-    ? guidanceText(source.settings, task.id)
-    : guidanceFor(container, task.id)
+  if (source?.use !== "given") {
+    const stored = await readGuidance(container)
+    return { guidance: guidanceText(stored, task.id), craft: craftText(stored, task.id) }
+  }
+  const given = source.settings
+  const entry = Object.hasOwn(given.tasks, task.id) ? given.tasks[task.id] : undefined
+  const craft =
+    entry?.craft === undefined
+      ? craftText(await readGuidance(container), task.id)
+      : craftText(given, task.id)
+  return { guidance: guidanceText(given, task.id), craft }
 }
 
 export interface TaskInput {
@@ -97,8 +115,10 @@ export const taskInputStep = createStep(
   async (input: TaskInputInput, { container }) => {
     const task = findAiTask(input.task)
     // The shop's writing guidance, a setting (adr/0074 §2): read here, never from the ask
-    const guidance = task ? await guidanceOf(container, task, input.guidance) : null
-    const instruction = task ? systemOf(task, input.option, input.entity_type, guidance) : null
+    const guided = task ? await guidanceOf(container, task, input.guidance) : null
+    const instruction = task
+      ? systemOf(task, input.option, input.entity_type, guided?.guidance, guided?.craft)
+      : null
     if (!task || instruction === null) {
       throw aiValidationError("ai.unknown_task")
     }

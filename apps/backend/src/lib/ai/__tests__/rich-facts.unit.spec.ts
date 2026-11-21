@@ -9,6 +9,7 @@ import {
 } from "../facts/category-products"
 import { PRODUCT_FACT_FIELDS, productFacts, readProductFacts } from "../facts/product"
 import { SEO_FACT_FIELDS } from "../facts/seo"
+import { STOREFRONT_KEY_FIELDS, storefrontChannelIds } from "../facts/storefront-channels"
 import type { FactsContainer } from "../facts/types"
 
 /**
@@ -31,14 +32,21 @@ interface Listed {
   config: { select: string[]; take: number }
 }
 
+// The storefront's publishable key and its channel (#247 D2): read apart from the record's graphs
+const STOREFRONT_KEYS = [{ id: "apk_1", revoked_at: null, sales_channels: [{ id: "sc_1" }] }]
+
 function containerWith(
   graphs: unknown[][],
-  listing: { rows: { id: string; title: string }[]; count: number } = { rows: [], count: 0 }
+  listing: { rows: { id: string; title: string }[]; count: number } = { rows: [], count: 0 },
+  keys: unknown[] = STOREFRONT_KEYS
 ) {
   const asked: Asked[] = []
   const listed: Listed[] = []
   const query = {
     graph: (request: Asked) => {
+      if (request.entity === "api_key") {
+        return Promise.resolve({ data: keys })
+      }
       asked.push(request)
       return Promise.resolve({ data: graphs[asked.length - 1] ?? [] })
     },
@@ -189,6 +197,58 @@ describe("what a category lists", () => {
       brands: null,
       product_count: null,
     })
+  })
+
+  it("names only products in the storefront's channels, nothing without one (#247 D2)", async () => {
+    // The first five are in another channel only: a wholesale or marketplace one
+    const elsewhere = brands.map((row, index) =>
+      index < 5 ? { ...row, sales_channels: [{ id: "sc_other" }] } : row
+    )
+    const { container } = containerWith([[CATEGORY], elsewhere], { rows, count: 20 })
+    const listed = (await categoryFacts(container, "pcat_1"))["products"]
+    const names = typeof listed === "string" ? listed.split(", ") : []
+    expect(names[0]).toBe("Gömlek 5")
+    expect(names).not.toContain("Gömlek 4")
+
+    // No publishable key in use: the safe side, no name, brand or count, and no product read
+    for (const keys of [
+      [],
+      [{ id: "apk_1", revoked_at: new Date(Date.now() - 1_000), sales_channels: [{ id: "sc_1" }] }],
+      [{ id: "apk_1", revoked_at: null, sales_channels: [{ id: "sc_1", is_disabled: true }] }],
+    ]) {
+      const none = containerWith([[CATEGORY], brands], { rows, count: 20 }, keys)
+      expect(await categoryFacts(none.container, "pcat_1")).toMatchObject({
+        products: null,
+        brands: null,
+        product_count: null,
+      })
+      expect(none.asked).toHaveLength(1)
+    }
+  })
+
+  it("reads the storefront's channels from its keys in use, never a key's token", async () => {
+    const asked: Asked[] = []
+    const later = new Date(Date.now() + 60_000)
+    const container: FactsContainer = {
+      resolve: () => ({
+        graph: (request: Asked) => {
+          asked.push(request)
+          return Promise.resolve({
+            data: [
+              { id: "apk_1", revoked_at: null, sales_channels: [{ id: "sc_1" }, null] },
+              // Revoked for later: Medusa still takes the key until then
+              { id: "apk_2", revoked_at: later, sales_channels: [{ id: "sc_2" }] },
+              { id: "apk_3", revoked_at: new Date(0), sales_channels: [{ id: "sc_3" }] },
+            ],
+          })
+        },
+      }),
+    }
+    expect([...(await storefrontChannelIds(container))].sort()).toEqual(["sc_1", "sc_2"])
+    expect(asked).toEqual([
+      { entity: "api_key", fields: [...STOREFRONT_KEY_FIELDS], filters: { type: "publishable" } },
+    ])
+    expect(STOREFRONT_KEY_FIELDS.join(",")).not.toMatch(/token|secret|redacted/)
   })
 
   it("estimates a large category's shown count from its sample", async () => {

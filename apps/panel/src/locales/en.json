@@ -11891,7 +11891,24 @@
         "examplesHint": "Up to {{max}} examples, each {{length}} characters at most. Do not write customer names or details; an example is sent to the service with every request.",
         "example": "Example {{n}}",
         "addExample": "Add example",
-        "removeExample": "Remove example {{n}}"
+        "removeExample": "Remove example {{n}}",
+        "hasCraft": "Own instruction",
+        "craft": {
+          "title": "Advanced",
+          "default": "Default instruction",
+          "edited": "Edited",
+          "hint": "The task instruction tells the AI how to do this task. Your text replaces the default; the rules below are always added. Only the store owner can change it.",
+          "label": "Task instruction",
+          "reset": "Back to default",
+          "outdated": "The default instruction was updated; see what changed.",
+          "showNew": "Show the new default",
+          "hideNew": "Hide the new default",
+          "newDefault": "New default instruction",
+          "useNew": "Use the new default",
+          "keep": "Keep my instruction",
+          "rules": "Rules always added",
+          "rulesHint": "Whatever your instruction says, these are added at the start and the end: no made-up facts, and the form, length and answer rules stay."
+        }
       },
       "try": {
         "title": "Try",

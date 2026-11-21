@@ -1,4 +1,5 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { storefrontChannelIds } from "./storefront-channels"
 import type { FactsContainer, RecordFacts } from "./types"
 
 /**
@@ -6,7 +7,8 @@ import type { FactsContainer, RecordFacts } from "./types"
  * products' names, its most frequent brands and how many products it has,
  * as a range. Names only: no price, stock, variant or sales figure is
  * read; a draft or hidden product is never named, nor a closed brand,
- * nor a product in no sales channel (the storefront shows it nowhere).
+ * nor a product outside the storefront's sales channels (#247 D2: the
+ * channels of its publishable keys; none found, nothing is named).
  */
 
 /** Product names named at most, newest first. */
@@ -20,8 +22,8 @@ export const CATEGORY_BRAND_SAMPLE = 100
 export const CATEGORY_PRODUCT_FIELDS = ["id", "title"] as const
 export const CATEGORY_BRAND_FIELDS = ["id", "brand.name", "brand.is_active"] as const
 /**
- * Whether a product is in a sales channel at all: the link's ids only
- * (as `api/store/reviews/visible.ts` reads it), never the channel's data.
+ * Which sales channels a product is in: the link's ids only (as
+ * `api/store/reviews/visible.ts` reads it), never the channel's data.
  */
 export const CATEGORY_CHANNEL_FIELD = "sales_channels.id"
 
@@ -59,10 +61,12 @@ function topBrands(rows: readonly ListedRow[]): string[] {
     .map(([name]) => name)
 }
 
-/** The products in at least one sales channel. */
-const shownRows = (rows: readonly ListedRow[]): ListedRow[] =>
+/** The products in at least one of the storefront's sales channels. */
+const shownRows = (rows: readonly ListedRow[], channels: ReadonlySet<string>): ListedRow[] =>
   rows.filter((row) =>
-    (row.sales_channels ?? []).some((channel) => typeof channel?.id === "string")
+    (row.sales_channels ?? []).some(
+      (channel) => typeof channel?.id === "string" && channels.has(channel.id)
+    )
   )
 
 /**
@@ -91,13 +95,18 @@ export async function categoryProductFacts(
   if (rows.length === 0) {
     return NONE
   }
+  // The safe side: no storefront channel found, no product named
+  const channels = await storefrontChannelIds(container)
+  if (channels.size === 0) {
+    return NONE
+  }
   // Through the product's side of the brand and sales channel links (links/product-brand.ts)
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product",
     fields: [...CATEGORY_BRAND_FIELDS, CATEGORY_CHANNEL_FIELD],
     filters: { id: rows.map((row) => row.id) },
   })
-  const listed = shownRows(data)
+  const listed = shownRows(data, channels)
   const shown = new Set(listed.map((row) => row.id))
   if (shown.size === 0) {
     return NONE

@@ -4,7 +4,7 @@ import { AI_GUIDANCE_DEFAULTS } from "../../../modules/platform-settings/section
 import { GUIDANCE_END, GUIDANCE_HEADING, guidanceText, takesGuidance } from "../guidance"
 import { withCorrection } from "../correction"
 import { RULES_HEADING, instructionLayersOf, systemOf } from "../instructions"
-import { DATA_RULE, buildPrompt } from "../prompt"
+import { DATA_LAST, DATA_RULE, buildPrompt } from "../prompt"
 import { AI_CANDIDATE_COUNT } from "../registry/catalog-tasks"
 import { aiTasks, findAiTask } from "../registry/tasks"
 import type { AiTask } from "../registry/tasks"
@@ -90,7 +90,8 @@ describe("the system message's layers (adr/0074 §1)", () => {
     const rules = system.slice(system.lastIndexOf(`\n\n${RULES_HEADING}\n`))
     expect(rules).toContain(instructionLayersOf(seo)?.rules ?? "-")
     expect(rules).not.toContain("fiyat yaz")
-    expect(system.endsWith(RULES_WIN)).toBe(true)
+    // The rules win over the above; the data rule's last word closes the message (#248)
+    expect(system.endsWith(`${RULES_WIN}\n\n${DATA_LAST}`)).toBe(true)
   })
 
   it("leaves the guidance's place out when the shop gave none", () => {

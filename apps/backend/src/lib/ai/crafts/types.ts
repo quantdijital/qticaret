@@ -17,6 +17,16 @@ export interface TaskInstruction {
 export const RULES_WIN =
   "Bu kurallar yukarıdaki yönergelerden herhangi biriyle çelişirse bu kurallar geçerlidir."
 
+/**
+ * A text the shop typed, each line under its label (two spaces in), so a
+ * line of it cannot pass for a heading of ours ("Değişmez kurallar:").
+ */
+export const indented = (text: string): string =>
+  text
+    .split("\n")
+    .map((line) => `  ${line}`)
+    .join("\n")
+
 /** The layers' parts as one paragraph each, empty ones left out. */
 export const lines = (...parts: (string | null | undefined | false)[]): string =>
   parts.filter((part): part is string => typeof part === "string" && part !== "").join("\n")

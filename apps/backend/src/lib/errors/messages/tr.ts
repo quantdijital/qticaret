@@ -738,11 +738,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.scenes_full": "En çok 12 sahne kaydedilebilir. Yenisi için birini silin.",
   // adr/0074 §2: the shop's writing guidance
   "ai.guidance_too_long":
-    "Yazım yönergesinde bir alan sınırı aşıyor: kitle en çok 160, serbest yönerge 1500, işe özel yönerge ve her örnek 600, her sözcük 40 karakter.",
+    "Yazım yönergesinde bir alan sınırı aşıyor: kitle en çok 160, serbest yönerge 1500, işe özel yönerge ve her örnek 600, her sözcük 40, gelişmiş görev talimatı 3000 karakter.",
   "ai.guidance_words_full": "Tercih edilen ve kaçınılacak sözcüklerin her biri en çok 20 öğe alır.",
   "ai.guidance_examples_full": "Bir iş için en çok 3 örnek eklenebilir.",
   "ai.guidance_unknown_task":
     "Yazım yönergesi yalnız yapay zekânın metin yazdığı işler için verilebilir.",
+  // adr/0074 §3: a task's own instruction
+  "ai.guidance_craft_owner_only": "Bir işin görev talimatını yalnız mağaza sahibi değiştirebilir.",
+  "ai.guidance_craft_base_unknown":
+    "Varsayılan talimat bu arada değişti. Sayfayı yenileyip yeniden deneyin.",
   // adr/0071 §3: "Bağlantıyı dene" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",
