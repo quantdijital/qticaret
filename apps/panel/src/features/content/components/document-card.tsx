@@ -35,7 +35,7 @@ interface DocumentCardProps {
    * typed one: the card's Save writes it, Undo drops it. `current` is the
    * text in the editor now (typed and unsaved included).
    */
-  action?: (put: (doc: JSONContent) => void, current: JSONContent) => ReactNode
+  action?: ((put: (doc: JSONContent) => void, current: JSONContent) => ReactNode) | undefined
 }
 
 /**
