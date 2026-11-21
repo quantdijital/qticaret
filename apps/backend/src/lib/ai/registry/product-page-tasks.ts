@@ -108,3 +108,37 @@ export const PRODUCT_CATEGORY_TASK: AiTask = {
   json: true,
   temperature: AI_TEMPERATURE.structured,
 }
+
+/** The longest answer read for an attributes suggestion, in characters: its JSON, all values together. */
+export const ATTRIBUTES_MAX_LENGTH = 4_000
+
+/** How much of a product's description an attributes suggestion reads: its values come from it. */
+export const ATTRIBUTES_FACT_LENGTH = 2_000
+
+/**
+ * Values for a product's empty public attributes (adr/0074 §5 madde 3):
+ * its template's attributes no value fills yet, named under short codes
+ * (`a1`, `a2`…) with their kind, unit and options; the answer is one JSON
+ * object of codes to values, each read against its attribute
+ * (lib/ai/product-attributes.ts): one that does not fit is dropped, an
+ * answer with none left is refused. A text task that also reads the
+ * product's first picture (`photo`) when the chosen service can see one.
+ * Structured data: no guidance or craft. Nothing is written: the panel
+ * offers each value beside its field, the card's Save stores what a
+ * person took.
+ */
+export const PRODUCT_ATTRIBUTES_TASK: AiTask = {
+  id: "product_attributes",
+  capability: "text",
+  photo: true,
+  mode: "sync",
+  options: [],
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "product_attributes",
+  maxLength: ATTRIBUTES_MAX_LENGTH,
+  entities: ["product"],
+  factMaxLengths: { description: ATTRIBUTES_FACT_LENGTH },
+  json: true,
+  temperature: AI_TEMPERATURE.structured,
+}

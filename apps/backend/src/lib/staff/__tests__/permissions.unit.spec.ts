@@ -184,6 +184,7 @@ describe("staff roles", () => {
       "short_description",
       "product_tags",
       "product_category",
+      "product_attributes",
       "test_text",
       "no_such_task",
       "__proto__",

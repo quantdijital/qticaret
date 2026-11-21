@@ -28,16 +28,12 @@ import { useCan } from "@/features/auth/api/staff"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { productFold } from "@/features/products/detail/sections"
 import { errorText } from "@/lib/errors"
-import { AttributeInput } from "./attribute-input"
+import { isEmpty } from "@/features/attributes/empty"
+import { useAttributesAi } from "@/features/attributes/use-attributes-ai"
+import { AttributeFields } from "./attribute-fields"
+import { AttributesAiButton } from "./attributes-ai"
 
 const NONE = "__none__"
-
-// A field left empty: nothing typed, picked or ticked
-const isEmpty = (value: AttributeValue | undefined) =>
-  value === null ||
-  value === undefined ||
-  value === "" ||
-  (Array.isArray(value) && value.length === 0)
 
 function AttributesForm({
   productId,
@@ -67,6 +63,13 @@ function AttributesForm({
     .sort((a, b) => a.rank - b.rank)
   const changedTemplate = templateId !== (saved.template?.id ?? null)
   const dirty = changedTemplate || JSON.stringify(values) !== JSON.stringify(saved.values)
+  // The AI fills the saved template's empty public fields (the backend reads the saved product)
+  const ai = useAttributesAi(productId)
+  const fillable =
+    !changedTemplate &&
+    definitions.some(
+      (definition) => definition.is_public !== false && isEmpty(saved.values[definition.key])
+    )
   // Folded, its line: the template and how many of its fields are filled ("Bıçak şablonu · 14/18 alan dolu")
   const filled = definitions.filter((definition) => !isEmpty(values[definition.key])).length
   const requiredEmpty = definitions.filter(
@@ -120,7 +123,16 @@ function AttributesForm({
     <CardForm
       title={t("attributes.productCard")}
       description={t("attributes.productHint")}
-      action={action}
+      action={
+        ai.shown && (fillable || ai.open) ? (
+          <div className="flex flex-wrap gap-2">
+            <AttributesAiButton ai={ai} />
+            {action}
+          </div>
+        ) : (
+          action
+        )
+      }
       collapse={collapse}
       dirty={dirty}
       saving={save.isPending}
@@ -153,7 +165,12 @@ function AttributesForm({
           <Select
             value={templateId ?? NONE}
             onValueChange={(next) => {
-              setTemplateId(next === NONE ? null : next)
+              const id = next === NONE ? null : next
+              // The values were asked for the saved template: another one's same key is not theirs
+              if (id !== templateId && ai.open) {
+                ai.close()
+              }
+              setTemplateId(id)
             }}
           >
             <SelectTrigger id="attributes-template" className="w-full sm:w-80">
@@ -170,20 +187,7 @@ function AttributesForm({
           </Select>
         )}
       </Field>
-      {definitions.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {definitions.map((definition) => (
-            <AttributeInput
-              key={definition.key}
-              definition={definition}
-              value={values[definition.key]}
-              onChange={(next) => {
-                setValues((was) => ({ ...was, [definition.key]: next }))
-              }}
-            />
-          ))}
-        </div>
-      ) : null}
+      <AttributeFields definitions={definitions} values={values} setValues={setValues} ai={ai} />
       <ConfirmDialog
         open={confirmChange}
         onOpenChange={setConfirmChange}

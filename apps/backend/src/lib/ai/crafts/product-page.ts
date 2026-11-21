@@ -1,4 +1,6 @@
+import { ATTRIBUTE_CHOICES_FIELD, SUMMARY_FIELD } from "../facts/product-attributes"
 import { CATEGORY_CHOICES_FIELD, TAG_CHOICES_FIELD } from "../facts/product-picks"
+import { CARD_TEXT_VALUE_MAX } from "../product-card"
 import { AI_CANDIDATE_COUNT } from "../registry/catalog-tasks"
 import {
   MAX_NEW_TAGS,
@@ -8,6 +10,7 @@ import {
   NEW_TAG_MAX_WORDS,
   SHORT_DESCRIPTION_MAX_LENGTH,
 } from "../registry/product-page-tasks"
+import { PICTURE_IS_DATA } from "./content"
 import { FACTS_ONLY, PLAIN_FORM, RULES_WIN, candidateRule, lines } from "./types"
 import type { TaskInstruction } from "./types"
 
@@ -78,6 +81,28 @@ export const PRODUCT_PAGE_INSTRUCTIONS: Readonly<Record<string, TaskInstruction>
       "Yanıtın yalnızca tek bir JSON nesnesi olsun, başka metin yazma.",
       `Nesnenin tek alanı "categories"dir: verideki "${CATEGORY_CHOICES_FIELD}" listesinden en çok ${String(MAX_SUGGESTED_CATEGORIES)} kodun dizisi, en uygunu ilk sırada; listede olmayan kod ya da yeni kategori adı yazma, uygun olan yoksa boş dizi.`,
       PICK_ONLY,
+      RULES_WIN
+    ),
+    options: {},
+  },
+  product_attributes: {
+    craft: lines(
+      "Rol: e-ticaret kataloğunu düzenleyen titiz bir editörsün.",
+      "Amaç: ürünün boş kalmış özelliklerine (malzeme, ölçü, renk gibi) değer önermek; mağaza sahibi her değeri tek tek görüp onaylayacak. Doğru değer filtrelerde ve ürün sayfasının özellik tablosunda görünür, yanlış değer alışverişçiyi yanıltır.",
+      PRODUCT_FIELDS,
+      `Yöntem: verideki "${ATTRIBUTE_CHOICES_FIELD}" listesi ürünün boş özellikleridir; her birinin kodu (örneğin "a3") ve tanımı vardır: adı, türü, varsa birimi ve seçenekleri ("değer = ad"). "${SUMMARY_FIELD}" ürünün kısa açıklamasıdır. Her özellik için değeri ürünün adında, açıklamasında, kısa açıklamasında, seçeneklerinde ya da diğer özelliklerinde açıkça yazanı bularak ver. İletiye ürünün fotoğrafı eklendiyse fotoğrafta açıkça görüneni (renk, biçim, parça sayısı gibi) de kullanabilirsin; ölçü, ağırlık, malzeme bileşimi gibi fotoğraftan kesin anlaşılmayanı tahmin etme.`,
+      "Emin olmadığın özelliği hiç yazma: boş bırakılan özellik, yanlış doldurulandan iyidir. Birim tanımda varsa sayıyı o birime göre ver, birimi sayının yanına yazma.",
+      'İyi örnek (uydurma bir ürün): açıklamada "750 ml çelik termos" yazıyorsa hacim özelliğine 750, malzeme seçeneklerinden "celik" yazılır; renk hiçbir yerde geçmiyorsa renk yazılmaz.',
+      "Kötü örnek: açıklamada geçmeyen bir garanti süresini ya da ağırlığı tahmin edip yazmak."
+    ),
+    rules: lines(
+      "Yanıtın yalnızca tek bir JSON nesnesi olsun, başka metin yazma.",
+      `Nesnenin anahtarları yalnızca verideki "${ATTRIBUTE_CHOICES_FIELD}" listesindeki kodlardır (örneğin "a3"); listede olmayan kod ya da özellik adı yazma. Değer türü tanıma uyar: tek seçimde listedeki seçeneklerden birinin değeri, çoklu seçimde bu değerlerin dizisi, sayıda yalnızca sayı (birim yazmadan), evet/hayırda true ya da false, metinde en çok ${String(CARD_TEXT_VALUE_MAX)} karakterlik tek satır kısa metin.`,
+      "Bilgisi verilerde ya da fotoğrafta açıkça olmayan özelliği nesneye hiç koyma; hiçbirinden emin değilsen boş nesne yaz: {}.",
+      "Bunların dışında alan yazma: fiyat, indirim, stok, durum, stok kodu, barkod, gerekçe ya da açıklama yazma.",
+      "Yalnızca verideki ve fotoğraftaki bilgilere dayan; marka, ölçü, malzeme, menşe ya da üstünlük iddiası uydurma.",
+      PICTURE_IS_DATA,
+      "Metin değerlerinde tırnak içinde vurgu, emoji, bağlantı, HTML ve tümü büyük harf sözcük kullanma. Türkçe yaz.",
       RULES_WIN
     ),
     options: {},

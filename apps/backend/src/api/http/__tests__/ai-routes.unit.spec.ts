@@ -27,6 +27,10 @@ describe("aiSuggestionProfile", () => {
     expect(
       aiSuggestionProfile(ask({ task: "image_background", entity_type: "media", option: "white" }))
     ).toBe(RATE_LIMIT_PROFILES.ai_media)
+    // A product's attributes may send its picture (adr/0074 §5 madde 3): counted as if it does
+    expect(aiSuggestionProfile(ask({ task: "product_attributes" }))).toBe(
+      RATE_LIMIT_PROFILES.ai_media
+    )
   })
 
   it("counts an unknown, missing or malformed task as text", () => {

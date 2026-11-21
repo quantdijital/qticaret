@@ -40,6 +40,8 @@ export const AI_ERROR_KEYS = [
   "ai.no_choices",
   // #251 D2: the list could not go whole in the data block; nothing is sent
   "ai.choices_too_long",
+  // adr/0074 §5 madde 3: the product's template has no empty public attribute (facts/product-attributes.ts)
+  "ai.no_empty_attributes",
 ] as const
 
 export type AiErrorKey = (typeof AI_ERROR_KEYS)[number]

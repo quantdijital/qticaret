@@ -21,6 +21,7 @@ import {
   COLLECTION_DESCRIPTION_TASK,
 } from "./listing-tasks"
 import {
+  PRODUCT_ATTRIBUTES_TASK,
   PRODUCT_CATEGORY_TASK,
   PRODUCT_TAGS_TASK,
   SHORT_DESCRIPTION_TASK,
@@ -59,6 +60,8 @@ export const AI_GATES = [
   // Picks from the shop's own lists: a closed schema and allow-lists (lib/ai/product-picks.ts)
   "product_tags",
   "product_category",
+  // Values for a product's empty attributes: per value against its attribute (lib/ai/product-attributes.ts)
+  "product_attributes",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -67,6 +70,13 @@ export const MAX_TASK_OPTIONS = 2
 export interface AiTask {
   id: string
   capability: AiCapability
+  /**
+   * A text task that also reads the product's first picture where the
+   * service chosen for it has `vision` (adr/0074 §5 madde 3): one button,
+   * the picture goes when there is one and the service can see it; the
+   * call then runs as `vision` (`runsAs`). Left out: its capability only.
+   */
+  photo?: true
   /** `job` runs as an async job (adr/0014); `sync` answers in the request. */
   mode: AiTaskMode
   /** Ready-made choices next to the button (a tone), two at most. */
@@ -224,7 +234,12 @@ const TASKS: readonly AiTask[] = [
   SHORT_DESCRIPTION_TASK,
   PRODUCT_TAGS_TASK,
   PRODUCT_CATEGORY_TASK,
+  PRODUCT_ATTRIBUTES_TASK,
 ]
+
+/** Whether a call of this task may run as this capability: its own, or `vision` for a `photo` task. */
+export const runsAs = (task: Pick<AiTask, "capability" | "photo">, capability: AiCapability) =>
+  capability === task.capability || (task.photo === true && capability === "vision")
 
 /** The data block's field lengths for a task: the shared ones, and the task's own over them. */
 export const factLengthsOf = (
