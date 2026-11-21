@@ -3895,6 +3895,26 @@
       "none": "No tags",
       "remove": "Remove the tag {{name}}",
       "ai": "Suggest tags"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "description": "Add questions and answers in the shop's name to the product page's Q&A. They are published at once; you can hide them under Reviews and questions › Questions.",
+      "empty": "The AI suggests 3–5 questions and answers from the product's description, short description, attributes and options. No question is written that the data cannot answer.",
+      "draft": "FAQ draft",
+      "hint": "Tick the ones to add; you can edit each question and answer before adding.",
+      "question": "Question",
+      "answer": "Answer",
+      "keep": "Add question {{number}}",
+      "add_one": "Add selected",
+      "add_other": "Add selected ({{count}})",
+      "added_one": "The question was added to the product page.",
+      "added_other": "{{count}} questions were added to the product page.",
+      "close": "Cancel",
+      "issues": {
+        "empty": "The question and the answer cannot be empty.",
+        "not_a_question": "The question must end with a question mark.",
+        "too_long": "A question can be at most 120 characters, an answer at most 400."
+      }
     }
   },
   "orders": {
@@ -11644,7 +11664,8 @@
       "short_description": "Short description",
       "product_tags": "Tag suggestion",
       "product_category": "Category suggestion",
-      "product_attributes": "Attribute filling"
+      "product_attributes": "Attribute filling",
+      "product_faq": "FAQ draft"
     },
     "options": {
       "short": "Short",

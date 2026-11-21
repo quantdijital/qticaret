@@ -8,6 +8,8 @@
 
 import { readAttributeSuggestions } from "@/features/ai/attribute-values"
 import type { AiAttributeSuggestions } from "@/features/ai/attribute-values"
+import { readFaq } from "@/features/ai/faq"
+import type { AiFaq, AiFaqItem } from "@/features/ai/faq"
 import { readPicks } from "@/features/ai/picks"
 import type { AiPicks } from "@/features/ai/picks"
 import { readProductCard } from "@/features/ai/product-card"
@@ -40,6 +42,8 @@ export interface AiSuggestion {
   picks?: AiPicks | null
   /** A product's empty attributes (`product_attributes`): a value by attribute key. */
   attributes?: AiAttributeSuggestions | null
+  /** A product's FAQ draft (`product_faq`): questions with their answers. */
+  faq?: AiFaq | null
 }
 
 /** A suggestion turned down by the gate (422) or a failed call (4xx/5xx), with what the panel may show. */
@@ -143,6 +147,7 @@ export async function requestSuggestion(request: AiSuggestionRequest): Promise<A
     ...("card" in data ? { card: readProductCard(data["card"]) } : {}),
     ...("picks" in data ? { picks: readPicks(data["picks"]) } : {}),
     ...("attributes" in data ? { attributes: readAttributeSuggestions(data["attributes"]) } : {}),
+    ...("faq" in data ? { faq: readFaq(data["faq"]) } : {}),
   }
 }
 
@@ -195,6 +200,21 @@ export async function acceptSuggestion(
   const body = candidateIndex === undefined ? {} : { candidate_index: candidateIndex }
   const text = suggestionOf(await postAi(decisionPath(id, "accept"), body))["text"]
   return typeof text === "string" ? text : null
+}
+
+/**
+ * `POST …/faq`: a FAQ draft's items a person kept, as they edited them, added
+ * as the shop's own questions on the product's page; the server gates each
+ * again (400 `ai.faq_item_invalid`) and records the decision. Unlike the other
+ * decisions this one writes: the questions are published at once.
+ */
+export async function addFaqItems(id: string, items: readonly AiFaqItem[]): Promise<number> {
+  const data = suggestionOf(
+    await postAi(`/admin/ai/suggestions/${encodeURIComponent(id)}/faq`, {
+      items: items.map((item) => ({ q: item.question, a: item.answer })),
+    })
+  )
+  return Array.isArray(data["question_ids"]) ? data["question_ids"].length : 0
 }
 
 /** `POST …/dismiss`: the suggestion was not used. */
