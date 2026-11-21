@@ -117,7 +117,7 @@ medusaIntegrationTestRunner({
       // The subject picked is its place among the three; the whole JSON comes back
       const takeAt = (candidate_index: number) =>
         settle(
-          http.post<{ suggestion: { text: string; candidate_index: number } }>(
+          http.post<{ suggestion: { text: string; candidate_index: number }; message?: string }>(
             `/admin/ai/suggestions/${answered.data.suggestion?.id ?? ""}/accept`,
             { candidate_index },
             { headers: owner.headers }
@@ -191,7 +191,7 @@ medusaIntegrationTestRunner({
       expect([refused.status, refused.data.message]).toEqual([403, "ai.feature_off"])
       // A draft asked before the feature was turned off is not taken after
       const taken = await settle(
-        http.post(
+        http.post<{ message?: string }>(
           `/admin/ai/suggestions/${answered.data.suggestion?.id ?? ""}/accept`,
           { candidate_index: 0 },
           { headers: owner.headers }
