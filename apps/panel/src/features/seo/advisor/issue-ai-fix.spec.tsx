@@ -218,8 +218,8 @@ describe("IssueAiFix", () => {
     expect(saves()).toEqual([])
   })
 
-  it("draws nothing on a brand's finding, even one a task names", async () => {
-    renderPage([TITLE], "brand", false)
+  it("draws nothing on a blog post's finding, even one a task names", async () => {
+    renderPage([TITLE], "post", false)
     await screen.findByText(TITLE_FINDING)
     expect(screen.queryByRole("button", { name: /Yapay zekâyla düzelt/ })).not.toBeInTheDocument()
   })

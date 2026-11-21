@@ -12,6 +12,8 @@ export function CollectionDescriptionCard({ collection }: { collection: Collecti
   const details = useSetCollectionDetails(collection.id)
   return (
     <ListingDescriptionCard
+      kind="collection"
+      id={collection.id}
       doc={collection.description_doc}
       text={collection.description}
       saving={details.isPending}

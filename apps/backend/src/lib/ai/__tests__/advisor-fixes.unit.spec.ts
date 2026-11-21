@@ -5,6 +5,7 @@ import {
   ADVISOR_AI_FIELDS,
   ADVISOR_AI_FIXES,
   advisorAiFix,
+  fixesOf,
   withAdvisorAiFixes,
 } from "../registry/advisor-fixes"
 import { findAiTask, isTaskEntity } from "../registry/tasks"
@@ -62,7 +63,7 @@ const ids = (page: AdvisorFacts) => findIssues(page).map(({ ruleId }) => ruleId)
 
 describe("advisor AI fixes (docs/22 Aşama 3)", () => {
   it("maps each rule to a real task, a known field and one of the task's options", () => {
-    for (const fix of Object.values(ADVISOR_AI_FIXES)) {
+    for (const fix of Object.values(ADVISOR_AI_FIXES).flatMap(fixesOf)) {
       const task = findAiTask(fix.task, "production")
       expect(task).not.toBeNull()
       expect(ADVISOR_AI_FIELDS).toContain(fix.field)
@@ -84,27 +85,48 @@ describe("advisor AI fixes (docs/22 Aşama 3)", () => {
     for (const rule of Object.keys(ADVISOR_AI_FIXES)) {
       expect(found).toContain(rule)
     }
-    for (const kind of ["product", "category", "page"] as const satisfies AiEntityType[]) {
-      const fix = advisorAiFix(kind, { ruleId: "X-TITLE-01" }, "production")
-      const task = fix ? findAiTask(fix.task, "production") : null
-      expect(task && isTaskEntity(task, kind)).toBe(true)
+    const kinds = ["product", "category", "collection", "brand", "page"] as const
+    for (const kind of kinds satisfies readonly AiEntityType[]) {
+      for (const ruleId of ["X-TITLE-01", "X-META-01"]) {
+        const fix = advisorAiFix(kind, { ruleId }, "production")
+        const task = fix ? findAiTask(fix.task, "production") : null
+        expect(task && isTaskEntity(task, kind)).toBe(true)
+      }
     }
   })
 
-  it("leaves out what no task fixes: other rules, other kinds, a listing's own text", () => {
+  it("leaves out what no task fixes: other rules, other kinds, a content page's text", () => {
     for (const ruleId of ["P-TITLE-02", "P-META-02", "P-TITLE-04", "P-KW-01", "P-IMG-01"]) {
       expect(advisorAiFix("product", { ruleId }, "production")).toBeNull()
     }
-    for (const kind of ["brand", "collection", "post", "landing"] as const) {
+    for (const kind of ["post", "landing"] as const) {
       expect(advisorAiFix(kind, { ruleId: `X-TITLE-01` }, "production")).toBeNull()
     }
-    // A category's CONT-01 is its listing text, not a product's description
-    expect(advisorAiFix("category", { ruleId: "C-CONT-01" }, "production")).toBeNull()
+    for (const ruleId of ["B-LOGO-01", "C-EMPTY-01", "C-DEPTH-01"]) {
+      expect(advisorAiFix("category", { ruleId }, "production")).toBeNull()
+    }
+    expect(advisorAiFix("page", { ruleId: "A-CONT-01" }, "production")).toBeNull()
     expect(advisorAiFix("product", { ruleId: "P-CONT-01" }, "production")).toEqual({
       task: "product_description",
       field: "description",
       option: "detailed",
     })
+  })
+
+  it("answers a listing page's thin text with its own kind's description task (adr/0074 §5)", () => {
+    const tasks = {
+      category: "category_description",
+      collection: "collection_description",
+      brand: "brand_description",
+    } as const
+    for (const [kind, task] of Object.entries(tasks) as [keyof typeof tasks, string][]) {
+      const prefix = { category: "C", collection: "K", brand: "B" }[kind]
+      expect(advisorAiFix(kind, { ruleId: `${prefix}-CONT-01` }, "production")).toEqual({
+        task,
+        field: "description",
+        option: "detailed",
+      })
+    }
   })
 
   it("adds the fix beside a finding and leaves the others as they were", () => {
@@ -134,6 +156,15 @@ describe("advisor AI fixes (docs/22 Aşama 3)", () => {
         rule: "P-CONT-01",
         saved: { body: BODY, bodyHtml: `<p>${BODY}</p>` },
       },
+      ...(["category", "collection", "brand"] as const).map((kind) => ({
+        page: facts(kind, {
+          body: "Kısa metin.",
+          bodyHtml: "<p>Kısa metin.</p>",
+          listing: { products: 12, depth: 1, hasLogo: true },
+        }),
+        rule: `${{ category: "C", collection: "K", brand: "B" }[kind]}-CONT-01`,
+        saved: { body: BODY, bodyHtml: `<p>${BODY}</p>` },
+      })),
     ]
     for (const { page, rule, saved } of cases) {
       const issue = findIssues(page).find(({ ruleId }) => ruleId === rule)

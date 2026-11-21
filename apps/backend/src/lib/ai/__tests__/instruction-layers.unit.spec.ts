@@ -30,6 +30,9 @@ describe("the system message's layers (adr/0074 §1)", () => {
   it("covers every text task, each with a craft and rules", () => {
     expect(TEXT_TASKS.map((each) => each.id).sort()).toEqual(
       [
+        "brand_description",
+        "category_description",
+        "collection_description",
         "focus_keyword",
         "image_alt_text",
         "product_description",

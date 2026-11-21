@@ -12,6 +12,8 @@ export function BrandDescriptionCard({ brand }: { brand: Brand }) {
   const update = useUpdateBrand(brand.id)
   return (
     <ListingDescriptionCard
+      kind="brand"
+      id={brand.id}
       doc={brand.description_doc}
       text={brand.description}
       saving={update.isPending}

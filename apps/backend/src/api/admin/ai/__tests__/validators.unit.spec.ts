@@ -68,6 +68,17 @@ describe("POST /admin/ai/suggestions: a scene", () => {
   })
 })
 
+describe("POST /admin/ai/suggestions: a listing page (adr/0074 §5 madde 1)", () => {
+  it("takes a collection and a brand by their ids, never a text", () => {
+    const ask = { task: "collection_description", option: "short" }
+    expect(ok({ ...ask, entity_type: "collection", entity_id: "pcol_01ABC" })).toBe(true)
+    expect(ok({ ...ask, entity_type: "brand", entity_id: "brand_01ABC" })).toBe(true)
+    expect(ok({ ...ask, entity_type: "brand", entity_id: "brand_01ABC", text: "x" })).toBe(false)
+    expect(ok({ ...ask, entity_type: "brand", entity_id: "seller_01ABC" })).toBe(false)
+    expect(ok({ ...ask, entity_type: "landing", entity_id: "pcol_01ABC" })).toBe(false)
+  })
+})
+
 describe("a scene typed once, and the shop's saved scenes, as the route sees them", () => {
   it("passes a typed scene on cleaned, personal data taken out", async () => {
     const { refusal, body } = await validated(AdminPostAiSuggestion, {

@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { GUIDANCE_TASKS } from "@/features/ai/api/guidance"
 import type { AiGuidanceSettings } from "@/features/ai/api/guidance"
 import { AiGuidanceTab } from "./ai-guidance-tab"
 
@@ -130,7 +131,8 @@ describe("AiGuidanceTab", () => {
       expect(saves).toHaveLength(1)
     })
     const tasks = saves[0]?.tasks ?? {}
-    expect(Object.keys(tasks)).toHaveLength(8)
+    expect(Object.keys(tasks).sort()).toEqual([...GUIDANCE_TASKS].sort())
+    expect(Object.keys(tasks)).toContain("brand_description")
     expect(tasks["seo_description"]).toEqual({
       extra: null,
       examples: ["Kısa ve net bir örnek."],

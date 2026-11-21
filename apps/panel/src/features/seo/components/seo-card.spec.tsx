@@ -32,7 +32,10 @@ const EMPTY = {
   og_image_alt: null,
 }
 
-function renderCard(type: "page" | "collection" = "page", saved: object = EMPTY) {
+function renderCard(
+  type: "page" | "collection" | "brand" | "post" = "page",
+  saved: object = EMPTY
+) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   })
@@ -327,10 +330,23 @@ describe("SeoCard", () => {
 
     it("has no button on a card the AI core does not write for", () => {
       offer(["deepseek"])
-      renderCard("collection")
+      renderCard("post")
       expect(field("seo-title-cent_1")).toBeInTheDocument()
       expect(fetchMock).not.toHaveBeenCalledWith("/admin/ai/services")
       expect(screen.queryByRole("button", { name: /yapay zekâ ile öner/i })).not.toBeInTheDocument()
     })
+
+    it.each(["collection", "brand"] as const)(
+      "asks a %s's search title for the record itself (adr/0074 §5)",
+      async (type) => {
+        offer(["deepseek"])
+        const user = userEvent.setup()
+        renderCard(type)
+        await user.click(await titleButton())
+        await screen.findByText(SUGGESTED)
+        const body = JSON.parse((net.mock.calls[0]?.[1] as { body: string }).body) as unknown
+        expect(body).toEqual({ task: "seo_title", entity_type: type, entity_id: "cent_1" })
+      }
+    )
   })
 })

@@ -1,4 +1,4 @@
-import { MIN_PRODUCT_WORDS } from "../seo/advisor"
+import { MIN_LISTING_WORDS, MIN_PRODUCT_WORDS } from "../seo/advisor"
 import { wordCount } from "../seo/advisor/text"
 import { SERP_TEXT_LENGTH } from "../seo/pixel-width"
 import { RULES_HEADING } from "./instructions"
@@ -56,7 +56,8 @@ function reasonOf(task: AiTask, candidate: RefusedCandidate, problem: string, da
     return lengthReason(task, candidate.text)
   }
   if (problem === "too_short") {
-    return `${String(wordCount(candidate.text))} sözcük; en az ${String(MIN_PRODUCT_WORDS)} sözcük olmalı`
+    const min = task.gate === "listing_description" ? MIN_LISTING_WORDS : MIN_PRODUCT_WORDS
+    return `${String(wordCount(candidate.text))} sözcük; en az ${String(min)} sözcük olmalı`
   }
   if (problem === "ungrounded") {
     // A text that reads as a person's data names nothing of itself back

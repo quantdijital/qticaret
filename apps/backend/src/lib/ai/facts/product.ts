@@ -3,7 +3,8 @@ import { textOf } from "../../../workflows/seo/highlight"
 import type { HighlightValue } from "../../../workflows/seo/highlight"
 import { plainText } from "../../seo/text"
 import { aiValidationError } from "../errors"
-import { shownCategory } from "./category"
+import { PLACED_CATEGORY_FIELDS, shownCategoryIds } from "./category-tree"
+import type { PlacedCategory } from "./category-tree"
 import { SEO_FACT_FIELDS, seoFactsOf } from "./seo"
 import type { SeoRow } from "./seo"
 import type { FactsContainer, RecordFacts } from "./types"
@@ -13,13 +14,15 @@ interface ProductRow {
   subtitle?: string | null
   description?: string | null
   brand?: { name: string; is_active?: boolean | null } | null
-  categories?:
-    ({ name: string; is_internal?: boolean | null; is_active?: boolean | null } | null)[] | null
+  categories?: (PlacedCategory | null)[] | null
   attribute_values?: (HighlightValue | null)[] | null
   options?:
     | ({ title?: string | null; values?: ({ value?: string | null } | null)[] | null } | null)[]
     | null
-  collection?: { title?: string | null } | null
+  collection?: {
+    title?: string | null
+    collection_extension?: { is_active?: boolean | null } | null
+  } | null
   tags?: ({ value?: string | null } | null)[] | null
   seo_meta?: SeoRow | null
 }
@@ -31,15 +34,16 @@ export const PRODUCT_FACT_FIELDS = [
   "description",
   "brand.name",
   "brand.is_active",
-  "categories.name",
-  "categories.is_internal",
-  "categories.is_active",
+  // Ids and paths too: a category under an internal or closed parent is not named (#250 D1)
+  ...PLACED_CATEGORY_FIELDS,
   "attribute_values.*",
   "attribute_values.definition.*",
   // What a shopper picks among (Renk: siyah, kahve), the collection and tags it is listed under
   "options.title",
   "options.values.value",
   "collection.title",
+  // A collection the shop hid is not named (#250 B1), as a closed brand or category
+  "collection.collection_extension.is_active",
   "tags.value",
 ] as const
 
@@ -107,14 +111,26 @@ async function productRow(
   return (data[0] as ProductRow | undefined) ?? null
 }
 
-function factsOf(product: ProductRow): ProductFacts {
+// The collection's own row says whether its page is public; no row: it is (workflows/catalog/collection-fields.ts)
+const shownCollection = (product: ProductRow): string | null => {
+  const collection = product.collection
+  return present(collection?.title) && collection.collection_extension?.is_active !== false
+    ? collection.title
+    : null
+}
+
+async function factsOf(container: FactsContainer, product: ProductRow): Promise<ProductFacts> {
+  const categories = product.categories ?? []
+  const shownIds = await shownCategoryIds(container, categories)
   return {
     name: product.title,
     subtitle: product.subtitle ?? null,
     // A brand the shop closed is not named (as a category it closed)
     brand: product.brand?.is_active === false ? null : (product.brand?.name ?? null),
-    category: product.categories?.find(shownCategory)?.name ?? null,
-    collection: present(product.collection?.title) ? product.collection.title : null,
+    category:
+      categories.find((category) => typeof category?.id === "string" && shownIds.has(category.id))
+        ?.name ?? null,
+    collection: shownCollection(product),
     tags: tagsOf(product),
     options: optionsOf(product).slice(0, MAX_PRODUCT_OPTIONS),
     // Written for shoppers: the shop's own attributes stay out (adr/0005 T5)
@@ -142,7 +158,7 @@ export async function readProductFacts(
   id: string
 ): Promise<ProductFacts | null> {
   const product = await productRow(container, id, false)
-  return product ? factsOf(product) : null
+  return product ? factsOf(container, product) : null
 }
 
 /**
@@ -155,5 +171,5 @@ export async function productFacts(container: FactsContainer, id: string): Promi
   if (!product) {
     throw aiValidationError("ai.unknown_entity")
   }
-  return { ...factsOf(product), ...seoFactsOf(product.seo_meta) }
+  return { ...(await factsOf(container, product)), ...seoFactsOf(product.seo_meta) }
 }

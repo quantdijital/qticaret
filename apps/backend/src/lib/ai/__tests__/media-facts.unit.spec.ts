@@ -19,7 +19,9 @@ const PRODUCT = {
   title: "Seramik Kupa",
   subtitle: "El yapımı, ayse.yilmaz@example.com",
   description: "<p>Gizli not</p>",
-  categories: [{ name: "Mutfak", is_internal: false, is_active: true }],
+  categories: [
+    { id: "pcat_1", mpath: "pcat_1", name: "Mutfak", is_internal: false, is_active: true },
+  ],
   attribute_values: [],
 }
 
@@ -31,6 +33,11 @@ function containerWith(media: Record<string, unknown> | null): {
   const query = {
     graph: (request: Asked) => {
       asked.push(request)
+      if (request.entity === "product_category") {
+        return Promise.resolve({
+          data: [{ id: "pcat_1", is_internal: false, is_active: true, parent_category_id: null }],
+        })
+      }
       if (request.entity === "media_asset") {
         return Promise.resolve({ data: media ? [media] : [] })
       }
