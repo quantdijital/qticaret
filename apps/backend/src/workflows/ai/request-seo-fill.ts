@@ -6,7 +6,13 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { SEO_FILL_MAX, asksOf, fieldsOfScope, quotaLeft } from "../../lib/ai/bulk-seo"
+import {
+  SEO_FILL_MAX,
+  SEO_FILL_READ,
+  asksOf,
+  fieldsOfScope,
+  quotaLeft,
+} from "../../lib/ai/bulk-seo"
 import type { SeoFillScope } from "../../lib/ai/bulk-seo"
 import { findAiTask } from "../../lib/ai/registry/tasks"
 import { ValidationError } from "../../lib/errors"
@@ -45,7 +51,10 @@ const checkSeoFillStep = createStep(
         throw new MedusaError(MedusaError.Types.FORBIDDEN, "staff.forbidden")
       }
     }
-    const targets = (await readSeoFillTargets(container, fields)).slice(0, SEO_FILL_MAX)
+    const { targets: found } = await readSeoFillTargets(container, fields, {
+      limit: SEO_FILL_READ,
+    })
+    const targets = found.slice(0, SEO_FILL_MAX)
     if (targets.length === 0) {
       throw new ValidationError("ai.seo_fill_nothing")
     }

@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { seoFillKinds, seoFillTargets } from "../../../lib/ai/bulk-seo"
+import { seoFillKinds, seoFillRules, seoFillTargets } from "../../../lib/ai/bulk-seo"
 import type { SeoFillField, SeoFillTarget } from "../../../lib/ai/bulk-seo"
 import { SEO_DESCRIPTION_TASK, SEO_TITLE_TASK } from "../../../lib/ai/registry/tasks"
 import { draftQuotaOf } from "../../../lib/plan-limits"
@@ -27,11 +27,14 @@ export const SEO_FILL_TASK_IDS: readonly string[] = [SEO_TITLE_TASK.id, SEO_DESC
 /** Above any package's monthly operations: only the package's own limit counts. */
 const NO_MONTHLY_CEILING = 2_147_483_647
 
-/** `type:id:task` of the search text suggestions waiting for a decision (of these pages, when named). */
+/** `type:id:task` of the search text suggestions waiting for a decision, of these pages only. */
 export async function waitingSeoKeys(
   container: Container,
-  ids?: readonly string[]
+  ids: readonly string[]
 ): Promise<Set<string>> {
+  if (ids.length === 0) {
+    return new Set()
+  }
   const open = await container
     .resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
     .listContentDrafts(
@@ -39,7 +42,7 @@ export async function waitingSeoKeys(
         kind: [...SEO_FILL_TASK_IDS],
         source: AI_SUGGESTION_SOURCE,
         status: "draft",
-        ...(ids ? { entity_id: [...ids] } : {}),
+        entity_id: [...new Set(ids)],
       },
       { select: ["entity_type", "entity_id", "kind"] }
     )
@@ -48,29 +51,33 @@ export async function waitingSeoKeys(
 
 /**
  * The pages worth asking for, the lowest score first, with the tasks their
- * findings ask for and no suggestion already waiting. With `ids`, only
- * those pages (the job checking again what it was queued with).
+ * findings ask for and no suggestion already waiting. Only pages with such
+ * a finding are read, filtered in the database (`pagesWithRules`), and at
+ * most `limit` of them; `read` says how many rows came back, so a caller
+ * can tell it reached the limit. With `ids`, only those pages (the job
+ * checking again what it was queued with).
  */
 export async function readSeoFillTargets(
   container: Container,
   fields: readonly SeoFillField[],
-  ids?: readonly string[]
-): Promise<SeoFillTarget[]> {
+  options: { limit: number; ids?: readonly string[] }
+): Promise<{ targets: SeoFillTarget[]; read: number }> {
   const kinds = seoFillKinds(ASSESSED_KINDS)
-  if (kinds.length === 0) {
-    return []
+  const rules = seoFillRules(fields)
+  if (kinds.length === 0 || rules.length === 0) {
+    return { targets: [], read: 0 }
   }
-  // A shop's pages fit: only the findings are read, no page's own text
-  const rows = await container
-    .resolve<SeoAdvisorModuleService>(SEO_ADVISOR_MODULE)
-    .listSeoAssessments(
-      { entity_type: kinds, ...(ids ? { entity_id: [...ids] } : {}) },
-      {
-        select: ["entity_type", "entity_id", "issues"],
-        order: { score: "ASC", entity_id: "ASC" },
-      }
-    )
-  return seoFillTargets(rows, fields, await waitingSeoKeys(container, ids))
+  const rows = await container.resolve<SeoAdvisorModuleService>(SEO_ADVISOR_MODULE).pagesWithRules({
+    kinds,
+    rules,
+    limit: options.limit,
+    ...(options.ids ? { ids: options.ids } : {}),
+  })
+  const waiting = await waitingSeoKeys(
+    container,
+    rows.map((row) => row.entity_id)
+  )
+  return { targets: seoFillTargets(rows, fields, waiting), read: rows.length }
 }
 
 /** The text asks the quota still allows now: the month's operations and today's text ceiling, as the usage page shows them. */

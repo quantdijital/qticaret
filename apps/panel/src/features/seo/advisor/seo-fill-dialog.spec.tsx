@@ -59,6 +59,8 @@ const KUPA = open("cdraft_2", "seo_description", "Kupa", [
 let services = task(["gemini"])
 let suggestions = [GOMLEK, KUPA]
 let saveFails = false
+const COUNT = { pages: 12, title: 8, description: 12, max: 50 }
+let counted: Record<string, unknown> = COUNT
 const netFetch = vi.fn()
 
 const json = (status: number, body: unknown) =>
@@ -90,6 +92,7 @@ beforeEach(() => {
   services = task(["gemini"])
   suggestions = [GOMLEK, KUPA]
   saveFails = false
+  counted = COUNT
   vi.mocked(toast.error).mockReset()
   netFetch.mockReset()
   netFetch.mockImplementation((url: string) => {
@@ -107,7 +110,7 @@ beforeEach(() => {
       return Promise.resolve({ job_id: "job_1", pages: 12, asks: 20 })
     }
     if (url === "/admin/ai/seo-fill") {
-      return Promise.resolve({ pages: 12, title: 8, description: 12, max: 50 })
+      return Promise.resolve(counted)
     }
     if (url === "/admin/ai/seo-fill/suggestions") {
       return Promise.resolve({ suggestions })
@@ -271,6 +274,22 @@ describe("the bulk SEO fill", () => {
         body: { scope: "title", service: "deepseek" },
       })
     })
+  })
+
+  it("takes one job's worth and shows a capped total with a plus", async () => {
+    counted = { pages: 5000, title: 5000, description: 5000, max: 50, capped: true }
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <SeoFillButton />
+      </QueryClientProvider>
+    )
+    const user = userEvent.setup()
+    await user.click(
+      await screen.findByRole("button", { name: "Eksik metaları yapay zekâ ile doldur (50)" })
+    )
+    expect(await screen.findByRole("button", { name: "50 sayfa için öner" })).toBeEnabled()
+    expect(screen.getByText(/toplam 5000\+ sayfa var/)).toBeInTheDocument()
   })
 
   it("shows the connect tip and no start when no service can do it", async () => {

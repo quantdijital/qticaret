@@ -103,7 +103,10 @@ export function SeoFillStart({
       </Button>
       <p className="text-xs text-muted-foreground">
         {total > pages
-          ? t(`${R}.batch`, { count: pages, total })
+          ? t(`${R}.batch`, {
+              count: pages,
+              total: count?.capped ? `${String(total)}+` : String(total),
+            })
           : t(`${R}.cost`, { count: pages })}
       </p>
       <details className="text-sm">

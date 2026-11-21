@@ -1,6 +1,6 @@
 import type { PageKind, SeoIssue } from "../seo/advisor"
 import type { AiEntityType } from "./facts"
-import { advisorAiFix } from "./registry/advisor-fixes"
+import { ADVISOR_AI_FIXES, advisorAiFix, fixesOf } from "./registry/advisor-fixes"
 
 /**
  * Filling the search texts in bulk (adr/0074 §5 madde 7, G7): the pages
@@ -37,6 +37,24 @@ export const seoFillKinds = (kinds: readonly PageKind[], nodeEnv?: string): Page
   kinds.filter((kind) =>
     PROBE_RULES.some((ruleId) => advisorAiFix(kind, { ruleId }, nodeEnv) !== null)
   )
+
+/** Rows the count reads at most: past it the panel shows "5000+". */
+export const SEO_FILL_COUNT_CAP = 5_000
+
+/** Rows the job's start reads at most: several jobs' worth, as some may already wait. */
+export const SEO_FILL_READ = SEO_FILL_MAX * 4
+
+/**
+ * The rules (without their kind letter) whose finding a search text for
+ * these fields closes, from the same table a finding's button reads: the
+ * database filters on these, so only pages with such a finding are read.
+ */
+export const seoFillRules = (fields: readonly SeoFillField[]): string[] =>
+  Object.entries(ADVISOR_AI_FIXES)
+    .filter(([, entry]) =>
+      fixesOf(entry).some((fix) => fields.some((field) => field === fix.field))
+    )
+    .map(([rule]) => rule)
 
 /** A stored assessment as far as the job reads it. */
 export interface AssessedPage {
@@ -131,4 +149,26 @@ export function quotaLeft(input: {
   return input.monthly.limit === null
     ? day
     : Math.min(day, Math.max(0, input.monthly.limit - input.monthly.used))
+}
+
+/**
+ * The button's count from what was read: pages in all and by field, and
+ * `capped` when the read reached `cap` rows (the panel shows "5000+").
+ */
+export function seoFillCount(
+  targets: readonly SeoFillTarget[],
+  read: number,
+  cap: number = SEO_FILL_COUNT_CAP
+): { pages: number; title: number; description: number; max: number; capped: boolean } {
+  const capped = read > cap
+  const within = (count: number) => Math.min(count, cap)
+  return {
+    pages: within(targets.length),
+    title: within(targets.filter((target) => target.tasks.includes("seo_title")).length),
+    description: within(
+      targets.filter((target) => target.tasks.includes("seo_description")).length
+    ),
+    max: SEO_FILL_MAX,
+    capped,
+  }
 }

@@ -24,6 +24,8 @@ export interface SeoFillCount {
   pages: number
   title: number
   description: number
+  /** The server stopped counting at its cap: the totals read "5000+". */
+  capped?: boolean
   /** Pages one job takes. */
   max: number
 }

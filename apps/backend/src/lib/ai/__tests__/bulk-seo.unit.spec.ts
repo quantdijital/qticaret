@@ -3,7 +3,9 @@ import {
   asksOf,
   fieldsOfScope,
   quotaLeft,
+  seoFillCount,
   seoFillKinds,
+  seoFillRules,
   seoFillTargets,
   seoFillTasks,
 } from "../bulk-seo"
@@ -112,5 +114,41 @@ describe("quotaLeft", () => {
     expect(quotaLeft({ monthly: { used: 120, limit: 100 }, daily: { used: 0, limit: 200 } })).toBe(
       0
     )
+  })
+})
+
+describe("seoFillRules", () => {
+  it("names the rules a search text closes, by field, as the database filters them", () => {
+    expect(seoFillRules(fieldsOfScope("both")).sort()).toEqual(["META-01", "TITLE-01", "TITLE-03"])
+    expect(seoFillRules(fieldsOfScope("title")).sort()).toEqual(["TITLE-01", "TITLE-03"])
+    expect(seoFillRules(fieldsOfScope("description"))).toEqual(["META-01"])
+  })
+})
+
+describe("seoFillCount", () => {
+  const target = (id: string, tasks: string[]) => ({
+    entity_type: "product" as const,
+    entity_id: id,
+    tasks,
+  })
+
+  it("counts pages in all and by field", () => {
+    const targets = [
+      target("prod_1", ["seo_title"]),
+      target("prod_2", ["seo_title", "seo_description"]),
+    ]
+    expect(seoFillCount(targets, 2)).toEqual({
+      pages: 2,
+      title: 2,
+      description: 1,
+      max: SEO_FILL_MAX,
+      capped: false,
+    })
+  })
+
+  it("says capped and stops at the cap once the read went past it", () => {
+    const targets = Array.from({ length: 6 }, (_, i) => target(`prod_${String(i)}`, ["seo_title"]))
+    expect(seoFillCount(targets, 6, 5)).toMatchObject({ pages: 5, title: 5, capped: true })
+    expect(seoFillCount(targets.slice(0, 5), 5, 5)).toMatchObject({ pages: 5, capped: false })
   })
 })

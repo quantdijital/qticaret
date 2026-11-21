@@ -112,11 +112,11 @@ export function seoFill(
     {
       eligible: async (pages, fields) => {
         const wanted = new Set(pages.map((page) => `${page.entity_type}:${page.entity_id}`))
-        const found = await readSeoFillTargets(
-          container,
-          fields,
-          pages.map((page) => page.entity_id)
-        )
+        // The queued pages only: an id may name a page of another kind too, so twice the rows
+        const { targets: found } = await readSeoFillTargets(container, fields, {
+          ids: pages.map((page) => page.entity_id),
+          limit: pages.length * 2,
+        })
         // In the order queued, of the kinds queued (an id is unique within its kind only)
         const byKey = new Map(
           found
