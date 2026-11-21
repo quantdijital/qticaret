@@ -6641,6 +6641,21 @@
     "aliasesHint": "Açıklamalarda bu özellik için geçen başka adlar; örn. Menşei için Üretim yeri.",
     "aliasesPlaceholder": "Ad yazıp Enter'a basın",
     "removeAlias": "“{{name}}” adını kaldır",
+    "ai": {
+      "fill": "Boş özellikleri doldur",
+      "found_one": "{{count}} özellik için öneri var; önerinin altındaki Uygula ile alana yazılır. Kaydetmek size kalır.",
+      "found_other": "{{count}} özellik için öneri var; her önerinin altındaki Uygula ile alana yazılır. Kaydetmek size kalır.",
+      "allTaken": "Önerilen alanlar dolu. Kaydetmek size kalır.",
+      "suggested": "Öneri: {{value}}",
+      "apply": "Uygula",
+      "applyNamed": "{{label}} için öneriyi uygula",
+      "ignore": "Yok say",
+      "ignoreNamed": "{{label}} için öneriyi yok say",
+      "applyAll": "Hepsini uygula",
+      "close": "Önerileri kapat",
+      "yes": "Evet",
+      "no": "Hayır"
+    },
     "facts": {
       "action": "Açıklamadaki özellikleri aktar",
       "title": "Açıklamadaki özellikleri aktar",
@@ -11628,7 +11643,8 @@
       "brand_description": "Marka açıklaması",
       "short_description": "Kısa açıklama",
       "product_tags": "Etiket önerisi",
-      "product_category": "Kategori önerisi"
+      "product_category": "Kategori önerisi",
+      "product_attributes": "Özellik doldurma"
     },
     "options": {
       "short": "Kısa",

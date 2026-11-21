@@ -6641,6 +6641,21 @@
     "aliasesHint": "Other names descriptions use for this attribute; e.g. Made in for Origin.",
     "aliasesPlaceholder": "Type a name and press Enter",
     "removeAlias": "Remove “{{name}}”",
+    "ai": {
+      "fill": "Fill empty attributes",
+      "found_one": "There is a suggestion for {{count}} attribute; Apply under it writes it in the field. Saving is up to you.",
+      "found_other": "There are suggestions for {{count}} attributes; Apply under each writes it in the field. Saving is up to you.",
+      "allTaken": "The suggested fields are filled. Saving is up to you.",
+      "suggested": "Suggestion: {{value}}",
+      "apply": "Apply",
+      "applyNamed": "Apply the suggestion for {{label}}",
+      "ignore": "Ignore",
+      "ignoreNamed": "Ignore the suggestion for {{label}}",
+      "applyAll": "Apply all",
+      "close": "Close suggestions",
+      "yes": "Yes",
+      "no": "No"
+    },
     "facts": {
       "action": "Bring over facts from the description",
       "title": "Bring over facts from the description",
@@ -11628,7 +11643,8 @@
       "brand_description": "Brand description",
       "short_description": "Short description",
       "product_tags": "Tag suggestion",
-      "product_category": "Category suggestion"
+      "product_category": "Category suggestion",
+      "product_attributes": "Attribute filling"
     },
     "options": {
       "short": "Short",
