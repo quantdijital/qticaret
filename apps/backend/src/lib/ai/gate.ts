@@ -145,7 +145,8 @@ export function suggestionProblems(task: AiTask, text: string, data?: string): s
   if (
     task.gate === "seo_title" ||
     task.gate === "seo_description" ||
-    task.gate === "product_description"
+    task.gate === "product_description" ||
+    task.gate === "listing_description"
   ) {
     return [...problems, ...fieldProblems(task.gate, text)]
   }

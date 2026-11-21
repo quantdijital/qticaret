@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto"
 import { CONTENT_INSTRUCTIONS } from "./crafts/content"
+import { LISTING_INSTRUCTIONS } from "./crafts/listing"
 import { REVIEW_INSTRUCTIONS } from "./crafts/reviews"
 import { SEO_INSTRUCTIONS } from "./crafts/seo"
 import { indented } from "./crafts/types"
@@ -33,6 +34,7 @@ import type { AiTask } from "./registry/tasks"
 const INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
   ...SEO_INSTRUCTIONS,
   ...CONTENT_INSTRUCTIONS,
+  ...LISTING_INSTRUCTIONS,
   ...REVIEW_INSTRUCTIONS,
 }
 
@@ -40,6 +42,9 @@ const INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
 const SUBJECTS: Readonly<Record<AiEntityType, string>> = {
   product: "Veri bir ürün sayfasına aittir.",
   category: "Veri bir kategori sayfasına aittir; sayfa bu kategorideki ürünleri listeler.",
+  collection:
+    "Veri bir koleksiyon sayfasına aittir; sayfa mağazanın bu koleksiyonda bir araya getirdiği ürünleri listeler.",
+  brand: "Veri bir marka sayfasına aittir; sayfa bu markanın mağazadaki ürünlerini listeler.",
   page: "Veri bir içerik sayfasına aittir.",
   media:
     "Veri bir mağaza görseline aittir; görsel bu iletiye ektir. Veride ürün adı varsa görsel o ürünü gösterir.",

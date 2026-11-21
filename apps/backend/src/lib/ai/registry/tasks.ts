@@ -15,6 +15,11 @@ import {
   IMAGE_SCENE_TASK,
   PRODUCT_FROM_PHOTO_TASK,
 } from "./image-tasks"
+import {
+  BRAND_DESCRIPTION_TASK,
+  CATEGORY_DESCRIPTION_TASK,
+  COLLECTION_DESCRIPTION_TASK,
+} from "./listing-tasks"
 import { QUESTION_ANSWER_TASK, REVIEW_REPLY_TASK, REVIEW_SUMMARY_TASK } from "./review-tasks"
 
 /** What a task is asked for: a text record, or a picture of the media library. */
@@ -42,6 +47,8 @@ export const AI_GATES = [
   // Short texts of the product page (registry/catalog-tasks.ts, lib/ai/short-text-gate.ts)
   "focus_keyword",
   "product_title",
+  // A category's, a collection's or a brand's description (registry/listing-tasks.ts)
+  "listing_description",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -111,11 +118,17 @@ export const TEST_TASK: AiTask = {
 }
 
 // The records with a page of their own; an image is none
-const PAGE_ENTITIES: readonly AiEntityType[] = ["product", "category", "page"]
+const PAGE_ENTITIES: readonly AiEntityType[] = [
+  "product",
+  "category",
+  "collection",
+  "brand",
+  "page",
+]
 
 /**
  * A page's search result title and description (Aşama 1, docs/22 PR 1-1),
- * for a product, a category or a content page. The gate is the advisor's
+ * for a product, a listing page (category, collection, brand) or a content page. The gate is the advisor's
  * own rules for the field (P-TITLE-01, P-META-01 and their noise rules),
  * so the longest suggestion is the field's character target.
  */
@@ -178,12 +191,16 @@ export const PRODUCT_DESCRIPTION_TASK: AiTask = {
 }
 
 export * from "./image-tasks"
+export * from "./listing-tasks"
 export * from "./review-tasks"
 
 const TASKS: readonly AiTask[] = [
   SEO_TITLE_TASK,
   SEO_DESCRIPTION_TASK,
   PRODUCT_DESCRIPTION_TASK,
+  CATEGORY_DESCRIPTION_TASK,
+  COLLECTION_DESCRIPTION_TASK,
+  BRAND_DESCRIPTION_TASK,
   IMAGE_ALT_TEXT_TASK,
   IMAGE_BACKGROUND_TASK,
   REVIEW_SUMMARY_TASK,

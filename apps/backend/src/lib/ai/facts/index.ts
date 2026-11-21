@@ -1,9 +1,7 @@
 import { brandOf } from "../../../workflows/messaging/brand"
 import { aiValidationError } from "../errors"
 import { categoryFacts } from "./category"
-
-/** How much of a category's joined product names goes: twelve names of a hundred characters. */
-const CATEGORY_PRODUCTS_LENGTH = 1_200
+import { brandFacts, collectionFacts } from "./listing"
 import { mediaFacts } from "./media"
 import type { AiImageRef } from "./media"
 import { PAGE_SUMMARY_LENGTH, pageFacts } from "./page"
@@ -11,6 +9,9 @@ import { productFacts } from "./product"
 import { productReviewFacts, questionFacts, reviewFacts } from "./reviews"
 import type { FactsContainer, RecordFacts } from "./types"
 import type { AiTaskReader } from "../registry/tasks"
+
+/** How much of a listing's joined product names goes: twelve names of a hundred characters. */
+const LISTING_PRODUCTS_LENGTH = 1_200
 
 /**
  * The records a suggestion can be asked for (adr/0071 §8, §10), each read
@@ -22,6 +23,8 @@ import type { AiTaskReader } from "../registry/tasks"
 export const AI_ENTITY_TYPES = [
   "product",
   "category",
+  "collection",
+  "brand",
   "page",
   "media",
   "review",
@@ -33,6 +36,9 @@ export type AiEntityType = (typeof AI_ENTITY_TYPES)[number]
 export const AI_ENTITY_ID_PREFIX: Readonly<Record<AiEntityType, string>> = {
   product: "prod",
   category: "pcat",
+  // Medusa's product collection, and the brands module's own (modules/brands/models/brand.ts)
+  collection: "pcol",
+  brand: "brand",
   page: "cnt",
   media: "media",
   review: "prev",
@@ -55,6 +61,8 @@ const READERS: Readonly<
 > = {
   product: fieldsOnly(productFacts),
   category: fieldsOnly(categoryFacts),
+  collection: fieldsOnly(collectionFacts),
+  brand: fieldsOnly(brandFacts),
   page: fieldsOnly(pageFacts),
   media: mediaFacts,
   review: fieldsOnly(reviewFacts),
@@ -65,6 +73,8 @@ const READERS: Readonly<
 const WITH_SHOP: ReadonlySet<AiEntityType> = new Set([
   "product",
   "category",
+  "collection",
+  "brand",
   "page",
   "review",
   "question",
@@ -73,8 +83,8 @@ const WITH_SHOP: ReadonlySet<AiEntityType> = new Set([
 /** Longest text per field where it differs from the data block's default. */
 export const AI_FACT_MAX_LENGTHS: Readonly<Record<string, number>> = {
   body: PAGE_SUMMARY_LENGTH,
-  // A category's product names (`CATEGORY_PRODUCT_EXAMPLES` of them), joined
-  products: CATEGORY_PRODUCTS_LENGTH,
+  // A listing's product names (`LISTING_PRODUCT_EXAMPLES` of them), joined
+  products: LISTING_PRODUCTS_LENGTH,
 }
 
 export interface EntityFacts {

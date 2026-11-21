@@ -66,7 +66,13 @@ describe("the product page's short text tasks: registry and instruction", () => 
   it("asks a keyword for a page of its own, a name for a product only", () => {
     const kinds = (task: typeof FOCUS_KEYWORD_TASK) =>
       AI_ENTITY_TYPES.filter((type) => isTaskEntity(task, type))
-    expect(kinds(FOCUS_KEYWORD_TASK)).toEqual(["product", "category", "page"])
+    expect(kinds(FOCUS_KEYWORD_TASK)).toEqual([
+      "product",
+      "category",
+      "collection",
+      "brand",
+      "page",
+    ])
     expect(kinds(PRODUCT_TITLE_TASK)).toEqual(["product"])
   })
 

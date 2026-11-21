@@ -58,6 +58,8 @@ describe("product description task (docs/22 PR 2-1)", () => {
     expect(AI_ENTITY_TYPES.filter((type) => isTaskEntity(SEO_TITLE_TASK, type))).toEqual([
       "product",
       "category",
+      "collection",
+      "brand",
       "page",
     ])
   })

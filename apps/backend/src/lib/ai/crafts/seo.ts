@@ -24,10 +24,10 @@ const SEO_WRITER =
 
 // Which fields of the data block carry what, told once for the SEO tasks
 const SEO_FIELDS =
-  'Verideki "focus_keyword" sayfanın odak anahtar kelimesidir; "current_seo_title" ve "current_seo_description" sayfanın bugünkü arama sonucu metinleridir; kategoride "products" içindeki ürünlerden örnek adlar, "brands" en sık markalar, "product_count" ürün sayısıdır.'
+  'Verideki "focus_keyword" sayfanın odak anahtar kelimesidir; "current_seo_title" ve "current_seo_description" sayfanın bugünkü arama sonucu metinleridir; kategori, koleksiyon ve marka sayfasında "products" içindeki ürünlerden örnek adlar, "brands" en sık markalar, "categories" (marka sayfasında) en sık kategoriler, "product_count" ürün sayısıdır.'
 
 const SEARCH_INTENT =
-  "Okur: arama kutusuna ürün türünü ya da ihtiyacını yazmış, sonuç listesini birkaç saniyede tarayan bir alışverişçi. Ürün sayfasında niyet çoğunlukla satın almaktır; kategori sayfasında seçenekleri görmek ve karşılaştırmaktır; içerik sayfasında bilgi almaktır."
+  "Okur: arama kutusuna ürün türünü ya da ihtiyacını yazmış, sonuç listesini birkaç saniyede tarayan bir alışverişçi. Ürün sayfasında niyet çoğunlukla satın almaktır; kategori, koleksiyon ve marka sayfasında seçenekleri görmek ve karşılaştırmaktır; içerik sayfasında bilgi almaktır."
 
 const SINGLE_LINE = `Tek satır, düz metin; köşeli ya da açılı ayraç kullanma. ${PLAIN_FORM}`
 
@@ -38,7 +38,7 @@ export const SEO_INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
       "Amaç: bu sayfanın arama sonuçlarındaki başlığını yazmak. Başlık arama motoruna sayfanın konusunu söyler ve sonuç listesinde tıklamayı kazanır.",
       SEARCH_INTENT,
       SEO_FIELDS,
-      'Yöntem: odak anahtar kelime varsa onu başlığın başına ya da başına yakın, doğal biçimiyle koy; yoksa sayfanın ürün türünü ya da konusunu ilk sözcüklere al. Ardından okuru ikna eden, sayfayı rakiplerinden ayıran bir bilgi ekle: marka, model, malzeme, renk, ölçü, kullanım alanı ya da kategorideki çeşitler. Mağaza adı veride varsa ve sığıyorsa sona "| Mağaza adı" biçiminde eklenebilir. Bugünkü başlık varsa onu aynen yazma; daha açık ve daha çekici olanını öner.',
+      'Yöntem: odak anahtar kelime varsa onu başlığın başına ya da başına yakın, doğal biçimiyle koy; yoksa sayfanın ürün türünü ya da konusunu ilk sözcüklere al. Ardından okuru ikna eden, sayfayı rakiplerinden ayıran bir bilgi ekle: marka, model, malzeme, renk, ölçü, kullanım alanı ya da liste sayfasındaki (kategori, koleksiyon, marka) çeşitler. Mağaza adı veride varsa ve sığıyorsa sona "| Mağaza adı" biçiminde eklenebilir. Bugünkü başlık varsa onu aynen yazma; daha açık ve daha çekici olanını öner.',
       "Adaylar birbirinden belirgin biçimde farklı olsun: biri anahtar kelimeyle başlasın, biri ayırt edici özelliği öne alsın, biri kullanım alanını ya da kime uygun olduğunu söylesin.",
       "Kalite ölçütü: ilk üç dört sözcükte konu anlaşılır; her sözcük bilgi taşır; anahtar kelime yığılmaz; doğal Türkçe okunur.",
       "İyi örnek (uydurma bir ürün): Çelik Termos 750 ml, Çift Cidarlı ve Sızdırmaz | Örnek Mağaza",
@@ -60,7 +60,7 @@ export const SEO_INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
       "Amaç: arama sonuçlarında başlığın altında görünecek açıklamayı yazmak. Bu metin sıralamayı değil, tıklanıp tıklanmamayı belirler: okura sayfada ne bulacağını ve neden tıklaması gerektiğini söyler.",
       SEARCH_INTENT,
       SEO_FIELDS,
-      "Yöntem: odak anahtar kelime varsa ilk cümlede doğal biçimde geçir. Sayfada ne bulunacağını somut söyle: ürün türü ve öne çıkan bir iki özellik; kategoride verideki ürün örneklerinden, markalardan ya da çeşitlerden birkaçı. Özelliği okurun kazancına çevir. Sonu kısa ve yumuşak bir davetle bitir (inceleyin, seçenekleri görün gibi). Başlığı tekrar etme; bugünkü açıklama varsa onu aynen yazma.",
+      "Yöntem: odak anahtar kelime varsa ilk cümlede doğal biçimde geçir. Sayfada ne bulunacağını somut söyle: ürün türü ve öne çıkan bir iki özellik; kategori, koleksiyon ya da marka sayfasında verideki ürün örneklerinden, markalardan, kategorilerden ya da çeşitlerden birkaçı. Özelliği okurun kazancına çevir. Sonu kısa ve yumuşak bir davetle bitir (inceleyin, seçenekleri görün gibi). Başlığı tekrar etme; bugünkü açıklama varsa onu aynen yazma.",
       "Adaylar birbirinden belirgin biçimde farklı olsun: biri faydayı öne alsın, biri ayırt edici özelliği, biri çeşitliliği ya da kullanım alanını.",
       "Kalite ölçütü: tek okumada ne olduğu anlaşılır; somut bilgi taşır; genel dolgu cümlesi yoktur.",
       "İyi örnek (uydurma bir ürün; veride çift cidar, 750 ml ve sızdırmaz kapak yazıyor): Çift cidarlı çelik termos, 750 ml hacmi ve sızdırmaz kapağıyla çantada güvenle taşınır. Renk seçeneklerini inceleyin.",
@@ -81,7 +81,7 @@ export const SEO_INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
     craft: lines(
       "Rol: Türkiye'de alışveriş aramalarını iyi bilen bir SEO uzmanısın.",
       "Amaç: bu sayfanın arama motorlarında hedefleyeceği odak anahtar kelimeyi seçmek: Türkiye'de alışveriş yapan birinin bu sayfayı bulmak için arama kutusuna gerçekten yazacağı kısa bir ifade.",
-      "Arama niyeti: ürün sayfasında ürün türü ve onu ayıran özellik (malzeme, kullanım, renk, ölçü, marka) birleşir; kategori sayfasında çeşidin adı kullanılır, ama çok genel tek sözcükten kaçınılır.",
+      "Arama niyeti: ürün sayfasında ürün türü ve onu ayıran özellik (malzeme, kullanım, renk, ölçü, marka) birleşir; kategori ve koleksiyon sayfasında çeşidin ya da seçkinin adı kullanılır, ama çok genel tek sözcükten kaçınılır; marka sayfasında marka adı tek başına ya da ürün türüyle birlikte kullanılır.",
       SEO_FIELDS,
       "Yöntem: insanların yazdığı gibi doğal sırada ve küçük harfle yaz; Türkçe karakterleri koru. İlk satır sayfaya en uygun ve en çok aranabilecek ana ifade olsun; ikincisi daha özgül, uzun kuyruk bir ifade; üçüncüsü aynı niyeti başka sözcüklerle söyleyen bir ifade. Bugünkü odak anahtar kelime varsa onu da tart; daha iyisi yoksa adaylardan biri olabilir.",
       "Kalite ölçütü: genellikle iki ile dört sözcük; ne cümle ne tek genel sözcük.",

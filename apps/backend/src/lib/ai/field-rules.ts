@@ -1,4 +1,4 @@
-import { MIN_PRODUCT_WORDS } from "../seo/advisor"
+import { MIN_LISTING_WORDS, MIN_PRODUCT_WORDS } from "../seo/advisor"
 import { hasSymbolRun, isShouting, repeatedWord, wordCount } from "../seo/advisor/text"
 import { SERP_TEXT_LENGTH, fitsSerp } from "../seo/pixel-width"
 import { readsAsLink } from "../text/link-like"
@@ -7,9 +7,14 @@ import { hasPersonalData } from "./redact"
 /**
  * The fields a suggestion fills that the SEO rule engine has rules for:
  * a page's search result title and description, and a product's
- * description (adr/0005, adr/0071 §9).
+ * description and a listing page's (adr/0005, adr/0071 §9, adr/0075).
  */
-export const AI_FIELD_RULES = ["seo_title", "seo_description", "product_description"] as const
+export const AI_FIELD_RULES = [
+  "seo_title",
+  "seo_description",
+  "product_description",
+  "listing_description",
+] as const
 export type AiFieldRule = (typeof AI_FIELD_RULES)[number]
 
 /**
@@ -31,6 +36,9 @@ export function fieldProblems(field: AiFieldRule, text: string): string[] {
     }
   }
   if (field === "product_description" && wordCount(text) < MIN_PRODUCT_WORDS) {
+    problems.push("too_short")
+  }
+  if (field === "listing_description" && wordCount(text) < MIN_LISTING_WORDS) {
     problems.push("too_short")
   }
   if (isShouting(text) || hasSymbolRun(text) || (field === "seo_title" && repeatedWord(text))) {
