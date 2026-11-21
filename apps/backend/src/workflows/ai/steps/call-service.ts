@@ -20,6 +20,8 @@ import { isFaqAllowed } from "../../../lib/ai/product-faq"
 import type { FaqAllowed } from "../../../lib/ai/product-faq"
 import { runAttributesTask, runCardTask, runFaqTask, runPickTask } from "../../../lib/ai/run-card"
 import { runTextTask } from "../../../lib/ai/run-text"
+import type { CampaignAllowed } from "../../../lib/ai/campaign-text"
+import { isCampaignTask, runCampaignTask } from "../../../lib/ai/run-campaign"
 import { correctionClaim, correctionUsageOf } from "./correction-claim"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import { isCredentialProvider } from "../../../modules/integration-credentials/providers"
@@ -35,6 +37,8 @@ export interface CallServiceInput {
   image_file_id?: string | null
   /** A product card's or a pick task's lists, read on the server (task-input); its answer may name nothing else. */
   allowed?: CardAllowed | PickAllowed | AttributeAllowed | FaqAllowed | null
+  /** A bulk message's limits (its figures, an SMS's end), read on the server (task-input). */
+  campaign?: CampaignAllowed | null
 }
 
 /** How the call ended; never the key, the service's own words or its raw answer. */
@@ -185,57 +189,67 @@ export const callServiceStep = createStep(
       const result = await withAiBreaker(
         input.service,
         () =>
-          task.gate === "product_card"
-            ? runCardTask({
+          isCampaignTask(task)
+            ? runCampaignTask({
                 connector,
                 task,
                 prompt,
-                allowed:
-                  allowed &&
-                  !isPickAllowed(allowed) &&
-                  !isAttributeAllowed(allowed) &&
-                  !isFaqAllowed(allowed)
-                    ? allowed
-                    : { categories: [], attributes: [] },
-                ...withImages,
+                // No limits read for this task: no figure is allowed, an SMS has no end counted
+                allowed: input.campaign ?? { kind: "campaign", numbers: [], sms: null },
               })
-            : task.gate === "product_faq"
-              ? runFaqTask({
+            : task.gate === "product_card"
+              ? runCardTask({
                   connector,
                   task,
                   prompt,
-                  // No list read for this task: nothing is held against, the gate still is
-                  allowed: isFaqAllowed(allowed) ? allowed : { kind: "product_faq", published: [] },
+                  allowed:
+                    allowed &&
+                    !isPickAllowed(allowed) &&
+                    !isAttributeAllowed(allowed) &&
+                    !isFaqAllowed(allowed)
+                      ? allowed
+                      : { categories: [], attributes: [] },
+                  ...withImages,
                 })
-              : task.gate === "product_attributes"
-                ? runAttributesTask({
+              : task.gate === "product_faq"
+                ? runFaqTask({
                     connector,
                     task,
                     prompt,
-                    // No list read for this task: nothing it names is allowed
-                    allowed: isAttributeAllowed(allowed)
+                    // No list read for this task: nothing is held against, the gate still is
+                    allowed: isFaqAllowed(allowed)
                       ? allowed
-                      : { kind: "product_attributes", attributes: [] },
-                    ...withImages,
+                      : { kind: "product_faq", published: [] },
                   })
-                : isPickTask(task)
-                  ? runPickTask({
+                : task.gate === "product_attributes"
+                  ? runAttributesTask({
                       connector,
                       task,
                       prompt,
                       // No list read for this task: nothing it names is allowed
-                      allowed:
-                        isPickAllowed(allowed) && allowed.kind === task.gate
-                          ? allowed
-                          : { kind: task.gate, choices: [], taken: [] },
-                    })
-                  : runTextTask({
-                      connector,
-                      task,
-                      prompt,
-                      mayCorrect: claim.mayCorrect,
+                      allowed: isAttributeAllowed(allowed)
+                        ? allowed
+                        : { kind: "product_attributes", attributes: [] },
                       ...withImages,
-                    }),
+                    })
+                  : isPickTask(task)
+                    ? runPickTask({
+                        connector,
+                        task,
+                        prompt,
+                        // No list read for this task: nothing it names is allowed
+                        allowed:
+                          isPickAllowed(allowed) && allowed.kind === task.gate
+                            ? allowed
+                            : { kind: task.gate, choices: [], taken: [] },
+                      })
+                    : runTextTask({
+                        connector,
+                        task,
+                        prompt,
+                        mayCorrect: claim.mayCorrect,
+                        ...withImages,
+                      }),
         DEFAULT_CIRCUIT_BREAKER,
         // The correction's own failure, returned inside the first call's permit, counts too
         correctionFailure

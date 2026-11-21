@@ -28,6 +28,7 @@ import {
   SHORT_DESCRIPTION_TASK,
 } from "./product-page-tasks"
 import { QUESTION_ANSWER_TASK, REVIEW_REPLY_TASK, REVIEW_SUMMARY_TASK } from "./review-tasks"
+import { CAMPAIGN_EMAIL_TASK, CAMPAIGN_SMS_TASK } from "./campaign-tasks"
 
 /** What a task is asked for: a text record, or a picture of the media library. */
 export type AiTaskEntity = AiEntityType | "media"
@@ -65,6 +66,9 @@ export const AI_GATES = [
   "product_attributes",
   // A product's FAQ: each question and answer through the shared gate (lib/ai/product-faq.ts)
   "product_faq",
+  // A bulk message's words: each text through the shared gate, an SMS counted as sent (lib/ai/campaign-text.ts)
+  "campaign_email",
+  "campaign_sms",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -84,6 +88,12 @@ export interface AiTask {
   mode: AiTaskMode
   /** Ready-made choices next to the button (a tone), two at most. */
   options: readonly string[]
+  /**
+   * `purpose`: the options say what a message is for (a bulk message's
+   * new product, discount, season, win-back; registry/campaign-tasks.ts),
+   * a closed list up to `MAX_PURPOSE_OPTIONS`, not a tone's two.
+   */
+  optionKind?: "purpose"
   /** Staff roles that may ask for it; checked in the workflow too. */
   roles: readonly StaffRole[]
   /** Platform credits one run costs (adr/0071 §7); never taken from the client. */
@@ -223,6 +233,7 @@ export * from "./image-tasks"
 export * from "./listing-tasks"
 export * from "./product-page-tasks"
 export * from "./review-tasks"
+export * from "./campaign-tasks"
 
 const TASKS: readonly AiTask[] = [
   SEO_TITLE_TASK,
@@ -245,6 +256,8 @@ const TASKS: readonly AiTask[] = [
   PRODUCT_CATEGORY_TASK,
   PRODUCT_ATTRIBUTES_TASK,
   PRODUCT_FAQ_TASK,
+  CAMPAIGN_EMAIL_TASK,
+  CAMPAIGN_SMS_TASK,
 ]
 
 /**

@@ -3,6 +3,7 @@ import { ATTRIBUTE_CHOICES_FIELD } from "../facts/product-attributes"
 import { PUBLISHED_QUESTIONS_FIELD } from "../product-faq"
 import { CATEGORY_CHOICES_FIELD, TAG_CHOICES_FIELD } from "../facts/product-picks"
 import { FAKE_SERVICE } from "../registry/services"
+import { fakeCampaignAnswer } from "./fake-campaign"
 import type { TextConnector, TextRequest, TextResult } from "./types"
 
 /**
@@ -166,6 +167,10 @@ function structuredAnswer(data: string): string {
   const categories = codesOf(data, CATEGORY_CHOICES_FIELD, 1)
   if (categories !== null) {
     return JSON.stringify({ categories })
+  }
+  const campaign = fakeCampaignAnswer(data)
+  if (campaign !== null) {
+    return campaign
   }
   return JSON.stringify({
     title: FAKE_SEEN,

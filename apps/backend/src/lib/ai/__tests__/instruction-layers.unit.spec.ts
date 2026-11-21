@@ -31,6 +31,8 @@ describe("the system message's layers (adr/0074 §1)", () => {
     expect(TEXT_TASKS.map((each) => each.id).sort()).toEqual(
       [
         "brand_description",
+        "campaign_email",
+        "campaign_sms",
         "category_description",
         "collection_description",
         "focus_keyword",
