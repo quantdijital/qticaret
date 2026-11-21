@@ -24,6 +24,8 @@ const PARAGRAPH =
   "Bu sayfada sıcak günler için seçilmiş hafif ve nefes alan parçalar bir arada duruyor. Gün boyu rahat giyilen modellerden özel günlere uygun seçeneklere kadar farklı ihtiyaçlara göre ürünler bulabilir, kullanım alanınıza göre seçim yapabilirsiniz."
 // Over the advisor's listing floor (MIN_LISTING_WORDS), plain paragraphs
 const DESCRIPTION = Array.from({ length: 4 }, () => PARAGRAPH).join("\n\n")
+// As the gate offers it: plain text, blank lines closed up (lib/ai/gate.ts `suggestionText`)
+const OFFERED = DESCRIPTION.replace(/\n\n/g, "\n")
 const TITLE = "Yazlık Keten Gömlekler, Rahat ve Nefes Alan Kesim"
 
 const unique = () => `${String(Date.now())}-${String(Math.floor(Math.random() * 1e6))}`
@@ -148,7 +150,7 @@ medusaIntegrationTestRunner({
 
       expect(answers.map((answer) => answer.status)).toEqual([201, 201, 201])
       for (const answer of answers) {
-        expect(answer.data.suggestion).toMatchObject({ service: "fake", text: DESCRIPTION })
+        expect(answer.data.suggestion).toMatchObject({ service: "fake", text: OFFERED })
       }
       expect(seen.map((request) => request.system)).toEqual([
         expect.stringContaining("kategori sayfasının"),
@@ -230,7 +232,7 @@ medusaIntegrationTestRunner({
           { headers: owner.headers }
         )
       )
-      expect(accepted.data.suggestion).toMatchObject({ status: "accepted", text: DESCRIPTION })
+      expect(accepted.data.suggestion).toMatchObject({ status: "accepted", text: OFFERED })
       const board = await settle(
         http.get<{ collection: { description: string | null } }>(
           `/admin/collection-board/${ids.collection}`,
