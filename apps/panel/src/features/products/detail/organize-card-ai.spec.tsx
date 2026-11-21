@@ -4,12 +4,13 @@ import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { ProductDetail } from "@/features/products/api/products"
+import { toast } from "sonner"
 import { OrganizeCard } from "./organize-card"
 
 const sdkFetch = vi.hoisted(() => vi.fn())
 const admin = vi.hoisted(() => ({
   product: { update: vi.fn() },
-  productTag: { create: vi.fn() },
+  productTag: { create: vi.fn(), list: vi.fn(), delete: vi.fn() },
 }))
 const netFetch = vi.fn()
 // The tree stands in as the ids it holds
@@ -104,6 +105,8 @@ function setup() {
   })
   admin.product.update.mockReset().mockResolvedValue({ product: PRODUCT })
   admin.productTag.create.mockReset().mockResolvedValue({ product_tag: { id: "ptag_new" } })
+  admin.productTag.list.mockReset().mockResolvedValue({ product_tags: [] })
+  admin.productTag.delete.mockReset().mockResolvedValue({ id: "ptag_new", deleted: true })
   render(
     <QueryClientProvider
       client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
@@ -195,5 +198,41 @@ describe("OrganizeCard's AI picks (adr/0074 §5 madde 2)", () => {
     await waitFor(() => {
       expect(admin.product.update).toHaveBeenCalledWith("prod_1", { tags: [] })
     })
+  })
+  it("links a shop tag of the same name instead of creating a second (#251 D1)", async () => {
+    const user = setup()
+    admin.productTag.list.mockResolvedValue({
+      product_tags: [
+        { id: "ptag_yazlik", value: "Yaz Sezonu Ürünü" },
+        { id: "ptag_old", value: "Yaz Sezonu" },
+      ],
+    })
+    await user.click(screen.getByRole("button", { name: /düzenle/i }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(await within(dialog).findByRole("button", { name: "Etiket öner" }))
+    await user.click(await within(dialog).findByRole("button", { name: "yaz sezonu (yeni) ekle" }))
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await waitFor(() => {
+      expect(admin.product.update).toHaveBeenCalledWith("prod_1", {
+        tags: [{ id: "ptag_1" }, { id: "ptag_old" }],
+      })
+    })
+    expect(admin.productTag.list).toHaveBeenCalledWith(expect.objectContaining({ q: "yaz sezonu" }))
+    expect(admin.productTag.create).not.toHaveBeenCalled()
+  })
+
+  it("takes back a tag it created when the product's update fails (#251 D1)", async () => {
+    const user = setup()
+    admin.product.update.mockRejectedValue(new Error("boom"))
+    await user.click(screen.getByRole("button", { name: /düzenle/i }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(await within(dialog).findByRole("button", { name: "Etiket öner" }))
+    await user.click(await within(dialog).findByRole("button", { name: "yaz sezonu (yeni) ekle" }))
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await waitFor(() => {
+      expect(admin.productTag.delete).toHaveBeenCalledWith("ptag_new")
+    })
+    expect(admin.productTag.create).toHaveBeenCalledTimes(1)
+    expect(toast.error).toHaveBeenCalled()
   })
 })

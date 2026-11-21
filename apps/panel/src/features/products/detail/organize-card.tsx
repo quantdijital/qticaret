@@ -21,7 +21,7 @@ import { VatSelect } from "@/features/products/components/vat-select"
 import { vatLabelOf, vatRatesQuery } from "@/features/settings/api/vat-rates"
 import { errorText } from "@/lib/errors"
 import { TagsField } from "./organize-tags"
-import { tagIds, tagsOf } from "./tag-values"
+import { dropTags, tagIds, tagsOf } from "./tag-values"
 import type { TagValue } from "./tag-values"
 import { PRODUCT_SECTIONS, someNames } from "./sections"
 import { SideCard } from "./side-card"
@@ -64,6 +64,8 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
 
   const submit = form.handleSubmit(async (values) => {
     const { dirtyFields } = form.formState
+    // Tags this save created, until the product's update links them (#251 D1)
+    let created: string[] = []
     try {
       if (
         dirtyFields.category_ids ||
@@ -72,7 +74,9 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
         dirtyFields.tags
       ) {
         // A new tag the person picked is created only now, then linked like the shop's own
-        const tags = dirtyFields.tags ? (await tagIds(values.tags)).map((id) => ({ id })) : null
+        const picked = dirtyFields.tags ? await tagIds(values.tags) : null
+        created = picked?.created ?? []
+        const tags = picked ? picked.ids.map((id) => ({ id })) : null
         await update.mutateAsync({
           ...(dirtyFields.category_ids || dirtyFields.type_id
             ? {
@@ -83,6 +87,7 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
           ...(dirtyFields.collection ? { collection_id: values.collection?.id ?? null } : {}),
           ...(tags ? { tags } : {}),
         })
+        created = []
       }
       if (dirtyFields.brand) {
         await setBrand.mutateAsync(values.brand?.id ?? null)
@@ -90,6 +95,8 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
       toast.success(t("products.detail.saved"))
       onClose()
     } catch (failure) {
+      // The update failed: a tag it would have linked is not left behind unused
+      await dropTags(created)
       toast.error(errorText(t, failure))
     }
   })

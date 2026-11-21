@@ -32,19 +32,61 @@ export const withTag = (tags: readonly TagValue[], pick: AiPick): TagValue[] =>
         pick.kind === "record" ? { id: pick.id, value: pick.name } : { id: null, value: pick.name },
       ]
 
+// The shop's tags a name search reads at most: an exact name is among the first
+const LOOKUP_LIMIT = 50
+
 /**
- * The tags' ids for the product's update: a new tag is created now, through
- * Medusa's own tag route (the person picked it; nothing was created before).
+ * One of the shop's tags with this name, letter case aside (#251 D1): the
+ * AI lists 200 of them, so a "new" one may already be there.
  */
-export async function tagIds(tags: readonly TagValue[]): Promise<string[]> {
+async function existingTag(value: string): Promise<string | null> {
+  const { product_tags } = await sdk.admin.productTag.list({
+    q: value,
+    limit: LOOKUP_LIMIT,
+    fields: "id,value",
+  })
+  return product_tags.find((tag) => fold(tag.value) === fold(value))?.id ?? null
+}
+
+export interface TagIds {
+  ids: string[]
+  /** The tags this save created: taken back if the product's update fails. */
+  created: string[]
+}
+
+/**
+ * The tags' ids for the product's update: a new tag is first looked up by
+ * name, and only created, through Medusa's own tag route, when the shop
+ * has none (the person picked it; nothing was created before). A failure
+ * part way takes back what this call created before passing it on.
+ */
+export async function tagIds(tags: readonly TagValue[]): Promise<TagIds> {
   const ids: string[] = []
-  for (const tag of tags) {
-    if (tag.id) {
-      ids.push(tag.id)
-      continue
+  const created: string[] = []
+  try {
+    for (const tag of tags) {
+      if (tag.id) {
+        ids.push(tag.id)
+        continue
+      }
+      const value = tag.value.trim()
+      const found = await existingTag(value)
+      if (found) {
+        ids.push(found)
+        continue
+      }
+      const { product_tag } = await sdk.admin.productTag.create({ value })
+      created.push(product_tag.id)
+      ids.push(product_tag.id)
     }
-    const { product_tag } = await sdk.admin.productTag.create({ value: tag.value.trim() })
-    ids.push(product_tag.id)
+  } catch (failure) {
+    await dropTags(created)
+    throw failure
   }
-  return [...new Set(ids)]
+  return { ids: [...new Set(ids)], created }
+}
+
+/** Takes back tags a failed save created; one that cannot go stays, the save's error is shown. */
+export async function dropTags(ids: readonly string[]): Promise<void> {
+  await Promise.allSettled(ids.map((id) => sdk.admin.productTag.delete(id)))
 }
