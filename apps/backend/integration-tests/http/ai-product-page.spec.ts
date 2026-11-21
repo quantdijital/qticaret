@@ -6,7 +6,7 @@ import { resetAiBreakers } from "../../src/lib/ai/breaker"
 import { fakeTextConnector } from "../../src/lib/ai/connectors/fake"
 import type { TextRequest } from "../../src/lib/ai/connectors/types"
 import { createAdminUser } from "../helpers/admin"
-import { aiProduct, aiRecords, askFor, connectFake, pushPlan } from "../helpers/ai"
+import { aiProduct, aiRecords, connectFake, pushPlan } from "../helpers/ai"
 import { managedForThisFile } from "../helpers/control-plane"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -67,7 +67,7 @@ medusaIntegrationTestRunner({
     let owner: { headers: Record<string, string> }
     const key = `test-key-${fakeSecret()}`
     const ask = (headers: Record<string, string>, body: Record<string, unknown>) =>
-      askFor(http)(headers, body) as Promise<{ status: number; data: Answer }>
+      settle(http.post<Answer>("/admin/ai/suggestions", body, { headers }))
     const records = () => aiRecords(getContainer())
     const products = () => getContainer().resolve(Modules.PRODUCT)
 
