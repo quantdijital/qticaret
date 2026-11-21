@@ -165,6 +165,9 @@ describe("a bulk e-mail's words", () => {
       ],
     })
     expect(urls()).toEqual(["/admin/ai/suggestions", "/admin/ai/suggestions/sug_1/accept"])
+    // The subject picked is recorded by its place among the three (adr/0074 §4)
+    const accepted = netFetch.mock.calls[1]?.[1] as { body: string }
+    expect(JSON.parse(accepted.body)).toEqual({ candidate_index: 1 })
   })
 
   it("asks before replacing the body's words, and may keep them", async () => {
@@ -180,7 +183,9 @@ describe("a bulk e-mail's words", () => {
     })
     await within(dialog).findByText("Kış seçkisi geldi")
     await user.click(within(dialog).getByRole("button", { name: "Kullan" }))
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent(/ürün kartları kalır/)
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      /düğmeler de değişir. Görseller ve ürün kartları kalır/
+    )
     expect(values().subject).toBe("Eski konu")
     await user.click(within(dialog).getByRole("button", { name: "Yalnız konu ve önizleme satırı" }))
     await waitFor(() => {

@@ -10842,7 +10842,7 @@
       "subjects": "Subject line",
       "preheader": "Preview line",
       "body": "Text",
-      "replaceBody": "The body has text. The suggested text takes its place; pictures and product cards stay. Leave without saving to get the old text back.",
+      "replaceBody": "The body has text. The suggested text takes its place; headings, lists and buttons are replaced too. Pictures and product cards stay. Leave without saving to get the old text back.",
       "replaceBodyAction": "Replace the body too",
       "keepBody": "Subject and preview line only",
       "replaceSms": "The text field is filled. The text you picked takes its place.",
@@ -11792,6 +11792,7 @@
       "input_unsupported": "This content cannot be sent to the service (type or size not suitable).",
       "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow.",
       "reviews_off": "AI on reviews and questions is off. It can be turned on under Settings › AI.",
+      "feature_off": "This feature is off for the shop.",
       "not_enough_reviews": "A summary needs at least 3 approved reviews of this product."
     },
     "background": {

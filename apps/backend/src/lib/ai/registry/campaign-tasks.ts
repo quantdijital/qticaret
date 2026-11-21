@@ -1,3 +1,4 @@
+import { MARKETING_CAMPAIGNS } from "../../../modules/platform-settings/features"
 import { AI_CANDIDATE_COUNT, AI_TEMPERATURE } from "./catalog-tasks"
 import type { AiTask } from "./tasks"
 
@@ -61,6 +62,8 @@ const CAMPAIGN_TASK_BASE = {
   mode: "sync",
   options: CAMPAIGN_PURPOSES,
   optionKind: "purpose",
+  // The feature it writes for: off, no draft is asked or taken (authorize-task, decide-suggestion)
+  flag: MARKETING_CAMPAIGNS,
   roles: ["owner", "admin"],
   credits: 1,
   entities: ["campaign"],

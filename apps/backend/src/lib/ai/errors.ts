@@ -32,6 +32,8 @@ export const AI_ERROR_KEYS = [
   "ai.candidate_unknown",
   // Aşama 9: reviews and questions
   "ai.reviews_off",
+  // A task's own feature flag off (e.g. `marketing.campaigns` for a bulk message's words)
+  "ai.feature_off",
   "ai.not_enough_reviews",
   // Aşama 7: a scene the shop wrote (lib/ai/scene-text.ts)
   "ai.scene_text_invalid",

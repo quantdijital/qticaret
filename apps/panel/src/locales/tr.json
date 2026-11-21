@@ -10842,7 +10842,7 @@
       "subjects": "Konu satırı",
       "preheader": "Önizleme satırı",
       "body": "Metin",
-      "replaceBody": "Gövdede yazı var. Önerilen metin bugünkü yazının yerine geçer; görseller ve ürün kartları kalır. Kaydetmeden çıkarsanız eski metin geri gelir.",
+      "replaceBody": "Gövdede yazı var. Önerilen metin bugünkü yazının yerine geçer; başlıklar, listeler ve düğmeler de değişir. Görseller ve ürün kartları kalır. Kaydetmeden çıkarsanız eski metin geri gelir.",
       "replaceBodyAction": "Gövdeyi de değiştir",
       "keepBody": "Yalnız konu ve önizleme satırı",
       "replaceSms": "Metin alanı dolu. Seçtiğiniz metin bugünkü metnin yerine geçer.",
@@ -11792,6 +11792,7 @@
       "input_unsupported": "Bu içerik servise gönderilemiyor (tür ya da boyut uygun değil).",
       "daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz.",
       "reviews_off": "Yorum ve sorularda yapay zekâ kapalı. Ayarlar › Yapay zekâ sayfasından açılabilir.",
+      "feature_off": "Bu özellik mağazada kapalı.",
       "not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı."
     },
     "background": {

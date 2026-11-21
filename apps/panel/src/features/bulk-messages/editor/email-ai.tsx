@@ -96,6 +96,11 @@ export function EmailAi({
           <p>{t("ai.suggest.refused")}</p>
         )
       }}
+      acceptIndex={(suggestion) => {
+        const email = readCampaignEmail(suggestion.text)
+        const at = email ? email.subjects.indexOf(subjectOf(suggestion.id, email)) : -1
+        return at === -1 ? undefined : at
+      }}
       onUse={(suggestion, _candidate, replace) => {
         const email = readCampaignEmail(suggestion.text)
         if (!email) {

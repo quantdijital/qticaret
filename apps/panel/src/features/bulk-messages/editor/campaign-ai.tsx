@@ -34,6 +34,8 @@ export interface CampaignAiProps {
   preview?: ((suggestion: AiSuggestion) => ReactNode) | undefined
   /** Gets what was taken: the candidate picked (a text) and whether the field's words go. */
   onUse: (suggestion: AiSuggestion, candidate: string | undefined, replace: boolean) => void
+  /** The pick's place when the choices are inside the one text (an e-mail's subject lines). */
+  acceptIndex?: ((suggestion: AiSuggestion) => number | undefined) | undefined
   /** The confirmation: its sentence, the replacing button and, when there is one, keeping the field. */
   confirm: { text: string; replace: string; keep?: string | undefined }
 }
@@ -45,7 +47,7 @@ export interface CampaignAiProps {
  * typed and nothing is saved. Drawn only for a role the task allows.
  */
 export function CampaignAi(props: CampaignAiProps) {
-  const { task, campaignId, dirty, filled, preview, onUse, confirm } = props
+  const { task, campaignId, dirty, filled, preview, onUse, acceptIndex, confirm } = props
   const { t } = useTranslation()
   const services = useQuery(aiServicesQuery())
   const view = services.data?.tasks.find((each) => each.id === task)
@@ -85,7 +87,7 @@ export function CampaignAi(props: CampaignAiProps) {
     const taken = state.suggestion
     setConfirming(null)
     setOpen(false)
-    await suggestion.accept(candidate)
+    await suggestion.accept(candidate, acceptIndex?.(taken))
     onUse(taken, candidate, replace)
   }
 

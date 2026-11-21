@@ -114,6 +114,21 @@ medusaIntegrationTestRunner({
       expect(answered.status).toBe(201)
       const email = JSON.parse(answered.data.suggestion?.text ?? "{}") as { subjects?: string[] }
       expect(email.subjects).toHaveLength(3)
+      // The subject picked is its place among the three; the whole JSON comes back
+      const takeAt = (candidate_index: number) =>
+        settle(
+          http.post<{ suggestion: { text: string; candidate_index: number } }>(
+            `/admin/ai/suggestions/${answered.data.suggestion?.id ?? ""}/accept`,
+            { candidate_index },
+            { headers: owner.headers }
+          )
+        )
+      const unknown = await takeAt(3)
+      expect([unknown.status, unknown.data.message]).toEqual([400, "ai.candidate_unknown"])
+      const taken = await takeAt(2)
+      expect(taken.status).toBe(200)
+      expect(taken.data.suggestion.candidate_index).toBe(2)
+      expect(taken.data.suggestion.text).toBe(answered.data.suggestion?.text)
       const request = seen[0]
       expect(request?.json).toBe(true)
       expect(request?.system).toContain("Amaç indirim")
@@ -163,6 +178,26 @@ medusaIntegrationTestRunner({
         entity_id: product,
       })
       expect([other.status, other.data.message]).toEqual([400, "ai.unknown_entity"])
+    })
+
+    it("refuses to write or take a message's words while bulk messages are off", async () => {
+      const id = await create({ name: "Yeni sezon", channel: "email", subject: "Yeni sezon" })
+      const body = { task: "campaign_email", entity_type: "campaign", entity_id: id }
+      const answered = await ask(owner.headers, body)
+      expect(answered.status).toBe(201)
+      await settings().setFeature("marketing.campaigns", false, null)
+
+      const refused = await ask(owner.headers, body)
+      expect([refused.status, refused.data.message]).toEqual([403, "ai.feature_off"])
+      // A draft asked before the feature was turned off is not taken after
+      const taken = await settle(
+        http.post(
+          `/admin/ai/suggestions/${answered.data.suggestion?.id ?? ""}/accept`,
+          { candidate_index: 0 },
+          { headers: owner.headers }
+        )
+      )
+      expect([taken.status, taken.data.message]).toEqual([403, "ai.feature_off"])
     })
 
     it("offers texts that fit one SMS with the shop's name and opt-out line, one picked", async () => {

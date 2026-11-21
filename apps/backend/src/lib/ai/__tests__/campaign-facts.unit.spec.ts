@@ -153,6 +153,30 @@ describe("a bulk e-mail's data block", () => {
     ).rejects.toThrow("ai.unknown_entity")
   })
 
+  it("allows only the figures the service was sent: none filtered out or clipped off", async () => {
+    const paragraph = (text: string) => ({ type: "paragraph", content: [{ type: "text", text }] })
+    const { container } = containerWith({
+      ...EMAIL_ROW,
+      body: {
+        type: "doc",
+        content: [
+          paragraph(
+            "Sorularınız için 0532 111 22 33 numarasını arayın, %15 indirim sizi bekliyor."
+          ),
+          paragraph("a".repeat(1_300)),
+          paragraph("Son gün 48 saat sonra."),
+        ],
+      },
+    })
+    const input = await campaignInput(container, CAMPAIGN_EMAIL_TASK, system(), "camp_1")
+    expect(input.data).not.toContain("0532")
+    expect(input.data).not.toContain("48 saat")
+    expect(input.campaign.numbers).toEqual(expect.arrayContaining(["20", "15"]))
+    for (const figure of ["0532", "111", "22", "33", "48"]) {
+      expect(input.campaign.numbers).not.toContain(figure)
+    }
+  })
+
   it("reads a card's products four at most, as the e-mail draws them", () => {
     const body = { content: ["a", "b", "c", "d", "e"].map((id) => card(`prod_${id}`)) }
     expect(cardProductIds(body)).toHaveLength(4)

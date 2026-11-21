@@ -7,13 +7,13 @@ import {
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { aiValidationError } from "../../lib/ai/errors"
-import { acceptedCandidate, draftCandidates } from "../../lib/ai/draft-candidates"
+import { acceptedDraft } from "../../lib/ai/draft-candidates"
 import { PRODUCT_FAQ_TASK, findAiTask } from "../../lib/ai/registry/tasks"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
-import { taskFlagOpen } from "./connections"
+import { taskFlagOffKey, taskFlagOpen } from "./connections"
 import { AI_SUGGESTION_SOURCE } from "./steps/save-suggestion"
 
 export interface DecideSuggestionInput {
@@ -40,7 +40,7 @@ export async function authorizeDecision(
     throw new MedusaError(MedusaError.Types.FORBIDDEN, "staff.forbidden")
   }
   if (!(await taskFlagOpen(container, task))) {
-    throw new MedusaError(MedusaError.Types.FORBIDDEN, "ai.reviews_off")
+    throw new MedusaError(MedusaError.Types.FORBIDDEN, taskFlagOffKey(task))
   }
 }
 
@@ -78,7 +78,7 @@ export async function decideSuggestion(
   }
   // Only a candidate this suggestion offered: never a text from the client
   const taken = accepted
-    ? acceptedCandidate(draftCandidates(findAiTask(draft.kind), draft.text), input.candidate_index)
+    ? acceptedDraft(findAiTask(draft.kind), draft.text, input.candidate_index)
     : null
   if (accepted && taken === null) {
     throw aiValidationError("ai.candidate_unknown")

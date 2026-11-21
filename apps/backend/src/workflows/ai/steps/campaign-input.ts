@@ -30,6 +30,31 @@ export function smsRoom(shop: string, optOut: string): number {
   return Math.max(0, (length.encoding === "gsm" ? ONE_PART : ONE_UCS2_PART) - (length.units - 1))
 }
 
+/**
+ * The figures a text may write: only those the service was sent, read from
+ * the data block as built (personal data taken out, each value clipped),
+ * never from the campaign's raw words: a phone number filtered out, or a
+ * figure past the clipped body, is not one the data holds. The room an SMS
+ * is asked to fit (`CAMPAIGN_SMS_ROOM_FIELD`) is an instruction, not a fact.
+ */
+export function sentFigures(data: string): string[] {
+  const block = (JSON.parse(data) as { data?: Record<string, unknown> }).data ?? {}
+  const texts = Object.entries(block).flatMap(([name, value]): string[] => {
+    if (name === CAMPAIGN_SMS_ROOM_FIELD) {
+      return []
+    }
+    if (typeof value === "string") {
+      return [value]
+    }
+    return Array.isArray(value)
+      ? value.flatMap((each: { label?: unknown; value?: unknown }) =>
+          [each.label, each.value].filter((text): text is string => typeof text === "string")
+        )
+      : []
+  })
+  return figuresOf(texts)
+}
+
 export interface CampaignInput {
   system: string
   data: string
@@ -57,7 +82,6 @@ export async function campaignInput(
   }
   const { shopName } = await brandOf(container)
   const fields = withShop(facts.fields, shopName)
-  const numbers = figuresOf(Object.values(fields).filter((v): v is string => typeof v === "string"))
   let end: CampaignAllowed["sms"] = null
   if (sms) {
     const marketing = (await container
@@ -76,6 +100,6 @@ export async function campaignInput(
   return {
     system: prompt.system,
     data: prompt.data,
-    campaign: { kind: "campaign", numbers, sms: end },
+    campaign: { kind: "campaign", numbers: sentFigures(prompt.data), sms: end },
   }
 }

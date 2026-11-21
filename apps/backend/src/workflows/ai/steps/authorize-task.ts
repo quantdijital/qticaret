@@ -5,7 +5,7 @@ import { isTaskOption } from "../../../lib/ai/instructions"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
 import { STAFF_ROLES_MODULE } from "../../../modules/staff-roles"
 import type StaffRolesModuleService from "../../../modules/staff-roles/service"
-import { aiFlagsOf, taskFlagOpen } from "../connections"
+import { aiFlagsOf, taskFlagOffKey, taskFlagOpen } from "../connections"
 
 export interface AuthorizeTaskInput {
   task: string
@@ -35,9 +35,10 @@ export const authorizeTaskStep = createStep(
     if (role === null || !task.roles.includes(role)) {
       throw new MedusaError(MedusaError.Types.FORBIDDEN, "staff.forbidden")
     }
-    // A task on customers' words waits for the shop's own flag (`ai.reviews`, adr/0071 §6)
+    // A task waits for its own flag: `ai.reviews` on customers' words (adr/0071 §6), the
+    // feature it writes for otherwise (`marketing.campaigns` for a bulk message's words)
     if (!(await taskFlagOpen(container, task))) {
-      throw new MedusaError(MedusaError.Types.FORBIDDEN, "ai.reviews_off")
+      throw new MedusaError(MedusaError.Types.FORBIDDEN, taskFlagOffKey(task))
     }
     const flags = await aiFlagsOf(container)
     if (!flags.ownKeys && flags.platformCredits !== true) {
