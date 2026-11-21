@@ -9,6 +9,7 @@ import {
   PRODUCT_TITLE_TASK,
   SEO_FACT_DESCRIPTION_LENGTH,
 } from "./catalog-tasks"
+import { POST_DRAFT_TASK } from "./content-tasks"
 import {
   IMAGE_ALT_TEXT_TASK,
   IMAGE_BACKGROUND_TASK,
@@ -69,6 +70,8 @@ export const AI_GATES = [
   // A bulk message's words: each text through the shared gate, an SMS counted as sent (lib/ai/campaign-text.ts)
   "campaign_email",
   "campaign_sms",
+  // A blog post's draft: each heading and paragraph through the shared gate, links by code (lib/ai/post-draft.ts)
+  "post_draft",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -101,6 +104,11 @@ export interface AiTask {
   gate: AiGate
   /** The longest suggestion, in characters; a longer one is refused (`length`). */
   maxLength: number
+  /**
+   * The output budget asked of the service, in tokens, where the length
+   * formula (`maxTokensOf`) would ask more than a long answer needs.
+   */
+  maxTokens?: number
   /** The kinds of record it is asked for; every text kind when left out. */
   entities?: readonly AiTaskEntity[]
   /** A job task: the most records one request may name (adr/0071 §8). */
@@ -163,11 +171,13 @@ const PAGE_ENTITIES: readonly AiEntityType[] = [
   "collection",
   "brand",
   "page",
+  "post",
 ]
 
 /**
  * A page's search result title and description (Aşama 1, docs/22 PR 1-1),
- * for a product, a listing page (category, collection, brand) or a content page. The gate is the advisor's
+ * for a product, a listing page (category, collection, brand), a content
+ * page or a blog post (adr/0074 §5 madde 1). The gate is the advisor's
  * own rules for the field (P-TITLE-01, P-META-01 and their noise rules),
  * so the longest suggestion is the field's character target.
  */
@@ -229,6 +239,7 @@ export const PRODUCT_DESCRIPTION_TASK: AiTask = {
   temperature: AI_TEMPERATURE.long,
 }
 
+export * from "./content-tasks"
 export * from "./image-tasks"
 export * from "./listing-tasks"
 export * from "./product-page-tasks"
@@ -258,6 +269,7 @@ const TASKS: readonly AiTask[] = [
   PRODUCT_FAQ_TASK,
   CAMPAIGN_EMAIL_TASK,
   CAMPAIGN_SMS_TASK,
+  POST_DRAFT_TASK,
 ]
 
 /**

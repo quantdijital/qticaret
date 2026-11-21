@@ -47,7 +47,7 @@ export const PRODUCT_TITLE_TARGET = { min: 30, max: 80 } as const
 export const SEO_FACT_DESCRIPTION_LENGTH = 1_500
 
 // The records with a page of their own and a facts reader (the SEO card's AI records)
-const KEYWORD_ENTITIES = ["product", "category", "collection", "brand", "page"] as const
+const KEYWORD_ENTITIES = ["product", "category", "collection", "brand", "page", "post"] as const
 
 /**
  * A page's focus keyword (the SEO card's "Odak anahtar kelime"): the main

@@ -1,6 +1,7 @@
 import { aiProviderError } from "../errors"
 import { ATTRIBUTE_CHOICES_FIELD } from "../facts/product-attributes"
 import { PUBLISHED_QUESTIONS_FIELD } from "../product-faq"
+import { LINK_CHOICES_FIELD } from "../post-draft"
 import { CATEGORY_CHOICES_FIELD, TAG_CHOICES_FIELD } from "../facts/product-picks"
 import { FAKE_SERVICE } from "../registry/services"
 import { fakeCampaignAnswer } from "./fake-campaign"
@@ -149,6 +150,32 @@ function fakeFaq(data: string): string {
   })
 }
 
+// One paragraph of a fake post: plain sentences, some sixty words, the same every time
+const FAKE_POST_PARAGRAPH = [
+  "Bu bölüm konunun temel noktalarını sade bir dille anlatır ve okurun aklındaki ilk soruları yanıtlar.",
+  "Her adımda neye dikkat etmek gerektiği kısa örneklerle açıklanır; böylece okur bilgiyi kendi durumuna kolayca uygular.",
+  "Sık yapılan hatalar ve bunlardan kaçınmanın yolları da ayrıca belirtilir.",
+  "Sonunda okur, konuyu baştan sona anlamış ve ne yapacağını bilen biri olarak yazıdan ayrılır.",
+].join(" ")
+
+/** A blog post draft: an opening, four headed sections and the first two link candidates. */
+function fakePostDraft(data: string): string {
+  const title = nameOf(data)
+  const body = [FAKE_POST_PARAGRAPH, FAKE_POST_PARAGRAPH]
+  const sections = [
+    { heading: "", paragraphs: [`${title} konusunun kısa yanıtı bu girişte yer alır.`, ...body] },
+    ...["Temel bilgiler", "Adım adım uygulama", "Sık yapılan hatalar", "Özet"].map((heading) => ({
+      heading,
+      paragraphs: body,
+    })),
+  ]
+  const links = (codesOf(data, LINK_CHOICES_FIELD, 2) ?? []).map((code) => ({
+    code,
+    why: "Uygulama bölümünde okurun aradığı sayfa olarak anılabilir.",
+  }))
+  return JSON.stringify({ sections, links })
+}
+
 /** A structured task's one JSON object: picks from the named list, attribute values, a FAQ, or a product card. */
 function structuredAnswer(data: string): string {
   const attributes = itemsOf(data, ATTRIBUTE_CHOICES_FIELD)
@@ -156,6 +183,9 @@ function structuredAnswer(data: string): string {
     return JSON.stringify(
       Object.fromEntries(attributes.map((each) => [each.label, fakeValue(each.value)]))
     )
+  }
+  if (itemsOf(data, LINK_CHOICES_FIELD) !== null) {
+    return fakePostDraft(data)
   }
   if (itemsOf(data, PUBLISHED_QUESTIONS_FIELD) !== null) {
     return fakeFaq(data)

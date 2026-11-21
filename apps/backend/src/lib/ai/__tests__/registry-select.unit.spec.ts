@@ -61,6 +61,7 @@ describe("AI registries (adr/0071 §2)", () => {
       "product_faq",
       "campaign_email",
       "campaign_sms",
+      "post_draft",
     ])
     expect(findAiTask("test_text", "development")).toBeNull()
   })

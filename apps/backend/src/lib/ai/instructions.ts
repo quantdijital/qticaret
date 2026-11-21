@@ -2,6 +2,7 @@ import { createHash } from "node:crypto"
 import { CAMPAIGN_INSTRUCTIONS } from "./crafts/campaign"
 import { CONTENT_INSTRUCTIONS } from "./crafts/content"
 import { LISTING_INSTRUCTIONS } from "./crafts/listing"
+import { POST_DRAFT_INSTRUCTIONS } from "./crafts/post-draft"
 import { PRODUCT_FAQ_INSTRUCTIONS } from "./crafts/product-faq"
 import { PRODUCT_PAGE_INSTRUCTIONS } from "./crafts/product-page"
 import { REVIEW_INSTRUCTIONS } from "./crafts/reviews"
@@ -40,6 +41,7 @@ const INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
   ...LISTING_INSTRUCTIONS,
   ...PRODUCT_PAGE_INSTRUCTIONS,
   ...PRODUCT_FAQ_INSTRUCTIONS,
+  ...POST_DRAFT_INSTRUCTIONS,
   ...REVIEW_INSTRUCTIONS,
   ...CAMPAIGN_INSTRUCTIONS,
 }
@@ -52,6 +54,7 @@ const SUBJECTS: Readonly<Record<AiEntityType, string>> = {
     "Veri bir koleksiyon sayfasına aittir; sayfa mağazanın bu koleksiyonda bir araya getirdiği ürünleri listeler.",
   brand: "Veri bir marka sayfasına aittir; sayfa bu markanın mağazadaki ürünlerini listeler.",
   page: "Veri bir içerik sayfasına aittir.",
+  post: "Veri mağazanın blogundaki bir yazıya aittir.",
   media:
     "Veri bir mağaza görseline aittir; görsel bu iletiye ektir. Veride ürün adı varsa görsel o ürünü gösterir.",
   review: "Veri bir müşterinin ürün yorumuna aittir; puan 5 üzerindendir.",
