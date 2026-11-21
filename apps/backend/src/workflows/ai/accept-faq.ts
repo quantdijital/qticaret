@@ -59,6 +59,26 @@ export function keptFaqItems(items: readonly { q: string; a: string }[]): FaqIte
   return kept
 }
 
+// The product's published questions read to hold a kept item against, at most
+const PUBLISHED_READ = 1_000
+
+/**
+ * The items no published question of the product already asks (folded as
+ * a FAQ answer's are held, `foldQuestion`): a repeat drops; none left is
+ * 400 `ai.faq_all_published`, nothing added.
+ */
+export function unpublishedFaqItems(
+  items: readonly FaqItem[],
+  published: readonly string[]
+): FaqItem[] {
+  const asked = new Set(published.map(foldQuestion))
+  const fresh = items.filter((item) => !asked.has(foldQuestion(item.question)))
+  if (fresh.length === 0) {
+    throw aiValidationError("ai.faq_all_published")
+  }
+  return fresh
+}
+
 /**
  * The decision on a FAQ draft (adr/0074 §5 madde 4), before anything is
  * written: only one of the core's own, still open, a product's FAQ, by a
@@ -87,6 +107,17 @@ async function claimFaq(container: Container, input: AcceptFaqInput): Promise<Cl
   if (data.length === 0) {
     throw aiValidationError("ai.unknown_entity")
   }
+  // Read on the server, never sent anywhere: one asked already on its page is not added twice
+  const published = await container
+    .resolve<ProductQaModuleService>(PRODUCT_QA_MODULE)
+    .listProductQuestions(
+      { product_id: draft.entity_id, status: "approved" },
+      { take: PUBLISHED_READ, select: ["id", "body"] }
+    )
+  const fresh = unpublishedFaqItems(
+    items,
+    published.map((each) => each.body)
+  )
   const decided = await drafts.decideOpen(draft.id, {
     status: "approved",
     decided_by: input.user_id,
@@ -96,7 +127,7 @@ async function claimFaq(container: Container, input: AcceptFaqInput): Promise<Cl
   if (!decided) {
     throw aiValidationError("ai.suggestion_not_open")
   }
-  return { draft_id: draft.id, product_id: draft.entity_id, items }
+  return { draft_id: draft.id, product_id: draft.entity_id, items: fresh }
 }
 
 const claimFaqStep = createStep(

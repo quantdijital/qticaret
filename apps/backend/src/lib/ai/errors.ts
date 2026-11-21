@@ -46,6 +46,10 @@ export const AI_ERROR_KEYS = [
   "ai.faq_item_invalid",
   // Only a FAQ draft's items are added as the shop's questions
   "ai.faq_not_product_faq",
+  // A FAQ draft is accepted by adding its items, never by the generic accept
+  "ai.faq_use_faq_route",
+  // Every kept FAQ item is asked already on the product's page
+  "ai.faq_all_published",
 ] as const
 
 export type AiErrorKey = (typeof AI_ERROR_KEYS)[number]

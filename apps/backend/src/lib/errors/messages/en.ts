@@ -734,6 +734,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.faq_item_invalid":
     "A question or answer cannot be added as it is: a question is one line ending in a question mark (at most 120 characters), an answer at most 400 characters, with no link, markup, personal data, price or all-caps words.",
   "ai.faq_not_product_faq": "This suggestion is not a product FAQ draft.",
+  "ai.faq_all_published": "Every selected question is already published on the product page.",
+  "ai.faq_use_faq_route": "A FAQ draft is accepted by adding the selected questions.",
   // Aşama 9: reviews and questions
   "ai.reviews_off": "AI on reviews and questions is off. You can turn it on under Settings > AI.",
   "ai.not_enough_reviews": "A summary needs at least 3 approved reviews of this product.",
