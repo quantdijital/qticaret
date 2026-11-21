@@ -14,6 +14,12 @@ export class Migration20261121200833 extends Migration {
   }
 
   override async down(): Promise<void> {
+    // The shop's own questions have no customer: they and their answers go before
+    // "customer_id" is required again, or the column could not be made not null
+    this.addSql(
+      `delete from "product_answer" where "question_id" in (select "id" from "product_question" where "author_kind" = 'shop');`
+    )
+    this.addSql(`delete from "product_question" where "author_kind" = 'shop';`)
     this.addSql(
       `alter table if exists "product_question" drop column if exists "author_kind", drop column if exists "user_id";`
     )
