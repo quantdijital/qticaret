@@ -132,7 +132,7 @@ medusaIntegrationTestRunner({
       )
       expect(rules(await assessment("product", id))).not.toContain("P-TITLE-01")
 
-      // A brand is no record the AI core reads: its findings carry no task
+      // A brand page is read too (adr/0074 §5): its title and its thin text carry their tasks
       const brand = await post<{ brand: { id: string } }>("/admin/brands", { name: "Örnek" })
       await http.put(
         `/admin/seo/brand/${brand.data.brand.id}`,
@@ -141,7 +141,14 @@ medusaIntegrationTestRunner({
       )
       const found = await assessment("brand", brand.data.brand.id)
       expect(rules(found)).toContain("B-TITLE-01")
-      expect(found.issues.every((issue) => issue.ai === undefined)).toBe(true)
+      const aiOf = (rule: string) => found.issues.find((issue) => issue.ruleId === rule)?.ai
+      expect(aiOf("B-TITLE-01")).toEqual({ task: "seo_title", field: "seo_title" })
+      expect(aiOf("B-CONT-01")).toEqual({
+        task: "brand_description",
+        field: "description",
+        option: "detailed",
+      })
+      expect(aiOf("B-LOGO-01")).toBeUndefined()
     })
 
     it("assesses a saved page on its own and sums the shop up", async () => {
