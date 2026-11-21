@@ -3,7 +3,8 @@ import { errorSummary, logger } from "../../../lib/logging"
 import type { AuditEntryInput } from "../../../modules/audit-log/service"
 import { auditContext, auditService } from "./context"
 import { diffSnapshots } from "./diff"
-import { AUDIT_RESOURCE_ID, AUDIT_RESULT } from "./notes"
+import { AUDIT_CHANGE, AUDIT_RESOURCE_ID, AUDIT_RESULT, auditChangeOf } from "./notes"
+import type { AuditChange } from "./notes"
 import { auditPath, describeRoute, matchAuditedResource } from "./registry"
 import type { ResourceMatch } from "./registry"
 import type { Snapshot } from "./types"
@@ -45,14 +46,38 @@ interface PendingEntry {
 }
 
 /** What the handler added to its entry (`notes.ts`). */
-function handlerNotes(res: MedusaResponse): { resourceId?: string; result?: unknown } {
+function handlerNotes(res: MedusaResponse): {
+  resourceId?: string
+  result?: unknown
+  change?: AuditChange
+} {
   const locals = (res as { locals?: Record<string, unknown> }).locals ?? {}
   const resourceId = locals[AUDIT_RESOURCE_ID]
   const result = locals[AUDIT_RESULT]
+  const change = auditChangeOf(locals[AUDIT_CHANGE])
   return {
     ...(typeof resourceId === "string" && resourceId !== "" ? { resourceId } : {}),
     ...(result !== undefined ? { result } : {}),
+    ...(change ? { change } : {}),
   }
+}
+
+// The handler's own before and after when it gave them, else read again now
+async function diffOf(
+  req: MedusaRequest,
+  match: ResourceMatch | null,
+  before: Snapshot | null,
+  change: AuditChange | undefined
+): Promise<Record<string, unknown> | null> {
+  if (match && change) {
+    return diffSnapshots(change.before, change.after, match.resource.sensitive)
+  }
+  // Read again whatever the status: a failed request may still have changed something
+  if (match && before) {
+    const after = await snapshotOf(req, match)
+    return after ? diffSnapshots(before, after, match.resource.sensitive) : null
+  }
+  return null
 }
 
 async function writeEntry({ req, res, match, before, entry: sent, fields }: PendingEntry) {
@@ -66,12 +91,9 @@ async function writeEntry({ req, res, match, before, entry: sent, fields }: Pend
     fields,
     ...(notes.result !== undefined ? { result: notes.result } : {}),
   }
-  // Read again whatever the status: a failed request may still have changed something
-  if (match && before) {
-    const after = await snapshotOf(req, match)
-    if (after) {
-      changes = { ...changes, diff: diffSnapshots(before, after, match.resource.sensitive) }
-    }
+  const diff = await diffOf(req, match, before, notes.change)
+  if (diff) {
+    changes = { ...changes, diff }
   }
   const service = auditService(req)
   try {

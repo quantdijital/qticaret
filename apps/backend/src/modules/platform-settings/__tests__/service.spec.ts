@@ -38,6 +38,33 @@ moduleIntegrationTestRunner<PlatformSettingsModuleService>({
         expect(await service.getSection("store")).toMatchObject({ weight_unit: "kg" })
       })
 
+      it("keeps every field of saves racing on one section, the first save too (review L2)", async () => {
+        // No row yet: both start before either has inserted it
+        await Promise.all([
+          service.saveSection("store", { weight_unit: "kg" }, "user_1"),
+          service.saveSection("store", { dimension_unit: "mm" }, "user_2"),
+        ])
+        expect(await service.readSection("store")).toMatchObject({
+          version: 2,
+          values: { weight_unit: "kg", dimension_unit: "mm" },
+        })
+
+        // A row now: each merge is over the other's write, none over a stale row
+        const changes = await Promise.all([
+          service.saveSection("store", { contact_email: "destek@example.com" }, "user_1"),
+          service.saveSection("store", { weight_unit: "g" }, "user_2"),
+          service.saveSection("store", { dimension_unit: "cm" }, "user_3"),
+        ])
+        expect(await service.readSection("store")).toMatchObject({
+          version: 5,
+          values: { contact_email: "destek@example.com", weight_unit: "g", dimension_unit: "cm" },
+        })
+        // Each save saw a different row before it: the versions follow one another
+        expect(
+          changes.map((change) => change.previous?.version ?? 0).sort((a, b) => a - b)
+        ).toEqual([2, 3, 4])
+      })
+
       it("refuses an invalid template with its key and stores nothing", async () => {
         const reason = await reasonOf(
           service.saveSection("seo", { title_templates: { product: "{fiyat}" } }, null)
@@ -77,13 +104,26 @@ moduleIntegrationTestRunner<PlatformSettingsModuleService>({
 
       it("puts a section back as it was", async () => {
         const first = await service.saveSection("store", { weight_unit: "kg" }, null)
-        await service.restoreSection("store", first.previous)
+        expect(first.version).toBe(1)
+        await service.restoreSection("store", first.previous, first.version)
         expect(await service.readSection("store")).toMatchObject({ version: 0 })
 
         await service.saveSection("store", { weight_unit: "kg" }, null)
         const second = await service.saveSection("store", { dimension_unit: "mm" }, null)
-        await service.restoreSection("store", second.previous)
+        expect(second.version).toBe(2)
+        await service.restoreSection("store", second.previous, second.version)
         expect((await service.getSection("store"))["dimension_unit"]).toBe("cm")
+      })
+
+      it("keeps a save made after the one being undone (review O1)", async () => {
+        const undone = await service.saveSection("store", { weight_unit: "kg" }, null)
+        await service.saveSection("store", { dimension_unit: "mm" }, null)
+        await service.restoreSection("store", undone.previous, undone.version)
+
+        expect(await service.readSection("store")).toMatchObject({
+          version: 2,
+          values: { weight_unit: "kg", dimension_unit: "mm" },
+        })
       })
     })
 

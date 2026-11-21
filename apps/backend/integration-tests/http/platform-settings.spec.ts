@@ -176,6 +176,42 @@ medusaIntegrationTestRunner({
       })
     })
 
+    it("keeps both of two saves sent at once, each with its own audit entry (review L2)", async () => {
+      const save = (body: Record<string, unknown>) =>
+        http.post<{ version: number }>("/admin/platform-settings/store", body, {
+          headers: admin.headers,
+        })
+      // The row first, so both saves below merge over a stored one
+      expect((await save({ dimension_unit: "mm" })).status).toBe(200)
+      const saved = await Promise.all([
+        save({ contact_email: "destek@example.com" }),
+        save({ weight_unit: "kg" }),
+      ])
+      const after = await http.get<{ version: number; values: Record<string, unknown> }>(
+        "/admin/platform-settings/store",
+        { headers: admin.headers }
+      )
+      const entries = await auditEntries("store", (each) => each.length >= 3)
+
+      // Each answer reads the row back after its save: the later one may already be in
+      expect(saved.map(({ status }) => status)).toEqual([200, 200])
+      const versions = saved.map(({ data }) => data.version).sort((a, b) => a - b)
+      expect(versions[1]).toBe(3)
+      expect([2, 3]).toContain(versions[0])
+      expect(after.data.version).toBe(3)
+      expect(after.data.values).toMatchObject({
+        dimension_unit: "mm",
+        contact_email: "destek@example.com",
+        weight_unit: "kg",
+      })
+      // Each entry says only its own field: neither save merged over a stale row
+      expect(entries.map((entry) => Object.keys(entry.changes?.diff ?? {})).sort()).toEqual([
+        ["contact_email"],
+        ["dimension_unit"],
+        ["weight_unit"],
+      ])
+    })
+
     it("refuses an unknown token, an unknown field and an unknown section", async () => {
       const post = (path: string, body: unknown) =>
         settle(http.post<{ message?: string }>(path, body, { headers: admin.headers }))
