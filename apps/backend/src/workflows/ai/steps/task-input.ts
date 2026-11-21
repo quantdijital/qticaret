@@ -15,11 +15,13 @@ import { systemOf } from "../../../lib/ai/instructions"
 import type { AttributeAllowed } from "../../../lib/ai/product-attributes"
 import type { CardAllowed } from "../../../lib/ai/product-card"
 import type { FaqAllowed } from "../../../lib/ai/product-faq"
+import type { PostDraftAllowed } from "../../../lib/ai/post-draft"
 import { isPickTask } from "../../../lib/ai/product-picks"
 import type { PickAllowed } from "../../../lib/ai/product-picks"
 import { buildPrompt } from "../../../lib/ai/prompt"
 import { factLengthsOf, findAiTask, isTaskEntity } from "../../../lib/ai/registry/tasks"
 import type { AiTask } from "../../../lib/ai/registry/tasks"
+import { postDraftInput } from "./post-draft-input"
 
 export { AI_ENTITY_TYPES } from "../../../lib/ai/facts"
 export type { AiEntityType } from "../../../lib/ai/facts"
@@ -86,7 +88,7 @@ export interface TaskInput {
    * A product card's lists (the only categories and attributes its answer
    * may name), or a pick task's list (the only tags or categories).
    */
-  allowed: CardAllowed | PickAllowed | AttributeAllowed | FaqAllowed | null
+  allowed: CardAllowed | PickAllowed | AttributeAllowed | FaqAllowed | PostDraftAllowed | null
 }
 
 /** A product card from a photo: the shop's lists beside the picture, nothing of the image record. */
@@ -241,6 +243,10 @@ export const taskInputStep = createStep(
     }
     if (task.gate === "product_faq") {
       return new StepResponse(await faqInput(container, task, instruction, input))
+    }
+    if (task.gate === "post_draft") {
+      const draft = await postDraftInput(container, task, instruction, input)
+      return new StepResponse<TaskInput>({ ...draft, image_file_id: null })
     }
     // Read by its type and id alone (lib/ai/facts): the record's text never comes from the client
     const { fields, maxLengths, image } = await entityFacts(

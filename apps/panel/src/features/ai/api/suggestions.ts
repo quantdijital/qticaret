@@ -11,14 +11,25 @@ import type { AiAttributeSuggestions } from "@/features/ai/attribute-values"
 import { readFaq } from "@/features/ai/faq"
 import type { AiFaq, AiFaqItem } from "@/features/ai/faq"
 import { readPicks } from "@/features/ai/picks"
+import { readPostDraft } from "@/features/ai/post-draft"
+import type { AiPostDraft } from "@/features/ai/post-draft"
 import type { AiPicks } from "@/features/ai/picks"
 import { readProductCard } from "@/features/ai/product-card"
 import type { ProductCard } from "@/features/ai/product-card"
 
 /** The record a suggestion is for; the backend reads its public facts itself. */
 export interface AiEntity {
-  /** The backend's `AI_ENTITY_TYPES`: a content page is `page`, a blog post is not one; `media` an image. */
-  type: "product" | "category" | "collection" | "brand" | "page" | "media" | "review" | "question"
+  /** The backend's `AI_ENTITY_TYPES`: a content page is `page`, a blog post `post`; `media` an image. */
+  type:
+    | "product"
+    | "category"
+    | "collection"
+    | "brand"
+    | "page"
+    | "post"
+    | "media"
+    | "review"
+    | "question"
   id: string
 }
 
@@ -44,6 +55,8 @@ export interface AiSuggestion {
   attributes?: AiAttributeSuggestions | null
   /** A product's FAQ draft (`product_faq`): questions with their answers. */
   faq?: AiFaq | null
+  /** A blog post's draft (`post_draft`): headed sections, the internal links apart. */
+  draft?: AiPostDraft | null
 }
 
 /** A suggestion turned down by the gate (422) or a failed call (4xx/5xx), with what the panel may show. */
@@ -148,6 +161,7 @@ export async function requestSuggestion(request: AiSuggestionRequest): Promise<A
     ...("picks" in data ? { picks: readPicks(data["picks"]) } : {}),
     ...("attributes" in data ? { attributes: readAttributeSuggestions(data["attributes"]) } : {}),
     ...("faq" in data ? { faq: readFaq(data["faq"]) } : {}),
+    ...("draft" in data ? { draft: readPostDraft(data["draft"]) } : {}),
   }
 }
 

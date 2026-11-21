@@ -32,9 +32,10 @@ interface DocumentCardProps {
   /**
    * Right of the title: an action that may put a whole new text in the
    * editor (an AI suggestion, adr/0071 §13). The text is a change like any
-   * typed one: the card's Save writes it, Undo drops it.
+   * typed one: the card's Save writes it, Undo drops it. `current` is the
+   * text in the editor now (typed and unsaved included).
    */
-  action?: (put: (doc: JSONContent) => void) => ReactNode
+  action?: (put: (doc: JSONContent) => void, current: JSONContent) => ReactNode
 }
 
 /**
@@ -61,7 +62,7 @@ export function DocumentCard({
     <CardForm
       title={title}
       description={description}
-      action={action?.(setDraft)}
+      action={action?.(setDraft, draft ?? stored)}
       dirty={dirty}
       saving={saving}
       onSubmit={() => {
