@@ -785,6 +785,7 @@
         "customer.data_export": "Customer data export",
         "catalog.description_facts": "Facts from descriptions",
         "ai.alt_text": "Bulk alt text suggestions",
+        "ai.seo_fill": "Bulk SEO text suggestions",
         "content.link_rewrite": "Fixing links in texts",
         "order.export": "Order export"
       }
@@ -6096,6 +6097,53 @@
       "urls_other": "{{urls}} pages",
       "none": "No sitemap yet; the first refresh makes it.",
       "pending": "The latest changes go in at the next refresh."
+    },
+    "aiFill": {
+      "open_one": "Fill missing meta with AI ({{count}})",
+      "open_other": "Fill missing meta with AI ({{count}})",
+      "title": "Fill missing search texts",
+      "description": "Ask AI for suggestions for the pages the SEO advisor says have a missing or weak search title or description; see each with its page and use it or dismiss it.",
+      "start_one": "Suggest for {{count}} page",
+      "start_other": "Suggest for {{count}} pages",
+      "cost_one": "One AI operation per field per page.",
+      "cost_other": "One AI operation per field per page.",
+      "batch_one": "At most {{count}} page at a time; {{total}} in all, the rest next time.",
+      "batch_other": "At most {{count}} pages at a time; {{total}} in all, the rest next time.",
+      "options": "Options",
+      "scopeLabel": "What to fill",
+      "scopes": {
+        "both": "Search title and description",
+        "title": "Search title only",
+        "description": "Search description only"
+      },
+      "fields": {
+        "seo_title": "Search title",
+        "seo_description": "Search description"
+      },
+      "working": "Preparing suggestions…",
+      "made_one": "{{count}} suggestion prepared.",
+      "made_other": "{{count}} suggestions prepared.",
+      "left_one": "No suggestion for {{count}} field.",
+      "left_other": "No suggestion for {{count}} fields.",
+      "jobFailed": "The suggestions could not be prepared. Try again in a moment.",
+      "background": "Suggestions are being prepared in the background; reopen this window to see them.",
+      "empty": "No suggestions waiting.",
+      "listLabel": "Search text suggestions waiting",
+      "waiting_one": "{{count}} suggestion waiting for approval",
+      "waiting_other": "{{count}} suggestions waiting for approval",
+      "useAll": "Use all",
+      "note": "Use saves the text as the page's search text right away. You can pick another candidate and edit it before using it.",
+      "current": "Now: {{text}}",
+      "currentEmpty": "Now empty",
+      "candidates": "Candidates for {{name}}",
+      "length": "{{length}} characters (search shows up to {{shown}})",
+      "field": "{{name}}, {{field}}",
+      "useOne": "{{name}}, {{field}}: use the suggestion",
+      "dismissOne": "{{name}}, {{field}}: dismiss the suggestion",
+      "saved": "{{name}} saved.",
+      "savedAll_one": "{{count}} search text saved.",
+      "savedAll_other": "{{count}} search texts saved.",
+      "saveFailed": "{{name}} could not be saved: {{reason}}"
     },
     "advisor": {
       "title": "SEO advisor",

@@ -12,6 +12,7 @@ import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { GRADE_TEXT } from "./grades"
 import { ScoreRing } from "./score-ring"
+import { SeoFillButton } from "./seo-fill-button"
 import { errorText } from "@/lib/errors"
 
 const GRADES: Grade[] = ["excellent", "good", "needs_work", "poor"]
@@ -37,6 +38,7 @@ export function AdvisorSummaryCard({ className }: { className?: string }) {
     <SectionCard
       title={t("seo.advisor.title")}
       description={t("seo.advisor.summaryHint")}
+      action={<SeoFillButton />}
       className={className}
     >
       {summary.isError ? (
