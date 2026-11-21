@@ -176,7 +176,7 @@ describe("the bulk SEO fill", () => {
 
   it("saves the picked candidate to the page's field, then accepts it by its place", async () => {
     const user = await show()
-    await user.click(await screen.findByRole("button", { name: GOMLEK.candidates[1] }))
+    await user.click(await screen.findByRole("button", { name: GOMLEK.candidates[1] ?? "" }))
     expect(screen.getByRole("textbox", { name: "Keten Gömlek, Arama başlığı" })).toHaveValue(
       GOMLEK.candidates[1]
     )
