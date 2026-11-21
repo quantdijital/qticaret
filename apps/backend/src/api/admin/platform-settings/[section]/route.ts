@@ -8,6 +8,7 @@ import type { SectionName, SeoSettings } from "../../../../modules/platform-sett
 import type PlatformSettingsModuleService from "../../../../modules/platform-settings/service"
 import type { SectionValues } from "../../../../modules/platform-settings/service"
 import { updatePlatformSettingsWorkflow } from "../../../../workflows/platform-settings/update-platform-settings"
+import { refuseCraftUnlessOwner } from "../../ai/craft-owner"
 
 function sectionParam(req: AuthenticatedMedusaRequest): SectionName {
   const section = req.params["section"] ?? ""
@@ -65,6 +66,9 @@ export async function POST(
   const section = sectionParam(req)
   if (section === "seo") {
     await refuseStyleChange(req)
+  }
+  if (section === "ai_guidance") {
+    await refuseCraftUnlessOwner(req, (req.validatedBody as { tasks?: unknown }).tasks)
   }
   await updatePlatformSettingsWorkflow(req.scope).run({
     input: { section, values: req.validatedBody, actor_id: req.auth_context.actor_id || null },

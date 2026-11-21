@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { cleanText } from "../../../lib/ai/prompt"
 import { aiTasks } from "../../../lib/ai/registry/tasks"
+import { guidanceSaveIssue, mergeGuidance } from "./ai-guidance-craft"
 import { defineSection, isPlainObject } from "./define"
 
 /**
@@ -29,6 +30,7 @@ export const GUIDANCE_LIMITS = {
   extra: 600,
   examples: 3,
   example: 600,
+  craft: 3_000,
 } as const
 
 export interface AiTaskGuidance {
@@ -36,6 +38,13 @@ export interface AiTaskGuidance {
   extra: string | null
   /** Texts the shop liked, given as a model of tone and shape, never to copy. */
   examples: string[]
+  /**
+   * The owner's own craft, in the default's place (adr/0074 §3); null or
+   * left out: the default. The owner's alone to write (the route checks).
+   */
+  craft?: string | null
+  /** The default craft's version when the craft was written (`craftVersion`); the server sets it. */
+  craft_base?: string | null
 }
 
 export interface AiGuidanceSettings {
@@ -178,15 +187,23 @@ const examples = z
     return kept
   })
 
+// A version label as `craftVersion` writes it
+const CRAFT_VERSION = /^[0-9a-f]{12}$/
+
 const taskGuidance = z
   .object({
     extra: text(GUIDANCE_LIMITS.extra, true).optional(),
     examples: examples.optional(),
+    craft: text(GUIDANCE_LIMITS.craft, true).optional(),
+    craft_base: z.string().regex(CRAFT_VERSION).nullable().optional(),
   })
   .strict()
   .transform((value): AiTaskGuidance => ({
     extra: value.extra ?? null,
     examples: value.examples ?? [],
+    // Left out stays left out: a save that does not send the craft keeps the stored one
+    ...(value.craft === undefined ? {} : { craft: value.craft }),
+    ...(value.craft_base === undefined ? {} : { craft_base: value.craft_base }),
   }))
 
 /**
@@ -235,5 +252,7 @@ export const aiGuidanceSection = defineSection<AiGuidanceSettings>(
   },
   AI_GUIDANCE_DEFAULTS,
   undefined,
-  upgrade
+  upgrade,
+  guidanceSaveIssue,
+  mergeGuidance
 )

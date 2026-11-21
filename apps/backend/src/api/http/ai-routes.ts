@@ -71,17 +71,24 @@ export const AI_ROUTES = [
     methods: ["POST" as const],
     middlewares: [requireUserActor],
   },
-  // "Dene" on the guidance page (adr/0074 §2): two text calls, within the text budget
+  // "Dene" on the guidance page (adr/0074 §2): two text calls, a correction each at
+  // most, so a budget of its own, narrower than an ask's (#247 D1)
   {
     matcher: "/admin/ai/guidance/preview",
     methods: ["POST" as const],
     middlewares: [
       requireUserActor,
-      rateLimit(() => RATE_LIMIT_PROFILES.ai_text, {
+      rateLimit(() => RATE_LIMIT_PROFILES.ai_preview, {
         identity: (req) => (req as AuthenticatedMedusaRequest).auth_context.actor_id,
       }),
       validateAndTransformBody(AdminPostAiGuidancePreview),
     ],
+  },
+  // The text tasks' default crafts and fixed rules (adr/0074 §3): code's text only
+  {
+    matcher: "/admin/ai/guidance/crafts",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
   },
   // The acceptance rate by task (adr/0074 §4): counts only
   {

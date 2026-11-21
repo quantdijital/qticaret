@@ -24,7 +24,15 @@ export interface SectionDefinition<T extends object> {
    * the rule looks at is refused (adr/0062 §6).
    */
   saveIssue?: SectionSaveCheck<T>
+  /**
+   * How a save's patch lands on the stored values, where one level of
+   * `mergePatch` is not enough (a nested field the patch leaves out kept,
+   * or one the server sets); its result is checked by `full` as any.
+   */
+  merge?: SectionMerge<T>
 }
+
+export type SectionMerge<T> = (before: T, patch: Record<string, unknown>) => Record<string, unknown>
 
 export type SectionUpgrade = (stored: Record<string, unknown>) => Record<string, unknown>
 
@@ -44,7 +52,8 @@ export function defineSection<T extends object>(
   defaults: T,
   refine?: (values: T, ctx: z.RefinementCtx) => void,
   upgrade?: SectionUpgrade,
-  saveIssue?: SectionSaveCheck<T>
+  saveIssue?: SectionSaveCheck<T>,
+  merge?: SectionMerge<T>
 ): SectionDefinition<T> {
   const base = z.object(fields).strict()
   const full = (refine
@@ -68,6 +77,7 @@ export function defineSection<T extends object>(
     patch,
     ...(upgrade ? { upgrade } : {}),
     ...(saveIssue ? { saveIssue } : {}),
+    ...(merge ? { merge } : {}),
   }
 }
 
