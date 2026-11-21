@@ -1,6 +1,6 @@
 import { aiProviderError } from "../errors"
 import { ATTRIBUTE_CHOICES_FIELD } from "../facts/product-attributes"
-import { PUBLISHED_QUESTIONS_FIELD } from "../facts/product-faq"
+import { PUBLISHED_QUESTIONS_FIELD } from "../product-faq"
 import { CATEGORY_CHOICES_FIELD, TAG_CHOICES_FIELD } from "../facts/product-picks"
 import { FAKE_SERVICE } from "../registry/services"
 import type { TextConnector, TextRequest, TextResult } from "./types"

@@ -7,11 +7,13 @@ import { AI_REVIEWS } from "../../../modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { aiValidationError } from "../errors"
 import { maskNames } from "../mask-names"
-import { foldQuestion } from "../product-faq"
+import { PUBLISHED_QUESTIONS_FIELD, foldQuestion } from "../product-faq"
 import type { FaqAllowed } from "../product-faq"
 import { FAQ_PUBLISHED_QUESTIONS, FAQ_QUESTION_MAX_LENGTH } from "../registry/product-page-tasks"
 import { SUMMARY_FIELD } from "./product-attributes"
 import type { FactsContainer, RecordFacts } from "./types"
+
+export { PUBLISHED_QUESTIONS_FIELD }
 
 /**
  * What a FAQ draft reads beside the product's own facts (adr/0074 §5
@@ -24,9 +26,6 @@ import type { FactsContainer, RecordFacts } from "./types"
  * shop's own questions go. Every published one is still held on the server
  * (`allowed`), which never leaves the shop. Price and stock are not read.
  */
-
-/** The data block's list of published questions: what the instruction names. */
-export const PUBLISHED_QUESTIONS_FIELD = "published_questions"
 
 /** Longest published question sent, in characters: a FAQ question's own room, and some. */
 const PUBLISHED_QUESTION_LENGTH = FAQ_QUESTION_MAX_LENGTH * 2

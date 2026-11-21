@@ -77,6 +77,13 @@ const ANSWER_TASK: AiTask = {
 // A price in Turkish lira: never in the data, and stale the day it changes
 const PRICE = /₺|\d\s*(?:TL|TRY)(?![\p{L}\p{N}])|(?<![\p{L}\p{N}])(?:TL|TRY)\s*\d/u
 
+/**
+ * The data block's list of published questions: what the instruction names.
+ * Here, not with the facts, so an instruction naming it does not load the
+ * facts' modules (platform settings) and close an import cycle.
+ */
+export const PUBLISHED_QUESTIONS_FIELD = "published_questions"
+
 // Markup in what was written, before it is cleaned: a tag is refused, never silently dropped
 const MARKUP = /<\/?[a-z!?]/i
 

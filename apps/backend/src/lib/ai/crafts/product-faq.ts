@@ -1,4 +1,4 @@
-import { PUBLISHED_QUESTIONS_FIELD } from "../facts/product-faq"
+import { PUBLISHED_QUESTIONS_FIELD } from "../product-faq"
 import { SUMMARY_FIELD } from "../facts/product-attributes"
 import {
   FAQ_ANSWER_MAX_LENGTH,
