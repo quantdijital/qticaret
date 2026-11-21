@@ -14,7 +14,8 @@ import type { AuditedResource, Resolver, Snapshot } from "../types"
 const service = (scope: Resolver) =>
   scope.resolve(PLATFORM_SETTINGS_MODULE) as PlatformSettingsModuleService
 
-function flatten(values: Record<string, unknown>): Snapshot {
+/** A section's values as an audit snapshot: nested fields by their path. */
+export function flattenSettings(values: Record<string, unknown>): Snapshot {
   const flat: Snapshot = {}
   for (const [key, value] of Object.entries(values)) {
     if (value !== null && typeof value === "object" && !Array.isArray(value)) {
@@ -40,7 +41,7 @@ export const SETTINGS_RESOURCES: readonly AuditedResource[] = [
     snapshot: async ({ scope, params }) => {
       const section = params["section"] ?? ""
       return isSectionName(section)
-        ? flatten((await service(scope).readSection(section)).values)
+        ? flattenSettings((await service(scope).readSection(section)).values)
         : {}
     },
   },

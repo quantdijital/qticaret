@@ -1,6 +1,9 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { ValidationError } from "../../../../lib/errors"
+import { AUDIT_CHANGE } from "../../../http/audit/notes"
+import type { AuditChange } from "../../../http/audit/notes"
+import { flattenSettings } from "../../../http/audit/resources/settings"
 import { storefrontHome } from "../../../../lib/storefront/home"
 import { PLATFORM_SETTINGS_MODULE } from "../../../../modules/platform-settings"
 import { isSectionName } from "../../../../modules/platform-settings/sections"
@@ -70,8 +73,15 @@ export async function POST(
   if (section === "ai_guidance") {
     await refuseCraftUnlessOwner(req, (req.validatedBody as { tasks?: unknown }).tasks)
   }
-  await updatePlatformSettingsWorkflow(req.scope).run({
+  const { result } = await updatePlatformSettingsWorkflow(req.scope).run({
     input: { section, values: req.validatedBody, actor_id: req.auth_context.actor_id || null },
   })
+  // The audit diff from the row this save read under the section's lock, not
+  // from reads around the request a racing save may have moved (#249)
+  const change: AuditChange = {
+    before: flattenSettings(result.before),
+    after: flattenSettings(result.after),
+  }
+  res.locals[AUDIT_CHANGE] = change
   res.json(await sectionAnswer(req, section))
 }
