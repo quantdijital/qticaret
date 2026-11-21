@@ -20,11 +20,22 @@ interface Asked {
   filters: Record<string, unknown>
 }
 
+// A product's categories and their ancestors, as the tree check reads them (facts/category-tree.ts)
+const TREE = [
+  { id: "pcat_hidden", is_internal: true, is_active: true, parent_category_id: null },
+  { id: "pcat_closed", is_internal: false, is_active: false, parent_category_id: null },
+  { id: "pcat_shirts", is_internal: false, is_active: true, parent_category_id: null },
+  { id: "pcat_sub", is_internal: false, is_active: true, parent_category_id: "pcat_hidden" },
+]
+
 function containerWith(rows: unknown[]): { container: FactsContainer; asked: Asked[] } {
   const asked: Asked[] = []
   const query = {
     graph: (request: Asked) => {
       asked.push(request)
+      if (request.fields.includes("parent_category_id")) {
+        return Promise.resolve({ data: TREE })
+      }
       return Promise.resolve({ data: rows })
     },
     // A category's listing (facts/category-products.ts): none here
@@ -49,6 +60,27 @@ describe("AI record facts (adr/0071 §10)", () => {
       }
     }
   })
+  it("names no category under an internal parent nor a hidden collection (#250 D1, B1)", async () => {
+    const product = (collection: unknown) => ({
+      title: "Keten Gömlek",
+      categories: [
+        { id: "pcat_sub", mpath: "pcat_hidden.pcat_sub", name: "Gizli Alt", is_internal: false },
+        { id: "pcat_shirts", mpath: "pcat_shirts", name: "Gömlekler", is_internal: false },
+      ],
+      collection,
+    })
+    const hidden = containerWith([
+      product({ title: "Kapalı Seçki", collection_extension: { is_active: false } }),
+    ])
+    const facts = await productFacts(hidden.container, "prod_1")
+    expect(facts).toMatchObject({ category: "Gömlekler", collection: null })
+    expect(JSON.stringify(facts)).not.toMatch(/Gizli Alt|Kapalı Seçki/)
+    expect(hidden.asked[1]).toMatchObject({ entity: "product_category" })
+    expect(PRODUCT_FACT_FIELDS).toContain("collection.collection_extension.is_active")
+
+    const shown = containerWith([product({ title: "Yaz Seçkisi", collection_extension: null })])
+    expect((await productFacts(shown.container, "prod_1"))["collection"]).toBe("Yaz Seçkisi")
+  })
 
   it("sends a product's public attributes only, and no internal category", async () => {
     const { container, asked } = containerWith([
@@ -58,9 +90,9 @@ describe("AI record facts (adr/0071 §10)", () => {
         description: `<p>Yazlık gömlek.</p> ${PERSONAL}`,
         brand: { name: "Marka" },
         categories: [
-          { name: "Gizli Toptan", is_internal: true },
-          { name: "Kapalı Sezon", is_internal: false, is_active: false },
-          { name: "Gömlekler", is_internal: false },
+          { id: "pcat_hidden", name: "Gizli Toptan", is_internal: true },
+          { id: "pcat_closed", name: "Kapalı Sezon", is_internal: false, is_active: false },
+          { id: "pcat_shirts", mpath: "pcat_shirts", name: "Gömlekler", is_internal: false },
         ],
         attribute_values: [
           { value_text: "Keten", definition: { label: "Malzeme", type: "text", is_public: true } },

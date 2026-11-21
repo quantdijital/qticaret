@@ -1,4 +1,6 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { PLACED_CATEGORY_FIELDS, shownCategoryIds } from "./category-tree"
+import type { PlacedCategory } from "./category-tree"
 import { storefrontChannelIds } from "./storefront-channels"
 import type { FactsContainer, RecordFacts } from "./types"
 
@@ -23,12 +25,7 @@ export const LISTING_SAMPLE = 100
 /** Only names and a link's names: nothing priced, stocked or counted per sale. */
 export const LISTING_PRODUCT_FIELDS = ["id", "title"] as const
 export const LISTING_BRAND_FIELDS = ["id", "brand.name", "brand.is_active"] as const
-export const LISTING_CATEGORY_FIELDS = [
-  "id",
-  "categories.name",
-  "categories.is_internal",
-  "categories.is_active",
-] as const
+export const LISTING_CATEGORY_FIELDS = ["id", ...PLACED_CATEGORY_FIELDS] as const
 /**
  * Which sales channels a product is in: the link's ids only (as
  * `api/store/reviews/visible.ts` reads it), never the channel's data.
@@ -51,7 +48,7 @@ interface NamedRow {
 interface ListedRow {
   id: string
   brand?: NamedRow | null
-  categories?: (NamedRow | null)[] | null
+  categories?: (PlacedCategory | null)[] | null
   sales_channels?: ({ id?: string | null } | null)[] | null
 }
 
@@ -77,18 +74,29 @@ function shownName(row: NamedRow | null | undefined, internalToo: boolean): stri
   return name === "" ? null : name
 }
 
-const namesOf = (row: ListedRow, tally: ListingTally): string[] =>
+// A category is named only when it and every ancestor are shown (`shownCategoryIds`, #250 D1)
+const namesOf = (row: ListedRow, tally: ListingTally, shownIds: ReadonlySet<string>): string[] =>
   tally === "brands"
     ? [shownName(row.brand, false)].filter((name): name is string => name !== null)
-    : [...new Set((row.categories ?? []).map((category) => shownName(category, true)))].filter(
-        (name): name is string => name !== null
-      )
+    : [
+        ...new Set(
+          (row.categories ?? []).map((category) =>
+            typeof category?.id === "string" && shownIds.has(category.id)
+              ? shownName(category, true)
+              : null
+          )
+        ),
+      ].filter((name): name is string => name !== null)
 
 /** The most frequent names first; a tie keeps the alphabetical order. */
-function topNames(rows: readonly ListedRow[], tally: ListingTally): string[] {
+function topNames(
+  rows: readonly ListedRow[],
+  tally: ListingTally,
+  shownIds: ReadonlySet<string>
+): string[] {
   const counts = new Map<string, number>()
   for (const row of rows) {
-    for (const name of namesOf(row, tally)) {
+    for (const name of namesOf(row, tally, shownIds)) {
       counts.set(name, (counts.get(name) ?? 0) + 1)
     }
   }
@@ -149,7 +157,7 @@ export async function listingProductFacts(
     ],
     filters: { id: rows.map((row) => row.id) },
   })
-  const listed = shownRows(data as ListedRow[], channels)
+  const listed = shownRows(data, channels)
   const shown = new Set(listed.map((row) => row.id))
   if (shown.size === 0) {
     return noneOf(tally)
@@ -163,7 +171,14 @@ export async function listingProductFacts(
         .filter((title) => title !== "")
     ),
   ]
-  const top = topNames(listed, tally)
+  const shownIds =
+    tally === "categories"
+      ? await shownCategoryIds(
+          container,
+          listed.flatMap((row) => row.categories ?? [])
+        )
+      : new Set<string>()
+  const top = topNames(listed, tally, shownIds)
   return {
     products: names.slice(0, LISTING_PRODUCT_EXAMPLES).join(", ") || null,
     [tally]: top.length > 0 ? top.join(", ") : null,

@@ -3,6 +3,7 @@ import { AI_ENTITY_ID_PREFIX, entityFacts } from "../facts"
 import {
   BRAND_FACT_FIELDS,
   COLLECTION_FACT_FIELDS,
+  MAX_BRAND_PRODUCT_IDS,
   brandFacts,
   collectionFacts,
 } from "../facts/listing"
@@ -137,15 +138,53 @@ describe("a brand's facts", () => {
     id: row.id,
     sales_channels: [{ id: "sc_1" }],
     categories: [
-      { name: "Termoslar", is_active: true, is_internal: false },
-      index < 2 ? { name: "Toptan Gizli", is_active: true, is_internal: true } : null,
-      index < 4 ? { name: "Kapalı Raf", is_active: false, is_internal: false } : null,
-      index > 3 ? { name: "Mataralar", is_active: true, is_internal: false } : null,
+      { id: "pcat_t", mpath: "pcat_t", name: "Termoslar", is_active: true, is_internal: false },
+      index < 2
+        ? {
+            id: "pcat_g",
+            mpath: "pcat_g",
+            name: "Toptan Gizli",
+            is_active: true,
+            is_internal: true,
+          }
+        : null,
+      index < 4
+        ? {
+            id: "pcat_k",
+            mpath: "pcat_k",
+            name: "Kapalı Raf",
+            is_active: false,
+            is_internal: false,
+          }
+        : null,
+      index > 3
+        ? { id: "pcat_m", mpath: "pcat_m", name: "Mataralar", is_active: true, is_internal: false }
+        : null,
+      // Shown on its own flags, but under an internal parent: no page, never named (#250 D1)
+      index < 3
+        ? {
+            id: "pcat_s",
+            mpath: "pcat_g.pcat_s",
+            name: "Gizli Alt",
+            is_active: true,
+            is_internal: false,
+          }
+        : null,
     ],
   }))
+  // The categories and their ancestors as the tree check reads them, in one query
+  const TREE = [
+    { id: "pcat_t", is_internal: false, is_active: true, parent_category_id: null },
+    { id: "pcat_m", is_internal: false, is_active: true, parent_category_id: null },
+    { id: "pcat_g", is_internal: true, is_active: true, parent_category_id: null },
+    { id: "pcat_s", is_internal: false, is_active: true, parent_category_id: "pcat_g" },
+  ]
 
   it("names its products and their most frequent shown categories, never internal or closed", async () => {
-    const { container, asked, listed } = containerWith([[BRAND], linked], { rows, count: 6 })
+    const { container, asked, listed } = containerWith([[BRAND], linked, TREE], {
+      rows,
+      count: 6,
+    })
     const facts = await brandFacts(container, "brand_1")
 
     expect(listed[0]).toEqual({ id: rows.map((row) => row.id), status: "published" })
@@ -157,7 +196,16 @@ describe("a brand's facts", () => {
       focus_keyword: "piknik termos",
     })
     expect(facts).not.toHaveProperty("brands")
-    expect(JSON.stringify(facts)).not.toMatch(/Toptan Gizli|Kapalı Raf/)
+    expect(JSON.stringify(facts)).not.toMatch(/Toptan Gizli|Kapalı Raf|Gizli Alt/)
+    // One tree query: the shown-looking categories and their ancestors, never a closed one's
+    expect(asked[2]).toMatchObject({ entity: "product_category" })
+    expect([...(asked[2]?.filters["id"] as string[])].sort()).toEqual([
+      "pcat_g",
+      "pcat_m",
+      "pcat_s",
+      "pcat_t",
+    ])
+    expect(asked).toHaveLength(3)
     expect(asked[0]).toMatchObject({ entity: "brand", fields: [...BRAND_FACT_FIELDS] })
     expect(asked[1]?.fields).toEqual([...LISTING_CATEGORY_FIELDS, LISTING_CHANNEL_FIELD])
     for (const field of [...BRAND_FACT_FIELDS, ...LISTING_CATEGORY_FIELDS]) {
@@ -173,6 +221,15 @@ describe("a brand's facts", () => {
       product_count: null,
     })
     expect(listed).toEqual([])
+  })
+
+  it("reads its listing from at most MAX_BRAND_PRODUCT_IDS products (#250 D2)", async () => {
+    const many = Array.from({ length: MAX_BRAND_PRODUCT_IDS + 500 }, (_, index) => ({
+      id: `prod_${String(index)}`,
+    }))
+    const { container, listed } = containerWith([[{ ...BRAND, products: many }]])
+    await brandFacts(container, "brand_1")
+    expect((listed[0]?.["id"] as string[]).length).toBe(MAX_BRAND_PRODUCT_IDS)
   })
 
   it("answers a missing brand as unknown", async () => {

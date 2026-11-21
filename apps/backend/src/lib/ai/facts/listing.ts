@@ -22,6 +22,9 @@ export const COLLECTION_FACT_FIELDS = [
   ...SEO_FACT_FIELDS,
 ] as const
 
+/** The most of a brand's product ids its listing is read from. */
+export const MAX_BRAND_PRODUCT_IDS = 1_000
+
 /** The brand's own fields, and its products' ids through the link (links/product-brand.ts). */
 export const BRAND_FACT_FIELDS = ["name", "description", "products.id", ...SEO_FACT_FIELDS] as const
 
@@ -77,9 +80,10 @@ export async function collectionFacts(container: FactsContainer, id: string): Pr
 
 export async function brandFacts(container: FactsContainer, id: string): Promise<RecordFacts> {
   const row = await rowOf<BrandRow>(container, "brand", BRAND_FACT_FIELDS, id)
-  const ids = (row.products ?? []).flatMap((product) =>
-    typeof product?.id === "string" ? [product.id] : []
-  )
+  // A hard ceiling on the IN list (#250 D2): past it the count is only a range anyway ("500+ ürün")
+  const ids = (row.products ?? [])
+    .flatMap((product) => (typeof product?.id === "string" ? [product.id] : []))
+    .slice(0, MAX_BRAND_PRODUCT_IDS)
   const listing =
     ids.length > 0
       ? await listingProductFacts(container, { id: ids }, "categories")
