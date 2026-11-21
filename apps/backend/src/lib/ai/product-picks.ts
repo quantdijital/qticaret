@@ -58,7 +58,12 @@ export const isPickTask = (
 
 /** Whether a task's lists are a pick's (a product card's are categories and attributes). */
 export const isPickAllowed = (allowed: unknown): allowed is PickAllowed =>
-  typeof allowed === "object" && allowed !== null && "choices" in allowed && "kind" in allowed
+  typeof allowed === "object" &&
+  allowed !== null &&
+  "choices" in allowed &&
+  "kind" in allowed &&
+  // A post draft's link list has choices too: only a pick's own kinds are a pick's
+  (allowed.kind === "product_tags" || allowed.kind === "product_category")
 
 // Room for a code ("e200"), or an id or a name a model wrote in its place (refused as unknown)
 const CODE = z.string().max(64)

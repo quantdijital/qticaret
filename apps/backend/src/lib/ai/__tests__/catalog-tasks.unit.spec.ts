@@ -72,6 +72,7 @@ describe("the product page's short text tasks: registry and instruction", () => 
       "collection",
       "brand",
       "page",
+      "post",
     ])
     expect(kinds(PRODUCT_TITLE_TASK)).toEqual(["product"])
   })

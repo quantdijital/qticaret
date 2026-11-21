@@ -24,9 +24,9 @@ export const FILLABLE_FIELDS: readonly AdvisorAiField[] = [
   "description",
 ]
 
-/** The records the AI core reads (`AI_ENTITY_TYPES`); a blog post, a landing page… have no button. */
+/** The records the AI core reads (`AI_ENTITY_TYPES`); a landing page has no button. */
 export const aiEntityOf = (kind: AdvisorKind, id: string): AiEntity | null =>
-  kind === "post" || kind === "landing" ? null : { type: kind, id }
+  kind === "landing" ? null : { type: kind, id }
 
 /** Hands an accepted suggestion to the record's form; kept for it until it is drawn. */
 export function sendAiFill(type: string, id: string, field: AdvisorAiField, text: string): void {

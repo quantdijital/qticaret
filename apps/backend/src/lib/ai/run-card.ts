@@ -7,6 +7,8 @@ import type { FaqAllowed } from "./product-faq"
 import type { CardAllowed } from "./product-card"
 import { productPicksOf } from "./product-picks"
 import type { PickAllowed } from "./product-picks"
+import { postDraftOf } from "./post-draft"
+import type { PostDraftAllowed } from "./post-draft"
 import type { PromptMessages } from "./prompt"
 import type { AiTask } from "./registry/tasks"
 import { maxTokensOf } from "./run-text"
@@ -85,6 +87,24 @@ export async function runFaqTask(input: {
   return runStructured(input, (text) => {
     const result = productFaqOf(text, input.allowed)
     return "problems" in result ? result : { value: result.suggestions }
+  })
+}
+
+/**
+ * A blog post draft's call (lib/ai/post-draft.ts): the same JSON call; every
+ * heading and paragraph gated on its own, the links held against the list
+ * the prompt named.
+ */
+export async function runPostDraftTask(input: {
+  connector: TextConnector
+  task: AiTask
+  prompt: PromptMessages
+  allowed: PostDraftAllowed
+  signal?: AbortSignal
+}): Promise<TextTaskResult> {
+  return runStructured(input, (text) => {
+    const result = postDraftOf(text, input.allowed)
+    return "problems" in result ? result : { value: result.draft }
   })
 }
 

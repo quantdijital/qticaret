@@ -21,6 +21,12 @@ import { findAiTask, isTaskEntity } from "./tasks"
  * writes no value it is unsure of, so it cannot promise to close the
  * finding, and its answer is values for a form, not one text for a field;
  * the manual fix opens the attributes card, where its button is.
+ * A blog post's length and structure (A-LEN-01, A-STRUCT-01) have none:
+ * `post_draft` writes a whole new body in place of the one there, from
+ * the title alone, and its answer is a document with links beside it, not
+ * one text for a field; the manual fix opens the body card, where its
+ * button is (adr/0074 Ek (7)). A post's title and description (A-TITLE-01,
+ * A-TITLE-03, A-META-01) are fixed as every page's.
  */
 
 /** The form field a suggestion goes to: the SEO card's two, a page's long description. */
@@ -77,8 +83,8 @@ const isAiEntity = (kind: PageKind): kind is Extract<PageKind, AiEntityType> =>
 
 /**
  * The AI fix for a finding on a page of this kind, or null: the rule has
- * no entry for the kind, the kind is no record the AI core reads (a blog
- * post, a landing page) or the task is not asked for it.
+ * no entry for the kind, the kind is no record the AI core reads (a
+ * landing page) or the task is not asked for it.
  */
 export function advisorAiFix(
   kind: PageKind,

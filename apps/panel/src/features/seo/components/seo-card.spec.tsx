@@ -33,7 +33,7 @@ const EMPTY = {
 }
 
 function renderCard(
-  type: "page" | "collection" | "brand" | "post" = "page",
+  type: "page" | "collection" | "brand" | "post" | "landing" = "page",
   saved: object = EMPTY
 ) {
   const client = new QueryClient({
@@ -330,13 +330,13 @@ describe("SeoCard", () => {
 
     it("has no button on a card the AI core does not write for", () => {
       offer(["deepseek"])
-      renderCard("post")
+      renderCard("landing")
       expect(field("seo-title-cent_1")).toBeInTheDocument()
       expect(fetchMock).not.toHaveBeenCalledWith("/admin/ai/services")
       expect(screen.queryByRole("button", { name: /yapay zekâ ile öner/i })).not.toBeInTheDocument()
     })
 
-    it.each(["collection", "brand"] as const)(
+    it.each(["collection", "brand", "post"] as const)(
       "asks a %s's search title for the record itself (adr/0074 §5)",
       async (type) => {
         offer(["deepseek"])

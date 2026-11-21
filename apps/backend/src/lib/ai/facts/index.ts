@@ -5,6 +5,7 @@ import { brandFacts, collectionFacts } from "./listing"
 import { mediaFacts } from "./media"
 import type { AiImageRef } from "./media"
 import { PAGE_SUMMARY_LENGTH, pageFacts } from "./page"
+import { POST_BODY_FACT_LENGTH, postFacts } from "./post"
 import { productFacts } from "./product"
 import { productReviewFacts, questionFacts, reviewFacts } from "./reviews"
 import type { FactsContainer, RecordFacts } from "./types"
@@ -26,6 +27,7 @@ export const AI_ENTITY_TYPES = [
   "collection",
   "brand",
   "page",
+  "post",
   "media",
   "review",
   "question",
@@ -40,6 +42,8 @@ export const AI_ENTITY_ID_PREFIX: Readonly<Record<AiEntityType, string>> = {
   collection: "pcol",
   brand: "brand",
   page: "cnt",
+  // The same records as a page (content_entry); the reader holds the kind apart
+  post: "cnt",
   media: "media",
   review: "prev",
   question: "pq",
@@ -48,6 +52,8 @@ export const AI_ENTITY_ID_PREFIX: Readonly<Record<AiEntityType, string>> = {
 interface ReadRecord {
   fields: RecordFacts
   image?: AiImageRef
+  /** Longest text per field where the kind reads more than the shared lengths (a post's body). */
+  maxLengths?: Readonly<Record<string, number>>
 }
 
 const fieldsOnly =
@@ -64,6 +70,10 @@ const READERS: Readonly<
   collection: fieldsOnly(collectionFacts),
   brand: fieldsOnly(brandFacts),
   page: fieldsOnly(pageFacts),
+  post: async (container, id) => ({
+    fields: await postFacts(container, id),
+    maxLengths: { body: POST_BODY_FACT_LENGTH },
+  }),
   media: mediaFacts,
   review: fieldsOnly(reviewFacts),
   question: fieldsOnly(questionFacts),
@@ -76,6 +86,7 @@ const WITH_SHOP: ReadonlySet<AiEntityType> = new Set([
   "collection",
   "brand",
   "page",
+  "post",
   "review",
   "question",
 ])
@@ -137,7 +148,7 @@ export async function entityFacts(
   const shop = WITH_SHOP.has(type) ? (await brandOf(container)).shopName : null
   return {
     fields: shop === null ? read.fields : withShop(read.fields, shop),
-    maxLengths: AI_FACT_MAX_LENGTHS,
+    maxLengths: { ...AI_FACT_MAX_LENGTHS, ...read.maxLengths },
     image: read.image ?? null,
   }
 }

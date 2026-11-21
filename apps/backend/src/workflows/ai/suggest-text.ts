@@ -2,6 +2,7 @@ import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework
 import { readAttributeSuggestions } from "../../lib/ai/product-attributes"
 import { readProductCard } from "../../lib/ai/product-card"
 import { readFaqSuggestions } from "../../lib/ai/product-faq"
+import { readPostDraft } from "../../lib/ai/post-draft"
 import { isPickTask, readProductPicks } from "../../lib/ai/product-picks"
 import { findAiTask } from "../../lib/ai/registry/tasks"
 import { authorizeTaskStep } from "./steps/authorize-task"
@@ -151,6 +152,10 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       // A product's FAQ items, in order; its text is the same as JSON
       ...(findAiTask(input.task)?.gate === "product_faq"
         ? { faq: outcome.status === "succeeded" ? readFaqSuggestions(outcome.text) : null }
+        : {}),
+      // A blog post draft: its sections and the links apart; its text is the same as JSON
+      ...(findAiTask(input.task)?.gate === "post_draft"
+        ? { draft: outcome.status === "succeeded" ? readPostDraft(outcome.text) : null }
         : {}),
       problems: outcome.problems,
       alternatives: chosen.alternatives,

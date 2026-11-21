@@ -85,7 +85,7 @@ describe("advisor AI fixes (docs/22 Aşama 3)", () => {
     for (const rule of Object.keys(ADVISOR_AI_FIXES)) {
       expect(found).toContain(rule)
     }
-    const kinds = ["product", "category", "collection", "brand", "page"] as const
+    const kinds = ["product", "category", "collection", "brand", "page", "post"] as const
     for (const kind of kinds satisfies readonly AiEntityType[]) {
       for (const ruleId of ["X-TITLE-01", "X-META-01"]) {
         const fix = advisorAiFix(kind, { ruleId }, "production")
@@ -99,9 +99,15 @@ describe("advisor AI fixes (docs/22 Aşama 3)", () => {
     for (const ruleId of ["P-TITLE-02", "P-META-02", "P-TITLE-04", "P-KW-01", "P-IMG-01"]) {
       expect(advisorAiFix("product", { ruleId }, "production")).toBeNull()
     }
-    for (const kind of ["post", "landing"] as const) {
-      expect(advisorAiFix(kind, { ruleId: `X-TITLE-01` }, "production")).toBeNull()
+    expect(advisorAiFix("landing", { ruleId: `L-TITLE-01` }, "production")).toBeNull()
+    // A post's length and structure: the draft writes a whole new body, from its own card only
+    for (const ruleId of ["A-LEN-01", "A-STRUCT-01", "A-ANSWER-01", "A-INLINK-01"]) {
+      expect(advisorAiFix("post", { ruleId }, "production")).toBeNull()
     }
+    expect(advisorAiFix("post", { ruleId: "A-META-01" }, "production")).toEqual({
+      task: "seo_description",
+      field: "seo_description",
+    })
     for (const ruleId of ["B-LOGO-01", "C-EMPTY-01", "C-DEPTH-01"]) {
       expect(advisorAiFix("category", { ruleId }, "production")).toBeNull()
     }
