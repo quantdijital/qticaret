@@ -17,7 +17,11 @@ import { AiGuidanceTab } from "./ai-guidance-tab"
 const fetchMock = vi.hoisted(() => vi.fn())
 const can = vi.hoisted(() => ({ settings: true }))
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => can.settings }))
+vi.mock("@/features/auth/api/staff", () => ({
+  useCan: () => can.settings,
+  // An admin: the tasks' own instruction (owner only) is ai-guidance-craft.spec.tsx's
+  useStaff: () => ({ role: "admin" }),
+}))
 
 let values: AiGuidanceSettings
 const saves: Partial<AiGuidanceSettings>[] = []

@@ -122,7 +122,9 @@ medusaIntegrationTestRunner({
         ],
         [{ tasks: { seo_title: { examples: ["a", "b", "c", "d"] } } }, "ai.guidance_examples_full"],
         [{ tasks: { image_background: { extra: "x" } } }, "ai.guidance_unknown_task"],
-        [{ tasks: { seo_title: { craft: "Sen bir şairsin" } } }, "invalid_data"],
+        // A task's craft is a field of its own now (adr/0074 §3, ai-craft.spec.ts); others stay refused
+        [{ tasks: { seo_title: { prompt: "Sen bir şairsin" } } }, "invalid_data"],
+        [{ tasks: { seo_title: { craft: "a".repeat(3001) } } }, "ai.guidance_too_long"],
       ]
       for (const [body, message] of refusals) {
         const answer = await save(owner.headers, body)

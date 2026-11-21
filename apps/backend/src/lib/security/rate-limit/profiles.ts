@@ -87,6 +87,13 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 30, windowMs: 10 * MINUTE },
     perIdentityAnyIp: { max: 20, windowMs: 10 * MINUTE },
   },
+  // adr/0074 §2 "Dene" (#247 D1): one try is two text calls and a correction each at
+  // most, so a budget of its own: five tries a staff member, wherever they are
+  ai_preview: {
+    name: "ai_preview",
+    perIp: { max: 10, windowMs: 10 * MINUTE },
+    perIdentityAnyIp: { max: 5, windowMs: 10 * MINUTE },
+  },
   // adr/0071 §8: image and video work, dearer and slower than text: narrower
   ai_media: {
     name: "ai_media",

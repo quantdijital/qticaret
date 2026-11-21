@@ -145,7 +145,8 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
     const before = parseStored(name, row?.values)
     let after: SectionValues
     try {
-      after = section.full.parse(mergePatch(before, patch))
+      const merged = section.merge ? section.merge(before, patch) : mergePatch(before, patch)
+      after = section.full.parse(merged)
     } catch (error) {
       throw toValidationError(error)
     }

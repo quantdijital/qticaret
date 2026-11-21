@@ -23,6 +23,7 @@ export const GUIDANCE_LIMITS = {
   extra: 600,
   examples: 3,
   example: 600,
+  craft: 3_000,
 } as const
 
 /**
@@ -44,6 +45,14 @@ export type GuidanceTask = (typeof GUIDANCE_TASKS)[number]
 export interface AiTaskGuidance {
   extra: string | null
   examples: string[]
+  /**
+   * The owner's own instruction in the default's place (adr/0074 §3); null
+   * or left out: the default. Sent by the owner only: the server refuses it
+   * from anyone else, and a save without it keeps the stored one.
+   */
+  craft?: string | null
+  /** The default's version it was written against; the server sets it (sent only to keep one's own). */
+  craft_base?: string | null
 }
 
 export interface AiGuidanceSettings {
