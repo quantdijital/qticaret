@@ -191,7 +191,8 @@ medusaIntegrationTestRunner({
       )
       const entries = await auditEntries("store", (each) => each.length >= 2)
 
-      expect(saved.map(({ data }) => data.version).sort()).toEqual([1, 2])
+      // Each answer reads the row back after its save: the later one may already be in
+      expect(saved.map(({ status }) => status)).toEqual([200, 200])
       expect(after.data.version).toBe(2)
       expect(after.data.values).toMatchObject({
         contact_email: "destek@example.com",
