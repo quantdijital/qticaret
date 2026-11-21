@@ -67,6 +67,17 @@ medusaIntegrationTestRunner({
       )
     const add = (headers: Record<string, string>, id: string, items: unknown) =>
       settle(http.post<Answer>(`/admin/ai/suggestions/${id}/faq`, { items }, { headers }))
+    const decide = (id: string, decision: "accept" | "dismiss") =>
+      settle(
+        http.post<Answer>(`/admin/ai/suggestions/${id}/${decision}`, {}, { headers: owner.headers })
+      )
+    // Customers' words go to the service only with the shop's consent (`ai.reviews`, KVKK)
+    const customersOpen = async (enabled: boolean) => {
+      const set = await settle(
+        http.post("/admin/features/ai.reviews", { enabled }, { headers: owner.headers })
+      )
+      expect(set.status).toBe(200)
+    }
     const notifications = async () =>
       (await getContainer().resolve(Modules.NOTIFICATION).listNotifications({})).length
 
@@ -114,6 +125,7 @@ medusaIntegrationTestRunner({
 
     it("drafts from the product's facts, masks the asker and writes nothing", async () => {
       const id = await product()
+      await customersOpen(true)
       const before = await qa().listProductQuestions({ product_id: id })
       const seen = answering(() =>
         JSON.stringify({
@@ -149,6 +161,41 @@ medusaIntegrationTestRunner({
       // Customers' words are not copied into the suggestion's record
       const draft = (await aiRecords(getContainer()).drafts()).at(-1)
       expect(draft?.prompt).not.toContain("kapak sızdırır")
+    })
+
+    it("with AI on customers' words off, sends only the shop's questions yet drops a repeat", async () => {
+      const id = await product()
+      await qa().createProductQuestions({
+        product_id: id,
+        author_kind: "shop",
+        author_name: "Örnek Mağaza",
+        body: "Bulaşık makinesinde yıkanır mı?",
+        status: "approved",
+      })
+      const seen = answering(() =>
+        JSON.stringify({
+          items: [
+            { q: "Kaç saat sıcak tutar?", a: "Açıklamaya göre gün boyu sıcak tutar." },
+            // A customer's question, not sent, is still held on the server
+            { q: "Merhaba ben Ayşe, kapak sızdırır mı?", a: "Hayır." },
+            { q: "Hacmi ne kadar?", a: "750 ml hacimlidir." },
+          ],
+        })
+      )
+
+      const answer = await ask(owner.headers, id)
+
+      expect(answer.status).toBe(201)
+      expect(answer.data.suggestion?.faq?.items.map((each) => each.question)).toEqual([
+        "Kaç saat sıcak tutar?",
+        "Hacmi ne kadar?",
+      ])
+      const [request] = seen
+      expect(request?.data).toContain("published_questions")
+      expect(request?.data).toContain("Bulaşık makinesinde yıkanır mı?")
+      for (const leak of ["sızdırır", "Ayşe", "Kaya", "cus_faq_test"]) {
+        expect(request?.data).not.toContain(leak)
+      }
     })
 
     it("refuses an answer with fewer than two valid items", async () => {
@@ -225,6 +272,43 @@ medusaIntegrationTestRunner({
       expect(rate.data.tasks.find((row) => row.task === "product_faq")).toMatchObject({
         accepted: 1,
       })
+    })
+
+    it("takes a draft only by adding items, none of them published already", async () => {
+      const id = await product()
+      await qa().createProductQuestions({
+        product_id: id,
+        author_kind: "shop",
+        author_name: "Örnek Mağaza",
+        body: "Kaç saat sıcak tutar?",
+        status: "approved",
+      })
+      const suggestion = (await ask(owner.headers, id)).data.suggestion?.id ?? ""
+
+      // The generic accept would record a decision with nothing added
+      const accepted = await decide(suggestion, "accept")
+      expect([accepted.status, accepted.data.message]).toEqual([400, "ai.faq_use_faq_route"])
+
+      const repeat = await add(owner.headers, suggestion, [
+        { q: "kaç saat sıcak tutar ?", a: "Gün boyu sıcak tutar." },
+      ])
+      expect([repeat.status, repeat.data.message]).toEqual([400, "ai.faq_all_published"])
+
+      const mixed = await add(owner.headers, suggestion, [
+        { q: "Kaç saat sıcak tutar?", a: "Gün boyu sıcak tutar." },
+        { q: "Hacmi ne kadar?", a: "750 ml hacimlidir." },
+      ])
+      expect(mixed.status).toBe(201)
+      expect(mixed.data.suggestion?.question_ids).toHaveLength(1)
+      const shop = await qa().listProductQuestions({ product_id: id, author_kind: "shop" })
+      expect(shop.map((each) => each.body).sort()).toEqual([
+        "Hacmi ne kadar?",
+        "Kaç saat sıcak tutar?",
+      ])
+
+      // Dismissing a FAQ draft stays open
+      const other = (await ask(owner.headers, id)).data.suggestion?.id ?? ""
+      expect((await decide(other, "dismiss")).status).toBe(200)
     })
 
     it("lets only owner and admin ask and add, and gives the FAQ the shop's guidance", async () => {

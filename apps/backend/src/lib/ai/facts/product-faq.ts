@@ -2,6 +2,9 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { SUMMARY_TEXT_MAX, storedSummaryText } from "../../catalog/summary"
 import { PRODUCT_QA_MODULE } from "../../../modules/product-qa"
 import type ProductQaModuleService from "../../../modules/product-qa/service"
+import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
+import { AI_REVIEWS } from "../../../modules/platform-settings/features"
+import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { aiValidationError } from "../errors"
 import { maskNames } from "../mask-names"
 import { foldQuestion } from "../product-faq"
@@ -16,7 +19,10 @@ import type { FactsContainer, RecordFacts } from "./types"
  * published on its page, so none is asked again. Only a question's words
  * go, a customer's own name masked in them (lib/ai/mask-names.ts, as an
  * answer draft's); no name as a fact, no answer, customer, order or staff
- * field. Price and stock are not read.
+ * field. A customer's question goes only while the shop lets AI read what
+ * customers wrote (`ai.reviews`, adr/0071 §10, KVKK); with it off only the
+ * shop's own questions go. Every published one is still held on the server
+ * (`allowed`), which never leaves the shop. Price and stock are not read.
  */
 
 /** The data block's list of published questions: what the instruction names. */
@@ -66,11 +72,16 @@ export async function productFaqFacts(
         select: ["id", "body", "author_name", "author_kind"],
       }
     )) as QuestionRow[]
+  // Customers' words leave the shop only with the shop's consent to AI on them (KVKK)
+  const customersOpen = await container
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .isFeatureEnabled(AI_REVIEWS)
+  const sent = customersOpen ? questions : questions.filter((each) => each.author_kind === "shop")
   const summary = storedSummaryText(row.product_extension?.summary_doc)
   return {
     fields: {
       // Always a list, empty too: the instruction names it either way
-      [PUBLISHED_QUESTIONS_FIELD]: questions.map((each, index) => ({
+      [PUBLISHED_QUESTIONS_FIELD]: sent.map((each, index) => ({
         label: `s${String(index + 1)}`,
         value: publishedQuestionText(each),
       })),

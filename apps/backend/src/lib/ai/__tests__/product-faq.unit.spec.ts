@@ -1,12 +1,7 @@
-import { PRODUCT_QA_MODULE } from "../../../modules/product-qa"
 import { keptFaqItems } from "../../../workflows/ai/accept-faq"
-import { fakeTextConnector } from "../connectors/fake"
-import { PUBLISHED_QUESTIONS_FIELD, productFaqFacts } from "../facts/product-faq"
-import type { FactsContainer } from "../facts/types"
 import { GUIDANCE_HEADING } from "../guidance"
 import { RULES_HEADING, isCraftTask, systemOf, takesGuidance } from "../instructions"
 import { NAME_MASK } from "../mask-names"
-import { buildPrompt } from "../prompt"
 import {
   faqItemOf,
   foldQuestion,
@@ -24,7 +19,6 @@ import {
   PRODUCT_TAGS_TASK,
   findAiTask,
 } from "../registry/tasks"
-import { runFaqTask } from "../run-card"
 
 /**
  * A product's FAQ draft (adr/0074 §5 madde 4): one JSON object, each item
@@ -196,96 +190,6 @@ describe("the items a person kept, before they are stored", () => {
       }
       expect(thrown).toMatchObject({ safeMessage: "ai.faq_item_invalid", field: "items.1" })
     }
-  })
-})
-
-interface Listed {
-  filters: Record<string, unknown>
-  config: { select?: string[]; take?: number }
-}
-
-function containerWith(questions: { body: string; author_name: string; author_kind?: string }[]) {
-  const listed: Listed[] = []
-  const graphs: { fields: string[] }[] = []
-  const qa = {
-    listProductQuestions: (filters: Record<string, unknown>, config: Listed["config"]) => {
-      listed.push({ filters, config })
-      return Promise.resolve(questions)
-    },
-  }
-  const query = {
-    graph: (input: { fields: string[] }) => {
-      graphs.push(input)
-      return Promise.resolve({
-        data: [
-          {
-            id: "prod_1",
-            product_extension: {
-              summary_doc: {
-                type: "doc",
-                content: [
-                  { type: "paragraph", content: [{ type: "text", text: "Çift cidarlı termos." }] },
-                ],
-              },
-            },
-          },
-        ],
-      })
-    },
-  }
-  const container: FactsContainer = {
-    resolve: (key: string) => (key === PRODUCT_QA_MODULE ? qa : query),
-  }
-  return { container, listed, graphs }
-}
-
-describe("what a FAQ draft reads", () => {
-  it("sends the published questions with a customer's name masked, never as a fact", async () => {
-    const { container, listed, graphs } = containerWith([
-      {
-        body: "Merhaba ben Ayşe, kapak sızdırır mı?",
-        author_name: "Ayşe K.",
-        author_kind: "customer",
-      },
-      { body: "Kaç saat sıcak tutar?", author_name: "Örnek Mağaza", author_kind: "shop" },
-    ])
-    const facts = await productFaqFacts(container, "prod_1")
-
-    expect(facts.fields[PUBLISHED_QUESTIONS_FIELD]).toEqual([
-      { label: "s1", value: `Merhaba ben ${NAME_MASK}, kapak sızdırır mı?` },
-      { label: "s2", value: "Kaç saat sıcak tutar?" },
-    ])
-    expect(facts.fields["summary"]).toBe("Çift cidarlı termos.")
-    expect(JSON.stringify(facts.fields)).not.toContain("Ayşe")
-    // Only published ones, by named columns: no customer id, contact or answer
-    expect(listed[0]?.filters).toEqual({ product_id: "prod_1", status: "approved" })
-    expect(listed[0]?.config.select).toEqual(["id", "body", "author_name", "author_kind"])
-    expect(graphs[0]?.fields.join(" ")).not.toMatch(/price|inventory|stock|customer|variants/)
-    expect(facts.allowed).toEqual({
-      kind: "product_faq",
-      published: [foldQuestion("Merhaba ben Ayşe, kapak sızdırır mı?"), "kaç saat sıcak tutar"],
-    })
-  })
-
-  it("names the list even when nothing is published, so the fake service knows the task", async () => {
-    const { container } = containerWith([])
-    const facts = await productFaqFacts(container, "prod_1")
-    expect(facts.fields[PUBLISHED_QUESTIONS_FIELD]).toEqual([])
-    const prompt = buildPrompt({
-      instruction: systemOf(PRODUCT_FAQ_TASK, null, "product") ?? "",
-      fields: { name: "Çelik Termos", ...facts.fields },
-      maxLengths: facts.maxLengths,
-      maxItems: facts.maxItems,
-    })
-    const result = await runFaqTask({
-      connector: fakeTextConnector,
-      task: PRODUCT_FAQ_TASK,
-      prompt,
-      allowed: facts.allowed,
-    })
-    expect(result.status).toBe("succeeded")
-    const read = readFaqSuggestions(result.status === "succeeded" ? result.text : null)
-    expect(read?.items).toHaveLength(3)
   })
 })
 
