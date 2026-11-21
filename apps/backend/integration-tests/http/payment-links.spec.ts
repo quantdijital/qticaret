@@ -31,6 +31,19 @@ const HOUR = 60 * 60 * 1000
 // Whole phone forms only: a bare "532" also matches timestamped product names.
 const PHONE_FORMS = [GUEST.phone, "05321234567", "5321234567", "532 123 45 67"]
 
+// Whole forms, then the digits alone (catches dashes, dots, spaces), the last seven
+// digits and the "45 67" tail. The timestamped product name is cut out first.
+function expectNoPhone(text: string): void {
+  const bare = text.replace(/bicak-\d+/g, "")
+  const digits = bare.replace(/\D/g, "")
+  for (const form of PHONE_FORMS) {
+    expect(bare).not.toContain(form)
+  }
+  expect(digits).not.toContain("5321234567")
+  expect(digits).not.toContain("1234567")
+  expect(bare).not.toContain("45 67")
+}
+
 interface View {
   payment_link?: Record<string, unknown>
   message?: string
@@ -103,9 +116,10 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(row)).not.toContain(GUEST.email)
       expect(share.data.share["sms_text"]).toContain("toplam ₺270,00")
       expect(share.data.share["sms_text"]).toContain(made.data.share?.url ?? "-")
-      for (const personal of [GUEST.email, GUEST.first_name, GUEST.last_name, ...PHONE_FORMS]) {
+      for (const personal of [GUEST.email, GUEST.first_name, GUEST.last_name]) {
         expect(share.data.share["sms_text"]).not.toContain(personal)
       }
+      expectNoPhone(String(share.data.share["sms_text"]))
       expect(share.data.share["whatsapp_url"]).toMatch(/^https:\/\/wa\.me\/905321234567\?text=/)
     })
 
@@ -212,9 +226,10 @@ medusaIntegrationTestRunner({
         total: 30_000,
         shipping: { preset: true },
       })
-      for (const personal of [GUEST.email, GUEST.last_name, ...PHONE_FORMS, "Atatürk"]) {
+      for (const personal of [GUEST.email, GUEST.last_name, "Atatürk"]) {
         expect(JSON.stringify(shown.data)).not.toContain(personal)
       }
+      expectNoPhone(JSON.stringify(shown.data))
       for (const answer of [forged, unknown, endedView, canceled]) {
         expect(answer.status).toBe(404)
         expect(answer.data.message).toBe("payment_link.unavailable")
