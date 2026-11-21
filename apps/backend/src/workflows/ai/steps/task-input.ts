@@ -3,7 +3,7 @@ import { aiValidationError } from "../../../lib/ai/errors"
 import { AI_ENTITY_ID_PREFIX, entityFacts } from "../../../lib/ai/facts"
 import type { AiEntityType } from "../../../lib/ai/facts"
 import { productCardFacts } from "../../../lib/ai/facts/product-card"
-import { productPickFacts } from "../../../lib/ai/facts/product-picks"
+import { productPickFacts, sentWhole } from "../../../lib/ai/facts/product-picks"
 import { craftText, guidanceText, readGuidance, takesGuidance } from "../../../lib/ai/guidance"
 import type { AiGuidanceSettings } from "../../../modules/platform-settings/sections/ai-guidance"
 import { systemOf } from "../../../lib/ai/instructions"
@@ -132,9 +132,13 @@ async function pickInput(
   const prompt = buildPrompt({
     instruction,
     fields: { ...picks.fields, ...record.fields },
-    maxLengths: factLengthsOf(task, record.maxLengths),
+    maxLengths: { ...factLengthsOf(task, record.maxLengths), ...picks.maxLengths },
     maxItems: picks.maxItems,
   })
+  // A list the block could not hold whole is not sent (#251 D2): no call, no quota
+  if (!sentWhole(prompt.data, picks)) {
+    throw aiValidationError("ai.choices_too_long")
+  }
   return { system: prompt.system, data: prompt.data, image_file_id: null, allowed: picks.allowed }
 }
 

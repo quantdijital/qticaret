@@ -19,6 +19,14 @@ import type { FactsContainer, RecordFacts } from "./types"
 export const TAG_CHOICES_FIELD = "tag_choices"
 export const CATEGORY_CHOICES_FIELD = "category_choices"
 
+/**
+ * One listed name's longest text (#251 D2): short, so a full list (200
+ * tags, 150 categories) stays far under the data block's ceiling and is
+ * never the field it drops. A category's "Üst > Alt" takes two names.
+ */
+export const TAG_CHOICE_LENGTH = 60
+export const CATEGORY_CHOICE_LENGTH = 120
+
 interface OwnRow {
   tags?: ({ id?: string | null; value?: string | null } | null)[] | null
   categories?: ({ id?: string | null } | null)[] | null
@@ -26,8 +34,33 @@ interface OwnRow {
 
 export interface PickFacts {
   fields: RecordFacts
+  maxLengths: Readonly<Record<string, number>>
   maxItems: Readonly<Record<string, number>>
   allowed: PickAllowed
+}
+
+/**
+ * Whether the data block carries the whole list (#251 D2): every listed
+ * code, in order. A block that lost the list, or part of it, is not sent:
+ * the answer would name codes the service never saw.
+ */
+export function sentWhole(data: string, facts: PickFacts): boolean {
+  const field = facts.allowed.kind === "product_tags" ? TAG_CHOICES_FIELD : CATEGORY_CHOICES_FIELD
+  const codes = facts.allowed.choices.map((each) => each.code)
+  let sent: unknown
+  try {
+    sent = (JSON.parse(data) as { data?: Record<string, unknown> }).data?.[field]
+  } catch {
+    return false
+  }
+  if (sent === undefined) {
+    return codes.length === 0
+  }
+  return (
+    Array.isArray(sent) &&
+    sent.length === codes.length &&
+    sent.every((each, index) => (each as { label?: unknown } | null)?.label === codes[index])
+  )
 }
 
 /** The product's own tags and categories: what is not offered again. */
@@ -81,6 +114,7 @@ export async function productPickFacts(
     const choices = await tagChoices(container, new Set(own.tags.map((tag) => tag.id)))
     return {
       fields: { [TAG_CHOICES_FIELD]: listOf(choices) },
+      maxLengths: { [TAG_CHOICES_FIELD]: TAG_CHOICE_LENGTH },
       maxItems: { [TAG_CHOICES_FIELD]: MAX_TAG_CHOICES },
       allowed: { kind, choices, taken: own.tags.map((tag) => tag.value) },
     }
@@ -88,6 +122,7 @@ export async function productPickFacts(
   const choices = await shownCategories(container, new Set(own.categories))
   return {
     fields: { [CATEGORY_CHOICES_FIELD]: listOf(choices) },
+    maxLengths: { [CATEGORY_CHOICES_FIELD]: CATEGORY_CHOICE_LENGTH },
     maxItems: { [CATEGORY_CHOICES_FIELD]: MAX_CARD_CATEGORIES },
     allowed: { kind, choices, taken: [] },
   }

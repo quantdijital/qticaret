@@ -730,6 +730,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.candidate_unknown": "Bu önerinin böyle bir adayı yok.",
   "ai.no_choices":
     "Önerilecek kategori yok: mağazanın vitrinde görünen ve ürünün henüz bulunmadığı bir kategorisi olmalı.",
+  "ai.choices_too_long":
+    "Mağazanın listesi bu öneri için fazla uzun; yapay zekâya gönderilmedi. Uzun etiket ya da kategori adlarını kısaltın.",
   // Aşama 9: reviews and questions
   "ai.reviews_off":
     "Yorum ve sorularda yapay zekâ kapalı. Ayarlar > Yapay zekâ sayfasından açabilirsiniz.",
