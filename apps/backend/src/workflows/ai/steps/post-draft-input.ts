@@ -42,10 +42,15 @@ export async function postDraftInput(
 ): Promise<PostDraftInput> {
   const record = await entityFacts(container, input.entity_type, input.entity_id)
   const fields = pick(record.fields)
-  const words = [fields["name"], fields["focus_keyword"], fields["summary"]]
-    .filter((value): value is string => typeof value === "string")
-    .join(" ")
-  const links = await postLinkFacts(container, words)
+  const text = (name: string): string | null => {
+    const value = fields[name]
+    return typeof value === "string" ? value : null
+  }
+  const links = await postLinkFacts(container, {
+    title: text("name"),
+    focusKeyword: text("focus_keyword"),
+    summary: text("summary"),
+  })
   const prompt = buildPrompt({
     instruction,
     fields: { ...links.fields, ...fields },

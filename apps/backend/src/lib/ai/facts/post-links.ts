@@ -4,7 +4,9 @@ import type UrlRegistryModuleService from "../../../modules/url-registry/service
 import { LINK_CHOICES_FIELD } from "../post-draft"
 import type { PostDraftAllowed, PostLinkChoice, PostLinkKind } from "../post-draft"
 import { POST_LINK_CATEGORIES, POST_LINK_CHOICES } from "../registry/content-tasks"
-import { shownCategories } from "./product-card"
+import { ranked, topicOf } from "./post-topic"
+import type { PostTopic } from "./post-topic"
+import { allShownCategories } from "./product-card"
 import { storefrontChannelIds } from "./storefront-channels"
 import type { FactsContainer, RecordFacts } from "./types"
 
@@ -13,7 +15,8 @@ import type { FactsContainer, RecordFacts } from "./types"
  * shop's shown categories (none internal or closed, nor under such a
  * parent) and its published products in the storefront's sales channels,
  * each only with a storefront path of its own (the URL registry's active
- * one). Those nearest the post's words come first; at most
+ * one). Those nearest the post's subject come first (`post-topic`: focus
+ * keyword, then title, then summary), ranked before the cut; at most
  * `POST_LINK_CHOICES`, `POST_LINK_CATEGORIES` of them categories. Only a
  * short code and the name are sent (`k1` a category, `u1` a product); the
  * ids and paths stay on the server (`allowed`). Names only: no price,
@@ -51,51 +54,6 @@ interface Candidate {
   kind: PostLinkKind
   id: string
   name: string
-}
-
-// Words that say nothing of a subject: left out of the match
-const STOP_WORDS = new Set([
-  "ve",
-  "ile",
-  "için",
-  "bir",
-  "bu",
-  "şu",
-  "en",
-  "nasıl",
-  "nedir",
-  "neden",
-  "hangi",
-  "rehber",
-  "rehberi",
-  "ipucu",
-  "ipuçları",
-])
-
-/** A text's word stems: lower case, three letters or more, the first five (Turkish suffixes vary). */
-export function stemsOf(text: string): Set<string> {
-  return new Set(
-    text
-      .toLocaleLowerCase("tr")
-      .split(/[^\p{L}\p{N}]+/u)
-      .filter((word) => word.length >= 3 && !STOP_WORDS.has(word))
-      .map((word) => word.slice(0, 5))
-  )
-}
-
-/** How many of the post's stems a name holds. */
-const scoreOf = (name: string, post: ReadonlySet<string>): number =>
-  [...stemsOf(name)].filter((stem) => post.has(stem)).length
-
-/** The candidates nearest the post first; a tie keeps the list's own order. */
-export function ranked<T extends { name: string }>(
-  candidates: readonly T[],
-  post: ReadonlySet<string>
-): T[] {
-  return candidates
-    .map((each, index) => ({ each, index, score: scoreOf(each.name, post) }))
-    .sort((a, b) => b.score - a.score || a.index - b.index)
-    .map(({ each }) => each)
 }
 
 /** The published products in one of the storefront's channels, newest first. */
@@ -154,11 +112,12 @@ async function pathsOf(
 /** The list a post draft names, and the same list as `allowed`. */
 export async function postLinkFacts(
   container: FactsContainer,
-  postWords: string
+  topic: PostTopic
 ): Promise<PostLinkFacts> {
-  const post = stemsOf(postWords)
+  const post = topicOf(topic)
+  // Every shown category, ranked before the cut (a card's alphabetical first 150 would miss some)
   const [categoryRows, products] = await Promise.all([
-    shownCategories(container),
+    allShownCategories(container),
     shownProducts(container),
   ])
   const categories: Candidate[] = categoryRows.map((row) => ({

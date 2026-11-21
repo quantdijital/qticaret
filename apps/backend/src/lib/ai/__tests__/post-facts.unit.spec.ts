@@ -3,7 +3,7 @@ import { URL_REGISTRY_MODULE } from "../../../modules/url-registry"
 import { postDraftInput } from "../../../workflows/ai/steps/post-draft-input"
 import { AI_FACT_MAX_LENGTHS, entityFacts } from "../facts"
 import { POST_BODY_FACT_LENGTH, POST_FACT_FIELDS, postFacts } from "../facts/post"
-import { postLinkFacts, stemsOf } from "../facts/post-links"
+import { LINK_CHOICE_LENGTH, postLinkFacts } from "../facts/post-links"
 import type { FactsContainer } from "../facts/types"
 import { LINK_CHOICES_FIELD } from "../post-draft"
 import { POST_DRAFT_TASK, POST_LINK_CATEGORIES, POST_LINK_CHOICES } from "../registry/tasks"
@@ -187,7 +187,10 @@ describe("a post draft's link candidates", () => {
       },
     })
 
-    const facts = await postLinkFacts(container, "Termos nasıl temizlenir? termos temizliği")
+    const facts = await postLinkFacts(container, {
+      title: "Termos nasıl temizlenir?",
+      focusKeyword: "termos temizliği",
+    })
 
     expect(facts.allowed.choices).toEqual([
       {
@@ -243,7 +246,7 @@ describe("a post draft's link candidates", () => {
     )
     const { container } = containerWith({ categories, products, paths })
 
-    const facts = await postLinkFacts(container, "Bir yazı")
+    const facts = await postLinkFacts(container, { title: "Bir yazı" })
 
     expect(facts.allowed.choices).toHaveLength(POST_LINK_CHOICES)
     expect(facts.allowed.choices.filter((each) => each.kind === "category")).toHaveLength(
@@ -251,8 +254,33 @@ describe("a post draft's link candidates", () => {
     )
   })
 
-  it("matches words by their stem, leaving out the words that say nothing", () => {
-    expect([...stemsOf("Termosların temizliği için bir rehber")]).toEqual(["termo", "temiz"])
+  it("ranks every shown category before the cut, not the alphabetical first ones", async () => {
+    const categories = Array.from({ length: 200 }, (_, index) => ({
+      id: `pcat_${String(index)}`,
+      name: `Aksesuar ${String(index).padStart(3, "0")}`,
+      is_active: true,
+      is_internal: false,
+      parent_category_id: null,
+    }))
+    categories.push({
+      id: "pcat_z",
+      name: "Zeytinyağı Şişeleri",
+      is_active: true,
+      is_internal: false,
+      parent_category_id: null,
+    })
+    const paths = Object.fromEntries(categories.map((each) => [each.id, `/k/${each.id}`]))
+    const { container } = containerWith({ categories, paths })
+
+    const facts = await postLinkFacts(container, {
+      title: "Zeytinyağı nasıl saklanır?",
+      focusKeyword: "zeytinyağı saklama",
+    })
+
+    expect(facts.allowed.choices[0]).toMatchObject({ code: "k1", id: "pcat_z" })
+    expect(facts.allowed.choices.slice(1).map((each) => each.name)).toEqual(
+      Array.from({ length: POST_LINK_CATEGORIES - 1 }, (_, index) => `Aksesuar 00${String(index)}`)
+    )
   })
 })
 
@@ -276,5 +304,36 @@ describe("a post draft's input", () => {
     expect(input.allowed.choices.map((each) => each.code)).toEqual(["k1"])
     expect(input.data).not.toContain("Uzun bir metin")
     expect(input.data).not.toContain("Ayşe")
+  })
+
+  it("sends the whole list even at its longest: every code the server holds, each name clipped", async () => {
+    const long = (index: number) => `Termos ${String(index)} ${"uzun ad ".repeat(40)}`
+    const categories = Array.from({ length: 20 }, (_, index) => ({
+      id: `pcat_${String(index)}`,
+      name: long(index),
+      is_active: true,
+      is_internal: false,
+      parent_category_id: null,
+    }))
+    const products = Array.from({ length: 40 }, (_, index) => ({
+      id: `prod_${String(index)}`,
+      title: long(index),
+    }))
+    const paths = Object.fromEntries(
+      [...categories, ...products].map((each) => [each.id, `/x/${each.id}`])
+    )
+    const posts = [{ ...POST, excerpt: "Özet sözcüğü ".repeat(100) }]
+    const { container } = containerWith({ posts, categories, products, paths })
+
+    const input = await postDraftInput(container, POST_DRAFT_TASK, "talimat", {
+      entity_type: "post",
+      entity_id: "cnt_1",
+    })
+    const data = (JSON.parse(input.data) as { data: Record<string, unknown> }).data
+    const sent = data[LINK_CHOICES_FIELD] as { label: string; value: string }[]
+
+    expect(input.allowed.choices).toHaveLength(POST_LINK_CHOICES)
+    expect(sent.map((each) => each.label)).toEqual(input.allowed.choices.map((each) => each.code))
+    expect(sent.every((each) => Array.from(each.value).length <= LINK_CHOICE_LENGTH + 1)).toBe(true)
   })
 })
