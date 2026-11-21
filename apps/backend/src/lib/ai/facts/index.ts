@@ -1,6 +1,7 @@
 import { brandOf } from "../../../workflows/messaging/brand"
 import { aiValidationError } from "../errors"
 import { categoryFacts } from "./category"
+import { campaignFacts } from "./campaign"
 import { brandFacts, collectionFacts } from "./listing"
 import { mediaFacts } from "./media"
 import type { AiImageRef } from "./media"
@@ -31,6 +32,8 @@ export const AI_ENTITY_TYPES = [
   "media",
   "review",
   "question",
+  // A bulk message (adr/0050): its own words only, never its audience (facts/campaign.ts)
+  "campaign",
 ] as const
 export type AiEntityType = (typeof AI_ENTITY_TYPES)[number]
 
@@ -47,6 +50,7 @@ export const AI_ENTITY_ID_PREFIX: Readonly<Record<AiEntityType, string>> = {
   media: "media",
   review: "prev",
   question: "pq",
+  campaign: "camp",
 }
 
 interface ReadRecord {
@@ -77,6 +81,7 @@ const READERS: Readonly<
   media: mediaFacts,
   review: fieldsOnly(reviewFacts),
   question: fieldsOnly(questionFacts),
+  campaign: fieldsOnly(async (container, id) => (await campaignFacts(container, id)).fields),
 }
 
 // A page's text names the shop it is on; an image is described by what it shows alone
@@ -89,6 +94,7 @@ const WITH_SHOP: ReadonlySet<AiEntityType> = new Set([
   "post",
   "review",
   "question",
+  "campaign",
 ])
 
 /** Longest text per field where it differs from the data block's default. */

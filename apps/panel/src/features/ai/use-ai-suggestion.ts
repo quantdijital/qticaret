@@ -90,14 +90,16 @@ export function useAiSuggestion(task: string, entity: AiEntity) {
   /**
    * The text to put in the form: the candidate picked (the first when none
    * is named); the decision and the pick are recorded, the record is not written.
+   * `index` names the pick's place itself, for a suggestion whose choices are
+   * inside its one text (a bulk e-mail's subject lines, adr/0074 §4).
    */
   const accept = useCallback(
-    async (candidate?: string): Promise<string | null> => {
+    async (candidate?: string, index?: number): Promise<string | null> => {
       if (state.status !== "suggestion") {
         return null
       }
       const { id, text, candidates } = state.suggestion
-      const at = candidate === undefined ? -1 : candidates.indexOf(candidate)
+      const at = index ?? (candidate === undefined ? -1 : candidates.indexOf(candidate))
       const picked = at === -1 ? text : candidate
       reset()
       // The text is already here: a decision that could not be recorded does not hold up the form

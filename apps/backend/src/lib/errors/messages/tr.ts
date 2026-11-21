@@ -742,6 +742,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   // Aşama 9: reviews and questions
   "ai.reviews_off":
     "Yorum ve sorularda yapay zekâ kapalı. Ayarlar > Yapay zekâ sayfasından açabilirsiniz.",
+  "ai.feature_off": "Bu özellik mağazada kapalı.",
   "ai.not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı.",
   // Aşama 7: a scene the shop wrote
   "ai.scene_text_invalid":

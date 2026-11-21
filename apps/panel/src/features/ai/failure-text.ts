@@ -19,6 +19,7 @@ const OWN_WORDS = new Set([
   "daily_limit_reached",
   // Aşama 9: reviews and questions
   "reviews_off",
+  "feature_off",
   "not_enough_reviews",
 ])
 

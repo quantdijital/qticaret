@@ -738,6 +738,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.faq_use_faq_route": "A FAQ draft is accepted by adding the selected questions.",
   // Aşama 9: reviews and questions
   "ai.reviews_off": "AI on reviews and questions is off. You can turn it on under Settings > AI.",
+  "ai.feature_off": "This feature is off for the shop.",
   "ai.not_enough_reviews": "A summary needs at least 3 approved reviews of this product.",
   // Aşama 7: a scene the shop wrote
   "ai.scene_text_invalid":

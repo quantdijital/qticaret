@@ -45,6 +45,8 @@ export const GUIDANCE_TASKS = [
   "review_reply",
   "question_answer",
   "review_summary",
+  "campaign_email",
+  "campaign_sms",
 ] as const
 export type GuidanceTask = (typeof GUIDANCE_TASKS)[number]
 

@@ -7,6 +7,7 @@ import type { AiService } from "../registry/services"
 import {
   IMAGE_BACKGROUND_TASK,
   IMAGE_SCENE_TASK,
+  MAX_PURPOSE_OPTIONS,
   MAX_TASK_OPTIONS,
   TEST_TASK,
   aiTasks,
@@ -58,15 +59,19 @@ describe("AI registries (adr/0071 §2)", () => {
       "product_category",
       "product_attributes",
       "product_faq",
+      "campaign_email",
+      "campaign_sms",
       "post_draft",
     ])
     expect(findAiTask("test_text", "development")).toBeNull()
   })
 
-  it("gives every task a known capability, two options at most and a role", () => {
+  it("gives every task a known capability, two options at most (a purpose list four) and a role", () => {
     for (const task of aiTasks("test")) {
       expect(AI_CAPABILITIES).toContain(task.capability)
-      expect(task.options.length).toBeLessThanOrEqual(MAX_TASK_OPTIONS)
+      expect(task.options.length).toBeLessThanOrEqual(
+        task.optionKind === "purpose" ? MAX_PURPOSE_OPTIONS : MAX_TASK_OPTIONS
+      )
       expect(task.roles.length).toBeGreaterThan(0)
       expect(Number.isSafeInteger(task.credits) && task.credits >= 0).toBe(true)
     }

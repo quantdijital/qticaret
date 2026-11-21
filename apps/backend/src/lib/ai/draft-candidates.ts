@@ -19,6 +19,34 @@ export function draftCandidates(task: Pick<AiTask, "candidates"> | null, text: s
   return (task?.candidates ?? 1) > 1 ? text.split("\n").filter((line) => line !== "") : [text]
 }
 
+/** How many subject lines a bulk e-mail's stored JSON offers; 0 for anything else. */
+function subjectCount(text: string): number {
+  try {
+    const subjects = (JSON.parse(text) as { subjects?: unknown } | null)?.subjects
+    return Array.isArray(subjects) ? subjects.length : 0
+  } catch {
+    return 0
+  }
+}
+
+/**
+ * What accepting a draft takes (adr/0074 §4). A bulk e-mail is one JSON
+ * text whose candidates are its subject lines: the index names the subject
+ * picked (kept as `accepted_index`) and the whole JSON is returned, the
+ * server's own text, never the client's. Any other task: its candidate.
+ */
+export function acceptedDraft(
+  task: Pick<AiTask, "candidates" | "gate"> | null,
+  text: string,
+  index: number | undefined
+): { index: number; text: string } | null {
+  if (task?.gate !== "campaign_email") {
+    return acceptedCandidate(draftCandidates(task, text), index)
+  }
+  const taken = acceptedCandidate(Array<string>(subjectCount(text)).fill(text), index)
+  return taken === null ? null : { index: taken.index, text }
+}
+
 /**
  * The candidate accepted: by its place in the list (the first when none
  * is named); null when the suggestion offered no such candidate.
