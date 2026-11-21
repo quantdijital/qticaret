@@ -69,14 +69,18 @@ medusaIntegrationTestRunner({
       )
       return data.order.id
     }
-    /** Waits for the order's events to settle: they are recorded once tried. */
+    /**
+     * Waits for the order's events to settle. A row is claimed as `pending` before the
+     * request goes out and settled after it answers, so only rows no longer `pending`
+     * mean the fake has seen the request.
+     */
     const settled = (orderId: string, count: number) =>
       eventually(
         () =>
           getContainer()
             .resolve<ConversionsModuleService>(CONVERSIONS_MODULE)
             .listConversionEvents({ order_id: orderId }),
-        (rows) => rows.length >= count
+        (rows) => rows.filter((row) => row.status !== "pending").length >= count
       )
 
     beforeAll(async () => {
