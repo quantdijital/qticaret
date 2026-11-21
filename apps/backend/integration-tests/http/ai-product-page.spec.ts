@@ -241,8 +241,11 @@ medusaIntegrationTestRunner({
     it("turns away a category ask with nothing left to pick, before any call", async () => {
       const container = getContainer()
       const product = await aiProduct(container)
-      const only = await category(container, "Tek Kategori")
-      await products().updateProducts(product, { category_ids: [only] })
+      await category(container, "Tek Kategori")
+      // The demo seed (stockShop) opens its own categories: the product is put in every one
+      const every = await products().listProductCategories({}, { select: ["id"] })
+      expect(every.length).toBeGreaterThan(1)
+      await products().updateProducts(product, { category_ids: every.map((each) => each.id) })
       const seen = answering(() => JSON.stringify({ categories: [] }))
       const answer = await ask(owner.headers, {
         task: "product_category",
