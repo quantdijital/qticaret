@@ -40,9 +40,12 @@ export type TextTaskResult = (
   correction: CorrectionAttempt | null
 }
 
-/** Room for the longest answer: every candidate at its longest, a token at least a character. */
+/**
+ * Room for the longest answer: every candidate at its longest, a token at
+ * least a character; a task's own budget (`maxTokens`) where it names one.
+ */
 export const maxTokensOf = (task: AiTask): number =>
-  Math.max(64, task.maxLength * 2 * Math.max(1, task.candidates ?? 1))
+  task.maxTokens ?? Math.max(64, task.maxLength * 2 * Math.max(1, task.candidates ?? 1))
 
 interface CallInput {
   connector: TextConnector

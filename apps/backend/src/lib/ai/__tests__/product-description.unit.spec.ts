@@ -61,6 +61,7 @@ describe("product description task (docs/22 PR 2-1)", () => {
       "collection",
       "brand",
       "page",
+      "post",
     ])
   })
 

@@ -41,6 +41,7 @@ export const GUIDANCE_TASKS = [
   "category_description",
   "collection_description",
   "brand_description",
+  "post_draft",
   "review_reply",
   "question_answer",
   "review_summary",

@@ -7373,6 +7373,25 @@
       "title": "Açıklama",
       "hint": "Vitrinde sayfanın altında, ürünlerden sonra görünür. Başka yerden yapıştırdığınız başlıklar ve paragraflar korunur; görünüşünü Tema ayarları > Liste metni belirler.",
       "ai": "Açıklama için yapay zekâ ile öner"
+    },
+    "postDraft": {
+      "button": "Taslak yaz",
+      "title": "Yazı taslağı",
+      "description": "Yapay zekâ yazının başlığından, odak anahtar kelimesinden ve özetinden başlıklı bir taslak yazar. Kullanmadan önce okuyun; Kaydet'e basana kadar hiçbir şey değişmez.",
+      "replaceWarning": "Bu taslak, editördeki bugünkü metnin yerine geçer. Kaydetmeden çıkarsanız ya da Geri al'a basarsanız eski metin geri gelir.",
+      "replace": "Yeni taslakla değiştir",
+      "back": "Geri",
+      "linksTitle": "İç bağlantı önerileri",
+      "linksHint": "Taslak metne bağlantı koymaz. Bağlantıyı kopyalayın, metinde ilgili sözcükleri seçip bağlantı düğmesiyle ekleyin.",
+      "linksClose": "Bağlantı önerilerini kapat",
+      "copy": "Bağlantıyı kopyala",
+      "copyLabel": "{{name}} bağlantısını kopyala",
+      "copied": "Bağlantı kopyalandı: {{path}}",
+      "copyFailed": "Kopyalanamadı; bağlantıyı elle yazın: {{path}}",
+      "kinds": {
+        "category": "Kategori",
+        "product": "Ürün"
+      }
     }
   },
   "priceLists": {
@@ -11665,7 +11684,8 @@
       "product_tags": "Etiket önerisi",
       "product_category": "Kategori önerisi",
       "product_attributes": "Özellik doldurma",
-      "product_faq": "SSS taslağı"
+      "product_faq": "SSS taslağı",
+      "post_draft": "Blog yazısı taslağı"
     },
     "options": {
       "short": "Kısa",
