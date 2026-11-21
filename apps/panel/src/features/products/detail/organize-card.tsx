@@ -9,6 +9,7 @@ import { SearchPicker } from "@qticaret/admin-ui/patterns/search-picker"
 import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
 import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
 import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
+import { AiPicks } from "@/features/ai/components/ai-picks"
 import { brandOptions, useSetProductBrand } from "@/features/brands/api/brands"
 import { collectionOptions } from "@/features/collections/api/collections"
 import { findingsNote } from "@/features/content/section-findings"
@@ -19,6 +20,9 @@ import { CategoryTree } from "@/features/products/components/category-tree"
 import { VatSelect } from "@/features/products/components/vat-select"
 import { vatLabelOf, vatRatesQuery } from "@/features/settings/api/vat-rates"
 import { errorText } from "@/lib/errors"
+import { TagsField } from "./organize-tags"
+import { dropTags, tagIds, tagsOf } from "./tag-values"
+import type { TagValue } from "./tag-values"
 import { PRODUCT_SECTIONS, someNames } from "./sections"
 import { SideCard } from "./side-card"
 
@@ -27,6 +31,7 @@ interface Values {
   type_id: string
   brand: PickerOption | null
   collection: PickerOption | null
+  tags: TagValue[]
 }
 
 // The brand comes through a link (F3.11): Medusa's product type does not name it
@@ -43,9 +48,14 @@ const savedOf = (product: ProductDetail): Values => ({
   type_id: product.type?.id ?? "",
   brand: brandOf(product),
   collection: collectionOf(product),
+  tags: tagsOf(product),
 })
 
-/** Categories, brand, collection and KDV group in a dialog; each saved where it is kept. */
+/**
+ * Categories, tags, brand, collection and KDV group in a dialog; each saved
+ * where it is kept. Beside categories and tags the AI picks from the shop's
+ * own lists (adr/0074 §5 madde 2); a pick only fills the form.
+ */
 function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose: () => void }) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
@@ -54,8 +64,19 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
 
   const submit = form.handleSubmit(async (values) => {
     const { dirtyFields } = form.formState
+    // Tags this save created, until the product's update links them (#251 D1)
+    let created: string[] = []
     try {
-      if (dirtyFields.category_ids || dirtyFields.type_id || dirtyFields.collection) {
+      if (
+        dirtyFields.category_ids ||
+        dirtyFields.type_id ||
+        dirtyFields.collection ||
+        dirtyFields.tags
+      ) {
+        // A new tag the person picked is created only now, then linked like the shop's own
+        const picked = dirtyFields.tags ? await tagIds(values.tags) : null
+        created = picked?.created ?? []
+        const tags = picked ? picked.ids.map((id) => ({ id })) : null
         await update.mutateAsync({
           ...(dirtyFields.category_ids || dirtyFields.type_id
             ? {
@@ -64,7 +85,9 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
               }
             : {}),
           ...(dirtyFields.collection ? { collection_id: values.collection?.id ?? null } : {}),
+          ...(tags ? { tags } : {}),
         })
+        created = []
       }
       if (dirtyFields.brand) {
         await setBrand.mutateAsync(values.brand?.id ?? null)
@@ -72,6 +95,8 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
       toast.success(t("products.detail.saved"))
       onClose()
     } catch (failure) {
+      // The update failed: a tag it would have linked is not left behind unused
+      await dropTags(created)
       toast.error(errorText(t, failure))
     }
   })
@@ -95,7 +120,31 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
           <Controller
             control={form.control}
             name="category_ids"
-            render={({ field }) => <CategoryTree value={field.value} onChange={field.onChange} />}
+            render={({ field }) => (
+              <div className="flex flex-col gap-2">
+                <AiPicks
+                  task="product_category"
+                  entity={{ type: "product", id: product.id }}
+                  label={t("products.detail.aiCategories")}
+                  has={(pick) => pick.kind === "record" && field.value.includes(pick.id)}
+                  onPick={(pick) => {
+                    if (pick.kind === "record" && !field.value.includes(pick.id)) {
+                      field.onChange([...field.value, pick.id])
+                    }
+                  }}
+                />
+                <CategoryTree value={field.value} onChange={field.onChange} />
+              </div>
+            )}
+          />
+        </Field>
+        <Field label={t("products.tags.field")} hint={t("products.tags.hint")}>
+          <Controller
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <TagsField productId={product.id} value={field.value} onChange={field.onChange} />
+            )}
           />
         </Field>
         <Field label={t("brands.field")} htmlFor="detail-brand" hint={t("brands.fieldHint")}>
@@ -181,6 +230,7 @@ export function OrganizeCard({
     ? rates?.rates.find((each) => each.product_type_id === saved.type_id)
     : rates?.default
   const categories = (product.categories ?? []).map((category) => category.name)
+  const tags = saved.tags.map((tag) => tag.value)
   return (
     <SideCard
       id={PRODUCT_SECTIONS.organize}
@@ -201,6 +251,11 @@ export function OrganizeCard({
           label: t("collections.field"),
           value: saved.collection?.label ?? t("collections.none"),
           empty: !saved.collection,
+        },
+        {
+          label: t("products.tags.field"),
+          value: tags.length > 0 ? someNames(tags, 3) : t("products.tags.none"),
+          empty: tags.length === 0,
         },
         { label: t("products.wizard.vat"), value: rate ? vatLabelOf(rate) : "—" },
       ]}

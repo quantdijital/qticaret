@@ -36,6 +36,10 @@ export const AI_ERROR_KEYS = [
   // Aşama 7: a scene the shop wrote (lib/ai/scene-text.ts)
   "ai.scene_text_invalid",
   "ai.scenes_full",
+  // adr/0074 §5 madde 2: no shown category left to pick from (lib/ai/facts/product-picks.ts)
+  "ai.no_choices",
+  // #251 D2: the list could not go whole in the data block; nothing is sent
+  "ai.choices_too_long",
 ] as const
 
 export type AiErrorKey = (typeof AI_ERROR_KEYS)[number]

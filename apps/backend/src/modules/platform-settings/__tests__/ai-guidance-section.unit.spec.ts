@@ -59,9 +59,13 @@ describe("ai_guidance section", () => {
   it("takes guidance for the registry's text tasks only", () => {
     expect(isGuidanceTask("seo_title")).toBe(true)
     expect(isGuidanceTask("review_reply")).toBe(true)
+    expect(isGuidanceTask("short_description")).toBe(true)
     expect(isGuidanceTask("image_background")).toBe(false)
+    // A pick from the shop's lists is answered as JSON: no guidance (adr/0074 §5 madde 2)
+    expect(isGuidanceTask("product_tags")).toBe(false)
+    expect(isGuidanceTask("product_category")).toBe(false)
     expect(isGuidanceTask("__proto__")).toBe(false)
-    for (const id of ["made_up", "image_alt_text", "product_from_photo"]) {
+    for (const id of ["made_up", "image_alt_text", "product_from_photo", "product_tags"]) {
       expect(messages(parse({ tasks: { [id]: { extra: "kısa yaz" } } }))).toContain(
         "ai.guidance_unknown_task"
       )

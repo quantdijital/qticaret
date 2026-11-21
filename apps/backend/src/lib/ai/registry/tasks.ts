@@ -20,6 +20,11 @@ import {
   CATEGORY_DESCRIPTION_TASK,
   COLLECTION_DESCRIPTION_TASK,
 } from "./listing-tasks"
+import {
+  PRODUCT_CATEGORY_TASK,
+  PRODUCT_TAGS_TASK,
+  SHORT_DESCRIPTION_TASK,
+} from "./product-page-tasks"
 import { QUESTION_ANSWER_TASK, REVIEW_REPLY_TASK, REVIEW_SUMMARY_TASK } from "./review-tasks"
 
 /** What a task is asked for: a text record, or a picture of the media library. */
@@ -49,6 +54,11 @@ export const AI_GATES = [
   "product_title",
   // A category's, a collection's or a brand's description (registry/listing-tasks.ts)
   "listing_description",
+  // The product page's short description, tags and categories (registry/product-page-tasks.ts)
+  "short_description",
+  // Picks from the shop's own lists: a closed schema and allow-lists (lib/ai/product-picks.ts)
+  "product_tags",
+  "product_category",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -192,6 +202,7 @@ export const PRODUCT_DESCRIPTION_TASK: AiTask = {
 
 export * from "./image-tasks"
 export * from "./listing-tasks"
+export * from "./product-page-tasks"
 export * from "./review-tasks"
 
 const TASKS: readonly AiTask[] = [
@@ -210,6 +221,9 @@ const TASKS: readonly AiTask[] = [
   IMAGE_SCENE_TASK,
   FOCUS_KEYWORD_TASK,
   PRODUCT_TITLE_TASK,
+  SHORT_DESCRIPTION_TASK,
+  PRODUCT_TAGS_TASK,
+  PRODUCT_CATEGORY_TASK,
 ]
 
 /** The data block's field lengths for a task: the shared ones, and the task's own over them. */

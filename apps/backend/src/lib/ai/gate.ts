@@ -10,6 +10,7 @@ import {
   keywordLines,
   productTitleProblems,
   productTitleText,
+  shortDescriptionProblems,
 } from "./short-text-gate"
 
 /**
@@ -159,8 +160,11 @@ export function suggestionProblems(task: AiTask, text: string, data?: string): s
   if (task.gate === "image_alt") {
     problems.push(...altTextProblems(text))
   }
+  if (task.gate === "short_description") {
+    problems.push(...shortDescriptionProblems(text))
+  }
   // A masked name echoed back (lib/ai/mask-names.ts): a draft with a hole in it, never offered
-  if (task.gate === "plain_text" && MASK_LEFT.test(text)) {
+  if ((task.gate === "plain_text" || task.gate === "short_description") && MASK_LEFT.test(text)) {
     problems.push("masked_name")
   }
   if (isShouting(text) || hasSymbolRun(text)) {

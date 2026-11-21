@@ -725,6 +725,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.unknown_task": "There is no such AI task.",
   "ai.suggestion_not_open": "This suggestion is no longer waiting for a decision.",
   "ai.candidate_unknown": "This suggestion has no such candidate.",
+  "ai.no_choices":
+    "There is no category to suggest: the shop needs a category shown on the storefront that the product is not in yet.",
+  "ai.choices_too_long":
+    "The shop's list is too long for this suggestion; nothing was sent to the AI. Shorten long tag or category names.",
   // Aşama 9: reviews and questions
   "ai.reviews_off": "AI on reviews and questions is off. You can turn it on under Settings > AI.",
   "ai.not_enough_reviews": "A summary needs at least 3 approved reviews of this product.",

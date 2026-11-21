@@ -165,6 +165,9 @@ const DETAIL_FIELDS = [
   "brand.name",
   "collection.id",
   "collection.title",
+  // The organize card's tags (adr/0074 §5 madde 2: picked there, AI or not)
+  "tags.id",
+  "tags.value",
   "type.id",
   "type.value",
   "options.id",

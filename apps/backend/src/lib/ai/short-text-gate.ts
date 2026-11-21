@@ -6,6 +6,7 @@ import {
   FOCUS_KEYWORD_MAX_LENGTH,
   FOCUS_KEYWORD_MAX_WORDS,
 } from "./registry/catalog-tasks"
+import { SHORT_DESCRIPTION_MAX_SENTENCES } from "./registry/product-page-tasks"
 
 /**
  * The gates of the product page's short texts (registry/catalog-tasks.ts):
@@ -188,6 +189,29 @@ export function productTitleProblems(text: string, data: string | undefined): st
   // No facts to hold it against: nothing can show the name invents nothing
   if (data === undefined || ungroundedWords(text, data).length > 0) {
     problems.push("ungrounded")
+  }
+  return problems
+}
+
+// A sentence's end: its marks, then a space and a capital letter ("3.5 cm", "vb. ürünler" do not end one)
+const SENTENCE_END = /[.!?…]+\s+(?=\p{Lu})/gu
+
+/** Sentences in a text, as a reader counts them: one, and one more for each end inside it. */
+export const sentenceCount = (text: string): number =>
+  text.trim() === "" ? 0 : 1 + (text.trim().match(SENTENCE_END)?.length ?? 0)
+
+/**
+ * What is wrong with a short description's own shape: a second line
+ * (it is one paragraph) or more sentences than it holds. What every text
+ * is checked for (a link, a person's data, shouting) is the gate's own.
+ */
+export function shortDescriptionProblems(text: string): string[] {
+  const problems: string[] = []
+  if (text.includes("\n")) {
+    problems.push("lines")
+  }
+  if (sentenceCount(text) > SHORT_DESCRIPTION_MAX_SENTENCES) {
+    problems.push("sentences")
   }
   return problems
 }

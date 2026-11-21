@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto"
 import { CONTENT_INSTRUCTIONS } from "./crafts/content"
 import { LISTING_INSTRUCTIONS } from "./crafts/listing"
+import { PRODUCT_PAGE_INSTRUCTIONS } from "./crafts/product-page"
 import { REVIEW_INSTRUCTIONS } from "./crafts/reviews"
 import { SEO_INSTRUCTIONS } from "./crafts/seo"
 import { indented } from "./crafts/types"
@@ -35,6 +36,7 @@ const INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
   ...SEO_INSTRUCTIONS,
   ...CONTENT_INSTRUCTIONS,
   ...LISTING_INSTRUCTIONS,
+  ...PRODUCT_PAGE_INSTRUCTIONS,
   ...REVIEW_INSTRUCTIONS,
 }
 

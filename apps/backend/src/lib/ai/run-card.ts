@@ -1,6 +1,8 @@
 import type { AiImageInput, TextConnector } from "./connectors/types"
 import { productCardOf } from "./product-card"
 import type { CardAllowed } from "./product-card"
+import { productPicksOf } from "./product-picks"
+import type { PickAllowed } from "./product-picks"
 import type { PromptMessages } from "./prompt"
 import type { AiTask } from "./registry/tasks"
 import { maxTokensOf } from "./run-text"
@@ -22,6 +24,40 @@ export async function runCardTask(input: {
   images?: readonly AiImageInput[]
   signal?: AbortSignal
 }): Promise<TextTaskResult> {
+  return runStructured(input, (text) => {
+    const result = productCardOf(text, input.allowed)
+    return "problems" in result ? result : { value: result.card }
+  })
+}
+
+/**
+ * A pick task's call (a product's tags or categories, lib/ai/product-picks.ts):
+ * the same JSON call, its answer read against the closed schema and the
+ * lists the prompt named; what comes out is the picks as JSON text.
+ */
+export async function runPickTask(input: {
+  connector: TextConnector
+  task: AiTask
+  prompt: PromptMessages
+  allowed: PickAllowed
+  signal?: AbortSignal
+}): Promise<TextTaskResult> {
+  return runStructured(input, (text) => {
+    const result = productPicksOf(text, input.allowed)
+    return "problems" in result ? result : { value: result.picks }
+  })
+}
+
+async function runStructured(
+  input: {
+    connector: TextConnector
+    task: AiTask
+    prompt: PromptMessages
+    images?: readonly AiImageInput[]
+    signal?: AbortSignal
+  },
+  read: (text: string) => { value: unknown } | { problems: string[] }
+): Promise<TextTaskResult> {
   const { connector, task, prompt } = input
   const answer = await connector.complete({
     system: prompt.system,
@@ -32,11 +68,11 @@ export async function runCardTask(input: {
     ...(input.images === undefined ? {} : { images: input.images }),
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   })
-  const result = productCardOf(answer.text, input.allowed)
+  const result = read(answer.text)
   if ("problems" in result) {
     return { status: "refused", problems: result.problems, usage: answer.usage, correction: null }
   }
-  const text = JSON.stringify(result.card) as GatedText
+  const text = JSON.stringify(result.value) as GatedText
   // A card is one answer, never candidates, and is not corrected (its schema refuses, not its words)
   return { status: "succeeded", text, candidates: [text], usage: answer.usage, correction: null }
 }

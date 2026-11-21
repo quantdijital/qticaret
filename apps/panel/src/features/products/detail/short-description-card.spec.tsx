@@ -14,6 +14,8 @@ const editorProps = vi.hoisted(() => vi.fn())
 const typed = vi.hoisted((): { doc: unknown } => ({ doc: null }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+// The AI button has its own spec (short-description-card-ai.spec.tsx)
+vi.mock("@/features/ai/components/ai-button", () => ({ AiButton: () => null }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 // ProseMirror cannot lay out in jsdom: the document shown as JSON, an edit given whole
 vi.mock("@/features/content/editor/rich-editor", () => ({

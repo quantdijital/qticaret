@@ -12,7 +12,9 @@ import { failureOf } from "../../../lib/ai/outcome"
 import type { AiCapability } from "../../../lib/ai/registry/capabilities"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
 import type { CardAllowed } from "../../../lib/ai/product-card"
-import { runCardTask } from "../../../lib/ai/run-card"
+import { isPickAllowed, isPickTask } from "../../../lib/ai/product-picks"
+import type { PickAllowed } from "../../../lib/ai/product-picks"
+import { runCardTask, runPickTask } from "../../../lib/ai/run-card"
 import { runTextTask } from "../../../lib/ai/run-text"
 import { correctionClaim, correctionUsageOf } from "./correction-claim"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
@@ -27,8 +29,8 @@ export interface CallServiceInput {
   data: string
   /** A vision task's picture: its stored file, read here (never an address, never its bytes in a step). */
   image_file_id?: string | null
-  /** A product card's lists, read on the server (task-input); its answer may name nothing else. */
-  allowed?: CardAllowed | null
+  /** A product card's or a pick task's lists, read on the server (task-input); its answer may name nothing else. */
+  allowed?: CardAllowed | PickAllowed | null
 }
 
 /** How the call ended; never the key, the service's own words or its raw answer. */
@@ -174,7 +176,8 @@ export const callServiceStep = createStep(
       const withImages = images === undefined ? {} : { images }
       // A second call, when no candidate passed, takes a place under the day's ceiling only
       const claim = correctionClaim(container, input.capability)
-      // A product card is read against its closed schema and the shop's lists, never as free text
+      const allowed = input.allowed ?? null
+      // A product card and a pick are read against their closed schemas and the shop's lists, never as free text
       const result = await withAiBreaker(
         input.service,
         () =>
@@ -183,10 +186,28 @@ export const callServiceStep = createStep(
                 connector,
                 task,
                 prompt,
-                allowed: input.allowed ?? { categories: [], attributes: [] },
+                allowed:
+                  allowed && !isPickAllowed(allowed) ? allowed : { categories: [], attributes: [] },
                 ...withImages,
               })
-            : runTextTask({ connector, task, prompt, mayCorrect: claim.mayCorrect, ...withImages }),
+            : isPickTask(task)
+              ? runPickTask({
+                  connector,
+                  task,
+                  prompt,
+                  // No list read for this task: nothing it names is allowed
+                  allowed:
+                    isPickAllowed(allowed) && allowed.kind === task.gate
+                      ? allowed
+                      : { kind: task.gate, choices: [], taken: [] },
+                })
+              : runTextTask({
+                  connector,
+                  task,
+                  prompt,
+                  mayCorrect: claim.mayCorrect,
+                  ...withImages,
+                }),
         DEFAULT_CIRCUIT_BREAKER,
         // The correction's own failure, returned inside the first call's permit, counts too
         correctionFailure

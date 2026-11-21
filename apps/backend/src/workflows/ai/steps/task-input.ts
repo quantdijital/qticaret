@@ -3,10 +3,13 @@ import { aiValidationError } from "../../../lib/ai/errors"
 import { AI_ENTITY_ID_PREFIX, entityFacts } from "../../../lib/ai/facts"
 import type { AiEntityType } from "../../../lib/ai/facts"
 import { productCardFacts } from "../../../lib/ai/facts/product-card"
+import { productPickFacts, sentWhole } from "../../../lib/ai/facts/product-picks"
 import { craftText, guidanceText, readGuidance, takesGuidance } from "../../../lib/ai/guidance"
 import type { AiGuidanceSettings } from "../../../modules/platform-settings/sections/ai-guidance"
 import { systemOf } from "../../../lib/ai/instructions"
 import type { CardAllowed } from "../../../lib/ai/product-card"
+import { isPickTask } from "../../../lib/ai/product-picks"
+import type { PickAllowed } from "../../../lib/ai/product-picks"
 import { buildPrompt } from "../../../lib/ai/prompt"
 import { factLengthsOf, findAiTask, isTaskEntity } from "../../../lib/ai/registry/tasks"
 import type { AiTask } from "../../../lib/ai/registry/tasks"
@@ -70,8 +73,11 @@ export interface TaskInput {
   system: string
   data: string
   image_file_id: string | null
-  /** A product card's lists: the only categories and attributes its answer may name. */
-  allowed: CardAllowed | null
+  /**
+   * A product card's lists (the only categories and attributes its answer
+   * may name), or a pick task's list (the only tags or categories).
+   */
+  allowed: CardAllowed | PickAllowed | null
 }
 
 /** A product card from a photo: the shop's lists beside the picture, nothing of the image record. */
@@ -104,6 +110,39 @@ async function cardInput(
 }
 
 /**
+ * A pick task (a product's tags or categories): the product's own facts,
+ * read as any product task's, after the shop's list it may pick from (first,
+ * so a block too long gives up the product's long text, never the list).
+ */
+async function pickInput(
+  container: Parameters<typeof productPickFacts>[0],
+  task: AiTask,
+  instruction: string,
+  input: TaskInputInput
+): Promise<TaskInput> {
+  if (!isPickTask(task)) {
+    throw aiValidationError("ai.unknown_task")
+  }
+  const record = await entityFacts(container, input.entity_type, input.entity_id)
+  const picks = await productPickFacts(container, task.gate, input.entity_id)
+  // Nothing to pick from: turned away before any quota is claimed (a tag may still be new)
+  if (task.gate === "product_category" && picks.allowed.choices.length === 0) {
+    throw aiValidationError("ai.no_choices")
+  }
+  const prompt = buildPrompt({
+    instruction,
+    fields: { ...picks.fields, ...record.fields },
+    maxLengths: { ...factLengthsOf(task, record.maxLengths), ...picks.maxLengths },
+    maxItems: picks.maxItems,
+  })
+  // A list the block could not hold whole is not sent (#251 D2): no call, no quota
+  if (!sentWhole(prompt.data, picks)) {
+    throw aiValidationError("ai.choices_too_long")
+  }
+  return { system: prompt.system, data: prompt.data, image_file_id: null, allowed: picks.allowed }
+}
+
+/**
  * The call's two messages (adr/0071 §8.3, §9; adr/0074 §1): the task's
  * instruction with the shop's writing guidance in its labelled place (a
  * text task only), and the record read on the server (no text of it is
@@ -128,6 +167,9 @@ export const taskInputStep = createStep(
     }
     if (task.gate === "product_card") {
       return new StepResponse(await cardInput(container, task, input))
+    }
+    if (isPickTask(task)) {
+      return new StepResponse(await pickInput(container, task, instruction, input))
     }
     // Read by its type and id alone (lib/ai/facts): the record's text never comes from the client
     const { fields, maxLengths, image } = await entityFacts(

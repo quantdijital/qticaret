@@ -32,6 +32,16 @@ describe("errorText", () => {
     ).toBe("Netgsm hizmetine şu an ulaşılamıyor; biraz sonra tekrar deneyin.")
   })
 
+  it("says a busy record's sentence (a settings save that met the section's lock, 503)", () => {
+    // The backend's `errors.busy` in the session's language; the panel shows it as it is
+    const busy = {
+      status: 503,
+      statusText: "Service Unavailable",
+      message: "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin.",
+    }
+    expect(errorText(t, busy)).toBe(busy.message)
+  })
+
   it("says it in the panel's own words when the body was kept (labels, invoices)", async () => {
     const said = await responseFailure(
       json(502, {

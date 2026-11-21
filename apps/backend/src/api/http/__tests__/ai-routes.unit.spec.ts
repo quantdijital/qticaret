@@ -7,7 +7,13 @@ const ask = (body: unknown) => ({ body }) as unknown as MedusaRequest
 describe("aiSuggestionProfile", () => {
   it("counts a text task against the text budget", () => {
     expect(aiSuggestionProfile(ask({ task: "seo_title" }))).toBe(RATE_LIMIT_PROFILES.ai_text)
-    for (const task of ["focus_keyword", "product_title"]) {
+    for (const task of [
+      "focus_keyword",
+      "product_title",
+      "short_description",
+      "product_tags",
+      "product_category",
+    ]) {
       expect(aiSuggestionProfile(ask({ task }))).toBe(RATE_LIMIT_PROFILES.ai_text)
     }
     expect(aiSuggestionProfile(ask({ task: "product_description" }))).toBe(
