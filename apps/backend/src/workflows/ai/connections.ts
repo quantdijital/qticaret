@@ -5,7 +5,7 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-creden
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { isAiCredentialProvider } from "../../modules/integration-credentials/providers-ai"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
-import { AI_OWN_KEYS } from "../../modules/platform-settings/features"
+import { AI_OWN_KEYS, AI_REVIEWS } from "../../modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 
 type Resolver = Pick<MedusaContainer, "resolve">
@@ -38,6 +38,15 @@ export async function taskFlagOpen(
     : container
         .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
         .isFeatureEnabled(task.flag)
+}
+
+/**
+ * The message key of a task asked while its own flag is off: `ai.reviews`
+ * says where to turn it on (Settings > AI); any other flag is the shop's
+ * feature itself (e.g. `marketing.campaigns`), off as a whole.
+ */
+export function taskFlagOffKey(task: Pick<AiTask, "flag">): string {
+  return task.flag === AI_REVIEWS ? "ai.reviews_off" : "ai.feature_off"
 }
 
 export async function aiFlagsOf(container: Resolver): Promise<AiFlags> {

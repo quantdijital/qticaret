@@ -21,6 +21,9 @@ import type { PickAllowed } from "../../../lib/ai/product-picks"
 import { buildPrompt } from "../../../lib/ai/prompt"
 import { factLengthsOf, findAiTask, isTaskEntity } from "../../../lib/ai/registry/tasks"
 import type { AiTask } from "../../../lib/ai/registry/tasks"
+import type { CampaignAllowed } from "../../../lib/ai/campaign-text"
+import { isCampaignTask } from "../../../lib/ai/run-campaign"
+import { campaignInput } from "./campaign-input"
 import { postDraftInput } from "./post-draft-input"
 
 export { AI_ENTITY_TYPES } from "../../../lib/ai/facts"
@@ -89,6 +92,8 @@ export interface TaskInput {
    * may name), or a pick task's list (the only tags or categories).
    */
   allowed: CardAllowed | PickAllowed | AttributeAllowed | FaqAllowed | PostDraftAllowed | null
+  /** A bulk message's limits: the figures its data holds and an SMS's end (steps/campaign-input.ts). */
+  campaign?: CampaignAllowed | null
 }
 
 /** A product card from a photo: the shop's lists beside the picture, nothing of the image record. */
@@ -243,6 +248,10 @@ export const taskInputStep = createStep(
     }
     if (task.gate === "product_faq") {
       return new StepResponse(await faqInput(container, task, instruction, input))
+    }
+    if (isCampaignTask(task)) {
+      const campaign = await campaignInput(container, task, instruction, input.entity_id)
+      return new StepResponse<TaskInput>({ ...campaign, image_file_id: null, allowed: null })
     }
     if (task.gate === "post_draft") {
       const draft = await postDraftInput(container, task, instruction, input)

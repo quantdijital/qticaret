@@ -10898,6 +10898,30 @@
       "tooManyProducts": "An e-mail can hold at most {{max}} product cards.",
       "smsTooLong": "With the shop's name and the opt-out line the text is longer than {{parts}} SMS; shorten it.",
       "smsTooLongStored": "With the longest first name and the links' campaign code the text is longer than {{parts}} parts; shorten it."
+    },
+    "ai": {
+      "button": "Suggest with AI",
+      "purpose": "What is this message for?",
+      "purposeHint": "Leave it unpicked for a general message. A rate, code or date is used only when the message's name or text states it.",
+      "ask": "Suggest",
+      "dirty": "Unsaved changes are not taken into account: the suggestion is written from the saved message.",
+      "back": "Back",
+      "subjects": "Subject line",
+      "preheader": "Preview line",
+      "body": "Text",
+      "replaceBody": "The body has text. The suggested text takes its place; headings, lists and buttons are replaced too. Pictures and product cards stay. Leave without saving to get the old text back.",
+      "replaceBodyAction": "Replace the body too",
+      "keepBody": "Subject and preview line only",
+      "replaceSms": "The text field is filled. The text you picked takes its place.",
+      "replaceSmsAction": "Replace the text",
+      "campaign_email": {
+        "title": "Suggest e-mail text",
+        "description": "AI writes three subject lines, a preview line and a short text from the message's name, its current text and the products on its cards. No recipient list is sent; nothing changes until you save."
+      },
+      "campaign_sms": {
+        "title": "Suggest SMS text",
+        "description": "AI writes three short texts from the message's name and its current text; each fits one SMS with the shop's name and the opt-out line. No recipient list is sent; nothing changes until you save."
+      }
     }
   },
   "paymentLinks": {
@@ -11733,13 +11757,19 @@
       "product_category": "Category suggestion",
       "product_attributes": "Attribute filling",
       "product_faq": "FAQ draft",
-      "post_draft": "Blog post draft"
+      "post_draft": "Blog post draft",
+      "campaign_email": "Newsletter e-mail text",
+      "campaign_sms": "SMS campaign text"
     },
     "options": {
       "short": "Short",
       "detailed": "Detailed",
       "transparent": "Transparent",
-      "white": "White background"
+      "white": "White background",
+      "new_product": "New product",
+      "discount": "Discount",
+      "season": "Season",
+      "win_back": "Win-back"
     },
     "card": {
       "servicesTitle": "Services",
@@ -11830,6 +11860,7 @@
       "input_unsupported": "This content cannot be sent to the service (type or size not suitable).",
       "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow.",
       "reviews_off": "AI on reviews and questions is off. It can be turned on under Settings › AI.",
+      "feature_off": "This feature is off for the shop.",
       "not_enough_reviews": "A summary needs at least 3 approved reviews of this product."
     },
     "background": {

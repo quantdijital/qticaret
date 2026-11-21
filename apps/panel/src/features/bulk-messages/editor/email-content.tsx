@@ -11,6 +11,7 @@ import { TokenSlot } from "@/features/settings/components/shop-token-menu"
 import type { ExtraToken } from "@/features/settings/components/shop-token-menu"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { cn } from "@qticaret/admin-ui/lib/utils"
+import { EmailAi } from "./email-ai"
 import { useNameToken } from "./name-token"
 
 const F = "bulkMessages.fields"
@@ -67,9 +68,17 @@ function LineField({
  * An e-mail (adr/0050 §4): its subject (120), the preview line the inbox
  * shows after it, and a body written as a page is, the server drawing it
  * as e-mail: headings, paragraphs, lists, links, buttons, the media
- * library's images and up to four product cards.
+ * library's images and up to four product cards. "Yapay zekâ ile öner"
+ * beside the subject offers its words (adr/0074 §5 madde 6).
  */
-export function EmailContent({ form }: { form: UseFormReturn<EditorValues> }) {
+export function EmailContent({
+  form,
+  ai,
+}: {
+  form: UseFormReturn<EditorValues>
+  /** The saved campaign the words are asked for; none: no "Yapay zekâ ile öner". */
+  ai?: { campaignId: string; dirty: boolean } | null | undefined
+}) {
   const { t } = useTranslation()
   const extra = useNameToken()
   const body = useWatch({ control: form.control, name: "body" })
@@ -79,6 +88,7 @@ export function EmailContent({ form }: { form: UseFormReturn<EditorValues> }) {
     <SectionCard
       title={t("bulkMessages.content.emailTitle")}
       description={t("bulkMessages.content.emailHint")}
+      action={ai ? <EmailAi form={form} campaignId={ai.campaignId} dirty={ai.dirty} /> : undefined}
     >
       <div className="flex flex-col gap-5">
         <div className="grid items-start gap-5 md:grid-cols-2">

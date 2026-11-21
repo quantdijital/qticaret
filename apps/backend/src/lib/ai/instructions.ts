@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto"
+import { CAMPAIGN_INSTRUCTIONS } from "./crafts/campaign"
 import { CONTENT_INSTRUCTIONS } from "./crafts/content"
 import { LISTING_INSTRUCTIONS } from "./crafts/listing"
 import { POST_DRAFT_INSTRUCTIONS } from "./crafts/post-draft"
@@ -42,6 +43,7 @@ const INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
   ...PRODUCT_FAQ_INSTRUCTIONS,
   ...POST_DRAFT_INSTRUCTIONS,
   ...REVIEW_INSTRUCTIONS,
+  ...CAMPAIGN_INSTRUCTIONS,
 }
 
 // Which page the data block describes; told in the instruction, not in the data
@@ -58,6 +60,8 @@ const SUBJECTS: Readonly<Record<AiEntityType, string>> = {
   review: "Veri bir müşterinin ürün yorumuna aittir; puan 5 üzerindendir.",
   question:
     "Veri bir müşterinin ürün sorusuna ve sorunun sorulduğu ürünün mağazada yayımlanmış bilgilerine aittir.",
+  campaign:
+    "Veri mağazanın izin vermiş müşterilerine göndereceği bir toplu iletiye (e-posta ya da SMS) aittir.",
 }
 
 /** The heading of the rules layer, the system message's last. */
