@@ -59,6 +59,15 @@ const TEMPLATE: AttributeTemplate = {
   ],
 }
 
+// Another template with a field under the same key: the saved one's values are not its
+const OTHER: AttributeTemplate = {
+  id: "atpl_2",
+  name: "Bıçak",
+  handle: "bicak",
+  description: null,
+  definitions: [definition({ key: "origin", label: "Üretim yeri", type: "text", rank: 0 })],
+}
+
 const task = (allowed = true) => ({
   id: "product_attributes",
   capability: "text",
@@ -84,7 +93,7 @@ function setup(
       })
     }
     if (url === "/admin/attribute-templates") {
-      return Promise.resolve({ attribute_templates: [TEMPLATE], count: 1 })
+      return Promise.resolve({ attribute_templates: [TEMPLATE, OTHER], count: 2 })
     }
     return Promise.resolve({
       template: TEMPLATE,
@@ -194,6 +203,23 @@ describe("AttributesCard's AI fill (adr/0074 §5 madde 3)", () => {
       expect(posted()).toEqual(["/admin/ai/suggestions", "/admin/ai/suggestions/sug_1/dismiss"])
     })
     expect(screen.queryByText("Öneri: Türkiye")).not.toBeInTheDocument()
+  })
+
+  it("closes the suggestions when another template is picked", async () => {
+    const user = setup()
+    await user.click(await screen.findByRole("button", { name: BUTTON }))
+    await screen.findByText("Öneri: Türkiye")
+
+    await user.click(screen.getByRole("combobox", { name: "Özellik şablonu" }))
+    await user.click(await screen.findByRole("option", { name: "Bıçak" }))
+
+    expect(await screen.findByLabelText("Üretim yeri")).toHaveValue("")
+    expect(screen.queryByText("Öneri: Türkiye")).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /için öneriyi uygula/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Hepsini uygula" })).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(posted()).toEqual(["/admin/ai/suggestions", "/admin/ai/suggestions/sug_1/dismiss"])
+    })
   })
 
   it("draws no button for a role the task does not allow, or with nothing empty saved", async () => {

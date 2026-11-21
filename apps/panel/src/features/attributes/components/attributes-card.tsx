@@ -165,7 +165,12 @@ function AttributesForm({
           <Select
             value={templateId ?? NONE}
             onValueChange={(next) => {
-              setTemplateId(next === NONE ? null : next)
+              const id = next === NONE ? null : next
+              // The values were asked for the saved template: another one's same key is not theirs
+              if (id !== templateId && ai.open) {
+                ai.close()
+              }
+              setTemplateId(id)
             }}
           >
             <SelectTrigger id="attributes-template" className="w-full sm:w-80">
