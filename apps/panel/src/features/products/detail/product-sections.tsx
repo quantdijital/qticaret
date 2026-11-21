@@ -3,6 +3,7 @@ import { useSectionFindings } from "@/features/content/section-findings"
 import type { ProductDetail } from "@/features/products/api/products"
 import { AddonsCard } from "./addons-card"
 import { CatalogCard } from "./catalog-card"
+import { FaqCard } from "./faq-card"
 import { OrganizeCard } from "./organize-card"
 import { PriceHistoryCard } from "./price-history-card"
 import { ProductSeoCard } from "./product-seo-card"
@@ -34,6 +35,8 @@ export function ProductSections({ product }: { product: ProductDetail }) {
     <>
       <ProductSeoCard product={product} fold={findings(S.seo)} />
       <AttributesCard productId={product.id} fold={findings(S.attributes)} />
+      {/* adr/0074 §5 madde 4: drawn for a role that may ask for the FAQ draft */}
+      <FaqCard productId={product.id} />
       {/* adr/0052: shown while the shop's add-ons are on or the product still has some */}
       {addons ? <AddonsCard productId={product.id} fold={findings(S.addons)} /> : null}
       <PriceHistoryCard productId={product.id} fold={findings(S.priceHistory)} />

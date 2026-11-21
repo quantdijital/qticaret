@@ -142,3 +142,49 @@ export const PRODUCT_ATTRIBUTES_TASK: AiTask = {
   json: true,
   temperature: AI_TEMPERATURE.structured,
 }
+
+/** Questions one FAQ draft offers: at least, at most, and fewer valid than the least refuse it. */
+export const FAQ_MIN_ITEMS = 3
+export const FAQ_MAX_ITEMS = 5
+export const FAQ_MIN_VALID_ITEMS = 2
+
+/** The longest question and answer of a FAQ item, in characters. */
+export const FAQ_QUESTION_MAX_LENGTH = 120
+export const FAQ_ANSWER_MAX_LENGTH = 400
+
+/** The longest answer read for a FAQ draft, in characters: its JSON, all items together. */
+export const FAQ_MAX_LENGTH = 4_000
+
+/** The shop's published questions on the product a FAQ draft reads, newest first, not to ask again. */
+export const FAQ_PUBLISHED_QUESTIONS = 20
+
+/**
+ * A product's FAQ drafted (adr/0074 §5 madde 4): three to five questions
+ * a shopper asks, each answered from the product's own facts (its
+ * description, short description, attributes, options); a question the
+ * data cannot answer is not written. One JSON object
+ * (`{"items": [{"q", "a"}]}`), each text through the shared gate on its
+ * own (lib/ai/product-faq.ts): one that fails drops, fewer than
+ * `FAQ_MIN_VALID_ITEMS` left refuses the answer. The product's published
+ * questions go as data, their authors' names masked, so none is asked
+ * again. A shopper reads the words: the shop's guidance and the owner's
+ * craft apply (`prose`). Nothing is written here: "Seçilenleri ekle" sends
+ * the items a person kept, gated again, as the shop's own questions.
+ */
+export const PRODUCT_FAQ_TASK: AiTask = {
+  id: "product_faq",
+  capability: "text",
+  mode: "sync",
+  options: [],
+  roles: ["owner", "admin"],
+  credits: 1,
+  gate: "product_faq",
+  maxLength: FAQ_MAX_LENGTH,
+  entities: ["product"],
+  factMaxLengths: { description: ATTRIBUTES_FACT_LENGTH },
+  json: true,
+  prose: true,
+  temperature: AI_TEMPERATURE.factual,
+  // The published questions are customers' words: not copied into the suggestion (adr/0071 §10)
+  keepData: false,
+}

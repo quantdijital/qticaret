@@ -2,7 +2,13 @@ import { z } from "@medusajs/framework/zod"
 import { MONTH_PATTERN } from "../../../modules/ai/usage-summary"
 import { AI_ENTITY_TYPES } from "../../../lib/ai/facts"
 import { IMAGE_BACKGROUNDS } from "../../../lib/ai/registry/services"
-import { IMAGE_BACKGROUND_MAX_BATCH, IMAGE_SCENE_MAX_BATCH } from "../../../lib/ai/registry/tasks"
+import {
+  FAQ_ANSWER_MAX_LENGTH,
+  FAQ_MAX_ITEMS,
+  FAQ_QUESTION_MAX_LENGTH,
+  IMAGE_BACKGROUND_MAX_BATCH,
+  IMAGE_SCENE_MAX_BATCH,
+} from "../../../lib/ai/registry/tasks"
 import { SCENE_CODE } from "@qticaret/sector-packs"
 import { MEDIA_ID } from "../../../workflows/async-job/types/ai-image-edit"
 import { SCENE_TEXT_MAX, cleanSceneText } from "../../../lib/ai/scene-text"
@@ -147,6 +153,29 @@ export const AdminPostAiAccept = z
   })
   .strict()
 export type AdminPostAiAcceptType = z.infer<typeof AdminPostAiAccept>
+
+/**
+ * "Seçilenleri ekle" under a product's FAQ draft (adr/0074 §5 madde 4): the
+ * items a person kept, as they edited them, one to five. Only bounded here;
+ * each is gated again in the workflow (`keptFaqItems`) as an answer's item
+ * was, and refused with `ai.faq_item_invalid` when it does not pass.
+ */
+export const AdminPostAiFaq = z
+  .object({
+    items: z
+      .array(
+        z
+          .object({
+            q: z.string().max(FAQ_QUESTION_MAX_LENGTH * 4),
+            a: z.string().max(FAQ_ANSWER_MAX_LENGTH * 4),
+          })
+          .strict()
+      )
+      .min(1)
+      .max(FAQ_MAX_ITEMS),
+  })
+  .strict()
+export type AdminPostAiFaqType = z.infer<typeof AdminPostAiFaq>
 
 /** The tasks the guidance page's "Dene" compares (adr/0074 §2): a product's prose. */
 export const GUIDANCE_PREVIEW_TASKS = [

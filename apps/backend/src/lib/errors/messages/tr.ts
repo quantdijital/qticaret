@@ -734,6 +734,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Mağazanın listesi bu öneri için fazla uzun; yapay zekâya gönderilmedi. Uzun etiket, kategori ya da özellik seçeneği adlarını kısaltın.",
   "ai.no_empty_attributes":
     "Doldurulacak boş özellik yok: ürünün kayıtlı şablonunda vitrinde görünen ve henüz değeri olmayan bir özellik olmalı.",
+  "ai.faq_item_invalid":
+    "Bir soru ya da yanıt bu haliyle eklenemez: soru tek satır ve soru işaretiyle biter (en çok 120 karakter), yanıt en çok 400 karakterdir; bağlantı, HTML, kişisel veri, fiyat ve tümü büyük harf sözcük içermez.",
+  "ai.faq_not_product_faq": "Bu öneri bir ürün SSS taslağı değil.",
+  "ai.faq_all_published": "Seçilen soruların hepsi ürün sayfasında zaten yayımlanmış.",
+  "ai.faq_use_faq_route": "SSS taslağı, seçilen sorular eklenerek kabul edilir.",
   // Aşama 9: reviews and questions
   "ai.reviews_off":
     "Yorum ve sorularda yapay zekâ kapalı. Ayarlar > Yapay zekâ sayfasından açabilirsiniz.",

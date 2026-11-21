@@ -37,6 +37,7 @@ export const GUIDANCE_TASKS = [
   "product_title",
   "short_description",
   "product_description",
+  "product_faq",
   "category_description",
   "collection_description",
   "brand_description",

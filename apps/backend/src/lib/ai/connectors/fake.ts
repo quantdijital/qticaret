@@ -1,5 +1,6 @@
 import { aiProviderError } from "../errors"
 import { ATTRIBUTE_CHOICES_FIELD } from "../facts/product-attributes"
+import { PUBLISHED_QUESTIONS_FIELD } from "../product-faq"
 import { CATEGORY_CHOICES_FIELD, TAG_CHOICES_FIELD } from "../facts/product-picks"
 import { FAKE_SERVICE } from "../registry/services"
 import type { TextConnector, TextRequest, TextResult } from "./types"
@@ -118,13 +119,45 @@ function fakeValue(line: string): unknown {
   return "örnek"
 }
 
-/** A structured task's one JSON object: picks from the named list, attribute values, or a product card. */
+/** The product's name in the data block, or a stand-in. */
+function nameOf(data: string): string {
+  try {
+    const block = JSON.parse(data) as unknown
+    const fields = isRecord(block) && isRecord(block["data"]) ? block["data"] : {}
+    return typeof fields["name"] === "string" ? fields["name"].slice(0, 200) : "Bu ürün"
+  } catch {
+    return "Bu ürün"
+  }
+}
+
+/** A FAQ draft: three questions, each answered with the product's name, the same every time. */
+function fakeFaq(data: string): string {
+  const name = nameOf(data)
+  return JSON.stringify({
+    items: [
+      {
+        q: "Bu ürün ne için kullanılır?",
+        a: `${name}, ürün sayfasında anlatılan kullanım için tasarlanmıştır.`,
+      },
+      {
+        q: "Ürünün öne çıkan özellikleri nelerdir?",
+        a: `${name} için özellikler ürün açıklamasında yer alır.`,
+      },
+      { q: "Hangi seçenekleri var?", a: `${name} için seçenekler ürün sayfasında listelenir.` },
+    ],
+  })
+}
+
+/** A structured task's one JSON object: picks from the named list, attribute values, a FAQ, or a product card. */
 function structuredAnswer(data: string): string {
   const attributes = itemsOf(data, ATTRIBUTE_CHOICES_FIELD)
   if (attributes !== null) {
     return JSON.stringify(
       Object.fromEntries(attributes.map((each) => [each.label, fakeValue(each.value)]))
     )
+  }
+  if (itemsOf(data, PUBLISHED_QUESTIONS_FIELD) !== null) {
+    return fakeFaq(data)
   }
   const tags = codesOf(data, TAG_CHOICES_FIELD, 2)
   if (tags !== null) {

@@ -2,6 +2,8 @@ import type { AiImageInput, TextConnector } from "./connectors/types"
 import { productAttributesOf } from "./product-attributes"
 import type { AttributeAllowed } from "./product-attributes"
 import { productCardOf } from "./product-card"
+import { productFaqOf } from "./product-faq"
+import type { FaqAllowed } from "./product-faq"
 import type { CardAllowed } from "./product-card"
 import { productPicksOf } from "./product-picks"
 import type { PickAllowed } from "./product-picks"
@@ -65,6 +67,23 @@ export async function runAttributesTask(input: {
 }): Promise<TextTaskResult> {
   return runStructured(input, (text) => {
     const result = productAttributesOf(text, input.allowed)
+    return "problems" in result ? result : { value: result.suggestions }
+  })
+}
+
+/**
+ * A FAQ draft's call (lib/ai/product-faq.ts): the same JSON call; each item
+ * read and gated on its own, against the questions the product already has.
+ */
+export async function runFaqTask(input: {
+  connector: TextConnector
+  task: AiTask
+  prompt: PromptMessages
+  allowed: FaqAllowed
+  signal?: AbortSignal
+}): Promise<TextTaskResult> {
+  return runStructured(input, (text) => {
+    const result = productFaqOf(text, input.allowed)
     return "problems" in result ? result : { value: result.suggestions }
   })
 }

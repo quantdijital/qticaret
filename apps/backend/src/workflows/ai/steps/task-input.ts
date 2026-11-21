@@ -7,12 +7,14 @@ import {
   productAttributeFacts,
   sentWholeAttributes,
 } from "../../../lib/ai/facts/product-attributes"
+import { productFaqFacts } from "../../../lib/ai/facts/product-faq"
 import { productPickFacts, sentWhole } from "../../../lib/ai/facts/product-picks"
 import { craftText, guidanceText, readGuidance, takesGuidance } from "../../../lib/ai/guidance"
 import type { AiGuidanceSettings } from "../../../modules/platform-settings/sections/ai-guidance"
 import { systemOf } from "../../../lib/ai/instructions"
 import type { AttributeAllowed } from "../../../lib/ai/product-attributes"
 import type { CardAllowed } from "../../../lib/ai/product-card"
+import type { FaqAllowed } from "../../../lib/ai/product-faq"
 import { isPickTask } from "../../../lib/ai/product-picks"
 import type { PickAllowed } from "../../../lib/ai/product-picks"
 import { buildPrompt } from "../../../lib/ai/prompt"
@@ -84,7 +86,7 @@ export interface TaskInput {
    * A product card's lists (the only categories and attributes its answer
    * may name), or a pick task's list (the only tags or categories).
    */
-  allowed: CardAllowed | PickAllowed | AttributeAllowed | null
+  allowed: CardAllowed | PickAllowed | AttributeAllowed | FaqAllowed | null
 }
 
 /** A product card from a photo: the shop's lists beside the picture, nothing of the image record. */
@@ -184,6 +186,28 @@ async function attributesInput(
 }
 
 /**
+ * A FAQ draft: the product's own facts, then its short description and the
+ * questions already published on its page (their authors' names masked),
+ * held on the server too (`allowed`) so one asked again drops.
+ */
+async function faqInput(
+  container: Parameters<typeof productFaqFacts>[0],
+  task: AiTask,
+  instruction: string,
+  input: TaskInputInput
+): Promise<TaskInput> {
+  const record = await entityFacts(container, input.entity_type, input.entity_id)
+  const faq = await productFaqFacts(container, input.entity_id)
+  const prompt = buildPrompt({
+    instruction,
+    fields: { ...record.fields, ...faq.fields },
+    maxLengths: { ...factLengthsOf(task, record.maxLengths), ...faq.maxLengths },
+    maxItems: faq.maxItems,
+  })
+  return { system: prompt.system, data: prompt.data, image_file_id: null, allowed: faq.allowed }
+}
+
+/**
  * The call's two messages (adr/0071 §8.3, §9; adr/0074 §1): the task's
  * instruction with the shop's writing guidance in its labelled place (a
  * text task only), and the record read on the server (no text of it is
@@ -214,6 +238,9 @@ export const taskInputStep = createStep(
     }
     if (task.gate === "product_attributes") {
       return new StepResponse(await attributesInput(container, task, instruction, input))
+    }
+    if (task.gate === "product_faq") {
+      return new StepResponse(await faqInput(container, task, instruction, input))
     }
     // Read by its type and id alone (lib/ai/facts): the record's text never comes from the client
     const { fields, maxLengths, image } = await entityFacts(

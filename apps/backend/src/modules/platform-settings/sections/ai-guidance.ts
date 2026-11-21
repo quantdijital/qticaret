@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { cleanText } from "../../../lib/ai/prompt"
-import { aiTasks } from "../../../lib/ai/registry/tasks"
+import { aiTasks, writesProse } from "../../../lib/ai/registry/tasks"
 import { guidanceSaveIssue, mergeGuidance } from "./ai-guidance-craft"
 import { defineSection, isPlainObject } from "./define"
 
@@ -76,10 +76,11 @@ const UNKNOWN_TASK = "ai.guidance_unknown_task"
 /**
  * Whether the guidance may be given for this task: a text task of the
  * registry that writes prose; one answered as JSON (a product's tags or
- * categories) takes none (`takesGuidance`).
+ * categories) takes none, unless its texts are prose (a product's FAQ;
+ * `writesProse`, as `takesGuidance`).
  */
 export const isGuidanceTask = (id: string): boolean =>
-  aiTasks().some((task) => task.id === id && task.capability === "text" && task.json !== true)
+  aiTasks().some((task) => task.id === id && writesProse(task))
 
 // Markup goes whole; a stray angle bracket with it
 const TAG = /<[^>]*>|[<>]/g

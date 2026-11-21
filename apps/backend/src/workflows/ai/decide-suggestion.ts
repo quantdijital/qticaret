@@ -8,7 +8,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { aiValidationError } from "../../lib/ai/errors"
 import { acceptedCandidate, draftCandidates } from "../../lib/ai/draft-candidates"
-import { findAiTask } from "../../lib/ai/registry/tasks"
+import { PRODUCT_FAQ_TASK, findAiTask } from "../../lib/ai/registry/tasks"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
@@ -71,6 +71,11 @@ export async function decideSuggestion(
   }
   await authorizeDecision(container, draft.kind, input.user_id)
   const accepted = input.decision === "accept"
+  // A FAQ draft is taken by adding its items (`/faq`): an accept here would record a decision
+  // with nothing added; dismissing it stays open
+  if (accepted && draft.kind === PRODUCT_FAQ_TASK.id) {
+    throw aiValidationError("ai.faq_use_faq_route")
+  }
   // Only a candidate this suggestion offered: never a text from the client
   const taken = accepted
     ? acceptedCandidate(draftCandidates(findAiTask(draft.kind), draft.text), input.candidate_index)

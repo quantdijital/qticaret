@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto"
 import { CONTENT_INSTRUCTIONS } from "./crafts/content"
 import { LISTING_INSTRUCTIONS } from "./crafts/listing"
+import { PRODUCT_FAQ_INSTRUCTIONS } from "./crafts/product-faq"
 import { PRODUCT_PAGE_INSTRUCTIONS } from "./crafts/product-page"
 import { REVIEW_INSTRUCTIONS } from "./crafts/reviews"
 import { SEO_INSTRUCTIONS } from "./crafts/seo"
@@ -8,7 +9,7 @@ import { indented } from "./crafts/types"
 import type { TaskInstruction } from "./crafts/types"
 import type { AiEntityType } from "./facts"
 import { DATA_LAST, DATA_RULE } from "./prompt"
-import { aiTasks, findAiTask } from "./registry/tasks"
+import { aiTasks, findAiTask, writesProse } from "./registry/tasks"
 import type { AiTask } from "./registry/tasks"
 
 /**
@@ -37,6 +38,7 @@ const INSTRUCTIONS: Readonly<Record<string, TaskInstruction>> = {
   ...CONTENT_INSTRUCTIONS,
   ...LISTING_INSTRUCTIONS,
   ...PRODUCT_PAGE_INSTRUCTIONS,
+  ...PRODUCT_FAQ_INSTRUCTIONS,
   ...REVIEW_INSTRUCTIONS,
 }
 
@@ -73,10 +75,13 @@ export function instructionLayersOf(task: AiTask): TaskInstruction | null {
  * Whether a task takes the shop's guidance: a text task that writes prose
  * for a shopper (adr/0074 §2). A picture's alt text (vision) describes what
  * it shows, not in the shop's voice, and a product card from a photo
- * (vision, one JSON object) is structured data: neither takes it.
+ * (vision, one JSON object) is structured data: neither takes it, nor do
+ * picks and values answered as JSON. A JSON answer whose texts are prose
+ * (a product's FAQ, `prose`) does: its words are read as written.
  */
-export const takesGuidance = (task: Pick<AiTask, "capability" | "json" | "gate">): boolean =>
-  task.capability === "text" && task.json !== true && task.gate !== "product_card"
+export const takesGuidance = (
+  task: Pick<AiTask, "capability" | "json" | "prose" | "gate">
+): boolean => writesProse(task)
 
 /** Whether the owner may write a task's craft (adr/0074 §3): a task that takes guidance and has one. */
 export function isCraftTask(id: string): boolean {

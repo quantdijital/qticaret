@@ -24,7 +24,8 @@ async function customerName(container: Container, customerId: string): Promise<s
     fields: ["first_name", "last_name"],
     filters: { id: customerId },
   })
-  return authorNameOf(data[0] ?? { first_name: null, last_name: null })
+  const row = data[0] as { first_name: string | null; last_name: string | null } | undefined
+  return authorNameOf(row ?? { first_name: null, last_name: null })
 }
 
 /** A signed-in customer's question about a published product; it waits for the shop. */
@@ -138,6 +139,8 @@ export async function productQuestions(
       id: row.id,
       body: row.body,
       author_name: row.author_name,
+      // The shop's own question (its FAQ, adr/0074 §5 madde 4), under the shop's name
+      by_shop: row.author_kind === "shop",
       created_at: iso(row.created_at),
       answers: (answers.get(row.id) ?? []).map(answerView),
     })),
@@ -182,8 +185,10 @@ export async function questionPage(container: Container, questionId: string) {
   }
   const rows = answers.get(question.id) ?? []
   const path = entry ? `${entry.path}/${QUESTION_SEGMENT}/${question.id}` : null
+  // QAPage is for questions people asked (docs/13 §5); the shop's own FAQ carries none
+  const asked = question.author_kind !== "shop"
   const jsonLd =
-    path && brand.storefrontUrl
+    asked && path && brand.storefrontUrl
       ? qaPageJsonLd(
           {
             question: {
@@ -209,6 +214,7 @@ export async function questionPage(container: Container, questionId: string) {
       id: question.id,
       body: question.body,
       author_name: question.author_name,
+      by_shop: !asked,
       created_at: iso(question.created_at),
       answers: rows.map(answerView),
     },

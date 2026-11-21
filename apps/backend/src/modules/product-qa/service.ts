@@ -82,6 +82,65 @@ class ProductQaModuleService extends MedusaService({ ProductQuestion, ProductAns
     return { id: answer.id }
   }
 
+  /**
+   * The shop's own questions with their answers (adr/0074 §5 madde 4, the
+   * product's FAQ): both in the shop's name and shown at once, as the
+   * shop's answer is. No customer is named; nothing is sent to anyone.
+   */
+  @InjectTransactionManager()
+  async addShopQuestions(
+    input: {
+      product_id: string
+      user_id: string
+      author_name: string
+      items: { question: string; answer: string }[]
+    },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ question_ids: string[]; answer_ids: string[] }> {
+    const now = new Date()
+    const shop = {
+      product_id: input.product_id,
+      author_kind: "shop" as const,
+      customer_id: null,
+      user_id: input.user_id,
+      author_name: input.author_name,
+      status: "approved" as const,
+      has_link: false,
+      moderated_by: input.user_id,
+      moderated_at: now,
+    }
+    const questions = await this.createProductQuestions(
+      input.items.map((item) => ({ ...shop, body: item.question, answer_count: 1 })),
+      sharedContext
+    )
+    const answers = await this.createProductAnswers(
+      questions.map((question, index) => ({
+        ...shop,
+        question_id: question.id,
+        body: input.items[index]?.answer ?? "",
+      })),
+      sharedContext
+    )
+    return {
+      question_ids: questions.map((question) => question.id),
+      answer_ids: answers.map((answer) => answer.id),
+    }
+  }
+
+  /** The shop's questions added together taken back (a failed step's undo), answers and all. */
+  @InjectTransactionManager()
+  async removeShopQuestions(
+    input: { question_ids: string[]; answer_ids: string[] },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    if (input.answer_ids.length > 0) {
+      await this.deleteProductAnswers(input.answer_ids, sharedContext)
+    }
+    if (input.question_ids.length > 0) {
+      await this.deleteProductQuestions(input.question_ids, sharedContext)
+    }
+  }
+
   @InjectTransactionManager()
   protected async recount_(
     questionIds: string[],

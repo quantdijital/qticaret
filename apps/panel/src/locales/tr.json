@@ -3895,6 +3895,26 @@
       "none": "Etiket yok",
       "remove": "{{name}} etiketini kaldır",
       "ai": "Etiket öner"
+    },
+    "faq": {
+      "title": "Sık sorulan sorular",
+      "description": "Ürün sayfasındaki Soru-Cevap bölümüne mağaza adına soru ve yanıt ekleyin. Eklenenler hemen yayımlanır; Yorumlar ve sorular › Sorular ekranından gizleyebilirsiniz.",
+      "empty": "Yapay zekâ ürünün açıklamasından, kısa açıklamasından, özelliklerinden ve seçeneklerinden 3–5 soru ve yanıt önerir. Veride yanıtı olmayan soru yazılmaz.",
+      "draft": "SSS taslağı",
+      "hint": "Ekleyeceklerinizi işaretleyin; soru ve yanıtları eklemeden önce düzenleyebilirsiniz.",
+      "question": "Soru",
+      "answer": "Yanıt",
+      "keep": "{{number}}. soruyu ekle",
+      "add_one": "Seçileni ekle",
+      "add_other": "Seçilenleri ekle ({{count}})",
+      "added_one": "Soru ürün sayfasına eklendi.",
+      "added_other": "{{count}} soru ürün sayfasına eklendi.",
+      "close": "Vazgeç",
+      "issues": {
+        "empty": "Soru ve yanıt boş olamaz.",
+        "not_a_question": "Soru, soru işaretiyle bitmeli.",
+        "too_long": "Soru en çok 120, yanıt en çok 400 karakter olabilir."
+      }
     }
   },
   "orders": {
@@ -11644,7 +11664,8 @@
       "short_description": "Kısa açıklama",
       "product_tags": "Etiket önerisi",
       "product_category": "Kategori önerisi",
-      "product_attributes": "Özellik doldurma"
+      "product_attributes": "Özellik doldurma",
+      "product_faq": "SSS taslağı"
     },
     "options": {
       "short": "Kısa",
