@@ -28,6 +28,8 @@ import { loadTrAddressFixture } from "../helpers/tr-address"
 jest.setTimeout(180 * 1000)
 
 const HOUR = 60 * 60 * 1000
+// Whole phone forms only: a bare "532" also matches timestamped product names.
+const PHONE_FORMS = [GUEST.phone, "05321234567", "5321234567", "532 123 45 67"]
 
 interface View {
   payment_link?: Record<string, unknown>
@@ -101,7 +103,7 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(row)).not.toContain(GUEST.email)
       expect(share.data.share["sms_text"]).toContain("toplam ₺270,00")
       expect(share.data.share["sms_text"]).toContain(made.data.share?.url ?? "-")
-      for (const personal of [GUEST.email, GUEST.first_name, GUEST.last_name, "532"]) {
+      for (const personal of [GUEST.email, GUEST.first_name, GUEST.last_name, ...PHONE_FORMS]) {
         expect(share.data.share["sms_text"]).not.toContain(personal)
       }
       expect(share.data.share["whatsapp_url"]).toMatch(/^https:\/\/wa\.me\/905321234567\?text=/)
@@ -210,7 +212,7 @@ medusaIntegrationTestRunner({
         total: 30_000,
         shipping: { preset: true },
       })
-      for (const personal of [GUEST.email, GUEST.last_name, "532", "Atatürk"]) {
+      for (const personal of [GUEST.email, GUEST.last_name, ...PHONE_FORMS, "Atatürk"]) {
         expect(JSON.stringify(shown.data)).not.toContain(personal)
       }
       for (const answer of [forged, unknown, endedView, canceled]) {
