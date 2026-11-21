@@ -5,7 +5,7 @@ import { SEO_INSTRUCTIONS } from "./crafts/seo"
 import { indented } from "./crafts/types"
 import type { TaskInstruction } from "./crafts/types"
 import type { AiEntityType } from "./facts"
-import { DATA_RULE } from "./prompt"
+import { DATA_LAST, DATA_RULE } from "./prompt"
 import { aiTasks, findAiTask } from "./registry/tasks"
 import type { AiTask } from "./registry/tasks"
 
@@ -22,7 +22,9 @@ import type { AiTask } from "./registry/tasks"
  *    `lib/ai/guidance.ts`'s alone (`guidanceText`), passed here whole;
  * 5. the chosen ready-made option;
  * (a correction's note, when there is one: `lib/ai/correction.ts`;)
- * 6. the rules that never change, last, saying they win over the above.
+ * 6. the rules that never change, saying they win over the above;
+ * 7. the data rule once more (`DATA_LAST`), the message's last sentence:
+ *    above everything, the owner's own instruction included.
  *
  * The layers 1, 2, 5 and 6 are written in code only; the shop's data goes
  * in the separate data block (lib/ai/prompt.ts).
@@ -91,7 +93,7 @@ export interface DefaultCraft {
   version: string
   /** The data rule, the system message's first part. */
   data_rule: string
-  /** The rules layer, heading included: always last, whatever the craft says. */
+  /** The rules layer, heading included, and the data rule's last word: always last, whatever the craft says. */
   rules: string
 }
 
@@ -107,7 +109,7 @@ export function defaultCraftOf(id: string): DefaultCraft | null {
     craft: instruction.craft,
     version: craftVersion(instruction.craft),
     data_rule: DATA_RULE,
-    rules: `${RULES_HEADING}\n${instruction.rules}`,
+    rules: `${RULES_HEADING}\n${instruction.rules}\n\n${DATA_LAST}`,
   }
 }
 
@@ -152,6 +154,7 @@ export function systemOf(
     guidance?.trim() ?? null,
     chosen ? `Seçilen ayar: ${chosen}` : null,
     `${RULES_HEADING}\n${instruction.rules}`,
+    DATA_LAST,
   ]
     .filter((part): part is string => typeof part === "string" && part.trim() !== "")
     .join("\n\n")

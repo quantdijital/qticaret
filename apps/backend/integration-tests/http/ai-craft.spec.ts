@@ -4,7 +4,7 @@ import { resetAiBreakers } from "../../src/lib/ai/breaker"
 import { fakeTextConnector } from "../../src/lib/ai/connectors/fake"
 import type { TextRequest } from "../../src/lib/ai/connectors/types"
 import { CRAFT_HEADING, RULES_HEADING, instructionLayersOf } from "../../src/lib/ai/instructions"
-import { DATA_RULE } from "../../src/lib/ai/prompt"
+import { DATA_LAST, DATA_RULE } from "../../src/lib/ai/prompt"
 import { findAiTask } from "../../src/lib/ai/registry/tasks"
 import { createAdminUser } from "../helpers/admin"
 import type { AiAnswer } from "../helpers/ai"
@@ -99,7 +99,7 @@ medusaIntegrationTestRunner({
       expect(seo).toMatchObject({
         craft: layers?.craft,
         data_rule: DATA_RULE,
-        rules: `${RULES_HEADING}\n${layers?.rules ?? "-"}`,
+        rules: `${RULES_HEADING}\n${layers?.rules ?? "-"}\n\n${DATA_LAST}`,
       })
       expect(seo?.version).toMatch(/^[0-9a-f]{12}$/)
       const tasks = answer.data.crafts.map((each) => each.task)
@@ -171,7 +171,7 @@ medusaIntegrationTestRunner({
       expect(system).not.toContain(layers?.craft ?? "-")
       expect(system.split(REAL_RULES)).toHaveLength(2)
       expect(system.slice(system.lastIndexOf(REAL_RULES))).toBe(
-        `${REAL_RULES}${layers?.rules ?? "-"}`
+        `${REAL_RULES}${layers?.rules ?? "-"}\n\n${DATA_LAST}`
       )
       // The craft is the system message's, never the data block's
       expect(seen[0]?.data).not.toContain("Kısa ve net yaz")
