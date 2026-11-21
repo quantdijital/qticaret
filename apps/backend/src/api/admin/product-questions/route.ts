@@ -56,6 +56,7 @@ export async function GET(
       id: question.id,
       body: question.body,
       author_name: question.author_name,
+      by_shop: question.author_kind === "shop",
       status: question.status,
       has_link: question.has_link,
       created_at: question.created_at,

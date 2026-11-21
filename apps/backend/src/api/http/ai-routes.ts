@@ -6,6 +6,7 @@ import {
   AdminGetAiSuggestions,
   AdminGetAiUsage,
   AdminPostAiAccept,
+  AdminPostAiFaq,
   AdminPostAiGuidancePreview,
   AdminPostAiSuggestion,
 } from "../admin/ai/validators"
@@ -66,6 +67,12 @@ export const AI_ROUTES = [
     matcher: "/admin/ai/suggestions/:id/accept",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostAiAccept)],
+  },
+  // A product's FAQ draft taken: the kept items, gated again, added as the shop's questions
+  {
+    matcher: "/admin/ai/suggestions/:id/faq",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostAiFaq)],
   },
   {
     matcher: "/admin/ai/suggestions/:id/dismiss",

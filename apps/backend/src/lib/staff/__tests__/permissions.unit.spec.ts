@@ -185,6 +185,7 @@ describe("staff roles", () => {
       "product_tags",
       "product_category",
       "product_attributes",
+      "product_faq",
       "test_text",
       "no_such_task",
       "__proto__",
@@ -543,6 +544,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/ai/suggestions": false,
   "POST /admin/ai/suggestions/:id/accept": true,
   "POST /admin/ai/suggestions/:id/dismiss": true,
+  // A product FAQ added as the shop's questions: the task is owner and admin's (adr/0074 §5 madde 4)
+  "POST /admin/ai/suggestions/:id/faq": false,
   "POST /admin/ai/guidance/preview": false,
   "POST /admin/content/:id": false,
   "DELETE /admin/content/:id": false,

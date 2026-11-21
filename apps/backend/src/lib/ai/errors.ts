@@ -42,6 +42,10 @@ export const AI_ERROR_KEYS = [
   "ai.choices_too_long",
   // adr/0074 §5 madde 3: the product's template has no empty public attribute (facts/product-attributes.ts)
   "ai.no_empty_attributes",
+  // adr/0074 §5 madde 4: a FAQ item a person kept does not pass the gate (lib/ai/product-faq.ts)
+  "ai.faq_item_invalid",
+  // Only a FAQ draft's items are added as the shop's questions
+  "ai.faq_not_product_faq",
 ] as const
 
 export type AiErrorKey = (typeof AI_ERROR_KEYS)[number]

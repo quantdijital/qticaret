@@ -65,6 +65,9 @@ describe("ai_guidance section", () => {
     expect(isGuidanceTask("product_tags")).toBe(false)
     expect(isGuidanceTask("product_category")).toBe(false)
     expect(isGuidanceTask("product_attributes")).toBe(false)
+    // A FAQ is answered as JSON but its words are prose a shopper reads: it takes the guidance
+    expect(isGuidanceTask("product_faq")).toBe(true)
+    expect(parse({ tasks: { product_faq: { extra: "kısa yaz" } } }).success).toBe(true)
     expect(isGuidanceTask("__proto__")).toBe(false)
     for (const id of ["made_up", "image_alt_text", "product_from_photo", "product_tags"]) {
       expect(messages(parse({ tasks: { [id]: { extra: "kısa yaz" } } }))).toContain(

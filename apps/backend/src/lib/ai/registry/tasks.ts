@@ -23,6 +23,7 @@ import {
 import {
   PRODUCT_ATTRIBUTES_TASK,
   PRODUCT_CATEGORY_TASK,
+  PRODUCT_FAQ_TASK,
   PRODUCT_TAGS_TASK,
   SHORT_DESCRIPTION_TASK,
 } from "./product-page-tasks"
@@ -62,6 +63,8 @@ export const AI_GATES = [
   "product_category",
   // Values for a product's empty attributes: per value against its attribute (lib/ai/product-attributes.ts)
   "product_attributes",
+  // A product's FAQ: each question and answer through the shared gate (lib/ai/product-faq.ts)
+  "product_faq",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
@@ -105,6 +108,12 @@ export interface AiTask {
   keepData?: boolean
   /** The answer is one JSON object: the service's JSON mode is asked for where it has one. */
   json?: boolean
+  /**
+   * A JSON answer whose texts a shopper reads as they are (a product's FAQ):
+   * the shop's guidance and the owner's craft apply to it as to prose
+   * (`writesProse`). A JSON answer of picks, values or a card takes neither.
+   */
+  prose?: true
   /**
    * `scenes`: the options are the shop's scenes, read from its sector packs
    * (lib/ai/scenes.ts), not `options`; only a service with a scene endpoint
@@ -235,7 +244,19 @@ const TASKS: readonly AiTask[] = [
   PRODUCT_TAGS_TASK,
   PRODUCT_CATEGORY_TASK,
   PRODUCT_ATTRIBUTES_TASK,
+  PRODUCT_FAQ_TASK,
 ]
+
+/**
+ * Whether a task writes words a shopper reads in the shop's voice (adr/0074
+ * §2): a text task answered as text, or as JSON whose texts are prose
+ * (`prose`). A picture's alt text (vision), a product card and the picks
+ * and values answered as JSON are not.
+ */
+export const writesProse = (task: Pick<AiTask, "capability" | "json" | "prose" | "gate">) =>
+  task.capability === "text" &&
+  (task.json !== true || task.prose === true) &&
+  task.gate !== "product_card"
 
 /** Whether a call of this task may run as this capability: its own, or `vision` for a `photo` task. */
 export const runsAs = (task: Pick<AiTask, "capability" | "photo">, capability: AiCapability) =>
