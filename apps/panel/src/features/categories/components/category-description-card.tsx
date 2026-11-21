@@ -31,6 +31,8 @@ export function CategoryDescriptionCard({ categoryId }: { categoryId: string }) 
   }
   return (
     <ListingDescriptionCard
+      kind="category"
+      id={categoryId}
       doc={description.data.description_doc}
       text={description.data.description}
       saving={save.isPending}

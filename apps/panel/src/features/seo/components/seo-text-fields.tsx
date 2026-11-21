@@ -28,11 +28,18 @@ export function Counter({ length, limit }: { length: number; limit: number }) {
 
 /**
  * The records the AI core can write a search title and description for
- * (adr/0071 §8, docs/22 PR 1-1): a product, a category and a content page.
- * Any other SEO card (collection, brand, post, landing…) has no button.
+ * (adr/0071 §8, docs/22 PR 1-1; adr/0074 §5): a product, a category, a
+ * collection, a brand and a content page. Any other SEO card (post,
+ * landing, a blog archive) has no button.
  */
 const aiEntityOf = (type: SeoEntityType, id: string): AiEntity | null =>
-  type === "product" || type === "category" || type === "page" ? { type, id } : null
+  type === "product" ||
+  type === "category" ||
+  type === "collection" ||
+  type === "brand" ||
+  type === "page"
+    ? { type, id }
+    : null
 
 /** The field and, where the AI core writes for the record, its button level beside it. */
 function WithAi({

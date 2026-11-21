@@ -7327,7 +7327,8 @@
     },
     "listingDescription": {
       "title": "Açıklama",
-      "hint": "Vitrinde sayfanın altında, ürünlerden sonra görünür. Başka yerden yapıştırdığınız başlıklar ve paragraflar korunur; görünüşünü Tema ayarları > Liste metni belirler."
+      "hint": "Vitrinde sayfanın altında, ürünlerden sonra görünür. Başka yerden yapıştırdığınız başlıklar ve paragraflar korunur; görünüşünü Tema ayarları > Liste metni belirler.",
+      "ai": "Açıklama için yapay zekâ ile öner"
     }
   },
   "priceLists": {
@@ -11612,7 +11613,10 @@
       "product_from_photo": "Fotoğraftan ürün kartı",
       "focus_keyword": "Odak anahtar kelime",
       "product_title": "Ürün adı",
-      "product_description": "Ürün açıklaması"
+      "product_description": "Ürün açıklaması",
+      "category_description": "Kategori açıklaması",
+      "collection_description": "Koleksiyon açıklaması",
+      "brand_description": "Marka açıklaması"
     },
     "options": {
       "short": "Kısa",

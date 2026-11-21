@@ -1,10 +1,21 @@
 import type { JSONContent } from "@tiptap/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { AiButton } from "@/features/ai/components/ai-button"
 import { DocumentCard } from "@/features/content/components/document-card"
-import { docOfDescription } from "@/features/products/description-doc"
+import { docOfDescription, docOfParagraphs } from "@/features/products/description-doc"
+import { useAiFill } from "@/features/seo/advisor/ai-fill"
+
+/** A listing page's kind: its description task is the backend's `<kind>_description`. */
+export type ListingKind = "category" | "collection" | "brand"
+
+/** The ready lengths the AI core writes a listing's text in (adr/0074 §5); no prompt to write. */
+const AI_OPTIONS = ["short", "detailed"] as const
 
 interface ListingDescriptionCardProps {
+  /** The page's kind and id: the AI button asks its description for this record. */
+  kind: ListingKind
+  id: string
   /** The text as written; null: the record has plain text only. */
   doc: JSONContent | null
   /** The plain text, opened as its paragraphs while there is no document. */
@@ -20,9 +31,18 @@ interface ListingDescriptionCardProps {
  * italic and links; no pictures, cards or shop details. A record with
  * plain text only opens as its paragraphs, and saving writes its document
  * (the move from plain text happens here, on the shop's save). The
- * storefront draws it at the foot of the page, after the products.
+ * storefront draws it at the foot of the page, after the products. The AI
+ * button beside the title (adr/0074 §5 madde 1) puts a suggestion in as
+ * plain paragraphs, a change the card's Save writes; nothing before.
  */
-export function ListingDescriptionCard({ doc, text, saving, save }: ListingDescriptionCardProps) {
+export function ListingDescriptionCard({
+  kind,
+  id,
+  doc,
+  text,
+  saving,
+  save,
+}: ListingDescriptionCardProps) {
   const { t } = useTranslation()
   // One object per stored text: the editor puts a new one in only when it changes
   const stored = useMemo(() => doc ?? docOfDescription(text), [doc, text])
@@ -35,6 +55,37 @@ export function ListingDescriptionCard({ doc, text, saving, save }: ListingDescr
       media={false}
       shopTokens={false}
       save={save}
+      action={(put) => <ListingDescriptionAi kind={kind} id={id} put={put} />}
+    />
+  )
+}
+
+/**
+ * The card's AI button, and the receiver of the one on an advisor finding
+ * (C/B/K-CONT-01): either way the text goes in as plain paragraphs, an
+ * unsaved change of the editor.
+ */
+function ListingDescriptionAi({
+  kind,
+  id,
+  put,
+}: {
+  kind: ListingKind
+  id: string
+  put: (doc: JSONContent) => void
+}) {
+  const { t } = useTranslation()
+  const fill = (text: string) => {
+    put(docOfParagraphs(text))
+  }
+  useAiFill(kind, id, "description", fill)
+  return (
+    <AiButton
+      task={`${kind}_description`}
+      entity={{ type: kind, id }}
+      options={AI_OPTIONS}
+      label={t("content.listingDescription.ai")}
+      onUse={fill}
     />
   )
 }

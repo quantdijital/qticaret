@@ -91,6 +91,15 @@ const shown = async () =>
 const saveShown = () =>
   !screen.getByRole("button", { name: "Kaydet" }).parentElement?.classList.contains("hidden")
 
+// The record's own route answers; the AI services offer nothing here (listing-description-card-ai.spec.tsx)
+function respond(record: (url: string, init?: never) => Promise<unknown>) {
+  fetchMock.mockImplementation((url: string, init?: never) =>
+    url === "/admin/ai/services"
+      ? Promise.resolve({ services: [], tasks: [], flags: { own_keys: true } })
+      : record(url, init)
+  )
+}
+
 async function editAndSave() {
   typed.doc = DOC
   await userEvent.click(screen.getByRole("button", { name: "edit" }))
@@ -106,9 +115,11 @@ describe("listing description cards (adr/0075)", () => {
 
   describe("category", () => {
     it("opens plain text as its paragraphs, in an editor without pictures or shop details", async () => {
-      fetchMock.mockResolvedValue({
-        description: { category_id: "sef", description: PLAIN, description_doc: null },
-      })
+      respond(() =>
+        Promise.resolve({
+          description: { category_id: "sef", description: PLAIN, description_doc: null },
+        })
+      )
       renderCard(<CategoryDescriptionCard categoryId="sef" />)
 
       expect(await shown()).toEqual(PARAGRAPHS)
@@ -119,15 +130,14 @@ describe("listing description cards (adr/0075)", () => {
     })
 
     it("writes the document through its own route only and shows the saved one", async () => {
-      fetchMock.mockImplementation(
-        (_url: string, init?: { body?: { description_doc?: JSONContent | null } }) =>
-          Promise.resolve({
-            description: {
-              category_id: "sef",
-              description: PLAIN,
-              description_doc: init?.body?.description_doc ?? null,
-            },
-          })
+      respond((_url: string, init?: { body?: { description_doc?: JSONContent | null } }) =>
+        Promise.resolve({
+          description: {
+            category_id: "sef",
+            description: PLAIN,
+            description_doc: init?.body?.description_doc ?? null,
+          },
+        })
       )
       renderCard(<CategoryDescriptionCard categoryId="sef" />)
       await shown()
@@ -148,9 +158,8 @@ describe("listing description cards (adr/0075)", () => {
 
   describe("brand", () => {
     it("opens plain text as its paragraphs and saves the document only", async () => {
-      fetchMock.mockImplementation(
-        (_url: string, init?: { body?: { description_doc?: JSONContent } }) =>
-          Promise.resolve({ brand: { ...BRAND, description_doc: init?.body?.description_doc } })
+      respond((_url: string, init?: { body?: { description_doc?: JSONContent } }) =>
+        Promise.resolve({ brand: { ...BRAND, description_doc: init?.body?.description_doc } })
       )
       renderCard(<BrandDescriptionCard brand={BRAND} />)
 
@@ -174,11 +183,10 @@ describe("listing description cards (adr/0075)", () => {
   describe("collection", () => {
     it("opens plain text as its paragraphs and saves the document only", async () => {
       const collection = collectionFixture({ description: PLAIN })
-      fetchMock.mockImplementation(
-        (_url: string, init?: { body?: { description_doc?: JSONContent } }) =>
-          Promise.resolve({
-            collection: { ...collection, description_doc: init?.body?.description_doc },
-          })
+      respond((_url: string, init?: { body?: { description_doc?: JSONContent } }) =>
+        Promise.resolve({
+          collection: { ...collection, description_doc: init?.body?.description_doc },
+        })
       )
       renderCard(<CollectionDescriptionCard collection={collection} />)
 
