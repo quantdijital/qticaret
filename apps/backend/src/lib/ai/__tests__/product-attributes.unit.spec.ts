@@ -276,6 +276,35 @@ describe("the empty attributes a suggestion names (facts/product-attributes.ts)"
     expect(sentWholeAttributes("{", facts)).toBe(false)
   })
 
+  it("does not send a line clipped short of its options", async () => {
+    // Forty long labels: the line passes ATTRIBUTE_LINE_LENGTH and would lose its last options
+    const options = Array.from({ length: 40 }, (_, index) => ({
+      value: `o${String(index)}`,
+      label: `Seçenek adı oldukça uzun ${String(index)}`,
+    }))
+    const row = {
+      ...PRODUCT,
+      attribute_template: {
+        definitions: [
+          { key: "finish", label: "Yüzey", type: "select", options, scope: "product", rank: 0 },
+        ],
+      },
+      attribute_values: [],
+    }
+    const facts = await productAttributeFacts(containerWith(row).container, "prod_1")
+    expect(facts.allowed.attributes.map((each) => each.code)).toEqual(["a1"])
+    const prompt = buildPrompt({
+      instruction: "x",
+      fields: facts.fields,
+      maxLengths: facts.maxLengths,
+      maxItems: facts.maxItems,
+    })
+    // The code is there, its line is not whole
+    expect(prompt.data).toContain('"label":"a1"')
+    expect(prompt.data).not.toContain("Seçenek adı oldukça uzun 39")
+    expect(sentWholeAttributes(prompt.data, facts)).toBe(false)
+  })
+
   it("runs on the fake service: one value per attribute, read back by key", async () => {
     const facts = await productAttributeFacts(containerWith(PRODUCT).container, "prod_1")
     const prompt = buildPrompt({

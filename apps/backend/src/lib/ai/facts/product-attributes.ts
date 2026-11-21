@@ -104,11 +104,16 @@ export function emptyAttributes(row: AttributeProductRow): AttributeChoice[] {
 }
 
 /**
- * Whether the data block carries the whole list: every code, in order. A
- * block that lost part of it is not sent: the answer would name codes the
- * service never saw (#251 D2, as a pick's list).
+ * Whether the data block carries the whole list: every code, in order,
+ * each with its whole line. A block that lost part of it is not sent: the
+ * answer would name codes, or options, the service never saw (#251 D2, as
+ * a pick's list; #252 D1, a line clipped at `ATTRIBUTE_LINE_LENGTH`).
  */
 export function sentWholeAttributes(data: string, facts: AttributeFacts): boolean {
+  const lines = facts.allowed.attributes.map((each) => attributeLine(each))
+  if (lines.some((line) => Array.from(line.trim()).length > ATTRIBUTE_LINE_LENGTH)) {
+    return false
+  }
   const codes = facts.allowed.attributes.map((each) => each.code)
   let sent: unknown
   try {
