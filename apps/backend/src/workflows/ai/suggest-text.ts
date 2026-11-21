@@ -1,4 +1,5 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
+import { readAttributeSuggestions } from "../../lib/ai/product-attributes"
 import { readProductCard } from "../../lib/ai/product-card"
 import { isPickTask, readProductPicks } from "../../lib/ai/product-picks"
 import { findAiTask } from "../../lib/ai/registry/tasks"
@@ -47,24 +48,29 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       task: input.task,
       user_id: input.user_id,
       service: input.service,
+      // A `photo` task (a product's attributes) reads the product's picture where the service sees
+      entity_type: input.entity_type,
+      entity_id: input.entity_id,
     }))
   )
   const prompt = taskInputStep(
-    transform({ input }, ({ input }) => ({
+    transform({ input, chosen }, ({ input, chosen }) => ({
       task: input.task,
       option: input.option,
       entity_type: input.entity_type,
       entity_id: input.entity_id,
       template_id: input.template_id,
+      image_file_id: chosen.image_file_id,
     }))
   )
+  // The call's capability is the chosen service's way of running it: `vision` with a picture
   const claimed = claimQuotaStep(
-    transform({ authorized }, ({ authorized }) => ({ capability: authorized.capability }))
+    transform({ chosen }, ({ chosen }) => ({ capability: chosen.capability }))
   )
   const outcome = callServiceStep(
     transform({ authorized, chosen, prompt }, ({ authorized, chosen, prompt }) => ({
       task: authorized.task,
-      capability: authorized.capability,
+      capability: chosen.capability,
       service: chosen.service,
       system: prompt.system,
       data: prompt.data,
@@ -80,7 +86,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
   const usage = recordUsageStep(
     transform({ input, authorized, chosen, outcome }, ({ input, authorized, chosen, outcome }) => ({
       task: authorized.task,
-      capability: authorized.capability,
+      capability: chosen.capability,
       service: chosen.service,
       funding: chosen.funding,
       outcome,
@@ -133,6 +139,13 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       // A pick (a product's tags or categories) also as its records; its text is the same as JSON
       ...(isPickTask(findAiTask(input.task) ?? { gate: "plain_text" })
         ? { picks: outcome.status === "succeeded" ? readProductPicks(outcome.text) : null }
+        : {}),
+      // Values for the empty attributes, by key; its text is the same as JSON
+      ...(findAiTask(input.task)?.gate === "product_attributes"
+        ? {
+            attributes:
+              outcome.status === "succeeded" ? readAttributeSuggestions(outcome.text) : null,
+          }
         : {}),
       problems: outcome.problems,
       alternatives: chosen.alternatives,

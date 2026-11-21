@@ -10,11 +10,13 @@ import type { AiErrorKey } from "../../../lib/ai/errors"
 import { readVisionSource, visionImage } from "../../../lib/ai/image-input"
 import { failureOf } from "../../../lib/ai/outcome"
 import type { AiCapability } from "../../../lib/ai/registry/capabilities"
-import { findAiTask } from "../../../lib/ai/registry/tasks"
+import { findAiTask, runsAs } from "../../../lib/ai/registry/tasks"
 import type { CardAllowed } from "../../../lib/ai/product-card"
 import { isPickAllowed, isPickTask } from "../../../lib/ai/product-picks"
 import type { PickAllowed } from "../../../lib/ai/product-picks"
-import { runCardTask, runPickTask } from "../../../lib/ai/run-card"
+import { isAttributeAllowed } from "../../../lib/ai/product-attributes"
+import type { AttributeAllowed } from "../../../lib/ai/product-attributes"
+import { runAttributesTask, runCardTask, runPickTask } from "../../../lib/ai/run-card"
 import { runTextTask } from "../../../lib/ai/run-text"
 import { correctionClaim, correctionUsageOf } from "./correction-claim"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
@@ -30,7 +32,7 @@ export interface CallServiceInput {
   /** A vision task's picture: its stored file, read here (never an address, never its bytes in a step). */
   image_file_id?: string | null
   /** A product card's or a pick task's lists, read on the server (task-input); its answer may name nothing else. */
-  allowed?: CardAllowed | PickAllowed | null
+  allowed?: CardAllowed | PickAllowed | AttributeAllowed | null
 }
 
 /** How the call ended; never the key, the service's own words or its raw answer. */
@@ -152,7 +154,7 @@ export const callServiceStep = createStep(
       retry_after_ms: null,
     }
     try {
-      if (!task || !resolved || task.capability !== input.capability) {
+      if (!task || !resolved || !runsAs(task, input.capability)) {
         throw aiProviderError({
           service: input.service,
           key: "ai.service_unavailable",
@@ -187,27 +189,40 @@ export const callServiceStep = createStep(
                 task,
                 prompt,
                 allowed:
-                  allowed && !isPickAllowed(allowed) ? allowed : { categories: [], attributes: [] },
+                  allowed && !isPickAllowed(allowed) && !isAttributeAllowed(allowed)
+                    ? allowed
+                    : { categories: [], attributes: [] },
                 ...withImages,
               })
-            : isPickTask(task)
-              ? runPickTask({
+            : task.gate === "product_attributes"
+              ? runAttributesTask({
                   connector,
                   task,
                   prompt,
                   // No list read for this task: nothing it names is allowed
-                  allowed:
-                    isPickAllowed(allowed) && allowed.kind === task.gate
-                      ? allowed
-                      : { kind: task.gate, choices: [], taken: [] },
-                })
-              : runTextTask({
-                  connector,
-                  task,
-                  prompt,
-                  mayCorrect: claim.mayCorrect,
+                  allowed: isAttributeAllowed(allowed)
+                    ? allowed
+                    : { kind: "product_attributes", attributes: [] },
                   ...withImages,
-                }),
+                })
+              : isPickTask(task)
+                ? runPickTask({
+                    connector,
+                    task,
+                    prompt,
+                    // No list read for this task: nothing it names is allowed
+                    allowed:
+                      isPickAllowed(allowed) && allowed.kind === task.gate
+                        ? allowed
+                        : { kind: task.gate, choices: [], taken: [] },
+                  })
+                : runTextTask({
+                    connector,
+                    task,
+                    prompt,
+                    mayCorrect: claim.mayCorrect,
+                    ...withImages,
+                  }),
         DEFAULT_CIRCUIT_BREAKER,
         // The correction's own failure, returned inside the first call's permit, counts too
         correctionFailure

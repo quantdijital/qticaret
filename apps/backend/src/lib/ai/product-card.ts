@@ -151,7 +151,7 @@ const YES = new Set(["true", "evet", "var", "yes"])
 const NO = new Set(["false", "hayır", "hayir", "yok", "no"])
 
 /** One attribute's value as its definition takes it; null drops it. */
-function valueOf(attribute: CardAttribute, raw: unknown): CardValue | null {
+export function attributeValueOf(attribute: CardAttribute, raw: unknown): CardValue | null {
   switch (attribute.type) {
     case "text": {
       if (typeof raw !== "string") {
@@ -198,7 +198,7 @@ function attributesOf(
   const values: Record<string, CardValue> = Object.create(null) as Record<string, CardValue>
   for (const [key, value] of Object.entries(raw ?? {}).slice(0, MAX_ATTRIBUTE_KEYS)) {
     const attribute = byKey.get(key)
-    const read = attribute ? valueOf(attribute, value) : null
+    const read = attribute ? attributeValueOf(attribute, value) : null
     if (attribute && read !== null) {
       values[attribute.key] = read
     }

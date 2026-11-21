@@ -29,7 +29,8 @@ export function aiSuggestionProfile(req: MedusaRequest) {
   const id =
     typeof body === "object" && body !== null ? (body as { task?: unknown }).task : undefined
   const task = typeof id === "string" ? findAiTask(id) : null
-  return task === null || task.capability === "text"
+  // A `photo` task may send the product's picture: counted as one that does
+  return task === null || (task.capability === "text" && task.photo !== true)
     ? RATE_LIMIT_PROFILES.ai_text
     : RATE_LIMIT_PROFILES.ai_media
 }

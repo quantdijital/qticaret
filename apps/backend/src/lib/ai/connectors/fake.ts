@@ -1,4 +1,5 @@
 import { aiProviderError } from "../errors"
+import { ATTRIBUTE_CHOICES_FIELD } from "../facts/product-attributes"
 import { CATEGORY_CHOICES_FIELD, TAG_CHOICES_FIELD } from "../facts/product-picks"
 import { FAKE_SERVICE } from "../registry/services"
 import type { TextConnector, TextRequest, TextResult } from "./types"
@@ -75,8 +76,56 @@ function codesOf(data: string, field: string, count: number): string[] | null {
   }
 }
 
-/** A structured task's one JSON object: picks from the named list, or a product card. */
+/** A list field's items in the data block (`{label, value}`); null when it has no such list. */
+function itemsOf(data: string, field: string): { label: string; value: string }[] | null {
+  try {
+    const block = JSON.parse(data) as unknown
+    const fields = isRecord(block) && isRecord(block["data"]) ? block["data"] : {}
+    const list = fields[field]
+    return Array.isArray(list)
+      ? list.flatMap((each: unknown) =>
+          isRecord(each) && typeof each["label"] === "string" && typeof each["value"] === "string"
+            ? [{ label: each["label"], value: each["value"] }]
+            : []
+        )
+      : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * A value for an attribute as its line describes it (facts/product-card.ts
+ * `attributeLine`: "Ad · tür · birim: … · seçenekler: değer = ad; …"):
+ * the first option, a number, yes, or a short text.
+ */
+function fakeValue(line: string): unknown {
+  const parts = line.split(" · ")
+  const kind = parts[1] ?? ""
+  const first = /seçenekler: ([^=;]+) =/.exec(line)?.[1]?.trim()
+  if (kind.startsWith("tek seçim")) {
+    return first ?? null
+  }
+  if (kind.startsWith("çoklu seçim")) {
+    return first ? [first] : null
+  }
+  if (kind === "sayı") {
+    return 1
+  }
+  if (kind.startsWith("evet/hayır")) {
+    return true
+  }
+  return "örnek"
+}
+
+/** A structured task's one JSON object: picks from the named list, attribute values, or a product card. */
 function structuredAnswer(data: string): string {
+  const attributes = itemsOf(data, ATTRIBUTE_CHOICES_FIELD)
+  if (attributes !== null) {
+    return JSON.stringify(
+      Object.fromEntries(attributes.map((each) => [each.label, fakeValue(each.value)]))
+    )
+  }
   const tags = codesOf(data, TAG_CHOICES_FIELD, 2)
   if (tags !== null) {
     return JSON.stringify({ existing: tags, new: tags.length === 0 ? ["örnek etiket"] : [] })

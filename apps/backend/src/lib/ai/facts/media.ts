@@ -22,7 +22,7 @@ interface MediaRow {
 }
 
 // What a stored master is when the pipeline took it in (F3.3); SVG is a library logo, never read
-const READABLE_TYPES: ReadonlySet<string> = new Set([
+export const READABLE_TYPES: ReadonlySet<string> = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",

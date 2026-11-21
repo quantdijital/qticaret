@@ -17,6 +17,10 @@ import { findAiTask, isTaskEntity } from "./tasks"
  * itself is not changed. P-IMG-02 (images without alt text) has none
  * either: its subject is many images and `image_alt_text` reads one, so
  * its manual fix opens the first image's alt field, where the button is.
+ * P-CONT-03 (required attributes left empty) has none: `product_attributes`
+ * writes no value it is unsure of, so it cannot promise to close the
+ * finding, and its answer is values for a form, not one text for a field;
+ * the manual fix opens the attributes card, where its button is.
  */
 
 /** The form field a suggestion goes to: the SEO card's two, a page's long description. */

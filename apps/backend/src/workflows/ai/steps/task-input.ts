@@ -3,10 +3,15 @@ import { aiValidationError } from "../../../lib/ai/errors"
 import { AI_ENTITY_ID_PREFIX, entityFacts } from "../../../lib/ai/facts"
 import type { AiEntityType } from "../../../lib/ai/facts"
 import { productCardFacts } from "../../../lib/ai/facts/product-card"
+import {
+  productAttributeFacts,
+  sentWholeAttributes,
+} from "../../../lib/ai/facts/product-attributes"
 import { productPickFacts, sentWhole } from "../../../lib/ai/facts/product-picks"
 import { craftText, guidanceText, readGuidance, takesGuidance } from "../../../lib/ai/guidance"
 import type { AiGuidanceSettings } from "../../../modules/platform-settings/sections/ai-guidance"
 import { systemOf } from "../../../lib/ai/instructions"
+import type { AttributeAllowed } from "../../../lib/ai/product-attributes"
 import type { CardAllowed } from "../../../lib/ai/product-card"
 import { isPickTask } from "../../../lib/ai/product-picks"
 import type { PickAllowed } from "../../../lib/ai/product-picks"
@@ -26,6 +31,8 @@ export interface TaskInputInput {
   template_id?: string | null | undefined
   /** Which writing guidance goes in; the shop's stored one when left out. */
   guidance?: GuidanceSource | undefined
+  /** A `photo` task's picture, found where its service was chosen (select-service); none: text only. */
+  image_file_id?: string | null | undefined
 }
 
 /**
@@ -77,7 +84,7 @@ export interface TaskInput {
    * A product card's lists (the only categories and attributes its answer
    * may name), or a pick task's list (the only tags or categories).
    */
-  allowed: CardAllowed | PickAllowed | null
+  allowed: CardAllowed | PickAllowed | AttributeAllowed | null
 }
 
 /** A product card from a photo: the shop's lists beside the picture, nothing of the image record. */
@@ -143,6 +150,40 @@ async function pickInput(
 }
 
 /**
+ * An attributes suggestion: the product's own facts after the empty public
+ * attributes it may fill (first, so a block too long gives up the long
+ * text, never the list); the picture by its file id when the chosen service
+ * reads it. Nothing empty to fill: turned away before any quota is claimed.
+ */
+async function attributesInput(
+  container: Parameters<typeof productAttributeFacts>[0],
+  task: AiTask,
+  instruction: string,
+  input: TaskInputInput
+): Promise<TaskInput> {
+  const record = await entityFacts(container, input.entity_type, input.entity_id)
+  const attributes = await productAttributeFacts(container, input.entity_id)
+  if (attributes.allowed.attributes.length === 0) {
+    throw aiValidationError("ai.no_empty_attributes")
+  }
+  const prompt = buildPrompt({
+    instruction,
+    fields: { ...attributes.fields, ...record.fields },
+    maxLengths: { ...factLengthsOf(task, record.maxLengths), ...attributes.maxLengths },
+    maxItems: attributes.maxItems,
+  })
+  if (!sentWholeAttributes(prompt.data, attributes)) {
+    throw aiValidationError("ai.choices_too_long")
+  }
+  return {
+    system: prompt.system,
+    data: prompt.data,
+    image_file_id: input.image_file_id ?? null,
+    allowed: attributes.allowed,
+  }
+}
+
+/**
  * The call's two messages (adr/0071 §8.3, §9; adr/0074 §1): the task's
  * instruction with the shop's writing guidance in its labelled place (a
  * text task only), and the record read on the server (no text of it is
@@ -170,6 +211,9 @@ export const taskInputStep = createStep(
     }
     if (isPickTask(task)) {
       return new StepResponse(await pickInput(container, task, instruction, input))
+    }
+    if (task.gate === "product_attributes") {
+      return new StepResponse(await attributesInput(container, task, instruction, input))
     }
     // Read by its type and id alone (lib/ai/facts): the record's text never comes from the client
     const { fields, maxLengths, image } = await entityFacts(

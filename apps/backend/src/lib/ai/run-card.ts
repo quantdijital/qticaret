@@ -1,4 +1,6 @@
 import type { AiImageInput, TextConnector } from "./connectors/types"
+import { productAttributesOf } from "./product-attributes"
+import type { AttributeAllowed } from "./product-attributes"
 import { productCardOf } from "./product-card"
 import type { CardAllowed } from "./product-card"
 import { productPicksOf } from "./product-picks"
@@ -45,6 +47,25 @@ export async function runPickTask(input: {
   return runStructured(input, (text) => {
     const result = productPicksOf(text, input.allowed)
     return "problems" in result ? result : { value: result.picks }
+  })
+}
+
+/**
+ * An attributes suggestion's call (lib/ai/product-attributes.ts): the same
+ * JSON call, with the product's picture where the service can see it; its
+ * values read one by one against the empty attributes the prompt named.
+ */
+export async function runAttributesTask(input: {
+  connector: TextConnector
+  task: AiTask
+  prompt: PromptMessages
+  allowed: AttributeAllowed
+  images?: readonly AiImageInput[]
+  signal?: AbortSignal
+}): Promise<TextTaskResult> {
+  return runStructured(input, (text) => {
+    const result = productAttributesOf(text, input.allowed)
+    return "problems" in result ? result : { value: result.suggestions }
   })
 }
 

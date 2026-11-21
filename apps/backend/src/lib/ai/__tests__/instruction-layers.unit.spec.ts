@@ -41,6 +41,7 @@ describe("the system message's layers (adr/0074 §1)", () => {
         "short_description",
         "product_tags",
         "product_category",
+        "product_attributes",
         "question_answer",
         "review_reply",
         "review_summary",

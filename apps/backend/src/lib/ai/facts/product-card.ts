@@ -25,9 +25,9 @@ const MAX_CATEGORY_ROWS = 2000
 /** Product attributes of one template named at most. */
 export const MAX_CARD_ATTRIBUTES = 40
 /** Options of one attribute named at most. */
-const MAX_CARD_OPTIONS = 40
+export const MAX_CARD_OPTIONS = 40
 // Room for an attribute's line with its options
-const ATTRIBUTE_LINE_LENGTH = 900
+export const ATTRIBUTE_LINE_LENGTH = 900
 
 interface DefinitionRow {
   key: string

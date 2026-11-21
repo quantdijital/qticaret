@@ -37,6 +37,8 @@ jest.mock("../steps/select-service", () => ({
         funding: "own_key",
         alternatives: [],
         remember: false,
+        capability: "text",
+        image_file_id: null,
       })
   ),
 }))

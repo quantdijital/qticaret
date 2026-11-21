@@ -731,7 +731,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.no_choices":
     "Önerilecek kategori yok: mağazanın vitrinde görünen ve ürünün henüz bulunmadığı bir kategorisi olmalı.",
   "ai.choices_too_long":
-    "Mağazanın listesi bu öneri için fazla uzun; yapay zekâya gönderilmedi. Uzun etiket ya da kategori adlarını kısaltın.",
+    "Mağazanın listesi bu öneri için fazla uzun; yapay zekâya gönderilmedi. Uzun etiket, kategori ya da özellik seçeneği adlarını kısaltın.",
+  "ai.no_empty_attributes":
+    "Doldurulacak boş özellik yok: ürünün kayıtlı şablonunda vitrinde görünen ve henüz değeri olmayan bir özellik olmalı.",
   // Aşama 9: reviews and questions
   "ai.reviews_off":
     "Yorum ve sorularda yapay zekâ kapalı. Ayarlar > Yapay zekâ sayfasından açabilirsiniz.",
