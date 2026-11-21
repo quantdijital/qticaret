@@ -14,6 +14,7 @@ import { TokenSlot } from "@/features/settings/components/shop-token-menu"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { useNameToken } from "./name-token"
+import { SmsAi } from "./sms-ai"
 import type { SmsRules } from "./use-sms-rules"
 
 const S = "bulkMessages.sms"
@@ -82,17 +83,24 @@ export function SmsContent({
   form,
   rules,
   stored,
+  ai,
 }: {
   form: UseFormReturn<EditorValues>
   rules: SmsRules
   stored: StoredSms
+  /** The saved campaign the words are asked for; none: no "Yapay zekâ ile öner". */
+  ai?: { campaignId: string; dirty: boolean } | null | undefined
 }) {
   const { t } = useTranslation()
   const extra = useNameToken()
   const text = useWatch({ control: form.control, name: "sms_text" })
   const error = form.formState.errors.sms_text?.message
   return (
-    <SectionCard title={t(`${S}.title`)} description={t(`${S}.description`)}>
+    <SectionCard
+      title={t(`${S}.title`)}
+      description={t(`${S}.description`)}
+      action={ai ? <SmsAi form={form} campaignId={ai.campaignId} dirty={ai.dirty} /> : undefined}
+    >
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <label htmlFor="bulk-sms" className="text-sm font-medium">

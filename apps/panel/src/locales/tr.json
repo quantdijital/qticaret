@@ -10831,6 +10831,30 @@
       "tooManyProducts": "Bir e-postada en çok {{max}} ürün kartı olabilir.",
       "smsTooLong": "Metin, mağaza adı ve ret metniyle birlikte {{parts}} SMS boyunu geçiyor; kısaltın.",
       "smsTooLongStored": "Metin, en uzun alıcı adı ve bağlantıların kampanya koduyla {{parts}} parçayı geçiyor; kısaltın."
+    },
+    "ai": {
+      "button": "Yapay zekâ ile öner",
+      "purpose": "Bu ileti ne için?",
+      "purposeHint": "Seçmezseniz genel bir ileti yazılır. Oran, kod ya da tarih yalnız iletinin adında ya da metninde yazıyorsa kullanılır.",
+      "ask": "Öner",
+      "dirty": "Kaydedilmemiş değişiklikler hesaba katılmaz: öneri iletinin kayıtlı hâlinden yazılır.",
+      "back": "Geri",
+      "subjects": "Konu satırı",
+      "preheader": "Önizleme satırı",
+      "body": "Metin",
+      "replaceBody": "Gövdede yazı var. Önerilen metin bugünkü yazının yerine geçer; görseller ve ürün kartları kalır. Kaydetmeden çıkarsanız eski metin geri gelir.",
+      "replaceBodyAction": "Gövdeyi de değiştir",
+      "keepBody": "Yalnız konu ve önizleme satırı",
+      "replaceSms": "Metin alanı dolu. Seçtiğiniz metin bugünkü metnin yerine geçer.",
+      "replaceSmsAction": "Metni değiştir",
+      "campaign_email": {
+        "title": "E-posta metni öner",
+        "description": "Yapay zekâ iletinin adından, bugünkü metninden ve kartlardaki ürünlerden üç konu satırı, bir önizleme satırı ve kısa bir metin yazar. Alıcı listesi gönderilmez; Kaydet'e basana kadar hiçbir şey değişmez."
+      },
+      "campaign_sms": {
+        "title": "SMS metni öner",
+        "description": "Yapay zekâ iletinin adından ve bugünkü metninden üç kısa metin yazar; her biri mağaza adı ve ret satırıyla tek SMS'e sığar. Alıcı listesi gönderilmez; Kaydet'e basana kadar hiçbir şey değişmez."
+      }
     }
   },
   "paymentLinks": {
@@ -11665,13 +11689,19 @@
       "product_tags": "Etiket önerisi",
       "product_category": "Kategori önerisi",
       "product_attributes": "Özellik doldurma",
-      "product_faq": "SSS taslağı"
+      "product_faq": "SSS taslağı",
+      "campaign_email": "E-posta bülteni metni",
+      "campaign_sms": "SMS kampanya metni"
     },
     "options": {
       "short": "Kısa",
       "detailed": "Ayrıntılı",
       "transparent": "Şeffaf",
-      "white": "Beyaz zemin"
+      "white": "Beyaz zemin",
+      "new_product": "Yeni ürün",
+      "discount": "İndirim",
+      "season": "Sezon",
+      "win_back": "Geri kazanım"
     },
     "card": {
       "servicesTitle": "Servisler",

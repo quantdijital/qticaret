@@ -17,8 +17,17 @@ import type { ProductCard } from "@/features/ai/product-card"
 
 /** The record a suggestion is for; the backend reads its public facts itself. */
 export interface AiEntity {
-  /** The backend's `AI_ENTITY_TYPES`: a content page is `page`, a blog post is not one; `media` an image. */
-  type: "product" | "category" | "collection" | "brand" | "page" | "media" | "review" | "question"
+  /** The backend's `AI_ENTITY_TYPES`: a content page is `page`, a blog post is not one; `media` an image; `campaign` a bulk message. */
+  type:
+    | "product"
+    | "category"
+    | "collection"
+    | "brand"
+    | "page"
+    | "media"
+    | "review"
+    | "question"
+    | "campaign"
   id: string
 }
 

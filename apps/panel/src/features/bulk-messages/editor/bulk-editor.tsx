@@ -71,6 +71,8 @@ export function BulkEditor({ campaign }: { campaign: BulkMessage }) {
     name: ["channel", "subject", "body", "sms_text"],
   })
   const dirty = form.formState.isDirty
+  // The words are asked for the saved campaign: only while the editor shows its own channel
+  const ai = channel === campaign.channel ? { campaignId: campaign.id, dirty } : null
   const missing = missingContent({ channel, subject, body, sms_text: smsText })
   const blocked = dirty
     ? t(`${E}.unsaved`)
@@ -159,9 +161,10 @@ export function BulkEditor({ campaign }: { campaign: BulkMessage }) {
                       form={form}
                       rules={rules}
                       stored={{ text: campaign.sms_text, parts: storedSmsParts(rendered) }}
+                      ai={ai}
                     />
                   ) : (
-                    <EmailContent form={form} />
+                    <EmailContent form={form} ai={ai} />
                   ),
               },
               {
