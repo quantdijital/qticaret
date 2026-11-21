@@ -46,8 +46,16 @@ describe("seoFillTasks", () => {
 
 describe("seoFillKinds", () => {
   it("keeps the kinds the search text tasks are asked for", () => {
-    const kinds = seoFillKinds(["product", "category", "brand", "collection", "page", "landing"])
-    expect(kinds).toEqual(["product", "category", "brand", "collection", "page"])
+    const kinds = seoFillKinds([
+      "product",
+      "category",
+      "brand",
+      "collection",
+      "page",
+      "post",
+      "landing",
+    ])
+    expect(kinds).toEqual(["product", "category", "brand", "collection", "page", "post"])
   })
 })
 
