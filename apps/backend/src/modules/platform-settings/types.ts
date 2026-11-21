@@ -22,6 +22,8 @@ export interface SectionChange {
   after: SectionValues
   /** The row before the change, for a compensation to put back; null when there was none. */
   previous: StoredSection | null
+  /** The version this save wrote: a compensation puts `previous` back only over it. */
+  version: number
 }
 
 export interface FeatureState extends FeatureDefinition {

@@ -145,6 +145,34 @@ medusaIntegrationTestRunner({
       })
     })
 
+    it("keeps the owner's craft when an admin's note is saved at the same time (#249 Y1)", async () => {
+      const admin = await createAdminUser(http, getContainer(), "admin")
+      // The row first, so both saves below merge over a stored one
+      expect(
+        (await saveAs(admin.headers, { tasks: { seo_description: { extra: "Kısa" } } })).status
+      ).toBe(200)
+
+      const [craft, note] = await Promise.all([
+        saveAs(owner.headers, { tasks: { seo_title: { craft: "Önce ürün adı." } } }),
+        saveAs(admin.headers, {
+          tasks: { seo_title: { extra: "Markayı sona koy", examples: [] } },
+        }),
+      ])
+      expect([craft.status, note.status]).toEqual([200, 200])
+
+      const stored = await settle(
+        http.get<Section & { version: number }>("/admin/platform-settings/ai_guidance", {
+          headers: owner.headers,
+        })
+      )
+      expect(stored.data.version).toBe(3)
+      expect(stored.data.values?.tasks["seo_title"]).toMatchObject({
+        extra: "Markayı sona koy",
+        craft: "Önce ürün adı.",
+      })
+      expect(stored.data.values?.tasks["seo_description"]).toMatchObject({ extra: "Kısa" })
+    })
+
     it("puts the owner's craft in the default's place, the rules still last", async () => {
       const productId = await aiProduct(getContainer())
       const seen = answering()

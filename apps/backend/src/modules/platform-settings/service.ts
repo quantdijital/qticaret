@@ -173,12 +173,22 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
       before,
       after,
       previous: row ? { values: row.values, version: row.version } : null,
+      // A new row starts at the model's default, 1
+      version: row ? row.version + 1 : 1,
     }
   }
 
-  /** Puts a section back as it was before a save (workflow compensation). */
-  async restoreSection(name: SectionName, previous: StoredSection | null): Promise<void> {
-    await this.restoreSectionInTransaction_(name, previous)
+  /**
+   * Puts a section back as it was before a save (workflow compensation),
+   * only while the row still holds the version that save wrote
+   * (`savedVersion`): a save that came in between is kept, not undone.
+   */
+  async restoreSection(
+    name: SectionName,
+    previous: StoredSection | null,
+    savedVersion: number
+  ): Promise<void> {
+    await this.restoreSectionInTransaction_(name, previous, savedVersion)
     await this.cache.invalidate()
   }
 
@@ -186,11 +196,18 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
   protected async restoreSectionInTransaction_(
     name: SectionName,
     previous: StoredSection | null,
+    savedVersion: number,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     await lockSection(sharedContext, name)
     const [row] = await this.listSettingsSections({ section: name }, { take: 1 }, sharedContext)
-    if (!row) {
+    if (row?.version !== savedVersion) {
+      logger.warn({
+        event: "platform_settings.restore_skipped",
+        section: name,
+        savedVersion,
+        storedVersion: row?.version ?? null,
+      })
       return
     }
     if (previous === null) {

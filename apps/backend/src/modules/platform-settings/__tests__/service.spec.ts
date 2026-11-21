@@ -60,7 +60,9 @@ moduleIntegrationTestRunner<PlatformSettingsModuleService>({
           values: { contact_email: "destek@example.com", weight_unit: "g", dimension_unit: "cm" },
         })
         // Each save saw a different row before it: the versions follow one another
-        expect(changes.map((change) => change.previous?.version).sort()).toEqual([2, 3, 4])
+        expect(
+          changes.map((change) => change.previous?.version ?? 0).sort((a, b) => a - b)
+        ).toEqual([2, 3, 4])
       })
 
       it("refuses an invalid template with its key and stores nothing", async () => {
@@ -102,13 +104,26 @@ moduleIntegrationTestRunner<PlatformSettingsModuleService>({
 
       it("puts a section back as it was", async () => {
         const first = await service.saveSection("store", { weight_unit: "kg" }, null)
-        await service.restoreSection("store", first.previous)
+        expect(first.version).toBe(1)
+        await service.restoreSection("store", first.previous, first.version)
         expect(await service.readSection("store")).toMatchObject({ version: 0 })
 
         await service.saveSection("store", { weight_unit: "kg" }, null)
         const second = await service.saveSection("store", { dimension_unit: "mm" }, null)
-        await service.restoreSection("store", second.previous)
+        expect(second.version).toBe(2)
+        await service.restoreSection("store", second.previous, second.version)
         expect((await service.getSection("store"))["dimension_unit"]).toBe("cm")
+      })
+
+      it("keeps a save made after the one being undone (review O1)", async () => {
+        const undone = await service.saveSection("store", { weight_unit: "kg" }, null)
+        await service.saveSection("store", { dimension_unit: "mm" }, null)
+        await service.restoreSection("store", undone.previous, undone.version)
+
+        expect(await service.readSection("store")).toMatchObject({
+          version: 2,
+          values: { weight_unit: "kg", dimension_unit: "mm" },
+        })
       })
     })
 
