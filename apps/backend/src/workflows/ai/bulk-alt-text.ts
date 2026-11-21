@@ -1,11 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { z } from "@medusajs/framework/zod"
 import { IMAGE_ALT_BULK_MAX, IMAGE_ALT_TEXT_TASK } from "../../lib/ai/registry/tasks"
-import { errorSummary, logger } from "../../lib/logging"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
 import { MEDIA_MODULE } from "../../modules/media"
 import type MediaModuleService from "../../modules/media/service"
+import { errorKeyOf, runBulkSuggestions } from "./bulk-run"
+import type { BulkSummary } from "./bulk-run"
 import { AI_SUGGESTION_SOURCE } from "./steps/save-suggestion"
 import { suggestTextWorkflow } from "./suggest-text"
 
@@ -32,43 +33,10 @@ export const AiAltTextInput = z
   .strict()
 export type AiAltTextInput = z.infer<typeof AiAltTextInput>
 
-export interface BulkAltTextSummary {
-  asked: number
-  suggested: number
-  refused: number
-  failed: number
-  /** Had an alt text, an open suggestion, or no stored picture: not asked. */
-  skipped: number
-  /** Not asked because the job stopped. */
-  not_asked: number
-  /** The key the job stopped on; null when it went through. */
-  stopped: string | null
-}
+/** Had an alt text, an open suggestion, or no stored picture: skipped, not asked. */
+export type BulkAltTextSummary = BulkSummary
 
-// Every later image would fail the same way: stop rather than spend the attempts
-const STOP_KEYS: ReadonlySet<string> = new Set([
-  "plan.limit_reached",
-  "ai.daily_limit_reached",
-  "ai.no_service",
-  "ai.service_unavailable",
-  "ai.own_keys_not_in_plan",
-  "ai.key_rejected",
-  "ai.provider_balance",
-  "ai.provider_quota",
-  "staff.forbidden",
-])
-
-/** The i18n key a failed run carries, in whatever shape the workflow hands it back. */
-export function errorKeyOf(error: unknown): string {
-  const shape = (error ?? {}) as { qtErrorKind?: unknown; safeMessage?: unknown; message?: unknown }
-  if (shape.qtErrorKind === "plan_limit") {
-    return "plan.limit_reached"
-  }
-  if (typeof shape.safeMessage === "string") {
-    return shape.safeMessage
-  }
-  return typeof shape.message === "string" ? shape.message : ""
-}
+export { errorKeyOf }
 
 export interface BulkAltTextDeps {
   /** The ids worth asking for, in the order given: no alt text, a stored picture, no open suggestion. */
@@ -87,41 +55,16 @@ export async function runBulkAltText(
 ): Promise<BulkAltTextSummary> {
   const ids = [...new Set(mediaIds)].slice(0, IMAGE_ALT_BULK_MAX)
   const eligible = await deps.eligible(ids)
-  const summary: BulkAltTextSummary = {
-    asked: 0,
-    suggested: 0,
-    refused: 0,
-    failed: 0,
-    skipped: ids.length - eligible.length,
-    not_asked: 0,
-    stopped: null,
-  }
-  for (const [index, id] of eligible.entries()) {
-    if (await deps.waiting(id)) {
-      summary.skipped += 1
-      await deps.progress(Math.round(((index + 1) / eligible.length) * 100))
-      continue
-    }
-    summary.asked += 1
-    try {
-      const status = await deps.suggest(id)
-      summary[status === "draft" ? "suggested" : "refused"] += 1
-    } catch (error) {
-      const key = errorKeyOf(error)
-      if (STOP_KEYS.has(key)) {
-        // The image that met the ceiling was not asked either
-        summary.asked -= 1
-        summary.not_asked = eligible.length - index
-        summary.stopped = key
-        break
-      }
-      // The summary counts it only; what went wrong goes to the log, redacted
-      logger.warn({ event: "ai.alt_text_image_failed", key, err: errorSummary(error) })
-      summary.failed += 1
-    }
-    await deps.progress(Math.round(((index + 1) / eligible.length) * 100))
-  }
-  return summary
+  return runBulkSuggestions(
+    {
+      waiting: deps.waiting,
+      suggest: deps.suggest,
+      progress: deps.progress,
+      failedEvent: "ai.alt_text_image_failed",
+    },
+    eligible,
+    ids.length - eligible.length
+  )
 }
 
 type Container = Pick<MedusaContainer, "resolve">

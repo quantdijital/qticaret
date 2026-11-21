@@ -165,6 +165,8 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/ai/guidance*" },
   // The open suggestions to review (docs/22 "Aşama 5"): the task's roles; the route checks them too
   { methods: ["GET"], path: "/admin/ai/suggestions" },
+  // The bulk SEO fill and its review list (adr/0074 §5 madde 7): the search text tasks' roles
+  { methods: "*", path: "/admin/ai/seo-fill*" },
   // Wholesalers, their levels and prices (ADR-0068 §9): owner and admin; operations sees orders
   { methods: "*", path: "/admin/wholesale*" },
 ]

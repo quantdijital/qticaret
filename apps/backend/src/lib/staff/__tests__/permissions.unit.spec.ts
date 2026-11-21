@@ -166,6 +166,19 @@ describe("staff roles", () => {
     expect(table("readonly")).toEqual([true, false, false, false, false, false, false, false])
   })
 
+  it("keeps the bulk SEO fill the owner's and admin's (adr/0074 §5 madde 7)", () => {
+    for (const [method, path] of [
+      ["GET", "/admin/ai/seo-fill"],
+      ["POST", "/admin/ai/seo-fill"],
+      ["GET", "/admin/ai/seo-fill/suggestions"],
+    ] as const) {
+      expect(allowed("owner", method, path)).toBe(true)
+      expect(allowed("admin", method, path)).toBe(true)
+      expect(allowed("operations", method, path)).toBe(false)
+      expect(allowed("readonly", method, path)).toBe(false)
+    }
+  })
+
   it("opens to operations only the AI tasks on reviews and questions (Aşama 9)", () => {
     const ask = (role: "operations" | "readonly", aiTask?: string) =>
       allowed(role, "POST", "/admin/ai/suggestions", { aiTask })
@@ -547,6 +560,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   // A product FAQ added as the shop's questions: the task is owner and admin's (adr/0074 §5 madde 4)
   "POST /admin/ai/suggestions/:id/faq": false,
   "POST /admin/ai/guidance/preview": false,
+  // The bulk SEO fill: the search text tasks are owner and admin's (adr/0074 §5 madde 7)
+  "POST /admin/ai/seo-fill": false,
   "POST /admin/content/:id": false,
   "DELETE /admin/content/:id": false,
   "POST /admin/content": false,

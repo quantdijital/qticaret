@@ -10,6 +10,7 @@ import {
   AdminPostAiGuidancePreview,
   AdminPostAiSuggestion,
 } from "../admin/ai/validators"
+import { AdminPostSeoFill } from "../admin/ai/seo-fill/validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 
@@ -101,6 +102,29 @@ export const AI_ROUTES = [
   // The acceptance rate by task (adr/0074 §4): counts only
   {
     matcher: "/admin/ai/acceptance",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
+  // The bulk SEO fill (adr/0074 §5 madde 7): its count and review list read, the job queued
+  // within a text ask's budget (the job itself is one at a time)
+  {
+    matcher: "/admin/ai/seo-fill",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
+  {
+    matcher: "/admin/ai/seo-fill",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.ai_text, {
+        identity: (req) => (req as AuthenticatedMedusaRequest).auth_context.actor_id,
+      }),
+      validateAndTransformBody(AdminPostSeoFill),
+    ],
+  },
+  {
+    matcher: "/admin/ai/seo-fill/suggestions",
     methods: ["GET" as const],
     middlewares: [requireUserActor],
   },

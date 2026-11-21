@@ -754,6 +754,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.guidance_craft_owner_only": "Only the store owner can change a task's instruction.",
   "ai.guidance_craft_base_unknown":
     "The default instruction has changed meanwhile. Reload the page and try again.",
+  // adr/0074 §5 madde 7: the bulk SEO fill
+  "ai.seo_fill_nothing":
+    "No page has a missing or weak search text; those waiting for a decision are not asked again.",
+  "ai.seo_fill_quota_short":
+    "Not enough AI allowance left: this job needs {{needed}} operations, {{left}} are left. Try a narrower choice (title only or description only) or raise your allowance.",
   // adr/0071 §3: "Test the connection" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek did not accept this API key. Copy it again from the API keys page of the DeepSeek platform.",
