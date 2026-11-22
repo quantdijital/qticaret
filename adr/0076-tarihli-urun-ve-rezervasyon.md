@@ -429,3 +429,7 @@ Basit yol ilkesi: her ayrıntılı çözümün aç/kapa ile seçilen basit bir a
 - **KVKK.** Yeni tablo yok; `contact_message` satırına not düşüldü. KVKK araması ve silmesi (`workflows/contact/customer-data.ts`) mesajları müşteri kimliği, e-posta özeti ya da telefon özetiyle (`phone_hash`) bulur; yalnız telefonla bırakılmış talep de kişinin verisine girer ve silinir. Personel panelde telefonla da arar.
 - **Yeni anahtarlar.** Hata: `booking.online_not_offered`, `booking.request_not_offered`, `booking.request_slot_invalid`, `booking.request_when_invalid`, `booking.request_people_invalid`. Zil: `contact.booking_received`. E-posta metinleri: `staff_contact.subjects.booking`, `staff_contact.booking_request`, `staff_contact.booking_flexible`, `staff_contact.booking_adults`, `staff_contact.booking_children`. Vitrin: `booking_request.*`. Panel: `products.booking.settings.saleMode*`, `customers.contactMessages.subjects.booking`, `subjectFilter`, `allSubjects`, `phoneFilter`, `detail.{product,when,people,flexible,adults,children}`.
 - **Testler.** HTTP `booking-requests.spec.ts` (kapalı kalkış, telefonla KVKK ve panel araması dahil) ve `booking-cart.spec.ts` (sonradan `request` olan ürünün ödemesi/tamamlanması); birim: istek doğrulayıcı, vitrin eylemi, tema formu, görünüm; panel: iletişim mesajları sayfası ve satış biçimi alanı.
+
+## Ek 2026-11-23: arama adr/0077'de
+
+Tarihli ürünün vitrinde aranması (kategori, kesin tarih ya da esnek ay, kişi sayısı), ay takvimi, kartta aralığa göre kalkış ve fiyat, `departures` bölümü ve travel paketi v2 adr/0077'de karara bağlandı.
