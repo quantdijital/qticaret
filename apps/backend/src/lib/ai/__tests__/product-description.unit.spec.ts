@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import { MIN_PRODUCT_WORDS } from "../../seo/advisor"
 import { wordCount } from "../../seo/advisor/text"
 import { fakeTextConnector } from "../connectors/fake"
@@ -161,19 +162,25 @@ describe("product description task (docs/22 PR 2-1)", () => {
   })
 
   it("turns down a long unbroken run as noise before any pattern, in linear time", () => {
+    const runs = [
+      (size: number) => "a".repeat(size),
+      (size: number) => "a@".repeat(size / 2),
+      (size: number) => "aa.".repeat(Math.floor(size / 3)),
+    ]
     const hostile = [
-      "a".repeat(PRODUCT_DESCRIPTION_MAX_LENGTH),
-      "a@".repeat(PRODUCT_DESCRIPTION_MAX_LENGTH / 2),
-      "aa.".repeat(Math.floor(PRODUCT_DESCRIPTION_MAX_LENGTH / 3)),
+      ...runs.map((run) => run(PRODUCT_DESCRIPTION_MAX_LENGTH)),
       `${GOOD} ${"x".repeat(61)}`,
     ]
     for (const text of hostile) {
-      const started = performance.now()
-      const problems = suggestionProblems(PRODUCT_DESCRIPTION_TASK, text)
-      const took = performance.now() - started
-
-      expect(problems).toContain("noise")
-      expect(took).toBeLessThan(50)
+      expect(suggestionProblems(PRODUCT_DESCRIPTION_TASK, text)).toContain("noise")
+    }
+    // An eighth of the longest answer against the longest: linear, not a wall-clock budget
+    for (const run of runs) {
+      const growth = measureGrowth((size) => {
+        const text = run(size)
+        return () => suggestionProblems(PRODUCT_DESCRIPTION_TASK, text)
+      }, PRODUCT_DESCRIPTION_MAX_LENGTH / 8)
+      expect(growth).toMatchObject({ linear: true })
     }
     // The SEO gates are not touched: a short field keeps its own rules
     expect(suggestionProblems(SEO_TITLE_TASK, "x".repeat(SERP_TITLE_PROBE))).not.toContain("noise")

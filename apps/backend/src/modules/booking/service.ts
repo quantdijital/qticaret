@@ -6,7 +6,7 @@ import {
   MedusaError,
   MedusaService,
 } from "@medusajs/framework/utils"
-import { slotsById, slotsOfBookable } from "./availability"
+import { openSlotsOf, slotsById, slotsOfBookable } from "./availability"
 import type { SlotAvailability } from "./availability"
 import { cartHold } from "./cart-hold"
 import type { HoldClient } from "./client-share"
@@ -249,6 +249,16 @@ class BookingModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {}
   ): Promise<SlotAvailability[]> {
     return slotsOfBookable(managerOf(sharedContext), bookableId, options)
+  }
+
+  /** Several bookables' open slots with a free place, after `from`, at most `limit` each. */
+  @InjectManager()
+  async openSlots(
+    bookableIds: string[],
+    options: { from: Date; limit: number },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<SlotAvailability[]> {
+    return openSlotsOf(managerOf(sharedContext), bookableIds, options)
   }
 
   /** New slots, every one empty (`sold`, `held` 0); their ids in the order given. */

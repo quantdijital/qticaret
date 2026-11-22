@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { logger } from "../../../lib/logging"
 import { csrfProtection } from "../csrf"
@@ -355,10 +356,12 @@ describe("routePath", () => {
   })
 
   it("trims a long run of slashes in linear time", () => {
-    const start = performance.now()
-    routePath(request(`/auth/${"/".repeat(16_000)}x`))
-    routePath(request(`/auth${"/".repeat(16_000)}`))
-    // The regex it replaces took ~90 ms for one of these
-    expect(performance.now() - start).toBeLessThan(50)
+    // The regex it replaces took ~90 ms on 16,000 slashes; timed at an eighth of that and at it
+    const slashes = (size: number) => {
+      const inner = request(`/auth/${"/".repeat(size)}x`)
+      const trailing = request(`/auth${"/".repeat(size)}`)
+      return () => [routePath(inner), routePath(trailing)]
+    }
+    expect(measureGrowth(slashes, 2_000)).toMatchObject({ linear: true })
   })
 })

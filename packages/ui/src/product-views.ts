@@ -1,5 +1,5 @@
 import type { AddonFieldView } from "./addon-views"
-import type { BookingView } from "./booking-views"
+import type { BookingView, CardBookingView } from "./booking-views"
 import type { ProductMainView } from "./main-views"
 import type {
   QuickAddView,
@@ -64,6 +64,11 @@ export interface ProductCardView {
   shown?: CardShownView
   /** The quick view button's look while the shop has it on (adr/0049 Ek 2026-11-15); none: no button. */
   quickView?: CardQuickViewTrigger
+  /**
+   * A dated product's (adr/0076 §10): its price is "…'den itibaren" and
+   * the nearest departure goes under it. None: any other product's card.
+   */
+  booking?: CardBookingView
 }
 
 /** A card's pills and rows as the shop set them, on every variant (adr/0049 Ek 2026-11-15). */

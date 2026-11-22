@@ -15,6 +15,11 @@ export const StoreGetCardFacts = z
           .min(1)
           .max(MAX_PRODUCTS)
       ),
+    // The region a dated card's from price is read in (adr/0076 §10); none: lira
+    region_id: z
+      .string()
+      .regex(/^reg_[0-9A-Za-z]{1,40}$/)
+      .optional(),
   })
   .strict()
 export type StoreGetCardFactsType = z.infer<typeof StoreGetCardFacts>

@@ -207,6 +207,18 @@ export interface StoreCardFacts {
    * and how many; null without one. Absent from a backend before it.
    */
   rating?: { average: number; count: number } | null
+  /**
+   * A dated product's (adr/0076 §10), only while the shop sells them: the
+   * lowest paying price over the departures on sale (else the base
+   * prices) in the currency's amount, and the nearest departure on sale
+   * (ISO; said in `timezone`); each null when there is none.
+   */
+  booking?: {
+    from_price: number | null
+    currency_code: string
+    next_departure: string | null
+    timezone: string
+  }
 }
 
 export interface StoreProduct {

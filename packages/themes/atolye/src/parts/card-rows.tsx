@@ -1,6 +1,7 @@
 import { BellRing, PenLine } from "lucide-react"
 import type { CardShownView, ProductCardView, Translate } from "@qticaret/ui"
 import { REVIEWS_ID, STOCK_ALERT_ID } from "../product/anchors"
+import { BookingPriceRow } from "./card-booking"
 import { CardRating, isOut } from "./card-parts"
 import { Price } from "./Price"
 import { Stars } from "./Stars"
@@ -74,6 +75,9 @@ export function CardPriceRow({
   t: Translate
   className?: string
 }) {
+  if (product.booking) {
+    return <BookingPriceRow product={product} t={t} className={className} />
+  }
   const row = isOut(product) ? shownOf(product).soldOutRow : "price"
   if (row === "text") {
     return (

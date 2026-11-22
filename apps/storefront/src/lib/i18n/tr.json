@@ -1176,6 +1176,8 @@
   "booking.added": "Yerleriniz sepete eklendi.",
   "booking.soon": "Yakında yeni tarihler",
   "booking.soon_text": "Şu an satışta tarih yok. Yeni tarihler eklendiğinde bu sayfadan rezervasyon yapabilirsiniz.",
+  "booking.card_from": "{price}'den itibaren",
+  "booking.card_next": "En yakın: {date}",
   "booking.ages": "{min}–{max} yaş",
   "booking.ages_from": "{min} yaş ve üzeri",
   "booking.ages_to": "{max} yaşa kadar",
