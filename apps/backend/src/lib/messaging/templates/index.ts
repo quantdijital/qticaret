@@ -1,4 +1,10 @@
 import { migrationInvite, passwordReset, verifyEmail } from "./account"
+import {
+  bookingCancelled,
+  bookingConfirmed,
+  bookingDepartureCancelled,
+  bookingReminder,
+} from "./booking"
 import { campaignMessage } from "./campaign"
 import { cartReminder } from "./cart-reminder"
 import { giftCardIssued } from "./gift-card"
@@ -35,6 +41,12 @@ import { staffStockShort } from "./staff-stock-short"
 
 export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
 export type { AnnouncementVars } from "./marketing"
+export type {
+  BookingCancelVars,
+  BookingDepartureVars,
+  BookingTermVars,
+  BookingVars,
+} from "./booking"
 export type { CampaignVars } from "./campaign"
 export type { CartReminderVars } from "./cart-reminder"
 export type { ConsentConfirmVars } from "./consent"
@@ -73,6 +85,11 @@ export const MESSAGE_TEMPLATES = {
   "order.delivered": orderDelivered,
   // F8 (adr/0034 §7): the order's invoice, issued
   "order.invoiced": orderInvoiced,
+  // adr/0076 Ek D7b: a dated order's booking confirmed, reminded, a departure cancelled
+  "booking.confirmed": bookingConfirmed,
+  "booking.reminder": bookingReminder,
+  "booking.cancelled": bookingCancelled,
+  "booking.departure_cancelled": bookingDepartureCancelled,
   "return.requested": returnRequested,
   "return.approved": returnApproved,
   "return.refunded": returnRefunded,

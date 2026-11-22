@@ -809,6 +809,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/booking-travelers/:id/reveal": false,
   // adr/0076 Ek D6b: a traveler's own KVKK request, owner and admin only
   "POST /admin/booking-travelers/search": false,
+  // adr/0076 Ek D7b: a voucher's code checked at a departure, a read of the order
+  "POST /admin/booking-vouchers/check": true,
   "POST /admin/booking-travelers/erase": false,
 }
 

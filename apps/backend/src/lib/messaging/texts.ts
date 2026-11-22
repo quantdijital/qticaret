@@ -1,4 +1,5 @@
 import type { MessageLocale } from "../errors/messages"
+import { BOOKING_TEXTS } from "./booking-texts"
 import { RETURN_TEXTS } from "./return-texts"
 import { STAFF_ACCOUNT_TEXTS } from "./staff-account-texts"
 import { PAYMENT_ISSUE_TEXTS } from "./payment-issue-texts"
@@ -16,6 +17,7 @@ export const MESSAGE_LOCALE: MessageLocale = "tr"
 
 const TR: Readonly<Record<string, string>> = {
   ...RETURN_TEXTS,
+  ...BOOKING_TEXTS,
   ...STAFF_ACCOUNT_TEXTS,
   ...STOCK_SHORT_TEXTS,
   ...PAYMENT_ISSUE_TEXTS,

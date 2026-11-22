@@ -6,6 +6,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import type { OrderBoard } from "@/features/orders/api/orders"
 import { OrderBoardCard } from "@/features/orders/components/order-board-card"
 import { OrderExportButton } from "@/features/orders/components/order-export"
+import { VoucherCheckButton } from "@/features/orders/components/voucher-check"
 import { cleanSearch, filtersOf } from "@/features/orders/search"
 import type { OrderListSearch } from "@/features/orders/search"
 import { PaymentLinkButtons } from "@/features/payment-links/components/order-buttons"
@@ -72,6 +73,8 @@ export function OrdersPage() {
               <Link to="/orders/invoices">{t("orders.invoice.queue")}</Link>
             </Button>
             {/* The list as it is filtered, as a file: the owner's alone */}
+            {/* adr/0076 Ek D7b: a booking voucher's code checked at a departure */}
+            <VoucherCheckButton />
             <OrderExportButton filters={filters} />
             {/* adr/0051: staff-made orders paid through a link, while the shop has them on */}
             <PaymentLinkButtons />

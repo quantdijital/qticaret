@@ -99,16 +99,18 @@ const textOf = (value: unknown): string => (typeof value === "string" ? value : 
  * opens it from the e-mail, a customer too without signing in. Null until
  * the shop has a domain, or for an order without an e-mail.
  */
-async function orderUrlOf(
+export async function orderUrlOf(
   container: Pick<MedusaContainer, "resolve">,
-  order: { id: string; email: string | null }
+  order: { id: string; email: string | null },
+  /** A page under the order's (`/voucher`, adr/0076 Ek D7b). */
+  page = ""
 ): Promise<string | null> {
   const { storefrontUrl } = await brandOf(container)
   if (!storefrontUrl || !order.email) {
     return null
   }
   const token = orderAccessToken(orderAccessKey(), { id: order.id, email: order.email })
-  return `${storefrontUrl}${ORDER_PATH}/${encodeURIComponent(order.id)}?${new URLSearchParams({ token }).toString()}`
+  return `${storefrontUrl}${ORDER_PATH}/${encodeURIComponent(order.id)}${page}?${new URLSearchParams({ token }).toString()}`
 }
 
 /** Whether the shopper accepted the contracts at checkout: the order keeps them (F13.2). */

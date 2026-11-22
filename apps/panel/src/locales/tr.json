@@ -1678,6 +1678,12 @@
           },
           "payment_link": {
             "sent": "Ödeme bağlantısı"
+          },
+          "booking": {
+            "confirmed": "Rezervasyon onaylandı",
+            "reminder": "Kalkış hatırlatması",
+            "cancelled": "Rezervasyon iptal edildi",
+            "departure_cancelled": "Kalkış iptal edildi (mağaza)"
           }
         }
       },
@@ -1744,6 +1750,11 @@
           },
           "stock": {
             "alert_confirm": "Zorunlu: müşteri stok bildirimini istedi; onaylamadan ileti almaz."
+          },
+          "booking": {
+            "confirmed": "Zorunlu: kalkış bilgileri, iptal koşulları ve voucher müşteriye yalnız bu iletiyle ulaşır.",
+            "cancelled": "Zorunlu: müşteri iptalin ve iade tutarının bilgisini bu iletiyle alır.",
+            "departure_cancelled": "Zorunlu: kalkışı mağaza iptal etti; müşteri bunu ve tam iadeyi yalnız bu iletiyle öğrenir."
           }
         },
         "marketingOn": "Terk edilmiş sepet hatırlatması açık. Açıp kapatmak Pazarlama ayarlarındadır.",
@@ -3670,7 +3681,10 @@
           "add": "İptal kademesi ekle",
           "packageFree": "Paket tur: 30 gün ve öncesinde kesinti yapılmaz (%0 uygulanır).",
           "noDayZero": "Kalkışa {{days}} günden az kala yapılan iptallerde de bu satır (%{{percent}}) uygulanır. Son günler için ayrı bir kural istiyorsanız 0 günlük satır ekleyin."
-        }
+        },
+        "reminder_days": "Hatırlatma (gün önce)",
+        "days": "gün",
+        "reminder_daysHint": "Kalkıştan bu kadar gün önce müşteriye hatırlatma e-postası gider. 0: gönderilmez."
       },
       "errors": {
         "disabled": "Tarihli ürünler için önce Ayarlar > Özellikler'den hem tarihli ürünleri hem dijital ve hizmet ürünlerini açın.",
@@ -3705,7 +3719,8 @@
           "tierPercent": "Kesinti 0 ile 100 arasında tam sayı olmalı.",
           "tierSame": "Bu gün sayısı başka bir satırda var.",
           "tierOrder": "Kalkışa daha yakın satır daha az kesemez.",
-          "tierRows": "En çok 10 iptal kademesi girilebilir."
+          "tierRows": "En çok 10 iptal kademesi girilebilir.",
+          "reminderDays": "Hatırlatma 0 ile 30 gün arasında olmalı (0: gönderilmez)."
         },
         "tiers": "İptal kademeleri geçersiz: her gün sayısı bir kez yazılır, kalkışa yaklaştıkça kesinti azalamaz.",
         "slotCancelled": "İptal edilmiş kalkış yeniden açılamaz.",
@@ -5066,6 +5081,20 @@
       },
       "doneByHand": "Rezervasyon iptal edildi; {{amount}} elle iade edilecek.",
       "orderCancelled": "Rezervasyon ve ödemesi alınmamış sipariş iptal edildi."
+    },
+    "vouchers": {
+      "title": "Voucher doğrula",
+      "description": "Müşterinin voucher'ındaki doğrulama kodunu yazın; rezervasyonun geçerli olup olmadığını görün.",
+      "code": "Doğrulama kodu",
+      "check": "Doğrula",
+      "valid": "Geçerli rezervasyon",
+      "cancelled": "Bu rezervasyon iptal edilmiş",
+      "unknown": "Bu kodla bir rezervasyon bulunamadı",
+      "order": "Sipariş #{{number}}",
+      "units_one": "{{count}} kişi",
+      "units_other": "{{count}} kişi",
+      "departure_cancelled": "Bu kalkış iptal edildi",
+      "open_order": "Siparişi aç"
     }
   },
   "customers": {

@@ -345,6 +345,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This product has no cancellation terms; contact the shop to cancel.",
   "booking.cancel_unpaid": "Cancel an unpaid order as a whole.",
   "booking.cancel_unknown": "No booking to cancel was found on this order.",
+  "booking.voucher_unknown": "No booking was found on this order.",
   "booking.use_booking_cancel":
     "A dated order is cancelled booking by booking; the refund follows the cancellation terms.",
   "booking.order_change_unsupported":

@@ -26,6 +26,7 @@ describe("booking drafts", () => {
       hold_minutes: "20",
       cutoff_hours: "0",
       min_participants: "",
+      reminder_days: "2",
       traveler_level: "none",
     })
     const input = settingsInputOf({
@@ -40,6 +41,7 @@ describe("booking drafts", () => {
       hold_minutes: 20,
       max_units_per_cart: 20,
       min_participants: null,
+      reminder_days: 2,
       pax_by_variant: { infant: { pax: 0, max_age: 2 } },
       traveler_fields: { level: "none" },
       cancellation_tiers: [],

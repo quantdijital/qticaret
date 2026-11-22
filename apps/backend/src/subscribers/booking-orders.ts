@@ -4,6 +4,7 @@ import {
   cancelOrderBookingsWorkflow,
   confirmOrderBookingsWorkflow,
 } from "../workflows/booking/orders"
+import { confirmsBooking, sendBookingConfirmations } from "../workflows/booking/messages"
 
 /**
  * A dated order's places (adr/0076 §5, §8): placed, its cart's hold
@@ -24,7 +25,13 @@ export default async function bookingOrders({
       await cancelOrderBookingsWorkflow(container).run({ input: { order_id: data.id } })
       return
     }
-    await confirmOrderBookingsWorkflow(container).run({ input: { order_id: data.id } })
+    const { result } = await confirmOrderBookingsWorkflow(container).run({
+      input: { order_id: data.id },
+    })
+    // adr/0076 Ek D7b: its confirmation e-mail; a failure is logged, never thrown
+    if (confirmsBooking(result)) {
+      await sendBookingConfirmations(container, data.id)
+    }
   } catch (error) {
     logger.error({
       event: "booking.order_sync_failed",

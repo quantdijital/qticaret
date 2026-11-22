@@ -38,6 +38,7 @@ import { ABANDONED_CART_ROUTES } from "./http/abandoned-cart-routes"
 import { ADDON_ROUTES } from "./http/addon-routes"
 import { BOOKING_ROUTES } from "./http/booking-routes"
 import { BOOKING_CANCEL_ROUTES } from "./http/booking-cancel-routes"
+import { BOOKING_VOUCHER_ROUTES } from "./http/booking-voucher-routes"
 import { BOOKING_STORE_ROUTES } from "./http/booking-store-routes"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { CUSTOMER_ROUTES } from "./http/customer-routes"
@@ -418,6 +419,8 @@ export default defineMiddlewares({
     ...BOOKING_STORE_ROUTES,
     // adr/0076 D7a: a departure of a dated order cancelled with its refund, a departure cancelled
     ...BOOKING_CANCEL_ROUTES,
+    // adr/0076 D7b: a booking's voucher for its shopper, its code checked by staff
+    ...BOOKING_VOUCHER_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",

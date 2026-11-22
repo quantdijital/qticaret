@@ -65,6 +65,13 @@ export const RATE_LIMIT_PROFILES = {
   installment: { name: "installment", perIp: { max: 30, windowMs: MINUTE } },
   // adr/0025 Ek 2026-11-03: a gift card's balance by its code; each ask is a guess at a code
   gift_card_balance: { name: "gift_card_balance", perIp: { max: 10, windowMs: MINUTE } },
+  // adr/0076 Ek D7b: staff checking a booking voucher's code at a departure; a group
+  // boards in minutes, but codes are never tried in bulk (80 random bits besides)
+  voucher_check: {
+    name: "voucher_check",
+    perIp: { max: 120, windowMs: 10 * MINUTE },
+    perIdentity: { max: 60, windowMs: 10 * MINUTE },
+  },
   // F18 D4: a listing's filtered page reads its whole listing once a cache
   // window; per the shopper's address, signed by the storefront or not
   listing: { name: "listing", perIp: { max: 120, windowMs: MINUTE } },

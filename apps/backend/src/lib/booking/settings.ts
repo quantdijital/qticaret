@@ -105,6 +105,8 @@ export const BookableSettings = z
     cancellation_tiers: CancellationTiers.optional(),
     pax_by_variant: PaxByVariant.optional(),
     timezone: TimeZone.optional(),
+    // adr/0076 Ek D7b: days before a departure its reminder goes; 0 sends none
+    reminder_days: z.number().int().min(0).max(30).optional(),
   })
   .strict()
 export type BookableSettingsType = z.infer<typeof BookableSettings>

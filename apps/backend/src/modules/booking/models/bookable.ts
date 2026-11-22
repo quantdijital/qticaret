@@ -30,9 +30,12 @@ export const Bookable = model
     cancellation_tiers: model.json().nullable(),
     pax_by_variant: model.json().nullable(),
     timezone: model.text().default("Europe/Istanbul"),
+    // adr/0076 Ek D7b: the reminder goes this many days before a departure; 0 sends none
+    reminder_days: model.number().default(2),
   })
   .indexes([{ on: ["product_id"], unique: true }])
   .checks([
+    { name: "bookable_reminder_days_check", expression: "reminder_days BETWEEN 0 AND 30" },
     { name: "bookable_hold_minutes_check", expression: "hold_minutes BETWEEN 10 AND 60" },
     { name: "bookable_cutoff_hours_check", expression: "cutoff_hours >= 0" },
     { name: "bookable_max_units_check", expression: "max_units_per_cart >= 1" },

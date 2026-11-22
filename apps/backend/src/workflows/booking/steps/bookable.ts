@@ -23,6 +23,7 @@ const SETTING_KEYS = [
   "cancellation_tiers",
   "pax_by_variant",
   "timezone",
+  "reminder_days",
 ] as const
 
 // The JSON columns are typed as objects; the tiers are a list (lib/booking/settings)

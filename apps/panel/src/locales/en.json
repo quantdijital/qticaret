@@ -1678,6 +1678,12 @@
           },
           "payment_link": {
             "sent": "Payment link"
+          },
+          "booking": {
+            "confirmed": "Booking confirmed",
+            "reminder": "Departure reminder",
+            "cancelled": "Booking cancelled",
+            "departure_cancelled": "Departure cancelled (shop)"
           }
         }
       },
@@ -1744,6 +1750,11 @@
           },
           "stock": {
             "alert_confirm": "Required: the customer asked for the stock alert and gets nothing until they confirm."
+          },
+          "booking": {
+            "confirmed": "Required: the departure details, cancellation terms and voucher reach the customer only through this message.",
+            "cancelled": "Required: the customer learns of the cancellation and the refund through this message.",
+            "departure_cancelled": "Required: the shop cancelled the departure; the customer learns of it and the full refund only through this message."
           }
         },
         "marketingOn": "Abandoned cart reminders are on. They are turned on and off in Marketing settings.",
@@ -3670,7 +3681,10 @@
           "add": "Add a cancellation tier",
           "packageFree": "Package travel: 30 days or more before, nothing is kept (0% applies).",
           "noDayZero": "Cancels fewer than {{days}} days before the departure also keep this row's share ({{percent}}%). Add a 0-day row for a rule of their own for the last days."
-        }
+        },
+        "reminder_days": "Reminder (days before)",
+        "days": "days",
+        "reminder_daysHint": "A reminder e-mail goes to the customer this many days before the departure. 0: none."
       },
       "errors": {
         "disabled": "For dated products, first turn on both dated products and digital and service products in Settings > Features.",
@@ -3705,7 +3719,8 @@
           "tierPercent": "The share must be a whole number between 0 and 100.",
           "tierSame": "Another row has this day count.",
           "tierOrder": "A row nearer the departure cannot keep less.",
-          "tierRows": "At most 10 cancellation tiers."
+          "tierRows": "At most 10 cancellation tiers.",
+          "reminderDays": "The reminder must be between 0 and 30 days (0: none)."
         },
         "tiers": "Cancellation tiers are invalid: each day count once, and nearer the departure never keeps less.",
         "slotCancelled": "A cancelled departure cannot be opened again.",
@@ -5066,6 +5081,20 @@
       },
       "doneByHand": "Booking cancelled; {{amount}} is to be refunded by hand.",
       "orderCancelled": "The booking and its unpaid order were cancelled."
+    },
+    "vouchers": {
+      "title": "Check a voucher",
+      "description": "Type the check code on the customer's voucher to see whether the booking stands.",
+      "code": "Check code",
+      "check": "Check",
+      "valid": "Valid booking",
+      "cancelled": "This booking was cancelled",
+      "unknown": "No booking has this code",
+      "order": "Order #{{number}}",
+      "units_one": "{{count}} person",
+      "units_other": "{{count}} people",
+      "departure_cancelled": "This departure was cancelled",
+      "open_order": "Open order"
     }
   },
   "customers": {

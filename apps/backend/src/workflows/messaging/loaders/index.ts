@@ -3,6 +3,7 @@ import type { MessageTemplateName } from "../../../lib/messaging/templates"
 import { loadCampaignMessage } from "../../campaigns/loader"
 import type { VarsOf } from "../deliver"
 import { loadAnnouncement, loadPasswordReset, loadVerification } from "./account"
+import { loadBookingCancel, loadBookingConfirmed, loadBookingReminder } from "./booking"
 import { loadPaymentFailed } from "./cart"
 import { loadCartReminder } from "./cart-reminder"
 import { loadConsentRequest } from "./consent"
@@ -45,6 +46,11 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "order.shipped": (container, id) => loadParcelMessage(container, id),
   "order.delivered": (container, id) => loadParcelMessage(container, id),
   "order.invoiced": (container, id) => loadInvoiceMessage(container, id),
+  // adr/0076 Ek D7b: the booking for its confirmation, a departure's use row for the rest
+  "booking.confirmed": (container, id) => loadBookingConfirmed(container, id),
+  "booking.reminder": (container, id) => loadBookingReminder(container, id),
+  "booking.cancelled": loadBookingCancel,
+  "booking.departure_cancelled": loadBookingCancel,
   "return.requested": (container, id) => loadReturnMessage(container, id),
   "return.approved": (container, id) => loadReturnMessage(container, id),
   "return.refunded": (container, id) => loadReturnMessage(container, id),

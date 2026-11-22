@@ -24,6 +24,7 @@ export const BOOKING_LIMITS = {
   holdMax: 60,
   maxUnits: 500,
   minParticipants: 10_000,
+  reminderDays: 30,
   pax: 20,
   age: 120,
   adjustment: 1_000_000,
@@ -142,6 +143,9 @@ export const settingsSchema = z.object({
     .string()
     .refine((text) => countIn(text, 1, BOOKING_LIMITS.maxUnits), `${F}.maxUnits`),
   min_participants: optionalCount(1, BOOKING_LIMITS.minParticipants, `${F}.minParticipants`),
+  reminder_days: z
+    .string()
+    .refine((text) => countIn(text, 0, BOOKING_LIMITS.reminderDays), `${F}.reminderDays`),
   traveler_level: z.enum(TRAVELER_LEVELS),
   tiers: tiersSchema,
   pax: z.record(
@@ -176,6 +180,7 @@ export function settingsDraftOf(
       bookable?.min_participants === null || bookable?.min_participants === undefined
         ? ""
         : String(bookable.min_participants),
+    reminder_days: String(bookable?.reminder_days ?? 2),
     traveler_level: bookable?.traveler_fields?.level ?? "none",
     tiers: tierDraftsOf(bookable?.cancellation_tiers),
     pax: Object.fromEntries(
@@ -213,6 +218,7 @@ export function settingsInputOf(draft: SettingsDraft): BookableSettingsInput {
     hold_minutes: count(draft.hold_minutes),
     max_units_per_cart: count(draft.max_units_per_cart),
     min_participants: draft.min_participants.trim() === "" ? null : count(draft.min_participants),
+    reminder_days: count(draft.reminder_days),
     pax_by_variant: pax,
     traveler_fields: { level: draft.traveler_level },
     cancellation_tiers: tiersInputOf(draft.tiers),

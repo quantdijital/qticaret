@@ -6,6 +6,8 @@ import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type { MessageSkipReason } from "../../modules/messaging/models/message-skip"
 import type MessagingModuleService from "../../modules/messaging/service"
+import { BOOKING_MODULE } from "../../modules/booking"
+import type BookingModuleService from "../../modules/booking/service"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
@@ -19,7 +21,14 @@ export const isCustomerTemplate = (name: string): boolean => !name.startsWith("s
 const CUSTOMER_TEMPLATES = Object.keys(MESSAGE_TEMPLATES).filter(isCustomerTemplate)
 
 /** What an order's history reads besides the order: its parcels' and return requests' messages. */
-export const HISTORY_RESOURCE_TYPES = new Set(["order", "fulfillment", "return_request"])
+export const HISTORY_RESOURCE_TYPES = new Set([
+  "order",
+  "fulfillment",
+  "return_request",
+  // adr/0076 Ek D7b: a dated order's booking and its departures
+  "booking",
+  "booking_slot_use",
+])
 
 /**
  * The order's messages staff may send again (2026-11-06), from their
@@ -138,7 +147,8 @@ export async function orderMessages(container: Container, orderId: string) {
 /**
  * What an order's messages are about: the order, its parcels, its return
  * requests and its sale invoices (the invoice's link goes under the
- * invoice's id).
+ * invoice's id), and a dated order's bookings and their departures
+ * (adr/0076 Ek D7b).
  */
 export async function orderMessageResources(
   container: Container,
@@ -153,6 +163,14 @@ export async function orderMessageResources(
   if (!order) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
   }
+  const bookings = container.resolve<BookingModuleService>(BOOKING_MODULE)
+  const booked = await bookings.listBookings({ order_id: orderId }, { select: ["id"] })
+  const uses = booked.length
+    ? await bookings.listBookingSlotUses(
+        { booking_id: booked.map((booking) => booking.id) },
+        { select: ["id"] }
+      )
+    : []
   const [requests, invoices] = await Promise.all([
     container
       .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
@@ -166,6 +184,8 @@ export async function orderMessageResources(
     ...(order.fulfillments ?? []).flatMap((parcel) => (parcel ? [parcel.id] : [])),
     ...requests.map((request) => request.id),
     ...invoices.map((invoice) => invoice.id),
+    ...booked.map((booking) => booking.id),
+    ...uses.map((use) => use.id),
   ]
 }
 

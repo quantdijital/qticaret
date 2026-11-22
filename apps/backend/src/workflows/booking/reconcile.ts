@@ -3,6 +3,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { BOOKING_KEY } from "../../lib/booking/cart-lines"
 import { errorSummary, logger } from "../../lib/logging"
+import { sendBookingConfirmations } from "./messages"
 import { cancelOrderBookingsWorkflow, confirmOrderBookingsWorkflow } from "./orders"
 import type { ConfirmOutcome } from "./orders"
 import { RECONCILE_MAX_ATTEMPTS, reconcileAttempts } from "./reconcile-attempts"
@@ -80,12 +81,16 @@ export interface ReconcileActions {
 }
 
 const workflowActions = (container: Container): ReconcileActions => ({
-  confirm: async (orderId, quiet) =>
-    (
-      await confirmOrderBookingsWorkflow(container as MedusaContainer).run({
-        input: { order_id: orderId, quiet },
-      })
-    ).result,
+  confirm: async (orderId, quiet) => {
+    const { result } = await confirmOrderBookingsWorkflow(container as MedusaContainer).run({
+      input: { order_id: orderId, quiet },
+    })
+    // A booking the order event missed gets its confirmation e-mail here (adr/0076 Ek D7b)
+    if (result === "confirmed" || result === "retaken") {
+      await sendBookingConfirmations(container as MedusaContainer, orderId)
+    }
+    return result
+  },
   cancel: (orderId) =>
     cancelOrderBookingsWorkflow(container as MedusaContainer).run({
       input: { order_id: orderId },

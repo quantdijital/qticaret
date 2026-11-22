@@ -353,6 +353,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu ürün için iptal koşulu tanımlı değil; iptal için mağazayla iletişime geçin.",
   "booking.cancel_unpaid": "Ödemesi alınmamış siparişi bütün olarak iptal edin.",
   "booking.cancel_unknown": "Bu siparişte iptal edilecek rezervasyon bulunamadı.",
+  "booking.voucher_unknown": "Bu siparişte rezervasyon bulunamadı.",
   "booking.use_booking_cancel":
     "Tarihli siparişte iptal her rezervasyon için ayrı yapılır; iade tutarı iptal koşullarına göre hesaplanır.",
   "booking.order_change_unsupported":

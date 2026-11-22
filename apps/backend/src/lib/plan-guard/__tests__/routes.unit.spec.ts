@@ -143,6 +143,8 @@ describe("the plan guard's allow-list", () => {
     // adr/0076 Ek D7a: a booking's or a whole departure's cancel gives money back
     "POST /admin/orders/:id/bookings/cancel",
     "POST /admin/booking-slots/:id/cancel",
+    // adr/0076 Ek D7b: a sold booking's voucher checked
+    "POST /admin/booking-vouchers/check",
     // Stock, KVKK, exports, one's own account, taking access away
     "POST /admin/inventory-items/:id/location-levels/:location_id",
     "POST /admin/inventory-items/location-levels/batch",
