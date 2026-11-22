@@ -18,6 +18,7 @@ import type {
   ProductCondition,
   ProductKind,
 } from "@/features/products/api/product-edit"
+import { BookingModeField } from "./booking-mode-field"
 import { GiftCardField } from "./gift-card-field"
 
 // Radix Select has no empty value; this one stands for "none chosen"
@@ -30,6 +31,8 @@ export interface CatalogValues {
   withdrawal_excluded: boolean
   restriction: Restriction | null
   is_gift_card: boolean
+  /** Sold by departure (`booking_mode: departure`, adr/0076 §2). */
+  booking: boolean
 }
 
 /** Which of the fields the shop uses (feature flags), or this product already has. */
@@ -37,6 +40,8 @@ export interface CatalogShown {
   kinds: boolean
   restricted: boolean
   giftCard: boolean
+  /** Dated sale: the flag on, or this product already dated. */
+  booking: boolean
 }
 
 /**
@@ -60,6 +65,8 @@ export function CatalogFields({
   const { t } = useTranslation()
   // A gift card is digital: its kind is the server's while it is one
   const gift = useWatch({ control: form.control, name: "is_gift_card" })
+  // Only a service is sold by departure (adr/0076 §2)
+  const kind = useWatch({ control: form.control, name: "kind" })
   return (
     <>
       {shown.kinds ? (
@@ -92,6 +99,7 @@ export function CatalogFields({
           />
         </Field>
       ) : null}
+      {shown.booking && kind === "service" && !gift ? <BookingModeField form={form} /> : null}
       <Field label={t("products.catalog.condition")} htmlFor="catalog-condition">
         <Controller
           control={form.control}
