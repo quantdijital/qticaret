@@ -115,6 +115,10 @@ ADR eki + F16 ile birlikte. Kapsam: `ai.platform_credits` bayrağı, `ai_free_cr
 - **`product_title`** (`text`; yalnız ürün; ürünün açıklamasından 1.000 karakter okunur): marka + tür/model + ayırt edici özellik düzeninde daha açık ad; hedef 30–80, üst sınır 120 karakter. Kapı: tek satır, bağırma ya da üç kez geçen sözcük yok, bağlantı ve kişisel veri yok, ve **uydurma yok**: adın her sözcüğü servise gönderilen veri bloğunda bulunmalı (rakamlı sözcük birebir; üç harf ve üstü sözcük ilk beş harfiyle, Türkçe ekler için; "ve", "ile", "için" gibi bağlaçlar serbest), yoksa `ungrounded` ile reddedilir. Panel: genel karttaki "Ürün adı" alanının yanında düğme.
 - Ortak: roller owner/admin, 1 kredi, `ai_text` hız profili, kullanım satırı öneriden önce yazılır; giden veri SEO işleriyle aynı okuyucudan (fiyat, stok, iç kategori, kişisel veri gitmez). Testler: `lib/ai/__tests__/catalog-tasks.unit.spec.ts`, `integration-tests/http/ai-catalog-tasks.spec.ts`, panelde `ai-button-choices.spec.tsx`, `seo-card.spec.tsx`, `general-card.spec.tsx`.
 
+## Aşama 10a: vitrin arama niyeti (adr/0077)
+
+Müşterinin vitrinde yazdığı cümleyi ("ağustosta iki kişi Kapadokya") arama süzgecine çeviren `search_intent` işi. Kiracı bayrağı `ai.storefront_search`, varsayılan kapalı; yalnız mağazanın kendi anahtarıyla. Çıktı katı Zod, yalnız süzgeç (kategori ve nitelik değeri mağazanın kapalı listesinden, tarih/ay, kişi); sonuçları normal arama üretir, etiketler sunucunun doğrulanmış süzgecinden kurulur. Metin `redactPersonalData`'dan geçer, saklanmaz, `ai_usage`'a yazılmaz (isteyen `"vitrin"`). Sınır: IP başına dakikada 5 / günde 30, mağaza başına günde 500, 24 saat önbellek; servis düşerse `q` aramasına döner. Bu, adr/0071 §10'daki "müşteri verisi gitmez" kuralının tek istisnasıdır (adr/0077 §7). PR'lar: backend (uç `api/store/search/interpret`, `security-reviewer` zorunlu) ve arayüz ("Kendi cümlenle ara", panelde anahtar).
+
 ## Aşama 10–13
 
 Akıllı arama (`embedding`; adr/0056 ile), görünüm asistanı, toplu komut, 3D ve ajan ticareti: her biri kendi ADR'siyle. Bu çekirdek onlara yalnız servis kaydı, seçim, kota ve kullanım kaydını verir.
