@@ -13,6 +13,12 @@ export const BOOKING_TEXTS: Readonly<Record<string, string>> = {
   "booking_confirmed.voucher": "Voucher'ı aç",
   "booking_confirmed.voucher_note":
     "Voucher üzerindeki doğrulama kodunu kimseyle paylaşmayın; kalkışta görevliye gösterin.",
+  // Ek basit yol: the shop runs without vouchers; its own note, else this one
+  "booking_confirmed.preheader_simple": "Kalkış bilgileri ve iptal koşulları bu e-postada.",
+  "booking_confirmed.intro_simple":
+    "#{{number}} numaralı siparişinizdeki rezervasyon {{shop}} tarafından onaylandı. Kalkış bilgileri aşağıda.",
+  "booking.voucher_off_note":
+    "Rezervasyon ayrıntıları için sizinle telefon veya e-posta ile iletişime geçeceğiz.",
   "booking.departure": "{{title}}",
   "booking.when": "Kalkış: {{when}}",
   "booking.meeting_point": "Buluşma yeri: {{place}}",
@@ -25,11 +31,16 @@ export const BOOKING_TEXTS: Readonly<Record<string, string>> = {
   "booking.terms_none":
     "Bu rezervasyon hesabınızdan iptal edilemez; değişiklik için mağazayla iletişime geçin.",
   "booking.terms_how": "İptali sipariş sayfanızdan yapabilirsiniz; iade tutarı orada gösterilir.",
+  "booking.terms_contact":
+    "İptal ve değişiklik için mağazayla telefon ya da e-postayla iletişime geçin.",
   "booking_reminder.subject": "Kalkışınız yaklaşıyor: {{when}}",
   "booking_reminder.preheader": "#{{number}} numaralı siparişinizin kalkış bilgileri.",
   "booking_reminder.heading": "{{name}}, kalkışınız yaklaşıyor",
   "booking_reminder.intro":
     "{{shop}} ile rezervasyonunuzu hatırlatmak isteriz. Kalkış bilgileri aşağıda; voucher'ınızı yanınızda bulundurun.",
+  "booking_reminder.preheader_simple": "#{{number}} numaralı siparişinizin kalkış bilgileri.",
+  "booking_reminder.intro_simple":
+    "{{shop}} ile rezervasyonunuzu hatırlatmak isteriz. Kalkış bilgileri aşağıda.",
   "booking_cancelled.subject": "Rezervasyonunuz iptal edildi #{{number}}",
   "booking_cancelled.preheader": "İptal edilen kalkış ve iade bilgisi bu e-postada.",
   "booking_cancelled.heading": "{{name}}, rezervasyonunuz iptal edildi",

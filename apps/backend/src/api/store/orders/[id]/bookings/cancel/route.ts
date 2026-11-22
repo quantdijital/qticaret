@@ -1,4 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { MedusaError } from "@medusajs/framework/utils"
+import { CANCEL_BY_CONTACT, bookingFlow } from "../../../../../../lib/booking/flow"
 import { toMedusaAmount } from "../../../../../../lib/money"
 import { cancelBookingDeparture } from "../../../../../../workflows/booking/cancel"
 import { orderAccessOf } from "../../../../../http/order-access"
@@ -12,6 +14,10 @@ import type { StorePostBookingCancelType } from "../validators"
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const access = orderAccessOf(req)
+  // Ek basit yol: the shop takes cancels by phone or e-mail; staff's cancel stays open
+  if (!(await bookingFlow(req.scope)).online_cancel_enabled) {
+    throw new MedusaError(MedusaError.Types.NOT_ALLOWED, CANCEL_BY_CONTACT)
+  }
   const body = req.validatedBody as StorePostBookingCancelType
   const result = await cancelBookingDeparture(req.scope, {
     order_id: access.order_id,
