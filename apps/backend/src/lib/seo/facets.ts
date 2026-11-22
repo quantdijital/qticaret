@@ -8,7 +8,23 @@
  * order (`stok` among them), each with its values sorted,
  * then `fiyat`, `sirala` and `sayfa`; any other parameter (`utm_source`)
  * stays as it came, after them. Pure: the caller knows the keys.
+ *
+ * A date search (adr/0077 §2, facets-dated.ts) adds `kategori` (a
+ * search's), `tarih` or `ay`, `kisi` after the filters, before `fiyat`,
+ * and `sirala=kalkis`; the dates, the party and that sort only while the
+ * shop sells dated products, else they are dropped (a 301 without them).
  */
+
+import {
+  DATED_PARAMS,
+  DEPARTURE_SORT,
+  categoryOf,
+  datesOf,
+  datesParam,
+  paxOf,
+  todayIn,
+} from "./facets-dated"
+import type { ListingDates } from "./facets-dated"
 
 export const LISTING_PARAMS = {
   brand: "marka",
@@ -22,7 +38,13 @@ export const LISTING_PARAMS = {
 export const IN_STOCK_VALUE = "var"
 
 /** Sort orders a listing offers; the first is the default and is never written. */
-export const SORT_ORDERS = ["onerilen", "yeni", "fiyat-artan", "fiyat-azalan"] as const
+export const SORT_ORDERS = [
+  "onerilen",
+  "yeni",
+  "fiyat-artan",
+  "fiyat-azalan",
+  DEPARTURE_SORT,
+] as const
 export type SortOrder = (typeof SORT_ORDERS)[number]
 
 // A crawler trap is not a page: more than this is not answered
@@ -51,6 +73,22 @@ export interface ListingQuery {
   page: number
   /** Parameters that are not the listing's, as they came. */
   rest: [string, string][]
+  /** A search's category handle (`kategori`), its subtree included. */
+  category?: string | null
+  /** Departure dates asked (`tarih` or `ay`), only while the shop sells dated products. */
+  dates?: ListingDates | null
+  /** Places the party takes (`kisi`); 1 when not asked. */
+  pax?: number
+}
+
+/** How a listing's query is read beside its filter keys. */
+export interface ListingReadOptions {
+  /** The shop sells dated products (`catalog.booking`): dates, party and `kalkis` are read. */
+  booking?: boolean
+  /** The site search: `kategori` is its parameter. */
+  search?: boolean
+  /** Today in the shop's zone, `YYYY-MM-DD` (tests); else read now. */
+  today?: string
 }
 
 export type ListingRead =
@@ -61,6 +99,8 @@ export type ListingRead =
 // Names other URLs use: the listing's own, a variant's, search and tracking parameters
 const RESERVED_KEYS: ReadonlySet<string> = new Set([
   ...Object.values(LISTING_PARAMS),
+  // adr/0077 §2: a date search's own, whether the shop sells dated products or not
+  ...Object.values(DATED_PARAMS),
   "variant",
   "q",
   "gclid",
@@ -78,7 +118,16 @@ export const isReservedParam = (key: string): boolean =>
 export const filterKeysOf = (keys: Iterable<string>): Set<string> =>
   new Set([...keys].filter((key) => FILTER_KEY.test(key) && !isReservedParam(key)))
 
-const isListingKey = (key: string, filterKeys: ReadonlySet<string>) =>
+// The dates and the party are the listing's even while not read: they go in its 301
+const isListingKey = (
+  key: string,
+  filterKeys: ReadonlySet<string>,
+  options: ListingReadOptions = {}
+) =>
+  (options.search === true && key === DATED_PARAMS.category) ||
+  key === DATED_PARAMS.dates ||
+  key === DATED_PARAMS.months ||
+  key === DATED_PARAMS.pax ||
   key === LISTING_PARAMS.stock ||
   key === LISTING_PARAMS.price ||
   key === LISTING_PARAMS.sort ||
@@ -96,9 +145,11 @@ function priceOf(raw: string | undefined): ListingQuery["price"] {
   return min !== null && max !== null && min > max ? null : { min, max }
 }
 
-const sortOf = (raw: string | undefined): ListingQuery["sort"] =>
-  SORT_ORDERS.slice(1).find((order): order is Exclude<SortOrder, "onerilen"> => order === raw) ??
-  null
+const sortOf = (raw: string | undefined, booking: boolean): ListingQuery["sort"] =>
+  SORT_ORDERS.slice(1).find(
+    (order): order is Exclude<SortOrder, "onerilen"> =>
+      order === raw && (booking || order !== DEPARTURE_SORT)
+  ) ?? null
 
 // No page number, or one that is no number, is the first page; one past the cap, none
 const pageNumberOf = (raw: string | undefined): number | null => {
@@ -140,6 +191,15 @@ export function listingSearch(query: ListingQuery): string {
   for (const [key, values] of query.filters) {
     params.append(key, values.join(","))
   }
+  if (query.category) {
+    params.append(DATED_PARAMS.category, query.category)
+  }
+  if (query.dates) {
+    params.append(...datesParam(query.dates))
+  }
+  if (query.pax !== undefined && query.pax > 1) {
+    params.append(DATED_PARAMS.pax, String(query.pax))
+  }
   if (query.price) {
     const end = (value: number | null) => (value === null ? "" : String(value))
     params.append(LISTING_PARAMS.price, `${end(query.price.min)}-${end(query.price.max)}`)
@@ -165,10 +225,11 @@ export function listingSearch(query: ListingQuery): string {
  */
 export function readListingQuery(
   search: URLSearchParams,
-  filterKeys: ReadonlySet<string>
+  filterKeys: ReadonlySet<string>,
+  options: ListingReadOptions = {}
 ): ListingRead {
   const pairs = [...search.entries()]
-  const own = pairs.filter(([key]) => isListingKey(key, filterKeys))
+  const own = pairs.filter(([key]) => isListingKey(key, filterKeys, options))
   const last = (key: string) => own.filter(([each]) => each === key).at(-1)?.[1]
   const filters = filtersOf(own, filterKeys)
   const page = pageNumberOf(last(LISTING_PARAMS.page))
@@ -181,12 +242,28 @@ export function readListingQuery(
   ) {
     return { kind: "out_of_bounds" }
   }
+  const booking = options.booking === true
   const query: ListingQuery = {
     filters,
     price: priceOf(last(LISTING_PARAMS.price)),
-    sort: sortOf(last(LISTING_PARAMS.sort)),
+    sort: sortOf(last(LISTING_PARAMS.sort), booking),
     page,
-    rest: pairs.filter(([key]) => !isListingKey(key, filterKeys)),
+    rest: pairs.filter(([key]) => !isListingKey(key, filterKeys, options)),
+  }
+  const category = options.search === true ? categoryOf(last(DATED_PARAMS.category)) : null
+  if (category) {
+    query.category = category
+  }
+  if (booking) {
+    const today = options.today ?? todayIn(new Date())
+    const dates = datesOf(last(DATED_PARAMS.dates), last(DATED_PARAMS.months), today)
+    const pax = paxOf(last(DATED_PARAMS.pax))
+    if (dates) {
+      query.dates = dates
+    }
+    if (pax > 1) {
+      query.pax = pax
+    }
   }
   // Only the listing's own parameters must be in order; the others stay where they came
   const came = new URLSearchParams(own).toString().replace(/%2C/g, ",")
@@ -195,13 +272,27 @@ export function readListingQuery(
 
 /** Whether the query narrows or reorders the listing: such a page is not indexed. */
 export const isNarrowed = (query: ListingQuery): boolean =>
-  query.filters.length > 0 || query.price !== null || query.sort !== null
+  query.filters.length > 0 ||
+  query.price !== null ||
+  query.sort !== null ||
+  !!query.category ||
+  !!query.dates ||
+  (query.pax ?? 1) > 1
 
 /** The one filter a query holds, if it holds exactly one value and nothing else narrows it. */
 export function singleFilter(query: ListingQuery): { key: string; value: string } | null {
   const [only] = query.filters
   const value = only?.[1].length === 1 ? only[1][0] : undefined
-  if (query.filters.length !== 1 || !only || value === undefined || query.price || query.sort) {
+  if (
+    query.filters.length !== 1 ||
+    !only ||
+    value === undefined ||
+    query.price ||
+    query.sort ||
+    query.category ||
+    query.dates ||
+    (query.pax ?? 1) > 1
+  ) {
     return null
   }
   return { key: only[0], value }
@@ -219,6 +310,10 @@ export function facetDisallowLines(filterKeys: Iterable<string>): string[] {
     LISTING_PARAMS.stock,
     LISTING_PARAMS.price,
     LISTING_PARAMS.sort,
+    // adr/0077 §2; `kategori` lives on `/arama`, closed already, and `sirala=kalkis` under `sirala`
+    DATED_PARAMS.dates,
+    DATED_PARAMS.months,
+    DATED_PARAMS.pax,
   ]
   return [...new Set(keys)].flatMap((key) => [`Disallow: /*?${key}=`, `Disallow: /*&${key}=`])
 }

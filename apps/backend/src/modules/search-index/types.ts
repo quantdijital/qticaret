@@ -73,7 +73,10 @@ export interface ListingPlan {
     in_stock: boolean
   }
   price: { key: string; min: number | null; max: number | null }
-  sort: "relevance" | "newest" | "price_asc" | "price_desc"
+  /** `ids_order`: in `order_ids`' order (a date search's departures), the others after, newest first. */
+  sort: "relevance" | "newest" | "price_asc" | "price_desc" | "ids_order"
+  /** The order `ids_order` follows. */
+  order_ids?: string[]
   page: { offset: number; limit: number }
   /** Only the count (a listing's resolve, a page past the last). */
   countOnly?: boolean

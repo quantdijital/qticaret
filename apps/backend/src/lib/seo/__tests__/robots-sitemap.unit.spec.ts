@@ -54,6 +54,13 @@ describe("robotsTxt", () => {
         "Disallow: /*&fiyat=",
         "Disallow: /*?sirala=",
         "Disallow: /*&sirala=",
+        // adr/0077 §2: a date search's dates and party
+        "Disallow: /*?tarih=",
+        "Disallow: /*&tarih=",
+        "Disallow: /*?ay=",
+        "Disallow: /*&ay=",
+        "Disallow: /*?kisi=",
+        "Disallow: /*&kisi=",
         "",
       ].join("\n")
     )

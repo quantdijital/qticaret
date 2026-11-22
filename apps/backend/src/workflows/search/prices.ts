@@ -17,7 +17,10 @@ import { productsShown } from "../pricing/sale-products"
 
 type Maybe<T> = T | null | undefined
 
-/** A product as the index reads it for its prices. */
+/**
+ * A product as the index reads it for its prices: the variants its price
+ * is the lowest of (a dated product's paying categories only, adr/0077 §5).
+ */
 export interface PricedSource {
   id: string
   published: boolean
@@ -32,14 +35,18 @@ export interface IndexedPrices {
 
 interface RegionPriced {
   id: string
-  variants?: Maybe<Maybe<{ calculated_price?: Maybe<{ calculated_amount?: Maybe<number> }> }>[]>
+  variants?: Maybe<
+    Maybe<{ id?: string; calculated_price?: Maybe<{ calculated_amount?: Maybe<number> }> }>[]
+  >
 }
 
-/** Each product's lowest selling price per region, for a shopper with no customer group. */
+/** Each product's lowest selling price per region over its priced variants, for a shopper with no customer group. */
 async function regionPrices(
   container: MedusaContainer,
-  ids: string[]
+  products: readonly PricedSource[]
 ): Promise<Map<string, Record<string, number>>> {
+  const ids = products.map((product) => product.id)
+  const priced = new Set(products.flatMap((product) => product.variant_ids))
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const { data: regions } = await query.graph({
     entity: "region",
@@ -50,7 +57,7 @@ async function regionPrices(
   for (const region of ids.length > 0 ? (regions as { id: string; currency_code: string }[]) : []) {
     const { data } = await query.graph({
       entity: "product",
-      fields: ["id", "variants.calculated_price.calculated_amount"],
+      fields: ["id", "variants.id", "variants.calculated_price.calculated_amount"],
       filters: { id: ids },
       context: {
         variants: {
@@ -64,7 +71,7 @@ async function regionPrices(
     for (const product of data as RegionPriced[]) {
       const amounts = (product.variants ?? []).flatMap((variant) => {
         const amount = variant?.calculated_price?.calculated_amount
-        return typeof amount === "number" ? [amount] : []
+        return typeof amount === "number" && variant?.id && priced.has(variant.id) ? [amount] : []
       })
       if (amounts.length > 0) {
         const own = prices.get(product.id) ?? {}
@@ -101,10 +108,7 @@ export async function indexedPrices(
   products: readonly PricedSource[]
 ): Promise<Map<string, IndexedPrices>> {
   const [prices, shown] = await Promise.all([
-    regionPrices(
-      container,
-      products.map((product) => product.id)
-    ),
+    regionPrices(container, products),
     // A draft is listed nowhere: its shown price is not worked out
     productsShown(
       container,

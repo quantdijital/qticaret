@@ -4,7 +4,7 @@ import { storedAddonsOf } from "../../lib/catalog/addons"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { CATALOG_BOOKING, PRODUCT_ADDONS } from "../../modules/platform-settings/features"
 import { bookingCardFacts } from "../booking/card-facts"
-import type { BookingCardFact, DatedCardProduct } from "../booking/card-facts"
+import type { BookingCardFact, CardWindow, DatedCardProduct } from "../booking/card-facts"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
@@ -126,6 +126,8 @@ export async function cardFacts(
     product_ids: readonly string[]
     sales_channel_ids: readonly string[]
     region_id?: string | undefined
+    /** A date search's dates and party (adr/0077 §4); read only while the shop sells dated products. */
+    window?: CardWindow | undefined
   }
 ): Promise<Record<string, CardFacts>> {
   const ids = [...new Set(input.product_ids)]
@@ -178,7 +180,7 @@ export async function cardFacts(
   const [availability, dated] = await Promise.all([
     stockRead,
     bookingOn
-      ? bookingCardFacts(container, shown, input.region_id)
+      ? bookingCardFacts(container, shown, input.region_id, input.window)
       : new Map<string, BookingCardFact>(),
   ])
   const available = (variantId: string) => availability?.[variantId]?.availability ?? 0

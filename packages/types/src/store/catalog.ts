@@ -218,6 +218,14 @@ export interface StoreCardFacts {
     currency_code: string
     next_departure: string | null
     timezone: string
+    /**
+     * Only when the card was asked for a date search's dates (adr/0077
+     * §4): the places left on `next_departure` (null without one), and
+     * `in_range`: the departure and the from price are those inside the
+     * dates asked. Absent otherwise, and from a backend before it.
+     */
+    left?: number | null
+    in_range?: true
   }
 }
 
