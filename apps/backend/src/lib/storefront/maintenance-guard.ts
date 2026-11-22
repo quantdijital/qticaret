@@ -45,6 +45,8 @@ const OPEN_WRITES: readonly RegExp[] = [
   /^\/store\/gift-cards\/balance$/,
   /^\/store\/shipping-options\/[^/]+\/calculate$/,
   /^\/store\/orders\/[^/]+\/cancel$/,
+  // A dated order's departure cancelled with its refund (adr/0076 Ek D7a), as an order's cancel
+  /^\/store\/orders\/[^/]+\/bookings\/cancel$/,
   /^\/store\/customers\/me\/consents$/,
   /^\/store\/customers\/me\/privacy-requests$/,
   /^\/store\/consents\/(?:cookies|unsubscribe|confirm)$/,

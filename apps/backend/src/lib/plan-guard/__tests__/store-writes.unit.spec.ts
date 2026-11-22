@@ -39,6 +39,7 @@ const STORE_WRITES: Readonly<Record<string, "cart" | "guarded" | "read" | "open"
   "POST /store/gift-cards/balance": "read",
   "POST /store/newsletter": "open",
   "POST /store/order-lookup": "read",
+  "POST /store/orders/:id/bookings/cancel": "open",
   "POST /store/orders/:id/cancel": "open",
   "POST /store/orders/:id/returns": "open",
   "POST /store/payment-links/:token/cart": "guarded",

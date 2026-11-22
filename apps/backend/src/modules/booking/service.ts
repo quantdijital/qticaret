@@ -8,6 +8,12 @@ import {
 } from "@medusajs/framework/utils"
 import { openSlotsOf, slotsById, slotsOfBookable } from "./availability"
 import type { SlotAvailability } from "./availability"
+import {
+  cancelBookingSlot,
+  cancelledSlotsWithLiveUses,
+  liveUsesOfOrder,
+  liveUsesOnSlot,
+} from "./cancel-uses"
 import { cartHold } from "./cart-hold"
 import type { HoldClient } from "./client-share"
 import { cancelBooking, confirmHold, extendHold, holdUnits, updateSlot } from "./counters"
@@ -34,6 +40,7 @@ export interface BookingModuleOptions {
 }
 
 export type { SlotAvailability } from "./availability"
+export type { LiveUse } from "./cancel-uses"
 export type { CartHold } from "./cart-hold"
 export type { HoldClient } from "./client-share"
 export type { HoldState, SlotChanges } from "./counters"
@@ -205,6 +212,38 @@ class BookingModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {}
   ): Promise<boolean> {
     return cancelBooking(managerOf(sharedContext), bookingId)
+  }
+
+  /** One departure of a confirmed booking cancelled, its places back (D7a); whether it changed. */
+  @InjectTransactionManager()
+  async cancelBookingSlot(
+    bookingId: string,
+    slotId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return cancelBookingSlot(managerOf(sharedContext), bookingId, slotId)
+  }
+
+  /** An order's live departures: its confirmed bookings' uses not cancelled. */
+  @InjectManager()
+  async liveUsesOfOrder(orderId: string, @MedusaContext() sharedContext: Context = {}) {
+    return liveUsesOfOrder(managerOf(sharedContext), orderId)
+  }
+
+  /** A slot's live departures, a page at a time (the departure cancel). */
+  @InjectManager()
+  async liveUsesOnSlot(
+    slotId: string,
+    limit: number,
+    @MedusaContext() sharedContext: Context = {}
+  ) {
+    return liveUsesOnSlot(managerOf(sharedContext), slotId, limit)
+  }
+
+  /** Cancelled slots with a live departure left (the departure cancel's resume). */
+  @InjectManager()
+  async cancelledSlotsWithLiveUses(limit: number, @MedusaContext() sharedContext: Context = {}) {
+    return cancelledSlotsWithLiveUses(managerOf(sharedContext), limit)
   }
 
   /** Holds past their end released, a batch a call (`now`: the database's clock by default). */

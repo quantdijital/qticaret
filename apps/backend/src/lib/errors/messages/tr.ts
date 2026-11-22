@@ -347,6 +347,19 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "booking.travelers_invalid": "Bir katılımcının bilgisi eksik ya da geçersiz; formu kontrol edin.",
   "booking.traveler_unknown": "Katılımcı bulunamadı.",
   "booking.traveler_search_invalid": "Ad, soyad, doğum tarihi ya da numara geçersiz; kontrol edin.",
+  "booking.cancel_too_late":
+    "Hizmet günü geldi; bu rezervasyon artık iptal edilemez. Mağazayla iletişime geçin.",
+  "booking.cancel_unavailable":
+    "Bu ürün için iptal koşulu tanımlı değil; iptal için mağazayla iletişime geçin.",
+  "booking.cancel_unpaid": "Ödemesi alınmamış siparişi bütün olarak iptal edin.",
+  "booking.cancel_unknown": "Bu siparişte iptal edilecek rezervasyon bulunamadı.",
+  "booking.use_booking_cancel":
+    "Tarihli siparişte iptal her rezervasyon için ayrı yapılır; iade tutarı iptal koşullarına göre hesaplanır.",
+  "booking.order_change_unsupported":
+    "Tarihli ürün iade ya da değişimle geri alınmaz; rezervasyonu iptal edin.",
+  "booking.slot_cancelled": "Bu kalkış iptal edildi; yeniden açılamaz.",
+  "booking.use_departure_cancel":
+    'Kalkışı iptal etmek için "Kalkışı iptal et"i kullanın; rezervasyonlar iade edilir.',
   "addons.required_must_be_free": "Ücretli ek seçenek zorunlu yapılamaz.",
   "addons.not_addon_line": "Bu ürünün ek seçeneği yok.",
   "addons.unknown": "Bu ek seçenek ya da seçim üründe yok.",

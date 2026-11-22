@@ -20,6 +20,13 @@ export interface ReturnsSettings {
    * as a field until the panel drops its control.
    */
   return_shipping: "shop"
+  /**
+   * The shop sells package travel (adr/0076 §8, K9): a dated booking
+   * cancelled 30 days or more before its day keeps nothing, whatever the
+   * product's tiers say, and the shopper is told the refund comes within
+   * 14 days. A plain switch, no sector in the code.
+   */
+  package_travel: boolean
 }
 
 export const MIN_WITHDRAWAL_DAYS = 14
@@ -33,6 +40,7 @@ export const returnsSection = defineSection<ReturnsSettings>(
       .min(MIN_WITHDRAWAL_DAYS, { message: "platform_settings.withdrawal_days_invalid" })
       .max(365, { message: "platform_settings.withdrawal_days_invalid" }),
     return_shipping: z.enum(["shop"], { message: "platform_settings.return_shipping_shop_only" }),
+    package_travel: z.boolean(),
   },
-  { withdrawal_days: MIN_WITHDRAWAL_DAYS, return_shipping: "shop" }
+  { withdrawal_days: MIN_WITHDRAWAL_DAYS, return_shipping: "shop", package_travel: false }
 )

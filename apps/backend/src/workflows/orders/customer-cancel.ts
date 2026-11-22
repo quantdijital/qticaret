@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { cancelOrderWorkflow } from "@medusajs/medusa/core-flows"
+import { bookingMarkOf } from "../../lib/booking/cart-lines"
 import { ValidationError } from "../../lib/errors"
 import { cardsVoidedByCancel } from "../../lib/orders/gift-returns"
 import { cancelLockKeys } from "../../lib/orders/locks"
@@ -13,6 +14,7 @@ export interface CancelOrderRow {
   customer_id?: string | null
   status?: string
   fulfillments?: ({ canceled_at?: unknown } | null)[] | null
+  items?: ({ metadata?: unknown } | null)[] | null
   payment_collections?:
     | ({
         payments?: ({ provider_id?: string | null; captured_at?: unknown } | null)[] | null
@@ -25,6 +27,7 @@ export const CANCEL_ORDER_FIELDS = [
   "customer_id",
   "status",
   "fulfillments.canceled_at",
+  "items.metadata",
   "payment_collections.payments.provider_id",
   "payment_collections.payments.captured_at",
 ]
@@ -36,7 +39,9 @@ export const CANCEL_ORDER_FIELDS = [
  * it comes back as a return); money taken by hand, a bank transfer the
  * shop confirmed or a difference staff collected on an edit
  * (`orders.cancel_contact_shop`: the refund would only be written down,
- * security review 2026-10-28). Pure: the cancel and the order page's
+ * security review 2026-10-28); a paid order with a dated line
+ * (`booking.use_booking_cancel`: its departures are cancelled one by
+ * one, by their tiers, adr/0076 Ek D7a). Pure: the cancel and the order page's
  * `cancellable` read the same rule.
  */
 export function cancelRefusal(order: CancelOrderRow): string | null {
@@ -55,7 +60,12 @@ export function cancelRefusal(order: CancelOrderRow): string | null {
   // Offline money, or a difference staff collected by hand (an edit): it goes back by hand
   const takenByHand =
     taken.length > 1 || taken.some((payment) => isOfflineProvider(payment?.provider_id ?? ""))
-  return takenByHand ? "orders.cancel_contact_shop" : null
+  if (takenByHand) {
+    return "orders.cancel_contact_shop"
+  }
+  // A paid dated order is cancelled departure by departure, by its tiers (adr/0076 Ek D7a)
+  const dated = (order.items ?? []).some((item) => bookingMarkOf(item?.metadata) !== null)
+  return dated && taken.length > 0 ? "booking.use_booking_cancel" : null
 }
 
 /**

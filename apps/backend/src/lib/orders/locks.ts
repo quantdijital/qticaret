@@ -41,10 +41,22 @@ export const isCancelRefundReference = (reference: string): boolean =>
   reference.startsWith("cancel")
 
 /**
+ * The reference a dated booking's departure cancel refunds under
+ * (adr/0076 Ek D7a): the booking's use row's own, so a cancel tried
+ * again (the shopper's, staff's or the departure cancel's sweep)
+ * refunds it once. At most 40 letters and digits; no panel key starts so.
+ */
+export const bookingCancelReference = (useId: string): string =>
+  `booking${useId.replace(/[^A-Za-z0-9]/g, "")}`.slice(0, 40)
+
+/**
  * A refund a flow makes again under its own reference until it is done: a
- * cancel's, a return's (`return<request>`). Never closed in part by staff
- * (review D4-1, S1): run again, the flow sends what is left (M1). An
+ * cancel's, a return's (`return<request>`), a booking cancel's
+ * (`booking<use>`). Never closed in part by staff (review D4-1, S1):
+ * run again, the flow sends what is left (M1). An
  * edit's is not: the edit never makes its refund again (MF1).
  */
 export const isFlowOwnedRefund = (reference: string): boolean =>
-  isCancelRefundReference(reference) || reference.startsWith("return")
+  isCancelRefundReference(reference) ||
+  reference.startsWith("return") ||
+  reference.startsWith("booking")

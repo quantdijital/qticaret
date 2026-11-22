@@ -104,10 +104,13 @@ export async function cancelBooking(manager: Executor, bookingId: string): Promi
     }
     return false
   }
+  // A departure cancelled on its own gave its places back already (D7a)
   const uses = unitsBySlot(
     await rows(
       manager,
-      `SELECT slot_id, units FROM booking_slot_use WHERE booking_id = ? AND deleted_at IS NULL`,
+      `UPDATE booking_slot_use SET cancelled_at = now(), updated_at = now()
+        WHERE booking_id = ? AND cancelled_at IS NULL AND deleted_at IS NULL
+       RETURNING slot_id, units`,
       [bookingId]
     )
   )

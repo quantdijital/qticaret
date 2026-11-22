@@ -102,6 +102,15 @@ export const updateSlotStep = createStep(
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "booking.slot_unknown")
     }
     const { changes } = input
+    // A departure is cancelled only with its bookings refunded (D7a), and stays so
+    if (changes.status !== undefined && changes.status !== slot.status) {
+      if (slot.status === "cancelled") {
+        throw new ValidationError("booking.slot_cancelled", { field: "status" })
+      }
+      if (changes.status === "cancelled") {
+        throw new ValidationError("booking.use_departure_cancel", { field: "status" })
+      }
+    }
     checkDates(
       changes.starts_at ?? slot.starts_at,
       changes.ends_at === undefined ? slot.ends_at : changes.ends_at

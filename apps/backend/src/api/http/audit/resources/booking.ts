@@ -88,4 +88,31 @@ export const BOOKING_RESOURCES: readonly AuditedResource[] = [
         : {}
     },
   },
+  {
+    // The shop cancels a departure: its state and places before and after (adr/0076 Ek D7a)
+    method: "POST",
+    route: "POST /admin/booking-slots/:id/cancel",
+    pattern: new RegExp(`^/admin/booking-slots/(?<id>${ID})/cancel$`, "i"),
+    resourceType: "booking_slot",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: async ({ scope, params }) => {
+      const [slot] = await bookingOf(scope).listBookingSlots(
+        { id: params["id"] ?? "" },
+        { take: 1 }
+      )
+      return slot ? { status: slot.status, sold: slot.sold } : {}
+    },
+  },
+  {
+    // One departure of an order cancelled by staff: the order's live departures before and after
+    method: "POST",
+    route: "POST /admin/orders/:id/bookings/cancel",
+    pattern: new RegExp(`^/admin/orders/(?<id>${ID})/bookings/cancel$`, "i"),
+    resourceType: "booking",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: async ({ scope, params }) => {
+      const uses = await bookingOf(scope).liveUsesOfOrder(params["id"] ?? "")
+      return Object.fromEntries(uses.map((use) => [`${use.slot_id}.units`, use.units]))
+    },
+  },
 ]
