@@ -24,6 +24,7 @@ import type SectorPacksModuleService from "../../modules/sector-packs/service"
 import { defaultLayout } from "./layout-default"
 import { layoutRow } from "./layout-row"
 import { liveMenus, presetLookups } from "./preset-lookups"
+import { sectionTypesOff } from "./layout-flags"
 
 /** The pack every shop has its presets from, applied or not (adr/0063 §7). */
 export const GENERAL_PACK = "general"
@@ -61,6 +62,11 @@ export interface LoadedPreset {
 export interface PresetResolution {
   records: Record<string, string>
   links: Record<string, PresetLink | null>
+  /**
+   * Section types whose feature flag is off in this shop, with their flags
+   * (adr/0077 §8): their sections are dropped as `feature_off`.
+   */
+  types_off: Record<string, string>
   /** The images the resolved design still shows. */
   images: string[]
 }
@@ -170,6 +176,7 @@ function documentOf(
     images,
     live: kept.live,
     laid_out: kept.frame.pages.map((page) => page.page_id),
+    types_off: new Map(Object.entries(resolution.types_off)),
   })
   const frame = withShopFrame(resolved.groups, kept.frame)
   const pages = withShopPages(resolved.pages, kept.frame.pages)
@@ -197,10 +204,14 @@ export const resolvePresetStep = createStep(
   "storefront-preset-resolve",
   async (preset: LoadedPreset, { container }) => {
     const markers = presetMarkers({ layout: preset.layout, menus: preset.menus })
-    const lookups = await presetLookups(container, markers, placeholders(markers.images))
+    const [lookups, off] = await Promise.all([
+      presetLookups(container, markers, placeholders(markers.images)),
+      sectionTypesOff(container),
+    ])
     const resolution = {
       records: Object.fromEntries(lookups.records),
       links: Object.fromEntries(lookups.links),
+      types_off: Object.fromEntries(off),
     }
     const checked = documentOf(
       preset,
