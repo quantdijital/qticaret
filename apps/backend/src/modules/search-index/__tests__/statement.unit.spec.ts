@@ -64,6 +64,19 @@ describe("the listing statement (adr/0056)", () => {
     expect(count.sql).not.toContain("sales_channel_ids")
   })
 
+  it("answers only the count and the ids when asked, the page at most 1000 long", () => {
+    const { sql, params } = listingStatement(
+      plan({ idsOnly: true, page: { offset: 0, limit: 5000 } })
+    )
+    expect(sql).toContain("AS ids")
+    expect(sql).not.toContain("AS brands")
+    expect(sql).not.toContain("AS options")
+    expect(sql).not.toContain("AS in_stock")
+    expect(params).toContain(1000)
+    expect(params).not.toContain(5000)
+    expect(placeholders(sql)).toBe(params.length)
+  })
+
   it("reads the statement's row into the answer", () => {
     const filtered = plan({
       filters: { brands: null, options: [{ key: "renk", values: ["mavi"] }], in_stock: false },

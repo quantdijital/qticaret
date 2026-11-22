@@ -78,6 +78,9 @@ export const RATE_LIMIT_PROFILES = {
   // A storefront page's card facts (adr/0046 Ek 2026-11-04); a date search's read the
   // departures in its dates (adr/0077 §4). A page asks once a listing, once a home rail
   card_facts: { name: "card_facts", perIp: { max: 240, windowMs: MINUTE } },
+  // A month's departure calendar (adr/0077 §6): asked as a shopper opens the date
+  // picker or turns a month; each answer is kept a minute, a miss reads the month
+  departure_calendar: { name: "departure_calendar", perIp: { max: 60, windowMs: MINUTE } },
   // The header's live search (2026-11-05): a read as the shopper types, after a
   // pause; the storefront keeps each answer a minute, so a word asked again is free
   search_suggest: { name: "search_suggest", perIp: { max: 240, windowMs: MINUTE } },

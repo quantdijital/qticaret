@@ -10,6 +10,7 @@ import { CATALOG_BOOKING } from "../../modules/platform-settings/features"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { StorePostCartBooking } from "../store/carts/[id]/bookings/validators"
 import { StorePostCartTravelers } from "../store/carts/[id]/travelers/validators"
+import { StoreGetDepartureCalendar } from "../store/departures/calendar/validators"
 import { StoreGetProductBooking } from "../store/products/[id]/booking/validators"
 import { clientIp, isShopperAddressUnknown } from "./client-ip"
 import { rateLimit } from "./rate-limit"
@@ -91,6 +92,16 @@ export const BOOKING_STORE_ROUTES = [
     middlewares: [
       requireFeature(CATALOG_BOOKING),
       validateAndTransformQuery(StoreGetProductBooking, {}),
+    ],
+  },
+  {
+    // A month's departures by day (adr/0077 §6): a read, on its own budget per address
+    matcher: "/store/departures/calendar",
+    methods: ["GET" as const],
+    middlewares: [
+      requireFeature(CATALOG_BOOKING),
+      rateLimit(() => RATE_LIMIT_PROFILES.departure_calendar),
+      validateAndTransformQuery(StoreGetDepartureCalendar, {}),
     ],
   },
   {

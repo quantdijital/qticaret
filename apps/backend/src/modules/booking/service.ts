@@ -8,6 +8,8 @@ import {
 } from "@medusajs/framework/utils"
 import { openSlotsOf, slotsById, slotsOfBookable } from "./availability"
 import type { SlotAvailability } from "./availability"
+import { calendarRowsOf } from "./calendar"
+import type { CalendarQuery, CalendarRow } from "./calendar"
 import { departureMatches, windowSlotsOf } from "./matches"
 import type { DepartureMatch, DepartureQuery } from "./matches"
 import {
@@ -55,6 +57,7 @@ export interface BookingModuleOptions {
 export type { SlotAvailability } from "./availability"
 export type { LiveUse } from "./cancel-uses"
 export type { DepartureDates, DepartureMatch, DepartureQuery } from "./matches"
+export type { CalendarQuery, CalendarRow } from "./calendar"
 export type { CartHold } from "./cart-hold"
 export type { HoldClient } from "./client-share"
 export type { HoldState, SlotChanges } from "./counters"
@@ -408,6 +411,16 @@ class BookingModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {}
   ): Promise<SlotAvailability[]> {
     return windowSlotsOf(managerOf(sharedContext), bookableIds, query, limit)
+  }
+
+  /** Several bookables' matching departures in a month, by local day (adr/0077 §6). */
+  @InjectManager()
+  async calendarRows(
+    bookableIds: string[],
+    query: CalendarQuery,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<CalendarRow[]> {
+    return calendarRowsOf(managerOf(sharedContext), bookableIds, query)
   }
 
   /** New slots, every one empty (`sold`, `held` 0); their ids in the order given. */
