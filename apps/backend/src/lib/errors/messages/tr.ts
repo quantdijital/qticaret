@@ -326,6 +326,17 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "booking.timezone_invalid": "Saat dilimi geçerli değil (ör. Europe/Istanbul).",
   "booking.price_adjustment_invalid":
     "Fiyat farkı en çok 1.000.000 TL, en çok iki ondalıkla girilmeli; en çok 100 varyant için.",
+  "booking.use_booking_route":
+    "Bu ürün tarihli satılır: ürün sayfasından kalkış tarihini ve kişi sayısını seçin.",
+  "booking.sales_closed": "Bu kalkışın satışı kapandı.",
+  "booking.max_units": "Bir sepette en çok {{max}} kişilik yer ayrılabilir.",
+  "booking.currency_unsupported":
+    "Bu kalkış yalnız Türk lirasıyla satılır; sepetin para birimini değiştirin.",
+  "booking.price_unavailable": "Bu seçeneğin sepetinizin para biriminde fiyatı yok.",
+  "booking.hold_expired": "Sepetteki yer tutma süresi doldu; tarihi yeniden seçin.",
+  "booking.hold_mismatch": "Ayrılan yerler sepetle uyuşmuyor; tarihi ve kişileri yeniden seçin.",
+  "booking.price_changed": "Sepetinizdeki bir rezervasyonun fiyatı değişti; sepeti gözden geçirin.",
+  "booking.region_unknown": "Bölge bulunamadı.",
   "addons.required_must_be_free": "Ücretli ek seçenek zorunlu yapılamaz.",
   "addons.not_addon_line": "Bu ürünün ek seçeneği yok.",
   "addons.unknown": "Bu ek seçenek ya da seçim üründe yok.",

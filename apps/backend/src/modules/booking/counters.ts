@@ -11,12 +11,14 @@ export type { HoldState } from "./holds"
  * `held` to `sold` (already counted, so capacity cannot refuse it), the
  * hold goes and the booking is written, in one transaction. Again for the
  * same hold and order: the booking it made, nothing changed (`created`
- * false); for another order, refused.
+ * false); for another order, refused. `lineItemId`: the order's first
+ * dated line, the booking's line (its other lines carry the same mark).
  */
 export async function confirmHold(
   manager: Executor,
   holdId: string,
-  orderId: string
+  orderId: string,
+  lineItemId: string | null = null
 ): Promise<{ booking_id: string; created: boolean }> {
   const [hold] = await rows(
     manager,
@@ -55,8 +57,8 @@ export async function confirmHold(
   const bookingId = generateEntityId(undefined, "bkng")
   await manager.execute(
     `INSERT INTO booking (id, order_id, line_item_id, hold_id, status, created_at, updated_at)
-     VALUES (?, ?, NULL, ?, 'confirmed', now(), now())`,
-    [bookingId, orderId, holdId]
+     VALUES (?, ?, ?, ?, 'confirmed', now(), now())`,
+    [bookingId, orderId, lineItemId, holdId]
   )
   if (units.length > 0) {
     await manager.execute(

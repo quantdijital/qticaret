@@ -14,6 +14,7 @@ import {
   releaseLockStep,
   updateLineItemInCartWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { bookingMarkOf } from "../../lib/booking/cart-lines"
 import { ADDONS_KEY } from "../../lib/catalog/addons"
 import type { AddonSelection } from "../../lib/catalog/addons"
 import { ValidationError } from "../../lib/errors"
@@ -77,6 +78,10 @@ export const planLineAddonsStep = createStep(
     const line = linesOf(cart).find((item) => item.id === input.line_id)
     if (!line) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart.line_unknown")
+    }
+    // A dated line's price is its departure's (adr/0076 §5); add-ons on a departure come later
+    if (bookingMarkOf(line.metadata)) {
+      throw new ValidationError("booking.use_booking_route", { field: "line_id" })
     }
     const addons = line.product_id
       ? ((await productAddonsAmong(container, [line.product_id])).get(line.product_id) ?? [])

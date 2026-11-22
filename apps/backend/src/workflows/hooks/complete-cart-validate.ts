@@ -17,6 +17,7 @@ import { assertBuyerNotBlocked } from "../fraud/buyer-blocked"
 import { assertConsented } from "../legal/consent"
 import { assertGiftLinesReady } from "../gift-cards/cart-gifts"
 import { assertAddonLinesCurrent } from "../addons/checkout"
+import { assertBookingLinesCurrent } from "../booking/cart/checkout"
 import {
   assertLinkCartCompletes,
   claimLinkForCart,
@@ -102,6 +103,8 @@ completeCartWorkflow.hooks.validate(
     await assertGiftLinesReady(container, cart.id, null)
     // Add-on lines still cost what they did when the payment started (adr/0052 §5)
     await assertAddonLinesCurrent(container, cart.id)
+    // Dated lines: the hold live and theirs, its places the lines', every price current (adr/0076 §5)
+    await assertBookingLinesCurrent(container, cart.id)
     // A payment link's cart: the link still open, this its latest cart, its lines and code as made (adr/0051 §5)
     const linkId = await assertLinkCartCompletes(container, cart.id)
     // A wholesaler's cart: no code, its minimum, and every cart at its customer's prices now,
