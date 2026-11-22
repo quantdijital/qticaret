@@ -34,5 +34,15 @@ export function createTemporaryAdmin(): TemporaryAdmin {
 
 /** The run's admin removed with its login: a user cannot delete itself through the API. */
 export function removeTemporaryAdmin(email: string): void {
-  backend(["exec", "./src/scripts/remove-e2e-admin.ts", email])
+  try {
+    backend(["exec", "./src/scripts/remove-e2e-admin.ts", email])
+  } catch (error) {
+    // The CLI's output stays piped (the CI log is public); only the script's own
+    // refusal or a staff error code (`staff.last_owner`) is passed on, so a failure says why
+    const piped = (error as { stderr?: Buffer | string | null }).stderr
+    const stderr = piped ? piped.toString() : ""
+    const reasons = stderr.match(/remove-e2e-admin: [^\n]+|staff\.[a-z_]+/g)
+    // eslint-disable-next-line preserve-caught-error -- its cause would carry the whole piped output into the public report
+    throw new Error(`removing the e2e admin failed: ${reasons?.join("; ") ?? "no reason given"}`)
+  }
 }
