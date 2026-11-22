@@ -1,5 +1,5 @@
 import { ValidationError } from "../errors"
-import { kurus, subtractKurus, sumKurus } from "../money"
+import { kurus, prorateKurus, subtractKurus, sumKurus } from "../money"
 import type { Kurus } from "../money"
 import { spreadRefund, unitsRefund } from "./refunds"
 import type { LineShare } from "./shares"
@@ -24,6 +24,13 @@ export interface RefundRequest {
    * against none of them; only what was paid caps it.
    */
   balance?: Kurus
+  /**
+   * With `items`: the share of their money the shop keeps, 0–100 (a
+   * dated line cancelled under its tier, adr/0076 §8): each line gives
+   * back its units less this share, rounded half up to the kuruş. Set by
+   * the server from the tier, never by a request.
+   */
+  fee_percent?: number
 }
 
 export interface PlannedLine {
@@ -44,8 +51,12 @@ const remainingOf = (line: LineShare, refunded: Refunded): Kurus =>
 function itemLines(
   shares: readonly LineShare[],
   refunded: Refunded,
-  items: NonNullable<RefundRequest["items"]>
+  items: NonNullable<RefundRequest["items"]>,
+  feePercent = 0
 ): PlannedLine[] {
+  if (!Number.isInteger(feePercent) || feePercent < 0 || feePercent > 100) {
+    throw new RangeError("a fee is a whole percent from 0 to 100")
+  }
   // A line named twice gives back both counts, once
   const wanted = new Map<string, number>()
   for (const item of items) {
@@ -61,7 +72,13 @@ function itemLines(
       throw new ValidationError("orders.refund_units_exceeded", { field: "items" })
     }
     const { net } = unitsRefund(line, before, quantity)
-    return { id, kind: line.kind, quantity, net: kurus(Math.min(net, remainingOf(line, refunded))) }
+    const paid = kurus(Math.min(net, remainingOf(line, refunded)))
+    return {
+      id,
+      kind: line.kind,
+      quantity,
+      net: subtractKurus(paid, prorateKurus(paid, feePercent, 100)),
+    }
   })
 }
 
@@ -100,7 +117,7 @@ export function planRefund(
     }))
   } else {
     lines = [
-      ...itemLines(shares, refunded, request.items ?? []),
+      ...itemLines(shares, refunded, request.items ?? [], request.fee_percent),
       ...(request.shipping
         ? shares
             .filter((line) => line.kind === "shipping")

@@ -86,7 +86,7 @@ export async function readDashboardTasks(scope: MedusaContainer) {
     legalIdentity(scope),
   ])
   const orders = open.data as LifecycleOrder[]
-  const stages = orders.map(lifecycleOf)
+  const stages = orders.map((order) => lifecycleOf(order))
   const items = stock.data as StockRow[]
   const thresholds = await lowStockThresholds(
     scope,

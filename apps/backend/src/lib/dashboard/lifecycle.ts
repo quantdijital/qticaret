@@ -1,11 +1,13 @@
 import type { OrderDetailDTO } from "@medusajs/framework/types"
+import { MathBN } from "@medusajs/framework/utils"
 import { getLastPaymentStatus } from "@medusajs/medusa/core-flows"
+import { bookingMarkOf } from "../booking/cart-lines"
 
 /**
- * Where an order stands for the shop, in five words the panel shows
+ * Where an order stands for the shop, in six words the panel shows
  * (docs/06 sözlük): waiting for payment, to be shipped, in transit,
- * delivered, canceled. Payment follows Medusa's own order list; the parcel
- * side is read from each item's fulfilled, shipped and delivered counts, so
+ * planned (a dated line ahead, adr/0076 §8), delivered, canceled.
+ * Payment follows Medusa's own order list; the parcel side is read from each item's fulfilled, shipped and delivered counts, so
  * an order with something left to send stays "to ship" after its first
  * parcel leaves. Lines that need no shipping (digital, service; F3.2) are
  * done once paid. The list, the dashboard and the order page all use this.
@@ -15,6 +17,7 @@ export const LIFECYCLES = [
   "awaiting_payment",
   "to_ship",
   "shipped",
+  "planned",
   "delivered",
   "canceled",
 ] as const
@@ -30,6 +33,8 @@ export const LIFECYCLE_FIELDS = [
   // Medusa fills an item's quantity only with its detail (or the totals) requested
   "items.quantity",
   "items.requires_shipping",
+  // A dated line's record (adr/0076 §8): its service date makes a paid order "planned"
+  "items.metadata",
   "items.detail.quantity",
   "items.detail.fulfilled_quantity",
   "items.detail.shipped_quantity",
@@ -40,6 +45,8 @@ export interface LifecycleItem {
   quantity?: number | null
   /** False for a digital or service line (F3.2); missing reads as true. */
   requires_shipping?: boolean | null
+  /** A dated line carries its departure's start here (`qt_booking`, adr/0076 §5). */
+  metadata?: unknown
   detail?: {
     fulfilled_quantity?: number | null
     shipped_quantity?: number | null
@@ -80,6 +87,23 @@ export function paymentStatusOf(order: LifecycleOrder): string {
 
 export const isPaid = (order: LifecycleOrder): boolean => PAID.has(paymentStatusOf(order))
 
+type BNInput = Parameters<typeof MathBN.convert>[0]
+const amountOf = (value: unknown) => MathBN.convert((value ?? 0) as BNInput)
+
+/** Money was taken and all of it went back. */
+function allGivenBack(order: LifecycleOrder): boolean {
+  const rows = (order.payment_collections ?? []).filter(Boolean)
+  const taken = rows.reduce(
+    (sum, row) => MathBN.add(sum, amountOf(row?.captured_amount)),
+    MathBN.convert(0)
+  )
+  const back = rows.reduce(
+    (sum, row) => MathBN.add(sum, amountOf(row?.refunded_amount)),
+    MathBN.convert(0)
+  )
+  return MathBN.gt(taken, 0) && MathBN.gte(back, taken)
+}
+
 const presentItems = (order: LifecycleOrder): LifecycleItem[] =>
   (order.items ?? []).filter((item): item is LifecycleItem => item !== null)
 
@@ -104,7 +128,49 @@ export function hasSomethingToShip(order: LifecycleOrder): boolean {
   })
 }
 
-export function lifecycleOf(order: LifecycleOrder): Lifecycle {
+/**
+ * The latest service date of the order's dated lines (adr/0076 §8), as
+ * their records give it; null without one. A departure moved by staff
+ * after the order keeps the date the line was sold for.
+ */
+export function serviceDateOf(order: LifecycleOrder): Date | null {
+  let latest: number | null = null
+  for (const item of presentItems(order)) {
+    const mark = bookingMarkOf(item.metadata)
+    const at = mark ? Date.parse(mark.starts_at) : Number.NaN
+    if (!Number.isNaN(at) && (latest === null || at > latest)) {
+      latest = at
+    }
+  }
+  return latest === null ? null : new Date(latest)
+}
+
+/**
+ * Where the order stands. A paid order whose parcels are all done (or
+ * that has none) and holds a dated line is "planned" until its service
+ * date, then done ("delivered", shown as completed); a dated-only order
+ * whose money all went back (its bookings cancelled) reads as canceled.
+ * Without dated lines nothing changed. `now` is ignored unless a Date
+ * (a caller mapping over orders passes an index).
+ */
+export function lifecycleOf(order: LifecycleOrder, now?: unknown): Lifecycle {
+  const stage = parcelStageOf(order)
+  if (stage !== "delivered" && stage !== "awaiting_payment") {
+    return stage
+  }
+  const serviceDate = serviceDateOf(order)
+  if (serviceDate === null) {
+    return stage
+  }
+  const datedOnly = presentItems(order).every((item) => bookingMarkOf(item.metadata) !== null)
+  if (datedOnly && allGivenBack(order)) {
+    return "canceled"
+  }
+  const at = now instanceof Date ? now : new Date()
+  return stage === "delivered" && serviceDate.getTime() > at.getTime() ? "planned" : stage
+}
+
+function parcelStageOf(order: LifecycleOrder): Lifecycle {
   if (order.status === "canceled") {
     return "canceled"
   }
