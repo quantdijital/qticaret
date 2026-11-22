@@ -369,29 +369,30 @@ medusaIntegrationTestRunner({
     it("caps one address's carts at the departure's share; another address books freely", async () => {
       await turnOn()
       const container = getContainer()
-      const { adult, slotId } = await tour(20)
-      const [first, second, other] = [
-        await emptyCart(container),
-        await emptyCart(container),
-        await emptyCart(container),
-      ]
+      const { adult, slotId } = await tour(50)
+      const carts = await Promise.all(Array.from({ length: 5 }, () => emptyCart(container)))
       const ask = (quantity: number) => ({
         slot_id: slotId,
         items: [{ variant_id: adult, quantity }],
       })
 
-      // A share of 10 on a departure of 20 (its floor): 6 + 5 from one address is too many
-      const firstAnswer = await bookFrom("203.0.113.7", first, ask(6))
-      const secondAnswer = await bookFrom("203.0.113.7", second, ask(5))
-      const otherAnswer = await bookFrom("192.0.2.44", other, ask(5))
+      // A cart's share of 10 on a departure of 50; one address keeps three
+      // carts' worth (families behind one network): 30, never a 31st place
+      const shared = []
+      for (const [cartId, quantity] of [
+        [carts[0], 10],
+        [carts[1], 10],
+        [carts[2], 10],
+        [carts[3], 1],
+      ] as const) {
+        shared.push(await bookFrom("203.0.113.7", cartId ?? "", ask(quantity)))
+      }
+      const otherAnswer = await bookFrom("192.0.2.44", carts[4] ?? "", ask(5))
 
-      expect(firstAnswer.status).toBe(200)
-      expect([secondAnswer.status, secondAnswer.data.message]).toEqual([
-        400,
-        "booking.client_share",
-      ])
+      expect(shared.slice(0, 3).map((answer) => answer.status)).toEqual([200, 200, 200])
+      expect([shared[3]?.status, shared[3]?.data.message]).toEqual([400, "booking.client_share"])
       expect(otherAnswer.status).toBe(200)
-      expect(await slotOf(slotId)).toMatchObject({ held: 11, available: 9 })
+      expect(await slotOf(slotId)).toMatchObject({ held: 35, available: 15 })
     })
 
     it("pushes the hold as the payment starts, sells the places with the order, frees them on cancel", async () => {

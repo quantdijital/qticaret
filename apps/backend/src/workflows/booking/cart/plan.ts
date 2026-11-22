@@ -10,6 +10,7 @@ import {
 import type { BookingMark } from "../../../lib/booking/cart-lines"
 import { ConflictError, ValidationError } from "../../../lib/errors"
 import { toMedusaAmount } from "../../../lib/money"
+import { clientSlotCap } from "../../../modules/booking/client-share"
 import type { HoldClient } from "../../../modules/booking/service"
 import { quantityOf, readAddonCart } from "../../addons/cart"
 import type { AddonCart } from "../../addons/cart"
@@ -156,7 +157,9 @@ export async function planCartBooking(
     hold_minutes: target.bookable.hold_minutes,
     lines,
     replaced_line_ids: lineIdsOfSlot(cart, input.slot_id),
-    client: input.client_hash ? { hash: input.client_hash, maxPerSlot: share } : null,
+    client: input.client_hash
+      ? { hash: input.client_hash, maxPerSlot: clientSlotCap(target.slot.capacity, share) }
+      : null,
   }
 }
 

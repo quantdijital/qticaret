@@ -5,7 +5,7 @@ import type { Executor, SlotUnits } from "./sql"
 /**
  * The shopper behind a hold (adr/0076 Ek takip M1): the address as a keyed
  * hash, never the address, and how many places its live holds may keep on
- * one departure (the per-cart share of that departure).
+ * one departure (`clientSlotCap`: a few per-cart shares of that departure).
  */
 export interface HoldClient {
   hash: string
@@ -15,6 +15,19 @@ export interface HoldClient {
 // Live places one address may hold over every departure at once: a few
 // families' carts, never a script's many carts filling a season
 export const CLIENT_LIVE_UNITS = 60
+
+// Carts' shares one address may hold on one departure: an address is often
+// many households at once (mobile CGNAT, a hotel's, school's or office's
+// network), so it gets a few carts' worth, never only one (adr/0076 Ek
+// takip M1: shared addresses against one person locking a departure)
+export const CLIENT_CARTS_PER_SLOT = 3
+
+/**
+ * The most one address's live holds may keep on a departure: a few carts'
+ * shares (`cartShareOf`), never past the departure's own places.
+ */
+export const clientSlotCap = (capacity: number, cartShare: number): number =>
+  Math.min(capacity, CLIENT_CARTS_PER_SLOT * cartShare)
 
 /** The advisory lock key of one address's holds. */
 export const clientLockKey = (hash: string): string => `booking:client:${hash}`

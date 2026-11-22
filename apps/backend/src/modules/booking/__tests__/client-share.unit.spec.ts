@@ -1,4 +1,10 @@
-import { CLIENT_LIVE_UNITS, clientLockKey, clientShareCap } from "../client-share"
+import {
+  CLIENT_CARTS_PER_SLOT,
+  CLIENT_LIVE_UNITS,
+  clientLockKey,
+  clientShareCap,
+  clientSlotCap,
+} from "../client-share"
 
 const units = (entries: [string, number][] = []) => new Map(entries)
 
@@ -44,6 +50,19 @@ describe("one address's share of live holds (adr/0076 Ek takip M1)", () => {
     expect(
       clientShareCap(units([["s1", 5]]), units([["s1", 6]]), [{ slotId: "s1", units: 7 }], 10)
     ).toBe(5)
+  })
+
+  it("lets one address keep a few carts' shares of a departure, never past its places", () => {
+    expect(CLIENT_CARTS_PER_SLOT).toBe(3)
+    // A share of 10 on a departure of 50: three families behind one address
+    expect(clientSlotCap(50, 10)).toBe(30)
+    // A share of 10 on a departure of 20: the departure, never more
+    expect(clientSlotCap(20, 10)).toBe(20)
+    // A third cart of the address fits under 30; a fourth does not
+    expect(
+      clientShareCap(units(), units([["s1", 20]]), [{ slotId: "s1", units: 10 }], 30)
+    ).toBeNull()
+    expect(clientShareCap(units(), units([["s1", 30]]), [{ slotId: "s1", units: 1 }], 30)).toBe(0)
   })
 
   it("locks one key per address, the hash and never more", () => {
