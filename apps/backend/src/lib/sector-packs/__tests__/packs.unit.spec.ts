@@ -96,6 +96,29 @@ describe("a pack the shop cannot take", () => {
       "category a: text_invalid",
     ])
   })
+
+  it("takes catalog defaults only as the settings section does (adr/0076 §12)", () => {
+    const defaults = (kind: "physical" | "service", booking_mode: "none" | "departure") =>
+      pack({ catalog: { new_product: { kind, booking_mode }, dated_schema_type: "Event" } })
+    expect(packProblems(defaults("service", "departure"), TEST)).toEqual([])
+    expect(packProblems(defaults("physical", "departure"), TEST)).toEqual([
+      "catalog new_product_booking_mode: catalog.booking_kind",
+    ])
+  })
+
+  it("takes a page only with a clean title and a document the editor could write", () => {
+    const doc = { type: "doc" as const, content: [{ type: "paragraph" }] }
+    expect(packProblems(pack({ pages: [{ handle: "a", title: "A", body: doc }] }), TEST)).toEqual(
+      []
+    )
+    expect(
+      packProblems(pack({ pages: [{ handle: "a", title: "A\u0007", body: doc }] }), TEST)
+    ).toEqual(["page a: text_invalid"])
+    const script = { type: "doc" as const, content: [{ type: "script", text: "x" }] }
+    expect(
+      packProblems(pack({ pages: [{ handle: "a", title: "A", body: script }] }), TEST).length
+    ).toBeGreaterThan(0)
+  })
 })
 
 describe("tenant:apply-pack pack=", () => {

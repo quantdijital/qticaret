@@ -9,6 +9,9 @@ export const PACK_ITEM_KINDS = [
   // adr/0063 §4: what a storefront preset makes in the shop (an image it uploads, a demo record)
   "preset_image",
   "demo_record",
+  // adr/0076 §12: a content page made as a draft, a catalog default set in the settings
+  "page",
+  "setting",
 ] as const
 export type PackItemKind = (typeof PACK_ITEM_KINDS)[number]
 
