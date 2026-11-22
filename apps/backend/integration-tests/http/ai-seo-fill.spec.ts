@@ -95,7 +95,10 @@ medusaIntegrationTestRunner({
       for (const row of rows) {
         await advisor().updateSeoAssessments({
           id: row.id,
-          issues: ids.includes(row.entity_id) ? [issue("P-TITLE-01"), issue("P-META-01")] : [],
+          // The column is JSON holding the finding list; the model types it as a record
+          issues: (ids.includes(row.entity_id)
+            ? [issue("P-TITLE-01"), issue("P-META-01")]
+            : []) as unknown as Record<string, unknown>,
         })
       }
       return ids

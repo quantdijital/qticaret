@@ -53,10 +53,14 @@ async function pagesOf(
     return new Map()
   }
   const spec = SEO_ENTITIES[type]
+  const filters: Record<string, unknown> = {
+    id: ids,
+    ...("kind" in spec ? { kind: spec.kind } : {}),
+  }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: spec.entity,
     fields: ["id", nameField, "seo_meta.seo_title", "seo_meta.seo_description"],
-    filters: { id: ids, ...("kind" in spec ? { kind: spec.kind } : {}) },
+    filters,
   })
   const rows = data as (Record<string, unknown> & {
     id: string
