@@ -357,6 +357,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "booking.departure_cancelled_unpaid":
     "A departure of this order was cancelled before it was paid; no money can be taken. Cancel the order.",
   "booking.use_departure_cancel": 'Use "Cancel departure" to cancel it; its bookings are refunded.',
+  // adr/0076 Ek 2026-11-23: call-me requests
+  "booking.online_not_offered":
+    "This product is not sold online; leave a request on its page and the shop will call you.",
+  "booking.request_not_offered": "This product takes no requests.",
+  "booking.request_slot_invalid": "The chosen departure no longer takes requests for this product.",
+  "booking.request_when_invalid": "Choose one departure, a day or a month; not a past date.",
+  "booking.request_people_invalid": "A request for this product can be for at most {{max}} people.",
   "addons.required_must_be_free": "A paid add-on cannot be required.",
   "addons.not_addon_line": "This product has no add-ons.",
   "addons.unknown": "The product has no such add-on or option.",

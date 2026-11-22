@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { useState } from "react"
-import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
@@ -19,18 +18,10 @@ import {
 } from "@/features/customers/api/contact-messages"
 import type { ContactMessage, ContactStatus } from "@/features/customers/api/contact-messages"
 import { errorText } from "@/lib/errors"
+import { ContactBookingFacts, Fact } from "./contact-booking-facts"
 import { formatDateTime, formatPhone } from "@qticaret/admin-ui/lib/format"
 
 const M = "customers.contactMessages"
-
-function Fact({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="grid grid-cols-[7rem_1fr] gap-3 py-2 text-[13px]">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 break-words">{children}</dd>
-    </div>
-  )
-}
 
 /** `mailto:` with the address kept whole and a subject the reply starts from. */
 function mailtoOf(email: string, subject: string): string {
@@ -154,12 +145,17 @@ export function ContactMessageDialog({ message, steps, onClose }: ContactMessage
           <dl className="divide-y">
             <Fact label={t(`${M}.detail.name`)}>{message.name}</Fact>
             <Fact label={t(`${M}.detail.email`)}>
-              <a
-                href={mailtoOf(message.email, reply)}
-                className="break-all text-primary-text hover:underline"
-              >
-                {message.email}
-              </a>
+              {/* A booking request may come with a phone only */}
+              {message.email ? (
+                <a
+                  href={mailtoOf(message.email, reply)}
+                  className="break-all text-primary-text hover:underline"
+                >
+                  {message.email}
+                </a>
+              ) : (
+                "—"
+              )}
             </Fact>
             <Fact label={t(`${M}.detail.phone`)}>
               {message.phone ? (
@@ -170,6 +166,7 @@ export function ContactMessageDialog({ message, steps, onClose }: ContactMessage
                 "—"
               )}
             </Fact>
+            <ContactBookingFacts message={message} />
             <Fact label={t(`${M}.detail.order`)}>
               {message.order_number ? (
                 <Link
@@ -205,11 +202,13 @@ export function ContactMessageDialog({ message, steps, onClose }: ContactMessage
               ) : null}
             </Fact>
           </dl>
-          <DialogSection title={t(`${M}.detail.message`)}>
-            <p className="rounded-md border bg-muted/40 p-3 text-sm break-words whitespace-pre-wrap">
-              {message.body}
-            </p>
-          </DialogSection>
+          {message.body ? (
+            <DialogSection title={t(`${M}.detail.message`)}>
+              <p className="rounded-md border bg-muted/40 p-3 text-sm break-words whitespace-pre-wrap">
+                {message.body}
+              </p>
+            </DialogSection>
+          ) : null}
         </DialogBody>
       ) : null}
     </DetailDialog>

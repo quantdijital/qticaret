@@ -6,10 +6,26 @@ import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@qticaret/admin-ui/ui/select"
 import { useRecordWalk } from "@qticaret/admin-ui/hooks/use-record-walk"
-import { CONTACT_PAGE_SIZE, contactMessagesQuery } from "@/features/customers/api/contact-messages"
-import type { ContactMessage, ContactStatus } from "@/features/customers/api/contact-messages"
+import {
+  CONTACT_PAGE_SIZE,
+  CONTACT_SUBJECTS,
+  contactMessagesQuery,
+} from "@/features/customers/api/contact-messages"
+import type {
+  ContactMessage,
+  ContactStatus,
+  ContactSubject,
+} from "@/features/customers/api/contact-messages"
 import { ContactMessageDialog } from "@/features/customers/components/contact-message-dialog"
 import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { errorText } from "@/lib/errors"
@@ -17,6 +33,8 @@ import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const route = getRouteApi("/_auth/customers/contact-messages")
 const M = "customers.contactMessages"
+// The subject filter's "every subject" choice
+const EVERY = "all"
 
 function useColumns(onOpen: (message: ContactMessage) => void): Column<ContactMessage>[] {
   const { t } = useTranslation()
@@ -53,7 +71,17 @@ function useColumns(onOpen: (message: ContactMessage) => void): Column<ContactMe
     {
       key: "subject",
       header: t(`${M}.columns.subject`),
-      cell: (message) => t(`${M}.subjects.${message.subject}`),
+      cell: (message) => (
+        <div className="flex max-w-56 min-w-0 flex-col items-start">
+          <span>{t(`${M}.subjects.${message.subject}`)}</span>
+          {/* A booking request names its product (adr/0076 Ek 2026-11-23) */}
+          {message.product_title ? (
+            <span className="max-w-full truncate text-xs text-muted-foreground">
+              {message.product_title}
+            </span>
+          ) : null}
+        </div>
+      ),
     },
     {
       key: "order",
@@ -97,15 +125,27 @@ export function ContactMessagesPage() {
   const navigate = useNavigate()
   const status: ContactStatus = search.status ?? "new"
   const page = (search.page ?? 1) - 1
-  const list = useQuery(contactMessagesQuery(status, page))
+  const subject: ContactSubject | undefined = search.subject
+  // A phone number finds a request left without an e-mail (adr/0076 Ek 2026-11-23)
+  const phone = search.phone ?? ""
+  const list = useQuery(contactMessagesQuery(status, page, subject, phone.trim() || undefined))
   const walk = useRecordWalk(list.data?.contact_messages, (message) => message.id)
   const columns = useColumns(walk.show)
-  const setSearch = (next: { status?: ContactStatus; page?: number }) => {
+  const setSearch = (next: {
+    status?: ContactStatus
+    subject?: ContactSubject | typeof EVERY
+    phone?: string
+    page?: number
+  }) => {
     const nextStatus = next.status ?? status
+    const nextSubject = next.subject ?? subject
+    const nextPhone = (next.phone ?? phone).trim()
     void navigate({
       to: "/customers/contact-messages",
       search: {
         status: nextStatus === "new" ? undefined : nextStatus,
+        subject: nextSubject === EVERY ? undefined : nextSubject,
+        phone: nextPhone === "" ? undefined : nextPhone,
         page: next.page && next.page > 1 ? next.page : undefined,
       },
       replace: true,
@@ -127,6 +167,33 @@ export function ContactMessagesPage() {
             { key: "handled", label: t(`${M}.tabs.handled`) },
           ]}
         />
+        <div className="flex flex-wrap items-center gap-3 px-5 py-3">
+          <Select
+            value={subject ?? EVERY}
+            onValueChange={(next) => {
+              setSearch({ subject: next as ContactSubject | typeof EVERY, page: 1 })
+            }}
+          >
+            <SelectTrigger aria-label={t(`${M}.subjectFilter`)} className="w-full sm:w-64">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={EVERY}>{t(`${M}.allSubjects`)}</SelectItem>
+              {CONTACT_SUBJECTS.map((key) => (
+                <SelectItem key={key} value={key}>
+                  {t(`${M}.subjects.${key}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <SearchInput
+            value={phone}
+            placeholder={t(`${M}.phoneFilter`)}
+            onChange={(text) => {
+              setSearch({ phone: text, page: 1 })
+            }}
+          />
+        </div>
         {list.isError ? (
           <div className="p-5">
             <ErrorState text={errorText(t, list.error)} onRetry={() => void list.refetch()} />

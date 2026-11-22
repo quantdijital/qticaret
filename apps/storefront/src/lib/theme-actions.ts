@@ -21,6 +21,7 @@ import { installmentsFor } from "@/app/actions/installments"
 import { addAddress, removeAddress } from "@/app/actions/addresses"
 import { addAddonsToCart, saveLineAddons } from "@/app/actions/addons"
 import { addBookingToCart } from "@/app/actions/booking"
+import { requestBooking } from "@/app/actions/booking-request"
 import { addGiftToCart, checkGiftCardBalance, saveGiftRecipient } from "@/app/actions/gift-cards"
 import { cancelBooking, cancelOrder, requestReturn } from "@/app/actions/order"
 import { leaveLinkCart } from "@/app/actions/payment-link"
@@ -62,6 +63,7 @@ export const themeActions: ThemeActions = {
   addAddonsToCart,
   saveLineAddons,
   addBookingToCart,
+  requestBooking,
   leaveLinkCart,
 }
 

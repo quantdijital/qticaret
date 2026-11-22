@@ -36,7 +36,9 @@ export interface StaffMfaVars {
 
 /** A contact message came, about what; who and what they wrote stay in the panel. */
 export interface StaffContactVars {
-  subject: "order" | "product" | "return" | "payment" | "kvkk" | "other"
+  subject: "order" | "product" | "return" | "payment" | "kvkk" | "booking" | "other"
+  /** A booking request's product, dates and people, in words (adr/0076 Ek 2026-11-23). */
+  request?: string | null
   /** A KVKK request's last day to answer (30 days from its coming, adr/0041), in words. */
   due?: string | null
 }
@@ -159,6 +161,8 @@ export const staffContactMessage: MessageTemplate<StaffContactVars> = {
           kind: "paragraph",
           text: messageText("staff_contact.intro", { subject }),
         },
+        // A booking request says what it asks for; no person's data (adr/0076 Ek 2026-11-23)
+        ...(vars.request ? [{ kind: "paragraph" as const, text: vars.request }] : []),
         // A data request runs on the law's clock (KVKK md. 13, adr/0041)
         ...(vars.subject === "kvkk"
           ? [

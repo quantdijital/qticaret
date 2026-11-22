@@ -23,6 +23,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Yeni iletişim mesajı: {{subject}}",
       description: "Müşteriler > İletişim mesajları'nda okuyun.",
     },
+    "contact.booking_received": {
+      title: "Rezervasyon talebi: {{product}}",
+      description: "{{request}} Müşteriler > İletişim mesajları'nda okuyup müşteriyi arayın.",
+    },
     "contact.kvkk_received": {
       title: "Yeni KVKK başvurusu",
       description:
@@ -230,6 +234,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "contact.message_received": {
       title: "New contact message: {{subject}}",
       description: "Read it under Customers > Contact messages.",
+    },
+    "contact.booking_received": {
+      title: "Booking request: {{product}}",
+      description: "{{request}} Read it under Customers > Contact messages and call the customer.",
     },
     "contact.kvkk_received": {
       title: "New KVKK data request",

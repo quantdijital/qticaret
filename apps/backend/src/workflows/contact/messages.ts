@@ -14,7 +14,8 @@ import type { ReceiveInput } from "../../modules/contact-messages/service"
 /** Raised once a contact message is kept; the bell and the staff e-mail follow it. */
 export const CONTACT_MESSAGE_RECEIVED = "contact_message.received"
 
-const receiveStep = createStep(
+/** Keeps a message sealed; undone by deleting it. Also a booking request's (booking-request.ts). */
+export const receiveContactMessageStep = createStep(
   "contact-receive-message",
   async (input: ReceiveInput, { container }) => {
     const created = await container
@@ -35,7 +36,7 @@ const receiveStep = createStep(
 export const receiveContactMessageWorkflow = createWorkflow(
   "contact-receive-message",
   (input: ReceiveInput) => {
-    const created = receiveStep(input)
+    const created = receiveContactMessageStep(input)
     emitEventStep({
       eventName: CONTACT_MESSAGE_RECEIVED,
       data: transform({ created }, ({ created }) => ({ id: created.id })),

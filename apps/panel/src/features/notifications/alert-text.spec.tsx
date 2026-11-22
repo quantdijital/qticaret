@@ -43,3 +43,25 @@ describe("the bell's account alert for an AI service (adr/0071 §3)", () => {
     expect(account("acme").title).toBe("acme hesap bilgileri değişti")
   })
 })
+
+describe("the bell's contact alert (adr/0047; adr/0076 Ek 2026-11-23)", () => {
+  const alert = (data: Record<string, unknown>) =>
+    renderHook(() => useAlertText({ kind: "contact_message", ...data })).result.current
+
+  it("says a booking request's product, dates and people as the server worded them", () => {
+    const { title, description, link } = alert({
+      subject: "booking",
+      title: "Rezervasyon talebi: Kapadokya turu",
+      description: "Rezervasyon talebi: Kapadokya turu, Mart 2027, 2 yetişkin.",
+    })
+    expect(title).toBe("Rezervasyon talebi: Kapadokya turu")
+    expect(description).toContain("Mart 2027, 2 yetişkin")
+    expect(link?.to).toBe("/customers/contact-messages")
+  })
+
+  it("words any other message from its subject alone", () => {
+    const { title } = alert({ subject: "order", description: "Ayşe yazdı" })
+    expect(title).toContain("Sipariş")
+    expect(title).not.toContain("Ayşe")
+  })
+})

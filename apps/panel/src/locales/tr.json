@@ -3677,6 +3677,13 @@
         "maxAgeOf": "{{variant}}: en büyük yaş",
         "travelerLevel": "Katılımcı bilgisi",
         "travelerLevelHint": "Ödemede her katılımcı için istenir. Kimlik ya da pasaport no şifreli saklanır, panelde maskeli görünür. Yalnız gerçekten gerekeni isteyin (KVKK).",
+        "saleMode": "Satış biçimi",
+        "saleModeHint": "Sizi arayalım: vitrinde sepete ekleme yerine talep formu çıkar; ödeme alınmaz, kontenjan düşmez. Talepler Müşteriler > İletişim mesajları'nda görünür.",
+        "saleModes": {
+          "online": "Çevrim içi satış",
+          "request": "Sizi arayalım (ödeme yok)",
+          "both": "İkisi de"
+        },
         "travelerLevels": {
           "none": "İstemiyorum (bilgileri sonra kendim alırım)",
           "name": "Ad soyad",
@@ -5194,6 +5201,9 @@
       "title": "İletişim mesajları",
       "description": "Vitrindeki iletişim formundan yazılanlar. Yanıtı kendi e-posta programınızdan verin, sonra mesajı yanıtlandı olarak işaretleyin.",
       "views": "Mesaj görünümleri",
+      "subjectFilter": "Konu",
+      "allSubjects": "Tüm konular",
+      "phoneFilter": "Telefonla ara",
       "tabs": {
         "new": "Bekleyen",
         "handled": "Yanıtlanan"
@@ -5214,6 +5224,7 @@
         "product": "Ürün",
         "return": "İade ve değişim",
         "payment": "Ödeme",
+        "booking": "Rezervasyon talebi",
         "other": "Diğer",
         "kvkk": "KVKK başvurusu"
       },
@@ -5227,6 +5238,12 @@
         "email": "E-posta",
         "phone": "Telefon",
         "order": "Sipariş",
+        "product": "Ürün",
+        "when": "Tarih",
+        "people": "Kişi",
+        "flexible": "Tarih esnek",
+        "adults": "{{count}} yetişkin",
+        "children": "{{count}} çocuk",
         "customer": "Müşteri",
         "openCustomer": "Müşteri kaydını aç",
         "status": "Durum",

@@ -13,6 +13,7 @@ import { bookingFailureText } from "./booking-failure"
 import type { VariantName } from "./slot-facts"
 import { BOOKING_LIMITS, settingsDraftOf, settingsInputOf, settingsSchema } from "./slot-schemas"
 import type { SettingsDraft } from "./slot-schemas"
+import { SaleModeField } from "./sale-mode-field"
 import { TravelerLevelField } from "./traveler-level-field"
 import { CancelTiersField } from "./cancel-tiers-field"
 
@@ -23,7 +24,8 @@ const B = "products.booking.settings"
  * when sales close, how long a cart holds places, the most places in a
  * cart, the minimum group (for information) and how many places each
  * variant takes (an infant 0) with its ages, and what checkout asks of
- * each traveler (D6b), and the customer's cancellation tiers (D7a).
+ * each traveler (D6b), and the customer's cancellation tiers (D7a); first,
+ * how it is sold: online, by a call-me request, or both (Ek 2026-11-23).
  */
 export function BookingSettings({
   productId,
@@ -94,6 +96,7 @@ export function BookingSettings({
         form.reset(values, FULL_RESET)
       }}
     >
+      <SaleModeField control={form.control} />
       <div className="grid gap-4 sm:grid-cols-2">
         {number("cutoff_hours", 0, BOOKING_LIMITS.cutoffHours, t(`${B}.hours`))}
         {number("hold_minutes", BOOKING_LIMITS.holdMin, BOOKING_LIMITS.holdMax, t(`${B}.minutes`))}

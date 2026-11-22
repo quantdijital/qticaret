@@ -10,6 +10,9 @@ import type { ContactMessage } from "@/features/customers/api/contact-messages"
 import { ContactMessagesPage } from "./contact-messages-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
+// The address's search; a test may set a subject
+const search = vi.hoisted(() => ({ value: {} }))
+const navigateMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
@@ -20,8 +23,8 @@ vi.mock("@tanstack/react-router", () => ({
       {children}
     </a>
   ),
-  getRouteApi: () => ({ useSearch: () => ({}) }),
-  useNavigate: () => vi.fn(),
+  getRouteApi: () => ({ useSearch: () => search.value }),
+  useNavigate: () => navigateMock,
 }))
 
 const message = (id: string, more: Partial<ContactMessage> = {}): ContactMessage => ({
@@ -78,7 +81,9 @@ async function openFirst() {
 
 describe("ContactMessagesPage", () => {
   beforeEach(() => {
+    search.value = {}
     fetchMock.mockReset()
+    navigateMock.mockReset()
     serve([message("cm_1"), message("cm_2", { name: "Ali Veli", subject: "return" })])
   })
 
@@ -171,5 +176,70 @@ describe("ContactMessagesPage", () => {
       within(sheet).queryByRole("button", { name: "Yanıtlandı olarak işaretle" })
     ).not.toBeInTheDocument()
     expect(within(sheet).queryByRole("button", { name: "Sil" })).not.toBeInTheDocument()
+  })
+
+  it("shows a booking request's product, dates and people, with a phone only (adr/0076 Ek 2026-11-23)", async () => {
+    serve([
+      message("cm_3", {
+        subject: "booking",
+        order_number: null,
+        email: "",
+        body: "",
+        product_id: "prod_1",
+        product_title: "Kapadokya turu",
+        details: { month: "2027-03", adults: 2, children: 1 },
+      }),
+    ])
+    renderPage("owner")
+
+    expect(await screen.findByText("Rezervasyon talebi")).toBeInTheDocument()
+    expect(screen.getByText("Kapadokya turu")).toBeInTheDocument()
+    const sheet = await openFirst()
+    expect(within(sheet).getByRole("link", { name: "Kapadokya turu" })).toBeInTheDocument()
+    expect(within(sheet).getByText("Mart 2027")).toBeInTheDocument()
+    expect(within(sheet).getByText("2 yetişkin, 1 çocuk")).toBeInTheDocument()
+    // No address to mail, no message to show
+    expect(within(sheet).queryByRole("link", { name: /@/ })).not.toBeInTheDocument()
+    expect(within(sheet).queryByText("Mesaj")).not.toBeInTheDocument()
+  })
+
+  it("says open dates when a request names none, and asks for one subject when filtered", async () => {
+    search.value = { subject: "booking" }
+    serve([
+      message("cm_4", {
+        subject: "booking",
+        product_id: "prod_1",
+        product_title: "Kapadokya turu",
+        details: { adults: 1 },
+      }),
+    ])
+    renderPage("owner")
+
+    const sheet = await openFirst()
+    expect(within(sheet).getByText("Tarih esnek")).toBeInTheDocument()
+    expect(within(sheet).getByText("1 yetişkin")).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/contact-messages", {
+      query: { status: "new", offset: 0, limit: 50, subject: "booking" },
+    })
+  })
+
+  it("finds requests by a phone number, typed or in the address (adr/0076 Ek 2026-11-23)", async () => {
+    search.value = { phone: "0532 123 45 67" }
+    renderPage("owner")
+
+    await screen.findByRole("button", { name: "Ayşe Yılmaz" })
+    expect(fetchMock).toHaveBeenCalledWith("/admin/contact-messages", {
+      query: { status: "new", offset: 0, limit: 50, phone: "0532 123 45 67" },
+    })
+    const box = screen.getByRole("searchbox", { name: "Telefonla ara" })
+    await userEvent.clear(box)
+    await userEvent.type(box, "05551112233")
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: { status: undefined, subject: undefined, phone: "05551112233", page: undefined },
+        })
+      )
+    })
   })
 })

@@ -180,6 +180,38 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "reminder_days": {
+          "name": "reminder_days",
+          "type": "integer",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "2",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "sale_mode": {
+          "name": "sale_mode",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'online'",
+          "comment": null,
+          "enumItems": ["online", "request", "both"],
+          "mappedType": "enum"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -260,6 +292,11 @@
         }
       ],
       "checks": [
+        {
+          "name": "bookable_reminder_days_check",
+          "expression": "reminder_days BETWEEN 0 AND 30",
+          "definition": "check ((reminder_days BETWEEN 0 AND 30))"
+        },
         {
           "name": "bookable_hold_minutes_check",
           "expression": "hold_minutes BETWEEN 10 AND 60",
@@ -361,6 +398,22 @@
           "enumItems": ["confirmed", "cancelled", "completed"],
           "mappedType": "enum"
         },
+        "voucher_code": {
+          "name": "voucher_code",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -439,6 +492,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_booking_order_id\" ON \"booking\" (\"order_id\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_booking_voucher_code_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_booking_voucher_code_unique\" ON \"booking\" (\"voucher_code\") WHERE voucher_code IS NOT NULL AND deleted_at IS NULL"
         },
         {
           "keyName": "booking_pkey",
@@ -1121,6 +1183,70 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "json"
+        },
+        "reminded_at": {
+          "name": "reminded_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "cancel_refund": {
+          "name": "cancel_refund",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": ["sent", "none", "offline", "credit", "exceeds"],
+          "mappedType": "enum"
+        },
+        "refund_due": {
+          "name": "refund_due",
+          "type": "integer",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "bell_checked_at": {
+          "name": "bell_checked_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
         },
         "created_at": {
           "name": "created_at",

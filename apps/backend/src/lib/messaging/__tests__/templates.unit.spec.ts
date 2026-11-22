@@ -84,8 +84,11 @@ describe("a commercial e-mail's way out", () => {
 })
 
 describe("staff.contact_message", () => {
-  const mail = (vars: { subject: "order" | "kvkk"; due?: string | null }) =>
-    MESSAGE_TEMPLATES["staff.contact_message"].email?.(vars, brand)
+  const mail = (vars: {
+    subject: "order" | "kvkk" | "booking"
+    due?: string | null
+    request?: string | null
+  }) => MESSAGE_TEMPLATES["staff.contact_message"].email?.(vars, brand)
 
   it("names a KVKK request's legal last day (adr/0047 Ek 2026-11-02)", () => {
     const kvkk = mail({ subject: "kvkk", due: "2 Aralık 2026" })
@@ -97,6 +100,15 @@ describe("staff.contact_message", () => {
 
   it("says nothing of a deadline for any other message", () => {
     expect(mail({ subject: "order" })?.text).not.toContain("30 gün")
+  })
+
+  it("says a booking request's product, dates and people (adr/0076 Ek 2026-11-23)", () => {
+    const booking = mail({
+      subject: "booking",
+      request: "Rezervasyon talebi: Kapadokya turu, tarih esnek, 2 yetişkin.",
+    })
+    expect(booking?.subject).toBe("Yeni iletişim mesajı: Rezervasyon talebi")
+    expect(booking?.text).toContain("Kapadokya turu, tarih esnek, 2 yetişkin.")
   })
 })
 

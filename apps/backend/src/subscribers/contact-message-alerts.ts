@@ -7,6 +7,7 @@ import { notificationText } from "../lib/notifications/messages"
 import { CONTACT_MESSAGES_MODULE } from "../modules/contact-messages"
 import type ContactMessagesModuleService from "../modules/contact-messages/service"
 import { contactAnswerDue } from "../workflows/contact/answer-due"
+import { bookingRequestFacts } from "../workflows/contact/booking-request-text"
 import { CONTACT_MESSAGE_RECEIVED } from "../workflows/contact/messages"
 import { alertStaff } from "../workflows/messaging/staff"
 
@@ -32,7 +33,7 @@ export default async function contactMessageAlerts({
   const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
   const [message] = await messages.listContactMessages(
     { id: data.id },
-    { select: ["id", "subject", "created_at"], take: 1 }
+    { select: ["id", "subject", "product_id", "details", "created_at"], take: 1 }
   )
   if (!message) {
     return
@@ -41,6 +42,9 @@ export default async function contactMessageAlerts({
   // A KVKK request (adr/0047 Ek 2026-11-02): the bell names the law's last day
   const due =
     message.subject === "kvkk" ? await contactAnswerDue(container, message.created_at) : null
+  // A booking request (adr/0076 Ek 2026-11-23): the bell names the product, dates and people
+  const request =
+    message.subject === "booking" ? await bookingRequestFacts(container, message) : null
   await container
     .resolve(Modules.NOTIFICATION)
     .createNotifications({
@@ -57,7 +61,15 @@ export default async function contactMessageAlerts({
         subject: message.subject,
         ...(due
           ? { due_at: due.at, ...notificationText("contact.kvkk_received", { due: due.text }) }
-          : notificationText("contact.message_received", { subject })),
+          : request
+            ? {
+                product_id: message.product_id,
+                ...notificationText("contact.booking_received", {
+                  product: request.product,
+                  request: request.line,
+                }),
+              }
+            : notificationText("contact.message_received", { subject })),
       },
     })
     .catch((error: unknown) => {

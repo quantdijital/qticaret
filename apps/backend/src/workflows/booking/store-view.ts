@@ -109,6 +109,8 @@ export async function storeProductBooking(
     cutoff_hours: bookable.cutoff_hours,
     hold_minutes: bookable.hold_minutes,
     max_units_per_cart: bookable.max_units_per_cart,
+    // adr/0076 Ek 2026-11-23: the page offers the cart, a call-me request, or both
+    sale_mode: bookable.sale_mode,
     timezone: bookable.timezone,
     currency_code: cart.currency_code,
     categories: variants.map((variant) => ({

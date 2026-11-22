@@ -6,7 +6,9 @@ import { Trail } from "./parts/Trail"
 import { AskOnWhatsApp } from "./product/AskOnWhatsApp"
 import { Assurances } from "./product/Assurances"
 import { Booking } from "./product/Booking"
+import { BookingRequest, BookingRequestToggle } from "./product/BookingRequest"
 import { bookingWords } from "./product/booking-words"
+import { requestWords } from "./product/request-words"
 import { Buy } from "./product/Buy"
 import { Community } from "./product/Community"
 import { Details } from "./product/Details"
@@ -70,6 +72,30 @@ export function ProductPage({
     view.booking && actions.addBookingToCart
       ? { view: view.booking, action: actions.addBookingToCart }
       : null
+  // A call-me request (adr/0076 Ek 2026-11-23): in place of the cart, or under it
+  const saleMode = booking?.view.saleMode
+  const request =
+    booking && actions.requestBooking && (saleMode === "request" || saleMode === "both")
+      ? {
+          mode: saleMode,
+          form:
+            saleMode === "request" ? (
+              <BookingRequest
+                productId={view.id}
+                view={booking.view}
+                action={actions.requestBooking}
+                words={requestWords(t)}
+              />
+            ) : (
+              <BookingRequestToggle
+                productId={view.id}
+                view={booking.view}
+                action={actions.requestBooking}
+                words={requestWords(t)}
+              />
+            ),
+        }
+      : null
   return (
     <>
       {/* The product's own block: the design's main section, in its look when the shop set one */}
@@ -129,6 +155,7 @@ export function ProductPage({
                     view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null
                   }
                   words={bookingWords(t)}
+                  request={request}
                 />
               ) : (
                 <Buy

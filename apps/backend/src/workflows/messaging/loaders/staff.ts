@@ -4,6 +4,7 @@ import { panelUrl } from "../../../lib/env"
 import { inviteLink } from "../../../lib/staff"
 import { CONTACT_MESSAGES_MODULE } from "../../../modules/contact-messages"
 import { contactAnswerDue } from "../../contact/answer-due"
+import { bookingRequestFacts } from "../../contact/booking-request-text"
 import type ContactMessagesModuleService from "../../../modules/contact-messages/service"
 import type {
   StaffContactVars,
@@ -74,7 +75,7 @@ export async function loadStaffContact(
   const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
   const [message] = await messages.listContactMessages(
     { id: messageId },
-    { select: ["subject", "created_at"], take: 1 }
+    { select: ["subject", "product_id", "details", "created_at"], take: 1 }
   )
   if (!message) {
     return null
@@ -83,7 +84,15 @@ export async function loadStaffContact(
   const due =
     message.subject === "kvkk" ? (await contactAnswerDue(container, message.created_at)).text : null
   return {
-    vars: { subject: message.subject, due },
+    vars: {
+      subject: message.subject,
+      due,
+      // adr/0076 Ek 2026-11-23: a booking request's product, dates and people
+      request:
+        message.subject === "booking"
+          ? ((await bookingRequestFacts(container, message))?.line ?? null)
+          : null,
+    },
     ...STAFF,
     resourceType: "contact_message",
   }

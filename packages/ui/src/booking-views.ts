@@ -48,6 +48,18 @@ export interface BookingView {
   fewLeft: number
   /** The most places one cart may hold on a departure (the server checks again). */
   maxUnits: number
+  /**
+   * How the product is sold (adr/0076 Ek 2026-11-23): absent or `online`,
+   * the cart only, drawn as before; `request`, a "call me" form in place of
+   * the cart (no payment, no places held); `both`, the cart with a
+   * secondary "call me" button that opens the form
+   * (`ProductActions.requestBooking`). A theme without it draws the cart.
+   */
+  saleMode?: "online" | "request" | "both"
+  /** The privacy notice the request form's consent links to; null: none published. */
+  privacyPath?: string | null
+  /** The months a request may name, this one first (`value` YYYY-MM, `label` "Mart 2027"). */
+  requestMonths?: { value: string; label: string }[]
 }
 
 /** A dated cart line (`CartLineView.booking`): when, and whether its places are still held. */

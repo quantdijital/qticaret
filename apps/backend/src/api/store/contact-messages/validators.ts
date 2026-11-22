@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { normalizeTrPhone } from "../../../lib/tr/phone"
-import { CONTACT_SUBJECTS } from "../../../modules/contact-messages/models/contact-message"
+import { CONTACT_FORM_SUBJECTS } from "../../../modules/contact-messages/models/contact-message"
 
 // Text as typed, without control characters other than line breaks
 const plain = (value: string): string => value.replace(/[^\P{Cc}\n]/gu, "").trim()
@@ -30,7 +30,7 @@ export const StorePostContactMessage = z
         }
         return phone
       }),
-    subject: z.enum(CONTACT_SUBJECTS),
+    subject: z.enum(CONTACT_FORM_SUBJECTS),
     order_number: z
       .string()
       .trim()

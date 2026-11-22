@@ -15,6 +15,10 @@ export type SlotStatus = (typeof SLOT_STATUSES)[number]
 export const TRAVELER_LEVELS = ["none", "name", "birth_date", "identity", "nationality"] as const
 export type TravelerLevel = (typeof TRAVELER_LEVELS)[number]
 
+/** How a dated product is sold (adr/0076 Ek 2026-11-23): the cart, a call-me request, or both. */
+export const SALE_MODES = ["online", "request", "both"] as const
+export type SaleMode = (typeof SALE_MODES)[number]
+
 /** Per variant: how many places a unit takes (an infant 0) and the ages it is for. */
 export interface PaxEntry {
   pax: number
@@ -44,6 +48,8 @@ export interface Bookable {
   cancellation_tiers?: CancellationTier[]
   /** Days before a departure its reminder goes (adr/0076 Ek D7b); 0: none. Absent: older backend. */
   reminder_days?: number
+  /** Sold online, by a call-me request, or both (adr/0076 Ek 2026-11-23). Absent: older backend. */
+  sale_mode?: SaleMode
 }
 
 export interface BookableAnswer {
@@ -97,6 +103,7 @@ export interface BookableSettingsInput {
   traveler_fields?: { level: TravelerLevel }
   cancellation_tiers?: CancellationTier[]
   reminder_days?: number
+  sale_mode?: SaleMode
 }
 
 export interface NewSlot {

@@ -12,6 +12,8 @@ import {
  * decides; the guard closes it meanwhile (closed unless named open).
  */
 const OWN_STORE_WRITES: Readonly<Record<string, "closed" | "open">> = {
+  // adr/0076 Ek 2026-11-23: a call-me request, closed like the contact form
+  "POST /store/booking-requests": "closed",
   "POST /store/cart-reminders/redeem": "closed",
   "POST /store/carts/:id/age-declaration": "closed",
   "POST /store/carts/:id/bookings": "closed",

@@ -135,6 +135,22 @@ export function useAlertText(data: Record<string, unknown>) {
     // A KVKK request carries the law's last day for the answer (adr/0047)
     const due = text(data["due_at"])
     const dueDay = due && !Number.isNaN(Date.parse(due)) ? formatDate(due) : null
+    // A booking request names its product, dates and people (adr/0076 Ek 2026-11-23): no
+    // person's data, worded by the server from its own records
+    const request = subject === "booking" ? text(data["description"]) : ""
+    if (request) {
+      return {
+        title: text(data["title"]) || t("customers.contactMessages.subjects.booking"),
+        description: request,
+        Icon: Mail,
+        tone: "bg-info-soft text-info-text",
+        link: {
+          to: "/customers/contact-messages" as const,
+          search: { subject: "booking" as const },
+          params: {},
+        },
+      }
+    }
     return {
       title: t("notifications.contactMessage.title", {
         subject: t(`customers.contactMessages.subjects.${subject}`),

@@ -116,6 +116,10 @@ export async function planCartBooking(
   const cart = await openCart(container, input.cart_id, input.sales_channel_ids)
   const target = await readBookingTarget(container, input.slot_id, cart.sales_channel_id)
   assertSlotSells(target)
+  // adr/0076 Ek 2026-11-23: a product sold by call-me request only has no cart
+  if (target.bookable.sale_mode === "request") {
+    throw new ValidationError("booking.online_not_offered", { field: "slot_id" })
+  }
   const items = mergedItems(input.items)
   assertVariantsOf(
     target,
