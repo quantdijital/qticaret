@@ -22,8 +22,11 @@ export function departureState(
   fewLeft: number,
   words: BookingWords
 ): { text: string; tone: "off" | "few" | "plain" } {
-  if (departure.status === "closed" || departure.prices.length === 0) {
-    return { text: departure.prices.length === 0 ? words.noPrice : words.closed, tone: "off" }
+  if (departure.status === "closed") {
+    return { text: words.closed, tone: "off" }
+  }
+  if (departure.prices.length === 0) {
+    return { text: words.noPrice, tone: "off" }
   }
   if (departure.available <= 0) {
     return { text: words.full, tone: "off" }
@@ -160,7 +163,7 @@ export function Counts({
               <div role="group" aria-label={label} className="flex shrink-0 items-center gap-1">
                 <button
                   type="button"
-                  aria-label={`${words.decrease}: ${category.title}`}
+                  aria-label={words.decrease.replace("{title}", category.title)}
                   disabled={count <= 0}
                   onClick={() => {
                     change(category.variantId, count - 1)
@@ -178,7 +181,7 @@ export function Counts({
                 <input type="hidden" name={`qty_${category.variantId}`} value={count} />
                 <button
                   type="button"
-                  aria-label={`${words.increase}: ${category.title}`}
+                  aria-label={words.increase.replace("{title}", category.title)}
                   disabled={!canAdd(category)}
                   onClick={() => {
                     change(category.variantId, count + 1)

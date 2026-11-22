@@ -3,11 +3,43 @@ import { formatLira } from "@qticaret/ui"
 import type { CheckoutSummaryView, ImageView, Translate } from "@qticaret/ui"
 import { cartShips } from "@/lib/cart/ships"
 import type { CheckoutCart } from "@/lib/checkout/cart"
+import type { StoreCartBooking } from "@/lib/booking/store"
 import { lineAddonsOf } from "./addons"
+import { holdViewOf, lineBookingOf, withBookingRead } from "./booking"
 import { lineNetOf, netDiscountOf, netTotalsOf, taxLinesOf } from "./cart-tax"
 import { lineImageOf, linePathOf } from "./line-paths"
 
 const kurus = (lira: number) => Math.round(lira * 100)
+
+/** A dated line's departure (adr/0076 §10); nothing on any other line. */
+const bookingOf = (lineId: string, metadata: unknown) => {
+  const booking = lineBookingOf(lineId, metadata, null)
+  return booking ? { booking } : {}
+}
+
+/**
+ * The basket with its dated lines told by the cart's read (adr/0076 §10):
+ * each line expired once its places are not held, the hold's countdown,
+ * and a note when a shipping method is left on a cart that ships nothing
+ * (Ek D3). Without the read (no dated lines): the summary as it was.
+ */
+export function withBookingSummary(
+  summary: CheckoutSummaryView,
+  items: readonly { id: string; metadata?: Record<string, unknown> | null }[],
+  booking: StoreCartBooking | null,
+  t: Translate
+): CheckoutSummaryView {
+  const hold = holdViewOf(items, booking)
+  if (!booking || !hold) {
+    return summary
+  }
+  return {
+    ...summary,
+    lines: withBookingRead(summary.lines, items, booking),
+    hold,
+    ...(booking.shipping_method_stale ? { notice: t("booking.shipping_stale") } : {}),
+  }
+}
 
 /**
  * The basket beside the checkout and the card form: each line with its
@@ -35,6 +67,7 @@ export function summaryOf(
       image: lineImageOf(line.thumbnail, line.title, pictures),
       path: linePathOf(paths, line),
       addons: lineAddonsOf(line.metadata).addons,
+      ...bookingOf(line.id, line.metadata),
     })),
     items: formatLira(cart.original_item_total),
     discount: net ? netDiscountOf(net) : discount > 0 ? formatLira(discount / 100) : null,

@@ -16,6 +16,8 @@ import {
 } from "@/lib/store-api/requests"
 import { currentCustomer } from "@/lib/account/auth"
 import { productAddonsOrNone } from "@/lib/cart/addons"
+import { productBooking } from "@/lib/booking/store"
+import { EMPTY_BOOKING, bookingViewOf } from "@/lib/views/booking"
 import { installmentSummaries } from "@/lib/store-api/installments"
 import { productTexts } from "@/lib/store-api/product-description"
 import { storefrontEnv } from "@/lib/env"
@@ -62,6 +64,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     customer,
     sections,
     addons,
+    booking,
   ] = await Promise.all([
     asked,
     // The line under the price, from the price the page shows (kept ten minutes a price)
@@ -82,6 +85,10 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     }),
     // A gift card takes no add-ons; none while the shop has them off (`features`: not asked then)
     product.product_extension?.is_gift_card ? Promise.resolve([]) : productAddonsOrNone(product.id),
+    // A dated product's departures (adr/0076 §10); null while the shop has dated sales off
+    product.product_extension?.booking_mode === "departure"
+      ? productBooking(product.id)
+      : Promise.resolve(null),
   ])
   // The shop's WhatsApp number comes with its contact details (adr/0048); the return
   // policy's page for the shipping card, the frame asked for it already (kept a minute)
@@ -125,6 +132,10 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     giftCard: features?.gift_cards === true && product.product_extension?.is_gift_card === true,
     // Picked above "add to cart"; the server prices them on the line (adr/0052)
     addons: addonFieldsOf(addons, t),
+    // Departures and counts in place of "add to cart"; dated sales off: no departures, "soon"
+    ...(product.product_extension?.booking_mode === "departure"
+      ? { booking: booking ? bookingViewOf(booking, t) : EMPTY_BOOKING }
+      : {}),
     signedIn: customer !== null,
     shippingNote:
       free_shipping_threshold && free_shipping_threshold > 0

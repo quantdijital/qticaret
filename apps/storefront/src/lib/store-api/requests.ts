@@ -220,6 +220,8 @@ const PAGE_FIELDS = [
   // Its withdrawal mark, read by its kind (adr/0052 Ek 2026-11-03): on the product's own answer only
   "product_extension.withdrawal_excluded",
   "product_extension.kind",
+  // A dated product's page asks its departures (adr/0076 §10)
+  "product_extension.booking_mode",
 ]
 
 export interface ProductQuery {

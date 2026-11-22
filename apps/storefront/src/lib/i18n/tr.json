@@ -1166,6 +1166,8 @@
   "booking.no_seat": "Yer tutmaz",
   "booking.no_price": "Bu tarihte satılmıyor",
   "booking.count_of": "{title} sayısı",
+  "booking.decrease": "{title} sayısını azalt",
+  "booking.increase": "{title} sayısını artır",
   "booking.total": "Toplam",
   "booking.total_people": "{count} kişi",
   "booking.total_note": "Kesin tutar sepette hesaplanır.",
@@ -1200,5 +1202,8 @@
   "booking.unavailable": "Rezervasyon şu an alınmıyor.",
   "booking.add_failed": "Yerler ayrılamadı. Lütfen yeniden deneyin.",
   "booking.choose_departure": "Bir tarih seçin.",
-  "booking.choose_people": "En az bir kişi seçin."
+  "booking.choose_people": "En az bir kişi seçin.",
+  "booking.hold_mismatch": "Sepetteki yerler değişti. Sepetinize dönüp tarihi yeniden seçin.",
+  "booking.price_changed": "Bir tarihin fiyatı değişti. Sepetinize dönüp güncel fiyatı görün.",
+  "cart.shipping_not_needed": "Sepette kargo gerektiren ürün yok ama önceki bir kargo seçimi kaldı. Lütfen bizimle iletişime geçin."
 }
