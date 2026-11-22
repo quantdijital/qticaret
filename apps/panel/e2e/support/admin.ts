@@ -26,7 +26,12 @@ export function createTemporaryAdmin(): TemporaryAdmin {
   const email = `e2e-${String(Date.now())}-${randomBytes(3).toString("hex")}@example.com`
   const password = randomBytes(18).toString("base64url")
   // `--password=`, joined: a password starting with "-" would read as an option
-  backend(["user", `--email=${email}`, `--password=${password}`])
+  try {
+    backend(["user", `--email=${email}`, `--password=${password}`])
+  } catch {
+    // The thrown message carries the command line, password and all (the CI log is public)
+    throw new Error("e2e: the temporary admin could not be created")
+  }
   // The run checks every screen: it is the shop's owner (adr/0040)
   backend(["exec", "./src/scripts/set-staff-role.ts", email, "owner"])
   return { email, password }

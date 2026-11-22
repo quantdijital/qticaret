@@ -1,5 +1,6 @@
 import type { ExecArgs } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
+import { isLocalEnv, parseEnv } from "../lib/env"
 import { logger } from "../lib/logging"
 import { STAFF_ROLES_MODULE } from "../modules/staff-roles"
 import type StaffRolesModuleService from "../modules/staff-roles/service"
@@ -40,6 +41,10 @@ export function e2eAdminExit(
  * makes (apps/panel/e2e/support/admin.ts) is refused.
  */
 export default async function removeE2eAdmin({ container, args }: ExecArgs) {
+  // Leaves a shop without staff on its way: never where the shop runs (security review D1)
+  if (!isLocalEnv({ NODE_ENV: parseEnv().NODE_ENV })) {
+    throw new Error("remove-e2e-admin: development or test only")
+  }
   const email = args[0] ?? ""
   if (!E2E_STAFF_EMAIL.test(email)) {
     throw new Error("remove-e2e-admin: not an e2e admin address")
