@@ -98,6 +98,15 @@ describe("a dated product page's booking view", () => {
     expect(view.maxUnits).toBe(8)
   })
 
+  it("says a call-me product's sale mode with the privacy notice and months; online says nothing", () => {
+    // adr/0076 Ek 2026-11-23: an online-only product's view stays as it was
+    expect(bookingViewOf({ ...BOOKING, sale_mode: "online" }, t)).toEqual(bookingViewOf(BOOKING, t))
+    expect(bookingViewOf(BOOKING, t)).not.toHaveProperty("saleMode")
+    const view = bookingViewOf({ ...BOOKING, sale_mode: "both" }, t, "/yasal/kvkk")
+    expect(view).toMatchObject({ saleMode: "both", privacyPath: "/yasal/kvkk" })
+    expect(view.requestMonths).toHaveLength(12)
+  })
+
   it("shows a closed departure and an overbooked one with no places", () => {
     const view = bookingViewOf(BOOKING, t)
     const byId = new Map(view.departures.map((each) => [each.id, each]))

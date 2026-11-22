@@ -6,7 +6,7 @@ import { challengeOf } from "@/lib/checkout/pay"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeCall } from "@/lib/store-api/server"
 
-const optional = (schema: z.ZodString) =>
+const optional = <Schema extends z.ZodType<string, string>>(schema: Schema) =>
   schema.optional().or(z.literal("").transform(() => undefined))
 
 const count = (min: number) => z.coerce.number().int().min(min).max(500)

@@ -93,6 +93,38 @@ export const EMPTY_BOOKING: BookingView = {
   maxUnits: 0,
 }
 
+/** How many months ahead a call-me request may name (adr/0076 Ek 2026-11-23). */
+export const REQUEST_MONTHS = 12
+
+/** This month and the next ones in the product's zone: `2027-03` told "Mart 2027". */
+export function requestMonths(zone: string = DEFAULT_ZONE, now: Date = new Date()) {
+  let parts: Intl.DateTimeFormatPart[]
+  try {
+    parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: zone,
+      year: "numeric",
+      month: "2-digit",
+    }).formatToParts(now)
+  } catch {
+    parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: DEFAULT_ZONE,
+      year: "numeric",
+      month: "2-digit",
+    }).formatToParts(now)
+  }
+  const year = Number(parts.find((part) => part.type === "year")?.value)
+  const month = Number(parts.find((part) => part.type === "month")?.value) - 1
+  const label = new Intl.DateTimeFormat("tr-TR", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  })
+  return Array.from({ length: REQUEST_MONTHS }, (_, index) => {
+    const at = new Date(Date.UTC(year, month + index, 1))
+    return { value: at.toISOString().slice(0, 7), label: label.format(at) }
+  })
+}
+
 /**
  * The product page's booking form from the backend's answer: the
  * categories with their ages, the departures soonest first, each told in
@@ -129,7 +161,7 @@ export function bookingViewOf(
     maxUnits: booking.max_units_per_cart,
     // A call-me request (adr/0076 Ek 2026-11-23); an online-only product's view stays as it was
     ...(booking.sale_mode === "request" || booking.sale_mode === "both"
-      ? { saleMode: booking.sale_mode, privacyPath }
+      ? { saleMode: booking.sale_mode, privacyPath, requestMonths: requestMonths(booking.timezone) }
       : {}),
   }
 }

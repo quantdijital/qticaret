@@ -58,6 +58,8 @@ export interface BookingView {
   saleMode?: "online" | "request" | "both"
   /** The privacy notice the request form's consent links to; null: none published. */
   privacyPath?: string | null
+  /** The months a request may name, this one first (`value` YYYY-MM, `label` "Mart 2027"). */
+  requestMonths?: { value: string; label: string }[]
 }
 
 /** A dated cart line (`CartLineView.booking`): when, and whether its places are still held. */

@@ -27,6 +27,9 @@ const FORM = "rezervasyon-formu"
  * the lines in the cart), then "Rezervasyon yap" in the shop's colour
  * with the favourite heart. Without departures: "new dates soon", the
  * page stays as it is. The form sends the departure and the counts only.
+ * A product sold by "call me" request (adr/0076 Ek 2026-11-23) shows the
+ * request form in place of all this (`request.mode` `request`), or under
+ * it (`both`, a secondary button that opens it).
  */
 export function Booking({
   productId,
@@ -36,6 +39,7 @@ export function Booking({
   summary,
   whatsapp,
   words,
+  request = null,
 }: {
   productId: string
   view: BookingView
@@ -44,6 +48,8 @@ export function Booking({
   summary: ReactNode
   whatsapp: ReactNode
   words: BookingWords
+  /** The call-me form, in place of the cart (`request`) or under it (`both`). */
+  request?: { mode: "request" | "both"; form: ReactNode } | null
 }) {
   const { state, pending, form } = useKeptForm(action)
   const [chosen, setChosen] = useState<string | null>(() => firstBookable(view))
@@ -62,6 +68,17 @@ export function Booking({
     }
   }, [state, words.added])
 
+  if (request?.mode === "request") {
+    return (
+      <div className="gf-buy-stack flex flex-col gap-6">
+        {summary}
+        {request.form}
+        <div className="flex items-center gap-2">{favorite}</div>
+        {whatsapp}
+      </div>
+    )
+  }
+
   if (view.departures.length === 0) {
     return (
       <div className="gf-buy-stack flex flex-col gap-6">
@@ -74,6 +91,7 @@ export function Booking({
           </div>
         </div>
         <div className="flex items-center gap-2">{favorite}</div>
+        {request?.form}
         {whatsapp}
       </div>
     )
@@ -171,6 +189,7 @@ export function Booking({
             </span>
           )}
         </p>
+        {request?.form}
         {whatsapp}
       </div>
     </div>
