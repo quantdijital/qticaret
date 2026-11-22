@@ -24,7 +24,7 @@ import { BookingHold, BookingHoldSlot } from "./models/booking-hold"
 import { BookingSlot } from "./models/booking-slot"
 import { BookingTraveler } from "./models/booking-traveler"
 import { attachTravelers, refreshTravelerPurge } from "./traveler-attach"
-import { replaceCartTravelers, revealDocument, sealTraveler } from "./travelers"
+import { documentHashOf, replaceCartTravelers, revealDocument, sealTraveler } from "./travelers"
 import type { TravelerKeys } from "./travelers"
 
 /** The shop's PII keys (adr/0009), for travelers' ID numbers; hex, 32 bytes each. */
@@ -137,6 +137,15 @@ class BookingModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {}
   ): Promise<string | null> {
     return revealDocument(managerOf(sharedContext), this.travelerKeys(), travelerId)
+  }
+
+  /**
+   * The keyed hash of a cleaned ID or passport number, to find the rows
+   * that carry it (a traveler's own KVKK request, adr/0076 Ek D6b); the
+   * number itself is not kept.
+   */
+  travelerDocumentHash(number: string): string {
+    return documentHashOf(this.travelerKeys(), number)
   }
 
   /** Sets a cart's places per slot (0 gives one back); null: the cart holds nothing now. */

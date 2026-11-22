@@ -126,6 +126,9 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/customers/:id/billing-profile/reveal",
     // A traveler's full ID or passport number for the departure's list (adr/0076 §7)
     "/admin/booking-travelers/:id/reveal",
+    // A traveler's own KVKK request: their rows found, copied and deleted (adr/0076 Ek D6b)
+    "/admin/booking-travelers/search",
+    "/admin/booking-travelers/erase",
     // A contact form message marked answered: the shop still answers its customers
     "/admin/contact-messages/:id",
   ]),

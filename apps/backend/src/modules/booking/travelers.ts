@@ -38,6 +38,10 @@ export interface SealedTraveler {
 // The tail kept plain: four characters, two of a short number (5–7) so most of it stays hidden
 const shownLength = (number: string): number => (number.length >= 8 ? 4 : 2)
 
+/** The keyed hash a cleaned number is found by (a KVKK request's search; adr/0076 Ek D6b). */
+export const documentHashOf = (keys: TravelerKeys, number: string): string =>
+  hashPii(number, keys.hash, DOCUMENT_CONTEXT)
+
 /** The number sealed for the cart; the rest as it came. */
 export function sealTraveler(
   keys: TravelerKeys,
@@ -56,7 +60,7 @@ export function sealTraveler(
     document_encrypted: number
       ? encryptPii(number, keys.encryption, encryptionContext(cartId))
       : null,
-    document_hash: number ? hashPii(number, keys.hash, DOCUMENT_CONTEXT) : null,
+    document_hash: number ? documentHashOf(keys, number) : null,
     document_last4: number ? number.slice(-shownLength(number)) : null,
     key_version: number ? TRAVELER_KEY_VERSION : null,
     purge_after: purgeAfter,
