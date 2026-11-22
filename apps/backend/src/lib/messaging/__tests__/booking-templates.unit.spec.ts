@@ -59,6 +59,42 @@ describe("a dated order's e-mails (adr/0076 Ek D7b)", () => {
     expect(email?.text).toContain("İade tutarı: ₺9.000,00")
   })
 
+  it("keeps the voucher's words and button while the shop has vouchers (the default)", () => {
+    const email = bookingConfirmed.email?.(bookingConfirmed.sample, BRAND)
+    expect(email?.text).toContain("voucher'ınızı yazdırabilir")
+    expect(email?.text).toContain("Voucher'ı aç")
+    expect(email?.text).toContain("İptali sipariş sayfanızdan yapabilirsiniz")
+    expect(email?.text).not.toContain("telefon veya e-posta ile iletişime geçeceğiz")
+  })
+
+  it("without vouchers: no button nor word of one, the shop's note in its place (Ek basit yol)", () => {
+    const simple = { ...bookingConfirmed.sample, voucherUrl: null, voucherOffNote: "" }
+    const email = bookingConfirmed.email?.(simple, BRAND)
+    expect(email?.text).not.toMatch(/voucher/i)
+    expect(email?.html).not.toContain("/voucher")
+    expect(email?.text).toContain(
+      "Rezervasyon ayrıntıları için sizinle telefon veya e-posta ile iletişime geçeceğiz."
+    )
+    expect(email?.text).toContain("Siparişi görüntüle")
+    const own = bookingConfirmed.email?.(
+      { ...simple, voucherOffNote: "Kalkıştan bir gün önce sizi arayacağız." },
+      BRAND
+    )
+    expect(own?.text).toContain("Kalkıştan bir gün önce sizi arayacağız.")
+    expect(own?.text).not.toContain("iletişime geçeceğiz")
+    const reminder = bookingReminder.email?.({ ...bookingReminder.sample, ...simple }, BRAND)
+    expect(reminder?.text).not.toMatch(/voucher/i)
+  })
+
+  it("sends the shopper to the shop for a cancel while online cancel is off", () => {
+    const email = bookingConfirmed.email?.(
+      { ...bookingConfirmed.sample, onlineCancel: false },
+      BRAND
+    )
+    expect(email?.text).not.toContain("İptali sipariş sayfanızdan yapabilirsiniz")
+    expect(email?.text).toContain("İptal ve değişiklik için mağazayla telefon ya da e-postayla")
+  })
+
   it("are e-mail only, sent again from their resource, and the reminder alone may be turned off", () => {
     for (const template of [bookingConfirmed, bookingReminder, bookingCancelled]) {
       expect(template.channels).toEqual(["email"])

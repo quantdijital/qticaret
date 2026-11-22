@@ -1,7 +1,8 @@
 import { formatLira } from "@qticaret/ui"
 import type { OrderBookingView, Translate } from "@qticaret/ui"
-import type { OrderDeparturesRow } from "../orders/bookings"
+import type { CancelContactRow, OrderDeparturesRow } from "../orders/bookings"
 import { departureLabel } from "./booking"
+import { displayPhone } from "./frame"
 
 /** The backend's refusals of a shopper's departure cancel the page says in its own words. */
 const REFUSALS: ReadonlySet<string> = new Set([
@@ -10,6 +11,19 @@ const REFUSALS: ReadonlySet<string> = new Set([
   "booking.cancel_unpaid",
   "orders.cancel_contact_shop",
 ])
+
+const BY_CONTACT = "booking.cancel_by_contact"
+
+/** The shop's note (or the default) and how to reach it, as one sentence run. */
+function contactNote(contact: CancelContactRow | undefined, t: Translate): string {
+  return [
+    contact?.note ?? t(BY_CONTACT),
+    contact?.phone ? t("booking.contact_phone", { phone: displayPhone(contact.phone) }) : null,
+    contact?.email ? t("booking.contact_email", { email: contact.email }) : null,
+  ]
+    .filter(Boolean)
+    .join(" ")
+}
 
 /**
  * A dated order's departures on its page (adr/0076 Ek D7a): when and
@@ -44,7 +58,9 @@ export function orderBookingsOf(
       note:
         row.cancelled || row.cancellable || row.refusal === null
           ? null
-          : t(REFUSALS.has(row.refusal) ? row.refusal : "order.booking_cancel_unavailable"),
+          : row.refusal === BY_CONTACT
+            ? contactNote(found.contact, t)
+            : t(REFUSALS.has(row.refusal) ? row.refusal : "order.booking_cancel_unavailable"),
     }
   })
 }

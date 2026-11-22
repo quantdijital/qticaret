@@ -1383,6 +1383,22 @@
         "packageTravel": "I sell package travel",
         "packageTravelHint": "When on, a dated product cancelled 30 days or more before its day keeps nothing (whatever its cancellation terms say); the shopper is told the refund comes within 14 days."
       },
+      "bookingFlow": {
+        "title": "Booking flow",
+        "description": "For dated products the voucher and the shopper's own cancel are optional. Turned off, the shopper sees your note instead; you handle the rest by phone or e-mail.",
+        "voucher": "Send vouchers",
+        "voucherHint": "The voucher link in the confirmation e-mail, the voucher page and its check code. Off, no voucher is made and the Check voucher button in Orders is hidden.",
+        "voucherNote": "Note in the e-mail instead of the voucher",
+        "voucherNoteDefault": "We will contact you by phone or e-mail with your booking's details.",
+        "onlineCancel": "Shoppers may cancel from the order page",
+        "onlineCancelHint": "The cancel and its refund on the order page. Off, you cancel and refund from the order's page in the panel.",
+        "cancelNote": "Note on the order page instead of the cancel",
+        "cancelNoteDefault": "Contact us to cancel or change your booking.",
+        "noteHint": "Left empty, the text above is shown.",
+        "cancelNoteHint": "Left empty, the text above is shown. The phone and e-mail of the shop profile are added below the note.",
+        "noteTooLong": "The note may be at most {{max}} characters.",
+        "noteInvalid": "The note must be one line, without invisible characters."
+      },
       "tabs": {
         "carriers": "Carriers",
         "options": "Options and rates",
@@ -3669,7 +3685,7 @@
           "both": "Both"
         },
         "travelerLevels": {
-          "none": "Do not ask",
+          "none": "Don't ask (I'll collect them myself later)",
           "name": "Name",
           "birth_date": "Name, birth date",
           "identity": "Name, birth date, ID/passport no",

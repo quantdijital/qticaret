@@ -92,6 +92,8 @@ const NOTES: Record<string, string> = {
   "rezervasyon-gec": "booking.cancel_too_late",
   "rezervasyon-kademe-yok": "booking.cancel_unavailable",
   "rezervasyon-magaza": "orders.cancel_contact_shop",
+  // The shop takes cancels by phone or e-mail (adr/0076 Ek basit yol)
+  "rezervasyon-iletisim": "booking.cancel_by_contact",
 }
 
 // The carrier's words for where a parcel is; anything else reads as on its way

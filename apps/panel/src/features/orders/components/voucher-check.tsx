@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { CircleCheck, CircleX, TicketCheck } from "lucide-react"
 import { useState } from "react"
@@ -16,6 +17,8 @@ import { useVoucherCheck } from "@/features/orders/api/vouchers"
 import type { VoucherCheck } from "@/features/orders/api/vouchers"
 import { BOOKING_FLAG } from "@/features/products/api/booking"
 import { useFeature } from "@/features/settings/api/features"
+import { sectionQuery } from "@/features/settings/api/sections"
+import type { BookingFlowSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
 
 const V = "orders.vouchers"
@@ -71,15 +74,18 @@ function CheckResult({ result }: { result: VoucherCheck }) {
  * "Voucher doğrula" (adr/0076 Ek D7b): staff type the code on a booking's
  * voucher at the departure and see whether it stands. Every role that
  * reads orders; the server counts and records each check. Shown while
- * the shop sells dated products.
+ * the shop sells dated products and has vouchers (adr/0076 Ek basit yol).
  */
 export function VoucherCheckButton() {
   const { t } = useTranslation()
   const on = useFeature(BOOKING_FLAG)
+  // Hidden only once the shop is known to run without vouchers
+  const flow = useQuery({ ...sectionQuery<BookingFlowSettings>("booking"), enabled: on })
+  const vouchers = flow.data?.values.voucher_enabled ?? true
   const [open, setOpen] = useState(false)
   const [code, setCode] = useState("")
   const check = useVoucherCheck()
-  if (!on) {
+  if (!on || !vouchers) {
     return null
   }
   return (

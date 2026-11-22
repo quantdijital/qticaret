@@ -15,6 +15,7 @@ import { ShippingOptionsCard } from "@/features/settings/components/shipping-opt
 import { DeliveryCard } from "@/features/settings/components/delivery-card"
 import { RatesCard } from "@/features/settings/components/shipping-rules-cards"
 import { LabelSizeCard } from "@/features/settings/components/label-size-card"
+import { BookingFlowCard } from "@/features/settings/components/booking-flow-card"
 import { ReturnsCard } from "@/features/settings/components/returns-card"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
@@ -135,7 +136,17 @@ export function ShippingPage() {
               </>
             ),
           },
-          { key: "returns", label: t(`${S}.tabs.returns`), content: <ReturnsCard /> },
+          {
+            key: "returns",
+            label: t(`${S}.tabs.returns`),
+            // adr/0076 Ek basit yol: the dated products' flows, while the shop sells them
+            content: (
+              <>
+                <ReturnsCard />
+                <BookingFlowCard />
+              </>
+            ),
+          },
           { key: "locations", label: t(`${S}.tabs.locations`), content: <LocationsPanel /> },
         ]}
       />
