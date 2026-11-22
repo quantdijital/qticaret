@@ -3614,7 +3614,8 @@
           "confirmed": "Onaylı",
           "cancelled": "İptal",
           "completed": "Tamamlandı"
-        }
+        },
+        "print": "Katılımcı listesini yazdır"
       },
       "settings": {
         "title": "Rezervasyon ayarları",
@@ -3635,7 +3636,16 @@
         "minAge": "En küçük yaş",
         "maxAge": "En büyük yaş",
         "minAgeOf": "{{variant}}: en küçük yaş",
-        "maxAgeOf": "{{variant}}: en büyük yaş"
+        "maxAgeOf": "{{variant}}: en büyük yaş",
+        "travelerLevel": "Katılımcı bilgisi",
+        "travelerLevelHint": "Ödemede her katılımcı için istenir. Kimlik ya da pasaport no şifreli saklanır, panelde maskeli görünür. Yalnız gerçekten gerekeni isteyin (KVKK).",
+        "travelerLevels": {
+          "none": "İsteme",
+          "name": "Ad soyad",
+          "birth_date": "Ad soyad, doğum tarihi",
+          "identity": "Ad soyad, doğum tarihi, kimlik/pasaport no",
+          "nationality": "Ad soyad, doğum tarihi, kimlik/pasaport no, uyruk"
+        }
       },
       "errors": {
         "disabled": "Tarihli ürünler için önce Ayarlar > Özellikler'den hem tarihli ürünleri hem dijital ve hizmet ürünlerini açın.",
@@ -3667,6 +3677,20 @@
           "pax": "Kaç kişi sayar 0 ile 20 arasında tam sayı olmalı.",
           "age": "Yaş 0 ile 120 arasında olmalı."
         }
+      },
+      "travelers": {
+        "title": "Katılımcılar",
+        "none": "Katılımcı bilgisi yok.",
+        "reveal": "Numarayı göster",
+        "hide": "Gizle",
+        "printTitle": "Katılımcı listesi",
+        "noDeparture": "Kalkış bulunamadı.",
+        "count_one": "{{count}} katılımcı",
+        "count_other": "{{count}} katılımcı",
+        "name": "Ad soyad",
+        "birthDate": "Doğum tarihi",
+        "nationality": "Uyruk",
+        "document": "Kimlik/pasaport no"
       }
     },
     "addons": {
@@ -5372,6 +5396,51 @@
       "whatsappTextNoName": "Merhaba, sepetinizde bıraktığınız ürünlerle ilgili yardımcı olabileceğimiz bir konu var mı?",
       "previous": "Önceki sepet",
       "next": "Sonraki sepet"
+    },
+    "sectionTravelers": "Katılımcı başvuruları",
+    "travelerRequests": {
+      "title": "Katılımcı başvuruları",
+      "description": "Rezervasyonda adı geçen kişinin KVKK başvurusu: kayıtlarını bulun, dökümünü verin ya da silin.",
+      "hint": "Katılımcı alıcı değildir ve hesabı yoktur; kayıtları verdiği bilgilerle bulunur. Ad ve soyad tam yazılır (büyük/küçük harf ve i/ı farkı gözetilmez); doğum tarihi ya da numara verilirse onlarla da eşleşir. Bulunamazsa farklı yazımı deneyin. Her arama kayda geçer.",
+      "notAllowed": "Bu ekranı yalnız mağaza sahibi ve yöneticiler kullanabilir.",
+      "fields": {
+        "first_name": "Ad",
+        "last_name": "Soyad",
+        "birth_date": "Doğum tarihi",
+        "birthDateHint": "Doğum tarihi istemeyen turlarda boş bırakın.",
+        "document_no": "Kimlik ya da pasaport no",
+        "documentHint": "Verilirse yalnız bu numarayla kayıtlı satırlar bulunur; numara saklanmaz."
+      },
+      "errors": {
+        "firstName": "Adı yazın.",
+        "lastName": "Soyadı yazın.",
+        "document": "Numara en çok 40 karakter olabilir."
+      },
+      "search": "Ara",
+      "noneFound": "Bu bilgilerle kayıtlı katılımcı bulunamadı. Farklı yazımı deneyin (ör. Ş yerine S, ikinci adla ya da onsuz).",
+      "found_one": "{{count}} kayıt bulundu.",
+      "found_other": "{{count}} kayıt bulundu.",
+      "download": "Dökümü indir",
+      "erase": "Seçilenleri sil",
+      "pick": "Seç",
+      "pickOne": "{{name}} seç",
+      "differs": "Bulunan kayıtlarda bu bilgi farklı",
+      "narrowWarning": "Aynı adı taşıyan başka kişiler olabilir. Döküm vermeden ya da silmeden önce doğum tarihi ya da kimlik/pasaport numarasıyla aramayı daraltın ve yalnız başvuranın kayıtlarını seçin.",
+      "mixedWarning": "Bulunan kayıtlarda farklı doğum tarihleri ya da uyruklar var (işaretli); bunlar farklı kişilere ait olabilir.",
+      "eraseList": "Silinecek kayıtlar",
+      "inCart": "Sepette (siparişe dönüşmedi)",
+      "columns": {
+        "person": "Katılımcı",
+        "trip": "Ürün ve tarih",
+        "order": "Sipariş",
+        "purge": "Kendiliğinden silinme"
+      },
+      "eraseTitle_one": "{{count}} katılımcı kaydı silinsin mi?",
+      "eraseTitle_other": "{{count}} katılımcı kaydı silinsin mi?",
+      "eraseText": "Kayıtlar kalıcı silinir; geri alınamaz. Sipariş, tutarı ve satırlarıyla muhasebe için kalır. Silme kayda geçer.",
+      "eraseConfirm": "Kalıcı sil",
+      "erased_one": "{{count}} kayıt silindi.",
+      "erased_other": "{{count}} kayıt silindi."
     }
   },
   "categories": {

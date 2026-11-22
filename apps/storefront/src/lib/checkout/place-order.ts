@@ -121,6 +121,9 @@ const KNOWN = new Set([
   "booking.slot_closed",
   "booking.sales_closed",
   "booking.slot_unknown",
+  // A dated line's travelers not in or no longer right (adr/0076 Ek D6b): its step opens again
+  "booking.travelers_missing",
+  "booking.travelers_invalid",
   // A shipping method left on a cart that ships nothing any more (adr/0076 Ek D3)
   "cart.shipping_not_needed",
 ])

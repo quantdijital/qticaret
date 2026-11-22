@@ -5,6 +5,7 @@ import { shippingInfoEvents } from "@/lib/analytics/cart-payloads"
 import { checkoutEvents } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { visitorAmounts } from "@/lib/analytics/tags"
+import { asksTravelers, cartTravelers } from "@/lib/booking/travelers"
 import { shopperGiftLines } from "@/lib/cart/gift"
 import { OUT_OF_STOCK, cartShortLines } from "@/lib/cart/stock"
 import { checkoutCart } from "@/lib/checkout/cart"
@@ -12,6 +13,7 @@ import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { checkoutActions } from "@/lib/theme-actions"
 import { billingOf } from "@/lib/views/account"
+import { hasBookingLines } from "@/lib/views/booking"
 import { checkoutView, stepOf } from "@/lib/views/checkout"
 import { theme } from "@/theme"
 
@@ -30,7 +32,7 @@ const RETURN_ERRORS = new Set([
 
 /**
  * `/odeme` (D7): address, shipping and payment for the shopper's cart.
- * `?adim=adres|kargo` reopens an earlier step; a step past the first one
+ * `?adim=adres|kargo|katilimcilar` reopens an earlier step; a step past the first one
  * missing is never shown. An empty or ordered cart goes back to `/sepet`.
  */
 export default async function CheckoutPage({
@@ -49,12 +51,14 @@ export default async function CheckoutPage({
   const asked = typeof query["adim"] === "string" ? query["adim"] : undefined
   const failed = typeof query["hata"] === "string" ? query["hata"] : null
   const error = failed && RETURN_ERRORS.has(failed) ? t(failed) : null
-  const [[saved], billing, gifts, short, amounts] = await Promise.all([
+  const [[saved], billing, gifts, short, amounts, travelers] = await Promise.all([
     customer ? customerAddresses() : Promise.resolve([]),
     customer ? billingOf() : Promise.resolve(null),
     shopperGiftLines(cart.id),
     cartShortLines(cart.id),
     visitorAmounts(),
+    // A dated line's departure may ask for its travelers (adr/0076 Ek D6b)
+    hasBookingLines(cart.items) ? cartTravelers(cart.id) : Promise.resolve(null),
   ])
   // A unit another order took since it was put in the cart: seen in the cart, before paying
   // (adr/0026 Ek 2026-11-06); the payment's start checks again
@@ -65,11 +69,12 @@ export default async function CheckoutPage({
   const unnamed = gifts.some((gift) => gift.recipient === null)
   const view = await checkoutView(
     cart,
-    stepOf(cart, asked),
+    stepOf(cart, asked, asksTravelers(travelers) ? travelers : null),
     error ?? (unnamed ? t("gift_card.recipient_required") : null),
     t,
     customer ? { ...customer, address: saved ?? null } : null,
-    billing
+    billing,
+    travelers
   )
   // A gift line is never paid with credit. Cash on delivery is the backend's to offer: for a
   // payment link's cart only when the shop allows it (adr/0051), absent from the methods otherwise

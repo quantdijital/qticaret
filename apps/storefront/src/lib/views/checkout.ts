@@ -34,8 +34,11 @@ import type { PaymentMethods } from "@/lib/checkout/options"
 import { STEP_PATHS, stepsOf } from "./checkout-steps"
 import { summaryOf, withBookingSummary } from "./checkout-summary"
 import { cartBooking } from "@/lib/booking/store"
+import { asksTravelers } from "@/lib/booking/travelers"
+import type { StoreCartTravelers } from "@/lib/booking/travelers"
 import { hasBookingLines } from "./booking"
 import { displayPhone } from "./frame"
+import { travelersView } from "./travelers"
 import { linePicturesOf, productPathsOf } from "./line-paths"
 
 export { summaryOf } from "./checkout-summary"
@@ -190,7 +193,8 @@ export async function checkoutView(
   error: string | null,
   t: Translate,
   customer: CustomerDefaults | null = null,
-  billing: Billing = null
+  billing: Billing = null,
+  travelers: StoreCartTravelers | null = null
 ): Promise<CheckoutPageView> {
   const address = cart.shipping_address
   // An empty form starts from the customer's newest saved address
@@ -200,7 +204,7 @@ export async function checkoutView(
   const complete = addressComplete(cart)
   const chosen = cart.shipping_methods[0] ?? null
   // Nothing to ship (adr/0076 §6): no carriers to offer, the payment opens once the address is in
-  const steps = stepsOf(cart)
+  const steps = stepsOf(cart, asksTravelers(travelers) ? travelers : null)
   const ships = steps.includes("shipping")
   const [
     provinces,
@@ -230,6 +234,7 @@ export async function checkoutView(
   return {
     step,
     steps,
+    travelers: travelersView(cart.items, travelers, t),
     address: {
       values: {
         email: cart.email ?? customer?.email ?? "",

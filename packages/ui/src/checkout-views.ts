@@ -1,6 +1,7 @@
 import type { LineAddonView } from "./addon-views"
 import type { BookingHoldView, CartLineBookingView } from "./booking-views"
 import type { TaxLinesView } from "./cart-views"
+import type { TravelersStepView } from "./traveler-views"
 import type { BreadcrumbView, ImageView, LinkView } from "./views"
 
 /**
@@ -127,7 +128,8 @@ export interface CheckoutSummaryView {
   notice?: string | null
 }
 
-export type CheckoutStep = "address" | "shipping" | "payment"
+/** `travelers`: a dated product's travelers, before the payment (adr/0076 §7); only when asked. */
+export type CheckoutStep = "address" | "shipping" | "travelers" | "payment"
 
 export interface CheckoutPageView {
   /** The step open for editing; the ones before it show their summary. */
@@ -137,8 +139,14 @@ export interface CheckoutPageView {
    * three, as before. A cart with nothing to ship has no `shipping` step;
    * its address step then asks for the invoice and contact details (the
    * same fields, its own title). A theme draws no step that is not listed.
+   * `travelers` is listed only when a dated line asks for them (Ek D6b).
    */
   steps?: CheckoutStep[]
+  /**
+   * The travelers step's departures and what each asks (adr/0076 Ek D6b);
+   * absent or null: the cart asks for none.
+   */
+  travelers?: TravelersStepView | null
   address: AddressStepView
   /** The address as saved, once it is. */
   addressSummary: AddressSummaryView | null
@@ -162,7 +170,7 @@ export interface CheckoutPageView {
   /** A message already in words, after a failed step. */
   error: string | null
   /** Each step's own address, to reopen it. */
-  editPaths: Record<CheckoutStep, string>
+  editPaths: Record<Exclude<CheckoutStep, "travelers">, string> & { travelers?: string }
   /** Who the invoice is made out to, in words, and where to change it (F8 billing profile). */
   invoice: { text: string; link: { label: string; path: string } | null }
 }
