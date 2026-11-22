@@ -55,6 +55,13 @@ function unitsOfMarks(lines: { line: OrderLine; mark: BookingMark }[]): SlotUnit
 
 export type ConfirmOutcome = "none" | "existing" | "confirmed" | "retaken" | "failed" | "canceled"
 
+export interface ConfirmOptions {
+  /** A retry of the reconcile job between its first and last try: no error line for a failure. */
+  quiet?: boolean
+}
+
+type ConfirmInput = { order_id: string } & ConfirmOptions
+
 /**
  * A placed order's places moved from its cart's hold to `sold` and its
  * booking written (adr/0076 §5): `confirmHold`, idempotent (the order's
@@ -68,7 +75,8 @@ export type ConfirmOutcome = "none" | "existing" | "confirmed" | "retaken" | "fa
  */
 export async function confirmOrderBookings(
   container: Container,
-  orderId: string
+  orderId: string,
+  options: ConfirmOptions = {}
 ): Promise<ConfirmOutcome> {
   const { lines, canceled } = await datedLinesOf(container, orderId)
   if (lines.length === 0) {
@@ -101,7 +109,9 @@ export async function confirmOrderBookings(
     logger.warn({ event: "booking.confirm_retaken", order_id: orderId })
     return "retaken"
   } catch (error) {
-    logger.error({ event: "booking.confirm_failed", order_id: orderId, err: errorSummary(error) })
+    if (!options.quiet) {
+      logger.error({ event: "booking.confirm_failed", order_id: orderId, err: errorSummary(error) })
+    }
     await alertConfirmFailed(container, orderId)
     return "failed"
   }
@@ -122,14 +132,16 @@ export async function cancelOrderBookings(container: Container, orderId: string)
 
 export const confirmOrderBookingsStep = createStep(
   "booking-confirm-order",
-  async (input: { order_id: string }, { container }) =>
-    new StepResponse(await confirmOrderBookings(container, input.order_id))
+  async (input: ConfirmInput, { container }) =>
+    new StepResponse(
+      await confirmOrderBookings(container, input.order_id, { quiet: input.quiet === true })
+    )
 )
 
 /** `confirmOrderBookings` under the order's lock: two deliveries of the event write one booking. */
 export const confirmOrderBookingsWorkflow = createWorkflow(
   "booking-confirm-order",
-  (input: { order_id: string }) => {
+  (input: ConfirmInput) => {
     const key = transform({ input }, ({ input }) => `booking:order:${input.order_id}`)
     acquireLockStep({ key, timeout: 10, ttl: 30 })
     const outcome = confirmOrderBookingsStep(input)

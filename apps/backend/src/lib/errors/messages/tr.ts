@@ -330,6 +330,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu ürün tarihli satılır: ürün sayfasından kalkış tarihini ve kişi sayısını seçin.",
   "booking.sales_closed": "Bu kalkışın satışı kapandı.",
   "booking.max_units": "Bir sepette en çok {{max}} kişilik yer ayrılabilir.",
+  "booking.client_share":
+    "Bu bağlantıdan şu an daha fazla yer ayrılamıyor; bu kalkışta en çok {{max}} kişilik yer seçilebilir.",
   "booking.currency_unsupported":
     "Bu kalkış yalnız Türk lirasıyla satılır; sepetin para birimini değiştirin.",
   "booking.price_unavailable": "Bu seçeneğin sepetinizin para biriminde fiyatı yok.",

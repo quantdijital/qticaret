@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 import { isRetryable } from "../errors"
 import { isStockRefusal } from "../stock/refusals"
 
@@ -29,6 +30,9 @@ const CART_RULES =
 // the panel's catalog checks; only add-ons or bookings switched off are the cart's
 const CART_RULE_KEYS = new Set(["catalog.addons_disabled", "catalog.booking_disabled"])
 
+// Our own not-found keys of the dated lines; Medusa's not-found words are never in this form
+const BOOKING_NOT_FOUND = /^booking\.[a-z_]+$/
+
 const textOf = (value: unknown): string => (typeof value === "string" ? value : "")
 
 /** The kind of an error a completion handed back, plain object or Error alike. */
@@ -42,6 +46,14 @@ export function completionFailureOf(error: unknown): CompletionFailure {
   >
   const rule = textOf(fields["safeMessage"])
   if (CART_RULES.test(rule) || CART_RULE_KEYS.has(rule)) {
+    return "refund"
+  }
+  // A departure gone or no longer sold (`booking.slot_unknown`) is a Medusa NOT_FOUND, its key
+  // in the message: the 404 the storefront needs, and as final a verdict as the ones above
+  if (
+    fields["type"] === MedusaError.Types.NOT_FOUND &&
+    BOOKING_NOT_FOUND.test(textOf(fields["message"]))
+  ) {
     return "refund"
   }
   // Medusa's inventory refusals (`lib/stock/refusals`): its words decide

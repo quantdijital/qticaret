@@ -79,6 +79,22 @@ describe("completionFailureOf (adr/0026 Ek 2026-11-06)", () => {
       expect(completionFailureOf(new ConflictError(key))).toBe("refund")
       expect(completionFailureOf(plain(new ConflictError(key)))).toBe("refund")
     }
+    // A departure gone or no longer sold: Medusa's NOT_FOUND carrying our key
+    const gone = new MedusaError(MedusaError.Types.NOT_FOUND, "booking.slot_unknown")
+    expect(completionFailureOf(gone)).toBe("refund")
+    expect(completionFailureOf(plain(gone))).toBe("refund")
+  })
+
+  it("refunds a NOT_FOUND only for a booking key, not for other not-found words", () => {
+    for (const error of [
+      new MedusaError(MedusaError.Types.NOT_FOUND, "cart.unknown"),
+      new MedusaError(MedusaError.Types.NOT_FOUND, "Cart with id: cart_01 was not found"),
+      new MedusaError(MedusaError.Types.NOT_FOUND, "booking.slot_unknown for slot bkslot_1"),
+      // The key under another type is not this verdict
+      new MedusaError(MedusaError.Types.DB_ERROR, "booking.slot_unknown"),
+    ]) {
+      expect(completionFailureOf(error)).toBe("retry")
+    }
   })
 
   it("tries anything else again: locks, the database, the provider, what it does not know", () => {

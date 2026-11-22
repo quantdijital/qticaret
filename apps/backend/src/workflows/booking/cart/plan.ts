@@ -10,6 +10,8 @@ import {
 import type { BookingMark } from "../../../lib/booking/cart-lines"
 import { ConflictError, ValidationError } from "../../../lib/errors"
 import { toMedusaAmount } from "../../../lib/money"
+import { clientSlotCap } from "../../../modules/booking/client-share"
+import type { HoldClient } from "../../../modules/booking/service"
 import { quantityOf, readAddonCart } from "../../addons/cart"
 import type { AddonCart } from "../../addons/cart"
 import { bookingLinesOf } from "./review"
@@ -32,6 +34,8 @@ export interface CartBookingInput {
   sales_channel_ids: string[]
   /** Price categories and how many of each; nothing else (no price, no date, no person). */
   items: { variant_id: string; quantity: number }[]
+  /** The shopper's address as a keyed hash (never the address); null: not known, not capped. */
+  client_hash?: string | null
 }
 
 /** A line the departure gets, priced on the server; its mark is completed with the hold. */
@@ -57,6 +61,8 @@ export interface CartBookingPlan {
   lines: PlannedLine[]
   /** The cart's lines of this departure now, replaced by `lines`. */
   replaced_line_ids: string[]
+  /** The address's live holds capped at this departure's per-cart share (adr/0076 Ek takip M1). */
+  client: HoldClient | null
 }
 
 /** The storefront's open cart, or 404 (another channel's cart is not this storefront's). */
@@ -151,6 +157,9 @@ export async function planCartBooking(
     hold_minutes: target.bookable.hold_minutes,
     lines,
     replaced_line_ids: lineIdsOfSlot(cart, input.slot_id),
+    client: input.client_hash
+      ? { hash: input.client_hash, maxPerSlot: clientSlotCap(target.slot.capacity, share) }
+      : null,
   }
 }
 

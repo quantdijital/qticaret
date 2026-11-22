@@ -1,10 +1,14 @@
+import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { cancelOrderWorkflow, createCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import type { Knex } from "@medusajs/framework/mikro-orm/knex"
+import { resetClientIpSecret } from "../../src/api/http/client-ip"
+import { CLIENT_IP_HEADERS, signClientIp } from "../../src/lib/security/client-ip"
 import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
+import { reconcileBookings } from "../../src/workflows/booking/reconcile"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
 import { BANK_TRANSFER } from "../helpers/gift-sale"
@@ -36,6 +40,19 @@ interface BookingAnswer {
 const DAY = 24 * 60 * 60 * 1000
 let made = 0
 
+// Read lazily by `clientIp`, so setting it before the first request is enough
+const SECRET = `storefront-ip-${randomUUID()}`
+process.env["STOREFRONT_IP_SECRET"] = SECRET
+
+const signedAs = (ip: string): Record<string, string> => {
+  const time = Math.floor(Date.now() / 1000)
+  return {
+    [CLIENT_IP_HEADERS.ip]: ip,
+    [CLIENT_IP_HEADERS.time]: String(time),
+    [CLIENT_IP_HEADERS.signature]: signClientIp(SECRET, ip, time),
+  }
+}
+
 /** adr/0076 D3: a departure's places in a cart, priced on the server, through the order. */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -55,6 +72,13 @@ medusaIntegrationTestRunner({
     const post = (url: string, body: unknown) =>
       settle(http.post<Answer>(url, body, { headers: store.headers }))
     const book = (cartId: string, body: unknown) => post(`/store/carts/${cartId}/bookings`, body)
+    // A shopper's address as our storefront's server signs it (documentation range addresses)
+    const bookFrom = (ip: string, cartId: string, body: unknown) =>
+      settle(
+        http.post<Answer>(`/store/carts/${cartId}/bookings`, body, {
+          headers: { ...store.headers, ...signedAs(ip) },
+        })
+      )
     const startPayment = (cartId: string) =>
       post(`/store/carts/${cartId}/payment-session`, { provider_id: BANK_TRANSFER })
     const slotOf = async (slotId: string) => (await bookings().slotAvailability([slotId]))[0]
@@ -134,6 +158,10 @@ medusaIntegrationTestRunner({
       const slotId = ((slots.data["slots"] as { id: string }[] | undefined) ?? [])[0]?.id ?? ""
       return { productId, adult, infant, slotId }
     }
+
+    beforeAll(() => {
+      resetClientIpSecret()
+    })
 
     beforeEach(async () => {
       const container = getContainer()
@@ -321,9 +349,13 @@ medusaIntegrationTestRunner({
       const container = getContainer()
       const carts = [await emptyCart(container), await emptyCart(container)]
 
+      // Two shoppers: one address's carts would be capped by its share first
       const answers = await Promise.all(
-        carts.map((cartId) =>
-          book(cartId, { slot_id: slotId, items: [{ variant_id: adult, quantity: 1 }] })
+        carts.map((cartId, index) =>
+          bookFrom(`198.51.100.${String(index + 1)}`, cartId, {
+            slot_id: slotId,
+            items: [{ variant_id: adult, quantity: 1 }],
+          })
         )
       )
 
@@ -332,6 +364,63 @@ medusaIntegrationTestRunner({
         "booking.slot_full"
       )
       expect(await slotOf(slotId)).toMatchObject({ held: 1, available: 0 })
+    })
+
+    it("caps one address's carts at the departure's share; another address books freely", async () => {
+      await turnOn()
+      const container = getContainer()
+      const { adult, slotId } = await tour(50)
+      // One after another: the guest's customer is made once, not raced
+      const carts: string[] = []
+      for (let i = 0; i < 5; i += 1) {
+        carts.push(await emptyCart(container))
+      }
+      const ask = (quantity: number) => ({
+        slot_id: slotId,
+        items: [{ variant_id: adult, quantity }],
+      })
+
+      // A cart's share of 10 on a departure of 50; one address keeps three
+      // carts' worth (families behind one network): 30, never a 31st place
+      const shared = []
+      for (const [cartId, quantity] of [
+        [carts[0], 10],
+        [carts[1], 10],
+        [carts[2], 10],
+        [carts[3], 1],
+      ] as const) {
+        shared.push(await bookFrom("203.0.113.7", cartId ?? "", ask(quantity)))
+      }
+      const otherAnswer = await bookFrom("192.0.2.44", carts[4] ?? "", ask(5))
+
+      expect(shared.slice(0, 3).map((answer) => answer.status)).toEqual([200, 200, 200])
+      expect([shared[3]?.status, shared[3]?.data.message]).toEqual([400, "booking.client_share"])
+      expect(otherAnswer.status).toBe(200)
+      expect(await slotOf(slotId)).toMatchObject({ held: 35, available: 15 })
+    })
+
+    it("tags no address on an unsigned call from the storefront's server", async () => {
+      await turnOn()
+      const container = getContainer()
+      const knex = () => container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+      const { adult, slotId } = await tour(10)
+      const [signedCart, unsignedCart] = [await emptyCart(container), await emptyCart(container)]
+      const ask = { slot_id: slotId, items: [{ variant_id: adult, quantity: 1 }] }
+
+      // The test client signs from this connection first: it is the storefront's server
+      const signedAnswer = await bookFrom("203.0.113.8", signedCart, ask)
+      const unsignedAnswer = await book(unsignedCart, ask)
+      const hashes = await knex()("booking_hold")
+        .whereIn("cart_id", [signedCart, unsignedCart])
+        .select("cart_id", "client_hash")
+      const hashOf = (cartId: string) =>
+        (hashes as { cart_id: string; client_hash: string | null }[]).find(
+          (row) => row.cart_id === cartId
+        )?.client_hash
+
+      expect([signedAnswer.status, unsignedAnswer.status]).toEqual([200, 200])
+      expect(hashOf(signedCart)).toEqual(expect.any(String))
+      expect(hashOf(unsignedCart)).toBeNull()
     })
 
     it("pushes the hold as the payment starts, sells the places with the order, frees them on cancel", async () => {
@@ -389,6 +478,40 @@ medusaIntegrationTestRunner({
       ])
       expect(freed).toMatchObject({ sold: 0, held: 0, available: 10 })
       expect(cancelled?.status).toBe("cancelled")
+    })
+
+    it("reconciles a cancel the order event missed, and leaves a confirmed order alone", async () => {
+      await turnOn()
+      const container = getContainer()
+      const knex = () => container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+      const { adult, slotId } = await tour(10)
+      const cartId = await emptyCart(container)
+      await book(cartId, { slot_id: slotId, items: [{ variant_id: adult, quantity: 2 }] })
+      await startPayment(cartId)
+      const placed = await post(`/store/carts/${cartId}/complete`, {})
+      const orderId = (placed.data["order"] as { id: string } | undefined)?.id ?? ""
+      await eventually(
+        () => slotOf(slotId),
+        (slot) => slot?.sold === 2
+      )
+      // Old enough for the job to look at it; its booking is there
+      await knex()("order")
+        .where({ id: orderId })
+        .update({ created_at: knex().raw("now() - interval '30 minutes'") })
+      const untouched = await reconcileBookings(container)
+      // Cancelled without its event (a lost delivery)
+      await knex()("order")
+        .where({ id: orderId })
+        .update({ status: "canceled", canceled_at: knex().raw("now()") })
+      const reconciled = await reconcileBookings(container)
+      const [booking] = await bookings().listBookings({ order_id: orderId })
+
+      expect(placed.status).toBe(200)
+      const nothing = { confirmed: 0, existing: 0, none: 0, cancelled: 0, failed: 0, given_up: 0 }
+      expect(untouched).toEqual(nothing)
+      expect(reconciled).toEqual({ ...nothing, cancelled: 1 })
+      expect(booking?.status).toBe("cancelled")
+      expect(await slotOf(slotId)).toMatchObject({ sold: 0, available: 10 })
     })
 
     it("refuses a payment's start and the completion once the hold has ended", async () => {

@@ -321,6 +321,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This product is booked by date: choose a departure and the number of people on its page.",
   "booking.sales_closed": "Sales for this departure have closed.",
   "booking.max_units": "At most {{max}} places can be booked in one cart.",
+  "booking.client_share":
+    "No more places can be held from this connection now; at most {{max}} on this departure.",
   "booking.currency_unsupported":
     "This departure can only be booked in Turkish lira; change the cart's currency.",
   "booking.price_unavailable": "This option has no price in your cart's currency.",

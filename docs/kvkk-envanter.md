@@ -83,6 +83,7 @@
 | `fraud_block` (fraud-guard) | e-posta ve telefon yalnızca anahtarlı özetle (Ş), maskeli görünüm; alan adı; IP adresi (Ö); neden (D) | kara liste (F15.6, adr/0044 §4) | Bitiş tarihine kadar; IP en çok 1 yıl. Süresi geçen kayıt kalıcı silinir (`fraud-retention`) | Kalır: dolandırıcılığa karşı hukuki yarar (KVKK m.5/2-f). Ham değer zaten tutulmaz. |
 | `fraud_review` (fraud-guard) | sipariş kimliği, kural adları ve puanlar; personel notu (D) | şüpheli sipariş incelemesi (adr/0044 §3) | Siparişle birlikte | Not temizlenir. |
 | Ödeme hız sayaçları (Redis) | IP kovası, e-posta ve telefonun anahtarlı özeti | hız kuralları (adr/0044 §2) | En çok 7 gün (sayaç penceresi) | Kendiliğinden düşer. |
+| `booking_hold.client_hash` (booking) | yer tutan ziyaretçinin IP kovasının (IPv6 /64) anahtarlı özeti (Ö, `PII_HASH_KEY`, amaç `booking.client`); ham IP tutulmaz; sepet kimliği | kötüye kullanım önleme: bir adresin canlı yer tutmaları kalkış başına sepet payıyla ve toplam 60 birimle sınırlı (adr/0076 Ek takip M1) | Tutmayla birlikte silinir: sipariş onayında, sepetten çıkınca ya da süresi dolunca (`booking-hold-expiry`, dakikada bir); bir tutma en çok 120 dk (+15 dk tamamlama payı) yaşar | Tutmayla silinir; ayrı silme gerekmez. |
 | `traffic_source` (traffic-sources)                | sepet kimliği, UTM, yönlendiren alan adı                   | trafik kaynağı          | Sepet ve siparişle birlikte        | —                                                             |
 
 ## 4. Personel, denetim ve sistem
