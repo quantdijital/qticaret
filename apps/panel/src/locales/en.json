@@ -3661,6 +3661,13 @@
         "maxAgeOf": "{{variant}}: maximum age",
         "travelerLevel": "Traveler details",
         "travelerLevelHint": "Asked for each traveler at checkout. An ID or passport number is kept encrypted and shown masked in the panel. Ask only what you need (KVKK).",
+        "saleMode": "Sale mode",
+        "saleModeHint": "Call me: the storefront shows a request form instead of add to cart; no payment is taken and no places are held. Requests appear under Customers > Contact messages.",
+        "saleModes": {
+          "online": "Online sale",
+          "request": "Call me (no payment)",
+          "both": "Both"
+        },
         "travelerLevels": {
           "none": "Do not ask",
           "name": "Name",
@@ -5178,6 +5185,8 @@
       "title": "Contact messages",
       "description": "What shoppers wrote from the storefront's contact form. Reply from your own mail program, then mark the message as answered.",
       "views": "Message views",
+      "subjectFilter": "Subject",
+      "allSubjects": "All subjects",
       "tabs": {
         "new": "Waiting",
         "handled": "Answered"
@@ -5198,6 +5207,7 @@
         "product": "Product",
         "return": "Returns and exchanges",
         "payment": "Payment",
+        "booking": "Booking request",
         "other": "Other",
         "kvkk": "KVKK data request"
       },
@@ -5211,6 +5221,12 @@
         "email": "E-mail",
         "phone": "Phone",
         "order": "Order",
+        "product": "Product",
+        "when": "Date",
+        "people": "People",
+        "flexible": "Flexible dates",
+        "adults": "{{count}} adults",
+        "children": "{{count}} children",
         "customer": "Customer",
         "openCustomer": "Open the customer's record",
         "status": "Status",

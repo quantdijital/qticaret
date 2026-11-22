@@ -4,7 +4,7 @@ import {
   parseCountInput,
   parseMoneyInput,
 } from "@qticaret/admin-ui/lib/money-input"
-import { TRAVELER_LEVELS } from "@/features/products/api/booking"
+import { SALE_MODES, TRAVELER_LEVELS } from "@/features/products/api/booking"
 import type {
   Bookable,
   BookableSettingsInput,
@@ -147,6 +147,7 @@ export const settingsSchema = z.object({
     .string()
     .refine((text) => countIn(text, 0, BOOKING_LIMITS.reminderDays), `${F}.reminderDays`),
   traveler_level: z.enum(TRAVELER_LEVELS),
+  sale_mode: z.enum(SALE_MODES),
   tiers: tiersSchema,
   pax: z.record(
     z.string(),
@@ -182,6 +183,7 @@ export function settingsDraftOf(
         : String(bookable.min_participants),
     reminder_days: String(bookable?.reminder_days ?? 2),
     traveler_level: bookable?.traveler_fields?.level ?? "none",
+    sale_mode: bookable?.sale_mode ?? "online",
     tiers: tierDraftsOf(bookable?.cancellation_tiers),
     pax: Object.fromEntries(
       variants.map((variant) => {
@@ -221,6 +223,7 @@ export function settingsInputOf(draft: SettingsDraft): BookableSettingsInput {
     reminder_days: count(draft.reminder_days),
     pax_by_variant: pax,
     traveler_fields: { level: draft.traveler_level },
+    sale_mode: draft.sale_mode,
     cancellation_tiers: tiersInputOf(draft.tiers),
   }
 }

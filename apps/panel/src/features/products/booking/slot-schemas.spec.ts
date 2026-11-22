@@ -28,6 +28,8 @@ describe("booking drafts", () => {
       min_participants: "",
       reminder_days: "2",
       traveler_level: "none",
+      // adr/0076 Ek 2026-11-23: today's way unless the shop chooses
+      sale_mode: "online",
     })
     const input = settingsInputOf({
       ...draft,
@@ -44,6 +46,7 @@ describe("booking drafts", () => {
       reminder_days: 2,
       pax_by_variant: { infant: { pax: 0, max_age: 2 } },
       traveler_fields: { level: "none" },
+      sale_mode: "online",
       cancellation_tiers: [],
     })
   })

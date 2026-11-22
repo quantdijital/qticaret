@@ -1,5 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { BOOKING_MODULE } from "../../../modules/booking"
+import type BookingModuleService from "../../../modules/booking/service"
 import { CONTACT_MESSAGES_MODULE } from "../../../modules/contact-messages"
 import type ContactMessagesModuleService from "../../../modules/contact-messages/service"
 import type { AdminGetContactMessagesType } from "./validators"
@@ -34,6 +36,16 @@ export async function GET(
       product.title ?? null,
     ])
   )
+  const slotIds = rows.flatMap((row) => {
+    const slot = (row.details as { slot_id?: unknown } | null)?.slot_id
+    return typeof slot === "string" ? [slot] : []
+  })
+  const slots = slotIds.length
+    ? await req.scope
+        .resolve<BookingModuleService>(BOOKING_MODULE)
+        .listBookingSlots({ id: slotIds }, { select: ["id", "starts_at"] })
+    : []
+  const startsAt = new Map(slots.map((slot) => [slot.id, new Date(slot.starts_at).toISOString()]))
   res.json({
     contact_messages: rows.map((row) => ({
       id: row.id,
@@ -42,6 +54,9 @@ export async function GET(
       product_id: row.product_id,
       product_title: row.product_id ? (titles.get(row.product_id) ?? null) : null,
       details: row.details,
+      // The departure asked for, when it still exists
+      slot_starts_at:
+        startsAt.get((row.details as { slot_id?: string } | null)?.slot_id ?? "") ?? null,
       customer_id: row.customer_id,
       status: row.status,
       handled_by: row.handled_by,
