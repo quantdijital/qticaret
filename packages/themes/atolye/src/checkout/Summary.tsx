@@ -65,12 +65,14 @@ function Totals({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) 
           <dd className="tabular">−{summary.credit}</dd>
         </div>
       )}
-      <div className={row}>
-        <dt className="text-stage-text-2">{t("cart.shipping")}</dt>
-        <dd className={cn("tabular", !summary.shipping && "text-stage-text-2")}>
-          {summary.shipping ?? t("checkout.shipping_next")}
-        </dd>
-      </div>
+      {summary.ships !== false && (
+        <div className={row}>
+          <dt className="text-stage-text-2">{t("cart.shipping")}</dt>
+          <dd className={cn("tabular", !summary.shipping && "text-stage-text-2")}>
+            {summary.shipping ?? t("checkout.shipping_next")}
+          </dd>
+        </div>
+      )}
       {summary.tax && (
         <div className={row}>
           <dt className="text-stage-text-2">{t("cart.vat")}</dt>

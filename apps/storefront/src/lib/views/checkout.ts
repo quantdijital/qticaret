@@ -31,6 +31,7 @@ import {
   shippingOptions,
 } from "@/lib/checkout/options"
 import type { PaymentMethods } from "@/lib/checkout/options"
+import { STEP_PATHS, stepsOf } from "./checkout-steps"
 import { summaryOf } from "./checkout-summary"
 import { displayPhone } from "./frame"
 import { linePicturesOf, productPathsOf } from "./line-paths"
@@ -40,30 +41,7 @@ export { summaryOf } from "./checkout-summary"
 /** The text version of the marketing consent the checkout offers (F10). */
 export const MARKETING_TEXT_VERSION = "checkout-1"
 
-export const STEP_PATHS: Record<CheckoutStep, string> = {
-  address: "/odeme?adim=adres",
-  shipping: "/odeme?adim=kargo",
-  payment: "/odeme",
-}
-
-const STEP_OF: Record<string, CheckoutStep> = {
-  adres: "address",
-  kargo: "shipping",
-  odeme: "payment",
-}
-
-const ORDER: CheckoutStep[] = ["address", "shipping", "payment"]
-
-/** The step to open: the one asked for, never past the first one still missing. */
-export function stepOf(cart: CheckoutCart, asked: string | undefined): CheckoutStep {
-  const reachable: CheckoutStep = !addressComplete(cart)
-    ? "address"
-    : cart.shipping_methods.length === 0
-      ? "shipping"
-      : "payment"
-  const wanted = (asked ? STEP_OF[asked] : undefined) ?? reachable
-  return ORDER.indexOf(wanted) <= ORDER.indexOf(reachable) ? wanted : reachable
-}
+export { STEP_PATHS, stepOf, stepsOf } from "./checkout-steps"
 
 export function addressSummaryOf(
   email: string | null,
@@ -219,13 +197,16 @@ export async function checkoutView(
   const selects = known ? await selectsOf(known) : { province: "", district: "", neighborhood: "" }
   const complete = addressComplete(cart)
   const chosen = cart.shipping_methods[0] ?? null
+  // Nothing to ship (adr/0076 §6): no carriers to offer, the payment opens once the address is in
+  const steps = stepsOf(cart)
+  const ships = steps.includes("shipping")
   const [provinces, districts, neighborhoods, options, payment, paths, pictures, wholesale] =
     await Promise.all([
       provinceOptions(),
       selects.province ? districtOptions(selects.province) : [],
       selects.district ? neighborhoodOptions(selects.district) : [],
-      complete ? shippingOptions(cart.id) : [],
-      complete && chosen
+      complete && ships ? shippingOptions(cart.id) : [],
+      complete && (chosen || !ships)
         ? paymentStep(cart, t)
         : { paymentMethods: [], contracts: {}, ageLimit: null },
       productPathsOf(cart.items),
@@ -235,6 +216,7 @@ export async function checkoutView(
     ])
   return {
     step,
+    steps,
     address: {
       values: {
         email: cart.email ?? customer?.email ?? "",

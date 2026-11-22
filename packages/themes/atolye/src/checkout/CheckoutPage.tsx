@@ -40,6 +40,8 @@ function Invoice({ invoice }: { invoice: CheckoutPageView["invoice"] }) {
  * form; the open one shows its fields, the ones before it what was given,
  * the ones after only their titles. Guests check out as they are. On a
  * desktop the basket is a graphite stage that stays beside the steps.
+ * Only the view's steps are drawn (adr/0076 §6): a cart nothing ships for
+ * has no shipping step, its address step the invoice's and the contact's.
  */
 export function CheckoutPage({
   view,
@@ -51,11 +53,16 @@ export function CheckoutPage({
   actions: CheckoutActions
 }) {
   const errors = Object.fromEntries(CHECKOUT_ERRORS.map((key) => [key, t(key)]))
+  // The cart's own steps (adr/0076 §6); a view without them takes all three, as before
+  const steps = view.steps ?? ORDER
   const stateOf = (step: CheckoutStep) => {
-    const here = ORDER.indexOf(view.step)
-    const there = ORDER.indexOf(step)
+    const here = steps.indexOf(view.step)
+    const there = steps.indexOf(step)
     return there < here ? "done" : there === here ? "open" : "ahead"
   }
+  const numberOf = (step: CheckoutStep) => steps.indexOf(step) + 1
+  // Nothing to ship: the address is the invoice's and the contact's, the payment next
+  const ships = steps.includes("shipping")
   const edit = t("checkout.edit")
   const address = view.addressSummary
   const { promotions } = view
@@ -82,120 +89,127 @@ export function CheckoutPage({
       <div className="grid items-start gap-(--gap-columns) lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12">
         <div className="flex min-w-0 flex-col gap-3">
           <FoldedSummary summary={view.summary} t={t} code={code("odeme-kod-katli")} />
-          <Step
-            number={1}
-            title={t("checkout.step_address")}
-            state={stateOf("address")}
-            editPath={view.editPaths.address}
-            editLabel={edit}
-            summary={
-              address && (
-                <address className="flex flex-col gap-0.5 not-italic">
-                  <span className="font-semibold text-text">{address.name}</span>
-                  <span className="line-clamp-2 sm:line-clamp-none">
-                    {address.lines.filter(Boolean).join(", ")}
-                  </span>
-                  <span className="max-sm:hidden">{address.phone}</span>
-                  <span className="break-all max-sm:hidden">{address.email}</span>
-                </address>
-              )
-            }
-          >
-            <AddressForm
-              step={view.address}
-              actions={actions}
-              words={{
-                contact: t("checkout.contact"),
-                delivery: t("order.delivery"),
-                email: t("checkout.email"),
-                emailHint: t("checkout.email_hint"),
-                phone: t("checkout.phone"),
-                phoneHint: t("checkout.phone_hint"),
-                firstName: t("checkout.first_name"),
-                lastName: t("checkout.last_name"),
-                province: t("checkout.province"),
-                district: t("checkout.district"),
-                neighborhood: t("checkout.neighborhood"),
-                loading: t("checkout.loading"),
-                street: t("checkout.street"),
-                streetHint: t("checkout.street_hint"),
-                submit: t("checkout.to_shipping"),
-                saving: t("checkout.saving"),
-                errors,
-                fallback: t("checkout.address_invalid"),
-                placeholders: placeholderWords(t),
-              }}
-            />
-          </Step>
-          <Step
-            number={2}
-            title={t("checkout.step_shipping")}
-            state={stateOf("shipping")}
-            editPath={view.editPaths.shipping}
-            editLabel={edit}
-            summary={view.shippingSummary}
-          >
-            <ShippingForm
-              options={view.shippingOptions}
-              selected={view.shippingSelected}
-              choose={actions.chooseShipping}
-              words={{
-                legend: t("checkout.step_shipping"),
-                none: t("checkout.no_shipping"),
-                submit: t("checkout.to_payment"),
-                saving: t("checkout.saving"),
-                errors,
-                fallback: t("checkout.shipping_failed"),
-              }}
-            />
-          </Step>
-          <Step
-            number={3}
-            title={t("checkout.step_payment")}
-            state={stateOf("payment")}
-            editPath={view.editPaths.payment}
-            editLabel={edit}
-          >
-            <Invoice invoice={view.invoice} />
-            {view.paymentMethods.length === 0 ? (
-              <p className="rounded-media gf-pane-inner p-4 text-sm font-semibold">
-                {t("checkout.no_payment")}
-              </p>
-            ) : (
-              <PaymentForm
-                methods={view.paymentMethods}
-                contracts={view.contracts}
-                ageLimit={view.ageLimit}
-                marketingVersion={view.marketingVersion}
-                total={view.summary.total}
-                placeOrder={actions.placeOrder}
+          {steps.includes("address") && (
+            <Step
+              number={numberOf("address")}
+              title={t(ships ? "checkout.step_address" : "checkout.step_contact")}
+              state={stateOf("address")}
+              editPath={view.editPaths.address}
+              editLabel={edit}
+              summary={
+                address && (
+                  <address className="flex flex-col gap-0.5 not-italic">
+                    <span className="font-semibold text-text">{address.name}</span>
+                    <span className="line-clamp-2 sm:line-clamp-none">
+                      {address.lines.filter(Boolean).join(", ")}
+                    </span>
+                    <span className="max-sm:hidden">{address.phone}</span>
+                    <span className="break-all max-sm:hidden">{address.email}</span>
+                  </address>
+                )
+              }
+            >
+              <AddressForm
+                step={view.address}
+                actions={actions}
                 words={{
-                  methods: t("checkout.methods"),
-                  total: t("checkout.total"),
-                  contracts: t("checkout.contracts"),
-                  read: t("checkout.read"),
-                  accept: t("checkout.accept"),
-                  age: t("checkout.age"),
-                  ageTitle: t("checkout.age_title"),
-                  birthDate: t("checkout.birth_date"),
-                  marketingTitle: t("checkout.marketing_title"),
-                  marketingEmail: t("checkout.marketing_email"),
-                  marketingSms: t("checkout.marketing_sms"),
-                  payCard: t("checkout.pay_with_card"),
-                  placeOrder: t("checkout.place_order"),
-                  working: t("checkout.working"),
-                  checking: t("checkout.checking"),
-                  secure: t("checkout.secure_payment"),
+                  contact: t("checkout.contact"),
+                  delivery: t(ships ? "order.delivery" : "checkout.billing_address"),
+                  ...(ships ? {} : { deliveryNote: t("checkout.billing_address_note") }),
+                  email: t("checkout.email"),
+                  emailHint: t("checkout.email_hint"),
+                  phone: t("checkout.phone"),
+                  phoneHint: t("checkout.phone_hint"),
+                  firstName: t("checkout.first_name"),
+                  lastName: t("checkout.last_name"),
+                  province: t("checkout.province"),
+                  district: t("checkout.district"),
+                  neighborhood: t("checkout.neighborhood"),
+                  loading: t("checkout.loading"),
+                  street: t("checkout.street"),
+                  streetHint: t("checkout.street_hint"),
+                  submit: t(ships ? "checkout.to_shipping" : "checkout.to_payment"),
+                  saving: t("checkout.saving"),
                   errors,
-                  fallback: t("checkout.failed"),
-                  fixes: [
-                    { errors: CART_FIX_ERRORS, label: t("checkout.fix_in_cart"), path: "/sepet" },
-                    { errors: LINK_ERRORS, label: t("not_found.home"), path: "/" },
-                  ],
+                  fallback: t("checkout.address_invalid"),
+                  placeholders: placeholderWords(t),
                 }}
               />
-            )}
-          </Step>
+            </Step>
+          )}
+          {ships && (
+            <Step
+              number={numberOf("shipping")}
+              title={t("checkout.step_shipping")}
+              state={stateOf("shipping")}
+              editPath={view.editPaths.shipping}
+              editLabel={edit}
+              summary={view.shippingSummary}
+            >
+              <ShippingForm
+                options={view.shippingOptions}
+                selected={view.shippingSelected}
+                choose={actions.chooseShipping}
+                words={{
+                  legend: t("checkout.step_shipping"),
+                  none: t("checkout.no_shipping"),
+                  submit: t("checkout.to_payment"),
+                  saving: t("checkout.saving"),
+                  errors,
+                  fallback: t("checkout.shipping_failed"),
+                }}
+              />
+            </Step>
+          )}
+          {steps.includes("payment") && (
+            <Step
+              number={numberOf("payment")}
+              title={t("checkout.step_payment")}
+              state={stateOf("payment")}
+              editPath={view.editPaths.payment}
+              editLabel={edit}
+            >
+              <Invoice invoice={view.invoice} />
+              {view.paymentMethods.length === 0 ? (
+                <p className="rounded-media gf-pane-inner p-4 text-sm font-semibold">
+                  {t("checkout.no_payment")}
+                </p>
+              ) : (
+                <PaymentForm
+                  methods={view.paymentMethods}
+                  contracts={view.contracts}
+                  ageLimit={view.ageLimit}
+                  marketingVersion={view.marketingVersion}
+                  total={view.summary.total}
+                  placeOrder={actions.placeOrder}
+                  words={{
+                    methods: t("checkout.methods"),
+                    total: t("checkout.total"),
+                    contracts: t("checkout.contracts"),
+                    read: t("checkout.read"),
+                    accept: t("checkout.accept"),
+                    age: t("checkout.age"),
+                    ageTitle: t("checkout.age_title"),
+                    birthDate: t("checkout.birth_date"),
+                    marketingTitle: t("checkout.marketing_title"),
+                    marketingEmail: t("checkout.marketing_email"),
+                    marketingSms: t("checkout.marketing_sms"),
+                    payCard: t("checkout.pay_with_card"),
+                    placeOrder: t("checkout.place_order"),
+                    working: t("checkout.working"),
+                    checking: t("checkout.checking"),
+                    secure: t("checkout.secure_payment"),
+                    errors,
+                    fallback: t("checkout.failed"),
+                    fixes: [
+                      { errors: CART_FIX_ERRORS, label: t("checkout.fix_in_cart"), path: "/sepet" },
+                      { errors: LINK_ERRORS, label: t("not_found.home"), path: "/" },
+                    ],
+                  }}
+                />
+              )}
+            </Step>
+          )}
         </div>
         <Summary summary={view.summary} t={t} code={code("odeme-kod")} className="hidden lg:flex" />
       </div>

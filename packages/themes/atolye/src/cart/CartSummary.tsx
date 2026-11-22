@@ -91,11 +91,13 @@ export function CartSummary({
           {view.discount && <Row term={t("cart.discount")} value={`−${view.discount}`} deal />}
           {view.tax && <Row term={t("cart.vat")} value={view.tax.vat} />}
           {view.credit && <Row term={t("cart.gift_card_credit")} value={`−${view.credit}`} deal />}
-          <Row
-            term={t("cart.shipping")}
-            value={view.shipping ?? t("cart.shipping_at_checkout")}
-            quiet={!view.shipping}
-          />
+          {view.ships !== false && (
+            <Row
+              term={t("cart.shipping")}
+              value={view.shipping ?? t("cart.shipping_at_checkout")}
+              quiet={!view.shipping}
+            />
+          )}
           <div className="mt-2 flex items-baseline justify-between gap-4 rounded-media gf-shape bg-paper p-4">
             <dt className="font-semibold">
               {t(view.tax ? "cart.subtotal_with_vat" : "cart.subtotal")}

@@ -9,6 +9,7 @@ import { visitorAmounts } from "@/lib/analytics/tags"
 import { addonsOfProducts } from "@/lib/cart/addons"
 import { codesOf, currentCart } from "@/lib/cart/cart"
 import { shopperGiftLines } from "@/lib/cart/gift"
+import { cartShips } from "@/lib/cart/ships"
 import { OUT_OF_STOCK, cartShortLines, outOfStockText } from "@/lib/cart/stock"
 import {
   INSUFFICIENT_STOCK,
@@ -117,6 +118,7 @@ export default async function CartPage({
   const paidByCard = codes.length > 0 || Boolean(cart?.credit_line_total)
   const items = cart?.original_item_total ?? 0
   const subtotal = cart?.item_total ?? 0
+  const ships = cartShips(cart?.items)
   return (
     <>
       {/* Once per visit to the cart, not again as its lines change (the frame tells those) */}
@@ -149,7 +151,11 @@ export default async function CartPage({
           giftNotice:
             gifts.length > 0 && paidByCard ? t("gift_card.not_payable_with_credit") : null,
           credit: cart?.credit_line_total ? formatLira(cart.credit_line_total) : null,
-          freeShipping: freeShippingOf(subtotal, settings.free_shipping_threshold, t),
+          // Nothing to ship (adr/0076 §6): no free shipping meter, no shipping row
+          freeShipping: ships
+            ? freeShippingOf(subtotal, settings.free_shipping_threshold, t)
+            : null,
+          ...(ships ? {} : { ships: false }),
           error: refused,
           // A wholesaler's order under its minimum units (ADR-0068 §8): "Ödemeye geç" off
           // with the reason beside it while it is short; the backend refuses the payment itself

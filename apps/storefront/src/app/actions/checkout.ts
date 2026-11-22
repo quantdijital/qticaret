@@ -34,6 +34,7 @@ import type { PaymentSession } from "@/lib/checkout/pay"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storePost } from "@/lib/store-api/server"
 import { cardProviderOf } from "@/lib/views/checkout"
+import { afterAddressPath } from "@/lib/views/checkout-steps"
 
 /** The address step (D7): the shopper's contact and delivery address on the cart. */
 export async function saveAddress(_state: ActionResult, form: FormData): Promise<ActionResult> {
@@ -67,7 +68,8 @@ export async function saveAddress(_state: ActionResult, form: FormData): Promise
     }).catch(() => undefined)
   }
   revalidatePath("/odeme")
-  redirect("/odeme?adim=kargo")
+  // A cart with nothing to ship goes on to the payment (adr/0076 §6)
+  redirect(afterAddressPath(cart))
 }
 
 const OPTION_ID = z.string().regex(/^so_[0-9A-Za-z]{10,64}$/)

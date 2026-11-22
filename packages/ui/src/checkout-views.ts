@@ -98,6 +98,12 @@ export interface CheckoutSummaryView {
   credit?: string | null
   /** Null until a shipping method is chosen. */
   shipping: string | null
+  /**
+   * False: nothing in the basket is shipped (digital and service lines, a
+   * gift card; adr/0076 §6), so no shipping row at all. Absent or true:
+   * the row as `shipping` says it.
+   */
+  ships?: boolean
   total: string
   /**
    * A wholesaler's basket (ADR-0068 §5): the lines and items without KDV
@@ -112,6 +118,13 @@ export type CheckoutStep = "address" | "shipping" | "payment"
 export interface CheckoutPageView {
   /** The step open for editing; the ones before it show their summary. */
   step: CheckoutStep
+  /**
+   * The steps this cart takes, in order (adr/0076 §6, K7). Absent: all
+   * three, as before. A cart with nothing to ship has no `shipping` step;
+   * its address step then asks for the invoice and contact details (the
+   * same fields, its own title). A theme draws no step that is not listed.
+   */
+  steps?: CheckoutStep[]
   address: AddressStepView
   /** The address as saved, once it is. */
   addressSummary: AddressSummaryView | null

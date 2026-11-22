@@ -26,6 +26,8 @@ export interface CartLine {
   variant_id?: string | null
   /** The server's records on the line: its add-on picks (`qt_addons`, adr/0052) among them. */
   metadata?: Record<string, unknown> | null
+  /** False for a digital or service line, a gift card's too (adr/0076 §6); absent: shipped. */
+  requires_shipping?: boolean | null
 }
 
 export interface Cart {
@@ -75,6 +77,7 @@ const CART_FIELDS = [
   "items.product_id",
   "items.variant_id",
   "items.metadata",
+  "items.requires_shipping",
   "promotions.code",
   "promotions.is_automatic",
   "credit_line_total",

@@ -159,6 +159,8 @@ const TR: Readonly<Record<string, string>> = {
   "order_placed.heading": "Teşekkürler {{name}}, siparişiniz alındı",
   "order_placed.intro":
     "#{{number}} numaralı siparişinizi aldık. Kargoya verildiğinde size haber vereceğiz.",
+  "order_placed.intro_unshipped":
+    "#{{number}} numaralı siparişinizi aldık. Siparişinizin ayrıntıları aşağıdadır.",
   "order_placed.bank_transfer":
     "Siparişinizi hazırlamamız için {{total}} tutarındaki ödemeyi aşağıdaki hesaba gönderin ve açıklamaya sipariş numaranızı yazın.",
   "order_placed.bank_deadline":

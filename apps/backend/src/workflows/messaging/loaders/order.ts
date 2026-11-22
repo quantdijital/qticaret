@@ -44,6 +44,8 @@ const ORDER_FIELDS = [
   "items.total",
   // A line's add-on picks (adr/0052 §9)
   "items.metadata",
+  // An order nothing ships for has no shipping row or delivery address (adr/0076 §6)
+  "items.requires_shipping",
   "shipping_address.first_name",
   "shipping_address.last_name",
   "shipping_address.address_1",
@@ -74,6 +76,7 @@ interface OrderRow {
     quantity: MedusaAmount
     total: MedusaAmount
     metadata?: Record<string, unknown> | null
+    requires_shipping?: boolean | null
   } | null)[]
   shipping_address: Record<string, string | null | undefined> | null
   payment_collections:
@@ -152,6 +155,8 @@ export async function loadOrderMessage(
     : null
   const address = order.shipping_address ?? {}
   const discount = fromMedusaAmount(order.discount_total, { allowRounding: true })
+  const lines = order.items.flatMap((item) => (item ? [item] : []))
+  const ships = lines.length === 0 || lines.some((item) => item.requires_shipping !== false)
   return {
     vars: {
       number: String(order.display_id),
@@ -198,6 +203,8 @@ export async function loadOrderMessage(
       ]
         .map(addressLine)
         .filter((line): line is string => line !== null),
+      // Left out for a shipped order: its message as it was
+      ...(ships ? {} : { ships: false }),
       orderUrl: await orderUrlOf(container, order),
       contracts: await hasContracts(container, order.cart?.id),
     },

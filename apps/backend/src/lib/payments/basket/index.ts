@@ -20,6 +20,8 @@ export interface BasketLine {
   quantity: number
   /** What the line costs in this payment, for all its quantity. */
   amount: Kurus
+  /** False: an item nothing ships for (adr/0076 §6); absent: shipped. */
+  ships?: false
 }
 
 export class BasketMismatch extends Error {
@@ -30,7 +32,10 @@ export class BasketMismatch extends Error {
 }
 
 export function paymentBasket(
-  lines: readonly (Pick<LineShare, "id" | "kind" | "quantity" | "net"> & { name: string })[],
+  lines: readonly (Pick<LineShare, "id" | "kind" | "quantity" | "net"> & {
+    name: string
+    ships?: boolean
+  })[],
   payable: Kurus
 ): BasketLine[] {
   const total = sumKurus(lines.map((line) => line.net))
@@ -54,6 +59,7 @@ export function paymentBasket(
       name: line.name,
       quantity: line.quantity,
       amount: subtractKurus(line.net, credits[index] ?? kurus(0)),
+      ...(line.ships === false ? { ships: false as const } : {}),
     }))
     .filter((line) => line.amount > 0)
 }
