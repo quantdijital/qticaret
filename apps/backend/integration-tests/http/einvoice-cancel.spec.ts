@@ -51,6 +51,25 @@ medusaIntegrationTestRunner({
       await eventually(() => invoiceOf(orderId), Boolean)
       return orderId
     }
+    // The minute's job (jobs/einvoice-issue.ts) runs in this process too. On CI it took a
+    // just-paid invoice before the case canceled its order and drafted it at Paraşüt
+    // (run 44949975551): what the job does right, but not the case under test. A case
+    // that needs an invoice nothing has sent yet parks it under its own claim first: a job
+    // run meanwhile skips it until the lease ends (5 min), and `runUntil` looks past that.
+    // An order the job reached first is set aside for a new one.
+    const unsentOrder = async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const orderId = await paidOrder()
+        const claimed = await getContainer()
+          .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+          .claimDue(20)
+        const own = claimed.find((row) => row.order_id === orderId)
+        if (own?.status === "pending" && own.external_id === null) {
+          return orderId
+        }
+      }
+      throw new Error("the einvoice job took every order first")
+    }
     const runUntil = async (orderId: string, done: (status: string | undefined) => boolean) => {
       for (let minute = 0; minute < 12; minute++) {
         await issueInvoices(getContainer(), minutesLater(minute * 2))
@@ -142,7 +161,7 @@ medusaIntegrationTestRunner({
     })
 
     it("cancels an invoice never sent without a word to Paraşüt", async () => {
-      const orderId = await paidOrder()
+      const orderId = await unsentOrder()
       const before = parasut.requests.length
       await cancel(orderId)
       const undone = await runUntil(orderId, (status) => status === "cancelled")
@@ -154,7 +173,7 @@ medusaIntegrationTestRunner({
     })
 
     it("sees an order canceled whose event was missed, before anything goes to Paraşüt", async () => {
-      const orderId = await paidOrder()
+      const orderId = await unsentOrder()
       await advanceOrder(getContainer(), orderId, "canceled")
       const row = await eventually(
         () => invoiceOf(orderId),

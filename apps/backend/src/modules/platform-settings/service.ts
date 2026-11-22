@@ -14,9 +14,9 @@ import type Redis from "ioredis"
 import { featureDefinition, featureRegistry } from "./features"
 import { PlatformFlagStore, effectiveValue, managedOnly } from "./service-platform-flags"
 import type { PlatformFlagSync } from "./service-platform-flags"
-import { lockSection } from "./section-lock"
-import { SECTIONS, mergePatch, sectionOf } from "./sections"
-import { parseStored, toValidationError } from "./sections/stored"
+import { restoreStoredSection, writeSection } from "./section-write"
+import { SECTIONS } from "./sections"
+import { parseStored } from "./sections/stored"
 import type { SectionName } from "./sections"
 import type {
   FeatureChange,
@@ -142,40 +142,8 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
     actorId: string | null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<SectionChange> {
-    const section = sectionOf(name)
-    // Another save of this section waits here: the merge below is over the latest row
-    await lockSection(sharedContext, name)
-    const [row] = await this.listSettingsSections({ section: name }, { take: 1 }, sharedContext)
-    const before = parseStored(name, row?.values)
-    let after: SectionValues
-    try {
-      const merged = section.merge ? section.merge(before, patch) : mergePatch(before, patch)
-      after = section.full.parse(merged)
-    } catch (error) {
-      throw toValidationError(error)
-    }
-    const issue = section.saveIssue?.(after, before)
-    if (issue) {
-      throw new ValidationError(issue.message, { field: issue.path.join(".") })
-    }
-    if (row) {
-      await this.updateSettingsSections(
-        { id: row.id, values: after, version: row.version + 1, updated_by: actorId },
-        sharedContext
-      )
-    } else {
-      await this.createSettingsSections(
-        { section: name, values: after, updated_by: actorId },
-        sharedContext
-      )
-    }
-    return {
-      before,
-      after,
-      previous: row ? { values: row.values, version: row.version } : null,
-      // A new row starts at the model's default, 1
-      version: row ? row.version + 1 : 1,
-    }
+    // Lock, merge over the latest row, validate, write (section-write.ts)
+    return writeSection(this, sharedContext, name, patch, actorId)
   }
 
   /**
@@ -199,25 +167,8 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
     savedVersion: number,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
-    await lockSection(sharedContext, name)
-    const [row] = await this.listSettingsSections({ section: name }, { take: 1 }, sharedContext)
-    if (row?.version !== savedVersion) {
-      logger.warn({
-        event: "platform_settings.restore_skipped",
-        section: name,
-        savedVersion,
-        storedVersion: row?.version ?? null,
-      })
-      return
-    }
-    if (previous === null) {
-      await this.deleteSettingsSections(row.id, sharedContext)
-      return
-    }
-    await this.updateSettingsSections(
-      { id: row.id, values: previous.values, version: row.version + 1 },
-      sharedContext
-    )
+    // Under the section's lock, only over `savedVersion` (section-write.ts)
+    await restoreStoredSection(this, sharedContext, name, previous, savedVersion)
   }
 
   /**
