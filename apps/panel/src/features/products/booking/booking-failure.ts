@@ -17,6 +17,9 @@ const REFUSALS: Readonly<Record<string, string>> = {
   "booking.hold_minutes_invalid": "holdMinutes",
   "booking.pax_ages_invalid": "paxAges",
   "booking.pax_invalid": "pax",
+  "booking.cancellation_tiers_invalid": "tiers",
+  "booking.slot_cancelled": "slotCancelled",
+  "booking.use_departure_cancel": "useDepartureCancel",
 }
 
 /**

@@ -42,6 +42,7 @@ describe("booking drafts", () => {
       min_participants: null,
       pax_by_variant: { infant: { pax: 0, max_age: 2 } },
       traveler_fields: { level: "none" },
+      cancellation_tiers: [],
     })
   })
 

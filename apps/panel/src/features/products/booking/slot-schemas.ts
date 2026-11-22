@@ -11,6 +11,7 @@ import type {
   BookingSlot,
   PaxEntry,
 } from "@/features/products/api/booking"
+import { tierDraftsOf, tiersInputOf, tiersSchema } from "./cancel-tiers"
 import { recurringStarts, zonedIso } from "./slot-dates"
 
 const F = "products.booking.errors.form"
@@ -142,6 +143,7 @@ export const settingsSchema = z.object({
     .refine((text) => countIn(text, 1, BOOKING_LIMITS.maxUnits), `${F}.maxUnits`),
   min_participants: optionalCount(1, BOOKING_LIMITS.minParticipants, `${F}.minParticipants`),
   traveler_level: z.enum(TRAVELER_LEVELS),
+  tiers: tiersSchema,
   pax: z.record(
     z.string(),
     z
@@ -175,6 +177,7 @@ export function settingsDraftOf(
         ? ""
         : String(bookable.min_participants),
     traveler_level: bookable?.traveler_fields?.level ?? "none",
+    tiers: tierDraftsOf(bookable?.cancellation_tiers),
     pax: Object.fromEntries(
       variants.map((variant) => {
         const entry = bookable?.pax_by_variant[variant.id]
@@ -212,5 +215,6 @@ export function settingsInputOf(draft: SettingsDraft): BookableSettingsInput {
     min_participants: draft.min_participants.trim() === "" ? null : count(draft.min_participants),
     pax_by_variant: pax,
     traveler_fields: { level: draft.traveler_level },
+    cancellation_tiers: tiersInputOf(draft.tiers),
   }
 }

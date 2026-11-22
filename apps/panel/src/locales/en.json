@@ -3567,10 +3567,16 @@
       },
       "cancel": {
         "title": "Cancel the departure?",
-        "description": "The {{start}} departure is taken off sale and no longer listed on the storefront.",
+        "description": "The {{start}} departure is taken off sale at once, no longer listed on the storefront, and every confirmed booking is refunded in full.",
         "confirm": "Cancel departure",
-        "sold_one": "This departure has {{count}} place sold (confirmed booking). Refunds and customer notices are not automatic yet; cancel and refund the orders by hand.",
-        "sold_other": "This departure has {{count}} places sold (confirmed bookings). Refunds and customer notices are not automatic yet; cancel and refund the orders by hand."
+        "loading": "Working out the bookings it touches…",
+        "previewFailed": "The bookings it touches could not be read. Cancelling still refunds every booking in full.",
+        "touches": "Bookings: {{bookings}} · orders: {{orders}} · places: {{units}}",
+        "refund": "Refund in all: {{amount}}",
+        "refundAtLeast": "Refund in all at least {{amount}} (many bookings; all are refunded)",
+        "after": "Refunds and cancels run in the background after you confirm; any that fail are tried again.",
+        "noBookings": "This departure has no confirmed bookings.",
+        "done": "Departure cancelled; refunds started."
       },
       "columns": {
         "start": "Departure",
@@ -3641,6 +3647,19 @@
           "birth_date": "Name, birth date",
           "identity": "Name, birth date, ID/passport no",
           "nationality": "Name, birth date, ID/passport no, nationality"
+        },
+        "tiers": {
+          "title": "Customer cancellation",
+          "hint": "What is kept when the customer cancels from their account, by days left to the departure. The days left fall to the best matching row; below every row the row with the fewest days applies.",
+          "empty": "With no rows the customer cannot cancel themselves; you can always cancel from the order.",
+          "days": "days",
+          "orMore": "or more before:",
+          "kept": "kept",
+          "daysOf": "Row {{number}}: days before the departure",
+          "percentOf": "Row {{number}}: share kept",
+          "remove": "Remove row {{number}}",
+          "add": "Add a cancellation tier",
+          "packageFree": "Package travel: 30 days or more before, nothing is kept (0% applies)."
         }
       },
       "errors": {
@@ -3671,8 +3690,16 @@
           "maxUnits": "Most places per cart must be between 1 and 500.",
           "minParticipants": "Minimum participants must be between 1 and 10,000, or left empty.",
           "pax": "Places taken must be a whole number between 0 and 20.",
-          "age": "Age must be between 0 and 120."
-        }
+          "age": "Age must be between 0 and 120.",
+          "tierDays": "Days must be a whole number between 0 and 365.",
+          "tierPercent": "The share must be a whole number between 0 and 100.",
+          "tierSame": "Another row has this day count.",
+          "tierOrder": "A row nearer the departure cannot keep less.",
+          "tierRows": "At most 10 cancellation tiers."
+        },
+        "tiers": "Cancellation tiers are invalid: each day count once, and nearer the departure never keeps less.",
+        "slotCancelled": "A cancelled departure cannot be opened again.",
+        "useDepartureCancel": "Use the cancel button to cancel a departure; its bookings are refunded."
       },
       "travelers": {
         "title": "Travelers",

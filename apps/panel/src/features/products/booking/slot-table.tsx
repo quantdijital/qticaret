@@ -20,8 +20,11 @@ export interface SlotActions {
   onEdit: (slot: BookingSlot) => void
   onBookings: (slot: BookingSlot) => void
   onStatus: (slot: BookingSlot, status: SlotStatus) => void
-  /** Asks first: confirmed bookings stay and are refunded by hand until D7. */
-  onCancel: (slot: BookingSlot) => void
+  /**
+   * Asks first with what it touches and gives back (adr/0076 Ek D7a);
+   * absent: not offered (money goes back: owner and admin).
+   */
+  onCancel?: (slot: BookingSlot) => void
 }
 
 /**
@@ -111,7 +114,8 @@ export function SlotTable({
                     >
                       <Lock />
                     </Button>
-                  ) : (
+                  ) : slot.status === "cancelled" ? null : (
+                    // A cancelled departure is not opened again (the server refuses it)
                     <Button
                       type="button"
                       variant="ghost"
@@ -125,7 +129,7 @@ export function SlotTable({
                       <LockOpen />
                     </Button>
                   )}
-                  {slot.status === "cancelled" ? null : (
+                  {slot.status === "cancelled" || !actions.onCancel ? null : (
                     <Button
                       type="button"
                       variant="ghost"
@@ -134,7 +138,7 @@ export function SlotTable({
                       aria-label={label("cancel")}
                       disabled={busy}
                       onClick={() => {
-                        actions.onCancel(slot)
+                        actions.onCancel?.(slot)
                       }}
                     >
                       <Ban />

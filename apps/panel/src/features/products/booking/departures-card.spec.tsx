@@ -53,9 +53,10 @@ interface Setup {
   catalog?: Partial<ProductCatalog>
   slots?: BookingSlot[]
   refuse?: Record<string, unknown>
+  money?: boolean
 }
 
-function setup({ flag = true, catalog = {}, slots = [SLOT], refuse }: Setup = {}) {
+function setup({ flag = true, catalog = {}, slots = [SLOT], refuse, money = true }: Setup = {}) {
   fetchMock.mockImplementation((url: string, init?: { method?: string; body?: unknown }) => {
     if (url === "/admin/features") {
       return Promise.resolve({ features: [{ key: "catalog.booking", enabled: flag }] })
@@ -65,6 +66,22 @@ function setup({ flag = true, catalog = {}, slots = [SLOT], refuse }: Setup = {}
     }
     if (url.endsWith("/bookable")) {
       return Promise.resolve({ booking_mode: "departure", bookable: null })
+    }
+    if (url === "/admin/staff/me") {
+      return Promise.resolve({ role: money ? "admin" : "operations", can: { money } })
+    }
+    if (url.endsWith("/cancel")) {
+      return Promise.resolve({
+        preview: {
+          slot_id: "bkslot_1",
+          status: "open",
+          bookings: 2,
+          orders: 2,
+          units: 3,
+          refund: "4500",
+          partial: false,
+        },
+      })
     }
     if (url.endsWith("/bookings")) {
       return Promise.resolve({
@@ -193,20 +210,25 @@ describe("DeparturesCard", () => {
     ])
   })
 
-  it("asks before cancelling a departure with places sold, saying refunds are by hand for now", async () => {
+  it("asks before cancelling a departure with what it touches and the server's refund", async () => {
     setup()
     await userEvent.click(await screen.findByRole("button", { name: /09:00: iptal et/ }))
     const dialog = screen.getByRole("alertdialog", { name: "Kalkış iptal edilsin mi?" })
-    expect(within(dialog).getByRole("alert")).toHaveTextContent(
-      /3 satılmış yer \(onaylı rezervasyon\) var.*elle iptal edip iade edin/
-    )
+    const alert = await within(dialog).findByRole("alert")
+    expect(alert).toHaveTextContent("Rezervasyon: 2 · sipariş: 2 · yer: 3")
+    expect(alert).toHaveTextContent(/Toplam iade: ₺4\.500,00/)
     await userEvent.click(within(dialog).getByRole("button", { name: "Kalkışı iptal et" }))
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith("/admin/booking-slots/bkslot_1", {
-        method: "POST",
-        body: { status: "cancelled" },
-      })
+      expect(posts()).toEqual([
+        ["/admin/booking-slots/bkslot_1/cancel", { method: "POST", body: {} }],
+      ])
     })
+  })
+
+  it("does not offer a departure's cancel to a role that cannot give money back", async () => {
+    setup({ money: false })
+    await screen.findByRole("button", { name: /09:00: düzenle/ })
+    expect(screen.queryByRole("button", { name: /09:00: iptal et/ })).toBeNull()
   })
 
   it("shows a departure's bookings by order, with no person's details", async () => {

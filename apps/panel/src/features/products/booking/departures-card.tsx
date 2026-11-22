@@ -11,10 +11,12 @@ import {
   BOOKING_FLAG,
   bookableQuery,
   slotsQuery,
+  useCancelDeparture,
   useUpdateSlot,
 } from "@/features/products/api/booking"
 import type { BookingSlot, SlotStatus } from "@/features/products/api/booking"
 import { productCatalogQuery } from "@/features/products/api/product-edit"
+import { useCan } from "@/features/auth/api/staff"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { AddSlotDialog } from "./add-slot-dialog"
@@ -45,6 +47,9 @@ function Departures({ productId, variants }: { productId: string; variants: Vari
   const bookable = useQuery(bookableQuery(productId))
   const slots = useQuery(slotsQuery(productId))
   const update = useUpdateSlot(productId)
+  const cancelDeparture = useCancelDeparture(productId)
+  // Cancelling gives money back: owner and admin (the server decides again)
+  const mayCancel = useCan("money")
   const [open, setOpen] = useState<Open>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const zone = bookable.data?.bookable?.timezone ?? DEFAULT_ZONE
@@ -107,7 +112,7 @@ function Departures({ productId, variants }: { productId: string; variants: Vari
             <SlotTable
               slots={list}
               zone={zone}
-              busy={update.isPending}
+              busy={update.isPending || cancelDeparture.isPending}
               actions={{
                 onEdit: (slot) => {
                   setOpen({ kind: "edit", slot })
@@ -116,9 +121,13 @@ function Departures({ productId, variants }: { productId: string; variants: Vari
                   setOpen({ kind: "bookings", slot })
                 },
                 onStatus: setStatus,
-                onCancel: (slot) => {
-                  setOpen({ kind: "cancel", slot })
-                },
+                ...(mayCancel
+                  ? {
+                      onCancel: (slot: BookingSlot) => {
+                        setOpen({ kind: "cancel", slot })
+                      },
+                    }
+                  : {}),
               }}
             />
           </div>
@@ -170,7 +179,14 @@ function Departures({ productId, variants }: { productId: string; variants: Vari
           zone={zone}
           onCancel={close}
           onConfirm={() => {
-            setStatus(open.slot, "cancelled")
+            cancelDeparture.mutate(open.slot.id, {
+              onSuccess: () => {
+                toast.success(t(`${B}.cancel.done`))
+              },
+              onError: (error) => {
+                toast.error(bookingFailureText(t, error))
+              },
+            })
             close()
           }}
         />
