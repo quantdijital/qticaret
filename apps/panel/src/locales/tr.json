@@ -8571,7 +8571,9 @@
         "place": {
           "top": "Izgaranın üstüne taşı",
           "bottom": "Izgaranın altına taşı"
-        }
+        },
+        "off": "Kapalı",
+        "offNote": "{{capability}} kapalı olduğu için bu bölüm vitrinde görünmez; özellik açılınca yeniden görünür."
       },
       "add": {
         "title": "Bölüm ekle",
@@ -8583,7 +8585,8 @@
           "footer": "Bütün sayfalarda, ödeme sayfası dışında, alt bilginin üstünde görünür; her bölüm bir kez eklenir, sonra sürükleyerek sırasını değiştirebilirsiniz.",
           "pages": "Bu sayfaya, bölümlerin sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
         },
-        "once": "Bu sayfada zaten var."
+        "once": "Bu sayfada zaten var.",
+        "general": "Genel bölümler"
       },
       "types": {
         "announcement_bar": {
@@ -10746,6 +10749,9 @@
           "payment_facts": "Mağazanın ödeme yöntemleri ve taksit seçenekleri buraya kendiliğinden gelir; ödeme ayarlarında değişir. Sayfa metninin hemen ardından konunca metnin yanında görünür.",
           "shipping_facts": "Kargo firmaları, ücretler ve teslim süreleri buraya kendiliğinden gelir; kargo ayarlarında değişir. Sayfa metninin hemen ardından konunca metnin yanında görünür."
         }
+      },
+      "capabilities": {
+        "dated": "Tarihli ürünler"
       }
     },
     "maintenance": {
@@ -10928,7 +10934,9 @@
         "pageMissingAddress": "Adresi ‘{{handle}}’ olan sayfa olmadığı için sayfa düzeni eklenmedi. Bu adresle bir sayfa açıp görünümü yeniden uygulayın.",
         "pageLimit": "{{name}} sayfasının düzeni eklenmedi: kendi düzeni olan en çok {{max}} sayfa olabilir.",
         "pageLimitAddress": "Adresi ‘{{handle}}’ olan sayfanın düzeni eklenmedi: kendi düzeni olan en çok {{max}} sayfa olabilir.",
-        "keptPages": "Sayfalarınıza kendi kurduğunuz düzenler korundu."
+        "keptPages": "Sayfalarınıza kendi kurduğunuz düzenler korundu.",
+        "featureOff_one": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı.",
+        "featureOff_other": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı."
       },
       "history": {
         "lead": "Daha eski yayınlar:",
