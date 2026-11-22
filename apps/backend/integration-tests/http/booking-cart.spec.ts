@@ -713,5 +713,28 @@ medusaIntegrationTestRunner({
       expect([completed.status, completed.data.message]).toEqual([400, "booking.use_booking_route"])
       expect([again.status, again.data.message]).toEqual([400, "booking.use_booking_route"])
     })
+
+    it("refuses at the payment and the completion a line whose product went to request only", async () => {
+      await turnOn()
+      const { productId, adult, slotId } = await tour(10)
+      await staff(`/admin/products/${productId}/bookable`, { sale_mode: "both" })
+      const cartId = await emptyCart(getContainer())
+      const booked = await book(cartId, {
+        slot_id: slotId,
+        items: [{ variant_id: adult, quantity: 1 }],
+      })
+      const started = await startPayment(cartId)
+      await staff(`/admin/products/${productId}/bookable`, { sale_mode: "request" })
+
+      const completed = await post(`/store/carts/${cartId}/complete`, {})
+      const again = await startPayment(cartId)
+
+      expect([booked.status, started.status]).toEqual([200, 200])
+      expect([completed.status, completed.data.message]).toEqual([
+        400,
+        "booking.online_not_offered",
+      ])
+      expect([again.status, again.data.message]).toEqual([400, "booking.online_not_offered"])
+    })
   },
 })

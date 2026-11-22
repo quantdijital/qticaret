@@ -12,6 +12,7 @@ import { ContactMessagesPage } from "./contact-messages-page"
 const fetchMock = vi.hoisted(() => vi.fn())
 // The address's search; a test may set a subject
 const search = vi.hoisted(() => ({ value: {} }))
+const navigateMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
@@ -23,7 +24,7 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
   getRouteApi: () => ({ useSearch: () => search.value }),
-  useNavigate: () => vi.fn(),
+  useNavigate: () => navigateMock,
 }))
 
 const message = (id: string, more: Partial<ContactMessage> = {}): ContactMessage => ({
@@ -82,6 +83,7 @@ describe("ContactMessagesPage", () => {
   beforeEach(() => {
     search.value = {}
     fetchMock.mockReset()
+    navigateMock.mockReset()
     serve([message("cm_1"), message("cm_2", { name: "Ali Veli", subject: "return" })])
   })
 
@@ -218,6 +220,26 @@ describe("ContactMessagesPage", () => {
     expect(within(sheet).getByText("1 yetişkin")).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith("/admin/contact-messages", {
       query: { status: "new", offset: 0, limit: 50, subject: "booking" },
+    })
+  })
+
+  it("finds requests by a phone number, typed or in the address (adr/0076 Ek 2026-11-23)", async () => {
+    search.value = { phone: "0532 123 45 67" }
+    renderPage("owner")
+
+    await screen.findByRole("button", { name: "Ayşe Yılmaz" })
+    expect(fetchMock).toHaveBeenCalledWith("/admin/contact-messages", {
+      query: { status: "new", offset: 0, limit: 50, phone: "0532 123 45 67" },
+    })
+    const box = screen.getByRole("searchbox", { name: "Telefonla ara" })
+    await userEvent.clear(box)
+    await userEvent.type(box, "05551112233")
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: { status: undefined, subject: undefined, phone: "05551112233", page: undefined },
+        })
+      )
     })
   })
 })

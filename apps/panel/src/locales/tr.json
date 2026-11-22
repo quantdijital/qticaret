@@ -5203,6 +5203,7 @@
       "views": "Mesaj görünümleri",
       "subjectFilter": "Konu",
       "allSubjects": "Tüm konular",
+      "phoneFilter": "Telefonla ara",
       "tabs": {
         "new": "Bekleyen",
         "handled": "Yanıtlanan"

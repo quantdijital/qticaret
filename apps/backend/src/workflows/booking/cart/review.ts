@@ -45,7 +45,8 @@ export function bookingLinesOf(cart: AddonCart): BookingLine[] {
  * The cart's dated lines by departure, each departure read as the cart's
  * storefront sees it now: a slot gone, unpublished or out of the channel
  * reads as unknown; one closed or past its sales, as closed; a variant no
- * longer the product's, as unknown. Null when the cart has none; with the
+ * longer the product's, as unknown; selling, a product now sold by request
+ * only stops the payment and the completion. Null when the cart has none; with the
  * shop's bookings off, a dated line stops the cart.
  */
 export async function slotLinesOf(
@@ -69,6 +70,10 @@ export async function slotLinesOf(
     const target = await readBookingTarget(container, slotId, cart.sales_channel_id)
     if (options.sells) {
       assertSlotSells(target)
+      // Turned to call-me request only after the line went in (adr/0076 Ek 2026-11-23)
+      if (target.bookable.sale_mode === "request") {
+        throw new ValidationError("booking.online_not_offered", { field: "items" })
+      }
     }
     assertVariantsOf(
       target,

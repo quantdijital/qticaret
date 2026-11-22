@@ -76,10 +76,11 @@ export const CONTACT_MESSAGES_KEY = ["contact-messages"] as const
 export const contactMessagesQuery = (
   status: ContactStatus,
   page: number,
-  subject?: ContactSubject
+  subject?: ContactSubject,
+  phone?: string
 ) =>
   queryOptions({
-    queryKey: [...CONTACT_MESSAGES_KEY, status, page, subject ?? "all"],
+    queryKey: [...CONTACT_MESSAGES_KEY, status, page, subject ?? "all", phone ?? ""],
     queryFn: () =>
       sdk.client.fetch<ContactMessagesResponse>(PATH, {
         query: {
@@ -87,6 +88,7 @@ export const contactMessagesQuery = (
           offset: page * CONTACT_PAGE_SIZE,
           limit: CONTACT_PAGE_SIZE,
           ...(subject ? { subject } : {}),
+          ...(phone ? { phone } : {}),
         },
       }),
   })

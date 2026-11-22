@@ -49,7 +49,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["order", "product", "return", "payment", "kvkk", "other"],
+          "enumItems": ["order", "product", "return", "payment", "kvkk", "booking", "other"],
           "mappedType": "enum"
         },
         "order_number": {
@@ -74,7 +74,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": null,
@@ -83,6 +83,54 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "text"
+        },
+        "phone_hash": {
+          "name": "phone_hash",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "details": {
+          "name": "details",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
         },
         "sealed": {
           "name": "sealed",
@@ -235,6 +283,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_contact_message_customer_id\" ON \"contact_message\" (\"customer_id\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_contact_message_phone_hash",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_contact_message_phone_hash\" ON \"contact_message\" (\"phone_hash\") WHERE phone_hash IS NOT NULL AND deleted_at IS NULL"
         },
         {
           "keyName": "contact_message_pkey",

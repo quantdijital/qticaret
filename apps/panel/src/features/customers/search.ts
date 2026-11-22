@@ -2,10 +2,11 @@ import { z } from "zod"
 import { CONTACT_STATUSES, CONTACT_SUBJECTS } from "./api/contact-messages"
 import { CUSTOMER_KINDS } from "./api/customers"
 
-/** The contact messages' URL: `/customers/contact-messages?status=handled&subject=booking&page=2` (1-based). */
+/** The contact messages' URL: `/customers/contact-messages?status=handled&subject=booking&phone=0532…&page=2` (1-based). */
 export const contactMessageSearchSchema = z.object({
   status: z.enum(CONTACT_STATUSES).optional().catch(undefined),
   subject: z.enum(CONTACT_SUBJECTS).optional().catch(undefined),
+  phone: z.string().max(20).optional().catch(undefined),
   page: z.coerce.number().int().min(1).max(10_000).optional().catch(undefined),
 })
 

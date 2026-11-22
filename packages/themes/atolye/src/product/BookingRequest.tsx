@@ -32,7 +32,8 @@ export function BookingRequest({
   /** The form's heading id; its fields' ids start with it. */
   id?: string
 }) {
-  const departures = view.departures
+  // Only departures on sale; the server turns a closed one down (adr/0076 Ek 2026-11-23)
+  const departures = view.departures.filter((departure) => departure.status === "open")
   const months = view.requestMonths ?? []
   const [when, setWhen] = useState<string>(() => departures[0]?.id ?? FLEXIBLE)
   const [sent, setSent] = useState(false)

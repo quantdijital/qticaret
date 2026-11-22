@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { CONTACT_MESSAGES_MODULE } from "../../src/modules/contact-messages"
 import type ContactMessagesModuleService from "../../src/modules/contact-messages/service"
+import { contactMessagesFor, eraseContactMessages } from "../../src/workflows/contact/customer-data"
 import { createAdminUser } from "../helpers/admin"
 import { emptyCart, publishTour } from "../helpers/booking-tour"
 import type { Tour } from "../helpers/booking-tour"
@@ -31,6 +32,8 @@ interface Listed {
 }
 
 const DAY = 24 * 60 * 60 * 1000
+// A phone of each test's own: a phone is counted five an hour across the file (D1)
+let dialled = 10
 
 /** adr/0076 Ek 2026-11-23: a dated product's call-me request, kept as a sealed contact message. */
 medusaIntegrationTestRunner({
@@ -40,6 +43,7 @@ medusaIntegrationTestRunner({
     let store: Storefront
     let shop: StockShop
     let tour: Tour
+    let phone: string
 
     const staff = (url: string, body: unknown) =>
       settle(http.post<Answer>(url, body, { headers: admin.headers }))
@@ -49,7 +53,7 @@ medusaIntegrationTestRunner({
     const request = (extra: Record<string, unknown> = {}) => ({
       product_id: tour.productId,
       name: "Ayşe Yılmaz",
-      phone: "0532 123 45 67",
+      phone,
       adults: 2,
       consent: true,
       ...extra,
@@ -57,8 +61,17 @@ medusaIntegrationTestRunner({
     // A departure moved or cancelled under the request, as no route would
     const slotRow = () =>
       getContainer().resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)("booking_slot")
+    const listFor = async (query: string) =>
+      (
+        await settle(
+          http.get<{ contact_messages: Listed[] }>(`/admin/contact-messages?${query}`, {
+            headers: admin.headers,
+          })
+        )
+      ).data.contact_messages
 
     beforeEach(async () => {
+      phone = `0532 123 45 ${String((dialled += 1))}`
       const container = getContainer()
       shop = await stockShop(container)
       store = await createStorefront(container)
@@ -91,7 +104,7 @@ medusaIntegrationTestRunner({
       expect(mine).toMatchObject({
         subject: "booking",
         name: "Ayşe Yılmaz",
-        phone: "+905321234567",
+        phone: `+90532123${phone.slice(-5).replace(" ", "")}`,
         email: "ayse@example.com",
         body: "Arayın",
         details: { slot_id: tour.slotId, adults: 2, children: 1 },
@@ -102,7 +115,7 @@ medusaIntegrationTestRunner({
         .resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
         .listContactMessages({ id: mine?.id ?? "" }, { take: 1 })
       expect(row?.sealed).not.toContain("Ayşe")
-      expect(row?.sealed).not.toContain("5321234567")
+      expect(row?.sealed).not.toContain(phone.replace(/\D/g, "").slice(-10))
       expect(row?.details).toEqual({ slot_id: tour.slotId, adults: 2, children: 1 })
 
       const bell = await eventually(
@@ -177,6 +190,38 @@ medusaIntegrationTestRunner({
         400,
         "booking.request_slot_invalid",
       ])
+    })
+
+    it("refuses a departure closed to sales, and a day or month over two years ahead", async () => {
+      await slotRow().where({ id: tour.slotId }).update({ status: "closed" })
+      const closed = await ask(request({ slot_id: tour.slotId }))
+      expect([closed.status, closed.data.message]).toEqual([400, "booking.request_slot_invalid"])
+
+      const far = new Date(Date.now() + 3 * 365 * DAY).toISOString()
+      const day = await ask(request({ date: far.slice(0, 10) }))
+      expect([day.status, day.data.message]).toEqual([400, "booking.request_when_invalid"])
+      const month = await ask(request({ month: far.slice(0, 7) }))
+      expect([month.status, month.data.message]).toEqual([400, "booking.request_when_invalid"])
+    })
+
+    it("finds a request left with a phone only by that phone, for KVKK and in the panel", async () => {
+      expect((await ask(request({ note: "Arayın" }))).status).toBe(202)
+      const container = getContainer()
+      const typed = `+90 ${phone.slice(1)}`
+
+      const copy = await contactMessagesFor(container, "cus_yok", [typed])
+      expect(copy).toEqual([
+        expect.objectContaining({ konu: "booking", ürün: tour.productId, body: "Arayın" }),
+      ])
+      expect(await contactMessagesFor(container, "cus_yok", ["0555 000 00 00"])).toEqual([])
+
+      const found = await listFor(`phone=${encodeURIComponent(phone.replace(/ /g, ""))}`)
+      expect(found.map((row) => row.product_id)).toEqual([tour.productId])
+      expect(await listFor("phone=05550000000")).toEqual([])
+      expect(await listFor("phone=12")).toEqual([])
+
+      expect(await eraseContactMessages(container, "cus_yok", [phone])).toBe(1)
+      expect(await listFor("subject=booking")).toEqual([])
     })
 
     it("needs a phone, the consent, and no more people than the product's cap", async () => {

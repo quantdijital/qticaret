@@ -77,14 +77,14 @@ async function requestedProduct(container: Container, input: BookingRequestInput
   return bookable
 }
 
-/** A departure asked for: the product's own, not cancelled, not started. */
+/** A departure asked for: the product's own, on sale (not closed or cancelled), not started. */
 async function checkSlot(container: Container, bookable: BookableRow, slotId: string, now: Date) {
   const [slot] = await container
     .resolve<BookingModuleService>(BOOKING_MODULE)
     .listBookingSlots({ id: slotId }, { take: 1 })
   if (
     slot?.bookable_id !== bookable.id ||
-    slot.status === "cancelled" ||
+    slot.status !== "open" ||
     new Date(slot.starts_at).getTime() <= now.getTime()
   ) {
     throw new ValidationError("booking.request_slot_invalid", { field: "slot_id" })
@@ -112,7 +112,12 @@ export const checkBookingRequestStep = createStep(
     if (input.slot_id) {
       await checkSlot(container, bookable, input.slot_id, now)
     }
-    if ((input.date && input.date < today) || (input.month && input.month < today.slice(0, 7))) {
+    // Not in the past, and at most two years ahead: no request for a far-off day
+    const horizon = `${String(Number(today.slice(0, 4)) + 2)}${today.slice(4)}`
+    if (
+      (input.date && (input.date < today || input.date > horizon)) ||
+      (input.month && (input.month < today.slice(0, 7) || input.month > horizon.slice(0, 7)))
+    ) {
       throw new ValidationError("booking.request_when_invalid", {
         field: input.date ? "date" : "month",
       })

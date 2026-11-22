@@ -5203,6 +5203,7 @@
       "views": "Message views",
       "subjectFilter": "Subject",
       "allSubjects": "All subjects",
+      "phoneFilter": "Search by phone",
       "tabs": {
         "new": "Waiting",
         "handled": "Answered"

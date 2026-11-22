@@ -130,6 +130,21 @@ describe("a dated product's call-me request on its page", () => {
     expect(html).toContain("Talebimi gönder")
     expect(html).toMatch(/<option value="flexible"[^>]*selected|selected[^>]*value="flexible"/)
   })
+
+  it("offers only departures on sale, never a closed one", () => {
+    const [open] = view().departures
+    if (!open) throw new Error("fixture")
+    const closed = {
+      ...open,
+      id: "bkslot_kapali",
+      label: "Pazar, 13 Aralık 2026 · 09:00",
+      status: "closed" as const,
+    }
+    const html = page(view({ saleMode: "request", departures: [closed, open] }))
+    expect(html).not.toContain("bkslot_kapali")
+    expect(html).not.toContain("Pazar, 13 Aralık 2026")
+    expect(html).toMatch(/<option value="bkslot_az"[^>]*selected|selected[^>]*value="bkslot_az"/)
+  })
 })
 
 describe("the request form in the browser", () => {

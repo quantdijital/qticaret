@@ -6,6 +6,7 @@ import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import {
   Select,
@@ -125,21 +126,26 @@ export function ContactMessagesPage() {
   const status: ContactStatus = search.status ?? "new"
   const page = (search.page ?? 1) - 1
   const subject: ContactSubject | undefined = search.subject
-  const list = useQuery(contactMessagesQuery(status, page, subject))
+  // A phone number finds a request left without an e-mail (adr/0076 Ek 2026-11-23)
+  const phone = search.phone ?? ""
+  const list = useQuery(contactMessagesQuery(status, page, subject, phone.trim() || undefined))
   const walk = useRecordWalk(list.data?.contact_messages, (message) => message.id)
   const columns = useColumns(walk.show)
   const setSearch = (next: {
     status?: ContactStatus
     subject?: ContactSubject | typeof EVERY
+    phone?: string
     page?: number
   }) => {
     const nextStatus = next.status ?? status
     const nextSubject = next.subject ?? subject
+    const nextPhone = (next.phone ?? phone).trim()
     void navigate({
       to: "/customers/contact-messages",
       search: {
         status: nextStatus === "new" ? undefined : nextStatus,
         subject: nextSubject === EVERY ? undefined : nextSubject,
+        phone: nextPhone === "" ? undefined : nextPhone,
         page: next.page && next.page > 1 ? next.page : undefined,
       },
       replace: true,
@@ -180,6 +186,13 @@ export function ContactMessagesPage() {
               ))}
             </SelectContent>
           </Select>
+          <SearchInput
+            value={phone}
+            placeholder={t(`${M}.phoneFilter`)}
+            onChange={(text) => {
+              setSearch({ phone: text, page: 1 })
+            }}
+          />
         </div>
         {list.isError ? (
           <div className="p-5">
