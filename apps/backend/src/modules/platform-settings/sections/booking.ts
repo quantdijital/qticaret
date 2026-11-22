@@ -26,7 +26,7 @@ const note = z
   .string()
   .trim()
   .max(BOOKING_NOTE_MAX)
-  .refine((value) => isCleanText(value, true), { message: "platform_settings.text_invalid" })
+  .refine((value) => isCleanText(value), { message: "platform_settings.text_invalid" })
   .transform((value) => (value === "" ? null : value))
   .nullable()
 

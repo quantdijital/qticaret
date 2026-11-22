@@ -69,5 +69,18 @@ describe("whether the shopper may cancel an order", () => {
     // Nothing taken yet: the whole order may still be cancelled, its places given back
     expect(cancelRefusal({ ...paid(unpaid), items: [dated] })).toBeNull()
     expect(cancelRefusal({ ...paid(card), items: [{ metadata: null }] })).toBeNull()
+
+    // adr/0076 Ek basit yol: the shop takes cancels by phone, paid or not
+    expect(cancelRefusal({ ...paid(unpaid), items: [dated] }, false)).toBe(
+      "booking.cancel_by_contact"
+    )
+    expect(cancelRefusal({ ...paid(card), items: [dated] }, false)).toBe(
+      "booking.cancel_by_contact"
+    )
+    // An order without a dated line is not touched by it; a cancelled one stays done
+    expect(cancelRefusal({ ...paid(card), items: [{ metadata: null }] }, false)).toBeNull()
+    expect(cancelRefusal({ ...paid(unpaid), items: [dated], status: "canceled" }, false)).toBe(
+      "orders.canceled"
+    )
   })
 })

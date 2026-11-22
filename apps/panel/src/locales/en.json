@@ -1396,7 +1396,8 @@
         "cancelNoteDefault": "Contact us to cancel or change your booking.",
         "noteHint": "Left empty, the text above is shown.",
         "cancelNoteHint": "Left empty, the text above is shown. The phone and e-mail of the shop profile are added below the note.",
-        "noteTooLong": "The note may be at most {{max}} characters."
+        "noteTooLong": "The note may be at most {{max}} characters.",
+        "noteInvalid": "The note must be one line, without invisible characters."
       },
       "tabs": {
         "carriers": "Carriers",

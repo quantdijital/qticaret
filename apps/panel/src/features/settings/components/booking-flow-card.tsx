@@ -10,7 +10,7 @@ import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
-import { Textarea } from "@qticaret/admin-ui/ui/textarea"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import { BOOKING_FLAG } from "@/features/products/api/booking"
 import { useFeature } from "@/features/settings/api/features"
 import { BOOKING_NOTE_MAX, sectionQuery, useSaveSection } from "@/features/settings/api/sections"
@@ -19,7 +19,21 @@ import { errorText } from "@/lib/errors"
 
 const F = "settings.shipping.bookingFlow"
 
-const note = z.string().max(BOOKING_NOTE_MAX, `${F}.noteTooLong`)
+// One line of clean text, as the server keeps it: no line breaks or other control characters
+function isClean(text: string): boolean {
+  // Control characters are single UTF-16 units: one index at a time is enough
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index)
+    if (code < 0x20 || (code >= 0x7f && code <= 0x9f)) {
+      return false
+    }
+  }
+  return true
+}
+const note = z
+  .string()
+  .max(BOOKING_NOTE_MAX, `${F}.noteTooLong`)
+  .refine(isClean, `${F}.noteInvalid`)
 const schema = z.object({
   voucher_enabled: z.boolean(),
   voucher_off_note: note,
@@ -79,9 +93,8 @@ function FlowSwitch({
           hint={t(label === "voucher" ? `${F}.noteHint` : `${F}.cancelNoteHint`)}
           error={error ? t(error, { max: BOOKING_NOTE_MAX }) : undefined}
         >
-          <Textarea
+          <Input
             id={`booking-flow-${noteName}`}
-            rows={2}
             maxLength={BOOKING_NOTE_MAX}
             placeholder={t(`${F}.${noteKey}Default`)}
             aria-invalid={Boolean(error)}

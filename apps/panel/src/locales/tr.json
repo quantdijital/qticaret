@@ -1396,7 +1396,8 @@
         "cancelNoteDefault": "İptal ve değişiklik için bizimle iletişime geçin.",
         "noteHint": "Boş bırakırsanız yukarıdaki metin gösterilir.",
         "cancelNoteHint": "Boş bırakırsanız yukarıdaki metin gösterilir. Mağaza profilindeki telefon ve e-posta notun altına eklenir.",
-        "noteTooLong": "Not en çok {{max}} karakter olabilir."
+        "noteTooLong": "Not en çok {{max}} karakter olabilir.",
+        "noteInvalid": "Not tek satır olmalı; görünmeyen karakter içeremez."
       },
       "tabs": {
         "carriers": "Kargo firmaları",

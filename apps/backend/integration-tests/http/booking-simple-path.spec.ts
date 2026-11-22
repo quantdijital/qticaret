@@ -8,6 +8,7 @@ import { createAdminUser } from "../helpers/admin"
 import { emptyCart, publishTour } from "../helpers/booking-tour"
 import type { Tour } from "../helpers/booking-tour"
 import { completeWithSystemPayment } from "../helpers/checkout"
+import { BANK_TRANSFER } from "../helpers/gift-sale"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
 import { eventually } from "../helpers/eventually"
@@ -169,6 +170,53 @@ medusaIntegrationTestRunner({
       })
       expect(byStaff.status).toBe(200)
       expect(byStaff.data["cancelled"]).toBe(true)
+    })
+
+    it("without online cancel refuses the whole order's cancel too, unpaid as it is", async () => {
+      await staff("/admin/platform-settings/bank_transfer", {
+        enabled: true,
+        account_holder: "Örnek Ticaret A.Ş.",
+        bank_name: "Örnek Bankası",
+        iban: "TR330006100519786457841326",
+        deadline_hours: 24,
+      })
+      await flow({ online_cancel_enabled: false })
+      const cartId = await emptyCart(getContainer(), shop)
+      const booked = await settle(
+        http.post<Answer>(
+          `/store/carts/${cartId}/bookings`,
+          { slot_id: tour.slotId, items: [{ variant_id: tour.adult, quantity: 1 }] },
+          { headers: store.headers }
+        )
+      )
+      expect(booked.status).toBe(200)
+      await http.post(
+        `/store/carts/${cartId}/payment-session`,
+        { provider_id: BANK_TRANSFER },
+        { headers: store.headers }
+      )
+      const placed = await http.post<{ order: { id: string } }>(
+        `/store/carts/${cartId}/complete`,
+        {},
+        { headers: store.headers }
+      )
+      const orderId = placed.data.order.id
+      await getContainer()
+        .resolve(Modules.ORDER)
+        .updateOrders(orderId, { customer_id: customer.id })
+      // Nothing taken yet: with online cancel on this order could be cancelled whole
+      const refused = await settle(
+        http.post<Answer>(`/store/orders/${orderId}/cancel`, {}, { headers: customer.headers })
+      )
+      expect(refused.status).toBe(400)
+      expect(refused.data.message).toBe("booking.cancel_by_contact")
+      const state = await settle(
+        http.get<Answer>(`/store/orders/${orderId}/returnable`, { headers: customer.headers })
+      )
+      expect(state.data).toMatchObject({
+        cancellable: false,
+        cancel_refusal: "booking.cancel_by_contact",
+      })
     })
 
     it("ignores the choice while dated selling is off: the e-mail as before", async () => {
