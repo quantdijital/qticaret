@@ -2,6 +2,16 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-22: yapay zekâ işleri tamam (adr/0074 G1–G7), tarihli ürün ve rezervasyon başlıyor (adr/0076)
+
+- **Sıradaki işler (Deniz için not: çakışma olmasın diye buraya bak):**
+  1. adr/0076 D1: kargosuz vitrin ödemesi (`apps/storefront` checkout adımları, `packages/ui` `CheckoutView.steps`, Atölye ödeme sayfası, iyzico `itemType`, sipariş e-postası). Ödeme dokunur, `security-reviewer`.
+  2. adr/0076 D2: yeni `booking` modülü (migration), `product_extension.booking_mode`, bayrak `catalog.booking`.
+  3. Sonra D3–D8 sırayla (ADR'deki dilim tablosu). Yavaş gidilecek; Deniz dönünce hızlanır.
+- **Biten (hepsi `dev`'de):** adr/0074 K1–K3 ve G1–G7: #234, #236, #237, #247, #248, #250, #251, #252, #254, #256, #257, #258, #259; ayar kaydı yarışı #249; kararsız testler #253, #255.
+- **Sahip kararı (2026-11-22):** turizm acentası müşterisi için tur satışı; sektöre özel kod yok, yetenek ürün düzeyinde, `travel` sektör paketi veri olarak. Deniz telefonda onayladı.
+- **Açık (kod dışı):** paket turda KDV/fatura (mali müşavir), katılımcı verisi saklama süresi ve sözleşme metinleri (hukukçu), kapora için sağlayıcı desteği.
+
 ## 2026-11-21: yazım yönergesinin bağlanması, "Dene", kabul oranı (adr/0074 K2 sonu)
 
 - **Sıradaki işler:**

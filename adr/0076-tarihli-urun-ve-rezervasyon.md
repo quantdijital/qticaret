@@ -1,0 +1,195 @@
+# ADR-0076: Tarihli ürün ve rezervasyon: kontenjanlı kalkış, katılımcı, kargosuz ödeme
+
+- **Durum:** Kabul edildi (sahip kararı 2026-11-22; Deniz telefonda onayladı, döndüğünde okuyup revize eder)
+- **Tarih:** 2026-11-22
+- **İlgili:** adr/0007 (KDV modeli), adr/0009 (kimlik no saklama), adr/0012 (özellik bayrakları), adr/0051 (ödeme bağlantısı), adr/0061 (sektör paketleri), adr/0066 (tema katmanları, biçim sözleşmesi), adr/0071 ve adr/0074 (yapay zekâ işleri), docs/kvkk-envanter.md
+- **Dayanak:** sahip (2026-11-22): kendi turlarını satan bir seyahat acentası altyapıyı kullanmak istiyor (pazar yeri değil, kendi mağazası; kargolanan ürün yok). Altyapı bozulmasın; ileride otel, oda ve araç kiralama (tarih aralığı seçerek) da gelebilir, şimdi yazılmasa bile bugünkü temel ona uygun olsun.
+
+## Bağlam
+
+Platform sektörden bağımsızdır; sektörel ihtiyaç özellik bayrağı ve şablonla çözülür (CLAUDE.md). Tur, bilet, atölye, kurs, konaklama ve araç kiralamanın ortak noktası aynıdır: **satılan şey bir tarihe (ya da tarih aralığına) bağlı sınırlı kontenjandır** ve kargolanmaz. Bu ADR o ortak yeteneği tanımlar; "turizm" bir sektör paketidir, kodda adı geçmez.
+
+Kapsam dışı (bilerek): başka sağlayıcıların envanterini anlık çeken seyahat acentesi motoru (binlerce otelin müsaitliği, uçuş arama, kanal yöneticisi). Bu ADR mağazanın **kendi** tarihli ürünlerini satmasını kapsar.
+
+### Kodda bugün olan (2026-11-22 `dev`, okundu)
+
+- **Kargosuz ürünün backend'i hazır.** `product_extension.kind = physical | digital | service` (`modules/catalog-extension/models/product-extension.ts`), bayrak `catalog.non_physical`; fiziksel olmayan üründe envanter kalemi `requires_shipping=false`, kargo profili bağı kalkar (`workflows/catalog/shipping-kind.ts`); sepet kargo yöntemi olmadan tamamlanır, kargo yöntemi verilirse reddedilir (`lib/checkout/rules.ts`, `workflows/hooks/complete-cart-validate.ts`; test `integration-tests/http/non-physical-products.spec.ts`).
+- **Vitrin ödemesi kargosuz sepeti geçirmiyor.** Adımlar sabit `address → shipping → payment` (`apps/storefront/src/lib/views/checkout.ts`, sözleşme `packages/ui/src/checkout-views.ts` `CheckoutStep`, tema `packages/themes/atolye/src/checkout/CheckoutPage.tsx`); kargo yöntemi seçilmeden ödeme adımı yüklenmez. Adres formu tam teslimat adresi ister. iyzico her kalemi `itemType: "PHYSICAL"` ve teslimat adresiyle gönderir (`lib/payments/iyzico/checkout-form.ts`).
+- **Tarih, kontenjan, kişi tipi, katılımcı kavramı yok.** Nitelik türlerinde tarih yok; stok Medusa envanteri + `stock-ledger` defteri; sepette süreli tutma yok (Medusa rezervasyonu yalnız sipariş oluşurken yapılır).
+- **Sunucu fiyatlı sepet satırının emsali var:** ek seçenekler (`workflows/addons/set-line.ts`, `price-line.ts`, `checkout.ts`): ayrı rota, Zod, sunucu fiyatı, `is_custom_price`, `metadata.qt_addons`, tamamlamada yeniden doğrulama. İstemci satır metadata'sında yalnız `qt_` öneki korunur (`api/http/payment-routes.ts`).
+- **Sipariş durumu:** kargosuz ve ödenmiş sipariş `delivered` sayılır (`lib/dashboard/lifecycle.ts`); iade penceresi gönderime bağlıdır (`lib/orders/returns.ts`); sipariş e-postası her zaman kargo ve adres gösterir.
+- **Kimlik verisi deseni:** `billing_profile` (şifreli + özet + son 4 hane, `packages/server-kit/src/crypto/pii.ts`); satır metadata'sı birden çok kopyada durduğundan şifreli veri için uygun değil.
+- **Sektör paketi:** bayrak, nitelik şablonu, kategori, SEO, sahne ve hazır görünüm taşır (`packages/sector-packs/src/schema.ts`), eklemeli uygulanır; üst panel sihirbazında seçilir.
+- **Kapora yok:** ödeme bağlantısı sepet tabanlı ve tam tutardır (adr/0051).
+
+### Dışarıda nasıl yapılıyor (kaynaklı araştırma, 2026-11-22)
+
+- **Medusa v2** resmi bilet ve kiralama örneklerinde aynı yolu izler: kontenjan ayrı modülde, ürün varyantına module link ile bağlı; sepete eklerken ve tamamlarken denetim; satır fiyatı sunucuda `unit_price` ile. Çekirdek değişmez.
+- **Shopify** fiziksel/fiziksel değil ayrımını ürün düzeyinde yapar; rezervasyon uygulamaları tarihi varyant yapmaz (varyant sayısı patlar), takvimi ayrı tutar. Kayıttaki sektör sorusu yalnız öneri üretir, kilitlemez.
+- **Tur sistemlerinin ortak modeli (OCTO standardı, Bókun, FareHarbor, Checkfront):** ürün → seçenek → fiyat kategorisi (yetişkin/çocuk/bebek; yaş aralığı, kaç kişi saydığı) ve ayrı bir **kalkış** kaydı (kapasite, kalan, satış kapanışı); rezervasyon süreli tutmayla başlar (15–60 dk), sonra onaylanır; katılımcı soruları; iptal kademeleri; voucher.
+- **Fazla satışı önleme:** sayaç satırı + koşullu `UPDATE` + `CHECK` kısıtı; tekil kaynakta (belirli araç, belirli ev) `tstzrange` + `EXCLUDE USING GIST`.
+- **Türkiye:** paket turu yalnız belgeli seyahat acentası satar; belge no ve unvan sitede gösterilir; Paket Tur Sözleşmeleri Yönetmeliği ön bilgilendirme ister, kalkışa 30 günden fazla varken fesihte kesinti (vergi/harç dışında) yapılamaz, iade 14 gün içinde; paket tur Mesafeli Sözleşmeler Yönetmeliği kapsamı dışındadır, belirli tarihli konaklama/araç/etkinlik hizmetinde cayma hakkı yoktur; kimlik fotokopisi toplamanın dayanağı yoktur (KVKK ilke kararı 2025).
+
+## Karar
+
+### 1. İlke: yetenek ürün düzeyinde, sektör paket düzeyinde
+
+- Kurulumda mağazaya kalıcı bir "sektör modu" seçtirilmez. Yetenek **ürünün üzerinde** açılır; aynı mağaza tur da bavul da satabilir.
+- Kod hiçbir yerde "tur", "otel", "araç" demez; "tarihli ürün", "kalkış", "katılımcı", "fiyat kategorisi" der.
+- Sektör paketi (§12) yalnız veridir: bayrakları açar, şablon ve görünüm getirir.
+- Bayraklar kapalıyken hiçbir mevcut davranış değişmez; yeni tablolar boş kalır, yeni rotalar 404/403 döner.
+
+### 2. Ürün alanı: `booking_mode`
+
+`product_extension`'a yeni alan (yeni anlam yeni alan; `kind` okuyan kod bozulmaz):
+
+- `booking_mode: "none" | "departure" | "range"`, varsayılan `none`.
+- `departure`: sabit başlangıçlı kalkışlar (tur, etkinlik, kurs, atölye). **Bu ADR'de yazılan mod.**
+- `range`: müşterinin seçtiği tarih aralığı (konaklama, kiralama). Değer şimdiden ayrılır, **yazılmaz**; doğrulayıcı reddeder (§11).
+- `booking_mode ≠ none` yalnız `kind = service` ile ve bayrak açıkken kaydedilir (`workflows/catalog/kind-rules.ts`).
+- Bayrak: `catalog.booking` (varsayılan kapalı, mağazanın; `catalog.non_physical`'ı gerektirir).
+
+### 3. `booking` modülü (yeni, çekirdeğe dokunmaz)
+
+| Model | Ne tutar |
+|---|---|
+| `bookable` | Ürüne bağlı ayar (module link `product ↔ bookable`): mod, satış kapanışı (kalkıştan N saat önce), tutma süresi, asgari katılımcı, istenen katılımcı alanları, iptal kademeleri, saat dilimi |
+| `booking_slot` | Bir kalkış: `starts_at`, `ends_at`, `capacity`, `sold`, `held`, `status (open, closed, cancelled)`, isteğe bağlı fiyat farkı. `CHECK (sold + held <= capacity)` |
+| `booking_hold` | Sepetteki süreli tutma: `cart_id`, `expires_at`; satırları `booking_hold_slot (slot_id, units)` |
+| `booking` | Onaylı rezervasyon: `order_id`, satır kimliği, `status (confirmed, cancelled, completed)`; satırları `booking_slot_use (slot_id, units)` |
+| `booking_traveler` | Katılımcı (§7) |
+
+- Tutma ve rezervasyonun slotla bağı **liste** olarak tutulur (tek kalkışta bir satır). Böylece ileride "üç gece = üç slot" aynı tablolarla çalışır; `range` modu için şema değişmez.
+- **Kontenjanın sahibi `booking_slot` sayacıdır.** Tarihli ürünün varyantlarında Medusa `manage_inventory` kapalıdır; düşük stok ve "gelince haber ver" uyarıları bu ürünleri görmez; ön sipariş açılamaz.
+- Sayaç değişimi tek komutla: `UPDATE booking_slot SET held = held + :n WHERE id = :id AND status = 'open' AND sold + held + :n <= capacity`; sıfır satır = yer yok. Birden çok slot aynı işlemde, kimlik sırasıyla.
+
+### 4. Varyant = fiyat kategorisi, tarih değil
+
+- Tarih başına varyant üretilmez (çok tarihli üründe varyant sayısı patlar, kişi tipleri ortak kontenjanı paylaşamaz).
+- Varyantlar fiyat kategorisidir: "Yetişkin", "Çocuk", "Bebek" ya da mağazanın seçenekleri (ör. otel sınıfı × kişi tipi). Fiyat, para birimi, fiyat listesi, KDV ve kampanya Medusa'nın olağan yolundan gelir.
+- Varyant başına `pax` (kaç kişi sayar; bebek 0, aile bileti 4 olabilir) ve isteğe bağlı yaş aralığı `bookable` ayarında tutulur.
+- Kalkışa özel fiyat: slot üzerinde varyant başına isteğe bağlı fark ya da sabit tutar (sezon, erken kalkış). Satır fiyatı her zaman sunucuda hesaplanır.
+
+### 5. Sepet ve fiyat
+
+- Tarihli ürün olağan "sepete ekle" ile eklenemez (kanca reddeder). Kendi rotası: `POST /store/carts/:id/bookings` (`slot_id`, `items: [{ variant_id, quantity }]`); fiyat, tarih ve kontenjan istemciden alınmaz.
+- İş akışı (ek seçenek deseni): sepet kilidi → slot açık mı, satış kapanışı geçmiş mi → koşullu `UPDATE` ile tutma → satırlar `unit_price` (sunucu) ve `metadata.qt_booking { hold_id, slot_id }` ile eklenir. Telafi: tutma geri alınır.
+- Satır adedi ya da silme yine aynı modülden geçer; tutma buna göre güncellenir.
+- **Tutma süresi** varsayılan 20 dk (ayar, 10–60). Ödeme başlatılırken (`read-checkout-cart`) ve tamamlama doğrulamasında uzatılır; yönlendirmeli ödemede (iyzico, PayTR) ödeme dönüşüne kadar geçerlidir.
+- Süresi dolan tutmayı zamanlanmış iş siler ve sayacı düşürür; okuma `expires_at > now()` süzgeciyle yapılır, iş gecikse de kontenjan bloklanmaz.
+- **Tamamlama:** `complete-cart-validate` zincirine `assertBookingLinesCurrent` (tutma geçerli, fiyat güncel, katılımcı bilgisi tam). Sipariş oluşunca `held → sold` aktarımı ve `booking` kaydı kilit altında, yinelenebilir (idempotent) bir iş akışında. Tutma zaten sayacın içinde olduğundan bu aktarım kontenjan yüzünden düşemez.
+- Sipariş iptali ya da tam iade: `booking` iptal olur, `sold` düşer.
+
+### 6. Kargosuz ödeme (genel düzeltme; dijital ve hizmet ürününe de yarar)
+
+- Vitrin: adımlar sepetten türetilir. Kargo gerektiren kalem yoksa kargo adımı yoktur; adres adımı "fatura ve iletişim" kipine iner.
+- Tema sözleşmesi: `CheckoutView`'a `steps: CheckoutStep[]` alanı (okuma varsayılanı bugünkü üç adım). Mevcut biçim yerinde yeniden çizilmez; tema listede olmayan adımı çizmez (adr/0066 K6).
+- Backend `shipping_address.country_code` zorunluluğunu korur (KDV); kargosuz sepette fatura adresi teslimat adresine de yazılır.
+- iyzico: kargosuz kalem `itemType: "VIRTUAL"`; PayTR sepeti aynı kalır. Kapıda ödeme kargosuz sepette zaten kapalı.
+- Sipariş e-postası kargosuz siparişte kargo satırını ve teslimat adresi bloğunu çizmez.
+
+### 7. Katılımcı bilgisi ve KVKK
+
+- Ürün ayarı hangi alanların istendiğini söyler: yok / yalnız ad soyad / + doğum tarihi / + kimlik ya da pasaport no / + uyruk. **Kimlik görseli yükleme yoktur.**
+- Ödemede "Katılımcılar" adımı (`steps`'te yeni değer `travelers`; yalnız gerektiğinde görünür). Kişi sayısı satırlardaki `pax` toplamından gelir.
+- Saklama: `booking_traveler`; ad ve doğum tarihi düz, kimlik/pasaport no **şifreli + özet + son 4 hane** (adr/0009 deseni). Satır metadata'sına kişi verisi yazılmaz.
+- Panelde kimlik no maskeli; tam değeri görmek yetkiye bağlı ve denetim kaydına düşer. Loglara, e-faturaya, ödeme sağlayıcısına, yapay zekâ servislerine gitmez.
+- Saklama süresi: hizmet tarihinden sonra ayarlanabilir süre (varsayılanı hukukçuyla netleşir; açık soru), `compliance-retention` işi siler; silme talebi mevcut silme iş akışına bağlanır. `docs/kvkk-envanter.md` §1'e satır.
+
+### 8. Sipariş yaşam döngüsü, iptal, bildirim
+
+- `lifecycleOf`: tarihli satırı olan ödenmiş sipariş hizmet tarihine kadar **"planlandı"**, tarih geçince "tamamlandı". Kargosuz diğer ürünlerin bugünkü davranışı değişmez.
+- **İptal kademeleri** `bookable` ayarında: "hizmet tarihine N gün ve daha fazla kala %X kesinti". Mağaza ayarında "paket tur satıyorum" işaretliyse alt sınır kodlanır: 30 gün ve daha fazla kala kesinti yapılamaz; iade süresi 14 gün olarak gösterilir.
+- Müşteri hesabından iptal talebi; iade tutarını sunucu kademeden hesaplar, iade `order-refunds` yolundan yapılır. Tarihli üründe cayma metni buna göre yazılır.
+- Mağazanın kalkışı iptal etmesi (asgari katılımcı sağlanamadı): slot `cancelled`, etkilenen rezervasyonlara tam iade ve bildirim; panel kaç rezervasyonun etkileneceğini önce gösterir.
+- Bildirimler: rezervasyon onayı (tarih, buluşma yeri, katılımcı sayısı, iptal koşulları, PDF voucher), hatırlatma (ayar: N gün önce), kalkış iptali. Voucher rezervasyon başına tektir, doğrulama kodu taşır.
+
+### 9. Panel
+
+- Ürün detayında, `booking_mode ≠ none` iken "Tarihler ve kontenjan" kartı: kalkış ekle (tek tek ya da yinelenen: her cumartesi, şu aralıkta), kapasite, kapat/iptal, kalkış başına satılan/tutulan/kalan.
+- "Rezervasyonlar" ekranı: kalkışa göre katılımcı listesi (yazdırılabilir, dışa aktarım yetkiye bağlı), takvim görünümü.
+- Arayüz sade: temel ayarlar görünür, iptal kademeleri ve katılımcı alanları ikinci planda (hafıza: panel ayar dili).
+
+### 10. Vitrin, tema sözleşmesi, SEO
+
+- Ürün sayfası: `ProductPageView`'a isteğe bağlı `booking` görünümü (kalkışlar, kalan yer, kategori fiyatları) ve `ThemeActions.addBookingToCart?`. Tema yeteneği yoksa çizmez; `product_main` bugünkü biçimi değişmez (özellik, biçim değil). Takvimli ayrı iskelet istenirse yeni biçim olarak gelir.
+- Sepette tutma süresi geri sayımı; süre dolunca satır "süresi doldu, yeniden seç" durumuna geçer.
+- Liste ve kartlarda "…'dan itibaren" fiyatı ve en yakın kalkış.
+- JSON-LD: `booking_mode = departure` üründe `Product` + `Offer` yanında `Event` ya da `TouristTrip` (pakete göre) üretimi; kargo ve iade alanları yazılmaz. Google Merchant beslemesi tarihli ürünü göndermez. Geçmiş kalkışı kalan ürün yayından kalkmaz, "yakında yeni tarihler" gösterir (SEO değeri korunur).
+- Yapay zekâ işleri: ürün açıklaması, SSS ve SEO işlerinin veri okuyucusu tarihli üründe süre, kalkış yeri ve dahil olanlar niteliklerini de verir (ayrı PR; adr/0074 veri sınırı aynen).
+
+### 11. Tarih aralığı modu (yazılmıyor; temel buna hazır)
+
+- **Oda tipi × gece:** gece başına bir `booking_slot` (kapasite = o tipteki oda sayısı). Rezervasyon, aralıktaki her gecenin slotunu aynı işlemde düşer; biri yoksa hiçbiri tutulmaz. §3'teki tablolar ve §5'teki tutma aynen kullanılır.
+- **Tekil kaynak (belirli araç, belirli ev):** ek tablo `booking_resource` + `booking_resource_use (resource_id, during tstzrange)` ve `EXCLUDE USING GIST`; bakım/hazırlık payı aralık genişletilerek.
+- Fiyat: gece/gün başına birim fiyat × süre, sezon kuralları; yine sunucuda.
+- Bu mod ayrı ADR'de ayrıntılanır; bu ADR yalnız şunları garanti eder: `booking_mode` değeri ayrılmıştır, slot ve tutma tabloları çok slotlu kullanıma göre kurulur, sepet rotası `slot_id` yanında ileride `from/to` alabilecek biçimde sürümlenir.
+
+### 12. Sektör paketi ve kurulum
+
+- Yeni paket `travel` (`packages/sector-packs/packs/travel`): `flags.json` (`catalog.non_physical`, `catalog.booking`), nitelik şablonu (süre, kalkış yeri, dahil olanlar, dahil olmayanlar, vize/pasaport notu), örnek kategoriler, hazır görünüm, iptal koşulları sayfa şablonu.
+- Paket şemasına küçük ek: `catalog.json` ile yeni ürünün varsayılan türü (`kind`, `booking_mode`). Eklemeli; mevcut paketler etkilenmez.
+- Üst panel sihirbazındaki paket seçimi bugünkü gibi kalır; paket sonradan panelden de uygulanabilir. Paket uygulanmamış mağaza bayrağı elle açarak aynı yeteneği kullanır.
+- Mağaza profili: "yasal belge satırı" (belge adı, numarası, unvan; ör. seyahat acentası işletme belgesi). Dolu ise vitrin alt bilgisinde ve ödeme sayfasında gösterilir. Sektöre özel değil, serbest etiketli alan.
+
+### 13. Güvenlik
+
+- Fiyat, tarih, kontenjan, kişi sayısı sunucuda (altın kural 5). `qt_booking` yalnız sunucu yazar.
+- Fazla satış: koşullu `UPDATE` + `CHECK`; sepet ve slot işlemleri kilit altında; eşzamanlılık testi zorunlu.
+- Tutma kötüye kullanımı: sepet başına ve IP başına hız sınırı (mevcut `lib/security`), tek sepetin tutabileceği en çok birim (ayar).
+- Katılımcı verisi §7; voucher doğrulama kodu tahmin edilemez, kişi verisi taşımaz.
+- Ödeme, migration ve KVKK dokunan her dilim birleşmeden önce `security-reviewer`.
+
+## Dilimler
+
+| # | Dilim | Not |
+|---|---|---|
+| D1 | Kargosuz vitrin ödemesi (§6) | Genel düzeltme; `catalog.non_physical` açık mağazalara hemen yarar. Ödeme dokunur → güvenlik incelemesi |
+| D2 | `booking` modülü: modeller, migration, sayaç, tutma, süre işi, bayrak, `booking_mode` (§2, §3) | Yalnız backend; eşzamanlılık testleri |
+| D3 | Sepet rotası, sunucu fiyatı, tamamlama doğrulaması, `held → sold`, iptalde geri verme (§4, §5) | Fiyat ve ödeme yolu → güvenlik incelemesi |
+| D4 | Panel: tarihler ve kontenjan kartı, rezervasyon listesi (§9) | |
+| D5 | Vitrin ve tema sözleşmesi: kalkış seçimi, kategori adetleri, sepette geri sayım (§10) | Görünüm kilidi testi hakem |
+| D6 | Katılımcı bilgisi: şifreli saklama, ödeme adımı, panel, saklama süresi (§7) | KVKK → güvenlik incelemesi; envanter güncellenir |
+| D7 | Yaşam döngüsü "planlandı", iptal kademeleri, onay/hatırlatma e-postası, voucher (§8) | |
+| D8 | `travel` paketi, yasal belge satırı, JSON-LD, yapay zekâ veri okuyucusu (§10, §12) | |
+
+D1–D3 bitince tur, yönetici API'siyle tanımlanıp vitrinden uçtan uca satılabilir; D4–D8 deneyimi tamamlar. Sıra tek tek, her dilim ayrı PR.
+
+**Sonraya (ayrı ADR):** kapora ve bakiye tahsilatı (kısmi ödeme, bakiye bağlantısı, vadesinde ödenmezse iptal; sağlayıcıların ön provizyon desteği doğrulanacak), oda dağılımı ve tek kişi farkı, kalkışa bağlı ek hizmetler (mevcut ek seçenekler üzerine), tarih aralığı modu (§11), ön bilgilendirme broşürü ve sözleşme PDF'i, dış sistemlerle eşitleme (OCTO), "sizi arayalım" talep formu.
+
+## Karar listesi (K)
+
+- **K1** Sektör modu yok; yetenek ürün alanı (`booking_mode`) ve bayrakla açılır, sektör paketi yalnız veridir.
+- **K2** Kontenjanın sahibi `booking` modülünün sayaç satırıdır; Medusa envanteri tarihli üründe kullanılmaz.
+- **K3** Varyant fiyat kategorisidir; tarih varyant değildir.
+- **K4** Tutma ve rezervasyon slot **listesine** bağlanır; tarih aralığı modu aynı tablolarla çalışır.
+- **K5** Sepette süreli tutma vardır (varsayılan 20 dk); ödeme sırasında uzar.
+- **K6** Tarihli satır yalnız kendi rotasıyla eklenir; fiyat ve tarih istemciden alınmaz.
+- **K7** Kargosuz ödeme tema sözleşmesine `steps` alanıyla gelir; mevcut biçim yeniden çizilmez.
+- **K8** Katılımcı kimlik verisi ayrı şifreli tabloda; görsel yükleme yok; satır metadata'sında kişi verisi yok.
+- **K9** "Paket tur satıyorum" işaretli mağazada 30 gün kuralı alt sınır olarak kodlanır; kademeler onun üstünde ayardır.
+- **K10** İlk sürüm tam ödemedir; kapora ayrı ADR.
+- **K11** Bayraklar kapalıyken mevcut mağazalarda hiçbir davranış değişmez; her dilim bunu testle gösterir.
+
+## Alternatifler
+
+- **Tarih = varyant, kontenjan = Medusa envanteri** (Medusa bilet örneğindeki yol). Reddedildi: çok tarihli üründe varyant patlar; kişi tipleri ortak kontenjanı paylaşamaz; sepette tutma yine yazılmak zorunda; stok uyarıları gürültü üretir; tarih aralığına hiç taşınmaz.
+- **Ayrı "turizm" uygulaması ya da sektöre özel kurulum.** Reddedildi: "hiçbir kod sektöre özel yazılmaz" kuralına aykırı; karışık mağazayı engeller; bilet, kurs, kiralama için yeniden yazım gerekir.
+- **Tur ve kiralama için baştan tek genel "kaynak + aralık" motoru.** Ertelendi: tekil kaynak kısıtı ve gece fiyatı bugün ihtiyaç değil; sayaç modeli hem kalkışı hem oda tipi × geceyi karşılar, tekil kaynak eklenebilir bir tablodur (§11).
+- **Hazır rezervasyon hizmetini gömmek (dış widget).** Reddedildi: ödeme, fatura, SEO ve müşteri kaydı platformun dışına çıkar; platformun değer önerisiyle çelişir.
+- **Yolcu bilgisini sipariş notunda toplamak.** Reddedildi: düz metin kimlik verisi, saklama süresi ve silme uygulanamaz.
+
+## Sonuçlar
+
+- Platform fiziksel ürünün yanında tarihli hizmet satabilir; tur, etkinlik, kurs ve atölye aynı yeteneği kullanır, konaklama ve kiralama aynı temele eklenir.
+- Yeni bir modül, bir ürün alanı, bir bayrak, tema sözleşmesinde iki isteğe bağlı ek gelir; Medusa çekirdeği ve mevcut mağazaların akışı değişmez.
+- Süreli tutma yeni bir zamanlanmış iş ve yeni bir hata sınıfı ("süresi doldu") getirir; vitrin bunu göstermek zorundadır.
+- Kimlik verisi işlemek yeni bir KVKK yükümlülüğüdür; envanter, saklama süresi ve yetki ayrımı D6'da birlikte gelir.
+
+### Açık sorular (kod dışı, sahiple ve danışmanlarla)
+
+- Paket turda KDV ve fatura kurgusu (yurt dışı hizmet payı, aracılık durumunda matrah): mali müşavir.
+- Katılımcı kimlik verisinin saklama süresi ve paket tur ön bilgilendirme/sözleşme metinleri: hukukçu.
+- Zorunlu paket tur sigortası poliçesinin müşteriye iletimi (voucher ekinde mi): acentayla.
+- Kapora için iyzico ve PayTR'nin ön provizyon ya da sonradan tahsilat desteği: sağlayıcılarla (kapora ADR'sinden önce).
+- İlk müşteri acentanın gerçek ürün yapısı (oda dağılımı, ek turlar, çocuk yaş sınırları): D4 öncesi görüşme.

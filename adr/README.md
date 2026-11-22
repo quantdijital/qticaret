@@ -81,3 +81,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0073 | [İçerik sayfalarında bölümler: tema düzenleyiciden sayfa düzeni](0073-icerik-sayfalarinda-bolumler.md) | — |
 | 0074 | [Yapay zekâ öneri kalitesi, mağazanın yazım yönergesi ve yeni kullanım yerleri](0074-yapay-zeka-oneri-kalitesi-ve-yazim-yonergesi.md) | — |
 | 0075 | [Kategori, marka ve koleksiyon açıklaması: zengin metin, sayfanın altında](0075-liste-aciklamasi-zengin-metin-altta.md) | — |
+| 0076 | [Tarihli ürün ve rezervasyon: kontenjanlı kalkış, katılımcı, kargosuz ödeme](0076-tarihli-urun-ve-rezervasyon.md) | — |
