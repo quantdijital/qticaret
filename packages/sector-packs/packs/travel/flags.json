@@ -1,0 +1,4 @@
+[
+  { "key": "catalog.non_physical", "enabled": true },
+  { "key": "catalog.booking", "enabled": true }
+]

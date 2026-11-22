@@ -95,6 +95,37 @@ export const sceneSchema = z.strictObject({
   prompt: z.string().trim().min(20).max(400).regex(PLAIN_LINE),
 })
 
+/** A product's kind (F3.2) and how it is sold by date (adr/0076 §2); `range` is not written yet. */
+export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
+export const BOOKING_MODES = ["none", "departure"] as const
+/** The structured data a dated product's page adds beside its `Product` (adr/0076 §10). */
+export const DATED_SCHEMA_TYPES = ["TouristTrip", "Event"] as const
+
+/**
+ * The shop's catalog defaults a pack sets (adr/0076 §12): what a new
+ * product starts as and the structured data type of a dated product. The
+ * backend's settings section checks them again (a dated product is a
+ * service); one the shop has changed is kept.
+ */
+export const catalogDefaultsSchema = z.strictObject({
+  new_product: z
+    .strictObject({ kind: z.enum(PRODUCT_KINDS), booking_mode: z.enum(BOOKING_MODES) })
+    .optional(),
+  dated_schema_type: z.enum(DATED_SCHEMA_TYPES).optional(),
+})
+
+/**
+ * A content page the pack offers (adr/0076 §12), made as a **draft** for
+ * the shop to read, fill in and publish: its handle (its address), title
+ * and body, the editor's document (adr/0019), which the backend checks as
+ * the panel's save does.
+ */
+export const pageSchema = z.strictObject({
+  handle,
+  title: z.string().trim().min(1).max(200),
+  body: z.looseObject({ type: z.literal("doc") }),
+})
+
 /**
  * The files a pack's folder may hold, and what each is; any other file is
  * refused, but for the `presets/` folder (`PRESETS_DIR`, `preset-load.ts`).
@@ -106,6 +137,8 @@ export const PACK_FILES = {
   "flags.json": z.array(flagPresetSchema).max(50),
   "seo.json": seoTemplateSetSchema,
   "scenes.json": z.array(sceneSchema).max(MAX_SCENES),
+  "catalog.json": catalogDefaultsSchema,
+  "pages.json": z.array(pageSchema).max(20),
 } as const
 
 export type PackManifest = z.infer<typeof manifestSchema>
@@ -114,6 +147,8 @@ export type CategoryData = z.infer<typeof categorySchema>
 export type FlagPreset = z.infer<typeof flagPresetSchema>
 export type SeoTemplateSet = z.infer<typeof seoTemplateSetSchema>
 export type SceneData = z.infer<typeof sceneSchema>
+export type CatalogDefaults = z.infer<typeof catalogDefaultsSchema>
+export type PageData = z.infer<typeof pageSchema>
 
 /** A pack as read: its manifest and its items (a file left out: none of that kind). */
 export interface SectorPack extends Omit<PackManifest, "format"> {
@@ -121,6 +156,10 @@ export interface SectorPack extends Omit<PackManifest, "format"> {
   categories: CategoryData[]
   flags: FlagPreset[]
   seo: SeoTemplateSet
+  /** `catalog.json` (adr/0076 §12); left out: the shop's catalog defaults stay. */
+  catalog?: CatalogDefaults | undefined
+  /** `pages.json` (adr/0076 §12): content pages made as drafts. */
+  pages?: PageData[] | undefined
 }
 
 /**

@@ -1,0 +1,57 @@
+[
+  {
+    "handle": "tur-bilgileri",
+    "name": "Tur bilgileri",
+    "description": "Tarihli tur ve geziler için: süre, kalkış yeri, dahil olan ve olmayan hizmetler, vize ve pasaport notu. Süre ve kalkış yeri arama sonucu açıklamasında öne çıkar.",
+    "groups": [
+      { "key": "genel", "name": "Genel", "rank": 0 },
+      { "key": "kapsam", "name": "Fiyata dahil olanlar", "rank": 1 },
+      { "key": "belgeler", "name": "Belgeler", "rank": 2 }
+    ],
+    "definitions": [
+      {
+        "key": "sure",
+        "label": "Süre",
+        "type": "number",
+        "unit": "gün",
+        "group": "genel",
+        "rank": 0,
+        "is_seo_highlight": true,
+        "aliases": ["Tur süresi", "Gün sayısı"]
+      },
+      {
+        "key": "kalkis_yeri",
+        "label": "Kalkış yeri",
+        "type": "text",
+        "group": "genel",
+        "rank": 1,
+        "is_seo_highlight": true,
+        "aliases": ["Kalkış noktası", "Buluşma yeri"]
+      },
+      {
+        "key": "dahil_olanlar",
+        "label": "Dahil olanlar",
+        "type": "text",
+        "group": "kapsam",
+        "rank": 2,
+        "aliases": ["Fiyata dahil olanlar", "Dahil hizmetler"]
+      },
+      {
+        "key": "dahil_olmayanlar",
+        "label": "Dahil olmayanlar",
+        "type": "text",
+        "group": "kapsam",
+        "rank": 3,
+        "aliases": ["Fiyata dahil olmayanlar", "Ekstralar"]
+      },
+      {
+        "key": "vize_pasaport_notu",
+        "label": "Vize ve pasaport notu",
+        "type": "text",
+        "group": "belgeler",
+        "rank": 4,
+        "aliases": ["Vize bilgisi", "Pasaport bilgisi"]
+      }
+    ]
+  }
+]

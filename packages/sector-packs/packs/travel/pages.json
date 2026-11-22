@@ -1,0 +1,123 @@
+[
+  {
+    "handle": "iptal-kosullari",
+    "title": "İptal ve Değişiklik Koşulları",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Bu sayfa bir şablondur. Köşeli parantez içindeki yerleri kendi koşullarınızla doldurun, metni hukuk danışmanınıza kontrol ettirin ve sonra yayımlayın."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Katılımcının iptali" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Rezervasyonunuzu iptal etmek için bize yazılı olarak (e-posta ya da hesabınızdaki sipariş sayfasından) başvurun. İade tutarı, iptal bildiriminin bize ulaştığı tarihin kalkışa kalan süresine göre hesaplanır:"
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Kalkıştan [30] gün öncesine kadar: ödenen tutarın tamamı iade edilir."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Kalkıştan [29] ile [15] gün önce: ödenen tutarın [%50]'si iade edilir."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Kalkışa [14] günden az kala ya da katılmama durumunda: iade yapılmaz."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Katılımcı değişikliği" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Kalkıştan [7] gün öncesine kadar yerinizi, katılım koşullarını taşıyan başka bir kişiye devredebilirsiniz. Devirden doğan ek masraflar [devreden ve devralan tarafından birlikte] karşılanır."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Bizim iptalimiz" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Asgari katılımcı sayısına ulaşılmazsa ya da olağanüstü durumlar nedeniyle kalkış yapılamazsa, durumu kalkıştan en geç [7] gün önce size bildiririz ve ödediğiniz tutarın tamamını [14] gün içinde iade ederiz."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "İade yöntemi" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "İadeler, ödemenin yapıldığı yönteme (kart ya da havale) yapılır. Bankanızın iadeyi hesabınıza yansıtma süresi bizim kontrolümüz dışındadır."
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
