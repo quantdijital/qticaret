@@ -61,6 +61,14 @@ export const POST_DRAFT_MAX_LENGTH = 16_000
  */
 export const POST_DRAFT_MAX_TOKENS = 8_000
 
+/**
+ * Platform credits one draft costs (adr/0071 §7, the wallet still to come):
+ * its output runs to many times a short search text's, so it weighs more.
+ * The month's operation count (`llm_credits_per_month`) counts it once,
+ * as any other call (adr/0071 §5).
+ */
+export const POST_DRAFT_CREDITS = 4
+
 /** How much of the post's summary the draft reads. */
 export const POST_SUMMARY_FACT_LENGTH = 600
 
@@ -71,7 +79,7 @@ export const POST_DRAFT_TASK: AiTask = {
   options: ["short", "detailed"],
   // Those who may write a post: content routes are not among operations' writes
   roles: ["owner", "admin"],
-  credits: 1,
+  credits: POST_DRAFT_CREDITS,
   gate: "post_draft",
   maxLength: POST_DRAFT_MAX_LENGTH,
   maxTokens: POST_DRAFT_MAX_TOKENS,

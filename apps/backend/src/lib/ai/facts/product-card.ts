@@ -50,15 +50,16 @@ export interface ProductCardFacts {
 const TEMPLATE_ID = /^atpl_[A-Za-z0-9]{1,40}$/
 
 /**
- * The shop's shown categories, "Üst > Alt" under a parent, under codes
- * `k1`, `k2`…: one with an internal or closed ancestor anywhere up its
- * tree is not shown, nor one whose ancestors were not all read. Those in
- * `leaveOut` (a product's own) are not named, and the codes count without them.
+ * Every shown category of the shop, "Üst > Alt" under a parent, in
+ * alphabetical order and uncut: one with an internal or closed ancestor
+ * anywhere up its tree is not shown, nor one whose ancestors were not all
+ * read. Those in `leaveOut` are left out. A caller that orders by its own
+ * measure (a post's link candidates) cuts after ordering.
  */
-export async function shownCategories(
+export async function allShownCategories(
   container: FactsContainer,
   leaveOut: ReadonlySet<string> = new Set()
-): Promise<CardAllowed["categories"]> {
+): Promise<{ id: string; name: string }[]> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product_category",
     fields: ["id", "name", "is_active", "is_internal", "parent_category_id"],
@@ -76,6 +77,18 @@ export async function shownCategories(
       return [{ id: row.id, name: parent ? `${parent.name} > ${row.name}` : row.name }]
     })
     .sort((a, b) => a.name.localeCompare(b.name, "tr"))
+}
+
+/**
+ * The shop's shown categories (`allShownCategories`), the first
+ * `MAX_CARD_CATEGORIES` alphabetically, under codes `k1`, `k2`…: those in
+ * `leaveOut` (a product's own) are not named, and the codes count without them.
+ */
+export async function shownCategories(
+  container: FactsContainer,
+  leaveOut: ReadonlySet<string> = new Set()
+): Promise<CardAllowed["categories"]> {
+  return (await allShownCategories(container, leaveOut))
     .slice(0, MAX_CARD_CATEGORIES)
     .map((row, index) => ({ code: `k${String(index + 1)}`, ...row }))
 }
