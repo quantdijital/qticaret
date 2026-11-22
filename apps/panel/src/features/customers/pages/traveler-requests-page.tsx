@@ -15,8 +15,6 @@ import { EMPTY_SEARCH, searchOf, searchSchema } from "@/features/customers/trave
 import type { SearchDraft } from "@/features/customers/traveler-search"
 import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { TravelerRequestResults } from "@/features/customers/components/traveler-request-results"
-import { BOOKING_FLAG } from "@/features/products/api/booking"
-import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 
 const R = "customers.travelerRequests"
@@ -26,12 +24,12 @@ const R = "customers.travelerRequests"
  * The person named in a booking is not the buyer and has no account; staff
  * find their rows by the name, and the birth date or the ID number when
  * the product asked them, hand over a copy (the number masked) and delete
- * them on request. Owner and admin; the dated sales flag on.
+ * them on request. Owner and admin, whatever the dated sales flag says
+ * (security review O2): rows entered while it was on outlive it.
  */
 export function TravelerRequestsPage() {
   const { t } = useTranslation()
   const allowed = useCan("travelerRequests")
-  const flagOn = useFeature(BOOKING_FLAG)
   const find = useFindTravelers()
   const [asked, setAsked] = useState<TravelerSearch | null>(null)
   const form = useForm<SearchDraft>({
@@ -67,8 +65,8 @@ export function TravelerRequestsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader title={t(`${R}.title`)} description={t(`${R}.description`)} />
       <CustomersNav />
-      {!allowed || !flagOn ? (
-        <EmptyState text={t(allowed ? `${R}.flagOff` : `${R}.notAllowed`)} />
+      {!allowed ? (
+        <EmptyState text={t(`${R}.notAllowed`)} />
       ) : (
         <>
           <form
@@ -96,6 +94,7 @@ export function TravelerRequestsPage() {
           {find.isSuccess && asked ? (
             <TravelerRequestResults
               key={JSON.stringify(asked)}
+              asked={asked}
               rows={find.data}
               onErased={() => {
                 find.mutate(asked)

@@ -5394,9 +5394,8 @@
     "travelerRequests": {
       "title": "Traveler requests",
       "description": "A KVKK request from a person named in a booking: find their records, give them a copy or delete them.",
-      "hint": "A traveler is not the buyer and has no account; their records are found by what they give. Write the first and last name in full; a birth date or number, if given, must match too. Every search is recorded.",
+      "hint": "A traveler is not the buyer and has no account; their records are found by what they give. Write the first and last name in full (case and the Turkish i/ı aside); a birth date or number, if given, must match too. If nothing is found, try another spelling. Every search is recorded.",
       "notAllowed": "Only the owner and admins can use this screen.",
-      "flagOff": "Dated sales are off; there are no traveler records.",
       "fields": {
         "first_name": "First name",
         "last_name": "Last name",
@@ -5411,13 +5410,17 @@
         "document": "The number can be at most 40 characters."
       },
       "search": "Search",
-      "noneFound": "No traveler is recorded with these details.",
+      "noneFound": "No traveler is recorded with these details. Try another spelling (S for Ş, with or without a middle name).",
       "found_one": "{{count}} record found.",
       "found_other": "{{count}} records found.",
       "download": "Download copy",
       "erase": "Delete selected",
       "pick": "Select",
       "pickOne": "Select {{name}}",
+      "differs": "The records found differ here",
+      "narrowWarning": "Other people may share this name. Before giving a copy or deleting, narrow the search with the birth date or the ID or passport number, and select only the requester's records.",
+      "mixedWarning": "The records found hold different birth dates or nationalities (marked); they may belong to different people.",
+      "eraseList": "Records to delete",
       "inCart": "In a cart (not ordered)",
       "columns": {
         "person": "Traveler",

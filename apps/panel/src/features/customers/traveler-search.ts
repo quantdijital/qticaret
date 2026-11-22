@@ -1,5 +1,5 @@
 import { z } from "zod"
-import type { TravelerSearch } from "@/features/customers/api/traveler-requests"
+import type { FoundTraveler, TravelerSearch } from "@/features/customers/api/traveler-requests"
 
 const R = "customers.travelerRequests"
 
@@ -18,6 +18,27 @@ export const EMPTY_SEARCH: SearchDraft = {
   birth_date: "",
   document_no: "",
 }
+
+/**
+ * What to warn of before a copy or a deletion (security review O1): a
+ * name alone, or more than one row, may be other people of that name
+ * (`narrow`: ask for the birth date or the number); rows holding more
+ * than one birth date or nationality surely are (`mixed`, and which of
+ * the two differ, to mark them on each row).
+ */
+export function searchWarnings(asked: TravelerSearch, rows: readonly FoundTraveler[]) {
+  const byNameOnly = !asked.birth_date && !asked.document_no
+  const differ = (values: (string | null)[]) => new Set(values.filter(Boolean)).size > 1
+  const birthDates = differ(rows.map((row) => row.birth_date))
+  const nationalities = differ(rows.map((row) => row.nationality))
+  return {
+    narrow: rows.length > 1 || (byNameOnly && rows.length > 0),
+    mixed: birthDates || nationalities,
+    birthDates,
+    nationalities,
+  }
+}
+export type SearchWarnings = ReturnType<typeof searchWarnings>
 
 /** What the form sends: empty optional fields left out. */
 export function searchOf(draft: SearchDraft): TravelerSearch {

@@ -80,12 +80,21 @@ describe("TravelerRequestsPage (adr/0076 Ek D6b)", () => {
     fetchMock.mockReset()
   })
 
-  it("is closed to those who may not, and while dated sales are off", async () => {
+  it("is closed to those who may not", async () => {
     setup({ can: false })
     expect(
       await screen.findByText("Bu ekranı yalnız mağaza sahibi ve yöneticiler kullanabilir.")
     ).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: "Ara" })).toBeNull()
+    expect(screen.queryByRole("link", { name: "Katılımcı başvuruları" })).toBeNull()
+  })
+
+  it("stays open while dated sales are off: the rows outlive the flag (review O2)", async () => {
+    setup({ flag: false })
+    expect(await screen.findByRole("link", { name: "Katılımcı başvuruları" })).toBeInTheDocument()
+    await search({ Ad: "Ayşe", Soyad: "Yılmaz" })
+    expect(await screen.findByText("1 kayıt bulundu.")).toBeInTheDocument()
+    expect(screen.queryByText(/Tarihli satış kapalı/)).toBeNull()
   })
 
   it("asks for the name before searching", async () => {
@@ -113,12 +122,21 @@ describe("TravelerRequestsPage (adr/0076 Ek D6b)", () => {
     )
   })
 
-  it("deletes the rows picked after asking, then searches again", async () => {
+  it("ticks nothing at first; deletes the rows picked after naming them, then searches again", async () => {
     setup()
     await search({ Ad: "Ayşe", Soyad: "Yılmaz" })
-    await userEvent.click(await screen.findByRole("button", { name: "Seçilenleri sil" }))
+    const eraseButton = await screen.findByRole("button", { name: "Seçilenleri sil" })
+    expect(screen.getByRole("checkbox", { name: "Ayşe Yılmaz seç" })).not.toBeChecked()
+    expect(eraseButton).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Dökümü indir" })).toBeDisabled()
+    await userEvent.click(screen.getByRole("checkbox", { name: "Ayşe Yılmaz seç" }))
+    await userEvent.click(eraseButton)
     const confirm = await screen.findByRole("alertdialog")
     expect(within(confirm).getByText("1 katılımcı kaydı silinsin mi?")).toBeInTheDocument()
+    const listed = within(confirm).getByRole("list", { name: "Silinecek kayıtlar" })
+    expect(within(listed).getByText("Ayşe Yılmaz")).toBeInTheDocument()
+    expect(within(listed).getByText(/^Kapadokya turu · 2 May 2099/)).toBeInTheDocument()
+    expect(within(confirm).getByRole("button", { name: "Vazgeç" })).toBeInTheDocument()
     await userEvent.click(within(confirm).getByRole("button", { name: "Kalıcı sil" }))
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/booking-travelers/erase", {
@@ -127,15 +145,46 @@ describe("TravelerRequestsPage (adr/0076 Ek D6b)", () => {
       })
     })
     expect(
-      await screen.findByText("Bu bilgilerle kayıtlı katılımcı bulunamadı.")
+      await screen.findByText(/^Bu bilgilerle kayıtlı katılımcı bulunamadı\. Farklı yazımı deneyin/)
     ).toBeInTheDocument()
+  })
+
+  it("warns that a name alone may be someone else, and not when narrowed by the number (O1)", async () => {
+    setup()
+    await search({ Ad: "Ayşe", Soyad: "Yılmaz" })
+    expect(await screen.findByText(/^Aynı adı taşıyan başka kişiler olabilir/)).toBeInTheDocument()
+    expect(screen.queryByText(/farklı doğum tarihleri ya da uyruklar/)).toBeNull()
+  })
+
+  it("does not warn when one row matches the number given", async () => {
+    setup()
+    await search({ Ad: "Ayşe", Soyad: "Yılmaz", "Kimlik ya da pasaport no": "U12345678" })
+    expect(await screen.findByText("1 kayıt bulundu.")).toBeInTheDocument()
+    expect(screen.queryByText(/^Aynı adı taşıyan başka kişiler olabilir/)).toBeNull()
+  })
+
+  it("marks rows that disagree on the birth date or nationality (O1)", async () => {
+    setup({
+      found: [FOUND, { ...FOUND, id: "bktrv_2", birth_date: "1985-03-02", nationality: "DE" }],
+    })
+    await search({ Ad: "Ayşe", Soyad: "Yılmaz", "Kimlik ya da pasaport no": "U12345678" })
+    expect(await screen.findByText("2 kayıt bulundu.")).toBeInTheDocument()
+    expect(screen.getByText(/^Aynı adı taşıyan başka kişiler olabilir/)).toBeInTheDocument()
+    expect(screen.getByText(/farklı doğum tarihleri ya da uyruklar var/)).toBeInTheDocument()
+    const marked = document.querySelectorAll("mark")
+    expect([...marked].map((mark) => mark.textContent)).toEqual([
+      "15.01.1990",
+      "Türkiye",
+      "02.03.1985",
+      "Almanya",
+    ])
   })
 
   it("says so when nothing is found", async () => {
     setup({ found: [] })
     await search({ Ad: "Ali", Soyad: "Kaya" })
     expect(
-      await screen.findByText("Bu bilgilerle kayıtlı katılımcı bulunamadı.")
+      await screen.findByText(/^Bu bilgilerle kayıtlı katılımcı bulunamadı\. Farklı yazımı deneyin/)
     ).toBeInTheDocument()
   })
 })

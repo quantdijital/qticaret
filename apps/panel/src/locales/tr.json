@@ -5394,9 +5394,8 @@
     "travelerRequests": {
       "title": "Katılımcı başvuruları",
       "description": "Rezervasyonda adı geçen kişinin KVKK başvurusu: kayıtlarını bulun, dökümünü verin ya da silin.",
-      "hint": "Katılımcı alıcı değildir ve hesabı yoktur; kayıtları verdiği bilgilerle bulunur. Ad ve soyad tam yazılır; doğum tarihi ya da numara verilirse onlarla da eşleşir. Her arama kayda geçer.",
+      "hint": "Katılımcı alıcı değildir ve hesabı yoktur; kayıtları verdiği bilgilerle bulunur. Ad ve soyad tam yazılır (büyük/küçük harf ve i/ı farkı gözetilmez); doğum tarihi ya da numara verilirse onlarla da eşleşir. Bulunamazsa farklı yazımı deneyin. Her arama kayda geçer.",
       "notAllowed": "Bu ekranı yalnız mağaza sahibi ve yöneticiler kullanabilir.",
-      "flagOff": "Tarihli satış kapalı; katılımcı kaydı yok.",
       "fields": {
         "first_name": "Ad",
         "last_name": "Soyad",
@@ -5411,13 +5410,17 @@
         "document": "Numara en çok 40 karakter olabilir."
       },
       "search": "Ara",
-      "noneFound": "Bu bilgilerle kayıtlı katılımcı bulunamadı.",
+      "noneFound": "Bu bilgilerle kayıtlı katılımcı bulunamadı. Farklı yazımı deneyin (ör. Ş yerine S, ikinci adla ya da onsuz).",
       "found_one": "{{count}} kayıt bulundu.",
       "found_other": "{{count}} kayıt bulundu.",
       "download": "Dökümü indir",
       "erase": "Seçilenleri sil",
       "pick": "Seç",
       "pickOne": "{{name}} seç",
+      "differs": "Bulunan kayıtlarda bu bilgi farklı",
+      "narrowWarning": "Aynı adı taşıyan başka kişiler olabilir. Döküm vermeden ya da silmeden önce doğum tarihi ya da kimlik/pasaport numarasıyla aramayı daraltın ve yalnız başvuranın kayıtlarını seçin.",
+      "mixedWarning": "Bulunan kayıtlarda farklı doğum tarihleri ya da uyruklar var (işaretli); bunlar farklı kişilere ait olabilir.",
+      "eraseList": "Silinecek kayıtlar",
       "inCart": "Sepette (siparişe dönüşmedi)",
       "columns": {
         "person": "Katılımcı",
