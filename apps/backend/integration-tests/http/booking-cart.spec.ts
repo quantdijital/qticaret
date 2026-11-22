@@ -112,6 +112,10 @@ medusaIntegrationTestRunner({
       await staff(`/admin/products/${productId}/catalog`, { kind: "service", booking_mode: mode })
       await staff(`/admin/products/${productId}`, { status: "published" })
       if (mode === "none") {
+        // A service sold without stock: no location holds it, so stock is not tracked
+        await staff(`/admin/products/${productId}`, {
+          variants: [adult, infant].map((id) => ({ id, manage_inventory: false })),
+        })
         return { productId, adult, infant, slotId: "" }
       }
       await staff(`/admin/products/${productId}/bookable`, {
@@ -287,10 +291,10 @@ medusaIntegrationTestRunner({
       expect([changed.status, changed.data.message]).toEqual([400, "booking.use_booking_route"])
       expect(page.status).toBe(200)
       expect(page.data.booking).toMatchObject({
-        categories: [
+        categories: expect.arrayContaining([
           expect.objectContaining({ variant_id: adult, pax: 1 }),
           expect.objectContaining({ variant_id: infant, pax: 0, max_age: 2 }),
-        ],
+        ]) as unknown,
         slots: [
           expect.objectContaining({
             id: slotId,

@@ -60,7 +60,7 @@ export async function readAddonCart(
     fields: CART_FIELDS,
     filters: { id: cartId },
   })
-  return data[0] as AddonCart | undefined
+  return (data as AddonCart[])[0]
 }
 
 /**
