@@ -5,7 +5,7 @@ import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import type { StoreLayout } from "@qticaret/types"
 import type { FormAction, PlaceOrderResult } from "@qticaret/ui"
-import { menusOf } from "@/test/preset-lock/fake-store-api"
+import { menusOf, packFeatures, shopFeatures } from "@/test/preset-lock/fake-store-api"
 import { htmlLines, pageParts } from "@/test/preset-lock/html-lines"
 import {
   LOCK_DIR,
@@ -145,6 +145,7 @@ describe("the preset lock (docs/tema/bilesen-standardi.md §7)", () => {
     const answer = presetAnswer(preset)
     store.layout = answer.layout
     store.menus = menusOf(preset.menus)
+    shopFeatures.current = packFeatures(preset.pack)
     const notes = fixtureNotes(answer)
     const frame = header(key, notes) + htmlLines(await frameHtml())
     const home = pageParts(htmlLines(await homeHtml(answer.layout)))
@@ -188,6 +189,7 @@ describe("the preset lock (docs/tema/bilesen-standardi.md §7)", () => {
     const answer = presetAnswer(preset)
     store.layout = answer.layout
     store.menus = menusOf(preset.menus)
+    shopFeatures.current = packFeatures(preset.pack)
     const frame = header(key, fixtureNotes(answer)) + htmlLines(await frameHtml())
     if (!UPDATING) {
       expect(existsSync(join(LOCK_DIR, key, "frame.html")), `fixture ${key}. ${UPDATE_HINT}`).toBe(
