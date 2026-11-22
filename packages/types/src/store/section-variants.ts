@@ -54,6 +54,13 @@ export const SECTION_VARIANTS = {
    */
   related_products: ["grid", "carousel"],
   /**
+   * The shop's reviews (adr/0077 §10): `grid`, today's summary beside the
+   * three newest quotes; `carousel`, the newest reviews one card each in a
+   * row that slides (the scroller kit, `section-scroller`), each its
+   * customer's photo when there is one, name, stars and quote.
+   */
+  reviews: ["grid", "carousel"],
+  /**
    * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
    * drawing first. The header bar's `centered` is the theme setting's
    * centred header (`header.layout`), read into the bar by name; its
@@ -221,6 +228,7 @@ export type HeroVariant = SectionVariant<"hero">
 export type CategoriesVariant = SectionVariant<"categories">
 export type ProductsVariant = SectionVariant<"products">
 export type RelatedProductsVariant = SectionVariant<"related_products">
+export type ReviewsVariant = SectionVariant<"reviews">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type NewsletterVariant = SectionVariant<"newsletter">

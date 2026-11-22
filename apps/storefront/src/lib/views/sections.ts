@@ -3,6 +3,7 @@ import type { StoreCategorySection, StoreLayoutSection, StoreProductSection } fr
 import { deviceOf } from "@qticaret/types/section-device"
 import { faqSettingsOf } from "@qticaret/types/section-faq"
 import { lookOf } from "@qticaret/types/section-look"
+import { scrollerSettingsOf } from "@qticaret/types/section-scroller"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, PageTextSectionView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
@@ -32,7 +33,7 @@ import { relatedView } from "./related"
 import { richTextView } from "./rich-text"
 import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
-import { statsView, stepsView } from "./points"
+import { collageView, statsView, stepsView } from "./points"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
 
@@ -144,6 +145,10 @@ async function sectionView(
             ...(photos.length > 0 ? { photos } : {}),
             // The shop's average, count and spread (adr/0046 Ek 2026-11-05)
             ...(summary ? { summary } : {}),
+            // One card each in a sliding row (adr/0077 §10); a grid as before variants
+            ...(variantOf("reviews", section.variant) === "carousel"
+              ? { variant: "carousel" as const, scroller: scrollerSettingsOf(section.scroller) }
+              : {}),
           }
         : null
     }
@@ -195,6 +200,8 @@ async function sectionView(
       return stripGalleryView(section, t)
     case "stats":
       return statsView(section, t)
+    case "photo_collage":
+      return collageView(section, t)
     case "steps":
       return stepsView(section, t)
     case "help": {
