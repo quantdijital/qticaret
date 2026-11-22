@@ -2,6 +2,13 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-22: adr/0076 D6b, katılımcı ekranları ve KVKK başvurusu
+
+- **Dal:** `oguzhan/rezervasyon-katilimci-ekran`. Panel: ürünün rezervasyon ayarında katılımcı düzeyi; kalkışın rezervasyon listesinde katılımcılar, "Numarayı göster" (sahip/yönetici, yeniden doğrulama, 30 sn), yazdırılabilir katılımcı listesi (dışa aktarım yok); Müşteriler > Katılımcı başvuruları (arama POST, tam ad eşleşmesi, numara özetle; JSON kopya; yeniden doğrulamalı silme). Backend: arama/silme uçları, yetenek `travelerRequests`, alıcının veri dökümüne `katılımcılar` (maskeli). Tema sözleşmesi `travelers` adımı, Atölye formu; vitrin `/odeme?adim=katilimcilar` (yalnız katılımcı isteyen kalkış varken, ödemeden önce), sunucu eylemi alanları seviyeye göre denetler. Görünüm kilidi değişmedi. ADR Ek D6b, `docs/kvkk-envanter.md`.
+- **Bilinen sınır:** kayıtlı numara vitrine dönmez, form yeniden açılınca numara yeniden yazılır; backend 400'ü alan adı taşımaz (alan hataları vitrinde).
+- **Sıradaki işler:** PR'ın güvenlik incelemesi (`security-reviewer`) ve bulguların kapatılması, birleşme; D7 yaşam döngüsü, iptal kademeleri, e-postalar; D8 `travel` paketi, JSON-LD.
+- **Açık (hukukçu):** katılımcı saklama süresi (180 gün öneri).
+
 ## 2026-11-22: adr/0076 D6, katılımcı bilgisi (backend)
 
 - **Dal:** `oguzhan/rezervasyon-katilimci`. `booking_traveler` tablosu (migration): ad, soyad, doğum tarihi, uyruk düz; kimlik/pasaport no şifreli + özet + son 4. `GET/POST /store/carts/:id/travelers` (bayrak, satış kanalı, `booking` hız profili; kişi sayısı Σ adet × pax); ödeme başlangıcı ve tamamlama `booking.travelers_missing`; sipariş onayında rezervasyona aktarım; panel listesinde maskeli katılımcılar (denetlenen okuma), tam numara `POST /admin/booking-travelers/:id/reveal` (sahip/yönetici, yeniden doğrulama, denetim kaydı). Saklama: hizmet tarihi + 180 gün, terk edilen sepette 2 gün (`compliance-retention`); KVKK silmesi bağlandı. ADR Ek D6 (vitrin ucu sözleşmesi), `docs/kvkk-envanter.md`.
