@@ -17,6 +17,7 @@ export type * from "@/features/storefront/api/layout-catalog"
 export type * from "@/features/storefront/api/layout-cards"
 export type * from "@/features/storefront/api/layout-shelf"
 export type * from "@/features/storefront/api/layout-strips"
+export type * from "@/features/storefront/api/layout-points"
 export type * from "@/features/storefront/api/layout-pages"
 
 export interface LayoutRevision {

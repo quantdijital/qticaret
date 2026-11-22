@@ -16,6 +16,8 @@ import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ContactForm, FactsNote } from "./forms/page-text-fields"
 import { StripGalleryForm } from "./forms/strip-gallery-form"
+import { StatsForm } from "./forms/stats-form"
+import { StepsForm } from "./forms/steps-form"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { TrustBadgeList } from "./shared/trust-badge-list"
 import { NamedGroup } from "./named-group"
@@ -70,6 +72,10 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
       return <BannerForm section={section} {...props} />
     case "strip_gallery":
       return <StripGalleryForm section={section} {...props} />
+    case "stats":
+      return <StatsForm section={section} {...props} />
+    case "steps":
+      return <StepsForm section={section} {...props} />
     case "categories":
       return <CategoriesForm section={section} {...props} />
     case "products":

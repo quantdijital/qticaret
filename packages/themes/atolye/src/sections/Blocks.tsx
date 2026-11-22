@@ -29,6 +29,8 @@ import { Reviews } from "./Reviews"
 import { Shelf } from "./Shelf"
 import { Signup } from "./Signup"
 import { Spotlight } from "./Spotlight"
+import { Stats } from "./Stats"
+import { Steps } from "./Steps"
 import { Story } from "./Story"
 import { StripGallery } from "./StripGallery"
 
@@ -188,6 +190,10 @@ function BlockView({
       return subscribe ? <Signup section={section} t={t} subscribe={subscribe} /> : null
     case "brands":
       return <Brands section={section} />
+    case "stats":
+      return <Stats section={section} />
+    case "steps":
+      return <Steps section={section} />
     case "marquee":
       return (
         <Marquee

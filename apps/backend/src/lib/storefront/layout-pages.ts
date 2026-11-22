@@ -12,6 +12,8 @@ import { newsletter } from "./sections/newsletter"
 import { contact, pageOnlyOnce, paymentFacts, shippingFacts } from "./sections/page-text"
 import { products } from "./sections/products"
 import { pageRichText } from "./sections/rich-text"
+import { stats } from "./sections/stats"
+import { steps } from "./sections/steps"
 import { stripGallery } from "./sections/strip-gallery"
 import { trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -45,6 +47,8 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "posts",
   "reviews",
   "google_rating",
+  "stats",
+  "steps",
   "contact",
   "payment_facts",
   "shipping_facts",
@@ -72,6 +76,8 @@ export const contentPageSection = z.discriminatedUnion(
     counted("posts", 6, 3),
     counted("reviews", 12, 6),
     googleRating,
+    stats,
+    steps,
     contact,
     paymentFacts,
     shippingFacts,

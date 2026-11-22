@@ -32,6 +32,7 @@ import { relatedView } from "./related"
 import { richTextView } from "./rich-text"
 import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
+import { statsView, stepsView } from "./points"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
 
@@ -192,6 +193,10 @@ async function sectionView(
       return marqueeView(section, t)
     case "strip_gallery":
       return stripGalleryView(section, t)
+    case "stats":
+      return statsView(section, t)
+    case "steps":
+      return stepsView(section, t)
     case "help": {
       const contact = contactOf(await legalIdentity(), t)
       const reachable = Boolean(contact.whatsappHref ?? contact.phone ?? contact.email)

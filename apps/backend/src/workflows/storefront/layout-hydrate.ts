@@ -20,6 +20,7 @@ import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
 import { hydrateArticle, hydrateContact } from "./layout-hydrate-text"
 import { hydrateShelf } from "./layout-hydrate-shelf"
 import { hydrateStrips } from "./layout-hydrate-strips"
+import { hydratePoints } from "./layout-hydrate-points"
 import type { BandPick } from "./price-bands"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
@@ -289,6 +290,9 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
       return { id, type, variant: section.variant }
     case "marquee":
       return hydrateMarquee(section, at)
+    case "stats":
+    case "steps":
+      return hydratePoints(section, { fill: (text) => fill(text, at.values), link })
     case "contact":
       return hydrateContact(section, at)
     case "payment_facts":
