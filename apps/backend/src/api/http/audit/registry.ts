@@ -1,6 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { routePathKeepingCase } from "../request-path"
 import { ATTRIBUTE_RESOURCES } from "./resources/attributes"
+import { BOOKING_RESOURCES } from "./resources/booking"
 import { BRAND_RESOURCES } from "./resources/brands"
 import { CATALOG_RESOURCES } from "./resources/catalog"
 import { CHARGEBACK_RESOURCES } from "./resources/chargebacks"
@@ -41,6 +42,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...SETTINGS_RESOURCES,
   ...ATTRIBUTE_RESOURCES,
   ...CATALOG_RESOURCES,
+  ...BOOKING_RESOURCES,
   ...PROMOTION_RESOURCES,
   ...SEO_RESOURCES,
   ...REDIRECT_RESOURCES,

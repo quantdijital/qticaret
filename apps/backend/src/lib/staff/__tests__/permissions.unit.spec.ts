@@ -792,6 +792,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/storefront-menus": false,
   "POST /admin/storefront-menus/:id": false,
   "DELETE /admin/storefront-menus/:id": false,
+  // adr/0076: dated products' settings and departures are the product editors'
+  "POST /admin/products/:id/bookable": false,
+  "POST /admin/products/:id/booking-slots": false,
+  "POST /admin/booking-slots/:id": false,
 }
 
 const ADMIN_DIR = join(__dirname, "../../../api/admin")

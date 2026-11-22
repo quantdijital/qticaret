@@ -5,6 +5,7 @@ import { productDescriptionDoc } from "../../../../../lib/catalog/description"
 import { productSummaryDoc } from "../../../../../lib/catalog/summary"
 import { isCleanText } from "../../../../../lib/security"
 import {
+  PRODUCT_BOOKING_MODES,
   PRODUCT_CONDITIONS,
   PRODUCT_KINDS,
 } from "../../../../../modules/catalog-extension/models/product-extension"
@@ -60,6 +61,8 @@ export const AdminPostProductCatalog = z
     description_doc: productDescriptionDoc.nullable().optional(),
     // adr/0055 Ek 2026-11-06: the short description as written; one without text or null clears it
     summary_doc: productSummaryDoc.nullable().optional(),
+    // adr/0076 §2: a dated product; needs kind service and catalog.booking (checked in the workflow)
+    booking_mode: z.enum(PRODUCT_BOOKING_MODES).optional(),
     variants: z
       .record(
         id,

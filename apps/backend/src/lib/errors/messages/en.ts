@@ -290,6 +290,33 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "addons.text_rules_invalid": "A text's length is between 1 and 200 characters.",
   "addons.choices_invalid": "A choice add-on has 2-10 options.",
   "addons.too_many": "A product has at most 5 add-ons.",
+  // adr/0076: dated products
+  "catalog.booking_disabled":
+    "Turn on both dated products and digital and service products in Settings > Features first.",
+  "catalog.booking_kind":
+    "A dated product must be a service; stop selling it by date before changing its kind.",
+  "catalog.booking_range_unavailable":
+    "Selling by date range (stays, rentals) is not available yet.",
+  "booking.product_not_dated":
+    "This product is not sold by date; set it to sell by departure first.",
+  "booking.variant_unknown": "The variant chosen is not this product's.",
+  "booking.slot_unknown": "The departure was not found.",
+  "booking.slot_full": "Not enough places are left on this departure.",
+  "booking.slot_closed": "This departure is closed for sale.",
+  "booking.slot_dates_invalid": "The end must come after the start.",
+  "booking.capacity_below_sold": "The capacity cannot go below the places sold and held in carts.",
+  "booking.units_invalid": "The number of people must be a whole number from 1 to 10,000.",
+  "booking.hold_minutes_invalid": "A hold lasts from 1 to 120 minutes.",
+  "booking.hold_missing": "The places held in your cart have expired; choose the date again.",
+  "booking.hold_used": "These held places belong to another order.",
+  "booking.unknown": "The booking was not found.",
+  "booking.cancellation_tiers_invalid":
+    "Cancellation tiers cannot repeat a day count; ten tiers at most.",
+  "booking.pax_ages_invalid": "The lowest age cannot be above the highest.",
+  "booking.pax_invalid": "Place counts can be set for 100 variants at most.",
+  "booking.timezone_invalid": "The time zone is not valid (e.g. Europe/Istanbul).",
+  "booking.price_adjustment_invalid":
+    "A price difference is at most 1,000,000 TL with at most two decimals, for 100 variants at most.",
   "addons.required_must_be_free": "A paid add-on cannot be required.",
   "addons.not_addon_line": "This product has no add-ons.",
   "addons.unknown": "The product has no such add-on or option.",

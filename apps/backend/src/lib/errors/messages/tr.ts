@@ -298,6 +298,34 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "addons.text_rules_invalid": "Yazı uzunluğu 1 ile 200 karakter arasında olmalı.",
   "addons.choices_invalid": "Seçim türündeki ek seçenekte 2-10 seçenek olmalı.",
   "addons.too_many": "Bir üründe en çok 5 ek seçenek olabilir.",
+  // adr/0076: dated products
+  "catalog.booking_disabled":
+    "Tarihli ürünler için önce Ayarlar > Özellikler'den hem tarihli ürünleri hem dijital ve hizmet ürünlerini açın.",
+  "catalog.booking_kind":
+    "Tarihli ürün yalnız hizmet türünde olabilir; türü değiştirmeden önce tarihli satışı kapatın.",
+  "catalog.booking_range_unavailable":
+    "Tarih aralığıyla satış (konaklama, kiralama) henüz kullanılamıyor.",
+  "booking.product_not_dated":
+    "Bu ürün tarihli satılmıyor; önce ürünün satış biçimini kalkış tarihli yapın.",
+  "booking.variant_unknown": "Seçilen varyant bu ürüne ait değil.",
+  "booking.slot_unknown": "Kalkış bulunamadı.",
+  "booking.slot_full": "Bu kalkışta yeterli yer kalmadı.",
+  "booking.slot_closed": "Bu kalkış satışa kapalı.",
+  "booking.slot_dates_invalid": "Bitiş zamanı başlangıçtan sonra olmalı.",
+  "booking.capacity_below_sold":
+    "Kapasite, satılan ve sepetlerde tutulan yer sayısının altına indirilemez.",
+  "booking.units_invalid": "Kişi sayısı 1 ile 10.000 arasında tam sayı olmalı.",
+  "booking.hold_minutes_invalid": "Tutma süresi 1 ile 120 dakika arasında olmalı.",
+  "booking.hold_missing": "Sepetteki yer tutma süresi doldu; tarihi yeniden seçin.",
+  "booking.hold_used": "Bu yer tutma başka bir siparişe bağlandı.",
+  "booking.unknown": "Rezervasyon bulunamadı.",
+  "booking.cancellation_tiers_invalid":
+    "İptal kademelerinde aynı gün sayısı iki kez kullanılamaz; en çok 10 kademe olabilir.",
+  "booking.pax_ages_invalid": "En küçük yaş en büyük yaştan büyük olamaz.",
+  "booking.pax_invalid": "Kişi sayısı ayarı en çok 100 varyant için girilebilir.",
+  "booking.timezone_invalid": "Saat dilimi geçerli değil (ör. Europe/Istanbul).",
+  "booking.price_adjustment_invalid":
+    "Fiyat farkı en çok 1.000.000 TL, en çok iki ondalıkla girilmeli; en çok 100 varyant için.",
   "addons.required_must_be_free": "Ücretli ek seçenek zorunlu yapılamaz.",
   "addons.not_addon_line": "Bu ürünün ek seçeneği yok.",
   "addons.unknown": "Bu ek seçenek ya da seçim üründe yok.",

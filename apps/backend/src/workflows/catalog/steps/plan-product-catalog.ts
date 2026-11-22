@@ -9,7 +9,10 @@ import type { SummaryDoc } from "../../../lib/catalog/summary"
 import type { ContentDoc } from "../../../lib/content"
 import { hasText } from "../../../lib/content/plain"
 import { addonsToWrite } from "../addons"
+import { bookingModeOf, bookingVariantsToAlign } from "../booking-mode"
+import type { BookingMode, StockVariant } from "../booking-mode"
 import { giftCardKind, kindShipping } from "../kind-rules"
+import { checkSuccessor } from "../successor"
 import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
@@ -47,6 +50,8 @@ export interface SetProductCatalogInput {
    * `lib/catalog/summary`); one without text, or null, clears it.
    */
   summary_doc?: SummaryDoc | null | undefined
+  /** How it is booked (adr/0076 §2, `booking-mode.ts`). */
+  booking_mode?: BookingMode | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -70,6 +75,7 @@ export interface ExtensionFields {
   addons: StoredAddons | null
   description_doc: DescriptionDoc | null
   summary_doc: SummaryDoc | null
+  booking_mode: BookingMode
 }
 
 export interface ProductCatalogPlan {
@@ -86,6 +92,8 @@ export interface ProductCatalogPlan {
   shipping: ShippingChanges
   /** The product's own description, when the document's plain text changes it (adr/0055). */
   description?: string | undefined
+  /** A dated product's variants stop tracking stock and selling past it (adr/0076 §3). */
+  alignBookingVariants: boolean
 }
 
 type ShippingVariant = NonNullable<NonNullable<ShippingRow["variants"]>[number]>
@@ -95,56 +103,20 @@ interface ProductRow extends ShippingRow {
   description?: string | null
   categories?: ({ id: string } | null)[] | null
   variants?: (
-    | (ShippingVariant & {
-        id: string
-        variant_extension?: ({ id: string } & VariantFields) | null
-      })
+    | (ShippingVariant &
+        StockVariant & {
+          id: string
+          variant_extension?: ({ id: string } & VariantFields) | null
+        })
     | null
   )[]
   product_extension?: (ExtensionFields & { id: string }) | null
 }
 
-// A successor chain longer than this is refused as if it looped
-const MAX_SUCCESSOR_CHAIN = 20
-
 async function productRow(container: MedusaContainer, id: string, fields: string[]) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const { data } = await query.graph({ entity: "product", fields, filters: { id } })
   return data[0] as ProductRow | undefined
-}
-
-/**
- * The successor is where the product's URL points once it is no longer sold
- * (docs/13 §2.4): another existing product, and following successors from
- * it never comes back to this one (a redirect loop).
- */
-async function checkSuccessor(container: MedusaContainer, productId: string, successorId: string) {
-  if (successorId === productId) {
-    throw new ValidationError("catalog.successor_self", { field: "successor_product_id" })
-  }
-  let current = successorId
-  for (let step = 0; step < MAX_SUCCESSOR_CHAIN; step += 1) {
-    const row = await productRow(container, current, [
-      "id",
-      "product_extension.successor_product_id",
-    ])
-    if (!row) {
-      if (step === 0) {
-        throw new ValidationError("catalog.successor_unknown", { field: "successor_product_id" })
-      }
-      // A deleted product further down ends the chain
-      return
-    }
-    const next = row.product_extension?.successor_product_id
-    if (!next) {
-      return
-    }
-    if (next === productId) {
-      break
-    }
-    current = next
-  }
-  throw new ValidationError("catalog.successor_loop", { field: "successor_product_id" })
 }
 
 const EXTENSION_KEYS = [
@@ -158,6 +130,7 @@ const EXTENSION_KEYS = [
   "addons",
   "description_doc",
   "summary_doc",
+  "booking_mode",
 ] as const
 
 type ExtensionChanges = Omit<SetProductCatalogInput, "addons"> & {
@@ -211,6 +184,8 @@ export const planProductCatalogStep = createStep(
       "variants.id",
       "variants.variant_extension.*",
       "product_extension.*",
+      "variants.manage_inventory",
+      "variants.allow_backorder",
       ...SHIPPING_FIELDS,
     ])
     if (!product) {
@@ -251,6 +226,13 @@ export const planProductCatalogStep = createStep(
     }
     const extension = product.product_extension ?? null
     const kind = await giftCardKind(container, input, extension)
+    const currentMode = extension?.booking_mode ?? "none"
+    const bookingMode = await bookingModeOf(
+      container,
+      input.booking_mode,
+      currentMode,
+      kind ?? extension?.kind ?? "physical"
+    )
     const addons = await addonsToWrite(container, input.addons)
     const description = descriptionChanges(input.description_doc, {
       doc: extension?.description_doc ?? null,
@@ -264,7 +246,14 @@ export const planProductCatalogStep = createStep(
           ? input.summary_doc
           : null
     const { set, previous } = changesOf(
-      { ...input, kind, addons, description_doc: description.doc, summary_doc: summary },
+      {
+        ...input,
+        kind,
+        addons,
+        description_doc: description.doc,
+        summary_doc: summary,
+        booking_mode: bookingMode,
+      },
       extension
     )
     const plan: ProductCatalogPlan = {
@@ -281,6 +270,10 @@ export const planProductCatalogStep = createStep(
           )
         : NO_SHIPPING_CHANGES,
       ...(description.description === undefined ? {} : { description: description.description }),
+      alignBookingVariants: bookingVariantsToAlign(
+        bookingMode ?? currentMode,
+        product.variants ?? []
+      ),
     }
     return new StepResponse(plan)
   }

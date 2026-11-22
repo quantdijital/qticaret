@@ -36,6 +36,7 @@ import { ACCOUNT_ROUTES } from "./http/account-routes"
 import { SIGN_IN_EPOCH_ROUTES } from "./http/sign-in-epoch"
 import { ABANDONED_CART_ROUTES } from "./http/abandoned-cart-routes"
 import { ADDON_ROUTES } from "./http/addon-routes"
+import { BOOKING_ROUTES } from "./http/booking-routes"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { CUSTOMER_ROUTES } from "./http/customer-routes"
 import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
@@ -409,6 +410,8 @@ export default defineMiddlewares({
     ...GIFT_CARD_SALE_ROUTES,
     // adr/0052: product add-ons (a line's picks priced on the server)
     ...ADDON_ROUTES,
+    // adr/0076: dated products' settings and departures, behind catalog.booking
+    ...BOOKING_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",
