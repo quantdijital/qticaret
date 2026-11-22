@@ -35,12 +35,15 @@ export interface DatedCardProduct {
   id: string
   variants?: ({ id: string } | null)[] | null
   product_extension?: { booking_mode?: string | null } | null
-  bookable?: {
-    id: string
-    cutoff_hours: number
-    pax_by_variant: unknown
-    timezone: string
-  } | null
+  bookable?:
+    | {
+        id: string
+        cutoff_hours: number
+        pax_by_variant: unknown
+        timezone: string
+      }
+    | null
+    | undefined
 }
 
 const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
