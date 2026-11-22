@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
+import { resumeDepartureCancels } from "../workflows/booking/departure-cancel"
 import { reconcileBookings } from "../workflows/booking/reconcile"
 import { reconcileTravelers } from "../workflows/booking/reconcile-travelers"
 
@@ -20,6 +21,15 @@ export default async function bookingReconcile(container: MedusaContainer) {
     }
   } catch (error) {
     logger.warn({ event: "booking.reconcile_failed", err: errorSummary(error) })
+  }
+  try {
+    // A departure the shop cancelled, its bookings not all refunded yet (adr/0076 Ek D7a)
+    const departures = await resumeDepartureCancels(container)
+    if (departures.cancelled + departures.failed > 0) {
+      logger.info({ event: "booking.departures_resumed", ...departures })
+    }
+  } catch (error) {
+    logger.warn({ event: "booking.departures_resume_failed", err: errorSummary(error) })
   }
   try {
     const travelers = await reconcileTravelers(container)

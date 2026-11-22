@@ -10,10 +10,12 @@ import type {
   StoreOrder,
 } from "@/lib/orders/order"
 import { providersOf } from "@/lib/orders/order"
+import type { OrderDeparturesRow } from "@/lib/orders/bookings"
 import { lineAddonsOf } from "./addons"
 import { addressSummaryOf } from "./checkout"
 import { lineImageOf, linePathOf } from "./line-paths"
 import { orderGiftOf } from "./order-gift"
+import { orderBookingsOf } from "./order-bookings"
 import { orderProgress, paymentWordsOf } from "./order-progress"
 import {
   DEFECT_REASONS,
@@ -67,6 +69,13 @@ export interface OrderExtras {
   paths?: ReadonlyMap<string, string>
   /** The lines' pictures with their versions (`linePicturesOf`); none: the thumbnails as they are. */
   pictures?: ReadonlyMap<string, ImageView>
+  /** A dated order's departures (`orderBookings`); none or null: not a dated order. */
+  bookings?: OrderDeparturesRow | null
+}
+
+const bookingsField = (found: OrderDeparturesRow | null, t: Translate) => {
+  const bookings = orderBookingsOf(found, t)
+  return bookings ? { bookings } : {}
 }
 
 const NOTES: Record<string, string> = {
@@ -76,6 +85,13 @@ const NOTES: Record<string, string> = {
   "iptal-hediye-karti": "orders.gift_card_used",
   "iptal-magaza": "orders.cancel_contact_shop",
   "iptal-iade-isleniyor": "orders.refund_unsettled",
+  "iptal-rezervasyon": "booking.use_booking_cancel",
+  // A departure's cancel (`cancelBooking`, adr/0076 Ek D7a)
+  "rezervasyon-iptal": "order.notice_booking_canceled",
+  "rezervasyon-iptal-olmadi": "order.notice_booking_cancel_refused",
+  "rezervasyon-gec": "booking.cancel_too_late",
+  "rezervasyon-kademe-yok": "booking.cancel_unavailable",
+  "rezervasyon-magaza": "orders.cancel_contact_shop",
 }
 
 // The carrier's words for where a parcel is; anything else reads as on its way
@@ -227,6 +243,8 @@ export function orderView(
     ),
     payment: paymentWordsOf(providers, t),
     guest: extras.guest ?? false,
+    // A dated order's departures with their cancel (adr/0076 Ek D7a); none: drawn as before
+    ...bookingsField(extras.bookings ?? null, t),
     breadcrumbs: [
       { label: t("home.label"), path: "/" },
       { label: t("order.title", { id: order.display_id }), path: null },

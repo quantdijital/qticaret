@@ -18,13 +18,22 @@ export const Booking = model
   })
   .indexes([{ on: ["hold_id"], unique: true }, { on: ["order_id"] }])
 
-/** A booking's places on one slot. */
+/**
+ * A booking's places on one slot. `cancelled_at`: this departure alone
+ * was cancelled (adr/0076 D7a: the shopper's, staff's or the shop's
+ * whole departure), its places given back; the booking stays confirmed
+ * while another of its departures is not. `cancellation`: the product's
+ * tiers and zone when the booking was confirmed (`{ timezone, tiers }`,
+ * review O5); a cancel reckons by it, by the product's settings when null.
+ */
 export const BookingSlotUse = model
   .define("booking_slot_use", {
     id: model.id({ prefix: "bkuse" }).primaryKey(),
     booking_id: model.text(),
     slot_id: model.text(),
     units: model.number(),
+    cancelled_at: model.dateTime().nullable(),
+    cancellation: model.json().nullable(),
   })
   .indexes([{ on: ["booking_id", "slot_id"], unique: true }, { on: ["slot_id"] }])
   .checks([{ name: "booking_slot_use_units_check", expression: "units > 0" }])

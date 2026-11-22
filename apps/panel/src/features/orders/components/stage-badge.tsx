@@ -8,6 +8,8 @@ const TONE: Record<Lifecycle, StatusTone> = {
   awaiting_payment: "warning",
   to_ship: "warning",
   shipped: "info",
+  // A dated order paid, its service day ahead (adr/0076 §8)
+  planned: "info",
   delivered: "success",
   canceled: "neutral",
 }

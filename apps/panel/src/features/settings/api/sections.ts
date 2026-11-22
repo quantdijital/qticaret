@@ -129,6 +129,11 @@ export interface ReturnsSettings {
    * `platform_settings.return_shipping_shop_only`. Read, never sent.
    */
   return_shipping: "shop"
+  /**
+   * The shop sells package travel (adr/0076 §8): a dated booking cancelled
+   * 30 days or more ahead keeps nothing; the refund comes within 14 days.
+   */
+  package_travel: boolean
 }
 
 export const MIN_WITHDRAWAL_DAYS = 14

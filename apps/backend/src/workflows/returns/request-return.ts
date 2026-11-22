@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
+import { bookingMarkOf } from "../../lib/booking/cart-lines"
 import { ValidationError } from "../../lib/errors"
 import { returnsLockKey } from "../../lib/orders/locks"
 import {
@@ -63,6 +64,15 @@ export async function requestReturn(
       }
       const policy = await returnPolicy(container)
       const lines = input.items.map(({ line_item_id, quantity }) => ({ line_item_id, quantity }))
+      // A dated line is never returned nor swapped: its departure is cancelled (adr/0076 Ek D7a)
+      const dated = new Set(
+        (order.items ?? []).flatMap((item) =>
+          item && bookingMarkOf(item.metadata) ? [item.id] : []
+        )
+      )
+      if (lines.some((line) => dated.has(line.line_item_id))) {
+        throw new ValidationError("booking.order_change_unsupported", { field: "items" })
+      }
       const gifts = await giftLinesOf(container, order.items ?? [])
       const giftProblem = giftReturnProblem(lines, gifts, input, now, policy.withdrawal_days)
       const giftRequest = lines.some((line) => gifts.has(line.line_item_id))

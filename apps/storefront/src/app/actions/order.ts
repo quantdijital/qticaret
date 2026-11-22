@@ -29,6 +29,7 @@ const CANCEL_REFUSALS: Readonly<Record<string, string>> = {
   "orders.gift_card_used": "iptal-hediye-karti",
   "orders.cancel_contact_shop": "iptal-magaza",
   "orders.refund_unsettled": "iptal-iade-isleniyor",
+  "booking.use_booking_cancel": "iptal-rezervasyon",
 }
 
 /**
@@ -54,6 +55,47 @@ export async function cancelOrder(form: FormData): Promise<void> {
       throw error
     }
     note = (error.messageKey ? CANCEL_REFUSALS[error.messageKey] : undefined) ?? "iptal-olmadi"
+  }
+  revalidatePath(`/siparis/${order_id}`)
+  redirect(back(order_id, token, note))
+}
+
+const SLOT_ID = z.string().regex(/^bkslot_[A-Za-z0-9]{1,40}$/)
+
+/** A departure cancel's refusals the page says in its own words (`?durum=`). */
+const BOOKING_REFUSALS: Readonly<Record<string, string>> = {
+  "booking.cancel_too_late": "rezervasyon-gec",
+  "booking.cancel_unavailable": "rezervasyon-kademe-yok",
+  "orders.cancel_contact_shop": "rezervasyon-magaza",
+}
+
+/**
+ * The shopper cancels one departure of their dated order (adr/0076 Ek
+ * D7a), after the page showed what comes back: only the departure is
+ * sent; the backend works the refund out by the product's tiers.
+ */
+export async function cancelBooking(form: FormData): Promise<void> {
+  const parsed = z
+    .object({ order_id: ORDER_ID, token: TOKEN, slot_id: SLOT_ID })
+    .safeParse(Object.fromEntries(form))
+  if (!parsed.success) {
+    redirect("/")
+  }
+  const { order_id, token, slot_id } = parsed.data
+  let note = "rezervasyon-iptal"
+  try {
+    await storeCall(`/store/orders/${encodeURIComponent(order_id)}/bookings/cancel`, {
+      method: "POST",
+      body: { slot_id },
+      headers: keyed(token),
+    })
+  } catch (error) {
+    if (!isStoreApiError(error)) {
+      throw error
+    }
+    note =
+      (error.messageKey ? BOOKING_REFUSALS[error.messageKey] : undefined) ??
+      "rezervasyon-iptal-olmadi"
   }
   revalidatePath(`/siparis/${order_id}`)
   redirect(back(order_id, token, note))

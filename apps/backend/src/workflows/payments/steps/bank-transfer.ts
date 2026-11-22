@@ -9,6 +9,7 @@ import {
   transferDeadline,
 } from "../../../lib/payments/bank-transfer"
 import type { BankTransferOrderRow } from "../../../lib/payments/bank-transfer"
+import { refuseMoneyForCancelledDeparture } from "../../booking/paid-guard"
 
 /** An order's bank transfer, as the confirmation needs it; `done` when the money is already in. */
 export type BankTransferOrder =
@@ -50,6 +51,10 @@ export const readBankTransferOrderStep = createStep(
       throw new ValidationError("bank_transfer.not_this_order")
     }
     const { session } = transfer
+    if (!transfer.captured) {
+      // A departure cancelled before the money came: nothing to take it for (review O3)
+      await refuseMoneyForCancelledDeparture(container, orderId)
+    }
     return new StepResponse<BankTransferOrder>(
       transfer.captured
         ? { done: true }

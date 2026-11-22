@@ -101,4 +101,46 @@ describe("planRefund (F5 V5)", () => {
       "orders.refund_exceeds_paid"
     )
   })
+
+  it("keeps a dated cancel tier's share of each line, rounded half up to the kuruş (adr/0076)", () => {
+    // 2 × 90 = 180 at 25%: 45 kept, 135 back; 1 unit (90,00) at 33%: 29,70 kept, 60,30 back
+    expect(
+      planRefund(
+        shares,
+        nothing,
+        { items: [{ id: "item_1", quantity: 2 }], fee_percent: 25 },
+        kurus(21000)
+      )
+    ).toEqual({
+      lines: [{ id: "item_1", kind: "item", quantity: 2, net: kurus(13500) }],
+      total: kurus(13500),
+    })
+    expect(
+      planRefund(
+        shares,
+        nothing,
+        { items: [{ id: "item_1", quantity: 1 }], fee_percent: 33 },
+        kurus(21000)
+      ).total
+    ).toBe(6030)
+    // Everything kept: nothing to give back
+    expect(
+      reasonOf(() =>
+        planRefund(
+          shares,
+          nothing,
+          { items: [{ id: "item_1", quantity: 1 }], fee_percent: 100 },
+          kurus(21000)
+        )
+      )
+    ).toBe("orders.refund_empty")
+    expect(() =>
+      planRefund(
+        shares,
+        nothing,
+        { items: [{ id: "item_1", quantity: 1 }], fee_percent: 101 },
+        kurus(21000)
+      )
+    ).toThrow(RangeError)
+  })
 })

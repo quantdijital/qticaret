@@ -95,6 +95,7 @@ const STAGES: Readonly<Record<Lifecycle, string>> = {
   awaiting_payment: "Ödeme bekliyor",
   to_ship: "Hazırlanacak",
   shipped: "Kargoda",
+  planned: "Planlandı",
   delivered: "Teslim edildi",
   canceled: "İptal edildi",
 }

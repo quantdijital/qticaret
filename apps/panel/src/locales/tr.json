@@ -1379,7 +1379,9 @@
         "payer": "İade kargosu",
         "payerRule": "Cayma iadelerinde iade kargosu mağazaya aittir (Mesafeli Sözleşmeler Yönetmeliği md. 12).",
         "payerHint": "Müşteriden iade masrafı istenemez; ürünlerin arama motorlarına verilen bilgisi ücretsiz iade der.",
-        "excludedHint": "Ambalajı açılınca hijyen gereği iade alınamayan fiziksel ürünü ürün sayfasında \"Cayma hakkı dışında\" olarak işaretleyin: talep alınır, ambalajı açılmış gelen teslim almada reddedilir. Dijital ürün ve hizmette bu işaret cayma hakkını tümden kaldırır. Kişiye özel hazırlanan ürün için ek seçeneği \"Cayma dışı\" yapın."
+        "excludedHint": "Ambalajı açılınca hijyen gereği iade alınamayan fiziksel ürünü ürün sayfasında \"Cayma hakkı dışında\" olarak işaretleyin: talep alınır, ambalajı açılmış gelen teslim almada reddedilir. Dijital ürün ve hizmette bu işaret cayma hakkını tümden kaldırır. Kişiye özel hazırlanan ürün için ek seçeneği \"Cayma dışı\" yapın.",
+        "packageTravel": "Paket tur satıyorum",
+        "packageTravelHint": "Açıksa tarihli üründe hizmet gününe 30 gün ve daha fazla kala yapılan iptalde kesinti yapılmaz (ürünün iptal koşulları ne derse desin); müşteriye iadenin 14 gün içinde yapılacağı söylenir."
       },
       "tabs": {
         "carriers": "Kargo firmaları",
@@ -3128,6 +3130,7 @@
     "awaiting_payment": "Ödeme bekliyor",
     "to_ship": "Hazırlanacak",
     "shipped": "Kargoda",
+    "planned": "Planlandı",
     "delivered": "Teslim edildi",
     "canceled": "İptal edildi"
   },
@@ -3571,10 +3574,18 @@
       },
       "cancel": {
         "title": "Kalkış iptal edilsin mi?",
-        "description": "{{start}} kalkışı satıştan kalkar ve vitrinde listelenmez.",
+        "description": "{{start}} kalkışı hemen satıştan kalkar, vitrinde listelenmez ve her onaylı rezervasyonun tamamı iade edilir.",
         "confirm": "Kalkışı iptal et",
-        "sold_one": "Bu kalkışta {{count}} satılmış yer (onaylı rezervasyon) var. İade ve müşteriye bildirim şimdilik kendiliğinden yapılmaz; siparişleri elle iptal edip iade edin.",
-        "sold_other": "Bu kalkışta {{count}} satılmış yer (onaylı rezervasyon) var. İade ve müşteriye bildirim şimdilik kendiliğinden yapılmaz; siparişleri elle iptal edip iade edin."
+        "loading": "Etkilenecek rezervasyonlar hesaplanıyor…",
+        "previewFailed": "Etkilenecek rezervasyonlar okunamadı. İptal yine de her rezervasyonu tam iade eder.",
+        "touches": "Rezervasyon: {{bookings}} · sipariş: {{orders}} · yer: {{units}}",
+        "refund": "Toplam iade: {{amount}}",
+        "refundAtLeast": "Toplam iade en az {{amount}} (bazı rezervasyonlar hesaplanamadı; hepsi tam iade edilir)",
+        "after": "İade ve iptaller onaydan sonra arka planda yapılır; aksayan olursa yeniden denenir.",
+        "noBookings": "Bu kalkışta onaylı rezervasyon yok.",
+        "done": "Kalkış iptal edildi; iadeler başlatıldı.",
+        "byHand_one": "Elle iade edilecek: {{amount}} ({{count}} sipariş; havale, kapıda ödeme ya da hediye kartı). Yerler bırakılır, parayı siz gönderirsiniz.",
+        "byHand_other": "Elle iade edilecek: {{amount}} ({{count}} sipariş; havale, kapıda ödeme ya da hediye kartı). Yerler bırakılır, parayı siz gönderirsiniz."
       },
       "columns": {
         "start": "Kalkış",
@@ -3645,6 +3656,20 @@
           "birth_date": "Ad soyad, doğum tarihi",
           "identity": "Ad soyad, doğum tarihi, kimlik/pasaport no",
           "nationality": "Ad soyad, doğum tarihi, kimlik/pasaport no, uyruk"
+        },
+        "tiers": {
+          "title": "Müşteri iptali",
+          "hint": "Müşteri hesabından iptal ettiğinde kalkışa kalan güne göre tutulacak pay. Kalan gün en uygun satıra düşer; tüm satırların altında en az günlü satır geçer.",
+          "empty": "Satır yoksa müşteri kendisi iptal edemez; siz siparişten her zaman iptal edebilirsiniz.",
+          "days": "gün",
+          "orMore": "ve daha önce:",
+          "kept": "kesilir",
+          "daysOf": "{{number}}. satır: kalkıştan kaç gün önce",
+          "percentOf": "{{number}}. satır: kesinti yüzdesi",
+          "remove": "{{number}}. satırı kaldır",
+          "add": "İptal kademesi ekle",
+          "packageFree": "Paket tur: 30 gün ve öncesinde kesinti yapılmaz (%0 uygulanır).",
+          "noDayZero": "Kalkışa {{days}} günden az kala yapılan iptallerde de bu satır (%{{percent}}) uygulanır. Son günler için ayrı bir kural istiyorsanız 0 günlük satır ekleyin."
         }
       },
       "errors": {
@@ -3675,8 +3700,16 @@
           "maxUnits": "Sepet başına en çok yer 1 ile 500 arasında olmalı.",
           "minParticipants": "Asgari katılımcı 1 ile 10.000 arasında olmalı ya da boş bırakılmalı.",
           "pax": "Kaç kişi sayar 0 ile 20 arasında tam sayı olmalı.",
-          "age": "Yaş 0 ile 120 arasında olmalı."
-        }
+          "age": "Yaş 0 ile 120 arasında olmalı.",
+          "tierDays": "Gün sayısı 0 ile 365 arasında tam sayı olmalı.",
+          "tierPercent": "Kesinti 0 ile 100 arasında tam sayı olmalı.",
+          "tierSame": "Bu gün sayısı başka bir satırda var.",
+          "tierOrder": "Kalkışa daha yakın satır daha az kesemez.",
+          "tierRows": "En çok 10 iptal kademesi girilebilir."
+        },
+        "tiers": "İptal kademeleri geçersiz: her gün sayısı bir kez yazılır, kalkışa yaklaştıkça kesinti azalamaz.",
+        "slotCancelled": "İptal edilmiş kalkış yeniden açılamaz.",
+        "useDepartureCancel": "Kalkışı iptal etmek için iptal düğmesini kullanın; rezervasyonlar iade edilir."
       },
       "travelers": {
         "title": "Katılımcılar",
@@ -5005,7 +5038,35 @@
     },
     "wholesaleMatches_one": "Aramanız {{count}} toptan siparişini de buldu; toptan siparişler burada listelenmez.",
     "wholesaleMatches_other": "Aramanız {{count}} toptan siparişini de buldu; toptan siparişler burada listelenmez.",
-    "wholesaleMatchesLink": "Toptancılar > Siparişler'de gör"
+    "wholesaleMatchesLink": "Toptancılar > Siparişler'de gör",
+    "bookings": {
+      "title": "Rezervasyonlar",
+      "cancelled": "İptal edildi",
+      "confirmed": "Onaylı",
+      "cancel": "İptal et",
+      "cancelTitle": "Rezervasyon iptal edilsin mi?",
+      "cancelDescription": "{{start}} kalkışındaki yerler bırakılır ve seçtiğiniz tutar ödeme sağlayıcısından iade edilir.",
+      "confirm": "Rezervasyonu iptal et",
+      "mode": "İade şekli",
+      "modes": {
+        "tier": "Ürünün iptal kademesine göre (%{{percent}} kesinti)",
+        "noTier": "Ürünün iptal kademesi yok",
+        "full": "Tamamını iade et"
+      },
+      "loading": "İade tutarı hesaplanıyor…",
+      "refund": "İade: {{amount}} (ödenen {{paid}})",
+      "refusal": "Bu şekilde iptal edilemiyor; tamamını iade etmeyi seçin.",
+      "previewFailed": "İade tutarı okunamadı; onaylarsanız sunucu yeniden hesaplar.",
+      "done": "Rezervasyon iptal edildi.",
+      "byHand": "Bu tutar kendiliğinden gönderilmez ({{reason}}); iptalden sonra elle iade edin.",
+      "byHandReasons": {
+        "offline": "havale ya da kapıda ödeme",
+        "credit": "hediye kartı ya da mağaza kredisi kullanıldı",
+        "exceeds": "ödemede kalan tutardan fazla"
+      },
+      "doneByHand": "Rezervasyon iptal edildi; {{amount}} elle iade edilecek.",
+      "orderCancelled": "Rezervasyon ve ödemesi alınmamış sipariş iptal edildi."
+    }
   },
   "customers": {
     "description": "Sipariş veren ya da üye olan herkes",

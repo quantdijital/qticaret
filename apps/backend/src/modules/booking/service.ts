@@ -8,6 +8,14 @@ import {
 } from "@medusajs/framework/utils"
 import { openSlotsOf, slotsById, slotsOfBookable } from "./availability"
 import type { SlotAvailability } from "./availability"
+import {
+  cancelBookingSlot,
+  cancelledSlotsWithLiveUses,
+  liveUsesOfOrder,
+  liveUsesOnSlot,
+  orderHasCancelledDeparture,
+  releaseSlotHolds,
+} from "./cancel-uses"
 import { cartHold } from "./cart-hold"
 import type { HoldClient } from "./client-share"
 import { cancelBooking, confirmHold, extendHold, holdUnits, updateSlot } from "./counters"
@@ -34,6 +42,7 @@ export interface BookingModuleOptions {
 }
 
 export type { SlotAvailability } from "./availability"
+export type { LiveUse } from "./cancel-uses"
 export type { CartHold } from "./cart-hold"
 export type { HoldClient } from "./client-share"
 export type { HoldState, SlotChanges } from "./counters"
@@ -207,6 +216,47 @@ class BookingModuleService extends MedusaService({
     return cancelBooking(managerOf(sharedContext), bookingId)
   }
 
+  /** One departure of a confirmed booking cancelled, its places back (D7a); whether it changed. */
+  @InjectTransactionManager()
+  async cancelBookingSlot(
+    bookingId: string,
+    slotId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return cancelBookingSlot(managerOf(sharedContext), bookingId, slotId)
+  }
+
+  /** An order's live departures: its confirmed bookings' uses not cancelled. */
+  @InjectManager()
+  async liveUsesOfOrder(orderId: string, @MedusaContext() sharedContext: Context = {}) {
+    return liveUsesOfOrder(managerOf(sharedContext), orderId)
+  }
+
+  /** A slot's live departures, a page at a time (the departure cancel). */
+  @InjectManager()
+  async liveUsesOnSlot(
+    slotId: string,
+    limit: number,
+    @MedusaContext() sharedContext: Context = {}
+  ) {
+    return liveUsesOnSlot(managerOf(sharedContext), slotId, limit)
+  }
+
+  /** Cancelled slots with a live departure left (the departure cancel's resume). */
+  @InjectManager()
+  async cancelledSlotsWithLiveUses(limit: number, @MedusaContext() sharedContext: Context = {}) {
+    return cancelledSlotsWithLiveUses(managerOf(sharedContext), limit)
+  }
+
+  /** Whether a departure of the order was cancelled (money taken now refuses, review O3). */
+  @InjectManager()
+  async orderHasCancelledDeparture(
+    orderId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return orderHasCancelledDeparture(managerOf(sharedContext), orderId)
+  }
+
   /** Holds past their end released, a batch a call (`now`: the database's clock by default). */
   @InjectTransactionManager()
   async releaseExpiredHolds(
@@ -225,6 +275,10 @@ class BookingModuleService extends MedusaService({
   ): Promise<boolean> {
     const manager = managerOf(sharedContext)
     const found = await updateSlot(manager, slotId, changes)
+    if (found && changes.status === "cancelled") {
+      // No more sales: carts' holds on it go too, their checkout refuses (review D5)
+      await releaseSlotHolds(manager, slotId)
+    }
     if (found && (changes.starts_at !== undefined || changes.ends_at !== undefined)) {
       // Its travelers are kept for a period after its date: the date moved, so does theirs
       await refreshTravelerPurge(manager, slotId)

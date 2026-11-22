@@ -26,12 +26,14 @@ export async function readSlotBookings(scope: MedusaContainer, slotId: string) {
   }
   const uses = await service.listBookingSlotUses(
     { slot_id: slotId },
-    { take: MOST, select: ["booking_id", "units"] }
+    { take: MOST, select: ["booking_id", "units", "cancelled_at"] }
   )
   if (uses.length === 0) {
     return []
   }
   const unitsOf = new Map(uses.map((use) => [use.booking_id, use.units]))
+  // This departure cancelled on its own (D7a): the booking reads cancelled here
+  const cancelledHere = new Set(uses.flatMap((use) => (use.cancelled_at ? [use.booking_id] : [])))
   const bookings = await service.listBookings(
     { id: [...unitsOf.keys()] },
     {
@@ -52,7 +54,7 @@ export async function readSlotBookings(scope: MedusaContainer, slotId: string) {
     order_id: booking.order_id,
     display_id: numberOf.get(booking.order_id) ?? null,
     units: unitsOf.get(booking.id) ?? 0,
-    status: booking.status,
+    status: cancelledHere.has(booking.id) ? "cancelled" : booking.status,
     created_at: new Date(booking.created_at).toISOString(),
     travelers: travelersOf.get(booking.id) ?? [],
   }))

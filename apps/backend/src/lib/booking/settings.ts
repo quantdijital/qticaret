@@ -2,9 +2,7 @@ import { z } from "@medusajs/framework/zod"
 
 /**
  * A dated product's booking settings as the API takes and gives them
- * (adr/0076 §3, §4, §7, §8). The JSON ones are kept as these shapes;
- * `traveler_fields` and `cancellation_tiers` are read by later slices
- * (D6, D7) and only stored now, with their defaults.
+ * (adr/0076 §3, §4, §7, §8). The JSON ones are kept as these shapes.
  */
 
 // Medusa IDs are short
@@ -35,6 +33,17 @@ export const CancellationTiers = z
   .refine((tiers) => new Set(tiers.map((tier) => tier.days_before)).size === tiers.length, {
     message: "booking.cancellation_tiers_invalid",
   })
+  // Closer to the day never keeps less (D7a): sorted by days, the share only grows
+  .refine(
+    (tiers) =>
+      [...tiers]
+        .sort((a, b) => b.days_before - a.days_before)
+        .every(
+          (tier, index, sorted) =>
+            index === 0 || tier.fee_percent >= (sorted[index - 1]?.fee_percent ?? 0)
+        ),
+    { message: "booking.cancellation_tiers_invalid" }
+  )
 export type CancellationTiersType = z.infer<typeof CancellationTiers>
 
 /**

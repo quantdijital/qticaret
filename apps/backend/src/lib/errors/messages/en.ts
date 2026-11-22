@@ -339,6 +339,20 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "booking.travelers_invalid": "A traveler's details are missing or not valid; check the form.",
   "booking.traveler_unknown": "Traveler not found.",
   "booking.traveler_search_invalid": "The name, birth date or number is not valid; check them.",
+  "booking.cancel_too_late":
+    "The service day has come; this booking can no longer be cancelled. Contact the shop.",
+  "booking.cancel_unavailable":
+    "This product has no cancellation terms; contact the shop to cancel.",
+  "booking.cancel_unpaid": "Cancel an unpaid order as a whole.",
+  "booking.cancel_unknown": "No booking to cancel was found on this order.",
+  "booking.use_booking_cancel":
+    "A dated order is cancelled booking by booking; the refund follows the cancellation terms.",
+  "booking.order_change_unsupported":
+    "A dated product is not returned or exchanged; cancel the booking instead.",
+  "booking.slot_cancelled": "This departure was cancelled; it cannot be opened again.",
+  "booking.departure_cancelled_unpaid":
+    "A departure of this order was cancelled before it was paid; no money can be taken. Cancel the order.",
+  "booking.use_departure_cancel": 'Use "Cancel departure" to cancel it; its bookings are refunded.',
   "addons.required_must_be_free": "A paid add-on cannot be required.",
   "addons.not_addon_line": "This product has no add-ons.",
   "addons.unknown": "The product has no such add-on or option.",

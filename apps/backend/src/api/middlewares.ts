@@ -37,6 +37,7 @@ import { SIGN_IN_EPOCH_ROUTES } from "./http/sign-in-epoch"
 import { ABANDONED_CART_ROUTES } from "./http/abandoned-cart-routes"
 import { ADDON_ROUTES } from "./http/addon-routes"
 import { BOOKING_ROUTES } from "./http/booking-routes"
+import { BOOKING_CANCEL_ROUTES } from "./http/booking-cancel-routes"
 import { BOOKING_STORE_ROUTES } from "./http/booking-store-routes"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { CUSTOMER_ROUTES } from "./http/customer-routes"
@@ -415,6 +416,8 @@ export default defineMiddlewares({
     ...BOOKING_ROUTES,
     // adr/0076 D3: a departure's places in a cart, a dated product's departures for its page
     ...BOOKING_STORE_ROUTES,
+    // adr/0076 D7a: a departure of a dated order cancelled with its refund, a departure cancelled
+    ...BOOKING_CANCEL_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",

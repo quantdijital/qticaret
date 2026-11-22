@@ -77,6 +77,17 @@ export async function confirmHold(
         count,
       ])
     )
+    // The cancellation terms as sold (review O5): a later change to the product's tiers or
+    // zone does not change what this booking gets back
+    await manager.execute(
+      `UPDATE booking_slot_use u
+          SET cancellation = jsonb_build_object(
+                'timezone', b.timezone,
+                'tiers', COALESCE(b.cancellation_tiers, '[]'::jsonb))
+         FROM booking_slot s JOIN bookable b ON b.id = s.bookable_id
+        WHERE u.booking_id = ? AND s.id = u.slot_id`,
+      [bookingId]
+    )
   }
   return { booking_id: bookingId, created: true }
 }
@@ -104,10 +115,13 @@ export async function cancelBooking(manager: Executor, bookingId: string): Promi
     }
     return false
   }
+  // A departure cancelled on its own gave its places back already (D7a)
   const uses = unitsBySlot(
     await rows(
       manager,
-      `SELECT slot_id, units FROM booking_slot_use WHERE booking_id = ? AND deleted_at IS NULL`,
+      `UPDATE booking_slot_use SET cancelled_at = now(), updated_at = now()
+        WHERE booking_id = ? AND cancelled_at IS NULL AND deleted_at IS NULL
+       RETURNING slot_id, units`,
       [bookingId]
     )
   )

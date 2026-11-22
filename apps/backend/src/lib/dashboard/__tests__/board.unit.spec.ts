@@ -30,6 +30,7 @@ describe("boardSlice", () => {
     expect(boardSlice(orders, "to_ship", 0, 20).counts).toEqual({
       all: 5,
       awaiting_payment: 1,
+      planned: 0,
       to_ship: 2,
       shipped: 1,
       delivered: 0,

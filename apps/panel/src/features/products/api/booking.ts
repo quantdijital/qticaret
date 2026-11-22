@@ -22,6 +22,12 @@ export interface PaxEntry {
   max_age?: number
 }
 
+/** "`days_before` days or more before the date, `fee_percent`% is kept" (adr/0076 §8). */
+export interface CancellationTier {
+  days_before: number
+  fee_percent: number
+}
+
 /** `GET /admin/products/:id/bookable`: the product's settings (null until made). */
 export interface Bookable {
   id: string
@@ -34,6 +40,8 @@ export interface Bookable {
   timezone: string
   /** Absent from an older backend: none asked. */
   traveler_fields?: { level: TravelerLevel }
+  /** Absent from an older backend: no customer cancellation. */
+  cancellation_tiers?: CancellationTier[]
 }
 
 export interface BookableAnswer {
@@ -85,6 +93,7 @@ export interface BookableSettingsInput {
   min_participants?: number | null
   pax_by_variant?: Record<string, PaxEntry>
   traveler_fields?: { level: TravelerLevel }
+  cancellation_tiers?: CancellationTier[]
 }
 
 export interface NewSlot {
@@ -179,6 +188,52 @@ export function useUpdateSlot(productId: string) {
     },
   })
 }
+/** What cancelling a departure touches and gives back (adr/0076 Ek D7a); lira, the server's sum. */
+export interface DepartureCancelPreview {
+  slot_id: string
+  status: SlotStatus
+  bookings: number
+  orders: number
+  units: number
+  refund: string
+  /** Lira left to staff to give back by hand (bank transfer, cash, gift card), and its orders. */
+  refund_by_hand: string
+  by_hand_orders: number
+  /** Not every booking was worked out (too many, or one unreadable): the sums are at least these. */
+  partial: boolean
+}
+
+const slotCancelPath = (slotId: string) =>
+  `/admin/booking-slots/${encodeURIComponent(slotId)}/cancel`
+
+export const departureCancelQuery = (slotId: string) =>
+  queryOptions({
+    queryKey: ["booking-slots", slotId, "cancel"],
+    queryFn: async () =>
+      (await sdk.client.fetch<{ preview: DepartureCancelPreview }>(slotCancelPath(slotId))).preview,
+    // Read when the dialog opens; a sale since then is counted again
+    staleTime: 0,
+  })
+
+/**
+ * The departure cancelled: no more sales now, every booking on it refunded
+ * in full and cancelled after the answer (the server's own work). Owner and admin.
+ */
+export function useCancelDeparture(productId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (slotId: string) =>
+      // The server answers with the counts only; the refunds run after it
+      sdk.client.fetch<{ departure: Pick<DepartureCancelPreview, "slot_id" | "bookings"> }>(
+        slotCancelPath(slotId),
+        { method: "POST", body: {} }
+      ),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: BOOKING_KEY(productId) })
+    },
+  })
+}
+
 /**
  * A booked traveler's full ID or passport number (adr/0076 §7): owner and
  * admin, proved again (428 asks), recorded before it answers.

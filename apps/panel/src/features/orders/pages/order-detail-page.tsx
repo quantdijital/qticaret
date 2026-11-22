@@ -18,6 +18,7 @@ import { orderPaymentDetailsQuery } from "@/features/orders/api/payments"
 import { returnRequestsQuery } from "@/features/orders/api/returns"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { StockShortBadge } from "@/features/orders/components/stock-short-badge"
+import { BookingCancelCard } from "@/features/orders/detail/booking-cancel-card"
 import { ItemsCard } from "@/features/orders/detail/items-card"
 import { NotesCard } from "@/features/orders/detail/notes-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
@@ -166,6 +167,7 @@ export function OrderDetailPage() {
       <PageGrid>
         <PageColumn span={8}>
           <ItemsCard order={order} {...(money.data ? { money: money.data } : {})} />
+          <BookingCancelCard orderId={order.id} />
           <PaymentCard
             order={order}
             {...(money.data ? { money: money.data } : {})}

@@ -77,3 +77,26 @@ export interface CardBookingView {
   /** The same moment for `<time dateTime>` (ISO 8601); null with `next`. */
   nextAt: string | null
 }
+
+/**
+ * One departure of a dated order on its page (`OrderPageView.bookings`,
+ * adr/0076 Ek D7a): when, what, and what cancelling it now gives back as
+ * the backend works it out. The cancel is asked first, then confirmed
+ * (`OrderActions.cancelBooking`, the departure alone is sent).
+ */
+export interface OrderBookingView {
+  slotId: string
+  /** "Cumartesi, 12 Aralık 2026 · 09:00", in the product's time zone. */
+  departure: string
+  /** The lines on it, joined ("Kapadokya turu: Yetişkin"). */
+  titles: string
+  cancelled: boolean
+  /** The shopper may cancel it now (the backend decides again). */
+  cancellable: boolean
+  /** What cancelling now gives back, with the share kept, in words; null when not cancellable. */
+  refund: string | null
+  /** When the money comes, in words ("İade 14 gün içinde"); null: as the payment provider does. */
+  refundNote: string | null
+  /** Why not, in words; null: cancellable or already cancelled. */
+  note: string | null
+}

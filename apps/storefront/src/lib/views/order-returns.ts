@@ -78,6 +78,8 @@ export const giftCardUsed = (found: ReturnableRow | null): boolean =>
 const CANCEL_NOTES: ReadonlySet<string> = new Set([
   "orders.cancel_contact_shop",
   "orders.gift_card_used",
+  // A paid dated order: its departures are cancelled one by one, below (adr/0076 Ek D7a)
+  "booking.use_booking_cancel",
 ])
 
 /**

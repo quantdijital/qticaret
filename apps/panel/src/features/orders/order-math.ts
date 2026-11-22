@@ -37,7 +37,8 @@ export function milestones(order: MilestoneFacts, stage: Lifecycle) {
   const captured = earliest(
     payments.filter((row) => !row.canceled_at).map((row) => row.captured_at)
   )
-  const paidStage = stage === "to_ship" || stage === "shipped" || stage === "delivered"
+  const paidStage =
+    stage === "to_ship" || stage === "shipped" || stage === "planned" || stage === "delivered"
   return {
     placed,
     // Held but not yet taken still lets the shop send: dated from the order then

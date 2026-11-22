@@ -32,6 +32,10 @@ export const OPEN_ALERTS: readonly string[] = [
   "booking.confirm_failed",
   // A booking whose travelers could not be attached (adr/0076 §7): the order's number only
   "booking.travelers_attach_failed",
+  // A cancelled booking's money left to staff, a departure's refund given up (adr/0076 Ek
+  // D7a): the order's number and the departure's id only
+  "booking.refund_by_hand",
+  "booking.departure_refund_given_up",
   "payments.orphan_recorded",
   "payments.orphan_refunded",
   "payments.orphan_refund_failed",

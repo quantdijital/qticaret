@@ -54,4 +54,20 @@ describe("whether the shopper may cancel an order", () => {
       "orders.cancel_contact_shop"
     )
   })
+
+  it("sends a paid dated order to its departures' own cancel (adr/0076 Ek D7a)", () => {
+    const dated = {
+      metadata: {
+        qt_booking: { hold_id: "h", slot_id: "s", starts_at: "2027-01-01T07:00:00Z", pax: 1 },
+      },
+    }
+    const unpaid = { provider_id: "pp_bank-transfer_bank-transfer", captured_at: null }
+
+    expect(cancelRefusal({ ...paid(card), items: [dated, { metadata: null }] })).toBe(
+      "booking.use_booking_cancel"
+    )
+    // Nothing taken yet: the whole order may still be cancelled, its places given back
+    expect(cancelRefusal({ ...paid(unpaid), items: [dated] })).toBeNull()
+    expect(cancelRefusal({ ...paid(card), items: [{ metadata: null }] })).toBeNull()
+  })
 })

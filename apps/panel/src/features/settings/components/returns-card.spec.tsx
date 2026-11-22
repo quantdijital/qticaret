@@ -11,7 +11,11 @@ const fetchMock = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
-const SAVED: ReturnsSettings = { withdrawal_days: 14, return_shipping: "shop" }
+const SAVED: ReturnsSettings = {
+  withdrawal_days: 14,
+  return_shipping: "shop",
+  package_travel: false,
+}
 
 const renderCard = () =>
   render(
@@ -46,7 +50,7 @@ describe("ReturnsCard", () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/returns", {
         method: "POST",
-        body: { withdrawal_days: 30 },
+        body: { withdrawal_days: 30, package_travel: false },
       })
     })
   })
@@ -90,6 +94,22 @@ describe("ReturnsCard", () => {
 
     await waitFor(() => {
       expect(days).toHaveValue("30")
+    })
+  })
+
+  it("turns the package travel floor on with its switch (adr/0076 §8)", async () => {
+    renderCard()
+    const toggle = await screen.findByRole("switch", { name: "Paket tur satıyorum" })
+    expect(toggle).not.toBeChecked()
+
+    await userEvent.click(toggle)
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/returns", {
+        method: "POST",
+        body: { withdrawal_days: 14, package_travel: true },
+      })
     })
   })
 })

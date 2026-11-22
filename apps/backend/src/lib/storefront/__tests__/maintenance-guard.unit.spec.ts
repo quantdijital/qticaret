@@ -39,6 +39,7 @@ const OWN_STORE_WRITES: Readonly<Record<string, "closed" | "open">> = {
   "POST /store/gift-cards/balance": "open",
   "POST /store/newsletter": "closed",
   "POST /store/order-lookup": "open",
+  "POST /store/orders/:id/bookings/cancel": "open",
   "POST /store/orders/:id/cancel": "open",
   "POST /store/orders/:id/returns": "open",
   "POST /store/payment-links/:token/cart": "closed",

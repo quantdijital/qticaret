@@ -154,6 +154,61 @@ describe("the theme's order page", () => {
     expect(html).not.toContain("Siparişi iptal et")
   })
 
+  it("draws a dated order's departures, the cancel asked first with what comes back (adr/0076 Ek D7a)", () => {
+    const booking = {
+      slotId: "bkslot_1",
+      departure: "Cumartesi, 12 Aralık 2026 · 09:00",
+      titles: "Kapadokya turu",
+      cancelled: false,
+      cancellable: true,
+      refund: "Şimdi iptal ederseniz 800,00 TL iade edilir (%20 kesinti).",
+      refundNote: "İade en geç 14 gün içinde yapılır.",
+      note: null,
+    }
+    const html = renderPage(atolyeTheme, "OrderPage", {
+      view: view({
+        bookings: [
+          booking,
+          { ...booking, slotId: "bkslot_2", cancellable: false, note: "Mağazayla görüşün." },
+        ],
+      }),
+      actions: { ...actions, cancelBooking: () => Promise.resolve() },
+    })
+    expect(html).toContain("Rezervasyonlarınız")
+    expect(html).toMatch(/<details[^>]*>[\s\S]*?İptal talebi<\/summary>[\s\S]*?800,00 TL/)
+    expect(html).toContain('name="slot_id" value="bkslot_1"')
+    expect(html).not.toContain('value="bkslot_2"')
+    expect(html).toContain("Mağazayla görüşün.")
+    expect(html).toContain("İptali onayla")
+    // No amount travels with the form
+    expect(html).not.toMatch(/name="(amount|refund)"/)
+  })
+
+  it("draws no departures for an order without them, nor a cancel the storefront does not offer", () => {
+    expect(renderPage(atolyeTheme, "OrderPage", { view: view(), actions })).not.toContain(
+      "Rezervasyonlarınız"
+    )
+    const html = renderPage(atolyeTheme, "OrderPage", {
+      view: view({
+        bookings: [
+          {
+            slotId: "bkslot_1",
+            departure: "Cumartesi, 12 Aralık 2026 · 09:00",
+            titles: "",
+            cancelled: false,
+            cancellable: true,
+            refund: "800,00 TL",
+            refundNote: null,
+            note: null,
+          },
+        ],
+      }),
+      actions,
+    })
+    expect(html).toContain("Rezervasyonlarınız")
+    expect(html).not.toContain("İptal talebi")
+  })
+
   it("draws its boxes on the theme's box recipe, the address inside one as an inner box (adr/0067)", () => {
     const html = renderPage(atolyeTheme, "OrderPage", { view: view(), actions })
     // The summary, tracking, documents, lines and steps; the cancel form

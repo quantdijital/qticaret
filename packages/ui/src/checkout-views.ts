@@ -1,5 +1,5 @@
 import type { LineAddonView } from "./addon-views"
-import type { BookingHoldView, CartLineBookingView } from "./booking-views"
+import type { BookingHoldView, CartLineBookingView, OrderBookingView } from "./booking-views"
 import type { TaxLinesView } from "./cart-views"
 import type { TravelersStepView } from "./traveler-views"
 import type { BreadcrumbView, ImageView, LinkView } from "./views"
@@ -357,6 +357,12 @@ export interface OrderPageView {
   payment?: string | null
   /** Opened by a shopper not signed in: the page may offer an account. */
   guest?: boolean
+  /**
+   * A dated order's departures, each with its cancel asked first and then
+   * confirmed (adr/0076 Ek D7a). Null or left out: not a dated order, and
+   * the page is drawn as before.
+   */
+  bookings?: OrderBookingView[] | null
 }
 
 export type OrderStepKey = "placed" | "paid" | "packed" | "shipped" | "delivered"
@@ -378,4 +384,10 @@ export interface OrderActions {
     state: { ok: boolean; error: string | null },
     form: FormData
   ) => Promise<{ ok: boolean; error: string | null }>
+  /**
+   * One departure of a dated order cancelled (adr/0076 Ek D7a). A plain
+   * form: `order_id`, `token`, `slot_id`; never an amount. Left out: the
+   * storefront does not offer it.
+   */
+  cancelBooking?: (form: FormData) => Promise<void>
 }

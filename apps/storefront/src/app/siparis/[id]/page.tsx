@@ -18,6 +18,7 @@ import {
 import { robotsOnly } from "@/lib/seo/metadata"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
+import { orderBookings } from "@/lib/orders/bookings"
 import { orderView } from "@/lib/views/order"
 import { orderActions } from "@/lib/theme-actions"
 import { theme } from "@/theme"
@@ -53,7 +54,7 @@ export default async function OrderPage({
   })
   const fresh = query["yeni"] === "1"
   // What may come back is the backend's count, read fresh (no-store) with the page
-  const [returns, returnable, shipments, invoice, contracts, session, paths, pictures] =
+  const [returns, returnable, shipments, invoice, contracts, session, paths, pictures, bookings] =
     await Promise.all([
       orderReturns(order.id, token),
       orderReturnable(order.id, token),
@@ -64,6 +65,8 @@ export default async function OrderPage({
       // Each line's product page; a product gone or hidden since reads as text
       productPathsOf(order.items),
       linePicturesOf(order.items),
+      // A dated order's departures with what cancelling each gives back (adr/0076 Ek D7a)
+      orderBookings(order.id, token),
     ])
   // The purchase's amounts are the order's to allow too, not the session's alone (ADR-0068
   // slice 5 review L2): a wholesale order opened signed out goes without them
@@ -96,6 +99,7 @@ export default async function OrderPage({
           guest: session === null,
           paths,
           pictures,
+          bookings,
         })}
       />
     </>
