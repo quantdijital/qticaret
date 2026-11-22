@@ -6,6 +6,8 @@ import type SectorPacksModuleService from "../../modules/sector-packs/service"
 import { logger } from "../logging"
 import { applyAttributeTemplates } from "./apply-attributes"
 import { applyCategories } from "./apply-catalog"
+import { applyCatalogDefaults } from "./apply-catalog-defaults"
+import { applyPages } from "./apply-pages"
 import { applyFlags, applySeoTemplates } from "./apply-settings"
 import { checkedPack } from "./check"
 
@@ -48,6 +50,8 @@ export async function applySectorPack(
   await applyCategories(context)
   await applyFlags(context)
   await applySeoTemplates(context)
+  await applyCatalogDefaults(context)
+  await applyPages(context)
   await ledger.markApplied(pack.code, pack.version)
   logger.info(
     { event: "sector_pack.applied", pack: pack.code, version: pack.version, ...counts },

@@ -595,6 +595,8 @@
   "footer.tax": "{office} V.D. {number}",
   "footer.kep": "KEP: {value}",
   "footer.etbis": "ETBİS: {value}",
+  "footer.document": "{name}: {number}",
+  "footer.document_holder": "{name}: {number} ({holder})",
   "listing.all_products": "Tüm ürünler",
   "product.saving": "{amount} tasarruf",
   "product.free_shipping_from": "{amount} ve üzeri siparişlerde kargo ücretsiz.",

@@ -40,3 +40,17 @@ export async function legalIdentity(container: Container): Promise<LegalIdentity
   }
   return { ...facts, gaps: identityGaps(facts) }
 }
+/** The licence line (adr/0076 §12) once it has a name and a number; its holder only when given. */
+export function documentLineOf(identity: {
+  document_name: string | null
+  document_number: string | null
+  document_holder: string | null
+}): { name: string; number: string; holder: string | null } | null {
+  return identity.document_name && identity.document_number
+    ? {
+        name: identity.document_name,
+        number: identity.document_number,
+        holder: identity.document_holder,
+      }
+    : null
+}

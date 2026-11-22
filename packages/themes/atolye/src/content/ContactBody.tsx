@@ -147,8 +147,9 @@ function Imprint({
       <dl
         className={`grid gap-x-8 gap-y-3 sm:grid-cols-2 sm:gap-y-5 ${wide ? "lg:grid-cols-3" : ""}`}
       >
-        {rows.map((row) => (
-          <div key={row.label} className="flex min-w-0 flex-col gap-0.5">
+        {rows.map((row, index) => (
+          // A shop may name its document as another row is labelled: the place keeps them apart
+          <div key={`${row.label}-${String(index)}`} className="flex min-w-0 flex-col gap-0.5">
             <dt className="text-sm text-text-3">{row.label}</dt>
             <dd className="flex items-center gap-1 text-text">
               <span className="min-w-0 break-words">{row.value}</span>

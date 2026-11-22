@@ -1,0 +1,12 @@
+[
+  { "handle": "yurt-ici-turlar", "name": "Yurt İçi Turlar" },
+  { "handle": "kultur-turlari", "name": "Kültür Turları", "parent": "yurt-ici-turlar" },
+  { "handle": "doga-ve-trekking", "name": "Doğa ve Trekking", "parent": "yurt-ici-turlar" },
+  { "handle": "gunubirlik-turlar", "name": "Günübirlik Turlar", "parent": "yurt-ici-turlar" },
+  { "handle": "yurt-disi-turlar", "name": "Yurt Dışı Turlar" },
+  { "handle": "avrupa-turlari", "name": "Avrupa Turları", "parent": "yurt-disi-turlar" },
+  { "handle": "uzak-dogu-turlari", "name": "Uzak Doğu Turları", "parent": "yurt-disi-turlar" },
+  { "handle": "vizesiz-turlar", "name": "Vizesiz Turlar", "parent": "yurt-disi-turlar" },
+  { "handle": "gemi-turlari", "name": "Gemi Turları" },
+  { "handle": "etkinlik-ve-atolyeler", "name": "Etkinlik ve Atölyeler" }
+]

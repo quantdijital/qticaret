@@ -94,6 +94,8 @@ export const wizardSchema = z
   .object({
     // F3.2: digital and service products skip shipping (flag catalog.non_physical)
     kind: z.enum(["physical", "digital", "service"]),
+    // adr/0076 §2: a service sold by departure (flag catalog.booking); the shop's default (§12)
+    booking_mode: z.enum(["none", "departure"]),
     title: z.string().trim().min(2, { message: "products.errors.title" }).max(MAX_TEXT),
     handle: z
       .string()
@@ -167,6 +169,7 @@ export const BLANK_VARIANT = {
 
 export const defaultWizardValues = (): WizardValues => ({
   kind: "physical",
+  booking_mode: "none",
   title: "",
   handle: "",
   description: "",

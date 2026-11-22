@@ -1,6 +1,7 @@
 import {
   articleJsonLd,
   breadcrumbJsonLd,
+  datedJsonLd,
   listingJsonLd,
   productJsonLd,
   profilePageJsonLd,
@@ -286,5 +287,17 @@ function structuredData(
               canonical
             )
           : null
-  return [page, breadcrumbJsonLd(breadcrumbs)].filter((block): block is JsonLd => block !== null)
+  // adr/0076 §10: a dated product's trip or events beside its `Product`
+  const dated = subject.product?.dated
+    ? datedJsonLd(subject.product.dated, {
+        name: subject.product.name,
+        description,
+        images: subject.product.images,
+        url: canonical,
+        shop,
+      })
+    : []
+  return [page, ...dated, breadcrumbJsonLd(breadcrumbs)].filter(
+    (block): block is JsonLd => block !== null
+  )
 }

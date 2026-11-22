@@ -71,6 +71,15 @@ function checkItems(pack: SectorPack & Pick<LoadedSectorPack, "scenes">): void {
   if (scene) {
     fail(`scene ${scene} twice`)
   }
+  const page = repeated((pack.pages ?? []).map((each) => each.handle))
+  if (page) {
+    fail(`page ${page} twice`)
+  }
+  const defaults = pack.catalog?.new_product
+  // adr/0076 §2: a product sold by date is a service
+  if (defaults && defaults.booking_mode !== "none" && defaults.kind !== "service") {
+    fail(`catalog.json: booking_mode ${defaults.booking_mode} needs kind service`)
+  }
 }
 
 /** One pack's folder read and checked; throws `SectorPackError` naming what is wrong. */
@@ -103,6 +112,8 @@ export function readPack(dir: string, code: string): LoadedSectorPack {
     categories: readFile(dir, code, "categories.json") ?? [],
     flags: readFile(dir, code, "flags.json") ?? [],
     seo: readFile(dir, code, "seo.json") ?? {},
+    catalog: readFile(dir, code, "catalog.json") ?? {},
+    pages: readFile(dir, code, "pages.json") ?? [],
     presets: readPresets(dir, code),
     scenes: readFile(dir, code, "scenes.json") ?? [],
   }

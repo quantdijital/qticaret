@@ -20,6 +20,10 @@ export interface LegalSettings {
   kep: string | null
   etbis: string | null
   same_as: string[]
+  /** A licence its trade asks the shop to show (adr/0076 §12): shown once name and number are given. */
+  document_name: string | null
+  document_number: string | null
+  document_holder: string | null
 }
 
 /** One range the shop answers in (adr/0048): ISO weekday 1 (Monday) … 7, `HH:MM`, `closes` up to `24:00`. */

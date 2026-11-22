@@ -6,6 +6,8 @@ import { mergePatch } from "../../modules/platform-settings/sections/define"
 import { seoSection } from "../../modules/platform-settings/sections/seo"
 import { duplicateKeys, strayGroups } from "../../modules/product-attributes/validation"
 import { isCleanText } from "../security/text"
+import { catalogProblems } from "./apply-catalog-defaults"
+import { pageProblems } from "./apply-pages"
 
 /**
  * A sector pack checked with this shop's own rules (adr/0061 C12): every
@@ -101,6 +103,8 @@ export function packProblems(pack: SectorPack, env: NodeJS.ProcessEnv = process.
     ...flagProblems(pack, env),
     ...seoProblems(pack),
     ...categoryProblems(pack),
+    ...catalogProblems(pack),
+    ...pageProblems(pack),
   ]
 }
 
@@ -112,6 +116,8 @@ export function checkedPack(pack: SectorPack, env: NodeJS.ProcessEnv = process.e
     ...flagProblems(pack, env),
     ...seoProblems(pack),
     ...categoryProblems(pack),
+    ...catalogProblems(pack),
+    ...pageProblems(pack),
   ]
   if (problems.length > 0) {
     throw new SectorPackInvalidError(pack.code, problems)

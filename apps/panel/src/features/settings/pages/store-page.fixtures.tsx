@@ -29,6 +29,9 @@ export const LEGAL: LegalSettings = {
   kep: null,
   etbis: null,
   same_as: ["https://instagram.com/ornek"],
+  document_name: null,
+  document_number: null,
+  document_holder: null,
 }
 
 export const APPEARANCE: AppearanceSettings = {

@@ -4,6 +4,7 @@ import { aiScenesSection } from "./ai-scenes"
 import { appearanceSection } from "./appearance"
 import { bankTransferSection } from "./bank-transfer"
 import { cashOnDeliverySection } from "./cash-on-delivery"
+import { catalogSection } from "./catalog"
 import type { SectionDefinition } from "./define"
 import { inventorySection } from "./inventory"
 import { invoicingSection } from "./invoicing"
@@ -30,6 +31,7 @@ export type { AiScenesSettings, OwnScene } from "./ai-scenes"
 export type { AppearanceSettings } from "./appearance"
 export type { BankTransferSettings } from "./bank-transfer"
 export type { CashOnDeliverySettings } from "./cash-on-delivery"
+export type { CatalogSettings } from "./catalog"
 export type { InventorySettings } from "./inventory"
 export type { CarrierIdentity, InvoiceCarrier, InvoicingSettings } from "./invoicing"
 export type { LegalSettings } from "./legal"
@@ -82,6 +84,7 @@ export const SECTIONS = {
   payment_links: paymentLinksSection,
   ai_scenes: aiScenesSection,
   ai_guidance: aiGuidanceSection,
+  catalog: catalogSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

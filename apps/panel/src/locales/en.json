@@ -542,11 +542,18 @@
           "tax_number": "Tax number or Turkish ID number",
           "mersis": "MERSİS number",
           "kep": "KEP address",
-          "etbis": "ETBİS registration number"
+          "etbis": "ETBİS registration number",
+          "document_name": "Document name",
+          "document_number": "Document number",
+          "document_holder": "Document holder"
         },
         "taxNumberHint": "A company's 10-digit tax number; a sole trader's 11-digit Turkish ID number.",
         "mersisHint": "16 digits. Leave empty if a sole trader has none.",
-        "etbisHint": "The number given after registering with the Electronic Commerce Information System."
+        "etbisHint": "The number given after registering with the Electronic Commerce Information System.",
+        "document": "Trade licence",
+        "documentHint": "A document your trade asks you to show (e.g. a travel agency licence). Once its name and number are given, it shows in the storefront's footer and imprint under the name you write.",
+        "documentNameHint": "Shown under this name, e.g. TÜRSAB licence no.",
+        "documentHolderHint": "When the document is held under a name other than your company title."
       },
       "social": {
         "title": "Social accounts",

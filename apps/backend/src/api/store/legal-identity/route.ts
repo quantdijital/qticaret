@@ -5,7 +5,7 @@ import type MediaModuleService from "../../../modules/media/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type { StoreSettings } from "../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
-import { legalIdentity } from "../../../workflows/legal/identity"
+import { documentLineOf, legalIdentity } from "../../../workflows/legal/identity"
 
 /** The ETBİS QR code's image with what the media library knows of it; null without one. */
 async function etbisQr(scope: MedusaContainer) {
@@ -32,8 +32,10 @@ async function etbisQr(scope: MedusaContainer) {
  * GET /store/legal-identity (F13.9, adr/0041 §3, adr/0048): the shop's
  * legal identity and how it is reached, for the storefront's footer, its
  * contact page and its WhatsApp buttons; and its ETBİS QR code's image
- * (adr/0046 Ek 2026-11-04). Public by law or by the shop's choice; what
- * the shop has not entered comes back as null (hours: none).
+ * (adr/0046 Ek 2026-11-04); and the licence line its trade asks it to show
+ * (adr/0076 §12), null until named and numbered. Public by law or by the
+ * shop's choice; what the shop has not entered comes back as null (hours:
+ * none).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const [identity, qr] = await Promise.all([legalIdentity(req.scope), etbisQr(req.scope)])
@@ -50,6 +52,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       etbis: identity.etbis,
       etbis_qr: qr,
       same_as: identity.same_as,
+      document: documentLineOf(identity),
       email: identity.contact_email,
       phone: identity.contact_phone,
       whatsapp: identity.whatsapp_phone,

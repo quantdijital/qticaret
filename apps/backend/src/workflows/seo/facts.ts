@@ -27,6 +27,7 @@ export const PRODUCT_FACT_FIELDS = [
   "product_extension.kind",
   "product_extension.withdrawal_excluded",
   "product_extension.restriction",
+  "product_extension.booking_mode",
   "categories.id",
   "categories.mpath",
   "attribute_template.definitions.scope",
@@ -69,6 +70,8 @@ export interface FactRow {
     kind?: string | null
     withdrawal_excluded?: boolean | null
     restriction?: string | null
+    /** adr/0076 §2: sold by date (`none` or absent: not); its offers name no shipping or returns. */
+    booking_mode?: string | null
   } | null
   categories?: ({ id: string; mpath?: string | null } | null)[] | null
   attribute_template?: {
@@ -201,6 +204,8 @@ export function productFacts(
 ): ProductFacts {
   const byOption = propertiesByOption(row)
   const physical = (row.product_extension?.kind ?? "physical") === "physical"
+  // adr/0076 §10: a dated product names no shipping or return policy in its offers
+  const dated = (row.product_extension?.booking_mode ?? "none") !== "none"
   const images = [...(row.images ?? [])]
     .filter((image): image is { url: string; rank?: number | null } => image !== null)
     .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
@@ -252,25 +257,27 @@ export function productFacts(
       (property, index, all) => used.has(property) && all.indexOf(property) === index
     ),
     variants,
-    delivery: shipping
-      ? {
-          handling: [shipping.settings.handling_days_min, shipping.settings.handling_days_max],
-          transit: [shipping.settings.transit_days_min, shipping.settings.transit_days_max],
-        }
-      : null,
+    delivery:
+      shipping && !dated
+        ? {
+            handling: [shipping.settings.handling_days_min, shipping.settings.handling_days_max],
+            transit: [shipping.settings.transit_days_min, shipping.settings.transit_days_max],
+          }
+        : null,
     // F13.6: the shop's return policy, this product's exclusion. A physical
     // product's mark is a sealed good, returnable unopened (adr/0052 Ek
     // 2026-11-03); a withdrawal's return costs the shopper nothing (MSY md. 12/5)
-    returnPolicy: returns
-      ? {
-          days: returns.withdrawal_days,
-          freeReturn: true,
-          excluded: productMarkOf(
-            row.product_extension?.withdrawal_excluded,
-            row.product_extension?.kind
-          ).excluded,
-        }
-      : null,
+    returnPolicy:
+      returns && !dated
+        ? {
+            days: returns.withdrawal_days,
+            freeReturn: true,
+            excluded: productMarkOf(
+              row.product_extension?.withdrawal_excluded,
+              row.product_extension?.kind
+            ).excluded,
+          }
+        : null,
     adultConsideration: adultConsiderationOf(row, restricted),
   }
 }
