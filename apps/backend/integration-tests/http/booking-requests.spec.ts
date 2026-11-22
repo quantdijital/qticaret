@@ -10,6 +10,7 @@ import type { Tour } from "../helpers/booking-tour"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { loadTrAddressFixture } from "../helpers/tr-address"
 import { stockShop } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
@@ -73,6 +74,7 @@ medusaIntegrationTestRunner({
     beforeEach(async () => {
       phone = `0532 123 45 ${String((dialled += 1))}`
       const container = getContainer()
+      await loadTrAddressFixture(container)
       shop = await stockShop(container)
       store = await createStorefront(container)
       admin = await createAdminUser(http, container)
