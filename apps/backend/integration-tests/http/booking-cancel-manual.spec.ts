@@ -1,13 +1,11 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import {
-  capturePaymentWorkflow,
-  createPaymentCollectionForCartWorkflow,
-} from "@medusajs/medusa/core-flows"
+import { createPaymentCollectionForCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
 import { ORDER_REFUNDS_MODULE } from "../../src/modules/order-refunds"
 import type OrderRefundsModuleService from "../../src/modules/order-refunds/service"
+import { confirmOrderBookings } from "../../src/workflows/booking/orders"
 import { createAdminUser } from "../helpers/admin"
 import { emptyCart, publishTour } from "../helpers/booking-tour"
 import type { Tour } from "../helpers/booking-tour"
@@ -190,7 +188,9 @@ medusaIntegrationTestRunner({
       await flag("promotions.gift_cards", true)
       const made = await http.post<{ gift_card: { code: string } }>(
         "/admin/gift-cards",
-        { currency_code: "try", value: 400 },
+        // Above the tour's 900: the card pays it all, no payment taken (only a
+        // hosted card form's payment is refunded on its own, D7a security review)
+        { currency_code: "try", value: 1000 },
         { headers: admin.headers }
       )
       const container = getContainer()
@@ -201,21 +201,18 @@ medusaIntegrationTestRunner({
         { code: made.data.gift_card.code },
         { headers: store.headers }
       )
-      const { result: collection } = await createPaymentCollectionForCartWorkflow(container).run({
-        input: { cart_id: cartId },
-      })
-      const orderId =
-        (await completeWithSystemPayment(container, cartId, collection.id)).order_id ?? ""
+      await http.post(
+        `/store/carts/${cartId}/payment-session`,
+        { provider_id: "credit" },
+        { headers: store.headers }
+      )
+      const placed = await http.post<{ order: { id: string } }>(
+        `/store/carts/${cartId}/complete`,
+        {},
+        { headers: store.headers }
+      )
+      const orderId = placed.data.order.id
       await container.resolve(Modules.ORDER).updateOrders(orderId, { customer_id: customer.id })
-      const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-        entity: "order",
-        fields: ["payment_collections.payments.id"],
-        filters: { id: orderId },
-      })
-      const order = (data as { payment_collections: { payments: { id: string }[] }[] }[])[0]
-      await capturePaymentWorkflow(container).run({
-        input: { payment_id: order?.payment_collections[0]?.payments[0]?.id ?? "" },
-      })
       await eventually(
         () => bookings().listBookings({ order_id: orderId }),
         (list) => list.length === 1
@@ -258,6 +255,24 @@ medusaIntegrationTestRunner({
       expect(copied?.timezone).toBe("Europe/Istanbul")
       expect(copied?.tiers).toHaveLength(TIERS.length)
       expect(preview.data.departures[0]?.fee_percent).toBe(20)
+    })
+
+    it("takes a placed order's places again by its lines' units when its hold is gone (D7a security review)", async () => {
+      const orderId = await transferOrder([[tour.slotId, 2]])
+      const [booking] = await bookings().listBookings({ order_id: orderId })
+      // As if the hold was swept before the confirmation: no booking, the places free
+      await bookings().cancelBooking(booking?.id ?? "")
+      // The module refuses writing its rows by hand; the test takes the booking away in SQL
+      await getContainer()
+        .resolve(ContainerRegistrationKeys.PG_CONNECTION)
+        .raw("UPDATE booking SET deleted_at = now() WHERE id = ?", [booking?.id ?? ""])
+      const freed = (await slotRow(tour.slotId))?.sold
+
+      const outcome = await confirmOrderBookings(getContainer(), orderId)
+
+      expect(freed).toBe(0)
+      expect(outcome).toBe("retaken")
+      expect((await slotRow(tour.slotId))?.sold).toBe(2)
     })
 
     it("gives up carts' holds on a cancelled departure; their checkout refuses (D5)", async () => {

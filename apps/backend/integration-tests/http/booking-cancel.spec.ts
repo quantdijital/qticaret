@@ -1,23 +1,21 @@
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import {
-  capturePaymentWorkflow,
-  createPaymentCollectionForCartWorkflow,
-} from "@medusajs/medusa/core-flows"
+import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { fakePaytrAccount, startFakePaytr } from "@qticaret/testing"
+import type { FakePaytr } from "@qticaret/testing"
 import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
 import { ORDER_REFUNDS_MODULE } from "../../src/modules/order-refunds"
 import type OrderRefundsModuleService from "../../src/modules/order-refunds/service"
 import { processDepartureCancel } from "../../src/workflows/booking/departure-cancel"
 import { createAdminUser } from "../helpers/admin"
-import { emptyCart, publishTour } from "../helpers/booking-tour"
+import { emptyCart, payByPaytr, publishTour } from "../helpers/booking-tour"
 import type { Tour } from "../helpers/booking-tour"
-import { completeWithSystemPayment } from "../helpers/checkout"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { connectPaytr } from "../helpers/paytr"
 import { stockShop } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
@@ -42,6 +40,8 @@ const TIERS = [
   { days_before: 7, fee_percent: 20 },
   { days_before: 0, fee_percent: 100 },
 ]
+// A made-up PayTR account, fresh per run; the fake server checks every signature with it
+const account = fakePaytrAccount()
 
 /**
  * adr/0076 D7a: a dated order's departure cancelled by its shopper (the
@@ -52,7 +52,8 @@ const TIERS = [
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let admin: Awaited<ReturnType<typeof createAdminUser>>
+    let fake: FakePaytr
+    let admin: { headers: Record<string, string> }
     let store: Storefront
     let shop: StockShop
     let customer: TestCustomer
@@ -75,28 +76,18 @@ medusaIntegrationTestRunner({
       (await bookings().listBookingSlots({ id: slotId }))[0]?.sold
     const refundsOf = (orderId: string) => ledger().listOrderRefunds({ order_id: orderId })
 
-    /** A dated order paid by card (the system provider, captured), made `owner`'s. */
+    /**
+     * A dated order paid by card through PayTR's form (only a hosted card
+     * form is refunded on its own), made `owner`'s.
+     */
     const datedOrder = async (owner: TestCustomer, lines: [string, number][]) => {
       const container = getContainer()
       const cartId = await emptyCart(container, shop)
       for (const [slotId, quantity] of lines) {
         expect((await book(cartId, slotId, quantity)).status).toBe(200)
       }
-      const { result: collection } = await createPaymentCollectionForCartWorkflow(container).run({
-        input: { cart_id: cartId },
-      })
-      const placed = await completeWithSystemPayment(container, cartId, collection.id)
-      const orderId = placed.order_id ?? ""
+      const orderId = await payByPaytr(http, container, fake, store.headers, cartId)
       await container.resolve(Modules.ORDER).updateOrders(orderId, { customer_id: owner.id })
-      const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-        entity: "order",
-        fields: ["payment_collections.payments.id"],
-        filters: { id: orderId },
-      })
-      const order = (data as { payment_collections: { payments: { id: string }[] }[] }[])[0]
-      await capturePaymentWorkflow(container).run({
-        input: { payment_id: order?.payment_collections[0]?.payments[0]?.id ?? "" },
-      })
       await eventually(
         () => bookings().listBookings({ order_id: orderId }),
         (list) => list.length === 1
@@ -118,12 +109,21 @@ medusaIntegrationTestRunner({
         )
       )
 
+    beforeAll(async () => {
+      fake = await startFakePaytr(account)
+      // Read on the first PayTR call (lib/payments/paytr/client.ts)
+      process.env["PAYTR_BASE_URL"] = fake.url
+    })
+    afterAll(async () => {
+      delete process.env["PAYTR_BASE_URL"]
+      await fake.close()
+    })
     beforeEach(async () => {
       const container = getContainer()
       await loadTrAddressFixture(container)
       shop = await stockShop(container)
       store = await createStorefront(container)
-      admin = await createAdminUser(http, container)
+      admin = await connectPaytr(http, container, account)
       customer = await registerCustomer(http, store)
       await flag("catalog.non_physical", true)
       await flag("catalog.booking", true)
