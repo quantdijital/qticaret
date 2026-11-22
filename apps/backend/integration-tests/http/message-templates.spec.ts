@@ -42,7 +42,8 @@ medusaIntegrationTestRunner({
 
       expect(list.status).toBe(200)
       // adr/0068 Ek 2026-11-15 (2): staff open wholesalers with a password, no mail goes
-      expect(list.data.templates).toHaveLength(35)
+      // adr/0076 Ek D7b: four booking messages
+      expect(list.data.templates).toHaveLength(39)
       const names = list.data.templates.map((template) => template.name)
       expect(names).not.toContain("account.wholesale_invite")
       expect(names).not.toContain("account.wholesale_enabled")

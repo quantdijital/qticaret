@@ -48,7 +48,8 @@ async function orderOf(container: Container, orderId: string): Promise<OrderRow 
     ],
     filters: { id: orderId },
   })
-  return (data as OrderRow[])[0] ?? null
+  // Typed as the whole Order in CI; only these fields are read
+  return (data as unknown as OrderRow[])[0] ?? null
 }
 
 const greetingOf = (order: OrderRow): string =>
