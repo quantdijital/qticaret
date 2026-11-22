@@ -12,6 +12,7 @@ import type {
   ShopRatingView,
   Translate,
 } from "@qticaret/ui"
+import { withCardBooking } from "./card-booking"
 import { unrated } from "./card-shown"
 import type {
   StoreCardFacts,
@@ -80,8 +81,9 @@ export function withCardFacts(
     }
     const quick = fact.quick_add && card.price && card.available ? fact.quick_add : null
     const rating = options.showRating ? cardRating(fact.rating, t) : null
+    // A dated product's from price and next departure (adr/0076 §10); any other card as it was
     const read = {
-      ...card,
+      ...withCardBooking(card, fact.booking),
       stock: fact.stock,
       quickAdd: quick ? { variantId: quick.variant_id } : null,
     }

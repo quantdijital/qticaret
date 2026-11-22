@@ -11,6 +11,7 @@ import type {
   StoreReviewSummary,
 } from "@qticaret/types"
 import { isStoreApiError } from "./errors"
+import { liraRegion } from "./requests"
 import { storeGet, storePublicFind, storePublicGet } from "./server"
 
 /**
@@ -92,17 +93,26 @@ export const categoryDescription = cache(async (id: string): Promise<string | nu
 // The card facts route takes a hundred products at a time
 const FACTS_CHUNK = 100
 
-/** A page of cards' stock buckets and quick-add variants, by product id; never cached (stock). */
+/**
+ * A page of cards' stock buckets and quick-add variants, by product id;
+ * never cached (stock). A dated product's from price is asked in the
+ * lira region (adr/0076 §10); without it, the backend's lira.
+ */
 export async function cardFacts(
   productIds: readonly string[]
 ): Promise<Record<string, StoreCardFacts>> {
   const unique = [...new Set(productIds)]
   const found: Record<string, StoreCardFacts> = {}
+  if (unique.length === 0) {
+    return found
+  }
+  const region = await liraRegion().catch(() => null)
   for (let start = 0; start < unique.length; start += FACTS_CHUNK) {
     const { facts } = await orNone(
       () =>
         storeGet<{ facts: Record<string, StoreCardFacts> }>("/store/card-facts", {
           id: unique.slice(start, start + FACTS_CHUNK),
+          ...(region ? { region_id: region.id } : {}),
         }),
       { facts: {} }
     )
