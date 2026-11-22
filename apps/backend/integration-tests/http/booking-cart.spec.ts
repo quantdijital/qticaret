@@ -668,9 +668,14 @@ medusaIntegrationTestRunner({
           headers: store.headers,
         })
       )
+      // A cart that is not there (or not this storefront's) is not found (security review D-2/D-3)
+      const unknown = await settle(
+        http.get<Answer>(`/store/carts/cart_01UNKNOWN/bookings`, { headers: store.headers })
+      )
       const started = await startPayment(cartId)
       const placed = await post(`/store/carts/${cartId}/complete`, {})
 
+      expect(unknown.status).toBe(404)
       expect(shipped.status).toBe(200)
       expect(methodsBefore).toBe(1)
       expect(removed.status).toBe(200)

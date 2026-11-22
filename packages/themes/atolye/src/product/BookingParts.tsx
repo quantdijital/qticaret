@@ -145,7 +145,7 @@ export function Counts({
         {categories.map((category) => {
           const count = counts[category.variantId] ?? 0
           const price = departure?.prices.find((each) => each.variantId === category.variantId)
-          const label = words.countOf.replace("{title}", category.title)
+          const label = words.countOf.replace("{title}", () => category.title)
           return (
             <li
               key={category.variantId}
@@ -163,7 +163,7 @@ export function Counts({
               <div role="group" aria-label={label} className="flex shrink-0 items-center gap-1">
                 <button
                   type="button"
-                  aria-label={words.decrease.replace("{title}", category.title)}
+                  aria-label={words.decrease.replace("{title}", () => category.title)}
                   disabled={count <= 0}
                   onClick={() => {
                     change(category.variantId, count - 1)
@@ -181,7 +181,7 @@ export function Counts({
                 <input type="hidden" name={`qty_${category.variantId}`} value={count} />
                 <button
                   type="button"
-                  aria-label={words.increase.replace("{title}", category.title)}
+                  aria-label={words.increase.replace("{title}", () => category.title)}
                   disabled={!canAdd(category)}
                   onClick={() => {
                     change(category.variantId, count + 1)

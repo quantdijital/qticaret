@@ -92,6 +92,7 @@ describe("parseEnv", () => {
         ...s3Env,
         CREDENTIALS_ENCRYPTION_KEY: hexKey(),
         AUTH_MFA_ENCRYPTION_KEY: hexKey(),
+        STOREFRONT_IP_SECRET: hexKey(),
         BACKEND_URL: "https://api.example.com",
         NODE_ENV: env,
       }).REDIS_URL
@@ -120,6 +121,7 @@ describe("parseEnv", () => {
       ...s3Env,
       CREDENTIALS_ENCRYPTION_KEY: hexKey(),
       AUTH_MFA_ENCRYPTION_KEY: hexKey(),
+      STOREFRONT_IP_SECRET: hexKey(),
       BACKEND_URL: "https://api.example.com",
       NODE_ENV: "production",
     }
@@ -308,6 +310,16 @@ describe("parseEnv", () => {
     )
     expect(parseEnv(validEnv).AUTH_MFA_ENCRYPTION_KEY).toBeUndefined()
   })
+
+  it.each(["production", "staging"])(
+    "requires the storefront's address secret in %s (adr/0076 Ek D5)",
+    (env) => {
+      expect(errorOf({ ...validEnv, NODE_ENV: env })).toContain(
+        "STOREFRONT_IP_SECRET: is required in production and staging"
+      )
+      expect(parseEnv(validEnv).STOREFRONT_IP_SECRET).toBeUndefined()
+    }
+  )
 
   it("keeps the provider account key apart from the PII keys", () => {
     expect(

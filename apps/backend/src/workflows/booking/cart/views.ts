@@ -1,11 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { bookingMarkOf } from "../../../lib/booking/cart-lines"
 import { bookingService } from "./target"
 
 type Container = Pick<MedusaContainer, "resolve">
 
 interface CartRow {
+  sales_channel_id?: string | null
   items?:
     | ({
         id: string
@@ -27,10 +28,15 @@ interface CartRow {
  * before (adr/0076 Ek D3); the server takes it off on the cart's change and
  * at the payment's start (Ek D5), so this is true only for a moment.
  */
-export async function bookingCartView(container: Container, cartId: string) {
+export async function bookingCartView(
+  container: Container,
+  cartId: string,
+  salesChannelIds: string[]
+) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "cart",
     fields: [
+      "sales_channel_id",
       "items.id",
       "items.variant_id",
       "items.quantity",
@@ -41,7 +47,11 @@ export async function bookingCartView(container: Container, cartId: string) {
     ],
     filters: { id: cartId },
   })
-  const cart = (data[0] ?? {}) as CartRow
+  const cart = (data as CartRow[])[0]
+  // Only a cart of this storefront's sales channel; none, not found (security review D-2/D-3)
+  if (!cart || !salesChannelIds.includes(cart.sales_channel_id ?? "")) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart.unknown")
+  }
   const items = (cart.items ?? []).flatMap((item) => (item ? [item] : []))
   const hold = await bookingService(container).cartHold(cartId)
   return {

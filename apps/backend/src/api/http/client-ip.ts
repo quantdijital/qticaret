@@ -1,6 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { parseEnv } from "../../lib/env"
-import { verifiedClientAddress } from "../../lib/security/client-ip"
+import { logger } from "../../lib/logging"
+import { CLIENT_IP_HEADERS, verifiedClientAddress } from "../../lib/security/client-ip"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import type { RateLimitProfile } from "../../lib/security/rate-limit/profiles"
 
@@ -13,8 +14,26 @@ function secret(): string | undefined {
   return storefrontSecret
 }
 
-/** What the storefront's server signed on this request, if anything valid (see `lib/security/client-ip`). */
-const vouched = (req: MedusaRequest) => verifiedClientAddress(req.headers, secret())
+const MISMATCH_WARN_EVERY_MS = 10 * 60_000
+let lastMismatchWarn = 0
+
+/**
+ * What the storefront's server signed on this request, if anything valid
+ * (see `lib/security/client-ip`). A signature sent but refused (no or a
+ * different secret here, clocks apart) warns now and then: every shopper
+ * would quietly count as the storefront's one address (security review D-1).
+ */
+function vouched(req: MedusaRequest): { ip: string | null } | null {
+  const result = verifiedClientAddress(req.headers, secret())
+  if (result === null && req.headers[CLIENT_IP_HEADERS.signature] !== undefined) {
+    const now = Date.now()
+    if (now - lastMismatchWarn >= MISMATCH_WARN_EVERY_MS) {
+      lastMismatchWarn = now
+      logger.warn({ event: "security.storefront_signature_refused" })
+    }
+  }
+  return result
+}
 
 /**
  * The shopper's address for limits, fraud checks and evidence (adr/0046 §5):
