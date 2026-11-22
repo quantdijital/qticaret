@@ -28,6 +28,7 @@ import type { NewsletterLookView } from "./newsletter-views"
 import type { ContentPageSectionView } from "./page-text-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ProductsSectionView } from "./shelf-views"
+import type { StatsSectionView, StepsSectionView } from "./points-views"
 import type { StripGallerySectionView } from "./strip-views"
 import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
 
@@ -101,6 +102,8 @@ export type HomeSectionView = {
   | MarqueeSectionView
   | BannerSectionView
   | StripGallerySectionView
+  | StatsSectionView
+  | StepsSectionView
   | {
       id: string
       type: "categories"

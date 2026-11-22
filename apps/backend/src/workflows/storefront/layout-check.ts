@@ -57,6 +57,10 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "strip_gallery") {
     return section.items.flatMap((each) => (each.link ? [each.link] : []))
   }
+  // The numbered steps' one link under them (adr/0077 §10)
+  if (section.type === "steps") {
+    return section.link ? [section.link] : []
+  }
   // The catalog header's highlighted last link and its strip's note (adr/0049 Ek 2026-11-15)
   if (section.type === "header_bar" && section.variant === "catalog") {
     return [section.highlight_link, section.strip_note_link].flatMap((link) => (link ? [link] : []))

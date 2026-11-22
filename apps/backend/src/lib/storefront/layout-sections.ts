@@ -18,6 +18,8 @@ import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
 import { footerRichText, placedRichText, richText } from "./sections/rich-text"
 import { priceBands } from "./sections/price-bands"
+import { stats } from "./sections/stats"
+import { steps } from "./sections/steps"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -57,6 +59,8 @@ export const pageSection = z.discriminatedUnion(
     counted("posts", 6, 3),
     counted("reviews", 12, 6),
     googleRating,
+    stats,
+    steps,
     richText,
     trustBadges,
     newsletter,
