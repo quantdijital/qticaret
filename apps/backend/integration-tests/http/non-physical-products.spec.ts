@@ -204,8 +204,13 @@ medusaIntegrationTestRunner({
       }
       // Flag off, the product physical: shipped as before (K11)
       expect(await readLines(physicalId)).toEqual([true])
+      // A shipped cart completes only with a shipping method (Medusa refuses it otherwise)
+      const { data: options } = await container
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "shipping_option", fields: ["id"] })
       const shippedOrder = await placeOrder(container, {
         ...demo,
+        shippingOptionId: (options[0] as { id: string } | undefined)?.id,
         items: [{ variant_id: physicalId, quantity: 1 }],
         address: { first_name: "Ayşe", last_name: "Yılmaz", address_1: "Demo Sokak 1" },
       })
