@@ -785,6 +785,22 @@
           "enumItems": [],
           "mappedType": "json"
         },
+        "booking_mode": {
+          "name": "booking_mode",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'none'",
+          "comment": null,
+          "enumItems": ["none", "departure", "range"],
+          "mappedType": "enum"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
