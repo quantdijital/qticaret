@@ -19,6 +19,7 @@ import { repriceAddonLinesStep } from "../addons/checkout"
 import { assertWholesaleCartStep, checkWholesaleCartStep } from "../wholesale/checkout-start"
 import { applyPaymentFeeStep } from "./steps/payment-fee"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
+import { dropUnneededShippingStep } from "../checkout/unneeded-shipping"
 
 /**
  * Set on the cart by this workflow alone (storefronts cannot write `qt_`
@@ -102,6 +103,8 @@ export const startCreditCheckoutWorkflow = createWorkflow(
       sales_channel_ids: input.sales_channel_ids,
     })
     acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
+    // A shipping method left on a cart that ships nothing goes (adr/0076 Ek D5)
+    dropUnneededShippingStep({ cart_id: input.cart_id })
     // A gift card is never paid with gift cards or store credit (adr/0025 Ek 2026-11-03)
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,

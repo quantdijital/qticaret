@@ -19,6 +19,7 @@ import type { HostedCheckout } from "../../lib/payments/checkout"
 import { checkCartStockStep } from "./steps/cart-stock"
 import { offlineSessionDataStep } from "./steps/offline-session"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
+import { dropUnneededShippingStep } from "../checkout/unneeded-shipping"
 import { applyPaymentFeeStep, checkPaymentFeeStep } from "./steps/payment-fee"
 import { readPaymentCollectionStep } from "./steps/read-payment-collection"
 import { recordPaymentFormStep } from "./steps/record-payment-form"
@@ -63,6 +64,8 @@ export const startCartPaymentWorkflow = createWorkflow(
     // The cart's own lock, as Medusa's cart workflows take it: the cart cannot
     // change between reading its amount and starting the session for it
     acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
+    // A shipping method left on a cart that ships nothing goes (adr/0076 Ek D5)
+    dropUnneededShippingStep({ cart_id: input.cart_id })
     checkPaymentFeeStep({ cart_id: input.cart_id, fee: fee.fee })
     // Units another order took since they were put in the cart (adr/0026 Ek 2026-11-06)
     checkCartStockStep(input.cart_id)

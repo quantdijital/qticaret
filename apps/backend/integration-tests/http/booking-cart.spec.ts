@@ -624,6 +624,65 @@ medusaIntegrationTestRunner({
       expect(read.data.cart.total).toBe(3601)
     })
 
+    it("takes the shipping method off once only dated lines are left, and the order goes through", async () => {
+      await turnOn()
+      const container = getContainer()
+      const query = container.resolve(ContainerRegistrationKeys.QUERY)
+      const { adult, slotId } = await tour(10)
+      const knife = await stockedProduct(container, shop, `kargo-${String((made += 1))}`, 5, 100)
+      const cartId = await emptyCart(container)
+      const added = await post(`/store/carts/${cartId}/line-items`, {
+        variant_id: knife.variantId,
+        quantity: 1,
+      })
+      const shipped = await post(`/store/carts/${cartId}/shipping-methods`, {
+        option_id: shop.shippingOptionId,
+      })
+      await book(cartId, { slot_id: slotId, items: [{ variant_id: adult, quantity: 1 }] })
+      const methodsOf = async () => {
+        const { data } = await query.graph({
+          entity: "cart",
+          fields: ["shipping_methods.id"],
+          filters: { id: cartId },
+        })
+        return ((data as { shipping_methods?: unknown[] | null }[])[0]?.shipping_methods ?? [])
+          .length
+      }
+      const methodsBefore = await methodsOf()
+      const knifeLine = (
+        (added.data["cart"] as { items: { id: string; variant_id: string }[] } | undefined)
+          ?.items ?? []
+      ).find((item) => item.variant_id === knife.variantId)?.id
+      const removed = await settle(
+        http.delete<Answer>(`/store/carts/${cartId}/line-items/${knifeLine ?? ""}`, {
+          headers: store.headers,
+        })
+      )
+      // The cart's change takes the method off (`cart-unneeded-shipping`), after the answer
+      const methodsAfter = await eventually(methodsOf, (count) => count === 0)
+      const view = await settle(
+        http.get<Answer>(`/store/carts/${cartId}/bookings`, { headers: store.headers })
+      )
+      const total = await settle(
+        http.get<{ cart: { total: number; shipping_total: number } }>(`/store/carts/${cartId}`, {
+          headers: store.headers,
+        })
+      )
+      const started = await startPayment(cartId)
+      const placed = await post(`/store/carts/${cartId}/complete`, {})
+
+      expect(shipped.status).toBe(200)
+      expect(methodsBefore).toBe(1)
+      expect(removed.status).toBe(200)
+      expect(methodsAfter).toBe(0)
+      expect(view.data["shipping_method_stale"]).toBe(false)
+      // 1.500 + 250,50 for the departure; no shipping left on the bill
+      expect(total.data.cart).toMatchObject({ total: 1750.5, shipping_total: 0 })
+      expect(started.status).toBe(200)
+      expect(placed.status).toBe(200)
+      expect(placed.data["order"]).toMatchObject({ total: 1750.5 })
+    })
+
     it("refuses at the payment and the completion a variant put in before its product was dated", async () => {
       await turnOn()
       const container = getContainer()
