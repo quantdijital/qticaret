@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
+import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { cancelOrderWorkflow } from "@medusajs/medusa/core-flows"
 import { errorSummary, logger } from "../../lib/logging"
 import { kurus } from "../../lib/money"
@@ -7,9 +7,8 @@ import type { Kurus } from "../../lib/money"
 import { bookingCancelReference, cancelLockKeys } from "../../lib/orders/locks"
 import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
-import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
-import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { refundOrderWorkflow } from "../orders/refund-order"
+import { doneBefore, refundedBefore } from "./cancel-again"
 import { customerCancelRefusal, planBookingCancel, refuse } from "./cancel-plan"
 import type { CancelMode, CancelPlan, ManualRefund } from "./cancel-plan"
 import { alertRefundByHand } from "./confirm-alert"
@@ -73,14 +72,6 @@ export const bookingCancelLockKeys = (orderId: string): string[] => [
   ...cancelLockKeys(orderId),
 ]
 
-/** What the departure's refund gave, from the ledger: one made by an earlier try counts. */
-async function refundedBefore(container: MedusaContainer, useId: string): Promise<Kurus> {
-  const [entry] = await container
-    .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-    .listOrderRefunds({ reference: bookingCancelReference(useId) }, { take: 1 })
-  return kurus(entry && entry.status !== "failed" ? entry.amount : 0)
-}
-
 /** Whether the refund is sent now: due, and not left to staff. Pure. */
 export const sendsRefund = (plan: Pick<CancelPlan, "request" | "refund" | "manual">): boolean =>
   Boolean(plan.request) && plan.refund > 0 && plan.manual === null
@@ -120,6 +111,37 @@ async function cancelUnpaidOrder(
   }
 }
 
+/**
+ * `booking.cancelled` sent once the places are back. The cancel is done
+ * by then: an event bus that fails is logged (ids only) and never fails
+ * the cancel, whose retry would find nothing left to do.
+ */
+async function announceCancel(
+  container: MedusaContainer,
+  plan: CancelPlan,
+  by: CancelBy
+): Promise<void> {
+  try {
+    await container.resolve(Modules.EVENT_BUS).emit({
+      name: BOOKING_CANCELLED,
+      data: {
+        order_id: plan.order_id,
+        booking_id: plan.use.booking_id,
+        slot_id: plan.use.slot_id,
+        by,
+        refund_by_hand: plan.manual !== null,
+      },
+    })
+  } catch (error) {
+    logger.error({
+      event: "booking.cancelled_event_failed",
+      order_id: plan.order_id,
+      slot_id: plan.use.slot_id,
+      err: errorSummary(error),
+    })
+  }
+}
+
 /** The plan carried out: refund (or staff's by hand), then the places. Under the locks. */
 async function carryOut(
   container: MedusaContainer,
@@ -142,19 +164,11 @@ async function carryOut(
   const changed = await bookings.cancelBookingSlot(plan.use.booking_id, plan.use.slot_id)
   const byHand = changed && plan.manual !== null ? plan.refund : kurus(0)
   if (changed) {
-    await container.resolve(Modules.EVENT_BUS).emit({
-      name: BOOKING_CANCELLED,
-      data: {
-        order_id: plan.order_id,
-        booking_id: plan.use.booking_id,
-        slot_id: plan.use.slot_id,
-        by: input.by,
-        refund_by_hand: plan.manual !== null,
-      },
-    })
+    // The bell first: the places are back, staff must hear of the money whatever follows
     if (byHand > 0) {
       await alertRefundByHand(container, plan.order_id, plan.use.slot_id)
     }
+    await announceCancel(container, plan, input.by)
   }
   const orderCancelled =
     changed &&
@@ -211,37 +225,4 @@ export async function cancelBookingDeparture(
     },
     { timeout: LOCK_TIMEOUT_SECONDS }
   )
-}
-
-/** No live departure on the slot: cancelled before (the same answer) or never the order's. */
-async function doneBefore(
-  container: MedusaContainer,
-  input: BookingCancelInput
-): Promise<BookingCancelResult> {
-  const bookings = container.resolve<BookingModuleService>(BOOKING_MODULE)
-  const ofOrder = await bookings.listBookings({ order_id: input.order_id }, { select: ["id"] })
-  const [use] =
-    ofOrder.length === 0
-      ? []
-      : await bookings.listBookingSlotUses(
-          { booking_id: ofOrder.map((booking) => booking.id), slot_id: input.slot_id },
-          { take: 1, select: ["id", "cancelled_at"] }
-        )
-  if (!use) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "booking.cancel_unknown")
-  }
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "order",
-    fields: ["status"],
-    filters: { id: input.order_id },
-  })
-  return {
-    order_id: input.order_id,
-    slot_id: input.slot_id,
-    cancelled: false,
-    refunded: await refundedBefore(container, use.id),
-    refund_by_hand: kurus(0),
-    manual: null,
-    order_cancelled: (data as { status?: string }[])[0]?.status === "canceled",
-  }
 }
