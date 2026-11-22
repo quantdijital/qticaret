@@ -157,13 +157,16 @@ medusaIntegrationTestRunner({
       expect(party.data.days.map((each) => each.date)).toEqual([dayOf(firstUtc + 4 * DAY)])
     })
 
-    it("narrows to a category's subtree and never counts another channel's tour", async () => {
+    it("narrows to a category's subtree; never counts a draft or another channel's tour", async () => {
       const { month, firstUtc } = monthAhead()
       const { productId: inside } = await tour([{ at: firstUtc + 6 * DAY + 6 * HOUR }])
       await tour([{ at: firstUtc + 7 * DAY + 6 * HOUR }])
       const channel = await staff("/admin/sales-channels", { name: "Başka kanal" })
       const otherChannel = (channel.data as { sales_channel: { id: string } }).sales_channel.id
       await tour([{ at: firstUtc + 8 * DAY + 6 * HOUR }], otherChannel)
+      // Taken back to draft: no longer sold, its departures count nowhere
+      const { productId: drafted } = await tour([{ at: firstUtc + 9 * DAY + 6 * HOUR }])
+      expect((await staff(`/admin/products/${drafted}`, { status: "draft" })).status).toBe(200)
       const parent = await staff("/admin/product-categories", {
         name: "Kültür turları",
         handle: "kultur-turlari",

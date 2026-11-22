@@ -54,10 +54,10 @@ const calendarCache = createTtlCache<DepartureCalendar>({ ttlMs: 60_000, maxEntr
 async function shownProducts(
   container: MedusaContainer,
   input: CalendarInput,
+  category: string[] | null,
   matched: string[]
 ): Promise<string[]> {
-  const category = input.category ? await categorySubtreeByHandle(container, input.category) : null
-  if (matched.length === 0 || category?.length === 0) {
+  if (matched.length === 0) {
     return []
   }
   const result = await container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE).listing({
@@ -108,6 +108,7 @@ export function calendarDays(
 async function readCalendar(
   container: MedusaContainer,
   input: CalendarInput,
+  category: string[] | null,
   now: Date
 ): Promise<DepartureCalendar> {
   const service = bookingService(container)
@@ -116,9 +117,10 @@ async function readCalendar(
   const shown = await shownProducts(
     container,
     input,
+    category,
     matches.map((match) => match.product_id)
   )
-  const empty: DepartureCalendar = { month: input.month, currency: CURRENCY, days: [] }
+  const empty = emptyCalendar(input.month)
   if (shown.length === 0) {
     return empty
   }
@@ -133,7 +135,8 @@ async function readCalendar(
       "bookable.pax_by_variant",
       "bookable.timezone",
     ],
-    filters: { id: shown },
+    // The index lists published products only; read again here as a second guard
+    filters: { id: shown, status: "published" },
   })
   // Settings kept from an earlier mode are not a departure
   const byBookable = new Map<string, DatedCardProduct>()
@@ -153,17 +156,33 @@ async function readCalendar(
   return { ...empty, days: calendarDays(rows, byBookable, bases) }
 }
 
-/** The month's calendar for the shopper's channels, kept a minute per month, scope and party. */
-export function departureCalendar(
+const emptyCalendar = (month: string): DepartureCalendar => ({
+  month,
+  currency: CURRENCY,
+  days: [],
+})
+
+/**
+ * The month's calendar for the shopper's channels, kept a minute per
+ * month, category subtree (its ids, not the handle asked), party and
+ * channels. A handle no shown category has answers empty at once: no
+ * departure is read and nothing is kept for it, so made-up handles fill
+ * no cache.
+ */
+export async function departureCalendar(
   container: MedusaContainer,
   input: CalendarInput,
   now: Date = new Date()
 ): Promise<DepartureCalendar> {
+  const category = input.category ? await categorySubtreeByHandle(container, input.category) : null
+  if (category?.length === 0) {
+    return emptyCalendar(input.month)
+  }
   const key = JSON.stringify([
     input.month,
-    input.category,
+    category ? [...category].sort() : null,
     input.pax,
     [...input.sales_channel_ids].sort(),
   ])
-  return calendarCache(key, () => readCalendar(container, input, now))
+  return calendarCache(key, () => readCalendar(container, input, category, now))
 }
