@@ -1185,7 +1185,7 @@
   "booking.line_expired": "Süresi doldu — yeniden seçin",
   "booking.line_change": "Değiştir",
   "booking.line_change_of": "{title}: tarihi ya da kişi sayısını değiştir",
-  "booking.shipping_stale": "Sepette kargo yöntemi kaldı; ödeme adımında güncellenecek.",
+  "booking.shipping_stale": "Sepette kargo gerektiren ürün kalmadı; kargo ücreti kaldırılıyor, toplam ödemede buna göre güncellenir.",
   "booking.slot_full": "Bu tarihte bu kadar yer kalmadı. Kişi sayısını azaltın ya da başka bir tarih seçin.",
   "booking.slot_closed": "Bu tarih satışa kapandı. Başka bir tarih seçin.",
   "booking.sales_closed": "Bu tarihin satışı kapandı. Başka bir tarih seçin.",

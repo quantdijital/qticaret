@@ -21,7 +21,7 @@ const bookingOf = (lineId: string, metadata: unknown) => {
  * The basket with its dated lines told by the cart's read (adr/0076 §10):
  * each line expired once its places are not held, the hold's countdown,
  * and a note when a shipping method is left on a cart that ships nothing
- * (Ek D3). Without the read (no dated lines): the summary as it was.
+ * (Ek D3; the server is taking it off, Ek D5). Without the read: as it was.
  */
 export function withBookingSummary(
   summary: CheckoutSummaryView,

@@ -24,7 +24,8 @@ interface CartRow {
  * storefront's countdown): its live hold's end and its dated lines, each
  * `held` while that hold keeps its places. `shipping_method_stale`:
  * nothing in the cart ships any more but a shipping method is left from
- * before (adr/0076 Ek D3); the storefront asks again or drops it.
+ * before (adr/0076 Ek D3); the server takes it off on the cart's change and
+ * at the payment's start (Ek D5), so this is true only for a moment.
  */
 export async function bookingCartView(container: Container, cartId: string) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
