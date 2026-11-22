@@ -31,13 +31,16 @@ export const STORE_GIFT_PRODUCT_FIELDS = [
   "product_extension.summary_doc",
   "product_extension.withdrawal_excluded",
   "product_extension.kind",
+  // adr/0076 §10: a dated product's page asks its departures (never through a cart line)
+  "product_extension.booking_mode",
 ]
 
 const EXTENSION = /product_extension/iu
 // The mark, through any relation that reaches a product (`items.product.…`)
 const GIFT_MARK = /^(?:[a-z_]+\.)*product_extension\.is_gift_card$/u
 // On the product's own answer only: a cart line has no use for them
-const PRODUCT_OWN = /^product_extension\.(?:description_doc|summary_doc|withdrawal_excluded|kind)$/u
+const PRODUCT_OWN =
+  /^product_extension\.(?:description_doc|summary_doc|withdrawal_excluded|kind|booking_mode)$/u
 
 /**
  * A product's extension in Store `fields`: its gift card mark and, on the

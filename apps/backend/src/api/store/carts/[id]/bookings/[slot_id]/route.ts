@@ -18,6 +18,6 @@ export async function DELETE(req: MedusaStoreRequest, res: MedusaResponse): Prom
   res.setHeader("Cache-Control", "no-store")
   res.json({
     booking: { slot_id: result.slot_id, removed: result.removed },
-    ...(await bookingCartView(req.scope, cartId)),
+    ...(await bookingCartView(req.scope, cartId, req.publishable_key_context.sales_channel_ids)),
   })
 }

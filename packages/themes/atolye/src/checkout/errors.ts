@@ -11,6 +11,13 @@ export const CART_FIX_ERRORS = [
   "catalog.addons_disabled",
   // A payment link's code on another cart (adr/0051): taken off in the cart
   "cart.payment_link_code_misused",
+  // A dated line's hold or departure (adr/0076 §10): picked again from the cart
+  "booking.hold_expired",
+  "booking.hold_mismatch",
+  "booking.price_changed",
+  "booking.slot_closed",
+  "booking.sales_closed",
+  "booking.slot_unknown",
 ]
 
 /** A payment link's cart that can no longer be paid (adr/0051): the way out is home. */
@@ -64,4 +71,5 @@ export const CHECKOUT_ERRORS = [
   ...CART_FIX_ERRORS,
   ...LINK_ERRORS,
   "cart.payment_link_no_cod",
+  "cart.shipping_not_needed",
 ]

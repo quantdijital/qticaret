@@ -1,4 +1,5 @@
 import type { LineAddonView } from "./addon-views"
+import type { BookingHoldView, CartLineBookingView } from "./booking-views"
 import type { TaxLinesView } from "./cart-views"
 import type { BreadcrumbView, ImageView, LinkView } from "./views"
 
@@ -88,6 +89,8 @@ export interface CheckoutLineView {
   path?: string | null
   /** The line's add-on picks (adr/0052). */
   addons?: LineAddonView[]
+  /** A dated line's departure and whether its places are still held (adr/0076 §10); absent otherwise. */
+  booking?: CartLineBookingView | null
 }
 
 export interface CheckoutSummaryView {
@@ -111,6 +114,17 @@ export interface CheckoutSummaryView {
    * shipping and the total as they are. Absent for every other shopper.
    */
   tax?: TaxLinesView | null
+  /**
+   * The hold on the dated lines' places (adr/0076 §10): "Yerleriniz MM:SS
+   * daha tutuluyor" in the summary; run out, the payment button is drawn
+   * off. Absent or null: no dated lines.
+   */
+  hold?: BookingHoldView | null
+  /**
+   * A note above the summary, in words (a shipping method left on a cart
+   * that ships nothing any more, adr/0076 Ek D3). Absent or null: none.
+   */
+  notice?: string | null
 }
 
 export type CheckoutStep = "address" | "shipping" | "payment"

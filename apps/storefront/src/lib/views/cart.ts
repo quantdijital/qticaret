@@ -13,6 +13,7 @@ import type { GiftLine } from "@/lib/cart/gift"
 import { cartShips } from "@/lib/cart/ships"
 import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { addonFormOf, lineAddonsOf } from "./addons"
+import { lineBookingOf } from "./booking"
 import { lineNetOf, netTotalsOf } from "./cart-tax"
 import { lineImageOf, linePathOf } from "./line-paths"
 
@@ -58,19 +59,26 @@ export function cartLinesOf(
   pictures: ReadonlyMap<string, ImageView> = new Map(),
   taxNote: string | null = null
 ): CartLineView[] {
-  return (cart?.items ?? []).map((line) => ({
-    ...lineAddonsOf(line.metadata),
-    id: line.id,
-    title: line.title,
-    detail: line.variant_title ?? line.subtitle,
-    quantity: line.quantity,
-    total: formatLira(taxNote ? lineNetOf(line) : line.total),
-    original:
-      !taxNote && differs(line.original_total, line.total) ? formatLira(line.original_total) : null,
-    ...(taxNote ? { taxNote } : {}),
-    image: lineImageOf(line.thumbnail, line.title, pictures),
-    path: linePathOf(paths, line),
-  }))
+  return (cart?.items ?? []).map((line) => {
+    // A dated line's departure (adr/0076 §10); its hold is read on the cart page only
+    const booking = lineBookingOf(line.id, line.metadata, null)
+    return {
+      ...lineAddonsOf(line.metadata),
+      id: line.id,
+      title: line.title,
+      detail: line.variant_title ?? line.subtitle,
+      quantity: line.quantity,
+      total: formatLira(taxNote ? lineNetOf(line) : line.total),
+      original:
+        !taxNote && differs(line.original_total, line.total)
+          ? formatLira(line.original_total)
+          : null,
+      ...(taxNote ? { taxNote } : {}),
+      image: lineImageOf(line.thumbnail, line.title, pictures),
+      path: linePathOf(paths, line),
+      ...(booking ? { booking } : {}),
+    }
+  })
 }
 
 /**

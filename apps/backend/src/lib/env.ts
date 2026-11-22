@@ -280,6 +280,16 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "is required in production and staging",
     })
   }
+  // Unsigned, every shopper the storefront serves would count as its server's
+  // one address (rate limits, booking's per-address share, consent proof):
+  // compulsory where the shop runs (adr/0076 Ek D5, security review D-1)
+  if (deployed && env.STOREFRONT_IP_SECRET === undefined) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["STOREFRONT_IP_SECRET"],
+      message: "is required in production and staging",
+    })
+  }
   // The refresh signal crosses the network to the storefront: over TLS once deployed
   if (deployed && env.STOREFRONT_ORIGIN?.startsWith("http:")) {
     ctx.addIssue({

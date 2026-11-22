@@ -34,11 +34,44 @@ function Words({ line, t }: { line: CartLineView; t: Translate }) {
       {line.detail && line.detail.trim() !== line.title.trim() && (
         <p className="text-sm text-text-3">{line.detail}</p>
       )}
+      {line.booking && (
+        <p className="text-sm">
+          <span className="text-text-2">{t("booking.line_departure")} </span>
+          <span className="font-semibold">{line.booking.departure}</span>
+        </p>
+      )}
+      {line.booking?.expired && (
+        <p className="text-sm font-semibold text-error">{t("booking.line_expired")}</p>
+      )}
       <LineAddons
         addons={line.addons}
         note={line.nonWithdrawable ? t("addons.line_non_withdrawable") : null}
         className="mt-1"
       />
+    </div>
+  )
+}
+
+/**
+ * A dated line's own controls (adr/0076 §10): its count is the product
+ * page's to change ("Değiştir" goes there, the departure picked again),
+ * so no stepper; the count in words and the bin.
+ */
+function BookingControls({ line, t }: { line: CartLineView; t: Translate }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <p className="tabular text-sm text-text-2">
+        {t("cart.line_quantity", { count: line.quantity })}
+      </p>
+      {line.path && (
+        <a
+          href={line.path}
+          aria-label={t("booking.line_change_of", { title: line.title })}
+          className="gf-link min-h-11 text-sm font-semibold"
+        >
+          {t("booking.line_change")}
+        </a>
+      )}
     </div>
   )
 }
@@ -122,15 +155,19 @@ export function CartLine({
           <Words line={line} t={t} />
           <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2">
             <div className="flex items-center gap-1">
-              <Stepper
-                quantity={line.quantity}
-                most={line.maxQuantity ?? MAX_QUANTITY}
-                words={{
-                  group: t("cart.quantity_of", { title: line.title }),
-                  decrease: t("product.decrease"),
-                  increase: t("product.increase"),
-                }}
-              />
+              {line.booking ? (
+                <BookingControls line={line} t={t} />
+              ) : (
+                <Stepper
+                  quantity={line.quantity}
+                  most={line.maxQuantity ?? MAX_QUANTITY}
+                  words={{
+                    group: t("cart.quantity_of", { title: line.title }),
+                    decrease: t("product.decrease"),
+                    increase: t("product.increase"),
+                  }}
+                />
+              )}
               <button
                 type="submit"
                 name="remove"

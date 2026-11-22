@@ -2,6 +2,11 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-22: adr/0076 D5, vitrinde kalkış seçimi ve geri sayım
+
+- **Dal:** `oguzhan/rezervasyon-vitrin`. Tema sözleşmesine isteğe bağlı rezervasyon alanları (`packages/ui/src/booking-views.ts`); Atölye ürün sayfasında kalkış ve kategori adetleri ("Son N yer", "Yakında yeni tarihler"), sepette/ödemede "Yerleriniz MM:SS ayrıldı" geri sayımı; `GET /store/carts/:id/bookings`; imzalı "adres bilinmiyor" (`isStorefrontUnsigned` kaldırıldı); sepette kargo gerektiren kalem kalmayınca kargo yöntemini sunucu kaldırır (abonelik + ödeme başlangıcı). Mevcut görünümler değişmedi (görünüm kilidi yeşil).
+- **Sıradaki işler:** D6 katılımcı bilgisi (şifreli, KVKK, `security-reviewer`); D7 yaşam döngüsü, iptal kademeleri, e-postalar; D8 `travel` paketi, JSON-LD. Sonra kartlarda "…'dan itibaren" ve en yakın kalkış.
+
 ## 2026-11-22: adr/0076 D4, panelde tarihler ve kontenjan
 
 - **Dal:** `oguzhan/rezervasyon-panel`. Katalog bilgilerinde "Tarihli satış (kalkışlı)" aç/kapat (kapatırken stok takibi uyarısı ve ilerideki yer sayısı); ürün sayfasında "Tarihler ve kontenjan" kartı (kalkış ekle, yinelenen kalkış en çok 60, kapasite/fiyat farkı, kapat/aç/iptal, katılımcılar = siparişler), "Rezervasyon ayarları" ikinci planda. Yeni okuma ucu `GET /admin/booking-slots/:id/bookings` (kişi verisi yok).

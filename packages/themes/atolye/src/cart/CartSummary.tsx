@@ -2,9 +2,10 @@ import { Lock } from "lucide-react"
 import type { CartPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { TrustIcon } from "../parts/TrustIcon"
-import { CheckoutLink } from "./CheckoutLink"
 import { promotionWords } from "./code-words"
 import { CodeForm } from "./CodeForm"
+import { HoldCountdown } from "./HoldCountdown"
+import { PayLink } from "./PayLink"
 
 const GIFT_CARD_ERRORS = ["cart.gift_card_invalid", "errors.too_many_requests"]
 
@@ -56,6 +57,13 @@ export function CartSummary({
         <h2 id="sepet-ozeti" className="text-title">
           {t("cart.summary")}
         </h2>
+        {/* Dated lines' places, held a while (adr/0076 §10) */}
+        {view.hold && (
+          <HoldCountdown
+            hold={view.hold}
+            words={{ held: t("booking.hold_left"), expired: t("booking.hold_gone") }}
+          />
+        )}
         {!locked && (
           <CodeForm
             id="kupon"
@@ -107,10 +115,12 @@ export function CartSummary({
         </dl>
         {view.tax && <p className="text-sm text-text-2">{view.tax.note}</p>}
         <div className="flex flex-col gap-3 max-lg:hidden">
-          <CheckoutLink
+          <PayLink
             id="odeme-engeli"
             label={t("cart.checkout")}
             blocked={view.checkoutBlocked}
+            hold={view.hold}
+            expired={t("booking.hold_gone")}
             className="w-full"
           />
           <p className="flex items-center justify-center gap-2 text-sm text-text-2">

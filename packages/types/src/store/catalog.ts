@@ -245,6 +245,12 @@ export interface StoreProduct {
     withdrawal_excluded?: boolean | null
     kind?: string | null
     /**
+     * `departure`: a dated product (adr/0076 §2), bought through its
+     * departures (`/store/products/:id/booking`), never "add to cart". On
+     * the product's own answer only (`+product_extension.booking_mode`).
+     */
+    booking_mode?: string | null
+    /**
      * The shop's short description as a content document (adr/0055 Ek
      * 2026-11-06), with `+product_extension.summary_doc`, on the product's
      * own answer only. The storefront prints the backend's HTML of it

@@ -34,6 +34,8 @@ import { netDiscountOf, netTotalsOf, taxLinesOf } from "@/lib/views/cart-tax"
 import { wholesaleCheckoutBlocked } from "@/lib/views/cart-wholesale"
 import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
 import { currentWholesale } from "@/lib/account/wholesale"
+import { cartBooking } from "@/lib/booking/store"
+import { hasBookingLines, holdViewOf, withBookingRead } from "@/lib/views/booking"
 import { theme } from "@/theme"
 
 // docs/13 §7: the cart is noindex,nofollow (backend `system_pages`)
@@ -88,7 +90,7 @@ export default async function CartPage({
           : null
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
-  const [gifts, addons, extras, paths, pictures, amounts] = await Promise.all([
+  const [gifts, addons, extras, paths, pictures, amounts, booking] = await Promise.all([
     shopperGiftLines(cart?.id),
     // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
     locked
@@ -101,10 +103,12 @@ export default async function CartPage({
     // Each line's picture in its small versions (the same answer as the paths)
     linePicturesOf(cart?.items ?? []),
     visitorAmounts(),
+    // The dated lines' hold, for its countdown (adr/0076 §10); not asked without one
+    cart && hasBookingLines(cart.items) ? cartBooking(cart.id) : Promise.resolve(null),
   ])
   // A gift card line takes no add-ons (its product page offers none)
   const giftLines = new Set(gifts.map((gift) => gift.line_id))
-  const lines = withGiftLines(
+  const built = withGiftLines(
     withAddonForms(
       cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
       cart ? { ...cart, items: cart.items.filter((line) => !giftLines.has(line.id)) } : null,
@@ -113,6 +117,12 @@ export default async function CartPage({
     ),
     gifts
   )
+  const lines = withBookingRead(built, cart?.items ?? [], booking)
+  const hold = holdViewOf(cart?.items ?? [], booking)
+  // A dated line whose places are no longer held stops the payment until it is picked again
+  const bookingBlocked = lines.some((line) => line.booking?.expired)
+    ? { reason: t("booking.hold_gone") }
+    : null
   // A gift card is bought with money only: no card or credit field while one is in the cart
   const codes = (cart?.gift_cards ?? []).map((card) => card.code)
   const paidByCard = codes.length > 0 || Boolean(cart?.credit_line_total)
@@ -159,7 +169,9 @@ export default async function CartPage({
           error: refused,
           // A wholesaler's order under its minimum units (ADR-0068 §8): "Ödemeye geç" off
           // with the reason beside it while it is short; the backend refuses the payment itself
-          checkoutBlocked: wholesaleCheckoutBlocked(cart, wholesale, t),
+          checkoutBlocked: wholesaleCheckoutBlocked(cart, wholesale, t) ?? bookingBlocked,
+          // The dated lines' places, held a while; "Ödemeye geç" goes off when the hold ends
+          ...(hold ? { hold } : {}),
           locked,
           shipping: extras.shipping ?? null,
           offers: extras.offers ?? [],

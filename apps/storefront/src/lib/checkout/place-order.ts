@@ -114,6 +114,15 @@ const KNOWN = new Set([
   // A wholesale cart the backend could not set right before paying (ADR-0068 slice 4 review Y2);
   // a theme that does not list it says its own "could not complete" words
   "wholesale.payment_unavailable",
+  // A dated line not ready to pay (adr/0076 Ek D3): its departure is picked again from the cart
+  "booking.hold_expired",
+  "booking.hold_mismatch",
+  "booking.price_changed",
+  "booking.slot_closed",
+  "booking.sales_closed",
+  "booking.slot_unknown",
+  // A shipping method left on a cart that ships nothing any more (adr/0076 Ek D3)
+  "cart.shipping_not_needed",
 ])
 
 /**

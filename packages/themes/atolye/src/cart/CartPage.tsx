@@ -5,7 +5,7 @@ import { Container } from "../parts/Container"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
 import { CartLine } from "./CartLine"
 import { CartSummary } from "./CartSummary"
-import { CheckoutLink } from "./CheckoutLink"
+import { PayLink } from "./PayLink"
 import { Upsell } from "./Upsell"
 
 /** A note over the lines: an error in the error's colour, anything else plain. */
@@ -157,17 +157,19 @@ export function CartPage({
             className={cn(
               "sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-(--z-sticky) flex items-center gap-4 rounded-tile bg-field p-3 pl-5 shadow-float lg:hidden",
               // The reason takes a row of its own under the subtotal and the button
-              view.checkoutBlocked && "flex-wrap gap-y-2"
+              (view.checkoutBlocked ?? view.hold) && "flex-wrap gap-y-2"
             )}
           >
             <p className="flex flex-col leading-tight">
               <span className="text-xs text-text-2">{t("cart.subtotal")}</span>
               <span className="tabular text-lg font-extrabold">{view.subtotal}</span>
             </p>
-            <CheckoutLink
+            <PayLink
               id="odeme-engeli-telefon"
               label={t("cart.checkout")}
               blocked={view.checkoutBlocked}
+              hold={view.hold}
+              expired={t("booking.hold_gone")}
               className="flex-1"
               reasonClassName="basis-full"
             />

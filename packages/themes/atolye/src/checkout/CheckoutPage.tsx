@@ -182,6 +182,7 @@ export function CheckoutPage({
                   marketingVersion={view.marketingVersion}
                   total={view.summary.total}
                   placeOrder={actions.placeOrder}
+                  hold={view.summary.hold}
                   words={{
                     methods: t("checkout.methods"),
                     total: t("checkout.total"),

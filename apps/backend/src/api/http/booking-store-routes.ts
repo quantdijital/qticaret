@@ -7,9 +7,10 @@ import { parseEnv } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { RATE_LIMIT_PROFILES, ipBucket } from "../../lib/security/rate-limit"
 import { CATALOG_BOOKING } from "../../modules/platform-settings/features"
+import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { StorePostCartBooking } from "../store/carts/[id]/bookings/validators"
 import { StoreGetProductBooking } from "../store/products/[id]/booking/validators"
-import { clientIp, isStorefrontUnsigned } from "./client-ip"
+import { clientIp, isShopperAddressUnknown } from "./client-ip"
 import { rateLimit } from "./rate-limit"
 import { requireFeature } from "./require-feature"
 
@@ -54,13 +55,13 @@ let clientHashKey: Buffer | undefined
  * The shopper's address as a booking hold keeps it (adr/0076 Ek takip M1):
  * a keyed hash of the address the limits count (IPv6 by its /64), never
  * the address nor a plain hash a list of addresses would reverse. Null
- * when no address is known: such a hold is not capped by address. An
- * unsigned call from our storefront's server (it could not read the
- * shopper's address) is one of them: its address is the storefront's,
- * which every shopper would share.
+ * when no address is known: such a hold is not capped by address. A call
+ * our storefront's server signed as "address unknown" (adr/0076 Ek D5) is
+ * one of them: its connection address is the storefront's, which every
+ * such shopper would share.
  */
 export function bookingClientHash(req: MedusaRequest): string | null {
-  if (isStorefrontUnsigned(req)) {
+  if (isShopperAddressUnknown(req)) {
     return null
   }
   const bucket = ipBucket(clientIp(req) ?? undefined)
@@ -98,6 +99,15 @@ export const BOOKING_STORE_ROUTES = [
       requireFeature(CATALOG_BOOKING),
       bookingLimit,
       validateAndTransformBody(StorePostCartBooking),
+    ],
+  },
+  {
+    // The cart's hold and dated lines, for the storefront's countdown (adr/0076 Ek D5); reads only
+    matcher: "/store/carts/:id/bookings",
+    methods: ["GET" as const],
+    middlewares: [
+      requireFeature(CATALOG_BOOKING),
+      validateAndTransformQuery(AdminGetDashboardNoQuery, {}),
     ],
   },
   {

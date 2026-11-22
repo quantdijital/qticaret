@@ -174,6 +174,18 @@ export async function addLine(
   metadata?: Record<string, string>
 ): Promise<string> {
   const line = { variant_id: variantId, quantity, ...(metadata ? { metadata } : {}) }
+  return intoCart((cartId) =>
+    storePost(`/store/carts/${encodeURIComponent(cartId)}/line-items`, line)
+  )
+}
+
+/**
+ * Sends something into the shopper's cart (a line, a departure's places):
+ * the open cart, or a new one when there is none or the remembered one is
+ * gone or ordered (its 404 answered once with a fresh cart). Answers the
+ * cart's id.
+ */
+export async function intoCart(send: (cartId: string) => Promise<unknown>): Promise<string> {
   const existing = await currentCart().catch((error: unknown) => {
     if (isStoreApiError(error)) {
       return null
@@ -182,7 +194,7 @@ export async function addLine(
   })
   const cartId = existing?.id ?? (await newCart())
   try {
-    await storePost(`/store/carts/${encodeURIComponent(cartId)}/line-items`, line)
+    await send(cartId)
     return cartId
   } catch (error) {
     if (!existing || !isNotFound(error)) {
@@ -190,7 +202,7 @@ export async function addLine(
     }
     await forgetCart()
     const fresh = await newCart()
-    await storePost(`/store/carts/${encodeURIComponent(fresh)}/line-items`, line)
+    await send(fresh)
     return fresh
   }
 }

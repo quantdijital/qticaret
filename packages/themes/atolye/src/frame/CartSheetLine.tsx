@@ -102,6 +102,7 @@ function Words({ line, words }: { line: CartLineView; words: SheetLineWords }) {
       {line.detail && line.detail.trim() !== line.title.trim() && (
         <span className="text-text-3">{line.detail}</span>
       )}
+      {line.booking && <span className="font-semibold">{line.booking.departure}</span>}
       <LineAddons addons={line.addons} note={line.nonWithdrawable ? words.nonWithdrawable : null} />
     </div>
   )
@@ -126,7 +127,8 @@ export function CartSheetLine({
   locked: boolean
   words: SheetLineWords
 }) {
-  if (!change || locked) {
+  // A dated line's count is its product page's to change (adr/0076 §10); the cart page removes it
+  if (!change || locked || line.booking) {
     return <ReadOnlyLine line={line} words={words} />
   }
   return <LineForm line={line} change={change} words={words} />

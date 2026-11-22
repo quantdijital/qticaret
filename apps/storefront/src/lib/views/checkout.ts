@@ -32,7 +32,9 @@ import {
 } from "@/lib/checkout/options"
 import type { PaymentMethods } from "@/lib/checkout/options"
 import { STEP_PATHS, stepsOf } from "./checkout-steps"
-import { summaryOf } from "./checkout-summary"
+import { summaryOf, withBookingSummary } from "./checkout-summary"
+import { cartBooking } from "@/lib/booking/store"
+import { hasBookingLines } from "./booking"
 import { displayPhone } from "./frame"
 import { linePicturesOf, productPathsOf } from "./line-paths"
 
@@ -200,20 +202,31 @@ export async function checkoutView(
   // Nothing to ship (adr/0076 §6): no carriers to offer, the payment opens once the address is in
   const steps = stepsOf(cart)
   const ships = steps.includes("shipping")
-  const [provinces, districts, neighborhoods, options, payment, paths, pictures, wholesale] =
-    await Promise.all([
-      provinceOptions(),
-      selects.province ? districtOptions(selects.province) : [],
-      selects.district ? neighborhoodOptions(selects.district) : [],
-      complete && ships ? shippingOptions(cart.id) : [],
-      complete && (chosen || !ships)
-        ? paymentStep(cart, t)
-        : { paymentMethods: [], contracts: {}, ageLimit: null },
-      productPathsOf(cart.items),
-      linePicturesOf(cart.items),
-      // A wholesaler's basket is without KDV, the KDV a line of its own (ADR-0068 §5)
-      customer ? currentWholesale() : RETAIL,
-    ])
+  const [
+    provinces,
+    districts,
+    neighborhoods,
+    options,
+    payment,
+    paths,
+    pictures,
+    wholesale,
+    booking,
+  ] = await Promise.all([
+    provinceOptions(),
+    selects.province ? districtOptions(selects.province) : [],
+    selects.district ? neighborhoodOptions(selects.district) : [],
+    complete && ships ? shippingOptions(cart.id) : [],
+    complete && (chosen || !ships)
+      ? paymentStep(cart, t)
+      : { paymentMethods: [], contracts: {}, ageLimit: null },
+    productPathsOf(cart.items),
+    linePicturesOf(cart.items),
+    // A wholesaler's basket is without KDV, the KDV a line of its own (ADR-0068 §5)
+    customer ? currentWholesale() : RETAIL,
+    // The dated lines' hold, for its countdown (adr/0076 §10); not asked without one
+    hasBookingLines(cart.items) ? cartBooking(cart.id) : null,
+  ])
   return {
     step,
     steps,
@@ -251,7 +264,12 @@ export async function checkoutView(
       : null,
     ...payment,
     marketingVersion: MARKETING_TEXT_VERSION,
-    summary: summaryOf(cart, t, paths, pictures, wholesale.active && wholesale.vatExclusive),
+    summary: withBookingSummary(
+      summaryOf(cart, t, paths, pictures, wholesale.active && wholesale.vatExclusive),
+      cart.items,
+      booking,
+      t
+    ),
     // A payment link's cart keeps the code it was made with (adr/0051): no field
     promotions: isPaymentLinkCart(cart.metadata) ? null : codesOf(cart),
     error,
