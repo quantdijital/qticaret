@@ -141,6 +141,12 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: HOUR },
     perIdentity: { max: 5, windowMs: HOUR },
   },
+  // adr/0076 Ek 2026-11-23: a booking request's phone counted on its own,
+  // beside the contact form's profile (which counts its address)
+  booking_request_phone: {
+    name: "booking_request_phone",
+    perIdentity: { max: 5, windowMs: HOUR },
+  },
   // F18: the newsletter box mails a confirmation; per address and per e-mail
   newsletter: {
     name: "newsletter",

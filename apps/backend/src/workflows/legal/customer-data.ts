@@ -152,7 +152,13 @@ export async function customerData(container: Container, customerId: string) {
         ),
     ])
   const email = typeof customer["email"] === "string" ? customer["email"] : ""
-  const contact = await contactMessagesFor(container, customerId, email ? [email] : [])
+  // A booking request may carry a phone only (adr/0076 Ek 2026-11-23): the profile's phone finds it
+  const phone = typeof customer["phone"] === "string" ? customer["phone"] : ""
+  const contact = await contactMessagesFor(
+    container,
+    customerId,
+    [email, phone].filter((value) => value !== "")
+  )
   const campaigns = await campaignMessagesFor(container, customerId, email ? [email] : [])
   const paymentLinks = await paymentLinksFor(container, customerId, email ? [email] : [])
   const wholesale = await wholesaleDataFor(container, customerId, email ? [email] : [], orderIds)

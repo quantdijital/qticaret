@@ -21,14 +21,11 @@ const byEmail = (req: { body?: unknown }) => {
   return typeof email === "string" ? email.trim().toLowerCase() : undefined
 }
 
-// A booking request needs a phone, not an address: counted by whichever it has
-const byEmailOrPhone = (req: { body?: unknown }) => {
-  const email = byEmail(req)
-  if (email) {
-    return email
-  }
+// A booking request's phone, its national ten digits however typed
+const byPhone = (req: { body?: unknown }) => {
   const phone = (req.body as { phone?: unknown } | undefined)?.phone
-  return typeof phone === "string" ? phone.replace(/\D/g, "").slice(-10) : undefined
+  const digits = typeof phone === "string" ? phone.replace(/\D/g, "").slice(-10) : ""
+  return digits === "" ? undefined : `phone:${digits}`
 }
 
 /**
@@ -58,7 +55,9 @@ export const CONTACT_ROUTES = [
     middlewares: [
       requireFeature(CATALOG_BOOKING),
       optionalCustomer,
-      rateLimit(() => RATE_LIMIT_PROFILES.contact_message, { identity: byEmailOrPhone }),
+      // Per address and per e-mail as the contact form; the phone always counted too (D1)
+      rateLimit(() => RATE_LIMIT_PROFILES.contact_message, { identity: byEmail }),
+      rateLimit(() => RATE_LIMIT_PROFILES.booking_request_phone, { identity: byPhone }),
       challengeOver("contact", { max: 1, windowMs: HOUR }),
       validateAndTransformBody(StorePostBookingRequest),
       requireMailDomain(),

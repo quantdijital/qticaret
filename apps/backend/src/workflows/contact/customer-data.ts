@@ -4,14 +4,30 @@ import type ContactMessagesModuleService from "../../modules/contact-messages/se
 
 type Container = Pick<MedusaContainer, "resolve">
 
-/** A person's contact messages: by their account, or by an address of theirs (a guest's). */
+/**
+ * A person's contact messages: by their account, or by an address or a
+ * phone of theirs (a guest's; a booking request may carry a phone only,
+ * adr/0076 Ek 2026-11-23). `addresses` mixes e-mails and phones.
+ */
 async function messagesOf(container: Container, customerId: string, addresses: string[]) {
   const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
-  const hashes = addresses.flatMap((address) => messages.emailHashOf(address) ?? [])
+  const emails = addresses.filter((address) => address.includes("@"))
+  const hashes = emails.flatMap((address) => messages.emailHashOf(address) ?? [])
+  const phones = [
+    ...new Set(
+      addresses
+        .filter((address) => !address.includes("@"))
+        .flatMap((phone) => messages.phoneHashOf(phone) ?? [])
+    ),
+  ]
   const rows = await messages.listContactMessages(
-    hashes.length
-      ? { $or: [{ customer_id: customerId }, { email_hash: hashes }] }
-      : { customer_id: customerId },
+    {
+      $or: [
+        { customer_id: customerId },
+        ...(hashes.length ? [{ email_hash: hashes }] : []),
+        ...(phones.length ? [{ phone_hash: phones }] : []),
+      ],
+    },
     {
       select: [
         "id",

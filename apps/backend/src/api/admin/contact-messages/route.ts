@@ -16,10 +16,16 @@ export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetContactMessagesType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { status, subject, offset, limit } = req.validatedQuery
+  const { status, subject, phone, offset, limit } = req.validatedQuery
   const messages = req.scope.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
+  // A phone that is not a Turkish number finds nothing (no hash to match)
+  const phoneHash = phone === undefined ? undefined : (messages.phoneHashOf(phone) ?? "-")
   const [rows, count] = await messages.listAndCountContactMessages(
-    subject ? { status, subject } : { status },
+    {
+      status,
+      ...(subject ? { subject } : {}),
+      ...(phoneHash ? { phone_hash: phoneHash } : {}),
+    },
     { skip: offset, take: limit, order: { created_at: status === "new" ? "ASC" : "DESC" } }
   )
   const productIds = [...new Set(rows.flatMap((row) => (row.product_id ? [row.product_id] : [])))]
@@ -43,7 +49,7 @@ export async function GET(
   const slots = slotIds.length
     ? await req.scope
         .resolve<BookingModuleService>(BOOKING_MODULE)
-        .listBookingSlots({ id: slotIds }, { select: ["id", "starts_at"] })
+        .listBookingSlots({ id: slotIds }, { select: ["id", "starts_at"], take: slotIds.length })
     : []
   const startsAt = new Map(slots.map((slot) => [slot.id, new Date(slot.starts_at).toISOString()]))
   res.json({

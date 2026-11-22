@@ -2,6 +2,7 @@ import { MedusaService } from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, hashPii, parseKey } from "@qticaret/server-kit"
 import { ValidationError } from "../../lib/errors"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
+import { normalizeTrPhone } from "../../lib/tr/phone"
 import { CONTACT_STATUSES, CONTACT_SUBJECTS, ContactMessage } from "./models/contact-message"
 
 export { CONTACT_STATUSES, CONTACT_SUBJECTS }
@@ -48,6 +49,7 @@ export interface ReceiveInput extends ContactContent {
 
 const SEAL = "contact-messages.content"
 const HASH = "contact-messages.email"
+const PHONE_HASH = "contact-messages.phone"
 
 /** Contact messages (F18 D10, adr/0047): kept sealed, answered from the panel. */
 class ContactMessagesModuleService extends MedusaService({ ContactMessage }) {
@@ -65,6 +67,12 @@ class ContactMessagesModuleService extends MedusaService({ ContactMessage }) {
   emailHashOf(email: string): string | null {
     const normalized = normalizeRecipient("email", email)
     return normalized ? hashPii(normalized, this.hashKey, HASH) : null
+  }
+
+  /** The keyed hash a person's phone is found by (E.164 first); null for none or not Turkish. */
+  phoneHashOf(phone: string): string | null {
+    const normalized = normalizeTrPhone(phone)
+    return normalized ? hashPii(normalized, this.hashKey, PHONE_HASH) : null
   }
 
   async receive(input: ReceiveInput): Promise<{ id: string }> {
@@ -87,6 +95,8 @@ class ContactMessagesModuleService extends MedusaService({ ContactMessage }) {
       product_id: input.product_id ?? null,
       details: (input.details ?? null) as Record<string, unknown> | null,
       email_hash: email ? hashPii(email, this.hashKey, HASH) : null,
+      // A KVKK request finds a message by its phone too (adr/0076 Ek 2026-11-23, O1)
+      phone_hash: input.phone ? this.phoneHashOf(input.phone) : null,
       sealed: encryptPii(JSON.stringify(content), this.encryptionKey, SEAL),
       status: "new",
     })

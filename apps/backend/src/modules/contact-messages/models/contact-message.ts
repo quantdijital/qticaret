@@ -42,6 +42,8 @@ export const ContactMessage = model
     order_number: model.text().nullable(),
     /** Empty for a booking request left with a phone only. */
     email_hash: model.text().nullable(),
+    /** The phone as a keyed hash, to find a person's messages by it for a KVKK request. */
+    phone_hash: model.text().nullable(),
     /** A booking request's product (adr/0076 Ek 2026-11-23). */
     product_id: model.text().nullable(),
     /** A booking request's `{ slot_id?, date?, month?, adults, children? }`; no person's data. */
@@ -55,5 +57,6 @@ export const ContactMessage = model
   .indexes([
     { on: ["status", "created_at"], where: "deleted_at IS NULL" },
     { on: ["email_hash"], where: "deleted_at IS NULL" },
+    { on: ["phone_hash"], where: "phone_hash IS NOT NULL AND deleted_at IS NULL" },
     { on: ["customer_id"], where: "deleted_at IS NULL" },
   ])
