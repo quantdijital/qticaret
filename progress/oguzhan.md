@@ -2,6 +2,11 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-22: adr/0076 D4, panelde tarihler ve kontenjan
+
+- **Dal:** `oguzhan/rezervasyon-panel`. Katalog bilgilerinde "Tarihli satış (kalkışlı)" aç/kapat (kapatırken stok takibi uyarısı ve ilerideki yer sayısı); ürün sayfasında "Tarihler ve kontenjan" kartı (kalkış ekle, yinelenen kalkış en çok 60, kapasite/fiyat farkı, kapat/aç/iptal, katılımcılar = siparişler), "Rezervasyon ayarları" ikinci planda. Yeni okuma ucu `GET /admin/booking-slots/:id/bookings` (kişi verisi yok).
+- **Sıradaki işler:** D5 vitrin (kalkış seçimi, kategori adetleri, geri sayım); D6 katılımcılar paneldeki "Katılımcılar" penceresine eklenir.
+
 ## 2026-11-22: yapay zekâ işleri tamam (adr/0074 G1–G7), tarihli ürün ve rezervasyon başlıyor (adr/0076)
 
 - **Sıradaki işler (Deniz için not: çakışma olmasın diye buraya bak):**
