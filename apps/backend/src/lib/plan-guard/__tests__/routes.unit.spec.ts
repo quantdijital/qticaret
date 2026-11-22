@@ -102,6 +102,8 @@ describe("every admin write route has a plan decision", () => {
       "ai.alt_text",
       // Writes new media records and pays a service: never while the plan is closed
       "ai.image_edit",
+      // Spends the quota on suggestions: as the alt text job
+      "ai.seo_fill",
       "catalog.bulk_edit",
       "catalog.description_facts",
       "catalog.import",

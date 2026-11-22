@@ -759,6 +759,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.guidance_craft_owner_only": "Bir işin görev talimatını yalnız mağaza sahibi değiştirebilir.",
   "ai.guidance_craft_base_unknown":
     "Varsayılan talimat bu arada değişti. Sayfayı yenileyip yeniden deneyin.",
+  // adr/0074 §5 madde 7: the bulk SEO fill
+  "ai.seo_fill_nothing":
+    "Arama metni eksik ya da zayıf sayfa yok; öneri bekleyenler de yeniden sorulmaz.",
+  "ai.seo_fill_quota_short":
+    "Kalan yapay zekâ hakkı yetmiyor: bu iş {{needed}} işlem istiyor, {{left}} kaldı. Daha dar bir seçimle (yalnız başlık ya da yalnız açıklama) deneyin ya da hakkınızı artırın.",
   // adr/0071 §3: "Bağlantıyı dene" refused the key of an AI service
   "deepseek.secret_invalid":
     "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",

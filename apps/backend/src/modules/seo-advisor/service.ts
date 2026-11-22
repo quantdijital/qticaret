@@ -33,6 +33,13 @@ export interface DuplicateGroup {
   groups: number
 }
 
+/** A page's findings as the bulk SEO fill reads them. */
+export interface PageWithFindings {
+  entity_type: AssessedKind
+  entity_id: string
+  issues: unknown
+}
+
 // Fixed column names: never from input
 const HASH_COLUMNS = { title: "title_hash", description: "description_hash" } as const
 
@@ -99,6 +106,48 @@ class SeoAdvisorModuleService extends MedusaService({ SeoAssessment }) {
         ORDER BY pages DESC, entity_type LIMIT ?`,
       [limit]
     )) as DuplicateGroup[]
+  }
+
+  /**
+   * Pages of these kinds with a finding of one of these rules, the rule
+   * named without its kind letter ("TITLE-01" for P-, C-, B-…), the lowest
+   * score first, at most `limit`; with `ids`, only those pages. Filtered
+   * in the database, so the bulk SEO fill (adr/0074 §5 madde 7) never
+   * reads every page's findings. Every value is a bound parameter.
+   */
+  @InjectManager()
+  async pagesWithRules(
+    input: {
+      kinds: readonly string[]
+      rules: readonly string[]
+      limit: number
+      ids?: readonly string[]
+    },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<PageWithFindings[]> {
+    if (input.kinds.length === 0 || input.rules.length === 0 || input.ids?.length === 0) {
+      return []
+    }
+    const list = (values: readonly unknown[]) => values.map(() => "?").join(", ")
+    const manager = sharedContext.manager as {
+      execute: (sql: string, params: unknown[]) => Promise<unknown>
+    }
+    return (await manager.execute(
+      `SELECT entity_type, entity_id, issues
+         FROM seo_assessment
+        WHERE deleted_at IS NULL
+          AND entity_type IN (${list(input.kinds)})
+          ${input.ids ? `AND entity_id IN (${list(input.ids)})` : ""}
+          AND jsonb_typeof(issues::jsonb) = 'array'
+          AND EXISTS (
+            SELECT 1 FROM jsonb_array_elements(issues::jsonb) AS found
+             WHERE substring(found->>'ruleId' FROM position('-' IN found->>'ruleId') + 1)
+                   IN (${list(input.rules)})
+          )
+        ORDER BY score ASC, entity_id ASC
+        LIMIT ?`,
+      [...input.kinds, ...(input.ids ?? []), ...input.rules, input.limit]
+    )) as PageWithFindings[]
   }
 }
 

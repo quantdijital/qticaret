@@ -39,3 +39,44 @@ describe("saving an assessment", () => {
     expect(save).toHaveBeenCalledTimes(1)
   })
 })
+
+describe("pages with rules", () => {
+  const service = Object.create(SeoAdvisorModuleService.prototype) as SeoAdvisorModuleService
+  const managerWith = (rows: unknown[]) => ({ execute: jest.fn().mockResolvedValue(rows) })
+
+  it("filters by kind, rule and limit in the database, every value bound", async () => {
+    const manager = managerWith([{ entity_type: "product", entity_id: "prod_1", issues: [] }])
+    const rows = await service.pagesWithRules(
+      { kinds: ["product", "brand"], rules: ["TITLE-01", "META-01"], limit: 201 },
+      { manager }
+    )
+    expect(rows).toHaveLength(1)
+    const [sql, params] = manager.execute.mock.calls[0] as [string, unknown[]]
+    expect(sql).toContain("entity_type IN (?, ?)")
+    expect(sql).not.toContain("entity_id IN")
+    expect(sql).toContain("jsonb_array_elements")
+    expect(sql).toMatch(/LIMIT \?$/m)
+    expect(sql).not.toMatch(/TITLE|META|product/)
+    expect(params).toEqual(["product", "brand", "TITLE-01", "META-01", 201])
+  })
+
+  it("narrows to the ids given, and reads nothing for none", async () => {
+    const manager = managerWith([])
+    await service.pagesWithRules(
+      { kinds: ["product"], rules: ["META-01"], limit: 4, ids: ["prod_1", "prod_2"] },
+      { manager }
+    )
+    const [sql, params] = manager.execute.mock.calls[0] as [string, unknown[]]
+    expect(sql).toContain("entity_id IN (?, ?)")
+    expect(params).toEqual(["product", "prod_1", "prod_2", "META-01", 4])
+    expect(
+      await service.pagesWithRules(
+        { kinds: ["product"], rules: ["META-01"], limit: 4, ids: [] },
+        {
+          manager,
+        }
+      )
+    ).toEqual([])
+    expect(manager.execute).toHaveBeenCalledTimes(1)
+  })
+})

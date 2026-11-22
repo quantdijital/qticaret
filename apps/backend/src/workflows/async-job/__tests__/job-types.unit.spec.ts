@@ -20,6 +20,7 @@ describe("job types", () => {
       "accounting.package",
       "ai.alt_text",
       "ai.image_edit",
+      "ai.seo_fill",
       "audit_log.export",
       "catalog.bulk_edit",
       "catalog.description_facts",
@@ -83,7 +84,12 @@ describe("job types", () => {
       managersOnly: true,
       containsPersonalData: false,
     })
-    expect(MANAGER_JOB_TYPES).toEqual(["ai.image_edit", "wholesale.carts", "wholesale.sync"])
+    expect(MANAGER_JOB_TYPES).toEqual([
+      "ai.image_edit",
+      "ai.seo_fill",
+      "wholesale.carts",
+      "wholesale.sync",
+    ])
   })
 
   it("syncs the address data one run at a time, never through the jobs route", () => {

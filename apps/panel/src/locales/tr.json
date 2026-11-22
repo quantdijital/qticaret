@@ -785,6 +785,7 @@
         "customer.data_export": "Müşteri verisi dışa aktarımı",
         "catalog.description_facts": "Açıklamadan özellik aktarma",
         "ai.alt_text": "Toplu alt metin önerisi",
+        "ai.seo_fill": "Toplu SEO metni önerisi",
         "content.link_rewrite": "Metinlerdeki bağlantıları düzeltme",
         "order.export": "Sipariş dışa aktarımı"
       }
@@ -6096,6 +6097,53 @@
       "urls_other": "{{urls}} sayfa",
       "none": "Henüz site haritası yok; ilk yenilemede oluşur.",
       "pending": "Son değişiklikler bir sonraki yenilemede eklenecek."
+    },
+    "aiFill": {
+      "open_one": "Eksik metaları yapay zekâ ile doldur ({{count}})",
+      "open_other": "Eksik metaları yapay zekâ ile doldur ({{count}})",
+      "title": "Eksik arama metinlerini doldur",
+      "description": "SEO danışmanının arama başlığı ya da açıklaması eksik veya zayıf dediği sayfalar için yapay zekâdan öneri isteyin; her öneriyi sayfasıyla birlikte görüp kullanın ya da vazgeçin.",
+      "start_one": "{{count}} sayfa için öner",
+      "start_other": "{{count}} sayfa için öner",
+      "cost_one": "Sayfa başına alan başına bir yapay zekâ işlemi harcanır.",
+      "cost_other": "Sayfa başına alan başına bir yapay zekâ işlemi harcanır.",
+      "batch_one": "Bir seferde en çok {{count}} sayfa; toplam {{total}} sayfa var, kalanlar sonraki seferde.",
+      "batch_other": "Bir seferde en çok {{count}} sayfa; toplam {{total}} sayfa var, kalanlar sonraki seferde.",
+      "options": "Seçenekler",
+      "scopeLabel": "Neler doldurulsun",
+      "scopes": {
+        "both": "Arama başlığı ve açıklaması",
+        "title": "Yalnız arama başlığı",
+        "description": "Yalnız arama açıklaması"
+      },
+      "fields": {
+        "seo_title": "Arama başlığı",
+        "seo_description": "Arama açıklaması"
+      },
+      "working": "Öneriler hazırlanıyor…",
+      "made_one": "{{count}} öneri hazırlandı.",
+      "made_other": "{{count}} öneri hazırlandı.",
+      "left_one": "{{count}} alan için öneri çıkmadı.",
+      "left_other": "{{count}} alan için öneri çıkmadı.",
+      "jobFailed": "Öneriler hazırlanamadı. Biraz sonra yeniden deneyin.",
+      "background": "Öneriler arka planda hazırlanıyor; bu pencereyi yeniden açınca görürsünüz.",
+      "empty": "Bekleyen öneri yok.",
+      "listLabel": "Bekleyen arama metni önerileri",
+      "waiting_one": "{{count}} öneri onay bekliyor",
+      "waiting_other": "{{count}} öneri onay bekliyor",
+      "useAll": "Tümünü kullan",
+      "note": "Kullan, metni sayfanın arama metni olarak hemen kaydeder. Adaylardan birini seçebilir, kullanmadan önce düzenleyebilirsiniz.",
+      "current": "Şu an: {{text}}",
+      "currentEmpty": "Şu an boş",
+      "candidates": "{{name}} için adaylar",
+      "length": "{{length}} karakter (aramada {{shown}} karaktere kadar görünür)",
+      "field": "{{name}}, {{field}}",
+      "useOne": "{{name}}, {{field}}: öneriyi kullan",
+      "dismissOne": "{{name}}, {{field}}: öneriden vazgeç",
+      "saved": "{{name}} kaydedildi.",
+      "savedAll_one": "{{count}} arama metni kaydedildi.",
+      "savedAll_other": "{{count}} arama metni kaydedildi.",
+      "saveFailed": "{{name}} kaydedilemedi: {{reason}}"
     },
     "advisor": {
       "title": "SEO danışmanı",
