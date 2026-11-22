@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import { contentDoc, docStats, isSafeHref, renderDoc } from ".."
 import { plainText } from "../../seo/resolve"
 
@@ -31,17 +32,25 @@ describe("content bounds (no input costs more than its size)", () => {
   })
 
   it("reads a long run of marks or brackets in one pass", () => {
-    // Five paragraphs of 20,000 dots then a letter: the sentence counter's worst case
-    const paragraph = {
-      type: "paragraph",
-      content: [{ type: "text", text: ".".repeat(19_999) + "a" }],
+    // Five paragraphs of dots then a letter: the sentence counter's worst case. Timed at
+    // an eighth of 20,000 dots and at 20,000: linear, not a wall-clock budget
+    const dots = (size: number) => {
+      const paragraph = {
+        type: "paragraph",
+        content: [{ type: "text", text: ".".repeat(size - 1) + "a" }],
+      }
+      const doc = contentDoc.parse({
+        type: "doc",
+        content: Array.from({ length: 5 }, () => paragraph),
+      })
+      return () => docStats(doc)
     }
-    const doc = contentDoc.parse({
-      type: "doc",
-      content: Array.from({ length: 5 }, () => paragraph),
-    })
-    expect(timed(() => docStats(doc))).toBeLessThan(200)
-    expect(timed(() => plainText("<".repeat(100_000)))).toBeLessThan(200)
+    expect(measureGrowth(dots, 2_500)).toMatchObject({ linear: true })
+    const brackets = (size: number) => {
+      const text = "<".repeat(size)
+      return () => plainText(text)
+    }
+    expect(measureGrowth(brackets, 12_500)).toMatchObject({ linear: true })
     expect(plainText("3 < 5 ve 7 > 4 <b>kalın</b>")).toBe("3 < 5 ve 7 > 4 kalın")
   })
 })

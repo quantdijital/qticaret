@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import { ValidationError } from "../../errors"
 import {
   assertValidTemplate,
@@ -157,12 +158,12 @@ describe("renderTemplate", () => {
   })
 
   it("stays linear on a long run of punctuation", () => {
-    const long = `a${";".repeat(50_000)}b`
-    const started = performance.now()
+    const punctuation = (size: number) => {
+      const long = `a${";".repeat(size)}b`
+      return () => renderTemplate("{kısa_açıklama};", { kısa_açıklama: long })
+    }
 
-    renderTemplate("{kısa_açıklama};", { kısa_açıklama: long })
-
-    expect(performance.now() - started).toBeLessThan(200)
+    expect(measureGrowth(punctuation, 6_250)).toMatchObject({ linear: true })
   })
 })
 

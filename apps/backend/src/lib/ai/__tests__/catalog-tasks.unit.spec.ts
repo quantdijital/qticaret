@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import type { TextConnector, TextRequest } from "../connectors/types"
 import { AI_ENTITY_TYPES } from "../facts"
 import { MAX_SUGGESTION_CHARS, suggestionProblems, suggestionTextFor } from "../gate"
@@ -213,22 +214,21 @@ describe("the product name gate", () => {
  */
 describe("shaping a long answer", () => {
   const LONG = MAX_SUGGESTION_CHARS - 2
-  const runs = [
-    `a${'"'.repeat(LONG)}b`,
-    `a${".".repeat(LONG)}b`,
-    `a${"’".repeat(LONG)}b`,
-    `a${"…".repeat(LONG)}b`,
-  ]
-  const fast = (shape: () => unknown) => {
-    const started = performance.now()
-    shape()
-    return performance.now() - started
-  }
+  const MARKS = ['"', ".", "’", "…"]
+  const run = (mark: string, size: number) => `a${mark.repeat(size)}b`
+  const runs = MARKS.map((mark) => run(mark, LONG))
+  // Timed at an eighth of the longest answer and at the longest: linear, not a wall-clock budget
+  const BASE = Math.floor(LONG / 8)
+  const linear = (shape: (text: string) => unknown) => (mark: string) =>
+    measureGrowth((size) => {
+      const text = run(mark, size)
+      return () => shape(text)
+    }, BASE)
 
   it("cuts quotes and end marks from the ends in linear time", () => {
-    for (const text of runs) {
-      expect(fast(() => keywordLines(text))).toBeLessThan(200)
-      expect(fast(() => productTitleText(text))).toBeLessThan(200)
+    for (const mark of MARKS) {
+      expect(linear(keywordLines)(mark)).toMatchObject({ linear: true })
+      expect(linear(productTitleText)(mark)).toMatchObject({ linear: true })
     }
     // Only the ends: a run between words stays
     expect(productTitleText(`a${'"'.repeat(10)}b`)).toBe(`a${'"'.repeat(10)}b`)
@@ -237,9 +237,12 @@ describe("shaping a long answer", () => {
 
   it("leaves an answer far over the task's length unshaped, and refuses it for its length", () => {
     for (const task of [FOCUS_KEYWORD_TASK, PRODUCT_TITLE_TASK]) {
+      for (const mark of MARKS) {
+        const shape = (text: string) => suggestionTextFor(task, text)
+        expect(linear(shape)(mark)).toMatchObject({ linear: true })
+      }
       for (const text of runs) {
-        let shaped = ""
-        expect(fast(() => (shaped = suggestionTextFor(task, text)))).toBeLessThan(200)
+        const shaped = suggestionTextFor(task, text)
         expect(shaped).toBe(text)
         expect(suggestionProblems(task, shaped, DATA)).toEqual(["length"])
       }

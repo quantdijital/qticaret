@@ -26,7 +26,12 @@ export function createTemporaryAdmin(): TemporaryAdmin {
   const email = `e2e-${String(Date.now())}-${randomBytes(3).toString("hex")}@example.com`
   const password = randomBytes(18).toString("base64url")
   // `--password=`, joined: a password starting with "-" would read as an option
-  backend(["user", `--email=${email}`, `--password=${password}`])
+  try {
+    backend(["user", `--email=${email}`, `--password=${password}`])
+  } catch {
+    // The thrown message carries the command line, password and all (the CI log is public)
+    throw new Error("e2e: the temporary admin could not be created")
+  }
   // The run checks every screen: it is the shop's owner (adr/0040)
   backend(["exec", "./src/scripts/set-staff-role.ts", email, "owner"])
   return { email, password }
@@ -34,5 +39,15 @@ export function createTemporaryAdmin(): TemporaryAdmin {
 
 /** The run's admin removed with its login: a user cannot delete itself through the API. */
 export function removeTemporaryAdmin(email: string): void {
-  backend(["exec", "./src/scripts/remove-e2e-admin.ts", email])
+  try {
+    backend(["exec", "./src/scripts/remove-e2e-admin.ts", email])
+  } catch (error) {
+    // The CLI's output stays piped (the CI log is public); only the script's own
+    // refusal or a staff error code (`staff.last_owner`) is passed on, so a failure says why
+    const piped = (error as { stderr?: Buffer | string | null }).stderr
+    const stderr = piped ? piped.toString() : ""
+    const reasons = stderr.match(/remove-e2e-admin: [^\n]+|staff\.[a-z_]+/g)
+    // eslint-disable-next-line preserve-caught-error -- its cause would carry the whole piped output into the public report
+    throw new Error(`removing the e2e admin failed: ${reasons?.join("; ") ?? "no reason given"}`)
+  }
 }
