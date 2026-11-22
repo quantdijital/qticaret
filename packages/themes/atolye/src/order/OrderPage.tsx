@@ -1,6 +1,7 @@
 import type { OrderActions, OrderPageView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { OrderAside } from "./OrderAside"
+import { OrderBookings } from "./OrderBookings"
 import { OrderHero } from "./OrderHero"
 import { BankTransfer, CashOnDelivery, OrderLines, Parcels } from "./OrderParts"
 import { OrderReturns } from "./OrderReturns"
@@ -98,6 +99,7 @@ export function OrderPage({
           <CashOnDelivery view={view} t={t} />
           <Parcels view={view} t={t} />
           <OrderLines view={view} t={t} />
+          <OrderBookings view={view} t={t} actions={actions} />
           <Requests view={view} t={t} />
           <OrderReturns view={view} t={t} action={actions.requestReturn} />
           <Cancel view={view} t={t} actions={actions} />

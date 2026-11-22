@@ -22,7 +22,7 @@ import { addAddress, removeAddress } from "@/app/actions/addresses"
 import { addAddonsToCart, saveLineAddons } from "@/app/actions/addons"
 import { addBookingToCart } from "@/app/actions/booking"
 import { addGiftToCart, checkGiftCardBalance, saveGiftRecipient } from "@/app/actions/gift-cards"
-import { cancelOrder, requestReturn } from "@/app/actions/order"
+import { cancelBooking, cancelOrder, requestReturn } from "@/app/actions/order"
 import { leaveLinkCart } from "@/app/actions/payment-link"
 import { requestPrivacy } from "@/app/actions/privacy"
 import { saveTravelers } from "@/app/actions/travelers"
@@ -105,4 +105,4 @@ export const accountActions: AccountActions = {
 }
 
 /** An order's own forms: cancel, ask to return (F7). */
-export const orderActions: OrderActions = { cancelOrder, requestReturn }
+export const orderActions: OrderActions = { cancelOrder, requestReturn, cancelBooking }
