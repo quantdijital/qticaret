@@ -15,7 +15,9 @@ export class Migration20261122160000 extends Migration {
    * Back to the kinds before adr/0076 §12: the ledger's rows of the two
    * kinds this migration allowed (a pack's draft pages, its catalog
    * defaults) would fail the narrower check, so they go first. The pages
-   * and settings they name stay in the shop.
+   * and settings they name stay in the shop. Applying the pack again after
+   * this offers its catalog defaults again (a setting back at the platform's
+   * default takes the pack's).
    */
   override async down(): Promise<void> {
     this.addSql(`delete from "sector_pack_item" where "kind" in ('page', 'setting');`)
