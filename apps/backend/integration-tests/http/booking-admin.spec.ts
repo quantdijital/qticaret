@@ -84,6 +84,7 @@ medusaIntegrationTestRunner({
         ["get", `/admin/products/${productId}/booking-slots`],
         ["post", `/admin/products/${productId}/booking-slots`],
         ["post", "/admin/booking-slots/bkslot_01ABC"],
+        ["get", "/admin/booking-slots/bkslot_01ABC/bookings"],
       ] as const) {
         expect((await call(method, path)).status).toBe(404)
       }

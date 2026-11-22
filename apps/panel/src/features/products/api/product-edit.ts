@@ -2,6 +2,7 @@ import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query
 import type { JSONContent } from "@tiptap/react"
 import type { Restriction } from "@/features/categories/api/restrictions"
 import type { AddonInput, ProductAddon } from "@/features/products/api/addons"
+import type { BookingMode } from "@/features/products/api/booking"
 import { sdk } from "@/lib/sdk"
 
 /** Saving what the product page edits beyond the product's own fields. */
@@ -24,6 +25,8 @@ export interface ProductCatalog {
   restriction: Restriction | null
   /** Its variants are gift card amounts (adr/0025 Ek 2026-11-03); marked, it is digital. */
   is_gift_card: boolean
+  /** Sold by departure (adr/0076 §2); absent from an older backend: none. */
+  booking_mode?: BookingMode
   /** Paid or free add-ons a shopper picks beside the variant (adr/0052), in the shop's order. */
   addons: ProductAddon[]
   /**
@@ -68,6 +71,8 @@ export function useSaveCatalog(id: string) {
       withdrawal_excluded?: boolean
       restriction?: Restriction | null
       is_gift_card?: boolean
+      /** Dated sale on or off; another kind needs `none` in the same save (adr/0076 Ek). */
+      booking_mode?: "none" | "departure"
       /** The whole list, ids kept; null clears it. */
       addons?: AddonInput[] | null
       /** The description as a document; the server writes its plain text too (ADR-0055). */
@@ -80,6 +85,8 @@ export function useSaveCatalog(id: string) {
       // A kind change moves the product's shipping set-up and what its page asks for; a
       // description saved as a document rewrites the product's plain text
       await client.invalidateQueries({ queryKey: ["products", "detail", id] })
+      // Dated sale turned on or off: its settings and departures (adr/0076 §9)
+      await client.invalidateQueries({ queryKey: ["products", "booking", id] })
     },
   })
 }

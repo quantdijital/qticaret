@@ -3504,6 +3504,164 @@
       "giftCardFeatures": "Go to features",
       "kindGiftCard": "A gift card is a digital product; its kind cannot change."
     },
+    "booking": {
+      "title": "Dates and capacity",
+      "description": "Each departure has its own capacity; places sold and held in carts are tracked here.",
+      "empty": "No departures yet. Add a single departure or create repeating ones.",
+      "zoneNote": "Times are in the product's time zone ({{zone}}).",
+      "capacity": "Capacity",
+      "capacityHint": "The most places (people) this departure can sell.",
+      "places": "places",
+      "mode": {
+        "label": "Dated sale (departures)",
+        "hint": "Services that start at a set date and time: tours, events, workshops. Each departure has its own capacity; stock tracking is turned off on the variants. Default: off."
+      },
+      "off": {
+        "title": "Turn off dated sale?",
+        "description": "The product sells without choosing a departure, through the ordinary cart. Existing departures and bookings are not deleted.",
+        "confirm": "Turn off dated sale",
+        "stock": "Stock tracking does not come back on by itself; the product can sell without limit. Turn stock tracking on in the variants if needed.",
+        "taken_one": "Upcoming departures have {{count}} place sold or held in carts.",
+        "taken_other": "Upcoming departures have {{count}} places sold or held in carts."
+      },
+      "add": {
+        "action": "Add departure",
+        "title": "Add departure",
+        "start": "Start date and time"
+      },
+      "recurring": {
+        "action": "Repeating departures",
+        "title": "Repeating departures",
+        "weekdays": "Days",
+        "days": {
+          "0": "Sun",
+          "1": "Mon",
+          "2": "Tue",
+          "3": "Wed",
+          "4": "Thu",
+          "5": "Fri",
+          "6": "Sat"
+        },
+        "time": "Time",
+        "from": "First day",
+        "to": "Last day",
+        "capacityHint": "Each departure gets the same capacity; change any of them later.",
+        "preview_one": "{{count}} departure will be added: {{first}}.",
+        "preview_other": "{{count}} departures will be added: first {{first}}, last {{last}}.",
+        "previewNone": "No departure matches. Choose the days and the date range.",
+        "more": "At most {{max}} departures are added at once; add the rest of the range afterwards."
+      },
+      "slots": {
+        "added_one": "Departure added.",
+        "added_other": "{{count}} departures added."
+      },
+      "edit": {
+        "title": "Edit departure",
+        "capacityHint_one": "Cannot go below the {{count}} place sold and held in carts.",
+        "capacityHint_other": "Cannot go below the {{count}} places sold and held in carts.",
+        "prices": "Price difference for this departure",
+        "pricesHint": "An amount added to the variant's price for this departure (TRY). Write a minus for a discount (e.g. -150). A variant left empty sells at its usual price; line prices are always worked out on the server."
+      },
+      "cancel": {
+        "title": "Cancel the departure?",
+        "description": "The {{start}} departure is taken off sale and no longer listed on the storefront.",
+        "confirm": "Cancel departure",
+        "sold_one": "This departure has {{count}} place sold (confirmed booking). Refunds and customer notices are not automatic yet; cancel and refund the orders by hand.",
+        "sold_other": "This departure has {{count}} places sold (confirmed bookings). Refunds and customer notices are not automatic yet; cancel and refund the orders by hand."
+      },
+      "columns": {
+        "start": "Departure",
+        "capacity": "Capacity",
+        "sold": "Sold",
+        "held": "Held",
+        "available": "Left",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "statuses": {
+        "open": "On sale",
+        "closed": "Closed",
+        "cancelled": "Cancelled"
+      },
+      "statusSaved": {
+        "open": "Departure opened for sale.",
+        "closed": "Departure closed for sale.",
+        "cancelled": "Departure cancelled."
+      },
+      "actions": {
+        "bookings": "{{start}}: participants",
+        "bookingsShort": "Participants",
+        "edit": "{{start}}: edit",
+        "close": "{{start}}: close for sale",
+        "open": "{{start}}: open for sale",
+        "cancel": "{{start}}: cancel"
+      },
+      "bookings": {
+        "title": "Participants",
+        "empty": "No bookings on this departure yet.",
+        "order": "Order",
+        "units": "Places",
+        "status": "Status",
+        "date": "Date",
+        "statuses": {
+          "confirmed": "Confirmed",
+          "cancelled": "Cancelled",
+          "completed": "Completed"
+        }
+      },
+      "settings": {
+        "title": "Booking settings",
+        "cutoff_hours": "Sales close",
+        "cutoff_hoursHint": "How many hours before the departure sales close. 0: open until it starts.",
+        "hold_minutes": "Hold in cart",
+        "hold_minutesHint": "How many minutes a cart holds places before payment (10–60). Default: 20.",
+        "max_units_per_cart": "Most places per cart",
+        "max_units_per_cartHint": "The most places one cart can take on this product. Default: 20.",
+        "min_participants": "Minimum participants",
+        "min_participantsHint": "For information; sales do not depend on it.",
+        "hours": "hours",
+        "minutes": "min",
+        "none": "None",
+        "paxTitle": "Kinds of person",
+        "paxHint": "How many places each variant takes and its ages. An infant may take 0, a family ticket 4; default 1.",
+        "paxOf": "{{variant}}: places taken",
+        "minAge": "Min age",
+        "maxAge": "Max age",
+        "minAgeOf": "{{variant}}: minimum age",
+        "maxAgeOf": "{{variant}}: maximum age"
+      },
+      "errors": {
+        "disabled": "For dated products, first turn on both dated products and digital and service products in Settings > Features.",
+        "kind": "A dated product can only be a service; turn off dated sale before changing its kind.",
+        "range": "Selling by date range (stays, rentals) is not available yet.",
+        "notDated": "This product is not sold by date; turn on dated sale in its catalog details first.",
+        "capacityBelowSold": "Capacity cannot go below the places sold and held in carts.",
+        "dates": "The end must be after the start.",
+        "slotUnknown": "Departure not found; the list was refreshed.",
+        "variantUnknown": "A variant given a price difference is not this product's.",
+        "priceAdjustment": "A price difference can be at most 1,000,000 TRY, to the kuruş.",
+        "holdMinutes": "The hold must be between 10 and 60 minutes.",
+        "paxAges": "The minimum age cannot be above the maximum age.",
+        "pax": "Kinds of person can be set for at most 100 variants.",
+        "form": {
+          "capacity": "Capacity must be a whole number between 1 and 10,000.",
+          "start": "Enter the start date and time.",
+          "past": "The departure must be in the future.",
+          "from": "Choose the first day.",
+          "to": "Choose the last day.",
+          "weekdays": "Choose at least one day.",
+          "time": "Enter the time (e.g. 09:00).",
+          "range": "The last day cannot be before the first.",
+          "noStarts": "No future departure falls on those days in that range.",
+          "adjustment": "Write the price difference in TRY (e.g. 250.50 or -150).",
+          "cutoff": "Sales close must be between 0 and 1440 hours.",
+          "maxUnits": "Most places per cart must be between 1 and 500.",
+          "minParticipants": "Minimum participants must be between 1 and 10,000, or left empty.",
+          "pax": "Places taken must be a whole number between 0 and 20.",
+          "age": "Age must be between 0 and 120."
+        }
+      }
+    },
     "addons": {
       "title": "Add-ons",
       "description": "A text or a choice the shopper picks with the variant. Its price is worked out on the server and added to the product's unit price.",

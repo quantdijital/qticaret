@@ -3504,6 +3504,164 @@
       "giftCardFeatures": "Özelliklere git",
       "kindGiftCard": "Hediye kartı dijital üründür; türü değiştirilemez."
     },
+    "booking": {
+      "title": "Tarihler ve kontenjan",
+      "description": "Her kalkışın kendi kontenjanı vardır; satılan ve sepetlerde tutulan yerler buradan izlenir.",
+      "empty": "Henüz kalkış yok. Tek bir kalkış ekleyin ya da yinelenen kalkış oluşturun.",
+      "zoneNote": "Saatler ürünün saat diliminde ({{zone}}).",
+      "capacity": "Kontenjan",
+      "capacityHint": "Bu kalkışta satılabilecek en çok yer (kişi).",
+      "places": "yer",
+      "mode": {
+        "label": "Tarihli satış (kalkışlı)",
+        "hint": "Tur, etkinlik, atölye gibi belirli tarih ve saatte başlayan hizmetler. Her kalkışın kendi kontenjanı olur; varyantlarda stok takibi kapanır. Varsayılan: kapalı."
+      },
+      "off": {
+        "title": "Tarihli satış kapatılsın mı?",
+        "description": "Ürün kalkış seçilmeden, olağan sepet yoluyla satılır. Mevcut kalkışlar ve rezervasyonlar silinmez.",
+        "confirm": "Tarihli satışı kapat",
+        "stock": "Stok takibi kendiliğinden açılmaz; ürün sınırsız satılabilir hâle gelir. Gerekirse varyantlarda stok takibini açın.",
+        "taken_one": "Gelecekteki kalkışlarda {{count}} satılmış ya da sepette tutulan yer var.",
+        "taken_other": "Gelecekteki kalkışlarda {{count}} satılmış ya da sepette tutulan yer var."
+      },
+      "add": {
+        "action": "Kalkış ekle",
+        "title": "Kalkış ekle",
+        "start": "Başlangıç tarihi ve saati"
+      },
+      "recurring": {
+        "action": "Yinelenen kalkış",
+        "title": "Yinelenen kalkış",
+        "weekdays": "Günler",
+        "days": {
+          "0": "Paz",
+          "1": "Pzt",
+          "2": "Sal",
+          "3": "Çar",
+          "4": "Per",
+          "5": "Cum",
+          "6": "Cmt"
+        },
+        "time": "Saat",
+        "from": "İlk gün",
+        "to": "Son gün",
+        "capacityHint": "Her kalkışa aynı kontenjan verilir; sonradan tek tek değiştirilebilir.",
+        "preview_one": "{{count}} kalkış eklenecek: {{first}}.",
+        "preview_other": "{{count}} kalkış eklenecek: ilki {{first}}, sonuncusu {{last}}.",
+        "previewNone": "Seçimlere uyan kalkış yok. Günleri ve tarih aralığını seçin.",
+        "more": "Tek seferde en çok {{max}} kalkış eklenir; kalan günler için aralığın devamını sonra ekleyin."
+      },
+      "slots": {
+        "added_one": "Kalkış eklendi.",
+        "added_other": "{{count}} kalkış eklendi."
+      },
+      "edit": {
+        "title": "Kalkışı düzenle",
+        "capacityHint_one": "Satılan ve sepetlerde tutulan {{count}} yerin altına indirilemez.",
+        "capacityHint_other": "Satılan ve sepetlerde tutulan {{count}} yerin altına indirilemez.",
+        "prices": "Kalkışa özel fiyat farkı",
+        "pricesHint": "Varyant fiyatına bu kalkış için eklenecek tutar (TL). İndirim için eksi yazın (ör. -150). Boş bırakılan varyant olağan fiyatla satılır; satır fiyatı her zaman sunucuda hesaplanır."
+      },
+      "cancel": {
+        "title": "Kalkış iptal edilsin mi?",
+        "description": "{{start}} kalkışı satıştan kalkar ve vitrinde listelenmez.",
+        "confirm": "Kalkışı iptal et",
+        "sold_one": "Bu kalkışta {{count}} satılmış yer (onaylı rezervasyon) var. İade ve müşteriye bildirim şimdilik kendiliğinden yapılmaz; siparişleri elle iptal edip iade edin.",
+        "sold_other": "Bu kalkışta {{count}} satılmış yer (onaylı rezervasyon) var. İade ve müşteriye bildirim şimdilik kendiliğinden yapılmaz; siparişleri elle iptal edip iade edin."
+      },
+      "columns": {
+        "start": "Kalkış",
+        "capacity": "Kontenjan",
+        "sold": "Satılan",
+        "held": "Tutulan",
+        "available": "Kalan",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "statuses": {
+        "open": "Satışta",
+        "closed": "Kapalı",
+        "cancelled": "İptal"
+      },
+      "statusSaved": {
+        "open": "Kalkış satışa açıldı.",
+        "closed": "Kalkış satışa kapatıldı.",
+        "cancelled": "Kalkış iptal edildi."
+      },
+      "actions": {
+        "bookings": "{{start}}: katılımcılar",
+        "bookingsShort": "Katılımcılar",
+        "edit": "{{start}}: düzenle",
+        "close": "{{start}}: satışa kapat",
+        "open": "{{start}}: satışa aç",
+        "cancel": "{{start}}: iptal et"
+      },
+      "bookings": {
+        "title": "Katılımcılar",
+        "empty": "Bu kalkışta henüz rezervasyon yok.",
+        "order": "Sipariş",
+        "units": "Yer",
+        "status": "Durum",
+        "date": "Tarih",
+        "statuses": {
+          "confirmed": "Onaylı",
+          "cancelled": "İptal",
+          "completed": "Tamamlandı"
+        }
+      },
+      "settings": {
+        "title": "Rezervasyon ayarları",
+        "cutoff_hours": "Satış kapanışı",
+        "cutoff_hoursHint": "Kalkıştan kaç saat önce satış kapanır. 0: kalkışa kadar açık.",
+        "hold_minutes": "Sepette tutma süresi",
+        "hold_minutesHint": "Ödeme yapılmadan sepette yer kaç dakika tutulur (10–60). Varsayılan: 20.",
+        "max_units_per_cart": "Sepet başına en çok yer",
+        "max_units_per_cartHint": "Bir sepetin bir üründe ayırabileceği en çok yer. Varsayılan: 20.",
+        "min_participants": "Asgari katılımcı",
+        "min_participantsHint": "Bilgi içindir; satış bu sayıya bağlı değildir.",
+        "hours": "saat",
+        "minutes": "dk",
+        "none": "Yok",
+        "paxTitle": "Kişi tipleri",
+        "paxHint": "Her varyantın kaç yer saydığı ve yaş aralığı. Bebek 0, aile bileti 4 sayabilir; varsayılan 1.",
+        "paxOf": "{{variant}}: kaç kişi sayar",
+        "minAge": "En küçük yaş",
+        "maxAge": "En büyük yaş",
+        "minAgeOf": "{{variant}}: en küçük yaş",
+        "maxAgeOf": "{{variant}}: en büyük yaş"
+      },
+      "errors": {
+        "disabled": "Tarihli ürünler için önce Ayarlar > Özellikler'den hem tarihli ürünleri hem dijital ve hizmet ürünlerini açın.",
+        "kind": "Tarihli ürün yalnız hizmet türünde olabilir; türü değiştirmeden önce tarihli satışı kapatın.",
+        "range": "Tarih aralığıyla satış (konaklama, kiralama) henüz kullanılamıyor.",
+        "notDated": "Bu ürün tarihli satılmıyor; önce katalog bilgilerinden tarihli satışı açın.",
+        "capacityBelowSold": "Kontenjan, satılan ve sepetlerde tutulan yer sayısının altına indirilemez.",
+        "dates": "Bitiş zamanı başlangıçtan sonra olmalı.",
+        "slotUnknown": "Kalkış bulunamadı; liste yenilendi.",
+        "variantUnknown": "Fiyat farkı girilen varyant bu ürüne ait değil.",
+        "priceAdjustment": "Fiyat farkı en çok 1.000.000 TL ve kuruş hassasiyetinde olabilir.",
+        "holdMinutes": "Tutma süresi 10 ile 60 dakika arasında olmalı.",
+        "paxAges": "En küçük yaş en büyük yaştan büyük olamaz.",
+        "pax": "Kişi tipi ayarı en çok 100 varyant için girilebilir.",
+        "form": {
+          "capacity": "Kontenjan 1 ile 10.000 arasında tam sayı olmalı.",
+          "start": "Başlangıç tarihi ve saatini girin.",
+          "past": "Kalkış gelecekte olmalı.",
+          "from": "İlk günü seçin.",
+          "to": "Son günü seçin.",
+          "weekdays": "En az bir gün seçin.",
+          "time": "Saati girin (ör. 09:00).",
+          "range": "Son gün ilk günden önce olamaz.",
+          "noStarts": "Seçilen günler ve aralıkta gelecekte kalkış yok.",
+          "adjustment": "Fiyat farkını TL olarak yazın (ör. 250,50 ya da -150).",
+          "cutoff": "Satış kapanışı 0 ile 1440 saat arasında olmalı.",
+          "maxUnits": "Sepet başına en çok yer 1 ile 500 arasında olmalı.",
+          "minParticipants": "Asgari katılımcı 1 ile 10.000 arasında olmalı ya da boş bırakılmalı.",
+          "pax": "Kaç kişi sayar 0 ile 20 arasında tam sayı olmalı.",
+          "age": "Yaş 0 ile 120 arasında olmalı."
+        }
+      }
+    },
     "addons": {
       "title": "Ek seçenekler",
       "description": "Müşterinin varyantla birlikte seçtiği yazı ya da seçenek. Ücreti sunucuda hesaplanır ve ürünün birim fiyatına eklenir.",
