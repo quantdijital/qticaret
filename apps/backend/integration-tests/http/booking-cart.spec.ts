@@ -8,6 +8,7 @@ import { resetClientIpSecret } from "../../src/api/http/client-ip"
 import { CLIENT_IP_HEADERS, signClientIp } from "../../src/lib/security/client-ip"
 import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
+import { reconcileBookings } from "../../src/workflows/booking/reconcile"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
 import { BANK_TRANSFER } from "../helpers/gift-sale"
@@ -448,6 +449,39 @@ medusaIntegrationTestRunner({
       ])
       expect(freed).toMatchObject({ sold: 0, held: 0, available: 10 })
       expect(cancelled?.status).toBe("cancelled")
+    })
+
+    it("reconciles a cancel the order event missed, and leaves a confirmed order alone", async () => {
+      await turnOn()
+      const container = getContainer()
+      const knex = () => container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+      const { adult, slotId } = await tour(10)
+      const cartId = await emptyCart(container)
+      await book(cartId, { slot_id: slotId, items: [{ variant_id: adult, quantity: 2 }] })
+      await startPayment(cartId)
+      const placed = await post(`/store/carts/${cartId}/complete`, {})
+      const orderId = (placed.data["order"] as { id: string } | undefined)?.id ?? ""
+      await eventually(
+        () => slotOf(slotId),
+        (slot) => slot?.sold === 2
+      )
+      // Old enough for the job to look at it; its booking is there
+      await knex()("order")
+        .where({ id: orderId })
+        .update({ created_at: knex().raw("now() - interval '30 minutes'") })
+      const untouched = await reconcileBookings(container)
+      // Cancelled without its event (a lost delivery)
+      await knex()("order")
+        .where({ id: orderId })
+        .update({ status: "canceled", canceled_at: knex().raw("now()") })
+      const reconciled = await reconcileBookings(container)
+      const [booking] = await bookings().listBookings({ order_id: orderId })
+
+      expect(placed.status).toBe(200)
+      expect(untouched).toEqual({ confirmed: 0, cancelled: 0, failed: 0 })
+      expect(reconciled).toEqual({ confirmed: 0, cancelled: 1, failed: 0 })
+      expect(booking?.status).toBe("cancelled")
+      expect(await slotOf(slotId)).toMatchObject({ sold: 0, available: 10 })
     })
 
     it("refuses a payment's start and the completion once the hold has ended", async () => {
