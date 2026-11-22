@@ -1,6 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { UNBOOKED_TRAVELER_DAYS } from "../../lib/booking/travelers"
+import { Modules } from "@medusajs/framework/utils"
+import { MAX_TRAVELERS, UNBOOKED_TRAVELER_DAYS } from "../../lib/booking/travelers"
 import { cutoffOf } from "../../lib/compliance/retention"
+import { errorSummary, logger } from "../../lib/logging"
 import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
 import { orderedCarts } from "../compliance/retention"
@@ -12,12 +14,54 @@ const BATCH = 500
 const MAX_BATCHES = 40
 
 /**
+ * An abandoned cart's old unbooked travelers deleted, under the cart's
+ * lock (the completion holds it from its check of the travelers to the
+ * order's link): a cart being completed right now is passed over, never
+ * left with an order but no travelers. Checked again inside the lock: a
+ * cart that became an order meanwhile keeps them. How many; 0 when the
+ * lock is busy (the next night tries again).
+ */
+async function forgetAbandonedCart(
+  container: Container,
+  cartId: string,
+  cutoff: Date
+): Promise<number> {
+  const service = container.resolve<BookingModuleService>(BOOKING_MODULE)
+  try {
+    return await container.resolve(Modules.LOCKING).execute(
+      cartId,
+      async () => {
+        if ((await orderedCarts(container, [cartId])).has(cartId)) {
+          return 0
+        }
+        const rows = await service.listBookingTravelers(
+          { cart_id: cartId, booking_id: null, created_at: { $lt: cutoff } },
+          { select: ["id"], take: MAX_TRAVELERS }
+        )
+        if (rows.length > 0) {
+          await service.deleteBookingTravelers(rows.map((row) => row.id))
+        }
+        return rows.length
+      },
+      { timeout: 1 }
+    )
+  } catch (error) {
+    logger.warn({
+      event: "booking.travelers_forget_skipped",
+      cart_id: cartId,
+      err: errorSummary(error),
+    })
+    return 0
+  }
+}
+
+/**
  * Travelers deleted for good (adr/0076 §7, docs/kvkk-envanter.md), part of
  * the nightly `compliance-retention`: (a) every one whose departure's
  * period has passed (`purge_after`, the service's date + 180 days); (b) a
  * cart's that never became an order, two days on (a hold lives at most
  * 135 minutes). A cart that did become an order keeps its travelers until
- * (a), even when they never reached its booking.
+ * (a); the reconcile job attaches any that missed its booking.
  */
 export async function forgetTravelers(
   container: Container,
@@ -48,10 +92,9 @@ export async function forgetTravelers(
       { select: ["id", "cart_id"], take: BATCH, order: { id: "ASC" } }
     )
     const ordered = await orderedCarts(container, [...new Set(rows.map((row) => row.cart_id))])
-    const due = rows.filter((row) => !ordered.has(row.cart_id))
-    if (due.length > 0) {
-      await service.deleteBookingTravelers(due.map((row) => row.id))
-      unbooked += due.length
+    const due = [...new Set(rows.flatMap((row) => (ordered.has(row.cart_id) ? [] : [row.cart_id])))]
+    for (const cartId of due) {
+      unbooked += await forgetAbandonedCart(container, cartId, cutoff)
     }
     after = rows.at(-1)?.id ?? after
     if (rows.length < BATCH) {

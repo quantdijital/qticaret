@@ -7,7 +7,7 @@ import type { Executor } from "./sql"
 /**
  * Travelers' rows (adr/0076 §7, K8): an ID or passport number is kept
  * encrypted with the shop's PII key, bound to its cart, beside a keyed
- * hash and its last four characters (adr/0009); nothing else of it.
+ * hash and its last four characters (two when shorter than eight, adr/0009); nothing else.
  */
 
 /** Domain separation for the number's ciphertext and hash. */
@@ -35,6 +35,9 @@ export interface SealedTraveler {
   purge_after: Date
 }
 
+// The tail kept plain: four characters, two of a short number (5–7) so most of it stays hidden
+const shownLength = (number: string): number => (number.length >= 8 ? 4 : 2)
+
 /** The number sealed for the cart; the rest as it came. */
 export function sealTraveler(
   keys: TravelerKeys,
@@ -54,7 +57,7 @@ export function sealTraveler(
       ? encryptPii(number, keys.encryption, encryptionContext(cartId))
       : null,
     document_hash: number ? hashPii(number, keys.hash, DOCUMENT_CONTEXT) : null,
-    document_last4: number ? number.slice(-4) : null,
+    document_last4: number ? number.slice(-shownLength(number)) : null,
     key_version: number ? TRAVELER_KEY_VERSION : null,
     purge_after: purgeAfter,
   }
@@ -112,21 +115,6 @@ export async function replaceCartTravelers(
     ])
   )
   return travelers.length
-}
-
-/** The cart's travelers made the booking's (the order's confirmation); again changes nothing. */
-export async function attachTravelers(
-  manager: Executor,
-  cartId: string,
-  bookingId: string
-): Promise<number> {
-  const updated = await rows(
-    manager,
-    `UPDATE booking_traveler SET booking_id = ?, updated_at = now()
-     WHERE cart_id = ? AND booking_id IS NULL AND deleted_at IS NULL RETURNING id`,
-    [bookingId, cartId]
-  )
-  return updated.length
 }
 
 /** A booked traveler's full number, or null when none was asked; unknown: 404. */

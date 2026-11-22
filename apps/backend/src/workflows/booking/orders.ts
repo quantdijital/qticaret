@@ -53,11 +53,27 @@ function unitsOfMarks(lines: { line: OrderLine; mark: BookingMark }[]): SlotUnit
     .map(([slotId, units]) => ({ slotId, units }))
 }
 
+/** The order's cart's travelers made its booking's (adr/0076 §7); again changes nothing. */
+export async function moveOrderTravelers(
+  container: Container,
+  orderId: string,
+  bookingId: string
+): Promise<number> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "order",
+    fields: ["cart.id"],
+    filters: { id: orderId },
+  })
+  const cartId = (data[0] as { cart?: { id: string } | null } | undefined)?.cart?.id
+  return cartId ? service(container).attachTravelers(cartId, bookingId) : 0
+}
+
 /**
- * The order's cart's travelers made its booking's (adr/0076 §7); again
- * changes nothing. A failure does not undo the booking: it is logged (the
- * order's id only) and the travelers stay against the ordered cart, kept
- * until their departure's period ends, for staff to see on the cart.
+ * `moveOrderTravelers` at the confirmation. A failure does not undo the
+ * booking: it is logged (the order's id only) and the travelers stay
+ * against the ordered cart, out of the panel's sight; the reconcile job
+ * finds them and tries again (`reconcile-travelers.ts`), ringing the
+ * panel's bell when it gives up.
  */
 export async function attachOrderTravelers(
   container: Container,
@@ -65,15 +81,7 @@ export async function attachOrderTravelers(
   bookingId: string
 ): Promise<void> {
   try {
-    const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-      entity: "order",
-      fields: ["cart.id"],
-      filters: { id: orderId },
-    })
-    const cartId = (data[0] as { cart?: { id: string } | null } | undefined)?.cart?.id
-    if (cartId) {
-      await service(container).attachTravelers(cartId, bookingId)
-    }
+    await moveOrderTravelers(container, orderId, bookingId)
   } catch (error) {
     logger.error({
       event: "booking.travelers_attach_failed",

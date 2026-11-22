@@ -13,9 +13,10 @@ function sources(dir: string): string[] {
   })
 }
 
-// What reads or writes a traveler's row, by name of the model, its table or its methods
+// What reads or writes a traveler's row: the model, its table, its methods and the functions
+// that carry its rows out (the panel's list, the storefront's view)
 const TOUCHES =
-  /\bBookingTraveler\b|\bbooking_traveler\b|BookingTravelers\b|revealTravelerDocument|setCartTravelers|attachTravelers|cartTravelersView|eraseCartTravelers/
+  /BookingTravelers?\b|\bbooking_traveler\b|revealTravelerDocument|setCartTravelers|attachTravelers|moveOrderTravelers|cartTravelersView|eraseCartTravelers|readSlotBookings|unbookedTravelers/
 
 /**
  * A traveler's details stay with the booking (adr/0076 §7): they reach no
@@ -24,15 +25,18 @@ const TOUCHES =
  * here on purpose and reviewed (KVKK).
  */
 const ALLOWED = [
+  "api/admin/booking-slots/[id]/bookings/route.ts",
   "api/admin/booking-slots/bookings-view.ts",
   "api/admin/booking-travelers/[id]/reveal/route.ts",
   "api/store/carts/[id]/travelers/route.ts",
   "modules/booking/migrations/Migration20261122095448.ts",
   "modules/booking/models/booking-traveler.ts",
   "modules/booking/service.ts",
+  "modules/booking/traveler-attach.ts",
   "modules/booking/travelers.ts",
   "workflows/booking/cart/travelers.ts",
   "workflows/booking/orders.ts",
+  "workflows/booking/reconcile-travelers.ts",
   "workflows/booking/traveler-retention.ts",
   "workflows/legal/erasure/traces.ts",
 ]

@@ -46,7 +46,8 @@ export const BOOKING_ROUTES = [
     middlewares: [requireFeature(CATALOG_BOOKING), validateAndTransformBody(AdminPostBookingSlot)],
   },
   {
-    // Every role that reads orders: each one does (adr/0040); no person's details in it
+    // Every role that reads orders (adr/0040): travelers' names, birth dates and nationalities
+    // with the number masked (adr/0076 §7); a sensitive read, each one audited
     matcher: "/admin/booking-slots/:id/bookings",
     methods: ["GET" as const],
     middlewares: [requireFeature(CATALOG_BOOKING)],

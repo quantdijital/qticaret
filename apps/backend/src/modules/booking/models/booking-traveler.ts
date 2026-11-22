@@ -6,7 +6,7 @@ import { model } from "@medusajs/framework/utils"
  * fills checkout; the order's confirmation sets `booking_id`. The name,
  * the birth date and the nationality (ISO 3166-1 alpha-2) are kept plain;
  * an ID or passport number only encrypted (bound to the cart), as a keyed
- * hash and its last four characters (adr/0009). Never in a line's
+ * hash and its last four characters (two if short; adr/0009). Never in a line's
  * metadata, a log, an invoice, a payment provider or an AI service.
  * `purge_after`: the service's date plus the period travelers are kept;
  * the nightly retention deletes the row then (`compliance-retention`).

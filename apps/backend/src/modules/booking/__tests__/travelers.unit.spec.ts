@@ -56,6 +56,12 @@ describe("a traveler's ID number sealed (adr/0076 §7, adr/0009)", () => {
     expect(one.document_encrypted).not.toBe(two.document_encrypted)
   })
 
+  it("keeps only the last two characters of a short number (review D5)", () => {
+    const short = sealTraveler(keys, "cart_1", { ...traveler, document_no: "AB12345" }, PURGE)
+    const eight = sealTraveler(keys, "cart_1", { ...traveler, document_no: "AB123456" }, PURGE)
+    expect([short.document_last4, eight.document_last4]).toEqual(["45", "3456"])
+  })
+
   it("keeps nothing of a number not asked", () => {
     expect(sealTraveler(keys, "cart_1", { ...traveler, document_no: null }, PURGE)).toMatchObject({
       document_encrypted: null,

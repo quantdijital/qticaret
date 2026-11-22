@@ -204,6 +204,6 @@ export function travelersComplete(
     })
 }
 
-/** A number as staff and the shopper see it: its last four only. */
+/** A number as staff and the shopper see it: its last four only (two of a short one). */
 export const maskDocument = (last4: string | null): string | null =>
   last4 === null ? null : `***${last4}`

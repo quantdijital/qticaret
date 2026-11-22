@@ -23,7 +23,8 @@ import { Booking, BookingSlotUse } from "./models/booking"
 import { BookingHold, BookingHoldSlot } from "./models/booking-hold"
 import { BookingSlot } from "./models/booking-slot"
 import { BookingTraveler } from "./models/booking-traveler"
-import { attachTravelers, replaceCartTravelers, revealDocument, sealTraveler } from "./travelers"
+import { attachTravelers, refreshTravelerPurge } from "./traveler-attach"
+import { replaceCartTravelers, revealDocument, sealTraveler } from "./travelers"
 import type { TravelerKeys } from "./travelers"
 
 /** The shop's PII keys (adr/0009), for travelers' ID numbers; hex, 32 bytes each. */
@@ -213,7 +214,13 @@ class BookingModuleService extends MedusaService({
     changes: SlotChanges,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<boolean> {
-    return updateSlot(managerOf(sharedContext), slotId, changes)
+    const manager = managerOf(sharedContext)
+    const found = await updateSlot(manager, slotId, changes)
+    if (found && (changes.starts_at !== undefined || changes.ends_at !== undefined)) {
+      // Its travelers are kept for a period after its date: the date moved, so does theirs
+      await refreshTravelerPurge(manager, slotId)
+    }
+    return found
   }
 
   /** The slots named with what is free now (live holds only). */

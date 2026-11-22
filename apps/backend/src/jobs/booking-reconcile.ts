@@ -1,13 +1,16 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
 import { reconcileBookings } from "../workflows/booking/reconcile"
+import { reconcileTravelers } from "../workflows/booking/reconcile-travelers"
 
 /**
  * Dated orders the order events missed (adr/0076 Ek takip L2), every ten
  * minutes: a placed order's booking confirmed, a cancelled one's bookings
- * cancelled (`workflows/booking/reconcile.ts`). Logs counts only; one
- * order's failure is logged with its id and the run goes on. On a shop
- * that sells no dated product: two indexed reads that find nothing.
+ * cancelled (`workflows/booking/reconcile.ts`), then a booking's travelers
+ * that failed to follow it attached (`reconcile-travelers.ts`, adr/0076
+ * §7). Logs counts only; one order's failure is logged with its id and
+ * the run goes on. On a shop that sells no dated product: three indexed
+ * reads that find nothing.
  */
 export default async function bookingReconcile(container: MedusaContainer) {
   try {
@@ -17,6 +20,14 @@ export default async function bookingReconcile(container: MedusaContainer) {
     }
   } catch (error) {
     logger.warn({ event: "booking.reconcile_failed", err: errorSummary(error) })
+  }
+  try {
+    const travelers = await reconcileTravelers(container)
+    if (travelers.attached + travelers.failed > 0) {
+      logger.info({ event: "booking.travelers_reconciled", ...travelers })
+    }
+  } catch (error) {
+    logger.warn({ event: "booking.travelers_reconcile_failed", err: errorSummary(error) })
   }
 }
 
