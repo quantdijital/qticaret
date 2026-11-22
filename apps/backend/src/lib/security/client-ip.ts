@@ -36,14 +36,23 @@ const single = (value: HeaderValue): string | undefined =>
   typeof value === "string" ? value.trim() : undefined
 
 /**
- * The signed address, or null when there is none, it is malformed, stale or
- * its signature does not match. A repeated header (an array) never counts.
+ * The address header's value when the storefront's server could not read
+ * the shopper's address (adr/0076 Ek D5): signed like an address, so only
+ * the storefront can say it, and never taken for one.
  */
-export function verifiedClientIp(
+export const CLIENT_IP_UNKNOWN = "unknown"
+
+/**
+ * What the storefront's server vouched for: the shopper's address, or
+ * `ip: null` when it signed that the address is unknown. Null when nothing
+ * valid was signed: no headers, malformed, stale or a signature that does
+ * not match. A repeated header (an array) never counts.
+ */
+export function verifiedClientAddress(
   headers: Record<string, HeaderValue>,
   secret: string | undefined,
   nowSeconds: number = Math.floor(Date.now() / 1000)
-): string | null {
+): { ip: string | null } | null {
   if (secret === undefined || secret === "") {
     return null
   }
@@ -53,12 +62,32 @@ export function verifiedClientIp(
   if (ip === undefined || time === undefined || signature === undefined) {
     return null
   }
-  if (isIP(ip) === 0 || !/^\d{1,12}$/.test(time) || !/^[0-9a-f]{64}$/i.test(signature)) {
+  const unknown = ip === CLIENT_IP_UNKNOWN
+  if (
+    (!unknown && isIP(ip) === 0) ||
+    !/^\d{1,12}$/.test(time) ||
+    !/^[0-9a-f]{64}$/i.test(signature)
+  ) {
     return null
   }
   const signedAt = Number(time)
   if (Math.abs(nowSeconds - signedAt) > CLIENT_IP_MAX_SKEW_SECONDS) {
     return null
   }
-  return safeEqual(signature.toLowerCase(), signClientIp(secret, ip, signedAt)) ? ip : null
+  if (!safeEqual(signature.toLowerCase(), signClientIp(secret, ip, signedAt))) {
+    return null
+  }
+  return { ip: unknown ? null : ip }
+}
+
+/**
+ * The signed address, or null when there is none, it is malformed, stale,
+ * its signature does not match or the storefront signed it as unknown.
+ */
+export function verifiedClientIp(
+  headers: Record<string, HeaderValue>,
+  secret: string | undefined,
+  nowSeconds: number = Math.floor(Date.now() / 1000)
+): string | null {
+  return verifiedClientAddress(headers, secret, nowSeconds)?.ip ?? null
 }

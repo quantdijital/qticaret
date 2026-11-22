@@ -33,6 +33,8 @@ describe("a product's extension in Store fields (adr/0025 Ek 2026-11-03)", () =>
     "+product_extension.summary_doc",
     // adr/0052 Ek 2026-11-03: the withdrawal mark and the kind that reads it (MSY md. 5/1-h)
     "+product_extension.withdrawal_excluded,+product_extension.kind",
+    // adr/0076 §10: whether the product is dated (its page asks its departures)
+    "+product_extension.booking_mode",
   ])("lets %s through", (fields) => {
     expect(restricted(fields)).toBe("next")
   })
@@ -51,6 +53,7 @@ describe("a product's extension in Store fields (adr/0025 Ek 2026-11-03)", () =>
     "items.product.product_extension.description_doc",
     "product_extension.description_doc.content",
     "items.product.product_extension.summary_doc",
+    "items.product.product_extension.booking_mode",
     // The old column is gone
     "+product_extension.summary",
   ])("refuses %s", (fields) => {

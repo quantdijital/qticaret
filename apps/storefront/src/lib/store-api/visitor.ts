@@ -35,18 +35,29 @@ export function visitorIp(headers: Headers, trustedHops = 0): string | null {
   return ip !== null && isIP(ip) !== 0 ? ip : null
 }
 
-/** The three headers, or none without a secret or an address. */
+/**
+ * Signed in the address's place when the shopper's address could not be
+ * read (adr/0076 Ek D5): the backend then counts no shopper by our
+ * server's own address, which every such shopper would share.
+ */
+export const UNKNOWN_VISITOR = "unknown"
+
+/**
+ * The three headers, or none without a secret. Without an address the
+ * same headers say, signed, that it is unknown.
+ */
 export function signedVisitorHeaders(
   secret: string | undefined,
   ip: string | null,
   now: number = Math.floor(Date.now() / 1000)
 ): Record<string, string> {
-  if (!secret || !ip) {
+  if (!secret) {
     return {}
   }
+  const value = ip ?? UNKNOWN_VISITOR
   return {
-    [CLIENT_IP_HEADERS.ip]: ip,
+    [CLIENT_IP_HEADERS.ip]: value,
     [CLIENT_IP_HEADERS.time]: String(now),
-    [CLIENT_IP_HEADERS.signature]: signClientIp(secret, ip, now),
+    [CLIENT_IP_HEADERS.signature]: signClientIp(secret, value, now),
   }
 }

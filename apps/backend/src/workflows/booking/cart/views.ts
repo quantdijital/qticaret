@@ -20,8 +20,9 @@ interface CartRow {
 }
 
 /**
- * The cart's dated side after a booking change: its hold's end (for the
- * storefront's countdown) and its dated lines. `shipping_method_stale`:
+ * The cart's dated side (after a booking change, or read for the
+ * storefront's countdown): its live hold's end and its dated lines, each
+ * `held` while that hold keeps its places. `shipping_method_stale`:
  * nothing in the cart ships any more but a shipping method is left from
  * before (adr/0076 Ek D3); the storefront asks again or drops it.
  */
@@ -55,6 +56,8 @@ export async function bookingCartView(container: Container, cartId: string) {
               unit_price: Number(item.unit_price),
               slot_id: mark.slot_id,
               starts_at: mark.starts_at,
+              // The live hold still keeps this line's places (a hold opened anew leaves older lines out)
+              held: hold?.live === true && hold.hold_id === mark.hold_id,
             },
           ]
         : []

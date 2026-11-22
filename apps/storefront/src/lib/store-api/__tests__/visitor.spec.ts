@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { CLIENT_IP_HEADERS, signClientIp, signedVisitorHeaders, visitorIp } from "../visitor"
+import {
+  CLIENT_IP_HEADERS,
+  UNKNOWN_VISITOR,
+  signClientIp,
+  signedVisitorHeaders,
+  visitorIp,
+} from "../visitor"
 
 describe("signClientIp", () => {
   it("matches the backend's signature (the same fixed vector as client-ip.unit.spec.ts)", () => {
@@ -30,12 +36,23 @@ describe("visitorIp", () => {
 })
 
 describe("signedVisitorHeaders", () => {
-  it("signs the address with the time, or sends nothing without both", () => {
+  it("signs the address with the time, or sends nothing without a secret", () => {
     const signed = signedVisitorHeaders("s".repeat(32), "203.0.113.9", 1_700_000_000)
     expect(signed[CLIENT_IP_HEADERS.ip]).toBe("203.0.113.9")
     expect(signed[CLIENT_IP_HEADERS.time]).toBe("1700000000")
     expect(signed[CLIENT_IP_HEADERS.signature]).toMatch(/^[0-9a-f]{64}$/)
     expect(signedVisitorHeaders(undefined, "203.0.113.9")).toEqual({})
-    expect(signedVisitorHeaders("s".repeat(32), null)).toEqual({})
+    expect(signedVisitorHeaders(undefined, null)).toEqual({})
+  })
+
+  it("signs 'unknown' when the address could not be read (adr/0076 Ek D5)", () => {
+    const signed = signedVisitorHeaders("k".repeat(32), null, 1_700_000_000)
+    expect(signed).toEqual({
+      [CLIENT_IP_HEADERS.ip]: UNKNOWN_VISITOR,
+      [CLIENT_IP_HEADERS.time]: "1700000000",
+      // The same fixed vector as the backend's client-ip.unit.spec.ts
+      [CLIENT_IP_HEADERS.signature]:
+        "4bf1244f97699c7007af4d0e714f8b01d9a1da5023aa44d6a40ba39e99a4cfe7",
+    })
   })
 })

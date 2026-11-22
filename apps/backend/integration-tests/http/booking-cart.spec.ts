@@ -5,7 +5,11 @@ import { cancelOrderWorkflow, createCartWorkflow } from "@medusajs/medusa/core-f
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { resetClientIpSecret } from "../../src/api/http/client-ip"
-import { CLIENT_IP_HEADERS, signClientIp } from "../../src/lib/security/client-ip"
+import {
+  CLIENT_IP_HEADERS,
+  CLIENT_IP_UNKNOWN,
+  signClientIp,
+} from "../../src/lib/security/client-ip"
 import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
 import { reconcileBookings } from "../../src/workflows/booking/reconcile"
@@ -192,6 +196,9 @@ medusaIntegrationTestRunner({
         slot_id: "bkslot_01ABC",
         items: [{ variant_id: product.variantId, quantity: 1 }],
       })
+      const hold = await settle(
+        http.get(`/store/carts/${cartId}/bookings`, { headers: store.headers })
+      )
       const remove = await settle(
         http.delete(`/store/carts/${cartId}/bookings/bkslot_01ABC`, { headers: store.headers })
       )
@@ -210,7 +217,7 @@ medusaIntegrationTestRunner({
       const started = await startPayment(cartId)
       const placed = await post(`/store/carts/${cartId}/complete`, {})
 
-      expect([add.status, remove.status, read.status]).toEqual([404, 404, 404])
+      expect([add.status, remove.status, read.status, hold.status]).toEqual([404, 404, 404, 404])
       expect(line?.quantity).toBe(2)
       expect(changed.status).toBe(200)
       expect(started.status).toBe(200)
@@ -399,28 +406,37 @@ medusaIntegrationTestRunner({
       expect(await slotOf(slotId)).toMatchObject({ held: 35, available: 15 })
     })
 
-    it("tags no address on an unsigned call from the storefront's server", async () => {
+    it("tags no address when the storefront signs it as unknown; a direct client by its own", async () => {
       await turnOn()
       const container = getContainer()
       const knex = () => container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
       const { adult, slotId } = await tour(10)
-      const [signedCart, unsignedCart] = [await emptyCart(container), await emptyCart(container)]
+      const [signedCart, unknownCart, directCart] = [
+        await emptyCart(container),
+        await emptyCart(container),
+        await emptyCart(container),
+      ]
       const ask = { slot_id: slotId, items: [{ variant_id: adult, quantity: 1 }] }
 
-      // The test client signs from this connection first: it is the storefront's server
       const signedAnswer = await bookFrom("203.0.113.8", signedCart, ask)
-      const unsignedAnswer = await book(unsignedCart, ask)
+      // adr/0076 Ek D5: the storefront could not read the shopper's address and says so, signed
+      const unknownAnswer = await bookFrom(CLIENT_IP_UNKNOWN, unknownCart, ask)
+      const directAnswer = await book(directCart, ask)
       const hashes = await knex()("booking_hold")
-        .whereIn("cart_id", [signedCart, unsignedCart])
+        .whereIn("cart_id", [signedCart, unknownCart, directCart])
         .select("cart_id", "client_hash")
       const hashOf = (cartId: string) =>
         (hashes as { cart_id: string; client_hash: string | null }[]).find(
           (row) => row.cart_id === cartId
         )?.client_hash
 
-      expect([signedAnswer.status, unsignedAnswer.status]).toEqual([200, 200])
+      expect([signedAnswer.status, unknownAnswer.status, directAnswer.status]).toEqual([
+        200, 200, 200,
+      ])
       expect(hashOf(signedCart)).toEqual(expect.any(String))
-      expect(hashOf(unsignedCart)).toBeNull()
+      expect(hashOf(unknownCart)).toBeNull()
+      expect(hashOf(directCart)).toEqual(expect.any(String))
+      expect(hashOf(directCart)).not.toBe(hashOf(signedCart))
     })
 
     it("pushes the hold as the payment starts, sells the places with the order, frees them on cancel", async () => {
@@ -548,12 +564,27 @@ medusaIntegrationTestRunner({
         await book(cartId, { slot_id: slotId, items: [{ variant_id: adult, quantity: 1 }] })
       }
 
+      const read = (cartId: string) =>
+        settle(
+          http.get<BookingAnswer & { lines: { held: boolean }[] }>(
+            `/store/carts/${cartId}/bookings`,
+            { headers: store.headers }
+          )
+        )
+      // The storefront's countdown reads the hold's end, and each line whether it is still held
+      const live = await read(late)
       await expire(late)
+      const gone = await read(late)
       const lateStart = await startPayment(late)
       const started = await startPayment(paying)
       await expire(paying)
       const completed = await post(`/store/carts/${paying}/complete`, {})
 
+      expect(live.status).toBe(200)
+      expect(live.data.hold?.expires_at).toEqual(expect.any(String))
+      expect(live.data.lines).toEqual([expect.objectContaining({ slot_id: slotId, held: true })])
+      expect(gone.data.hold).toBeNull()
+      expect(gone.data.lines).toEqual([expect.objectContaining({ slot_id: slotId, held: false })])
       expect([lateStart.status, lateStart.data.message]).toEqual([409, "booking.hold_expired"])
       expect(started.status).toBe(200)
       expect(completed.status).toBe(409)

@@ -5,6 +5,18 @@ import { bookingCartView } from "../../../../../workflows/booking/cart/views"
 import type { StorePostCartBookingType } from "./validators"
 
 /**
+ * GET /store/carts/:id/bookings (adr/0076 Ek D5): the cart's hold (its end,
+ * for the storefront's countdown) and its dated lines, each saying whether
+ * the live hold still keeps its places; `shipping_method_stale` as the
+ * booking answers give it. The cart's id is its key, as for Medusa's own
+ * cart route; no person's data. Behind `catalog.booking`.
+ */
+export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
+  res.setHeader("Cache-Control", "no-store")
+  res.json(await bookingCartView(req.scope, req.params["id"] ?? ""))
+}
+
+/**
  * POST /store/carts/:id/bookings (adr/0076 §5): a departure's places held
  * for the cart and its lines priced on the server; sent again for the same
  * departure, its lines become these. Behind `catalog.booking`.
