@@ -151,6 +151,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Ödeme alındı ama kalkışta yer kalmamış. Müşteriyle görüşüp tarihi değiştirin ya da iade edin.",
     },
+    "booking.travelers_attach_failed": {
+      title: "#{{order}} siparişinin katılımcı bilgileri rezervasyona eklenemedi",
+      description:
+        "Rezervasyon geçerli ama katılımcı listesi boş görünüyor. Katılımcı bilgilerini müşteriden isteyin.",
+    },
     "einvoice.issue_stopped": {
       title: "#{{order}} siparişinin faturası kesilemedi",
       description:
@@ -338,6 +343,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Order #{{order}}'s booking could not be confirmed",
       description:
         "The payment was taken but the departure has no places left. Talk to the customer, then move the date or refund.",
+    },
+    "booking.travelers_attach_failed": {
+      title: "Order #{{order}}'s travelers could not be added to its booking",
+      description:
+        "The booking stands but shows no travelers. Ask the customer for their travelers' details.",
     },
     "einvoice.issue_stopped": {
       title: "Order #{{order}}'s invoice could not be issued",

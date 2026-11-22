@@ -53,6 +53,44 @@ function unitsOfMarks(lines: { line: OrderLine; mark: BookingMark }[]): SlotUnit
     .map(([slotId, units]) => ({ slotId, units }))
 }
 
+/** The order's cart's travelers made its booking's (adr/0076 §7); again changes nothing. */
+export async function moveOrderTravelers(
+  container: Container,
+  orderId: string,
+  bookingId: string
+): Promise<number> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "order",
+    fields: ["cart.id"],
+    filters: { id: orderId },
+  })
+  const cartId = (data[0] as { cart?: { id: string } | null } | undefined)?.cart?.id
+  return cartId ? service(container).attachTravelers(cartId, bookingId) : 0
+}
+
+/**
+ * `moveOrderTravelers` at the confirmation. A failure does not undo the
+ * booking: it is logged (the order's id only) and the travelers stay
+ * against the ordered cart, out of the panel's sight; the reconcile job
+ * finds them and tries again (`reconcile-travelers.ts`), ringing the
+ * panel's bell when it gives up.
+ */
+export async function attachOrderTravelers(
+  container: Container,
+  orderId: string,
+  bookingId: string
+): Promise<void> {
+  try {
+    await moveOrderTravelers(container, orderId, bookingId)
+  } catch (error) {
+    logger.error({
+      event: "booking.travelers_attach_failed",
+      order_id: orderId,
+      err: errorSummary(error),
+    })
+  }
+}
+
 export type ConfirmOutcome = "none" | "existing" | "confirmed" | "retaken" | "failed" | "canceled"
 
 export interface ConfirmOptions {
@@ -83,7 +121,10 @@ export async function confirmOrderBookings(
     return "none"
   }
   const bookings = service(container)
-  if ((await bookings.listBookings({ order_id: orderId }, { take: 1 })).length > 0) {
+  const [existing] = await bookings.listBookings({ order_id: orderId }, { take: 1 })
+  if (existing) {
+    // A run that confirmed but stopped before its travelers: they follow now
+    await attachOrderTravelers(container, orderId, existing.id)
     return "existing"
   }
   if (canceled) {
@@ -93,7 +134,8 @@ export async function confirmOrderBookings(
   const lineId = lines[0]?.line.id ?? null
   const holdId = lines[0]?.mark.hold_id ?? ""
   try {
-    await bookings.confirmHold(holdId, orderId, lineId)
+    const { booking_id: bookingId } = await bookings.confirmHold(holdId, orderId, lineId)
+    await attachOrderTravelers(container, orderId, bookingId)
     return "confirmed"
   } catch (error) {
     if ((error as { safeMessage?: unknown }).safeMessage !== "booking.hold_missing") {
@@ -105,7 +147,8 @@ export async function confirmOrderBookings(
     if (!hold) {
       return "none"
     }
-    await bookings.confirmHold(hold.hold_id, orderId, lineId)
+    const { booking_id: bookingId } = await bookings.confirmHold(hold.hold_id, orderId, lineId)
+    await attachOrderTravelers(container, orderId, bookingId)
     logger.warn({ event: "booking.confirm_retaken", order_id: orderId })
     return "retaken"
   } catch (error) {

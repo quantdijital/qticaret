@@ -32,6 +32,9 @@ const SECRET_PARTS = [
   "tckn",
   "taxid",
   "identitynumber",
+  // A traveler's ID or passport number (adr/0076 §7)
+  "documentno",
+  "passport",
   "cardnumber",
   "cvv",
   "cvc",
@@ -56,6 +59,7 @@ const PERSONAL_PARTS = [
   "fullname",
   "legalname",
   "contactname",
+  "birthdate",
 ]
 const PERSONAL_EXCEPTIONS = new Set(["emailverified"])
 const REFERENCE = /ids?$/
@@ -104,7 +108,7 @@ const PHONE_PREFIX = String.raw`(?:(?:\+|%2B)?90[\s-]?|0)`
 const PHONE_REST = String.raw`\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}(?![A-Za-z0-9])`
 // Secrets written as `name=value` or `"name": "value"` inside text: form
 // bodies, query strings, JSON kept as a string
-const SECRET_NAME = String.raw`[A-Za-z0-9_-]*(?:password|passwd|secret|token|api[_-]?key|signature|merchant[_-]?(?:key|salt)|tckn|identity[_-]?number|card[_-]?number|cvv|cvc)`
+const SECRET_NAME = String.raw`[A-Za-z0-9_-]*(?:password|passwd|secret|token|api[_-]?key|signature|merchant[_-]?(?:key|salt)|tckn|identity[_-]?number|document[_-]?no|passport(?:[_-]?(?:no|number))?|birth[_-]?date|card[_-]?number|cvv|cvc)`
 const TEXT_PATTERNS: readonly (readonly [
   RegExp,
   (match: string, ...groups: string[]) => string,

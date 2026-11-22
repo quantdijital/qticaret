@@ -33,6 +33,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   // F13.2: the shopper's IP address and the contracts filled with the order
   ["/admin/orders/:id/legal", "order", false],
   ["/admin/orders/:id/legal/:kind", "order", false],
+  // adr/0076 §7: a departure's bookings name their travelers (the ID number masked)
+  ["/admin/booking-slots/:id/bookings", "booking_slot", false],
   ["/admin/customers/:id/messages", "customer", false],
   // F6.7: a dispute's evidence holds the order's delivery address
   ["/admin/chargebacks/:id/evidence", "chargeback", false],

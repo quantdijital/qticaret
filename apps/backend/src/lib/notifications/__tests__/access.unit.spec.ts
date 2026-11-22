@@ -81,6 +81,9 @@ const TEMPLATED: Record<string, string[]> = {
   "`einvoice.${document}_due`": unionOf("workflows/einvoice/queue-return.ts", "ReturnDocument").map(
     (document) => `einvoice.${document}_due`
   ),
+  "`booking.${alert}`": unionOf("workflows/booking/confirm-alert.ts", "BookingAlert").map(
+    (alert) => `booking.${alert}`
+  ),
 }
 
 describe("every alert kind is named, open or closed (adr/0020)", () => {

@@ -124,6 +124,8 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/customers/:id/consents",
     "/admin/messaging/suppressions",
     "/admin/customers/:id/billing-profile/reveal",
+    // A traveler's full ID or passport number for the departure's list (adr/0076 §7)
+    "/admin/booking-travelers/:id/reveal",
     // A contact form message marked answered: the shop still answers its customers
     "/admin/contact-messages/:id",
   ]),

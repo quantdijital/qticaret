@@ -8,6 +8,7 @@ import { refusePlainDatedItems } from "./plain-items"
 import { holdMatches, slotLinesOf, staleBookingLines, trimHoldToLines } from "./review"
 import type { SlotLines } from "./review"
 import { bookingService } from "./target"
+import { assertTravelersComplete } from "./travelers"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -76,6 +77,8 @@ export async function prepareBookingPayment(container: Container, cartId: string
     slots,
     await bookingService(container).cartHold(cartId)
   )
+  // Travelers the products ask for, entered before the money moves (adr/0076 §7)
+  await assertTravelersComplete(container, cartId, slots)
 }
 
 /**
@@ -97,6 +100,7 @@ export async function assertBookingLinesCurrent(container: Container, cartId: st
   }
   const service = bookingService(container)
   await assertHeldAndPriced(container, cart, slots, await service.cartHold(cartId))
+  await assertTravelersComplete(container, cartId, slots)
   // Past the hold's lifetime if need be: the payment is taken by now (adr/0076 Ek)
   await extend(container, cartId, COMPLETION_HOLD_MINUTES, { completion: true })
 }

@@ -17,6 +17,7 @@ const STORE_WRITES: Readonly<Record<string, "cart" | "guarded" | "read" | "open"
   "POST /store/carts/:id/age-declaration": "cart",
   "POST /store/carts/:id/bookings": "cart",
   "DELETE /store/carts/:id/bookings/:slot_id": "cart",
+  "POST /store/carts/:id/travelers": "cart",
   "POST /store/carts/:id/consents": "cart",
   "POST /store/carts/:id/legal-consents": "cart",
   "POST /store/carts/:id/line-items/:line_id/addons": "cart",

@@ -27,7 +27,8 @@ function containerOf(
 const bookingService = (overrides: Record<string, jest.Mock> = {}) => ({
   listBookings: jest.fn().mockResolvedValue([]),
   releaseHold: jest.fn().mockResolvedValue(true),
-  confirmHold: jest.fn().mockResolvedValue(undefined),
+  confirmHold: jest.fn().mockResolvedValue({ booking_id: "bkng_1", created: true }),
+  attachTravelers: jest.fn().mockResolvedValue(0),
   holdUnits: jest.fn(),
   ...overrides,
 })
@@ -75,6 +76,34 @@ describe("a dated order's places (adr/0076 Ek, review D1, O4)", () => {
         data: expect.objectContaining({ order_id: "order_1", display_id: "42" }) as unknown,
       })
     )
+  })
+
+  it("moves the cart's travelers to the booking it confirms (adr/0076 §7)", async () => {
+    const bookings = bookingService()
+    const { container } = containerOf(
+      { order: [{ id: "order_1", status: "pending", cart: { id: "cart_1" }, items: [datedLine] }] },
+      bookings
+    )
+
+    expect(await confirmOrderBookings(container, "order_1")).toBe("confirmed")
+    expect(bookings.attachTravelers).toHaveBeenCalledWith("cart_1", "bkng_1")
+  })
+
+  it("keeps the booking when its travelers cannot follow, and logs only the order", async () => {
+    const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+    const bookings = bookingService({
+      attachTravelers: jest.fn().mockRejectedValue(new Error("connection lost")),
+    })
+    const { container } = containerOf(
+      { order: [{ id: "order_1", status: "pending", cart: { id: "cart_1" }, items: [datedLine] }] },
+      bookings
+    )
+
+    expect(await confirmOrderBookings(container, "order_1")).toBe("confirmed")
+    expect(error).toHaveBeenCalledWith(
+      expect.objectContaining({ event: "booking.travelers_attach_failed", order_id: "order_1" })
+    )
+    error.mockRestore()
   })
 
   it("logs no error line for a quiet retry of the reconcile job", async () => {

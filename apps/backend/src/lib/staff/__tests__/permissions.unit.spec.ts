@@ -330,6 +330,7 @@ describe("staff roles", () => {
       staff: true,
       audit: true,
       taxId: true,
+      travelerDocuments: true,
       privacy: true,
       invoices: true,
       migration: true,
@@ -356,6 +357,7 @@ describe("staff roles", () => {
       staff: false,
       audit: true,
       taxId: true,
+      travelerDocuments: true,
       privacy: true,
       invoices: true,
       migration: false,
@@ -385,6 +387,7 @@ describe("staff roles", () => {
       staff: false,
       audit: false,
       taxId: false,
+      travelerDocuments: false,
       privacy: false,
       invoices: false,
       migration: false,
@@ -796,6 +799,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/products/:id/bookable": false,
   "POST /admin/products/:id/booking-slots": false,
   "POST /admin/booking-slots/:id": false,
+  // adr/0076 §7: a traveler's full ID number, owner and admin only
+  "POST /admin/booking-travelers/:id/reveal": false,
 }
 
 const ADMIN_DIR = join(__dirname, "../../../api/admin")
