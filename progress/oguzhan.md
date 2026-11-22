@@ -2,6 +2,12 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-22: adr/0076 D7a, planlandı aşaması, iptal kademeleri ve iade
+
+- **Dal:** `oguzhan/rezervasyon-iptal`. Backend: "Planlandı" aşaması (tarihli sipariş hizmet gününe dek), iptal kademeleri (ürün saat diliminde takvim günü, paket turda 30 gün tabanı), kalkış başına iptal (önce iade, sonra yer; `booking_slot_use.cancelled_at` migration), kalkış iptali (arka planda tam iade, uzlaştırma işi), müşteri/personel uçları, iade/değişim talebinde tarihli satır reddi. Panel: "Planlandı" etiketi, iade ayarında paket tur anahtarı, rezervasyon ayarında kademe düzenleyici, kalkış iptalinde önizleme (rezervasyon/sipariş/yer, toplam iade), sipariş sayfasında "Rezervasyonlar" kartı (kademe ya da tamamı, önizleme → onay; sahip/yönetici). Vitrin: sipariş sayfasında "Rezervasyonlarınız", "İptal talebi" → iade tutarı → "İptali onayla" (tutar gönderilmez); tema sözleşmesinde isteğe bağlı `bookings`/`cancelBooking`. ADR Ek D7a.
+- **Bilinen sınır:** kesintili iptal edilen sipariş "Planlandı/Tamamlandı" görünmeye devam eder.
+- **Sıradaki işler:** PR'ın güvenlik incelemesi (`security-reviewer`; ödeme/iade ve migration), birleşme; D7b e-postalar (iptal, kalkış iptali), hatırlatma, PDF voucher; D8 `travel` paketi, JSON-LD.
+
 ## 2026-11-22: adr/0076 D6b, katılımcı ekranları ve KVKK başvurusu
 
 - **Dal:** `oguzhan/rezervasyon-katilimci-ekran`. Panel: ürünün rezervasyon ayarında katılımcı düzeyi; kalkışın rezervasyon listesinde katılımcılar, "Numarayı göster" (sahip/yönetici, yeniden doğrulama, 30 sn), yazdırılabilir katılımcı listesi (dışa aktarım yok); Müşteriler > Katılımcı başvuruları (arama POST, tam ad eşleşmesi, numara özetle; JSON kopya; yeniden doğrulamalı silme). Backend: arama/silme uçları, yetenek `travelerRequests`, alıcının veri dökümüne `katılımcılar` (maskeli). Tema sözleşmesi `travelers` adımı, Atölye formu; vitrin `/odeme?adim=katilimcilar` (yalnız katılımcı isteyen kalkış varken, ödemeden önce), sunucu eylemi alanları seviyeye göre denetler. Görünüm kilidi değişmedi. ADR Ek D6b, `docs/kvkk-envanter.md`.
