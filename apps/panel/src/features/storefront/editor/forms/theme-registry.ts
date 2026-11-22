@@ -27,6 +27,7 @@ import type { CardVariant, StyleKitField } from "@qticaret/types"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { allSections } from "@/features/storefront/layout/sections"
 import { STYLE_KIT_READY } from "./style-kit-ready"
+import { TOUR_CARD_META } from "./theme-registry-tour"
 
 /**
  * The theme panel's fields as the settings search knows them (adr/0049 Ek
@@ -65,7 +66,13 @@ export type ThemeField = {
 /** Where the cards are drawn framed or compact: the theme's variant and every rail's own. */
 export type CardVariantsInUse = ReadonlySet<CardVariant>
 
-interface FieldMeta {
+/** The shop's flags that are on (`catalog.booking`), for a field only such a shop needs. */
+export type ShopFlags = ReadonlySet<string>
+
+/** No flag on: what a field asks of the shop's flags while they load or outside the editor. */
+export const NO_SHOP_FLAGS: ShopFlags = new Set()
+
+export interface FieldMeta {
   group: ThemeGroupName
   label: string
   term?: string
@@ -74,7 +81,7 @@ interface FieldMeta {
   /** More words the search finds it by, never shown (an i18n key): "boşluk" finds the spacing. */
   keywords?: string
   /** Whether the field means anything now; hidden from the form and the search otherwise. */
-  shown?: (theme: ThemeChoices, variants: CardVariantsInUse) => boolean
+  shown?: (theme: ThemeChoices, variants: CardVariantsInUse, flags: ShopFlags) => boolean
 }
 
 const named = (list: readonly string[], prefix: string, key = (option: string) => option) =>
@@ -243,6 +250,8 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   "product_card.hover_image": { group: "card", label: `${C}.hover_image` },
   "product_card.delivery_note": framedSwitch("delivery_note"),
   "product_card.full_button": framedSwitch("full_button"),
+  // The tour card's look (adr/0077 Ek "tur kartı"), each hidden where it means nothing
+  ...TOUR_CARD_META,
   "product_card.button_style": {
     group: "framed",
     label: `${C}.button_style`,
@@ -269,7 +278,7 @@ export interface ThemeRegistryField {
   keywords: string | null
   /** The element the search scrolls to, focuses and marks. */
   target: string
-  shown: (theme: ThemeChoices, variants: CardVariantsInUse) => boolean
+  shown: (theme: ThemeChoices, variants: CardVariantsInUse, flags: ShopFlags) => boolean
 }
 
 /** A field's element id in the theme panel: `theme-product-card-variant`. */

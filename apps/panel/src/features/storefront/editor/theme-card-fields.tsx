@@ -7,13 +7,17 @@ import {
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
+  CARD_TEXT_POSITIONS,
   CARD_VARIANTS,
+  DATED_CARD_SWITCHES,
   FRAMED_CARD_SWITCHES,
   QUICK_VIEW_SWITCHES,
+  TOUR_CARD_SWITCHES,
 } from "@/features/storefront/api/theme"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { PanelGroup } from "./panel-header"
+import { useSectionFlags } from "./section-flags"
 import { ChoiceSelect, SwitchRow } from "./theme-fields"
 import { THEME_FIELD, THEME_GROUP_TITLES } from "./forms/theme-registry"
 import type { CardVariantsInUse, ThemeGroupName, ThemeRegistryField } from "./forms/theme-registry"
@@ -22,7 +26,13 @@ const C = "storefront.editor.theme"
 
 type Card = ThemeSettings["product_card"]
 type CardChoice =
-  "ratio" | "variant" | "no_reviews" | "sold_out_row" | "button_style" | "quick_view_trigger"
+  | "ratio"
+  | "variant"
+  | "no_reviews"
+  | "sold_out_row"
+  | "button_style"
+  | "quick_view_trigger"
+  | "text_position"
 
 /** A card choice's list, as the registry names its options in this order. */
 const LISTS: { [K in CardChoice]: readonly Card[K][] } = {
@@ -32,7 +42,11 @@ const LISTS: { [K in CardChoice]: readonly Card[K][] } = {
   sold_out_row: CARD_SOLD_OUT_ROWS,
   button_style: CARD_BUTTON_STYLES,
   quick_view_trigger: CARD_QUICK_VIEW_TRIGGERS,
+  text_position: CARD_TEXT_POSITIONS,
 }
+
+/** The tour card's switches in the panel's order: every card's, then a dated card's. */
+const TOUR_SWITCHES = [...TOUR_CARD_SWITCHES, ...DATED_CARD_SWITCHES] as const
 
 /** Two choices side by side once each gets 160 px. */
 const Pair = ({ children }: { children: ReactNode }) => (
@@ -50,7 +64,9 @@ interface CardGroupsProps {
  * The product card's groups (adr/0062, adr/0049 Ek 2026-11-14 §3.3 and Ek
  * 2026-11-15): the open "Ürün kartı" with its picture, variant, brand and
  * stars, the stars' place without reviews, the pills and a sold-out card's
- * row, every card's; then the framed card's switches and its button's
+ * row, every card's; the tour card's look (adr/0077 Ek "tur kartı": the
+ * words' place up top, its switches under "Tur kartı", a dated card's two
+ * only with `catalog.booking`); then the framed card's switches and its button's
  * look; the quick view's switch, its button's look and what its dialog
  * shows, the last three only while it is on. Each field's name, term, hint and element from the registry; one
  * meaningless now (`shown`) is not drawn.
@@ -61,7 +77,8 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
   const set = (patch: Partial<Card>) => {
     onChange({ ...theme, product_card: { ...card, ...patch } })
   }
-  const visible = (field: ThemeRegistryField) => field.shown(theme, variants)
+  const flags = useSectionFlags().on
+  const visible = (field: ThemeRegistryField) => field.shown(theme, variants, flags)
   const termOf = (field: ThemeRegistryField) => (field.term ? t(field.term) : undefined)
 
   const choice = (name: CardChoice) => {
@@ -92,6 +109,8 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
       | (typeof FRAMED_CARD_SWITCHES)[number]
       | "quick_view"
       | (typeof QUICK_VIEW_SWITCHES)[number]
+      | (typeof TOUR_CARD_SWITCHES)[number]
+      | (typeof DATED_CARD_SWITCHES)[number]
   ) => {
     const field = THEME_FIELD[`product_card.${name}`]
     return visible(field) ? (
@@ -109,6 +128,8 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
     ) : null
   }
 
+  const tourShown = TOUR_SWITCHES.some((name) => visible(THEME_FIELD[`product_card.${name}`]))
+
   return (
     <>
       <PanelGroup name="card" title={t(THEME_GROUP_TITLES.card)} reveal={reveal("card")}>
@@ -116,6 +137,7 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
           {choice("ratio")}
           {choice("variant")}
         </Pair>
+        {choice("text_position")}
         {toggle("show_brand")}
         {toggle("show_rating")}
         {choice("no_reviews")}
@@ -125,6 +147,13 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
         </p>
         {CARD_BADGE_SWITCHES.map(toggle)}
         {choice("sold_out_row")}
+        {/* The tour card's extras (adr/0077 Ek "tur kartı"): a dated card's two only with the flag */}
+        {tourShown && (
+          <p className="pt-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            {t(`${C}.tourCard.title`)}
+          </p>
+        )}
+        {TOUR_SWITCHES.map(toggle)}
         {/* The quick view (adr/0049 Ek 2026-11-15): its look and contents only while it is on */}
         <p className="pt-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
           {t(`${C}.quickViewTitle`)}

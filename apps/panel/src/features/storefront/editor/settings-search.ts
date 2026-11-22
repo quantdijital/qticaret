@@ -8,8 +8,8 @@ import { sectionFields } from "./forms/field-registry"
 import type { RegistryField } from "./forms/field-registry"
 import { footerRowsFields } from "./footer-rows/footer-rows-fields"
 import type { ThemeChoices } from "@/features/storefront/api/theme"
-import { THEME_FIELDS, THEME_GROUP_TITLES } from "./forms/theme-registry"
-import type { CardVariantsInUse, ThemeRegistryField } from "./forms/theme-registry"
+import { NO_SHOP_FLAGS, THEME_FIELDS, THEME_GROUP_TITLES } from "./forms/theme-registry"
+import type { CardVariantsInUse, ShopFlags, ThemeRegistryField } from "./forms/theme-registry"
 import { pageSectionsOf } from "@/features/storefront/layout/page-layouts"
 import type { ShownPage } from "./editor-page"
 
@@ -138,7 +138,9 @@ export function searchTheme(
   query: string,
   theme: ThemeChoices,
   variants: CardVariantsInUse,
-  t: Translate
+  t: Translate,
+  // The shop's flags that are on: a dated card's fields only with `catalog.booking`
+  flags: ShopFlags = NO_SHOP_FLAGS
 ): ThemeHit[] {
   const words = searchText(query).split(" ").filter(Boolean)
   if (words.length === 0) {
@@ -146,7 +148,7 @@ export function searchTheme(
   }
   const name = searchText(t("storefront.editor.theme.title"))
   return THEME_FIELDS.flatMap((field) => {
-    if (!field.shown(theme, variants)) {
+    if (!field.shown(theme, variants, flags)) {
       return []
     }
     const found = fieldMatch(
