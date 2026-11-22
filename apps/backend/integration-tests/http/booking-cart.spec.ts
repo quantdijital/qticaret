@@ -452,6 +452,13 @@ medusaIntegrationTestRunner({
           { add: [{ variant_id: adult, quantity: 1 }] },
         ].map((change) => staff(`/admin/orders/${orderId}/edit/preview`, change))
       )
+      // The departure's bookings for the panel (D4): the order's number, no person's details
+      const listed = await settle(
+        http.get<Answer>(`/admin/booking-slots/${slotId}/bookings`, { headers: admin.headers })
+      )
+      const unknownSlot = await settle(
+        http.get<Answer>("/admin/booking-slots/bkslot_nope/bookings", { headers: admin.headers })
+      )
       await cancelOrderWorkflow(container).run({ input: { order_id: orderId } })
       const freed = await eventually(
         () => slotOf(slotId),
@@ -476,6 +483,18 @@ medusaIntegrationTestRunner({
         [400, "booking.order_edit_unavailable"],
         [400, "booking.order_edit_unavailable"],
       ])
+      expect(listed.status).toBe(200)
+      expect(listed.data["bookings"]).toEqual([
+        {
+          id: booking?.id,
+          order_id: orderId,
+          display_id: expect.any(Number) as unknown,
+          units: 2,
+          status: "confirmed",
+          created_at: expect.any(String) as unknown,
+        },
+      ])
+      expect(unknownSlot.status).toBe(404)
       expect(freed).toMatchObject({ sold: 0, held: 0, available: 10 })
       expect(cancelled?.status).toBe("cancelled")
     })
