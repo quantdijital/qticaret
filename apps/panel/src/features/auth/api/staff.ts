@@ -22,6 +22,10 @@ export type Capability =
   | "staff"
   | "audit"
   | "taxId"
+  /** A traveler's full ID or passport number (adr/0076 §7): owner and admin, proved again. */
+  | "travelerDocuments"
+  /** A traveler's own KVKK request: their rows found, copied, deleted (adr/0076 Ek D6b). */
+  | "travelerRequests"
   | "privacy"
   | "invoices"
   | "migration"

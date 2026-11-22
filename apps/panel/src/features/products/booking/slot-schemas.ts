@@ -4,6 +4,7 @@ import {
   parseCountInput,
   parseMoneyInput,
 } from "@qticaret/admin-ui/lib/money-input"
+import { TRAVELER_LEVELS } from "@/features/products/api/booking"
 import type {
   Bookable,
   BookableSettingsInput,
@@ -140,6 +141,7 @@ export const settingsSchema = z.object({
     .string()
     .refine((text) => countIn(text, 1, BOOKING_LIMITS.maxUnits), `${F}.maxUnits`),
   min_participants: optionalCount(1, BOOKING_LIMITS.minParticipants, `${F}.minParticipants`),
+  traveler_level: z.enum(TRAVELER_LEVELS),
   pax: z.record(
     z.string(),
     z
@@ -172,6 +174,7 @@ export function settingsDraftOf(
       bookable?.min_participants === null || bookable?.min_participants === undefined
         ? ""
         : String(bookable.min_participants),
+    traveler_level: bookable?.traveler_fields?.level ?? "none",
     pax: Object.fromEntries(
       variants.map((variant) => {
         const entry = bookable?.pax_by_variant[variant.id]
@@ -208,5 +211,6 @@ export function settingsInputOf(draft: SettingsDraft): BookableSettingsInput {
     max_units_per_cart: count(draft.max_units_per_cart),
     min_participants: draft.min_participants.trim() === "" ? null : count(draft.min_participants),
     pax_by_variant: pax,
+    traveler_fields: { level: draft.traveler_level },
   }
 }

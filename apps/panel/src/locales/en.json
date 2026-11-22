@@ -3607,7 +3607,8 @@
           "confirmed": "Confirmed",
           "cancelled": "Cancelled",
           "completed": "Completed"
-        }
+        },
+        "print": "Print traveler list"
       },
       "settings": {
         "title": "Booking settings",
@@ -3628,7 +3629,16 @@
         "minAge": "Min age",
         "maxAge": "Max age",
         "minAgeOf": "{{variant}}: minimum age",
-        "maxAgeOf": "{{variant}}: maximum age"
+        "maxAgeOf": "{{variant}}: maximum age",
+        "travelerLevel": "Traveler details",
+        "travelerLevelHint": "Asked for each traveler at checkout. An ID or passport number is kept encrypted and shown masked in the panel. Ask only what you need (KVKK).",
+        "travelerLevels": {
+          "none": "Do not ask",
+          "name": "Name",
+          "birth_date": "Name, birth date",
+          "identity": "Name, birth date, ID/passport no",
+          "nationality": "Name, birth date, ID/passport no, nationality"
+        }
       },
       "errors": {
         "disabled": "For dated products, first turn on both dated products and digital and service products in Settings > Features.",
@@ -3660,6 +3670,20 @@
           "pax": "Places taken must be a whole number between 0 and 20.",
           "age": "Age must be between 0 and 120."
         }
+      },
+      "travelers": {
+        "title": "Travelers",
+        "none": "No traveler details.",
+        "reveal": "Show number",
+        "hide": "Hide",
+        "printTitle": "Traveler list",
+        "noDeparture": "Departure not found.",
+        "count_one": "{{count}} traveler",
+        "count_other": "{{count}} travelers",
+        "name": "Name",
+        "birthDate": "Birth date",
+        "nationality": "Nationality",
+        "document": "ID/passport no"
       }
     },
     "addons": {
@@ -5365,6 +5389,48 @@
       "whatsappTextNoName": "Merhaba, sepetinizde bıraktığınız ürünlerle ilgili yardımcı olabileceğimiz bir konu var mı?",
       "previous": "Previous cart",
       "next": "Next cart"
+    },
+    "sectionTravelers": "Traveler requests",
+    "travelerRequests": {
+      "title": "Traveler requests",
+      "description": "A KVKK request from a person named in a booking: find their records, give them a copy or delete them.",
+      "hint": "A traveler is not the buyer and has no account; their records are found by what they give. Write the first and last name in full; a birth date or number, if given, must match too. Every search is recorded.",
+      "notAllowed": "Only the owner and admins can use this screen.",
+      "flagOff": "Dated sales are off; there are no traveler records.",
+      "fields": {
+        "first_name": "First name",
+        "last_name": "Last name",
+        "birth_date": "Birth date",
+        "birthDateHint": "Leave empty for trips that do not ask a birth date.",
+        "document_no": "ID or passport no",
+        "documentHint": "If given, only records with this number are found; the number is not kept."
+      },
+      "errors": {
+        "firstName": "Enter the first name.",
+        "lastName": "Enter the last name.",
+        "document": "The number can be at most 40 characters."
+      },
+      "search": "Search",
+      "noneFound": "No traveler is recorded with these details.",
+      "found_one": "{{count}} record found.",
+      "found_other": "{{count}} records found.",
+      "download": "Download copy",
+      "erase": "Delete selected",
+      "pick": "Select",
+      "pickOne": "Select {{name}}",
+      "inCart": "In a cart (not ordered)",
+      "columns": {
+        "person": "Traveler",
+        "trip": "Product and date",
+        "order": "Order",
+        "purge": "Deleted automatically"
+      },
+      "eraseTitle_one": "Delete {{count}} traveler record?",
+      "eraseTitle_other": "Delete {{count}} traveler records?",
+      "eraseText": "The records are deleted for good; this cannot be undone. The order stays, with its amounts and lines, for the books. The deletion is recorded.",
+      "eraseConfirm": "Delete for good",
+      "erased_one": "{{count}} record deleted.",
+      "erased_other": "{{count}} records deleted."
     }
   },
   "categories": {

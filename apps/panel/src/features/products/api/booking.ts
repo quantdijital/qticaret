@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 /** Dated products (adr/0076): sold by departure, each with its own places. */
@@ -9,6 +10,10 @@ export type BookingMode = "none" | "departure" | "range"
 
 export const SLOT_STATUSES = ["open", "closed", "cancelled"] as const
 export type SlotStatus = (typeof SLOT_STATUSES)[number]
+
+/** What checkout asks of each traveler, each level adding to the one before (adr/0076 §7). */
+export const TRAVELER_LEVELS = ["none", "name", "birth_date", "identity", "nationality"] as const
+export type TravelerLevel = (typeof TRAVELER_LEVELS)[number]
 
 /** Per variant: how many places a unit takes (an infant 0) and the ages it is for. */
 export interface PaxEntry {
@@ -27,6 +32,8 @@ export interface Bookable {
   min_participants: number | null
   pax_by_variant: Record<string, PaxEntry>
   timezone: string
+  /** Absent from an older backend: none asked. */
+  traveler_fields?: { level: TravelerLevel }
 }
 
 export interface BookableAnswer {
@@ -47,7 +54,19 @@ export interface BookingSlot {
   price_adjustments: Record<string, number> | null
 }
 
-/** One booking on a departure: the order, its places; no person's details (D6). */
+/** A booked traveler on a departure (adr/0076 §7): the number only masked. */
+export interface SlotTraveler {
+  id: string
+  position: number
+  first_name: string
+  last_name: string
+  birth_date: string | null
+  nationality: string | null
+  /** `***1234`; null when the product asked none. */
+  document_masked: string | null
+}
+
+/** One booking on a departure: the order, its places, its travelers there. */
 export interface SlotBooking {
   id: string
   order_id: string
@@ -55,6 +74,8 @@ export interface SlotBooking {
   units: number
   status: "confirmed" | "cancelled" | "completed"
   created_at: string
+  /** Absent from an older backend. */
+  travelers?: SlotTraveler[]
 }
 
 export interface BookableSettingsInput {
@@ -63,6 +84,7 @@ export interface BookableSettingsInput {
   max_units_per_cart?: number
   min_participants?: number | null
   pax_by_variant?: Record<string, PaxEntry>
+  traveler_fields?: { level: TravelerLevel }
 }
 
 export interface NewSlot {
@@ -155,5 +177,22 @@ export function useUpdateSlot(productId: string) {
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: BOOKING_KEY(productId) })
     },
+  })
+}
+/**
+ * A booked traveler's full ID or passport number (adr/0076 §7): owner and
+ * admin, proved again (428 asks), recorded before it answers.
+ */
+export function useRevealTravelerDocument() {
+  return useMutation({
+    mutationFn: (travelerId: string) =>
+      withReauth((extra) =>
+        sdk.client.fetch<{ id: string; document_no: string | null }>(
+          `/admin/booking-travelers/${encodeURIComponent(travelerId)}/reveal`,
+          { method: "POST", body: {}, ...extra }
+        )
+      ),
+    // The number is not kept once nothing shows it
+    gcTime: 0,
   })
 }
