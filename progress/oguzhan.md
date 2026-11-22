@@ -2,6 +2,11 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-22: adr/0076 D8, `travel` paketi, yasal belge satırı, tarihli ürün SEO
+
+- **Dal:** `oguzhan/turizm-paketi`. Paket şemasına eklemeli `catalog.json` (yeni ürünün türü ve tarihli satışı, yapılandırılmış veri türü) ve `pages.json` (taslak sayfalar); backend bunları yeni `catalog` ayar bölümüne ve içerik sayfalarına yazar (defter türleri `page`, `setting`, migration). `travel` paketi: bayraklar, "Tur bilgileri" şablonu, 10 kategori, taslak iptal koşulları sayfası (hazır görünüm yok, sonraya). Ürün sihirbazı mağazanın varsayılan türüyle başlar, "Tarihli satış" anahtarı. Yasal kimlikte "Faaliyet belgesi" (ad, numara, sahip): vitrin alt bilgisi ve künye; ödeme sayfası #270 sonrası. Tarihli üründe `TouristTrip` (ya da `Event`) bloğu, kargo/iade alanı yok; beslemeler tarihli ürünü göndermez. Yapay zekâ okuyucusu değişmedi (açık nitelikler zaten gidiyor). ADR Ek "D8".
+- **Sıradaki işler:** D6b (#270), D7; panelde `catalog` ayar kartı; ödeme sayfasında belge satırı; `travel` hazır görünümü.
+
 ## 2026-11-22: adr/0076 D5 takibi, kartlarda "…'den itibaren" ve en yakın kalkış
 
 - **Dal:** `oguzhan/tarihli-kart-fiyat`. `GET /store/card-facts` tarihli ürüne `booking { from_price, next_departure, … }` ekler (yalnız `catalog.booking` açıkken; sayfa başına tek fiyat ve tek kalkış okuması; bebek kategorisi fiyata girmez). Tarihli üründe kart hızlı ekleme yok. Tema sözleşmesinde `ProductCardView.booking?`; Atölye kartı "1.750,50 TL'den itibaren" + "En yakın: 12 Ara" ya da "Yakında yeni tarihler". Diğer kartlar ve görünüm kilidi değişmedi. ADR Ek "D5 takip: kart fiyatı".
