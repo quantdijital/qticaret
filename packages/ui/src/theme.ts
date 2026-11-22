@@ -108,6 +108,15 @@ export interface ThemeActions {
    */
   addBookingToCart?: FormAction
   /**
+   * A dated product's "call me" request (adr/0076 Ek 2026-11-23): no
+   * payment, no places held; the shop calls back. Fields: `product_id`,
+   * `name`, `phone`, `email` (optional), one of `slot_id`, `date`
+   * (YYYY-MM-DD) or `month` (YYYY-MM) or none (open dates), `adults`,
+   * `children`, `note`, `consent` (`1`), `challenge` (a solved proof
+   * of work, when one was asked).
+   */
+  requestBooking?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+  /**
    * A plain form: a payment link's cart (adr/0051) let go, so the shopper
    * can shop anew; the link itself still opens from its message.
    */

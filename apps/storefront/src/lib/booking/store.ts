@@ -36,6 +36,8 @@ export interface StoreProductBooking {
   max_units_per_cart: number
   timezone: string
   currency_code: string
+  /** adr/0076 Ek 2026-11-23: the cart, a call-me request, or both; absent from an older backend. */
+  sale_mode?: "online" | "request" | "both"
   categories: StoreBookingCategory[]
   slots: StoreBookingSlot[]
 }

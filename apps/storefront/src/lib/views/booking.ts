@@ -98,7 +98,11 @@ export const EMPTY_BOOKING: BookingView = {
  * categories with their ages, the departures soonest first, each told in
  * the product's zone with its places and each category's price.
  */
-export function bookingViewOf(booking: StoreProductBooking, t: Translate): BookingView {
+export function bookingViewOf(
+  booking: StoreProductBooking,
+  t: Translate,
+  privacyPath: string | null = null
+): BookingView {
   const categories: BookingCategoryView[] = booking.categories.map((category) => ({
     variantId: category.variant_id,
     title: category.title ?? "",
@@ -123,6 +127,10 @@ export function bookingViewOf(booking: StoreProductBooking, t: Translate): Booki
       })),
     fewLeft: FEW_LEFT,
     maxUnits: booking.max_units_per_cart,
+    // A call-me request (adr/0076 Ek 2026-11-23); an online-only product's view stays as it was
+    ...(booking.sale_mode === "request" || booking.sale_mode === "both"
+      ? { saleMode: booking.sale_mode, privacyPath }
+      : {}),
   }
 }
 

@@ -92,10 +92,13 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   ])
   // The shop's WhatsApp number comes with its contact details (adr/0048); the return
   // policy's page for the shipping card, the frame asked for it already (kept a minute)
-  const [{ whatsapp }, returnPolicy, withAmounts] = await Promise.all([
+  const requests = booking?.sale_mode === "request" || booking?.sale_mode === "both"
+  const [{ whatsapp }, returnPolicy, withAmounts, privacyNotice] = await Promise.all([
     legalIdentity(),
     legalDocument("return_policy"),
     visitorAmounts(),
+    // A call-me request's consent links the privacy notice (adr/0076 Ek 2026-11-23)
+    requests ? legalDocument("privacy_notice") : Promise.resolve(null),
   ])
   const here = `${url.pathname}${url.search}`
   // The badges and colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
@@ -134,7 +137,11 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     addons: addonFieldsOf(addons, t),
     // Departures and counts in place of "add to cart"; dated sales off: no departures, "soon"
     ...(product.product_extension?.booking_mode === "departure"
-      ? { booking: booking ? bookingViewOf(booking, t) : EMPTY_BOOKING }
+      ? {
+          booking: booking
+            ? bookingViewOf(booking, t, privacyNotice ? legalPath("privacy_notice") : null)
+            : EMPTY_BOOKING,
+        }
       : {}),
     signedIn: customer !== null,
     shippingNote:
