@@ -14,8 +14,15 @@ describe("listing search query", () => {
     expect(parsed.id).toBeUndefined()
   })
 
+  // adr/0077 §2: a search by dates or category has no `q`; the route refuses
+  // one whose query holds neither (integration-tests/http/dated-search.spec.ts)
+  it("leaves a search without `q` to the route", () => {
+    const parsed = StoreGetListingProducts.parse({ ...base, type: "search" })
+    expect(parsed).toMatchObject({ type: "search", query: "" })
+    expect(parsed.q).toBeUndefined()
+  })
+
   it.each([
-    ["missing", {}],
     ["empty", { q: "" }],
     ["blank", { q: "   " }],
     ["punctuation only", { q: "?!-" }],

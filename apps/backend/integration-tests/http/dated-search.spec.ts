@@ -120,7 +120,8 @@ medusaIntegrationTestRunner({
 
       const dated = await search({ tarih })
       const party = await search({ tarih, kisi: "3" })
-      const bySort = await search({ sirala: "kalkis" })
+      // A sort is no search by itself (adr/0077 §2): `kalkis` alone is read on the catalogue
+      const bySort = await listing({ type: "all", id: "all" }, { sirala: "kalkis" })
 
       expect(dated.status).toBe(200)
       expect(dated.data.product_ids).toEqual([sooner.productId, later.productId])
@@ -135,6 +136,7 @@ medusaIntegrationTestRunner({
       expect(bySort.data.product_ids).toContain(plain.productId)
       // A search with neither words, dates nor category is still refused; nor is a far date
       expect((await search({})).status).toBe(400)
+      expect((await search({ sirala: "kalkis" })).status).toBe(400)
       expect((await search({ tarih: "9999-12-31_9999-12-31" })).status).toBe(400)
     })
 

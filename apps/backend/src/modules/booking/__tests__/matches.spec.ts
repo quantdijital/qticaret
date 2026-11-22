@@ -134,7 +134,7 @@ moduleIntegrationTestRunner<BookingModuleService>({
       ).rejects.toMatchObject({ safeMessage: "booking.dates_invalid" })
     })
 
-    it("finds the departures through the partial index on their start", async () => {
+    it("reads the days as a range of an index on the departures' start", async () => {
       const { month } = monthAhead()
       const { sql: text, params } = matchesStatement({
         dates: { months: [month] },
@@ -147,7 +147,24 @@ moduleIntegrationTestRunner<BookingModuleService>({
         return em.execute<{ "QUERY PLAN": string }[]>(`EXPLAIN ${text}`, params)
       })
       const lines = plan.map((row) => row["QUERY PLAN"]).join("\n")
-      expect(lines).toContain("IDX_booking_slot_open_starts_at")
+      // Which of the indexes on the start a near-empty table picks is the planner's
+      // choice; what matters is that the days are read as an index range, not a scan
+      expect(lines).toMatch(
+        /(Index (Only )?Scan using|Bitmap Index Scan on) "?IDX_booking_slot_\w+/
+      )
+      expect(lines).toMatch(/Index Cond: \(\(?starts_at >= /)
+      expect(lines).not.toMatch(/Seq Scan on booking_slot/)
+    })
+
+    it("keeps a partial index on the open departures' start", async () => {
+      const rows = await sql(
+        "SELECT indexdef FROM pg_indexes WHERE tablename = 'booking_slot' AND indexname = ?",
+        ["IDX_booking_slot_open_starts_at"]
+      )
+      const definition = String((rows[0] as { indexdef?: string } | undefined)?.indexdef)
+      expect(definition).toMatch(/\(starts_at\) WHERE/)
+      expect(definition).toContain("'open'")
+      expect(definition).toContain("deleted_at IS NULL")
     })
   },
 })
