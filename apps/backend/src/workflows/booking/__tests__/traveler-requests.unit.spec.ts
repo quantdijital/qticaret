@@ -72,12 +72,16 @@ describe("a traveler's own KVKK request (adr/0076 Ek D6b)", () => {
     expect(booking.travelerDocumentHash).toHaveBeenCalledWith("U12345678")
     expect(booking.listBookingTravelers).toHaveBeenCalledWith(
       {
-        first_name: { $ilike: "ayşe" },
-        last_name: { $ilike: "Yılmaz" },
+        first_name: { $ilike: "ay_e" },
+        last_name: { $ilike: "Y_lmaz" },
         birth_date: "1990-01-15",
         document_hash: "hash:U12345678",
       },
-      expect.objectContaining({ take: MOST_FOUND, order: { created_at: "DESC" } })
+      expect.objectContaining({
+        take: MOST_FOUND * 2,
+        skip: 0,
+        order: { created_at: "DESC", id: "DESC" },
+      })
     )
     const select = (booking.listBookingTravelers.mock.calls[0] as unknown[])[1] as {
       select: string[]
@@ -109,7 +113,7 @@ describe("a traveler's own KVKK request (adr/0076 Ek D6b)", () => {
     await findBookingTravelers(container, { first_name: "A_li", last_name: "100%" }, NOW)
 
     expect(booking.listBookingTravelers).toHaveBeenCalledWith(
-      { first_name: { $ilike: "A\\_li" }, last_name: { $ilike: "100\\%" } },
+      { first_name: { $ilike: "A\\_l_" }, last_name: { $ilike: "100\\%" } },
       expect.anything()
     )
     expect(booking.travelerDocumentHash).not.toHaveBeenCalled()
@@ -134,22 +138,71 @@ describe("a traveler's own KVKK request (adr/0076 Ek D6b)", () => {
 
     const [found] = await findBookingTravelers(
       container,
-      { first_name: "Ayşe", last_name: "Y" },
+      { first_name: "Ayşe", last_name: "yılmaz" },
       NOW
     )
 
     expect(found).toMatchObject({ order_id: null, display_id: null })
   })
 
+  it("matches a name by Turkish case, the dotted and dotless i as one (review D2)", async () => {
+    const { container, booking } = containerWith([
+      { ...ROW, id: "bktrv_2", first_name: "İSMAİL", last_name: "IŞIK" },
+      { ...ROW, id: "bktrv_3", first_name: "ismail", last_name: "işik" },
+      { ...ROW, id: "bktrv_4", first_name: "Ismaıl", last_name: "ışık" },
+      // Of the first cut's shape, another name
+      { ...ROW, id: "bktrv_5", first_name: "asmail", last_name: "Işık" },
+    ])
+
+    const found = await findBookingTravelers(
+      container,
+      { first_name: "ismail", last_name: "Işık" },
+      NOW
+    )
+
+    expect(booking.listBookingTravelers).toHaveBeenCalledWith(
+      { first_name: { $ilike: "_sma_l" }, last_name: { $ilike: "___k" } },
+      expect.anything()
+    )
+    expect(found.map((row) => row.id)).toEqual(["bktrv_2", "bktrv_3", "bktrv_4"])
+  })
+
+  it("reads the first cut on, page by page, and keeps at most MOST_FOUND", async () => {
+    const page = (name: string) =>
+      Array.from({ length: MOST_FOUND * 2 }, (_, at) => ({
+        ...ROW,
+        id: `bktrv_${name}_${String(at)}`,
+        first_name: name,
+      }))
+    const { container, booking } = containerWith([])
+    booking.listBookingTravelers
+      .mockResolvedValueOnce(page("Asmail"))
+      .mockResolvedValueOnce(page("İsmail"))
+
+    const found = await findBookingTravelers(
+      container,
+      { first_name: "ismail", last_name: "Yılmaz" },
+      NOW
+    )
+
+    expect(booking.listBookingTravelers).toHaveBeenCalledTimes(2)
+    expect(booking.listBookingTravelers).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ skip: MOST_FOUND * 2 })
+    )
+    expect(found).toHaveLength(MOST_FOUND)
+    expect(found.every((row) => row.first_name === "İsmail")).toBe(true)
+  })
+
   it("deletes for good only the rows that exist, and says how many", async () => {
     const { container, booking } = containerWith([ROW])
 
-    const deleted = await eraseBookingTravelers(container, ["bktrv_1", "bktrv_gone"])
+    const erased = await eraseBookingTravelers(container, ["bktrv_1", "bktrv_gone"])
 
-    expect(deleted).toBe(1)
+    expect(erased).toEqual({ deleted: 1, booking_ids: ["bkng_1"], slot_ids: ["bkslot_1"] })
     expect(booking.listBookingTravelers).toHaveBeenCalledWith(
       { id: ["bktrv_1", "bktrv_gone"] },
-      { select: ["id"] }
+      { select: ["id", "booking_id", "slot_id"] }
     )
     expect(booking.deleteBookingTravelers).toHaveBeenCalledWith(["bktrv_1"])
   })

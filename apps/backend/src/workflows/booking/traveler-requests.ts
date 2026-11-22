@@ -72,8 +72,29 @@ const SHOWN = [
 
 const iso = (value: Date | string): string => new Date(value).toISOString()
 
-// The pattern's own characters taken as they are: a name is matched whole, case aside
-const exactly = (text: string): string => text.replace(/[\\%_]/g, (char) => `\\${char}`)
+/**
+ * A name as two spellings of it compare (review D2): Turkish case rules
+ * ("İSMAİL" is "ismail"), and the dotted and dotless i taken as one, as a
+ * name typed on another keyboard loses the dot ("IŞIK", "Işık", "işik").
+ */
+export const foldName = (text: string): string =>
+  text.normalize("NFC").toLocaleLowerCase("tr").replace(/̇/g, "").replace(/ı/g, "i")
+
+/**
+ * The database's first cut of a name, its letters' length kept: plain
+ * letters and digits as they are (ILIKE folds their case), the pattern's
+ * own characters escaped, and any i or letter beyond ASCII left to one
+ * `_`, since the database's case rules are not Turkish; `foldName` then
+ * decides.
+ */
+const roughly = (text: string): string =>
+  text
+    .normalize("NFC")
+    .replace(/[\\%_]|[iI]|[^\x20-\x7e]/gu, (char) => (/[\\%_]/.test(char) ? `\\${char}` : "_"))
+
+// Rows the first cut reads at a time, and how many such reads at most
+const PAGE = MOST_FOUND * 2
+const MOST_PAGES = 5
 
 const refuse = (field: string): never => {
   throw new ValidationError("booking.traveler_search_invalid", { field })
@@ -142,7 +163,8 @@ async function described(container: Container, rows: readonly TravelerRow[]) {
 
 /**
  * The rows that name the person asking: the first and last name matched
- * whole (case aside), and the birth date and the number when given (the
+ * whole by `foldName` (Turkish case, i and ı as one), and the birth date
+ * and the number when given (the
  * number by its keyed hash). 400 `booking.traveler_search_invalid` when
  * an entry is not a name, a date or a number. Newest first, at most
  * `MOST_FOUND`.
@@ -161,16 +183,33 @@ export async function findBookingTravelers(
     ? (cleanDocument(input.document_no) ?? refuse("document_no"))
     : null
   const service = container.resolve<BookingModuleService>(BOOKING_MODULE)
-  const rows = await service.listBookingTravelers(
-    {
-      first_name: { $ilike: exactly(firstName) },
-      last_name: { $ilike: exactly(lastName) },
-      ...(birth ? { birth_date: birth } : {}),
-      ...(number ? { document_hash: service.travelerDocumentHash(number) } : {}),
-    },
-    { select: SHOWN, take: MOST_FOUND, order: { created_at: "DESC" } }
-  )
-  return described(container, rows)
+  const filters = {
+    first_name: { $ilike: roughly(firstName) },
+    last_name: { $ilike: roughly(lastName) },
+    ...(birth ? { birth_date: birth } : {}),
+    ...(number ? { document_hash: service.travelerDocumentHash(number) } : {}),
+  }
+  const first = foldName(firstName)
+  const last = foldName(lastName)
+  const rows: TravelerRow[] = []
+  // The first cut may hold other names of the same shape; read on until enough are this one's
+  for (let page = 0; page < MOST_PAGES && rows.length < MOST_FOUND; page += 1) {
+    const read = await service.listBookingTravelers(filters, {
+      select: SHOWN,
+      take: PAGE,
+      skip: page * PAGE,
+      order: { created_at: "DESC", id: "DESC" },
+    })
+    rows.push(
+      ...(read as unknown as TravelerRow[]).filter(
+        (row) => foldName(row.first_name) === first && foldName(row.last_name) === last
+      )
+    )
+    if (read.length < PAGE) {
+      break
+    }
+  }
+  return described(container, rows.slice(0, MOST_FOUND))
 }
 
 /**
@@ -179,11 +218,19 @@ export async function findBookingTravelers(
  */
 export async function eraseBookingTravelers(container: Container, ids: readonly string[]) {
   const service = container.resolve<BookingModuleService>(BOOKING_MODULE)
-  const rows = await service.listBookingTravelers({ id: [...ids] }, { select: ["id"] })
+  const rows = await service.listBookingTravelers(
+    { id: [...ids] },
+    { select: ["id", "booking_id", "slot_id"] }
+  )
   if (rows.length > 0) {
     await service.deleteBookingTravelers(rows.map((row) => row.id))
   }
-  return rows.length
+  // Which bookings and departures lost a traveler (review D1): ids only, no one's details
+  return {
+    deleted: rows.length,
+    booking_ids: [...new Set(rows.flatMap((row) => (row.booking_id ? [row.booking_id] : [])))],
+    slot_ids: [...new Set(rows.map((row) => row.slot_id))],
+  }
 }
 
 /**

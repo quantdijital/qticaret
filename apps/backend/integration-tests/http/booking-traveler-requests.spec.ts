@@ -35,6 +35,19 @@ medusaIntegrationTestRunner({
     const search = (body: unknown, headers?: Record<string, string>) =>
       staff("/admin/booking-travelers/search", body, headers)
 
+    // Mutations are written once the response has finished: they may land a moment later
+    const mutationOf = async (action: string) => {
+      const audit = getContainer().resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+      for (let attempt = 0; attempt < 30; attempt += 1) {
+        const [entry] = await audit.listAuditEntries({ kind: "mutation", action, outcome: 200 })
+        if (entry) {
+          return entry
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      return undefined
+    }
+
     beforeEach(async () => {
       const container = getContainer()
       await loadTrAddressFixture(container)
@@ -47,10 +60,11 @@ medusaIntegrationTestRunner({
       await flag("catalog.non_physical", false)
     })
 
-    it("answers as missing while the flag is off (K11)", async () => {
+    it("keeps a traveler's request open while the flag is off (review O2)", async () => {
       const found = await search({ first_name: "Ayşe", last_name: "Yılmaz" })
       const erased = await staff("/admin/booking-travelers/erase", { ids: ["bktrv_x"] })
-      expect([found.status, erased.status]).toEqual([404, 404])
+      expect([found.status, found.data.travelers]).toEqual([200, []])
+      expect([erased.status, erased.data.deleted]).toEqual([200, 0])
     })
 
     it("finds a traveler's rows, copies them masked to the buyer, and deletes them on request", async () => {
@@ -69,12 +83,13 @@ medusaIntegrationTestRunner({
         settle(http.post<Answer>(url, body, { headers: store.headers }))
       await post(`/store/carts/${cartId}/bookings`, {
         slot_id: slotId,
-        items: [{ variant_id: adult, quantity: 2 }],
+        items: [{ variant_id: adult, quantity: 3 }],
       })
       const saved = await post(`/store/carts/${cartId}/travelers`, {
         travelers: [
           traveler(slotId, "U12345678"),
           traveler(slotId, "98765432101", { first_name: "Mehmet" }),
+          traveler(slotId, "K55554444", { first_name: "İSMAİL", last_name: "KAYA" }),
         ],
       })
       const ops = await createAdminUser(http, container, "operations")
@@ -97,6 +112,9 @@ medusaIntegrationTestRunner({
         birth_date: "1990-13-01",
       })
       const byOps = await search({ first_name: "Ayşe", last_name: "Yılmaz" }, ops.headers)
+      // Turkish case: "ismail" finds "İSMAİL", and so does "ISMAIL" (review D2)
+      const ismail = await search({ first_name: "ismail", last_name: "Kaya" })
+      const dotless = await search({ first_name: "ISMAIL", last_name: "kaya" })
       const copy = await customerData(container, customer?.id ?? "")
       const audit = getContainer().resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
       const reads = await audit.listAuditEntries({
@@ -123,6 +141,10 @@ medusaIntegrationTestRunner({
         "booking.traveler_search_invalid",
       ])
       expect(byOps.status).toBe(403)
+      expect(ismail.data.travelers).toEqual([
+        expect.objectContaining({ first_name: "İSMAİL", last_name: "KAYA" }),
+      ])
+      expect(dotless.data.travelers).toHaveLength(1)
       expect(JSON.stringify([byName.data, byAll.data])).not.toMatch(
         /U12345678|document_encrypted|document_hash/
       )
@@ -138,6 +160,8 @@ medusaIntegrationTestRunner({
       expect(reads.length).toBeGreaterThanOrEqual(3)
       expect(JSON.stringify(reads.map((entry) => entry.changes))).not.toMatch(/Ayşe|Yılmaz|1990/)
 
+      // The shop stops selling dated products: the rows entered stay theirs to ask for (O2)
+      await flag("catalog.booking", false)
       const ayse = (byName.data.travelers?.[0]?.["id"] as string | undefined) ?? ""
       const bare = await staff("/admin/booking-travelers/erase", { ids: [ayse] }, admin.plain)
       const erasedByOps = await staff(
@@ -152,7 +176,16 @@ medusaIntegrationTestRunner({
       expect(bare.status).toBe(428)
       expect(erasedByOps.status).toBe(403)
       expect([erased.status, erased.data.deleted]).toEqual([200, 1])
+      expect(after.status).toBe(200)
       expect(after.data.travelers).toEqual([])
+      // Recorded with the departure's and bookings' ids, never who (review D1)
+      const written = await mutationOf("POST /admin/booking-travelers/erase")
+      expect(written?.changes).toEqual(
+        expect.objectContaining({
+          result: { deleted: 1, booking_ids: [], slot_ids: [slotId] },
+        })
+      )
+      expect(JSON.stringify(written?.changes)).not.toMatch(/Ayşe|Yılmaz|1990|5678/)
       // Only the asking person's row goes
       expect(mehmet.data.travelers).toHaveLength(1)
     })

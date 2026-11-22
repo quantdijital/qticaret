@@ -16,7 +16,8 @@ import { requireFeature } from "./require-feature"
 
 /**
  * Dated products' settings and departures (adr/0076 §3), behind
- * `catalog.booking`: off, every route answers as if it did not exist.
+ * `catalog.booking`: off, every route answers as if it did not exist,
+ * but a traveler's KVKK request (search and erase), which stays open.
  * Writes are the product editors' (owner and admin, the staff rules'
  * default); reads every role's.
  */
@@ -69,22 +70,17 @@ export const BOOKING_ROUTES = [
   },
   {
     // A traveler's own KVKK request (adr/0076 Ek D6b): their rows found by name, birth date
-    // or number; owner and admin by the role table (a POST), recorded by the route first
+    // or number; owner and admin by the role table (a POST), recorded by the route first.
+    // Not behind the flag (review O2): rows entered while it was on outlive it, and a
+    // person's right to them does not end when the shop stops selling dated products
     matcher: "/admin/booking-travelers/search",
     methods: ["POST" as const],
-    middlewares: [
-      requireFeature(CATALOG_BOOKING),
-      validateAndTransformBody(AdminPostTravelerSearch),
-    ],
+    middlewares: [validateAndTransformBody(AdminPostTravelerSearch)],
   },
   {
-    // The rows found deleted for good: owner and admin, proved again
+    // The rows found deleted for good: owner and admin, proved again; flag or not
     matcher: "/admin/booking-travelers/erase",
     methods: ["POST" as const],
-    middlewares: [
-      requireFeature(CATALOG_BOOKING),
-      requireReauth(),
-      validateAndTransformBody(AdminPostTravelerErase),
-    ],
+    middlewares: [requireReauth(), validateAndTransformBody(AdminPostTravelerErase)],
   },
 ]
