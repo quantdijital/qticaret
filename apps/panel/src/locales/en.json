@@ -1372,7 +1372,9 @@
         "payer": "Return shipping",
         "payerRule": "On a withdrawal the return shipping is the shop's (Distance Contracts Regulation art. 12).",
         "payerHint": "The shopper may not be charged for the return; the products' details for search engines say free returns.",
-        "excludedHint": "Mark a physical product that cannot come back once opened for hygiene as \"Outside the right of withdrawal\" on its page: the request is taken, and one that arrives opened is refused at receipt. On a digital product or a service the mark removes the right outright. For a made-to-order good, mark its add-on \"Outside the right of withdrawal\"."
+        "excludedHint": "Mark a physical product that cannot come back once opened for hygiene as \"Outside the right of withdrawal\" on its page: the request is taken, and one that arrives opened is refused at receipt. On a digital product or a service the mark removes the right outright. For a made-to-order good, mark its add-on \"Outside the right of withdrawal\".",
+        "packageTravel": "I sell package travel",
+        "packageTravelHint": "When on, a dated product cancelled 30 days or more before its day keeps nothing (whatever its cancellation terms say); the shopper is told the refund comes within 14 days."
       },
       "tabs": {
         "carriers": "Carriers",
@@ -3121,6 +3123,7 @@
     "awaiting_payment": "Awaiting payment",
     "to_ship": "To ship",
     "shipped": "In transit",
+    "planned": "Planned",
     "delivered": "Delivered",
     "canceled": "Canceled"
   },

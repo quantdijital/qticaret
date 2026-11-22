@@ -12,6 +12,7 @@ const STAGES: { key: Lifecycle; color: string }[] = [
   { key: "awaiting_payment", color: "var(--chart-ramp-1)" },
   { key: "to_ship", color: "var(--chart-ramp-2)" },
   { key: "shipped", color: "var(--chart-ramp-3)" },
+  { key: "planned", color: "var(--chart-ramp-3)" },
   { key: "delivered", color: "var(--chart-ramp-4)" },
   { key: "canceled", color: "var(--chart-canceled)" },
 ]

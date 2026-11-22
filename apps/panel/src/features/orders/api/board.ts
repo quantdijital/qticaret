@@ -7,6 +7,7 @@ export const ORDER_STAGES = [
   "awaiting_payment",
   "to_ship",
   "shipped",
+  "planned",
   "delivered",
   "canceled",
 ] as const

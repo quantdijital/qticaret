@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -8,6 +8,7 @@ import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { MIN_WITHDRAWAL_DAYS, sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { ReturnsSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
@@ -20,11 +21,13 @@ const schema = z.object({
     const days = Number(text.trim())
     return /^\d{2,3}$/.test(text.trim()) && days >= MIN_WITHDRAWAL_DAYS && days <= 365
   }, `${R}.daysInvalid`),
+  package_travel: z.boolean(),
 })
 type Values = z.infer<typeof schema>
 
 const valuesOf = (saved: ReturnsSettings): Values => ({
   withdrawal_days: String(saved.withdrawal_days),
+  package_travel: saved.package_travel,
 })
 
 function Form({ saved }: { saved: ReturnsSettings }) {
@@ -36,11 +39,12 @@ function Form({ saved }: { saved: ReturnsSettings }) {
     values,
     resetOptions: { keepDirtyValues: true },
   })
+  const packageTravel = useWatch({ control: form.control, name: "package_travel" })
   const { errors } = form.formState
   const submit = form.handleSubmit((next) => {
     save.mutate(
       // Who pays the return is the law's, not a choice: never sent (adr/0032 Ek 2026-11-03)
-      { withdrawal_days: Number(next.withdrawal_days) },
+      { withdrawal_days: Number(next.withdrawal_days), package_travel: next.package_travel },
       {
         onSuccess: (result) => {
           form.reset(valuesOf(result.values), FULL_RESET)
@@ -85,6 +89,25 @@ function Form({ saved }: { saved: ReturnsSettings }) {
         </div>
       </div>
       <p className="text-[13px] text-muted-foreground">{t(`${R}.excludedHint`)}</p>
+      {/* Package travel (adr/0076 §8): a switch, no sector in the code */}
+      <div className="flex items-start justify-between gap-4 border-t pt-4">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <label htmlFor="returns-package-travel" className="text-sm font-medium">
+            {t(`${R}.packageTravel`)}
+          </label>
+          <span id="returns-package-travel-hint" className="text-[13px] text-muted-foreground">
+            {t(`${R}.packageTravelHint`)}
+          </span>
+        </div>
+        <Switch
+          id="returns-package-travel"
+          aria-describedby="returns-package-travel-hint"
+          checked={packageTravel}
+          onCheckedChange={(checked) => {
+            form.setValue("package_travel", checked, { shouldDirty: true })
+          }}
+        />
+      </div>
     </CardForm>
   )
 }

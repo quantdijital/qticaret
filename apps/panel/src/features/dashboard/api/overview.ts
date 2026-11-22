@@ -2,7 +2,8 @@ import { keepPreviousData, queryOptions } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 import type { PeriodKey } from "@/features/dashboard/period"
 
-export type Lifecycle = "awaiting_payment" | "to_ship" | "shipped" | "delivered" | "canceled"
+export type Lifecycle =
+  "awaiting_payment" | "to_ship" | "shipped" | "planned" | "delivered" | "canceled"
 
 interface Compared<T> {
   current: T

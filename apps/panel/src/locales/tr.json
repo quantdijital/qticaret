@@ -1372,7 +1372,9 @@
         "payer": "İade kargosu",
         "payerRule": "Cayma iadelerinde iade kargosu mağazaya aittir (Mesafeli Sözleşmeler Yönetmeliği md. 12).",
         "payerHint": "Müşteriden iade masrafı istenemez; ürünlerin arama motorlarına verilen bilgisi ücretsiz iade der.",
-        "excludedHint": "Ambalajı açılınca hijyen gereği iade alınamayan fiziksel ürünü ürün sayfasında \"Cayma hakkı dışında\" olarak işaretleyin: talep alınır, ambalajı açılmış gelen teslim almada reddedilir. Dijital ürün ve hizmette bu işaret cayma hakkını tümden kaldırır. Kişiye özel hazırlanan ürün için ek seçeneği \"Cayma dışı\" yapın."
+        "excludedHint": "Ambalajı açılınca hijyen gereği iade alınamayan fiziksel ürünü ürün sayfasında \"Cayma hakkı dışında\" olarak işaretleyin: talep alınır, ambalajı açılmış gelen teslim almada reddedilir. Dijital ürün ve hizmette bu işaret cayma hakkını tümden kaldırır. Kişiye özel hazırlanan ürün için ek seçeneği \"Cayma dışı\" yapın.",
+        "packageTravel": "Paket tur satıyorum",
+        "packageTravelHint": "Açıksa tarihli üründe hizmet gününe 30 gün ve daha fazla kala yapılan iptalde kesinti yapılmaz (ürünün iptal koşulları ne derse desin); müşteriye iadenin 14 gün içinde yapılacağı söylenir."
       },
       "tabs": {
         "carriers": "Kargo firmaları",
@@ -3121,6 +3123,7 @@
     "awaiting_payment": "Ödeme bekliyor",
     "to_ship": "Hazırlanacak",
     "shipped": "Kargoda",
+    "planned": "Planlandı",
     "delivered": "Teslim edildi",
     "canceled": "İptal edildi"
   },
