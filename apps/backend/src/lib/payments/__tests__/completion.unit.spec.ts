@@ -58,6 +58,10 @@ describe("completionFailureOf (adr/0026 Ek 2026-11-06)", () => {
       "addons.required",
       "addons.max_quantity",
       "catalog.addons_disabled",
+      // adr/0076: a dated line refused (the hold ended, a plain dated item) or bookings off
+      "booking.use_booking_route",
+      "booking.sales_closed",
+      "catalog.booking_disabled",
     ]) {
       expect(completionFailureOf(new ValidationError(key))).toBe("refund")
       expect(completionFailureOf(plain(new ValidationError(key)))).toBe("refund")
@@ -65,7 +69,13 @@ describe("completionFailureOf (adr/0026 Ek 2026-11-06)", () => {
     // Only that one catalog refusal is the cart's: the catalog's own checks are not
     expect(completionFailureOf(new ValidationError("catalog.description_blocks"))).toBe("retry")
     // A cart not at its customer's prices now is a conflict, refunded alike
-    for (const key of ["wholesale.prices_changed", "cart.prices_changed"]) {
+    for (const key of [
+      "wholesale.prices_changed",
+      "cart.prices_changed",
+      "booking.hold_expired",
+      "booking.hold_mismatch",
+      "booking.price_changed",
+    ]) {
       expect(completionFailureOf(new ConflictError(key))).toBe("refund")
       expect(completionFailureOf(plain(new ConflictError(key)))).toBe("refund")
     }

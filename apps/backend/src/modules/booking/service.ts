@@ -8,6 +8,7 @@ import {
 } from "@medusajs/framework/utils"
 import { slotsById, slotsOfBookable } from "./availability"
 import type { SlotAvailability } from "./availability"
+import { cartHold } from "./cart-hold"
 import { cancelBooking, confirmHold, extendHold, holdUnits, updateSlot } from "./counters"
 import type { HoldState, SlotChanges } from "./counters"
 import { createSlots, deleteEmptySlots } from "./slots"
@@ -20,6 +21,7 @@ import { BookingHold, BookingHoldSlot } from "./models/booking-hold"
 import { BookingSlot } from "./models/booking-slot"
 
 export type { SlotAvailability } from "./availability"
+export type { CartHold } from "./cart-hold"
 export type { HoldState, SlotChanges } from "./counters"
 export type { SlotInput } from "./slots"
 export type { SlotUnits } from "./sql"
@@ -73,14 +75,19 @@ class BookingModuleService extends MedusaService({
     return (await releaseHolds(managerOf(sharedContext), [holdId])) > 0
   }
 
-  /** A live hold's end pushed to at least `minutes` from now; null when it has none or it ended. */
+  /**
+   * A live hold's end pushed to at least `minutes` from now; null when it
+   * has none or it ended. `completion`: the order's completion, which may
+   * go past the hold's lifetime by its grace.
+   */
   @InjectTransactionManager()
   async extendHold(
     cartId: string,
     minutes: number,
+    options: { completion?: boolean } = {},
     @MedusaContext() sharedContext: Context = {}
   ): Promise<HoldState | null> {
-    return extendHold(managerOf(sharedContext), cartId, minutes)
+    return extendHold(managerOf(sharedContext), cartId, minutes, options)
   }
 
   /** A hold made an order's booking; the same call again changes nothing. */
@@ -88,9 +95,16 @@ class BookingModuleService extends MedusaService({
   async confirmHold(
     holdId: string,
     orderId: string,
+    lineItemId: string | null = null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<{ booking_id: string; created: boolean }> {
-    return confirmHold(managerOf(sharedContext), holdId, orderId)
+    return confirmHold(managerOf(sharedContext), holdId, orderId, lineItemId)
+  }
+
+  /** The cart's hold with its places per slot (live or not), or null. */
+  @InjectManager()
+  async cartHold(cartId: string, @MedusaContext() sharedContext: Context = {}) {
+    return cartHold(managerOf(sharedContext), cartId)
   }
 
   /** A confirmed booking cancelled and its places given back; whether it changed. */

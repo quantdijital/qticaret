@@ -1,6 +1,7 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createCartWorkflow, updateCartWorkflow } from "@medusajs/medusa/core-flows"
 import type { AddressFields } from "../../modules/tr-address/validation"
+import { refusePlainDatedItems } from "../booking/cart/plain-items"
 import { assertTrAddresses } from "../tr-address/assert-tr-addresses"
 
 /**
@@ -27,6 +28,8 @@ createCartWorkflow.hooks.validate(async ({ input }, { container }) => {
     addresses.push(["billing_address", billing])
   }
   await assertTrAddresses(container, addresses)
+  // adr/0076 §5: a dated product's variant is added only through its booking route
+  await refusePlainDatedItems(container, input.items)
 })
 
 updateCartWorkflow.hooks.validate(async ({ input }, { container }) => {
@@ -41,7 +44,8 @@ updateCartWorkflow.hooks.validate(async ({ input }, { container }) => {
     fields: ["shipping_address.*", "billing_address.*"],
     filters: { id: input.id },
   })
-  const stored = data[0]
+  const stored = data[0] as
+    { shipping_address?: AddressFields | null; billing_address?: AddressFields | null } | undefined
   // Partial updates are checked merged over the stored address
   const addresses: [string, AddressFields][] = []
   if (shipping) {

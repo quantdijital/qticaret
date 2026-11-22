@@ -14,6 +14,8 @@ import {
 const OWN_STORE_WRITES: Readonly<Record<string, "closed" | "open">> = {
   "POST /store/cart-reminders/redeem": "closed",
   "POST /store/carts/:id/age-declaration": "closed",
+  "POST /store/carts/:id/bookings": "closed",
+  "DELETE /store/carts/:id/bookings/:slot_id": "closed",
   "POST /store/carts/:id/consents": "closed",
   "POST /store/carts/:id/legal-consents": "closed",
   "POST /store/carts/:id/line-items/:line_id/addons": "closed",

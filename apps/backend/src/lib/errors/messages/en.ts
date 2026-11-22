@@ -317,6 +317,22 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "booking.timezone_invalid": "The time zone is not valid (e.g. Europe/Istanbul).",
   "booking.price_adjustment_invalid":
     "A price difference is at most 1,000,000 TL with at most two decimals, for 100 variants at most.",
+  "booking.use_booking_route":
+    "This product is booked by date: choose a departure and the number of people on its page.",
+  "booking.sales_closed": "Sales for this departure have closed.",
+  "booking.max_units": "At most {{max}} places can be booked in one cart.",
+  "booking.currency_unsupported":
+    "This departure can only be booked in Turkish lira; change the cart's currency.",
+  "booking.price_unavailable": "This option has no price in your cart's currency.",
+  "booking.hold_expired": "The places held in your cart have expired; choose the date again.",
+  "booking.hold_mismatch":
+    "The places held no longer match your cart; choose the date and people again.",
+  "booking.price_changed": "The price of a booking in your cart has changed; review your cart.",
+  "booking.region_unknown": "The region was not found.",
+  "booking.quantity_too_high": "At most 100 of one option can be booked.",
+  "booking.too_many_free_units": "At most 2 free guests can come with each person taking a place.",
+  "booking.order_edit_unavailable":
+    "Dated products cannot be changed by an order edit; cancel the order if need be.",
   "addons.required_must_be_free": "A paid add-on cannot be required.",
   "addons.not_addon_line": "This product has no add-ons.",
   "addons.unknown": "The product has no such add-on or option.",

@@ -133,11 +133,19 @@ export const addonUnitPrice = (base: Kurus, chosen: readonly ChosenAddon[]): Kur
 /**
  * A line charges other than its add-ons cost now (adr/0052 §5): its unit
  * price is not the expected one, or Medusa would price it itself (not a
- * custom price), which drops the add-ons from the price.
+ * custom price), which drops the add-ons from the price. With
+ * `taxInclusive` given, a line whose tax-inclusive flag differs is stale
+ * too (a tax-inclusive price read as tax-exclusive charges the tax twice).
  */
 export const isStalePrice = (
-  line: { unit_price: MedusaAmount; is_custom_price?: boolean | null },
-  expected: Kurus
+  line: {
+    unit_price: MedusaAmount
+    is_custom_price?: boolean | null
+    is_tax_inclusive?: boolean | null
+  },
+  expected: Kurus,
+  taxInclusive?: boolean
 ): boolean =>
   line.is_custom_price !== true ||
-  fromMedusaAmount(line.unit_price, { allowRounding: true }) !== expected
+  fromMedusaAmount(line.unit_price, { allowRounding: true }) !== expected ||
+  (taxInclusive !== undefined && (line.is_tax_inclusive === true) !== taxInclusive)

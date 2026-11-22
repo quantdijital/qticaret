@@ -15,6 +15,7 @@ export interface AddonCartLine {
   quantity: MedusaAmount
   unit_price: MedusaAmount
   is_custom_price?: boolean | null
+  is_tax_inclusive?: boolean | null
   metadata?: Record<string, unknown> | null
 }
 
@@ -45,6 +46,7 @@ const CART_FIELDS = [
     "quantity",
     "unit_price",
     "is_custom_price",
+    "is_tax_inclusive",
     "metadata",
   ].map((field) => `items.${field}`),
 ]
@@ -58,7 +60,7 @@ export async function readAddonCart(
     fields: CART_FIELDS,
     filters: { id: cartId },
   })
-  return data[0]
+  return (data as AddonCart[])[0]
 }
 
 /**
@@ -101,12 +103,15 @@ export interface VariantPrice {
   calculated: Kurus
   /** The price before a sale list, when it is higher; null otherwise. */
   original: Kurus | null
+  /** Whether the price list gives it with tax in (the store's currency or region setting). */
+  tax_inclusive: boolean
 }
 
 interface VariantRow {
   calculated_price?: {
     calculated_amount?: MedusaAmount | null
     original_amount?: MedusaAmount | null
+    is_calculated_price_tax_inclusive?: boolean | null
   } | null
 }
 
@@ -125,7 +130,12 @@ export async function variantPrice(
   const groups = (cart.customer?.groups ?? []).flatMap((group) => (group ? [group.id] : []))
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product_variant",
-    fields: ["id", "calculated_price.calculated_amount", "calculated_price.original_amount"],
+    fields: [
+      "id",
+      "calculated_price.calculated_amount",
+      "calculated_price.original_amount",
+      "calculated_price.is_calculated_price_tax_inclusive",
+    ],
     filters: { id: variantId },
     context: {
       calculated_price: QueryContext({
@@ -150,5 +160,9 @@ export async function variantPrice(
     price.original_amount === null || price.original_amount === undefined
       ? null
       : fromMedusaAmount(price.original_amount, { allowRounding: true })
-  return { calculated, original: original !== null && original > calculated ? original : null }
+  return {
+    calculated,
+    original: original !== null && original > calculated ? original : null,
+    tax_inclusive: price.is_calculated_price_tax_inclusive === true,
+  }
 }

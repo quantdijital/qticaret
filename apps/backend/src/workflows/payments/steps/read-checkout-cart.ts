@@ -5,6 +5,7 @@ import { ConflictError, ValidationError } from "../../../lib/errors"
 import { assertAgeDeclared } from "../../legal/age"
 import { assertConsented } from "../../legal/consent"
 import { assertGiftLinesReady } from "../../gift-cards/cart-gifts"
+import { prepareBookingPayment } from "../../booking/cart/checkout"
 import { itemAmounts, lineShares, shippingAmounts } from "../../../lib/orders"
 import type { LineShare } from "../../../lib/orders"
 import type { HostedCheckout } from "../../../lib/payments/checkout"
@@ -117,6 +118,8 @@ export const readCheckoutCartStep = createStep(
     await assertAgeDeclared(container, cart.id)
     // A gift line names its recipient and is not paid with credit (adr/0025 Ek 2026-11-03)
     await assertGiftLinesReady(container, cart.id, input.provider_id)
+    // Dated lines: the hold trimmed to them, pushed for the payment's return, checked (adr/0076 §5)
+    await prepareBookingPayment(container, cart.id)
 
     const names = new Map([
       ...items.map((item) => [item.id, itemName(item)] as const),

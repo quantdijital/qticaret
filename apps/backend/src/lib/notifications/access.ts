@@ -28,6 +28,8 @@ export const OPEN_ALERTS: readonly string[] = [
   "payments.refund_incomplete",
   "payments.refund_unresolved",
   "payments.cancel_refund_order_open",
+  // A paid order whose departure had no room (adr/0076 Ek): the order's number only
+  "booking.confirm_failed",
   "payments.orphan_recorded",
   "payments.orphan_refunded",
   "payments.orphan_refund_failed",
