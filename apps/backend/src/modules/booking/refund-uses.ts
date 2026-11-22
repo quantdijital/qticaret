@@ -25,8 +25,9 @@ const cancelledUseOf = (row: Record<string, unknown>): CancelledUse => ({
 })
 
 /**
- * Departures cancelled in the last `days` whose refund may be owed by
- * hand, the latest first: kept as left to staff, or, cancelled before the
+ * Cancelled departures changed in the last `days` (cancelled, or marked
+ * owed by hand later) whose refund may be owed by hand, the latest
+ * first: kept as left to staff, or, cancelled before the
  * way was kept, on a departure the shop cancelled (always in full). The
  * caller checks the ledger and the bell; nothing here is written.
  */
@@ -42,7 +43,7 @@ export async function cancelledUsesByHand(
        JOIN booking b ON b.id = u.booking_id AND b.deleted_at IS NULL
        JOIN booking_slot s ON s.id = u.slot_id
       WHERE u.cancelled_at IS NOT NULL AND u.deleted_at IS NULL
-        AND u.cancelled_at > now() - make_interval(days => ?)
+        AND u.updated_at > now() - make_interval(days => ?)
         AND (u.cancel_refund IN ('offline', 'credit', 'exceeds')
              OR (u.cancel_refund IS NULL AND s.status = 'cancelled'))
       ORDER BY u.cancelled_at DESC, u.id

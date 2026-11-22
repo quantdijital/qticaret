@@ -12,8 +12,9 @@ import { alertRefundByHand, bellKey } from "./confirm-alert"
  * D7a): a cancel that gave the places back but stopped before its
  * `booking.refund_by_hand` bell, or whose bell could not be written,
  * leaves money owed that no one hears of. The reconcile job looks at
- * departures cancelled in the last days whose money was left to staff
- * (or, kept before, cancelled with their whole departure): with no
+ * departures cancelled (or marked owed by hand) in the last days whose
+ * money was left to staff (or, kept before, cancelled with their whole
+ * departure): with no
  * refund in the ledger for it (`booking<use>`), money taken for the
  * order and no bell yet, the bell rings. Its key is the cancel's
  * (once per order and departure), so a bell rung before is never

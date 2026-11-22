@@ -50,7 +50,7 @@ describe("the bell sweep's departures", () => {
     expect(found).toEqual([
       { use_id: "bkuse_1", order_id: "order_1", slot_id: "bkslot_1", cancel_refund: null },
     ])
-    expect(calls[0]?.sql).toContain("u.cancelled_at > now() - make_interval(days => ?)")
+    expect(calls[0]?.sql).toContain("u.updated_at > now() - make_interval(days => ?)")
     expect(calls[0]?.sql).toContain(
       "(u.cancel_refund IN ('offline', 'credit', 'exceeds') OR (u.cancel_refund IS NULL AND s.status = 'cancelled'))"
     )
