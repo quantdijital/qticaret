@@ -67,7 +67,25 @@ export async function publishedLegalLinks(): Promise<{ label: string; path: stri
   })
 }
 
-/** The shop's identity lines the e-commerce law asks for, those it filled in. */
+/** The licence line its trade asks the shop to show (adr/0076 §12), as it names it; null: none. */
+export function documentLineOf(identity: LegalIdentity, t: Translate): string | null {
+  const document = identity.document
+  if (!document) {
+    return null
+  }
+  return document.holder
+    ? t("footer.document_holder", {
+        name: document.name,
+        number: document.number,
+        holder: document.holder,
+      })
+    : t("footer.document", { name: document.name, number: document.number })
+}
+
+/**
+ * The shop's identity lines the e-commerce law asks for, those it filled
+ * in; then its licence line, when it has one (none: the lines as before).
+ */
 export function identityLinesOf(identity: LegalIdentity, t: Translate): string[] {
   return [
     identity.mersis ? t("footer.mersis", { value: identity.mersis }) : null,
@@ -76,5 +94,6 @@ export function identityLinesOf(identity: LegalIdentity, t: Translate): string[]
       : null,
     identity.kep ? t("footer.kep", { value: identity.kep }) : null,
     identity.etbis ? t("footer.etbis", { value: identity.etbis }) : null,
+    documentLineOf(identity, t),
   ].filter((line): line is string => line !== null)
 }

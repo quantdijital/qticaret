@@ -14,7 +14,15 @@ const K = "settings.store.legal"
 
 // The address is written with the contact details, the social accounts on their own tab
 type Values = Record<
-  "company_title" | "mersis" | "tax_office" | "tax_number" | "kep" | "etbis",
+  | "company_title"
+  | "mersis"
+  | "tax_office"
+  | "tax_number"
+  | "kep"
+  | "etbis"
+  | "document_name"
+  | "document_number"
+  | "document_holder",
   string
 >
 
@@ -25,6 +33,10 @@ const valuesOf = (saved: LegalSettings): Values => ({
   tax_number: saved.tax_number ?? "",
   kep: saved.kep ?? "",
   etbis: saved.etbis ?? "",
+  // Absent on a section stored before adr/0076 §12; the server fills its defaults in
+  document_name: saved.document_name ?? "",
+  document_number: saved.document_number ?? "",
+  document_holder: saved.document_holder ?? "",
 })
 
 // The server's rule (lib/legal/identity.ts): MERSİS, KEP and ETBİS are asked, not required
@@ -109,6 +121,31 @@ export function LegalIdentityCard({
           <Input id="legal-etbis" {...form.register("etbis")} />
         </Field>
       </div>
+      {/* adr/0076 §12: a licence the shop's trade asks it to show, named by the shop */}
+      <fieldset className="grid gap-3 border-t pt-4">
+        <legend className="text-sm font-medium">{t(`${K}.document`)}</legend>
+        <p className="text-[13px] text-muted-foreground">{t(`${K}.documentHint`)}</p>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field {...field("document_name", { hint: t(`${K}.documentNameHint`) })}>
+            <Input id="legal-document_name" maxLength={100} {...form.register("document_name")} />
+          </Field>
+          <Field {...field("document_number")}>
+            <Input
+              id="legal-document_number"
+              maxLength={60}
+              autoComplete="off"
+              {...form.register("document_number")}
+            />
+          </Field>
+          <Field {...field("document_holder", { hint: t(`${K}.documentHolderHint`) })}>
+            <Input
+              id="legal-document_holder"
+              maxLength={200}
+              {...form.register("document_holder")}
+            />
+          </Field>
+        </div>
+      </fieldset>
     </CardForm>
   )
 }

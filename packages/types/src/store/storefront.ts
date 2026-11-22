@@ -289,6 +289,12 @@ export interface LegalIdentity {
   etbis_qr?: StoreImage | null
   /** The shop's social profiles. */
   same_as: string[]
+  /**
+   * A licence its trade asks it to show (adr/0076 §12), as the shop names
+   * it: "TÜRSAB belge no", its number, whose it is when given; absent or
+   * null: none.
+   */
+  document?: { name: string; number: string; holder: string | null } | null
   email: string | null
   /** E.164. */
   phone: string | null
