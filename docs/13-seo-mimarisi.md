@@ -156,6 +156,10 @@ Kurallar:
   - Filtreli, fiyatlı ya da sıralı liste `noindex,follow`, canonical temiz sayfa. Numaralı sayfanın JSON-LD'si kendi adresini ve "Sayfa N" adını taşır, ilk sayfanın ürün listesini taşımaz. Resolve yanıtında okunan sorgu `listing` alanında (`page_size` dahil; storefront ürünleri buna göre ister).
   - robots.txt şablonundaki `{facet_disallow}` satırı her filtre, `stok`, `fiyat` ve `sirala` için `Disallow: /*?{ad}=` ve `Disallow: /*&{ad}=` satırlarına açılır; `sayfa` ve landing yolları açık kalır. Mağaza denetimi (S-ROBOTS-01) açık kalan filtre adresini bulur.
   - `/store/seo/site` storefront'un kendi sayfalarının robots değerini verir: arama `noindex,follow`; sepet, ödeme, hesap, giriş `noindex,nofollow`.
+- **Uygulama notu (tarihli ürün araması, adr/0077 §2, 2026-11-23):**
+  - Yeni ayrılmış parametreler: `kategori` (handle, alt kategoriler dahil), `tarih` (`YYYY-MM-DD_YYYY-MM-DD`, bugünden sonra, en çok 62 gün), `ay` (`YYYY-MM[,YYYY-MM]`, en çok 3, önümüzdeki 12 ay), `kisi` (`1..20`; `1` yazılmaz) ve `sirala`'nın yeni değeri `kalkis`. `tarih` ile `ay` birlikteyse `tarih` kalır. Kanonik olmayan biçim tek 301. `tarih`, `ay`, `kisi` yalnız `catalog.booking` açıkken okunur, kapalıyken 301 ile atılır. Bu adlar filtrelenebilir niteliğin anahtarı olamaz; çakışan anahtarlı nitelik süzgeçten çıkar.
+  - `/arama`, `q` yokken de geçerli `tarih`/`ay` ya da `kategori` ile sonuç verir; sayfa `noindex,follow` kalır.
+  - `{facet_disallow}` şu satırları da üretir: `Disallow: /*?tarih=`, `Disallow: /*&tarih=`, `Disallow: /*?ay=`, `Disallow: /*&ay=`, `Disallow: /*?kisi=`, `Disallow: /*&kisi=`; `sirala=kalkis` mevcut `sirala` satırlarıyla zaten kapsanır. `kategori` yalnız `/arama`'da anlamlıdır ve o yol zaten `Disallow: /arama` ile kapalıdır. Doğal dil aramasının "Anladığım" etiketleri ve takvim bağlantıları `nofollow`.
 - Sıralama ve fiyat aralığı parametreleri asla indekslenmez. Sayfalama §3.
 - Dahili arama sayfası `noindex`; arama terimleri raporu (F11) içerik fırsatı önerir (çok aranan ama ürünü/sayfası olmayan terimler).
 

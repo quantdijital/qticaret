@@ -408,3 +408,7 @@ D7a (#273) ve D7b (#274) güvenlik incelemelerinden kalan düşük bulgular kapa
 - **Katılımcı bilgisi.** `traveler_fields.level = none` zaten basit yoldur; paneldeki etiketi "İstemiyorum (bilgileri sonra kendim alırım)" oldu. Ek iş yok.
 - **Panel.** Ayarlar > Kargo ve teslimat > İade sekmesinde "Rezervasyon akışı" kartı, yalnız `catalog.booking` açıkken: iki anahtar, kapalı olanın altında not alanı (ikinci plan; yer tutucu varsayılan cümle).
 - **Sonraya (ayrı iş).** Ödeme almadan "sizi arayalım" talep formu: tarih ve kişi sayısı seçilir, ödeme ve kontenjan düşümü olmadan mağazaya talep düşer. Ürün düzeyinde basit yol geçersiz kılması gerekirse.
+
+## Ek 2026-11-23: arama adr/0077'de
+
+Tarihli ürünün vitrinde aranması (kategori, kesin tarih ya da esnek ay, kişi sayısı), ay takvimi, kartta aralığa göre kalkış ve fiyat, `departures` bölümü ve travel paketi v2 adr/0077'de karara bağlandı.
