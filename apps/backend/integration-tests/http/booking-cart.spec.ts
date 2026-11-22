@@ -395,6 +395,30 @@ medusaIntegrationTestRunner({
       expect(await slotOf(slotId)).toMatchObject({ held: 35, available: 15 })
     })
 
+    it("tags no address on an unsigned call from the storefront's server", async () => {
+      await turnOn()
+      const container = getContainer()
+      const knex = () => container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+      const { adult, slotId } = await tour(10)
+      const [signedCart, unsignedCart] = [await emptyCart(container), await emptyCart(container)]
+      const ask = { slot_id: slotId, items: [{ variant_id: adult, quantity: 1 }] }
+
+      // The test client signs from this connection first: it is the storefront's server
+      const signedAnswer = await bookFrom("203.0.113.8", signedCart, ask)
+      const unsignedAnswer = await book(unsignedCart, ask)
+      const hashes = await knex()("booking_hold")
+        .whereIn("cart_id", [signedCart, unsignedCart])
+        .select("cart_id", "client_hash")
+      const hashOf = (cartId: string) =>
+        (hashes as { cart_id: string; client_hash: string | null }[]).find(
+          (row) => row.cart_id === cartId
+        )?.client_hash
+
+      expect([signedAnswer.status, unsignedAnswer.status]).toEqual([200, 200])
+      expect(hashOf(signedCart)).toEqual(expect.any(String))
+      expect(hashOf(unsignedCart)).toBeNull()
+    })
+
     it("pushes the hold as the payment starts, sells the places with the order, frees them on cancel", async () => {
       await turnOn()
       const container = getContainer()

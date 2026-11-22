@@ -9,7 +9,7 @@ import { RATE_LIMIT_PROFILES, ipBucket } from "../../lib/security/rate-limit"
 import { CATALOG_BOOKING } from "../../modules/platform-settings/features"
 import { StorePostCartBooking } from "../store/carts/[id]/bookings/validators"
 import { StoreGetProductBooking } from "../store/products/[id]/booking/validators"
-import { clientIp } from "./client-ip"
+import { clientIp, isStorefrontUnsigned } from "./client-ip"
 import { rateLimit } from "./rate-limit"
 import { requireFeature } from "./require-feature"
 
@@ -54,9 +54,15 @@ let clientHashKey: Buffer | undefined
  * The shopper's address as a booking hold keeps it (adr/0076 Ek takip M1):
  * a keyed hash of the address the limits count (IPv6 by its /64), never
  * the address nor a plain hash a list of addresses would reverse. Null
- * when no address is known: such a hold is not capped by address.
+ * when no address is known: such a hold is not capped by address. An
+ * unsigned call from our storefront's server (it could not read the
+ * shopper's address) is one of them: its address is the storefront's,
+ * which every shopper would share.
  */
 export function bookingClientHash(req: MedusaRequest): string | null {
+  if (isStorefrontUnsigned(req)) {
+    return null
+  }
   const bucket = ipBucket(clientIp(req) ?? undefined)
   if (bucket === null) {
     return null
