@@ -1,6 +1,7 @@
 import { kurus } from "../../../lib/money"
 import { cancelsOrder, sendsRefund } from "../cancel"
-import { customerCancelRefusal, manualRefundOf, takenByHandOf } from "../cancel-plan"
+import { customerCancelRefusal } from "../cancel-plan"
+import { cancelRefundOf, manualRefundOf, takenByHandOf, takenPaymentsOf } from "../refund-way"
 
 const DAY = 24 * 60 * 60 * 1000
 const NOW = new Date("2026-12-01T09:00:00Z")
@@ -71,6 +72,58 @@ describe("money taken by hand: an allow list of hosted card forms (D7a security 
     expect(
       takenByHandOf([{ provider_id: "pp_paytr_paytr" }, { provider_id: "pp_paytr_paytr" }])
     ).toBe(true)
+  })
+})
+
+describe("money taken: counted by captures (refund safety follow-up)", () => {
+  const order = (...payments: Record<string, unknown>[]) => ({
+    payment_collections: [{ payments }],
+  })
+
+  it("counts a payment captured in part, whose captured_at stays empty", () => {
+    const partial = { provider_id: "pp_cod_cod", captured_at: null, captures: [{ id: "capt_1" }] }
+
+    expect(takenPaymentsOf(order(partial))).toEqual([partial])
+    expect(takenByHandOf(takenPaymentsOf(order(partial)))).toBe(true)
+  })
+
+  it("counts a payment captured in full", () => {
+    const full = { provider_id: "pp_paytr_paytr", captured_at: "2026-11-22", captures: [] }
+
+    expect(takenPaymentsOf(order(full))).toEqual([full])
+  })
+
+  it("leaves out a payment only held, and one cancelled", () => {
+    expect(
+      takenPaymentsOf(
+        order(
+          { provider_id: "pp_cod_cod", captured_at: null, captures: [] },
+          { provider_id: "pp_paytr_paytr", captured_at: "x", canceled_at: "y" },
+          { provider_id: "pp_paytr_paytr", captures: [{ id: "capt_2" }], canceled_at: "y" }
+        )
+      )
+    ).toEqual([])
+    expect(takenPaymentsOf(undefined)).toEqual([])
+  })
+
+  it("leaves a card payment and a transfer captured in part to staff", () => {
+    const taken = takenPaymentsOf(
+      order(
+        { provider_id: "pp_paytr_paytr", captured_at: "x" },
+        { provider_id: "pp_bank-transfer_bank-transfer", captures: [{ id: "capt_3" }] }
+      )
+    )
+
+    expect(taken).toHaveLength(2)
+    expect(takenByHandOf(taken)).toBe(true)
+  })
+})
+
+describe("the way a cancel gave the money back, kept on its use row", () => {
+  it("keeps staff's reason, a refund sent, or nothing due", () => {
+    expect(cancelRefundOf({ refund: kurus(100), manual: "exceeds" })).toBe("exceeds")
+    expect(cancelRefundOf({ refund: kurus(100), manual: null })).toBe("sent")
+    expect(cancelRefundOf({ refund: kurus(0), manual: null })).toBe("none")
   })
 })
 

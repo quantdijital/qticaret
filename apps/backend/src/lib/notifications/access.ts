@@ -35,6 +35,9 @@ export const OPEN_ALERTS: readonly string[] = [
   // A cancelled booking's money left to staff, a departure's refund given up (adr/0076 Ek
   // D7a): the order's number and the departure's id only
   "booking.refund_by_hand",
+  // A cancelled departure's share of cash on delivery (review O1 of #277): the order's number,
+  // the departure's id and the share the server worked out
+  "booking.cash_share_by_hand",
   "booking.departure_refund_given_up",
   "payments.orphan_recorded",
   "payments.orphan_refunded",

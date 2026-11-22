@@ -12,6 +12,7 @@ import { doneBefore, refundedBefore } from "./cancel-again"
 import { customerCancelRefusal, planBookingCancel, refuse } from "./cancel-plan"
 import type { CancelMode, CancelPlan, ManualRefund } from "./cancel-plan"
 import { alertRefundByHand } from "./confirm-alert"
+import { cancelRefundOf } from "./refund-way"
 
 /**
  * One departure of an order cancelled with its money back (adr/0076 §8,
@@ -161,7 +162,12 @@ async function carryOut(
     })
   }
   const bookings = container.resolve<BookingModuleService>(BOOKING_MODULE)
-  const changed = await bookings.cancelBookingSlot(plan.use.booking_id, plan.use.slot_id)
+  // How the money went back, kept with the places: a cancel asked again reads it
+  const changed = await bookings.cancelBookingSlot(
+    plan.use.booking_id,
+    plan.use.slot_id,
+    cancelRefundOf(plan)
+  )
   const byHand = changed && plan.manual !== null ? plan.refund : kurus(0)
   if (changed) {
     // The bell first: the places are back, staff must hear of the money whatever follows

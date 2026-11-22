@@ -161,6 +161,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Yer geri verildi ama para kendiliğinden gönderilmedi (havale, kapıda ödeme, hediye kartı ya da ödenenden fazla pay). İadeyi siparişin sayfasından elle yapın.",
     },
+    "booking.cash_share_by_hand": {
+      title: "#{{order}} siparişinde iptal edilen kalkışın payı elle iade edilecek",
+      description:
+        "Kapıda ödeme tahsilatı siparişin tamamıyla kaydedildi; iptal edilen kalkışın payı {{amount}} TL. Kurye siparişin tamamını aldıysa kalkışın payını siparişin sayfasından iade edin; kalkışın payını almadıysa iade etmeyin.",
+    },
     "booking.departure_refund_given_up": {
       title: "#{{order}} siparişinin iptal edilen kalkışı için iade yapılamadı",
       description:
@@ -363,6 +368,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Order #{{order}}'s cancelled booking is to be refunded by hand",
       description:
         "The places were given back but no money was sent (a bank transfer, cash on delivery, a gift card or a share above what was paid). Refund it by hand from the order's page.",
+    },
+    "booking.cash_share_by_hand": {
+      title: "Order #{{order}}'s cancelled departure's share is to be refunded by hand",
+      description:
+        "Cash on delivery was recorded for the whole order; the cancelled departure's share is {{amount}} TL. If the courier collected the whole order, refund the departure's share from the order's page; if not, refund nothing.",
     },
     "booking.departure_refund_given_up": {
       title: "Order #{{order}}'s booking on a cancelled departure could not be refunded",

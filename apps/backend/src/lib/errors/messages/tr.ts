@@ -359,6 +359,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "booking.order_change_unsupported":
     "Tarihli ürün iade ya da değişimle geri alınmaz; rezervasyonu iptal edin.",
   "booking.slot_cancelled": "Bu kalkış iptal edildi; yeniden açılamaz.",
+  "booking.cancel_refund_invalid": "İadenin yolu tanınmıyor.",
+  "booking.refund_due_invalid": "İade edilecek pay geçersiz.",
   "booking.departure_cancelled_unpaid":
     "Bu siparişin bir kalkışı ödeme alınmadan iptal edildi; ödeme alınamaz. Siparişi iptal edin.",
   "booking.use_departure_cancel":
@@ -1342,6 +1344,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu iade kısmen yapılmış görünmüyor; kaydı diğer seçeneklerle sonuçlandırın.",
   "orders.refund_check_shown": 'Sağlayıcı bu iadeyi yapılmış gösteriyor; "para gitmedi" seçilemez.',
   "payments.use_order_refund": "Bu ödemenin iadesi siparişin iade adımından yapılır.",
+  "payments.partial_capture_refused": "Bu ödeme yalnız tutarın tamamıyla tahsil edilir.",
   "payments.max_installment_invalid":
     "En çok taksit 2 ile 12 arasında olmalı (0: PayTR'nin izin verdiği en çok).",
   "payments.installments_unknown": "Taksit tablosu için ürün ya da sepet bulunamadı.",

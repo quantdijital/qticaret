@@ -9,8 +9,9 @@ import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { readOrderMoney } from "../orders/order-money"
 import type { BookingCancelInput, BookingCancelResult } from "./cancel"
-import { takenByHandOf } from "./cancel-plan"
 import { alertRefundByHand } from "./confirm-alert"
+import { TAKEN_PAYMENT_FIELDS, isManualRefund, takenByHandOf, takenPaymentsOf } from "./refund-way"
+import type { PaidOrderRow } from "./refund-way"
 
 /**
  * A departure's cancel asked again once done (adr/0076 Ek D7a): the same
@@ -26,32 +27,32 @@ export async function refundedBefore(container: MedusaContainer, useId: string):
   return kurus(entry && entry.status !== "failed" ? entry.amount : 0)
 }
 
-const TAKEN_FIELDS = [
-  "payment_collections.payments.provider_id",
-  "payment_collections.payments.captured_at",
-]
-
-interface DoneOrder {
+interface DoneOrder extends PaidOrderRow {
   status?: string | null
-  payment_collections?:
-    | ({
-        payments?: ({ provider_id?: string | null; captured_at?: unknown } | null)[] | null
-      } | null)[]
-    | null
 }
 
 /**
- * Whether the order's money goes back by hand: taken other than by one
- * hosted card form (`takenByHandOf`), or credit used.
+ * Whether the order's money goes back by hand as it stands now: taken
+ * other than by one hosted card form (`takenByHandOf`), or credit used.
+ * Only a guess for a departure cancelled before its way was kept.
  */
-async function refundsByHand(
+export async function moneyBackByHand(
   container: MedusaContainer,
   orderId: string,
-  order: DoneOrder | undefined
+  order?: PaidOrderRow
 ): Promise<boolean> {
-  const taken = (order?.payment_collections ?? []).flatMap((collection) =>
-    (collection?.payments ?? []).filter((payment) => Boolean(payment?.captured_at))
-  )
+  const row =
+    order ??
+    (
+      (
+        await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+          entity: "order",
+          fields: TAKEN_PAYMENT_FIELDS,
+          filters: { id: orderId },
+        })
+      ).data as unknown as PaidOrderRow[]
+    )[0]
+  const taken = takenPaymentsOf(row)
   if (taken.length > 0 && takenByHandOf(taken)) {
     return true
   }
@@ -59,13 +60,30 @@ async function refundsByHand(
 }
 
 /**
+ * Whether a cancelled departure's refund is staff's to give by hand: the
+ * way its cancel kept (`cancel_refund`) decides; a refund sent or none
+ * due rings nothing (a tier that kept it all, a share sent). Cancelled
+ * before the way was kept (null): guessed from the order as it is now.
+ */
+export async function owedByHand(
+  container: MedusaContainer,
+  orderId: string,
+  kept: string | null,
+  order?: PaidOrderRow
+): Promise<boolean> {
+  if (kept !== null) {
+    return isManualRefund(kept)
+  }
+  return moneyBackByHand(container, orderId, order)
+}
+
+/**
  * No live departure on the slot: cancelled before (the same answer) or
  * never the order's. Staff's cancel asked again after the places went
- * back with no refund made rings the refund bell again when the money
- * goes back by hand (security review of D7a): a run that stopped between
- * the places and the bell is caught up; a bell rung before is not
- * repeated (its key). A tier that kept everything may ring it once with
- * nothing due; the order's page shows no refund owed.
+ * back with no refund made rings the refund bell again when its cancel
+ * left the money to staff (security review of D7a and its follow-up): a
+ * run that stopped between the places and the bell is caught up; a bell
+ * rung before is not repeated (its key).
  */
 export async function doneBefore(
   container: MedusaContainer,
@@ -78,23 +96,25 @@ export async function doneBefore(
       ? []
       : await bookings.listBookingSlotUses(
           { booking_id: ofOrder.map((booking) => booking.id), slot_id: input.slot_id },
-          { take: 1, select: ["id", "cancelled_at"] }
+          { take: 1, select: ["id", "cancelled_at", "cancel_refund", "refund_due"] }
         )
   if (!use) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "booking.cancel_unknown")
   }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
-    fields: ["status", ...TAKEN_FIELDS],
+    fields: ["status", ...TAKEN_PAYMENT_FIELDS],
     filters: { id: input.order_id },
   })
-  const order = (data as DoneOrder[])[0]
+  const order = (data as unknown as DoneOrder[])[0]
   const refunded = await refundedBefore(container, use.id)
   if (
     use.cancelled_at &&
     refunded <= 0 &&
     input.by !== "customer" &&
-    (await refundsByHand(container, input.order_id, order))
+    // A cash on delivery share rings its own bell (`booking.cash_share_by_hand`)
+    (use.refund_due ?? null) === null &&
+    (await owedByHand(container, input.order_id, use.cancel_refund ?? null, order))
   ) {
     await alertRefundByHand(container, input.order_id, input.slot_id)
   }
