@@ -359,6 +359,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "booking.order_change_unsupported":
     "Tarihli ürün iade ya da değişimle geri alınmaz; rezervasyonu iptal edin.",
   "booking.slot_cancelled": "Bu kalkış iptal edildi; yeniden açılamaz.",
+  "booking.cancel_refund_invalid": "İadenin yolu tanınmıyor.",
   "booking.departure_cancelled_unpaid":
     "Bu siparişin bir kalkışı ödeme alınmadan iptal edildi; ödeme alınamaz. Siparişi iptal edin.",
   "booking.use_departure_cancel":

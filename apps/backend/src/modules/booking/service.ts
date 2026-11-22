@@ -30,6 +30,8 @@ import { Bookable } from "./models/bookable"
 import { parseKey } from "@qticaret/server-kit"
 import type { CleanTraveler } from "../../lib/booking/travelers"
 import { Booking, BookingSlotUse } from "./models/booking"
+import type { CancelRefundWay } from "./models/booking"
+import { cancelledUsesByHand, cancelledUsesOfOrder, markUsesOwedByHand } from "./refund-uses"
 import { BookingHold, BookingHoldSlot } from "./models/booking-hold"
 import { BookingSlot } from "./models/booking-slot"
 import { BookingTraveler } from "./models/booking-traveler"
@@ -223,9 +225,10 @@ class BookingModuleService extends MedusaService({
   async cancelBookingSlot(
     bookingId: string,
     slotId: string,
+    refund: CancelRefundWay | null = null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<boolean> {
-    return cancelBookingSlot(managerOf(sharedContext), bookingId, slotId)
+    return cancelBookingSlot(managerOf(sharedContext), bookingId, slotId, refund)
   }
 
   /** An order's live departures: its confirmed bookings' uses not cancelled. */
@@ -257,6 +260,31 @@ class BookingModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {}
   ): Promise<boolean> {
     return orderHasCancelledDeparture(managerOf(sharedContext), orderId)
+  }
+
+  /** Departures cancelled lately whose refund may be owed by hand (the bell sweep). */
+  @InjectManager()
+  async cancelledUsesByHand(
+    days: number,
+    limit: number,
+    @MedusaContext() sharedContext: Context = {}
+  ) {
+    return cancelledUsesByHand(managerOf(sharedContext), days, limit)
+  }
+
+  /** An order's cancelled departures and how their money went back. */
+  @InjectManager()
+  async cancelledUsesOfOrder(orderId: string, @MedusaContext() sharedContext: Context = {}) {
+    return cancelledUsesOfOrder(managerOf(sharedContext), orderId)
+  }
+
+  /** Cancelled departures marked as owed back by hand; how many changed. */
+  @InjectTransactionManager()
+  async markUsesOwedByHand(
+    useIds: string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    return markUsesOwedByHand(managerOf(sharedContext), useIds)
   }
 
   /** The booking's voucher code, made on first read (adr/0076 Ek D7b); null: no booking. */

@@ -9,6 +9,10 @@ type Container = Pick<MedusaContainer, "resolve">
 export type BookingAlert =
   "confirm_failed" | "travelers_attach_failed" | "refund_by_hand" | "departure_refund_given_up"
 
+/** The bell's key rung once: per order, and per departure when given. */
+export const bellKey = (alert: BookingAlert, orderId: string, slotId?: string): string =>
+  `booking.${alert}:${orderId}${slotId ? `:${slotId}` : ""}`
+
 /**
  * A booking alert on an order's bell: ids, the order number and a
  * departure's id only; never fails its caller.
@@ -20,9 +24,7 @@ async function ringOrderBell(
   extra: { slot_id?: string; once?: boolean } = {}
 ): Promise<void> {
   // Once per order (and departure): rung again, Medusa skips the same key (adr/0076 Ek D7a)
-  const key = extra.once
-    ? `booking.${alert}:${orderId}${extra.slot_id ? `:${extra.slot_id}` : ""}`
-    : null
+  const key = extra.once ? bellKey(alert, orderId, extra.slot_id) : null
   try {
     const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
       entity: "order",
@@ -46,7 +48,18 @@ async function ringOrderBell(
       },
     })
   } catch (error) {
-    logger.warn({ event: "booking.alert_failed", order_id: orderId, err: errorSummary(error) })
+    // Money owed by hand that no one hears of is lost: an error, not a warning
+    const entry = {
+      event: "booking.alert_failed",
+      alert,
+      order_id: orderId,
+      err: errorSummary(error),
+    }
+    if (alert === "refund_by_hand") {
+      logger.error(entry)
+    } else {
+      logger.warn(entry)
+    }
   }
 }
 
