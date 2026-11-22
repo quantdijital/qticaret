@@ -136,5 +136,36 @@ medusaIntegrationTestRunner({
       })
       expect(preview.data.html).toContain(`Örnek Ticaret Ltd. Şti., ${vkn}`)
     })
+
+    it("shows the licence line the shop names once it has a name and a number (adr/0076 §12)", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const store = await createStorefront(container)
+      const save = (body: Record<string, unknown>) =>
+        settle(http.post("/admin/platform-settings/legal", body, { headers: owner.headers }))
+      const shown = async () =>
+        (
+          await settle(
+            http.get<{ identity: { document: unknown } }>("/store/legal-identity", {
+              headers: store.headers,
+            })
+          )
+        ).data.identity.document
+
+      expect(await shown()).toBeNull()
+      // A name alone says nothing
+      expect((await save({ document_name: "TÜRSAB belge no" })).status).toBe(200)
+      expect(await shown()).toBeNull()
+      const bad = await save({ document_number: "12\u0007" })
+      expect(bad.status).toBe(400)
+      expect((await save({ document_number: " 12345 ", document_holder: "" })).status).toBe(200)
+      expect(await shown()).toEqual({ name: "TÜRSAB belge no", number: "12345", holder: null })
+      await save({ document_holder: "Örnek Turizm Seyahat Acentası" })
+      expect(await shown()).toEqual({
+        name: "TÜRSAB belge no",
+        number: "12345",
+        holder: "Örnek Turizm Seyahat Acentası",
+      })
+    })
   },
 })

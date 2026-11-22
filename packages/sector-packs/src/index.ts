@@ -1,9 +1,14 @@
 export {
+  BOOKING_MODES,
+  DATED_SCHEMA_TYPES,
   MAX_SCENES,
   PACK_CODE,
   PACK_FORMAT,
   PACK_FILES,
+  PRODUCT_KINDS,
   SCENE_CODE,
+  catalogDefaultsSchema,
+  pageSchema,
   sceneSchema,
   attributeTemplateSchema,
   categorySchema,
@@ -13,10 +18,12 @@ export {
 } from "./schema"
 export type {
   AttributeTemplateData,
+  CatalogDefaults,
   CategoryData,
   FlagPreset,
   LoadedSectorPack,
   PackManifest,
+  PageData,
   SceneData,
   SectorPack,
   SectorPackSummary,
@@ -67,6 +74,10 @@ export const packItemKey = {
   attribute: (handle: string, key: string) => `attribute:${handle}/${key}`,
   category: (handle: string) => `category:${handle}`,
   flag: (key: string) => `flag:${key}`,
+  /** A content page made as a draft (adr/0076 §12), by its handle. */
+  page: (handle: string) => `page:${handle}`,
+  /** A catalog default (`catalog.json`, adr/0076 §12), by its settings field. */
+  setting: (section: string, field: string) => `setting:${section}.${field}`,
   seo: (group: string, entity: string) => `seo:${group}.${entity}`,
   /**
    * A preset's image uploaded to the shop's media library (adr/0063 §4), by

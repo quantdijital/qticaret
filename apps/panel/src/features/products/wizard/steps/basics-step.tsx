@@ -8,6 +8,7 @@ import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { CategoryTree } from "@/features/products/components/category-tree"
 import { VatSelect } from "@/features/products/components/vat-select"
@@ -131,7 +132,48 @@ function KindPicker() {
           </RadioGroup>
         )}
       />
+      <DatedSwitch />
     </Field>
+  )
+}
+
+/**
+ * adr/0076 §2: a service sold by departure, once the shop sells dated
+ * products; its default is the shop's (`catalog` settings, §12).
+ */
+function DatedSwitch() {
+  const { t } = useTranslation()
+  const { control } = useFormContext<WizardValues>()
+  const kind = useWatch({ control, name: "kind" })
+  const enabled = useFeature("catalog.booking")
+  if (!enabled || kind !== "service") {
+    return null
+  }
+  return (
+    <div className="mt-3 flex items-start justify-between gap-4">
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <label htmlFor="wizard-booking" className="text-sm font-medium">
+          {t("products.booking.mode.label")}
+        </label>
+        <span id="wizard-booking-hint" className="text-[13px] text-muted-foreground">
+          {t("products.booking.mode.hint")}
+        </span>
+      </div>
+      <Controller
+        control={control}
+        name="booking_mode"
+        render={({ field }) => (
+          <Switch
+            id="wizard-booking"
+            aria-describedby="wizard-booking-hint"
+            checked={field.value === "departure"}
+            onCheckedChange={(on) => {
+              field.onChange(on ? "departure" : "none")
+            }}
+          />
+        )}
+      />
+    </div>
   )
 }
 

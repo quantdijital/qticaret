@@ -221,7 +221,9 @@
             "flag",
             "seo_template",
             "preset_image",
-            "demo_record"
+            "demo_record",
+            "page",
+            "setting"
           ],
           "mappedType": "enum"
         },

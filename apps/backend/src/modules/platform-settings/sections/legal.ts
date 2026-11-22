@@ -23,6 +23,15 @@ export interface LegalSettings {
   etbis: string | null
   /** The shop's social profiles (`sameAs`). */
   same_as: string[]
+  /**
+   * A licence or registration the shop's trade asks it to show (adr/0076
+   * §12), named by the shop: the document's name ("TÜRSAB belge no"), its
+   * number and whose it is when not the company's. Shown once name and
+   * number are both given.
+   */
+  document_name: string | null
+  document_number: string | null
+  document_holder: string | null
 }
 
 const clean = { message: "platform_settings.text_invalid" }
@@ -84,6 +93,9 @@ export const legalSection = defineSection<LegalSettings>(
           .regex(/^https:\/\/[^\s]+$/i, { message: "platform_settings.url_invalid" })
       )
       .max(10),
+    document_name: text(100),
+    document_number: text(60),
+    document_holder: text(200),
   },
   {
     company_title: null,
@@ -94,5 +106,8 @@ export const legalSection = defineSection<LegalSettings>(
     kep: null,
     etbis: null,
     same_as: [],
+    document_name: null,
+    document_number: null,
+    document_holder: null,
   }
 )

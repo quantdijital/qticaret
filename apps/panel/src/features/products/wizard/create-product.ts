@@ -100,6 +100,7 @@ export function productBody({ values, defaults, defaultOption }: CreateInput) {
 
 interface CatalogBody {
   kind?: WizardValues["kind"]
+  booking_mode?: "departure"
   summary_doc?: JSONContent
   variants?: Record<string, { cost?: number; mpn?: string }>
 }
@@ -112,7 +113,8 @@ interface CatalogBody {
  * rows' order). Null when there is none of them.
  */
 export function catalogBody(
-  values: Pick<WizardValues, "kind" | "summary_doc"> & Partial<Pick<WizardValues, "variants">>,
+  values: Pick<WizardValues, "kind" | "summary_doc"> &
+    Partial<Pick<WizardValues, "variants" | "booking_mode">>,
   variantIds: readonly (string | undefined)[] = []
 ): CatalogBody | null {
   const variants = Object.fromEntries(
@@ -128,6 +130,10 @@ export function catalogBody(
   )
   const body: CatalogBody = {
     ...(values.kind === "physical" ? {} : { kind: values.kind }),
+    // adr/0076 §2: sold by departure, saved with its kind (the server checks the flag)
+    ...(values.kind === "service" && values.booking_mode === "departure"
+      ? { booking_mode: "departure" as const }
+      : {}),
     ...(hasSummaryText(values.summary_doc) ? { summary_doc: values.summary_doc } : {}),
     ...(Object.keys(variants).length > 0 ? { variants } : {}),
   }

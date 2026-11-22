@@ -542,11 +542,18 @@
           "tax_number": "Vergi no ya da T.C. kimlik no",
           "mersis": "MERSİS numarası",
           "kep": "KEP adresi",
-          "etbis": "ETBİS kayıt numarası"
+          "etbis": "ETBİS kayıt numarası",
+          "document_name": "Belge adı",
+          "document_number": "Belge numarası",
+          "document_holder": "Belge sahibi"
         },
         "taxNumberHint": "Şirketler için 10 haneli vergi numarası; şahıs işletmeleri için 11 haneli T.C. kimlik numarası.",
         "mersisHint": "16 hane. Şahıs işletmesinin MERSİS numarası yoksa boş bırakın.",
-        "etbisHint": "Elektronik Ticaret Bilgi Sistemi'ne kayıt olduktan sonra verilen numara."
+        "etbisHint": "Elektronik Ticaret Bilgi Sistemi'ne kayıt olduktan sonra verilen numara.",
+        "document": "Faaliyet belgesi",
+        "documentHint": "Sektörünüzün göstermenizi istediği bir belge varsa (ör. seyahat acentası işletme belgesi). Adı ve numarası girilince vitrinin altbilgisinde ve künyede yazdığınız adla görünür.",
+        "documentNameHint": "Vitrinde bu adla yazılır, ör. TÜRSAB belge no.",
+        "documentHolderHint": "Belge unvanınızdan farklı bir ada kayıtlıysa."
       },
       "social": {
         "title": "Sosyal hesaplar",

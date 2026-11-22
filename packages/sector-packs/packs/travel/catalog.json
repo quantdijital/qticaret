@@ -1,0 +1,4 @@
+{
+  "new_product": { "kind": "service", "booking_mode": "departure" },
+  "dated_schema_type": "TouristTrip"
+}

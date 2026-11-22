@@ -96,6 +96,48 @@ describe("a pack the shop cannot take", () => {
       "category a: text_invalid",
     ])
   })
+
+  it("takes catalog defaults only as the settings section does (adr/0076 §12)", () => {
+    const defaults = (kind: "physical" | "service", booking_mode: "none" | "departure") =>
+      pack({ catalog: { new_product: { kind, booking_mode }, dated_schema_type: "Event" } })
+    expect(packProblems(defaults("service", "departure"), TEST)).toEqual([])
+    expect(packProblems(defaults("physical", "departure"), TEST)).toEqual([
+      "catalog new_product_booking_mode: catalog.booking_kind",
+    ])
+  })
+
+  it("takes a page only with a clean title and a document the editor could write", () => {
+    const doc = { type: "doc" as const, content: [{ type: "paragraph" }] }
+    expect(packProblems(pack({ pages: [{ handle: "a", title: "A", body: doc }] }), TEST)).toEqual(
+      []
+    )
+    expect(
+      packProblems(pack({ pages: [{ handle: "a", title: "A\u0007", body: doc }] }), TEST)
+    ).toEqual(["page a: text_invalid"])
+    const script = { type: "doc" as const, content: [{ type: "script", text: "x" }] }
+    expect(
+      packProblems(pack({ pages: [{ handle: "a", title: "A", body: script }] }), TEST).length
+    ).toBeGreaterThan(0)
+  })
+
+  it("refuses a page the text's save would refuse, before anything is written", () => {
+    const page = (content: unknown[]) =>
+      pack({ pages: [{ handle: "a", title: "A", body: { type: "doc", content } }] })
+    const text = (value: string) => ({
+      type: "paragraph",
+      content: [{ type: "text", text: value }],
+    })
+    // A misspelt `{belirteç}` would show as typed; `[30]` is a blank to fill, no token
+    expect(packProblems(page([text("Kalkıştan [30] gün önce")]), TEST)).toEqual([])
+    expect(packProblems(page([text("Bize {magza_adi} yazın")]), TEST)).toEqual([
+      "page a body: {magza_adi} unknown",
+    ])
+    // An image is one of the shop's uploads, a card one of its records: never a pack's
+    const image = { type: "image", attrs: { src: "https://ornek.com/a.jpg", alt: "a" } }
+    expect(packProblems(page([image]), TEST)).toEqual(["page a body: holds an image"])
+    const card = { type: "productCard", attrs: { id: "prod_01ARZ3NDEKTSV4RRFFQ69G5FAV" } }
+    expect(packProblems(page([card]), TEST)).toEqual(["page a body: holds a card"])
+  })
 })
 
 describe("tenant:apply-pack pack=", () => {

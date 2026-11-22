@@ -59,7 +59,31 @@ describe("StorePage: legal identity and social accounts", () => {
           tax_number: "1234567890",
           kep: "",
           etbis: "",
+          document_name: "",
+          document_number: "",
+          document_holder: "",
         },
+      })
+    })
+  })
+
+  it("saves the licence line the shop's trade asks for, under the name it gives it", async () => {
+    search.current = { part: "legal" }
+    renderPage()
+    const name = await screen.findByRole("textbox", { name: "Belge adı" })
+    const identity = card("Yasal kimlik")
+    expect(within(identity).getByText("Faaliyet belgesi")).toBeInTheDocument()
+
+    await userEvent.type(name, "TÜRSAB belge no")
+    await userEvent.type(screen.getByRole("textbox", { name: "Belge numarası" }), "12345")
+    await userEvent.click(within(identity).getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      const [, init] = posts(fetchMock).find(([url]) => url === LEGAL_URL) ?? []
+      expect(init?.body).toMatchObject({
+        document_name: "TÜRSAB belge no",
+        document_number: "12345",
+        document_holder: "",
       })
     })
   })

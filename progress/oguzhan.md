@@ -2,6 +2,11 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-22: adr/0076 D8, `travel` paketi, yasal belge satırı, tarihli ürün SEO
+
+- **Dal:** `oguzhan/turizm-paketi`. Paket şemasına eklemeli `catalog.json` (yeni ürünün türü ve tarihli satışı, yapılandırılmış veri türü) ve `pages.json` (taslak sayfalar); backend bunları yeni `catalog` ayar bölümüne ve içerik sayfalarına yazar (defter türleri `page`, `setting`, migration). `travel` paketi: bayraklar, "Tur bilgileri" şablonu, 10 kategori, taslak iptal koşulları sayfası (hazır görünüm yok, sonraya). Ürün sihirbazı mağazanın varsayılan türüyle başlar, "Tarihli satış" anahtarı. Yasal kimlikte "Faaliyet belgesi" (ad, numara, sahip): vitrin alt bilgisi ve künye; ödeme sayfası #270 sonrası. Tarihli üründe `TouristTrip` (ya da `Event`) bloğu, kargo/iade alanı yok; beslemeler tarihli ürünü göndermez. Yapay zekâ okuyucusu değişmedi (açık nitelikler zaten gidiyor). ADR Ek "D8".
+- **Sıradaki işler:** D6b (#270), D7; panelde `catalog` ayar kartı; ödeme sayfasında belge satırı; `travel` hazır görünümü.
+
 ## 2026-11-22: adr/0076 D6b, katılımcı ekranları ve KVKK başvurusu
 
 - **Dal:** `oguzhan/rezervasyon-katilimci-ekran`. Panel: ürünün rezervasyon ayarında katılımcı düzeyi; kalkışın rezervasyon listesinde katılımcılar, "Numarayı göster" (sahip/yönetici, yeniden doğrulama, 30 sn), yazdırılabilir katılımcı listesi (dışa aktarım yok); Müşteriler > Katılımcı başvuruları (arama POST, tam ad eşleşmesi, numara özetle; JSON kopya; yeniden doğrulamalı silme). Backend: arama/silme uçları, yetenek `travelerRequests`, alıcının veri dökümüne `katılımcılar` (maskeli). Tema sözleşmesi `travelers` adımı, Atölye formu; vitrin `/odeme?adim=katilimcilar` (yalnız katılımcı isteyen kalkış varken, ödemeden önce), sunucu eylemi alanları seviyeye göre denetler. Görünüm kilidi değişmedi. ADR Ek D6b, `docs/kvkk-envanter.md`.

@@ -17,6 +17,7 @@ import { shopDefaultsQuery } from "@/features/products/api/lookups"
 import { LimitNotice } from "@/features/settings/components/limit-notice"
 import { usePlanFailureToast } from "@/features/settings/use-plan-failure"
 import { errorText } from "@/lib/errors"
+import { useCatalogDefaults } from "./catalog-defaults"
 import { useCreateProduct } from "./create-product"
 import { canPublish, readiness } from "./readiness"
 import { STEP_FIELDS, defaultWizardValues, stepsFor, wizardSchema } from "./schema"
@@ -51,6 +52,8 @@ export function ProductWizardPage() {
     defaultValues: defaultWizardValues(),
     mode: "onTouched",
   })
+  // adr/0076 §12: the kind a new product starts as, the shop's
+  useCatalogDefaults(form)
   const [current, setCurrent] = useState(0)
   const [reached, setReached] = useState(0)
   const defaults = useQuery(shopDefaultsQuery())

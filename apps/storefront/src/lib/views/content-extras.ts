@@ -98,11 +98,24 @@ export function identityRows(identity: LegalIdentity, t: Translate): IdentityRow
     ["content.identity_kep", identity.kep, copy("content.identity_copy_kep", identity.kep)],
     ["content.identity_etbis", identity.etbis],
   ]
-  return rows.flatMap(([key, value, copied]) =>
-    value?.trim()
-      ? [copied ? { label: t(key), value, copy: copied } : { label: t(key), value }]
-      : []
-  )
+  // adr/0076 §12: the licence its trade asks it to show, under the name the shop gave it
+  const document = identity.document
+  const licence: IdentityRowView[] = document
+    ? [
+        {
+          label: document.name,
+          value: document.holder ? `${document.number} (${document.holder})` : document.number,
+        },
+      ]
+    : []
+  return [
+    ...rows.flatMap(([key, value, copied]) =>
+      value?.trim()
+        ? [copied ? { label: t(key), value, copy: copied } : { label: t(key), value }]
+        : []
+    ),
+    ...licence,
+  ]
 }
 
 /** How a card family is written on its own cards; an unknown one as the provider names it. */
