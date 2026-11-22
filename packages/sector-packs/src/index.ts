@@ -52,6 +52,7 @@ export type {
   StorefrontPreset,
 } from "./preset-schema"
 export { PRESETS_DIR, readPreset } from "./preset-load"
+export { SECTION_REQUIRES, checkPresetFlags } from "./section-requires"
 export {
   DEFAULT_PACKS_DIR,
   SectorPackError,

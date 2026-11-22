@@ -1,7 +1,7 @@
 import type { TFunction } from "i18next"
 import { CircleCheck } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { PAGE_LAYOUT_LIMITS } from "@qticaret/types"
+import { CAPABILITY_GROUPS, PAGE_LAYOUT_LIMITS, capabilityOfFlag } from "@qticaret/types"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { ApplyReport as Report, SkippedRef } from "./api"
 
@@ -9,6 +9,18 @@ const R = "storefront.gallery.report"
 
 /** A content page's layout left out for a page the shop has not made (adr/0073 §4). */
 const isMissingPage = (each: SkippedRef) => each.where === "pages"
+
+/** A section left out for its feature flag, off in this shop (adr/0077 §8). */
+const isFeatureOff = (each: SkippedRef) => each.reason === "feature_off"
+
+/** The capabilities the flags left off are named by ("Tarihli ürünler"), once each. */
+function capabilitiesOf(t: TFunction, skipped: readonly SkippedRef[]): string {
+  const names = skipped.flatMap((each) => {
+    const capability = each.flag ? capabilityOfFlag(each.flag) : null
+    return capability ? [t(CAPABILITY_GROUPS[capability].label)] : []
+  })
+  return [...new Set(names)].join(", ")
+}
 
 /** The section names a skipped reference was in, once each: `home.kategoriler` → `kategoriler`. */
 const refsOf = (skipped: readonly SkippedRef[]) =>
@@ -33,12 +45,14 @@ function pageNote(t: TFunction, each: SkippedRef): string {
  * (PLAN §4.3): the look is in the draft, the draft before it was kept (and
  * under which name), sections left out for a record the shop lacks, a
  * content page's layout left out for a page the shop has not made (with
- * how to bring it in), the shop's own header or footer and its own page
+ * how to bring it in), sections left out for a feature the shop has off
+ * (adr/0077 §8), the shop's own header or footer and its own page
  * layouts kept. Closed with "Kapat".
  */
 export function ApplyReport({ report, onClose }: { report: Report; onClose: () => void }) {
   const { t } = useTranslation()
-  const skipped = report.skipped.filter((each) => !isMissingPage(each))
+  const skipped = report.skipped.filter((each) => !isMissingPage(each) && !isFeatureOff(each))
+  const featureOff = report.skipped.filter(isFeatureOff)
   const pages = report.skipped.filter(isMissingPage)
   const sections = new Set(skipped.map((each) => each.where)).size
   const keptPages = report.kept.some((each) => each.startsWith("pages."))
@@ -61,6 +75,14 @@ export function ApplyReport({ report, onClose }: { report: Report; onClose: () =
           ) : null}
           {sections > 0 ? (
             <p>{t(`${R}.skipped`, { count: sections, refs: refsOf(skipped) })}</p>
+          ) : null}
+          {featureOff.length > 0 ? (
+            <p>
+              {t(`${R}.featureOff`, {
+                count: featureOff.length,
+                capabilities: capabilitiesOf(t, featureOff),
+              })}
+            </p>
           ) : null}
           {pages.map((each) => (
             <p key={each.ref}>{pageNote(t, each)}</p>

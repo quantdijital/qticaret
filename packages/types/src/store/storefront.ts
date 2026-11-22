@@ -244,8 +244,10 @@ export interface StorefrontAnswer {
   /**
    * What the storefront offers only while the shop has it on: gift card
    * codes (F4.8) and product add-ons (adr/0052); their routes answer 404 while off.
+   * `booking`: dated products (`catalog.booking`, adr/0076), the sections that
+   * need it drawn only while on (adr/0077 §8); absent from a backend before it.
    */
-  features?: { gift_cards: boolean; product_addons: boolean }
+  features?: { gift_cards: boolean; product_addons: boolean; booking?: boolean }
   /**
    * The footer's ways to pay and carriers (adr/0046 Ek 2026-11-04), derived
    * from what the shop set up; absent from a backend before it: none.

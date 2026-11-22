@@ -7,7 +7,7 @@ import { createStorefront } from "../helpers/storefront"
 jest.setTimeout(120 * 1000)
 
 interface Frame {
-  features?: { gift_cards: boolean; product_addons: boolean }
+  features?: { gift_cards: boolean; product_addons: boolean; booking: boolean }
   marks?: { payments: string[]; carriers: string[] }
   storefront: {
     announcements: string[]
@@ -83,7 +83,11 @@ medusaIntegrationTestRunner({
       })
       expect(before.data.free_shipping_threshold).toBeNull()
       // Gift cards and add-ons are off until the shop turns them on (F4.8, adr/0052)
-      expect(before.data.features).toEqual({ gift_cards: false, product_addons: false })
+      expect(before.data.features).toEqual({
+        gift_cards: false,
+        product_addons: false,
+        booking: false,
+      })
       expect(before.headers["cache-control"]).toContain("max-age=300")
       expect(script.status).toBe(400)
       // A misspelt detail would show as typed: refused, naming the ones there are (adr/0048)
@@ -212,7 +216,11 @@ medusaIntegrationTestRunner({
       await flag(false)
 
       expect(off.data.features?.product_addons).toBe(false)
-      expect(on.data.features).toEqual({ gift_cards: false, product_addons: true })
+      expect(on.data.features).toEqual({
+        gift_cards: false,
+        product_addons: true,
+        booking: false,
+      })
     })
   },
 })

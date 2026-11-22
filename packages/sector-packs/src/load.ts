@@ -4,6 +4,7 @@ import type { z } from "zod"
 import { PRESETS_DIR, readPresets } from "./preset-load"
 import type { StorefrontPreset } from "./preset-schema"
 import { SectorPackError, readJsonFile } from "./read-json"
+import { checkPresetFlags } from "./section-requires"
 import { PACK_CODE, PACK_FILES } from "./schema"
 import type { LoadedSectorPack, SectorPack, SectorPackSummary } from "./schema"
 
@@ -118,6 +119,8 @@ export function readPack(dir: string, code: string): LoadedSectorPack {
     scenes: readFile(dir, code, "scenes.json") ?? [],
   }
   checkItems(pack)
+  // A look laying out a flagged section only in a pack that turns its flag on (adr/0077 §8)
+  checkPresetFlags(pack)
   return pack
 }
 

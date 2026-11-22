@@ -1,4 +1,6 @@
-import type { StoreLayout, StoreMenu } from "@qticaret/types"
+import type { StoreLayout, StoreMenu, StorefrontAnswer } from "@qticaret/types"
+import { CAPABILITY_GROUPS } from "@qticaret/types/section-requires"
+import { sectorPack } from "@qticaret/sector-packs"
 import type { PresetMenu } from "@qticaret/sector-packs"
 import { StoreApiError } from "@/lib/store-api/errors"
 import {
@@ -15,6 +17,7 @@ import {
   productsIn,
 } from "./fixture-shop"
 import { linkOf } from "./preset-resolve"
+import { PACKS_DIR } from "./presets"
 
 /**
  * The fixed shop's Store API (preset lock): every call the frame and the
@@ -147,6 +150,28 @@ function cardFacts(query: Query) {
   }
 }
 
+type Features = NonNullable<StorefrontAnswer["features"]>
+
+const ALL_OFF: Features = { gift_cards: false, product_addons: false, booking: false }
+
+/**
+ * `GET /store/storefront`'s `features` as a shop the pack set up has them
+ * (adr/0077 §8): each flag as the pack's `flags.json` turns it, else off
+ * (the registry's defaults for these three); a frame fixture with no pack, all off.
+ */
+export function packFeatures(pack: string | null): Features {
+  const flags = pack ? (sectorPack(pack, PACKS_DIR)?.flags ?? []) : []
+  const on = (key: string) => flags.some((flag) => flag.key === key && flag.enabled)
+  return {
+    gift_cards: on("promotions.gift_cards"),
+    product_addons: on("catalog.addons"),
+    booking: on(CAPABILITY_GROUPS.dated.flag),
+  }
+}
+
+/** The drawn preset's features: a spec sets them with its layout (`packFeatures`). */
+export const shopFeatures: { current: Features } = { current: ALL_OFF }
+
 /** The answer to a GET, by path; throws for one this file does not know. */
 export function storeAnswer(
   layout: StoreLayout,
@@ -176,6 +201,7 @@ export function storeAnswer(
           color_swatches: [],
         },
         free_shipping_threshold: 1500,
+        features: shopFeatures.current,
         marks: {
           payments: [{ key: "visa" }, { key: "mastercard" }],
           carriers: [{ key: "yurtici" }],

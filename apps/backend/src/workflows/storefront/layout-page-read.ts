@@ -3,6 +3,8 @@ import { LAYOUT_LIMITS, isShowing, layoutDocument, sectionIds } from "../../lib/
 import type { ContentPageSection, LayoutDocument } from "../../lib/storefront/layout"
 import { hasPageText, pageTextSections, withTextAt } from "../../lib/storefront/page-text"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
+import { withoutTypesOff } from "../../lib/storefront/sections/requires"
+import { offKey, sectionTypesOff } from "./layout-flags"
 import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
 import { linksOf } from "./layout-check"
@@ -62,10 +64,15 @@ export async function storePageLayout(
   design: PageDesign,
   pageId: string,
   channels: readonly string[] | null = null,
-  now = new Date()
+  now = new Date(),
+  off?: ReadonlyMap<string, string>
 ) {
-  const { sections: all, synthesized } = await pageSectionsIn(container, design, pageId)
-  const showing = all.filter((section) => isShowing(section, now))
+  const [{ sections: all, synthesized }, typesOff] = await Promise.all([
+    pageSectionsIn(container, design, pageId),
+    off ?? sectionTypesOff(container),
+  ])
+  // A section whose feature flag is off is left out, kept in the design (adr/0077 §8)
+  const showing = withoutTypesOff(all, typesOff).filter((section) => isShowing(section, now))
   const head = { page_id: pageId, ...(synthesized ? { synthesized: true as const } : {}) }
   if (showing.length === 0) {
     return { ...head, sections: [] }
@@ -118,12 +125,13 @@ export async function publishedPageLayout(
   pageId: string,
   channels: readonly string[] | null = null
 ): Promise<ShownPage> {
-  const edition = await layoutEdition(container)
+  const [edition, off] = await Promise.all([layoutEdition(container), sectionTypesOff(container)])
   const shop = channels ? [...new Set(channels)].sort().join(",") : "*"
-  const key = `${edition?.published ? editionKey(edition) : "unpublished"}|${pageId}|${shop}`
+  const revision = edition?.published ? editionKey(edition) : "unpublished"
+  const key = `${revision}|${pageId}|${shop}|${offKey(off)}`
   return pageCache(key, async () => {
     const design = edition?.published ? await publishedRead(container, edition) : NO_DESIGN
-    return storePageLayout(container, design, pageId, channels)
+    return storePageLayout(container, design, pageId, channels, new Date(), off)
   })
 }
 

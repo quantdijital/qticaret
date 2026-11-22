@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { renderToStaticMarkup } from "react-dom/server"
-import { menusOf } from "@/test/preset-lock/fake-store-api"
+import { menusOf, packFeatures, shopFeatures } from "@/test/preset-lock/fake-store-api"
 import {
   ABOUT_PAGE,
   CONTACT_PAGE,
@@ -101,6 +101,7 @@ beforeAll(() => {
   }
   store.layout = presetAnswer(base).layout
   store.menus = menusOf(base.menus)
+  shopFeatures.current = packFeatures(base.pack)
   store.answer = contentAnswerOf(base)
 })
 
@@ -150,6 +151,7 @@ describe("the preset lock's content page layouts (docs/tema/bilesen-standardi.md
     async ({ key, file, page, preset, own }) => {
       store.layout = presetAnswer(preset).layout
       store.menus = menusOf(preset.menus)
+      shopFeatures.current = packFeatures(preset.pack)
       store.answer = contentAnswerOf(preset, own.layouts)
       if (!UPDATING) {
         expect(

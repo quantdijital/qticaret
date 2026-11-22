@@ -108,8 +108,13 @@ export interface SkippedRef {
   ref: string
   /** A page left out: its usual name (`Hakkımızda`), when the look gives one. */
   name?: string
-  /** Why a page's layout was left out: no such page, or no room for another page's layout. */
-  reason?: "missing" | "limit"
+  /**
+   * Why it was left out: a page's layout, no such page or no room for
+   * another page's layout; a section, its feature flag off in this shop
+   * (`feature_off`, adr/0077 §8: `ref` its type, `flag` the flag).
+   */
+  reason?: "missing" | "limit" | "feature_off"
+  flag?: string
 }
 
 /** What an apply did, for the editor's note. */

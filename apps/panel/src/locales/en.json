@@ -8588,7 +8588,9 @@
         "place": {
           "top": "Move above the grid",
           "bottom": "Move below the grid"
-        }
+        },
+        "off": "Off",
+        "offNote": "{{capability}} is off, so this section is not shown on the storefront; it shows again once turned on."
       },
       "add": {
         "title": "Add section",
@@ -8600,7 +8602,8 @@
           "footer": "Shown above the footer on every page but checkout; each section is added once, then drag to change their order.",
           "pages": "Added to this page, after its sections; then drag it or use the arrows to move it."
         },
-        "once": "Already on this page."
+        "once": "Already on this page.",
+        "general": "General sections"
       },
       "types": {
         "announcement_bar": {
@@ -10763,6 +10766,9 @@
           "payment_facts": "The shop's payment methods and instalments come here by themselves; they change in the payment settings. Right after the page text, they stand beside it.",
           "shipping_facts": "Carriers, fees and delivery times come here by themselves; they change in the shipping settings. Right after the page text, they stand beside it."
         }
+      },
+      "capabilities": {
+        "dated": "Dated products"
       }
     },
     "maintenance": {
@@ -10945,7 +10951,9 @@
         "pageMissingAddress": "The page layout was not added because there is no page at the address ‘{{handle}}’. Create a page at that address and apply the look again.",
         "pageLimit": "The {{name}} page's layout was not added: at most {{max}} pages can have their own layout.",
         "pageLimitAddress": "The layout of the page at ‘{{handle}}’ was not added: at most {{max}} pages can have their own layout.",
-        "keptPages": "The layouts you set up on your pages were kept."
+        "keptPages": "The layouts you set up on your pages were kept.",
+        "featureOff_one": "{{count}} section was not added: {{capabilities}} is off in this shop.",
+        "featureOff_other": "{{count}} sections were not added: {{capabilities}} is off in this shop."
       },
       "history": {
         "lead": "Older publications:",
