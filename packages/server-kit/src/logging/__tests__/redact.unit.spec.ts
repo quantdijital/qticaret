@@ -323,6 +323,16 @@ describe("redactText", () => {
     ["national mobile with spaces", "phone 0532 123 45 67", `phone ${REDACTED}`],
     ["TCKN", `tckn ${VALID_TCKN} given`, `tckn ${REDACTED} given`],
     [
+      "traveler's document fields kept as a string (adr/0076 §7)",
+      `{"document_no":"U12345678","passport_number":"P1234567","birth_date":"1990-01-15","slot":1}`,
+      `{"document_no":"${REDACTED}","passport_number":"${REDACTED}","birth_date":"${REDACTED}","slot":1}`,
+    ],
+    [
+      "traveler's fields in a form body",
+      "documentNo=U12345678&passport=P1234567&birthDate=1990-01-15&count=2",
+      `documentNo=${REDACTED}&passport=${REDACTED}&birthDate=${REDACTED}&count=2`,
+    ],
+    [
       "Google's answer in a callback's query",
       "GET /google/callback?state=st-for-a-test&code=4/code-for-a-test 303",
       `GET /google/callback?state=${REDACTED}&code=${REDACTED} 303`,
