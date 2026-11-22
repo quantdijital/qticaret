@@ -53,8 +53,8 @@ export function CheckoutPage({
   actions: CheckoutActions
 }) {
   const errors = Object.fromEntries(CHECKOUT_ERRORS.map((key) => [key, t(key)]))
-  // The cart's own steps (adr/0076 §6); a view without them takes all three, as before
-  const steps = view.steps ?? ORDER
+  // The cart's own steps (adr/0076 §6); a view without them (or with none) takes all three, as before
+  const steps = view.steps?.length ? view.steps : ORDER
   const stateOf = (step: CheckoutStep) => {
     const here = steps.indexOf(view.step)
     const there = steps.indexOf(step)
