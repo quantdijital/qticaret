@@ -50,17 +50,29 @@ describe("runHealthChecks", () => {
   })
 
   it("runs the checks in parallel", async () => {
+    // Counted, not timed (a busy CI machine broke a wall-clock budget): every
+    // check has started before any one of them is let finish
+    let running = 0
+    let most = 0
+    const finishers: (() => void)[] = []
     const slow = () =>
-      new Promise<{ status: "ok" }>((resolve) =>
-        setTimeout(() => {
+      new Promise<{ status: "ok" }>((resolve) => {
+        running++
+        most = Math.max(most, running)
+        finishers.push(() => {
+          running--
           resolve({ status: "ok" })
-        }, 150)
-      )
-    const started = Date.now()
+        })
+      })
 
-    await runHealthChecks([check("a", slow), check("b", slow), check("c", slow)])
+    const report = runHealthChecks([check("a", slow), check("b", slow), check("c", slow)])
+    await new Promise((resolve) => setImmediate(resolve))
+    expect(most).toBe(3)
+    for (const finish of finishers) {
+      finish()
+    }
 
-    expect(Date.now() - started).toBeLessThan(400)
+    expect((await report).checks).toHaveLength(3)
   })
 })
 
