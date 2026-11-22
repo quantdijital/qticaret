@@ -48,6 +48,7 @@ export type {
 export type * from "./account-views"
 export type * from "./addon-views"
 export type * from "./banner-views"
+export type * from "./booking-views"
 export type * from "./card-views"
 export type * from "./catalog-views"
 export type * from "./category-card-views"

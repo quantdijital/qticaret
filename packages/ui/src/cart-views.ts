@@ -1,4 +1,5 @@
 import type { AddonFormView, LineAddonView } from "./addon-views"
+import type { BookingHoldView, CartLineBookingView } from "./booking-views"
 import type { BreadcrumbView, ProductCardView } from "./product-views"
 import type { ImageView, LinkView, TrustBadgeView } from "./views"
 
@@ -35,6 +36,12 @@ export interface CartLineView {
   maxQuantity?: number | null
   /** The picks' form, for a line of a product with add-ons while the shop offers them. */
   addonForm?: AddonFormView | null
+  /**
+   * A dated line (adr/0076 §10): its departure, and whether its places
+   * are still held. Its quantity is not changed here (no stepper; "Değiştir"
+   * goes to the product's page, `path`); removing it stays. Absent: any other line.
+   */
+  booking?: CartLineBookingView | null
 }
 
 /** A gift card line: who it goes to, as typed (the edit form shows it again). */
@@ -108,6 +115,12 @@ export interface CartPageView {
    * A hint only; the backend refuses the payment itself.
    */
   checkoutBlocked?: CheckoutBlockedView | null
+  /**
+   * The hold on the dated lines' places (adr/0076 §10): "Yerleriniz MM:SS
+   * daha tutuluyor" by the totals; run out, "Ödemeye geç" is drawn off.
+   * Absent or null: no dated lines.
+   */
+  hold?: BookingHoldView | null
 }
 
 /** A reason the cart stops before the payment (`CartPageView.checkoutBlocked`). */

@@ -100,6 +100,13 @@ export interface ThemeActions {
    */
   saveLineAddons?: (form: FormData) => Promise<void>
   /**
+   * A dated product's departure into the cart (adr/0076 §5, K6). Fields:
+   * `product_id`, `slot_id`, and `qty_<variant_id>` for each price
+   * category (0 or empty is none). It sends that departure's lines whole:
+   * sent again, they replace the ones in the cart. Never a price or a date.
+   */
+  addBookingToCart?: FormAction
+  /**
    * A plain form: a payment link's cart (adr/0051) let go, so the shopper
    * can shop anew; the link itself still opens from its message.
    */

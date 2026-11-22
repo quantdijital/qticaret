@@ -1,4 +1,5 @@
 import type { AddonFieldView } from "./addon-views"
+import type { BookingView } from "./booking-views"
 import type { ProductMainView } from "./main-views"
 import type {
   QuickAddView,
@@ -234,6 +235,13 @@ export interface ProductPageView {
    * to cart"; none while the shop has them off or the product has none.
    */
   addons?: AddonFieldView[]
+  /**
+   * A dated product (adr/0076 §10): its departures and price categories,
+   * picked in place of the options and "add to cart" (`addBookingToCart`).
+   * Absent or null: any other product, drawn as before. A feature of the
+   * main block, not a variant of it (adr/0066 K3(b), K4).
+   */
+  booking?: BookingView | null
   /**
    * A line above the page saying what is shown: a draft product's signed
    * preview (F18), as a content page's. Null or left out: none.
