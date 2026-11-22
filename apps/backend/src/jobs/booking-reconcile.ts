@@ -3,13 +3,15 @@ import { errorSummary, logger } from "../lib/logging"
 import { resumeDepartureCancels } from "../workflows/booking/departure-cancel"
 import { reconcileBookings } from "../workflows/booking/reconcile"
 import { reconcileTravelers } from "../workflows/booking/reconcile-travelers"
+import { ringLostRefundBells } from "../workflows/booking/refund-bells"
 
 /**
  * Dated orders the order events missed (adr/0076 Ek takip L2), every ten
  * minutes: a placed order's booking confirmed, a cancelled one's bookings
  * cancelled (`workflows/booking/reconcile.ts`), then a booking's travelers
  * that failed to follow it attached (`reconcile-travelers.ts`, adr/0076
- * §7). Logs counts only; one order's failure is logged with its id and
+ * §7), and a cancelled departure's refund bell that never rang rung
+ * (`refund-bells.ts`). Logs counts only; one order's failure is logged with its id and
  * the run goes on. On a shop that sells no dated product: three indexed
  * reads that find nothing.
  */
@@ -30,6 +32,15 @@ export default async function bookingReconcile(container: MedusaContainer) {
     }
   } catch (error) {
     logger.warn({ event: "booking.departures_resume_failed", err: errorSummary(error) })
+  }
+  try {
+    // Money left to staff whose bell was lost (refund safety follow-up of adr/0076)
+    const bells = await ringLostRefundBells(container)
+    if (bells.rung + bells.failed > 0) {
+      logger.info({ event: "booking.refund_bells_caught_up", ...bells })
+    }
+  } catch (error) {
+    logger.error({ event: "booking.refund_bells_failed", err: errorSummary(error) })
   }
   try {
     const travelers = await reconcileTravelers(container)

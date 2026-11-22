@@ -1,4 +1,6 @@
 import { ValidationError } from "../../lib/errors"
+import { CANCEL_REFUNDS } from "./models/booking"
+import type { CancelRefundWay } from "./models/booking"
 import { asInt, rows } from "./sql"
 import type { Executor } from "./sql"
 
@@ -9,13 +11,18 @@ import type { Executor } from "./sql"
  * locked first, so two cancels of the same booking (the shopper's and the
  * shop's departure cancel) run one after the other. Whether it changed: a
  * departure cancelled already, a booking no longer confirmed, or one not
- * on that slot change nothing.
+ * on that slot change nothing. `refund`: how the money went back, kept
+ * on the use row in the same statement (a cancel asked again reads it).
  */
 export async function cancelBookingSlot(
   manager: Executor,
   bookingId: string,
-  slotId: string
+  slotId: string,
+  refund: CancelRefundWay | null = null
 ): Promise<boolean> {
+  if (refund !== null && !CANCEL_REFUNDS.includes(refund)) {
+    throw new ValidationError("booking.cancel_refund_invalid", { field: "cancel_refund" })
+  }
   const [booking] = await rows(
     manager,
     `SELECT id, status FROM booking WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
@@ -29,10 +36,10 @@ export async function cancelBookingSlot(
   }
   const [use] = await rows(
     manager,
-    `UPDATE booking_slot_use SET cancelled_at = now(), updated_at = now()
+    `UPDATE booking_slot_use SET cancelled_at = now(), cancel_refund = ?, updated_at = now()
       WHERE booking_id = ? AND slot_id = ? AND cancelled_at IS NULL AND deleted_at IS NULL
      RETURNING units`,
-    [bookingId, slotId]
+    [refund, bookingId, slotId]
   )
   if (!use) {
     return false

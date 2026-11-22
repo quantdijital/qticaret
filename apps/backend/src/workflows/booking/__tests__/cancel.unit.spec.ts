@@ -35,12 +35,17 @@ const offlinePlan = {
 function containerOf(
   options: {
     emit?: jest.Mock
-    uses?: { id: string; cancelled_at: Date | null }[]
+    uses?: { id: string; cancelled_at: Date | null; cancel_refund?: string | null }[]
+    bellFails?: boolean
     payments?: { provider_id: string; captured_at: Date | null }[]
     ledger?: { amount: number; status: string }[]
   } = {}
 ) {
-  const notifications = { createNotifications: jest.fn().mockResolvedValue([]) }
+  const notifications = {
+    createNotifications: options.bellFails
+      ? jest.fn().mockRejectedValue(new Error("db down"))
+      : jest.fn().mockResolvedValue([]),
+  }
   const emit = options.emit ?? jest.fn().mockResolvedValue(undefined)
   const bookings = {
     cancelBookingSlot: jest.fn().mockResolvedValue(true),
@@ -72,6 +77,7 @@ function containerOf(
     container: { resolve: (key: string) => services[key] } as never,
     notifications,
     emit,
+    bookings,
   }
 }
 
@@ -166,5 +172,54 @@ describe("a departure's refund left to staff, rung whatever follows (D7a securit
     const plainCard = containerOf({ uses: cancelled, payments: card })
     await cancelBookingDeparture(plainCard.container, staffCancel)
     expect(refundBells(plainCard.notifications)).toHaveLength(0)
+  })
+})
+
+describe("the way a cancel gave the money back, kept (refund safety follow-up)", () => {
+  it("keeps the plan's way with the places, in the same call", async () => {
+    planned.mockResolvedValue(offlinePlan as never)
+    const { container, bookings } = containerOf()
+
+    await cancelBookingDeparture(container, staffCancel)
+
+    expect(bookings.cancelBookingSlot).toHaveBeenCalledWith("bkng_1", "bkslot_1", "offline")
+  })
+
+  it("rings again for a share above the payments, though paid by card", async () => {
+    planned.mockResolvedValue(null)
+    const { container, notifications } = containerOf({
+      uses: [{ id: "bkuse_1", cancelled_at: new Date(), cancel_refund: "exceeds" }],
+      payments: [{ provider_id: "pp_paytr_paytr", captured_at: new Date() }],
+    })
+
+    await cancelBookingDeparture(container, staffCancel)
+
+    expect(refundBells(notifications)).toHaveLength(1)
+  })
+
+  it("never rings for a tier that kept it all, though paid by transfer", async () => {
+    planned.mockResolvedValue(null)
+    const { container, notifications } = containerOf({
+      uses: [{ id: "bkuse_1", cancelled_at: new Date(), cancel_refund: "none" }],
+      payments: [{ provider_id: "pp_bank-transfer_bank-transfer", captured_at: new Date() }],
+    })
+
+    await cancelBookingDeparture(container, staffCancel)
+
+    expect(refundBells(notifications)).toHaveLength(0)
+  })
+
+  it("logs a refund bell that cannot be written as an error", async () => {
+    planned.mockResolvedValue(offlinePlan as never)
+    const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+    const { container } = containerOf({ bellFails: true })
+
+    const result = await cancelBookingDeparture(container, staffCancel)
+
+    expect(result.cancelled).toBe(true)
+    expect(error).toHaveBeenCalledWith(
+      expect.objectContaining({ event: "booking.alert_failed", alert: "refund_by_hand" })
+    )
+    error.mockRestore()
   })
 })

@@ -3,6 +3,14 @@ import { model } from "@medusajs/framework/utils"
 export const BOOKING_STATUSES = ["confirmed", "cancelled", "completed"] as const
 
 /**
+ * How a departure's cancel gave its money back (refund safety follow-up of
+ * adr/0076): `sent` by the provider, `none` due, or left to staff
+ * (`offline`, `credit`, `exceeds`).
+ */
+export const CANCEL_REFUNDS = ["sent", "none", "offline", "credit", "exceeds"] as const
+export type CancelRefundWay = (typeof CANCEL_REFUNDS)[number]
+
+/**
  * A confirmed booking (adr/0076 §3): an order's places, moved from the
  * cart's hold to `sold`. `hold_id` is the hold it came from, unique, so
  * confirming the same hold again finds this row and changes nothing.
@@ -33,6 +41,11 @@ export const Booking = model
  * tiers and zone when the booking was confirmed (`{ timezone, tiers }`,
  * review O5); a cancel reckons by it, by the product's settings when null.
  * `reminded_at`: the departure's reminder went out (adr/0076 Ek D7b).
+ * `cancel_refund`: how the cancel gave the money back (`CANCEL_REFUNDS`),
+ * written with `cancelled_at`; null before it was kept, and while live.
+ * `refund_due`: kuruş, the departure's share of cash on delivery recorded
+ * after its cancel (owed back by hand). `bell_checked_at`: the refund
+ * bell sweep settled the row (rung, or nothing owed).
  */
 export const BookingSlotUse = model
   .define("booking_slot_use", {
@@ -43,6 +56,9 @@ export const BookingSlotUse = model
     cancelled_at: model.dateTime().nullable(),
     cancellation: model.json().nullable(),
     reminded_at: model.dateTime().nullable(),
+    cancel_refund: model.enum([...CANCEL_REFUNDS]).nullable(),
+    refund_due: model.number().nullable(),
+    bell_checked_at: model.dateTime().nullable(),
   })
   .indexes([{ on: ["booking_id", "slot_id"], unique: true }, { on: ["slot_id"] }])
   .checks([{ name: "booking_slot_use_units_check", expression: "units > 0" }])

@@ -13,7 +13,6 @@ import { kurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import { planRefund } from "../../lib/orders"
 import type { RefundRequest } from "../../lib/orders"
-import { isHostedFormProvider } from "../../lib/payments/checkout"
 import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
 import type { LiveUse } from "../../modules/booking/service"
@@ -21,6 +20,10 @@ import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { readOrderMoney } from "../orders/order-money"
 import { returnPolicy } from "../returns/policy"
+import { TAKEN_PAYMENT_FIELDS, manualRefundOf, takenByHandOf, takenPaymentsOf } from "./refund-way"
+import type { ManualRefund, PaidOrderRow } from "./refund-way"
+
+export type { ManualRefund } from "./refund-way"
 
 /**
  * What cancelling one departure of an order gives back (adr/0076 §8, Ek
@@ -33,17 +36,7 @@ import { returnPolicy } from "../returns/policy"
 /** Who cancels: the shopper (their tier), staff (the tier or all of it), the shop's departure cancel (all). */
 export type CancelMode = "tier" | "full"
 
-/**
- * Why the refund is not sent on its own but left to staff (review O1,
- * O2): `offline`, money not taken by a hosted card form (a bank transfer, cash on
- * delivery, an edit's difference) goes back by hand; `credit`, part was
- * paid with a gift card or store credit, which must go back to the card
- * or the account, never turned into cash; `exceeds`, the departure's
- * share is more than the payments still hold.
- */
-export type ManualRefund = "offline" | "credit" | "exceeds"
-
-interface OrderRow {
+interface OrderRow extends PaidOrderRow {
   id: string
   status?: string | null
   customer_id?: string | null
@@ -54,11 +47,6 @@ interface OrderRow {
         quantity?: unknown
         detail?: { quantity?: unknown } | null
         metadata?: unknown
-      } | null)[]
-    | null
-  payment_collections?:
-    | ({
-        payments?: ({ provider_id?: string | null; captured_at?: unknown } | null)[] | null
       } | null)[]
     | null
 }
@@ -106,8 +94,7 @@ const ORDER_FIELDS = [
   // Medusa fills an item's quantity only with its detail requested (order-facts.ts)
   "items.detail.quantity",
   "items.metadata",
-  "payment_collections.payments.provider_id",
-  "payment_collections.payments.captured_at",
+  ...TAKEN_PAYMENT_FIELDS,
 ]
 
 // Far above any order: the departure's share worked out before the payments cap it
@@ -161,6 +148,8 @@ interface DepartureMoney {
   credit: Kurus
   /** The departure's share is more than the payments still hold. */
   exceeds: boolean
+  /** Taken by the order's payments, in full or in part, before any refund. */
+  taken: Kurus
 }
 
 /** The departure's refund under a rule: its lines' units left, less the share kept. */
@@ -184,7 +173,7 @@ async function refundOf(
   })
   const none = { paid: kurus(0), refund: kurus(0), request: null, credit: money.credit }
   if (items.length === 0 || (money.refundable <= 0 && money.credit <= 0)) {
-    return { ...none, exceeds: false }
+    return { ...none, exceeds: false, taken: money.paid }
   }
   // Worked out uncapped: a share above what the payments hold is staff's to settle (O1)
   const plan = (fee: number) => {
@@ -205,43 +194,9 @@ async function refundOf(
     request: refund > 0 ? { items, fee_percent: feePercent } : null,
     credit: money.credit,
     exceeds: refund > money.refundable,
+    taken: money.paid,
   }
 }
-
-/**
- * Why the departure's refund is left to staff, null when it is sent
- * (review O1, O2): money taken by hand first, then credit used, then a
- * share above what the payments hold. Pure.
- */
-export function manualRefundOf(facts: {
-  refund: Kurus
-  taken_by_hand: boolean
-  credit: Kurus
-  exceeds: boolean
-}): ManualRefund | null {
-  if (facts.refund <= 0) {
-    return null
-  }
-  if (facts.taken_by_hand) {
-    return "offline"
-  }
-  if (facts.credit > 0) {
-    return "credit"
-  }
-  return facts.exceeds ? "exceeds" : null
-}
-
-/**
- * Whether the money taken goes back by hand (security review of D7a): only
- * one payment taken through a hosted card form (PayTR, iyzico) is refunded
- * on its own; any other way (a bank transfer, cash on delivery, the
- * system provider, one not known yet) or more than one payment is staff's.
- * An allow list: a new way to pay is by hand until named here. Pure.
- */
-export const takenByHandOf = (
-  taken: readonly ({ provider_id?: string | null } | null | undefined)[]
-): boolean =>
-  taken.length > 1 || taken.some((payment) => !isHostedFormProvider(payment?.provider_id ?? ""))
 
 /**
  * The plan for cancelling the order's departure on `slotId` now. Null
@@ -271,10 +226,8 @@ export async function planBookingCancel(
       ? { fee_percent: 0, days_before: null }
       : feeRuleFor(slot.tiers, days, { packageTravel })
   const money = await refundOf(container, order, input.slot_id, rule?.fee_percent ?? 100)
-  const taken = (order.payment_collections ?? []).flatMap((collection) =>
-    (collection?.payments ?? []).filter((payment) => Boolean(payment?.captured_at))
-  )
-  const takenByHand = takenByHandOf(taken)
+  // Counted by their captures: a partial capture leaves `captured_at` empty
+  const takenByHand = takenByHandOf(takenPaymentsOf(order))
   const refund = rule ? money.refund : kurus(0)
   const items = (order.items ?? []).filter((item) => item !== null)
   return {
@@ -298,7 +251,7 @@ export async function planBookingCancel(
       credit: money.credit,
       exceeds: money.exceeds,
     }),
-    unpaid: taken.length === 0 && money.credit <= 0,
+    unpaid: money.taken <= 0 && money.credit <= 0,
     dated_only: items.length > 0 && items.every((item) => bookingMarkOf(item.metadata) !== null),
     refund_within_days: packageTravel ? PACKAGE_TRAVEL_REFUND_DAYS : null,
     currency_code: order.currency_code ?? "try",
