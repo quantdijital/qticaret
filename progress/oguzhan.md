@@ -6,7 +6,8 @@
 
 - **Dal:** `oguzhan/rezervasyon-iptal`. Backend: "Planlandı" aşaması (tarihli sipariş hizmet gününe dek), iptal kademeleri (ürün saat diliminde takvim günü, paket turda 30 gün tabanı), kalkış başına iptal (önce iade, sonra yer; `booking_slot_use.cancelled_at` migration), kalkış iptali (arka planda tam iade, uzlaştırma işi), müşteri/personel uçları, iade/değişim talebinde tarihli satır reddi. Panel: "Planlandı" etiketi, iade ayarında paket tur anahtarı, rezervasyon ayarında kademe düzenleyici, kalkış iptalinde önizleme (rezervasyon/sipariş/yer, toplam iade), sipariş sayfasında "Rezervasyonlar" kartı (kademe ya da tamamı, önizleme → onay; sahip/yönetici). Vitrin: sipariş sayfasında "Rezervasyonlarınız", "İptal talebi" → iade tutarı → "İptali onayla" (tutar gönderilmez); tema sözleşmesinde isteğe bağlı `bookings`/`cancelBooking`. ADR Ek D7a.
 - **Bilinen sınır:** kesintili iptal edilen sipariş "Planlandı/Tamamlandı" görünmeye devam eder.
-- **Sıradaki işler:** PR'ın güvenlik incelemesi (`security-reviewer`; ödeme/iade ve migration), birleşme; D7b e-postalar (iptal, kalkış iptali), hatırlatma, PDF voucher; D8 `travel` paketi, JSON-LD.
+- **Güvenlik incelemesi kapandı (aynı PR):** havale/kapıda ödeme/hediye kartı ile ödenmiş ya da ödenenden fazla pay elle iade (zil `booking.refund_by_hand`, müşteriye "mağazayla görüşün"), ödemesiz tarihli sipariş son kalkışla iptal, iptal edilmiş kalkışlı siparişte havale onayı/çekim reddi, kademeler onayda kopyalanır (`booking_slot_use.cancellation`, yeni migration), sepet tutmaları kalkış iptalinde silinir, toplu iptal POST yalnız sayılar; ADR Ek "D7a güvenlik incelemesinin kapanışı". CI kırığı: sipariş satırı adedi `items.detail.quantity` olmadan boş geliyordu (iade hep 0).
+- **Sıradaki işler:** CI yeşil olunca birleşme; kredi payını karta geri yazma (ayrı iş); D7b e-postalar (iptal, kalkış iptali), hatırlatma, PDF voucher.
 
 ## 2026-11-22: adr/0076 D8, `travel` paketi, yasal belge satırı, tarihli ürün SEO
 
