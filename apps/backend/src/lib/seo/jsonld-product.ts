@@ -8,6 +8,7 @@ import { shippingDetailsOf } from "./jsonld-shipping"
 import type { DeliveryFacts } from "./jsonld-shipping"
 import { withVideos } from "./jsonld-video"
 import type { VideoFacts } from "./jsonld-video"
+import type { DatedFacts } from "./jsonld-dated"
 
 export const AVAILABILITIES = ["InStock", "OutOfStock", "BackOrder", "PreOrder"] as const
 export type Availability = (typeof AVAILABILITIES)[number]
@@ -81,6 +82,8 @@ export interface ProductFacts {
   adultConsideration?: string | null
   /** Its ready videos in gallery order (adr/0069 §9): a `VideoObject` each, in one `@graph`. */
   videos?: VideoFacts[]
+  /** Sold by date (adr/0076 §10): its own block beside this one; none: not dated. */
+  dated?: DatedFacts | null
 }
 
 export interface ReturnPolicyFacts {

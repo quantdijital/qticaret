@@ -39,6 +39,7 @@ import type { CategoryRow, SeoMetaRow } from "./payload-sources"
 import { markedCategories } from "../catalog/restrictions"
 import { returnPolicy } from "../returns/policy"
 import { productVideoFacts } from "./video-facts"
+import { datedFactsOf } from "./dated-facts"
 
 /**
  * Loads what a page's `seo` object needs (adr/0015) and builds it with
@@ -55,6 +56,7 @@ interface ProductRow extends Omit<FactRow, "product_extension"> {
     primary_category_id?: string | null
     condition?: Condition | null
     summary_doc?: unknown
+    booking_mode?: string | null
   } | null
   attribute_values?: (HighlightValue | null)[] | null
   brand?: { name: string } | null
@@ -129,11 +131,12 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     (product.variants ?? []).flatMap((variant) => (variant ? [variant.id] : [])),
     "try"
   )
-  const [shipping, returns, restricted, videos] = await Promise.all([
+  const [shipping, returns, restricted, videos, dated] = await Promise.all([
     shippingFactsOf(container),
     returnPolicy(container),
     markedCategories(container),
     productVideoFacts(container, product.id),
+    datedFactsOf(container, product.id, product.product_extension?.booking_mode),
   ])
   const facts = {
     ...productFacts(
@@ -154,6 +157,8 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       ).get(product.id) ?? null,
     // adr/0069 §9: the ready videos the page shows, a `VideoObject` each
     videos,
+    // adr/0076 §10: a dated product's trip or events beside its `Product`
+    dated,
   }
   const subject: SeoSubject = {
     kind: "product",

@@ -69,9 +69,18 @@ function placeOf(row: FeedProductRow, names: ReadonlyMap<string, string>): FeedP
 }
 
 /**
+ * A product sold by date (adr/0076 §10): no feed item. A shopping feed
+ * lists goods that ship at one price; a departure's price and places are
+ * the page's, and the product cannot go in a cart without one.
+ */
+export const isDated = (row: Pick<FactRow, "product_extension">): boolean =>
+  (row.product_extension?.booking_mode ?? "none") !== "none"
+
+/**
  * Every published product with a storefront address, as feed items: the
  * same facts, prices (the 30-day rule's too) and shipping rates the page's
  * JSON-LD is built from (docs/13 §10), with where it sits in the catalog.
+ * A dated product is left out (`isDated`).
  */
 export async function catalogItems(
   container: MedusaContainer,
@@ -123,7 +132,7 @@ export async function catalogItems(
     )
     for (const row of rows) {
       const path = paths.get(row.id)
-      if (path) {
+      if (path && !isDated(row)) {
         const facts = productFacts(
           row,
           row.brand?.name ?? null,

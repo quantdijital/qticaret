@@ -116,7 +116,7 @@ async function pricingOf(container: Container, regionId: string | undefined) {
 }
 
 /** Base prices for many variants in one read, a guest's, in the pricing given. */
-async function basePrices(
+export async function basePrices(
   container: Container,
   variantIds: readonly string[],
   pricing: { currency_code: string; region_id?: string }

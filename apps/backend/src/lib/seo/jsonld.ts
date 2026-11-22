@@ -11,6 +11,8 @@ import type { JsonLd } from "./jsonld-base"
 
 export type { JsonLd } from "./jsonld-base"
 export { AVAILABILITIES, VARIES_BY_PROPERTIES, productJsonLd } from "./jsonld-product"
+export { DATED_DEPARTURES, DATED_TYPES, datedJsonLd } from "./jsonld-dated"
+export type { DatedFacts, DatedType, DepartureFacts } from "./jsonld-dated"
 export type {
   Availability,
   Condition,
