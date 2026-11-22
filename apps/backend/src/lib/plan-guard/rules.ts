@@ -55,6 +55,8 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/orders/:id/edit/preview",
     "/admin/orders/:id/notes",
     "/admin/orders/:id/messages/:message_id/resend",
+    // A booking voucher checked at a departure already sold (adr/0076 Ek D7b)
+    "/admin/booking-vouchers/check",
   ]),
   { methods: DELETE, path: "/admin/orders/:id/notes/:note_id" },
   // Its money: a transfer confirmed, a refund, store credit, a capture, a chargeback,

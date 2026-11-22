@@ -42,6 +42,8 @@ export interface Bookable {
   traveler_fields?: { level: TravelerLevel }
   /** Absent from an older backend: no customer cancellation. */
   cancellation_tiers?: CancellationTier[]
+  /** Days before a departure its reminder goes (adr/0076 Ek D7b); 0: none. Absent: older backend. */
+  reminder_days?: number
 }
 
 export interface BookableAnswer {
@@ -94,6 +96,7 @@ export interface BookableSettingsInput {
   pax_by_variant?: Record<string, PaxEntry>
   traveler_fields?: { level: TravelerLevel }
   cancellation_tiers?: CancellationTier[]
+  reminder_days?: number
 }
 
 export interface NewSlot {

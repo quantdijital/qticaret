@@ -202,6 +202,10 @@ const aiSuggestion: Rule = {
   when: operationsAiTask,
 }
 
+// A booking voucher's code checked at a departure (adr/0076 Ek D7b): a read of the
+// order in a POST, so the code stays out of URLs; every role that reads orders
+const voucherCheck: Rule = { methods: ["POST"], path: "/admin/booking-vouchers/check" }
+
 /** What `operations` writes: the day's orders, parcels, returns, stock and moderation. */
 export const OPERATIONS_WRITES: readonly Rule[] = [
   // An order's email and addresses (Medusa's update), and shipping it
@@ -258,8 +262,9 @@ export const OPERATIONS_WRITES: readonly Rule[] = [
   aiSuggestion,
   { methods: ["POST"], path: "/admin/ai/suggestions/:id/accept" },
   { methods: ["POST"], path: "/admin/ai/suggestions/:id/dismiss" },
+  voucherCheck,
   readJob,
   cancelJob,
 ]
 
-export const READONLY_WRITES: readonly Rule[] = [readJob, cancelJob]
+export const READONLY_WRITES: readonly Rule[] = [readJob, cancelJob, voucherCheck]

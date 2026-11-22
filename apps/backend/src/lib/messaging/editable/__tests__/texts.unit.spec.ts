@@ -40,6 +40,10 @@ describe("customer messages the shop may reword", () => {
     expect(required).toEqual([
       "account.password_reset",
       "account.verify_email",
+      // adr/0076 Ek D7b: the booking's terms and voucher, and a cancel the shopper did not ask for
+      "booking.cancelled",
+      "booking.confirmed",
+      "booking.departure_cancelled",
       "consent.confirm",
       "gift_card.issued",
       "order.access_link",

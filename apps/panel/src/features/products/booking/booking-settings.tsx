@@ -58,7 +58,8 @@ export function BookingSettings({
     })
   })
   const number = (
-    name: "cutoff_hours" | "hold_minutes" | "max_units_per_cart" | "min_participants",
+    name:
+      "cutoff_hours" | "hold_minutes" | "max_units_per_cart" | "min_participants" | "reminder_days",
     min: number,
     max: number,
     suffix: string,
@@ -104,6 +105,7 @@ export function BookingSettings({
           t("products.booking.places"),
           t(`${B}.none`)
         )}
+        {number("reminder_days", 0, BOOKING_LIMITS.reminderDays, t(`${B}.days`))}
       </div>
       <div className="border-t pt-4">
         <TravelerLevelField control={form.control} />
