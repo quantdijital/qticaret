@@ -9,6 +9,7 @@ import {
 import { slotsById, slotsOfBookable } from "./availability"
 import type { SlotAvailability } from "./availability"
 import { cartHold } from "./cart-hold"
+import type { HoldClient } from "./client-share"
 import { cancelBooking, confirmHold, extendHold, holdUnits, updateSlot } from "./counters"
 import type { HoldState, SlotChanges } from "./counters"
 import { createSlots, deleteEmptySlots } from "./slots"
@@ -22,6 +23,7 @@ import { BookingSlot } from "./models/booking-slot"
 
 export type { SlotAvailability } from "./availability"
 export type { CartHold } from "./cart-hold"
+export type { HoldClient } from "./client-share"
 export type { HoldState, SlotChanges } from "./counters"
 export type { SlotInput } from "./slots"
 export type { SlotUnits } from "./sql"
@@ -64,9 +66,10 @@ class BookingModuleService extends MedusaService({
     cartId: string,
     items: SlotUnits[],
     ttlMinutes: number,
+    client: HoldClient | null = null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<HoldState | null> {
-    return holdUnits(managerOf(sharedContext), cartId, items, ttlMinutes)
+    return holdUnits(managerOf(sharedContext), cartId, items, ttlMinutes, client)
   }
 
   /** Lets a hold go, its places freed; whether there was one. */

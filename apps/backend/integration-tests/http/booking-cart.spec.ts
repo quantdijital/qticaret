@@ -1,8 +1,11 @@
+import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { cancelOrderWorkflow, createCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import type { Knex } from "@medusajs/framework/mikro-orm/knex"
+import { resetClientIpSecret } from "../../src/api/http/client-ip"
+import { CLIENT_IP_HEADERS, signClientIp } from "../../src/lib/security/client-ip"
 import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
 import { createAdminUser } from "../helpers/admin"
@@ -36,6 +39,19 @@ interface BookingAnswer {
 const DAY = 24 * 60 * 60 * 1000
 let made = 0
 
+// Read lazily by `clientIp`, so setting it before the first request is enough
+const SECRET = `storefront-ip-${randomUUID()}`
+process.env["STOREFRONT_IP_SECRET"] = SECRET
+
+const signedAs = (ip: string): Record<string, string> => {
+  const time = Math.floor(Date.now() / 1000)
+  return {
+    [CLIENT_IP_HEADERS.ip]: ip,
+    [CLIENT_IP_HEADERS.time]: String(time),
+    [CLIENT_IP_HEADERS.signature]: signClientIp(SECRET, ip, time),
+  }
+}
+
 /** adr/0076 D3: a departure's places in a cart, priced on the server, through the order. */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -55,6 +71,13 @@ medusaIntegrationTestRunner({
     const post = (url: string, body: unknown) =>
       settle(http.post<Answer>(url, body, { headers: store.headers }))
     const book = (cartId: string, body: unknown) => post(`/store/carts/${cartId}/bookings`, body)
+    // A shopper's address as our storefront's server signs it (documentation range addresses)
+    const bookFrom = (ip: string, cartId: string, body: unknown) =>
+      settle(
+        http.post<Answer>(`/store/carts/${cartId}/bookings`, body, {
+          headers: { ...store.headers, ...signedAs(ip) },
+        })
+      )
     const startPayment = (cartId: string) =>
       post(`/store/carts/${cartId}/payment-session`, { provider_id: BANK_TRANSFER })
     const slotOf = async (slotId: string) => (await bookings().slotAvailability([slotId]))[0]
@@ -134,6 +157,10 @@ medusaIntegrationTestRunner({
       const slotId = ((slots.data["slots"] as { id: string }[] | undefined) ?? [])[0]?.id ?? ""
       return { productId, adult, infant, slotId }
     }
+
+    beforeAll(() => {
+      resetClientIpSecret()
+    })
 
     beforeEach(async () => {
       const container = getContainer()
@@ -321,9 +348,13 @@ medusaIntegrationTestRunner({
       const container = getContainer()
       const carts = [await emptyCart(container), await emptyCart(container)]
 
+      // Two shoppers: one address's carts would be capped by its share first
       const answers = await Promise.all(
-        carts.map((cartId) =>
-          book(cartId, { slot_id: slotId, items: [{ variant_id: adult, quantity: 1 }] })
+        carts.map((cartId, index) =>
+          bookFrom(`198.51.100.${String(index + 1)}`, cartId, {
+            slot_id: slotId,
+            items: [{ variant_id: adult, quantity: 1 }],
+          })
         )
       )
 
@@ -332,6 +363,34 @@ medusaIntegrationTestRunner({
         "booking.slot_full"
       )
       expect(await slotOf(slotId)).toMatchObject({ held: 1, available: 0 })
+    })
+
+    it("caps one address's carts at the departure's share; another address books freely", async () => {
+      await turnOn()
+      const container = getContainer()
+      const { adult, slotId } = await tour(20)
+      const [first, second, other] = [
+        await emptyCart(container),
+        await emptyCart(container),
+        await emptyCart(container),
+      ]
+      const ask = (quantity: number) => ({
+        slot_id: slotId,
+        items: [{ variant_id: adult, quantity }],
+      })
+
+      // A share of 10 on a departure of 20 (its floor): 6 + 5 from one address is too many
+      const firstAnswer = await bookFrom("203.0.113.7", first, ask(6))
+      const secondAnswer = await bookFrom("203.0.113.7", second, ask(5))
+      const otherAnswer = await bookFrom("192.0.2.44", other, ask(5))
+
+      expect(firstAnswer.status).toBe(200)
+      expect([secondAnswer.status, secondAnswer.data.message]).toEqual([
+        400,
+        "booking.client_share",
+      ])
+      expect(otherAnswer.status).toBe(200)
+      expect(await slotOf(slotId)).toMatchObject({ held: 11, available: 9 })
     })
 
     it("pushes the hold as the payment starts, sells the places with the order, frees them on cancel", async () => {

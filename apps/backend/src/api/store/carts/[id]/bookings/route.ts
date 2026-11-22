@@ -1,4 +1,5 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
+import { bookingClientHash } from "../../../../http/booking-store-routes"
 import { setCartBookingWorkflow } from "../../../../../workflows/booking/cart/set-booking"
 import { bookingCartView } from "../../../../../workflows/booking/cart/views"
 import type { StorePostCartBookingType } from "./validators"
@@ -19,6 +20,7 @@ export async function POST(
       slot_id: req.validatedBody.slot_id,
       items: req.validatedBody.items,
       sales_channel_ids: req.publishable_key_context.sales_channel_ids,
+      client_hash: bookingClientHash(req),
     },
   })
   res.setHeader("Cache-Control", "no-store")

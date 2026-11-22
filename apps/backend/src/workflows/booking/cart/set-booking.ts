@@ -13,6 +13,7 @@ import {
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { errorSummary, logger } from "../../../lib/logging"
+import type { HoldClient } from "../../../modules/booking/service"
 import { cartItemsOf, planCartBooking } from "./plan"
 import type { CartBookingInput, CartBookingPlan } from "./plan"
 import { bookingService } from "./target"
@@ -30,6 +31,8 @@ export interface HoldChange {
   units: number
   units_before: number
   minutes: number
+  /** The shopper's address and its share (the booking route's raise); the undo never caps. */
+  client?: HoldClient | null
 }
 
 /**
@@ -45,7 +48,8 @@ export const holdCartUnitsStep = createStep(
     const hold = await bookingService(container).holdUnits(
       change.cart_id,
       [{ slotId: change.slot_id, units: change.units }],
-      change.minutes
+      change.minutes,
+      change.client ?? null
     )
     return new StepResponse(
       { hold_id: hold?.hold_id ?? null, expires_at: hold?.expires_at ?? null },
@@ -79,6 +83,7 @@ const holdChangeOf = (plan: CartBookingPlan, units: number): HoldChange => ({
   units,
   units_before: plan.units_before,
   minutes: plan.hold_minutes,
+  client: plan.client,
 })
 
 /**

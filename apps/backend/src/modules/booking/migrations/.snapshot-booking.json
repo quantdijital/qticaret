@@ -503,6 +503,22 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "client_hash": {
+          "name": "client_hash",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -581,6 +597,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_booking_hold_expires_at\" ON \"booking_hold\" (\"expires_at\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_booking_hold_client_hash",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_booking_hold_client_hash\" ON \"booking_hold\" (\"client_hash\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "booking_hold_pkey",

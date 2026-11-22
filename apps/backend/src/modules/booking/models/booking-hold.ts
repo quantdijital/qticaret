@@ -12,8 +12,11 @@ export const BookingHold = model
     id: model.id({ prefix: "bkhold" }).primaryKey(),
     cart_id: model.text(),
     expires_at: model.dateTime(),
+    // The shopper's address as a keyed hash (never the address): its live
+    // holds are capped (adr/0076 Ek takip M1); gone with the hold
+    client_hash: model.text().nullable(),
   })
-  .indexes([{ on: ["cart_id"], unique: true }, { on: ["expires_at"] }])
+  .indexes([{ on: ["cart_id"], unique: true }, { on: ["expires_at"] }, { on: ["client_hash"] }])
 
 /** A hold's places on one slot. */
 export const BookingHoldSlot = model

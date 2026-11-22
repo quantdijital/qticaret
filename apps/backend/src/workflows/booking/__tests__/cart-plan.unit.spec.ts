@@ -30,6 +30,7 @@ const plan: CartBookingPlan = {
     },
   ],
   replaced_line_ids: [],
+  client: { hash: "a1b2c3", maxPerSlot: 10 },
 }
 
 const slot = (slotId: string, units: number) => ({ slot_id: slotId, units }) as SlotLines

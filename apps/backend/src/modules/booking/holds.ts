@@ -1,5 +1,7 @@
 import { generateEntityId } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { assertClientShare } from "./client-share"
+import type { HoldClient } from "./client-share"
 import {
   asInt,
   giveBackHeld,
@@ -36,16 +38,25 @@ const stateOf = (hold: Row | undefined): HoldState => ({
   expires_at: new Date(hold?.["expires_at"] as string | Date),
 })
 
-/** A new hold row for the cart, ending `minutes` from now. */
-async function openHold(manager: Executor, cartId: string, minutes: number): Promise<Row[]> {
+/**
+ * A new hold row for the cart, ending `minutes` from now, or its row now.
+ * `clientHash` tags it with the shopper asking (null keeps the tag it has).
+ */
+async function openHold(
+  manager: Executor,
+  cartId: string,
+  minutes: number,
+  clientHash: string | null
+): Promise<Row[]> {
   return rows(
     manager,
-    `INSERT INTO booking_hold (id, cart_id, expires_at, created_at, updated_at)
-     VALUES (?, ?, now() + make_interval(mins => ?), now(), now())
+    `INSERT INTO booking_hold (id, cart_id, expires_at, client_hash, created_at, updated_at)
+     VALUES (?, ?, now() + make_interval(mins => ?), ?, now(), now())
      ON CONFLICT (cart_id) WHERE deleted_at IS NULL
-     DO UPDATE SET updated_at = now()
+     DO UPDATE SET updated_at = now(),
+                   client_hash = COALESCE(EXCLUDED.client_hash, booking_hold.client_hash)
      RETURNING id, expires_at, expires_at <= now() AS expired`,
-    [generateEntityId(undefined, "bkhold"), cartId, minutes]
+    [generateEntityId(undefined, "bkhold"), cartId, minutes, clientHash]
   )
 }
 
@@ -55,17 +66,24 @@ async function openHold(manager: Executor, cartId: string, minutes: number): Pro
  * but never past its lifetime. Locks (adr/0076 Ek): the cart's hold row
  * first, then every slot touched at once in id order. A hold already
  * expired is not brought back: its places go back and a new hold starts.
- * Any slot refused undoes the whole call (the transaction).
+ * Any slot refused undoes the whole call (the transaction). `client`
+ * (the storefront's booking route): the shopper's address, its live
+ * holds capped before anything is locked or taken (`client-share.ts`,
+ * whose advisory lock comes first of all); the hold is tagged with it.
  */
 export async function holdUnits(
   manager: Executor,
   cartId: string,
   items: readonly SlotUnits[],
-  minutes: number
+  minutes: number,
+  client: HoldClient | null = null
 ): Promise<HoldState | null> {
   checkMinutes(minutes)
   const wanted = normalizeUnits(items, 0)
-  const [own] = await openHold(manager, cartId, minutes)
+  if (client) {
+    await assertClientShare(manager, cartId, client, wanted)
+  }
+  const [own] = await openHold(manager, cartId, minutes, client?.hash ?? null)
   const ownId = String(own?.["id"])
   const expired = own?.["expired"] === true
   await lockSlotsFreeingExpired(
@@ -74,7 +92,7 @@ export async function holdUnits(
     expired ? [ownId] : []
   )
   const [hold] = expired
-    ? await openHold(manager, cartId, minutes)
+    ? await openHold(manager, cartId, minutes, client?.hash ?? null)
     : await rows(
         manager,
         `UPDATE booking_hold
