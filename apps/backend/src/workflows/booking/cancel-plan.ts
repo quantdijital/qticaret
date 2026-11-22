@@ -48,7 +48,14 @@ interface OrderRow {
   status?: string | null
   customer_id?: string | null
   currency_code?: string | null
-  items?: ({ id: string; quantity?: unknown; metadata?: unknown } | null)[] | null
+  items?:
+    | ({
+        id: string
+        quantity?: unknown
+        detail?: { quantity?: unknown } | null
+        metadata?: unknown
+      } | null)[]
+    | null
   payment_collections?:
     | ({
         payments?: ({ provider_id?: string | null; captured_at?: unknown } | null)[] | null
@@ -96,6 +103,8 @@ const ORDER_FIELDS = [
   "currency_code",
   "items.id",
   "items.quantity",
+  // Medusa fills an item's quantity only with its detail requested (order-facts.ts)
+  "items.detail.quantity",
   "items.metadata",
   "payment_collections.payments.provider_id",
   "payment_collections.payments.captured_at",
@@ -169,7 +178,8 @@ async function refundOf(
     if (!item || bookingMarkOf(item.metadata)?.slot_id !== slotId) {
       return []
     }
-    const left = Number(item.quantity ?? 0) - (refunded.units.get(item.id) ?? 0)
+    const left =
+      Number(item.detail?.quantity ?? item.quantity ?? 0) - (refunded.units.get(item.id) ?? 0)
     return left > 0 ? [{ id: item.id, quantity: left }] : []
   })
   const none = { paid: kurus(0), refund: kurus(0), request: null, credit: money.credit }

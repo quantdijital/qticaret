@@ -55,6 +55,7 @@ describe("buildOverview", () => {
   it("says where the window's orders stand, canceled ones included", () => {
     expect(overview.statuses).toEqual({
       awaiting_payment: 0,
+      planned: 0,
       to_ship: 2,
       shipped: 0,
       delivered: 0,

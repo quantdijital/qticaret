@@ -671,6 +671,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/orders/:id/edit": false,
   "POST /admin/orders/:id/refunds/preview": false,
   "POST /admin/orders/:id/refunds": false,
+  // adr/0076 Ek D7a: a booking's or a whole departure's cancel gives money back
+  "POST /admin/orders/:id/bookings/cancel": false,
+  "POST /admin/booking-slots/:id/cancel": false,
   // An open refund settled by hand moves the order's money as a refund does
   "POST /admin/orders/:id/refunds/:reference/settle": false,
   "POST /admin/orders/:id/ship": true,
