@@ -156,6 +156,16 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Rezervasyon geçerli ama katılımcı listesi boş görünüyor. Katılımcı bilgilerini müşteriden isteyin.",
     },
+    "booking.refund_by_hand": {
+      title: "#{{order}} siparişinin iptal edilen rezervasyonu elle iade edilecek",
+      description:
+        "Yer geri verildi ama para kendiliğinden gönderilmedi (havale, kapıda ödeme, hediye kartı ya da ödenenden fazla pay). İadeyi siparişin sayfasından elle yapın.",
+    },
+    "booking.departure_refund_given_up": {
+      title: "#{{order}} siparişinin iptal edilen kalkışı için iade yapılamadı",
+      description:
+        "Bugünkü denemelerin hepsi başarısız oldu; rezervasyon ve para olduğu gibi duruyor. Siparişin sayfasından bakın; yarın yeniden denenecek.",
+    },
     "einvoice.issue_stopped": {
       title: "#{{order}} siparişinin faturası kesilemedi",
       description:
@@ -348,6 +358,16 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Order #{{order}}'s travelers could not be added to its booking",
       description:
         "The booking stands but shows no travelers. Ask the customer for their travelers' details.",
+    },
+    "booking.refund_by_hand": {
+      title: "Order #{{order}}'s cancelled booking is to be refunded by hand",
+      description:
+        "The places were given back but no money was sent (a bank transfer, cash on delivery, a gift card or a share above what was paid). Refund it by hand from the order's page.",
+    },
+    "booking.departure_refund_given_up": {
+      title: "Order #{{order}}'s booking on a cancelled departure could not be refunded",
+      description:
+        "Every try today failed; the booking and the money stand as they were. See the order's page; it is tried again tomorrow.",
     },
     "einvoice.issue_stopped": {
       title: "Order #{{order}}'s invoice could not be issued",

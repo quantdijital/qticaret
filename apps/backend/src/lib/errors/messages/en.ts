@@ -350,6 +350,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "booking.order_change_unsupported":
     "A dated product is not returned or exchanged; cancel the booking instead.",
   "booking.slot_cancelled": "This departure was cancelled; it cannot be opened again.",
+  "booking.departure_cancelled_unpaid":
+    "A departure of this order was cancelled before it was paid; no money can be taken. Cancel the order.",
   "booking.use_departure_cancel": 'Use "Cancel departure" to cancel it; its bookings are refunded.',
   "addons.required_must_be_free": "A paid add-on cannot be required.",
   "addons.not_addon_line": "This product has no add-ons.",

@@ -97,7 +97,7 @@ async function refundBeforeCancel(
 }
 
 // Each refund asks the provider: a budget per address and per staff member
-const refundLimit = rateLimit(() => RATE_LIMIT_PROFILES.provider_check, {
+export const refundLimit = rateLimit(() => RATE_LIMIT_PROFILES.provider_check, {
   identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
 })
 

@@ -1,4 +1,10 @@
-import { PACKAGE_TRAVEL_FREE_DAYS, daysBefore, effectiveTiers, feeRuleFor } from "../cancellation"
+import {
+  PACKAGE_TRAVEL_FREE_DAYS,
+  cancellationTermsOf,
+  daysBefore,
+  effectiveTiers,
+  feeRuleFor,
+} from "../cancellation"
 import { CancellationTiers } from "../settings"
 
 const tiers = [
@@ -68,6 +74,20 @@ describe("feeRuleFor (adr/0076 §8)", () => {
     expect(feeRuleFor(greedy, 90, { packageTravel: false })?.fee_percent).toBe(20)
   })
 
+  it("ties the floor to the days left, not to the tier reached (review D1)", () => {
+    // Every tier 30 days or more out: closer than that the closest tier's share is kept
+    const farOnly = [
+      { days_before: 45, fee_percent: 30 },
+      { days_before: 30, fee_percent: 50 },
+    ]
+    expect(feeRuleFor(farOnly, 31, { packageTravel: true })?.fee_percent).toBe(0)
+    expect(feeRuleFor(farOnly, 29, { packageTravel: true })).toEqual({
+      fee_percent: 50,
+      days_before: 30,
+    })
+    expect(feeRuleFor(farOnly, 0, { packageTravel: true })?.fee_percent).toBe(50)
+  })
+
   it("shows the tiers under the floor", () => {
     expect(effectiveTiers(tiers, true)).toEqual([
       { days_before: 30, fee_percent: 0 },
@@ -96,5 +116,36 @@ describe("CancellationTiers", () => {
         { days_before: 3, fee_percent: 20 },
       ]).success
     ).toBe(false)
+  })
+})
+
+describe("cancellationTermsOf (review O5)", () => {
+  const live = { timezone: "Europe/Berlin", tiers: [{ days_before: 0, fee_percent: 100 }] }
+
+  it("reckons by the terms copied when the booking was confirmed", () => {
+    expect(cancellationTermsOf({ timezone: "Europe/Istanbul", tiers }, live)).toEqual({
+      timezone: "Europe/Istanbul",
+      tiers,
+    })
+  })
+
+  it("keeps a copy of no tiers: the shop sold it with none", () => {
+    expect(cancellationTermsOf({ timezone: "Europe/Istanbul", tiers: [] }, live).tiers).toEqual([])
+  })
+
+  it("falls back to the product's settings now for a booking without a copy", () => {
+    expect(cancellationTermsOf(null, live)).toEqual(live)
+    expect(cancellationTermsOf(undefined, { timezone: null, tiers: null })).toEqual({
+      timezone: "Europe/Istanbul",
+      tiers: [],
+    })
+  })
+
+  it("never trusts a copy that does not read as terms", () => {
+    expect(cancellationTermsOf({ timezone: "Mars/Olympus", tiers }, live)).toEqual(live)
+    expect(
+      cancellationTermsOf({ timezone: "Europe/Istanbul", tiers: [{ days_before: -1 }] }, live)
+    ).toEqual(live)
+    expect(cancellationTermsOf("text", live)).toEqual(live)
   })
 })

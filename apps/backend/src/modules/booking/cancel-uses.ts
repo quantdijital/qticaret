@@ -58,11 +58,29 @@ export async function cancelBookingSlot(
 
 /** A live departure of a confirmed booking: what a cancel acts on. */
 export interface LiveUse {
+  /** The use row: the refund's reference is made from it. */
+  use_id: string
   booking_id: string
   order_id: string
   slot_id: string
   units: number
+  /** The cancellation terms copied at confirmation (`{ timezone, tiers }`), null before O5. */
+  cancellation: unknown
 }
+
+const USE_COLUMNS = `u.id AS use_id, u.booking_id, b.order_id, u.slot_id, u.units, u.cancellation`
+
+const liveUseOf = (row: Record<string, unknown>): LiveUse => ({
+  use_id: String(row["use_id"]),
+  booking_id: String(row["booking_id"]),
+  order_id: String(row["order_id"]),
+  slot_id: String(row["slot_id"]),
+  units: asInt(row["units"]),
+  cancellation:
+    typeof row["cancellation"] === "string"
+      ? (JSON.parse(row["cancellation"]) as unknown)
+      : (row["cancellation"] ?? null),
+})
 
 /** The confirmed bookings' live departures on a slot, oldest first, a page at a time. */
 export async function liveUsesOnSlot(
@@ -72,7 +90,7 @@ export async function liveUsesOnSlot(
 ): Promise<LiveUse[]> {
   const found = await rows(
     manager,
-    `SELECT u.booking_id, b.order_id, u.slot_id, u.units
+    `SELECT ${USE_COLUMNS}
        FROM booking_slot_use u JOIN booking b ON b.id = u.booking_id
       WHERE u.slot_id = ? AND u.cancelled_at IS NULL AND u.deleted_at IS NULL
         AND b.status = 'confirmed' AND b.deleted_at IS NULL
@@ -80,47 +98,89 @@ export async function liveUsesOnSlot(
       LIMIT ?`,
     [slotId, limit]
   )
-  return found.map((row) => ({
-    booking_id: String(row["booking_id"]),
-    order_id: String(row["order_id"]),
-    slot_id: String(row["slot_id"]),
-    units: asInt(row["units"]),
-  }))
+  return found.map(liveUseOf)
 }
 
 /** An order's live departures (its confirmed bookings' uses not cancelled). */
 export async function liveUsesOfOrder(manager: Executor, orderId: string): Promise<LiveUse[]> {
   const found = await rows(
     manager,
-    `SELECT u.booking_id, b.order_id, u.slot_id, u.units
+    `SELECT ${USE_COLUMNS}
        FROM booking_slot_use u JOIN booking b ON b.id = u.booking_id
       WHERE b.order_id = ? AND b.status = 'confirmed' AND b.deleted_at IS NULL
         AND u.cancelled_at IS NULL AND u.deleted_at IS NULL
       ORDER BY u.slot_id`,
     [orderId]
   )
-  return found.map((row) => ({
-    booking_id: String(row["booking_id"]),
-    order_id: String(row["order_id"]),
-    slot_id: String(row["slot_id"]),
-    units: asInt(row["units"]),
-  }))
+  return found.map(liveUseOf)
 }
 
-/** Cancelled slots that still have a confirmed booking's live departure (the resume sweep). */
+/**
+ * Cancelled slots that still have a confirmed booking's live departure
+ * (the resume sweep), the longest waiting first, in a stable order: the
+ * sweep reads more than it works on and passes over slots whose every
+ * booking it has given up on for now (review D4).
+ */
 export async function cancelledSlotsWithLiveUses(
   manager: Executor,
   limit: number
 ): Promise<string[]> {
   const found = await rows(
     manager,
-    `SELECT DISTINCT s.id
+    `SELECT s.id, s.updated_at
        FROM booking_slot s
-       JOIN booking_slot_use u ON u.slot_id = s.id AND u.cancelled_at IS NULL AND u.deleted_at IS NULL
-       JOIN booking b ON b.id = u.booking_id AND b.status = 'confirmed' AND b.deleted_at IS NULL
       WHERE s.status = 'cancelled' AND s.deleted_at IS NULL
+        AND EXISTS (
+          SELECT 1 FROM booking_slot_use u
+            JOIN booking b ON b.id = u.booking_id AND b.status = 'confirmed' AND b.deleted_at IS NULL
+           WHERE u.slot_id = s.id AND u.cancelled_at IS NULL AND u.deleted_at IS NULL)
+      ORDER BY s.updated_at, s.id
       LIMIT ?`,
     [limit]
   )
   return found.map((row) => String(row["id"]))
+}
+
+/**
+ * The carts' holds on a slot given up (review D5): the departure was
+ * cancelled, so the places they keep go back (`held` falls) and their
+ * checkout refuses (the hold no longer matches its lines, the slot no
+ * longer sells). Run in the transaction that marks the slot cancelled,
+ * after its row lock. How many places.
+ */
+export async function releaseSlotHolds(manager: Executor, slotId: string): Promise<number> {
+  const freed = await rows(
+    manager,
+    `DELETE FROM booking_hold_slot WHERE slot_id = ? RETURNING units`,
+    [slotId]
+  )
+  const units = freed.reduce((sum, row) => sum + asInt(row["units"]), 0)
+  if (units > 0) {
+    await manager.execute(
+      `UPDATE booking_slot SET held = GREATEST(held - ?, 0), updated_at = now() WHERE id = ?`,
+      [units, slotId]
+    )
+  }
+  return units
+}
+
+/**
+ * Whether one of the order's departures was cancelled (its use row, or
+ * the whole booking): money taken for it now would have nothing to pay
+ * for (review O3), so a bank transfer's confirmation or a capture refuses.
+ */
+export async function orderHasCancelledDeparture(
+  manager: Executor,
+  orderId: string
+): Promise<boolean> {
+  const [found] = await rows(
+    manager,
+    `SELECT 1 AS found
+       FROM booking b JOIN booking_slot_use u ON u.booking_id = b.id AND u.deleted_at IS NULL
+      WHERE b.order_id = ? AND b.deleted_at IS NULL
+        AND (u.cancelled_at IS NOT NULL OR b.status = 'cancelled')
+      LIMIT 1`,
+    [orderId]
+  )
+  return Boolean(found)
 }

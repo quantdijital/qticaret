@@ -13,6 +13,8 @@ import {
   cancelledSlotsWithLiveUses,
   liveUsesOfOrder,
   liveUsesOnSlot,
+  orderHasCancelledDeparture,
+  releaseSlotHolds,
 } from "./cancel-uses"
 import { cartHold } from "./cart-hold"
 import type { HoldClient } from "./client-share"
@@ -246,6 +248,15 @@ class BookingModuleService extends MedusaService({
     return cancelledSlotsWithLiveUses(managerOf(sharedContext), limit)
   }
 
+  /** Whether a departure of the order was cancelled (money taken now refuses, review O3). */
+  @InjectManager()
+  async orderHasCancelledDeparture(
+    orderId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return orderHasCancelledDeparture(managerOf(sharedContext), orderId)
+  }
+
   /** Holds past their end released, a batch a call (`now`: the database's clock by default). */
   @InjectTransactionManager()
   async releaseExpiredHolds(
@@ -264,6 +275,10 @@ class BookingModuleService extends MedusaService({
   ): Promise<boolean> {
     const manager = managerOf(sharedContext)
     const found = await updateSlot(manager, slotId, changes)
+    if (found && changes.status === "cancelled") {
+      // No more sales: carts' holds on it go too, their checkout refuses (review D5)
+      await releaseSlotHolds(manager, slotId)
+    }
     if (found && (changes.starts_at !== undefined || changes.ends_at !== undefined)) {
       // Its travelers are kept for a period after its date: the date moved, so does theirs
       await refreshTravelerPurge(manager, slotId)

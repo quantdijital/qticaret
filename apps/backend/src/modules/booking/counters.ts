@@ -77,6 +77,17 @@ export async function confirmHold(
         count,
       ])
     )
+    // The cancellation terms as sold (review O5): a later change to the product's tiers or
+    // zone does not change what this booking gets back
+    await manager.execute(
+      `UPDATE booking_slot_use u
+          SET cancellation = jsonb_build_object(
+                'timezone', b.timezone,
+                'tiers', COALESCE(b.cancellation_tiers, '[]'::jsonb))
+         FROM booking_slot s JOIN bookable b ON b.id = s.bookable_id
+        WHERE u.booking_id = ? AND s.id = u.slot_id`,
+      [bookingId]
+    )
   }
   return { booking_id: bookingId, created: true }
 }

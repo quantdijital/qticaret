@@ -7,7 +7,10 @@ import {
   AdminPostOrderBookingCancel,
 } from "../admin/orders/[id]/bookings/validators"
 import { StorePostBookingCancel } from "../store/orders/[id]/bookings/validators"
+import { requireUserActor } from "./actor"
+import { refuseCaptureForCancelledDeparture } from "./booking-capture-guard"
 import { optionalCustomer, orderAccess, orderActor } from "./order-access"
+import { refundLimit } from "./order-refund-routes"
 import { rateLimit } from "./rate-limit"
 import { requireFeature } from "./require-feature"
 
@@ -19,7 +22,8 @@ const NoBody = z.object({}).strict()
  * adr/0037 §2; anyone else is told there is no such order), within the
  * order cancel's budget. Staff's: reads every role's; a cancel gives money
  * back, so it is the owner's and admin's (the role table's default for a
- * POST, as an order's cancel and refunds).
+ * POST, as an order's cancel and refunds), a staff member's only (no
+ * integration key) and within the refunds' budget (review D6).
  */
 export const BOOKING_CANCEL_ROUTES = [
   {
@@ -51,6 +55,8 @@ export const BOOKING_CANCEL_ROUTES = [
     methods: ["POST" as const],
     middlewares: [
       requireFeature(CATALOG_BOOKING),
+      requireUserActor,
+      refundLimit,
       validateAndTransformBody(AdminPostOrderBookingCancel),
     ],
   },
@@ -62,6 +68,14 @@ export const BOOKING_CANCEL_ROUTES = [
   {
     matcher: "/admin/booking-slots/:id/cancel",
     methods: ["POST" as const],
-    middlewares: [requireFeature(CATALOG_BOOKING), validateAndTransformBody(NoBody)],
+    middlewares: [
+      requireFeature(CATALOG_BOOKING),
+      requireUserActor,
+      refundLimit,
+      validateAndTransformBody(NoBody),
+    ],
   },
+  // No `methods` on purpose (a method-scoped middleware may sort after the core route);
+  // whatever the flag, a cancelled departure's order takes no money (review O3)
+  { matcher: "/admin/payments/:id/capture", middlewares: [refuseCaptureForCancelledDeparture] },
 ]

@@ -66,6 +66,8 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/orders/:id/refunds/:reference/settle",
     // A dated order's departure cancelled with its refund (adr/0076 Ek D7a)
     "/admin/orders/:id/bookings/cancel",
+    // A whole departure cancelled: its bookings' money back, no new sale (review D7)
+    "/admin/booking-slots/:id/cancel",
     "/admin/orders/:id/credit-lines",
     "/admin/orders/:id/payment-sessions/authorize",
     "/admin/payments/:id/capture",

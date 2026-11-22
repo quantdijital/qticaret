@@ -5,7 +5,7 @@ import { toMedusaAmount } from "../../lib/money"
 import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
 import { customerCancelRefusal, planBookingCancel } from "./cancel-plan"
-import type { CancelMode } from "./cancel-plan"
+import type { CancelMode, ManualRefund } from "./cancel-plan"
 
 /**
  * An order's departures with what cancelling each would give back now
@@ -30,6 +30,8 @@ export interface DepartureCancelView {
   paid: string
   refund: string
   refund_within_days: number | null
+  /** Set: cancelling leaves the refund to staff (taken by hand, credit used, above the payments). */
+  manual: ManualRefund | null
 }
 
 interface ItemRow {
@@ -93,6 +95,7 @@ export async function departureCancelViews(
       paid: toMedusaAmount(plan.paid),
       refund: toMedusaAmount(plan.refund),
       refund_within_days: plan.refund_within_days,
+      manual: plan.manual,
     })
   }
   departures.sort((a, b) => a.starts_at.localeCompare(b.starts_at))
@@ -116,6 +119,7 @@ function cancelledView(
     paid: "0.00",
     refund: "0.00",
     refund_within_days: null,
+    manual: null,
   }
 }
 

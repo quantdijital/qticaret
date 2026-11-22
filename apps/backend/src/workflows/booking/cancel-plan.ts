@@ -1,9 +1,13 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
-import { PACKAGE_TRAVEL_REFUND_DAYS, daysBefore, feeRuleFor } from "../../lib/booking/cancellation"
+import {
+  PACKAGE_TRAVEL_REFUND_DAYS,
+  cancellationTermsOf,
+  daysBefore,
+  feeRuleFor,
+} from "../../lib/booking/cancellation"
 import type { FeeRule } from "../../lib/booking/cancellation"
 import { bookingMarkOf } from "../../lib/booking/cart-lines"
-import { CancellationTiers } from "../../lib/booking/settings"
 import { ValidationError } from "../../lib/errors"
 import { kurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
@@ -20,14 +24,24 @@ import { returnPolicy } from "../returns/policy"
 
 /**
  * What cancelling one departure of an order gives back (adr/0076 §8, Ek
- * D7a), worked out on the server from the product's tiers, the days left
- * and what the departure's lines were paid; read only. The shopper's
- * preview, their cancel, staff's and the shop's departure cancel all read
- * this. Amounts in kuruş.
+ * D7a), worked out on the server from the tiers the booking was sold
+ * under, the days left and what the departure's lines were paid; read
+ * only. The shopper's preview, their cancel, staff's and the shop's
+ * departure cancel all read this. Amounts in kuruş.
  */
 
 /** Who cancels: the shopper (their tier), staff (the tier or all of it), the shop's departure cancel (all). */
 export type CancelMode = "tier" | "full"
+
+/**
+ * Why the refund is not sent on its own but left to staff (review O1,
+ * O2): `offline`, money taken by hand (a bank transfer, cash on
+ * delivery, an edit's difference) goes back by hand; `credit`, part was
+ * paid with a gift card or store credit, which must go back to the card
+ * or the account, never turned into cash; `exceeds`, the departure's
+ * share is more than the payments still hold.
+ */
+export type ManualRefund = "offline" | "credit" | "exceeds"
 
 interface OrderRow {
   id: string
@@ -56,14 +70,20 @@ export interface CancelPlan {
   rule: FeeRule | null
   /** What the departure's lines still hold of what was paid. */
   paid: Kurus
-  /** What goes back now. */
+  /** What goes back now (sent, or left to staff when `manual`). */
   refund: Kurus
   /** The refund's request: the departure's lines, their units left and the share kept. */
   request: RefundRequest | null
   /** Money taken by hand (a bank transfer, an edit's difference): it goes back by hand. */
   taken_by_hand: boolean
-  /** Nothing was taken yet (a bank transfer not confirmed). */
+  /** Paid with gift cards or store credit, in kuruş. */
+  credit: Kurus
+  /** Set: the refund is not sent, staff give it back by hand (`refund` is what is due). */
+  manual: ManualRefund | null
+  /** Nothing was taken yet (a bank transfer not confirmed), nor any credit used. */
   unpaid: boolean
+  /** Every line of the order is dated: with nothing paid, the order goes once none is left. */
+  dated_only: boolean
   /** The refund comes within this many days (package travel), or null. */
   refund_within_days: number | null
   currency_code: string
@@ -81,6 +101,9 @@ const ORDER_FIELDS = [
   "payment_collections.payments.captured_at",
 ]
 
+// Far above any order: the departure's share worked out before the payments cap it
+const UNCAPPED = kurus(Number.MAX_SAFE_INTEGER)
+
 const service = (container: Pick<MedusaContainer, "resolve">) =>
   container.resolve<BookingModuleService>(BOOKING_MODULE)
 
@@ -97,29 +120,19 @@ async function orderOf(container: MedusaContainer, orderId: string): Promise<Ord
   return order
 }
 
-/** The departure and its product's settings. */
-async function slotFacts(container: MedusaContainer, slotId: string) {
+/** The departure, and the terms its booking was sold under (the product's now for older ones). */
+async function slotFacts(container: MedusaContainer, use: LiveUse) {
   const bookings = service(container)
-  const [slot] = await bookings.listBookingSlots({ id: slotId }, { take: 1 })
+  const [slot] = await bookings.listBookingSlots({ id: use.slot_id }, { take: 1 })
   if (!slot) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "booking.slot_unknown")
   }
   const [bookable] = await bookings.listBookables({ id: slot.bookable_id }, { take: 1 })
-  const tiers = CancellationTiers.safeParse(bookable?.cancellation_tiers ?? [])
-  return {
-    starts_at: new Date(slot.starts_at),
-    timezone: bookable?.timezone ?? "Europe/Istanbul",
-    tiers: tiers.success ? tiers.data : [],
-  }
-}
-
-/** The use row behind a live departure (its id names the refund). */
-async function useIdOf(container: MedusaContainer, use: LiveUse): Promise<string> {
-  const [row] = await service(container).listBookingSlotUses(
-    { booking_id: use.booking_id, slot_id: use.slot_id },
-    { take: 1, select: ["id"] }
-  )
-  return row?.id ?? ""
+  const terms = cancellationTermsOf(use.cancellation, {
+    timezone: bookable?.timezone ?? null,
+    tiers: bookable?.cancellation_tiers ?? [],
+  })
+  return { starts_at: new Date(slot.starts_at), ...terms }
 }
 
 /** The order's live departure on the slot, or null (none, or cancelled already). */
@@ -132,13 +145,22 @@ export async function liveUseOf(
   return uses.find((use) => use.slot_id === slotId) ?? null
 }
 
+interface DepartureMoney {
+  paid: Kurus
+  refund: Kurus
+  request: RefundRequest | null
+  credit: Kurus
+  /** The departure's share is more than the payments still hold. */
+  exceeds: boolean
+}
+
 /** The departure's refund under a rule: its lines' units left, less the share kept. */
 async function refundOf(
   container: MedusaContainer,
   order: OrderRow,
   slotId: string,
   feePercent: number
-): Promise<{ paid: Kurus; refund: Kurus; request: RefundRequest | null }> {
+): Promise<DepartureMoney> {
   const money = await readOrderMoney(container, order.id)
   const refunded = await container
     .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
@@ -150,12 +172,14 @@ async function refundOf(
     const left = Number(item.quantity ?? 0) - (refunded.units.get(item.id) ?? 0)
     return left > 0 ? [{ id: item.id, quantity: left }] : []
   })
-  if (items.length === 0 || money.refundable <= 0) {
-    return { paid: kurus(0), refund: kurus(0), request: null }
+  const none = { paid: kurus(0), refund: kurus(0), request: null, credit: money.credit }
+  if (items.length === 0 || (money.refundable <= 0 && money.credit <= 0)) {
+    return { ...none, exceeds: false }
   }
+  // Worked out uncapped: a share above what the payments hold is staff's to settle (O1)
   const plan = (fee: number) => {
     try {
-      return planRefund(money.lines, refunded, { items, fee_percent: fee }, money.refundable).total
+      return planRefund(money.lines, refunded, { items, fee_percent: fee }, UNCAPPED).total
     } catch (error) {
       // Everything kept, or nothing left to give: no refund
       if ((error as { safeMessage?: string }).safeMessage === "orders.refund_empty") {
@@ -169,14 +193,39 @@ async function refundOf(
     paid: plan(0),
     refund,
     request: refund > 0 ? { items, fee_percent: feePercent } : null,
+    credit: money.credit,
+    exceeds: refund > money.refundable,
   }
+}
+
+/**
+ * Why the departure's refund is left to staff, null when it is sent
+ * (review O1, O2): money taken by hand first, then credit used, then a
+ * share above what the payments hold. Pure.
+ */
+export function manualRefundOf(facts: {
+  refund: Kurus
+  taken_by_hand: boolean
+  credit: Kurus
+  exceeds: boolean
+}): ManualRefund | null {
+  if (facts.refund <= 0) {
+    return null
+  }
+  if (facts.taken_by_hand) {
+    return "offline"
+  }
+  if (facts.credit > 0) {
+    return "credit"
+  }
+  return facts.exceeds ? "exceeds" : null
 }
 
 /**
  * The plan for cancelling the order's departure on `slotId` now. Null
  * when the order has no live departure there (none, or cancelled
  * already). `mode: "full"` gives everything back (staff's choice, the
- * shop's departure cancel); `tier` the product's tier, and with no tier
+ * shop's departure cancel); `tier` the booking's tier, and with no tier
  * set nothing is planned to go back (`rule` null: the caller refuses).
  */
 export async function planBookingCancel(
@@ -189,7 +238,7 @@ export async function planBookingCancel(
   }
   const [order, slot, policy] = await Promise.all([
     orderOf(container, input.order_id),
-    slotFacts(container, input.slot_id),
+    slotFacts(container, use),
     returnPolicy(container),
   ])
   const now = input.now ?? new Date()
@@ -203,22 +252,33 @@ export async function planBookingCancel(
   const taken = (order.payment_collections ?? []).flatMap((collection) =>
     (collection?.payments ?? []).filter((payment) => Boolean(payment?.captured_at))
   )
+  const takenByHand =
+    taken.length > 1 || taken.some((payment) => isOfflineProvider(payment?.provider_id ?? ""))
+  const refund = rule ? money.refund : kurus(0)
+  const items = (order.items ?? []).filter((item) => item !== null)
   return {
     order_id: order.id,
     customer_id: order.customer_id ?? null,
     order_status: order.status ?? "",
     use,
-    use_id: await useIdOf(container, use),
+    use_id: use.use_id,
     starts_at: slot.starts_at,
     timezone: slot.timezone,
     days_before: days,
     rule,
     paid: money.paid,
-    refund: rule ? money.refund : kurus(0),
+    refund,
     request: rule ? money.request : null,
-    taken_by_hand:
-      taken.length > 1 || taken.some((payment) => isOfflineProvider(payment?.provider_id ?? "")),
-    unpaid: taken.length === 0,
+    taken_by_hand: takenByHand,
+    credit: money.credit,
+    manual: manualRefundOf({
+      refund,
+      taken_by_hand: takenByHand,
+      credit: money.credit,
+      exceeds: money.exceeds,
+    }),
+    unpaid: taken.length === 0 && money.credit <= 0,
+    dated_only: items.length > 0 && items.every((item) => bookingMarkOf(item.metadata) !== null),
     refund_within_days: packageTravel ? PACKAGE_TRAVEL_REFUND_DAYS : null,
     currency_code: order.currency_code ?? "try",
   }
@@ -227,10 +287,17 @@ export async function planBookingCancel(
 /**
  * Why the shopper may not cancel the departure themselves (an i18n key),
  * null when they may: the order cancelled, the day reached, no tier set,
- * money taken by hand (the shop gives it back) or none taken yet (the
- * whole order's cancel is theirs then).
+ * none taken yet (the whole order's cancel is theirs then), or a refund
+ * the shop gives back by hand (money taken by hand, credit used, a share
+ * above what was paid: `orders.cancel_contact_shop`).
  */
-export function customerCancelRefusal(plan: CancelPlan, now = new Date()): string | null {
+export function customerCancelRefusal(
+  plan: Pick<
+    CancelPlan,
+    "order_status" | "starts_at" | "rule" | "unpaid" | "taken_by_hand" | "manual"
+  >,
+  now = new Date()
+): string | null {
   if (plan.order_status === "canceled") {
     return "orders.canceled"
   }
@@ -243,7 +310,7 @@ export function customerCancelRefusal(plan: CancelPlan, now = new Date()): strin
   if (plan.unpaid) {
     return "booking.cancel_unpaid"
   }
-  return plan.taken_by_hand ? "orders.cancel_contact_shop" : null
+  return plan.taken_by_hand || plan.manual ? "orders.cancel_contact_shop" : null
 }
 
 /** A plan's refusal as the error the routes answer with. */

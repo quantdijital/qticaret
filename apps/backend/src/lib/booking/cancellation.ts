@@ -1,3 +1,4 @@
+import { CancellationTiers } from "./settings"
 import type { CancellationTiersType } from "./settings"
 
 /**
@@ -65,8 +66,9 @@ export function feeRuleFor(
   if (!tier) {
     return null
   }
-  const free = options.packageTravel && tier.days_before >= PACKAGE_TRAVEL_FREE_DAYS
-  return { fee_percent: free ? 0 : tier.fee_percent, days_before: tier.days_before }
+  // The floor is the days actually left (review D1), handled above: a tier of 30 days or
+  // more reached here (every tier that far out, the day closer) keeps its own share
+  return { fee_percent: tier.fee_percent, days_before: tier.days_before }
 }
 
 /**
@@ -84,4 +86,48 @@ export function effectiveTiers(
         ? { ...tier, fee_percent: 0 }
         : tier
     )
+}
+
+/** The terms a departure's cancel is reckoned by: its tiers and the zone its days are counted in. */
+export interface CancellationTerms {
+  timezone: string
+  tiers: CancellationTiersType
+}
+
+const DEFAULT_ZONE = "Europe/Istanbul"
+
+function validZone(zone: unknown): zone is string {
+  if (typeof zone !== "string" || zone === "") {
+    return false
+  }
+  try {
+    new Intl.DateTimeFormat("en-CA", { timeZone: zone })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * The terms as sold (review O5): the copy the booking's confirmation
+ * wrote (`{ timezone, tiers }`) when it reads as such; a booking
+ * confirmed before the copy existed (null), or a copy that does not
+ * parse, is reckoned by the product's settings now (`live`).
+ */
+export function cancellationTermsOf(
+  copy: unknown,
+  live: { timezone?: string | null; tiers?: unknown }
+): CancellationTerms {
+  if (copy && typeof copy === "object") {
+    const { timezone, tiers } = copy as { timezone?: unknown; tiers?: unknown }
+    const parsed = CancellationTiers.safeParse(tiers ?? [])
+    if (validZone(timezone) && parsed.success) {
+      return { timezone, tiers: parsed.data }
+    }
+  }
+  const parsed = CancellationTiers.safeParse(live.tiers ?? [])
+  return {
+    timezone: validZone(live.timezone) ? live.timezone : DEFAULT_ZONE,
+    tiers: parsed.success ? parsed.data : [],
+  }
 }

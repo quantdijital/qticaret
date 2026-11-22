@@ -17,8 +17,9 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
  * POST /admin/booking-slots/:id/cancel: the departure cancelled now (no
  * more sales), its bookings refunded in full and cancelled after the
  * answer (`booking.departure_cancelled`; the reconcile job carries on
- * what is left). Asked again: the same, nothing given back twice.
+ * what is left). Answers with the counts only (review D3). Asked again:
+ * the same, nothing given back twice.
  */
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
-  res.json({ preview: await startDepartureCancel(req.scope, req.params["id"] ?? "") })
+  res.json({ departure: await startDepartureCancel(req.scope, req.params["id"] ?? "") })
 }
