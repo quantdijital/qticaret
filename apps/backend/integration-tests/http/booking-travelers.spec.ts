@@ -1,7 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import {
   createApiKeysWorkflow,
-  createCartWorkflow,
   createSalesChannelsWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
 } from "@medusajs/medusa/core-flows"
@@ -12,11 +11,11 @@ import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
 import { forgetTravelers } from "../../src/workflows/booking/traveler-retention"
 import { createAdminUser } from "../helpers/admin"
+import { emptyCart, publishTour, traveler } from "../helpers/booking-tour"
 import { eventually } from "../helpers/eventually"
 import { BANK_TRANSFER } from "../helpers/gift-sale"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
-import { PAYTR_ADDRESS } from "../helpers/paytr"
 import { stockShop } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
@@ -34,15 +33,6 @@ interface TravelersAnswer {
 
 const DAY = 24 * 60 * 60 * 1000
 let made = 0
-
-const traveler = (slotId: string, documentNo: string, extra: Record<string, string> = {}) => ({
-  slot_id: slotId,
-  first_name: "Ayşe",
-  last_name: "Yılmaz",
-  birth_date: "1990-01-15",
-  document_no: documentNo,
-  ...extra,
-})
 
 /** adr/0076 D6: a dated product's travelers, from the cart to the booking and the panel. */
 medusaIntegrationTestRunner({
@@ -62,60 +52,6 @@ medusaIntegrationTestRunner({
       post(`/store/carts/${cartId}/travelers`, { travelers: list }, headers)
     const readTravelers = (cartId: string, headers: Record<string, string> = store.headers) =>
       settle(http.get<TravelersAnswer>(`/store/carts/${cartId}/travelers`, { headers }))
-
-    const emptyCart = async (container: MedusaContainer) => {
-      const { result } = await createCartWorkflow(container).run({
-        input: {
-          region_id: shop.regionId,
-          sales_channel_id: shop.salesChannelId,
-          currency_code: "try",
-          email: "ayse.yilmaz@example.com",
-          shipping_address: PAYTR_ADDRESS,
-          billing_address: PAYTR_ADDRESS,
-        },
-      })
-      return result.id
-    }
-
-    /** A published tour asking for travelers at `level`: an adult (1 place), an infant (none). */
-    const tour = async (level: string) => {
-      const { data } = await http.post<{
-        product: { id: string; variants: { id: string; title: string }[] }
-      }>(
-        "/admin/products",
-        {
-          title: `Efes turu ${String((made += 1))}`,
-          status: "draft",
-          options: [{ title: "Kişi", values: ["Yetişkin", "Bebek"] }],
-          variants: ["Yetişkin", "Bebek"].map((title) => ({
-            title,
-            options: { Kişi: title },
-            prices: [{ currency_code: "try", amount: title === "Bebek" ? 100 : 900 }],
-          })),
-          sales_channels: [{ id: shop.salesChannelId }],
-        },
-        { headers: admin.headers }
-      )
-      const productId = data.product.id
-      const variantOf = (title: string) =>
-        data.product.variants.find((variant) => variant.title === title)?.id ?? ""
-      const adult = variantOf("Yetişkin")
-      const infant = variantOf("Bebek")
-      await staff(`/admin/products/${productId}/catalog`, {
-        kind: "service",
-        booking_mode: "departure",
-      })
-      await staff(`/admin/products/${productId}`, { status: "published" })
-      await staff(`/admin/products/${productId}/bookable`, {
-        traveler_fields: { level },
-        pax_by_variant: { [infant]: { pax: 0, max_age: 2 } },
-      })
-      const slots = await staff(`/admin/products/${productId}/booking-slots`, {
-        slots: [{ starts_at: new Date(Date.now() + 10 * DAY).toISOString(), capacity: 10 }],
-      })
-      const slotId = ((slots.data["slots"] as { id: string }[] | undefined) ?? [])[0]?.id ?? ""
-      return { productId, adult, infant, slotId }
-    }
 
     /** A publishable key of another storefront (its own sales channel). */
     const otherStorefront = async (container: MedusaContainer) => {
@@ -151,7 +87,7 @@ medusaIntegrationTestRunner({
     })
 
     it("answers as missing while the flag is off (K11)", async () => {
-      const cartId = await emptyCart(getContainer())
+      const cartId = await emptyCart(getContainer(), shop)
       const read = await readTravelers(cartId)
       const write = await travelers(cartId, [])
       expect([read.status, write.status]).toEqual([404, 404])
@@ -161,8 +97,13 @@ medusaIntegrationTestRunner({
       await flag("catalog.non_physical", true)
       await flag("catalog.booking", true)
       const container = getContainer()
-      const { productId, adult, infant, slotId } = await tour("identity")
-      const cartId = await emptyCart(container)
+      const { productId, adult, infant, slotId } = await publishTour(
+        http,
+        admin.headers,
+        shop,
+        "identity"
+      )
+      const cartId = await emptyCart(container, shop)
       await post(`/store/carts/${cartId}/bookings`, {
         slot_id: slotId,
         items: [
@@ -302,8 +243,8 @@ medusaIntegrationTestRunner({
       await flag("catalog.non_physical", true)
       await flag("catalog.booking", true)
       const container = getContainer()
-      const { adult, slotId } = await tour("name")
-      const cartId = await emptyCart(container)
+      const { adult, slotId } = await publishTour(http, admin.headers, shop, "name")
+      const cartId = await emptyCart(container, shop)
       await post(`/store/carts/${cartId}/bookings`, {
         slot_id: slotId,
         items: [{ variant_id: adult, quantity: 1 }],
@@ -329,8 +270,8 @@ medusaIntegrationTestRunner({
       await flag("catalog.non_physical", true)
       await flag("catalog.booking", true)
       const container = getContainer()
-      const { adult, slotId } = await tour("name")
-      const cartId = await emptyCart(container)
+      const { adult, slotId } = await publishTour(http, admin.headers, shop, "name")
+      const cartId = await emptyCart(container, shop)
       await post(`/store/carts/${cartId}/bookings`, {
         slot_id: slotId,
         items: [{ variant_id: adult, quantity: 1 }],
