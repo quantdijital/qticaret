@@ -7,7 +7,7 @@ import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { ReturnsSettings } from "@/features/settings/api/sections"
-import { PACKAGE_TRAVEL_FREE_DAYS, TIER_LIMITS, nextTier } from "./cancel-tiers"
+import { PACKAGE_TRAVEL_FREE_DAYS, TIER_LIMITS, lastDaysTier, nextTier } from "./cancel-tiers"
 import type { SettingsDraft } from "./slot-schemas"
 
 const B = "products.booking.settings.tiers"
@@ -32,6 +32,7 @@ export function CancelTiersField({
   const returns = useQuery(sectionQuery<ReturnsSettings>("returns"))
   const packageTravel = returns.data?.values.package_travel === true
   const listError = errors?.root?.message ?? errors?.message
+  const lastDays = lastDaysTier(rows)
   return (
     <fieldset className="flex flex-col gap-3 border-t pt-4">
       <legend className="text-sm font-medium">{t(`${B}.title`)}</legend>
@@ -93,6 +94,11 @@ export function CancelTiersField({
             )
           })}
         </ol>
+      ) : null}
+      {lastDays ? (
+        <p role="status" className="text-xs text-warning-text">
+          {t(`${B}.noDayZero`, { days: lastDays.days, percent: lastDays.percent })}
+        </p>
       ) : null}
       {listError ? (
         <p role="alert" className="text-xs text-destructive-text">

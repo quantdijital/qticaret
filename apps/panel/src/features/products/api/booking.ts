@@ -196,7 +196,10 @@ export interface DepartureCancelPreview {
   orders: number
   units: number
   refund: string
-  /** More bookings than the server reads at once: the counts are exact, the refund at least this. */
+  /** Lira left to staff to give back by hand (bank transfer, cash, gift card), and its orders. */
+  refund_by_hand: string
+  by_hand_orders: number
+  /** Not every booking was worked out (too many, or one unreadable): the sums are at least these. */
   partial: boolean
 }
 
@@ -220,10 +223,11 @@ export function useCancelDeparture(productId: string) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (slotId: string) =>
-      sdk.client.fetch<{ preview: DepartureCancelPreview }>(slotCancelPath(slotId), {
-        method: "POST",
-        body: {},
-      }),
+      // The server answers with the counts only; the refunds run after it
+      sdk.client.fetch<{ departure: Pick<DepartureCancelPreview, "slot_id" | "bookings"> }>(
+        slotCancelPath(slotId),
+        { method: "POST", body: {} }
+      ),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: BOOKING_KEY(productId) })
     },

@@ -79,6 +79,8 @@ function setup({ flag = true, catalog = {}, slots = [SLOT], refuse, money = true
           orders: 2,
           units: 3,
           refund: "4500",
+          refund_by_hand: "900",
+          by_hand_orders: 1,
           partial: false,
         },
       })
@@ -217,6 +219,8 @@ describe("DeparturesCard", () => {
     const alert = await within(dialog).findByRole("alert")
     expect(alert).toHaveTextContent("Rezervasyon: 2 · sipariş: 2 · yer: 3")
     expect(alert).toHaveTextContent(/Toplam iade: ₺4\.500,00/)
+    // A bank transfer or a gift card is refunded by hand: shown apart (review O2)
+    expect(alert).toHaveTextContent(/Elle iade edilecek: ₺900,00 \(1 sipariş/)
     await userEvent.click(within(dialog).getByRole("button", { name: "Kalkışı iptal et" }))
     await waitFor(() => {
       expect(posts()).toEqual([

@@ -24,6 +24,7 @@ const DEPARTURE: OrderDeparture = {
   paid: "1000",
   refund: "800",
   refund_within_days: null,
+  manual: null,
 }
 
 function setup({ money = true, departures = [DEPARTURE] } = {}) {
@@ -36,7 +37,13 @@ function setup({ money = true, departures = [DEPARTURE] } = {}) {
         return Promise.resolve({ role: money ? "owner" : "operations", can: { money } })
       }
       if (init?.method === "POST") {
-        return Promise.resolve({ cancelled: true, refunded: "1000" })
+        return Promise.resolve({
+          cancelled: true,
+          refunded: "1000",
+          refund_by_hand: "0",
+          manual: null,
+          order_cancelled: false,
+        })
       }
       const full = init?.query?.mode === "full"
       return Promise.resolve({
@@ -83,6 +90,15 @@ describe("BookingCancelCard", () => {
     expect(await screen.findByText("İptal edildi")).toBeInTheDocument()
     expect(screen.getByText("Onaylı")).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: "İptal et" })).toBeNull()
+  })
+
+  it("says a bank transfer's refund is left to staff before the cancel (review O2)", async () => {
+    setup({ departures: [{ ...DEPARTURE, manual: "offline" }] })
+    await userEvent.click(await screen.findByRole("button", { name: "İptal et" }))
+    const dialog = screen.getByRole("alertdialog", { name: "Rezervasyon iptal edilsin mi?" })
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "Bu tutar kendiliğinden gönderilmez (havale ya da kapıda ödeme); iptalden sonra elle iade edin."
+    )
   })
 
   it("is not drawn for an order without bookings", async () => {

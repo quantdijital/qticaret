@@ -68,6 +68,14 @@ export function SlotCancelConfirm({
               amount: formatMoney(data.refund, "try"),
             })}
           </p>
+          {data.by_hand_orders > 0 ? (
+            <p className="font-medium">
+              {t(`${B}.byHand`, {
+                amount: formatMoney(data.refund_by_hand, "try"),
+                count: data.by_hand_orders,
+              })}
+            </p>
+          ) : null}
           <p className="text-muted-foreground">{t(`${B}.after`)}</p>
         </div>
       ) : (

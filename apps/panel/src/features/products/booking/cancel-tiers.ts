@@ -82,6 +82,22 @@ export const tiersInputOf = (rows: readonly TierDraft[]): CancellationTier[] =>
     }))
     .sort((a, b) => b.days_before - a.days_before)
 
+/**
+ * The row the last days fall to when no row is set at 0 days (review
+ * D2): the server applies the closest row below every row, so a shop
+ * whose rows stop at, say, 7 days keeps that share to the departure;
+ * the panel says so. Null when a 0-day row is there, or no row reads.
+ */
+export function lastDaysTier(rows: readonly TierDraft[]): { days: number; percent: number } | null {
+  const numbers = numbersOf(rows).filter(
+    (row): row is { days: number; percent: number } => row.days !== null && row.percent !== null
+  )
+  if (numbers.length === 0 || numbers.some((row) => row.days === 0)) {
+    return null
+  }
+  return numbers.reduce((closest, row) => (row.days < closest.days ? row : closest))
+}
+
 /** A new row: a day under the last one, keeping at least what it keeps. */
 export function nextTier(rows: readonly TierDraft[]): TierDraft {
   const last = numbersOf(rows).at(-1)

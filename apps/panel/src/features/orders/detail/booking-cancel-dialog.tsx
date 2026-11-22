@@ -52,8 +52,16 @@ export function BookingCancelDialog({
         cancel.mutate(
           { slot_id: departure.slot_id, mode },
           {
-            onSuccess: () => {
-              toast.success(t(`${K}.done`))
+            onSuccess: (result) => {
+              toast.success(
+                result.order_cancelled
+                  ? t(`${K}.orderCancelled`)
+                  : result.manual
+                    ? t(`${K}.doneByHand`, {
+                        amount: formatMoney(result.refund_by_hand, currency),
+                      })
+                    : t(`${K}.done`)
+              )
             },
             onError: (failure) => {
               toast.error(errorText(t, failure))
@@ -97,6 +105,14 @@ export function BookingCancelDialog({
                 })
               : t(`${K}.previewFailed`)}
       </p>
+      {current?.manual && !current.refusal ? (
+        <p
+          role="alert"
+          className="rounded-md border border-warning/40 bg-warning-soft px-3 py-2 text-sm"
+        >
+          {t(`${K}.byHand`, { reason: t(`${K}.byHandReasons.${current.manual}`) })}
+        </p>
+      ) : null}
     </ConfirmDialog>
   )
 }

@@ -5,6 +5,18 @@ import { useOrderMutation } from "@/features/orders/api/mutation"
 /** Staff's choice when cancelling a departure (adr/0076 Ek D7a): the product's tier, or all back. */
 export type BookingCancelMode = "tier" | "full"
 
+/** Why a departure's refund is left to staff: taken by hand, credit used, above the payments. */
+export type BookingManualRefund = "offline" | "credit" | "exceeds"
+
+/** A departure cancelled: what was sent, what is left to staff, whether the unpaid order went. */
+export interface BookingCancelResult {
+  cancelled: boolean
+  refunded: string
+  refund_by_hand: string
+  manual: BookingManualRefund | null
+  order_cancelled: boolean
+}
+
 /**
  * One departure of a dated order with what cancelling it would give back
  * under the asked mode; lira, worked out on the server (never sent back).
@@ -24,6 +36,8 @@ export interface OrderDeparture {
   paid: string
   refund: string
   refund_within_days: number | null
+  /** Set: the refund is not sent on its own, staff give it back by hand (and why). */
+  manual: BookingManualRefund | null
 }
 
 export interface OrderDepartures {
@@ -45,7 +59,7 @@ export const orderBookingsQuery = (orderId: string, mode: BookingCancelMode) =>
 /** One departure cancelled with its refund: the departure and the mode, never an amount. */
 export const useCancelOrderBooking = (orderId: string) =>
   useOrderMutation((input: { slot_id: string; mode: BookingCancelMode }) =>
-    sdk.client.fetch<{ cancelled: boolean; refunded: string }>(`${bookingsPath(orderId)}/cancel`, {
+    sdk.client.fetch<BookingCancelResult>(`${bookingsPath(orderId)}/cancel`, {
       method: "POST",
       body: input,
     })

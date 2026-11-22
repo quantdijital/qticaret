@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { nextTier, tierDraftsOf, tiersInputOf, tiersSchema } from "./cancel-tiers"
+import { lastDaysTier, nextTier, tierDraftsOf, tiersInputOf, tiersSchema } from "./cancel-tiers"
 
 const row = (days: string, percent: string) => ({ days_before: days, fee_percent: percent })
 
@@ -39,5 +39,12 @@ describe("cancellation tiers", () => {
     expect(nextTier([])).toEqual(row("30", "0"))
     expect(nextTier([row("30", "0")])).toEqual(row("15", "25"))
     expect(nextTier([row("1", "90")])).toEqual(row("0", "100"))
+  })
+
+  it("names the row the last days fall to when no row is set at 0 days (review D2)", () => {
+    expect(lastDaysTier([row("30", "10"), row("7", "50")])).toEqual({ days: 7, percent: 50 })
+    expect(lastDaysTier([row("7", "50"), row("0", "100")])).toBeNull()
+    expect(lastDaysTier([])).toBeNull()
+    expect(lastDaysTier([row("", "10")])).toBeNull()
   })
 })

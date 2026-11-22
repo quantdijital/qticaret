@@ -3580,10 +3580,12 @@
         "previewFailed": "The bookings it touches could not be read. Cancelling still refunds every booking in full.",
         "touches": "Bookings: {{bookings}} · orders: {{orders}} · places: {{units}}",
         "refund": "Refund in all: {{amount}}",
-        "refundAtLeast": "Refund in all at least {{amount}} (many bookings; all are refunded)",
+        "refundAtLeast": "Refund in all at least {{amount}} (some bookings could not be worked out; all are refunded in full)",
         "after": "Refunds and cancels run in the background after you confirm; any that fail are tried again.",
         "noBookings": "This departure has no confirmed bookings.",
-        "done": "Departure cancelled; refunds started."
+        "done": "Departure cancelled; refunds started.",
+        "byHand_one": "To refund by hand: {{amount}} ({{count}} order; bank transfer, cash on delivery or gift card). The places go back; you send the money.",
+        "byHand_other": "To refund by hand: {{amount}} ({{count}} orders; bank transfer, cash on delivery or gift card). The places go back; you send the money."
       },
       "columns": {
         "start": "Departure",
@@ -3666,7 +3668,8 @@
           "percentOf": "Row {{number}}: share kept",
           "remove": "Remove row {{number}}",
           "add": "Add a cancellation tier",
-          "packageFree": "Package travel: 30 days or more before, nothing is kept (0% applies)."
+          "packageFree": "Package travel: 30 days or more before, nothing is kept (0% applies).",
+          "noDayZero": "Cancels fewer than {{days}} days before the departure also keep this row's share ({{percent}}%). Add a 0-day row for a rule of their own for the last days."
         }
       },
       "errors": {
@@ -5054,7 +5057,15 @@
       "refund": "Refund: {{amount}} (paid {{paid}})",
       "refusal": "It cannot be cancelled this way; choose to refund all of it.",
       "previewFailed": "The refund could not be read; if you confirm, the server works it out again.",
-      "done": "Booking cancelled."
+      "done": "Booking cancelled.",
+      "byHand": "This amount is not sent on its own ({{reason}}); refund it by hand after the cancel.",
+      "byHandReasons": {
+        "offline": "bank transfer or cash on delivery",
+        "credit": "a gift card or store credit was used",
+        "exceeds": "more than the payments still hold"
+      },
+      "doneByHand": "Booking cancelled; {{amount}} is to be refunded by hand.",
+      "orderCancelled": "The booking and its unpaid order were cancelled."
     }
   },
   "customers": {

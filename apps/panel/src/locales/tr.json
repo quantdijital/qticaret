@@ -3580,10 +3580,12 @@
         "previewFailed": "Etkilenecek rezervasyonlar okunamadı. İptal yine de her rezervasyonu tam iade eder.",
         "touches": "Rezervasyon: {{bookings}} · sipariş: {{orders}} · yer: {{units}}",
         "refund": "Toplam iade: {{amount}}",
-        "refundAtLeast": "Toplam iade en az {{amount}} (çok sayıda rezervasyon; tamamı iade edilir)",
+        "refundAtLeast": "Toplam iade en az {{amount}} (bazı rezervasyonlar hesaplanamadı; hepsi tam iade edilir)",
         "after": "İade ve iptaller onaydan sonra arka planda yapılır; aksayan olursa yeniden denenir.",
         "noBookings": "Bu kalkışta onaylı rezervasyon yok.",
-        "done": "Kalkış iptal edildi; iadeler başlatıldı."
+        "done": "Kalkış iptal edildi; iadeler başlatıldı.",
+        "byHand_one": "Elle iade edilecek: {{amount}} ({{count}} sipariş; havale, kapıda ödeme ya da hediye kartı). Yerler bırakılır, parayı siz gönderirsiniz.",
+        "byHand_other": "Elle iade edilecek: {{amount}} ({{count}} sipariş; havale, kapıda ödeme ya da hediye kartı). Yerler bırakılır, parayı siz gönderirsiniz."
       },
       "columns": {
         "start": "Kalkış",
@@ -3666,7 +3668,8 @@
           "percentOf": "{{number}}. satır: kesinti yüzdesi",
           "remove": "{{number}}. satırı kaldır",
           "add": "İptal kademesi ekle",
-          "packageFree": "Paket tur: 30 gün ve öncesinde kesinti yapılmaz (%0 uygulanır)."
+          "packageFree": "Paket tur: 30 gün ve öncesinde kesinti yapılmaz (%0 uygulanır).",
+          "noDayZero": "Kalkışa {{days}} günden az kala yapılan iptallerde de bu satır (%{{percent}}) uygulanır. Son günler için ayrı bir kural istiyorsanız 0 günlük satır ekleyin."
         }
       },
       "errors": {
@@ -5054,7 +5057,15 @@
       "refund": "İade: {{amount}} (ödenen {{paid}})",
       "refusal": "Bu şekilde iptal edilemiyor; tamamını iade etmeyi seçin.",
       "previewFailed": "İade tutarı okunamadı; onaylarsanız sunucu yeniden hesaplar.",
-      "done": "Rezervasyon iptal edildi."
+      "done": "Rezervasyon iptal edildi.",
+      "byHand": "Bu tutar kendiliğinden gönderilmez ({{reason}}); iptalden sonra elle iade edin.",
+      "byHandReasons": {
+        "offline": "havale ya da kapıda ödeme",
+        "credit": "hediye kartı ya da mağaza kredisi kullanıldı",
+        "exceeds": "ödemede kalan tutardan fazla"
+      },
+      "doneByHand": "Rezervasyon iptal edildi; {{amount}} elle iade edilecek.",
+      "orderCancelled": "Rezervasyon ve ödemesi alınmamış sipariş iptal edildi."
     }
   },
   "customers": {
