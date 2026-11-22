@@ -65,7 +65,8 @@ medusaIntegrationTestRunner({
       const tour = await publishTour(http, admin.headers, shop, "none")
       const blocks = await blocksOf(tour.productId)
       const types = blocks.map((block) => block["@type"])
-      expect(types).toEqual(["ProductGroup", "TouristTrip", "BreadcrumbList"])
+      // The tour sits in no category: a one-crumb trail writes no BreadcrumbList
+      expect(types).toEqual(["ProductGroup", "TouristTrip"])
       const trip = blocks[1] as { subTrip: Block[]; provider?: Block }
       expect(trip.subTrip).toHaveLength(1)
       expect(trip.subTrip[0]).toMatchObject({
@@ -81,14 +82,14 @@ medusaIntegrationTestRunner({
       ).toBe(200)
       const tour = await publishTour(http, admin.headers, shop, "none")
       const types = (await blocksOf(tour.productId)).map((block) => block["@type"])
-      expect(types).toEqual(["ProductGroup", "Event", "BreadcrumbList"])
+      expect(types).toEqual(["ProductGroup", "Event"])
     })
 
     it("writes no trip while the shop does not sell dated products, and keeps the page", async () => {
       const tour = await publishTour(http, admin.headers, shop, "none")
       await flag("catalog.booking", false)
       const types = (await blocksOf(tour.productId)).map((block) => block["@type"])
-      expect(types).toEqual(["ProductGroup", "BreadcrumbList"])
+      expect(types).toEqual(["ProductGroup"])
     })
 
     it("leaves a dated product out of the shopping feeds, the others in", async () => {

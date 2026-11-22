@@ -119,6 +119,25 @@ describe("a pack the shop cannot take", () => {
       packProblems(pack({ pages: [{ handle: "a", title: "A", body: script }] }), TEST).length
     ).toBeGreaterThan(0)
   })
+
+  it("refuses a page the text's save would refuse, before anything is written", () => {
+    const page = (content: unknown[]) =>
+      pack({ pages: [{ handle: "a", title: "A", body: { type: "doc", content } }] })
+    const text = (value: string) => ({
+      type: "paragraph",
+      content: [{ type: "text", text: value }],
+    })
+    // A misspelt `{belirteç}` would show as typed; `[30]` is a blank to fill, no token
+    expect(packProblems(page([text("Kalkıştan [30] gün önce")]), TEST)).toEqual([])
+    expect(packProblems(page([text("Bize {magza_adi} yazın")]), TEST)).toEqual([
+      "page a body: {magza_adi} unknown",
+    ])
+    // An image is one of the shop's uploads, a card one of its records: never a pack's
+    const image = { type: "image", attrs: { src: "https://ornek.com/a.jpg", alt: "a" } }
+    expect(packProblems(page([image]), TEST)).toEqual(["page a body: holds an image"])
+    const card = { type: "productCard", attrs: { id: "prod_01ARZ3NDEKTSV4RRFFQ69G5FAV" } }
+    expect(packProblems(page([card]), TEST)).toEqual(["page a body: holds a card"])
+  })
 })
 
 describe("tenant:apply-pack pack=", () => {

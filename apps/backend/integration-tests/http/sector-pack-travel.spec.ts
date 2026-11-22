@@ -117,7 +117,10 @@ medusaIntegrationTestRunner({
             actor_id: null,
           },
         })
-      ).rejects.toThrow()
+        // A workflow rejects with its error serialized, no Error instance: matched by its message
+      ).rejects.toMatchObject({
+        message: expect.stringContaining("catalog.booking_kind") as unknown,
+      })
     })
   },
 })
