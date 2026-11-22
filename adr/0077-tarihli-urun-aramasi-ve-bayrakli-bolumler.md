@@ -118,6 +118,14 @@ Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; �
 - **Tarihli ürüne özgü:** `departures` ("Yaklaşan kalkışlar"; `catalog.booking`'e bağlı, §8). Veri `GET /store/departures`.
 - **Tur programı (itinerary)** bu ADR'de yok: veri biçimi sahibin kararına bırakıldı (öneri: tarihli üründe gün başlığı + metin listesi).
 
+**Uygulama notu (PR5a, `stats` ve `steps`).** Sözleşme `packages/types/src/store/section-stats.ts`, `section-steps.ts`; backend aynası `lib/storefront/sections/stats.ts`, `steps.ts` (eşitlik testi). Ana sayfa ve içerik sayfaları alır; ürün ve kategori sayfası almaz.
+
+- `stats` "Rakam şeridi": başlık isteğe bağlı (yoksa liste ekran okuyucuya "Rakamlarla" adıyla); 2–6 öge `{value ≤16, label ≤48, text ≤120 isteğe bağlı}`; ayar `dividers` **on**/off ("Ayırıcı çizgileri göster", Diziliş). Çizim `dl`; değer büyük, sayaç/animasyon yok.
+- `steps` "Numaralı adımlar": başlık (boşsa vitrinin "Nasıl işler?"), giriş ≤240, 3–6 adım `{title ≤60, text ≤240 isteğe bağlı}`, isteğe bağlı tek bağlantı; ayarlar `layout` **row**/column ("Yan yana / Alt alta"), `numbers` **padded**/plain ("01, 02 / 1, 2"), ikisi Diziliş'te açık. Çizim `ol`; basılı numara `aria-hidden`.
+- Zemin ve hizalama bölümün kendi ayarı değil, ortak `look.ground` / `look.align` (bilesen-standardi §0.5: bir kavram bir takım); panelde Stil › Görünüm. `steps` uzun metin taşıdığı için `primary` zemin sunulmaz (adr/0062 §6), `stats` sunar.
+- `SECTION_VARIANTS`'a girmediler: tek çizim var; biçimsiz kayıt varsayılan okunduğu için ikinci biçim geldiğinde liste ilk sıradaki bugünkü çizimle açılır, göç gerekmez.
+- Bilerek yok: ikon/görsel (adımlar sade numara), düğme stili (tek bağlantı temanın ana düğmesi), telefon sütun ayarı (rakam telefonda ikişer, adımlar alt alta).
+
 ### 11. travel paketi sürüm 2
 
 - Yeni seçim niteliği **"Gidilecek yer"** (`gidilecek_yer`): filtrelenebilir; üründe tek değer, süzgeçte çoklu seçim. Arama kutusunun "nereye" alanı bunu kullanır.
