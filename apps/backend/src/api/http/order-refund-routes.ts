@@ -7,6 +7,8 @@ import type {
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { fromMedusaAmount } from "../../lib/money"
+import type { MedusaAmount } from "../../lib/money"
 import { isCheckoutProvider } from "../../lib/payments/checkout"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { cancelGiftCardsWorkflow } from "../../workflows/orders/cancel-gift-cards"
@@ -43,13 +45,40 @@ async function refuseHostedPaymentRefund(
   }
 }
 
+interface CapturedPayment {
+  provider_id?: string | null
+  amount?: MedusaAmount | null
+  captures?: ({ amount?: MedusaAmount | null } | null)[] | null
+}
+
 /**
- * Medusa's capture of part of a payment (`amount`) refused for the ways
- * our checkout starts (a bank transfer, cash on delivery, a hosted card
- * form): the panel captures the whole payment, and a partial capture
- * leaves `captured_at` empty, money taken that code reading it would miss
- * (refund safety follow-up of adr/0076). The amount is never the
- * client's to set for these; the system provider goes on as before.
+ * Whether `amount` asks for exactly what the payment has left to capture
+ * (its amount less its captures), to the kuruş. An amount that is not a
+ * plain number of lira (or has digits below a kuruş) asks for something
+ * else. Pure.
+ */
+export function capturesTheRest(amount: unknown, payment: CapturedPayment): boolean {
+  let asked: number
+  try {
+    asked = fromMedusaAmount(amount as MedusaAmount)
+  } catch {
+    return false
+  }
+  const taken = (payment.captures ?? []).reduce(
+    (sum, capture) => sum + fromMedusaAmount(capture?.amount ?? 0, { allowRounding: true }),
+    0
+  )
+  return asked === fromMedusaAmount(payment.amount ?? 0, { allowRounding: true }) - taken
+}
+
+/**
+ * Medusa's capture of part of a payment refused for the ways our checkout
+ * starts (a bank transfer, cash on delivery, a hosted card form): an
+ * `amount` other than what the payment has left, worked out here from
+ * its captures, is refused (review D1 of #277: the rest, or no amount, goes
+ * on). A partial capture leaves `captured_at` empty, money taken that
+ * code reading it would miss (refund safety follow-up of adr/0076); the
+ * panel captures the whole payment. The system provider goes on as before.
  */
 export async function refusePartialCapture(
   req: MedusaRequest,
@@ -62,11 +91,14 @@ export async function refusePartialCapture(
     return
   }
   try {
-    const [payment] = await req.scope
-      .resolve(Modules.PAYMENT)
-      .listPayments({ id: req.params["id"] ?? "" }, { select: ["provider_id"] })
+    const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: "payment",
+      fields: ["provider_id", "amount", "captures.amount"],
+      filters: { id: req.params["id"] ?? "" },
+    })
+    const payment = (data as unknown as CapturedPayment[])[0]
     next(
-      isCheckoutProvider(payment?.provider_id)
+      payment && isCheckoutProvider(payment.provider_id) && !capturesTheRest(amount, payment)
         ? new ValidationError("payments.partial_capture_refused", { field: "amount" })
         : undefined
     )

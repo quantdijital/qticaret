@@ -1,5 +1,10 @@
 import { cancelBookingSlot } from "../cancel-uses"
-import { cancelledUsesByHand, cancelledUsesOfOrder, markUsesOwedByHand } from "../refund-uses"
+import {
+  cancelledUsesByHand,
+  cancelledUsesOfOrder,
+  markBellsChecked,
+  markUseOwedByHand,
+} from "../refund-uses"
 import type { Executor } from "../sql"
 
 /** An executor answering each statement in turn, keeping what it was asked. */
@@ -42,14 +47,35 @@ describe("a departure's cancel keeps how its money went back (refund safety foll
 describe("the bell sweep's departures", () => {
   it("reads lately cancelled ones left to staff, or kept before on a cancelled departure", async () => {
     const { manager, calls } = fakeManager([
-      [{ use_id: "bkuse_1", order_id: "order_1", slot_id: "bkslot_1", cancel_refund: null }],
+      [
+        {
+          use_id: "bkuse_1",
+          order_id: "order_1",
+          slot_id: "bkslot_1",
+          cancel_refund: "offline",
+          refund_due: "45000",
+          cancelled_at: "2026-11-20T10:00:00Z",
+          cancellation: '{"timezone":"Europe/Istanbul","tiers":[]}',
+        },
+      ],
     ])
 
     const found = await cancelledUsesByHand(manager, 7, 100)
 
     expect(found).toEqual([
-      { use_id: "bkuse_1", order_id: "order_1", slot_id: "bkslot_1", cancel_refund: null },
+      {
+        use_id: "bkuse_1",
+        order_id: "order_1",
+        slot_id: "bkslot_1",
+        cancel_refund: "offline",
+        refund_due: 45000,
+        cancelled_at: new Date("2026-11-20T10:00:00Z"),
+        cancellation: { timezone: "Europe/Istanbul", tiers: [] },
+      },
     ])
+    // Settled rows leave the query; the longest waiting come first (review O3 of #277)
+    expect(calls[0]?.sql).toContain("u.bell_checked_at IS NULL")
+    expect(calls[0]?.sql).toContain("ORDER BY u.updated_at, u.id")
     expect(calls[0]?.sql).toContain("u.updated_at > now() - make_interval(days => ?)")
     expect(calls[0]?.sql).toContain(
       "(u.cancel_refund IN ('offline', 'credit', 'exceeds') OR (u.cancel_refund IS NULL AND s.status = 'cancelled'))"
@@ -66,14 +92,30 @@ describe("the bell sweep's departures", () => {
   })
 })
 
-describe("cancelled departures owed back by hand", () => {
-  it("marks only those with nothing sent, and writes nothing for none", async () => {
+describe("a cancelled departure owed back by hand", () => {
+  it("marks it with its share and puts it back before the sweep, only when nothing was sent", async () => {
     const { manager, calls } = fakeManager([[{ id: "bkuse_1" }]])
 
-    expect(await markUsesOwedByHand(manager, ["bkuse_1", "bkuse_2"])).toBe(1)
-    expect(calls[0]?.sql).toContain("SET cancel_refund = 'offline'")
+    expect(await markUseOwedByHand(manager, "bkuse_1", 45000)).toBe(true)
+    expect(calls[0]?.sql).toContain(
+      "SET cancel_refund = 'offline', refund_due = ?, bell_checked_at = NULL"
+    )
     expect(calls[0]?.sql).toContain("(cancel_refund IS NULL OR cancel_refund = 'none')")
+    expect(calls[0]?.params).toEqual([45000, "bkuse_1"])
+  })
+
+  it("refuses a share that is not whole kuruş", async () => {
+    await expect(markUseOwedByHand(fakeManager([]).manager, "bkuse_1", 1.5)).rejects.toMatchObject({
+      safeMessage: "booking.refund_due_invalid",
+    })
+  })
+
+  it("marks the rows the sweep settled, and writes nothing for none", async () => {
+    const { manager, calls } = fakeManager([[{ id: "bkuse_1" }]])
+
+    expect(await markBellsChecked(manager, ["bkuse_1", "bkuse_2"])).toBe(1)
+    expect(calls[0]?.sql).toContain("SET bell_checked_at = now()")
     expect(calls[0]?.params).toEqual(["bkuse_1", "bkuse_2"])
-    expect(await markUsesOwedByHand(fakeManager([]).manager, [])).toBe(0)
+    expect(await markBellsChecked(fakeManager([]).manager, [])).toBe(0)
   })
 })

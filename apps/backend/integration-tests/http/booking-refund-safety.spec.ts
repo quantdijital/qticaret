@@ -169,11 +169,18 @@ medusaIntegrationTestRunner({
       expect(keptBefore).toBe("none")
       expect(bellsBefore).not.toContain("booking.refund_by_hand")
       expect(captured.status).toBe(200)
-      expect((await useOf(orderId))?.cancel_refund).toBe("offline")
+      // Written once the capture went through, after the answer (review O1, O2 of #277)
+      const marked = await eventually(
+        () => useOf(orderId),
+        (use) => use?.cancel_refund === "offline"
+      )
+      // The tour's 900 TL, worked out on the server: the shop cancelled nothing, staff gave all back
+      expect(marked?.refund_due).toBe(90000)
       await eventually(
         () => bells(orderId),
-        (rung) => rung.includes("booking.refund_by_hand")
+        (rung) => rung.includes("booking.cash_share_by_hand")
       )
+      expect(await bells(orderId)).not.toContain("booking.refund_by_hand")
     })
   },
 })

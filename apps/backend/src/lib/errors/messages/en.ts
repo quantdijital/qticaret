@@ -352,6 +352,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "A dated product is not returned or exchanged; cancel the booking instead.",
   "booking.slot_cancelled": "This departure was cancelled; it cannot be opened again.",
   "booking.cancel_refund_invalid": "The refund's way is not known.",
+  "booking.refund_due_invalid": "The share to refund is not valid.",
   "booking.departure_cancelled_unpaid":
     "A departure of this order was cancelled before it was paid; no money can be taken. Cancel the order.",
   "booking.use_departure_cancel": 'Use "Cancel departure" to cancel it; its bookings are refunded.',

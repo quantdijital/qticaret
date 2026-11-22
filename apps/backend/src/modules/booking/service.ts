@@ -31,7 +31,12 @@ import { parseKey } from "@qticaret/server-kit"
 import type { CleanTraveler } from "../../lib/booking/travelers"
 import { Booking, BookingSlotUse } from "./models/booking"
 import type { CancelRefundWay } from "./models/booking"
-import { cancelledUsesByHand, cancelledUsesOfOrder, markUsesOwedByHand } from "./refund-uses"
+import {
+  cancelledUsesByHand,
+  cancelledUsesOfOrder,
+  markBellsChecked,
+  markUseOwedByHand,
+} from "./refund-uses"
 import { BookingHold, BookingHoldSlot } from "./models/booking-hold"
 import { BookingSlot } from "./models/booking-slot"
 import { BookingTraveler } from "./models/booking-traveler"
@@ -278,13 +283,23 @@ class BookingModuleService extends MedusaService({
     return cancelledUsesOfOrder(managerOf(sharedContext), orderId)
   }
 
-  /** Cancelled departures marked as owed back by hand; how many changed. */
+  /** A cancelled departure marked as owed back by hand, with its share (kuruş); whether it changed. */
   @InjectTransactionManager()
-  async markUsesOwedByHand(
+  async markUseOwedByHand(
+    useId: string,
+    due: number,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    return markUseOwedByHand(managerOf(sharedContext), useId, due)
+  }
+
+  /** Rows the refund bell sweep settled; how many. */
+  @InjectTransactionManager()
+  async markBellsChecked(
     useIds: string[],
     @MedusaContext() sharedContext: Context = {}
   ): Promise<number> {
-    return markUsesOwedByHand(managerOf(sharedContext), useIds)
+    return markBellsChecked(managerOf(sharedContext), useIds)
   }
 
   /** The booking's voucher code, made on first read (adr/0076 Ek D7b); null: no booking. */

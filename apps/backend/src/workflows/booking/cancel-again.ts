@@ -96,7 +96,7 @@ export async function doneBefore(
       ? []
       : await bookings.listBookingSlotUses(
           { booking_id: ofOrder.map((booking) => booking.id), slot_id: input.slot_id },
-          { take: 1, select: ["id", "cancelled_at", "cancel_refund"] }
+          { take: 1, select: ["id", "cancelled_at", "cancel_refund", "refund_due"] }
         )
   if (!use) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "booking.cancel_unknown")
@@ -112,6 +112,8 @@ export async function doneBefore(
     use.cancelled_at &&
     refunded <= 0 &&
     input.by !== "customer" &&
+    // A cash on delivery share rings its own bell (`booking.cash_share_by_hand`)
+    (use.refund_due ?? null) === null &&
     (await owedByHand(container, input.order_id, use.cancel_refund ?? null, order))
   ) {
     await alertRefundByHand(container, input.order_id, input.slot_id)
