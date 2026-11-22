@@ -226,6 +226,12 @@ export interface StoreCardFacts {
      */
     left?: number | null
     in_range?: true
+    /**
+     * Its length in whole days, from its public tour length attribute (a
+     * sector pack's "Süre", adr/0077 Ek "tur kartı"); absent without one,
+     * and from a backend before it.
+     */
+    duration_days?: number
   }
 }
 

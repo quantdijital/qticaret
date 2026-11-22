@@ -14,6 +14,10 @@
       "file": "buy.css"
     },
     {
+      "sha256": "af138dbdc6dc7e1ebc4a8705fad6da20bbcb93e192184130247dd5965e2dc8db",
+      "file": "card-over.css"
+    },
+    {
       "sha256": "2bdbdae95ff5119d88a6e66df7156d5ee25a2bbba7b530d7e2536e157d9e7598",
       "file": "card.css"
     },
@@ -134,7 +138,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "b0fdca1fe15b08e420daf86bb840f61f0cb641b65c61359247bc12851a6e4a7a",
+      "sha256": "ef5ce3443b9cdad2f2bd19c69bf855752f61ae158d3e6d2ccd2fd2d247dc0ae2",
       "file": "styles.css"
     },
     {

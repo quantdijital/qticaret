@@ -1,0 +1,35 @@
+/*
+ * A standard card with its words over the photo (`parts/card-over.tsx`,
+ * adr/0077 Ek "tur kartı"). The photo's well stacks the photo and the
+ * words in one grid cell, the words at its foot: they stay in the flow
+ * (not positioned), so the name's link still covers the whole card from
+ * the well, and paint over the photo (`z-index: 0`) but under the pills,
+ * the quick view and the quick add, which come after them. Under the
+ * words a graphite fade, near the stage's own ground where the words
+ * stand, so the stage's light ink reads on any photograph; the words take
+ * the stage's inks (as a `stage` ground's section does, `look.css`).
+ */
+@layer components {
+  .gf-card-over .gf-card-media {
+    display: grid;
+    grid-template: 100% / 100%;
+  }
+  .gf-card-over .gf-card-media > * {
+    grid-area: 1 / 1;
+  }
+  .gf-card-over-text {
+    align-self: end;
+    z-index: 0;
+    background-image: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--color-stage) 94%, transparent) 0%,
+      color-mix(in oklab, var(--color-stage) 82%, transparent) 55%,
+      transparent
+    );
+    --color-text: var(--color-stage-text);
+    --color-text-2: var(--color-stage-text-2);
+    --color-text-3: var(--color-stage-text-2);
+    --color-deal: var(--color-deal-on-stage);
+    color: var(--color-text);
+  }
+}
