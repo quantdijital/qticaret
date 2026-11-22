@@ -508,6 +508,8 @@ medusaIntegrationTestRunner({
           units: 2,
           status: "confirmed",
           created_at: expect.any(String) as unknown,
+          // The tour asks for no travelers (D6)
+          travelers: [],
         },
       ])
       expect(unknownSlot.status).toBe(404)
