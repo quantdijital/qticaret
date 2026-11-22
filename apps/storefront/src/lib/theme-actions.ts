@@ -25,6 +25,7 @@ import { addGiftToCart, checkGiftCardBalance, saveGiftRecipient } from "@/app/ac
 import { cancelOrder, requestReturn } from "@/app/actions/order"
 import { leaveLinkCart } from "@/app/actions/payment-link"
 import { requestPrivacy } from "@/app/actions/privacy"
+import { saveTravelers } from "@/app/actions/travelers"
 import { askQuestion, stockAlert, writeReview } from "@/app/actions/product"
 import {
   addToCart,
@@ -76,6 +77,7 @@ export const checkoutActions: CheckoutActions = {
   neighborhoods: loadNeighborhoods,
   applyPromotion,
   removePromotion: removeCheckoutPromotion,
+  saveTravelers,
 }
 
 /** Signing in and its kin (D8). */
