@@ -1,5 +1,6 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { BOOKING_KEY } from "../../../lib/booking/cart-lines"
+import { logger } from "../../../lib/logging"
 import { BOOKING_MODULE } from "../../../modules/booking"
 import { refuseBookingEdits } from "../order-edit"
 import { confirmOrderBookings } from "../orders"
@@ -74,6 +75,24 @@ describe("a dated order's places (adr/0076 Ek, review D1, O4)", () => {
         data: expect.objectContaining({ order_id: "order_1", display_id: "42" }) as unknown,
       })
     )
+  })
+
+  it("logs no error line for a quiet retry of the reconcile job", async () => {
+    const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+    const bookings = bookingService({
+      confirmHold: jest.fn().mockRejectedValue({ safeMessage: "booking.hold_missing" }),
+      holdUnits: jest.fn().mockRejectedValue({ safeMessage: "booking.slot_full" }),
+    })
+    const { container } = containerOf(
+      { order: [{ id: "order_1", status: "pending", display_id: 42, items: [datedLine] }] },
+      bookings
+    )
+
+    expect(await confirmOrderBookings(container, "order_1", { quiet: true })).toBe("failed")
+    expect(error).not.toHaveBeenCalled()
+    expect(await confirmOrderBookings(container, "order_1")).toBe("failed")
+    expect(error).toHaveBeenCalledTimes(1)
+    error.mockRestore()
   })
 })
 

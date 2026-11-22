@@ -479,8 +479,9 @@ medusaIntegrationTestRunner({
       const [booking] = await bookings().listBookings({ order_id: orderId })
 
       expect(placed.status).toBe(200)
-      expect(untouched).toEqual({ confirmed: 0, cancelled: 0, failed: 0 })
-      expect(reconciled).toEqual({ confirmed: 0, cancelled: 1, failed: 0 })
+      const nothing = { confirmed: 0, existing: 0, none: 0, cancelled: 0, failed: 0, given_up: 0 }
+      expect(untouched).toEqual(nothing)
+      expect(reconciled).toEqual({ ...nothing, cancelled: 1 })
       expect(booking?.status).toBe("cancelled")
       expect(await slotOf(slotId)).toMatchObject({ sold: 0, available: 10 })
     })
