@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import {
   compilePattern,
   locationOf,
@@ -101,10 +102,13 @@ describe("patterns", () => {
 
   it("takes a long hostile path in linear time", () => {
     const pattern = compilePattern("/a/:b/:c/*") ?? []
-    const path = `/a${"/x".repeat(250)}`
-    const started = performance.now()
-    expect(matchPattern(pattern, path)).not.toBeNull()
-    expect(performance.now() - started).toBeLessThan(50)
+    const path = (size: number) => `/a${"/x".repeat(size)}`
+    expect(matchPattern(pattern, path(250))).not.toBeNull()
+    const hostile = (size: number) => {
+      const long = path(size)
+      return () => matchPattern(pattern, long)
+    }
+    expect(measureGrowth(hostile, 250)).toMatchObject({ linear: true })
   })
 
   it("tries more literal patterns first, whatever their age", () => {
