@@ -139,29 +139,69 @@ export async function releaseHolds(manager: Executor, holdIds: string[]): Promis
   )
 }
 
+const sortedUnique = (list: string[]): string[] => [...new Set(list)].sort()
+
 /**
- * Releases holds past their end (by `now`, the database's clock when
- * null), a batch at a time; only those on `slotIds` when given. A hold
- * another run has locked (its cart is changing it) is skipped, not waited
- * for: the next run takes it if it is still expired. How many.
+ * The one lock order (adr/0076 Ek): hold rows first, then every slot a
+ * change touches, locked at once in id order, and never a hold after a
+ * slot. Here: the expired holds on `slotIds` (others' locked holds are
+ * skipped, not waited for) and `alsoRelease` (holds the caller has
+ * locked already) are taken, then `slotIds` with all of those holds'
+ * slots in one `ORDER BY id FOR UPDATE`, then the holds are released.
+ * Two runs sharing slots in any mix wait in one line, never in a circle.
  */
-export async function releaseExpired(
+export async function lockSlotsFreeingExpired(
   manager: Executor,
-  now: Date | null,
-  slotIds: string[] | null
-): Promise<number> {
-  const onSlots =
-    slotIds && slotIds.length > 0
-      ? `AND id IN (SELECT hold_id FROM booking_hold_slot WHERE slot_id IN (${marks(slotIds.length)}))`
-      : ""
+  slotIds: string[],
+  alsoRelease: string[] = []
+): Promise<void> {
+  const expired =
+    slotIds.length === 0
+      ? []
+      : await rows(
+          manager,
+          `SELECT id FROM booking_hold
+            WHERE deleted_at IS NULL AND expires_at <= now()
+              AND id IN (SELECT hold_id FROM booking_hold_slot
+                          WHERE deleted_at IS NULL AND slot_id IN (${marks(slotIds.length)}))
+            ORDER BY id LIMIT ? FOR UPDATE SKIP LOCKED`,
+          [...slotIds, SWEEP_BATCH]
+        )
+  const holdIds = sortedUnique([...expired.map((row) => String(row["id"])), ...alsoRelease])
+  const theirs =
+    holdIds.length === 0
+      ? []
+      : await rows(
+          manager,
+          `SELECT DISTINCT slot_id FROM booking_hold_slot
+            WHERE deleted_at IS NULL AND hold_id IN (${marks(holdIds.length)})`,
+          holdIds
+        )
+  const all = sortedUnique([...slotIds, ...theirs.map((row) => String(row["slot_id"]))])
+  if (all.length > 0) {
+    await manager.execute(
+      `SELECT id FROM booking_slot WHERE id IN (${marks(all.length)}) ORDER BY id FOR UPDATE`,
+      all
+    )
+  }
+  await releaseHolds(manager, holdIds)
+}
+
+/**
+ * The sweep: holds past their end (by `now`, the database's clock when
+ * null) released a batch at a time, in the same order (holds, then their
+ * slots by id). A hold another run has locked (its cart is changing it)
+ * is skipped, not waited for: the next run takes it if still expired.
+ */
+export async function releaseExpired(manager: Executor, now: Date | null): Promise<number> {
   const gone = await rows(
     manager,
     `DELETE FROM booking_hold WHERE id IN (
        SELECT id FROM booking_hold
-        WHERE expires_at <= COALESCE(?::timestamptz, now()) ${onSlots}
+        WHERE deleted_at IS NULL AND expires_at <= COALESCE(?::timestamptz, now())
         ORDER BY id LIMIT ? FOR UPDATE SKIP LOCKED)
      RETURNING id`,
-    [now, ...(slotIds && slotIds.length > 0 ? slotIds : []), SWEEP_BATCH]
+    [now, SWEEP_BATCH]
   )
   return dropDeletedHolds(
     manager,

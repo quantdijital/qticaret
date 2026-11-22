@@ -12,7 +12,7 @@ const HOUR = 60 * 60 * 1000
 moduleIntegrationTestRunner<BookingModuleService>({
   moduleName: BOOKING_MODULE,
   resolve: "./src/modules/booking",
-  testSuite: ({ service }) => {
+  testSuite: ({ service, MikroOrmWrapper }) => {
     let bookableId: string
 
     beforeEach(async () => {
@@ -20,15 +20,20 @@ moduleIntegrationTestRunner<BookingModuleService>({
       bookableId = bookable.id
     })
 
-    const slot = async (capacity: number, status: "open" | "closed" = "open") =>
-      (
-        await service.createBookingSlots({
-          bookable_id: bookableId,
-          starts_at: new Date(Date.now() + 48 * HOUR),
-          capacity,
-          status,
-        })
-      ).id
+    const slot = async (capacity: number, status: "open" | "closed" = "open") => {
+      const [id] = await service.createSlots([
+        { bookable_id: bookableId, starts_at: new Date(Date.now() + 48 * HOUR), capacity, status },
+      ])
+      return id ?? ""
+    }
+
+    // The generated writers are refused (D3): the test reaches the rows itself
+    const sql = (text: string, params: unknown[] = []) =>
+      MikroOrmWrapper.forkManager().execute(text, params)
+    const expire = (holdId: string | undefined) =>
+      sql(`UPDATE booking_hold SET expires_at = now() - interval '1 minute' WHERE id = ?`, [
+        holdId ?? "",
+      ])
 
     const counters = async (id: string) => {
       const row = await service.retrieveBookingSlot(id)
@@ -102,10 +107,7 @@ moduleIntegrationTestRunner<BookingModuleService>({
     it("leaves an expired hold out of reads and sweeps it", async () => {
       const id = await slot(3)
       const hold = await service.holdUnits("cart_a", [{ slotId: id, units: 3 }], 20)
-      await service.updateBookingHolds({
-        id: hold?.hold_id ?? "",
-        expires_at: new Date(Date.now() - 60 * 1000),
-      })
+      await expire(hold?.hold_id)
 
       const [read] = await service.slotAvailability([id])
       expect(read).toMatchObject({ capacity: 3, sold: 0, held: 0, available: 3 })
@@ -119,10 +121,7 @@ moduleIntegrationTestRunner<BookingModuleService>({
     it("frees an expired hold's places for another cart before the sweep", async () => {
       const id = await slot(2)
       const hold = await service.holdUnits("cart_a", [{ slotId: id, units: 2 }], 20)
-      await service.updateBookingHolds({
-        id: hold?.hold_id ?? "",
-        expires_at: new Date(Date.now() - 60 * 1000),
-      })
+      await expire(hold?.hold_id)
 
       const taken = await service.holdUnits("cart_b", [{ slotId: id, units: 2 }], 20)
 
@@ -204,25 +203,14 @@ moduleIntegrationTestRunner<BookingModuleService>({
         "booking.slot_full"
       )
       // The checks refuse counters past the capacity, or below zero, written any way
-      const overfull = await service
-        .createBookingSlots({
-          bookable_id: bookableId,
-          starts_at: new Date(),
-          capacity: 1,
-          sold: 2,
-        })
-        .then(() => "written")
-        .catch(() => "refused")
-      const negative = await service
-        .createBookingSlots({
-          bookable_id: bookableId,
-          starts_at: new Date(),
-          capacity: 1,
-          held: -1,
-        })
-        .then(() => "written")
-        .catch(() => "refused")
-      expect([overfull, negative]).toEqual(["refused", "refused"])
+      const write = (text: string) =>
+        sql(text, [id])
+          .then(() => "written")
+          .catch(() => "refused")
+      expect([
+        await write(`UPDATE booking_slot SET sold = 2 WHERE id = ?`),
+        await write(`UPDATE booking_slot SET held = -1 WHERE id = ?`),
+      ]).toEqual(["refused", "refused"])
     })
   },
 })

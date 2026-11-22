@@ -1,125 +1,10 @@
 import { generateEntityId } from "@medusajs/framework/utils"
 import { ConflictError, ValidationError } from "../../lib/errors"
-import {
-  asInt,
-  giveBackHeld,
-  normalizeUnits,
-  releaseExpired,
-  rows,
-  takeUnits,
-  unitsBySlot,
-} from "./sql"
-import type { Executor, SlotUnits } from "./sql"
+import { lockSlotsFreeingExpired, rows, unitsBySlot } from "./sql"
+import type { Executor } from "./sql"
 
-/** A cart's hold as it stands after a change; null: it holds nothing now. */
-export interface HoldState {
-  hold_id: string
-  expires_at: Date
-}
-
-// The longest a hold is set or extended to at once (minutes)
-export const MAX_HOLD_MINUTES = 120
-
-function checkMinutes(minutes: number): void {
-  if (!Number.isInteger(minutes) || minutes < 1 || minutes > MAX_HOLD_MINUTES) {
-    throw new ValidationError("booking.hold_minutes_invalid", { field: "hold_minutes" })
-  }
-}
-
-/**
- * Sets how many places a cart holds on each slot named (0 gives a slot
- * back; slots not named keep theirs), the hold ending `minutes` from now.
- * Order of locks, the same in every run: the expired holds on these slots
- * (released first, so a late sweep never blocks a place), then the cart's
- * hold row, then the slots in id order. Any slot refused undoes the whole
- * call (the transaction).
- */
-export async function holdUnits(
-  manager: Executor,
-  cartId: string,
-  items: readonly SlotUnits[],
-  minutes: number
-): Promise<HoldState | null> {
-  checkMinutes(minutes)
-  const wanted = normalizeUnits(items, 0)
-  await releaseExpired(
-    manager,
-    null,
-    wanted.map((item) => item.slotId)
-  )
-  const [hold] = await rows(
-    manager,
-    `INSERT INTO booking_hold (id, cart_id, expires_at, created_at, updated_at)
-     VALUES (?, ?, now() + make_interval(mins => ?), now(), now())
-     ON CONFLICT (cart_id) WHERE deleted_at IS NULL
-     DO UPDATE SET expires_at = EXCLUDED.expires_at, updated_at = now()
-     RETURNING id, expires_at`,
-    [generateEntityId(undefined, "bkhold"), cartId, minutes]
-  )
-  const holdId = String(hold?.["id"])
-  const held = new Map(
-    (
-      await rows(
-        manager,
-        `SELECT slot_id, units FROM booking_hold_slot WHERE hold_id = ? AND deleted_at IS NULL`,
-        [holdId]
-      )
-    ).map((row) => [String(row["slot_id"]), asInt(row["units"])])
-  )
-  for (const { slotId, units } of wanted) {
-    const delta = units - (held.get(slotId) ?? 0)
-    if (delta > 0) {
-      await takeUnits(manager, slotId, delta)
-    } else if (delta < 0) {
-      await giveBackHeld(manager, [{ slotId, units: -delta }])
-    }
-    if (units === 0) {
-      await manager.execute(`DELETE FROM booking_hold_slot WHERE hold_id = ? AND slot_id = ?`, [
-        holdId,
-        slotId,
-      ])
-      held.delete(slotId)
-    } else if (delta !== 0 || !held.has(slotId)) {
-      await manager.execute(
-        `INSERT INTO booking_hold_slot (id, hold_id, slot_id, units, created_at, updated_at)
-         VALUES (?, ?, ?, ?, now(), now())
-         ON CONFLICT (hold_id, slot_id) WHERE deleted_at IS NULL
-         DO UPDATE SET units = EXCLUDED.units, updated_at = now()`,
-        [generateEntityId(undefined, "bkhslot"), holdId, slotId, units]
-      )
-      held.set(slotId, units)
-    }
-  }
-  if (held.size === 0) {
-    await manager.execute(`DELETE FROM booking_hold WHERE id = ?`, [holdId])
-    return null
-  }
-  return { hold_id: holdId, expires_at: new Date(hold?.["expires_at"] as string | Date) }
-}
-
-/**
- * Pushes a live hold's end to at least `minutes` from now (payment
- * started, §5); never shortens it. An expired one is not brought back
- * (its places may already be someone else's): null.
- */
-export async function extendHold(
-  manager: Executor,
-  cartId: string,
-  minutes: number
-): Promise<HoldState | null> {
-  checkMinutes(minutes)
-  const [hold] = await rows(
-    manager,
-    `UPDATE booking_hold
-        SET expires_at = GREATEST(expires_at, now() + make_interval(mins => ?)), updated_at = now()
-      WHERE cart_id = ? AND deleted_at IS NULL AND expires_at > now()
-     RETURNING id, expires_at`,
-    [minutes, cartId]
-  )
-  return hold
-    ? { hold_id: String(hold["id"]), expires_at: new Date(hold["expires_at"] as string | Date) }
-    : null
-}
+export { extendHold, holdUnits, HOLD_LIFETIME_MINUTES, MAX_HOLD_MINUTES } from "./holds"
+export type { HoldState } from "./holds"
 
 /**
  * Turns a hold into an order's booking: each slot's places move from
@@ -253,7 +138,8 @@ export async function updateSlot(
     params.push(value)
   }
   if (changes.capacity !== undefined) {
-    await releaseExpired(manager, null, [slotId])
+    // The slot (and its expired holds' slots) locked in the one order first
+    await lockSlotsFreeingExpired(manager, [slotId])
     set("capacity", changes.capacity)
   }
   if (changes.status !== undefined) {

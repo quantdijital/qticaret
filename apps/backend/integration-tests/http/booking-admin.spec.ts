@@ -139,6 +139,21 @@ medusaIntegrationTestRunner({
       expect((await saveCatalog({ kind: "physical", booking_mode: "none" })).status).toBe(200)
     })
 
+    it("keeps a dated product's variants off stock when the product is saved with them", async () => {
+      await turnOn()
+      await saveCatalog({ kind: "service", booking_mode: "departure" })
+      const [variant] = await variantsOf(getContainer(), productId)
+
+      const saved = await call("post", `/admin/products/${productId}`, {
+        variants: [{ id: variant?.id, manage_inventory: true, allow_backorder: true }],
+      })
+
+      expect(saved.status).toBe(200)
+      expect(await variantsOf(getContainer(), productId)).toEqual([
+        expect.objectContaining({ manage_inventory: false, allow_backorder: false }),
+      ])
+    })
+
     it("keeps settings and departures, refuses a capacity below the places taken", async () => {
       await turnOn()
       const notDated = await call("post", `/admin/products/${productId}/booking-slots`, {

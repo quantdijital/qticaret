@@ -58,6 +58,26 @@ export async function alignBookingVariants(
   return changed
 }
 
+/** The same for every variant of the products named (a product updated with its variants). */
+export async function alignBookingProducts(
+  container: MedusaContainer,
+  productIds: string[]
+): Promise<StockFields[]> {
+  if (productIds.length === 0) {
+    return []
+  }
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const { data } = await query.graph({
+    entity: "product",
+    fields: ["id", "variants.id"],
+    filters: { id: productIds },
+  })
+  const variantIds = (data as { variants?: { id: string }[] | null }[]).flatMap((product) =>
+    (product.variants ?? []).map((variant) => variant.id)
+  )
+  return alignBookingVariants(container, variantIds)
+}
+
 export async function restoreBookingVariants(
   container: MedusaContainer,
   previous: StockFields[]

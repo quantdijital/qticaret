@@ -34,7 +34,7 @@ function checkDates(startsAt: Date, endsAt: Date | null | undefined): void {
   }
 }
 
-/** New departures of a bookable, places all free; undone by deleting them. */
+/** New departures of a bookable, places all free; undone by deleting the ones still empty. */
 export const createSlotsStep = createStep(
   "booking-create-slots",
   async (
@@ -50,7 +50,7 @@ export const createSlotsStep = createStep(
     }
     const service = container.resolve<BookingModuleService>(BOOKING_MODULE)
     // Counters are never taken from the request: every slot starts empty
-    const made = await service.createBookingSlots(
+    const ids = await service.createSlots(
       input.slots.map((slot) => ({
         bookable_id: input.bookable.id,
         starts_at: slot.starts_at,
@@ -60,12 +60,11 @@ export const createSlotsStep = createStep(
         price_adjustments: adjustmentsInKurus(slot.price_adjustments ?? null),
       }))
     )
-    const ids = made.map((slot) => slot.id)
     return new StepResponse(ids, ids)
   },
   async (ids, { container }) => {
     if (ids && ids.length > 0) {
-      await container.resolve<BookingModuleService>(BOOKING_MODULE).deleteBookingSlots(ids)
+      await container.resolve<BookingModuleService>(BOOKING_MODULE).deleteEmptySlots(ids)
     }
   }
 )

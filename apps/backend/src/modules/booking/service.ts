@@ -3,12 +3,15 @@ import {
   InjectManager,
   InjectTransactionManager,
   MedusaContext,
+  MedusaError,
   MedusaService,
 } from "@medusajs/framework/utils"
 import { slotsById, slotsOfBookable } from "./availability"
 import type { SlotAvailability } from "./availability"
 import { cancelBooking, confirmHold, extendHold, holdUnits, updateSlot } from "./counters"
 import type { HoldState, SlotChanges } from "./counters"
+import { createSlots, deleteEmptySlots } from "./slots"
+import type { SlotInput } from "./slots"
 import { releaseExpired, releaseHolds } from "./sql"
 import type { Executor, SlotUnits } from "./sql"
 import { Bookable } from "./models/bookable"
@@ -18,6 +21,7 @@ import { BookingSlot } from "./models/booking-slot"
 
 export type { SlotAvailability } from "./availability"
 export type { HoldState, SlotChanges } from "./counters"
+export type { SlotInput } from "./slots"
 export type { SlotUnits } from "./sql"
 
 const managerOf = (sharedContext: Context): Executor => {
@@ -29,12 +33,20 @@ const managerOf = (sharedContext: Context): Executor => {
   return manager
 }
 
+// No parameters: a call with the generated writer's arguments does not
+// compile, and one that gets past the types still throws
+function refuseCounterWrite(): never {
+  throw new MedusaError(
+    MedusaError.Types.NOT_ALLOWED,
+    "booking counters are written only through the booking service's own methods"
+  )
+}
+
 /**
  * Dated products' bookings (adr/0076 §3). The generated CRUD writes
- * settings, new slots and reads; every change to a slot's counters goes
- * through the methods below, raw SQL with every value bound, each call one
- * transaction (`sql.ts`, `counters.ts`). A slot is never updated through
- * the generated `updateBookingSlots`: it would write counters it read.
+ * settings (bookables) and reads; slots, holds and bookings are written
+ * only through the methods below, raw SQL with every value bound, each
+ * call one transaction (`sql.ts`, `holds.ts`, `counters.ts`, `slots.ts`).
  */
 class BookingModuleService extends MedusaService({
   Bookable,
@@ -96,7 +108,7 @@ class BookingModuleService extends MedusaService({
     now: Date | null = null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<number> {
-    return releaseExpired(managerOf(sharedContext), now, null)
+    return releaseExpired(managerOf(sharedContext), now)
   }
 
   /** A slot's own fields changed, its counters kept; whether it exists. */
@@ -127,6 +139,65 @@ class BookingModuleService extends MedusaService({
   ): Promise<SlotAvailability[]> {
     return slotsOfBookable(managerOf(sharedContext), bookableId, options)
   }
+
+  /** New slots, every one empty (`sold`, `held` 0); their ids in the order given. */
+  @InjectTransactionManager()
+  async createSlots(
+    slots: SlotInput[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<string[]> {
+    return createSlots(managerOf(sharedContext), slots)
+  }
+
+  /** Slots removed only while nothing is sold or held on them (a new slot undone); the ids gone. */
+  @InjectTransactionManager()
+  async deleteEmptySlots(
+    ids: string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<string[]> {
+    return deleteEmptySlots(managerOf(sharedContext), ids)
+  }
+
+  // The counters' rows are written only by the methods above: a generated
+  // writer could set `sold`/`held`, drop a hold without giving its places
+  // back or bring one back. Field initialisers run after the base
+  // constructor, so these replace the generated methods on every instance.
+  override createBookingSlots = refuseCounterWrite
+  override updateBookingSlots = refuseCounterWrite
+  override deleteBookingSlots = refuseCounterWrite
+  override softDeleteBookingSlots = refuseCounterWrite
+  override restoreBookingSlots = refuseCounterWrite
+  override createBookingHolds = refuseCounterWrite
+  override updateBookingHolds = refuseCounterWrite
+  override deleteBookingHolds = refuseCounterWrite
+  override softDeleteBookingHolds = refuseCounterWrite
+  override restoreBookingHolds = refuseCounterWrite
+  override createBookingHoldSlots = refuseCounterWrite
+  override updateBookingHoldSlots = refuseCounterWrite
+  override deleteBookingHoldSlots = refuseCounterWrite
+  override softDeleteBookingHoldSlots = refuseCounterWrite
+  override restoreBookingHoldSlots = refuseCounterWrite
+  override createBookings = refuseCounterWrite
+  override updateBookings = refuseCounterWrite
+  override deleteBookings = refuseCounterWrite
+  override softDeleteBookings = refuseCounterWrite
+  override restoreBookings = refuseCounterWrite
+  override createBookingSlotUses = refuseCounterWrite
+  override updateBookingSlotUses = refuseCounterWrite
+  override deleteBookingSlotUses = refuseCounterWrite
+  override softDeleteBookingSlotUses = refuseCounterWrite
+  override restoreBookingSlotUses = refuseCounterWrite
 }
+
+/** The generated writers this service replaces, for the test that calls each. */
+export const REFUSED_WRITERS = [
+  "BookingSlots",
+  "BookingHolds",
+  "BookingHoldSlots",
+  "Bookings",
+  "BookingSlotUses",
+].flatMap((name) =>
+  ["create", "update", "delete", "softDelete", "restore"].map((verb) => `${verb}${name}`)
+)
 
 export default BookingModuleService

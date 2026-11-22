@@ -1,5 +1,6 @@
 import { StepResponse } from "@medusajs/framework/workflows-sdk"
 import { updateProductsWorkflow } from "@medusajs/medusa/core-flows"
+import { alignBookingProducts, restoreBookingVariants } from "../catalog/align-booking"
 import { alignProductProfiles, restoreProductProfiles } from "../catalog/align-shipping"
 import { claimProductPaths, unclaimPaths } from "../catalog/entity-paths"
 import { addBackorderLevels, removeBackorderLevels } from "../stock/backorder-levels"
@@ -15,11 +16,15 @@ updateProductsWorkflow.hooks.productsUpdated(
     const claims = await claimProductPaths(container, ids)
     // F3.2: a digital or service product given a shipping profile again leaves it
     const profiles = await alignProductProfiles(container, ids)
+    // adr/0076 K2: a dated product's variants stay off stock, set before the
+    // backorder levels so none gets a stock level for selling past stock
+    const booking = await alignBookingProducts(container, ids)
     const levels = await addBackorderLevels(container, { product_ids: ids })
-    return new StepResponse(undefined, { claims, profiles, levels })
+    return new StepResponse(undefined, { claims, profiles, booking, levels })
   },
   async (undo, { container }) => {
     await removeBackorderLevels(container, undo?.levels ?? [])
+    await restoreBookingVariants(container, undo?.booking ?? [])
     await restoreProductProfiles(container, undo?.profiles ?? [])
     await unclaimPaths(container, undo?.claims ?? [])
   }
