@@ -17,8 +17,12 @@ async function ringOrderBell(
   container: Container,
   orderId: string,
   alert: BookingAlert,
-  extra: { slot_id?: string } = {}
+  extra: { slot_id?: string; once?: boolean } = {}
 ): Promise<void> {
+  // Once per order (and departure): rung again, Medusa skips the same key (adr/0076 Ek D7a)
+  const key = extra.once
+    ? `booking.${alert}:${orderId}${extra.slot_id ? `:${extra.slot_id}` : ""}`
+    : null
   try {
     const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
       entity: "order",
@@ -32,6 +36,7 @@ async function ringOrderBell(
       template: "admin-ui",
       trigger_type: `booking.${alert}`,
       resource_id: orderId,
+      ...(key ? { idempotency_key: key } : {}),
       data: {
         kind: `booking_${alert}`,
         order_id: orderId,
@@ -69,13 +74,15 @@ export const alertTravelersAttachFailed = (container: Container, orderId: string
  * sent on its own (adr/0076 Ek D7a, review O1/O2,
  * `booking.refund_by_hand`): a bank transfer or cash taken by hand, a
  * gift card or store credit used, or a share above what the payments
- * hold. The places are given back; staff refund it by hand.
+ * hold. The places are given back; staff refund it by hand. Once per
+ * departure: a cancel tried again rings it again safely.
  */
 export const alertRefundByHand = (
   container: Container,
   orderId: string,
   slotId: string
-): Promise<void> => ringOrderBell(container, orderId, "refund_by_hand", { slot_id: slotId })
+): Promise<void> =>
+  ringOrderBell(container, orderId, "refund_by_hand", { slot_id: slotId, once: true })
 
 /**
  * Rings the panel's bell for a booking on a cancelled departure whose

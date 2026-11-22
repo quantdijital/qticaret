@@ -20,8 +20,15 @@ type Container = Pick<MedusaContainer, "resolve">
 
 interface OrderLine {
   id: string
-  quantity: unknown
+  quantity?: unknown
+  detail?: { quantity?: unknown } | null
   metadata?: unknown
+}
+
+/** A line's units: Medusa fills them only with `items.detail.quantity` asked (cancel-plan.ts). */
+export const unitsOfLine = (line: OrderLine): number => {
+  const units = Number(line.detail?.quantity ?? line.quantity ?? 0)
+  return Number.isFinite(units) ? units : 0
 }
 
 const service = (container: Container) => container.resolve<BookingModuleService>(BOOKING_MODULE)
@@ -30,7 +37,14 @@ const service = (container: Container) => container.resolve<BookingModuleService
 async function datedLinesOf(container: Container, orderId: string) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
-    fields: ["id", "status", "items.id", "items.quantity", "items.metadata"],
+    fields: [
+      "id",
+      "status",
+      "items.id",
+      "items.quantity",
+      "items.detail.quantity",
+      "items.metadata",
+    ],
     filters: { id: orderId },
   })
   const order = data[0] as { status?: string | null; items?: (OrderLine | null)[] } | undefined
@@ -46,7 +60,7 @@ async function datedLinesOf(container: Container, orderId: string) {
 function unitsOfMarks(lines: { line: OrderLine; mark: BookingMark }[]): SlotUnits[] {
   const totals = new Map<string, number>()
   for (const { line, mark } of lines) {
-    totals.set(mark.slot_id, (totals.get(mark.slot_id) ?? 0) + Number(line.quantity) * mark.pax)
+    totals.set(mark.slot_id, (totals.get(mark.slot_id) ?? 0) + unitsOfLine(line) * mark.pax)
   }
   return [...totals.entries()]
     .filter(([, units]) => units > 0)

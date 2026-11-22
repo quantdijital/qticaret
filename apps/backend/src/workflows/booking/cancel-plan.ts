@@ -13,7 +13,7 @@ import { kurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import { planRefund } from "../../lib/orders"
 import type { RefundRequest } from "../../lib/orders"
-import { isOfflineProvider } from "../../lib/payments/checkout"
+import { isHostedFormProvider } from "../../lib/payments/checkout"
 import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
 import type { LiveUse } from "../../modules/booking/service"
@@ -35,7 +35,7 @@ export type CancelMode = "tier" | "full"
 
 /**
  * Why the refund is not sent on its own but left to staff (review O1,
- * O2): `offline`, money taken by hand (a bank transfer, cash on
+ * O2): `offline`, money not taken by a hosted card form (a bank transfer, cash on
  * delivery, an edit's difference) goes back by hand; `credit`, part was
  * paid with a gift card or store credit, which must go back to the card
  * or the account, never turned into cash; `exceeds`, the departure's
@@ -232,6 +232,18 @@ export function manualRefundOf(facts: {
 }
 
 /**
+ * Whether the money taken goes back by hand (security review of D7a): only
+ * one payment taken through a hosted card form (PayTR, iyzico) is refunded
+ * on its own; any other way (a bank transfer, cash on delivery, the
+ * system provider, one not known yet) or more than one payment is staff's.
+ * An allow list: a new way to pay is by hand until named here. Pure.
+ */
+export const takenByHandOf = (
+  taken: readonly ({ provider_id?: string | null } | null | undefined)[]
+): boolean =>
+  taken.length > 1 || taken.some((payment) => !isHostedFormProvider(payment?.provider_id ?? ""))
+
+/**
  * The plan for cancelling the order's departure on `slotId` now. Null
  * when the order has no live departure there (none, or cancelled
  * already). `mode: "full"` gives everything back (staff's choice, the
@@ -262,8 +274,7 @@ export async function planBookingCancel(
   const taken = (order.payment_collections ?? []).flatMap((collection) =>
     (collection?.payments ?? []).filter((payment) => Boolean(payment?.captured_at))
   )
-  const takenByHand =
-    taken.length > 1 || taken.some((payment) => isOfflineProvider(payment?.provider_id ?? ""))
+  const takenByHand = takenByHandOf(taken)
   const refund = rule ? money.refund : kurus(0)
   const items = (order.items ?? []).filter((item) => item !== null)
   return {

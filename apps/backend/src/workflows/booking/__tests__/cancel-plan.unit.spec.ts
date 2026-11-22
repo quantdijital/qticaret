@@ -1,6 +1,6 @@
 import { kurus } from "../../../lib/money"
 import { cancelsOrder, sendsRefund } from "../cancel"
-import { customerCancelRefusal, manualRefundOf } from "../cancel-plan"
+import { customerCancelRefusal, manualRefundOf, takenByHandOf } from "../cancel-plan"
 
 const DAY = 24 * 60 * 60 * 1000
 const NOW = new Date("2026-12-01T09:00:00Z")
@@ -44,6 +44,33 @@ describe("a departure's refund left to staff (review O1, O2)", () => {
     expect(sendsRefund({ request, refund: kurus(100), manual: "offline" })).toBe(false)
     expect(sendsRefund({ request, refund: kurus(100), manual: "credit" })).toBe(false)
     expect(sendsRefund({ request: null, refund: kurus(0), manual: null })).toBe(false)
+  })
+})
+
+describe("money taken by hand: an allow list of hosted card forms (D7a security review)", () => {
+  it("sends back one payment taken by PayTR or iyzico on its own", () => {
+    expect(takenByHandOf([{ provider_id: "pp_paytr_paytr" }])).toBe(false)
+    expect(takenByHandOf([{ provider_id: "pp_iyzico_iyzico" }])).toBe(false)
+    expect(takenByHandOf([])).toBe(false)
+  })
+
+  it("leaves every other way to staff: transfer, cash, the system provider, an unknown one", () => {
+    for (const provider of [
+      "pp_bank-transfer_bank-transfer",
+      "pp_cod_cod",
+      "pp_system_default",
+      "pp_stripe_stripe",
+      "",
+    ]) {
+      expect(takenByHandOf([{ provider_id: provider }])).toBe(true)
+    }
+    expect(takenByHandOf([null])).toBe(true)
+  })
+
+  it("leaves more than one payment to staff, even two by card", () => {
+    expect(
+      takenByHandOf([{ provider_id: "pp_paytr_paytr" }, { provider_id: "pp_paytr_paytr" }])
+    ).toBe(true)
   })
 })
 

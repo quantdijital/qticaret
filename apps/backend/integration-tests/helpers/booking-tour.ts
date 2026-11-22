@@ -1,8 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { createCartWorkflow } from "@medusajs/medusa/core-flows"
+import type { FakePaytr } from "@qticaret/testing"
 import type { HttpClient } from "./http"
 import { settle } from "./http"
-import { PAYTR_ADDRESS } from "./paytr"
+import { PAYTR_ADDRESS, notifyPaytr, orderOfCart, startPaytrPayment } from "./paytr"
 import type { StockShop } from "./stock"
 
 /** adr/0076 D6 suites' shared setup: a dated tour asking for travelers, an empty cart. */
@@ -37,6 +38,35 @@ export async function emptyCart(container: MedusaContainer, shop: StockShop): Pr
     },
   })
   return result.id
+}
+
+/**
+ * The cart paid by card as a shopper does: PayTR's form (the fake server,
+ * `PAYTR_BASE_URL`), its notification posted and acknowledged; the order
+ * it became. The shop's PayTR account must be connected.
+ */
+export async function payByPaytr(
+  http: HttpClient,
+  container: MedusaContainer,
+  fake: FakePaytr,
+  storeHeaders: Record<string, string>,
+  cartId: string
+): Promise<string> {
+  const reference = await startPaytrPayment(http, storeHeaders, cartId)
+  const notified = await notifyPaytr(http, fake.pay(reference))
+  if (notified.status !== 200) {
+    throw new Error(`PayTR's notification answered ${String(notified.status)}`)
+  }
+  // PayTR counts the payment acknowledged once the shop answered "OK"
+  const payment = fake.payments.get(reference)
+  if (payment) {
+    payment.notified = true
+  }
+  const orderId = await orderOfCart(container, cartId)
+  if (!orderId) {
+    throw new Error("the paid cart became no order")
+  }
+  return orderId
 }
 
 export interface Tour {

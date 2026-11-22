@@ -3,7 +3,7 @@ import { BOOKING_KEY } from "../../../lib/booking/cart-lines"
 import { logger } from "../../../lib/logging"
 import { BOOKING_MODULE } from "../../../modules/booking"
 import { refuseBookingEdits } from "../order-edit"
-import { confirmOrderBookings } from "../orders"
+import { confirmOrderBookings, unitsOfLine } from "../orders"
 
 const mark = { hold_id: "bkhold_1", slot_id: "bkslot_1", starts_at: "2026-12-01T09:00:00Z", pax: 1 }
 const datedLine = { id: "ordli_1", quantity: 2, metadata: { [BOOKING_KEY]: mark } }
@@ -76,6 +76,43 @@ describe("a dated order's places (adr/0076 Ek, review D1, O4)", () => {
         data: expect.objectContaining({ order_id: "order_1", display_id: "42" }) as unknown,
       })
     )
+  })
+
+  it("takes the places again by the line's units from its detail (D7a security review)", async () => {
+    const bookings = bookingService({
+      confirmHold: jest
+        .fn()
+        .mockRejectedValueOnce({ safeMessage: "booking.hold_missing" })
+        .mockResolvedValue({ booking_id: "bkng_2", created: true }),
+      holdUnits: jest.fn().mockResolvedValue({ hold_id: "bkhold_order" }),
+    })
+    // As Medusa answers: the line's units only under `detail` once asked for
+    const line = { id: "ordli_1", detail: { quantity: 3 }, metadata: datedLine.metadata }
+    const { container, graph } = containerOf(
+      { order: [{ id: "order_1", status: "pending", items: [line] }] },
+      bookings
+    )
+    const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
+
+    expect(await confirmOrderBookings(container, "order_1")).toBe("retaken")
+    expect(bookings.holdUnits).toHaveBeenCalledWith(
+      "order:order_1",
+      [{ slotId: "bkslot_1", units: 3 }],
+      10
+    )
+    expect(graph).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: expect.arrayContaining(["items.detail.quantity"]) as unknown,
+      })
+    )
+    warn.mockRestore()
+  })
+
+  it("counts a line with no units read as none, never NaN", () => {
+    expect(unitsOfLine({ id: "l", detail: { quantity: 2 } })).toBe(2)
+    expect(unitsOfLine({ id: "l", quantity: 4 })).toBe(4)
+    expect(unitsOfLine({ id: "l" })).toBe(0)
+    expect(unitsOfLine({ id: "l", quantity: "x" })).toBe(0)
   })
 
   it("moves the cart's travelers to the booking it confirms (adr/0076 §7)", async () => {
