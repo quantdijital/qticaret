@@ -1,6 +1,11 @@
 "use client"
 
-import type { SaveTravelers, TravelerGroupView, TravelersStepView } from "@qticaret/ui"
+import type {
+  SaveTravelers,
+  TravelerGroupView,
+  TravelersResult,
+  TravelersStepView,
+} from "@qticaret/ui"
 import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { FieldError, SelectField, TextField } from "./fields"
 
@@ -43,7 +48,10 @@ export function TravelersForm({
   save: SaveTravelers
   words: TravelersWords
 }) {
-  const { state, pending, form } = useKeptForm(save)
+  const kept = useKeptForm(save)
+  const { pending, form } = kept
+  // The hook keeps what the action answered: this action's answers name a field
+  const state = kept.state as TravelersResult
   const message = state.error ? (words.errors[state.error] ?? words.fallback) : null
   // Each group's first traveler's number
   const firsts = step.groups.map((_, index) =>
