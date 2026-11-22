@@ -55,6 +55,9 @@ export function listField(
   if (section.type === "stats") {
     return row(parts, "items", section.items.length, ["value", "label", "text"])
   }
+  if (section.type === "photo_collage") {
+    return row(parts, "items", section.items.length, ["caption", "image", "link"])
+  }
   if (section.type === "steps") {
     return row(parts, "items", section.items.length, ["title", "text"])
   }
