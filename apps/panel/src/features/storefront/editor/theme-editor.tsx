@@ -20,6 +20,7 @@ import type { EditorView } from "./editor-layout"
 import { EditorShell } from "./editor-shell"
 import { EditorTree } from "./editor-tree"
 import { SectionChooser } from "./section-chooser"
+import { SectionFlagsProvider } from "./section-flags-provider"
 import type { Adding } from "./section-chooser"
 import { useEditorSidebar } from "./editor-sidebar"
 import { EditorTopBar } from "./editor-top-bar"
@@ -227,83 +228,86 @@ export function ThemeEditor({
   )
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-background">
-      <EditorTopBar
-        layout={shape}
-        onExit={() => void exit()}
-        page={page}
-        onPage={place.choosePage}
-        pagePicker={pages.picker}
-        view={view}
-        onView={setView}
-        sidebar={sidebar.shown}
-        onSidebar={sidebar.toggle}
-        canUndo={state.past.length > 0}
-        canRedo={state.future.length > 0}
-        onUndo={undo}
-        onRedo={redo}
-        status={
-          <SaveStatus
-            status={autosave.status}
-            dirty={autosave.dirty}
-            blocked={problems.size > 0}
-            onRetry={autosave.retry}
-          />
-        }
-        tools={tools}
-        publish={
-          <PublishButton
-            actions={actions}
-            changed={changed}
-            doc={doc}
-            editing={place.contentPage.id}
-          />
-        }
-      />
-      <OpenedSectionContext.Provider value={found ? found.section.id : null}>
-        <SectionHoverContext.Provider value={hover}>
-          <EditorShell
-            layout={shape}
-            view={view}
-            sidebar={sidebar.shown}
-            tree={tree}
-            form={form}
-            formKey={formKey}
-            preview={
-              <PreviewFrame
-                preview={preview}
-                device={device}
-                onDevice={setDevice}
-                sample={
-                  page === "home" || page === "content" ? null : (
-                    <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
-                  )
-                }
-                missing={target.missing}
-                notice={notice}
-                announce={announce}
-                finding={target.finding}
-              />
-            }
-          />
-        </SectionHoverContext.Provider>
-      </OpenedSectionContext.Provider>
-      <SectionChooser
-        doc={shownDoc}
-        page={page}
-        content={place.contentPage.id}
-        adding={adding}
-        act={pages.act}
-        onClose={() => {
-          setAdding(null)
-        }}
-        onAdded={(id) => {
-          markNew(id)
-          setAdding(null)
-          setOpened({ kind: "section", id })
-        }}
-      />
-      <LeaveGuard when={autosave.dirty} />
-    </div>
+    // Flagged sections offered and marked by the shop's flags (adr/0077 §8)
+    <SectionFlagsProvider>
+      <div className="flex h-dvh flex-col overflow-hidden bg-background">
+        <EditorTopBar
+          layout={shape}
+          onExit={() => void exit()}
+          page={page}
+          onPage={place.choosePage}
+          pagePicker={pages.picker}
+          view={view}
+          onView={setView}
+          sidebar={sidebar.shown}
+          onSidebar={sidebar.toggle}
+          canUndo={state.past.length > 0}
+          canRedo={state.future.length > 0}
+          onUndo={undo}
+          onRedo={redo}
+          status={
+            <SaveStatus
+              status={autosave.status}
+              dirty={autosave.dirty}
+              blocked={problems.size > 0}
+              onRetry={autosave.retry}
+            />
+          }
+          tools={tools}
+          publish={
+            <PublishButton
+              actions={actions}
+              changed={changed}
+              doc={doc}
+              editing={place.contentPage.id}
+            />
+          }
+        />
+        <OpenedSectionContext.Provider value={found ? found.section.id : null}>
+          <SectionHoverContext.Provider value={hover}>
+            <EditorShell
+              layout={shape}
+              view={view}
+              sidebar={sidebar.shown}
+              tree={tree}
+              form={form}
+              formKey={formKey}
+              preview={
+                <PreviewFrame
+                  preview={preview}
+                  device={device}
+                  onDevice={setDevice}
+                  sample={
+                    page === "home" || page === "content" ? null : (
+                      <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
+                    )
+                  }
+                  missing={target.missing}
+                  notice={notice}
+                  announce={announce}
+                  finding={target.finding}
+                />
+              }
+            />
+          </SectionHoverContext.Provider>
+        </OpenedSectionContext.Provider>
+        <SectionChooser
+          doc={shownDoc}
+          page={page}
+          content={place.contentPage.id}
+          adding={adding}
+          act={pages.act}
+          onClose={() => {
+            setAdding(null)
+          }}
+          onAdded={(id) => {
+            markNew(id)
+            setAdding(null)
+            setOpened({ kind: "section", id })
+          }}
+        />
+        <LeaveGuard when={autosave.dirty} />
+      </div>
+    </SectionFlagsProvider>
   )
 }

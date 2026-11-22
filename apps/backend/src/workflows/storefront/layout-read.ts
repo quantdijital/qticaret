@@ -11,6 +11,8 @@ import { shownSettings } from "../../lib/storefront/layout-settings"
 import { newsletterImages, printedNewsletter } from "../../lib/storefront/sections/newsletter"
 import { richTextImages } from "../../lib/storefront/sections/rich-text"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
+import { withoutTypesOff } from "../../lib/storefront/sections/requires"
+import { offKey, sectionTypesOff } from "./layout-flags"
 import type { shopInfoValues } from "../shop/info-values"
 import { editionKey, layoutEdition } from "./layout-row"
 import { publishedDocument } from "./layout-published"
@@ -47,19 +49,25 @@ export const imageUrls = (section: BodySection): string[] =>
  * names' as written here, else as the old storefront fields hold them; the
  * theme's settings as written here, else as the theme section holds them
  * (adr/0063 §3). The menu set is the preview's to show (`draftMenus`):
- * the live menus are the module's, so it is null here.
+ * the live menus are the module's, so it is null here. A section whose
+ * feature flag is off (adr/0077 §8) is left out, kept in the document.
  */
 export async function storeLayout(
   container: MedusaContainer,
   stored: LayoutDocument,
   channels: readonly string[] | null = null,
-  now = new Date()
+  now = new Date(),
+  off?: ReadonlyMap<string, string>
 ) {
-  const legacy = await legacySettings(container)
+  const [legacy, typesOff] = await Promise.all([
+    legacySettings(container),
+    off ?? sectionTypesOff(container),
+  ])
   // A design from before the main sections reads them in, the header's from the theme's
   const doc = withMainSections(stored, shownSettings(stored.settings, legacy).theme.header)
-  const showing = <T extends Parameters<typeof isShowing>[0]>(group: readonly T[]) =>
-    group.filter((section) => isShowing(section, now))
+  const showing = <T extends Parameters<typeof isShowing>[0] & { type: string }>(
+    group: readonly T[]
+  ) => withoutTypesOff(group, typesOff).filter((section) => isShowing(section, now))
   const header = showing(doc.header).filter(
     (section): section is Exclude<typeof section, { type: "header_bar" }> =>
       section.type !== "header_bar"
@@ -229,13 +237,14 @@ export async function publishedLayout(
   channels: readonly string[] | null = null
 ): Promise<Shown> {
   // The revision only: the documents are read on a miss (security review 2026-11-19, S2)
-  const edition = await layoutEdition(container)
+  const [edition, off] = await Promise.all([layoutEdition(container), sectionTypesOff(container)])
   const doc = edition?.published ? editionKey(edition) : "default"
-  const key = `${doc}|${channels ? [...new Set(channels)].sort().join(",") : "*"}`
+  // A flag turned on or off is seen at once, as a new publication is (adr/0077 §8)
+  const key = `${doc}|${channels ? [...new Set(channels)].sort().join(",") : "*"}|${offKey(off)}`
   return shownCache(key, async () => {
     const shown = edition?.published
       ? await publishedDocument(container, edition)
       : await defaultLayout(container)
-    return storeLayout(container, shown, channels)
+    return storeLayout(container, shown, channels, new Date(), off)
   })
 }

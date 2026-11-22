@@ -43,6 +43,11 @@ export interface PresetLookups {
    * `LAYOUT_LIMITS.pages` is left out, never the whole look refused.
    */
   laid_out?: readonly string[]
+  /**
+   * Section types whose feature flag is off in this shop, each with its flag
+   * (adr/0077 §8, `sectionTypesOff`): such a section is dropped, `feature_off`.
+   */
+  types_off?: ReadonlyMap<string, string>
 }
 
 export interface SkippedRef {
@@ -58,8 +63,14 @@ export interface SkippedRef {
   kept_live?: boolean
   /** A content page left out: its usual name as the preset gives it (`Hakkımızda`), for the panel to say. */
   name?: string
-  /** Why a content page's layout was left out: the shop has no such page, or no room for another layout. */
-  reason?: "missing" | "limit"
+  /**
+   * Why it was left out: a content page's layout, the shop having no such
+   * page (`missing`) or no room for another (`limit`); a section, its
+   * feature flag off in this shop (`feature_off`, adr/0077 §8; `ref` its type).
+   */
+  reason?: "missing" | "limit" | "feature_off"
+  /** A section dropped for its flag: the flag (`catalog.booking`). */
+  flag?: string
 }
 
 export interface PresetGroups {
@@ -111,6 +122,13 @@ function standing(sections: readonly unknown[], where: string, report: Report): 
     const at = `${where}.${sectionId(section)}`
     const shown = new Set<string>()
     const { lookups, skipped } = report
+    const type = isObject(section) && typeof section["type"] === "string" ? section["type"] : null
+    const flag = type === null ? undefined : lookups.types_off?.get(type)
+    if (type !== null && flag !== undefined) {
+      skipped.push({ where: at, ref: type, reason: "feature_off", flag })
+      report.dropped.push(at)
+      return []
+    }
     const resolved = resolveSection(section, { lookups, where: at, skipped, images: shown })
     if (resolved === null) {
       report.dropped.push(at)

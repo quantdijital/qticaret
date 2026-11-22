@@ -3,9 +3,11 @@ import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
 import type { BodySection, FooterSection, Placement } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
-import { isScheduled } from "@/features/storefront/layout/sections"
+import { CAPABILITY_GROUPS } from "@qticaret/types"
+import { isScheduled, offCapability } from "@/features/storefront/layout/sections"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { SectionRow } from "./section-row"
+import { useSectionFlags } from "./section-flags"
 import type { DropPlace, RowDrag } from "./section-row"
 
 interface SectionListProps<S extends BodySection | FooterSection> {
@@ -61,6 +63,7 @@ export function SectionList<S extends BodySection | FooterSection>({
   onRemove,
 }: SectionListProps<S>) {
   const { t } = useTranslation()
+  const flags = useSectionFlags()
   const [dragged, setDragged] = useState<string | null>(null)
   const [over, setOver] = useState<{ id: string; place: DropPlace } | null>(null)
   const other: Placement | null = placement ? (placement === "top" ? "bottom" : "top") : null
@@ -96,7 +99,13 @@ export function SectionList<S extends BodySection | FooterSection>({
   return (
     <ol aria-label={label} className="flex flex-col gap-0.5">
       {sections.map((section, index) => {
-        const { name, detail } = sectionLabel(t, section, inFooter)
+        const { name, detail: type } = sectionLabel(t, section, inFooter)
+        // Kept while its feature flag is off, not drawn (adr/0077 §8): the row says why
+        const off = offCapability(section.type, flags)
+        const offNote = off
+          ? t("storefront.editor.row.offNote", { capability: t(CAPABILITY_GROUPS[off].label) })
+          : null
+        const detail = [type, offNote].filter((part) => part !== null).join(" · ") || null
         const move = (to: number) => () => {
           dispatch({ type: "move", id: section.id, to })
         }
@@ -110,6 +119,7 @@ export function SectionList<S extends BodySection | FooterSection>({
             visible={section.visible}
             scheduled={isScheduled(section)}
             problem={problems.has(section.id)}
+            off={off !== null}
             onOpen={() => {
               onOpen(section.id)
             }}

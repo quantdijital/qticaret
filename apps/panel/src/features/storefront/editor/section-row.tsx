@@ -53,6 +53,11 @@ interface SectionRowProps {
   visible: boolean
   scheduled: boolean
   problem: boolean
+  /**
+   * Its feature flag is off (adr/0077 §8): kept, not drawn on the storefront;
+   * marked "Kapalı", `detail` says why.
+   */
+  off?: boolean
   onOpen: () => void
   onToggle: () => void
   onRemove: () => void
@@ -84,6 +89,7 @@ export function SectionRow({
   visible,
   scheduled,
   problem,
+  off = false,
   onOpen,
   onToggle,
   onRemove,
@@ -169,7 +175,7 @@ export function SectionRow({
           className={cn(
             "flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left text-sm",
             current && "font-medium",
-            !visible && "text-muted-foreground"
+            (!visible || off) && "text-muted-foreground"
           )}
           onClick={onOpen}
         >
@@ -181,6 +187,11 @@ export function SectionRow({
               aria-label={t(`${R}.problem`)}
               className="size-3.5 shrink-0 text-destructive-text"
             />
+          ) : null}
+          {off ? (
+            <span className="shrink-0 rounded-sm border px-1 text-[11px] leading-4 text-muted-foreground">
+              {t(`${R}.off`)}
+            </span>
           ) : null}
           {scheduled ? (
             <Clock

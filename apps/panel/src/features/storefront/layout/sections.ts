@@ -11,7 +11,16 @@ import type {
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
-import { CONTENT_PAGE_SECTION_TYPES, PAGE_LAYOUT_LIMITS, PAGE_ONLY_TYPES } from "@qticaret/types"
+import {
+  CAPABILITY_GROUPS,
+  CONTENT_PAGE_SECTION_TYPES,
+  PAGE_LAYOUT_LIMITS,
+  PAGE_ONLY_TYPES,
+  SECTION_REQUIRES,
+  capabilityOf,
+  sectionAllowed,
+} from "@qticaret/types"
+import type { Capability } from "@qticaret/types"
 import { LAYOUT_LIMITS } from "@/features/storefront/api/layout"
 
 /**
@@ -100,6 +109,48 @@ export const GROUP_TYPES: Readonly<Record<PageGroup, readonly BodySectionType[]>
   product: PRODUCT_TYPES,
   category: CATEGORY_TYPES,
   pages: PAGE_TYPES,
+}
+
+/**
+ * The shop's feature flags as the editor reads them for flagged sections
+ * (adr/0077 §8): the flags on, and which section type needs which
+ * (`SECTION_REQUIRES`; a test passes its own).
+ */
+export interface SectionFlags {
+  on: ReadonlySet<string>
+  requires: Readonly<Record<string, string>>
+}
+
+export const NO_FLAGS: SectionFlags = { on: new Set(), requires: SECTION_REQUIRES }
+
+/** The capability a section type needs that is off in this shop, else null (it shows). */
+export const offCapability = (type: string, flags: SectionFlags): Capability | null =>
+  sectionAllowed(type, (flag) => flags.on.has(flag), flags.requires)
+    ? null
+    : capabilityOf(type, flags.requires)
+
+/** The types offered: those whose flag is off are not (adr/0077 §8). */
+export const allowedTypes = <T extends string>(types: readonly T[], flags: SectionFlags): T[] =>
+  types.filter((type) => offCapability(type, flags) === null)
+
+/** A page body's types as its chooser offers them, those whose flag is off left out. */
+export const typesFor = (group: PageGroup, flags: SectionFlags): BodySectionType[] =>
+  allowedTypes(GROUP_TYPES[group], flags)
+
+/**
+ * The chooser's groups: the sections every shop may add first, then each
+ * capability's under its name ("Tarihli ürünler"), in the given order.
+ */
+export function chooserGroups<T extends string>(
+  types: readonly T[],
+  flags: SectionFlags
+): { capability: Capability | null; types: T[] }[] {
+  const general = types.filter((type) => capabilityOf(type, flags.requires) === null)
+  const gated = (Object.keys(CAPABILITY_GROUPS) as Capability[]).map((capability) => ({
+    capability,
+    types: types.filter((type) => capabilityOf(type, flags.requires) === capability),
+  }))
+  return [{ capability: null, types: general }, ...gated].filter((group) => group.types.length > 0)
 }
 
 /** The sections a page body holds at most (a content page: each page's own). */

@@ -6,7 +6,7 @@ import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, PageTextSectionView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
-import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
+import { legalIdentity, siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { heroView, priceBandsView, withCounts } from "./catalog"
@@ -30,6 +30,7 @@ import {
 } from "./section-data"
 import { relatedView } from "./related"
 import { richTextView } from "./rich-text"
+import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
@@ -235,12 +236,16 @@ export async function sectionViews(
   t: Translate,
   context: SectionContext = {}
 ): Promise<HomeSectionView[]> {
+  // A section whose feature flag is off is not drawn (adr/0077 §8); the frame read only when one needs a flag
+  const allowed = needsFlags(sections)
+    ? withFeatures(sections, (await storefrontSettings()).features)
+    : sections
   const [views, editing] = await Promise.all([
-    Promise.all(sections.map((section) => sectionView(section, t, context))),
+    Promise.all(allowed.map((section) => sectionView(section, t, context))),
     isEditorSession(),
   ])
   return views.flatMap((view, index) => {
-    const section = sections[index]
+    const section = allowed[index]
     if (!view || !section) {
       return []
     }

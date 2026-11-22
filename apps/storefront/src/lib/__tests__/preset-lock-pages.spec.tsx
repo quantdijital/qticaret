@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import type { ReactElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import type { Resolution } from "@qticaret/types"
-import { menusOf } from "@/test/preset-lock/fake-store-api"
+import { menusOf, packFeatures, shopFeatures } from "@/test/preset-lock/fake-store-api"
 import { pageAnswer } from "@/test/preset-lock/fake-page-api"
 import { PAGE_CATEGORY, PAGE_CATEGORY_PATH, PAGE_PRODUCT } from "@/test/preset-lock/fixture-pages"
 import { htmlLines } from "@/test/preset-lock/html-lines"
@@ -114,6 +114,7 @@ describe("the preset lock's product and category pages (docs/tema/bilesen-standa
     const answer = presetAnswer(preset)
     store.layout = answer.layout
     store.menus = menusOf(preset.menus)
+    shopFeatures.current = packFeatures(preset.pack)
     const notes = fixtureNotes(answer)
     const files = [
       { file: "product.html", html: header(key, notes) + htmlLines(await productHtml()) },
