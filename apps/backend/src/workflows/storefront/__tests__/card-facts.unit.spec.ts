@@ -64,6 +64,15 @@ describe("quickAddOf", () => {
     ).toBeNull()
   })
 
+  it("leaves out a dated product: it is booked on its page (adr/0076 §5)", () => {
+    expect(
+      quickAddOf({ ...one, product_extension: { booking_mode: "departure" } }, "in_stock", false)
+    ).toBeNull()
+    expect(
+      quickAddOf({ ...one, product_extension: { booking_mode: "none" } }, "in_stock", false)
+    ).toEqual({ variant_id: "variant_1" })
+  })
+
   it("leaves out a required add-on while the shop offers add-ons", () => {
     const product = { ...one, product_extension: { addons: required } }
     expect(quickAddOf(product, "in_stock", true)).toBeNull()

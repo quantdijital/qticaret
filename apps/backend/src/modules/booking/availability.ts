@@ -65,6 +65,34 @@ export async function slotsById(manager: Executor, ids: string[]): Promise<SlotA
   return found.map(availabilityOf)
 }
 
+/**
+ * Several bookables' open slots with a place free now, starting after
+ * `from`, at most `limit` each, by bookable and start: a page of cards in
+ * one statement (adr/0076 §10). The sales' close is the caller's to apply.
+ */
+export async function openSlotsOf(
+  manager: Executor,
+  bookableIds: readonly string[],
+  options: { from: Date; limit: number }
+): Promise<SlotAvailability[]> {
+  if (bookableIds.length === 0) {
+    return []
+  }
+  const found = await rows(
+    manager,
+    `SELECT * FROM (
+       SELECT x.*, ROW_NUMBER() OVER (PARTITION BY x.bookable_id ORDER BY x.starts_at, x.id) AS place
+         FROM (${SELECT} AND s.bookable_id IN (${marks(bookableIds.length)})
+                 AND s.status = 'open' AND s.starts_at > ?) x
+        WHERE x.capacity - x.sold - x.held_live > 0
+     ) y
+     WHERE y.place <= ?
+     ORDER BY y.bookable_id, y.starts_at, y.id`,
+    [...bookableIds, options.from, options.limit]
+  )
+  return found.map(availabilityOf)
+}
+
 /** A bookable's slots by start, from `from` on when given, at most `limit`. */
 export async function slotsOfBookable(
   manager: Executor,
