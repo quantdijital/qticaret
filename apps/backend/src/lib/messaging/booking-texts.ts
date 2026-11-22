@@ -42,7 +42,7 @@ export const BOOKING_TEXTS: Readonly<Record<string, string>> = {
     "Üzgünüz, {{shop}} aşağıdaki kalkışı iptal etti. Bu kalkış için ödediğiniz tutarın tamamı iade ediliyor; sizin bir şey yapmanız gerekmiyor.",
   "booking.refund": "İade tutarı: {{amount}}",
   "booking.refund_card":
-    "İade ödeme yaptığınız karta gönderildi; bankanıza göre hesabınıza geçmesi birkaç iş günü sürebilir.",
+    "İade ödeme yaptığınız karta gönderilir; bankanıza göre hesabınıza geçmesi birkaç iş günü sürebilir.",
   "booking.refund_none": "Bu kalkış için iade edilecek bir tutar yok.",
   "booking.refund_by_hand":
     "Ödemeniz kart dışında bir yolla alındığından iade mağaza tarafından ayrıca yapılacak; mağaza sizinle iletişime geçecek.",
