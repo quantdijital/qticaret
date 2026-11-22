@@ -90,7 +90,16 @@ export function TravelerRequestsPage() {
               </Button>
             </div>
           </form>
-          {find.isError ? <ErrorState text={errorText(t, find.error)} /> : null}
+          {find.isError ? (
+            <ErrorState
+              text={errorText(t, find.error)}
+              onRetry={() => {
+                if (asked) {
+                  find.mutate(asked)
+                }
+              }}
+            />
+          ) : null}
           {find.isSuccess && asked ? (
             <TravelerRequestResults
               key={JSON.stringify(asked)}

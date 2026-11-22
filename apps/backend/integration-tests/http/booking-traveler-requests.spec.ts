@@ -2,7 +2,6 @@ import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
-import { customerData } from "../../src/workflows/legal/customer-data"
 import { createAdminUser } from "../helpers/admin"
 import { emptyCart, publishTour, traveler } from "../helpers/booking-tour"
 import type { HttpClient } from "../helpers/http"
@@ -12,6 +11,7 @@ import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
 import { loadTrAddressFixture } from "../helpers/tr-address"
+import type * as CustomerDataModule from "../../src/workflows/legal/customer-data"
 
 jest.setTimeout(240 * 1000)
 
@@ -115,6 +115,9 @@ medusaIntegrationTestRunner({
       // Turkish case: "ismail" finds "İSMAİL", and so does "ISMAIL" (review D2)
       const ismail = await search({ first_name: "ismail", last_name: "Kaya" })
       const dotless = await search({ first_name: "ISMAIL", last_name: "kaya" })
+      // Loaded once the app is up: its module links need the modules registered first
+      const { customerData } =
+        (await import("../../src/workflows/legal/customer-data")) as typeof CustomerDataModule
       const copy = await customerData(container, customer?.id ?? "")
       const audit = getContainer().resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
       const reads = await audit.listAuditEntries({
