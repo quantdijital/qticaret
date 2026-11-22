@@ -31,6 +31,7 @@ const bookableView = (row: BookableRow) => ({
   pax_by_variant: row.pax_by_variant ?? {},
   timezone: row.timezone,
   reminder_days: row.reminder_days,
+  sale_mode: row.sale_mode,
 })
 
 interface ProductRow {

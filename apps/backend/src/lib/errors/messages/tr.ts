@@ -365,6 +365,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu siparişin bir kalkışı ödeme alınmadan iptal edildi; ödeme alınamaz. Siparişi iptal edin.",
   "booking.use_departure_cancel":
     'Kalkışı iptal etmek için "Kalkışı iptal et"i kullanın; rezervasyonlar iade edilir.',
+  // adr/0076 Ek 2026-11-23: call-me requests
+  "booking.online_not_offered":
+    "Bu ürün çevrim içi satılmıyor; ürün sayfasından talep bırakın, mağaza sizi arasın.",
+  "booking.request_not_offered": "Bu ürün için talep alınmıyor.",
+  "booking.request_slot_invalid": "Seçilen kalkış artık bu ürün için talep alınamıyor.",
+  "booking.request_when_invalid":
+    "Bir kalkış, bir gün ya da bir ay seçin; geçmiş bir tarih seçilemez.",
+  "booking.request_people_invalid": "Bu ürün için en çok {{max}} kişilik talep bırakılabilir.",
   "addons.required_must_be_free": "Ücretli ek seçenek zorunlu yapılamaz.",
   "addons.not_addon_line": "Bu ürünün ek seçeneği yok.",
   "addons.unknown": "Bu ek seçenek ya da seçim üründe yok.",

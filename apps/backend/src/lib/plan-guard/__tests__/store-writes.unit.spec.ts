@@ -13,6 +13,8 @@ import { join, relative } from "node:path"
  *   reviews, an order already placed; it stays open while suspended
  */
 const STORE_WRITES: Readonly<Record<string, "cart" | "guarded" | "read" | "open">> = {
+  // adr/0076 Ek 2026-11-23: a call-me request, open like the contact form
+  "POST /store/booking-requests": "open",
   "POST /store/cart-reminders/redeem": "guarded",
   "POST /store/carts/:id/age-declaration": "cart",
   "POST /store/carts/:id/bookings": "cart",

@@ -16,6 +16,7 @@ export interface BookableRow {
   pax_by_variant: unknown
   timezone: string
   reminder_days: number
+  sale_mode: "online" | "request" | "both"
 }
 
 /** A dated product: its variants and its booking settings, if made yet. */

@@ -1,27 +1,47 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { CONTACT_MESSAGES_MODULE } from "../../../modules/contact-messages"
 import type ContactMessagesModuleService from "../../../modules/contact-messages/service"
 import type { AdminGetContactMessagesType } from "./validators"
 
 /**
  * GET /admin/contact-messages (adr/0047): the contact form's messages,
- * waiting ones by default, newest first, opened for the panel.
+ * waiting ones by default, newest first, opened for the panel; one
+ * subject when asked. A booking request names its product's title
+ * (adr/0076 Ek 2026-11-23).
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetContactMessagesType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { status, offset, limit } = req.validatedQuery
+  const { status, subject, offset, limit } = req.validatedQuery
   const messages = req.scope.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
   const [rows, count] = await messages.listAndCountContactMessages(
-    { status },
+    subject ? { status, subject } : { status },
     { skip: offset, take: limit, order: { created_at: status === "new" ? "ASC" : "DESC" } }
+  )
+  const productIds = [...new Set(rows.flatMap((row) => (row.product_id ? [row.product_id] : [])))]
+  const { data: products } = productIds.length
+    ? await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: "product",
+        fields: ["id", "title"],
+        filters: { id: productIds },
+      })
+    : { data: [] }
+  const titles = new Map(
+    (products as { id: string; title?: string | null }[]).map((product) => [
+      product.id,
+      product.title ?? null,
+    ])
   )
   res.json({
     contact_messages: rows.map((row) => ({
       id: row.id,
       subject: row.subject,
       order_number: row.order_number,
+      product_id: row.product_id,
+      product_title: row.product_id ? (titles.get(row.product_id) ?? null) : null,
+      details: row.details,
       customer_id: row.customer_id,
       status: row.status,
       handled_by: row.handled_by,

@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { SALE_MODES } from "../../modules/booking/models/bookable"
 
 /**
  * A dated product's booking settings as the API takes and gives them
@@ -107,6 +108,8 @@ export const BookableSettings = z
     timezone: TimeZone.optional(),
     // adr/0076 Ek D7b: days before a departure its reminder goes; 0 sends none
     reminder_days: z.number().int().min(0).max(30).optional(),
+    // adr/0076 Ek 2026-11-23: sold online, by a call-me request, or both
+    sale_mode: z.enum(SALE_MODES).optional(),
   })
   .strict()
 export type BookableSettingsType = z.infer<typeof BookableSettings>

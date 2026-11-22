@@ -20,6 +20,7 @@ async function bookableSnapshot(scope: unknown, productId: string): Promise<Snap
     min_participants: row.min_participants,
     timezone: row.timezone,
     reminder_days: row.reminder_days,
+    sale_mode: row.sale_mode,
     traveler_fields: JSON.stringify(row.traveler_fields ?? null),
     cancellation_tiers: JSON.stringify(row.cancellation_tiers ?? null),
     pax_by_variant: JSON.stringify(row.pax_by_variant ?? null),

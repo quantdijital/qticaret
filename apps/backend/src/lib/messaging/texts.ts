@@ -73,7 +73,13 @@ const TR: Readonly<Record<string, string>> = {
   "staff_contact.subjects.return": "İade ve değişim",
   "staff_contact.subjects.payment": "Ödeme",
   "staff_contact.subjects.kvkk": "KVKK başvurusu",
+  "staff_contact.subjects.booking": "Rezervasyon talebi",
   "staff_contact.subjects.other": "Diğer",
+  // adr/0076 Ek 2026-11-23: a dated product's call-me request, what it asks for
+  "staff_contact.booking_request": "Rezervasyon talebi: {{product}}, {{when}}, {{people}}.",
+  "staff_contact.booking_flexible": "tarih esnek",
+  "staff_contact.booking_adults": "{{count}} yetişkin",
+  "staff_contact.booking_children": "{{count}} çocuk",
   "staff_contact.kvkk_preheader": "KVKK başvurusu: yanıt için son gün {{due}}.",
   "staff_contact.kvkk_due":
     "Bu bir KVKK başvurusu. Kanun en geç 30 gün içinde yanıt vermenizi ister (KVKK md. 13); son gün {{due}}. Başvuranın kimliğini doğrulayın. Başvuru bir müşteri hesabına aitse talebi o müşterinin KVKK talepleri bölümüne de kaydedin.",

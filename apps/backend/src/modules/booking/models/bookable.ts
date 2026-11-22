@@ -3,6 +3,13 @@ import { model } from "@medusajs/framework/utils"
 export const BOOKING_MODES = ["departure", "range"] as const
 
 /**
+ * How a dated product is sold (adr/0076 Ek 2026-11-23): `online` through
+ * the cart, `request` only by a "call me" request (no payment, no places
+ * taken), `both` the cart with the request beside it.
+ */
+export const SALE_MODES = ["online", "request", "both"] as const
+
+/**
  * A dated product's booking settings (adr/0076 §3), one row a product,
  * linked to it (`links/product-bookable.ts`); `product_id` keeps two first
  * saves from making two rows. Only `departure` is written today (§11).
@@ -14,7 +21,8 @@ export const BOOKING_MODES = ["departure", "range"] as const
  *   their shapes in `lib/booking/settings`;
  * - `pax_by_variant`: variant id → how many places a unit takes and the
  *   ages it is for (§4: a variant is a price category, not a date);
- * - `timezone`: the zone the shop sets departures in.
+ * - `timezone`: the zone the shop sets departures in;
+ * - `sale_mode`: sold online, by a call-me request, or both.
  * No personal data.
  */
 export const Bookable = model
@@ -32,6 +40,8 @@ export const Bookable = model
     timezone: model.text().default("Europe/Istanbul"),
     // adr/0076 Ek D7b: the reminder goes this many days before a departure; 0 sends none
     reminder_days: model.number().default(2),
+    // adr/0076 Ek 2026-11-23: online (today's way), request only, or both
+    sale_mode: model.enum([...SALE_MODES]).default("online"),
   })
   .indexes([{ on: ["product_id"], unique: true }])
   .checks([

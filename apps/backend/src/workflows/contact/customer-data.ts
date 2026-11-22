@@ -12,7 +12,19 @@ async function messagesOf(container: Container, customerId: string, addresses: s
     hashes.length
       ? { $or: [{ customer_id: customerId }, { email_hash: hashes }] }
       : { customer_id: customerId },
-    { select: ["id", "subject", "order_number", "status", "sealed", "created_at"], take: null }
+    {
+      select: [
+        "id",
+        "subject",
+        "order_number",
+        "product_id",
+        "details",
+        "status",
+        "sealed",
+        "created_at",
+      ],
+      take: null,
+    }
   )
   return { messages, rows }
 }
@@ -27,6 +39,8 @@ export async function contactMessagesFor(
   return rows.map((row) => ({
     konu: row.subject,
     sipariş_no: row.order_number,
+    // A booking request's product and dates (adr/0076 Ek 2026-11-23)
+    ...(row.product_id ? { ürün: row.product_id, talep: row.details } : {}),
     durum: row.status,
     gönderilme: row.created_at,
     ...messages.open(row.sealed),

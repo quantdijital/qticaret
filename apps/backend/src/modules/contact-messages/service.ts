@@ -13,9 +13,25 @@ export interface ContactMessagesOptions {
 
 export type ContactSubject = (typeof CONTACT_SUBJECTS)[number]
 
+/**
+ * What a booking request asks for (adr/0076 Ek 2026-11-23): one departure,
+ * a day or a month, or none (the dates are open); how many people. No
+ * person's data: it stays in the open.
+ */
+export interface BookingRequestDetails {
+  slot_id?: string
+  /** YYYY-MM-DD */
+  date?: string
+  /** YYYY-MM */
+  month?: string
+  adults: number
+  children?: number
+}
+
 /** What the person wrote: sealed at rest, opened for the panel. */
 export interface ContactContent {
   name: string
+  /** Empty only on a booking request left with a phone. */
   email: string
   phone: string | null
   body: string
@@ -25,6 +41,9 @@ export interface ReceiveInput extends ContactContent {
   subject: ContactSubject
   order_number: string | null
   customer_id: string | null
+  /** A booking request's product and what it asks for (subject `booking`). */
+  product_id?: string | null | undefined
+  details?: BookingRequestDetails | null | undefined
 }
 
 const SEAL = "contact-messages.content"
@@ -49,8 +68,10 @@ class ContactMessagesModuleService extends MedusaService({ ContactMessage }) {
   }
 
   async receive(input: ReceiveInput): Promise<{ id: string }> {
-    const email = normalizeRecipient("email", input.email)
-    if (!email) {
+    // A booking request may come with a phone only; a message is answered by e-mail
+    const optional = input.subject === "booking" && input.email === "" && Boolean(input.phone)
+    const email = optional ? "" : normalizeRecipient("email", input.email)
+    if (email === null || (!optional && !email)) {
       throw new ValidationError("messaging.recipient_invalid", { field: "email" })
     }
     const content: ContactContent = {
@@ -63,7 +84,9 @@ class ContactMessagesModuleService extends MedusaService({ ContactMessage }) {
       customer_id: input.customer_id,
       subject: input.subject,
       order_number: input.order_number,
-      email_hash: hashPii(email, this.hashKey, HASH),
+      product_id: input.product_id ?? null,
+      details: (input.details ?? null) as Record<string, unknown> | null,
+      email_hash: email ? hashPii(email, this.hashKey, HASH) : null,
       sealed: encryptPii(JSON.stringify(content), this.encryptionKey, SEAL),
       status: "new",
     })
