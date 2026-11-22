@@ -370,7 +370,11 @@ medusaIntegrationTestRunner({
       await turnOn()
       const container = getContainer()
       const { adult, slotId } = await tour(50)
-      const carts = await Promise.all(Array.from({ length: 5 }, () => emptyCart(container)))
+      // One after another: the guest's customer is made once, not raced
+      const carts: string[] = []
+      for (let i = 0; i < 5; i += 1) {
+        carts.push(await emptyCart(container))
+      }
       const ask = (quantity: number) => ({
         slot_id: slotId,
         items: [{ variant_id: adult, quantity }],
