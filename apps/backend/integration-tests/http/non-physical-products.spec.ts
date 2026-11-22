@@ -10,6 +10,7 @@ import { createStorefront } from "../helpers/storefront"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { completeWithSystemPayment } from "../helpers/checkout"
+import { eventually } from "../helpers/eventually"
 
 jest.setTimeout(180 * 1000)
 
@@ -156,7 +157,8 @@ medusaIntegrationTestRunner({
       expect(state.data).toMatchObject({ stage: "delivered", ship: null })
 
       // Through the Store API, as a shop's checkout does: a method left on a
-      // cart with nothing to ship is refused, not charged
+      // cart with nothing to ship is taken off by the server (adr/0076 Ek D5;
+      // the completion refuses one still there), never charged
       const store = await createStorefront(container)
       const send = <T>(path: string, body: object) =>
         settle(http.post<T>(path, body, { headers: store.headers }))
@@ -178,9 +180,28 @@ medusaIntegrationTestRunner({
       ).run({
         input: { cart_id: cartId },
       })
+      const methods = await eventually(
+        async () => {
+          const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+            entity: "cart",
+            fields: ["shipping_methods.id"],
+            filters: { id: cartId },
+          })
+          return ((data as { shipping_methods?: unknown[] | null }[])[0]?.shipping_methods ?? [])
+            .length
+        },
+        (count) => count === 0
+      )
       const completed = await completeWithSystemPayment(getContainer(), cartId, collection.id)
+      const { data: orders } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: "order",
+        fields: ["shipping_total"],
+        filters: { id: completed.order_id ?? "" },
+      })
 
-      expect(completed).toEqual({ order_id: null, message: "cart.shipping_not_needed" })
+      expect(methods).toBe(0)
+      expect(completed.order_id).toEqual(expect.any(String))
+      expect(Number((orders as { shipping_total: unknown }[])[0]?.shipping_total)).toBe(0)
     })
 
     it("tells the storefront and the order's e-mail what ships (adr/0076 §6)", async () => {
