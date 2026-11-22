@@ -72,12 +72,14 @@ describe("dated cart lines (adr/0076 §4, §5)", () => {
     expect(ask(2, 5)).toBe("booking.too_many_free_units")
   })
 
-  it("lets one cart hold a fifth of a departure, at least one place, within the product's cap", () => {
+  it("lets one cart hold a fifth of a departure, a small group at least, within the product's cap", () => {
     expect(cartShareOf(1, 10)).toBe(1)
-    expect(cartShareOf(3, 10)).toBe(1)
-    expect(cartShareOf(10, 10)).toBe(2)
-    expect(cartShareOf(21, 10)).toBe(5)
+    expect(cartShareOf(3, 10)).toBe(3)
+    expect(cartShareOf(10, 10)).toBe(10)
+    expect(cartShareOf(21, 10)).toBe(10)
     expect(cartShareOf(200, 10)).toBe(10)
+    expect(cartShareOf(30, 20)).toBe(10)
+    expect(cartShareOf(200, 50)).toBe(40)
   })
 
   it("closes sales at the cutoff before the departure", () => {

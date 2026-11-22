@@ -71,13 +71,19 @@ export const FREE_UNITS_PER_PLACE = 2
 // The share of a departure one cart may hold at once (adr/0076 Ek): no
 // cart, nor one address's few carts, keeps a departure from everyone else
 export const CART_SHARE_OF_CAPACITY = 0.2
+// A family or a small group books together whatever the departure's size
+export const CART_GROUP_FLOOR = 10
 
 /**
- * What one cart may hold on a departure: a fifth of its places (at least
- * one) and never more than the product's per-cart cap.
+ * What one cart may hold on a departure: a fifth of its places, but never
+ * less than a small group (ten, or the whole departure when smaller), and
+ * never more than the product's per-cart cap.
  */
 export const cartShareOf = (capacity: number, maxUnitsPerCart: number): number =>
-  Math.min(maxUnitsPerCart, Math.max(1, Math.ceil(capacity * CART_SHARE_OF_CAPACITY)))
+  Math.min(
+    maxUnitsPerCart,
+    Math.max(Math.min(capacity, CART_GROUP_FLOOR), Math.ceil(capacity * CART_SHARE_OF_CAPACITY))
+  )
 
 /**
  * Why these (merged) units cannot be booked, or null: a category over

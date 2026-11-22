@@ -243,7 +243,7 @@ medusaIntegrationTestRunner({
       // A fifth of the ten places is one cart's most (adr/0076 Ek): no cart takes the departure
       const full = await book(cartId, {
         slot_id: slotId,
-        items: [{ variant_id: adult, quantity: 3 }],
+        items: [{ variant_id: adult, quantity: 11 }],
       })
       const again = await book(cartId, {
         slot_id: slotId,
