@@ -5,7 +5,8 @@
 ## 2026-11-22: adr/0076 D6, katılımcı bilgisi (backend)
 
 - **Dal:** `oguzhan/rezervasyon-katilimci`. `booking_traveler` tablosu (migration): ad, soyad, doğum tarihi, uyruk düz; kimlik/pasaport no şifreli + özet + son 4. `GET/POST /store/carts/:id/travelers` (bayrak, satış kanalı, `booking` hız profili; kişi sayısı Σ adet × pax); ödeme başlangıcı ve tamamlama `booking.travelers_missing`; sipariş onayında rezervasyona aktarım; panel listesinde maskeli katılımcılar (denetlenen okuma), tam numara `POST /admin/booking-travelers/:id/reveal` (sahip/yönetici, yeniden doğrulama, denetim kaydı). Saklama: hizmet tarihi + 180 gün, terk edilen sepette 2 gün (`compliance-retention`); KVKK silmesi bağlandı. ADR Ek D6 (vitrin ucu sözleşmesi), `docs/kvkk-envanter.md`.
-- **Sıradaki işler:** birleşmeden önce `security-reviewer` (KVKK + migration); D6b panel (ürün ayarında katılımcı düzeyi, listede katılımcılar, "Numarayı göster") ve vitrin `travelers` adımı; veri dökümüne katılımcılar; D7, D8.
+- **Güvenlik incelemesi:** kritik/yüksek yok; orta ve düşük bulgular aynı PR'da kapandı: aktarım rezervasyonun aldığıyla sınırlı (fazlası silinir, istenmeyen alan boşalır), aktarılamayan katılımcıları uzlaştırma işi yeniden bağlar (üç denemede olmazsa panel uyarısı), terk edilen sepet silmesi sepet kilidi altında, kalkış tarihi değişince silme tarihi yeniden hesaplanır, kısa numarada son 2 hane, metin içi log maskesi, sınır testi genişledi.
+- **Sıradaki işler:** D6b panel (ürün ayarında katılımcı düzeyi, listede katılımcılar, "Numarayı göster") ve vitrin `travelers` adımı; veri dökümüne katılımcılar; D7, D8.
 - **Açık (hukukçu):** katılımcı saklama süresi (180 gün öneri).
 
 ## 2026-11-22: adr/0076 D5, vitrinde kalkış seçimi ve geri sayım
