@@ -25,6 +25,7 @@ const OWN_STORE_WRITES: Readonly<Record<string, "closed" | "open">> = {
   "POST /store/carts/:id/payment-session": "closed",
   "POST /store/carts/:id/source": "closed",
   "POST /store/carts/:id/tracking": "closed",
+  "POST /store/carts/:id/travelers": "closed",
   "POST /store/consents/confirm": "open",
   "POST /store/consents/cookies": "open",
   "POST /store/consents/unsubscribe": "open",
