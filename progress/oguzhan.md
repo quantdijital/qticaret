@@ -2,6 +2,11 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-22: adr/0076 D5 takibi, kartlarda "…'den itibaren" ve en yakın kalkış
+
+- **Dal:** `oguzhan/tarihli-kart-fiyat`. `GET /store/card-facts` tarihli ürüne `booking { from_price, next_departure, … }` ekler (yalnız `catalog.booking` açıkken; sayfa başına tek fiyat ve tek kalkış okuması; bebek kategorisi fiyata girmez). Tarihli üründe kart hızlı ekleme yok. Tema sözleşmesinde `ProductCardView.booking?`; Atölye kartı "1.750,50 TL'den itibaren" + "En yakın: 12 Ara" ya da "Yakında yeni tarihler". Diğer kartlar ve görünüm kilidi değişmedi. ADR Ek "D5 takip: kart fiyatı".
+- **Sıradaki işler:** D6b (panel katılımcılar, vitrin `travelers` adımı; ayrı PR #270), D7, D8; hızlı bakıştan kalkış seçimi sonraya.
+
 ## 2026-11-22: adr/0076 D6, katılımcı bilgisi (backend)
 
 - **Dal:** `oguzhan/rezervasyon-katilimci`. `booking_traveler` tablosu (migration): ad, soyad, doğum tarihi, uyruk düz; kimlik/pasaport no şifreli + özet + son 4. `GET/POST /store/carts/:id/travelers` (bayrak, satış kanalı, `booking` hız profili; kişi sayısı Σ adet × pax); ödeme başlangıcı ve tamamlama `booking.travelers_missing`; sipariş onayında rezervasyona aktarım; panel listesinde maskeli katılımcılar (denetlenen okuma), tam numara `POST /admin/booking-travelers/:id/reveal` (sahip/yönetici, yeniden doğrulama, denetim kaydı). Saklama: hizmet tarihi + 180 gün, terk edilen sepette 2 gün (`compliance-retention`); KVKK silmesi bağlandı. ADR Ek D6 (vitrin ucu sözleşmesi), `docs/kvkk-envanter.md`.

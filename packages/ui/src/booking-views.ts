@@ -63,3 +63,17 @@ export interface BookingHoldView {
   /** When the places go back (ISO 8601); null: already gone. */
   expiresAt: string | null
 }
+
+/**
+ * A dated product's card (`ProductCardView.booking`, adr/0076 §10): its
+ * `price` is then the lowest paying price over the departures on sale
+ * (`from: true`), said "…'den itibaren", and under it the nearest
+ * departure or "new dates soon". A theme without it draws the price as
+ * any "from" price.
+ */
+export interface CardBookingView {
+  /** The nearest departure on sale, short, in the product's time zone ("12 Ara"); null: none now. */
+  next: string | null
+  /** The same moment for `<time dateTime>` (ISO 8601); null with `next`. */
+  nextAt: string | null
+}

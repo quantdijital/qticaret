@@ -8,7 +8,9 @@ import type { StoreGetCardFactsType } from "./validators"
  * home rail): `stock` as a bucket (`in_stock`, `low`, `out`; never the
  * number), `quick_add` (the one variant a card may put in the cart, or
  * null) and `rating` (the average and count of its approved reviews, or
- * null; adr/0062). Only published products in the shopper's sales
+ * null; adr/0062); while the shop sells dated products, a dated one's
+ * `booking` (from price in `region_id`'s currency, next departure;
+ * adr/0076 §10). Only published products in the shopper's sales
  * channels answer. Stock changes by the minute: not kept by caches.
  */
 export async function GET(
@@ -18,6 +20,7 @@ export async function GET(
   const facts = await cardFacts(req.scope, {
     product_ids: req.validatedQuery.id,
     sales_channel_ids: req.publishable_key_context.sales_channel_ids,
+    region_id: req.validatedQuery.region_id,
   })
   res.setHeader("Cache-Control", "no-store")
   res.json({ facts })
