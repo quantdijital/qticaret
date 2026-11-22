@@ -29,6 +29,8 @@ interface TravelersAnswer {
   needs: { slot_id: string; level: string; count: number }[]
   travelers: Record<string, unknown>[]
   complete: boolean
+  // An error answer (404 `cart.unknown`) carries only this
+  message?: string
 }
 
 const DAY = 24 * 60 * 60 * 1000
