@@ -142,6 +142,7 @@ Veri sorumlusu Quant Dijital'dir (kurulunca; adr/0061 §2). Burada mağazaların
 - **Aydınlatma:** yetkililere aydınlatma metni hizmet sözleşmesiyle verilir (docs/12, hukuk taslağı bekliyor).
 
 ---
+| `booking_traveler` (booking) | Tarihli üründe katılımcı (kendisi ya da üçüncü kişi): ad, soyad (D); ürün isterse doğum tarihi (D), kimlik ya da pasaport numarası (Ş, sepete bağlı bağlam + Ö, son 4 hane D), uyruk (ISO ülke kodu, D); sepet, kalkış ve rezervasyon kimliği. Kimlik görseli tutulmaz. Ürün hangi alanları istemiyorsa o alan alınmaz (istenmeyen alan 400). | Tur, etkinlik ya da kursun katılımcı listesi (adr/0076 §7, K8). Hukuki sebep: sözleşmenin ifası (KVKK md. 5/2-c); paket turda yasal yükümlülük (hukukçu doğrulayacak) | Hizmet tarihinden (kalkışın bitişi, yoksa başlangıcı) 180 gün sonra silinir (`booking_travelers`, öneri; hukukçuyla netleşecek). Siparişe dönüşmeyen sepetinki 2 gün sonra silinir; siparişe dönüşmüş ama rezervasyona bağlanamamışsa 180 gün kuralıyla. Satır metadata'sına, loglara (anahtar adları maskeli), e-faturaya, ödeme sağlayıcısına, yapay zekâ servislerine, iletilere gitmez; iş akışı kaydına girmez (vitrin ucu iş akışı değildir). Panelde numara maskeli (`***1234`); tam değer yalnız sahip ve yöneticiye, yeniden doğrulamayla ve her okuma denetim kaydına (`POST /admin/booking-travelers/:id/reveal`). Kalkışın rezervasyon listesi okunuşu da denetim kaydına düşer. | Kişinin bütün sepetlerinin katılımcıları (siparişe dönüşmüş olanlar dahil) kalıcı silinir; rezervasyon ve sipariş tutarları kalır. **Açık:** veri dökümüne katılımcılar henüz eklenmedi; katılımcının (alıcı değil) kendi başvurusunda personel satırı bulacak panel aracı yok (D6b). |
 
 ## Gecelik saklama işi (`compliance-retention`)
 
@@ -156,6 +157,7 @@ Veri sorumlusu Quant Dijital'dir (kurulunca; adr/0061 §2). Burada mağazaların
 | `abandoned_cart_contacts` | Siparişe dönüşmeyen sepeti e-posta ve adresleriyle, hatırlatma ve trafik kaynağı kaydıyla birlikte siler. Parası alınmış (`payment_recovery`) ya da ödeme formu açık sepet kalır. | `abandonedCartContact` 90 gün |
 | `ga_clients` | Ölçüm onayındaki GA istemci kimliğini boşaltır: iade olayı artık gidemez. | iade süresi + `gaClientMargin` 45 gün |
 | `sent_messages` | Gönderilen e-posta ve SMS kayıtlarını (alıcı adresiyle) siler. Panelin zil bildirimleri kişiye ileti değildir, kalır. | `sentMessage` 1095 gün |
+| `booking_travelers` | Hizmet tarihi + 180 günü geçen katılımcıları (`purge_after`) ve siparişe dönüşmeyen sepetin 2 günden eski katılımcılarını kalıcı siler (adr/0076 §7). | `TRAVELER_KEEP_DAYS` 180, `UNBOOKED_TRAVELER_DAYS` 2 (`lib/booking/travelers.ts`) |
 
 Her parça ayrı çalışır; biri hata verse de diğerleri yapılır. Bir gecede 500'den fazla satır birikmişse kalanı sonraki gecelere kalır.
 
