@@ -1,6 +1,7 @@
 import {
   FEATURED_PRODUCT_SETTINGS,
   RICH_TEXT_IMAGE_SIDES,
+  STEPS_SETTINGS,
   STRIP_GALLERY_SETTINGS,
   newsletterHasNote,
 } from "@qticaret/types"
@@ -52,6 +53,9 @@ export type ContentField =
   | "questions"
   | "form"
   | "imprint"
+  | "dividers"
+  | "steps_layout"
+  | "numbers"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -100,6 +104,34 @@ function stripGalleryFields(section: AnySection): RegistryField[] {
       }
     }
   )
+}
+
+/** The steps' settings drawn as steps (`points-groups.tsx`), by setting and field name. */
+export const STEPS_FIELDS = [
+  ["layout", "steps_layout"],
+  ["numbers", "numbers"],
+] as const satisfies readonly (readonly [keyof typeof STEPS_SETTINGS, ContentField])[]
+
+/** The figures strip's switch and the steps' two steps, open in "Diziliş" (adr/0077 §10). */
+function pointsFields(section: AnySection): RegistryField[] {
+  if (section.type === "stats") {
+    const D = `${E}.stats.dividers`
+    return [{ ...entry(section, "dividers", `${D}.label`, [], "layout"), term: `${D}.term` }]
+  }
+  return STEPS_FIELDS.map(([name, field]) => {
+    const P = `${E}.steps.${name}`
+    const steps: readonly string[] = STEPS_SETTINGS[name]
+    return {
+      ...entry(
+        section,
+        field,
+        `${P}.label`,
+        steps.map((step) => `${P}.${step}`),
+        "layout"
+      ),
+      term: `${P}.term`,
+    }
+  })
 }
 
 /** The featured product's strips' look (`featured-groups.tsx`): three steps, two switches. */
@@ -213,6 +245,9 @@ export function contentFields(section: AnySection): RegistryField[] {
         : []
     case "strip_gallery":
       return stripGalleryFields(section)
+    case "stats":
+    case "steps":
+      return pointsFields(section)
     // The picture's side beside the text, while the variant has one (adr/0073 §3)
     case "rich_text":
       return section.variant === "with_image"

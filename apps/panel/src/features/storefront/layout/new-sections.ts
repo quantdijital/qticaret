@@ -16,6 +16,8 @@ import {
   ANNOUNCEMENT_DEFAULTS,
   BANNER_DEFAULTS,
   MARQUEE_DEFAULTS,
+  STATS_DEFAULTS,
+  STEPS_DEFAULTS,
   SLIDER_DEFAULTS,
   STRIP_GALLERY_DEFAULTS,
   defaultVariant,
@@ -117,6 +119,25 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
       }
     case "help":
       return { ...base, type, title: null, text: null }
+    // Three figures and three steps to write (adr/0077 §10): a row as most shops fill it
+    case "stats":
+      return {
+        ...base,
+        type,
+        title: null,
+        items: [0, 1, 2].map(() => ({ value: "", label: "", text: null })),
+        ...STATS_DEFAULTS,
+      }
+    case "steps":
+      return {
+        ...base,
+        type,
+        title: null,
+        intro: null,
+        items: [0, 1, 2].map(() => ({ title: "", text: null })),
+        link: null,
+        ...STEPS_DEFAULTS,
+      }
   }
 }
 

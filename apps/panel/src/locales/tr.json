@@ -8721,6 +8721,14 @@
         "shipping_facts": {
           "name": "Kargo bilgileri",
           "description": "Kargo firmaları, ücretsiz kargo sınırı ve teslim süreleri, güncel hâliyle."
+        },
+        "stats": {
+          "name": "Rakam şeridi",
+          "description": "Mağazanızı anlatan 2–6 rakam: değer büyük, altında etiketi ve isterseniz kısa bir açıklama (ör. 20 yıl, 10.000+ müşteri)."
+        },
+        "steps": {
+          "name": "Numaralı adımlar",
+          "description": "Bir işin 3–6 adımı sırayla, numaralarıyla: başlık, kısa giriş ve isterseniz altında tek bağlantı."
         }
       },
       "variants": {
@@ -8927,7 +8935,8 @@
         "newsletterText": "Vitrinin metni: kampanya ve yeniliklerden e-postayla haberdar olun…",
         "faq": "Sık sorulan sorular",
         "related_products": "Benzer ürünler",
-        "price_bands": "Fiyata göre alışveriş"
+        "price_bands": "Fiyata göre alışveriş",
+        "steps": "Nasıl işler?"
       },
       "fields": {
         "eyebrow": "Üst satır",
@@ -10769,6 +10778,50 @@
       },
       "capabilities": {
         "dated": "Tarihli ürünler"
+      },
+      "stats": {
+        "titleHint": "Boş bırakılırsa rakamlar başlıksız görünür.",
+        "items": "Rakamlar",
+        "item": "Rakam {{number}}",
+        "value": "Değer {{number}}",
+        "valuePlaceholder": "20 yıl",
+        "valueHint": "Büyük yazılan kısa değer: 50+, 10.000, %98, 8.000 m.",
+        "label": "Etiket {{number}}",
+        "labelPlaceholder": "Tecrübe",
+        "text": "Açıklama {{number}}",
+        "add": "Rakam ekle",
+        "hint": "En az {{min}}, en çok {{max}} rakam.",
+        "dividers": {
+          "label": "Ayırıcı çizgileri göster",
+          "term": "divider",
+          "hint": "Rakamların arasında ince çizgi; kapalıyken yalnız boşluk."
+        }
+      },
+      "steps": {
+        "intro": "Giriş",
+        "items": "Adımlar",
+        "item": "Adım {{number}}",
+        "title": "Adım {{number}} başlığı",
+        "text": "Adım {{number}} metni",
+        "add": "Adım ekle",
+        "hint": "En az {{min}}, en çok {{max}} adım; numaraları vitrin verir.",
+        "link": "Bağlantı",
+        "linkTerm": "link",
+        "linkHint": "Adımların altında tek düğme; boşsa düğme yok.",
+        "layout": {
+          "label": "Diziliş",
+          "term": "layout",
+          "hint": "Geniş ekranda adımların duruşu; telefonda hep alt alta.",
+          "row": "Yan yana",
+          "column": "Alt alta"
+        },
+        "numbers": {
+          "label": "Numara biçimi",
+          "term": "numbering",
+          "hint": "Adımların başındaki numaranın yazılışı.",
+          "padded": "01, 02",
+          "plain": "1, 2"
+        }
       }
     },
     "maintenance": {

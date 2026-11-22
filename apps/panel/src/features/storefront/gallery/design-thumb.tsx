@@ -27,6 +27,8 @@ const SHAPES: Record<string, Shape> = {
   marquee: "strip",
   price_bands: "strip",
   google_rating: "strip",
+  stats: "strip",
+  steps: "text",
 }
 
 // How much of the page each kind takes, as a share of the room

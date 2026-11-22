@@ -8721,6 +8721,14 @@
         "shipping_facts": {
           "name": "Shipping details",
           "description": "Carriers, the free shipping threshold and delivery times, kept current."
+        },
+        "stats": {
+          "name": "Figures strip",
+          "description": "2–6 figures about your shop: the value large, its label under it and an optional short line (e.g. 20 years, 10,000+ customers)."
+        },
+        "steps": {
+          "name": "Numbered steps",
+          "description": "3–6 steps of a process in order, numbered: a title, a short intro and an optional single link under them."
         }
       },
       "variants": {
@@ -8927,7 +8935,8 @@
         "newsletterText": "The storefront's text: hear about campaigns and news by e-mail…",
         "faq": "Frequently asked questions",
         "related_products": "Related products",
-        "price_bands": "Shop by price"
+        "price_bands": "Shop by price",
+        "steps": "How it works"
       },
       "fields": {
         "eyebrow": "Eyebrow",
@@ -10769,6 +10778,50 @@
       },
       "capabilities": {
         "dated": "Dated products"
+      },
+      "stats": {
+        "titleHint": "Left empty, the figures show without a heading.",
+        "items": "Figures",
+        "item": "Figure {{number}}",
+        "value": "Value {{number}}",
+        "valuePlaceholder": "20 years",
+        "valueHint": "The short value set large: 50+, 10,000, 98%, 8,000 m.",
+        "label": "Label {{number}}",
+        "labelPlaceholder": "Experience",
+        "text": "Line {{number}}",
+        "add": "Add a figure",
+        "hint": "At least {{min}}, at most {{max}} figures.",
+        "dividers": {
+          "label": "Show dividers",
+          "term": "divider",
+          "hint": "A thin line between the figures; off, space alone."
+        }
+      },
+      "steps": {
+        "intro": "Intro",
+        "items": "Steps",
+        "item": "Step {{number}}",
+        "title": "Step {{number}} title",
+        "text": "Step {{number}} text",
+        "add": "Add a step",
+        "hint": "At least {{min}}, at most {{max}} steps; the storefront numbers them.",
+        "link": "Link",
+        "linkTerm": "link",
+        "linkHint": "One button under the steps; empty, no button.",
+        "layout": {
+          "label": "Layout",
+          "term": "layout",
+          "hint": "How the steps stand on a wide screen; on a phone always one under another.",
+          "row": "Side by side",
+          "column": "One under another"
+        },
+        "numbers": {
+          "label": "Numbering",
+          "term": "numbering",
+          "hint": "How the number before each step is written.",
+          "padded": "01, 02",
+          "plain": "1, 2"
+        }
       }
     },
     "maintenance": {

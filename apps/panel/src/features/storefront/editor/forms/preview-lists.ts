@@ -51,6 +51,13 @@ export function listField(
   if (section.type === "marquee") {
     return row(parts, "items", section.items.length, ["text", "subtext"])
   }
+  // A figure's or a step's words (adr/0077 §10)
+  if (section.type === "stats") {
+    return row(parts, "items", section.items.length, ["value", "label", "text"])
+  }
+  if (section.type === "steps") {
+    return row(parts, "items", section.items.length, ["title", "text"])
+  }
   if (section.type === "banner") {
     return row(parts, "slides", section.slides.length, BANNER_PARTS)
   }

@@ -66,6 +66,8 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
   "related_products",
   "featured_product",
   "strip_gallery",
+  "stats",
+  "steps",
   "rich_text",
   "faq",
   "newsletter",
@@ -163,6 +165,8 @@ function wordField(section: AnySection, word: string): PreviewField | null {
     (word === "title" && TITLED.has(section.type)) ||
     (word === "text" && TEXTED.has(section.type)) ||
     (word === "body" && section.type === "rich_text") ||
+    // The steps' intro and their one link (adr/0077 §10)
+    (section.type === "steps" && (word === "intro" || word === "link")) ||
     // The picture beside the text (adr/0073 §3), while the variant shows its field
     (word === "image" && section.type === "rich_text" && section.variant === "with_image") ||
     (word === "more" && ownMore(section)) ||

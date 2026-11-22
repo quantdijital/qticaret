@@ -19,7 +19,7 @@ const NO_ALIGN: ReadonlySet<LookedType> = new Set(["hero", "hero_slider", "banne
  * Types carrying long text: the shop's colour holds its foreground only for
  * large text and controls (adr/0062 §6, 3:1), so it is not offered there.
  */
-const LONG_TEXT: ReadonlySet<LookedType> = new Set(["rich_text", "faq"])
+const LONG_TEXT: ReadonlySet<LookedType> = new Set(["rich_text", "faq", "steps"])
 
 /**
  * Types that offer only some of the look: a scrolling strip has its own

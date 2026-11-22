@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   BookOpen,
   Boxes,
+  ChartNoAxesColumn,
   CircleHelp,
   Columns3,
   Contact,
@@ -13,6 +14,7 @@ import {
   GalleryHorizontalEnd,
   LayoutGrid,
   LifeBuoy,
+  ListOrdered,
   Mail,
   Megaphone,
   MoveHorizontal,
@@ -44,6 +46,8 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   hero_slider: GalleryHorizontalEnd,
   banner: GalleryHorizontal,
   strip_gallery: Columns3,
+  stats: ChartNoAxesColumn,
+  steps: ListOrdered,
   categories: LayoutGrid,
   products: ShoppingBag,
   featured_product: ScanSearch,
@@ -100,6 +104,8 @@ function ownTitle(section: AnySection): string | null {
     case "help":
     case "price_bands":
     case "strip_gallery":
+    case "stats":
+    case "steps":
       return section.title
     case "announcement_bar":
       return section.lines.find((line) => line.trim() !== "") ?? null
