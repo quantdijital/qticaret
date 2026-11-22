@@ -13,6 +13,7 @@ import {
   forgetGaClients,
   forgetSentMessages,
 } from "../workflows/compliance/retention-contacts"
+import { forgetTravelers } from "../workflows/booking/traveler-retention"
 
 /**
  * The nightly retention pass (F13.5, adr/0041 §6): personal data whose
@@ -32,6 +33,8 @@ export default async function complianceRetention(container: MedusaContainer) {
     abandoned_cart_contacts: () => forgetAbandonedCartContacts(container, now),
     ga_clients: () => forgetGaClients(container, now),
     sent_messages: () => forgetSentMessages(container, now),
+    // adr/0076 §7: travelers past their departure's period, and an abandoned cart's
+    booking_travelers: () => forgetTravelers(container, now),
   }
   for (const [part, run] of Object.entries(parts)) {
     try {

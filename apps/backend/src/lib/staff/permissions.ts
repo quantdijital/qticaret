@@ -172,6 +172,8 @@ const CAPABILITY_PROBES = {
   staff: ["POST", "/admin/staff/members/:id"],
   audit: ["GET", "/admin/audit-log"],
   taxId: ["POST", "/admin/customers/:id/billing-profile/reveal"],
+  // adr/0076 §7: a traveler's full ID or passport number, owner and admin, audited
+  travelerDocuments: ["POST", "/admin/booking-travelers/:id/reveal"],
   // F13.5: recording and answering a customer's KVKK requests
   privacy: ["POST", "/admin/customers/:id/privacy-requests"],
   // F8: an invoice's PDF, the buyer and their tax id on it

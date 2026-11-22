@@ -9,6 +9,7 @@ import { RATE_LIMIT_PROFILES, ipBucket } from "../../lib/security/rate-limit"
 import { CATALOG_BOOKING } from "../../modules/platform-settings/features"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { StorePostCartBooking } from "../store/carts/[id]/bookings/validators"
+import { StorePostCartTravelers } from "../store/carts/[id]/travelers/validators"
 import { StoreGetProductBooking } from "../store/products/[id]/booking/validators"
 import { clientIp, isShopperAddressUnknown } from "./client-ip"
 import { rateLimit } from "./rate-limit"
@@ -104,6 +105,24 @@ export const BOOKING_STORE_ROUTES = [
   {
     // The cart's hold and dated lines, for the storefront's countdown (adr/0076 Ek D5); reads only
     matcher: "/store/carts/:id/bookings",
+    methods: ["GET" as const],
+    middlewares: [
+      requireFeature(CATALOG_BOOKING),
+      validateAndTransformQuery(AdminGetDashboardNoQuery, {}),
+    ],
+  },
+  {
+    // The cart's travelers (adr/0076 §7): written on the booking budget, read freely
+    matcher: "/store/carts/:id/travelers",
+    methods: ["POST" as const],
+    middlewares: [
+      requireFeature(CATALOG_BOOKING),
+      bookingLimit,
+      validateAndTransformBody(StorePostCartTravelers),
+    ],
+  },
+  {
+    matcher: "/store/carts/:id/travelers",
     methods: ["GET" as const],
     middlewares: [
       requireFeature(CATALOG_BOOKING),

@@ -335,6 +335,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "booking.too_many_free_units": "At most 2 free guests can come with each person taking a place.",
   "booking.order_edit_unavailable":
     "Dated products cannot be changed by an order edit; cancel the order if need be.",
+  "booking.travelers_missing": "Enter the details of every traveler before paying.",
+  "booking.travelers_invalid": "A traveler's details are missing or not valid; check the form.",
+  "booking.traveler_unknown": "Traveler not found.",
   "addons.required_must_be_free": "A paid add-on cannot be required.",
   "addons.not_addon_line": "This product has no add-ons.",
   "addons.unknown": "The product has no such add-on or option.",

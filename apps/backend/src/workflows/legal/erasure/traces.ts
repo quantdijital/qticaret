@@ -14,6 +14,7 @@ import type LegalModuleService from "../../../modules/legal/service"
 import { MESSAGING_MODULE } from "../../../modules/messaging"
 import type MessagingModuleService from "../../../modules/messaging/service"
 import { erasedKeyOf } from "../../../lib/migration/erased"
+import { eraseCartTravelers } from "../../booking/traveler-retention"
 import { eraseCampaignRecipients } from "../../campaigns/customer-data"
 import { eraseContactMessages } from "../../contact/customer-data"
 import { removeReviewPhotos } from "../../customers/review-photos"
@@ -54,6 +55,11 @@ async function eraseCarts(container: Container, customerId: string) {
   )
   const open = rows.filter((cart) => !cart.completed_at).map((cart) => cart.id)
   const completed = rows.filter((cart) => cart.completed_at)
+  // The travelers entered on any of them, booked or not (adr/0076 §7)
+  await eraseCartTravelers(
+    container,
+    rows.map((cart) => cart.id)
+  )
   if (open.length > 0) {
     const legal = container.resolve<LegalModuleService>(LEGAL_MODULE)
     const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)

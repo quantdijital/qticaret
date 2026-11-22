@@ -299,7 +299,11 @@ module.exports = defineConfig({
       options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
     },
     // adr/0076: dated products' departures, places, carts' holds and bookings
-    { resolve: "./src/modules/booking" },
+    // D6: travelers' ID numbers sealed with the PII keys (adr/0009)
+    {
+      resolve: "./src/modules/booking",
+      options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
+    },
     // F18 (adr/0049): the storefront's design from the theme editor: draft, live, revisions
     { resolve: "./src/modules/storefront-layout" },
     // F18 (adr/0049): the storefront's menus, their links pointing at records

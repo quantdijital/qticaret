@@ -9,7 +9,7 @@ describe("booking service writers", () => {
   >
 
   it("lists a writer for every counter model and verb", () => {
-    expect(REFUSED_WRITERS).toHaveLength(25)
+    expect(REFUSED_WRITERS).toHaveLength(29)
     expect(REFUSED_WRITERS).toEqual(
       expect.arrayContaining([
         "createBookingSlots",
@@ -17,8 +17,13 @@ describe("booking service writers", () => {
         "updateBookingHolds",
         "restoreBookings",
         "softDeleteBookingSlotUses",
+        // A traveler is written only sealed and never soft-deleted (adr/0076 §7)
+        "createBookingTravelers",
+        "updateBookingTravelers",
+        "softDeleteBookingTravelers",
       ])
     )
+    expect(REFUSED_WRITERS).not.toContain("deleteBookingTravelers")
   })
 
   it.each(REFUSED_WRITERS)("refuses %s, so the counters keep their rule", (name) => {

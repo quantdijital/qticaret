@@ -17,9 +17,20 @@ import type { SlotInput } from "./slots"
 import { releaseExpired, releaseHolds } from "./sql"
 import type { Executor, SlotUnits } from "./sql"
 import { Bookable } from "./models/bookable"
+import { parseKey } from "@qticaret/server-kit"
+import type { CleanTraveler } from "../../lib/booking/travelers"
 import { Booking, BookingSlotUse } from "./models/booking"
 import { BookingHold, BookingHoldSlot } from "./models/booking-hold"
 import { BookingSlot } from "./models/booking-slot"
+import { BookingTraveler } from "./models/booking-traveler"
+import { attachTravelers, replaceCartTravelers, revealDocument, sealTraveler } from "./travelers"
+import type { TravelerKeys } from "./travelers"
+
+/** The shop's PII keys (adr/0009), for travelers' ID numbers; hex, 32 bytes each. */
+export interface BookingModuleOptions {
+  encryptionKey?: string
+  hashKey?: string
+}
 
 export type { SlotAvailability } from "./availability"
 export type { CartHold } from "./cart-hold"
@@ -59,7 +70,74 @@ class BookingModuleService extends MedusaService({
   BookingHoldSlot,
   Booking,
   BookingSlotUse,
+  BookingTraveler,
 }) {
+  private readonly options: BookingModuleOptions
+  private keys: TravelerKeys | undefined
+
+  constructor(container: Record<string, unknown>, options: BookingModuleOptions = {}) {
+    // eslint-disable-next-line prefer-rest-params -- MedusaService needs every constructor argument
+    super(...arguments)
+    this.options = options
+  }
+
+  // Read on first use: a test of the counters runs without them
+  private travelerKeys(): TravelerKeys {
+    this.keys ??= {
+      encryption: parseKey(this.options.encryptionKey ?? "", "booking encryptionKey"),
+      hash: parseKey(this.options.hashKey ?? "", "booking hashKey"),
+    }
+    return this.keys
+  }
+
+  /**
+   * The cart's travelers not yet booked replaced by these, each number
+   * sealed here (the plain number goes no further); `purgeAfter` per
+   * departure. Checked before (`lib/booking/travelers`).
+   */
+  @InjectTransactionManager()
+  async setCartTravelers(
+    cartId: string,
+    travelers: readonly CleanTraveler[],
+    purgeAfter: Record<string, Date>,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    const keys = this.travelerKeys()
+    return replaceCartTravelers(
+      managerOf(sharedContext),
+      cartId,
+      travelers.map((traveler) => {
+        const purge = purgeAfter[traveler.slot_id]
+        if (!purge) {
+          throw new Error("booking: no purge date for a traveler's departure")
+        }
+        return sealTraveler(keys, cartId, traveler, purge)
+      })
+    )
+  }
+
+  /** The cart's travelers made the booking's; again changes nothing. */
+  @InjectTransactionManager()
+  async attachTravelers(
+    cartId: string,
+    bookingId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    return attachTravelers(managerOf(sharedContext), cartId, bookingId)
+  }
+
+  /**
+   * A booked traveler's full ID or passport number (null: none asked).
+   * For the audited staff route only; never logged, never sent on.
+   */
+  @InjectManager()
+  async revealTravelerDocument(
+    travelerId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<string | null> {
+    return revealDocument(managerOf(sharedContext), this.travelerKeys(), travelerId)
+  }
+
   /** Sets a cart's places per slot (0 gives one back); null: the cart holds nothing now. */
   @InjectTransactionManager()
   async holdUnits(
@@ -204,6 +282,11 @@ class BookingModuleService extends MedusaService({
   override deleteBookingSlotUses = refuseCounterWrite
   override softDeleteBookingSlotUses = refuseCounterWrite
   override restoreBookingSlotUses = refuseCounterWrite
+  // A traveler is written only sealed (`setCartTravelers`); deleted for good, never soft
+  override createBookingTravelers = refuseCounterWrite
+  override updateBookingTravelers = refuseCounterWrite
+  override softDeleteBookingTravelers = refuseCounterWrite
+  override restoreBookingTravelers = refuseCounterWrite
 }
 
 /** The generated writers this service replaces, for the test that calls each. */
@@ -213,8 +296,10 @@ export const REFUSED_WRITERS = [
   "BookingHoldSlots",
   "Bookings",
   "BookingSlotUses",
-].flatMap((name) =>
-  ["create", "update", "delete", "softDelete", "restore"].map((verb) => `${verb}${name}`)
-)
+]
+  .flatMap((name) =>
+    ["create", "update", "delete", "softDelete", "restore"].map((verb) => `${verb}${name}`)
+  )
+  .concat(["create", "update", "softDelete", "restore"].map((verb) => `${verb}BookingTravelers`))
 
 export default BookingModuleService

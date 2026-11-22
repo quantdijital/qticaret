@@ -6,6 +6,8 @@ import {
   AdminPostBookingSlot,
   AdminPostBookingSlots,
 } from "../admin/booking-slots/validators"
+import { AdminPostRevealTaxId } from "../admin/customers/[id]/billing-profile/reveal/validators"
+import { requireReauth } from "./reauth"
 import { requireFeature } from "./require-feature"
 
 /**
@@ -48,5 +50,16 @@ export const BOOKING_ROUTES = [
     matcher: "/admin/booking-slots/:id/bookings",
     methods: ["GET" as const],
     middlewares: [requireFeature(CATALOG_BOOKING)],
+  },
+  {
+    // A traveler's full ID number (adr/0076 §7): owner and admin by the role table (a
+    // POST), proved again, recorded by the route before it answers
+    matcher: "/admin/booking-travelers/:id/reveal",
+    methods: ["POST" as const],
+    middlewares: [
+      requireFeature(CATALOG_BOOKING),
+      requireReauth(),
+      validateAndTransformBody(AdminPostRevealTaxId),
+    ],
   },
 ]

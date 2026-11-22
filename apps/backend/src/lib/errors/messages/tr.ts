@@ -343,6 +343,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "booking.too_many_free_units": "Yer tutan her kişi için en çok 2 ücretsiz kişi eklenebilir.",
   "booking.order_edit_unavailable":
     "Rezervasyonlu ürünler sipariş düzenlemeyle değiştirilemez; gerekirse siparişi iptal edin.",
+  "booking.travelers_missing": "Ödemeden önce bütün katılımcıların bilgilerini girin.",
+  "booking.travelers_invalid": "Bir katılımcının bilgisi eksik ya da geçersiz; formu kontrol edin.",
+  "booking.traveler_unknown": "Katılımcı bulunamadı.",
   "addons.required_must_be_free": "Ücretli ek seçenek zorunlu yapılamaz.",
   "addons.not_addon_line": "Bu ürünün ek seçeneği yok.",
   "addons.unknown": "Bu ek seçenek ya da seçim üründe yok.",

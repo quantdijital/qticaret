@@ -32,6 +32,9 @@ const SECRET_PARTS = [
   "tckn",
   "taxid",
   "identitynumber",
+  // A traveler's ID or passport number (adr/0076 §7)
+  "documentno",
+  "passport",
   "cardnumber",
   "cvv",
   "cvc",
@@ -56,6 +59,7 @@ const PERSONAL_PARTS = [
   "fullname",
   "legalname",
   "contactname",
+  "birthdate",
 ]
 const PERSONAL_EXCEPTIONS = new Set(["emailverified"])
 const REFERENCE = /ids?$/
