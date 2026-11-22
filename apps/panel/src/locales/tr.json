@@ -1383,6 +1383,21 @@
         "packageTravel": "Paket tur satıyorum",
         "packageTravelHint": "Açıksa tarihli üründe hizmet gününe 30 gün ve daha fazla kala yapılan iptalde kesinti yapılmaz (ürünün iptal koşulları ne derse desin); müşteriye iadenin 14 gün içinde yapılacağı söylenir."
       },
+      "bookingFlow": {
+        "title": "Rezervasyon akışı",
+        "description": "Tarihli ürünlerde voucher ve müşterinin kendi iptali isteğe bağlıdır. Kapattığınızda müşteri onların yerine sizin notunuzu görür; gerisini telefon ya da e-postayla siz yürütürsünüz.",
+        "voucher": "Voucher gönder",
+        "voucherHint": "Onay e-postasında voucher bağlantısı, voucher sayfası ve doğrulama kodu. Kapalıyken voucher üretilmez, Siparişler'deki Voucher doğrula düğmesi de görünmez.",
+        "voucherNote": "Voucher yerine e-postadaki not",
+        "voucherNoteDefault": "Rezervasyon ayrıntıları için sizinle telefon veya e-posta ile iletişime geçeceğiz.",
+        "onlineCancel": "Müşteri sipariş sayfasından iptal edebilsin",
+        "onlineCancelHint": "Sipariş sayfasında iptal ve iade hesabı. Kapalıyken iptali ve iadeyi siparişin sayfasından siz yaparsınız.",
+        "cancelNote": "İptal yerine sipariş sayfasındaki not",
+        "cancelNoteDefault": "İptal ve değişiklik için bizimle iletişime geçin.",
+        "noteHint": "Boş bırakırsanız yukarıdaki metin gösterilir.",
+        "cancelNoteHint": "Boş bırakırsanız yukarıdaki metin gösterilir. Mağaza profilindeki telefon ve e-posta notun altına eklenir.",
+        "noteTooLong": "Not en çok {{max}} karakter olabilir."
+      },
       "tabs": {
         "carriers": "Kargo firmaları",
         "options": "Seçenekler ve ücretler",
@@ -3662,7 +3677,7 @@
         "travelerLevel": "Katılımcı bilgisi",
         "travelerLevelHint": "Ödemede her katılımcı için istenir. Kimlik ya da pasaport no şifreli saklanır, panelde maskeli görünür. Yalnız gerçekten gerekeni isteyin (KVKK).",
         "travelerLevels": {
-          "none": "İsteme",
+          "none": "İstemiyorum (bilgileri sonra kendim alırım)",
           "name": "Ad soyad",
           "birth_date": "Ad soyad, doğum tarihi",
           "identity": "Ad soyad, doğum tarihi, kimlik/pasaport no",

@@ -138,6 +138,20 @@ export interface ReturnsSettings {
 
 export const MIN_WITHDRAWAL_DAYS = 14
 
+/**
+ * The simple path of dated products (adr/0076 Ek basit yol): the shop may
+ * run without vouchers or the shopper's online cancel, its own note shown
+ * instead (null: the default sentence). Counts only while dated selling is on.
+ */
+export interface BookingFlowSettings {
+  voucher_enabled: boolean
+  voucher_off_note: string | null
+  online_cancel_enabled: boolean
+  cancel_off_note: string | null
+}
+
+export const BOOKING_NOTE_MAX = 500
+
 /** Who restricted products are sold to (F13.3): the lowest age a buyer declares. */
 export interface ComplianceSettings {
   min_age: number
