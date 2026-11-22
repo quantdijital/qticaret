@@ -298,6 +298,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/payment-links",
       options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
     },
+    // adr/0076: dated products' departures, places, carts' holds and bookings
+    { resolve: "./src/modules/booking" },
     // F18 (adr/0049): the storefront's design from the theme editor: draft, live, revisions
     { resolve: "./src/modules/storefront-layout" },
     // F18 (adr/0049): the storefront's menus, their links pointing at records

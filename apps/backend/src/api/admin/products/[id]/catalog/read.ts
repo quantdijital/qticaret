@@ -30,6 +30,7 @@ interface ProductRow {
     addons?: unknown
     description_doc?: unknown
     summary_doc?: unknown
+    booking_mode?: string | null
   } | null
 }
 
@@ -98,6 +99,8 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     description_doc: (extension?.description_doc ?? null) as ContentDoc | null,
     // adr/0055 Ek 2026-11-06: the short description as written; null, none
     summary_doc: summaryDocOf(extension?.summary_doc),
+    // adr/0076 §2: a dated product's booking mode; `none` for every other
+    booking_mode: extension?.booking_mode ?? "none",
     primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
     successor: await productTitle(scope, extension?.successor_product_id ?? null),
     categories,

@@ -49,6 +49,12 @@ export const MARKETING_CAMPAIGNS = "marketing.campaigns"
 /** Product add-ons priced on the server, a typed text or a choice (adr/0052). */
 export const PRODUCT_ADDONS = "catalog.addons"
 
+/**
+ * Dated products sold by departure, their places held in carts and booked
+ * (adr/0076). Needs `catalog.non_physical`: a dated product is a service.
+ */
+export const CATALOG_BOOKING = "catalog.booking"
+
 /** Orders staff make and the customer pays through a link (adr/0051). */
 export const PAYMENT_LINKS = "orders.payment_links"
 
@@ -140,6 +146,14 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.catalog_addons.label",
     descriptionKey: "qticaret.features.catalog_addons.description",
+  },
+  // adr/0076: dated products are services, so a product is set to one only while
+  // catalog.non_physical is on too (the catalog save checks both)
+  [CATALOG_BOOKING]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.catalog_booking.label",
+    descriptionKey: "qticaret.features.catalog_booking.description",
   },
   // adr/0050: off until the shop takes on bulk messages; the panel shows the screen only when on
   [MARKETING_CAMPAIGNS]: {

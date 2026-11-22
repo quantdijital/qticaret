@@ -696,6 +696,10 @@
           "addons": {
             "label": "Product add-ons",
             "description": "Products may offer paid add-ons: a typed text or a choice, priced on the server and added to the line's price. They are set on the product page's Add-ons card."
+          },
+          "booking": {
+            "label": "Dated products",
+            "description": "Sell services with departure dates (tours, events, courses, workshops): each departure has its own places, held in the cart for a while. Digital and service products must be on too."
           }
         },
         "marketing": {

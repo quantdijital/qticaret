@@ -12,6 +12,7 @@ import {
   emitEventStep,
   releaseLockStep,
   updateInventoryItemsStep,
+  updateProductVariantsWorkflow,
   updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
@@ -79,6 +80,17 @@ export const setProductCatalogWorkflow = createWorkflow(
         })
       }
     )
+
+    // adr/0076 §3: a dated product's places are the booking module's; its variants
+    // neither track stock nor sell past it (the variant hooks keep new ones so)
+    when("catalog-booking-variants", { plan }, ({ plan }) => plan.alignBookingVariants).then(() => {
+      updateProductVariantsWorkflow.runAsStep({
+        input: transform({ plan }, ({ plan }) => ({
+          selector: { product_id: plan.product_id },
+          update: { manage_inventory: false, allow_backorder: false },
+        })),
+      })
+    })
 
     // Search reads MPNs, the description and the short description (adr/0056)
     const saved = transform({ input }, ({ input }) => ({ id: input.product_id }))

@@ -696,6 +696,10 @@
           "addons": {
             "label": "Ürün ek seçenekleri",
             "description": "Ürünler ücretli ya da ücretsiz ek seçenek sunabilir: müşterinin yazdığı bir metin ya da birkaç seçenekten biri. Ek seçeneğin ücreti sunucuda hesaplanır ve satır fiyatına eklenir; ayarları ürün sayfasındaki Ek seçenekler kartında."
+          },
+          "booking": {
+            "label": "Tarihli ürünler",
+            "description": "Kalkış tarihli hizmetler (tur, etkinlik, kurs, atölye) satılabilir: her kalkışın kendi kontenjanı olur, sepette yer süreli tutulur. Dijital ve hizmet ürünlerinin de açık olması gerekir."
           }
         },
         "marketing": {

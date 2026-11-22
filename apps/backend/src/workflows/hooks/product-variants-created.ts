@@ -1,5 +1,6 @@
 import { StepResponse } from "@medusajs/framework/workflows-sdk"
 import { createProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
+import { alignBookingVariants, restoreBookingVariants } from "../catalog/align-booking"
 import { alignVariantItems, restoreVariantItems } from "../catalog/align-shipping"
 import { addBackorderLevels, removeBackorderLevels } from "../stock/backorder-levels"
 
@@ -10,12 +11,15 @@ import { addBackorderLevels, removeBackorderLevels } from "../stock/backorder-le
 createProductVariantsWorkflow.hooks.productVariantsCreated(
   async ({ product_variants }, { container }) => {
     const ids = product_variants.map((variant) => variant.id)
+    // First, so a dated product's variant gets no stock level for selling past stock
+    const booking = await alignBookingVariants(container, ids)
     const changed = await alignVariantItems(container, ids)
     const levels = await addBackorderLevels(container, { variant_ids: ids })
-    return new StepResponse(undefined, { changed, levels })
+    return new StepResponse(undefined, { booking, changed, levels })
   },
   async (undo, { container }) => {
     await removeBackorderLevels(container, undo?.levels ?? [])
     await restoreVariantItems(container, undo?.changed ?? [])
+    await restoreBookingVariants(container, undo?.booking ?? [])
   }
 )

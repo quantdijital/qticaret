@@ -195,6 +195,8 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   "/admin/category-descriptions*",
   "/admin/category-restrictions*",
   "/admin/catalog*",
+  // Dated products' departures (adr/0076); their settings are under /admin/products
+  "/admin/booking-slots*",
   "/admin/media*",
   "/admin/uploads*",
   "/admin/migrations*",

@@ -3,6 +3,8 @@ import { RESTRICTIONS } from "../../../lib/catalog/restrictions"
 
 export const PRODUCT_CONDITIONS = ["new", "refurbished", "used", "damaged"] as const
 export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
+/** How a dated product is booked (adr/0076 §2); `range` is reserved, not yet written (§11). */
+export const PRODUCT_BOOKING_MODES = ["none", "departure", "range"] as const
 
 /**
  * What Medusa's product has no column for (F3.1, docs/13 §2.2 and §2.4),
@@ -36,6 +38,9 @@ export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
  *   document held to the short slot's set (adr/0055 Ek 2026-11-06,
  *   `lib/catalog/summary`), shown under the product's name above its
  *   price, and the meta description's fallback. Null: none.
+ * - `booking_mode`: a dated product sold by departure (adr/0076 §2), a
+ *   service under the `catalog.booking` flag; its places are the booking
+ *   module's, not stock. `none` for every other product.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -49,4 +54,5 @@ export const ProductExtension = model.define("product_extension", {
   addons: model.json().nullable(),
   description_doc: model.json().nullable(),
   summary_doc: model.json().nullable(),
+  booking_mode: model.enum([...PRODUCT_BOOKING_MODES]).default("none"),
 })

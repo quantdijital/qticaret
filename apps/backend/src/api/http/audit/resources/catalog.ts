@@ -25,6 +25,7 @@ interface ProductRow {
     addons?: unknown
     description_doc?: unknown
     summary_doc?: unknown
+    booking_mode?: string | null
   } | null
 }
 
@@ -70,6 +71,8 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
     description_doc: docDigest(extension?.description_doc),
     // adr/0055 Ek 2026-11-06: the short description, by its digest as the long one's
     summary_doc: docDigest(extension?.summary_doc),
+    // adr/0076 §2
+    booking_mode: extension?.booking_mode ?? "none",
     ...Object.fromEntries(
       (product.variants ?? []).flatMap((variant): [string, string | number | null][] =>
         variant
