@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { createTtlCache } from "../../lib/cache"
 import type { ListingQuery } from "../../lib/seo/facets"
 import { DEPARTURE_SORT, todayIn } from "../../lib/seo/facets-dated"
 import type { ListingDates } from "../../lib/seo/facets-dated"
@@ -18,6 +19,13 @@ import { bookingService } from "../booking/cart/target"
 
 /** Products a date search narrows to at most, the nearest first (adr/0077 Riskler). */
 export const MAX_DATED_PRODUCTS = 1000
+
+/**
+ * A date search's products, by its dates, party and today, kept a short
+ * while in this process (adr/0077 Riskler): places change by the minute,
+ * the card facts say them fresh.
+ */
+const matchesCache = createTtlCache<string[]>({ ttlMs: 30_000, maxEntries: 200 })
 
 /** How far ahead `kalkis` looks without dates. */
 const AHEAD_DAYS = 365
@@ -74,13 +82,13 @@ export async function datedListing(
   const dates: DepartureDates = query.dates
     ? departureDatesOf(query.dates)
     : { ranges: [{ from: today, to: dayPlus(today, AHEAD_DAYS) }] }
-  const matches = await bookingService(container).departureMatches({
-    dates,
-    pax: query.pax ?? 1,
-    now,
+  const pax = query.pax ?? 1
+  // Every page, filter and sort of the same dates shares one read for a while
+  const ids = await matchesCache(JSON.stringify([today, dates, pax]), async () => {
+    const matches = await bookingService(container).departureMatches({ dates, pax, now })
+    const first = matches.slice(0, MAX_DATED_PRODUCTS).map((match) => match.product_id)
+    const sold = await departureProducts(container, first)
+    return first.filter((id) => sold.has(id))
   })
-  const first = matches.slice(0, MAX_DATED_PRODUCTS).map((match) => match.product_id)
-  const sold = await departureProducts(container, first)
-  const ids = first.filter((id) => sold.has(id))
   return { scope_ids: query.dates ? ids : null, order_ids: ids }
 }

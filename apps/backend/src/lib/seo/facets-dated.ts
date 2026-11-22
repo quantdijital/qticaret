@@ -62,7 +62,15 @@ function dayTime(day: string): number | null {
   return new Date(time).toISOString().slice(0, 10) === day ? time : null
 }
 
-/** A range from today on, its end not before its start, at most MAX_RANGE_DAYS; else null. */
+const monthIndex = (year: number, month: number) => year * 12 + (month - 1)
+
+// A day's month, counted from year 0 (`YYYY-MM-DD` already checked)
+const monthOfDay = (day: string) => monthIndex(Number(day.slice(0, 4)), Number(day.slice(5, 7)))
+
+/**
+ * A range from today on, starting within the months `ay` offers, its end
+ * not before its start, at most MAX_RANGE_DAYS; else null.
+ */
 export function rangeOf(raw: string | undefined, today: string): ListingDates | null {
   const match = raw === undefined ? null : RANGE.exec(raw)
   const from = match?.[1]
@@ -76,10 +84,12 @@ export function rangeOf(raw: string | undefined, today: string): ListingDates | 
   if (start === null || end === null || first === null || start < first || end < start) {
     return null
   }
+  // No further ahead than `ay` reaches: a far date is no shopper's (nor a Date's)
+  if (monthOfDay(from) >= monthOfDay(today) + MONTHS_AHEAD) {
+    return null
+  }
   return (end - start) / DAY_MS + 1 > MAX_RANGE_DAYS ? null : { kind: "range", from, to }
 }
-
-const monthIndex = (year: number, month: number) => year * 12 + (month - 1)
 
 /**
  * The months asked within this month and the next eleven, sorted and

@@ -1,4 +1,5 @@
-import { asInt, marks, rows } from "./sql"
+import { ValidationError } from "../../lib/errors"
+import { MAX_UNITS, asInt, marks, rows } from "./sql"
 import type { Executor, Row } from "./sql"
 import { availabilityOf } from "./availability"
 import type { SlotAvailability } from "./availability"
@@ -9,8 +10,8 @@ import type { SlotAvailability } from "./availability"
  * starts inside the dates asked, and its free places (capacity − sold −
  * live holds) cover the party. Dates are the product's own: a day or a
  * month starts and ends in its `timezone`. Live holds are added up only
- * for the departures already inside the dates, and the dates' outer
- * bounds in UTC let the partial index on `starts_at` find them
+ * for the departures already inside the dates, and each span's bounds
+ * in UTC let the partial index on `starts_at` find them
  * (`IDX_booking_slot_open_starts_at`).
  */
 
@@ -44,82 +45,105 @@ const MONTH = /^(\d{4})-(\d{2})$/
 const HOUR = 60 * 60 * 1000
 // No zone is further from UTC than this (Kiribati +14, Baker Island −12)
 const ZONE_REACH = 14 * HOUR
+// Years a departure is searched in; a date outside is no shopper's (and no Date's)
+const FIRST_YEAR = 2000
+const LAST_YEAR = 9000
+// Spans one search reads at most (three months, one range)
+const MAX_SPANS = 3
 
-const isoDay = (date: Date) => date.toISOString().slice(0, 10)
+/** Products one date search answers at most, the nearest first (adr/0077 Riskler). */
+export const MAX_MATCHES = 1000
 
-function dayAfter(day: string): string {
+const refused = (): ValidationError =>
+  new ValidationError("booking.dates_invalid", { field: "dates" })
+
+// A real calendar day's UTC midnight inside the years searched
+function dayTime(day: string): number {
   const match = DAY.exec(day)
-  if (!match) {
-    throw new Error(`booking: not a day: ${day}`)
+  const year = Number(match?.[1])
+  const time = Date.UTC(year, Number(match?.[2]) - 1, Number(match?.[3]))
+  if (!match || year < FIRST_YEAR || year > LAST_YEAR || Number.isNaN(time)) {
+    throw refused()
   }
-  return isoDay(new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]) + 1)))
+  if (new Date(time).toISOString().slice(0, 10) !== day) {
+    throw refused()
+  }
+  return time
 }
+
+const isoDay = (time: number) => new Date(time).toISOString().slice(0, 10)
 
 function monthSpan(month: string): LocalSpan {
   const match = MONTH.exec(month)
-  if (!match) {
-    throw new Error(`booking: not a month: ${month}`)
+  const year = Number(match?.[1])
+  const index = Number(match?.[2]) - 1
+  if (!match || year < FIRST_YEAR || year > LAST_YEAR || index < 0 || index > 11) {
+    throw refused()
   }
-  const year = Number(match[1])
-  const index = Number(match[2]) - 1
   return {
-    from: isoDay(new Date(Date.UTC(year, index, 1))),
-    to: isoDay(new Date(Date.UTC(year, index + 1, 1))),
+    from: isoDay(Date.UTC(year, index, 1)),
+    to: isoDay(Date.UTC(year, index + 1, 1)),
   }
 }
 
 /** The dates as local day spans (each end a local midnight, `to` excluded). */
 export function localSpans(dates: DepartureDates): LocalSpan[] {
-  if ("months" in dates) {
-    return dates.months.map(monthSpan)
+  const spans =
+    "months" in dates
+      ? dates.months.map(monthSpan)
+      : dates.ranges.map((range) => {
+          const from = dayTime(range.from)
+          const to = dayTime(range.to)
+          if (to < from) {
+            throw refused()
+          }
+          return { from: range.from, to: isoDay(to + 24 * HOUR) }
+        })
+  if (spans.length === 0 || spans.length > MAX_SPANS) {
+    throw refused()
   }
-  return dates.ranges.map((range) => {
-    if (!DAY.test(range.from)) {
-      throw new Error(`booking: not a day: ${range.from}`)
-    }
-    return { from: range.from, to: dayAfter(range.to) }
-  })
+  return spans
 }
 
-/** The spans' outer bounds in UTC, wide enough for any zone, never before `now`. */
-export function outerBounds(spans: readonly LocalSpan[], now: Date): { from: Date; to: Date } {
-  const starts = spans.map((span) => Date.parse(`${span.from}T00:00:00Z`) - ZONE_REACH)
-  const ends = spans.map((span) => Date.parse(`${span.to}T00:00:00Z`) + ZONE_REACH)
-  return {
-    from: new Date(Math.max(now.getTime(), Math.min(...starts))),
-    to: new Date(Math.max(...ends)),
-  }
+/** A span's bounds in UTC, wide enough for any zone, never before `now`; null when it has passed. */
+export function spanBounds(span: LocalSpan, now: Date): { from: Date; to: Date } | null {
+  const from = Math.max(now.getTime(), Date.parse(`${span.from}T00:00:00Z`) - ZONE_REACH)
+  const to = Date.parse(`${span.to}T00:00:00Z`) + ZONE_REACH
+  return from < to ? { from: new Date(from), to: new Date(to) } : null
 }
 
 /**
  * The departures inside the dates with room for the party, as one
  * statement: `c` the open departures in the spans whose sales are still
- * on (the index's range, then each product's zone), `h` their live
- * holds, then what is left of each. `bookableIds` narrows to some
- * products (a page of cards).
+ * on (each span its own range on the index, then the product's zone), `h`
+ * their live holds, then what is left of each. `bookableIds` narrows to
+ * some products (a page of cards). A month apart from the next is read
+ * on its own: what lies between them is never read.
  */
 export function windowStatement(
   query: DepartureQuery,
   bookableIds: readonly string[] | null
 ): { cte: string; params: unknown[] } {
-  const spans = localSpans(query.dates)
-  if (spans.length === 0) {
-    throw new Error("booking: no dates to match")
-  }
-  const bounds = outerBounds(spans, query.now)
+  const spans = localSpans(query.dates).flatMap((span) => {
+    const bounds = spanBounds(span, query.now)
+    return bounds ? [{ span, bounds }] : []
+  })
   const local = "(s.starts_at AT TIME ZONE b.timezone)"
-  const inSpans = spans
-    .map(() => `(${local} >= ?::timestamp AND ${local} < ?::timestamp)`)
-    .join(" OR ")
+  const inSpans =
+    spans
+      .map(
+        () =>
+          `(s.starts_at >= ? AND s.starts_at < ? AND ${local} >= ?::timestamp AND ${local} < ?::timestamp)`
+      )
+      .join(" OR ") || "false"
   const cte = `WITH c AS MATERIALIZED (
       SELECT s.id, s.bookable_id, s.starts_at, s.ends_at, s.status, s.capacity, s.sold,
              s.price_adjustments, b.product_id
         FROM booking_slot s
         JOIN bookable b ON b.id = s.bookable_id AND b.deleted_at IS NULL AND b.mode = 'departure'
        WHERE s.status = 'open' AND s.deleted_at IS NULL
-         AND s.starts_at >= ? AND s.starts_at < ?
-         AND s.starts_at > ?::timestamptz + make_interval(hours => b.cutoff_hours)
          AND (${inSpans})
+         AND s.starts_at > ?::timestamptz + make_interval(hours => b.cutoff_hours)
          AND s.capacity - s.sold >= ?
          ${bookableIds ? `AND s.bookable_id IN (${marks(bookableIds.length)})` : ""}
     ), h AS (
@@ -136,10 +160,13 @@ export function windowStatement(
        WHERE c.capacity - c.sold - COALESCE(h.units, 0) >= ?
     )`
   const params: unknown[] = [
-    bounds.from,
-    bounds.to,
+    ...spans.flatMap(({ span, bounds }) => [
+      bounds.from,
+      bounds.to,
+      `${span.from} 00:00:00`,
+      `${span.to} 00:00:00`,
+    ]),
     query.now,
-    ...spans.flatMap((span) => [`${span.from} 00:00:00`, `${span.to} 00:00:00`]),
     query.pax,
     ...(bookableIds ?? []),
     query.pax,
@@ -147,41 +174,45 @@ export function windowStatement(
   return { cte, params }
 }
 
-/** The statement `departureMatches` runs: each product's first matching departure. */
-export function matchesStatement(query: DepartureQuery): { sql: string; params: unknown[] } {
+/**
+ * The statement `departureMatches` runs: each product's first matching
+ * departure, then the nearest `limit` of them.
+ */
+export function matchesStatement(
+  query: DepartureQuery,
+  limit: number = MAX_MATCHES
+): { sql: string; params: unknown[] } {
   const { cte, params } = windowStatement(query, null)
   return {
     sql: `${cte}
-      SELECT DISTINCT ON (w.product_id) w.product_id, w.id AS slot_id, w.starts_at, w.left_places
-        FROM w ORDER BY w.product_id, w.starts_at, w.id`,
-    params,
+      SELECT * FROM (
+        SELECT DISTINCT ON (w.product_id) w.product_id, w.id AS slot_id, w.starts_at, w.left_places
+          FROM w ORDER BY w.product_id, w.starts_at, w.id
+      ) d
+      ORDER BY d.starts_at, d.product_id
+      LIMIT ?`,
+    params: [...params, limit],
   }
 }
 
 const toDate = (value: unknown): Date => new Date(value as string | Date)
 
-/** Each product's first matching departure, the earliest first. */
+/** Each product's first matching departure, the earliest first, at most MAX_MATCHES. */
 export async function departureMatches(
   manager: Executor,
   query: DepartureQuery
 ): Promise<DepartureMatch[]> {
-  if (!Number.isInteger(query.pax) || query.pax < 1) {
-    throw new Error("booking: a party is at least one place")
+  if (!Number.isInteger(query.pax) || query.pax < 1 || query.pax > MAX_UNITS) {
+    throw new ValidationError("booking.units_invalid", { field: "pax" })
   }
   const { sql, params } = matchesStatement(query)
   const found = await rows(manager, sql, params)
-  return found
-    .map((row: Row) => ({
-      product_id: String(row["product_id"]),
-      slot_id: String(row["slot_id"]),
-      starts_at: toDate(row["starts_at"]),
-      left: asInt(row["left_places"]),
-    }))
-    .sort(
-      (a, b) =>
-        a.starts_at.getTime() - b.starts_at.getTime() ||
-        (a.product_id < b.product_id ? -1 : a.product_id > b.product_id ? 1 : 0)
-    )
+  return found.map((row: Row) => ({
+    product_id: String(row["product_id"]),
+    slot_id: String(row["slot_id"]),
+    starts_at: toDate(row["starts_at"]),
+    left: asInt(row["left_places"]),
+  }))
 }
 
 /**

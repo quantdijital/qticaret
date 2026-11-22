@@ -73,11 +73,20 @@ export const PaxByVariant = z
   .refine((record) => Object.keys(record).length <= 100, { message: "booking.pax_invalid" })
 export type PaxByVariantType = z.infer<typeof PaxByVariant>
 
-/** IANA zone names the runtime knows (`Europe/Istanbul`). */
+/**
+ * IANA zone names the runtime knows, as Area/City (`Europe/Istanbul`,
+ * `America/Argentina/Buenos_Aires`). The database reads the zone too
+ * (`AT TIME ZONE`, adr/0077 §3), where an offset (`+03:00`) is POSIX and
+ * reads with its sign turned, and an abbreviation may mean another zone:
+ * neither is taken.
+ */
+const ZONE_NAME = /^[A-Z][A-Za-z]+(?:\/[A-Za-z0-9][A-Za-z0-9_+-]*){1,2}$/
+
 export const TimeZone = z
   .string()
   .min(1)
   .max(64)
+  .regex(ZONE_NAME, { message: "booking.timezone_invalid" })
   .refine(
     (zone) => {
       try {

@@ -3,7 +3,9 @@ import { AdminPostCategoryDescription } from "../admin/category-descriptions/val
 import { AdminPostCategoryImage } from "../admin/category-images/validators"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { StoreGetCardFacts } from "../store/card-facts/validators"
+import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { requireUserActor } from "./actor"
+import { rateLimit } from "./rate-limit"
 
 const noQuery = validateAndTransformQuery(AdminGetDashboardNoQuery, {})
 
@@ -55,6 +57,9 @@ export const STOREFRONT_CARD_ROUTES = [
   {
     matcher: "/store/card-facts",
     methods: ["GET" as const],
-    middlewares: [validateAndTransformQuery(StoreGetCardFacts, {})],
+    middlewares: [
+      rateLimit(() => RATE_LIMIT_PROFILES.card_facts),
+      validateAndTransformQuery(StoreGetCardFacts, {}),
+    ],
   },
 ]

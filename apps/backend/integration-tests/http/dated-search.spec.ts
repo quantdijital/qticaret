@@ -133,8 +133,9 @@ medusaIntegrationTestRunner({
         outside.productId,
       ])
       expect(bySort.data.product_ids).toContain(plain.productId)
-      // A search with neither words, dates nor category is still refused
+      // A search with neither words, dates nor category is still refused; nor is a far date
       expect((await search({})).status).toBe(400)
+      expect((await search({ tarih: "9999-12-31_9999-12-31" })).status).toBe(400)
     })
 
     it("narrows a search to a category's subtree without words", async () => {
@@ -166,7 +167,8 @@ medusaIntegrationTestRunner({
     it("drops the dates and the party with the flag off: the canonical query has none", async () => {
       const dated = await tour([{ days: 7, capacity: 10 }])
       const plain = await stockedProduct(getContainer(), shop, `duz-${String((made += 1))}`, 5)
-      const tarih = `${dayAhead(5)}_${dayAhead(20)}`
+      // Other dates than the test above: a date search's products are kept 30 seconds
+      const tarih = `${dayAhead(4)}_${dayAhead(21)}`
 
       const on = await listing({ type: "all", id: "all" }, { tarih, kisi: "2" })
       await flag("catalog.booking", false)
@@ -201,6 +203,7 @@ medusaIntegrationTestRunner({
       const ranged = await cards(`&from=${dayAhead(10)}&to=${dayAhead(20)}&pax=2`)
       const crowd = await cards(`&from=${dayAhead(10)}&to=${dayAhead(20)}&pax=5`)
       const past = await cards(`&from=2020-01-01&to=2020-01-05`)
+      const far = await cards(`&from=9999-12-31&to=9999-12-31`)
 
       expect(plain.data.facts[productId]?.booking).toEqual({
         from_price: 1500,
@@ -222,6 +225,7 @@ medusaIntegrationTestRunner({
         in_range: true,
       })
       expect(past.status).toBe(400)
+      expect(far.status).toBe(400)
     })
   },
 })

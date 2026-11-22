@@ -34,6 +34,9 @@ describe("a date search's parameters", () => {
       ["an end before the start", "2026-12-05_2026-12-01", false],
       ["a day the calendar has not", "2026-02-30_2026-03-02", false],
       ["another form", "2026-12-01..2026-12-05", false],
+      ["a start in the last month ay offers", "2027-10-31_2027-11-02", true],
+      ["a start past the months ay offers", "2027-11-01_2027-11-02", false],
+      ["a start no shopper means (PR #281 review)", "9999-12-31_9999-12-31", false],
     ])("%s", (_, raw, ok) => {
       expect(rangeOf(raw, TODAY) !== null).toBe(ok)
     })

@@ -124,6 +124,16 @@ moduleIntegrationTestRunner<BookingModuleService>({
       expect(slots[0]?.available).toBe(10)
     })
 
+    it("refuses a date no search holds as a validation error, not a crash", async () => {
+      await expect(
+        service.departureMatches({
+          dates: { ranges: [{ from: "9999-12-31", to: "9999-12-31" }] },
+          pax: 1,
+          now: new Date(),
+        })
+      ).rejects.toMatchObject({ safeMessage: "booking.dates_invalid" })
+    })
+
     it("finds the departures through the partial index on their start", async () => {
       const { month } = monthAhead()
       const { sql: text, params } = matchesStatement({
