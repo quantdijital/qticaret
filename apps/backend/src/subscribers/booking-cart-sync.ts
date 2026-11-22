@@ -1,6 +1,6 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { errorSummary, logger } from "../lib/logging"
-import { bookingEnabled } from "../workflows/booking/cart/target"
+import { bookingEnabled, bookingService } from "../workflows/booking/cart/target"
 import { syncCartHoldWorkflow } from "../workflows/booking/cart/sync-hold"
 
 /**
@@ -16,6 +16,11 @@ export default async function bookingCartSync({
 }: SubscriberArgs<{ id: string }>) {
   try {
     if (!(await bookingEnabled(container))) {
+      return
+    }
+    // Most carts hold nothing: the cart's lock is taken only for one that does
+    const hold = await bookingService(container).cartHold(data.id)
+    if (!hold?.live) {
       return
     }
     await syncCartHoldWorkflow(container).run({ input: { cart_id: data.id } })
