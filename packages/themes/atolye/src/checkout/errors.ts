@@ -72,4 +72,11 @@ export const CHECKOUT_ERRORS = [
   ...LINK_ERRORS,
   "cart.payment_link_no_cod",
   "cart.shipping_not_needed",
+  // A dated product's travelers (adr/0076 Ek D6b): their step's refusals, and the payment's
+  "booking.travelers_missing",
+  "booking.travelers_invalid",
+  "checkout.traveler_name_required",
+  "checkout.traveler_birth_date_invalid",
+  "checkout.traveler_document_invalid",
+  "checkout.traveler_nationality_required",
 ]

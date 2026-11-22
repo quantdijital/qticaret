@@ -13,6 +13,7 @@ import { bookingFailureText } from "./booking-failure"
 import type { VariantName } from "./slot-facts"
 import { BOOKING_LIMITS, settingsDraftOf, settingsInputOf, settingsSchema } from "./slot-schemas"
 import type { SettingsDraft } from "./slot-schemas"
+import { TravelerLevelField } from "./traveler-level-field"
 
 const B = "products.booking.settings"
 
@@ -20,7 +21,8 @@ const B = "products.booking.settings"
  * The product's booking settings, the card's second plane (adr/0076 §3):
  * when sales close, how long a cart holds places, the most places in a
  * cart, the minimum group (for information) and how many places each
- * variant takes (an infant 0) with its ages.
+ * variant takes (an infant 0) with its ages, and what checkout asks of
+ * each traveler (D6b).
  */
 export function BookingSettings({
   productId,
@@ -101,6 +103,9 @@ export function BookingSettings({
           t("products.booking.places"),
           t(`${B}.none`)
         )}
+      </div>
+      <div className="border-t pt-4">
+        <TravelerLevelField control={form.control} />
       </div>
       {variants.length > 0 ? (
         <fieldset className="flex flex-col gap-3 border-t pt-4">

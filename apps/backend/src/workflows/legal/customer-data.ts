@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { BACK_IN_STOCK_MODULE } from "../../modules/back-in-stock"
+import { customerBookingTravelers } from "../booking/traveler-requests"
 import { campaignMessagesFor } from "../campaigns/customer-data"
 import { contactMessagesFor } from "../contact/customer-data"
 import { exportedItems } from "../gift-cards/kvkk"
@@ -45,7 +46,8 @@ const iso = (value: unknown): string | null =>
  * answer to their request for a copy: their profile and addresses, invoice
  * identity (the tax number's last four digits), orders, consents and the
  * contracts' acceptance, messages sent, returns, reviews, questions, stock
- * alerts, saved products and their wholesale account. Sections are named
+ * alerts, saved products, their wholesale account and the travelers they
+ * named for dated products (the number masked). Sections are named
  * in Turkish: the file is theirs to read.
  */
 export async function customerData(container: Container, customerId: string) {
@@ -154,6 +156,8 @@ export async function customerData(container: Container, customerId: string) {
   const campaigns = await campaignMessagesFor(container, customerId, email ? [email] : [])
   const paymentLinks = await paymentLinksFor(container, customerId, email ? [email] : [])
   const wholesale = await wholesaleDataFor(container, customerId, email ? [email] : [], orderIds)
+  // adr/0076 Ek D6b: the travelers they entered at checkout, the number masked
+  const travelers = await customerBookingTravelers(container, customerId)
   // The photos they put on reviews (adr/0037 §4 Ek 2026-11-04), by their addresses
   const reviewPhotos = await container
     .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
@@ -192,5 +196,7 @@ export async function customerData(container: Container, customerId: string) {
     ödeme_bağlantıları: paymentLinks,
     // ADR-0068 §10: their wholesale account, if they are or were a wholesaler
     toptan_hesap: wholesale,
+    // adr/0076 §7: the travelers they named for dated products
+    katılımcılar: travelers,
   }
 }

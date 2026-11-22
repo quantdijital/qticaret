@@ -117,6 +117,8 @@ const CAN_ALL = {
   staff: true,
   audit: true,
   taxId: true,
+  travelerDocuments: true,
+  travelerRequests: true,
   privacy: true,
   invoices: true,
   migration: true,

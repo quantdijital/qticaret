@@ -22,7 +22,12 @@ describe("booking drafts", () => {
 
   it("starts from the server's defaults and sends only variants that differ from one place", () => {
     const draft = settingsDraftOf(null, [{ id: "adult" }, { id: "infant" }])
-    expect(draft).toMatchObject({ hold_minutes: "20", cutoff_hours: "0", min_participants: "" })
+    expect(draft).toMatchObject({
+      hold_minutes: "20",
+      cutoff_hours: "0",
+      min_participants: "",
+      traveler_level: "none",
+    })
     const input = settingsInputOf({
       ...draft,
       pax: {
@@ -36,6 +41,7 @@ describe("booking drafts", () => {
       max_units_per_cart: 20,
       min_participants: null,
       pax_by_variant: { infant: { pax: 0, max_age: 2 } },
+      traveler_fields: { level: "none" },
     })
   })
 

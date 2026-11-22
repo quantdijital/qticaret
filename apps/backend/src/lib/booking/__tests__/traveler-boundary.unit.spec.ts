@@ -28,6 +28,8 @@ const ALLOWED = [
   "api/admin/booking-slots/[id]/bookings/route.ts",
   "api/admin/booking-slots/bookings-view.ts",
   "api/admin/booking-travelers/[id]/reveal/route.ts",
+  "api/admin/booking-travelers/erase/route.ts",
+  "api/admin/booking-travelers/search/route.ts",
   "api/store/carts/[id]/travelers/route.ts",
   "modules/booking/migrations/Migration20261122095448.ts",
   "modules/booking/models/booking-traveler.ts",
@@ -38,6 +40,8 @@ const ALLOWED = [
   "workflows/booking/orders.ts",
   "workflows/booking/reconcile-travelers.ts",
   "workflows/booking/traveler-retention.ts",
+  "workflows/booking/traveler-requests.ts",
+  "workflows/legal/customer-data.ts",
   "workflows/legal/erasure/traces.ts",
 ]
 

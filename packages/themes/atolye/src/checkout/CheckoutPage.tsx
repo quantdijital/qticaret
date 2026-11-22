@@ -10,6 +10,8 @@ import { ShippingForm } from "./ShippingForm"
 import { Step } from "./Step"
 import { FoldedSummary, Summary } from "./Summary"
 import { SummaryCode } from "./SummaryCode"
+import { TravelersForm } from "./TravelersForm"
+import { travelerWords } from "./traveler-words"
 
 const ORDER: CheckoutStep[] = ["address", "shipping", "payment"]
 
@@ -42,6 +44,8 @@ function Invoice({ invoice }: { invoice: CheckoutPageView["invoice"] }) {
  * desktop the basket is a graphite stage that stays beside the steps.
  * Only the view's steps are drawn (adr/0076 §6): a cart nothing ships for
  * has no shipping step, its address step the invoice's and the contact's.
+ * A dated product that asks for its travelers adds their step before the
+ * payment (Ek D6b), drawn only with its view and its action.
  */
 export function CheckoutPage({
   view,
@@ -66,7 +70,7 @@ export function CheckoutPage({
   const edit = t("checkout.edit")
   const address = view.addressSummary
   const { promotions } = view
-  const { applyPromotion, removePromotion } = actions
+  const { applyPromotion, removePromotion, saveTravelers } = actions
   // The summary is drawn twice (folded on a phone, a stage on a desktop): one field each, own ids
   const code = (id: string) =>
     promotions && applyPromotion && removePromotion ? (
@@ -158,6 +162,22 @@ export function CheckoutPage({
                   errors,
                   fallback: t("checkout.shipping_failed"),
                 }}
+              />
+            </Step>
+          )}
+          {steps.includes("travelers") && view.travelers && saveTravelers && (
+            <Step
+              number={numberOf("travelers")}
+              title={t("checkout.step_travelers")}
+              state={stateOf("travelers")}
+              editPath={view.editPaths.travelers ?? view.editPaths.payment}
+              editLabel={edit}
+              summary={view.travelers.summary}
+            >
+              <TravelersForm
+                step={view.travelers}
+                save={saveTravelers}
+                words={travelerWords(t, errors)}
               />
             </Step>
           )}

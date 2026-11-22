@@ -11,6 +11,7 @@ import type {
   PlaceOrderResult,
 } from "./checkout-views"
 import type { PaymentLinkPageView } from "./payment-link-views"
+import type { SaveTravelers } from "./traveler-views"
 import type {
   BlogIndexPageView,
   BrandsPageView,
@@ -151,6 +152,11 @@ export interface CheckoutActions {
   applyPromotion?: FormAction
   /** A plain form, field `code`: takes a code off; a refusal comes back to checkout with its key. */
   removePromotion?: (form: FormData) => Promise<void>
+  /**
+   * The travelers step's form (adr/0076 Ek D6b; fields in `SaveTravelers`).
+   * Left out: no travelers step is drawn.
+   */
+  saveTravelers?: SaveTravelers
 }
 
 interface Page<View> {

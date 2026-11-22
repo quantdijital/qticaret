@@ -1207,5 +1207,22 @@
   "booking.choose_people": "En az bir kişi seçin.",
   "booking.hold_mismatch": "Sepetteki yerler değişti. Sepetinize dönüp tarihi yeniden seçin.",
   "booking.price_changed": "Bir tarihin fiyatı değişti. Sepetinize dönüp güncel fiyatı görün.",
-  "cart.shipping_not_needed": "Sepette kargo gerektiren ürün yok ama önceki bir kargo seçimi kaldı. Lütfen bizimle iletişime geçin."
+  "cart.shipping_not_needed": "Sepette kargo gerektiren ürün yok ama önceki bir kargo seçimi kaldı. Lütfen bizimle iletişime geçin.",
+  "checkout.step_travelers": "Katılımcılar",
+  "checkout.traveler_n": "{n}. katılımcı",
+  "checkout.traveler_birth_date": "Doğum tarihi",
+  "checkout.traveler_document": "Kimlik ya da pasaport no",
+  "checkout.traveler_document_hint": "T.C. kimlik no ya da pasaport no; şifreli saklanır.",
+  "checkout.traveler_document_saved": "Kayıtlı: {masked}. Devam etmek için numarayı yeniden yazın.",
+  "checkout.traveler_nationality": "Uyruk",
+  "checkout.traveler_choose": "Seçin",
+  "checkout.travelers_note": "Rezervasyon için her katılımcının bilgilerini kimlikte yazdığı gibi girin. Bu bilgiler yalnız hizmetin verilmesi için kullanılır.",
+  "checkout.travelers_failed": "Katılımcı bilgileri kaydedilemedi. Lütfen tekrar deneyin.",
+  "checkout.travelers_summary": "{count} katılımcı",
+  "checkout.traveler_name_required": "Ad ve soyadı girin (en çok 100 karakter).",
+  "checkout.traveler_birth_date_invalid": "Geçerli bir doğum tarihi girin.",
+  "checkout.traveler_document_invalid": "Kimlik ya da pasaport numarası 5–20 harf ve rakamdan oluşmalı.",
+  "checkout.traveler_nationality_required": "Uyruğu seçin.",
+  "booking.travelers_missing": "Ödemeden önce katılımcı bilgilerini girin.",
+  "booking.travelers_invalid": "Katılımcı bilgileri rezervasyonla uyuşmuyor. Lütfen kontrol edip yeniden kaydedin."
 }
