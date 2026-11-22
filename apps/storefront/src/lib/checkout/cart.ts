@@ -33,6 +33,8 @@ export interface CheckoutCartLine {
   tax_total?: number | null
   /** The server's records on the line: its add-on picks (`qt_addons`, adr/0052). */
   metadata?: Record<string, unknown> | null
+  /** False for a digital or service line, a gift card's too (adr/0076 §6); absent: shipped. */
+  requires_shipping?: boolean | null
 }
 
 export interface CheckoutCart {
@@ -92,6 +94,7 @@ const FIELDS = [
   "items.total",
   "items.tax_total",
   "items.metadata",
+  "items.requires_shipping",
   "original_item_total",
   "item_total",
   "item_subtotal",

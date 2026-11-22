@@ -10,6 +10,7 @@ import type {
 import type { StoreProductAddon } from "@qticaret/types"
 import type { Cart } from "@/lib/cart/cart"
 import type { GiftLine } from "@/lib/cart/gift"
+import { cartShips } from "@/lib/cart/ships"
 import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { addonFormOf, lineAddonsOf } from "./addons"
 import { lineNetOf, netTotalsOf } from "./cart-tax"
@@ -95,7 +96,8 @@ export function miniCartOf(
   return {
     lines: cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
     subtotal: formatLira(net ? net.net / 100 : cart.item_total),
-    freeShipping: freeShippingOf(cart.item_total, threshold, t),
+    // Nothing to ship (adr/0076 §6): no free shipping meter
+    freeShipping: cartShips(cart.items) ? freeShippingOf(cart.item_total, threshold, t) : null,
     locked: lockedNoteOf(cart, t),
     ...(net ? { taxNote: t("cart.drawer_wholesale_note") } : {}),
     ...(checkoutBlocked ? { checkoutBlocked } : {}),

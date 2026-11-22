@@ -30,7 +30,8 @@ export interface CheckoutCart {
   payment_collection_id: string | null
   email: string
   buyer: HostedCheckout["buyer"]
-  lines: (Pick<LineShare, "id" | "kind" | "quantity" | "net"> & { name: string })[]
+  /** `ships: false` on an item nothing ships for (adr/0076 §6): iyzico's basket names it virtual. */
+  lines: (Pick<LineShare, "id" | "kind" | "quantity" | "net"> & { name: string; ships?: false })[]
 }
 
 const ADDRESS_FIELDS = [
@@ -121,6 +122,9 @@ export const readCheckoutCartStep = createStep(
       ...items.map((item) => [item.id, itemName(item)] as const),
       ...shipping.map((method) => [method.id, shippingName(method)] as const),
     ])
+    const unshipped = new Set(
+      items.filter((item) => item.requires_shipping === false).map((item) => item.id)
+    )
     const shares = lineShares([
       ...items.map((item) => itemAmounts(itemFacts(item))),
       ...shipping.map((method) => shippingAmounts(shippingFacts(method))),
@@ -145,6 +149,7 @@ export const readCheckoutCartStep = createStep(
         quantity: share.quantity,
         net: share.net,
         name: names.get(share.id) ?? share.id,
+        ...(share.kind === "item" && unshipped.has(share.id) ? { ships: false as const } : {}),
       })),
     }
     return new StepResponse(result)

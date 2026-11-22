@@ -79,13 +79,16 @@ export function checkoutFormRequest(input: CheckoutFormInput): Record<string, un
       country: address.country,
       zipCode: address.zipCode,
     },
+    // Sent for an all-virtual basket too: the checkout keeps one address for both (adr/0076 §6),
+    // and the form was measured with it; iyzico asks for it only with a physical item
     shippingAddress: address,
     billingAddress: address,
     basketItems: basket.map((line) => ({
       id: line.id,
       name: text(line.name, 255),
       category1: line.kind === "shipping" ? "Kargo" : "Ürün",
-      itemType: "PHYSICAL",
+      // A digital or service item, a gift card too, ships nothing (adr/0076 §6)
+      itemType: line.kind === "item" && line.ships === false ? "VIRTUAL" : "PHYSICAL",
       price: toIyzicoPrice(kurus(line.amount)),
     })),
   }

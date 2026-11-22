@@ -11,6 +11,8 @@ const INITIAL: ActionResult = { ok: false, error: null }
 export interface AddressWords {
   contact: string
   delivery: string
+  /** A line under the address's title (a cart with nothing to ship: what the address is for). */
+  deliveryNote?: string
   email: string
   emailHint: string
   phone: string
@@ -169,6 +171,9 @@ export function AddressForm({
       </fieldset>
       <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className={LEGEND}>{words.delivery}</legend>
+        {words.deliveryNote && (
+          <p className="-mt-2 text-sm text-text-2 sm:col-span-2">{words.deliveryNote}</p>
+        )}
         <TextField
           id="first_name"
           name="first_name"

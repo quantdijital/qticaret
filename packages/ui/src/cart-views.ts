@@ -87,6 +87,12 @@ export interface CartPageView {
    */
   shipping?: string | null
   /**
+   * False: nothing in the cart is shipped (digital and service lines, a
+   * gift card; adr/0076 §6), so no shipping row. Absent or true: the row
+   * as `shipping` says it.
+   */
+  ships?: boolean
+  /**
    * The shop's automatic offers the cart reaches by its total, in words
    * ("2.000,00 TL ve üzeri sepette %10 indirim"), each once; none: no line.
    */

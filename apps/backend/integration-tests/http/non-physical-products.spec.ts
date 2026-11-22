@@ -4,6 +4,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { seedDemo } from "../../src/scripts/seed"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { loadOrderMessage } from "../../src/workflows/messaging/loaders/order"
 import { createAdminUser } from "../helpers/admin"
 import { createStorefront } from "../helpers/storefront"
 import type { HttpClient } from "../helpers/http"
@@ -180,6 +181,53 @@ medusaIntegrationTestRunner({
       const completed = await completeWithSystemPayment(getContainer(), cartId, collection.id)
 
       expect(completed).toEqual({ order_id: null, message: "cart.shipping_not_needed" })
+    })
+
+    it("tells the storefront and the order's e-mail what ships (adr/0076 §6)", async () => {
+      const container = getContainer()
+      const physicalId = (await product(container, productId)).variants?.[0]?.id ?? ""
+      const store = await createStorefront(container)
+      // The storefront's checkout reads each line's mark to drop the shipping step
+      const readLines = async (variantId: string) => {
+        const created = await settle(
+          http.post<{ cart: { id: string } }>(
+            "/store/carts",
+            { region_id: demo.regionId, items: [{ variant_id: variantId, quantity: 1 }] },
+            { headers: store.headers }
+          )
+        )
+        const read = await http.get<{ cart: { items: { requires_shipping: boolean }[] } }>(
+          `/store/carts/${created.data.cart.id}?fields=items.id,items.requires_shipping`,
+          { headers: store.headers }
+        )
+        return read.data.cart.items.map((item) => item.requires_shipping)
+      }
+      // Flag off, the product physical: shipped as before (K11)
+      expect(await readLines(physicalId)).toEqual([true])
+      // A shipped cart completes only with a shipping method (Medusa refuses it otherwise)
+      const { data: options } = await container
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "shipping_option", fields: ["id"] })
+      const shippedOrder = await placeOrder(container, {
+        ...demo,
+        shippingOptionId: (options[0] as { id: string } | undefined)?.id,
+        items: [{ variant_id: physicalId, quantity: 1 }],
+        address: { first_name: "Ayşe", last_name: "Yılmaz", address_1: "Demo Sokak 1" },
+      })
+      const shipped = await loadOrderMessage(container, shippedOrder)
+      expect(shipped?.vars).not.toHaveProperty("ships")
+
+      await setFlag(true)
+      await setKind("digital")
+      const digitalId = (await product(container, productId)).variants?.[0]?.id ?? ""
+      expect(await readLines(digitalId)).toEqual([false])
+      const digitalOrder = await placeOrder(container, {
+        ...demo,
+        items: [{ variant_id: digitalId, quantity: 1 }],
+        address: { first_name: "Ayşe", last_name: "Yılmaz", address_1: "Demo Sokak 1" },
+      })
+      const digital = await loadOrderMessage(container, digitalOrder)
+      expect(digital?.vars).toMatchObject({ ships: false })
     })
   },
 })

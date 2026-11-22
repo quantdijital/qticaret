@@ -1,6 +1,7 @@
 import "server-only"
 import { formatLira } from "@qticaret/ui"
 import type { CheckoutSummaryView, ImageView, Translate } from "@qticaret/ui"
+import { cartShips } from "@/lib/cart/ships"
 import type { CheckoutCart } from "@/lib/checkout/cart"
 import { lineAddonsOf } from "./addons"
 import { lineNetOf, netDiscountOf, netTotalsOf, taxLinesOf } from "./cart-tax"
@@ -44,6 +45,8 @@ export function summaryOf(
         : cart.shipping_total > 0
           ? formatLira(cart.shipping_total)
           : t("checkout.free"),
+    // Nothing to ship (adr/0076 §6): no shipping row; a shipped basket's view as it was
+    ...(cartShips(cart.items) ? {} : { ships: false }),
     total: formatLira(cart.total),
     ...(net ? { tax: taxLinesOf(net, t("checkout.wholesale_note")) } : {}),
   }

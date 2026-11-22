@@ -25,12 +25,19 @@ export interface OrderVars {
   /** The shop's account for a bank transfer, with when it must arrive. */
   bank: { holder: string; bank: string; iban: string; deadline: string | null } | null
   address: string[]
+  /**
+   * False: nothing in the order ships (digital and service lines, a gift
+   * card; adr/0076 §6), so no shipping row and no delivery address.
+   * Absent or true: both, as before.
+   */
+  ships?: boolean
   orderUrl: string | null
   /** The order keeps the contracts the shopper accepted (F13.2); its page shows them. */
   contracts: boolean
 }
 
 export function orderSummary(vars: OrderVars): EmailBlock[] {
+  const ships = vars.ships !== false
   return [
     {
       kind: "items",
@@ -40,12 +47,14 @@ export function orderSummary(vars: OrderVars): EmailBlock[] {
       kind: "summary",
       rows: [
         { label: messageText("order.subtotal"), value: vars.subtotal },
-        { label: messageText("order.shipping"), value: vars.shipping },
+        ...(ships ? [{ label: messageText("order.shipping"), value: vars.shipping }] : []),
         ...(vars.discount ? [{ label: messageText("order.discount"), value: vars.discount }] : []),
         { label: messageText("order.total"), value: vars.total, strong: true },
       ],
     },
-    { kind: "details", title: messageText("order.address"), lines: vars.address },
+    ...(ships
+      ? [{ kind: "details" as const, title: messageText("order.address"), lines: vars.address }]
+      : []),
   ]
 }
 
@@ -91,7 +100,8 @@ const EDIT: EditSpec<OrderVars> = {
     subject: "order_placed.subject",
     preheader: "order_placed.preheader",
     heading: "order_placed.heading",
-    intro: "order_placed.intro",
+    // An order nothing ships for is never "handed to the carrier" (adr/0076 §6)
+    intro: (vars) => (vars.ships === false ? "order_placed.intro_unshipped" : "order_placed.intro"),
     sms: "order_placed.sms",
   },
   values: (vars, brand) => ({

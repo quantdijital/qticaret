@@ -130,6 +130,8 @@ export const hostedCheckout = z.object({
         quantity: z.number().int().positive(),
         // Kuruş, for the line's whole quantity
         amount: z.number().int().positive(),
+        // False: an item nothing ships for, a digital or service line (adr/0076 §6); absent: shipped
+        ships: z.boolean().optional(),
       })
     )
     .min(1),
