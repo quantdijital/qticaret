@@ -71,4 +71,38 @@ describe("orderBookingsOf (adr/0076 Ek D7a)", () => {
     ])
     expect(t("booking.cancel_too_late")).not.toBe("booking.cancel_too_late")
   })
+
+  it("puts the shop's note and contacts where the cancel was while it takes cancels by phone (Ek basit yol)", () => {
+    const byContact = row({ cancellable: false, refusal: "booking.cancel_by_contact" })
+    const [plain] =
+      orderBookingsOf(
+        {
+          currency_code: "try",
+          departures: [byContact],
+          contact: { note: null, phone: "+902125550000", email: "tur@ornek.example" },
+        },
+        t
+      ) ?? []
+    expect(plain?.cancellable).toBe(false)
+    expect(plain?.refund).toBeNull()
+    expect(plain?.note).toBe(
+      "İptal ve değişiklik için bizimle iletişime geçin. Telefon: 0212 555 00 00 E-posta: tur@ornek.example"
+    )
+    const [own] =
+      orderBookingsOf(
+        {
+          currency_code: "try",
+          departures: [byContact],
+          contact: { note: "Bizi hafta içi arayın.", phone: null, email: null },
+        },
+        t
+      ) ?? []
+    expect(own?.note).toBe("Bizi hafta içi arayın.")
+  })
+
+  it("draws a departure exactly as before when the backend sends no contact", () => {
+    const found = { currency_code: "try", departures: [row()] }
+    expect(orderBookingsOf({ ...found }, t)).toEqual(orderBookingsOf(found, t))
+    expect(orderBookingsOf(found, t)?.[0]?.note).toBeNull()
+  })
 })

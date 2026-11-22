@@ -343,6 +343,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The service day has come; this booking can no longer be cancelled. Contact the shop.",
   "booking.cancel_unavailable":
     "This product has no cancellation terms; contact the shop to cancel.",
+  "booking.cancel_by_contact": "This shop takes cancellations and changes by phone or e-mail.",
   "booking.cancel_unpaid": "Cancel an unpaid order as a whole.",
   "booking.cancel_unknown": "No booking to cancel was found on this order.",
   "booking.voucher_unknown": "No booking was found on this order.",

@@ -30,6 +30,8 @@ const CANCEL_REFUSALS: Readonly<Record<string, string>> = {
   "orders.cancel_contact_shop": "iptal-magaza",
   "orders.refund_unsettled": "iptal-iade-isleniyor",
   "booking.use_booking_cancel": "iptal-rezervasyon",
+  // adr/0076 Ek basit yol: the shop takes a dated order's cancel by phone or e-mail
+  "booking.cancel_by_contact": "rezervasyon-iletisim",
 }
 
 /**
@@ -67,6 +69,7 @@ const BOOKING_REFUSALS: Readonly<Record<string, string>> = {
   "booking.cancel_too_late": "rezervasyon-gec",
   "booking.cancel_unavailable": "rezervasyon-kademe-yok",
   "orders.cancel_contact_shop": "rezervasyon-magaza",
+  "booking.cancel_by_contact": "rezervasyon-iletisim",
 }
 
 /**

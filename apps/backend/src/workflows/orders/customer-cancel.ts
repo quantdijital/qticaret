@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { cancelOrderWorkflow } from "@medusajs/medusa/core-flows"
 import { bookingMarkOf } from "../../lib/booking/cart-lines"
+import { CANCEL_BY_CONTACT, bookingFlow } from "../../lib/booking/flow"
 import { ValidationError } from "../../lib/errors"
 import { cardsVoidedByCancel } from "../../lib/orders/gift-returns"
 import { cancelLockKeys } from "../../lib/orders/locks"
@@ -41,10 +42,12 @@ export const CANCEL_ORDER_FIELDS = [
  * (`orders.cancel_contact_shop`: the refund would only be written down,
  * security review 2026-10-28); a paid order with a dated line
  * (`booking.use_booking_cancel`: its departures are cancelled one by
- * one, by their tiers, adr/0076 Ek D7a). Pure: the cancel and the order page's
- * `cancellable` read the same rule.
+ * one, by their tiers, adr/0076 Ek D7a); any order with a dated line
+ * while the shop takes cancels by phone or e-mail (`onlineCancel` false:
+ * `booking.cancel_by_contact`, paid or not, adr/0076 Ek basit yol).
+ * Pure: the cancel and the order page's `cancellable` read the same rule.
  */
-export function cancelRefusal(order: CancelOrderRow): string | null {
+export function cancelRefusal(order: CancelOrderRow, onlineCancel = true): string | null {
   if (order.status === "canceled") {
     return "orders.canceled"
   }
@@ -53,6 +56,10 @@ export function cancelRefusal(order: CancelOrderRow): string | null {
   )
   if (order.status === "completed" || packed) {
     return "orders.cancel_after_packing"
+  }
+  const dated = (order.items ?? []).some((item) => bookingMarkOf(item?.metadata) !== null)
+  if (dated && !onlineCancel) {
+    return CANCEL_BY_CONTACT
   }
   const taken = (order.payment_collections ?? []).flatMap((collection) =>
     (collection?.payments ?? []).filter((payment) => Boolean(payment?.captured_at))
@@ -64,7 +71,6 @@ export function cancelRefusal(order: CancelOrderRow): string | null {
     return "orders.cancel_contact_shop"
   }
   // A paid dated order is cancelled departure by departure, by its tiers (adr/0076 Ek D7a)
-  const dated = (order.items ?? []).some((item) => bookingMarkOf(item?.metadata) !== null)
   return dated && taken.length > 0 ? "booking.use_booking_cancel" : null
 }
 
@@ -90,7 +96,10 @@ export async function customerCancelState(
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
   }
   // No customer record of its own: the cancel answers it as no order
-  const refusal = cancelRefusal(order) ?? (order.customer_id ? null : "orders.unknown")
+  // The setting is read with each ask (adr/0076 Ek basit yol)
+  const { online_cancel_enabled } = await bookingFlow(container)
+  const refusal =
+    cancelRefusal(order, online_cancel_enabled) ?? (order.customer_id ? null : "orders.unknown")
   if (refusal) {
     return { cancellable: false, refusal }
   }
@@ -130,7 +139,8 @@ export async function cancelOrderForCustomer(
       if (order?.customer_id !== input.customer_id) {
         throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
       }
-      const refusal = cancelRefusal(order)
+      const { online_cancel_enabled } = await bookingFlow(container)
+      const refusal = cancelRefusal(order, online_cancel_enabled)
       if (refusal === "orders.canceled") {
         return { order_id: input.order_id, refunded: 0 }
       }

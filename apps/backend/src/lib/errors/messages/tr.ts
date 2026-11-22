@@ -351,6 +351,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Hizmet günü geldi; bu rezervasyon artık iptal edilemez. Mağazayla iletişime geçin.",
   "booking.cancel_unavailable":
     "Bu ürün için iptal koşulu tanımlı değil; iptal için mağazayla iletişime geçin.",
+  "booking.cancel_by_contact": "Bu mağazada iptal ve değişiklik telefon ya da e-postayla yapılır.",
   "booking.cancel_unpaid": "Ödemesi alınmamış siparişi bütün olarak iptal edin.",
   "booking.cancel_unknown": "Bu siparişte iptal edilecek rezervasyon bulunamadı.",
   "booking.voucher_unknown": "Bu siparişte rezervasyon bulunamadı.",

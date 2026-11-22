@@ -1,4 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { bookingFlow, byContact, cancelContactOf } from "../../../../../lib/booking/flow"
 import { departureCancelViews } from "../../../../../workflows/booking/cancel-view"
 import { orderAccessOf } from "../../../../http/order-access"
 
@@ -7,6 +8,8 @@ import { orderAccessOf } from "../../../../http/order-access"
  * departures for its own shopper (signed in, or with the order's key),
  * each with whether it can be cancelled now and what would come back by
  * its tier, worked out on the server. Nothing is changed; no personal data.
+ * While the shop takes cancels by phone or e-mail (Ek basit yol), none is
+ * cancellable and `contact` says how to reach the shop.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const access = orderAccessOf(req)
@@ -15,6 +18,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     by: "customer",
     mode: "tier",
   })
+  const flow = await bookingFlow(req.scope)
   res.setHeader("Cache-Control", "no-store")
-  res.json(view)
+  res.json(
+    flow.online_cancel_enabled ? view : byContact(view, await cancelContactOf(req.scope, flow))
+  )
 }

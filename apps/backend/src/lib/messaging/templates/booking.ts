@@ -1,8 +1,9 @@
 import { textsFor } from "../editable/texts"
 import type { EditSpec } from "../editable/types"
 import { messageText } from "../texts"
+import { departureBlocks, termBlocks, voucherBlocks } from "./booking-blocks"
+import type { BookingDepartureVars, BookingFlowVars, BookingTermVars } from "./booking-blocks"
 import { renderEmail } from "./layout"
-import type { EmailBlock } from "./layout"
 import type { Brand, EmailContext, MessageTemplate } from "./types"
 
 /**
@@ -10,23 +11,10 @@ import type { Brand, EmailContext, MessageTemplate } from "./types"
  * name a traveler; the voucher's code is on its page, not in the e-mail.
  */
 
-/** A departure as a message shows it. */
-export interface BookingDepartureVars {
-  title: string
-  /** The date and time in the product's zone, written out. */
-  when: string
-  meetingPoint: string | null
-  units: number
-}
-
-/** A cancellation tier as sold: from `days` days before, `percent` kept. */
-export interface BookingTermVars {
-  days: number
-  percent: number
-}
+export type { BookingDepartureVars, BookingTermVars } from "./booking-blocks"
 
 /** The confirmation and the reminder. */
-export interface BookingVars {
+export interface BookingVars extends BookingFlowVars {
   number: string
   customerName: string
   departures: BookingDepartureVars[]
@@ -34,8 +22,6 @@ export interface BookingVars {
   when: string
   /** The terms of the first departure (one product a booking, nearly always); empty: no cancel. */
   terms: BookingTermVars[]
-  voucherUrl: string | null
-  orderUrl: string | null
 }
 
 /** One departure cancelled: by the shopper or staff, or the whole departure by the shop. */
@@ -50,46 +36,15 @@ export interface BookingCancelVars {
   orderUrl: string | null
 }
 
-export function departureLines(departure: BookingDepartureVars): string[] {
-  return [
-    messageText("booking.when", { when: departure.when }),
-    ...(departure.meetingPoint
-      ? [messageText("booking.meeting_point", { place: departure.meetingPoint })]
-      : []),
-    messageText("booking.units", { count: departure.units }),
-  ]
-}
+const withVoucher = (prefix: string, field: string) => (vars: BookingVars) =>
+  `${prefix}.${field}${vars.voucherOffNote === null ? "" : "_simple"}`
 
-const departureBlocks = (departures: BookingDepartureVars[]): EmailBlock[] =>
-  departures.map((departure) => ({
-    kind: "details" as const,
-    title: messageText("booking.departure", { title: departure.title }),
-    lines: departureLines(departure),
-  }))
-
-export function termText(term: BookingTermVars): string {
-  const values = { days: term.days, percent: term.percent }
-  if (term.days === 0) {
-    return messageText(
-      term.percent === 0 ? "booking.term_free_today" : "booking.term_fee_today",
-      values
-    )
-  }
-  return messageText(term.percent === 0 ? "booking.term_free" : "booking.term_fee", values)
-}
-
-function termBlocks(terms: BookingTermVars[]): EmailBlock[] {
-  return [
-    {
-      kind: "details",
-      title: messageText("booking.terms_title"),
-      lines:
-        terms.length === 0
-          ? [messageText("booking.terms_none")]
-          : [...terms.map(termText), messageText("booking.terms_how")],
-    },
-  ]
-}
+const flowBase = (prefix: string) => ({
+  subject: `${prefix}.subject`,
+  preheader: withVoucher(prefix, "preheader"),
+  heading: `${prefix}.heading`,
+  intro: withVoucher(prefix, "intro"),
+})
 
 const base = (prefix: string) => ({
   subject: `${prefix}.subject`,
@@ -112,7 +67,7 @@ const CONFIRMED: EditSpec<BookingVars> = {
   // The booking's details and terms the shopper relies on, with the voucher
   required: true,
   tokens: TOKENS,
-  fields: base("booking_confirmed"),
+  fields: flowBase("booking_confirmed"),
   values: bookingValues,
 }
 
@@ -120,7 +75,7 @@ const REMINDER: EditSpec<BookingVars> = {
   group: "order",
   required: false,
   tokens: { ...TOKENS, kalkış: "when" },
-  fields: base("booking_reminder"),
+  fields: flowBase("booking_reminder"),
   values: bookingValues,
 }
 
@@ -164,6 +119,8 @@ const SAMPLE: BookingVars = {
     { days: 0, percent: 100 },
   ],
   voucherUrl: "https://magaza.example/siparis/order_ornek/voucher?token=ornek",
+  voucherOffNote: null,
+  onlineCancel: true,
   orderUrl: "https://magaza.example/siparis/order_ornek?token=ornek",
 }
 
@@ -177,11 +134,8 @@ function bookingEmail(spec: EditSpec<BookingVars>, withTerms: boolean) {
       blocks: [
         { kind: "paragraph", text: text("intro") },
         ...departureBlocks(vars.departures),
-        ...(withTerms ? termBlocks(vars.terms) : []),
-        { kind: "button", label: messageText("booking_confirmed.voucher"), url: vars.voucherUrl },
-        ...(vars.voucherUrl
-          ? [{ kind: "note" as const, text: messageText("booking_confirmed.voucher_note") }]
-          : []),
+        ...(withTerms ? termBlocks(vars.terms, vars.onlineCancel) : []),
+        ...voucherBlocks(vars),
       ],
       footer: footer(brand),
     })

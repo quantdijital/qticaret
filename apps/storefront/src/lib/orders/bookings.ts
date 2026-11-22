@@ -23,9 +23,21 @@ export interface OrderDepartureRow {
   refund_within_days: number | null
 }
 
+/**
+ * How to reach the shop while it takes cancels by phone or e-mail
+ * (adr/0076 Ek basit yol): its own note (null: the default) and contacts.
+ */
+export interface CancelContactRow {
+  note: string | null
+  phone: string | null
+  email: string | null
+}
+
 export interface OrderDeparturesRow {
   currency_code: string
   departures: OrderDepartureRow[]
+  /** Only while the shop has the shopper's online cancel off. */
+  contact?: CancelContactRow
 }
 
 /**

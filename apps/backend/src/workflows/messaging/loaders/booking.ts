@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { bookingFlow } from "../../../lib/booking/flow"
 import { logger } from "../../../lib/logging"
 import type {
   BookingCancelVars,
@@ -81,6 +82,8 @@ async function bookingMessage(
   if (!order || !first) {
     return null
   }
+  // Ek basit yol: without vouchers no link, the shop's note ("" for the default) in its place
+  const flow = await bookingFlow(container)
   return {
     vars: {
       number: String(order.display_id),
@@ -88,7 +91,9 @@ async function bookingMessage(
       departures: departures.map(departureVars),
       when: first.when,
       terms: first.terms.map((term) => ({ days: term.days_before, percent: term.fee_percent })),
-      voucherUrl: await orderUrlOf(container, order, "/voucher"),
+      voucherUrl: flow.voucher_enabled ? await orderUrlOf(container, order, "/voucher") : null,
+      voucherOffNote: flow.voucher_enabled ? null : (flow.voucher_off_note ?? ""),
+      onlineCancel: flow.online_cancel_enabled,
       orderUrl: await orderUrlOf(container, order),
     },
     ...recipientsOf(order),
@@ -111,7 +116,10 @@ export async function loadBookingConfirmed(
     })
     return null
   }
-  await container.resolve<BookingModuleService>(BOOKING_MODULE).ensureVoucher(sheet.booking_id)
+  // A shop without vouchers makes no code (Ek basit yol)
+  if ((await bookingFlow(container)).voucher_enabled) {
+    await container.resolve<BookingModuleService>(BOOKING_MODULE).ensureVoucher(sheet.booking_id)
+  }
   return bookingMessage(container, sheet, live, "booking")
 }
 
