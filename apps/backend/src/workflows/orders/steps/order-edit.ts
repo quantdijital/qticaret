@@ -9,6 +9,7 @@ import { EINVOICE_MODULE } from "../../../modules/einvoice"
 import type EinvoiceModuleService from "../../../modules/einvoice/service"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
+import { refuseBookingEdits } from "../../booking/order-edit"
 
 export interface OrderEditChanges {
   /** Existing lines: a new quantity (0 takes the line off), a corrected unit price (kuruş). */
@@ -20,7 +21,7 @@ export interface OrderEditChanges {
 interface EditOrderRow {
   status?: string
   summary?: { pending_difference?: MedusaAmount | null } | null
-  items?: ({ id: string } | null)[] | null
+  items?: ({ id: string; metadata?: unknown } | null)[] | null
   fulfillments?: ({ canceled_at?: unknown } | null)[] | null
   payment_collections?:
     | ({
@@ -59,6 +60,7 @@ export const checkOrderEditStep = createStep(
         "status",
         "summary",
         "items.id",
+        "items.metadata",
         "fulfillments.canceled_at",
         "payment_collections.status",
         "payment_collections.payments.provider_id",
@@ -79,6 +81,8 @@ export const checkOrderEditStep = createStep(
     if (ids.size !== input.items.length || input.items.some((item) => !lines.has(item.id))) {
       throw new ValidationError("orders.edit_items_invalid", { field: "items" })
     }
+    // A departure's places do not follow an edit (adr/0076 Ek, until D7)
+    await refuseBookingEdits(container, order.items ?? [], input)
     const packed = (order.fulfillments ?? []).some((each) => each && !each.canceled_at)
     if (order.status === "canceled" || order.status === "completed" || packed) {
       throw new ValidationError("orders.edit_after_packing")

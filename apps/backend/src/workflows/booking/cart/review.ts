@@ -118,7 +118,7 @@ export async function staleBookingLines(
         line.variant_id ?? "",
         quantityOf(line)
       )
-      if (isStalePrice(line, price.unit_price)) {
+      if (isStalePrice(line, price.unit_price, price.is_tax_inclusive)) {
         stale.push(line)
       }
     }

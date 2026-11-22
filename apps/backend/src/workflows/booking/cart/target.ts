@@ -109,6 +109,11 @@ export interface BookingPrice {
   unit_price: Kurus
   /** The price before a sale list, with the departure's difference; null without a sale. */
   compare_at_unit_price: Kurus | null
+  /**
+   * Whether the price has the tax in, as the variant's own price does: the
+   * line says so, or a tax-inclusive shop would add the tax on top.
+   */
+  is_tax_inclusive: boolean
 }
 
 /**
@@ -137,5 +142,6 @@ export async function priceBookingLine(
     unit_price: bookingUnitPrice(base.calculated, adjustment),
     compare_at_unit_price:
       base.original === null ? null : bookingUnitPrice(base.original, adjustment),
+    is_tax_inclusive: base.tax_inclusive,
   }
 }

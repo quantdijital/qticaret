@@ -46,6 +46,15 @@ export const RATE_LIMIT_PROFILES = {
     // The cart's own budget, however many addresses start or complete it
     perIdentityAnyIp: { max: 30, windowMs: 10 * MINUTE },
   },
+  // adr/0076 Ek: holding a departure's places, apart from the checkout's
+  // budget. Per address it is tighter (each hold keeps places from others
+  // for its life); per cart a shopper may change dates and people freely
+  booking: {
+    name: "booking",
+    perIp: { max: 30, windowMs: 10 * MINUTE },
+    perIdentity: { max: 20, windowMs: MINUTE },
+    perIdentityAnyIp: { max: 40, windowMs: 10 * MINUTE },
+  },
   coupon: {
     name: "coupon",
     perIp: { max: 30, windowMs: 10 * MINUTE },

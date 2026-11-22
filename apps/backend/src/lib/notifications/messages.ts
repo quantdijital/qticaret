@@ -146,6 +146,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "{{known}} tanesi eski sitenin bilinen adresi; Ayarlar > Taşıma'dan 301 ya da 410 kararı verin.",
     },
+    "booking.confirm_failed": {
+      title: "#{{order}} siparişinin rezervasyonu onaylanamadı",
+      description:
+        "Ödeme alındı ama kalkışta yer kalmamış. Müşteriyle görüşüp tarihi değiştirin ya da iade edin.",
+    },
     "einvoice.issue_stopped": {
       title: "#{{order}} siparişinin faturası kesilemedi",
       description:
@@ -328,6 +333,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "{{count}} addresses answered 404 since cutover",
       description:
         "{{known}} were the old site's known addresses; decide a 301 or 410 in Settings > Migration.",
+    },
+    "booking.confirm_failed": {
+      title: "Order #{{order}}'s booking could not be confirmed",
+      description:
+        "The payment was taken but the departure has no places left. Talk to the customer, then move the date or refund.",
     },
     "einvoice.issue_stopped": {
       title: "Order #{{order}}'s invoice could not be issued",

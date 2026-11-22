@@ -1,6 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
-import { BOOKING_KEY, paxOf, unitsOf } from "../../../lib/booking/cart-lines"
+import {
+  BOOKING_KEY,
+  bookingUnitsProblem,
+  cartShareOf,
+  paxOf,
+  unitsOf,
+} from "../../../lib/booking/cart-lines"
 import type { BookingMark } from "../../../lib/booking/cart-lines"
 import { ConflictError, ValidationError } from "../../../lib/errors"
 import { toMedusaAmount } from "../../../lib/money"
@@ -34,6 +40,7 @@ export interface PlannedLine {
   quantity: number
   unit_price: string
   compare_at_unit_price: string | null
+  is_tax_inclusive: boolean
   pax: number
 }
 
@@ -88,8 +95,9 @@ function otherUnits(cart: AddonCart, target: BookingTarget, slotId: string): num
  * Checks a booking request and prices it; writes nothing (adr/0076 §5):
  * the storefront's open cart, a departure of a published dated product of
  * its channel, open and before its sales close, variants of that product,
- * at least one place and no more than the product's per-cart cap. Each
- * line is priced from the cart's own pricing context and the departure's
+ * at least one place, at most 100 of a category and two infants per
+ * place, no more than the product's per-cart cap nor a fifth of the
+ * departure (adr/0076 Ek). Each line is priced from the cart's own pricing context and the departure's
  * difference, never from the request.
  */
 export async function planCartBooking(
@@ -107,14 +115,18 @@ export async function planCartBooking(
     target,
     items.map((item) => item.variant_id)
   )
-  const units = unitsOf(items, target.bookable.pax_by_variant)
-  if (units < 1) {
-    throw new ValidationError("booking.units_invalid", { field: "items" })
+  const problem = bookingUnitsProblem(items, target.bookable.pax_by_variant)
+  if (problem) {
+    throw new ValidationError(problem, { field: "items" })
   }
-  if (units + otherUnits(cart, target, input.slot_id) > target.bookable.max_units_per_cart) {
+  const units = unitsOf(items, target.bookable.pax_by_variant)
+  const cap = target.bookable.max_units_per_cart
+  // The product's cap over all its departures; a fifth of this one's places (adr/0076 Ek)
+  const share = cartShareOf(target.slot.capacity, cap)
+  if (units + otherUnits(cart, target, input.slot_id) > cap || units > share) {
     throw new ValidationError("booking.max_units", {
       field: "items",
-      values: { max: String(target.bookable.max_units_per_cart) },
+      values: { max: String(Math.min(cap, share)) },
     })
   }
   const lines: PlannedLine[] = []
@@ -126,6 +138,7 @@ export async function planCartBooking(
       unit_price: toMedusaAmount(price.unit_price),
       compare_at_unit_price:
         price.compare_at_unit_price === null ? null : toMedusaAmount(price.compare_at_unit_price),
+      is_tax_inclusive: price.is_tax_inclusive,
       pax: paxOf(target.bookable.pax_by_variant, item.variant_id),
     })
   }
@@ -165,6 +178,8 @@ export function cartItemsOf(plan: CartBookingPlan, holdId: string) {
       variant_id: line.variant_id,
       quantity: line.quantity,
       unit_price: line.unit_price,
+      // Said outright, not left to Medusa's fallback for a custom price
+      is_tax_inclusive: line.is_tax_inclusive,
       ...(line.compare_at_unit_price === null
         ? {}
         : { compare_at_unit_price: line.compare_at_unit_price }),

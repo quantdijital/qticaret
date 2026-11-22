@@ -17,9 +17,17 @@ const plan: CartBookingPlan = {
       quantity: 2,
       unit_price: "1750",
       compare_at_unit_price: null,
+      is_tax_inclusive: true,
       pax: 1,
     },
-    { variant_id: "variant_i", quantity: 1, unit_price: "0", compare_at_unit_price: "100", pax: 0 },
+    {
+      variant_id: "variant_i",
+      quantity: 1,
+      unit_price: "0",
+      compare_at_unit_price: "100",
+      is_tax_inclusive: true,
+      pax: 0,
+    },
   ],
   replaced_line_ids: [],
 }
@@ -35,6 +43,7 @@ describe("a booking request's lines (adr/0076 §5)", () => {
         variant_id: "variant_a",
         quantity: 2,
         unit_price: "1750",
+        is_tax_inclusive: true,
         metadata: {
           [BOOKING_KEY]: {
             hold_id: "bkhold_1",

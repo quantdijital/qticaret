@@ -79,7 +79,7 @@ medusaIntegrationTestRunner({
      * takes no place, one departure in ten days with `capacity` places and
      * a 250,50 TL difference on the adult's price.
      */
-    const tour = async (capacity: number) => {
+    const tour = async (capacity: number, mode: "departure" | "none" = "departure") => {
       const { data } = await http.post<{
         product: { id: string; variants: { id: string; title: string }[] }
       }>(
@@ -109,11 +109,11 @@ medusaIntegrationTestRunner({
         data.product.variants.find((variant) => variant.title === title)?.id ?? ""
       const adult = variantOf("Yetişkin")
       const infant = variantOf("Bebek")
-      await staff(`/admin/products/${productId}/catalog`, {
-        kind: "service",
-        booking_mode: "departure",
-      })
+      await staff(`/admin/products/${productId}/catalog`, { kind: "service", booking_mode: mode })
       await staff(`/admin/products/${productId}`, { status: "published" })
+      if (mode === "none") {
+        return { productId, adult, infant, slotId: "" }
+      }
       await staff(`/admin/products/${productId}/bookable`, {
         hold_minutes: 20,
         pax_by_variant: { [infant]: { pax: 0, max_age: 2 } },
@@ -188,7 +188,7 @@ medusaIntegrationTestRunner({
 
     it("books only through its route, at the server's price, and keeps the places in step", async () => {
       await turnOn()
-      const { productId, adult, infant, slotId } = await tour(3)
+      const { productId, adult, infant, slotId } = await tour(10)
       const cartId = await emptyCart(getContainer())
 
       const plain = await post(`/store/carts/${cartId}/line-items`, {
@@ -208,6 +208,20 @@ medusaIntegrationTestRunner({
         quantity: 1,
         metadata: { qt_booking: { slot_id: slotId } },
       })
+      const infants = await book(cartId, {
+        slot_id: slotId,
+        items: [
+          { variant_id: adult, quantity: 1 },
+          { variant_id: infant, quantity: 3 },
+        ],
+      })
+      const repeated = await book(cartId, {
+        slot_id: slotId,
+        items: [
+          { variant_id: adult, quantity: 60 },
+          { variant_id: adult, quantity: 41 },
+        ],
+      })
       const booked = await book(cartId, {
         slot_id: slotId,
         items: [
@@ -226,9 +240,10 @@ medusaIntegrationTestRunner({
           headers: store.headers,
         })
       )
+      // A fifth of the ten places is one cart's most (adr/0076 Ek): no cart takes the departure
       const full = await book(cartId, {
         slot_id: slotId,
-        items: [{ variant_id: adult, quantity: 4 }],
+        items: [{ variant_id: adult, quantity: 3 }],
       })
       const again = await book(cartId, {
         slot_id: slotId,
@@ -256,6 +271,9 @@ medusaIntegrationTestRunner({
       expect([madeWith.status, madeWith.data.message]).toEqual([400, "booking.use_booking_route"])
       expect(priced.status).toBe(400)
       expect([marked.status, marked.data.message]).toEqual([400, "cart.metadata_reserved"])
+      // Two place-less units per place at most; a category's asks added up, 100 at most
+      expect([infants.status, infants.data.message]).toEqual([400, "booking.too_many_free_units"])
+      expect([repeated.status, repeated.data.message]).toEqual([400, "booking.quantity_too_high"])
       expect(booked.status).toBe(200)
       expect(answer.booking).toEqual({ slot_id: slotId, units: 2 })
       expect(answer.hold?.expires_at).toEqual(expect.any(String))
@@ -265,7 +283,7 @@ medusaIntegrationTestRunner({
         quantity: 1,
         unit_price: 100,
       })
-      expect(afterBook).toMatchObject({ held: 2, sold: 0, available: 1 })
+      expect(afterBook).toMatchObject({ held: 2, sold: 0, available: 8 })
       expect([changed.status, changed.data.message]).toEqual([400, "booking.use_booking_route"])
       expect(page.status).toBe(200)
       expect(page.data.booking).toMatchObject({
@@ -277,20 +295,20 @@ medusaIntegrationTestRunner({
           expect.objectContaining({
             id: slotId,
             status: "open",
-            available: 1,
+            available: 8,
             prices: expect.arrayContaining([{ variant_id: adult, amount: 1750.5 }]) as unknown,
           }),
         ],
       })
-      expect([full.status, full.data.message]).toEqual([409, "booking.slot_full"])
+      expect([full.status, full.data.message]).toEqual([400, "booking.max_units"])
       expect(again.status).toBe(200)
       expect((again.data as unknown as BookingAnswer).lines).toHaveLength(1)
-      expect(afterAgain).toMatchObject({ held: 1, available: 2 })
+      expect(afterAgain).toMatchObject({ held: 1, available: 9 })
       expect(coreDelete.status).toBe(200)
-      expect(afterCoreDelete).toMatchObject({ held: 0, available: 3 })
+      expect(afterCoreDelete).toMatchObject({ held: 0, available: 10 })
       expect(removed.status).toBe(200)
       expect(removed.data.lines).toEqual([])
-      expect(afterRemove).toMatchObject({ held: 0, available: 3 })
+      expect(afterRemove).toMatchObject({ held: 0, available: 10 })
     })
 
     it("gives the last place to one of two carts asking at once", async () => {
@@ -315,7 +333,7 @@ medusaIntegrationTestRunner({
     it("pushes the hold as the payment starts, sells the places with the order, frees them on cancel", async () => {
       await turnOn()
       const container = getContainer()
-      const { adult, slotId } = await tour(5)
+      const { adult, slotId } = await tour(10)
       const cartId = await emptyCart(container)
       const booked = await book(cartId, {
         slot_id: slotId,
@@ -332,6 +350,15 @@ medusaIntegrationTestRunner({
         (slot) => slot?.sold === 2
       )
       const [booking] = await bookings().listBookings({ order_id: orderId })
+      // An edit leaves the departure's places alone (adr/0076 Ek, until D7)
+      const datedLine = booking?.line_item_id ?? ""
+      const edits = await Promise.all(
+        [
+          { items: [{ id: datedLine, quantity: 3 }] },
+          { items: [{ id: datedLine, quantity: 0 }] },
+          { add: [{ variant_id: adult, quantity: 1 }] },
+        ].map((change) => staff(`/admin/orders/${orderId}/edit/preview`, change))
+      )
       await cancelOrderWorkflow(container).run({ input: { order_id: orderId } })
       const freed = await eventually(
         () => slotOf(slotId),
@@ -344,14 +371,19 @@ medusaIntegrationTestRunner({
       expect(hold?.expires_at.getTime()).toBeGreaterThan(before.getTime())
       expect(hold?.expires_at.getTime()).toBeGreaterThan(Date.now() + 25 * 60_000)
       expect(placed.status).toBe(200)
-      expect(sold).toMatchObject({ sold: 2, held: 0, available: 3 })
+      expect(sold).toMatchObject({ sold: 2, held: 0, available: 8 })
       expect(booking).toMatchObject({
         order_id: orderId,
         status: "confirmed",
         line_item_id: expect.any(String) as unknown,
       })
       expect(await bookings().cartHold(cartId)).toBeNull()
-      expect(freed).toMatchObject({ sold: 0, held: 0, available: 5 })
+      expect(edits.map((edit) => [edit.status, edit.data.message])).toEqual([
+        [400, "booking.order_edit_unavailable"],
+        [400, "booking.order_edit_unavailable"],
+        [400, "booking.order_edit_unavailable"],
+      ])
+      expect(freed).toMatchObject({ sold: 0, held: 0, available: 10 })
       expect(cancelled?.status).toBe("cancelled")
     })
 
@@ -381,6 +413,62 @@ medusaIntegrationTestRunner({
       expect(completed.status).toBe(409)
       expect(completed.data.message).toBe("booking.hold_expired")
       expect(await slotOf(slotId)).toMatchObject({ sold: 0 })
+    })
+
+    it("prices a dated line with tax in as the shop's ordinary lines, no tax added on top", async () => {
+      await turnOn()
+      const container = getContainer()
+      const { adult, slotId } = await tour(10)
+      const knife = await stockedProduct(container, shop, `kdv-${String((made += 1))}`, 5, 100)
+      const cartId = await emptyCart(container)
+      await post(`/store/carts/${cartId}/line-items`, { variant_id: knife.variantId, quantity: 1 })
+      const booked = await book(cartId, {
+        slot_id: slotId,
+        items: [{ variant_id: adult, quantity: 2 }],
+      })
+      const read = await settle(
+        http.get<{
+          cart: {
+            total: number
+            items: { variant_id: string; is_tax_inclusive: boolean; unit_price: number }[]
+          }
+        }>(`/store/carts/${cartId}?fields=+items.is_tax_inclusive`, {
+          headers: store.headers,
+        })
+      )
+      const items = read.data.cart.items
+      const plainLine = items.find((item) => item.variant_id === knife.variantId)
+      const datedLine = items.find((item) => item.variant_id === adult)
+
+      expect(booked.status).toBe(200)
+      expect(plainLine?.is_tax_inclusive).toBe(true)
+      expect(datedLine).toMatchObject({ unit_price: 1750.5, is_tax_inclusive: true })
+      // 100 + 2 × 1.750,50, KDV inside: nothing added (no shipping method yet)
+      expect(read.data.cart.total).toBe(3601)
+    })
+
+    it("refuses at the payment and the completion a variant put in before its product was dated", async () => {
+      await turnOn()
+      const container = getContainer()
+      const { productId, adult } = await tour(10, "none")
+      const cartId = await emptyCart(container)
+      const added = await post(`/store/carts/${cartId}/line-items`, {
+        variant_id: adult,
+        quantity: 1,
+      })
+      const started = await startPayment(cartId)
+      await staff(`/admin/products/${productId}/catalog`, {
+        kind: "service",
+        booking_mode: "departure",
+      })
+
+      const completed = await post(`/store/carts/${cartId}/complete`, {})
+      const again = await startPayment(cartId)
+
+      expect(added.status).toBe(200)
+      expect(started.status).toBe(200)
+      expect([completed.status, completed.data.message]).toEqual([400, "booking.use_booking_route"])
+      expect([again.status, again.data.message]).toEqual([400, "booking.use_booking_route"])
     })
   },
 })

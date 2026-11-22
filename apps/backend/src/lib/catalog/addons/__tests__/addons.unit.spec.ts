@@ -192,6 +192,18 @@ describe("product add-ons (adr/0052)", () => {
     expect(isStalePrice({ unit_price: 1235, is_custom_price: false }, kurus(123_500))).toBe(true)
   })
 
+  it("finds a line stale when its tax-inclusive flag is not the price's, when asked", () => {
+    const line = { unit_price: 1235, is_custom_price: true }
+    expect(isStalePrice({ ...line, is_tax_inclusive: true }, kurus(123_500), true)).toBe(false)
+    expect(isStalePrice({ ...line, is_tax_inclusive: false }, kurus(123_500), false)).toBe(false)
+    // A tax-inclusive price on a line read as tax-exclusive: the tax would be added on top
+    expect(isStalePrice({ ...line, is_tax_inclusive: false }, kurus(123_500), true)).toBe(true)
+    expect(isStalePrice({ ...line, is_tax_inclusive: null }, kurus(123_500), true)).toBe(true)
+    expect(isStalePrice({ ...line, is_tax_inclusive: true }, kurus(123_500), false)).toBe(true)
+    // Not asked (the add-on lines): the flag is not read
+    expect(isStalePrice({ ...line, is_tax_inclusive: false }, kurus(123_500))).toBe(false)
+  })
+
   it("keeps a line's record: withdrawal, invoice words without the text, and its erasure", () => {
     const addons = stored()
     const [text, choice] = addons

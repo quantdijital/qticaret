@@ -337,6 +337,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "booking.hold_mismatch": "Ayrılan yerler sepetle uyuşmuyor; tarihi ve kişileri yeniden seçin.",
   "booking.price_changed": "Sepetinizdeki bir rezervasyonun fiyatı değişti; sepeti gözden geçirin.",
   "booking.region_unknown": "Bölge bulunamadı.",
+  "booking.quantity_too_high": "Bir seçenekten en çok 100 adet ayrılabilir.",
+  "booking.too_many_free_units": "Yer tutan her kişi için en çok 2 ücretsiz kişi eklenebilir.",
+  "booking.order_edit_unavailable":
+    "Rezervasyonlu ürünler sipariş düzenlemeyle değiştirilemez; gerekirse siparişi iptal edin.",
   "addons.required_must_be_free": "Ücretli ek seçenek zorunlu yapılamaz.",
   "addons.not_addon_line": "Bu ürünün ek seçeneği yok.",
   "addons.unknown": "Bu ek seçenek ya da seçim üründe yok.",

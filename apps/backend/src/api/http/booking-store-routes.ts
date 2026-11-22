@@ -45,8 +45,9 @@ export async function protectBookingLine(
   }
 }
 
-// Holding places is a cart write: the checkout's budget, per address and per cart
-const bookingLimit = rateLimit(() => RATE_LIMIT_PROFILES.checkout, {
+// Holding places has its own budget, per address and per cart (adr/0076 Ek):
+// a shopper choosing dates does not use up the payment's
+const bookingLimit = rateLimit(() => RATE_LIMIT_PROFILES.booking, {
   identity: (req) => req.params["id"],
 })
 

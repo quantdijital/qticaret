@@ -64,6 +64,43 @@ export function unitsOf(
   return items.reduce((sum, item) => sum + item.quantity * paxOf(paxByVariant, item.variant_id), 0)
 }
 
+// The most of one price category a cart books, its asks added up
+export const MAX_QUANTITY_PER_VARIANT = 100
+// Units that take no place (an infant) per place taken: two per adult
+export const FREE_UNITS_PER_PLACE = 2
+// The share of a departure one cart may hold at once (adr/0076 Ek): no
+// cart, nor one address's few carts, keeps a departure from everyone else
+export const CART_SHARE_OF_CAPACITY = 0.2
+
+/**
+ * What one cart may hold on a departure: a fifth of its places (at least
+ * one) and never more than the product's per-cart cap.
+ */
+export const cartShareOf = (capacity: number, maxUnitsPerCart: number): number =>
+  Math.min(maxUnitsPerCart, Math.max(1, Math.ceil(capacity * CART_SHARE_OF_CAPACITY)))
+
+/**
+ * Why these (merged) units cannot be booked, or null: a category over
+ * its most, no place at all, or more place-less units (infants) than two
+ * per place taken. The error key.
+ */
+export function bookingUnitsProblem(
+  items: readonly { variant_id: string; quantity: number }[],
+  paxByVariant: unknown
+): string | null {
+  if (items.some((item) => item.quantity > MAX_QUANTITY_PER_VARIANT)) {
+    return "booking.quantity_too_high"
+  }
+  const units = unitsOf(items, paxByVariant)
+  if (units < 1) {
+    return "booking.units_invalid"
+  }
+  const free = items
+    .filter((item) => paxOf(paxByVariant, item.variant_id) === 0)
+    .reduce((sum, item) => sum + item.quantity, 0)
+  return free > units * FREE_UNITS_PER_PLACE ? "booking.too_many_free_units" : null
+}
+
 /** Sales close `cutoffHours` before the departure; at or past that moment nothing is sold. */
 export function salesClosed(startsAt: Date, cutoffHours: number, now: Date = new Date()): boolean {
   return now.getTime() >= startsAt.getTime() - cutoffHours * HOUR

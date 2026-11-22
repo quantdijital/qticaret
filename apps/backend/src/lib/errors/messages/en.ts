@@ -329,6 +329,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The places held no longer match your cart; choose the date and people again.",
   "booking.price_changed": "The price of a booking in your cart has changed; review your cart.",
   "booking.region_unknown": "The region was not found.",
+  "booking.quantity_too_high": "At most 100 of one option can be booked.",
+  "booking.too_many_free_units": "At most 2 free guests can come with each person taking a place.",
+  "booking.order_edit_unavailable":
+    "Dated products cannot be changed by an order edit; cancel the order if need be.",
   "addons.required_must_be_free": "A paid add-on cannot be required.",
   "addons.not_addon_line": "This product has no add-ons.",
   "addons.unknown": "The product has no such add-on or option.",

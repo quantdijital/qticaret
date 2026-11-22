@@ -2,8 +2,9 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { COMPLETION_HOLD_MINUTES, PAYMENT_HOLD_MINUTES } from "../../../lib/booking/cart-lines"
 import { ConflictError } from "../../../lib/errors"
 import type { CartHold } from "../../../modules/booking/service"
-import { readAddonCart } from "../../addons/cart"
+import { linesOf, readAddonCart } from "../../addons/cart"
 import type { AddonCart } from "../../addons/cart"
+import { refusePlainDatedItems } from "./plain-items"
 import { holdMatches, slotLinesOf, staleBookingLines, trimHoldToLines } from "./review"
 import type { SlotLines } from "./review"
 import { bookingService } from "./target"
@@ -38,8 +39,13 @@ async function assertHeldAndPriced(
 }
 
 /** The hold's end pushed to at least `minutes` from now; refused once it has ended. */
-async function extend(container: Container, cartId: string, minutes: number): Promise<void> {
-  if (!(await bookingService(container).extendHold(cartId, minutes))) {
+async function extend(
+  container: Container,
+  cartId: string,
+  minutes: number,
+  options: { completion?: boolean } = {}
+): Promise<void> {
+  if (!(await bookingService(container).extendHold(cartId, minutes, options))) {
     throw new ConflictError("booking.hold_expired")
   }
 }
@@ -56,6 +62,8 @@ export async function prepareBookingPayment(container: Container, cartId: string
   if (!cart) {
     return
   }
+  // A dated product's variant put in before the product was dated: no place, no departure
+  await refusePlainDatedItems(container, linesOf(cart))
   const slots = await slotLinesOf(container, cart, { sells: true })
   if (!slots) {
     return
@@ -81,11 +89,14 @@ export async function assertBookingLinesCurrent(container: Container, cartId: st
   if (!cart) {
     return
   }
+  // A dated product's variant put in before the product was dated: no place, no departure
+  await refusePlainDatedItems(container, linesOf(cart))
   const slots = await slotLinesOf(container, cart, { sells: true })
   if (!slots) {
     return
   }
   const service = bookingService(container)
   await assertHeldAndPriced(container, cart, slots, await service.cartHold(cartId))
-  await extend(container, cartId, COMPLETION_HOLD_MINUTES)
+  // Past the hold's lifetime if need be: the payment is taken by now (adr/0076 Ek)
+  await extend(container, cartId, COMPLETION_HOLD_MINUTES, { completion: true })
 }

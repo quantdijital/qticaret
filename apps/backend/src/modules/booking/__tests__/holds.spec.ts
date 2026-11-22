@@ -111,6 +111,30 @@ moduleIntegrationTestRunner<BookingModuleService>({
       expect(held?.hold_id).toBe(hold?.hold_id)
     })
 
+    it("lets the completion alone push a hold 15 minutes past its lifetime", async () => {
+      const [id = ""] = await slots(1, 2)
+      const age = async (cartId: string) => {
+        const hold = await service.holdUnits(cartId, [{ slotId: id, units: 1 }], 20)
+        await sql(
+          `UPDATE booking_hold SET created_at = now() - interval '118 minutes',
+                  expires_at = now() + interval '1 minute' WHERE id = ?`,
+          [hold?.hold_id ?? ""]
+        )
+      }
+      await age("cart_a")
+      await age("cart_b")
+
+      const other = await service.extendHold("cart_a", 15)
+      const completion = await service.extendHold("cart_b", 15, { completion: true })
+
+      // 120 from its start: 2 minutes from now; the completion's 15 fit within 135
+      expect(other?.expires_at.getTime()).toBeLessThanOrEqual(Date.now() + 2 * MINUTE + MINUTE)
+      expect(completion?.expires_at.getTime()).toBeGreaterThan(Date.now() + 13 * MINUTE)
+      expect(completion?.expires_at.getTime()).toBeLessThanOrEqual(
+        Date.now() + 15 * MINUTE + MINUTE
+      )
+    })
+
     it("refuses the generated writers and removes only empty slots", async () => {
       const [empty = "", used = ""] = await slots(2, 3)
       await service.holdUnits("cart_a", [{ slotId: used, units: 1 }], 20)

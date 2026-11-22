@@ -3,7 +3,13 @@ import { ConflictError, ValidationError } from "../../lib/errors"
 import { lockSlotsFreeingExpired, rows, unitsBySlot } from "./sql"
 import type { Executor } from "./sql"
 
-export { extendHold, holdUnits, HOLD_LIFETIME_MINUTES, MAX_HOLD_MINUTES } from "./holds"
+export {
+  COMPLETION_GRACE_MINUTES,
+  extendHold,
+  holdUnits,
+  HOLD_LIFETIME_MINUTES,
+  MAX_HOLD_MINUTES,
+} from "./holds"
 export type { HoldState } from "./holds"
 
 /**

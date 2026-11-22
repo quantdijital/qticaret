@@ -14,6 +14,7 @@ import { errorSummary, logger } from "../../lib/logging"
 import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
 import type { SlotUnits } from "../../modules/booking/service"
+import { alertConfirmFailed } from "./confirm-alert"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -25,20 +26,20 @@ interface OrderLine {
 
 const service = (container: Container) => container.resolve<BookingModuleService>(BOOKING_MODULE)
 
-/** The order's dated lines, in line order. */
+/** The order's dated lines, in line order, and whether it was cancelled. */
 async function datedLinesOf(container: Container, orderId: string) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
-    fields: ["id", "items.id", "items.quantity", "items.metadata"],
+    fields: ["id", "status", "items.id", "items.quantity", "items.metadata"],
     filters: { id: orderId },
   })
-  const items = ((data[0] as { items?: (OrderLine | null)[] } | undefined)?.items ?? []).flatMap(
-    (item) => (item ? [item] : [])
-  )
-  return items.flatMap((line) => {
+  const order = data[0] as { status?: string | null; items?: (OrderLine | null)[] } | undefined
+  const items = (order?.items ?? []).flatMap((item) => (item ? [item] : []))
+  const lines = items.flatMap((line) => {
     const mark = bookingMarkOf(line.metadata)
     return mark ? [{ line, mark }] : []
   })
+  return { lines, canceled: order?.status === "canceled" }
 }
 
 /** Places per slot the order's lines take, as their marks recorded them. */
@@ -52,7 +53,7 @@ function unitsOfMarks(lines: { line: OrderLine; mark: BookingMark }[]): SlotUnit
     .map(([slotId, units]) => ({ slotId, units }))
 }
 
-export type ConfirmOutcome = "none" | "existing" | "confirmed" | "retaken" | "failed"
+export type ConfirmOutcome = "none" | "existing" | "confirmed" | "retaken" | "failed" | "canceled"
 
 /**
  * A placed order's places moved from its cart's hold to `sold` and its
@@ -61,19 +62,25 @@ export type ConfirmOutcome = "none" | "existing" | "confirmed" | "retaken" | "fa
  * the completion, so it is there; if it is not (swept in between), the
  * places are taken again under the order's own key and confirmed. Places
  * that are no longer free are never invented: the order stands, the
- * failure is logged as an error (the error tracker's alarm) for staff.
+ * failure is logged as an error (the error tracker's alarm) and rings
+ * the panel's bell for staff. An order cancelled before this ran (its
+ * cancel found nothing to cancel) is not confirmed: its hold goes back.
  */
 export async function confirmOrderBookings(
   container: Container,
   orderId: string
 ): Promise<ConfirmOutcome> {
-  const lines = await datedLinesOf(container, orderId)
+  const { lines, canceled } = await datedLinesOf(container, orderId)
   if (lines.length === 0) {
     return "none"
   }
   const bookings = service(container)
   if ((await bookings.listBookings({ order_id: orderId }, { take: 1 })).length > 0) {
     return "existing"
+  }
+  if (canceled) {
+    await bookings.releaseHold(lines[0]?.mark.hold_id ?? "")
+    return "canceled"
   }
   const lineId = lines[0]?.line.id ?? null
   const holdId = lines[0]?.mark.hold_id ?? ""
@@ -95,6 +102,7 @@ export async function confirmOrderBookings(
     return "retaken"
   } catch (error) {
     logger.error({ event: "booking.confirm_failed", order_id: orderId, err: errorSummary(error) })
+    await alertConfirmFailed(container, orderId)
     return "failed"
   }
 }
@@ -127,5 +135,27 @@ export const confirmOrderBookingsWorkflow = createWorkflow(
     const outcome = confirmOrderBookingsStep(input)
     releaseLockStep({ key })
     return new WorkflowResponse(outcome)
+  }
+)
+
+export const cancelOrderBookingsStep = createStep(
+  "booking-cancel-order",
+  async (input: { order_id: string }, { container }) =>
+    new StepResponse(await cancelOrderBookings(container, input.order_id))
+)
+
+/**
+ * `cancelOrderBookings` under the same lock as the confirmation: a cancel
+ * and a placing handled at once never leave the places sold on a
+ * cancelled order (the confirmation, running second, finds it cancelled).
+ */
+export const cancelOrderBookingsWorkflow = createWorkflow(
+  "booking-cancel-order",
+  (input: { order_id: string }) => {
+    const key = transform({ input }, ({ input }) => `booking:order:${input.order_id}`)
+    acquireLockStep({ key, timeout: 10, ttl: 30 })
+    const cancelled = cancelOrderBookingsStep(input)
+    releaseLockStep({ key })
+    return new WorkflowResponse(cancelled)
   }
 )

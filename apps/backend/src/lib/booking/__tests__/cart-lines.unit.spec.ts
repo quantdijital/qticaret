@@ -5,6 +5,8 @@ import {
   adjustmentProblem,
   bookingMarkOf,
   bookingUnitPrice,
+  bookingUnitsProblem,
+  cartShareOf,
   paxOf,
   salesClosed,
   unitsOf,
@@ -50,6 +52,32 @@ describe("dated cart lines (adr/0076 §4, §5)", () => {
       )
     ).toBe(9)
     expect(unitsOf([{ variant_id: "infant", quantity: 2 }], pax)).toBe(0)
+  })
+
+  it("refuses a category over 100, no place at all, or more than two infants per place", () => {
+    const pax = { adult: { pax: 1 }, infant: { pax: 0 } }
+    const ask = (adults: number, infants: number) =>
+      bookingUnitsProblem(
+        [
+          { variant_id: "adult", quantity: adults },
+          { variant_id: "infant", quantity: infants },
+        ].filter((item) => item.quantity > 0),
+        pax
+      )
+
+    expect(ask(2, 4)).toBeNull()
+    expect(ask(100, 0)).toBeNull()
+    expect(ask(101, 0)).toBe("booking.quantity_too_high")
+    expect(ask(0, 1)).toBe("booking.units_invalid")
+    expect(ask(2, 5)).toBe("booking.too_many_free_units")
+  })
+
+  it("lets one cart hold a fifth of a departure, at least one place, within the product's cap", () => {
+    expect(cartShareOf(1, 10)).toBe(1)
+    expect(cartShareOf(3, 10)).toBe(1)
+    expect(cartShareOf(10, 10)).toBe(2)
+    expect(cartShareOf(21, 10)).toBe(5)
+    expect(cartShareOf(200, 10)).toBe(10)
   })
 
   it("closes sales at the cutoff before the departure", () => {

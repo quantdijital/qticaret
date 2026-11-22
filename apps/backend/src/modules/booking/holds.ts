@@ -21,6 +21,9 @@ export const MAX_HOLD_MINUTES = 120
 // The longest one hold lives from its start, however often it is pushed
 // (minutes): places are not kept from others by extending without end
 export const HOLD_LIFETIME_MINUTES = 120
+// How far past its lifetime the order's completion alone may push a hold
+// (minutes): the payment is taken by then; the order confirms the places
+export const COMPLETION_GRACE_MINUTES = 15
 
 function checkMinutes(minutes: number): void {
   if (!Number.isInteger(minutes) || minutes < 1 || minutes > MAX_HOLD_MINUTES) {
@@ -127,14 +130,18 @@ export async function holdUnits(
  * Pushes a live hold's end to at least `minutes` from now (payment
  * started, §5), never past its lifetime; never shortens it. An expired
  * one is not brought back (its places may already be someone else's):
- * null.
+ * null. The order's completion alone may go past the lifetime, by
+ * `COMPLETION_GRACE_MINUTES` (adr/0076 Ek): a payment already taken
+ * must still find its places when the order confirms them.
  */
 export async function extendHold(
   manager: Executor,
   cartId: string,
-  minutes: number
+  minutes: number,
+  options: { completion?: boolean } = {}
 ): Promise<HoldState | null> {
   checkMinutes(minutes)
+  const lifetime = HOLD_LIFETIME_MINUTES + (options.completion ? COMPLETION_GRACE_MINUTES : 0)
   const [hold] = await rows(
     manager,
     `UPDATE booking_hold
@@ -144,7 +151,7 @@ export async function extendHold(
             updated_at = now()
       WHERE cart_id = ? AND deleted_at IS NULL AND expires_at > now()
      RETURNING id, expires_at`,
-    [minutes, HOLD_LIFETIME_MINUTES, cartId]
+    [minutes, lifetime, cartId]
   )
   return hold ? stateOf(hold) : null
 }

@@ -75,14 +75,19 @@ class BookingModuleService extends MedusaService({
     return (await releaseHolds(managerOf(sharedContext), [holdId])) > 0
   }
 
-  /** A live hold's end pushed to at least `minutes` from now; null when it has none or it ended. */
+  /**
+   * A live hold's end pushed to at least `minutes` from now; null when it
+   * has none or it ended. `completion`: the order's completion, which may
+   * go past the hold's lifetime by its grace.
+   */
   @InjectTransactionManager()
   async extendHold(
     cartId: string,
     minutes: number,
+    options: { completion?: boolean } = {},
     @MedusaContext() sharedContext: Context = {}
   ): Promise<HoldState | null> {
-    return extendHold(managerOf(sharedContext), cartId, minutes)
+    return extendHold(managerOf(sharedContext), cartId, minutes, options)
   }
 
   /** A hold made an order's booking; the same call again changes nothing. */
