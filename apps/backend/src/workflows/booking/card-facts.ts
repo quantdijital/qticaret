@@ -10,7 +10,7 @@ import {
 } from "../../lib/booking/cart-lines"
 import { fromMedusaAmount, toMedusaAmount } from "../../lib/money"
 import type { Kurus, MedusaAmount } from "../../lib/money"
-import type { SlotAvailability } from "../../modules/booking/service"
+import type { DepartureDates, SlotAvailability } from "../../modules/booking/service"
 import { bookingService } from "./cart/target"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -28,6 +28,19 @@ export interface BookingCardFact {
   /** ISO time; the card says it in `timezone`. */
   next_departure: string | null
   timezone: string
+  /**
+   * A date search's card only (adr/0077 §4): the places left on
+   * `next_departure` (null without one), and `in_range`: the departure
+   * and the from price are those inside the dates asked.
+   */
+  left?: number | null
+  in_range?: true
+}
+
+/** A date search's dates and party, as the card facts read them (adr/0077 §4). */
+export interface CardWindow {
+  dates: DepartureDates
+  pax: number
 }
 
 /** A dated product as the card facts read it. */
@@ -67,7 +80,8 @@ export function bookingCardFactOf(
   bases: ReadonlyMap<string, Kurus | null>,
   slots: readonly SlotAvailability[],
   currencyCode: string,
-  now: Date
+  now: Date,
+  inRange = false
 ): BookingCardFact | null {
   const bookable = product.bookable
   if (!bookable || product.product_extension?.booking_mode !== "departure") {
@@ -91,12 +105,13 @@ export function bookingCardFactOf(
     })
   const prices = selling.length > 0 ? selling.flatMap(pricesAt) : pricesAt(null)
   const lowest = prices.length > 0 ? Math.min(...prices) : null
-  return {
+  const fact: BookingCardFact = {
     from_price: lowest === null ? null : lira(lowest as Kurus),
     currency_code: currencyCode,
     next_departure: selling[0]?.starts_at.toISOString() ?? null,
     timezone: bookable.timezone,
   }
+  return inRange ? { ...fact, left: selling[0]?.available ?? null, in_range: true } : fact
 }
 
 /** The region's currency, else lira; an unknown region prices as none. */
@@ -149,12 +164,16 @@ export async function basePrices(
  * The card facts of a page's dated products (adr/0076 §10): one region
  * read, one price read for all their categories and one slot read for all
  * their departures, whatever the page's size. Products that are not dated
- * (or have no booking settings yet) are left out.
+ * (or have no booking settings yet) are left out. With a date search's
+ * `window` (adr/0077 §4) the departures read are those inside its dates
+ * with room for its party: the next one is the nearest of them and the
+ * from price is over them.
  */
 export async function bookingCardFacts(
   container: Container,
   products: readonly DatedCardProduct[],
-  regionId: string | undefined
+  regionId: string | undefined,
+  window?: CardWindow
 ): Promise<Map<string, BookingCardFact>> {
   const dated = products.filter(
     (product) => product.bookable && product.product_extension?.booking_mode === "departure"
@@ -164,17 +183,18 @@ export async function bookingCardFacts(
   }
   const now = new Date()
   const pricing = await pricingOf(container, regionId)
+  const bookableIds = dated.flatMap((product) => (product.bookable ? [product.bookable.id] : []))
+  const service = bookingService(container)
   const [bases, slots] = await Promise.all([
     basePrices(container, dated.flatMap(payingVariants), pricing),
-    bookingService(container).openSlots(
-      dated.flatMap((product) => (product.bookable ? [product.bookable.id] : [])),
-      { from: now, limit: STORE_SLOTS_LIMIT }
-    ),
+    window
+      ? service.windowSlots(bookableIds, { ...window, now }, STORE_SLOTS_LIMIT)
+      : service.openSlots(bookableIds, { from: now, limit: STORE_SLOTS_LIMIT }),
   ])
   const facts = new Map<string, BookingCardFact>()
   for (const product of dated) {
     const own = slots.filter((slot) => slot.bookable_id === product.bookable?.id)
-    const fact = bookingCardFactOf(product, bases, own, pricing.currency_code, now)
+    const fact = bookingCardFactOf(product, bases, own, pricing.currency_code, now, !!window)
     if (fact) {
       facts.set(product.id, fact)
     }

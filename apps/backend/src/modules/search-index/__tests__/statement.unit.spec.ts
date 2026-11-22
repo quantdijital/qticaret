@@ -97,4 +97,16 @@ describe("the listing statement (adr/0056)", () => {
     expect(listingResult(filtered, undefined).count).toBe(0)
     expect(listingResult(plan(), { count: 0, price: [null, null] }).price).toBeNull()
   })
+
+  it("orders by the ids given, the others after, newest first (adr/0077 §2)", () => {
+    const { sql, params } = listingStatement(
+      plan({ sort: "ids_order", order_ids: ["prod_b", "prod_a"] })
+    )
+    expect(sql).toContain("array_position(")
+    expect(sql).toContain("ord_at ASC NULLS LAST, created_at DESC, product_id")
+    expect(params).toContain(JSON.stringify(["prod_b", "prod_a"]))
+    expect(placeholders(sql)).toBe(params.length)
+    // Any other sort keeps its statement as before: no position worked out
+    expect(listingStatement(plan()).sql).not.toContain("array_position")
+  })
 })

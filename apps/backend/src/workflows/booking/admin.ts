@@ -1,6 +1,7 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { acquireLockStep, emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import type { BookableSettingsType } from "../../lib/booking/settings"
+import { CATALOG_PRODUCT_SAVED } from "../catalog/events"
 import { ensureBookableStep, setBookableStep } from "./steps/bookable"
 import { createSlotsStep, updateSlotStep } from "./steps/slots"
 import type { NewSlot, SlotUpdate } from "./steps/slots"
@@ -21,6 +22,9 @@ export const setBookableWorkflow = createWorkflow(
     const lockKey = transform({ input }, ({ input }) => productLock(input.product_id))
     acquireLockStep({ key: lockKey, timeout: 10, ttl: 30 })
     const id = setBookableStep(input)
+    // The search index prices a dated product by its paying categories (adr/0077 §5)
+    const saved = transform({ input }, ({ input }) => ({ id: input.product_id }))
+    emitEventStep({ eventName: CATALOG_PRODUCT_SAVED, data: saved })
     releaseLockStep({ key: lockKey })
     return new WorkflowResponse(id)
   }

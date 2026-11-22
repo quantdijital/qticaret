@@ -117,4 +117,31 @@ describe("bookingCardFactOf", () => {
     ).toBeNull()
     expect(bookingCardFactOf({ ...tour, bookable: null }, bases, [], "try", NOW)).toBeNull()
   })
+
+  it("says a date search's card's places left and marks it in range (adr/0077 §4)", () => {
+    const fact = bookingCardFactOf(
+      tour,
+      bases,
+      [slot("s1", 48, { available: 3 }), slot("s2", 96)],
+      "try",
+      NOW,
+      true
+    )
+    expect(fact).toMatchObject({
+      from_price: 900,
+      next_departure: new Date(NOW.getTime() + 48 * HOUR).toISOString(),
+      left: 3,
+      in_range: true,
+    })
+    // None inside the dates: no departure, no places, the base prices
+    expect(bookingCardFactOf(tour, bases, [], "try", NOW, true)).toMatchObject({
+      next_departure: null,
+      left: null,
+      in_range: true,
+    })
+    // Without dates the fact has neither field
+    const plain = bookingCardFactOf(tour, bases, [slot("s1", 48)], "try", NOW)
+    expect(plain).not.toHaveProperty("left")
+    expect(plain).not.toHaveProperty("in_range")
+  })
 })

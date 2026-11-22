@@ -34,7 +34,8 @@ const SELECT = `
 
 const toDate = (value: unknown): Date => new Date(value as string | Date)
 
-function availabilityOf(row: Row): SlotAvailability {
+/** A row with `held_live` read as a slot with what is free. */
+export function availabilityOf(row: Row): SlotAvailability {
   const capacity = asInt(row["capacity"])
   const sold = asInt(row["sold"])
   const held = asInt(row["held_live"])

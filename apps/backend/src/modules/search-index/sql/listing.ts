@@ -13,12 +13,22 @@ import { Statement } from "./statement"
  * plan's (how many filters, units); every value is bound.
  */
 
-const ORDER: Record<ListingPlan["sort"], string> = {
+const ORDER: Record<Exclude<ListingPlan["sort"], "ids_order">, string> = {
   relevance: "in_stock DESC, score DESC, created_at DESC, product_id",
   newest: "created_at DESC, product_id",
   price_asc: "price ASC NULLS LAST, created_at DESC, product_id",
   price_desc: "price DESC NULLS LAST, created_at DESC, product_id",
 }
+
+/**
+ * The page's order. `ids_order` follows the ids given (`array_position`
+ * over the bound list, worked out once per row in `f`); a product not in
+ * it comes after, the newest first.
+ */
+const orderOf = (plan: ListingPlan): string =>
+  plan.sort === "ids_order"
+    ? "ord_at ASC NULLS LAST, created_at DESC, product_id"
+    : ORDER[plan.sort]
 
 /** Chips a search shows: the categories and brands most of its first hits are in. */
 const RELATED_LIMIT = 5
@@ -138,7 +148,11 @@ export function listingStatement(plan: ListingPlan): { sql: string; params: unkn
   const flags = conditions.map((condition) => `${condition.sql} AS ${condition.name}`)
   const related = relatedOf(plan, sql)
   const all = allBut(conditions)
-  const order = ORDER[plan.sort]
+  const order = orderOf(plan)
+  const ordAt =
+    plan.sort === "ids_order"
+      ? `, array_position(${sql.textArray(plan.order_ids ?? [])}, m.product_id) AS ord_at`
+      : ""
   const selects = [`(SELECT count(*)::integer FROM f WHERE ${all}) AS count`]
   if (!plan.countOnly) {
     selects.push(
@@ -167,7 +181,7 @@ export function listingStatement(plan: ListingPlan): { sql: string; params: unkn
         FROM search_document d ${rank.lateral}
        WHERE d.published ${scope}
     ), f AS MATERIALIZED (
-      SELECT m.*${flags.map((flag) => `, ${flag}`).join("")} FROM m
+      SELECT m.*${flags.map((flag) => `, ${flag}`).join("")}${ordAt} FROM m
     )${related?.cte ?? ""}
     SELECT ${selects.join(",\n")}`
   return sql.finish(text)

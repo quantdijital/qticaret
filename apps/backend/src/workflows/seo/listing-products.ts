@@ -9,7 +9,14 @@ import type SearchIndexModuleService from "../../modules/search-index/service"
 import type { ListingPlan, ListingResult } from "../../modules/search-index/types"
 import { facetsOf } from "./listing-facets"
 import type { FilterDefinition, ListingFacets } from "./listing-facets"
-import { listingScope, planFilters, planSort, priceKey } from "./listing-plan"
+import { datedListing } from "./listing-dated"
+import {
+  categorySubtreeByHandle,
+  listingScope,
+  planFilters,
+  planSort,
+  priceKey,
+} from "./listing-plan"
 import type { Listed } from "./listing-plan"
 import { SEARCH_LISTING, searchListing } from "./listing-search"
 import type { ListingSearch } from "./listing-search"
@@ -30,7 +37,7 @@ export { ALL_PRODUCTS } from "./listing-plan"
 export interface ListingProductsInput {
   listed: Listed
   query: ListingQuery
-  /** A site search's words as the shopper typed them. */
+  /** A site search's words as the shopper typed them; none: a search by dates or category only. */
   search?: string
   currency_code: string
   region_id: string | null
@@ -47,6 +54,11 @@ export interface ListingProductsAnswer {
   facets: ListingFacets
   /** A site search's suggestions and related chips. */
   search?: ListingSearch
+  /**
+   * The listing's query in canonical form (adr/0077 §2), when the one
+   * asked was not: the page moves there with one 301.
+   */
+  canonical_query?: string
 }
 
 /** The filterable choice attributes, by key: their labels and option labels, in rank order. */
@@ -95,12 +107,23 @@ export async function listingProducts(
 ): Promise<ListingProductsAnswer> {
   const started = performance.now()
   const isSearch = input.listed.entity_type === SEARCH_LISTING
-  const [scope, definitions] = await Promise.all([
+  const { query } = input
+  const [listed, definitions, dated, category] = await Promise.all([
     isSearch ? Promise.resolve({}) : listingScope(container, input.listed),
     definitionsCache("definitions", () => filterDefinitions(container)),
+    datedListing(container, query),
+    query.category ? categorySubtreeByHandle(container, query.category) : null,
   ])
-  const { query } = input
+  const scope = listed && {
+    ...listed,
+    ...(category ? { category_ids: category } : {}),
+    ...(dated.scope_ids ? { product_ids: dated.scope_ids } : {}),
+  }
   const size = input.limit ?? LISTING_PAGE_SIZE
+  const text = input.search?.trim() ?? ""
+  // Dates asked and no order chosen: the nearest departure first
+  const sort =
+    query.sort || !dated.scope_ids ? planSort(query.sort, isSearch && text !== "") : "ids_order"
   const base: ListingPlan = {
     channels: [...input.sales_channel_ids],
     scope: scope ?? {},
@@ -111,11 +134,13 @@ export async function listingProducts(
       min: query.price?.min ?? null,
       max: query.price?.max ?? null,
     },
-    sort: planSort(query.sort, isSearch),
+    sort,
+    ...(sort === "ids_order" ? { order_ids: dated.order_ids ?? [] } : {}),
     page: { offset: (query.page - 1) * size, limit: size },
   }
   const index = container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE)
-  const searched = isSearch ? await searchListing(container, base, input.search ?? "") : null
+  const searched =
+    isSearch && text !== "" ? await searchListing(container, base, input.search ?? "") : null
   const result = !scope
     ? NOTHING
     : searched

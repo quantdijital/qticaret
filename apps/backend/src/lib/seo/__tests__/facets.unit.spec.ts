@@ -1,13 +1,7 @@
 import { parseRobots, isCrawlable } from "../robots-match"
 import type { SeoPayload } from "../resolve"
-import {
-  facetDisallowLines,
-  filterKeysOf,
-  isNarrowed,
-  listingSearch,
-  readListingQuery,
-  singleFilter,
-} from "../facets"
+import { facetDisallowLines } from "../facets-robots"
+import { filterKeysOf, isNarrowed, listingSearch, readListingQuery, singleFilter } from "../facets"
 import type { ListingQuery } from "../facets"
 import { listingSeo } from "../listing-seo"
 
