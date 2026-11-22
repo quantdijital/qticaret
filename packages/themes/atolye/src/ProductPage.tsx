@@ -5,9 +5,12 @@ import { ProductGrid } from "./parts/ProductCard"
 import { Trail } from "./parts/Trail"
 import { AskOnWhatsApp } from "./product/AskOnWhatsApp"
 import { Assurances } from "./product/Assurances"
+import { Booking } from "./product/Booking"
+import { bookingWords } from "./product/booking-words"
 import { Buy } from "./product/Buy"
 import { Community } from "./product/Community"
 import { Details } from "./product/Details"
+import { Favorite } from "./product/Favorite"
 import { Gallery } from "./product/Gallery"
 import { Headline } from "./product/Headline"
 import { Summary } from "./product/Summary"
@@ -62,6 +65,11 @@ export function ProductPage({
     !view.giftCard && view.addons && view.addons.length > 0 && actions.addAddonsToCart
       ? { action: actions.addAddonsToCart, fields: view.addons, words: addonWords(t) }
       : null
+  // A dated product (adr/0076 §10): departures and counts in place of "add to cart"
+  const booking =
+    view.booking && actions.addBookingToCart
+      ? { view: view.booking, action: actions.addBookingToCart }
+      : null
   return (
     <>
       {/* The product's own block: the design's main section, in its look when the shop set one */}
@@ -102,30 +110,52 @@ export function ProductPage({
           <div className="@container min-w-0 lg:pl-(--space-lg)">
             <div className="gf-buy-stack flex flex-col gap-6 md:sticky md:top-(--gf-stick-top)">
               <Headline view={view} t={t} />
-              <Buy
-                productId={view.id}
-                title={view.title}
-                image={view.images[0] ?? null}
-                options={view.options}
-                variants={view.variants}
-                selectedVariantId={view.selectedVariantId}
-                addToCart={actions.addToCart}
-                gift={gift ? { action: gift, words: giftWords(t) } : null}
-                addons={addons}
-                favorite={{
-                  add: actions.addFavorite,
-                  loginPath: view.loginPath,
-                  words: favoriteWords(t),
-                }}
-                installments={{ load: actions.installments, words: installmentWords(t) }}
-                stockAlert={{ action: actions.stockAlert, words: alertWords(t) }}
-                signedIn={view.signedIn}
-                summary={view.summaryHtml ? <Summary html={view.summaryHtml} /> : null}
-                whatsapp={
-                  view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null
-                }
-                words={buyWords(t, percents)}
-              />
+              {booking ? (
+                <Booking
+                  productId={view.id}
+                  view={booking.view}
+                  action={booking.action}
+                  favorite={
+                    <Favorite
+                      productId={view.id}
+                      signedIn={view.signedIn}
+                      loginPath={view.loginPath}
+                      add={actions.addFavorite}
+                      words={favoriteWords(t)}
+                    />
+                  }
+                  summary={view.summaryHtml ? <Summary html={view.summaryHtml} /> : null}
+                  whatsapp={
+                    view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null
+                  }
+                  words={bookingWords(t)}
+                />
+              ) : (
+                <Buy
+                  productId={view.id}
+                  title={view.title}
+                  image={view.images[0] ?? null}
+                  options={view.options}
+                  variants={view.variants}
+                  selectedVariantId={view.selectedVariantId}
+                  addToCart={actions.addToCart}
+                  gift={gift ? { action: gift, words: giftWords(t) } : null}
+                  addons={addons}
+                  favorite={{
+                    add: actions.addFavorite,
+                    loginPath: view.loginPath,
+                    words: favoriteWords(t),
+                  }}
+                  installments={{ load: actions.installments, words: installmentWords(t) }}
+                  stockAlert={{ action: actions.stockAlert, words: alertWords(t) }}
+                  signedIn={view.signedIn}
+                  summary={view.summaryHtml ? <Summary html={view.summaryHtml} /> : null}
+                  whatsapp={
+                    view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null
+                  }
+                  words={buyWords(t, percents)}
+                />
+              )}
               {/* Before the purchase, beside the buy form (MSY md. 5/1-h, 6/2): the storefront's words */}
               {view.withdrawalNote && (
                 <p className="flex items-start gap-3 rounded-media gf-box p-4 text-sm font-semibold">

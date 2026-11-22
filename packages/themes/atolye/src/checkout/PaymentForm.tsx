@@ -2,8 +2,15 @@
 
 import { CreditCard, Gift, HandCoins, Landmark, Lock, type LucideIcon } from "lucide-react"
 import { useState } from "react"
-import type { CheckoutActions, ContractView, PaymentKind, PaymentMethodView } from "@qticaret/ui"
+import type {
+  BookingHoldView,
+  CheckoutActions,
+  ContractView,
+  PaymentKind,
+  PaymentMethodView,
+} from "@qticaret/ui"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
+import { useHoldLeft } from "../cart/HoldCountdown"
 import { useChallengeForm } from "../frame/useChallengeForm"
 import { ACCEPT_ERRORS, AGE_ERRORS, Consents, type ConsentWords } from "./Consents"
 import { ChoiceRow, FieldError } from "./fields"
@@ -46,9 +53,12 @@ export function PaymentForm({
   marketingVersion,
   total,
   placeOrder,
+  hold,
   words,
 }: {
   methods: PaymentMethodView[]
+  /** Dated lines' hold (adr/0076 §10): the button is drawn off once it ends. */
+  hold?: BookingHoldView | null | undefined
   /** The backend's total in words, as the summary says it. */
   total: string
   contracts: Partial<Record<PaymentKind, ContractView[]>>
@@ -65,6 +75,7 @@ export function PaymentForm({
   const message = error ? (words.errors[error] ?? words.fallback) : null
   const placed = error !== null && (ACCEPT_ERRORS.includes(error) || AGE_ERRORS.includes(error))
   const fix = error ? words.fixes.find((each) => each.errors.includes(error)) : undefined
+  const expired = useHoldLeft(hold) === 0
   return (
     <form
       onSubmit={(event) => {
@@ -132,7 +143,7 @@ export function PaymentForm({
         </p>
         <button
           type="submit"
-          disabled={pending || methods.length === 0}
+          disabled={pending || methods.length === 0 || expired}
           aria-busy={pending || undefined}
           className="gf-btn w-full"
         >

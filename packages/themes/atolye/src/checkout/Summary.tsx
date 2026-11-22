@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CheckoutSummaryView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { HoldCountdown } from "../cart/HoldCountdown"
 import { LineAddons } from "../parts/LineAddons"
 import { LineName, LinePhoto } from "../parts/LineLink"
 
@@ -36,12 +37,40 @@ function Lines({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) {
             {line.detail && line.detail.trim() !== line.title.trim() && (
               <span className="text-stage-text-2">{line.detail}</span>
             )}
+            {line.booking && <span className="font-semibold">{line.booking.departure}</span>}
             <LineAddons addons={line.addons ?? []} stage className="mt-1" />
           </div>
           <span className="tabular shrink-0 text-sm font-semibold">{line.total}</span>
         </li>
       ))}
     </ul>
+  )
+}
+
+/**
+ * Above the basket: the dated lines' hold ticking (adr/0076 §10) and a
+ * note from the storefront (a shipping method left on a cart that ships
+ * nothing). Neither: nothing drawn.
+ */
+function Notes({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) {
+  if (!summary.hold && !summary.notice) {
+    return null
+  }
+  return (
+    <div className="flex flex-col gap-3">
+      {summary.hold && (
+        <HoldCountdown
+          hold={summary.hold}
+          words={{ held: t("booking.hold_left"), expired: t("booking.hold_gone") }}
+          className="text-text"
+        />
+      )}
+      {summary.notice && (
+        <p role="status" className="text-sm text-stage-text-2">
+          {summary.notice}
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -117,6 +146,7 @@ export function Summary({
       <h2 id="odeme-ozeti" className="text-title">
         {t("cart.summary")}
       </h2>
+      <Notes summary={summary} t={t} />
       <Lines summary={summary} t={t} />
       {code}
       <Totals summary={summary} t={t} />
@@ -139,7 +169,7 @@ export function FoldedSummary({
   t: Translate
   code?: ReactNode
 }) {
-  return (
+  const folded = (
     <details className="gf-stage group rounded-tile lg:hidden">
       <summary className="flex min-h-14 cursor-pointer items-center gap-3 px-5 text-sm">
         <span className="flex-1 font-semibold">{t("checkout.show_summary")}</span>
@@ -156,5 +186,17 @@ export function FoldedSummary({
         <Totals summary={summary} t={t} />
       </div>
     </details>
+  )
+  if (!summary.hold && !summary.notice) {
+    return folded
+  }
+  // The hold and the note stay in sight above the folded basket
+  return (
+    <div className="flex flex-col gap-3 lg:hidden">
+      <div className="gf-stage rounded-tile p-4">
+        <Notes summary={summary} t={t} />
+      </div>
+      {folded}
+    </div>
   )
 }
