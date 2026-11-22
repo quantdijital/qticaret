@@ -17,6 +17,8 @@ import {
   releaseSlotHolds,
 } from "./cancel-uses"
 import { cartHold } from "./cart-hold"
+import { bookingByVoucher, dueReminders, ensureVoucher, markReminded } from "./messages"
+import { newVoucherCode } from "../../lib/booking/voucher-code"
 import type { HoldClient } from "./client-share"
 import { cancelBooking, confirmHold, extendHold, holdUnits, updateSlot } from "./counters"
 import type { HoldState, SlotChanges } from "./counters"
@@ -255,6 +257,30 @@ class BookingModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {}
   ): Promise<boolean> {
     return orderHasCancelledDeparture(managerOf(sharedContext), orderId)
+  }
+
+  /** The booking's voucher code, made on first read (adr/0076 Ek D7b); null: no booking. */
+  @InjectTransactionManager()
+  async ensureVoucher(bookingId: string, @MedusaContext() sharedContext: Context = {}) {
+    return ensureVoucher(managerOf(sharedContext), bookingId, () => newVoucherCode())
+  }
+
+  /** The booking a normalized voucher code belongs to, or null. */
+  @InjectManager()
+  async bookingByVoucher(code: string, @MedusaContext() sharedContext: Context = {}) {
+    return bookingByVoucher(managerOf(sharedContext), code)
+  }
+
+  /** Departures whose reminder is due at `now`, soonest first (`DUE_REMINDERS`). */
+  @InjectManager()
+  async dueReminders(now: Date, limit: number, @MedusaContext() sharedContext: Context = {}) {
+    return dueReminders(managerOf(sharedContext), now, limit)
+  }
+
+  /** A departure's reminder marked sent; whether this call marked it. */
+  @InjectTransactionManager()
+  async markReminded(useId: string, @MedusaContext() sharedContext: Context = {}) {
+    return markReminded(managerOf(sharedContext), useId)
   }
 
   /** Holds past their end released, a batch a call (`now`: the database's clock by default). */

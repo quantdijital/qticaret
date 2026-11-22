@@ -15,6 +15,7 @@ export interface BookableRow {
   cancellation_tiers: unknown
   pax_by_variant: unknown
   timezone: string
+  reminder_days: number
 }
 
 /** A dated product: its variants and its booking settings, if made yet. */

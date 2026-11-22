@@ -30,6 +30,7 @@ const bookableView = (row: BookableRow) => ({
   cancellation_tiers: row.cancellation_tiers ?? [],
   pax_by_variant: row.pax_by_variant ?? {},
   timezone: row.timezone,
+  reminder_days: row.reminder_days,
 })
 
 interface ProductRow {
