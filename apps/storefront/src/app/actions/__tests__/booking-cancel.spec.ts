@@ -51,6 +51,8 @@ describe("cancelBooking (adr/0076 Ek D7a)", () => {
     ["booking.cancel_too_late", 400, "rezervasyon-gec"],
     ["booking.cancel_unavailable", 400, "rezervasyon-kademe-yok"],
     ["orders.cancel_contact_shop", 400, "rezervasyon-magaza"],
+    // adr/0076 Ek basit yol: the shop takes cancels by phone or e-mail
+    ["booking.cancel_by_contact", 400, "rezervasyon-iletisim"],
     ["booking.cancel_unknown", 404, "rezervasyon-iptal-olmadi"],
     [null, 500, "rezervasyon-iptal-olmadi"],
   ])("says the backend's %s refusal in its own words", async (key, status, note) => {

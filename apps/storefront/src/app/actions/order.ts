@@ -67,6 +67,7 @@ const BOOKING_REFUSALS: Readonly<Record<string, string>> = {
   "booking.cancel_too_late": "rezervasyon-gec",
   "booking.cancel_unavailable": "rezervasyon-kademe-yok",
   "orders.cancel_contact_shop": "rezervasyon-magaza",
+  "booking.cancel_by_contact": "rezervasyon-iletisim",
 }
 
 /**
