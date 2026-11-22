@@ -44,6 +44,38 @@ async function refuseHostedPaymentRefund(
 }
 
 /**
+ * Medusa's capture of part of a payment (`amount`) refused for the ways
+ * our checkout starts (a bank transfer, cash on delivery, a hosted card
+ * form): the panel captures the whole payment, and a partial capture
+ * leaves `captured_at` empty, money taken that code reading it would miss
+ * (refund safety follow-up of adr/0076). The amount is never the
+ * client's to set for these; the system provider goes on as before.
+ */
+export async function refusePartialCapture(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const amount = (req.body as { amount?: unknown } | undefined)?.amount
+  if (req.method !== "POST" || amount === undefined || amount === null) {
+    next()
+    return
+  }
+  try {
+    const [payment] = await req.scope
+      .resolve(Modules.PAYMENT)
+      .listPayments({ id: req.params["id"] ?? "" }, { select: ["provider_id"] })
+    next(
+      isCheckoutProvider(payment?.provider_id)
+        ? new ValidationError("payments.partial_capture_refused", { field: "amount" })
+        : undefined
+    )
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
  * Medusa's cancel gives a captured payment back but goes on when the
  * refund fails, leaving the order cancelled and the money kept. An order
  * Medusa would cancel is refunded through ours first, under a reference of
@@ -132,6 +164,10 @@ export const ORDER_REFUND_ROUTES = [
   // No `methods` on purpose: a method-scoped middleware may sort after the core route
   { matcher: "/admin/payments/:id/refund", middlewares: [refuseHostedPaymentRefund] },
   // Cash on delivery's "collected" (adr/0029): Medusa's capture, by staff only
-  { matcher: "/admin/payments/:id/capture", middlewares: [requireUserActor] },
+  // The whole payment only, for our checkout's ways (no `methods`, as above)
+  {
+    matcher: "/admin/payments/:id/capture",
+    middlewares: [requireUserActor, refusePartialCapture],
+  },
   { matcher: "/admin/orders/:id/cancel", middlewares: [holdCancelLocks, refundBeforeCancel] },
 ]

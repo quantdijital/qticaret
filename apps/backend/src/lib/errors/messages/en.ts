@@ -1331,6 +1331,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.refund_check_shown":
     'The provider shows this refund made; "money did not go back" cannot be chosen.',
   "payments.use_order_refund": "This payment is refunded from the order's refund step.",
+  "payments.partial_capture_refused": "This payment is captured only in full.",
   "payments.max_installment_invalid": "The most installments is 2 to 12 (0: what PayTR allows).",
   "payments.installments_unknown": "No product or cart found for the installment table.",
   "payments.installments_target": "Give a cart, or a product and a region, for installments.",

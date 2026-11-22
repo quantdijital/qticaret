@@ -1342,6 +1342,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu iade kısmen yapılmış görünmüyor; kaydı diğer seçeneklerle sonuçlandırın.",
   "orders.refund_check_shown": 'Sağlayıcı bu iadeyi yapılmış gösteriyor; "para gitmedi" seçilemez.',
   "payments.use_order_refund": "Bu ödemenin iadesi siparişin iade adımından yapılır.",
+  "payments.partial_capture_refused": "Bu ödeme yalnız tutarın tamamıyla tahsil edilir.",
   "payments.max_installment_invalid":
     "En çok taksit 2 ile 12 arasında olmalı (0: PayTR'nin izin verdiği en çok).",
   "payments.installments_unknown": "Taksit tablosu için ürün ya da sepet bulunamadı.",

@@ -9,7 +9,8 @@ import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { readOrderMoney } from "../orders/order-money"
 import type { BookingCancelInput, BookingCancelResult } from "./cancel"
-import { takenByHandOf } from "./cancel-plan"
+import { TAKEN_PAYMENT_FIELDS, takenByHandOf, takenPaymentsOf } from "./refund-way"
+import type { PaidOrderRow } from "./refund-way"
 import { alertRefundByHand } from "./confirm-alert"
 
 /**
@@ -26,18 +27,8 @@ export async function refundedBefore(container: MedusaContainer, useId: string):
   return kurus(entry && entry.status !== "failed" ? entry.amount : 0)
 }
 
-const TAKEN_FIELDS = [
-  "payment_collections.payments.provider_id",
-  "payment_collections.payments.captured_at",
-]
-
-interface DoneOrder {
+interface DoneOrder extends PaidOrderRow {
   status?: string | null
-  payment_collections?:
-    | ({
-        payments?: ({ provider_id?: string | null; captured_at?: unknown } | null)[] | null
-      } | null)[]
-    | null
 }
 
 /**
@@ -49,9 +40,7 @@ async function refundsByHand(
   orderId: string,
   order: DoneOrder | undefined
 ): Promise<boolean> {
-  const taken = (order?.payment_collections ?? []).flatMap((collection) =>
-    (collection?.payments ?? []).filter((payment) => Boolean(payment?.captured_at))
-  )
+  const taken = takenPaymentsOf(order)
   if (taken.length > 0 && takenByHandOf(taken)) {
     return true
   }
@@ -85,7 +74,7 @@ export async function doneBefore(
   }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
-    fields: ["status", ...TAKEN_FIELDS],
+    fields: ["status", ...TAKEN_PAYMENT_FIELDS],
     filters: { id: input.order_id },
   })
   const order = (data as DoneOrder[])[0]
