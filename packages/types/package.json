@@ -11,6 +11,7 @@
     "./style-kit": "./src/store/style-kit.ts",
     "./listing-text": "./src/store/listing-text.ts",
     "./section-variants": "./src/store/section-variants.ts",
+    "./section-requires": "./src/store/section-requires.ts",
     "./section-look": "./src/store/section-look.ts",
     "./section-device": "./src/store/section-device.ts",
     "./section-announcement": "./src/store/section-announcement.ts",
