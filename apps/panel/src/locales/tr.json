@@ -5028,7 +5028,27 @@
     },
     "wholesaleMatches_one": "Aramanız {{count}} toptan siparişini de buldu; toptan siparişler burada listelenmez.",
     "wholesaleMatches_other": "Aramanız {{count}} toptan siparişini de buldu; toptan siparişler burada listelenmez.",
-    "wholesaleMatchesLink": "Toptancılar > Siparişler'de gör"
+    "wholesaleMatchesLink": "Toptancılar > Siparişler'de gör",
+    "bookings": {
+      "title": "Rezervasyonlar",
+      "cancelled": "İptal edildi",
+      "confirmed": "Onaylı",
+      "cancel": "İptal et",
+      "cancelTitle": "Rezervasyon iptal edilsin mi?",
+      "cancelDescription": "{{start}} kalkışındaki yerler bırakılır ve seçtiğiniz tutar ödeme sağlayıcısından iade edilir.",
+      "confirm": "Rezervasyonu iptal et",
+      "mode": "İade şekli",
+      "modes": {
+        "tier": "Ürünün iptal kademesine göre (%{{percent}} kesinti)",
+        "noTier": "Ürünün iptal kademesi yok",
+        "full": "Tamamını iade et"
+      },
+      "loading": "İade tutarı hesaplanıyor…",
+      "refund": "İade: {{amount}} (ödenen {{paid}})",
+      "refusal": "Bu şekilde iptal edilemiyor; tamamını iade etmeyi seçin.",
+      "previewFailed": "İade tutarı okunamadı; onaylarsanız sunucu yeniden hesaplar.",
+      "done": "Rezervasyon iptal edildi."
+    }
   },
   "customers": {
     "description": "Sipariş veren ya da üye olan herkes",

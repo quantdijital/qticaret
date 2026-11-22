@@ -5028,7 +5028,27 @@
     },
     "wholesaleMatches_one": "Your search also found {{count}} wholesale order; wholesale orders are not listed here.",
     "wholesaleMatches_other": "Your search also found {{count}} wholesale orders; wholesale orders are not listed here.",
-    "wholesaleMatchesLink": "See them in Wholesalers > Orders"
+    "wholesaleMatchesLink": "See them in Wholesalers > Orders",
+    "bookings": {
+      "title": "Bookings",
+      "cancelled": "Cancelled",
+      "confirmed": "Confirmed",
+      "cancel": "Cancel",
+      "cancelTitle": "Cancel the booking?",
+      "cancelDescription": "The places on the {{start}} departure are released and the chosen amount is refunded through the payment provider.",
+      "confirm": "Cancel booking",
+      "mode": "Refund",
+      "modes": {
+        "tier": "By the product's cancellation tier ({{percent}}% kept)",
+        "noTier": "The product has no cancellation tier",
+        "full": "Refund all of it"
+      },
+      "loading": "Working out the refund…",
+      "refund": "Refund: {{amount}} (paid {{paid}})",
+      "refusal": "It cannot be cancelled this way; choose to refund all of it.",
+      "previewFailed": "The refund could not be read; if you confirm, the server works it out again.",
+      "done": "Booking cancelled."
+    }
   },
   "customers": {
     "description": "Everyone who ordered or signed up",
