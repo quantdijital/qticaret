@@ -141,6 +141,8 @@ medusaIntegrationTestRunner({
 
     it("keeps a dated product's variants off stock when the product is saved with them", async () => {
       await turnOn()
+      // Selling past stock is the pre-order feature's; on, so the save reaches the hook
+      await setFlag("stock.preorder", true)
       await saveCatalog({ kind: "service", booking_mode: "departure" })
       const [variant] = await variantsOf(getContainer(), productId)
 

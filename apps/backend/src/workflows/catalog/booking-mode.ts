@@ -37,9 +37,7 @@ export async function bookingModeOf(
   if (mode === "range") {
     throw new ValidationError("catalog.booking_range_unavailable", { field: "booking_mode" })
   }
-  if (kind !== "service") {
-    throw new ValidationError("catalog.booking_kind", { field: asked ? "booking_mode" : "kind" })
-  }
+  // A feature turned off answers first, whatever else the save says (K11)
   if (mode !== current) {
     const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     const [booking, nonPhysical] = await Promise.all([
@@ -49,6 +47,9 @@ export async function bookingModeOf(
     if (!booking || !nonPhysical) {
       throw new ValidationError("catalog.booking_disabled", { field: "booking_mode" })
     }
+  }
+  if (kind !== "service") {
+    throw new ValidationError("catalog.booking_kind", { field: asked ? "booking_mode" : "kind" })
   }
   return asked
 }
