@@ -34,7 +34,7 @@ function CheckResult({ result }: { result: VoucherCheck }) {
   return (
     <div role="status" className="flex flex-col gap-3 rounded-md border p-3">
       <p
-        className={`flex items-center gap-2 text-sm font-medium ${valid ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"}`}
+        className={`flex items-center gap-2 text-sm font-medium ${valid ? "text-success-text" : "text-destructive"}`}
       >
         {valid ? (
           <CircleCheck className="size-4 shrink-0" aria-hidden="true" />
