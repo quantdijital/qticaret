@@ -19,7 +19,7 @@ import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { useDeleteCategory, useUpdateCategory } from "@/features/categories/api/categories"
 import type { Category } from "@/features/categories/api/categories"
 import { ancestorHandles, descendantsOf, treeRows } from "@/features/categories/tree"
-import { useCategoryPathPrefix } from "@/features/categories/use-category-path"
+import { useCategoryPath } from "@/features/categories/use-category-path"
 import { errorText } from "@/lib/errors"
 import { isValidSlug, toSlug } from "@/lib/slug"
 
@@ -49,7 +49,7 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
   const update = useUpdateCategory()
   const remove = useDeleteCategory()
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const prefix = useCategoryPathPrefix()
+  const pathOf = useCategoryPath()
   const saved: Values = {
     name: category.name,
     handle: category.handle,
@@ -66,9 +66,10 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
   const blocked = descendantsOf(categories, category.id).add(category.id)
   const parents = treeRows(categories, new Set()).filter((row) => !blocked.has(row.category.id))
   const slug = handle.trim() || toSlug(name)
-  const path = [...ancestorHandles(categories, parent === ROOT ? null : parent), slug || "…"].join(
-    "/"
-  )
+  const path = pathOf([
+    ...ancestorHandles(categories, parent === ROOT ? null : parent),
+    slug || "…",
+  ])
 
   const submit = form.handleSubmit((values) => {
     const input = {
@@ -124,10 +125,7 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
             validate: (text) => text.trim() === "" || isValidSlug(text.trim()),
           })}
         />
-        <p className="font-mono text-xs text-muted-foreground">
-          {prefix}
-          {path}
-        </p>
+        <p className="font-mono text-xs text-muted-foreground">{path}</p>
       </Field>
       <Field label={t("categories.parent")} htmlFor="category-parent">
         <Controller
