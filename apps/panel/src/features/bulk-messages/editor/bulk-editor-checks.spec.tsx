@@ -116,7 +116,7 @@ describe("BulkEditor: the backend's counts and refusals (adr/0050 §4, §6)", ()
       })
     )
 
-    await user.type(screen.getByLabelText(/İletinin adı/), " 2")
+    await user.type(screen.getByLabelText(/Mesajın adı/), " 2")
     await user.click(screen.getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
@@ -134,7 +134,7 @@ describe("BulkEditor: the backend's counts and refusals (adr/0050 §4, §6)", ()
 
     expect(
       await screen.findByText(
-        "Bu kitlede iletiyi alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
+        "Bu kitlede mesajı alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
       )
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Şimdi gönder" })).toBeDisabled()

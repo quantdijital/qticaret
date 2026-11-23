@@ -33,7 +33,7 @@ function accessFor({ role, flag }: { role?: "owner" | "operations"; flag?: boole
 describe("the menu's items behind a flag and a capability", () => {
   const bulk = navItem("bulkMessages")
 
-  it("offers Toplu ileti to the owner while the shop has it on", () => {
+  it("offers Toplu mesaj to the owner while the shop has it on", () => {
     expect(accessFor({ role: "owner", flag: true })(bulk)).toBe(true)
   })
 
