@@ -109,6 +109,17 @@ describe("staff roles", () => {
     ["POST", "/admin/%6digrations"],
     ["POST", "/admin/layouts/settings.sidebar"],
     ["POST", "/admin/views/orders/configurations"],
+    // The storefront's looks, read too (the owner, 2026-11-23), in every spelling Express runs
+    ["GET", "/admin/storefront-designs"],
+    ["GET", "/admin/storefront%2ddesigns"],
+    ["GET", "/admin/Storefront-Designs/"],
+    ["POST", "/admin/storefront-designs/sfd_1/apply"],
+    ["POST", "/admin/storefront-designs/sfd%5f1/apply"],
+    ["DELETE", "/admin/STOREFRONT-DESIGNS/sfd_1"],
+    ["GET", "/admin/storefront-presets"],
+    ["GET", "/admin/storefront%2Dpresets/general/sade/preview"],
+    ["POST", "/admin/storefront-presets/general/sade/apply"],
+    ["POST", "/admin/Storefront-Presets/general/sade/apply"],
   ] as const)("keeps %s %s the owner's alone", (method, path) => {
     expect(decide("admin", method, path)).toEqual({ allowed: false, reason: "owner_only" })
   })
