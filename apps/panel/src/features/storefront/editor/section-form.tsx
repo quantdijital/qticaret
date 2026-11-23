@@ -18,6 +18,7 @@ import { ContactForm, FactsNote } from "./forms/page-text-fields"
 import { StripGalleryForm } from "./forms/strip-gallery-form"
 import { StatsForm } from "./forms/stats-form"
 import { StepsForm } from "./forms/steps-form"
+import { CollageForm } from "./forms/collage-form"
 import { DeparturesForm } from "./forms/departures-form"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { TrustBadgeList } from "./shared/trust-badge-list"
@@ -77,6 +78,8 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
       return <StatsForm section={section} {...props} />
     case "steps":
       return <StepsForm section={section} {...props} />
+    case "photo_collage":
+      return <CollageForm section={section} {...props} />
     case "departures":
       return <DeparturesForm section={section} {...props} />
     case "categories":

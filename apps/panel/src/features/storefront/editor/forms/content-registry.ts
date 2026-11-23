@@ -1,5 +1,6 @@
 import {
   FEATURED_PRODUCT_SETTINGS,
+  PHOTO_COLLAGE_SETTINGS,
   RICH_TEXT_IMAGE_SIDES,
   STEPS_SETTINGS,
   DEPARTURES_SETTINGS,
@@ -57,6 +58,8 @@ export type ContentField =
   | "dividers"
   | "steps_layout"
   | "numbers"
+  | "collage_layout"
+  | "collage_phone"
   | "departures_layout"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
@@ -136,6 +139,30 @@ function pointsFields(section: AnySection): RegistryField[] {
   })
 }
 
+/** The collage's two steps by setting and field name, open in "Diziliş" (`collage-groups.tsx`). */
+export const COLLAGE_FIELDS = [
+  ["layout", "collage_layout"],
+  ["phone", "collage_phone"],
+] as const satisfies readonly (readonly [keyof typeof PHOTO_COLLAGE_SETTINGS, ContentField])[]
+
+/** The photo collage's layout from 1024 px and on a phone (adr/0077 §10). */
+function collageFields(section: AnySection): RegistryField[] {
+  return COLLAGE_FIELDS.map(([name, field]) => {
+    const P = `${E}.photoCollage.${name}`
+    const steps: readonly string[] = PHOTO_COLLAGE_SETTINGS[name]
+    return {
+      ...entry(
+        section,
+        field,
+        `${P}.label`,
+        steps.map((step) => `${P}.${step}`),
+        "layout"
+      ),
+      term: `${P}.term`,
+    }
+  })
+}
+
 /** The featured product's strips' look (`featured-groups.tsx`): three steps, two switches. */
 function stripsFields(section: AnySection): RegistryField[] {
   const P = `${E}.featured`
@@ -164,8 +191,15 @@ export function contentFields(section: AnySection): RegistryField[] {
       // A grid's or a carousel's count; the other variants' are fixed
       return section.variant === "grid" || section.variant === "carousel" ? [limit(section)] : []
     case "posts":
-    case "reviews":
       return [limit(section)]
+    // A carousel's scroller beside the count (adr/0077 §10)
+    case "reviews":
+      return [
+        limit(section),
+        ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
+      ]
+    case "photo_collage":
+      return collageFields(section)
     case "related_products":
       // As a rail's (bilesen-denetimi (b) 7): a grid's columns, the card, a carousel's scroller
       return [

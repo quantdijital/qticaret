@@ -29,6 +29,7 @@ const SHAPES: Record<string, Shape> = {
   google_rating: "strip",
   stats: "strip",
   steps: "text",
+  photo_collage: "cards",
   departures: "strip",
 }
 

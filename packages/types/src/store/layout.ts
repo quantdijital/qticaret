@@ -25,7 +25,13 @@ import type { StoreDeparturesSection } from "./section-departures.js"
 import type { StoreNewsletterSection } from "./section-newsletter.js"
 import type { StoreRichTextSection } from "./section-rich-text.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
-import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
+import type { StorePhotoCollageSection } from "./section-collage.js"
+import type {
+  CardVariant,
+  RelatedProductsVariant,
+  ReviewsVariant,
+  TrustBadgesVariant,
+} from "./section-variants.js"
 import type { ScrollerSettings, SliderSettings } from "./section-scroller.js"
 import type {
   MenuLinkKind,
@@ -116,7 +122,8 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | StoreProductsSection
     | StoreFeaturedProductSection
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
-    | { id: string; type: "posts" | "reviews"; title: string | null; limit: number }
+    | { id: string; type: "posts"; title: string | null; limit: number }
+    | StoreReviewsSection
     | StoreGoogleRatingSection
     | StoreRichTextSection
     | {
@@ -137,8 +144,23 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | StoreStripGallerySection
     | StoreStatsSection
     | StoreStepsSection
+    | StorePhotoCollageSection
     | StoreDeparturesSection
   )
+
+/**
+ * The shop's reviews (adr/0077 §10): `variant` and `scroller` only on a
+ * `carousel` (a grid prints as it did before variants); the storefront
+ * reads an unknown variant as the grid (`variantOf`).
+ */
+export interface StoreReviewsSection {
+  id: string
+  type: "reviews"
+  title: string | null
+  limit: number
+  variant?: ReviewsVariant
+  scroller?: ScrollerSettings
+}
 
 /**
  * The scrolling strip (adr/0049 Ek 2026-11-14 §4.1): on the home, product

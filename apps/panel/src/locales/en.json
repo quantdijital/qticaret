@@ -8733,6 +8733,10 @@
         "departures": {
           "name": "Upcoming departures",
           "description": "Your dated products' nearest departures: date, tour name, places left and price; the storefront reads them live."
+        },
+        "photo_collage": {
+          "name": "Photo collage",
+          "description": "3–7 photos together: the first large or all even; optionally a title, an intro and a caption and link per photo."
         }
       },
       "variants": {
@@ -8793,6 +8797,10 @@
           "pane": "Text only",
           "with_image": "Text with image",
           "article": "Page text"
+        },
+        "reviews": {
+          "grid": "Grid",
+          "carousel": "Carousel"
         }
       },
       "look": {
@@ -10864,6 +10872,33 @@
           "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
           "list": "List",
           "cards": "Cards"
+        }
+      },
+      "photoCollage": {
+        "titleHint": "Left empty, the photos show without a heading.",
+        "intro": "Intro",
+        "items": "Photos",
+        "item": "Photo {{number}}",
+        "image": "Photo {{number}}",
+        "imageHint": "From the media library; its description (alt text) is required.",
+        "caption": "Photo {{number}} caption",
+        "link": "Photo {{number}} link",
+        "linkTerm": "link",
+        "add": "Add photo",
+        "hint": "At least {{min}}, at most {{max}} photos.",
+        "layout": {
+          "label": "Layout",
+          "term": "layout",
+          "hint": "How the photos stand on a wide screen.",
+          "asymmetric": "Asymmetric",
+          "even": "Even grid"
+        },
+        "phone": {
+          "label": "On a phone",
+          "term": "mobile",
+          "hint": "On a narrow screen the photos slide sideways or stack.",
+          "scroll": "Slide sideways",
+          "stack": "Stacked"
         }
       }
     },

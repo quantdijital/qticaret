@@ -6,7 +6,7 @@ import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
 import { listProblems } from "./shelf-problems"
 import { stripGalleryProblems } from "./strip-problems"
-import { statsProblems, stepsProblems } from "./points-problems"
+import { collageProblems, statsProblems, stepsProblems } from "./points-problems"
 import { marqueeLimitIds } from "./page-limits"
 import { footerBandProblem, footerRowsProblems } from "./footer-rows-problems"
 import { allSections } from "./sections"
@@ -114,6 +114,8 @@ function fieldsOf(section: AnySection): Found[] {
       return statsProblems(section)
     case "steps":
       return stepsProblems(section)
+    case "photo_collage":
+      return collageProblems(section)
     // Upcoming departures: their category or collection chosen, the intro's length (adr/0077 §10)
     case "departures": {
       const { source } = section

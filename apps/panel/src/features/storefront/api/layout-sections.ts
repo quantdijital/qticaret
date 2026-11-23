@@ -8,6 +8,7 @@ import type {
   MarqueeSettings,
   ProductSource,
   RelatedProductsVariant,
+  ReviewsVariant,
   ScrollerSettings,
   SectionDevice,
   SectionLook,
@@ -30,7 +31,11 @@ import type {
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
 import type { ProductsSection } from "@/features/storefront/api/layout-shelf"
 import type { StripGallerySection } from "@/features/storefront/api/layout-strips"
-import type { StatsSection, StepsSection } from "@/features/storefront/api/layout-points"
+import type {
+  PhotoCollageSection,
+  StatsSection,
+  StepsSection,
+} from "@/features/storefront/api/layout-points"
 import type { DeparturesSection } from "@/features/storefront/api/layout-departures"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
@@ -188,11 +193,25 @@ export interface BrandsSection extends BodySectionBase {
   brand_ids: string[]
 }
 
-export interface CountedSection extends BodySectionBase {
-  type: "posts" | "reviews"
+export interface PostsSection extends BodySectionBase {
+  type: "posts"
   title: string | null
   limit: number
 }
+
+/** The shop's newest reviews (adr/0077 §10): today's grid, or one card each in a sliding row. */
+export interface ReviewsSection extends BodySectionBase {
+  type: "reviews"
+  title: string | null
+  limit: number
+  /** The server fills `grid` on reading. */
+  variant: ReviewsVariant
+  /** `carousel`: the scroller kit's settings. */
+  scroller?: ScrollerSettings
+}
+
+/** The latest posts or reviews: a title and how many. */
+export type CountedSection = PostsSection | ReviewsSection
 
 /**
  * The home page's Google rating badge (adr/0058 Ek 2026-11-06): Google's
@@ -339,6 +358,7 @@ export type HomeSection =
   | StripGallerySection
   | StatsSection
   | StepsSection
+  | PhotoCollageSection
   | DeparturesSection
   | CategoriesSection
   | ProductsSection

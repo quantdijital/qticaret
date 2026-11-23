@@ -2,8 +2,8 @@ import { z } from "@medusajs/framework/zod"
 import { title } from "../layout-fields"
 import { bodyFields } from "./look"
 
-/** The newest posts or reviews, up to a count. */
-export const counted = (type: "posts" | "reviews", max: number, fallback: number) =>
+/** The newest posts, up to a count (the reviews have their own variants, `reviews.ts`). */
+export const counted = (type: "posts", max: number, fallback: number) =>
   z
     .object({
       ...bodyFields,
