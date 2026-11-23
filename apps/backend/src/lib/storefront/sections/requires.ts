@@ -19,8 +19,10 @@ export const CAPABILITY_GROUPS = {
 
 export type CapabilityFlag = (typeof CAPABILITY_GROUPS)[keyof typeof CAPABILITY_GROUPS]["flag"]
 
-/** Section type → the flag it needs; empty until `departures` (adr/0077 §10). */
-export const SECTION_REQUIRES: Readonly<Record<string, CapabilityFlag>> = {}
+/** Section type → the flag it needs (the first: `departures`, adr/0077 §10). */
+export const SECTION_REQUIRES: Readonly<Record<string, CapabilityFlag>> = {
+  departures: "catalog.booking",
+}
 
 /** Section types → their flags, as a design's checks read them (tests pass their own). */
 export type SectionRequires = Readonly<Record<string, string>>

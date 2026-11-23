@@ -1,6 +1,7 @@
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { StatsSection } from "../../lib/storefront/sections/stats"
 import type { StepsSection } from "../../lib/storefront/sections/steps"
+import type { DeparturesSection } from "../../lib/storefront/sections/departures"
 import type { StoreLayoutLink } from "./layout-hydrate"
 
 /** What the figures strip and the steps are printed with: the hydrate's own helpers. */
@@ -45,5 +46,23 @@ export function hydratePoints(section: StatsSection | StepsSection, at: PointsCo
     link: at.link(section.link),
     layout: section.layout,
     numbers: section.numbers,
+  }
+}
+
+/**
+ * Upcoming departures as the storefront asks for them (adr/0077 §10): the
+ * shop's words filled, the source, count and layout as saved; the rows
+ * themselves are read live (`GET /store/departures`), never kept here.
+ */
+export function hydrateDepartures(section: DeparturesSection, at: PointsContext) {
+  const { id, type } = section
+  return {
+    id,
+    type,
+    title: section.title,
+    intro: at.fill(section.intro),
+    source: section.source,
+    limit: section.limit,
+    layout: section.layout,
   }
 }
