@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 import { ListPlus, Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -11,7 +12,7 @@ import type { AddonTemplate } from "@/features/products/api/addon-templates"
 import { ADDONS_FLAG } from "@/features/products/api/addons"
 import { featuresQuery, useFeatureState } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
-import { AddonTemplateDialog } from "./addon-template-dialog"
+import { AddonTemplateCreateDialog } from "./addon-template-create-dialog"
 
 const T = "products.addonTemplates"
 
@@ -63,7 +64,7 @@ function useColumns(onOpen: (template: AddonTemplate) => void): Column<AddonTemp
 /**
  * Settings > Product attributes, below the attribute templates (adr/0052
  * Ek 2026-11-23): add-on templates, one row each; a row opens its
- * dialog. Shown while the shop's add-ons are on, or while any exist.
+ * page. Shown while the shop's add-ons are on, or while any exist.
  */
 export function AddonTemplatesSection() {
   const { t } = useTranslation()
@@ -71,8 +72,16 @@ export function AddonTemplatesSection() {
   const features = useQuery(featuresQuery())
   const state = useFeatureState(ADDONS_FLAG)
   const flagOn = features.isError ? false : state === true
-  const [open, setOpen] = useState<AddonTemplate | "new" | null>(null)
-  const columns = useColumns(setOpen)
+  const navigate = useNavigate()
+  const [creating, setCreating] = useState(false)
+  // A row opens the template's own page: one window, never a dialog on a dialog
+  const openTemplate = (template: AddonTemplate) => {
+    void navigate({
+      to: "/settings/attributes/addon-templates/$id",
+      params: { id: template.id },
+    })
+  }
+  const columns = useColumns(openTemplate)
   if (!flagOn && (query.data ?? []).length === 0) {
     return null
   }
@@ -80,7 +89,7 @@ export function AddonTemplatesSection() {
     <Button
       variant="outline"
       onClick={() => {
-        setOpen("new")
+        setCreating(true)
       }}
     >
       <Plus />
@@ -111,7 +120,7 @@ export function AddonTemplatesSection() {
           rows={query.data}
           rowKey={(template) => template.id}
           loading={query.isPending}
-          onRowClick={setOpen}
+          onRowClick={openTemplate}
           empty={
             <div className="flex flex-col items-center gap-3 text-center">
               <ListPlus className="size-8 text-muted-foreground" aria-hidden="true" />
@@ -121,12 +130,10 @@ export function AddonTemplatesSection() {
           }
         />
       )}
-      {open ? (
-        <AddonTemplateDialog
-          template={open === "new" ? null : open}
-          flagOn={flagOn}
+      {creating ? (
+        <AddonTemplateCreateDialog
           onClose={() => {
-            setOpen(null)
+            setCreating(false)
           }}
         />
       ) : null}

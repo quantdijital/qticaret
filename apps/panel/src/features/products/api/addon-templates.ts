@@ -18,6 +18,7 @@ export interface AddonTemplate {
   product_count: number
   /** Attribute templates that carry it. */
   attribute_templates: { id: string; name: string }[]
+  updated_at?: string
 }
 
 /** How a product reaches a template: linked to it, or through its attribute template. */
@@ -46,6 +47,13 @@ export const addonTemplatesQuery = () =>
 
 const templateUrl = (id: string) => `/admin/addon-templates/${encodeURIComponent(id)}`
 
+export const addonTemplateQuery = (id: string) =>
+  queryOptions({
+    queryKey: [...TEMPLATES_KEY, id],
+    queryFn: async () =>
+      (await sdk.client.fetch<{ addon_template: AddonTemplate }>(templateUrl(id))).addon_template,
+  })
+
 // A template's change reaches every product that shows it
 async function refresh(client: ReturnType<typeof useQueryClient>) {
   await client.invalidateQueries({ queryKey: TEMPLATES_KEY })
@@ -62,8 +70,8 @@ export function useSaveAddonTemplate() {
       ...body
     }: {
       id: string | null
-      name: string
-      addons: AddonInput[]
+      name?: string
+      addons?: AddonInput[]
     }) =>
       (
         await sdk.client.fetch<{ addon_template: AddonTemplate }>(

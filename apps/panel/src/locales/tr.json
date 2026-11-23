@@ -4216,12 +4216,8 @@
       "addons": "Ek seçenekler",
       "addonsHint": "Şablonun ek seçenekleri ürünün en çok {{max}} ek seçeneğine dahildir.",
       "noAddons": "Şablonda henüz ek seçenek yok. En az bir ek seçenek ekleyin.",
-      "liveNote_one": "Bu şablon {{count}} ürüne bağlı (özellik şablonları: {{templates}}). Kaydedince değişiklik hepsinde hemen görünür; verilmiş siparişler değişmez.",
-      "liveNote_other": "Bu şablon {{count}} ürüne bağlı (özellik şablonları: {{templates}}). Kaydedince değişiklik hepsinde hemen görünür; verilmiş siparişler değişmez.",
-      "liveNoteNew": "Şablonu ürün sayfasındaki Ek seçenekler kartından, toplu düzenlemeden ya da bir özellik şablonundan ürünlere bağlayabilirsiniz.",
       "addonNote": "Değişiklik şablon kaydedilince geçerli olur.",
       "delete": "Şablonu sil",
-      "deleteHint": "Silinen şablonun ek seçenekleri bağlı ürünlerden kalkar. Verilmiş siparişler değişmez.",
       "deleteTitle": "\"{{name}}\" silinsin mi?",
       "deleteDescription_one": "Şablon {{count}} üründen ve onu taşıyan özellik şablonlarından kalkar. Bu ek seçenekleri sepetine eklemiş müşteriler ödemeden önce seçimlerini değiştirmek zorunda kalır.",
       "deleteDescription_other": "Şablon {{count}} üründen ve onu taşıyan özellik şablonlarından kalkar. Bu ek seçenekleri sepetine eklemiş müşteriler ödemeden önce seçimlerini değiştirmek zorunda kalır.",
@@ -4229,8 +4225,8 @@
       "saved": "Şablon kaydedildi.",
       "errors": {
         "name": "Şablon adı 1-60 karakter olmalı.",
-        "empty": "Şablonda en az bir ek seçenek olmalı.",
-        "tooMany": "Bu değişiklikle bazı ürünlerde 5 ek seçenek sınırı aşılır; önce o ürünlerden ek seçenek kaldırın."
+        "tooMany": "Bu değişiklikle bazı ürünlerde 5 ek seçenek sınırı aşılır; önce o ürünlerden ek seçenek kaldırın.",
+        "idUnknown": "Şablonda olmayan bir ek seçenek kimliği gönderildi. Sayfayı yenileyip yeniden deneyin."
       },
       "add": "Şablon ekle",
       "pickTitle": "Ek seçenek şablonu ekle",
@@ -4245,7 +4241,17 @@
       "editInSettings": "Şablonu düzenle",
       "unlink": "Bağlantıyı kaldır",
       "hidden_one": "{{count}} ek seçenek 5 sınırını aştığı için vitrinde görünmüyor; bir şablonu ya da ürünün ek seçeneğini kaldırın.",
-      "hidden_other": "{{count}} ek seçenek 5 sınırını aştığı için vitrinde görünmüyor; bir şablonu ya da ürünün ek seçeneğini kaldırın."
+      "hidden_other": "{{count}} ek seçenek 5 sınırını aştığı için vitrinde görünmüyor; bir şablonu ya da ürünün ek seçeneğini kaldırın.",
+      "usage": "Kullanım",
+      "usageHint": "Şablonu değiştirince buradaki bütün ürünler hemen değişir; verilmiş siparişler değişmez.",
+      "linkedProducts": "Doğrudan bağlı ürünler",
+      "carriedBy": "Taşıyan özellik şablonları",
+      "carriedByNone": "Yok",
+      "createHint": "Şablonu adıyla oluşturun; ek seçeneklerini açılan sayfasında ekleyin.",
+      "carryHidden_one": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez. Kaydedebilirsiniz; bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir.",
+      "carryHidden_other": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez. Kaydedebilirsiniz; bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir.",
+      "carryRequiredHidden_one": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez, aralarında zorunlu bir ek seçenek de var. Kaydedebilirsiniz; önce bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir.",
+      "carryRequiredHidden_other": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez, aralarında zorunlu bir ek seçenek de var. Kaydedebilirsiniz; önce bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir."
     }
   },
   "orders": {
