@@ -9,6 +9,7 @@ import { useReportRange } from "@/features/reports/use-report"
 import { jobResultUrl } from "@/features/settings/api/activity"
 import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
+import { useJobsMessage } from "@/features/settings/use-jobs-message"
 
 export type ReportTable =
   | "summary"
@@ -47,6 +48,7 @@ export function ReportExportButton({
   size?: "sm" | "default"
 }) {
   const { t } = useTranslation()
+  const jobs = useJobsMessage()
   const range = useReportRange()
   const [running, setRunning] = useState(false)
   const start = async () => {
@@ -66,7 +68,7 @@ export function ReportExportButton({
       if (job.status === "succeeded") {
         window.location.assign(new URL(await jobResultUrl(job.id), window.location.origin).href)
       } else if (job.status === "queued" || job.status === "running") {
-        toast.info(t(`${E}.later`))
+        toast.info(t(jobs(`${E}.later`)))
       } else {
         toast.error(job.error_message ?? t(`${E}.failed`))
       }

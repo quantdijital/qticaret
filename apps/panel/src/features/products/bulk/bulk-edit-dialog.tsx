@@ -21,6 +21,7 @@ import type { BulkForm } from "@/features/products/bulk/bulk-form"
 import { BulkJobResult } from "@/features/products/bulk/bulk-job-result"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { useJobsMessage } from "@/features/settings/use-jobs-message"
 
 interface BulkEditDialogProps {
   /** The change to make; null while the dialog is closed. */
@@ -38,6 +39,7 @@ interface BulkEditDialogProps {
  */
 export function BulkEditDialog({ action, productIds, onClose, onDone }: BulkEditDialogProps) {
   const { t } = useTranslation()
+  const jobs = useJobsMessage()
   const client = useQueryClient()
   const [form, setForm] = useState<BulkForm>(EMPTY_BULK_FORM)
   const [tried, setTried] = useState(false)
@@ -50,8 +52,8 @@ export function BulkEditDialog({ action, productIds, onClose, onDone }: BulkEdit
 
   const close = () => {
     if (job && !finished) {
-      // The job goes on on the server; Settings > Jobs shows where it stands
-      toast.info(t("products.bulk.background"))
+      // The job goes on on the server; Settings > Audit log > Jobs shows where it stands
+      toast.info(t(jobs("products.bulk.background")))
     }
     if (job) {
       void client.invalidateQueries({ queryKey: ["products"] })

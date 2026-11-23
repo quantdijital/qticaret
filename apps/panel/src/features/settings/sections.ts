@@ -96,9 +96,9 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
       { key: "features", to: "/settings/features", icon: ToggleRight, needs: "settings" },
       // F14: moving the shop in from its old platform, the owner's alone
       { key: "migration", to: "/settings/migration", icon: Import, needs: "migration" },
-      // The audit log and the long jobs, in tabs (the owner, 2026-11-23): everyone has their
-      // jobs there, the log is a tab only for those who may read it
-      { key: "audit", to: "/settings/audit", icon: FileClock },
+      // The audit log and the long jobs, in tabs (the owner, 2026-11-23); a role without the
+      // log sees neither (the owner, 2026-11-23: "işler görünmeyen rollerde gösterilmesine gerek yok")
+      { key: "audit", to: "/settings/audit", icon: FileClock, needs: "audit" },
     ],
   },
 ]

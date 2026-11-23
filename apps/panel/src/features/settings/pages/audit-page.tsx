@@ -10,7 +10,7 @@ import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
-import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { EmptyState, ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { useRecordWalk } from "@qticaret/admin-ui/hooks/use-record-walk"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
@@ -28,7 +28,7 @@ import { AuditDetailDialog } from "@/features/settings/components/audit-detail-d
 import { AuditFilters } from "@/features/settings/components/audit-filters"
 import { JobsList } from "@/features/settings/components/jobs-list"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
-import { useCan } from "@/features/auth/api/staff"
+import { staffQuery, useCan } from "@/features/auth/api/staff"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
@@ -151,19 +151,26 @@ function ExportButton({ search }: { search: AuditSearch }) {
 }
 
 /**
- * Settings > Audit log, in tabs (the owner, 2026-11-23): the log for those
- * who may read it (adr/0040), first; the long jobs (adr/0014), everyone's,
- * beside it. A role without the log has the jobs alone, as İşler was.
+ * Settings > Audit log, in tabs (the owner, 2026-11-23): the log (adr/0040)
+ * first, the long jobs (adr/0014) beside it, both for those who may read
+ * the log. Any other role sees neither (the owner, 2026-11-23): one
+ * sentence says so, as on the other screens a role may not open.
  */
 export function AuditPage() {
   const { t } = useTranslation()
   const search = route.useSearch()
+  // Until the role is known nothing is said about it
+  const staff = useQuery(staffQuery())
   const audit = useCan("audit")
   if (!audit) {
     return (
       <div className="flex flex-col gap-6">
-        <PageHeader title={t("settings.jobs.title")} description={t("settings.jobs.subtitle")} />
-        <JobsList />
+        <PageHeader title={t("settings.audit.title")} />
+        {staff.isPending ? (
+          <LoadingRows rows={6} />
+        ) : (
+          <EmptyState text={t("settings.audit.noAccess")} />
+        )}
       </div>
     )
   }

@@ -16,6 +16,7 @@ import type { SheetJob } from "@/features/products/api/sheets"
 import { jobResultUrl } from "@/features/settings/api/activity"
 import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
+import { useJobsMessage } from "@/features/settings/use-jobs-message"
 
 const A = "settings.accounting.package"
 // The months offered: this one and the twelve before it
@@ -39,6 +40,7 @@ function recentMonths(now: Date = new Date()) {
  */
 export function AccountingPackageCard({ className }: { className?: string }) {
   const { t } = useTranslation()
+  const jobs = useJobsMessage()
   const months = recentMonths()
   const [month, setMonth] = useState(months[1]?.value ?? months[0]?.value ?? "")
   const [running, setRunning] = useState(false)
@@ -53,7 +55,7 @@ export function AccountingPackageCard({ className }: { className?: string }) {
       if (job.status === "succeeded") {
         window.location.assign(new URL(await jobResultUrl(job.id), window.location.origin).href)
       } else if (job.status === "queued" || job.status === "running") {
-        toast.info(t(`${A}.later`))
+        toast.info(t(jobs(`${A}.later`)))
       } else {
         toast.error(job.error_message ?? t(`${A}.failed`))
       }

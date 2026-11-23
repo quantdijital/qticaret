@@ -17,7 +17,10 @@ vi.mock("@/lib/sdk", () => ({
   sdk: { client: { fetch: fetchMock }, admin: { user: { list: listUsers } } },
 }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => staff.audit }))
+vi.mock("@/features/auth/api/staff", () => ({
+  useCan: () => staff.audit,
+  staffQuery: () => ({ queryKey: ["staff"], queryFn: () => Promise.resolve({ can: {} }) }),
+}))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => (
     <a href="/settings/audit?part=jobs">{children}</a>
@@ -158,14 +161,20 @@ describe("AuditPage", () => {
     expect(screen.queryByRole("button", { name: /dışa aktar/i })).toBeNull()
   })
 
-  it("gives a role without the log its jobs alone, as İşler was", async () => {
+  it("tells a role without the log it may not, the jobs too (the owner, 2026-11-23)", async () => {
     staff.audit = false
-    fetchMock.mockResolvedValue({ async_jobs: [], count: 0 })
+    search.current = { part: "jobs" }
     renderPage()
 
-    expect(screen.getByRole("heading", { name: "İşler" })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Denetim kaydı" })).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        "Denetim kaydını ve işleri yalnız mağaza sahibi ve yöneticiler görebilir."
+      )
+    ).toBeInTheDocument()
     expect(screen.queryByRole("tab")).toBeNull()
-    expect(await screen.findByText(/Henüz iş yok/)).toBeInTheDocument()
+    expect(screen.queryByText(/Henüz iş yok/)).toBeNull()
     expect(fetchMock).not.toHaveBeenCalledWith("/admin/audit-log", expect.anything())
+    expect(fetchMock).not.toHaveBeenCalledWith("/admin/async-jobs", expect.anything())
   })
 })
