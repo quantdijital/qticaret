@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { clearUpcomingCaches } from "../../src/workflows/booking/upcoming"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -97,6 +98,8 @@ medusaIntegrationTestRunner({
     }
 
     beforeEach(async () => {
+      // The departures and the category tree are kept across sources and counts
+      clearUpcomingCaches()
       const container = getContainer()
       shop = await stockShop(container)
       store = await createStorefront(container)
@@ -198,11 +201,12 @@ medusaIntegrationTestRunner({
 
     it("keeps an answer 30 seconds: a departure closed meanwhile shows until then", async () => {
       const { slotIds } = await tour([{ at: Date.now() + 6 * DAY }])
-      // A count no other test asks: its own cache entry
       const first = await upcoming("limit=7")
       const closed = await staff(`/admin/booking-slots/${slotIds[0] ?? ""}`, { status: "closed" })
       expect(closed.status).toBe(200)
-      const again = await upcoming("limit=7")
+      // Another count is cut from the same kept answer
+      const again = await upcoming("limit=8")
+      clearUpcomingCaches()
       const fresh = await upcoming("limit=8")
 
       expect(first.data.departures).toHaveLength(1)

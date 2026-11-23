@@ -2,12 +2,18 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createTtlCache } from "../../lib/cache"
 import type { Kurus } from "../../lib/money"
-import type { DepartureQuery, SlotAvailability } from "../../modules/booking/service"
+import { DEPARTURES_LIMITS } from "../../lib/storefront/sections/departures"
+import type {
+  DepartureMatch,
+  DepartureQuery,
+  SlotAvailability,
+} from "../../modules/booking/service"
 import { SEARCH_INDEX_MODULE } from "../../modules/search-index"
 import type SearchIndexModuleService from "../../modules/search-index/service"
 import { IDS_ONLY_LIMIT } from "../../modules/search-index/types"
 import type { ListingPlan } from "../../modules/search-index/types"
 import { categoryRows, subtreeIn } from "../content/landing-facet"
+import type { CategoryRow } from "../content/landing-facet"
 import { categorySubtreeByHandle, priceKey } from "../seo/listing-plan"
 import { basePrices, lira, payingPricesAt, payingVariants } from "./card-facts"
 import type { DatedCardProduct } from "./card-facts"
@@ -21,7 +27,10 @@ import { bookingService } from "./cart/target"
  * shown subtree or a collection when asked), by date, at most
  * `PER_PRODUCT` each. Each priced on the server by the card's rule (a
  * guest's base price plus the departure's difference, paying places only,
- * lira). Places left are told only when few. Kept 30 seconds in this process.
+ * lira). Places left are told only when few. Kept 30 seconds in this process:
+ * the matches once for every source and channel, the answer per source and
+ * channels at the largest count (a smaller count is its first rows), the
+ * category tree a minute.
  */
 
 /** A product's departures in one list at most (`DEPARTURES_LIMITS.per_product`). */
@@ -64,9 +73,28 @@ export interface UpcomingProduct extends DatedCardProduct {
   handle: string
   title: string
   thumbnail: string | null
+  sales_channels?: ({ id: string } | null)[] | null
 }
 
+/** The answer is read for the largest count and cut to the one asked. */
+const MOST = DEPARTURES_LIMITS.limit.max
+
 const upcomingCache = createTtlCache<UpcomingDepartures>({ ttlMs: 30_000, maxEntries: 500 })
+// The bookable departures do not depend on who asks: one read for every source and channel
+const matchesCache = createTtlCache<DepartureMatch[]>({ ttlMs: 30_000, maxEntries: 4 })
+// Every category id asked is looked up here, a made-up one too: no table read for each
+const categoriesCache = createTtlCache<CategoryRow[]>({ ttlMs: 60_000, maxEntries: 1 })
+
+/** Forgets what is kept (tests that change departures, categories or channels). */
+export function clearUpcomingCaches(): void {
+  upcomingCache.clear()
+  matchesCache.clear()
+  categoriesCache.clear()
+}
+
+/** Whether the product is in one of the shopper's sales channels. */
+export const inChannels = (product: UpcomingProduct, channels: ReadonlySet<string>): boolean =>
+  (product.sales_channels ?? []).some((each) => each !== null && channels.has(each.id))
 
 const empty = (): UpcomingDepartures => ({ currency: CURRENCY, departures: [] })
 
@@ -119,7 +147,7 @@ export function upcomingRows(
 
 /** A shown category's id and its shown subtree; empty when that category is not shown. */
 async function categorySubtreeById(container: MedusaContainer, id: string): Promise<string[]> {
-  const rows = await categoryRows(container)
+  const rows = await categoriesCache("rows", () => categoryRows(container))
   const root = rows.find((row) => row.id === id)
   if (!root || !root.is_active || root.is_internal) {
     return []
@@ -162,18 +190,20 @@ async function scopeOf(
 
 async function readUpcoming(
   container: MedusaContainer,
-  input: UpcomingInput,
+  channels: readonly string[],
   scope: ListingPlan["scope"],
   now: Date
 ): Promise<UpcomingDepartures> {
   const service = bookingService(container)
   const query: DepartureQuery = { dates: horizon(now), pax: 1, now }
-  const matches = await service.departureMatches(query)
+  const matches = await matchesCache(JSON.stringify(query.dates), () =>
+    service.departureMatches(query)
+  )
   if (matches.length === 0) {
     return empty()
   }
   const { ids } = await container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE).listing({
-    channels: [...input.sales_channel_ids],
+    channels: [...channels],
     scope: { ...scope, product_ids: matches.map((match) => match.product_id) },
     text: null,
     filters: { brands: null, options: [], in_stock: false },
@@ -183,10 +213,10 @@ async function readUpcoming(
     idsOnly: true,
   })
   const shown = new Set(ids)
-  // The nearest `limit` products by their first departure hold every row the list can show
+  // The nearest `MOST` products by their first departure hold every row the list can show
   const nearest = matches
     .filter((match) => shown.has(match.product_id))
-    .slice(0, input.limit)
+    .slice(0, MOST)
     .map((match) => match.product_id)
   if (nearest.length === 0) {
     return empty()
@@ -204,13 +234,20 @@ async function readUpcoming(
       "bookable.cutoff_hours",
       "bookable.pax_by_variant",
       "bookable.timezone",
+      "sales_channels.id",
     ],
-    // The index lists published products only; read again here as a second guard
+    // The index lists published products in the shopper's channels only; both read
+    // again here as a second guard (an index a moment behind the catalogue)
     filters: { id: nearest, status: "published" },
   })
+  const allowed = new Set(channels)
   const byBookable = new Map<string, UpcomingProduct>()
   for (const product of data as UpcomingProduct[]) {
-    if (product.bookable && product.product_extension?.booking_mode === "departure") {
+    if (
+      product.bookable &&
+      product.product_extension?.booking_mode === "departure" &&
+      inChannels(product, allowed)
+    ) {
       byBookable.set(product.bookable.id, product)
     }
   }
@@ -222,14 +259,17 @@ async function readUpcoming(
     basePrices(container, products.flatMap(payingVariants), { currency_code: CURRENCY }),
     service.windowSlots([...byBookable.keys()], query, PER_PRODUCT),
   ])
-  return { currency: CURRENCY, departures: upcomingRows(slots, byBookable, bases, input.limit) }
+  return { currency: CURRENCY, departures: upcomingRows(slots, byBookable, bases, MOST) }
 }
 
 /**
  * The upcoming departures for the shopper's channels, kept 30 seconds per
- * source (a category's subtree ids, not the handle asked), count and
- * channels. A category not shown or a collection that does not exist
- * answers empty at once and keeps nothing, so made-up ids fill no cache.
+ * source (a category's subtree ids, not the handle asked) and channels,
+ * read for the largest count and cut to the count asked: the first `limit`
+ * rows of the nearest `MOST` products are those of the nearest `limit`. A
+ * category not shown or a collection that does not exist answers empty at
+ * once and keeps no answer, so made-up ids fill no answer cache; a category
+ * id is looked up in the kept tree.
  */
 export async function upcomingDepartures(
   container: MedusaContainer,
@@ -240,11 +280,8 @@ export async function upcomingDepartures(
   if (scope === null) {
     return empty()
   }
-  const key = JSON.stringify([
-    scope.category_ids ?? null,
-    scope.collection_id ?? null,
-    input.limit,
-    [...input.sales_channel_ids].sort(),
-  ])
-  return upcomingCache(key, () => readUpcoming(container, input, scope, now))
+  const channels = [...input.sales_channel_ids].sort()
+  const key = JSON.stringify([scope.category_ids ?? null, scope.collection_id ?? null, channels])
+  const all = await upcomingCache(key, () => readUpcoming(container, channels, scope, now))
+  return { currency: all.currency, departures: all.departures.slice(0, input.limit) }
 }
