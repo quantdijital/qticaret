@@ -693,80 +693,143 @@
       "list": "Features",
       "empty": "No features to switch yet. Features such as cash on delivery will show up here as they arrive.",
       "locked": "Comes with your plan; cannot be changed here.",
+      "search": "Search features",
+      "noMatch": "No feature matches your search.",
+      "lockedBadge": "In your plan",
+      "requires": "Works only while “{{name}}” is on too.",
+      "groups": {
+        "catalog": {
+          "title": "Catalog and products",
+          "description": "Product kinds, dated products and parts of the product page."
+        },
+        "customers": {
+          "title": "Customers and marketing",
+          "description": "Wholesalers and bulk messages to consented customers."
+        },
+        "seo": {
+          "title": "Search engines (SEO)",
+          "description": "Publishing checks and notices to search engines."
+        },
+        "sales": {
+          "title": "Sales and payment",
+          "description": "Ways to pay, gift cards and selling past stock."
+        },
+        "restricted": {
+          "title": "Age-restricted products",
+          "description": "Marking adults-only products and asking for age at checkout."
+        },
+        "ai": {
+          "title": "AI",
+          "description": "Your own service key and tasks on what customers write."
+        },
+        "other": {
+          "title": "Other",
+          "description": "Features not yet placed in a group."
+        }
+      },
       "flags": {
         "ai": {
           "reviews": {
             "label": "AI on reviews and questions",
+            "summary": "Sums up reviews and drafts replies to reviews and questions.",
             "description": "Product reviews are summed up; replies to reviews and questions are drafted. What customers wrote goes to the connected service without the author's name and contact details."
+          },
+          "own_keys": {
+            "label": "Your own AI key",
+            "summary": "AI services are connected with the shop's own key.",
+            "description": "AI services are connected with the key of the shop's own account; the service bills the shop directly. Connections are under Settings > AI."
+          },
+          "storefront_search": {
+            "label": "Search in your own words",
+            "summary": "Shoppers can search the storefront in their own words.",
+            "description": "Shoppers type what they look for as a sentence (e.g. \"camping knife under 500 lira\"); the shop's own AI key reads it into the search's filters. What the shopper typed goes to the connected service."
           }
         },
         "catalog": {
           "non_physical": {
             "label": "Digital and service products",
+            "summary": "Products with no shipping: e-books, gift codes, courses, services.",
             "description": "Sell products that need no shipping (e-books, gift codes, courses, services); they ask for no shipping or measurements."
           },
           "restricted": {
             "label": "Restricted products",
+            "summary": "Products and categories can be marked adults only.",
             "description": "Products and categories can be marked adults only (weapons and blades, alcohol, tobacco, adult content). Marked products are told to search engines as adult-oriented and stay out of the product feeds."
           },
           "addons": {
             "label": "Product add-ons",
+            "summary": "Products can offer paid or free add-ons.",
             "description": "Products may offer paid add-ons: a typed text or a choice, priced on the server and added to the line's price. They are set on the product page's Add-ons card."
           },
           "booking": {
             "label": "Dated products",
+            "summary": "Services with departure dates and places: tours, events, courses.",
             "description": "Sell services with departure dates (tours, events, courses, workshops): each departure has its own places, held in the cart for a while. Digital and service products must be on too."
+          },
+          "product_videos": {
+            "label": "Product videos",
+            "summary": "Uploaded videos and YouTube links on product pages.",
+            "description": "Product pages show the videos the shop uploads and YouTube links. Uploads count toward the plan's storage limit."
           }
         },
         "marketing": {
           "campaigns": {
             "label": "Bulk e-mail and SMS",
+            "summary": "Bulk e-mail and SMS to consented customers from the panel.",
             "description": "Bulk e-mail and SMS campaigns to consented customers from the panel."
           }
         },
         "seo": {
           "indexnow": {
             "label": "Announce changed pages with IndexNow",
+            "summary": "Changed pages are announced to Bing and Yandex at once.",
             "description": "When a product, category or brand page is added, changed or removed, Bing, Yandex and other IndexNow search engines are told. Needs the shop's main domain; Google does not take part."
           },
           "publish_gate": {
             "label": "SEO publish gate",
+            "summary": "A product with a critical gap or a low score cannot go live.",
             "description": "A product with a critical gap (no price or image) or an SEO score under 50 cannot go live. When off, the advisor only suggests."
           }
         },
         "stock": {
           "preorder": {
             "label": "Selling past stock (preorder)",
+            "summary": "A variant out of stock keeps selling as a preorder.",
             "description": "A variant whose stock runs out can still be sold, as a preorder or shipped from a supplier. Turned on per variant on the product page; search engines are told it is on backorder."
           }
         },
         "promotions": {
           "gift_cards": {
             "label": "Gift cards and store credit",
+            "summary": "Give gift cards; put refunds and goodwill amounts on account.",
             "description": "Gift cards can be made and given to customers, who use the code in their basket and keep what is left for later. Store credit takes refunds or goodwill amounts onto an account."
           }
         },
         "payments": {
           "cash_on_delivery": {
             "label": "Cash on delivery",
+            "summary": "Shoppers pay the courier on delivery.",
             "description": "Shoppers can pay the courier on delivery. The fee, the limit and the couriers that collect are under Settings > Payment > Cash on delivery."
           }
         },
         "compliance": {
           "age_verification": {
             "label": "Age verification",
+            "summary": "A cart with an adults-only product asks for age before paying.",
             "description": "When a cart holds an adults-only product, the shopper declares their age with their date of birth before paying; under the limit, no payment is taken. The date of birth is not kept. The limit is in Settings > Legal texts."
           }
         },
         "orders": {
           "payment_links": {
             "label": "Orders by payment link",
+            "summary": "The team prepares the order; the customer pays by link.",
             "description": "The team prepares an order in the panel; the customer pays through a payment link on the storefront."
           }
         },
         "customers": {
           "wholesale": {
             "label": "Wholesale customers",
+            "summary": "Wholesalers see their own prices before VAT and order.",
             "description": "Wholesalers are opened from the panel; signed in, they see products at their level’s or their own prices, without KDV, and order. Public prices do not change. Turned off, wholesalers see retail prices; their records and prices are kept."
           }
         }

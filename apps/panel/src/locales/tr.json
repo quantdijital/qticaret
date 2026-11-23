@@ -693,80 +693,143 @@
       "list": "Özellikler",
       "empty": "Şu an açıp kapatılabilecek bir özellik yok. Kapıda ödeme gibi özellikler eklendikçe burada görünecek.",
       "locked": "Paketinizle birlikte gelir; buradan değiştirilemez.",
+      "search": "Özellik ara",
+      "noMatch": "Aramanızla eşleşen özellik yok.",
+      "lockedBadge": "Paketinizde",
+      "requires": "Çalışması için “{{name}}” özelliğinin de açık olması gerekir.",
+      "groups": {
+        "catalog": {
+          "title": "Katalog ve ürün",
+          "description": "Ürün türleri, tarihli ürünler ve ürün sayfasının parçaları."
+        },
+        "customers": {
+          "title": "Müşteriler ve pazarlama",
+          "description": "Toptancılar ve izinli müşterilere toplu mesaj."
+        },
+        "seo": {
+          "title": "Arama motorları (SEO)",
+          "description": "Yayın denetimi ve arama motorlarına bildirim."
+        },
+        "sales": {
+          "title": "Satış ve ödeme",
+          "description": "Ödeme yolları, hediye kartı ve stoksuz satış."
+        },
+        "restricted": {
+          "title": "Yaş sınırlı ürünler",
+          "description": "Yaş sınırlı ürünlerin işaretlenmesi ve ödemede yaş beyanı."
+        },
+        "ai": {
+          "title": "Yapay zekâ",
+          "description": "Kendi servis anahtarınız ve müşteri metinleriyle çalışan görevler."
+        },
+        "other": {
+          "title": "Diğer",
+          "description": "Henüz bir gruba yerleşmemiş özellikler."
+        }
+      },
       "flags": {
         "ai": {
           "reviews": {
             "label": "Yorum ve sorularda yapay zekâ",
+            "summary": "Yorumları özetler, yorum ve sorulara yanıt taslağı hazırlar.",
             "description": "Ürün yorumları özetlenir; yorumlara ve sorulara yanıt taslağı hazırlanır. Müşterilerin yazdığı metin, yazar adı ve iletişim bilgisi ayıklanarak bağlı servise gider."
+          },
+          "own_keys": {
+            "label": "Kendi yapay zekâ anahtarınız",
+            "summary": "Yapay zekâ servislerine mağazanın kendi anahtarıyla bağlanılır.",
+            "description": "Yapay zekâ servislerine mağazanın kendi hesabının anahtarıyla bağlanılır; kullanım ücretini servis doğrudan mağazaya yansıtır. Bağlantılar Ayarlar > Yapay zekâ'da."
+          },
+          "storefront_search": {
+            "label": "Kendi cümlesiyle arama",
+            "summary": "Müşteri vitrinde aradığını kendi cümlesiyle yazabilir.",
+            "description": "Müşteri vitrinde aradığını cümleyle yazar (ör. \"500 liranın altında kamp bıçağı\"); cümle mağazanın kendi yapay zekâ anahtarıyla arama filtrelerine çevrilir. Müşterinin yazdığı metin bağlı servise gider."
           }
         },
         "catalog": {
           "non_physical": {
             "label": "Dijital ve hizmet ürünleri",
+            "summary": "Kargo gerektirmeyen ürünler: e-kitap, hediye kodu, kurs, hizmet.",
             "description": "Kargo gerektirmeyen ürünler (e-kitap, hediye kodu, kurs, hizmet) satılabilir; bu ürünlerde kargo ve ölçü istenmez."
           },
           "restricted": {
             "label": "Kısıtlı ürünler",
+            "summary": "Ürün ve kategoriler yaş sınırlı olarak işaretlenebilir.",
             "description": "Ürün ve kategoriler yaş sınırlı (silah ve kesici alet, alkol, tütün, yetişkin içeriği) işaretlenebilir. İşaretli ürünler arama motorlarına yetişkinlere yönelik olarak bildirilir ve ürün feed'lerine girmez."
           },
           "addons": {
             "label": "Ürün ek seçenekleri",
+            "summary": "Ürünlere ücretli ya da ücretsiz ek seçenek eklenebilir.",
             "description": "Ürünler ücretli ya da ücretsiz ek seçenek sunabilir: müşterinin yazdığı bir metin ya da birkaç seçenekten biri. Ek seçeneğin ücreti sunucuda hesaplanır ve satır fiyatına eklenir; ayarları ürün sayfasındaki Ek seçenekler kartında."
           },
           "booking": {
             "label": "Tarihli ürünler",
+            "summary": "Tur, etkinlik, kurs gibi kalkış tarihli ve kontenjanlı hizmetler.",
             "description": "Kalkış tarihli hizmetler (tur, etkinlik, kurs, atölye) satılabilir: her kalkışın kendi kontenjanı olur, sepette yer süreli tutulur. Dijital ve hizmet ürünlerinin de açık olması gerekir."
+          },
+          "product_videos": {
+            "label": "Ürün videoları",
+            "summary": "Ürün sayfalarında yüklenen videolar ve YouTube bağlantıları.",
+            "description": "Ürün sayfalarında mağazanın yüklediği videolar ve YouTube bağlantıları gösterilir. Yüklenen videolar paketin depolama sınırından düşer."
           }
         },
         "marketing": {
           "campaigns": {
             "label": "Toplu e-posta ve SMS",
+            "summary": "İzinli müşterilere panelden toplu e-posta ve SMS gönderilir.",
             "description": "İzin vermiş müşterilere panelden toplu e-posta ve SMS kampanyası gönderilebilir."
           }
         },
         "seo": {
           "indexnow": {
             "label": "Değişen sayfaları IndexNow ile bildir",
+            "summary": "Değişen sayfalar Bing ve Yandex'e hemen bildirilir.",
             "description": "Ürün, kategori ve marka sayfası eklenince, değişince ya da kalkınca Bing, Yandex ve diğer IndexNow arama motorlarına haber verilir. Mağazanın ana alan adı gerekir; Google bu protokole katılmıyor."
           },
           "publish_gate": {
             "label": "SEO yayın kapısı",
+            "summary": "Kritik eksiği olan ya da puanı düşük ürün yayına alınmaz.",
             "description": "Kritik eksiği olan (fiyat ya da görsel yok) ya da SEO puanı 50'nin altındaki ürün yayına alınamaz. Kapalıyken danışman yalnızca öneri verir."
           }
         },
         "stock": {
           "preorder": {
             "label": "Stoksuz satış (ön sipariş)",
+            "summary": "Stoku biten varyant ön siparişle satılmaya devam eder.",
             "description": "Stoku biten varyant satılmaya devam edebilir: ön sipariş ya da tedarikçiden gönderim için. Ürün sayfasında varyant bazında açılır; arama motorlarına \"ön sipariş\" olarak bildirilir."
           }
         },
         "promotions": {
           "gift_cards": {
             "label": "Hediye kartı ve mağaza kredisi",
+            "summary": "Hediye kartı verilir; iade ve iyi niyet tutarı hesaba yazılır.",
             "description": "Hediye kartı oluşturulup müşteriye verilebilir; müşteri kodu sepette kullanır, kalan bakiyesi sonraki alışverişte geçer. Mağaza kredisiyle iade ya da iyi niyet tutarı hesaba yazılabilir."
           }
         },
         "payments": {
           "cash_on_delivery": {
             "label": "Kapıda ödeme",
+            "summary": "Müşteri ödemeyi teslimatta kuryeye yapar.",
             "description": "Müşteri ödemeyi teslimatta kuryeye yapabilir. Ücret, üst tutar ve kapıda tahsilat yapan kargo seçenekleri Ayarlar > Ödeme > Kapıda ödeme'de."
           }
         },
         "compliance": {
           "age_verification": {
             "label": "Yaş doğrulama",
+            "summary": "Yaş sınırlı ürünlü sepette ödemeden önce yaş beyanı istenir.",
             "description": "Sepette yaş sınırlı ürün varsa müşteri ödemeden önce doğum tarihini girerek yaşını beyan eder; sınırın altındaysa ödeme alınmaz. Doğum tarihi saklanmaz. Sınır Ayarlar > Yasal metinler'de."
           }
         },
         "orders": {
           "payment_links": {
             "label": "Ödeme bağlantısıyla sipariş",
+            "summary": "Ekip siparişi hazırlar, müşteri bağlantıyla öder.",
             "description": "Ekip panelden sipariş hazırlar; müşteri vitrindeki ödeme bağlantısıyla öder."
           }
         },
         "customers": {
           "wholesale": {
             "label": "Toptancı müşteriler",
+            "summary": "Toptancılar kendi fiyatlarını KDV hariç görür ve sipariş verir.",
             "description": "Panelden toptancı açılır; toptancı giriş yaptığında ürünleri toptan seviyesinin ya da kendine özel fiyatlarla, KDV hariç görür ve sipariş verir. Herkese açık fiyatlar değişmez. Kapatılırsa toptancılar perakende fiyat görür; kayıtları ve fiyatları silinmez."
           }
         }
