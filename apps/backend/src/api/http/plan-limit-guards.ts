@@ -1,5 +1,4 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../../lib/logging"
 import { assertStorageFits } from "../../lib/plan-limits"
 import { removeFiles } from "../../workflows/media/files"
@@ -123,7 +122,7 @@ export function registerUploads(
         },
         async (error: unknown) => {
           logger.info({ event: "media.upload_not_registered", err: errorSummary(error) })
-          await removeFiles(req.scope as MedusaContainer, ids)
+          await removeFiles(req.scope, ids)
           platformErrorHandler(error, req, res, next)
         }
       )
