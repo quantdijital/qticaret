@@ -25,7 +25,9 @@ const answered = (filter: InterpretRun["filter"]): InterpretRun => ({
 })
 
 let clock = new Date("2027-06-10T09:00:00Z")
-const interpreter = () => createSearchInterpreter({ now: () => clock })
+// The keyed hash needs the platform's key; the folded sentence stands in for it here
+const plainKey = (folded: string) => folded
+const interpreter = () => createSearchInterpreter({ now: () => clock, keyOf: plainKey })
 
 beforeEach(() => {
   clock = new Date("2027-06-10T09:00:00Z")
@@ -48,7 +50,7 @@ describe("the search interpretation's cache and fallback", () => {
   })
 
   it("forgets the sentence after 24 hours", async () => {
-    const interpret = createSearchInterpreter({ now: () => clock, ttlMs: 1000 })
+    const interpret = createSearchInterpreter({ now: () => clock, ttlMs: 1000, keyOf: plainKey })
     const run = jest.fn().mockResolvedValue(answered({ q: "balon" }))
     await interpret("balon", run)
     clock = new Date(clock.getTime() + 1001)
@@ -99,6 +101,20 @@ describe("the search interpretation's cache and fallback", () => {
     expect(info.mock.calls.map(([line]) => (line as unknown as { reason: string }).reason)).toEqual(
       ["error", "refused"]
     )
+  })
+
+  it("keys the cache by the sentence with personal data out, never as typed", async () => {
+    const keyOf = jest.fn((folded: string) => `h:${String(folded.length)}`)
+    const interpret = createSearchInterpreter({ now: () => clock, keyOf })
+    const run = jest.fn().mockResolvedValue(answered({ q: "balon" }))
+    await interpret("Balon 0532 123 45 67", run)
+    await interpret("balon 0533 999 88 77", run)
+    expect(keyOf.mock.calls.flat().join(" ")).not.toMatch(/053|Balon/)
+    expect(run).toHaveBeenCalledTimes(1)
+    // Only personal data: nothing to read, no call
+    const only = await interpret("0532 123 45 67", run)
+    expect(only.fallback).toBe(true)
+    expect(run).toHaveBeenCalledTimes(1)
   })
 
   it("cuts a fallback to what the site search reads", async () => {

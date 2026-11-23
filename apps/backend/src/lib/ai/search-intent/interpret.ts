@@ -1,8 +1,11 @@
+import { hashPii, parseKey } from "@qticaret/server-kit"
 import { createTtlCache } from "../../cache"
+import { parseEnv } from "../../env"
 import { logger } from "../../logging"
 import { normalizeText } from "../../search"
 import { todayIn } from "../../seo/facets-dated"
 import { fallbackAnswer, searchAnswer } from "./answer"
+import { searchTextOut } from "./prompt"
 import type { DroppedPart, SearchFilter, SearchInterpretation, SearchLists } from "./types"
 
 /**
@@ -11,8 +14,10 @@ import type { DroppedPart, SearchFilter, SearchInterpretation, SearchLists } fro
  * read once in 24 hours, so a repeated or popular sentence costs one
  * call. Only an answer the service gave is kept; a failure (the flag
  * off, no key, the ceiling reached, the service down or its answer no
- * filter) is not, and the sentence is searched as it is. The key is the
- * folded sentence in process memory only; the log holds no text.
+ * filter) is not, and the sentence is searched as it is. The key is a
+ * keyed hash (`PII_HASH_KEY`) of the sentence as it may leave the shop
+ * (personal data out) and folded: no sentence is held as a key, and the
+ * log holds no text.
  */
 
 /** What the workflow gives back (workflows/ai/interpret-search.ts). */
@@ -49,10 +54,25 @@ const reasonOf = (error: unknown): string => {
   return /^ai\.[a-z_]{1,60}$/.test(message) ? message : "error"
 }
 
+let cacheKey: Buffer | undefined
+
+/** The folded sentence's keyed hash: a list of sentences cannot reverse it. */
+function hashedSentence(folded: string): string {
+  cacheKey ??= parseKey(parseEnv().PII_HASH_KEY, "PII_HASH_KEY")
+  return hashPii(folded, cacheKey, "search_intent.cache").slice(0, 40)
+}
+
 export function createSearchInterpreter(
-  options: { ttlMs?: number; maxEntries?: number; now?: () => Date } = {}
+  options: {
+    ttlMs?: number
+    maxEntries?: number
+    now?: () => Date
+    /** The folded sentence's cache key (tests); a keyed hash otherwise. */
+    keyOf?: (folded: string) => string
+  } = {}
 ) {
   const now = options.now ?? (() => new Date())
+  const keyOf = options.keyOf ?? hashedSentence
   const cache = createTtlCache<Kept>({
     ttlMs: options.ttlMs ?? SEARCH_CACHE_TTL_MS,
     maxEntries: options.maxEntries ?? SEARCH_CACHE_ENTRIES,
@@ -62,12 +82,12 @@ export function createSearchInterpreter(
     text: string,
     run: (text: string) => Promise<InterpretRun>
   ): Promise<SearchInterpretation> => {
-    const folded = normalizeText(text)
+    const folded = normalizeText(searchTextOut(text))
     if (folded === "") {
       return fallbackAnswer(text)
     }
     // Today in the key: "bu hafta sonu" means another range tomorrow
-    const key = `${todayIn(now())}|${folded}`
+    const key = `${todayIn(now())}|${keyOf(folded)}`
     try {
       const kept = await cache(key, async () => {
         const result = await run(text)

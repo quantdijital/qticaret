@@ -1,6 +1,8 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakeSecret } from "@qticaret/testing"
 import { resetAiBreakers } from "../../src/lib/ai/breaker"
+import { fakeTextConnector } from "../../src/lib/ai/connectors/fake"
+import { aiProviderError } from "../../src/lib/ai/errors"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import { AI_STOREFRONT_SEARCH } from "../../src/modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
@@ -51,6 +53,11 @@ medusaIntegrationTestRunner({
       store = await createStorefront(getContainer())
     })
 
+    afterEach(() => {
+      jest.restoreAllMocks()
+      Reflect.deleteProperty(process.env, "AI_STORE_SEARCH_DAILY_LIMIT")
+    })
+
     it("does not exist while the shop's flag is off", async () => {
       const answer = await interpret("Kapadokya balon turu")
       expect(answer.status).toBe(404)
@@ -67,6 +74,40 @@ medusaIntegrationTestRunner({
         fallback: true,
       })
       expect(await aiRecords(getContainer()).usages()).toEqual([])
+      expect(await storedRunsWith(getContainer(), "travertenleri")).toBe(0)
+    })
+
+    it("searches the sentence as it is at the day's ceiling, calling nothing and keeping no text", async () => {
+      await settings().setFeature(AI_STOREFRONT_SEARCH, true, null)
+      await connectFake(http, owner.headers, key)
+      process.env["AI_STORE_SEARCH_DAILY_LIMIT"] = "0"
+      const complete = jest.spyOn(fakeTextConnector, "complete")
+      const answer = await interpret("Efes antik kenti")
+      expect(answer.data).toMatchObject({ query: "q=Efes+antik+kenti", fallback: true })
+      expect(complete).not.toHaveBeenCalled()
+      expect(await aiRecords(getContainer()).usages()).toEqual([])
+      expect(await storedRunsWith(getContainer(), "antik kenti")).toBe(0)
+    })
+
+    it("searches the sentence as it is when the service fails, recording the call without it", async () => {
+      await settings().setFeature(AI_STOREFRONT_SEARCH, true, null)
+      await connectFake(http, owner.headers, key)
+      jest
+        .spyOn(fakeTextConnector, "complete")
+        .mockRejectedValue(
+          aiProviderError({ service: "fake", key: "ai.provider_busy", code: "http_429" })
+        )
+      const answer = await interpret("Nemrut dağı gün doğumu")
+      expect(answer.data).toMatchObject({
+        query: "q=Nemrut+da%C4%9F%C4%B1+g%C3%BCn+do%C4%9Fumu",
+        fallback: true,
+      })
+      const usages = await aiRecords(getContainer()).usages()
+      expect(usages.map((each) => [each.status, each.error_code, each.requested_by])).toEqual([
+        ["failed", "http_429", "vitrin"],
+      ])
+      expect(JSON.stringify(usages)).not.toMatch(/Nemrut/)
+      expect(await storedRunsWith(getContainer(), "Nemrut")).toBe(0)
     })
 
     it("reads the sentence on the shop's key, once a day, keeping no text", async () => {

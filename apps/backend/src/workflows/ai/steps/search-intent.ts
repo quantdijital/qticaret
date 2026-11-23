@@ -119,7 +119,7 @@ export const callSearchStep = createStep(
         })
       }
       const connector = textConnectorFor(input.service, "text", apiKey)
-      const result = await withAiBreaker(input.service, () =>
+      const result = await withAiBreaker(`${input.service}:storefront`, () =>
         runSearchIntent({
           connector,
           text: input.text,

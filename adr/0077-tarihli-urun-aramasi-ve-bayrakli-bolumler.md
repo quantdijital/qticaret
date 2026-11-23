@@ -98,6 +98,9 @@ Fiyata göre sıralama ve fiyat süzgeci dizindeki fiyatı kullanır. Tarihli ü
 - `understood` etiketleri mağazanın adlarıdır (kategori, nitelik değeri); tarih ve ay sunucuda `tr-TR` ile biçimlenir; `kisi` etiketi yalın sayıdır (vitrin çeviri anahtarıyla "N kişi" yazar).
 - Önbellek süreç belleğinde, anahtar "bugün + katlanmış cümle" (göreli tarih ertesi gün başka aralıktır), 24 saat, en çok 2000 kayıt; yalnız servisin verdiği yanıt tutulur. Zaman aşımı 8 sn (müşteri bekliyor). Kullanım satırında `requested_by = "vitrin"`, kayıt alanları boş; log satırı yalnız sayı ve kod, geri dönüşte yalnız neden kodu.
 - Bakımda (adr/0053) uç kapalıdır; askıdaki mağazada POST ile okuma (`read`) sayılır. Bayrağın panel anahtarı ve çevirisi PR9'da.
+- **KVKK, PR9 için zorunlu (güvenlik incelemesi O-1):** `redactPersonalData` kişi adını ve posta adresini ayıklamaz. Bu yüzden PR9 (a) arama kutusunun altında "kişisel bilgi yazmayın" ipucunu, (b) bayrak açılırken panelde sahibe uyarıyı (cümle yurt dışındaki servise, mağazanın kendi sözleşmesiyle gider; aydınlatma metnine satır eklenmeli) getirir; bayrak panelden bunlar olmadan açılmaz. Aydınlatma metni şablonuna (`lib/legal/starters/privacy-notice.ts` 6. madde ve taslak notu) satır bu PR'da eklendi.
+- Adresi okunamayan vitrin çağrısı (`isShopperAddressUnknown`, adr/0076 Ek D5) servise gitmez, hız sınırından önce düz aramaya döner: bütün bu müşteriler vitrinin tek adresini paylaşır. Önbellek anahtarı ayıklanmış ve katlanmış cümlenin anahtarlı özetidir (`PII_HASH_KEY`). Vitrin çağrıları kendi devre kesicisinde (`<servis>:storefront`) sayılır; personelin kesicisini açmaz.
+- **Takip:** çok adresten dağıtık tüketime karşı challenge eşiği (ör. günlük tavanın yarısı dolunca `challengeOver`); kötüye kullanım ölçülünce.
 
 ### 8. Bayrağa bağlı bölümler
 
