@@ -18,6 +18,9 @@ import { renderPage } from "@/test/theme-render"
  * unless the shop set one), so the section's box carries no ground.
  */
 
+/** The look rides on the section wrapper, beside the section itself. */
+type Look = Pick<HomeSectionView, "look">
+
 const picture = (name: string): ImageView => ({
   src: `/media/${name}.jpg`,
   alt: name,
@@ -37,7 +40,7 @@ const post = (at: number): PostCardView => ({
   category: null,
 })
 
-const guides = (over: Partial<PostsSectionView> = {}): PostsSectionView => ({
+const guides = (over: Partial<PostsSectionView> & Look = {}): HomeSectionView => ({
   id: "yazilar",
   type: "posts",
   title: "Gezi yazıları",
@@ -46,7 +49,7 @@ const guides = (over: Partial<PostsSectionView> = {}): PostsSectionView => ({
   ...over,
 })
 
-const band = (over: Partial<BannerSectionView> = {}): BannerSectionView => ({
+const band = (over: Partial<BannerSectionView> & Look = {}): HomeSectionView => ({
   id: "kampanya",
   type: "banner",
   slides: [

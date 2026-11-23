@@ -36,7 +36,13 @@ const band = (more: Partial<StoreBannerSection> = {}): StoreBannerSection => ({
   type: "banner",
   slides: [
     {
-      image: { url: "http://localhost:9000/static/vadi.jpg", alt: "Vadi", width: 1, height: 1 },
+      image: {
+        url: "http://localhost:9000/static/vadi.jpg",
+        alt: "Vadi",
+        width: 1,
+        height: 1,
+        derivatives: null,
+      },
       heading: "Macera",
       text: null,
       link: null,
