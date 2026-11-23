@@ -7,7 +7,6 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ConflictError, ValidationError } from "../../lib/errors"
 import { logger } from "../../lib/logging"
 import { isFlowOwnedRefund, orderRefundLockKey } from "../../lib/orders/locks"
@@ -21,6 +20,8 @@ import type { LedgerEntry } from "./refund-settle"
 import { refundTraceOf } from "./refund-trace"
 import { dropPendingRefund } from "./steps/pending-refund"
 import { restoreRefundTransaction } from "./steps/refund-transactions"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 export interface SettleRefundByHandInput {
   order_id: string
@@ -257,9 +258,9 @@ export const settleRefundByHandWorkflow = createWorkflow(
   (input: SettleRefundByHandInput) => {
     const lockKey = transform({ input }, ({ input }) => orderRefundLockKey(input.order_id))
     // The refund workflow's TTL (review D4-1, L3): never let go while its records are written
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 600 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 600 })
     const settled = settleRefundByHandStep(input)
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(settled)
   }
 )

@@ -6,7 +6,6 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { errorSummary, logger } from "../../lib/logging"
 import { alertRecovery } from "../../lib/payments/recovery-alert"
 import { AUDIT_LOG_MODULE } from "../../modules/audit-log"
@@ -19,6 +18,8 @@ import { recoverPaytrPayment } from "./recover-paytr"
 import { alertPaymentIssue } from "./issue-alert"
 import { orderOfRecovery } from "./recovery-order"
 import type { OrderCheck } from "./recovery-order"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 type Recovery = Awaited<ReturnType<PaymentRecoveryModuleService["retrievePaymentRecovery"]>>
 
@@ -193,9 +194,9 @@ export const recoverPaymentWorkflow = createWorkflow(
   "payments-recover-payment",
   (recoveryId: string) => {
     const key = transform({ recoveryId }, ({ recoveryId }) => `payments:recovery:${recoveryId}`)
-    acquireLockStep({ key, timeout: 1, ttl: 600 })
+    const held = acquireLocksStep({ key, timeout: 1, ttl: 600 })
     const outcome = refundRecoveryStep(recoveryId)
-    releaseLockStep({ key })
+    releaseLocksStep(held)
     return new WorkflowResponse(outcome)
   }
 )

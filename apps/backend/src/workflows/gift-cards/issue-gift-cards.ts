@@ -7,7 +7,6 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { createGiftCardsWorkflow, deleteGiftCardWorkflow } from "@medusajs/loyalty-plugin/workflows"
 import { errorSummary, logger } from "../../lib/logging"
 import { giftIssueLockKey } from "../../lib/orders/locks"
@@ -15,6 +14,8 @@ import { giftCardCode } from "../../lib/promotions"
 import { GIFT_CARDS_KEY, giftIssuePlan, last4 } from "../../lib/promotions/gift-sale"
 import type { GiftIssuePlan } from "../../lib/promotions/gift-sale"
 import { ISSUE_KEY, cardsOfLines, liraOfKurus, orderGifts } from "./order-gifts"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 export interface IssueGiftCardsInput {
   order_id: string
@@ -148,7 +149,7 @@ export const issueGiftCardsWorkflow = createWorkflow(
   "gift-cards-issue",
   (input: IssueGiftCardsInput) => {
     const lockKey = transform({ input }, ({ input }) => giftIssueLockKey(input.order_id))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 120 })
     const planned = planGiftCardsStep(input)
     const made = createGiftCardsStep(
       transform({ planned, input }, ({ planned, input }) => ({
@@ -157,7 +158,7 @@ export const issueGiftCardsWorkflow = createWorkflow(
       }))
     )
     const recorded = recordGiftCardsStep(input)
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(
       transform({ planned, made, recorded }, ({ planned, made, recorded }) => ({
         state: planned.plan.state,
