@@ -1,4 +1,5 @@
 import {
+  BANNER_SPLIT_EDGES,
   CATEGORY_CARD_DEFAULTS,
   CATEGORY_COLLAGE_DEFAULTS,
   CATEGORY_PANELS_DEFAULTS,
@@ -121,6 +122,10 @@ export const VARIANT_FIELDS: {
     // A content page's own text (adr/0073 Ek 2026-11-19 (2) K2): its outline and questions as today
     article: { outline: "auto", questions: "auto" },
   },
+  // adr/0077 Ek (Vadi): the panel's words and button empty (its button the blog's); title and count stay
+  posts: { grid: {}, intro_panel: { eyebrow: null, intro: null, link: null } },
+  // adr/0077 Ek (Vadi): no upper line, a straight edge; the slides and the band's steps stay
+  banner: { standard: {}, split: { eyebrow: null, edge: BANNER_SPLIT_EDGES[0] } },
   product_main: { standard: {} },
   category_main: { standard: {} },
 }

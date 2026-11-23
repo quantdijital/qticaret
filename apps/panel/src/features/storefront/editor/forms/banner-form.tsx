@@ -7,6 +7,7 @@ import { EmptyLine, RowActions } from "@/features/settings/components/storefront
 import type { BannerSection, BannerSlide } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { BannerSlideFields } from "./banner-slide"
+import { BannerSplitWords } from "./banner-split-fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { PREVIEW_IDS } from "./preview-fields"
@@ -31,6 +32,10 @@ export function BannerForm({ section, problems, onChange }: SectionFormProps<Ban
   const full = section.slides.length >= L.slides
   return (
     <div className="flex flex-col gap-4">
+      {/* The split's upper line (adr/0077 Ek); it draws the first picture only */}
+      {section.variant === "split" ? (
+        <BannerSplitWords section={section} problems={problems} onChange={onChange} />
+      ) : null}
       {section.slides.length === 0 ? (
         <EmptyLine text={t(`${B}.empty`)} />
       ) : (

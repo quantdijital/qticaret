@@ -61,7 +61,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         scroller: SLIDER_DEFAULTS,
       }
     case "banner":
-      return { ...base, type, slides: [], ...BANNER_DEFAULTS }
+      return { ...base, type, slides: [], ...BANNER_DEFAULTS, variant: defaultVariant(type) }
     case "strip_gallery":
       // No strip yet: the shop adds two to eight, each from a record or its own picture
       return { ...base, type, title: null, text: null, items: [], ...STRIP_GALLERY_DEFAULTS }
@@ -91,7 +91,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "brands":
       return { ...base, type, title: null, brand_ids: [] }
     case "posts":
-      return { ...base, type, title: null, limit: 3 }
+      return { ...base, type, title: null, limit: 3, variant: defaultVariant(type) }
     case "reviews":
       return { ...base, type, title: null, limit: 6 }
     case "google_rating":
