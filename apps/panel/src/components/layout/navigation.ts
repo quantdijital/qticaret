@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { Capability } from "@/features/auth/api/staff"
+import { COLLECTIONS_FLAG } from "@/features/collections/paths"
 import { WHOLESALE_FLAG } from "@/features/wholesale/api/types"
 
 /**
@@ -52,7 +53,10 @@ export interface NavGroup {
 export const NAV_GROUPS: NavGroup[] = [
   {
     key: null,
-    items: [{ key: "dashboard", to: "/", icon: LayoutDashboard, exact: true }],
+    items: [
+      { key: "dashboard", to: "/", icon: LayoutDashboard, exact: true },
+      { key: "reports", to: "/reports", icon: ChartColumnBig },
+    ],
   },
   {
     key: "sales",
@@ -79,27 +83,34 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    // What the shop sells and has on hand (the owner, 2026-11-23: each thing under its kind)
     key: "catalog",
     items: [
       { key: "products", to: "/products", icon: Package },
       { key: "categories", to: "/categories", icon: FolderTree },
       { key: "brands", to: "/brands", icon: Tag },
-      { key: "collections", to: "/collections", icon: Layers },
+      // While the shop has collections on (on by default; Ayarlar > Özellikler)
+      { key: "collections", to: "/collections", icon: Layers, feature: COLLECTIONS_FLAG },
       { key: "inventory", to: "/inventory", icon: Warehouse },
-      { key: "reviews", to: "/reviews", icon: MessageSquareText },
     ],
   },
   {
-    // What the shop's customers see around its catalog (adr/0049); the editor opens full screen
+    // How the storefront looks (adr/0049); the editor opens full screen
     key: "storefront",
     items: [
-      // Ready-made and saved looks into the draft (adr/0064)
-      { key: "looks", to: "/storefront/looks", icon: LayoutTemplate },
       // The storefront's preferences are a panel of it (the owner, 2026-11-16)
       { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
+      // Ready-made and saved looks into the draft (adr/0064)
+      { key: "looks", to: "/storefront/looks", icon: LayoutTemplate },
+      { key: "menus", to: "/storefront/menus", icon: ListTree },
+    ],
+  },
+  {
+    // What the shop writes and uploads (the owner, 2026-11-23)
+    key: "content",
+    items: [
       // The shop's own pages, found here and written in the theme editor (adr/0073 Ek not 2026-11-20)
       { key: "pages", to: "/storefront/pages", icon: Files },
-      { key: "menus", to: "/storefront/menus", icon: ListTree },
       // The blog: its posts, categories, tags and authors, and the filter pages
       { key: "content", to: "/content", icon: FileText },
       // Every picture the shop uploaded; the pickers of every image field open it too
@@ -107,7 +118,8 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    key: "growth",
+    // Bringing customers in and back (the owner, 2026-11-23: "Büyüme" became "Pazarlama")
+    key: "marketing",
     items: [
       { key: "promotions", to: "/promotions", icon: BadgePercent },
       // adr/0050: bulk e-mail and SMS, the owner's and admin's, while the shop has it on
@@ -118,8 +130,8 @@ export const NAV_GROUPS: NavGroup[] = [
         feature: "marketing.campaigns",
         needs: "bulkMessages",
       },
+      { key: "reviews", to: "/reviews", icon: MessageSquareText },
       { key: "seo", to: "/seo", icon: Search },
-      { key: "reports", to: "/reports", icon: ChartColumnBig },
     ],
   },
 ]

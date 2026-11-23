@@ -24,13 +24,41 @@ describe("itemFor: the menu item a page lights", () => {
   })
 })
 
+describe("the menu's groups (the owner, 2026-11-23)", () => {
+  it("puts each item under its kind: sales, catalog, storefront, content, marketing", () => {
+    expect(NAV_GROUPS.map((group) => [group.key, group.items.map((item) => item.key)])).toEqual([
+      [null, ["dashboard", "reports"]],
+      ["sales", ["orders", "paymentLinks", "customers", "wholesale"]],
+      ["catalog", ["products", "categories", "brands", "collections", "inventory"]],
+      ["storefront", ["themeEditor", "looks", "menus"]],
+      ["content", ["pages", "content", "media"]],
+      ["marketing", ["promotions", "bulkMessages", "reviews", "seo"]],
+    ])
+  })
+
+  it("keeps every route and gate where it was", () => {
+    expect(navItem("reports")).toMatchObject({ to: "/reports" })
+    expect(navItem("reviews")).toMatchObject({ to: "/reviews" })
+    expect(navItem("media")).toMatchObject({ to: "/media" })
+    expect(navItem("bulkMessages")).toMatchObject({
+      to: "/bulk-messages",
+      feature: "marketing.campaigns",
+      needs: "bulkMessages",
+    })
+    expect(navItem("paymentLinks")).toMatchObject({
+      feature: "orders.payment_links",
+      needs: "paymentLinks",
+    })
+  })
+})
+
 describe("the Sayfalar item (adr/0073 Ek not 2026-11-20)", () => {
-  it("stands in Vitrin before the blog, lit on its list", () => {
+  it("stands in İçerik before the blog, lit on its list", () => {
     expect(navItem("pages")).toMatchObject({ to: "/storefront/pages" })
     expect(itemFor("/storefront/pages")?.key).toBe("pages")
     expect(itemFor("/content")?.key).toBe("content")
-    const storefront = NAV_GROUPS.find((group) => group.key === "storefront")
-    const keys = storefront?.items.map((item) => item.key) ?? []
+    const content = NAV_GROUPS.find((group) => group.key === "content")
+    const keys = content?.items.map((item) => item.key) ?? []
     expect(keys.indexOf("pages")).toBeLessThan(keys.indexOf("content"))
   })
 })

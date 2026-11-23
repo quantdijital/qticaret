@@ -1,6 +1,7 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { requireUserActor } from "./actor"
+import { refuseOffCollectionSeo } from "../validation/collection-reads"
 import { seoPublishGate } from "../validation/seo-publish-gate"
 import { rateLimit } from "./rate-limit"
 import { StoreGetSeoPaths, StoreGetSeoResolve, StorePostNotFound } from "../store/seo/validators"
@@ -33,7 +34,8 @@ export const SEO_ROUTES = [
   {
     matcher: "/admin/seo/:entity_type/:entity_id",
     methods: ["PUT" as const],
-    middlewares: [validateAndTransformBody(AdminPutSeoMeta)],
+    // Collections off: a collection's fields are refused as a missing route, before the body
+    middlewares: [refuseOffCollectionSeo("meta"), validateAndTransformBody(AdminPutSeoMeta)],
   },
   get("/admin/seo/redirects", AdminGetRedirects),
   ...["/admin/seo/redirects", "/admin/seo/redirects/:id"].map((matcher) => ({
@@ -74,7 +76,7 @@ export const SEO_ROUTES = [
   {
     matcher: "/admin/seo/assessments/:kind/:id/fix",
     methods: ["POST" as const],
-    middlewares: [validateAndTransformBody(AdminPostAssessmentFix)],
+    middlewares: [refuseOffCollectionSeo("fix"), validateAndTransformBody(AdminPostAssessmentFix)],
   },
   get("/store/seo/resolve", StoreGetSeoResolve),
   get("/store/seo/paths", StoreGetSeoPaths),

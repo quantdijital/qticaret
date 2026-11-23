@@ -5,6 +5,7 @@ import { metadataOf } from "@/lib/seo/metadata"
 import { resolvePath } from "@/lib/store-api/requests"
 import { pagedSeo } from "@/lib/seo/paging"
 import { blogPageOf } from "@/lib/views/blog"
+import { collectionsOn } from "@/lib/views/collections-on"
 import { EntityScreen } from "@/screens/entity"
 import { requestedUrl } from "@/screens/url"
 
@@ -36,6 +37,14 @@ export async function generateMetadata({ params }: CatchAllProps): Promise<Metad
     return NOT_FOUND_METADATA
   }
   const { url, page } = await resolution()
+  // Collections off: a resolve answer cached across the change gets the not-found page's noindex
+  if (
+    page.type === "entity" &&
+    page.entity_type === "product_collection" &&
+    !(await collectionsOn())
+  ) {
+    return NOT_FOUND_METADATA
+  }
   if (page.type === "entity" && page.seo) {
     // A list's later page is its own page (docs/13 §3, §7): a listing's number and canonical
     // come from resolve, a blog archive's or author's from the address

@@ -58,8 +58,9 @@
     "groups": {
       "sales": "Satış",
       "catalog": "Katalog",
-      "growth": "Büyüme",
-      "storefront": "Vitrin"
+      "storefront": "Vitrin",
+      "content": "İçerik",
+      "marketing": "Pazarlama"
     },
     "categories": "Kategoriler",
     "inventory": "Stok",
@@ -71,9 +72,9 @@
     "reviews": "Yorumlar ve sorular",
     "menus": "Menüler",
     "themeEditor": "Tema düzenleyici",
-    "bulkMessages": "Toplu ileti",
+    "bulkMessages": "Toplu mesaj",
     "paymentLinks": "Ödeme bağlantıları",
-    "media": "Ortam kütüphanesi",
+    "media": "Medya kütüphanesi",
     "collections": "Koleksiyonlar",
     "looks": "Görünümler",
     "pages": "Sayfalar"
@@ -644,7 +645,7 @@
         "moving": "Adresler taşınıyor… %{{percent}}",
         "moved_one": "{{count}} sayfa yeni adresine taşındı.",
         "moved_other": "{{count}} sayfa yeni adresine taşındı.",
-        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > İşler'de.",
+        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > Denetim kaydı > İşler'de.",
         "option": {
           "prefixed": "Önekli",
           "flat": "Öneksiz, kökte"
@@ -770,6 +771,11 @@
             "label": "Ürün videoları",
             "summary": "Ürün sayfalarında yüklenen videolar ve YouTube bağlantıları.",
             "description": "Ürün sayfalarında mağazanın yüklediği videolar ve YouTube bağlantıları gösterilir. Yüklenen videolar paketin depolama sınırından düşer."
+          },
+          "collections": {
+            "label": "Koleksiyonlar",
+            "summary": "Ürünleri bir tema altında toplayan, kendi sayfası olan listeler.",
+            "description": "Koleksiyonlar ürünleri bir tema altında toplar (yaz seçkisi, hediye fikirleri); her birinin kendi sayfası olur ve menülerde, vitrin bölümlerinde kullanılabilir. Kapatınca koleksiyon sayfaları ve bağlantıları vitrinden kalkar, koleksiyonlar silinmez; yeniden açınca her şey geri gelir."
           }
         },
         "marketing": {
@@ -833,6 +839,13 @@
             "description": "Panelden toptancı açılır; toptancı giriş yaptığında ürünleri toptan seviyesinin ya da kendine özel fiyatlarla, KDV hariç görür ve sipariş verir. Herkese açık fiyatlar değişmez. Kapatılırsa toptancılar perakende fiyat görür; kayıtları ve fiyatları silinmez."
           }
         }
+      },
+      "collectionsOff": {
+        "title": "Koleksiyonlar kapatılsın mı?",
+        "description": "Koleksiyon sayfaları, menülerdeki ve vitrin bölümlerindeki koleksiyon bağlantıları kalkar. Koleksiyonlar silinmez; yeniden açınca hepsi geri gelir.",
+        "confirm": "Koleksiyonları kapat",
+        "live_one": "{{count}} koleksiyon sayfası yayında. Adresleri 404 olur; arama motorlarındaki sıralamalarını kaybedebilir.",
+        "live_other": "{{count}} koleksiyon sayfası yayında. Adresleri 404 olur; arama motorlarındaki sıralamalarını kaybedebilir."
       }
     },
     "jobs": {
@@ -898,9 +911,12 @@
       },
       "empty": "Bu türde kayıt yok.",
       "export": "CSV olarak dışa aktar",
-      "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sayfasından indirebilirsiniz.",
-      "openJobs": "İşler sayfasına git",
-      "retention": "Dışa aktarılan dosyalar İşler sayfasında bir hafta saklanır.",
+      "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sekmesinden indirebilirsiniz.",
+      "openJobs": "İşler sekmesine git",
+      "retention": "Dışa aktarılan dosyalar İşler sekmesinde bir hafta saklanır.",
+      "tabs": {
+        "log": "Denetim kaydı"
+      },
       "exportFiltered": "Süzülenleri CSV olarak dışa aktar",
       "emptyFiltered": "Bu süzgeçlere uyan kayıt yok.",
       "filters": {
@@ -1734,7 +1750,7 @@
           },
           "marketing": {
             "announcement": "Kampanya duyurusu",
-            "campaign": "Toplu ileti"
+            "campaign": "Toplu mesaj"
           },
           "staff": {
             "new_order": "Ekip: yeni sipariş",
@@ -2046,13 +2062,11 @@
       "integrations": "Bağlı dış servislerin çalışıp çalışmadığı",
       "ai": "Metin taslağı yazan servisler, anahtarları ve bu ayki kullanım",
       "features": "Açılıp kapatılabilen mağaza özellikleri",
-      "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
-      "audit": "Panelde kim neyi ne zaman değiştirdi",
+      "audit": "Panelde kim neyi ne zaman değiştirdi, dışa aktarma gibi uzun süren işler ve dosyaları",
       "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü",
       "accounting": "Mali müşavire aylık paket",
       "api": "Kendi sistemleriniz için API anahtarları",
-      "team": "Panele kimlerin hangi rolle girdiği ve davetler",
-      "security": "İki adımlı doğrulama, ekip için zorunluluk, sahtekârlık önleme",
+      "security": "Hesabınız ve iki adımlı doğrulama, ekip üyeleri ve davetler, sahtekârlık önleme",
       "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
       "einvoice": "Fatura programı, kesim anı ve seri, taşıyıcı bilgileri, muhasebe",
       "migration": "Eski platformdan katalog, müşteri ve 301 yönlendirmeleri",
@@ -2210,19 +2224,19 @@
         "feeds": "Ürün akışları",
         "conversions": "Dönüşüm ölçümü",
         "carts": "Terk edilen sepet",
-        "bulk": "Toplu ileti"
+        "bulk": "Toplu mesaj"
       },
       "bulk": {
-        "title": "Toplu ileti kuralları",
-        "description": "Büyüme > Toplu ileti'den gönderilen e-posta ve SMS kampanyalarının sınırları.",
-        "cap": "Bir kişiye 24 saatte en çok bir toplu ileti",
-        "capHint": "Son 24 saatte başka bir toplu ileti almış kişi yeni iletinin kitlesinden çıkarılır; şikâyetleri ve abonelikten çıkışları azaltır.",
+        "title": "Toplu mesaj kuralları",
+        "description": "Pazarlama > Toplu mesaj'dan gönderilen e-posta ve SMS kampanyalarının sınırları.",
+        "cap": "Bir kişiye 24 saatte en çok bir toplu mesaj",
+        "capHint": "Son 24 saatte başka bir toplu mesaj almış kişi yeni mesajın kitlesinden çıkarılır; şikâyetleri ve abonelikten çıkışları azaltır.",
         "hours": "Toplu SMS saatleri",
         "hoursHint": "Toplu SMS'ler yalnız bu saatler arasında gider (Türkiye saati). Saat dışında kalan gönderim bekler, saat gelince kendiliğinden sürer.",
         "start": "Başlangıç",
         "end": "Bitiş",
         "hoursInvalid": "Bitiş saati başlangıç saatinden sonra olmalı.",
-        "saved": "Toplu ileti kuralları kaydedildi."
+        "saved": "Toplu mesaj kuralları kaydedildi."
       }
     },
     "accounting": {
@@ -2239,7 +2253,7 @@
         "privacy": "Bireysel müşterilerin adı pakette yer almaz; kurumsal müşterilerin unvanı ve VKN'si yer alır. Her paket denetim kaydına düşer.",
         "month": "Ay",
         "download": "Paketi indir",
-        "later": "Paket hazırlanıyor; bitince Ayarlar > İşler'den indirebilirsiniz.",
+        "later": "Paket hazırlanıyor; bitince Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
         "failed": "Paket hazırlanamadı."
       }
     },
@@ -5162,7 +5176,7 @@
       "button": "Dışa aktar",
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
-      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > İşler'den indirebilirsiniz.",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
       "failed": "Sipariş dosyası hazırlanamadı."
     },
     "addons": {
@@ -6018,7 +6032,7 @@
     "export": {
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
-      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > İşler'den indirebilirsiniz.",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
       "failed": "Rapor dosyası hazırlanamadı."
     },
     "daily": {
@@ -6595,7 +6609,7 @@
       "title": "Site haritası",
       "hint": "Arama motorları sayfalarınızı bu dosyalardan bulur; değişikliklerden birkaç dakika sonra kendiliğinden yenilenir.",
       "refresh": "Şimdi yenile",
-      "queued": "Site haritası yenileniyor; Ayarlar > İşler'den izleyebilirsiniz.",
+      "queued": "Site haritası yenileniyor; Ayarlar > Denetim kaydı > İşler'den izleyebilirsiniz.",
       "hostMissing": "Ana alan adı girilmeden site haritası oluşmaz; adresler tam olmalı.",
       "noIndexing": "Bu ortam arama motorlarına kapalı: robots.txt tüm tarayıcıları engelliyor, sayfalar noindex.",
       "generated": "{{when}} oluşturuldu",
@@ -7435,6 +7449,10 @@
       "noMatch": "Aramanızla eşleşen ürün yok.",
       "removeOf": "{{name}}: koleksiyondan çıkar",
       "removed": "Ürün koleksiyondan çıkarıldı."
+    },
+    "gate": {
+      "off": "Koleksiyonlar bu mağazada kapalı. Koleksiyonlarınız silinmedi; açınca burada yeniden yönetilir.",
+      "turnOn": "Özelliklere git"
     }
   },
   "address": {
@@ -9315,7 +9333,7 @@
         "notePlaceholder": "Ayda birkaç e-posta · İstediğiniz an ayrılın",
         "noteHint": "Tutabileceğiniz bir söz yazın. Boş bırakırsanız vitrin kendi metnini kullanır.",
         "image": "Görsel",
-        "imageHint": "Ortam kütüphanesinden bir görsel; kartın solunda durur. Görsel seçilmezse kutu yan yana bant olarak çizilir.",
+        "imageHint": "Medya kütüphanesinden bir görsel; kartın solunda durur. Görsel seçilmezse kutu yan yana bant olarak çizilir.",
         "consent": "Onay metni",
         "consentTerm": "İYS",
         "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
@@ -10686,7 +10704,7 @@
           },
           "image": {
             "name": "Resim",
-            "description": "Ortam kütüphanesinden bir resim, isterseniz bağlantılı."
+            "description": "Medya kütüphanesinden bir resim, isterseniz bağlantılı."
           },
           "app_badges": {
             "name": "Uygulama mağazası rozetleri",
@@ -11325,18 +11343,18 @@
     }
   },
   "bulkMessages": {
-    "title": "Toplu ileti",
+    "title": "Toplu mesaj",
     "description": "İzinli müşterilerinize ve bülten abonelerinize toplu e-posta ya da SMS gönderin.",
-    "new": "Yeni ileti",
-    "empty": "Henüz toplu ileti yok. İlk iletinizi hazırlayın.",
-    "emptyFiltered": "Bu süzgece uyan ileti yok.",
-    "views": "İleti durumları",
+    "new": "Yeni mesaj",
+    "empty": "Henüz toplu mesaj yok. İlk mesajınızı hazırlayın.",
+    "emptyFiltered": "Bu süzgece uyan mesaj yok.",
+    "views": "Mesaj durumları",
     "allStatuses": "Tümü",
     "channelFilter": "Kanal",
     "allChannels": "Tüm kanallar",
-    "off": "Toplu e-posta ve SMS bu mağazada kapalı. Açınca izinli müşterilerinize panelden kampanya iletisi gönderebilirsiniz.",
+    "off": "Toplu e-posta ve SMS bu mağazada kapalı. Açınca izinli müşterilerinize panelden kampanya mesajı gönderebilirsiniz.",
     "turnOn": "Özelliklerden aç",
-    "noAccess": "Toplu iletileri yalnız mağaza sahibi ve yöneticiler hazırlayıp gönderebilir.",
+    "noAccess": "Toplu mesajları yalnız mağaza sahibi ve yöneticiler hazırlayıp gönderebilir.",
     "columns": {
       "name": "Ad",
       "channel": "Kanal",
@@ -11373,8 +11391,8 @@
       "channel_off": "Gönderen alan adı ya da SMS hesabı şu an kullanılamıyor. Kanal yeniden çalışınca kendiliğinden sürer."
     },
     "failure": {
-      "generic": "Gönderim başlatılamadı. İletiyi kopyalayıp yeniden deneyin.",
-      "segment_unknown": "Seçilen segment artık yok; gönderim başlatılamadı. İletiyi kopyalayıp kitleyi yeniden seçin."
+      "generic": "Gönderim başlatılamadı. Mesajı kopyalayıp yeniden deneyin.",
+      "segment_unknown": "Seçilen segment artık yok; gönderim başlatılamadı. Mesajı kopyalayıp kitleyi yeniden seçin."
     },
     "scheduledFor": "{{when}} için zamanlandı.",
     "sourceCount_one": "{{count}} kaynak",
@@ -11388,16 +11406,16 @@
       "finished": "Bitti"
     },
     "create": {
-      "title": "Yeni toplu ileti",
+      "title": "Yeni toplu mesaj",
       "hint": "Ad ve kanalı seçin; kitleyi ve içeriği sonraki sayfada hazırlarsınız. Kitle önce bütün izinli müşteriler olarak gelir.",
       "submit": "Taslağı oluştur",
       "created": "Taslak oluşturuldu."
     },
     "fields": {
-      "name": "İletinin adı",
+      "name": "Mesajın adı",
       "nameHint": "Yalnız panelde görünür.",
       "channel": "Kanal",
-      "channelHint": "Her ileti tek kanaldan gider.",
+      "channelHint": "Her mesaj tek kanaldan gider.",
       "utm": "Kampanya kodu",
       "utmHint": "Mağaza bağlantılarına utm_campaign olarak eklenir; rapor satışları bununla bulur.",
       "subject": "Konu",
@@ -11415,13 +11433,13 @@
     },
     "editor": {
       "general": "Genel",
-      "parts": "İletinin bölümleri",
+      "parts": "Mesajın bölümleri",
       "tabs": {
         "audience": "Kitle",
         "content": "İçerik",
         "send": "Deneme ve gönderim"
       },
-      "saved": "İleti kaydedildi.",
+      "saved": "Mesaj kaydedildi.",
       "invalid": "Bazı alanlar eksik ya da hatalı; işaretli yerleri düzeltin.",
       "unsaved": "Kaydedilmemiş değişiklikler var; denemeden ve göndermeden önce kaydedin.",
       "incomplete": "Önce şunları yazın: {{fields}}.",
@@ -11430,11 +11448,11 @@
         "body": "e-posta metni",
         "sms_text": "SMS metni"
       },
-      "emptyAudience": "Bu kitlede iletiyi alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
+      "emptyAudience": "Bu kitlede mesajı alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
     },
     "audience": {
       "title": "Kimlere gidecek",
-      "description": "Bir ya da birkaç kaynak seçin. Aynı kişi birden çok kaynakta olsa da tek ileti alır; yalnız bu kanalda izni olanlara gider.",
+      "description": "Bir ya da birkaç kaynak seçin. Aynı kişi birden çok kaynakta olsa da tek mesaj alır; yalnız bu kanalda izni olanlara gider.",
       "all_consented": "Bütün izinli müşteriler",
       "all_consentedHint": "Bu kanalda ticari ileti izni veren bütün müşteri hesapları.",
       "newsletter": "Bülten aboneleri",
@@ -11467,7 +11485,7 @@
       "no_consent": "Bu kanalda izni yok",
       "suppressed": "Gönderim engeli listesinde",
       "iys_pending": "İzni İYS'ye henüz bildirilmedi",
-      "recent": "Son 24 saatte başka bir toplu ileti aldı",
+      "recent": "Son 24 saatte başka bir toplu mesaj aldı",
       "invalid_recipient": "Adresi ya da numarası geçersiz",
       "over_quota": "Günlük sınıra takıldı"
     },
@@ -11998,7 +12016,7 @@
         "brand": "Marka logosu",
         "content": "Sayfa ya da yazı",
         "landing": "Açılış sayfası",
-        "bulk_message": "Toplu ileti",
+        "bulk_message": "Toplu mesaj",
         "storefront": "Vitrin",
         "logo": "Logo",
         "share_image": "Paylaşım görseli",

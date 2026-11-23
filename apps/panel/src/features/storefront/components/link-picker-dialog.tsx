@@ -12,6 +12,7 @@ import {
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/tabs"
 import { useIsMobile } from "@qticaret/admin-ui/hooks/use-mobile"
+import { offeredKinds, useCollectionsOn } from "@/features/collections/api/flag"
 import { isStorefrontHref } from "@/features/settings/storefront"
 import { MENU_LIMITS, RECORD_KINDS } from "@/features/storefront/api/menus"
 import type { RecordKind } from "@/features/storefront/api/menus"
@@ -131,6 +132,12 @@ export function LinkPickerDialog({ row, onClose, onPick }: LinkPickerDialogProps
   const narrow = useIsMobile()
   const to = row?.to
   const current = to?.kind === kind && to.kind !== "url" ? to.target : null
+  // Collections off: not offered as a link; a link already to one keeps its tab
+  const collectionsOn = useCollectionsOn()
+  const groups = GROUPS.map((group) => ({
+    ...group,
+    kinds: offeredKinds(group.kinds, collectionsOn, to?.kind),
+  }))
   return (
     <Dialog
       open
@@ -154,7 +161,7 @@ export function LinkPickerDialog({ row, onClose, onPick }: LinkPickerDialogProps
           className="grid gap-4 md:grid-cols-[11rem_minmax(0,1fr)]"
         >
           <div className="flex flex-col gap-3">
-            {GROUPS.map((group) => (
+            {groups.map((group) => (
               <div key={group.key} className="flex flex-col gap-1">
                 <p
                   id={`menu-picker-${group.key}`}
@@ -179,19 +186,21 @@ export function LinkPickerDialog({ row, onClose, onPick }: LinkPickerDialogProps
               </div>
             ))}
           </div>
-          {GROUPS.flatMap((group) => group.kinds).map((each) => (
-            <TabsContent key={each} value={each} className="min-w-0">
-              {isRecordKind(each) ? (
-                <RecordPane kind={each} current={current} onPick={onPick} />
-              ) : each === "legal" ? (
-                <LegalPane current={current} onPick={onPick} />
-              ) : each === "system" ? (
-                <SystemPane current={current} onPick={onPick} />
-              ) : (
-                <UrlPane row={row} onPick={onPick} />
-              )}
-            </TabsContent>
-          ))}
+          {groups
+            .flatMap((group) => group.kinds)
+            .map((each) => (
+              <TabsContent key={each} value={each} className="min-w-0">
+                {isRecordKind(each) ? (
+                  <RecordPane kind={each} current={current} onPick={onPick} />
+                ) : each === "legal" ? (
+                  <LegalPane current={current} onPick={onPick} />
+                ) : each === "system" ? (
+                  <SystemPane current={current} onPick={onPick} />
+                ) : (
+                  <UrlPane row={row} onPick={onPick} />
+                )}
+              </TabsContent>
+            ))}
         </Tabs>
       </DialogContent>
     </Dialog>

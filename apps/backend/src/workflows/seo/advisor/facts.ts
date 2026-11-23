@@ -6,6 +6,7 @@ import type { AdvisorFacts, PageKind } from "../../../lib/seo/advisor"
 import { plainText } from "../../../lib/seo"
 import { COLLECTION_EXTENSION_FIELDS, isCollectionShown } from "../../catalog/collection-fields"
 import type { CollectionExtensionRow } from "../../catalog/collection-fields"
+import { collectionsOn } from "../../catalog/collections-flag"
 import { CATALOG_ENTITY_TYPES } from "../../catalog/entity-paths"
 import { liraOf } from "../facts"
 import type { FactRow } from "../facts"
@@ -245,8 +246,10 @@ export async function advisorFacts(
   const named = row as { title?: string | null; name?: string | null }
   const name = named.title ?? named.name ?? row.handle
   const noindex = own?.robots_override?.startsWith("noindex") ?? false
+  // Collections off (`catalog.collections`): no collection page is live
+  const kindOn = kind === "collection" ? await collectionsOn(container) : true
   return {
-    isListed: isLive(kind, row) && !noindex && !own?.canonical_override,
+    isListed: kindOn && isLive(kind, row) && !noindex && !own?.canonical_override,
     kind,
     name,
     handle: row.handle,

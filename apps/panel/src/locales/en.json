@@ -58,8 +58,9 @@
     "groups": {
       "sales": "Sales",
       "catalog": "Catalog",
-      "growth": "Growth",
-      "storefront": "Storefront"
+      "storefront": "Storefront",
+      "content": "Content",
+      "marketing": "Marketing"
     },
     "categories": "Categories",
     "inventory": "Inventory",
@@ -644,7 +645,7 @@
         "moving": "Moving addresses… {{percent}}%",
         "moved_one": "{{count}} page moved to its new address.",
         "moved_other": "{{count}} pages moved to their new addresses.",
-        "failed": "The addresses could not be moved; run the check again. Details in Settings > Jobs.",
+        "failed": "The addresses could not be moved; run the check again. Details in Settings > Audit log > Jobs.",
         "option": {
           "prefixed": "With prefix",
           "flat": "No prefix, at the root"
@@ -770,6 +771,11 @@
             "label": "Product videos",
             "summary": "Uploaded videos and YouTube links on product pages.",
             "description": "Product pages show the videos the shop uploads and YouTube links. Uploads count toward the plan's storage limit."
+          },
+          "collections": {
+            "label": "Collections",
+            "summary": "Lists that gather products under a theme, each with its own page.",
+            "description": "Collections gather products under a theme (a summer selection, gift ideas); each has its own page and can be used in menus and storefront sections. Turned off, collection pages and links leave the storefront and no collection is deleted; turned back on, everything returns."
           }
         },
         "marketing": {
@@ -833,6 +839,13 @@
             "description": "Wholesalers are opened from the panel; signed in, they see products at their level’s or their own prices, without KDV, and order. Public prices do not change. Turned off, wholesalers see retail prices; their records and prices are kept."
           }
         }
+      },
+      "collectionsOff": {
+        "title": "Turn collections off?",
+        "description": "Collection pages and the collection links in menus and storefront sections go away. Collections are not deleted; turning them back on brings them all back.",
+        "confirm": "Turn collections off",
+        "live_one": "{{count}} collection page is live. Its address will answer 404 and may lose its search rankings.",
+        "live_other": "{{count}} collection pages are live. Their addresses will answer 404 and may lose their search rankings."
       }
     },
     "jobs": {
@@ -900,7 +913,10 @@
       "export": "Export as CSV",
       "exportStarted": "Export started. Download the file from Jobs when it is ready.",
       "openJobs": "Go to Jobs",
-      "retention": "Exported files are kept on the Jobs page for a week.",
+      "retention": "Exported files are kept in the Jobs tab for a week.",
+      "tabs": {
+        "log": "Audit log"
+      },
       "exportFiltered": "Export the filtered entries as CSV",
       "emptyFiltered": "No entry matches these filters.",
       "filters": {
@@ -2046,13 +2062,11 @@
       "integrations": "Whether the connected services are working",
       "ai": "The services that draft texts, their keys and this month's use",
       "features": "Shop features you can turn on or off",
-      "jobs": "Long jobs such as exports, and their files",
-      "audit": "Who changed what in the panel, and when",
+      "audit": "Who changed what in the panel and when, long jobs such as exports and their files",
       "marketing": "Cart reminders, product feeds, Merchant Center and conversion measurement",
       "accounting": "The month's package for the accountant",
       "api": "API keys for your own systems",
-      "team": "Who uses the panel, with which role, and invitations",
-      "security": "Two-step verification, the team's requirement, fraud prevention",
+      "security": "Your account and two-step verification, team members and invitations, fraud prevention",
       "legal": "Contracts, policies and the privacy notice",
       "einvoice": "Invoicing program, timing and series, carrier details, accounting",
       "migration": "Catalog, customers and 301s from the old platform",
@@ -2214,7 +2228,7 @@
       },
       "bulk": {
         "title": "Bulk message rules",
-        "description": "Limits for the e-mail and SMS campaigns sent from Growth > Bulk messages.",
+        "description": "Limits for the e-mail and SMS campaigns sent from Marketing > Bulk messages.",
         "cap": "At most one bulk message per person in 24 hours",
         "capHint": "Anyone who got another bulk message in the last 24 hours is left out of a new one; fewer complaints and unsubscribes.",
         "hours": "Bulk SMS hours",
@@ -2239,7 +2253,7 @@
         "privacy": "Individual customers' names are not in it; corporate customers' registered names and tax ids are. Each package is recorded in the audit log.",
         "month": "Month",
         "download": "Download the package",
-        "later": "The package is being made; download it from Settings > Jobs when it is done.",
+        "later": "The package is being made; download it from Settings > Audit log > Jobs when it is done.",
         "failed": "The package could not be made."
       }
     },
@@ -5162,7 +5176,7 @@
       "button": "Export",
       "excel": "Download as Excel",
       "csv": "Download CSV",
-      "later": "The file is being prepared; download it from Settings > Jobs when it is ready.",
+      "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
       "failed": "The order file could not be made."
     },
     "addons": {
@@ -6018,7 +6032,7 @@
     "export": {
       "excel": "Download as Excel",
       "csv": "Download CSV",
-      "later": "The file is being made; once ready, download it from Settings > Jobs.",
+      "later": "The file is being made; once ready, download it from Settings > Audit log > Jobs.",
       "failed": "The report file could not be made."
     },
     "daily": {
@@ -6595,7 +6609,7 @@
       "title": "Sitemap",
       "hint": "Search engines find your pages in these files; they refresh a few minutes after changes.",
       "refresh": "Refresh now",
-      "queued": "The sitemap is being refreshed; follow it in Settings > Jobs.",
+      "queued": "The sitemap is being refreshed; follow it in Settings > Audit log > Jobs.",
       "hostMissing": "No sitemap without the main domain: addresses must be complete.",
       "noIndexing": "This instance is closed to search engines: robots.txt blocks all crawlers, pages say noindex.",
       "generated": "made {{when}}",
@@ -7435,6 +7449,10 @@
       "noMatch": "No product matches your search.",
       "removeOf": "{{name}}: take out of the collection",
       "removed": "Product taken out of the collection."
+    },
+    "gate": {
+      "off": "Collections are off in this shop. Your collections were not deleted; turn them on to manage them here again.",
+      "turnOn": "Go to features"
     }
   },
   "address": {

@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import {
   CATALOG_BOOKING,
+  CATALOG_COLLECTIONS,
   GIFT_CARDS,
   PRODUCT_ADDONS,
 } from "../../../modules/platform-settings/features"
@@ -86,6 +87,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     giftCards,
     addons,
     booking,
+    collections,
     values,
     marks,
     shared,
@@ -97,6 +99,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     settings.isFeatureEnabled(GIFT_CARDS),
     settings.isFeatureEnabled(PRODUCT_ADDONS),
     settings.isFeatureEnabled(CATALOG_BOOKING),
+    settings.isFeatureEnabled(CATALOG_COLLECTIONS),
     shopInfoValues(req.scope),
     shopMarks(req.scope),
     liveSettings(req.scope),
@@ -105,6 +108,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     PromotionSettings,
     ShippingSettings,
     MarketingSettings,
+    boolean,
     boolean,
     boolean,
     boolean,
@@ -129,7 +133,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     delivery: storefrontDelivery(shipping, marketing),
     // What the storefront offers only while the shop has it on (its routes answer 404 otherwise)
     // Dated products (adr/0076): the sections that need them drawn only while on (adr/0077 §8)
-    features: { gift_cards: giftCards, product_addons: addons, booking },
+    // Collections (`catalog.collections`): their sections' products and links drawn only while on
+    features: { gift_cards: giftCards, product_addons: addons, booking, collections },
     // The footer's ways to pay and carriers, as the shop has them set up (adr/0046 Ek 2026-11-04)
     marks,
   })

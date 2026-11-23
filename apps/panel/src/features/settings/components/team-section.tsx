@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
-import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
@@ -143,11 +142,12 @@ function MemberRow({
 }
 
 /**
- * Settings > Team (F12.6, adr/0040): who works in the panel and with which
- * role. The owner invites, changes roles and takes people off; an admin
- * reads the list.
+ * Settings > Security > Team (F12.6, adr/0040; the owner, 2026-11-23: a
+ * tab of Security, no page of its own): who works in the panel and with
+ * which role. The owner invites, changes roles and takes people off; an
+ * admin reads the list.
  */
-export function TeamPage() {
+export function TeamSection() {
   const { t } = useTranslation()
   const team = useQuery(teamQuery())
   const manage = useCan("staff")
@@ -174,14 +174,16 @@ export function TeamPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t(`${T}.title`)}
-        description={t(`${T}.description`)}
+    <>
+      {manage ? <LimitNotice limit="staff" id={SEATS_NOTICE} /> : null}
+      <SectionCard
+        title={t(`${T}.members`)}
+        description={t(`${T}.membersHint`)}
+        flush
         action={
           manage ? (
             <Button
-              // The notice below says why at the limit, the strip above every page while
+              // The notice above says why at the limit, the strip above every page while
               // the shop is restricted
               disabled={inviteClosed}
               title={
@@ -201,9 +203,7 @@ export function TeamPage() {
             </Button>
           ) : undefined
         }
-      />
-      {manage ? <LimitNotice limit="staff" id={SEATS_NOTICE} /> : null}
-      <SectionCard title={t(`${T}.members`)} description={t(`${T}.membersHint`)} flush>
+      >
         {team.isPending ? (
           <div className="border-t p-5">
             <LoadingRows />
@@ -298,6 +298,6 @@ export function TeamPage() {
           setRemoving(null)
         }}
       />
-    </div>
+    </>
   )
 }

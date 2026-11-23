@@ -41,7 +41,7 @@ describe("the bulk messages' settings (adr/0050)", () => {
   it("turns the 24-hour limit off and moves the SMS hours, saving only what changed", async () => {
     const user = userEvent.setup()
     renderCard()
-    const cap = await screen.findByRole("switch", { name: /24 saatte en çok bir toplu ileti/ })
+    const cap = await screen.findByRole("switch", { name: /24 saatte en çok bir toplu mesaj/ })
     expect(cap).toBeChecked()
 
     await user.click(cap)

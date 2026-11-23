@@ -2,7 +2,14 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { storedListingDoc } from "../../../lib/catalog/listing-description"
 import { containsPattern } from "../../../lib/security"
-import { COLLECTION_EXTENSION_FIELDS } from "../../../workflows/catalog/collection-fields"
+import { URL_REGISTRY_MODULE } from "../../../modules/url-registry"
+import type UrlRegistryModuleService from "../../../modules/url-registry/service"
+import {
+  COLLECTION_EXTENSION_FIELDS,
+  COLLECTION_LIVE_FIELDS,
+  isCollectionShown,
+} from "../../../workflows/catalog/collection-fields"
+import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../../../workflows/catalog/entity-paths"
 import type { CollectionExtensionRow } from "../../../workflows/catalog/collection-fields"
 import type { AdminGetCollectionBoardType } from "./validators"
 
@@ -70,17 +77,44 @@ async function productCounts(
   return new Map(counts)
 }
 
+/**
+ * How many collections have a page on the storefront by their own state:
+ * shown and holding an active path. What turning `catalog.collections` off
+ * would take offline (the panel's warning says the count); the flag itself
+ * is not read, so the number stays the same either way.
+ */
+async function liveCount(container: MedusaContainer): Promise<number> {
+  const entries = await container
+    .resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+    .listUrlEntries(
+      { locale: CATALOG_LOCALE, entity_type: CATALOG_ENTITY_TYPES.collection, status: "active" },
+      { select: ["entity_id"] }
+    )
+  if (entries.length === 0) {
+    return 0
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "product_collection",
+    fields: ["id", ...COLLECTION_LIVE_FIELDS],
+    filters: { id: [...new Set(entries.map((entry) => entry.entity_id))] },
+  })
+  return (data as CollectionRow[]).filter(isCollectionShown).length
+}
+
 /** A page of collections by title, with their product counts, pictures and visibility. */
 export async function readCollections(
   container: MedusaContainer,
   query: AdminGetCollectionBoardType
 ) {
-  const { data, metadata } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "product_collection",
-    fields: FIELDS,
-    filters: query.q ? { title: { $ilike: containsPattern(query.q) } } : {},
-    pagination: { skip: query.offset, take: query.limit, order: { title: "ASC" } },
-  })
+  const [{ data, metadata }, live] = await Promise.all([
+    container.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: "product_collection",
+      fields: FIELDS,
+      filters: query.q ? { title: { $ilike: containsPattern(query.q) } } : {},
+      pagination: { skip: query.offset, take: query.limit, order: { title: "ASC" } },
+    }),
+    liveCount(container),
+  ])
   const rows = data as CollectionRow[]
   const counts = await productCounts(
     container,
@@ -89,6 +123,7 @@ export async function readCollections(
   return {
     collections: rows.map((row) => presentCollection(row, counts.get(row.id) ?? 0)),
     count: metadata?.count ?? rows.length,
+    live_count: live,
     offset: query.offset,
     limit: query.limit,
   }

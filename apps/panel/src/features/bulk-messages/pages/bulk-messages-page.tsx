@@ -141,7 +141,7 @@ function BulkList({ onNew }: { onNew: () => void }) {
   )
 }
 
-/** Büyüme > Toplu ileti (adr/0050 §10): bulk e-mail and SMS to consented customers. */
+/** Pazarlama > Toplu mesaj (adr/0050 §10): bulk e-mail and SMS to consented customers. */
 export function BulkMessagesPage() {
   const { t } = useTranslation()
   const gate = useBulkAccess()
