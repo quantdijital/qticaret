@@ -10,6 +10,7 @@ import type {
   MarqueeSettings,
   ProductSource,
   RelatedProductsVariant,
+  ReviewsVariant,
   ScrollerSettings,
   SectionDevice,
   SectionLook,
@@ -22,18 +23,24 @@ import type {
   RichTextImageSide,
   RichTextVariant,
   TrustBadgesVariant,
+  TrustCardStep,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import type {
   CategoriesCollageFields,
   CategoriesPanelsFields,
+  CategoriesIconsFields,
   CategoriesLinkedFields,
 } from "@/features/storefront/api/layout-cards"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
 import type { ProductsSection } from "@/features/storefront/api/layout-shelf"
 import type { StripGallerySection } from "@/features/storefront/api/layout-strips"
-import type { StatsSection, StepsSection } from "@/features/storefront/api/layout-points"
+import type {
+  PhotoCollageSection,
+  StatsSection,
+  StepsSection,
+} from "@/features/storefront/api/layout-points"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
@@ -176,7 +183,13 @@ interface CategoriesBase extends BodySectionBase {
 
 /** Today's picture tiles, the linked cards, the collage or the panels, each with its own fields (adr/0049). */
 export type CategoriesSection = CategoriesBase &
-  ({ variant: "tiles" } | CategoriesLinkedFields | CategoriesCollageFields | CategoriesPanelsFields)
+  (
+    | { variant: "tiles" }
+    | CategoriesLinkedFields
+    | CategoriesCollageFields
+    | CategoriesPanelsFields
+    | CategoriesIconsFields
+  )
 
 /**
  * One product up close (adr/0046 Ek 2026-11-05): the storefront adds its
@@ -217,10 +230,15 @@ export interface PostsSection extends BodySectionBase {
   link?: LayoutLink | null
 }
 
+/** The shop's newest reviews (adr/0077 §10): today's grid, or one card each in a sliding row. */
 export interface ReviewsSection extends BodySectionBase {
   type: "reviews"
   title: string | null
   limit: number
+  /** The server fills `grid` on reading. */
+  variant: ReviewsVariant
+  /** `carousel`: the scroller kit's settings. */
+  scroller?: ScrollerSettings
 }
 
 /** The latest posts or reviews: a title and how many. */
@@ -262,11 +280,14 @@ export interface RichTextSection extends BodySectionBase {
   questions?: PageTextSwitch
 }
 
-export interface TrustBadgesSection extends BodySectionBase {
-  type: "trust_badges"
-  /** How the strip is drawn (adr/0049 Ek 2026-11-14 §2); the server fills the default on reading. */
-  variant: TrustBadgesVariant
-}
+/**
+ * How the strip is drawn (adr/0049 Ek 2026-11-14 §2; the server fills the
+ * default on reading); the card with its lift (adr/0077 §10 Ek).
+ */
+export type TrustBadgesSection = BodySectionBase & { type: "trust_badges" } & (
+    | { variant: Exclude<TrustBadgesVariant, "card"> }
+    | { variant: "card"; lift: TrustCardStep<"lift"> }
+  )
 
 export interface HelpSection extends BodySectionBase {
   type: "help"
@@ -371,6 +392,7 @@ export type HomeSection =
   | StripGallerySection
   | StatsSection
   | StepsSection
+  | PhotoCollageSection
   | CategoriesSection
   | ProductsSection
   | FeaturedProductSection

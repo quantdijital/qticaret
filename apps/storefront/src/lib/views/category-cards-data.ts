@@ -140,7 +140,7 @@ export type CardedPart =
   | { variant: "collage"; collage: CategoryCollageView }
   | { variant: "panels"; panels: CategoryPanelsView }
 
-/** The cards and the variant's own part for `linked`, `collage` and `panels`; null for the tiles. */
+/** The cards and the variant's own part for `linked`, `collage` and `panels`; null for the tiles and the icon row. */
 export async function cardedCategoriesView(
   section: StoreCategoriesSection,
   t: Translate,
@@ -159,6 +159,8 @@ export async function cardedCategoriesView(
       const { cards, panels } = await panelsCategoriesView(section, t, home)
       return { cards, part: { variant: "panels", panels } }
     }
+    // The icon row is not carded: the section's view draws it before asking here
+    case "icons":
     case "tiles":
     case undefined:
       return null

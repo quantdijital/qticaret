@@ -68,6 +68,7 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
   "strip_gallery",
   "stats",
   "steps",
+  "photo_collage",
   "rich_text",
   "faq",
   "newsletter",
@@ -172,6 +173,7 @@ function wordField(section: AnySection, word: string): PreviewField | null {
       section.variant === "intro_panel" &&
       (word === "eyebrow" || word === "intro" || word === "link")) ||
     (word === "eyebrow" && section.type === "banner" && section.variant === "split") ||
+    (section.type === "photo_collage" && word === "intro") ||
     // The picture beside the text (adr/0073 §3), while the variant shows its field
     (word === "image" && section.type === "rich_text" && section.variant === "with_image") ||
     (word === "more" && ownMore(section)) ||

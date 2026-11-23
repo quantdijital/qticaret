@@ -16,6 +16,7 @@ import { catalogSlides } from "../../lib/storefront/sections/hero"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
 import { shelfSources } from "../../lib/storefront/sections/products"
 import { stripGalleryImages, stripRecord } from "../../lib/storefront/sections/strip-gallery"
+import { photoCollageImages } from "../../lib/storefront/sections/photo-collage"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
@@ -64,6 +65,10 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   // The numbered steps' one link under them (adr/0077 §10)
   if (section.type === "steps") {
     return section.link ? [section.link] : []
+  }
+  // A collage photograph's own link (adr/0077 §10)
+  if (section.type === "photo_collage") {
+    return section.items.flatMap((each) => (each.link ? [each.link] : []))
   }
   // The catalog header's highlighted last link and its strip's note (adr/0049 Ek 2026-11-15)
   if (section.type === "header_bar" && section.variant === "catalog") {
@@ -155,6 +160,9 @@ export function imagesOf(section: BodySection): string[] {
   }
   if (section.type === "strip_gallery") {
     return stripGalleryImages(section)
+  }
+  if (section.type === "photo_collage") {
+    return photoCollageImages(section)
   }
   if (section.type === "rich_text") {
     // The text's own pictures and the one beside it (adr/0073 §3, `with_image`)

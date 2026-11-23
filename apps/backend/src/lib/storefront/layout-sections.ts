@@ -5,7 +5,6 @@ import { announcementBar } from "./sections/announcement-bar"
 import { banner, placedBanner } from "./sections/banner"
 import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
-import { counted } from "./sections/counted"
 import { faq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
 import { googleRating } from "./sections/google-rating"
@@ -21,6 +20,8 @@ import { posts } from "./sections/posts"
 import { priceBands } from "./sections/price-bands"
 import { stats } from "./sections/stats"
 import { steps } from "./sections/steps"
+import { photoCollage } from "./sections/photo-collage"
+import { reviews } from "./sections/reviews"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -58,10 +59,11 @@ export const pageSection = z.discriminatedUnion(
     featuredProduct,
     brands,
     posts,
-    counted("reviews", 12, 6),
+    reviews,
     googleRating,
     stats,
     steps,
+    photoCollage,
     richText,
     trustBadges,
     newsletter,

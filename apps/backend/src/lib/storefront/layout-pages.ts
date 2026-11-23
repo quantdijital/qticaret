@@ -3,7 +3,6 @@ import { LAYOUT_LIMITS } from "./layout-fields"
 import { banner } from "./sections/banner"
 import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
-import { counted } from "./sections/counted"
 import { posts } from "./sections/posts"
 import { faq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
@@ -15,6 +14,8 @@ import { products } from "./sections/products"
 import { pageRichText } from "./sections/rich-text"
 import { stats } from "./sections/stats"
 import { steps } from "./sections/steps"
+import { photoCollage } from "./sections/photo-collage"
+import { reviews } from "./sections/reviews"
 import { stripGallery } from "./sections/strip-gallery"
 import { trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -50,6 +51,7 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "google_rating",
   "stats",
   "steps",
+  "photo_collage",
   "contact",
   "payment_facts",
   "shipping_facts",
@@ -75,10 +77,11 @@ export const contentPageSection = z.discriminatedUnion(
     categories,
     brands,
     posts,
-    counted("reviews", 12, 6),
+    reviews,
     googleRating,
     stats,
     steps,
+    photoCollage,
     contact,
     paymentFacts,
     shippingFacts,

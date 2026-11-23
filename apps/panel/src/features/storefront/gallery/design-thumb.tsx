@@ -29,6 +29,7 @@ const SHAPES: Record<string, Shape> = {
   google_rating: "strip",
   stats: "strip",
   steps: "text",
+  photo_collage: "cards",
 }
 
 // How much of the page each kind takes, as a share of the room

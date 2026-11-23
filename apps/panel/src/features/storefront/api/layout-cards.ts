@@ -1,8 +1,10 @@
 import type {
   CategoryCardStep,
   CategoryCollageStep,
+  CategoryIconsStep,
   FooterBarStep,
   PaymentBadge,
+  SectionIcon,
 } from "@qticaret/types"
 
 // The linked category cards and the footer bar's own settings in the theme
@@ -35,6 +37,18 @@ export interface CategoriesCollageFields {
 /** The panels' own fields (`panels`, adr/0049 Ek 2026-11-19): the collage's, under their own name. */
 export interface CategoriesPanelsFields extends Omit<CategoriesCollageFields, "variant"> {
   variant: "panels"
+}
+
+/**
+ * The icon row's own fields (`icons`, adr/0077 §10 Ek): the disc's ground,
+ * the row on a phone, and each named category's icon by its id (none: its
+ * picture, else its initial).
+ */
+export interface CategoriesIconsFields {
+  variant: "icons"
+  disc: CategoryIconsStep<"disc">
+  phone: CategoryIconsStep<"phone">
+  category_icons: Record<string, SectionIcon>
 }
 
 /** The footer's settings, the same in every footer variant. */

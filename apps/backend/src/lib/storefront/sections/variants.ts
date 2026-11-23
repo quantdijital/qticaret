@@ -14,13 +14,15 @@ import { z } from "@medusajs/framework/zod"
  * variant goes into the contract first, then here, then into the theme.
  */
 export const SECTION_VARIANTS = {
-  trust_badges: ["strip", "lined"],
+  // `card` (adr/0077 §10 Ek): one white floating box, lifted over the section before it while `lift` is on
+  trust_badges: ["strip", "lined", "card"],
   // H17: the category list, the opening's tile and two category tiles side by side
   hero: ["standard", "category_list"],
   // Today's picture tiles; `linked` each category a card with its subcategories' links;
   // `collage` photo-led cards filling each row, the first wider
   // `panels` (Ek 2026-11-19) frameless graphite panels, the first tall beside the others
-  categories: ["tiles", "linked", "collage", "panels"],
+  // `icons` (adr/0077 §10 Ek): one row of round discs, each an icon over its name
+  categories: ["tiles", "linked", "collage", "panels", "icons"],
   // The product rail (adr/0049 Ek 2026-11-15): today's grid first; `strips`, `ranked`, `stage_list` Ek 2026-11-16
   products: [
     "grid",
@@ -34,6 +36,8 @@ export const SECTION_VARIANTS = {
   ],
   // A product page's related products (bilesen-denetimi (b) 7): today's grid first
   related_products: ["grid", "carousel"],
+  // The shop's reviews (adr/0077 §10): today's grid first; `carousel` one card each, sliding
+  reviews: ["grid", "carousel"],
   // The main sections (adr/0049 Ek 2026-11-14 §5, §7): today's drawing first.
   // `centered` is the theme setting's centred header (`header.layout`), read
   // into the bar; its drawing stays on adr/0062 karar 6's branch. `catalog` is N14

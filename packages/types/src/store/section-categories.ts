@@ -11,6 +11,8 @@
  * Imports nothing at run time (the storefront takes it from the
  * `@qticaret/types/section-categories` subpath, which Turbopack resolves).
  */
+import type { SectionIcon } from "./section-icons.js"
+
 export const CATEGORY_CARD_SETTINGS = {
   /** Cards in a row on a wide screen; a tablet shows two. */
   columns: [2, 3, 4],
@@ -120,4 +122,55 @@ export interface StoreCategoriesLinked {
   frame: CategoryCardStep<"frame">
   /** Subcategory links under each card's name at most (0–8). */
   links: number
+}
+
+/**
+ * The `icons` variant (adr/0077 §10 Ek, "ikonlu bölümler"): the categories
+ * in one row, each a round light disc holding its icon and its name under
+ * it. Each category's icon is picked in the section (`category_icons`, by
+ * category id, from `SECTION_ICONS`), never on the category; one with none
+ * shows its own picture in the disc, else its name's first letter.
+ * `disc`: the disc's ground, the main colour's light tint (`tint`), the
+ * page's quiet field (`well`) or a hairline ring (`line`). `phone`: on a
+ * narrow screen the row slides sideways (`scroll`) or wraps onto more rows
+ * (`wrap`). The categories named, else the top ones; their count under the
+ * name while `show_count` is on.
+ */
+export const CATEGORY_ICONS_SETTINGS = {
+  disc: ["tint", "well", "line"],
+  phone: ["scroll", "wrap"],
+} as const satisfies Record<string, readonly [string, ...string[]]>
+
+export type CategoryIconsSetting = keyof typeof CATEGORY_ICONS_SETTINGS
+export type CategoryIconsStep<S extends CategoryIconsSetting> =
+  (typeof CATEGORY_ICONS_SETTINGS)[S][number]
+
+/** A section switched to `icons`, and what a reader takes for a field it lacks. */
+export const CATEGORY_ICONS_DEFAULTS: {
+  readonly [S in CategoryIconsSetting]: CategoryIconsStep<S>
+} = {
+  disc: "tint",
+  phone: "scroll",
+}
+
+/** `icons`' own fields as `GET /store/storefront-layout` prints them. */
+export interface StoreCategoriesIcons {
+  variant: "icons"
+  disc: CategoryIconsStep<"disc">
+  phone: CategoryIconsStep<"phone">
+  /** Each picked icon by category id; a category with none is absent. */
+  category_icons: Record<string, SectionIcon>
+}
+
+/** The icon row's settings as a reader takes them: one missing or off the list reads as its default. */
+export function categoryIconsSettingsOf(section: Partial<Record<CategoryIconsSetting, unknown>>): {
+  [S in CategoryIconsSetting]: CategoryIconsStep<S>
+} {
+  const step = <S extends CategoryIconsSetting>(name: S): CategoryIconsStep<S> => {
+    const steps: readonly unknown[] = CATEGORY_ICONS_SETTINGS[name]
+    return steps.includes(section[name])
+      ? (section[name] as CategoryIconsStep<S>)
+      : CATEGORY_ICONS_DEFAULTS[name]
+  }
+  return { disc: step("disc"), phone: step("phone") }
 }

@@ -12,6 +12,7 @@ import {
   FileText,
   GalleryHorizontal,
   GalleryHorizontalEnd,
+  Images,
   LayoutGrid,
   LifeBuoy,
   ListOrdered,
@@ -48,6 +49,7 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   strip_gallery: Columns3,
   stats: ChartNoAxesColumn,
   steps: ListOrdered,
+  photo_collage: Images,
   categories: LayoutGrid,
   products: ShoppingBag,
   featured_product: ScanSearch,
@@ -106,6 +108,7 @@ function ownTitle(section: AnySection): string | null {
     case "strip_gallery":
     case "stats":
     case "steps":
+    case "photo_collage":
       return section.title
     case "announcement_bar":
       return section.lines.find((line) => line.trim() !== "") ?? null

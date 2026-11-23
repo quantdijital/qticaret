@@ -6,7 +6,7 @@ import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
 import { listProblems } from "./shelf-problems"
 import { stripGalleryProblems } from "./strip-problems"
-import { statsProblems, stepsProblems } from "./points-problems"
+import { collageProblems, statsProblems, stepsProblems } from "./points-problems"
 import { postsProblems, splitEyebrowProblem } from "./band-problems"
 import { marqueeLimitIds } from "./page-limits"
 import { footerBandProblem, footerRowsProblems } from "./footer-rows-problems"
@@ -115,6 +115,8 @@ function fieldsOf(section: AnySection): Found[] {
       return statsProblems(section)
     case "steps":
       return stepsProblems(section)
+    case "photo_collage":
+      return collageProblems(section)
     case "banner":
       return [
         ["slides", section.slides.length === 0 ? "slidesRequired" : null],
