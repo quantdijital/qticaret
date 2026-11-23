@@ -38,6 +38,8 @@ export interface TemplateForm {
   description: string
   groups: GroupForm[]
   definitions: DefinitionForm[]
+  /** Add-on templates its products get, in order (adr/0052 Ek 2026-11-23); saved on their own. */
+  addonTemplateIds: string[]
 }
 
 export const emptyDefinition = (): DefinitionForm => ({
@@ -89,8 +91,13 @@ export const templateForm = (template?: AttributeTemplate | null): TemplateForm 
     definitions: [...(template?.definitions ?? [])]
       .sort((a, b) => a.rank - b.rank)
       .map((definition) => definitionForm(definition, keys)),
+    addonTemplateIds: [...(template?.addon_template_ids ?? [])],
   }
 }
+
+/** Whether the carried add-on templates changed: they are saved by their own route. */
+export const carriedChanged = (saved: AttributeTemplate | null, form: TemplateForm): boolean =>
+  JSON.stringify(saved?.addon_template_ids ?? []) !== JSON.stringify(form.addonTemplateIds)
 
 const orNull = (text: string): string | null => (text.trim() === "" ? null : text.trim())
 

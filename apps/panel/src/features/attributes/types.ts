@@ -47,6 +47,8 @@ export interface AttributeTemplate {
   /** None or empty: the spec table is one list. Missing from a backend before it. */
   groups?: AttributeGroup[] | null
   definitions: AttributeDefinition[]
+  /** Add-on templates its products get, in order (adr/0052 Ek 2026-11-23); none: null. */
+  addon_template_ids?: string[] | null
 }
 
 export type AttributeValue = string | number | boolean | string[] | null
