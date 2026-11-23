@@ -11889,7 +11889,7 @@
   },
   "plan": {
     "title": "Abonelik",
-    "description": "Paketiniz, limitleriniz ve kullanımınız, ödeme durumunuz. Bu sayfa bilgi içindir; paket değişikliği için bizimle iletişime geçebilirsiniz.",
+    "description": "Paketiniz, sıradaki ödemeniz ve limitlerinizin kullanımı.",
     "unmanaged": "Bu mağazada paket limiti yok: ürün, ekip, depolama ve içerik taslakları sınırsızdır.",
     "loadFailed": "Abonelik bilgileri yüklenemedi.",
     "view": "Aboneliği gör",
@@ -11904,31 +11904,24 @@
       "howToPay": "Ödeme bilgileri"
     },
     "package": {
-      "title": "Paket",
-      "text": "Mağazanızın paketi ve durumu.",
-      "name": "Paket",
-      "status": "Mağaza durumu",
-      "period": "Bu dönem",
+      "title": "Paketiniz",
       "none": "Paket tanımlı değil"
-    },
-    "statuses": {
-      "provisioning": "Kuruluyor",
-      "active": "Etkin",
-      "restricted": "Kısıtlı",
-      "suspended": "Askıda",
-      "closing": "Kapanıyor",
-      "closed": "Kapalı"
     },
     "usage": {
       "title": "Limitler ve kullanım",
-      "text": "Toplam ve bu ayki kullanımınız. Limitin %80'inden itibaren sarı, yeni kaydı durduran bir limitte kırmızı görünür.",
-      "listLabel": "Limitler ve kullanım",
+      "text": "Limitin %80'ine gelince sarı, yeni kayıt eklenemeyecek kadar dolunca kırmızı görünür.",
+      "totals": "Mağaza geneli",
+      "totalsHint": "Toplam kayıtlarınız.",
+      "monthly": "Bu ay · {{period}}",
+      "monthlyHint": "Ay başında sıfırlanır.",
       "barLabel": "{{name}}: {{value}}",
       "of": "{{used}} / {{max}}",
       "unlimited": "{{used}} · sınırsız",
+      "left": "{{value}} kaldı",
+      "over": "{{value}} fazla",
       "pending_one": "{{count}} bekleyen davet dahil",
       "pending_other": "{{count}} bekleyen davet dahil",
-      "ordersNote": "Uyarı, engellenmez",
+      "ordersNote": "Siparişler hiçbir zaman durdurulmaz",
       "tone": {
         "warn": "Limite yaklaştı",
         "full": "Limitte",
@@ -11942,25 +11935,6 @@
       "storage_mb": "Depolama",
       "llm_credits_per_month": "Bu ayki içerik taslakları",
       "custom_domains": "Özel alan adları"
-    },
-    "mb": "{{value}} MB",
-    "billing": {
-      "title": "Ödeme",
-      "text": "Abonelik ödemenizin durumu ve sıradaki ödeme.",
-      "status": "Ödeme durumu",
-      "nextDue": "Sonraki ödeme günü",
-      "graceEnds": "Ek süre bitişi",
-      "amount": "Tutar",
-      "none": "—",
-      "instruction": "Ödeme talimatı",
-      "noInstruction": "Ödeme talimatı, ödeme günü yaklaştığında burada görünür.",
-      "statuses": {
-        "trialing": "Deneme süresinde",
-        "active": "Güncel",
-        "past_due": "Gecikmiş",
-        "restricted": "Kısıtlı",
-        "cancelled": "Sona erdi"
-      }
     },
     "notice": {
       "products": {
@@ -11985,7 +11959,53 @@
       }
     },
     "createBlocked": "Ürün limitinize ulaştığınız için yeni ürün eklenemez.",
-    "inviteBlocked": "Ekip limitinize ulaştığınız için yeni davet gönderilemez."
+    "inviteBlocked": "Ekip limitinize ulaştığınız için yeni davet gönderilemez.",
+    "loading": "Abonelik bilgileri yükleniyor",
+    "state": {
+      "provisioning": "Kuruluyor",
+      "trialing": "Deneme süresinde",
+      "active": "Etkin",
+      "due_soon": "Ödeme yaklaşıyor",
+      "past_due": "Ödeme gecikti",
+      "restricted": "Kısıtlı",
+      "suspended": "Askıda",
+      "cancelled": "Sona erdi",
+      "closing": "Kapanıyor",
+      "closed": "Kapalı"
+    },
+    "stateText": {
+      "provisioning": "Mağazanız kuruluyor; paketiniz kurulum bitince etkinleşir.",
+      "trialing": "Deneme süreniz devam ediyor. Süre bitince ilk ödemeniz başlar.",
+      "active": "Aboneliğiniz güncel.",
+      "due_soon": "Ödeme gününüz yaklaşıyor. Ödeme bilgileri yanda.",
+      "past_due": "Ödemeniz gecikti. Ek süre bitmeden ödenirse hiçbir şey kısıtlanmaz; vitrininiz satışa devam ediyor.",
+      "restricted": "Ödeme gecikti, panel salt okunur. Ödeme alınınca kısıtlama kalkar; vitrininiz satışa devam ediyor.",
+      "suspended": "Mağazanız askıda: vitrin ziyaretçilere kapalı. Ayrıntılar için bizimle iletişime geçin.",
+      "cancelled": "Aboneliğiniz sona erdi. Yeniden başlatmak için bizimle iletişime geçin.",
+      "closing": "Mağazanız kapanıyor.",
+      "closed": "Mağazanız kapalı."
+    },
+    "facts": {
+      "nextDue": "Sonraki ödeme",
+      "lateDue": "Geciken ödeme",
+      "trialEnds": "Deneme bitişi",
+      "nothingDue": "Bekleyen ödeme yok",
+      "amount": "Tutar",
+      "firstAmount": "İlk ödeme tutarı",
+      "graceEnds": "Ek süre bitişi",
+      "graceHint": "Bu tarihe kadar ödenmezse panel kısıtlanır.",
+      "period": "Kullanım dönemi",
+      "periodHint": "Aylık limitler her ayın başında sıfırlanır."
+    },
+    "payment": {
+      "title": "Nasıl ödenir",
+      "none": "Ödeme bilgileri, ödeme günü yaklaştığında burada görünür.",
+      "copy": "Kopyala",
+      "copied": "Ödeme bilgileri kopyalandı.",
+      "copyFailed": "Kopyalanamadı; metni seçip kopyalayabilirsiniz.",
+      "changeTitle": "Paket değişikliği",
+      "changeText": "Paketinizi yükseltmek ya da değiştirmek için bizimle iletişime geçin."
+    }
   },
   "wholesale": {
     "gate": {

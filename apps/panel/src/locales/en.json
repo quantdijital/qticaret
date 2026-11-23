@@ -11889,7 +11889,7 @@
   },
   "plan": {
     "title": "Subscription",
-    "description": "Your package, limits and usage, and payment status. This page is for information; contact us to change your package.",
+    "description": "Your package, your next payment and the use of your limits.",
     "unmanaged": "This shop has no package limits: products, team, storage and content drafts are unlimited.",
     "loadFailed": "The subscription could not be loaded.",
     "view": "View subscription",
@@ -11904,31 +11904,24 @@
       "howToPay": "How to pay"
     },
     "package": {
-      "title": "Package",
-      "text": "Your shop's package and status.",
-      "name": "Package",
-      "status": "Shop status",
-      "period": "This period",
+      "title": "Your package",
       "none": "No package set"
-    },
-    "statuses": {
-      "provisioning": "Being set up",
-      "active": "Active",
-      "restricted": "Restricted",
-      "suspended": "Suspended",
-      "closing": "Closing",
-      "closed": "Closed"
     },
     "usage": {
       "title": "Limits and usage",
-      "text": "Your total and this month's usage. Amber from 80% of a limit, red at a limit that stops new records.",
-      "listLabel": "Limits and usage",
+      "text": "Amber from 80% of a limit, red when no new record can be added.",
+      "totals": "Shop totals",
+      "totalsHint": "Your records in total.",
+      "monthly": "This month · {{period}}",
+      "monthlyHint": "Resets at the start of the month.",
       "barLabel": "{{name}}: {{value}}",
       "of": "{{used}} / {{max}}",
       "unlimited": "{{used}} · unlimited",
+      "left": "{{value}} left",
+      "over": "{{value}} over",
       "pending_one": "{{count}} open invitation included",
       "pending_other": "{{count}} open invitations included",
-      "ordersNote": "Warning only, never blocked",
+      "ordersNote": "Orders are never stopped",
       "tone": {
         "warn": "Near the limit",
         "full": "At the limit",
@@ -11942,25 +11935,6 @@
       "storage_mb": "Storage",
       "llm_credits_per_month": "Content drafts this month",
       "custom_domains": "Custom domains"
-    },
-    "mb": "{{value}} MB",
-    "billing": {
-      "title": "Payment",
-      "text": "Your subscription payment's status and the next payment.",
-      "status": "Payment status",
-      "nextDue": "Next payment day",
-      "graceEnds": "Grace period ends",
-      "amount": "Amount",
-      "none": "—",
-      "instruction": "Payment instructions",
-      "noInstruction": "Payment instructions appear here as the payment day nears.",
-      "statuses": {
-        "trialing": "In trial",
-        "active": "Up to date",
-        "past_due": "Overdue",
-        "restricted": "Restricted",
-        "cancelled": "Ended"
-      }
     },
     "notice": {
       "products": {
@@ -11985,7 +11959,53 @@
       }
     },
     "createBlocked": "New products cannot be added: your product limit is reached.",
-    "inviteBlocked": "No new invitation can be sent: your team limit is reached."
+    "inviteBlocked": "No new invitation can be sent: your team limit is reached.",
+    "loading": "Loading the subscription",
+    "state": {
+      "provisioning": "Being set up",
+      "trialing": "In trial",
+      "active": "Active",
+      "due_soon": "Payment due soon",
+      "past_due": "Payment overdue",
+      "restricted": "Restricted",
+      "suspended": "Suspended",
+      "cancelled": "Ended",
+      "closing": "Closing",
+      "closed": "Closed"
+    },
+    "stateText": {
+      "provisioning": "Your shop is being set up; your package starts when it is ready.",
+      "trialing": "Your trial is running. Your first payment starts when it ends.",
+      "active": "Your subscription is up to date.",
+      "due_soon": "Your payment day is near. How to pay is beside this.",
+      "past_due": "Your payment is late. Paid before the grace period ends, nothing is restricted; your storefront keeps selling.",
+      "restricted": "The payment is late and the panel is read only. The restriction lifts once the payment is in; your storefront keeps selling.",
+      "suspended": "Your shop is suspended: the storefront is closed to visitors. Contact us for the details.",
+      "cancelled": "Your subscription has ended. Contact us to start it again.",
+      "closing": "Your shop is closing.",
+      "closed": "Your shop is closed."
+    },
+    "facts": {
+      "nextDue": "Next payment",
+      "lateDue": "Overdue payment",
+      "trialEnds": "Trial ends",
+      "nothingDue": "Nothing due",
+      "amount": "Amount",
+      "firstAmount": "First payment",
+      "graceEnds": "Grace period ends",
+      "graceHint": "Unpaid by then, the panel is restricted.",
+      "period": "Usage period",
+      "periodHint": "Monthly limits reset at the start of each month."
+    },
+    "payment": {
+      "title": "How to pay",
+      "none": "Payment details appear here as the payment day nears.",
+      "copy": "Copy",
+      "copied": "Payment details copied.",
+      "copyFailed": "Could not copy; select the text to copy it.",
+      "changeTitle": "Changing your package",
+      "changeText": "Contact us to upgrade or change your package."
+    }
   },
   "wholesale": {
     "gate": {

@@ -15,8 +15,10 @@ test("opens Settings > Abonelik from the settings menu, read only", async ({ pag
   await page.waitForURL("**/settings/subscription")
 
   await expect(pageHeading(page)).toHaveText("Abonelik")
-  const usage = page.getByRole("list", { name: "Limitler ve kullanım" })
-  await expect(usage.getByRole("listitem")).toHaveCount(5)
+  // The shop's totals and this month's counts, in two groups
+  const usage = page.getByRole("list", { name: "Mağaza geneli" })
+  await expect(usage.getByRole("listitem")).toHaveCount(3)
+  await expect(page.getByRole("list", { name: /^Bu ay · / }).getByRole("listitem")).toHaveCount(2)
   await expect(page.getByText("Bu mağazada paket limiti yok", { exact: false })).toBeVisible()
   // Read only: the page's card has nothing to press (the shell's menus are elsewhere)
   const card = page.locator("section").filter({ has: usage }).last()
