@@ -302,20 +302,22 @@ medusaIntegrationTestRunner({
       )
 
       // Unknown (a removed look too: general/grafit, owner 2026-11-17), refused demo,
-      // and not for operations
+      // and the owner's alone (2026-11-23): not for an admin either
       expect((await apply("general", "yok")).status).toBe(404)
       expect((await apply("general", "grafit")).status).toBe(404)
       expect((await apply(LOOK.pack, LOOK.code, { demo: true })).status).toBe(400)
       expect((await apply(LOOK.pack, LOOK.code, { other: 1 })).status).toBe(400)
-      const operations = await createAdminUser(http, container, "operations")
-      const refused = await settle(
-        http.post(
-          `/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/apply`,
-          {},
-          { headers: operations.headers }
+      for (const role of ["admin", "operations"] as const) {
+        const member = await createAdminUser(http, container, role)
+        const refused = await settle(
+          http.post(
+            `/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/apply`,
+            {},
+            { headers: member.headers }
+          )
         )
-      )
-      expect(refused.status).toBe(403)
+        expect(refused.status).toBe(403)
+      }
     })
 
     it("uploads a preset's image once and leaves out what the shop lacks", async () => {

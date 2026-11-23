@@ -189,29 +189,39 @@ medusaIntegrationTestRunner({
       expect(gallery.designs).toHaveLength(10)
     })
 
-    it("lets every staff member read, only the owner and admins write, and records each write", async () => {
+    it("opens the looks to the owner alone, and records each write", async () => {
       const container = getContainer()
       const { staff } = await ownerWithDraft()
       const saved = await staff.saveDesign({ name: "Kayıt" })
       const id = saved.data.design?.id ?? ""
       expect(id).toMatch(/^sfd_/)
+      expect((await staff.get("/admin/storefront-designs")).status).toBe(200)
+      expect((await staff.get("/admin/storefront-presets")).status).toBe(200)
 
       // Signed out
       expect((await settle(http.get("/admin/storefront-designs"))).status).toBe(401)
       expect((await settle(http.post("/admin/storefront-designs", { name: "x" }))).status).toBe(401)
 
-      for (const role of ["operations", "readonly"] as const) {
+      // The owner, 2026-11-23: "Görünümler yalnızca sahiplere açık": admins neither read nor write
+      for (const role of ["admin", "operations", "readonly"] as const) {
         const member = staffClient(http, (await createAdminUser(http, container, role)).headers)
-        expect((await member.get("/admin/storefront-designs")).status).toBe(200)
+        expect((await member.get("/admin/storefront-designs")).status).toBe(403)
+        expect((await member.get("/admin/storefront-presets")).status).toBe(403)
+        expect(
+          (await member.get(`/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/preview`)).status
+        ).toBe(403)
         expect((await member.saveDesign({ name: `Rol ${role}` })).status).toBe(403)
         expect(
           (await member.post(`/admin/storefront-designs/${id}`, { name: "Yeni" })).status
         ).toBe(403)
         expect((await member.remove(`/admin/storefront-designs/${id}`)).status).toBe(403)
         expect((await member.applyDesign(id)).status).toBe(403)
+        expect((await member.applyPreset(LOOK.pack, LOOK.code)).status).toBe(403)
+        // The theme editor stays theirs to read
+        expect((await member.get("/admin/storefront-layout")).status).toBe(200)
       }
-      const admin = staffClient(http, (await createAdminUser(http, container, "admin")).headers)
-      expect((await admin.saveDesign({ name: "Yöneticinin" })).status).toBe(200)
+      // Nothing an admin tried was kept
+      expect((await staff.gallery()).designs.map((each) => each.id)).toEqual([id])
 
       // The owner's four kinds of write, each recorded on the saved look
       expect(
@@ -286,12 +296,9 @@ medusaIntegrationTestRunner({
       for (const path of ["general/grafit", "cutlery/Katalog", "cutlery/..%2Fkatalog", "yok/yok"]) {
         expect((await staff.get(`/admin/storefront-presets/${path}/preview`)).status).toBe(404)
       }
-      // A read, as the gallery's list is: any staff member's (operations reads all but the private)
-      const operations = staffClient(
-        http,
-        (await createAdminUser(http, container, "operations")).headers
-      )
-      expect((await operations.get(picturePath)).status).toBe(200)
+      // As the gallery's list: the owner's alone (2026-11-23)
+      const admin = staffClient(http, (await createAdminUser(http, container, "admin")).headers)
+      expect((await admin.get(picturePath)).status).toBe(403)
     })
 
     it("opens a draft and a live design naming a removed look as the shop's own work", async () => {

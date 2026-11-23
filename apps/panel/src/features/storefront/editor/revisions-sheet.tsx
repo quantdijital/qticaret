@@ -30,6 +30,8 @@ interface RevisionsSheetProps {
   busy: boolean
   /** `menus`: the menus the revision put live come with it (adr/0063 §3). */
   onRestore: (revision: number, menus: boolean) => void
+  /** A revision may be kept as a saved look: the looks are the owner's alone (2026-11-23). */
+  canKeep: boolean
 }
 
 /**
@@ -48,6 +50,7 @@ export function RevisionsSheet({
   ask,
   busy,
   onRestore,
+  canKeep,
 }: RevisionsSheetProps) {
   const { t } = useTranslation()
   const [asking, setAsking] = useState<LayoutRevision | null>(null)
@@ -68,7 +71,9 @@ export function RevisionsSheet({
         <SheetContent className="w-full sm:max-w-md">
           <SheetHeader>
             <SheetTitle>{t(`${V}.title`)}</SheetTitle>
-            <SheetDescription>{t(`${V}.description`)}</SheetDescription>
+            <SheetDescription>
+              {t(canKeep ? `${V}.description` : `${V}.descriptionKept`)}
+            </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-6 pb-6">
             {revisions.length === 0 ? (
@@ -94,18 +99,20 @@ export function RevisionsSheet({
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        aria-label={t(`${V}.saveAsOf`, { revision: each.revision })}
-                        onClick={() => {
-                          setKeeping(each)
-                        }}
-                      >
-                        <BookmarkPlus />
-                        {t(`${V}.saveAs`)}
-                      </Button>
+                      {canKeep ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          aria-label={t(`${V}.saveAsOf`, { revision: each.revision })}
+                          onClick={() => {
+                            setKeeping(each)
+                          }}
+                        >
+                          <BookmarkPlus />
+                          {t(`${V}.saveAs`)}
+                        </Button>
+                      ) : null}
                       <Button
                         type="button"
                         variant="outline"
@@ -162,7 +169,7 @@ export function RevisionsSheet({
         ) : null}
       </ConfirmDialog>
       <SaveDesignDialog
-        open={keeping !== null}
+        open={canKeep && keeping !== null}
         onOpenChange={(next) => {
           if (!next) {
             setKeeping(null)

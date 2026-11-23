@@ -100,8 +100,8 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       // The storefront's preferences are a panel of it (the owner, 2026-11-16)
       { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
-      // Ready-made and saved looks into the draft (adr/0064)
-      { key: "looks", to: "/storefront/looks", icon: LayoutTemplate },
+      // Ready-made and saved looks into the draft (adr/0064): the owner's alone (2026-11-23)
+      { key: "looks", to: "/storefront/looks", icon: LayoutTemplate, needs: "looks" },
       { key: "menus", to: "/storefront/menus", icon: ListTree },
     ],
   },
