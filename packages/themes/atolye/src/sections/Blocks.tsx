@@ -27,6 +27,8 @@ import { type Block, blocksOf, headingId } from "./plan"
 import { PriceBands } from "./PriceBands"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
+import { ReviewsCarousel } from "./ReviewsCarousel"
+import { PhotoCollage } from "./PhotoCollage"
 import { Shelf } from "./Shelf"
 import { Signup } from "./Signup"
 import { Spotlight } from "./Spotlight"
@@ -186,6 +188,10 @@ function BlockView({
     case "featured_product":
       return <Spotlight section={section} t={t} quickAdd={quickAdd} />
     case "reviews":
+      // adr/0077 §10: one card each, sliding; the cards carry the customers' photos
+      if (section.variant === "carousel") {
+        return <ReviewsCarousel section={section} t={t} />
+      }
       return (
         <>
           <Reviews section={section} t={t} />
@@ -212,6 +218,8 @@ function BlockView({
       return <Stats section={section} />
     case "steps":
       return <Steps section={section} />
+    case "photo_collage":
+      return <PhotoCollage section={section} first={first} />
     case "marquee":
       return (
         <Marquee

@@ -1,7 +1,8 @@
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { StatsSection } from "../../lib/storefront/sections/stats"
 import type { StepsSection } from "../../lib/storefront/sections/steps"
-import type { StoreLayoutLink } from "./layout-hydrate"
+import type { PhotoCollageSection } from "../../lib/storefront/sections/photo-collage"
+import type { StoreLayoutImage, StoreLayoutLink } from "./layout-hydrate"
 
 /** What the figures strip and the steps are printed with: the hydrate's own helpers. */
 export interface PointsContext {
@@ -48,5 +49,30 @@ export function hydratePoints(section: StatsSection | StepsSection, at: PointsCo
     link: at.link(section.link),
     layout: section.layout,
     numbers: section.numbers,
+  }
+}
+
+/**
+ * The photo collage as the storefront prints it (adr/0077 §10): each
+ * picture with what the media library knows of it and the shop's own
+ * words, its caption filled, its link placed (a broken one null, the
+ * photograph kept), the settings as saved.
+ */
+export function hydrateCollage(
+  section: PhotoCollageSection,
+  at: PointsContext & { image: (url: string, alt: string | null) => StoreLayoutImage }
+) {
+  return {
+    id: section.id,
+    type: section.type,
+    title: section.title,
+    intro: at.fill(section.intro),
+    items: section.items.map((each) => ({
+      image: { ...at.image(each.image.url, each.image.alt), alt: each.image.alt },
+      caption: at.fill(each.caption),
+      link: at.link(each.link),
+    })),
+    layout: section.layout,
+    phone: section.phone,
   }
 }

@@ -75,7 +75,11 @@ export function FrameGroup({ section, group, reveal, onChange }: GroupProps) {
 export function OtherGroup({ section, reveal, onChange }: Omit<GroupProps, "group">) {
   const { t } = useTranslation()
   const strip = section.type === "marquee" ? section : null
-  const rail = section.type === "products" || section.type === "related_products" ? section : null
+  // A product rail's, the related products' or the reviews' carousel (adr/0077 §10)
+  const rail =
+    section.type === "products" || section.type === "related_products" || section.type === "reviews"
+      ? section
+      : null
   const scroller = rail?.variant === "carousel" ? scrollerSettingsOf(rail.scroller) : null
   const slider = turnsAsSlider(section) ? section : null
   if (!strip && !scroller && !slider) {

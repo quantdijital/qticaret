@@ -20,7 +20,7 @@ import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
 import { hydrateArticle, hydrateContact } from "./layout-hydrate-text"
 import { hydrateShelf } from "./layout-hydrate-shelf"
 import { hydrateStrips } from "./layout-hydrate-strips"
-import { hydratePoints } from "./layout-hydrate-points"
+import { hydrateCollage, hydratePoints } from "./layout-hydrate-points"
 import type { BandPick } from "./price-bands"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
@@ -287,8 +287,19 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
     case "brands":
       return { id, type, title: section.title, brand_ids: section.brand_ids }
     case "posts":
-    case "reviews":
       return { id, type, title: section.title, limit: section.limit }
+    case "reviews":
+      // A grid prints as before variants; a carousel names itself and its scroller (adr/0077 §10)
+      return section.variant === "carousel"
+        ? {
+            id,
+            type,
+            title: section.title,
+            limit: section.limit,
+            variant: section.variant,
+            scroller: section.scroller,
+          }
+        : { id, type, title: section.title, limit: section.limit }
     case "google_rating":
       // The figures and excerpts are the storefront's to fetch (`/store/google-reviews`)
       return {
@@ -312,6 +323,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
     case "stats":
     case "steps":
       return hydratePoints(section, { fill: (text) => fill(text, at.values), link })
+    case "photo_collage":
+      return hydrateCollage(section, { fill: (text) => fill(text, at.values), link, image })
     case "contact":
       return hydrateContact(section, at)
     case "payment_facts":

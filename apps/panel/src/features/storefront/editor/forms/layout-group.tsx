@@ -8,6 +8,7 @@ import { IconGroups } from "./icon-groups"
 import type { FieldGroupName } from "./field-registry"
 import { RelatedGroups } from "./related-groups"
 import { PointsGroups } from "./points-groups"
+import { CollageGroups, ReviewsGroups } from "./collage-groups"
 import { StripGalleryGroups } from "./strip-gallery-groups"
 
 /**
@@ -36,6 +37,12 @@ export function SectionLayoutGroup({
   }
   if (section.type === "strip_gallery") {
     return <StripGalleryGroups section={section} reveal={reveal} onChange={onChange} />
+  }
+  if (section.type === "photo_collage") {
+    return <CollageGroups section={section} reveal={reveal} onChange={onChange} />
+  }
+  if (section.type === "reviews") {
+    return <ReviewsGroups section={section} reveal={reveal} onChange={onChange} />
   }
   if (section.type === "stats" || section.type === "steps") {
     return <PointsGroups section={section} reveal={reveal} onChange={onChange} />

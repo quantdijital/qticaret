@@ -8729,6 +8729,10 @@
         "steps": {
           "name": "Numbered steps",
           "description": "3–6 steps of a process in order, numbered: a title, a short intro and an optional single link under them."
+        },
+        "photo_collage": {
+          "name": "Photo collage",
+          "description": "3–7 photos together: the first large or all even; optionally a title, an intro and a caption and link per photo."
         }
       },
       "variants": {
@@ -8791,6 +8795,10 @@
           "pane": "Text only",
           "with_image": "Text with image",
           "article": "Page text"
+        },
+        "reviews": {
+          "grid": "Grid",
+          "carousel": "Carousel"
         }
       },
       "look": {
@@ -10908,6 +10916,33 @@
         "headset": "Support",
         "utensils": "Food",
         "gem": "Gem"
+      },
+      "photoCollage": {
+        "titleHint": "Left empty, the photos show without a heading.",
+        "intro": "Intro",
+        "items": "Photos",
+        "item": "Photo {{number}}",
+        "image": "Photo {{number}}",
+        "imageHint": "From the media library; its description (alt text) is required.",
+        "caption": "Photo {{number}} caption",
+        "link": "Photo {{number}} link",
+        "linkTerm": "link",
+        "add": "Add photo",
+        "hint": "At least {{min}}, at most {{max}} photos.",
+        "layout": {
+          "label": "Layout",
+          "term": "layout",
+          "hint": "How the photos stand on a wide screen.",
+          "asymmetric": "Asymmetric",
+          "even": "Even grid"
+        },
+        "phone": {
+          "label": "On a phone",
+          "term": "mobile",
+          "hint": "On a narrow screen the photos slide sideways or stack.",
+          "scroll": "Slide sideways",
+          "stack": "Stacked"
+        }
       }
     },
     "maintenance": {

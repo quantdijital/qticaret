@@ -40,6 +40,7 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "google_rating",
   "stats",
   "steps",
+  "photo_collage",
   "contact",
   "payment_facts",
   "shipping_facts",
