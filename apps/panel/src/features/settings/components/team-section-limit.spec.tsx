@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { planOf } from "@/features/settings/plan.fixtures"
-import { TeamPage } from "./team-page"
+import { TeamSection } from "./team-section"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -42,12 +42,12 @@ function renderPage(seats: { used: number; max: number }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <TeamPage />
+      <TeamSection />
     </QueryClientProvider>
   )
 }
 
-describe("TeamPage at the package's team limit (adr/0061 Ek C14)", () => {
+describe("TeamSection at the package's team limit (adr/0061 Ek C14)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
   })

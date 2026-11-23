@@ -58,8 +58,9 @@
     "groups": {
       "sales": "Satış",
       "catalog": "Katalog",
-      "growth": "Büyüme",
-      "storefront": "Vitrin"
+      "storefront": "Vitrin",
+      "content": "İçerik",
+      "marketing": "Pazarlama"
     },
     "categories": "Kategoriler",
     "inventory": "Stok",
@@ -644,7 +645,7 @@
         "moving": "Adresler taşınıyor… %{{percent}}",
         "moved_one": "{{count}} sayfa yeni adresine taşındı.",
         "moved_other": "{{count}} sayfa yeni adresine taşındı.",
-        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > İşler'de."
+        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > Denetim kaydı > İşler'de."
       },
       "searchConsole": {
         "title": "Search Console",
@@ -826,9 +827,12 @@
       },
       "empty": "Bu türde kayıt yok.",
       "export": "CSV olarak dışa aktar",
-      "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sayfasından indirebilirsiniz.",
-      "openJobs": "İşler sayfasına git",
-      "retention": "Dışa aktarılan dosyalar İşler sayfasında bir hafta saklanır.",
+      "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sekmesinden indirebilirsiniz.",
+      "openJobs": "İşler sekmesine git",
+      "retention": "Dışa aktarılan dosyalar İşler sekmesinde bir hafta saklanır.",
+      "tabs": {
+        "log": "Denetim kaydı"
+      },
       "exportFiltered": "Süzülenleri CSV olarak dışa aktar",
       "emptyFiltered": "Bu süzgeçlere uyan kayıt yok.",
       "filters": {
@@ -1974,13 +1978,11 @@
       "integrations": "Bağlı dış servislerin çalışıp çalışmadığı",
       "ai": "Metin taslağı yazan servisler, anahtarları ve bu ayki kullanım",
       "features": "Açılıp kapatılabilen mağaza özellikleri",
-      "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
-      "audit": "Panelde kim neyi ne zaman değiştirdi",
+      "audit": "Panelde kim neyi ne zaman değiştirdi, dışa aktarma gibi uzun süren işler ve dosyaları",
       "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü",
       "accounting": "Mali müşavire aylık paket",
       "api": "Kendi sistemleriniz için API anahtarları",
-      "team": "Panele kimlerin hangi rolle girdiği ve davetler",
-      "security": "İki adımlı doğrulama, ekip için zorunluluk, sahtekârlık önleme",
+      "security": "Hesabınız ve iki adımlı doğrulama, ekip üyeleri ve davetler, sahtekârlık önleme",
       "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
       "einvoice": "Fatura programı, kesim anı ve seri, taşıyıcı bilgileri, muhasebe",
       "migration": "Eski platformdan katalog, müşteri ve 301 yönlendirmeleri",
@@ -2167,7 +2169,7 @@
         "privacy": "Bireysel müşterilerin adı pakette yer almaz; kurumsal müşterilerin unvanı ve VKN'si yer alır. Her paket denetim kaydına düşer.",
         "month": "Ay",
         "download": "Paketi indir",
-        "later": "Paket hazırlanıyor; bitince Ayarlar > İşler'den indirebilirsiniz.",
+        "later": "Paket hazırlanıyor; bitince Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
         "failed": "Paket hazırlanamadı."
       }
     },
@@ -5016,7 +5018,7 @@
       "button": "Dışa aktar",
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
-      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > İşler'den indirebilirsiniz.",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
       "failed": "Sipariş dosyası hazırlanamadı."
     },
     "addons": {
@@ -5872,7 +5874,7 @@
     "export": {
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
-      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > İşler'den indirebilirsiniz.",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
       "failed": "Rapor dosyası hazırlanamadı."
     },
     "daily": {
@@ -6449,7 +6451,7 @@
       "title": "Site haritası",
       "hint": "Arama motorları sayfalarınızı bu dosyalardan bulur; değişikliklerden birkaç dakika sonra kendiliğinden yenilenir.",
       "refresh": "Şimdi yenile",
-      "queued": "Site haritası yenileniyor; Ayarlar > İşler'den izleyebilirsiniz.",
+      "queued": "Site haritası yenileniyor; Ayarlar > Denetim kaydı > İşler'den izleyebilirsiniz.",
       "hostMissing": "Ana alan adı girilmeden site haritası oluşmaz; adresler tam olmalı.",
       "noIndexing": "Bu ortam arama motorlarına kapalı: robots.txt tüm tarayıcıları engelliyor, sayfalar noindex.",
       "generated": "{{when}} oluşturuldu",

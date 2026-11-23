@@ -10,14 +10,21 @@ import { AuditPage } from "./audit-page"
 const fetchMock = vi.hoisted(() => vi.fn())
 const listUsers = vi.hoisted(() => vi.fn())
 const search = vi.hoisted((): { current: AuditSearch } => ({ current: {} }))
+// Who may read the log (adr/0040): the owner unless a test says otherwise
+const staff = vi.hoisted(() => ({ audit: true }))
 
 vi.mock("@/lib/sdk", () => ({
   sdk: { client: { fetch: fetchMock }, admin: { user: { list: listUsers } } },
 }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => staff.audit }))
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children }: { children: ReactNode }) => <a href="/settings/jobs">{children}</a>,
+  Link: ({ children }: { children: ReactNode }) => (
+    <a href="/settings/audit?part=jobs">{children}</a>
+  ),
   getRouteApi: () => ({ useSearch: () => search.current }),
+  // The tabs read the open one from the address
+  useSearch: () => search.current,
   useNavigate: () => vi.fn(),
 }))
 
@@ -57,6 +64,7 @@ function renderPage() {
 describe("AuditPage", () => {
   beforeEach(() => {
     search.current = {}
+    staff.audit = true
     fetchMock.mockReset()
     fetchMock.mockImplementation((path: string) => {
       if (path === "/admin/audit-log/resource-types") {
@@ -121,5 +129,43 @@ describe("AuditPage", () => {
       method: "POST",
       body: { type: "audit_log.export", input: { kind: "mutation", actor_id: "user_1" } },
     })
+  })
+
+  it("opens on the log, with the long jobs as a tab beside it (the owner, 2026-11-23)", async () => {
+    renderPage()
+
+    await screen.findByText("POST /admin/products/:id")
+    expect(screen.getByRole("tab", { name: "Denetim kaydı" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    )
+    expect(screen.getByRole("tab", { name: "İşler" })).toHaveAttribute("aria-selected", "false")
+  })
+
+  it("shows the jobs at ?part=jobs, without the log's export", async () => {
+    search.current = { part: "jobs" }
+    fetchMock.mockImplementation((path: string) =>
+      Promise.resolve(
+        path === "/admin/async-jobs"
+          ? { async_jobs: [], count: 0 }
+          : { audit_entries: [], count: 0 }
+      )
+    )
+    renderPage()
+
+    expect(screen.getByRole("tab", { name: "İşler" })).toHaveAttribute("aria-selected", "true")
+    expect(await screen.findByText(/Henüz iş yok/)).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /dışa aktar/i })).toBeNull()
+  })
+
+  it("gives a role without the log its jobs alone, as İşler was", async () => {
+    staff.audit = false
+    fetchMock.mockResolvedValue({ async_jobs: [], count: 0 })
+    renderPage()
+
+    expect(screen.getByRole("heading", { name: "İşler" })).toBeInTheDocument()
+    expect(screen.queryByRole("tab")).toBeNull()
+    expect(await screen.findByText(/Henüz iş yok/)).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalledWith("/admin/audit-log", expect.anything())
   })
 })

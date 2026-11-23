@@ -58,8 +58,9 @@
     "groups": {
       "sales": "Sales",
       "catalog": "Catalog",
-      "growth": "Growth",
-      "storefront": "Storefront"
+      "storefront": "Storefront",
+      "content": "Content",
+      "marketing": "Marketing"
     },
     "categories": "Categories",
     "inventory": "Inventory",
@@ -644,7 +645,7 @@
         "moving": "Moving addresses… {{percent}}%",
         "moved_one": "{{count}} page moved to its new address.",
         "moved_other": "{{count}} pages moved to their new addresses.",
-        "failed": "The addresses could not be moved; run the check again. Details in Settings > Jobs."
+        "failed": "The addresses could not be moved; run the check again. Details in Settings > Audit log > Jobs."
       },
       "searchConsole": {
         "title": "Search Console",
@@ -828,7 +829,10 @@
       "export": "Export as CSV",
       "exportStarted": "Export started. Download the file from Jobs when it is ready.",
       "openJobs": "Go to Jobs",
-      "retention": "Exported files are kept on the Jobs page for a week.",
+      "retention": "Exported files are kept in the Jobs tab for a week.",
+      "tabs": {
+        "log": "Audit log"
+      },
       "exportFiltered": "Export the filtered entries as CSV",
       "emptyFiltered": "No entry matches these filters.",
       "filters": {
@@ -1974,13 +1978,11 @@
       "integrations": "Whether the connected services are working",
       "ai": "The services that draft texts, their keys and this month's use",
       "features": "Shop features you can turn on or off",
-      "jobs": "Long jobs such as exports, and their files",
-      "audit": "Who changed what in the panel, and when",
+      "audit": "Who changed what in the panel and when, long jobs such as exports and their files",
       "marketing": "Cart reminders, product feeds, Merchant Center and conversion measurement",
       "accounting": "The month's package for the accountant",
       "api": "API keys for your own systems",
-      "team": "Who uses the panel, with which role, and invitations",
-      "security": "Two-step verification, the team's requirement, fraud prevention",
+      "security": "Your account and two-step verification, team members and invitations, fraud prevention",
       "legal": "Contracts, policies and the privacy notice",
       "einvoice": "Invoicing program, timing and series, carrier details, accounting",
       "migration": "Catalog, customers and 301s from the old platform",
@@ -2167,7 +2169,7 @@
         "privacy": "Individual customers' names are not in it; corporate customers' registered names and tax ids are. Each package is recorded in the audit log.",
         "month": "Month",
         "download": "Download the package",
-        "later": "The package is being made; download it from Settings > Jobs when it is done.",
+        "later": "The package is being made; download it from Settings > Audit log > Jobs when it is done.",
         "failed": "The package could not be made."
       }
     },
@@ -5016,7 +5018,7 @@
       "button": "Export",
       "excel": "Download as Excel",
       "csv": "Download CSV",
-      "later": "The file is being prepared; download it from Settings > Jobs when it is ready.",
+      "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
       "failed": "The order file could not be made."
     },
     "addons": {
@@ -5872,7 +5874,7 @@
     "export": {
       "excel": "Download as Excel",
       "csv": "Download CSV",
-      "later": "The file is being made; once ready, download it from Settings > Jobs.",
+      "later": "The file is being made; once ready, download it from Settings > Audit log > Jobs.",
       "failed": "The report file could not be made."
     },
     "daily": {
@@ -6449,7 +6451,7 @@
       "title": "Sitemap",
       "hint": "Search engines find your pages in these files; they refresh a few minutes after changes.",
       "refresh": "Refresh now",
-      "queued": "The sitemap is being refreshed; follow it in Settings > Jobs.",
+      "queued": "The sitemap is being refreshed; follow it in Settings > Audit log > Jobs.",
       "hostMissing": "No sitemap without the main domain: addresses must be complete.",
       "noIndexing": "This instance is closed to search engines: robots.txt blocks all crawlers, pages say noindex.",
       "generated": "made {{when}}",
