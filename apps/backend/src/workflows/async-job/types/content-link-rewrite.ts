@@ -22,7 +22,8 @@ const HEARTBEAT_MS = 60_000
 
 /**
  * The shop's texts' links to itself rewritten (adr/0042 Ek 2026-11-05):
- * pages, posts and products' descriptions, every link to the shop or its
+ * pages, posts, products' descriptions and categories', brands' and
+ * collections' descriptions (adr/0075), every link to the shop or its
  * old site pointed at the page that answers it today; links elsewhere
  * never. Owner and admin queue it (`POST /admin/async-jobs`); it writes
  * products' descriptions, so it runs apart from an import, a bulk edit or
