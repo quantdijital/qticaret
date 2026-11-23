@@ -51,6 +51,10 @@ export async function settleMigratedLinks(
     scope: {
       entries: idsOf((kind) => kind !== "product"),
       products: idsOf((kind) => kind === "product"),
+      // A source brings listings' plain text only (adr/0075): their documents are the shop's own
+      categories: [],
+      brands: [],
+      collections: [],
     },
   })
   return { reserved, legacy, ...result }

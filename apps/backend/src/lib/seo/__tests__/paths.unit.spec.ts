@@ -1,4 +1,9 @@
-import { RESERVED_ROOT_SEGMENTS, SYSTEM_PAGES, isReservedPath } from "../paths"
+import {
+  RESERVED_ROOT_SEGMENTS,
+  SYSTEM_PAGES,
+  isReservedPath,
+  startsInReservedRoot,
+} from "../paths"
 
 describe("isReservedPath", () => {
   it.each([
@@ -94,4 +99,20 @@ describe("isReservedPath", () => {
       expect(isReservedPath(path)).toBe(true)
     }
   })
+})
+
+describe("startsInReservedRoot (adr/0017 Ek 2026-11-23)", () => {
+  it.each(["/sepet", "/sepet/indirim", "/yasal/kvkk", "/blog/kategori/x", "/sitemap-x/y"])(
+    "keeps %s from a nested category: the storefront's own route answers there",
+    (path) => {
+      expect(startsInReservedRoot(path)).toBe(true)
+    }
+  )
+
+  it.each(["/hediyelik-esyalar/caki-kutusu", "/sepetler/hasir", "/caki-kutusu"])(
+    "leaves %s to records",
+    (path) => {
+      expect(startsInReservedRoot(path)).toBe(false)
+    }
+  )
 })

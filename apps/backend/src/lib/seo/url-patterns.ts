@@ -7,16 +7,36 @@
 
 export type UrlStyle = "prefixed" | "flat"
 
+/**
+ * Categories have a third style (adr/0017 Ek 2026-11-23): `nested`, the
+ * tree without the `/kategori` prefix (`/hediyelik-esyalar/caki-kutusu`),
+ * as a WooCommerce site with its category base taken off serves them.
+ */
+export type CategoryUrlStyle = UrlStyle | "nested"
+
+export const URL_STYLES: readonly UrlStyle[] = ["prefixed", "flat"]
+export const CATEGORY_URL_STYLES: readonly CategoryUrlStyle[] = ["prefixed", "nested", "flat"]
+
 export const productPath = (handle: string, style: UrlStyle): string =>
   style === "flat" ? `/${handle}` : `/urun/${handle}`
 
-/** `handles` run from the root category down to this one; the URL carries the tree. */
-export function categoryPath(handles: readonly string[], style: UrlStyle): string {
+/**
+ * `handles` run from the root category down to this one: the prefixed and
+ * nested styles carry the tree, the flat one the category's own handle.
+ */
+export function categoryPath(handles: readonly string[], style: CategoryUrlStyle): string {
   const own = handles.at(-1)
   if (own === undefined) {
     throw new Error("categoryPath needs at least the category's own handle")
   }
-  return style === "flat" ? `/${own}` : `/kategori/${handles.join("/")}`
+  switch (style) {
+    case "flat":
+      return `/${own}`
+    case "nested":
+      return `/${handles.join("/")}`
+    case "prefixed":
+      return `/kategori/${handles.join("/")}`
+  }
 }
 
 export const collectionPath = (handle: string): string => `/koleksiyon/${handle}`

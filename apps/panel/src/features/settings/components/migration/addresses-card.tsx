@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { FileUp, Loader2, Map as MapIcon, Play } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { FileUp, Info, Loader2, Map as MapIcon, Play } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -60,7 +61,40 @@ function Readiness({ summary }: { summary: AddressSummary }) {
           </div>
         ))}
       </dl>
+      <CategoryStyleHint hint={summary.category_style ?? null} />
     </div>
+  )
+}
+
+/**
+ * A category URL style that keeps more of the old site's category
+ * addresses as they were (adr/0017 Ek 2026-11-23): said, never set; the
+ * owner moves the style in SEO settings.
+ */
+function CategoryStyleHint({ hint }: { hint: AddressSummary["category_style"] | null }) {
+  const { t } = useTranslation()
+  if (!hint?.suggested) {
+    return null
+  }
+  return (
+    <p className="flex items-start gap-2 rounded-md bg-info-soft px-3 py-2.5 text-[13px] text-info-text">
+      <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <span>
+        {t(`${A}.categoryStyle`, {
+          style: t(`settings.seo.style.category.${hint.suggested}`),
+          kept: formatCount(hint.kept[hint.suggested]),
+          total: formatCount(hint.total),
+          now: formatCount(hint.kept[hint.current]),
+        })}{" "}
+        <Link
+          to="/settings/seo"
+          search={{ part: "addresses" }}
+          className="font-medium underline underline-offset-2"
+        >
+          {t(`${A}.categoryStyleLink`)}
+        </Link>
+      </span>
+    </p>
   )
 }
 

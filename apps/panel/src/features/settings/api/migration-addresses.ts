@@ -1,6 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { MIGRATION_KEY } from "@/features/settings/api/migration"
 import type { MigrationJob } from "@/features/settings/api/migration"
+import type { CategoryUrlStyle } from "@/features/settings/api/url-style"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
@@ -41,6 +42,16 @@ export interface AddressSummary {
   unsupported: number
   top: { checked: number; unanswered: { address: string; clicks: number | null }[] }
   ready: boolean
+  /**
+   * Which category URL style keeps the old category addresses unchanged
+   * (adr/0017 Ek 2026-11-23); null with no old category address tied to a category.
+   */
+  category_style?: {
+    current: CategoryUrlStyle
+    total: number
+    kept: Record<CategoryUrlStyle, number>
+    suggested: CategoryUrlStyle | null
+  } | null
 }
 
 export const addressSummaryQuery = () =>
