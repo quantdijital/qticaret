@@ -1,7 +1,9 @@
 import type { ShelfColumns, ShelfPhoneColumns } from "@qticaret/types"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
-import { CardBadges, drawnCardVariant, isOut, quickAddWords } from "./card-parts"
+import { CardArrow } from "./card-arrow"
+import { OverCard } from "./card-over"
+import { CardBadges, drawnCardVariant, isOut, quickAddWords, textOver } from "./card-parts"
 import { CardPhoto } from "./CardPhoto"
 import { CardPriceRow, CardStars } from "./card-rows"
 import { CompactCard } from "./CompactCard"
@@ -37,7 +39,10 @@ const SIZES = {
  * 256 px wide or more (a container query): five across at 1440 px, or a
  * listing's four at 1024, keep the smaller one. A card the storefront
  * sends as `framed` is drawn by `FramedCard` (adr/0049 Ek 2026-11-14 §3.3),
- * one sent as `compact` by `CompactCard` (Ek 2026-11-15).
+ * one sent as `compact` by `CompactCard` (Ek 2026-11-15). The shop's
+ * tour look (adr/0077 Ek "tur kartı", `look`): the words over the photo
+ * (`OverCard`), a decorative arrow at the price row's end; none of it
+ * on today's card, whose markup is as it was.
  */
 export function ProductCard({
   product,
@@ -62,6 +67,11 @@ export function ProductCard({
   }
   if (variant === "compact") {
     return <CompactCard product={product} t={t} priority={priority} />
+  }
+  if (textOver(product)) {
+    return (
+      <OverCard product={product} t={t} quickAdd={quickAdd} priority={priority} sizes={sizes} />
+    )
   }
   const out = isOut(product)
   const add = quickAdd && product.quickAdd && !out ? product.quickAdd : null
@@ -92,7 +102,14 @@ export function ProductCard({
           </a>
         </h3>
         <CardStars product={product} t={t} />
-        <CardPriceRow product={product} t={t} className="mt-auto pt-1" />
+        {product.look?.arrow ? (
+          <div className="mt-auto flex items-end justify-between gap-2 pt-1">
+            <CardPriceRow product={product} t={t} className="min-w-0" />
+            <CardArrow />
+          </div>
+        ) : (
+          <CardPriceRow product={product} t={t} className="mt-auto pt-1" />
+        )}
       </div>
     </article>
   )

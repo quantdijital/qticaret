@@ -58,6 +58,12 @@ describe("theme section", () => {
         quick_view_rating: true,
         quick_view_summary: true,
         quick_view_quantity: true,
+        // adr/0077 Ek "tur kartı": words under the photo, none of the tour card's extras
+        text_position: "below",
+        rating_badge: false,
+        arrow: false,
+        duration_row: false,
+        per_person: false,
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",

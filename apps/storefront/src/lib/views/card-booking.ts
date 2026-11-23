@@ -1,6 +1,7 @@
 import { formatLira } from "@qticaret/ui"
-import type { CardBookingView, PriceView, ProductCardView } from "@qticaret/ui"
+import type { CardBookingView, PriceView, ProductCardView, Translate } from "@qticaret/ui"
 import type { StoreCardFacts } from "@qticaret/types"
+import { durationWords } from "./card-look"
 
 // The zone a departure is said in when the product's is not one the runtime knows
 const DEFAULT_ZONE = "Europe/Istanbul"
@@ -25,11 +26,14 @@ export function shortDeparture(startsAt: string, zone: string = DEFAULT_ZONE): s
  * lowest paying price as a "from" price in place of the card's own (whose
  * lowest variant may be an infant's), and the nearest departure on sale.
  * A price in another currency than lira is not ours to word: the card
- * keeps its own. Any other product's card is returned as it was.
+ * keeps its own. Its length in words ("5 gün • 4 gece") only while the
+ * shop shows it (`look.duration`, adr/0077 Ek "tur kartı") and the
+ * backend says one. Any other product's card is returned as it was.
  */
 export function withCardBooking(
   card: ProductCardView,
-  booking: StoreCardFacts["booking"]
+  booking: StoreCardFacts["booking"],
+  t?: Translate
 ): ProductCardView {
   if (!booking) {
     return card
@@ -37,9 +41,11 @@ export function withCardBooking(
   const next = booking.next_departure
     ? shortDeparture(booking.next_departure, booking.timezone)
     : null
+  const duration = card.look?.duration && t ? durationWords(booking.duration_days, t) : null
   const view: CardBookingView = {
     next,
     nextAt: next ? booking.next_departure : null,
+    ...(duration ? { duration } : {}),
   }
   if (booking.currency_code.toLowerCase() !== "try") {
     return { ...card, booking: view }

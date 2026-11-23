@@ -1,3 +1,4 @@
+import { Star } from "lucide-react"
 import type { CardRatingView, CardVariant, ProductCardView, Translate } from "@qticaret/ui"
 import type { QuickAddWords } from "./QuickAdd"
 import { Stars } from "./Stars"
@@ -47,17 +48,43 @@ export const badgesOf = (product: ProductCardView) => ({
   soldOut: product.shown?.soldOutBadge ?? true,
 })
 
+/** Whether a standard card's words stand over its photo (adr/0077 Ek "tur kartı"). */
+export const textOver = (product: ProductCardView): boolean =>
+  !!product.look?.over && drawnCardVariant(product) === "standard"
+
 /**
- * The pills on a card's photo: a discount ("%30", the reader hears "%30
- * indirim"), then "Tükendi" or "Az kaldı" (a stock bucket, never a
- * number); each as the shop shows it.
+ * Whether the card's stars stand as a pill on its photo (adr/0077 Ek "tur
+ * kartı"): the card has them, it has the pills on its photo (the compact
+ * card keeps its row), and the shop asked for the pill or put the words
+ * over the photo (no stars' row there).
+ */
+export const ratingBadged = (product: ProductCardView): boolean =>
+  !!product.rating &&
+  drawnCardVariant(product) !== "compact" &&
+  (!!product.look?.ratingBadge || textOver(product))
+
+/**
+ * The pills on a card's photo: the stars' average when the shop puts them
+ * there ("★ 4,8", the reader hears the rating's whole sentence), a
+ * discount ("%30", the reader hears "%30 indirim"), then "Tükendi" or "Az
+ * kaldı" (a stock bucket, never a number); each as the shop shows it.
  */
 export function CardBadges({ product, t }: { product: ProductCardView; t: Translate }) {
   const badges = badgesOf(product)
   const discount = badges.sale ? (product.price?.discount ?? null) : null
   const out = isOut(product)
+  const rating = ratingBadged(product) ? product.rating : null
   return (
     <ul className="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
+      {rating && (
+        <li className="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
+          <Star className="size-3.5 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
+          <span aria-hidden="true" className="tabular">
+            {rating.average}
+          </span>
+          <span className="sr-only">{rating.label}</span>
+        </li>
+      )}
       {discount !== null && (
         <li className="rounded-pill bg-deal px-2 py-1 text-deal-ink">
           <span aria-hidden="true">{t("product.discount_short", { percent: discount })}</span>

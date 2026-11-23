@@ -4,6 +4,7 @@ import {
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
+  CARD_TEXT_POSITIONS,
 } from "./storefront.js"
 
 /** adr/0049 Ek 2026-11-15: the card's lists; the backend mirrors them (`theme-card.unit.spec.ts`). */
@@ -15,5 +16,7 @@ describe("the product card's choices", () => {
     expect(CARD_BUTTON_STYLES).toEqual(["solid", "outline", "text"])
     // The quick view button: on hover first, today's nothing being the switch off
     expect(CARD_QUICK_VIEW_TRIGGERS).toEqual(["hover", "icon"])
+    // adr/0077 Ek "tur kartı": today's words under the photo first
+    expect(CARD_TEXT_POSITIONS).toEqual(["below", "over"])
   })
 })

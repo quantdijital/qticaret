@@ -69,6 +69,29 @@ export interface ProductCardView {
    * the nearest departure goes under it. None: any other product's card.
    */
   booking?: CardBookingView
+  /**
+   * The card's look as the shop set it (adr/0077 Ek "tur kartı"); none:
+   * today's card. A theme without it draws today's.
+   */
+  look?: CardLookView
+}
+
+/**
+ * A card's look beyond today's (adr/0077 Ek "tur kartı"), each off on
+ * today's card. `over` and `arrow` are the standard card's; `duration`
+ * and `perPerson` draw only on a dated card (`booking`).
+ */
+export interface CardLookView {
+  /** The name, a line and the price over a dark fade at the photo's foot, the price at the right. */
+  over: boolean
+  /** The stars' average as a pill on the photo ("★ 4,8") instead of the stars' row. */
+  ratingBadge: boolean
+  /** A round arrow at the card's foot, for the eye only: the card keeps its one link. */
+  arrow: boolean
+  /** A dated card's length row (`booking.duration`). */
+  duration: boolean
+  /** "kişi başı" after a dated card's price. */
+  perPerson: boolean
 }
 
 /** A card's pills and rows as the shop set them, on every variant (adr/0049 Ek 2026-11-15). */

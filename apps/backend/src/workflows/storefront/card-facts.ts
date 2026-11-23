@@ -1,5 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, getVariantAvailability } from "@medusajs/framework/utils"
+import { durationDaysOf } from "../../lib/booking/duration"
+import type { DurationAttributeRow } from "../../lib/booking/duration"
 import { storedAddonsOf } from "../../lib/catalog/addons"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { CATALOG_BOOKING, PRODUCT_ADDONS } from "../../modules/platform-settings/features"
@@ -49,15 +51,27 @@ interface ProductRow {
     booking_mode?: string | null
   } | null
   bookable?: DatedCardProduct["bookable"]
+  attribute_values?: (DurationAttributeRow | null)[] | null
 }
 
-// A dated product's booking settings, read only while the shop sells them
+// A dated product's booking settings and its length (adr/0077 Ek "tur kartı"), read only
+// while the shop sells them
 const BOOKABLE_FIELDS = [
   "bookable.id",
   "bookable.cutoff_hours",
   "bookable.pax_by_variant",
   "bookable.timezone",
+  "attribute_values.value_number",
+  "attribute_values.definition.key",
+  "attribute_values.definition.is_public",
+  "attribute_values.definition.type",
 ]
+
+/** A dated card's fact with the tour's length, when its attribute gives one. */
+function withDuration(booking: BookingCardFact, product: ProductRow): BookingCardFact {
+  const days = durationDaysOf(product.attribute_values)
+  return days === null ? booking : { ...booking, duration_days: days }
+}
 
 /** A product's stock as the card says it: units summed over the variants that keep count. */
 export function stockBucketOf(
@@ -195,7 +209,7 @@ export async function cardFacts(
           stock,
           quick_add: quickAddOf(product, stock, addonsOn),
           rating: ratings.get(product.id) ?? null,
-          ...(booking ? { booking } : {}),
+          ...(booking ? { booking: withDuration(booking, product) } : {}),
         },
       ]
     })

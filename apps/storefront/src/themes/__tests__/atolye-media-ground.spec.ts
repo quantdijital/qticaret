@@ -34,6 +34,8 @@ const WELLS: Readonly<Record<string, readonly [number, number]>> = {
   "parts/CompactCard.tsx": [1, 0],
   "parts/FramedCard.tsx": [1, 0],
   "parts/ProductCard.tsx": [1, 0],
+  // adr/0077 tour card: the photo-over card keeps its photograph's well
+  "parts/card-over.tsx": [1, 0],
   "payment-link/LinkLines.tsx": [0, 1],
   "product/Gallery.tsx": [1, 0],
   "product/ReviewList.tsx": [1, 0],

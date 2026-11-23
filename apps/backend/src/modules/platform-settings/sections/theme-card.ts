@@ -43,6 +43,17 @@ export interface ProductCardSettings {
   quick_view_rating: boolean
   quick_view_summary: boolean
   quick_view_quantity: boolean
+  /**
+   * The tour card's look (adr/0077 Ek "tur kartı"), each off or today's by
+   * default: a standard card's words under or over its photo, the stars as
+   * a pill on the photo, a decorative arrow at its foot; a dated card's
+   * length row and "kişi başı" after its price.
+   */
+  text_position: (typeof CARD_TEXT_POSITIONS)[number]
+  rating_badge: boolean
+  arrow: boolean
+  duration_row: boolean
+  per_person: boolean
 }
 
 /**
@@ -55,6 +66,38 @@ export const CARD_NO_REVIEWS = ["hide", "empty_stars", "write_first"] as const
 export const CARD_BUTTON_STYLES = ["solid", "outline", "text"] as const
 /** The quick view button (`CARD_QUICK_VIEW_TRIGGERS`): on hover, or an icon always. */
 export const CARD_QUICK_VIEW_TRIGGERS = ["hover", "icon"] as const
+/** A standard card's words (`CARD_TEXT_POSITIONS`): under the photo (today's) or over it. */
+export const CARD_TEXT_POSITIONS = ["below", "over"] as const
+
+/**
+ * The card's defaults, the Grafit look's (adr/0062 §2): today's card. A
+ * row or preset written before a field reads it from here.
+ */
+export const PRODUCT_CARD_DEFAULTS: ProductCardSettings = {
+  ratio: "1:1",
+  show_brand: true,
+  show_rating: false,
+  variant: "standard",
+  hover_image: true,
+  delivery_note: true,
+  full_button: true,
+  sale_badge: true,
+  low_stock_badge: true,
+  sold_out_badge: true,
+  sold_out_row: "price",
+  no_reviews: "hide",
+  button_style: "outline",
+  quick_view: false,
+  quick_view_trigger: "hover",
+  quick_view_rating: true,
+  quick_view_summary: true,
+  quick_view_quantity: true,
+  text_position: "below",
+  rating_badge: false,
+  arrow: false,
+  duration_row: false,
+  per_person: false,
+}
 
 const CHOICE_ERROR = { error: "platform_settings.invalid" }
 
@@ -110,5 +153,10 @@ export const productCardSchema = z
     quick_view_rating: z.boolean(),
     quick_view_summary: z.boolean(),
     quick_view_quantity: z.boolean(),
+    text_position: choice(CARD_TEXT_POSITIONS),
+    rating_badge: z.boolean(),
+    arrow: z.boolean(),
+    duration_row: z.boolean(),
+    per_person: z.boolean(),
   })
   .strict()
