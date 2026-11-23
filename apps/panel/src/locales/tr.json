@@ -645,7 +645,16 @@
         "moving": "Adresler taşınıyor… %{{percent}}",
         "moved_one": "{{count}} sayfa yeni adresine taşındı.",
         "moved_other": "{{count}} sayfa yeni adresine taşındı.",
-        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > Denetim kaydı > İşler'de."
+        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > Denetim kaydı > İşler'de.",
+        "option": {
+          "prefixed": "Önekli",
+          "flat": "Öneksiz, kökte"
+        },
+        "category": {
+          "prefixed": "Önekli, üst kategorilerle",
+          "nested": "Öneksiz, üst kategorilerle",
+          "flat": "Öneksiz, yalnız kendi adı"
+        }
       },
       "searchConsole": {
         "title": "Search Console",
@@ -2996,6 +3005,8 @@
         "notReady": "Kesime hazır değil",
         "noTraffic": "Search Console verisi yok: en çok trafik alan sayfaları yükleyin.",
         "unanswered": "En çok trafik alan adreslerden {{count}} tanesi henüz yanıt vermiyor.",
+        "categoryStyle": "Eski sitenin {{total}} kategori adresinden {{kept}} tanesi “{{style}}” kategori adres biçimiyle aynen korunur (şu anki biçimde {{now}}). Biçimi değiştirirseniz diğer kategori adresleri 301 ile yenilerine gider.",
+        "categoryStyleLink": "Adres biçimini aç",
         "counts": {
           "total": "Adres",
           "matched": "Eşleşen",

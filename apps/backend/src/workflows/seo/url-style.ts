@@ -1,14 +1,22 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { brandPath, categoryPath, isReservedPath, isValidSlug, productPath } from "../../lib/seo"
-import type { UrlStyle } from "../../lib/seo"
+import {
+  brandPath,
+  categoryPath,
+  isReservedPath,
+  isValidSlug,
+  productPath,
+  startsInReservedRoot,
+} from "../../lib/seo"
+import type { CategoryUrlStyle, UrlStyle } from "../../lib/seo"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import type { ClaimInput } from "../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 
 /**
- * Moving every product, category and brand to another URL style (docs/13 §2.2):
+ * Moving every product, category and brand to another URL style (docs/13 §2.2;
+ * the categories' nested style, adr/0017 Ek 2026-11-23):
  * the new paths are claimed record by record, the old ones stay reserved
  * and resolution sends them on with a 301 (adr/0017). A plan comes first:
  * a path two records would share, a page the storefront keeps, or another
@@ -17,7 +25,7 @@ import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 
 export interface UrlStyles {
   product: UrlStyle
-  category: UrlStyle
+  category: CategoryUrlStyle
   brand: UrlStyle
 }
 
@@ -72,6 +80,8 @@ async function allRows<T>(
 interface Wanted extends StyleMove {
   /** Handles that made no valid slug (pre-F3.1 records): no path can be made. */
   invalid?: boolean
+  /** A nested category path under a root the storefront keeps (`/sepet/x`). */
+  underReservedRoot?: boolean
 }
 
 async function wantedPaths(container: MedusaContainer, styles: UrlStyles): Promise<Wanted[]> {
@@ -109,12 +119,14 @@ async function wantedPaths(container: MedusaContainer, styles: UrlStyles): Promi
     const valid = handles.every(
       (handle): handle is string => handle !== undefined && isValidSlug(handle)
     )
+    const path = valid ? categoryPath(handles, styles.category) : ""
     wanted.push({
       entity_type: CATALOG_ENTITY_TYPES.category,
       entity_id: category.id,
       name: category.name,
-      path: valid ? categoryPath(handles, styles.category) : "",
+      path,
       invalid: !valid,
+      underReservedRoot: styles.category === "nested" && valid && startsInReservedRoot(path),
       replaced: "reserve",
     })
   }
@@ -173,7 +185,7 @@ export async function planUrlStyle(
     const holder = held.get(path)
     if (records.length > 1) {
       conflicts.push({ path, reason: "shared", records: records.map(recordOf) })
-    } else if (isReservedPath(path)) {
+    } else if (isReservedPath(path) || records.some((each) => each.underReservedRoot)) {
       conflicts.push({ path, reason: "reserved_root", records: records.map(recordOf) })
     } else if (holder && key(holder) !== key(records[0] ?? { entity_type: "", entity_id: "" })) {
       conflicts.push({ path, reason: "taken", records: records.map(recordOf), holder })

@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type { QueryClient } from "@tanstack/react-query"
 import { categoryTreeQuery } from "@/features/categories/api/categories"
 import { ancestorHandles } from "@/features/categories/tree"
+import { categoryPathOf } from "@/features/categories/use-category-path"
 import { seoSettingsQuery } from "@/features/settings/api/seo"
 import type { BodyGroup } from "@/features/storefront/api/layout"
 import { sdk } from "@/lib/sdk"
@@ -43,7 +44,7 @@ async function samplesOf(
       path: `${prefix}${product.handle}`,
     }))
   }
-  const prefix = seo?.values.url_style.category === "flat" ? "/" : "/kategori/"
+  const style = seo?.values.url_style.category ?? "prefixed"
   const tree = await client.query({ ...categoryTreeQuery(), staleTime: KEEP_MS })
   const wanted = folded(q.trim())
   return tree
@@ -53,10 +54,10 @@ async function samplesOf(
     .map((category) => ({
       id: category.id,
       name: category.name,
-      path: `${prefix}${[
-        ...ancestorHandles(tree, category.parent_category_id ?? null),
-        category.handle,
-      ].join("/")}`,
+      path: categoryPathOf(
+        [...ancestorHandles(tree, category.parent_category_id ?? null), category.handle],
+        style
+      ),
     }))
 }
 

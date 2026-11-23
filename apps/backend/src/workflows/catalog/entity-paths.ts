@@ -2,8 +2,17 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { ValidationError, isValidationError } from "../../lib/errors"
 import { logger } from "../../lib/logging"
-import { brandPath, categoryPath, collectionPath, isValidSlug, productPath } from "../../lib/seo"
-import type { UrlStyle } from "../../lib/seo"
+import {
+  CATEGORY_URL_STYLES,
+  URL_STYLES,
+  brandPath,
+  categoryPath,
+  collectionPath,
+  isValidSlug,
+  productPath,
+  startsInReservedRoot,
+} from "../../lib/seo"
+import type { CategoryUrlStyle } from "../../lib/seo"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { SeoSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
@@ -27,7 +36,6 @@ import type { ClaimInput, PathClaim } from "../../modules/url-registry/service"
 // One language until F19 (DEFAULT_LOCALE in packages/types)
 export const CATALOG_LOCALE = "tr"
 const LOCALE = CATALOG_LOCALE
-const STYLES: readonly UrlStyle[] = ["prefixed", "flat"]
 
 export const CATALOG_ENTITY_TYPES = {
   product: "product",
@@ -149,7 +157,7 @@ export async function claimProductPaths(
         entity_type: CATALOG_ENTITY_TYPES.product,
         entity_id: product.id,
         path: productPath(handle, style.product),
-        accepted: STYLES.map((each) => productPath(handle, each)),
+        accepted: URL_STYLES.map((each) => productPath(handle, each)),
         replaced: product.status === "published" ? "reserve" : "free",
       }
     })
@@ -166,7 +174,7 @@ const chainOf = (category: CategoryRow): string[] => (category.mpath ?? category
 function categoryWanted(
   category: CategoryRow,
   byId: Map<string, CategoryRow>,
-  style: UrlStyle
+  style: CategoryUrlStyle
 ): Wanted {
   const handles = chainOf(category).map((id) => {
     const ancestor = byId.get(id)
@@ -175,18 +183,23 @@ function categoryWanted(
     }
     return handleOf(ancestor)
   })
+  const path = categoryPath(handles, style)
+  // Without the prefix, a tree under a kept root (`/sepet/x`) would sit under the storefront's own page
+  if (style === "nested" && startsInReservedRoot(path)) {
+    throw new ValidationError("seo.path_reserved", { field: "handle" })
+  }
   return {
     entity_type: CATALOG_ENTITY_TYPES.category,
     entity_id: category.id,
-    path: categoryPath(handles, style),
-    accepted: STYLES.map((each) => categoryPath(handles, each)),
+    path,
+    accepted: CATEGORY_URL_STYLES.map((each) => categoryPath(handles, each)),
   }
 }
 
 /**
  * Claims the categories' paths, and with `subtree` (the default) their
- * descendants': a prefixed category URL carries the tree, so renaming or
- * moving one changes every path below it. A descendant whose path cannot be
+ * descendants': a prefixed or nested category URL carries the tree, so
+ * renaming or moving one changes every path below it. A descendant whose path cannot be
  * made (a handle from before F3.1) is skipped and logged, since the save
  * did not touch it.
  */
@@ -268,7 +281,7 @@ export async function claimBrandPaths(
         entity_type: CATALOG_ENTITY_TYPES.brand,
         entity_id: brand.id,
         path: brandPath(handle, style.brand),
-        accepted: STYLES.map((each) => brandPath(handle, each)),
+        accepted: URL_STYLES.map((each) => brandPath(handle, each)),
         replaced: brand.is_active ? "reserve" : "free",
       }
     })

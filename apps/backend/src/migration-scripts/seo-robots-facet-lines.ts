@@ -29,10 +29,14 @@ type Audit = Pick<AuditLogModuleService, "record">
  * wrote stays; so does a shop that never saved (it reads the default).
  * Returns whether it changed.
  */
-export async function updateRobotsDefault(settings: Settings, audit: Audit): Promise<boolean> {
+export async function updateRobotsDefault(
+  settings: Settings,
+  audit: Audit,
+  previous: string = PREVIOUS_DEFAULT
+): Promise<boolean> {
   const { values, version } = await settings.readSection("seo")
   const template = (values as unknown as SeoSettings).robots_txt.replace(/\r\n?/g, "\n").trim()
-  if (version === 0 || template !== PREVIOUS_DEFAULT) {
+  if (version === 0 || template !== previous) {
     return false
   }
   await settings.saveSection("seo", { robots_txt: DEFAULT_ROBOTS_TXT }, null)
@@ -42,7 +46,7 @@ export async function updateRobotsDefault(settings: Settings, audit: Audit): Pro
     actor_type: "system",
     resource_type: "platform_settings",
     resource_id: "seo",
-    changes: { robots_txt: { before: PREVIOUS_DEFAULT, after: DEFAULT_ROBOTS_TXT } },
+    changes: { robots_txt: { before: previous, after: DEFAULT_ROBOTS_TXT } },
   })
   return true
 }
