@@ -64,7 +64,8 @@ export function CategoryIcons({
                 <span
                   className={cn(
                     "flex size-16 items-center justify-center overflow-hidden rounded-pill transition-colors lg:size-20",
-                    DISC[view.disc]
+                    // A picture sits on the photo well (adr/0067 S4), an icon or a letter on the disc
+                    !item.icon && item.image ? "bg-media" : DISC[view.disc]
                   )}
                 >
                   {item.icon ? (
