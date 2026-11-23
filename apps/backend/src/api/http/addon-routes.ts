@@ -5,6 +5,13 @@ import { lineAddonsOf } from "../../lib/catalog/addons"
 import { ValidationError } from "../../lib/errors"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { PRODUCT_ADDONS } from "../../modules/platform-settings/features"
+import {
+  AdminGetAddonTemplates,
+  AdminPostAddonTemplate,
+  AdminPostCarriedAddonTemplates,
+  AdminPostProductAddonTemplates,
+  AdminUpdateAddonTemplate,
+} from "../admin/addon-templates/validators"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { StorePostLineAddons } from "../store/carts/[id]/line-items/[line_id]/addons/validators"
 import { rateLimit } from "./rate-limit"
@@ -82,5 +89,31 @@ export const ADDON_ROUTES = [
   {
     matcher: "/store/carts/:id/line-items/:line_id",
     middlewares: [protectAddonLine],
+  },
+  // adr/0052 Ek 2026-11-23: add-on templates; writing add-ons or linking checks the flag in the workflow
+  {
+    matcher: "/admin/addon-templates",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetAddonTemplates, {})],
+  },
+  {
+    matcher: "/admin/addon-templates",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostAddonTemplate)],
+  },
+  {
+    matcher: "/admin/addon-templates/:id",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminUpdateAddonTemplate)],
+  },
+  {
+    matcher: "/admin/products/:id/addon-templates",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostProductAddonTemplates)],
+  },
+  {
+    matcher: "/admin/attribute-templates/:id/addon-templates",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostCarriedAddonTemplates)],
   },
 ]

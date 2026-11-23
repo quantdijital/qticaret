@@ -9,6 +9,7 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { setProductBrandWorkflow } from "../../brands/workflows"
+import { setProductAddonTemplatesWorkflow } from "../../addon-templates"
 import { upsertProductAttributesWorkflow } from "../../product-attributes/upsert-product-attributes"
 import { upsertSeoMetaWorkflow } from "../../seo/upsert-seo-meta"
 import { setProductCatalogWorkflow } from "../set-product-catalog"
@@ -130,6 +131,20 @@ export const duplicateProductWorkflow = createWorkflow(
           product_id: productId,
           template_id: plan.attributes?.template_id ?? null,
           values: plan.attributes?.values ?? {},
+        })),
+      })
+    })
+
+    // adr/0052 Ek 2026-11-23: the same add-on templates, linked (live) as the source's
+    when(
+      "catalog-copy-addon-templates",
+      { plan },
+      ({ plan }) => plan.addon_template_ids.length > 0
+    ).then(() => {
+      setProductAddonTemplatesWorkflow.runAsStep({
+        input: transform({ plan, productId }, ({ plan, productId }) => ({
+          product_id: productId,
+          template_ids: plan.addon_template_ids,
         })),
       })
     })

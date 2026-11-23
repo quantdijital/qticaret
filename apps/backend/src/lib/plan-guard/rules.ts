@@ -200,6 +200,8 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   "/admin/collections*",
   "/admin/collection-board*",
   "/admin/attribute-templates*",
+  // adr/0052 Ek 2026-11-23
+  "/admin/addon-templates*",
   "/admin/description-facts*",
   "/admin/brands*",
   "/admin/category-images*",
