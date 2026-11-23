@@ -7,7 +7,7 @@ export interface SeoSettingsResponse {
     canonical_host: string | null
     url_style: {
       product: "prefixed" | "flat"
-      category: "prefixed" | "flat"
+      category: "prefixed" | "nested" | "flat"
       brand: "prefixed" | "flat"
     }
   }

@@ -171,7 +171,7 @@ type UrlStyle = "prefixed" | "flat"
 
 export interface SeoSettings {
   canonical_host: string | null
-  url_style: { product: UrlStyle; category: UrlStyle; brand: UrlStyle }
+  url_style: { product: UrlStyle; category: UrlStyle | "nested"; brand: UrlStyle }
   title_templates: {
     product: string
     category: string
