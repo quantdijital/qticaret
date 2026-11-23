@@ -11889,8 +11889,8 @@
   },
   "plan": {
     "title": "Abonelik",
-    "description": "Paketiniz, sıradaki ödemeniz ve limitlerinizin kullanımı.",
-    "unmanaged": "Bu mağazada paket limiti yok: ürün, ekip, depolama ve içerik taslakları sınırsızdır.",
+    "description": "Paket, ödeme ve kullanım.",
+    "unmanaged": "Paket limiti yok",
     "loadFailed": "Abonelik bilgileri yüklenemedi.",
     "view": "Aboneliği gör",
     "strip": {
@@ -11904,24 +11904,54 @@
       "howToPay": "Ödeme bilgileri"
     },
     "package": {
-      "title": "Paketiniz",
+      "label": "Paket",
       "none": "Paket tanımlı değil"
+    },
+    "hero": {
+      "amount": {
+        "due": "Sonraki ödeme",
+        "trial": "İlk ödeme",
+        "late": "Geciken ödeme"
+      },
+      "nothingDue": "Bekleyen ödeme yok",
+      "date": {
+        "due": "Son ödeme günü",
+        "trial": "Deneme bitişi",
+        "late": "Son ödeme günü"
+      },
+      "graceEnds": "Ek süre sonu",
+      "countdown": {
+        "trial_one": "{{count}} gün kaldı",
+        "trial_other": "{{count}} gün kaldı",
+        "due_one": "{{count}} gün kaldı",
+        "due_other": "{{count}} gün kaldı",
+        "grace_one": "Ek süre: {{count}} gün",
+        "grace_other": "Ek süre: {{count}} gün",
+        "overdue_one": "{{count}} gün gecikti",
+        "overdue_other": "{{count}} gün gecikti",
+        "today": "Bugün"
+      },
+      "ring": {
+        "trial": "Deneme",
+        "due": "Ödemeye",
+        "grace": "Ek süre",
+        "overdue": "Gecikme",
+        "day": "gün"
+      },
+      "period": "Dönem",
+      "periodHint": "Aylık limitler her ayın başında sıfırlanır."
     },
     "usage": {
       "title": "Limitler ve kullanım",
-      "text": "Limitin %80'ine gelince sarı, yeni kayıt eklenemeyecek kadar dolunca kırmızı görünür.",
-      "totals": "Mağaza geneli",
-      "totalsHint": "Toplam kayıtlarınız.",
-      "monthly": "Bu ay · {{period}}",
-      "monthlyHint": "Ay başında sıfırlanır.",
+      "hint": "%80'den sarı, limitte kırmızı.",
+      "monthly": "Bu ay",
+      "unlimited": "Sınırsız",
       "barLabel": "{{name}}: {{value}}",
-      "of": "{{used}} / {{max}}",
-      "unlimited": "{{used}} · sınırsız",
       "left": "{{value}} kaldı",
       "over": "{{value}} fazla",
-      "pending_one": "{{count}} bekleyen davet dahil",
-      "pending_other": "{{count}} bekleyen davet dahil",
-      "ordersNote": "Siparişler hiçbir zaman durdurulmaz",
+      "pending_one": "{{count}} davet bekliyor",
+      "pending_other": "{{count}} davet bekliyor",
+      "ordersNote": "Siparişler hiçbir zaman durdurulmaz.",
       "tone": {
         "warn": "Limite yaklaştı",
         "full": "Limitte",
@@ -11930,10 +11960,10 @@
     },
     "keys": {
       "products": "Ürünler",
-      "orders_per_month": "Bu ayki siparişler",
+      "orders_per_month": "Siparişler",
       "staff": "Ekip",
       "storage_mb": "Depolama",
-      "llm_credits_per_month": "Bu ayki içerik taslakları",
+      "llm_credits_per_month": "İçerik taslakları",
       "custom_domains": "Özel alan adları"
     },
     "notice": {
@@ -11985,26 +12015,14 @@
       "closing": "Mağazanız kapanıyor.",
       "closed": "Mağazanız kapalı."
     },
-    "facts": {
-      "nextDue": "Sonraki ödeme",
-      "lateDue": "Geciken ödeme",
-      "trialEnds": "Deneme bitişi",
-      "nothingDue": "Bekleyen ödeme yok",
-      "amount": "Tutar",
-      "firstAmount": "İlk ödeme tutarı",
-      "graceEnds": "Ek süre bitişi",
-      "graceHint": "Bu tarihe kadar ödenmezse panel kısıtlanır.",
-      "period": "Kullanım dönemi",
-      "periodHint": "Aylık limitler her ayın başında sıfırlanır."
-    },
     "payment": {
-      "title": "Nasıl ödenir",
-      "none": "Ödeme bilgileri, ödeme günü yaklaştığında burada görünür.",
+      "title": "Ödeme bilgileri",
+      "none": "Ödeme bilgisi yok",
       "copy": "Kopyala",
       "copied": "Ödeme bilgileri kopyalandı.",
       "copyFailed": "Kopyalanamadı; metni seçip kopyalayabilirsiniz.",
-      "changeTitle": "Paket değişikliği",
-      "changeText": "Paketinizi yükseltmek ya da değiştirmek için bizimle iletişime geçin."
+      "change": "Paket değişikliği",
+      "changeHint": "Paketinizi yükseltmek ya da değiştirmek için bizimle iletişime geçin."
     }
   },
   "wholesale": {

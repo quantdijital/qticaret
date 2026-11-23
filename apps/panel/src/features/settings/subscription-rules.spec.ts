@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest"
 import type { BillingSummary } from "@/features/settings/api/plan"
 import { LIMITS } from "@/features/settings/plan.fixtures"
-import { limitGroups, periodLabel, planState, storageText } from "./subscription-rules"
+import {
+  countdownOf,
+  daysUntil,
+  limitGroups,
+  periodLabel,
+  planState,
+  ringShare,
+  storageText,
+  tileSpan,
+} from "./subscription-rules"
 
 const billing = (changes: Partial<BillingSummary> = {}): BillingSummary => ({
   status: "active",
@@ -43,6 +52,59 @@ describe("planState", () => {
     expect(planState({ status: "restricted", billing: late }, today)).toBe("restricted")
     expect(planState({ status: "suspended", billing: late }, today)).toBe("suspended")
     expect(planState({ status: "provisioning", billing: null }, today)).toBe("provisioning")
+  })
+})
+
+describe("countdownOf", () => {
+  const today = "2026-11-20"
+
+  it("counts to the next payment, or a trial's end", () => {
+    expect(countdownOf("active", billing(), today)).toEqual({ kind: "due", days: 11 })
+    expect(countdownOf("due_soon", billing({ due_on: "2026-11-20" }), today)).toEqual({
+      kind: "due",
+      days: 0,
+    })
+    expect(countdownOf("trialing", billing({ status: "trialing" }), today)).toEqual({
+      kind: "trial",
+      days: 11,
+    })
+  })
+
+  it("counts a late payment's grace, then the days overdue once it is gone", () => {
+    const late = billing({ status: "past_due", due_on: "2026-11-10", grace_ends_on: "2026-11-17" })
+    expect(countdownOf("past_due", { ...late, grace_ends_on: "2026-11-24" }, today)).toEqual({
+      kind: "grace",
+      days: 4,
+    })
+    expect(countdownOf("past_due", { ...late, grace_ends_on: "2026-11-20" }, today)).toEqual({
+      kind: "grace",
+      days: 0,
+    })
+    expect(countdownOf("restricted", late, today)).toEqual({ kind: "overdue", days: 10 })
+    expect(countdownOf("past_due", { ...late, grace_ends_on: null }, today)).toEqual({
+      kind: "overdue",
+      days: 10,
+    })
+  })
+
+  it("has nothing to count without an open payment", () => {
+    expect(countdownOf("active", null, today)).toBeNull()
+    expect(countdownOf("active", billing({ due_on: null }), today)).toBeNull()
+  })
+
+  it("fills the ring within a month, a late payment's fully", () => {
+    expect(ringShare({ kind: "due", days: 15 })).toBe(0.5)
+    expect(ringShare({ kind: "trial", days: 45 })).toBe(1)
+    expect(ringShare({ kind: "grace", days: 0 })).toBe(0)
+    expect(ringShare({ kind: "overdue", days: 3 })).toBe(1)
+    expect(daysUntil("2026-12-01", "2026-11-20")).toBe(11)
+    expect(daysUntil("2026-11-10", "2026-11-20")).toBe(-10)
+  })
+})
+
+describe("tileSpan", () => {
+  it("shares a group's rows evenly on the 6-column grid", () => {
+    expect([1, 2, 3, 4, 5].map(tileSpan)).toEqual([6, 3, 2, 3, 2])
   })
 })
 

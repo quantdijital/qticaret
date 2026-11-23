@@ -11889,8 +11889,8 @@
   },
   "plan": {
     "title": "Subscription",
-    "description": "Your package, your next payment and the use of your limits.",
-    "unmanaged": "This shop has no package limits: products, team, storage and content drafts are unlimited.",
+    "description": "Package, payment and usage.",
+    "unmanaged": "No package limits",
     "loadFailed": "The subscription could not be loaded.",
     "view": "View subscription",
     "strip": {
@@ -11904,24 +11904,54 @@
       "howToPay": "How to pay"
     },
     "package": {
-      "title": "Your package",
+      "label": "Package",
       "none": "No package set"
+    },
+    "hero": {
+      "amount": {
+        "due": "Next payment",
+        "trial": "First payment",
+        "late": "Overdue payment"
+      },
+      "nothingDue": "Nothing due",
+      "date": {
+        "due": "Due date",
+        "trial": "Trial ends",
+        "late": "Due date"
+      },
+      "graceEnds": "Grace ends",
+      "countdown": {
+        "trial_one": "{{count}} day left",
+        "trial_other": "{{count}} days left",
+        "due_one": "{{count}} day left",
+        "due_other": "{{count}} days left",
+        "grace_one": "Grace: {{count}} day",
+        "grace_other": "Grace: {{count}} days",
+        "overdue_one": "{{count}} day overdue",
+        "overdue_other": "{{count}} days overdue",
+        "today": "Today"
+      },
+      "ring": {
+        "trial": "Trial",
+        "due": "To payment",
+        "grace": "Grace",
+        "overdue": "Overdue",
+        "day": "days"
+      },
+      "period": "Period",
+      "periodHint": "Monthly limits reset at the start of each month."
     },
     "usage": {
       "title": "Limits and usage",
-      "text": "Amber from 80% of a limit, red when no new record can be added.",
-      "totals": "Shop totals",
-      "totalsHint": "Your records in total.",
-      "monthly": "This month · {{period}}",
-      "monthlyHint": "Resets at the start of the month.",
+      "hint": "Amber from 80%, red at the limit.",
+      "monthly": "This month",
+      "unlimited": "Unlimited",
       "barLabel": "{{name}}: {{value}}",
-      "of": "{{used}} / {{max}}",
-      "unlimited": "{{used}} · unlimited",
       "left": "{{value}} left",
       "over": "{{value}} over",
-      "pending_one": "{{count}} open invitation included",
-      "pending_other": "{{count}} open invitations included",
-      "ordersNote": "Orders are never stopped",
+      "pending_one": "{{count}} invitation open",
+      "pending_other": "{{count}} invitations open",
+      "ordersNote": "Orders are never stopped.",
       "tone": {
         "warn": "Near the limit",
         "full": "At the limit",
@@ -11930,10 +11960,10 @@
     },
     "keys": {
       "products": "Products",
-      "orders_per_month": "Orders this month",
+      "orders_per_month": "Orders",
       "staff": "Team",
       "storage_mb": "Storage",
-      "llm_credits_per_month": "Content drafts this month",
+      "llm_credits_per_month": "Content drafts",
       "custom_domains": "Custom domains"
     },
     "notice": {
@@ -11985,26 +12015,14 @@
       "closing": "Your shop is closing.",
       "closed": "Your shop is closed."
     },
-    "facts": {
-      "nextDue": "Next payment",
-      "lateDue": "Overdue payment",
-      "trialEnds": "Trial ends",
-      "nothingDue": "Nothing due",
-      "amount": "Amount",
-      "firstAmount": "First payment",
-      "graceEnds": "Grace period ends",
-      "graceHint": "Unpaid by then, the panel is restricted.",
-      "period": "Usage period",
-      "periodHint": "Monthly limits reset at the start of each month."
-    },
     "payment": {
-      "title": "How to pay",
-      "none": "Payment details appear here as the payment day nears.",
+      "title": "Payment details",
+      "none": "No payment details",
       "copy": "Copy",
       "copied": "Payment details copied.",
       "copyFailed": "Could not copy; select the text to copy it.",
-      "changeTitle": "Changing your package",
-      "changeText": "Contact us to upgrade or change your package."
+      "change": "Change of package",
+      "changeHint": "Contact us to upgrade or change your package."
     }
   },
   "wholesale": {

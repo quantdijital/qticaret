@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import type { BillingSummary } from "@/features/settings/api/plan"
 import { planOf } from "@/features/settings/plan.fixtures"
 import { SubscriptionPage } from "./subscription-page"
 
@@ -18,35 +19,31 @@ function renderPage() {
   )
 }
 
-const rowOf = (name: string) => {
-  const row = screen.getByText(name).closest("li")
-  if (!row) {
-    throw new Error(`no row for ${name}`)
-  }
-  return within(row)
-}
+/** A usage tile by its limit's name. */
+const tileOf = (name: string) => within(screen.getByRole("listitem", { name }))
 
-/** A fact of the package card by its label: its value and hint. */
-const factOf = (label: string) => {
-  const fact = screen.getByText(label).parentElement
-  if (!fact) {
-    throw new Error(`no fact ${label}`)
-  }
-  return within(fact)
-}
+const packageCard = () => within(screen.getByRole("region", { name: "Paket" }))
 
-const LATE = {
-  status: "past_due" as const,
+const billingOf = (changes: Partial<BillingSummary>): BillingSummary => ({
+  status: "active",
+  due_on: "2026-12-01",
+  grace_ends_on: null,
+  amount: 149_900,
+  currency: "TRY",
+  ...changes,
+})
+
+const LATE = billingOf({
+  status: "past_due",
   due_on: "2026-11-15",
   grace_ends_on: "2026-12-08",
   amount: 149_000,
-  currency: "TRY" as const,
-}
+})
 
 describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
-    // An Istanbul day five days before the fixture's due day; only Date is faked
+    // Istanbul's 26 Nov 2026, five days before the fixture's due day; only Date is faked
     vi.useFakeTimers({ toFake: ["Date"] })
     vi.setSystemTime(new Date("2026-11-26T09:00:00Z"))
   })
@@ -55,30 +52,35 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     vi.useRealTimers()
   })
 
-  it("leads with the package, one status and the next payment", async () => {
+  it("leads with the package, one status, the amount due, its day and a countdown", async () => {
     fetchMock.mockResolvedValue({ plan: planOf() })
     renderPage()
 
-    expect(await screen.findByText("Standart")).toBeInTheDocument()
-    expect(screen.getByText("Etkin")).toBeInTheDocument()
-    expect(screen.getByText("Aboneliğiniz güncel.")).toBeInTheDocument()
-    expect(factOf("Sonraki ödeme").getByText("1 Ara 2026")).toBeInTheDocument()
-    expect(factOf("Tutar").getByText(/1\.499,00/)).toBeInTheDocument()
-    // The month as words, not `2026-11`
-    expect(factOf("Kullanım dönemi").getByText("Kasım 2026")).toBeInTheDocument()
+    await screen.findByText("Standart")
+    const card = packageCard()
+    expect(card.getByRole("heading", { name: "Standart" })).toBeInTheDocument()
+    expect(card.getByText("Etkin")).toBeInTheDocument()
+    expect(card.getByText("Sonraki ödeme")).toBeInTheDocument()
+    expect(card.getByText(/1\.499,00/)).toBeInTheDocument()
+    expect(card.getByText("1 Ara 2026")).toBeInTheDocument()
+    expect(card.getByText("5 gün kaldı")).toBeInTheDocument()
+    expect(card.getByRole("img", { name: "5 gün kaldı" })).toBeInTheDocument()
+    // The month as words, not `2026-11`; what it means behind the (i)
+    expect(card.getByText("Kasım 2026")).toBeInTheDocument()
     expect(screen.queryByText("2026-11")).toBeNull()
-    expect(
-      screen.getByText("Ödeme bilgileri, ödeme günü yaklaştığında burada görünür.")
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText("Paketinizi yükseltmek ya da değiştirmek için bizimle iletişime geçin.")
-    ).toBeInTheDocument()
-    // Read only, and nothing to copy without an instruction
-    expect(screen.queryByRole("button")).toBeNull()
+    expect(card.getByRole("button", { name: "Bilgi: Dönem" })).toBeInTheDocument()
+    // The status's sentence is not on the card, only behind its (i) for a screen reader
+    expect(card.getByRole("button", { name: "Bilgi: Etkin" })).toHaveAccessibleDescription(
+      "Aboneliğiniz güncel."
+    )
+    // No instruction yet: an empty state, nothing to copy, the package change as one line
+    expect(screen.getByText("Ödeme bilgisi yok")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Kopyala" })).toBeNull()
+    expect(screen.getByRole("button", { name: "Bilgi: Paket değişikliği" })).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith("/admin/plan")
   })
 
-  it("groups the limits into the shop's totals and this month, as meters", async () => {
+  it("shows each limit as a tile: use over limit, a bar coloured by threshold, monthly marked", async () => {
     fetchMock.mockResolvedValue({
       plan: planOf(
         {},
@@ -91,67 +93,64 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     })
     renderPage()
 
-    const totals = await screen.findByRole("list", { name: "Mağaza geneli" })
-    const month = screen.getByRole("list", { name: "Bu ay · Kasım 2026" })
-    expect(within(totals).getAllByRole("listitem")).toHaveLength(3)
-    // Custom domains are not applied yet: not listed
-    expect(within(month).getAllByRole("listitem")).toHaveLength(2)
+    const list = await screen.findByRole("list", { name: "Limitler ve kullanım" })
+    // Custom domains are not applied yet: no tile
+    expect(within(list).getAllByRole("listitem")).toHaveLength(5)
     expect(screen.queryByText("Özel alan adları")).toBeNull()
 
-    expect(rowOf("Ürünler").getByText("Limitte")).toBeInTheDocument()
-    expect(rowOf("Ürünler").getByText("500 / 500")).toBeInTheDocument()
-    expect(rowOf("Ürünler").getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100")
+    expect(tileOf("Ürünler").getByText("Limitte")).toBeInTheDocument()
+    expect(tileOf("Ürünler").getByText("500")).toBeInTheDocument()
+    expect(tileOf("Ürünler").getByText("/ 500")).toBeInTheDocument()
+    expect(tileOf("Ürünler").getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100")
+    expect(tileOf("Ürünler").queryByText("Bu ay")).toBeNull()
     // Storage in GB, how much is left in MB
-    expect(rowOf("Depolama").getByText("1,7 GB / 2 GB")).toBeInTheDocument()
-    expect(rowOf("Depolama").getByText("Limite yaklaştı")).toBeInTheDocument()
-    expect(rowOf("Depolama").getByText("348 MB kaldı")).toBeInTheDocument()
-    // The month's orders past their limit: a warning, never a refusal
-    expect(rowOf("Bu ayki siparişler").getByText("Limit aşıldı")).toBeInTheDocument()
-    expect(
-      rowOf("Bu ayki siparişler").getByText("20 fazla · Siparişler hiçbir zaman durdurulmaz")
-    ).toBeInTheDocument()
-    expect(rowOf("Ekip").getByText("1 kaldı · 1 bekleyen davet dahil")).toBeInTheDocument()
-    expect(rowOf("Bu ayki içerik taslakları").queryByText("Limite yaklaştı")).toBeNull()
-    expect(rowOf("Bu ayki içerik taslakları").getByText("93 kaldı")).toBeInTheDocument()
+    expect(tileOf("Depolama").getByText("1,7 GB")).toBeInTheDocument()
+    expect(tileOf("Depolama").getByText("/ 2 GB")).toBeInTheDocument()
+    expect(tileOf("Depolama").getByText("Limite yaklaştı")).toBeInTheDocument()
+    expect(tileOf("Depolama").getByText("348 MB kaldı")).toBeInTheDocument()
+    // The month's orders past their limit: a warning, never a refusal (said behind the (i))
+    const orders = tileOf("Siparişler")
+    expect(orders.getByText("Bu ay")).toBeInTheDocument()
+    expect(orders.getByText("Limit aşıldı")).toBeInTheDocument()
+    expect(orders.getByText("20 fazla")).toBeInTheDocument()
+    expect(orders.getByRole("button", { name: "Bilgi: Siparişler" })).toBeInTheDocument()
+    expect(tileOf("Ekip").getByText("1 davet bekliyor")).toBeInTheDocument()
+    expect(tileOf("İçerik taslakları").getByText("Bu ay")).toBeInTheDocument()
+    expect(tileOf("İçerik taslakları").queryByText("Limite yaklaştı")).toBeNull()
+    expect(tileOf("İçerik taslakları").getByText("93 kaldı")).toBeInTheDocument()
   })
 
-  it("shows a trial's end and its first payment", async () => {
+  it("counts down a trial to its end and names the first payment", async () => {
     fetchMock.mockResolvedValue({
       plan: planOf({
-        billing: {
-          status: "trialing",
-          due_on: "2026-12-10",
-          grace_ends_on: null,
-          amount: 99_900,
-          currency: "TRY",
-        },
+        billing: billingOf({ status: "trialing", due_on: "2026-12-10", amount: 99_900 }),
       }),
     })
     renderPage()
 
     expect(await screen.findByText("Deneme süresinde")).toBeInTheDocument()
-    expect(factOf("Deneme bitişi").getByText("10 Ara 2026")).toBeInTheDocument()
-    expect(factOf("İlk ödeme tutarı").getByText(/999,00/)).toBeInTheDocument()
-    expect(screen.queryByText("Sonraki ödeme")).toBeNull()
+    const card = packageCard()
+    expect(card.getByText("İlk ödeme")).toBeInTheDocument()
+    expect(card.getByText(/999,00/)).toBeInTheDocument()
+    expect(card.getByText("10 Ara 2026")).toBeInTheDocument()
+    expect(card.getByRole("img", { name: "14 gün kaldı" })).toHaveTextContent("Deneme")
+    expect(card.queryByText("Sonraki ödeme")).toBeNull()
   })
 
-  it("says a payment is near in its last days", async () => {
-    fetchMock.mockResolvedValue({
-      plan: planOf({
-        billing: {
-          status: "active",
-          due_on: "2026-11-28",
-          grace_ends_on: null,
-          amount: 149_900,
-          currency: "TRY",
-        },
-      }),
-    })
+  it("turns amber in a payment's last days", async () => {
+    fetchMock.mockResolvedValue({ plan: planOf({ billing: billingOf({ due_on: "2026-11-28" }) }) })
     renderPage()
     expect(await screen.findByText("Ödeme yaklaşıyor")).toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "2 gün kaldı" })).toBeInTheDocument()
   })
 
-  it("shows a late payment with its grace day, how to pay, and copies it", async () => {
+  it("says the due day is today", async () => {
+    fetchMock.mockResolvedValue({ plan: planOf({ billing: billingOf({ due_on: "2026-11-26" }) }) })
+    renderPage()
+    expect(await screen.findByRole("img", { name: "Bugün" })).toBeInTheDocument()
+  })
+
+  it("counts a late payment's grace down, shows how to pay and copies it", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true })
     const instruction = "Alıcı: Quant Dijital Yazılım\nIBAN: TR12 0006 4000 0011 2345 6789 01"
@@ -166,11 +165,13 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     renderPage()
 
     expect(await screen.findByText("Profesyonel Ağ")).toBeInTheDocument()
-    expect(screen.getByText("Ödeme gecikti")).toBeInTheDocument()
-    expect(factOf("Geciken ödeme").getByText("15 Kas 2026")).toBeInTheDocument()
-    expect(factOf("Tutar").getByText(/1\.490,00/)).toBeInTheDocument()
-    expect(factOf("Ek süre bitişi").getByText("8 Ara 2026")).toBeInTheDocument()
-    expect(screen.queryByText("Kullanım dönemi")).toBeNull()
+    const card = packageCard()
+    expect(card.getByText("Ödeme gecikti")).toBeInTheDocument()
+    expect(card.getByText("Geciken ödeme")).toBeInTheDocument()
+    expect(card.getByText(/1\.490,00/)).toBeInTheDocument()
+    expect(card.getByText("15 Kas 2026")).toBeInTheDocument()
+    expect(card.getByText("8 Ara 2026")).toBeInTheDocument()
+    expect(card.getByRole("img", { name: "Ek süre: 12 gün" })).toBeInTheDocument()
     expect(screen.getByText(/IBAN: TR12 0006/)).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Kopyala" }))
@@ -179,44 +180,37 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     })
   })
 
-  it("leads with the restricted shop's state over its payment's", async () => {
-    fetchMock.mockResolvedValue({
-      plan: planOf({ status: "restricted", billing: { ...LATE, status: "restricted" } }),
-    })
-    renderPage()
-
-    expect(await screen.findByText("Kısıtlı")).toBeInTheDocument()
-    expect(screen.getByText(/panel salt okunur/)).toBeInTheDocument()
-    expect(factOf("Ek süre bitişi").getByText("8 Ara 2026")).toBeInTheDocument()
-  })
-
-  it("says nothing is due when no payment is open", async () => {
+  it("leads with the restricted shop's state and counts the days overdue", async () => {
     fetchMock.mockResolvedValue({
       plan: planOf({
-        billing: {
-          status: "active",
-          due_on: null,
-          grace_ends_on: null,
-          amount: null,
-          currency: "TRY",
-        },
+        status: "restricted",
+        billing: { ...LATE, status: "restricted", grace_ends_on: "2026-11-22" },
       }),
     })
     renderPage()
 
+    expect(await screen.findByText("Kısıtlı")).toBeInTheDocument()
+    expect(screen.getByText(/panel salt okunur/)).toHaveClass("sr-only")
+    expect(screen.getByRole("img", { name: "11 gün gecikti" })).toBeInTheDocument()
+  })
+
+  it("says nothing is due when no payment is open, without a ring", async () => {
+    fetchMock.mockResolvedValue({
+      plan: planOf({ billing: billingOf({ due_on: null, amount: null }) }),
+    })
+    renderPage()
+
     expect(await screen.findByText("Bekleyen ödeme yok")).toBeInTheDocument()
-    expect(factOf("Tutar").getByText("—")).toBeInTheDocument()
+    expect(screen.queryByRole("img")).toBeNull()
   })
 
   it("names the package from its code when an older document has no name", async () => {
-    fetchMock.mockResolvedValue({
-      plan: planOf({ package_code: "kurumsal", package_name: null }),
-    })
+    fetchMock.mockResolvedValue({ plan: planOf({ package_code: "kurumsal", package_name: null }) })
     renderPage()
     expect(await screen.findByText("Kurumsal")).toBeInTheDocument()
   })
 
-  it("says a shop without a plan has no limits, and shows its use", async () => {
+  it("shows a shop without a control plane only its use, every tile unlimited", async () => {
     fetchMock.mockResolvedValue({
       plan: planOf(
         { managed: false, package_code: null, billing: null },
@@ -232,16 +226,13 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     })
     renderPage()
 
-    expect(
-      await screen.findByText(
-        "Bu mağazada paket limiti yok: ürün, ekip, depolama ve içerik taslakları sınırsızdır."
-      )
-    ).toBeInTheDocument()
-    expect(rowOf("Ürünler").getByText("120 · sınırsız")).toBeInTheDocument()
-    expect(rowOf("Depolama").getByText("380 MB · sınırsız")).toBeInTheDocument()
+    expect(await screen.findByText("Paket limiti yok")).toBeInTheDocument()
+    expect(screen.getAllByText("Sınırsız")).toHaveLength(5)
+    expect(tileOf("Ürünler").getByText("120")).toBeInTheDocument()
+    expect(tileOf("Depolama").getByText("380 MB")).toBeInTheDocument()
     expect(screen.queryByRole("progressbar")).toBeNull()
-    expect(screen.queryByText("Paketiniz")).toBeNull()
-    expect(screen.queryByText("Nasıl ödenir")).toBeNull()
+    expect(screen.queryByRole("region", { name: "Paket" })).toBeNull()
+    expect(screen.queryByText("Ödeme bilgileri")).toBeNull()
   })
 
   it("shows the page's shape while it loads, and a retry when it fails", async () => {
