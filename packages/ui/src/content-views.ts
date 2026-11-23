@@ -29,6 +29,7 @@ import type { ContentPageSectionView } from "./page-text-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ProductsSectionView } from "./shelf-views"
 import type { StatsSectionView, StepsSectionView } from "./points-views"
+import type { SearchBoxSectionView } from "./search-form-views"
 import type { StripGallerySectionView } from "./strip-views"
 import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
 
@@ -104,6 +105,7 @@ export type HomeSectionView = {
   | StripGallerySectionView
   | StatsSectionView
   | StepsSectionView
+  | SearchBoxSectionView
   | {
       id: string
       type: "categories"

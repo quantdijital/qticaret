@@ -95,7 +95,12 @@ export function BookingPriceRow({
   )
 }
 
-/** The nearest departure on sale ("En yakın: 12 Ara"), or "Yakında yeni tarihler". */
+/**
+ * The nearest departure on sale ("En yakın: 12 Ara"), or "Yakında yeni
+ * tarihler". A date search's card (adr/0077 §4) says the departure is in
+ * the dates asked ("Tarihlerinizde: 12 Ara") and, when few, the places
+ * left after it ("Son 3 yer"); a card without them reads as before.
+ */
 export function BookingNext({
   product,
   t,
@@ -113,9 +118,19 @@ export function BookingNext({
     <p className={withClass("flex items-center gap-1.5 text-xs text-text-2", className)}>
       <CalendarDays className="size-4 shrink-0 text-text-3" aria-hidden="true" strokeWidth={1.75} />
       {booking.next && booking.nextAt ? (
-        <time dateTime={booking.nextAt}>{t("booking.card_next", { date: booking.next })}</time>
+        <time dateTime={booking.nextAt}>
+          {t(booking.inRange ? "booking.card_in_range" : "booking.card_next", {
+            date: booking.next,
+          })}
+        </time>
       ) : (
         <span>{t("booking.soon")}</span>
+      )}
+      {booking.next && booking.left !== undefined && (
+        <span className="font-semibold text-text">
+          <span aria-hidden="true">· </span>
+          {t("booking.few_left", { count: booking.left })}
+        </span>
       )}
     </p>
   )

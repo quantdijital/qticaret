@@ -33,6 +33,8 @@ import { richTextView } from "./rich-text"
 import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
 import { statsView, stepsView } from "./points"
+import { EMPTY_VALUES } from "./search-form"
+import { currentSearchForm } from "./search-form-data"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
 
@@ -197,6 +199,15 @@ async function sectionView(
       return statsView(section, t)
     case "steps":
       return stepsView(section, t)
+    case "search_box":
+      // The shop's one search box, its fields the theme's (adr/0077 §1)
+      return {
+        id,
+        type: "search_box",
+        title: section.title,
+        intro: section.intro,
+        form: await currentSearchForm(EMPTY_VALUES, t),
+      }
     case "help": {
       const contact = contactOf(await legalIdentity(), t)
       const reachable = Boolean(contact.whatsappHref ?? contact.phone ?? contact.email)

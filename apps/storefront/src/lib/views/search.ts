@@ -1,5 +1,6 @@
-import type { CategoryCardView, SearchHelpView } from "@qticaret/ui"
+import type { CategoryCardView, SearchHelpView, Translate } from "@qticaret/ui"
 import type { ListingAnswer } from "@/lib/store-api/listings"
+import { NO_DATED, datedWords } from "./dated-search"
 import { hrefOf, stateFromSearch, toggled } from "./listing"
 import type { ListingState } from "./listing"
 
@@ -23,6 +24,42 @@ export function searchStateOf(search: URLSearchParams): ListingState & { q: stri
     .replace(/[\uD800-\uDBFF]$/, "")
     .trim()
   return { ...stateFromSearch(search), q }
+}
+
+/**
+ * Where a search moves when the backend read its query in another form
+ * (adr/0077 §2): the words first, then the canonical query as given.
+ */
+export function canonicalSearchPath(q: string, canonical: string): string {
+  const parts = [q ? new URLSearchParams({ q }).toString() : "", canonical].filter(Boolean)
+  return parts.length > 0 ? `${SEARCH_PATH}?${parts.join("&")}` : SEARCH_PATH
+}
+
+/**
+ * A search's title (adr/0077 §1): its words ("“çakı” için sonuçlar"), the
+ * category and filter values asked by their names, the dates and party in
+ * words, joined by " · " ("Kapadokya · 1–10 Ara · 2 kişi"); "Arama" when
+ * nothing is named.
+ */
+export function searchTitle(
+  state: ListingState & { q: string },
+  categories: readonly { handle: string; name: string }[],
+  attributes: ListingAnswer["facets"]["attributes"],
+  t: Translate
+): string {
+  const dated = state.dated ?? NO_DATED
+  const category = categories.find((each) => each.handle === dated.category)?.name
+  const values = state.filters.flatMap(([key, chosen]) => {
+    const values = attributes.find((attribute) => attribute.key === key)?.values ?? []
+    return chosen.flatMap((value) => values.find((each) => each.value === value)?.label ?? [])
+  })
+  const parts = [
+    ...(state.q ? [t("search.results_for", { q: state.q })] : []),
+    ...(category ? [category] : []),
+    ...values,
+    ...datedWords(dated, t),
+  ]
+  return parts.length > 0 ? parts.join(" · ") : t("search.title")
 }
 
 /** A new search for these words, from its first page. */
