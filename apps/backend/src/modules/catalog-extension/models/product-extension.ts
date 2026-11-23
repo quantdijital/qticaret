@@ -41,6 +41,9 @@ export const PRODUCT_BOOKING_MODES = ["none", "departure", "range"] as const
  * - `booking_mode`: a dated product sold by departure (adr/0076 §2), a
  *   service under the `catalog.booking` flag; its places are the booking
  *   module's, not stock. `none` for every other product.
+ * - `badge`: the product's own card badge ("Sınırlı"), one short line of
+ *   clean text (`lib/catalog/badge`), shown while the shop has manual
+ *   badges on (`product_badges` settings). Null: none.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -55,4 +58,5 @@ export const ProductExtension = model.define("product_extension", {
   description_doc: model.json().nullable(),
   summary_doc: model.json().nullable(),
   booking_mode: model.enum([...PRODUCT_BOOKING_MODES]).default("none"),
+  badge: model.text().nullable(),
 })
