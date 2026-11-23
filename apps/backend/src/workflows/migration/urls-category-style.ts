@@ -111,5 +111,5 @@ export async function categoryStyleHint(container: Container): Promise<CategoryS
     container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE).getSection("seo"),
   ])
   const current = (seo as unknown as SeoSettings).url_style.category
-  return hintOf(current, old, stylePaths(data as CategoryRow[]))
+  return hintOf(current, old, stylePaths(data))
 }
