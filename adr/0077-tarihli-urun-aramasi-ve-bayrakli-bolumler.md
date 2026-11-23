@@ -147,6 +147,14 @@ Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; �
 - `SECTION_VARIANTS`'a girmediler: tek çizim var; biçimsiz kayıt varsayılan okunduğu için ikinci biçim geldiğinde liste ilk sıradaki bugünkü çizimle açılır, göç gerekmez.
 - Bilerek yok: ikon/görsel (adımlar sade numara), düğme stili (tek bağlantı temanın ana düğmesi), telefon sütun ayarı (rakam telefonda ikişer, adımlar alt alta).
 
+**Uygulama notu (PR10, `departures`).** İlk bayrağa bağlı bölüm: `SECTION_REQUIRES = { departures: "catalog.booking" }` üç kopyada (`@qticaret/types`, backend `sections/requires.ts`, `sector-packs`; eşitlik testleri). Sözleşme `packages/types/src/store/section-departures.ts`, backend aynası `lib/storefront/sections/departures.ts`. Ana sayfa ve içerik sayfaları alır.
+
+- Alanlar: başlık (boşsa vitrinin "Yaklaşan kalkışlar"), giriş ≤240, kaynak `all` / `category` (`category_id`) / `collection` (`collection_id`), adet 3–12 (varsayılan 6); ayar `layout` **list**/cards ("Liste / Kartlar", Diziliş). Kategori ve koleksiyon tasarımın tuttuğu kayıt sayılır; canlı değilse bölüm düşer.
+- Uç `GET /store/departures?limit=3..12[&category_id=|kategori=|collection_id=]` (en çok bir kaynak; bilinmeyen parametre 400) → `{ currency: "try", departures: [{ product { id, handle, title, thumbnail }, slot_id, starts_at, timezone, left, from_price }] }`. Akış `workflows/booking/upcoming.ts`: bugünden bir yıl ileriye §3'e uyan kalkışlar (açık, satış kapanışı geçmemiş, en az bir yer; `departureMatches`, en yakın 1000 ürün) → arama dizininde kanal, yayın ve kaynakla süzülür → ilk kalkışına göre en yakın `limit` ürün → `windowSlots` ile ürün başına en çok 2 kalkış → tarih sırasıyla ilk `limit` satır. `left` yalnız ≤5 ise (kart kuralı), değilse null. Fiyat kartın kuralıyla sunucuda (`payingPricesAt`, misafir fiyatı + kalkış farkı, yer tutan kategoriler), lira.
+- `catalog.booking` kapalı: 404 (`requireFeature`). Hız profili `upcoming_departures` (adres başına dakikada 60). Süreç içi önbellek 30 sn; anahtar kategori alt ağacı / koleksiyon + adet + satış kanalları. Gösterilmeyen kategori ya da olmayan koleksiyon önbelleğe girmeden boş döner. Yanıt `Cache-Control: no-store`.
+- Vitrin satırları canlı okur (`storeGet`, alışverişçinin adresiyle), ürün sayfası yolu olmayan satırı atar; tarih ürünün saat diliminde. Atölye `sections/Departures.tsx`: liste (tarih kutusu, ad, "Son N yer", "…'den başlayan", "İncele") ya da kartlar (fotoğraf `bg-media` kuyusunda). Kilitli görünümlerin hiçbiri bölümü kullanmaz: HTML ve stil özeti değişmedi.
+- Bilinen sınır: küçük resim sürümsüz (`thumbnail` adresi olduğu gibi); kartlar düzeninde ağır olabilir, gerekirse ürün görsel sürümleri eklenir.
+
 ### 11. travel paketi sürüm 2
 
 - Yeni seçim niteliği **"Gidilecek yer"** (`gidilecek_yer`): filtrelenebilir; üründe tek değer, süzgeçte çoklu seçim. Arama kutusunun "nereye" alanı bunu kullanır.
