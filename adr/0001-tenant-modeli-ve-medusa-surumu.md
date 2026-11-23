@@ -10,6 +10,7 @@ Platform birden çok bağımsız mağazaya hizmet verecek. Medusa v2 tek mağaza
 - **Instance-per-tenant:** Her tenant'a ayrı Medusa server + worker ve ayrı PostgreSQL veritabanı.
 - **Medusa sürümü:** `@medusajs/medusa@2.21.2` (2026-09-28). Tüm `@medusajs/*` paketleri aynı sürüme exact sabitlenir.
   - 2.22.0 / 2.22.1 (2026-10-21 / 23) 14 günlük `minimumReleaseAge` kuralına takıldığı için seçilmedi.
+  - **Güncelleme 2026-11-23:** 2.22.6'ya (2026-11-09) yükseltildi (`deniz/medusa-2-22`). 2.22.5'in güvenlik düzeltmesini taşıyan, bekleme süresini geçmiş en yeni 2.22.x.
 - Sürüm sabitlenir (exact), yükseltmeler ayrı PR + canary tenant ile yapılır.
 - **Node.js:** 24 LTS (`engines: >=24.11.0 <25`, `.nvmrc`). Medusa 20/22/24 LTS'i destekler. 24 en uzun destek süresine sahip ve Medusa Cloud storefront build'leri de onu kullanıyor. 25+ desteklenmiyor.
 - **TypeScript:** 5.9.3. Medusa paketleri TS için üst sınır tanımlamıyor.
@@ -52,4 +53,4 @@ CI kritik açıkta kırılır. Yüksek seviyedekiler aşağıda takip edilir; hi
 ## Sonuçlar
 - F16'da provisioning otomasyonu zorunlu.
 - Tenant sayısı arttığında kaynak optimizasyonu yeni ADR ile değerlendirilecek.
-- 2.22.x'e yükseltme 14 günlük bekleme süresi dolduktan sonra (en erken 2026-11-06) ayrı PR olarak yapılabilir. 2.22 Node ≥22.22 istiyor, Node 24 bunu zaten karşılıyor.
+- 2.22.x'e yükseltme 2026-11-23'te 2.22.6 ile yapıldı. 2.22 Node ≥22.22 istiyor, Node 24 bunu zaten karşılıyor.
