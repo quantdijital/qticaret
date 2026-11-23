@@ -2,6 +2,7 @@ import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/f
 import { AdminGetCollectionBoard } from "../admin/collection-board/validators"
 import { AdminPostCollectionDetails } from "../admin/collections/[id]/details/validators"
 import { CATALOG_COLLECTIONS } from "../../modules/platform-settings/features"
+import { rejectOffCollectionReads } from "../validation/collection-reads"
 import { requireFeature, requireFeatureForWrites } from "./require-feature"
 
 /**
@@ -15,6 +16,8 @@ import { requireFeature, requireFeatureForWrites } from "./require-feature"
 export const COLLECTION_GATES = [
   { matcher: "/admin/collections", middlewares: [requireFeatureForWrites(CATALOG_COLLECTIONS)] },
   { matcher: "/store/collections", middlewares: [requireFeature(CATALOG_COLLECTIONS)] },
+  // Products neither filtered by nor showing a collection while off
+  { matcher: "/store/products", middlewares: [rejectOffCollectionReads] },
 ]
 
 /**

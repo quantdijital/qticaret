@@ -92,6 +92,22 @@ medusaIntegrationTestRunner({
       expect([create.status, update.status, details.status, removed.status]).toEqual([
         404, 404, 404, 404,
       ])
+      // Before any validator (an invalid body is 404, not 400), on every spelling of the path
+      const invalid = await post("/admin/collections", {})
+      const products = await post(`/admin/collections/${id}/products`, { add: [] })
+      const trailing = await post(`/admin/collections/${id}/`, { title: "Yaz" })
+      const upper = await post(`/admin/Collections/${id}`, { title: "Yaz" })
+      expect([invalid.status, products.status, trailing.status, upper.status]).toEqual([
+        404, 404, 404, 404,
+      ])
+      // Its SEO fields and the advisor's fixes are its writes too
+      const seo = await settle(
+        http.put(`/admin/seo/collection/${id}`, { seo_title: "Yaz" }, { headers: admin.headers })
+      )
+      const fix = await post(`/admin/seo/assessments/collection/${id}/fix`, {
+        action: "use_template_title",
+      })
+      expect([seo.status, fix.status]).toEqual([404, 404])
       expect((await adminGet(`/admin/collections/${id}`)).status).toBe(200)
       expect((await adminGet(`/admin/collection-board/${id}`)).status).toBe(200)
 
@@ -112,6 +128,15 @@ medusaIntegrationTestRunner({
         }).toString()}`
       )
       expect(listing.status).toBe(404)
+      // Products neither filter by a collection nor show one; its path is not given out
+      const byCollection = await storeGet(`/store/products?collection_id=${id}`)
+      const withCollection = await storeGet("/store/products?fields=id,*collection")
+      const plain = await storeGet("/store/products?fields=id,title")
+      expect([byCollection.status, withCollection.status, plain.status]).toEqual([400, 400, 200])
+      const paths = await storeGet<{ paths: Record<string, string> }>(
+        `/store/seo/paths?type=product_collection&id=${id}`
+      )
+      expect(paths.data.paths).toEqual({})
       expect(await sitemapCollections()).not.toContain("/koleksiyon/yaz-seckisi")
       const frame = await storeGet<{ features?: { collections?: boolean } }>("/store/storefront")
       expect(frame.data.features?.collections).toBe(false)
@@ -123,6 +148,15 @@ medusaIntegrationTestRunner({
         entity_type: "product_collection",
       })
       expect((await storeGet(`/store/collections/${id}`)).status).toBe(200)
+      expect((await storeGet(`/store/products?collection_id=${id}`)).status).toBe(200)
+      const back = await storeGet<{ paths: Record<string, string> }>(
+        `/store/seo/paths?type=product_collection&id=${id}`
+      )
+      expect(back.data.paths).toEqual({ [id]: "/koleksiyon/yaz-seckisi" })
+      const seoBack = await settle(
+        http.put(`/admin/seo/collection/${id}`, { seo_title: "Yaz" }, { headers: admin.headers })
+      )
+      expect(seoBack.status).toBe(200)
       expect(await sitemapCollections()).toContain(
         "https://magaza.example.com/koleksiyon/yaz-seckisi"
       )
