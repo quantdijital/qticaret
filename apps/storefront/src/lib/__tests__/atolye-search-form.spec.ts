@@ -152,7 +152,7 @@ describe("Atölye's search box", () => {
   })
 })
 
-const tour = (booking: ProductCardView["booking"]): ProductCardView => ({
+const tour = (booking: NonNullable<ProductCardView["booking"]>): ProductCardView => ({
   id: "prod_1",
   title: "Kapadokya turu",
   path: "/urun/kapadokya-turu",
