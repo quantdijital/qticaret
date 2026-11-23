@@ -10,6 +10,7 @@ import type { Kurus } from "../../../lib/money"
 import { baseTryOf, nextPrices, pricesOf } from "../prices"
 import { MAX_AMOUNT, MAX_COST } from "./change"
 import type { BulkChange } from "./change"
+import { planAddonTemplate } from "./plan-addon-template"
 import { altWrites } from "./plan-alt"
 import { UNCHANGED, skipped, writing } from "./plan-result"
 import type { BulkDiff, BulkPlan, PlanContext } from "./plan-result"
@@ -208,5 +209,7 @@ export function planBulkChange(
       return altWrites(product)
     case "cost":
       return planCost(product, change)
+    case "addon_template":
+      return planAddonTemplate(product, change, context.addonTemplates ?? new Map())
   }
 }

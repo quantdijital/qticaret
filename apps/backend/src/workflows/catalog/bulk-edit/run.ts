@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { chunksOf } from "../../../lib/catalog"
+import { templateSourceOf } from "../../../lib/catalog/addons"
 import { ValidationError } from "../../../lib/errors"
 import { serverErrorMessage } from "../../../lib/errors/messages"
 import { errorSummary, logger } from "../../../lib/logging"
@@ -54,6 +55,22 @@ async function planContext(container: MedusaContainer, change: BulkChange): Prom
     if (data.length === 0) {
       throw new ValidationError("bulk_edit.category_unknown", { field: "category_id" })
     }
+  }
+  if (change.action === "addon_template") {
+    const { data } = await query.graph({
+      entity: "addon_template",
+      fields: ["id", "name", "addons"],
+    })
+    const templates = new Map(
+      (data as { id: string; name: string; addons?: unknown }[]).map((row) => [
+        row.id,
+        templateSourceOf(row),
+      ])
+    )
+    if (!templates.has(change.template_id)) {
+      throw new ValidationError("bulk_edit.addon_template_unknown", { field: "template_id" })
+    }
+    return { locationId: null, addonTemplates: templates }
   }
   if (change.action !== "stock") {
     return { locationId: null }
