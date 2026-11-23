@@ -2,6 +2,7 @@ import type { ReactElement } from "react"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import {
   CategoriesCollage,
+  CategoriesIcons,
   CategoriesLinked,
   CategoriesPanels,
   CategoriesTiles,
@@ -75,6 +76,29 @@ function TrustLined() {
       ))}
       {FOUR.map((x) => (
         <Badge key={x} x={x} y={12} />
+      ))}
+    </>
+  )
+}
+
+/** adr/0077 §10 Ek: one white box floating over the picture above it, short rules between. */
+function TrustCard() {
+  return (
+    <>
+      <rect x={1} y={1} width={110} height={12} rx={2} className="fill-current opacity-25" />
+      <rect
+        x={6}
+        y={8}
+        width={100}
+        height={20}
+        rx={4}
+        className="fill-background stroke-current opacity-70"
+      />
+      {[31, 58, 85].map((x) => (
+        <line key={x} x1={x - 2} y1={12} x2={x - 2} y2={24} className="stroke-current opacity-40" />
+      ))}
+      {[8, 33, 60, 87].map((x) => (
+        <Badge key={x} x={x} y={14} />
       ))}
     </>
   )
@@ -184,13 +208,14 @@ function HeroCategoryList() {
 const SKETCHES: {
   readonly [T in VariantSectionType]?: Readonly<Record<SectionVariant<T>, () => ReactElement>>
 } = {
-  trust_badges: { strip: TrustStrip, lined: TrustLined },
+  trust_badges: { strip: TrustStrip, lined: TrustLined, card: TrustCard },
   hero: { standard: HeroStandard, category_list: HeroCategoryList },
   categories: {
     tiles: CategoriesTiles,
     linked: CategoriesLinked,
     collage: CategoriesCollage,
     panels: CategoriesPanels,
+    icons: CategoriesIcons,
   },
   header_bar: { standard: HeaderStandard, centered: HeaderCentered, catalog: HeaderCatalog },
   footer_bar: {

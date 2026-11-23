@@ -28,16 +28,29 @@ export function PointsGroups({
   return (
     <PanelGroup name="layout" title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
       {section.type === "stats" ? (
-        <SwitchRow
-          id={FIELD_IDS.content(section.id, "dividers")}
-          label={t("storefront.editor.stats.dividers.label")}
-          term={t("storefront.editor.stats.dividers.term")}
-          hint={t("storefront.editor.stats.dividers.hint")}
-          checked={statsSettingsOf(section).dividers === "on"}
-          onChange={(on) => {
-            onChange({ ...section, dividers: on ? "on" : "off" })
-          }}
-        />
+        <>
+          <SwitchRow
+            id={FIELD_IDS.content(section.id, "dividers")}
+            label={t("storefront.editor.stats.dividers.label")}
+            term={t("storefront.editor.stats.dividers.term")}
+            hint={t("storefront.editor.stats.dividers.hint")}
+            checked={statsSettingsOf(section).dividers === "on"}
+            onChange={(on) => {
+              onChange({ ...section, dividers: on ? "on" : "off" })
+            }}
+          />
+          {/* Each figure's icon over its value (adr/0077 §10 Ek); picked in the content */}
+          <SwitchRow
+            id={FIELD_IDS.content(section.id, "show_icons")}
+            label={t("storefront.editor.stats.icons.label")}
+            term={t("storefront.editor.stats.icons.term")}
+            hint={t("storefront.editor.stats.icons.hint")}
+            checked={statsSettingsOf(section).icons === "on"}
+            onChange={(on) => {
+              onChange({ ...section, icons: on ? "on" : "off" })
+            }}
+          />
+        </>
       ) : (
         STEPS_FIELDS.map(([name, field]) => (
           <StepChoice<string>

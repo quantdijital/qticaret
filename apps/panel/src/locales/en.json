@@ -8738,7 +8738,8 @@
       "variants": {
         "trust_badges": {
           "strip": "Strip",
-          "lined": "Lined boxes"
+          "lined": "Lined boxes",
+          "card": "Floating card"
         },
         "header_bar": {
           "standard": "Logo on the left",
@@ -8776,7 +8777,8 @@
           "tiles": "Picture tiles",
           "linked": "Cards with subcategories",
           "collage": "Photo collage",
-          "panels": "Photo panels"
+          "panels": "Photo panels",
+          "icons": "Icon row"
         },
         "related_products": {
           "grid": "Grid",
@@ -10821,6 +10823,12 @@
           "label": "Show dividers",
           "term": "divider",
           "hint": "A thin line between the figures; off, space alone."
+        },
+        "iconOf": "Figure {{number}} icon",
+        "icons": {
+          "label": "Show icons",
+          "term": "icon",
+          "hint": "The icon you pick above each figure; a figure with none shows no icon."
         }
       },
       "steps": {
@@ -10848,6 +10856,66 @@
           "padded": "01, 02",
           "plain": "1, 2"
         }
+      },
+      "trustCard": {
+        "lift": {
+          "label": "Overlap the section above",
+          "term": "overlap",
+          "hint": "The box rises over the bottom edge of the section before it (usually the cover picture). Not as the page's first section."
+        }
+      },
+      "categoryIcons": {
+        "icons": "Category icons",
+        "iconsHint": "A category with no icon shows its picture, else its name's first letter.",
+        "iconsEmpty": "Pick categories to give each an icon; with none picked the top categories show with their pictures or first letters.",
+        "iconOf": "{{name}} icon",
+        "noIcon": "Its picture or first letter",
+        "disc": {
+          "label": "Circle background",
+          "term": "background",
+          "hint": "How the circle holding the icon looks.",
+          "tint": "Light tint of the main colour",
+          "well": "Light grey",
+          "line": "Outline"
+        },
+        "phone": {
+          "label": "On a phone",
+          "term": "mobile",
+          "hint": "Categories that do not fit a narrow screen slide sideways or wrap onto a new row.",
+          "scroll": "Slide sideways",
+          "wrap": "Wrap"
+        }
+      },
+      "icons": {
+        "none": "No icon",
+        "truck": "Shipping",
+        "clock": "Clock",
+        "shield": "Security",
+        "card": "Card",
+        "refresh": "Returns and exchanges",
+        "award": "Award",
+        "gift": "Gift",
+        "phone": "Phone",
+        "compass": "Compass",
+        "map_pin": "Location",
+        "plane": "Plane",
+        "mountain": "Mountain",
+        "palm": "Palm tree",
+        "leaf": "Leaf",
+        "sun": "Sun",
+        "landmark": "Landmark",
+        "house": "House",
+        "heart": "Heart",
+        "users": "People",
+        "star": "Star",
+        "sparkles": "Sparkles",
+        "camera": "Camera",
+        "calendar": "Calendar",
+        "tag": "Tag",
+        "package": "Package",
+        "headset": "Support",
+        "utensils": "Food",
+        "gem": "Gem"
       },
       "photoCollage": {
         "titleHint": "Left empty, the photos show without a heading.",

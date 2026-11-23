@@ -1,10 +1,11 @@
 import { fieldKey, fieldMark } from "@qticaret/ui"
 import type { TrustBadgeView } from "@qticaret/ui"
 import { Container } from "../parts/Container"
+import { Card } from "./PromiseCard"
 import { TrustIcon } from "../parts/TrustIcon"
 
 /** The trust strip's variants this theme draws (adr/0049 Ek 2026-11-14); another draws as `strip`. */
-export const PROMISE_VARIANTS = ["strip", "lined"] as const
+export const PROMISE_VARIANTS = ["strip", "lined", "card"] as const
 export type PromiseVariant = (typeof PROMISE_VARIANTS)[number]
 
 interface PromisesProps {
@@ -16,6 +17,8 @@ interface PromisesProps {
   marks?: boolean | undefined
   /** Right under a picture opening: it keeps close to it; anywhere else a thin strip's small gap. */
   hug?: boolean
+  /** The card's lift over the section before it (adr/0077 §10 Ek): only with one before it. */
+  lift?: boolean
 }
 
 /**
@@ -29,9 +32,19 @@ interface PromisesProps {
  * is a thin strip (`data-thin`, `thin.css`): the small section gap above it
  * and before the next section.
  */
-export function Promises({ badges, label, variant = "strip", marks, hug = false }: PromisesProps) {
+export function Promises({
+  badges,
+  label,
+  variant = "strip",
+  marks,
+  hug = false,
+  lift = false,
+}: PromisesProps) {
   if (badges.length === 0) {
     return null
+  }
+  if (variant === "card") {
+    return <Card badges={badges} label={label} marks={marks} hug={hug} lift={lift} />
   }
   return (
     <section aria-label={label} data-thin="" className={hug ? "pt-3 lg:pt-4" : "gf-section"}>

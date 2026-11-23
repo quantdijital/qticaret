@@ -35,6 +35,8 @@ const BARE = [
   "parts/QuickViewButton.tsx",
   "product/Installments.tsx",
   "product/Write.tsx",
+  // adr/0077 §10 Ek: the trust badges' floating card, no border of its own
+  "sections/PromiseCard.tsx",
 ]
 
 const source = (file: string) => readFileSync(`${ATOLYE_SOURCE}${file}`, "utf8")
