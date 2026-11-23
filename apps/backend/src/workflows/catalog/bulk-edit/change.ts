@@ -117,14 +117,35 @@ export const BulkChange = z.union([
 export type BulkChange = z.infer<typeof BulkChange>
 export type BulkAction = BulkChange["action"]
 
+/**
+ * Products the server finds itself, for an add-on template (2026-11-23):
+ * the whole catalogue or a category with those below it. Read a page at
+ * a time, with no cap on how many; gift card products are left out.
+ */
+export const BulkScope = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("all") }).strict(),
+  z.object({ kind: z.literal("category"), category_id: id }).strict(),
+])
+export type BulkScope = z.infer<typeof BulkScope>
+
+/** The products named, or (an add-on template only) a scope the server reads. */
 export const BulkEditInput = z
   .object({
     product_ids: z
       .array(id)
       .min(1)
       .max(MAX_BULK_PRODUCTS)
-      .refine((ids) => new Set(ids).size === ids.length),
+      .refine((ids) => new Set(ids).size === ids.length)
+      .optional(),
+    scope: BulkScope.optional(),
     change: BulkChange,
   })
   .strict()
+  .refine(
+    ({ product_ids, scope, change }) =>
+      scope === undefined
+        ? product_ids !== undefined
+        : product_ids === undefined && change.action === "addon_template",
+    { path: ["scope"] }
+  )
 export type BulkEditInput = z.infer<typeof BulkEditInput>
