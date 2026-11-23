@@ -6,7 +6,6 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { debitAccountsWorkflow } from "@medusajs/loyalty-plugin/workflows"
 import { ValidationError } from "../../lib/errors"
 import {
@@ -23,6 +22,8 @@ import {
   updateReturnRequestStep,
 } from "./steps/return-request"
 import type { RequestFacts } from "./steps/return-request"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 /**
  * The cards the request withdraws, read under the order's returns lock:
@@ -78,7 +79,7 @@ export const withdrawGiftCardsWorkflow = createWorkflow(
   (input: { id: string; staff_id: string; note?: string | null }) => {
     const orderId = returnRequestOrderStep({ id: input.id })
     const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 120 })
     const request = readReturnRequestStep({ id: input.id, status: "requested" })
     const debits = planGiftWithdrawalStep(request)
     debitAccountsWorkflow.runAsStep({ input: debits })
@@ -101,7 +102,7 @@ export const withdrawGiftCardsWorkflow = createWorkflow(
         }
       })
     )
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(received)
   }
 )

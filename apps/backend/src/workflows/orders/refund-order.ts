@@ -4,7 +4,6 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { toMedusaAmount } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import { orderRefundLockKey } from "../../lib/orders/locks"
@@ -17,6 +16,8 @@ import type { RefundOrderInput } from "./steps/order-refund"
 import { namePendingRefundStep } from "./steps/pending-refund"
 import { restoreRefundTransactionsStep } from "./steps/refund-transactions"
 import { sendRefundStep } from "./steps/send-refund"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 /**
  * Gives money back on an order, line by line (F5 V5, adr/0010), under the
@@ -35,7 +36,7 @@ export const refundOrderWorkflow = createWorkflow(
   (input: RefundOrderInput) => {
     const lockKey = transform({ input }, ({ input }) => orderRefundLockKey(input.order_id))
     // A provider refunding in parts makes several calls in a row: the lock outlasts them
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 600 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 600 })
     const plan = planOrderRefundStep(input)
     const entryId = openRefundEntryStep({ order: input, plan })
     namePendingRefundStep({ plan, reference: input.reference })
@@ -62,7 +63,7 @@ export const refundOrderWorkflow = createWorkflow(
       )
     })
     closeRefundEntryStep({ entry_id: entryId, plan })
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(
       transform({ input, plan }, ({ input, plan }) => ({
         reference: input.reference,

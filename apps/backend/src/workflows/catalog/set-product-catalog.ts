@@ -6,15 +6,15 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import {
-  acquireLockStep,
   createRemoteLinkStep,
   dismissRemoteLinkStep,
   emitEventStep,
-  releaseLockStep,
   updateInventoryItemsStep,
   updateProductVariantsWorkflow,
   updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import { CATALOG_PRODUCT_SAVED } from "./events"
 import { planProductCatalogStep } from "./steps/plan-product-catalog"
@@ -40,7 +40,7 @@ export const setProductCatalogWorkflow = createWorkflow(
       `catalog:${input.product_id}`,
       ...(input.successor_product_id ? [SUCCESSOR_LOCK] : []),
     ])
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 30 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 30 })
 
     const plan = planProductCatalogStep(input)
     const written = writeProductCatalogStep(plan)
@@ -95,7 +95,7 @@ export const setProductCatalogWorkflow = createWorkflow(
     // Search reads MPNs, the description and the short description (adr/0056)
     const saved = transform({ input }, ({ input }) => ({ id: input.product_id }))
     emitEventStep({ eventName: CATALOG_PRODUCT_SAVED, data: saved })
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse({ product_id: input.product_id })
   }
 )

@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { parseEnv } from "../../../lib/env"
 import { brandPath, categoryPath, collectionPath, productPath } from "../../../lib/seo"
 import { hostFinding, robotsFinding, sitemapFinding } from "../../../lib/seo/audit"
@@ -12,6 +13,9 @@ import type { SeoSettings } from "../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { SEO_SITEMAPS_MODULE } from "../../../modules/seo-sitemaps"
 import type SeoSitemapsModuleService from "../../../modules/seo-sitemaps/service"
+import { URL_REGISTRY_MODULE } from "../../../modules/url-registry"
+import type UrlRegistryModuleService from "../../../modules/url-registry/service"
+import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../../catalog/entity-paths"
 import { listingFilterKeys } from "../listing"
 import { shopOf } from "../payload-sources"
 import { sitemapCounts } from "../sitemap-build"
@@ -21,6 +25,8 @@ const samplePages = (style: SeoSettings["url_style"]): string[] => [
   "/",
   productPath("ornek-urun", style.product),
   categoryPath(["ornek-kategori"], style.category),
+  // A subcategory: the prefixed and nested styles carry the tree (adr/0017 Ek 2026-11-23)
+  categoryPath(["ornek-kategori", "ornek-alt-kategori"], style.category),
   // A facet landing page sits under its category (F3.16)
   `${categoryPath(["ornek-kategori"], style.category)}/ornek-filtre`,
   brandPath("ornek-marka", style.brand),
@@ -40,6 +46,39 @@ const sampleFacets = (style: SeoSettings["url_style"], filterKeys: Set<string>):
   ]
 }
 
+// Enough of the shop's top categories to catch a rule that closes one by its name's start
+const ROOT_SAMPLES = 50
+
+/**
+ * The shop's live top categories at their paths: a bare prefix rule
+ * (`Disallow: /hesap`) closes `/hesap-makineleri` too, which no made-up
+ * sample shows (adr/0017 Ek 2026-11-23).
+ */
+async function rootCategoryPaths(container: MedusaContainer): Promise<string[]> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "product_category",
+    fields: ["id"],
+    filters: { parent_category_id: null, is_active: true, is_internal: false },
+    pagination: { take: ROOT_SAMPLES },
+  })
+  const ids = (data as { id: string }[]).map((row) => row.id)
+  if (ids.length === 0) {
+    return []
+  }
+  const entries = await container
+    .resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+    .listUrlEntries(
+      {
+        locale: CATALOG_LOCALE,
+        entity_type: CATALOG_ENTITY_TYPES.category,
+        entity_id: ids,
+        status: "active",
+      },
+      { select: ["path"] }
+    )
+  return entries.map((entry) => entry.path)
+}
+
 /** S-HOST-01, S-ROBOTS-01 and S-SITEMAP-01: what lets search engines in and shows them around. */
 export async function siteFindings(
   container: MedusaContainer,
@@ -50,7 +89,10 @@ export async function siteFindings(
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .getSection("seo")) as unknown as SeoSettings
   const hasHost = Boolean(shop.canonicalHost)
-  const filterKeys = await listingFilterKeys(container)
+  const [filterKeys, roots] = await Promise.all([
+    listingFilterKeys(container),
+    rootCategoryPaths(container),
+  ])
   // What `/robots.txt` serves now, built as its route builds it
   const robots = robotsTxt({
     template: seo.robots_txt,
@@ -82,7 +124,7 @@ export async function siteFindings(
       ? robotsFinding(
           robots,
           hasHost,
-          samplePages(seo.url_style),
+          [...new Set([...samplePages(seo.url_style), ...roots])],
           sampleFacets(seo.url_style, filterKeys)
         )
       : null,

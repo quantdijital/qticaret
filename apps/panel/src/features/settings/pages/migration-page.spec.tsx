@@ -11,6 +11,11 @@ const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
+}))
 
 const address = (changes: Partial<OldAddress>): OldAddress => ({
   id: "murl_1",
@@ -87,6 +92,46 @@ describe("Settings > Migration", () => {
         body: { decision: "redirect", target: "/urun/yeni" },
       })
     })
+  })
+
+  it("suggests the category URL style that keeps the old category addresses (adr/0017 Ek 2026-11-23)", async () => {
+    const summary = (answers["/admin/migrations/urls/summary"] as { summary: object }).summary
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(
+        url === "/admin/migrations/urls/summary"
+          ? {
+              summary: {
+                ...summary,
+                category_style: {
+                  current: "prefixed",
+                  total: 40,
+                  kept: { prefixed: 0, nested: 40, flat: 12 },
+                  suggested: "nested",
+                },
+              },
+            }
+          : (answers[url] ?? {})
+      )
+    )
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <AddressesCard />
+      </QueryClientProvider>
+    )
+
+    expect(
+      await screen.findByText(/40 kategori adresinden 40 tanesi “Öneksiz, üst kategorilerle”/)
+    ).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Adres biçimini aç" })).toHaveAttribute(
+      "href",
+      "/settings/seo"
+    )
+  })
+
+  it("says nothing of the category URL style when the current one keeps the most", async () => {
+    renderWith(<AddressesCard />)
+    expect(await screen.findByText("Kesime hazır değil")).toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "Adres biçimini aç" })).toBeNull()
   })
 
   it("checks a feed with the owner's parcel and shows the run going", async () => {

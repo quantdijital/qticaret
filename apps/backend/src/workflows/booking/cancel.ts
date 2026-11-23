@@ -5,6 +5,7 @@ import { errorSummary, logger } from "../../lib/logging"
 import { kurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import { bookingCancelReference, cancelLockKeys } from "../../lib/orders/locks"
+import { withLocks } from "../locking/with-locks"
 import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
 import { refundOrderWorkflow } from "../orders/refund-order"
@@ -204,7 +205,8 @@ export async function cancelBookingDeparture(
   input: BookingCancelInput,
   now = new Date()
 ): Promise<BookingCancelResult> {
-  return container.resolve(Modules.LOCKING).execute(
+  return withLocks(
+    container.resolve(Modules.LOCKING),
     bookingCancelLockKeys(input.order_id),
     async () => {
       const plan = await planBookingCancel(container, {
