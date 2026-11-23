@@ -3,6 +3,7 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
 import { cancelLockKeys } from "../../lib/orders/locks"
+import { withLocks } from "../../workflows/locking/with-locks"
 import { AdminPostBankTransferConfirm } from "../admin/orders/[id]/bank-transfer/confirm/validators"
 import { requireUserActor } from "./actor"
 
@@ -25,7 +26,8 @@ export async function holdCancelLocks(
   // Set inside the job: whether `next` was already called
   const state = { started: false }
   try {
-    await req.scope.resolve(Modules.LOCKING).execute(
+    await withLocks(
+      req.scope.resolve(Modules.LOCKING),
       cancelLockKeys(req.params["id"] ?? ""),
       () =>
         new Promise<void>((resolve) => {

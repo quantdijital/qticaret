@@ -14,6 +14,8 @@ import { MAX_BULK_PRODUCTS, matchingProductIds } from "@/features/products/api/b
 import type { BulkAction } from "@/features/products/api/bulk"
 import type { ProductFilters } from "@/features/products/api/products"
 import { useCan } from "@/features/auth/api/staff"
+import { ADDONS_FLAG } from "@/features/products/api/addons"
+import { useFeatureState } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 
@@ -41,6 +43,8 @@ export function BulkBar({ selected, onSelect, filters, total, onAction, onFacts 
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const canEdit = useCan("catalog")
+  // adr/0052 Ek 2026-11-23: add-on templates while the shop's add-ons are on
+  const addonsOn = useFeatureState(ADDONS_FLAG) === true
   // Picked one by one across pages, past what a run takes
   const tooMany = selected.size > MAX_BULK_PRODUCTS
   const selectAll = async () => {
@@ -118,6 +122,12 @@ export function BulkBar({ selected, onSelect, filters, total, onAction, onFacts 
           {CATALOG_ACTIONS.map(item)}
           <DropdownMenuSeparator />
           {SEO_ACTIONS.map(item)}
+          {addonsOn ? (
+            <>
+              <DropdownMenuSeparator />
+              {item("addon_template")}
+            </>
+          ) : null}
           {canEdit ? (
             <>
               <DropdownMenuSeparator />

@@ -24,8 +24,19 @@ export interface LimitStanding {
   pending?: number
 }
 
-/** The billing summary the panel shows: the document's, without the name and instruction lifted out. */
-export type BillingStanding = Omit<PlanBillingSummary, "package_name" | "payment_instruction">
+type Terms = "period" | "price" | "trial_started_on" | "trial_ends_on"
+
+/**
+ * The billing summary the panel shows: the document's, without the name
+ * and instruction lifted out; the subscription's terms (Ek C20) always
+ * there, null from a document without them (an older control plane).
+ */
+export type BillingStanding = Omit<
+  PlanBillingSummary,
+  "package_name" | "payment_instruction" | Terms
+> & {
+  [K in Terms]-?: NonNullable<PlanBillingSummary[K]> | null
+}
 
 /**
  * Settings > Abonelik's reading (adr/0061 §5.6, Ek C14, C16): the package
@@ -73,7 +84,15 @@ export async function readPlanSummary(
       }
     })
   )
-  const { package_name = null, payment_instruction = null, ...billing } = state.billing ?? {}
+  const {
+    package_name = null,
+    payment_instruction = null,
+    period = null,
+    price = null,
+    trial_started_on = null,
+    trial_ends_on = null,
+    ...billing
+  } = state.billing ?? {}
   return {
     managed: state.managed,
     status: state.status,
@@ -82,7 +101,15 @@ export async function readPlanSummary(
     period: turkishMonth(now),
     warning_ratio: LIMIT_WARNING_RATIO,
     limits,
-    billing: state.billing ? (billing as BillingStanding) : null,
+    billing: state.billing
+      ? ({
+          ...billing,
+          period,
+          price,
+          trial_started_on,
+          trial_ends_on,
+        } as BillingStanding)
+      : null,
     payment_instruction,
   }
 }

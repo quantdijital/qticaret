@@ -9,6 +9,7 @@ import type { BulkAction } from "@/features/products/api/bulk"
 import { categoriesQuery } from "@/features/products/api/lookups"
 import { treeOrder } from "@/features/products/category-order"
 import { Choices } from "@/features/products/bulk/bulk-choices"
+import { BulkAddonTemplateFields } from "@/features/products/bulk/bulk-addon-template-fields"
 import { BulkCostFields } from "@/features/products/bulk/bulk-cost-fields"
 import { bulkChangeOf, examplePrice } from "@/features/products/bulk/bulk-form"
 import type { BulkForm } from "@/features/products/bulk/bulk-form"
@@ -239,5 +240,7 @@ export function BulkFields({ action, ...props }: FieldsProps & { action: BulkAct
       return <p className="text-sm text-muted-foreground">{t("products.bulk.alt.hint")}</p>
     case "cost":
       return <BulkCostFields {...props} />
+    case "addon_template":
+      return <BulkAddonTemplateFields {...props} />
   }
 }

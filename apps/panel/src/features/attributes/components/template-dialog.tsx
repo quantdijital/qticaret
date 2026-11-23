@@ -15,6 +15,7 @@ import type { TemplateForm } from "@/features/attributes/form"
 import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
 import { isValidSlug, toSlug } from "@/lib/slug"
+import { AddonTemplatesTab } from "./addon-templates-tab"
 import { DefinitionsTab } from "./definitions-tab"
 import { GroupList } from "./group-list"
 import { TemplateInfo } from "./template-info"
@@ -22,7 +23,7 @@ import { TemplateInfo } from "./template-info"
 const A = "attributes"
 const TAB_BODY = "flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
 
-type TemplateTab = "definitions" | "groups" | "info"
+type TemplateTab = "definitions" | "groups" | "addons" | "info"
 
 interface TemplateDialogProps {
   /** The template to edit; null for a new one. */
@@ -32,23 +33,34 @@ interface TemplateDialogProps {
   /** The template the arrows go to, by its place: the form starts again from it. */
   templateAt?: (index: number) => AttributeTemplate | undefined
   onClose: () => void
+  /** The shop's add-ons are on (adr/0052 Ek 2026-11-23): the add-on templates tab shows. */
+  addonsOn?: boolean
 }
 
 /**
- * A template in one dialog (adr/0013), on three tabs: its attributes
- * (first: what the owner comes for), the spec table's groups, and the
+ * A template in one dialog (adr/0013), on its tabs: its attributes
+ * (first: what the owner comes for), the spec table's groups, the add-on
+ * templates its products get (adr/0052 Ek 2026-11-23), and the
  * template's own name, note and deletion. A new template opens on its
  * name, the one field it needs. Removing an attribute that products may
  * hold values for is asked about first; the arrows go to the shop's next
  * template, asking first when something is not saved.
  */
-export function TemplateDialog({ template, steps, templateAt, onClose }: TemplateDialogProps) {
+export function TemplateDialog({
+  template,
+  steps,
+  templateAt,
+  onClose,
+  addonsOn = false,
+}: TemplateDialogProps) {
   const { t } = useTranslation()
   const form = useForm<TemplateForm>({ defaultValues: templateForm(template) })
-  const [definitions, groups] = useWatch({
+  const [definitions, groups, carried] = useWatch({
     control: form.control,
-    name: ["definitions", "groups"],
+    name: ["definitions", "groups", "addonTemplateIds"],
   })
+  // adr/0052 Ek 2026-11-23: shown while the shop's add-ons are on, or while it carries some
+  const showAddons = addonsOn || (template?.addon_template_ids?.length ?? 0) > 0
   const save = useSaveTemplate()
   const remove = useDeleteTemplate()
   const guard = useDiscardGuard(form.formState.isDirty)
@@ -159,6 +171,11 @@ export function TemplateDialog({ template, steps, templateAt, onClose }: Templat
                   />
                 ) : null}
               </TabsTrigger>
+              {showAddons ? (
+                <TabsTrigger value="addons">
+                  {t(`${A}.tabs.addons`, { count: carried.length })}
+                </TabsTrigger>
+              ) : null}
               <TabsTrigger value="info">{t(`${A}.tabs.info`)}</TabsTrigger>
             </TabsList>
             {/* Started again for another template: what the parts keep for themselves too */}
@@ -182,6 +199,13 @@ export function TemplateDialog({ template, steps, templateAt, onClose }: Templat
                 <GroupList />
               </DialogBody>
             </TabsContent>
+            {showAddons ? (
+              <TabsContent value="addons" forceMount className={TAB_BODY}>
+                <DialogBody>
+                  <AddonTemplatesTab />
+                </DialogBody>
+              </TabsContent>
+            ) : null}
             <TabsContent value="info" forceMount className={TAB_BODY}>
               <DialogBody>
                 <TemplateInfo

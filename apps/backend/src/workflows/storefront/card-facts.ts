@@ -3,6 +3,8 @@ import { ContainerRegistrationKeys, getVariantAvailability } from "@medusajs/fra
 import { durationDaysOf } from "../../lib/booking/duration"
 import type { DurationAttributeRow } from "../../lib/booking/duration"
 import { storedAddonsOf } from "../../lib/catalog/addons"
+import type { StoredAddon } from "../../lib/catalog/addons"
+import { productAddonsAmong } from "../addons/effective"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { CATALOG_BOOKING, PRODUCT_ADDONS } from "../../modules/platform-settings/features"
 import { bookingCardFacts } from "../booking/card-facts"
@@ -98,7 +100,9 @@ export function stockBucketOf(
 export function quickAddOf(
   product: ProductRow,
   stock: StockBucket,
-  addonsOn: boolean
+  addonsOn: boolean,
+  /** Its effective add-ons, templates' included (adr/0052 Ek 2026-11-23); left out, its own. */
+  effective?: readonly StoredAddon[]
 ): CardFacts["quick_add"] {
   const variants = (product.variants ?? []).filter((variant): variant is VariantRow => !!variant)
   const [only] = variants
@@ -114,7 +118,7 @@ export function quickAddOf(
   }
   if (
     addonsOn &&
-    storedAddonsOf(product.product_extension?.addons).some((addon) => addon.required)
+    (effective ?? storedAddonsOf(product.product_extension?.addons)).some((addon) => addon.required)
   ) {
     return null
   }
@@ -191,11 +195,18 @@ export async function cardFacts(
   const stockRead = counted.length
     ? getVariantAvailability(query, { variant_ids: counted, sales_channel_id: channel })
     : Promise.resolve(undefined)
-  const [availability, dated] = await Promise.all([
+  const [availability, dated, addons] = await Promise.all([
     stockRead,
     bookingOn
       ? bookingCardFacts(container, shown, input.region_id, input.window)
       : new Map<string, BookingCardFact>(),
+    // A template's required add-on keeps the card from adding too (adr/0052 Ek 2026-11-23)
+    addonsOn
+      ? productAddonsAmong(
+          container,
+          shown.map((product) => product.id)
+        )
+      : new Map<string, StoredAddon[]>(),
   ])
   const available = (variantId: string) => availability?.[variantId]?.availability ?? 0
   const lowAt = shared.low_stock_threshold
@@ -207,7 +218,7 @@ export async function cardFacts(
         product.id,
         {
           stock,
-          quick_add: quickAddOf(product, stock, addonsOn),
+          quick_add: quickAddOf(product, stock, addonsOn, addons.get(product.id) ?? []),
           rating: ratings.get(product.id) ?? null,
           ...(booking ? { booking: withDuration(booking, product) } : {}),
         },

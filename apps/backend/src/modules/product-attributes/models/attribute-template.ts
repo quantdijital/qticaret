@@ -12,5 +12,10 @@ export const AttributeTemplate = model.define("attribute_template", {
    * a definition names its section by `key`. None: one plain table.
    */
   groups: model.json().nullable(),
+  /**
+   * Add-on templates its products get (adr/0052 Ek 2026-11-23), in order:
+   * a list of `addon_template` ids. None: null.
+   */
+  addon_template_ids: model.json().nullable(),
   definitions: model.hasMany(() => AttributeDefinition, { mappedBy: "template" }),
 })

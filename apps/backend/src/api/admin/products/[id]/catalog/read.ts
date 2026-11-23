@@ -4,6 +4,7 @@ import { variantGtin } from "../../../../../lib/catalog"
 import { storedAddonsOf } from "../../../../../lib/catalog/addons"
 import { summaryDocOf } from "../../../../../lib/catalog/summary"
 import type { ContentDoc } from "../../../../../lib/content"
+import { effectiveAddonsAmong } from "../../../../../workflows/addons/effective"
 
 interface ProductRow {
   id: string
@@ -87,6 +88,7 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
   const extension = product.product_extension ?? null
   const categories = present(product.categories).map(({ id, name }) => ({ id, name }))
   const primary = extension?.primary_category_id ?? null
+  const effective = (await effectiveAddonsAmong(scope, [productId])).get(productId)
   return {
     condition: extension?.condition ?? "new",
     kind: extension?.kind ?? "physical",
@@ -95,6 +97,9 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     is_gift_card: extension?.is_gift_card ?? false,
     // adr/0052: prices in lira, as saved
     addons: storedAddonsOf(extension?.addons ?? null),
+    // adr/0052 Ek 2026-11-23: the templates it reaches (live), and what is past five
+    addon_templates: effective?.templates ?? [],
+    addons_hidden: effective?.hidden ?? 0,
     // adr/0055: the document as saved; null, the product has plain text only
     description_doc: (extension?.description_doc ?? null) as ContentDoc | null,
     // adr/0055 Ek 2026-11-06: the short description as written; null, none

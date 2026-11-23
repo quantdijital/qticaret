@@ -91,6 +91,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
   "brands.name_taken": "Bu adla bir marka zaten var.",
   "brands.unknown": "Marka bulunamadı.",
+  "bulk_edit.addon_template_unknown": "Seçilen ek seçenek şablonu bulunamadı.",
   "bulk_edit.alt_not_filled": "Bazı görsellerin alt metni yazılamadı; ürün sayfasından ekleyin.",
   "bulk_edit.category_unknown": "Seçilen kategori bulunamadı.",
   "bulk_edit.cost_out_of_range": "Yeni maliyet üst sınırı aşar.",
@@ -298,6 +299,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "addons.text_rules_invalid": "Yazı uzunluğu 1 ile 200 karakter arasında olmalı.",
   "addons.choices_invalid": "Seçim türündeki ek seçenekte 2-10 seçenek olmalı.",
   "addons.too_many": "Bir üründe en çok 5 ek seçenek olabilir.",
+  "addon_templates.name_invalid":
+    "Şablon adı 1-60 karakter olmalı ve görünmez karakter içermemeli.",
+  "addon_templates.duplicate": "Aynı şablon iki kez seçilmiş.",
+  "addon_templates.id_unknown":
+    "Şablonda olmayan bir ek seçenek ya da seçenek kimliği gönderildi. Sayfayı yenileyip yeniden deneyin.",
+  "addon_templates.unknown": "Ek seçenek şablonu bulunamadı.",
+  "addon_templates.too_many":
+    "Bu değişiklikle bazı ürünlerde 5 ek seçenek sınırı aşılır; önce o ürünlerden ek seçenek kaldırın.",
   // adr/0076: dated products
   "catalog.booking_disabled":
     "Tarihli ürünler için önce Ayarlar > Özellikler'den hem tarihli ürünleri hem dijital ve hizmet ürünlerini açın.",

@@ -4,7 +4,8 @@ import { z } from "@medusajs/framework/zod"
  * One change applied to many products at once (F3.10): the base TRY price,
  * stock at the default warehouse, the status, a category, the SEO texts
  * given back to the shop's templates, the images' missing alt texts, or
- * the variants' unit cost (F11.4).
+ * the variants' unit cost (F11.4), or an add-on template (adr/0052 Ek
+ * 2026-11-23).
  */
 
 /** Products one run takes; the panel selects at most this many. */
@@ -94,7 +95,25 @@ const cost = z
         : value !== undefined && value !== 0 && value >= MIN_PERCENT && value <= MAX_PERCENT
   )
 
-export const BulkChange = z.union([price, stock, status, category, seoTemplate, altText, cost])
+// adr/0052 Ek 2026-11-23: an add-on template linked to or unlinked from each product
+const addonTemplate = z
+  .object({
+    action: z.literal("addon_template"),
+    mode: z.enum(["add", "remove"]),
+    template_id: id,
+  })
+  .strict()
+
+export const BulkChange = z.union([
+  price,
+  stock,
+  status,
+  category,
+  seoTemplate,
+  altText,
+  cost,
+  addonTemplate,
+])
 export type BulkChange = z.infer<typeof BulkChange>
 export type BulkAction = BulkChange["action"]
 

@@ -646,6 +646,7 @@
         "moved_one": "{{count}} page moved to its new address.",
         "moved_other": "{{count}} pages moved to their new addresses.",
         "failed": "The addresses could not be moved; run the check again. Details in Settings > Audit log > Jobs.",
+        "failedNoJobs": "The addresses could not be moved; run the check again.",
         "option": {
           "prefixed": "With prefix",
           "flat": "No prefix, at the root"
@@ -924,6 +925,7 @@
       "exportStarted": "Export started. Download the file from Jobs when it is ready.",
       "openJobs": "Go to Jobs",
       "retention": "Exported files are kept in the Jobs tab for a week.",
+      "noAccess": "Only the owner and admins can see the audit log and the jobs.",
       "tabs": {
         "log": "Audit log"
       },
@@ -2264,6 +2266,7 @@
         "month": "Month",
         "download": "Download the package",
         "later": "The package is being made; download it from Settings > Audit log > Jobs when it is done.",
+        "laterNoJobs": "The package is being made in the background.",
         "failed": "The package could not be made."
       }
     },
@@ -4013,7 +4016,8 @@
       "apply_one": "Apply to {{formatted}} product",
       "apply_other": "Apply to {{formatted}} products",
       "working": "Updating products…",
-      "background": "The bulk edit goes on in the background; follow it under Settings › Jobs.",
+      "background": "The bulk edit goes on in the background; follow it under Settings > Audit log > Jobs.",
+      "backgroundNoJobs": "The bulk edit goes on in the background.",
       "jobFailed": "The bulk edit could not finish.",
       "changed_one": "{{formatted}} product updated.",
       "changed_other": "{{formatted}} products updated.",
@@ -4030,7 +4034,8 @@
         "category": "Edit category",
         "seo_template": "Apply SEO template",
         "alt_text": "Fill missing alt texts",
-        "cost": "Change cost"
+        "cost": "Change cost",
+        "addon_template": "Assign / remove add-on template"
       },
       "price": {
         "mode": "Price change",
@@ -4100,7 +4105,8 @@
         "adjust": "Enter a whole number above zero.",
         "category": "Choose a category.",
         "seoFields": "Choose at least one field.",
-        "cost": "Enter a cost between 0 and 10,000,000 ₺."
+        "cost": "Enter a cost between 0 and 10,000,000 ₺.",
+        "addonTemplate": "Choose an add-on template."
       },
       "cost": {
         "mode": "Cost change",
@@ -4115,6 +4121,19 @@
           "percent": "Only variants with a cost change."
         },
         "clearHint": "The selected products' variants lose their cost; they leave the stock value."
+      },
+      "addonTemplate": {
+        "mode": "Action",
+        "modes": {
+          "add": "Assign",
+          "remove": "Remove"
+        },
+        "label": "Add-on template",
+        "hints": {
+          "add": "The template is linked to the selected products. Products it would take past 5 add-ons are skipped and listed in the report.",
+          "remove": "The template is unlinked from the selected products; templates from an attribute template are not affected."
+        },
+        "none": "No add-on templates yet."
       }
     },
     "priceHistory": {
@@ -4278,6 +4297,63 @@
         "not_a_question": "The question must end with a question mark.",
         "too_long": "A question can be at most 120 characters, an answer at most 400."
       }
+    },
+    "addonTemplates": {
+      "title": "Add-on templates",
+      "subtitle": "Define add-ons once and link them to products. Changing a template changes every linked product.",
+      "create": "Create template",
+      "new": "New add-on template",
+      "dialogHint": "The template's add-ons show on linked products' pages beside the product's own add-ons.",
+      "empty": "No add-on templates yet. Define an add-on such as \"Name engraving, +150 TL\" once and link it to many products.",
+      "columns": {
+        "name": "Template",
+        "used": "Used by"
+      },
+      "productCount_one": "{{count}} product",
+      "productCount_other": "{{count}} products",
+      "carriedCount_one": "{{count}} attribute template",
+      "carriedCount_other": "{{count}} attribute templates",
+      "name": "Template name",
+      "nameHint": "Shown in the panel only; at most {{max}} characters.",
+      "addons": "Add-ons",
+      "addonsHint": "The template's add-ons count toward a product's {{max}} add-ons.",
+      "noAddons": "No add-ons in the template yet. Add at least one.",
+      "addonNote": "The change applies when the template is saved.",
+      "delete": "Delete template",
+      "deleteTitle": "Delete \"{{name}}\"?",
+      "deleteDescription_one": "The template leaves {{count}} product and the attribute templates carrying it. Shoppers with these add-ons in their cart must change them before paying.",
+      "deleteDescription_other": "The template leaves {{count}} products and the attribute templates carrying it. Shoppers with these add-ons in their cart must change them before paying.",
+      "deleted": "Template deleted.",
+      "saved": "Template saved.",
+      "errors": {
+        "name": "The template name must be 1-60 characters.",
+        "tooMany": "This change would give some products more than 5 add-ons; remove add-ons from them first.",
+        "idUnknown": "An add-on id the template does not have was sent. Reload the page and try again."
+      },
+      "add": "Add template",
+      "pickTitle": "Add an add-on template",
+      "pickDescription": "The template's add-ons are linked to this product; when the template changes, so does this product.",
+      "link": "Link",
+      "noneToPick": "No template to link.",
+      "openSettings": "Create one under product attributes",
+      "doesNotFit_one": "{{count}} add-on: does not fit within this product's 5.",
+      "doesNotFit_other": "{{count}} add-ons: do not fit within this product's 5.",
+      "viaProduct": "Template",
+      "viaAttribute": "From attribute template",
+      "editInSettings": "Edit template",
+      "unlink": "Unlink",
+      "hidden_one": "{{count}} add-on is past the limit of 5 and not shown in the store; remove a template or an add-on.",
+      "hidden_other": "{{count}} add-ons are past the limit of 5 and not shown in the store; remove a template or an add-on.",
+      "usage": "Usage",
+      "usageHint": "Changing the template changes all of these products at once; placed orders stay as they are.",
+      "linkedProducts": "Linked products",
+      "carriedBy": "Carried by attribute templates",
+      "carriedByNone": "None",
+      "createHint": "Create the template by its name; add its add-ons on the page that opens.",
+      "carryHidden_one": "With this attribute template the product has more than 5 add-ons: {{count}} add-on is not shown in the store. You can save; removing a template or an add-on is advised.",
+      "carryHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store. You can save; removing a template or an add-on is advised.",
+      "carryRequiredHidden_one": "With this attribute template the product has more than 5 add-ons: {{count}} add-on is not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised.",
+      "carryRequiredHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised."
     }
   },
   "orders": {
@@ -5115,6 +5191,7 @@
       "excel": "Download as Excel",
       "csv": "Download CSV",
       "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
+      "laterNoJobs": "The file is being prepared in the background.",
       "failed": "The order file could not be made."
     },
     "addons": {
@@ -5971,6 +6048,7 @@
       "excel": "Download as Excel",
       "csv": "Download CSV",
       "later": "The file is being made; once ready, download it from Settings > Audit log > Jobs.",
+      "laterNoJobs": "The file is being made in the background.",
       "failed": "The report file could not be made."
     },
     "daily": {
@@ -6547,6 +6625,7 @@
       "hint": "Search engines find your pages in these files; they refresh a few minutes after changes.",
       "refresh": "Refresh now",
       "queued": "The sitemap is being refreshed; follow it in Settings > Audit log > Jobs.",
+      "queuedNoJobs": "The sitemap is being refreshed.",
       "hostMissing": "No sitemap without the main domain: addresses must be complete.",
       "noIndexing": "This instance is closed to search engines: robots.txt blocks all crawlers, pages say noindex.",
       "generated": "made {{when}}",
@@ -7240,7 +7319,8 @@
       "no": "No",
       "apply": "Bring over",
       "working": "Bringing the facts over…",
-      "background": "Bringing over goes on in the background; follow it in Settings › Jobs.",
+      "background": "Bringing over goes on in the background; follow it in Settings > Audit log > Jobs.",
+      "backgroundNoJobs": "Bringing over goes on in the background.",
       "jobFailed": "Bringing over could not finish.",
       "written_one": "{{values}} values written to {{formatted}} product.",
       "written_other": "{{values}} values written to {{formatted}} products.",
@@ -7262,7 +7342,9 @@
       "definitions_other": "Attributes ({{count}})",
       "groups_one": "Groups ({{count}})",
       "groups_other": "Groups ({{count}})",
-      "info": "Template details"
+      "info": "Template details",
+      "addons_one": "Add-ons ({{count}})",
+      "addons_other": "Add-ons ({{count}})"
     },
     "tabError": "A field on this tab needs fixing",
     "descriptionHint": "Shown in the panel only.",
@@ -7282,7 +7364,11 @@
     },
     "seoHint": "Its value may be used in the product's title on Google.",
     "drag": "Drag to move",
-    "actions": "{{name}}: actions"
+    "actions": "{{name}}: actions",
+    "addonTemplates": {
+      "hint": "The add-on templates you tick are added to every product using this attribute template, after the product's own add-ons, in this order.",
+      "none": "No add-on templates yet. Create one in the Add-on templates section of this page."
+    }
   },
   "brands": {
     "description": "Each brand has its own page, logo and products.",
@@ -8580,6 +8666,7 @@
         "open": "Publication history",
         "title": "Publication history",
         "description": "The last 20 publications are kept by themselves. Add one you want to keep for good to 'My saved looks'.",
+        "descriptionKept": "The last 20 publications are kept by themselves; any of them can go back into the draft.",
         "empty": "Nothing published yet; publications show here after the first one.",
         "item": "Publication {{revision}}",
         "live": "Live",
@@ -11136,6 +11223,7 @@
       "title": "Looks",
       "description": "Choose your store's look, save it and come back to it any time. Changes stay hidden from visitors until you publish.",
       "openEditor": "Open theme editor",
+      "noAccess": "Only the shop owner can open the looks.",
       "thumbAlt": "Thumbnail of the {{name}} look",
       "sections_one": "{{count}} section",
       "sections_other": "{{count}} sections",
@@ -11990,8 +12078,8 @@
   },
   "plan": {
     "title": "Subscription",
-    "description": "Your package, limits and usage, and payment status. This page is for information; contact us to change your package.",
-    "unmanaged": "This shop has no package limits: products, team, storage and content drafts are unlimited.",
+    "description": "Package, payment and usage.",
+    "unmanaged": "No package limits",
     "loadFailed": "The subscription could not be loaded.",
     "view": "View subscription",
     "strip": {
@@ -12005,31 +12093,60 @@
       "howToPay": "How to pay"
     },
     "package": {
-      "title": "Package",
-      "text": "Your shop's package and status.",
-      "name": "Package",
-      "status": "Shop status",
-      "period": "This period",
+      "label": "Package",
       "none": "No package set"
     },
-    "statuses": {
-      "provisioning": "Being set up",
-      "active": "Active",
-      "restricted": "Restricted",
-      "suspended": "Suspended",
-      "closing": "Closing",
-      "closed": "Closed"
+    "hero": {
+      "amount": {
+        "due": "Next payment",
+        "trial": "First payment",
+        "late": "Overdue payment"
+      },
+      "nothingDue": "Nothing due",
+      "date": {
+        "due": "Due date",
+        "trial": "Trial ends",
+        "late": "Due date"
+      },
+      "graceEnds": "Grace ends",
+      "countdown": {
+        "trial_one": "{{count}} day left",
+        "trial_other": "{{count}} days left",
+        "due_one": "{{count}} day left",
+        "due_other": "{{count}} days left",
+        "grace_one": "Grace: {{count}} day",
+        "grace_other": "Grace: {{count}} days",
+        "overdue_one": "{{count}} day overdue",
+        "overdue_other": "{{count}} days overdue",
+        "today": "Today"
+      },
+      "ring": {
+        "trial": "Trial",
+        "due": "To payment",
+        "grace": "Grace",
+        "overdue": "Overdue",
+        "day": "days",
+        "trialUsed": "Trial: {{used}} / {{total}} days"
+      },
+      "period": "Period",
+      "periodHint": "Monthly limits reset at the start of each month.",
+      "per": {
+        "monthly": "/ month",
+        "yearly": "/ year"
+      },
+      "price": "Package price"
     },
     "usage": {
       "title": "Limits and usage",
-      "text": "Your total and this month's usage. Amber from 80% of a limit, red at a limit that stops new records.",
-      "listLabel": "Limits and usage",
+      "hint": "Amber from 80%, red at the limit.",
+      "monthly": "This month",
+      "unlimited": "Unlimited",
       "barLabel": "{{name}}: {{value}}",
-      "of": "{{used}} / {{max}}",
-      "unlimited": "{{used}} · unlimited",
-      "pending_one": "{{count}} open invitation included",
-      "pending_other": "{{count}} open invitations included",
-      "ordersNote": "Warning only, never blocked",
+      "left": "{{value}} left",
+      "over": "{{value}} over",
+      "pending_one": "{{count}} invitation open",
+      "pending_other": "{{count}} invitations open",
+      "ordersNote": "Orders are never stopped.",
       "tone": {
         "warn": "Near the limit",
         "full": "At the limit",
@@ -12038,30 +12155,11 @@
     },
     "keys": {
       "products": "Products",
-      "orders_per_month": "Orders this month",
+      "orders_per_month": "Orders",
       "staff": "Team",
       "storage_mb": "Storage",
-      "llm_credits_per_month": "Content drafts this month",
+      "llm_credits_per_month": "Content drafts",
       "custom_domains": "Custom domains"
-    },
-    "mb": "{{value}} MB",
-    "billing": {
-      "title": "Payment",
-      "text": "Your subscription payment's status and the next payment.",
-      "status": "Payment status",
-      "nextDue": "Next payment day",
-      "graceEnds": "Grace period ends",
-      "amount": "Amount",
-      "none": "—",
-      "instruction": "Payment instructions",
-      "noInstruction": "Payment instructions appear here as the payment day nears.",
-      "statuses": {
-        "trialing": "In trial",
-        "active": "Up to date",
-        "past_due": "Overdue",
-        "restricted": "Restricted",
-        "cancelled": "Ended"
-      }
     },
     "notice": {
       "products": {
@@ -12086,7 +12184,62 @@
       }
     },
     "createBlocked": "New products cannot be added: your product limit is reached.",
-    "inviteBlocked": "No new invitation can be sent: your team limit is reached."
+    "inviteBlocked": "No new invitation can be sent: your team limit is reached.",
+    "loading": "Loading the subscription",
+    "state": {
+      "provisioning": "Being set up",
+      "trialing": "In trial",
+      "active": "Active",
+      "due_soon": "Payment due soon",
+      "past_due": "Payment overdue",
+      "restricted": "Restricted",
+      "suspended": "Suspended",
+      "cancelled": "Ended",
+      "closing": "Closing",
+      "closed": "Closed"
+    },
+    "stateText": {
+      "provisioning": "Your shop is being set up; your package starts when it is ready.",
+      "trialing": "Your trial is running. Your first payment starts when it ends.",
+      "active": "Your subscription is up to date.",
+      "due_soon": "Your payment day is near. How to pay is beside this.",
+      "past_due": "Your payment is late. Paid before the grace period ends, nothing is restricted; your storefront keeps selling.",
+      "restricted": "The payment is late and the panel is read only. The restriction lifts once the payment is in; your storefront keeps selling.",
+      "suspended": "Your shop is suspended: the storefront is closed to visitors. Contact us for the details.",
+      "cancelled": "Your subscription has ended. Contact us to start it again.",
+      "closing": "Your shop is closing.",
+      "closed": "Your shop is closed."
+    },
+    "payment": {
+      "title": "Payment details",
+      "none": "No payment details",
+      "copy": "Copy",
+      "copied": "Payment details copied.",
+      "copyFailed": "Could not copy; select the text to copy it.",
+      "change": "Change of package",
+      "changeHint": "Contact us to upgrade or change your package."
+    },
+    "history": {
+      "title": "Payments",
+      "loading": "Loading payments",
+      "empty": "No payments yet",
+      "unavailable": "Payments could not be loaded right now",
+      "period": "Period",
+      "day": "Date",
+      "amount": "Amount",
+      "status": "Status",
+      "invoice": "Invoice",
+      "invoiceOf": "Invoice for {{period}}",
+      "noInvoice": "No invoice",
+      "showAll_one": "Show all ({{count}})",
+      "showAll_other": "Show all ({{count}})",
+      "state": {
+        "paid": "Paid",
+        "waived": "Waived",
+        "open": "Pending",
+        "late": "Late"
+      }
+    }
   },
   "wholesale": {
     "gate": {

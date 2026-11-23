@@ -208,6 +208,8 @@ const CAPABILITY_PROBES = {
   abandonedCarts: ["GET", "/admin/abandoned-carts"],
   // 2026-11-06: an order's message sent again: owner, admin, operations
   resendMessages: ["POST", "/admin/orders/:id/messages/:message_id/resend"],
+  // adr/0064, the owner 2026-11-23: the storefront's looks, read or written, the owner's alone
+  looks: ["GET", "/admin/storefront-designs"],
   // ADR-0068 §3, §9: the wholesalers, their levels and prices, read or written: owner and admin
   wholesale: ["GET", "/admin/wholesale/accounts"],
 } as const satisfies Record<string, readonly [Method, string]>

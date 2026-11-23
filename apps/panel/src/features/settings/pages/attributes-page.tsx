@@ -9,6 +9,9 @@ import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { useRecordWalk } from "@qticaret/admin-ui/hooks/use-record-walk"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { templatesQuery } from "@/features/attributes/api"
+import { ADDONS_FLAG } from "@/features/products/api/addons"
+import { useFeatureState } from "@/features/settings/api/features"
+import { AddonTemplatesSection } from "@/features/products/addon-templates/addon-templates-section"
 import { TemplateDialog } from "@/features/attributes/components/template-dialog"
 import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
@@ -66,6 +69,7 @@ export function AttributesPage() {
   const walk = useRecordWalk(query.data, (template) => template.id)
   const columns = useColumns(walk.show)
   const [creating, setCreating] = useState(false)
+  const addonsOn = useFeatureState(ADDONS_FLAG) === true
   const add = (
     <Button
       onClick={() => {
@@ -101,17 +105,21 @@ export function AttributesPage() {
           />
         )}
       </section>
+      {/* adr/0052 Ek 2026-11-23: add-ons defined once, beside the attribute templates */}
+      <AddonTemplatesSection />
       {walk.open ? (
         <TemplateDialog
           template={walk.open}
           steps={walk.steps}
           templateAt={(index) => query.data?.[index]}
           onClose={walk.close}
+          addonsOn={addonsOn}
         />
       ) : null}
       {creating ? (
         <TemplateDialog
           template={null}
+          addonsOn={addonsOn}
           onClose={() => {
             setCreating(false)
           }}

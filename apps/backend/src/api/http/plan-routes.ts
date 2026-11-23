@@ -14,4 +14,10 @@ export const PLAN_ROUTES = [
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
   },
+  // Ek C20: the shop's payments to the platform, the same people
+  {
+    matcher: "/admin/plan/payments",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
+  },
 ]

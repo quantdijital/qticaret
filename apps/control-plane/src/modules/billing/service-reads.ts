@@ -75,6 +75,28 @@ export class BillingReads extends MedusaService({
     )
   }
 
+  /**
+   * A shop's own payment history (Ek C20): its charges but the voided, the
+   * latest period first, at most `take`. Only by the shop's id: the tenant
+   * API passes the id its signature proved.
+   */
+  @InjectManager()
+  async historyOf(
+    tenantId: string,
+    take: number,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<ChargeRecord[]> {
+    return await this.listCharges(
+      { tenant_id: tenantId, status: ["open", "paid", "waived"] },
+      {
+        select: [...CHARGE_FIELDS],
+        order: { period_start: "DESC", created_at: "DESC" },
+        take,
+      },
+      sharedContext
+    )
+  }
+
   @InjectManager()
   async chargeOf(
     tenantId: string,

@@ -1,12 +1,12 @@
 import { Modules } from "@medusajs/framework/utils"
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import {
-  acquireLockStep,
   createRemoteLinkStep,
   dismissRemoteLinkStep,
   emitEventStep,
-  releaseLockStep,
 } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../modules/product-attributes"
 import { CATALOG_PRODUCT_SAVED } from "../catalog/events"
 import { planProductAttributesStep } from "./steps/plan-product-attributes"
@@ -28,7 +28,7 @@ export const upsertProductAttributesWorkflow = createWorkflow(
       `product-attributes:${input.product_id}`,
       ...(input.template_id ? [templateLockKey(input.template_id)] : []),
     ])
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 30 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 30 })
 
     const plan = planProductAttributesStep(input)
     const written = writeAttributeValuesStep(plan)
@@ -61,7 +61,7 @@ export const upsertProductAttributesWorkflow = createWorkflow(
     // Search and listings read the values (adr/0056)
     const saved = transform({ input }, ({ input }) => ({ id: input.product_id }))
     emitEventStep({ eventName: CATALOG_PRODUCT_SAVED, data: saved })
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse({ product_id: input.product_id })
   }
 )

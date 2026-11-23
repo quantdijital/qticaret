@@ -5,7 +5,6 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import {
-  acquireLockStep,
   emitEventStep,
   beginExchangeOrderWorkflow,
   confirmExchangeRequestWorkflow,
@@ -13,7 +12,6 @@ import {
   markPaymentCollectionAsPaid,
   orderExchangeAddNewItemWorkflow,
   orderExchangeRequestItemReturnWorkflow,
-  releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { RETURN_REQUEST_APPROVED } from "./events"
 import { returnsLockKey } from "../../lib/orders/locks"
@@ -25,6 +23,8 @@ import {
   storeReturnLabelStep,
   updateReturnRequestStep,
 } from "./steps/return-request"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 /**
  * The shop approves a swap (adr/0032 §6): checked at the difference staff
@@ -41,7 +41,7 @@ export const approveExchangeWorkflow = createWorkflow(
   (input: { id: string; staff_id: string; note?: string | null; collected: boolean }) => {
     const orderId = returnRequestOrderStep({ id: input.id })
     const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 180 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 180 })
     const request = readReturnRequestStep({ id: input.id, status: "requested" })
     const expected = checkExchangeStep(
       transform({ request, input }, ({ request, input }) => ({
@@ -157,7 +157,7 @@ export const approveExchangeWorkflow = createWorkflow(
         kind: approved.kind,
       })),
     })
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(approved)
   }
 )

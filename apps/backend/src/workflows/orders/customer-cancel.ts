@@ -6,6 +6,7 @@ import { CANCEL_BY_CONTACT, bookingFlow } from "../../lib/booking/flow"
 import { ValidationError } from "../../lib/errors"
 import { cardsVoidedByCancel } from "../../lib/orders/gift-returns"
 import { cancelLockKeys } from "../../lib/orders/locks"
+import { withLocks } from "../locking/with-locks"
 import { isOfflineProvider } from "../../lib/payments/checkout"
 import { giftLinesOf } from "../returns/gift-lines"
 import { cancelGiftCardsWorkflow } from "./cancel-gift-cards"
@@ -126,7 +127,8 @@ export async function cancelOrderForCustomer(
   container: MedusaContainer,
   input: { order_id: string; customer_id: string }
 ): Promise<{ order_id: string; refunded: number }> {
-  return container.resolve(Modules.LOCKING).execute(
+  return withLocks(
+    container.resolve(Modules.LOCKING),
     cancelLockKeys(input.order_id),
     async () => {
       const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({

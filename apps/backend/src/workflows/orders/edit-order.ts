@@ -17,6 +17,7 @@ import {
 import { errorSummary, logger } from "../../lib/logging"
 import { kurus, toMedusaAmount } from "../../lib/money"
 import { cancelLockKeys } from "../../lib/orders/locks"
+import { withLocks } from "../locking/with-locks"
 import { refundOrderWorkflow } from "./refund-order"
 import {
   checkOrderEditStep,
@@ -166,7 +167,7 @@ async function editMade(
 }
 
 const underCancelLocks = <T>(container: MedusaContainer, orderId: string, job: () => Promise<T>) =>
-  container.resolve(Modules.LOCKING).execute(cancelLockKeys(orderId), job, { timeout: 10 })
+  withLocks(container.resolve(Modules.LOCKING), cancelLockKeys(orderId), job, { timeout: 10 })
 
 /** The preview, under the order's cancel locks: an edit is not opened while one runs. */
 export const previewOrderEdit = (container: MedusaContainer, input: OrderEditInput) =>

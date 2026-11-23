@@ -98,13 +98,49 @@ describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
       package_name: "Profesyonel Ağ",
       payment_instruction: "IBAN: TR12",
     })
+    // A document without the terms (an older control plane): each one null
     expect(summary.billing).toEqual({
       status: "past_due",
       due_on: "2026-12-01",
       grace_ends_on: "2026-12-08",
       amount: 149_000,
       currency: "TRY",
+      period: null,
+      price: null,
+      trial_started_on: null,
+      trial_ends_on: null,
     })
+  })
+
+  it("passes the subscription's terms through: period, price and trial (Ek C20)", async () => {
+    const { container } = shop(true)
+    const services = container as unknown as { resolve: (key: string) => unknown }
+    const state = await (
+      services.resolve("control_plane") as { planState: () => Promise<Record<string, unknown>> }
+    ).planState()
+    state["billing"] = {
+      status: "trialing",
+      due_on: "2026-11-15",
+      grace_ends_on: null,
+      amount: 149_000,
+      currency: "TRY",
+      period: "yearly",
+      price: 1_490_000,
+      trial_started_on: "2026-11-01",
+      trial_ends_on: "2026-11-15",
+    }
+
+    const summary = await readPlanSummary(container)
+
+    expect(summary.billing).toMatchObject({
+      status: "trialing",
+      period: "yearly",
+      price: 1_490_000,
+      trial_started_on: "2026-11-01",
+      trial_ends_on: "2026-11-15",
+    })
+    // The month the limits count stays the summary's own
+    expect(summary.period).toMatch(/^\d{4}-\d{2}$/)
   })
 
   it("has no limits and no billing without a control plane", async () => {

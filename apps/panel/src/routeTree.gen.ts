@@ -74,7 +74,6 @@ import { Route as AuthSettingsAccountingRouteImport } from "./routes/_auth/setti
 import { Route as AuthSettingsAiRouteImport } from "./routes/_auth/settings/ai"
 import { Route as AuthSettingsApiRouteImport } from "./routes/_auth/settings/api"
 import { Route as AuthSettingsAppearanceRouteImport } from "./routes/_auth/settings/appearance"
-import { Route as AuthSettingsAttributesRouteImport } from "./routes/_auth/settings/attributes"
 import { Route as AuthSettingsAuditRouteImport } from "./routes/_auth/settings/audit"
 import { Route as AuthSettingsEinvoiceRouteImport } from "./routes/_auth/settings/einvoice"
 import { Route as AuthSettingsFeaturesRouteImport } from "./routes/_auth/settings/features"
@@ -107,6 +106,7 @@ import { Route as AuthCustomersWholesaleOrdersRouteImport } from "./routes/_auth
 import { Route as AuthPromotionsPriceListsIndexRouteImport } from "./routes/_auth/promotions/price-lists/index"
 import { Route as AuthPromotionsPriceListsIdRouteImport } from "./routes/_auth/promotions/price-lists/$id"
 import { Route as AuthPromotionsPriceListsNewRouteImport } from "./routes/_auth/promotions/price-lists/new"
+import { Route as AuthSettingsAttributesIndexRouteImport } from "./routes/_auth/settings/attributes/index"
 import { Route as AuthSettingsLegalIndexRouteImport } from "./routes/_auth/settings/legal/index"
 import { Route as AuthSettingsLegalKindRouteImport } from "./routes/_auth/settings/legal/$kind"
 import { Route as AuthSettingsMarketingIndexRouteImport } from "./routes/_auth/settings/marketing/index"
@@ -121,6 +121,7 @@ import { Route as AuthWholesaleTiersIndexRouteImport } from "./routes/_auth/whol
 import { Route as AuthWholesaleTiersIdRouteImport } from "./routes/_auth/wholesale/tiers/$id"
 import { Route as AuthCustomersWholesaleTiersIndexRouteImport } from "./routes/_auth/customers/wholesale/tiers/index"
 import { Route as AuthCustomersWholesaleTiersIdRouteImport } from "./routes/_auth/customers/wholesale/tiers/$id"
+import { Route as AuthSettingsAttributesAddonTemplatesIdRouteImport } from "./routes/_auth/settings/attributes/addon-templates/$id"
 
 const AuthRoute = AuthRouteImport.update({
   id: "/_auth",
@@ -445,11 +446,6 @@ const AuthSettingsAppearanceRoute = AuthSettingsAppearanceRouteImport.update({
   path: "/appearance",
   getParentRoute: () => AuthSettingsRoute,
 } as any)
-const AuthSettingsAttributesRoute = AuthSettingsAttributesRouteImport.update({
-  id: "/attributes",
-  path: "/attributes",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
 const AuthSettingsAuditRoute = AuthSettingsAuditRouteImport.update({
   id: "/audit",
   path: "/audit",
@@ -610,6 +606,11 @@ const AuthPromotionsPriceListsNewRoute = AuthPromotionsPriceListsNewRouteImport.
   path: "/promotions/price-lists/new",
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthSettingsAttributesIndexRoute = AuthSettingsAttributesIndexRouteImport.update({
+  id: "/attributes/",
+  path: "/attributes/",
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsLegalIndexRoute = AuthSettingsLegalIndexRouteImport.update({
   id: "/legal/",
   path: "/legal/",
@@ -680,6 +681,12 @@ const AuthCustomersWholesaleTiersIdRoute = AuthCustomersWholesaleTiersIdRouteImp
   path: "/customers/wholesale/tiers/$id",
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthSettingsAttributesAddonTemplatesIdRoute =
+  AuthSettingsAttributesAddonTemplatesIdRouteImport.update({
+    id: "/attributes/addon-templates/$id",
+    path: "/attributes/addon-templates/$id",
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   "/": typeof AuthIndexRoute
@@ -731,7 +738,6 @@ export interface FileRoutesByFullPath {
   "/settings/ai": typeof AuthSettingsAiRoute
   "/settings/api": typeof AuthSettingsApiRoute
   "/settings/appearance": typeof AuthSettingsAppearanceRoute
-  "/settings/attributes": typeof AuthSettingsAttributesRoute
   "/settings/audit": typeof AuthSettingsAuditRoute
   "/settings/einvoice": typeof AuthSettingsEinvoiceRoute
   "/settings/features": typeof AuthSettingsFeaturesRoute
@@ -784,6 +790,7 @@ export interface FileRoutesByFullPath {
   "/wholesale/tiers/$id": typeof AuthWholesaleTiersIdRoute
   "/customers/wholesale/": typeof AuthCustomersWholesaleIndexRoute
   "/promotions/price-lists/": typeof AuthPromotionsPriceListsIndexRoute
+  "/settings/attributes/": typeof AuthSettingsAttributesIndexRoute
   "/settings/legal/": typeof AuthSettingsLegalIndexRoute
   "/settings/marketing/": typeof AuthSettingsMarketingIndexRoute
   "/settings/payments/": typeof AuthSettingsPaymentsIndexRoute
@@ -791,6 +798,7 @@ export interface FileRoutesByFullPath {
   "/settings/sms/": typeof AuthSettingsSmsIndexRoute
   "/wholesale/tiers/": typeof AuthWholesaleTiersIndexRoute
   "/customers/wholesale/tiers/$id": typeof AuthCustomersWholesaleTiersIdRoute
+  "/settings/attributes/addon-templates/$id": typeof AuthSettingsAttributesAddonTemplatesIdRoute
   "/customers/wholesale/tiers/": typeof AuthCustomersWholesaleTiersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -841,7 +849,6 @@ export interface FileRoutesByTo {
   "/settings/ai": typeof AuthSettingsAiRoute
   "/settings/api": typeof AuthSettingsApiRoute
   "/settings/appearance": typeof AuthSettingsAppearanceRoute
-  "/settings/attributes": typeof AuthSettingsAttributesRoute
   "/settings/audit": typeof AuthSettingsAuditRoute
   "/settings/einvoice": typeof AuthSettingsEinvoiceRoute
   "/settings/features": typeof AuthSettingsFeaturesRoute
@@ -894,6 +901,7 @@ export interface FileRoutesByTo {
   "/wholesale/tiers/$id": typeof AuthWholesaleTiersIdRoute
   "/customers/wholesale": typeof AuthCustomersWholesaleIndexRoute
   "/promotions/price-lists": typeof AuthPromotionsPriceListsIndexRoute
+  "/settings/attributes": typeof AuthSettingsAttributesIndexRoute
   "/settings/legal": typeof AuthSettingsLegalIndexRoute
   "/settings/marketing": typeof AuthSettingsMarketingIndexRoute
   "/settings/payments": typeof AuthSettingsPaymentsIndexRoute
@@ -901,6 +909,7 @@ export interface FileRoutesByTo {
   "/settings/sms": typeof AuthSettingsSmsIndexRoute
   "/wholesale/tiers": typeof AuthWholesaleTiersIndexRoute
   "/customers/wholesale/tiers/$id": typeof AuthCustomersWholesaleTiersIdRoute
+  "/settings/attributes/addon-templates/$id": typeof AuthSettingsAttributesAddonTemplatesIdRoute
   "/customers/wholesale/tiers": typeof AuthCustomersWholesaleTiersIndexRoute
 }
 export interface FileRoutesById {
@@ -956,7 +965,6 @@ export interface FileRoutesById {
   "/_auth/settings/ai": typeof AuthSettingsAiRoute
   "/_auth/settings/api": typeof AuthSettingsApiRoute
   "/_auth/settings/appearance": typeof AuthSettingsAppearanceRoute
-  "/_auth/settings/attributes": typeof AuthSettingsAttributesRoute
   "/_auth/settings/audit": typeof AuthSettingsAuditRoute
   "/_auth/settings/einvoice": typeof AuthSettingsEinvoiceRoute
   "/_auth/settings/features": typeof AuthSettingsFeaturesRoute
@@ -1009,6 +1017,7 @@ export interface FileRoutesById {
   "/_auth/wholesale/tiers/$id": typeof AuthWholesaleTiersIdRoute
   "/_auth/customers/wholesale/": typeof AuthCustomersWholesaleIndexRoute
   "/_auth/promotions/price-lists/": typeof AuthPromotionsPriceListsIndexRoute
+  "/_auth/settings/attributes/": typeof AuthSettingsAttributesIndexRoute
   "/_auth/settings/legal/": typeof AuthSettingsLegalIndexRoute
   "/_auth/settings/marketing/": typeof AuthSettingsMarketingIndexRoute
   "/_auth/settings/payments/": typeof AuthSettingsPaymentsIndexRoute
@@ -1016,6 +1025,7 @@ export interface FileRoutesById {
   "/_auth/settings/sms/": typeof AuthSettingsSmsIndexRoute
   "/_auth/wholesale/tiers/": typeof AuthWholesaleTiersIndexRoute
   "/_auth/customers/wholesale/tiers/$id": typeof AuthCustomersWholesaleTiersIdRoute
+  "/_auth/settings/attributes/addon-templates/$id": typeof AuthSettingsAttributesAddonTemplatesIdRoute
   "/_auth/customers/wholesale/tiers/": typeof AuthCustomersWholesaleTiersIndexRoute
 }
 export interface FileRouteTypes {
@@ -1070,7 +1080,6 @@ export interface FileRouteTypes {
     | "/settings/ai"
     | "/settings/api"
     | "/settings/appearance"
-    | "/settings/attributes"
     | "/settings/audit"
     | "/settings/einvoice"
     | "/settings/features"
@@ -1123,6 +1132,7 @@ export interface FileRouteTypes {
     | "/wholesale/tiers/$id"
     | "/customers/wholesale/"
     | "/promotions/price-lists/"
+    | "/settings/attributes/"
     | "/settings/legal/"
     | "/settings/marketing/"
     | "/settings/payments/"
@@ -1130,6 +1140,7 @@ export interface FileRouteTypes {
     | "/settings/sms/"
     | "/wholesale/tiers/"
     | "/customers/wholesale/tiers/$id"
+    | "/settings/attributes/addon-templates/$id"
     | "/customers/wholesale/tiers/"
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1180,7 +1191,6 @@ export interface FileRouteTypes {
     | "/settings/ai"
     | "/settings/api"
     | "/settings/appearance"
-    | "/settings/attributes"
     | "/settings/audit"
     | "/settings/einvoice"
     | "/settings/features"
@@ -1233,6 +1243,7 @@ export interface FileRouteTypes {
     | "/wholesale/tiers/$id"
     | "/customers/wholesale"
     | "/promotions/price-lists"
+    | "/settings/attributes"
     | "/settings/legal"
     | "/settings/marketing"
     | "/settings/payments"
@@ -1240,6 +1251,7 @@ export interface FileRouteTypes {
     | "/settings/sms"
     | "/wholesale/tiers"
     | "/customers/wholesale/tiers/$id"
+    | "/settings/attributes/addon-templates/$id"
     | "/customers/wholesale/tiers"
   id:
     | "__root__"
@@ -1294,7 +1306,6 @@ export interface FileRouteTypes {
     | "/_auth/settings/ai"
     | "/_auth/settings/api"
     | "/_auth/settings/appearance"
-    | "/_auth/settings/attributes"
     | "/_auth/settings/audit"
     | "/_auth/settings/einvoice"
     | "/_auth/settings/features"
@@ -1347,6 +1358,7 @@ export interface FileRouteTypes {
     | "/_auth/wholesale/tiers/$id"
     | "/_auth/customers/wholesale/"
     | "/_auth/promotions/price-lists/"
+    | "/_auth/settings/attributes/"
     | "/_auth/settings/legal/"
     | "/_auth/settings/marketing/"
     | "/_auth/settings/payments/"
@@ -1354,6 +1366,7 @@ export interface FileRouteTypes {
     | "/_auth/settings/sms/"
     | "/_auth/wholesale/tiers/"
     | "/_auth/customers/wholesale/tiers/$id"
+    | "/_auth/settings/attributes/addon-templates/$id"
     | "/_auth/customers/wholesale/tiers/"
   fileRoutesById: FileRoutesById
 }
@@ -1824,13 +1837,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthSettingsAppearanceRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/attributes": {
-      id: "/_auth/settings/attributes"
-      path: "/attributes"
-      fullPath: "/settings/attributes"
-      preLoaderRoute: typeof AuthSettingsAttributesRouteImport
-      parentRoute: typeof AuthSettingsRoute
-    }
     "/_auth/settings/audit": {
       id: "/_auth/settings/audit"
       path: "/audit"
@@ -2055,6 +2061,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthPromotionsPriceListsNewRouteImport
       parentRoute: typeof AuthRoute
     }
+    "/_auth/settings/attributes/": {
+      id: "/_auth/settings/attributes/"
+      path: "/attributes"
+      fullPath: "/settings/attributes/"
+      preLoaderRoute: typeof AuthSettingsAttributesIndexRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     "/_auth/settings/legal/": {
       id: "/_auth/settings/legal/"
       path: "/legal"
@@ -2153,6 +2166,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthCustomersWholesaleTiersIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    "/_auth/settings/attributes/addon-templates/$id": {
+      id: "/_auth/settings/attributes/addon-templates/$id"
+      path: "/attributes/addon-templates/$id"
+      fullPath: "/settings/attributes/addon-templates/$id"
+      preLoaderRoute: typeof AuthSettingsAttributesAddonTemplatesIdRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
   }
 }
 
@@ -2187,7 +2207,6 @@ interface AuthSettingsRouteChildren {
   AuthSettingsAiRoute: typeof AuthSettingsAiRoute
   AuthSettingsApiRoute: typeof AuthSettingsApiRoute
   AuthSettingsAppearanceRoute: typeof AuthSettingsAppearanceRoute
-  AuthSettingsAttributesRoute: typeof AuthSettingsAttributesRoute
   AuthSettingsAuditRoute: typeof AuthSettingsAuditRoute
   AuthSettingsEinvoiceRoute: typeof AuthSettingsEinvoiceRoute
   AuthSettingsFeaturesRoute: typeof AuthSettingsFeaturesRoute
@@ -2209,11 +2228,13 @@ interface AuthSettingsRouteChildren {
   AuthSettingsPaymentsProviderRoute: typeof AuthSettingsPaymentsProviderRoute
   AuthSettingsShippingCarrierRoute: typeof AuthSettingsShippingCarrierRoute
   AuthSettingsSmsProviderRoute: typeof AuthSettingsSmsProviderRoute
+  AuthSettingsAttributesIndexRoute: typeof AuthSettingsAttributesIndexRoute
   AuthSettingsLegalIndexRoute: typeof AuthSettingsLegalIndexRoute
   AuthSettingsMarketingIndexRoute: typeof AuthSettingsMarketingIndexRoute
   AuthSettingsPaymentsIndexRoute: typeof AuthSettingsPaymentsIndexRoute
   AuthSettingsShippingIndexRoute: typeof AuthSettingsShippingIndexRoute
   AuthSettingsSmsIndexRoute: typeof AuthSettingsSmsIndexRoute
+  AuthSettingsAttributesAddonTemplatesIdRoute: typeof AuthSettingsAttributesAddonTemplatesIdRoute
 }
 
 const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
@@ -2221,7 +2242,6 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsAiRoute: AuthSettingsAiRoute,
   AuthSettingsApiRoute: AuthSettingsApiRoute,
   AuthSettingsAppearanceRoute: AuthSettingsAppearanceRoute,
-  AuthSettingsAttributesRoute: AuthSettingsAttributesRoute,
   AuthSettingsAuditRoute: AuthSettingsAuditRoute,
   AuthSettingsEinvoiceRoute: AuthSettingsEinvoiceRoute,
   AuthSettingsFeaturesRoute: AuthSettingsFeaturesRoute,
@@ -2243,11 +2263,13 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsPaymentsProviderRoute: AuthSettingsPaymentsProviderRoute,
   AuthSettingsShippingCarrierRoute: AuthSettingsShippingCarrierRoute,
   AuthSettingsSmsProviderRoute: AuthSettingsSmsProviderRoute,
+  AuthSettingsAttributesIndexRoute: AuthSettingsAttributesIndexRoute,
   AuthSettingsLegalIndexRoute: AuthSettingsLegalIndexRoute,
   AuthSettingsMarketingIndexRoute: AuthSettingsMarketingIndexRoute,
   AuthSettingsPaymentsIndexRoute: AuthSettingsPaymentsIndexRoute,
   AuthSettingsShippingIndexRoute: AuthSettingsShippingIndexRoute,
   AuthSettingsSmsIndexRoute: AuthSettingsSmsIndexRoute,
+  AuthSettingsAttributesAddonTemplatesIdRoute: AuthSettingsAttributesAddonTemplatesIdRoute,
 }
 
 const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(AuthSettingsRouteChildren)

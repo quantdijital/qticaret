@@ -12,6 +12,12 @@ export interface ReplaceDraftInput {
   text_at?: Record<string, number>
   actor: string | null
   reason: "restore" | "discard"
+  /**
+   * Whether the oldest automatic saves beyond five go: only for the one
+   * who owns the looks (the owner, 2026-11-23); another role's run keeps
+   * the replaced draft and removes none.
+   */
+  evict: boolean
 }
 
 /**
@@ -31,6 +37,7 @@ export const replaceDraftWorkflow = createWorkflow(
         actor: input.actor,
         save_as: null,
         reason: input.reason,
+        evict: input.evict,
       }))
     )
     const source = placePageTextsStep(

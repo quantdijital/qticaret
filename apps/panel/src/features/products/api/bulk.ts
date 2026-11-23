@@ -9,7 +9,14 @@ import type { ProductFilters } from "@/features/products/api/products"
 export const MAX_BULK_PRODUCTS = 1000
 
 export type BulkAction =
-  "price" | "stock" | "status" | "category" | "seo_template" | "alt_text" | "cost"
+  | "price"
+  | "stock"
+  | "status"
+  | "category"
+  | "seo_template"
+  | "alt_text"
+  | "cost"
+  | "addon_template"
 
 /** The change as the job takes it (`catalog.bulk_edit`). */
 export type BulkChange =
@@ -21,6 +28,8 @@ export type BulkChange =
   | { action: "alt_text" }
   /** F11.4: the variants' unit cost in lira, VAT excluded; `percent` leaves one without a cost. */
   | { action: "cost"; mode: "set" | "percent" | "clear"; value?: number }
+  /** adr/0052 Ek 2026-11-23: an add-on template linked to or unlinked from each product. */
+  | { action: "addon_template"; mode: "add" | "remove"; template_id: string }
 
 export interface BulkSummary {
   action: BulkAction
