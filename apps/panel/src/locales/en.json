@@ -8796,6 +8796,14 @@
           "with_image": "Text with image",
           "article": "Page text"
         },
+        "posts": {
+          "grid": "Tiles",
+          "intro_panel": "Intro panel"
+        },
+        "banner": {
+          "standard": "Words over the picture",
+          "split": "Split band"
+        },
         "reviews": {
           "grid": "Grid",
           "carousel": "Carousel"
@@ -9049,6 +9057,15 @@
           "solid": "Filled",
           "outline": "Outlined",
           "text": "Text"
+        },
+        "eyebrowPlaceholder": "E.g. Special offer",
+        "splitFirst": "The split band shows the first picture only; the others return when the variant changes.",
+        "edge": {
+          "label": "Edge",
+          "term": "edge",
+          "hint": "Where the picture meets the panel.",
+          "straight": "Straight",
+          "curved": "Curved"
         }
       },
       "products": {
@@ -10856,6 +10873,13 @@
           "padded": "01, 02",
           "plain": "1, 2"
         }
+      },
+      "posts": {
+        "eyebrowPlaceholder": "E.g. Need inspiration?",
+        "intro": "Intro",
+        "link": "Button",
+        "linkTerm": "button",
+        "linkHint": "Left empty, the button leads to every post."
       },
       "trustCard": {
         "lift": {

@@ -91,7 +91,7 @@ describe("a section's look in Atölye", () => {
     // The stage lifts only the sale price (`ui.css`'s `.gf-stage .text-deal`): the badge is `bg-deal`
     expect(LOOK_CSS).not.toContain("--color-deal:")
     expect(LOOK_CSS).toMatch(
-      /\.gf-look\[data-ground="primary"\] \.text-deal \{\s*color: var\(--primary-foreground\);/
+      /:is\(\.gf-look, \.gf-ground\)\[data-ground="primary"\] \.text-deal \{\s*color: var\(--primary-foreground\);/
     )
   })
 

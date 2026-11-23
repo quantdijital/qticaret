@@ -25,6 +25,7 @@ import type { StoreStepsSection } from "./section-steps.js"
 import type { TrustCardStep } from "./section-trust.js"
 import type { StoreNewsletterSection } from "./section-newsletter.js"
 import type { StoreRichTextSection } from "./section-rich-text.js"
+import type { StorePostsSection } from "./section-posts.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { StorePhotoCollageSection } from "./section-collage.js"
 import type {
@@ -129,7 +130,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | StoreProductsSection
     | StoreFeaturedProductSection
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
-    | { id: string; type: "posts"; title: string | null; limit: number }
+    | StorePostsSection
     | StoreReviewsSection
     | StoreGoogleRatingSection
     | StoreRichTextSection

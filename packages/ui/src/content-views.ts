@@ -11,6 +11,7 @@ import type {
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { BannerSectionView } from "./banner-views"
+import type { PostsSectionView } from "./posts-views"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
 import type {
   CategoryCardsView,
@@ -134,7 +135,7 @@ export type HomeSectionView = {
   | ProductsSectionView
   | FeaturedProductSectionView
   | { id: string; type: "brands"; title: string; brands: SectionBrandView[] }
-  | { id: string; type: "posts"; title: string; posts: PostCardView[]; more: LinkView }
+  | PostsSectionView
   | {
       id: string
       type: "reviews"

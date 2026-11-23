@@ -1,7 +1,9 @@
 import type {
   AnnouncementSettings,
   BannerSettings,
+  BannerSplitEdge,
   BannerTone,
+  BannerVariant,
   CardVariant,
   FaqSettings,
   FeaturedProductSettings,
@@ -17,6 +19,7 @@ import type {
   SliderSettings,
   NewsletterVariant,
   PageTextSwitch,
+  PostsVariant,
   RichTextImageSide,
   RichTextVariant,
   TrustBadgesVariant,
@@ -156,6 +159,15 @@ export interface BannerSlide {
 export type BannerSection = BodySectionBase & {
   type: "banner"
   slides: BannerSlide[]
+  /**
+   * How it is drawn (adr/0077 Ek): `standard`, today's slides; `split`, the
+   * first slide's picture beside a panel. The server fills the default on reading.
+   */
+  variant: BannerVariant
+  /** `split`: the line above the heading. */
+  eyebrow?: string | null
+  /** `split`: the picture's inner edge. */
+  edge?: BannerSplitEdge
 } & BannerSettings
 
 interface CategoriesBase extends BodySectionBase {
@@ -200,10 +212,22 @@ export interface BrandsSection extends BodySectionBase {
   brand_ids: string[]
 }
 
+/**
+ * The newest posts (adr/0077 Ek): today's tiles, or one panel with an
+ * upper line, an intro and a button beside the cards. The server fills
+ * `grid` on reading.
+ */
 export interface PostsSection extends BodySectionBase {
   type: "posts"
   title: string | null
   limit: number
+  variant: PostsVariant
+  /** `intro_panel`: the line above the heading. */
+  eyebrow?: string | null
+  /** `intro_panel`: the words under the heading. */
+  intro?: string | null
+  /** `intro_panel`: the button; none: the storefront's "every post". */
+  link?: LayoutLink | null
 }
 
 /** The shop's newest reviews (adr/0077 §10): today's grid, or one card each in a sliding row. */

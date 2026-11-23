@@ -17,6 +17,7 @@ import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { LinkField } from "./link-field"
 import { PREVIEW_IDS } from "./preview-fields"
+import { PostsIntroFields } from "./posts-intro-fields"
 import { CategoryIconsField } from "./category-icons-field"
 import { iconsFor } from "./icon-registry"
 import { RecordListField } from "./record-fields"
@@ -191,6 +192,10 @@ export function CountedForm({ section, problems, onChange }: SectionFormProps<Co
           }}
         />
       </div>
+      {/* The posts' intro panel's own words and button (adr/0077 Ek) */}
+      {section.type === "posts" && section.variant === "intro_panel" ? (
+        <PostsIntroFields section={section} problems={problems} onChange={onChange} />
+      ) : null}
     </div>
   )
 }

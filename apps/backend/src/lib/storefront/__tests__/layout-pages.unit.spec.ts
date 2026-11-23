@@ -38,7 +38,7 @@ describe("content pages' own sections (adr/0073 §1)", () => {
         page_id: PAGE,
         sections: [
           { id: "ustyardim", type: "help", ...ALWAYS, title: null, text: null },
-          { id: "yazilar01", type: "posts", ...ALWAYS, title: null, limit: 3 },
+          { id: "yazilar01", type: "posts", ...ALWAYS, title: null, limit: 3, variant: "grid" },
           { id: "guvence01", type: "trust_badges", ...ALWAYS, variant: "lined" },
         ],
       },
