@@ -72,6 +72,8 @@ export const AI_GATES = [
   "campaign_sms",
   // A blog post's draft: each heading and paragraph through the shared gate, links by code (lib/ai/post-draft.ts)
   "post_draft",
+  // A storefront search's filter: a closed schema and the shop's lists (lib/ai/search-intent)
+  "search_intent",
 ] as const
 export type AiGate = (typeof AI_GATES)[number]
 
