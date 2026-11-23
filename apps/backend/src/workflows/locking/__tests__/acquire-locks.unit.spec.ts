@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto"
-import path from "node:path"
 import { asValue } from "@medusajs/framework/awilix"
 import { Modules, createMedusaContainer } from "@medusajs/framework/utils"
 import {
@@ -9,20 +7,9 @@ import {
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep } from "@medusajs/medusa/core-flows"
-import Redis from "ioredis"
 import { acquireLocksStep, lockOrder } from "../acquire-locks"
-
-/** What the locking module asks of a provider, as the tests use it. */
-interface Provider {
-  acquire(keys: string | string[], args?: { expire?: number }): Promise<void>
-  release(keys: string | string[]): Promise<boolean>
-}
-
-// Medusa's own providers, the module's code as it runs (not exported by name):
-// locally TEST_REDIS_URL=redis://localhost:56379/15, CI's quality job has a Redis
-const packageDir = (name: string, from: string) =>
-  path.dirname(require.resolve(name, { paths: [path.dirname(require.resolve(from))] }))
-const redisUrl = process.env["TEST_REDIS_URL"]
+import { isFree as isFreeIn, providers, silent, twoKeys } from "./providers"
+import type { Provider } from "./providers"
 
 /** A workflow's failure, which Medusa rejects with as a plain object: its message. */
 const failure = (run: Promise<unknown>): Promise<string | null> =>
@@ -30,33 +17,6 @@ const failure = (run: Promise<unknown>): Promise<string | null> =>
     () => null,
     (error: unknown) => (error as { message?: string }).message ?? String(error)
   )
-const silent = { warn: () => undefined, error: () => undefined, info: () => undefined }
-
-async function inMemory(): Promise<{ provider: Provider; close: () => Promise<void> }> {
-  const dir = packageDir("@medusajs/locking", "@medusajs/medusa/locking")
-  const { InMemoryLockingProvider } = (await import(path.join(dir, "providers/in-memory.js"))) as {
-    InMemoryLockingProvider: new () => Provider
-  }
-  return { provider: new InMemoryLockingProvider(), close: () => Promise.resolve() }
-}
-
-async function redis(): Promise<{ provider: Provider; close: () => Promise<void> }> {
-  const dir = packageDir("@medusajs/locking-redis", "@medusajs/medusa/locking-redis")
-  const { RedisLockingProvider } = (await import(path.join(dir, "services/redis-lock.js"))) as {
-    RedisLockingProvider: new (deps: object, options: object) => Provider
-  }
-  const client = new Redis(redisUrl ?? "")
-  const provider = new RedisLockingProvider(
-    { redisClient: client, prefix: `qt:test:lock:${randomUUID()}:`, logger: silent },
-    {}
-  )
-  return { provider, close: () => client.quit().then(() => undefined) }
-}
-
-const providers = [
-  { name: "in-memory", make: inMemory },
-  ...(redisUrl === undefined ? [] : [{ name: "redis", make: redis }]),
-]
 
 describe("lockOrder", () => {
   it("takes the keys once each, always in the same order", () => {
@@ -109,19 +69,8 @@ describe.each(providers)("locking several keys ($name provider)", ({ name, make 
     made.register({ [Modules.LOCKING]: asValue(provider), logger: asValue(silent) })
     return made
   }
-  const isFree = async (key: string) => {
-    try {
-      await provider.acquire(key, { expire: 60 })
-    } catch {
-      return false
-    }
-    await provider.release(key)
-    return true
-  }
-  const keys = () => {
-    const prefix = randomUUID()
-    return { a: `${prefix}:a`, b: `${prefix}:b` }
-  }
+  const isFree = (key: string) => isFreeIn(provider, key)
+  const keys = twoKeys
 
   beforeAll(async () => {
     ;({ provider, close } = await make())
