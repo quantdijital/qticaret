@@ -1,7 +1,7 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { CONTENT_MODULE } from "../../src/modules/content"
 import type ContentModuleService from "../../src/modules/content/service"
-import { layouts } from "../../src/workflows/storefront/layout-row"
+import { layoutRow, layouts } from "../../src/workflows/storefront/layout-row"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -51,10 +51,12 @@ medusaIntegrationTestRunner({
           { ...help("altyardim1"), placement: "bottom" },
         ],
       }
+      // Saved and published as today's editor writes it: one list, no `placement` (K1)
+      const listed = { page_id: about, sections: [help("ustyardim1"), help("altyardim1")] }
       await settle(
         http.post(
           "/admin/storefront-layout",
-          { document: { header: [], home: [], footer: [], pages: [older] } },
+          { document: { header: [], home: [], footer: [], pages: [listed] } },
           asOwner
         )
       )
@@ -110,10 +112,26 @@ medusaIntegrationTestRunner({
       await container
         .resolve<ContentModuleService>(CONTENT_MODULE)
         .updateContentEntries({ id: about, body: old })
-      const older = {
-        page_id: about,
-        sections: [{ ...help("ustyardim1"), placement: "top" }],
+      // The stored draft from before the text was a section: `placement`, no text (K1)
+      await settle(
+        http.post(
+          "/admin/storefront-layout",
+          { document: { header: [], home: [], footer: [], pages: [] } },
+          asOwner
+        )
+      )
+      const row = await layoutRow(container)
+      if (!row) {
+        throw new Error("no design")
       }
+      await layouts(container).updateStorefrontLayouts({
+        id: row.id,
+        draft: {
+          ...(row.draft as Record<string, unknown>),
+          pages: [{ page_id: about, sections: [{ ...help("ustyardim1"), placement: "top" }] }],
+        },
+      })
+      const older = { page_id: about, sections: [help("ustyardim1")] }
 
       // The editor's save places the text from its mirror: not its own work, not refused (K2)
       const saved = await settle(

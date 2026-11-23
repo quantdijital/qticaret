@@ -644,7 +644,16 @@
         "moving": "Moving addresses… {{percent}}%",
         "moved_one": "{{count}} page moved to its new address.",
         "moved_other": "{{count}} pages moved to their new addresses.",
-        "failed": "The addresses could not be moved; run the check again. Details in Settings > Jobs."
+        "failed": "The addresses could not be moved; run the check again. Details in Settings > Jobs.",
+        "option": {
+          "prefixed": "With prefix",
+          "flat": "No prefix, at the root"
+        },
+        "category": {
+          "prefixed": "With prefix, parent categories included",
+          "nested": "No prefix, parent categories included",
+          "flat": "No prefix, its own name only"
+        }
       },
       "searchConsole": {
         "title": "Search Console",
@@ -2994,6 +3003,8 @@
         "notReady": "Not ready to cut over",
         "noTraffic": "No Search Console data: upload the most visited pages.",
         "unanswered": "{{count}} of the most visited addresses answer nothing yet.",
+        "categoryStyle": "{{kept}} of the old site's {{total}} category addresses stay exactly as they were with the “{{style}}” category URL style ({{now}} with the current one). If you change the style, the other category addresses 301 to their new ones.",
+        "categoryStyleLink": "Open the URL style",
         "counts": {
           "total": "Addresses",
           "matched": "Matched",
@@ -11149,6 +11160,10 @@
         "pageMissingAddress": "The page layout was not added because there is no page at the address ‘{{handle}}’. Create a page at that address and apply the look again.",
         "pageLimit": "The {{name}} page's layout was not added: at most {{max}} pages can have their own layout.",
         "pageLimitAddress": "The layout of the page at ‘{{handle}}’ was not added: at most {{max}} pages can have their own layout.",
+        "pageMade": "The {{name}} page was opened as a draft; to put it live, choose Live in the page settings.",
+        "pageTaken": "The {{name}} page could not be opened: another record uses the address ‘{{handle}}’. The page layout was not added.",
+        "pageTakenAddress": "No page could be opened at ‘{{handle}}’: another record uses the address. The page layout was not added.",
+        "textKept": "The {{name}} page kept its own text; the look changed only its layout.",
         "keptPages": "The layouts you set up on your pages were kept.",
         "featureOff_one": "{{count}} section was not added: {{capabilities}} is off in this shop.",
         "featureOff_other": "{{count}} sections were not added: {{capabilities}} is off in this shop."

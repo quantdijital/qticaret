@@ -109,12 +109,27 @@ export interface SkippedRef {
   /** A page left out: its usual name (`Hakkımızda`), when the look gives one. */
   name?: string
   /**
-   * Why it was left out: a page's layout, no such page or no room for
-   * another page's layout; a section, its feature flag off in this shop
-   * (`feature_off`, adr/0077 §8: `ref` its type, `flag` the flag).
+   * Why it was left out: a page's layout, no such page, its address
+   * another record's so none could be opened (`taken`, adr/0073 Ek
+   * 2026-11-19 (2) K6) or no room for another page's layout; a section,
+   * its feature flag off in this shop (`feature_off`, adr/0077 §8: `ref`
+   * its type, `flag` the flag).
    */
-  reason?: "missing" | "limit" | "feature_off"
+  reason?: "missing" | "taken" | "limit" | "feature_off"
   flag?: string
+}
+
+/** A page a look opened as a draft (adr/0073 Ek 2026-11-19 (2) K6). */
+export interface MadePage {
+  ref: string
+  page_id: string
+  name: string
+}
+
+/** A page whose own text a look kept (K6): `page:hakkimizda`, the look's name for it. */
+export interface KeptText {
+  ref: string
+  name?: string
 }
 
 /** What an apply did, for the editor's note. */
@@ -127,6 +142,10 @@ export interface ApplyReport {
   skipped: SkippedRef[]
   /** The shop's header or footer sections kept (`footer.<id>`), its own page layouts (`pages.<id>`). */
   kept: string[]
+  /** Pages the look opened as drafts; absent in a report made before them. */
+  made_pages?: MadePage[]
+  /** Pages whose own text the look kept. */
+  texts_kept?: KeptText[]
 }
 
 export { GALLERY_KEY }
@@ -155,6 +174,9 @@ interface ApplyAnswer extends LayoutAnswer {
     auto_saved: DesignRef | null
     skipped: SkippedRef[]
     kept?: string[]
+    /** A look's: pages it opened as drafts, pages whose text it kept (K6); absent for a saved look. */
+    made_pages?: MadePage[]
+    texts_kept?: KeptText[]
     /** Content page layouts left out for pages deleted since (adr/0073 §1); absent before them. */
     dropped_pages?: number
   }

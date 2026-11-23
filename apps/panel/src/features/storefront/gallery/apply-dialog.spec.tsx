@@ -132,16 +132,26 @@ describe("ApplyDialog", () => {
       saved_name: "Eski vitrin",
       skipped: [],
       kept: ["footer"],
+      made_pages: [],
+      texts_kept: [],
     })
     expect(client.getQueryData(LAYOUT_KEY)).toMatchObject({ revision: layout.revision })
     expect(onClose).toHaveBeenCalled()
   })
 
-  it("carries a content page the shop has not made into the editor's note (adr/0073 §4)", async () => {
-    const missing = { where: "pages", ref: "page:hakkimizda", name: "Hakkımızda" }
+  it("carries the content pages it opened, kept the text of or left out into the editor's note", async () => {
+    const missing = { where: "pages", ref: "page:sss", reason: "taken" }
+    const made = { ref: "page:hakkimizda", page_id: "cnt_about", name: "Hakkımızda" }
+    const text = { ref: "page:iletisim", name: "İletişim" }
     fetchMock.mockResolvedValue({
       layout: layoutOf(),
-      result: { auto_saved: null, skipped: [missing], kept: ["pages.cnt_contact"] },
+      result: {
+        auto_saved: null,
+        skipped: [missing],
+        kept: ["pages.cnt_contact"],
+        made_pages: [made],
+        texts_kept: [text],
+      },
     })
     const user = userEvent.setup()
     const { client } = open(sade())
@@ -154,6 +164,8 @@ describe("ApplyDialog", () => {
     expect(client.getQueryData(REPORT_KEY)).toMatchObject({
       skipped: [missing],
       kept: ["pages.cnt_contact"],
+      made_pages: [made],
+      texts_kept: [text],
     })
   })
 
