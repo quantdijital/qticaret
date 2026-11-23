@@ -140,7 +140,7 @@ async function collectionRows(
     filters,
     pagination: { skip, take: PAGE, order: { id: "ASC" } },
   })
-  return data as CollectionRow[]
+  return data
 }
 
 const collectionDoc = (row: CollectionRow): ContentDoc | null =>
