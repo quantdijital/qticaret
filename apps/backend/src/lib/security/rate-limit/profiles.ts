@@ -122,6 +122,14 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: 10 * MINUTE },
     perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
+  // adr/0077 §7: a shopper's sentence read by the shop's AI service, each a call at the
+  // shop's cost through a public route: five a minute and thirty a day per address, beside
+  // the shop's own daily ceiling (AI_STORE_SEARCH_DAILY_LIMIT) and the day's cache
+  ai_store_search: { name: "ai_store_search", perIp: { max: 5, windowMs: MINUTE } },
+  ai_store_search_daily: {
+    name: "ai_store_search_daily",
+    perIp: { max: 30, windowMs: 24 * HOUR },
+  },
   // The media library bringing in an image by its address: each is a fetch from the internet
   media_import: { name: "media_import", perIp: { max: 60, windowMs: 10 * MINUTE } },
   // A product video's upload (adr/0069 §3): up to 50 MB and an ffprobe run each; per

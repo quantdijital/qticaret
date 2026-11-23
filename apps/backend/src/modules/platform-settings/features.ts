@@ -76,6 +76,14 @@ export const AI_OWN_KEYS = "ai.own_keys"
 export const AI_REVIEWS = "ai.reviews"
 
 /**
+ * The storefront's "search in your own words" (adr/0077 §7): a shopper's
+ * sentence read into the search's filters by the shop's own AI key. The
+ * one exception to adr/0071 §10: a shopper's words go to the service, so
+ * the shop turns it on itself; off until it does.
+ */
+export const AI_STOREFRONT_SEARCH = "ai.storefront_search"
+
+/**
  * Flags taken out of the registry. A shop may still hold a stored value for
  * one (an override row, a plan document's key); reads skip it as an unknown
  * key and nothing writes it again. `content.ai_drafts`: the drafts of
@@ -200,6 +208,14 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.ai_reviews.label",
     descriptionKey: "qticaret.features.ai_reviews.description",
+  },
+  // adr/0077 §7: the shopper's own words go to the service, so the shop turns it on itself
+  // and only its own key pays; off, the interpret route answers as if it did not exist
+  [AI_STOREFRONT_SEARCH]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.ai_storefront_search.label",
+    descriptionKey: "qticaret.features.ai_storefront_search.description",
   },
 })
 

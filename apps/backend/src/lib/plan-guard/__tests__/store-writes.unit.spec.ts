@@ -49,6 +49,8 @@ const STORE_WRITES: Readonly<Record<string, "cart" | "guarded" | "read" | "open"
   "POST /store/products/:id/questions": "open",
   "POST /store/products/:id/reviews": "open",
   "POST /store/products/:id/reviews/photos": "open",
+  // adr/0077 §7: a search read by POST, its sentence in the body
+  "POST /store/search/interpret": "read",
   "POST /store/seo/not-found": "open",
   "POST /store/stock-alerts": "open",
   "POST /store/stock-alerts/confirm": "open",
