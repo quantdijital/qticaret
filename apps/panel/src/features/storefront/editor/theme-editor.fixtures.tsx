@@ -103,7 +103,7 @@ export const DOC: LayoutDocument = {
       columns: 3,
       more: { kind: "system", target: "shop", label: null },
     },
-    { id: "blogyazilari", type: "posts", ...ALWAYS, title: null, limit: 3 },
+    { id: "blogyazilari", type: "posts", ...ALWAYS, title: null, limit: 3, variant: "grid" },
   ],
   footer: [
     {

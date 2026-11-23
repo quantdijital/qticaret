@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next"
 import type { AnySection } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
-import { BANNER_LAYOUT_SETTINGS } from "./banner-groups"
+import { BANNER_LAYOUT_SETTINGS, bannerSettingsFor } from "./banner-groups"
 import { BannerSettings } from "./banner-settings"
+import { BannerEdgeField } from "./banner-split-fields"
 import { FeaturedGroups } from "./featured-groups"
 import { IconGroups } from "./icon-groups"
 import type { FieldGroupName } from "./field-registry"
@@ -59,7 +60,17 @@ export function SectionLayoutGroup({
   }
   return (
     <PanelGroup name="layout" title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
-      <BannerSettings section={section} settings={BANNER_LAYOUT_SETTINGS} onChange={onChange} />
+      <div className="flex flex-col gap-5">
+        <BannerSettings
+          section={section}
+          settings={bannerSettingsFor(section.variant, BANNER_LAYOUT_SETTINGS)}
+          onChange={onChange}
+        />
+        {/* The split's edge (adr/0077 Ek), beside its height */}
+        {section.variant === "split" ? (
+          <BannerEdgeField section={section} onChange={onChange} />
+        ) : null}
+      </div>
     </PanelGroup>
   )
 }

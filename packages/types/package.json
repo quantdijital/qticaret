@@ -22,6 +22,7 @@
     "./section-newsletter": "./src/store/section-newsletter.ts",
     "./section-rich-text": "./src/store/section-rich-text.ts",
     "./section-banner": "./src/store/section-banner.ts",
+    "./section-posts": "./src/store/section-posts.ts",
     "./section-catalog": "./src/store/section-catalog.ts",
     "./section-categories": "./src/store/section-categories.ts",
     "./section-footer": "./src/store/section-footer.ts",

@@ -32,6 +32,8 @@ describe("the picture band's settings (adr/0049 Ek 2026-11-14 §3.3 E2)", () => 
       ...band(),
       ...ALWAYS,
       ...BANNER_DEFAULTS,
+      // Today's band (adr/0077 Ek): the variants' default
+      variant: "standard",
       slides: [
         {
           image: WIDE,

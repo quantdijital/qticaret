@@ -124,7 +124,7 @@ describe("the theme's other boxes (adr/0067 step 4)", () => {
     // Graphite and the shop's colour turn those two tokens for the section inside
     const look = atolyeCss("look.css")
     for (const ground of ["stage", "primary"]) {
-      const tokens = find(look, `.gf-look[data-ground="${ground}"] > *`).body
+      const tokens = find(look, `:is(.gf-look, .gf-ground)[data-ground="${ground}"] > *`).body
       expect(tokens, ground).toMatch(/--color-paper: /)
       expect(tokens, ground).toMatch(/--color-rule: /)
     }

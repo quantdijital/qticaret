@@ -7,6 +7,7 @@ import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
 import { listProblems } from "./shelf-problems"
 import { stripGalleryProblems } from "./strip-problems"
 import { collageProblems, statsProblems, stepsProblems } from "./points-problems"
+import { postsProblems, splitEyebrowProblem } from "./band-problems"
 import { marqueeLimitIds } from "./page-limits"
 import { footerBandProblem, footerRowsProblems } from "./footer-rows-problems"
 import { allSections } from "./sections"
@@ -124,6 +125,8 @@ function fieldsOf(section: AnySection): Found[] {
     case "banner":
       return [
         ["slides", section.slides.length === 0 ? "slidesRequired" : null],
+        // The split's upper line (adr/0077 Ek)
+        ["eyebrow", section.variant === "split" ? splitEyebrowProblem(section) : null],
         ...section.slides.flatMap((slide, index): Found[] => {
           const at = `slides.${String(index)}`
           return [
@@ -224,8 +227,9 @@ function fieldsOf(section: AnySection): Found[] {
               : "imageRequired",
         ],
       ]
-    case "brands":
     case "posts":
+      return postsProblems(section)
+    case "brands":
     case "reviews":
     case "google_rating":
       return [["title", textProblem(section.title, L.title)]]

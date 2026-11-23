@@ -1,10 +1,5 @@
-import {
-  BANNER_SETTINGS,
-  HEADER_MENU_IMAGES,
-  HEADER_SEARCH_STYLES,
-  MARQUEE_SETTINGS,
-} from "@qticaret/types"
-import type { BannerSetting, MarqueeSetting, SectionLookField } from "@qticaret/types"
+import { HEADER_MENU_IMAGES, HEADER_SEARCH_STYLES, MARQUEE_SETTINGS } from "@qticaret/types"
+import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
 import type {
   AnySection,
   HeaderCatalogFields,
@@ -18,7 +13,7 @@ import { offeredVariants, offersVariants } from "@/features/storefront/layout/va
 import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
 import { cardFooterFields } from "./card-field-ids"
 import type { FooterPart } from "../footer-rows/footer-rows-fields"
-import { BANNER_GROUPS } from "./banner-groups"
+import { bannerFields, bannerSettingId } from "./banner-groups"
 import { CONTENT_IDS, contentFields } from "./content-registry"
 import { isFooterBand } from "./newsletter-band"
 import {
@@ -92,7 +87,6 @@ export interface RegistryField {
 const P = "storefront.editor.panel"
 const LOOK = "storefront.editor.look"
 const MARQUEE = "storefront.editor.marquee"
-const BANNER = "storefront.editor.banner"
 const HEADER = "storefront.editor.headerBar"
 
 /**
@@ -211,7 +205,7 @@ export const FIELD_IDS = {
   placement: (sectionId: string) => `${sectionId}-placement`,
   look: (sectionId: string, field: SectionLookField) => `${sectionId}-look-${field}`,
   marquee: (sectionId: string, setting: MarqueeSetting) => `${sectionId}-marquee-${setting}`,
-  banner: (sectionId: string, setting: BannerSetting) => `${sectionId}-banner-${setting}`,
+  banner: bannerSettingId,
   ...SHELF_IDS,
   ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
@@ -297,19 +291,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   fields.push(...cardFooterFields(section))
   // The band's basics open in "Diziliş", its width and buttons closed in "Diğer ayarlar"
   if (section.type === "banner") {
-    for (const [setting, steps] of Object.entries(BANNER_SETTINGS) as [
-      BannerSetting,
-      readonly string[],
-    ][]) {
-      fields.push({
-        key: `banner.${setting}`,
-        group: BANNER_GROUPS[setting],
-        label: `${BANNER}.${setting}.label`,
-        term: `${BANNER}.${setting}.term`,
-        options: steps.map((step) => `${BANNER}.${setting}.${step}`),
-        target: FIELD_IDS.banner(id, setting),
-      })
-    }
+    fields.push(...bannerFields(section))
   }
   if (section.type === "products") {
     fields.push(...shelfFields(section))

@@ -8800,6 +8800,14 @@
           "with_image": "Görselli metin",
           "article": "Sayfa metni"
         },
+        "posts": {
+          "grid": "Kutucuklar",
+          "intro_panel": "Tanıtım paneli"
+        },
+        "banner": {
+          "standard": "Görsel üstü yazı",
+          "split": "Bölünmüş bant"
+        },
         "reviews": {
           "grid": "Izgara",
           "carousel": "Kaydırıcı"
@@ -9053,6 +9061,15 @@
           "solid": "Dolu",
           "outline": "Çerçeveli",
           "text": "Yazı"
+        },
+        "eyebrowPlaceholder": "Örn. Özel fırsat",
+        "splitFirst": "Bölünmüş bant yalnız ilk görseli gösterir; diğerleri biçim değişince geri gelir.",
+        "edge": {
+          "label": "Geçiş",
+          "term": "edge",
+          "hint": "Görselin panele değdiği kenar.",
+          "straight": "Düz",
+          "curved": "Yuvarlak"
         }
       },
       "products": {
@@ -10894,6 +10911,13 @@
       "searchBox": {
         "titleHint": "Boş bırakılırsa kutu başlıksız görünür.",
         "intro": "Giriş"
+      },
+      "posts": {
+        "eyebrowPlaceholder": "Örn. İlham mı lazım?",
+        "intro": "Giriş",
+        "link": "Düğme",
+        "linkTerm": "button",
+        "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür."
       },
       "trustCard": {
         "lift": {

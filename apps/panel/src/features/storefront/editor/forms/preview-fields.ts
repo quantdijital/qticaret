@@ -170,6 +170,11 @@ function wordField(section: AnySection, word: string): PreviewField | null {
     // The steps' intro and their one link (adr/0077 §10)
     (section.type === "steps" && (word === "intro" || word === "link")) ||
     (section.type === "search_box" && word === "intro") ||
+    // The posts' intro panel's words and button, the split band's upper line (adr/0077 Ek)
+    (section.type === "posts" &&
+      section.variant === "intro_panel" &&
+      (word === "eyebrow" || word === "intro" || word === "link")) ||
+    (word === "eyebrow" && section.type === "banner" && section.variant === "split") ||
     (section.type === "photo_collage" && word === "intro") ||
     // The picture beside the text (adr/0073 §3), while the variant shows its field
     (word === "image" && section.type === "rich_text" && section.variant === "with_image") ||
