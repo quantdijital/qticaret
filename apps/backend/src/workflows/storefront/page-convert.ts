@@ -5,7 +5,8 @@ import {
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { releaseLockStep } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
 import { logger } from "../../lib/logging"
 import { convertPages } from "../../lib/storefront/page-text-convert"
 import type { ConversionCount } from "../../lib/storefront/page-text-convert"
@@ -123,7 +124,7 @@ const movePageTextsStep = createStep(
 /** The conversion under the design's and the content's locks, the storefront told after. */
 export const movePageTextsWorkflow = createWorkflow("storefront-move-page-texts", () => {
   const keys = [LAYOUT_LOCK.key, CONTENT_LOCK.key]
-  acquireLockStep({ ...LAYOUT_LOCK, key: keys })
+  acquireLocksStep({ ...LAYOUT_LOCK, key: keys })
   const moved = movePageTextsStep()
   releaseLockStep({ key: keys })
   refreshStorefrontStep(["layout"])

@@ -6,7 +6,8 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { releaseLockStep } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
 import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { planContentLinks } from "./link-plan"
 import type { LinkPlan, LinkRow, LinkScope } from "./link-plan"
@@ -65,7 +66,7 @@ export const rewriteContentLinksWorkflow = createWorkflow(
       // A plan with nothing to write still takes one lock of its own, never none
       return keys.length > 0 ? keys : ["content-links"]
     })
-    acquireLockStep({ key, timeout: 30, ttl: 300 })
+    acquireLocksStep({ key, timeout: 30, ttl: 300 })
     const layout = rewriteLayoutLinksStep(
       transform({ plan }, ({ plan }) => ({ ids: plan.writes.entries, next: plan.next }))
     )

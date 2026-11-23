@@ -6,7 +6,6 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import {
-  acquireLockStep,
   createRemoteLinkStep,
   dismissRemoteLinkStep,
   emitEventStep,
@@ -15,6 +14,7 @@ import {
   updateProductVariantsWorkflow,
   updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import { CATALOG_PRODUCT_SAVED } from "./events"
 import { planProductCatalogStep } from "./steps/plan-product-catalog"
@@ -40,7 +40,7 @@ export const setProductCatalogWorkflow = createWorkflow(
       `catalog:${input.product_id}`,
       ...(input.successor_product_id ? [SUCCESSOR_LOCK] : []),
     ])
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 30 })
+    acquireLocksStep({ key: lockKey, timeout: 10, ttl: 30 })
 
     const plan = planProductCatalogStep(input)
     const written = writeProductCatalogStep(plan)

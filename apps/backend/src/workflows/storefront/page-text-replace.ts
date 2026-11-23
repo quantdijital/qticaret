@@ -6,7 +6,8 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
 import { docStats } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
 import { readStoredLayout } from "../../lib/storefront/layout"
@@ -124,7 +125,7 @@ export const replacePageTextWorkflow = createWorkflow(
   "storefront-page-text-replace",
   (input: ReplacePageTextInput) => {
     const keys = [LAYOUT_LOCK.key, CONTENT_LOCK.key]
-    acquireLockStep({ ...LAYOUT_LOCK, key: keys })
+    acquireLocksStep({ ...LAYOUT_LOCK, key: keys })
     const checked = checkPageTextStep(input)
     const layout = replaceLayoutTextStep(
       transform({ checked }, ({ checked }) => ({ page_id: checked.page_id, doc: checked.doc }))
