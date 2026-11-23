@@ -12,6 +12,7 @@ import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
 import { AiPicks } from "@/features/ai/components/ai-picks"
 import { brandOptions, useSetProductBrand } from "@/features/brands/api/brands"
 import { collectionOptions } from "@/features/collections/api/collections"
+import { useCollectionsOn } from "@/features/collections/api/flag"
 import { findingsNote } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { useUpdateProduct } from "@/features/products/api/products"
@@ -60,6 +61,8 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
   const setBrand = useSetProductBrand(product.id)
+  // Collections off: the field is not offered; the product keeps the one it has
+  const collectionsOn = useCollectionsOn()
   const form = useForm<Values>({ defaultValues: savedOf(product) })
 
   const submit = form.handleSubmit(async (values) => {
@@ -165,28 +168,30 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
             )}
           />
         </Field>
-        <Field
-          label={t("collections.field")}
-          htmlFor="detail-collection"
-          hint={t("collections.fieldHint")}
-        >
-          <Controller
-            control={form.control}
-            name="collection"
-            render={({ field }) => (
-              <SearchPicker
-                id="detail-collection"
-                value={field.value}
-                onChange={field.onChange}
-                search={collectionOptions}
-                queryKey={["collections", "options"]}
-                placeholder={t("collections.pick")}
-                empty={t("collections.noneFound")}
-                inactiveNote={t("collections.inactive")}
-              />
-            )}
-          />
-        </Field>
+        {collectionsOn ? (
+          <Field
+            label={t("collections.field")}
+            htmlFor="detail-collection"
+            hint={t("collections.fieldHint")}
+          >
+            <Controller
+              control={form.control}
+              name="collection"
+              render={({ field }) => (
+                <SearchPicker
+                  id="detail-collection"
+                  value={field.value}
+                  onChange={field.onChange}
+                  search={collectionOptions}
+                  queryKey={["collections", "options"]}
+                  placeholder={t("collections.pick")}
+                  empty={t("collections.noneFound")}
+                  inactiveNote={t("collections.inactive")}
+                />
+              )}
+            />
+          </Field>
+        ) : null}
         <Field
           label={t("products.wizard.vat")}
           htmlFor="detail-vat"
@@ -225,6 +230,7 @@ export function OrganizeCard({
     setOpen(true)
   })
   const rates = useQuery(vatRatesQuery()).data
+  const collectionsOn = useCollectionsOn()
   const saved = savedOf(product)
   const rate = saved.type_id
     ? rates?.rates.find((each) => each.product_type_id === saved.type_id)
@@ -247,11 +253,15 @@ export function OrganizeCard({
           value: saved.brand?.label ?? t("products.sections.noBrand"),
           empty: !saved.brand,
         },
-        {
-          label: t("collections.field"),
-          value: saved.collection?.label ?? t("collections.none"),
-          empty: !saved.collection,
-        },
+        ...(collectionsOn
+          ? [
+              {
+                label: t("collections.field"),
+                value: saved.collection?.label ?? t("collections.none"),
+                empty: !saved.collection,
+              },
+            ]
+          : []),
         {
           label: t("products.tags.field"),
           value: tags.length > 0 ? someNames(tags, 3) : t("products.tags.none"),

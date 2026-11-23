@@ -762,6 +762,11 @@
             "label": "Product videos",
             "summary": "Uploaded videos and YouTube links on product pages.",
             "description": "Product pages show the videos the shop uploads and YouTube links. Uploads count toward the plan's storage limit."
+          },
+          "collections": {
+            "label": "Collections",
+            "summary": "Lists that gather products under a theme, each with its own page.",
+            "description": "Collections gather products under a theme (a summer selection, gift ideas); each has its own page and can be used in menus and storefront sections. Turned off, collection pages and links leave the storefront and no collection is deleted; turned back on, everything returns."
           }
         },
         "marketing": {
@@ -825,6 +830,13 @@
             "description": "Wholesalers are opened from the panel; signed in, they see products at their level’s or their own prices, without KDV, and order. Public prices do not change. Turned off, wholesalers see retail prices; their records and prices are kept."
           }
         }
+      },
+      "collectionsOff": {
+        "title": "Turn collections off?",
+        "description": "Collection pages and the collection links in menus and storefront sections go away. Collections are not deleted; turning them back on brings them all back.",
+        "confirm": "Turn collections off",
+        "live_one": "{{count}} collection page is live. Its address will answer 404 and may lose its search rankings.",
+        "live_other": "{{count}} collection pages are live. Their addresses will answer 404 and may lose their search rankings."
       }
     },
     "jobs": {
@@ -7348,6 +7360,10 @@
       "noMatch": "No product matches your search.",
       "removeOf": "{{name}}: take out of the collection",
       "removed": "Product taken out of the collection."
+    },
+    "gate": {
+      "off": "Collections are off in this shop. Your collections were not deleted; turn them on to manage them here again.",
+      "turnOn": "Go to features"
     }
   },
   "address": {

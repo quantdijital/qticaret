@@ -762,6 +762,11 @@
             "label": "Ürün videoları",
             "summary": "Ürün sayfalarında yüklenen videolar ve YouTube bağlantıları.",
             "description": "Ürün sayfalarında mağazanın yüklediği videolar ve YouTube bağlantıları gösterilir. Yüklenen videolar paketin depolama sınırından düşer."
+          },
+          "collections": {
+            "label": "Koleksiyonlar",
+            "summary": "Ürünleri bir tema altında toplayan, kendi sayfası olan listeler.",
+            "description": "Koleksiyonlar ürünleri bir tema altında toplar (yaz seçkisi, hediye fikirleri); her birinin kendi sayfası olur ve menülerde, vitrin bölümlerinde kullanılabilir. Kapatınca koleksiyon sayfaları ve bağlantıları vitrinden kalkar, koleksiyonlar silinmez; yeniden açınca her şey geri gelir."
           }
         },
         "marketing": {
@@ -825,6 +830,13 @@
             "description": "Panelden toptancı açılır; toptancı giriş yaptığında ürünleri toptan seviyesinin ya da kendine özel fiyatlarla, KDV hariç görür ve sipariş verir. Herkese açık fiyatlar değişmez. Kapatılırsa toptancılar perakende fiyat görür; kayıtları ve fiyatları silinmez."
           }
         }
+      },
+      "collectionsOff": {
+        "title": "Koleksiyonlar kapatılsın mı?",
+        "description": "Koleksiyon sayfaları, menülerdeki ve vitrin bölümlerindeki koleksiyon bağlantıları kalkar. Koleksiyonlar silinmez; yeniden açınca hepsi geri gelir.",
+        "confirm": "Koleksiyonları kapat",
+        "live_one": "{{count}} koleksiyon sayfası yayında. Adresleri 404 olur; arama motorlarındaki sıralamalarını kaybedebilir.",
+        "live_other": "{{count}} koleksiyon sayfası yayında. Adresleri 404 olur; arama motorlarındaki sıralamalarını kaybedebilir."
       }
     },
     "jobs": {
@@ -7348,6 +7360,10 @@
       "noMatch": "Aramanızla eşleşen ürün yok.",
       "removeOf": "{{name}}: koleksiyondan çıkar",
       "removed": "Ürün koleksiyondan çıkarıldı."
+    },
+    "gate": {
+      "off": "Koleksiyonlar bu mağazada kapalı. Koleksiyonlarınız silinmedi; açınca burada yeniden yönetilir.",
+      "turnOn": "Özelliklere git"
     }
   },
   "address": {

@@ -4,6 +4,7 @@ import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
 import { useDiscardGuard } from "@qticaret/admin-ui/patterns/use-discard-guard"
 import { DialogBody, DialogSection } from "@qticaret/admin-ui/ui/dialog"
 import { STRIP_GALLERY_LIMITS } from "@qticaret/types"
+import { offeredKinds, useCollectionsOn } from "@/features/collections/api/flag"
 import type { StripItem, StripGallerySection } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { sectionProblems } from "@/features/storefront/layout/problems"
@@ -56,6 +57,8 @@ export function StripItemDialog({
   const dirty = Boolean(saved && item && !same(saved, item))
   const guard = useDiscardGuard(dirty)
   const { kind } = item?.source ?? { kind: "custom" }
+  // Collections off: not offered as an item's source; an item already on one keeps it
+  const collectionsOn = useCollectionsOn()
   const target = item ? targetOf(item) : null
   const names = useRecordNames(kind === "custom" ? "product" : kind, target ? [target] : [])
   if (!saved || !item) {
@@ -118,7 +121,7 @@ export function StripItemDialog({
             label={t(`${G}.kind`)}
             hint={t(`${G}.kindHint`)}
             value={kind}
-            options={STRIP_SOURCE_KINDS.map((value) => ({
+            options={offeredKinds(STRIP_SOURCE_KINDS, collectionsOn, kind).map((value) => ({
               value,
               label: t(`${G}.kinds.${value}`),
             }))}

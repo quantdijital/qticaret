@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { Capability } from "@/features/auth/api/staff"
+import { COLLECTIONS_FLAG } from "@/features/collections/paths"
 import { WHOLESALE_FLAG } from "@/features/wholesale/api/types"
 
 /**
@@ -88,7 +89,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { key: "products", to: "/products", icon: Package },
       { key: "categories", to: "/categories", icon: FolderTree },
       { key: "brands", to: "/brands", icon: Tag },
-      { key: "collections", to: "/collections", icon: Layers },
+      // While the shop has collections on (on by default; Ayarlar > Özellikler)
+      { key: "collections", to: "/collections", icon: Layers, feature: COLLECTIONS_FLAG },
       { key: "inventory", to: "/inventory", icon: Warehouse },
     ],
   },

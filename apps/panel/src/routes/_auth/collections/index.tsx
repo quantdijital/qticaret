@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
+import { CollectionsGate } from "@/features/collections/components/collections-gate"
 import { CollectionsPage } from "@/features/collections/pages/collections-page"
 
 /** `/collections?q=yaz&page=2` (1-based in the URL). */
@@ -10,5 +11,10 @@ const collectionsSearchSchema = z.object({
 
 export const Route = createFileRoute("/_auth/collections/")({
   validateSearch: collectionsSearchSchema,
-  component: CollectionsPage,
+  // `catalog.collections` off: the "kapalı" state, not the list (the records are kept)
+  component: () => (
+    <CollectionsGate>
+      <CollectionsPage />
+    </CollectionsGate>
+  ),
 })

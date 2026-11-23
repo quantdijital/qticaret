@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { offeredKinds, useCollectionsOn } from "@/features/collections/api/flag"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type { ProductSource } from "@/features/storefront/api/layout"
 import { BEST_SELLER_DAYS } from "@/features/storefront/api/layout"
@@ -33,6 +34,8 @@ export function ProductSourceField({
   onChange: (source: ProductSource, field?: string) => void
 }) {
   const { t } = useTranslation()
+  // Collections off: not offered as a source; a list already on one keeps it in sight
+  const collectionsOn = useCollectionsOn()
   return (
     <>
       <Field label={t(`${P}.source`)} term={t(`${P}.sourceTerm`)}>
@@ -46,7 +49,7 @@ export function ProductSourceField({
             }
           }}
         >
-          {SOURCE_KINDS.map((kind) => (
+          {offeredKinds(SOURCE_KINDS, collectionsOn, source.kind).map((kind) => (
             <label key={kind} className="flex items-center gap-2 text-sm">
               <RadioGroupItem value={kind} />
               {t(`${P}.sources.${kind}`)}

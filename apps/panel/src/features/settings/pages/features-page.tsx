@@ -10,6 +10,8 @@ import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import type { FeatureState } from "@/features/settings/api/features"
 import { featuresQuery, useSetFeature } from "@/features/settings/api/features"
+import { COLLECTIONS_FLAG } from "@/features/collections/paths"
+import { CollectionsOffConfirm } from "@/features/settings/components/collections-off-confirm"
 import { FeatureRow } from "@/features/settings/components/feature-row"
 import type { FeatureGroup } from "@/features/settings/feature-groups"
 import {
@@ -35,6 +37,17 @@ export function FeaturesPage() {
   const toggle = useSetFeature()
   const textOf = useFeatureText()
   const [search, setSearch] = useState("")
+  const [confirmOff, setConfirmOff] = useState(false)
+
+  const save = (key: string, enabled: boolean) => {
+    toggle.mutate(
+      { key, enabled },
+      {
+        onSuccess: () => toast.success(t("settings.saved")),
+        onError: (failure) => toast.error(errorText(t, failure)),
+      }
+    )
+  }
 
   const features = query.data ?? []
   const shown = search
@@ -69,13 +82,12 @@ export function FeaturesPage() {
             requires={requiresOf(feature)}
             busy={toggle.isPending}
             onToggle={(enabled) => {
-              toggle.mutate(
-                { key: feature.key, enabled },
-                {
-                  onSuccess: () => toast.success(t("settings.saved")),
-                  onError: (failure) => toast.error(errorText(t, failure)),
-                }
-              )
+              // Collections off takes their pages offline: asked first (a warning, not a block)
+              if (feature.key === COLLECTIONS_FLAG && !enabled) {
+                setConfirmOff(true)
+                return
+              }
+              save(feature.key, enabled)
             }}
           />
         ))}
@@ -120,6 +132,17 @@ export function FeaturesPage() {
         // A search that leaves one column: its cards take the whole width
         <div className="flex flex-col gap-[var(--grid-gap)]">{groups.map(card)}</div>
       )}
+      {confirmOff ? (
+        <CollectionsOffConfirm
+          onConfirm={() => {
+            setConfirmOff(false)
+            save(COLLECTIONS_FLAG, false)
+          }}
+          onCancel={() => {
+            setConfirmOff(false)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

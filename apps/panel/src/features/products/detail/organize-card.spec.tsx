@@ -105,6 +105,32 @@ describe("OrganizeCard's collection", () => {
     })
   })
 
+  it("offers no collection, on its line or in the dialog, while the shop has collections off", async () => {
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(
+        url === "/admin/features"
+          ? {
+              features: [
+                { key: "catalog.collections", default: true, owner: "tenant", enabled: false },
+              ],
+            }
+          : url === "/admin/ai/services"
+            ? { services: [], tasks: [], flags: { own_keys: true } }
+            : { rates: [], default: null }
+      )
+    )
+    renderCard()
+
+    await waitFor(() => {
+      expect(screen.queryByText("Yaz Seçkisi")).toBeNull()
+    })
+    expect(screen.queryByText("Koleksiyon")).toBeNull()
+    await userEvent.click(screen.getByRole("button", { name: /düzenle/i }))
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).queryByTestId("detail-collection-value")).toBeNull()
+    expect(within(dialog).getByTestId("detail-brand-value")).toBeInTheDocument()
+  })
+
   it("takes the product out of its collection", async () => {
     renderCard()
 
