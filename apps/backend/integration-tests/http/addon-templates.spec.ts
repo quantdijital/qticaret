@@ -1,7 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import ProductAddonTemplateLink from "../../src/links/product-addon-template"
 import { createAdminUser } from "../helpers/admin"
 import { BANK_TRANSFER, orderLines } from "../helpers/gift-sale"
 import type { HttpClient } from "../helpers/http"
@@ -16,6 +15,13 @@ import type { Storefront } from "../helpers/storefront"
 import { loadTrAddressFixture } from "../helpers/tr-address"
 
 jest.setTimeout(240 * 1000)
+
+/**
+ * The product ↔ add-on template link's entry point (`links/product-addon-template.ts`),
+ * named here: importing a link definition outside the app evaluates it before its
+ * modules' linkables exist.
+ */
+const PRODUCT_ADDON_TEMPLATE_LINK = "product_addon_template"
 
 type Answer = { message?: string } & Record<string, unknown>
 interface Addon {
@@ -413,7 +419,7 @@ medusaIntegrationTestRunner({
       const { data } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
         .graph({
-          entity: ProductAddonTemplateLink.entryPoint,
+          entity: PRODUCT_ADDON_TEMPLATE_LINK,
           fields: ["product_id", "addon_template_id"],
           filters: { addon_template_id: template.id },
         })

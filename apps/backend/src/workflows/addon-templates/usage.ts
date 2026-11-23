@@ -3,13 +3,20 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { growsPastLimit } from "../../lib/catalog/addons"
 import type { AddonSources, AddonTemplateSource } from "../../lib/catalog/addons"
 import { ValidationError } from "../../lib/errors"
-import ProductAddonTemplateLink from "../../links/product-addon-template"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { PRODUCT_ADDONS } from "../../modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { addonSourcesAmong, carriedIdsOf } from "../addons/effective"
 
 type Container = Pick<MedusaContainer, "resolve">
+
+/**
+ * The product ↔ add-on template link's entry point (`links/product-addon-template.ts`:
+ * Medusa names it `<product alias>_<addon template alias>`). Named, not imported: a
+ * link definition evaluated before its modules load (a spec importing a workflow)
+ * finds their linkables undefined.
+ */
+export const PRODUCT_ADDON_TEMPLATE_LINK = "product_addon_template"
 
 /**
  * Who uses an add-on template (adr/0052 Ek 2026-11-23), and whether a
@@ -78,7 +85,7 @@ export async function productLinksOf(
     return []
   }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: ProductAddonTemplateLink.entryPoint,
+    entity: PRODUCT_ADDON_TEMPLATE_LINK,
     fields: ["product_id", "addon_template_id"],
     filters: { addon_template_id: [...templateIds] },
   })
