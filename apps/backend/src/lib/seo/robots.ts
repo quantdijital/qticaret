@@ -1,4 +1,4 @@
-import { facetDisallowLines } from "./facets"
+import { facetDisallowLines } from "./facets-robots"
 
 /**
  * robots.txt (docs/13 §6, §7, §9): the shop's own template with the

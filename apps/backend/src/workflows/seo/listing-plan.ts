@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { LISTING_PAGE_SIZE, LISTING_PARAMS } from "../../lib/seo/facets"
 import type { ListingQuery } from "../../lib/seo/facets"
 import { CONTENT_MODULE } from "../../modules/content"
@@ -30,6 +31,24 @@ export interface Listed {
 
 const subtree = async (container: MedusaContainer, categoryId: string) =>
   subtreeIn(await categoryRows(container), categoryId, true)
+
+/**
+ * A search's `kategori` (adr/0077 §2): the shown category with that
+ * handle and its shown subtree; an empty list when none is shown by it
+ * (the search then lists nothing).
+ */
+export async function categorySubtreeByHandle(
+  container: MedusaContainer,
+  handle: string
+): Promise<string[]> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "product_category",
+    fields: ["id"],
+    filters: { handle, is_active: true, is_internal: false },
+  })
+  const found = (data as { id: string }[])[0]
+  return found ? subtree(container, found.id) : []
+}
 
 /** What the listing lists before its filters; null for a listing gone since or none known. */
 export async function listingScope(
@@ -86,6 +105,8 @@ const SORTS: Record<NonNullable<ListingQuery["sort"]>, ListingPlan["sort"]> = {
   yeni: "newest",
   "fiyat-artan": "price_asc",
   "fiyat-azalan": "price_desc",
+  // The nearest departure first (adr/0077 §2): the ids come in that order from the booking module
+  kalkis: "ids_order",
 }
 
 /** The query's sort; none chosen is relevance for a search, the newest first for a listing. */

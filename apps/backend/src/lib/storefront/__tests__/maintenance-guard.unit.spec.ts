@@ -49,6 +49,8 @@ const OWN_STORE_WRITES: Readonly<Record<string, "closed" | "open">> = {
   "POST /store/products/:id/questions": "closed",
   "POST /store/products/:id/reviews": "closed",
   "POST /store/products/:id/reviews/photos": "closed",
+  // adr/0077 §7: a call at the shop's cost; a dark shop searches nothing
+  "POST /store/search/interpret": "closed",
   "POST /store/seo/not-found": "open",
   "POST /store/stock-alerts": "closed",
   "POST /store/stock-alerts/confirm": "open",

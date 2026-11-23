@@ -218,7 +218,36 @@ export interface StoreCardFacts {
     currency_code: string
     next_departure: string | null
     timezone: string
+    /**
+     * Only when the card was asked for a date search's dates (adr/0077
+     * §4): the places left on `next_departure` (null without one), and
+     * `in_range`: the departure and the from price are those inside the
+     * dates asked. Absent otherwise, and from a backend before it.
+     */
+    left?: number | null
+    in_range?: true
+    /**
+     * Its length in whole days, from its public tour length attribute (a
+     * sector pack's "Süre", adr/0077 Ek "tur kartı"); absent without one,
+     * and from a backend before it.
+     */
+    duration_days?: number
   }
+}
+
+/**
+ * `GET /store/departures/calendar?month=YYYY-MM[&kategori=][&kisi=]`
+ * (adr/0077 §6), only while the shop sells dated products: each local day
+ * of the month (the product's zone) with a departure a date search would
+ * match, how many, and the lowest paying price over them (a guest's, in
+ * lira as the card's `from_price`: 1750.5; each departure's difference
+ * added; null when none has a price). Lira only. Days without one are
+ * left out.
+ */
+export interface StoreDepartureCalendar {
+  month: string
+  currency: "try"
+  days: { date: string; from_price: number | null; departures: number }[]
 }
 
 export interface StoreProduct {

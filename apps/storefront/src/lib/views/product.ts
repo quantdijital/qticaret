@@ -1,5 +1,6 @@
 import type {
   BreadcrumbView,
+  CardLookView,
   CardShownView,
   CardVariant,
   InstallmentSummaryView,
@@ -10,6 +11,7 @@ import type {
 } from "@qticaret/ui"
 import type { CardQuickViewTrigger, PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
 import { framedCard, type FramedCardOptions } from "./card-framed"
+import { cardLook } from "./card-look"
 import { cardShown } from "./card-shown"
 import { productImages, variantImages } from "./image"
 import { cardPrice, isAvailable, isVatExclusive, shownAmount, variantPrice } from "./price"
@@ -36,6 +38,8 @@ export interface CardOptions {
   shown?: CardShownView
   /** The quick view button's look while the shop has it on (adr/0049 Ek 2026-11-15); none: no button. */
   quickView?: CardQuickViewTrigger | null
+  /** The tour card's look (adr/0077 Ek "tur kartı"); none: today's card. */
+  look?: CardLookView
 }
 
 // Without the shop's settings: the brand as ever, no stars (the setting's own default)
@@ -59,6 +63,7 @@ export function productCard(
   const variant = options.variant ?? "standard"
   const framed = framedCard(variant, product, displays, options.framed ?? NO_FRAMED_EXTRAS)
   const shown = cardShown(options.shown)
+  const look = cardLook(options.look)
   const images = productImages(product)
   // The second photo only beside a first one (one photo: no swap)
   const second = options.hoverImage && images[0] ? (images[1] ?? null) : null
@@ -75,6 +80,7 @@ export function productCard(
     ...(framed ? { variant, framed } : variant === "compact" ? { variant } : {}),
     ...(shown ? { shown } : {}),
     ...(options.quickView ? { quickView: options.quickView } : {}),
+    ...(look ? { look } : {}),
   }
 }
 

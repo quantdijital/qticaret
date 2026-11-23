@@ -7,7 +7,9 @@ import { isCleanText } from "../../../lib/security/text"
  * region and currency, and in `query` the listing's own query string as
  * on its page (`marka`, attribute keys, `fiyat`, `sirala`, `sayfa`), read
  * by the listing's rules (docs/13 §7). A site search (`type=search`) names
- * no `id`: its `q` is what the shopper typed.
+ * no `id`: its `q` is what the shopper typed. A search without `q` is
+ * one by dates or category (adr/0077 §2): the route asks its query holds
+ * one, else it is refused as an empty search was.
  */
 export const StoreGetListingProducts = z
   .object({
@@ -41,7 +43,7 @@ export const StoreGetListingProducts = z
   .superRefine((value, ctx) => {
     if (value.type === "search") {
       // Punctuation alone is no search either
-      if (value.q === undefined || queryWords(value.q).length === 0) {
+      if (value.q !== undefined && queryWords(value.q).length === 0) {
         ctx.addIssue({ code: "custom", path: ["q"], message: "listing.search_query_invalid" })
       }
       return

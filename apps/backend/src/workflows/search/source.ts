@@ -5,6 +5,7 @@ import { searchFields } from "../../lib/search/document"
 import type { DocumentInput } from "../../modules/search-index/types"
 import { textOf } from "../seo/highlight"
 import type { HighlightValue } from "../seo/highlight"
+import { paxOf } from "../../lib/booking/cart-lines"
 import { indexedPrices } from "./prices"
 
 /**
@@ -36,6 +37,9 @@ export const SOURCE_FIELDS = [
   "brand.handle",
   // adr/0055 Ek 2026-11-06: the short description, below the title
   "product_extension.summary_doc",
+  // adr/0077 §5: a dated product's price is its paying categories' lowest
+  "product_extension.booking_mode",
+  "bookable.pax_by_variant",
   "attribute_values.value_text",
   "attribute_values.value_number",
   "attribute_values.value_boolean",
@@ -98,11 +102,28 @@ export interface ProductSource {
     Maybe<HighlightValue & { definition?: Maybe<{ key?: Maybe<string> }> }>[]
   >
   variants?: Maybe<Maybe<Variant>[]>
-  product_extension?: Maybe<{ summary_doc?: unknown }>
+  product_extension?: Maybe<{ summary_doc?: unknown; booking_mode?: Maybe<string> }>
+  bookable?: Maybe<{ pax_by_variant?: unknown }>
 }
 
 const present = <T>(values: Maybe<Maybe<T>[]>): T[] =>
   (values ?? []).filter((value): value is T => value !== null && value !== undefined)
+
+/**
+ * The variants a product's indexed price is the lowest of: all of them,
+ * but a dated product's only those that take a place (an infant who
+ * takes none is no "from" price, adr/0077 §5), unless none does. The
+ * card prices a date search's departures; a seasonal difference between
+ * the two is a known limit (adr/0077 §5).
+ */
+export function pricedVariantIds(product: ProductSource): string[] {
+  const ids = present(product.variants).flatMap((variant) => (variant.id ? [variant.id] : []))
+  if (product.product_extension?.booking_mode !== "departure") {
+    return ids
+  }
+  const paying = ids.filter((id) => paxOf(product.bookable?.pax_by_variant, id) > 0)
+  return paying.length > 0 ? paying : ids
+}
 
 const texts = (values: readonly Maybe<string>[]): string[] =>
   values.filter((value): value is string => typeof value === "string" && value.trim() !== "")
@@ -226,7 +247,7 @@ export async function readSearchDocuments(
     products.map((product) => ({
       id: product.id,
       published: product.status === "published",
-      variant_ids: present(product.variants).flatMap((variant) => (variant.id ? [variant.id] : [])),
+      variant_ids: pricedVariantIds(product),
     }))
   )
   const found = new Set(products.map((product) => product.id))

@@ -45,6 +45,9 @@ export interface PendingClaim {
   version: string
 }
 
+/** The most ids an `idsOnly` plan answers (adr/0077 §6). */
+export const IDS_ONLY_LIMIT = 1000
+
 /** What a listing or a search asks of the index (built by the listing workflow). */
 export interface ListingPlan {
   /** The shopper's sales channels; null counts every channel (a listing's resolve). */
@@ -73,10 +76,18 @@ export interface ListingPlan {
     in_stock: boolean
   }
   price: { key: string; min: number | null; max: number | null }
-  sort: "relevance" | "newest" | "price_asc" | "price_desc"
+  /** `ids_order`: in `order_ids`' order (a date search's departures), the others after, newest first. */
+  sort: "relevance" | "newest" | "price_asc" | "price_desc" | "ids_order"
+  /** The order `ids_order` follows. */
+  order_ids?: string[]
   page: { offset: number; limit: number }
   /** Only the count (a listing's resolve, a page past the last). */
   countOnly?: boolean
+  /**
+   * Only the count and the ids, no facets (a departure calendar's scope,
+   * adr/0077 §6); the page at most IDS_ONLY_LIMIT long.
+   */
+  idsOnly?: true
   /** Related chips from the first this many hits by relevance (search). */
   related?: number
 }

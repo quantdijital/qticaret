@@ -1,7 +1,12 @@
 import { z } from "@medusajs/framework/zod"
 import { AA_LARGE_TEXT, contrastRatio } from "../../../lib/color/contrast"
 import { defineSection, isPlainObject } from "./define"
-import { PRODUCT_CARD_VARIANTS, productCardSchema, upgradeCard } from "./theme-card"
+import {
+  PRODUCT_CARD_DEFAULTS,
+  PRODUCT_CARD_VARIANTS,
+  productCardSchema,
+  upgradeCard,
+} from "./theme-card"
 import type { ProductCardSettings } from "./theme-card"
 import {
   LISTING_TEXT_DEFAULTS,
@@ -18,6 +23,7 @@ export {
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
+  CARD_TEXT_POSITIONS,
   PRODUCT_CARD_VARIANTS,
   upgradeCard,
 } from "./theme-card"
@@ -166,26 +172,7 @@ const GRAFIT: ThemeSettings = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: {
-    ratio: "1:1",
-    show_brand: true,
-    show_rating: false,
-    variant: "standard",
-    hover_image: true,
-    delivery_note: true,
-    full_button: true,
-    sale_badge: true,
-    low_stock_badge: true,
-    sold_out_badge: true,
-    sold_out_row: "price",
-    no_reviews: "hide",
-    button_style: "outline",
-    quick_view: false,
-    quick_view_trigger: "hover",
-    quick_view_rating: true,
-    quick_view_summary: true,
-    quick_view_quantity: true,
-  },
+  product_card: PRODUCT_CARD_DEFAULTS,
   header: { layout: "left", sticky: true },
   buttons: "pill",
   section_spacing: "normal",

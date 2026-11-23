@@ -1,10 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, getVariantAvailability } from "@medusajs/framework/utils"
+import { durationDaysOf } from "../../lib/booking/duration"
+import type { DurationAttributeRow } from "../../lib/booking/duration"
 import { storedAddonsOf } from "../../lib/catalog/addons"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { CATALOG_BOOKING, PRODUCT_ADDONS } from "../../modules/platform-settings/features"
 import { bookingCardFacts } from "../booking/card-facts"
-import type { BookingCardFact, DatedCardProduct } from "../booking/card-facts"
+import type { BookingCardFact, CardWindow, DatedCardProduct } from "../booking/card-facts"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
@@ -49,15 +51,27 @@ interface ProductRow {
     booking_mode?: string | null
   } | null
   bookable?: DatedCardProduct["bookable"]
+  attribute_values?: (DurationAttributeRow | null)[] | null
 }
 
-// A dated product's booking settings, read only while the shop sells them
+// A dated product's booking settings and its length (adr/0077 Ek "tur kartı"), read only
+// while the shop sells them
 const BOOKABLE_FIELDS = [
   "bookable.id",
   "bookable.cutoff_hours",
   "bookable.pax_by_variant",
   "bookable.timezone",
+  "attribute_values.value_number",
+  "attribute_values.definition.key",
+  "attribute_values.definition.is_public",
+  "attribute_values.definition.type",
 ]
+
+/** A dated card's fact with the tour's length, when its attribute gives one. */
+function withDuration(booking: BookingCardFact, product: ProductRow): BookingCardFact {
+  const days = durationDaysOf(product.attribute_values)
+  return days === null ? booking : { ...booking, duration_days: days }
+}
 
 /** A product's stock as the card says it: units summed over the variants that keep count. */
 export function stockBucketOf(
@@ -126,6 +140,8 @@ export async function cardFacts(
     product_ids: readonly string[]
     sales_channel_ids: readonly string[]
     region_id?: string | undefined
+    /** A date search's dates and party (adr/0077 §4); read only while the shop sells dated products. */
+    window?: CardWindow | undefined
   }
 ): Promise<Record<string, CardFacts>> {
   const ids = [...new Set(input.product_ids)]
@@ -178,7 +194,7 @@ export async function cardFacts(
   const [availability, dated] = await Promise.all([
     stockRead,
     bookingOn
-      ? bookingCardFacts(container, shown, input.region_id)
+      ? bookingCardFacts(container, shown, input.region_id, input.window)
       : new Map<string, BookingCardFact>(),
   ])
   const available = (variantId: string) => availability?.[variantId]?.availability ?? 0
@@ -193,7 +209,7 @@ export async function cardFacts(
           stock,
           quick_add: quickAddOf(product, stock, addonsOn),
           rating: ratings.get(product.id) ?? null,
-          ...(booking ? { booking } : {}),
+          ...(booking ? { booking: withDuration(booking, product) } : {}),
         },
       ]
     })

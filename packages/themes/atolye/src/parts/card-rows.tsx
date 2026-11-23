@@ -2,7 +2,7 @@ import { BellRing, PenLine } from "lucide-react"
 import type { CardShownView, ProductCardView, Translate } from "@qticaret/ui"
 import { REVIEWS_ID, STOCK_ALERT_ID } from "../product/anchors"
 import { BookingPriceRow } from "./card-booking"
-import { CardRating, isOut } from "./card-parts"
+import { CardRating, isOut, ratingBadged } from "./card-parts"
 import { Price } from "./Price"
 import { Stars } from "./Stars"
 
@@ -33,7 +33,8 @@ const OVER = "relative z-(--z-raised) font-semibold text-text underline underlin
  */
 export function CardStars({ product, t }: { product: ProductCardView; t: Translate }) {
   if (product.rating) {
-    return <CardRating rating={product.rating} />
+    // On the photo as a pill when the shop puts them there (adr/0077 Ek "tur kartı")
+    return ratingBadged(product) ? null : <CardRating rating={product.rating} />
   }
   const { noReviews } = shownOf(product)
   if (noReviews === "empty_stars") {

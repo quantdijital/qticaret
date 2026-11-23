@@ -89,4 +89,29 @@ describe("withCardFacts with a dated product", () => {
     expect(plain).not.toHaveProperty("booking")
     expect(plain?.price?.current).toBe("100,00 TL")
   })
+
+  // adr/0077 Ek "tur kartı": the tour's length in words, only while the shop shows it
+  it("says the tour's length only on a card whose look asks for it", () => {
+    const look = {
+      over: false,
+      ratingBadge: false,
+      arrow: false,
+      duration: true,
+      perPerson: false,
+    }
+    const facts = {
+      a: { stock: "in_stock" as const, quick_add: null, booking: { ...booking, duration_days: 5 } },
+    }
+    const [shown] = withCardFacts([card("a", { look })], facts, { showRating: false }, t)
+    const [hidden] = withCardFacts([card("a")], facts, { showRating: false }, t)
+    const [none] = withCardFacts(
+      [card("a", { look })],
+      { a: { stock: "in_stock", quick_add: null, booking } },
+      { showRating: false },
+      t
+    )
+    expect(shown?.booking?.duration).toBe("5 gün • 4 gece")
+    expect(hidden?.booking).not.toHaveProperty("duration")
+    expect(none?.booking).not.toHaveProperty("duration")
+  })
 })

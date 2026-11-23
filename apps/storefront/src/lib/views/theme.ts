@@ -9,6 +9,7 @@ import {
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_NO_REVIEWS,
   CARD_SOLD_OUT_ROWS,
+  CARD_TEXT_POSITIONS,
   RADIUS_STEPS,
   SECTION_SPACINGS,
   SURFACE_STYLES,
@@ -57,6 +58,11 @@ export const DEFAULT_THEME: StoreThemeSettings = {
     quick_view_rating: true,
     quick_view_summary: true,
     quick_view_quantity: true,
+    text_position: "below",
+    rating_badge: false,
+    arrow: false,
+    duration_row: false,
+    per_person: false,
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",
@@ -153,6 +159,10 @@ const CARD_FLAGS = [
   "quick_view_rating",
   "quick_view_summary",
   "quick_view_quantity",
+  "rating_badge",
+  "arrow",
+  "duration_row",
+  "per_person",
 ] as const
 
 /**
@@ -235,6 +245,11 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
         at(raw, "product_card", "quick_view_trigger"),
         CARD_QUICK_VIEW_TRIGGERS,
         d.product_card.quick_view_trigger
+      ),
+      text_position: oneOf(
+        at(raw, "product_card", "text_position"),
+        CARD_TEXT_POSITIONS,
+        d.product_card.text_position
       ),
     },
     header: {

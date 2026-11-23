@@ -76,6 +76,14 @@ Fiyata göre sıralama ve fiyat süzgeci dizindeki fiyatı kullanır. Tarihli ü
 
 `GET /store/departures/calendar`: gün başına en düşük fiyat ve kalkış sayısı. Yalnız TL. 60 saniye önbellek, hız sınırı, `catalog.booking` bayrağı. Tek istekte bakılan ürün kümesi en çok 1000 ile sınırlıdır (`ListingPlan.idsOnly`). Vitrinde takvim "Kesin tarih / Esnek ay" sekmeli, günün altında fiyatla; kodu yalnız takvim açılınca yüklenir.
 
+**Uygulama notu (PR4, takvim backend'i).** `GET /store/departures/calendar?month=YYYY-MM[&kategori=<handle>][&kisi=1..20]` → `{ month, currency: "try", days: [{ date, from_price, departures }] }`; kalkışı olmayan gün yazılmaz. `month` aramanın okuduğu aylardan biri olmalı (bu ay + 11, `facets-dated.ts`), değilse 400; bilinmeyen parametre 400.
+
+- **Akış** (`workflows/booking/calendar.ts`): ayda §3'e uyan ürünler (`departureMatches`, en yakın 1000) → arama dizininde kimlikle süzülür (`ListingPlan.idsOnly`: yalnız sayım + kimlik, sayfa en çok `IDS_ONLY_LIMIT` = 1000; yayımlanmış, alışverişçinin satış kanalı, `kategori` gösterilen alt ağacıyla) → yalnız hâlâ `booking_mode = departure` olanlar → tek SQL (`modules/booking/calendar.ts`: PR2'nin `windowStatement`'ı, `GROUP BY` yerel gün + bookable, gün başına kalkış sayısı ve ayrı fiyat farkı kümeleri; bütün değerler bağlı).
+- **Fiyat** kartın kuralıyla sunucuda: misafir taban fiyatı + kalkış farkı, yer tutan kategoriler (`card-facts.ts` `payingPricesAt`, `basePrices` ortak). Birim **kartın `from_price`'ı gibi lira** (1750.5), kuruş değil: vitrinin bütün fiyat alanları bu birimde.
+- Gün ürünün saat diliminde (`starts_at AT TIME ZONE timezone`); ay sınırı da öyle (PR2).
+- `catalog.booking` kapalı: 404 (`requireFeature`, ilk ara katman). Hız sınırı `departure_calendar`: IP başına dakikada 60. Süreç içi önbellek 60 sn; anahtar ay + kategori + kişi + satış kanalları. Yanıt `Cache-Control: no-store`.
+- Kapsam dışı (PR6 isterse): `q` ve nitelik süzgeci (ör. `gidilecek_yer`) takvimde yok; takvim kategori ve kişiyle daralır.
+
 ### 7. Doğal dille arama (isteğe bağlı üçüncü kat)
 
 "Kendi cümlenle ara": müşteri "ağustosta iki kişi Kapadokya" yazar, sunucu bunu §2'deki süzgeçlere çevirir.
@@ -88,6 +96,19 @@ Fiyata göre sıralama ve fiyat süzgeci dizindeki fiyatı kullanır. Tarihli ü
 - **adr/0071 §10 istisnası:** bu işte servise giden metin müşterinin yazdığı vitrin metnidir. Veri olarak gider (talimat sabit, metin ayrı veri bloğunda), `redactPersonalData`'dan geçer, **saklanmaz** (`ai_usage`'a metin yazılmaz; isteyen `"vitrin"` olarak kaydedilir). Kişisel veri isteyen bir alan yoktur.
 - Sınırlar: IP başına dakikada 5, günde 30; mağaza başına günde 500 (varsayılanlar; tavan ortam değişkeniyle, `.env.example`'a yazılır). Aynı metin için 24 saat önbellek. Kötüye kullanım görülürse challenge eklenebilir.
 - Uç `api/store/search/interpret`; PR'ı `security-reviewer`'dan geçer.
+
+**Uygulama notu (PR7, backend).** Uç `POST /store/search/interpret` `{ text }` (tek satıra indirilir, 1–200 karakter, denetim karakteri yok) → `{ query, understood: [{ kind, label, param, value }], dropped: [{ kind, reason }], fallback? }`. Kod: `lib/ai/search-intent/` (istem, okuma, yanıt, önbellek), `lib/ai/facts/search-lists.ts` (kapalı listeler), `workflows/ai/interpret-search.ts` ve `steps/search-intent.ts`, iş kaydı `lib/ai/registry/search-tasks.ts`.
+- **Bayrak kapalı → 404** (`requireFeature`, uç yokmuş gibi); anahtar yok, `ai.own_keys` kapalı, tavan dolu, servis düştü, çıktı şemaya uymadı ya da süzgeç boş kaldı → 200 `fallback: true`, `query: "q=<metin>"` (metin site aramasının okuduğu 100 karaktere kırpılır).
+- İş `search_intent` personel iş listesinde (`aiTasks()`) **yoktur**; rolü boştur, öneri ucu onu çalıştıramaz. Servis yalnız `own_key` olanlardan seçilir; tercih okunmaz (kişi yok).
+- **Günlük tavan ayrı sayaçtır** (`ai_daily_usage.limit_group = storefront_search`): personelin `text` tavanını ve aylık `llm_credits_per_month`'u tüketmez, onlardan da etkilenmez. `AI_STORE_SEARCH_DAILY_LIMIT` (varsayılan 500) platformun değeridir; diğer tavanlardan farklı olarak yükseltilebilir (anahtar mağazanın), 0 kapatır. Servis işi almadıysa talep geri verilir.
+- Hız sınırı iki profil: `ai_store_search` (adres başına dakikada 5), `ai_store_search_daily` (günde 30); gövde okunmadan önce. Challenge eklenmedi (kötüye kullanım görülürse `challengeOver` ile).
+- Çıktı: `.strict()` şema; tanınmayan alan bütün yanıtı reddeder. Her parça ayrı okunur: kategori yalnız gösterilen kategorilerin handle'ı; nitelik yalnız herkese açık, süzülebilir, URL'de okunan (ayrılmış adla çakışmayan) seçimli niteliğin değeri; `tarih`/`ay` `facets-dated` kurallarından (aralık aya üstün gelir); `kisi` 1–20; tarihli ürün kapalıysa tarih ve kişi `not_offered`. `q` yalnız müşterinin cümlesinde (ayıklanmış hâliyle) geçen sözcükleri tutar: model sözcük ekleyemez, ayıklanan kişisel veriyi geri getiremez. `dropped` yalnız tür ve neden taşır, modelin metnini taşımaz.
+- `understood` etiketleri mağazanın adlarıdır (kategori, nitelik değeri); tarih ve ay sunucuda `tr-TR` ile biçimlenir; `kisi` etiketi yalın sayıdır (vitrin çeviri anahtarıyla "N kişi" yazar).
+- Önbellek süreç belleğinde, anahtar "bugün + katlanmış cümle" (göreli tarih ertesi gün başka aralıktır), 24 saat, en çok 2000 kayıt; yalnız servisin verdiği yanıt tutulur. Zaman aşımı 8 sn (müşteri bekliyor). Kullanım satırında `requested_by = "vitrin"`, kayıt alanları boş; log satırı yalnız sayı ve kod, geri dönüşte yalnız neden kodu.
+- Bakımda (adr/0053) uç kapalıdır; askıdaki mağazada POST ile okuma (`read`) sayılır. Bayrağın panel anahtarı ve çevirisi PR9'da.
+- **KVKK, PR9 için zorunlu (güvenlik incelemesi O-1):** `redactPersonalData` kişi adını ve posta adresini ayıklamaz. Bu yüzden PR9 (a) arama kutusunun altında "kişisel bilgi yazmayın" ipucunu, (b) bayrak açılırken panelde sahibe uyarıyı (cümle yurt dışındaki servise, mağazanın kendi sözleşmesiyle gider; aydınlatma metnine satır eklenmeli) getirir; bayrak panelden bunlar olmadan açılmaz. Aydınlatma metni şablonuna (`lib/legal/starters/privacy-notice.ts` 6. madde ve taslak notu) satır bu PR'da eklendi.
+- Adresi okunamayan vitrin çağrısı (`isShopperAddressUnknown`, adr/0076 Ek D5) servise gitmez, hız sınırından önce düz aramaya döner: bütün bu müşteriler vitrinin tek adresini paylaşır. Önbellek anahtarı ayıklanmış ve katlanmış cümlenin anahtarlı özetidir (`PII_HASH_KEY`). Vitrin çağrıları kendi devre kesicisinde (`<servis>:storefront`) sayılır; personelin kesicisini açmaz.
+- **Takip:** çok adresten dağıtık tüketime karşı challenge eşiği (ör. günlük tavanın yarısı dolunca `challengeOver`); kötüye kullanım ölçülünce.
 
 ### 8. Bayrağa bağlı bölümler
 
@@ -137,6 +158,16 @@ Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; �
 - Yeni seçim niteliği **"Gidilecek yer"** (`gidilecek_yer`): filtrelenebilir; üründe tek değer, süzgeçte çoklu seçim. Arama kutusunun "nereye" alanı bunu kullanır.
 - Hazır görünüm **"Rota"** (`travel/presets/rota`): Hero `full_image` + arama → ürün kaydırıcısı "Popüler turlar" → `departures` → `stats` → `steps` → `reviews` carousel → `photo_collage` → e-bülten; alt bilgi `brand_columns` koyu zemin (`ground: stage`); başlık yazı tipi Playfair (mevcut `HEADING_FONTS`, yeni kod yok). Görseller Commons CC0 / CC BY.
 
+### Ek (2026-11-23): tur kartı görünümü ("Vadi" ve "Patika" için)
+
+İlham: Pomaii "Popular Destinations" (görsel üstü yazı, puan rozeti) ve Wanderly "Curated Just for You" (rozet, "5 gün • 4 gece", "kişi başı", ok). Biçim sözleşmesi gereği yeni biçim değil, tema düzeyindeki `product_card`'a **ayar** olarak geldi; hepsinin varsayılanı bugünkü kart, kilitli görünümlerin HTML'i değişmedi (yalnız `styles.lock.json`'da yeni `card-over.css` özeti).
+
+- `text_position`: `below` (bugünkü) | `over` ("Yazının yeri"). Yalnız standart kartta; çerçeveli ve kompakt kart kendi çizimini korur. `over`'da ad, alt satır ve fiyat (sağda) fotoğrafın altındaki grafit geçişin üstünde, sahnenin açık mürekkebiyle; yıldız satırı yok, puan rozet olarak çizilir; tek bağlantı adın bağlantısıdır ve bütün kartı kaplar. Bilinen sınır: bu düzende dokunmatik ekranda ikinci fotoğraf kaydırması bağlantının altında kalır (dokununca ürün açılır).
+- `rating_badge`: yıldızlar açıkken ortalama fotoğrafın sol üstünde "★ 4,8" rozeti olarak, yıldız satırı yerine. Kompakt kart satırını korur.
+- `arrow`: standart kartta (yazı altta) fiyat satırının sonunda yuvarlak ok; `aria-hidden`, bağlantı ya da düğme değil.
+- `duration_row` ve `per_person`: yalnız tarihli kartta (`booking`) çizilir; panelde yalnız `catalog.booking` açıkken görünür. Süre kart bilgisinde `booking.duration_days` olarak gelir: travel paketinin "Tur bilgileri" şablonundaki `sure` (sayı, gün) niteliğinden, herkese açık ve 1–365 tam sayıysa (`lib/booking/duration.ts` `DURATION_KEYS`, `MEETING_POINT_KEYS` deseni); yalnız bayrak açıkken okunur. Vitrin "5 gün • 4 gece" yazar; gece sayısı gün − 1 (varsayım: turun son günü dönüş), tek günlük tur "1 gün".
+- **Ürün rozeti ("Çok satan", "Yeni") bu ekte yok:** ürüne bağlı bir rozet/etiket verisi bugün yok (Medusa etiketleri vitrine okunmuyor, kartta etiket alanı yok). Yeni veri icat edilmedi; karar sahibin (öneri: ürün kataloğunda tek kısa "kart rozeti" metni ya da Medusa etiketlerinden biri, kartın sol üst rozet listesine eklenir).
+
 ### Varsayılanlar
 
 Tek "Kişi" alanı = yer sayısı; tur tipi = kategori; `search_box` ana sayfa ve içerik sayfalarına eklenebilir; takvim yalnız TL; doğal dil kapalı; arama kutusunun bütün alanları açık (mağaza tek tek kapatabilir).
@@ -165,7 +196,10 @@ Rezervasyon dosyalarına dokunan açık bir iş dalı (talep formu) varken PR2 v
 - **Güvenlik ve KVKK.** Doğal dil ucu herkese açık bir LLM kapısıdır: hız sınırı, günlük tavan, önbellek, gerekirse challenge; çıktı yalnız süzgeçtir, eylem tetiklemez; metin saklanmaz ve kullanım kaydına yazılmaz. adr/0071 §10'a istisna bu ADR'nin §7'sidir; bayrak varsayılan kapalı ve yalnız mağazanın kendi anahtarıyla.
 - **Biçim sözleşmesi.** Mevcut biçimler yerinde değişmez: Hero'ya yeni biçim, `reviews`'a yeni biçim (eski çizim `grid` adıyla aynen), kart alanları isteğe bağlı. Yeni Atölye CSS dosyaları `styles.lock.json`'u değiştirir; bilerek `pnpm lock:presets`, PR'a "HTML aynı, yalnız stil özeti". Paralel PR'larda kilit örnekleri çakışabilir: rebase sonrası kilit yeniden yazılır.
 - **Bilinen sınır.** Fiyat sıralaması dizin fiyatıyla, kart fiyatı aralıkla (§5).
+- **Bilinen sınır (takvim, §6).** Ayın en yakın 1000 ürünü, satış kanalı ve kategori süzgecinden **önce** seçilir; süzgeç sonra uygulanır. Sızıntı yoktur (başka kanalın ya da kategorinin ürünü hiç görünmez), ama ayda 1000'den çok tarihli ürünü olan mağazada takvim bazı günleri eksik gösterebilir.
 
 ## Açık
+
+- **Kart ürün rozeti verisi** ("Çok satan", "Yeni", tur kartı eki): veri kaynağı sahibin kararı.
 
 - **Tur programı verisi** (gün gün plan): biçim sahibin kararı; öneri tarihli üründe `itinerary` alanı (gün başlığı + metin). Karar gelene kadar bölüm yazılmaz.

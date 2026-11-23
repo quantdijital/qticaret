@@ -7,7 +7,7 @@ import {
   MedusaService,
   generateEntityId,
 } from "@medusajs/framework/utils"
-import type { AiLimitGroup } from "../../lib/ai/limits"
+import type { AiDailyGroup } from "../../lib/ai/limits"
 import { AiDailyUsage } from "./models/ai-daily-usage"
 import { AiPreference } from "./models/ai-preference"
 import { AiUsage } from "./models/ai-usage"
@@ -58,7 +58,7 @@ class AiModuleService extends MedusaService({ AiUsage, AiPreference, AiDailyUsag
    */
   @InjectTransactionManager()
   async claimDaily(
-    group: AiLimitGroup,
+    group: AiDailyGroup,
     limit: number,
     now: Date = new Date(),
     @MedusaContext() sharedContext: Context = {}
@@ -82,7 +82,7 @@ class AiModuleService extends MedusaService({ AiUsage, AiPreference, AiDailyUsag
   /** Gives back a call claimed on `day` (the call failed before the service took it). */
   @InjectTransactionManager()
   async releaseDaily(
-    group: AiLimitGroup,
+    group: AiDailyGroup,
     day: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
@@ -96,7 +96,7 @@ class AiModuleService extends MedusaService({ AiUsage, AiPreference, AiDailyUsag
   /** Calls of a group claimed today. */
   @InjectManager()
   async usedToday(
-    group: AiLimitGroup,
+    group: AiDailyGroup,
     now: Date = new Date(),
     @MedusaContext() sharedContext: Context = {}
   ): Promise<number> {

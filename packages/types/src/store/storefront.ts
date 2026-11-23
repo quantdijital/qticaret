@@ -146,6 +146,19 @@ export interface StoreThemeSettings extends StyleKit {
     quick_view_rating: boolean
     quick_view_summary: boolean
     quick_view_quantity: boolean
+    /**
+     * A standard card's words (adr/0077 Ek "tur kartı"): under the photo
+     * (today's) or over a dark fade on it (`CARD_TEXT_POSITIONS`).
+     */
+    text_position: CardTextPosition
+    /** The stars' average as a pill on the photo instead of the stars' row, while they are shown. */
+    rating_badge: boolean
+    /** A round arrow at a standard card's foot, for the eye only (the card keeps its one link). */
+    arrow: boolean
+    /** A dated product's length ("5 gün • 4 gece") from its tour length attribute, when it has one. */
+    duration_row: boolean
+    /** "kişi başı" after a dated product's price. */
+    per_person: boolean
   }
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
@@ -227,6 +240,14 @@ export type CardButtonStyle = (typeof CARD_BUTTON_STYLES)[number]
  */
 export const CARD_QUICK_VIEW_TRIGGERS = ["hover", "icon"] as const
 export type CardQuickViewTrigger = (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
+
+/**
+ * Where a standard card's words stand (adr/0077 Ek "tur kartı"): `below`
+ * the photo (today's card, the default), `over` it, on a dark fade at its
+ * foot, the price at the right. The framed and compact cards keep theirs.
+ */
+export const CARD_TEXT_POSITIONS = ["below", "over"] as const
+export type CardTextPosition = (typeof CARD_TEXT_POSITIONS)[number]
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
 export interface StorefrontAnswer {

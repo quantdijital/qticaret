@@ -4,17 +4,23 @@ import {
   LISTING_PARAMS,
   filterKeysOf,
   isNarrowed,
+  isReservedParam,
   listingSearch,
   readListingQuery,
   singleFilter,
 } from "../../lib/seo/facets"
-import type { ListingQuery } from "../../lib/seo/facets"
+import type { ListingQuery, ListingReadOptions } from "../../lib/seo/facets"
+import { DATED_PARAMS } from "../../lib/seo/facets-dated"
+import { logger } from "../../lib/logging"
 import { encodePath } from "../../lib/seo/redirects"
 import type { RequestPath } from "../../lib/seo/redirects"
 import { BRANDS_MODULE } from "../../modules/brands"
 import type BrandsModuleService from "../../modules/brands/service"
 import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
+import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import { CATALOG_BOOKING } from "../../modules/platform-settings/features"
+import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../modules/product-attributes/service"
 import { SEO_REDIRECTS_MODULE } from "../../modules/seo-redirects"
@@ -72,7 +78,15 @@ async function remembered<T>(
   return value
 }
 
-/** The attribute keys a listing's URL may filter by: filterable choice attributes'. */
+// Reserved names a filterable attribute already had, said once a process (adr/0077 §2)
+const reservedSaid = new Set<string>()
+
+/**
+ * The attribute keys a listing's URL may filter by: filterable choice
+ * attributes'. A key a later release reserved (`kategori`, `tarih`,
+ * `ay`, `kisi`, adr/0077 §2) is no filter any more; the shop is told in
+ * the log, and the attribute keeps its values and its page.
+ */
 export function listingFilterKeys(container: MedusaContainer): Promise<Set<string>> {
   return remembered(container, "keys", async () => {
     const definitions = await container
@@ -81,8 +95,26 @@ export function listingFilterKeys(container: MedusaContainer): Promise<Set<strin
         { is_filterable: true, type: ["select", "multi_select"] },
         { select: ["key"] }
       )
-    return filterKeysOf(definitions.map((definition) => definition.key))
+    const keys = definitions.map((definition) => definition.key)
+    for (const key of keys) {
+      if (isReservedParam(key) && !reservedSaid.has(key)) {
+        reservedSaid.add(key)
+        logger.warn({ event: "listing.filter_key_reserved", key })
+      }
+    }
+    return filterKeysOf(keys)
   })
+}
+
+/** How the shop reads a listing's query: dates and party only while it sells dated products. */
+export async function listingReadOptions(
+  container: MedusaContainer,
+  search = false
+): Promise<ListingReadOptions> {
+  const booking = await container
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .isFeatureEnabled(CATALOG_BOOKING)
+  return { booking, search }
 }
 
 async function brandIdsOf(container: MedusaContainer, handles: string[]): Promise<string[]> {
@@ -124,9 +156,15 @@ const listingLocation = (path: string, query: ListingQuery): string => {
 }
 
 /** Whether the query names anything a listing reads; utm and other parameters do not. */
+// `kategori` is a search's: on a listing page it is any other parameter
+const DATED_KEYS: readonly string[] = [DATED_PARAMS.dates, DATED_PARAMS.months, DATED_PARAMS.pax]
+
 const hasListingParams = (request: RequestPath, keys: ReadonlySet<string>): boolean =>
   [...request.query.keys()].some(
-    (key) => keys.has(key) || Object.values<string>(LISTING_PARAMS).includes(key)
+    (key) =>
+      keys.has(key) ||
+      Object.values<string>(LISTING_PARAMS).includes(key) ||
+      DATED_KEYS.includes(key)
   )
 
 /** The facts a canonical listing query needs from the database, remembered. */
@@ -164,7 +202,7 @@ export async function listingAnswer(
   if (!hasListingParams(request, keys)) {
     return { kind: "plain" }
   }
-  const read = readListingQuery(request.query, keys)
+  const read = readListingQuery(request.query, keys, await listingReadOptions(container))
   if (read.kind === "out_of_bounds") {
     return { kind: "not_found" }
   }

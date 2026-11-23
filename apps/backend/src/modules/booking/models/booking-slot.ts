@@ -22,7 +22,15 @@ export const BookingSlot = model
     status: model.enum([...SLOT_STATUSES]).default("open"),
     price_adjustments: model.json().nullable(),
   })
-  .indexes([{ on: ["bookable_id", "starts_at"] }])
+  .indexes([
+    { on: ["bookable_id", "starts_at"] },
+    // adr/0077: departures found by their dates across products (search, cards)
+    {
+      name: "IDX_booking_slot_open_starts_at",
+      on: ["starts_at"],
+      where: "status = 'open' AND deleted_at IS NULL",
+    },
+  ])
   .checks([
     { name: "booking_slot_counts_check", expression: "sold + held <= capacity" },
     { name: "booking_slot_nonnegative_check", expression: "sold >= 0 AND held >= 0" },

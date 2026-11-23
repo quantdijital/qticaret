@@ -9446,6 +9446,24 @@
         "quick_view_summaryHint": "The product's short description; without one, the description's first paragraph.",
         "quick_view_quantity": "Show the quantity field in the dialog",
         "quick_view_quantityHint": "While off, the dialog adds one.",
+        "tourCard": {
+          "title": "Tour card",
+          "words": "tour trip card badge rating arrow length days nights per person price text over photo",
+          "text_position": "Where the text stands",
+          "text_positionHint": "Over the photo: the name and price stand on a dark fade at the photo's foot. Standard cards only.",
+          "textPositions": {
+            "below": "Under the photo",
+            "over": "Over the photo"
+          },
+          "rating_badge": "Show the rating as a badge on the photo",
+          "rating_badgeHint": "The stars and average show in a small badge at the photo's top left instead of under the name. A product without reviews gets none.",
+          "arrow": "Show an arrow at the card's bottom right",
+          "arrowHint": "For looks only; the whole card still opens the product.",
+          "duration_row": "Show the tour's length",
+          "duration_rowHint": "A \"5 days • 4 nights\" row on a dated product, read from its Tour details' Length field; none when it is empty.",
+          "per_person": "Write \"per person\" after the price",
+          "per_personHint": "Only on a dated product."
+        },
         "cardVariant": "Card style",
         "cardVariants": {
           "standard": "Standard",

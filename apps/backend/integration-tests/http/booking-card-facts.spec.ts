@@ -174,5 +174,27 @@ medusaIntegrationTestRunner({
       })
       expect(odd.status).toBe(400)
     })
+
+    it("says a tour's length from its length attribute, and nothing without one (adr/0077 Ek)", async () => {
+      const { productId } = await tour([{ hours: 5 * 24, capacity: 4 }])
+      const bare = await tour([{ hours: 5 * 24, capacity: 4 }])
+      const template = await staff("/admin/attribute-templates", {
+        name: "Tur bilgileri",
+        handle: `tur-bilgileri-${String((made += 1))}`,
+        definitions: [{ key: "sure", label: "Süre", type: "number", unit: "gün" }],
+      })
+      expect(template.status).toBe(200)
+      const templateId = (template.data["attribute_template"] as { id: string }).id
+      const saved = await staff(`/admin/products/${productId}/attributes`, {
+        template_id: templateId,
+        values: { sure: 5 },
+      })
+      expect(saved.status).toBe(200)
+
+      const read = await facts([productId, bare.productId])
+
+      expect(read[productId]?.booking).toMatchObject({ duration_days: 5 })
+      expect(read[bare.productId]?.booking).not.toHaveProperty("duration_days")
+    })
   },
 })

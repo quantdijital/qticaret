@@ -4,6 +4,7 @@ import { PUBLISHED_QUESTIONS_FIELD } from "../product-faq"
 import { LINK_CHOICES_FIELD } from "../post-draft"
 import { CATEGORY_CHOICES_FIELD, TAG_CHOICES_FIELD } from "../facts/product-picks"
 import { FAKE_SERVICE } from "../registry/services"
+import { SEARCH_TEXT_FIELD } from "../search-intent/prompt"
 import { fakeCampaignAnswer } from "./fake-campaign"
 import type { TextConnector, TextRequest, TextResult } from "./types"
 
@@ -132,6 +133,18 @@ function nameOf(data: string): string {
   }
 }
 
+/** A storefront search's sentence (lib/ai/search-intent): the fake searches it as it is. */
+function searchTextOf(data: string): string | null {
+  try {
+    const block = JSON.parse(data) as unknown
+    const fields = isRecord(block) && isRecord(block["data"]) ? block["data"] : {}
+    const text = fields[SEARCH_TEXT_FIELD]
+    return typeof text === "string" ? text : null
+  } catch {
+    return null
+  }
+}
+
 /** A FAQ draft: three questions, each answered with the product's name, the same every time. */
 function fakeFaq(data: string): string {
   const name = nameOf(data)
@@ -183,6 +196,10 @@ function structuredAnswer(data: string): string {
     return JSON.stringify(
       Object.fromEntries(attributes.map((each) => [each.label, fakeValue(each.value)]))
     )
+  }
+  const sentence = searchTextOf(data)
+  if (sentence !== null) {
+    return JSON.stringify({ q: sentence })
   }
   if (itemsOf(data, LINK_CHOICES_FIELD) !== null) {
     return fakePostDraft(data)

@@ -83,7 +83,7 @@ export function withCardFacts(
     const rating = options.showRating ? cardRating(fact.rating, t) : null
     // A dated product's from price and next departure (adr/0076 §10); any other card as it was
     const read = {
-      ...withCardBooking(card, fact.booking),
+      ...withCardBooking(card, fact.booking, t),
       stock: fact.stock,
       quickAdd: quick ? { variantId: quick.variant_id } : null,
     }

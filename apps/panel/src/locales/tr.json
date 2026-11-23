@@ -9446,6 +9446,24 @@
         "quick_view_summaryHint": "Ürünün kısa açıklaması; yoksa açıklamanın ilk paragrafı.",
         "quick_view_quantity": "Pencerede adet seçiciyi göster",
         "quick_view_quantityHint": "Kapalıyken pencereden bir adet eklenir.",
+        "tourCard": {
+          "title": "Tur kartı",
+          "words": "tur gezi kart rozet puan ok süre gün gece kişi başı fiyat yazı görsel üstü",
+          "text_position": "Yazının yeri",
+          "text_positionHint": "Görsel üstünde: ürün adı ve fiyat fotoğrafın altındaki koyu geçişin üstünde durur. Yalnız standart kartta geçer.",
+          "textPositions": {
+            "below": "Görselin altında",
+            "over": "Görselin üstünde"
+          },
+          "rating_badge": "Puanı görselde rozet olarak göster",
+          "rating_badgeHint": "Yıldızlar ve ortalama, ad satırının altı yerine fotoğrafın sol üstünde küçük bir rozette görünür. Yorumu olmayan üründe rozet çıkmaz.",
+          "arrow": "Kartın sağ altında ok göster",
+          "arrowHint": "Yalnız görünüş içindir; kartın tamamı yine ürüne gider.",
+          "duration_row": "Tur süresini göster",
+          "duration_rowHint": "Tarihli üründe \"5 gün • 4 gece\" satırı. Süre, ürünün Tur bilgileri özelliklerindeki Süre alanından okunur; boşsa satır çıkmaz.",
+          "per_person": "Fiyatın yanına \"kişi başı\" yaz",
+          "per_personHint": "Yalnız tarihli üründe görünür."
+        },
         "cardVariant": "Kart biçimi",
         "cardVariants": {
           "standard": "Standart",

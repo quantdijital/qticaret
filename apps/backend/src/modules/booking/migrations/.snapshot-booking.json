@@ -1063,6 +1063,15 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_booking_slot_bookable_id_starts_at\" ON \"booking_slot\" (\"bookable_id\", \"starts_at\") WHERE deleted_at IS NULL"
         },
         {
+          "keyName": "IDX_booking_slot_open_starts_at",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_booking_slot_open_starts_at\" ON \"booking_slot\" (\"starts_at\") WHERE status = 'open' AND deleted_at IS NULL"
+        },
+        {
           "keyName": "booking_slot_pkey",
           "columnNames": ["id"],
           "composite": false,

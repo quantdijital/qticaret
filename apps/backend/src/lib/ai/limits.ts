@@ -40,6 +40,24 @@ export function dailyLimits(
   return { text: limit("text"), image: limit("image"), video: limit("video") }
 }
 
+/**
+ * The storefront's search intent (adr/0077 §7): shoppers' calls counted
+ * on their own, apart from the staff's `text`, so a busy shop front can
+ * neither use up the staff's day nor be stopped by it. Its ceiling is the
+ * platform's to set (`AI_STORE_SEARCH_DAILY_LIMIT`), 0 closing it.
+ */
+export const STOREFRONT_SEARCH_GROUP = "storefront_search"
+export const DEFAULT_STOREFRONT_SEARCH_LIMIT = 500
+
+/** A day's counter: a kind of staff work, or the storefront's search. */
+export type AiDailyGroup = AiLimitGroup | typeof STOREFRONT_SEARCH_GROUP
+
+/** The storefront search's ceiling in force: the platform's value, else the default. */
+export const storefrontSearchLimit = (value: number | undefined): number =>
+  value !== undefined && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : DEFAULT_STOREFRONT_SEARCH_LIMIT
+
 /** Whether one more call of this capability fits in the day. */
 export function withinDailyLimit(
   capability: AiCapability,

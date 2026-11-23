@@ -75,6 +75,12 @@ export const RATE_LIMIT_PROFILES = {
   // F18 D4: a listing's filtered page reads its whole listing once a cache
   // window; per the shopper's address, signed by the storefront or not
   listing: { name: "listing", perIp: { max: 120, windowMs: MINUTE } },
+  // A storefront page's card facts (adr/0046 Ek 2026-11-04); a date search's read the
+  // departures in its dates (adr/0077 §4). A page asks once a listing, once a home rail
+  card_facts: { name: "card_facts", perIp: { max: 240, windowMs: MINUTE } },
+  // A month's departure calendar (adr/0077 §6): asked as a shopper opens the date
+  // picker or turns a month; each answer is kept a minute, a miss reads the month
+  departure_calendar: { name: "departure_calendar", perIp: { max: 60, windowMs: MINUTE } },
   // The header's live search (2026-11-05): a read as the shopper types, after a
   // pause; the storefront keeps each answer a minute, so a word asked again is free
   search_suggest: { name: "search_suggest", perIp: { max: 240, windowMs: MINUTE } },
@@ -115,6 +121,14 @@ export const RATE_LIMIT_PROFILES = {
     name: "ai_media",
     perIp: { max: 10, windowMs: 10 * MINUTE },
     perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
+  },
+  // adr/0077 §7: a shopper's sentence read by the shop's AI service, each a call at the
+  // shop's cost through a public route: five a minute and thirty a day per address, beside
+  // the shop's own daily ceiling (AI_STORE_SEARCH_DAILY_LIMIT) and the day's cache
+  ai_store_search: { name: "ai_store_search", perIp: { max: 5, windowMs: MINUTE } },
+  ai_store_search_daily: {
+    name: "ai_store_search_daily",
+    perIp: { max: 30, windowMs: 24 * HOUR },
   },
   // The media library bringing in an image by its address: each is a fetch from the internet
   media_import: { name: "media_import", perIp: { max: 60, windowMs: 10 * MINUTE } },

@@ -1,4 +1,4 @@
-import { documentOf } from "../source"
+import { documentOf, pricedVariantIds } from "../source"
 import type { ProductSource } from "../source"
 
 const product = (over: Partial<ProductSource> = {}): ProductSource => ({
@@ -102,5 +102,39 @@ describe("a product's search row (adr/0056)", () => {
     expect(documentOf(product(), {}).on_sale).toBe(false)
     expect(documentOf(product(), {}, true).on_sale).toBe(true)
     expect(documentOf(product({ status: "draft" }), {}, true).on_sale).toBe(false)
+  })
+
+  it("prices a dated product by its paying categories only (adr/0077 §5)", () => {
+    const variants = [{ id: "adult" }, { id: "child" }, { id: "infant" }]
+    const pax_by_variant = { infant: { pax: 0 } }
+    expect(
+      pricedVariantIds(
+        product({
+          variants,
+          product_extension: { booking_mode: "departure" },
+          bookable: { pax_by_variant },
+        })
+      )
+    ).toEqual(["adult", "child"])
+    // Not dated: every variant, whatever settings it kept
+    expect(
+      pricedVariantIds(
+        product({
+          variants,
+          product_extension: { booking_mode: "none" },
+          bookable: { pax_by_variant },
+        })
+      )
+    ).toEqual(["adult", "child", "infant"])
+    // No category takes a place: still a price to show
+    expect(
+      pricedVariantIds(
+        product({
+          variants: [{ id: "infant" }],
+          product_extension: { booking_mode: "departure" },
+          bookable: { pax_by_variant },
+        })
+      )
+    ).toEqual(["infant"])
   })
 })

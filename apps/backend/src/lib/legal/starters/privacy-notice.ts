@@ -16,6 +16,7 @@ const NOTE = draftNote([
   "VERBİS kayıt yükümlülüğünün mağazanız için doğup doğmadığı.",
   "İnternet sitesi trafik kayıtlarının 5651 sayılı Kanun kapsamında tutulma yükümlülüğü (yorum ve soru-cevap gibi kullanıcı içerikleri nedeniyle yer sağlayıcılık).",
   "Kapıda ödeme ve havale iadeleri için alınan banka hesap bilgisi (IBAN) platformda bir alanda tutulmuyor; personelin bu bilgiyi nasıl alacağı ve ne kadar saklayacağı.",
+  'Vitrinde "kendi cümlenizle arayın" (yapay zekâ ile arama) özelliğini açacaksanız: arama cümlesinin Mağazanın kendi hesabıyla bağlandığı yurt dışındaki yapay zekâ servisine aktarımının dayanağı (Mağaza sözleşmenin tarafıdır); özelliği kullanmıyorsanız 6. maddedeki ilgili satırı silin.',
   "Yaş sınırlı ürünlerde yaş beyanının hukuki sebebi (sektörünüze özgü mevzuat).",
   "Ürün sayfasındaki YouTube videosu oynatıldığında Google'a (yurt dışı) aktarımın dayanağı: ziyaretçinin oynatma eylemiyle başlayan aktarımın md. 9/6 arızi aktarım hallerinden birine girip girmediği, yoksa açık rıza ya da standart sözleşme gerekip gerekmediği.",
 ])
@@ -212,6 +213,7 @@ export const privacyNotice: { title: string; content: Block[] } = {
       "E-posta gönderim hizmeti: e-posta adresiniz ve size gönderilen iletinin içeriği.",
       "İzin verdiyseniz ölçüm ve reklam hizmetleri (Google, Meta): 5. maddede sayılan bilgiler.",
       "Sosyal hesapla giriş seçtiyseniz Google veya Apple: girişin doğrulanması için gerekli bilgiler.",
+      'Mağazamız "kendi cümlenizle arayın" özelliğini açtıysa ve bu özelliği kullanırsanız yapay zekâ hizmet sağlayıcısı: arama kutusuna yazdığınız cümle (e-posta, telefon, IBAN, kart ve T.C. kimlik numarası gibi bilgiler gönderilmeden önce ayıklanır; ad ve adres ayıklanamaz, bu nedenle arama kutusuna kişisel bilgi yazmayınız). Cümle Mağazada saklanmaz; yalnızca aramanızı süzgeçlere çevirmek için kullanılır.',
       "Bir ürün sayfasındaki YouTube videosunu oynattığınızda YouTube (Google): IP adresiniz, tarayıcı bilgileriniz ve YouTube'un kendi çerez ve yerel depolama tanımlayıcıları. Video oynatılmadan önce YouTube'a hiçbir bilgi gönderilmez; aktarım, videoyu oynatma eyleminizle ve yalnızca oynatıcının çalışması için gereken ölçüde gerçekleşir.",
     ]),
     p(
