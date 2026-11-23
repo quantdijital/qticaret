@@ -14,8 +14,9 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const { result } = await saveLayoutDraftWorkflow(req.scope).run({
-    // The draft, and where an older editor's pages keep their text (adr/0073 Ek 2026-11-19 (2) K1)
-    input: req.validatedBody.document,
+    // One list per page (adr/0073 Ek 2026-11-19 (2) K1): a section's `placement` on a page is
+    // refused by the schema; a stored draft from before keeps its pages' text (`keepPageTexts`)
+    input: { document: req.validatedBody.document },
   })
   // Content pages deleted since, their layouts left out of the draft (adr/0073 §1)
   res.json({ layout: await adminLayout(req.scope), dropped_pages: result.dropped_pages })

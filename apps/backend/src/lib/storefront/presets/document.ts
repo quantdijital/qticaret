@@ -2,7 +2,6 @@ import { ValidationError } from "../../errors"
 import { themeSection, withCardDefaults } from "../../../modules/platform-settings/sections/theme"
 import type { ThemeSettings } from "../../../modules/platform-settings/sections"
 import { layoutDocument } from "../layout"
-import { unplacedPages } from "../layout-pages-stored"
 import type { LayoutDocument } from "../layout"
 import type { LayoutSettings } from "../layout-settings"
 import type { PresetGroups, ResolvedPreset } from "./resolve"
@@ -111,9 +110,9 @@ export function presetDocument(
 ): LayoutDocument {
   const parsed = layoutDocument.safeParse({
     ...resolved.groups,
-    // A preset written before a page's text was a section (adr/0073 Ek 2026-11-19 (2) K1)
-    // reads as a stored design does: one list, its `placement` gone
-    pages: unplacedPages(resolved.pages ?? []),
+    // One list per page, its text a section (adr/0073 Ek 2026-11-19 (2) K1): a preset's
+    // `placement` is refused when the pack is read (`preset-schema.ts`), not folded here
+    pages: resolved.pages ?? [],
     settings: {
       trust_badges: kept.trust_badges,
       color_swatches: kept.color_swatches,

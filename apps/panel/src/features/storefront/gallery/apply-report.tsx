@@ -29,14 +29,18 @@ const refsOf = (skipped: readonly SkippedRef[]) =>
 /** `page:hakkimizda` → `hakkimizda`: the address the shop opens the page at. */
 const handleOf = (ref: string) => ref.slice(ref.indexOf(":") + 1)
 
+const PAGE_NOTES = { limit: "pageLimit", taken: "pageTaken" } as const
+
 /**
  * Why a page's layout was not added: no such page (open it at this
- * address), or no room for another page's own layout; by the page's name
- * when the look gives one, else by its address.
+ * address), its address another record's so none could be opened, or no
+ * room for another page's own layout; by the page's name when the look
+ * gives one, else by its address.
  */
 function pageNote(t: TFunction, each: SkippedRef): string {
   const values = { name: each.name, handle: handleOf(each.ref), max: PAGE_LAYOUT_LIMITS.pages }
-  const key = each.reason === "limit" ? "pageLimit" : "pageMissing"
+  const key =
+    each.reason === "limit" || each.reason === "taken" ? PAGE_NOTES[each.reason] : "pageMissing"
   return t(`${R}.${key}${each.name ? "" : "Address"}`, values)
 }
 
@@ -45,9 +49,10 @@ function pageNote(t: TFunction, each: SkippedRef): string {
  * (PLAN §4.3): the look is in the draft, the draft before it was kept (and
  * under which name), sections left out for a record the shop lacks, a
  * content page's layout left out for a page the shop has not made (with
- * how to bring it in), sections left out for a feature the shop has off
- * (adr/0077 §8), the shop's own header or footer and its own page
- * layouts kept. Closed with "Kapat".
+ * how to bring it in), a page opened as a draft for the look and a page
+ * whose own text was kept (adr/0073 Ek 2026-11-19 (2) K6), sections left
+ * out for a feature the shop has off (adr/0077 §8), the shop's own header
+ * or footer and its own page layouts kept. Closed with "Kapat".
  */
 export function ApplyReport({ report, onClose }: { report: Report; onClose: () => void }) {
   const { t } = useTranslation()
@@ -84,8 +89,14 @@ export function ApplyReport({ report, onClose }: { report: Report; onClose: () =
               })}
             </p>
           ) : null}
+          {(report.made_pages ?? []).map((each) => (
+            <p key={each.page_id}>{t(`${R}.pageMade`, { name: each.name })}</p>
+          ))}
           {pages.map((each) => (
             <p key={each.ref}>{pageNote(t, each)}</p>
+          ))}
+          {(report.texts_kept ?? []).map((each) => (
+            <p key={each.ref}>{t(`${R}.textKept`, { name: each.name ?? handleOf(each.ref) })}</p>
           ))}
           {keptFrame ? <p>{t(`${R}.kept`)}</p> : null}
           {keptPages ? <p>{t(`${R}.keptPages`)}</p> : null}

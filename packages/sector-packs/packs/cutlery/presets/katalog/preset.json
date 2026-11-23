@@ -1,7 +1,7 @@
 {
   "format": "quant-storefront-preset",
   "code": "katalog",
-  "version": 4,
+  "version": 5,
   "theme": "atolye",
   "name": "Katalog",
   "description": "Sık bir mağaza ana sayfası, Grafit görünümünde: tek satırlık sade katalog üst bilgisi (dar arama, telefon, adlarıyla Hesabım, Favoriler, Sepet), solda ürün sayılarıyla kategori listesi, ortada giriş, yanında iki kategori karosu; sekmeli raflar, fiyat bantları, mutfak rafı, çeliğe ve sapa göre kategori karoları, müşteri yorumları; Hakkımızda sayfası düzeni. Alt bilgiye, menülere, ürünlere dokunmaz.",
