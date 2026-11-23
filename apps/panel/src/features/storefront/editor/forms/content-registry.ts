@@ -248,6 +248,9 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "stats":
     case "steps":
       return pointsFields(section)
+    // The box's fields are the theme's (adr/0077 §1), not the section's
+    case "search_box":
+      return []
     // The picture's side beside the text, while the variant has one (adr/0073 §3)
     case "rich_text":
       return section.variant === "with_image"

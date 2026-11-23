@@ -23,6 +23,7 @@ import {
   PanelBottom,
   PanelTop,
   ScanSearch,
+  Search,
   ShoppingBag,
   Star,
   Tags,
@@ -48,6 +49,7 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   strip_gallery: Columns3,
   stats: ChartNoAxesColumn,
   steps: ListOrdered,
+  search_box: Search,
   categories: LayoutGrid,
   products: ShoppingBag,
   featured_product: ScanSearch,
@@ -106,6 +108,7 @@ function ownTitle(section: AnySection): string | null {
     case "strip_gallery":
     case "stats":
     case "steps":
+    case "search_box":
       return section.title
     case "announcement_bar":
       return section.lines.find((line) => line.trim() !== "") ?? null

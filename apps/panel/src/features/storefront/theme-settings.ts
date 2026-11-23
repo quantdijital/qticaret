@@ -1,6 +1,6 @@
 import { GRAFIT_THEME } from "@/features/storefront/api/theme"
 import type { ThemeChoices } from "@/features/storefront/api/theme"
-import { STYLE_KIT_FIELDS } from "@qticaret/types"
+import { STYLE_KIT_FIELDS, searchFormOf } from "@qticaret/types"
 
 /**
  * The theme's settings as the form and its sample hold them (adr/0053 §B):
@@ -25,6 +25,8 @@ export const themeValuesOf = (saved: ThemeChoices): ThemeValues => ({
   section_spacing: saved.section_spacing,
   surface_style: saved.surface_style,
   listing_text: { ...saved.listing_text },
+  // A draft from before adr/0077 has none: the box's defaults
+  search_form: searchFormOf(saved.search_form),
   menu_style: saved.menu_style,
   shadow: saved.shadow,
   chip_style: saved.chip_style,
@@ -36,7 +38,11 @@ export const themeValuesOf = (saved: ThemeChoices): ThemeValues => ({
 /** Grafit as the form holds it: no colour of the shop's own, the theme's every default. */
 export const GRAFIT_VALUES: ThemeValues = themeValuesOf(GRAFIT_THEME)
 
-/** Whether the form holds Grafit already: nothing for "Grafit'e dön" to put back. */
+/**
+ * Whether the form holds Grafit already: nothing for "Grafit'e dön" to put
+ * back. The search box's fields (adr/0077 §1) are not the look: Grafit
+ * keeps the shop's.
+ */
 export function isGrafit(values: ThemeValues): boolean {
   const g = GRAFIT_VALUES
   return (
