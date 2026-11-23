@@ -31,7 +31,7 @@ export function planAddonTemplate(
     }
     const after = linked.filter((id) => id !== change.template_id)
     return writing(
-      { action: "addon_template", template_ids: after },
+      { action: "addon_template", mode: "remove", template_id: change.template_id },
       { addon_templates: { before: linked, after } }
     )
   }
@@ -46,7 +46,7 @@ export function planAddonTemplate(
   })
   return within
     ? writing(
-        { action: "addon_template", template_ids: after },
+        { action: "addon_template", mode: "add", template_id: change.template_id },
         { addon_templates: { before: linked, after } }
       )
     : skipped("addons.too_many")

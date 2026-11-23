@@ -124,7 +124,10 @@ export async function writeBulkChange(
       return
     case "addon_template":
       await setProductAddonTemplatesWorkflow(container).run({
-        input: { product_id: productId, template_ids: write.template_ids },
+        input:
+          write.mode === "add"
+            ? { product_id: productId, add: write.template_id }
+            : { product_id: productId, remove: write.template_id },
       })
       return
   }

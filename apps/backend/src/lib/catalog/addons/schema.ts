@@ -175,6 +175,11 @@ export type StoredAddon = {
   | { kind: "choice"; choices: StoredChoice[] }
 )
 
+// A price read back is held to the bounds a save keeps: one written around them is no add-on
+const storedPrice = z
+  .number()
+  .refine((value) => Number.isFinite(value) && value >= 0 && value <= ADDON_PRICE_MAX)
+
 const storedAddon: z.ZodType<StoredAddon> = z.union([
   z.object({
     id: addonId,
@@ -184,7 +189,7 @@ const storedAddon: z.ZodType<StoredAddon> = z.union([
     required: z.boolean(),
     max_quantity: z.number().int().nullable(),
     non_withdrawable: z.boolean(),
-    price: z.number(),
+    price: storedPrice,
     text: textRules,
   }),
   z.object({
@@ -195,7 +200,7 @@ const storedAddon: z.ZodType<StoredAddon> = z.union([
     required: z.boolean(),
     max_quantity: z.number().int().nullable(),
     non_withdrawable: z.boolean(),
-    choices: z.array(z.object({ id: addonId, label: z.string(), price: z.number() })),
+    choices: z.array(z.object({ id: addonId, label: z.string(), price: storedPrice })),
   }),
 ])
 

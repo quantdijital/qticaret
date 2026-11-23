@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import ProductAddonTemplateLink from "../../src/links/product-addon-template"
 import { createAdminUser } from "../helpers/admin"
 import { BANK_TRANSFER, orderLines } from "../helpers/gift-sale"
 import type { HttpClient } from "../helpers/http"
@@ -370,6 +371,75 @@ medusaIntegrationTestRunner({
       })
 
       expect([stopped.status, stopped.data.message]).toEqual([400, "addons.unavailable"])
+    })
+
+    it("refuses an add-on id the template never had; new ones get the server's", async () => {
+      await flag(true)
+      const template = await createTemplate()
+      const foreign = await staff(`/admin/addon-templates/${template.id}`, {
+        addons: [{ ...ENGRAVING, id: "ad_yabanci" }],
+      })
+      const onCreate = await staff("/admin/addon-templates", {
+        name: "Kimlikli",
+        addons: [{ ...ENGRAVING, id: "ad_kendi" }],
+      })
+      const added = await staff(`/admin/addon-templates/${template.id}`, {
+        addons: [
+          { ...ENGRAVING, id: template.addons[0]?.id },
+          { ...ENGRAVING, label: "İkinci" },
+        ],
+      })
+      const ids = (added.data["addon_template"] as Template).addons.map((each) => each.id)
+
+      expect([foreign.status, foreign.data.message]).toEqual([400, "addon_templates.id_unknown"])
+      expect([onCreate.status, onCreate.data.message]).toEqual([400, "addon_templates.id_unknown"])
+      expect(added.status).toBe(200)
+      expect(ids[0]).toBe(template.addons[0]?.id)
+      expect(ids[1]).toMatch(/^ad_[0-9a-f]{12}$/)
+    })
+
+    it("leaves no link to a template deleted while it was being linked", async () => {
+      await flag(true)
+      const template = await createTemplate()
+      const p = await product()
+      const [linked, removed] = await Promise.all([
+        link(p.productId, [template.id]),
+        settle(
+          http.delete<Answer>(`/admin/addon-templates/${template.id}`, { headers: admin.headers })
+        ),
+      ])
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: ProductAddonTemplateLink.entryPoint,
+          fields: ["product_id", "addon_template_id"],
+          filters: { addon_template_id: template.id },
+        })
+      const shown = await storeAddons(p.productId)
+
+      expect(removed.status).toBe(200)
+      // The link either went first (and the delete dismissed it) or found the template gone
+      expect([200, 404]).toContain(linked.status)
+      expect(data).toEqual([])
+      expect(shown.data.addons).toEqual([])
+    })
+
+    it("refuses a bulk link at once while add-ons are off", async () => {
+      await flag(true)
+      const template = await createTemplate()
+      const p = await product()
+      await flag(false)
+      const job = await staff("/admin/async-jobs", {
+        type: "catalog.bulk_edit",
+        input: {
+          product_ids: [p.productId],
+          change: { action: "addon_template", mode: "add", template_id: template.id },
+        },
+      })
+      const done = await sheets.settled((job.data["async_job"] as SheetJob).id)
+
+      expect(done.status).toBe("failed")
+      expect(done.error_code).toBe("catalog.addons_disabled")
     })
 
     it("keeps templates the owner's and admin's: operations staff are refused", async () => {

@@ -119,3 +119,42 @@ export const addonCount = (sources: AddonSources): number => {
 /** Whether these sources stay within the limit. */
 export const withinAddonLimit = (sources: AddonSources): boolean =>
   addonCount(sources) <= ADDONS_MAX
+
+/**
+ * Whether a change takes a product past five add-ons, counted merged
+ * (duplicates once) before and after: one already past five may still
+ * shrink or stay as it is.
+ */
+export const growsPastLimit = (before: AddonSources, after: AddonSources): boolean =>
+  !withinAddonLimit(after) && addonCount(after) > addonCount(before)
+
+/**
+ * Whether a template's save names an add-on or a choice it does not have:
+ * new ones come without an id (the server gives it), so a stranger id is
+ * refused rather than taken (adr/0052 Ek 2026-11-23).
+ */
+export function hasForeignIds(
+  inputs: readonly {
+    id?: string | undefined
+    kind: string
+    choices?: { id?: string | undefined }[]
+  }[],
+  existing: readonly StoredAddon[]
+): boolean {
+  const known = new Map(existing.map((addon) => [addon.id, addon]))
+  return inputs.some((input) => {
+    if (input.id === undefined) {
+      return (input.choices ?? []).some((choice) => choice.id !== undefined)
+    }
+    const stored = known.get(input.id)
+    if (!stored) {
+      return true
+    }
+    const choices = new Set(
+      stored.kind === "choice" ? stored.choices.map((choice) => choice.id) : []
+    )
+    return (input.choices ?? []).some(
+      (choice) => choice.id !== undefined && !choices.has(choice.id)
+    )
+  })
+}

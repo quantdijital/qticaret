@@ -6,7 +6,7 @@ import {
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { templateLockKey } from "../product-attributes/templates"
-import { planProductAddonTemplatesStep } from "./product-links"
+import { planProductAddonTemplatesStep, templatesLinkedBy } from "./product-links"
 import type { SetProductAddonTemplatesInput } from "./product-links"
 import {
   addonTemplateLinksStep,
@@ -63,11 +63,16 @@ export const deleteAddonTemplateWorkflow = createWorkflow(
   }
 )
 
-/** The add-on templates linked to a product, as a whole list. */
+/** The add-on templates linked to a product: the whole list, or one added or removed. */
 export const setProductAddonTemplatesWorkflow = createWorkflow(
   "addon-templates-set-product",
   (input: SetProductAddonTemplatesInput) => {
-    const key = transform({ input }, ({ input }) => `catalog:${input.product_id}`)
+    // The product's lock, then each template it may link (sorted): a delete of
+    // one waits for the link, or the link finds the template gone
+    const key = transform({ input }, ({ input }) => [
+      `catalog:${input.product_id}`,
+      ...templatesLinkedBy(input).map(addonTemplateLockKey),
+    ])
     acquireLockStep({ key, timeout: 10, ttl: 30 })
     const plan = planProductAddonTemplatesStep(input)
     const create = transform({ plan }, ({ plan }) => plan.create)
@@ -81,11 +86,14 @@ export const setProductAddonTemplatesWorkflow = createWorkflow(
   }
 )
 
-/** The add-on templates an attribute template carries, under that template's lock. */
+/** The add-on templates an attribute template carries, under its lock and theirs. */
 export const carryAddonTemplatesWorkflow = createWorkflow(
   "addon-templates-carry",
   (input: CarryInput) => {
-    const key = transform({ input }, ({ input }) => templateLockKey(input.attribute_template_id))
+    const key = transform({ input }, ({ input }) => [
+      templateLockKey(input.attribute_template_id),
+      ...[...new Set(input.addon_template_ids)].sort().map(addonTemplateLockKey),
+    ])
     acquireLockStep({ key, timeout: 10, ttl: 120 })
     const result = carryAddonTemplatesStep(input)
     releaseLockStep({ key })

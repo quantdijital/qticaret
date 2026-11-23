@@ -18,6 +18,8 @@ export {
   addonCount,
   byTemplateName,
   effectiveAddons,
+  growsPastLimit,
+  hasForeignIds,
   templateSourceOf,
   withinAddonLimit,
 } from "./templates"

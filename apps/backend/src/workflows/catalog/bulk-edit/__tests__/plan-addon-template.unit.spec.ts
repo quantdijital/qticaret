@@ -37,7 +37,7 @@ describe("bulk edit: add-on template (adr/0052 Ek 2026-11-23)", () => {
     )
     expect(plan).toEqual({
       kind: "write",
-      write: { action: "addon_template", template_ids: ["adtpl_b", "adtpl_a"] },
+      write: { action: "addon_template", mode: "add", template_id: "adtpl_a" },
       diff: { addon_templates: { before: ["adtpl_b"], after: ["adtpl_b", "adtpl_a"] } },
     })
   })
@@ -91,7 +91,7 @@ describe("bulk edit: add-on template (adr/0052 Ek 2026-11-23)", () => {
     )
     expect(plan).toEqual({
       kind: "write",
-      write: { action: "addon_template", template_ids: ["adtpl_b"] },
+      write: { action: "addon_template", mode: "remove", template_id: "adtpl_a" },
       diff: { addon_templates: { before: ["adtpl_a", "adtpl_b"], after: ["adtpl_b"] } },
     })
     expect(

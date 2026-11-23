@@ -295,6 +295,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The template name must be 1-60 characters without invisible characters.",
   "addon_templates.empty": "A template needs at least one add-on.",
   "addon_templates.duplicate": "The same template is chosen twice.",
+  "addon_templates.id_unknown":
+    "An add-on or choice id the template does not have was sent. Reload and try again.",
   "addon_templates.unknown": "Add-on template not found.",
   "addon_templates.too_many":
     "This change would give some products more than 5 add-ons; remove add-ons from them first.",

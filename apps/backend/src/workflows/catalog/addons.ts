@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { addonCount, toStoredAddons, withinAddonLimit } from "../../lib/catalog/addons"
+import { growsPastLimit, toStoredAddons } from "../../lib/catalog/addons"
 import type { AddonInput, StoredAddons } from "../../lib/catalog/addons"
 import { ValidationError } from "../../lib/errors"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -34,8 +34,7 @@ export async function addonsToWrite(
   const sources = (await addonSourcesAmong(container, [productId])).get(productId)
   // One already past five (its attribute template changed) may still shrink
   if (sources) {
-    const next = { ...sources, own: items }
-    if (!withinAddonLimit(next) && addonCount(next) > addonCount(sources)) {
+    if (growsPastLimit(sources, { ...sources, own: items })) {
       throw new ValidationError("addons.too_many", { field: "addons" })
     }
   }

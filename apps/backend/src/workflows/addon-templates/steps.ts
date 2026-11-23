@@ -2,7 +2,8 @@ import { randomBytes } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { toStoredAddons } from "../../lib/catalog/addons"
+import { hasForeignIds, toStoredAddons } from "../../lib/catalog/addons"
+import { ValidationError } from "../../lib/errors"
 import type { AddonInput, StoredAddons } from "../../lib/catalog/addons"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../modules/product-attributes/service"
@@ -43,6 +44,9 @@ export const createAddonTemplateStep = createStep(
   "addon-templates-create",
   async (input: AddonTemplateInput, { container }) => {
     await requireAddonsFlag(container)
+    if (hasForeignIds(input.addons, [])) {
+      throw new ValidationError("addon_templates.id_unknown", { field: "addons" })
+    }
     const created = await serviceOf(container).createAddonTemplates({
       name: input.name,
       addons: addonsColumn({ items: toStoredAddons(input.addons, newId) }),
@@ -71,7 +75,8 @@ interface Previous {
 
 /**
  * A template changed: every product using it reads the change at once.
- * More add-ons than before must keep each of them within five.
+ * A save that grows any of them past five (merged count) is refused, as
+ * is an add-on or choice id the template never had.
  */
 export const updateAddonTemplateStep = createStep(
   "addon-templates-update",
@@ -91,9 +96,14 @@ export const updateAddonTemplateStep = createStep(
     }
     if (input.addons !== undefined) {
       await requireAddonsFlag(container)
-      const items = toStoredAddons(input.addons, newId)
       const before = (await addonTemplatesByIds(container, [input.id])).get(input.id)
-      if (before && items.length > before.addons.length) {
+      // New add-ons and choices get the server's ids; one it never gave is refused
+      if (hasForeignIds(input.addons, before?.addons ?? [])) {
+        throw new ValidationError("addon_templates.id_unknown", { field: "addons" })
+      }
+      const items = toStoredAddons(input.addons, newId)
+      // Every save that sends add-ons, counted merged: a swap can grow a product too
+      if (before) {
         const usage = await addonTemplateUsage(container, input.id)
         await checkAddonLimit(
           container,

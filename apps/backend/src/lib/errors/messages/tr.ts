@@ -303,6 +303,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Şablon adı 1-60 karakter olmalı ve görünmez karakter içermemeli.",
   "addon_templates.empty": "Şablonda en az bir ek seçenek olmalı.",
   "addon_templates.duplicate": "Aynı şablon iki kez seçilmiş.",
+  "addon_templates.id_unknown":
+    "Şablonda olmayan bir ek seçenek ya da seçenek kimliği gönderildi. Sayfayı yenileyip yeniden deneyin.",
   "addon_templates.unknown": "Ek seçenek şablonu bulunamadı.",
   "addon_templates.too_many":
     "Bu değişiklikle bazı ürünlerde 5 ek seçenek sınırı aşılır; önce o ürünlerden ek seçenek kaldırın.",

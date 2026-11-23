@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { withinAddonLimit } from "../../lib/catalog/addons"
+import { growsPastLimit } from "../../lib/catalog/addons"
 import type { AddonSources, AddonTemplateSource } from "../../lib/catalog/addons"
 import { ValidationError } from "../../lib/errors"
 import ProductAddonTemplateLink from "../../links/product-addon-template"
@@ -102,7 +102,8 @@ export async function addonTemplateUsage(
 
 /**
  * Refuses a change that would take any of these products past five
- * add-ons: `change` gives each product's sources as they would be.
+ * add-ons, counted merged before and after: `change` gives each
+ * product's sources as they would be.
  */
 export async function checkAddonLimit(
   container: Container,
@@ -112,7 +113,7 @@ export async function checkAddonLimit(
 ): Promise<void> {
   const sources = await addonSourcesAmong(container, productIds)
   for (const [productId, each] of sources) {
-    if (!withinAddonLimit(change(each, productId))) {
+    if (growsPastLimit(each, change(each, productId))) {
       throw new ValidationError(key, { field: "addons" })
     }
   }

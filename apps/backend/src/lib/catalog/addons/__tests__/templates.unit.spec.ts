@@ -8,6 +8,9 @@ import {
   byTemplateName,
   chooseAddons,
   effectiveAddons,
+  growsPastLimit,
+  hasForeignIds,
+  storedAddonsOf,
   templateSourceOf,
   withinAddonLimit,
 } from ".."
@@ -140,5 +143,53 @@ describe("add-on templates: input", () => {
     expect(AddonTemplateIds.safeParse(["adtpl_1", "adtpl_2"]).success).toBe(true)
     expect(AddonTemplateIds.safeParse(["adtpl_1", "adtpl_1"]).success).toBe(false)
     expect(AddonTemplateIds.safeParse([]).success).toBe(true)
+  })
+})
+
+describe("add-on templates: the limit counted merged, and ids the server gave", () => {
+  it("refuses a change that grows a product past five, even with the template's list as long", () => {
+    const before = {
+      own: [text("o1"), text("o2"), text("o3"), text("o4")],
+      carried: [],
+      linked: [template("adtpl_1", "A", [text("o1")])],
+    }
+    // Same list length, but the template's add-on no longer repeats an own one
+    const after = { ...before, linked: [template("adtpl_1", "A", [text("t1")])] }
+    expect(growsPastLimit(before, before)).toBe(false)
+    expect(growsPastLimit(before, after)).toBe(false)
+    const full = { ...before, own: [...before.own, text("o5")] }
+    expect(
+      growsPastLimit(full, { ...full, linked: [template("adtpl_1", "A", [text("t1")])] })
+    ).toBe(true)
+    // One already past five may shrink or stay
+    const over = { ...full, linked: [template("adtpl_1", "A", [text("t1"), text("t2")])] }
+    expect(growsPastLimit(over, { ...over, own: over.own.slice(1) })).toBe(false)
+  })
+
+  it("refuses an add-on or choice id the template never had", () => {
+    const stored: StoredAddon[] = [
+      text("ad_1"),
+      {
+        ...text("ad_2"),
+        kind: "choice",
+        choices: [{ id: "ch_1", label: "A", price: 1 }],
+      } as unknown as StoredAddon,
+    ]
+    expect(hasForeignIds([{ id: "ad_1", kind: "text" }, { kind: "text" }], stored)).toBe(false)
+    expect(hasForeignIds([{ id: "ad_x", kind: "text" }], stored)).toBe(true)
+    expect(
+      hasForeignIds([{ id: "ad_2", kind: "choice", choices: [{ id: "ch_1" }, {}] }], stored)
+    ).toBe(false)
+    expect(hasForeignIds([{ id: "ad_2", kind: "choice", choices: [{ id: "ch_x" }] }], stored)).toBe(
+      true
+    )
+    expect(hasForeignIds([{ kind: "choice", choices: [{ id: "ch_1" }] }], stored)).toBe(true)
+    expect(hasForeignIds([{ id: "ad_1", kind: "text" }], [])).toBe(true)
+  })
+
+  it("reads a stored price outside the bounds as no add-ons", () => {
+    expect(storedAddonsOf({ items: [text("ad_1", 10)] })).toHaveLength(1)
+    expect(storedAddonsOf({ items: [text("ad_1", -1)] })).toEqual([])
+    expect(storedAddonsOf({ items: [text("ad_1", 10_001)] })).toEqual([])
   })
 })

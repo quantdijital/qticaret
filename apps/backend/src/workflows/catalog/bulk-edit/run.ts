@@ -6,6 +6,7 @@ import { ValidationError } from "../../../lib/errors"
 import { serverErrorMessage } from "../../../lib/errors/messages"
 import { errorSummary, logger } from "../../../lib/logging"
 import type { SheetCell } from "../../../lib/sheets"
+import { requireAddonsFlag } from "../../addon-templates/usage"
 import { publishGate } from "../../seo/advisor/publish-gate"
 import { writeErrorText } from "../write-error"
 import type { BulkAction, BulkChange, BulkEditInput } from "./change"
@@ -57,6 +58,10 @@ async function planContext(container: MedusaContainer, change: BulkChange): Prom
     }
   }
   if (change.action === "addon_template") {
+    // Linking needs the shop's add-ons on: said once for the run, not per product
+    if (change.mode === "add") {
+      await requireAddonsFlag(container)
+    }
     const { data } = await query.graph({
       entity: "addon_template",
       fields: ["id", "name", "addons"],
