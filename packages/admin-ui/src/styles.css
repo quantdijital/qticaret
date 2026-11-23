@@ -6,6 +6,7 @@
  *   @import "@qticaret/admin-ui/styles.css";
  */
 @import "./theme/tokens.css";
+@import "./theme/scrollbar.css";
 
 /* The package's own classes (components, patterns, charts) are generated too */
 @source "./";

@@ -1,0 +1,114 @@
+/*
+ * Scrollbars (the owner, 2026-11-23: "tarayıcıların varsayılan ayarlarıyla
+ * gelmemeli, temayla uyumlu olsun"): one look for every scrolling box in
+ * the panel (the page, pane dialog bodies, sheets, menus, selects, the
+ * command menu, popovers, wide tables, text areas, the editors and the
+ * sidebar). A thin bar, no track of its own, a rounded thumb in the muted
+ * text colour at low contrast that darkens a step on hover and drag.
+ * Colours come from the theme tokens only, so light, dark and every shop's
+ * colours draw it; the dark menu reads its own muted colour.
+ *
+ * Chrome/Edge 121+ and Firefox use the standard properties; Safari, which
+ * lacks `scrollbar-color`, gets the `::-webkit-scrollbar` rules instead.
+ * Each block sits behind `@supports`, so the two never apply together.
+ * High contrast (`forced-colors: active`) keeps the system's scrollbars.
+ */
+@layer base {
+  :where(:root, .dark, [data-slot="sidebar"]) {
+    --scrollbar-base: var(--muted-foreground);
+    /* Resting: visible but quiet; hover/drag: a step darker (≥ 3:1 on the surface) */
+    --scrollbar-thumb: color-mix(in oklch, var(--scrollbar-base) 40%, transparent);
+    --scrollbar-thumb-hover: color-mix(in oklch, var(--scrollbar-base) 85%, transparent);
+    --scrollbar-track: transparent;
+  }
+
+  /* The menu is dark in both modes: its own muted colour on its own surface */
+  [data-slot="sidebar"] {
+    --scrollbar-base: var(--sidebar-muted-foreground);
+  }
+
+  @media (forced-colors: none) {
+    @supports (scrollbar-color: auto) {
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+      }
+
+      /* No thumb hover in the standard: the box under the pointer shows a darker thumb */
+      :where(:not(html, body)):hover {
+        scrollbar-color: var(--scrollbar-thumb-hover) var(--scrollbar-track);
+      }
+    }
+
+    @supports not (scrollbar-color: auto) {
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-track,
+      ::-webkit-scrollbar-corner {
+        background: var(--scrollbar-track);
+      }
+      ::-webkit-scrollbar-thumb {
+        /* A 6 px thumb inside the 10 px bar, like the standard thin bar */
+        border: 2px solid transparent;
+        border-radius: 9999px;
+        background-clip: padding-box;
+        background-color: var(--scrollbar-thumb);
+      }
+      ::-webkit-scrollbar-thumb:hover,
+      ::-webkit-scrollbar-thumb:active {
+        background-color: var(--scrollbar-thumb-hover);
+      }
+    }
+  }
+
+  /* High contrast: the system draws the scrollbars */
+  @media (forced-colors: active) {
+    * {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+  }
+
+  /*
+   * The one hidden bar, on purpose: the collapsed (icon) menu scrolls by
+   * wheel, touch and keyboard without a bar beside the icons.
+   */
+  [data-collapsible="icon"] [data-slot="sidebar-content"] {
+    scrollbar-width: none;
+  }
+  [data-collapsible="icon"] [data-slot="sidebar-content"]::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Radix ScrollArea draws its own bar: the same size, shape and colours */
+@layer components {
+  .qt-scrollbar {
+    @apply flex touch-none p-0.5 select-none;
+
+    &[data-orientation="vertical"] {
+      @apply h-full w-2.5;
+    }
+    &[data-orientation="horizontal"] {
+      @apply h-2.5 flex-col;
+    }
+  }
+
+  .qt-scrollbar-thumb {
+    @apply relative flex-1 rounded-full transition-colors;
+    background-color: var(--scrollbar-thumb);
+
+    .qt-scrollbar:hover > &,
+    &:active {
+      background-color: var(--scrollbar-thumb-hover);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .qt-scrollbar-thumb {
+      background-color: CanvasText;
+    }
+  }
+}

@@ -132,8 +132,8 @@ export function AppSidebar({
       <SidebarHeader className="h-[var(--layout-topbar-height)] justify-center px-3">
         <StoreMark />
       </SidebarHeader>
-      {/* Folded, a menu taller than the window still scrolls to its last items; no bar in the icon strip */}
-      <SidebarContent className="gap-0 px-1 pt-2 group-data-[collapsible=icon]:overflow-y-auto group-data-[collapsible=icon]:[scrollbar-width:none]">
+      {/* Folded, a menu taller than the window still scrolls to its last items; no bar in the icon strip (admin-ui theme/scrollbar.css) */}
+      <SidebarContent className="gap-0 px-1 pt-2 group-data-[collapsible=icon]:overflow-y-auto">
         {/* A landmark screen readers list as the menu; `contents` keeps the sidebar's layout */}
         <nav aria-label={t("nav.label")} className="contents">
           {groups.map((group) => (
