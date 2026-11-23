@@ -21,10 +21,11 @@ export const AddonTemplateName = z
     message: "addon_templates.name_invalid",
   })
 
-/** A template's add-ons: as a product's, at least one. */
-export const AddonTemplateAddons = AddonsInput.refine((addons) => addons.length >= 1, {
-  message: "addon_templates.empty",
-})
+/**
+ * A template's add-ons: as a product's. None is allowed: the panel makes a
+ * template by its name first and fills it on its own page.
+ */
+export const AddonTemplateAddons = AddonsInput
 
 /** Ids of add-on templates as a write names them: each once, few enough to matter. */
 export const AddonTemplateIds = z

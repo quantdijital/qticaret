@@ -148,7 +148,8 @@ medusaIntegrationTestRunner({
       const gone = await read<Answer>(`/admin/addon-templates/${created.id}`)
 
       expect([off.status, off.data.message]).toEqual([400, "catalog.addons_disabled"])
-      expect([empty.status, empty.data.message]).toEqual([400, "addon_templates.empty"])
+      // A template is made by its name first and filled on its page
+      expect(empty.status).toBe(200)
       expect([paidRequired.status, paidRequired.data.message]).toEqual([
         400,
         "addons.required_must_be_free",
@@ -158,7 +159,8 @@ medusaIntegrationTestRunner({
       expect(created.addons).toEqual([
         expect.objectContaining({ id: expect.any(String) as unknown, price: 150 }) as unknown,
       ])
-      expect(list.data.addon_templates.map((each) => each.id)).toEqual([created.id])
+      // By name: "Boş" (made empty above) before "Kazıma"
+      expect(list.data.addon_templates.map((each) => each.name)).toEqual(["Boş", "Kazıma"])
       expect(renamed.data["addon_template"]).toMatchObject({
         name: "İsim kazıma",
         addons: [expect.objectContaining({ id: created.addons[0]?.id, price: 175 })],

@@ -127,11 +127,11 @@ describe("add-on templates: input", () => {
     expect(AddonTemplateName.safeParse("x".repeat(61)).success).toBe(false)
   })
 
-  it("needs at least one add-on and keeps a product's rules", () => {
+  it("keeps a product's rules, none allowed while it is new", () => {
     const engraving = { kind: "text", label: "Kazıma", price: 150 }
     expect(AddonTemplateAddons.safeParse([engraving]).success).toBe(true)
-    const empty = AddonTemplateAddons.safeParse([])
-    expect(empty.error?.issues[0]?.message).toBe("addon_templates.empty")
+    // Made by its name first, filled on its page
+    expect(AddonTemplateAddons.safeParse([]).success).toBe(true)
     const paidRequired = AddonTemplateAddons.safeParse([{ ...engraving, required: true }])
     expect(paidRequired.error?.issues[0]?.message).toBe("addons.required_must_be_free")
     expect(AddonTemplateAddons.safeParse(Array.from({ length: 6 }, () => engraving)).success).toBe(
