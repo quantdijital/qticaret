@@ -3932,7 +3932,8 @@
         "category": "Kategoriyi düzenle",
         "seo_template": "SEO şablonunu uygula",
         "alt_text": "Eksik alt metinleri doldur",
-        "cost": "Maliyeti değiştir"
+        "cost": "Maliyeti değiştir",
+        "addon_template": "Ek seçenek şablonu ata / kaldır"
       },
       "price": {
         "mode": "Fiyat değişikliği",
@@ -4002,7 +4003,8 @@
         "adjust": "Sıfırdan büyük bir tam sayı girin.",
         "category": "Bir kategori seçin.",
         "seoFields": "En az bir alan seçin.",
-        "cost": "0 ile 10.000.000 ₺ arasında bir maliyet girin."
+        "cost": "0 ile 10.000.000 ₺ arasında bir maliyet girin.",
+        "addonTemplate": "Bir ek seçenek şablonu seçin."
       },
       "cost": {
         "mode": "Maliyet değişikliği",
@@ -4017,6 +4019,19 @@
           "percent": "Yalnızca maliyeti girilmiş varyantlar değişir."
         },
         "clearHint": "Seçilen ürünlerin varyantlarındaki maliyet silinir; stok değerine katılmazlar."
+      },
+      "addonTemplate": {
+        "mode": "İşlem",
+        "modes": {
+          "add": "Ata",
+          "remove": "Kaldır"
+        },
+        "label": "Ek seçenek şablonu",
+        "hints": {
+          "add": "Şablon seçili ürünlere bağlanır. 5 ek seçenek sınırını aşacak ürünler atlanır ve raporda yazılır.",
+          "remove": "Şablonun bağlantısı seçili ürünlerden kalkar; özellik şablonundan gelen şablonlar etkilenmez."
+        },
+        "none": "Henüz ek seçenek şablonu yok."
       }
     },
     "priceHistory": {
@@ -4180,6 +4195,57 @@
         "not_a_question": "Soru, soru işaretiyle bitmeli.",
         "too_long": "Soru en çok 120, yanıt en çok 400 karakter olabilir."
       }
+    },
+    "addonTemplates": {
+      "title": "Ek seçenek şablonları",
+      "subtitle": "Ek seçenekleri bir kez tanımlayın, ürünlere bağlayın. Şablonu değiştirince bağlı bütün ürünler değişir.",
+      "create": "Şablon oluştur",
+      "new": "Yeni ek seçenek şablonu",
+      "dialogHint": "Şablonun ek seçenekleri bağlı ürünlerin sayfasında, ürünün kendi ek seçenekleriyle birlikte görünür.",
+      "empty": "Henüz ek seçenek şablonu yok. Örneğin \"Bıçağa isim kazıma, +150 TL\" gibi bir ek seçeneği bir kez tanımlayıp birçok ürüne bağlayabilirsiniz.",
+      "columns": {
+        "name": "Şablon",
+        "used": "Kullanım"
+      },
+      "productCount_one": "{{count}} ürün",
+      "productCount_other": "{{count}} ürün",
+      "carriedCount_one": "{{count}} özellik şablonu",
+      "carriedCount_other": "{{count}} özellik şablonu",
+      "name": "Şablon adı",
+      "nameHint": "Yalnız panelde görünür; en çok {{max}} karakter.",
+      "addons": "Ek seçenekler",
+      "addonsHint": "Şablonun ek seçenekleri ürünün en çok {{max}} ek seçeneğine dahildir.",
+      "noAddons": "Şablonda henüz ek seçenek yok. En az bir ek seçenek ekleyin.",
+      "liveNote_one": "Bu şablon {{count}} ürüne bağlı (özellik şablonları: {{templates}}). Kaydedince değişiklik hepsinde hemen görünür; verilmiş siparişler değişmez.",
+      "liveNote_other": "Bu şablon {{count}} ürüne bağlı (özellik şablonları: {{templates}}). Kaydedince değişiklik hepsinde hemen görünür; verilmiş siparişler değişmez.",
+      "liveNoteNew": "Şablonu ürün sayfasındaki Ek seçenekler kartından, toplu düzenlemeden ya da bir özellik şablonundan ürünlere bağlayabilirsiniz.",
+      "addonNote": "Değişiklik şablon kaydedilince geçerli olur.",
+      "delete": "Şablonu sil",
+      "deleteHint": "Silinen şablonun ek seçenekleri bağlı ürünlerden kalkar. Verilmiş siparişler değişmez.",
+      "deleteTitle": "\"{{name}}\" silinsin mi?",
+      "deleteDescription_one": "Şablon {{count}} üründen ve onu taşıyan özellik şablonlarından kalkar. Bu ek seçenekleri sepetine eklemiş müşteriler ödemeden önce seçimlerini değiştirmek zorunda kalır.",
+      "deleteDescription_other": "Şablon {{count}} üründen ve onu taşıyan özellik şablonlarından kalkar. Bu ek seçenekleri sepetine eklemiş müşteriler ödemeden önce seçimlerini değiştirmek zorunda kalır.",
+      "deleted": "Şablon silindi.",
+      "saved": "Şablon kaydedildi.",
+      "errors": {
+        "name": "Şablon adı 1-60 karakter olmalı.",
+        "empty": "Şablonda en az bir ek seçenek olmalı.",
+        "tooMany": "Bu değişiklikle bazı ürünlerde 5 ek seçenek sınırı aşılır; önce o ürünlerden ek seçenek kaldırın."
+      },
+      "add": "Şablon ekle",
+      "pickTitle": "Ek seçenek şablonu ekle",
+      "pickDescription": "Şablonun ek seçenekleri bu ürüne bağlanır; şablon değişince bu ürün de değişir.",
+      "link": "Bağla",
+      "noneToPick": "Bağlanabilecek şablon yok.",
+      "openSettings": "Ürün özelliklerinde şablon oluşturun",
+      "doesNotFit_one": "{{count}} ek seçenek: bu üründe 5 sınırına sığmaz.",
+      "doesNotFit_other": "{{count}} ek seçenek: bu üründe 5 sınırına sığmaz.",
+      "viaProduct": "Şablon",
+      "viaAttribute": "Özellik şablonundan",
+      "editInSettings": "Şablonu düzenle",
+      "unlink": "Bağlantıyı kaldır",
+      "hidden_one": "{{count}} ek seçenek 5 sınırını aştığı için vitrinde görünmüyor; bir şablonu ya da ürünün ek seçeneğini kaldırın.",
+      "hidden_other": "{{count}} ek seçenek 5 sınırını aştığı için vitrinde görünmüyor; bir şablonu ya da ürünün ek seçeneğini kaldırın."
     }
   },
   "orders": {
@@ -7165,7 +7231,9 @@
       "definitions_other": "Özellikler ({{count}})",
       "groups_one": "Gruplar ({{count}})",
       "groups_other": "Gruplar ({{count}})",
-      "info": "Şablon bilgisi"
+      "info": "Şablon bilgisi",
+      "addons_one": "Ek seçenekler ({{count}})",
+      "addons_other": "Ek seçenekler ({{count}})"
     },
     "tabError": "Bu sekmede düzeltilecek bir alan var",
     "descriptionHint": "Yalnızca panelde görünür.",
@@ -7185,7 +7253,11 @@
     },
     "seoHint": "Değeri, ürünün Google'da görünen başlığında kullanılabilir.",
     "drag": "Sürükleyerek taşı",
-    "actions": "{{name}}: işlemler"
+    "actions": "{{name}}: işlemler",
+    "addonTemplates": {
+      "hint": "İşaretlediğiniz ek seçenek şablonları bu özellik şablonunu kullanan bütün ürünlere eklenir. Ek seçenekler ürünün kendi ek seçeneklerinden sonra, bu sırayla görünür.",
+      "none": "Henüz ek seçenek şablonu yok. Bu sayfadaki Ek seçenek şablonları bölümünden oluşturabilirsiniz."
+    }
   },
   "brands": {
     "description": "Markaların kendi sayfası, logosu ve ürünleri olur.",

@@ -1,6 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { JSONContent } from "@tiptap/react"
 import type { Restriction } from "@/features/categories/api/restrictions"
+import type { ProductAddonTemplate } from "@/features/products/api/addon-templates"
 import type { AddonInput, ProductAddon } from "@/features/products/api/addons"
 import type { BookingMode } from "@/features/products/api/booking"
 import { sdk } from "@/lib/sdk"
@@ -29,6 +30,10 @@ export interface ProductCatalog {
   booking_mode?: BookingMode
   /** Paid or free add-ons a shopper picks beside the variant (adr/0052), in the shop's order. */
   addons: ProductAddon[]
+  /** Add-on templates it reaches, live (adr/0052 Ek 2026-11-23); absent from an older backend: none. */
+  addon_templates?: ProductAddonTemplate[]
+  /** Add-ons past the limit of five, not shown to shoppers (its attribute template changed). */
+  addons_hidden?: number
   /**
    * The long description as a document (ADR-0055): headings, lists, quotes,
    * tables; null while the product has only its plain text.
