@@ -2144,7 +2144,7 @@
       },
       "bulk": {
         "title": "Toplu mesaj kuralları",
-        "description": "Büyüme > Toplu mesaj'dan gönderilen e-posta ve SMS kampanyalarının sınırları.",
+        "description": "Pazarlama > Toplu mesaj'dan gönderilen e-posta ve SMS kampanyalarının sınırları.",
         "cap": "Bir kişiye 24 saatte en çok bir toplu mesaj",
         "capHint": "Son 24 saatte başka bir toplu mesaj almış kişi yeni mesajın kitlesinden çıkarılır; şikâyetleri ve abonelikten çıkışları azaltır.",
         "hours": "Toplu SMS saatleri",

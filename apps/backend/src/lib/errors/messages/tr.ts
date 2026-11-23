@@ -87,7 +87,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "chargebacks.transition_invalid": "Kayıt bu duruma geçemez; kapanmış kayıt yeniden açılmaz.",
   "chargebacks.unknown": "Ters ibraz kaydı bulunamadı.",
   "brands.description_invalid": "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
-  "brands.logo_unknown": "Logo ortam kütüphanesinden seçilmeli: kütüphanedeki bir görsel olmalı.",
+  "brands.logo_unknown": "Logo medya kütüphanesinden seçilmeli: kütüphanedeki bir görsel olmalı.",
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
   "brands.name_taken": "Bu adla bir marka zaten var.",
   "brands.unknown": "Marka bulunamadı.",
@@ -912,12 +912,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Ürün ya da kategoriyi yaş sınırlı işaretlemek için önce Ayarlar > Özellikler'den “Kısıtlı ürünler” özelliğini açın.",
   "catalog.category_unknown": "Kategori bulunamadı.",
   "catalog.category_image_unknown":
-    "Kategori görseli mağazanın yüklediği dosyalardan olmalı; ortam kütüphanesinden seçin.",
+    "Kategori görseli mağazanın yüklediği dosyalardan olmalı; medya kütüphanesinden seçin.",
   "catalog.collection_unknown": "Koleksiyon bulunamadı.",
   "catalog.collection_description_invalid":
     "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
   "catalog.collection_image_unknown":
-    "Koleksiyon görseli mağazanın yüklediği dosyalardan olmalı; ortam kütüphanesinden seçin.",
+    "Koleksiyon görseli mağazanın yüklediği dosyalardan olmalı; medya kütüphanesinden seçin.",
   "age.declaration_missing":
     "Sepetinizde yaş sınırlı ürün var; ödemeye geçmeden önce yaşınızı beyan edin.",
   "age.under_limit": "Bu ürünler yalnızca yaş sınırını geçenlere satılabilir.",
@@ -1022,9 +1022,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.page_unknown":
     "Seçilen sayfa bulunamadı. İçerik'teki sayfalarınızdan birini seçin.",
   "platform_settings.favicon_unknown":
-    "Site simgesi ortam kütüphanenizden seçilmeli. Görseli kütüphaneye yükleyip yeniden seçin.",
+    "Site simgesi medya kütüphanenizden seçilmeli. Görseli kütüphaneye yükleyip yeniden seçin.",
   "platform_settings.logo_unknown":
-    "Logo ortam kütüphanenizden seçilmeli. Görseli kütüphaneye yükleyip yeniden seçin.",
+    "Logo medya kütüphanenizden seçilmeli. Görseli kütüphaneye yükleyip yeniden seçin.",
   "platform_settings.favicon_type":
     "Site simgesi PNG olmalı. Simgenizi PNG olarak kaydedip yükleyin.",
   "platform_settings.favicon_too_large":
@@ -1465,9 +1465,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.wordpress_variation_unread": "Varyasyonun seçenek değerleri okunamadı; taşınmadı.",
   "migration.wordpress_variation_orphan": "Varyasyonun ana ürünü dosyada yok; taşınmadı.",
   "migration.wordpress_image_missing":
-    "Görsel dosyanın ortam kütüphanesinde yok; taşınmadı. Ürüne elle ekleyebilirsiniz.",
+    "Görsel dosyanın medya kütüphanesinde yok; taşınmadı. Ürüne elle ekleyebilirsiniz.",
   "migration.wordpress_category_image_missing":
-    "Kategorinin görseli dosyanın ortam kütüphanesinde yok; taşınmadı. Kategoriye elle ekleyebilirsiniz.",
+    "Kategorinin görseli dosyanın medya kütüphanesinde yok; taşınmadı. Kategoriye elle ekleyebilirsiniz.",
   "migration.category_cover_no_category": "Görselin kategorisi bu mağazada yok; görsel taşınmadı.",
   "migration.category_cover_refused":
     "Kategori görseli kaydedilemedi; kategoriye elle ekleyebilirsiniz.",
@@ -1535,7 +1535,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "fraud.block_invalid_email_domain": "Geçerli bir alan adı girin (ör. ornek.com).",
   "fraud.block_invalid_phone": "Geçerli bir Türkiye telefon numarası girin.",
   "fraud.block_invalid_ip": "Geçerli bir IP adresi girin.",
-  "campaigns.unknown": "Toplu ileti bulunamadı.",
+  "campaigns.unknown": "Toplu mesaj bulunamadı.",
   "campaigns.locked":
     "Bu ileti zamanlandı ya da gönderilmeye başladı; içeriği değişmez. Değiştirmek için kopyalayın.",
   "campaigns.status_conflict": "İletinin durumu az önce değişti; sayfayı yenileyin.",

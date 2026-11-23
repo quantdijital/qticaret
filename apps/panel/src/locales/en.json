@@ -2144,7 +2144,7 @@
       },
       "bulk": {
         "title": "Bulk message rules",
-        "description": "Limits for the e-mail and SMS campaigns sent from Growth > Bulk messages.",
+        "description": "Limits for the e-mail and SMS campaigns sent from Marketing > Bulk messages.",
         "cap": "At most one bulk message per person in 24 hours",
         "capHint": "Anyone who got another bulk message in the last 24 hours is left out of a new one; fewer complaints and unsubscribes.",
         "hours": "Bulk SMS hours",
