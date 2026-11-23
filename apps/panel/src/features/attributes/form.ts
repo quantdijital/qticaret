@@ -110,6 +110,15 @@ export function keyFromLabel(label: string): string {
 /** An option's value from its label: the slug facet URLs use (F3.17). */
 export const optionValue = (label: string): string => toSlug(label).slice(0, 100)
 
+/** A field's options with the ones just added from a product that the saved group lacks yet. */
+export const withAdded = (
+  options: readonly AttributeOption[],
+  added: readonly AttributeOption[]
+): AttributeOption[] => [
+  ...options,
+  ...added.filter((each) => !options.some((option) => option.value === each.value)),
+]
+
 /**
  * The definitions as the API takes them; list order becomes `rank`. Given
  * the template's section keys, each names its section (or none); without

@@ -157,8 +157,8 @@ describe("FactsDialog (adr/0013 Ek 2026-11-05)", () => {
     const dialog = await screen.findByRole("dialog")
     expect(await within(dialog).findByText("Uzunluk: 22 cm")).toBeTruthy()
     expect(within(dialog).getByText("Yazılacak")).toBeTruthy()
-    expect(within(dialog).getByText("Alanı yok")).toBeTruthy()
-    await userEvent.click(within(dialog).getByLabelText("Alan olarak ekle"))
+    expect(within(dialog).getByText("Grupta yok")).toBeTruthy()
+    await userEvent.click(within(dialog).getByLabelText("Özellik olarak ekle"))
     await userEvent.click(within(dialog).getByRole("button", { name: "Aktar" }))
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
@@ -205,7 +205,7 @@ describe("FactsDialog (adr/0013 Ek 2026-11-05)", () => {
     )
     renderDialog(["prod_1"])
     const dialog = await screen.findByRole("dialog")
-    expect(await within(dialog).findByText("Şablonu olmayan 1 ürün için şablon")).toBeTruthy()
+    expect(await within(dialog).findByText("Özellik grubu olmayan 1 ürün için grup")).toBeTruthy()
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
         "/admin/description-facts/preview",

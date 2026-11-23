@@ -31,6 +31,7 @@ import { AddonNotice } from "@/features/products/detail/addon-notice"
 import { productFold } from "@/features/products/detail/sections"
 import { errorText } from "@/lib/errors"
 import { isEmpty } from "@/features/attributes/empty"
+import { useAddOption } from "@/features/attributes/use-add-option"
 import { useAttributesAi } from "@/features/attributes/use-attributes-ai"
 import { AttributeFields } from "./attribute-fields"
 import { AttributesAiButton } from "./attributes-ai"
@@ -42,12 +43,15 @@ function AttributesForm({
   saved,
   action,
   fold,
+  canEdit,
 }: {
   productId: string
   saved: ProductAttributes
   /** Beside the title: bringing the description's facts over. */
   action?: ReactNode
   fold?: SectionFindings | undefined
+  /** May write the catalog: a missing value can be added to the group from here. */
+  canEdit: boolean
 }) {
   const { t } = useTranslation()
   const templates = useQuery(templatesQuery())
@@ -69,12 +73,14 @@ function AttributesForm({
   const dirty = changedTemplate || JSON.stringify(values) !== JSON.stringify(saved.values)
   // The AI fills the saved template's empty public fields (the backend reads the saved product)
   const ai = useAttributesAi(productId)
+  // A missing value of a list field is added to the group without leaving the product
+  const addOption = useAddOption(canEdit ? template : null)
   const fillable =
     !changedTemplate &&
     definitions.some(
       (definition) => definition.is_public !== false && isEmpty(saved.values[definition.key])
     )
-  // Folded, its line: the template and how many of its fields are filled ("Bıçak şablonu · 14/18 alan dolu")
+  // Folded, its line: the template and how many of its fields are filled ("Bıçak · 14/18 özellik dolu")
   const filled = definitions.filter((definition) => !isEmpty(values[definition.key])).length
   const requiredEmpty = definitions.filter(
     (definition) => definition.is_required && isEmpty(values[definition.key])
@@ -126,7 +132,6 @@ function AttributesForm({
   return (
     <CardForm
       title={t("attributes.productCard")}
-      description={t("attributes.productHint")}
       action={
         ai.shown && (fillable || ai.open) ? (
           <div className="flex flex-wrap gap-2">
@@ -153,11 +158,7 @@ function AttributesForm({
         setValues(saved.values)
       }}
     >
-      <Field
-        label={t("attributes.template")}
-        htmlFor="attributes-template"
-        hint={templates.data?.length === 0 ? undefined : t("attributes.templatePickHint")}
-      >
+      <Field label={t("attributes.template")} htmlFor="attributes-template">
         {templates.data?.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {t("attributes.noTemplates")}{" "}
@@ -203,7 +204,13 @@ function AttributesForm({
           )}
         />
       ) : null}
-      <AttributeFields definitions={definitions} values={values} setValues={setValues} ai={ai} />
+      <AttributeFields
+        definitions={definitions}
+        values={values}
+        setValues={setValues}
+        ai={ai}
+        addOption={addOption}
+      />
       <ConfirmDialog
         open={confirmChange}
         onOpenChange={setConfirmChange}
@@ -248,6 +255,7 @@ export function AttributesCard({
         productId={productId}
         saved={query.data}
         fold={fold}
+        canEdit={canEdit}
         action={
           canEdit ? (
             <Button

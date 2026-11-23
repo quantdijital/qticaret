@@ -64,7 +64,7 @@ describe("AttributesPage", () => {
     fetchMock.mockResolvedValue({ attribute_templates: [], count: 0 })
     renderPage()
 
-    expect(await screen.findByText(/Henüz şablon yok/)).toBeInTheDocument()
-    expect(screen.getAllByRole("button", { name: "Şablon oluştur" })).toHaveLength(2)
+    expect(await screen.findByText(/Henüz özellik grubu yok/)).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: "Özellik grubu ekle" })).toHaveLength(2)
   })
 })

@@ -80,9 +80,9 @@ describe("the new product's attributes", () => {
     act(() => {
       form().setError("attributes.material", { message: "products.errors.attributeRequired" })
     })
-    expect(await screen.findByText(/şablonda zorunlu/)).toBeInTheDocument()
+    expect(await screen.findByText(/Bu özellik zorunlu/)).toBeInTheDocument()
     await userEvent.setup().type(input, "Seramik")
-    expect(screen.queryByText(/şablonda zorunlu/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Bu özellik zorunlu/)).not.toBeInTheDocument()
     expect(form().getValues("attributes")).toEqual({ material: "Seramik" })
   })
 })
