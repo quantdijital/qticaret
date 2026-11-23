@@ -82,7 +82,7 @@ export function CategoryIcons({
                     </span>
                   )}
                 </span>
-                <span className="text-sm leading-snug font-semibold text-balance group-hover:underline">
+                <span className="text-sm leading-snug font-semibold text-balance transition-colors group-hover:text-text-2">
                   {item.label}
                 </span>
                 {typeof item.count === "number" && (
