@@ -138,7 +138,7 @@ export function windowStatement(
       .join(" OR ") || "false"
   const cte = `WITH c AS MATERIALIZED (
       SELECT s.id, s.bookable_id, s.starts_at, s.ends_at, s.status, s.capacity, s.sold,
-             s.price_adjustments, b.product_id
+             s.price_adjustments, b.product_id, b.timezone
         FROM booking_slot s
         JOIN bookable b ON b.id = s.bookable_id AND b.deleted_at IS NULL AND b.mode = 'departure'
        WHERE s.status = 'open' AND s.deleted_at IS NULL

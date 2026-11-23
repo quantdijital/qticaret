@@ -1,3 +1,4 @@
+import { IDS_ONLY_LIMIT } from "../types"
 import type { FacetCount, ListingPlan, ListingResult } from "../types"
 import { ranking } from "./ranking"
 import { Statement } from "./statement"
@@ -154,11 +155,17 @@ export function listingStatement(plan: ListingPlan): { sql: string; params: unkn
       ? `, array_position(${sql.textArray(plan.order_ids ?? [])}, m.product_id) AS ord_at`
       : ""
   const selects = [`(SELECT count(*)::integer FROM f WHERE ${all}) AS count`]
+  const limit = plan.idsOnly ? Math.min(plan.page.limit, IDS_ONLY_LIMIT) : plan.page.limit
   if (!plan.countOnly) {
     selects.push(
       `(SELECT coalesce(jsonb_agg(p.product_id ORDER BY ${order}), '[]'::jsonb)
           FROM (SELECT * FROM f WHERE ${all} ORDER BY ${order}
-                 LIMIT ${sql.param(plan.page.limit)} OFFSET ${sql.param(plan.page.offset)}) p) AS ids`,
+                 LIMIT ${sql.param(limit)} OFFSET ${sql.param(plan.page.offset)}) p) AS ids`
+    )
+  }
+  // Only the ids: a calendar's scope needs no facets (adr/0077 §6)
+  if (!plan.countOnly && !plan.idsOnly) {
+    selects.push(
       `(SELECT coalesce(jsonb_agg(jsonb_build_array(b.brand_handle, b.name, b.n)), '[]'::jsonb)
           FROM (SELECT brand_handle, min(brand_name) AS name, count(*)::integer AS n FROM f
                  WHERE brand_handle IS NOT NULL AND ${allBut(conditions, "fb")}

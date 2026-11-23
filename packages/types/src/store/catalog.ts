@@ -229,6 +229,21 @@ export interface StoreCardFacts {
   }
 }
 
+/**
+ * `GET /store/departures/calendar?month=YYYY-MM[&kategori=][&kisi=]`
+ * (adr/0077 §6), only while the shop sells dated products: each local day
+ * of the month (the product's zone) with a departure a date search would
+ * match, how many, and the lowest paying price over them (a guest's, in
+ * lira as the card's `from_price`: 1750.5; each departure's difference
+ * added; null when none has a price). Lira only. Days without one are
+ * left out.
+ */
+export interface StoreDepartureCalendar {
+  month: string
+  currency: "try"
+  days: { date: string; from_price: number | null; departures: number }[]
+}
+
 export interface StoreProduct {
   id: string
   title: string

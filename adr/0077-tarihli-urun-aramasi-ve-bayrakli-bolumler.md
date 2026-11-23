@@ -76,6 +76,14 @@ Fiyata göre sıralama ve fiyat süzgeci dizindeki fiyatı kullanır. Tarihli ü
 
 `GET /store/departures/calendar`: gün başına en düşük fiyat ve kalkış sayısı. Yalnız TL. 60 saniye önbellek, hız sınırı, `catalog.booking` bayrağı. Tek istekte bakılan ürün kümesi en çok 1000 ile sınırlıdır (`ListingPlan.idsOnly`). Vitrinde takvim "Kesin tarih / Esnek ay" sekmeli, günün altında fiyatla; kodu yalnız takvim açılınca yüklenir.
 
+**Uygulama notu (PR4, takvim backend'i).** `GET /store/departures/calendar?month=YYYY-MM[&kategori=<handle>][&kisi=1..20]` → `{ month, currency: "try", days: [{ date, from_price, departures }] }`; kalkışı olmayan gün yazılmaz. `month` aramanın okuduğu aylardan biri olmalı (bu ay + 11, `facets-dated.ts`), değilse 400; bilinmeyen parametre 400.
+
+- **Akış** (`workflows/booking/calendar.ts`): ayda §3'e uyan ürünler (`departureMatches`, en yakın 1000) → arama dizininde kimlikle süzülür (`ListingPlan.idsOnly`: yalnız sayım + kimlik, sayfa en çok `IDS_ONLY_LIMIT` = 1000; yayımlanmış, alışverişçinin satış kanalı, `kategori` gösterilen alt ağacıyla) → yalnız hâlâ `booking_mode = departure` olanlar → tek SQL (`modules/booking/calendar.ts`: PR2'nin `windowStatement`'ı, `GROUP BY` yerel gün + bookable, gün başına kalkış sayısı ve ayrı fiyat farkı kümeleri; bütün değerler bağlı).
+- **Fiyat** kartın kuralıyla sunucuda: misafir taban fiyatı + kalkış farkı, yer tutan kategoriler (`card-facts.ts` `payingPricesAt`, `basePrices` ortak). Birim **kartın `from_price`'ı gibi lira** (1750.5), kuruş değil: vitrinin bütün fiyat alanları bu birimde.
+- Gün ürünün saat diliminde (`starts_at AT TIME ZONE timezone`); ay sınırı da öyle (PR2).
+- `catalog.booking` kapalı: 404 (`requireFeature`, ilk ara katman). Hız sınırı `departure_calendar`: IP başına dakikada 60. Süreç içi önbellek 60 sn; anahtar ay + kategori + kişi + satış kanalları. Yanıt `Cache-Control: no-store`.
+- Kapsam dışı (PR6 isterse): `q` ve nitelik süzgeci (ör. `gidilecek_yer`) takvimde yok; takvim kategori ve kişiyle daralır.
+
 ### 7. Doğal dille arama (isteğe bağlı üçüncü kat)
 
 "Kendi cümlenle ara": müşteri "ağustosta iki kişi Kapadokya" yazar, sunucu bunu §2'deki süzgeçlere çevirir.
@@ -159,6 +167,7 @@ Rezervasyon dosyalarına dokunan açık bir iş dalı (talep formu) varken PR2 v
 - **Güvenlik ve KVKK.** Doğal dil ucu herkese açık bir LLM kapısıdır: hız sınırı, günlük tavan, önbellek, gerekirse challenge; çıktı yalnız süzgeçtir, eylem tetiklemez; metin saklanmaz ve kullanım kaydına yazılmaz. adr/0071 §10'a istisna bu ADR'nin §7'sidir; bayrak varsayılan kapalı ve yalnız mağazanın kendi anahtarıyla.
 - **Biçim sözleşmesi.** Mevcut biçimler yerinde değişmez: Hero'ya yeni biçim, `reviews`'a yeni biçim (eski çizim `grid` adıyla aynen), kart alanları isteğe bağlı. Yeni Atölye CSS dosyaları `styles.lock.json`'u değiştirir; bilerek `pnpm lock:presets`, PR'a "HTML aynı, yalnız stil özeti". Paralel PR'larda kilit örnekleri çakışabilir: rebase sonrası kilit yeniden yazılır.
 - **Bilinen sınır.** Fiyat sıralaması dizin fiyatıyla, kart fiyatı aralıkla (§5).
+- **Bilinen sınır (takvim, §6).** Ayın en yakın 1000 ürünü, satış kanalı ve kategori süzgecinden **önce** seçilir; süzgeç sonra uygulanır. Sızıntı yoktur (başka kanalın ya da kategorinin ürünü hiç görünmez), ama ayda 1000'den çok tarihli ürünü olan mağazada takvim bazı günleri eksik gösterebilir.
 
 ## Açık
 
