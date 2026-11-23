@@ -31,6 +31,7 @@ import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/lay
 import type { ProductsSection } from "@/features/storefront/api/layout-shelf"
 import type { StripGallerySection } from "@/features/storefront/api/layout-strips"
 import type { StatsSection, StepsSection } from "@/features/storefront/api/layout-points"
+import type { DeparturesSection } from "@/features/storefront/api/layout-departures"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
@@ -338,6 +339,7 @@ export type HomeSection =
   | StripGallerySection
   | StatsSection
   | StepsSection
+  | DeparturesSection
   | CategoriesSection
   | ProductsSection
   | FeaturedProductSection

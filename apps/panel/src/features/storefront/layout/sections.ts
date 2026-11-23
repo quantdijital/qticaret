@@ -60,6 +60,7 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "faq",
   "stats",
   "steps",
+  "departures",
   "trust_badges",
   "marquee",
   "price_bands",

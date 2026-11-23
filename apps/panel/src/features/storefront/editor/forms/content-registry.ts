@@ -2,6 +2,7 @@ import {
   FEATURED_PRODUCT_SETTINGS,
   RICH_TEXT_IMAGE_SIDES,
   STEPS_SETTINGS,
+  DEPARTURES_SETTINGS,
   STRIP_GALLERY_SETTINGS,
   newsletterHasNote,
 } from "@qticaret/types"
@@ -56,6 +57,7 @@ export type ContentField =
   | "dividers"
   | "steps_layout"
   | "numbers"
+  | "departures_layout"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -248,6 +250,21 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "stats":
     case "steps":
       return pointsFields(section)
+    // The count in the content; the list or cards in "Diziliş" (adr/0077 §10)
+    case "departures":
+      return [
+        { ...limit(section), term: `${E}.departures.limitTerm` },
+        {
+          ...entry(
+            section,
+            "departures_layout",
+            `${E}.departures.layout.label`,
+            DEPARTURES_SETTINGS.layout.map((step) => `${E}.departures.layout.${step}`),
+            "layout"
+          ),
+          term: `${E}.departures.layout.term`,
+        },
+      ]
     // The picture's side beside the text, while the variant has one (adr/0073 §3)
     case "rich_text":
       return section.variant === "with_image"

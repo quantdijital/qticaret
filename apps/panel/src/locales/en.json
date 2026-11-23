@@ -8729,6 +8729,10 @@
         "steps": {
           "name": "Numbered steps",
           "description": "3–6 steps of a process in order, numbered: a title, a short intro and an optional single link under them."
+        },
+        "departures": {
+          "name": "Upcoming departures",
+          "description": "Your dated products' nearest departures: date, tour name, places left and price; the storefront reads them live."
         }
       },
       "variants": {
@@ -8936,7 +8940,8 @@
         "faq": "Frequently asked questions",
         "related_products": "Related products",
         "price_bands": "Shop by price",
-        "steps": "How it works"
+        "steps": "How it works",
+        "departures": "Upcoming departures"
       },
       "fields": {
         "eyebrow": "Eyebrow",
@@ -10839,6 +10844,26 @@
           "hint": "How the number before each step is written.",
           "padded": "01, 02",
           "plain": "1, 2"
+        }
+      },
+      "departures": {
+        "intro": "Intro",
+        "source": "Departures",
+        "sourceTerm": "source",
+        "sourceHint": "The nearest departures on sale with places left, by date; a tour at most twice.",
+        "sources": {
+          "all": "Every dated product",
+          "category": "A category's products",
+          "collection": "A collection's products"
+        },
+        "limitTerm": "limit",
+        "limitHint": "Between {{min}} and {{max}} departures.",
+        "layout": {
+          "label": "Layout",
+          "term": "layout",
+          "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
+          "list": "List",
+          "cards": "Cards"
         }
       }
     },

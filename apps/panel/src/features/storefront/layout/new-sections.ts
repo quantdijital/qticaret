@@ -18,6 +18,8 @@ import {
   MARQUEE_DEFAULTS,
   STATS_DEFAULTS,
   STEPS_DEFAULTS,
+  DEPARTURES_DEFAULTS,
+  DEPARTURES_LIMITS,
   SLIDER_DEFAULTS,
   STRIP_GALLERY_DEFAULTS,
   defaultVariant,
@@ -137,6 +139,17 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         items: [0, 1, 2].map(() => ({ title: "", text: null })),
         link: null,
         ...STEPS_DEFAULTS,
+      }
+    // Every dated product's nearest departures, as a list (adr/0077 §10)
+    case "departures":
+      return {
+        ...base,
+        type,
+        title: null,
+        intro: null,
+        source: { kind: "all" },
+        limit: DEPARTURES_LIMITS.limit.default,
+        ...DEPARTURES_DEFAULTS,
       }
   }
 }
