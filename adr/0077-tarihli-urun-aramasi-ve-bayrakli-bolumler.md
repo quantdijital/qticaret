@@ -147,6 +147,12 @@ Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; �
 - `SECTION_VARIANTS`'a girmediler: tek çizim var; biçimsiz kayıt varsayılan okunduğu için ikinci biçim geldiğinde liste ilk sıradaki bugünkü çizimle açılır, göç gerekmez.
 - Bilerek yok: ikon/görsel (adımlar sade numara), düğme stili (tek bağlantı temanın ana düğmesi), telefon sütun ayarı (rakam telefonda ikişer, adımlar alt alta).
 
+**Uygulama notu (dalga 8, "Vadi": `posts` ve `banner` biçimleri).** İki bölüm ilk kez biçim listesi aldı; listenin ilki bugünkü çizim ve varsayılan (`posts`: `grid` "Kutucuklar", `banner`: `standard` "Görsel üstü yazı"), biçimsiz kayıt onu okur, mağaza API'si onu biçimden önceki gibi basar; kilitli görünümlerin HTML'i değişmedi (yalnız `styles.lock.json`'da `look.css`, `styles.css` ve yeni `split.css` özetleri).
+
+- `posts` `intro_panel` "Tanıtım paneli": yuvarlak köşeli tek panel; solda üst satır (`eyebrow` ≤40), başlık, giriş (`intro` ≤200) ve düğme (`link`; yoksa vitrinin "Tüm yazılar"ı), sağda sayının ilk 2–3 yazısı kart olarak (kapak, başlık, okuma süresi · tarih); telefonda alt alta. Sözleşme `section-posts.ts`, backend `sections/posts.ts`.
+- `banner` `split` "Bölünmüş bant": ilk slaytın görseli solda, sağda panelde üst satır (`eyebrow` ≤40), slaytın başlığı, metni ve düğmeleri (bandın düğme stiliyle); `edge` **straight**/curved ("Geçiş: Düz / Yuvarlak", Diziliş'te yüksekliğin yanında; yuvarlak, görselin iç kenarını `clip-path` ile yumuşak bir yayla panele bağlar, telefonda görselin altında). Slaytlar, genişlik ve yükseklik ortaktır, geçişte korunur; yazının yeri ve perde bu biçimde anlamsız olduğundan panelde gizlenir. Diğer slaytlar saklanır, çizilmez.
+- Zemin yine bölümün `look.ground`'u (bir kavram bir takım), ama bu iki biçimde bölüm kutusunu değil kendi panelini boyar (`panel-ground.ts`; `look.css` zemin kuralları `.gf-ground` kutusunu da alır). Ayarlanmamışsa tanıtım paneli "Hafif ton" (`well`), bölünmüş bant "Koyu" (`stage`).
+
 ### 11. travel paketi sürüm 2
 
 - Yeni seçim niteliği **"Gidilecek yer"** (`gidilecek_yer`): filtrelenebilir; üründe tek değer, süzgeçte çoklu seçim. Arama kutusunun "nereye" alanı bunu kullanır.
