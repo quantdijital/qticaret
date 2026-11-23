@@ -82,7 +82,7 @@ export async function withCheckedVideo<T>(
   try {
     // The product, its room and the storage limit first: they need no body and no tools,
     // and say more than "unavailable" would
-    await precheck(req.scope as MedusaContainer, productId, declaredBytes(req))
+    await precheck(req.scope, productId, declaredBytes(req))
     if (!(await videoUploadAvailable())) {
       throw new RetryableError("video.upload_unavailable")
     }
