@@ -1,5 +1,12 @@
 export { SEO_META_LIMITS, isSitePath, seoTextHash } from "./meta"
-export { RESERVED_ROOT_SEGMENTS, SYSTEM_PAGES, isReservedPath, startsInReservedRoot } from "./paths"
+export {
+  RECORD_PREFIXES,
+  RESERVED_ROOT_SEGMENTS,
+  SYSTEM_PAGES,
+  isReservedPath,
+  isStorefrontKept,
+  startsInReservedRoot,
+} from "./paths"
 export { SERP_LIMITS, SERP_TEXT_LENGTH, estimatePixelWidth, fitsSerp } from "./pixel-width"
 export type { SerpField } from "./pixel-width"
 export { SLUG_MAX_LENGTH, SLUG_SEGMENT, isValidSlug, toSlug } from "./slug"

@@ -26,12 +26,17 @@ const template = z
 
 // `{sitemap_url}` is filled in when robots.txt is generated (F3.6); `{facet_disallow}`
 // becomes a line per listing filter, sort and price parameter (F3.17)
+// Each system page exactly, below it and with a query: a bare prefix (`Disallow: /hesap`)
+// would also close a shop's `/hesap-makineleri` category (adr/0017 Ek 2026-11-23)
+const SYSTEM_DISALLOW = ["sepet", "odeme", "hesap", "arama"].flatMap((segment) => [
+  `Disallow: /${segment}$`,
+  `Disallow: /${segment}/`,
+  `Disallow: /${segment}?`,
+])
+
 export const DEFAULT_ROBOTS_TXT = [
   "User-agent: *",
-  "Disallow: /sepet",
-  "Disallow: /odeme",
-  "Disallow: /hesap",
-  "Disallow: /arama",
+  ...SYSTEM_DISALLOW,
   "{facet_disallow}",
   "",
   "Sitemap: {sitemap_url}",

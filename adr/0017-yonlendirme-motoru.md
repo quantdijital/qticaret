@@ -107,4 +107,10 @@ Uygulamada kararın iki noktası değişti. Kullanıcı yokken önerilen seçene
 | Ayrı `category_paths` alanı | Ad açık | Aynı bilgi iki alanda (`url_style.category` + yeni alan), eski kayıtlarla göç gerekir |
 | Eski adreslere 301 (biçim eklemeden) | Kod yok | Kategori adresleri değişir; sıralama aktarımı 301'e kalır, sahip istemedi |
 
+**Güvenlik incelemesinden sonra eklenenler (aynı gün).**
+
+- **Kayıt düzeyinde ret.** `url-registry` `assertClaimable` artık ayrılmış bir kökün altındaki her yolu reddeder (`/sepet/x`, `/yasal/x`, `/hediye-karti/x`: `seo.path_reserved`). İstisna, kayıtların yaşadığı önekler: `urun`, `kategori`, `marka`, `koleksiyon`, `blog` (`RECORD_PREFIXES`). Kategori düzeyindeki kontrol daha açık hata verdiği için kalır. Taşımanın eski adres rezervi (`urls-apply`) bu yoldan geçmez; eski sitenin kendi yolları rezerve edilebilmeye devam eder.
+- **Vitrin rotaları sözleşmesi.** Bir birim testi vitrinin `app/` kök klasörlerini (sayfa ya da rota içerenleri; `[...]`, `_x`, `%5Fx` hariç) ve `SYSTEM_ROOTS` / `STOREFRONT_INDEXES` listelerini okur. Her biri backend'in `RESERVED_ROOT_SEGMENTS` kümesinde olmalı. Vitrine yeni kök rota eklenip backend'de ayrılmazsa test düşer.
+- **Varsayılan robots.txt.** `Disallow: /hesap` gibi çıplak önekler `/hesap-makineleri` kategorisini de kapatıyordu. Varsayılan artık her sistem sayfasını tam olarak, altıyla ve sorgusuyla kapatır (`/hesap$`, `/hesap/`, `/hesap?`). Mağazanın kendi yazdığı şablon değişmez. Eski varsayılanı kaydetmiş mağazayı `seo-robots-exact-system-pages` göç betiği yeni varsayılana çevirir ve denetim kaydına sistemin işi olarak yazar. S-ROBOTS-01 denetimi örnek sayfalara mağazanın gerçek kök kategorilerini (en çok 50) de katar.
+
 **Sonuçlar.** Kategori tabanı kaldırılmış WooCommerce mağazası `nested` seçerek kategori adreslerini birebir korur. Kökte ürün ve kategori aynı ad alanını paylaşır; çakışma kayıt anında ve biçim değişimi planında görünür.
