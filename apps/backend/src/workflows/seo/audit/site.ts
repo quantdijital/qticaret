@@ -21,6 +21,8 @@ const samplePages = (style: SeoSettings["url_style"]): string[] => [
   "/",
   productPath("ornek-urun", style.product),
   categoryPath(["ornek-kategori"], style.category),
+  // A subcategory: the prefixed and nested styles carry the tree (adr/0017 Ek 2026-11-23)
+  categoryPath(["ornek-kategori", "ornek-alt-kategori"], style.category),
   // A facet landing page sits under its category (F3.16)
   `${categoryPath(["ornek-kategori"], style.category)}/ornek-filtre`,
   brandPath("ornek-marka", style.brand),

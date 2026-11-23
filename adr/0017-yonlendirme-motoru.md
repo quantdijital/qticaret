@@ -80,3 +80,31 @@ Uygulamada kararın iki noktası değişti. Kullanıcı yokken önerilen seçene
   - Günlük iş 90 günden eski kayıtları siler ve en çok istenen 10.000 kaydı tutar.
 - **Kaynakta sorgu dizesi kabul edilmiyor** (`/urun.php?id=12`). F14 geçiş aracı bu tür adresleri eşleme raporuna düşürür.
 - **Hedef yalnızca site içi göreli yol** (sorgu dizesi olabilir). Canonical host doğrulaması gelene kadar mutlak URL kabul edilmiyor (docs/13 §3).
+
+## Ek (2026-11-23): öneksiz ağaç kategori adresleri (`nested`)
+
+**Bağlam.** Adres biçimi (docs/13 §2.2, F3 T4) ürün, kategori ve marka için ayrı ayrı `prefixed` ya da `flat` seçiliyordu. Kategoride `flat` öneki atarken üst kategorileri de atıyordu (`/kategori/hediyelik-esyalar/caki-kutusu` → `/caki-kutusu`). Kategori tabanı kaldırılmış WooCommerce siteleri (sahibin eski sitesi: `/el-yapimi-caki/damascus-cakilar/`) ağacı öneksiz sunuyor; bu mağazalar bizde aynı adresi tutamıyor, her alt kategori 301 alıyordu. Sahip onayı (2026-11-23): yeni seçenek olarak eklensin, mevcut biçimler değişmesin.
+
+**Karar.**
+
+- Kategori adres biçimine üçüncü değer: `url_style.category: "prefixed" | "nested" | "flat"`. `nested` = `/{ata-slug'ları}/{slug}`. Ürün ve marka `prefixed | flat` olarak kalır. Ayar zaten varlık başına olduğu için üçüncü bir genel `UrlStyle` yerine yalnız kategorinin değer kümesi genişledi; ürün ve markada "ağaç" anlamsız olurdu. Varsayılan `prefixed`; kayıtlı ayarlar aynen geçerli.
+- **Çakışma kuralı.** Yol tekilliği yine `url-registry`'de, `(locale, path)`:
+  - Kök kategori `nested` ve `flat` biçimlerinde aynı yolu alır (`/hediyelik-esyalar`). Kökteki ürün, sayfa, marka ya da landing ile çakışırsa kayıt `seo.path_taken` ile reddedilir. Biçim değişimi planı bunu `taken` ya da `shared` olarak listeler ve iş başlamaz.
+  - Derinde: alt kategori yolu (`/a/b`) aynı kategorinin landing yoluyla (`/a/{facet-slug}`) aynı biçimde. Önekli biçimdeki gibi ilk kaydeden alır, ikincisi reddedilir.
+  - Ayrılmış kök segmentler (`sepet`, `yasal`, `blog`, `urun`, `sitemap*` …): kök kategori zaten `seo.path_reserved` alıyordu. `nested`'de bunun altındaki hiçbir yol da alınamaz (`startsInReservedRoot`), çünkü vitrinin kendi rotaları (`/yasal/[slug]`, `/siparis/[id]`) orada yanıt verir. Plan bu kayıtları `reserved_root` olarak listeler. Kaydetmede kategori `seo.path_reserved` ile reddedilir; aynı kaydetmede değişen bir alt kategori atlanır ve loglanır (eski davranış).
+  - Numara eklenmez. Kategori handle'ı sahibin yazdığı slug'dır ve çakışma nedeniyle reddedilir (ürün kopyasındaki `-2` yalnız yeni handle üretiminde var).
+- **Geçiş ve 301.** Biçim değişimi mevcut `seo.url_style` işiyle yapılır: plan → her kaydın yeni yolu partilerle `claimPaths` (eski yol `reserved`) → landing'ler kategorinin yeni yolunu izler (`claimLandingsBelow`) → biçim en sonda kaydedilir. Eski yollar registry'de rezerve kalır, çözümleme onları tek atlamada güncel yola 301'ler (uygulama notu). `flat` ↔ `nested` geçişinde kök kategoriler taşınmaz (aynı yol), yalnız alt kategoriler taşınır. Kaydetme anındaki kanca bir kaydın "kabul edilen" yollarına üç biçimi de sayar; biçim değişimi tek iş olarak kalır, ilgisiz düzenlemeleri bloklamaz.
+- **Ad değişimi ve taşıma.** `nested` ağacı taşıdığı için önekli biçimdeki gibi alt ağacın tamamı (ve altındaki landing'ler) aynı işlemde yeni yolunu alır, eskiler 301'ler.
+- **Site haritası, breadcrumb, JSON-LD, canonical** yolu registry'den okur. Ayrı iş gerekmez. SEO denetimi (robots) örnek sayfalara bir alt kategori ekledi. Advisor `C-DEPTH-01` ağaç derinliğine bakar, URL'ye değil; değişmedi.
+- **Taşıma (F14).** WordPress kaynağı kategori tabanını zaten algılıyor (`detectBase`, `/` = tabansız). Adres envanteri özeti (`GET /admin/migrations/urls/summary`) artık `category_style` döner: eski kategori adreslerinden kaçını her biçimin aynen koruduğu ve şimdikinden daha çoğunu koruyan biçim (`suggested`). Panelin "Eski adresler" kartı bunu bilgi notu olarak gösterir ve Adres biçimi ayarına bağlantı verir. Ayar sessizce değiştirilmez; seçim sahibindir. Shopify'da kategori ağacı adresi yok (`/collections/x`), öneri çıkmaz.
+
+**Alternatifler.**
+
+| Seçenek | Artı | Eksi |
+|---|---|---|
+| **Kategori ayarına üçüncü değer (seçilen)** | Mevcut ayar modeli ve taşıma işi aynen kullanılır; ürün ve markada anlamsız seçenek yok | Kategori tipi ürün ve markanınkinden ayrılır |
+| Üçüncü genel `UrlStyle` | Tek tip | Ürün ve markada `nested` = `flat`; panelde ve doğrulamada boş seçenek |
+| Ayrı `category_paths` alanı | Ad açık | Aynı bilgi iki alanda (`url_style.category` + yeni alan), eski kayıtlarla göç gerekir |
+| Eski adreslere 301 (biçim eklemeden) | Kod yok | Kategori adresleri değişir; sıralama aktarımı 301'e kalır, sahip istemedi |
+
+**Sonuçlar.** Kategori tabanı kaldırılmış WooCommerce mağazası `nested` seçerek kategori adreslerini birebir korur. Kökte ürün ve kategori aynı ad alanını paylaşır; çakışma kayıt anında ve biçim değişimi planında görünür.

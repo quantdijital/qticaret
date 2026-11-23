@@ -14,6 +14,8 @@ const MAX_ROBOTS_BYTES = 8 * 1024
 const MAX_ROBOTS_LINES = 500
 
 const urlStyle = z.enum(["prefixed", "flat"])
+// Categories also take the tree without the prefix (adr/0017 Ek 2026-11-23)
+const categoryUrlStyle = z.enum(["prefixed", "nested", "flat"])
 const cleanText = { message: "platform_settings.text_invalid" }
 const template = z
   .string()
@@ -46,12 +48,16 @@ function isRobotsTxt(text: string): boolean {
 
 type TemplateEntity = keyof typeof SEO_TEMPLATE_TOKENS
 type UrlStyle = "prefixed" | "flat"
+type CategoryUrlStyle = UrlStyle | "nested"
 
 export interface SeoSettings {
   /** Lower-case host the storefront's canonical URLs use; null until a domain is set. */
   canonical_host: string | null
-  /** docs/13 §2: `/urun/{slug}` (prefixed) or `/{slug}` (flat). */
-  url_style: { product: UrlStyle; category: UrlStyle; brand: UrlStyle }
+  /**
+   * docs/13 §2: `/urun/{slug}` (prefixed) or `/{slug}` (flat); a category
+   * also `/{ata-slug'ları}/{slug}` (nested, adr/0017 Ek 2026-11-23).
+   */
+  url_style: { product: UrlStyle; category: CategoryUrlStyle; brand: UrlStyle }
   title_templates: {
     product: string
     category: string
@@ -82,7 +88,9 @@ export const seoSection = defineSection<SeoSettings>(
       .toLowerCase()
       .regex(HOSTNAME, { message: "platform_settings.host_invalid" })
       .nullable(),
-    url_style: z.object({ product: urlStyle, category: urlStyle, brand: urlStyle }).strict(),
+    url_style: z
+      .object({ product: urlStyle, category: categoryUrlStyle, brand: urlStyle })
+      .strict(),
     title_templates: z
       .object({
         product: template,

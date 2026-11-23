@@ -87,6 +87,20 @@ export function isReservedPath(path: string): boolean {
 }
 
 /**
+ * Whether `path` starts in a root segment the storefront keeps
+ * (`/sepet/x`, `/yasal/x`): its own routes answer there whatever the
+ * registry holds. A nested category path (adr/0017 Ek 2026-11-23) may not,
+ * at any depth; the prefixed styles' paths are what the prefixes are for.
+ */
+export function startsInReservedRoot(path: string): boolean {
+  const first = path.split("/")[1] ?? ""
+  return (
+    RESERVED_ROOT_SEGMENTS.has(first) ||
+    RESERVED_ROOT_PREFIXES.some((prefix) => first.startsWith(prefix))
+  )
+}
+
+/**
  * How the storefront's own pages are indexed (docs/13 §6, §7): search
  * results stay out of the index but their links are followed; the rest
  * are nobody's search result. robots.txt keeps several of them out too.
