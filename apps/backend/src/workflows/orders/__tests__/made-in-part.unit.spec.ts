@@ -183,6 +183,7 @@ describe("staff close an iyzico refund made in part, sending nothing (D4-1)", ()
     expect(shop.createRefunds).toHaveBeenCalledWith({
       payment: "pay_01",
       amount: "240.00",
+      status: "succeeded",
       created_by: "user_01",
       note: checkedNote(REFERENCE),
     })
