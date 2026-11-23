@@ -1,6 +1,28 @@
 // The category section's variants in small for the "Biçim" choice (adr/0049 Ek 2026-11-15)
 
 /** Today's picture tiles: four pictures in a row, a name under each. */
+/** adr/0077 §10 Ek: one row of round discs, each an icon over its name. */
+export function CategoriesIcons() {
+  return (
+    <>
+      {[10, 33, 56, 79, 102].map((x) => (
+        <g key={x}>
+          <circle cx={x} cy={12} r={8} className="fill-current opacity-20" />
+          <circle cx={x} cy={12} r={3} className="fill-none stroke-current opacity-70" />
+          <rect
+            x={x - 7}
+            y={24}
+            width={14}
+            height={2.5}
+            rx={1}
+            className="fill-current opacity-60"
+          />
+        </g>
+      ))}
+    </>
+  )
+}
+
 export function CategoriesTiles() {
   return (
     <>

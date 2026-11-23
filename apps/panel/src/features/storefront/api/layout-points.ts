@@ -1,4 +1,4 @@
-import type { StatsSettings, StepsSettings } from "@qticaret/types"
+import type { SectionIcon, StatsSettings, StepsSettings } from "@qticaret/types"
 import type { BodySectionBase, LayoutLink } from "@/features/storefront/api/layout-sections"
 
 // The figures strip and the numbered steps of the theme editor's document (adr/0077 §10)
@@ -9,6 +9,8 @@ export interface StatsItem {
   /** May hold the shop's details (`{mağaza_adı}`). */
   label: string
   text: string | null
+  /** Its icon (adr/0077 §10 Ek), drawn while the strip shows icons; absent: none. */
+  icon?: SectionIcon
 }
 
 /** Two to six figures with an optional heading; its ground and alignment are the look's. */

@@ -19,12 +19,14 @@ import type {
   RichTextImageSide,
   RichTextVariant,
   TrustBadgesVariant,
+  TrustCardStep,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import type {
   CategoriesCollageFields,
   CategoriesPanelsFields,
+  CategoriesIconsFields,
   CategoriesLinkedFields,
 } from "@/features/storefront/api/layout-cards"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
@@ -164,7 +166,13 @@ interface CategoriesBase extends BodySectionBase {
 
 /** Today's picture tiles, the linked cards, the collage or the panels, each with its own fields (adr/0049). */
 export type CategoriesSection = CategoriesBase &
-  ({ variant: "tiles" } | CategoriesLinkedFields | CategoriesCollageFields | CategoriesPanelsFields)
+  (
+    | { variant: "tiles" }
+    | CategoriesLinkedFields
+    | CategoriesCollageFields
+    | CategoriesPanelsFields
+    | CategoriesIconsFields
+  )
 
 /**
  * One product up close (adr/0046 Ek 2026-11-05): the storefront adds its
@@ -229,11 +237,14 @@ export interface RichTextSection extends BodySectionBase {
   questions?: PageTextSwitch
 }
 
-export interface TrustBadgesSection extends BodySectionBase {
-  type: "trust_badges"
-  /** How the strip is drawn (adr/0049 Ek 2026-11-14 §2); the server fills the default on reading. */
-  variant: TrustBadgesVariant
-}
+/**
+ * How the strip is drawn (adr/0049 Ek 2026-11-14 §2; the server fills the
+ * default on reading); the card with its lift (adr/0077 §10 Ek).
+ */
+export type TrustBadgesSection = BodySectionBase & { type: "trust_badges" } & (
+    | { variant: Exclude<TrustBadgesVariant, "card"> }
+    | { variant: "card"; lift: TrustCardStep<"lift"> }
+  )
 
 export interface HelpSection extends BodySectionBase {
   type: "help"

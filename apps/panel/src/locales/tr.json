@@ -8734,7 +8734,8 @@
       "variants": {
         "trust_badges": {
           "strip": "Şerit",
-          "lined": "Çizgili kutular"
+          "lined": "Çizgili kutular",
+          "card": "Yüzen kart"
         },
         "header_bar": {
           "standard": "Solda logo",
@@ -8772,7 +8773,8 @@
           "tiles": "Görselli karo",
           "linked": "Alt kategorili kart",
           "collage": "Fotoğraflı kolaj",
-          "panels": "Fotoğraf panoları"
+          "panels": "Fotoğraf panoları",
+          "icons": "İkonlu sıra"
         },
         "related_products": {
           "grid": "Izgara",
@@ -10795,6 +10797,12 @@
           "label": "Ayırıcı çizgileri göster",
           "term": "divider",
           "hint": "Rakamların arasında ince çizgi; kapalıyken yalnız boşluk."
+        },
+        "iconOf": "Rakam {{number}} ikonu",
+        "icons": {
+          "label": "İkon göster",
+          "term": "icon",
+          "hint": "Her rakamın üstünde seçtiğiniz ikon; ikon seçilmeyen rakam ikonsuz görünür."
         }
       },
       "steps": {
@@ -10822,6 +10830,66 @@
           "padded": "01, 02",
           "plain": "1, 2"
         }
+      },
+      "trustCard": {
+        "lift": {
+          "label": "Üstteki bölüme taşsın",
+          "term": "overlap",
+          "hint": "Kutu bir önceki bölümün (çoğunlukla kapak görseli) alt kenarına biner. Sayfanın ilk bölümüyse taşmaz."
+        }
+      },
+      "categoryIcons": {
+        "icons": "Kategori ikonları",
+        "iconsHint": "İkon seçmediğiniz kategoride kategorinin görseli, o da yoksa adının baş harfi görünür.",
+        "iconsEmpty": "Kategori seçince her birine ikon verebilirsiniz; seçmezseniz ana kategoriler görselleri ya da baş harfleriyle görünür.",
+        "iconOf": "{{name}} ikonu",
+        "noIcon": "Görseli ya da baş harfi",
+        "disc": {
+          "label": "Daire zemini",
+          "term": "background",
+          "hint": "İkonun durduğu yuvarlağın görünüşü.",
+          "tint": "Ana rengin açık tonu",
+          "well": "Açık gri",
+          "line": "Çizgi"
+        },
+        "phone": {
+          "label": "Telefonda",
+          "term": "mobile",
+          "hint": "Dar ekranda sığmayan kategoriler yana kayar ya da alt satıra iner.",
+          "scroll": "Yana kaydır",
+          "wrap": "Alt satıra geç"
+        }
+      },
+      "icons": {
+        "none": "İkonsuz",
+        "truck": "Kargo",
+        "clock": "Saat",
+        "shield": "Güvenlik",
+        "card": "Kart",
+        "refresh": "İade ve değişim",
+        "award": "Ödül",
+        "gift": "Hediye",
+        "phone": "Telefon",
+        "compass": "Pusula",
+        "map_pin": "Konum",
+        "plane": "Uçak",
+        "mountain": "Dağ",
+        "palm": "Palmiye",
+        "leaf": "Yaprak",
+        "sun": "Güneş",
+        "landmark": "Tarihi yapı",
+        "house": "Ev",
+        "heart": "Kalp",
+        "users": "İnsanlar",
+        "star": "Yıldız",
+        "sparkles": "Parıltı",
+        "camera": "Fotoğraf makinesi",
+        "calendar": "Takvim",
+        "tag": "Etiket",
+        "package": "Paket",
+        "headset": "Destek",
+        "utensils": "Yemek",
+        "gem": "Mücevher"
       }
     },
     "maintenance": {
