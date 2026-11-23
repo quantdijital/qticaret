@@ -91,6 +91,14 @@ export const presetHref = z.string().refine((value) => isShopPath(value) || isHt
 /** A record by its kind and handle, in place of its id. */
 export const handleRef = z.strictObject({ $handle: z.string().max(110).regex(PRESET_HANDLE) })
 
+/**
+ * A content page by its handle, and only a page (`page:hakkimizda`): the
+ * apply opens a missing one as a draft (adr/0073 Ek 2026-11-19 (2) K6),
+ * so another kind's handle must never stand here.
+ */
+export const PAGE_HANDLE = /^page:[a-z0-9]+(?:-[a-z0-9]+)*$/
+export const pageRef = z.strictObject({ $handle: z.string().max(110).regex(PAGE_HANDLE) })
+
 /** One of the preset's images, in place of a media library address. */
 export const imageRef = z.strictObject({
   $image: z.string().regex(PRESET_IMAGE_PATH),
@@ -161,18 +169,27 @@ const sections = z.array(sectionFrame).max(PRESET_LIMITS.sections)
 const group = sections.optional()
 
 /**
- * A content page's own layout (adr/0073 §4): the page by its handle
- * (`{ "$handle": "page:hakkimizda" }`, checked with the other references),
- * its sections as the frame goes. The preset never makes the page: a shop
- * without one is told by the page's usual `name` (a label, never written
- * into the design). Which types a page takes and how many pages and
- * sections a design holds are the backend's design schema's to judge, as
- * for every group.
+ * A content page's section: one list, drawn in its order, the page's text
+ * a section in it (adr/0073 Ek 2026-11-19 (2) K1, K9). No `placement`:
+ * the page's sections no longer stand above or below a text apart.
+ */
+const pageSection = sectionFrame.refine((section) => !("placement" in section), {
+  message: "a page's section has no placement",
+})
+
+/**
+ * A content page's own layout (adr/0073 §4, Ek 2026-11-19 (2) K6): the
+ * page by its handle (`{ "$handle": "page:hakkimizda" }`, checked with the
+ * other references), its sections as the frame goes. A shop without the
+ * page has it opened as a draft under the page's usual `name` (its title;
+ * a label, never written into the design). Which types a page takes and
+ * how many pages and sections a design holds are the backend's design
+ * schema's to judge, as for every group.
  */
 const pageLayout = z.strictObject({
-  page_id: handleRef,
+  page_id: pageRef,
   name: plain(60).optional(),
-  sections: sections.min(1),
+  sections: z.array(pageSection).max(PRESET_LIMITS.sections).min(1),
 })
 
 /**

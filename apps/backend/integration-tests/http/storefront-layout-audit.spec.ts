@@ -1,5 +1,6 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
+import { LOOK, withCutlery } from "../helpers/designs"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 
@@ -7,10 +8,14 @@ jest.setTimeout(180 * 1000)
 
 interface AuditEntry {
   action: string
+  actor_type?: string
+  actor_id?: string | null
   resource_type: string | null
   resource_id: string | null
   outcome: number | null
-  changes: { diff?: Record<string, { before?: unknown; after?: unknown }> } | null
+  changes:
+    | ({ diff?: Record<string, { before?: unknown; after?: unknown }> } & Record<string, unknown>)
+    | null
 }
 
 interface AdminLayout {
@@ -147,6 +152,66 @@ medusaIntegrationTestRunner({
         after: "published",
       })
       expect(JSON.stringify(publication?.changes)).not.toContain("Yeni sayfa")
+    })
+
+    it("records the pages a look opened and the texts it kept, by id and reference only", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const asOwner = { headers: owner.headers }
+      await withCutlery(container)
+      const applied = await settle(
+        http.post<{ result: { made_pages: { page_id: string }[] } }>(
+          `/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/apply`,
+          {},
+          asOwner
+        )
+      )
+      expect(applied.status).toBe(200)
+      const [made] = applied.data.result.made_pages
+      expect(made?.page_id).toMatch(/^cnt_/)
+
+      let entry: AuditEntry | undefined
+      for (let attempt = 0; attempt < 30 && !entry; attempt++) {
+        const { data } = await http.get<{ audit_entries: AuditEntry[] }>(
+          "/admin/audit-log?resource_type=storefront_layout&limit=100",
+          asOwner
+        )
+        entry = data.audit_entries.find((each) => each.action === "storefront_layout.preset_pages")
+        if (!entry) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+      }
+      // adr/0073 Ek 2026-11-19 (2) K6, security review S9: the staff member's, ids only
+      expect(entry).toMatchObject({
+        actor_type: "user",
+        actor_id: owner.userId,
+        resource_id: `${LOOK.pack}/${LOOK.code}`,
+        changes: { made_pages: [made?.page_id], texts_kept: [] },
+      })
+      expect(JSON.stringify(entry?.changes)).not.toContain("Hakkımızda")
+
+      // Applied again: no page opened, the look's own text is the page's now, kept
+      expect(
+        (
+          await settle(
+            http.post(`/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/apply`, {}, asOwner)
+          )
+        ).status
+      ).toBe(200)
+      let second: AuditEntry[] = []
+      for (let attempt = 0; attempt < 30 && second.length < 2; attempt++) {
+        const { data } = await http.get<{ audit_entries: AuditEntry[] }>(
+          "/admin/audit-log?resource_type=storefront_layout&limit=100",
+          asOwner
+        )
+        second = data.audit_entries.filter(
+          (each) => each.action === "storefront_layout.preset_pages"
+        )
+        if (second.length < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+      }
+      expect(second.map((each) => each.changes?.["texts_kept"])).toContainEqual(["page:hakkimizda"])
     })
   },
 })
