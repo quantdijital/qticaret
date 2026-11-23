@@ -219,6 +219,23 @@ describe("SubscriptionPage: terms and payments (adr/0061 Ek C20)", () => {
     expect(screen.getByText("Standart")).toBeInTheDocument()
   })
 
+  it("links an invoice only over https", async () => {
+    serve(planOf({ billing: billingOf({}) }), {
+      payments: {
+        state: "ok",
+        records: [
+          record({ id: "chg_a", invoice_url: "javascript:alert(1)" }),
+          record({ id: "chg_b", invoice_url: "http://fatura.example.com/1.pdf" }),
+        ],
+      },
+    })
+    renderPage()
+
+    const card = await paymentsCard()
+    expect(await card.findAllByText("Fatura yok")).toHaveLength(2)
+    expect(card.queryByRole("link")).toBeNull()
+  })
+
   it("has no payments card for a shop without a control plane", async () => {
     serve(planOf({ managed: false, billing: null }), {
       payments: { state: "unmanaged", records: [] },

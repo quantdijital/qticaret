@@ -50,6 +50,8 @@ function Row({ record, today }: { record: PaymentRecord; today: string }) {
   const { t } = useTranslation()
   const state = paymentStateOf(record, today)
   const day = formatDate(paymentDayOf(record))
+  // The backend sends https only; held here too, so no other scheme is ever a link
+  const invoiceUrl = record.invoice_url?.startsWith("https://") ? record.invoice_url : null
   return (
     <TableRow>
       <TableCell className="pl-5">
@@ -69,9 +71,9 @@ function Row({ record, today }: { record: PaymentRecord; today: string }) {
         <StatusBadge tone={TONES[state]}>{t(`plan.history.state.${state}`)}</StatusBadge>
       </TableCell>
       <TableCell className="pr-5 text-right">
-        {record.invoice_url ? (
+        {invoiceUrl ? (
           <a
-            href={record.invoice_url}
+            href={invoiceUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-[13px] font-medium text-primary hover:underline"

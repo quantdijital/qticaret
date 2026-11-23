@@ -67,11 +67,12 @@ const billingSummarySchema = z.strictObject({
     .optional(),
   /**
    * The subscription's terms (Ek C20), optional as C16's: what one period
-   * costs (`price`, kuruş, the running period's; the package's before a
-   * subscription) and how long it is; the trial's first and next-paid day
-   * (both null without a trial). A shop takes documents without them.
+   * costs (`price`, kuruş, the running period's) and how long it is; the
+   * trial's first and next-paid day
+   * (both null without a trial); all null before a subscription. A shop
+   * takes documents without them.
    */
-  period: z.enum(BILLING_PERIODS).optional(),
+  period: z.enum(BILLING_PERIODS).nullable().optional(),
   price: z.int().min(0).nullable().optional(),
   trial_started_on: z.iso.date().nullable().optional(),
   trial_ends_on: z.iso.date().nullable().optional(),

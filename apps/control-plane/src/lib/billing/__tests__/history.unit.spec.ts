@@ -107,12 +107,10 @@ describe("billingHistoryOf (adr/0061 Ek C20)", () => {
 })
 
 describe("subscriptionTerms (adr/0061 Ek C20)", () => {
-  const plan = { price: 199_000, period: "yearly" as const }
-
-  it("is the package's price and period before a subscription, with no trial", () => {
-    expect(subscriptionTerms(null, plan)).toEqual({
-      period: "yearly",
-      price: 199_000,
+  it("is nothing before a subscription: a package's price change reissues no document", () => {
+    expect(subscriptionTerms(null)).toEqual({
+      period: null,
+      price: null,
       trial_started_on: null,
       trial_ends_on: null,
     })
@@ -125,13 +123,13 @@ describe("subscriptionTerms (adr/0061 Ek C20)", () => {
       started_on: "2026-11-01",
       trial_ends_on: "2026-11-15",
     }
-    expect(subscriptionTerms(sub, plan)).toEqual({
+    expect(subscriptionTerms(sub)).toEqual({
       period: "monthly",
       price: 149_000,
       trial_started_on: "2026-11-01",
       trial_ends_on: "2026-11-15",
     })
-    expect(subscriptionTerms({ ...sub, trial_ends_on: null }, plan)).toMatchObject({
+    expect(subscriptionTerms({ ...sub, trial_ends_on: null })).toMatchObject({
       trial_started_on: null,
       trial_ends_on: null,
     })
@@ -154,15 +152,12 @@ describe("subscriptionTerms (adr/0061 Ek C20)", () => {
         currency: "TRY",
         package_name: "Standart",
         payment_instruction: null,
-        ...subscriptionTerms(
-          {
-            price: 149_000,
-            period: "monthly",
-            started_on: "2026-11-01",
-            trial_ends_on: "2026-11-15",
-          },
-          plan
-        ),
+        ...subscriptionTerms({
+          price: 149_000,
+          period: "monthly",
+          started_on: "2026-11-01",
+          trial_ends_on: "2026-11-15",
+        }),
       },
       now: new Date("2026-11-05T09:00:00Z"),
       nodeEnv: "test",

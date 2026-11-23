@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import type { BillingPeriod, PlanBillingSummary } from "@qticaret/types/control-plane"
+import type { PlanBillingSummary } from "@qticaret/types/control-plane"
 import { billingIn } from "../../workflows/modules"
 import { billingSummary, graceOf } from "./rules"
 import { subscriptionTerms } from "./terms"
@@ -25,7 +25,7 @@ const NOTHING_DUE = {
 export async function billingSummaryOf(
   container: Container,
   tenantId: string,
-  plan: { name: string; price: number; period: BillingPeriod }
+  plan: { name: string; price: number }
 ): Promise<PlanBillingSummary> {
   const billing = billingIn(container)
   const [sub, instruction] = await Promise.all([
@@ -36,7 +36,7 @@ export async function billingSummaryOf(
   const extra = {
     package_name: plan.name,
     payment_instruction: instruction.value ?? null,
-    ...subscriptionTerms(sub, plan),
+    ...subscriptionTerms(sub),
   }
   if (!sub) {
     return { ...NOTHING_DUE, ...extra }

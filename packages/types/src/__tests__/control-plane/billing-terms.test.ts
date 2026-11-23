@@ -23,7 +23,7 @@ describe("plan document: the subscription's terms (adr/0061 Ek C20)", () => {
       ...planDocument,
       billing: {
         ...planDocument.billing,
-        period: "yearly",
+        period: null,
         price: null,
         trial_started_on: null,
         trial_ends_on: null,
