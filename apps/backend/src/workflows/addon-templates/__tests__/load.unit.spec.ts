@@ -1,9 +1,10 @@
+// A spec importing a workflow (bulk edit, catalog) pulls these in before any module loads
+import { writeBulkChange } from "../../catalog/bulk-edit/write"
+import { setProductAddonTemplatesWorkflow } from "../index"
+
 describe("add-on template workflows", () => {
-  it("load outside the app without evaluating a link definition", async () => {
-    // A spec importing a workflow (bulk edit, catalog) pulls these in before any module loads
-    const workflows = await import("..")
-    const write = await import("../../catalog/bulk-edit/write")
-    expect(workflows.setProductAddonTemplatesWorkflow).toBeDefined()
-    expect(write.writeBulkChange).toBeDefined()
+  it("load outside the app without evaluating a link definition", () => {
+    expect(setProductAddonTemplatesWorkflow).toBeDefined()
+    expect(writeBulkChange).toBeDefined()
   })
 })

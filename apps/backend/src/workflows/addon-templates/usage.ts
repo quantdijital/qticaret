@@ -89,7 +89,8 @@ export async function productLinksOf(
     fields: ["product_id", "addon_template_id"],
     filters: { addon_template_id: [...templateIds] },
   })
-  return data as { product_id: string; addon_template_id: string }[]
+  // Typed by Medusa's generated link types where they exist, `any` where not: read through unknown
+  return data as unknown[] as { product_id: string; addon_template_id: string }[]
 }
 
 export async function addonTemplateUsage(

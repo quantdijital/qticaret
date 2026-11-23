@@ -426,8 +426,12 @@ medusaIntegrationTestRunner({
       const shown = await storeAddons(p.productId)
 
       expect(removed.status).toBe(200)
-      // The link either went first (and the delete dismissed it) or found the template gone
-      expect([200, 404]).toContain(linked.status)
+      // The link went first (and the delete dismissed it), found the template gone, or
+      // met the delete's lock: the platform's "busy, try again" answer (503 errors.busy)
+      expect([200, 404, 503]).toContain(linked.status)
+      if (linked.status === 503) {
+        expect(linked.data.message).toBe("errors.busy")
+      }
       expect(data).toEqual([])
       expect(shown.data.addons).toEqual([])
     })
