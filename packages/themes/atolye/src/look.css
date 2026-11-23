@@ -119,23 +119,23 @@
     padding-block: var(--look-inner, var(--look-inner-medium));
   }
 
-  .gf-look[data-ground="page"] {
+  :is(.gf-look, .gf-ground)[data-ground="page"] {
     background: var(--color-paper);
     color: var(--color-text);
   }
-  .gf-look[data-ground="well"] {
+  :is(.gf-look, .gf-ground)[data-ground="well"] {
     --look-page: var(--color-paper);
     --look-well: var(--color-paper-2);
     background: var(--color-paper-2);
     color: var(--color-text);
   }
   /* The two papers trade places: a tile on paper, a chip on the tile in the well's tint */
-  .gf-look[data-ground="well"] > * {
+  :is(.gf-look, .gf-ground)[data-ground="well"] > * {
     --color-paper: var(--look-well);
     --color-paper-2: var(--look-page);
   }
   /* The background and ink are `gf-stage`'s; the section's own tokens turn to the stage's */
-  .gf-look[data-ground="stage"] > * {
+  :is(.gf-look, .gf-ground)[data-ground="stage"] > * {
     --color-text: var(--color-stage-text);
     --color-text-2: var(--color-stage-text-2);
     --color-text-3: var(--color-stage-text-2);
@@ -150,11 +150,11 @@
     --color-error: var(--color-error-on-stage);
     --color-focus: var(--color-signal-on-stage);
   }
-  .gf-look[data-ground="primary"] {
+  :is(.gf-look, .gf-ground)[data-ground="primary"] {
     background: var(--primary);
     color: var(--primary-foreground);
   }
-  .gf-look[data-ground="primary"] > * {
+  :is(.gf-look, .gf-ground)[data-ground="primary"] > * {
     --color-text: var(--primary-foreground);
     --color-text-2: var(--primary-foreground);
     --color-text-3: var(--primary-foreground);
@@ -189,7 +189,7 @@
  * outside the layers, as `ui.css`'s graphite rule, since `text-deal` is a
  * utility and `--color-deal` also paints the sale badge, which stays red.
  */
-.gf-look[data-ground="primary"] .text-deal {
+:is(.gf-look, .gf-ground)[data-ground="primary"] .text-deal {
   color: var(--primary-foreground);
 }
 

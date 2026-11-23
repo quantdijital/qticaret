@@ -1,6 +1,7 @@
 import "server-only"
 import type { StoreBannerSection } from "@qticaret/types"
-import { bannerStepOf, bannerToneOf } from "@qticaret/types/section-banner"
+import { bannerSplitEdgeOf, bannerStepOf, bannerToneOf } from "@qticaret/types/section-banner"
+import { variantOf } from "@qticaret/types/section-variants"
 import type { BannerSectionView, Translate } from "@qticaret/ui"
 import { layoutImage, layoutLink } from "./layout"
 
@@ -41,5 +42,13 @@ export function bannerView(section: StoreBannerSection, t: Translate): BannerSec
     text_position: bannerStepOf("text_position", section.text_position),
     overlay: bannerStepOf("overlay", section.overlay),
     button_style: bannerStepOf("button_style", section.button_style),
+    // The split (adr/0077 Ek) only when the contract knows it; else today's slides
+    ...(variantOf("banner", section.variant) === "split"
+      ? {
+          variant: "split" as const,
+          eyebrow: section.eyebrow ?? null,
+          edge: bannerSplitEdgeOf(section.edge),
+        }
+      : {}),
   }
 }

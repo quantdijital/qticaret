@@ -66,7 +66,7 @@
       "file": "listing-text.css"
     },
     {
-      "sha256": "b717743da0f872a4506c70261f1f938fb6b1347bde9b5ef8cd2c3c7b3ab050f3",
+      "sha256": "46795c86a310dc9976595a9b6fbde0e0c4502e6c9ae3620ccf196f046bb11e87",
       "file": "look.css"
     },
     {
@@ -130,6 +130,10 @@
       "file": "slider.css"
     },
     {
+      "sha256": "8c6684b33f5467b15eb23d34be2fabd4423afa05b56b25fd170dccef662308a9",
+      "file": "split.css"
+    },
+    {
       "sha256": "fd1224ca73b4aa0f421ed889d3a5ad8fffa2c402c231b68b7c49ab83b24dd2e9",
       "file": "strip-gallery.css"
     },
@@ -138,7 +142,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "ef5ce3443b9cdad2f2bd19c69bf855752f61ae158d3e6d2ccd2fd2d247dc0ae2",
+      "sha256": "6c795284e62dfc4c46d9dff5cbee9ca387e0444743a1480dc1ea4c240381cf87",
       "file": "styles.css"
     },
     {

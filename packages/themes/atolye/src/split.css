@@ -1,0 +1,18 @@
+/*
+ * The split band (sections/CampaignSplit.tsx, adr/0077 Ek, "Bölünmüş
+ * bant"): with `edge="curved"` the picture's inner edge bows softly into
+ * the ground behind it (the box's, `look.css`'s `.gf-ground`), at its foot
+ * on a phone where the picture is on top, on its right from 1024 px where
+ * it stands beside the words. `straight` draws no clip: the picture's own
+ * rectangle. A clip, not a shape on top: nothing to read, nothing to hide.
+ */
+@layer components {
+  .gf-split[data-edge="curved"] .gf-split-picture {
+    clip-path: ellipse(125% 100% at 50% 0%);
+  }
+  @media (width >= 64rem) {
+    .gf-split[data-edge="curved"] .gf-split-picture {
+      clip-path: ellipse(100% 125% at 0% 50%);
+    }
+  }
+}

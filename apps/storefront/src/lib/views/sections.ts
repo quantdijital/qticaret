@@ -5,7 +5,6 @@ import { faqSettingsOf } from "@qticaret/types/section-faq"
 import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, PageTextSectionView, Translate } from "@qticaret/ui"
-import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
@@ -20,7 +19,7 @@ import { marqueeView } from "./marquee"
 import { newsletterLookOf } from "./newsletter"
 import { currentShared, isEditorSession, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
-import { postCards } from "./posts"
+import { postsView } from "./posts-section"
 import {
   brandLinks,
   categoryLinks,
@@ -112,18 +111,8 @@ async function sectionView(
         ? { id, type: "brands", title: section.title ?? t("home.brands"), brands }
         : null
     }
-    case "posts": {
-      const { entries } = await blogPosts(0, section.limit)
-      return entries.length > 0
-        ? {
-            id,
-            type: "posts",
-            title: section.title ?? t("home.posts"),
-            posts: postCards(entries, t),
-            more: { label: t("home.all_posts"), path: "/blog" },
-          }
-        : null
-    }
+    case "posts":
+      return postsView(section, t)
     case "featured_product":
       return featuredView(section, t)
     case "reviews": {

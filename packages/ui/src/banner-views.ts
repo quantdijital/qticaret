@@ -1,4 +1,4 @@
-import type { BannerSettings, BannerTone } from "@qticaret/types"
+import type { BannerSettings, BannerSplitEdge, BannerTone, BannerVariant } from "@qticaret/types"
 import type { ImageView, LinkView } from "./views"
 
 /**
@@ -12,6 +12,16 @@ export interface BannerSectionView extends BannerSettings {
   id: string
   type: "banner"
   slides: BannerSlideView[]
+  /**
+   * `split` (adr/0077 Ek, "Bölünmüş bant"): the first slide's picture
+   * beside a panel on the section's ground; absent: today's slides. A
+   * theme without that drawing draws the slides (`drawnVariant`).
+   */
+  variant?: BannerVariant
+  /** `split`: the line above the heading; null: none. */
+  eyebrow?: string | null
+  /** `split`: the picture's inner edge. */
+  edge?: BannerSplitEdge
 }
 
 export interface BannerSlideView {

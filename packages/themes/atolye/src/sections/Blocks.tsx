@@ -9,6 +9,7 @@ import type {
 import { Aisles } from "./Aisles"
 import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
+import { CampaignSplit } from "./CampaignSplit"
 import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
 import { CategoryCollage } from "./CategoryCollage"
 import { CategoryPanels } from "./CategoryPanels"
@@ -16,12 +17,14 @@ import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
 import { GoogleRating } from "./GoogleRating"
 import { Guides } from "./Guides"
+import { GuidesPanel } from "./GuidesPanel"
 import { Help } from "./Help"
 import { Hero } from "./Hero"
 import { HERO_VARIANTS, HeroCatalog } from "./HeroCatalog"
 import { HeroSlider } from "./HeroSlider"
 import { Look } from "./Look"
 import { Marquee } from "./Marquee"
+import { boxLook, panelGround } from "./panel-ground"
 import { type Block, blocksOf, headingId } from "./plan"
 import { PriceBands } from "./PriceBands"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
@@ -42,7 +45,7 @@ const helpOf = (block: Block | undefined) =>
 
 /** The block's look: a shelf of joined rails takes its first rail's (adr/0049 Ek 2026-11-14 §6). */
 const lookOf = (block: Block) =>
-  block.kind === "shelf" ? block.sections[0]?.look : block.section.look
+  block.kind === "shelf" ? block.sections[0]?.look : boxLook(block, block.section.look)
 
 /** The screens it shows on (docs/tema/bilesen-standardi §2): a shelf of joined rails, its first rail's. */
 const deviceOf = (block: Block) =>
@@ -161,8 +164,15 @@ function BlockView({
         />
       )
     }
-    case "banner":
-      return <Campaign section={section} label={t("home.banner")} first={first} />
+    case "banner": {
+      // The split (adr/0077 Ek) paints the section's ground on its own panel
+      const ground = panelGround(block)
+      return ground ? (
+        <CampaignSplit section={section} ground={ground} label={t("home.banner")} first={first} />
+      ) : (
+        <Campaign section={section} label={t("home.banner")} first={first} />
+      )
+    }
     case "strip_gallery":
       return <StripGallery section={section} t={t} first={first} />
     case "featured_product":
@@ -180,8 +190,15 @@ function BlockView({
       return <GoogleRating section={section} t={t} />
     case "rich_text":
       return <Story section={section} />
-    case "posts":
-      return <Guides section={section} />
+    case "posts": {
+      // The intro panel (adr/0077 Ek) paints the section's ground on its own panel
+      const ground = panelGround(block)
+      return ground ? (
+        <GuidesPanel section={section} ground={ground} />
+      ) : (
+        <Guides section={section} />
+      )
+    }
     case "faq":
       return <Faq section={section} help={helpOf(next)} t={t} />
     case "help":
