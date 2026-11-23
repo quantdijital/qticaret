@@ -17,8 +17,9 @@ import type { StoreGetListingProductsType } from "../validators"
  * as its page is. A site search (`type=search`, `q`) answers the same,
  * most relevant first, with `search` (suggestions, related chips); its
  * first unfiltered page is counted for the search report (F11.8). A
- * search without `q` answers when its query asks dates or a category
- * (adr/0077 §2; dates only while the shop sells dated products), else it
+ * search without `q` answers when its query asks dates, a category or a
+ * filter (the search box's "where" field, adr/0077 §1; dates only while
+ * the shop sells dated products, §2), else it
  * is refused as an empty search. A query not in canonical form comes back
  * with `canonical_query`, where its page moves.
  */
@@ -36,7 +37,9 @@ export async function GET(
   if (read.kind === "out_of_bounds") {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "listing.out_of_bounds")
   }
-  if (isSearch && q === undefined && !read.query.dates && !read.query.category) {
+  const narrowed =
+    Boolean(read.query.dates) || Boolean(read.query.category) || read.query.filters.length > 0
+  if (isSearch && q === undefined && !narrowed) {
     throw new MedusaError(MedusaError.Types.INVALID_DATA, "listing.search_query_invalid")
   }
   const answer = await listingProducts(req.scope, {

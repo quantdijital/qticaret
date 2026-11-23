@@ -10,6 +10,7 @@
     "./storefront": "./src/store/storefront.ts",
     "./style-kit": "./src/store/style-kit.ts",
     "./listing-text": "./src/store/listing-text.ts",
+    "./search-form": "./src/store/search-form.ts",
     "./section-variants": "./src/store/section-variants.ts",
     "./section-requires": "./src/store/section-requires.ts",
     "./section-look": "./src/store/section-look.ts",
@@ -30,6 +31,7 @@
     "./section-strips": "./src/store/section-strips.ts",
     "./section-stats": "./src/store/section-stats.ts",
     "./section-steps": "./src/store/section-steps.ts",
+    "./section-search-box": "./src/store/section-search-box.ts",
     "./section-pages": "./src/store/section-pages.ts",
     "./editor-bridge": "./src/editor-bridge.ts",
     "./control-plane": {

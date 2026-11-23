@@ -5,6 +5,7 @@
  */
 import type { MediaDerivatives, StoreImage } from "./catalog.js"
 import type { ListingTextSettings } from "./listing-text.js"
+import type { SearchFormSettings } from "./search-form.js"
 import type { CardVariant } from "./section-variants.js"
 import type { StyleKit } from "./style-kit.js"
 
@@ -172,6 +173,11 @@ export interface StoreThemeSettings extends StyleKit {
    * it: `LISTING_TEXT_DEFAULTS` (`listingTextOf`).
    */
   listing_text?: ListingTextSettings
+  /**
+   * The search box's fields (adr/0077 §1, `search-form.ts`). Absent from
+   * a backend before it: `SEARCH_FORM_DEFAULTS` (`searchFormOf`).
+   */
+  search_form?: SearchFormSettings
 }
 
 /**

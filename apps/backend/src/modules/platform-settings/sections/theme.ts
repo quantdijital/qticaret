@@ -14,6 +14,8 @@ import {
   withListingTextDefaults,
 } from "./theme-listing-text"
 import type { ListingTextSettings } from "./theme-listing-text"
+import { SEARCH_FORM_DEFAULTS, searchFormSchema, withSearchFormDefaults } from "./theme-search-form"
+import type { SearchFormSettings } from "./theme-search-form"
 import { STYLE_KIT_DEFAULTS, styleKitSchema, withStyleKitDefaults } from "./theme-style-kit"
 import type { StyleKitSettings } from "./theme-style-kit"
 import { RADIUS_STEPS, SECTION_SPACINGS, SURFACE_STYLES } from "./theme-steps"
@@ -30,6 +32,8 @@ export {
 export type { ProductCardSettings } from "./theme-card"
 export { LISTING_TEXT, LISTING_TEXT_DEFAULTS, withListingTextDefaults } from "./theme-listing-text"
 export type { ListingTextSettings } from "./theme-listing-text"
+export { SEARCH_FORM_DEFAULTS } from "./theme-search-form"
+export type { SearchFormSettings } from "./theme-search-form"
 export { STYLE_KIT, STYLE_KIT_DEFAULTS, withStyleKitDefaults } from "./theme-style-kit"
 export { RADIUS_STEPS, SECTION_SPACINGS, SURFACE_STYLES } from "./theme-steps"
 
@@ -119,6 +123,8 @@ export interface ThemeSettings extends StyleKitSettings {
   surface_style: (typeof SURFACE_STYLES)[number]
   /** A category, brand or collection page's own text at its foot (adr/0075). */
   listing_text: ListingTextSettings
+  /** The search box's fields (adr/0077 §1). */
+  search_form: SearchFormSettings
 }
 
 const color = z
@@ -178,6 +184,7 @@ const GRAFIT: ThemeSettings = {
   section_spacing: "normal",
   surface_style: "filled",
   listing_text: LISTING_TEXT_DEFAULTS,
+  search_form: SEARCH_FORM_DEFAULTS,
   ...STYLE_KIT_DEFAULTS,
 }
 
@@ -202,7 +209,7 @@ export function withCardDefaults(value: unknown): unknown {
     value = { ...value, surface_style: GRAFIT.surface_style }
   }
   // And the style kit (adr/0067): without a field, today's drawing; the listing text's too (adr/0075)
-  value = withListingTextDefaults(withStyleKitDefaults(value))
+  value = withSearchFormDefaults(withListingTextDefaults(withStyleKitDefaults(value)))
   if (!isPlainObject(value) || !isPlainObject(value["product_card"])) {
     return value
   }
@@ -276,6 +283,7 @@ export const themeSection = defineSection<ThemeSettings>(
     section_spacing: z.enum(SECTION_SPACINGS),
     surface_style: z.enum(SURFACE_STYLES),
     listing_text: listingTextSchema,
+    search_form: searchFormSchema,
     ...styleKitSchema,
   },
   GRAFIT,

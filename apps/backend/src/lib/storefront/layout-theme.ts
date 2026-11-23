@@ -7,6 +7,7 @@ import {
   withCardDefaults,
   withListingTextDefaults,
 } from "../../modules/platform-settings/sections/theme"
+import { withSearchFormDefaults } from "../../modules/platform-settings/sections/theme-search-form"
 import type { ThemeSettings } from "../../modules/platform-settings/sections"
 
 /**
@@ -18,8 +19,8 @@ import type { ThemeSettings } from "../../modules/platform-settings/sections"
  * sees the same storefront without a migration.
  */
 export const layoutTheme = z
-  // A save from a panel before adr/0075 sends no listing text: its defaults stand
-  .preprocess(withListingTextDefaults, themeSection.full)
+  // A save from a panel before adr/0075 (adr/0077) sends no listing text (search form): defaults stand
+  .preprocess((value) => withSearchFormDefaults(withListingTextDefaults(value)), themeSection.full)
   .nullable()
   .default(null)
 
@@ -54,6 +55,8 @@ const shown = (theme: ThemeSettings): ShownTheme => ({
   surface_style: theme.surface_style,
   // A category, brand or collection page's own text at its foot (adr/0075)
   listing_text: theme.listing_text,
+  // The search box's fields (adr/0077 §1)
+  search_form: theme.search_form,
   // The style kit (adr/0067 §1)
   menu_style: theme.menu_style,
   shadow: theme.shadow,

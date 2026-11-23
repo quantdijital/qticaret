@@ -20,6 +20,7 @@ import { footerRichText, placedRichText, richText } from "./sections/rich-text"
 import { priceBands } from "./sections/price-bands"
 import { stats } from "./sections/stats"
 import { steps } from "./sections/steps"
+import { searchBox } from "./sections/search-box"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -61,6 +62,7 @@ export const pageSection = z.discriminatedUnion(
     googleRating,
     stats,
     steps,
+    searchBox,
     richText,
     trustBadges,
     newsletter,
