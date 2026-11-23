@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
-import { releaseLockStep } from "@medusajs/medusa/core-flows"
 import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { docStats } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
 import { assertCards, bodyOf, mediaOf } from "../content/rules"
@@ -32,7 +32,7 @@ export const importPageWorkflow = createWorkflow(
   "migration-import-page",
   (input: { page: ImportedPage; doc: ContentDoc }) => {
     const keys = [LAYOUT_LOCK.key, CONTENT_LOCK.key]
-    acquireLocksStep({ ...LAYOUT_LOCK, key: keys })
+    const held = acquireLocksStep({ ...LAYOUT_LOCK, key: keys })
     const saved = saveContentWorkflow.runAsStep({
       input: transform({ input }, ({ input }) => ({
         kind: "page" as const,
@@ -45,7 +45,7 @@ export const importPageWorkflow = createWorkflow(
         doc: input.doc,
       })),
     })
-    releaseLockStep({ key: keys })
+    releaseLocksStep(held)
     return new WorkflowResponse(transform({ saved }, ({ saved }) => saved.id))
   }
 )

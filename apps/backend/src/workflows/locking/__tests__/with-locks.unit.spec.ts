@@ -82,4 +82,14 @@ describe.each(providers)("withLocks ($name provider)", ({ make }) => {
     expect(await isFree(a)).toBe(true)
     expect(await isFree(b)).toBe(true)
   })
+
+  it("refuses no key at all, the job never run unguarded", async () => {
+    const job = jest.fn(() => Promise.resolve())
+
+    await expect(withLocks(locking(), [], job, { timeout: 1 })).rejects.toThrow(
+      "withLocks needs at least one key"
+    )
+    await expect(withLocks(locking(), [""], job, { timeout: 1 })).rejects.toThrow("at least one")
+    expect(job).not.toHaveBeenCalled()
+  })
 })

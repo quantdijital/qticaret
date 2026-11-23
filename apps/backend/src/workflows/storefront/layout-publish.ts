@@ -5,8 +5,9 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { emitEventStep } from "@medusajs/medusa/core-flows"
 import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { ValidationError } from "../../lib/errors"
 import { readStoredLayout } from "../../lib/storefront/layout"
 import type { LayoutDocument } from "../../lib/storefront/layout"
@@ -156,7 +157,7 @@ export const publishLayoutWorkflow = createWorkflow(
     // live; the content's too: a page's mirror and status are written here
     const keys = [LAYOUT_LOCK.key, MENUS_LOCK.key, CONTENT_LOCK.key]
     const locks = { ...LAYOUT_LOCK, key: keys }
-    acquireLocksStep(locks)
+    const held = acquireLocksStep(locks)
     const loaded = loadDraftStep()
     // A content page deleted since the save goes live without its layout (adr/0073 §1)
     const pruned = prunePagesStep(transform({ loaded }, ({ loaded }) => loaded.draft))
@@ -188,7 +189,7 @@ export const publishLayoutWorkflow = createWorkflow(
     emitEventStep({ eventName: CONTENT_SAVED, data: saved }).config({
       name: "storefront-layout-publish-content-saved",
     })
-    releaseLockStep({ key: keys })
+    releaseLocksStep(held)
     refreshStorefrontStep(
       transform({ menus, saved }, ({ menus, saved }) => [
         ...(menus.replaced ? ["menus" as const] : []),

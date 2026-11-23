@@ -1,4 +1,5 @@
 import type { ILockingModule } from "@medusajs/framework/types"
+import { MedusaError } from "@medusajs/framework/utils"
 import { lockOrder } from "./acquire-locks"
 
 export interface WithLocksOptions {
@@ -16,7 +17,8 @@ export interface WithLocksOptions {
  * key is taken by its own `execute`, in one fixed order (no two callers
  * wait on each other), one inside the other: each has its own owner and
  * lease renewal, a timeout lets go of the keys already held, and every
- * key is given back once `job` ends, however it ends.
+ * key is given back once `job` ends, however it ends. No key at all is a
+ * caller's mistake (the job would run unguarded): it throws.
  */
 export function withLocks<T>(
   locking: ILockingModule,
@@ -25,6 +27,11 @@ export function withLocks<T>(
   options: WithLocksOptions
 ): Promise<T> {
   const ordered = lockOrder(keys)
+  if (ordered.length === 0) {
+    return Promise.reject(
+      new MedusaError(MedusaError.Types.INVALID_DATA, "withLocks needs at least one key")
+    )
+  }
   const deadline = Date.now() + options.timeout * 1000
   const hold = (index: number): Promise<T> => {
     const key = ordered[index]

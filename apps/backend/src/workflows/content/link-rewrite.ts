@@ -6,8 +6,8 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { releaseLockStep } from "@medusajs/medusa/core-flows"
 import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { planContentLinks } from "./link-plan"
 import type { LinkPlan, LinkRow, LinkScope } from "./link-plan"
@@ -66,7 +66,7 @@ export const rewriteContentLinksWorkflow = createWorkflow(
       // A plan with nothing to write still takes one lock of its own, never none
       return keys.length > 0 ? keys : ["content-links"]
     })
-    acquireLocksStep({ key, timeout: 30, ttl: 300 })
+    const held = acquireLocksStep({ key, timeout: 30, ttl: 300 })
     const layout = rewriteLayoutLinksStep(
       transform({ plan }, ({ plan }) => ({ ids: plan.writes.entries, next: plan.next }))
     )
@@ -85,7 +85,7 @@ export const rewriteContentLinksWorkflow = createWorkflow(
         pages: layout.pages,
       }))
     )
-    releaseLockStep({ key })
+    releaseLocksStep(held)
     // Pages and posts the storefront shows (its menus and lists); a product's text is read fresh
     refreshStorefrontStep(
       transform({ entries, layout }, ({ entries, layout }) => [
