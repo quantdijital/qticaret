@@ -1,12 +1,14 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Copy, Plus } from "lucide-react"
 import { useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
-import { Button } from "@qticaret/admin-ui/ui/button"
+import { scopeCategoryOf } from "@/features/products/addon-templates/addon-scope"
+import type { ScopeCategory } from "@/features/products/addon-templates/addon-scope"
+import { AddonScopeFields } from "@/features/products/addon-templates/addon-scope-fields"
 import { ProductAddonTemplates } from "@/features/products/addon-templates/product-addon-templates"
+import { useAddonScope } from "@/features/products/addon-templates/use-addon-scope"
 import type { ProductAddonTemplate } from "@/features/products/api/addon-templates"
 import { ADDONS_FLAG, ADDON_LIMITS } from "@/features/products/api/addons"
 import type { ProductAddon } from "@/features/products/api/addons"
@@ -20,6 +22,7 @@ import { AddonCopyDialog } from "./addon-copy-dialog"
 import { AddonDialog } from "./addon-dialog"
 import { AddonNotice } from "./addon-notice"
 import { AddonRow } from "./addon-row"
+import { AddonToolbar } from "./addon-toolbar"
 import { inputOf, valueOf } from "./addon-values"
 import { productFold, someNames } from "./sections"
 import { useAddonsShown } from "./use-addons-shown"
@@ -43,6 +46,7 @@ function AddonsForm({
   hidden,
   flagOn,
   fold,
+  category,
 }: {
   productId: string
   saved: readonly ProductAddon[]
@@ -51,6 +55,7 @@ function AddonsForm({
   hidden: number
   flagOn: boolean
   fold?: SectionFindings | undefined
+  category: ScopeCategory | null
 }) {
   const { t } = useTranslation()
   const client = useQueryClient()
@@ -64,6 +69,8 @@ function AddonsForm({
   const [failure, setFailure] = useState<AddonsFailure | null>(null)
   // A refusal of the open dialog's save, said in it
   const [dialogFailure, setDialogFailure] = useState<AddonsFailure | null>(null)
+  // A new add-on kept as the product's own, or saved as a template applied to products
+  const scoped = useAddonScope(productId, templates, category, flagOn)
   // A cart line names its add-on by id: one removed stops those carts at checkout
   const removed = saved.some((addon) => !items.some((item) => item.id === addon.id))
 
@@ -92,6 +99,15 @@ function AddonsForm({
     if (!editing) {
       return
     }
+    if (editing.index === null && scoped.scope.mode === "template") {
+      void scoped.apply(value, {
+        done: () => {
+          setEditing(null)
+        },
+        fail: setDialogFailure,
+      })
+      return
+    }
     const current = form.getValues("items")
     const next =
       editing.index === null
@@ -104,6 +120,9 @@ function AddonsForm({
 
   const edit = (index: number | null) => {
     setDialogFailure(null)
+    if (index === null) {
+      scoped.reset()
+    }
     setEditing({ index })
   }
 
@@ -181,35 +200,16 @@ function AddonsForm({
           </ol>
         )}
         {flagOn ? (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={full}
-              onClick={() => {
-                edit(null)
-              }}
-            >
-              <Plus />
-              {t(`${A}.add`)}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setDialogFailure(null)
-                setCopying(true)
-              }}
-            >
-              <Copy />
-              {t(`${A}.copy.action`)}
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              {t(`${A}.limit`, { max: ADDON_LIMITS.addons })}
-            </span>
-          </div>
+          <AddonToolbar
+            full={full}
+            onAdd={() => {
+              edit(null)
+            }}
+            onCopy={() => {
+              setDialogFailure(null)
+              setCopying(true)
+            }}
+          />
         ) : null}
         {flagOn || templates.length > 0 ? (
           <ProductAddonTemplates
@@ -235,13 +235,20 @@ function AddonsForm({
           items={items}
           index={editing.index}
           onGo={edit}
-          saving={save.isPending}
+          saving={save.isPending || scoped.saving}
           failure={dialogFailure}
           onClose={() => {
             setEditing(null)
           }}
           onSave={saveFromDialog}
-        />
+          {...(editing.index === null && scoped.scope.mode === "template"
+            ? { note: t("products.addonScope.note") }
+            : {})}
+        >
+          {editing.index === null ? (
+            <AddonScopeFields value={scoped.scope} onChange={scoped.setScope} category={category} />
+          ) : null}
+        </AddonDialog>
       ) : null}
       {copying ? (
         <AddonCopyDialog
@@ -295,6 +302,7 @@ export function AddonsCard({
       hidden={catalog.data.addons_hidden ?? 0}
       flagOn={flagOn}
       fold={fold}
+      category={scopeCategoryOf(catalog.data)}
     />
   )
 }

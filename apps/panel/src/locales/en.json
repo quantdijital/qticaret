@@ -4343,7 +4343,67 @@
       "carryHidden_one": "With this attribute template the product has more than 5 add-ons: {{count}} add-on is not shown in the store. You can save; removing a template or an add-on is advised.",
       "carryHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store. You can save; removing a template or an add-on is advised.",
       "carryRequiredHidden_one": "With this attribute template the product has more than 5 add-ons: {{count}} add-on is not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised.",
-      "carryRequiredHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised."
+      "carryRequiredHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised.",
+      "apply": {
+        "action": "Apply to products",
+        "title": "Apply to products",
+        "description": "Link the \"{{name}}\" template to products or remove it from them.",
+        "mode": "Action",
+        "modes": {
+          "add": "Link",
+          "remove": "Remove"
+        },
+        "modeHints": {
+          "add": "The template is linked to the products chosen; those already linked stay as they are. Products it would take past 5 add-ons are skipped and listed in the report.",
+          "remove": "The template's direct link is removed from the products chosen; those it reaches through an attribute template stay."
+        },
+        "target": "Products",
+        "targets": {
+          "all": "All products",
+          "category": "Category",
+          "products": "Chosen products"
+        },
+        "allHint": "Applied to every product in the shop, gift card products excepted. Each product is checked on its own.",
+        "category": "Category",
+        "categoryHint": "Products in its subcategories are included.",
+        "categoryPlaceholder": "Search categories",
+        "noCategories": "No category found.",
+        "products": "Products",
+        "productPlaceholder": "Search and add products",
+        "noProducts": "No product found.",
+        "removeProduct": "{{name}}: remove from the list",
+        "submit": {
+          "add": "Link",
+          "remove": "Remove"
+        },
+        "errors": {
+          "category": "Choose a category.",
+          "products": "Choose at least one product."
+        }
+      }
+    },
+    "addonScope": {
+      "title": "Scope",
+      "hints": {
+        "product": "The add-on is saved on this product only.",
+        "template": "The add-on is saved as a new template and linked to the products chosen. Changing the template changes every linked product; products it would take past 5 add-ons are skipped and listed in the report."
+      },
+      "modes": {
+        "product": "This product only",
+        "template": "Save as a template and apply"
+      },
+      "target": "Apply to",
+      "targetHint": "A category includes the products in its subcategories. Gift card products are left out.",
+      "targets": {
+        "all": "All products",
+        "category": "Products in this product's category",
+        "categoryOf": "Products in this product's category ({{name}})",
+        "product": "This product"
+      },
+      "nameHint": "Left empty, the add-on's name is used. Shown in the panel only; at most {{max}} characters.",
+      "note": "Saving creates the template and links it to the products chosen.",
+      "linked": "Template saved and linked to this product.",
+      "notApplied": "The template was saved but not applied to products; try again with \"Apply to products\" on its page."
     }
   },
   "orders": {
