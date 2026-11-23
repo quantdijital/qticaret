@@ -31,6 +31,7 @@ import { Signup } from "./Signup"
 import { Spotlight } from "./Spotlight"
 import { Stats } from "./Stats"
 import { Steps } from "./Steps"
+import { Departures } from "./Departures"
 import { Story } from "./Story"
 import { StripGallery } from "./StripGallery"
 
@@ -194,6 +195,8 @@ function BlockView({
       return <Stats section={section} />
     case "steps":
       return <Steps section={section} />
+    case "departures":
+      return <Departures section={section} t={t} />
     case "marquee":
       return (
         <Marquee
