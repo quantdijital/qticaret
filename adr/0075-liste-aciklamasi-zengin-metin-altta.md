@@ -103,7 +103,7 @@ listing_text: {
 
 - Medusa'nın kendi kategori ucu (`POST /admin/product-categories/:id`) `description` yazarsa belge eski kalabilir; vitrin belgeyi gösterir. Panel kategori formunda açıklamayı yalnız yeni uçtan yazar; Medusa Admin'e ekran yazılmaz.
 - Kategori silinince `category_extension` satırı yetim kalır (resim satırı gibi); okunmaz, zararsız.
-- Bir sayfanın adresi değişince ürün açıklamalarındaki bağlantılar yeniden yazılır (`workflows/content/rewrite-links`); liste açıklamaları bu işe henüz katılmaz (eski yol 301 verir). Sonraki iş.
+- ~~Liste açıklamaları bağlantı düzeltme işine katılmaz.~~ Kapandı (2026-11-23, güvenlik incelemesi I2, PR #244): kategori, marka ve koleksiyon belgeleri bağlantı raporunda ve düzeltmesinde ürün açıklaması gibi sayılır (`workflows/content/link-listings.ts`; rapor türleri "Kategori/Marka/Koleksiyon açıklaması"). Yazma her birinin kendi kayıt yolundan geçer (kategoride `setCategoryDescriptionWorkflow`, markada `saveBrandWorkflow`, koleksiyonda `setCollectionDetailsWorkflow`): kilit, düz metin aynası, olay ve telafi panelden kayıtla aynı; düz metni artık tutmayan (eskimiş) belge okunmaz, yazılmaz. Kontrol (dry run) hiçbir şey yazmaz. Göç sonrası bağlantı düzeltmesi liste açıklamalarına girmez (kaynak yalnız düz metin getirir). Ortam kütüphanesi kullanım denetimi değişmedi: liste belgesi görsel düğümü taşıyamaz (§2), saklı belge okunurken yeniden denetlenir; bir görselin adresine verilen metin bağlantısı görselin kullanımı sayılmaz.
 
 ## Dilimler
 
