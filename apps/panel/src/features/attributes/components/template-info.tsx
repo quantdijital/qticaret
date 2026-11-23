@@ -1,8 +1,8 @@
-import { Trash2 } from "lucide-react"
+import { ChevronDown, ChevronRight } from "lucide-react"
+import { useId } from "react"
 import { useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
-import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import type { TemplateForm } from "@/features/attributes/form"
@@ -11,48 +11,67 @@ import { toSlug } from "@/lib/slug"
 const A = "attributes"
 
 /**
- * The template itself: its name, its short name (fixed once saved) and a
- * note for the shop; a saved one can be deleted from here.
+ * The group's name, above its tabs: the one thing a new group needs.
+ * Its short name (fixed once saved) and a note for the shop fold under
+ * "Diğer ayarlar".
  */
-export function TemplateInfo({ saved, onDelete }: { saved: boolean; onDelete: () => void }) {
+export function TemplateInfo({
+  saved,
+  more,
+  onMoreChange,
+}: {
+  saved: boolean
+  more: boolean
+  onMoreChange: (open: boolean) => void
+}) {
   const { t } = useTranslation()
   const { control, register } = useFormContext<TemplateForm>()
   const name = useWatch({ control, name: "name" })
+  const bodyId = useId()
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t(`${A}.templateName`)} htmlFor="template-name" required>
-          <Input id="template-name" {...register("name")} />
-        </Field>
-        <Field label={t(`${A}.handle`)} htmlFor="template-handle" hint={t(`${A}.handleHint`)}>
-          <Input
-            id="template-handle"
-            placeholder={toSlug(name)}
-            disabled={saved}
-            className="font-mono text-[13px]"
-            {...register("handle")}
-          />
-        </Field>
-      </div>
-      <Field
-        label={t(`${A}.description`)}
-        htmlFor="template-description"
-        hint={t(`${A}.descriptionHint`)}
-      >
-        <Textarea id="template-description" className="min-h-16" {...register("description")} />
+    <div className="flex flex-col gap-3">
+      <Field label={t(`${A}.templateName`)} htmlFor="template-name" required>
+        <Input
+          id="template-name"
+          placeholder={t(`${A}.templateNamePlaceholder`)}
+          className="sm:max-w-sm"
+          {...register("name")}
+        />
       </Field>
-      {saved ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-5">
-          <p className="text-[13px] text-muted-foreground">{t(`${A}.deleteDescription`)}</p>
-          <Button
-            type="button"
-            variant="outline"
-            className="text-destructive-text"
-            onClick={onDelete}
+      <button
+        type="button"
+        aria-expanded={more}
+        aria-controls={more ? bodyId : undefined}
+        className="flex h-8 items-center gap-1.5 self-start rounded-md text-sm font-medium text-muted-foreground hover:text-foreground"
+        onClick={() => {
+          onMoreChange(!more)
+        }}
+      >
+        {more ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+        {t(`${A}.more`)}
+      </button>
+      {more ? (
+        <div id={bodyId} className="grid gap-4 border-l pl-4 sm:grid-cols-2">
+          <Field label={t(`${A}.handle`)} htmlFor="template-handle" hint={t(`${A}.handleHint`)}>
+            <Input
+              id="template-handle"
+              placeholder={toSlug(name)}
+              disabled={saved}
+              className="font-mono text-[13px]"
+              {...register("handle")}
+            />
+          </Field>
+          <Field
+            label={t(`${A}.description`)}
+            htmlFor="template-description"
+            hint={t(`${A}.descriptionHint`)}
           >
-            <Trash2 />
-            {t(`${A}.deleteTemplate`)}
-          </Button>
+            <Textarea
+              id="template-description"
+              className="min-h-[var(--control-height)]"
+              {...register("description")}
+            />
+          </Field>
         </div>
       ) : null}
     </div>

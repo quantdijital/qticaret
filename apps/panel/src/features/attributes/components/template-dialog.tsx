@@ -1,12 +1,15 @@
+import { Trash2 } from "lucide-react"
 import { useLayoutEffect, useState } from "react"
 import { FormProvider, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { FieldHints } from "@qticaret/admin-ui/hooks/use-field-hints"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
 import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
 import { RecordStepper } from "@qticaret/admin-ui/patterns/record-stepper"
 import type { RecordSteps } from "@qticaret/admin-ui/patterns/record-stepper"
 import { useDiscardGuard } from "@qticaret/admin-ui/patterns/use-discard-guard"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/tabs"
 import { useDeleteTemplate, useSaveTemplate } from "@/features/attributes/api"
@@ -23,28 +26,28 @@ import { TemplateInfo } from "./template-info"
 const A = "attributes"
 const TAB_BODY = "flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
 
-type TemplateTab = "definitions" | "groups" | "addons" | "info"
+type TemplateTab = "definitions" | "groups" | "addons"
 
 interface TemplateDialogProps {
-  /** The template to edit; null for a new one. */
+  /** The group to edit; null for a new one. */
   template: AttributeTemplate | null
-  /** A saved template's place among the shop's: ‹ n / m › walks them. */
+  /** A saved group's place among the shop's: ‹ n / m › walks them. */
   steps?: RecordSteps
-  /** The template the arrows go to, by its place: the form starts again from it. */
+  /** The group the arrows go to, by its place: the form starts again from it. */
   templateAt?: (index: number) => AttributeTemplate | undefined
   onClose: () => void
-  /** The shop's add-ons are on (adr/0052 Ek 2026-11-23): the add-on templates tab shows. */
+  /** The shop's add-ons are on (adr/0052 Ek 2026-11-23): the add-ons tab shows. */
   addonsOn?: boolean
 }
 
 /**
- * A template in one dialog (adr/0013), on its tabs: its attributes
- * (first: what the owner comes for), the spec table's groups, the add-on
- * templates its products get (adr/0052 Ek 2026-11-23), and the
- * template's own name, note and deletion. A new template opens on its
- * name, the one field it needs. Removing an attribute that products may
- * hold values for is asked about first; the arrows go to the shop's next
- * template, asking first when something is not saved.
+ * An attribute group (adr/0013 template) in one dialog: its name on top,
+ * then its attributes (what the owner comes for), the product page's
+ * sections and the add-on groups its products get (adr/0052 Ek
+ * 2026-11-23) on tabs. Deleting sits in the footer. Help texts fold into
+ * an (i) beside their field. Removing an attribute products may hold
+ * values for is asked about first; the arrows go to the shop's next
+ * group, asking first when something is not saved.
  */
 export function TemplateDialog({
   template,
@@ -64,10 +67,11 @@ export function TemplateDialog({
   const save = useSaveTemplate()
   const remove = useDeleteTemplate()
   const guard = useDiscardGuard(form.formState.isDirty)
-  const [tab, setTab] = useState<TemplateTab>(template ? "definitions" : "info")
+  const [tab, setTab] = useState<TemplateTab>("definitions")
+  const [more, setMore] = useState(false)
   const [pending, setPending] = useState<TemplateForm | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  // A refused field to put the caret in once its tab shows; each refusal is a new one
+  // A refused field to put the caret in once it shows; each refusal is a new one
   const [refused, setRefused] = useState<{ id: string } | null>(null)
   useLayoutEffect(() => {
     if (refused) {
@@ -92,8 +96,12 @@ export function TemplateDialog({
       const handle = values.handle.trim() || toSlug(values.name)
       if (!values.name.trim() || (!template && !isValidSlug(handle))) {
         toast.error(t(`${A}.nameRequired`))
-        setTab("info")
-        setRefused({ id: "template-name" })
+        // A name that makes no short name: the short name is what to fix
+        const badHandle = values.name.trim() !== "" && values.handle.trim() !== ""
+        if (badHandle) {
+          setMore(true)
+        }
+        setRefused({ id: badHandle ? "template-handle" : "template-name" })
         return
       }
       const next = { ...values, handle }
@@ -103,7 +111,7 @@ export function TemplateDialog({
         send(next, false)
       }
     },
-    // A group without a name: its tab shows the line that says so
+    // A section without a name: its tab shows the line that says so
     (errors) => {
       if (errors.groups) {
         setTab("groups")
@@ -124,7 +132,6 @@ export function TemplateDialog({
         size="lg"
         pane="fixed"
         title={template ? template.name : t(`${A}.newTemplate`)}
-        description={t(`${A}.templateHint`)}
         headerAction={
           template && steps ? (
             <RecordStepper
@@ -149,74 +156,89 @@ export function TemplateDialog({
         onSubmit={() => void submit()}
         guard={guard}
         initialFocus={template ? null : "template-name"}
+        footerStart={
+          template ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="text-destructive-text"
+              disabled={save.isPending}
+              onClick={() => {
+                setConfirmDelete(true)
+              }}
+            >
+              <Trash2 />
+              {t(`${A}.deleteTemplate`)}
+            </Button>
+          ) : null
+        }
       >
         <FormProvider {...form}>
-          <Tabs
-            value={tab}
-            onValueChange={(next) => {
-              setTab(next as TemplateTab)
-            }}
-            className="flex min-h-0 flex-1 flex-col gap-5"
-          >
-            <TabsList className="w-full shrink-0 sm:w-fit">
-              <TabsTrigger value="definitions">
-                {t(`${A}.tabs.definitions`, { count: definitions.length })}
-              </TabsTrigger>
-              <TabsTrigger value="groups">
-                {t(`${A}.tabs.groups`, { count: groups.length })}
-                {groupError ? (
-                  <span
-                    className="size-1.5 rounded-full bg-destructive"
-                    aria-label={t(`${A}.tabError`)}
-                  />
-                ) : null}
-              </TabsTrigger>
-              {showAddons ? (
-                <TabsTrigger value="addons">
-                  {t(`${A}.tabs.addons`, { count: carried.length })}
+          <FieldHints style="tip">
+            <div className="shrink-0">
+              <TemplateInfo
+                key={template?.id ?? "new"}
+                saved={template !== null}
+                more={more}
+                onMoreChange={setMore}
+              />
+            </div>
+            <Tabs
+              value={tab}
+              onValueChange={(next) => {
+                setTab(next as TemplateTab)
+              }}
+              className="flex min-h-0 flex-1 flex-col gap-5"
+            >
+              <TabsList className="w-full shrink-0 sm:w-fit">
+                <TabsTrigger value="definitions">
+                  {t(`${A}.tabs.definitions`, { count: definitions.length })}
                 </TabsTrigger>
-              ) : null}
-              <TabsTrigger value="info">{t(`${A}.tabs.info`)}</TabsTrigger>
-            </TabsList>
-            {/* Started again for another template: what the parts keep for themselves too */}
-            <TabsContent
-              key={template?.id ?? "new"}
-              value="definitions"
-              forceMount
-              className={TAB_BODY}
-            >
-              <DialogBody>
-                <DefinitionsTab />
-              </DialogBody>
-            </TabsContent>
-            <TabsContent
-              key={`groups-${template?.id ?? "new"}`}
-              value="groups"
-              forceMount
-              className={TAB_BODY}
-            >
-              <DialogBody>
-                <GroupList />
-              </DialogBody>
-            </TabsContent>
-            {showAddons ? (
-              <TabsContent value="addons" forceMount className={TAB_BODY}>
+                <TabsTrigger value="groups">
+                  {t(`${A}.tabs.groups`, { count: groups.length })}
+                  {groupError ? (
+                    <span
+                      className="size-1.5 rounded-full bg-destructive"
+                      aria-label={t(`${A}.tabError`)}
+                    />
+                  ) : null}
+                </TabsTrigger>
+                {showAddons ? (
+                  <TabsTrigger value="addons">
+                    {t(`${A}.tabs.addons`, { count: carried.length })}
+                  </TabsTrigger>
+                ) : null}
+              </TabsList>
+              {/* Started again for another group: what the parts keep for themselves too */}
+              <TabsContent
+                key={template?.id ?? "new"}
+                value="definitions"
+                forceMount
+                className={TAB_BODY}
+              >
                 <DialogBody>
-                  <AddonTemplatesTab />
+                  <DefinitionsTab />
                 </DialogBody>
               </TabsContent>
-            ) : null}
-            <TabsContent value="info" forceMount className={TAB_BODY}>
-              <DialogBody>
-                <TemplateInfo
-                  saved={template !== null}
-                  onDelete={() => {
-                    setConfirmDelete(true)
-                  }}
-                />
-              </DialogBody>
-            </TabsContent>
-          </Tabs>
+              <TabsContent
+                key={`groups-${template?.id ?? "new"}`}
+                value="groups"
+                forceMount
+                className={TAB_BODY}
+              >
+                <DialogBody>
+                  <GroupList />
+                </DialogBody>
+              </TabsContent>
+              {showAddons ? (
+                <TabsContent value="addons" forceMount className={TAB_BODY}>
+                  <DialogBody>
+                    <AddonTemplatesTab />
+                  </DialogBody>
+                </TabsContent>
+              ) : null}
+            </Tabs>
+          </FieldHints>
         </FormProvider>
       </FormDialog>
       <ConfirmDialog

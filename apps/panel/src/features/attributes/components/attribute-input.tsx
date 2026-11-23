@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
@@ -11,9 +13,17 @@ import {
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
-import type { AttributeDefinition, AttributeValue } from "@/features/attributes/types"
+import type {
+  AttributeDefinition,
+  AttributeOption,
+  AttributeValue,
+} from "@/features/attributes/types"
+import { withAdded } from "@/features/attributes/form"
+import { NewValue } from "./new-value"
+import type { AddValue } from "./new-value"
 
 const NONE = "__none__"
+const NEW = "__new__"
 
 interface AttributeInputProps {
   definition: AttributeDefinition
@@ -21,14 +31,38 @@ interface AttributeInputProps {
   onChange: (value: AttributeValue) => void
   /** An i18n'd error sentence under the field (a required one left empty). */
   error?: string | undefined
+  /** A list field's missing value added to the group from here; none: only its values. */
+  addOption?: AddValue | undefined
 }
 
 /** The field for one attribute, by its type; an empty field means "no value" (null). */
-export function AttributeInput({ definition, value, onChange, error }: AttributeInputProps) {
+export function AttributeInput({
+  definition,
+  value,
+  onChange,
+  error,
+  addOption,
+}: AttributeInputProps) {
   const { t } = useTranslation()
   const id = `attribute-${definition.key}`
-  const options = definition.options ?? []
+  // Added here: shown at once, before the saved group comes back with them
+  const [added, setAdded] = useState<AttributeOption[]>([])
+  const [adding, setAdding] = useState(false)
+  const options = withAdded(definition.options ?? [], added)
   const label = `${definition.label}${definition.unit ? ` (${definition.unit})` : ""}`
+  const newValue = (pick: (option: AttributeOption) => void) =>
+    addOption ? (
+      <NewValue
+        label={definition.label}
+        open={adding}
+        onOpenChange={setAdding}
+        add={addOption}
+        onAdded={(option) => {
+          setAdded((was) => [...was, option])
+          pick(option)
+        }}
+      />
+    ) : null
 
   if (definition.type === "boolean") {
     return (
@@ -51,7 +85,7 @@ export function AttributeInput({ definition, value, onChange, error }: Attribute
     const selected = Array.isArray(value) ? value : []
     return (
       <Field label={label} required={definition.is_required} error={error}>
-        <div role="group" aria-label={label} className="flex flex-wrap gap-2">
+        <div role="group" aria-label={label} className="flex flex-wrap items-center gap-2">
           {options.map((option) => (
             <label
               key={option.value}
@@ -70,31 +104,59 @@ export function AttributeInput({ definition, value, onChange, error }: Attribute
               {option.label}
             </label>
           ))}
+          {adding ? null : newValue(() => undefined)}
         </div>
+        {adding
+          ? newValue((option) => {
+              onChange([...selected.filter((item) => item !== option.value), option.value])
+            })
+          : null}
       </Field>
     )
   }
   return (
     <Field label={label} htmlFor={id} required={definition.is_required} error={error}>
       {definition.type === "select" ? (
-        <Select
-          value={typeof value === "string" ? value : NONE}
-          onValueChange={(next) => {
-            onChange(next === NONE ? null : next)
-          }}
-        >
-          <SelectTrigger id={id} className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={NONE}>{t("attributes.noValue")}</SelectItem>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-2">
+          <Select
+            value={typeof value === "string" ? value : NONE}
+            onValueChange={(next) => {
+              if (next === NEW) {
+                setAdding(true)
+                return
+              }
+              // Radix's hidden select reports "" for a value whose option it has not drawn yet
+              // (one just added): no value is NONE, never ""
+              if (next === "") {
+                return
+              }
+              onChange(next === NONE ? null : next)
+            }}
+          >
+            <SelectTrigger id={id} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>{t("attributes.noValue")}</SelectItem>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+              {addOption ? (
+                <SelectItem value={NEW} className="text-muted-foreground">
+                  <Plus />
+                  {t("attributes.newValue")}
+                </SelectItem>
+              ) : null}
+            </SelectContent>
+          </Select>
+          {adding
+            ? newValue((option) => {
+                onChange(option.value)
+              })
+            : null}
+        </div>
       ) : definition.type === "number" ? (
         <NumberField
           plain

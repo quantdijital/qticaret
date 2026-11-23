@@ -54,7 +54,6 @@ export function GroupList() {
   }
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[13px] text-muted-foreground">{t(`${G}.hint`)}</p>
       {groups.fields.length > 0 ? (
         <ol className="flex flex-col gap-2">
           {groups.fields.map((field, index) => {
@@ -95,7 +94,11 @@ export function GroupList() {
             )
           })}
         </ol>
-      ) : null}
+      ) : (
+        <p className="rounded-md border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+          {t(`${G}.hint`)}
+        </p>
+      )}
       <div className="flex flex-wrap items-center gap-2">
         <Input
           aria-label={t(`${G}.newName`)}

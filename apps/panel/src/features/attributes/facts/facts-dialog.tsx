@@ -38,7 +38,7 @@ interface FactsDialogProps {
 }
 
 /**
- * "Açıklamadaki özellikleri aktar" (adr/0013 Ek 2026-11-05): what the
+ * "Açıklamadan aktar" (adr/0013 Ek 2026-11-05): what the
  * products' descriptions state as facts, the field each goes to and its
  * value, the labels no field names (to add as fields, or as another name
  * of one), then the run that writes them, its progress and its report.

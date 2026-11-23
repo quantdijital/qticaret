@@ -7,6 +7,7 @@ import {
   carriedChanged,
   removedDefinitions,
   templateForm,
+  withAdded,
 } from "./form"
 import type { AttributeTemplate } from "./types"
 
@@ -112,5 +113,14 @@ describe("carried add-on templates (adr/0052 Ek 2026-11-23)", () => {
     expect(carriedChanged(saved, form)).toBe(false)
     expect(carriedChanged(saved, { ...form, addonTemplateIds: ["adtpl_2", "adtpl_1"] })).toBe(true)
     expect(carriedChanged(null, templateForm(null))).toBe(false)
+  })
+})
+
+describe("withAdded", () => {
+  it("shows values added from a product until the saved group has them, once each", () => {
+    const steel = { value: "steel", label: "Çelik" }
+    const bamboo = { value: "bambu", label: "Bambu" }
+    expect(withAdded([steel], [bamboo])).toEqual([steel, bamboo])
+    expect(withAdded([steel, bamboo], [bamboo])).toEqual([steel, bamboo])
   })
 })

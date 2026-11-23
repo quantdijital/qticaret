@@ -78,18 +78,18 @@ describe("TemplateDialog: spec table groups", () => {
   it("adds a group by name, puts a field in it and sends both", async () => {
     renderDialog(template())
 
-    await userEvent.click(screen.getByRole("tab", { name: "Gruplar (0)" }))
-    await userEvent.type(screen.getByRole("textbox", { name: "Yeni grup adı" }), "Ölçüler")
-    await userEvent.click(screen.getByRole("button", { name: "Grup ekle" }))
+    await userEvent.click(screen.getByRole("tab", { name: "Bölümler (0)" }))
+    await userEvent.type(screen.getByRole("textbox", { name: "Yeni bölüm adı" }), "Ölçüler")
+    await userEvent.click(screen.getByRole("button", { name: "Bölüm ekle" }))
     // A second one with the same name gets a key of its own
-    await userEvent.type(screen.getByRole("textbox", { name: "Yeni grup adı" }), "Ölçüler{Enter}")
-    expect(screen.getByRole("textbox", { name: "1. grubun adı" })).toHaveValue("Ölçüler")
-    await userEvent.clear(screen.getByRole("textbox", { name: "2. grubun adı" }))
-    await userEvent.type(screen.getByRole("textbox", { name: "2. grubun adı" }), "Bakım")
+    await userEvent.type(screen.getByRole("textbox", { name: "Yeni bölüm adı" }), "Ölçüler{Enter}")
+    expect(screen.getByRole("textbox", { name: "1. bölümün adı" })).toHaveValue("Ölçüler")
+    await userEvent.clear(screen.getByRole("textbox", { name: "2. bölümün adı" }))
+    await userEvent.type(screen.getByRole("textbox", { name: "2. bölümün adı" }), "Bakım")
 
     await userEvent.click(screen.getByRole("tab", { name: "Özellikler (1)" }))
     await userEvent.click(row("Genişlik"))
-    await userEvent.click(screen.getByRole("combobox", { name: "Grup" }))
+    await userEvent.click(screen.getByRole("combobox", { name: "Bölüm" }))
     await userEvent.click(await screen.findByRole("option", { name: "Bakım" }))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
@@ -106,11 +106,10 @@ describe("TemplateDialog: spec table groups", () => {
   it("saves a template without groups as before", async () => {
     renderDialog(template())
 
-    await userEvent.click(screen.getByRole("tab", { name: "Şablon bilgisi" }))
-    await userEvent.type(screen.getByRole("textbox", { name: /Şablon adı/ }), " ve dekor")
+    await userEvent.type(screen.getByRole("textbox", { name: /Grup adı/ }), " ve dekor")
     await userEvent.click(screen.getByRole("tab", { name: "Özellikler (1)" }))
     await userEvent.click(row("Genişlik"))
-    expect(screen.queryByRole("combobox", { name: "Grup" })).toBeNull()
+    expect(screen.queryByRole("combobox", { name: "Bölüm" })).toBeNull()
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
     const body = await savedBody()
@@ -131,11 +130,11 @@ describe("TemplateDialog: spec table groups", () => {
       })
     )
 
-    await userEvent.click(screen.getByRole("tab", { name: "Gruplar (2)" }))
+    await userEvent.click(screen.getByRole("tab", { name: "Bölümler (2)" }))
     // Each group says how many attributes it holds
     expect(screen.getByText("1 özellik")).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("button", { name: "2. grup: yukarı taşı" }))
-    await userEvent.click(screen.getByRole("button", { name: "2. grup: kaldır" }))
+    await userEvent.click(screen.getByRole("button", { name: "2. bölüm: yukarı taşı" }))
+    await userEvent.click(screen.getByRole("button", { name: "2. bölüm: kaldır" }))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
     const body = await savedBody()
@@ -184,14 +183,48 @@ describe("TemplateDialog: walking the shop's templates", () => {
     const dialog = screen.getByRole("dialog", { name: "Mobilya" })
     expect(within(dialog).getByText("1 / 2")).toBeInTheDocument()
 
-    await user.click(within(dialog).getByRole("button", { name: "Sonraki şablon" }))
+    await user.click(within(dialog).getByRole("button", { name: "Sonraki grup" }))
     expect(screen.getByRole("dialog", { name: "Bıçak" })).toBe(dialog)
-    expect(within(dialog).getByRole("textbox", { name: /Şablon adı/ })).toHaveValue("Bıçak")
+    expect(within(dialog).getByRole("textbox", { name: /Grup adı/ })).toHaveValue("Bıçak")
 
-    await user.type(within(dialog).getByRole("textbox", { name: /Şablon adı/ }), " seti")
-    await user.click(within(dialog).getByRole("button", { name: "Önceki şablon" }))
+    await user.type(within(dialog).getByRole("textbox", { name: /Grup adı/ }), " seti")
+    await user.click(within(dialog).getByRole("button", { name: "Önceki grup" }))
     await user.click(await screen.findByRole("button", { name: "Değişiklikleri at" }))
-    expect(within(dialog).getByRole("textbox", { name: /Şablon adı/ })).toHaveValue("Mobilya")
+    expect(within(dialog).getByRole("textbox", { name: /Grup adı/ })).toHaveValue("Mobilya")
     expect(within(dialog).getByText("1 / 2")).toBeInTheDocument()
+  })
+})
+
+describe("TemplateDialog: name, more settings and deleting", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    fetchMock.mockResolvedValue({})
+  })
+
+  it("keeps the short name and the note under Diğer ayarlar, the short name fixed once saved", async () => {
+    renderDialog(template({ description: "Mutfak" }))
+    expect(screen.queryByRole("textbox", { name: /Kısa ad/ })).toBeNull()
+    await userEvent.click(screen.getByRole("button", { name: "Diğer ayarlar" }))
+    expect(screen.getByRole("textbox", { name: /Kısa ad/ })).toBeDisabled()
+    expect(screen.getByRole("textbox", { name: /Not/ })).toHaveValue("Mutfak")
+  })
+
+  it("deletes a saved group from the footer, asking first", async () => {
+    const onClose = vi.fn()
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <TemplateDialog template={template()} onClose={onClose} />
+      </QueryClientProvider>
+    )
+    await userEvent.click(screen.getByRole("button", { name: "Grubu sil" }))
+    const confirm = await screen.findByRole("alertdialog", { name: "Mobilya silinsin mi?" })
+    await userEvent.click(within(confirm).getByRole("button", { name: "Grubu sil" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(URL, { method: "DELETE" })
+    })
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled()
+    })
   })
 })
