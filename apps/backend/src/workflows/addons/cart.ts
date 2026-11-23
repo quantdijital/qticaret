@@ -1,9 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, QueryContext } from "@medusajs/framework/utils"
-import { storedAddonsOf } from "../../lib/catalog/addons"
-import type { StoredAddon } from "../../lib/catalog/addons"
 import { fromMedusaAmount } from "../../lib/money"
 import type { Kurus, MedusaAmount } from "../../lib/money"
+
+/** Every product's effective add-ons, own and templates' (adr/0052 Ek 2026-11-23). */
+export { productAddonsAmong } from "./effective"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -73,30 +74,6 @@ export const linesOf = (cart: AddonCart): AddonCartLine[] =>
   (cart.items ?? []).flatMap((item) => (item ? [item] : []))
 
 export const quantityOf = (line: AddonCartLine): number => Number(line.quantity)
-
-/** The add-ons of these products, by product (a product without any is left out). */
-export async function productAddonsAmong(
-  container: Container,
-  productIds: readonly (string | null | undefined)[]
-): Promise<Map<string, StoredAddon[]>> {
-  const ids = [...new Set(productIds.filter((id): id is string => Boolean(id)))]
-  if (ids.length === 0) {
-    return new Map()
-  }
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "product",
-    fields: ["id", "product_extension.addons"],
-    filters: { id: ids },
-  })
-  return new Map(
-    (data as { id: string; product_extension?: { addons?: unknown } | null }[]).flatMap(
-      (product) => {
-        const addons = storedAddonsOf(product.product_extension?.addons ?? null)
-        return addons.length > 0 ? [[product.id, addons] as const] : []
-      }
-    )
-  )
-}
 
 export interface VariantPrice {
   /** What the cart would charge for the variant now, per unit. */
