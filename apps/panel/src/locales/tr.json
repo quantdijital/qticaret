@@ -72,9 +72,9 @@
     "reviews": "Yorumlar ve sorular",
     "menus": "Menüler",
     "themeEditor": "Tema düzenleyici",
-    "bulkMessages": "Toplu ileti",
+    "bulkMessages": "Toplu mesaj",
     "paymentLinks": "Ödeme bağlantıları",
-    "media": "Ortam kütüphanesi",
+    "media": "Medya kütüphanesi",
     "collections": "Koleksiyonlar",
     "looks": "Görünümler",
     "pages": "Sayfalar"
@@ -1750,7 +1750,7 @@
           },
           "marketing": {
             "announcement": "Kampanya duyurusu",
-            "campaign": "Toplu ileti"
+            "campaign": "Toplu mesaj"
           },
           "staff": {
             "new_order": "Ekip: yeni sipariş",
@@ -2224,19 +2224,19 @@
         "feeds": "Ürün akışları",
         "conversions": "Dönüşüm ölçümü",
         "carts": "Terk edilen sepet",
-        "bulk": "Toplu ileti"
+        "bulk": "Toplu mesaj"
       },
       "bulk": {
-        "title": "Toplu ileti kuralları",
-        "description": "Büyüme > Toplu ileti'den gönderilen e-posta ve SMS kampanyalarının sınırları.",
-        "cap": "Bir kişiye 24 saatte en çok bir toplu ileti",
-        "capHint": "Son 24 saatte başka bir toplu ileti almış kişi yeni iletinin kitlesinden çıkarılır; şikâyetleri ve abonelikten çıkışları azaltır.",
+        "title": "Toplu mesaj kuralları",
+        "description": "Pazarlama > Toplu mesaj'dan gönderilen e-posta ve SMS kampanyalarının sınırları.",
+        "cap": "Bir kişiye 24 saatte en çok bir toplu mesaj",
+        "capHint": "Son 24 saatte başka bir toplu mesaj almış kişi yeni mesajın kitlesinden çıkarılır; şikâyetleri ve abonelikten çıkışları azaltır.",
         "hours": "Toplu SMS saatleri",
         "hoursHint": "Toplu SMS'ler yalnız bu saatler arasında gider (Türkiye saati). Saat dışında kalan gönderim bekler, saat gelince kendiliğinden sürer.",
         "start": "Başlangıç",
         "end": "Bitiş",
         "hoursInvalid": "Bitiş saati başlangıç saatinden sonra olmalı.",
-        "saved": "Toplu ileti kuralları kaydedildi."
+        "saved": "Toplu mesaj kuralları kaydedildi."
       }
     },
     "accounting": {
@@ -9255,7 +9255,7 @@
         "notePlaceholder": "Ayda birkaç e-posta · İstediğiniz an ayrılın",
         "noteHint": "Tutabileceğiniz bir söz yazın. Boş bırakırsanız vitrin kendi metnini kullanır.",
         "image": "Görsel",
-        "imageHint": "Ortam kütüphanesinden bir görsel; kartın solunda durur. Görsel seçilmezse kutu yan yana bant olarak çizilir.",
+        "imageHint": "Medya kütüphanesinden bir görsel; kartın solunda durur. Görsel seçilmezse kutu yan yana bant olarak çizilir.",
         "consent": "Onay metni",
         "consentTerm": "İYS",
         "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
@@ -10626,7 +10626,7 @@
           },
           "image": {
             "name": "Resim",
-            "description": "Ortam kütüphanesinden bir resim, isterseniz bağlantılı."
+            "description": "Medya kütüphanesinden bir resim, isterseniz bağlantılı."
           },
           "app_badges": {
             "name": "Uygulama mağazası rozetleri",
@@ -11265,18 +11265,18 @@
     }
   },
   "bulkMessages": {
-    "title": "Toplu ileti",
+    "title": "Toplu mesaj",
     "description": "İzinli müşterilerinize ve bülten abonelerinize toplu e-posta ya da SMS gönderin.",
-    "new": "Yeni ileti",
-    "empty": "Henüz toplu ileti yok. İlk iletinizi hazırlayın.",
-    "emptyFiltered": "Bu süzgece uyan ileti yok.",
-    "views": "İleti durumları",
+    "new": "Yeni mesaj",
+    "empty": "Henüz toplu mesaj yok. İlk mesajınızı hazırlayın.",
+    "emptyFiltered": "Bu süzgece uyan mesaj yok.",
+    "views": "Mesaj durumları",
     "allStatuses": "Tümü",
     "channelFilter": "Kanal",
     "allChannels": "Tüm kanallar",
-    "off": "Toplu e-posta ve SMS bu mağazada kapalı. Açınca izinli müşterilerinize panelden kampanya iletisi gönderebilirsiniz.",
+    "off": "Toplu e-posta ve SMS bu mağazada kapalı. Açınca izinli müşterilerinize panelden kampanya mesajı gönderebilirsiniz.",
     "turnOn": "Özelliklerden aç",
-    "noAccess": "Toplu iletileri yalnız mağaza sahibi ve yöneticiler hazırlayıp gönderebilir.",
+    "noAccess": "Toplu mesajları yalnız mağaza sahibi ve yöneticiler hazırlayıp gönderebilir.",
     "columns": {
       "name": "Ad",
       "channel": "Kanal",
@@ -11313,8 +11313,8 @@
       "channel_off": "Gönderen alan adı ya da SMS hesabı şu an kullanılamıyor. Kanal yeniden çalışınca kendiliğinden sürer."
     },
     "failure": {
-      "generic": "Gönderim başlatılamadı. İletiyi kopyalayıp yeniden deneyin.",
-      "segment_unknown": "Seçilen segment artık yok; gönderim başlatılamadı. İletiyi kopyalayıp kitleyi yeniden seçin."
+      "generic": "Gönderim başlatılamadı. Mesajı kopyalayıp yeniden deneyin.",
+      "segment_unknown": "Seçilen segment artık yok; gönderim başlatılamadı. Mesajı kopyalayıp kitleyi yeniden seçin."
     },
     "scheduledFor": "{{when}} için zamanlandı.",
     "sourceCount_one": "{{count}} kaynak",
@@ -11328,16 +11328,16 @@
       "finished": "Bitti"
     },
     "create": {
-      "title": "Yeni toplu ileti",
+      "title": "Yeni toplu mesaj",
       "hint": "Ad ve kanalı seçin; kitleyi ve içeriği sonraki sayfada hazırlarsınız. Kitle önce bütün izinli müşteriler olarak gelir.",
       "submit": "Taslağı oluştur",
       "created": "Taslak oluşturuldu."
     },
     "fields": {
-      "name": "İletinin adı",
+      "name": "Mesajın adı",
       "nameHint": "Yalnız panelde görünür.",
       "channel": "Kanal",
-      "channelHint": "Her ileti tek kanaldan gider.",
+      "channelHint": "Her mesaj tek kanaldan gider.",
       "utm": "Kampanya kodu",
       "utmHint": "Mağaza bağlantılarına utm_campaign olarak eklenir; rapor satışları bununla bulur.",
       "subject": "Konu",
@@ -11355,13 +11355,13 @@
     },
     "editor": {
       "general": "Genel",
-      "parts": "İletinin bölümleri",
+      "parts": "Mesajın bölümleri",
       "tabs": {
         "audience": "Kitle",
         "content": "İçerik",
         "send": "Deneme ve gönderim"
       },
-      "saved": "İleti kaydedildi.",
+      "saved": "Mesaj kaydedildi.",
       "invalid": "Bazı alanlar eksik ya da hatalı; işaretli yerleri düzeltin.",
       "unsaved": "Kaydedilmemiş değişiklikler var; denemeden ve göndermeden önce kaydedin.",
       "incomplete": "Önce şunları yazın: {{fields}}.",
@@ -11370,11 +11370,11 @@
         "body": "e-posta metni",
         "sms_text": "SMS metni"
       },
-      "emptyAudience": "Bu kitlede iletiyi alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
+      "emptyAudience": "Bu kitlede mesajı alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
     },
     "audience": {
       "title": "Kimlere gidecek",
-      "description": "Bir ya da birkaç kaynak seçin. Aynı kişi birden çok kaynakta olsa da tek ileti alır; yalnız bu kanalda izni olanlara gider.",
+      "description": "Bir ya da birkaç kaynak seçin. Aynı kişi birden çok kaynakta olsa da tek mesaj alır; yalnız bu kanalda izni olanlara gider.",
       "all_consented": "Bütün izinli müşteriler",
       "all_consentedHint": "Bu kanalda ticari ileti izni veren bütün müşteri hesapları.",
       "newsletter": "Bülten aboneleri",
@@ -11407,7 +11407,7 @@
       "no_consent": "Bu kanalda izni yok",
       "suppressed": "Gönderim engeli listesinde",
       "iys_pending": "İzni İYS'ye henüz bildirilmedi",
-      "recent": "Son 24 saatte başka bir toplu ileti aldı",
+      "recent": "Son 24 saatte başka bir toplu mesaj aldı",
       "invalid_recipient": "Adresi ya da numarası geçersiz",
       "over_quota": "Günlük sınıra takıldı"
     },
@@ -11938,7 +11938,7 @@
         "brand": "Marka logosu",
         "content": "Sayfa ya da yazı",
         "landing": "Açılış sayfası",
-        "bulk_message": "Toplu ileti",
+        "bulk_message": "Toplu mesaj",
         "storefront": "Vitrin",
         "logo": "Logo",
         "share_image": "Paylaşım görseli",

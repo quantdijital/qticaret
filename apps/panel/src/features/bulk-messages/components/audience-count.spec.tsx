@@ -19,7 +19,7 @@ describe("AudienceCount (adr/0050 §3)", () => {
     expect(rows).toEqual([
       ["Bu kanalda izni yok", "200"],
       ["İzni İYS'ye henüz bildirilmedi", "40"],
-      ["Son 24 saatte başka bir toplu ileti aldı", "20"],
+      ["Son 24 saatte başka bir toplu mesaj aldı", "20"],
     ])
     // Nothing waits for the next day within the quota
     expect(screen.queryByText(/ertesi gün/)).toBeNull()
