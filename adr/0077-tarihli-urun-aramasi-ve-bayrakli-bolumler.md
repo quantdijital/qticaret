@@ -147,6 +147,12 @@ Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; �
 - `SECTION_VARIANTS`'a girmediler: tek çizim var; biçimsiz kayıt varsayılan okunduğu için ikinci biçim geldiğinde liste ilk sıradaki bugünkü çizimle açılır, göç gerekmez.
 - Bilerek yok: ikon/görsel (adımlar sade numara), düğme stili (tek bağlantı temanın ana düğmesi), telefon sütun ayarı (rakam telefonda ikişer, adımlar alt alta).
 
+**Uygulama notu (PR5b, `photo_collage` ve `reviews` carousel).** Sözleşme `packages/types/src/store/section-collage.ts` ve `SECTION_VARIANTS.reviews`; backend aynası `lib/storefront/sections/photo-collage.ts`, `reviews.ts` (eşitlik testleri). Kolaj ana sayfa ve içerik sayfalarına girer; ürün ve kategori sayfası almaz.
+
+- `photo_collage` "Fotoğraf kolajı": başlık isteğe bağlı (yoksa liste ekran okuyucuya "Fotoğraflar" adıyla), giriş ≤240, 3–7 fotoğraf `{image (medya kütüphanesi), alt ≤300 zorunlu, caption ≤60 isteğe bağlı, link isteğe bağlı}`; ayarlar `layout` **asymmetric**/even ("Asimetrik / Eşit ızgara") ve `phone` **scroll**/stack ("Yana kaydır / Alt alta"), ikisi Diziliş'te açık. Atölye'de 1024 px'ten dört sütun, ilk fotoğraf 2×2 ve kalanlar her adette satırı dolduracak biçimde; yazı fotoğrafın üstünde kâğıt zeminli küçük etiket, perde yok. İlk bölümse ilk fotoğraf öncelikli, gerisi `lazy`.
+- `reviews` biçimleri `grid` (bugünkü çizim, varsayılan) ve `carousel`. Biçimsiz kayıt `grid` okunur; `grid`'in yayın çıktısı değişmedi (`variant`/`scroller` yalnız `carousel`'de basılır), kilitli görünümler aynı. `carousel` ortak kaydırma takımını (`scroller`) alır: Kaydırma'da görünen kart ve oklar, kalanı Diğer ayarlar'da. Her yorum bir kart (müşteri fotoğrafı varsa üstte, puan, alıntı, ad, ürün); kartlar fotoğrafı taşıdığı için müşteri fotoğrafları şeridi bu biçimde ayrıca çizilmez, özet (ortalama ve dağılım) da yok.
+- Zemin ve hizalama ortak `look`; köşe ve aralık stil takımından (bilesen-standardi §0.5). Bilerek yok: kolaja odak noktası ve telefon görseli (fotoğraflar `object-cover`, kırpma oranı düzenden gelir), kendiliğinden dönen kolaj.
+
 ### 11. travel paketi sürüm 2
 
 - Yeni seçim niteliği **"Gidilecek yer"** (`gidilecek_yer`): filtrelenebilir; üründe tek değer, süzgeçte çoklu seçim. Arama kutusunun "nereye" alanı bunu kullanır.
