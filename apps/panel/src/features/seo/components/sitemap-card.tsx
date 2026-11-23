@@ -72,7 +72,11 @@ export function SitemapCard({ className }: { className?: string }) {
           {data.host_missing ? (
             <Notice>
               {t("seo.sitemap.hostMissing")}{" "}
-              <Link to="/settings/seo" className="font-medium underline underline-offset-2">
+              <Link
+                to="/settings/seo"
+                search={{ part: "addresses" }}
+                className="font-medium underline underline-offset-2"
+              >
                 {t("seo.editSettings")}
               </Link>
             </Notice>

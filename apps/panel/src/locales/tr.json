@@ -575,7 +575,7 @@
     },
     "seo": {
       "title": "SEO",
-      "subtitle": "Arama motorlarında mağazanızın nasıl görüneceğini belirleyen genel ayarlar.",
+      "subtitle": "Mağazanızın arama motorlarında ve yapay zekâ aramalarında nasıl göründüğü: öneriler, denetim, yönlendirmeler ve ayarlar.",
       "addresses": "Alan adı",
       "addressesHint": "Kalıcı adresler ve paylaşım bağlantıları bu alan adıyla oluşur.",
       "host": "Ana alan adı",
@@ -674,9 +674,19 @@
         "descriptionHint": "Boşsa açıklama yazılmaz; arama motoru sayfadan bir parça seçer. Yaklaşık 155 karakter görünür."
       },
       "tabs": {
+        "overview": "Genel bakış",
+        "advisor": "Öneriler",
+        "audit": "Denetim",
+        "redirects": "Yönlendirmeler",
+        "siteSearch": "Site araması",
         "addresses": "Adresler",
         "pages": "Başlıklar ve görsel",
         "search": "Arama motorları"
+      },
+      "summary": {
+        "critical_one": "{{products}} üründe kritik eksik",
+        "critical_other": "{{products}} üründe kritik eksik",
+        "clean": "Kritik eksik yok"
       }
     },
     "features": {
@@ -2043,7 +2053,7 @@
     "sectionHints": {
       "store": "Mağaza adı ve logosu, iletişim bilgileri ve çalışma saatleri, yasal kimlik, sosyal hesaplar",
       "appearance": "Panelin marka rengi, köşeleri ve yoğunluğu",
-      "seo": "Alan adı ve adres yapısı, başlık şablonları, arama motorları",
+      "seo": "Öneriler, denetim, yönlendirmeler, site araması, adresler, başlıklar ve arama motorları",
       "attributes": "Ürünlerde kullanılan özellik şablonları",
       "payments": "Kartla ödeme, taksit, havale ve kapıda ödeme",
       "shipping": "Kargo firmaları, seçenekler ve ücretler, iade, depolar ve stok",
@@ -6265,7 +6275,6 @@
     }
   },
   "seo": {
-    "description": "Mağazanızın arama motorlarında ve yapay zekâ aramalarında nasıl göründüğü",
     "editSettings": "SEO ayarları",
     "search": "Arama sonuçlarında",
     "searchHint": "Şablonlarınızla bir ürün sayfası böyle görünür.",

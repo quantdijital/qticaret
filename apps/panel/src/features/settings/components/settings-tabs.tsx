@@ -8,6 +8,14 @@ export type SettingsTab = PageTab
  * subject, its parts side by side instead of scattered pages): the
  * panel's `PageTabs`, its open tab in the address (`?part=`).
  */
-export function SettingsTabs({ tabs, label }: { tabs: readonly SettingsTab[]; label: string }) {
-  return <PageTabs tabs={tabs} label={label} />
+export function SettingsTabs({
+  tabs,
+  label,
+  onOpen,
+}: {
+  tabs: readonly SettingsTab[]
+  label: string
+  onOpen?: (key: string) => void
+}) {
+  return <PageTabs tabs={tabs} label={label} {...(onOpen ? { onOpen } : {})} />
 }

@@ -575,7 +575,7 @@
     },
     "seo": {
       "title": "SEO",
-      "subtitle": "General settings for how your shop shows up in search engines.",
+      "subtitle": "How your shop shows up in search engines and AI search: suggestions, audit, redirects and settings.",
       "addresses": "Domain",
       "addressesHint": "Permanent addresses and share links use this domain.",
       "host": "Main domain",
@@ -674,9 +674,19 @@
         "descriptionHint": "When empty, no description is written and search engines pick a passage from the page. About 155 characters show."
       },
       "tabs": {
+        "overview": "Overview",
+        "advisor": "Suggestions",
+        "audit": "Audit",
+        "redirects": "Redirects",
+        "siteSearch": "Site search",
         "addresses": "Addresses",
         "pages": "Titles and image",
         "search": "Search engines"
+      },
+      "summary": {
+        "critical_one": "{{products}} product misses something critical",
+        "critical_other": "{{products}} products miss something critical",
+        "clean": "Nothing critical missing"
       }
     },
     "features": {
@@ -2043,7 +2053,7 @@
     "sectionHints": {
       "store": "Shop name and logo, contact details and opening hours, legal identity, social accounts",
       "appearance": "The panel's brand colour, corners and density",
-      "seo": "Domain and address style, title templates, search engines",
+      "seo": "Suggestions, audit, redirects, site search, addresses, titles and search engines",
       "attributes": "Attribute templates for products",
       "payments": "Card payments, installments, bank transfer and cash on delivery",
       "shipping": "Carriers, options and rates, returns, warehouses and stock",
@@ -6265,7 +6275,6 @@
     }
   },
   "seo": {
-    "description": "How your shop shows up in search engines and AI search",
     "editSettings": "SEO settings",
     "search": "In search results",
     "searchHint": "With your templates, a product page looks like this.",

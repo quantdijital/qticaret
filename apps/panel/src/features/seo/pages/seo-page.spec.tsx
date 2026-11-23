@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { SeoOverviewPage } from "./seo-page"
+import { SeoOverview } from "./seo-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -25,8 +25,6 @@ vi.mock("@/features/seo/components/setup-checklist-card", () => ({
 }))
 vi.mock("@/features/seo/components/site-search-card", () => ({ SiteSearchCard: stub("search") }))
 vi.mock("@/features/seo/components/sitemap-card", () => ({ SitemapCard: stub("sitemap") }))
-vi.mock("@/features/seo/advisor/summary-card", () => ({ AdvisorSummaryCard: stub("advisor") }))
-vi.mock("@/features/seo/audit/audit-card", () => ({ AuditCard: stub("audit") }))
 vi.mock("@/features/dashboard/components/catalog-health-card", () => ({
   CatalogHealthCard: stub("catalog"),
 }))
@@ -42,14 +40,14 @@ function renderPage(opened: { search_console: boolean; web_vitals: boolean }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <SeoOverviewPage />
+      <SeoOverview />
     </QueryClientProvider>
   )
 }
 
 const card = (name: string) => screen.queryByRole("region", { name })
 
-describe("SeoOverviewPage", () => {
+describe("SeoOverview", () => {
   beforeEach(() => {
     fetchMock.mockReset()
   })

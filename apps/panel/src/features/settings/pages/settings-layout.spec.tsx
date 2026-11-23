@@ -94,6 +94,10 @@ describe("Settings home", () => {
       "/settings/subscription"
     )
     expect(screen.queryByRole("link", { name: /^Vitrin/ })).toBeNull()
+    // SEO's one home (the owner, 2026-11-23): its line says what is inside
+    expect(
+      screen.getByRole("link", { name: /^SEO.*Öneriler, denetim, yönlendirmeler, site araması/ })
+    ).toHaveAttribute("href", "/settings/seo")
   })
 
   it("offers operations staff only what they may use: no settings to change", () => {
@@ -103,9 +107,11 @@ describe("Settings home", () => {
     // Integrations show the shop's set-up and its failures: those who set it up (F12.2).
     // Maintenance shows them whether the storefront is dark, its switch read-only, as the
     // storefront preferences page did (adr/0053). Their jobs are under Denetim kaydı, whose
-    // log they do not see (the owner, 2026-11-23)
+    // log they do not see (the owner, 2026-11-23). SEO's daily work is theirs as it was under
+    // Pazarlama; its settings tabs are not (the owner, 2026-11-23)
     expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
       "/settings/maintenance",
+      "/settings/seo",
       "/settings/security",
       "/settings/audit",
     ])
