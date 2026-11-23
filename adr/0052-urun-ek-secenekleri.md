@@ -265,7 +265,7 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. Yazı satırın her 
 **Karar:**
 
 1. **Model.**
-   - `addon_template` tablosu `product-attributes` modülünde: `id` (`adtpl_`), `name` (en çok 60), `addons` (ürünün kendi ekleriyle aynı `{ items }` biçimi ve aynı doğrulama: tür, sınırlar, ücretli ek zorunlu olamaz, en çok 5; şablonda en az 1). Migration `Migration20261123120000` (elle yazıldı, anlık görüntü güncellendi).
+   - `addon_template` tablosu `product-attributes` modülünde: `id` (`adtpl_`), `name` (en çok 60), `addons` (ürünün kendi ekleriyle aynı `{ items }` biçimi ve aynı doğrulama: tür, sınırlar, ücretli ek zorunlu olamaz, en çok 5; şablon önce yalnız adıyla, eksiz oluşturulabilir). Migration `Migration20261123120000` (elle yazıldı, anlık görüntü güncellendi).
    - Ürün ↔ şablon: çoktan çoğa modül bağlantısı (`links/product-addon-template.ts`; tablo `db:migrate` ile senkronlanır). Canlı bağdır, kopya değildir: ürün şablonun eklerini her okumada şablondan alır.
    - Özellik şablonu ↔ ek şablonu: `attribute_template.addon_template_ids` (sıralı kimlik listesi, JSON). Özellik şablonunu kullanan her ürün bu şablonların eklerini alır.
 2. **Etkin ekler ve sıra** (`lib/catalog/addons/templates.ts` `effectiveAddons`, saf):
@@ -292,7 +292,8 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. Yazı satırın her 
    - Ürün kopyalama, kaynağın doğrudan bağlı şablonlarını da bağlar; özellik şablonu zaten kopyalanıyordu.
 7. **Yetki ve denetim:** katalog yazmasıyla aynıdır. Uçlar sahip ve yönetici içindir, `operations` reddedilir (izin tablosu testi); plan kapısında katalog alanındadır. Denetim kaydı önce/sonra tutar: şablonun adı ve ekleri, ürünün bağlı şablonları, özellik şablonunun taşıdıkları (`audit/resources/addon-templates.ts`). Toplu işte her ürünün kendi kaydı vardır.
 8. **Panel:**
-   - **Ayarlar > Ürün özellikleri:** özellik şablonlarının altında "Ek seçenek şablonları" tablosu. Satıra tıklayınca standart pencere açılır: ad, ekler (ürün sayfasındaki ek penceresiyle düzenlenir), kaç ürüne ve hangi özellik şablonlarına bağlı olduğu, silme.
+   - **Ayarlar > Ürün özellikleri:** özellik şablonlarının altında "Ek seçenek şablonları" tablosu. Satıra tıklayınca şablonun kendi sayfası açılır (`/settings/attributes/addon-templates/:id`). Sayfada ad kartı ve ekler kartı vardır; ek, ürün sayfasındaki tek ek penceresiyle eklenir ya da düzenlenir. Sağ sütunda kullanım (doğrudan bağlı ürün sayısı, taşıyan özellik şablonları), başlık menüsünde silme yer alır. Pencere üstünde pencere açılmaz. "Şablon oluştur" yalnız adı sorar, şablonu oluşturup sayfasına götürür.
+   - **Ürün sayfası, özellik şablonu değişirken:** yeni şablonun taşıdığı ekler ürünü 5'in üstüne çıkaracaksa ya da zorunlu bir ek gizlenecekse kaydetmeden önce uyarı çıkar; kayıt engellenmez.
    - **Ürün sayfası "Ek seçenekler" kartı:** bağlı şablonların ekleri salt okunur görünür. Şablonun nereden geldiği yazar ("Şablon" ya da "Özellik şablonundan"). Doğrudan bağlı olan buradan kaldırılır. "Şablon ekle" sığmayan şablonu gösterir ama seçtirmez.
    - **Toplu düzenleme:** "Ek seçenek şablonu ata / kaldır".
    - **Özellik şablonu penceresi:** "Ek seçenekler" sekmesi (bayrak açıkken ya da şablon taşıyorsa).
@@ -311,3 +312,11 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. Yazı satırın her 
 - Birim: `lib/catalog/addons/__tests__/templates.unit.spec.ts` (birleştirme, sıra, tekrar, sınır, fiyatın değişmediği) ve `bulk-edit/__tests__/plan-addon-template.unit.spec.ts`.
 - HTTP: `integration-tests/http/addon-templates.spec.ts` (CRUD, ürün/toplu/özellik şablonu bağı, düzenlemenin ürüne yansıması, sepet fiyatı, şablon değişip silinince siparişin değişmemesi, bağ kalkınca sepetin durması, yetki reddi).
 - Panel: `addon-templates.spec.tsx`, `bulk-form.spec.ts`, `attributes/form.spec.ts`.
+
+**Güvenlik incelemesinden sonra (2026-11-23):**
+- **5 sınırı:** ek gönderen her şablon kaydında denetlenir. Ölçü liste uzunluğu değil, birleştirilmiş sayıdır (tekrarlar bir kez); kayıt öncesi ve sonrası karşılaştırılır (`growsPastLimit`).
+- **Kimlikler:** şablon kaydında şablonun hiç sahip olmadığı bir ek ya da seçenek kimliği reddedilir (`addon_templates.id_unknown`). Yenilerin kimliğini sunucu verir; oluştururken kimlik gönderilemez.
+- **Kilitler:** ürüne şablon bağlama ve özellik şablonuna şablon ekleme, eklenen her şablonun kilidini de alır (sıralı, Medusa'nın `acquireLockStep`'i). Bağlama ile şablonun düzenlenmesi ya da silinmesi böylece sıraya girer: silinmekte olan şablona bağ ya kurulmadan reddedilir ya da silme onu kaldırır.
+- **Toplu düzenleme:** yalnız tek değişikliği (ekle ya da kaldır) gönderir. Bütün liste ürünün kilidi altında, o anki bağlardan hesaplanır; arada kurulan bir bağ düşmez.
+- **Toplu atamada bayrak:** ek seçenekler kapalıyken iş, başında `catalog.addons_disabled` ile durur.
+- **Saklı fiyatın okunması:** fiyat okunurken de 0–10.000 TL sınırına bağlıdır; sınır dışı bir kayıt ek sayılmaz.
