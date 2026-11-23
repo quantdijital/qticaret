@@ -109,6 +109,17 @@ describe("staff roles", () => {
     ["POST", "/admin/%6digrations"],
     ["POST", "/admin/layouts/settings.sidebar"],
     ["POST", "/admin/views/orders/configurations"],
+    // The storefront's looks, read too (the owner, 2026-11-23), in every spelling Express runs
+    ["GET", "/admin/storefront-designs"],
+    ["GET", "/admin/storefront%2ddesigns"],
+    ["GET", "/admin/Storefront-Designs/"],
+    ["POST", "/admin/storefront-designs/sfd_1/apply"],
+    ["POST", "/admin/storefront-designs/sfd%5f1/apply"],
+    ["DELETE", "/admin/STOREFRONT-DESIGNS/sfd_1"],
+    ["GET", "/admin/storefront-presets"],
+    ["GET", "/admin/storefront%2Dpresets/general/sade/preview"],
+    ["POST", "/admin/storefront-presets/general/sade/apply"],
+    ["POST", "/admin/Storefront-Presets/general/sade/apply"],
   ] as const)("keeps %s %s the owner's alone", (method, path) => {
     expect(decide("admin", method, path)).toEqual({ allowed: false, reason: "owner_only" })
   })
@@ -346,6 +357,7 @@ describe("staff roles", () => {
       customers: true,
       abandonedCarts: true,
       resendMessages: true,
+      looks: true,
       wholesale: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
@@ -371,6 +383,7 @@ describe("staff roles", () => {
       legalTexts: true,
       vatRates: false,
       orderExport: false,
+      looks: false,
       wholesale: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
@@ -405,6 +418,7 @@ describe("staff roles", () => {
       customers: true,
       abandonedCarts: true,
       resendMessages: true,
+      looks: false,
       wholesale: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
@@ -483,6 +497,37 @@ describe("staff roles", () => {
       expect(allowed(role, "GET", "/admin/vat-rates")).toBe(true)
       // Medusa's own lists stay readable; the panel reads the rates from ours
       expect(allowed(role, "GET", "/admin/product-types")).toBe(true)
+    }
+  })
+
+  it("keeps the storefront's looks, read or written, the owner's alone (adr/0064, 2026-11-23)", () => {
+    for (const role of STAFF_ROLES) {
+      const can = capabilitiesOf(role).looks
+      expect(can).toBe(role === "owner")
+      for (const [method, path] of [
+        ["GET", "/admin/storefront-designs"],
+        ["POST", "/admin/storefront-designs"],
+        ["POST", "/admin/storefront-designs/sfd_1"],
+        ["DELETE", "/admin/storefront-designs/sfd_1"],
+        ["POST", "/admin/storefront-designs/sfd_1/apply"],
+        ["GET", "/admin/storefront-presets"],
+        ["GET", "/admin/storefront-presets/cutlery/katalog/preview"],
+        ["POST", "/admin/storefront-presets/cutlery/katalog/apply"],
+        // Encoded, as Express decodes the segments
+        ["POST", "/admin/storefront%2Ddesigns/sfd_1/apply"],
+      ] as const) {
+        expect({ role, method, path, allowed: allowed(role, method, path) }).toEqual({
+          role,
+          method,
+          path,
+          allowed: can,
+        })
+      }
+      // The theme editor itself is not a look: its draft, publish and history stay as they were
+      expect(allowed(role, "GET", "/admin/storefront-layout")).toBe(true)
+      expect(allowed(role, "POST", "/admin/storefront-layout/revisions/3/restore")).toBe(
+        role === "owner" || role === "admin"
+      )
     }
   })
 

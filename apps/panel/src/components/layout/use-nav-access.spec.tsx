@@ -106,6 +106,32 @@ describe("the menu's items behind a flag and a capability", () => {
     expect(accessFor({})(wholesale)).toBe(false)
   })
 
+  it("offers Görünümler to the owner alone (2026-11-23)", () => {
+    const looks = navItem("looks")
+    expect(looks).toMatchObject({ to: "/storefront/looks", needs: "looks" })
+    const as = (role: "owner" | "admin" | "operations") => {
+      const query = new QueryClient({
+        defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+      })
+      // An admin: everything the owner has but the owner's own, the looks among them
+      const me = staff(role === "admin" ? "owner" : role)
+      query.setQueryData(
+        STAFF_KEY,
+        role === "admin" ? { ...me, role, can: { ...me.can, looks: false } } : me
+      )
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={query}>{children}</QueryClientProvider>
+      )
+      return renderHook(() => useNavAccess(), { wrapper }).result.current
+    }
+    expect(as("owner")(looks)).toBe(true)
+    expect(as("admin")(looks)).toBe(false)
+    expect(as("operations")(looks)).toBe(false)
+    expect(accessFor({})(looks)).toBe(false)
+    // The theme editor stays every role's
+    expect(as("admin")(navItem("themeEditor"))).toBe(true)
+  })
+
   it("leaves items with neither alone", () => {
     expect(accessFor({})(navItem("promotions"))).toBe(true)
   })

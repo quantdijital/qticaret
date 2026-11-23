@@ -1,6 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { replaceDraftWorkflow } from "../../../../workflows/storefront/draft-replace"
 import { draftSource } from "../../../../workflows/storefront/layout"
+import { ownsLooks } from "../owns-looks"
 import { adminLayout } from "../read"
 
 /**
@@ -16,6 +17,7 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
       text_at: source.text_at,
       actor: req.auth_context.actor_id,
       reason: "discard",
+      evict: await ownsLooks(req),
     },
   })
   res.json({

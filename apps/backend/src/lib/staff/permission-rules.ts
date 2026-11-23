@@ -124,6 +124,10 @@ export const OWNER_ONLY: readonly Rule[] = [
   // the panel has its own, Medusa Admin is off (the F15 audit)
   { methods: WRITES, path: "/admin/layouts*" },
   { methods: WRITES, path: "/admin/views*" },
+  // The storefront's looks (adr/0064): the ready-made and saved ones, read, applied into the
+  // draft, kept, renamed, deleted (the owner, 2026-11-23: "yalnızca sahiplere açık")
+  { methods: "*", path: "/admin/storefront-designs*" },
+  { methods: "*", path: "/admin/storefront-presets*" },
   // The shop's people
   { methods: WRITES, path: "/admin/users*" },
   { methods: "*", path: "/admin/invites*" },

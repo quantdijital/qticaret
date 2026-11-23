@@ -50,6 +50,8 @@ export type Capability =
   | "abandonedCarts"
   /** An order's message sent again (2026-11-06): owner, admin, operations. */
   | "resendMessages"
+  /** Vitrin › Görünümler: the ready-made and saved looks, read or written (adr/0064): the owner's alone. */
+  | "looks"
   /** The wholesalers, their levels and prices (ADR-0068 §9): owner and admin. */
   | "wholesale"
 
