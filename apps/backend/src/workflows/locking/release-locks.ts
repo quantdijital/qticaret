@@ -1,6 +1,7 @@
 import type { ILockingModule } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { logger } from "../../lib/logging"
 import type { HeldLocks } from "./acquire-locks"
 
 /**
@@ -20,6 +21,10 @@ export const releaseLocksStep = createStep(
     const released = await container
       .resolve<ILockingModule>(Modules.LOCKING)
       .release(held.keys, { ownerId: held.ownerId })
+    if (!released) {
+      // A lease ran out mid-run: the work after it went on unguarded
+      logger.warn({ event: "locks.lost", keys: held.keys })
+    }
     return new StepResponse(released)
   }
 )

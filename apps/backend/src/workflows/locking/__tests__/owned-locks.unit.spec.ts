@@ -7,6 +7,7 @@ import {
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
+import { logger } from "../../../lib/logging"
 import { acquireLocksStep, assertLockTimes } from "../acquire-locks"
 import { releaseLocksStep } from "../release-locks"
 import { isFree as isFreeIn, providers, silent, twoKeys } from "./providers"
@@ -25,9 +26,6 @@ describe("assertLockTimes", () => {
       assertLockTimes({ timeout: 10, ttl: 30 })
     }).not.toThrow()
     expect(() => {
-      assertLockTimes({ timeout: 10 })
-    }).not.toThrow()
-    expect(() => {
       assertLockTimes({ ttl: 1 })
     }).not.toThrow()
     expect(() => {
@@ -37,8 +35,11 @@ describe("assertLockTimes", () => {
       assertLockTimes({ timeout: 10, ttl: 5 })
     }).toThrow("must be longer")
     expect(() => {
-      assertLockTimes({ timeout: -1 })
+      assertLockTimes({ timeout: -1, ttl: 5 })
     }).toThrow("timeout must be 0 or more")
+    expect(() => {
+      assertLockTimes({ ttl: 0 })
+    }).toThrow("ttl must be more than 0")
   })
 })
 
@@ -138,6 +139,7 @@ describe.each(providers)("owned locks ($name provider)", ({ name, make }) => {
 
   it("leaves a key that ran out and was taken again to its new holder", async () => {
     const { a } = twoKeys()
+    const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
     between.mockImplementation(async () => {
       await sleep(1200)
       // Another run (owner-less, as Medusa's step) takes the key ours lost
@@ -147,6 +149,9 @@ describe.each(providers)("owned locks ($name provider)", ({ name, make }) => {
     await pair(container()).run({ input: { keys: [a], ttl: 1 }, throwOnError: true })
 
     expect(await isFree(a)).toBe(false)
+    // The run is told its lease ran out under it
+    expect(warn).toHaveBeenCalledWith({ event: "locks.lost", keys: [a] })
+    warn.mockRestore()
     await provider.release(a)
   })
 
@@ -180,6 +185,14 @@ describe.each(providers)("owned locks ($name provider)", ({ name, make }) => {
 
     expect(await isFree(a)).toBe(true)
     expect(await isFree(b)).toBe(true)
+  })
+
+  it("refuses no key at all: what follows would run unguarded", async () => {
+    expect(
+      await failure(
+        timed(container()).run({ input: { keys: [""], timeout: 0, ttl: 5 }, throwOnError: true })
+      )
+    ).toBe("acquireLocksStep needs at least one key")
   })
 
   it("a nested run neither takes nor gives back its parent's keys", async () => {

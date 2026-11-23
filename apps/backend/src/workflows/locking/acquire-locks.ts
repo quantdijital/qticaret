@@ -11,7 +11,7 @@ export interface AcquireLocksInput {
   /** Seconds to keep trying, all keys together; 0: one try. */
   timeout?: number
   /** Seconds each key is held at most if never released; more than `timeout`. */
-  ttl?: number
+  ttl: number
   /** Seconds between tries of a key that is held. */
   retryInterval?: number
   /** Also lock when run as a nested workflow's step (Medusa skips it then, as here). */
@@ -37,11 +37,14 @@ export const lockOrder = (key: string | string[]): string[] =>
  * the last is still awaited: the run would then go on with a key it lost.
  */
 export function assertLockTimes(input: Pick<AcquireLocksInput, "timeout" | "ttl">): void {
+  if (!(input.ttl > 0)) {
+    throw new MedusaError(MedusaError.Types.INVALID_DATA, "Lock ttl must be more than 0")
+  }
   const timeout = input.timeout ?? 0
   if (!(timeout >= 0)) {
     throw new MedusaError(MedusaError.Types.INVALID_DATA, "Lock timeout must be 0 or more")
   }
-  if (input.ttl !== undefined && !(input.ttl > timeout)) {
+  if (!(input.ttl > timeout)) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
       `Lock ttl (${String(input.ttl)}s) must be longer than its timeout (${String(timeout)}s)`
@@ -99,10 +102,14 @@ export const acquireLocksStep = createStep(
   async (input: AcquireLocksInput, { container, parentStepIdempotencyKey }) => {
     assertLockTimes(input)
     const keys = lockOrder(input.key)
-    const ownerId = `qt-locks:${randomUUID()}`
     if (keys.length === 0) {
-      return new StepResponse<HeldLocks, HeldLocks>({ keys, ownerId }, { keys, ownerId })
+      // As withLocks: what follows would run unguarded
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "acquireLocksStep needs at least one key"
+      )
     }
+    const ownerId = `qt-locks:${randomUUID()}`
     if (parentStepIdempotencyKey && !input.executeOnSubWorkflow) {
       // Medusa's own step does the same; its type leaves a skip out
       return StepResponse.skip() as unknown as StepResponse<HeldLocks, HeldLocks>
@@ -110,7 +117,7 @@ export const acquireLocksStep = createStep(
     const locking = container.resolve<ILockingModule>(Modules.LOCKING)
     const deadline = Date.now() + (input.timeout ?? 0) * 1000
     const retryMs = (input.retryInterval ?? 0.3) * 1000
-    const args = input.ttl === undefined ? { ownerId } : { ownerId, expire: input.ttl }
+    const args = { ownerId, expire: input.ttl }
     const held: string[] = []
     try {
       for (const key of keys) {
@@ -129,8 +136,7 @@ export const acquireLocksStep = createStep(
     if (!held || held.keys.length === 0) {
       return
     }
-    await container.resolve<ILockingModule>(Modules.LOCKING).release(held.keys, {
-      ownerId: held.ownerId,
-    })
+    // Logged, not thrown: a failing give-back must not stop the rest of the undo
+    await releaseOwned(container.resolve<ILockingModule>(Modules.LOCKING), held.keys, held.ownerId)
   }
 )

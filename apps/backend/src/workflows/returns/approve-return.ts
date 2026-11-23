@@ -1,10 +1,8 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import {
-  acquireLockStep,
   emitEventStep,
   beginReturnOrderWorkflow,
   confirmReturnRequestWorkflow,
-  releaseLockStep,
   requestItemReturnWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { RETURN_REQUEST_APPROVED } from "./events"
@@ -16,6 +14,8 @@ import {
   storeReturnLabelStep,
   updateReturnRequestStep,
 } from "./steps/return-request"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 /**
  * The shop approves a return request (adr/0032): Medusa's return opened
@@ -31,7 +31,7 @@ export const approveReturnWorkflow = createWorkflow(
   (input: { id: string; staff_id: string; note?: string | null }) => {
     const orderId = returnRequestOrderStep({ id: input.id })
     const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 120 })
     const request = readReturnRequestStep({ id: input.id, status: "requested" })
     const change = beginReturnOrderWorkflow.runAsStep({
       input: transform({ request, input }, ({ request, input }) => ({
@@ -87,7 +87,7 @@ export const approveReturnWorkflow = createWorkflow(
         kind: approved.kind,
       })),
     })
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(approved)
   }
 )

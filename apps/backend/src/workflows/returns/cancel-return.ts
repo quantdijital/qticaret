@@ -5,16 +5,16 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import {
-  acquireLockStep,
   cancelOrderExchangeWorkflow,
   cancelReturnWorkflow,
   emitEventStep,
-  releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { returnsLockKey } from "../../lib/orders/locks"
 import { RETURN_REQUEST_CANCELED } from "./events"
 import { readCancellableRequestStep, withdrawCarrierReturnStep } from "./steps/cancel"
 import { returnRequestOrderStep, updateReturnRequestStep } from "./steps/return-request"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 export interface CancelReturnInput {
   id: string
@@ -39,7 +39,7 @@ export const cancelReturnRequestWorkflow = createWorkflow(
   (input: CancelReturnInput) => {
     const orderId = returnRequestOrderStep({ id: input.id })
     const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 120 })
     const request = readCancellableRequestStep({ id: input.id })
     withdrawCarrierReturnStep(
       transform({ request }, ({ request }) => ({
@@ -92,7 +92,7 @@ export const cancelReturnRequestWorkflow = createWorkflow(
         kind: canceled.kind,
       })),
     })
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(canceled)
   }
 )
