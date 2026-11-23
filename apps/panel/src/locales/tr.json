@@ -4343,7 +4343,67 @@
       "carryHidden_one": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez. Kaydedebilirsiniz; bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir.",
       "carryHidden_other": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez. Kaydedebilirsiniz; bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir.",
       "carryRequiredHidden_one": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez, aralarında zorunlu bir ek seçenek de var. Kaydedebilirsiniz; önce bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir.",
-      "carryRequiredHidden_other": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez, aralarında zorunlu bir ek seçenek de var. Kaydedebilirsiniz; önce bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir."
+      "carryRequiredHidden_other": "Bu özellik şablonuyla üründe 5'ten fazla ek seçenek olur: {{count}} ek seçenek vitrinde görünmez, aralarında zorunlu bir ek seçenek de var. Kaydedebilirsiniz; önce bir şablonu ya da ürünün ek seçeneğini kaldırmanız önerilir.",
+      "apply": {
+        "action": "Ürünlere uygula",
+        "title": "Ürünlere uygula",
+        "description": "\"{{name}}\" şablonunu ürünlere bağlayın ya da ürünlerden kaldırın.",
+        "mode": "İşlem",
+        "modes": {
+          "add": "Bağla",
+          "remove": "Kaldır"
+        },
+        "modeHints": {
+          "add": "Şablon seçilen ürünlere bağlanır; zaten bağlı olanlar değişmez. 5 ek seçenek sınırını aşacak ürünler atlanır ve raporda yazılır.",
+          "remove": "Şablonun doğrudan bağlantısı seçilen ürünlerden kalkar; özellik şablonundan gelenler değişmez."
+        },
+        "target": "Ürünler",
+        "targets": {
+          "all": "Tüm ürünler",
+          "category": "Kategori",
+          "products": "Seçili ürünler"
+        },
+        "allHint": "Mağazadaki bütün ürünlere uygulanır; hediye kartı ürünleri hariç. Her ürün tek tek kontrol edilir.",
+        "category": "Kategori",
+        "categoryHint": "Alt kategorilerdeki ürünler de dahildir.",
+        "categoryPlaceholder": "Kategori arayın",
+        "noCategories": "Kategori bulunamadı.",
+        "products": "Ürünler",
+        "productPlaceholder": "Ürün arayıp ekleyin",
+        "noProducts": "Ürün bulunamadı.",
+        "removeProduct": "{{name}}: listeden çıkar",
+        "submit": {
+          "add": "Bağla",
+          "remove": "Kaldır"
+        },
+        "errors": {
+          "category": "Bir kategori seçin.",
+          "products": "En az bir ürün seçin."
+        }
+      }
+    },
+    "addonScope": {
+      "title": "Kapsam",
+      "hints": {
+        "product": "Ek seçenek yalnız bu ürüne kaydedilir.",
+        "template": "Ek seçenek yeni bir şablon olarak kaydedilir ve seçilen ürünlere bağlanır. Şablonu değiştirince bağlı bütün ürünler değişir; 5 ek seçenek sınırını aşacak ürünler atlanır ve raporda yazılır."
+      },
+      "modes": {
+        "product": "Yalnız bu ürün",
+        "template": "Şablon olarak kaydet ve uygula"
+      },
+      "target": "Uygulanacak ürünler",
+      "targetHint": "Kategori, alt kategorilerdeki ürünleri de kapsar. Hediye kartı ürünlerine uygulanmaz.",
+      "targets": {
+        "all": "Tüm ürünler",
+        "category": "Bu ürünün kategorisindeki ürünler",
+        "categoryOf": "Bu ürünün kategorisindeki ürünler ({{name}})",
+        "product": "Bu ürün"
+      },
+      "nameHint": "Boş bırakırsanız ek seçeneğin adı kullanılır. Yalnız panelde görünür; en çok {{max}} karakter.",
+      "note": "Kaydedince şablon oluşturulur ve seçilen ürünlere bağlanır.",
+      "linked": "Şablon kaydedildi ve bu ürüne bağlandı.",
+      "notApplied": "Şablon kaydedildi ama ürünlere uygulanamadı; şablonun sayfasından \"Ürünlere uygula\" ile yeniden deneyin."
     }
   },
   "orders": {
