@@ -17,4 +17,11 @@ describe("GET /admin/plan by role", () => {
     ])
     expect(decide("readonly", "GET", "/admin/plan").reason).toBe("private")
   })
+
+  // Ek C20: the payments to the platform go with the plan, to the same roles
+  it.each(STAFF_ROLES)("%s reads the payments exactly as it reads the plan", (role) => {
+    expect(decide(role, "GET", "/admin/plan/payments").allowed).toBe(
+      decide(role, "GET", "/admin/plan").allowed
+    )
+  })
 })

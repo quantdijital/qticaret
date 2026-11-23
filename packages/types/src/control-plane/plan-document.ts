@@ -1,5 +1,11 @@
 import { z } from "zod"
-import { FEATURE_FLAG_KEY, LIMIT_KEYS, SUBSCRIPTION_STATUSES, TENANT_STATUSES } from "./registry"
+import {
+  BILLING_PERIODS,
+  FEATURE_FLAG_KEY,
+  LIMIT_KEYS,
+  SUBSCRIPTION_STATUSES,
+  TENANT_STATUSES,
+} from "./registry"
 import type { LimitKey } from "./registry"
 import { ed25519SignatureSchema, keyIdSchema, tenantIdSchema } from "./signature"
 
@@ -59,6 +65,16 @@ const billingSummarySchema = z.strictObject({
     .regex(PLAIN_TEXT)
     .nullable()
     .optional(),
+  /**
+   * The subscription's terms (Ek C20), optional as C16's: what one period
+   * costs (`price`, kuruş, the running period's; the package's before a
+   * subscription) and how long it is; the trial's first and next-paid day
+   * (both null without a trial). A shop takes documents without them.
+   */
+  period: z.enum(BILLING_PERIODS).optional(),
+  price: z.int().min(0).nullable().optional(),
+  trial_started_on: z.iso.date().nullable().optional(),
+  trial_ends_on: z.iso.date().nullable().optional(),
 })
 
 export const planDocumentSchema = z.strictObject({

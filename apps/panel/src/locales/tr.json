@@ -11936,10 +11936,16 @@
         "due": "Ödemeye",
         "grace": "Ek süre",
         "overdue": "Gecikme",
-        "day": "gün"
+        "day": "gün",
+        "trialUsed": "Deneme: {{used}} / {{total}} gün"
       },
       "period": "Dönem",
-      "periodHint": "Aylık limitler her ayın başında sıfırlanır."
+      "periodHint": "Aylık limitler her ayın başında sıfırlanır.",
+      "per": {
+        "monthly": "/ ay",
+        "yearly": "/ yıl"
+      },
+      "price": "Paket ücreti"
     },
     "usage": {
       "title": "Limitler ve kullanım",
@@ -12023,6 +12029,27 @@
       "copyFailed": "Kopyalanamadı; metni seçip kopyalayabilirsiniz.",
       "change": "Paket değişikliği",
       "changeHint": "Paketinizi yükseltmek ya da değiştirmek için bizimle iletişime geçin."
+    },
+    "history": {
+      "title": "Ödemeler",
+      "loading": "Ödemeler yükleniyor",
+      "empty": "Henüz ödeme yok",
+      "unavailable": "Ödemeler şu an alınamadı",
+      "period": "Dönem",
+      "day": "Tarih",
+      "amount": "Tutar",
+      "status": "Durum",
+      "invoice": "Fatura",
+      "invoiceOf": "{{period}} faturası",
+      "noInvoice": "Fatura yok",
+      "showAll_one": "Tümünü göster ({{count}})",
+      "showAll_other": "Tümünü göster ({{count}})",
+      "state": {
+        "paid": "Ödendi",
+        "waived": "Bağışlandı",
+        "open": "Bekliyor",
+        "late": "Gecikti"
+      }
     }
   },
   "wholesale": {

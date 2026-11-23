@@ -1,4 +1,4 @@
-import { CalendarDays, CalendarRange, CircleCheck, Hourglass, Package } from "lucide-react"
+import { CalendarDays, CalendarRange, CircleCheck, Hourglass, Package, Tag } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import { useId } from "react"
@@ -13,7 +13,7 @@ import { packageName } from "@/features/settings/plan-rules"
 import { DaysRing } from "@/features/settings/components/days-ring"
 import type { RingTone } from "@/features/settings/components/days-ring"
 import { isLate, periodLabel, ringShare } from "@/features/settings/subscription-rules"
-import type { Countdown, PlanState } from "@/features/settings/subscription-rules"
+import type { Countdown, PlanState, TrialProgress } from "@/features/settings/subscription-rules"
 
 const STATE_TONES: Record<PlanState, StatusTone> = {
   provisioning: "info",
@@ -82,17 +82,21 @@ const ringToneOf = (countdown: Countdown): RingTone =>
 /**
  * The package at the top of Settings > Abonelik (adr/0061 §5.6, Ek C16):
  * its name and one status, the amount due large with its day and a
- * countdown, the ring counting the same days, the month the monthly
- * limits count. The status's meaning sits behind the (i).
+ * countdown and its period ("/ ay"), the ring counting the same days (a
+ * trial's as days used of its whole, Ek C20), the month the monthly limits
+ * count and the package's price. The status's meaning sits behind the (i).
  */
 export function PlanCard({
   plan,
   state,
   countdown,
+  trial = null,
 }: {
   plan: PlanSummary
   state: PlanState
   countdown: Countdown | null
+  /** The trial's days used of its whole, when the document gives both (Ek C20). */
+  trial?: TrialProgress | null
 }) {
   const { t } = useTranslation()
   const hintId = useId()
@@ -113,6 +117,12 @@ export function PlanCard({
       : t(`plan.hero.countdown.${countdown.kind}`, { count: countdown.days })
     : null
   const accent = ACCENT[state]
+  const per = billing?.period ? t(`plan.hero.per.${billing.period}`) : null
+  const price =
+    billing?.price === null || billing?.price === undefined || !per
+      ? null
+      : formatMoney(billing.price / 100, billing.currency)
+  const trialRing = countdown?.kind === "trial" ? trial : null
   return (
     <section
       aria-label={t("plan.package.label")}
@@ -157,6 +167,11 @@ export function PlanCard({
                 </span>
                 <span className="text-[32px] leading-10 font-semibold tracking-[-0.02em] tabular-nums sm:text-[36px] sm:leading-11">
                   {amount ?? "—"}
+                  {amount && per ? (
+                    <span className="ml-1.5 text-[15px] font-medium tracking-normal text-muted-foreground">
+                      {per}
+                    </span>
+                  ) : null}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -192,12 +207,17 @@ export function PlanCard({
           )}
           {countdown && countdownText ? (
             <DaysRing
-              days={countdown.days}
+              days={trialRing ? trialRing.used : countdown.days}
+              total={trialRing?.total}
               unit={t("plan.hero.ring.day")}
               caption={t(`plan.hero.ring.${countdown.kind}`)}
-              share={ringShare(countdown)}
+              share={ringShare(countdown, { trial: trialRing, period: billing?.period ?? null })}
               tone={ringToneOf(countdown)}
-              label={countdownText}
+              label={
+                trialRing
+                  ? t("plan.hero.ring.trialUsed", { used: trialRing.used, total: trialRing.total })
+                  : countdownText
+              }
             />
           ) : null}
         </div>
@@ -207,6 +227,15 @@ export function PlanCard({
         <span className="text-muted-foreground">{t("plan.hero.period")}</span>
         <span className="font-medium">{periodLabel(plan.period)}</span>
         <InfoTip name={t("plan.hero.period")} hint={t("plan.hero.periodHint")} />
+        {price && per ? (
+          <span className="flex items-center gap-2 sm:ml-auto">
+            <Tag className="size-4 text-muted-foreground" aria-hidden="true" />
+            <span className="text-muted-foreground">{t("plan.hero.price")}</span>
+            <span className="font-medium tabular-nums">
+              {price} {per}
+            </span>
+          </span>
+        ) : null}
       </div>
     </section>
   )

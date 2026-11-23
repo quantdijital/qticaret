@@ -14,11 +14,13 @@ const STROKE = 9
 
 /**
  * A countdown as a ring (the SEO score ring's drawing): the days in the
- * middle, a word under them, the arc filled to `share` (0–1). The whole
- * thing is one image named by `label`.
+ * middle (over `total` when the whole is known: a trial's "9/14"), a
+ * word under them, the arc filled to `share` (0–1). The whole thing is
+ * one image named by `label`.
  */
 export function DaysRing({
   days,
+  total,
   unit,
   caption,
   share,
@@ -26,6 +28,7 @@ export function DaysRing({
   label,
 }: {
   days: number
+  total?: number | undefined
   unit: string
   caption: string
   share: number
@@ -69,7 +72,12 @@ export function DaysRing({
         aria-hidden="true"
         className="absolute inset-0 flex flex-col items-center justify-center leading-none"
       >
-        <span className="text-[28px] font-semibold tracking-[-0.02em] tabular-nums">{days}</span>
+        <span className="text-[28px] font-semibold tracking-[-0.02em] tabular-nums">
+          {days}
+          {total === undefined ? null : (
+            <span className="text-[15px] font-medium text-muted-foreground">/{total}</span>
+          )}
+        </span>
         <span className="mt-1 text-[11px] font-medium text-muted-foreground">{unit}</span>
         <span className="mt-0.5 text-[11px] text-muted-foreground">{caption}</span>
       </span>

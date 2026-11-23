@@ -11936,10 +11936,16 @@
         "due": "To payment",
         "grace": "Grace",
         "overdue": "Overdue",
-        "day": "days"
+        "day": "days",
+        "trialUsed": "Trial: {{used}} / {{total}} days"
       },
       "period": "Period",
-      "periodHint": "Monthly limits reset at the start of each month."
+      "periodHint": "Monthly limits reset at the start of each month.",
+      "per": {
+        "monthly": "/ month",
+        "yearly": "/ year"
+      },
+      "price": "Package price"
     },
     "usage": {
       "title": "Limits and usage",
@@ -12023,6 +12029,27 @@
       "copyFailed": "Could not copy; select the text to copy it.",
       "change": "Change of package",
       "changeHint": "Contact us to upgrade or change your package."
+    },
+    "history": {
+      "title": "Payments",
+      "loading": "Loading payments",
+      "empty": "No payments yet",
+      "unavailable": "Payments could not be loaded right now",
+      "period": "Period",
+      "day": "Date",
+      "amount": "Amount",
+      "status": "Status",
+      "invoice": "Invoice",
+      "invoiceOf": "Invoice for {{period}}",
+      "noInvoice": "No invoice",
+      "showAll_one": "Show all ({{count}})",
+      "showAll_other": "Show all ({{count}})",
+      "state": {
+        "paid": "Paid",
+        "waived": "Waived",
+        "open": "Pending",
+        "late": "Late"
+      }
     }
   },
   "wholesale": {
