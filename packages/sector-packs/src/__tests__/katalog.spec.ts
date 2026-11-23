@@ -8,7 +8,7 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     expect(katalog).toMatchObject({
       pack: "cutlery",
       code: "katalog",
-      version: 4,
+      version: 5,
       theme: "atolye",
       name: "Katalog",
       tone: "light",
@@ -106,43 +106,48 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toContain("katalog")
   })
 
-  it("lays out the shop's Hakkımızda page below its text, on its fourth version (adr/0073 §4)", () => {
+  it("lays out the shop's Hakkımızda page as one list, its text first (adr/0073 Ek 2026-11-19 (2) K9)", () => {
     const katalog = storefrontPreset("cutlery", "katalog")
     const [about, ...others] = katalog?.layout.pages ?? []
     expect(others).toEqual([])
     expect(about).toMatchObject({ page_id: { $handle: "page:hakkimizda" }, name: "Hakkımızda" })
-    // No section above the page's own text
-    expect(
-      about?.sections.map((each) => [each.id, each.type, each["variant"], each["placement"]])
-    ).toEqual([
-      ["hakkimizdahikaye", "rich_text", "with_image", "bottom"],
-      ["hakkimizdainanc", "rich_text", undefined, "bottom"],
-      ["hakkimizdavaat", "trust_badges", "lined", "bottom"],
-      ["hakkimizdaraf", "products", undefined, "bottom"],
-      ["hakkimizdayorum", "reviews", undefined, "bottom"],
-      ["hakkimizdayardim", "help", undefined, "bottom"],
+    // One list, no `placement`: the look's own page text first, then the six sections as before
+    expect(about?.sections.map((each) => [each.id, each.type, each["variant"]])).toEqual([
+      ["hakkimizdametin", "rich_text", "article"],
+      ["hakkimizdahikaye", "rich_text", "with_image"],
+      ["hakkimizdainanc", "rich_text", undefined],
+      ["hakkimizdavaat", "trust_badges", "lined"],
+      ["hakkimizdaraf", "products", undefined],
+      ["hakkimizdayorum", "reviews", undefined],
+      ["hakkimizdayardim", "help", undefined],
     ])
-    expect(about?.sections[0]).toMatchObject({
+    expect(about?.sections.some((each) => "placement" in each)).toBe(false)
+    const [text, ...design] = about?.sections ?? []
+    // Untitled, read as today's page text; the shop's name by its token
+    expect(text).toMatchObject({ title: null, outline: "auto", questions: "auto" })
+    expect(JSON.stringify(text)).toContain("Köklerimizden geleceğe.")
+    expect(JSON.stringify(text)).toContain("{mağaza_adı}, el işçiliğini")
+    expect(design[0]).toMatchObject({
       title: "Ateşten doğan karakter",
       image: { $image: "images/acilis-bileme.webp" },
       image_side: "end",
     })
     // The shop's name by its token, never written into the look
-    expect(JSON.stringify(about?.sections[0])).toContain("{mağaza_adı} olarak")
-    expect(about?.sections[3]).toMatchObject({
+    expect(JSON.stringify(design[0])).toContain("{mağaza_adı} olarak")
+    expect(design[3]).toMatchObject({
       title: "Atölyeden seçtiklerimiz",
       source: { kind: "best_sellers", days: 90 },
       columns: 4,
       limit: 8,
     })
-    expect(about?.sections[4]).toMatchObject({ title: "Müşterilerimiz ne diyor", limit: 6 })
-    expect(about?.sections[5]).toMatchObject({ title: "Hangi bıçak size uygun?" })
+    expect(design[4]).toMatchObject({ title: "Müşterilerimiz ne diyor", limit: 6 })
+    expect(design[5]).toMatchObject({ title: "Hangi bıçak size uygun?" })
     // Shop-facing words only (adr/0073 §4)
     expect(JSON.stringify(about).toLocaleLowerCase("tr")).not.toMatch(/demo|örnek|deneme/)
     // The picture is the bıçak pack's own, credited
     expect(katalog?.credits.map((credit) => credit.file)).toEqual(["images/acilis-bileme.webp"])
     expect(katalog?.description).toContain("Hakkımızda sayfası düzeni")
-    expect(katalogVersion()).toBe(4)
-    expect(sectorPack("cutlery")?.version).toBe(15)
+    expect(katalogVersion()).toBe(5)
+    expect(sectorPack("cutlery")?.version).toBe(16)
   })
 })

@@ -132,9 +132,9 @@ describe("the katalog preset's Hakkımızda page (adr/0073 §4)", () => {
     expect(resolved.images).toEqual(["images/acilis-bileme.webp"])
     expect(doc.pages.map((page) => page.page_id)).toEqual([ABOUT])
     const sections = doc.pages[0]?.sections ?? []
-    // One list since adr/0073 Ek 2026-11-19 (2) K1: the preset's older `placement` read as
-    // the stored rule reads it, every section below the page's text, in its order
+    // One list (adr/0073 Ek 2026-11-19 (2) K9): the look's own text first, then its six sections
     expect(sections.map((section) => section.type)).toEqual([
+      "rich_text",
       "rich_text",
       "rich_text",
       "trust_badges",
@@ -144,20 +144,28 @@ describe("the katalog preset's Hakkımızda page (adr/0073 §4)", () => {
     ])
     expect(sections.some((section) => "placement" in section)).toBe(false)
     expect(sections[0]).toMatchObject({
+      id: "hakkimizdametin",
+      variant: "article",
+      title: null,
+      outline: "auto",
+      questions: "auto",
+    })
+    expect(JSON.stringify(sections[0])).toContain("{mağaza_adı}, el işçiliğini")
+    expect(sections[1]).toMatchObject({
       variant: "with_image",
       image_side: "end",
       image: { url: "/media/acilis-bileme.webp", alt: "Su taşında bilenen mutfak bıçağı" },
       title: "Ateşten doğan karakter",
     })
-    // The second text keeps today's drawing
-    expect(sections[1]).toMatchObject({ variant: "pane", title: "Neye inanıyoruz" })
-    expect(sections[2]).toMatchObject({ variant: "lined" })
-    expect(sections[3]).toMatchObject({
+    // The second design text keeps today's drawing
+    expect(sections[2]).toMatchObject({ variant: "pane", title: "Neye inanıyoruz" })
+    expect(sections[3]).toMatchObject({ variant: "lined" })
+    expect(sections[4]).toMatchObject({
       source: { kind: "best_sellers", days: 90 },
       columns: 4,
       limit: 8,
     })
-    expect(sections[4]).toMatchObject({ limit: 6 })
+    expect(sections[5]).toMatchObject({ limit: 6 })
   })
 
   it("names no record or link inside the page: a shop with the page gets every section", () => {
