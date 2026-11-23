@@ -1,5 +1,11 @@
 import type { StorefrontPreset } from "@qticaret/sector-packs"
-import { ABOUT_PAGE, CONTACT_PAGE, CONTENT_ENTRIES, STORY_PAGE } from "./fixture-content"
+import {
+  ABOUT_PAGE,
+  CONTACT_PAGE,
+  CONTENT_ENTRIES,
+  STORY_PAGE,
+  pageTextSections,
+} from "./fixture-content"
 import { presetAnswer } from "./store-layout"
 import type { Section } from "./preset-resolve"
 
@@ -10,9 +16,35 @@ import type { Section } from "./preset-resolve"
  * sections, kept as `<pack>-<code>/<file>` beside its frame and home page.
  * A page the fixture has not is named at the top of the snapshot, as the
  * backend names it in `skipped`. The sections are read as the backend
- * reads a page's (`presetAnswer`'s category group keeps their place), a
- * rich text's document printed as `storeLayout` prints it.
+ * reads a page's (`presetAnswer`'s category group), a rich text's
+ * document printed as `storeLayout` prints it. The fixture's pages have
+ * their own text: kept in the place of the preset's text sections, as
+ * the apply keeps a shop's (`withShopTexts`, adr/0073 Ek 2026-11-19 (2) K6).
  */
+
+/** A page's own text section: an `article` or the contact section (K6). */
+const isPageText = (section: Section): boolean =>
+  (section.type === "rich_text" && section["variant"] === "article") || section.type === "contact"
+
+/**
+ * The page's own text where the preset's first text section stood (first
+ * when it has none), the preset's text sections left out (K6).
+ */
+function withPageText(
+  page: (typeof CONTENT_ENTRIES)[number],
+  listed: readonly Section[],
+  sections: readonly Section[]
+): unknown[] {
+  const texts = new Set(listed.filter(isPageText).map((section) => section.id))
+  const first = listed.findIndex(isPageText)
+  const before = new Set(listed.slice(0, Math.max(first, 0)).map((section) => section.id))
+  const design = sections.filter((section) => !texts.has(section.id))
+  return [
+    ...design.filter((section) => before.has(section.id)),
+    ...pageTextSections(page),
+    ...design.filter((section) => !before.has(section.id)),
+  ]
+}
 
 /** Each fixture page's snapshot, by its handle. */
 const FILES: ReadonlyMap<string, string> = new Map([
@@ -67,15 +99,22 @@ function docHtml(doc: unknown): string {
     .join("")
 }
 
-/** A section as `GET /store/storefront-layout/pages/:id` prints it (`hydrateSection`). */
-function printed(section: Section): Section {
+/**
+ * A section as `GET /store/storefront-layout/pages/:id` prints it
+ * (`hydrateSection`): one list, the category group's `placement` the
+ * read gave it left out (adr/0073 Ek 2026-11-19 (2) K1).
+ */
+function printed(read: Section): Section {
+  const section = Object.fromEntries(
+    Object.entries(read).filter(([key]) => key !== "placement")
+  ) as Section
   if (section.type !== "rich_text") return section
-  const { body, variant, image, image_side: side, placement, look, device, ...rest } = section
+  const { body, variant, image, image_side: side, look, device, ...rest } = section
   const out: Section = { ...rest, title: section["title"] ?? null, html: docHtml(body) }
   if (variant === "with_image") {
     Object.assign(out, { variant, image, image_side: side ?? "start" })
   }
-  return { ...out, ...(look ? { look } : {}), ...(device ? { device } : {}), placement }
+  return { ...out, ...(look ? { look } : {}), ...(device ? { device } : {}) }
 }
 
 export interface PresetContentPage {
@@ -115,7 +154,10 @@ export function presetContentPages(preset: StorefrontPreset): {
       ...own(read.skipped).map((each) => `<!-- not in the fixture shop: ${each} -->`),
       ...own(read.dropped).map((each) => `<!-- section dropped: ${each} -->`)
     )
-    layouts[page.id] = { page_id: page.id, sections }
+    layouts[page.id] = {
+      page_id: page.id,
+      sections: withPageText(page, entry.sections, sections),
+    }
     pages.push({ file, page })
   }
   return { pages, layouts, notes }
