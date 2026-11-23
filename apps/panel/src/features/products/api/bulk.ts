@@ -49,6 +49,23 @@ export const startBulkEdit = async (productIds: string[], change: BulkChange) =>
   ).async_job
 
 /**
+ * Products the server finds itself, for an add-on template (2026-11-23):
+ * the whole catalogue or a category with those below it, with no cap.
+ */
+export type BulkScope = { kind: "all" } | { kind: "category"; category_id: string }
+
+export const startScopedBulkEdit = async (
+  scope: BulkScope,
+  change: Extract<BulkChange, { action: "addon_template" }>
+) =>
+  (
+    await sdk.client.fetch<{ async_job: SheetJob }>("/admin/async-jobs", {
+      method: "POST",
+      body: { type: "catalog.bulk_edit", input: { scope, change } },
+    })
+  ).async_job
+
+/**
  * Every product the list's search, view and filters hold, for "select
  * all": their ids and how many there are. Past the limit no id is taken.
  */
