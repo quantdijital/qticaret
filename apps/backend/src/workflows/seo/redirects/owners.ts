@@ -8,6 +8,7 @@ import type UrlRegistryModuleService from "../../../modules/url-registry/service
 import type { UrlOwner } from "../../../modules/url-registry/validation"
 import { COLLECTION_LIVE_FIELDS, isCollectionShown } from "../../catalog/collection-fields"
 import type { CollectionExtensionRow } from "../../catalog/collection-fields"
+import { collectionsOn } from "../../catalog/collections-flag"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../../catalog/entity-paths"
 
 /**
@@ -151,7 +152,10 @@ export async function ownerState(container: MedusaContainer, owner: UrlOwner): P
     }
   }
   const successorId = row.product_extension?.successor_product_id ?? null
-  if (!isLive(owner.entity_type, row)) {
+  // Collections off (`catalog.collections`): every collection's page is hidden, none gone
+  const switchedOff =
+    owner.entity_type === CATALOG_ENTITY_TYPES.collection && !(await collectionsOn(container))
+  if (switchedOff || !isLive(owner.entity_type, row)) {
     return { kind: "hidden", successorId }
   }
   // A landing page shows while its category does, and goes with it (F3.16)

@@ -21,6 +21,7 @@ import { hydrateArticle, hydrateContact } from "./layout-hydrate-text"
 import { hydrateShelf } from "./layout-hydrate-shelf"
 import { hydrateStrips } from "./layout-hydrate-strips"
 import { hydrateCollage, hydrateDepartures, hydratePoints } from "./layout-hydrate-points"
+import { hydrateBanner, hydratePosts } from "./layout-hydrate-band"
 import type { BandPick } from "./price-bands"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
@@ -104,35 +105,14 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
   const image = (url: string, alt: string | null): StoreLayoutImage =>
     at.images.get(url) ?? { url, alt, width: null, height: null, derivatives: null }
   const link = (each: MenuLinkInput | null) => (each ? (at.links.get(each) ?? null) : null)
+  const band = { fill: (text: string | null) => fill(text, at.values), link, image }
   switch (section.type) {
     case "hero":
       return hydrateHero(section, { fill: (text) => fill(text, at.values), link, image })
     case "price_bands":
       return hydratePriceBands(section, at.bands?.get(id), (text) => fill(text, at.values))
     case "banner":
-      return {
-        id,
-        type,
-        slides: section.slides.map((slide) => ({
-          image: { ...image(slide.image.url, slide.image.alt), alt: slide.image.alt },
-          mobile_image: slide.mobile_image
-            ? {
-                ...image(slide.mobile_image.url, slide.mobile_image.alt),
-                alt: slide.mobile_image.alt,
-              }
-            : null,
-          heading: fill(slide.heading, at.values),
-          text: fill(slide.text, at.values),
-          link: link(slide.link),
-          second_link: link(slide.second_link),
-          tone: slide.tone,
-        })),
-        width: section.width,
-        height: section.height,
-        text_position: section.text_position,
-        overlay: section.overlay,
-        button_style: section.button_style,
-      }
+      return hydrateBanner(section, band)
     case "hero_slider":
       return {
         id,
@@ -270,11 +250,24 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
               links: section.links,
             }
           : {}),
+        // The icon row (adr/0077 §10 Ek): its settings and the icons of the categories it names
+        ...(section.variant === "icons"
+          ? {
+              variant: section.variant,
+              disc: section.disc,
+              phone: section.phone,
+              category_icons: Object.fromEntries(
+                Object.entries(section.category_icons).filter(([id]) =>
+                  section.category_ids.includes(id)
+                )
+              ),
+            }
+          : {}),
       }
     case "brands":
       return { id, type, title: section.title, brand_ids: section.brand_ids }
     case "posts":
-      return { id, type, title: section.title, limit: section.limit }
+      return hydratePosts(section, band)
     case "reviews":
       // A grid prints as before variants; a carousel names itself and its scroller (adr/0077 §10)
       return section.variant === "carousel"
@@ -298,7 +291,13 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
       }
     case "trust_badges":
       // The badges are the shared settings'; the section says where and how it is drawn
-      return { id, type, variant: section.variant }
+      return {
+        id,
+        type,
+        variant: section.variant,
+        // The card's lift, only on the card (adr/0077 §10 Ek)
+        ...(section.variant === "card" ? { lift: section.lift } : {}),
+      }
     case "marquee":
       return hydrateMarquee(section, at)
     case "stats":

@@ -165,6 +165,7 @@ describe("the settings search and the preview's marks", () => {
 
     expect(contentFields(strip).map((each) => [each.key, each.group])).toEqual([
       ["dividers", "layout"],
+      ["show_icons", "layout"],
     ])
     expect(contentFields(steps).map((each) => [each.key, each.group])).toEqual([
       ["steps_layout", "layout"],

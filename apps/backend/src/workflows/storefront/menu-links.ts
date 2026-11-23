@@ -8,6 +8,7 @@ import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import { COLLECTION_LIVE_FIELDS, isCollectionShown } from "../catalog/collection-fields"
 import type { CollectionExtensionRow } from "../catalog/collection-fields"
+import { collectionsOn } from "../catalog/collections-flag"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -107,6 +108,8 @@ async function recordLinks(
 ): Promise<Map<string, ResolvedLink>> {
   const spec = RECORDS[kind]
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  // Collections off (`catalog.collections`): their links are broken, so menus skip them
+  const kindOn = kind === "collection" ? await collectionsOn(container) : true
   const [{ data }, entries] = await Promise.all([
     query.graph({ entity: spec.entity, fields: spec.fields, filters: { id: ids } }),
     container
@@ -122,7 +125,11 @@ async function recordLinks(
       const path = paths.get(row.id) ?? null
       return [
         row.id,
-        { name: row.name ?? row.title ?? null, path, broken: !spec.live(row) || path === null },
+        {
+          name: row.name ?? row.title ?? null,
+          path,
+          broken: !kindOn || !spec.live(row) || path === null,
+        },
       ]
     })
   )

@@ -15,6 +15,7 @@ import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type {
   StoreCategoriesCollage,
+  StoreCategoriesIcons,
   StoreCategoriesLinked,
   StoreCategoriesPanels,
 } from "./section-categories.js"
@@ -22,8 +23,10 @@ import type { StoreStripGallerySection } from "./section-strips.js"
 import type { StoreStatsSection } from "./section-stats.js"
 import type { StoreStepsSection } from "./section-steps.js"
 import type { StoreDeparturesSection } from "./section-departures.js"
+import type { TrustCardStep } from "./section-trust.js"
 import type { StoreNewsletterSection } from "./section-newsletter.js"
 import type { StoreRichTextSection } from "./section-rich-text.js"
+import type { StorePostsSection } from "./section-posts.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { StorePhotoCollageSection } from "./section-collage.js"
 import type {
@@ -111,7 +114,13 @@ export type StoreCategoriesSection = {
   show_count?: boolean
   /** The link beside the title; none (or absent): the storefront's "every category". */
   more?: StoreLayoutLink | null
-} & ({ variant?: "tiles" } | StoreCategoriesLinked | StoreCategoriesCollage | StoreCategoriesPanels)
+} & (
+  | { variant?: "tiles" }
+  | StoreCategoriesLinked
+  | StoreCategoriesCollage
+  | StoreCategoriesPanels
+  | StoreCategoriesIcons
+)
 
 export type StoreLayoutSection = StoreSectionLookPart &
   (
@@ -122,7 +131,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | StoreProductsSection
     | StoreFeaturedProductSection
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
-    | { id: string; type: "posts"; title: string | null; limit: number }
+    | StorePostsSection
     | StoreReviewsSection
     | StoreGoogleRatingSection
     | StoreRichTextSection
@@ -135,6 +144,8 @@ export type StoreLayoutSection = StoreSectionLookPart &
          * as the default (`variantOf`).
          */
         variant?: TrustBadgesVariant
+        /** The `card` variant's lift (adr/0077 §10 Ek); printed only for `card`, read with `trustCardSettingsOf`. */
+        lift?: TrustCardStep<"lift">
       }
     | { id: string; type: "help"; title: string | null; text: string | null }
     | StoreNewsletterSection

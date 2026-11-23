@@ -2,6 +2,7 @@ import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/htt
 import { MedusaError } from "@medusajs/framework/utils"
 import { normalizeText } from "../../../../lib/search"
 import { listingSearch, readListingQuery } from "../../../../lib/seo/facets"
+import { collectionsOn } from "../../../../workflows/catalog/collections-flag"
 import { listingFilterKeys, listingReadOptions } from "../../../../workflows/seo/listing"
 import { listingProducts } from "../../../../workflows/seo/listing-products"
 import { SEARCH_LISTING } from "../../../../workflows/seo/listing-search"
@@ -35,6 +36,10 @@ export async function GET(
   const read = readListingQuery(new URLSearchParams(query), keys, options)
   if (read.kind === "out_of_bounds") {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "listing.out_of_bounds")
+  }
+  // Collections off (`catalog.collections`): a collection's listing is not found, as its page
+  if (type === "product_collection" && !(await collectionsOn(req.scope))) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "catalog.collection_unknown")
   }
   if (isSearch && q === undefined && !read.query.dates && !read.query.category) {
     throw new MedusaError(MedusaError.Types.INVALID_DATA, "listing.search_query_invalid")

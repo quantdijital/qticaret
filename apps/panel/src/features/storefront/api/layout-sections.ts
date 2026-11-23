@@ -1,7 +1,9 @@
 import type {
   AnnouncementSettings,
   BannerSettings,
+  BannerSplitEdge,
   BannerTone,
+  BannerVariant,
   CardVariant,
   FaqSettings,
   FeaturedProductSettings,
@@ -17,15 +19,18 @@ import type {
   SliderSettings,
   NewsletterVariant,
   PageTextSwitch,
+  PostsVariant,
   RichTextImageSide,
   RichTextVariant,
   TrustBadgesVariant,
+  TrustCardStep,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import type {
   CategoriesCollageFields,
   CategoriesPanelsFields,
+  CategoriesIconsFields,
   CategoriesLinkedFields,
 } from "@/features/storefront/api/layout-cards"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
@@ -155,6 +160,15 @@ export interface BannerSlide {
 export type BannerSection = BodySectionBase & {
   type: "banner"
   slides: BannerSlide[]
+  /**
+   * How it is drawn (adr/0077 Ek): `standard`, today's slides; `split`, the
+   * first slide's picture beside a panel. The server fills the default on reading.
+   */
+  variant: BannerVariant
+  /** `split`: the line above the heading. */
+  eyebrow?: string | null
+  /** `split`: the picture's inner edge. */
+  edge?: BannerSplitEdge
 } & BannerSettings
 
 interface CategoriesBase extends BodySectionBase {
@@ -170,7 +184,13 @@ interface CategoriesBase extends BodySectionBase {
 
 /** Today's picture tiles, the linked cards, the collage or the panels, each with its own fields (adr/0049). */
 export type CategoriesSection = CategoriesBase &
-  ({ variant: "tiles" } | CategoriesLinkedFields | CategoriesCollageFields | CategoriesPanelsFields)
+  (
+    | { variant: "tiles" }
+    | CategoriesLinkedFields
+    | CategoriesCollageFields
+    | CategoriesPanelsFields
+    | CategoriesIconsFields
+  )
 
 /**
  * One product up close (adr/0046 Ek 2026-11-05): the storefront adds its
@@ -193,10 +213,22 @@ export interface BrandsSection extends BodySectionBase {
   brand_ids: string[]
 }
 
+/**
+ * The newest posts (adr/0077 Ek): today's tiles, or one panel with an
+ * upper line, an intro and a button beside the cards. The server fills
+ * `grid` on reading.
+ */
 export interface PostsSection extends BodySectionBase {
   type: "posts"
   title: string | null
   limit: number
+  variant: PostsVariant
+  /** `intro_panel`: the line above the heading. */
+  eyebrow?: string | null
+  /** `intro_panel`: the words under the heading. */
+  intro?: string | null
+  /** `intro_panel`: the button; none: the storefront's "every post". */
+  link?: LayoutLink | null
 }
 
 /** The shop's newest reviews (adr/0077 §10): today's grid, or one card each in a sliding row. */
@@ -249,11 +281,14 @@ export interface RichTextSection extends BodySectionBase {
   questions?: PageTextSwitch
 }
 
-export interface TrustBadgesSection extends BodySectionBase {
-  type: "trust_badges"
-  /** How the strip is drawn (adr/0049 Ek 2026-11-14 §2); the server fills the default on reading. */
-  variant: TrustBadgesVariant
-}
+/**
+ * How the strip is drawn (adr/0049 Ek 2026-11-14 §2; the server fills the
+ * default on reading); the card with its lift (adr/0077 §10 Ek).
+ */
+export type TrustBadgesSection = BodySectionBase & { type: "trust_badges" } & (
+    | { variant: Exclude<TrustBadgesVariant, "card"> }
+    | { variant: "card"; lift: TrustCardStep<"lift"> }
+  )
 
 export interface HelpSection extends BodySectionBase {
   type: "help"

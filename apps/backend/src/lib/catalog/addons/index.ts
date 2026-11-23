@@ -11,6 +11,24 @@ export {
   toStoredAddons,
 } from "./schema"
 export type { AddonCharset, AddonInput, StoredAddon, StoredAddons, StoredChoice } from "./schema"
+export {
+  AddonTemplateAddons,
+  AddonTemplateIds,
+  AddonTemplateName,
+  addonCount,
+  byTemplateName,
+  effectiveAddons,
+  growsPastLimit,
+  hasForeignIds,
+  templateSourceOf,
+  withinAddonLimit,
+} from "./templates"
+export type {
+  AddonSources,
+  AddonTemplateSource,
+  AddonTemplateVia,
+  EffectiveAddons,
+} from "./templates"
 export { addonTextProblem, plainAddonText } from "./text"
 export type { AddonTextProblem } from "./text"
 export {

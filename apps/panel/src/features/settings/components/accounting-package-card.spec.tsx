@@ -4,6 +4,8 @@ import "@/lib/i18n"
 import { AccountingPackageCard } from "./accounting-package-card"
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: vi.fn() } } }))
+// A role that may open Settings > Audit log > Jobs, where the file waits
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 describe("AccountingPackageCard", () => {

@@ -47,7 +47,7 @@ import { WHOLESALE_ROUTES } from "./http/wholesale-routes"
 import { WHOLESALE_STORE_ROUTES } from "./http/wholesale-store-routes"
 import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
-import { COLLECTION_ROUTES } from "./http/collection-routes"
+import { COLLECTION_GATES, COLLECTION_ROUTES } from "./http/collection-routes"
 import { SEARCH_ROUTES } from "./http/search-routes"
 import { VAT_ROUTES } from "./http/vat-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
@@ -202,6 +202,8 @@ export default defineMiddlewares({
         auditMutations,
       ],
     },
+    // `catalog.collections` off: collection writes and the Store API's collections are missing
+    ...COLLECTION_GATES,
     // F3.1: handles are storefront slugs. Without `methods` this runs before
     // the core routes validate the body, so the handle it fills reaches them
     ...["/admin/products", "/admin/product-categories", "/admin/collections"].map((matcher) => ({

@@ -259,3 +259,11 @@ Sahibin 2026-11-17 isteği (Görünümler sayfası, kayıtlı görünümlerin li
 - Silme kalıcıdır (K2 (a)); telafide satır aynı kimlikle geri yazılır.
 
 **Uygulama sırası güncellemesi.** G1 ve G2 ile G3'ün budama dışı kısmı tek PR'da yapıldı (backend). G3 budaması ve G4 ayrı iş olarak kalır. G5 ve G6 panel PR'ıdır; G7 belgeleri ayrı PR'dadır.
+
+## Ek 2026-11-23: Görünümler yalnız sahibin
+
+Sahip kararı: "Görünümler yalnızca sahiplere açık olmalı." §6'daki yetki satırının yerine geçer.
+
+- **Uçlar:** `/admin/storefront-designs*` ve `/admin/storefront-presets*` (liste, küçük resim, kaydet, yeniden adlandır, sil, uygula) okuma dahil `OWNER_ONLY`'dir (`lib/staff/permission-rules.ts`); `admin`, `operations` ve `readonly` 403 (`owner_only`) alır. Yeni yetenek `looks` (`GET /admin/storefront-designs`), paneldeki menü öğesi, `/storefront/looks` adresi (erişim yok durumu) ve düzenleyicinin "Görünümler" menüsü ona bağlıdır.
+- **Düzenleyici değişmez:** taslak, yayın, "Vazgeç" ve yayın geçmişinden geri yükleme `owner` ve `admin`'de kalır (adr/0049 §5). Diğer roller düzenleyicide yalnız "Yayın geçmişi"ni görür; bir yayını kayıtlı görünüm olarak saklayamaz.
+- **Otomatik kayıt ve budama:** bir yöneticinin "Vazgeç"i ya da geri yüklemesi değiştirilen taslağı yine otomatik kayıt olarak saklar (taslak kaybolmasın), ama beşi aşan en eski otomatik kayıtları silmez: yönetici, açamadığı sahibin kayıtlarını tekrar tekrar "Vazgeç"le silemesin. Budamayı yalnız `looks` yetkisi olanın akışı yapar (`replaceDraftWorkflow` `evict`); sahibin bir sonraki otomatik kaydı sayıyı beşe indirir. Görünüm uygulama zaten yalnız sahibin olduğu için her zaman budar.

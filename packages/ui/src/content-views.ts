@@ -11,6 +11,7 @@ import type {
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { BannerSectionView } from "./banner-views"
+import type { PostsSectionView } from "./posts-views"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
 import type {
   CategoryCardsView,
@@ -31,6 +32,7 @@ import type { ContentPageSectionView } from "./page-text-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ProductsSectionView } from "./shelf-views"
 import type { StatsSectionView, StepsSectionView } from "./points-views"
+import type { CategoryIconsView } from "./icon-views"
 import type { PhotoCollageSectionView } from "./collage-views"
 import type { DeparturesSectionView } from "./departures-views"
 import type { StripGallerySectionView } from "./strip-views"
@@ -129,11 +131,13 @@ export type HomeSectionView = {
       collage?: CategoryCollageView | null
       /** `panels`' settings and cards; a theme without that drawing draws the tiles. */
       panels?: CategoryPanelsView | null
+      /** `icons`' settings and discs (adr/0077 §10 Ek); a theme without that drawing draws the tiles. */
+      icons?: CategoryIconsView | null
     }
   | ProductsSectionView
   | FeaturedProductSectionView
   | { id: string; type: "brands"; title: string; brands: SectionBrandView[] }
-  | { id: string; type: "posts"; title: string; posts: PostCardView[]; more: LinkView }
+  | PostsSectionView
   | {
       id: string
       type: "reviews"
@@ -171,6 +175,8 @@ export type HomeSectionView = {
       /** How the strip is drawn (adr/0049 Ek 2026-11-14 §2); a theme draws its default for one it lacks (`drawnVariant`). */
       variant: TrustBadgesVariant
       badges: TrustBadgeView[]
+      /** The card's lift over the section before it (adr/0077 §10 Ek); absent: none. */
+      lift?: boolean
     }
   | ({
       id: string

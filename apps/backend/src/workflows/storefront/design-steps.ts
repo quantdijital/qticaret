@@ -23,6 +23,13 @@ export interface AutoSaveInput {
   reason: DesignReason
   /** The saved look being applied: never the automatic save removed to make room. */
   keep?: string
+  /**
+   * Whether the oldest automatic saves beyond five are removed (default
+   * true). The looks are the owner's alone (2026-11-23): another role's
+   * discard or restore still keeps the replaced draft but removes none of
+   * the owner's; the owner's next automatic save trims back to five.
+   */
+  evict?: boolean
 }
 
 /**
@@ -137,6 +144,10 @@ export const autoSaveDraftStep = createStep(
       created_by: input.actor,
     })
     const undo: AutoSaveUndo = { made: made.id, evicted: [] }
+    if (input.evict === false) {
+      const kept: DesignRef = { id: made.id, kind: "auto", name: null }
+      return new StepResponse<DesignRef | null, AutoSaveUndo | null>(kept, undo)
+    }
     try {
       const autos = (await service.listStorefrontDesigns(
         { kind: "auto" },

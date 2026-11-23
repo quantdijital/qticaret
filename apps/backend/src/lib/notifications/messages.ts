@@ -42,9 +42,9 @@ export const NOTIFICATION_MESSAGES: Readonly<
         "Bugün {{count}}/{{limit}} SMS gönderildi. Sınıra ulaşınca SMS gitmez; Ayarlar > SMS'ten değiştirebilirsiniz.",
     },
     "campaigns.paused_complaints": {
-      title: "Toplu ileti durduruldu: {{name}}",
+      title: "Toplu mesaj durduruldu: {{name}}",
       description:
-        "Şikâyet ya da geri dönen e-posta oranı sınırı aştı. Kitleyi ve içeriği inceleyip Büyüme > Toplu ileti'den sürdürebilirsiniz.",
+        "Şikâyet ya da geri dönen e-posta oranı sınırı aştı. Kitleyi ve içeriği inceleyip Pazarlama > Toplu mesaj'dan sürdürebilirsiniz.",
     },
     "messaging.email_daily_limit": {
       title: "Günlük e-posta sınırının %80'i doldu",
@@ -252,7 +252,7 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "campaigns.paused_complaints": {
       title: "Bulk message stopped: {{name}}",
       description:
-        "Its complaint or bounce rate passed the limit. Review the audience and content, then resume it under Growth > Bulk messages.",
+        "Its complaint or bounce rate passed the limit. Review the audience and content, then resume it under Marketing > Bulk messages.",
     },
     "messaging.email_daily_limit": {
       title: "80% of today's e-mail limit used",

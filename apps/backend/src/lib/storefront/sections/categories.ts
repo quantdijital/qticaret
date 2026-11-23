@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { LAYOUT_LIMITS, optional, recordId, title } from "../layout-fields"
 import { storefrontLink } from "../menus"
+import { sectionIcon } from "./icons"
 import { bodyFields } from "./look"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
@@ -58,6 +59,17 @@ export const CATEGORY_PANELS_DEFAULTS = {
   links: 4,
 } as const
 
+/**
+ * The icon row's settings (adr/0077 §10 Ek): mirrors `@qticaret/types`'
+ * `CATEGORY_ICONS_SETTINGS` and `CATEGORY_ICONS_DEFAULTS`.
+ */
+export const CATEGORY_ICONS_SETTINGS = {
+  disc: ["tint", "well", "line"],
+  phone: ["scroll", "wrap"],
+} as const
+
+export const CATEGORY_ICONS_DEFAULTS = { disc: "tint", phone: "scroll" } as const
+
 type Lists = Readonly<Record<string, readonly (string | number)[]>>
 
 /** A step on the setting's list; another is a stale or forged editor, as a variant off its list is. */
@@ -74,6 +86,7 @@ const stepOn =
 const step = stepOn(CATEGORY_CARD_SETTINGS, CATEGORY_CARD_DEFAULTS)
 const collageStep = stepOn(CATEGORY_COLLAGE_SETTINGS, CATEGORY_COLLAGE_DEFAULTS)
 const panelsStep = stepOn(CATEGORY_PANELS_SETTINGS, CATEGORY_PANELS_DEFAULTS)
+const iconsStep = stepOn(CATEGORY_ICONS_SETTINGS, CATEGORY_ICONS_DEFAULTS)
 
 /** Subcategory links under each card's name, the variant's own default. */
 const links = (fallback: number) =>
@@ -152,17 +165,37 @@ const panels = z
   })
   .strict()
 
+/**
+ * The categories in one row of round discs, each its icon over its name
+ * (adr/0077 §10 Ek). Each icon is picked here by category id, never on the
+ * category; one with none shows the category's picture, else its first
+ * letter. An icon kept for a category no longer named is never drawn.
+ */
+const icons = z
+  .object({
+    ...common,
+    variant: z.literal("icons"),
+    disc: iconsStep("disc"),
+    phone: iconsStep("phone"),
+    category_icons: z
+      .record(recordId, sectionIcon)
+      .refine((picked) => Object.keys(picked).length <= LAYOUT_LIMITS.items, VARIANT_ERROR)
+      .default({}),
+  })
+  .strict()
+
 export const CATEGORIES_BRANCHES: Readonly<Record<SectionVariant<"categories">, VariantBranch>> = {
   tiles,
   linked,
   collage,
   panels,
+  icons,
 }
 
 /** The shop's categories as cards. */
 export const categories = z.discriminatedUnion(
   "variant",
-  [tiles, linked, collage, panels],
+  [tiles, linked, collage, panels, icons],
   VARIANT_ERROR
 )
 

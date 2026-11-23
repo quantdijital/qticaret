@@ -20,9 +20,10 @@ import { isObject, resolveSection, text } from "./resolve-section"
  * category (`OPTIONAL_IN_ITEMS`) are cleared; a menu
  * whose every link is gone leaves the set, the shop's live menu kept in its
  * place (`resolveMenus`), never an empty menu put live; a content page's
- * layout (adr/0073 §4) whose page the shop has not made, or that the
- * design has no room for, is left out whole: a preset never makes a page.
- * Each is named in `skipped`.
+ * layout (adr/0073 §4) whose page the shop has not made and the apply
+ * could not open as a draft (adr/0073 Ek 2026-11-19 (2) K6: its address
+ * taken, or the look gives it no name), or that the design has no room
+ * for, is left out whole. Each is named in `skipped`.
  */
 
 /** A link resolved without its wording: the preset's label goes on it. */
@@ -48,6 +49,11 @@ export interface PresetLookups {
    * (adr/0077 §8, `sectionTypesOff`): such a section is dropped, `feature_off`.
    */
   types_off?: ReadonlyMap<string, string>
+  /**
+   * Pages the apply could not open as drafts, their address held by
+   * another record (`page:hakkimizda`): their layouts are left out, `taken`.
+   */
+  taken?: ReadonlySet<string>
 }
 
 export interface SkippedRef {
@@ -65,10 +71,12 @@ export interface SkippedRef {
   name?: string
   /**
    * Why it was left out: a content page's layout, the shop having no such
-   * page (`missing`) or no room for another (`limit`); a section, its
-   * feature flag off in this shop (`feature_off`, adr/0077 §8; `ref` its type).
+   * page (`missing`), its address held by another record so no draft could
+   * be opened (`taken`, adr/0073 Ek 2026-11-19 (2) K6) or no room for
+   * another (`limit`); a section, its feature flag off in this shop
+   * (`feature_off`, adr/0077 §8; `ref` its type).
    */
-  reason?: "missing" | "limit" | "feature_off"
+  reason?: "missing" | "taken" | "limit" | "feature_off"
   /** A section dropped for its flag: the flag (`catalog.booking`). */
   flag?: string
 }
@@ -142,10 +150,11 @@ function standing(sections: readonly unknown[], where: string, report: Report): 
 /**
  * The content pages' layouts on the shop's own pages (adr/0073 §4), each
  * left out with its sections and named in `skipped` under `pages` when the
- * shop has not made the page (`missing`; a draft page counts as made) or
- * the design has no room for another page's layout (`limit`: the draft's
- * own layouts stay, warn don't block). One whose every section went is
- * left out too (a page has no empty layout).
+ * shop has no such page (`missing`; a draft page counts as made, and so
+ * does one the apply opened, K6), its address another record's (`taken`),
+ * or the design has no room for another page's layout (`limit`: the
+ * draft's own layouts stay, warn don't block). One whose every section
+ * went is left out too (a page has no empty layout).
  */
 function resolvePages(pages: readonly unknown[], report: Report): PresetPage[] {
   const laidOut = new Set(report.lookups.laid_out ?? [])
@@ -154,13 +163,14 @@ function resolvePages(pages: readonly unknown[], report: Report): PresetPage[] {
     const entry = isObject(page) ? page : {}
     const ref = text(isObject(entry["page_id"]) ? entry["page_id"]["$handle"] : null) ?? "?"
     const name = text(entry["name"])
-    const leftOut = (reason: "missing" | "limit") => {
+    const leftOut = (reason: "missing" | "taken" | "limit") => {
       report.skipped.push({ where: "pages", ref, ...(name === null ? {} : { name }), reason })
       return []
     }
-    const id = report.lookups.records.get(ref)
+    // A content page's handle only: another kind's record never stands as a page
+    const id = ref.startsWith("page:") ? report.lookups.records.get(ref) : undefined
     if (id === undefined) {
-      return leftOut("missing")
+      return leftOut(report.lookups.taken?.has(ref) ? "taken" : "missing")
     }
     const added = !laidOut.has(id)
     if (added && room <= 0) {

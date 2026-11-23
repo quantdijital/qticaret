@@ -88,15 +88,26 @@ medusaIntegrationTestRunner({
       const malformed = await save([{ page_id: "/hakkimizda", sections: [help("yardim001")] }])
       expect(malformed.status).toBe(400)
 
-      const saved = await save([
+      const article = {
+        id: "metin00001",
+        type: "rich_text",
+        variant: "article",
+        body: doc("Atölyemiz Denizli'de."),
+      }
+      // One list (adr/0073 Ek 2026-11-19 (2) K1): no editor sends a page's `placement` any more,
+      // and the save no longer folds one (S9)
+      const placed = await save([
         { page_id: about, sections: [help("yardim001", { placement: "top" }), help("yardim002")] },
+      ])
+      expect(placed.status).toBe(400)
+
+      const saved = await save([
+        { page_id: about, sections: [help("yardim001"), article, help("yardim002")] },
         { page_id: fresh, sections: [help("yardim003")] },
       ])
       expect(saved.status).toBe(200)
       expect(saved.data.dropped_pages).toBe(0)
       expect(saved.data.layout.draft.pages.map((page) => page.page_id)).toEqual([about, fresh])
-      // An older editor's `placement` folds into one list, the page's text where it stood
-      // (adr/0073 Ek 2026-11-19 (2) K1): the sections above it first
       const [aboutDraft, freshDraft] = saved.data.layout.draft.pages
       expect(aboutDraft?.sections.map((section) => [section.type, section["variant"]])).toEqual([
         ["help", undefined],

@@ -1,5 +1,5 @@
 import { ValidationError } from "../../lib/errors"
-import { SLUG_SEGMENT, isReservedPath, isValidSlug } from "../../lib/seo"
+import { SLUG_SEGMENT, isStorefrontKept, isValidSlug } from "../../lib/seo"
 
 export interface UrlKey {
   locale: string
@@ -42,9 +42,14 @@ export function assertUrlKey({ locale, path }: UrlKey): void {
   }
 }
 
-/** A record may not take a root path the storefront keeps (`/arama`, docs/13 §2.2). */
+/**
+ * A record may not take a path the storefront keeps (docs/13 §2.2): a
+ * reserved root (`/arama`), nor anything under one that is no record
+ * prefix (`/sepet/x`, `/yasal/x`), where the storefront's own routes
+ * answer first (adr/0017 Ek 2026-11-23).
+ */
 export function assertClaimable({ path }: UrlKey): void {
-  if (isReservedPath(path)) {
+  if (isStorefrontKept(path)) {
     throw new ValidationError("seo.path_reserved", { field: "path" })
   }
 }

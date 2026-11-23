@@ -85,6 +85,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Enter the brand's name (120 characters at most).",
   "brands.name_taken": "A brand with this name already exists.",
   "brands.unknown": "Brand not found.",
+  "bulk_edit.addon_template_unknown": "The chosen add-on template was not found.",
   "bulk_edit.alt_not_filled":
     "Some images' alt text could not be written; add it on the product page.",
   "bulk_edit.category_unknown": "The chosen category was not found.",
@@ -290,6 +291,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "addons.text_rules_invalid": "A text's length is between 1 and 200 characters.",
   "addons.choices_invalid": "A choice add-on has 2-10 options.",
   "addons.too_many": "A product has at most 5 add-ons.",
+  "addon_templates.name_invalid":
+    "The template name must be 1-60 characters without invisible characters.",
+  "addon_templates.duplicate": "The same template is chosen twice.",
+  "addon_templates.id_unknown":
+    "An add-on or choice id the template does not have was sent. Reload and try again.",
+  "addon_templates.unknown": "Add-on template not found.",
+  "addon_templates.too_many":
+    "This change would give some products more than 5 add-ons; remove add-ons from them first.",
   // adr/0076: dated products
   "catalog.booking_disabled":
     "Turn on both dated products and digital and service products in Settings > Features first.",

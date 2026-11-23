@@ -67,6 +67,29 @@ export function requireFeature(key: string) {
   }
 }
 
+const READS = new Set(["GET", "HEAD", "OPTIONS"])
+
+/**
+ * `requireFeature` for writes only: reads pass while the flag is off, so
+ * the records a switched-off feature keeps can still be seen (and nothing
+ * leans on them unseen). Registered without `methods`, ahead of the core
+ * routes' body validators.
+ */
+export function requireFeatureForWrites(key: string) {
+  const gate = requireFeature(key)
+  return async (
+    req: MedusaRequest,
+    res: MedusaResponse,
+    next: MedusaNextFunction
+  ): Promise<void> => {
+    if (READS.has(req.method)) {
+      next()
+      return
+    }
+    await gate(req, res, next)
+  }
+}
+
 /** Answers as Express does for a route that does not exist, and logs why. */
 export function answerAsMissing(req: MedusaRequest, res: MedusaResponse, reason: string): void {
   logRejection(req, ensureRequestId(req, res), { status: 404, type: undefined, reason })

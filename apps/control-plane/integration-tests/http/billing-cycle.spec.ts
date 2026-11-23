@@ -71,6 +71,11 @@ medusaIntegrationTestRunner({
         currency: "TRY",
         package_name: "Profesyonel Ağ",
         payment_instruction: null,
+        // Ek C20: the subscription's terms
+        period: "monthly",
+        price: 49_000,
+        trial_started_on: d0,
+        trial_ends_on: addDays(d0, 14),
       })
     })
 

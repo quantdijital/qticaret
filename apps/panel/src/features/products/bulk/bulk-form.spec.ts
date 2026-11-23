@@ -79,4 +79,19 @@ describe("bulk edit form", () => {
     expect(examplePrice({ action: "price", mode: "amount", value: -0.5 }, 100)).toBe(99.5)
     expect(examplePrice({ action: "alt_text" }, 100)).toBeNull()
   })
+
+  it("assigns or removes an add-on template, one chosen (adr/0052 Ek 2026-11-23)", () => {
+    expect(bulkChangeOf("addon_template", form({ addonTemplateId: "adtpl_1" }))).toEqual({
+      change: { action: "addon_template", mode: "add", template_id: "adtpl_1" },
+    })
+    expect(
+      bulkChangeOf(
+        "addon_template",
+        form({ addonTemplateMode: "remove", addonTemplateId: "adtpl_1" })
+      )
+    ).toEqual({ change: { action: "addon_template", mode: "remove", template_id: "adtpl_1" } })
+    expect(bulkChangeOf("addon_template", form({}))).toEqual({
+      error: "products.bulk.errors.addonTemplate",
+    })
+  })
 })

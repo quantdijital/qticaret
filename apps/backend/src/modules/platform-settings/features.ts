@@ -55,6 +55,14 @@ export const PRODUCT_ADDONS = "catalog.addons"
  */
 export const CATALOG_BOOKING = "catalog.booking"
 
+/**
+ * Product collections (Ürünler > Koleksiyonlar): on by default, so a shop
+ * keeps them. Off, their pages answer 404 and leave the sitemap, menus and
+ * sections skip them and the admin's collection writes are refused; the
+ * records stay and come back when it is on again.
+ */
+export const CATALOG_COLLECTIONS = "catalog.collections"
+
 /** Orders staff make and the customer pays through a link (adr/0051). */
 export const PAYMENT_LINKS = "orders.payment_links"
 
@@ -162,6 +170,13 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.catalog_booking.label",
     descriptionKey: "qticaret.features.catalog_booking.description",
+  },
+  // On by default (existing shops unchanged); off hides collections, keeps their records
+  [CATALOG_COLLECTIONS]: {
+    default: true,
+    owner: "tenant",
+    labelKey: "qticaret.features.catalog_collections.label",
+    descriptionKey: "qticaret.features.catalog_collections.description",
   },
   // adr/0050: off until the shop takes on bulk messages; the panel shows the screen only when on
   [MARKETING_CAMPAIGNS]: {

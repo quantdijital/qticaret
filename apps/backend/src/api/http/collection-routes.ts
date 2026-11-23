@@ -1,6 +1,24 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { AdminGetCollectionBoard } from "../admin/collection-board/validators"
 import { AdminPostCollectionDetails } from "../admin/collections/[id]/details/validators"
+import { CATALOG_COLLECTIONS } from "../../modules/platform-settings/features"
+import { rejectOffCollectionReads } from "../validation/collection-reads"
+import { requireFeature, requireFeatureForWrites } from "./require-feature"
+
+/**
+ * `catalog.collections` off: the admin's collection writes (Medusa's
+ * create, update, delete and products, and the details) answer as missing
+ * routes; reads stay, so the kept records can still be seen. The Store
+ * API's collections answer as missing, their pages are not found. Without
+ * `methods`, so they run before the core routes' validators and the
+ * handle filler; registered ahead of both.
+ */
+export const COLLECTION_GATES = [
+  { matcher: "/admin/collections", middlewares: [requireFeatureForWrites(CATALOG_COLLECTIONS)] },
+  { matcher: "/store/collections", middlewares: [requireFeature(CATALOG_COLLECTIONS)] },
+  // Products neither filtered by nor showing a collection while off
+  { matcher: "/store/products", middlewares: [rejectOffCollectionReads] },
+]
 
 /**
  * Ürünler > Koleksiyonlar: the panel's list and a collection's text,

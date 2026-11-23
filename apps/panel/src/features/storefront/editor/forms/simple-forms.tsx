@@ -17,6 +17,9 @@ import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { LinkField } from "./link-field"
 import { PREVIEW_IDS } from "./preview-fields"
+import { PostsIntroFields } from "./posts-intro-fields"
+import { CategoryIconsField } from "./category-icons-field"
+import { iconsFor } from "./icon-registry"
 import { RecordListField } from "./record-fields"
 import { SwitchRow } from "../theme-fields"
 
@@ -86,9 +89,19 @@ export function CategoriesForm({
         ids={section.category_ids}
         empty={t(`${R}.categoriesEmpty`)}
         onChange={(category_ids) => {
-          onChange({ ...section, category_ids })
+          // The icon row keeps only the icons of the categories still named (adr/0077 §10 Ek)
+          onChange(
+            section.variant === "icons"
+              ? {
+                  ...section,
+                  category_ids,
+                  category_icons: iconsFor(category_ids, section.category_icons),
+                }
+              : { ...section, category_ids }
+          )
         }}
       />
+      {section.variant === "icons" && <CategoryIconsField section={section} onChange={onChange} />}
       <div id={FIELD_IDS.content(section.id, "show_count")}>
         <SwitchRow
           id={`${section.id}-show-count`}
@@ -179,6 +192,10 @@ export function CountedForm({ section, problems, onChange }: SectionFormProps<Co
           }}
         />
       </div>
+      {/* The posts' intro panel's own words and button (adr/0077 Ek) */}
+      {section.type === "posts" && section.variant === "intro_panel" ? (
+        <PostsIntroFields section={section} problems={problems} onChange={onChange} />
+      ) : null}
     </div>
   )
 }

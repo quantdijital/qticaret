@@ -1,9 +1,11 @@
 import { useTranslation } from "react-i18next"
 import type { AnySection } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
-import { BANNER_LAYOUT_SETTINGS } from "./banner-groups"
+import { BANNER_LAYOUT_SETTINGS, bannerSettingsFor } from "./banner-groups"
 import { BannerSettings } from "./banner-settings"
+import { BannerEdgeField } from "./banner-split-fields"
 import { FeaturedGroups } from "./featured-groups"
+import { IconGroups } from "./icon-groups"
 import type { FieldGroupName } from "./field-registry"
 import { RelatedGroups } from "./related-groups"
 import { PointsGroups } from "./points-groups"
@@ -50,12 +52,29 @@ export function SectionLayoutGroup({
   if (section.type === "departures") {
     return <DeparturesGroups section={section} reveal={reveal} onChange={onChange} />
   }
+  // The trust card's lift, the icon row's disc and phone row (adr/0077 §10 Ek)
+  if (
+    (section.type === "trust_badges" && section.variant === "card") ||
+    (section.type === "categories" && section.variant === "icons")
+  ) {
+    return <IconGroups section={section} reveal={reveal} onChange={onChange} />
+  }
   if (section.type !== "banner") {
     return null
   }
   return (
     <PanelGroup name="layout" title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
-      <BannerSettings section={section} settings={BANNER_LAYOUT_SETTINGS} onChange={onChange} />
+      <div className="flex flex-col gap-5">
+        <BannerSettings
+          section={section}
+          settings={bannerSettingsFor(section.variant, BANNER_LAYOUT_SETTINGS)}
+          onChange={onChange}
+        />
+        {/* The split's edge (adr/0077 Ek), beside its height */}
+        {section.variant === "split" ? (
+          <BannerEdgeField section={section} onChange={onChange} />
+        ) : null}
+      </div>
     </PanelGroup>
   )
 }

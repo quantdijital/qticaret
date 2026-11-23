@@ -7,7 +7,12 @@ import { createStorefront } from "../helpers/storefront"
 jest.setTimeout(120 * 1000)
 
 interface Frame {
-  features?: { gift_cards: boolean; product_addons: boolean; booking: boolean }
+  features?: {
+    gift_cards: boolean
+    product_addons: boolean
+    booking: boolean
+    collections: boolean
+  }
   marks?: { payments: string[]; carriers: string[] }
   storefront: {
     announcements: string[]
@@ -87,6 +92,8 @@ medusaIntegrationTestRunner({
         gift_cards: false,
         product_addons: false,
         booking: false,
+        // Collections are on unless the shop turns them off
+        collections: true,
       })
       expect(before.headers["cache-control"]).toContain("max-age=300")
       expect(script.status).toBe(400)
@@ -220,6 +227,7 @@ medusaIntegrationTestRunner({
         gift_cards: false,
         product_addons: true,
         booking: false,
+        collections: true,
       })
     })
   },

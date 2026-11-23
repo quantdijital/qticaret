@@ -1,6 +1,6 @@
 import path from "node:path"
 import { layoutDocument, readStoredLayout, readStoredLayoutTexts } from "../layout"
-import { legacyTextAt, unplacedPages } from "../layout-pages-stored"
+import { legacyTextAt } from "../layout-pages-stored"
 import { CONTACT_SWITCHES, PAGE_ONLY_TYPES } from "../sections/page-text"
 import { PAGE_TEXT_SWITCHES } from "../sections/rich-text"
 import { logger } from "../../logging"
@@ -151,20 +151,5 @@ describe("a page stored before its text was a section (K1)", () => {
     expect(legacyTextAt({})).toEqual({})
     expect(legacyTextAt(null)).toEqual({})
     expect(readStoredLayout(page([help("yardim001")])).pages[0]?.sections).toHaveLength(1)
-  })
-
-  it("reads a preset's pages written with places as one list", () => {
-    expect(
-      unplacedPages([
-        {
-          page_id: { $handle: "page:hakkimizda" },
-          sections: [help("a00001", "bottom"), help("b00001", "top")],
-        },
-        "broken",
-      ])
-    ).toEqual([
-      { page_id: { $handle: "page:hakkimizda" }, sections: [help("b00001"), help("a00001")] },
-      "broken",
-    ])
   })
 })

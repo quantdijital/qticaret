@@ -8,7 +8,6 @@ import {
   Import,
   KeyRound,
   ListChecks,
-  ListTodo,
   Megaphone,
   Scale,
   Palette,
@@ -19,7 +18,6 @@ import {
   Store,
   ToggleRight,
   Truck,
-  Users,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { Capability } from "@/features/auth/api/staff"
@@ -88,8 +86,9 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
     sections: [
       // adr/0061 Ek C14: the package, limits and payment; owner and admin (the API's own rule)
       { key: "subscription", to: "/settings/subscription", icon: Gauge, needs: "settings" },
+      // One's own account, the team (a tab for those who may see it) and fraud, in tabs
+      // (the owner, 2026-11-23: Ekip joined Güvenlik)
       { key: "security", to: "/settings/security", icon: ShieldCheck },
-      { key: "team", to: "/settings/team", icon: Users, needs: "team" },
       { key: "integrations", to: "/settings/integrations", icon: Plug, needs: "settings" },
       // adr/0071 §13: the AI services and their use; the owner connects, the admin tests and reads
       { key: "ai", to: "/settings/ai", icon: Sparkles, needs: "settings" },
@@ -97,7 +96,8 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
       { key: "features", to: "/settings/features", icon: ToggleRight, needs: "settings" },
       // F14: moving the shop in from its old platform, the owner's alone
       { key: "migration", to: "/settings/migration", icon: Import, needs: "migration" },
-      { key: "jobs", to: "/settings/jobs", icon: ListTodo },
+      // The audit log and the long jobs, in tabs (the owner, 2026-11-23); a role without the
+      // log sees neither (the owner, 2026-11-23: "işler görünmeyen rollerde gösterilmesine gerek yok")
       { key: "audit", to: "/settings/audit", icon: FileClock, needs: "audit" },
     ],
   },

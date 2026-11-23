@@ -9,19 +9,23 @@ import type {
 import { Aisles } from "./Aisles"
 import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
+import { CampaignSplit } from "./CampaignSplit"
 import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
 import { CategoryCollage } from "./CategoryCollage"
+import { CategoryIcons } from "./CategoryIcons"
 import { CategoryPanels } from "./CategoryPanels"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
 import { GoogleRating } from "./GoogleRating"
 import { Guides } from "./Guides"
+import { GuidesPanel } from "./GuidesPanel"
 import { Help } from "./Help"
 import { Hero } from "./Hero"
 import { HERO_VARIANTS, HeroCatalog } from "./HeroCatalog"
 import { HeroSlider } from "./HeroSlider"
 import { Look } from "./Look"
 import { Marquee } from "./Marquee"
+import { boxLook, panelGround } from "./panel-ground"
 import { type Block, blocksOf, headingId } from "./plan"
 import { PriceBands } from "./PriceBands"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
@@ -45,7 +49,7 @@ const helpOf = (block: Block | undefined) =>
 
 /** The block's look: a shelf of joined rails takes its first rail's (adr/0049 Ek 2026-11-14 §6). */
 const lookOf = (block: Block) =>
-  block.kind === "shelf" ? block.sections[0]?.look : block.section.look
+  block.kind === "shelf" ? block.sections[0]?.look : boxLook(block, block.section.look)
 
 /** The screens it shows on (docs/tema/bilesen-standardi §2): a shelf of joined rails, its first rail's. */
 const deviceOf = (block: Block) =>
@@ -67,6 +71,7 @@ function BlockView({
   next,
   first,
   afterOpening,
+  atStart,
   context,
 }: {
   block: Block
@@ -75,6 +80,8 @@ function BlockView({
   first: boolean
   /** Right after the page's picture opening: a trust strip keeps close to it. */
   afterOpening: boolean
+  /** The page's first block: nothing before it for the trust card to rise over. */
+  atStart: boolean
   context: Context
 }) {
   const { t, subscribe, quickAdd } = context
@@ -111,6 +118,7 @@ function BlockView({
           variant={drawnVariant("trust_badges", section.variant, PROMISE_VARIANTS)}
           marks={section.editor}
           hug={afterOpening}
+          lift={section.lift === true && !atStart}
         />
       )
     case "categories": {
@@ -122,6 +130,19 @@ function BlockView({
             id={headingId(section.id)}
             title={section.title}
             view={section.collage}
+            all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+            ownAll={Boolean(section.more)}
+            t={t}
+            marks={section.editor}
+          />
+        )
+      }
+      if (drawn === "icons" && section.icons) {
+        return (
+          <CategoryIcons
+            id={headingId(section.id)}
+            title={section.title}
+            view={section.icons}
             all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
             ownAll={Boolean(section.more)}
             t={t}
@@ -164,8 +185,15 @@ function BlockView({
         />
       )
     }
-    case "banner":
-      return <Campaign section={section} label={t("home.banner")} first={first} />
+    case "banner": {
+      // The split (adr/0077 Ek) paints the section's ground on its own panel
+      const ground = panelGround(block)
+      return ground ? (
+        <CampaignSplit section={section} ground={ground} label={t("home.banner")} first={first} />
+      ) : (
+        <Campaign section={section} label={t("home.banner")} first={first} />
+      )
+    }
     case "strip_gallery":
       return <StripGallery section={section} t={t} first={first} />
     case "featured_product":
@@ -187,8 +215,15 @@ function BlockView({
       return <GoogleRating section={section} t={t} />
     case "rich_text":
       return <Story section={section} />
-    case "posts":
-      return <Guides section={section} />
+    case "posts": {
+      // The intro panel (adr/0077 Ek) paints the section's ground on its own panel
+      const ground = panelGround(block)
+      return ground ? (
+        <GuidesPanel section={section} ground={ground} />
+      ) : (
+        <Guides section={section} />
+      )
+    }
     case "faq":
       return <Faq section={section} help={helpOf(next)} t={t} />
     case "help":
@@ -257,6 +292,7 @@ export function Blocks({
           next={blocks[index + 1]}
           first={heroFirst && index === 0}
           afterOpening={heroFirst && index === 1}
+          atStart={index === 0}
           context={context}
         />
       </Look>

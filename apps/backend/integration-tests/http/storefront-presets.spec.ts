@@ -218,11 +218,21 @@ medusaIntegrationTestRunner({
         dropped: expect.any(Array) as unknown,
         // Katalog writes no footer: the shop's stays, and the answer says so
         kept: ownFooter.map((section) => `footer.${section.id}`),
-        images: { added: 0, kept: 0 },
+        // Hakkımızda's picture, the page opened for the look (adr/0073 Ek 2026-11-19 (2) K6)
+        images: { added: 1, kept: 0 },
         demo: { added: 0, kept: 0 },
+        // The shop had no Hakkımızda: opened as a draft, with the look's own text
+        made_pages: [
+          {
+            ref: "page:hakkimizda",
+            page_id: expect.stringMatching(/^cnt_/) as unknown,
+            name: "Hakkımızda",
+          },
+        ],
+        texts_kept: [],
         // The shop's own draft kept first (adr/0064 Ek 2026-11-17)
         auto_saved: { id: expect.stringMatching(/^sfd_/) as unknown, kind: "auto", name: null },
-        // No content page laid out, none deleted (adr/0073 §1)
+        // No content page deleted (adr/0073 §1)
         dropped_pages: 0,
       })
       expect(ownFooter.length).toBeGreaterThan(0)
@@ -292,20 +302,22 @@ medusaIntegrationTestRunner({
       )
 
       // Unknown (a removed look too: general/grafit, owner 2026-11-17), refused demo,
-      // and not for operations
+      // and the owner's alone (2026-11-23): not for an admin either
       expect((await apply("general", "yok")).status).toBe(404)
       expect((await apply("general", "grafit")).status).toBe(404)
       expect((await apply(LOOK.pack, LOOK.code, { demo: true })).status).toBe(400)
       expect((await apply(LOOK.pack, LOOK.code, { other: 1 })).status).toBe(400)
-      const operations = await createAdminUser(http, container, "operations")
-      const refused = await settle(
-        http.post(
-          `/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/apply`,
-          {},
-          { headers: operations.headers }
+      for (const role of ["admin", "operations"] as const) {
+        const member = await createAdminUser(http, container, role)
+        const refused = await settle(
+          http.post(
+            `/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/apply`,
+            {},
+            { headers: member.headers }
+          )
         )
-      )
-      expect(refused.status).toBe(403)
+        expect(refused.status).toBe(403)
+      }
     })
 
     it("uploads a preset's image once and leaves out what the shop lacks", async () => {

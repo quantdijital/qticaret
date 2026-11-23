@@ -1,6 +1,6 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { logger } from "../../../lib/logging"
-import { requireFeature } from "../require-feature"
+import { requireFeature, requireFeatureForWrites } from "../require-feature"
 import { fakeResponse } from "./fakes"
 
 const request = (enabled: boolean | Error, originalUrl = "/admin/x") =>
@@ -57,6 +57,51 @@ describe("requireFeature", () => {
 
   it("refuses an unknown flag when the route is defined", () => {
     expect(() => requireFeature("no.such_flag")).toThrow(/not a registered feature flag/)
+  })
+
+  it.each(["GET", "HEAD", "OPTIONS"])(
+    "lets a %s through for writes-only gating while the flag is off",
+    async (method) => {
+      const next = jest.fn()
+
+      await requireFeatureForWrites("test.sample")(
+        { ...request(false), method } as MedusaRequest,
+        fakeResponse().res,
+        next
+      )
+
+      expect(next).toHaveBeenCalled()
+    }
+  )
+
+  it.each(["POST", "DELETE"])(
+    "refuses a %s for writes-only gating while the flag is off",
+    async (method) => {
+      const response = fakeResponse()
+      const next = jest.fn()
+
+      await requireFeatureForWrites("test.sample")(
+        { ...request(false, "/admin/collections"), method } as MedusaRequest,
+        response.res,
+        next
+      )
+
+      expect(next).not.toHaveBeenCalled()
+      expect(response.status()).toBe(404)
+      expect(response.body()).toContain(`<pre>Cannot ${method} /admin/collections</pre>`)
+    }
+  )
+
+  it("lets a write through for writes-only gating while the flag is on", async () => {
+    const next = jest.fn()
+
+    await requireFeatureForWrites("test.sample")(
+      { ...request(true), method: "POST" } as MedusaRequest,
+      fakeResponse().res,
+      next
+    )
+
+    expect(next).toHaveBeenCalled()
   })
 
   it("answers like a missing route while the flag is off", async () => {

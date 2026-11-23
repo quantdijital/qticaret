@@ -4,9 +4,11 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, cancelOrderWorkflow, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { cancelOrderWorkflow } from "@medusajs/medusa/core-flows"
 import { bankTransferLockKey } from "../../lib/payments/bank-transfer"
 import { readExpiredBankTransferStep } from "./steps/bank-transfer"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 /**
  * Cancels a bank transfer order whose time to pay ran out (F6 W2,
@@ -18,12 +20,12 @@ export const expireBankTransferWorkflow = createWorkflow(
   "payments-expire-bank-transfer",
   (input: { order_id: string; now: string }) => {
     const lockKey = transform({ input }, ({ input }) => bankTransferLockKey(input.order_id))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 60 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 60 })
     const check = readExpiredBankTransferStep(input)
     when("payments-bank-transfer-expired", { check }, ({ check }) => check.expired).then(() => {
       cancelOrderWorkflow.runAsStep({ input: { order_id: input.order_id } })
     })
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(check)
   }
 )

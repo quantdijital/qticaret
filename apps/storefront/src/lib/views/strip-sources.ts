@@ -12,6 +12,7 @@ import {
   productIdsOf,
 } from "@/lib/store-api/requests"
 import { picturedCategories } from "./category-tiles"
+import { collectionsOn } from "./collections-on"
 import { imageView, productImages } from "./image"
 import { mapLimited } from "./limited"
 import { PHOTO_REQUESTS } from "./nav-pictures"
@@ -169,10 +170,12 @@ export async function stripSources(
     kind: StripRecordKind,
     load: (ids: string[]) => Promise<[string, SourceFacts][]>
   ) => (of(kind).length > 0 ? orNone(() => load(of(kind)), []) : none())
+  // Collections off: their items find no source, so the strip leaves them out
+  const withCollections = of("collection").length > 0 && (await collectionsOn())
   const found = await Promise.all([
     want("product", (ids) => products(ids, t)),
     want("category", (ids) => categories(ids, t)),
-    want("collection", collections),
+    withCollections ? want("collection", collections) : none(),
     want("brand", brands),
   ])
   return new Map(found.flat())

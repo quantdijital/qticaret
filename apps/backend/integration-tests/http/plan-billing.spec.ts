@@ -66,14 +66,58 @@ medusaIntegrationTestRunner({
           currency: "TRY",
         },
       })
-      // The name and the instruction are lifted out of the billing summary
+      // The name and the instruction are lifted out of the billing summary; the
+      // terms (Ek C20) are always there, null from a document without them
       expect(Object.keys(summary.billing ?? {}).sort()).toEqual([
         "amount",
         "currency",
         "due_on",
         "grace_ends_on",
+        "period",
+        "price",
         "status",
+        "trial_ends_on",
+        "trial_started_on",
       ])
+      expect(summary.billing).toMatchObject({
+        period: null,
+        price: null,
+        trial_started_on: null,
+        trial_ends_on: null,
+      })
+    })
+
+    it("shows the subscription's terms a newer document carries: period, price, trial (Ek C20)", async () => {
+      const trial: PlanBillingSummary = {
+        status: "trialing",
+        due_on: "2026-12-15",
+        grace_ends_on: null,
+        amount: 1_490_000,
+        currency: "TRY",
+        package_name: "Profesyonel Ağ",
+        payment_instruction: null,
+        period: "yearly",
+        price: 1_490_000,
+        trial_started_on: "2026-12-01",
+        trial_ends_on: "2026-12-15",
+      }
+      expect((await push(trial)).status).toBe(200)
+
+      expect((await plan()).billing).toEqual({
+        status: "trialing",
+        due_on: "2026-12-15",
+        grace_ends_on: null,
+        amount: 1_490_000,
+        currency: "TRY",
+        period: "yearly",
+        price: 1_490_000,
+        trial_started_on: "2026-12-01",
+        trial_ends_on: "2026-12-15",
+      })
+      // A period the contract does not know is refused, and the last document stands
+      const weekly = await push({ ...trial, period: "weekly" } as unknown as PlanBillingSummary)
+      expect(weekly.status).toBe(400)
+      expect((await plan()).billing?.period).toBe("yearly")
     })
 
     it("takes a document without the new fields (an older control plane) and one with null", async () => {

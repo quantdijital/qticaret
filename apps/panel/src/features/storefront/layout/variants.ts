@@ -1,7 +1,10 @@
 import {
+  BANNER_SPLIT_EDGES,
   CATEGORY_CARD_DEFAULTS,
   CATEGORY_COLLAGE_DEFAULTS,
   CATEGORY_PANELS_DEFAULTS,
+  CATEGORY_ICONS_DEFAULTS,
+  TRUST_CARD_DEFAULTS,
   FOOTER_COLUMNS_DEFAULTS,
   FOOTER_ROWS_DEFAULTS,
   FOOTER_ROWS_START,
@@ -51,7 +54,8 @@ export type VariantSection = Extract<AnySection, { type: VariantSectionType }>
 export const VARIANT_FIELDS: {
   readonly [T in VariantSectionType]: Readonly<Record<SectionVariant<T>, Readonly<object>>>
 } = {
-  trust_badges: { strip: {}, lined: {} },
+  // The card starts unlifted (adr/0077 §10 Ek)
+  trust_badges: { strip: {}, lined: {}, card: TRUST_CARD_DEFAULTS },
   // H17's own fields as a switched opening starts them: the top categories with counts
   hero: {
     standard: {},
@@ -71,6 +75,8 @@ export const VARIANT_FIELDS: {
     linked: CATEGORY_CARD_DEFAULTS,
     collage: CATEGORY_COLLAGE_DEFAULTS,
     panels: CATEGORY_PANELS_DEFAULTS,
+    // The icon row starts with no icon picked: each disc its picture or initial
+    icons: { ...CATEGORY_ICONS_DEFAULTS, category_icons: {} },
   },
   // A rail's own by variant (Ek 2026-11-15): a columns rail starts one more list, the newest
   products: {
@@ -123,6 +129,10 @@ export const VARIANT_FIELDS: {
     // A content page's own text (adr/0073 Ek 2026-11-19 (2) K2): its outline and questions as today
     article: { outline: "auto", questions: "auto" },
   },
+  // adr/0077 Ek (Vadi): the panel's words and button empty (its button the blog's); title and count stay
+  posts: { grid: {}, intro_panel: { eyebrow: null, intro: null, link: null } },
+  // adr/0077 Ek (Vadi): no upper line, a straight edge; the slides and the band's steps stay
+  banner: { standard: {}, split: { eyebrow: null, edge: BANNER_SPLIT_EDGES[0] } },
   product_main: { standard: {} },
   category_main: { standard: {} },
 }

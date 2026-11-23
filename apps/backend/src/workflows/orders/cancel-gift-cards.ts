@@ -7,7 +7,8 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { debitAccountsWorkflow } from "@medusajs/loyalty-plugin/workflows"
 import { ConflictError } from "../../lib/errors"
 import {
@@ -96,7 +97,7 @@ export const cancelGiftCardsWorkflow = createWorkflow(
       giftIssueLockKey(input.order_id),
     ])
     // A provider refunding in parts makes several calls in a row: the lock outlasts them
-    acquireLockStep({ key: lockKeys, timeout: 10, ttl: 600 })
+    const held = acquireLocksStep({ key: lockKeys, timeout: 10, ttl: 600 })
     const debits = planCancelVoidStep(
       transform({ input }, ({ input }) => ({ order_id: input.order_id }))
     )
@@ -112,7 +113,7 @@ export const cancelGiftCardsWorkflow = createWorkflow(
     )
     // Before Medusa's own cancel refunds anything left: no payment names one of ours (review D1)
     clearPendingRefundsStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
-    releaseLockStep({ key: lockKeys })
+    releaseLocksStep(held)
     return new WorkflowResponse(transform({ debits }, ({ debits }) => ({ voided: debits.length })))
   }
 )

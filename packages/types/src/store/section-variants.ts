@@ -8,8 +8,12 @@
  * names are `storefront.editor.variants.<type>.<variant>`.
  */
 export const SECTION_VARIANTS = {
-  /** `strip`: today's tinted strip; `lined`: boxes split by hairlines (GB4). */
-  trust_badges: ["strip", "lined"],
+  /**
+   * `strip`: today's tinted strip; `lined`: boxes split by hairlines (GB4);
+   * `card` (adr/0077 §10 Ek): one white floating box, rules between the
+   * badges, lifted over the section before it while `lift` is on.
+   */
+  trust_badges: ["strip", "lined", "card"],
   /**
    * `standard`: today's graphite opening; `category_list`: the category
    * list, the opening's tile and two category tiles side by side (H17).
@@ -20,9 +24,10 @@ export const SECTION_VARIANTS = {
    * first subcategories as links (adr/0049 Ek 2026-11-15); `collage`:
    * photo-led cards filling each row, the first one wider while `lead` is on;
    * `panels` (Ek 2026-11-19): frameless graphite panels led by their photos,
-   * the first tall beside the others stacked while `lead` is on.
+   * the first tall beside the others stacked while `lead` is on; `icons`
+   * (adr/0077 §10 Ek): one row of round discs, each an icon over its name.
    */
-  categories: ["tiles", "linked", "collage", "panels"],
+  categories: ["tiles", "linked", "collage", "panels", "icons"],
   /**
    * The product rail (adr/0049 Ek 2026-11-15): `grid`, today's rows of
    * cards; `carousel`, one row that slides (the scroller kit,
@@ -102,6 +107,25 @@ export const SECTION_VARIANTS = {
    * `section-rich-text`.
    */
   rich_text: ["pane", "with_image", "article"],
+  /**
+   * The shop's newest posts (adr/0077 Ek, "Vadi"): `grid`, today's three
+   * tiles under the heading; `intro_panel` ("Tanıtım paneli"), one rounded
+   * panel on the section's ground (a light tint unless the shop set one),
+   * an upper line, the heading, a short intro and a button on one side,
+   * two or three post cards (cover, title, reading time or date) on the
+   * other, stacked on a phone. Fields by variant: `section-posts`.
+   */
+  posts: ["grid", "intro_panel"],
+  /**
+   * The picture band (adr/0077 Ek, "Vadi"): `standard`, today's slides
+   * with their words over the pictures; `split` ("Bölünmüş bant"), the
+   * first slide's picture on one side, its inner edge straight or curved
+   * (`edge`), beside a panel on the section's ground (the dark stage
+   * unless the shop set one) holding an upper line, the heading, the
+   * line and the buttons; the picture on top on a phone. Fields by
+   * variant: `section-banner`.
+   */
+  banner: ["standard", "split"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
@@ -233,6 +257,8 @@ export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type NewsletterVariant = SectionVariant<"newsletter">
 export type RichTextVariant = SectionVariant<"rich_text">
+export type PostsVariant = SectionVariant<"posts">
+export type BannerVariant = SectionVariant<"banner">
 export type ProductMainVariant = SectionVariant<"product_main">
 export type CategoryMainVariant = SectionVariant<"category_main">
 

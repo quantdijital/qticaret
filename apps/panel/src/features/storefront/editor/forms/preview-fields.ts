@@ -169,6 +169,11 @@ function wordField(section: AnySection, word: string): PreviewField | null {
     (word === "body" && section.type === "rich_text") ||
     // The steps' intro and their one link (adr/0077 §10)
     (section.type === "steps" && (word === "intro" || word === "link")) ||
+    // The posts' intro panel's words and button, the split band's upper line (adr/0077 Ek)
+    (section.type === "posts" &&
+      section.variant === "intro_panel" &&
+      (word === "eyebrow" || word === "intro" || word === "link")) ||
+    (word === "eyebrow" && section.type === "banner" && section.variant === "split") ||
     (section.type === "photo_collage" && word === "intro") ||
     // Upcoming departures' intro (adr/0077 §10)
     (section.type === "departures" && word === "intro") ||

@@ -49,6 +49,10 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "banner") {
     return bannerLinks(section)
   }
+  // The posts' intro panel's button (adr/0077 Ek)
+  if (section.type === "posts") {
+    return section.variant === "intro_panel" && section.link ? [section.link] : []
+  }
   if (section.type === "hero_slider") {
     return section.slides.flatMap((slide) => (slide.link ? [slide.link] : []))
   }

@@ -1,6 +1,7 @@
 import { StepResponse } from "@medusajs/framework/workflows-sdk"
 import { errorSummary, logger } from "../../lib/logging"
-import { CUSTOMERS_WHOLESALE } from "../../modules/platform-settings/features"
+import { CATALOG_COLLECTIONS, CUSTOMERS_WHOLESALE } from "../../modules/platform-settings/features"
+import { forgetCollectionPages } from "../catalog/collections-flag"
 import { setFeatureFlagWorkflow } from "../platform-settings/set-feature-flag"
 import { setWholesaleListsStatus } from "../wholesale/lists-status"
 import { queueWholesaleCarts } from "../wholesale/queue"
@@ -12,6 +13,11 @@ import { queueWholesaleCarts } from "../wholesale/queue"
 // priced again. A job that cannot be queued is logged; the flag stands.
 setFeatureFlagWorkflow.hooks.featureSet(
   async ({ key, enabled }, { container }) => {
+    // Collections on or off: their pages answer otherwise now, so cached answers go
+    if (key === CATALOG_COLLECTIONS) {
+      await forgetCollectionPages(container)
+      return new StepResponse(undefined, [])
+    }
     if (key !== CUSTOMERS_WHOLESALE) {
       return new StepResponse(undefined, [])
     }

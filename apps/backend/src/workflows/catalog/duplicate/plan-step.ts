@@ -61,7 +61,12 @@ const SOURCE_FIELDS = [
   "product_extension.*",
 ]
 
-export type ProductCopyPlan = CopyPlan & { source_id: string; handle: string }
+export type ProductCopyPlan = CopyPlan & {
+  source_id: string
+  handle: string
+  /** The add-on templates linked to the source (adr/0052 Ek 2026-11-23); none while add-ons are off. */
+  addon_template_ids: string[]
+}
 
 /**
  * Reads the product to copy and plans its copy (`copyPlan`) on a free
@@ -94,6 +99,22 @@ export const planProductCopyStep = createStep(
       { giftCards, addons, restricted },
       { template_id: attributes.template?.id ?? null, values: attributes.values }
     )
-    return new StepResponse<ProductCopyPlan>({ ...plan, source_id: source.id, handle })
+    const linked = addons
+      ? ((
+          (
+            await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+              entity: "product",
+              fields: ["id", "addon_templates.id"],
+              filters: { id: source.id },
+            })
+          ).data[0] as { addon_templates?: ({ id: string } | null)[] | null } | undefined
+        )?.addon_templates ?? [])
+      : []
+    return new StepResponse<ProductCopyPlan>({
+      ...plan,
+      source_id: source.id,
+      handle,
+      addon_template_ids: linked.flatMap((each) => (each ? [each.id] : [])),
+    })
   }
 )

@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Button } from "@qticaret/admin-ui/ui/button"
+import { ProductAddonTemplates } from "@/features/products/addon-templates/product-addon-templates"
+import type { ProductAddonTemplate } from "@/features/products/api/addon-templates"
 import { ADDONS_FLAG, ADDON_LIMITS } from "@/features/products/api/addons"
 import type { ProductAddon } from "@/features/products/api/addons"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
@@ -37,11 +39,16 @@ const valuesOf = (addons: readonly ProductAddon[]): Values => ({ items: addons.m
 function AddonsForm({
   productId,
   saved,
+  templates,
+  hidden,
   flagOn,
   fold,
 }: {
   productId: string
   saved: readonly ProductAddon[]
+  /** Add-on templates it reaches, live (adr/0052 Ek 2026-11-23). */
+  templates: readonly ProductAddonTemplate[]
+  hidden: number
   flagOn: boolean
   fold?: SectionFindings | undefined
 }) {
@@ -100,7 +107,10 @@ function AddonsForm({
     setEditing({ index })
   }
 
-  const full = list.fields.length >= ADDON_LIMITS.addons
+  // Template add-ons count toward the five
+  const fromTemplates = templates.reduce((sum, template) => sum + template.addons.length, 0)
+  const full = list.fields.length + fromTemplates >= ADDON_LIMITS.addons
+  const room = ADDON_LIMITS.addons - saved.length - fromTemplates
   return (
     <>
       <CardForm
@@ -113,12 +123,17 @@ function AddonsForm({
             "addons",
             fold,
             [
-              saved.length > 0
-                ? t("products.sections.addons", { count: saved.length })
+              saved.length + fromTemplates > 0
+                ? t("products.sections.addons", { count: saved.length + fromTemplates })
                 : t("products.sections.noAddons"),
-              saved.length > 0
+              saved.length + fromTemplates > 0
                 ? someNames(
-                    saved.map((addon) => addon.label),
+                    [
+                      ...saved.map((addon) => addon.label),
+                      ...templates.flatMap((template) =>
+                        template.addons.map((addon) => addon.label)
+                      ),
+                    ],
                     3
                   )
                 : undefined,
@@ -196,6 +211,15 @@ function AddonsForm({
             </span>
           </div>
         ) : null}
+        {flagOn || templates.length > 0 ? (
+          <ProductAddonTemplates
+            productId={productId}
+            templates={templates}
+            room={room}
+            hidden={hidden}
+            flagOn={flagOn}
+          />
+        ) : null}
         <div className="flex flex-col gap-1 text-xs text-muted-foreground">
           <p>{t(`${A}.example`)}</p>
           <p>{t(`${A}.discountNote`)}</p>
@@ -264,6 +288,13 @@ export function AddonsCard({
     return null
   }
   return (
-    <AddonsForm productId={productId} saved={catalog.data.addons} flagOn={flagOn} fold={fold} />
+    <AddonsForm
+      productId={productId}
+      saved={catalog.data.addons}
+      templates={catalog.data.addon_templates ?? []}
+      hidden={catalog.data.addons_hidden ?? 0}
+      flagOn={flagOn}
+      fold={fold}
+    />
   )
 }

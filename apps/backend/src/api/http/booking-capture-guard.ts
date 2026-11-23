@@ -2,6 +2,7 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
 import { cancelLockKeys } from "../../lib/orders/locks"
+import { withLocks } from "../../workflows/locking/with-locks"
 import { captureForCancelledDeparture, settleCashCapture } from "../../workflows/booking/paid-guard"
 import { orderOfPayment } from "../../workflows/gift-cards/issue-and-send"
 
@@ -35,7 +36,8 @@ export async function refuseCaptureForCancelledDeparture(
       next()
       return
     }
-    await req.scope.resolve(Modules.LOCKING).execute(
+    await withLocks(
+      req.scope.resolve(Modules.LOCKING),
       cancelLockKeys(orderId),
       async () => {
         const owed = await captureForCancelledDeparture(req.scope, orderId, paymentId)

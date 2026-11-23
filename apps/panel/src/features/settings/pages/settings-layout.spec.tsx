@@ -76,7 +76,14 @@ describe("Settings home", () => {
     // adr/0061 Ek C14: Subscription joined the system group; maintenance came from the
     // storefront preferences (the owner, 2026-11-16)
     // adr/0071 §13: AI joined the system group
-    expect(screen.getAllByRole("link")).toHaveLength(21)
+    // Ekip is a tab of Güvenlik and İşler one of Denetim kaydı (the owner, 2026-11-23)
+    expect(screen.getAllByRole("link")).toHaveLength(19)
+    expect(screen.queryByRole("link", { name: /^Ekip/ })).toBeNull()
+    expect(screen.queryByRole("link", { name: /^İşler/ })).toBeNull()
+    expect(screen.getByRole("link", { name: /Güvenlik.*ekip üyeleri/ })).toHaveAttribute(
+      "href",
+      "/settings/security"
+    )
     expect(screen.getByRole("link", { name: /Yapay zekâ/ })).toHaveAttribute("href", "/settings/ai")
     expect(screen.getByRole("link", { name: /Bakım modu/ })).toHaveAttribute(
       "href",
@@ -95,11 +102,11 @@ describe("Settings home", () => {
 
     // Integrations show the shop's set-up and its failures: those who set it up (F12.2).
     // Maintenance shows them whether the storefront is dark, its switch read-only, as the
-    // storefront preferences page did (adr/0053)
+    // storefront preferences page did (adr/0053). Denetim kaydı, with its jobs, is not
+    // theirs (the owner, 2026-11-23)
     expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
       "/settings/maintenance",
       "/settings/security",
-      "/settings/jobs",
     ])
     expect(screen.queryByRole("heading", { name: "Satış ve teslimat" })).toBeNull()
     staff.allowed = () => true

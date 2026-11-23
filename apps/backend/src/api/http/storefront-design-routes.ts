@@ -20,8 +20,8 @@ const written = [
 
 /**
  * The saved looks (adr/0064, Ek 2026-11-17): people only, never a key;
- * rate limited per staff member. Which roles may write is the role
- * layer's (owner and admin, as the design's own writes).
+ * rate limited per staff member. Which roles may read or write is
+ * the role layer's (the owner's alone, 2026-11-23).
  */
 export const STOREFRONT_DESIGN_ROUTES = [
   {

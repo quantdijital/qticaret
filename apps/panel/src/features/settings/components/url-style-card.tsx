@@ -11,13 +11,31 @@ import { Progress } from "@qticaret/admin-ui/ui/progress"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { jobsQuery, useStartJob } from "@/features/settings/api/activity"
 import { URL_STYLE_JOB, checkUrlStyle, jobQuery } from "@/features/settings/api/url-style"
-import type { StyleCheck, UrlStyle, UrlStyles } from "@/features/settings/api/url-style"
+import type { CategoryUrlStyle, StyleCheck, UrlStyles } from "@/features/settings/api/url-style"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
+import { useJobsMessage } from "@/features/settings/use-jobs-message"
 
 const ENTITIES = ["product", "category", "brand"] as const
-const EXAMPLE_SLUG = { product: "keten-gomlek", category: "giyim", brand: "ornek-marka" } as const
-const PREFIX = { product: "/urun/", category: "/kategori/", brand: "/marka/" } as const
+type Entity = (typeof ENTITIES)[number]
+// Each choice with the address it gives; a category's also carry a subcategory's
+// tree, so the nested style (adr/0017 Ek 2026-11-23) reads apart from the flat one
+const CHOICES: Readonly<Record<Entity, readonly { style: CategoryUrlStyle; example: string }[]>> = {
+  product: [
+    { style: "prefixed", example: "/urun/keten-gomlek" },
+    { style: "flat", example: "/keten-gomlek" },
+  ],
+  category: [
+    { style: "prefixed", example: "/kategori/hediyelik-esyalar/caki-kutusu" },
+    { style: "nested", example: "/hediyelik-esyalar/caki-kutusu" },
+    { style: "flat", example: "/caki-kutusu" },
+  ],
+  brand: [
+    { style: "prefixed", example: "/marka/ornek-marka" },
+    { style: "flat", example: "/ornek-marka" },
+  ],
+}
 const SHOWN_CONFLICTS = 8
 
 function Conflicts({ check }: { check: StyleCheck }) {
@@ -64,6 +82,7 @@ function useStyleJob() {
  */
 export function UrlStyleCard({ saved }: { saved: UrlStyles }) {
   const { t } = useTranslation()
+  const jobs = useJobsMessage()
   const client = useQueryClient()
   const startJob = useStartJob()
   const [styles, setStyles] = useState<UrlStyles>(saved)
@@ -87,12 +106,12 @@ export function UrlStyleCard({ saved }: { saved: UrlStyles }) {
         t("settings.seo.style.moved", { count: Number(job.result_summary?.["moved"] ?? 0) })
       )
     } else {
-      toast.error(t("settings.seo.style.failed"))
+      toast.error(t(jobs("settings.seo.style.failed")))
     }
     start(null)
     setCheck(null)
     void client.invalidateQueries({ queryKey: ["settings"] })
-  }, [job, client, start, t])
+  }, [job, client, start, t, jobs])
 
   const runCheck = async () => {
     setChecking(true)
@@ -104,7 +123,7 @@ export function UrlStyleCard({ saved }: { saved: UrlStyles }) {
       setChecking(false)
     }
   }
-  const pick = (entity: (typeof ENTITIES)[number], style: UrlStyle) => {
+  const pick = (entity: Entity, style: CategoryUrlStyle) => {
     setStyles((current) => ({ ...current, [entity]: style }))
     setCheck(null)
   }
@@ -118,19 +137,30 @@ export function UrlStyleCard({ saved }: { saved: UrlStyles }) {
               value={styles[entity]}
               disabled={moving}
               onValueChange={(value) => {
-                pick(entity, value as UrlStyle)
+                pick(entity, value as CategoryUrlStyle)
               }}
-              className="grid gap-2 sm:grid-cols-2"
+              className={cn(
+                "grid gap-2",
+                CHOICES[entity].length === 3 ? "lg:grid-cols-3" : "sm:grid-cols-2"
+              )}
             >
-              {(["prefixed", "flat"] as const).map((style) => (
+              {CHOICES[entity].map(({ style, example }) => (
                 <label
                   key={style}
-                  className="flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2.5 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
+                  className="flex h-full cursor-pointer items-start gap-2.5 rounded-md border px-3 py-2.5 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
                 >
-                  <RadioGroupItem value={style} />
-                  <span className="font-mono text-[13px]">
-                    {style === "prefixed" ? PREFIX[entity] : "/"}
-                    {EXAMPLE_SLUG[entity]}
+                  <RadioGroupItem value={style} className="mt-0.5" />
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="text-[13px] font-medium">
+                      {t(
+                        entity === "category"
+                          ? `settings.seo.style.category.${style}`
+                          : `settings.seo.style.option.${style}`
+                      )}
+                    </span>
+                    <span className="font-mono text-xs break-all text-muted-foreground">
+                      {example}
+                    </span>
                   </span>
                 </label>
               ))}

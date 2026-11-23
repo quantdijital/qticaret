@@ -14,13 +14,15 @@ import { z } from "@medusajs/framework/zod"
  * variant goes into the contract first, then here, then into the theme.
  */
 export const SECTION_VARIANTS = {
-  trust_badges: ["strip", "lined"],
+  // `card` (adr/0077 §10 Ek): one white floating box, lifted over the section before it while `lift` is on
+  trust_badges: ["strip", "lined", "card"],
   // H17: the category list, the opening's tile and two category tiles side by side
   hero: ["standard", "category_list"],
   // Today's picture tiles; `linked` each category a card with its subcategories' links;
   // `collage` photo-led cards filling each row, the first wider
   // `panels` (Ek 2026-11-19) frameless graphite panels, the first tall beside the others
-  categories: ["tiles", "linked", "collage", "panels"],
+  // `icons` (adr/0077 §10 Ek): one row of round discs, each an icon over its name
+  categories: ["tiles", "linked", "collage", "panels", "icons"],
   // The product rail (adr/0049 Ek 2026-11-15): today's grid first; `strips`, `ranked`, `stage_list` Ek 2026-11-16
   products: [
     "grid",
@@ -47,6 +49,10 @@ export const SECTION_VARIANTS = {
   // The shop's own text (adr/0073 §3): today's pane first; `with_image` a picture beside it;
   // `article` a content page's own text (Ek 2026-11-19 (2) K2), the pages' only
   rich_text: ["pane", "with_image", "article"],
+  // adr/0077 Ek (Vadi): today's tiles first; `intro_panel` one panel, its words beside the cards
+  posts: ["grid", "intro_panel"],
+  // adr/0077 Ek (Vadi): today's band first; `split` the picture beside a panel on the ground
+  banner: ["standard", "split"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>

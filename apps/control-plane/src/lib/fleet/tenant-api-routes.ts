@@ -27,6 +27,8 @@ export const TENANT_API_ROUTES: readonly TenantApiRule[] = [
   { method: "GET", path: "/tenant-api/v1/plan", maxBodyBytes: 0 },
   // Ek C13: the shop's hourly usage report (totals only, the contract's strict schema)
   { method: "POST", path: "/tenant-api/v1/usage", maxBodyBytes: USAGE_REPORT_MAX_BYTES },
+  // Ek C20: the shop's own payment history, bound to the request's nonce
+  { method: "GET", path: "/tenant-api/v1/billing", maxBodyBytes: 0 },
 ]
 
 /** The table's row for a request (HEAD as GET), or null. */

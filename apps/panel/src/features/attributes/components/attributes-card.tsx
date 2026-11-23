@@ -26,6 +26,8 @@ import { FactsDialog } from "@/features/attributes/facts/facts-dialog"
 import type { AttributeValue, ProductAttributes } from "@/features/attributes/types"
 import { useCan } from "@/features/auth/api/staff"
 import type { SectionFindings } from "@/features/content/section-findings"
+import { useCarryCheck } from "@/features/products/addon-templates/carry-check"
+import { AddonNotice } from "@/features/products/detail/addon-notice"
 import { productFold } from "@/features/products/detail/sections"
 import { errorText } from "@/lib/errors"
 import { isEmpty } from "@/features/attributes/empty"
@@ -62,6 +64,8 @@ function AttributesForm({
     .filter((definition) => definition.scope === "product")
     .sort((a, b) => a.rank - b.rank)
   const changedTemplate = templateId !== (saved.template?.id ?? null)
+  // adr/0052 Ek 2026-11-23: the new template's add-ons may not fit in five (warned, not blocked)
+  const carry = useCarryCheck(productId, template, changedTemplate)
   const dirty = changedTemplate || JSON.stringify(values) !== JSON.stringify(saved.values)
   // The AI fills the saved template's empty public fields (the backend reads the saved product)
   const ai = useAttributesAi(productId)
@@ -187,6 +191,18 @@ function AttributesForm({
           </Select>
         )}
       </Field>
+      {carry ? (
+        <AddonNotice
+          tone="warning"
+          features={false}
+          text={t(
+            carry.requiredHidden
+              ? "products.addonTemplates.carryRequiredHidden"
+              : "products.addonTemplates.carryHidden",
+            { count: carry.hidden }
+          )}
+        />
+      ) : null}
       <AttributeFields definitions={definitions} values={values} setValues={setValues} ai={ai} />
       <ConfirmDialog
         open={confirmChange}

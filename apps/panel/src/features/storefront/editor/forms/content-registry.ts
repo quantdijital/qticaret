@@ -9,6 +9,7 @@ import {
 } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
+import { iconFields } from "./icon-registry"
 import { scrollerFields, sliderFields } from "./shelf-registry"
 import { kitDefaultsOf, turnsAsSlider } from "./slider-kit"
 
@@ -58,6 +59,10 @@ export type ContentField =
   | "dividers"
   | "steps_layout"
   | "numbers"
+  | "show_icons"
+  | "lift"
+  | "disc"
+  | "icons_phone"
   | "collage_layout"
   | "collage_phone"
   | "departures_layout"
@@ -217,7 +222,10 @@ export function contentFields(section: AnySection): RegistryField[] {
         ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
       ]
     case "categories":
-      return [entry(section, "show_count", `${E}.categories.showCount`)]
+      return [
+        entry(section, "show_count", `${E}.categories.showCount`),
+        ...iconFields(section, CONTENT_IDS.content),
+      ]
     case "hero":
       return section.variant === "category_list"
         ? [
@@ -283,7 +291,7 @@ export function contentFields(section: AnySection): RegistryField[] {
       return stripGalleryFields(section)
     case "stats":
     case "steps":
-      return pointsFields(section)
+      return [...pointsFields(section), ...iconFields(section, CONTENT_IDS.content)]
     // The count in the content; the list or cards in "Diziliş" (adr/0077 §10)
     case "departures":
       return [
@@ -322,6 +330,9 @@ export function contentFields(section: AnySection): RegistryField[] {
         entry(section, "form", `${E}.pageText.form`),
         entry(section, "imprint", `${E}.pageText.imprint`),
       ]
+    // The card's lift (adr/0077 §10 Ek); the strip and the lined boxes have none
+    case "trust_badges":
+      return iconFields(section, CONTENT_IDS.content)
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":
@@ -332,7 +343,6 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "help":
     case "marquee":
     case "product_main":
-    case "trust_badges":
     case "payment_facts":
     case "shipping_facts":
       return []

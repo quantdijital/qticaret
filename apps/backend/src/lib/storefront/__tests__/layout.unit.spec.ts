@@ -30,7 +30,7 @@ describe("storefront layout document (adr/0049)", () => {
     const doc = layoutDocument.parse({ home: [{ id: "yazilar1", type: "posts" }] })
     expect(doc).toEqual({
       header: [],
-      home: [{ id: "yazilar1", type: "posts", ...ALWAYS, title: null, limit: 3 }],
+      home: [{ id: "yazilar1", type: "posts", ...ALWAYS, title: null, limit: 3, variant: "grid" }],
       footer: [],
       product: [],
       category: [],

@@ -9,6 +9,8 @@ import { HERO_BRANCHES } from "./hero"
 import { TRUST_BADGES_BRANCHES } from "./trust-badges"
 import { NEWSLETTER_BRANCHES } from "./newsletter"
 import { RICH_TEXT_BRANCHES } from "./rich-text"
+import { POSTS_BRANCHES } from "./posts"
+import { BANNER_BRANCHES } from "./banner"
 import { REVIEWS_BRANCHES } from "./reviews"
 import { REMOVED_VARIANTS, SECTION_VARIANTS, isVariantType } from "./variants"
 import type { SectionVariant, VariantBranch, VariantSectionType } from "./variants"
@@ -25,6 +27,8 @@ const BRANCHES: {
   reviews: REVIEWS_BRANCHES,
   newsletter: NEWSLETTER_BRANCHES,
   rich_text: RICH_TEXT_BRANCHES,
+  posts: POSTS_BRANCHES,
+  banner: BANNER_BRANCHES,
   ...MAIN_BRANCHES,
 }
 

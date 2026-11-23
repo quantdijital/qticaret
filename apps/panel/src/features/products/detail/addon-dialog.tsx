@@ -74,6 +74,8 @@ interface AddonDialogProps {
   onClose: () => void
   /** Saves the product's add-ons with this one in its place. */
   onSave: (value: AddonValue) => void
+  /** What saving does, under the form; left out, the product's whole list is saved. */
+  note?: string
 }
 
 /**
@@ -91,6 +93,7 @@ export function AddonDialog({
   failure,
   onClose,
   onSave,
+  note,
 }: AddonDialogProps) {
   const { t } = useTranslation()
   const addon = index === null ? null : (items[index] ?? null)
@@ -145,7 +148,9 @@ export function AddonDialog({
       onSubmit={() => void submit()}
       guard={guard}
       footerStart={
-        <span className="self-center text-xs text-muted-foreground">{t(`${A}.savesAll`)}</span>
+        <span className="self-center text-xs text-muted-foreground">
+          {note ?? t(`${A}.savesAll`)}
+        </span>
       }
     >
       <FormProvider {...form}>

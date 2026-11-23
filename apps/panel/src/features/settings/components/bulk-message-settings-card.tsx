@@ -33,7 +33,7 @@ const hourText = (hour: number) => `${String(hour).padStart(2, "0")}:00`
 const hoursValid = (start: number, end: number): boolean => end > start
 
 /**
- * Settings > Marketing > Toplu ileti (adr/0050 §3, §6): one bulk message a
+ * Settings > Marketing > Toplu mesaj (adr/0050 §3, §6): one bulk message a
  * person in 24 hours at most, and the hours bulk texts go in, Türkiye
  * time; a text campaign outside them waits and goes on by itself.
  */

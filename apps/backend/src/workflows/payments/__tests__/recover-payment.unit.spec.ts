@@ -4,20 +4,11 @@ import {
   Modules,
   createMedusaContainer,
 } from "@medusajs/framework/utils"
-import type * as WorkflowsSdk from "@medusajs/framework/workflows-sdk"
 import { AUDIT_LOG_MODULE } from "../../../modules/audit-log"
 import { PAYMENT_RECOVERY_MODULE } from "../../../modules/payment-recovery"
 import { refundRecovery } from "../recover-payment"
 
-// The lock around a recovery is Medusa's; the providers' refunds are watched, never made
-jest.mock("@medusajs/medusa/core-flows", () => {
-  const sdk = jest.requireActual<typeof WorkflowsSdk>("@medusajs/framework/workflows-sdk")
-  const noop = (name: string) => sdk.createStep(name, () => new sdk.StepResponse(undefined))
-  return {
-    acquireLockStep: noop("test-acquire-lock"),
-    releaseLockStep: noop("test-release-lock"),
-  }
-})
+// The providers' refunds are watched, never made
 const recoverPaytrPayment = jest.fn<Promise<string>, unknown[]>()
 jest.mock("../recover-paytr", () => ({
   recoverPaytrPayment: (...args: unknown[]) => recoverPaytrPayment(...args),
