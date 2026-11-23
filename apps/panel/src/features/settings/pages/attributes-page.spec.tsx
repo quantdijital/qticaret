@@ -13,6 +13,8 @@ vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/settings">{children}</a>,
+  // adr/0052 Ek 2026-11-23: an add-on template's row opens its page
+  useNavigate: () => vi.fn(),
 }))
 
 const template = (more: Partial<AttributeTemplate>): AttributeTemplate => ({

@@ -12,7 +12,10 @@ export interface BulkProduct {
   title: string
   status: string
   categories?: ({ id: string; mpath?: string | null } | null)[] | null
-  product_extension?: { primary_category_id?: string | null } | null
+  product_extension?: { primary_category_id?: string | null; addons?: unknown } | null
+  /** adr/0052 Ek 2026-11-23: the templates linked to it, the ones its attribute template carries. */
+  addon_templates?: ({ id: string } | null)[] | null
+  attribute_template?: { addon_template_ids?: unknown } | null
   seo_meta?: { seo_title?: string | null; seo_description?: string | null } | null
   options?: { id: string; title: string }[] | null
   variants?: BulkVariant[] | null
@@ -55,6 +58,12 @@ const FIELDS: Readonly<Record<BulkAction, readonly string[]>> = {
   cost: [...BASE, "variants.id", "variants.variant_extension.cost"],
   category: [...BASE, "categories.id", "categories.mpath", "product_extension.primary_category_id"],
   seo_template: [...BASE, "seo_meta.seo_title", "seo_meta.seo_description"],
+  addon_template: [
+    ...BASE,
+    "product_extension.addons",
+    "addon_templates.id",
+    "attribute_template.addon_template_ids",
+  ],
   alt_text: [
     ...BASE,
     "options.id",

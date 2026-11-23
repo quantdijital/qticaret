@@ -3943,7 +3943,8 @@
         "category": "Edit category",
         "seo_template": "Apply SEO template",
         "alt_text": "Fill missing alt texts",
-        "cost": "Change cost"
+        "cost": "Change cost",
+        "addon_template": "Assign / remove add-on template"
       },
       "price": {
         "mode": "Price change",
@@ -4013,7 +4014,8 @@
         "adjust": "Enter a whole number above zero.",
         "category": "Choose a category.",
         "seoFields": "Choose at least one field.",
-        "cost": "Enter a cost between 0 and 10,000,000 ₺."
+        "cost": "Enter a cost between 0 and 10,000,000 ₺.",
+        "addonTemplate": "Choose an add-on template."
       },
       "cost": {
         "mode": "Cost change",
@@ -4028,6 +4030,19 @@
           "percent": "Only variants with a cost change."
         },
         "clearHint": "The selected products' variants lose their cost; they leave the stock value."
+      },
+      "addonTemplate": {
+        "mode": "Action",
+        "modes": {
+          "add": "Assign",
+          "remove": "Remove"
+        },
+        "label": "Add-on template",
+        "hints": {
+          "add": "The template is linked to the selected products. Products it would take past 5 add-ons are skipped and listed in the report.",
+          "remove": "The template is unlinked from the selected products; templates from an attribute template are not affected."
+        },
+        "none": "No add-on templates yet."
       }
     },
     "priceHistory": {
@@ -4191,6 +4206,63 @@
         "not_a_question": "The question must end with a question mark.",
         "too_long": "A question can be at most 120 characters, an answer at most 400."
       }
+    },
+    "addonTemplates": {
+      "title": "Add-on templates",
+      "subtitle": "Define add-ons once and link them to products. Changing a template changes every linked product.",
+      "create": "Create template",
+      "new": "New add-on template",
+      "dialogHint": "The template's add-ons show on linked products' pages beside the product's own add-ons.",
+      "empty": "No add-on templates yet. Define an add-on such as \"Name engraving, +150 TL\" once and link it to many products.",
+      "columns": {
+        "name": "Template",
+        "used": "Used by"
+      },
+      "productCount_one": "{{count}} product",
+      "productCount_other": "{{count}} products",
+      "carriedCount_one": "{{count}} attribute template",
+      "carriedCount_other": "{{count}} attribute templates",
+      "name": "Template name",
+      "nameHint": "Shown in the panel only; at most {{max}} characters.",
+      "addons": "Add-ons",
+      "addonsHint": "The template's add-ons count toward a product's {{max}} add-ons.",
+      "noAddons": "No add-ons in the template yet. Add at least one.",
+      "addonNote": "The change applies when the template is saved.",
+      "delete": "Delete template",
+      "deleteTitle": "Delete \"{{name}}\"?",
+      "deleteDescription_one": "The template leaves {{count}} product and the attribute templates carrying it. Shoppers with these add-ons in their cart must change them before paying.",
+      "deleteDescription_other": "The template leaves {{count}} products and the attribute templates carrying it. Shoppers with these add-ons in their cart must change them before paying.",
+      "deleted": "Template deleted.",
+      "saved": "Template saved.",
+      "errors": {
+        "name": "The template name must be 1-60 characters.",
+        "tooMany": "This change would give some products more than 5 add-ons; remove add-ons from them first.",
+        "idUnknown": "An add-on id the template does not have was sent. Reload the page and try again."
+      },
+      "add": "Add template",
+      "pickTitle": "Add an add-on template",
+      "pickDescription": "The template's add-ons are linked to this product; when the template changes, so does this product.",
+      "link": "Link",
+      "noneToPick": "No template to link.",
+      "openSettings": "Create one under product attributes",
+      "doesNotFit_one": "{{count}} add-on: does not fit within this product's 5.",
+      "doesNotFit_other": "{{count}} add-ons: do not fit within this product's 5.",
+      "viaProduct": "Template",
+      "viaAttribute": "From attribute template",
+      "editInSettings": "Edit template",
+      "unlink": "Unlink",
+      "hidden_one": "{{count}} add-on is past the limit of 5 and not shown in the store; remove a template or an add-on.",
+      "hidden_other": "{{count}} add-ons are past the limit of 5 and not shown in the store; remove a template or an add-on.",
+      "usage": "Usage",
+      "usageHint": "Changing the template changes all of these products at once; placed orders stay as they are.",
+      "linkedProducts": "Linked products",
+      "carriedBy": "Carried by attribute templates",
+      "carriedByNone": "None",
+      "createHint": "Create the template by its name; add its add-ons on the page that opens.",
+      "carryHidden_one": "With this attribute template the product has more than 5 add-ons: {{count}} add-on is not shown in the store. You can save; removing a template or an add-on is advised.",
+      "carryHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store. You can save; removing a template or an add-on is advised.",
+      "carryRequiredHidden_one": "With this attribute template the product has more than 5 add-ons: {{count}} add-on is not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised.",
+      "carryRequiredHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised."
     }
   },
   "orders": {
@@ -7176,7 +7248,9 @@
       "definitions_other": "Attributes ({{count}})",
       "groups_one": "Groups ({{count}})",
       "groups_other": "Groups ({{count}})",
-      "info": "Template details"
+      "info": "Template details",
+      "addons_one": "Add-ons ({{count}})",
+      "addons_other": "Add-ons ({{count}})"
     },
     "tabError": "A field on this tab needs fixing",
     "descriptionHint": "Shown in the panel only.",
@@ -7196,7 +7270,11 @@
     },
     "seoHint": "Its value may be used in the product's title on Google.",
     "drag": "Drag to move",
-    "actions": "{{name}}: actions"
+    "actions": "{{name}}: actions",
+    "addonTemplates": {
+      "hint": "The add-on templates you tick are added to every product using this attribute template, after the product's own add-ons, in this order.",
+      "none": "No add-on templates yet. Create one in the Add-on templates section of this page."
+    }
   },
   "brands": {
     "description": "Each brand has its own page, logo and products.",

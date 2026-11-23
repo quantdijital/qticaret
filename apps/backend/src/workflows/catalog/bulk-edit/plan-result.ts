@@ -1,3 +1,4 @@
+import type { AddonTemplateSource } from "../../../lib/catalog/addons"
 import type { LevelAdjustment, LevelQuantity } from "../../stock/write-levels"
 import type { nextPrices } from "../prices"
 
@@ -28,6 +29,11 @@ export type BulkWrite =
   | { action: "alt_text"; alts: { id: string; alt: string }[] }
   /** Unit costs by variant, in lira as the catalog save takes them; null clears one. */
   | { action: "cost"; variants: Record<string, { cost: number | null }> }
+  /**
+   * One add-on template linked or unlinked: applied to the links as they are
+   * when written, under the product's lock, so one made meanwhile is kept.
+   */
+  | { action: "addon_template"; mode: "add" | "remove"; template_id: string }
 
 /** A field's value before and after, by a key naming it (`variant:<id>:price:try`). */
 export type BulkDiff = Record<string, { before: unknown; after: unknown }>
@@ -41,6 +47,8 @@ export type BulkPlan =
 export interface PlanContext {
   /** The shop's default warehouse, where stock changes. */
   locationId: string | null
+  /** The shop's add-on templates, for an add-on template change (adr/0052 Ek 2026-11-23). */
+  addonTemplates?: ReadonlyMap<string, AddonTemplateSource>
 }
 
 export const UNCHANGED: BulkPlan = { kind: "unchanged" }

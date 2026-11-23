@@ -534,6 +534,11 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/attribute-templates/:id": false,
   "POST /admin/attribute-templates/:id/definitions/:definition_id/convert": false,
   "POST /admin/attribute-templates": false,
+  // adr/0052 Ek 2026-11-23: add-on templates are catalog writes, as a product's add-ons
+  "POST /admin/addon-templates/:id": false,
+  "DELETE /admin/addon-templates/:id": false,
+  "POST /admin/addon-templates": false,
+  "POST /admin/attribute-templates/:id/addon-templates": false,
   "POST /admin/brands/:id": false,
   "DELETE /admin/brands/:id": false,
   "POST /admin/brands": false,
@@ -692,6 +697,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/product-reviews/:id/reply": true,
   "DELETE /admin/product-reviews/:id/reply": true,
   "POST /admin/products/:id/attributes": false,
+  "POST /admin/products/:id/addon-templates": false,
   // adr/0013 Ek 2026-11-05: a preview of the facts in descriptions, the catalog roles'
   "POST /admin/description-facts/preview": false,
   "POST /admin/products/:id/brand": false,

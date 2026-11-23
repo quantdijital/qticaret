@@ -1,6 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
-import { templateBody } from "./form"
+import { carryAddonTemplates } from "@/features/products/api/addon-templates"
+import { carriedChanged, templateBody } from "./form"
 import type { TemplateForm } from "./form"
 import type { AttributeTemplate, AttributeValue, ProductAttributes } from "./types"
 
@@ -48,10 +49,16 @@ export function useSaveTemplate() {
             : { ...body, handle: form.handle.trim() },
         }
       )
+      // adr/0052 Ek 2026-11-23: the carried add-on templates, after the template exists
+      if (carriedChanged(template, form)) {
+        await carryAddonTemplates(saved.id, form.addonTemplateIds)
+      }
       return saved
     },
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: TEMPLATES_KEY })
+      await client.invalidateQueries({ queryKey: ["addon-templates"] })
+      await client.invalidateQueries({ queryKey: ["products", "catalog"] })
       await client.invalidateQueries({ queryKey: ["products", "attributes"] })
     },
   })
