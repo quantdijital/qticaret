@@ -33,7 +33,7 @@ function collect(): { file: string; base: string; className: string | null }[] {
       out.push({
         file: file.slice(SRC.length + 1),
         base: name.replace(/\.ts$/, ""),
-        className: match ? match[1] : null,
+        className: match?.[1] ?? null,
       })
     }
   }
