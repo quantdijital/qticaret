@@ -12,6 +12,9 @@ const KIND_TEXT: Readonly<Record<LinkRow["kind"], string>> = {
   page: "Sayfa",
   post: "Blog yazısı",
   product: "Ürün açıklaması",
+  category: "Kategori açıklaması",
+  brand: "Marka açıklaması",
+  collection: "Koleksiyon açıklaması",
 }
 
 const REASON_TEXT: Readonly<Record<NonNullable<LinkRow["reason"]>, string>> = {

@@ -3,9 +3,12 @@ import { sdk } from "@/lib/sdk"
 import type { AsyncJob } from "./activity"
 
 export type UrlStyle = "prefixed" | "flat"
+/** Categories also take the tree without the prefix (adr/0017 Ek 2026-11-23). */
+export type CategoryUrlStyle = UrlStyle | "nested"
+
 export interface UrlStyles {
   product: UrlStyle
-  category: UrlStyle
+  category: CategoryUrlStyle
   brand: UrlStyle
 }
 

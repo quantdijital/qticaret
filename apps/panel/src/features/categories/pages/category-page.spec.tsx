@@ -75,7 +75,7 @@ describe("CategoryPage", () => {
         category("sef", "Şef bıçakları", "mutfak", { is_internal: true }),
       ],
     })
-    fetchMock.mockReset().mockResolvedValue({ values: { url_style: { category: "nested" } } })
+    fetchMock.mockReset().mockResolvedValue({ values: { url_style: { category: "prefixed" } } })
   })
 
   it("shows the category's name, parents and visibility over its cards", async () => {
