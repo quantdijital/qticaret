@@ -1,4 +1,6 @@
 import { DEFAULT_ROBOTS_TXT } from "../../modules/platform-settings/sections/seo"
+import { isCrawlable, parseRobots } from "../../lib/seo/robots-match"
+import { F3_17_DEFAULT } from "../seo-robots-exact-system-pages"
 import { PREVIOUS_DEFAULT, updateRobotsDefault } from "../seo-robots-facet-lines"
 
 function fakes(robots: string, version: number) {
@@ -51,5 +53,40 @@ describe("robots default update (F3.17 migration script)", () => {
     expect(PREVIOUS_DEFAULT).toBe(
       "User-agent: *\nDisallow: /sepet\nDisallow: /odeme\nDisallow: /hesap\nDisallow: /arama\nDisallow: /*?sort=\nDisallow: /*?page=0\n\nSitemap: {sitemap_url}"
     )
+  })
+})
+
+describe("robots default with exact system pages (adr/0017 Ek 2026-11-23)", () => {
+  it("replaces the F3.17 default a shop saved", async () => {
+    const { settings, audit, saved, recorded } = fakes(F3_17_DEFAULT, 5)
+    expect(await updateRobotsDefault(settings as never, audit as never, F3_17_DEFAULT)).toBe(true)
+    expect(saved).toEqual([{ robots_txt: DEFAULT_ROBOTS_TXT }])
+    expect(recorded).toEqual([
+      expect.objectContaining({
+        changes: { robots_txt: { before: F3_17_DEFAULT, after: DEFAULT_ROBOTS_TXT } },
+      }),
+    ])
+  })
+
+  it("leaves a template of the shop's own", async () => {
+    const { settings, audit, saved } = fakes(`${F3_17_DEFAULT}\nDisallow: /ozel`, 5)
+    expect(await updateRobotsDefault(settings as never, audit as never, F3_17_DEFAULT)).toBe(false)
+    expect(saved).toEqual([])
+  })
+
+  it("knew the F3.17 default as the code had it", () => {
+    expect(F3_17_DEFAULT).toBe(
+      "User-agent: *\nDisallow: /sepet\nDisallow: /odeme\nDisallow: /hesap\nDisallow: /arama\n{facet_disallow}\n\nSitemap: {sitemap_url}"
+    )
+  })
+
+  it("closes the system pages, not a category whose name starts so", () => {
+    const groups = parseRobots(DEFAULT_ROBOTS_TXT)
+    for (const path of ["/sepet", "/hesap/siparisler", "/arama?q=caki", "/odeme"]) {
+      expect([path, isCrawlable(groups, "*", path)]).toEqual([path, false])
+    }
+    for (const path of ["/hesap-makineleri/bilimsel", "/sepetler", "/aramali-telsiz"]) {
+      expect([path, isCrawlable(groups, "*", path)]).toEqual([path, true])
+    }
   })
 })

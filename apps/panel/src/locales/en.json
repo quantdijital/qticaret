@@ -644,7 +644,16 @@
         "moving": "Moving addresses… {{percent}}%",
         "moved_one": "{{count}} page moved to its new address.",
         "moved_other": "{{count}} pages moved to their new addresses.",
-        "failed": "The addresses could not be moved; run the check again. Details in Settings > Jobs."
+        "failed": "The addresses could not be moved; run the check again. Details in Settings > Jobs.",
+        "option": {
+          "prefixed": "With prefix",
+          "flat": "No prefix, at the root"
+        },
+        "category": {
+          "prefixed": "With prefix, parent categories included",
+          "nested": "No prefix, parent categories included",
+          "flat": "No prefix, its own name only"
+        }
       },
       "searchConsole": {
         "title": "Search Console",
@@ -3057,6 +3066,8 @@
         "notReady": "Not ready to cut over",
         "noTraffic": "No Search Console data: upload the most visited pages.",
         "unanswered": "{{count}} of the most visited addresses answer nothing yet.",
+        "categoryStyle": "{{kept}} of the old site's {{total}} category addresses stay exactly as they were with the “{{style}}” category URL style ({{now}} with the current one). If you change the style, the other category addresses 301 to their new ones.",
+        "categoryStyleLink": "Open the URL style",
         "counts": {
           "total": "Addresses",
           "matched": "Matched",
