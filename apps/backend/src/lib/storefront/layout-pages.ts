@@ -4,6 +4,7 @@ import { banner } from "./sections/banner"
 import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
 import { counted } from "./sections/counted"
+import { posts } from "./sections/posts"
 import { faq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
 import { googleRating } from "./sections/google-rating"
@@ -73,7 +74,7 @@ export const contentPageSection = z.discriminatedUnion(
     featuredProduct,
     categories,
     brands,
-    counted("posts", 6, 3),
+    posts,
     counted("reviews", 12, 6),
     googleRating,
     stats,

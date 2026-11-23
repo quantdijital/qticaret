@@ -1,7 +1,9 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, image, optional, shopText } from "../layout-fields"
+import { LAYOUT_LIMITS, image, optional, placement, shopText } from "../layout-fields"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
+import { VARIANT_ERROR, defaultVariant } from "./variants"
+import type { SectionVariant, VariantBranch } from "./variants"
 
 /**
  * The picture band, `banner` (adr/0049 Ek 2026-11-14 §3.3 E2): one to six
@@ -77,20 +79,57 @@ const slide = z
   })
   .strict()
 
-export const banner = z
+/** What both variants hold, under the same names (switching keeps them). */
+const common = {
+  ...bodyFields,
+  type: z.literal("banner"),
+  slides: z.array(slide).min(1).max(LAYOUT_LIMITS.slides),
+  width: setting("width"),
+  height: setting("height"),
+  text_position: setting("text_position"),
+  overlay: setting("overlay"),
+  button_style: setting("button_style"),
+}
+
+/** Today's band: the slides side by side, their words over the pictures. */
+const standard = z.object({ ...common, variant: defaultVariant("banner") }).strict()
+
+/**
+ * adr/0077 Ek ("Bölünmüş bant"): the first slide's picture beside a panel
+ * on the section's ground, an upper line over its heading, the picture's
+ * inner edge straight or curved. Mirrors `@qticaret/types`'
+ * `BANNER_SPLIT_EDGES` and `BANNER_EYEBROW_MAX`.
+ */
+export const BANNER_SPLIT_EDGES = ["straight", "curved"] as const
+
+export const BANNER_EYEBROW_MAX = 40
+
+const split = z
   .object({
-    ...bodyFields,
-    type: z.literal("banner"),
-    slides: z.array(slide).min(1).max(LAYOUT_LIMITS.slides),
-    width: setting("width"),
-    height: setting("height"),
-    text_position: setting("text_position"),
-    overlay: setting("overlay"),
-    button_style: setting("button_style"),
+    ...common,
+    variant: z.literal("split"),
+    eyebrow: optional(shopText(BANNER_EYEBROW_MAX)),
+    edge: step(BANNER_SPLIT_EDGES, "straight"),
   })
   .strict()
 
-export type BannerSection = z.infer<typeof banner>
+/** What a band read as each variant keeps (`storedSection`). */
+export const BANNER_BRANCHES: Readonly<Record<SectionVariant<"banner">, VariantBranch>> = {
+  standard,
+  split,
+}
+
+/** On the home, product and content pages. */
+export const banner = z.discriminatedUnion("variant", [standard, split], VARIANT_ERROR)
+
+/** On a category page: above or below its products. */
+export const placedBanner = z.discriminatedUnion(
+  "variant",
+  [standard.extend({ placement }), split.extend({ placement })],
+  VARIANT_ERROR
+)
+
+export type BannerSection = z.infer<typeof banner> | z.infer<typeof placedBanner>
 
 /** Every picture a band shows: each slide's, and a phone's own where it has one. */
 export const bannerImages = (section: BannerSection): string[] =>

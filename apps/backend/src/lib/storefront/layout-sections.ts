@@ -2,7 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { placement } from "./layout-fields"
 import type { ContentPageSection } from "./layout-pages"
 import { announcementBar } from "./sections/announcement-bar"
-import { banner } from "./sections/banner"
+import { banner, placedBanner } from "./sections/banner"
 import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
 import { counted } from "./sections/counted"
@@ -17,6 +17,7 @@ import { headerMarquee, marquee, placedMarquee } from "./sections/marquee"
 import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
 import { footerRichText, placedRichText, richText } from "./sections/rich-text"
+import { posts } from "./sections/posts"
 import { priceBands } from "./sections/price-bands"
 import { stats } from "./sections/stats"
 import { steps } from "./sections/steps"
@@ -56,7 +57,7 @@ export const pageSection = z.discriminatedUnion(
     products,
     featuredProduct,
     brands,
-    counted("posts", 6, 3),
+    posts,
     counted("reviews", 12, 6),
     googleRating,
     stats,
@@ -99,7 +100,7 @@ export const categorySection = z.discriminatedUnion(
   [
     categoryMain,
     placedRichText,
-    banner.extend({ placement }),
+    placedBanner,
     faq.extend({ placement }),
     placedTrustBadges,
     worded("help").extend({ placement }),

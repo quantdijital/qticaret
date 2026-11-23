@@ -45,6 +45,10 @@ export const SECTION_VARIANTS = {
   // The shop's own text (adr/0073 §3): today's pane first; `with_image` a picture beside it;
   // `article` a content page's own text (Ek 2026-11-19 (2) K2), the pages' only
   rich_text: ["pane", "with_image", "article"],
+  // adr/0077 Ek (Vadi): today's tiles first; `intro_panel` one panel, its words beside the cards
+  posts: ["grid", "intro_panel"],
+  // adr/0077 Ek (Vadi): today's band first; `split` the picture beside a panel on the ground
+  banner: ["standard", "split"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
