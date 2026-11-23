@@ -7,9 +7,10 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { dayOf } from "@qticaret/admin-ui/lib/days"
 import { planQuery } from "@/features/settings/api/plan"
 import { PaymentCard } from "@/features/settings/components/payment-card"
+import { PaymentsHistoryCard } from "@/features/settings/components/payments-history-card"
 import { PlanCard } from "@/features/settings/components/plan-card"
 import { UsageCard } from "@/features/settings/components/usage-card"
-import { countdownOf, planState } from "@/features/settings/subscription-rules"
+import { countdownOf, planState, trialProgress } from "@/features/settings/subscription-rules"
 import { errorText } from "@/lib/errors"
 
 // The usual five tiles as the loaded page lays them out: three totals, two monthly
@@ -72,8 +73,9 @@ function PageSkeleton() {
 /**
  * Settings > Abonelik (adr/0061 §5.6, Ek C14, C16), read only and at a
  * glance: the package card (name, status, amount due, its day and a
- * countdown ring), how to pay beside it, a tile per limit under them. A
- * shop without a control plane shows only the tiles, every one unlimited.
+ * countdown ring), how to pay beside it, a tile per limit under them, the
+ * payments to the platform last (Ek C20). A shop without a control plane
+ * shows only the tiles, every one unlimited.
  */
 export function SubscriptionPage() {
   const { t } = useTranslation()
@@ -98,6 +100,7 @@ export function SubscriptionPage() {
                   plan={plan.data}
                   state={planState(plan.data, today)}
                   countdown={countdownOf(planState(plan.data, today), plan.data.billing, today)}
+                  trial={trialProgress(plan.data.billing, today)}
                 />
               </PageColumn>
               <PageColumn span={4}>
@@ -106,6 +109,7 @@ export function SubscriptionPage() {
             </PageGrid>
           ) : null}
           <UsageCard plan={plan.data} />
+          {plan.data.managed ? <PaymentsHistoryCard today={today} /> : null}
         </div>
       )}
     </div>

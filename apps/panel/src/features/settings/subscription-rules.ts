@@ -1,4 +1,4 @@
-import type { BillingSummary, LimitStanding } from "@/features/settings/api/plan"
+import type { BillingSummary, LimitStanding, PaymentRecord } from "@/features/settings/api/plan"
 import { paymentStrip, shownLimits } from "@/features/settings/plan-rules"
 
 /**
@@ -113,16 +113,50 @@ export function countdownOf(
   return { kind: state === "trialing" ? "trial" : "due", days: due }
 }
 
+/** A billing period's length in days, for the ring: a month or a year. */
+export const periodDays = (period: BillingSummary["period"]): number =>
+  period === "yearly" ? 365 : 30
+
 /**
- * The ring's scale: a month of days. The plan document carries neither a
- * trial's length nor the billing interval, so the ring counts down within
- * a month instead of showing a share of a known whole; a late payment's
- * ring is full.
+ * The ring's scale without a known whole: a month of days. A trial with
+ * both its days known fills by the days used (`trialProgress`); a
+ * payment's ring counts down within the period (a month, or a year); a
+ * late payment's ring is full.
  */
 export const RING_DAYS = 30
 
-export const ringShare = (countdown: Countdown): number =>
-  countdown.kind === "overdue" ? 1 : Math.min(countdown.days, RING_DAYS) / RING_DAYS
+/** A trial's days used of its whole ("9 / 14"), when the document gives both its days. */
+export interface TrialProgress {
+  used: number
+  total: number
+}
+
+export function trialProgress(billing: BillingSummary | null, today: string): TrialProgress | null {
+  const start = billing?.trial_started_on
+  const end = billing?.trial_ends_on
+  if (!start || !end) {
+    return null
+  }
+  const total = daysUntil(end, start)
+  if (total <= 0) {
+    return null
+  }
+  return { used: Math.min(Math.max(daysUntil(today, start), 0), total), total }
+}
+
+export function ringShare(
+  countdown: Countdown,
+  options: { trial?: TrialProgress | null; period?: BillingSummary["period"] } = {}
+): number {
+  if (countdown.kind === "overdue") {
+    return 1
+  }
+  if (countdown.kind === "trial" && options.trial) {
+    return options.trial.used / options.trial.total
+  }
+  const whole = countdown.kind === "due" ? periodDays(options.period) : RING_DAYS
+  return Math.min(countdown.days, whole) / whole
+}
 
 /**
  * Where a usage tile sits on a 6-column grid (tablet up to `xl`): a
@@ -131,3 +165,27 @@ export const ringShare = (countdown: Countdown): number =>
  */
 export const tileSpan = (count: number): 2 | 3 | 6 =>
   count <= 1 ? 6 : count === 2 || count === 4 ? 3 : 2
+
+/** A payment's status as its row says it: an open one past its day is late. */
+export type PaymentState = "paid" | "waived" | "open" | "late"
+
+export const paymentStateOf = (record: PaymentRecord, today: string): PaymentState =>
+  record.status === "open" ? (record.due_on < today ? "late" : "open") : record.status
+
+/** The day a payment's row shows: when it was paid, else when it is (was) due. */
+export const paymentDayOf = (record: PaymentRecord): string =>
+  record.status === "paid" && record.paid_on ? record.paid_on : record.due_on
+
+/**
+ * A payment's period in words: its month for a monthly one ("Kasım 2026"),
+ * first and last month for a yearly one ("Kasım 2026 – Ekim 2027").
+ */
+export function paymentPeriodLabel(record: PaymentRecord): string {
+  const first = periodLabel(record.period_start.slice(0, 7))
+  if (record.period !== "yearly") {
+    return first
+  }
+  const lastDay = new Date(Date.parse(`${record.period_end}T00:00:00Z`) - 86_400_000)
+  const last = periodLabel(lastDay.toISOString().slice(0, 7))
+  return `${first} – ${last}`
+}
