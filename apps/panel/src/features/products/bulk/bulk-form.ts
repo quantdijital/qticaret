@@ -23,6 +23,8 @@ export interface BulkForm {
   categoryId: string
   seoTitle: boolean
   seoDescription: boolean
+  addonTemplateMode: "add" | "remove"
+  addonTemplateId: string
 }
 
 export const EMPTY_BULK_FORM: BulkForm = {
@@ -36,6 +38,8 @@ export const EMPTY_BULK_FORM: BulkForm = {
   categoryId: "",
   seoTitle: true,
   seoDescription: false,
+  addonTemplateMode: "add",
+  addonTemplateId: "",
 }
 
 const MAX_AMOUNT = 1_000_000_000
@@ -135,6 +139,16 @@ export function bulkChangeOf(action: BulkAction, form: BulkForm): BulkFormResult
       return { change: { action: "alt_text" } }
     case "cost":
       return costChange(form)
+    case "addon_template":
+      return form.addonTemplateId
+        ? {
+            change: {
+              action: "addon_template",
+              mode: form.addonTemplateMode,
+              template_id: form.addonTemplateId,
+            },
+          }
+        : { error: "products.bulk.errors.addonTemplate" }
   }
 }
 
