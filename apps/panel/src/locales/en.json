@@ -3605,6 +3605,19 @@
       "blockedIn_one": "Discount not struck through on {{count}} variant",
       "blockedIn_other": "Discount not struck through on {{count}} variants"
     },
+    "badges": {
+      "title": "Product badges",
+      "description": "A small badge at the top left of the product card's photo. A card shows one: the product's own, else Best seller, else New.",
+      "manual": "The product's own badge",
+      "manualHint": "The short text you write on the product's page (e.g. \"Limited\").",
+      "bestSeller": "Best seller",
+      "bestSellerHint": "On products sold at least this many times in the last 30 days.",
+      "bestSellerMin": "Units sold (30 days)",
+      "new": "New",
+      "newHint": "On products added within this many days.",
+      "newDays": "Days",
+      "numberInvalid": "Enter a valid number."
+    },
     "catalog": {
       "card": "Catalog details",
       "hint": "Used in search results and product feeds.",
@@ -3629,6 +3642,8 @@
       "withdrawalExcludedHint": "On a physical product it is the sealed-goods warning (MSY art. 15/1-ç): the return can be requested, and one that arrives with its protective seal opened is refused at receipt. A digital product or a service stays outside the right outright (art. 15/1-ğ, h). For a made-to-order good (art. 15/1-b), mark its add-on \"Outside the right of withdrawal\".",
       "giftCard": "Gift card",
       "giftCardHint": "Its variants are the card's amounts. Once paid, a card is issued for each unit and e-mailed to the recipient. The product becomes digital, with no shipping; turning off stock tracking on its variants is recommended.",
+      "badge": "Product badge",
+      "badgeHint": "Shown on the card's photo, e.g. \"Limited\". {{max}} characters at most; leave empty for none.",
       "giftCardFeatures": "Go to features",
       "kindGiftCard": "A gift card is a digital product; its kind cannot change."
     },

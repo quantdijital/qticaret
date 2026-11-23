@@ -9,10 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { Restriction } from "@/features/categories/api/restrictions"
 import { RestrictionSelect } from "@/features/categories/components/restriction-select"
 import { PRODUCT_CONDITIONS, PRODUCT_KINDS } from "@/features/products/api/product-edit"
+import { PRODUCT_BADGE_MAX } from "@/features/settings/api/product-badges"
 import type {
   ProductCatalog,
   ProductCondition,
@@ -33,6 +35,8 @@ export interface CatalogValues {
   is_gift_card: boolean
   /** Sold by departure (`booking_mode: departure`, adr/0076 §2). */
   booking: boolean
+  /** Its own card badge; empty: none. */
+  badge: string
 }
 
 /** Which of the fields the shop uses (feature flags), or this product already has. */
@@ -42,6 +46,8 @@ export interface CatalogShown {
   giftCard: boolean
   /** Dated sale: the flag on, or this product already dated. */
   booking: boolean
+  /** Its own badge: the shop has them on, or this product already has one. */
+  badge: boolean
 }
 
 /**
@@ -185,6 +191,15 @@ export function CatalogFields({
             />
           )}
         />
+      ) : null}
+      {shown.badge ? (
+        <Field
+          label={t("products.catalog.badge")}
+          htmlFor="catalog-badge"
+          hint={t("products.catalog.badgeHint", { max: PRODUCT_BADGE_MAX })}
+        >
+          <Input id="catalog-badge" maxLength={PRODUCT_BADGE_MAX} {...form.register("badge")} />
+        </Field>
       ) : null}
       <div className="flex items-start justify-between gap-4 border-t pt-4">
         <div className="flex min-w-0 flex-col gap-0.5">

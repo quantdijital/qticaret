@@ -28,6 +28,8 @@ export interface ProductCatalog {
   is_gift_card: boolean
   /** Sold by departure (adr/0076 §2); absent from an older backend: none. */
   booking_mode?: BookingMode
+  /** Its own card badge ("Sınırlı"), shown while the shop has them on; absent from an older backend: none. */
+  badge?: string | null
   /** Paid or free add-ons a shopper picks beside the variant (adr/0052), in the shop's order. */
   addons: ProductAddon[]
   /** Add-on templates it reaches, live (adr/0052 Ek 2026-11-23); absent from an older backend: none. */
@@ -78,6 +80,8 @@ export function useSaveCatalog(id: string) {
       is_gift_card?: boolean
       /** Dated sale on or off; another kind needs `none` in the same save (adr/0076 Ek). */
       booking_mode?: "none" | "departure"
+      /** Its own card badge; null or empty clears it (the server cuts and checks it). */
+      badge?: string | null
       /** The whole list, ids kept; null clears it. */
       addons?: AddonInput[] | null
       /** The description as a document; the server writes its plain text too (ADR-0055). */
