@@ -23,6 +23,7 @@ import type { StoreStatsSection } from "./section-stats.js"
 import type { StoreStepsSection } from "./section-steps.js"
 import type { StoreNewsletterSection } from "./section-newsletter.js"
 import type { StoreRichTextSection } from "./section-rich-text.js"
+import type { StorePostsSection } from "./section-posts.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
 import type { ScrollerSettings, SliderSettings } from "./section-scroller.js"
@@ -115,7 +116,8 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | StoreProductsSection
     | StoreFeaturedProductSection
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
-    | { id: string; type: "posts" | "reviews"; title: string | null; limit: number }
+    | StorePostsSection
+    | { id: string; type: "reviews"; title: string | null; limit: number }
     | StoreGoogleRatingSection
     | StoreRichTextSection
     | {

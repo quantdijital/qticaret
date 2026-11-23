@@ -1,4 +1,5 @@
 import type { StoreLayoutImage, StoreLayoutLink } from "./layout.js"
+import type { BannerVariant } from "./section-variants.js"
 
 /**
  * The picture band's settings, `banner` (adr/0049 Ek 2026-11-14 §3.3 E2):
@@ -75,13 +76,39 @@ export const bannerToneOf = (tone: unknown): BannerTone => (tone === "dark" ? "d
 export type BannerSettings = { [S in BannerSetting]: BannerStep<S> }
 
 /**
+ * The split band's own (adr/0077 Ek, `split`, "Bölünmüş bant"): how the
+ * picture's inner edge meets the panel, `straight` (the default) or
+ * `curved`, a soft bow into the panel ("Geçiş: Düz / Yuvarlak"); an upper
+ * line above the heading. The slides, their words and buttons and the
+ * band's width and height are every variant's and stay across a switch;
+ * the split draws the first slide only. Mirrored by the backend.
+ */
+export const BANNER_SPLIT_EDGES = ["straight", "curved"] as const
+
+export type BannerSplitEdge = (typeof BANNER_SPLIT_EDGES)[number]
+
+/** The upper line's length (the hero's own, `section-catalog`). */
+export const BANNER_EYEBROW_MAX = 40
+
+/** The edge as a reader takes it: absent or off the list, `straight`. */
+export const bannerSplitEdgeOf = (value: unknown): BannerSplitEdge =>
+  BANNER_SPLIT_EDGES.find((each) => each === value) ?? "straight"
+
+/**
  * The band as the storefront reads it. The settings may be absent (a
  * backend from before them): read with `bannerStepOf` and `bannerToneOf`.
+ * `variant` and the split's own only off the default (a `standard` band
+ * prints as before variants); read the variant with `variantOf`.
  */
 export interface StoreBannerSection extends Partial<BannerSettings> {
   id: string
   type: "banner"
   slides: StoreBannerSlide[]
+  variant?: BannerVariant
+  /** `split`: the line above the heading; null or absent: none. */
+  eyebrow?: string | null
+  /** `split`: the picture's inner edge; absent: `straight`. */
+  edge?: BannerSplitEdge
 }
 
 export interface StoreBannerSlide {

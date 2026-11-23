@@ -95,6 +95,25 @@ export const SECTION_VARIANTS = {
    * `section-rich-text`.
    */
   rich_text: ["pane", "with_image", "article"],
+  /**
+   * The shop's newest posts (adr/0077 Ek, "Vadi"): `grid`, today's three
+   * tiles under the heading; `intro_panel` ("Tanıtım paneli"), one rounded
+   * panel on the section's ground (a light tint unless the shop set one),
+   * an upper line, the heading, a short intro and a button on one side,
+   * two or three post cards (cover, title, reading time or date) on the
+   * other, stacked on a phone. Fields by variant: `section-posts`.
+   */
+  posts: ["grid", "intro_panel"],
+  /**
+   * The picture band (adr/0077 Ek, "Vadi"): `standard`, today's slides
+   * with their words over the pictures; `split` ("Bölünmüş bant"), the
+   * first slide's picture on one side, its inner edge straight or curved
+   * (`edge`), beside a panel on the section's ground (the dark stage
+   * unless the shop set one) holding an upper line, the heading, the
+   * line and the buttons; the picture on top on a phone. Fields by
+   * variant: `section-banner`.
+   */
+  banner: ["standard", "split"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
@@ -225,6 +244,8 @@ export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type NewsletterVariant = SectionVariant<"newsletter">
 export type RichTextVariant = SectionVariant<"rich_text">
+export type PostsVariant = SectionVariant<"posts">
+export type BannerVariant = SectionVariant<"banner">
 export type ProductMainVariant = SectionVariant<"product_main">
 export type CategoryMainVariant = SectionVariant<"category_main">
 
