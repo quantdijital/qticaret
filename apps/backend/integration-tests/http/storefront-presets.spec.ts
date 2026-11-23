@@ -218,11 +218,21 @@ medusaIntegrationTestRunner({
         dropped: expect.any(Array) as unknown,
         // Katalog writes no footer: the shop's stays, and the answer says so
         kept: ownFooter.map((section) => `footer.${section.id}`),
-        images: { added: 0, kept: 0 },
+        // Hakkımızda's picture, the page opened for the look (adr/0073 Ek 2026-11-19 (2) K6)
+        images: { added: 1, kept: 0 },
         demo: { added: 0, kept: 0 },
+        // The shop had no Hakkımızda: opened as a draft, with the look's own text
+        made_pages: [
+          {
+            ref: "page:hakkimizda",
+            page_id: expect.stringMatching(/^cnt_/) as unknown,
+            name: "Hakkımızda",
+          },
+        ],
+        texts_kept: [],
         // The shop's own draft kept first (adr/0064 Ek 2026-11-17)
         auto_saved: { id: expect.stringMatching(/^sfd_/) as unknown, kind: "auto", name: null },
-        // No content page laid out, none deleted (adr/0073 §1)
+        // No content page deleted (adr/0073 §1)
         dropped_pages: 0,
       })
       expect(ownFooter.length).toBeGreaterThan(0)

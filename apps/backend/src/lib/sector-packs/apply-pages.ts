@@ -2,7 +2,7 @@ import { packItemKey } from "@qticaret/sector-packs"
 import type { SectorPack } from "@qticaret/sector-packs"
 import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
-import { importPage } from "../../workflows/migration/content-page"
+import { openDraftPage } from "../../workflows/content/draft-page"
 import { contentDoc, docStats } from "../content"
 import { isCleanText } from "../security/text"
 import { unknownDocTokens } from "../shop/tokens"
@@ -37,12 +37,6 @@ export function pageProblems(pack: Pick<SectorPack, "pages">): string[] {
   })
 }
 
-// A workflow rejects with its error serialized (no Error instance): read by its message
-const pathTaken = (error: unknown): boolean => {
-  const message = (error as { message?: unknown } | null)?.message
-  return typeof message === "string" && message.includes("seo.path_taken")
-}
-
 /**
  * The pack's content pages (adr/0076 §12), each made as a **draft** the
  * way an import makes a page (adr/0073 Ek 2026-11-19 (2) K4: a page's
@@ -67,26 +61,12 @@ export async function applyPages(context: ApplyContext): Promise<void> {
       await context.record({ key, kind: "page", outcome: "kept", record_id: existing.id })
       continue
     }
-    let made: string | null = null
-    try {
-      made = await importPage(
-        context.container,
-        {
-          title: page.title,
-          handle: page.handle,
-          status: "draft",
-          excerpt: null,
-          author_name: null,
-          image_url: null,
-          image_alt: null,
-        },
-        page.body
-      )
-    } catch (error) {
-      if (!pathTaken(error)) {
-        throw error
-      }
-    }
+    // A draft with its text, as an import writes it; an address another record holds: none
+    const made = await openDraftPage(
+      context.container,
+      { title: page.title, handle: page.handle },
+      page.body
+    )
     await context.record({
       key,
       kind: "page",

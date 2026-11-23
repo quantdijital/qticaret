@@ -117,9 +117,9 @@ describe("a preset's folder", () => {
       page_id: { $handle: "page:hakkimizda" },
       name: "Hakkımızda",
       sections: [
+        section("metin01", { type: "rich_text", variant: "article" }),
         section("hikaye01", {
           type: "rich_text",
-          placement: "bottom",
           image: { $image: "images/hero.webp", alt: "Atölye" },
         }),
       ],
@@ -141,10 +141,22 @@ describe("a preset's folder", () => {
   it.each([
     ["a page by its id", { page_id: "cnt_01JABCDEFGHJKMNPQRSTVWXYZ0" }, "pages.0.page_id"],
     ["a page of another kind", { page_id: { $handle: "category:av" } }, "pages.0.page_id"],
+    ["a product's handle as a page", { page_id: { $handle: "product:a" } }, "pages.0.page_id"],
+    [
+      "a page handle that is no slug",
+      { page_id: { $handle: "page:Hakkımızda" } },
+      "pages.0.page_id",
+    ],
     ["a page with no section", { sections: [] }, "pages.0.sections"],
     ["a field the page does not have", { title: "Hakkımızda" }, "pages.0"],
     ["a name that is no plain text", { name: "Hakkımızda\u0007" }, "pages.0.name"],
     ["a section id a group has", { sections: [section("girisbolumu")] }, "girisbolumu twice"],
+    // One list since adr/0073 Ek 2026-11-19 (2) K1: no section stands above or below a text apart
+    [
+      "a section placed above or below the page's text",
+      { sections: [section("sayfa01", { placement: "bottom" })] },
+      "pages.0.sections.0",
+    ],
   ])("refuses %s", (_what, fields, message) => {
     const page = { page_id: { $handle: "page:hakkimizda" }, sections: [section("sayfa01")] }
     refused(

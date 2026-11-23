@@ -134,17 +134,3 @@ export function legacyTextAt(stored: unknown): Record<string, number> {
   }
   return readStoredPages(stored["pages"], []).text_at
 }
-
-/**
- * Pages written before their text was a section (a preset's `layout.json`
- * until it is rewritten, adr/0073 Ek 2026-11-19 (2) K9) as one list:
- * the sections above the text first, `placement` gone, as a stored
- * design reads (`readStoredPages`). Anything else as it is, for the
- * schema to judge.
- */
-export const unplacedPages = (pages: readonly unknown[]): unknown[] =>
-  pages.map((page) =>
-    isPlainObject(page) && Array.isArray(page["sections"])
-      ? { ...page, sections: inDrawnOrder(page["sections"]).sections.map(unplaced) }
-      : page
-  )

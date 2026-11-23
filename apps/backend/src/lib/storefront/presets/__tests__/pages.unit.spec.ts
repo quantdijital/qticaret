@@ -46,7 +46,7 @@ describe("a preset's content page layouts (adr/0073 §4)", () => {
     expect(resolved.dropped).toEqual([])
   })
 
-  it("leaves out a page the shop has not made, naming it; the preset makes no page", () => {
+  it("leaves out a page the shop has not made and the apply did not open, naming it", () => {
     const resolved = resolvePreset(
       {
         home: [help("anayardim1")],
@@ -68,6 +68,37 @@ describe("a preset's content page layouts (adr/0073 §4)", () => {
     ])
     // The page is not a section: nothing is named dropped
     expect(resolved.dropped).toEqual([])
+  })
+
+  it("never lays out another kind's record as a page (security review S9)", () => {
+    const resolved = resolvePreset(
+      {
+        pages: [page("hakkimizda", [help("hkyardim01")])].map((each) => ({
+          ...each,
+          page_id: { $handle: "category:cakilar" },
+        })),
+      },
+      null,
+      lookups([["category:cakilar", "pcat_01KCAKILAR00000000000000"]])
+    )
+
+    expect(resolved.pages).toEqual([])
+    expect(resolved.skipped).toEqual([
+      { where: "pages", ref: "category:cakilar", reason: "missing" },
+    ])
+  })
+
+  it("names a page whose address another record held, so no draft was opened (Ek 2026-11-19 (2) K6)", () => {
+    const resolved = resolvePreset(
+      { pages: [page("hakkimizda", [help("hkyardim01")], "Hakkımızda")] },
+      null,
+      { ...lookups([]), taken: new Set(["page:hakkimizda"]) }
+    )
+
+    expect(resolved.pages).toEqual([])
+    expect(resolved.skipped).toEqual([
+      { where: "pages", ref: "page:hakkimizda", name: "Hakkımızda", reason: "taken" },
+    ])
   })
 
   it("leaves out a page the design has no room for, keeping the rest of the look (warn, don't block)", () => {
@@ -170,7 +201,8 @@ describe("a preset's content page layouts (adr/0073 §4)", () => {
 })
 
 describe("the shop's content page layouts under a preset (adr/0073 §4)", () => {
-  const shopContact = { page_id: CONTACT, sections: [help("iletisim01", { placement: "top" })] }
+  // As the draft is read (`storedDocument`): one list, an older `placement` read away (K1)
+  const shopContact = { page_id: CONTACT, sections: [help("iletisim01")] }
   const shopAbout = { page_id: ABOUT, sections: [help("eskiyardim")] }
 
   it("replaces a page the preset lays out and keeps every other, naming them", () => {
@@ -223,8 +255,6 @@ describe("the shop's content page layouts under a preset (adr/0073 §4)", () => 
       [CONTACT, ["iletisim01"]],
       [ABOUT, ["hkyardim01"]],
     ])
-    // One list since Ek 2026-11-19 (2) K1: an older place is read away, as a stored design's
-    expect(doc.pages.flatMap((each) => each.sections).some((s) => "placement" in s)).toBe(false)
   })
 
   it("writes nothing for a page section the editor's schema refuses (the page's own types)", () => {

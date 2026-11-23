@@ -1,30 +1,29 @@
-import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { SectorPackError, sectorPack, storefrontPreset } from "@qticaret/sector-packs"
 import type { PresetMenu } from "@qticaret/sector-packs"
 import { ValidationError } from "../../lib/errors"
 import { withDesignMark } from "./design-shared"
-import { shopSettingsOf } from "./design-steps"
 import { legacySettings } from "./layout-shared"
-import { layoutDocument, storedDocument } from "../../lib/storefront/layout"
-import type { LayoutDocument } from "../../lib/storefront/layout"
 import {
   presetDocument,
   presetTheme,
   withShopFrame,
   withShopPages,
 } from "../../lib/storefront/presets/document"
-import type { ShopFrame } from "../../lib/storefront/presets/document"
+import { withShopTexts } from "../../lib/storefront/presets/page-texts"
+import type { PageTextSource } from "../../lib/storefront/page-text"
 import { presetMarkers, resolvePreset } from "../../lib/storefront/presets/resolve"
-import type { PresetLink, SkippedRef } from "../../lib/storefront/presets/resolve"
+import type { PresetLink } from "../../lib/storefront/presets/resolve"
 import type { ThemeSettings } from "../../modules/platform-settings/sections"
 import { SECTOR_PACKS_MODULE } from "../../modules/sector-packs"
 import type SectorPacksModuleService from "../../modules/sector-packs/service"
-import { defaultLayout } from "./layout-default"
-import { layoutRow } from "./layout-row"
-import { liveMenus, presetLookups } from "./preset-lookups"
+import { keptSettings } from "./preset-kept"
+import type { KeptSettings } from "./preset-kept"
+import { presetLookups } from "./preset-lookups"
 import { sectionTypesOff } from "./layout-flags"
+import { placeholderOf, presetPageRefs, shopTextSources } from "./preset-pages"
+import type { KeptText, MadePage, OpenedPages, PageToOpen } from "./preset-pages"
 
 /** The pack every shop has its presets from, applied or not (adr/0063 §7). */
 export const GENERAL_PACK = "general"
@@ -69,46 +68,17 @@ export interface PresetResolution {
   types_off: Record<string, string>
   /** The images the resolved design still shows. */
   images: string[]
+  /**
+   * The pages the preset lays out that the shop has not made, to be opened
+   * as drafts (adr/0073 Ek 2026-11-19 (2) K6): each by its handle and the
+   * look's name for it, its title. Only the ones the design has room for.
+   */
+  open_pages: PageToOpen[]
 }
 
 /** Images checked before they are uploaded: any path on the shop passes the schema. */
 const placeholders = (paths: Iterable<string>): Map<string, string> =>
   new Map([...paths].map((path) => [path, `/${path}`]))
-
-/**
- * The draft's header and footer as the editor shows them (the default
- * design's before the first save): kept where the preset leaves the group
- * empty (`withShopFrame`); with its content pages' layouts, kept on every
- * page the preset does not lay out (`withShopPages`). A draft today's
- * schema no longer reads keeps none.
- */
-async function shopFrame(
-  container: MedusaContainer,
-  row: Awaited<ReturnType<typeof layoutRow>>
-): Promise<ShopFrame & { pages: LayoutDocument["pages"] }> {
-  if (!row) {
-    const { header, footer } = await defaultLayout(container)
-    return { header, footer, pages: [] }
-  }
-  const parsed = layoutDocument.safeParse(storedDocument(row.draft))
-  return parsed.success
-    ? { header: parsed.data.header, footer: parsed.data.footer, pages: parsed.data.pages }
-    : { header: [], footer: [], pages: [] }
-}
-
-/**
- * The draft's own parts a preset keeps: the trust badges, colour swatches
- * and "Az kaldı"; the shop's header and footer where the preset leaves
- * them empty (`withShopFrame`); with the shop's live menus, kept where the
- * preset leaves a place (`resolveMenus`). Read for the draft it writes
- * under the design's lock (`composePresetDraftStep`), so an editor's save
- * just before is kept.
- */
-async function keptSettings(container: MedusaContainer) {
-  const [row, live] = await Promise.all([layoutRow(container), liveMenus(container)])
-  const frame = await shopFrame(container, row)
-  return { settings: shopSettingsOf(row?.draft ?? null), live, frame }
-}
 
 /**
  * The preset read and its theme checked (adr/0063 §4.1): a preset this
@@ -157,19 +127,18 @@ export const loadPresetStep = createStep(
   }
 )
 
+/** The pages' ids the preset lays out with these records (opened pages' placeholders included). */
+const laidOutIds = (preset: LoadedPreset, records: Record<string, string>): string[] =>
+  presetPageRefs(preset.layout).flatMap(({ ref }) => (records[ref] ? [records[ref]] : []))
+
 /** The draft the preset makes with these lookups and image addresses (`presetDocument`). */
 function documentOf(
   preset: LoadedPreset,
-  resolution: Omit<PresetResolution, "images">,
+  resolution: Omit<PresetResolution, "images" | "open_pages"> & { taken?: string[] },
   images: Map<string, string>,
-  kept: Awaited<ReturnType<typeof keptSettings>>
-): {
-  document: LayoutDocument
-  skipped: SkippedRef[]
-  dropped: string[]
-  kept: string[]
-  images: string[]
-} {
+  kept: KeptSettings,
+  sources: ReadonlyMap<string, PageTextSource>
+) {
   const resolved = resolvePreset(preset.layout, preset.menus, {
     records: new Map(Object.entries(resolution.records)),
     links: new Map(Object.entries(resolution.links)),
@@ -177,20 +146,32 @@ function documentOf(
     live: kept.live,
     laid_out: kept.frame.pages.map((page) => page.page_id),
     types_off: new Map(Object.entries(resolution.types_off)),
+    taken: new Set(resolution.taken ?? []),
   })
   const frame = withShopFrame(resolved.groups, kept.frame)
-  const pages = withShopPages(resolved.pages, kept.frame.pages)
+  // The shop's own page text kept on the pages the look lays out (adr/0073 Ek 2026-11-19 (2) K6)
+  const named = new Set(resolved.pages.map((page) => page.page_id))
+  const others = kept.frame.pages.filter((page) => !named.has(page.page_id))
+  const texts = withShopTexts(resolved.pages, kept.frame.pages, sources, [frame.groups, others])
+  const pages = withShopPages(texts.pages, kept.frame.pages)
   const document = presetDocument(
     { groups: frame.groups, menus: resolved.menus, pages: pages.pages },
     preset.theme,
     { pack: preset.pack, code: preset.code, version: preset.version },
     kept.settings
   )
+  const refs = presetPageRefs(preset.layout)
+  const textsKept: KeptText[] = refs.flatMap(({ ref, name }) => {
+    const id = resolution.records[ref]
+    return id && texts.kept.includes(id) ? [{ ref, ...(name === null ? {} : { name }) }] : []
+  })
   return {
     document,
     skipped: resolved.skipped,
-    dropped: resolved.dropped,
+    dropped: [...resolved.dropped, ...texts.dropped],
     kept: [...frame.kept, ...pages.kept],
+    texts_kept: textsKept,
+    carried: texts.carried,
     images: resolved.images,
   }
 }
@@ -198,59 +179,100 @@ function documentOf(
 /**
  * Every `$handle` and `$href` looked up (adr/0063 §4.4) and the resolved
  * design held to the editor's schema before anything is uploaded or
- * written: a preset the schema refuses writes nothing. Reads only.
+ * written: a preset the schema refuses writes nothing. A page the preset
+ * lays out and the shop has not made is held to it under a stand-in id;
+ * the ones the design has room for are to be opened as drafts
+ * (`open_pages`, adr/0073 Ek 2026-11-19 (2) K6). Reads only.
  */
 export const resolvePresetStep = createStep(
   "storefront-preset-resolve",
   async (preset: LoadedPreset, { container }) => {
     const markers = presetMarkers({ layout: preset.layout, menus: preset.menus })
-    const [lookups, off] = await Promise.all([
+    const [lookups, off, kept] = await Promise.all([
       presetLookups(container, markers, placeholders(markers.images)),
       sectionTypesOff(container),
+      keptSettings(container),
     ])
     const resolution = {
       records: Object.fromEntries(lookups.records),
       links: Object.fromEntries(lookups.links),
       types_off: Object.fromEntries(off),
     }
+    // A page with no name of the look's has no title to be opened with: left out, `missing`
+    const toOpen = presetPageRefs(preset.layout).flatMap(({ ref, name }) =>
+      lookups.records.has(ref) || name === null ? [] : [{ ref, title: name }]
+    )
+    const records = { ...resolution.records }
+    toOpen.forEach((page, index) => {
+      records[page.ref] = placeholderOf(index)
+    })
+    const sources = await shopTextSources(container, laidOutIds(preset, records), kept.frame.pages)
     const checked = documentOf(
       preset,
-      resolution,
+      { ...resolution, records },
       new Map(lookups.images),
-      await keptSettings(container)
+      kept,
+      sources
     )
-    const out: PresetResolution = { ...resolution, images: checked.images }
+    const placed = new Set(checked.document.pages.map((page) => page.page_id))
+    const out: PresetResolution = {
+      ...resolution,
+      images: checked.images,
+      open_pages: toOpen.flatMap((page, index) =>
+        placed.has(placeholderOf(index))
+          ? [{ ...page, handle: page.ref.slice(page.ref.indexOf(":") + 1) }]
+          : []
+      ),
+    }
     return new StepResponse(out)
   }
 )
 
 /**
  * The draft the preset makes, its images now the library's (adr/0063
- * §4.5); with what was left out and the shop's sections kept, for the panel to say. Reads only, run
- * under the design's lock: the draft is written next (`saveDraftSteps`),
- * the shop's kept settings as they are at that moment. Labelled as a
- * ready-made look's (`settings.design`, adr/0064 Ek 2026-11-17 §2), so the
- * gallery tells it apart once edited.
+ * §4.5), on the pages opened for it (`openPresetPagesStep`); with what was
+ * left out, the shop's sections and page texts kept, and the pages opened,
+ * for the panel to say. Reads only, run under the design's lock: the
+ * draft is written next (`saveDraftSteps`, the kept texts `carried`: the
+ * shop's own, not the apply's new work), the shop's kept settings as they
+ * are at that moment. Labelled as a ready-made look's (`settings.design`,
+ * adr/0064 Ek 2026-11-17 §2), so the gallery tells it apart once edited.
  */
 export const composePresetDraftStep = createStep(
   "storefront-preset-compose",
   async (
-    input: { preset: LoadedPreset; resolution: PresetResolution; images: Record<string, string> },
+    input: {
+      preset: LoadedPreset
+      resolution: PresetResolution
+      images: Record<string, string>
+      opened: OpenedPages
+    },
     { container }
   ) => {
     const [kept, legacy] = await Promise.all([keptSettings(container), legacySettings(container)])
+    const records = { ...input.resolution.records, ...input.opened.records }
+    const sources = await shopTextSources(
+      container,
+      laidOutIds(input.preset, records),
+      kept.frame.pages
+    )
     const made = documentOf(
       input.preset,
-      input.resolution,
+      { ...input.resolution, records, taken: input.opened.taken },
       new Map(Object.entries(input.images)),
-      kept
+      kept,
+      sources
     )
     const document = withDesignMark(made.document, null, legacy)
+    const madePages: MadePage[] = input.opened.made
     return new StepResponse({
       document,
       skipped: made.skipped,
       dropped: made.dropped,
       kept: made.kept,
+      texts_kept: made.texts_kept,
+      carried: made.carried,
+      made_pages: madePages,
     })
   }
 )
