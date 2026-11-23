@@ -2,6 +2,8 @@ import {
   CATEGORY_CARD_DEFAULTS,
   CATEGORY_COLLAGE_DEFAULTS,
   CATEGORY_PANELS_DEFAULTS,
+  CATEGORY_ICONS_DEFAULTS,
+  TRUST_CARD_DEFAULTS,
   FOOTER_COLUMNS_DEFAULTS,
   FOOTER_ROWS_DEFAULTS,
   FOOTER_ROWS_START,
@@ -51,7 +53,8 @@ export type VariantSection = Extract<AnySection, { type: VariantSectionType }>
 export const VARIANT_FIELDS: {
   readonly [T in VariantSectionType]: Readonly<Record<SectionVariant<T>, Readonly<object>>>
 } = {
-  trust_badges: { strip: {}, lined: {} },
+  // The card starts unlifted (adr/0077 §10 Ek)
+  trust_badges: { strip: {}, lined: {}, card: TRUST_CARD_DEFAULTS },
   // H17's own fields as a switched opening starts them: the top categories with counts
   hero: {
     standard: {},
@@ -71,6 +74,8 @@ export const VARIANT_FIELDS: {
     linked: CATEGORY_CARD_DEFAULTS,
     collage: CATEGORY_COLLAGE_DEFAULTS,
     panels: CATEGORY_PANELS_DEFAULTS,
+    // The icon row starts with no icon picked: each disc its picture or initial
+    icons: { ...CATEGORY_ICONS_DEFAULTS, category_icons: {} },
   },
   // A rail's own by variant (Ek 2026-11-15): a columns rail starts one more list, the newest
   products: {
@@ -93,6 +98,8 @@ export const VARIANT_FIELDS: {
     stage_list: { stage_count: SHELF_LIMITS.stage_list.default, ...SHELF_STAGE_DEFAULTS },
   },
   // The related products as a rail's grid or carousel (bilesen-denetimi (b) 7)
+  // adr/0077 §10: the reviews as today's grid, or a carousel with the scroller kit's defaults
+  reviews: { grid: {}, carousel: { scroller: SCROLLER_DEFAULTS } },
   related_products: {
     grid: { columns: 3, columns_mobile: SHELF_PHONE_DEFAULT },
     carousel: { scroller: SCROLLER_DEFAULTS },

@@ -8733,12 +8733,17 @@
         "search_box": {
           "name": "Arama kutusu",
           "description": "Mağazanın arama kutusu, isterseniz başlık ve kısa girişle. Alanları Tema › Arama kutusu'ndan seçilir."
+        },
+        "photo_collage": {
+          "name": "Fotoğraf kolajı",
+          "description": "3–7 fotoğraf bir arada: ilki büyük ya da hepsi eşit; isterseniz başlık, giriş ve her fotoğrafa kısa yazı ile bağlantı."
         }
       },
       "variants": {
         "trust_badges": {
           "strip": "Şerit",
-          "lined": "Çizgili kutular"
+          "lined": "Çizgili kutular",
+          "card": "Yüzen kart"
         },
         "header_bar": {
           "standard": "Solda logo",
@@ -8776,7 +8781,8 @@
           "tiles": "Görselli karo",
           "linked": "Alt kategorili kart",
           "collage": "Fotoğraflı kolaj",
-          "panels": "Fotoğraf panoları"
+          "panels": "Fotoğraf panoları",
+          "icons": "İkonlu sıra"
         },
         "related_products": {
           "grid": "Izgara",
@@ -8793,6 +8799,10 @@
           "pane": "Yalnız metin",
           "with_image": "Görselli metin",
           "article": "Sayfa metni"
+        },
+        "reviews": {
+          "grid": "Izgara",
+          "carousel": "Kaydırıcı"
         }
       },
       "look": {
@@ -10847,6 +10857,12 @@
           "label": "Ayırıcı çizgileri göster",
           "term": "divider",
           "hint": "Rakamların arasında ince çizgi; kapalıyken yalnız boşluk."
+        },
+        "iconOf": "Rakam {{number}} ikonu",
+        "icons": {
+          "label": "İkon göster",
+          "term": "icon",
+          "hint": "Her rakamın üstünde seçtiğiniz ikon; ikon seçilmeyen rakam ikonsuz görünür."
         }
       },
       "steps": {
@@ -10878,6 +10894,93 @@
       "searchBox": {
         "titleHint": "Boş bırakılırsa kutu başlıksız görünür.",
         "intro": "Giriş"
+      },
+      "trustCard": {
+        "lift": {
+          "label": "Üstteki bölüme taşsın",
+          "term": "overlap",
+          "hint": "Kutu bir önceki bölümün (çoğunlukla kapak görseli) alt kenarına biner. Sayfanın ilk bölümüyse taşmaz."
+        }
+      },
+      "categoryIcons": {
+        "icons": "Kategori ikonları",
+        "iconsHint": "İkon seçmediğiniz kategoride kategorinin görseli, o da yoksa adının baş harfi görünür.",
+        "iconsEmpty": "Kategori seçince her birine ikon verebilirsiniz; seçmezseniz ana kategoriler görselleri ya da baş harfleriyle görünür.",
+        "iconOf": "{{name}} ikonu",
+        "noIcon": "Görseli ya da baş harfi",
+        "disc": {
+          "label": "Daire zemini",
+          "term": "background",
+          "hint": "İkonun durduğu yuvarlağın görünüşü.",
+          "tint": "Ana rengin açık tonu",
+          "well": "Açık gri",
+          "line": "Çizgi"
+        },
+        "phone": {
+          "label": "Telefonda",
+          "term": "mobile",
+          "hint": "Dar ekranda sığmayan kategoriler yana kayar ya da alt satıra iner.",
+          "scroll": "Yana kaydır",
+          "wrap": "Alt satıra geç"
+        }
+      },
+      "icons": {
+        "none": "İkonsuz",
+        "truck": "Kargo",
+        "clock": "Saat",
+        "shield": "Güvenlik",
+        "card": "Kart",
+        "refresh": "İade ve değişim",
+        "award": "Ödül",
+        "gift": "Hediye",
+        "phone": "Telefon",
+        "compass": "Pusula",
+        "map_pin": "Konum",
+        "plane": "Uçak",
+        "mountain": "Dağ",
+        "palm": "Palmiye",
+        "leaf": "Yaprak",
+        "sun": "Güneş",
+        "landmark": "Tarihi yapı",
+        "house": "Ev",
+        "heart": "Kalp",
+        "users": "İnsanlar",
+        "star": "Yıldız",
+        "sparkles": "Parıltı",
+        "camera": "Fotoğraf makinesi",
+        "calendar": "Takvim",
+        "tag": "Etiket",
+        "package": "Paket",
+        "headset": "Destek",
+        "utensils": "Yemek",
+        "gem": "Mücevher"
+      },
+      "photoCollage": {
+        "titleHint": "Boş bırakılırsa fotoğraflar başlıksız görünür.",
+        "intro": "Giriş",
+        "items": "Fotoğraflar",
+        "item": "Fotoğraf {{number}}",
+        "image": "Fotoğraf {{number}}",
+        "imageHint": "Medya kütüphanesinden; açıklaması (alt metin) zorunlu.",
+        "caption": "Fotoğraf {{number}} yazısı",
+        "link": "Fotoğraf {{number}} bağlantısı",
+        "linkTerm": "link",
+        "add": "Fotoğraf ekle",
+        "hint": "En az {{min}}, en çok {{max}} fotoğraf.",
+        "layout": {
+          "label": "Düzen",
+          "term": "layout",
+          "hint": "Geniş ekranda fotoğrafların dizilişi.",
+          "asymmetric": "Asimetrik",
+          "even": "Eşit ızgara"
+        },
+        "phone": {
+          "label": "Telefonda",
+          "term": "mobile",
+          "hint": "Dar ekranda fotoğraflar yana mı kayar, alt alta mı dizilir.",
+          "scroll": "Yana kaydır",
+          "stack": "Alt alta"
+        }
       }
     },
     "maintenance": {

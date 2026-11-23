@@ -1,4 +1,4 @@
-import type { StatsSettings, StepsSettings } from "@qticaret/types"
+import type { SectionIcon, StatsSettings, StepsSettings } from "@qticaret/types"
 import type { LinkView } from "./views"
 
 /**
@@ -23,6 +23,8 @@ export interface StatsItemView {
   value: string
   label: string
   text: string | null
+  /** Its icon over the value, only while the strip's `icons` is on and one is picked. */
+  icon?: SectionIcon | null
 }
 
 /**

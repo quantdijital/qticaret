@@ -20,7 +20,7 @@ import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
 import { hydrateArticle, hydrateContact } from "./layout-hydrate-text"
 import { hydrateShelf } from "./layout-hydrate-shelf"
 import { hydrateStrips } from "./layout-hydrate-strips"
-import { hydratePoints } from "./layout-hydrate-points"
+import { hydrateCollage, hydratePoints } from "./layout-hydrate-points"
 import type { BandPick } from "./price-bands"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
@@ -270,12 +270,36 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
               links: section.links,
             }
           : {}),
+        // The icon row (adr/0077 §10 Ek): its settings and the icons of the categories it names
+        ...(section.variant === "icons"
+          ? {
+              variant: section.variant,
+              disc: section.disc,
+              phone: section.phone,
+              category_icons: Object.fromEntries(
+                Object.entries(section.category_icons).filter(([id]) =>
+                  section.category_ids.includes(id)
+                )
+              ),
+            }
+          : {}),
       }
     case "brands":
       return { id, type, title: section.title, brand_ids: section.brand_ids }
     case "posts":
-    case "reviews":
       return { id, type, title: section.title, limit: section.limit }
+    case "reviews":
+      // A grid prints as before variants; a carousel names itself and its scroller (adr/0077 §10)
+      return section.variant === "carousel"
+        ? {
+            id,
+            type,
+            title: section.title,
+            limit: section.limit,
+            variant: section.variant,
+            scroller: section.scroller,
+          }
+        : { id, type, title: section.title, limit: section.limit }
     case "google_rating":
       // The figures and excerpts are the storefront's to fetch (`/store/google-reviews`)
       return {
@@ -287,7 +311,13 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
       }
     case "trust_badges":
       // The badges are the shared settings'; the section says where and how it is drawn
-      return { id, type, variant: section.variant }
+      return {
+        id,
+        type,
+        variant: section.variant,
+        // The card's lift, only on the card (adr/0077 §10 Ek)
+        ...(section.variant === "card" ? { lift: section.lift } : {}),
+      }
     case "marquee":
       return hydrateMarquee(section, at)
     case "stats":
@@ -301,6 +331,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         title: section.title,
         intro: fill(section.intro, at.values),
       }
+    case "photo_collage":
+      return hydrateCollage(section, { fill: (text) => fill(text, at.values), link, image })
     case "contact":
       return hydrateContact(section, at)
     case "payment_facts":

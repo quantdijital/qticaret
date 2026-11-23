@@ -1,5 +1,6 @@
 import {
   FEATURED_PRODUCT_SETTINGS,
+  PHOTO_COLLAGE_SETTINGS,
   RICH_TEXT_IMAGE_SIDES,
   STEPS_SETTINGS,
   STRIP_GALLERY_SETTINGS,
@@ -7,6 +8,7 @@ import {
 } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
+import { iconFields } from "./icon-registry"
 import { scrollerFields, sliderFields } from "./shelf-registry"
 import { kitDefaultsOf, turnsAsSlider } from "./slider-kit"
 
@@ -56,6 +58,12 @@ export type ContentField =
   | "dividers"
   | "steps_layout"
   | "numbers"
+  | "show_icons"
+  | "lift"
+  | "disc"
+  | "icons_phone"
+  | "collage_layout"
+  | "collage_phone"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -134,6 +142,30 @@ function pointsFields(section: AnySection): RegistryField[] {
   })
 }
 
+/** The collage's two steps by setting and field name, open in "Diziliş" (`collage-groups.tsx`). */
+export const COLLAGE_FIELDS = [
+  ["layout", "collage_layout"],
+  ["phone", "collage_phone"],
+] as const satisfies readonly (readonly [keyof typeof PHOTO_COLLAGE_SETTINGS, ContentField])[]
+
+/** The photo collage's layout from 1024 px and on a phone (adr/0077 §10). */
+function collageFields(section: AnySection): RegistryField[] {
+  return COLLAGE_FIELDS.map(([name, field]) => {
+    const P = `${E}.photoCollage.${name}`
+    const steps: readonly string[] = PHOTO_COLLAGE_SETTINGS[name]
+    return {
+      ...entry(
+        section,
+        field,
+        `${P}.label`,
+        steps.map((step) => `${P}.${step}`),
+        "layout"
+      ),
+      term: `${P}.term`,
+    }
+  })
+}
+
 /** The featured product's strips' look (`featured-groups.tsx`): three steps, two switches. */
 function stripsFields(section: AnySection): RegistryField[] {
   const P = `${E}.featured`
@@ -162,8 +194,15 @@ export function contentFields(section: AnySection): RegistryField[] {
       // A grid's or a carousel's count; the other variants' are fixed
       return section.variant === "grid" || section.variant === "carousel" ? [limit(section)] : []
     case "posts":
-    case "reviews":
       return [limit(section)]
+    // A carousel's scroller beside the count (adr/0077 §10)
+    case "reviews":
+      return [
+        limit(section),
+        ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
+      ]
+    case "photo_collage":
+      return collageFields(section)
     case "related_products":
       // As a rail's (bilesen-denetimi (b) 7): a grid's columns, the card, a carousel's scroller
       return [
@@ -181,7 +220,10 @@ export function contentFields(section: AnySection): RegistryField[] {
         ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
       ]
     case "categories":
-      return [entry(section, "show_count", `${E}.categories.showCount`)]
+      return [
+        entry(section, "show_count", `${E}.categories.showCount`),
+        ...iconFields(section, CONTENT_IDS.content),
+      ]
     case "hero":
       return section.variant === "category_list"
         ? [
@@ -247,7 +289,7 @@ export function contentFields(section: AnySection): RegistryField[] {
       return stripGalleryFields(section)
     case "stats":
     case "steps":
-      return pointsFields(section)
+      return [...pointsFields(section), ...iconFields(section, CONTENT_IDS.content)]
     // The box's fields are the theme's (adr/0077 §1), not the section's
     case "search_box":
       return []
@@ -274,6 +316,9 @@ export function contentFields(section: AnySection): RegistryField[] {
         entry(section, "form", `${E}.pageText.form`),
         entry(section, "imprint", `${E}.pageText.imprint`),
       ]
+    // The card's lift (adr/0077 §10 Ek); the strip and the lined boxes have none
+    case "trust_badges":
+      return iconFields(section, CONTENT_IDS.content)
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":
@@ -284,7 +329,6 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "help":
     case "marquee":
     case "product_main":
-    case "trust_badges":
     case "payment_facts":
     case "shipping_facts":
       return []

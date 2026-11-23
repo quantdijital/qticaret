@@ -1,5 +1,9 @@
-import { STATS_LIMITS, STEPS_LIMITS } from "@qticaret/types"
-import type { StatsSection, StepsSection } from "@/features/storefront/api/layout"
+import { PHOTO_COLLAGE_LIMITS, STATS_LIMITS, STEPS_LIMITS } from "@qticaret/types"
+import type {
+  PhotoCollageSection,
+  StatsSection,
+  StepsSection,
+} from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import type { Problem } from "./problems"
 import { linkProblem, textProblem } from "./problems"
@@ -44,5 +48,30 @@ export function stepsProblems(section: StepsSection): Found[] {
       ]
     }),
     ["link", linkProblem(section.link)],
+  ]
+}
+
+/**
+ * The photo collage (adr/0077 §10): each photograph chosen and its words
+ * written (a collage names its pictures nowhere else), its caption and
+ * link as any; the title and intro within their lengths.
+ */
+export function collageProblems(section: PhotoCollageSection): Found[] {
+  return [
+    ["title", textProblem(section.title, L.title)],
+    ["intro", textProblem(section.intro, PHOTO_COLLAGE_LIMITS.intro, true)],
+    ...section.items.flatMap((item, index): Found[] => {
+      const at = `items.${String(index)}`
+      return [
+        [
+          `${at}.image`,
+          item.image === null
+            ? "imageRequired"
+            : written(item.image.alt ?? "", PHOTO_COLLAGE_LIMITS.alt, false),
+        ],
+        [`${at}.caption`, textProblem(item.caption, PHOTO_COLLAGE_LIMITS.caption, true)],
+        [`${at}.link`, linkProblem(item.link)],
+      ]
+    }),
   ]
 }

@@ -8,8 +8,12 @@
  * names are `storefront.editor.variants.<type>.<variant>`.
  */
 export const SECTION_VARIANTS = {
-  /** `strip`: today's tinted strip; `lined`: boxes split by hairlines (GB4). */
-  trust_badges: ["strip", "lined"],
+  /**
+   * `strip`: today's tinted strip; `lined`: boxes split by hairlines (GB4);
+   * `card` (adr/0077 §10 Ek): one white floating box, rules between the
+   * badges, lifted over the section before it while `lift` is on.
+   */
+  trust_badges: ["strip", "lined", "card"],
   /**
    * `standard`: today's graphite opening; `category_list`: the category
    * list, the opening's tile and two category tiles side by side (H17).
@@ -20,9 +24,10 @@ export const SECTION_VARIANTS = {
    * first subcategories as links (adr/0049 Ek 2026-11-15); `collage`:
    * photo-led cards filling each row, the first one wider while `lead` is on;
    * `panels` (Ek 2026-11-19): frameless graphite panels led by their photos,
-   * the first tall beside the others stacked while `lead` is on.
+   * the first tall beside the others stacked while `lead` is on; `icons`
+   * (adr/0077 §10 Ek): one row of round discs, each an icon over its name.
    */
-  categories: ["tiles", "linked", "collage", "panels"],
+  categories: ["tiles", "linked", "collage", "panels", "icons"],
   /**
    * The product rail (adr/0049 Ek 2026-11-15): `grid`, today's rows of
    * cards; `carousel`, one row that slides (the scroller kit,
@@ -53,6 +58,13 @@ export const SECTION_VARIANTS = {
    * today's rows; `carousel`, one row that slides (the scroller kit).
    */
   related_products: ["grid", "carousel"],
+  /**
+   * The shop's reviews (adr/0077 §10): `grid`, today's summary beside the
+   * three newest quotes; `carousel`, the newest reviews one card each in a
+   * row that slides (the scroller kit, `section-scroller`), each its
+   * customer's photo when there is one, name, stars and quote.
+   */
+  reviews: ["grid", "carousel"],
   /**
    * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
    * drawing first. The header bar's `centered` is the theme setting's
@@ -221,6 +233,7 @@ export type HeroVariant = SectionVariant<"hero">
 export type CategoriesVariant = SectionVariant<"categories">
 export type ProductsVariant = SectionVariant<"products">
 export type RelatedProductsVariant = SectionVariant<"related_products">
+export type ReviewsVariant = SectionVariant<"reviews">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type NewsletterVariant = SectionVariant<"newsletter">

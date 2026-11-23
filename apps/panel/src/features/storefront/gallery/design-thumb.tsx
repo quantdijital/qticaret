@@ -30,6 +30,7 @@ const SHAPES: Record<string, Shape> = {
   stats: "strip",
   search_box: "strip",
   steps: "text",
+  photo_collage: "cards",
 }
 
 // How much of the page each kind takes, as a share of the room

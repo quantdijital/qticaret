@@ -11,6 +11,7 @@ import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
 import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
 import { CategoryCollage } from "./CategoryCollage"
+import { CategoryIcons } from "./CategoryIcons"
 import { CategoryPanels } from "./CategoryPanels"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
@@ -27,6 +28,8 @@ import { PriceBands } from "./PriceBands"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
 import { SearchBoxSection } from "./SearchBoxSection"
+import { ReviewsCarousel } from "./ReviewsCarousel"
+import { PhotoCollage } from "./PhotoCollage"
 import { Shelf } from "./Shelf"
 import { Signup } from "./Signup"
 import { Spotlight } from "./Spotlight"
@@ -65,6 +68,7 @@ function BlockView({
   next,
   first,
   afterOpening,
+  atStart,
   context,
 }: {
   block: Block
@@ -73,6 +77,8 @@ function BlockView({
   first: boolean
   /** Right after the page's picture opening: a trust strip keeps close to it. */
   afterOpening: boolean
+  /** The page's first block: nothing before it for the trust card to rise over. */
+  atStart: boolean
   context: Context
 }) {
   const { t, subscribe, quickAdd } = context
@@ -109,6 +115,7 @@ function BlockView({
           variant={drawnVariant("trust_badges", section.variant, PROMISE_VARIANTS)}
           marks={section.editor}
           hug={afterOpening}
+          lift={section.lift === true && !atStart}
         />
       )
     case "categories": {
@@ -120,6 +127,19 @@ function BlockView({
             id={headingId(section.id)}
             title={section.title}
             view={section.collage}
+            all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+            ownAll={Boolean(section.more)}
+            t={t}
+            marks={section.editor}
+          />
+        )
+      }
+      if (drawn === "icons" && section.icons) {
+        return (
+          <CategoryIcons
+            id={headingId(section.id)}
+            title={section.title}
+            view={section.icons}
             all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
             ownAll={Boolean(section.more)}
             t={t}
@@ -169,6 +189,10 @@ function BlockView({
     case "featured_product":
       return <Spotlight section={section} t={t} quickAdd={quickAdd} />
     case "reviews":
+      // adr/0077 §10: one card each, sliding; the cards carry the customers' photos
+      if (section.variant === "carousel") {
+        return <ReviewsCarousel section={section} t={t} />
+      }
       return (
         <>
           <Reviews section={section} t={t} />
@@ -197,6 +221,8 @@ function BlockView({
       return <Steps section={section} />
     case "search_box":
       return <SearchBoxSection section={section} />
+    case "photo_collage":
+      return <PhotoCollage section={section} first={first} />
     case "marquee":
       return (
         <Marquee
@@ -249,6 +275,7 @@ export function Blocks({
           next={blocks[index + 1]}
           first={heroFirst && index === 0}
           afterOpening={heroFirst && index === 1}
+          atStart={index === 0}
           context={context}
         />
       </Look>

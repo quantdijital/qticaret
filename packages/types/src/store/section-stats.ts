@@ -13,6 +13,8 @@
  * `@qticaret/types/section-stats` subpath).
  */
 
+import type { SectionIcon } from "./section-icons.js"
+
 /** How many figures, and each part's longest text. */
 export const STATS_LIMITS = {
   items: { min: 2, max: 6 },
@@ -24,6 +26,11 @@ export const STATS_LIMITS = {
 export const STATS_SETTINGS = {
   /** Hairlines between the figures (`on`) or space alone (`off`). */
   dividers: ["on", "off"],
+  /**
+   * Each figure's icon over its value (`on`, adr/0077 §10 Ek) or none
+   * (`off`, the strip as it came); a figure with no icon picked draws none.
+   */
+  icons: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StatsSetting = keyof typeof STATS_SETTINGS
@@ -32,19 +39,24 @@ export type StatsStep<S extends StatsSetting> = (typeof STATS_SETTINGS)[S][numbe
 /** A new strip's settings, and what one without them reads as. */
 export const STATS_DEFAULTS: { readonly [S in StatsSetting]: StatsStep<S> } = {
   dividers: "on",
+  icons: "off",
 }
 
 export const STATS_SETTING_NAMES = Object.keys(STATS_SETTINGS) as StatsSetting[]
 
 export type StatsSettings = { [S in StatsSetting]: StatsStep<S> }
 
+/** A setting as a reader takes it: one missing or off this build's list reads as its default. */
+const stepOf = <S extends StatsSetting>(name: S, value: unknown): StatsStep<S> => {
+  const steps: readonly unknown[] = STATS_SETTINGS[name]
+  return steps.includes(value) ? (value as StatsStep<S>) : STATS_DEFAULTS[name]
+}
+
 /** Every setting as a reader takes it: one missing or off this build's list reads as its default. */
 export function statsSettingsOf(section: Partial<Record<StatsSetting, unknown>>): StatsSettings {
-  const steps: readonly unknown[] = STATS_SETTINGS.dividers
   return {
-    dividers: steps.includes(section.dividers)
-      ? (section.dividers as StatsStep<"dividers">)
-      : STATS_DEFAULTS.dividers,
+    dividers: stepOf("dividers", section.dividers),
+    icons: stepOf("icons", section.icons),
   }
 }
 
@@ -53,6 +65,11 @@ export interface StoreStatsItem {
   value: string
   label: string
   text: string | null
+  /**
+   * Its icon (`SECTION_ICONS`), drawn while the strip's `icons` is on;
+   * absent from a backend before icons, and printed only when picked.
+   */
+  icon?: SectionIcon
 }
 
 /** The figures strip in `GET /store/storefront-layout`. */

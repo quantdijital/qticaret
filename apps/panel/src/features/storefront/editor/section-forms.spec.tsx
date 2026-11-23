@@ -325,6 +325,7 @@ describe("a content page's section chooser (adr/0073 §3, Ek 2026-11-19 (2) K5)"
       "Rakam şeridi",
       "Numaralı adımlar",
       "Arama kutusu",
+      "Fotoğraf kolajı",
       "Güven rozetleri",
       "Kayan yazı",
       "E-bülten",

@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next"
 import { ListFooter, RowActions } from "@/features/settings/components/storefront-rows"
-import { STATS_LIMITS } from "@qticaret/types"
+import { STATS_LIMITS, statsSettingsOf } from "@qticaret/types"
 import type { StatsItem, StatsSection } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { IconSelect } from "../shared/icon-select"
 import { F, TextField } from "./fields"
 import type { SectionFormProps } from "./form-props"
 import { PREVIEW_IDS } from "./preview-fields"
@@ -20,6 +21,8 @@ export function StatsForm({ section, problems, onChange }: SectionFormProps<Stat
   const { t } = useTranslation()
   const problem = useProblemText()
   const { min, max } = STATS_LIMITS.items
+  // Each figure's icon while the strip shows icons ("Diziliş", adr/0077 §10 Ek)
+  const showIcons = statsSettingsOf(section).icons === "on"
   const setItems = (items: StatsItem[], field?: string) => {
     onChange({ ...section, items }, field)
   }
@@ -67,6 +70,27 @@ export function StatsForm({ section, problems, onChange }: SectionFormProps<Stat
                   }}
                 />
               </div>
+              {showIcons && (
+                <IconSelect
+                  id={`${section.id}-${at}-icon`}
+                  label={t(`${S}.iconOf`, { number })}
+                  value={item.icon}
+                  onChange={(icon) => {
+                    // No icon: the figure without the field, as one from before icons
+                    const rest: StatsItem = {
+                      value: item.value,
+                      label: item.label,
+                      text: item.text,
+                    }
+                    setItems(
+                      section.items.map((each, place) =>
+                        place === index ? (icon ? { ...rest, icon } : rest) : each
+                      ),
+                      `${at}.icon`
+                    )
+                  }}
+                />
+              )}
               <TextField
                 id={PREVIEW_IDS.text(section.id, `${at}.value`)}
                 label={t(`${S}.value`, { number })}

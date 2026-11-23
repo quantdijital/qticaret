@@ -11,7 +11,7 @@ import {
 describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
   it("defaults to the first variant, the drawing from before variants", () => {
     expect(defaultVariant("trust_badges")).toBe("strip")
-    expect(SECTION_VARIANTS.trust_badges).toEqual(["strip", "lined"])
+    expect(SECTION_VARIANTS.trust_badges).toEqual(["strip", "lined", "card"])
   })
 
   it("reads a listed variant as it is, and none or an unknown one as the default", () => {
@@ -19,6 +19,14 @@ describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
     expect(variantOf("trust_badges", undefined)).toBe("strip")
     expect(variantOf("trust_badges", "bento")).toBe("strip")
     expect(variantOf("trust_badges", null)).toBe("strip")
+  })
+
+  it("draws the reviews as today's grid unless the carousel is chosen (adr/0077 §10)", () => {
+    expect(SECTION_VARIANTS.reviews).toEqual(["grid", "carousel"])
+    expect(defaultVariant("reviews")).toBe("grid")
+    expect(variantOf("reviews", undefined)).toBe("grid")
+    expect(variantOf("reviews", "carousel")).toBe("carousel")
+    expect(hasVariants("reviews")).toBe(true)
   })
 
   it("offers a choice only for a type with more than one variant", () => {

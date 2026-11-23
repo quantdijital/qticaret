@@ -1,6 +1,7 @@
 import { fieldKey, fieldMark } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
+import { SectionIcon } from "../parts/SectionIcon"
 import { type Of, headingId } from "./plan"
 import { SectionHead } from "./SectionHead"
 
@@ -75,6 +76,15 @@ export function Stats({ section }: { section: Of<"stats"> }) {
               {item.text && (
                 <dd className="order-3 max-w-[32ch] text-sm text-text-2" {...qf(at, "text")}>
                   {item.text}
+                </dd>
+              )}
+              {/* The figure's icon over its value, for the eye only (adr/0077 §10 Ek) */}
+              {item.icon && (
+                <dd
+                  aria-hidden="true"
+                  className="order-0 text-signal in-[.gf-stage]:text-signal-on-stage"
+                >
+                  <SectionIcon icon={item.icon} className="size-8 shrink-0 lg:size-9" />
                 </dd>
               )}
             </div>

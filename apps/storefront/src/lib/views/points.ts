@@ -1,8 +1,19 @@
-import type { StoreStatsSection, StoreStepsSection } from "@qticaret/types"
+import type {
+  StorePhotoCollageSection,
+  StoreStatsSection,
+  StoreStepsSection,
+} from "@qticaret/types"
+import { photoCollageSettingsOf } from "@qticaret/types/section-collage"
+import { sectionIconOf } from "@qticaret/types/section-icons"
 import { statsSettingsOf } from "@qticaret/types/section-stats"
 import { stepNumber, stepsSettingsOf } from "@qticaret/types/section-steps"
-import type { StatsSectionView, StepsSectionView, Translate } from "@qticaret/ui"
-import { layoutLink } from "./layout"
+import type {
+  PhotoCollageSectionView,
+  StatsSectionView,
+  StepsSectionView,
+  Translate,
+} from "@qticaret/ui"
+import { layoutImage, layoutLink } from "./layout"
 
 /**
  * The figures strip as the theme draws it (adr/0077 §10): the shop's
@@ -10,6 +21,7 @@ import { layoutLink } from "./layout"
  * from a newer backend, read as the default). No figure: no strip.
  */
 export function statsView(section: StoreStatsSection, t: Translate): StatsSectionView | null {
+  const settings = statsSettingsOf(section)
   return section.items.length > 0
     ? {
         id: section.id,
@@ -20,8 +32,10 @@ export function statsView(section: StoreStatsSection, t: Translate): StatsSectio
           value: item.value,
           label: item.label,
           text: item.text,
+          // Its icon only while the strip shows icons (adr/0077 §10 Ek)
+          ...(settings.icons === "on" ? { icon: sectionIconOf(item.icon) } : {}),
         })),
-        ...statsSettingsOf(section),
+        ...settings,
       }
     : null
 }
@@ -46,6 +60,33 @@ export function stepsView(section: StoreStepsSection, t: Translate): StepsSectio
         })),
         link: layoutLink(section.link, t),
         ...settings,
+      }
+    : null
+}
+
+/**
+ * The photo collage as the theme draws it (adr/0077 §10): each photograph
+ * with its own words (the caption when they are missing, from an older
+ * draft), its caption, its link as a path (a broken one none); its steps as
+ * the contract knows them. No photograph: no section.
+ */
+export function collageView(
+  section: StorePhotoCollageSection,
+  t: Translate
+): PhotoCollageSectionView | null {
+  return section.items.length > 0
+    ? {
+        id: section.id,
+        type: "photo_collage",
+        title: section.title,
+        label: t("home.collage_label"),
+        intro: section.intro,
+        items: section.items.map((item) => ({
+          image: layoutImage(item.image, item.caption ?? ""),
+          caption: item.caption,
+          href: layoutLink(item.link, t)?.path ?? null,
+        })),
+        ...photoCollageSettingsOf(section),
       }
     : null
 }

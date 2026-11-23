@@ -4,9 +4,11 @@ import { PanelGroup } from "../panel-header"
 import { BANNER_LAYOUT_SETTINGS } from "./banner-groups"
 import { BannerSettings } from "./banner-settings"
 import { FeaturedGroups } from "./featured-groups"
+import { IconGroups } from "./icon-groups"
 import type { FieldGroupName } from "./field-registry"
 import { RelatedGroups } from "./related-groups"
 import { PointsGroups } from "./points-groups"
+import { CollageGroups, ReviewsGroups } from "./collage-groups"
 import { StripGalleryGroups } from "./strip-gallery-groups"
 
 /**
@@ -36,8 +38,21 @@ export function SectionLayoutGroup({
   if (section.type === "strip_gallery") {
     return <StripGalleryGroups section={section} reveal={reveal} onChange={onChange} />
   }
+  if (section.type === "photo_collage") {
+    return <CollageGroups section={section} reveal={reveal} onChange={onChange} />
+  }
+  if (section.type === "reviews") {
+    return <ReviewsGroups section={section} reveal={reveal} onChange={onChange} />
+  }
   if (section.type === "stats" || section.type === "steps") {
     return <PointsGroups section={section} reveal={reveal} onChange={onChange} />
+  }
+  // The trust card's lift, the icon row's disc and phone row (adr/0077 §10 Ek)
+  if (
+    (section.type === "trust_badges" && section.variant === "card") ||
+    (section.type === "categories" && section.variant === "icons")
+  ) {
+    return <IconGroups section={section} reveal={reveal} onChange={onChange} />
   }
   if (section.type !== "banner") {
     return null

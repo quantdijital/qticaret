@@ -19,6 +19,7 @@ import { StripGalleryForm } from "./forms/strip-gallery-form"
 import { StatsForm } from "./forms/stats-form"
 import { StepsForm } from "./forms/steps-form"
 import { SearchBoxForm } from "./forms/search-box-form"
+import { CollageForm } from "./forms/collage-form"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { TrustBadgeList } from "./shared/trust-badge-list"
 import { NamedGroup } from "./named-group"
@@ -43,7 +44,9 @@ const ownsGroups = (section: AnySection): boolean =>
   section.type === "price_bands" ||
   section.type === "faq" ||
   section.type === "footer_bar" ||
-  (section.type === "categories" && section.variant !== "tiles")
+  // The carded categories split off their cards; the tiles and the icon row do not
+  (section.type === "categories" &&
+    (section.variant === "linked" || section.variant === "collage" || section.variant === "panels"))
 
 /**
  * A section's content in the panel's "İçerik" tab: its form inside the
@@ -79,6 +82,8 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
       return <StepsForm section={section} {...props} />
     case "search_box":
       return <SearchBoxForm section={section} {...props} />
+    case "photo_collage":
+      return <CollageForm section={section} {...props} />
     case "categories":
       return <CategoriesForm section={section} {...props} />
     case "products":

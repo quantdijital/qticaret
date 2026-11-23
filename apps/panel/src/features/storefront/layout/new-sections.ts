@@ -16,6 +16,7 @@ import {
   ANNOUNCEMENT_DEFAULTS,
   BANNER_DEFAULTS,
   MARQUEE_DEFAULTS,
+  PHOTO_COLLAGE_DEFAULTS,
   STATS_DEFAULTS,
   STEPS_DEFAULTS,
   SLIDER_DEFAULTS,
@@ -93,7 +94,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "posts":
       return { ...base, type, title: null, limit: 3 }
     case "reviews":
-      return { ...base, type, title: null, limit: 6 }
+      return { ...base, type, title: null, limit: 6, variant: "grid" }
     case "google_rating":
       return { ...base, type, title: null, excerpts: 0, profile_link: true }
     case "rich_text":
@@ -140,6 +141,16 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         items: [0, 1, 2].map(() => ({ title: "", text: null })),
         link: null,
         ...STEPS_DEFAULTS,
+      }
+    // Five photographs to choose (adr/0077 §10): the first large beside four, a full mosaic
+    case "photo_collage":
+      return {
+        ...base,
+        type,
+        title: null,
+        intro: null,
+        items: [0, 1, 2, 3, 4].map(() => ({ image: null, caption: null, link: null })),
+        ...PHOTO_COLLAGE_DEFAULTS,
       }
   }
 }

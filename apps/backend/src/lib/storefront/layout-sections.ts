@@ -21,6 +21,8 @@ import { priceBands } from "./sections/price-bands"
 import { stats } from "./sections/stats"
 import { steps } from "./sections/steps"
 import { searchBox } from "./sections/search-box"
+import { photoCollage } from "./sections/photo-collage"
+import { reviews } from "./sections/reviews"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -58,11 +60,12 @@ export const pageSection = z.discriminatedUnion(
     featuredProduct,
     brands,
     counted("posts", 6, 3),
-    counted("reviews", 12, 6),
+    reviews,
     googleRating,
     stats,
     steps,
     searchBox,
+    photoCollage,
     richText,
     trustBadges,
     newsletter,
