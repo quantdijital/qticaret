@@ -49,6 +49,7 @@ describe("the figures strip (adr/0077 §10)", () => {
         { ...figure("10.000+", "Mutlu müşteri"), text: null },
       ],
       dividers: "on",
+      icons: "off",
     })
     expect(doc.pages[0]?.sections[0]).toMatchObject({ type: "stats", dividers: "on" })
   })
@@ -184,6 +185,7 @@ describe("the figures strip and the steps on the storefront", () => {
         { value: "50+", label: "Şehir", text: "Her gün" },
       ],
       dividers: "off",
+      icons: "off",
       look: {
         space_outer: null,
         space_below: null,

@@ -29,8 +29,11 @@ export function hydratePoints(section: StatsSection | StepsSection, at: PointsCo
         value: item.value,
         label: filled(at, item.label),
         text: at.fill(item.text),
+        // Printed only when picked (adr/0077 §10 Ek)
+        ...(item.icon ? { icon: item.icon } : {}),
       })),
       dividers: section.dividers,
+      icons: section.icons,
     }
   }
   return {

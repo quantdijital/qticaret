@@ -11,7 +11,7 @@ import {
 describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
   it("defaults to the first variant, the drawing from before variants", () => {
     expect(defaultVariant("trust_badges")).toBe("strip")
-    expect(SECTION_VARIANTS.trust_badges).toEqual(["strip", "lined"])
+    expect(SECTION_VARIANTS.trust_badges).toEqual(["strip", "lined", "card"])
   })
 
   it("reads a listed variant as it is, and none or an unknown one as the default", () => {

@@ -1,4 +1,5 @@
 import type { StoreStatsSection, StoreStepsSection } from "@qticaret/types"
+import { sectionIconOf } from "@qticaret/types/section-icons"
 import { statsSettingsOf } from "@qticaret/types/section-stats"
 import { stepNumber, stepsSettingsOf } from "@qticaret/types/section-steps"
 import type { StatsSectionView, StepsSectionView, Translate } from "@qticaret/ui"
@@ -10,6 +11,7 @@ import { layoutLink } from "./layout"
  * from a newer backend, read as the default). No figure: no strip.
  */
 export function statsView(section: StoreStatsSection, t: Translate): StatsSectionView | null {
+  const settings = statsSettingsOf(section)
   return section.items.length > 0
     ? {
         id: section.id,
@@ -20,8 +22,10 @@ export function statsView(section: StoreStatsSection, t: Translate): StatsSectio
           value: item.value,
           label: item.label,
           text: item.text,
+          // Its icon only while the strip shows icons (adr/0077 §10 Ek)
+          ...(settings.icons === "on" ? { icon: sectionIconOf(item.icon) } : {}),
         })),
-        ...statsSettingsOf(section),
+        ...settings,
       }
     : null
 }

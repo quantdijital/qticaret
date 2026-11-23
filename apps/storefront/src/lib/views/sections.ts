@@ -3,6 +3,7 @@ import type { StoreCategorySection, StoreLayoutSection, StoreProductSection } fr
 import { deviceOf } from "@qticaret/types/section-device"
 import { faqSettingsOf } from "@qticaret/types/section-faq"
 import { lookOf } from "@qticaret/types/section-look"
+import { trustCardSettingsOf } from "@qticaret/types/section-trust"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, PageTextSectionView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
@@ -11,6 +12,7 @@ import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { heroView, priceBandsView, withCounts } from "./catalog"
 import { cardedCategoriesView } from "./category-cards-data"
+import { iconCategoriesView } from "./category-icons"
 import { picturedCategories } from "./category-tiles"
 import { featuredView } from "./featured"
 import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
@@ -69,6 +71,10 @@ async function sectionView(
     case "banner":
       return bannerView(section, t)
     case "categories": {
+      // The icon row (adr/0077 §10 Ek): its discs with the shop's icons
+      if (section.variant === "icons") {
+        return iconCategoriesView(section, t)
+      }
       // The carded variants (linked, collage, panels): their cards and own part; else the tiles
       const carded = await cardedCategoriesView(section, t, context.home === true)
       if (carded) {
@@ -171,7 +177,11 @@ async function sectionView(
       const { trust_badges: badges } = await currentShared()
       // Its variant as the contract knows it: none (an older backend) or a newer one, the default
       const variant = variantOf("trust_badges", section.variant)
-      return badges.length > 0 ? { id, type: "trust_badges", variant, badges } : null
+      // The card's lift over the section before it, only when on (adr/0077 §10 Ek)
+      const lift = variant === "card" && trustCardSettingsOf(section).lift === "on"
+      return badges.length > 0
+        ? { id, type: "trust_badges", variant, badges, ...(lift ? { lift } : {}) }
+        : null
     }
     case "newsletter": {
       const [site, identity, notice] = await Promise.all([
