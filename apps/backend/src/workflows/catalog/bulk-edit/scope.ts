@@ -93,7 +93,7 @@ export async function runProducts(
       entity: "product_category",
       fields: ["id", "parent_category_id"],
     })
-    categories = data as typeof categories
+    categories = data
     if (!categories.some((category) => category.id === scope.category_id)) {
       throw new ValidationError("bulk_edit.category_unknown", { field: "category_id" })
     }
@@ -112,7 +112,7 @@ export async function runProducts(
       filters: after === null ? filters : { ...filters, id: { $gt: after } },
       pagination: { skip: 0, take, order: { id: "ASC" } },
     })
-    return data as ScopeRow[]
+    return data
   }
   return { total: metadata?.count ?? 0, chunks: scopeChunks(read, size) }
 }

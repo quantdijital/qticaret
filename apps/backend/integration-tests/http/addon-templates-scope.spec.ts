@@ -17,6 +17,7 @@ interface Template {
   product_count: number
 }
 interface Catalog {
+  addons: unknown[]
   addon_templates: { id: string; via: string }[]
 }
 
@@ -30,7 +31,11 @@ const ENGRAVING = {
 const COVER = {
   kind: "choice",
   label: "Kılıf",
-  choices: [{ label: "Siyah", price: 300 }],
+  // A choice add-on takes at least two options: one alone is refused
+  choices: [
+    { label: "Siyah", price: 300 },
+    { label: "Kahve", price: 250 },
+  ],
 }
 
 let made = 0
@@ -52,18 +57,25 @@ medusaIntegrationTestRunner({
       settle(http.post<Answer>(url, body, { headers: admin.headers }))
     const read = <T>(url: string) => settle(http.get<T>(url, { headers: admin.headers }))
     const flag = (enabled: boolean) => staff("/admin/features/catalog.addons", { enabled })
-    const product = () => stockedProduct(getContainer(), shop, `kapsam-${String((made += 1))}`, 5)
+    const handleOf = () => `kapsam-${String((made += 1))}`
+    const product = async (handle = handleOf()) => ({
+      handle,
+      ...(await stockedProduct(getContainer(), shop, handle, 5)),
+    })
+    const catalogOf = async (productId: string) =>
+      (await read<Catalog>(`/admin/products/${productId}/catalog`)).data
     const linkedTo = async (productId: string) =>
       (await read<Catalog>(`/admin/products/${productId}/catalog`)).data.addon_templates
         .filter((each) => each.via === "product")
         .map((each) => each.id)
     const template = async (id: string) =>
       (await read<{ addon_template: Template }>(`/admin/addon-templates/${id}`)).data.addon_template
+    // Named apart per test: the suite's database keeps what earlier tests made
     const category = async (name: string, parent?: string) =>
       (
         (
           await staff("/admin/product-categories", {
-            name,
+            name: `${name} ${String((made += 1))}`,
             is_active: true,
             ...(parent ? { parent_category_id: parent } : {}),
           })
@@ -94,7 +106,7 @@ medusaIntegrationTestRunner({
       const first = await product()
       const second = await product()
       const full = await product()
-      await staff(`/admin/products/${full.productId}/catalog`, {
+      const filled = await staff(`/admin/products/${full.productId}/catalog`, {
         addons: Array.from({ length: 5 }, (_, index) => ({
           ...COVER,
           label: `Kılıf ${String(index)}`,
@@ -113,32 +125,47 @@ medusaIntegrationTestRunner({
       const report = done ? await sheets.fileOf(done) : []
       const usage = await template(saved.id)
 
+      const fullAfter = await catalogOf(full.productId)
+      // The catalogue holds earlier tests' products too: counted relative to the run
+      const summary = done?.result_summary as Record<string, number> | undefined
+      const total =
+        (summary?.["changed"] ?? 0) +
+        (summary?.["unchanged"] ?? 0) +
+        (summary?.["skipped"] ?? 0) +
+        (summary?.["failed"] ?? 0)
+
+      expect(filled.status).toBe(200)
       expect(created.status).toBe(200)
       expect(saved.name).toBe("Bıçağa isim kazıma")
       expect(queued.status).toBe(202)
       expect(done?.status).toBe("succeeded")
-      expect(done?.result_summary).toMatchObject({
-        action: "addon_template",
-        products: 3,
-        changed: 2,
-        skipped: 1,
-        failed: 0,
-      })
+      expect(summary).toMatchObject({ action: "addon_template", unchanged: 0, failed: 0 })
+      expect(summary?.["products"]).toBe(total)
+      expect(summary?.["changed"]).toBeGreaterThanOrEqual(2)
+      expect(summary?.["skipped"]).toBeGreaterThanOrEqual(1)
       expect(await linkedTo(first.productId)).toEqual([saved.id])
       expect(await linkedTo(second.productId)).toEqual([saved.id])
-      expect(await linkedTo(full.productId)).toEqual([])
-      expect(usage.product_count).toBe(2)
+      // The full one is left as it was: its five own add-ons, no template
+      expect(fullAfter.addons).toHaveLength(5)
+      expect(fullAfter.addon_templates).toEqual([])
+      expect(usage.product_count).toBe(summary?.["changed"])
       // The report names the product left out, and why
-      const skippedRow = report.find((row) => row[2] === "Atlandı")
-      expect(skippedRow?.[0]).toBe(`kapsam-${String(made)}`)
-      expect(skippedRow?.[3]).toEqual(expect.any(String))
+      const fullRow = report.find((row) => row[0] === full.handle)
+      expect(fullRow?.[2]).toBe("Atlandı")
+      expect(fullRow?.[3]).toEqual(expect.any(String))
+      expect(report.find((row) => row[0] === first.handle)?.[2]).toBe("Güncellendi")
 
-      // Run again: each is linked already, nothing changes
+      // Run again: those linked are left as they are, the full one skipped again
       const again = await run({
         scope: { kind: "all" },
         change: { action: "addon_template", mode: "add", template_id: saved.id },
       })
-      expect(again.done?.result_summary).toMatchObject({ changed: 0, unchanged: 2, skipped: 1 })
+      expect(again.done?.result_summary).toMatchObject({
+        changed: 0,
+        unchanged: summary?.["changed"],
+        skipped: summary?.["skipped"],
+        failed: 0,
+      })
     })
 
     it("applies and removes a template by category, with the ones below it", async () => {
