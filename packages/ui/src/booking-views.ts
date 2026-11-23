@@ -88,6 +88,11 @@ export interface CardBookingView {
   next: string | null
   /** The same moment for `<time dateTime>` (ISO 8601); null with `next`. */
   nextAt: string | null
+  /**
+   * Its length in words ("5 gün • 4 gece"), only while the shop shows it
+   * (`CardLookView.duration`) and the product has one.
+   */
+  duration?: string
 }
 
 /**

@@ -3,7 +3,7 @@ import { STYLE_KIT } from "@/features/storefront/api/theme"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { StyleKitField } from "@qticaret/types"
 import { ChoiceSelect } from "./theme-fields"
-import { THEME_FIELD } from "./forms/theme-registry"
+import { NO_SHOP_FLAGS, THEME_FIELD } from "./forms/theme-registry"
 import type { CardVariantsInUse } from "./forms/theme-registry"
 
 const K = "storefront.editor.theme.styleKit"
@@ -23,7 +23,7 @@ interface KitChoiceProps {
 export function KitChoice({ field, theme, variants, onChange }: KitChoiceProps) {
   const { t } = useTranslation()
   const meta = THEME_FIELD[field]
-  if (!meta.shown(theme, variants)) {
+  if (!meta.shown(theme, variants, NO_SHOP_FLAGS)) {
     return null
   }
   return (

@@ -35,6 +35,8 @@ export interface BookingCardFact {
    */
   left?: number | null
   in_range?: true
+  /** The tour's length in whole days, from its length attribute (adr/0077 Ek "tur kartı"); absent without one. */
+  duration_days?: number
 }
 
 /** A date search's dates and party, as the card facts read them (adr/0077 §4). */

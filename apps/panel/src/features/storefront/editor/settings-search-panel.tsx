@@ -12,6 +12,7 @@ import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { allHits, searchSettings, searchTheme, searchedSections } from "./settings-search"
 import type { SearchHit, ThemeHit } from "./settings-search"
 import { THEME_GROUP_TITLES, cardVariantsInUse } from "./forms/theme-registry"
+import { useSectionFlags } from "./section-flags"
 
 const S = "storefront.editor.search"
 
@@ -121,15 +122,16 @@ export function SettingsSearch({
   const { t } = useTranslation()
   const id = useId()
   const [query, setQuery] = useState("")
+  const flags = useSectionFlags()
   const hits = useMemo(() => {
     const sections = searchedSections(doc, page, (section, group) => {
       const inFooter = group === "footer"
       const { name } = sectionLabel(t, section, inFooter)
       return [name, t(`storefront.editor.types.${kindOf(section, inFooter)}.name`)]
     })
-    const theme = searchTheme(query, doc.settings.theme, cardVariantsInUse(doc), t)
+    const theme = searchTheme(query, doc.settings.theme, cardVariantsInUse(doc), t, flags.on)
     return allHits(searchSettings(query, sections, t), theme)
-  }, [doc, page, query, t])
+  }, [doc, page, query, t, flags])
   const searching = query.trim() !== ""
   return (
     <div className="flex flex-col">

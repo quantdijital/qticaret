@@ -3,6 +3,7 @@ import {
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
+  CARD_TEXT_POSITIONS,
   CARD_VARIANTS,
   LISTING_TEXT_ALIGNS,
   LISTING_TEXT_DEFAULTS,
@@ -62,6 +63,15 @@ export const QUICK_VIEW_SWITCHES = [
   "quick_view_summary",
   "quick_view_quantity",
 ] as const
+/**
+ * The tour card's look (adr/0077 Ek "tur kartı"): where a standard card's
+ * words stand, the contract's list; the stars' pill and the arrow, each a
+ * switch; a dated card's length row and "kişi başı", each a switch shown
+ * only while the shop sells dated products.
+ */
+export { CARD_TEXT_POSITIONS }
+export const TOUR_CARD_SWITCHES = ["rating_badge", "arrow"] as const
+export const DATED_CARD_SWITCHES = ["duration_row", "per_person"] as const
 export const HEADER_LAYOUTS = ["centered", "left"] as const
 export const BUTTON_SHAPES = ["pill", "rounded", "square"] as const
 /** The gap between sections, theme-wide (Tezgâh audit K-11): the contract's list, `normal` the theme's own. */
@@ -110,10 +120,14 @@ export interface ThemeSettings extends StyleKit {
     /** The quick view (adr/0049 Ek 2026-11-15): off by default, as cards were. */
     quick_view: boolean
     quick_view_trigger: (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
+    /** A standard card's words under or over its photo (adr/0077 Ek "tur kartı"). */
+    text_position: (typeof CARD_TEXT_POSITIONS)[number]
   } & Record<
     | (typeof FRAMED_CARD_SWITCHES)[number]
     | (typeof CARD_BADGE_SWITCHES)[number]
-    | (typeof QUICK_VIEW_SWITCHES)[number],
+    | (typeof QUICK_VIEW_SWITCHES)[number]
+    | (typeof TOUR_CARD_SWITCHES)[number]
+    | (typeof DATED_CARD_SWITCHES)[number],
     boolean
   >
   header: { layout: (typeof HEADER_LAYOUTS)[number]; sticky: boolean }
@@ -166,6 +180,11 @@ export const GRAFIT_THEME: ThemeChoices = {
     quick_view_rating: true,
     quick_view_summary: true,
     quick_view_quantity: true,
+    text_position: "below",
+    rating_badge: false,
+    arrow: false,
+    duration_row: false,
+    per_person: false,
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",

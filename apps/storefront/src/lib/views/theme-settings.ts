@@ -2,6 +2,7 @@ import "server-only"
 import { cache } from "react"
 import { storefrontSettings } from "@/lib/store-api/requests"
 import { currentLayout } from "./layout"
+import { cardLookOf } from "./card-look"
 import type { CardOptions } from "./product"
 import { themeSourceOf } from "./shared-settings"
 import { themeSettings } from "./theme"
@@ -48,5 +49,7 @@ export async function cardOptions(): Promise<CardOptions> {
     },
     // The quick view button (adr/0049 Ek 2026-11-15): none while the shop has it off
     quickView: card.quick_view ? card.quick_view_trigger : null,
+    // The tour card's look (adr/0077 Ek "tur kartı"); a dated card's rows only on a dated card
+    look: cardLookOf(card),
   }
 }

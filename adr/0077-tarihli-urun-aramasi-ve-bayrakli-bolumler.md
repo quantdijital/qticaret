@@ -152,6 +152,16 @@ Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; �
 - Yeni seçim niteliği **"Gidilecek yer"** (`gidilecek_yer`): filtrelenebilir; üründe tek değer, süzgeçte çoklu seçim. Arama kutusunun "nereye" alanı bunu kullanır.
 - Hazır görünüm **"Rota"** (`travel/presets/rota`): Hero `full_image` + arama → ürün kaydırıcısı "Popüler turlar" → `departures` → `stats` → `steps` → `reviews` carousel → `photo_collage` → e-bülten; alt bilgi `brand_columns` koyu zemin (`ground: stage`); başlık yazı tipi Playfair (mevcut `HEADING_FONTS`, yeni kod yok). Görseller Commons CC0 / CC BY.
 
+### Ek (2026-11-23): tur kartı görünümü ("Vadi" ve "Patika" için)
+
+İlham: Pomaii "Popular Destinations" (görsel üstü yazı, puan rozeti) ve Wanderly "Curated Just for You" (rozet, "5 gün • 4 gece", "kişi başı", ok). Biçim sözleşmesi gereği yeni biçim değil, tema düzeyindeki `product_card`'a **ayar** olarak geldi; hepsinin varsayılanı bugünkü kart, kilitli görünümlerin HTML'i değişmedi (yalnız `styles.lock.json`'da yeni `card-over.css` özeti).
+
+- `text_position`: `below` (bugünkü) | `over` ("Yazının yeri"). Yalnız standart kartta; çerçeveli ve kompakt kart kendi çizimini korur. `over`'da ad, alt satır ve fiyat (sağda) fotoğrafın altındaki grafit geçişin üstünde, sahnenin açık mürekkebiyle; yıldız satırı yok, puan rozet olarak çizilir; tek bağlantı adın bağlantısıdır ve bütün kartı kaplar. Bilinen sınır: bu düzende dokunmatik ekranda ikinci fotoğraf kaydırması bağlantının altında kalır (dokununca ürün açılır).
+- `rating_badge`: yıldızlar açıkken ortalama fotoğrafın sol üstünde "★ 4,8" rozeti olarak, yıldız satırı yerine. Kompakt kart satırını korur.
+- `arrow`: standart kartta (yazı altta) fiyat satırının sonunda yuvarlak ok; `aria-hidden`, bağlantı ya da düğme değil.
+- `duration_row` ve `per_person`: yalnız tarihli kartta (`booking`) çizilir; panelde yalnız `catalog.booking` açıkken görünür. Süre kart bilgisinde `booking.duration_days` olarak gelir: travel paketinin "Tur bilgileri" şablonundaki `sure` (sayı, gün) niteliğinden, herkese açık ve 1–365 tam sayıysa (`lib/booking/duration.ts` `DURATION_KEYS`, `MEETING_POINT_KEYS` deseni); yalnız bayrak açıkken okunur. Vitrin "5 gün • 4 gece" yazar; gece sayısı gün − 1 (varsayım: turun son günü dönüş), tek günlük tur "1 gün".
+- **Ürün rozeti ("Çok satan", "Yeni") bu ekte yok:** ürüne bağlı bir rozet/etiket verisi bugün yok (Medusa etiketleri vitrine okunmuyor, kartta etiket alanı yok). Yeni veri icat edilmedi; karar sahibin (öneri: ürün kataloğunda tek kısa "kart rozeti" metni ya da Medusa etiketlerinden biri, kartın sol üst rozet listesine eklenir).
+
 ### Varsayılanlar
 
 Tek "Kişi" alanı = yer sayısı; tur tipi = kategori; `search_box` ana sayfa ve içerik sayfalarına eklenebilir; takvim yalnız TL; doğal dil kapalı; arama kutusunun bütün alanları açık (mağaza tek tek kapatabilir).
@@ -183,5 +193,7 @@ Rezervasyon dosyalarına dokunan açık bir iş dalı (talep formu) varken PR2 v
 - **Bilinen sınır (takvim, §6).** Ayın en yakın 1000 ürünü, satış kanalı ve kategori süzgecinden **önce** seçilir; süzgeç sonra uygulanır. Sızıntı yoktur (başka kanalın ya da kategorinin ürünü hiç görünmez), ama ayda 1000'den çok tarihli ürünü olan mağazada takvim bazı günleri eksik gösterebilir.
 
 ## Açık
+
+- **Kart ürün rozeti verisi** ("Çok satan", "Yeni", tur kartı eki): veri kaynağı sahibin kararı.
 
 - **Tur programı verisi** (gün gün plan): biçim sahibin kararı; öneri tarihli üründe `itinerary` alanı (gün başlığı + metin). Karar gelene kadar bölüm yazılmaz.

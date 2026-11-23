@@ -5,15 +5,13 @@ import { SECTION_REQUIRES } from "@qticaret/types"
 import { featuresQuery } from "@/features/settings/api/features"
 import { SectionFlagsContext } from "./section-flags"
 
-// The flags are read only once some section needs one (none does yet)
-const NEEDED = Object.keys(SECTION_REQUIRES).length > 0
-
 /**
- * The shop's flags for the editor's flagged sections (adr/0077 §8): while
- * they load none is on, so a flagged section is not offered until known.
+ * The shop's flags for the editor's flagged sections (adr/0077 §8) and a
+ * dated card's theme fields (Ek "tur kartı"), always read: while they
+ * load none is on, so a flagged section or field is not offered until known.
  */
 export function SectionFlagsProvider({ children }: { children: ReactNode }) {
-  const { data } = useQuery({ ...featuresQuery(), enabled: NEEDED })
+  const { data } = useQuery(featuresQuery())
   const value = useMemo(
     () => ({
       on: new Set((data ?? []).filter((each) => each.enabled).map((each) => each.key)),

@@ -6,6 +6,7 @@ import {
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
+  CARD_TEXT_POSITIONS,
   themeSection,
   upgradeCard,
   withCardDefaults,
@@ -190,6 +191,61 @@ describe("theme section: the product card's quick view", () => {
   it("reads a row saved before it as today's card: no quick view", () => {
     const card = Object.fromEntries(
       Object.entries(defaults.product_card).filter(([key]) => !QUICK_VIEW_KEYS.includes(key))
+    )
+    expect(parseStored("theme", { ...defaults, product_card: card })).toEqual(defaults)
+    expect(withCardDefaults({ ...defaults, product_card: card })).toEqual(defaults)
+  })
+})
+
+/** adr/0077 Ek "tur kartı": the tour sites' card look, today's card until the shop asks. */
+describe("theme section: the product card's tour look", () => {
+  const TOUR_KEYS = ["text_position", "rating_badge", "arrow", "duration_row", "per_person"]
+  const issue = (product_card: Record<string, unknown>) =>
+    full.safeParse({ ...defaults, product_card: { ...defaults.product_card, ...product_card } })
+      .error?.issues[0]
+
+  it("holds the contract's list and draws today's card by default", () => {
+    const contract = jest.requireActual<Record<string, unknown>>(CONTRACT_FILE)
+    expect(CARD_TEXT_POSITIONS).toEqual(contract["CARD_TEXT_POSITIONS"])
+    expect(defaults.product_card).toMatchObject({
+      text_position: "below",
+      rating_badge: false,
+      arrow: false,
+      duration_row: false,
+      per_person: false,
+    })
+  })
+
+  it("takes each choice and switch, and refuses a place off the list with the error key", () => {
+    for (const text_position of CARD_TEXT_POSITIONS) {
+      expect(issue({ text_position })).toBeUndefined()
+    }
+    expect(
+      issue({ rating_badge: true, arrow: true, duration_row: true, per_person: true })
+    ).toBeUndefined()
+    expect(issue({ text_position: "beside" })).toMatchObject({
+      message: "platform_settings.invalid",
+      path: ["product_card", "text_position"],
+    })
+    expect(issue({ per_person: "yes" })).toBeDefined()
+    expect(issue({ badge_text: "Yeni" })).toBeDefined()
+  })
+
+  it("keeps the stored look on a patch that leaves it out", () => {
+    const stored = full.parse({
+      ...defaults,
+      product_card: { ...defaults.product_card, text_position: "over", per_person: true },
+    })
+    const patched = patch.parse({ product_card: { arrow: true } })
+    expect(full.parse(mergePatch(stored, patched)).product_card).toEqual({
+      ...stored.product_card,
+      arrow: true,
+    })
+  })
+
+  it("reads a row or preset saved before it as today's card", () => {
+    const card = Object.fromEntries(
+      Object.entries(defaults.product_card).filter(([key]) => !TOUR_KEYS.includes(key))
     )
     expect(parseStored("theme", { ...defaults, product_card: card })).toEqual(defaults)
     expect(withCardDefaults({ ...defaults, product_card: card })).toEqual(defaults)
