@@ -645,7 +645,8 @@
         "moving": "Adresler taşınıyor… %{{percent}}",
         "moved_one": "{{count}} sayfa yeni adresine taşındı.",
         "moved_other": "{{count}} sayfa yeni adresine taşındı.",
-        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > Denetim kaydı > İşler'de."
+        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > Denetim kaydı > İşler'de.",
+        "failedNoJobs": "Adresler taşınamadı; kontrolü yeniden çalıştırın."
       },
       "searchConsole": {
         "title": "Search Console",
@@ -830,6 +831,7 @@
       "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sekmesinden indirebilirsiniz.",
       "openJobs": "İşler sekmesine git",
       "retention": "Dışa aktarılan dosyalar İşler sekmesinde bir hafta saklanır.",
+      "noAccess": "Denetim kaydını ve işleri yalnız mağaza sahibi ve yöneticiler görebilir.",
       "tabs": {
         "log": "Denetim kaydı"
       },
@@ -2170,6 +2172,7 @@
         "month": "Ay",
         "download": "Paketi indir",
         "later": "Paket hazırlanıyor; bitince Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
+        "laterNoJobs": "Paket arka planda hazırlanıyor.",
         "failed": "Paket hazırlanamadı."
       }
     },
@@ -3917,7 +3920,8 @@
       "apply_one": "{{formatted}} ürüne uygula",
       "apply_other": "{{formatted}} ürüne uygula",
       "working": "Ürünler güncelleniyor…",
-      "background": "Toplu düzenleme arka planda sürüyor; Ayarlar › İşler'den izleyebilirsiniz.",
+      "background": "Toplu düzenleme arka planda sürüyor; Ayarlar > Denetim kaydı > İşler'den izleyebilirsiniz.",
+      "backgroundNoJobs": "Toplu düzenleme arka planda sürüyor.",
       "jobFailed": "Toplu düzenleme tamamlanamadı.",
       "changed_one": "{{formatted}} ürün güncellendi.",
       "changed_other": "{{formatted}} ürün güncellendi.",
@@ -5019,6 +5023,7 @@
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
       "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
+      "laterNoJobs": "Dosya arka planda hazırlanıyor.",
       "failed": "Sipariş dosyası hazırlanamadı."
     },
     "addons": {
@@ -5875,6 +5880,7 @@
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
       "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
+      "laterNoJobs": "Dosya arka planda hazırlanıyor.",
       "failed": "Rapor dosyası hazırlanamadı."
     },
     "daily": {
@@ -6452,6 +6458,7 @@
       "hint": "Arama motorları sayfalarınızı bu dosyalardan bulur; değişikliklerden birkaç dakika sonra kendiliğinden yenilenir.",
       "refresh": "Şimdi yenile",
       "queued": "Site haritası yenileniyor; Ayarlar > Denetim kaydı > İşler'den izleyebilirsiniz.",
+      "queuedNoJobs": "Site haritası yenileniyor.",
       "hostMissing": "Ana alan adı girilmeden site haritası oluşmaz; adresler tam olmalı.",
       "noIndexing": "Bu ortam arama motorlarına kapalı: robots.txt tüm tarayıcıları engelliyor, sayfalar noindex.",
       "generated": "{{when}} oluşturuldu",
@@ -7145,7 +7152,8 @@
       "no": "Hayır",
       "apply": "Aktar",
       "working": "Özellikler aktarılıyor…",
-      "background": "Aktarma arka planda sürüyor; Ayarlar › İşler'den izleyebilirsiniz.",
+      "background": "Aktarma arka planda sürüyor; Ayarlar > Denetim kaydı > İşler'den izleyebilirsiniz.",
+      "backgroundNoJobs": "Aktarma arka planda sürüyor.",
       "jobFailed": "Aktarma tamamlanamadı.",
       "written_one": "{{formatted}} ürüne {{values}} değer yazıldı.",
       "written_other": "{{formatted}} ürüne {{values}} değer yazıldı.",

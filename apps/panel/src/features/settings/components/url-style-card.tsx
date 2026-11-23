@@ -14,6 +14,7 @@ import { URL_STYLE_JOB, checkUrlStyle, jobQuery } from "@/features/settings/api/
 import type { StyleCheck, UrlStyle, UrlStyles } from "@/features/settings/api/url-style"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { useJobsMessage } from "@/features/settings/use-jobs-message"
 
 const ENTITIES = ["product", "category", "brand"] as const
 const EXAMPLE_SLUG = { product: "keten-gomlek", category: "giyim", brand: "ornek-marka" } as const
@@ -64,6 +65,7 @@ function useStyleJob() {
  */
 export function UrlStyleCard({ saved }: { saved: UrlStyles }) {
   const { t } = useTranslation()
+  const jobs = useJobsMessage()
   const client = useQueryClient()
   const startJob = useStartJob()
   const [styles, setStyles] = useState<UrlStyles>(saved)
@@ -87,12 +89,12 @@ export function UrlStyleCard({ saved }: { saved: UrlStyles }) {
         t("settings.seo.style.moved", { count: Number(job.result_summary?.["moved"] ?? 0) })
       )
     } else {
-      toast.error(t("settings.seo.style.failed"))
+      toast.error(t(jobs("settings.seo.style.failed")))
     }
     start(null)
     setCheck(null)
     void client.invalidateQueries({ queryKey: ["settings"] })
-  }, [job, client, start, t])
+  }, [job, client, start, t, jobs])
 
   const runCheck = async () => {
     setChecking(true)

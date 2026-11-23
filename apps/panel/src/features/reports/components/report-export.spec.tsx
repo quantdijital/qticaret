@@ -9,6 +9,8 @@ const assign = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { info: vi.fn(), error: vi.fn() } }))
+// A role that may open Settings > Audit log > Jobs, where the file waits
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true }))
 vi.mock("@/features/reports/use-report", () => ({
   useReportRange: () => ({ from: "2026-10-01", to: "2026-10-07" }),
 }))

@@ -645,7 +645,8 @@
         "moving": "Moving addresses… {{percent}}%",
         "moved_one": "{{count}} page moved to its new address.",
         "moved_other": "{{count}} pages moved to their new addresses.",
-        "failed": "The addresses could not be moved; run the check again. Details in Settings > Audit log > Jobs."
+        "failed": "The addresses could not be moved; run the check again. Details in Settings > Audit log > Jobs.",
+        "failedNoJobs": "The addresses could not be moved; run the check again."
       },
       "searchConsole": {
         "title": "Search Console",
@@ -830,6 +831,7 @@
       "exportStarted": "Export started. Download the file from Jobs when it is ready.",
       "openJobs": "Go to Jobs",
       "retention": "Exported files are kept in the Jobs tab for a week.",
+      "noAccess": "Only the owner and admins can see the audit log and the jobs.",
       "tabs": {
         "log": "Audit log"
       },
@@ -2170,6 +2172,7 @@
         "month": "Month",
         "download": "Download the package",
         "later": "The package is being made; download it from Settings > Audit log > Jobs when it is done.",
+        "laterNoJobs": "The package is being made in the background.",
         "failed": "The package could not be made."
       }
     },
@@ -3917,7 +3920,8 @@
       "apply_one": "Apply to {{formatted}} product",
       "apply_other": "Apply to {{formatted}} products",
       "working": "Updating products…",
-      "background": "The bulk edit goes on in the background; follow it under Settings › Jobs.",
+      "background": "The bulk edit goes on in the background; follow it under Settings > Audit log > Jobs.",
+      "backgroundNoJobs": "The bulk edit goes on in the background.",
       "jobFailed": "The bulk edit could not finish.",
       "changed_one": "{{formatted}} product updated.",
       "changed_other": "{{formatted}} products updated.",
@@ -5019,6 +5023,7 @@
       "excel": "Download as Excel",
       "csv": "Download CSV",
       "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
+      "laterNoJobs": "The file is being prepared in the background.",
       "failed": "The order file could not be made."
     },
     "addons": {
@@ -5875,6 +5880,7 @@
       "excel": "Download as Excel",
       "csv": "Download CSV",
       "later": "The file is being made; once ready, download it from Settings > Audit log > Jobs.",
+      "laterNoJobs": "The file is being made in the background.",
       "failed": "The report file could not be made."
     },
     "daily": {
@@ -6452,6 +6458,7 @@
       "hint": "Search engines find your pages in these files; they refresh a few minutes after changes.",
       "refresh": "Refresh now",
       "queued": "The sitemap is being refreshed; follow it in Settings > Audit log > Jobs.",
+      "queuedNoJobs": "The sitemap is being refreshed.",
       "hostMissing": "No sitemap without the main domain: addresses must be complete.",
       "noIndexing": "This instance is closed to search engines: robots.txt blocks all crawlers, pages say noindex.",
       "generated": "made {{when}}",
@@ -7145,7 +7152,8 @@
       "no": "No",
       "apply": "Bring over",
       "working": "Bringing the facts over…",
-      "background": "Bringing over goes on in the background; follow it in Settings › Jobs.",
+      "background": "Bringing over goes on in the background; follow it in Settings > Audit log > Jobs.",
+      "backgroundNoJobs": "Bringing over goes on in the background.",
       "jobFailed": "Bringing over could not finish.",
       "written_one": "{{values}} values written to {{formatted}} product.",
       "written_other": "{{values}} values written to {{formatted}} products.",

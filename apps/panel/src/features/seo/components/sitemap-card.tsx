@@ -10,6 +10,7 @@ import { SITEMAP_JOB, sitemapStatusQuery } from "@/features/seo/api/sitemap"
 import { useStartJob } from "@/features/settings/api/activity"
 import { errorText } from "@/lib/errors"
 import { formatCount, formatRelative } from "@qticaret/admin-ui/lib/format"
+import { useJobsMessage } from "@/features/settings/use-jobs-message"
 
 function Notice({ children }: { children: React.ReactNode }) {
   return (
@@ -27,6 +28,7 @@ function Notice({ children }: { children: React.ReactNode }) {
  */
 export function SitemapCard({ className }: { className?: string }) {
   const { t } = useTranslation()
+  const jobs = useJobsMessage()
   const client = useQueryClient()
   const status = useQuery(sitemapStatusQuery())
   const start = useStartJob()
@@ -40,7 +42,7 @@ export function SitemapCard({ className }: { className?: string }) {
       { type: SITEMAP_JOB, input: {} },
       {
         onSuccess: () => {
-          toast.success(t("seo.sitemap.queued"))
+          toast.success(t(jobs("seo.sitemap.queued")))
           void client.invalidateQueries({ queryKey: ["seo", "sitemap"] })
         },
         onError: (failure) => toast.error(errorText(t, failure)),
