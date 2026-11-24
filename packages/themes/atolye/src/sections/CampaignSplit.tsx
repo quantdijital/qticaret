@@ -1,6 +1,7 @@
 import { fieldKey, fieldMark } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
+import { HandNote } from "../parts/HandNote"
 import { BandPicture } from "./BandPicture"
 import { buttonClass } from "./campaign-steps"
 import type { Of } from "./plan"
@@ -19,7 +20,8 @@ const HEIGHT = {
  * The split band (`banner`, adr/0077 Ek, "Bölünmüş bant"): the first
  * slide's picture on the left, its words on the right on the section's
  * ground (`ground`, the shop's look; the dark stage unless it set one,
- * `Blocks` keeps it off the box): an upper line, the heading, the line and
+ * `Blocks` keeps it off the box): an upper line, a hand note (`HandNote`,
+ * only when the band has one), the heading, the line and
  * one or two buttons in the shop's style. The picture's inner edge meets
  * the ground straight or in a soft bow (`edge`, `split.css`); on a phone
  * the picture is on top, the bow at its foot. In the container with
@@ -71,6 +73,8 @@ export function CampaignSplit({
             {section.eyebrow}
           </p>
         )}
+        {/* The ground's own ink, as the heading's */}
+        {section.note && <HandNote note={section.note} mark={fieldMark(section.editor, "note")} />}
         {slide.heading && (
           <h2 className="text-display" {...qf("heading")}>
             {slide.heading}

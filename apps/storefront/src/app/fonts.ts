@@ -1,4 +1,4 @@
-import type { StoreThemeSettings } from "@qticaret/types"
+import type { AccentFont, StoreThemeSettings } from "@qticaret/types"
 import type { ThemeFont } from "@/lib/views/theme"
 
 /**
@@ -21,6 +21,23 @@ export const FONT_FILES: Readonly<Record<ThemeFont, readonly [string, string]>> 
 }
 
 /**
+ * The accent faces' files (`ACCENT_FONTS`, `@qticaret/types/hand-note`),
+ * the same way. Never preloaded: only a section's hand note is drawn in
+ * one, so a browser fetches a file only when a page shows a note while
+ * the shop has chosen that face (`--font-accent`, `lib/views/theme.ts`).
+ */
+export const ACCENT_FONT_FILES: Readonly<
+  Record<Exclude<AccentFont, "none">, readonly [string, string]>
+> = {
+  caveat: ["/fonts/caveat-latin.891951df5e.woff2", "/fonts/caveat-tr.81d6c5c276.woff2"],
+  "dancing-script": [
+    "/fonts/dancing-script-latin.51acdc0e00.woff2",
+    "/fonts/dancing-script-tr.4374430929.woff2",
+  ],
+  kalam: ["/fonts/kalam-latin.954410601a.woff2", "/fonts/kalam-tr.b90a584f5b.woff2"],
+}
+
+/**
  * The most a page preloads in faces, in bytes (docs/21, adr/0062 §7): the
  * heaviest pair, Fraunces with Inter, is 124 968. A face that takes a pair
  * past it cannot join the lists.
@@ -33,7 +50,8 @@ export const FONT_PRELOAD_BUDGET = 125_000
  * first text on a phone (the hero's line, the cookie notice); the
  * heading face draws the shop's name in the header and the page's h1,
  * above the fold on every page, so it is preloaded too. The faces the
- * shop did not choose cost its visitors nothing. No pair may pass
+ * shop did not choose cost its visitors nothing, the accent face
+ * (`typography.accent`) included. No pair may pass
  * `FONT_PRELOAD_BUDGET` (the spec sums every pair's files).
  */
 export function fontPreloads(settings: StoreThemeSettings): string[] {

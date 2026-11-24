@@ -19,6 +19,7 @@ import { LISTING_TEXT_DEFAULTS, listingTextOf } from "@qticaret/types/listing-te
 import { SEARCH_FORM_DEFAULTS, searchFormOf } from "@qticaret/types/search-form"
 import { cardVariantOf } from "@qticaret/types/section-variants"
 import { STYLE_KIT_DEFAULTS } from "@qticaret/types/style-kit"
+import { accentDeclarations, accentOf } from "./accent"
 import { brandDeclarations, isHexColor, readableOn } from "./color"
 import { styleKitOf, styleKitView } from "./style-kit"
 
@@ -224,6 +225,8 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
     typography: {
       heading: oneOf(at(raw, "typography", "heading"), HEADING_FONTS, d.typography.heading),
       body: oneOf(at(raw, "typography", "body"), BODY_FONTS, d.typography.body),
+      // The hand note's face (`accent.ts`): none, absent or unknown leaves it out
+      ...accentOf(at(raw, "typography", "accent")),
     },
     radius: oneOf(at(raw, "radius"), RADIUS_STEPS, d.radius),
     product_card: {
@@ -315,6 +318,7 @@ export function themeStyle(
   if (typography.body !== DEFAULT_THEME.typography.body) {
     declarations.push(`--font-sans:${fontValue(typography.body)}`)
   }
+  declarations.push(...accentDeclarations(settings))
   const scale = RADIUS_SCALE[radius]
   if (scale) {
     declarations.push(`--radius-scale:${scale}`)

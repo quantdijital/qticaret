@@ -9,14 +9,21 @@ import type {
   Translate,
   TrustBadgeView,
 } from "@qticaret/ui"
+import { handNoteView } from "./accent"
 import { currentShared } from "./layout"
 import { EMPTY_VALUES } from "./search-form"
 import { currentSearchForm } from "./search-form-data"
+import { noteInHand } from "./theme-settings"
 
-/** What the opening reads beside its own fields: the shop's search box and its trust badges. */
+/**
+ * What the opening reads beside its own fields: the shop's search box, its
+ * trust badges, and whether its hand note is drawn in the accent face
+ * (absent: not).
+ */
 export interface HeroFullSource {
   search: SearchFormView | null
   badges: readonly TrustBadgeView[]
+  hand?: boolean
 }
 
 /**
@@ -42,12 +49,15 @@ function heroVideo(section: StoreHeroFull): HeroVideoView | null {
 export function heroFullParts(section: StoreHeroFull, source: HeroFullSource): HeroFullView {
   const settings = heroFullSettingsOf(section)
   const accent = section.title_accent?.trim() ?? ""
+  const note = handNoteView(section.note, source.hand === true)
   return {
     settings,
     accent: accent === "" ? null : accent,
     search: settings.action === "search" ? source.search : null,
     trust: section.show_trust === true ? source.badges.slice(0, HERO_FULL_LIMITS.trust) : [],
     video: heroVideo(section),
+    // The hand note only when there is one: an opening without it is the view it was
+    ...(note ? { note } : {}),
   }
 }
 
@@ -58,11 +68,13 @@ export function heroFullParts(section: StoreHeroFull, source: HeroFullSource): H
  */
 export async function heroFullView(section: StoreHeroFull, t: Translate): Promise<HeroFullView> {
   const { action } = heroFullSettingsOf(section)
-  const [search, badges] = await Promise.all([
+  const [search, badges, hand] = await Promise.all([
     action === "search" ? currentSearchForm(EMPTY_VALUES, t) : Promise.resolve(null),
     section.show_trust === true
       ? currentShared().then((shared) => shared.trust_badges)
       : Promise.resolve([]),
+    // The theme's accent face, read only for an opening with a note
+    noteInHand(section.note),
   ])
-  return heroFullParts(section, { search, badges })
+  return heroFullParts(section, { search, badges, hand })
 }

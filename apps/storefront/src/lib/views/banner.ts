@@ -3,6 +3,7 @@ import type { StoreBannerSection } from "@qticaret/types"
 import { bannerSplitEdgeOf, bannerStepOf, bannerToneOf } from "@qticaret/types/section-banner"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { BannerSectionView, Translate } from "@qticaret/ui"
+import { handNoteView } from "./accent"
 import { layoutImage, layoutLink } from "./layout"
 
 /**
@@ -13,7 +14,13 @@ import { layoutImage, layoutLink } from "./layout"
  * tone as the contract knows them (an unknown one, or none from a backend
  * before them, read as the default).
  */
-export function bannerView(section: StoreBannerSection, t: Translate): BannerSectionView {
+export function bannerView(
+  section: StoreBannerSection,
+  t: Translate,
+  /** The split's hand note in the shop's accent face (`noteInHand`); absent: not. */
+  hand = false
+): BannerSectionView {
+  const note = handNoteView(section.note, hand)
   return {
     id: section.id,
     type: "banner",
@@ -48,6 +55,8 @@ export function bannerView(section: StoreBannerSection, t: Translate): BannerSec
           variant: "split" as const,
           eyebrow: section.eyebrow ?? null,
           edge: bannerSplitEdgeOf(section.edge),
+          // The hand note only when there is one: a split without it is the view it was
+          ...(note ? { note } : {}),
         }
       : {}),
   }

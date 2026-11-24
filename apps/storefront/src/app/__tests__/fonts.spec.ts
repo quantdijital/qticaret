@@ -6,11 +6,12 @@ import { isStaticFile } from "@/lib/seo/paths"
 import { DEFAULT_THEME, THEME_FONTS } from "@/lib/views/theme"
 import type { ThemeBodyFont, ThemeHeadingFont } from "@qticaret/types"
 import { entry } from "@/themes/atolye"
-import { FONT_FILES, FONT_PRELOAD_BUDGET, fontPreloads } from "../fonts"
+import { ACCENT_FONT_FILES, FONT_FILES, FONT_PRELOAD_BUDGET, fontPreloads } from "../fonts"
 
 const publicDir = fileURLToPath(new URL("../../../public", import.meta.url))
 const css = readFileSync(fileURLToPath(new URL("../fonts.css", import.meta.url)), "utf8")
-const listed = Object.values(FONT_FILES).flat()
+const accentFiles = Object.values(ACCENT_FONT_FILES).flat()
+const listed = [...Object.values(FONT_FILES).flat(), ...accentFiles]
 
 const HEADINGS: readonly ThemeHeadingFont[] = [
   "fraunces",

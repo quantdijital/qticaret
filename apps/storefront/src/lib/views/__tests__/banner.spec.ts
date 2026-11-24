@@ -95,3 +95,26 @@ describe("the picture band's view (adr/0049 Ek 2026-11-14 §3.3 E2)", () => {
     expect(view.slides[0]?.secondFirst).toBe(true)
   })
 })
+
+describe("the split band's hand note", () => {
+  const split = (more: Partial<StoreBannerSection>): StoreBannerSection => ({
+    id: "afis2",
+    type: "banner",
+    variant: "split",
+    slides: [{ image: image("genis"), heading: "Kış", text: null, link: link("/kis") }],
+    ...more,
+  })
+
+  it("carries the note on a split only, in the accent face when asked", () => {
+    expect(bannerView(split({ note: " Sizi bekliyoruz! " }), t, true).note).toEqual({
+      text: "Sizi bekliyoruz!",
+      hand: true,
+    })
+    expect(bannerView(split({ note: "Merhaba" }), t).note).toEqual({ text: "Merhaba", hand: false })
+    // None: no note in the view at all; today's band never carries one
+    expect(bannerView(split({ note: null }), t)).not.toHaveProperty("note")
+    expect(bannerView(split({ variant: "standard", note: "Merhaba" }), t, true)).not.toHaveProperty(
+      "note"
+    )
+  })
+})
