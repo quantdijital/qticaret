@@ -11,6 +11,10 @@ import { MODES, inMode } from "./support/theme"
  */
 const SCREENS = [...SECTIONS, ...SETTINGS, "/reset-password"]
 
+// Each test opens its own screen and writes nothing, so the file's tests share
+// the workers (and the CI's two shards) instead of queueing behind one (adr/0081)
+test.describe.configure({ mode: "parallel" })
+
 async function seriousIssues(page: Page): Promise<string[]> {
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
