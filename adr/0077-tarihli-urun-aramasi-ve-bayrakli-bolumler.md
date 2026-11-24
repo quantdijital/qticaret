@@ -95,6 +95,13 @@ Fiyata göre sıralama ve fiyat süzgeci dizindeki fiyatı kullanır. Tarihli ü
 - `catalog.booking` kapalı: 404 (`requireFeature`, ilk ara katman). Hız sınırı `departure_calendar`: IP başına dakikada 60. Süreç içi önbellek 60 sn; anahtar ay + kategori + kişi + satış kanalları. Yanıt `Cache-Control: no-store`.
 - Kapsam dışı (PR6 isterse): `q` ve nitelik süzgeci (ör. `gidilecek_yer`) takvimde yok; takvim kategori ve kişiyle daralır.
 
+**Uygulama notu (PR6, takvim arayüzü).**
+
+- **Ara uç.** `GET /api/search/calendar?month=&kategori=&kisi=` (vitrin): parametreler backend'e gitmeden doğrulanır (ay aramanın okuduğu 12 aydan biri, kategori handle, kişi 1–20; bilinmeyen ya da yinelenen parametre 400). Fiyat yalnız gösterilir; vitrin sunucuda yazar (`12.400,00 TL`, telefonda `₺12,4 B`, 768 px'ten `₺12.400`). Bayrak kapalı (backend 404): boş gün listesi; 429 aynen, diğer hata 502. `Cache-Control: private, max-age=60`.
+- **Tema.** `SearchFormDatesView.calendar` isteğe bağlı alan (sözleşme geriye uyumlu; yoksa yalnız düz alanlar). Sunucudan giden HTML ve JavaScript'siz form değişmedi: takvim sayfa tarayıcıda çalışınca devreye girer (`useSyncExternalStore`); gün alanları salt okunur olur, ay alanı seçilen ayları (en çok 3) aynı adla gizli alana yazan bir düğmeye döner. Pencere Radix Dialog (`LayerPortal`): telefonda alttan sayfa, 768 px'ten ortada; ızgara WAI-ARIA tarih seçici deseni (oklar, Page Up/Down, Esc; odak açan alana döner). Kalkışı olmayan gün soluk ama seçilebilir; bugünden önceki ve başlangıçtan 62 günden uzak gün basılamaz.
+- **"Yalnız açılınca yüklenir".** Dinamik `import()` kullanılmadı; takvim kodu küçük tutuldu (tarih kütüphanesi yok, paket eklenmedi), ay verisi yalnız pencere açılınca ve gösterilen ay için istenir, sayfa ömrünce saklanır.
+- **Kilit etkisi yok.** Yeni CSS dosyası yok (yalnız Tailwind sınıfları); kilitli görünümlerin HTML'i ve `styles.lock.json` aynı.
+
 ### 7. Doğal dille arama (isteğe bağlı üçüncü kat)
 
 "Kendi cümlenle ara": müşteri "ağustosta iki kişi Kapadokya" yazar, sunucu bunu §2'deki süzgeçlere çevirir.

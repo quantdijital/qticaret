@@ -147,7 +147,7 @@ describe("every portal of the theme goes through its layers", () => {
     expect(bare).toEqual([])
   })
 
-  it("draws the six layers through LayerPortal", () => {
+  it("draws the seven layers through LayerPortal", () => {
     const users = sourceFiles(THEME_SRC)
       .filter((file) => readFileSync(file, "utf8").includes("<LayerPortal>"))
       .map((file) => relative(THEME_SRC, file))
@@ -156,6 +156,8 @@ describe("every portal of the theme goes through its layers", () => {
       "frame/QuickViewDialog.tsx",
       "frame/SearchDrop.tsx",
       "frame/Sheet.tsx",
+      // adr/0077 §6: the search box's calendar
+      "parts/DatePicker.tsx",
       "product/Installments.tsx",
       "product/Write.tsx",
       "product/Zoom.tsx",
