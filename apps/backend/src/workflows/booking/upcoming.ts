@@ -124,7 +124,7 @@ export function upcomingRows(
   byBookable: ReadonlyMap<string, UpcomingProduct>,
   bases: ReadonlyMap<string, Kurus | null>,
   limit: number,
-  shown: ReadonlyMap<string, CardShown> = new Map()
+  shown: ReadonlyMap<string, CardShown>
 ): UpcomingDeparture[] {
   return [...slots]
     .flatMap((slot) => {

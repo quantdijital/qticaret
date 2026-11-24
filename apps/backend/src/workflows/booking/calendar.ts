@@ -108,7 +108,7 @@ export function calendarDays(
   rows: readonly CalendarRow[],
   products: ReadonlyMap<string, DatedCardProduct>,
   bases: ReadonlyMap<string, Kurus | null>,
-  shown: ReadonlyMap<string, CardShown> = new Map()
+  shown: ReadonlyMap<string, CardShown>
 ): CalendarDay[] {
   const days = new Map<string, { departures: number; lowest: CardShown | null }>()
   for (const row of rows) {

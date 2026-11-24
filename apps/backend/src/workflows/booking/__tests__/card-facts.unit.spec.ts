@@ -3,6 +3,10 @@ import type { Kurus } from "../../../lib/money"
 import type { SlotAvailability } from "../../../modules/booking/service"
 import { bookingCardFactOf, cardUnits } from "../card-facts"
 import type { DatedCardProduct } from "../card-facts"
+import type { CardShown } from "../card-price"
+
+// No promotion worked out for any place: each at its own price
+const NONE = new Map<string, CardShown>()
 
 // adr/0076 §10: a dated card's from price and next departure, on the server
 const NOW = new Date("2026-12-01T09:00:00.000Z")
@@ -51,7 +55,9 @@ describe("bookingCardFactOf", () => {
       bases,
       [slot("s1", 48, { price_adjustments: { child: 25_050 } }), slot("s2", 96)],
       "try",
-      NOW
+      NOW,
+      false,
+      NONE
     )
     expect(fact).toEqual({
       from_price: 1500,
@@ -67,7 +73,9 @@ describe("bookingCardFactOf", () => {
       bases,
       [slot("s1", 48, { price_adjustments: { adult: -10_000 } }), slot("s2", 96)],
       "try",
-      NOW
+      NOW,
+      false,
+      NONE
     )
     expect(fact?.from_price).toBe(1400)
   })
@@ -83,24 +91,30 @@ describe("bookingCardFactOf", () => {
         slot("next", 72),
       ],
       "try",
-      NOW
+      NOW,
+      false,
+      NONE
     )
     expect(fact?.next_departure).toBe(new Date(NOW.getTime() + 72 * HOUR).toISOString())
   })
 
   it("keeps the base price without a departure on sale, and no departure", () => {
-    const fact = bookingCardFactOf(tour, bases, [slot("late", 2)], "try", NOW)
+    const fact = bookingCardFactOf(tour, bases, [slot("late", 2)], "try", NOW, false, NONE)
     expect(fact).toMatchObject({ from_price: 1500, next_departure: null })
   })
 
   it("says no price when no category has one, and never prices a difference in another currency", () => {
-    expect(bookingCardFactOf(tour, new Map(), [slot("s1", 48)], "try", NOW)?.from_price).toBe(null)
+    expect(
+      bookingCardFactOf(tour, new Map(), [slot("s1", 48)], "try", NOW, false, NONE)?.from_price
+    ).toBe(null)
     const euro = bookingCardFactOf(
       { ...tour, variants: [{ id: "adult" }] },
       bases,
       [slot("s1", 48, { price_adjustments: { adult: 5_000 } }), slot("s2", 72)],
       "eur",
-      NOW
+      NOW,
+      false,
+      NONE
     )
     expect(euro?.from_price).toBe(1500)
   })
@@ -112,10 +126,14 @@ describe("bookingCardFactOf", () => {
         bases,
         [],
         "try",
-        NOW
+        NOW,
+        false,
+        NONE
       )
     ).toBeNull()
-    expect(bookingCardFactOf({ ...tour, bookable: null }, bases, [], "try", NOW)).toBeNull()
+    expect(
+      bookingCardFactOf({ ...tour, bookable: null }, bases, [], "try", NOW, false, NONE)
+    ).toBeNull()
   })
 
   it("says a date search's card's places left and marks it in range (adr/0077 §4)", () => {
@@ -125,7 +143,8 @@ describe("bookingCardFactOf", () => {
       [slot("s1", 48, { available: 3 }), slot("s2", 96)],
       "try",
       NOW,
-      true
+      true,
+      NONE
     )
     expect(fact).toMatchObject({
       from_price: 1500,
@@ -134,13 +153,13 @@ describe("bookingCardFactOf", () => {
       in_range: true,
     })
     // None inside the dates: no departure, no places, the base prices
-    expect(bookingCardFactOf(tour, bases, [], "try", NOW, true)).toMatchObject({
+    expect(bookingCardFactOf(tour, bases, [], "try", NOW, true, NONE)).toMatchObject({
       next_departure: null,
       left: null,
       in_range: true,
     })
     // Without dates the fact has neither field
-    const plain = bookingCardFactOf(tour, bases, [slot("s1", 48)], "try", NOW)
+    const plain = bookingCardFactOf(tour, bases, [slot("s1", 48)], "try", NOW, false, NONE)
     expect(plain).not.toHaveProperty("left")
     expect(plain).not.toHaveProperty("in_range")
   })
@@ -194,7 +213,7 @@ describe("bookingCardFactOf", () => {
       false,
       new Map([["adult:0", { current: kurus(150_000), before: null }]])
     )
-    expect(plain).toEqual(bookingCardFactOf(tour, bases, slots, "try", NOW))
+    expect(plain).toEqual(bookingCardFactOf(tour, bases, slots, "try", NOW, false, NONE))
     expect(plain).not.toHaveProperty("before")
   })
 
@@ -209,10 +228,10 @@ describe("bookingCardFactOf", () => {
     }
     const slots = [slot("s1", 48, { price_adjustments: { adult: -20_000 } }), slot("s2", 96)]
     // The adult ranks first: its cheaper departure, not the child's lower base
-    expect(bookingCardFactOf(ranked, bases, slots, "try", NOW)?.from_price).toBe(1300)
+    expect(bookingCardFactOf(ranked, bases, slots, "try", NOW, false, NONE)?.from_price).toBe(1300)
     // The adult has no price: the child speaks
     const noAdult = new Map(bases)
     noAdult.set("adult", null)
-    expect(bookingCardFactOf(ranked, noAdult, slots, "try", NOW)?.from_price).toBe(900)
+    expect(bookingCardFactOf(ranked, noAdult, slots, "try", NOW, false, NONE)?.from_price).toBe(900)
   })
 })

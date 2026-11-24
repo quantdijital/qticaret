@@ -3,6 +3,10 @@ import type { Kurus } from "../../../lib/money"
 import type { SlotAvailability } from "../../../modules/booking/service"
 import { FEW_LEFT, horizon, upcomingRows } from "../upcoming"
 import type { UpcomingProduct } from "../upcoming"
+import type { CardShown } from "../card-price"
+
+// No promotion worked out for any place: each at its own price
+const NONE = new Map<string, CardShown>()
 
 const tour = (id: string, bookable: string, more: Partial<UpcomingProduct> = {}) =>
   ({
@@ -65,7 +69,8 @@ describe("upcoming departures' rows (adr/0077 §10)", () => {
       ],
       byBookable,
       bases,
-      6
+      6,
+      NONE
     )
 
     expect(rows).toEqual([
@@ -92,7 +97,8 @@ describe("upcoming departures' rows (adr/0077 §10)", () => {
       ],
       byBookable,
       bases,
-      2
+      2,
+      NONE
     )
 
     expect(rows.map((row) => row.slot_id)).toEqual(["s_a1", "s_a2"])
@@ -103,7 +109,8 @@ describe("upcoming departures' rows (adr/0077 §10)", () => {
       [slot("s_a1", "bk_a", "2027-01-05T06:00:00Z", 9)],
       byBookable,
       new Map<string, Kurus | null>([["a_adult", null]]),
-      3
+      3,
+      NONE
     )
 
     expect(rows[0]?.from_price).toBeNull()

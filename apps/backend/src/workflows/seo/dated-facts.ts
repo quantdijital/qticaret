@@ -42,7 +42,7 @@ export function departureFactsOf(
   bases: ReadonlyMap<string, Kurus | null>,
   slots: readonly SlotAvailability[],
   now: Date,
-  shown: ReadonlyMap<string, CardShown> = new Map()
+  shown: ReadonlyMap<string, CardShown>
 ): DepartureFacts[] {
   return namedSlots(product, slots, now).map((slot) => ({
     startsAt: slot.starts_at.toISOString(),

@@ -167,7 +167,9 @@ export function cardUnits(
  * from price is the lowest of its places (`cardUnits`) as shown (`shown`,
  * by `placeKey`: the automatic promotions taken off, the price before
  * them when the price-before rule allows); a place without a display is
- * its own price.
+ * its own price. `shown` has no default, here and in the calendar, the
+ * upcoming departures and the structured data: a caller that left it out
+ * would say a price without the promotions the cart takes off.
  */
 export function bookingCardFactOf(
   product: DatedCardProduct,
@@ -175,8 +177,8 @@ export function bookingCardFactOf(
   slots: readonly SlotAvailability[],
   currencyCode: string,
   now: Date,
-  inRange = false,
-  shown: ReadonlyMap<string, CardShown> = new Map()
+  inRange: boolean,
+  shown: ReadonlyMap<string, CardShown>
 ): BookingCardFact | null {
   const bookable = product.bookable
   if (!bookable || product.product_extension?.booking_mode !== "departure") {
