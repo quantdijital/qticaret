@@ -99,6 +99,25 @@ const takesAny = (words: readonly string[], typed: string) =>
   )
 
 /**
+ * Loose, a sentence is never one keyword whole, so the phrase bonus does
+ * not reach it: a keyword of several words all met in the sentence ("kargo
+ * ücreti" in "kargo ücreti nereden değişir") counts its further words once
+ * more, the best such keyword only. Words scattered over a screen ("kargo"
+ * beginning "kargoya ver", a name's word) then do not outrank it.
+ */
+function wholeKeywordBonus(keywords: readonly string[], typed: readonly string[]): number {
+  let most = 0
+  for (const keyword of keywords) {
+    // As the sentence's own: a word under three letters ("e" of "e-posta") is not asked for
+    const words = wordsOf(keyword).filter((word) => word.length >= LOOSE_MIN_WORD)
+    if (words.length > 1 && words.every((word) => typed.some((each) => takesAny([word], each)))) {
+      most = Math.max(most, WEIGHTS.keyword * (words.length - 1))
+    }
+  }
+  return most
+}
+
+/**
  * The screens matching every typed word by a word's beginning, best first
  * (ties keep the map's order), offered to this staff member: a screen
  * under one they may not open is not offered either. `loose` (the
@@ -160,6 +179,9 @@ export function searchPanelMap<Entry extends PanelMapEntry>(
       score += PHRASE_BONUS.label + inLabel
     } else if (inKeyword >= 0) {
       score += PHRASE_BONUS.keyword + inKeyword
+    }
+    if (loose) {
+      score += wholeKeywordBonus(keywords, typed)
     }
     hits.push({ screen, trail, score })
   }

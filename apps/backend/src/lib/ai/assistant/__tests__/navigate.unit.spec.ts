@@ -71,6 +71,15 @@ describe("the panel's map, as the assistant reads it", () => {
     expect(searchScreens("qzx wvq", PANEL_SCREENS)).toEqual([])
   })
 
+  it("puts a keyword met whole before words scattered over a screen", () => {
+    // "orders" is the orders' name, "kargo" begins its "kargoya ver"; "kargo ücreti" is one keyword
+    const sentence = '{"open_screen":{"key":"orders"}} kargo ücreti nereden değişir'
+    expect(searchScreens(sentence, PANEL_SCREENS)[0]?.key).toBe("settings.shipping.options")
+    expect(searchScreens("siparişte kargo ücreti nereden değişir", PANEL_SCREENS)[0]?.key).toBe(
+      "settings.shipping.options"
+    )
+  })
+
   it("names only capabilities the backend knows, so no screen is hidden by a typo", () => {
     const known = Object.keys(capabilitiesOf("owner"))
     for (const screen of PANEL_MAP) {

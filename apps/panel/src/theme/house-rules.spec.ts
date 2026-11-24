@@ -89,10 +89,13 @@ describe("the panel's house rules (docs/18 §9)", () => {
 
   it("opens a record in the standard dialog, never in a side sheet", () => {
     // The owner, 2026-11-06: a row opens one dialog on the size scale. The phone's menu
-    // (admin-ui's sidebar) and the full-screen theme editor's own drawers stay sheets.
+    // (admin-ui's sidebar) and the full-screen theme editor's own drawers stay sheets. The
+    // assistant opens no record: it is a side panel by the owner's wish (adr/0079, "like VS
+    // Code's side bar"), on the phone a sheet.
     const drawers = new Set([
       "features/storefront/editor/editor-shell.tsx",
       "features/storefront/editor/revisions-sheet.tsx",
+      "features/assistant/assistant-panel.tsx",
     ])
     expect(breaches(/from "@qticaret\/admin-ui\/ui\/sheet"/g, (file) => drawers.has(file))).toEqual(
       []

@@ -1,5 +1,6 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakeSecret } from "@qticaret/testing"
+import { screenFeatures, visibleScreens } from "../../src/lib/ai/assistant/screens"
 import { resetAiBreakers } from "../../src/lib/ai/breaker"
 import { fakeToolConnector } from "../../src/lib/ai/connectors/fake-tools"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
@@ -157,8 +158,20 @@ medusaIntegrationTestRunner({
       const answer = await turn(readonly.headers, { message: "kargo ücreti nereden değişir" })
       expect(answer.status).toBe(200)
       const reply = answer.data.messages[1]
-      expect(reply?.screens ?? []).toEqual([])
-      expect(reply?.text).not.toContain("settings.")
+      /*
+       * The panel's loose search finds screens the role does see ("kargo"
+       * begins "kargoya ver" of the orders): naming one of those is no
+       * leak. Every screen named is the role's own, the shipping rates
+       * (needs `settings`) never are.
+       */
+      const seen = new Set(
+        visibleScreens("readonly", new Set(screenFeatures())).map((screen) => screen.key)
+      )
+      expect(seen.has("settings.shipping.options")).toBe(false)
+      for (const screen of reply?.screens ?? []) {
+        expect(seen.has(screen.key)).toBe(true)
+      }
+      expect(reply?.text).not.toContain("settings.shipping")
     })
 
     it("stops at the person's ceiling for the day, recording what was called", async () => {
