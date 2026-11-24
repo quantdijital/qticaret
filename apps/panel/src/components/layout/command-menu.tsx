@@ -22,6 +22,7 @@ import {
 } from "@qticaret/admin-ui/ui/command"
 import { useLogout } from "@/features/auth/api/me"
 import { SearchResults } from "@/features/search/search-results"
+import { SEO_PART_ITEMS } from "@/features/seo/parts"
 import { ALL_NAV_ITEMS } from "./navigation"
 import { useNavAccess } from "./use-nav-access"
 
@@ -118,6 +119,33 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
             </CommandItem>
           ))}
         </CommandGroup>
+        {/* Settings > SEO's tabs, each its own way in (the owner, 2026-11-23): shown once typing */}
+        {search ? (
+          <CommandGroup heading={t("nav.seo")}>
+            {SEO_PART_ITEMS.filter((item) =>
+              allowed({
+                key: item.part,
+                to: "/settings/seo",
+                icon: item.icon,
+                ...(item.needs ? { needs: item.needs } : {}),
+              })
+            ).map((item) => {
+              const label = `${t("nav.seo")} · ${t(`settings.seo.tabs.${item.label}`)}`
+              return (
+                <CommandItem
+                  key={item.part}
+                  value={label}
+                  onSelect={() => {
+                    run(() => void navigate({ to: "/settings/seo", search: { part: item.part } }))
+                  }}
+                >
+                  <item.icon />
+                  {label}
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
+        ) : null}
         <CommandSeparator />
         <CommandGroup heading={t("command.actions")}>
           {SHORTCUTS.map((shortcut) => (

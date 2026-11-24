@@ -11,7 +11,7 @@ import type { SeoSetupEntry, SeoSetupItem } from "@/features/seo/api/setup"
 
 const C = "seo.setup"
 
-// Where each item is done; the legal identity on the store profile's own tab
+// Where each item is done
 const WHERE: Record<
   SeoSetupItem,
   | "/settings/store"
@@ -30,9 +30,18 @@ const WHERE: Record<
   indexnow: "/settings/features",
 }
 
+// The tab it is done on: the store profile's legal identity, Settings > SEO's own parts
+const PART: Partial<Record<SeoSetupItem, string>> = {
+  legal_identity: "legal",
+  canonical_host: "addresses",
+  robots: "search",
+  share_image: "pages",
+}
+
 function Item({ entry, mayAct }: { entry: SeoSetupEntry; mayAct: boolean }) {
   const { t } = useTranslation()
   const where = WHERE[entry.key]
+  const part = PART[entry.key]
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t px-5 py-3">
       <CircleDashed className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -45,10 +54,7 @@ function Item({ entry, mayAct }: { entry: SeoSetupEntry; mayAct: boolean }) {
       {/* Google's items open where its account is connected, even while that is the step */}
       {mayAct ? (
         <Button asChild variant="outline" size="sm" className="ml-8 shrink-0 sm:ml-0">
-          <Link
-            to={where}
-            {...(entry.key === "legal_identity" ? { search: { part: "legal" } } : {})}
-          >
+          <Link to={where} {...(part ? { search: { part } } : {})}>
             {t(`${C}.go`)}
             <ArrowRight />
           </Link>

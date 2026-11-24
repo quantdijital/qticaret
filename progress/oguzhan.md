@@ -6,6 +6,11 @@
 
 - **Dal:** `oguzhan/dogal-dil-arayuz`. Vitrin: `/arama?q=<≥3 sözcük>` bayrak açıkken `POST /store/search/interpret` ile süzgece çevrilir, işaretli kanonik adrese 307 (`_anlam=1`), orada "Anladığım:" çipleri (nofollow, kaldırılabilir); hata/kapalıda düz `q` araması. Kutunun altında KVKK ipucu (yalnız bayrak açıkken). Backend: `features.natural_search`, bayrak yazımı yalnız sahip. Panel: Ayarlar › Yapay zekâ anahtarı + onay penceresi (Özellikler sayfasında da). ADR'ye PR9 notu.
 - **Sıradaki işler:** `security-reviewer` (public uç tüketimi, KVKK); üst bilgi canlı aramasına ipucu (takip).
+## 2026-11-24: adr/0077 PR8, Giriş bölümüne "Tam görsel" biçimi (#309)
+
+- **Dal:** `oguzhan/kapak-tam-gorsel` (#288 `oguzhan/arama-kutusu` üstüne kurulu; taban `dev`). Hero'ya üçüncü biçim `full_image`; `standard` ve `category_list` çizimine dokunulmadı. Ayarlar (kapalı liste, ilki varsayılan): `action` (düğme / arama kutusu, #288'in tek `SearchForm`'u), `search_position` (içinde / alt kenara taşan kart), `height`, `scrim`, `align`, `image_side` (arkada / yanda), `edge` (düz / dalgalı, `hero-full.css` maskesi), `title_accent` (aynı `h1` içinde ana renkte ikinci satır), `show_trust` (ortak güven rozetleri, en çok 4, taşan beyaz kutu). İkinci düğme mevcut `links`'in ikincisi. Görsel yoksa grafit sahne (`end` de `full` gibi çizilir). Zincir: `packages/types` `section-hero-full.ts`, backend `sections/hero.ts` + `hero-full.ts`, `packages/ui` `HeroFullView`, vitrin `views/hero-full.ts`, Atölye `HeroFull.tsx` + `HeroBlock.tsx`, panel `hero-full-fields.tsx` + `hero-full-registry.ts`; adr/0077 §9 eki.
+- **Kilit:** `pnpm lock:presets` bilerek; HTML aynı, yalnız `styles.lock.json`. Görsel yuvası taraması 34 → 35, gölge taramasına `sections/HeroFull.tsx`.
+- **Açık:** tarayıcıda gözle bakılmadı, `style:capture` koşulmadı ("Rota" hazır görünümü, PR11 öncesi 390 ve 1440 px'te bakılacak); backend typecheck yerelde dokunulmayan `scripts/bootstrap`, `scripts/seed` dosyalarında TS7006 verdi (CI'da bakılacak); el yazısı not ve kapakta video düğmesi kapsam dışı.
 
 ## 2026-11-22: adr/0076 D7b, rezervasyon e-postaları, hatırlatma, voucher
 

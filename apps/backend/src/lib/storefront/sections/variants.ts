@@ -17,7 +17,8 @@ export const SECTION_VARIANTS = {
   // `card` (adr/0077 §10 Ek): one white floating box, lifted over the section before it while `lift` is on
   trust_badges: ["strip", "lined", "card"],
   // H17: the category list, the opening's tile and two category tiles side by side
-  hero: ["standard", "category_list"],
+  // `full_image` (adr/0077 §9): the photograph as the whole opening
+  hero: ["standard", "category_list", "full_image"],
   // Today's picture tiles; `linked` each category a card with its subcategories' links;
   // `collage` photo-led cards filling each row, the first wider
   // `panels` (Ek 2026-11-19) frameless graphite panels, the first tall beside the others

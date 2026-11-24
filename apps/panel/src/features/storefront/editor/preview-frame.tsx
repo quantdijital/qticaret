@@ -157,7 +157,9 @@ export function PreviewFrame({
         text={t(`${V}.noHost`)}
         action={
           <Button asChild variant="outline" size="sm">
-            <Link to="/settings/seo">{t(`${V}.noHostLink`)}</Link>
+            <Link to="/settings/seo" search={{ part: "addresses" }}>
+              {t(`${V}.noHostLink`)}
+            </Link>
           </Button>
         }
       />

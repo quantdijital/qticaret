@@ -101,7 +101,7 @@ const CASES: Case[] = [
   { name: "new segment", path: "/customers/groups", open: click("Yeni segment") },
   { name: "team invite", path: "/settings/security?part=team", open: click("Davet et") },
   { name: "new API key", path: "/settings/api", open: click("Yeni anahtar") },
-  { name: "new redirect", path: "/seo/redirects", open: click("Yönlendirme ekle") },
+  { name: "new redirect", path: "/settings/seo?part=redirects", open: click("Yönlendirme ekle") },
   { name: "new menu", path: "/storefront/menus", open: click("Menü ekle") },
   { name: "new location", path: "/settings/shipping?part=locations", open: click("Depo ekle") },
   // The owner, 2026-11-05: a variant in one dialog, the media dialog on the size scale

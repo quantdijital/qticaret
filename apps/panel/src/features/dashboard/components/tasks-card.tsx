@@ -144,7 +144,8 @@ function rows(tasks: DashboardTasks, reach: Reach): TaskRow[] {
             key: "seoSetup" as const,
             icon: SearchCheck,
             count: tasks.seo_setup_open,
-            to: "/seo",
+            to: "/settings/seo",
+            search: { part: "overview" },
             urgent: false,
           },
         ]
