@@ -79,6 +79,8 @@ describe("the full image opening's start", () => {
       ...HERO_FULL_DEFAULTS,
       title_accent: null,
       show_trust: false,
+      video_url: null,
+      video_label: null,
     })
     const written = { ...hero(), heading: "Doğayı keşfet", image: { url: "/vadi.webp", alt: null } }
     const switched = switchVariant(written, "full_image")
@@ -202,6 +204,7 @@ describe("the full image opening in the settings search and the preview", () => 
     expect(keys(full())).toEqual([
       ["action", "content"],
       ["show_trust", "content"],
+      ["video_url", "video"],
       ["height", "layout"],
       ["align", "layout"],
       ["image_side", "layout"],
@@ -212,6 +215,7 @@ describe("the full image opening in the settings search and the preview", () => 
       ["action", "content"],
       ["search_position", "content"],
       ["show_trust", "content"],
+      ["video_url", "video"],
       ["height", "layout"],
       ["align", "layout"],
       ["image_side", "layout"],

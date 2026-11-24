@@ -57,6 +57,7 @@ const full = (
   accent: null,
   search: null,
   trust: [],
+  video: null,
   ...parts,
 })
 

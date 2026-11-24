@@ -37,7 +37,24 @@ describe("heroFullParts", () => {
       accent: null,
       search: null,
       trust: [],
+      video: null,
     })
+  })
+
+  it("carries the video's host and id only, never the pasted link, with the button's words", () => {
+    const source = { search: null, badges: [] }
+    const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42"
+
+    expect(
+      heroFullParts(section({ video_url: url, video_label: " Tanıtım " }), source).video
+    ).toEqual({ host: "youtube", id: "dQw4w9WgXcQ", label: "Tanıtım" })
+    expect(heroFullParts(section({ video_url: "vimeo.com/76979871" }), source).video).toEqual({
+      host: "vimeo",
+      id: "76979871",
+      label: null,
+    })
+    expect(heroFullParts(section({ video_url: "https://evil.example/v" }), source).video).toBeNull()
+    expect(heroFullParts(section({ video_label: "Tanıtım" }), source).video).toBeNull()
   })
 
   it("reads a step off its list as its default, a listed one as it is", () => {
@@ -82,7 +99,13 @@ describe("heroFullView", () => {
   it("reads neither the search box nor the badges for an opening that shows neither", async () => {
     const view = await heroFullView(section(), t)
 
-    expect(view).toEqual({ settings: HERO_FULL_DEFAULTS, accent: null, search: null, trust: [] })
+    expect(view).toEqual({
+      settings: HERO_FULL_DEFAULTS,
+      accent: null,
+      search: null,
+      trust: [],
+      video: null,
+    })
     expect(search.currentSearchForm).not.toHaveBeenCalled()
     expect(layout.currentShared).not.toHaveBeenCalled()
   })

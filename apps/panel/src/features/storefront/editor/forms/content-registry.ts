@@ -70,6 +70,8 @@ export type ContentField =
   | "action"
   | "search_position"
   | "show_trust"
+  | "video_url"
+  | "video_label"
   | "align"
   | "scrim"
   | "edge"

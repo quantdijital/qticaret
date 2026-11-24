@@ -38,6 +38,7 @@
     "./section-steps": "./src/store/section-steps.ts",
     "./section-search-box": "./src/store/section-search-box.ts",
     "./section-hero-full": "./src/store/section-hero-full.ts",
+    "./hero-video": "./src/store/hero-video.ts",
     "./section-collage": "./src/store/section-collage.ts",
     "./section-departures": "./src/store/section-departures.ts",
     "./section-pages": "./src/store/section-pages.ts",

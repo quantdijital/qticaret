@@ -9216,6 +9216,7 @@
         },
         "groups": {
           "buttons": "Düğmeler",
+          "video": "Video",
           "categoryList": "Kategori listesi",
           "tiles": "Yandaki karolar",
           "chips": "Hızlı bağlantılar",
@@ -9527,6 +9528,7 @@
       "problems": {
         "required": "Bu satırı yazın ya da kaldırın.",
         "tooLong": "En çok {{max}} karakter yazın.",
+        "videoInvalid": "Bir YouTube ya da Vimeo video bağlantısı yapıştırın (ör. https://youtu.be/… ya da https://vimeo.com/…).",
         "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
         "tokenUnknown": "Süslü parantez içinde tanınmayan bir bilgi var; bilgileri Bilgi ekle menüsünden ekleyin.",
         "linkLabel": "Dış adresin görünen yazısını girin.",
@@ -11283,6 +11285,20 @@
           "label": "Güven ikonlarını göster",
           "term": "trust badges",
           "hint": "Mağazanızın güven rozetleri (en çok 4) kapağın alt kenarında beyaz bir kutuda görünür."
+        },
+        "video": {
+          "url": {
+            "label": "Video adresi",
+            "term": "YouTube / Vimeo URL",
+            "placeholder": "https://www.youtube.com/watch?v=…",
+            "hint": "YouTube ya da Vimeo'daki videonun bağlantısını yapıştırın. Kapakta bir oynatma düğmesi çıkar; ziyaretçi basınca video bir pencerede açılır. Video basılmadan yüklenmez. Boş bırakırsanız düğme çizilmez."
+          },
+          "label": {
+            "label": "Düğme yazısı",
+            "term": "label",
+            "placeholder": "Videoyu izle",
+            "hint": "Boş bırakırsanız \"Videoyu izle\" yazar."
+          }
         },
         "height": {
           "label": "Yükseklik",

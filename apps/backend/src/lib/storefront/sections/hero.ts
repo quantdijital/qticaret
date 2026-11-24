@@ -3,6 +3,7 @@ import { image, optional, recordId, shopText, text } from "../layout-fields"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 import { HERO_FULL_DEFAULTS, HERO_FULL_LIMITS, HERO_FULL_SETTINGS } from "./hero-full"
+import { HERO_VIDEO_LIMITS, heroVideoOf } from "./hero-video"
 import type { HeroFullSetting, HeroFullStep } from "./hero-full"
 import { heroCatalogScroller } from "./scroller"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
@@ -120,11 +121,23 @@ const fullStep = <S extends HeroFullSetting>(name: S) => {
 }
 
 /**
+ * A YouTube or Vimeo video's link (`hero-video.ts`): any other refused,
+ * one longer than `HERO_VIDEO_LIMITS.url` before it is read; the
+ * storefront takes its id alone.
+ */
+const videoUrl = z
+  .string()
+  .trim()
+  .refine((value) => heroVideoOf(value) !== null, { message: "storefront_layout.video_invalid" })
+
+/**
  * adr/0077 §9, "Tam görsel": the picture as the whole opening (none: the
  * graphite stage), the words over it or (`image_side: end`) beside it; a
  * second heading line in the shop's colour, the buttons or the shop's one
  * search box (its fields the theme's), and the design's trust badges when
  * `show_trust`. The section holds neither the box's fields nor the badges.
+ * A YouTube or Vimeo link (`video_url`) adds a button that plays it in a
+ * lightbox, under its own words (`video_label`; none: the theme's).
  */
 const fullImage = z
   .object({
@@ -139,6 +152,8 @@ const fullImage = z
     image_side: fullStep("image_side"),
     edge: fullStep("edge"),
     show_trust: z.boolean().default(false),
+    video_url: optional(videoUrl),
+    video_label: optional(text(HERO_VIDEO_LIMITS.label)),
   })
   .strict()
 

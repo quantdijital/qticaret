@@ -55,6 +55,9 @@ export function hydrateHero(section: HeroSection, readers: Readers) {
       image_side: section.image_side,
       edge: section.edge,
       show_trust: section.show_trust,
+      // The storefront takes the video's id from the link and builds the player's address itself
+      video_url: section.video_url,
+      video_label: section.video_label,
     }
   }
   if (section.variant !== "category_list") {
