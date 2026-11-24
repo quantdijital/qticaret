@@ -63,6 +63,11 @@ export interface SearchFormCalendarView {
     weekdays: string[]
     /** "{date}, en düşük {price}, {count} kalkış": a day's button to a screen reader. */
     dayPriced: string
+    /**
+     * "{date}, en düşük {price}, önceki fiyat {before}, {count} kalkış": a
+     * day whose price has a price before it (`before`); absent, `dayPriced`.
+     */
+    dayPricedBefore?: string
     /** "{date}, {count} kalkış": a departure with no price. */
     dayCounted: string
     /** "{date}, kalkış yok". */
@@ -89,6 +94,14 @@ export interface SearchCalendarDayView {
   short: string | null
   /** "₺12.400": the price under the day from 768 px. */
   whole: string | null
+  /**
+   * "15.000,00 TL": the price before an automatic promotion, only when the
+   * price-before rule allows one (adr/0076 Ek "kalkış fiyatı
+   * promosyonlu"). Too narrow a day to strike it through: the price under
+   * the day takes the sale's colour, the button's name says it. Absent,
+   * the day is drawn as before.
+   */
+  before?: string
 }
 
 /** The calendar's answer for one month; days with no departure left out. */

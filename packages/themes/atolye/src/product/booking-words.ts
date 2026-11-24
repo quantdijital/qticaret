@@ -39,6 +39,7 @@ export const bookingWords = (t: Translate) => ({
   placesLeft: t("booking.places_left"),
   noSeat: t("booking.no_seat"),
   noPrice: t("booking.no_price"),
+  priceBefore: t("price.before"),
   decrease: t("booking.decrease"),
   increase: t("booking.increase"),
   countOf: t("booking.count_of"),

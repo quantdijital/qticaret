@@ -60,6 +60,23 @@ describe("GET /api/search/calendar", () => {
     })
   })
 
+  it("writes a day's price before its promotion only when the backend sent a higher one", async () => {
+    listings.departureCalendar.mockResolvedValueOnce({
+      month: "2026-12",
+      currency: "try",
+      days: [
+        { date: "2026-12-05", from_price: 12400, before: 15500, departures: 2 },
+        { date: "2026-12-06", from_price: 900, before: 900, departures: 1 },
+      ],
+    })
+    const answer = (await (await ask("?month=2026-12")).json()) as {
+      days: Record<string, unknown>[]
+    }
+
+    expect(answer.days[0]).toMatchObject({ price: "12.400,00 TL", before: "15.500,00 TL" })
+    expect(answer.days[1]).not.toHaveProperty("before")
+  })
+
   it("leaves the default party and an empty category out of the backend's question", async () => {
     await ask("?month=2026-11&kategori=&kisi=1")
     expect(listings.departureCalendar).toHaveBeenCalledWith({ month: "2026-11" })

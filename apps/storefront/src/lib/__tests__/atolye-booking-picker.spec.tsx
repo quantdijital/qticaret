@@ -51,7 +51,12 @@ const view: BookingView = {
       available: 2,
       status: "open",
       prices: [
-        { variantId: "variant_yetiskin", price: "1.750,00 TL", kurus: 175000 },
+        {
+          variantId: "variant_yetiskin",
+          price: "1.750,00 TL",
+          kurus: 175000,
+          before: "2.000,00 TL",
+        },
         { variantId: "variant_bebek", price: "0,00 TL", kurus: 0 },
       ],
     },
@@ -169,6 +174,20 @@ describe("the picker in the browser", () => {
     expect(total()).toContain("3.500,00")
     // No child price on that departure: its plus is off
     expect(button("Çocuk sayısını artır").disabled).toBe(true)
+  })
+
+  it("strikes a category's price before its promotion through, read as the price before", () => {
+    const struck = () => [...host.querySelectorAll("s")].map((each) => each.textContent)
+    // The first departure has none: its prices as before
+    expect(struck()).toEqual([])
+
+    act(() => {
+      host.querySelector<HTMLInputElement>("#kalkis-bkslot_az")?.click()
+    })
+    expect(struck()).toEqual(["Önceki fiyat: 2.000,00 TL"])
+    expect(host.querySelector("s .sr-only")?.textContent).toBe("Önceki fiyat: ")
+    // The running total adds what the cart charges
+    expect(total()).toContain("1.750,00")
   })
 
   it("sends the departure and the counts, never a price", async () => {

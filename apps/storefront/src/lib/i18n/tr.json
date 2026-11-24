@@ -118,6 +118,7 @@
   "search.calendar_apply": "Uygula",
   "search.calendar_weekdays": "Pzt,Sal,Çar,Per,Cum,Cmt,Paz",
   "search.calendar_day_priced": "{date}, en düşük {price}, {count} kalkış",
+  "search.calendar_day_priced_before": "{date}, en düşük {price}, önceki fiyat {before}, {count} kalkış",
   "search.calendar_day_counted": "{date}, {count} kalkış",
   "search.calendar_day_empty": "{date}, kalkış yok",
   "search.calendar_pick_start": "Başlangıç gününü seçin.",

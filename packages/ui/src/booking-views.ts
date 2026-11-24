@@ -22,6 +22,12 @@ export interface BookingPriceView {
   /** "1.250,00 TL". */
   price: string
   kurus: number
+  /**
+   * "1.500,00 TL": the price before an automatic promotion, struck through
+   * beside `price` only when the price-before rule allows one (adr/0076 Ek
+   * "kalkış fiyatı promosyonlu"); absent, the price is drawn as before.
+   */
+  before?: string
 }
 
 /** One departure as the page offers it. */

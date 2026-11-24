@@ -155,6 +155,10 @@ export function bookingViewOf(
           variantId: price.variant_id,
           price: formatLira(price.amount),
           kurus: Math.round(price.amount * 100),
+          // The backend's price-before rule decided it; never beside a higher price
+          ...(price.before !== undefined && price.before > price.amount
+            ? { before: formatLira(price.before) }
+            : {}),
         })),
       })),
     fewLeft: FEW_LEFT,
