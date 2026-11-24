@@ -748,6 +748,11 @@
       },
       "flags": {
         "ai": {
+          "assistant": {
+            "label": "Panel assistant",
+            "summary": "Find the screen you need by asking in your own words.",
+            "description": "Write what you want to do to the assistant on the right of the panel; it shows the screen where it is done. What staff write goes to the shop's connected AI service, so personal details such as a customer's name or phone number should not be typed. Only the owner can turn it on."
+          },
           "reviews": {
             "label": "AI on reviews and questions",
             "summary": "Sums up reviews and drafts replies to reviews and questions.",
@@ -13087,6 +13092,7 @@
       "fake": "A fake service for development: it writes its answer from the data itself and connects nowhere."
     },
     "tasks": {
+      "assistant": "Assistant",
       "test_text": "Test text",
       "seo_title": "Search title",
       "seo_description": "Search description",

@@ -748,6 +748,11 @@
       },
       "flags": {
         "ai": {
+          "assistant": {
+            "label": "Panel yardımcısı",
+            "summary": "Panelde soru yazarak aradığınız ekranı bulursunuz.",
+            "description": "Panelin sağındaki yardımcıya ne yapmak istediğinizi yazarsınız; yardımcı ilgili ekranı gösterir. Personelin yazdığı metin mağazanın bağlı yapay zekâ servisine gider; müşteri adı ya da telefon gibi kişisel bilgi yazılmamalıdır. Yalnız mağaza sahibi açabilir."
+          },
           "reviews": {
             "label": "Yorum ve sorularda yapay zekâ",
             "summary": "Yorumları özetler, yorum ve sorulara yanıt taslağı hazırlar.",
@@ -13087,6 +13092,7 @@
       "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
     },
     "tasks": {
+      "assistant": "Yardımcı",
       "test_text": "Deneme metni",
       "seo_title": "Arama başlığı",
       "seo_description": "Arama açıklaması",

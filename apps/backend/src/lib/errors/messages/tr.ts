@@ -850,6 +850,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bir soru ya da yanıt bu haliyle eklenemez: soru tek satır ve soru işaretiyle biter (en çok 120 karakter), yanıt en çok 400 karakterdir; bağlantı, HTML, kişisel veri, fiyat ve tümü büyük harf sözcük içermez.",
   "ai.faq_not_product_faq": "Bu öneri bir ürün SSS taslağı değil.",
   "ai.faq_all_published": "Seçilen soruların hepsi ürün sayfasında zaten yayımlanmış.",
+  "ai.assistant_off": "Yardımcı bu mağazada kapalı.",
+  "ai.assistant_no_tool_service":
+    "Yardımcıyı çalıştırabilecek bağlı bir yapay zekâ servisi yok. Ayarlar > Yapay zekâ'dan bağlayın.",
+  "ai.assistant_turn_limit":
+    "Yardımcı bu soruyu yanıtlayamadı. Sorunuzu daha kısa yazmayı deneyin.",
+  "ai.assistant_daily_limit":
+    "Yardımcının bugünkü kullanım sınırına ulaşıldı. Yarın yeniden deneyin.",
+  "ai.assistant_conversation_gone": "Bu sohbet artık yok; yeni bir sohbet başlatın.",
   "ai.faq_use_faq_route": "SSS taslağı, seçilen sorular eklenerek kabul edilir.",
   // Aşama 9: reviews and questions
   "ai.reviews_off":
