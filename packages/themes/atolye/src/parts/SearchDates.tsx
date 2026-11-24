@@ -6,7 +6,7 @@ import type { KeyboardEvent } from "react"
 import type { SearchFormDatesView, SearchFormDayView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { DatePicker } from "./DatePicker"
-import type { DatesChoice, PickerMode } from "./DatePicker"
+import type { DatesChoice, PickerMode } from "./date-picker-days"
 import { CONTROL, Cell, DayCell, SelectCell } from "./search-form-cells"
 
 const GROUP =

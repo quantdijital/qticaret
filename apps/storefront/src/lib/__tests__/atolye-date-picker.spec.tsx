@@ -35,6 +35,10 @@ const view = (booking = true): SearchFormView =>
 const fetched: string[] = []
 vi.stubGlobal("fetch", (address: string) => {
   fetched.push(address)
+  // A party of seven: the storefront failing (the calendar holds it)
+  if (address.includes("kisi=7")) {
+    return Promise.resolve(new Response("{}", { status: 502 }))
+  }
   const month = new URLSearchParams(address.split("?")[1]).get("month") ?? ""
   const day = {
     date: `${month}-05`,
@@ -64,6 +68,11 @@ afterEach(() => {
 })
 
 const settle = () => new Promise((done) => setTimeout(done, 20))
+/** Past the calendar's pause before it asks for a month (`MONTH_DELAY_MS`, 200 ms). */
+const asked = () =>
+  act(async () => {
+    await new Promise((done) => setTimeout(done, 260))
+  })
 const dialog = () => document.querySelector<HTMLElement>("[role=dialog]")
 const field = (name: string) => host.querySelector<HTMLInputElement>(`[name="${name}"]`)
 const day = (date: string) => document.querySelector<HTMLButtonElement>(`[data-day="${date}"]`)
@@ -120,9 +129,11 @@ describe("the search calendar", () => {
     }
     await press(from)
     expect(dialog()?.getAttribute("aria-modal")).toBe("true")
+    await asked()
     expect(fetched).toEqual(["/api/search/calendar?month=2026-11&kisi=3"])
     expect(day("2026-11-23")?.getAttribute("aria-disabled")).toBe("true")
     await press(button(t("search.calendar_next")))
+    await asked()
     expect(fetched.at(-1)).toBe("/api/search/calendar?month=2026-12&kisi=3")
     expect(day("2026-12-05")?.getAttribute("aria-label")).toBe(
       "5 Aralık 2026, en düşük 12.400,00 TL, 2 kalkış"
@@ -198,8 +209,9 @@ describe("the search calendar", () => {
       )
       await settle()
     })
-    // A week on, into the next month: its grid shown with its prices (kept from an earlier ask)
+    // A week on, into the next month: its grid shown, then its prices
     expect(document.activeElement?.getAttribute("data-day")).toBe("2026-12-02")
+    await asked()
     expect(day("2026-12-05")?.getAttribute("aria-label")).toContain("2 kalkış")
     await act(async () => {
       dialog()?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
@@ -210,5 +222,37 @@ describe("the search calendar", () => {
     await vi.waitFor(() => {
       expect(document.activeElement).toBe(field("tarih_baslangic"))
     })
+  })
+
+  it("asks only for the month the shopper stops on when paging quickly (#310 D2)", async () => {
+    await draw()
+    const people = host.querySelector<HTMLSelectElement>('select[name="kisi"]')
+    if (people) {
+      people.value = "4"
+    }
+    await press(field("tarih_baslangic"))
+    await press(button(t("search.calendar_next")))
+    await press(button(t("search.calendar_next")))
+    expect(fetched).toEqual([])
+    await asked()
+    expect(fetched).toEqual(["/api/search/calendar?month=2027-01&kisi=4"])
+  })
+
+  it("does not ask again for a month that failed, opened again within 30 seconds (#310 D2)", async () => {
+    await draw()
+    const people = host.querySelector<HTMLSelectElement>('select[name="kisi"]')
+    if (people) {
+      people.value = "7"
+    }
+    await press(field("tarih_baslangic"))
+    await asked()
+    expect(fetched).toEqual(["/api/search/calendar?month=2026-11&kisi=7"])
+    expect(dialog()?.textContent).toContain(t("search.calendar_failed"))
+    await press(button(t("search.calendar_close")))
+    expect(dialog()).toBeNull()
+    await press(field("tarih_baslangic"))
+    expect(dialog()?.textContent).toContain(t("search.calendar_failed"))
+    await asked()
+    expect(fetched).toHaveLength(1)
   })
 })

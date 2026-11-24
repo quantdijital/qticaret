@@ -91,6 +91,17 @@ export function calendarAskOf(
   return { month, category: category || null, pax: pax ? Number(pax) : 1 }
 }
 
+/**
+ * Whether the asked category is one the shop has (#310 review D1): the
+ * route checks it against the category tree it already keeps, so a made-up
+ * handle never reaches the backend nor fills its shared cache. No category
+ * asked: nothing to check.
+ */
+export const knownCategory = (
+  ask: CalendarAsk,
+  categories: readonly { handle: string }[]
+): boolean => ask.category === null || categories.some((each) => each.handle === ask.category)
+
 /** The backend's query: the default party and no category are not written. */
 export const calendarQuery = (ask: CalendarAsk): Record<string, string> => ({
   month: ask.month,

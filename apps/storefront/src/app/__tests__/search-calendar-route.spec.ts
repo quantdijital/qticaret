@@ -3,6 +3,8 @@ import { StoreApiError } from "@/lib/store-api/errors"
 
 const listings = vi.hoisted(() => ({ departureCalendar: vi.fn() }))
 vi.mock("@/lib/store-api/listings", () => listings)
+const requests = vi.hoisted(() => ({ allCategories: vi.fn() }))
+vi.mock("@/lib/store-api/requests", () => requests)
 vi.mock("@/lib/views/search-form-data", () => ({ shopToday: () => "2026-11-24" }))
 
 const { GET } = await import("../api/search/calendar/route")
@@ -17,6 +19,10 @@ const ask = (query: string) => GET(new Request(`http://localhost:8000/api/search
 describe("GET /api/search/calendar", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    requests.allCategories.mockResolvedValue([
+      { handle: "kultur-turlari" },
+      { handle: "doga-turlari" },
+    ])
     listings.departureCalendar.mockResolvedValue({
       month: "2026-12",
       currency: "try",
@@ -73,6 +79,26 @@ describe("GET /api/search/calendar", () => {
     const response = await ask(query)
     expect(response.status).toBe(400)
     expect(response.headers.get("cache-control")).toBe("private, no-store")
+    expect(listings.departureCalendar).not.toHaveBeenCalled()
+  })
+
+  it("refuses a category the shop does not have, never asking the backend (#310 D1)", async () => {
+    const response = await ask("?month=2026-12&kategori=uydurma-kategori")
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({ message: "search.calendar_invalid" })
+    expect(listings.departureCalendar).not.toHaveBeenCalled()
+  })
+
+  it("reads no category tree when no category is asked", async () => {
+    await ask("?month=2026-12")
+    expect(requests.allCategories).not.toHaveBeenCalled()
+    expect(listings.departureCalendar).toHaveBeenCalledWith({ month: "2026-12" })
+  })
+
+  it("answers a 502 without asking the backend when the category tree cannot be read", async () => {
+    requests.allCategories.mockRejectedValueOnce(new Error("down"))
+    const response = await ask("?month=2026-12&kategori=doga-turlari")
+    expect(response.status).toBe(502)
     expect(listings.departureCalendar).not.toHaveBeenCalled()
   })
 

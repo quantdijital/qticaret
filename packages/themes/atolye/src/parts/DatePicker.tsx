@@ -8,19 +8,16 @@ import type { SearchFormCalendarView, SearchFormDatesView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { LayerPortal } from "../frame/Layers"
 import { DatePickerMonth } from "./DatePickerMonth"
-import { addMonths, canPick, monthOf, pickDay, toggleMonth } from "./date-picker-days"
-import type { Bounds, DayRange } from "./date-picker-days"
-import { calendarAddress, loadMonth, narrowingOf } from "./date-picker-load"
+import { addMonths, applied, canPick, monthOf, pickDay, toggleMonth } from "./date-picker-days"
+import type { Bounds, DatesChoice, DayRange, PickerMode } from "./date-picker-days"
+import {
+  MONTH_DELAY_MS,
+  calendarAddress,
+  keptMonth,
+  loadMonth,
+  narrowingOf,
+} from "./date-picker-load"
 import type { MonthDays } from "./date-picker-load"
-
-export type PickerMode = "exact" | "flexible"
-
-/** What the dates fields hold: a range ("" none) or up to three months. */
-export interface DatesChoice {
-  from: string
-  to: string
-  months: string[]
-}
 
 /** The last answer and the address it is for; `days` null: it failed. */
 type Answer = { address: string; days: MonthDays | null } | null
@@ -28,15 +25,6 @@ type Answer = { address: string; days: MonthDays | null } | null
 const TAB =
   "flex-1 rounded-tile px-3 py-2 text-sm font-semibold outline-none focus-visible:outline-2 focus-visible:outline-focus"
 const ICON = "gf-icon-btn bg-paper-2 disabled:cursor-not-allowed disabled:opacity-40"
-
-/** What Apply writes: the open tab's choice wins; an empty one keeps the other's. */
-function applied(mode: PickerMode, range: DayRange, months: string[]): DatesChoice {
-  const days = { from: range.from, to: range.to || range.from }
-  if (mode === "exact") {
-    return range.from ? { ...days, months: [] } : { from: "", to: "", months }
-  }
-  return months.length > 0 ? { from: "", to: "", months } : { ...days, months: [] }
-}
 
 /**
  * The search box's calendar (adr/0077 §6): a modal dialog, a sheet from
@@ -82,27 +70,32 @@ export function DatePicker({
   const [answer, setAnswer] = useState<Answer>(null)
   const month = monthOf(focus)
   const address = calendarAddress(calendar.url, month, narrowing)
-  // Still asked until the answer is the shown month's
-  const days = answer?.address === address ? answer.days : undefined
+  // A kept month (or a held failure) at once; else still asked until the answer is the shown month's
+  const known = keptMonth(address)
+  const days = known !== undefined ? known : answer?.address === address ? answer.days : undefined
   const monthLabel = (value: string) =>
     dates.month.options.find((option) => option.value === value)?.label ?? value
 
   useEffect(() => {
-    if (mode !== "exact") {
+    if (mode !== "exact" || keptMonth(address) !== undefined) {
       return
     }
     const request = new AbortController()
-    loadMonth(address, request.signal).then(
-      (found) => {
-        setAnswer({ address, days: found })
-      },
-      () => {
-        if (!request.signal.aborted) {
-          setAnswer({ address, days: null })
+    // Paging through the months asks only for the one the shopper stops on (#310 D2)
+    const timer = setTimeout(() => {
+      loadMonth(address, request.signal).then(
+        (found) => {
+          setAnswer({ address, days: found })
+        },
+        () => {
+          if (!request.signal.aborted) {
+            setAnswer({ address, days: null })
+          }
         }
-      }
-    )
+      )
+    }, MONTH_DELAY_MS)
     return () => {
+      clearTimeout(timer)
       request.abort()
     }
   }, [address, mode])

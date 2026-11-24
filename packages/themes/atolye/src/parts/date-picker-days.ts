@@ -150,3 +150,21 @@ export const fill = (template: string, values: Record<string, string | number>):
   template.replace(/\{(\w+)\}/g, (match, name: string) =>
     values[name] === undefined ? match : String(values[name])
   )
+
+export type PickerMode = "exact" | "flexible"
+
+/** What the dates fields hold: a range ("" none) or up to three months. */
+export interface DatesChoice {
+  from: string
+  to: string
+  months: string[]
+}
+
+/** What Apply writes: the open tab's choice wins; an empty one keeps the other's. */
+export function applied(mode: PickerMode, range: DayRange, months: string[]): DatesChoice {
+  const days = { from: range.from, to: range.to || range.from }
+  if (mode === "exact") {
+    return range.from ? { ...days, months: [] } : { from: "", to: "", months }
+  }
+  return months.length > 0 ? { from: "", to: "", months } : { ...days, months: [] }
+}
