@@ -23,17 +23,20 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { Capability } from "@/features/auth/api/staff"
-import { COLLECTIONS_FLAG } from "@/features/collections/paths"
-import { WHOLESALE_FLAG } from "@/features/wholesale/api/types"
+import { panelScreen } from "@/features/panel-map/map"
 
 /**
- * The panel's map (docs/06 ekran planı): one place for the sidebar, the
- * command menu and the top bar's title.
+ * The panel's menu (docs/06 ekran planı): one place for the sidebar, the
+ * command menu and the top bar's title. Each item's path, name and gates
+ * come from the panel's map (adr/0079 §4, `@qticaret/types/panel-map`);
+ * the menu adds its icon and its place.
  */
 
 export interface NavItem {
   key: string
   to: string
+  /** Its name: an i18n key (`nav.orders`). */
+  label: string
   icon: LucideIcon
   /** Only this path, not its children. */
   exact?: boolean
@@ -49,48 +52,50 @@ export interface NavGroup {
   items: NavItem[]
 }
 
+/** The map's screen `key` as a menu item with its icon. */
+function fromMap(key: string, icon: LucideIcon, { exact }: { exact?: true } = {}): NavItem {
+  const screen = panelScreen(key)
+  return {
+    key,
+    to: screen.path,
+    label: screen.label,
+    icon,
+    ...(exact ? { exact } : {}),
+    ...(screen.feature ? { feature: screen.feature } : {}),
+    ...(screen.needs ? { needs: screen.needs } : {}),
+  }
+}
+
 export const NAV_GROUPS: NavGroup[] = [
   {
     key: null,
     items: [
-      { key: "dashboard", to: "/", icon: LayoutDashboard, exact: true },
-      { key: "reports", to: "/reports", icon: ChartColumnBig },
+      fromMap("dashboard", LayoutDashboard, { exact: true }),
+      fromMap("reports", ChartColumnBig),
     ],
   },
   {
     key: "sales",
     items: [
-      { key: "orders", to: "/orders", icon: ShoppingBag },
+      fromMap("orders", ShoppingBag),
       // adr/0051: orders staff make for a customer, paid through a link, while the shop has them on
-      {
-        key: "paymentLinks",
-        to: "/payment-links",
-        icon: Link2,
-        feature: "orders.payment_links",
-        needs: "paymentLinks",
-      },
-      { key: "customers", to: "/customers", icon: Users },
+      fromMap("paymentLinks", Link2),
+      fromMap("customers", Users),
       // ADR-0068: the wholesalers, their levels and orders, apart from the retail customers
       // (the owner, 2026-11-16), for owner and admin while the shop sells wholesale
-      {
-        key: "wholesale",
-        to: "/wholesale",
-        icon: Store,
-        feature: WHOLESALE_FLAG,
-        needs: "wholesale",
-      },
+      fromMap("wholesale", Store),
     ],
   },
   {
     // What the shop sells and has on hand (the owner, 2026-11-23: each thing under its kind)
     key: "catalog",
     items: [
-      { key: "products", to: "/products", icon: Package },
-      { key: "categories", to: "/categories", icon: FolderTree },
-      { key: "brands", to: "/brands", icon: Tag },
+      fromMap("products", Package),
+      fromMap("categories", FolderTree),
+      fromMap("brands", Tag),
       // While the shop has collections on (on by default; Ayarlar > Özellikler)
-      { key: "collections", to: "/collections", icon: Layers, feature: COLLECTIONS_FLAG },
-      { key: "inventory", to: "/inventory", icon: Warehouse },
+      fromMap("collections", Layers),
+      fromMap("inventory", Warehouse),
     ],
   },
   {
@@ -98,10 +103,10 @@ export const NAV_GROUPS: NavGroup[] = [
     key: "storefront",
     items: [
       // The storefront's preferences are a panel of it (the owner, 2026-11-16)
-      { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
+      fromMap("themeEditor", Paintbrush),
       // Ready-made and saved looks into the draft (adr/0064): the owner's alone (2026-11-23)
-      { key: "looks", to: "/storefront/looks", icon: LayoutTemplate, needs: "looks" },
-      { key: "menus", to: "/storefront/menus", icon: ListTree },
+      fromMap("looks", LayoutTemplate),
+      fromMap("menus", ListTree),
     ],
   },
   {
@@ -109,11 +114,11 @@ export const NAV_GROUPS: NavGroup[] = [
     key: "content",
     items: [
       // The shop's own pages, found here and written in the theme editor (adr/0073 Ek not 2026-11-20)
-      { key: "pages", to: "/storefront/pages", icon: Files },
+      fromMap("pages", Files),
       // The blog: its posts, categories, tags and authors, and the filter pages
-      { key: "content", to: "/content", icon: FileText },
+      fromMap("content", FileText),
       // Every picture the shop uploaded; the pickers of every image field open it too
-      { key: "media", to: "/media", icon: Images },
+      fromMap("media", Images),
     ],
   },
   {
@@ -121,21 +126,15 @@ export const NAV_GROUPS: NavGroup[] = [
     // SEO went to Settings > SEO, its one home (the owner, 2026-11-23)
     key: "marketing",
     items: [
-      { key: "promotions", to: "/promotions", icon: BadgePercent },
+      fromMap("promotions", BadgePercent),
       // adr/0050: bulk e-mail and SMS, the owner's and admin's, while the shop has it on
-      {
-        key: "bulkMessages",
-        to: "/bulk-messages",
-        icon: Mails,
-        feature: "marketing.campaigns",
-        needs: "bulkMessages",
-      },
-      { key: "reviews", to: "/reviews", icon: MessageSquareText },
+      fromMap("bulkMessages", Mails),
+      fromMap("reviews", MessageSquareText),
     ],
   },
 ]
 
-export const SETTINGS_ITEM: NavItem = { key: "settings", to: "/settings", icon: Settings }
+export const SETTINGS_ITEM: NavItem = fromMap("settings", Settings)
 
 export const ALL_NAV_ITEMS: NavItem[] = [
   ...NAV_GROUPS.flatMap((group) => group.items),

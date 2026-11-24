@@ -89,7 +89,7 @@ describe("CommandMenu SEO tabs (Settings > SEO, the owner, 2026-11-23)", () => {
   it("offers none before anything is typed, and SEO is no page of its own", () => {
     renderMenu()
 
-    expect(screen.queryByText(/^SEO · /)).toBeNull()
+    expect(screen.queryByText("Yönlendirmeler")).toBeNull()
     expect(screen.queryByText("SEO")).toBeNull()
   })
 
@@ -98,23 +98,24 @@ describe("CommandMenu SEO tabs (Settings > SEO, the owner, 2026-11-23)", () => {
     const onOpenChange = renderMenu()
 
     await user.type(screen.getByRole("combobox"), "yönlendir")
-    await user.click(await screen.findByText("SEO · Yönlendirmeler"))
+    await user.click(await screen.findByText("Yönlendirmeler"))
 
     expect(navigate).toHaveBeenCalledWith({ to: "/settings/seo", search: { part: "redirects" } })
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
-  it("lists every tab under SEO, its settings only for a role that may change them", async () => {
+  it("lists the tabs under SEO with their trail, its settings only for a role that may change them", async () => {
     const user = userEvent.setup()
     renderMenu()
 
     await user.type(screen.getByRole("combobox"), "seo")
 
-    expect(await screen.findByText("SEO · Genel bakış")).toBeInTheDocument()
+    expect(await screen.findByText("Genel bakış")).toBeInTheDocument()
     for (const name of ["Öneriler", "Denetim", "Yönlendirmeler", "Site araması"]) {
-      expect(screen.getByText(`SEO · ${name}`)).toBeInTheDocument()
+      expect(screen.getByText(name)).toBeInTheDocument()
     }
-    expect(screen.queryByText("SEO · Adresler")).toBeNull()
+    expect(screen.getAllByText("Ayarlar › SEO ›").length).toBeGreaterThanOrEqual(5)
+    expect(screen.queryByText("Adresler")).toBeNull()
   })
 
   it("adds the settings tabs for the owner", async () => {
@@ -123,8 +124,68 @@ describe("CommandMenu SEO tabs (Settings > SEO, the owner, 2026-11-23)", () => {
 
     await user.type(screen.getByRole("combobox"), "seo")
 
-    expect(await screen.findByText("SEO · Adresler")).toBeInTheDocument()
-    expect(screen.getByText("SEO · Arama motorları")).toBeInTheDocument()
+    expect(await screen.findByText("Adresler")).toBeInTheDocument()
+    expect(screen.getByText("Başlıklar ve görsel")).toBeInTheDocument()
+  })
+})
+
+describe("CommandMenu screens by everyday words (adr/0079 Y1-0)", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    fetchMock.mockResolvedValue({ orders: [], customers: [], products: [], parcels: [] })
+    vi.clearAllMocks()
+  })
+
+  it("puts the shipping rates first for 'kargo ücreti', with its trail and help, and opens it", async () => {
+    const user = userEvent.setup()
+    const onOpenChange = renderMenu(vi.fn(), { settings: true })
+
+    await user.type(screen.getByRole("combobox"), "kargo ücreti")
+
+    const first = (await screen.findAllByRole("option"))[0]
+    expect(first).toHaveTextContent("Ayarlar › Kargo ve teslimat › Seçenekler ve ücretler")
+    expect(first).toHaveTextContent("kargo ücretleri ve ücretsiz kargo sınırı")
+    await user.click(screen.getByText("Seçenekler ve ücretler"))
+
+    expect(navigate).toHaveBeenCalledWith({ to: "/settings/shipping", search: { part: "options" } })
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("finds it whatever the case and Turkish letters", async () => {
+    const user = userEvent.setup()
+    renderMenu(vi.fn(), { settings: true })
+
+    await user.type(screen.getByRole("combobox"), "KARGO UCRETI")
+
+    expect(await screen.findByText("Seçenekler ve ücretler")).toBeInTheDocument()
+  })
+
+  it("offers no settings screen to a role without settings", async () => {
+    const user = userEvent.setup()
+    renderMenu()
+
+    await user.type(screen.getByRole("combobox"), "kargo ücreti")
+
+    expect(await screen.findByText("Sonuç bulunamadı.")).toBeInTheDocument()
+    expect(screen.queryByText("Seçenekler ve ücretler")).toBeNull()
+  })
+
+  it("keeps the pages and shortcuts before anything is typed", () => {
+    renderMenu()
+
+    expect(screen.getByText("Siparişler")).toBeInTheDocument()
+    expect(screen.getByText("Ürün ekle")).toBeInTheDocument()
+    expect(screen.getByText("Görünüm ayarları")).toBeInTheDocument()
+    expect(screen.queryByText("Ekranlar")).toBeNull()
+  })
+
+  it("opens a shortcut with its search", async () => {
+    const user = userEvent.setup()
+    renderMenu()
+
+    await user.click(screen.getByText("Hazırlanacak siparişler"))
+
+    expect(navigate).toHaveBeenCalledWith({ to: "/orders", search: { stage: "to_ship" } })
   })
 })
 
