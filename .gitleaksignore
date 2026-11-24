@@ -43,3 +43,5 @@ ebeed5808153082b83c706a74c4e920f53662a7f:apps/storefront/e2e/catalog.ts:generic-
 c82914678d4ae5be8974e4a2e514ebb494401493:apps/backend/src/lib/errors/__tests__/provider-text.unit.spec.ts:stripe-access-token:31
 # panel: BirFatura card spec, a made-up test UUID that never existed as a real connection token; replaced by randomUUID()
 dc9891a47c3ad526429c629bcd35240868ef2eed:apps/panel/src/features/settings/components/birfatura-card.spec.tsx:generic-api-key:20
+# backend turnstile spec: typed wrong password (Turkish words + 123)
+4ad5761c2c27c22efacdf68f52ac1e7efd169051:apps/backend/integration-tests/http/turnstile.spec.ts:generic-api-key:56
