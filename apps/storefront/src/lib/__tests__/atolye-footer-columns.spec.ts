@@ -171,4 +171,15 @@ describe("the brand columns footer", () => {
     expect(css).toContain(".gf-pay")
     expect(css).toContain('.gf-pay [data-mark="amex"] img')
   })
+
+  it("keeps up to four link columns in one row, five and more as many as fit", () => {
+    const css = atolyeCss("footer-columns.css")
+    // More than four still wrap at 10rem each
+    expect(css).toContain("grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));")
+    // Four at 10rem each did not fit the eight columns they are given from 1024 to
+    // 1175 px: the fourth fell alone under the other three
+    const fewer = /\.gf-foot-columns:not\(:has\(> :nth-child\(5\)\)\) \{([^}]*)\}/.exec(css)
+    expect(fewer?.[1]).toContain("grid-auto-flow: column;")
+    expect(fewer?.[1]).toContain("grid-auto-columns: minmax(0, 1fr);")
+  })
 })

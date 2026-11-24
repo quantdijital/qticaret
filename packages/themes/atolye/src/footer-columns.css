@@ -66,6 +66,14 @@
     grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
     gap: 2rem var(--gap-columns);
   }
+  /* Up to four stand in one row, each an equal share (the ledger's four at
+     1024 px are as narrow): at 10rem each the fourth fell alone under the
+     other three from 1024 to 1175 px; one to three are drawn as before */
+  .gf-foot-columns:not(:has(> :nth-child(5))) {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
 
   /*
    * The bottom line: the marks first on their own row, then the year beside
