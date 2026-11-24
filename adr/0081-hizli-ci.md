@@ -33,24 +33,24 @@ Dal, `dev` ile ortak atasına göre değişen dosyalarına bakılarak sınıflan
 | Panel ya da `packages/admin-ui` de | Yukarıdaki + panel e2e |
 | Backend ya da ortak paket (`types`, `sector-packs`, `server-kit`, `config`, `testing`) | Hepsi (entegrasyon dahil) |
 | Çalışma alanı dışı (kilit dosyası, CI, turbo, kök `package.json`) | Hepsi, süzgeçsiz |
-| `dev`, `main`, elle tetikleme | Hepsi, süzgeçsiz |
+| `dev`, `main`, elle tetikleme | Hepsi, süzgeçsiz, birim testleri önbelleksiz (`--force`). Tek istisna: dalın **son yeşil koşusundan beri** yalnız not geldiyse hiçbir iş |
 
-Lint, typecheck ve birim testleri `turbo --filter=...[ortak ata]` ile yalnız değişen paketler ve onlara bağlı paketler için koşar. Derleme her zaman tamdır. Liste **izin listesidir**: tanınmayan her yol "hepsi" sayılır; yeni bir klasör kendiliğinden atlanmaz.
+Lint, typecheck ve birim testleri `turbo --filter=...[ortak ata]` ile yalnız değişen paketler ve onlara bağlı paketler için koşar. Derleme her zaman tamdır. Liste **izin listesidir**: tanınmayan her yol "hepsi" sayılır; yeni bir klasör kendiliğinden atlanmaz. Değişen dosyalar `git diff --no-renames` ile okunur: yeniden adlandırma bir silme ve bir ekleme sayılır, backend dosyasını `docs/` ya da vitrin altına taşımak onu gizlemez. `dev`/`main`'de "yalnız not" kararı son push'a göre değil son yeşil koşunun başına göre verilir (Actions API'sinden sorulur): bir not push'u, koşusunu iptal ettiği kod push'unun yerine geçemez.
 
 ### 2. Ağdan her seferinde çekileni önbellekten al
 
-- **ffmpeg** ve **Playwright'ın sistem kitaplıkları**: `scripts/ci-debs.sh` paketleri bir kez depodan indirir, `.deb` dosyalarını Actions önbelleğine koyar; sonraki işler `dpkg -i` ile kurar. Anahtar koşucu imajının sürümünü taşır; önbellek uymazsa depoya düşer. Kaynak yine Ubuntu'nun kendi paketidir (docs/08: `ffmpeg-static` ya da resmî olmayan derleme yok).
+- **ffmpeg** ve **Playwright'ın sistem kitaplıkları**: `scripts/ci-debs.sh` paketleri bir kez depodan indirir, `.deb` dosyalarını Actions önbelleğine koyar; sonraki işler `dpkg -i` ile kurar. Anahtar koşucu imajının sürümünü taşır; önbellek uymazsa depoya düşer. Kaynak yine Ubuntu'nun kendi paketidir (docs/08: `ffmpeg-static` ya da resmî olmayan derleme yok). Önbellek, paketler depodan gelir gelmez ve iş deponun hiçbir kodunu koşturmadan **önce** kaydedilir (`actions/cache/restore` + `save` ayrı; ffmpeg adımı checkout'tan hemen sonra): testlerin ya da bir bağımlılığın bıraktığı paket, sonraki işlerin root olarak kurduğu önbelleğe giremez.
 - **Playwright tarayıcısı**: `~/.cache/ms-playwright`, Playwright sürümüyle anahtarlı.
 - **Turbo**: `.turbo/cache` koşular arasında tutulur; dal `dev`'in sonuçlarından başlar. Bir haftalık girdiler silinir.
 
 ### 3. İşleri yan yana kes, çekirdekleri kullan
 
-- Eski "Lint, typecheck, test, build" işi ikiye ayrıldı: **static** (biçim, derleme, lint, typecheck) ve **unit** (dört grup yan yana: backend, panel, storefront, packages; `scripts/ci-unit.sh`).
-- **Entegrasyon:** parça başına üç jest işçisi (`JEST_WORKERS=3`; her dosyanın kendi veritabanı ve Redis ad alanı var), on iki yerine altı parça. Yerelde varsayılan bir işçi kalır.
+- Eski "Lint, typecheck, test, build" işi ayrıldı: **static** (biçim, derleme, lint, typecheck) ve **unit** (altı iş yan yana: backend üç parça `--shard`, panel, storefront, packages; `scripts/ci-unit.sh`).
+- **Entegrasyon:** parça başına üç jest işçisi (`JEST_WORKERS=3`; her dosyanın kendi veritabanı ve Redis ad alanı var), on iki yerine sekiz parça; test Postgres'inin verisi bellekte (`--tmpfs`). Yerelde varsayılan bir işçi kalır. Üç işçi iş başına verimi 3 değil ~1,5 kat artırdı (işlemci ve veritabanı çekişmesi); asıl kazanç açılışın ucuzlamasında (Sonraki adımlar).
 
 ### 4. Kararsız test koşuyu düşürmez, ama görünür kalır
 
-CI'da entegrasyon testi düşerse bir kez daha denenir (`integration-tests/plain-failures.js`). İlk hata günlükte kalır ve işin özetinde "Tried twice" başlığıyla adı yazılır. İkinci denemeye muhtaç test **hata sayılır ve onarılır**; yeniden deneme onu saklamak için değil, koşuyu kurtarmak içindir. Yerelde yeniden deneme yoktur.
+CI'da entegrasyon testi düşerse bir kez daha denenir (`integration-tests/plain-failures.js`). İlk hata günlükte kalır ve işin özetinde "Tried twice" başlığıyla adı yazılır. İkinci denemeye muhtaç test **hata sayılır ve onarılır**; yeniden deneme onu saklamak için değil, koşuyu kurtarmak içindir. Yerelde yeniden deneme yoktur. **Muafiyet:** arada bir düşmenin bulgunun kendisi olduğu dosyalar hiç yeniden denenmez: adı ödeme, iade, stok, hediye kartı, bildirim, yarış, idempotency geçenler ve istekleri yan yana gönderen (`Promise.all`) her dosya. Liste elle tutulmaz; dosyanın adından ve kaynağından okunur.
 
 ### 5. Tek sonuç: `CI`
 
@@ -77,10 +77,24 @@ Depo ayarlarında "Allow auto-merge" açılır ve `dev` için `CI` zorunlu denet
 
 ## Ölçüm (öncesi / sonrası)
 
-_Deneme koşularından sonra doldurulur._
+Tam koşu (backend'e dokunan dal), aynı gün, aynı hesap:
+
+| | Öncesi (45350802824) | Sonrası (45410820123) |
+|---|---|---|
+| Duvar saati (sıra dahil) | 58 dk | 32 dk |
+| En uzun iş | 43 dk | 17,9 dk |
+| Toplam makine süresi | 6,7 saat | 2,5 saat |
+| Panel e2e | 35 dk | 12,2 dk |
+| Entegrasyon | 12 parça, 18-33 dk | 8 parça, 11,6-17,9 dk |
+| Birim testleri | tek işte ~19 dk | backend 3 parça 5,2-6 dk; panel, storefront, packages ~1 dk (turbo önbelleği) |
+| Biçim, derleme, lint, typecheck | aynı işin içinde | 6,9 dk |
+| ffmpeg kurulumu | 16 dk'ya kadar | önbellekten < 30 sn |
+
+Yalnız vitrin/panel dalı entegrasyonu atlar (en uzun işi static, ~7 dk); yalnız not push'u saniyeler sürer. Bir koşu yuvaları 2,5 makine-saati tuttuğu için aynı 20 yuvadan ~2,5 kat koşu geçer.
 
 ## Sonraki adımlar
 
-- **Medusa açılışını ucuzlat:** 395 dosyanın her biri veritabanını baştan göç ettiriyor (~15-20 sn). Göç edilmiş şablon veritabanından kopyalama ya da dosyalar arası paylaşılan açılış araştırılacak; entegrasyon süresinin yarısından fazlası burada.
-- İki kararsız testin onarımı: `hostile.unit.spec.ts` (mutlak süre eşiği), `product-video-transcode.spec.ts` (kaynak silme yarışı).
+- **Medusa açılışını ucuzlat (dal `oguzhan/test-acilis-hizi`, ayrı PR):** 395 dosyanın her biri veritabanını baştan göç ettiriyor. Göç edilmiş şablon veritabanı bir kez kurulup her dosyada kopyalanır (`integration-tests/template/`); yerelde dosya başına 21-25 sn kazanç ölçüldü. CI ölçümü o PR'da.
+- Kararsız testler: `hostile.unit.spec.ts` süre bütçesi bu PR'da onarıldı; `product-video-transcode.spec.ts` (kaynak silme yarışı) ve `ai-craft.spec.ts` "owner's craft ... at the same time" (yük altında kayıp güncelleme; gerçek yarış olabilir) incelenecek.
+- Depo ayarı (sahip): dış katkıcılar için "Require approval for all external contributors"; önbellek herkese açık sayılır. `apps/control-plane`'in `test:integration:http` betiği CI'da hiçbir işte koşmuyor (bu PR'dan önce de öyle): teyit edilecek.
 - F16 dağıtım hattı (CD) kurulurken `main`'e çıkış aynı `CI` sonucuna bağlanır.
