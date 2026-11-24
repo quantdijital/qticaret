@@ -683,6 +683,73 @@ medusaIntegrationTestRunner({
       expect(read.data.cart.total).toBe(2981)
     })
 
+    it("takes an automatic promotion off the departure's price, the line's own price not struck through", async () => {
+      await turnOn()
+      const container = getContainer()
+      const { adult, slotId } = await tour(10)
+      await staff("/admin/price-lists", {
+        title: "Kampanya",
+        description: "",
+        status: "active",
+        type: "sale",
+        prices: [{ variant_id: adult, currency_code: "try", amount: 1200 }],
+      })
+      const promotion = await staff("/admin/promotions", {
+        code: "TUR10",
+        type: "standard",
+        status: "active",
+        is_automatic: true,
+        is_tax_inclusive: true,
+        application_method: {
+          type: "percentage",
+          target_type: "order",
+          allocation: "across",
+          value: 10,
+        },
+      })
+      const cartId = await emptyCart(container)
+      const booked = await book(cartId, {
+        slot_id: slotId,
+        items: [{ variant_id: adult, quantity: 2 }],
+      })
+      // A line's own totals are not among the store's default fields
+      const read = await settle(
+        http.get<{
+          cart: {
+            total: number
+            item_total: number
+            discount_total: number
+            items: {
+              variant_id: string
+              quantity: number
+              unit_price: number
+              compare_at_unit_price: number | null
+              total: number
+              discount_total: number
+              adjustments: { code: string; amount: number }[]
+            }[]
+          }
+        }>(`/store/carts/${cartId}?fields=+items.total,+items.discount_total`, {
+          headers: store.headers,
+        })
+      )
+      const { cart } = read.data
+      const line = cart.items.find((item) => item.variant_id === adult)
+
+      expect(promotion.status).toBe(200)
+      expect(booked.status).toBe(200)
+      expect(cart.items).toHaveLength(1)
+      // The sale's 1.200 plus the 250,50 difference; the same price as the one before:
+      // compare_at_unit_price written by the booking leaves the promotion's sum alone
+      expect(line).toMatchObject({ quantity: 2, unit_price: 1450.5, compare_at_unit_price: 1450.5 })
+      // 10 % of 2 × 1.450,50, tax inside as the line's price
+      expect(line?.adjustments.map(({ code, amount }) => ({ code, amount }))).toEqual([
+        { code: "TUR10", amount: 290.1 },
+      ])
+      expect(line).toMatchObject({ discount_total: 290.1, total: 2610.9 })
+      expect(cart).toMatchObject({ item_total: 2610.9, discount_total: 290.1, total: 2610.9 })
+    })
+
     it("takes the shipping method off once only dated lines are left, and the order goes through", async () => {
       await turnOn()
       const container = getContainer()
