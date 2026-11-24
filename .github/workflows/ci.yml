@@ -44,6 +44,7 @@ jobs:
       backend: ${{ steps.changes.outputs.backend }}
       e2e: ${{ steps.changes.outputs.e2e }}
       filter: ${{ steps.changes.outputs.filter }}
+      unit: ${{ steps.changes.outputs.unit }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -141,17 +142,19 @@ jobs:
         run: find .turbo/cache -type f -mtime +7 -delete 2>/dev/null || true
 
   # The unit tests, a group to a job, side by side (they took 19 minutes one
-  # after another inside one job, adr/0081)
+  # after another inside one job, adr/0081). Only the groups the push reaches
+  # open (scripts/ci-unit-groups.mjs; all six on dev, main and a full run):
+  # none reached, the job is skipped, which the gate counts as green
   unit:
     name: Unit tests (${{ matrix.group }})
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code == 'true' && needs.changes.outputs.unit != '[]'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        group: ["backend 1/3", "backend 2/3", "backend 3/3", panel, storefront, packages]
+        group: ${{ fromJSON(needs.changes.outputs.unit) }}
     # The rate limiter's Redis counters (an atomic Lua script) are tested
     # against a real Redis; the same pinned image as local dev
     services:

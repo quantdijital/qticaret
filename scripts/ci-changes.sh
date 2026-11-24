@@ -8,6 +8,8 @@
 #   e2e=true|false      - the panel's e2e (a real backend serving the panel)
 #   filter=<turbo args> - lint, typecheck and unit tests only for the changed
 #                         packages and those that depend on them; empty = all
+#   unit=<JSON list>    - the unit test jobs (ci-unit.sh groups) those packages
+#                         reach (scripts/ci-unit-groups.mjs); [] = none
 #
 # Everything runs on dev and main, on a manual run, and whenever a file
 # outside the workspaces' own folders changed (the lockfile, the CI, turbo or
@@ -18,17 +20,24 @@
 set -euo pipefail
 
 out="${GITHUB_OUTPUT:-/dev/stdout}"
+groups="$(dirname "$0")/ci-unit-groups.mjs"
 answer() {
   {
     echo "code=$1"
     echo "backend=$2"
     echo "e2e=$3"
     echo "filter=$4"
+    echo "unit=$5"
   } >>"$out"
-  echo "ci-changes: code=$1 backend=$2 e2e=$3 filter='$4' ($5)"
+  echo "ci-changes: code=$1 backend=$2 e2e=$3 filter='$4' unit=$5 ($6)"
   exit 0
 }
-full() { answer true true true "" "$1"; }
+# An assignment of its own, so a failing node stops the script (set -e)
+full() {
+  local all
+  all="$(node "$groups" --all)"
+  answer true true true "" "$all" "$1"
+}
 
 # A rename is a removal and an addition: a backend file moved under docs/ or
 # into the storefront still counts as a backend change (its old path is listed)
@@ -55,7 +64,7 @@ if [ "$ref" = "dev" ] || [ "$ref" = "main" ]; then
     git merge-base --is-ancestor "$green" HEAD; then
     since="$(changed "$green")"
     if [ -n "$since" ] && ! grep -Ev "$quiet" <<<"$since" >/dev/null; then
-      answer false false false "" "only notes on $ref since its last green run ${green:0:9}"
+      answer false false false "" "[]" "only notes on $ref since its last green run ${green:0:9}"
     fi
   fi
   full "branch $ref"
@@ -67,7 +76,7 @@ files="$(changed "$base")"
 [ -z "$files" ] && full "no changed files"
 
 relevant="$(grep -Ev "$quiet" <<<"$files" || true)"
-[ -z "$relevant" ] && answer false false false "" "only notes changed"
+[ -z "$relevant" ] && answer false false false "" "[]" "only notes changed"
 if grep -Ev '^(apps|packages)/' <<<"$relevant" >/dev/null; then
   full "a file outside the workspaces changed"
 fi
@@ -77,4 +86,6 @@ grep -Ev "$no_backend" <<<"$relevant" >/dev/null && backend=true
 e2e=false
 grep -Ev "$no_e2e" <<<"$relevant" >/dev/null && e2e=true
 
-answer true "$backend" "$e2e" "--filter=...[$base]" "packages changed since ${base:0:9} and their dependents"
+unit="$(node "$groups" <<<"$relevant")"
+
+answer true "$backend" "$e2e" "--filter=...[$base]" "$unit" "packages changed since ${base:0:9} and their dependents"
