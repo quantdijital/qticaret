@@ -6,6 +6,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type { StoreSettings } from "../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { documentLineOf, legalIdentity } from "../../../workflows/legal/identity"
+import { varyOnPublishableKey } from "../../../lib/http/vary"
 
 /** The ETBİS QR code's image with what the media library knows of it; null without one. */
 async function etbisQr(scope: MedusaContainer) {
@@ -40,7 +41,7 @@ async function etbisQr(scope: MedusaContainer) {
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const [identity, qr] = await Promise.all([legalIdentity(req.scope), etbisQr(req.scope)])
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({
     identity: {
       company_title: identity.company_title,

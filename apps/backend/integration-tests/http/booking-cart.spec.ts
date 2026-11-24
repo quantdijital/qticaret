@@ -325,6 +325,7 @@ medusaIntegrationTestRunner({
       expect(afterBook).toMatchObject({ held: 2, sold: 0, available: 8 })
       expect([changed.status, changed.data.message]).toEqual([400, "booking.use_booking_route"])
       expect(page.status).toBe(200)
+      expect(String(page.headers["vary"]).toLowerCase()).toContain("x-publishable-api-key")
       expect(page.data.booking).toMatchObject({
         categories: expect.arrayContaining([
           expect.objectContaining({ variant_id: adult, pax: 1 }),

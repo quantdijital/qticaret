@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { storeCategoryImages } from "../../../workflows/catalog/category-images"
+import { varyOnPublishableKey } from "../../../lib/http/vary"
 
 /**
  * GET /store/category-images (adr/0046 Ek 2026-11-04): the pictures of the
@@ -10,6 +11,6 @@ import { storeCategoryImages } from "../../../workflows/catalog/category-images"
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const images = await storeCategoryImages(req.scope)
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({ images })
 }

@@ -1,4 +1,5 @@
 import type { MedusaResponse } from "@medusajs/framework/http"
+import { varyOnPublishableKey } from "../../../lib/http/vary"
 
 /**
  * Address reference data changes about once a year (adr/0008), so shared
@@ -9,5 +10,5 @@ import type { MedusaResponse } from "@medusajs/framework/http"
 export function setReferenceDataCache(res: MedusaResponse): void {
   res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400")
   // Added to CORS's `Vary: Origin`, not in its place
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
 }

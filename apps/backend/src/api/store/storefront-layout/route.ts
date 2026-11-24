@@ -1,5 +1,6 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { publishedLayout } from "../../../workflows/storefront/layout-read"
+import { varyOnPublishableKey } from "../../../lib/http/vary"
 
 /**
  * GET /store/storefront-layout (adr/0049): the published design (else the
@@ -10,7 +11,7 @@ import { publishedLayout } from "../../../workflows/storefront/layout-read"
  */
 export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({
     layout: await publishedLayout(req.scope, req.publishable_key_context.sales_channel_ids),
   })

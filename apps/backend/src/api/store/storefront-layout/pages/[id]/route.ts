@@ -1,6 +1,7 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { publishedPageLayout } from "../../../../../workflows/storefront/layout-page-read"
 import { livePageId } from "../../page-reads"
+import { varyOnPublishableKey } from "../../../../../lib/http/vary"
 
 /**
  * GET /store/storefront-layout/pages/:id (adr/0073 §6): a live content
@@ -15,7 +16,7 @@ import { livePageId } from "../../page-reads"
  */
 export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   const id = await livePageId(req)
   res.json({
     page: id

@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { authorPostCounts, authorsByIds } from "../../../../../workflows/content/author-reads"
 import { storeAuthorDetail } from "../../authors"
+import { varyOnPublishableKey } from "../../../../../lib/http/vary"
 
 /**
  * `GET /store/content/authors/:id` (adr/0060): a blog author's page, as
@@ -20,6 +21,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     authorPostCounts(req.scope, [id], { live: true }),
   ])
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({ author: { ...author, post_count: live.get(id) ?? 0 } })
 }

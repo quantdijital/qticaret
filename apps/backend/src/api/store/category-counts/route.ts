@@ -1,5 +1,6 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { storeCategoryCounts } from "../../../workflows/catalog/category-counts"
+import { varyOnPublishableKey } from "../../../lib/http/vary"
 
 /**
  * GET /store/category-counts (adr/0049 Ek 2026-11-14 §10 karar 7b): how
@@ -12,6 +13,6 @@ import { storeCategoryCounts } from "../../../workflows/catalog/category-counts"
 export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
   const counts = await storeCategoryCounts(req.scope, req.publishable_key_context.sales_channel_ids)
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=60")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({ counts })
 }

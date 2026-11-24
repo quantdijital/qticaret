@@ -22,6 +22,7 @@ import type { LegalIdentity } from "../../../../workflows/legal/identity"
 import { shopOf } from "../../../../workflows/seo/payload-sources"
 import { planModeFor } from "../../../../lib/plan-guard"
 import { siteMaintenance } from "../../../../workflows/storefront/maintenance"
+import { varyOnPublishableKey } from "../../../../lib/http/vary"
 
 /**
  * The site icon as the storefront's `<head>` names it: its address and
@@ -145,7 +146,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   // reach the storefront, which asks at most once a minute per process and is told at
   // once by the refresh signal; a shared cache could hold either for hours
   res.setHeader("Cache-Control", "no-store")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({
     canonical_host: shop.canonicalHost,
     indexing: shop.indexing,
