@@ -7,6 +7,7 @@ import type { HttpClient } from "../../lib/clients"
 import { BASE_BITS, fallbackScope } from "../../lib/security/challenge"
 import { perIpScale } from "../../lib/security/rate-limit"
 import {
+  SECRET_REFUSED,
   TURNSTILE_HEADER,
   createTurnstileClient,
   isTurnstileTestSecret,
@@ -97,7 +98,7 @@ type Outcome = "passed" | "missing" | "refused" | "unavailable"
 // A token taken once here is not taken again, even before Cloudflare's own
 // reuse check (eventually consistent) would see it
 async function firstUse(token: string): Promise<boolean> {
-  const digest = createHash("sha256").update(token, "utf8").digest("hex").slice(0, 32)
+  const digest = createHash("sha256").update(token.trim(), "utf8").digest("hex").slice(0, 32)
   const { count } = await sharedRateLimitStore().hit(`fraud:turnstile:used:${digest}`, TOKEN_TTL_MS)
   return count === 1
 }
@@ -116,7 +117,8 @@ export async function turnstileOutcome(req: MedusaRequest, gate: TurnstileGate):
   }
   const pair = keysOf()
   if (pair === null) {
-    // The schema refuses a deployed start without keys: never here but by mistake
+    // A deployed start without keys is refused (assertTurnstileConfigured): never here
+    // but by mistake, and then every visitor pays the fallback: alert-worthy
     logger.error({ event: "security.turnstile_unconfigured", gate })
     return "unavailable"
   }
@@ -130,17 +132,29 @@ export async function turnstileOutcome(req: MedusaRequest, gate: TurnstileGate):
       remoteIp: clientIp(req),
       hostnames: await shopHostnames(req, env),
     },
-    { client: (client ??= createTurnstileClient()), offlineTestKeys: env.NODE_ENV === "test" }
+    {
+      client: (client ??= createTurnstileClient()),
+      local: isLocalEnv(env),
+      offlineTestKeys: env.NODE_ENV === "test",
+    }
   )
   if (verdict.ok) {
-    if (isTurnstileTestSecret(pair.secretKey) || (await firstUse(token ?? ""))) {
+    // The dummy token is every test's, on a developer's machine only
+    const testToken = isLocalEnv(env) && isTurnstileTestSecret(pair.secretKey)
+    if (testToken || (await firstUse(token ?? ""))) {
       return "passed"
     }
     logger.info({ event: "security.turnstile_refused", gate, reason: "reused", codes: [] })
     return "refused"
   }
   if (verdict.reason === "unavailable") {
-    logger.warn({ event: "security.turnstile_unavailable", gate, codes: verdict.codes })
+    // Our own secret refused never mends by itself: every visitor pays the fallback
+    const secretRefused = verdict.codes.some((code) => SECRET_REFUSED.has(code))
+    logger[secretRefused ? "error" : "warn"]({
+      event: secretRefused ? "security.turnstile_secret_refused" : "security.turnstile_unavailable",
+      gate,
+      codes: verdict.codes,
+    })
     return "unavailable"
   }
   if (verdict.reason !== "missing") {
@@ -155,14 +169,31 @@ export async function turnstileOutcome(req: MedusaRequest, gate: TurnstileGate):
   return "missing"
 }
 
-function refuse(
+// The fallback's asks from one address in a quarter of an hour: harder past each step
+const FALLBACK_WINDOW_MS = 15 * 60 * 1000
+const FALLBACK_STEPS = [
+  { over: 10, bits: BASE_BITS + 4 },
+  { over: 3, bits: BASE_BITS + 2 },
+] as const
+
+/** The fallback's difficulty for the `count`th ask from one address: 18, then 20, then 22 bits. */
+export const fallbackBits = (count: number): number =>
+  FALLBACK_STEPS.find((step) => count > step.over * perIpScale())?.bits ?? BASE_BITS
+
+async function refuse(
   req: MedusaRequest,
   res: MedusaResponse,
   gate: TurnstileGate,
   outcome: Exclude<Outcome, "passed">
-): void {
+): Promise<void> {
   if (outcome === "unavailable") {
-    demandChallenge(req, res, fallbackScope(gate), BASE_BITS, { fallback: "turnstile_unavailable" })
+    const { count } = await sharedRateLimitStore().hit(
+      `fraud:turnstile:fallback:${gate}:${clientBucket(req)}`,
+      FALLBACK_WINDOW_MS
+    )
+    demandChallenge(req, res, fallbackScope(gate), fallbackBits(count), {
+      fallback: "turnstile_unavailable",
+    })
     return
   }
   const missing = outcome === "missing"
@@ -192,7 +223,7 @@ export function requireTurnstile(gate: TurnstileGate) {
         next()
         return
       }
-      refuse(req, res, gate, outcome)
+      await refuse(req, res, gate, outcome)
     } catch (error) {
       next(error)
     }
@@ -225,7 +256,7 @@ export function turnstileOver(gate: TurnstileGate, limit: SoftLimit) {
         next()
         return
       }
-      refuse(req, res, gate, outcome)
+      await refuse(req, res, gate, outcome)
     } catch (error) {
       next(error)
     }

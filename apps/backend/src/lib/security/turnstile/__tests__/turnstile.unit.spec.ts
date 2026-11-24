@@ -9,7 +9,7 @@ import {
   verifyTurnstile,
 } from ".."
 import type { TurnstileCheck } from ".."
-import { checkTurnstileEnv, isTurnstileOff, turnstileKeys } from "../env"
+import { assertTurnstileConfigured, checkTurnstileEnv, isTurnstileOff, turnstileKeys } from "../env"
 
 // Made-up values in Cloudflare's shape, for these fakes only
 const SECRET = "0x4AAAAAAAmadeUpSecretForUnitTests"
@@ -143,9 +143,47 @@ describe("verifyTurnstile (adr/0044 Ek 2026-11-24)", () => {
     })
   })
 
+  it("refuses a 4xx Cloudflare answers for the request, unavailable only when throttled or our secret", async () => {
+    const bad = fake(reply({ success: false, "error-codes": ["bad-request"] }, 400))
+    const bare = fake(reply({}, 400))
+    const secret = fake(reply({ success: false, "error-codes": ["missing-input-secret"] }, 400))
+    const throttled = fake(reply({}, 429), reply({}, 429))
+    const own = fake(reply({ success: false, "error-codes": ["bad-request"] }))
+
+    expect(await verifyTurnstile(check(), { client: bad.client })).toEqual({
+      ok: false,
+      reason: "refused",
+      codes: ["bad-request"],
+    })
+    expect(await verifyTurnstile(check(), { client: bare.client })).toMatchObject({
+      reason: "refused",
+    })
+    expect(await verifyTurnstile(check(), { client: secret.client })).toEqual({
+      ok: false,
+      reason: "unavailable",
+      codes: ["missing-input-secret"],
+    })
+    expect(await verifyTurnstile(check(), { client: throttled.client })).toMatchObject({
+      reason: "unavailable",
+    })
+    expect(await verifyTurnstile(check(), { client: own.client })).toMatchObject({
+      reason: "refused",
+    })
+  })
+
+  it("refuses unasked a token with characters Cloudflare's never have", async () => {
+    const { client, sent } = fake()
+    for (const token of ["a b", "tokçen", "a\nb", "<script>"]) {
+      expect(await verifyTurnstile(check({ token }), { client })).toMatchObject({
+        reason: "refused",
+      })
+    }
+    expect(sent).toHaveLength(0)
+  })
+
   it("answers Cloudflare's test secrets offline as documented, without host or action", async () => {
     const { client, sent } = fake()
-    const offline = { client, offlineTestKeys: true }
+    const offline = { client, local: true, offlineTestKeys: true }
     const pass = check({ secret: TURNSTILE_TEST_SECRET_PASS, token: TURNSTILE_DUMMY_TOKEN })
 
     expect(await verifyTurnstile(pass, offline)).toEqual({ ok: true })
@@ -161,17 +199,25 @@ describe("verifyTurnstile (adr/0044 Ek 2026-11-24)", () => {
     expect(sent).toHaveLength(0)
   })
 
-  it("takes a test secret's pass from Cloudflare without its example.com host", async () => {
-    const { client } = fake(reply({ success: true, hostname: "example.com" }))
+  it("lets a test secret skip host and action on a developer's machine only", async () => {
     const pass = check({ secret: TURNSTILE_TEST_SECRET_PASS, token: TURNSTILE_DUMMY_TOKEN })
-    expect(await verifyTurnstile(pass, { client })).toEqual({ ok: true })
+    const local = fake(reply({ success: true, hostname: "example.com" }))
+    const live = fake(reply({ success: true, hostname: "example.com" }))
+
+    expect(await verifyTurnstile(pass, { client: local.client, local: true })).toEqual({
+      ok: true,
+    })
+    // Live, a test key is never offline and its answer is checked as any other's
+    expect(
+      await verifyTurnstile(pass, { client: live.client, offlineTestKeys: true })
+    ).toMatchObject({ ok: false, reason: "action" })
   })
 })
 
 describe("Turnstile's environment", () => {
-  const issues = (env: Record<string, string | undefined>, deployed: boolean) => {
+  const issues = (env: Record<string, string | undefined>) => {
     const found: string[] = []
-    checkTurnstileEnv(env, deployed, (path, message) => found.push(`${path}: ${message}`))
+    checkTurnstileEnv(env, (path, message) => found.push(`${path}: ${message}`))
     return found
   }
 
@@ -188,38 +234,65 @@ describe("Turnstile's environment", () => {
       })
     ).toEqual({ siteKey: "0x4AAAAsite", secretKey: SECRET })
     expect(turnstileKeys({ NODE_ENV: "production" })).toBeNull()
+    expect(turnstileKeys({})).toBeNull()
   })
 
-  it("requires both keys once deployed, never a test key, and the pair anywhere", () => {
-    expect(issues({}, true)).toEqual([
-      "TURNSTILE_SITE_KEY: is required in production and staging",
-      "TURNSTILE_SECRET_KEY: is required in production and staging",
-    ])
-    expect(
-      issues(
-        {
+  it.each([["production"], ["staging"], [undefined]])(
+    "refuses a test key with NODE_ENV %s (unset counts as live)",
+    (nodeEnv) => {
+      expect(
+        issues({
+          NODE_ENV: nodeEnv,
           TURNSTILE_SITE_KEY: TURNSTILE_TEST_SITE_KEY,
           TURNSTILE_SECRET_KEY: TURNSTILE_TEST_SECRET_PASS,
-        },
-        true
-      )
-    ).toEqual([
-      "TURNSTILE_SITE_KEY: must not be a Cloudflare test key in production and staging",
-      "TURNSTILE_SECRET_KEY: must not be a Cloudflare test key in production and staging",
-    ])
-    expect(issues({ TURNSTILE_SITE_KEY: "0x4AAAAsite" }, false)).toEqual([
+        })
+      ).toEqual([
+        "TURNSTILE_SITE_KEY: must not be a Cloudflare test key outside development and test",
+        "TURNSTILE_SECRET_KEY: must not be a Cloudflare test key outside development and test",
+      ])
+      expect(() => {
+        assertTurnstileConfigured({ NODE_ENV: nodeEnv })
+      }).toThrow("TURNSTILE_SITE_KEY: is required outside development and test")
+      expect(() => {
+        assertTurnstileConfigured({
+          NODE_ENV: nodeEnv,
+          TURNSTILE_SITE_KEY: "0x4AAAAsite",
+          TURNSTILE_SECRET_KEY: SECRET,
+        })
+      }).not.toThrow()
+    }
+  )
+
+  it("takes test keys or none on a developer's machine, and the pair anywhere", () => {
+    expect(
+      issues({
+        NODE_ENV: "development",
+        TURNSTILE_SITE_KEY: TURNSTILE_TEST_SITE_KEY,
+        TURNSTILE_SECRET_KEY: TURNSTILE_TEST_SECRET_PASS,
+      })
+    ).toEqual([])
+    expect(() => {
+      assertTurnstileConfigured({ NODE_ENV: "test" })
+    }).not.toThrow()
+    expect(issues({ NODE_ENV: "test", TURNSTILE_SITE_KEY: "0x4AAAAsite" })).toEqual([
       "TURNSTILE_SECRET_KEY: is required with the other Turnstile key",
     ])
-    expect(issues({}, false)).toEqual([])
     expect(
-      issues({ TURNSTILE_SITE_KEY: "0x4AAAAsite", TURNSTILE_SECRET_KEY: SECRET }, true)
+      issues({
+        NODE_ENV: "production",
+        TURNSTILE_SITE_KEY: "0x4AAAAsite",
+        TURNSTILE_SECRET_KEY: SECRET,
+      })
     ).toEqual([])
   })
 
   it("lets a developer turn it off, nowhere else", () => {
-    expect(issues({ NODE_ENV: "development", TURNSTILE: "off" }, false)).toEqual([])
-    expect(issues({ NODE_ENV: "test", TURNSTILE: "off" }, false)).toEqual([])
-    expect(issues({ NODE_ENV: "staging", TURNSTILE: "off" }, false)).toEqual([
+    expect(issues({ NODE_ENV: "development", TURNSTILE: "off" })).toEqual([])
+    expect(issues({ NODE_ENV: "test", TURNSTILE: "off" })).toEqual([])
+    expect(issues({ NODE_ENV: "staging", TURNSTILE: "off" })).toEqual([
+      "TURNSTILE: is allowed off on development and test only",
+    ])
+    expect(issues({ TURNSTILE: "off" })).toEqual([
       "TURNSTILE: is allowed off on development and test only",
     ])
     expect(isTurnstileOff({ NODE_ENV: "production", TURNSTILE: "off" })).toBe(false)

@@ -4,7 +4,13 @@ import type { TransportResponse } from "../../../lib/clients"
 import { solveChallenge } from "../../../lib/security/challenge"
 import { createMemoryStore } from "../../../lib/security/rate-limit"
 import { TURNSTILE_DUMMY_TOKEN, createTurnstileClient } from "../../../lib/security/turnstile"
-import { requireTurnstile, resetTurnstile, shopHostnames, turnstileOver } from "../turnstile"
+import {
+  fallbackBits,
+  requireTurnstile,
+  resetTurnstile,
+  shopHostnames,
+  turnstileOver,
+} from "../turnstile"
 import { parseEnv } from "../../../lib/env"
 import { fakeResponse } from "./fakes"
 
@@ -138,6 +144,35 @@ describe("requireTurnstile (adr/0044 Ek 2026-11-24)", () => {
       428
     )
     expect((await run(gate, { "x-challenge": answer })).status).toBe(428)
+  })
+
+  it("makes the fallback harder for one address the more it asks: 18, 20, then 22 bits", async () => {
+    process.env["TURNSTILE_SITE_KEY"] = SITE
+    process.env["TURNSTILE_SECRET_KEY"] = SECRET
+    resetTurnstile(cloudflare(() => Promise.reject(new Error("timeout"))))
+    const gate = requireTurnstile("contact")
+    const bits: number[] = []
+    for (let n = 0; n < 12; n++) {
+      bits.push((await run(gate, { "x-turnstile-token": "tok-4" })).body.challenge?.bits ?? 0)
+    }
+
+    expect(bits.slice(0, 3)).toEqual([18, 18, 18])
+    expect(bits.slice(3, 10)).toEqual(Array<number>(7).fill(20))
+    expect(bits.slice(10)).toEqual([22, 22])
+    expect([fallbackBits(1), fallbackBits(4), fallbackBits(11)]).toEqual([18, 20, 22])
+  })
+
+  it("logs our own secret refused as an error, and falls back", async () => {
+    process.env["TURNSTILE_SITE_KEY"] = SITE
+    process.env["TURNSTILE_SECRET_KEY"] = SECRET
+    const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+    resetTurnstile(cloudflare(says({ success: false, "error-codes": ["invalid-input-secret"] })))
+
+    const asked = await run(requireTurnstile("login"), { "x-turnstile-token": "tok-5" })
+    expect([asked.status, asked.body.message]).toEqual([428, "fraud.challenge_required"])
+    expect(error).toHaveBeenCalledWith(
+      expect.objectContaining({ event: "security.turnstile_secret_refused", gate: "login" })
+    )
   })
 
   it("asks nothing while a developer turned it off", async () => {

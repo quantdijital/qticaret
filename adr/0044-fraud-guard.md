@@ -182,6 +182,8 @@ Kalanlar (gözden geçir):
 | `password_reset` | `POST /auth/customer/emailpass/reset-password` | Her istekte | Herkesin tetikleyebildiği e-posta; hesap sayımı |
 | `staff_login` | `POST /auth/user/emailpass` | Her istekte | Paneli koruyan kapı; 2FA arkasında da olsa şifre denemesi pahalı olmalı |
 | `staff_password_reset` | `POST /auth/user/emailpass/reset-password` | Her istekte | Personel e-postası pompalama |
+| `staff_register` | `POST /auth/user/emailpass/register` | Her istekte | Medusa'nın personel hesabı açma ucu (davet kabulü); ayrı ad, personel girişinin token'ı burada geçmesin |
+| `verification` | `POST /auth/verification/request` | Her istekte | Yazılan adrese kod e-postası (oturumlu kimlikle); e-posta pompalama |
 | `checkout` | `POST /store/carts/:id/payment-session` | Her istekte | Her ödeme yolu buradan başlar (§2); kart deneme (card testing) botu |
 | `order_lookup` | `POST /store/order-lookup` | Eşikten sonra (IP başına saatte 5) | Kişisel veri tahmini; insanlar nadiren tekrarlar |
 | `contact` | `POST /store/contact-messages`, `POST /store/booking-requests` | Eşikten sonra (saatte 1, sayaç ortak) | Spam; ilk mesaj sürtünmesiz |
@@ -211,19 +213,19 @@ Kalanlar (gözden geçir):
 
 - `lib/security/turnstile`: Cloudflare `siteverify` (`POST https://challenges.cloudflare.com/turnstile/v0/siteverify`, JSON: `secret`, `response`, `remoteip`, `idempotency_key`). Platformun HTTP istemcisiyle: deneme başına 2 saniye, aynı `idempotency_key` ile bir tekrar, devre kesici (art arda 5 hatadan sonra 30 saniye doğrudan yedeğe). Hatalar entegrasyonlar sayfasına yazılmaz (panel mağazanındır).
 - Geçerli sayılması için: `success`, `action` kapının adı, `hostname` mağazanın alan adlarından biri. Alan adları: SEO bölümündeki `canonical_host` ve `www.` ikizi, `STOREFRONT_ORIGIN`, `BACKEND_URL` (panel), isteğe bağlı `TURNSTILE_ALLOWED_HOSTNAMES` (önizleme alan adı); yerelde `localhost`.
-- Token en çok 2048 karakter (Cloudflare sınırı). Başarılı token'ın özeti paylaşılan sayaç deposunda 5 dakika tutulur, ikinci kez kabul edilmez: Cloudflare'in yeniden kullanım denetimi sonunda tutarlıdır, aynı anda gelen iki istek ikisi de geçebilir.
+- Token yalnız `[A-Za-z0-9._-]`, en çok 2048 karakter (Cloudflare sınırı); başka bir şey Cloudflare'e sorulmadan 403'tür. Başarılı token'ın özeti paylaşılan sayaç deposunda 5 dakika tutulur, ikinci kez kabul edilmez: Cloudflare'in yeniden kullanım denetimi sonunda tutarlıdır, aynı anda gelen iki istek ikisi de geçebilir.
 - `remoteip` hız sınırlarının saydığı adrestir (`clientIp`): vitrin sunucusunun imzaladığı adres; yoksa `TRUST_CF_CONNECTING_IP=on` ise `CF-Connecting-IP` (tek, geçerli bir IP); yoksa bağlantının adresi. Bayrak varsayılan kapalıdır, yalnız köken sunucusu Cloudflare dışındaki trafiğe kapalıyken açılır (F16: güvenlik duvarı ya da Authenticated Origin Pulls); yoksa başlığı herkes yazabilir. Aynı adres hız sınırı kovalarına da girer.
 - Log: kapının adı, neden (`refused`, `action`, `hostname`, `reused`) ve Cloudflare'in hata kodları. Token, gizli anahtar ve IP loga girmez.
 
 ### Yedek: Cloudflare yanıt vermezse
 
-Ne açık kapı ne satış durdurma: Cloudflare'e ulaşılamaz, zaman aşımı olur, 5xx döner, yanıt bozuk gelir ya da kendi gizli anahtarımız reddedilirse (`missing-input-secret`, `invalid-input-secret`, `bad-request`, `internal-error`) §1'in iş kanıtı istenir. Yedeğin meydan okuması kapıya özel kapsamla imzalanır (`ts_<kapı>`): §1'in uyarlanır kapsamlarından (`login` vb.) alınmış bir çözüm Turnstile'ın yerine geçmez, bir kapınınki öbüründe geçmez. Çözüm tek kullanımlıktır; zorluk 18 bit. Cloudflare'in "token geçersiz" yanıtı yedeğe düşmez, 403'tür.
+Ne açık kapı ne satış durdurma: Cloudflare'e ulaşılamaz, zaman aşımı olur, 5xx ya da 429 döner, devre kesici açıktır, yanıt bozuk gelir ya da kendi gizli anahtarımız reddedilirse (`missing-input-secret`, `invalid-input-secret`) ya da Cloudflare `internal-error` derse §1'in iş kanıtı istenir. Başka her 4xx ve `bad-request` isteğin ya da token'ın kusurudur: 403, yedeğe düşmez (güvenlik incelemesi D1). Yedeğin meydan okuması kapıya özel kapsamla imzalanır (`ts_<kapı>`): §1'in uyarlanır kapsamlarından (`login` vb.) alınmış bir çözüm Turnstile'ın yerine geçmez, bir kapınınki öbüründe geçmez. Çözüm tek kullanımlıktır. Zorluk aynı IP kovasından 15 dakikadaki yedek isteği sayısıyla artar: ilk 3'te 18, 10'a kadar 20, sonra 22 bit (D2). Gizli anahtarın reddi ve anahtarsız çalışma `error` düzeyinde loglanır (`security.turnstile_secret_refused`, `security.turnstile_unconfigured`): kendiliğinden düzelmez, her ziyaretçi yedeği öder; alarm bağlanır (F16).
 
 ### Anahtarlar
 
 - Anahtarlar **platformundur**, mağaza paneline ya da veritabanına girmez: ortam değişkeni `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, her instance'ın kendi widget'ı. Kontrol düzlemi mağaza açılırken Cloudflare API'siyle widget'ı (`mode: managed`, mağazanın alan adları) oluşturup anahtarları yazar (T3, F16).
 - Yerelde ve testte ayarlı değilse Cloudflare'in resmi test anahtarları kullanılır (site `1x00000000000000000000AA`, gizli `1x0000000000000000000000000000000AA`; widget `XXXX.DUMMY.TOKEN.XXXX` verir, gizli anahtar yalnız onu kabul eder). Testte (`NODE_ENV=test`) test anahtarlarının yanıtı ağa çıkmadan, Cloudflare'in belgelediği gibi üretilir (her zaman geçen, her zaman reddeden `2x…`, harcanmış `3x…`); geliştirmede gerçek `siteverify` çağrılır. Test anahtarında `hostname` (`example.com`) ve `action` (yok) denetlenmez.
-- Canlı ve hazırlıkta iki anahtar zorunludur, test anahtarı reddedilir: süreç başlamaz (`AUTH_MFA_ENCRYPTION_KEY` gibi, `lib/env.ts`). İki anahtar birlikte verilir.
+- Geliştirme ve test dışında (`NODE_ENV` boşsa canlı sayılır) iki anahtar zorunludur, test anahtarı reddedilir: süreç başlamaz (anahtarlar açılışta `assertTurnstileConfigured`, kontrol düzleminin kuralı gibi; test anahtarı reddi şemada). İki anahtar birlikte verilir. Test anahtarının ayrıcalıkları (host ve action denetlenmez, dummy token tekrar kullanılabilir) yalnız geliştirme ve testte geçerlidir (güvenlik incelemesi O1).
 - Geliştirme ve test için `TURNSTILE=off` hiç token istemez (panelin e2e'si T2'ye kadar, yük testi); geliştirme ve test dışında süreç başlamaz.
 
 ### CSP
@@ -238,4 +240,7 @@ Cloudflare, F16'da trafiğin tamamını taşıyacak işleyendir; Turnstile aynı
 
 - **T1 backend (bu ek):** doğrulayıcı, ortam şeması, kapı ara katmanları, yedek, `CF-Connecting-IP`, site anahtarının yayımlanması, testler. Vitrin ve panel token göndermeden birleşirse giriş, kayıt ve ödeme 428 döner: T1 ve T2 birlikte birleşir ya da geliştiriciler T2'ye kadar `TURNSTILE=off` kullanır.
 - **T2 vitrin ve paneller:** widget (`interaction-only`, kapıya göre `action`), `X-Turnstile-Token`, 428/403 ve yedek akışı, CSP, `packages/types`'ta sözleşme; panel girişinde ve şifre sıfırlamada `GET /admin/public-config`. CI'daki panel e2e'sinde `TURNSTILE=off` kaldırılır.
-- **T3 kontrol düzlemi (F16):** mağaza açılırken Cloudflare API'siyle widget ve anahtarlar, alan adı eklenince widget'ın alan adları; kontrol düzleminin kendi girişine Turnstile; Cloudflare önde ve köken güvenlik duvarı, ardından `TRUST_CF_CONNECTING_IP=on`.
+- **T3 kontrol düzlemi (F16):** mağaza açılırken Cloudflare API'siyle widget ve anahtarlar, alan adı eklenince widget'ın alan adları; kontrol düzleminin kendi girişine Turnstile; `security.turnstile_secret_refused` ve `security.turnstile_unconfigured` için alarm. Cloudflare öne konunca, sırayla:
+  1. kökenin güvenlik duvarı yalnız Cloudflare'in IP aralıklarını (ya da Authenticated Origin Pulls) kabul eder;
+  2. vitrinin sunucusu ziyaretçinin adresini `CF-Connecting-IP`'den okuyup imzalar (`x-qt-client-ip`); yoksa vitrinden gelen her istek Cloudflare kenarının adresiyle sayılır;
+  3. ancak bundan sonra backend'de `TRUST_CF_CONNECTING_IP=on`.

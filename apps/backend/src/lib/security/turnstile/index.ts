@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { z } from "@medusajs/framework/zod"
 import { createHttpClient } from "../../clients"
+import { ProviderError } from "../../errors"
 import type { HttpClient, Transport } from "../../clients"
 import type { FailureLog } from "../../clients/failure-log"
 import {
@@ -34,7 +35,11 @@ export const TURNSTILE_GATES = [
   "password_reset",
   "checkout",
   "staff_login",
+  // Medusa's own staff account creation (an invitation's acceptance)
+  "staff_register",
   "staff_password_reset",
+  // A new e-mail verification code (Medusa's `/auth/verification/request`)
+  "verification",
   "order_lookup",
   "contact",
   "newsletter",
@@ -45,8 +50,8 @@ export const TURNSTILE_GATES = [
 ] as const
 export type TurnstileGate = (typeof TURNSTILE_GATES)[number]
 
-// Cloudflare's own bound on a token
-const MAX_TOKEN_LENGTH = 2048
+// Cloudflare's own bound on a token, in the characters its tokens are made of
+const TOKEN = /^[A-Za-z0-9._-]{1,2048}$/
 // Cloudflare's error codes are short words; anything else is not logged as said
 const ERROR_CODE = /^[a-z0-9-]{1,40}$/
 
@@ -75,13 +80,12 @@ const answer = z.object({
   challenge_ts: z.string().optional(),
 })
 
-// Our own secret refused, or a request we built wrong: Cloudflare cannot judge the visitor
-const OUR_FAULT = new Set([
+// Our own secret refused, or Cloudflare's own failure: it cannot judge the visitor
+export const SECRET_REFUSED: ReadonlySet<string> = new Set([
   "missing-input-secret",
   "invalid-input-secret",
-  "bad-request",
-  "internal-error",
 ])
+const NOT_JUDGED: ReadonlySet<string> = new Set([...SECRET_REFUSED, "internal-error"])
 
 // Nothing kept on the Integrations page: the panel is for the shop, this is the platform's
 const NO_FAILURE_LOG: FailureLog = {
@@ -108,6 +112,11 @@ export function createTurnstileClient(options: TurnstileClientOptions = {}): Htt
     maxResponseBytes: 16 * 1024,
     retry: { attempts: 2, baseDelayMs: 100, maxDelayMs: 300, maxRetryAfterMs: 0 },
     failureLog: () => NO_FAILURE_LOG,
+    // A 4xx's own word (`bad-request`); a 5xx or a 429 stays `http_<status>`
+    errorCode: (body, status) =>
+      status >= 500 || status === 429
+        ? undefined
+        : answer.safeParse(body).data?.["error-codes"]?.[0],
     ...options,
   })
 }
@@ -135,8 +144,35 @@ function testAnswer(secret: string, token: string): z.infer<typeof answer> {
 
 export interface VerifyOptions {
   client: HttpClient
+  /**
+   * A developer's machine or the tests (`isLocalEnv`): Cloudflare's test
+   * secrets keep their privileges (no host or action to check) only there.
+   */
+  local?: boolean
   /** Answer Cloudflare's test secrets here, without the network (NODE_ENV=test). */
   offlineTestKeys?: boolean
+}
+
+/**
+ * What a failed call says. Cloudflare down, slow, throttling us or our own
+ * secret refused: unavailable (the fallback decides). Any other 4xx is the
+ * token's or the request's: refused.
+ */
+function failedCall(error: unknown): TurnstileVerdict {
+  if (error instanceof ProviderError) {
+    const code = error.providerCode
+    if (NOT_JUDGED.has(code)) {
+      return { ok: false, reason: "unavailable", codes: [code] }
+    }
+    if (/^http_4\d\d$/.test(code) && code !== "http_429") {
+      return { ok: false, reason: "refused", codes: [] }
+    }
+    // Cloudflare's words are hyphenated (`bad-request`); the client's own are not (`aborted`)
+    if (code.includes("-") && ERROR_CODE.test(code)) {
+      return { ok: false, reason: "refused", codes: [code] }
+    }
+  }
+  return { ok: false, reason: "unavailable", codes: [] }
 }
 
 /** Asks Cloudflare whether the token is good for the gate, on one of the shop's hosts. */
@@ -148,10 +184,10 @@ export async function verifyTurnstile(
   if (token === "") {
     return { ok: false, reason: "missing", codes: [] }
   }
-  if (token.length > MAX_TOKEN_LENGTH) {
+  if (!TOKEN.test(token)) {
     return { ok: false, reason: "refused", codes: ["invalid-input-response"] }
   }
-  const testKey = isTurnstileTestSecret(check.secret)
+  const testKey = isTurnstileTestSecret(check.secret) && options.local === true
   let said: z.infer<typeof answer>
   if (testKey && options.offlineTestKeys) {
     said = testAnswer(check.secret, token)
@@ -171,13 +207,13 @@ export async function verifyTurnstile(
         secrets: [check.secret, token],
         schema: answer,
       })
-    } catch {
-      return { ok: false, reason: "unavailable", codes: [] }
+    } catch (error) {
+      return failedCall(error)
     }
   }
   const codes = codesOf(said["error-codes"])
   if (!said.success) {
-    return codes.some((code) => OUR_FAULT.has(code))
+    return codes.some((code) => NOT_JUDGED.has(code))
       ? { ok: false, reason: "unavailable", codes }
       : { ok: false, reason: "refused", codes }
   }

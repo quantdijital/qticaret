@@ -122,6 +122,18 @@ export const FRAUD_ROUTES = [
     methods: ["POST" as const],
     middlewares: [requireTurnstile("staff_password_reset")],
   },
+  // Medusa's staff account creation (accepting an invitation; security review O-I1)
+  {
+    matcher: "/auth/user/emailpass/register",
+    methods: ["POST" as const],
+    middlewares: [requireTurnstile("staff_register")],
+  },
+  // A verification code e-mailed to any address typed (security review O-D3)
+  {
+    matcher: "/auth/verification/request",
+    methods: ["POST" as const],
+    middlewares: [requireTurnstile("verification")],
+  },
   // `methods`: a matcher without them takes every path below it, registration included
   {
     matcher: "/auth/customer/emailpass",

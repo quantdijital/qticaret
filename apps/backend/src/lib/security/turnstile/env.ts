@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { isLocalEnv } from "@qticaret/server-kit"
+import { EnvValidationError, isLocalEnv } from "@qticaret/server-kit"
 import { TURNSTILE_TEST_SECRET_PASS, TURNSTILE_TEST_SITE_KEY, isTurnstileTestKey } from "./keys"
 
 /**
@@ -45,10 +45,12 @@ type TurnstileEnv = { [K in keyof typeof TURNSTILE_ENV]?: string | undefined } &
   NODE_ENV?: string | undefined
 }
 
-/** Both keys or none; once deployed both, and neither a test key. */
+/**
+ * Both keys or none; outside development and tests (an unset NODE_ENV
+ * counts as live) never a test key, which lets anyone through.
+ */
 export function checkTurnstileEnv(
   env: TurnstileEnv,
-  deployed: boolean,
   issue: (path: string, message: string) => void
 ): void {
   const site = env.TURNSTILE_SITE_KEY
@@ -59,21 +61,41 @@ export function checkTurnstileEnv(
       "is required with the other Turnstile key"
     )
   }
-  if (env.TURNSTILE === "off" && !isLocalEnv(env)) {
-    issue("TURNSTILE", "is allowed off on development and test only")
-  }
-  if (!deployed) {
+  if (isLocalEnv(env)) {
     return
+  }
+  if (env.TURNSTILE === "off") {
+    issue("TURNSTILE", "is allowed off on development and test only")
   }
   for (const [name, value] of [
     ["TURNSTILE_SITE_KEY", site],
     ["TURNSTILE_SECRET_KEY", secret],
   ] as const) {
-    if (value === undefined) {
-      issue(name, "is required in production and staging")
-    } else if (isTurnstileTestKey(value)) {
-      issue(name, "must not be a Cloudflare test key in production and staging")
+    if (value !== undefined && isTurnstileTestKey(value)) {
+      issue(name, "must not be a Cloudflare test key outside development and test")
     }
+  }
+}
+
+/**
+ * Outside development and tests (an unset NODE_ENV counts as live) the
+ * shop starts with both keys only. Called at boot after the schema, as
+ * the control plane's rule is (medusa-config.ts); throws the schema's own
+ * error, naming the variables, never their values.
+ */
+export function assertTurnstileConfigured(env: TurnstileEnv): void {
+  if (isLocalEnv(env)) {
+    return
+  }
+  const missing = (["TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"] as const).filter(
+    (name) => env[name] === undefined
+  )
+  if (missing.length > 0) {
+    throw new EnvValidationError(
+      `Invalid environment configuration:\n${missing
+        .map((name) => `  - ${name}: is required outside development and test`)
+        .join("\n")}`
+    )
   }
 }
 
@@ -88,8 +110,8 @@ export interface TurnstileKeys {
 
 /**
  * The keys in use: the env's, else on a developer's machine and in tests
- * Cloudflare's always-pass test keys. Null only where the schema would not
- * have started (deployed without keys).
+ * Cloudflare's always-pass test keys. Null only where the shop would not
+ * have started (`assertTurnstileConfigured`).
  */
 export function turnstileKeys(env: TurnstileEnv): TurnstileKeys | null {
   if (env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY) {
