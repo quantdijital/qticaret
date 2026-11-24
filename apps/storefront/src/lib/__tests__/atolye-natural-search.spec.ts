@@ -4,7 +4,10 @@ import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { HomeSectionView, ListingPageView, SearchFormView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
-import { renderPage } from "@/test/theme-render"
+import { renderPage, shopFixture } from "@/test/theme-render"
+// The theme's own parts: it exports pages, not these
+import { searchOf } from "../../../../../packages/themes/atolye/src/frame/header-words"
+import { SearchPanel } from "../../../../../packages/themes/atolye/src/frame/SearchPanel"
 
 /**
  * adr/0077 §7 as Atölye draws it: under the search box, while the shop
@@ -94,5 +97,25 @@ describe("Atölye's search in the shopper's own words", () => {
     expect(link).toContain('rel="nofollow"')
     expect(link).toContain('aria-label="Filtreyi kaldır: Kapadokya"')
     expect(renderListing(listing({ understood: null }))).not.toContain("Anladığım")
+  })
+
+  it("the header's live search: the hint in its panel only while on", () => {
+    const on = searchOf(shopFixture({ searchHint: HINT }), t, "/api/search").words
+    const off = searchOf(shopFixture(), t, "/api/search").words
+    expect(on.hint).toBe(HINT)
+    expect("hint" in off).toBe(false)
+    const panel = (words: typeof on) =>
+      renderToStaticMarkup(
+        createElement(SearchPanel, {
+          model: null,
+          words,
+          listboxId: "liste",
+          optionId: (index: number) => `secenek-${String(index)}`,
+          active: -1,
+          hidden: false,
+        })
+      )
+    expect(panel(on)).toContain("Kişisel bilgi (ad, telefon, adres) yazmayın.")
+    expect(panel(off)).not.toContain("Kişisel bilgi")
   })
 })

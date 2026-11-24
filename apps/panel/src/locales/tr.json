@@ -12901,7 +12901,7 @@
         "title": "Kendi cümlesiyle arama açılsın mı?",
         "description": "Müşterilerin vitrinde yazdığı arama cümleleri, mağazanızın kendi anahtarıyla bağlı yapay zekâ servisine gönderilir. Servis yurt dışında olabilir. Metin saklanmaz.",
         "personal": "Telefon, e-posta, kart ve kimlik numarası metinden ayıklanmaya çalışılır, ama cümlede geçen ad ve adres her zaman ayıklanamaz. Vitrinde arama kutusunun altında müşteriye kişisel bilgi yazmaması söylenir.",
-        "notice": "Bu aktarımı KVKK aydınlatma metninize eklemenizi öneririz (Ayarlar › Yasal metinler; hazır şablonda satırı var).",
+        "notice": "Aranan sözcükler, her aramada olduğu gibi, mağazanın arama raporunda 180 gün tutulur; vitrin analitiğine (GA4, Meta) aranan sözcükler gönderilmez. Bu aktarımı KVKK aydınlatma metninize eklemenizi öneririz (Ayarlar › Yasal metinler; hazır şablonda satırı var).",
         "confirm": "Aç"
       }
     },

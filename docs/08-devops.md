@@ -80,6 +80,7 @@ F16'da aynı workflow `DockerProvisioner` ile çalışır; imaj `NODE_OPTIONS=--
   - **Yedekten geri yükleme:** veritabanı yedeği hangi KEK'lerle sarıldıysa onlar env'de olmalı; `status` geri yüklemeden sonra çalıştırılır.
   - **C17'ye ilk yükseltme (F16):** C17 öncesi sürüm zarf biçimini okuyamaz; yeni sürüm okuduğu eski kaydı zarfa çevirir. Bu yüzden C17'yi içeren ilk yayında mağazanın sunucu ve worker'ı kayan değil, birlikte yeniden başlatılır.
   - Yeni mağazalar (üst panelin provisioner'ı) tek anahtarlı liste alır: `CREDENTIALS_ENCRYPTION_KEYS=<anahtar>`; emanet kopyası (`secret_escrow`) bu adı taşır.
+- **Vitrin vekil arkasında (adr/0077 §7, adr/0076 Ek D5; dağıtım denetim listesi):** vitrin yalnız ters vekilin (Caddy/CDN) arkasından erişilir, doğrudan portu dışarı açık değildir; `STOREFRONT_TRUSTED_PROXY_HOPS` gerçek vekil sayısına eşittir. Yanlışsa ziyaretçi adresi okunamaz (`isShopperAddressUnknown`: kendi cümlesiyle arama servise gitmez, düz aramaya döner) ya da sahte `X-Forwarded-For` ile adres başına hız sınırı (`ai_store_search`) aşılır.
 - **Destek erişimi:** süreli, gerekçeli, audit log'lu; tenant'a bildirim
 - **Kapatma:** veri dışa aktarma paketi → saklama süresi → silme, secret iptali, DNS temizliği
 - **Maliyet:** tenant başına kaynak/maliyet raporu; boşta tenant optimizasyonu ayrı ADR
@@ -95,6 +96,7 @@ F16'da aynı workflow `DockerProvisioner` ile çalışır; imaj `NODE_OPTIONS=--
 - Hata: GlitchTip, Türkiye'de kendi sunucumuzda (ADR-0045). Logger'ın error satırları redakte edilmiş hâliyle gider (`ERROR_TRACKING_DSN`); olayda mağazanın alan adı ve `RELEASE`
 - Yavaş sorgu: Postgres `pg_stat_statements` (sorgunun biçimi, değerler `$n` olarak). ORM değerleri SQL metnine gömdüğü için sorgu metni loglanmaz (`log_min_duration_statement` kullanılmaz, `log_min_error_statement=panic`). İzler dışa aktarılırken SQL değişmezlerinden ve kişisel veriden arındırılır (`lib/observability/scrub.ts`)
 - Uyarılar: ödeme başarısızlık oranı artışı, webhook hata oranı, kuyruk birikmesi, fatura dead-letter
+- Uyarı (adr/0077 §7): `ai.search_fallback` satırında `reason=ai.daily_limit_reached` görülmesi (mağazanın günlük vitrin arama tavanı doldu; çok adresten dağıtık tüketim olabilir: `challengeOver` eşiği takibi). `reason=address_unknown` sürekliyse `STOREFRONT_TRUSTED_PROXY_HOPS` yanlıştır.
 
 ## Yedekleme
 - Postgres: günlük tam + WAL/PITR, şifreli, farklı bölge

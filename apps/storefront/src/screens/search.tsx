@@ -188,6 +188,8 @@ export async function SearchScreen({ query }: { query: Query }) {
       breadcrumbs={breadcrumbs}
       jsonLd={[]}
       cardDates={cardDatesOf(dated)}
+      // A sentence may hold personal details: its words are not told to analytics (KVKK)
+      searchEvent={!natural}
       extra={{
         search: withTiles(help, tiles, popular),
         searchForm: form,

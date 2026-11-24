@@ -62,7 +62,10 @@ describe("AiStorefrontSearchCard", () => {
     })
     expect(dialog).toHaveAccessibleDescription(/yurt dışında olabilir/)
     expect(within(dialog).getByRole("alert")).toHaveTextContent(/ad ve adres her zaman ayıklanamaz/)
-    expect(within(dialog).getByText(/KVKK aydınlatma metninize/)).toBeInTheDocument()
+    // Where the words also land: the search report (180 days); never analytics
+    expect(within(dialog).getByText(/KVKK aydınlatma metninize/)).toHaveTextContent(
+      /arama raporunda 180 gün.*analitiğine.*gönderilmez/
+    )
     const cancel = within(dialog).getByRole("button", { name: "Vazgeç" })
     // Every Vazgeç is red (docs/18)
     expect(cancel.className).toMatch(/text-destructive-text/)

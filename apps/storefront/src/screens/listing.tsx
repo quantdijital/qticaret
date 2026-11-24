@@ -197,6 +197,7 @@ export async function ListingContent({
   jsonLd,
   extra = {},
   cardDates = null,
+  searchEvent = true,
 }: {
   type: ListingType | "search"
   /** The page's answer, by the listing's own query (`query=`). */
@@ -210,6 +211,8 @@ export async function ListingContent({
   extra?: Pick<ListingPageView, "search" | "empty" | "searchForm" | "searchHint" | "understood">
   /** A date search's dates and party: its dated cards are told them (adr/0077 §4). */
   cardDates?: Record<string, string | number> | null
+  /** Whether a search tells its words to analytics; off while the shop reads sentences (adr/0077 §7). */
+  searchEvent?: boolean
 }) {
   const asked = priceAsked(url.searchParams)
   if (asked !== undefined) {
@@ -302,7 +305,9 @@ export async function ListingContent({
       ? listEvent(type, isSearch ? t("search.title") : heading.title, products, displays)
       : null
   const measured: AnalyticsEvent[] = [
-    ...(isSearch && state.q && first ? [{ name: "search" as const, term: state.q }] : []),
+    ...(isSearch && searchEvent && state.q && first
+      ? [{ name: "search" as const, term: state.q }]
+      : []),
     ...(list ? [list] : []),
   ]
   // What a card's quick add puts in the cart (its brand for "added to cart"), and where each card leads

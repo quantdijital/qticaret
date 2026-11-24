@@ -12901,7 +12901,7 @@
         "title": "Turn on search in their own words?",
         "description": "The search sentences shoppers type on the storefront go to the connected AI service under your own key. The service may be abroad. The text is not stored.",
         "personal": "Phone numbers, emails, card and ID numbers are taken out where found, but a name or an address in the sentence cannot always be. The storefront tells shoppers under the search box not to type personal details.",
-        "notice": "We suggest adding this transfer to your privacy notice (Settings › Legal texts; the ready template has a line for it).",
+        "notice": "As with every search, the searched words stay in the shop's search report for 180 days; the storefront's analytics (GA4, Meta) are not told the searched words. We suggest adding this transfer to your privacy notice (Settings › Legal texts; the ready template has a line for it).",
         "confirm": "Turn on"
       }
     },

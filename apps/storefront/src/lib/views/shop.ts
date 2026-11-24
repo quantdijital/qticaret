@@ -75,7 +75,7 @@ export async function shopView(): Promise<ShopView> {
   const [
     site,
     categories,
-    { storefront: frame, free_shipping_threshold, marks },
+    { storefront: frame, free_shipping_threshold, marks, features },
     identity,
     cart,
     cookies,
@@ -223,5 +223,7 @@ export async function shopView(): Promise<ShopView> {
     etbisQr: identity.etbis_qr ? imageView(identity.etbis_qr, t("footer.etbis_qr_alt")) : null,
     paymentMarks: shopMarks(marks?.payments, t),
     carrierMarks: shopMarks(marks?.carriers, t),
+    // The header search's hint while sentences are read (adr/0077 §7)
+    ...(features?.natural_search === true ? { searchHint: t("search.natural_hint") } : {}),
   }
 }
