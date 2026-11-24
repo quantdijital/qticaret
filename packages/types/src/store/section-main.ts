@@ -82,6 +82,12 @@ export interface StoreMainSections {
     search_style?: HeaderSearchStyle
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
+    /**
+     * The action button of the variants other than `catalog` (whose
+     * `catalog.highlight_link` it is): its words and where it goes; absent
+     * while none is set (an older backend too), null when broken. None: no button.
+     */
+    highlight_link?: StoreLayoutLink | null
   }
   /**
    * The footer with its own settings (adr/0049 Ek 2026-11-15); an older

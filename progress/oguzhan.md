@@ -2,6 +2,11 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-24: hazır görünüm boşlukları, handle ile kategori ikonu ve her üst bilgide eylem düğmesi
+
+- **Dal:** `oguzhan/ikon-ve-ust-dugme`. `categories`/`icons`'a `category_icons_by_handle` (kimlik > handle > görsel > baş harf); `highlight_link` (katalogdaki eylem düğmesi) `standard` ve `centered` üst bilgide de; panelde "Eylem düğmesi". Kilitli görünümlerin HTML'i ve stil özeti aynı. adr/0077 dalga 7 Ek.
+- **Sıradaki işler:** #312 birleşince Vadi'ye kategori ikonları (handle ile), Patika'ya üst bilgi düğmesi.
+
 ## 2026-11-22: adr/0076 D7b, rezervasyon e-postaları, hatırlatma, voucher
 
 - **Dal:** `oguzhan/rezervasyon-bildirim`. Backend: dört düzenlenebilir ileti (onay, hatırlatma, iptal, mağazanın kalkış iptali; onay ve iptaller zorunlu), rezervasyon "sayfası" okuyucusu (kalkış ürünün saat diliminde, `kalkis_yeri` niteliği, kişi sayısı, satış anındaki kademeler + paket tur tabanı; katılımcı yok). Onay `order.placed` onayından ve uzlaştırmadan, iptaller `booking.cancelled` olayından (`by: shop` → kalkış iptali şablonu); hata iptali/onayı bozmaz. Saatlik `booking-reminders` işi (`reminder_days`, varsayılan 2, 0 kapalı; `reminded_at` işareti). Voucher: rezervasyon başına 80 bit Crockford kod (düz + benzersiz indeks, karar ADR'de), `GET /store/orders/:id/voucher` (yalnız siparişin sahibi), `POST /admin/booking-vouchers/check` (her rol, hız sınırı, denetim kaydı). Migration `Migration20261123010000`. Panel: Siparişler'de "Voucher doğrula", rezervasyon ayarında "Hatırlatma (gün önce)", ileti adları. Vitrin: `/siparis/:id/voucher` temanın içerik sayfasıyla (tema değişmedi). ADR Ek "D7b".

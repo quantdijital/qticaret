@@ -245,7 +245,8 @@ function fieldsOf(section: AnySection): Found[] {
             ["strip_note", textProblem(section.strip_note, HEADER_CATALOG_LIMITS.strip_note)],
             ["strip_note_link", linkProblem(section.strip_note_link)],
           ]
-        : []
+        : // Every other header's action button
+          [["highlight_link", linkProblem(section.highlight_link ?? null)]]
     // A content page's own: the contact text is checked on the server, the facts have no fields
     case "footer_bar":
     case "product_main":

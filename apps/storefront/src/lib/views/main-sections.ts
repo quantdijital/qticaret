@@ -31,6 +31,7 @@ import { footerColumnsOf } from "./footer-columns"
 import { footerRowsOf, freeRowsOf } from "./footer-rows"
 import type { FooterRowsParts } from "./footer-rows"
 import { headerCatalogOf } from "./header-catalog"
+import { menuLink } from "./menus"
 
 /**
  * The design's main sections as a theme draws them (adr/0049 Ek 2026-11-14
@@ -80,6 +81,10 @@ export function headerBarOf(
     searchStyle: headerSearchStyleOf(bar.search_style),
     ...(variant === "catalog" && parts
       ? { catalog: headerCatalogOf(bar.catalog, parts.t, parts.tree) }
+      : {}),
+    // The other variants' action button, as the catalog's (none, or broken: no button)
+    ...(variant !== "catalog" && bar.highlight_link && parts
+      ? { highlight: menuLink({ ...bar.highlight_link, children: [] }, parts.t) }
       : {}),
   }
 }

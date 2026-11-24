@@ -148,8 +148,19 @@ const OPTIONAL_FIELDS: {
   >
 } = {
   hero: { category_list: ["slides", "scroller"] },
+  // A preset's icons by handle (adr/0077 §10 Ek): the icon row's, dropped with it
+  categories: { icons: ["category_icons_by_handle"] },
   // The footer box's band on the footer's ground (adr/0070 §4 Ek): the bands' own, set by the shop
   newsletter: { split: ["joined"], image_card: ["joined"], strip: ["joined"] },
+}
+
+/**
+ * Fields every variant of a type holds though one starts them among its
+ * own: carried over a switch as written. The header's action button is
+ * every header's (the catalog header's highlighted link before).
+ */
+const SHARED_FIELDS: Readonly<Partial<Record<VariantSectionType, readonly string[]>>> = {
+  header_bar: ["highlight_link"],
 }
 
 /**
@@ -221,6 +232,13 @@ export function switchVariant<S extends VariantSection>(
     ...Object.keys(fields[section.variant] ?? {}),
     ...(optional[section.variant] ?? []),
   ])
+  const shared: readonly string[] = SHARED_FIELDS[section.type] ?? []
+  // A shared field one variant starts with a default stays once written (none: the default)
+  const carried = Object.fromEntries(
+    Object.entries(section).filter(
+      ([key, value]) => shared.includes(key) && value !== null && value !== undefined
+    )
+  )
   const kept = Object.fromEntries(Object.entries(section).filter(([key]) => !own.has(key)))
-  return { ...kept, ...structuredClone(fields[next] ?? {}), variant: next } as S
+  return { ...kept, ...structuredClone(fields[next] ?? {}), ...carried, variant: next } as S
 }

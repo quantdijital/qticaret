@@ -261,6 +261,11 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
                   section.category_ids.includes(id)
                 )
               ),
+              // By handle (a preset's): printed only once written, so a row before it prints as it did
+              ...(section.category_icons_by_handle &&
+              Object.keys(section.category_icons_by_handle).length > 0
+                ? { category_icons_by_handle: section.category_icons_by_handle }
+                : {}),
             }
           : {}),
       }
