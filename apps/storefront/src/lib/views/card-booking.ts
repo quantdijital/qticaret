@@ -77,11 +77,25 @@ function bookingPrice(fromPrice: number | null, before: number | undefined): Pri
     from: true,
     discount: null,
   }
-  const discount = before === undefined ? null : percentOff(before, fromPrice)
+  return withBefore(plain, fromPrice, before)
+}
+
+/**
+ * A dated price (`amount`, lira) struck through at `before` when the
+ * server sends one: an ordinary card's discount and saving beside it.
+ * Without one it is `plain`, drawn as before (adr/0076 Ek "kalkış fiyatı
+ * promosyonlu": the card and the upcoming departures alike).
+ */
+export function withBefore(
+  plain: PriceView,
+  amount: number,
+  before: number | undefined
+): PriceView {
+  const discount = before === undefined ? null : percentOff(before, amount)
   if (before === undefined || discount === null) {
     return plain
   }
   // In kuruş, so the saving is never a float's hair off
-  const saving = (Math.round(before * 100) - Math.round(fromPrice * 100)) / 100
+  const saving = (Math.round(before * 100) - Math.round(amount * 100)) / 100
   return { ...plain, before: formatLira(before), discount, saving: formatLira(saving) }
 }
