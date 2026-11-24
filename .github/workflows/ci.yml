@@ -30,8 +30,9 @@ jobs:
   quality:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-24.04
-    # Build ~2, lint and typecheck ~5, the tests one package at a time ~15 minutes
-    timeout-minutes: 40
+    # Build ~2, lint and typecheck ~5, the tests one package at a time ~28 minutes
+    # (2026-11-24: green runs took 36-37 minutes, so 40 cancelled loaded runs)
+    timeout-minutes: 60
     # The rate limiter's Redis counters (an atomic Lua script) are tested
     # against a real Redis; the same pinned image as local dev
     services:
