@@ -5,6 +5,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../../../modules/platform-settings"
 import type { SeoSettings } from "../../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../../modules/platform-settings/service"
 import { listingFilterKeys } from "../../../../workflows/seo/listing"
+import { varyOnPublishableKey } from "../../../../lib/http/vary"
 
 /**
  * `GET /store/seo/robots` (docs/13 §6, §9): the shop's robots.txt, served
@@ -17,7 +18,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   res.setHeader("Content-Type", "text/plain; charset=utf-8")
   res.setHeader("X-Content-Type-Options", "nosniff")
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.send(
     robotsTxt({
       template: seo.robots_txt,

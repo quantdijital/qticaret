@@ -8,6 +8,7 @@ import {
   isCollectionShown,
 } from "../../../../../workflows/catalog/collection-fields"
 import type { CollectionExtensionRow } from "../../../../../workflows/catalog/collection-fields"
+import { varyOnPublishableKey } from "../../../../../lib/http/vary"
 
 /**
  * GET /store/collections/:id/details: what a collection's page shows
@@ -34,7 +35,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
         .listMediaAssets({ url }, { select: ["width", "height", "derivatives"], take: 1 })
     : []
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({
     details: {
       description: own?.description ?? null,

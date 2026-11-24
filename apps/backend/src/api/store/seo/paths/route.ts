@@ -11,6 +11,7 @@ import { collectionsOn } from "../../../../workflows/catalog/collections-flag"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../../../../workflows/catalog/entity-paths"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { StoreGetSeoPathsType } from "../validators"
+import { varyOnPublishableKey } from "../../../../lib/http/vary"
 
 /**
  * The asked collections whose page is public: none while the shop has
@@ -54,6 +55,6 @@ export async function GET(
             { select: ["entity_id", "path"], take: ids.length }
           )
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({ paths: Object.fromEntries(entries.map((entry) => [entry.entity_id, entry.path])) })
 }

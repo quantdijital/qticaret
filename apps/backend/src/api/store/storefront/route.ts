@@ -24,6 +24,7 @@ import type { PageRole, RolePage } from "../../../lib/storefront/page-roles"
 import { storefrontRolePages } from "../../../workflows/storefront/page-roles"
 import { shopMarks } from "../../../workflows/storefront/shop-marks"
 import type { ShopMarks } from "../../../workflows/storefront/shop-marks"
+import { varyOnPublishableKey } from "../../../lib/http/vary"
 
 /**
  * GET /store/storefront (F18 D3, docs/19 §4): the storefront's frame as the
@@ -122,7 +123,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     storefront as unknown as Record<string, unknown>
   )
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({
     storefront: filled(storefront, shared, values, roles),
     // The theme's choices (F18 D11, adr/0053) as the published design holds them, else the

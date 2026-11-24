@@ -1,6 +1,7 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { storeProductBooking } from "../../../../../workflows/booking/store-view"
 import type { StoreGetProductBookingType } from "./validators"
+import { varyOnPublishableKey } from "../../../../../lib/http/vary"
 
 /**
  * GET /store/products/:id/booking (adr/0076 §10): a dated product's
@@ -16,5 +17,6 @@ export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise
     query.region_id
   )
   res.setHeader("Cache-Control", "public, max-age=15")
+  varyOnPublishableKey(res)
   res.json({ booking })
 }

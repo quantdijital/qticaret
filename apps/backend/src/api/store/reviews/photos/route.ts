@@ -2,6 +2,7 @@ import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/htt
 import { latestReviewPhotos } from "../../../../workflows/customers/review-photo-reads"
 import type { StoreGetReviewPhotosType } from "../../products/[id]/reviews/validators"
 import { visibleReviewed } from "../visible"
+import { varyOnPublishableKey } from "../../../../lib/http/vary"
 
 /**
  * GET /store/reviews/photos?limit= (adr/0046 Ek 2026-11-04): the newest
@@ -16,6 +17,6 @@ export async function GET(
   const titles = await visibleReviewed(req.scope, req.publishable_key_context.sales_channel_ids)
   const photos = await latestReviewPhotos(req.scope, titles, req.validatedQuery.limit)
   res.setHeader("Cache-Control", "public, max-age=60")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({ photos })
 }
