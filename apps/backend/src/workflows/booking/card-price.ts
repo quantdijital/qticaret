@@ -106,11 +106,12 @@ export async function basePrices(
 
 /**
  * How each place (one per category) is shown: its unit price less the
- * automatic promotions on its category, never below zero, and its
- * regular price with the departure's difference struck through only by
- * the price-before rule, the category's recorded prices read at the same
- * difference (a difference changed within the rule's days is not
- * recorded: the base's record speaks for it). By category.
+ * automatic promotions on its category, never below zero, and the price
+ * before them struck through only by the price-before rule, read from the
+ * category's recorded prices. A departure's difference has no record of
+ * its own (a difference raised yesterday would make a price never sold
+ * look cut, Ticari Reklam Yönetmeliği md. 14/3), so a place priced with
+ * one is never struck through: its promoted price alone. By category.
  */
 export async function cardUnitDisplays(
   container: Container,
@@ -120,16 +121,25 @@ export async function cardUnitDisplays(
   now: Date
 ): Promise<Map<string, CardShown>> {
   const priced = new Map<string, UnitPrice>()
+  const differs = new Set<string>()
   for (const unit of units) {
     const base = bases.get(unit.variant_id)
     if (!base) {
       continue
     }
-    const at = (price: Kurus) => bookingUnitPrice(price, unit.adjustment)
-    priced.set(unit.variant_id, { amount: unit.amount, original: at(base.original), recorded: at })
+    if (unit.adjustment !== 0) {
+      differs.add(unit.variant_id)
+    }
+    priced.set(unit.variant_id, {
+      amount: unit.amount,
+      original: bookingUnitPrice(base.original, unit.adjustment),
+    })
   }
   const displays = await unitDisplays(container, priced, currencyCode.toLowerCase(), now)
   return new Map(
-    [...displays].map(([id, shown]) => [id, { current: shown.current, before: shown.before }])
+    [...displays].map(([id, shown]) => [
+      id,
+      { current: shown.current, before: differs.has(id) ? null : shown.before },
+    ])
   )
 }

@@ -109,7 +109,11 @@ function shop(
       })),
     }
   }
-  const graph = (args: { entity: string; fields: string[] }) => Promise.resolve(rows(args))
+  const asked: string[] = []
+  const graph = (args: { entity: string; fields: string[] }) => {
+    asked.push(args.entity)
+    return Promise.resolve(rows(args))
+  }
   const historyOf = (ids: readonly string[]) =>
     Promise.resolve(
       new Map(
@@ -129,7 +133,7 @@ function shop(
     [PRICE_HISTORY_MODULE]: { historyOf },
   }
   const container = { resolve: (key: string) => services[key] } as unknown as MedusaContainer
-  return { container, computeActions }
+  return { container, computeActions, asked }
 }
 
 const base = (lira: number, original = lira): BasePrice => ({
@@ -137,12 +141,13 @@ const base = (lira: number, original = lira): BasePrice => ({
   original: kurus(original * 100),
 })
 const bases = new Map([["adult", base(1500)]])
-// The adult's place on a departure 250,50 TL dearer
+// The adult's place on a departure 250,50 TL dearer, and on one at the base price
 const unit = { variant_id: "adult", adjustment: 25_050, amount: kurus(175_050) }
+const level = { variant_id: "adult", adjustment: 0, amount: kurus(150_000) }
 
-const shownOf = async (promos: Promo[], history = {}) => {
+const shownOf = async (promos: Promo[], history = {}, place = unit) => {
   const { container } = shop(promos, history)
-  return (await cardUnitDisplays(container, [unit], bases, "try", NOW)).get("adult")
+  return (await cardUnitDisplays(container, [place], bases, "try", NOW)).get("adult")
 }
 
 describe("cardUnitDisplays", () => {
@@ -153,8 +158,8 @@ describe("cardUnitDisplays", () => {
   it("takes a percentage off the unit price the cart sees, the departure's difference included", async () => {
     const { container, computeActions } = shop([promo({ code: "OTO20" })])
     const shown = (await cardUnitDisplays(container, [unit], bases, "try", NOW)).get("adult")
-    // 1.750,50 less 20%: 1.400,40; struck through at the regular price with the difference
-    expect(shown).toEqual({ current: 140_040, before: 175_050 })
+    // 1.750,50 less 20%: 1.400,40; a difference has no record, so nothing struck through
+    expect(shown).toEqual({ current: 140_040, before: null })
     // No code is ever asked: only what every shopper gets
     expect(computeActions.mock.calls[0]?.[0]).toEqual([])
     expect(computeActions.mock.calls[0]?.[1].items[0]).toMatchObject({
@@ -165,10 +170,9 @@ describe("cardUnitDisplays", () => {
   })
 
   it("takes a fixed amount off each unit, never below zero", async () => {
-    expect(await shownOf([promo({ code: "OTO300", method: "fixed", value: 300 })])).toEqual({
-      current: 145_050,
-      before: 175_050,
-    })
+    const fixed = [promo({ code: "OTO300", method: "fixed", value: 300 })]
+    expect(await shownOf(fixed)).toEqual({ current: 145_050, before: null })
+    expect(await shownOf(fixed, {}, level)).toEqual({ current: 120_000, before: 150_000 })
     expect(await shownOf([promo({ code: "HEPSI", method: "fixed", value: 5000 })])).toMatchObject({
       current: 0,
     })
@@ -184,27 +188,33 @@ describe("cardUnitDisplays", () => {
     expect(await shownOf([promo({ code: "BASKA", products: ["prod_other"] })])).toEqual(none)
   })
 
-  it("strikes through by the price-before rule, the base's record read at the departure's difference", async () => {
-    // Sold at 1.300 five days ago, 1.500 since three: 1.300 + 250,50 is the lowest before
-    const history = {
+  it("strikes a departure without a difference through by the price-before rule, from the record", async () => {
+    const ten = [promo({ code: "OTO10", value: 10 })]
+    // Sold at 1.300 five days ago, 1.500 since three: 1.350 is no discount on 1.300
+    const raised = {
       adult: [
         { at: new Date(NOW.getTime() - 5 * DAY), amount: 1300, original: 1300 },
         { at: new Date(NOW.getTime() - 3 * DAY), amount: 1500, original: 1500 },
       ],
     }
-    // 1.575,45 is no discount on 1.550,50: the card strikes nothing through
-    expect(await shownOf([promo({ code: "OTO10", value: 10 })], history)).toEqual({
-      current: 157_545,
-      before: null,
-    })
-    // At 1.500 all along: 1.750,50 struck through, from the record
+    expect(await shownOf(ten, raised, level)).toEqual({ current: 135_000, before: null })
+    // At 1.500 all along: 1.500 struck through
     const steady = {
       adult: [{ at: new Date(NOW.getTime() - 20 * DAY), amount: 1500, original: 1500 }],
     }
-    expect(await shownOf([promo({ code: "OTO10", value: 10 })], steady)).toEqual({
-      current: 157_545,
-      before: 175_050,
-    })
+    expect(await shownOf(ten, steady, level)).toEqual({ current: 135_000, before: 150_000 })
+  })
+
+  it("never strikes a departure with a difference through: its price was never recorded", async () => {
+    // Base 1.500 all along, the difference raised to +1.000 today, then 20% off: 2.000, not "2.500 struck"
+    const steady = {
+      adult: [{ at: new Date(NOW.getTime() - 20 * DAY), amount: 1500, original: 1500 }],
+    }
+    const raisedToday = { variant_id: "adult", adjustment: 100_000, amount: kurus(250_000) }
+    const twenty = [promo({ code: "OTO20" })]
+    expect(await shownOf(twenty, steady, raisedToday)).toEqual({ current: 200_000, before: null })
+    // The same promotion on a departure without one: struck through
+    expect(await shownOf(twenty, steady, level)).toEqual({ current: 120_000, before: 150_000 })
   })
 
   it("is the price the index keeps for the same unit (one rule, adr/0077 §5)", async () => {
@@ -222,5 +232,14 @@ describe("cardUnitDisplays", () => {
     ).get("adult")
     expect(index?.current).toBe(120_000)
     expect(card?.current).toBe(index?.current)
+  })
+
+  it("reads the promotions once however many parts of 100 variants it prices", async () => {
+    const selling = Object.fromEntries(
+      Array.from({ length: 250 }, (_, index) => [`variant_${String(index)}`, 100])
+    )
+    const { container, asked } = shop([promo({ code: "OTO20" })], {}, selling)
+    await priceDisplays(container, Object.keys(selling), "try", NOW)
+    expect(asked.filter((entity) => entity === "promotion")).toHaveLength(1)
   })
 })

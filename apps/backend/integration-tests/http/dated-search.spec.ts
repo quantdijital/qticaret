@@ -1,3 +1,5 @@
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { createCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { todayIn } from "../../src/lib/seo/facets-dated"
 import { createAdminUser } from "../helpers/admin"
@@ -46,7 +48,7 @@ medusaIntegrationTestRunner({
 
     /** A published tour at 1.500 TL a place, with departures `days` from now. */
     const tour = async (departures: { days: number; capacity: number }[]) => {
-      const { data } = await http.post<{ product: { id: string } }>(
+      const { data } = await http.post<{ product: { id: string; variants: { id: string }[] } }>(
         "/admin/products",
         {
           title: `Kapadokya turu ${String((made += 1))}`,
@@ -78,7 +80,10 @@ medusaIntegrationTestRunner({
         })),
       })
       expect(created.status).toBe(200)
-      return { productId, starts }
+      const slotIds = ((created.data["slots"] as { id: string }[] | undefined) ?? []).map(
+        (slot) => slot.id
+      )
+      return { productId, starts, variantId: data.product.variants[0]?.id ?? "", slotIds }
     }
 
     const listing = async (params: Record<string, string>, query: Record<string, string>) => {
@@ -96,6 +101,30 @@ medusaIntegrationTestRunner({
       )
     }
     const search = (query: Record<string, string>) => listing({ type: "search" }, query)
+
+    /** What a guest's cart charges for its items once one place on the departure is booked. */
+    const bookedTotal = async (variantId: string, slotId: string): Promise<number> => {
+      const { result: cart } = await createCartWorkflow(getContainer()).run({
+        input: {
+          region_id: shop.regionId,
+          sales_channel_id: shop.salesChannelId,
+          currency_code: "try",
+          email: "ayse.yilmaz@example.com",
+        },
+      })
+      const booked = await settle(
+        http.post<Record<string, unknown>>(
+          `/store/carts/${cart.id}/bookings`,
+          { slot_id: slotId, items: [{ variant_id: variantId, quantity: 1 }] },
+          { headers: store.headers }
+        )
+      )
+      expect(booked.status).toBe(200)
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "cart", fields: ["item_total"], filters: { id: cart.id } })
+      return Math.round(Number((data[0] as { item_total: unknown }).item_total) * 100) / 100
+    }
 
     beforeEach(async () => {
       const container = getContainer()
@@ -290,6 +319,8 @@ medusaIntegrationTestRunner({
       // The index and the date search filter by the price the card says
       expect(indexed.data.product_ids).toEqual([promoted.productId])
       expect(dated.data.product_ids).toEqual([promoted.productId])
+      // And the cart charges it: a guest's place on that departure, through the booking route
+      expect(await bookedTotal(promoted.variantId, promoted.slotIds[0] ?? "")).toBe(1200)
     })
   },
 })

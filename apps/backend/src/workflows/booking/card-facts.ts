@@ -31,7 +31,8 @@ export interface BookingCardFact {
   from_price: number | null
   /**
    * The same unit's price struck through, only when the price-before rule
-   * lets it be shown as a discount (an ordinary card's `before`, F4.3);
+   * lets it be shown as a discount (an ordinary card's `before`, F4.3),
+   * never on a departure with a difference (no record of it, card-price.ts);
    * absent otherwise.
    */
   before?: number
