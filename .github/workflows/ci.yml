@@ -35,6 +35,10 @@ jobs:
     name: Changed packages
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    # The last green run of dev or main is asked of the API
+    permissions:
+      contents: read
+      actions: read
     outputs:
       code: ${{ steps.changes.outputs.code }}
       backend: ${{ steps.changes.outputs.backend }}
@@ -45,9 +49,20 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+      # On dev and main: the head of the branch's last green run. A push of
+      # notes alone skips the jobs only when nothing but notes came since
+      # that head, so it cannot stand in for a code push whose run it cancelled
+      - id: green
+        if: github.ref_name == 'dev' || github.ref_name == 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=$GITHUB_REF_NAME&status=success&per_page=1" \
+            -q '.workflow_runs[0].head_sha // ""' || true)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
       - id: changes
         env:
-          CI_BEFORE: ${{ github.event.before }}
+          CI_LAST_GREEN: ${{ steps.green.outputs.sha }}
         run: bash scripts/ci-changes.sh
 
   static:
@@ -163,6 +178,11 @@ jobs:
           persist-credentials: false
           # The changed packages are found against dev's history
           fetch-depth: 0
+      # Product videos (adr/0069): the backend's unit tests run the real ffprobe
+      # on clips ffmpeg makes in the test; without it they skip and say so
+      # (first, before the job runs any of the repository's code: see the action)
+      - uses: ./.github/actions/ffmpeg
+        if: startsWith(matrix.group, 'backend')
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -199,10 +219,6 @@ jobs:
           key: turbo-unit-${{ matrix.group }}-${{ github.sha }}
           restore-keys: |
             turbo-unit-${{ matrix.group }}-
-      # Product videos (adr/0069): the backend's unit tests run the real ffprobe
-      # on clips ffmpeg makes in the test; without it they skip and say so
-      - uses: ./.github/actions/ffmpeg
-        if: startsWith(matrix.group, 'backend')
       - name: Run the group's tests
         env:
           TURBO_FILTER: ${{ needs.changes.outputs.filter }}
@@ -265,6 +281,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Product videos (adr/0069): the video upload suite needs ffmpeg and
+      # ffprobe on the server; any HTTP shard may hold it
+      # (first, before the job runs any of the repository's code: see the action)
+      - uses: ./.github/actions/ffmpeg
+        if: matrix.suite != 'modules'
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -285,10 +306,6 @@ jobs:
             echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
-      # Product videos (adr/0069): the video upload suite needs ffmpeg and
-      # ffprobe on the server; any HTTP shard may hold it
-      - uses: ./.github/actions/ffmpeg
-        if: matrix.suite != 'modules'
       # Three jest workers, each replaced when its heap grows (jest.config.js)
       - name: Run the suite
         env:
@@ -308,7 +325,7 @@ jobs:
         env:
           SUITE: ${{ matrix.suite }}
         run: |
-          retried="$(grep -A3 'RETRY ERRORS' suite.log 2>/dev/null | grep -oE '●.*' | sort -u || true)"
+          retried="$(grep -oE 'LOGGING RETRY ERRORS.*' suite.log 2>/dev/null | sed 's/LOGGING RETRY ERRORS *//' | sort -u || true)"
           if [ -n "$retried" ]; then
             { echo "### Tried twice ($SUITE)"; echo '```'; echo "$retried"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -354,6 +371,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Product videos (adr/0069): the backend checks ffmpeg once at start (uploads stay
+      # closed without it) and product-video.e2e.ts makes its clip with it
+      # (first, before the job runs any of the repository's code: see the action)
+      - uses: ./.github/actions/ffmpeg
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -376,12 +397,13 @@ jobs:
         run: |
           echo "version=$(pnpm --silent --filter @qticaret/panel exec playwright --version | tr -dc '0-9.')" >> "$GITHUB_OUTPUT"
           echo "image=${ImageVersion:-none}" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: browsers
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: libraries
         with:
           path: ~/.cache/qt-debs/playwright
           key: debs-playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}-${{ steps.playwright.outputs.image }}
@@ -394,10 +416,20 @@ jobs:
       - name: Install Chromium for Playwright
         if: steps.browsers.outputs.cache-hit != 'true'
         run: pnpm --filter @qticaret/panel exec playwright install chromium
+      # Saved straight after the installs, before the job builds or tests anything
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.libraries.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/qt-debs/playwright
+          key: debs-playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}-${{ steps.playwright.outputs.image }}
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.browsers.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       # Product videos (adr/0069): the backend checks ffmpeg once at start (uploads stay
       # closed without it) and product-video.e2e.ts makes its clip with it. Ubuntu 24.04's
       # package is 6.1 (the backend wants 7 and only warns; docs/08)
-      - uses: ./.github/actions/ffmpeg
       - name: Database and demo shop
         run: |
           pnpm --filter @qticaret/backend medusa db:migrate

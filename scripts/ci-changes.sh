@@ -13,8 +13,8 @@
 # outside the workspaces' own folders changed (the lockfile, the CI, turbo or
 # the root package.json): such a change can reach every package.
 #
-# The checkout has the whole history (fetch-depth: 0). CI_BEFORE is the head
-# before the push (`github.event.before`), used on dev and main.
+# The checkout has the whole history (fetch-depth: 0). CI_LAST_GREEN is the
+# head of the branch's last green run, asked of the API on dev and main.
 set -euo pipefail
 
 out="${GITHUB_OUTPUT:-/dev/stdout}"
@@ -30,6 +30,10 @@ answer() {
 }
 full() { answer true true true "" "$1"; }
 
+# A rename is a removal and an addition: a backend file moved under docs/ or
+# into the storefront still counts as a backend change (its old path is listed)
+changed() { git diff --name-only --no-renames "$1" HEAD; }
+
 # Files that never change what a check sees
 quiet='^(progress/|docs/|adr/)|\.md$'
 # Folders whose packages the backend does not depend on (its integration
@@ -43,11 +47,15 @@ event="${GITHUB_EVENT_NAME:-push}"
 [ "$event" = "workflow_dispatch" ] && full "manual run"
 
 if [ "$ref" = "dev" ] || [ "$ref" = "main" ]; then
-  before="${CI_BEFORE:-}"
-  if [ -n "$before" ] && git cat-file -e "$before^{commit}" 2>/dev/null; then
-    pushed="$(git diff --name-only "$before" HEAD)"
-    if [ -n "$pushed" ] && ! grep -Ev "$quiet" <<<"$pushed" >/dev/null; then
-      answer false false false "" "only notes pushed to $ref"
+  # Skipped only when nothing but notes came since the last GREEN run, not
+  # since the last push: a notes push that cancels a code push's run in
+  # progress must not stand in for it (the next run still sees that code)
+  green="${CI_LAST_GREEN:-}"
+  if [ -n "$green" ] && git cat-file -e "$green^{commit}" 2>/dev/null &&
+    git merge-base --is-ancestor "$green" HEAD; then
+    since="$(changed "$green")"
+    if [ -n "$since" ] && ! grep -Ev "$quiet" <<<"$since" >/dev/null; then
+      answer false false false "" "only notes on $ref since its last green run ${green:0:9}"
     fi
   fi
   full "branch $ref"
@@ -55,7 +63,7 @@ fi
 
 git rev-parse --verify --quiet origin/dev >/dev/null || full "dev not fetched"
 base="$(git merge-base HEAD origin/dev)" || full "no merge base with dev"
-files="$(git diff --name-only "$base" HEAD)"
+files="$(changed "$base")"
 [ -z "$files" ] && full "no changed files"
 
 relevant="$(grep -Ev "$quiet" <<<"$files" || true)"

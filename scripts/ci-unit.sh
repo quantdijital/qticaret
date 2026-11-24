@@ -53,6 +53,13 @@ fi
 echo "ci-unit: $group${shard:+ (shard $shard)} -> ${args[*]}"
 # One package's tests at a time: side by side they starved the UI suites
 # past their per-test timeout on a four-core runner
+#
+# A full run (dev, main, by hand: no filter) runs every test afresh. Some
+# tests read another package's files without depending on it (the backend's
+# reserved storefront routes, the panel's copy of the feature list), so
+# turbo's cache, which knows a package by its own files, would replay their
+# last green over a change it cannot see. A branch's run keeps the cache.
+[ -z "$filter" ] && args+=("--force")
 if [ -n "$shard" ]; then
   pnpm turbo run test --continue --concurrency=1 "${args[@]}" -- "--shard=$shard"
 else
