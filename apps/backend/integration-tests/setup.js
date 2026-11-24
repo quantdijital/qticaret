@@ -1,3 +1,4 @@
+/* global jest */
 const { MetadataStorage } = require("@medusajs/framework/mikro-orm/core")
 
 MetadataStorage.clear()
@@ -35,4 +36,7 @@ if (process.env.TEST_TYPE?.startsWith("integration")) {
     }
   }
   http.globalAgent = new TurnstileAgent({ keepAlive: false })
+  // An HTTP spec file's database starts as a copy of the migrated template,
+  // when the run has one (integration-tests/template/README.md)
+  require("./template/runner").useTemplateDatabase(jest)
 }

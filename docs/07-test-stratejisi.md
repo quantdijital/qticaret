@@ -18,6 +18,7 @@
 - Her test dosyası Redis'te kendi ad alanındadır (`QT_TEST_RUN`: kilitler, sayaçlar, önbellek sürümleri). Aynı makinede iki koşu (başka bir worktree, başka bir ajan) birbirinin kilidini (ör. `catalog:successors`) beklemez.
 - CI'da HTTP testleri on iki parçaya bölünür (`--shard=N/12`; ~290 dosya, dosya başına ~45 sn, parça başına ~11–20 dk) ve modül testleriyle yan yana koşar; her işin kendi Postgres'i var.
 - Entegrasyon testinden çıkan her hata düz bir hataya çevrilir (`integration-tests/plain-failures.js`): axios'un döngüsel nesneleri (yanıt → istek → yanıt) jest alt sürecine ulaşınca süreç "Converting circular structure to JSON" ile ölür ve asıl hata görünmez. Testler bağlantıyı açık tutmaz (`setup.js`): istekler arasında 5 sn'den uzun iş (proof of work) yapan bir test, sunucunun kapattığı sokete yazıp ECONNRESET alıyordu.
+- Göçler koşu başına bir kez koşar (`integration-tests/template/README.md`): jest `globalSetup` göç edilmiş bir şablon veritabanı kurar (adı göç dosyalarının özetini taşır, göç değişince yenisi kurulur), her HTTP spec dosyasının veritabanı ondan kopyalanır. Şablon kurulamaz ya da kopyalanamazsa dosya eskisi gibi kendi veritabanını baştan göç ettirir (çıktıda `[template]` satırı). Kapatmak için `QT_IT_TEMPLATE_MODE=off`.
 - CI'da typecheck ve lint, `medusa build`'in ürettiği `.medusa/types`'tan sonra koşar; yerelde bu tipleri `medusa develop` üretir.
 
 ## E2E (panel)
