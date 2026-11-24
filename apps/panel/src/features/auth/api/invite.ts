@@ -1,5 +1,7 @@
 import { queryOptions } from "@tanstack/react-query"
 import { passwordRuleText } from "../password-rule"
+import { answerKey, postGated } from "./gated-post"
+import type { StaffGate } from "./gated-post"
 
 /** What an invitation is for: the address it was sent to and the role it gives. */
 export interface InviteInfo {
@@ -65,23 +67,35 @@ export const inviteInfoQuery = (token: string) =>
  * The invitation accepted: a login for the invited address (or the one an
  * earlier try made), then the member made with it. Signing in follows.
  */
-export async function acceptInvite(input: {
-  token: string
-  email: string
-  password: string
-  first_name: string
-  last_name: string
-}): Promise<void> {
+export async function acceptInvite(
+  input: {
+    token: string
+    email: string
+    password: string
+    first_name: string
+    last_name: string
+  },
+  // The earlier try's login is a sign-in: Turnstile's token goes with it (adr/0044 Ek 2026-11-24)
+  gate: StaffGate | null = null
+): Promise<void> {
   const credentials = JSON.stringify({ email: input.email, password: input.password })
   const login = await call<{ token: string }>("/auth/user/emailpass/register", {
     method: "POST",
     body: credentials,
-  }).catch((error: unknown) => {
+  }).catch(async (error: unknown) => {
     // A password the rule refuses is the answer; anything else may be an earlier try's login
     if (passwordRuleText(error)) {
       throw error
     }
-    return call<{ token: string }>("/auth/user/emailpass", { method: "POST", body: credentials })
+    const answer = await postGated<{ token?: string }>(
+      "/auth/user/emailpass",
+      { email: input.email, password: input.password },
+      gate
+    )
+    if (answer.status >= 400 || !answer.body.token) {
+      throw new InviteFailure(answer.status, answerKey(answer.body))
+    }
+    return { token: answer.body.token }
   })
   await call("/admin/staff/invites/accept", {
     method: "POST",

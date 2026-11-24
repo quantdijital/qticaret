@@ -259,12 +259,11 @@ jobs:
         # Two browsers run ~120 tests from one address: past the admin's 1,200 requests a
         # minute per IP, /admin/users/me answered 429 and the panel showed its sign-in page
         # mid-run. LOAD_TEST scales per-IP limits up, on development only (lib/env.ts)
-        # TURNSTILE off (development only, adr/0044 Ek 2026-11-24) until the panel's sign-in
-        # draws the widget (slice T2); the test keys then pass its dummy token
+        # Turnstile (adr/0044 Ek 2026-11-24) runs with Cloudflare's test keys: the sign-in page's
+        # widget gets the always-pass dummy token and the backend's siteverify accepts it
         env:
           NODE_ENV: development
           LOAD_TEST: "on"
-          TURNSTILE: "off"
         run: |
           pnpm --filter @qticaret/backend dev > backend.log 2>&1 &
           for attempt in $(seq 1 90); do

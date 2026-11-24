@@ -1,3 +1,5 @@
+import type { TurnstileAsk } from "@qticaret/types"
+import type { GatedChallenge } from "./lib/gate"
 import type { ComponentType, ReactNode } from "react"
 import type { AccountActions, AccountPageView, AuthActions, AuthPageView } from "./account-views"
 import type {
@@ -40,6 +42,9 @@ export interface ActionResult {
   ok: boolean
   /** A message key for the shopper, when something went wrong. */
   error: string | null
+  /** A bot check the backend wants first (adr/0044 Ek 2026-11-24); `sendGated` answers it. */
+  challenge?: GatedChallenge | null
+  turnstile?: TurnstileAsk | null
 }
 
 export type FormAction = (state: ActionResult, form: FormData) => Promise<ActionResult>

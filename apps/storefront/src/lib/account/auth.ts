@@ -11,8 +11,9 @@ import { claimsOf, sessionToken } from "./session"
  * work). Each answer's key goes back to the caller; nothing is kept here.
  */
 
-const challenged = (challenge: string | null) =>
-  challenge ? { headers: { "x-challenge": challenge } } : {}
+/** The bot checks' answers (`store-api/gate.ts`): sent as they came, nothing when none. */
+const challenged = (gate: Record<string, string>) =>
+  Object.keys(gate).length > 0 ? { headers: gate } : {}
 
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` })
 
@@ -21,11 +22,11 @@ export type LoginAnswer = { kind: "signed_in"; token: string } | { kind: "verify
 export async function login(
   email: string,
   password: string,
-  challenge: string | null
+  gate: Record<string, string> = {}
 ): Promise<LoginAnswer> {
   const answer = await storeCall<{ token: string; verification_required?: boolean }>(
     "/auth/customer/emailpass",
-    { method: "POST", body: { email, password }, ...challenged(challenge) }
+    { method: "POST", body: { email, password }, ...challenged(gate) }
   )
   return answer.verification_required
     ? { kind: "verify", token: answer.token }
@@ -36,12 +37,12 @@ export async function login(
 export async function registerIdentity(
   email: string,
   password: string,
-  challenge: string | null
+  gate: Record<string, string> = {}
 ): Promise<string> {
   const { token } = await storeCall<{ token: string }>("/auth/customer/emailpass/register", {
     method: "POST",
     body: { email, password },
-    ...challenged(challenge),
+    ...challenged(gate),
   })
   return token
 }
@@ -84,8 +85,13 @@ export async function refreshToken(token: string): Promise<string> {
   return answer.token
 }
 
-export function requestPasswordReset(email: string) {
-  return storePost("/auth/customer/emailpass/reset-password", { identifier: email })
+/** Turnstile on every request (adr/0044 Ek 2026-11-24): the token in `gate`. */
+export function requestPasswordReset(email: string, gate: Record<string, string> = {}) {
+  return storeCall("/auth/customer/emailpass/reset-password", {
+    method: "POST",
+    body: { identifier: email },
+    ...challenged(gate),
+  })
 }
 
 /** The new password with the reset link's key (a quarter of an hour long). */

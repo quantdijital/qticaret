@@ -2,7 +2,7 @@
 
 import { z } from "zod"
 import type { PlaceOrderResult } from "@qticaret/ui"
-import { challengeOf } from "@/lib/checkout/pay"
+import { gateAsk, gated } from "@/lib/store-api/gate"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeCall } from "@/lib/store-api/server"
 
@@ -58,17 +58,17 @@ export async function sendContact(
       challenge: null,
     }
   }
-  const { challenge, ...message } = parsed.data
+  const { challenge: _answered, ...message } = parsed.data
   try {
     await storeCall("/store/contact-messages", {
       method: "POST",
       body: message,
-      ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+      ...gated(form),
     })
   } catch (error) {
-    const asked = challengeOf(error)
+    const asked = gateAsk(error)
     if (asked) {
-      return { ok: false, error: null, challenge: asked }
+      return asked
     }
     return { ok: false, error: failure(error), challenge: null }
   }

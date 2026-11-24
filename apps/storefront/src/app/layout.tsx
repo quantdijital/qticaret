@@ -10,7 +10,8 @@ import { cartSnapshotOf } from "@/lib/analytics/cart-payloads"
 import { analyticsTags } from "@/lib/analytics/tags"
 import { headerCart } from "@/lib/cart/cart"
 import { siteIcons } from "@/lib/seo/icons"
-import { siteSeo } from "@/lib/store-api/requests"
+import { TurnstileProvider } from "@qticaret/ui/hooks/use-turnstile"
+import { siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { layoutPreviewToken } from "@/lib/views/layout"
@@ -41,15 +42,25 @@ export async function generateMetadata(): Promise<Metadata> {
   return { formatDetection: { telephone: false }, ...(icons ? { icons } : {}) }
 }
 
+/** The widget's public site key from the frame's answer (cached with it); none: the forms send without. */
+async function turnstileSiteKey(): Promise<string | null> {
+  try {
+    return (await storefrontSettings()).turnstile?.site_key ?? null
+  } catch {
+    return null
+  }
+}
+
 export const viewport: Viewport = { width: "device-width", initialScale: 1 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const [shop, settings, requestHeaders, tags, previewToken] = await Promise.all([
+  const [shop, settings, requestHeaders, tags, previewToken, siteKey] = await Promise.all([
     shopView(),
     currentTheme(),
     headers(),
     analyticsTags(),
     layoutPreviewToken(),
+    turnstileSiteKey(),
   ])
   // The shop's theme settings over the theme's own (adr/0053 §B), those the
   // theme takes: one style element with this response's nonce, so the CSP
@@ -89,6 +100,17 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           nonce={nonce}
           cart={cart}
         />
+        {/* Turnstile's public key for the risky forms (adr/0044 Ek 2026-11-24); the widget loads only when one wants it */}
+        <TurnstileProvider
+          setup={{
+            siteKey,
+            label: t("turnstile.label"),
+            hint: t("turnstile.hint"),
+            language: "tr",
+            // The storefront is always light (owner 2026-11-01)
+            theme: "light",
+          }}
+        >
         <theme.Layout
           shop={shop}
           t={t}
@@ -103,6 +125,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         >
           {children}
         </theme.Layout>
+        </TurnstileProvider>
       </body>
     </html>
   )

@@ -104,6 +104,11 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "noAccount": "No account? Ask the shop's owner for an invitation.",
+    "turnstile": {
+      "label": "Security check",
+      "hint": "Complete the security check below to continue.",
+      "failed": "The security check did not pass. Try again; if it keeps failing, reload the page."
+    },
     "intro": {
       "promise": "Run your shop from one panel.",
       "orders": {

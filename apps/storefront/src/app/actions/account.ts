@@ -29,7 +29,7 @@ import {
 } from "@/lib/account/session"
 import { cartIdFromCookie, forgetCart } from "@/lib/cart/cookie"
 import { storeCall } from "@/lib/store-api/server"
-import { challengeOf } from "@/lib/checkout/pay"
+import { gateAsk, gated, gateHeaders } from "@/lib/store-api/gate"
 
 const NONE = null
 const failed = (error: string): ChallengeResult => ({ ok: false, error, challenge: NONE })
@@ -43,10 +43,9 @@ const Challenge = z
   .optional()
   .or(z.literal("").transform(() => undefined))
 
-/** A 428's challenge for the form, or the refusal in words' key. */
+/** What the bot checks want of the form (a proof of work, Turnstile), or the refusal in words' key. */
 function answered(error: unknown, fallback: string): ChallengeResult {
-  const challenge = challengeOf(error)
-  return challenge ? { ok: false, error: NONE, challenge } : failed(accountError(error, fallback))
+  return gateAsk(error) ?? failed(accountError(error, fallback))
 }
 
 /** Signed in: the session, the open cart made the customer's, the page the shopper came for. */
@@ -82,10 +81,10 @@ export async function loginAction(
   if (!parsed.success) {
     return failed("account.login_failed")
   }
-  const { email, password, challenge, next } = parsed.data
+  const { email, password, next } = parsed.data
   let answer: Awaited<ReturnType<typeof login>>
   try {
-    answer = await login(email, password, challenge ?? null)
+    answer = await login(email, password, gateHeaders(form))
     if (answer.kind === "verify") {
       await requestVerification(answer.token, email)
       await rememberPending(answer.token)
@@ -141,7 +140,7 @@ export async function registerAction(
     return failed("account.terms_required")
   }
   try {
-    const token = await registerIdentity(input.email, input.password, input.challenge ?? null)
+    const token = await registerIdentity(input.email, input.password, gateHeaders(form))
     await createCustomer(token, {
       first_name: input.first_name,
       last_name: input.last_name,
@@ -179,7 +178,7 @@ export async function verifyAction(
   if (!parsed.success) {
     return failed("account.code_invalid")
   }
-  const { code, email, password, challenge } = parsed.data
+  const { code, email, password } = parsed.data
   let token = await pendingToken()
   let fresh: string
   try {
@@ -187,7 +186,7 @@ export async function verifyAction(
       if (!email || !password) {
         return failed("account.login_failed")
       }
-      const answer = await login(email, password, challenge ?? null)
+      const answer = await login(email, password, gateHeaders(form))
       // Verified already (a second click on the link): nothing to confirm
       token = answer.token
       if (answer.kind === "verify") {
@@ -216,11 +215,11 @@ export async function forgotAction(
     return failed("checkout.email_invalid")
   }
   try {
-    await requestPasswordReset(parsed.data)
+    await requestPasswordReset(parsed.data, gateHeaders(form))
   } catch (error) {
     // Whether the address has an account is not told (the answer is the same)
     const result = answered(error, "account.reset_failed")
-    if (result.challenge || result.error === "errors.too_many_requests") {
+    if (result.challenge || result.turnstile || result.error === "errors.too_many_requests") {
       return result
     }
   }
@@ -283,12 +282,12 @@ export async function lookupAction(
   if (!parsed.success) {
     return failed("account.lookup_failed")
   }
-  const { display_id, email, challenge } = parsed.data
+  const { display_id, email } = parsed.data
   try {
     await storeCall("/store/order-lookup", {
       method: "POST",
       body: { display_id: Number(display_id), email },
-      ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+      ...gated(form),
     })
   } catch (error) {
     return answered(error, "account.lookup_failed")

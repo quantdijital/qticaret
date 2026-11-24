@@ -8,6 +8,7 @@ const ERRORS = [
   "gift_card.code_invalid",
   "errors.too_many_requests",
   "errors.challenge_failed",
+  "errors.turnstile_failed",
 ]
 
 /**

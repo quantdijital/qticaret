@@ -17,7 +17,7 @@ describe("contentSecurityPolicy", () => {
     )
     expect(policy).not.toContain("'unsafe-inline'")
     expect(directive(policy, "script-src")).toBe(
-      "script-src 'self' 'nonce-abc123' 'strict-dynamic'"
+      "script-src 'self' 'nonce-abc123' 'strict-dynamic' https://challenges.cloudflare.com"
     )
   })
 
@@ -51,10 +51,10 @@ describe("contentSecurityPolicy", () => {
   it("frames YouTube's privacy-enhanced player and nothing else of YouTube's (adr/0069 §8)", () => {
     const production = contentSecurityPolicy("abc123", false)
     expect(directive(production, "frame-src")).toBe(
-      "frame-src https://www.youtube-nocookie.com/embed/"
+      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com"
     )
     expect(contentSecurityPolicy("abc123", true)).toContain(
-      "frame-src https://www.youtube-nocookie.com/embed/;"
+      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com;"
     )
     // The one origin, in the one directive: no scripts, pictures, connections or media of its own
     expect(production.match(/youtube/g)).toHaveLength(1)
@@ -74,7 +74,7 @@ describe("contentSecurityPolicy", () => {
 
   it("frames only the card providers' forms, and lets the payment return sit in our own frame", () => {
     const closed = contentSecurityPolicy("abc123", false)
-    expect(directive(closed, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com/embed/")
+    expect(directive(closed, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com")
     expect(directive(closed, "frame-ancestors")).toBe("frame-ancestors 'none'")
 
     const checkout = contentSecurityPolicy("abc123", false, {
@@ -82,9 +82,18 @@ describe("contentSecurityPolicy", () => {
       framedBySelf: true,
     })
     expect(directive(checkout, "frame-src")).toBe(
-      "frame-src https://www.youtube-nocookie.com/embed/ https://www.paytr.com"
+      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com https://www.paytr.com"
     )
     expect(directive(checkout, "frame-ancestors")).toBe("frame-ancestors 'self'")
+  })
+
+  it("loads Turnstile's script and frames its widget, nothing else of Cloudflare's (adr/0044 Ek 2026-11-24)", () => {
+    for (const development of [false, true]) {
+      const policy = contentSecurityPolicy("abc123", development)
+      expect(directive(policy, "script-src")).toContain(" https://challenges.cloudflare.com")
+      expect(directive(policy, "frame-src")).toContain(" https://challenges.cloudflare.com")
+      expect(policy.match(/challenges\.cloudflare\.com/g)).toHaveLength(2)
+    }
   })
 
   it("opens the measurement tags' hosts only for the tags the shop connected (docs/20)", () => {
@@ -94,7 +103,7 @@ describe("contentSecurityPolicy", () => {
 
     const google = contentSecurityPolicy("abc123", false, { tags: { google: true, meta: false } })
     expect(directive(google, "script-src")).toBe(
-      "script-src 'self' 'nonce-abc123' 'strict-dynamic' https://www.googletagmanager.com"
+      "script-src 'self' 'nonce-abc123' 'strict-dynamic' https://challenges.cloudflare.com https://www.googletagmanager.com"
     )
     expect(directive(google, "connect-src")).toBe(
       "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com"
@@ -108,6 +117,6 @@ describe("contentSecurityPolicy", () => {
     )
     expect(meta).not.toContain("google")
     // Nothing else opens: no frames but YouTube's player, no other scripts
-    expect(directive(meta, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com/embed/")
+    expect(directive(meta, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com")
   })
 })

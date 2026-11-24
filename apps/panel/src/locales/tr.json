@@ -104,6 +104,11 @@
     "showPassword": "Şifreyi göster",
     "hidePassword": "Şifreyi gizle",
     "noAccount": "Hesabınız yoksa mağaza sahibinden davet isteyin.",
+    "turnstile": {
+      "label": "Güvenlik doğrulaması",
+      "hint": "Devam etmek için aşağıdaki güvenlik doğrulamasını tamamlayın.",
+      "failed": "Güvenlik doğrulaması geçilemedi. Yeniden deneyin; sorun sürerse sayfayı yenileyin."
+    },
     "intro": {
       "promise": "Mağazanızı tek panelden yönetin.",
       "orders": {

@@ -48,13 +48,16 @@ export function NewsletterForm({
   className?: string
 }) {
   const [sent, setSent] = useState(false)
-  const { error, pending, onSubmit } = useChallengeForm(async (state, form) => {
-    const result = await action(state, form)
-    if (result.ok) {
-      setSent(true)
-    }
-    return result
-  })
+  const { error, pending, onSubmit, slot } = useChallengeForm(
+    async (state, form) => {
+      const result = await action(state, form)
+      if (result.ok) {
+        setSent(true)
+      }
+      return result
+    },
+    { action: "newsletter" }
+  )
   if (sent) {
     return (
       <p role="status" className={cn("text-md font-semibold", className)}>
@@ -114,6 +117,7 @@ export function NewsletterForm({
             {joined ? null : privacy}
           </span>
         </label>
+        {slot}
         <p id={`${id}-durum`} role="alert" className="min-h-[1lh] text-sm font-semibold">
           {error ? (words.errors[error] ?? words.fallback) : null}
         </p>

@@ -2,10 +2,10 @@
 
 import { z } from "zod"
 import type { ActionResult, PlaceOrderResult } from "@qticaret/ui"
-import { challengeOf } from "@/lib/checkout/pay"
+import { gateAsk, gated } from "@/lib/store-api/gate"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { reviewPhotoFiles } from "@/lib/reviews/photos"
-import { storeCall, storePost } from "@/lib/store-api/server"
+import { storeCall } from "@/lib/store-api/server"
 
 const PRODUCT_ID = z.string().regex(/^prod_[0-9A-Za-z]{10,64}$/)
 
@@ -67,13 +67,18 @@ export async function writeReview(_state: ActionResult, form: FormData): Promise
       )
       photoIds.push(uploaded.id)
     }
-    await storePost(`/store/products/${encodeURIComponent(product_id)}/reviews`, {
-      ...rest,
-      ...(title?.trim() ? { title: title.trim() } : {}),
-      ...(photoIds.length > 0 ? { photo_ids: photoIds } : {}),
+    await storeCall(`/store/products/${encodeURIComponent(product_id)}/reviews`, {
+      method: "POST",
+      body: {
+        ...rest,
+        ...(title?.trim() ? { title: title.trim() } : {}),
+        ...(photoIds.length > 0 ? { photo_ids: photoIds } : {}),
+      },
+      // Past a few an hour, Turnstile (adr/0044 Ek 2026-11-24)
+      ...gated(form),
     })
   } catch (error) {
-    return { ok: false, error: failure(error, "product.review_failed") }
+    return gateAsk(error) ?? { ok: false, error: failure(error, "product.review_failed") }
   }
   return { ok: true, error: null }
 }
@@ -87,11 +92,13 @@ export async function askQuestion(_state: ActionResult, form: FormData): Promise
     return { ok: false, error: "product.question_too_short" }
   }
   try {
-    await storePost(`/store/products/${encodeURIComponent(parsed.data.product_id)}/questions`, {
-      body: parsed.data.body,
+    await storeCall(`/store/products/${encodeURIComponent(parsed.data.product_id)}/questions`, {
+      method: "POST",
+      body: { body: parsed.data.body },
+      ...gated(form),
     })
   } catch (error) {
-    return { ok: false, error: failure(error, "product.question_failed") }
+    return gateAsk(error) ?? { ok: false, error: failure(error, "product.question_failed") }
   }
   return { ok: true, error: null }
 }
@@ -123,17 +130,17 @@ export async function stockAlert(
   if (!parsed.success) {
     return { ok: false, error: "checkout.email_invalid", challenge: null }
   }
-  const { variant_id, email, challenge } = parsed.data
+  const { variant_id, email } = parsed.data
   try {
     await storeCall("/store/stock-alerts", {
       method: "POST",
       body: { variant_id, ...(email ? { email } : {}) },
-      ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+      ...gated(form),
     })
   } catch (error) {
-    const asked = challengeOf(error)
+    const asked = gateAsk(error)
     if (asked) {
-      return { ok: false, error: null, challenge: asked }
+      return asked
     }
     const key = isStoreApiError(error) ? error.messageKey : null
     return {

@@ -2,6 +2,7 @@
 
 import { ChevronDown, CircleAlert } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import type { TurnstileGate } from "@qticaret/types"
 import type { AuthAction, AuthPageView } from "@qticaret/ui"
 import { forgetQuickViews } from "@qticaret/ui/lib/quick-view"
 import { CheckField, FieldError, TextField } from "../checkout/fields"
@@ -9,6 +10,21 @@ import type { PlaceholderWords } from "../parts/placeholders"
 import { useChallengeForm } from "../frame/useChallengeForm"
 import { FIELD_OF_AUTH_ERROR, firstAuthProblem, type AuthField } from "./auth-check"
 import { PasswordField } from "./PasswordField"
+
+/**
+ * Each mode's Turnstile gate (adr/0044 Ek 2026-11-24): a sign-in, a
+ * registration and a reset link's request carry a token with every send;
+ * a verification signs in again only without the kept login, so it waits
+ * to be asked. A new password with the link's key is no gate.
+ */
+const AUTH_GATES: Partial<
+  Record<AuthPageView["mode"], { action: TurnstileGate; eager?: boolean }>
+> = {
+  login: { action: "login", eager: true },
+  register: { action: "register", eager: true },
+  forgot: { action: "password_reset", eager: true },
+  verify: { action: "login" },
+}
 
 export interface AuthFormWords {
   email: string
@@ -57,7 +73,10 @@ export function AuthForm({
   forgotPath?: string | undefined
 }) {
   const { mode } = view
-  const { error, checking, pending, onSubmit } = useChallengeForm(action)
+  const { error, checking, pending, onSubmit, slot, warm } = useChallengeForm(
+    action,
+    AUTH_GATES[mode]
+  )
   const [local, setLocal] = useState<{ field: AuthField; error: string } | null>(null)
   const [edited, setEdited] = useState(false)
   const form = useRef<HTMLFormElement>(null)
@@ -109,6 +128,8 @@ export function AuthForm({
         setLocal(null)
         setEdited(true)
       }}
+      onFocus={warm}
+      onPointerDown={warm}
       className="flex flex-col gap-5"
     >
       {mode === "register" && (
@@ -262,6 +283,7 @@ export function AuthForm({
           </a>
         </p>
       )}
+      {slot}
       <div className="flex flex-col gap-3">
         {problem?.field === null && (
           <p
