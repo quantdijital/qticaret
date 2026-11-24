@@ -9369,7 +9369,7 @@
         "headingHint": "Boş bırakırsanız mağazanızın adı görünür.",
         "textPlaceholder": "Siparişleriniz aynı gün kargoda, iade 14 gün içinde ücretsiz.",
         "buttons": "Düğmeler",
-        "buttonsHint": "En çok {{max}} düğme; ilki ana düğme olur. Düğme eklemezseniz ilk iki kategoriniz gösterilir.",
+        "buttonsHint": "En çok {{max}} düğme; ilki ana düğme olur.",
         "button": "{{number}}. düğme",
         "addButton": "Düğme ekle",
         "imageHint": "Geniş, yatay bir görsel en iyi sonucu verir."
