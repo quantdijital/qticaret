@@ -78,6 +78,12 @@ const calendarCache = createTtlCache<DepartureCalendar>({ ttlMs: 60_000, maxEntr
  */
 const displayCache = createTtlCache<Map<string, CardShown>>({ ttlMs: 60_000, maxEntries: 500 })
 
+/** Forgets what is kept (tests that change departures, prices or promotions). */
+export function clearCalendarCaches(): void {
+  calendarCache.clear()
+  displayCache.clear()
+}
+
 /**
  * Everything a place's display is worked out from (`placeDisplays`): the
  * currency and, per place, its category, difference, price and the price
