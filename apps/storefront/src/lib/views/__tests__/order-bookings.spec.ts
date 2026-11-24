@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest"
 import { t } from "@/lib/i18n"
 import type { OrderDepartureRow } from "@/lib/orders/bookings"
+import { order as storeOrder, knifeLine } from "@/test/order-fixtures"
+import { orderView } from "../order"
 import { orderBookingsOf } from "../order-bookings"
 
 const row = (over: Partial<OrderDepartureRow> = {}): OrderDepartureRow => ({
@@ -104,5 +106,41 @@ describe("orderBookingsOf (adr/0076 Ek D7a)", () => {
     const found = { currency_code: "try", departures: [row()] }
     expect(orderBookingsOf({ ...found }, t)).toEqual(orderBookingsOf(found, t))
     expect(orderBookingsOf(found, t)?.[0]?.note).toBeNull()
+  })
+})
+
+describe("the order page's voucher link (adr/0076 Ek D7b)", () => {
+  const ORDER = storeOrder([knifeLine])
+  const page = (bookings: Parameters<typeof orderBookingsOf>[0], token: string | null = null) =>
+    orderView(ORDER, null, false, t, {
+      token,
+      contracts: [],
+      returns: [],
+      returnable: null,
+      shipments: [],
+      invoice: null,
+      note: null,
+      bookings,
+    })
+
+  it("links to the voucher beside the departures while the shop gives vouchers, with the order's key", () => {
+    const found = { currency_code: "try", departures: [row()], voucher: true }
+    expect(page(found).voucherPath).toBe(`/siparis/${ORDER.id}/voucher`)
+    expect(page(found, "abc.key").voucherPath).toBe(`/siparis/${ORDER.id}/voucher?token=abc.key`)
+  })
+
+  it("gives no link while the shop gives no vouchers or an older backend does not say", () => {
+    expect(page({ currency_code: "try", departures: [row()], voucher: false })).not.toHaveProperty(
+      "voucherPath"
+    )
+    expect(page({ currency_code: "try", departures: [row()] })).not.toHaveProperty("voucherPath")
+  })
+
+  it("gives no link without departures or while dated selling is off (no departures read)", () => {
+    expect(page({ currency_code: "try", departures: [], voucher: true })).not.toHaveProperty(
+      "voucherPath"
+    )
+    expect(page(null)).not.toHaveProperty("voucherPath")
+    expect(page(null)).not.toHaveProperty("bookings")
   })
 })

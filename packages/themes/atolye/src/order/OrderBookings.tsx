@@ -72,6 +72,11 @@ export function OrderBookings({
           </li>
         ))}
       </ul>
+      {view.voucherPath && (
+        <a href={view.voucherPath} className="gf-link self-start text-sm">
+          {t("order.booking_voucher")}
+        </a>
+      )}
     </section>
   )
 }

@@ -32,6 +32,7 @@ interface Departure {
 interface Departures {
   departures: Departure[]
   contact?: { note: string | null; phone: string | null; email: string | null }
+  voucher: boolean
 }
 
 const TIERS = [
@@ -120,11 +121,14 @@ medusaIntegrationTestRunner({
       expect(loaded?.vars.voucherUrl).toBeNull()
       expect(loaded?.vars.voucherOffNote).toBe("Sizi arayacağız.")
       expect((await voucherOf(orderId)).status).toBe(404)
+      // The order page links to no voucher either
+      expect((await departures(orderId)).data.voucher).toBe(false)
       const [row] = await bookings().listBookings({ id: bookingId }, { select: ["voucher_code"] })
       expect(row?.voucher_code ?? null).toBeNull()
       // Turned back on: the voucher is there again, its code made on first read
       await flow({ voucher_enabled: true })
       expect((await voucherOf(orderId)).status).toBe(200)
+      expect((await departures(orderId)).data.voucher).toBe(true)
       const [made] = await bookings().listBookings({ id: bookingId }, { select: ["voucher_code"] })
       expect(made?.voucher_code).toMatch(/^[0-9A-Z]{16}$/)
       // The link itself needs the storefront's address, which the tests leave unset

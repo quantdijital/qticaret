@@ -585,6 +585,7 @@
   "order.booking_refund_full": "Şimdi iptal ederseniz {amount} iade edilir (kesinti yok).",
   "order.booking_refund_within": "İade en geç {days} gün içinde yapılır.",
   "order.booking_cancel_unavailable": "Bu rezervasyon buradan iptal edilemez; iptal için mağazayla iletişime geçin.",
+  "order.booking_voucher": "Voucher'ı görüntüle",
   "voucher.title": "Rezervasyon voucher'ı",
   "voucher.order": "Sipariş #{number}",
   "voucher.code": "Doğrulama kodu:",

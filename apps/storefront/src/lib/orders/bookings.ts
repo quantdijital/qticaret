@@ -38,6 +38,8 @@ export interface OrderDeparturesRow {
   departures: OrderDepartureRow[]
   /** Only while the shop has the shopper's online cancel off. */
   contact?: CancelContactRow
+  /** Whether the shop gives vouchers (adr/0076 Ek D7b); left out by an older backend: no link. */
+  voucher?: boolean
 }
 
 /**

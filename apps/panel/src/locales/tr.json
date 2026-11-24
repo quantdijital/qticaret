@@ -393,6 +393,20 @@
       "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler."
     },
     "saved": "Ayarlar kaydedildi.",
+    "catalogDefaults": {
+      "title": "Yeni ürün varsayılanları",
+      "description": "Yeni ürün ekranı bu seçimlerle açılır. Var olan ürünler değişmez.",
+      "kind": "Yeni ürün türü",
+      "kindHint": "Yeni ürün bu türle başlar; ürün eklerken değiştirebilirsiniz. Varsayılan: Fiziksel ürün.",
+      "dated": "Yeni hizmet tarihli satılsın",
+      "datedHint": "Yeni hizmet \"Tarihli satış (kalkışlı)\" açık başlar. Varsayılan: kapalı.",
+      "schema": "Tarihli ürünün yapılandırılmış veri türü",
+      "schemaHint": "Tarihli ürün sayfasında arama motorlarına verilen ek bilgi. Tur için Tur gezisi, konser, atölye ya da kurs için Etkinlik. Varsayılan: Tur gezisi.",
+      "schemas": {
+        "TouristTrip": "Tur gezisi (TouristTrip)",
+        "Event": "Etkinlik (Event)"
+      }
+    },
     "storefront": {
       "moveUp": "{{item}}: yukarı taşı",
       "moveDown": "{{item}}: aşağı taşı",
