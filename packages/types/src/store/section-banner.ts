@@ -109,6 +109,8 @@ export interface StoreBannerSection extends Partial<BannerSettings> {
   eyebrow?: string | null
   /** `split`: the picture's inner edge; absent: `straight`. */
   edge?: BannerSplitEdge
+  /** `split`: a short hand note over the heading (`hand-note.ts`); null or absent: none. */
+  note?: string | null
 }
 
 export interface StoreBannerSlide {

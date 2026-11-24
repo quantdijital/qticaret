@@ -255,10 +255,11 @@ export function AddressesCard() {
         <p className="px-5 py-6 text-[13px] text-muted-foreground">{t(`${A}.empty`)}</p>
       ) : (
         <>
-          {/* Relative: the header's screen-reader text stays inside the scroll box, not past the page */}
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-left text-[13px] text-muted-foreground">
+          {/* Relative: the header's screen-reader text stays inside the card, not past the page */}
+          <div className="@container relative">
+            {/* Fits its card (AddressRow): in a narrow card the rows stack rather than scroll sideways */}
+            <table className="w-full text-sm @max-3xl:block">
+              <thead className="bg-muted/50 text-left text-[13px] text-muted-foreground @max-3xl:hidden">
                 <tr>
                   <th className="px-3 py-2 font-medium">{t(`${A}.columns.address`)}</th>
                   <th className="px-3 py-2 text-right font-medium">{t(`${A}.columns.clicks`)}</th>
@@ -269,7 +270,7 @@ export function AddressesCard() {
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="@max-3xl:block">
                 {list.data.urls.map((row) => (
                   <AddressRow key={row.id} row={row} />
                 ))}

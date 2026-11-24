@@ -1,6 +1,12 @@
 import { createHash } from "node:crypto"
 import { describe, expect, it } from "vitest"
-import { contentSecurityPolicy, RADIX_STYLE_HASHES } from "../csp"
+import { HERO_VIDEO_PLAYERS } from "@qticaret/types/hero-video"
+import {
+  contentSecurityPolicy,
+  RADIX_STYLE_HASHES,
+  VIMEO_PLAYER_SOURCE,
+  YOUTUBE_PLAYER_SOURCE,
+} from "../csp"
 
 const directive = (policy: string, name: string) =>
   policy.split("; ").find((each) => each.startsWith(`${name} `))
@@ -51,10 +57,10 @@ describe("contentSecurityPolicy", () => {
   it("frames YouTube's privacy-enhanced player and nothing else of YouTube's (adr/0069 §8)", () => {
     const production = contentSecurityPolicy("abc123", false)
     expect(directive(production, "frame-src")).toBe(
-      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com"
+      "frame-src https://www.youtube-nocookie.com/embed/ https://player.vimeo.com/video/ https://challenges.cloudflare.com"
     )
     expect(contentSecurityPolicy("abc123", true)).toContain(
-      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com;"
+      "frame-src https://www.youtube-nocookie.com/embed/ https://player.vimeo.com/video/ https://challenges.cloudflare.com;"
     )
     // The one origin, in the one directive: no scripts, pictures, connections or media of its own
     expect(production.match(/youtube/g)).toHaveLength(1)
@@ -72,10 +78,24 @@ describe("contentSecurityPolicy", () => {
     expect(directive(production, "frame-ancestors")).toBe("frame-ancestors 'none'")
   })
 
+  it("frames Vimeo's player path for the opening's video, nothing else of Vimeo's", () => {
+    for (const development of [false, true]) {
+      const policy = contentSecurityPolicy("abc123", development)
+      expect(directive(policy, "frame-src")).toContain(" https://player.vimeo.com/video/ ")
+      expect(policy.match(/vimeo/g)).toHaveLength(1)
+      expect(policy).not.toMatch(/vimeo\.com(?!\/video\/)|vimeocdn|\*\.vimeo/)
+    }
+    // The policy names the same two players the opening builds its addresses from
+    expect([YOUTUBE_PLAYER_SOURCE, VIMEO_PLAYER_SOURCE]).toEqual([
+      HERO_VIDEO_PLAYERS.youtube,
+      HERO_VIDEO_PLAYERS.vimeo,
+    ])
+  })
+
   it("frames only the card providers' forms, and lets the payment return sit in our own frame", () => {
     const closed = contentSecurityPolicy("abc123", false)
     expect(directive(closed, "frame-src")).toBe(
-      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com"
+      "frame-src https://www.youtube-nocookie.com/embed/ https://player.vimeo.com/video/ https://challenges.cloudflare.com"
     )
     expect(directive(closed, "frame-ancestors")).toBe("frame-ancestors 'none'")
 
@@ -84,7 +104,7 @@ describe("contentSecurityPolicy", () => {
       framedBySelf: true,
     })
     expect(directive(checkout, "frame-src")).toBe(
-      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com https://www.paytr.com"
+      "frame-src https://www.youtube-nocookie.com/embed/ https://player.vimeo.com/video/ https://challenges.cloudflare.com https://www.paytr.com"
     )
     expect(directive(checkout, "frame-ancestors")).toBe("frame-ancestors 'self'")
   })
@@ -120,7 +140,7 @@ describe("contentSecurityPolicy", () => {
     expect(meta).not.toContain("google")
     // Nothing else opens: no frames but YouTube's player, no other scripts
     expect(directive(meta, "frame-src")).toBe(
-      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com"
+      "frame-src https://www.youtube-nocookie.com/embed/ https://player.vimeo.com/video/ https://challenges.cloudflare.com"
     )
   })
 })

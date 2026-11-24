@@ -9,6 +9,8 @@ import type { Kurus, MedusaAmount } from "../../lib/money"
 import { offerOf } from "../../lib/pricing/offers"
 import type { CartOffer, Offer, PriceOffer, PromotionRow } from "../../lib/pricing/offers"
 
+type Resolver = Pick<MedusaContainer, "resolve">
+
 /** What the automatic promotions make of a variant's price before the cart (adr/0023 Ek 2026-11-05). */
 export interface VariantOffers {
   /** The offers that are the price, each from its start. */
@@ -43,8 +45,11 @@ const RULE = ["attribute", "operator", "values.value"]
 // Any minimum a cart offer asks is met in the reading: its target products are what it tells
 const ANY_CART = 1_000_000_000
 
-/** The shop's automatic promotions that may show before the cart, by code. */
-async function shownOffers(container: MedusaContainer, currency: string) {
+/** The shop's automatic promotions that may show before the cart, by code: read once per pricing. */
+export async function shownOffers(
+  container: Resolver,
+  currency: string
+): Promise<Map<string, Offer>> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "promotion",
     fields: [
@@ -77,23 +82,33 @@ async function shownOffers(container: MedusaContainer, currency: string) {
   return offers
 }
 
+/** A unit to price: its variant, and what it sells at (a departure's place: its base plus the difference). */
+export interface PricedUnit {
+  variant_id: string
+  amount: Kurus
+}
+
 /**
- * The automatic promotions on each variant at its selling price now, for
- * a shopper with no customer and a cart holding one of it: Medusa's own
+ * The automatic promotions on each unit at its selling price now, for a
+ * shopper with no customer and a cart holding one of it: Medusa's own
  * promotion module decides which apply (status, dates, limits, budget,
- * target products), as it will in the cart. A variant no offer touches
- * is not in the answer.
+ * target products), as it will in the cart. Units are keyed as the caller
+ * likes (a variant's id, or a departure's place: one variant at several
+ * prices); each is a line of its variant. A unit no offer touches is not
+ * in the answer. `read` gives the shown promotions when the caller prices
+ * in parts (`shownOffers`, read once); left out, they are read here.
  */
 export async function automaticOffers(
-  container: MedusaContainer,
-  prices: ReadonlyMap<string, Kurus>,
-  currency: string
+  container: Resolver,
+  prices: ReadonlyMap<string, PricedUnit>,
+  currency: string,
+  read: () => Promise<ReadonlyMap<string, Offer>> = () => shownOffers(container, currency)
 ): Promise<Map<string, VariantOffers>> {
   const found = new Map<string, VariantOffers>()
   if (prices.size === 0) {
     return found
   }
-  const offers = await shownOffers(container, currency)
+  const offers = await read()
   if (offers.size === 0) {
     return found
   }
@@ -108,19 +123,19 @@ export async function automaticOffers(
       "product.categories.id",
       "product.tags.id",
     ],
-    filters: { id: [...prices.keys()] },
+    filters: { id: [...new Set([...prices.values()].map((unit) => unit.variant_id))] },
   })
-  const items = (data as VariantRow[]).flatMap((variant): ComputeActionItemLine[] => {
-    const price = prices.get(variant.id)
-    const product = variant.product
-    if (price === undefined || !product) {
+  const variants = new Map((data as VariantRow[]).map((variant) => [variant.id, variant]))
+  const items = [...prices].flatMap(([id, unit]): ComputeActionItemLine[] => {
+    const product = variants.get(unit.variant_id)?.product
+    if (!product) {
       return []
     }
-    const amount = toMedusaAmount(price)
+    const amount = toMedusaAmount(unit.amount)
     return [
       {
-        id: variant.id,
-        variant_id: variant.id,
+        id,
+        variant_id: unit.variant_id,
         quantity: 1,
         unit_price: amount,
         subtotal: amount,

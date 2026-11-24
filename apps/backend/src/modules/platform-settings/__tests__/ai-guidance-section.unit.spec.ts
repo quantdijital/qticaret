@@ -107,7 +107,8 @@ describe("ai_guidance section", () => {
     expect(result?.prefer).toEqual(["El yapımı", "dayanıklı"])
     expect(result?.tasks).toEqual({
       seo_title: { extra: null, examples: [] },
-      product_title: { extra: "Kısa", examples: [] },
+      // What is left out stays left out here: a save's merge makes the entry whole
+      product_title: { extra: "Kısa" },
     })
     expect(parse({ audience: "   " }).data?.audience).toBeNull()
   })

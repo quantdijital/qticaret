@@ -213,6 +213,97 @@
   size-adjust: 101.39%;
 }
 
+/*
+ * The accent faces (handwriting, `ACCENT_FONTS` in `@qticaret/types`): only a
+ * section's hand note is drawn in one, and only while the shop chose it
+ * (`--font-accent`, `lib/views/theme.ts`). Never preloaded: a page with no
+ * note, or a shop with no accent face, fetches none of these files.
+ * Dancing Script's Turkish file carries another name inside ("Qticaret Ext
+ * Script"): the face has a Reserved Font Name. Fallback metrics against
+ * Arial over a Turkish sample line (fontTools).
+ */
+
+@font-face {
+  font-family: "qt-caveat";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/caveat-latin.891951df5e.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-caveat";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/caveat-tr.81d6c5c276.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-caveat-fallback";
+  src: local("Arial");
+  ascent-override: 132.23%;
+  descent-override: 41.32%;
+  line-gap-override: 0%;
+  size-adjust: 72.6%;
+}
+
+@font-face {
+  font-family: "qt-dancing-script";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/dancing-script-latin.51acdc0e00.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-dancing-script";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/dancing-script-tr.4374430929.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-dancing-script-fallback";
+  src: local("Arial");
+  ascent-override: 116.71%;
+  descent-override: 35.52%;
+  line-gap-override: 0%;
+  size-adjust: 78.83%;
+}
+
+@font-face {
+  font-family: "qt-kalam";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/kalam-latin.954410601a.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-kalam";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/kalam-tr.b90a584f5b.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-kalam-fallback";
+  src: local("Arial");
+  ascent-override: 112.84%;
+  descent-override: 56.37%;
+  line-gap-override: 0%;
+  size-adjust: 94.21%;
+}
+
 /* Each face's variable (`THEME_FONTS` in `lib/views/theme.ts`); the theme reads them */
 :root {
   --font-inter: "qt-inter", "qt-inter-fallback";
@@ -222,4 +313,7 @@
   --font-manrope: "qt-manrope", "qt-manrope-fallback";
   --font-source-sans: "qt-source-sans", "qt-source-sans-fallback";
   --font-nunito: "qt-nunito", "qt-nunito-fallback";
+  --font-caveat: "qt-caveat", "qt-caveat-fallback";
+  --font-dancing-script: "qt-dancing-script", "qt-dancing-script-fallback";
+  --font-kalam: "qt-kalam", "qt-kalam-fallback";
 }

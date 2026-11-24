@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { listingDescriptionHtml } from "../../../../lib/catalog/listing-description"
 import { activeBrand, storeBrand } from "../read"
+import { varyOnPublishableKey } from "../../../../lib/http/vary"
 
 /**
  * `GET /store/brands/:id`: an active brand (F3.11); its page's SEO comes
@@ -11,7 +12,7 @@ import { activeBrand, storeBrand } from "../read"
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const brand = await activeBrand(req.scope, req.params["id"] ?? "")
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({
     brand: {
       ...storeBrand(brand),

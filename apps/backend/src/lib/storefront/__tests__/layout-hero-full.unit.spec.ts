@@ -67,6 +67,9 @@ describe("the opening's full image (adr/0077 §9)", () => {
       title_accent: null,
       ...HERO_FULL_DEFAULTS,
       show_trust: false,
+      video_url: null,
+      video_label: null,
+      note: null,
     })
   })
 
@@ -167,6 +170,9 @@ describe("the opening's full image (adr/0077 §9)", () => {
       ...HERO_FULL_DEFAULTS,
       action: "search",
       show_trust: true,
+      video_url: null,
+      video_label: null,
+      note: null,
     })
   })
 

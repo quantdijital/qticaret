@@ -1,4 +1,5 @@
 import type { BannerSettings, BannerSplitEdge, BannerTone, BannerVariant } from "@qticaret/types"
+import type { HandNoteView } from "./hand-note-views"
 import type { ImageView, LinkView } from "./views"
 
 /**
@@ -22,6 +23,8 @@ export interface BannerSectionView extends BannerSettings {
   eyebrow?: string | null
   /** `split`: the picture's inner edge. */
   edge?: BannerSplitEdge
+  /** `split`: a short hand note over the heading; null or absent: none. */
+  note?: HandNoteView | null
 }
 
 export interface BannerSlideView {

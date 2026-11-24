@@ -393,6 +393,20 @@
       "modeHint": "A light or dark ground; by system follows your device."
     },
     "saved": "Settings saved.",
+    "catalogDefaults": {
+      "title": "New product defaults",
+      "description": "The new product screen opens with these choices. Existing products do not change.",
+      "kind": "New product type",
+      "kindHint": "A new product starts as this type; you can change it while adding. Default: Physical product.",
+      "dated": "Sell new services by date",
+      "datedHint": "A new service starts with \"Dated sale (departures)\" on. Default: off.",
+      "schema": "Structured data type of dated products",
+      "schemaHint": "Extra information given to search engines on a dated product's page. Tourist trip for tours; Event for concerts, workshops or courses. Default: Tourist trip.",
+      "schemas": {
+        "TouristTrip": "Tourist trip (TouristTrip)",
+        "Event": "Event (Event)"
+      }
+    },
     "storefront": {
       "moveUp": "{{item}}: move up",
       "moveDown": "{{item}}: move down",
@@ -574,9 +588,10 @@
       },
       "etbisQr": {
         "title": "ETBİS QR code",
-        "hint": "The QR code ETBİS (eticaret.gov.tr) gives on registration; shown in the storefront's footer. Optional.",
-        "size": "Upload the QR code image you downloaded from ETBİS as it is.",
-        "none": "No QR code"
+        "hint": "The QR code ETBİS (eticaret.gov.tr) gives on registration; upload the image you downloaded as it is. Shown in the storefront's footer. Optional.",
+        "none": "No QR code",
+        "set": "QR code added",
+        "choose": "Upload"
       }
     },
     "seo": {
@@ -747,6 +762,11 @@
       },
       "flags": {
         "ai": {
+          "assistant": {
+            "label": "Panel assistant",
+            "summary": "Find the screen you need by asking in your own words.",
+            "description": "Write what you want to do to the assistant on the right of the panel; it shows the screen where it is done. What staff write goes to the shop's connected AI service, so personal details such as a customer's name or phone number should not be typed. Only the owner can turn it on."
+          },
           "reviews": {
             "label": "AI on reviews and questions",
             "summary": "Sums up reviews and drafts replies to reviews and questions.",
@@ -3215,6 +3235,7 @@
     "canceled": "Canceled"
   },
   "command": {
+    "ask": "Ask the assistant: {{text}}",
     "title": "Command menu",
     "description": "Find an order, customer, product or parcel; go to a page or run an action.",
     "placeholder": "Order number, customer, product, SKU, tracking number or page…",
@@ -9270,6 +9291,7 @@
         },
         "groups": {
           "buttons": "Buttons",
+          "video": "Video",
           "categoryList": "Category list",
           "tiles": "Tiles beside it",
           "chips": "Quick links",
@@ -9415,6 +9437,12 @@
         },
         "eyebrowPlaceholder": "E.g. Special offer",
         "splitFirst": "The split band shows the first picture only; the others return when the variant changes.",
+        "note": {
+          "label": "Note",
+          "term": "note",
+          "placeholder": "E.g. We are waiting for you!",
+          "hint": "A small, tilted note above the heading. Shown in handwriting when the accent font is on; left empty, nothing is drawn."
+        },
         "edge": {
           "label": "Edge",
           "term": "edge",
@@ -9582,6 +9610,7 @@
       "problems": {
         "required": "Write this line or remove it.",
         "tooLong": "Write at most {{max}} characters.",
+        "videoInvalid": "Paste a YouTube or Vimeo video link (e.g. https://youtu.be/… or https://vimeo.com/…).",
         "textInvalid": "The text cannot hold invisible control characters.",
         "tokenUnknown": "There is an unknown detail in braces; add details from the Insert detail menu.",
         "linkLabel": "Enter the shown text of the address.",
@@ -9670,6 +9699,16 @@
         "fontNotes": {
           "noLira": "This font has no ₺ sign. Prices are drawn in the body font; a ₺ you type into a heading shows in a fallback font.",
           "singleWeight": "It has one weight: headings are drawn regular, not bold."
+        },
+        "accentFont": "Accent font",
+        "accentFontTerm": "handwriting · font-family",
+        "accentFontHint": "The short notes you write in sections (the opening and the split band) show in this font, like handwriting. With None the note is drawn in the body font, italic. The font loads only on a page with a note.",
+        "handwriting": "handwriting",
+        "accentFonts": {
+          "none": "None",
+          "caveat": "Caveat",
+          "dancing-script": "Dancing Script",
+          "kalam": "Kalam"
         },
         "shapes": "Shapes",
         "radius": "Corners",
@@ -11319,6 +11358,12 @@
           "placeholder": "E.g. Find your escape.",
           "hint": "A second line under the heading, in your main colour. Left empty, it is not drawn."
         },
+        "note": {
+          "label": "Note",
+          "term": "note",
+          "placeholder": "E.g. We are waiting for you!",
+          "hint": "A small, tilted note above the heading. Shown in handwriting when the accent font is on; left empty, nothing is drawn."
+        },
         "action": {
           "label": "Under the heading",
           "term": "action",
@@ -11338,6 +11383,20 @@
           "label": "Show trust icons",
           "term": "trust badges",
           "hint": "Your shop's trust badges (four at most) show in a white box at the cover's bottom edge."
+        },
+        "video": {
+          "url": {
+            "label": "Video address",
+            "term": "YouTube / Vimeo URL",
+            "placeholder": "https://www.youtube.com/watch?v=…",
+            "hint": "Paste the link of a video on YouTube or Vimeo. A play button shows on the cover; pressed, the video opens in a window. Nothing of the video loads before the press. Left empty, no button is drawn."
+          },
+          "label": {
+            "label": "Button text",
+            "term": "label",
+            "placeholder": "Watch the video",
+            "hint": "Left empty, it reads \"Watch the video\"."
+          }
         },
         "height": {
           "label": "Height",
@@ -13019,6 +13078,70 @@
     }
   },
   "ai": {
+    "assistant": {
+      "title": "Assistant",
+      "open": "Assistant",
+      "close": "Close the assistant",
+      "newChat": "New chat",
+      "resize": "Width of the assistant",
+      "placeholder": "What do you want to do?",
+      "send": "Send",
+      "hint": "Do not type personal details such as a customer's name or phone; ask by order number.",
+      "thinking": "Looking…",
+      "emptyTitle": "Ask what you are looking for in the panel",
+      "emptyText": "Write what you want to do; the assistant shows the screen where it is done.",
+      "examplesLabel": "Example questions",
+      "go": "Go to: {{name}}",
+      "you": "You",
+      "log": "Conversation",
+      "examples": {
+        "general": {
+          "one": "Where do I change the shipping rates?",
+          "two": "Where do I enter my bank transfer details?",
+          "three": "How do I add a new product?"
+        },
+        "orders": {
+          "one": "Where are the orders to ship?",
+          "two": "Where are the return requests?",
+          "three": "Where do I connect the invoice provider?"
+        },
+        "products": {
+          "one": "Where do I see the products running low?",
+          "two": "How do I put several products on sale?",
+          "three": "Where do I edit a product's search title?"
+        },
+        "settings": {
+          "one": "Where do I connect my domain?",
+          "two": "Where are the privacy texts?",
+          "three": "Where do I turn on cash on delivery?"
+        },
+        "reports": {
+          "one": "Which report shows the best sellers?",
+          "two": "Where is the stock report?",
+          "three": "How do I download a report as Excel?"
+        }
+      },
+      "errors": {
+        "assistant_turn_limit": "This conversation got too long. Start a new chat and ask again.",
+        "assistant_daily_limit": "The assistant's limit for today is reached. You can try again tomorrow.",
+        "credits_exhausted": "This month's AI credit is used up.",
+        "assistant_no_tool_service": "No connected AI service can run the assistant. The owner can connect one in Settings › AI.",
+        "assistant_off": "The assistant is off. The owner can turn it on in Settings › AI."
+      },
+      "setting": {
+        "title": "Assistant",
+        "description": "An assistant that opens on the right of the panel: write what you want to do and it shows the screen where it is done. Shortcut ⌘J / Ctrl+J.",
+        "detail": "What staff write goes to the shop's connected AI service. A conversation is kept for 24 hours at most; New chat or signing out deletes it at once.",
+        "ownerOnly": "What staff write goes to an outside service, so only the shop's owner can turn this on or off.",
+        "connect": "Connect AI: it can be turned on once a service that supports tool calling is connected in the list above.",
+        "confirmTitle": "Turn on the assistant?",
+        "confirmDescription": "Before turning it on, read what the assistant does and where the text goes.",
+        "confirmWhat": "What it does: it shows the panel's screen for a staff member's question. It changes nothing by itself.",
+        "confirmWhere": "Where the text goes: what staff write goes to the shop's connected AI service under the shop's own agreement with it; the service may be abroad. Personal details such as a customer's name or phone should not be typed.",
+        "confirmKeep": "Keeping: a conversation is kept for 24 hours at most; New chat or signing out deletes it at once. What is typed is not written to the database or the logs.",
+        "confirmAction": "Turn on the assistant"
+      }
+    },
     "title": "AI",
     "description": "Services you connect with your own key draft product texts and images.",
     "notInPlan": "Your plan does not include using AI with your own key. Stored keys are kept and work again once your plan changes.",
@@ -13086,6 +13209,7 @@
       "fake": "A fake service for development: it writes its answer from the data itself and connects nowhere."
     },
     "tasks": {
+      "assistant": "Assistant",
       "test_text": "Test text",
       "seo_title": "Search title",
       "seo_description": "Search description",

@@ -131,8 +131,13 @@ export function RichEditor({
         short={short}
         bare={bare}
       />
-      {/* A long text scrolls inside, under a toolbar that stays in reach; the page beside keeps its height */}
-      <EditorContent editor={editor} className="max-h-[min(70vh,48rem)] overflow-y-auto" />
+      {/* A long text scrolls inside, under a toolbar that stays in reach; the page beside keeps its height.
+          A table with many columns may also scroll sideways on a phone (e2e/support/scroll.ts) */}
+      <EditorContent
+        editor={editor}
+        data-scroll-area="both"
+        className="max-h-[min(70vh,48rem)] overflow-y-auto"
+      />
       <div
         className={cn(
           "flex justify-end border-t px-3 py-1.5 text-xs text-muted-foreground tabular-nums",

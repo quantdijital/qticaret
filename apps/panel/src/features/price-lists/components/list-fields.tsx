@@ -94,7 +94,8 @@ function GroupList({ value, onChange }: { value: string[]; onChange: (ids: strin
     <ul
       role="group"
       aria-label={t("priceLists.form.groups")}
-      className="relative flex max-h-60 flex-col gap-0.5 overflow-y-auto rounded-md border p-1.5"
+      data-scroll-area="y"
+      className="relative flex max-h-60 flex-col gap-0.5 overflow-x-hidden overflow-y-auto rounded-md border p-1.5"
     >
       {rows.map((group) => (
         <li key={group.id}>

@@ -52,6 +52,13 @@ export function BookingPrice({
       {product.look?.perPerson && (
         <span className="text-xs font-medium text-text-2">{t("booking.card_per_person")}</span>
       )}
+      {/* An automatic promotion's price before it, only when the price-before rule allows (as `Price`) */}
+      {product.price.before && (
+        <s className="tabular text-sm text-text-3">
+          <span className="sr-only">{t("price.before")} </span>
+          {product.price.before}
+        </s>
+      )}
     </p>
   )
 }

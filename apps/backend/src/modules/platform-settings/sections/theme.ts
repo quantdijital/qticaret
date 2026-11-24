@@ -18,7 +18,7 @@ import { SEARCH_FORM_DEFAULTS, searchFormSchema, withSearchFormDefaults } from "
 import type { SearchFormSettings } from "./theme-search-form"
 import { STYLE_KIT_DEFAULTS, styleKitSchema, withStyleKitDefaults } from "./theme-style-kit"
 import type { StyleKitSettings } from "./theme-style-kit"
-import { RADIUS_STEPS, SECTION_SPACINGS, SURFACE_STYLES } from "./theme-steps"
+import { ACCENT_FONTS, RADIUS_STEPS, SECTION_SPACINGS, SURFACE_STYLES } from "./theme-steps"
 
 export {
   CARD_BUTTON_STYLES,
@@ -35,7 +35,7 @@ export type { ListingTextSettings } from "./theme-listing-text"
 export { SEARCH_FORM_DEFAULTS } from "./theme-search-form"
 export type { SearchFormSettings } from "./theme-search-form"
 export { STYLE_KIT, STYLE_KIT_DEFAULTS, withStyleKitDefaults } from "./theme-style-kit"
-export { RADIUS_STEPS, SECTION_SPACINGS, SURFACE_STYLES } from "./theme-steps"
+export { ACCENT_FONTS, RADIUS_STEPS, SECTION_SPACINGS, SURFACE_STYLES } from "./theme-steps"
 
 /** The storefront themes this build carries (adr/0046 §7); a new theme is a deploy. */
 export const INSTALLED_THEMES = ["atolye"] as const
@@ -112,6 +112,8 @@ export interface ThemeSettings extends StyleKitSettings {
   typography: {
     heading: (typeof HEADING_FONTS)[number]
     body: (typeof BODY_FONTS)[number]
+    /** The hand note's face (`ACCENT_FONTS`); absent (a row before it): `none`. */
+    accent?: (typeof ACCENT_FONTS)[number]
   }
   radius: (typeof RADIUS_STEPS)[number]
   product_card: ProductCardSettings
@@ -275,7 +277,13 @@ export const themeSection = defineSection<ThemeSettings>(
         ),
       })
       .strict(),
-    typography: z.object({ heading: z.enum(HEADING_FONTS), body: z.enum(BODY_FONTS) }).strict(),
+    typography: z
+      .object({
+        heading: z.enum(HEADING_FONTS),
+        body: z.enum(BODY_FONTS),
+        accent: z.enum(ACCENT_FONTS).optional(),
+      })
+      .strict(),
     radius: z.enum(RADIUS_STEPS),
     product_card: productCardSchema,
     header: z.object({ layout: z.enum(["centered", "left"]), sticky: z.boolean() }).strict(),

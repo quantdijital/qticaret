@@ -203,7 +203,8 @@ export function TravelerRequestResults({
       >
         <ul
           aria-label={t(`${R}.eraseList`)}
-          className="max-h-56 overflow-y-auto rounded-md border text-sm"
+          data-scroll-area="y"
+          className="max-h-56 overflow-x-hidden overflow-y-auto rounded-md border text-sm"
         >
           {chosen.map((row) => (
             <li key={row.id} className="border-b px-3 py-2 last:border-b-0">

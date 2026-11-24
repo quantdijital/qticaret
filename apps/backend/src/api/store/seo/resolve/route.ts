@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { resolveStorefrontPath } from "../../../../workflows/seo/redirects/resolve"
 import type { StoreGetSeoResolveType } from "../validators"
+import { varyOnPublishableKey } from "../../../../lib/http/vary"
 
 /**
  * `GET /store/seo/resolve?path=` (docs/13 §4): what the storefront does
@@ -16,6 +17,6 @@ export async function GET(
   const resolution = await resolveStorefrontPath(req.scope, path, { cache: true })
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
   // Added to CORS's `Vary: Origin`, not in its place
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json(resolution)
 }

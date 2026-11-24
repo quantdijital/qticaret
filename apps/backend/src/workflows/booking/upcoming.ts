@@ -15,8 +15,10 @@ import type { ListingPlan } from "../../modules/search-index/types"
 import { categoryRows, subtreeIn } from "../content/landing-facet"
 import type { CategoryRow } from "../content/landing-facet"
 import { categorySubtreeByHandle, priceKey } from "../seo/listing-plan"
-import { basePrices, lira, payingPricesAt, payingVariants } from "./card-facts"
+import { payingUnitAt, payingVariants } from "./card-facts"
 import type { DatedCardProduct } from "./card-facts"
+import { baseAmounts, basePriceRows, lira, placeDisplays, shownOf, struck } from "./card-price"
+import type { CardShown } from "./card-price"
 import { bookingService } from "./cart/target"
 
 /**
@@ -27,7 +29,9 @@ import { bookingService } from "./cart/target"
  * shown subtree or a collection when asked), by date, at most
  * `PER_PRODUCT` each. Each priced on the server by the card's rule (a
  * guest's base price plus the departure's difference, paying places only,
- * lira). Places left are told only when few. Kept 30 seconds in this process:
+ * lira, the automatic promotions taken off: a promotion changed shows once
+ * the kept answer is gone). Places left are told only when few. Kept 30
+ * seconds in this process:
  * the matches once for every source and channel, the answer per source and
  * channels at the largest count (a smaller count is its first rows), the
  * category tree a minute.
@@ -60,7 +64,10 @@ export interface UpcomingDeparture {
   starts_at: string
   timezone: string
   left: number | null
+  /** Lira, the automatic promotions taken off (adr/0076 Ek "kalkış fiyatı promosyonlu"); null without a price. */
   from_price: number | null
+  /** The card's `before`: only when the price-before rule allows, never with a difference; absent otherwise. */
+  before?: number
 }
 
 export interface UpcomingDepartures {
@@ -108,14 +115,16 @@ export function horizon(now: Date): DepartureQuery["dates"] {
 
 /**
  * The rows of the list: the slots by start (then id), the first `limit`,
- * each with its product's name and its lowest paying price; a slot whose
- * product is not among those read is left out.
+ * each with its product's name and its lowest paying price as `shown`
+ * says (by `placeKey`, the promotions off); a slot whose product is not
+ * among those read is left out.
  */
 export function upcomingRows(
   slots: readonly SlotAvailability[],
   byBookable: ReadonlyMap<string, UpcomingProduct>,
   bases: ReadonlyMap<string, Kurus | null>,
-  limit: number
+  limit: number,
+  shown: ReadonlyMap<string, CardShown>
 ): UpcomingDeparture[] {
   return [...slots]
     .flatMap((slot) => {
@@ -128,7 +137,8 @@ export function upcomingRows(
     )
     .slice(0, limit)
     .map(({ slot, product }) => {
-      const prices = payingPricesAt(product, bases, slot.price_adjustments, CURRENCY)
+      const unit = payingUnitAt(product, bases, slot.price_adjustments, CURRENCY)
+      const price = unit ? shownOf(shown, unit) : null
       return {
         product: {
           id: product.id,
@@ -140,7 +150,8 @@ export function upcomingRows(
         starts_at: slot.starts_at.toISOString(),
         timezone: product.bookable?.timezone ?? "Europe/Istanbul",
         left: slot.available <= FEW_LEFT ? slot.available : null,
-        from_price: prices.length > 0 ? lira(Math.min(...prices) as Kurus) : null,
+        from_price: price === null ? null : lira(price.current),
+        ...struck(price),
       }
     })
 }
@@ -256,11 +267,18 @@ async function readUpcoming(
     return empty()
   }
   const products = [...byBookable.values()]
-  const [bases, slots] = await Promise.all([
-    basePrices(container, products.flatMap(payingVariants), { currency_code: CURRENCY }),
+  const [prices, slots] = await Promise.all([
+    basePriceRows(container, products.flatMap(payingVariants), { currency_code: CURRENCY }),
     service.windowSlots([...byBookable.keys()], query, PER_PRODUCT),
   ])
-  return { currency: CURRENCY, departures: upcomingRows(slots, byBookable, bases, MOST) }
+  const bases = baseAmounts(prices)
+  // Every slot's place in one reading of the record and the promotions
+  const units = slots.flatMap((slot) => {
+    const product = byBookable.get(slot.bookable_id)
+    return (product && payingUnitAt(product, bases, slot.price_adjustments, CURRENCY)) ?? []
+  })
+  const displays = await placeDisplays(container, units, prices, CURRENCY, now)
+  return { currency: CURRENCY, departures: upcomingRows(slots, byBookable, bases, MOST, displays) }
 }
 
 /**

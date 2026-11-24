@@ -1,4 +1,4 @@
-import type { PanelMapEntry } from "./types.js"
+import type { PanelMapEntry } from "./types"
 
 /** Settings › Sistem: the package, security and team, connections, AI, flags and logs. */
 export const SETTINGS_SYSTEM_ENTRIES = [

@@ -4,6 +4,7 @@
  * backend's build does not compile workspace TypeScript (adr/0046 §8).
  */
 import type { MediaDerivatives, StoreImage } from "./catalog.js"
+import type { AccentFont } from "./hand-note.js"
 import type { ListingTextSettings } from "./listing-text.js"
 import type { SearchFormSettings } from "./search-form.js"
 import type { CardVariant } from "./section-variants.js"
@@ -111,7 +112,15 @@ export interface StoreThemeSettings extends StyleKit {
     accent: string | null
     background: ThemeBackground
   }
-  typography: { heading: ThemeHeadingFont; body: ThemeBodyFont }
+  typography: {
+    heading: ThemeHeadingFont
+    body: ThemeBodyFont
+    /**
+     * The face a section's hand note is drawn in (`hand-note.ts`); absent
+     * (a backend before it) or `none`: the note in the body face, italic.
+     */
+    accent?: AccentFont
+  }
   radius: RadiusStep
   product_card: {
     ratio: "4:5" | "1:1" | "3:4"

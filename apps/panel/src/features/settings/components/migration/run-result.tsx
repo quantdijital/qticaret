@@ -48,7 +48,7 @@ function CountsTable({ mode, counts }: { mode: MigrationMode; counts: Counts }) 
     return own && (own.read > 0 || own.created > 0) ? [{ kind, ...own }] : []
   })
   return (
-    <div className="overflow-x-auto rounded-md border">
+    <div data-scroll-area="x" className="overflow-x-auto overflow-y-hidden rounded-md border">
       <table className="w-full text-sm">
         <thead className="bg-muted/50 text-left text-[13px] text-muted-foreground">
           <tr>

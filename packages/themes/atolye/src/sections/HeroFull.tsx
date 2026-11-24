@@ -2,9 +2,12 @@ import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
 import type { HeroFullView, Translate, TrustBadgeView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
+import { HandNote } from "../parts/HandNote"
 import { Preload } from "../parts/Preload"
 import { SearchForm } from "../parts/SearchForm"
 import { TrustIcon } from "../parts/TrustIcon"
+import { HeroVideo } from "./HeroVideo"
+import { heroVideoWords } from "./hero-video-words"
 import { type Of, headingId } from "./plan"
 
 /** The photograph across the screen, or beside the words from 1024 px. */
@@ -65,6 +68,11 @@ function Trust({ badges, label }: { badges: readonly TrustBadgeView[]; label: st
  * colour. Under the words either the buttons (the first the main one, the
  * second quiet) or the shop's one search box (`SearchForm`, adr/0077 §1),
  * inside the opening or as a card over its bottom edge (`search_position`).
+ * A video the shop linked adds a quiet play button after the buttons (with
+ * the search box, in a row of its own under the words) that opens it in a
+ * lightbox (`HeroVideo`); with none the row is drawn as before. A hand
+ * note (`HandNote`) stands over the heading in the heading's ink; with
+ * none, nothing is drawn there.
  * The shop's trust badges, when shown, are a box over the bottom edge too,
  * under the search card, which then takes the same width (one edge for
  * both). Beside the words the photograph ends where that foot begins, so
@@ -84,8 +92,9 @@ export function HeroFull({
   t: Translate
 }) {
   const id = headingId(hero.id)
-  const { settings, accent, search, trust } = full
+  const { settings, accent, search, trust, video } = full
   const { image } = hero
+  const buttons = search === null && hero.actions.length > 0
   // Beside the words only with a photograph to stand there: with none, the stage as `full` draws it
   const side = settings.image_side === "end" && image ? "end" : "full"
   const beside = side === "end"
@@ -151,6 +160,13 @@ export function HeroFull({
                 {hero.eyebrow}
               </p>
             )}
+            {full.note && (
+              <HandNote
+                note={full.note}
+                mark={fieldMark(on, "note")}
+                className={beside ? "text-text" : "text-stage-text"}
+              />
+            )}
             <Heading
               id={id}
               className={cn(
@@ -179,18 +195,20 @@ export function HeroFull({
                 {hero.intro}
               </p>
             )}
-            {search === null && hero.actions.length > 0 && (
+            {(buttons || video) && (
               <div className={cn("flex flex-wrap gap-3 pt-1", centred && "justify-center")}>
-                {hero.actions.slice(0, 2).map((action, index) => (
-                  <a
-                    key={`${action.path}-${index}`}
-                    href={action.path}
-                    className={cn("gf-btn", index > 0 && "gf-btn--quiet")}
-                    {...fieldMark(on, fieldKey("links", hero.actionsAt?.[index] ?? index))}
-                  >
-                    {action.label}
-                  </a>
-                ))}
+                {buttons &&
+                  hero.actions.slice(0, 2).map((action, index) => (
+                    <a
+                      key={`${action.path}-${index}`}
+                      href={action.path}
+                      className={cn("gf-btn", index > 0 && "gf-btn--quiet")}
+                      {...fieldMark(on, fieldKey("links", hero.actionsAt?.[index] ?? index))}
+                    >
+                      {action.label}
+                    </a>
+                  ))}
+                {video && <HeroVideo video={video} words={heroVideoWords(t)} />}
               </div>
             )}
           </div>

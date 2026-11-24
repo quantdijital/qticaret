@@ -7,15 +7,19 @@ import type SearchIndexModuleService from "../../modules/search-index/service"
 import { IDS_ONLY_LIMIT } from "../../modules/search-index/types"
 import type { CalendarRow } from "../../modules/booking/service"
 import { categorySubtreeByHandle, priceKey } from "../seo/listing-plan"
-import { basePrices, lira, payingPricesAt, payingVariants } from "./card-facts"
-import type { DatedCardProduct } from "./card-facts"
+import { payingUnitAt, payingVariants } from "./card-facts"
+import type { DatedCardProduct, PayingUnit } from "./card-facts"
+import { baseAmounts, basePriceRows, lira, lowestShown, placeDisplays, struck } from "./card-price"
+import type { CardShown } from "./card-price"
 import { bookingService } from "./cart/target"
 
 /**
  * A month's departure calendar (adr/0077 §6): for each local day the
  * departures a date search would match (§3: open, sales still on, room
  * for the party) and the lowest paying price over them, the card's rule
- * (a guest's base price plus each departure's difference, lira only).
+ * (a guest's base price plus each departure's difference, lira only, the
+ * automatic promotions taken off). A promotion changed shows here once
+ * the kept answer is gone.
  * The products looked at are those the search index lists for the
  * shopper: published, in their sales channels, in the category's shown
  * subtree when one is asked, at most IDS_ONLY_LIMIT; of them only those
@@ -34,8 +38,14 @@ export interface CalendarInput {
 export interface CalendarDay {
   /** `YYYY-MM-DD` in the product's zone. */
   date: string
-  /** Lira as the card's `from_price` (1750.5); null when no departure that day has a price. */
+  /**
+   * Lira as the card's `from_price` (1750.5), the automatic promotions
+   * taken off (adr/0076 Ek "kalkış fiyatı promosyonlu"); null when no
+   * departure that day has a price.
+   */
   from_price: number | null
+  /** The card's `before`: struck through only when the price-before rule allows, never with a difference; absent otherwise. */
+  before?: number
   departures: number
 }
 
@@ -73,25 +83,42 @@ async function shownProducts(
   return result.ids
 }
 
-/** The days of the rows, each day's departures added up and its lowest price kept. */
+/** The places a row's departures sell at before the promotions: one a departure, its main paying category's. */
+export function rowUnits(
+  row: CalendarRow,
+  products: ReadonlyMap<string, DatedCardProduct>,
+  bases: ReadonlyMap<string, Kurus | null>
+): PayingUnit[] {
+  const product = products.get(row.bookable_id)
+  return product
+    ? row.adjustments.flatMap((adjustments) => {
+        const unit = payingUnitAt(product, bases, adjustments, CURRENCY)
+        return unit ? [unit] : []
+      })
+    : []
+}
+
+/**
+ * The days of the rows, each day's departures added up and its lowest
+ * price kept: the card's, its places as shown (`shown`, by `placeKey`:
+ * the automatic promotions taken off; adr/0076 Ek "kalkış fiyatı
+ * promosyonlu"), a place without a display at its own price.
+ */
 export function calendarDays(
   rows: readonly CalendarRow[],
   products: ReadonlyMap<string, DatedCardProduct>,
-  bases: ReadonlyMap<string, Kurus | null>
+  bases: ReadonlyMap<string, Kurus | null>,
+  shown: ReadonlyMap<string, CardShown>
 ): CalendarDay[] {
-  const days = new Map<string, { departures: number; lowest: number | null }>()
+  const days = new Map<string, { departures: number; lowest: CardShown | null }>()
   for (const row of rows) {
-    const product = products.get(row.bookable_id)
-    if (!product) {
+    if (!products.has(row.bookable_id)) {
       continue
     }
-    const prices = row.adjustments.flatMap((adjustments) =>
-      payingPricesAt(product, bases, adjustments, CURRENCY)
-    )
-    const own = prices.length > 0 ? Math.min(...prices) : null
+    const own = lowestShown(rowUnits(row, products, bases), shown)
     const day = days.get(row.day) ?? { departures: 0, lowest: null }
     day.departures += row.departures
-    if (own !== null && (day.lowest === null || own < day.lowest)) {
+    if (own !== null && (day.lowest === null || own.current < day.lowest.current)) {
       day.lowest = own
     }
     days.set(row.day, day)
@@ -100,7 +127,8 @@ export function calendarDays(
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([date, day]) => ({
       date,
-      from_price: day.lowest === null ? null : lira(day.lowest as Kurus),
+      from_price: day.lowest === null ? null : lira(day.lowest.current),
+      ...struck(day.lowest),
       departures: day.departures,
     }))
 }
@@ -150,11 +178,15 @@ async function readCalendar(
     return empty
   }
   const products = [...byBookable.values()]
-  const [bases, rows] = await Promise.all([
-    basePrices(container, products.flatMap(payingVariants), { currency_code: CURRENCY }),
+  const [prices, rows] = await Promise.all([
+    basePriceRows(container, products.flatMap(payingVariants), { currency_code: CURRENCY }),
     service.calendarRows([...byBookable.keys()], { month: input.month, pax: input.pax, now }),
   ])
-  return { ...empty, days: calendarDays(rows, byBookable, bases) }
+  const bases = baseAmounts(prices)
+  // Every day's places in one reading of the record and the promotions
+  const units = rows.flatMap((row) => rowUnits(row, byBookable, bases))
+  const displays = await placeDisplays(container, units, prices, CURRENCY, now)
+  return { ...empty, days: calendarDays(rows, byBookable, bases, displays) }
 }
 
 const emptyCalendar = (month: string): DepartureCalendar => ({

@@ -3,6 +3,10 @@ import type { Kurus } from "../../../lib/money"
 import type { CalendarRow } from "../../../modules/booking/service"
 import { calendarDays } from "../calendar"
 import type { DatedCardProduct } from "../card-facts"
+import type { CardShown } from "../card-price"
+
+// No promotion worked out for any place: each at its own price
+const NONE = new Map<string, CardShown>()
 
 // adr/0077 §6: a month's days, priced on the server by the card's rule
 const tour = (id: string, bookableId: string): DatedCardProduct => ({
@@ -42,7 +46,8 @@ describe("calendarDays", () => {
     const days = calendarDays(
       [row("2027-03-05", "bk_a", { departures: 2 }), row("2027-03-05", "bk_b")],
       products,
-      bases
+      bases,
+      NONE
     )
     // An infant's free place is no "from" price
     expect(days).toEqual([{ date: "2027-03-05", from_price: 1200, departures: 3 }])
@@ -55,7 +60,8 @@ describe("calendarDays", () => {
         row("2027-03-07", "bk_b", { adjustments: [{ b_adult: 30_000 }] }),
       ],
       products,
-      bases
+      bases,
+      NONE
     )
     expect(days).toEqual([
       { date: "2027-03-06", from_price: 1099.5, departures: 1 },
@@ -68,7 +74,8 @@ describe("calendarDays", () => {
     const days = calendarDays(
       [row("2027-03-09", "bk_a"), row("2027-03-02", "bk_a"), row("2027-03-04", "bk_other")],
       products,
-      unpriced
+      unpriced,
+      NONE
     )
     expect(days).toEqual([
       { date: "2027-03-02", from_price: null, departures: 1 },

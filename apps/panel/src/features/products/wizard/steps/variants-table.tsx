@@ -167,7 +167,7 @@ export function VariantsTable() {
         </p>
         <BulkPrice />
       </div>
-      <div className="overflow-x-auto rounded-lg border">
+      <div data-scroll-area="x" className="overflow-x-auto overflow-y-hidden rounded-lg border">
         <table className="w-full min-w-[50rem] text-sm">
           <thead className="bg-muted/60">
             <tr>

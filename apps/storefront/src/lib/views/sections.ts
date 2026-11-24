@@ -40,6 +40,7 @@ import { searchBoxParts } from "./natural-search-on"
 import { departuresView } from "./departures"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
+import { noteInHand } from "./theme-settings"
 
 export type { ProductContext } from "./section-data"
 
@@ -72,7 +73,8 @@ async function sectionView(
     case "hero_slider":
       return heroSliderView(section, t)
     case "banner":
-      return bannerView(section, t)
+      // Only a split draws a note (`hand-note.ts`): the theme is read for none other
+      return bannerView(section, t, section.variant === "split" && (await noteInHand(section.note)))
     case "categories": {
       // The icon row (adr/0077 §10 Ek): its discs with the shop's icons
       if (section.variant === "icons") {

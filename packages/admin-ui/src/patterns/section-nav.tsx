@@ -12,11 +12,12 @@ interface SectionNavProps {
 /**
  * Sister screens of one sidebar section as tabs under the page title
  * (Kampanyalar: codes, price lists). Each is a link; the page it names is
- * marked current, so the address is the state.
+ * marked current, so the address is the state. The tabs wrap on a narrow
+ * screen rather than scroll sideways.
  */
 export function SectionNav({ label, items, keepSearch = false }: SectionNavProps) {
   return (
-    <nav aria-label={label} className="-mt-2 flex gap-1 overflow-x-auto border-b">
+    <nav aria-label={label} className="-mt-2 flex flex-wrap gap-x-1 border-b">
       {items.map((item) => (
         <Link
           key={item.to}

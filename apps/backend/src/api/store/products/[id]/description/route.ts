@@ -1,5 +1,6 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { storeProductDescription } from "./read"
+import { varyOnPublishableKey } from "../../../../../lib/http/vary"
 
 /**
  * GET /store/products/:id/description (adr/0055): the product's
@@ -13,5 +14,6 @@ export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise
     req.publishable_key_context.sales_channel_ids
   )
   res.setHeader("Cache-Control", "public, max-age=60")
+  varyOnPublishableKey(res)
   res.json(answer)
 }

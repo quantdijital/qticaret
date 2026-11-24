@@ -9,7 +9,6 @@ import { appearanceQuery } from "@/features/settings/api/appearance"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { LegalSettings, StoreSettings } from "@/features/settings/api/sections"
 import { storeQuery } from "@/features/settings/api/store"
-import { EtbisQrCard } from "@/features/settings/components/etbis-qr-card"
 import { LegalIdentityCard } from "@/features/settings/components/legal-identity-card"
 import { OpeningHoursCard } from "@/features/settings/components/opening-hours-card"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
@@ -90,14 +89,12 @@ export function StorePage() {
             </>
           )),
           tab("legal", (data) => (
-            <PageGrid>
-              <LegalIdentityCard
-                saved={data.legal}
-                hasContact={Boolean(data.values.contact_email ?? data.values.contact_phone)}
-                className={spanOf(8)}
-              />
-              <EtbisQrCard saved={data.values} className={spanOf(4)} />
-            </PageGrid>
+            // The ETBİS QR code is a thin row of the identity, beside the ETBİS number
+            <LegalIdentityCard
+              saved={data.legal}
+              qrUrl={data.values.etbis_qr_url}
+              hasContact={Boolean(data.values.contact_email ?? data.values.contact_phone)}
+            />
           )),
           tab("social", (data) => <SocialAccountsCard saved={data.legal} />),
         ]}

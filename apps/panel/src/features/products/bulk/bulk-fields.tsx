@@ -159,7 +159,8 @@ function CategoryFields({ form, onChange, error }: FieldsProps) {
             onValueChange={(categoryId) => {
               onChange({ categoryId })
             }}
-            className="relative flex max-h-60 flex-col gap-0.5 overflow-y-auto rounded-md border p-1.5"
+            data-scroll-area="y"
+            className="relative flex max-h-60 flex-col gap-0.5 overflow-x-hidden overflow-y-auto rounded-md border p-1.5"
           >
             {rows.map(({ category, depth }) => (
               <label

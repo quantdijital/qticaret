@@ -71,6 +71,15 @@ export function heroFullFields(section: AnySection, target: Target): RegistryFie
       options: [],
       target: target(section.id, "show_trust"),
     },
+    // The video button's link, in its own group ("Video")
+    {
+      key: "video_url",
+      group: "video",
+      label: `${H}.video.url.label`,
+      term: `${H}.video.url.term`,
+      options: [],
+      target: target(section.id, "video_url"),
+    },
     ...HERO_FULL_LAYOUT.filter(([name]) => heroFullShows(section, name)).map(([name, field]) =>
       step(name, field, "layout")
     ),

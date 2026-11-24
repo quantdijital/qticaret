@@ -210,7 +210,8 @@ export interface StoreCardFacts {
   /**
    * A dated product's (adr/0076 §10), only while the shop sells them: the
    * lowest paying price over the departures on sale (else the base
-   * prices) in the currency's amount, and the nearest departure on sale
+   * prices), the automatic promotions every shopper gets taken off, in
+   * the currency's amount, and the nearest departure on sale
    * (ISO; said in `timezone`); each null when there is none.
    */
   booking?: {
@@ -226,6 +227,14 @@ export interface StoreCardFacts {
      */
     left?: number | null
     in_range?: true
+    /**
+     * The from price's place before the automatic promotions every
+     * shopper gets (`from_price` has them taken off, adr/0076 Ek "kart
+     * fiyatı promosyonlu"), struck through: only when the price-before
+     * rule lets it be shown as a discount, as an ordinary card's `before`.
+     * Absent otherwise, and from a backend before it.
+     */
+    before?: number
     /**
      * Its length in whole days, from its public tour length attribute (a
      * sector pack's "Süre", adr/0077 Ek "tur kartı"); absent without one,
@@ -251,13 +260,14 @@ export type StoreCardBadge =
  * of the month (the product's zone) with a departure a date search would
  * match, how many, and the lowest paying price over them (a guest's, in
  * lira as the card's `from_price`: 1750.5; each departure's difference
- * added; null when none has a price). Lira only. Days without one are
- * left out.
+ * added, the automatic promotions taken off; null when none has a price;
+ * `before` as the card's, absent without one). Lira only. Days without
+ * one are left out.
  */
 export interface StoreDepartureCalendar {
   month: string
   currency: "try"
-  days: { date: string; from_price: number | null; departures: number }[]
+  days: { date: string; from_price: number | null; before?: number; departures: number }[]
 }
 
 export interface StoreProduct {

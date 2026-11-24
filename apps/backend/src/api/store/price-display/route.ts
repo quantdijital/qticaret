@@ -4,6 +4,7 @@ import type { CartOffer } from "../../../lib/pricing/offers"
 import { priceDisplays } from "../../../workflows/pricing/price-display"
 import { shopperVariantIds } from "../../../workflows/pricing/selling-prices"
 import type { StoreGetPriceDisplayType } from "./validators"
+import { varyOnPublishableKey } from "../../../lib/http/vary"
 
 const offerValue = (offer: CartOffer) =>
   offer.method.type === "percentage" ? offer.method.value : toMedusaAmount(offer.method.value)
@@ -31,7 +32,7 @@ export async function GET(
   )
   const displays = await priceDisplays(req.scope, visible, currency)
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({
     price_display: Object.fromEntries(
       [...displays].map(([id, display]) => [

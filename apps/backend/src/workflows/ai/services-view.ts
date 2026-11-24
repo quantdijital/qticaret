@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { AiCapability } from "../../lib/ai/registry/capabilities"
-import { aiServices } from "../../lib/ai/registry/services"
+import { ASSISTANT_TASK } from "../../lib/ai/registry/assistant-tasks"
+import { aiServices, verifiedToolCalls } from "../../lib/ai/registry/services"
 import type { AiFunding, AiTarget } from "../../lib/ai/registry/services"
 import { IMAGE_SCENE_TASK, aiTasks } from "../../lib/ai/registry/tasks"
 import { shopScenes } from "../../lib/ai/scenes"
@@ -51,6 +52,12 @@ export interface AiServicesView {
   services: AiServiceView[]
   tasks: AiTaskView[]
   flags: { own_keys: boolean }
+  /**
+   * The connected services the panel assistant can run on (adr/0079 §8: tool
+   * calling verified in the registry), whatever its flag: the owner turns
+   * the flag on only with one.
+   */
+  assistant_services: string[]
 }
 
 const backgroundsOf = (target: AiTarget | undefined): string[] =>
@@ -101,5 +108,13 @@ export async function aiServicesView(
       preference: await ai.preferenceOf(userId, task.id),
     }))
   )
-  return { services, tasks, flags: { own_keys: flags.ownKeys } }
+  const assistant = usableServices(ASSISTANT_TASK, connections, flags).filter(
+    (service) => verifiedToolCalls(service) !== null
+  )
+  return {
+    services,
+    tasks,
+    flags: { own_keys: flags.ownKeys },
+    assistant_services: assistant.map((service) => service.id),
+  }
 }

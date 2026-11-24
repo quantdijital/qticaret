@@ -1725,6 +1725,128 @@
     </section>
   </div>
 </div>
+<div data-qs="vadiprogram">
+  <section aria-labelledby="bolum-vadiprogram" class="gf-section">
+    <div class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-(--head-gap)">
+      <h2 id="bolum-vadiprogram">
+        Gün gün yolculuk
+      </h2>
+      <div class="w-full max-w-4xl">
+        <ol class="flex flex-col gap-2">
+          <li class="rounded-media gf-pane">
+            <h3>
+              <button
+                type="button"
+                aria-expanded="true"
+                aria-controls="program-vadiprogram-0"
+                class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 rounded-media px-5 py-3 text-start hover:bg-paper-3"
+              >
+                <span class="flex flex-col gap-0.5">
+                  <span class="text-sm font-semibold text-text-3">
+                    1. Gün
+                  </span>
+                  <span class="text-md font-semibold">
+                    Varış ve tanışma
+                  </span>
+                </span>
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="1.75"
+                  class="lucide lucide-plus size-5 shrink-0 motion-safe:transition-transform rotate-45"
+                  aria-hidden="true"
+                />
+              </button>
+            </h3>
+            <div id="program-vadiprogram-0" class="px-5 pb-5">
+              <div class="grid gap-4 lg:grid-cols-[1fr_20rem] lg:gap-6">
+                <div class="flex min-w-0 flex-col gap-3">
+                  <ul class="flex flex-wrap gap-2">
+                    <li
+                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="1.75"
+                        class="lucide lucide-moon size-4 shrink-0"
+                        aria-hidden="true"
+                      />
+                      Akşam yemeği
+                    </li>
+                    <li
+                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="1.75"
+                        class="lucide lucide-bed-double size-4 shrink-0"
+                        aria-hidden="true"
+                      />
+                      Konaklama
+                    </li>
+                  </ul>
+                  <div class="gf-prose gf-prose--small">
+                    <p>
+                      Buluşma noktasında karşılama, kısa tanışma ve ilk yürüyüş.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="rounded-media gf-pane">
+            <h3>
+              <button
+                type="button"
+                aria-expanded="false"
+                aria-controls="program-vadiprogram-1"
+                class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 rounded-media px-5 py-3 text-start hover:bg-paper-3"
+              >
+                <span class="flex flex-col gap-0.5">
+                  <span class="text-sm font-semibold text-text-3">
+                    2. Gün
+                  </span>
+                  <span class="text-md font-semibold">
+                    Serbest gün
+                  </span>
+                </span>
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="1.75"
+                  class="lucide lucide-plus size-5 shrink-0 motion-safe:transition-transform"
+                  aria-hidden="true"
+                />
+              </button>
+            </h3>
+            <div id="program-vadiprogram-1" hidden="" class="px-5 pb-5">
+              <div class="grid gap-4 lg:grid-cols-[1fr_20rem] lg:gap-6">
+                <div class="flex min-w-0 flex-col gap-3">
+                  <ul class="flex flex-wrap gap-2">
+                    <li
+                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="1.75"
+                        class="lucide lucide-sun size-4 shrink-0"
+                        aria-hidden="true"
+                      />
+                      Serbest zaman
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</div>
 <script>
   addEventListener("submit",function(a){if(!a.defaultPrevented){var b=a.target,d=a.submitter,c=b.action,e=d;if(d){var f=d.getAttribute("formAction");null!=f&&(c=f,e=null)}
   "javascript:throw new Error('React form unexpectedly submitted.')"===c&&(a.preventDefault(),a=new FormData(b,e),c=b.ownerDocument||b,(c.$$reactFormReplay=c.$$reactFormReplay||[]).push(b,d,a))}

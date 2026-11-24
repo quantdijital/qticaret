@@ -1,4 +1,10 @@
-import { HERO_FULL_LIMITS, bandsRise } from "@qticaret/types"
+import {
+  HAND_NOTE_MAX,
+  HERO_FULL_LIMITS,
+  HERO_VIDEO_LIMITS,
+  bandsRise,
+  heroVideoOf,
+} from "@qticaret/types"
 import type { HeroSection, PriceBandsSection } from "@/features/storefront/api/layout"
 import {
   HERO_CATALOG_LIMITS,
@@ -17,16 +23,26 @@ import { linkProblem, textProblem } from "./problems"
 
 type Found = [string, Problem | null]
 
-/** The full image's accent line (adr/0077 §9): within its limit, the shop's details allowed. */
+/**
+ * The full image's accent line (adr/0077 §9): within its limit, the shop's
+ * details allowed; its video's link a YouTube or Vimeo video the
+ * storefront plays, and the button's words within theirs.
+ */
 export function heroFullProblems(section: HeroSection): Found[] {
-  return section.variant === "full_image"
-    ? [
-        [
-          "title_accent",
-          textProblem(section.title_accent ?? null, HERO_FULL_LIMITS.title_accent, true),
-        ],
-      ]
-    : []
+  if (section.variant !== "full_image") {
+    return []
+  }
+  const link = section.video_url ?? null
+  return [
+    [
+      "title_accent",
+      textProblem(section.title_accent ?? null, HERO_FULL_LIMITS.title_accent, true),
+    ],
+    ["video_url", link !== null && heroVideoOf(link) === null ? "videoInvalid" : null],
+    ["video_label", textProblem(section.video_label ?? null, HERO_VIDEO_LIMITS.label)],
+    // The hand note over the heading: plain text within its length
+    ["note", textProblem(section.note ?? null, HAND_NOTE_MAX)],
+  ]
 }
 
 /** H17's own fields; today's opening has none. */

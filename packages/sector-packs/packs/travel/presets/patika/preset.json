@@ -4,7 +4,7 @@
   "version": 1,
   "theme": "atolye",
   "name": "Patika",
-  "description": "Yürüyüş ve doğa turları için: duyuru şeridi, sola hizalı tam görsel kapak, sekmeli arama kutusu ve güven rozetleri; beş rota kartı, ikonlu neden biz şeridi, oklu tur kartları, geniş yayla bandı, yorum kaydırıcı, yol notları ve iletişim sütunlu koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
+  "description": "Yürüyüş ve doğa turları için: duyuru şeridi, eylem düğmeli üst bilgi, sola hizalı tam görsel kapak, sekmeli arama kutusu ve güven rozetleri; beş rota kartı, ikonlu neden biz şeridi, oklu tur kartları, geniş yayla bandı, yorum kaydırıcı, yol notları ve iletişim sütunlu koyu alt bilgi ve tur sayfasında çizgili program. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {

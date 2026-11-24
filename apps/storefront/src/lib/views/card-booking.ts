@@ -3,6 +3,7 @@ import type { CardBookingView, PriceView, ProductCardView, Translate } from "@qt
 import type { StoreCardFacts } from "@qticaret/types"
 import { FEW_LEFT } from "./booking"
 import { durationWords } from "./card-look"
+import { percentOff } from "./price"
 
 // The zone a departure is said in when the product's is not one the runtime knows
 const DEFAULT_ZONE = "Europe/Istanbul"
@@ -57,9 +58,44 @@ export function withCardBooking(
   if (booking.currency_code.toLowerCase() !== "try") {
     return { ...card, booking: view }
   }
-  const price: PriceView | null =
-    booking.from_price === null
-      ? null
-      : { current: formatLira(booking.from_price), before: null, from: true, discount: null }
-  return { ...card, price, booking: view }
+  return { ...card, price: bookingPrice(booking.from_price, booking.before), booking: view }
+}
+
+/**
+ * The server's from price as the card's (promotions taken off), struck
+ * through at `before` only when the server sends one (the price-before
+ * rule, adr/0076 Ek "kart fiyatı promosyonlu"): an ordinary card's
+ * discount and saving beside it. Without one it is drawn as before.
+ */
+function bookingPrice(fromPrice: number | null, before: number | undefined): PriceView | null {
+  if (fromPrice === null) {
+    return null
+  }
+  const plain: PriceView = {
+    current: formatLira(fromPrice),
+    before: null,
+    from: true,
+    discount: null,
+  }
+  return withBefore(plain, fromPrice, before)
+}
+
+/**
+ * A dated price (`amount`, lira) struck through at `before` when the
+ * server sends one: an ordinary card's discount and saving beside it.
+ * Without one it is `plain`, drawn as before (adr/0076 Ek "kalkış fiyatı
+ * promosyonlu": the card and the upcoming departures alike).
+ */
+export function withBefore(
+  plain: PriceView,
+  amount: number,
+  before: number | undefined
+): PriceView {
+  const discount = before === undefined ? null : percentOff(before, amount)
+  if (before === undefined || discount === null) {
+    return plain
+  }
+  // In kuruş, so the saving is never a float's hair off
+  const saving = (Math.round(before * 100) - Math.round(amount * 100)) / 100
+  return { ...plain, before: formatLira(before), discount, saving: formatLira(saving) }
 }

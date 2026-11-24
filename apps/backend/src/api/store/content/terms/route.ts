@@ -3,6 +3,7 @@ import { CONTENT_MODULE } from "../../../../modules/content"
 import type ContentModuleService from "../../../../modules/content/service"
 import { byRank, postCounts, termView } from "../../../../workflows/content/term-reads"
 import type { StoreGetContentTermsType } from "../validators"
+import { varyOnPublishableKey } from "../../../../lib/http/vary"
 
 /**
  * `GET /store/content/terms?kind=` (adr/0019 ek 2026-11-03): the blog's
@@ -25,7 +26,7 @@ export async function GET(
     postCounts(req.scope, null, { live: true }),
   ])
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({
     terms: terms
       .filter((term) => (live.get(term.id) ?? 0) > 0)

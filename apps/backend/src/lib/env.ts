@@ -154,6 +154,11 @@ const envSchema = z.object({
   // adr/0077 §7: the storefront's search intent calls per shop and day, on the shop's
   // own key, apart from the staff's; unset: 500 (lib/ai/limits.ts), 0 closes it
   AI_STORE_SEARCH_DAILY_LIMIT: z.coerce.number().int().min(0).max(100_000).optional(),
+  // adr/0079 §8: the panel assistant's model calls a day, per shop and per staff member,
+  // apart from the staff's text work; unset: 300 and 100 (lib/ai/limits.ts), a value may
+  // only lower it, 0 closes it
+  AI_ASSISTANT_DAILY_LIMIT: z.coerce.number().int().min(0).max(100_000).optional(),
+  AI_ASSISTANT_USER_DAILY_LIMIT: z.coerce.number().int().min(0).max(100_000).optional(),
   // F10.11: the platform's API key for CrUX (Chrome's field data); off until set
   CRUX_API_KEY: z.string().max(200).optional(),
   // A fake Google (OAuth and Merchant API) in tests; refused when deployed

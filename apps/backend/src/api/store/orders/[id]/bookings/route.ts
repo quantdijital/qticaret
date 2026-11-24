@@ -9,7 +9,8 @@ import { orderAccessOf } from "../../../../http/order-access"
  * each with whether it can be cancelled now and what would come back by
  * its tier, worked out on the server. Nothing is changed; no personal data.
  * While the shop takes cancels by phone or e-mail (Ek basit yol), none is
- * cancellable and `contact` says how to reach the shop.
+ * cancellable and `contact` says how to reach the shop. `voucher`: whether
+ * the shop gives vouchers (Ek D7b), so the order page may link to its own.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const access = orderAccessOf(req)
@@ -20,7 +21,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   })
   const flow = await bookingFlow(req.scope)
   res.setHeader("Cache-Control", "no-store")
-  res.json(
-    flow.online_cancel_enabled ? view : byContact(view, await cancelContactOf(req.scope, flow))
-  )
+  const shown = flow.online_cancel_enabled
+    ? view
+    : byContact(view, await cancelContactOf(req.scope, flow))
+  res.json({ ...shown, voucher: flow.voucher_enabled })
 }

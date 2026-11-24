@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { listingDescriptionHtml } from "../../../../lib/catalog/listing-description"
 import { storeCategoryDoc } from "../../../../workflows/catalog/category-description"
+import { varyOnPublishableKey } from "../../../../lib/http/vary"
 
 /**
  * GET /store/category-descriptions/:id (adr/0075): a shown category's text
@@ -13,6 +14,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   const id = req.params["id"] ?? ""
   const stored = await storeCategoryDoc(req.scope, id)
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.json({ category_id: id, description_html: listingDescriptionHtml(stored) })
 }

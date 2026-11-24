@@ -187,6 +187,7 @@ medusaIntegrationTestRunner({
         expect.objectContaining({ id: expect.any(String) as unknown, kind: "choice" }) as unknown,
       ])
       expect(read.data.addons).toEqual(saved.data["addons"])
+      expect(String(read.headers["vary"]).toLowerCase()).toContain("x-publishable-api-key")
     })
 
     it("prices a line's picks on the server and never takes a price from the shopper", async () => {

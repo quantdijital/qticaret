@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { LAYOUT_LIMITS, image, optional, placement, shopText } from "../layout-fields"
+import { handNote } from "./hand-note"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
@@ -110,6 +111,8 @@ const split = z
     variant: z.literal("split"),
     eyebrow: optional(shopText(BANNER_EYEBROW_MAX)),
     edge: step(BANNER_SPLIT_EDGES, "straight"),
+    // A short hand note over the panel's heading (`hand-note.ts`); the slides have no one heading
+    note: handNote,
   })
   .strict()
 

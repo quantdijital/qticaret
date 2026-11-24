@@ -30,7 +30,7 @@ export const FEATURE_GROUPS = [
     ],
   },
   { id: "restricted", keys: ["catalog.restricted", "compliance.age_verification"] },
-  { id: "ai", keys: ["ai.own_keys", "ai.reviews", "ai.storefront_search"] },
+  { id: "ai", keys: ["ai.own_keys", "ai.reviews", "ai.storefront_search", "ai.assistant"] },
 ] as const
 
 export type FeatureGroupId = (typeof FEATURE_GROUPS)[number]["id"] | "other"

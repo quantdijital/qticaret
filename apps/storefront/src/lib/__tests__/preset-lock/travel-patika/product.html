@@ -1770,6 +1770,120 @@
     </section>
   </div>
 </div>
+<div data-qs="patikaprogram">
+  <section aria-labelledby="bolum-patikaprogram" class="gf-section">
+    <div class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-(--head-gap)">
+      <h2 id="bolum-patikaprogram">
+        Yürüyüş programı
+      </h2>
+      <div class="w-full max-w-4xl">
+        <ol class="flex flex-col">
+          <li
+            class="group/step relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 pb-8 last:pb-0"
+          >
+            <span
+              aria-hidden="true"
+              class="absolute top-3 bottom-0 left-[0.6875rem] w-px bg-rule group-last/step:hidden"
+            >
+            </span>
+            <span
+              aria-hidden="true"
+              class="relative mt-1.5 size-6 rounded-full border-2 border-text bg-paper"
+            >
+            </span>
+            <div class="flex min-w-0 flex-col gap-3">
+              <h3 class="flex flex-col gap-0.5">
+                <span class="text-sm font-semibold text-text-3">
+                  1. Gün
+                </span>
+                <span class="text-title font-semibold text-text">
+                  Varış ve tanışma
+                </span>
+              </h3>
+              <div class="grid gap-4 lg:grid-cols-[1fr_20rem] lg:gap-6">
+                <div class="flex min-w-0 flex-col gap-3">
+                  <ul class="flex flex-wrap gap-2">
+                    <li
+                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="1.75"
+                        class="lucide lucide-moon size-4 shrink-0"
+                        aria-hidden="true"
+                      />
+                      Akşam yemeği
+                    </li>
+                    <li
+                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="1.75"
+                        class="lucide lucide-bed-double size-4 shrink-0"
+                        aria-hidden="true"
+                      />
+                      Konaklama
+                    </li>
+                  </ul>
+                  <div class="gf-prose gf-prose--small">
+                    <p>
+                      Buluşma noktasında karşılama, kısa tanışma ve ilk yürüyüş.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li
+            class="group/step relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 pb-8 last:pb-0"
+          >
+            <span
+              aria-hidden="true"
+              class="absolute top-3 bottom-0 left-[0.6875rem] w-px bg-rule group-last/step:hidden"
+            >
+            </span>
+            <span
+              aria-hidden="true"
+              class="relative mt-1.5 size-6 rounded-full border-2 border-text bg-paper"
+            >
+            </span>
+            <div class="flex min-w-0 flex-col gap-3">
+              <h3 class="flex flex-col gap-0.5">
+                <span class="text-sm font-semibold text-text-3">
+                  2. Gün
+                </span>
+                <span class="text-title font-semibold text-text">
+                  Serbest gün
+                </span>
+              </h3>
+              <div class="grid gap-4 lg:grid-cols-[1fr_20rem] lg:gap-6">
+                <div class="flex min-w-0 flex-col gap-3">
+                  <ul class="flex flex-wrap gap-2">
+                    <li
+                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="1.75"
+                        class="lucide lucide-sun size-4 shrink-0"
+                        aria-hidden="true"
+                      />
+                      Serbest zaman
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</div>
 <script>
   addEventListener("submit",function(a){if(!a.defaultPrevented){var b=a.target,d=a.submitter,c=b.action,e=d;if(d){var f=d.getAttribute("formAction");null!=f&&(c=f,e=null)}
   "javascript:throw new Error('React form unexpectedly submitted.')"===c&&(a.preventDefault(),a=new FormData(b,e),c=b.ownerDocument||b,(c.$$reactFormReplay=c.$$reactFormReplay||[]).push(b,d,a))}

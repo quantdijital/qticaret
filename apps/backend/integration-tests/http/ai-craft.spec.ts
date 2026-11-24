@@ -173,6 +173,26 @@ medusaIntegrationTestRunner({
       expect(stored.data.values?.tasks["seo_description"]).toMatchObject({ extra: "Kısa" })
     })
 
+    // The order the test above meets only now and then: the note first
+    it("keeps an admin's note when the owner then saves the craft alone", async () => {
+      const admin = await createAdminUser(http, getContainer(), "admin")
+      const note = await saveAs(admin.headers, {
+        tasks: { seo_title: { extra: "Markayı sona koy", examples: [] } },
+      })
+      const craft = await saveAs(owner.headers, {
+        tasks: { seo_title: { craft: "Önce ürün adı." } },
+      })
+      expect([note.status, craft.status]).toEqual([200, 200])
+
+      const stored = await settle(
+        http.get<Section>("/admin/platform-settings/ai_guidance", { headers: owner.headers })
+      )
+      expect(stored.data.values?.tasks["seo_title"]).toMatchObject({
+        extra: "Markayı sona koy",
+        craft: "Önce ürün adı.",
+      })
+    })
+
     it("puts the owner's craft in the default's place, the rules still last", async () => {
       const productId = await aiProduct(getContainer())
       const seen = answering()

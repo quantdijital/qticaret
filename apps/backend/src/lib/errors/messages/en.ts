@@ -844,6 +844,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "A question or answer cannot be added as it is: a question is one line ending in a question mark (at most 120 characters), an answer at most 400 characters, with no link, markup, personal data, price or all-caps words.",
   "ai.faq_not_product_faq": "This suggestion is not a product FAQ draft.",
   "ai.faq_all_published": "Every selected question is already published on the product page.",
+  "ai.assistant_off": "The assistant is off for this shop.",
+  "ai.assistant_no_tool_service":
+    "No connected AI service can run the assistant. Connect one under Settings > AI.",
+  "ai.assistant_turn_limit": "The assistant could not answer this. Try a shorter question.",
+  "ai.assistant_daily_limit":
+    "The assistant's limit for today has been reached. Try again tomorrow.",
+  "ai.assistant_conversation_gone": "This conversation is gone; start a new one.",
   "ai.faq_use_faq_route": "A FAQ draft is accepted by adding the selected questions.",
   // Aşama 9: reviews and questions
   "ai.reviews_off": "AI on reviews and questions is off. You can turn it on under Settings > AI.",
@@ -1187,6 +1194,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_layout.token_unknown":
     "The text has a {…} detail that is not known. Available: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
   "storefront_layout.target_invalid": "The chosen record is not valid.",
+  "storefront_layout.video_invalid":
+    "The video address must be a YouTube or Vimeo video link (e.g. https://youtu.be/… or https://vimeo.com/…).",
   "storefront_layout.target_unknown":
     "A record one of the sections shows no longer exists; choose it again.",
   "storefront_layout.image_invalid": "The image must come from the shop's media library.",

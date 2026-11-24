@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { SEO_SITEMAPS_MODULE } from "../../../../../modules/seo-sitemaps"
 import type SeoSitemapsModuleService from "../../../../../modules/seo-sitemaps/service"
+import { varyOnPublishableKey } from "../../../../../lib/http/vary"
 
 // `sitemap.xml` (the index) and the files it names
 const NAME = /^sitemap(?:-[a-z]+-\d{1,4})?\.xml$/
@@ -24,6 +25,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   res.setHeader("X-Content-Type-Options", "nosniff")
   res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400")
   res.setHeader("Last-Modified", new Date(file.generated_at).toUTCString())
-  res.vary("x-publishable-api-key")
+  varyOnPublishableKey(res)
   res.send(file.content)
 }

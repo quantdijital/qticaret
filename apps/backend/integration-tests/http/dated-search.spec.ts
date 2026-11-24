@@ -1,3 +1,5 @@
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { createCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { todayIn } from "../../src/lib/seo/facets-dated"
 import { createAdminUser } from "../helpers/admin"
@@ -20,6 +22,14 @@ interface Listing {
 }
 interface Fact {
   booking?: Record<string, unknown>
+}
+/** A day of the calendar, or a row of the upcoming departures, as the test reads it. */
+interface Shown {
+  product: { id: string }
+  date: string
+  from_price: number | null
+  before?: number
+  departures: number
 }
 
 const HOUR = 60 * 60 * 1000
@@ -46,7 +56,7 @@ medusaIntegrationTestRunner({
 
     /** A published tour at 1.500 TL a place, with departures `days` from now. */
     const tour = async (departures: { days: number; capacity: number }[]) => {
-      const { data } = await http.post<{ product: { id: string } }>(
+      const { data } = await http.post<{ product: { id: string; variants: { id: string }[] } }>(
         "/admin/products",
         {
           title: `Kapadokya turu ${String((made += 1))}`,
@@ -78,7 +88,10 @@ medusaIntegrationTestRunner({
         })),
       })
       expect(created.status).toBe(200)
-      return { productId, starts }
+      const slotIds = ((created.data["slots"] as { id: string }[] | undefined) ?? []).map(
+        (slot) => slot.id
+      )
+      return { productId, starts, variantId: data.product.variants[0]?.id ?? "", slotIds }
     }
 
     const listing = async (params: Record<string, string>, query: Record<string, string>) => {
@@ -96,6 +109,78 @@ medusaIntegrationTestRunner({
       )
     }
     const search = (query: Record<string, string>) => listing({ type: "search" }, query)
+
+    /** What a guest's cart charges for its items once one place on the departure is booked. */
+    const bookedTotal = async (variantId: string, slotId: string): Promise<number> => {
+      const { result: cart } = await createCartWorkflow(getContainer()).run({
+        input: {
+          region_id: shop.regionId,
+          sales_channel_id: shop.salesChannelId,
+          currency_code: "try",
+          email: "ayse.yilmaz@example.com",
+        },
+      })
+      const booked = await settle(
+        http.post<Record<string, unknown>>(
+          `/store/carts/${cart.id}/bookings`,
+          { slot_id: slotId, items: [{ variant_id: variantId, quantity: 1 }] },
+          { headers: store.headers }
+        )
+      )
+      expect(booked.status).toBe(200)
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "cart", fields: ["item_total"], filters: { id: cart.id } })
+      return Math.round(Number((data[0] as { item_total: unknown }).item_total) * 100) / 100
+    }
+
+    /**
+     * Two tours' prices for their departure (8 days on, in "ege-turlari") where the
+     * storefront shows them: the page's departures, the category's calendar and
+     * upcoming departures, and the first tour's structured data.
+     */
+    const departureShown = async (promotedId: string, codedId: string) => {
+      const get = async <T>(url: string) =>
+        (await settle(http.get<T>(url, { headers: store.headers }))).data
+      const prices = async (productId: string) =>
+        (
+          await get<{ booking: { slots: { prices: unknown[] }[] } }>(
+            `/store/products/${productId}/booking?region_id=${shop.regionId}`
+          )
+        ).booking.slots[0]?.prices
+      const calendar = await get<{ days: Shown[] }>(
+        `/store/departures/calendar?month=${dayAhead(8).slice(0, 7)}&kategori=ege-turlari`
+      )
+      const upcoming = await get<{ departures: Shown[] }>(
+        "/store/departures?kategori=ege-turlari&limit=6"
+      )
+      const row = (productId: string) => {
+        const found = upcoming.departures.find((each) => each.product.id === productId)
+        return found && { from_price: found.from_price, before: found.before }
+      }
+      // Structured data needs the canonical host: its URLs are absolute
+      await staff("/admin/platform-settings/seo", { canonical_host: "ornek.com" })
+      const { data } = await http.get<{ product: { handle: string } }>(
+        `/admin/products/${promotedId}?fields=handle`,
+        { headers: admin.headers }
+      )
+      const path = encodeURIComponent(`/urun/${data.product.handle}`)
+      const seo = await get<{ seo?: { jsonLd: Record<string, unknown>[] } }>(
+        `/store/seo/resolve?path=${path}`
+      )
+      const trip = (seo.seo?.jsonLd ?? []).find((block) => block["@type"] === "TouristTrip") as
+        { subTrip?: { offers?: { price?: string } }[] } | undefined
+      return {
+        page: { promoted: await prices(promotedId), coded: await prices(codedId) },
+        calendar: calendar.days.map(({ from_price, before, departures }) => ({
+          from_price,
+          before,
+          departures,
+        })),
+        upcoming: { promoted: row(promotedId), coded: row(codedId) },
+        jsonld: trip?.subTrip?.[0]?.offers?.price,
+      }
+    }
 
     beforeEach(async () => {
       const container = getContainer()
@@ -228,6 +313,84 @@ medusaIntegrationTestRunner({
       })
       expect(past.status).toBe(400)
       expect(far.status).toBe(400)
+    })
+
+    // adr/0076 Ek "kart fiyatı promosyonlu": the card, the index and a date search agree
+    it("prices a card, the index and a date search with an automatic promotion, never a code's", async () => {
+      const promoted = await tour([{ days: 8, capacity: 10 }])
+      const coded = await tour([{ days: 8, capacity: 10 }])
+      const category = await staff("/admin/product-categories", {
+        name: "Ege turları",
+        handle: "ege-turlari",
+        is_active: true,
+      })
+      const categoryId = (category.data as { product_category: { id: string } }).product_category.id
+      for (const { productId } of [promoted, coded]) {
+        await staff(`/admin/products/${productId}`, { categories: [{ id: categoryId }] })
+      }
+      const offer = (code: string, automatic: boolean, value: number, productId: string) =>
+        staff("/admin/promotions", {
+          code,
+          type: "standard",
+          status: "active",
+          is_automatic: automatic,
+          is_tax_inclusive: true,
+          application_method: {
+            type: "percentage",
+            target_type: "items",
+            allocation: "across",
+            value,
+            target_rules: [{ attribute: "items.product.id", operator: "in", values: [productId] }],
+          },
+        })
+      expect((await offer("TUR20", true, 20, promoted.productId)).status).toBe(200)
+      expect((await offer("TURKOD30", false, 30, coded.productId)).status).toBe(200)
+      // Dates no other test asks: a date search's products and prices are kept 30 seconds
+      const tarih = `${dayAhead(3)}_${dayAhead(19)}`
+      const cards = async (extra: string) =>
+        (
+          await settle(
+            http.get<{ facts: Record<string, Fact> }>(
+              `/store/card-facts?id=${promoted.productId}&id=${coded.productId}&region_id=${shop.regionId}${extra}`,
+              { headers: store.headers }
+            )
+          )
+        ).data.facts
+
+      const plain = await cards("")
+      const ranged = await cards(`&from=${dayAhead(3)}&to=${dayAhead(19)}&pax=1`)
+      const indexed = await search({ kategori: "ege-turlari", fiyat: "1100-1300" })
+      const dated = await search({ kategori: "ege-turlari", tarih, fiyat: "1100-1300" })
+
+      // 1.500 less 20%, the price before it struck through
+      expect(plain[promoted.productId]?.booking).toMatchObject({ from_price: 1200, before: 1500 })
+      expect(ranged[promoted.productId]?.booking).toMatchObject({
+        from_price: 1200,
+        before: 1500,
+        in_range: true,
+      })
+      // A code's promotion stays in the cart: the card is as it was
+      expect(plain[coded.productId]?.booking).toMatchObject({ from_price: 1500 })
+      expect(plain[coded.productId]?.booking).not.toHaveProperty("before")
+      // The index and the date search filter by the price the card says
+      expect(indexed.data.product_ids).toEqual([promoted.productId])
+      expect(dated.data.product_ids).toEqual([promoted.productId])
+      // adr/0076 Ek "kalkış fiyatı promosyonlu": the page, the calendar, the upcoming
+      // departures and the structured data say the card's price too
+      const shown = await departureShown(promoted.productId, coded.productId)
+      expect(shown.page).toEqual({
+        promoted: [{ variant_id: promoted.variantId, amount: 1200, before: 1500 }],
+        coded: [{ variant_id: coded.variantId, amount: 1500 }],
+      })
+      // Both tours leave that day: the lowest, the promoted one's
+      expect(shown.calendar).toEqual([{ from_price: 1200, before: 1500, departures: 2 }])
+      expect(shown.upcoming).toEqual({
+        promoted: { from_price: 1200, before: 1500 },
+        coded: { from_price: 1500 },
+      })
+      expect(shown.jsonld).toBe("1200.00")
+      // And the cart charges it: a guest's place on that departure, through the booking route
+      expect(await bookedTotal(promoted.variantId, promoted.slotIds[0] ?? "")).toBe(1200)
     })
   },
 })

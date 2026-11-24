@@ -8,10 +8,10 @@ import {
   paxOf,
   salesClosed,
 } from "../../lib/booking/cart-lines"
-import { toMedusaAmount } from "../../lib/money"
-import type { Kurus } from "../../lib/money"
-import { variantPrice } from "../addons/cart"
+import type { SlotAvailability } from "../../modules/booking/service"
 import type { AddonCart } from "../addons/cart"
+import type { PayingUnit } from "./card-facts"
+import { baseAmounts, basePriceRows, lira, placeDisplays, shownOf, struck } from "./card-price"
 import { bookingService } from "./cart/target"
 import type { BookableRow } from "./product"
 
@@ -49,14 +49,15 @@ async function pricingCart(container: Container, regionId: string | undefined) {
   return { id: "", currency_code: region.currency_code, region_id: region.id } satisfies AddonCart
 }
 
-const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
-
 /**
  * GET /store/products/:id/booking (adr/0076 §10, read by D5): a published
  * dated product's price categories (places a unit takes, ages) and its
  * departures from now on, each with the places free now (live holds only)
  * and every category's price for that departure worked out on the server
- * (a guest's price; the cart prices the line again with its own context).
+ * (a guest's price, the automatic promotions taken off as on its card,
+ * adr/0076 Ek "kalkış fiyatı promosyonlu", and the price struck through
+ * only by the card's rule; the cart prices the line again with its own
+ * context).
  * A departure past its sales' close reads `closed`; a cancelled one is not
  * listed. No person's data. Another product reads as unknown.
  */
@@ -95,15 +96,42 @@ export async function storeProductBooking(
   }
   const cart = await pricingCart(container, regionId)
   const variants = (product.variants ?? []).flatMap((variant) => (variant ? [variant] : []))
-  const bases = new Map<string, Kurus | null>()
-  for (const variant of variants) {
-    bases.set(variant.id, (await variantPrice(container, cart, variant.id, 1))?.calculated ?? null)
-  }
   const now = new Date()
-  const slots = await bookingService(container).bookableSlots(bookable.id, {
-    from: now,
-    limit: STORE_SLOTS_LIMIT,
-  })
+  const [prices, all] = await Promise.all([
+    basePriceRows(
+      container,
+      variants.map((variant) => variant.id),
+      {
+        currency_code: cart.currency_code,
+        ...(cart.region_id ? { region_id: cart.region_id } : {}),
+      }
+    ),
+    bookingService(container).bookableSlots(bookable.id, { from: now, limit: STORE_SLOTS_LIMIT }),
+  ])
+  const bases = baseAmounts(prices)
+  const slots = all.filter((slot) => slot.status !== "cancelled")
+  // A departure's places: every category priced (base plus its difference), as the cart's lines
+  const placesOf = (slot: SlotAvailability): PayingUnit[] =>
+    variants.flatMap((variant) => {
+      const base = bases.get(variant.id)
+      const adjustment = adjustmentOf(slot.price_adjustments, variant.id)
+      if (
+        base === null ||
+        base === undefined ||
+        adjustmentProblem(cart.currency_code, adjustment)
+      ) {
+        return []
+      }
+      return [{ variant_id: variant.id, adjustment, amount: bookingUnitPrice(base, adjustment) }]
+    })
+  // Every departure's places in one reading of the record and the promotions
+  const shown = await placeDisplays(
+    container,
+    slots.flatMap(placesOf),
+    prices,
+    cart.currency_code,
+    now
+  )
   const pax = (bookable.pax_by_variant ?? {}) as Record<string, PaxEntry | undefined>
   return {
     cutoff_hours: bookable.cutoff_hours,
@@ -120,29 +148,21 @@ export async function storeProductBooking(
       min_age: pax[variant.id]?.min_age ?? null,
       max_age: pax[variant.id]?.max_age ?? null,
     })),
-    slots: slots
-      .filter((slot) => slot.status !== "cancelled")
-      .map((slot) => {
-        const selling =
-          slot.status === "open" && !salesClosed(slot.starts_at, bookable.cutoff_hours, now)
-        return {
-          id: slot.id,
-          starts_at: slot.starts_at.toISOString(),
-          ends_at: slot.ends_at?.toISOString() ?? null,
-          status: selling ? ("open" as const) : ("closed" as const),
-          available: selling ? slot.available : 0,
-          prices: variants.flatMap((variant) => {
-            const base = bases.get(variant.id)
-            const adjustment = adjustmentOf(slot.price_adjustments, variant.id)
-            if (base === null || base === undefined) {
-              return []
-            }
-            if (adjustmentProblem(cart.currency_code, adjustment)) {
-              return []
-            }
-            return [{ variant_id: variant.id, amount: lira(bookingUnitPrice(base, adjustment)) }]
-          }),
-        }
-      }),
+    slots: slots.map((slot) => {
+      const selling =
+        slot.status === "open" && !salesClosed(slot.starts_at, bookable.cutoff_hours, now)
+      return {
+        id: slot.id,
+        starts_at: slot.starts_at.toISOString(),
+        ends_at: slot.ends_at?.toISOString() ?? null,
+        status: selling ? ("open" as const) : ("closed" as const),
+        available: selling ? slot.available : 0,
+        // adr/0076 Ek "kalkış fiyatı promosyonlu": the card's price, the automatic promotions off
+        prices: placesOf(slot).map((unit) => {
+          const price = shownOf(shown, unit)
+          return { variant_id: unit.variant_id, amount: lira(price.current), ...struck(price) }
+        }),
+      }
+    }),
   }
 }

@@ -1,3 +1,4 @@
+import { RESTRICTED_UNTRUSTED } from "../../../modules/control-plane/trusted-state"
 import { DEFAULT_PLAN_STATE, NO_LIMITS } from "../../../modules/control-plane/types"
 import { readPlanSummary } from "../summary"
 import { USAGE_CACHE_MS, forgetUsage } from "../usage"
@@ -8,6 +9,8 @@ function shop(managed: boolean) {
   const counts = { products: 41 }
   const state = {
     ...DEFAULT_PLAN_STATE(managed),
+    // A verified document has a serial; managed without one there is none to trust
+    serial: managed ? 7 : null,
     package_code: managed ? "standart" : null,
     limits: { ...NO_LIMITS, products: 50, orders_per_month: 10, staff: 3, storage_mb: 100 },
     billing: managed
@@ -158,6 +161,32 @@ describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
       { key: "catalog.product_videos", enabled: false },
       { key: "ai.own_keys", enabled: true },
     ])
+  })
+
+  it("lists no features from a stored document it does not trust", async () => {
+    const { container } = shop(true)
+    const services = container as unknown as { resolve: (key: string) => unknown }
+    const state = await (
+      services.resolve("control_plane") as { planState: () => Promise<Record<string, unknown>> }
+    ).planState()
+    // A row that failed its checks: managed, no package, no flags; each flag's
+    // default ("on") may not be what the last applied document set
+    Object.assign(state, RESTRICTED_UNTRUSTED("suspended"))
+
+    const summary = await readPlanSummary(container)
+
+    expect(summary).toMatchObject({ managed: true, status: "suspended", features: [] })
+  })
+
+  it("lists no features before the first document arrives", async () => {
+    const { container } = shop(true)
+    const services = container as unknown as { resolve: (key: string) => unknown }
+    const state = await (
+      services.resolve("control_plane") as { planState: () => Promise<Record<string, unknown>> }
+    ).planState()
+    state["serial"] = null
+
+    expect((await readPlanSummary(container)).features).toEqual([])
   })
 
   it("gives every feature its default without a control plane", async () => {

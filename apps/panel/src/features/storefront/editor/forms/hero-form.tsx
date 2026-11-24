@@ -6,8 +6,10 @@ import { heroFullSettingsOf } from "@qticaret/types"
 import { NamedGroup } from "../named-group"
 import { F, TextField } from "./fields"
 import { HeroCatalogFields } from "./hero-catalog-fields"
+import { HandNoteField } from "./hand-note-field"
 import { HeroAccentField, HeroFullAction } from "./hero-full-fields"
 import { HeroSlidesField } from "./hero-slides-field"
+import { HeroVideoFields } from "./hero-video-fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { ImageField } from "./image-field"
@@ -26,7 +28,8 @@ type HeroFields = Pick<HeroSection, "eyebrow" | "heading" | "text" | "links" | "
  * slides' (adr/0049 Ek 2026-11-15): "İçerik" the line and the slides, its
  * own parts in their groups after (`HeroCatalogFields`). The full image
  * (adr/0077 §9) adds its accent line under the heading and, after the
- * picture, what stands under the words; its buttons only while it shows them.
+ * picture, what stands under the words; its buttons only while it shows them,
+ * and its video button's link and words in "Video".
  */
 export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroSection>) {
   const { t } = useTranslation()
@@ -66,6 +69,18 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
     <>
       <NamedGroup name="content">
         {eyebrow}
+        {/* The full image's hand note stands over its heading, as the storefront draws it */}
+        {full ? (
+          <HandNoteField
+            sectionId={section.id}
+            keys="storefront.editor.heroFull"
+            value={full.note ?? null}
+            problem={problems["note"]}
+            onChange={(note) => {
+              onChange({ ...full, note }, "note")
+            }}
+          />
+        ) : null}
         <TextField
           id={PREVIEW_IDS.text(section.id, "heading")}
           label={t(`${F}.heading`)}
@@ -110,6 +125,7 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
           <HeroButtons section={section} problems={problems} onChange={set} />
         </NamedGroup>
       )}
+      {full ? <HeroVideoFields section={full} problems={problems} onChange={onChange} /> : null}
     </>
   )
 }

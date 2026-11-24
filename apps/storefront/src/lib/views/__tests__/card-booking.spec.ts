@@ -66,6 +66,22 @@ describe("withCardBooking", () => {
     expect(withCardBooking(card("a"), undefined)).toEqual(card("a"))
   })
 
+  // adr/0076 Ek "kart fiyatı promosyonlu": the server's promoted price, struck through by its rule
+  it("strikes the price before an automatic promotion through when the server sends one", () => {
+    const read = withCardBooking(card("a"), { ...booking, from_price: 1400.4, before: 1750.5 })
+    expect(read.price).toEqual({
+      current: "1.400,40 TL",
+      before: "1.750,50 TL",
+      from: true,
+      discount: 20,
+      saving: "350,10 TL",
+    })
+    // None sent, or none above the price: drawn as before
+    expect(withCardBooking(card("a"), booking).price?.before).toBeNull()
+    const odd = withCardBooking(card("a"), { ...booking, before: 1750.5 })
+    expect(odd.price).toEqual({ current: "1.750,50 TL", before: null, from: true, discount: null })
+  })
+
   // adr/0077 §4: a date search's card
   it("says the departure is inside the dates asked and its places left when few", () => {
     const read = withCardBooking(card("a"), { ...booking, left: 3, in_range: true })

@@ -5,6 +5,7 @@ import type { BannerSplitEdge } from "@qticaret/types"
 import type { BannerSection } from "@/features/storefront/api/layout"
 import { bannerEdgeId } from "./banner-groups"
 import { TextField } from "./fields"
+import { HandNoteField } from "./hand-note-field"
 import type { SectionFormProps } from "./form-props"
 import { PREVIEW_IDS } from "./preview-fields"
 import { useProblemText } from "./problem-text"
@@ -13,7 +14,8 @@ const B = "storefront.editor.banner"
 
 /**
  * The split band's own words (adr/0077 Ek, "Bölünmüş bant"): the upper
- * line over the first picture's heading, and a note that only the first
+ * line over the first picture's heading, its hand note (`HandNoteField`),
+ * and a line telling that only the first
  * picture shows (the others stay, for a switch back).
  */
 export function BannerSplitWords({ section, problems, onChange }: SectionFormProps<BannerSection>) {
@@ -31,6 +33,15 @@ export function BannerSplitWords({ section, problems, onChange }: SectionFormPro
         error={problem(problems["eyebrow"], BANNER_EYEBROW_MAX)}
         onChange={(eyebrow) => {
           onChange({ ...section, eyebrow }, "eyebrow")
+        }}
+      />
+      <HandNoteField
+        sectionId={section.id}
+        keys={B}
+        value={section.note ?? null}
+        problem={problems["note"]}
+        onChange={(note) => {
+          onChange({ ...section, note }, "note")
         }}
       />
       <p className="text-xs text-muted-foreground">{t(`${B}.splitFirst`)}</p>

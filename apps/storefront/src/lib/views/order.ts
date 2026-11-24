@@ -73,9 +73,13 @@ export interface OrderExtras {
   bookings?: OrderDeparturesRow | null
 }
 
-const bookingsField = (found: OrderDeparturesRow | null, t: Translate) => {
+// The voucher link (adr/0076 Ek D7b) only beside departures and while the shop gives vouchers
+const bookingsField = (found: OrderDeparturesRow | null, t: Translate, voucherPath: string) => {
   const bookings = orderBookingsOf(found, t)
-  return bookings ? { bookings } : {}
+  if (!bookings) {
+    return {}
+  }
+  return found?.voucher === true ? { bookings, voucherPath } : { bookings }
 }
 
 const NOTES: Record<string, string> = {
@@ -246,7 +250,7 @@ export function orderView(
     payment: paymentWordsOf(providers, t),
     guest: extras.guest ?? false,
     // A dated order's departures with their cancel (adr/0076 Ek D7a); none: drawn as before
-    ...bookingsField(extras.bookings ?? null, t),
+    ...bookingsField(extras.bookings ?? null, t, orderHref(order.id, extras.token, "/voucher")),
     breadcrumbs: [
       { label: t("home.label"), path: "/" },
       { label: t("order.title", { id: order.display_id }), path: null },

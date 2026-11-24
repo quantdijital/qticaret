@@ -178,6 +178,8 @@ export const PLAN_OPEN: readonly Rule[] = [
   // invitation taken back (review L6: taking access away); reopening sells anew
   { methods: POST, path: "/admin/wholesale/accounts/:id/deactivate" },
   { methods: DELETE, path: "/admin/wholesale/accounts/:id" },
+  // adr/0079 §6: an assistant conversation dropped from Redis: the person's words forgotten
+  { methods: DELETE, path: "/admin/ai/assistant/conversations/:id" },
 ]
 
 const closed = (paths: readonly string[]): Rule[] =>

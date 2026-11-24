@@ -393,6 +393,20 @@
       "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler."
     },
     "saved": "Ayarlar kaydedildi.",
+    "catalogDefaults": {
+      "title": "Yeni ürün varsayılanları",
+      "description": "Yeni ürün ekranı bu seçimlerle açılır. Var olan ürünler değişmez.",
+      "kind": "Yeni ürün türü",
+      "kindHint": "Yeni ürün bu türle başlar; ürün eklerken değiştirebilirsiniz. Varsayılan: Fiziksel ürün.",
+      "dated": "Yeni hizmet tarihli satılsın",
+      "datedHint": "Yeni hizmet \"Tarihli satış (kalkışlı)\" açık başlar. Varsayılan: kapalı.",
+      "schema": "Tarihli ürünün yapılandırılmış veri türü",
+      "schemaHint": "Tarihli ürün sayfasında arama motorlarına verilen ek bilgi. Tur için Tur gezisi, konser, atölye ya da kurs için Etkinlik. Varsayılan: Tur gezisi.",
+      "schemas": {
+        "TouristTrip": "Tur gezisi (TouristTrip)",
+        "Event": "Etkinlik (Event)"
+      }
+    },
     "storefront": {
       "moveUp": "{{item}}: yukarı taşı",
       "moveDown": "{{item}}: aşağı taşı",
@@ -574,9 +588,10 @@
       },
       "etbisQr": {
         "title": "ETBİS karekodu",
-        "hint": "ETBİS'e (eticaret.gov.tr) kayıt olunca verilen karekod; vitrinin altbilgisinde gösterilir. İsteğe bağlı.",
-        "size": "ETBİS'ten indirdiğiniz karekod görselini olduğu gibi yükleyin.",
-        "none": "Karekod yok"
+        "hint": "ETBİS'e (eticaret.gov.tr) kayıt olunca verilen karekod; indirdiğiniz görseli olduğu gibi yükleyin. Vitrinin altbilgisinde gösterilir. İsteğe bağlı.",
+        "none": "Karekod yok",
+        "set": "Karekod eklendi",
+        "choose": "Yükle"
       }
     },
     "seo": {
@@ -747,6 +762,11 @@
       },
       "flags": {
         "ai": {
+          "assistant": {
+            "label": "Panel yardımcısı",
+            "summary": "Panelde soru yazarak aradığınız ekranı bulursunuz.",
+            "description": "Panelin sağındaki yardımcıya ne yapmak istediğinizi yazarsınız; yardımcı ilgili ekranı gösterir. Personelin yazdığı metin mağazanın bağlı yapay zekâ servisine gider; müşteri adı ya da telefon gibi kişisel bilgi yazılmamalıdır. Yalnız mağaza sahibi açabilir."
+          },
           "reviews": {
             "label": "Yorum ve sorularda yapay zekâ",
             "summary": "Yorumları özetler, yorum ve sorulara yanıt taslağı hazırlar.",
@@ -3215,6 +3235,7 @@
     "canceled": "İptal"
   },
   "command": {
+    "ask": "Yardımcıya sor: {{text}}",
     "title": "Komut menüsü",
     "description": "Sipariş, müşteri, ürün ya da kargo arayın; bir sayfaya gidin ya da bir işlem çalıştırın.",
     "placeholder": "Sipariş no, müşteri, ürün, SKU, takip no ya da sayfa…",
@@ -9270,6 +9291,7 @@
         },
         "groups": {
           "buttons": "Düğmeler",
+          "video": "Video",
           "categoryList": "Kategori listesi",
           "tiles": "Yandaki karolar",
           "chips": "Hızlı bağlantılar",
@@ -9347,7 +9369,7 @@
         "headingHint": "Boş bırakırsanız mağazanızın adı görünür.",
         "textPlaceholder": "Siparişleriniz aynı gün kargoda, iade 14 gün içinde ücretsiz.",
         "buttons": "Düğmeler",
-        "buttonsHint": "En çok {{max}} düğme; ilki ana düğme olur. Düğme eklemezseniz ilk iki kategoriniz gösterilir.",
+        "buttonsHint": "En çok {{max}} düğme; ilki ana düğme olur.",
         "button": "{{number}}. düğme",
         "addButton": "Düğme ekle",
         "imageHint": "Geniş, yatay bir görsel en iyi sonucu verir."
@@ -9415,6 +9437,12 @@
         },
         "eyebrowPlaceholder": "Örn. Özel fırsat",
         "splitFirst": "Bölünmüş bant yalnız ilk görseli gösterir; diğerleri biçim değişince geri gelir.",
+        "note": {
+          "label": "Not",
+          "term": "note",
+          "placeholder": "Örn. Sizi bekliyoruz",
+          "hint": "Başlığın üstünde küçük, eğik bir not. Vurgu yazı tipi açıksa el yazısıyla görünür; boş bırakırsanız çizilmez."
+        },
         "edge": {
           "label": "Geçiş",
           "term": "edge",
@@ -9582,6 +9610,7 @@
       "problems": {
         "required": "Bu satırı yazın ya da kaldırın.",
         "tooLong": "En çok {{max}} karakter yazın.",
+        "videoInvalid": "Bir YouTube ya da Vimeo video bağlantısı yapıştırın (ör. https://youtu.be/… ya da https://vimeo.com/…).",
         "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
         "tokenUnknown": "Süslü parantez içinde tanınmayan bir bilgi var; bilgileri Bilgi ekle menüsünden ekleyin.",
         "linkLabel": "Dış adresin görünen yazısını girin.",
@@ -9670,6 +9699,16 @@
         "fontNotes": {
           "noLira": "Bu yazı tipinde ₺ işareti yok. Fiyatlar metin yazı tipiyle çizilir; başlık metnine yazdığınız ₺ yedek bir yazı tipiyle görünür.",
           "singleWeight": "Tek kalınlığı vardır: başlıklar kalın değil, normal kalınlıkta çizilir."
+        },
+        "accentFont": "Vurgu yazı tipi",
+        "accentFontTerm": "el yazısı · font-family",
+        "accentFontHint": "Bölümlere yazdığınız kısa notlar (açılış ve bölünmüş bant) bu yazı tipiyle, el yazısı gibi görünür. Yok seçiliyse not metin yazı tipiyle italik çizilir. Yazı tipi yalnız not olan sayfada yüklenir.",
+        "handwriting": "el yazısı",
+        "accentFonts": {
+          "none": "Yok",
+          "caveat": "Caveat",
+          "dancing-script": "Dancing Script",
+          "kalam": "Kalam"
         },
         "shapes": "Şekiller",
         "radius": "Köşeler",
@@ -11319,6 +11358,12 @@
           "placeholder": "Örn. Kaçışını bul.",
           "hint": "Başlığın altında, ana renginizle yazılan ikinci satır. Boş bırakırsanız çizilmez."
         },
+        "note": {
+          "label": "Not",
+          "term": "note",
+          "placeholder": "Örn. Sizi bekliyoruz",
+          "hint": "Başlığın üstünde küçük, eğik bir not. Vurgu yazı tipi açıksa el yazısıyla görünür; boş bırakırsanız çizilmez."
+        },
         "action": {
           "label": "Başlığın altında",
           "term": "action",
@@ -11338,6 +11383,20 @@
           "label": "Güven ikonlarını göster",
           "term": "trust badges",
           "hint": "Mağazanızın güven rozetleri (en çok 4) kapağın alt kenarında beyaz bir kutuda görünür."
+        },
+        "video": {
+          "url": {
+            "label": "Video adresi",
+            "term": "YouTube / Vimeo URL",
+            "placeholder": "https://www.youtube.com/watch?v=…",
+            "hint": "YouTube ya da Vimeo'daki videonun bağlantısını yapıştırın. Kapakta bir oynatma düğmesi çıkar; ziyaretçi basınca video bir pencerede açılır. Video basılmadan yüklenmez. Boş bırakırsanız düğme çizilmez."
+          },
+          "label": {
+            "label": "Düğme yazısı",
+            "term": "label",
+            "placeholder": "Videoyu izle",
+            "hint": "Boş bırakırsanız \"Videoyu izle\" yazar."
+          }
         },
         "height": {
           "label": "Yükseklik",
@@ -13019,6 +13078,70 @@
     }
   },
   "ai": {
+    "assistant": {
+      "title": "Yardımcı",
+      "open": "Yardımcı",
+      "close": "Yardımcıyı kapat",
+      "newChat": "Yeni sohbet",
+      "resize": "Yardımcının genişliği",
+      "placeholder": "Ne yapmak istiyorsunuz?",
+      "send": "Gönder",
+      "hint": "Müşteri adı, telefon gibi kişisel bilgi yazmayın; sipariş numarasıyla sorun.",
+      "thinking": "Bakıyorum…",
+      "emptyTitle": "Panelde aradığınızı sorun",
+      "emptyText": "Ne yapmak istediğinizi yazın; yardımcı işin yapıldığı ekranı gösterir.",
+      "examplesLabel": "Örnek sorular",
+      "go": "Götür: {{name}}",
+      "you": "Siz",
+      "log": "Sohbet",
+      "examples": {
+        "general": {
+          "one": "Kargo ücretini nereden değiştiririm?",
+          "two": "Havale bilgilerimi nereye yazarım?",
+          "three": "Yeni ürünü nasıl eklerim?"
+        },
+        "orders": {
+          "one": "Kargoya verilecek siparişler nerede?",
+          "two": "İade talepleri nerede?",
+          "three": "Fatura sağlayıcısını nereden bağlarım?"
+        },
+        "products": {
+          "one": "Stoğu azalan ürünleri nerede görürüm?",
+          "two": "Ürünlere toplu indirim nasıl yapılır?",
+          "three": "Ürünün arama başlığını nereden düzenlerim?"
+        },
+        "settings": {
+          "one": "Alan adını nereden bağlarım?",
+          "two": "KVKK metinleri nerede?",
+          "three": "Kapıda ödemeyi nereden açarım?"
+        },
+        "reports": {
+          "one": "En çok satan ürünler hangi raporda?",
+          "two": "Stok raporu nerede?",
+          "three": "Raporu Excel olarak nasıl indiririm?"
+        }
+      },
+      "errors": {
+        "assistant_turn_limit": "Bu sohbet çok uzadı. Yeni sohbet başlatıp yeniden sorun.",
+        "assistant_daily_limit": "Yardımcının bugünkü kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz.",
+        "credits_exhausted": "Bu ayın yapay zekâ kredisi bitti.",
+        "assistant_no_tool_service": "Yardımcıyı çalıştırabilecek bağlı bir yapay zekâ servisi yok. Mağaza sahibi Ayarlar › Yapay zekâ'dan bağlayabilir.",
+        "assistant_off": "Yardımcı kapalı. Mağaza sahibi Ayarlar › Yapay zekâ'dan açabilir."
+      },
+      "setting": {
+        "title": "Yardımcı",
+        "description": "Panelin sağında açılan yardımcı: ne yapmak istediğinizi yazınca işin yapıldığı ekranı gösterir. Kısayolu ⌘J / Ctrl+J.",
+        "detail": "Personelin yazdığı metin mağazanın bağlı yapay zekâ servisine gider. Sohbet en çok 24 saat tutulur; Yeni sohbet ya da oturumu kapatınca hemen silinir.",
+        "ownerOnly": "Personelin yazdığı metin dış servise gittiği için bu ayarı yalnız mağaza sahibi açıp kapatabilir.",
+        "connect": "Yapay zekâyı bağla: yukarıdaki listeden araç çağırmayı destekleyen bir servis bağlayınca açılabilir.",
+        "confirmTitle": "Yardımcı açılsın mı?",
+        "confirmDescription": "Açmadan önce yardımcının ne yaptığını ve metnin nereye gittiğini okuyun.",
+        "confirmWhat": "Ne yapar: personelin sorusuna göre paneldeki ilgili ekranı gösterir. Kendiliğinden hiçbir şeyi değiştirmez.",
+        "confirmWhere": "Metin nereye gider: personelin yazdığı metin mağazanın bağlı yapay zekâ servisine, mağazanın o servisle sözleşmesiyle gider; servis yurt dışında olabilir. Müşteri adı, telefon gibi kişisel bilgi yazılmamalıdır.",
+        "confirmKeep": "Saklama: sohbet en çok 24 saat tutulur; Yeni sohbet ya da oturumu kapatınca hemen silinir. Yazılan metin veritabanına ve kayıtlara yazılmaz.",
+        "confirmAction": "Yardımcıyı aç"
+      }
+    },
     "title": "Yapay zekâ",
     "description": "Kendi anahtarınızla bağladığınız servisler ürün metni ve görsel taslakları hazırlar.",
     "notInPlan": "Paketiniz kendi anahtarınızla yapay zekâ kullanmayı kapsamıyor. Kayıtlı anahtarlar silinmez, paketiniz değişince yeniden çalışır.",
@@ -13086,6 +13209,7 @@
       "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
     },
     "tasks": {
+      "assistant": "Yardımcı",
       "test_text": "Deneme metni",
       "seo_title": "Arama başlığı",
       "seo_description": "Arama açıklaması",

@@ -52,6 +52,12 @@ export const AI_ERROR_KEYS = [
   "ai.faq_use_faq_route",
   // Every kept FAQ item is asked already on the product's page
   "ai.faq_all_published",
+  // adr/0079 §12: the panel assistant
+  "ai.assistant_off",
+  "ai.assistant_no_tool_service",
+  "ai.assistant_turn_limit",
+  "ai.assistant_daily_limit",
+  "ai.assistant_conversation_gone",
 ] as const
 
 export type AiErrorKey = (typeof AI_ERROR_KEYS)[number]

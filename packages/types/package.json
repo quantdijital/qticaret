@@ -38,12 +38,17 @@
     "./section-steps": "./src/store/section-steps.ts",
     "./section-search-box": "./src/store/section-search-box.ts",
     "./section-hero-full": "./src/store/section-hero-full.ts",
+    "./hero-video": "./src/store/hero-video.ts",
+    "./hand-note": "./src/store/hand-note.ts",
     "./section-collage": "./src/store/section-collage.ts",
     "./section-program": "./src/store/section-program.ts",
     "./section-departures": "./src/store/section-departures.ts",
     "./section-pages": "./src/store/section-pages.ts",
     "./editor-bridge": "./src/editor-bridge.ts",
-    "./panel-map": "./src/panel-map/index.ts",
+    "./panel-map": {
+      "qt-compiled": "./dist/panel-map/index.js",
+      "default": "./src/panel-map/index.ts"
+    },
     "./control-plane": {
       "qt-compiled": "./dist/control-plane/index.js",
       "default": "./src/control-plane/index.ts"
@@ -51,7 +56,7 @@
     "./control-plane/testing": "./src/control-plane/testing.ts"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && cp src/control-plane/package.json dist/control-plane/package.json",
+    "build": "tsc -p tsconfig.build.json && cp src/control-plane/package.json dist/control-plane/package.json && cp src/panel-map/package.json dist/panel-map/package.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

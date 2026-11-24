@@ -1,4 +1,4 @@
-import type { PanelMapEntry } from "./types.js"
+import type { PanelMapEntry } from "./types"
 
 /**
  * Settings › SEO, the shop's one SEO home, and its tabs (`SEO_PART_ITEMS`):
