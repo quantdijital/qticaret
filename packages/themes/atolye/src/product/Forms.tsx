@@ -4,6 +4,7 @@ import { CircleCheck, Star } from "lucide-react"
 import type { ReactNode } from "react"
 import type { ActionResult, FormAction } from "@qticaret/ui"
 import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
+import { useGatedAction } from "../frame/useGatedAction"
 import type { CommunityWords } from "./words"
 
 const FIELD = "gf-field rounded-box"
@@ -62,7 +63,8 @@ export function ReviewForm({
   /** Shown under the thanks once it is sent (the dialog's "Kapat"). */
   done?: ReactNode
 }) {
-  const { state, pending, form } = useKeptForm(write)
+  const gated = useGatedAction(write, "review")
+  const { state, pending, form } = useKeptForm(gated.action)
   if (state.ok) {
     return <Sent text={words.reviewSent} done={done} />
   }
@@ -135,6 +137,7 @@ export function ReviewForm({
           {words.photosHint}
         </p>
       </div>
+      {gated.slot}
       <button type="submit" disabled={pending} aria-busy={pending} className={SEND}>
         {pending ? words.sending : words.send}
       </button>
@@ -162,7 +165,8 @@ export function QuestionForm({
   /** Shown under the thanks once it is sent (the dialog's "Kapat"). */
   done?: ReactNode
 }) {
-  const { state, pending, form } = useKeptForm(ask)
+  const gated = useGatedAction(ask, "question")
+  const { state, pending, form } = useKeptForm(gated.action)
   if (state.ok) {
     return <Sent text={words.questionSent} done={done} />
   }
@@ -182,6 +186,7 @@ export function QuestionForm({
         placeholder={placeholder}
         className="gf-field min-h-32 rounded-box"
       />
+      {gated.slot}
       <button type="submit" disabled={pending} aria-busy={pending} className={`${SEND} mt-2`}>
         {pending ? words.sending : words.ask}
       </button>

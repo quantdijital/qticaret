@@ -37,13 +37,17 @@ export function BookingRequest({
   const months = view.requestMonths ?? []
   const [when, setWhen] = useState<string>(() => departures[0]?.id ?? FLEXIBLE)
   const [sent, setSent] = useState(false)
-  const { error, checking, pending, onSubmit } = useChallengeForm(async (state, form) => {
-    const result = await action(state, form)
-    if (result.ok) {
-      setSent(true)
-    }
-    return result
-  })
+  const { error, checking, pending, onSubmit, slot } = useChallengeForm(
+    async (state, form) => {
+      const result = await action(state, form)
+      if (result.ok) {
+        setSent(true)
+      }
+      return result
+    },
+    // A booking request shares the contact form's gate and counter (adr/0044 Ek 2026-11-24)
+    { action: "contact", className: "sm:col-span-2" }
+  )
   const optional = (label: string) => `${label} (${words.optional})`
   const field = (name: string) => `${id}-${name}`
   const message = error ? (words.errors[error] ?? words.fallback) : null
@@ -171,6 +175,7 @@ export function BookingRequest({
               </a>
             )}
           </CheckField>
+          {slot}
           <div role="alert" className="empty:hidden sm:col-span-2">
             {message && <FieldError id={field("hata")} message={message} />}
           </div>

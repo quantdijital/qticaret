@@ -5,7 +5,9 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Label } from "@qticaret/admin-ui/ui/label"
+import { answerKey, isTurnstileRefusal, postGated } from "@/features/auth/api/gated-post"
 import { AuthHeading, AuthShell } from "@/features/auth/components/auth-shell"
+import { useStaffTurnstile } from "@/features/auth/components/staff-turnstile"
 import { PasswordInput } from "@/features/auth/components/password-input"
 import { passwordRuleText } from "@/features/auth/password-rule"
 import { sdk } from "@/lib/sdk"
@@ -18,8 +20,22 @@ const MIN_PASSWORD = 10
 function RequestForm() {
   const { t } = useTranslation()
   const [email, setEmail] = useState("")
+  // Every request carries Turnstile's token (adr/0044 Ek 2026-11-24)
+  const turnstile = useStaffTurnstile("staff_password_reset")
   const request = useMutation({
-    mutationFn: (identifier: string) => sdk.auth.resetPassword("user", "emailpass", { identifier }),
+    mutationFn: async (identifier: string) => {
+      const answer = await postGated(
+        "/auth/user/emailpass/reset-password",
+        { identifier },
+        turnstile.gate
+      )
+      if (answer.status >= 400) {
+        throw Object.assign(new Error(answer.body.message ?? ""), {
+          status: answer.status,
+          code: answerKey(answer.body),
+        })
+      }
+    },
   })
   if (request.isSuccess) {
     return <p className="mt-8 text-sm">{t("reset.sent")}</p>
@@ -31,6 +47,8 @@ function RequestForm() {
         event.preventDefault()
         request.mutate(email.trim())
       }}
+      onFocus={turnstile.warm}
+      onPointerDown={turnstile.warm}
       noValidate
     >
       <div className="flex flex-col gap-2">
@@ -45,9 +63,10 @@ function RequestForm() {
           }}
         />
       </div>
+      {turnstile.slot}
       {request.isError ? (
         <p role="alert" className="text-sm text-destructive">
-          {t("errors.generic")}
+          {t(isTurnstileRefusal(request.error) ? "login.turnstile.failed" : "errors.generic")}
         </p>
       ) : null}
       <Button type="submit" disabled={!/^[^\s@]+@[^\s@]+$/.test(email.trim()) || request.isPending}>

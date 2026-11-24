@@ -1,3 +1,5 @@
+import type { TurnstileAsk } from "@qticaret/types"
+import type { GatedChallenge } from "./lib/gate"
 import type { LineAddonView } from "./addon-views"
 import type { BookingHoldView, CartLineBookingView, OrderBookingView } from "./booking-views"
 import type { TaxLinesView } from "./cart-views"
@@ -179,8 +181,13 @@ export interface CheckoutPageView {
 export interface PlaceOrderResult {
   ok: boolean
   error: string | null
-  /** The proof of work the backend asked for (adr/0044); the form solves it and posts again. */
-  challenge: { token: string; salt: string; bits: number } | null
+  /**
+   * The proof of work the backend asked for (adr/0044); the form solves it
+   * and posts again (`fallback`: in Turnstile's stead, adr/0044 Ek 2026-11-24).
+   */
+  challenge: GatedChallenge | null
+  /** Turnstile wanted (a 428) or refused (a 403): the form gets a token, or a fresh one. */
+  turnstile?: TurnstileAsk | null
 }
 
 /** A gift card's balance asked by its code, or why not. */

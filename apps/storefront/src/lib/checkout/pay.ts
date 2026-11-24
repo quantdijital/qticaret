@@ -17,25 +17,6 @@ export interface PaymentSession {
   data: Record<string, unknown>
 }
 
-export interface Challenge {
-  token: string
-  salt: string
-  bits: number
-}
-
-/** A 428's challenge (adr/0044), or null for any other failure. */
-export function challengeOf(error: unknown): Challenge | null {
-  if (!isStoreApiError(error) || error.status !== 428) {
-    return null
-  }
-  const challenge = (error.body as { challenge?: Partial<Challenge> } | null)?.challenge
-  return typeof challenge?.token === "string" &&
-    typeof challenge.salt === "string" &&
-    typeof challenge.bits === "number"
-    ? { token: challenge.token, salt: challenge.salt, bits: challenge.bits }
-    : null
-}
-
 /** Where the provider sends the shopper back: two pages of ours. */
 export function returnUrls(): { success: string; failure: string } {
   const origin = storefrontEnv().STOREFRONT_ORIGIN
@@ -52,11 +33,15 @@ export const OFFLINE_PROVIDERS = new Set([
   CREDIT_CHECKOUT,
 ])
 
-/** POST payment-session; the solved challenge, when there is one, rides in `X-Challenge`. */
+/**
+ * POST payment-session; the bot checks' answers ride along as headers
+ * (`store-api/gate.ts`): Turnstile's token on every start (adr/0044 Ek
+ * 2026-11-24), a solved proof of work when one was asked.
+ */
 export async function startPayment(
   cartId: string,
   providerId: string,
-  challenge: string | null
+  gate: Record<string, string> = {}
 ): Promise<PaymentSession> {
   const offline = OFFLINE_PROVIDERS.has(providerId)
   const { payment_session } = await storeCall<{ payment_session: PaymentSession }>(
@@ -66,7 +51,7 @@ export async function startPayment(
       body: offline
         ? { provider_id: providerId }
         : { provider_id: providerId, return_urls: returnUrls() },
-      ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+      ...(Object.keys(gate).length > 0 ? { headers: gate } : {}),
     }
   )
   return payment_session

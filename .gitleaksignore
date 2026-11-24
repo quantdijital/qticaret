@@ -49,3 +49,8 @@ dc9891a47c3ad526429c629bcd35240868ef2eed:apps/panel/src/features/settings/compon
 6f4ac95871aca6078a5687f580dbd1d3d30b3574:packages/ui/src/__tests__/gate.spec.ts:generic-api-key:138
 6f4ac95871aca6078a5687f580dbd1d3d30b3574:apps/storefront/src/lib/store-api/__tests__/gate.spec.ts:generic-api-key:83
 b8b305044aecbc6e6aac7cd318ff64ecd322b624:apps/storefront/src/app/actions/__tests__/account-turnstile.spec.ts:generic-api-key:138
+# the same turnstile fixtures as a merge stages them (a staged scan has no commit in its fingerprint)
+apps/backend/integration-tests/http/turnstile.spec.ts:generic-api-key:57
+apps/storefront/src/app/actions/__tests__/account-turnstile.spec.ts:generic-api-key:138
+apps/storefront/src/lib/store-api/__tests__/gate.spec.ts:generic-api-key:83
+packages/ui/src/__tests__/gate.spec.ts:generic-api-key:138
