@@ -1,7 +1,8 @@
 import path from "node:path"
 import { hydrateHero } from "../../../workflows/storefront/layout-hydrate-catalog"
-import { layoutDocument } from "../layout"
-import { HERO_VIDEO_LIMITS, heroVideoOf } from "../sections/hero-video"
+import { AdminPostStorefrontLayout } from "../../../api/admin/storefront-layout/validators"
+import { layoutDocument, readStoredLayout } from "../layout"
+import { HERO_VIDEO_LIMITS, heroVideoLinkOf, heroVideoOf } from "../sections/hero-video"
 
 // The contract's own file (`@qticaret/types`), through jest: the package is ESM for tsc here
 const CONTRACT_FILE = path.resolve(
@@ -10,6 +11,8 @@ const CONTRACT_FILE = path.resolve(
 )
 
 const YT = "dQw4w9WgXcQ"
+const SHORT_YT = `https://youtu.be/${YT}`
+const SHORT_VIMEO = "https://vimeo.com/76979871"
 const full = (more: Record<string, unknown> = {}) => ({
   id: "kapak00001",
   type: "hero",
@@ -18,6 +21,12 @@ const full = (more: Record<string, unknown> = {}) => ({
 })
 const issues = (more: Record<string, unknown>) =>
   layoutDocument.safeParse({ home: [full(more)] }).error?.issues.map((issue) => issue.message) ?? []
+
+/** The link the layout keeps for a pasted one. */
+const kept = (link: unknown): unknown => {
+  const section = layoutDocument.parse({ home: [full({ video_url: link })] }).home[0]
+  return section && "video_url" in section ? section.video_url : undefined
+}
 
 const ACCEPTED = [
   `https://www.youtube.com/watch?v=${YT}`,
@@ -60,14 +69,41 @@ describe("the full image opening's video (hero-video.ts)", () => {
     }
   })
 
-  it.each(ACCEPTED)("keeps a YouTube or Vimeo link as written: %s", (link) => {
-    const section = layoutDocument.parse({ home: [full({ video_url: link })] }).home[0]
+  it.each(ACCEPTED)("keeps a YouTube or Vimeo link as the host's own short link: %s", (link) => {
+    expect(kept(link)).toBe(link.includes("vimeo") ? SHORT_VIMEO : SHORT_YT)
+  })
 
-    expect(section).toMatchObject({ video_url: link, video_label: null })
+  it("keeps nothing of the pasted link but the video's id", () => {
+    expect(kept(`https://www.youtube.com/watch?v=${YT}&si=izleme123&t=42s`)).toBe(SHORT_YT)
+    expect(kept(`https://youtube.com/shorts/${YT}?feature=share`)).toBe(SHORT_YT)
+    expect(kept("https://player.vimeo.com/video/76979871?h=abc&autoplay=1")).toBe(SHORT_VIMEO)
+    // A dirty query and a direction mark: none of it reaches what is stored and served
+    expect(kept(`https://youtu.be/${YT}?x=<img src=x onerror=alert(1)>"‮`)).toBe(SHORT_YT)
+    // The short link reads back as itself
+    expect(kept(SHORT_YT)).toBe(SHORT_YT)
+    expect(kept(SHORT_VIMEO)).toBe(SHORT_VIMEO)
+    expect(heroVideoLinkOf("https://example.com/v")).toBeNull()
+  })
+
+  it("reads a stored link back as the short one", () => {
+    const doc = readStoredLayout({
+      home: [full({ video_url: `https://www.youtube.com/watch?v=${YT}&si=x` })],
+    })
+
+    expect(doc.home[0]).toMatchObject({ video_url: SHORT_YT })
   })
 
   it.each(REFUSED)("refuses a link that is not one: %s", (link) => {
     expect(issues({ video_url: link })).toEqual(["storefront_layout.video_invalid"])
+  })
+
+  it("refuses a link with a NUL or another control character as invalid input", () => {
+    for (const link of [`https://youtu.be/${YT}?x=\u0000`, `https://youtu.be/${YT}\u0007`]) {
+      expect(issues({ video_url: link })).toEqual(["storefront_layout.video_invalid"])
+      // The request body's validator refuses it (a 400): nothing reaches jsonb
+      const body = { document: { home: [full({ video_url: link })] } }
+      expect(AdminPostStorefrontLayout.safeParse(body).success).toBe(false)
+    }
   })
 
   it("refuses a link longer than any real one, and the button's words past their limit", () => {
@@ -79,22 +115,20 @@ describe("the full image opening's video (hero-video.ts)", () => {
   })
 
   it("refuses its fields on the other openings", () => {
-    const link = `https://youtu.be/${YT}`
-
     expect(
-      layoutDocument.safeParse({ home: [{ id: "kapak00001", type: "hero", video_url: link }] })
+      layoutDocument.safeParse({ home: [{ id: "kapak00001", type: "hero", video_url: SHORT_YT }] })
         .success
     ).toBe(false)
     expect(
       layoutDocument.safeParse({
-        home: [{ id: "kapak00001", type: "hero", variant: "category_list", video_url: link }],
+        home: [{ id: "kapak00001", type: "hero", variant: "category_list", video_url: SHORT_YT }],
       }).success
     ).toBe(false)
   })
 
-  it("prints the link and the button's words for the storefront to read", () => {
+  it("prints the short link and the button's words for the storefront to read", () => {
     const section = layoutDocument.parse({
-      home: [full({ video_url: ` https://youtu.be/${YT} `, video_label: "Tanıtım" })],
+      home: [full({ video_url: ` https://youtu.be/${YT}?si=abc `, video_label: "Tanıtım" })],
     }).home[0]
     if (section?.type !== "hero") {
       throw new Error("no hero")
@@ -106,7 +140,7 @@ describe("the full image opening's video (hero-video.ts)", () => {
     }
 
     expect(hydrateHero(section, readers as never)).toMatchObject({
-      video_url: `https://youtu.be/${YT}`,
+      video_url: SHORT_YT,
       video_label: "Tanıtım",
     })
   })

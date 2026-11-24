@@ -100,3 +100,20 @@ export function heroVideoOf(input: unknown): { host: HeroVideoHost; id: string }
   const vimeo = vimeoId(url)
   return vimeo === null ? null : { host: "vimeo", id: vimeo }
 }
+
+/** Each host's own short link to a video: what is kept in place of the pasted one. */
+const LINKS: Readonly<Record<HeroVideoHost, string>> = {
+  youtube: "https://youtu.be/",
+  vimeo: "https://vimeo.com/",
+}
+
+/**
+ * The link the layout keeps for a pasted one (docs/04: the link itself is
+ * not kept): built from the video's host and id alone, so nothing else of
+ * what was pasted (a tracking `si=`, a query, any other text) is stored or
+ * served; null when the link names no video. Reads back as the same video.
+ */
+export function heroVideoLinkOf(input: unknown): string | null {
+  const video = heroVideoOf(input)
+  return video === null ? null : `${LINKS[video.host]}${video.id}`
+}
