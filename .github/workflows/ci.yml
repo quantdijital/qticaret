@@ -1,11 +1,13 @@
 # Lint, typecheck, unit tests, build and HTTP integration tests (F0.5).
+# How the jobs are cut and what a branch may skip: adr/0081.
 # Third-party actions and images are pinned by commit SHA / digest
 # (docs/04, after the 2026 tag-hijack of trivy-action); Renovate bumps them.
 name: CI
 
 on:
+  # Every push gets a result, notes too (scripts/ci-changes.sh skips the jobs
+  # there): the one check a merge waits for, "CI", always arrives (adr/0081)
   push:
-    paths-ignore: ["**/*.md", "docs/**", "adr/**"]
   workflow_dispatch:
 
 permissions:
@@ -27,24 +29,49 @@ env:
   AUTH_CORS: http://localhost:9000,http://localhost:8000
 
 jobs:
-  quality:
-    name: Lint, typecheck, test, build
+  # What this push needs (scripts/ci-changes.sh, adr/0081): a branch runs what
+  # its changes can reach; dev, main and a manual run check everything.
+  changes:
+    name: Changed packages
     runs-on: ubuntu-24.04
-    # Build ~2, lint and typecheck ~5, the tests one package at a time ~28 minutes
-    # (2026-11-24: green runs took 36-37 minutes, so 40 cancelled loaded runs)
-    timeout-minutes: 60
-    # The rate limiter's Redis counters (an atomic Lua script) are tested
-    # against a real Redis; the same pinned image as local dev
-    services:
-      redis:
-        image: redis:7.4.11-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+    timeout-minutes: 5
+    # The last green run of dev or main is asked of the API
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      code: ${{ steps.changes.outputs.code }}
+      backend: ${{ steps.changes.outputs.backend }}
+      e2e: ${{ steps.changes.outputs.e2e }}
+      filter: ${{ steps.changes.outputs.filter }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      # On dev and main: the head of the branch's last green run. A push of
+      # notes alone skips the jobs only when nothing but notes came since
+      # that head, so it cannot stand in for a code push whose run it cancelled
+      - id: green
+        if: github.ref_name == 'dev' || github.ref_name == 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=$GITHUB_REF_NAME&status=success&per_page=1" \
+            -q '.workflow_runs[0].head_sha // ""' || true)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - id: changes
+        env:
+          CI_LAST_GREEN: ${{ steps.green.outputs.sha }}
+        run: bash scripts/ci-changes.sh
+
+  static:
+    name: Format, build, lint, typecheck
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    # Build ~2, lint and typecheck ~5 minutes; less with turbo's cache
+    timeout-minutes: 25
     env:
       TEST_REDIS_URL: redis://localhost:6379/15
       # The control plane validates its env wherever it reads it (its build,
@@ -57,6 +84,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # The changed packages are found against dev's history
+          fetch-depth: 0
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -84,49 +113,146 @@ jobs:
           echo "CP_ESCROW_RECIPIENTS=$(pnpm --silent --filter @qticaret/server-kit exec node --input-type=module
           -e 'import { generateIdentity, identityToRecipient } from "age-encryption";
           console.log(await identityToRecipient(await generateIdentity()))')" >> "$GITHUB_ENV"
+      # What turbo already built, linted or tested with the same inputs is not
+      # run again (adr/0081): a branch starts from dev's results. Entries a
+      # week old go, so the folder does not grow with every run
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-static-${{ github.sha }}
+          restore-keys: |
+            turbo-static-
       - run: pnpm format:check
       # The backend's tsconfig includes the query and container types Medusa
       # writes when it builds (.medusa/types; `medusa develop` writes them
       # locally): typecheck and lint run after them, not beside them.
       # A build is a release build: the apps' configs validate as deployed
-      # (NODE_ENV unset), so the control plane also needs Redis (the service
-      # above; nothing connects at build)
+      # (NODE_ENV unset), so the control plane also needs a Redis address
+      # (nothing connects at build)
       - run: pnpm turbo run build
         env:
           REDIS_URL: redis://localhost:6379
       # --continue: every failing package is reported, not only the first
-      - run: pnpm turbo run lint typecheck --continue
+      - run: pnpm turbo run lint typecheck --continue $TURBO_FILTER
+        env:
+          TURBO_FILTER: ${{ needs.changes.outputs.filter }}
+      - name: Drop week-old turbo entries
+        if: always()
+        run: find .turbo/cache -type f -mtime +7 -delete 2>/dev/null || true
+
+  # The unit tests, a group to a job, side by side (they took 19 minutes one
+  # after another inside one job, adr/0081)
+  unit:
+    name: Unit tests (${{ matrix.group }})
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        group: ["backend 1/3", "backend 2/3", "backend 3/3", panel, storefront, packages]
+    # The rate limiter's Redis counters (an atomic Lua script) are tested
+    # against a real Redis; the same pinned image as local dev
+    services:
+      redis:
+        image: redis:7.4.11-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_REDIS_URL: redis://localhost:6379/15
+      # The control plane validates its env wherever it reads it (its build,
+      # and unit tests of code that reads it, such as the rate limiter's
+      # identity key): a public-looking domain and an https panel pass both
+      # as deployed and as local. Build-time values only; nothing is served
+      PLATFORM_DOMAIN: qticaret-ci.dev
+      CP_PANEL_URL: https://cp.qticaret-ci.dev
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The changed packages are found against dev's history
+          fetch-depth: 0
       # Product videos (adr/0069): the backend's unit tests run the real ffprobe
       # on clips ffmpeg makes in the test; without it they skip and say so
-      - name: Install ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
-      # One package's tests at a time: beside lint and typecheck the runner's
-      # four cores starved the UI suites past their 5 s per-test timeout
-      - run: pnpm turbo run test --continue --concurrency=1
+      # (first, before the job runs any of the repository's code: see the action)
+      - uses: ./.github/actions/ffmpeg
+        if: startsWith(matrix.group, 'backend')
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Random per run and useless outside this job; masked all the same,
+      # since every later step lists its env in the (public) log
+      # (the control plane's keys too: its `medusa build` validates its env)
+      - name: Generate throwaway secrets
+        run: |
+          for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY \
+            AUTH_MFA_ENCRYPTION_KEY CP_HASH_KEY CP_MASTER_KEY; do
+            value="$(openssl rand -hex 32)"
+            # Masking only tidies the log: the values are worthless outside this
+            # job, so a branch that stops workflow commands exposes nothing
+            # nosemgrep: yaml.github-actions.security.audit.unsafe-add-mask-workflow-command.unsafe-add-mask-workflow-command
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
+          done
+      - run: pnpm install --frozen-lockfile
+      # The control plane's escrow recipient: a public age key whose identity
+      # is thrown away at once, so nothing sealed to it can ever be opened
+      - name: Throwaway escrow recipient
+        run: >-
+          echo "CP_ESCROW_RECIPIENTS=$(pnpm --silent --filter @qticaret/server-kit exec node --input-type=module
+          -e 'import { generateIdentity, identityToRecipient } from "age-encryption";
+          console.log(await identityToRecipient(await generateIdentity()))')" >> "$GITHUB_ENV"
+      # What turbo already built, linted or tested with the same inputs is not
+      # run again (adr/0081): a branch starts from dev's results. Entries a
+      # week old go, so the folder does not grow with every run
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-unit-${{ matrix.group }}-${{ github.sha }}
+          restore-keys: |
+            turbo-unit-${{ matrix.group }}-
+      - name: Run the group's tests
+        env:
+          TURBO_FILTER: ${{ needs.changes.outputs.filter }}
+          GROUP: ${{ matrix.group }}
+        run: bash scripts/ci-unit.sh "$GROUP"
+      - name: Drop week-old turbo entries
+        if: always()
+        run: find .turbo/cache -type f -mtime +7 -delete 2>/dev/null || true
 
   integration:
     name: Integration tests (${{ matrix.suite }})
+    needs: changes
+    # Skipped (and so passing) on a branch that leaves the backend's packages alone
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 50
-    # Side by side: each HTTP spec file boots Medusa (~45 s on a runner), and
-    # there are about 290 of them; twelve shards of ~24 files take ~20 minutes
+    timeout-minutes: 40
+    # Each HTTP spec file boots Medusa (~20 s) on a database and a Redis
+    # namespace of its own, so files run side by side: three jest workers on
+    # a runner's four cores, eight shards of ~50 files (adr/0081; before, twelve
+    # shards of one worker each left three cores idle and filled the
+    # account's twenty job slots)
     strategy:
       fail-fast: false
       matrix:
         suite:
           [
-            "HTTP 1/12",
-            "HTTP 2/12",
-            "HTTP 3/12",
-            "HTTP 4/12",
-            "HTTP 5/12",
-            "HTTP 6/12",
-            "HTTP 7/12",
-            "HTTP 8/12",
-            "HTTP 9/12",
-            "HTTP 10/12",
-            "HTTP 11/12",
-            "HTTP 12/12",
+            "HTTP 1/8",
+            "HTTP 2/8",
+            "HTTP 3/8",
+            "HTTP 4/8",
+            "HTTP 5/8",
+            "HTTP 6/8",
+            "HTTP 7/8",
+            "HTTP 8/8",
             "modules",
           ]
     services:
@@ -138,7 +264,10 @@ jobs:
           POSTGRES_DB: qticaret
         ports:
           - 5432:5432
+        # The data in memory: every spec file makes and migrates a database, and
+        # nothing of it outlives the job (adr/0081)
         options: >-
+          --tmpfs /var/lib/postgresql/data --shm-size 1g
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s
           --health-timeout 5s
@@ -152,6 +281,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Product videos (adr/0069): the video upload suite needs ffmpeg and
+      # ffprobe on the server; any HTTP shard may hold it
+      # (first, before the job runs any of the repository's code: see the action)
+      - uses: ./.github/actions/ffmpeg
+        if: matrix.suite != 'modules'
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -172,24 +306,35 @@ jobs:
             echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
-      # Product videos (adr/0069): the video upload suite needs ffmpeg and
-      # ffprobe on the server; any HTTP shard may hold it
-      - name: Install ffmpeg
-        if: matrix.suite != 'modules'
-        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
-      # One jest worker, replaced when its heap grows (jest.config.js)
+      # Three jest workers, each replaced when its heap grows (jest.config.js)
       - name: Run the suite
         env:
           SUITE: ${{ matrix.suite }}
+          JEST_WORKERS: "3"
         run: |
+          set -o pipefail
           if [ "$SUITE" = modules ]; then
-            pnpm --filter @qticaret/backend test:integration:modules
+            pnpm --filter @qticaret/backend test:integration:modules 2>&1 | tee suite.log
           else
-            pnpm --filter @qticaret/backend test:integration:http --shard="${SUITE#HTTP }"
+            pnpm --filter @qticaret/backend test:integration:http --shard="${SUITE#HTTP }" 2>&1 | tee suite.log
+          fi
+      # A test that passed only on its second try (integration-tests/plain-failures.js)
+      # is named in the run's summary: it is to be mended, not forgotten
+      - name: Name the tests that needed a second try
+        if: always()
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          retried="$(grep -oE 'LOGGING RETRY ERRORS.*' suite.log 2>/dev/null | sed 's/LOGGING RETRY ERRORS *//' | sort -u || true)"
+          if [ -n "$retried" ]; then
+            { echo "### Tried twice ($SUITE)"; echo '```'; echo "$retried"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           fi
 
   e2e:
     name: Panel e2e (smoke, accessibility)
+    needs: changes
+    # Skipped on a branch that touches only the storefront and its theme packages
+    if: needs.changes.outputs.e2e == 'true'
     runs-on: ubuntu-24.04
     # About 120 tests take 20 to 25 minutes on a runner (the accessibility pass alone ~11)
     timeout-minutes: 40
@@ -203,7 +348,10 @@ jobs:
           POSTGRES_DB: qticaret
         ports:
           - 5432:5432
+        # The data in memory: every spec file makes and migrates a database, and
+        # nothing of it outlives the job (adr/0081)
         options: >-
+          --tmpfs /var/lib/postgresql/data --shm-size 1g
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s
           --health-timeout 5s
@@ -223,6 +371,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Product videos (adr/0069): the backend checks ffmpeg once at start (uploads stay
+      # closed without it) and product-video.e2e.ts makes its clip with it
+      # (first, before the job runs any of the repository's code: see the action)
+      - uses: ./.github/actions/ffmpeg
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -239,13 +391,45 @@ jobs:
             echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
+      # The browser and the system libraries it needs come from the Actions
+      # cache (adr/0081): from the network they took up to nine minutes
+      - id: playwright
+        run: |
+          echo "version=$(pnpm --silent --filter @qticaret/panel exec playwright --version | tr -dc '0-9.')" >> "$GITHUB_OUTPUT"
+          echo "image=${ImageVersion:-none}" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: browsers
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: libraries
+        with:
+          path: ~/.cache/qt-debs/playwright
+          key: debs-playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}-${{ steps.playwright.outputs.image }}
+      - name: Install Chromium's system libraries
+        run: |
+          packages="$(pnpm --silent --filter @qticaret/panel exec playwright install-deps --dry-run chromium \
+            | grep -o 'install -y --no-install-recommends[^"]*' | sed 's/^install -y --no-install-recommends//')"
+          # shellcheck disable=SC2086
+          bash scripts/ci-debs.sh playwright $packages
       - name: Install Chromium for Playwright
-        run: pnpm --filter @qticaret/panel exec playwright install --with-deps chromium
+        if: steps.browsers.outputs.cache-hit != 'true'
+        run: pnpm --filter @qticaret/panel exec playwright install chromium
+      # Saved straight after the installs, before the job builds or tests anything
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.libraries.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/qt-debs/playwright
+          key: debs-playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}-${{ steps.playwright.outputs.image }}
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.browsers.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       # Product videos (adr/0069): the backend checks ffmpeg once at start (uploads stay
       # closed without it) and product-video.e2e.ts makes its clip with it. Ubuntu 24.04's
       # package is 6.1 (the backend wants 7 and only warns; docs/08)
-      - name: Install ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Database and demo shop
         run: |
           pnpm --filter @qticaret/backend medusa db:migrate
@@ -303,3 +487,24 @@ jobs:
             apps/panel/e2e/.report
             apps/panel/e2e/.results
           retention-days: 7
+
+  # The one result a merge waits for (adr/0081): green when every job that
+  # ran is green; a job the push did not need is skipped and counts as green.
+  gate:
+    name: CI
+    if: always()
+    needs: [changes, static, unit, integration, e2e]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Every job that ran is green
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != success ] && [ "$result" != skipped ]; then
+              echo "::error::a job ended as $result"
+              exit 1
+            fi
+          done

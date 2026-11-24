@@ -1,0 +1,2 @@
+# Session notes: both sides' lines are kept when two branches add to the top (adr/0081)
+progress/*.md merge=union
