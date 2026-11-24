@@ -387,6 +387,20 @@
       "modeHint": "A light or dark ground; by system follows your device."
     },
     "saved": "Settings saved.",
+    "catalogDefaults": {
+      "title": "New product defaults",
+      "description": "The new product screen opens with these choices. Existing products do not change.",
+      "kind": "New product type",
+      "kindHint": "A new product starts as this type; you can change it while adding. Default: Physical product.",
+      "dated": "Sell new services by date",
+      "datedHint": "A new service starts with \"Dated sale (departures)\" on. Default: off.",
+      "schema": "Structured data type of dated products",
+      "schemaHint": "Extra information given to search engines on a dated product's page. Tourist trip for tours; Event for concerts, workshops or courses. Default: Tourist trip.",
+      "schemas": {
+        "TouristTrip": "Tourist trip (TouristTrip)",
+        "Event": "Event (Event)"
+      }
+    },
     "storefront": {
       "moveUp": "{{item}}: move up",
       "moveDown": "{{item}}: move down",

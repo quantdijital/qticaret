@@ -207,6 +207,34 @@ describe("the theme's order page", () => {
     })
     expect(html).toContain("Rezervasyonlarınız")
     expect(html).not.toContain("İptal talebi")
+    expect(html).not.toContain("Voucher")
+  })
+
+  it("links to the order's voucher beside its departures, and only when given one (adr/0076 Ek D7b)", () => {
+    const bookings = [
+      {
+        slotId: "bkslot_1",
+        departure: "Cumartesi, 12 Aralık 2026 · 09:00",
+        titles: "Kapadokya turu",
+        cancelled: false,
+        cancellable: false,
+        refund: null,
+        refundNote: null,
+        note: null,
+      },
+    ]
+    const path = "/siparis/order_01/voucher?token=abc.key"
+    const html = renderPage(atolyeTheme, "OrderPage", {
+      view: view({ bookings, voucherPath: path }),
+      actions,
+    })
+    expect(html).toContain(
+      `<a href="${path}" class="gf-link self-start text-sm">Voucher&#x27;ı görüntüle</a>`
+    )
+    // A path without departures is not drawn: the link lives beside them
+    expect(
+      renderPage(atolyeTheme, "OrderPage", { view: view({ voucherPath: path }), actions })
+    ).not.toContain("Voucher")
   })
 
   it("draws its boxes on the theme's box recipe, the address inside one as an inner box (adr/0067)", () => {

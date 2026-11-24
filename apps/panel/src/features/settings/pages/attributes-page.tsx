@@ -13,6 +13,7 @@ import { ADDONS_FLAG } from "@/features/products/api/addons"
 import { useFeatureState } from "@/features/settings/api/features"
 import { AddonTemplatesSection } from "@/features/products/addon-templates/addon-templates-section"
 import { TemplateDialog } from "@/features/attributes/components/template-dialog"
+import { CatalogDefaultsCard } from "@/features/settings/components/catalog-defaults-card"
 import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
 
@@ -114,6 +115,8 @@ export function AttributesPage() {
       </section>
       {/* adr/0052 Ek 2026-11-23: add-ons defined once, beside the attribute templates */}
       <AddonTemplatesSection />
+      {/* adr/0076 §12: what a new product starts as, beside the attribute groups */}
+      <CatalogDefaultsCard />
       {walk.open ? (
         <TemplateDialog
           template={walk.open}

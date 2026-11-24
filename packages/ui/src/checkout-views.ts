@@ -363,6 +363,13 @@ export interface OrderPageView {
    * the page is drawn as before.
    */
   bookings?: OrderBookingView[] | null
+  /**
+   * The order's printable booking voucher (adr/0076 Ek D7b), with the
+   * order's key when it was opened with one; shown beside the departures.
+   * Null or left out: no voucher (not dated, or the shop gives none), and
+   * the page is drawn as before.
+   */
+  voucherPath?: string | null
 }
 
 export type OrderStepKey = "placed" | "paid" | "packed" | "shipped" | "delivered"
