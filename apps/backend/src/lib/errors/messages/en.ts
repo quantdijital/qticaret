@@ -228,6 +228,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.tags_too_many": "A post can have at most 50 tags.",
   "content.term_description_invalid":
     "The description must be at most 1000 characters, without disallowed characters.",
+  "content.term_description_too_long": "The description's text may be at most 5000 characters.",
   "content.term_handle_taken":
     "Another category or tag uses this address; write a different name or address.",
   "content.term_name_invalid":

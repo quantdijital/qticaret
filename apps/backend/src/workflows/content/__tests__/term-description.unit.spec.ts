@@ -55,6 +55,28 @@ describe("a blog term's description (adr/0075 Ek 2026-11-24)", () => {
     expect(() => termDescription({ description: "x".repeat(1001) }, null)).toThrow(ValidationError)
   })
 
+  it("refuses a document whose text is past an archive's foot (5000 characters)", () => {
+    const ofLength = (length: number) =>
+      parsed({
+        description_doc: {
+          type: "doc",
+          content: [{ type: "paragraph", content: [{ type: "text", text: "a".repeat(length) }] }],
+        },
+      })
+    const long = ofLength(5001)
+    const fits = ofLength(5000)
+
+    let refused: unknown = null
+    try {
+      termDescription({ description_doc: long }, null)
+    } catch (error) {
+      refused = error
+    }
+    expect(refused).toBeInstanceOf(ValidationError)
+    expect((refused as ValidationError).safeMessage).toBe("content.term_description_too_long")
+    expect(termDescription({ description_doc: fits }, null).description).toHaveLength(5000)
+  })
+
   it("leaves both alone when the save names neither", () => {
     const stored = { description: "Metin", description_doc: docOf("B", "Metin") }
 

@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import type { DescriptionDoc } from "../../lib/catalog/description"
 import { listingDescriptionChanges } from "../../lib/catalog/listing-description"
 import type { ContentDoc } from "../../lib/content/doc"
+import { docPlainText } from "../../lib/content/plain"
 import { ValidationError } from "../../lib/errors"
 import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
@@ -18,7 +19,12 @@ import { lineOf } from "./rules"
  * import, a script), which drops the document.
  */
 
-export const TERM_LIMITS = { name: 120, description: 1000 } as const
+/**
+ * `description` bounds plain text alone (an import); `document_text` a
+ * document's text (adr/0075 Ek 2026-11-24): an archive's foot, not a
+ * product's page, and the plain mirror stays the document's whole text.
+ */
+export const TERM_LIMITS = { name: 120, description: 1000, document_text: 5000 } as const
 
 export interface TermInput {
   name?: string | undefined
@@ -63,6 +69,9 @@ export function termDescription(
     input.description === undefined || input.description_doc !== undefined
       ? undefined
       : plainOf(input.description)
+  if (input.description_doc && docPlainText(input.description_doc, TERM_LIMITS.document_text).cut) {
+    throw new ValidationError("content.term_description_too_long", { field: "description_doc" })
+  }
   const changes = listingDescriptionChanges(
     { doc: input.description_doc, text },
     { doc: before.description_doc, description: before.description },

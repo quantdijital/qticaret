@@ -1,5 +1,7 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import type { ContentDoc } from "../../src/lib/content/doc"
+import { CONTENT_MODULE } from "../../src/modules/content"
+import type ContentModuleService from "../../src/modules/content/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { createAdminUser } from "../helpers/admin"
@@ -15,6 +17,12 @@ interface Term {
   kind: "category" | "tag"
   description: string | null
   description_doc: ContentDoc | null
+}
+
+interface Described {
+  term_id: string
+  description: string | null
+  description_html: string | null
 }
 
 interface Answer {
@@ -92,6 +100,9 @@ medusaIntegrationTestRunner({
 
       const plain = await term({ description: "Düz metin." }, id)
       expect(plain.data.term).toMatchObject({ description: "Düz metin.", description_doc: null })
+      // A document's text is an archive's foot, capped (security review L1)
+      const long = await term({ description_doc: body("Uzun metin. ".repeat(500)) }, id)
+      expect([long.status, long.data.message]).toEqual([400, "content.term_description_too_long"])
       const cleared = await term(
         { description_doc: { type: "doc", content: [{ type: "paragraph" }] } },
         id
@@ -114,11 +125,10 @@ medusaIntegrationTestRunner({
         body: body("Çelik türleri"),
         tag_ids: [made.id],
       })
-      const shown = await storeGet<{ term_id: string; description_html: string | null }>(
-        `/store/content/terms/${made.id}/description`
-      )
+      const shown = await storeGet<Described>(`/store/content/terms/${made.id}/description`)
       expect(shown.status).toBe(200)
       expect(shown.data.term_id).toBe(made.id)
+      expect(shown.data.description).toContain("Sert.")
       expect(shown.data.description_html).toContain("<h2")
       expect(shown.data.description_html).toContain("<strong>Sert.</strong>")
       expect(shown.headers["cache-control"]).toContain("max-age=60")
@@ -131,12 +141,25 @@ medusaIntegrationTestRunner({
       )
       expect(resolved.data.seo?.description).toContain("Sert.")
 
-      // Plain text only: no HTML, the list's `description` is shown
-      await term({ description: "Yalın." }, made.id)
-      const bare = await storeGet<{ description_html: string | null }>(
-        `/store/content/terms/${made.id}/description`
+      // The list carries no text, the archive's own read does (security review L1)
+      const list = await storeGet<{ terms: Record<string, unknown>[] }>(
+        "/store/content/terms?kind=tag"
       )
-      expect(bare.data.description_html).toBeNull()
+      expect(list.data.terms.map((each) => each["id"])).toEqual([made.id])
+      expect(list.data.terms[0]).not.toHaveProperty("description")
+
+      // A document left behind by a plain-text write elsewhere (an import) is stale: not
+      // rendered, the plain text shown (security review L2)
+      await getContainer()
+        .resolve<ContentModuleService>(CONTENT_MODULE)
+        .updateContentTerms({ id: made.id, description: "Başka metin." })
+      const stale = await storeGet<Described>(`/store/content/terms/${made.id}/description`)
+      expect(stale.data).toMatchObject({ description: "Başka metin.", description_html: null })
+
+      // Plain text only: no HTML, its plain text is shown
+      await term({ description: "Yalın." }, made.id)
+      const bare = await storeGet<Described>(`/store/content/terms/${made.id}/description`)
+      expect(bare.data).toMatchObject({ description: "Yalın.", description_html: null })
     })
   },
 })

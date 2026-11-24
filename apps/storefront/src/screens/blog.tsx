@@ -97,7 +97,7 @@ export async function BlogArchiveScreen({ page, url }: { page: Entity; url: URL 
   const raw = asked.length > 1 ? asked : asked[0]
   // The formatted text is read beside the lists, only for the first page, where it is drawn
   const first = blogPageOf(raw) === 1
-  const [terms, categories, html, settings] = await Promise.all([
+  const [terms, categories, text, settings] = await Promise.all([
     blogTerms(kind),
     blogTerms("category"),
     first ? blogTermDescription(page.entity_id) : null,
@@ -123,7 +123,7 @@ export async function BlogArchiveScreen({ page, url }: { page: Entity; url: URL 
           activeTerm: { kind, name, description: [] },
           footText: term
             ? listingTextView(
-                { html, plain: term.description },
+                { html: text?.description_html, plain: text?.description },
                 settings.listing_text,
                 list.pagination.page
               )

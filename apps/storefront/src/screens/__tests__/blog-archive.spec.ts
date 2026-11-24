@@ -32,7 +32,6 @@ const term = (over: Partial<StoreContentTermSummary> = {}): StoreContentTermSumm
   name: "Rehberler",
   handle: "rehberler",
   path: "/blog/kategori/rehberler",
-  description: "Bakım rehberi.\n\nİkinci paragraf.",
   post_count: 14,
   ...over,
 })
@@ -76,7 +75,11 @@ async function render(address: string) {
 beforeEach(() => {
   vi.clearAllMocks()
   blog.blogTerms.mockResolvedValue([term()])
-  blog.blogTermDescription.mockResolvedValue("<h2>Bakım</h2><p>Kuru tutun.</p>")
+  blog.blogTermDescription.mockResolvedValue({
+    term_id: "cterm_1",
+    description: "Bakım\n\nKuru tutun.",
+    description_html: "<h2>Bakım</h2><p>Kuru tutun.</p>",
+  })
   blog.blogPosts.mockResolvedValue({
     entries: Array.from({ length: 12 }, (_, i) => post(i + 1)),
     count: 14,
@@ -100,7 +103,11 @@ describe("a blog archive's own words", () => {
   })
 
   it("fall back to the plain text's paragraphs, with the default look for an older backend", async () => {
-    blog.blogTermDescription.mockResolvedValue(null)
+    blog.blogTermDescription.mockResolvedValue({
+      term_id: "cterm_1",
+      description: "Bakım rehberi.\n\nİkinci paragraf.",
+      description_html: null,
+    })
     look.currentTheme.mockResolvedValue({})
 
     const view = await render("https://ornek.com/blog/kategori/rehberler")
@@ -110,6 +117,14 @@ describe("a blog archive's own words", () => {
       paragraphs: ["Bakım rehberi.", "İkinci paragraf."],
       look: { size: "md", align: "start", width: "narrow", collapse: true },
     })
+  })
+
+  it("are none when the term's text cannot be read (the page never fails for it)", async () => {
+    blog.blogTermDescription.mockResolvedValue(null)
+
+    const view = await render("https://ornek.com/blog/kategori/rehberler")
+
+    expect(view.footText).toBeNull()
   })
 
   it("are not read nor drawn past the first page", async () => {

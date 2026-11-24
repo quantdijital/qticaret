@@ -36,23 +36,23 @@ export const blogTerms = cache(async (kind: BlogTermKind) => {
 })
 
 /**
- * A listed blog category's or tag's text as the shop formatted it (adr/0075
- * Ek 2026-11-24), the backend's HTML of its document, for the foot of its
- * archive's first page: shop-wide, kept a minute as the backend's answer
- * is. Null for a term without one (its plain text shows), one no longer
- * listed (404), a backend before it, or a failed call: the page never
- * fails for its text.
+ * A listed blog category's or tag's text (adr/0075 Ek 2026-11-24) for the
+ * foot of its archive's first page: the backend's HTML of its document and
+ * its plain text, shop-wide, kept a minute as the backend's answer is.
+ * Null for one no longer listed (404), a backend before it, or a failed
+ * call: the page never fails for its text.
  */
-export const blogTermDescription = cache(async (id: string): Promise<string | null> => {
-  try {
-    const answer = await storePublicFind<StoreContentTermDescription>(
-      `/store/content/terms/${encodeURIComponent(id)}/description`
-    )
-    return answer?.description_html ?? null
-  } catch {
-    return null
+export const blogTermDescription = cache(
+  async (id: string): Promise<StoreContentTermDescription | null> => {
+    try {
+      return await storePublicFind<StoreContentTermDescription>(
+        `/store/content/terms/${encodeURIComponent(id)}/description`
+      )
+    } catch {
+      return null
+    }
   }
-})
+)
 
 /** A blog author (adr/0060), as the author's page shows them, with their live posts counted. */
 export const blogAuthor = cache(async (id: string) => {

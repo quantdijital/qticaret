@@ -31,6 +31,8 @@ interface ListingDescriptionCardProps {
   save: (doc: JSONContent) => Promise<void>
   /** Whether the editor holds an unsaved change. */
   onDirtyChange?: (dirty: boolean) => void
+  /** Characters of text the server takes, counted below the editor (a blog term's 5000). */
+  maxChars?: number
 }
 
 /**
@@ -53,6 +55,7 @@ export function ListingDescriptionCard({
   saving,
   save,
   onDirtyChange,
+  maxChars,
 }: ListingDescriptionCardProps) {
   const { t } = useTranslation()
   // One object per stored text: the editor puts a new one in only when it changes
@@ -74,6 +77,7 @@ export function ListingDescriptionCard({
           : undefined
       }
       onDirtyChange={onDirtyChange}
+      {...(maxChars === undefined ? {} : { maxChars })}
     />
   )
 }

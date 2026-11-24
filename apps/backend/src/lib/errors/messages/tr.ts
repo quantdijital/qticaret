@@ -233,6 +233,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.tags_too_many": "Bir yazıya en fazla 50 etiket eklenebilir.",
   "content.term_description_invalid":
     "Açıklama en fazla 1000 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.term_description_too_long": "Açıklamanın metni en fazla 5000 karakter olabilir.",
   "content.term_handle_taken":
     "Bu adres başka bir kategoride ya da etikette kullanılıyor; farklı bir ad ya da adres yazın.",
   "content.term_name_invalid":
