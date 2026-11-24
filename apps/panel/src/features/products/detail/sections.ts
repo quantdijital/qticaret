@@ -43,6 +43,8 @@ export const PRODUCT_TARGETS: Readonly<Record<string, string>> = {
   edit_handle: "product-general",
   // The short description, its own card under the long one
   edit_summary: "product-short-description",
+  // adr/0078: a dated product's Program card (P-CONT-10)
+  edit_program: "product-program",
   add_images: "product-media",
   add_alt_text: MEDIA_ALT_TARGET,
   // The first variant without a price opens (`VariantsCard`)

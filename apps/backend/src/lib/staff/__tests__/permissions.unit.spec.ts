@@ -854,6 +854,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/storefront-menus/:id": false,
   // adr/0076: dated products' settings and departures are the product editors'
   "POST /admin/products/:id/bookable": false,
+  // adr/0078: a dated product's program, as its settings
+  "POST /admin/products/:id/program": false,
   "POST /admin/products/:id/booking-slots": false,
   "POST /admin/booking-slots/:id": false,
   // adr/0076 §7: a traveler's full ID number, owner and admin only

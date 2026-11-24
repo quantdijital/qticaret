@@ -154,6 +154,9 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
               ...(section.columns_mobile === 1 ? { columns_mobile: 1 as const } : {}),
             }),
       }
+    case "program":
+      // adr/0078: the steps are the product's, read by the storefront for its page
+      return { id, type, title: section.title, variant: section.variant }
     case "featured_product":
       return {
         id,

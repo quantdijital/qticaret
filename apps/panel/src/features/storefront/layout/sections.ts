@@ -75,6 +75,7 @@ type CategorySectionType = CategorySection["type"]
 /** What a product page takes under its own block (adr/0049 ek 2026-11-03). */
 export const PRODUCT_TYPES: readonly ProductSectionType[] = [
   "related_products",
+  "program",
   "rich_text",
   "banner",
   "faq",

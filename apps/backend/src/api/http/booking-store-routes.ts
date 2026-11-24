@@ -95,6 +95,12 @@ export const BOOKING_STORE_ROUTES = [
     ],
   },
   {
+    // adr/0078: a dated product's program for its page
+    matcher: "/store/products/:id/program",
+    methods: ["GET" as const],
+    middlewares: [requireFeature(CATALOG_BOOKING)],
+  },
+  {
     // A month's departures by day (adr/0077 §6): a read, on its own budget per address
     matcher: "/store/departures/calendar",
     methods: ["GET" as const],

@@ -21,6 +21,8 @@ const SHOP_FILLED: ReadonlySet<AnySection["type"]> = new Set([
   "categories",
   "products",
   "related_products",
+  // adr/0078: drawn only for a product with steps
+  "program",
   "brands",
   "posts",
   "reviews",

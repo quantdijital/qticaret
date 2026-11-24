@@ -210,6 +210,9 @@ export function contentFields(section: AnySection): RegistryField[] {
       ]
     case "photo_collage":
       return collageFields(section)
+    // adr/0078: the steps are the product's; the section has only its title and variant
+    case "program":
+      return []
     case "related_products":
       // As a rail's (bilesen-denetimi (b) 7): a grid's columns, the card, a carousel's scroller
       return [

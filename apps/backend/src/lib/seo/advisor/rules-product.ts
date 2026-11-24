@@ -92,6 +92,19 @@ const shortDescription = forProduct((_facts, product) =>
     : null
 )
 
+// adr/0078: a dated product without a program, a hint, never a block (a one-day event needs none)
+const program = forProduct((_facts, product) =>
+  product.programSteps === 0
+    ? {
+        ruleId: "P-CONT-10",
+        severity: "info",
+        category: "content",
+        params: {},
+        fix: { kind: "manual", action: "edit_program" },
+      }
+    : null
+)
+
 const imageCount = forProduct((_facts, product) => {
   if (product.images === 0) {
     return {
@@ -205,6 +218,7 @@ export const PRODUCT_RULES: readonly Rule[] = [
   headingOrder,
   insecureLinks,
   shortDescription,
+  program,
   imageCount,
   imageAlt,
   prices,

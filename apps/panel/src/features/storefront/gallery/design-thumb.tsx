@@ -19,6 +19,7 @@ const SHAPES: Record<string, Shape> = {
   featured_product: "hero",
   products: "cards",
   related_products: "cards",
+  program: "text",
   posts: "cards",
   categories: "tiles",
   brands: "tiles",

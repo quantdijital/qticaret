@@ -12,6 +12,7 @@ import { RICH_TEXT_BRANCHES } from "./rich-text"
 import { POSTS_BRANCHES } from "./posts"
 import { BANNER_BRANCHES } from "./banner"
 import { REVIEWS_BRANCHES } from "./reviews"
+import { PROGRAM_BRANCHES } from "./program"
 import { REMOVED_VARIANTS, SECTION_VARIANTS, isVariantType } from "./variants"
 import type { SectionVariant, VariantBranch, VariantSectionType } from "./variants"
 
@@ -25,6 +26,7 @@ const BRANCHES: {
   products: PRODUCTS_BRANCHES,
   related_products: RELATED_BRANCHES,
   reviews: REVIEWS_BRANCHES,
+  program: PROGRAM_BRANCHES,
   newsletter: NEWSLETTER_BRANCHES,
   rich_text: RICH_TEXT_BRANCHES,
   posts: POSTS_BRANCHES,

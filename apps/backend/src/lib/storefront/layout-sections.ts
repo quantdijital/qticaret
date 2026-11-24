@@ -15,6 +15,7 @@ import type { MainSectionType } from "./sections/main"
 import { headerMarquee, marquee, placedMarquee } from "./sections/marquee"
 import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
+import { program } from "./sections/program"
 import { footerRichText, placedRichText, richText } from "./sections/rich-text"
 import { posts } from "./sections/posts"
 import { priceBands } from "./sections/price-bands"
@@ -84,6 +85,7 @@ export const productSection = z.discriminatedUnion(
   [
     productMain,
     relatedProducts,
+    program,
     richText,
     banner,
     faq,

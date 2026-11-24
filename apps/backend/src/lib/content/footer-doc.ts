@@ -14,7 +14,7 @@ import type { ContentDoc } from "./doc"
  */
 export const FOOTER_DOC_LIMITS = { nodes: 200, textLength: 1500, depth: 4 } as const
 
-const FOOTER_NODES: ReadonlySet<string> = new Set([
+export const FOOTER_NODES: ReadonlySet<string> = new Set([
   "doc",
   "paragraph",
   "text",
@@ -30,13 +30,31 @@ interface Node {
   content?: unknown
 }
 
+/** A narrowed document's bounds: nodes, characters of text, nesting. */
+export interface NarrowDocLimits {
+  nodes: number
+  textLength: number
+  depth: number
+}
+
 /**
  * Whether a checked document fits a footer column: every node on the
  * list, and the whole within the bounds (the document itself is depth 0,
- * so a one-level list's text sits at 4). A loop with its own stack, as
- * the content document's own bounds.
+ * so a one-level list's text sits at 4).
  */
-export function fitsFooter(doc: ContentDoc): boolean {
+export const fitsFooter = (doc: ContentDoc): boolean =>
+  fitsNarrowDoc(doc, FOOTER_NODES, FOOTER_DOC_LIMITS)
+
+/**
+ * Whether a checked document holds only the nodes on a list, within
+ * bounds: a footer column's, a program step's (adr/0078). A loop with its
+ * own stack, as the content document's own bounds.
+ */
+export function fitsNarrowDoc(
+  doc: ContentDoc,
+  allowed: ReadonlySet<string>,
+  limits: NarrowDocLimits
+): boolean {
   const stack: [Node, number][] = [[doc, 0]]
   let nodes = 0
   let text = 0
@@ -46,10 +64,10 @@ export function fitsFooter(doc: ContentDoc): boolean {
     text += typeof node.text === "string" ? node.text.length : 0
     if (
       typeof node.type !== "string" ||
-      !FOOTER_NODES.has(node.type) ||
-      nodes > FOOTER_DOC_LIMITS.nodes ||
-      text > FOOTER_DOC_LIMITS.textLength ||
-      depth > FOOTER_DOC_LIMITS.depth
+      !allowed.has(node.type) ||
+      nodes > limits.nodes ||
+      text > limits.textLength ||
+      depth > limits.depth
     ) {
       return false
     }

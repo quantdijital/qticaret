@@ -23,8 +23,9 @@ describe("sections that need a feature flag (adr/0077 §8)", () => {
     expect(capabilityOfFlag("catalog.addons")).toBeNull()
   })
 
-  it("needs no flag for a type off the list, the first list holding none", () => {
-    expect(SECTION_REQUIRES).toEqual({})
+  it("needs no flag for a type off the list; a program needs dated products (adr/0078)", () => {
+    expect(SECTION_REQUIRES).toEqual({ program: "catalog.booking" })
+    expect(capabilityOf("program")).toBe("dated")
     expect(requiredFlag("hero")).toBeNull()
     expect(requiredFlag("constructor", REQUIRES)).toBeNull()
     expect(capabilityOf("hero", REQUIRES)).toBeNull()

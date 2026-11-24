@@ -5,10 +5,12 @@ import { SectorPackError } from "./read-json"
 /**
  * Section type → the feature flag it needs (adr/0077 §8). Mirrors
  * `@qticaret/types`' `SECTION_REQUIRES` (the loader runs compiled, reading
- * no runtime value from that package); a test keeps them equal. Empty
- * until the first flagged section (`departures`, adr/0077 §10).
+ * no runtime value from that package); a test keeps them equal. The
+ * first: a dated product's program (adr/0078).
  */
-export const SECTION_REQUIRES: Readonly<Record<string, string>> = {}
+export const SECTION_REQUIRES: Readonly<Record<string, string>> = {
+  program: "catalog.booking",
+}
 
 /** Every section type a preset lays out: its groups' and its content pages'. */
 function typesOf(layout: PresetLayout): Set<string> {

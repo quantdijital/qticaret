@@ -309,6 +309,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "booking.product_not_dated":
     "This product is not sold by date; set it to sell by departure first.",
   "booking.variant_unknown": "The variant chosen is not this product's.",
+  "booking.program_text_invalid":
+    "A program step's label, title or picture text holds characters that are not allowed.",
+  "booking.program_title_required": "Every program step needs a title.",
+  "booking.program_body_invalid":
+    "A program step's text may hold only paragraphs and lists, up to 2000 characters.",
+  "booking.program_image_unknown": "A program picture must be one of the media library's images.",
+  "booking.program_tag_unknown": "A program tag is not one of the listed ones.",
+  "booking.program_too_long": "A program holds at most 30 steps.",
   "booking.slot_unknown": "The departure was not found.",
   "booking.slot_full": "Not enough places are left on this departure.",
   "booking.slot_closed": "This departure is closed for sale.",

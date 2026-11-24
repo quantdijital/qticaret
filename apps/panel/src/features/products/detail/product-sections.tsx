@@ -2,6 +2,7 @@ import { AttributesCard } from "@/features/attributes/components/attributes-card
 import { useSectionFindings } from "@/features/content/section-findings"
 import type { ProductDetail } from "@/features/products/api/products"
 import { DeparturesCard } from "@/features/products/booking/departures-card"
+import { ProgramCard } from "@/features/products/program/program-card"
 import { AddonsCard } from "./addons-card"
 import { CatalogCard } from "./catalog-card"
 import { FaqCard } from "./faq-card"
@@ -36,6 +37,8 @@ export function ProductSections({ product }: { product: ProductDetail }) {
     <>
       {/* adr/0076 §9: a dated product's departures, first under the main cards */}
       <DeparturesCard productId={product.id} />
+      {/* adr/0078: its program, the steps its page shows */}
+      <ProgramCard productId={product.id} />
       <ProductSeoCard product={product} fold={findings(S.seo)} />
       <AttributesCard productId={product.id} fold={findings(S.attributes)} />
       {/* adr/0074 §5 madde 4: drawn for a role that may ask for the FAQ draft */}

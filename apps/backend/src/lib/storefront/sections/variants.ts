@@ -39,6 +39,8 @@ export const SECTION_VARIANTS = {
   related_products: ["grid", "carousel"],
   // The shop's reviews (adr/0077 §10): today's grid first; `carousel` one card each, sliding
   reviews: ["grid", "carousel"],
+  // A dated product's program (adr/0078): the steps down a line, or each a row that opens
+  program: ["timeline", "accordion"],
   // The main sections (adr/0049 Ek 2026-11-14 §5, §7): today's drawing first.
   // `centered` is the theme setting's centred header (`header.layout`), read
   // into the bar; its drawing stays on adr/0062 karar 6's branch. `catalog` is N14

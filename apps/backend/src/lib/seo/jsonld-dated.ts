@@ -26,9 +26,36 @@ export interface DepartureFacts {
   available: boolean
 }
 
+/** A program step as the trip's itinerary names it (adr/0078): its title and plain text. */
+export interface ItineraryStep {
+  name: string
+  description: string | null
+}
+
 export interface DatedFacts {
   type: DatedType
   departures: DepartureFacts[]
+  /** The program's steps, in order; absent or empty: no itinerary. A trip's only. */
+  itinerary?: ItineraryStep[]
+}
+
+/** A trip's program as an ordered list (schema.org `TouristTrip.itinerary`). */
+function itineraryOf(steps: readonly ItineraryStep[] | undefined): JsonLd | undefined {
+  if (!steps || steps.length === 0) {
+    return undefined
+  }
+  return {
+    "@type": "ItemList",
+    numberOfItems: steps.length,
+    itemListElement: steps.map((step, index) =>
+      compact({
+        "@type": "ListItem",
+        position: index + 1,
+        name: step.name,
+        description: step.description,
+      })
+    ),
+  }
 }
 
 interface Page {
@@ -65,6 +92,7 @@ function tripOf(dated: DatedFacts, page: Page): JsonLd {
     image: page.images,
     url: page.url,
     provider: organization(page.shop),
+    itinerary: itineraryOf(dated.itinerary),
     subTrip: dated.departures.map((departure) =>
       compact({
         "@type": "TouristTrip",

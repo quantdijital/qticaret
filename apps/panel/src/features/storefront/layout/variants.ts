@@ -104,6 +104,8 @@ export const VARIANT_FIELDS: {
   // The related products as a rail's grid or carousel (bilesen-denetimi (b) 7)
   // adr/0077 §10: the reviews as today's grid, or a carousel with the scroller kit's defaults
   reviews: { grid: {}, carousel: { scroller: SCROLLER_DEFAULTS } },
+  // adr/0078: both draw the product's steps; nothing of their own
+  program: { timeline: {}, accordion: {} },
   related_products: {
     grid: { columns: 3, columns_mobile: SHELF_PHONE_DEFAULT },
     carousel: { scroller: SCROLLER_DEFAULTS },

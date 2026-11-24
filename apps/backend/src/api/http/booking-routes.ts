@@ -11,6 +11,7 @@ import {
   AdminPostTravelerSearch,
 } from "../admin/booking-travelers/validators"
 import { AdminPostRevealTaxId } from "../admin/customers/[id]/billing-profile/reveal/validators"
+import { Program } from "../../lib/booking/program"
 import { requireReauth } from "./reauth"
 import { requireFeature } from "./require-feature"
 
@@ -31,6 +32,19 @@ export const BOOKING_ROUTES = [
     matcher: "/admin/products/:id/bookable",
     methods: ["POST" as const],
     middlewares: [requireFeature(CATALOG_BOOKING), validateAndTransformBody(AdminPostBookable)],
+  },
+  {
+    // adr/0078: a dated product's program, read and written whole as its settings
+    matcher: "/admin/products/:id/program",
+    methods: ["GET" as const],
+    middlewares: [requireFeature(CATALOG_BOOKING)],
+  },
+  {
+    // Thirty steps of short rich text fit well within this
+    matcher: "/admin/products/:id/program",
+    methods: ["POST" as const],
+    bodyParser: { sizeLimit: "512kb" },
+    middlewares: [requireFeature(CATALOG_BOOKING), validateAndTransformBody(Program)],
   },
   {
     matcher: "/admin/products/:id/booking-slots",

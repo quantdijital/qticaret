@@ -54,6 +54,8 @@ const WELLS: Readonly<Record<string, readonly [number, number]>> = {
   // adr/0077 §10: the photo collage's photographs, the reviews carousel's customer photo
   "sections/PhotoCollage.tsx": [1, 0],
   "sections/PriceBands.tsx": [0, 1],
+  // adr/0078: a program step's photograph
+  "sections/ProgramParts.tsx": [1, 0],
   "sections/ReviewsCarousel.tsx": [1, 0],
   "sections/ShelfStage.tsx": [2, 0],
   // adr/0073 §3: "Görselli metin"'s picture

@@ -17,6 +17,8 @@ export interface BookableRow {
   timezone: string
   reminder_days: number
   sale_mode: "online" | "request" | "both"
+  /** adr/0078: the program as saved (`lib/booking/program`), null without one. */
+  program?: unknown
 }
 
 /** A dated product: its variants and its booking settings, if made yet. */

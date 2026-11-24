@@ -4,7 +4,7 @@
  * of the facts, so the same page always gets the same score.
  */
 
-export const RULES_VERSION = 6
+export const RULES_VERSION = 7
 
 export const SEVERITIES = ["critical", "high", "medium", "low", "info"] as const
 export type Severity = (typeof SEVERITIES)[number]
@@ -77,6 +77,8 @@ export interface AdvisorFacts {
         missingAttributes: string[]
         /** Characters of its short description's text (adr/0055 Ek 2026-11-06); left out where not known. */
         summary?: number | undefined
+        /** A dated product's program steps (adr/0078); left out for a product not sold by date. */
+        programSteps?: number | undefined
       }
     | undefined
   listing?:

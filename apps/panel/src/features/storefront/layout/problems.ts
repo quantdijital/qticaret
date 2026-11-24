@@ -233,6 +233,7 @@ function fieldsOf(section: AnySection): Found[] {
     case "brands":
     case "reviews":
     case "google_rating":
+    case "program":
       return [["title", textProblem(section.title, L.title)]]
     case "header_bar":
       // The catalog header's words and highlighted link (adr/0049 Ek 2026-11-15)
