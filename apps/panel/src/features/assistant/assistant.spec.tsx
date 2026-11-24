@@ -3,6 +3,7 @@ import { act, render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { CURRENT_USER_KEY } from "@/features/auth/api/me"
 import { featuresQuery } from "@/features/settings/api/features"
 import { AssistantButton } from "./assistant-button"
 import { AssistantProvider } from "./assistant-context"
@@ -43,6 +44,7 @@ function renderAssistant(on = true) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   })
+  client.setQueryData(CURRENT_USER_KEY, { id: "user_1" })
   client.setQueryData(featuresQuery().queryKey, [
     { key: "ai.assistant", default: false, owner: "tenant", enabled: on },
   ])
@@ -161,6 +163,31 @@ describe("the panel assistant", () => {
       method: "DELETE",
     })
     expect(screen.queryByText("Tamam.")).toBeNull()
+    expect(window.sessionStorage.getItem("qt.assistant.session")).toBeNull()
+  })
+
+  it("drops on the server a conversation answered after 'Yeni sohbet' (review D1)", async () => {
+    let reply: (value: unknown) => void = () => undefined
+    fetchMock.mockReturnValue(
+      new Promise((resolve) => {
+        reply = resolve
+      })
+    )
+    sdkFetch.mockResolvedValue({ id: CONVERSATION, deleted: true })
+    renderAssistant()
+    const user = await ask("merhaba")
+    // Asked first, no id yet: nothing to delete at the click itself
+    await user.click(screen.getByRole("button", { name: /Yeni sohbet/ }))
+    expect(sdkFetch).not.toHaveBeenCalled()
+
+    await act(async () => {
+      reply(await answer(200, turn("Geç kalan yanıt.")))
+    })
+
+    expect(sdkFetch).toHaveBeenCalledWith(`/admin/ai/assistant/conversations/${CONVERSATION}`, {
+      method: "DELETE",
+    })
+    expect(screen.queryByText("Geç kalan yanıt.")).toBeNull()
     expect(window.sessionStorage.getItem("qt.assistant.session")).toBeNull()
   })
 

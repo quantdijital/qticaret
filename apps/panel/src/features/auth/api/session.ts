@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { clearSession } from "@/features/assistant/storage"
 import { i18next } from "@/lib/i18n"
 import { USER_STALE_MS, currentUserQuery } from "./me"
 import type { CurrentUser } from "./me"
@@ -48,6 +49,16 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms)
   })
 
+/**
+ * The session is over, however it ended (expired, 2FA required, signed
+ * out elsewhere): nothing read is kept, nor the assistant's conversation
+ * in the tab (adr/0079 §6; review O1).
+ */
+export function forgetSession(client: QueryClient): void {
+  client.clear()
+  clearSession()
+}
+
 /** Whether what was read at `updatedAt` still stands: no older than its staleness and the grace. */
 const withinGrace = (updatedAt: number, staleMs: number): boolean =>
   Date.now() - updatedAt <= staleMs + KNOWN_GRACE_MS
@@ -71,7 +82,7 @@ export const signInPage = {
 
 /** Signed out for the API: nothing read is kept, and the browser goes to sign-in. */
 function signOutHere(client: QueryClient): void {
-  client.clear()
+  forgetSession(client)
   const back = `${window.location.pathname}${window.location.search}`
   signInPage.open(`/login?redirect=${encodeURIComponent(back)}`)
 }
@@ -103,7 +114,7 @@ export async function loadCurrentUser(client: QueryClient): Promise<CurrentUser 
     return first.user
   }
   if (first.failure === "signedOut") {
-    client.clear()
+    forgetSession(client)
     return null
   }
   const known = recentUser(client)
@@ -132,7 +143,7 @@ export async function loadCurrentUser(client: QueryClient): Promise<CurrentUser 
     return second.user
   }
   if (second.failure === "signedOut") {
-    client.clear()
+    forgetSession(client)
     return null
   }
   throw new SessionUnavailableError(second.failure)
@@ -150,7 +161,7 @@ export async function loadStaff(client: QueryClient): Promise<StaffMe | null> {
   } catch (error) {
     const failure = sessionFailure(error)
     if (failure === "signedOut") {
-      client.clear()
+      forgetSession(client)
       return null
     }
     const known = recentStaff(client)

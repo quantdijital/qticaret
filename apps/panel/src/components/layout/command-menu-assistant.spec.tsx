@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
@@ -34,17 +34,37 @@ describe("CommandMenu's 'Yardımcıya sor' (adr/0079 §9)", () => {
     fetchMock.mockResolvedValue({ orders: [], customers: [], products: [], parcels: [] })
   })
 
-  it("asks the assistant the typed words, last in the list, and closes", async () => {
+  it("hands the typed words to the assistant, last in the list, and closes", async () => {
     const user = userEvent.setup()
     const { ask, onOpenChange } = renderMenu(true)
     await user.type(screen.getByRole("combobox"), "kargo ücreti")
 
     const item = await screen.findByRole("option", { name: "Yardımcıya sor: kargo ücreti" })
     expect(screen.getAllByRole("option").at(-1)).toBe(item)
+    // Once the records' search has answered
+    await waitFor(() => {
+      expect(item).toHaveAttribute("aria-disabled", "false")
+    })
 
     await user.click(item)
     expect(ask).toHaveBeenCalledWith("kargo ücreti")
     expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("is not what Enter picks while the records are still being looked up (review O2)", async () => {
+    fetchMock.mockReturnValue(new Promise(() => undefined))
+    const user = userEvent.setup()
+    const { ask } = renderMenu(true)
+    await user.type(screen.getByRole("combobox"), "Ayşe Yılmaz")
+    const item = await screen.findByRole("option", { name: "Yardımcıya sor: Ayşe Yılmaz" })
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled()
+    })
+
+    await user.keyboard("{Enter}")
+
+    expect(item).toHaveAttribute("aria-disabled", "true")
+    expect(ask).not.toHaveBeenCalled()
   })
 
   it("offers nothing of the assistant with the flag off or nothing typed", async () => {

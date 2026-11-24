@@ -2,6 +2,7 @@ import { useRouterState } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { useCurrentUser } from "@/features/auth/api/me"
 import { useFeature } from "@/features/settings/api/features"
 import { deleteAssistantConversation, postAssistantTurn } from "./api"
 import type { AssistantMessage } from "./api"
@@ -15,15 +16,33 @@ import type { AssistantSession } from "./storage"
  * The panel assistant's state for the whole shell (adr/0079 §9): open or
  * closed across pages, the conversation of the tab, ⌘J / Ctrl+J. With
  * the shop's flag off it adds nothing: no key, no button, no panel.
+ *
+ * A conversation is its asker's alone (review O1): another staff member
+ * signed in starts afresh, nothing of the last one's state carried over.
+ * Signed out (no user read for now) keeps the last one until the sign-in
+ * page takes over, so the page below is not remounted for nothing.
  */
 export function AssistantProvider({ children }: { children: ReactNode }) {
+  const id = useCurrentUser()?.id
+  const [owner, setOwner] = useState<string | null>(id ?? null)
+  if (id !== undefined && id !== owner) {
+    setOwner(id)
+  }
+  return (
+    <AssistantOf key={owner ?? ""} owner={owner}>
+      {children}
+    </AssistantOf>
+  )
+}
+
+function AssistantOf({ owner, children }: { owner: string | null; children: ReactNode }) {
   // Its state is kept either way: the flag read late must not remount the page below
   const enabled = useFeature(AI_ASSISTANT_FLAG)
   const { i18n } = useTranslation()
   const location = useRouterState({ select: (state) => state.location })
   const screen = openScreenOf(location.pathname, location.search)
   const [open, setOpen] = useState(false)
-  const [session, setSession] = useState<AssistantSession>(loadSession)
+  const [session, setSession] = useState<AssistantSession>(() => loadSession(owner))
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<unknown>(null)
   const [draft, setDraft] = useState("")
@@ -31,8 +50,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const generation = useRef(0)
 
   useEffect(() => {
-    saveSession(session)
-  }, [session])
+    saveSession(session, owner)
+  }, [session, owner])
 
   useEffect(() => {
     if (!enabled) {
@@ -72,6 +91,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     })
       .then((answer) => {
         if (generation.current !== turn) {
+          // "Yeni sohbet" came first, maybe before the server named the conversation (review D1)
+          deleteAssistantConversation(answer.conversation_id).catch(() => undefined)
           return
         }
         // The server's copy of the person's words (personal data patterns taken out) replaces ours
@@ -114,13 +135,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     toggle: () => {
       setOpen((now) => !now)
     },
+    // Only into the box, never sent (review O2): ⌘K is where names and phones are typed
     ask: (text) => {
       setOpen(true)
-      if (pending) {
-        setDraft(text)
-      } else {
-        send(text)
-      }
+      setDraft(text.slice(0, 2000))
     },
     send,
     reset,

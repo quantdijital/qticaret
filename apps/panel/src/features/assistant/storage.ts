@@ -24,16 +24,29 @@ export interface AssistantSession {
 
 export const EMPTY_SESSION: AssistantSession = { conversationId: null, messages: [] }
 
-export function loadSession(): AssistantSession {
+/**
+ * The tab's conversation, if it is this staff member's (`userId`). One
+ * kept by someone else (a session that ran out, another sign-in in the
+ * tab; review O1), or by no one known, is dropped unread.
+ */
+export function loadSession(userId: string | null): AssistantSession {
   try {
     const raw = window.sessionStorage.getItem(SESSION_KEY)
-    if (raw === null) {
+    if (raw === null || userId === null) {
       return EMPTY_SESSION
     }
-    const data = JSON.parse(raw) as { conversationId?: unknown; messages?: unknown } | null
+    const data = JSON.parse(raw) as {
+      userId?: unknown
+      conversationId?: unknown
+      messages?: unknown
+    } | null
+    if (data?.userId !== userId) {
+      clearSession()
+      return EMPTY_SESSION
+    }
     return {
-      conversationId: isConversationId(data?.conversationId) ? data.conversationId : null,
-      messages: Array.isArray(data?.messages)
+      conversationId: isConversationId(data.conversationId) ? data.conversationId : null,
+      messages: Array.isArray(data.messages)
         ? data.messages.flatMap((each) => messageOf(each) ?? []).slice(-MAX_KEPT)
         : [],
     }
@@ -42,22 +55,23 @@ export function loadSession(): AssistantSession {
   }
 }
 
-export function saveSession(session: AssistantSession): void {
+/** Kept under its owner's id: nobody else's tab reads it back. Unknown whose, it is not kept. */
+export function saveSession(session: AssistantSession, userId: string | null): void {
   try {
-    if (session.conversationId === null && session.messages.length === 0) {
+    if (userId === null || (session.conversationId === null && session.messages.length === 0)) {
       window.sessionStorage.removeItem(SESSION_KEY)
       return
     }
     window.sessionStorage.setItem(
       SESSION_KEY,
-      JSON.stringify({ ...session, messages: session.messages.slice(-MAX_KEPT) })
+      JSON.stringify({ userId, ...session, messages: session.messages.slice(-MAX_KEPT) })
     )
   } catch {
     // Storage off or full: the conversation lives on the server
   }
 }
 
-/** Sign-out: the tab forgets the conversation (the server drops it too, §6). */
+/** Any end of the session: the tab forgets the conversation (the server drops it too, §6). */
 export function clearSession(): void {
   try {
     window.sessionStorage.removeItem(SESSION_KEY)

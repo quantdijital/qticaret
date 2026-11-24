@@ -11,7 +11,11 @@ export interface AssistantState {
   open: boolean
   setOpen: (open: boolean) => void
   toggle: () => void
-  /** Opens the panel and sends the words (⌘K's "Yardımcıya sor"). */
+  /**
+   * Opens the panel with the words in its box, unsent (⌘K's "Yardımcıya
+   * sor"; review O2): sending is the person's own Enter, under the panel's
+   * personal data warning.
+   */
   ask: (text: string) => void
   send: (text: string) => void
   /** "Yeni sohbet": the server drops the conversation, the tab forgets it. */
