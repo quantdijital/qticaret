@@ -89,6 +89,9 @@ function Place({ use }: { use: MediaUse }) {
       return <span>{t(`${U}.seoPage`, { page: t(`${U}.seoTypes.${use.label ?? "page"}`) })}</span>
     case "storefront_design":
       return <span>{use.label ?? t(`${U}.autoSavedLook`)}</span>
+    // adr/0080: the pop-ups screen links it once it is there (S2)
+    case "popup":
+      return <span>{name}</span>
     case "order":
       return <span>{t(`${U}.orderText`)}</span>
   }

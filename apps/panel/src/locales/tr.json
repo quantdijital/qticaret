@@ -794,6 +794,11 @@
             "label": "Toplu e-posta ve SMS",
             "summary": "İzinli müşterilere panelden toplu e-posta ve SMS gönderilir.",
             "description": "İzin vermiş müşterilere panelden toplu e-posta ve SMS kampanyası gönderilebilir."
+          },
+          "popups": {
+            "label": "Pop-up'lar",
+            "summary": "Vitrinde bilgi, kampanya ve bülten pop-up'ları gösterilir.",
+            "description": "Pazarlama > Pop-up'lar ekranından vitrinde bilgi, kampanya kodu ya da bülten kaydı pop-up'ı gösterilir; sayfa, cihaz, ziyaretçi ve sıklık seçilir. Kapatılınca hiçbir pop-up görünmez, kayıtlar silinmez."
           }
         },
         "seo": {
@@ -12269,6 +12274,7 @@
         "category": "Kategori görseli",
         "etbis_qr": "ETBİS karekodu",
         "collection": "Koleksiyon görseli",
+        "popup": "Pop-up",
         "storefront_design": "Kayıtlı görünüm",
         "favicon": "Site simgesi"
       },

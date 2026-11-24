@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./catalog": "./src/store/catalog.ts",
     "./storefront": "./src/store/storefront.ts",
+    "./popups": "./src/store/popups.ts",
     "./style-kit": "./src/store/style-kit.ts",
     "./listing-text": "./src/store/listing-text.ts",
     "./search-form": "./src/store/search-form.ts",

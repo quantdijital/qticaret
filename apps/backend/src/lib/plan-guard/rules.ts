@@ -236,6 +236,8 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   "/admin/marketing-feeds*",
   "/admin/google*",
   "/admin/bulk-messages*",
+  // adr/0080: storefront pop-ups
+  "/admin/popups*",
   // Content, reviews and the storefront
   "/admin/content*",
   // adr/0071 §6: AI suggestions and their decisions write as content does
