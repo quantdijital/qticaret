@@ -1,0 +1,206 @@
+{
+  "header": [
+    {
+      "id": "mainheader",
+      "type": "header_bar",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "sticky": true,
+      "menu_images": "off",
+      "search_style": "icon"
+    }
+  ],
+  "home": [
+    {
+      "id": "vadiacilis",
+      "type": "hero",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "full_image",
+      "eyebrow": "Doğaya açılan rotalar",
+      "heading": "Yeni yerler keşfedin,",
+      "title_accent": "anılarınızı biriktirin",
+      "text": "Koylar, yaylalar ve vadiler arasında küçük gruplarla turlar. Gidilecek yeri, tarihi ve kişi sayısını seçin, uygun kalkışları görün.",
+      "links": [{ "$href": "/magaza", "label": "Turları incele" }],
+      "image": {
+        "$image": "images/kapak-oludeniz.webp",
+        "alt": "Yukarıdan bakışla Ölüdeniz lagünü, kumsal ve çevreleyen yeşil tepeler"
+      },
+      "action": "search",
+      "search_position": "overlap",
+      "height": "tall",
+      "scrim": "light",
+      "align": "start",
+      "image_side": "end",
+      "edge": "wave",
+      "show_trust": true
+    },
+    {
+      "id": "populerrotalar",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Popüler rotalar",
+      "source": { "kind": "best_sellers" },
+      "limit": 12,
+      "more": { "$href": "/magaza", "label": "Tüm turlar" },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
+      }
+    },
+    {
+      "id": "turturleri",
+      "type": "categories",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "icons",
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": null,
+        "ground": null,
+        "align": "center",
+        "width": null
+      },
+      "title": "Tur türleri",
+      "category_ids": [],
+      "show_count": false,
+      "more": null,
+      "disc": "tint",
+      "phone": "scroll",
+      "category_icons": {}
+    },
+    {
+      "id": "geziyazilari",
+      "type": "posts",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "intro_panel",
+      "title": "Yolculuğa ilham veren notlar",
+      "limit": 2,
+      "eyebrow": "Gezi yazıları",
+      "intro": "Rota önerileri, mevsim notları ve yolda öğrendiklerimiz. Gitmeden önce okuyun, giderken yanınıza alın.",
+      "link": { "$href": "/blog", "label": "Tüm yazılar" }
+    },
+    {
+      "id": "sezonbandi",
+      "type": "banner",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "split",
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": null,
+        "ground": "primary",
+        "align": null,
+        "width": null
+      },
+      "eyebrow": "Erken rezervasyon",
+      "edge": "curved",
+      "slides": [
+        {
+          "image": {
+            "$image": "images/bant-ayder.webp",
+            "alt": "Sisli yamaçlar arasında Ayder yaylasının ahşap evleri"
+          },
+          "mobile_image": null,
+          "heading": "Yaz yaylalarına şimdiden yer ayırtın",
+          "text": "Karadeniz ve Doğu Karadeniz yayla turlarında ilk kalkışların yerleri sınırlı.",
+          "link": { "$href": "/magaza", "label": "Kalkışları gör" },
+          "second_link": null,
+          "tone": "light"
+        }
+      ],
+      "width": "boxed",
+      "height": "medium",
+      "text_position": "middle_left",
+      "overlay": "none",
+      "button_style": "solid"
+    },
+    {
+      "id": "rakamlarlavadi",
+      "type": "stats",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": null,
+        "ground": null,
+        "align": "center",
+        "width": null
+      },
+      "title": null,
+      "items": [
+        { "value": "120+", "label": "Rota", "text": null, "icon": "map_pin" },
+        { "value": "8.000+", "label": "Mutlu gezgin", "text": null, "icon": "users" },
+        { "value": "4,8", "label": "Ortalama puan", "text": null, "icon": "star" },
+        { "value": "15", "label": "Yıllık deneyim", "text": null, "icon": "calendar" }
+      ],
+      "dividers": "off",
+      "icons": "on"
+    }
+  ],
+  "footer": [
+    {
+      "id": "mainfooter",
+      "type": "footer_bar",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "brand_columns",
+      "social": "icons",
+      "payment_badges": ["visa", "mastercard", "troy", "bank_transfer"],
+      "back_to_top": true,
+      "back_to_top_side": "right",
+      "back_to_top_shape": "round",
+      "back_to_top_mobile": true,
+      "top_strip": false,
+      "about": "Doğaya açılan rotalarda küçük gruplarla turlar. Programlar, dahil olanlar ve kalkış tarihleri her turun sayfasında.",
+      "ground": "well",
+      "badge_style": "card"
+    },
+    {
+      "id": "vadibulten",
+      "type": "newsletter",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "title": "Yeni rotalardan ilk siz haberdar olun",
+      "text": null,
+      "description": "Yeni rotalar ve erken rezervasyon dönemleri e-postanızda."
+    }
+  ],
+  "product": [
+    {
+      "id": "mainproduct",
+      "type": "product_main",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "image_ratio": "landscape"
+    }
+  ]
+}

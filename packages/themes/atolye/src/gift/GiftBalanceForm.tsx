@@ -30,14 +30,17 @@ export function GiftBalanceForm({
   words: GiftBalanceWords
 }) {
   const [balance, setBalance] = useState<string | null>(null)
-  const { error, checking, pending, onSubmit } = useChallengeForm(async (state, form) => {
-    setBalance(null)
-    const result = await action({ ...state, balance: null }, form)
-    if (result.ok) {
-      setBalance(result.balance)
-    }
-    return result
-  })
+  const { error, checking, pending, onSubmit, slot } = useChallengeForm(
+    async (state, form) => {
+      setBalance(null)
+      const result = await action({ ...state, balance: null }, form)
+      if (result.ok) {
+        setBalance(result.balance)
+      }
+      return result
+    },
+    { action: "gift_card" }
+  )
   return (
     <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4">
       <TextField
@@ -51,6 +54,7 @@ export function GiftBalanceForm({
         label={words.code}
         placeholder={words.placeholder}
       />
+      {slot}
       <button
         type="submit"
         disabled={pending}

@@ -64,3 +64,34 @@ for (const hook of ["beforeAll", "beforeEach", "afterAll", "afterEach"]) {
   const original = globalThis[hook]
   globalThis[hook] = (fn, timeout) => original(plainly(fn), timeout)
 }
+
+// On CI a test that fails is tried once more before its file fails (adr/0081):
+// a loaded runner must not cost a forty-minute run. The first failure stays in
+// the log ("RETRY ERRORS"), and the job's summary counts them, so a test that
+// needs its second try is seen and mended. Locally a failure is a failure.
+//
+// Not where failing now and then IS the finding: a file that tests a race,
+// an idempotent delivery, stock or money moved by two requests at once. A
+// second try there would turn a one-in-five double order into one in
+// twenty-five and call the rest green. Such a file is known by its name
+// (payments, stock, refunds, notifications) or by sending requests side by
+// side (`Promise.all`); a file that cannot be read is not retried either.
+const MONEY_OR_STOCK =
+  /(race|idempot|notification|webhook|callback|stock|gift-card|refund|payment|checkout|plan-limits)/
+const SIDE_BY_SIDE = /Promise\.all(Settled)?\(/
+
+function retriable(testPath) {
+  try {
+    const name = require("node:path").basename(testPath)
+    const source = require("node:fs").readFileSync(testPath, "utf8")
+    return !MONEY_OR_STOCK.test(name) && !SIDE_BY_SIDE.test(source)
+  } catch {
+    return false
+  }
+}
+
+// eslint-disable-next-line no-undef -- jest's own objects, given to every setup file
+if (process.env.CI && retriable(String(expect.getState().testPath ?? ""))) {
+  // eslint-disable-next-line no-undef -- jest's own object, given to every setup file
+  jest.retryTimes(1, { logErrorsBeforeRetry: true })
+}

@@ -107,6 +107,8 @@ export interface ListingPageView {
   subcategories: CategoryCardView[]
   products: ProductCardView[]
   total: number
+  /** The count in words where "N ürün" is not the word (a search's "N sonuç"); absent: "N ürün". */
+  countLabel?: string
   pagination: PaginationView
   sort: SortOptionView[]
   filters: FilterGroupView[]

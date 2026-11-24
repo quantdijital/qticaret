@@ -29,6 +29,7 @@ import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 
 /** A signed-in customer writing on the storefront, within one budget for reviews, questions and answers. */
+// Past three in an hour from one address, Turnstile first (turnstile-routes.ts)
 const customerWrites = () => [
   authenticate("customer", ["session", "bearer"]),
   rateLimit(() => RATE_LIMIT_PROFILES.review_write, {

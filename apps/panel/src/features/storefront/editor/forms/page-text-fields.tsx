@@ -37,15 +37,19 @@ export function PageTextSwitches({
           onChange({ ...section, outline: on ? "auto" : "off" }, "outline")
         }}
       />
-      <SwitchRow
-        id={FIELD_IDS.content(section.id, "questions")}
-        label={t(`${P}.questions`)}
-        hint={t(`${P}.questionsHint`)}
-        checked={questions}
-        onChange={(on) => {
-          onChange({ ...section, questions: on ? "auto" : "off" }, "questions")
-        }}
-      />
+      {/* Retired (adr/0073 Ek 2026-11-24 (2)): shown only on a text still read as questions,
+          to turn it off; a shop's questions are an FAQ section's rows */}
+      {questions ? (
+        <SwitchRow
+          id={FIELD_IDS.content(section.id, "questions")}
+          label={t(`${P}.questions`)}
+          hint={t(`${P}.questionsHint`)}
+          checked={questions}
+          onChange={(on) => {
+            onChange({ ...section, questions: on ? "auto" : "off" }, "questions")
+          }}
+        />
+      ) : null}
     </div>
   )
 }

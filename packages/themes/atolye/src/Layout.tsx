@@ -1,5 +1,11 @@
 import type { ReactNode } from "react"
-import type { PlaceOrderResult, QuickViewSetup, ShopView, Translate } from "@qticaret/ui"
+import type {
+  PlaceOrderResult,
+  PopupSetup,
+  QuickViewSetup,
+  ShopView,
+  Translate,
+} from "@qticaret/ui"
 import { Announcement } from "./frame/Announcement"
 import { BackToTop } from "./frame/BackToTop"
 import { BottomBar } from "./frame/BottomBar"
@@ -12,6 +18,8 @@ import { ImageCue } from "./frame/ImageCue"
 import { LayerMarks } from "./frame/Layers"
 import { layerMarks, rootMarks } from "./frame/root-marks"
 import { Marquee } from "./sections/Marquee"
+import { PopupHost } from "./frame/PopupHost"
+import { popupWords } from "./frame/popup-words"
 import { QuickViewHost } from "./frame/QuickViewHost"
 import { quickViewWords } from "./frame/quick-view-words"
 import { ScrollCue } from "./frame/ScrollCue"
@@ -40,6 +48,7 @@ export function Layout({
   searchSuggest,
   changeCartLine,
   quickView,
+  popups,
 }: {
   shop: ShopView
   t: Translate
@@ -49,6 +58,7 @@ export function Layout({
   searchSuggest?: string
   changeCartLine?: (form: FormData) => Promise<void>
   quickView?: QuickViewSetup
+  popups?: PopupSetup
 }) {
   const skip = (
     <a href="#icerik" className="gf-skip">
@@ -155,6 +165,20 @@ export function Layout({
         )}
         {/* The cards' quick view (adr/0049 Ek 2026-11-15): its dialog's code only on the first look */}
         {quickView && <QuickViewHost setup={quickView} words={quickViewWords(t)} />}
+        {/* The shop's pop-ups (adr/0080 §6): nothing drawn or loaded until one is due */}
+        {popups && (
+          <PopupHost
+            setup={popups}
+            member={shop.customerName !== null}
+            words={popupWords(
+              t,
+              shop.newsletter?.text ??
+                t("newsletter.text", { shop: shop.companyTitle ?? shop.name })
+            )}
+            privacyPath={shop.privacyPath}
+            subscribe={subscribe}
+          />
+        )}
         {consent}
         <ScrollCue />
         <ImageCue />

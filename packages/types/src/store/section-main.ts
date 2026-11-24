@@ -12,6 +12,7 @@ import type {
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
+  ProductImageRatio,
   ProductMainVariant,
 } from "./section-variants.js"
 
@@ -82,6 +83,12 @@ export interface StoreMainSections {
     search_style?: HeaderSearchStyle
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
+    /**
+     * The action button of the variants other than `catalog` (whose
+     * `catalog.highlight_link` it is): its words and where it goes; absent
+     * while none is set (an older backend too), null when broken. None: no button.
+     */
+    highlight_link?: StoreLayoutLink | null
   }
   /**
    * The footer with its own settings (adr/0049 Ek 2026-11-15); an older
@@ -100,6 +107,8 @@ export interface StoreMainSections {
     id: string
     type: "product_main"
     variant: ProductMainVariant
+    /** The gallery's picture shape; left out: the square (an older backend, or the shop left it). */
+    image_ratio?: ProductImageRatio
     look?: SectionLook
   }
   category_main: {

@@ -70,22 +70,23 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "photo_collage") {
     return section.items.flatMap((each) => (each.link ? [each.link] : []))
   }
-  // The catalog header's highlighted last link and its strip's note (adr/0049 Ek 2026-11-15)
-  if (section.type === "header_bar" && section.variant === "catalog") {
-    return [section.highlight_link, section.strip_note_link].flatMap((link) => (link ? [link] : []))
+  // Every header's action button; the catalog header's strip note too (adr/0049 Ek 2026-11-15)
+  if (section.type === "header_bar") {
+    return [
+      section.highlight_link,
+      section.variant === "catalog" ? section.strip_note_link : null,
+    ].flatMap((link) => (link ? [link] : []))
   }
   return []
 }
 
 /**
  * The header's sections that hold links: its scrolling strip and the
- * catalog header bar (the announcement's lines are words).
+ * header bar (its action button; the catalog's strip note). The
+ * announcement's lines are words.
  */
 export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection[] =>
-  doc.header.filter(
-    (section) =>
-      section.type === "marquee" || (section.type === "header_bar" && section.variant === "catalog")
-  )
+  doc.header.filter((section) => section.type === "marquee" || section.type === "header_bar")
 
 /** Every record a section names by id, as a link would point at it. */
 export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {
@@ -124,6 +125,15 @@ export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: s
   }
   // A rail's or a product page's related products: their category, collection or choice
   // (each of a columns rail's lists too)
+  // Upcoming departures' category or collection (adr/0077 §10)
+  if (section.type === "departures") {
+    const { source } = section
+    return source.kind === "category"
+      ? [as("category")(source.category_id)]
+      : source.kind === "collection"
+        ? [as("collection")(source.collection_id)]
+        : []
+  }
   if (section.type === "products" || section.type === "related_products") {
     const sources =
       section.type === "products"
@@ -140,6 +150,60 @@ export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: s
     )
   }
   return []
+}
+
+/** A record the design names, with the part naming it: a section's id, a free footer block's. */
+export interface NamedTarget {
+  part: string
+  kind: MenuLinkKind
+  target: string
+}
+
+const recordTargets = (links: readonly MenuLinkInput[]) =>
+  links.flatMap((link) =>
+    isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
+  )
+
+/**
+ * Every record the design's sections (every page's, the footer's drawn),
+ * its header's linked sections and a free rows footer's blocks (adr/0070)
+ * name, hidden ones too, each with the part naming it.
+ */
+export function layoutTargets(doc: LayoutDocument): NamedTarget[] {
+  const of = (part: string, list: { kind: MenuLinkKind; target: string }[]) =>
+    list.map((each) => ({ part, ...each }))
+  return [
+    ...bodySections(doc).flatMap((section) =>
+      of(section.id, [...recordsOf(section), ...recordTargets(linksOf(section))])
+    ),
+    ...headerLinked(doc).flatMap((section) => of(section.id, recordTargets(linksOf(section)))),
+    ...freeBlocksOf(doc.footer).flatMap((block) =>
+      of(block.id, recordTargets(footerRowLinks([block])))
+    ),
+  ]
+}
+
+/** The records a menu set the design carries (adr/0063 §3) links. */
+const menuTargets = (doc: LayoutDocument) =>
+  recordTargets(
+    (doc.settings.menus ?? []).flatMap((menu) =>
+      menu.items.flatMap((each) => [each.link, ...each.children])
+    )
+  )
+
+/** Every string a stored design (raw JSON or a document) holds: the record ids it names among them. */
+function storedStrings(value: unknown): Set<string> {
+  const strings = new Set<string>()
+  const stack: unknown[] = [value]
+  while (stack.length > 0) {
+    const node = stack.pop()
+    if (typeof node === "string") {
+      strings.add(node)
+    } else if (node !== null && typeof node === "object") {
+      stack.push(...Object.values(node as Record<string, unknown>))
+    }
+  }
+  return strings
 }
 
 /** The addresses of every image the design shows: openings, slides, rich text. */
@@ -199,6 +263,8 @@ const cardsOf = (sections: readonly BodySection[]) =>
  * schema's); the header's scrolling strip links only records that exist
  * too. A menu set the design carries (adr/0063 §3) links only
  * records that exist, as the Menüler screen asks (`storefront_menus.target_unknown`).
+ * A record is checked when the save names it anew, as its cards are: one
+ * `before` named already whose record was deleted since never refuses.
  * Returns the media records it uses, to keep their files.
  */
 export async function checkLayout(
@@ -208,35 +274,23 @@ export async function checkLayout(
   carried: readonly BodySection[] = []
 ): Promise<string[]> {
   const sections = bodySections(doc)
-  const recordLinks = (section: BodySection | HeaderSection) =>
-    linksOf(section).flatMap((link) =>
-      isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
-    )
   // A free rows footer's blocks (adr/0070): their pictures' links, pictures and words, hidden ones too
   const blocks = freeBlocksOf(doc.footer)
-  const targets = [
-    ...sections.flatMap((section) => [...recordsOf(section), ...recordLinks(section)]),
-    ...headerLinked(doc).flatMap(recordLinks),
-    ...footerRowLinks(blocks).flatMap((link) =>
-      isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
-    ),
-  ]
-  const menuTargets = (doc.settings.menus ?? []).flatMap((menu) =>
-    menu.items
-      .flatMap((each) => [each.link, ...each.children])
-      .flatMap((link) =>
-        isRecordKind(link.kind) && "target" in link
-          ? [{ kind: link.kind, target: link.target }]
-          : []
-      )
-  )
-  const found = await existingRecords(container, [...targets, ...menuTargets])
-  const missing = (list: typeof targets) =>
+  // Only the records this save names anew ("engel değil uyarı"): one the stored design
+  // (`before`) named already, whose record went since, is left out when drawn
+  // (`liveRecords`) and marked in the editor (`goneTargets`), never a lock on every change
+  const held = storedStrings(before)
+  const fresh = <T extends { target: string }>(list: readonly T[]) =>
+    list.filter((each) => !held.has(each.target))
+  const targets = fresh(layoutTargets(doc))
+  const menus = fresh(menuTargets(doc))
+  const found = await existingRecords(container, [...targets, ...menus])
+  const missing = (list: readonly { kind: MenuLinkKind; target: string }[]) =>
     list.some((each) => !found.has(`${each.kind}:${each.target}`))
   if (missing(targets)) {
     throw new ValidationError("storefront_layout.target_unknown", { field: "document" })
   }
-  if (missing(menuTargets)) {
+  if (missing(menus)) {
     throw new ValidationError("storefront_menus.target_unknown", { field: "document" })
   }
   for (const section of sections) {

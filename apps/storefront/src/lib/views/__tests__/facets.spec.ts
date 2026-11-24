@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { t } from "@/lib/i18n"
 import type { ListingAnswer } from "@/lib/store-api/listings"
-import { filterViews } from "../facets"
+import { filterViews, stockForCards } from "../facets"
 import { stateOf, stateFromSearch, withPage } from "../listing"
 import { searchStateOf } from "../search"
 
@@ -105,5 +105,21 @@ describe("the in-stock toggle (facets.stock)", () => {
     const state = searchStateOf(new URLSearchParams("q=şef&marka=arcos"))
     const views = filterViews("/arama", state, facets({ count: 3, selected: false }), false, t)
     expect(views.stock?.path).toBe("/arama?q=%C5%9Fef&marka=arcos&stok=var")
+  })
+})
+
+describe("the in-stock toggle on dated products (stockForCards)", () => {
+  const toggle = (selected: boolean) => ({ label: LABEL, count: 6, selected, path: "/arama" })
+  const dated = { booking: { duration: null, next: null } } as never
+
+  it("is left out when every card is a dated product's, kept when on to turn it off", () => {
+    expect(stockForCards(toggle(false), [dated, dated])).toBeNull()
+    expect(stockForCards(toggle(true), [dated])).toEqual(toggle(true))
+  })
+
+  it("stays with a product that is not dated, and on an empty page", () => {
+    expect(stockForCards(toggle(false), [dated, {}])).toEqual(toggle(false))
+    expect(stockForCards(toggle(false), [])).toEqual(toggle(false))
+    expect(stockForCards(null, [dated])).toBeNull()
   })
 })

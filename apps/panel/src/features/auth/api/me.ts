@@ -2,6 +2,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { z } from "zod"
 import { responseFailure } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
+import type { StaffGate } from "./gated-post"
 import { signInWithProof } from "./proof-login"
 
 export const CURRENT_USER_KEY = ["auth", "me"] as const
@@ -63,25 +64,17 @@ export interface MfaChallenge {
 }
 
 /**
- * Email and password → session cookie (js-sdk session mode calls
- * /auth/session). With 2FA on, the session waits for the code: the
- * challenge comes back for `useVerifyChallenge`. Past five tries on the
- * address the backend asks a proof of work first (428): solved here.
+ * Email and password → session cookie, as js-sdk's session mode does it
+ * (`/auth/session`), through `signInWithProof`: Turnstile's token with
+ * every try (adr/0044 Ek 2026-11-24) and the proof of work asked past five
+ * tries on the address (428) go along. With 2FA on, the session waits for
+ * the code: the challenge comes back for `useVerifyChallenge`.
  */
-export function useLogin() {
+export function useLogin(gate: StaffGate | null = null) {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: async ({ email, password }: Credentials): Promise<MfaChallenge | null> => {
-      try {
-        const result = await sdk.auth.login("user", "emailpass", { email, password })
-        return typeof result === "object" && "mfa_required" in result ? result.mfa_challenge : null
-      } catch (error) {
-        if ((error as { status?: unknown } | null)?.status !== 428) {
-          throw error
-        }
-        return signInWithProof({ email, password })
-      }
-    },
+    mutationFn: ({ email, password }: Credentials): Promise<MfaChallenge | null> =>
+      signInWithProof({ email, password }, gate),
     onSuccess: async () => {
       // Who signed in, and their role
       await client.invalidateQueries({ queryKey: ["auth"] })

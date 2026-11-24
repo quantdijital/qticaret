@@ -37,6 +37,9 @@ const smooth = () =>
  * mark on their thumbnails; the zoom
  * shows the photographs alone. Without videos the gallery is as it was.
  */
+/** The slide's shape: the square unless the shop chose another (`product_main.image_ratio`). */
+const SHAPES = { square: "aspect-square", landscape: "aspect-[4/3]", portrait: "aspect-[3/4]" }
+
 export function Gallery({
   images: all,
   videos = [],
@@ -44,6 +47,7 @@ export function Gallery({
   openOn = null,
   initial,
   words,
+  ratio = "square",
 }: {
   images: ImageView[]
   /** The product's videos (adr/0069); none: the photographs alone. */
@@ -55,7 +59,10 @@ export function Gallery({
   /** The product's first letter, while it has no photograph. */
   initial: string
   words: GalleryWords
+  /** The pictures' shape (the product block's setting); the thumbnails stay square. */
+  ratio?: "square" | "landscape" | "portrait"
 }) {
+  const shape = SHAPES[ratio]
   const rail = useRef<HTMLUListElement>(null)
   const opener = useRef<HTMLButtonElement>(null)
   const [index, setIndex] = useState(0)
@@ -124,7 +131,9 @@ export function Gallery({
 
   if (count === 0) {
     return (
-      <div className="gf-pictures flex aspect-square flex-col items-center justify-center gap-3 rounded-tile bg-paper-2 text-sm text-text-2">
+      <div
+        className={`gf-pictures flex ${shape} flex-col items-center justify-center gap-3 rounded-tile bg-paper-2 text-sm text-text-2`}
+      >
         <span aria-hidden="true" className="text-[10rem] leading-none font-extrabold text-paper-3">
           {initial}
         </span>
@@ -154,7 +163,7 @@ export function Gallery({
                 key={slide.image.src}
                 id={slideId(n + 1)}
                 data-index={n}
-                className="relative aspect-square w-full shrink-0"
+                className={`relative ${shape} w-full shrink-0`}
                 onClick={() => {
                   setZoom(slide.place)
                 }}
@@ -171,7 +180,7 @@ export function Gallery({
                 key={slide.video.id}
                 id={slideId(n + 1)}
                 data-index={n}
-                className="relative aspect-square w-full shrink-0"
+                className={`relative ${shape} w-full shrink-0`}
               >
                 {slide.video.youtube ? (
                   // A YouTube video: its cover until pressed, nothing of YouTube's before

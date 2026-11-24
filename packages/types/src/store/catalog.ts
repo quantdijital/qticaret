@@ -233,7 +233,17 @@ export interface StoreCardFacts {
      */
     duration_days?: number
   }
+  /**
+   * The one badge on the card's photo while the shop has one on: the
+   * product's own line (`text`), else "Çok satan", else "Yeni" (said in
+   * the storefront's words). Absent without one, and from a backend before it.
+   */
+  badge?: StoreCardBadge
 }
+
+/** A card's badge as `GET /store/card-facts` says it. */
+export type StoreCardBadge =
+  { kind: "manual"; text: string } | { kind: "best_seller" } | { kind: "new" }
 
 /**
  * `GET /store/departures/calendar?month=YYYY-MM[&kategori=][&kisi=]`

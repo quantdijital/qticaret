@@ -1,4 +1,5 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { JSONContent } from "@tiptap/react"
 import { sdk } from "@/lib/sdk"
 
 /** A blog's categories and tags (adr/0019 ek 2026-11-03, `/admin/content/terms`). */
@@ -21,7 +22,10 @@ export interface TermView {
 
 export interface Term extends TermView {
   kind: TermKind
+  /** The plain text: the server writes it from the document (adr/0075 Ek 2026-11-24). */
   description: string | null
+  /** The text as written; null: plain text only (the editor opens its paragraphs). */
+  description_doc: JSONContent | null
   /** The shop's order; then by name. */
   rank: number
   /** Posts filed under it, drafts too. */
@@ -35,6 +39,8 @@ export interface TermInput {
   name?: string
   handle?: string
   description?: string | null
+  /** The panel sends the document only; the server writes the plain text beside it. */
+  description_doc?: JSONContent | null
   rank?: number
 }
 

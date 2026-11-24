@@ -151,7 +151,8 @@ export const PAYMENT_ROUTES = [
     methods: ["POST" as const],
     // F15.6 (adr/0044): every way to pay starts here, a hosted card form too:
     // the block list and checkout velocity are counted on starting. adr/0061 Ek C15: a
-    // suspended shop starts no payment (one started before settles through its hook)
+    // suspended shop starts no payment (one started before settles through its hook).
+    // adr/0044 Ek 2026-11-24: Turnstile before all of these (turnstile-routes.ts)
     middlewares: [
       refuseSuspendedCheckout,
       checkoutLimit,

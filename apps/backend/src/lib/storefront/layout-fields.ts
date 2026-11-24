@@ -31,7 +31,6 @@ export const LAYOUT_LIMITS = {
   page: 12,
   items: 24,
   slides: 6,
-  faq: 12,
   related: 12,
 } as const
 

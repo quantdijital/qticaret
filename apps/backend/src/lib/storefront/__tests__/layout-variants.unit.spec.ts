@@ -69,7 +69,7 @@ describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
 
   it("leaves a listed or missing variant and a type without variants as they are", () => {
     const listed = badges({ variant: "lined" })
-    const plain = { id: "sss000001", type: "faq", variant: "nope" }
+    const plain = { id: "yardim0001", type: "help", variant: "nope" }
 
     expect(storedSection(listed)).toBe(listed)
     expect(storedSection(badges())).toEqual(badges())

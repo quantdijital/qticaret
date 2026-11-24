@@ -16,7 +16,7 @@ const CONTRACT_FILE = path.resolve(
   "../../../../../../packages/types/src/store/section-requires.ts"
 )
 
-// The list is empty until the first flagged section (adr/0077 §10): stand-in ones
+// A list of the tests' own beside the real one (whose first is the departures)
 const REQUIRES = { departures: "catalog.booking", tour_map: "catalog.booking", hero: "x.other" }
 
 const sections = [
@@ -32,6 +32,7 @@ describe("sections that need a feature flag (adr/0077 §8)", () => {
     )
     expect(SECTION_REQUIRES).toEqual(contract.SECTION_REQUIRES)
     expect(CAPABILITY_GROUPS).toEqual(contract.CAPABILITY_GROUPS)
+    expect(SECTION_REQUIRES).toEqual({ departures: "catalog.booking" })
   })
 
   it("names a type's flag, none for a type off the list", () => {
@@ -64,7 +65,7 @@ describe("sections that need a feature flag (adr/0077 §8)", () => {
     const resolve = jest.fn()
     const container = { resolve } as unknown as MedusaContainer
 
-    expect(await sectionTypesOff(container)).toEqual(new Map())
+    expect(await sectionTypesOff(container, {})).toEqual(new Map())
     expect(resolve).not.toHaveBeenCalled()
   })
 
@@ -72,7 +73,7 @@ describe("sections that need a feature flag (adr/0077 §8)", () => {
     const isFeatureEnabled = jest.fn(() => Promise.resolve(false))
     const container = { resolve: () => ({ isFeatureEnabled }) } as unknown as MedusaContainer
 
-    const off = await sectionTypesOff(container, { departures: "catalog.booking" })
+    const off = await sectionTypesOff(container)
 
     expect(isFeatureEnabled).toHaveBeenCalledWith("catalog.booking")
     expect(off.get("departures")).toBe("catalog.booking")

@@ -128,6 +128,7 @@ export const alertWords = (t: Translate) => ({
     "checkout.email_invalid",
     "errors.too_many_requests",
     "errors.challenge_failed",
+    "errors.turnstile_failed",
   ]),
   fallback: t("product.alert_failed"),
 })
@@ -170,9 +171,9 @@ export const galleryWords = (t: Translate) => ({
 export type GalleryWords = ReturnType<typeof galleryWords>
 
 /** The description and specs block: its tabs' name and the description's own toggle. */
-export const infoWords = (t: Translate) => ({
+export const infoWords = (t: Translate, unshipped = false) => ({
   tabs: t("product.info_tabs"),
-  description: t("product.description"),
+  description: t(unshipped ? "product.description_plain" : "product.description"),
   specs: t("product.specs"),
   more: t("product.read_more"),
   less: t("product.read_less"),
@@ -205,6 +206,8 @@ export const communityWords = (t: Translate) => ({
     "reviews.photo_uploads_full",
     "product.review_photos_invalid",
     "errors.too_many_requests",
+    "errors.challenge_failed",
+    "errors.turnstile_failed",
   ]),
   reviewFailed: t("product.review_failed"),
   questionFailed: t("product.question_failed"),

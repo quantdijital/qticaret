@@ -10,10 +10,12 @@ import { cartSnapshotOf } from "@/lib/analytics/cart-payloads"
 import { analyticsTags } from "@/lib/analytics/tags"
 import { headerCart } from "@/lib/cart/cart"
 import { siteIcons } from "@/lib/seo/icons"
-import { siteSeo } from "@/lib/store-api/requests"
+import { TurnstileProvider } from "@qticaret/ui/hooks/use-turnstile"
+import { siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { layoutPreviewToken } from "@/lib/views/layout"
+import { POPUP_SETUP, popupsOn } from "@/lib/views/popups"
 import { quickViewAddress } from "@/lib/views/quick-view"
 import { SUGGEST_PATH } from "@/lib/views/search-suggest"
 import { shopView } from "@/lib/views/shop"
@@ -41,15 +43,25 @@ export async function generateMetadata(): Promise<Metadata> {
   return { formatDetection: { telephone: false }, ...(icons ? { icons } : {}) }
 }
 
+/** The widget's public site key from the frame's answer (cached with it); none: the forms send without. */
+async function turnstileSiteKey(): Promise<string | null> {
+  try {
+    return (await storefrontSettings()).turnstile?.site_key ?? null
+  } catch {
+    return null
+  }
+}
+
 export const viewport: Viewport = { width: "device-width", initialScale: 1 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const [shop, settings, requestHeaders, tags, previewToken] = await Promise.all([
+  const [shop, settings, requestHeaders, tags, previewToken, siteKey] = await Promise.all([
     shopView(),
     currentTheme(),
     headers(),
     analyticsTags(),
     layoutPreviewToken(),
+    turnstileSiteKey(),
   ])
   // The shop's theme settings over the theme's own (adr/0053 §B), those the
   // theme takes: one style element with this response's nonce, so the CSP
@@ -62,6 +74,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // The cart the header shows (asked once per render), for its "added" and "taken out": only to a
   // browser whose visitor allowed a tag
   const cart = measured ? cartSnapshotOf(await headerCart()) : NO_CART
+  // The shop's pop-ups (adr/0080): the browser asks for them only while the shop has them on,
+  // never in a design preview; the frame's own answer says so, no call of its own
+  const popups = !preview && (await popupsOn().catch(() => false))
   return (
     <html lang="tr">
       {/* Browser extensions write attributes on <body> before React loads */}
@@ -89,20 +104,33 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           nonce={nonce}
           cart={cart}
         />
-        <theme.Layout
-          shop={shop}
-          t={t}
-          saveCookies={saveCookieChoice}
-          subscribe={subscribeNewsletter}
-          searchSuggest={SUGGEST_PATH}
-          changeCartLine={changeCartLine}
-          // The cards' quick view dialog (adr/0049 Ek 2026-11-15): only while the shop has it on
-          {...(settings.product_card.quick_view
-            ? { quickView: { address: quickViewAddress(previewToken), addToCart } }
-            : {})}
+        {/* Turnstile's public key for the risky forms (adr/0044 Ek 2026-11-24); the widget loads only when one wants it */}
+        <TurnstileProvider
+          setup={{
+            siteKey,
+            label: t("turnstile.label"),
+            hint: t("turnstile.hint"),
+            language: "tr",
+            // The storefront is always light (owner 2026-11-01)
+            theme: "light",
+          }}
         >
-          {children}
-        </theme.Layout>
+          <theme.Layout
+            shop={shop}
+            t={t}
+            saveCookies={saveCookieChoice}
+            subscribe={subscribeNewsletter}
+            searchSuggest={SUGGEST_PATH}
+            changeCartLine={changeCartLine}
+            // The cards' quick view dialog (adr/0049 Ek 2026-11-15): only while the shop has it on
+            {...(settings.product_card.quick_view
+              ? { quickView: { address: quickViewAddress(previewToken), addToCart } }
+              : {})}
+            {...(popups ? { popups: POPUP_SETUP } : {})}
+          >
+            {children}
+          </theme.Layout>
+        </TurnstileProvider>
       </body>
     </html>
   )

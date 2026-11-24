@@ -51,6 +51,11 @@ export function EditorTree({
   return (
     <>
       <EditorNotices
+        doc={doc}
+        onOpenSection={(id) => {
+          setOpened({ kind: "section", id })
+          showSidebar()
+        }}
         pendingMenus={doc.settings.menus}
         onDropMenus={() => {
           act({ type: "settings", settings: { ...doc.settings, menus: null } })

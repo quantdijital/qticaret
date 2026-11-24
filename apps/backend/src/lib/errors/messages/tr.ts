@@ -91,6 +91,23 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
   "brands.name_taken": "Bu adla bir marka zaten var.",
   "brands.unknown": "Marka bulunamadı.",
+  "popups.unknown": "Pop-up bulunamadı.",
+  "popups.text_invalid":
+    "Metin çok uzun ya da kullanılamayan karakterler içeriyor (düz metin; açıklama en çok 500 karakter ve 8 satır).",
+  "popups.link_invalid": "Bağlantı mağazada bir yol (/ ile başlar) ya da https adresi olmalı.",
+  "popups.promotion_required": "Kampanya pop-up'ı için bir indirim seçin.",
+  "popups.promotion_not_allowed": "İndirim yalnız kampanya pop-up'ına bağlanır.",
+  "popups.promotion_unknown": "Seçilen indirim bulunamadı.",
+  "popups.button_incomplete":
+    "Düğme için hem yazı hem bağlantı girin ya da ikisini de boş bırakın.",
+  "popups.button_link_not_allowed": "Bülten pop-up'ının düğmesi formu gönderir; bağlantı almaz.",
+  "popups.pages_required": "Pop-up'ın görüneceği en az bir sayfa türü seçin.",
+  "popups.trigger_value_invalid":
+    "Gecikme 0 ile 120 saniye, kaydırma oranı yüzde 1 ile 100 arasında olmalı.",
+  "popups.frequency_days_required": "Kaç günde bir gösterileceğini girin (1–365).",
+  "popups.dates_invalid": "Bitiş tarihi başlangıçtan sonra olmalı.",
+  "popups.image_unknown":
+    "Görsel medya kütüphanesinden seçilmeli: kütüphanedeki bir görsel olmalı.",
   "bulk_edit.addon_template_unknown": "Seçilen ek seçenek şablonu bulunamadı.",
   "bulk_edit.alt_not_filled": "Bazı görsellerin alt metni yazılamadı; ürün sayfasından ekleyin.",
   "bulk_edit.category_unknown": "Seçilen kategori bulunamadı.",
@@ -216,6 +233,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.tags_too_many": "Bir yazıya en fazla 50 etiket eklenebilir.",
   "content.term_description_invalid":
     "Açıklama en fazla 1000 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.term_description_too_long": "Açıklamanın metni en fazla 5000 karakter olabilir.",
   "content.term_handle_taken":
     "Bu adres başka bir kategoride ya da etikette kullanılıyor; farklı bir ad ya da adres yazın.",
   "content.term_name_invalid":
@@ -902,6 +920,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "listing.id_required": "Hangi listenin istendiği belirtilmeli.",
   "listing.search_query_invalid": "Aramak için bir kelime yazın (en çok 100 karakter).",
   "listing.search_query_unexpected": "Arama metni yalnızca aramada gönderilir.",
+  "listing.region_unknown": "Bölge bulunamadı.",
+  "listing.currency_mismatch": "Para birimi bölgenin para birimiyle aynı olmalı.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
   "legal.unknown": "Böyle bir yasal metin türü yok.",
   "legal.not_published": "Bu metin henüz yayımlanmadı.",
@@ -1190,6 +1210,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Satırın sütun sayısı seçilen düzenle uyuşmuyor; sayfayı yenileyip yeniden deneyin.",
   "storefront_layout.footer_block_invalid":
     "Alt bilgideki bir blok kaydedilemedi; alanlarını kontrol edin (yazı bloğunda başlık, resim ve tablo kullanılamaz; uygulama bağlantıları yalnız App Store ve Google Play adresi olabilir).",
+  "storefront_layout.faq_answer_invalid":
+    "Sık sorulan sorulardaki bir yanıt kaydedilemedi; yanıt boş olamaz, en çok 1500 karakter olur ve yalnız paragraf, liste, kalın, eğik ve bağlantı içerebilir.",
   "storefront_layout.footer_newsletter_twice":
     "Alt bilgide iki bülten formu olamaz; bülten bloğunu ya da alt bilgi grubundaki bülten bölümünü kaldırın ya da gizleyin.",
   // adr/0073: content pages' own sections
@@ -1534,6 +1556,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu şifre bilinen bir veri sızıntısında yer alıyor; başka bir şifre seçin.",
   "fraud.challenge_required":
     "Güvenlik doğrulaması gerekiyor; sayfa bunu kendisi yapar, yeniden deneyin.",
+  "fraud.turnstile_required":
+    "Güvenlik doğrulaması gerekiyor; doğrulamayı tamamlayıp yeniden deneyin.",
+  "fraud.turnstile_failed": "Güvenlik doğrulaması geçilemedi; sayfayı yenileyip yeniden deneyin.",
   "fraud.refused": "Bu işlem şu anda yapılamıyor; lütfen mağazayla iletişime geçin.",
   "fraud.checkout_refused": "Bu sipariş şu anda tamamlanamıyor; lütfen mağazayla iletişime geçin.",
   "fraud.velocity": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin.",

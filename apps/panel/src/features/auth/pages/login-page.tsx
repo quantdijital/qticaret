@@ -12,6 +12,8 @@ import type { MfaChallenge } from "@/features/auth/api/me"
 import { AuthHeading, AuthShell } from "@/features/auth/components/auth-shell"
 import { CodeStep } from "@/features/auth/components/code-step"
 import { PasswordInput } from "@/features/auth/components/password-input"
+import { useStaffTurnstile } from "@/features/auth/components/staff-turnstile"
+import { isTurnstileRefusal } from "@/features/auth/api/gated-post"
 import { errorText, isUnauthorized } from "@/lib/errors"
 
 const schema = z.object({
@@ -24,7 +26,9 @@ export function LoginPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { redirect } = useSearch({ from: "/login" })
-  const login = useLogin()
+  // Every sign-in carries Turnstile's token (adr/0044 Ek 2026-11-24)
+  const turnstile = useStaffTurnstile("staff_login")
+  const login = useLogin(turnstile.gate)
   const [challenge, setChallenge] = useState<MfaChallenge | null>(null)
   const done = () => void navigate({ to: redirect ?? "/" })
   const form = useForm<Form>({
@@ -47,7 +51,9 @@ export function LoginPage() {
   const failure = login.error
     ? isUnauthorized(login.error)
       ? t("login.failed")
-      : errorText(t, login.error)
+      : isTurnstileRefusal(login.error)
+        ? t("login.turnstile.failed")
+        : errorText(t, login.error)
     : null
 
   return (
@@ -77,6 +83,8 @@ export function LoginPage() {
           onSubmit={(event) => {
             void submit(event)
           }}
+          onFocus={turnstile.warm}
+          onPointerDown={turnstile.warm}
           noValidate
         >
           <div className="flex flex-col gap-2">
@@ -107,6 +115,7 @@ export function LoginPage() {
               <Link to="/reset-password">{t("login.forgot")}</Link>
             </Button>
           </div>
+          {turnstile.slot}
           {failure ? (
             <p role="alert" className="text-sm text-destructive">
               {failure}

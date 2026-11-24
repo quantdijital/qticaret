@@ -74,6 +74,18 @@ export interface ProductCardView {
    * today's card. A theme without it draws today's.
    */
   look?: CardLookView
+  /**
+   * The one small badge on the photo while the shop has one on: the
+   * product's own line ("Sınırlı"), "Çok satan" or "Yeni", its words
+   * already said. None: today's card, not a mark more.
+   */
+  badge?: CardBadgeView | null
+}
+
+/** A card's badge (`ProductCardView.badge`): its words and which kind, for a theme's colour. */
+export interface CardBadgeView {
+  text: string
+  kind: "manual" | "new" | "best_seller"
 }
 
 /**
@@ -242,6 +254,12 @@ export interface ProductPageView {
    * service, gift card), the buy column keeps the facts.
    */
   shipping?: ProductShippingView | null
+  /**
+   * The product is not shipped (a dated product, a service, a download, a
+   * gift card): its page's own headings say nothing of a parcel ("Açıklama",
+   * "Güvenceler", "Bunlara da göz atın"). Absent or false: today's words.
+   */
+  unshipped?: boolean
   /**
    * A physical product the shop marked as a sealed hygiene good, in words
    * near the cart form: its right of withdrawal ends once the seal is

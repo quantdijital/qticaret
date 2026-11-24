@@ -9,7 +9,9 @@ import { varyOnPublishableKey } from "../../../../lib/http/vary"
  * `GET /store/content/terms?kind=` (adr/0019 ek 2026-11-03): the blog's
  * categories or tags that file live posts, in the shop's order, each with
  * its archive's path and how many live posts it has. One with none is no
- * page to link to (its archive is noindex and out of the sitemap).
+ * page to link to (its archive is noindex and out of the sitemap). Its
+ * text is not in the list (adr/0075 Ek 2026-11-24): an archive reads its
+ * own from `/store/content/terms/:id/description`.
  */
 export async function GET(
   req: MedusaRequest<unknown, StoreGetContentTermsType>,
@@ -18,7 +20,7 @@ export async function GET(
   const { kind } = req.validatedQuery
   const [terms, live] = await Promise.all([
     req.scope.resolve<ContentModuleService>(CONTENT_MODULE).listContentTerms(kind ? { kind } : {}, {
-      select: ["id", "kind", "name", "handle", "description", "rank"],
+      select: ["id", "kind", "name", "handle", "rank"],
       take: null,
     }),
     postCounts(req.scope, null, { live: true }),
@@ -32,7 +34,6 @@ export async function GET(
       .map((term) => ({
         ...termView(term),
         kind: term.kind,
-        description: term.description,
         post_count: live.get(term.id) ?? 0,
       })),
   })

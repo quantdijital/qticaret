@@ -73,6 +73,7 @@
     "menus": "Menus",
     "themeEditor": "Theme editor",
     "bulkMessages": "Bulk messages",
+    "popups": "Pop-ups",
     "paymentLinks": "Payment links",
     "media": "Media library",
     "collections": "Collections",
@@ -104,6 +105,11 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "noAccount": "No account? Ask the shop's owner for an invitation.",
+    "turnstile": {
+      "label": "Security check",
+      "hint": "Complete the security check below to continue.",
+      "failed": "The security check did not pass. Try again; if it keeps failing, reload the page."
+    },
     "intro": {
       "promise": "Run your shop from one panel.",
       "orders": {
@@ -794,6 +800,11 @@
             "label": "Bulk e-mail and SMS",
             "summary": "Bulk e-mail and SMS to consented customers from the panel.",
             "description": "Bulk e-mail and SMS campaigns to consented customers from the panel."
+          },
+          "popups": {
+            "label": "Pop-ups",
+            "summary": "Info, campaign and newsletter pop-ups on the storefront.",
+            "description": "From Marketing > Pop-ups the storefront shows an info, campaign code or newsletter pop-up, by page, device, visitor and frequency. Turned off, no pop-up shows and none is deleted."
           }
         },
         "seo": {
@@ -3209,6 +3220,7 @@
     "placeholder": "Order number, customer, product, SKU, tracking number or page…",
     "empty": "No results.",
     "pages": "Pages",
+    "screens": "Screens",
     "actions": "Actions",
     "appearance": "Appearance settings",
     "trigger": "Search or jump to…",
@@ -3615,6 +3627,19 @@
       "blockedIn_one": "Discount not struck through on {{count}} variant",
       "blockedIn_other": "Discount not struck through on {{count}} variants"
     },
+    "badges": {
+      "title": "Product badges",
+      "description": "A small badge at the top left of the product card's photo. A card shows one: the product's own, else Best seller, else New.",
+      "manual": "The product's own badge",
+      "manualHint": "The short text you write on the product's page (e.g. \"Limited\").",
+      "bestSeller": "Best seller",
+      "bestSellerHint": "On products sold at least this many times in the last 30 days.",
+      "bestSellerMin": "Units sold (30 days)",
+      "new": "New",
+      "newHint": "On products added within this many days.",
+      "newDays": "Days",
+      "numberInvalid": "Enter a valid number."
+    },
     "catalog": {
       "card": "Catalog details",
       "hint": "Used in search results and product feeds.",
@@ -3639,6 +3664,9 @@
       "withdrawalExcludedHint": "On a physical product it is the sealed-goods warning (MSY art. 15/1-ç): the return can be requested, and one that arrives with its protective seal opened is refused at receipt. A digital product or a service stays outside the right outright (art. 15/1-ğ, h). For a made-to-order good (art. 15/1-b), mark its add-on \"Outside the right of withdrawal\".",
       "giftCard": "Gift card",
       "giftCardHint": "Its variants are the card's amounts. Once paid, a card is issued for each unit and e-mailed to the recipient. The product becomes digital, with no shipping; turning off stock tracking on its variants is recommended.",
+      "badge": "Product badge",
+      "badgeHint": "Shown on the card's photo, e.g. \"Limited\". {{max}} characters at most; leave empty for none.",
+      "badgeTooLong": "{{max}} characters at most.",
       "giftCardFeatures": "Go to features",
       "kindGiftCard": "A gift card is a digital product; its kind cannot change."
     },
@@ -7931,6 +7959,7 @@
       },
       "tabs": {
         "general": "General",
+        "description": "Description",
         "seo": "Search appearance"
       },
       "fields": {
@@ -7941,7 +7970,6 @@
       },
       "nameRequired": "Enter a name.",
       "handleHint": "If an archive with live posts gets a new address, the old one redirects to it.",
-      "descriptionHint": "Shown at the top of the archive page and in search results; when empty, the latest posts' titles are used.",
       "rankHint": "Lower numbers come first; equal ones are sorted by name.",
       "fallbackDescription": "{{name}} posts: {{titles}}",
       "delete": {
@@ -8036,6 +8064,7 @@
     "listingDescription": {
       "title": "Description",
       "hint": "Shown at the bottom of the page on the storefront, after the products. Headings and paragraphs you paste from elsewhere are kept; Theme settings > Listing text sets how it looks.",
+      "hintBlog": "Shown at the bottom of the page on the storefront, after the posts. Headings and paragraphs you paste from elsewhere are kept; Theme settings > Listing text sets how it looks.",
       "ai": "Suggest a description with AI"
     },
     "postDraft": {
@@ -8829,6 +8858,7 @@
       },
       "row": {
         "problem": "A field needs fixing",
+        "gone": "A record it shows was deleted; pick it again",
         "scheduled": "Scheduled",
         "moveUpOf": "Move {{name}} up",
         "moveDownOf": "Move {{name}} down",
@@ -8986,6 +9016,10 @@
           "name": "Numbered steps",
           "description": "3–6 steps of a process in order, numbered: a title, a short intro and an optional single link under them."
         },
+        "departures": {
+          "name": "Upcoming departures",
+          "description": "Your dated products' nearest departures: date, tour name, places left and price; the storefront reads them live."
+        },
         "search_box": {
           "name": "Search box",
           "description": "The shop's search box, with an optional title and short intro. Its fields are chosen in Theme › Search box."
@@ -9056,6 +9090,10 @@
           "pane": "Text only",
           "with_image": "Text with image",
           "article": "Page text"
+        },
+        "faq": {
+          "standard": "Beside the heading",
+          "page": "FAQ page"
         },
         "posts": {
           "grid": "Tiles",
@@ -9215,7 +9253,8 @@
         "faq": "Frequently asked questions",
         "related_products": "Related products",
         "price_bands": "Shop by price",
-        "steps": "How it works"
+        "steps": "How it works",
+        "departures": "Upcoming departures"
       },
       "fields": {
         "eyebrow": "Eyebrow",
@@ -9814,6 +9853,10 @@
             "hint": "The attribute a visitor picks (e.g. region, city). Only filterable attributes with choices are listed.",
             "none": "Word box (no attribute)"
           },
+          "placeholder": {
+            "label": "Word box hint",
+            "hint": "Shown in the word box before a search (e.g. \"Where would you like to go?\"). Empty: \"Search products, categories or brands\"."
+          },
           "show_category": {
             "label": "Category field",
             "hint": "Lets the visitor pick one of the top categories."
@@ -9843,13 +9886,23 @@
         "question": "Question {{number}}'s text",
         "answer": "Question {{number}}'s answer",
         "add": "Add question",
-        "hint": "Up to {{max}} questions; answers may hold the shop's details.",
+        "hint": "Up to {{max}} rows; questions under a heading show in its group. Answers may use the shop's details.",
         "openFirst": "First question open",
         "openFirstTerm": "open first",
         "openFirstHint": "The first answer shows when the page opens.",
         "singleOpen": "One question open at a time",
         "singleOpenTerm": "accordion",
-        "singleOpenHint": "Opening a question closes the one already open."
+        "singleOpenHint": "Opening a question closes the one already open.",
+        "addHeading": "Add heading",
+        "headingItem": "Heading {{number}}",
+        "headingText": "Group heading",
+        "headingHint": "Groups the questions under it, e.g. \"Shipping and delivery\".",
+        "duplicate": "{{item}}: add a copy",
+        "answerEmpty": "No answer yet",
+        "answerEdit": "Edit the answer",
+        "answerDescription": "You can use paragraphs, lists, bold, italic and links.",
+        "answerPlaceholder": "Write the answer",
+        "done": "Done"
       },
       "related": {
         "source": "Which products",
@@ -10164,6 +10217,10 @@
           "description": "How the shop works: the pages that show the contact form and the payment and shipping facts. These settings are not part of the draft: Save puts them live at once, without waiting for Publish. Maintenance mode is in Settings > Maintenance mode."
         }
       },
+      "goneRecords": {
+        "notice_one": "A record one section shows (a category, product, collection, brand or page) was deleted. The storefront leaves it out; open the marked section and pick again.",
+        "notice_other": "Records {{count}} sections show (a category, product, collection, brand or page) were deleted. The storefront leaves them out; open the marked sections and pick again."
+      },
       "pendingMenus": {
         "text_one": "The draft carries a restored version's menu: Publish replaces the shop's menu with it.",
         "text_other": "The draft carries a restored version's {{count}} menus: Publish replaces the shop's menus with them.",
@@ -10296,6 +10353,10 @@
           "label": "Highlighted link",
           "term": "link",
           "hint": "One standout link at the end of the main menu on the menu bar (e.g. Offers)."
+        },
+        "action_button": {
+          "label": "Action button",
+          "hint": "One button on the right beside the cart on wide screens (e.g. Book now). On phones, first in the menu. Empty: no button."
         },
         "utility_bar": {
           "label": "Top utility strip",
@@ -11098,7 +11159,7 @@
         "outlineHint": "A long text shows an outline of its headings beside it.",
         "questions": "Questions and answers",
         "questionsTerm": "soru-cevap",
-        "questionsHint": "A text of questions and answers shows as grouped collapsible questions.",
+        "questionsHint": "For older pages: bold questions in the text show as expandable questions. Use the \"FAQ\" section for new questions.",
         "contactBody": "Text",
         "form": "Contact form",
         "formTerm": "iletişim formu",
@@ -11163,6 +11224,26 @@
           "hint": "How the number before each step is written.",
           "padded": "01, 02",
           "plain": "1, 2"
+        }
+      },
+      "departures": {
+        "intro": "Intro",
+        "source": "Departures",
+        "sourceTerm": "source",
+        "sourceHint": "The nearest departures on sale with places left, by date; a tour at most twice.",
+        "sources": {
+          "all": "Every dated product",
+          "category": "A category's products",
+          "collection": "A collection's products"
+        },
+        "limitTerm": "limit",
+        "limitHint": "Between {{min}} and {{max}} departures.",
+        "layout": {
+          "label": "Layout",
+          "term": "layout",
+          "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
+          "list": "List",
+          "cards": "Cards"
         }
       },
       "searchBox": {
@@ -11324,6 +11405,16 @@
           "hint": "On a narrow screen the photos slide sideways or stack.",
           "scroll": "Slide sideways",
           "stack": "Stacked"
+        }
+      },
+      "productMain": {
+        "image_ratio": {
+          "label": "Image ratio",
+          "term": "image ratio",
+          "hint": "The shape of the large picture on the product page. Thumbnails stay square.",
+          "square": "Square",
+          "landscape": "Landscape 4:3",
+          "portrait": "Portrait 3:4"
         }
       }
     },
@@ -11854,6 +11945,187 @@
       }
     }
   },
+  "popups": {
+    "title": "Pop-ups",
+    "description": "Windows on the storefront with news, a discount code or a newsletter sign-up.",
+    "new": "New pop-up",
+    "newOf": "New pop-up: {{type}}",
+    "views": "Pop-up types",
+    "allTypes": "All",
+    "search": "Search pop-ups",
+    "empty": "No pop-ups yet.",
+    "emptyFiltered": "No pop-ups match this choice.",
+    "noAccess": "You may not create pop-ups.",
+    "switchLabel": "{{name}} on",
+    "turnedOn": "Pop-up turned on.",
+    "turnedOff": "Pop-up turned off.",
+    "delete": "Delete",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteDescription": "The pop-up leaves the storefront; its counts are kept.",
+    "deleted": "Pop-up deleted.",
+    "gate": {
+      "off": "Pop-ups are off. Turned on, the saved pop-ups come back as they were.",
+      "turnOn": "Turn on in Features"
+    },
+    "state": {
+      "off": "Off",
+      "scheduled": "Scheduled",
+      "live": "Live",
+      "ended": "Ended",
+      "campaign_inactive": "Campaign ended"
+    },
+    "types": {
+      "info": "Info",
+      "campaign": "Campaign",
+      "newsletter": "Newsletter"
+    },
+    "typeHints": {
+      "info": "An announcement, shipping news or a button to a page.",
+      "campaign": "A discount's code, with a copy button.",
+      "newsletter": "A newsletter sign-up form."
+    },
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "state": "Status",
+      "dates": "Dates",
+      "active": "On"
+    },
+    "dates": {
+      "from": "From {{date}}",
+      "until": "Until {{date}}",
+      "open": "No end"
+    },
+    "counts": {
+      "impressions": "Views",
+      "clicks": "Clicks",
+      "closes": "Closes",
+      "signups": "Sign-ups"
+    },
+    "choices": {
+      "page_scope": {
+        "all": "All pages",
+        "selected": "Selected pages"
+      },
+      "pages": {
+        "home": "Home",
+        "category": "Category",
+        "product": "Product",
+        "content": "Content page"
+      },
+      "device": {
+        "all": "Desktop and mobile",
+        "desktop": "Desktop only",
+        "mobile": "Mobile only"
+      },
+      "visitor": {
+        "any": "All visitors",
+        "new": "First-time visitors",
+        "returning": "Returning visitors"
+      },
+      "membership": {
+        "any": "Members and guests",
+        "member": "Members only",
+        "guest": "Guests only"
+      },
+      "trigger": {
+        "delay": "After a few seconds",
+        "scroll": "When the page is scrolled"
+      },
+      "frequency": {
+        "session": "Once a visit",
+        "days": "Every few days",
+        "until_closed": "Until closed"
+      },
+      "layout": {
+        "modal": "Centred window",
+        "corner": "Corner card"
+      }
+    },
+    "form": {
+      "content": "Content",
+      "name": "Name",
+      "nameHint": "Shown in the panel only.",
+      "type": "Type",
+      "title": "Title",
+      "body": "Text",
+      "submitLabel": "Button text",
+      "submitLabelHint": "Left empty, it says \"Subscribe\".",
+      "buttonLabel": "Button text",
+      "buttonHref": "Button link",
+      "image": "Image",
+      "imageAdd": "Add image",
+      "imageAlt": "Image description",
+      "promotion": "Discount",
+      "promotionPlaceholder": "Choose a discount",
+      "promotionOff": "off",
+      "automaticPromotion": "Automatic discount",
+      "noPromotions": "No discounts yet.",
+      "newPromotion": "Create a discount",
+      "audience": "Who and where",
+      "pages": "Pages",
+      "device": "Device",
+      "visitor": "Visitor",
+      "membership": "Membership",
+      "timing": "When",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "endsAtHint": "Left empty, it runs until turned off.",
+      "trigger": "Opens",
+      "delaySeconds": "Wait",
+      "scrollPercent": "Scrolled",
+      "secondsUnit": "s",
+      "frequency": "How often",
+      "frequencyDays": "Every how many days",
+      "daysUnit": "days",
+      "look": "Look",
+      "layout": "Layout",
+      "advanced": "Advanced",
+      "priority": "Priority",
+      "priorityHint": "When more than one pop-up fits a page, the larger number shows first.",
+      "activate": "Publish on save",
+      "create": "Create pop-up",
+      "saved": "Pop-up saved.",
+      "created": "Pop-up created.",
+      "invalid": "Some fields are missing or wrong."
+    },
+    "errors": {
+      "tooLong": "This field is too long.",
+      "textInvalid": "Enter plain text; some characters cannot be used.",
+      "nameRequired": "Enter a name.",
+      "titleRequired": "Enter a title.",
+      "tooManyLines": "The text may have at most 8 lines.",
+      "linkInvalid": "Enter a path on the shop (starting with /) or an https address.",
+      "number": "Enter a number.",
+      "priority": "Priority must be between 0 and 1000.",
+      "promotionRequired": "Choose a discount.",
+      "buttonLinkRequired": "Enter a link for the button.",
+      "buttonLabelRequired": "Enter the button's text for the link.",
+      "pagesRequired": "Choose at least one page.",
+      "delayRange": "The wait must be between 0 and 120 seconds.",
+      "scrollRange": "The scroll must be between 1 and 100 per cent.",
+      "daysRange": "Enter a number between 1 and 365 days.",
+      "dateInvalid": "Enter a valid date.",
+      "datesOrder": "The end must be after the start."
+    },
+    "preview": {
+      "title": "Preview",
+      "titlePlaceholder": "Title",
+      "automatic": "Applies in the cart on its own",
+      "email": "Your e-mail address",
+      "subscribe": "Subscribe",
+      "codePlaceholder": "CODE",
+      "device": "Preview device",
+      "desktop": "Desktop",
+      "mobile": "Mobile"
+    },
+    "stats": {
+      "title": "Results",
+      "clickRate": "Click rate {{rate}}",
+      "last30": "Views, last 30 days",
+      "daily": "Last 30 days, daily views"
+    }
+  },
   "paymentLinks": {
     "title": "Payment links",
     "description": "Orders taken on the phone, in messages or at the counter: the system prices them, the customer pays through a link.",
@@ -12214,6 +12486,7 @@
         "category": "Category image",
         "etbis_qr": "ETBİS QR code",
         "collection": "Collection picture",
+        "popup": "Pop-up",
         "storefront_design": "Saved look",
         "favicon": "Site icon"
       },

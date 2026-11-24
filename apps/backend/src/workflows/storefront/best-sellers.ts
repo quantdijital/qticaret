@@ -2,6 +2,7 @@ import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
+import { logger } from "../../lib/logging"
 import { LAYOUT_LIMITS } from "../../lib/storefront/layout"
 
 /**
@@ -39,9 +40,9 @@ const IN_CHANNELS = `
           WHERE psc.product_id = p.id AND psc.deleted_at IS NULL
             AND psc.sales_channel_id = ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb))))`
 
-/** The statement; `channels` adds the sales channel condition. */
-export function bestSellersStatement(channels: boolean): string {
-  return `SELECT li.product_id
+/** The sales the rankings count, from the window on (one bound value), per product. */
+function salesBody(channels: boolean): string {
+  return `
   FROM "order" o
   JOIN order_item oi ON oi.order_id = o.id AND oi.version = o.version AND oi.deleted_at IS NULL
   JOIN order_line_item li ON li.id = oi.item_id AND li.deleted_at IS NULL
@@ -60,9 +61,34 @@ export function bestSellersStatement(channels: boolean): string {
             AND pc.status IN (${quoted(PAID)})
             AND NOT (coalesce(pc.captured_amount, 0) > 0
                      AND coalesce(pc.refunded_amount, 0) >= pc.captured_amount)))${channels ? IN_CHANNELS : ""}
- GROUP BY li.product_id
+ GROUP BY li.product_id`
+}
+
+/** The statement; `channels` adds the sales channel condition. */
+export function bestSellersStatement(channels: boolean): string {
+  return `SELECT li.product_id${salesBody(channels)}
 HAVING sum(${UNITS}) > 0
  ORDER BY sum(${UNITS}) DESC, max(o.created_at) DESC, li.product_id
+ LIMIT ?`
+}
+
+/**
+ * The most products "Çok satan" holds at once: a bound on what one held
+ * read keeps in memory, far past a shop whose threshold still means
+ * something. Past it the most sold are kept and the log says so, once.
+ */
+export const SOLD_AT_LEAST_CAP = 5000
+
+/**
+ * The products that sold at least a number of units over the window, the
+ * same sales as the ranking's, most sold first: the window, the least and
+ * the most rows (all bound). Only ids: no order, customer or amount leaves
+ * the statement.
+ */
+export function soldAtLeastStatement(): string {
+  return `SELECT li.product_id${salesBody(false)}
+HAVING sum(${UNITS}) >= ?
+ ORDER BY sum(${UNITS}) DESC, li.product_id
  LIMIT ?`
 }
 
@@ -100,4 +126,43 @@ export function bestSellerIds(
 ): Promise<string[]> {
   const key = `${String(days)}|${channels ? [...new Set(channels)].sort().join(",") : "*"}`
   return held(key, () => readBestSellers(container, days, channels, now))
+}
+
+// A card's "Çok satan" (product badges) follows the sales as loosely as the rail
+const sold = createTtlCache<ReadonlySet<string>>({ ttlMs: BEST_SELLERS_TTL_MS, maxEntries: 8 })
+
+// The cap's warning, once a process: a threshold set too low says so without filling the log
+let capLogged = false
+
+/**
+ * The shop's products that sold at least `minUnits` units over the last
+ * `days`, whatever the channel (the card's own read keeps to the
+ * shopper's): one statement for the whole shop, held a few minutes per
+ * window and least, so a page of cards never asks per product.
+ */
+export function soldAtLeastIds(
+  container: Pick<MedusaContainer, "resolve">,
+  days: number,
+  minUnits: number,
+  now: Date = new Date()
+): Promise<ReadonlySet<string>> {
+  return sold(`${String(days)}|${String(minUnits)}`, async () => {
+    const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+    const since = new Date(now.getTime() - days * DAY_MS)
+    // One past the cap tells a full answer from one cut short
+    const result = await knex.raw<{ rows: { product_id: string }[] }>(soldAtLeastStatement(), [
+      since,
+      minUnits,
+      SOLD_AT_LEAST_CAP + 1,
+    ])
+    if (result.rows.length > SOLD_AT_LEAST_CAP && !capLogged) {
+      capLogged = true
+      logger.warn({
+        event: "storefront.best_seller_cap",
+        cap: SOLD_AT_LEAST_CAP,
+        min_units: minUnits,
+      })
+    }
+    return new Set(result.rows.slice(0, SOLD_AT_LEAST_CAP).map((row) => row.product_id))
+  })
 }

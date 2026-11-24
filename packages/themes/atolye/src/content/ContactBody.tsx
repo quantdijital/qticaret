@@ -20,6 +20,7 @@ const CONTACT_ERRORS = [
   "contact.phone_invalid",
   "contact.invalid",
   "errors.challenge_failed",
+  "errors.turnstile_failed",
 ]
 
 const contactWords = (t: Translate): ContactWords => ({

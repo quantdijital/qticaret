@@ -70,7 +70,11 @@ export function PaymentForm({
   const [picked, setMethod] = useState(methods[0]?.id ?? "")
   // A code applied from the summary can change the ways offered (nothing left to pay: credit alone)
   const method = methods.some((each) => each.id === picked) ? picked : (methods[0]?.id ?? "")
-  const { error, checking, pending, onSubmit } = useChallengeForm(placeOrder)
+  // Every payment's start carries Turnstile's token (adr/0044 Ek 2026-11-24)
+  const { error, checking, pending, onSubmit, slot, warm } = useChallengeForm(placeOrder, {
+    action: "checkout",
+    eager: true,
+  })
   const kind = methods.find((each) => each.id === method)?.kind ?? "card"
   const message = error ? (words.errors[error] ?? words.fallback) : null
   const placed = error !== null && (ACCEPT_ERRORS.includes(error) || AGE_ERRORS.includes(error))
@@ -83,6 +87,8 @@ export function PaymentForm({
         emitShopEvent({ type: "add_payment_info", payment: kind })
         onSubmit(event)
       }}
+      onFocus={warm}
+      onPointerDown={warm}
       className="flex flex-col gap-8"
     >
       <fieldset className="flex flex-col gap-3">
@@ -120,6 +126,7 @@ export function PaymentForm({
         message={message}
         words={words}
       />
+      {slot}
       <div className="sticky bottom-0 z-(--z-raised) -mx-5 flex flex-col gap-3 bg-paper-2 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:bg-transparent sm:p-0">
         <div role="alert" className="empty:hidden">
           {placed ? (

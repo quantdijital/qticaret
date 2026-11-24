@@ -1,5 +1,5 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
-import { HEADER_CATALOG_LIMITS, SEARCH_BOX_LIMITS } from "@qticaret/types"
+import { DEPARTURES_LIMITS, HEADER_CATALOG_LIMITS, SEARCH_BOX_LIMITS } from "@qticaret/types"
 import { LAYOUT_LIMITS as L, MARQUEE_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
@@ -10,6 +10,7 @@ import { collageProblems, statsProblems, stepsProblems } from "./points-problems
 import { postsProblems, splitEyebrowProblem } from "./band-problems"
 import { marqueeLimitIds } from "./page-limits"
 import { footerBandProblem, footerRowsProblems } from "./footer-rows-problems"
+import { faqProblems } from "./faq-problems"
 import { allSections } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
@@ -123,6 +124,22 @@ function fieldsOf(section: AnySection): Found[] {
       ]
     case "photo_collage":
       return collageProblems(section)
+    // Upcoming departures: their category or collection chosen, the intro's length (adr/0077 §10)
+    case "departures": {
+      const { source } = section
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ["intro", textProblem(section.intro, DEPARTURES_LIMITS.intro)],
+        [
+          "source",
+          source.kind === "category" && source.category_id === ""
+            ? "categoryRequired"
+            : source.kind === "collection" && source.collection_id === ""
+              ? "collectionRequired"
+              : null,
+        ],
+      ]
+    }
     case "banner":
       return [
         ["slides", section.slides.length === 0 ? "slidesRequired" : null],
@@ -178,26 +195,7 @@ function fieldsOf(section: AnySection): Found[] {
       ]
     }
     case "faq":
-      return [
-        ["title", textProblem(section.title, L.title)],
-        ...section.items.flatMap((item, index): Found[] => {
-          const at = `items.${String(index)}`
-          return [
-            [
-              `${at}.question`,
-              item.question.trim() === ""
-                ? "questionRequired"
-                : textProblem(item.question, L.question),
-            ],
-            [
-              `${at}.answer`,
-              item.answer.trim() === ""
-                ? "answerRequired"
-                : textProblem(item.answer, L.answer, true),
-            ],
-          ]
-        }),
-      ]
+      return [["title", textProblem(section.title, L.title)], ...faqProblems(section.items)]
     case "newsletter":
     case "help":
       return [
@@ -246,7 +244,8 @@ function fieldsOf(section: AnySection): Found[] {
             ["strip_note", textProblem(section.strip_note, HEADER_CATALOG_LIMITS.strip_note)],
             ["strip_note_link", linkProblem(section.strip_note_link)],
           ]
-        : []
+        : // Every other header's action button
+          [["highlight_link", linkProblem(section.highlight_link ?? null)]]
     // A content page's own: the contact text is checked on the server, the facts have no fields
     case "footer_bar":
     case "product_main":

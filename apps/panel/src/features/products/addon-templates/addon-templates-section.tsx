@@ -21,13 +21,15 @@ function useColumns(onOpen: (template: AddonTemplate) => void): Column<AddonTemp
   return [
     {
       key: "name",
+      // Long names and attribute lists wrap onto new lines; the table never scrolls sideways
+      className: "whitespace-normal",
       header: t(`${T}.columns.name`),
       cell: (template) => (
         <div className="flex min-w-0 flex-col items-start">
           {/* The row opens it too; this is the keyboard's way in */}
           <button
             type="button"
-            className="max-w-full truncate text-left font-medium hover:underline"
+            className="max-w-full text-left font-medium wrap-anywhere hover:underline"
             onClick={(event) => {
               event.stopPropagation()
               onOpen(template)
@@ -35,7 +37,7 @@ function useColumns(onOpen: (template: AddonTemplate) => void): Column<AddonTemp
           >
             {template.name}
           </button>
-          <span className="max-w-full truncate text-xs text-muted-foreground">
+          <span className="max-w-full text-xs text-muted-foreground wrap-anywhere">
             {template.addons.map((addon) => addon.label).join(", ")}
           </span>
         </div>
@@ -45,16 +47,23 @@ function useColumns(onOpen: (template: AddonTemplate) => void): Column<AddonTemp
       key: "used",
       header: t(`${T}.columns.used`),
       align: "right",
+      // On a phone the parts stack instead of widening the table; each stays whole
+      className: "whitespace-normal",
       cell: (template) => (
-        <span className="text-muted-foreground tabular-nums">
+        <span className="flex flex-wrap justify-end gap-x-1 text-muted-foreground tabular-nums">
           {[
             t(`${T}.productCount`, { count: template.product_count }),
             template.attribute_templates.length > 0
               ? t(`${T}.carriedCount`, { count: template.attribute_templates.length })
               : null,
           ]
-            .filter(Boolean)
-            .join(" · ")}
+            .filter((part): part is string => part !== null)
+            .map((part, index) => (
+              <span key={part} className="whitespace-nowrap">
+                {index > 0 ? "· " : null}
+                {part}
+              </span>
+            ))}
         </span>
       ),
     },
