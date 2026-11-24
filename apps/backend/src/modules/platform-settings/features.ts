@@ -92,6 +92,13 @@ export const AI_REVIEWS = "ai.reviews"
 export const AI_STOREFRONT_SEARCH = "ai.storefront_search"
 
 /**
+ * The panel assistant (adr/0079): staff's own words go to the shop's AI
+ * service, so the owner turns it on (`permission-rules.ts` OWNER_ONLY);
+ * off until they do.
+ */
+export const AI_ASSISTANT = "ai.assistant"
+
+/**
  * Flags taken out of the registry. A shop may still hold a stored value for
  * one (an override row, a plan document's key); reads skip it as an unknown
  * key and nothing writes it again. `content.ai_drafts`: the drafts of
@@ -231,6 +238,14 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.ai_storefront_search.label",
     descriptionKey: "qticaret.features.ai_storefront_search.description",
+  },
+  // adr/0079 §8: staff's words go to the service, so only the owner turns it on; off, the
+  // assistant's routes answer as if they did not exist
+  [AI_ASSISTANT]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.ai_assistant.label",
+    descriptionKey: "qticaret.features.ai_assistant.description",
   },
 })
 

@@ -7,6 +7,7 @@ import {
   MedusaService,
   generateEntityId,
 } from "@medusajs/framework/utils"
+import { assistantUserGroup } from "../../lib/ai/limits"
 import type { AiDailyGroup } from "../../lib/ai/limits"
 import { AiDailyUsage } from "./models/ai-daily-usage"
 import { AiPreference } from "./models/ai-preference"
@@ -168,6 +169,10 @@ class AiModuleService extends MedusaService({ AiUsage, AiPreference, AiDailyUsag
   async forgetStaff(userId: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
     const manager = managerOf(sharedContext)
     await manager.execute(`DELETE FROM ai_preference WHERE user_id = ?`, [userId])
+    // Their own assistant counters (adr/0079 §8) name them; the shop's stays
+    await manager.execute(`DELETE FROM ai_daily_usage WHERE limit_group = ?`, [
+      assistantUserGroup(userId),
+    ])
     await manager.execute(
       `UPDATE ai_usage SET requested_by = NULL, updated_at = now() WHERE requested_by = ?`,
       [userId]

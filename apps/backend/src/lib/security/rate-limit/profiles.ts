@@ -116,6 +116,13 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: 10 * MINUTE },
     perIdentityAnyIp: { max: 5, windowMs: 10 * MINUTE },
   },
+  // adr/0079 §8: the panel assistant's turns, ten a minute a staff member wherever they
+  // are (a turn is up to four model calls, each under the day's own ceiling too)
+  ai_assistant: {
+    name: "ai_assistant",
+    perIp: { max: 30, windowMs: MINUTE },
+    perIdentityAnyIp: { max: 10, windowMs: MINUTE },
+  },
   // adr/0071 §8: image and video work, dearer and slower than text: narrower
   ai_media: {
     name: "ai_media",

@@ -46,11 +46,31 @@ export interface OpenAiCompatibleTarget {
    * `maxBytes` before encoding. Left out: the target takes no image.
    */
   imageInput?: { maxBytes: number }
+  /** Tool calling (adr/0079 §2): the panel assistant's only way in. */
+  toolCalls?: ToolCallSupport
+}
+
+/**
+ * Tool calling as the service documents it for this endpoint (adr/0079
+ * §2): `tools` in the request, `tool_calls` in the answer, a result back
+ * as a `tool` message with its `tool_call_id`. A record is written after
+ * the pages are read, with their date and addresses; `verified: false`
+ * keeps the service out of the assistant (its other tasks run as before).
+ */
+export interface ToolCallSupport {
+  verified: boolean
+  /** `YYYY-MM-DD`, the day the pages were read. */
+  verifiedOn: string
+  /** The pages read. */
+  source: readonly string[]
+  /** `tool_choice: "auto"` is documented: sent; else left out (the service's default). */
+  toolChoice: boolean
 }
 
 export interface FakeTarget {
   connector: "fake"
   model: string
+  toolCalls?: ToolCallSupport
 }
 
 /** What an `image_edit` service is asked to do with the background (`image_background`). */
@@ -168,6 +188,19 @@ const DEEPSEEK: AiService = {
       jsonMode: true,
       // Thinking is on unless turned off; a title needs none
       body: { thinking: { type: "disabled" } },
+      /*
+       * Tool calling, read 2026-11-24 for adr/0079 §2: `tools` (function name,
+       * description, JSON Schema parameters), `tool_calls` in the answer, the result as
+       * `role: "tool"` with `tool_call_id`. `strict` only on the beta address (not used);
+       * `minLength`/`maxLength` are not enforced: the loop checks every argument again.
+       * `tool_choice` is not on the guide page: left out (its default, `auto`, with tools).
+       */
+      toolCalls: {
+        verified: true,
+        verifiedOn: "2026-11-24",
+        source: ["https://api-docs.deepseek.com/guides/tool_calls"],
+        toolChoice: false,
+      },
     },
     vision: {
       connector: "openai-compatible",
@@ -231,6 +264,17 @@ const MINIMAX: AiService = {
       jsonMode: false,
       // The model always thinks; its thinking goes to its own field, not into the text
       body: { reasoning_split: true, reasoning_effort: "low" },
+      /*
+       * Tool calling, read 2026-11-24 for adr/0079 §2: `tools` is taken, `tool_calls`
+       * documented only on a non-streaming answer, `tool_choice` not documented, nor how
+       * a tool's result goes back. Not verified: the assistant cannot choose this service.
+       */
+      toolCalls: {
+        verified: false,
+        verifiedOn: "2026-11-24",
+        source: ["https://platform.minimax.io/docs/api-reference/text-chat-openai"],
+        toolChoice: false,
+      },
     },
     vision: {
       connector: "openai-compatible",
@@ -334,6 +378,21 @@ const GEMINI: AiService = {
       jsonMode: false,
       // Thinking cannot be turned off on this model; the lowest documented effort in the example
       body: { reasoning_effort: "low" },
+      /*
+       * Tool calling, read 2026-11-24 for adr/0079 §2 (Context7
+       * /websites/ai_google_dev_gemini-api): the compatibility endpoint takes `tools` and
+       * `tool_choice` (`auto`) and answers `tool_calls`, as OpenAI's chat completions do.
+       * The native API's `validated` mode is not used (one shared way, adr/0071 karar 2).
+       */
+      toolCalls: {
+        verified: true,
+        verifiedOn: "2026-11-24",
+        source: [
+          "https://ai.google.dev/gemini-api/docs/openai",
+          "https://ai.google.dev/gemini-api/docs/function-calling",
+        ],
+        toolChoice: true,
+      },
     },
     vision: {
       connector: "openai-compatible",
@@ -475,7 +534,12 @@ export const FAKE_SERVICE: AiService = {
   hosts: [],
   downloadHosts: [],
   capabilities: {
-    text: { connector: "fake", model: "fake-text" },
+    text: {
+      connector: "fake",
+      model: "fake-text",
+      // Its own scenario (connectors/fake-tools.ts): no pages to read, nothing leaves the machine
+      toolCalls: { verified: true, verifiedOn: "2026-11-24", source: [], toolChoice: false },
+    },
     vision: { connector: "fake", model: "fake-vision" },
     image_edit: {
       connector: "fake-image",
@@ -502,4 +566,21 @@ export function findAiService(
   nodeEnv: string | undefined = process.env["NODE_ENV"]
 ): AiService | null {
   return aiServices(nodeEnv).find((service) => service.id === id) ?? null
+}
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/
+
+/**
+ * A service's tool calling where it is verified (adr/0079 §2): a date and
+ * the pages read, the fake service needing none. Null keeps the service
+ * out of the assistant; its other tasks are not touched.
+ */
+export function verifiedToolCalls(service: AiService): ToolCallSupport | null {
+  const target = service.capabilities.text
+  if (target?.connector !== "openai-compatible" && target?.connector !== "fake") {
+    return null
+  }
+  const support = target.toolCalls
+  const sourced = target.connector === "fake" || (support?.source.length ?? 0) > 0
+  return support?.verified === true && DAY.test(support.verifiedOn) && sourced ? support : null
 }

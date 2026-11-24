@@ -18,10 +18,10 @@ export const MAX_CONTENT_CHARS = 20_000
 /** A count above this is not a count; left out, so no estimate is made from it. */
 export const MAX_TOKEN_COUNT = 10_000_000
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
-function parse(body: Buffer): Record<string, unknown> | null {
+export function parse(body: Buffer): Record<string, unknown> | null {
   try {
     const parsed: unknown = JSON.parse(body.toString("utf8"))
     return isRecord(parsed) ? parsed : null
@@ -55,7 +55,7 @@ const count = (value: unknown): number | undefined =>
     ? value
     : undefined
 
-function usageOf(answer: Record<string, unknown>): AiUsage {
+export function usageOf(answer: Record<string, unknown>): AiUsage {
   const usage = answer["usage"]
   if (!isRecord(usage)) {
     return {}

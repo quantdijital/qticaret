@@ -11,8 +11,11 @@ import {
   AdminPostAiSuggestion,
 } from "../admin/ai/validators"
 import { AdminPostSeoFill } from "../admin/ai/seo-fill/validators"
+import { AdminPostAssistantTurn } from "../admin/ai/assistant/validators"
+import { AI_ASSISTANT } from "../../modules/platform-settings/features"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
+import { requireFeature } from "./require-feature"
 
 /**
  * adr/0071 §9, §11: the AI core's routes are for signed-in staff only (an
@@ -127,5 +130,24 @@ export const AI_ROUTES = [
     matcher: "/admin/ai/seo-fill/suggestions",
     methods: ["GET" as const],
     middlewares: [requireUserActor],
+  },
+  // The panel assistant (adr/0079 §8): no such routes while the shop's flag is off; a
+  // turn within ten a minute a staff member, its body the conversation's id and a message
+  {
+    matcher: "/admin/ai/assistant/turns",
+    methods: ["POST" as const],
+    middlewares: [
+      requireFeature(AI_ASSISTANT),
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.ai_assistant, {
+        identity: (req) => (req as AuthenticatedMedusaRequest).auth_context.actor_id,
+      }),
+      validateAndTransformBody(AdminPostAssistantTurn),
+    ],
+  },
+  {
+    matcher: "/admin/ai/assistant/conversations/:id",
+    methods: ["GET" as const, "DELETE" as const],
+    middlewares: [requireFeature(AI_ASSISTANT), requireUserActor],
   },
 ]

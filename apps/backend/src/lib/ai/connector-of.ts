@@ -1,9 +1,11 @@
 import { fakeTextConnector } from "./connectors/fake"
+import { fakeToolConnector } from "./connectors/fake-tools"
 import { openAiCompatibleText } from "./connectors/openai-compatible"
-import type { TextConnector } from "./connectors/types"
+import { openAiCompatibleTools } from "./connectors/openai-tools"
+import type { TextConnector, ToolConnector } from "./connectors/types"
 import { aiProviderError } from "./errors"
 import type { AiCapability } from "./registry/capabilities"
-import { findAiService } from "./registry/services"
+import { findAiService, verifiedToolCalls } from "./registry/services"
 import type { AiService, AiTarget } from "./registry/services"
 
 /**
@@ -54,4 +56,33 @@ export function textConnectorFor(
     throw aiProviderError({ service: serviceId, key: "ai.service_unavailable", code: "not_text" })
   }
   return openAiCompatibleText({ service, target, apiKey })
+}
+
+/**
+ * The tool calling connector of a registered service (adr/0079 §2), only
+ * where its tool support is verified in the registry; any other service
+ * is refused here, whatever asked for it.
+ */
+export function toolConnectorFor(
+  serviceId: string,
+  apiKey: string,
+  nodeEnv: string | undefined = process.env["NODE_ENV"]
+): ToolConnector {
+  const resolved = textTargetOf(serviceId, "text", nodeEnv)
+  const refuse = (code: string) =>
+    aiProviderError({ service: serviceId, key: "ai.service_unavailable", code })
+  if (resolved === null) {
+    throw refuse("not_registered")
+  }
+  const { service, target } = resolved
+  if (verifiedToolCalls(service) === null) {
+    throw refuse("tools_unverified")
+  }
+  if (target.connector === "fake") {
+    return fakeToolConnector
+  }
+  if (target.connector !== "openai-compatible") {
+    throw refuse("not_text")
+  }
+  return openAiCompatibleTools({ service, target, apiKey })
 }
