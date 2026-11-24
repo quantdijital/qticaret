@@ -147,7 +147,7 @@ Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; �
 **Ek (2026-11-24, PR8; "Vadi" ve "Patika" kapakları için):** aynı biçime, hepsi kapalı liste ve varsayılanı yukarıdaki kapak olan ayarlar eklendi (`packages/types/src/store/section-hero-full.ts`, backend aynası `lib/storefront/sections/hero-full.ts`):
 
 - `search_position`: `inside` | `overlap` (arama kutusu kapağın içinde ya da alt kenarına taşan kart); yalnız `action: search` iken okunur.
-- `image_side`: `full` | `end`. `end`: yazı sayfa zemininde ve kendi mürekkebiyle, görsel 1024 px'ten itibaren yanda ekran kenarına kadar (telefonda yazının üstünde); karartma bu yerleşimde çizilmez.
+- `image_side`: `full` | `end`. `end`: yazı sayfa zemininde ve kendi mürekkebiyle, görsel 1024 px'ten itibaren yanda ekran kenarına kadar (telefonda yazının üstünde); karartma bu yerleşimde çizilmez. Görsel yokken `end`, `full` gibi çizilir (grafit sahne, yazı üstünde; boş görsel kutusu yok).
 - `edge`: `straight` | `wave` (görselin kenarı dalgalı; tema stil dosyasında maske, `hero-full.css`).
 - `title_accent`: başlığın isteğe bağlı ikinci satırı, ana renkte; aynı `h1` içinde bir satırdır.
 - `show_trust`: tasarımın ortak güven rozetleri (en çok 4) kapağın alt kenarına taşan beyaz kutuda; varsayılan kapalı. Rozetler bölümün değil tasarımın verisidir (`settings.trust_badges`).

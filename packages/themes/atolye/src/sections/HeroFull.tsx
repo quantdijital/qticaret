@@ -56,7 +56,9 @@ function Trust({ badges, label }: { badges: readonly TrustBadgeView[]; label: st
  * Beside the words (`image_side: end`) the words stand on the page's
  * ground in its own inks and the photograph takes the other half from
  * 1024 px, up to the screen's edge; on a phone it is a picture over the
- * words. Its edge is its own rectangle or a soft wave (`edge`).
+ * words. Its edge is its own rectangle or a soft wave (`edge`). With no
+ * photograph there is nothing to stand beside the words: the opening
+ * draws as the stage alone, as `full` does (no empty box over the words).
  *
  * The heading is one heading (the page's h1 when the opening is first):
  * its second line (`accent`) is a line of the same heading, in the shop's
@@ -81,10 +83,12 @@ export function HeroFull({
 }) {
   const id = headingId(hero.id)
   const { settings, accent, search, trust } = full
-  const beside = settings.image_side === "end"
-  const centred = settings.align === "center"
   const { image } = hero
-  const sizes = SIZES[settings.image_side]
+  // Beside the words only with a photograph to stand there: with none, the stage as `full` draws it
+  const side = settings.image_side === "end" && image ? "end" : "full"
+  const beside = side === "end"
+  const centred = settings.align === "center"
+  const sizes = SIZES[side]
   const Heading = first ? "h1" : "h2"
   const overlap = search !== null && settings.search_position === "overlap"
   const foot = overlap || trust.length > 0
@@ -95,7 +99,7 @@ export function HeroFull({
     <section
       aria-labelledby={id}
       className={cn("gf-cover", !first && "gf-section")}
-      data-side={settings.image_side}
+      data-side={side}
       data-height={settings.height}
       data-scrim={settings.scrim}
       data-edge={settings.edge}
@@ -111,7 +115,7 @@ export function HeroFull({
               ? "relative aspect-[16/10] sm:aspect-[2/1] lg:absolute lg:inset-y-0 lg:right-0 lg:-z-10 lg:aspect-auto lg:w-[54%]"
               : "absolute inset-0 -z-10",
             // Beside the words a photograph's well; behind them, or with none, the stage
-            beside && image ? "bg-media" : "bg-stage"
+            beside ? "bg-media" : "bg-stage"
           )}
         >
           {image && (

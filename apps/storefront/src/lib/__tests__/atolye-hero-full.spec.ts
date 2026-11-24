@@ -197,6 +197,19 @@ describe("Atölye's full image opening", () => {
     expect(html).toContain('imageSizes="(min-width: 1024px) 56vw, 100vw"')
   })
 
+  it("draws the stage alone, as the full opening, when beside the words there is no photograph", () => {
+    const none = home([cover(full({ image_side: "end" }), { image: null })])
+
+    expect(sectionTag(none)).toContain('data-side="full"')
+    expect(none).not.toContain("<img")
+    expect(none).not.toContain("bg-media")
+    // No picture's box over the words on a phone: the stage behind them
+    expect(none).not.toContain("aspect-[16/10]")
+    expect(none).toMatch(/class="gf-cover-media[^"]*absolute inset-0 -z-10[^"]*bg-stage"/)
+    expect(none).toContain("gf-stage")
+    expect(none).toBe(home([cover(full(), { image: null })]))
+  })
+
   it("marks its fields in the editor's preview only", () => {
     const marked = home([cover(full({}, { accent: "Kaçışını bul." }), { editor: true })])
 
