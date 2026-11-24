@@ -75,7 +75,17 @@ export interface ListingPlan {
     options: { key: string; values: string[] }[]
     in_stock: boolean
   }
-  price: { key: string; min: number | null; max: number | null }
+  price: {
+    key: string
+    min: number | null
+    max: number | null
+    /**
+     * A date search's prices by product (adr/0077 §5 Ek): the sort, the
+     * filter and the range read these instead of the index's `key`; a
+     * product left out has none. Absent: the index's price, as before.
+     */
+    by_product?: Record<string, number>
+  }
   /** `ids_order`: in `order_ids`' order (a date search's departures), the others after, newest first. */
   sort: "relevance" | "newest" | "price_asc" | "price_desc" | "ids_order"
   /** The order `ids_order` follows. */

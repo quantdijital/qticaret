@@ -10,6 +10,7 @@ import type { ListingPlan, ListingResult } from "../../modules/search-index/type
 import { facetsOf } from "./listing-facets"
 import type { FilterDefinition, ListingFacets } from "./listing-facets"
 import { datedListing } from "./listing-dated"
+import { listingDatedPrices } from "./listing-dated-prices"
 import {
   categorySubtreeByHandle,
   listingScope,
@@ -119,6 +120,10 @@ export async function listingProducts(
     ...(category ? { category_ids: category } : {}),
     ...(dated.scope_ids ? { product_ids: dated.scope_ids } : {}),
   }
+  // Dates asked: the price sorted and filtered by is the card's, over the departures inside them
+  const byProduct = scope
+    ? await listingDatedPrices(container, query, dated.scope_ids, input.region_id)
+    : undefined
   const size = input.limit ?? LISTING_PAGE_SIZE
   const text = input.search?.trim() ?? ""
   // Dates asked and no order chosen: the nearest departure first
@@ -133,6 +138,7 @@ export async function listingProducts(
       key: priceKey(input.region_id, input.currency_code),
       min: query.price?.min ?? null,
       max: query.price?.max ?? null,
+      ...(byProduct ? { by_product: byProduct } : {}),
     },
     sort,
     ...(sort === "ids_order" ? { order_ids: dated.order_ids ?? [] } : {}),
