@@ -18,9 +18,31 @@ import type { ThemeSettings } from "../../modules/platform-settings/sections"
  * then take the `theme` settings section (adr/0053, adr/0062), so a shop
  * sees the same storefront without a migration.
  */
+/**
+ * The accent face "none" read as left out: a design from before the face
+ * holds none, and the two mean the same. One form, so choosing "none"
+ * again (or a panel writing it out) is no change against what is live.
+ */
+export const withoutNoAccent = (value: unknown): unknown => {
+  if (!isPlainObject(value)) {
+    return value
+  }
+  const typography = value["typography"]
+  if (!isPlainObject(typography) || typography["accent"] !== "none") {
+    return value
+  }
+  return {
+    ...value,
+    typography: Object.fromEntries(Object.entries(typography).filter(([key]) => key !== "accent")),
+  }
+}
+
 export const layoutTheme = z
   // A save from a panel before adr/0075 (adr/0077) sends no listing text (search form): defaults stand
-  .preprocess((value) => withSearchFormDefaults(withListingTextDefaults(value)), themeSection.full)
+  .preprocess(
+    (value) => withoutNoAccent(withSearchFormDefaults(withListingTextDefaults(value))),
+    themeSection.full
+  )
   .nullable()
   .default(null)
 
