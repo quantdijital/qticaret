@@ -5,6 +5,7 @@ import { parseEnv } from "../env"
 import { GOOGLE_PROVIDER, googleHosts } from "./oauth"
 import { reviewOf } from "./business-review"
 import type { GoogleReviewInput } from "./business-review"
+import { registerProcessCache } from "../cache/process-caches"
 
 /**
  * Google Business Profile for the shop's Google reviews (adr/0058),
@@ -234,6 +235,10 @@ export function createBusinessProfileApi(
 export type BusinessProfileApi = ReturnType<typeof createBusinessProfileApi>
 
 let shared: { key: string; api: BusinessProfileApi } | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per set of hosts (a fake server's in tests). */
 export function businessProfileApi(): BusinessProfileApi {

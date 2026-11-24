@@ -1,4 +1,5 @@
 import { promises as dns } from "node:dns"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * Whether the sender address's domain says who may mail for it (adr/0036
@@ -88,6 +89,11 @@ export async function readSenderDns(
 
 const kept = new Map<string, { until: number; value: SenderDns }>()
 const asking = new Map<string, Promise<SenderDns>>()
+// A bundled test run's next spec file looks its domains up afresh
+registerProcessCache(() => {
+  kept.clear()
+  asking.clear()
+})
 
 // A DNS that did not answer is asked again sooner
 const UNKNOWN_KEPT_MS = 60 * 1000

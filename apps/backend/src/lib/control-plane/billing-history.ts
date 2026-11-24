@@ -11,6 +11,7 @@ import { errorSummary, logger } from "../logging"
 import { controlPlaneConfig, tenantSigner } from "./config"
 import { readCapped } from "./pull"
 import type { Fetch } from "./pull"
+import { registerProcessCache } from "../cache/process-caches"
 
 export const BILLING_PATH = "/tenant-api/v1/billing"
 const TIMEOUT_MS = 5_000
@@ -30,6 +31,11 @@ export type PaymentHistory =
 
 let cached: { key: string; until: number; value: PaymentHistory } | null = null
 let inflight: { key: string; promise: Promise<PaymentHistory> } | null = null
+// A bundled test run's next spec file reads the history afresh
+registerProcessCache(() => {
+  cached = null
+  inflight = null
+})
 
 /** Forget the kept answer (tests, and nothing else). */
 export function forgetPaymentHistory(): void {

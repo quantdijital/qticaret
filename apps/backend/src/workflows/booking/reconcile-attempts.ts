@@ -1,6 +1,7 @@
 import type Redis from "ioredis"
 import { parseEnv } from "../../lib/env"
 import { createRedisClient, tenantNamespace } from "../../lib/redis"
+import { registerProcessCache } from "../../lib/cache/process-caches"
 
 // Failed tries the reconcile job gives one order before it leaves it alone
 export const RECONCILE_MAX_ATTEMPTS = 3
@@ -66,6 +67,11 @@ export function createRedisReconcileAttempts(
 }
 
 let shared: ReconcileAttempts | undefined
+// Without Redis (tests) the counters are the process's: a bundled test run
+// gives each spec file fresh ones
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** The tenant's counters: Redis when it is set, except in tests, which keep their own. */
 export function reconcileAttempts(): ReconcileAttempts {

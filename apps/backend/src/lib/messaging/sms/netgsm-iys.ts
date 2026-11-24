@@ -5,6 +5,7 @@ import { parseEnv } from "../../env"
 import { ProviderError } from "../../errors"
 import { NETGSM_PROVIDER, NETGSM_URL } from "./netgsm"
 import type { NetgsmCredentialsSource } from "./netgsm"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * İYS through the shop's Netgsm account (F10 M11, adr/0038 §2), as
@@ -155,6 +156,10 @@ export function createNetgsmIysApi(options: Partial<Omit<HttpClientOptions, "pro
 export type NetgsmIysApi = ReturnType<typeof createNetgsmIysApi>
 
 let shared: { key: string; api: NetgsmIysApi } | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per address; a local fake server's in development (`NETGSM_BASE_URL`). */
 export function netgsmIysApi(): NetgsmIysApi {

@@ -14,6 +14,7 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 import { maintenanceState } from "../../workflows/storefront/maintenance"
 import { rejectRequest } from "./reject"
 import { routePath } from "./request-path"
+import { registerProcessCache } from "../../lib/cache/process-caches"
 
 interface SectionState {
   enabled: boolean
@@ -24,6 +25,12 @@ const WARN_EVERY_MS = 60_000
 let lastWarning = Number.NEGATIVE_INFINITY
 // The last section read: what a failed read falls back on (security review L1)
 let lastKnown: MaintenanceSettings | null = null
+// A bundled test run's next spec file falls back on nothing the file before
+// it read, and is warned afresh
+registerProcessCache(() => {
+  lastKnown = null
+  lastWarning = Number.NEGATIVE_INFINITY
+})
 /**
  * The section's stored version, once per cached section value (security
  * review L2): the settings cache hands out a new object after every save and

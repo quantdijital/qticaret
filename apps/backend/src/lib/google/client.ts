@@ -4,6 +4,7 @@ import type { HttpClient, HttpClientOptions } from "../clients"
 import type { ProductInput } from "./merchant"
 import { GOOGLE_PROVIDER, emailOfIdToken, googleHosts } from "./oauth"
 import type { GoogleClient } from "./oauth"
+import { registerProcessCache } from "../cache/process-caches"
 
 /**
  * Google's token endpoint and Merchant API (F10 M13, adr/0038 §5). A
@@ -196,6 +197,10 @@ export function createGoogleApi(
 export type GoogleApi = ReturnType<typeof createGoogleApi>
 
 let shared: { key: string; api: GoogleApi } | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per set of hosts (a fake server's in tests). */
 export function googleApi(): GoogleApi {

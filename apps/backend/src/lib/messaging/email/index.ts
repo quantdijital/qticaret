@@ -3,6 +3,7 @@ import type { Env } from "../../env"
 import { logger } from "../../logging"
 import { createMailpitTransport, createResendTransport } from "./transports"
 import type { EmailTransport } from "./transports"
+import { registerProcessCache } from "../../cache/process-caches"
 
 export {
   RESEND_URL,
@@ -37,6 +38,10 @@ function build(env: Env): EmailTransport | null {
 }
 
 let shared: { key: string; transport: EmailTransport | null } | undefined
+// A new transport per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /**
  * The instance's e-mail transport (adr/0036), built once per setting; null

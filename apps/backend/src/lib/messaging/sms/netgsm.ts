@@ -4,6 +4,7 @@ import type { HttpClient, HttpClientOptions } from "../../clients"
 import { escapeXml } from "../../clients/xml"
 import { parseEnv } from "../../env"
 import { ProviderError } from "../../errors"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * Netgsm's SMS service (adr/0036), as its own SDK calls it: an XML order
@@ -160,6 +161,10 @@ export function createNetgsmApi(options: Partial<Omit<HttpClientOptions, "provid
 export type NetgsmApi = ReturnType<typeof createNetgsmApi>
 
 let shared: { key: string; api: NetgsmApi } | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per address; a local fake server's in development (`NETGSM_BASE_URL`). */
 export function netgsmApi(): NetgsmApi {

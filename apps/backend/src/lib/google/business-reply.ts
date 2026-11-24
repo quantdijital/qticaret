@@ -5,6 +5,7 @@ import type { HttpClient, HttpClientOptions } from "../clients"
 import { isAccountName, isLocationName } from "./business-profile"
 import { replyStateOf } from "./business-review"
 import { GOOGLE_PROVIDER, googleHosts } from "./oauth"
+import { registerProcessCache } from "../cache/process-caches"
 
 /**
  * The owner's reply to one Google review (adr/0058 Ek 2026-11-06), as
@@ -121,6 +122,10 @@ export function createBusinessReplyApi(
 export type BusinessReplyApi = ReturnType<typeof createBusinessReplyApi>
 
 let shared: { key: string; api: BusinessReplyApi } | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per host (a fake server's in tests). */
 export function businessReplyApi(): BusinessReplyApi {

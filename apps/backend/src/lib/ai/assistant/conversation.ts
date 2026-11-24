@@ -3,6 +3,7 @@ import type Redis from "ioredis"
 import { parseEnv } from "../../env"
 import { createRedisClient, tenantNamespace } from "../../redis"
 import type { ConverseMessage, ToolCall } from "../connectors/types"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * The assistant's conversation (adr/0079 §6, §7): kept on the server
@@ -161,6 +162,11 @@ export function createMemoryConversationStore(now: () => number = Date.now): Con
 }
 
 let shared: ConversationStore | undefined
+// Without Redis the store is the process's: a bundled test run gives each
+// spec file a fresh one
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** The tenant's store: Redis when configured, else this process's memory. */
 export function conversationStore(): ConversationStore {
