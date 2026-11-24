@@ -27,8 +27,28 @@ env:
   AUTH_CORS: http://localhost:9000,http://localhost:8000
 
 jobs:
+  # What this push needs (scripts/ci-changes.sh): a storefront or panel branch
+  # skips the backend's integration shards; lint, typecheck and test run for the
+  # changed packages and their dependents. dev and main always run in full.
+  changes:
+    name: Changed packages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      e2e: ${{ steps.changes.outputs.e2e }}
+      filter: ${{ steps.changes.outputs.filter }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - id: changes
+        run: bash scripts/ci-changes.sh
+
   quality:
     name: Lint, typecheck, test, build
+    needs: changes
     runs-on: ubuntu-24.04
     # Build ~2, lint and typecheck ~5, the tests one package at a time ~28 minutes
     # (2026-11-24: green runs took 36-37 minutes, so 40 cancelled loaded runs)
@@ -57,6 +77,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # The changed packages are found against dev's history
+          fetch-depth: 0
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -95,17 +117,24 @@ jobs:
         env:
           REDIS_URL: redis://localhost:6379
       # --continue: every failing package is reported, not only the first
-      - run: pnpm turbo run lint typecheck --continue
+      - run: pnpm turbo run lint typecheck --continue $TURBO_FILTER
+        env:
+          TURBO_FILTER: ${{ needs.changes.outputs.filter }}
       # Product videos (adr/0069): the backend's unit tests run the real ffprobe
       # on clips ffmpeg makes in the test; without it they skip and say so
       - name: Install ffmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
       # One package's tests at a time: beside lint and typecheck the runner's
       # four cores starved the UI suites past their 5 s per-test timeout
-      - run: pnpm turbo run test --continue --concurrency=1
+      - run: pnpm turbo run test --continue --concurrency=1 $TURBO_FILTER
+        env:
+          TURBO_FILTER: ${{ needs.changes.outputs.filter }}
 
   integration:
     name: Integration tests (${{ matrix.suite }})
+    needs: changes
+    # Skipped (and so passing) on a branch that leaves the backend's packages alone
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     # Side by side: each HTTP spec file boots Medusa (~45 s on a runner), and
@@ -190,6 +219,9 @@ jobs:
 
   e2e:
     name: Panel e2e (smoke, accessibility)
+    needs: changes
+    # Skipped on a branch that touches only the storefront and its theme packages
+    if: needs.changes.outputs.e2e == 'true'
     runs-on: ubuntu-24.04
     # About 120 tests take 20 to 25 minutes on a runner (the accessibility pass alone ~11)
     timeout-minutes: 40
