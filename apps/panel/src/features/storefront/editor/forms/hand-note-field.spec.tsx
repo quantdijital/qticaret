@@ -28,7 +28,7 @@ vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: vi.fn() }, admin: {} } }))
 type Full = Extract<HeroSection, { variant: "full_image" }>
 
 const full = (over: Partial<Full> = {}): Full => ({
-  ...(switchVariant(newHomeSection("hero", "kapak00001"), "full_image") as Full),
+  ...(switchVariant(newHomeSection("hero", "kapak00001") as HeroSection, "full_image") as Full),
   ...over,
 })
 const band = (over: Partial<BannerSection> = {}): BannerSection => ({
