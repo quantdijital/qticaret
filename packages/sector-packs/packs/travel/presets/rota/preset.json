@@ -4,7 +4,7 @@
   "version": 1,
   "theme": "atolye",
   "name": "Rota",
-  "description": "Tur ve gezi mağazası için tam ekran manzara: ortada serif başlık ve gidilecek yer, tarih, kişi arama kutusu; popüler turlar kaydırıcısı, yaklaşan kalkışlar, koyu rakam şeridi, dört adımda yolculuk, gezgin yorumları, keşif kolajı ve e-bültenli koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
+  "description": "Tur ve gezi mağazası için tam ekran manzara: ortada serif başlık ve gidilecek yer, tarih, kişi arama kutusu; popüler turlar kaydırıcısı, yaklaşan kalkışlar, koyu rakam şeridi, dört adımda yolculuk, gezgin yorumları, keşif kolajı, e-bültenli koyu alt bilgi ve tur sayfasında çizgili program. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {

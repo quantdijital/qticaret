@@ -248,6 +248,15 @@
       "ends_at": null,
       "variant": "standard",
       "image_ratio": "landscape"
+    },
+    {
+      "id": "rotaprogram",
+      "type": "program",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "timeline",
+      "title": "Tur programı"
     }
   ]
 }
