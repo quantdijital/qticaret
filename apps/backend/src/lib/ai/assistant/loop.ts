@@ -46,6 +46,11 @@ export interface LoopInput {
   history: readonly StoredMessage[]
   /** The person's new message, personal data patterns already taken out. */
   message: string
+  /**
+   * The open screen as untrusted data (`screenContextBlock`): put before
+   * the person's message for the service only, never kept.
+   */
+  screen?: string | null
   tools: readonly AssistantTool[]
   context: ToolContext
   /** Claims the next model call; false ends the turn before it is made. */
@@ -126,6 +131,12 @@ function runCall(
   }
 }
 
+/** The person's message with the open screen's data block before it, when there is one. */
+const withScreen = (message: ConverseMessage, screen: string | null): ConverseMessage =>
+  screen === null || message.role !== "user"
+    ? message
+    : { role: "user", content: `${screen}\n\n${message.content}` }
+
 export async function runAssistantLoop(input: LoopInput): Promise<LoopResult> {
   const tools = new Map(input.tools.map((tool) => [tool.id, tool]))
   const specs = input.tools.map(specOf)
@@ -150,10 +161,12 @@ export async function runAssistantLoop(input: LoopInput): Promise<LoopResult> {
     }
     // This turn whole, and as much of the earlier conversation as the window holds
     const room = Math.max(0, CONTEXT_MESSAGES - added.length)
+    const [own, ...steps] = forService(added)
     const messages: ConverseMessage[] = [
       { role: "system", content: input.system },
       ...forService(room === 0 ? [] : lastMessages(input.history, room)),
-      ...forService(added),
+      ...(own === undefined ? [] : [withScreen(own, input.screen ?? null)]),
+      ...steps,
     ]
     const started = Date.now()
     let answer: ConverseResult

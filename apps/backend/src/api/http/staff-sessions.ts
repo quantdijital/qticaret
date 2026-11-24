@@ -1,4 +1,5 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { conversationStore } from "../../lib/ai/assistant/conversation"
 import { errorSummary, logger } from "../../lib/logging"
 import { staffAccountStore } from "../../lib/staff/account-store"
 import type { AccountStore } from "../../lib/staff/account-store"
@@ -102,6 +103,14 @@ export function noteSessionEnd(req: MedusaRequest, _res: MedusaResponse, next: M
       .removeSessions(userId, [sessionID])
       .catch((error: unknown) => {
         logger.warn({ event: "staff.session_note_failed", err: errorSummary(error) })
+      })
+  }
+  if (userId) {
+    // adr/0079 §6: signing out drops the person's assistant conversations at once
+    conversationStore()
+      .removeUser(userId)
+      .catch((error: unknown) => {
+        logger.warn({ event: "ai.assistant_conversations_drop_failed", err: errorSummary(error) })
       })
   }
   next()

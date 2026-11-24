@@ -49,7 +49,12 @@ export function replyOf(
       if (screen === undefined) {
         return ""
       }
-      if (!screens.some((each) => each.key === screen.key) && screens.length < MAX_REPLY_SCREENS) {
+      const named = screens.some((each) => each.key === screen.key)
+      if (!named) {
+        // Past the limit a known screen is dropped too: a marker without its screen is never kept
+        if (screens.length >= MAX_REPLY_SCREENS) {
+          return ""
+        }
         screens.push({ key: screen.key, label: screen.label })
       }
       return `[[${screen.key}]]`

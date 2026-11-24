@@ -163,6 +163,8 @@ describe("the plan guard's allow-list", () => {
     // ADR-0068 §9: a wholesaler closed, a pending invitation taken back: access taken away
     "POST /admin/wholesale/accounts/:id/deactivate",
     "DELETE /admin/wholesale/accounts/:id",
+    // adr/0079 §6: an assistant conversation dropped, the person's words forgotten
+    "DELETE /admin/ai/assistant/conversations/:id",
   ])("keeps %s open", (route) => {
     expect(decisionOf(route)).toEqual({ allowed: true, reason: "open" })
   })
@@ -217,6 +219,8 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/wholesale/accounts/:id/password",
     "POST /admin/wholesale/accounts/:id/prices",
     "POST /admin/wholesale/tiers",
+    // adr/0079 §8: an assistant turn spends credits as any AI task
+    "POST /admin/ai/assistant/turns",
   ])("closes %s", (route) => {
     expect(decisionOf(route)).toEqual({ allowed: false, reason: "closed" })
   })

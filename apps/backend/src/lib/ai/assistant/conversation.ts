@@ -9,9 +9,10 @@ import type { ConverseMessage, ToolCall } from "../connectors/types"
  * only, under the person's own key, never sent back whole and never taken
  * from the panel (which sends the conversation's id alone, so no history
  * and no tool result can be slipped in). Lapses after 2 hours idle and
- * 24 hours at most; "Yeni sohbet" deletes it. Nothing of it is written to
- * the database, the usage rows, the log or the audit trail. Without Redis
- * (a developer's machine) it lives in this process.
+ * 24 hours at most; "Yeni sohbet" deletes it, signing out deletes them
+ * all. Nothing of it is written to the database, the usage rows, the log
+ * or the audit trail. Without Redis (a developer's machine) it lives in
+ * this process.
  */
 
 export const CONVERSATION_ID = /^aiconv_[0-9a-f]{32}$/
@@ -41,6 +42,8 @@ export interface ConversationStore {
   put: (key: string, record: ConversationRecord, ttlMs: number) => Promise<void>
   get: (key: string) => Promise<ConversationRecord | null>
   remove: (key: string) => Promise<void>
+  /** Every conversation of the person, at once: signing out (adr/0079 §6). */
+  removeUser: (userId: string) => Promise<void>
 }
 
 export const newConversationId = (): string => `aiconv_${randomBytes(16).toString("hex")}`
@@ -99,24 +102,48 @@ export function recordOf(text: string | null): ConversationRecord | null {
 export const ttlOf = (record: Pick<ConversationRecord, "created_at">, now: number): number =>
   Math.min(CONVERSATION_IDLE_MS, record.created_at + CONVERSATION_MAX_MS - now)
 
+/**
+ * Each person's conversations are listed beside them (a set of keys, no
+ * text), so signing out drops them all at once (adr/0079 §6). The list
+ * lasts a day from the last save: never shorter than a conversation in it.
+ */
 export function createRedisConversationStore(redis: Redis, prefix: string): ConversationStore {
   const key = (id: string) => `${prefix}${id}`
+  const index = (userId: string) => `${prefix}user:${userId}`
   return {
     put: async (id, record, ttlMs) => {
       await redis.set(key(id), JSON.stringify(record), "PX", Math.max(1, Math.floor(ttlMs)))
+      await redis.sadd(index(record.user_id), id)
+      await redis.pexpire(index(record.user_id), CONVERSATION_MAX_MS)
     },
     get: async (id) => recordOf(await redis.get(key(id))),
     remove: async (id) => {
       await redis.del(key(id))
     },
+    removeUser: async (userId) => {
+      const ids = await redis.smembers(index(userId))
+      await redis.del(...ids.map(key), index(userId))
+    },
   }
 }
 
 export function createMemoryConversationStore(now: () => number = Date.now): ConversationStore {
-  const records = new Map<string, { text: string; until: number }>()
+  const records = new Map<string, { text: string; until: number; user_id: string }>()
   return {
     put: (id, record, ttlMs) => {
-      records.set(id, { text: JSON.stringify(record), until: now() + ttlMs })
+      records.set(id, {
+        text: JSON.stringify(record),
+        until: now() + ttlMs,
+        user_id: record.user_id,
+      })
+      return Promise.resolve()
+    },
+    removeUser: (userId) => {
+      for (const [id, entry] of records) {
+        if (entry.user_id === userId) {
+          records.delete(id)
+        }
+      }
       return Promise.resolve()
     },
     get: (id) => {

@@ -13,7 +13,7 @@ import type { LoopResult } from "../../../lib/ai/assistant/loop"
 import { noReply, replyOf } from "../../../lib/ai/assistant/reply"
 import type { Reply } from "../../../lib/ai/assistant/reply"
 import { screenFeatures, visibleScreens } from "../../../lib/ai/assistant/screens"
-import { assistantSystem } from "../../../lib/ai/assistant/system"
+import { assistantSystem, screenContextBlock } from "../../../lib/ai/assistant/system"
 import { ASSISTANT_TOOLS, toolsFor } from "../../../lib/ai/assistant/tools"
 import type { AssistantLocale } from "../../../lib/ai/assistant/tools"
 import { withAiBreaker } from "../../../lib/ai/breaker"
@@ -193,7 +193,8 @@ export const assistantRunStep = createStep(
     const refused: { by: "daily_limit" | "credits" | null } = { by: null }
     const loop = await runAssistantLoop({
       connector,
-      system: assistantSystem(input.locale, open),
+      system: assistantSystem(input.locale),
+      screen: screenContextBlock(open),
       history: existing?.messages ?? [],
       message: userText,
       tools: toolsFor(input.role, features),

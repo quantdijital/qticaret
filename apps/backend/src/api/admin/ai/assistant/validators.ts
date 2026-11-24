@@ -1,12 +1,10 @@
 import { z } from "@medusajs/framework/zod"
 import { CONVERSATION_ID } from "../../../../lib/ai/assistant/conversation"
+import { ASSISTANT_RECORD_ID, ASSISTANT_RECORD_TYPES } from "../../../../lib/ai/assistant/system"
 import { SCREEN_KEY } from "../../../../lib/ai/assistant/tools/navigate"
 
 /** The longest message a person may send in one turn (adr/0079 §8, the context budget). */
 export const ASSISTANT_MESSAGE_MAX = 2_000
-
-const RECORD_TYPE = /^[a-z_]{1,40}$/
-const RECORD_ID = /^[A-Za-z0-9_-]{1,64}$/
 
 /**
  * `POST /admin/ai/assistant/turns` (adr/0079 §4, §7): the conversation's
@@ -22,7 +20,11 @@ export const AdminPostAssistantTurn = z
       .object({
         key: z.string().regex(SCREEN_KEY),
         record: z
-          .object({ type: z.string().regex(RECORD_TYPE), id: z.string().regex(RECORD_ID) })
+          .object({
+            // Security review D4: a closed kind and a Medusa id, nothing free to the model
+            type: z.enum(ASSISTANT_RECORD_TYPES),
+            id: z.string().regex(ASSISTANT_RECORD_ID),
+          })
           .strict()
           .optional(),
       })

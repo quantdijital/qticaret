@@ -46,13 +46,9 @@ export const assistantTurnWorkflow = createWorkflow(
         screen: input.screen ?? null,
       }))
     )
-    assistantSaveStep(
-      transform({ run }, ({ run }) => ({
-        conversation_id: run.conversation_id,
-        record: run.record,
-      }))
-    )
-    assistantRecordStep(
+    // Recorded before the conversation is kept (security review D3): a call made
+    // stays in `ai_usage` even when Redis then fails the save
+    const recorded = assistantRecordStep(
       transform({ input, access, run }, ({ input, access, run }) => ({
         user_id: input.user_id,
         service: access.service,
@@ -61,6 +57,12 @@ export const assistantTurnWorkflow = createWorkflow(
         calls: run.calls,
         tool_counts: run.tool_counts,
         outcome: run.error === null ? "answered" : run.error.code,
+      }))
+    )
+    assistantSaveStep(
+      transform({ run, recorded }, ({ run }) => ({
+        conversation_id: run.conversation_id,
+        record: run.record,
       }))
     )
     return new WorkflowResponse(

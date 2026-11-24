@@ -50,7 +50,12 @@ describe("conversation store", () => {
 
   it("sets Redis's expiry on every save, a day at most", async () => {
     const set = jest.fn().mockResolvedValue("OK")
-    const store = createRedisConversationStore({ set } as unknown as Redis, "qt:aiconv:t:")
+    const sadd = jest.fn().mockResolvedValue(1)
+    const pexpire = jest.fn().mockResolvedValue(1)
+    const store = createRedisConversationStore(
+      { set, sadd, pexpire } as unknown as Redis,
+      "qt:aiconv:t:"
+    )
     const id = newConversationId()
 
     await saveConversation(store, id, record(), START + CONVERSATION_MAX_MS - 1_000)
@@ -60,6 +65,55 @@ describe("conversation store", () => {
     const ttl = (set.mock.calls as unknown[][])[1]?.[3] as number
     expect(ttl).toBeLessThanOrEqual(CONVERSATION_MAX_MS)
     expect(ttl).toBe(CONVERSATION_IDLE_MS)
+  })
+
+  it("lists each person's conversations so signing out drops them all (review D2)", async () => {
+    const values = new Map<string, string>()
+    const sets = new Map<string, Set<string>>()
+    const redis = {
+      set: jest.fn((key: string, value: string) => {
+        values.set(key, value)
+        return Promise.resolve("OK")
+      }),
+      get: jest.fn((key: string) => Promise.resolve(values.get(key) ?? null)),
+      sadd: jest.fn((key: string, member: string) => {
+        sets.set(key, (sets.get(key) ?? new Set<string>()).add(member))
+        return Promise.resolve(1)
+      }),
+      pexpire: jest.fn().mockResolvedValue(1),
+      smembers: jest.fn((key: string) => Promise.resolve([...(sets.get(key) ?? [])])),
+      del: jest.fn((...keys: string[]) => {
+        keys.forEach((key) => {
+          values.delete(key)
+          sets.delete(key)
+        })
+        return Promise.resolve(keys.length)
+      }),
+    }
+    const store = createRedisConversationStore(redis as unknown as Redis, "qt:aiconv:t:")
+    const [first, second, other] = [newConversationId(), newConversationId(), newConversationId()]
+    await saveConversation(store, first, record(), START)
+    await saveConversation(store, second, record(), START)
+    await saveConversation(store, other, record({ user_id: "user_b" }), START)
+    expect(redis.pexpire).toHaveBeenCalledWith("qt:aiconv:t:user:user_a", CONVERSATION_MAX_MS)
+
+    await store.removeUser("user_a")
+
+    await expect(loadConversation(store, "user_a", first, START)).resolves.toBeNull()
+    await expect(loadConversation(store, "user_a", second, START)).resolves.toBeNull()
+    await expect(loadConversation(store, "user_b", other, START)).resolves.not.toBeNull()
+  })
+
+  it("drops a person's conversations from memory too, no one else's", async () => {
+    const store = createMemoryConversationStore(() => START)
+    const [mine, theirs] = [newConversationId(), newConversationId()]
+    await saveConversation(store, mine, record(), START)
+    await saveConversation(store, theirs, record({ user_id: "user_b" }), START)
+
+    await store.removeUser("user_a")
+
+    await expect(loadConversation(store, "user_a", mine, START)).resolves.toBeNull()
+    await expect(loadConversation(store, "user_b", theirs, START)).resolves.not.toBeNull()
   })
 
   it("reads only the person's own conversation, and none that lapsed", async () => {

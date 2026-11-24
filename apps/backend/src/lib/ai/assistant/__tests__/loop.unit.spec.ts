@@ -169,6 +169,27 @@ describe("runAssistantLoop", () => {
   })
 })
 
+describe("the open screen (review D4)", () => {
+  it("goes before the person's message as a data block, for the service only", async () => {
+    const block = '{"untrusted":true,"open_screen":{"key":"orders"}}'
+    const { connector, seen } = scripted([
+      { toolCalls: [call("find_screen", '{"query":"kargo"}')], usage: {} },
+      { text: "Tamam.", usage: {} },
+    ])
+
+    const result = await runAssistantLoop({ ...baseInput(connector), screen: block })
+
+    for (const request of seen) {
+      expect(request.messages[0]?.content).not.toContain("open_screen")
+      expect(request.messages[1]).toEqual({
+        role: "user",
+        content: `${block}\n\nkargo ücreti nereden değişir`,
+      })
+    }
+    expect(result.added[0]).toEqual({ role: "user", content: "kargo ücreti nereden değişir" })
+  })
+})
+
 describe("wrapResult", () => {
   it("keeps a tool's result under 4,000 characters, marked untrusted", () => {
     const long = { screens: Array.from({ length: 200 }, () => ({ help: "x".repeat(100) })) }
