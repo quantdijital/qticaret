@@ -9364,7 +9364,7 @@
         "note": {
           "label": "Not",
           "term": "note",
-          "placeholder": "Örn. Sizi bekliyoruz!",
+          "placeholder": "Örn. Sizi bekliyoruz",
           "hint": "Başlığın üstünde küçük, eğik bir not. Vurgu yazı tipi açıksa el yazısıyla görünür; boş bırakırsanız çizilmez."
         },
         "edge": {
@@ -11285,7 +11285,7 @@
         "note": {
           "label": "Not",
           "term": "note",
-          "placeholder": "Örn. Sizi bekliyoruz!",
+          "placeholder": "Örn. Sizi bekliyoruz",
           "hint": "Başlığın üstünde küçük, eğik bir not. Vurgu yazı tipi açıksa el yazısıyla görünür; boş bırakırsanız çizilmez."
         },
         "action": {
