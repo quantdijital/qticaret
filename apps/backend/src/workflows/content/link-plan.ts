@@ -21,12 +21,14 @@ import { followPath } from "../seo/redirects/resolve"
 import { draftPageTexts } from "./link-layout"
 import { brandDocuments, categoryDocuments, collectionDocuments } from "./link-listings"
 import type { ListingWrite } from "./link-listings"
+import { termDocuments } from "./link-terms"
 
 /**
  * What a link rewrite would do (adr/0042 Ek 2026-11-05): every content
  * document read (pages, as their text sections stand in the theme
  * editor's draft; posts; products' descriptions; categories', brands'
- * and collections' descriptions, adr/0075), each link to the
+ * and collections' descriptions, adr/0075; blog categories' and tags'
+ * descriptions, adr/0075 Ek 2026-11-24), each link to the
  * shop resolved once as the storefront would resolve it, the links that
  * move and those that answer nothing listed. Reads only.
  */
@@ -35,7 +37,8 @@ type Container = Pick<MedusaContainer, "resolve">
 
 const PAGE = 200
 
-export type LinkDocKind = "page" | "post" | "product" | "category" | "brand" | "collection"
+export type LinkDocKind =
+  "page" | "post" | "product" | "category" | "brand" | "collection" | "post_category" | "post_tag"
 
 /** One link of one document: where it goes now, or why it goes nowhere. */
 export interface LinkRow {
@@ -55,6 +58,8 @@ export interface LinkScope {
   categories?: string[] | null
   brands?: string[] | null
   collections?: string[] | null
+  /** Blog categories and tags (adr/0075 Ek 2026-11-24). */
+  terms?: string[] | null
 }
 
 export interface LinkPlan {
@@ -68,6 +73,8 @@ export interface LinkPlan {
     products: { product_id: string; extension_id: string }[]
     /** Categories, brands and collections: saved through their own saves. */
     listings: ListingWrite[]
+    /** Blog categories and tags: written under the content lock. */
+    terms: string[]
   }
   changed: LinkRow[]
   unresolved: LinkRow[]
@@ -233,7 +240,7 @@ export async function planContentLinks(
   const plan: LinkPlan = {
     documents: 0,
     next: {},
-    writes: { entries: [], products: [], listings: [] },
+    writes: { entries: [], products: [], listings: [], terms: [] },
     changed: [],
     unresolved: [],
   }
@@ -243,6 +250,7 @@ export async function planContentLinks(
     categoryDocuments(container, input.scope?.categories ?? null),
     brandDocuments(container, input.scope?.brands ?? null),
     collectionDocuments(container, input.scope?.collections ?? null),
+    termDocuments(container, input.scope?.terms ?? null),
   ]
   for (const documents of sources) {
     for await (const document of documents) {
@@ -266,6 +274,8 @@ export async function planContentLinks(
         plan.writes.products.push({ product_id: document.id, extension_id: document.extension_id })
       } else if (moves && isListing(document.kind)) {
         plan.writes.listings.push({ kind: document.kind, id: document.id })
+      } else if (moves && (document.kind === "post_category" || document.kind === "post_tag")) {
+        plan.writes.terms.push(document.id)
       } else if (moves) {
         plan.writes.entries.push(document.id)
       }

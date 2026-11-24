@@ -7953,6 +7953,7 @@
       },
       "tabs": {
         "general": "General",
+        "description": "Description",
         "seo": "Search appearance"
       },
       "fields": {
@@ -7963,7 +7964,6 @@
       },
       "nameRequired": "Enter a name.",
       "handleHint": "If an archive with live posts gets a new address, the old one redirects to it.",
-      "descriptionHint": "Shown at the top of the archive page and in search results; when empty, the latest posts' titles are used.",
       "rankHint": "Lower numbers come first; equal ones are sorted by name.",
       "fallbackDescription": "{{name}} posts: {{titles}}",
       "delete": {
@@ -8058,6 +8058,7 @@
     "listingDescription": {
       "title": "Description",
       "hint": "Shown at the bottom of the page on the storefront, after the products. Headings and paragraphs you paste from elsewhere are kept; Theme settings > Listing text sets how it looks.",
+      "hintBlog": "Shown at the bottom of the page on the storefront, after the posts. Headings and paragraphs you paste from elsewhere are kept; Theme settings > Listing text sets how it looks.",
       "ai": "Suggest a description with AI"
     },
     "postDraft": {
