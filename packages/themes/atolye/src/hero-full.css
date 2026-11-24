@@ -1,0 +1,92 @@
+/*
+ * The full image opening (sections/HeroFull.tsx, adr/0077 §9, "Tam
+ * görsel"): each of its steps an attribute on the section, mapped here onto
+ * the theme's own scale. Nothing is written for another opening: every
+ * rule sits under `.gf-cover`.
+ *
+ * - Height (`data-height`): about the screen's (`screen`) or two thirds of
+ *   it (`tall`), each between a least and a most so a short laptop and a
+ *   tall monitor both read as an opening. Beside the words (`data-side=
+ *   "end"`) the height holds from 1024 px; on a phone the photograph is a
+ *   plain picture over the words.
+ * - Veil (`data-scrim`): the graphite stage over the photograph, lighter or
+ *   stronger, so the stage's inks read on any picture. Only behind the
+ *   words (`data-side="full"`).
+ * - Edge (`data-edge="wave"`): the photograph's edge a soft wave, a mask
+ *   on the picture's own box (nothing drawn on top, nothing to read): its
+ *   foot, or from 1024 px its inner side when it stands beside the words.
+ * - Foot (`data-foot`): the search card and the trust box rise over the
+ *   opening's bottom edge by `--cover-lift`; the words keep that much more
+ *   room under them.
+ */
+@layer components {
+  .gf-cover {
+    --cover-min: clamp(28rem, 84svh, 56rem);
+    --cover-veil: 38%;
+    --cover-wave: 1.75rem;
+    --cover-lift: 2.5rem;
+    --cover-room: clamp(3rem, 8vw, 6rem);
+  }
+  .gf-cover[data-height="tall"] {
+    --cover-min: clamp(22rem, 58svh, 38rem);
+  }
+  .gf-cover[data-scrim="strong"] {
+    --cover-veil: 64%;
+  }
+
+  .gf-cover[data-side="full"] .gf-cover-stage {
+    min-height: var(--cover-min);
+  }
+  .gf-cover-body {
+    padding-block: var(--cover-room);
+  }
+  .gf-cover[data-foot] .gf-cover-body {
+    padding-bottom: calc(var(--cover-room) + var(--cover-lift));
+  }
+  .gf-cover-foot {
+    margin-top: calc(-1 * var(--cover-lift));
+  }
+
+  .gf-cover-title {
+    font-size: clamp(2.125rem, 3vw + 1.25rem, 4rem);
+    line-height: 1.04;
+    letter-spacing: var(--tracking-display);
+  }
+
+  .gf-cover[data-side="full"] .gf-cover-media::after {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in oklab, var(--color-stage) var(--cover-veil), transparent);
+    content: "";
+  }
+
+  .gf-cover[data-edge="wave"] .gf-cover-media {
+    mask-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0 0h1200v30C1000 70 800-10 600 30S200-10 0 30z'/%3E%3C/svg%3E"),
+      linear-gradient(#000, #000);
+    mask-position: bottom, top;
+    mask-size:
+      100% var(--cover-wave),
+      100% calc(100% - var(--cover-wave) + 1px);
+    mask-repeat: no-repeat;
+  }
+
+  @media (width >= 64rem) {
+    .gf-cover {
+      --cover-wave: 2.75rem;
+      --cover-lift: 3.5rem;
+    }
+    .gf-cover[data-side="end"] .gf-cover-stage {
+      min-height: var(--cover-min);
+    }
+    .gf-cover[data-side="end"][data-edge="wave"] .gf-cover-media {
+      mask-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 1200' preserveAspectRatio='none'%3E%3Cpath d='M60 0v1200H30C-10 1000 70 800 30 600S70 200 30 0z'/%3E%3C/svg%3E"),
+        linear-gradient(#000, #000);
+      mask-position: left, right;
+      mask-size:
+        var(--cover-wave) 100%,
+        calc(100% - var(--cover-wave) + 1px) 100%;
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { SECTION_VARIANTS, defaultVariant, variantOf } from "../store/section-va
 
 describe("the catalogue home page's parts", () => {
   it("draws today's opening by default, the category list on request", () => {
-    expect(SECTION_VARIANTS.hero).toEqual(["standard", "category_list"])
+    expect(SECTION_VARIANTS.hero).toEqual(["standard", "category_list", "full_image"])
     expect(defaultVariant("hero")).toBe("standard")
     expect(variantOf("hero", "category_list")).toBe("category_list")
     expect(variantOf("hero", "bento")).toBe("standard")

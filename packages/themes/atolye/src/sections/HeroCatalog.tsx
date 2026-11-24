@@ -15,8 +15,8 @@ import type { Mark, SlideExtras, SlidePlace } from "./HeroCatalogSlide"
 import { SliderStage } from "./SliderStage"
 import { sliderWords } from "./slider-words"
 
-/** The opening's variants this theme draws (`drawnVariant`): today's and the category list. */
-export const HERO_VARIANTS = ["standard", "category_list"] as const
+/** The opening's variants this theme draws (`drawnVariant`): today's, the category list and the full image. */
+export const HERO_VARIANTS = ["standard", "category_list", "full_image"] as const
 
 /**
  * Two or more slides in the opening's tile (adr/0049 Ek 2026-11-15): the

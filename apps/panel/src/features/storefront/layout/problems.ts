@@ -3,7 +3,7 @@ import { DEPARTURES_LIMITS, HEADER_CATALOG_LIMITS, SEARCH_BOX_LIMITS } from "@qt
 import { LAYOUT_LIMITS as L, MARQUEE_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
-import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
+import { heroCatalogProblems, heroFullProblems, priceBandsProblems } from "./catalog-problems"
 import { listProblems } from "./shelf-problems"
 import { stripGalleryProblems } from "./strip-problems"
 import { collageProblems, statsProblems, stepsProblems } from "./points-problems"
@@ -106,6 +106,7 @@ function fieldsOf(section: AnySection): Found[] {
         ["image", textProblem(section.image?.alt ?? null, L.alt)],
         ...section.links.map((link, index): Found => [`links.${String(index)}`, linkProblem(link)]),
         ...heroCatalogProblems(section),
+        ...heroFullProblems(section),
       ]
     case "price_bands":
       return priceBandsProblems(section)
