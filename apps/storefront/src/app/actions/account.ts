@@ -28,6 +28,7 @@ import {
   takeInvite,
 } from "@/lib/account/session"
 import { cartIdFromCookie, forgetCart } from "@/lib/cart/cookie"
+import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeCall } from "@/lib/store-api/server"
 import { gateAsk, gated, gateHeaders, underGate } from "@/lib/store-api/gate"
 
@@ -142,17 +143,27 @@ export async function registerAction(
   if (input.terms === "1" && input.accept !== "on") {
     return failed("account.terms_required")
   }
+  let token: string
   try {
-    const token = await registerIdentity(input.email, input.password, gateHeaders(form))
+    token = await registerIdentity(input.email, input.password, gateHeaders(form))
     await createCustomer(token, {
       first_name: input.first_name,
       last_name: input.last_name,
       ...(input.phone ? { phone: input.phone } : {}),
     })
+    // Kept before the code is asked: a send again after the code's own check resumes here
+    await rememberPending(token)
+  } catch (error) {
+    const kept = await resumedRegistration(error)
+    if (!kept) {
+      return answered(error, "account.register_failed")
+    }
+    token = kept
+  }
+  try {
     await underGate("verification", () =>
       requestVerification(token, input.email, gateHeaders(form, "verification"))
     )
-    await rememberPending(token)
     if (input.davet) {
       await rememberInvite(input.davet)
     }
@@ -161,6 +172,30 @@ export async function registerAction(
   }
   // `yeni`: the account was just made (the sign-up event, docs/20)
   redirect("/hesap/dogrula?gonderildi=1&yeni=1")
+}
+
+/**
+ * The same form sent again after its verification code's check (a
+ * Turnstile token, or its stand-in while Cloudflare cannot answer): the
+ * login and its account were made by the first send, which kept the
+ * login's key. The backend now says the address is taken; the key kept
+ * is taken up instead, so the shopper goes on to the code and is never
+ * stuck. Only a refusal for an existing address, and only with a live key
+ * this browser kept (the code request is bound to that login's own address).
+ */
+async function resumedRegistration(error: unknown): Promise<string | null> {
+  if (
+    !isStoreApiError(error) ||
+    accountError(error, "account.register_failed") !== "account.email_taken"
+  ) {
+    return null
+  }
+  const kept = await pendingToken()
+  if (!kept) {
+    return null
+  }
+  const { exp } = claimsOf(kept)
+  return exp === undefined || exp * 1000 > Date.now() ? kept : null
 }
 
 const Verify = z.object({

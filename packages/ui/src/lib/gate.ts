@@ -33,6 +33,12 @@ export interface GatedResult {
   error: string | null
   challenge?: GatedChallenge | null
   turnstile?: TurnstileAsk | null
+  /**
+   * Fields the action already acted on, for the send again: each named
+   * field replaced by these values (none: taken out). A review's photos,
+   * uploaded once, come back as their ids and the files stay home.
+   */
+  resume?: Record<string, string[]> | null
 }
 
 /** One gate's widget, as `useTurnstile` gives it; null without a site key. */
@@ -119,12 +125,19 @@ export async function sendGated<R extends GatedResult>(
     error,
     challenge: null,
     turnstile: null,
+    resume: null,
   })
 
   let result = await once()
   const asked = new Set<string>()
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    const { challenge, turnstile } = result
+    const { challenge, turnstile, resume } = result
+    for (const [field, values] of Object.entries(resume ?? {})) {
+      form.delete(field)
+      for (const value of values) {
+        form.append(field, value)
+      }
+    }
     if (challenge) {
       hooks.checking?.(true)
       try {

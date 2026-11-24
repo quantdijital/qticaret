@@ -165,4 +165,21 @@ describe("sendGated", () => {
 
     expect(result.error).toBe(CHALLENGE_FAILED)
   })
+
+  it("sends again what the action already did in place of what was sent (a review's photos)", async () => {
+    const review = widget()
+    const { send, seen } = backend([
+      { ...asked("review"), resume: { photo_ids: ["revph_1", "revph_2"], photos: [] } },
+      OK,
+    ])
+    const form = new FormData()
+    form.append("photos", new File(["x"], "a.jpg", { type: "image/jpeg" }))
+
+    await sendGated(send, form, gatesOf("review", { review }))
+
+    expect(seen[0]?.["photos"]).toBe("a.jpg")
+    expect(seen[1]?.["photos"]).toBeUndefined()
+    expect(form.getAll("photo_ids")).toEqual(["revph_1", "revph_2"])
+    expect(seen[1]?.["turnstile"]).toBe("tok-1")
+  })
 })

@@ -41,7 +41,9 @@ const Review = z.object({
  * up first, one by one as their bytes; the review then names them.
  */
 export async function writeReview(_state: ActionResult, form: FormData): Promise<ActionResult> {
-  const parsed = Review.safeParse(Object.fromEntries([...form].filter(([key]) => key !== "photos")))
+  const parsed = Review.safeParse(
+    Object.fromEntries([...form].filter(([key]) => key !== "photos" && key !== "photo_ids"))
+  )
   if (!parsed.success) {
     const field = String(parsed.error.issues[0]?.path[0] ?? "")
     return {
@@ -49,13 +51,18 @@ export async function writeReview(_state: ActionResult, form: FormData): Promise
       error: field === "rating" ? "product.rating_required" : "product.review_too_short",
     }
   }
-  const photos = reviewPhotoFiles(form)
+  // Uploaded by this form's first send, which a bot check stopped: not sent again
+  const kept = keptPhotoIds(form)
+  if (kept === null) {
+    return { ok: false, error: "product.review_photos_invalid" }
+  }
+  const photos = kept.length > 0 ? [] : reviewPhotoFiles(form)
   if (photos === null) {
     return { ok: false, error: "product.review_photos_invalid" }
   }
   const { product_id, title, ...rest } = parsed.data
+  const photoIds: string[] = [...kept]
   try {
-    const photoIds: string[] = []
     for (const photo of photos) {
       const { photo: uploaded } = await storeCall<{ photo: { id: string } }>(
         `/store/products/${encodeURIComponent(product_id)}/reviews/photos`,
@@ -78,9 +85,28 @@ export async function writeReview(_state: ActionResult, form: FormData): Promise
       ...gated(form),
     })
   } catch (error) {
-    return gateAsk(error) ?? { ok: false, error: failure(error, "product.review_failed") }
+    const asked = gateAsk(error)
+    if (asked) {
+      // The form sends again with the ids in place of the files (adr/0044 Ek 2026-11-24)
+      return photoIds.length > 0 ? { ...asked, resume: { photo_ids: photoIds, photos: [] } } : asked
+    }
+    return { ok: false, error: failure(error, "product.review_failed") }
   }
   return { ok: true, error: null }
+}
+
+// The backend's photo ids (`revph_…`): at most three, of their shape; the backend checks they are the customer's
+const PHOTO_ID = /^[A-Za-z0-9_-]{1,64}$/
+const MAX_PHOTOS = 3
+
+/** The photo ids a send again carries; null when they are not ids. */
+function keptPhotoIds(form: FormData): string[] | null {
+  const ids = form.getAll("photo_ids")
+  if (ids.length > MAX_PHOTOS) {
+    return null
+  }
+  const valid = ids.filter((id): id is string => typeof id === "string" && PHOTO_ID.test(id))
+  return valid.length === ids.length ? valid : null
 }
 
 const Question = z.object({ product_id: PRODUCT_ID, body: z.string().trim().min(5).max(1000) })

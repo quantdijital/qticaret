@@ -45,6 +45,8 @@ export interface ActionResult {
   /** A bot check the backend wants first (adr/0044 Ek 2026-11-24); `sendGated` answers it. */
   challenge?: GatedChallenge | null
   turnstile?: TurnstileAsk | null
+  /** Fields to send again in place of what was sent (`GatedResult.resume`). */
+  resume?: Record<string, string[]> | null
 }
 
 export type FormAction = (state: ActionResult, form: FormData) => Promise<ActionResult>
