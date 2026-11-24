@@ -914,6 +914,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "listing.id_required": "Say which listing is asked for.",
   "listing.search_query_invalid": "Type a word to search for (100 characters at most).",
   "listing.search_query_unexpected": "A search text is sent with a search only.",
+  "listing.region_unknown": "The region was not found.",
+  "listing.currency_mismatch": "The currency must be the region's currency.",
   "orders.nothing_to_ship": "Nothing is left to ship in this order.",
   "legal.unknown": "There is no such kind of legal text.",
   "legal.not_published": "This text is not published yet.",

@@ -81,6 +81,9 @@ export const RATE_LIMIT_PROFILES = {
   // A month's departure calendar (adr/0077 §6): asked as a shopper opens the date
   // picker or turns a month; each answer is kept a minute, a miss reads the month
   departure_calendar: { name: "departure_calendar", perIp: { max: 60, windowMs: MINUTE } },
+  // A listing asked with dates (adr/0077 §5 Ek): beside `listing`, its own budget, for
+  // a miss prices up to 1000 products over their departures; each answer is kept 30 s
+  dated_listing: { name: "dated_listing", perIp: { max: 60, windowMs: MINUTE } },
   // Upcoming departures (adr/0077 §10): a home page's section asks once a page view;
   // each answer is kept 30 seconds, a miss reads the nearest departures
   upcoming_departures: { name: "upcoming_departures", perIp: { max: 60, windowMs: MINUTE } },
