@@ -2,6 +2,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { BlogIndexPageView, BlogTermLinkView, PostCardView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { Trail } from "../parts/Trail"
+import { ListingText } from "../listing/ListingText"
 import { Pager } from "../listing/Pager"
 import { AuthorHead } from "./Author"
 import { PostCard, PostFacts } from "./PostCard"
@@ -81,10 +82,11 @@ function Lead({ post }: { post: PostCardView }) {
 /**
  * The blog (`/blog`), a category's or tag's archive (adr/0019 ek
  * 2026-11-03) and an author's page (adr/0060; their photo, title, bio and
- * profiles in its head): the title (and the term's own words on its first page),
- * the categories as pills, the newest post large on a graphite stage on
- * the first page (the next two or four half wide, so the rows below come
- * out full), then the rest as cards three across, and the pages.
+ * profiles in its head): the title, the categories as pills, the newest
+ * post large on a graphite stage on the first page (the next two or four
+ * half wide, so the rows below come out full), then the rest as cards
+ * three across, the pages, and on an archive's first page its own words
+ * at the foot, drawn as a product listing's (adr/0075 Ek 2026-11-24).
  */
 export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Translate }) {
   const terms = view.terms ?? []
@@ -139,6 +141,7 @@ export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Transla
         </>
       )}
       <Pager pagination={view.pagination} t={t} />
+      {view.footText && <ListingText text={view.footText} t={t} bare />}
     </Container>
   )
 }

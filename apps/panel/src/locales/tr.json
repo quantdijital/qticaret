@@ -7952,6 +7952,7 @@
       },
       "tabs": {
         "general": "Genel bilgiler",
+        "description": "Açıklama",
         "seo": "Arama görünümü"
       },
       "fields": {
@@ -7962,7 +7963,6 @@
       },
       "nameRequired": "Bir ad yazın.",
       "handleHint": "Yayında yazısı olan bir arşivin adresini değiştirirseniz eski adres yeni adrese yönlendirilir.",
-      "descriptionHint": "Arşiv sayfasının başında ve arama sonucunda görünür; boşsa son yazıların başlıkları kullanılır.",
       "rankHint": "Küçük sayı önce gelir; sırası eşit olanlar ada göre dizilir.",
       "fallbackDescription": "{{name}} yazıları: {{titles}}",
       "delete": {
@@ -8057,6 +8057,7 @@
     "listingDescription": {
       "title": "Açıklama",
       "hint": "Vitrinde sayfanın altında, ürünlerden sonra görünür. Başka yerden yapıştırdığınız başlıklar ve paragraflar korunur; görünüşünü Tema ayarları > Liste metni belirler.",
+      "hintBlog": "Vitrinde sayfanın altında, yazılardan sonra görünür. Başka yerden yapıştırdığınız başlıklar ve paragraflar korunur; görünüşünü Tema ayarları > Liste metni belirler.",
       "ai": "Açıklama için yapay zekâ ile öner"
     },
     "postDraft": {

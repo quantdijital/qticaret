@@ -60,11 +60,14 @@ export const CONTENT_ROUTES = [
   {
     matcher: "/admin/content/terms",
     methods: ["POST" as const],
+    // A description document (adr/0075 Ek 2026-11-24), as a brand's
+    bodyParser: { sizeLimit: "1mb" },
     middlewares: [validateAndTransformBody(AdminPostContentTerm)],
   },
   {
     matcher: "/admin/content/terms/:id",
     methods: ["POST" as const],
+    bodyParser: { sizeLimit: "1mb" },
     middlewares: [validateAndTransformBody(AdminUpdateContentTerm)],
   },
   // A blog's authors (adr/0060)
@@ -97,6 +100,12 @@ export const CONTENT_ROUTES = [
     matcher: "/store/content/terms",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetContentTerms, {})],
+  },
+  // A blog category's or tag's text, rendered (adr/0075 Ek 2026-11-24)
+  {
+    matcher: "/store/content/terms/:id/description",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
   },
   // A product's description document, rendered (adr/0055)
   {

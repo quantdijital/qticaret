@@ -20,6 +20,7 @@ import type {
 } from "./category-card-views"
 import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
 import type { HeroFullView } from "./hero-full-views"
+import type { ListingTextView } from "./listing-views"
 import type {
   FeaturedProductSectionView,
   GoogleRatingSectionView,
@@ -240,8 +241,18 @@ export interface BlogIndexPageView {
   pagination: PaginationView
   /** The blog's categories with live posts; none: no bar. */
   terms?: BlogTermLinkView[]
-  /** On a category's or tag's archive: which, and its own words; null on the index. */
+  /**
+   * On a category's or tag's archive: which; null on the index. Its own
+   * words come as `footText` (adr/0075 Ek 2026-11-24); `description` is
+   * what an older storefront sends for under the title (now always empty).
+   */
   activeTerm?: { kind: "category" | "tag"; name: string; description: string[] } | null
+  /**
+   * The archive's own text at its foot, after the posts and their pages, on
+   * its first page only, drawn as a product listing's (adr/0075 Ek
+   * 2026-11-24); none or absent: nothing there.
+   */
+  footText?: ListingTextView | null
   /** On an author's page (`/blog/yazar/{handle}`, adr/0060): who, for the page's head; null elsewhere. */
   activeAuthor?: AuthorView | null
 }

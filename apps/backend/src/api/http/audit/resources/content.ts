@@ -7,6 +7,7 @@ import type ContentModuleService from "../../../../modules/content/service"
 import type { ContentEntryRecord, LandingPageRecord } from "../../../../modules/content/service"
 import type { AuditedResource, Resolver, Snapshot } from "../types"
 import { ID } from "../types"
+import { docDigest } from "./catalog"
 
 /**
  * Content pages, blog posts and landing pages (F3.16, adr/0011): title, handle, status,
@@ -120,6 +121,8 @@ async function termSnapshot(scope: Resolver, filters: Record<string, string>): P
         name: term.name,
         handle: term.handle,
         description: term.description,
+        // adr/0075 Ek 2026-11-24: the document by its digest; its text shows as `description`
+        description_doc: docDigest(term.description_doc),
         rank: term.rank,
       }
     : {}

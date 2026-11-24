@@ -9,12 +9,18 @@ import { useAiFill } from "@/features/seo/advisor/ai-fill"
 /** A listing page's kind: its description task is the backend's `<kind>_description`. */
 export type ListingKind = "category" | "collection" | "brand"
 
+/** A blog category's or tag's archive (adr/0075 Ek 2026-11-24): no AI task writes its text. */
+export type BlogTermListingKind = "post_category" | "post_tag"
+
+const isCatalog = (kind: ListingKind | BlogTermListingKind): kind is ListingKind =>
+  kind === "category" || kind === "collection" || kind === "brand"
+
 /** The ready lengths the AI core writes a listing's text in (adr/0074 §5); no prompt to write. */
 const AI_OPTIONS = ["short", "detailed"] as const
 
 interface ListingDescriptionCardProps {
-  /** The page's kind and id: the AI button asks its description for this record. */
-  kind: ListingKind
+  /** The page's kind and id: the AI button asks its description for this record (catalog only). */
+  kind: ListingKind | BlogTermListingKind
   id: string
   /** The text as written; null: the record has plain text only. */
   doc: JSONContent | null
@@ -23,6 +29,8 @@ interface ListingDescriptionCardProps {
   saving: boolean
   /** Writes the document only; resolves once the cache holds the saved record. */
   save: (doc: JSONContent) => Promise<void>
+  /** Whether the editor holds an unsaved change. */
+  onDirtyChange?: (dirty: boolean) => void
 }
 
 /**
@@ -33,7 +41,9 @@ interface ListingDescriptionCardProps {
  * (the move from plain text happens here, on the shop's save). The
  * storefront draws it at the foot of the page, after the products. The AI
  * button beside the title (adr/0074 §5 madde 1) puts a suggestion in as
- * plain paragraphs, a change the card's Save writes; nothing before.
+ * plain paragraphs, a change the card's Save writes; nothing before. A
+ * blog category's or tag's text is the same (adr/0075 Ek 2026-11-24),
+ * drawn after the posts; it has no AI button.
  */
 export function ListingDescriptionCard({
   kind,
@@ -42,6 +52,7 @@ export function ListingDescriptionCard({
   text,
   saving,
   save,
+  onDirtyChange,
 }: ListingDescriptionCardProps) {
   const { t } = useTranslation()
   // One object per stored text: the editor puts a new one in only when it changes
@@ -49,13 +60,20 @@ export function ListingDescriptionCard({
   return (
     <DocumentCard
       title={t("content.listingDescription.title")}
-      description={t("content.listingDescription.hint")}
+      description={t(
+        isCatalog(kind) ? "content.listingDescription.hint" : "content.listingDescription.hintBlog"
+      )}
       stored={stored}
       saving={saving}
       media={false}
       shopTokens={false}
       save={save}
-      action={(put) => <ListingDescriptionAi kind={kind} id={id} put={put} />}
+      action={
+        isCatalog(kind)
+          ? (put) => <ListingDescriptionAi kind={kind} id={id} put={put} />
+          : undefined
+      }
+      onDirtyChange={onDirtyChange}
     />
   )
 }

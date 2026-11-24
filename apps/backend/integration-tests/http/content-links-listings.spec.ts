@@ -30,7 +30,8 @@ interface Described {
 
 /**
  * adr/0075 + adr/0042 Ek 2026-11-05: categories', brands' and collections'
- * description documents join the link rewrite: a product whose handle
+ * description documents join the link rewrite (blog categories' and tags'
+ * too, adr/0075 Ek 2026-11-24): a product whose handle
  * changed is linked at its new path after an apply, through each one's
  * own save (the plain text beside it unchanged); a dry run writes nothing.
  */
@@ -43,6 +44,7 @@ medusaIntegrationTestRunner({
     let categoryId: string
     let brandId: string
     let collectionId: string
+    let termId: string
 
     const post = <T>(url: string, body: unknown) =>
       settle(http.post<T & { message?: string }>(url, body, { headers: owner.headers }))
@@ -67,7 +69,8 @@ medusaIntegrationTestRunner({
       const collection = (
         await get<{ collection: Described }>(`/admin/collection-board/${collectionId}`)
       ).collection
-      return [category, brand, collection].map((each) => ({
+      const term = (await get<{ term: Described }>(`/admin/content/terms/${termId}`)).term
+      return [category, brand, collection, term].map((each) => ({
         links: docHrefs(each.description_doc),
         text: each.description,
       }))
@@ -108,6 +111,13 @@ medusaIntegrationTestRunner({
         description_doc: docOf("Yaz", `/urun/${oldHandle}?renk=mavi`),
       })
       expect(details.status).toBe(200)
+      const term = await post<{ term: { id: string } }>("/admin/content/terms", {
+        kind: "category",
+        name: `Rehber ${stamp}`,
+        description_doc: docOf("Rehber", `/urun/${oldHandle}`),
+      })
+      expect(term.status).toBe(201)
+      termId = term.data.term.id
 
       // The product's handle changes: its old path answers with a 301 to the new one (adr/0017)
       const renamed = await post(`/admin/products/${productId}`, { handle: newHandle })
@@ -126,21 +136,22 @@ medusaIntegrationTestRunner({
         { links: [`/urun/${oldHandle}`], text: "Kupa" },
         { links: [`https://magaza.example.com/urun/${oldHandle}#bakim`], text: "Usta" },
         { links: [`/urun/${oldHandle}?renk=mavi`], text: "Yaz" },
+        { links: [`/urun/${oldHandle}`], text: "Rehber" },
       ])
       // The dry run writes nothing and counts what the apply does
       expect(unchanged).toEqual(before)
       expect(checked.result_summary).toMatchObject({
         dry_run: true,
-        documents: 3,
-        rewritten: 3,
-        changed: 3,
+        documents: 4,
+        rewritten: 4,
+        changed: 4,
         unresolved: 0,
       })
       expect(applied.result_summary).toMatchObject({
         dry_run: false,
-        documents: 3,
-        rewritten: 3,
-        changed: 3,
+        documents: 4,
+        rewritten: 4,
+        changed: 4,
         unresolved: 0,
       })
       // Each document rewritten, its plain text (the mirror) as it was
@@ -148,6 +159,7 @@ medusaIntegrationTestRunner({
         { links: [`/urun/${newHandle}`], text: "Kupa" },
         { links: [`/urun/${newHandle}#bakim`], text: "Usta" },
         { links: [`/urun/${newHandle}?renk=mavi`], text: "Yaz" },
+        { links: [`/urun/${newHandle}`], text: "Rehber" },
       ])
       // Nothing is left to change
       expect(again.result_summary).toMatchObject({ rewritten: 0, changed: 0, unresolved: 0 })

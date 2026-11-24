@@ -361,6 +361,17 @@ export interface StoreContentTermSummary extends StoreContentTerm {
   post_count: number
 }
 
+/**
+ * `GET /store/content/terms/:id/description` (adr/0075 Ek 2026-11-24): a
+ * listed blog category's or tag's text as the shop formatted it, rendered
+ * on the server, for the foot of its archive; null: plain text only (the
+ * list's `description`).
+ */
+export interface StoreContentTermDescription {
+  term_id: string
+  description_html: string | null
+}
+
 /** A blog author's link on a network or the web: the person's own profile (`sameAs`). */
 export interface StoreContentAuthorLink {
   kind: "website" | "linkedin" | "instagram" | "x"
