@@ -100,7 +100,7 @@ describe("the full image opening's start", () => {
 
   it("names every step in both languages", () => {
     for (const words of [tr, en]) {
-      const own: Record<string, Record<string, string> | string> = words.storefront.editor.heroFull
+      const own: Record<string, unknown> = words.storefront.editor.heroFull
       for (const [name, steps] of Object.entries({
         action: ["button", "search"],
         search_position: ["inside", "overlap"],
