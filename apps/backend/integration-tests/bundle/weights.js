@@ -2,9 +2,12 @@
 // folder): the planner fills bundles by these seconds and the sequencer
 // spreads bundles over --shard jobs by them (README.md in this folder).
 //
-// Regenerated from the logs of a CI run's HTTP jobs, with QT_IT_BUNDLE on:
-//   gh api repos/<owner>/<repo>/actions/jobs/<job id>/logs > http-1.log   (each HTTP job)
-//   node integration-tests/bundle/weights.js http-*.log
+// Regenerated from the logs of a CI run's HTTP jobs, with QT_IT_BUNDLE on
+// (README.md, "Shards by seconds"): the whole run's log at once,
+//   gh run view <run id> --log > run.log
+//   node integration-tests/bundle/weights.js run.log
+// or each job's (gh api repos/<owner>/<repo>/actions/jobs/<job id>/logs).
+// Several runs' logs give each file its median.
 // host.js writes a line for each bundled file ("[bundle] <file> <seconds> s");
 // a file that runs alone is read from jest's "PASS <path> (<seconds> s)".
 const fs = require("node:fs")
@@ -16,7 +19,9 @@ const WEIGHTS_FILE = path.join(__dirname, "weights.json")
 // bundles, adr/0081 Ek). A file run alone pays it too.
 const BOOT_SECONDS = 17
 
-const TIMESTAMP = /^\S+Z /
+// A job's own log starts each line with its time; `gh run view --log` puts
+// the job's and the step's names before it, a tab after each
+const TIMESTAMP = /^(?:[^\t]*\t[^\t]*\t)?\S+Z /
 const FILE_LINE = /^\[bundle\] ([\w.-]+\.spec\.[jt]s) ([\d.]+) s$/
 const BUNDLE_LINE = /^\[bundle\] (bundle-[\w-]+\.spec\.js) \((?:plain|strict)\): (.+)$/
 const RESULT_LINE = /^(?:PASS|FAIL) integration-tests\/(http|\.bundles)\/([\w.-]+) \(([\d.]+) s\)/

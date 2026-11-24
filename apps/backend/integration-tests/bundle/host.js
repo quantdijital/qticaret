@@ -13,6 +13,7 @@
 const path = require("node:path")
 const { withTemplate } = require("../template/runner")
 const { forgetProcessCaches } = require("../../src/lib/cache/process-caches")
+const { ASYNC_JOB_MODULE } = require("../../src/modules/async-job")
 
 const HTTP_DIR = path.join(__dirname, "..", "http")
 const TEST_UTILS = "@medusajs/test-utils"
@@ -89,6 +90,23 @@ function withDefaultTimeout(timeout, register) {
   }
 }
 
+// A scheduled job that fires while Medusa boots (seo-sitemap-refresh queues
+// the sitemap on its first tick) can be in the booted snapshot as queued or
+// running, with no process behind it once restored: every later file that
+// queues a job of its kind got 409 async_job.already_running. A file alone
+// almost never boots into one, so each file starts without them.
+async function dropJobsInFlight(container, name) {
+  const jobs = container.resolve(ASYNC_JOB_MODULE)
+  const stuck = await jobs.listAsyncJobs(
+    { status: ["queued", "running"] },
+    { select: ["id", "type"] }
+  )
+  if (stuck.length > 0) {
+    await jobs.deleteAsyncJobs(stuck.map((job) => job.id))
+    say(`${name}: dropped jobs left in flight at boot: ${stuck.map((job) => job.type).join(", ")}`)
+  }
+}
+
 function realRunner() {
   const actual = jest.requireActual(TEST_UTILS).medusaIntegrationTestRunner
   const template = process.env.QT_IT_TEMPLATE
@@ -159,6 +177,7 @@ function hostSuites(context, state, specs, bundle) {
           // process (src/lib/cache/process-caches.ts)
           forgetProcessCaches()
         }
+        await dropJobsInFlight(context.getContainer(), spec.name)
         state.snapshotDue = true
       })
       if (spec.error) {

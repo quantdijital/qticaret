@@ -39,6 +39,11 @@ on for the HTTP jobs (`.github/workflows/ci.yml`).
      breakers), the integration health monitor, rate limit counters and the
      staff and editor session stores kept in memory (no Redis in CI). Each
      registers how it forgets, under NODE_ENV=test only;
+   - async jobs still `queued` or `running` are deleted: a scheduled job
+     that fired while Medusa booted (`seo-sitemap-refresh` on its first
+     tick) is in the booted state with no process behind it, and would
+     refuse every later file's job of its kind (409
+     `async_job.already_running`);
    - spies are restored (`jest.restoreAllMocks`) and real timers put back;
    - a file's `jest.setTimeout` is kept: its tests and hooks get it as their
      timeout. Medusa's boot and the runner's own hooks wait as long as the
@@ -61,10 +66,21 @@ exactly one. Within a job the workers take the heaviest file first. With
 bundles off, jest's own sequencer runs as before.
 
 `weights.json` (file name → seconds, without the boot) is measured, not
-written by hand. To refresh it after a CI run with bundles on, download
-the HTTP jobs' logs and run `node integration-tests/bundle/weights.js
-<log>...` (the header of `weights.js` says how). A new spec file needs no
-entry: it weighs the median until the next refresh.
+written by hand: a bundled file's seconds are the host's line for it
+(`[bundle] <file> <seconds> s`, from before its database is restored to
+after its last `afterAll`: hooks, snapshot and restore included), a lone
+file's are jest's `PASS <path> (<seconds> s)` less the boot. To refresh it
+after a CI run with bundles on, from `apps/backend`:
+
+```sh
+gh run view <run id> --repo quantdijital/qticaret --log > run.log && node integration-tests/bundle/weights.js run.log
+```
+
+Several runs' logs (`run-1.log run-2.log`) give each file its median. A
+file's seconds depend on what runs beside it (three workers on four cores),
+so one run is a noisy measure. A new spec file needs no entry: it weighs
+the median until the next refresh. To see a split: `--listTests
+--shard=k/N` with `QT_IT_BUNDLE=8` lists a job's files.
 
 ## Files that run alone
 

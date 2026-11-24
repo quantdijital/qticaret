@@ -28,6 +28,16 @@ describe("parseLog", () => {
     })
     expect([...log.alone]).toEqual([["alone.spec.ts", 45.5]])
   })
+
+  it("reads a whole run's log, each line after its job's and step's names", () => {
+    const run = LOG.split("\n")
+      .map((line) => `Integration tests (HTTP 1/8)\tRun the suite\t${line}`)
+      .join("\n")
+    const log = parseLog(run)
+    expect(log.files.get("a.spec.ts")).toBe(30.4)
+    expect(log.bundles.get("bundle-plain-001.spec.js")?.total).toBe(60)
+    expect([...log.alone]).toEqual([["alone.spec.ts", 45.5]])
+  })
 })
 
 describe("measure", () => {
