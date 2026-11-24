@@ -303,6 +303,14 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
     case "stats":
     case "steps":
       return hydratePoints(section, { fill: (text) => fill(text, at.values), link })
+    case "search_box":
+      // The box's fields are the theme's (adr/0077 §1); the section gives its words
+      return {
+        id,
+        type,
+        title: section.title,
+        intro: fill(section.intro, at.values),
+      }
     case "photo_collage":
       return hydrateCollage(section, { fill: (text) => fill(text, at.values), link, image })
     case "contact":

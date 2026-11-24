@@ -68,6 +68,7 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
   "strip_gallery",
   "stats",
   "steps",
+  "search_box",
   "photo_collage",
   "rich_text",
   "faq",
@@ -168,6 +169,7 @@ function wordField(section: AnySection, word: string): PreviewField | null {
     (word === "body" && section.type === "rich_text") ||
     // The steps' intro and their one link (adr/0077 §10)
     (section.type === "steps" && (word === "intro" || word === "link")) ||
+    (section.type === "search_box" && word === "intro") ||
     // The posts' intro panel's words and button, the split band's upper line (adr/0077 Ek)
     (section.type === "posts" &&
       section.variant === "intro_panel" &&

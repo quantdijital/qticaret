@@ -47,6 +47,13 @@ const SAVED: ThemeSettings = {
   section_spacing: "normal",
   surface_style: "filled",
   listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+  search_form: {
+    attribute_key: "bolge",
+    show_category: true,
+    show_dates: false,
+    show_people: true,
+    category_style: "tabs",
+  },
   menu_style: "filled",
   shadow: "float",
   chip_style: "filled",
@@ -67,6 +74,7 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       section_spacing: "normal",
       surface_style: "filled",
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+      search_form: { ...SAVED.search_form },
       menu_style: "filled",
       shadow: "float",
       chip_style: "filled",
@@ -113,6 +121,13 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       section_spacing: "normal",
       surface_style: "filled",
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+      search_form: {
+        attribute_key: null,
+        show_category: true,
+        show_dates: true,
+        show_people: true,
+        category_style: "select",
+      },
       menu_style: "filled",
       shadow: "float",
       chip_style: "filled",
@@ -163,6 +178,17 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       { ...g, header: { ...g.header, sticky: false } },
     ]
     expect(away.map(isGrafit)).toEqual(away.map(() => false))
+  })
+
+  it("leaves the search box's fields out: they are what the box asks, not the look (adr/0077 §1)", () => {
+    const g = GRAFIT_VALUES
+    expect(isGrafit({ ...g, search_form: { ...SAVED.search_form } })).toBe(true)
+  })
+
+  it("reads a draft from before the search box at the box's defaults", () => {
+    const old: Partial<ThemeSettings> = { ...SAVED }
+    delete old.search_form
+    expect(themeValuesOf(old as ThemeSettings).search_form).toEqual(GRAFIT_THEME.search_form)
   })
 })
 

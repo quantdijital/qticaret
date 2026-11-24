@@ -8977,6 +8977,10 @@
           "name": "Numaralı adımlar",
           "description": "Bir işin 3–6 adımı sırayla, numaralarıyla: başlık, kısa giriş ve isterseniz altında tek bağlantı."
         },
+        "search_box": {
+          "name": "Arama kutusu",
+          "description": "Mağazanın arama kutusu, isterseniz başlık ve kısa girişle. Alanları Tema › Arama kutusu'ndan seçilir."
+        },
         "photo_collage": {
           "name": "Fotoğraf kolajı",
           "description": "3–7 fotoğraf bir arada: ilki büyük ya da hepsi eşit; isterseniz başlık, giriş ve her fotoğrafa kısa yazı ile bağlantı."
@@ -9791,6 +9795,36 @@
             "hint": "Uzun metnin ilk satırları görünür, gerisi düğmeyle açılır. Metnin tamamı sayfada kalır; arama motorları hepsini okur."
           },
           "words": "açıklama metin yazı kategori marka koleksiyon devamını oku katla"
+        },
+        "searchFormTitle": "Arama kutusu",
+        "searchFormHint": "Mağazanın tek arama kutusunun alanları: Arama kutusu bölümünde ve arama sayfasının üstünde aynı görünür.",
+        "searchForm": {
+          "attribute_key": {
+            "label": "Nereye alanı",
+            "hint": "Ziyaretçinin seçeceği nitelik (ör. bölge, şehir). Yalnız filtrelenebilir ve seçenekli nitelikler listelenir.",
+            "none": "Kelime kutusu (nitelik yok)"
+          },
+          "show_category": {
+            "label": "Kategori alanı",
+            "hint": "Üst kategorilerden birini seçtirir."
+          },
+          "category_style": {
+            "label": "Kategoriler nasıl görünsün",
+            "hint": "Açılır liste yer kaplamaz; sekmeler kutunun üstünde yan yana durur.",
+            "steps": {
+              "select": "Açılır liste",
+              "tabs": "Sekmeler"
+            }
+          },
+          "show_dates": {
+            "label": "Tarih alanları",
+            "hint": "Başlangıç ve bitiş tarihi; aralıkta kalkışı olan ürünler bulunur."
+          },
+          "show_people": {
+            "label": "Kişi alanı",
+            "hint": "Kaç kişi; yeterli yeri olan tarihler öne çıkar."
+          },
+          "words": "arama kutu nereye tarih kişi kategori sekme"
         }
       },
       "faq": {
@@ -11120,6 +11154,10 @@
           "padded": "01, 02",
           "plain": "1, 2"
         }
+      },
+      "searchBox": {
+        "titleHint": "Boş bırakılırsa kutu başlıksız görünür.",
+        "intro": "Giriş"
       },
       "posts": {
         "eyebrowPlaceholder": "Örn. İlham mı lazım?",

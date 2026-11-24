@@ -1,4 +1,5 @@
 import type { ListingTextSettings } from "@qticaret/types"
+import type { SearchFormView } from "./search-form-views"
 import type { CategoryCardView } from "./card-views"
 import type { HomeSectionView } from "./content-views"
 import type { CategoryMainView } from "./main-views"
@@ -129,6 +130,11 @@ export interface ListingPageView {
   search?: SearchHelpView | null
   /** The empty list's words, when the page has its own (a search, the sale page). */
   empty?: string | null
+  /**
+   * A site search's search box above its results (adr/0077 §1), its values
+   * those asked; none on other lists, and a theme without it draws none.
+   */
+  searchForm?: SearchFormView | null
 }
 
 /** A site search's help (`/arama`, adr/0046 ek 2026-11-03): every item already a link. */

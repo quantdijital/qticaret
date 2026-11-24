@@ -1,4 +1,6 @@
 import type { ListingSort, ListingView } from "@qticaret/types"
+import { DATED_NAMES, appendDated, datedFromSearch, isDated } from "./dated-search"
+import type { DatedState } from "./dated-search"
 
 /**
  * A listing's query (docs/13 §7) as the storefront writes its links: in
@@ -15,6 +17,8 @@ export interface ListingState {
   page: number
   /** The search's words on `/arama`; none on a listing. */
   q?: string | null
+  /** A search's category, dates and party (adr/0077 §2), written after the filters. */
+  dated?: DatedState
 }
 
 const BRAND = "marka"
@@ -62,6 +66,7 @@ export function searchOf(state: ListingState): string {
   for (const [key, values] of state.filters) {
     params.append(key, values.join(","))
   }
+  appendDated(params, state.dated)
   if (state.price) {
     const end = (value: number | null) => (value === null ? "" : String(value))
     params.append("fiyat", `${end(state.price.min)}-${end(state.price.max)}`)
@@ -138,7 +143,7 @@ export function priceAsked(search: URLSearchParams): ListingState["price"] | und
     : range
 }
 
-const SORTS = new Set(["yeni", "fiyat-artan", "fiyat-azalan"])
+const SORTS = new Set(["yeni", "fiyat-artan", "fiyat-azalan", "kalkis"])
 const VALUE = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/
 const KEY = /^[a-z][a-z0-9_]{0,63}$/
 const OWN = new Set(["fiyat", "sirala", "sayfa", "fiyat_en_az", "fiyat_en_cok", "q", "variant"])
@@ -151,7 +156,7 @@ const OWN = new Set(["fiyat", "sirala", "sayfa", "fiyat_en_az", "fiyat_en_cok", 
 export function stateFromSearch(search: URLSearchParams): ListingState {
   const filters: [string, string[]][] = []
   for (const [key, raw] of search.entries()) {
-    if (OWN.has(key) || key.startsWith("utm_") || !KEY.test(key)) {
+    if (OWN.has(key) || DATED_NAMES.has(key) || key.startsWith("utm_") || !KEY.test(key)) {
       continue
     }
     const values = raw
@@ -166,7 +171,9 @@ export function stateFromSearch(search: URLSearchParams): ListingState {
   const price = /^(\d{1,9})?-(\d{1,9})?$/.exec(search.get("fiyat") ?? "")
   const sort = search.get("sirala")
   const page = Number(search.get("sayfa") ?? "1")
+  const dated = datedFromSearch(search)
   return normalized({
+    ...(isDated(dated) || dated.pax > 1 ? { dated } : {}),
     filters,
     price:
       price && (price[1] !== undefined || price[2] !== undefined)

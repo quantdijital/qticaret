@@ -10,6 +10,7 @@ import { useProblemText } from "./forms/problem-text"
 import { PanelGroup } from "./panel-header"
 import { ThemeChoices } from "./theme-choices"
 import { ListingTextGroup } from "./theme-listing-text-fields"
+import { SearchFormGroup } from "./theme-search-form-fields"
 import { BackgroundField, ColorInput } from "./theme-fields"
 import { ThemeSample } from "./theme-sample"
 import { Hint } from "./shared/hint"
@@ -61,7 +62,8 @@ export function ThemeForm({
   const shown = themeValuesOf(theme)
   const { colors } = theme
   const toGrafit = () => {
-    onChange({ ...theme, ...GRAFIT_THEME })
+    // The search box's fields are not the look (adr/0077 §1): the shop's stay
+    onChange({ ...theme, ...GRAFIT_THEME, search_form: theme.search_form })
     toast.success(t(`${C}.grafit.done`), {
       action: { label: t("storefront.editor.undo"), onClick: onUndo },
     })
@@ -116,6 +118,13 @@ export function ThemeForm({
       <ListingTextGroup
         theme={theme}
         reveal={reveal("listingText")}
+        onChange={(next) => {
+          onChange(next)
+        }}
+      />
+      <SearchFormGroup
+        theme={theme}
+        reveal={reveal("searchForm")}
         onChange={(next) => {
           onChange(next)
         }}

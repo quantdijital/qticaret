@@ -41,6 +41,7 @@ import type {
   StatsSection,
   StepsSection,
 } from "@/features/storefront/api/layout-points"
+import type { SearchBoxSection } from "@/features/storefront/api/layout-search-box"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
@@ -392,6 +393,7 @@ export type HomeSection =
   | StripGallerySection
   | StatsSection
   | StepsSection
+  | SearchBoxSection
   | PhotoCollageSection
   | CategoriesSection
   | ProductsSection

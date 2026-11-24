@@ -93,6 +93,14 @@ export interface CardBookingView {
    * (`CardLookView.duration`) and the product has one.
    */
   duration?: string
+  /**
+   * A date search's card (adr/0077 §4): the places left on `next`, given
+   * only when few (the storefront's "Son N yer" threshold), so a theme may
+   * say "Son 3 yer"; absent otherwise.
+   */
+  left?: number
+  /** `next` and the price are those inside the dates asked; absent: the card as always. */
+  inRange?: true
 }
 
 /**

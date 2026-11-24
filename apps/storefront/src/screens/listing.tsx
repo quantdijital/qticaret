@@ -196,6 +196,7 @@ export async function ListingContent({
   breadcrumbs,
   jsonLd,
   extra = {},
+  cardDates = null,
 }: {
   type: ListingType | "search"
   /** The page's answer, by the listing's own query (`query=`). */
@@ -205,8 +206,10 @@ export async function ListingContent({
   heading: () => Promise<Heading>
   breadcrumbs: (title: string) => BreadcrumbView[]
   jsonLd: Parameters<typeof JsonLd>[0]["blocks"]
-  /** A search's help, a page's own words for an empty list. */
-  extra?: Pick<ListingPageView, "search" | "empty">
+  /** A search's help and box, a page's own words for an empty list. */
+  extra?: Pick<ListingPageView, "search" | "empty" | "searchForm">
+  /** A date search's dates and party: its dated cards are told them (adr/0077 §4). */
+  cardDates?: Record<string, string | number> | null
 }) {
   const asked = priceAsked(url.searchParams)
   if (asked !== undefined) {
@@ -231,7 +234,10 @@ export async function ListingContent({
       products.map((product) => product.id)
     ),
     priceDisplays(variantIdsOf(products)),
-    cardFacts(products.map((product) => product.id)),
+    cardFacts(
+      products.map((product) => product.id),
+      cardDates
+    ),
     currentWholesale(),
   ])
   // The index holds retail prices only (ADR-0068 §7): a wholesaler's sort says it is the
@@ -260,6 +266,16 @@ export async function ListingContent({
       path: href(withSort(state, "fiyat-azalan")),
       current: state.sort === "fiyat-azalan",
     },
+    // A date search's own order: the nearest departure first (adr/0077 §2)
+    ...(cardDates
+      ? [
+          {
+            label: t("search.sort_departure"),
+            path: href(withSort(state, "kalkis")),
+            current: state.sort === "kalkis",
+          },
+        ]
+      : []),
   ]
   // The colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
   const [shared, options, amounts, settings] = await Promise.all([

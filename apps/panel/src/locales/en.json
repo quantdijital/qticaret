@@ -8977,6 +8977,10 @@
           "name": "Numbered steps",
           "description": "3–6 steps of a process in order, numbered: a title, a short intro and an optional single link under them."
         },
+        "search_box": {
+          "name": "Search box",
+          "description": "The shop's search box, with an optional title and short intro. Its fields are chosen in Theme › Search box."
+        },
         "photo_collage": {
           "name": "Photo collage",
           "description": "3–7 photos together: the first large or all even; optionally a title, an intro and a caption and link per photo."
@@ -9791,6 +9795,36 @@
             "hint": "A long text shows its first lines, the rest opens with a button. The whole text stays in the page; search engines read all of it."
           },
           "words": "description text category brand collection read more fold"
+        },
+        "searchFormTitle": "Search box",
+        "searchFormHint": "The fields of the shop's one search box: the same in the Search box section and on top of the search page.",
+        "searchForm": {
+          "attribute_key": {
+            "label": "Where field",
+            "hint": "The attribute a visitor picks (e.g. region, city). Only filterable attributes with choices are listed.",
+            "none": "Word box (no attribute)"
+          },
+          "show_category": {
+            "label": "Category field",
+            "hint": "Lets the visitor pick one of the top categories."
+          },
+          "category_style": {
+            "label": "How categories show",
+            "hint": "A drop-down takes no room; tabs stand side by side above the box.",
+            "steps": {
+              "select": "Drop-down",
+              "tabs": "Tabs"
+            }
+          },
+          "show_dates": {
+            "label": "Date fields",
+            "hint": "A start and an end date; products departing in the range are found."
+          },
+          "show_people": {
+            "label": "People field",
+            "hint": "How many people; dates with enough room come first."
+          },
+          "words": "search box where date people category tabs"
         }
       },
       "faq": {
@@ -11120,6 +11154,10 @@
           "padded": "01, 02",
           "plain": "1, 2"
         }
+      },
+      "searchBox": {
+        "titleHint": "Left empty, the box shows without a title.",
+        "intro": "Intro"
       },
       "posts": {
         "eyebrowPlaceholder": "E.g. Need inspiration?",
