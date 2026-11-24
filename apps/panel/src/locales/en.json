@@ -8858,6 +8858,7 @@
       },
       "row": {
         "problem": "A field needs fixing",
+        "gone": "A record it shows was deleted; pick it again",
         "scheduled": "Scheduled",
         "moveUpOf": "Move {{name}} up",
         "moveDownOf": "Move {{name}} down",
@@ -10215,6 +10216,10 @@
           "title": "Storefront preferences",
           "description": "How the shop works: the pages that show the contact form and the payment and shipping facts. These settings are not part of the draft: Save puts them live at once, without waiting for Publish. Maintenance mode is in Settings > Maintenance mode."
         }
+      },
+      "goneRecords": {
+        "notice_one": "A record one section shows (a category, product, collection, brand or page) was deleted. The storefront leaves it out; open the marked section and pick again.",
+        "notice_other": "Records {{count}} sections show (a category, product, collection, brand or page) were deleted. The storefront leaves them out; open the marked sections and pick again."
       },
       "pendingMenus": {
         "text_one": "The draft carries a restored version's menu: Publish replaces the shop's menu with it.",
