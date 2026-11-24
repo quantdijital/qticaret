@@ -37,5 +37,8 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.spec.{ts,tsx}"],
     css: false,
+    // A CI runner types into a form several times slower than a desk machine
+    // does: the same tests, more room (the default 5 s stays everywhere else)
+    testTimeout: process.env["CI"] ? 15_000 : 5_000,
   },
 })
