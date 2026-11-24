@@ -9082,6 +9082,10 @@
           "with_image": "Görselli metin",
           "article": "Sayfa metni"
         },
+        "faq": {
+          "standard": "Başlık yanında",
+          "page": "Sayfa SSS'si"
+        },
         "posts": {
           "grid": "Kutucuklar",
           "intro_panel": "Tanıtım paneli"
@@ -9873,13 +9877,23 @@
         "question": "{{number}}. sorunun metni",
         "answer": "{{number}}. sorunun cevabı",
         "add": "Soru ekle",
-        "hint": "En çok {{max}} soru; cevaplarda mağaza bilgisi kullanılabilir.",
+        "hint": "En çok {{max}} satır; başlık eklerseniz altındaki sorular onun grubunda görünür. Cevaplarda mağaza bilgisi kullanılabilir.",
         "openFirst": "İlk soru açık gelsin",
         "openFirstTerm": "open first",
         "openFirstHint": "Sayfa açıldığında ilk sorunun cevabı görünür.",
         "singleOpen": "Aynı anda tek soru açık",
         "singleOpenTerm": "accordion",
-        "singleOpenHint": "Bir soru açılınca açık olan öteki kapanır."
+        "singleOpenHint": "Bir soru açılınca açık olan öteki kapanır.",
+        "addHeading": "Başlık ekle",
+        "headingItem": "{{number}}. başlık",
+        "headingText": "Grup başlığı",
+        "headingHint": "Altındaki soruları gruplar; örneğin \"Kargo ve teslimat\".",
+        "duplicate": "{{item}}: kopyasını ekle",
+        "answerEmpty": "Cevap yazılmadı",
+        "answerEdit": "Cevabı düzenle",
+        "answerDescription": "Paragraf, liste, kalın, eğik yazı ve bağlantı kullanabilirsiniz.",
+        "answerPlaceholder": "Cevabı yazın",
+        "done": "Tamam"
       },
       "related": {
         "source": "Hangi ürünler",
@@ -11128,7 +11142,7 @@
         "outlineHint": "Uzun metnin yanında başlıklardan oluşan içindekiler gösterilir.",
         "questions": "Soru-cevap okuma",
         "questionsTerm": "questions",
-        "questionsHint": "Soru ve cevaplardan oluşan metin, gruplu açılır sorular olarak gösterilir.",
+        "questionsHint": "Eski sayfalar için: metindeki kalın sorular açılır sorular olarak gösterilir. Yeni sorular için \"Sık sorulan sorular\" bölümünü kullanın.",
         "contactBody": "Metin",
         "form": "İletişim formu",
         "formTerm": "form",

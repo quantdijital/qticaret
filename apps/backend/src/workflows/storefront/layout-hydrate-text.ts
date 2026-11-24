@@ -1,8 +1,10 @@
-import { docStats, renderDoc } from "../../lib/content"
+import { NO_CARDS, docStats, renderDoc } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
+import { isFaqHeading } from "../../lib/storefront/sections/faq"
+import type { FaqSection } from "../../lib/storefront/sections/faq"
 import type { ContactSection } from "../../lib/storefront/sections/page-text"
 import type { PageArticle } from "../../lib/storefront/sections/rich-text"
-import { fillShopDoc } from "../../lib/shop/tokens"
+import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
 import type { HydrateContext } from "./layout-hydrate"
 
@@ -46,6 +48,32 @@ export async function hydrateArticle(section: PageArticle, at: HydrateContext) {
     ...(await printedText(section.body, at)),
     outline: section.outline,
     questions: section.questions,
+  }
+}
+
+/**
+ * The FAQ's rows (adr/0073 Ek 2026-11-24 (2)): a rich answer as the
+ * backend's HTML (no cards or pictures: an answer takes none), a plain
+ * one saved before rich answers as it printed, its details filled in; a
+ * group's heading as written. The variant and the switches printed only
+ * off their defaults, so a section from before them prints as it did.
+ */
+export function hydrateFaq(section: FaqSection, at: Pick<HydrateContext, "values">) {
+  return {
+    id: section.id,
+    type: section.type,
+    title: section.title,
+    items: section.items.map((row) => {
+      if (isFaqHeading(row)) {
+        return { heading: row.heading }
+      }
+      return row.body
+        ? { question: row.question, html: renderDoc(fillShopDoc(row.body, at.values), NO_CARDS) }
+        : { question: row.question, answer: fillShopText(row.answer ?? "", at.values) }
+    }),
+    ...(section.variant === "page" ? { variant: section.variant } : {}),
+    ...(section.open_first === "on" ? { open_first: "on" } : {}),
+    ...(section.single_open === "on" ? { single_open: "on" } : {}),
   }
 }
 

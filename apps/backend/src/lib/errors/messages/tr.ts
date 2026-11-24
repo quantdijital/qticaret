@@ -1207,6 +1207,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Satırın sütun sayısı seçilen düzenle uyuşmuyor; sayfayı yenileyip yeniden deneyin.",
   "storefront_layout.footer_block_invalid":
     "Alt bilgideki bir blok kaydedilemedi; alanlarını kontrol edin (yazı bloğunda başlık, resim ve tablo kullanılamaz; uygulama bağlantıları yalnız App Store ve Google Play adresi olabilir).",
+  "storefront_layout.faq_answer_invalid":
+    "Sık sorulan sorulardaki bir yanıt kaydedilemedi; yanıt boş olamaz, en çok 1500 karakter olur ve yalnız paragraf, liste, kalın, eğik ve bağlantı içerebilir.",
   "storefront_layout.footer_newsletter_twice":
     "Alt bilgide iki bülten formu olamaz; bülten bloğunu ya da alt bilgi grubundaki bülten bölümünü kaldırın ya da gizleyin.",
   // adr/0073: content pages' own sections

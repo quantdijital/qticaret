@@ -27,6 +27,35 @@ const admin = vi.hoisted<AdminMock>(() => ({
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock }, admin } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+// The content editor (tiptap) stands in: its value shown, one button writes the answer
+vi.mock("@/features/content/editor/rich-editor", () => ({
+  RichEditor: (props: { label: string; onChange: (doc: unknown) => void }) => (
+    <button
+      type="button"
+      aria-describedby={undefined}
+      onClick={() => {
+        props.onChange({
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                { type: "text", text: "Bizi arayın: {telefon} ya da " },
+                {
+                  type: "text",
+                  text: "yazın",
+                  marks: [{ type: "link", attrs: { href: "/iletisim" } }],
+                },
+              ],
+            },
+          ],
+        })
+      }}
+    >
+      edit
+    </button>
+  ),
+}))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
   useRouter: () => ({ history: { back: vi.fn() } }),
@@ -36,6 +65,20 @@ vi.mock("@tanstack/react-router", () => ({
 }))
 
 const status = () => screen.getByRole("status", { name: "Taslağın durumu" })
+
+/** What the content editor's stand-in writes: one line with a link (adr/0073 Ek 2026-11-24 (2)). */
+const ANSWER = {
+  type: "doc",
+  content: [
+    {
+      type: "paragraph",
+      content: [
+        { type: "text", text: "Bizi arayın: {telefon} ya da " },
+        { type: "text", text: "yazın", marks: [{ type: "link", attrs: { href: "/iletisim" } }] },
+      ],
+    },
+  ],
+}
 
 // Each test types and picks through the whole editor, which draws itself anew
 // on every key: CPU work a full run's load can stretch past the default 5 s.
@@ -75,7 +118,7 @@ describe("the product and category pages' section forms", HEAVY, () => {
     releaseClock()
   })
 
-  it("writes FAQ questions and answers, an answer with the shop's details, and orders them", async () => {
+  it("writes FAQ questions, a rich answer and a heading, and orders, copies and removes them", async () => {
     await openOn("Kategori sayfası", "Sık sorulan sorular")
     // Where it stands is under "Stil", its questions under "İçerik"
     await openGroup(user, "Yeri")
@@ -93,28 +136,34 @@ describe("the product and category pages' section forms", HEAVY, () => {
       screen.getByRole("textbox", { name: /^2\. sorunun metni/ }),
       "Siparişimi nasıl sorarım?"
     )
-    const answer = screen.getByRole("textbox", { name: /^2\. sorunun cevabı/ })
-    await user.type(answer, "Bizi arayın: ")
-    // The shop's details come from the field's own menu
-    const item = answer.closest("li")
-    if (!item) throw new Error("No question row")
-    await user.click(within(item).getByRole("button", { name: "Bilgi ekle" }))
-    await user.click(await screen.findByRole("menuitem", { name: /Telefon/ }))
-    expect(answer).toHaveValue("Bizi arayın: {telefon}")
+    // The answer is written in the content editor's dialog (adr/0073 Ek 2026-11-24 (2))
+    await user.click(screen.getByRole("button", { name: /^2\. sorunun cevabı/ }))
+    const dialog = await screen.findByRole("dialog", { name: "Siparişimi nasıl sorarım?" })
+    await user.click(within(dialog).getByRole("button", { name: "edit" }))
+    await user.click(within(dialog).getByRole("button", { name: "Tamam" }))
     expect(screen.queryByRole("alert")).toBeNull()
 
     await user.click(screen.getByRole("button", { name: "2. soru: yukarı taşı" }))
+    await user.click(screen.getByRole("button", { name: "Başlık ekle" }))
+    await user.type(screen.getByRole("textbox", { name: /^Grup başlığı/ }), "İade")
+    await user.click(screen.getByRole("button", { name: "1. soru: kopyasını ekle" }))
     await saved((doc) => {
       expect(doc.category[1]).toMatchObject({
         id: "kategorisss",
         placement: "top",
+        variant: "standard",
         items: [
-          { question: "Siparişimi nasıl sorarım?", answer: "Bizi arayın: {telefon}" },
+          { question: "Siparişimi nasıl sorarım?", body: ANSWER },
+          { question: "Siparişimi nasıl sorarım?", body: ANSWER },
+          // A plain answer from before rich answers stays as it was until edited
           { question: "Kargo ne zaman çıkar?", answer: "Aynı gün kargoya veririz." },
+          { heading: "İade" },
         ],
       })
     })
-    // The last question stays: a FAQ holds at least one
+    // The last row stays: a FAQ holds at least one
+    await user.click(screen.getByRole("button", { name: "1. başlık: kaldır" }))
+    await user.click(screen.getByRole("button", { name: "3. soru: kaldır" }))
     await user.click(screen.getByRole("button", { name: "2. soru: kaldır" }))
     expect(screen.getByRole("button", { name: "1. soru: kaldır" })).toBeDisabled()
   })

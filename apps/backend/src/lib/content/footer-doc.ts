@@ -30,13 +30,27 @@ interface Node {
   content?: unknown
 }
 
+/** A narrowed document's bounds: its nodes, its characters of text, its depth. */
+export interface BareDocLimits {
+  nodes: number
+  textLength: number
+  depth: number
+}
+
 /**
  * Whether a checked document fits a footer column: every node on the
  * list, and the whole within the bounds (the document itself is depth 0,
- * so a one-level list's text sits at 4). A loop with its own stack, as
- * the content document's own bounds.
+ * so a one-level list's text sits at 4).
  */
-export function fitsFooter(doc: ContentDoc): boolean {
+export const fitsFooter = (doc: ContentDoc): boolean => fitsBare(doc, FOOTER_DOC_LIMITS)
+
+/**
+ * Whether a checked document holds only paragraphs, line breaks and lists
+ * (bold, italic and links as marks) within `limits`: a footer block's
+ * text, an FAQ's answer (adr/0073 Ek 2026-11-24 (2)). A loop with its own
+ * stack, as the content document's own bounds.
+ */
+export function fitsBare(doc: ContentDoc, limits: BareDocLimits): boolean {
   const stack: [Node, number][] = [[doc, 0]]
   let nodes = 0
   let text = 0
@@ -47,9 +61,9 @@ export function fitsFooter(doc: ContentDoc): boolean {
     if (
       typeof node.type !== "string" ||
       !FOOTER_NODES.has(node.type) ||
-      nodes > FOOTER_DOC_LIMITS.nodes ||
-      text > FOOTER_DOC_LIMITS.textLength ||
-      depth > FOOTER_DOC_LIMITS.depth
+      nodes > limits.nodes ||
+      text > limits.textLength ||
+      depth > limits.depth
     ) {
       return false
     }

@@ -1,5 +1,61 @@
 import { describe, expect, it } from "vitest"
-import { blocksOf, faqOf } from "../faq"
+import { blocksOf, faqOf, faqOfRows } from "../faq"
+
+// An FAQ's own rows by group (adr/0073 Ek 2026-11-24 (2)): as a text of questions was read
+describe("faqOfRows", () => {
+  it("groups the rows under their headings, a plain answer from before in a paragraph", () => {
+    const view = faqOfRows(
+      [
+        { question: "Üye olmalı mıyım?", html: "<p>Hayır.</p>" },
+        { heading: "Ödeme & İade" },
+        { question: "Taksit?", answer: "3 taksit <değil>" },
+        { heading: "Boş" },
+        { heading: "Kargo" },
+        { question: "Ne zaman?", html: "<p>Aynı gün.</p>" },
+      ],
+      new Set(["kargo"])
+    )
+    expect(view).toEqual({
+      intro: "",
+      groups: [
+        {
+          id: "sorular-1",
+          title: null,
+          lead: "",
+          items: [{ question: "Üye olmalı mıyım?", html: "<p>Hayır.</p>" }],
+        },
+        {
+          id: "odeme-iade",
+          title: "Ödeme & İade",
+          lead: "",
+          items: [{ question: "Taksit?", html: "<p>3 taksit &lt;değil&gt;</p>" }],
+        },
+        // A heading with no question after it is left out; the anchor taken skips on
+        {
+          id: "kargo-2",
+          title: "Kargo",
+          lead: "",
+          items: [{ question: "Ne zaman?", html: "<p>Aynı gün.</p>" }],
+        },
+      ],
+    })
+  })
+
+  it("reads the same groups and anchors as the text of questions it came from", () => {
+    const text =
+      "<h3>Kargo</h3><p><strong>Ne zaman?</strong></p><p>Aynı gün.</p>" +
+      "<p><strong>Nereden?</strong></p><p>İstanbul.</p><h3>Ödeme</h3>" +
+      "<p><strong>Taksit?</strong></p><ul><li>3</li></ul>"
+    const rows = [
+      { heading: "Kargo" },
+      { question: "Ne zaman?", html: "<p>Aynı gün.</p>" },
+      { question: "Nereden?", html: "<p>İstanbul.</p>" },
+      { heading: "Ödeme" },
+      { question: "Taksit?", html: "<ul><li>3</li></ul>" },
+    ]
+    expect(faqOfRows(rows, new Set(["icerik"]))).toEqual(faqOf(text, new Set(["icerik"])))
+  })
+})
 
 // A questions page read from the shop's own HTML (adr/0046 Ek 2026-11-05 içerik sayfaları)
 describe("blocksOf", () => {

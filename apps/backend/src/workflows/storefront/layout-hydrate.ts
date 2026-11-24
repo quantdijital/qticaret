@@ -17,7 +17,7 @@ import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
 import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
-import { hydrateArticle, hydrateContact } from "./layout-hydrate-text"
+import { hydrateArticle, hydrateContact, hydrateFaq } from "./layout-hydrate-text"
 import { hydrateShelf } from "./layout-hydrate-shelf"
 import { hydrateStrips } from "./layout-hydrate-strips"
 import { hydrateCollage, hydrateDepartures, hydratePoints } from "./layout-hydrate-points"
@@ -201,18 +201,7 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
       }
     }
     case "faq":
-      return {
-        id,
-        type,
-        title: section.title,
-        items: section.items.map((item) => ({
-          question: item.question,
-          answer: fillShopText(item.answer, at.values),
-        })),
-        // Printed only when on, so a section from before them prints as it did
-        ...(section.open_first === "on" ? { open_first: "on" } : {}),
-        ...(section.single_open === "on" ? { single_open: "on" } : {}),
-      }
+      return hydrateFaq(section, at)
     case "newsletter":
       // Each new field only off its default (adr/0049 Ek 2026-11-17 e-bülten)
       return printedNewsletter(section, (text) => fill(text, at.values), image)
