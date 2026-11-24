@@ -12,6 +12,7 @@ import {
   GripVertical,
   Settings2,
   Trash2,
+  TriangleAlert,
 } from "lucide-react"
 import { useContext, useId } from "react"
 import type { DragEvent } from "react"
@@ -27,6 +28,7 @@ import {
 import type { LucideIcon } from "lucide-react"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { OpenedSectionContext, SectionHoverContext } from "./editor-layout"
+import { useGoneRecords } from "./gone-records-context"
 import { Hint } from "./shared/hint"
 
 const R = "storefront.editor.row"
@@ -101,6 +103,8 @@ export function SectionRow({
   const { t } = useTranslation()
   // Its settings open beside the list: the row stays marked
   const current = useContext(OpenedSectionContext) === id
+  // It names a record deleted since: drawn without it, saved as it is, picked again here
+  const gone = useGoneRecords().has(id)
   // Pointed at in the preview: the row lights up; pointed at here, the preview frames it
   const { hovered, hover } = useContext(SectionHoverContext)
   const detailId = useId()
@@ -186,6 +190,13 @@ export function SectionRow({
               role="img"
               aria-label={t(`${R}.problem`)}
               className="size-3.5 shrink-0 text-destructive-text"
+            />
+          ) : null}
+          {gone ? (
+            <TriangleAlert
+              role="img"
+              aria-label={t(`${R}.gone`)}
+              className="size-3.5 shrink-0 text-warning-text"
             />
           ) : null}
           {off ? (

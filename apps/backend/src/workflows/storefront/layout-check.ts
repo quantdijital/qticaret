@@ -151,6 +151,60 @@ export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: s
   return []
 }
 
+/** A record the design names, with the part naming it: a section's id, a free footer block's. */
+export interface NamedTarget {
+  part: string
+  kind: MenuLinkKind
+  target: string
+}
+
+const recordTargets = (links: readonly MenuLinkInput[]) =>
+  links.flatMap((link) =>
+    isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
+  )
+
+/**
+ * Every record the design's sections (every page's, the footer's drawn),
+ * its header's linked sections and a free rows footer's blocks (adr/0070)
+ * name, hidden ones too, each with the part naming it.
+ */
+export function layoutTargets(doc: LayoutDocument): NamedTarget[] {
+  const of = (part: string, list: { kind: MenuLinkKind; target: string }[]) =>
+    list.map((each) => ({ part, ...each }))
+  return [
+    ...bodySections(doc).flatMap((section) =>
+      of(section.id, [...recordsOf(section), ...recordTargets(linksOf(section))])
+    ),
+    ...headerLinked(doc).flatMap((section) => of(section.id, recordTargets(linksOf(section)))),
+    ...freeBlocksOf(doc.footer).flatMap((block) =>
+      of(block.id, recordTargets(footerRowLinks([block])))
+    ),
+  ]
+}
+
+/** The records a menu set the design carries (adr/0063 §3) links. */
+const menuTargets = (doc: LayoutDocument) =>
+  recordTargets(
+    (doc.settings.menus ?? []).flatMap((menu) =>
+      menu.items.flatMap((each) => [each.link, ...each.children])
+    )
+  )
+
+/** Every string a stored design (raw JSON or a document) holds: the record ids it names among them. */
+function storedStrings(value: unknown): Set<string> {
+  const strings = new Set<string>()
+  const stack: unknown[] = [value]
+  while (stack.length > 0) {
+    const node = stack.pop()
+    if (typeof node === "string") {
+      strings.add(node)
+    } else if (node !== null && typeof node === "object") {
+      stack.push(...Object.values(node as Record<string, unknown>))
+    }
+  }
+  return strings
+}
+
 /** The addresses of every image the design shows: openings, slides, rich text. */
 export function imagesOf(section: BodySection): string[] {
   if (section.type === "hero") {
@@ -208,6 +262,8 @@ const cardsOf = (sections: readonly BodySection[]) =>
  * schema's); the header's scrolling strip links only records that exist
  * too. A menu set the design carries (adr/0063 §3) links only
  * records that exist, as the Menüler screen asks (`storefront_menus.target_unknown`).
+ * A record is checked when the save names it anew, as its cards are: one
+ * `before` named already whose record was deleted since never refuses.
  * Returns the media records it uses, to keep their files.
  */
 export async function checkLayout(
@@ -217,35 +273,23 @@ export async function checkLayout(
   carried: readonly BodySection[] = []
 ): Promise<string[]> {
   const sections = bodySections(doc)
-  const recordLinks = (section: BodySection | HeaderSection) =>
-    linksOf(section).flatMap((link) =>
-      isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
-    )
   // A free rows footer's blocks (adr/0070): their pictures' links, pictures and words, hidden ones too
   const blocks = freeBlocksOf(doc.footer)
-  const targets = [
-    ...sections.flatMap((section) => [...recordsOf(section), ...recordLinks(section)]),
-    ...headerLinked(doc).flatMap(recordLinks),
-    ...footerRowLinks(blocks).flatMap((link) =>
-      isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
-    ),
-  ]
-  const menuTargets = (doc.settings.menus ?? []).flatMap((menu) =>
-    menu.items
-      .flatMap((each) => [each.link, ...each.children])
-      .flatMap((link) =>
-        isRecordKind(link.kind) && "target" in link
-          ? [{ kind: link.kind, target: link.target }]
-          : []
-      )
-  )
-  const found = await existingRecords(container, [...targets, ...menuTargets])
-  const missing = (list: typeof targets) =>
+  // Only the records this save names anew ("engel değil uyarı"): one the stored design
+  // (`before`) named already, whose record went since, is left out when drawn
+  // (`liveRecords`) and marked in the editor (`goneTargets`), never a lock on every change
+  const held = storedStrings(before)
+  const fresh = <T extends { target: string }>(list: readonly T[]) =>
+    list.filter((each) => !held.has(each.target))
+  const targets = fresh(layoutTargets(doc))
+  const menus = fresh(menuTargets(doc))
+  const found = await existingRecords(container, [...targets, ...menus])
+  const missing = (list: readonly { kind: MenuLinkKind; target: string }[]) =>
     list.some((each) => !found.has(`${each.kind}:${each.target}`))
   if (missing(targets)) {
     throw new ValidationError("storefront_layout.target_unknown", { field: "document" })
   }
-  if (missing(menuTargets)) {
+  if (missing(menus)) {
     throw new ValidationError("storefront_menus.target_unknown", { field: "document" })
   }
   for (const section of sections) {
