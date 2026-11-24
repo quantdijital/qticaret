@@ -1,7 +1,7 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { SECTIONS } from "../../../modules/platform-settings/sections"
 import type { ProductBadgeSettings } from "../../../modules/platform-settings/sections"
-import { soldAtLeastStatement } from "../best-sellers"
+import { SOLD_AT_LEAST_CAP, soldAtLeastStatement } from "../best-sellers"
 import { anyBadgeOn, badgeOf, cardBadges, isNewProduct } from "../card-badge"
 
 const NOW = new Date("2026-11-24T12:00:00Z")
@@ -97,7 +97,11 @@ describe("product badges (the owner, 2026-11-24)", () => {
     const on = { ...OFF, best_seller_enabled: true, best_seller_min_units: 7 }
     const found = await cardBadges(container, products, on, NOW)
     expect([...found]).toEqual([["prod_2", { kind: "best_seller" }]])
-    expect(raw).toHaveBeenCalledWith(soldAtLeastStatement(), [daysAgo(30), 7])
+    expect(raw).toHaveBeenCalledWith(soldAtLeastStatement(), [
+      daysAgo(30),
+      7,
+      SOLD_AT_LEAST_CAP + 1,
+    ])
     // Held for the next page
     await cardBadges(container, products, on, NOW)
     expect(raw).toHaveBeenCalledTimes(1)
@@ -109,6 +113,8 @@ describe("product badges (the owner, 2026-11-24)", () => {
     expect(sql).toContain("o.canceled_at IS NULL")
     expect(sql).toContain("HAVING sum(GREATEST(oi.quantity - oi.return_received_quantity, 0)) >= ?")
     expect(sql).not.toContain("customer")
-    expect(sql.match(/\?/g)).toHaveLength(2)
+    expect(sql.match(/\?/g)).toHaveLength(3)
+    expect(sql).toContain("LIMIT ?")
+    expect(SOLD_AT_LEAST_CAP).toBe(5000)
   })
 })

@@ -14,7 +14,7 @@ import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { Restriction } from "@/features/categories/api/restrictions"
 import { RestrictionSelect } from "@/features/categories/components/restriction-select"
 import { PRODUCT_CONDITIONS, PRODUCT_KINDS } from "@/features/products/api/product-edit"
-import { PRODUCT_BADGE_MAX } from "@/features/settings/api/product-badges"
+import { PRODUCT_BADGE_MAX, badgeLength } from "@/features/settings/api/product-badges"
 import type {
   ProductCatalog,
   ProductCondition,
@@ -73,6 +73,7 @@ export function CatalogFields({
   const gift = useWatch({ control: form.control, name: "is_gift_card" })
   // Only a service is sold by departure (adr/0076 §2)
   const kind = useWatch({ control: form.control, name: "kind" })
+  const badgeError = Boolean(form.formState.errors.badge)
   return (
     <>
       {shown.kinds ? (
@@ -197,8 +198,18 @@ export function CatalogFields({
           label={t("products.catalog.badge")}
           htmlFor="catalog-badge"
           hint={t("products.catalog.badgeHint", { max: PRODUCT_BADGE_MAX })}
+          error={
+            badgeError ? t("products.catalog.badgeTooLong", { max: PRODUCT_BADGE_MAX }) : undefined
+          }
         >
-          <Input id="catalog-badge" maxLength={PRODUCT_BADGE_MAX} {...form.register("badge")} />
+          {/* Counted as a reader counts letters (the server's rule), not by the input's UTF-16 units */}
+          <Input
+            id="catalog-badge"
+            aria-invalid={badgeError}
+            {...form.register("badge", {
+              validate: (value) => badgeLength(value) <= PRODUCT_BADGE_MAX,
+            })}
+          />
         </Field>
       ) : null}
       <div className="flex items-start justify-between gap-4 border-t pt-4">

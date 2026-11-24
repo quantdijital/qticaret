@@ -3644,6 +3644,7 @@
       "giftCardHint": "Its variants are the card's amounts. Once paid, a card is issued for each unit and e-mailed to the recipient. The product becomes digital, with no shipping; turning off stock tracking on its variants is recommended.",
       "badge": "Product badge",
       "badgeHint": "Shown on the card's photo, e.g. \"Limited\". {{max}} characters at most; leave empty for none.",
+      "badgeTooLong": "{{max}} characters at most.",
       "giftCardFeatures": "Go to features",
       "kindGiftCard": "A gift card is a digital product; its kind cannot change."
     },

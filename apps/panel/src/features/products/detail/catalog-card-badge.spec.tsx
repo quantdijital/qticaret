@@ -78,7 +78,8 @@ describe("CatalogCard: the product's own badge", () => {
     })
     await openDialog()
     const field = await screen.findByLabelText("Ürün rozeti")
-    expect(field).toHaveAttribute("maxLength", "24")
+    // Letters are counted as the server counts them, not by the input's UTF-16 units
+    expect(field).not.toHaveAttribute("maxLength")
     await userEvent.type(field, "  Sınırlı ")
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {
@@ -94,6 +95,27 @@ describe("CatalogCard: the product's own badge", () => {
     renderCard()
     await openDialog()
     expect(screen.queryByLabelText("Ürün rozeti")).toBeNull()
+  })
+
+  it("counts letters as a reader sees them: 24 emoji pass, 25 letters do not", async () => {
+    answer(true)
+    renderCard()
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/product_badges")
+    })
+    await openDialog()
+    const field = await screen.findByLabelText("Ürün rozeti")
+    // Each two UTF-16 units: a maxLength would have cut them at 12
+    await userEvent.type(field, "🔥".repeat(24))
+    expect(field).toHaveValue("🔥".repeat(24))
+    await userEvent.clear(field)
+    await userEvent.type(field, "x".repeat(25))
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+    expect(await screen.findByText("En çok 24 karakter.")).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/admin/products/prod_1/catalog",
+      expect.objectContaining({ method: "POST" })
+    )
   })
 
   it("says a saved badge on the card and clears it with an empty field", async () => {

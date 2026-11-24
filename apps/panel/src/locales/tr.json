@@ -3644,6 +3644,7 @@
       "giftCardHint": "Varyantlar kartın tutarlarıdır. Ödeme alınınca her adet için bir kart üretilir ve alıcıya e-postayla gider. Ürün dijital olur, kargo gerekmez; varyantlarda stok takibini kapatmanız önerilir.",
       "badge": "Ürün rozeti",
       "badgeHint": "Kartta görselin üstünde görünür, ör. \"Sınırlı\". En çok {{max}} karakter; boş bırakırsanız rozet olmaz.",
+      "badgeTooLong": "En çok {{max}} karakter.",
       "giftCardFeatures": "Özelliklere git",
       "kindGiftCard": "Hediye kartı dijital üründür; türü değiştirilemez."
     },

@@ -2,6 +2,7 @@ import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
+import { logger } from "../../lib/logging"
 import { LAYOUT_LIMITS } from "../../lib/storefront/layout"
 
 /**
@@ -72,13 +73,23 @@ HAVING sum(${UNITS}) > 0
 }
 
 /**
+ * The most products "Çok satan" holds at once: a bound on what one held
+ * read keeps in memory, far past a shop whose threshold still means
+ * something. Past it the most sold are kept and the log says so, once.
+ */
+export const SOLD_AT_LEAST_CAP = 5000
+
+/**
  * The products that sold at least a number of units over the window, the
- * same sales as the ranking's: the window, then the least (both bound).
- * Only ids: no order, customer or amount leaves the statement.
+ * same sales as the ranking's, most sold first: the window, the least and
+ * the most rows (all bound). Only ids: no order, customer or amount leaves
+ * the statement.
  */
 export function soldAtLeastStatement(): string {
   return `SELECT li.product_id${salesBody(false)}
-HAVING sum(${UNITS}) >= ?`
+HAVING sum(${UNITS}) >= ?
+ ORDER BY sum(${UNITS}) DESC, li.product_id
+ LIMIT ?`
 }
 
 /** The ranked products of the last `days`, at most a rail's most (`LAYOUT_LIMITS.items`). */
@@ -120,6 +131,9 @@ export function bestSellerIds(
 // A card's "Çok satan" (product badges) follows the sales as loosely as the rail
 const sold = createTtlCache<ReadonlySet<string>>({ ttlMs: BEST_SELLERS_TTL_MS, maxEntries: 8 })
 
+// The cap's warning, once a process: a threshold set too low says so without filling the log
+let capLogged = false
+
 /**
  * The shop's products that sold at least `minUnits` units over the last
  * `days`, whatever the channel (the card's own read keeps to the
@@ -135,10 +149,20 @@ export function soldAtLeastIds(
   return sold(`${String(days)}|${String(minUnits)}`, async () => {
     const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
     const since = new Date(now.getTime() - days * DAY_MS)
+    // One past the cap tells a full answer from one cut short
     const result = await knex.raw<{ rows: { product_id: string }[] }>(soldAtLeastStatement(), [
       since,
       minUnits,
+      SOLD_AT_LEAST_CAP + 1,
     ])
-    return new Set(result.rows.map((row) => row.product_id))
+    if (result.rows.length > SOLD_AT_LEAST_CAP && !capLogged) {
+      capLogged = true
+      logger.warn({
+        event: "storefront.best_seller_cap",
+        cap: SOLD_AT_LEAST_CAP,
+        min_units: minUnits,
+      })
+    }
+    return new Set(result.rows.slice(0, SOLD_AT_LEAST_CAP).map((row) => row.product_id))
   })
 }

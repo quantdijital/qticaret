@@ -19,6 +19,12 @@ export interface ProductBadgeSettings {
 /** A product's own badge at most, as the server keeps it. */
 export const PRODUCT_BADGE_MAX = 24
 
+const GRAPHEMES = new Intl.Segmenter("tr", { granularity: "grapheme" })
+
+/** A badge's length as the server counts it: letters as a reader sees them, ends cut. */
+export const badgeLength = (text: string): number =>
+  Array.from(GRAPHEMES.segment(text.trim().replace(/\s+/gu, " "))).length
+
 export const NEW_DAYS_MAX = 365
 export const BEST_SELLER_MIN_MAX = 100_000
 
