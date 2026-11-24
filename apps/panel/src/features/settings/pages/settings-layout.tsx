@@ -147,7 +147,7 @@ export function SettingsLayout() {
         // A ring of room inside its edge, so a keyboard focus outline is not cut off
         className={cn(
           "lg:sticky lg:top-[calc(var(--layout-topbar-height)+var(--page-padding-wide)-0.25rem)] lg:-m-1 lg:w-[calc(15rem+0.5rem)] lg:shrink-0 lg:self-start lg:p-1",
-          "lg:max-h-[calc(100svh-var(--layout-topbar-height)-2*var(--page-padding-wide)+0.5rem)] lg:overflow-y-auto lg:overscroll-contain"
+          "lg:max-h-[calc(100svh-var(--layout-topbar-height)-2*var(--page-padding-wide)+0.5rem)] lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
         )}
       >
         <div className="lg:hidden">

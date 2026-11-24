@@ -73,7 +73,10 @@ export function ProductsTarget({
         className="sm:max-w-none"
       />
       {value.length > 0 ? (
-        <ul data-scroll-area="y" className="flex max-h-40 flex-wrap gap-2 overflow-y-auto">
+        <ul
+          data-scroll-area="y"
+          className="flex max-h-40 flex-wrap gap-2 overflow-x-hidden overflow-y-auto"
+        >
           {value.map((product) => (
             <li
               key={product.id}
