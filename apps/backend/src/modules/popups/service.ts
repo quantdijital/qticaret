@@ -5,12 +5,10 @@ import {
   InjectTransactionManager,
   MedusaContext,
   MedusaService,
-  generateEntityId,
 } from "@medusajs/framework/utils"
 import { POPUP_EVENT_COLUMNS } from "../../lib/popups/rules"
 import type { PopupEvent } from "../../lib/popups/rules"
 import { Popup } from "./models/popup"
-import { PopupMetric } from "./models/popup-metric"
 
 /** A pop-up's counts summed over the days asked for. */
 export interface PopupCounts {
@@ -32,14 +30,13 @@ export const NO_COUNTS: Readonly<PopupCounts> = Object.freeze({
 })
 
 interface CountRow {
-  popup_id: string
   impressions: string | number
   clicks: string | number
   closes: string | number
   signups: string | number
 }
 
-const countsOf = (row: Omit<CountRow, "popup_id">): PopupCounts => ({
+const countsOf = (row: CountRow): PopupCounts => ({
   impressions: Number(row.impressions),
   clicks: Number(row.clicks),
   closes: Number(row.closes),
@@ -54,8 +51,13 @@ const managerOf = (context: Context, purpose: string): EntityManager => {
   return manager
 }
 
-/** Storefront pop-ups and their daily counters (adr/0080). */
-class PopupsModuleService extends MedusaService({ Popup, PopupMetric }) {
+/**
+ * Storefront pop-ups (adr/0080) and their daily counters. The counters'
+ * table, `popup_metric` (bigint columns, one row per pop-up and day), is
+ * the migration's own, not a data model: Medusa's model language has no
+ * bigint, and the rows are only ever added to and summed, here.
+ */
+class PopupsModuleService extends MedusaService({ Popup }) {
   /**
    * Adds one to the day's counter of `event`: one statement, the day's row
    * made by the first, so two counts at once never lose one.
@@ -70,11 +72,10 @@ class PopupsModuleService extends MedusaService({ Popup, PopupMetric }) {
     // The column comes from the fixed map, never from the request
     const column = POPUP_EVENT_COLUMNS[event]
     await managerOf(sharedContext, "a count").execute(
-      `INSERT INTO popup_metric (id, popup_id, day, ${column}, created_at, updated_at)
-       VALUES (?, ?, ?, 1, now(), now())
-       ON CONFLICT (popup_id, day) WHERE deleted_at IS NULL
+      `INSERT INTO popup_metric (popup_id, day, ${column}) VALUES (?, ?, 1)
+       ON CONFLICT (popup_id, day)
        DO UPDATE SET ${column} = popup_metric.${column} + 1, updated_at = now()`,
-      [generateEntityId(undefined, "popmet"), popupId, day]
+      [popupId, day]
     )
   }
 
@@ -89,12 +90,13 @@ class PopupsModuleService extends MedusaService({ Popup, PopupMetric }) {
     if (popupIds.length === 0) {
       return found
     }
-    const rows = await managerOf(sharedContext, "the totals").execute<CountRow[]>(
+    const rows = await managerOf(sharedContext, "the totals").execute<
+      (CountRow & { popup_id: string })[]
+    >(
       `SELECT popup_id, sum(impressions) AS impressions, sum(clicks) AS clicks,
               sum(closes) AS closes, sum(signups) AS signups
        FROM popup_metric
-       WHERE popup_id IN (${popupIds.map(() => "?").join(", ")}) AND deleted_at IS NULL
-         ${since ? "AND day >= ?" : ""}
+       WHERE popup_id IN (${popupIds.map(() => "?").join(", ")}) ${since ? "AND day >= ?" : ""}
        GROUP BY popup_id`,
       since ? [...popupIds, since] : [...popupIds]
     )
@@ -109,12 +111,12 @@ class PopupsModuleService extends MedusaService({ Popup, PopupMetric }) {
     since: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<PopupDayCounts[]> {
-    const rows = await this.listPopupMetrics(
-      { popup_id: popupId, day: { $gte: since } },
-      { order: { day: "ASC" }, take: null },
-      sharedContext
+    const rows = await managerOf(sharedContext, "the days").execute<(CountRow & { day: string })[]>(
+      `SELECT day, impressions, clicks, closes, signups FROM popup_metric
+       WHERE popup_id = ? AND day >= ? ORDER BY day ASC`,
+      [popupId, since]
     )
-    return rows.map((row) => ({ day: row.day, ...countsOf({ ...row }) }))
+    return rows.map((row) => ({ day: row.day, ...countsOf(row) }))
   }
 }
 

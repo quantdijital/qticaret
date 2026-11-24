@@ -93,9 +93,15 @@ export const checkPopupStep = createStep(
     }
     const values = normalizePopup(merged)
     if (values.promotion_id) {
-      const found = await promotionsById(container, [values.promotion_id])
-      if (!found.has(values.promotion_id)) {
+      const promotion = (await promotionsById(container, [values.promotion_id])).get(
+        values.promotion_id
+      )
+      if (!promotion) {
         throw new ValidationError("popups.promotion_unknown", { field: "promotion_id" })
+      }
+      // A code meant for one person (a batch's copy, a payment link's) is never published
+      if (promotion.linkable === false) {
+        throw new ValidationError("popups.promotion_not_allowed", { field: "promotion_id" })
       }
     }
     if (values.image_url && values.image_url !== before?.image_url) {

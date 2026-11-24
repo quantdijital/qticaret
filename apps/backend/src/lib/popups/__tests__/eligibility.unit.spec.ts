@@ -148,6 +148,9 @@ describe("promotionState", () => {
     ).toBe("ended")
     expect(promotionState(promotion({ limit: 10, used: 10 }), NOW)).toBe("used_up")
     expect(promotionState(promotion({ limit: 10, used: 9 }), NOW)).toBe("live")
+    // A code meant for one person is never live for a pop-up, even while active
+    expect(promotionState(promotion({ linkable: false }), NOW)).toBe("inactive")
+    expect(promotionState(promotion({ linkable: true }), NOW)).toBe("live")
   })
 })
 

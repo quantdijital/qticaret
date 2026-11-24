@@ -117,6 +117,12 @@ export interface PopupPromotion {
   limit: number | null
   used: number | null
   campaign: { starts_at: Date | string | null; ends_at: Date | string | null } | null
+  /**
+   * Whether a pop-up may show it (adr/0080 §2): false for a code meant for
+   * one person (a single-use batch's copy, a payment link's code, a
+   * promotion used at most once). Absent: allowed.
+   */
+  linkable?: boolean
 }
 
 export type PromotionState = "live" | "inactive" | "not_started" | "ended" | "used_up" | "missing"
@@ -126,7 +132,8 @@ export function promotionState(promotion: PopupPromotion | null, now: Date): Pro
   if (!promotion) {
     return "missing"
   }
-  if (promotion.status !== "active") {
+  // A code meant for one person is never published, whatever its status
+  if (promotion.linkable === false || promotion.status !== "active") {
     return "inactive"
   }
   const starts = time(promotion.campaign?.starts_at ?? null)

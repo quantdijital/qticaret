@@ -20,7 +20,7 @@
 
 ### 1. Saklama: yeni `popups` modülü
 
-`apps/backend/src/modules/popups` (servis `PopupsModuleService`, `medusa-config.ts`'e kayıtlı). Migration `popups/Migration20261124080000` (iki tablo; anlık görüntü `.snapshot-popups.json`).
+`apps/backend/src/modules/popups` (servis `PopupsModuleService`, `medusa-config.ts`'e kayıtlı). Migration `popups/Migration20261124080000` (iki tablo; anlık görüntü `.snapshot-popups.json` yalnız `popup`'ı tutar, sayaç tablosu migration'ın kendisinindir).
 
 **`popup`** (`id` öneki `popup`):
 
@@ -46,15 +46,15 @@
 | `frequency`, `frequency_days` | `session \| days (1–365) \| until_closed` | |
 | `layout` | `modal \| corner` | Geniş ekranda; telefonda alt çekmece (§6) |
 
-**`popup_metric`** (`id` öneki `popmet`): `popup_id`, `day` (`YYYY-MM-DD`, UTC), `impressions`, `clicks`, `closes`, `signups`; `(popup_id, day)` silinmemişlerde tekil. Kişisel veri yok.
+**`popup_metric`**: `popup_id`, `day` (`YYYY-MM-DD`, UTC), `impressions`, `clicks`, `closes`, `signups` (**bigint**); birincil anahtar `(popup_id, day)`. Veri modeli değil, migration'ın elle yazılmış tablosu: Medusa'nın model dilinde bigint yok, satırlar yalnız servisin SQL'iyle artırılır ve toplanır (güvenlik incelemesi D-3: şişirilmiş sayaç int4'ü taşırmasın). Pop-up silinince satırlar kalır. Kişisel veri yok.
 
 - **Alanlar birlikte denetlenir** (`lib/popups/eligibility.ts` `popupProblem`): kampanya ↔ indirim, düğmenin yazı + bağlantısı birlikte, bültende bağlantı yok, seçili sayfa, tetik sınırı, gün sayısı, bitiş > başlangıç. Kullanılmayan alan kayıtta boşaltılır (`normalizePopup`): tür değişince eskiden kalan bir şey görünmez.
-- **Metin düz metindir.** HTML yazılmaz, okunmaz; vitrin metni metin düğümü olarak çizer. Denetim: kontrol ve biçim (`\p{Cf}`, bidi) karakterleri yok, uzunluk ve satır sınırı (`popups.text_invalid`). Zengin metin bilerek yok: pop-up birkaç cümledir.
+- **Metin düz metindir.** HTML yazılmaz, okunmaz. **Tema için kural:** `title`, `body`, `button.label`, `submit_label`, `image.alt` ve `promotion.code` yalnız metin düğümü olarak çizilir (React'te `{metin}`); `dangerouslySetInnerHTML`, `innerHTML` ya da markdown/HTML ayrıştırma yok; `body`'deki `\n` satır sonu CSS (`white-space: pre-line`) ya da satırlara bölmeyle gösterilir. Denetim: kontrol ve biçim (`\p{Cf}`, bidi) karakterleri yok, uzunluk ve satır sınırı (`popups.text_invalid`). Zengin metin bilerek yok: pop-up birkaç cümledir.
 
 ### 2. Türler
 
 - **Bilgi:** başlık, metin, isteğe bağlı görsel ve düğme (yazı + bağlantı).
-- **Kampanya:** Medusa indirimine bağlı (`promotion_id`; panel `GET /admin/promotion-board` listesinden seçer). Vitrin kodu kopyalama düğmesiyle gösterir; indirim otomatikse kod yerine "sepette kendiliğinden uygulanır" der (`promotion.code: null, automatic: true`). İndirim **canlı** değilse pop-up vitrine hiç gitmez: durumu `active` değil, kampanyası başlamamış ya da bitmiş, kullanım sınırı dolmuş. Kampanya bitince pop-up'ın kaydına dokunulmaz (panelde "kampanya bitti" görünür); indirim yeniden açılırsa pop-up kendiliğinden döner. İndirim tutarı her zaman sepette sunucuda hesaplanır; pop-up yalnız kodu gösterir (altın kural 5).
+- **Kampanya:** Medusa indirimine bağlı (`promotion_id`; panel `GET /admin/promotion-board` listesinden seçer). Vitrin kodu kopyalama düğmesiyle gösterir; indirim otomatikse kod yerine "sepette kendiliğinden uygulanır" der (`promotion.code: null, automatic: true`). İndirim **canlı** değilse pop-up vitrine hiç gitmez: durumu `active` değil, kampanyası başlamamış ya da bitmiş, kullanım sınırı dolmuş. **Kişiye özel kodlar hiç bağlanamaz** (güvenlik incelemesi O-1): tek kullanımlık kod partisinin kopyası (kampanya kimliği `codes-…`, `workflows/promotions/code-batches.ts`), ödeme bağlantısının kodu (`qt-payment-links` kampanyası, adr/0051) ve kullanım sınırı 1 olan indirim; kayıtta 400 `popups.promotion_not_allowed`, bu kuraldan önce yazılmış ya da elle eklenmiş bir satırda da vitrine gitmez, sayılmaz (panelde `campaign_inactive`). Kampanya bitince pop-up'ın kaydına dokunulmaz (panelde "kampanya bitti" görünür); indirim yeniden açılırsa pop-up kendiliğinden döner. İndirim tutarı her zaman sepette sunucuda hesaplanır; pop-up yalnız kodu gösterir (altın kural 5).
 - **Bülten:** e-posta alanı + izin kutusu, var olan `POST /store/newsletter`'a gönderilir (yeni kayıt yolu yok; çift onay, izin metni sürümü, hız sınırı ve meydan okuma aynen). Başarılı yanıttan sonra vitrin `signup` sayacını gönderir.
 
 ### 3. Hedefleme
@@ -95,7 +95,7 @@ Hata anahtarları (400, `message`): `popups.text_invalid`, `popups.link_invalid`
 **Vitrin:**
 
 - `GET /store/popups` → `{ popups: StorePopup[] }`; yalnız **açık, tarih aralığında ve (kampanyaysa) indirimi canlı** olanlar, öncelik sırasıyla, en çok 20. `Cache-Control: public, max-age=60, stale-while-revalidate=300`, `Vary: x-publishable-api-key`.
-- `POST /store/popups/:id/events` `{ type: "impression" | "click" | "close" | "signup" }` → 204 (sayılsın ya da sayılmasın aynı yanıt; bilinmeyen kimlik satır açmaz). Hız sınırı `popup_event` (IP başına dakikada 60). Yalnız açık ve tarih içindeki pop-up sayılır; `signup` yalnız bülten pop-up'ında.
+- `POST /store/popups/:id/events` `{ type: "impression" | "click" | "close" | "signup" }` → 204 (sayılsın ya da sayılmasın aynı yanıt; bilinmeyen kimlik satır açmaz). Hız sınırı `popup_event` (IP başına dakikada 20). Yalnız açık ve tarih içindeki pop-up sayılır, kampanya pop-up'ı yalnız indirimi canlıyken (`GET /store/popups` ile aynı denetim); `signup` yalnız bülten pop-up'ında.
 
 ```ts
 interface StorePopup {            // packages/types `@qticaret/types/popups`
@@ -133,6 +133,7 @@ Vitrine **gitmeyenler:** `name`, `is_active`, `starts_at`, `promotion_id`, zaman
 ### 7. Ölçüm
 
 - Sunucu sayaçları (§5) yalnız sayıdır; kimlik, IP, e-posta yazılmaz. Günlük satır, tek SQL deyimiyle artırılır (`INSERT … ON CONFLICT DO UPDATE`), eşzamanlı sayımlar kaybolmaz.
+- **Sayaçlar yaklaşıktır.** Uç kimliksizdir (kişisel veri tutmamanın bedeli): IP başına sınır bir adresi yavaşlatır, çok adresten gelen sahte olayları ayıramaz; sayılar şişirilebilir. Karar ve faturalama için değil, pop-up'ları birbirine göre kıyaslamak içindir; panel bunu "yaklaşık" diye gösterir. Kesin dönüşüm GA4 ve sipariş tarafındadır (indirim kodunun kullanımı).
 - Sayaç uç noktası iş akışı değildir: dışarıda geri alınacak bir şey yok, her pop-up görüntüsünün yolunda tek deyim (altın kural 3'ün bilinçli istisnası, `workflows/popups/metrics.ts`).
 - Vitrin ayrıca GA4 olayları gönderir (`popup_view`, `popup_click`, `popup_close`, `popup_signup`; parametre `popup_id`, `popup_type`), yalnız analitik izni verilmişse.
 

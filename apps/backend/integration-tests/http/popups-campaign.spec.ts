@@ -1,6 +1,10 @@
+import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { MEDIA_MODULE } from "../../src/modules/media"
 import type MediaModuleService from "../../src/modules/media/service"
+import { POPUPS_MODULE } from "../../src/modules/popups"
+import type PopupsModuleService from "../../src/modules/popups/service"
+import { PAYMENT_LINK_CAMPAIGN } from "../../src/workflows/payment-links/promotion"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -113,6 +117,50 @@ medusaIntegrationTestRunner({
         promotion_id: promotionId,
       })
       expect([other.status, other.data.message]).toEqual([400, "popups.promotion_not_allowed"])
+    })
+
+    it("never publishes a code meant for one person: a batch's copy, a payment link's, a single use", async () => {
+      const promotions = getContainer().resolve(Modules.PROMOTION)
+      const [batch, link] = await promotions.createCampaigns([
+        { name: "Tek kullanımlık kodlar", campaign_identifier: "codes-promo_sablon-abc123" },
+        { name: "Ödeme bağlantıları", campaign_identifier: PAYMENT_LINK_CAMPAIGN },
+      ])
+      const personal = [
+        await promotion("KIS-7QK2M9XH4TPA", { campaign_id: batch?.id }),
+        await promotion("PL-7QK2M9XH4TPA", { campaign_id: link?.id }),
+        await promotion("TEKSEFER", { limit: 1 }),
+      ]
+      for (const promotionId of personal) {
+        const refused = await post("/admin/popups", {
+          name: "x",
+          type: "campaign",
+          title: "x",
+          promotion_id: promotionId,
+        })
+        expect([refused.status, refused.data.message]).toEqual([
+          400,
+          "popups.promotion_not_allowed",
+        ])
+      }
+
+      // A row written before the rule (or round it) is never shown nor counted
+      const [row] = await getContainer()
+        .resolve<PopupsModuleService>(POPUPS_MODULE)
+        .createPopups([
+          {
+            name: "Eski",
+            type: "campaign",
+            title: "Eski kampanya",
+            promotion_id: personal[0] ?? "",
+            is_active: true,
+            pages: [] as unknown as Record<string, unknown>,
+          },
+        ])
+      const id = row?.id ?? ""
+      expect(await live()).toEqual([])
+      expect((await detail(id)).state).toBe("campaign_inactive")
+      await count(id, "impression")
+      expect((await detail(id)).counts.impressions).toBe(0)
     })
 
     it("takes a picture from the media library only, and gives its size to the storefront", async () => {

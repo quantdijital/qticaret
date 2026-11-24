@@ -57,6 +57,7 @@ export async function storePopups(
     container,
     dated.flatMap((row) => (row.type === "campaign" && row.promotion_id ? [row.promotion_id] : []))
   )
+  // Not live either: a code meant for one person (`linkable: false`), even on a row saved before
   const live = dated.filter(
     (row) =>
       row.type !== "campaign" ||
