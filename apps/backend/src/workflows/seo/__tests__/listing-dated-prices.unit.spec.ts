@@ -59,6 +59,10 @@ function fakeContainer(count: number, regionIds: string[] = ["reg_1"]) {
     if (request.entity === "region") {
       return Promise.resolve({ data: regionIds.map((id) => ({ id, currency_code: "try" })) })
     }
+    // No automatic promotion: the card's price is its own (card-price.ts)
+    if (request.entity === "promotion") {
+      return Promise.resolve({ data: [] })
+    }
     // Every adult 1.000 TL, an infant free
     return Promise.resolve({
       data: request.filters.id.map((id) => ({
@@ -76,8 +80,13 @@ function fakeContainer(count: number, regionIds: string[] = ["reg_1"]) {
       )
     )
   })
+  const historyOf = (ids: readonly string[]) => {
+    reads.push("history")
+    return Promise.resolve(new Map(ids.map((id) => [id, []])))
+  }
+  const services: Record<string, unknown> = { query: { graph }, priceHistory: { historyOf } }
   const container = {
-    resolve: (key: string) => (key === "query" ? { graph } : { windowSlots }),
+    resolve: (key: string) => services[key] ?? { windowSlots },
   }
   return { container, reads, graph, windowSlots }
 }
@@ -108,7 +117,15 @@ describe("a date search's prices", () => {
     await datedPricesOf(one.container, ["prod_0"], window, "reg_1")
     await datedPricesOf(many.container, ids, window, "reg_1")
 
-    expect([...one.reads].sort()).toEqual(["product", "product_variant", "region", "slots"])
+    // The promotions and the price history once too (card-price.ts), not per part of 100
+    expect([...one.reads].sort()).toEqual([
+      "history",
+      "product",
+      "product_variant",
+      "promotion",
+      "region",
+      "slots",
+    ])
     expect([...many.reads].sort()).toEqual([...one.reads].sort())
   })
 

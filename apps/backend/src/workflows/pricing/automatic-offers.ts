@@ -9,6 +9,8 @@ import type { Kurus, MedusaAmount } from "../../lib/money"
 import { offerOf } from "../../lib/pricing/offers"
 import type { CartOffer, Offer, PriceOffer, PromotionRow } from "../../lib/pricing/offers"
 
+type Resolver = Pick<MedusaContainer, "resolve">
+
 /** What the automatic promotions make of a variant's price before the cart (adr/0023 Ek 2026-11-05). */
 export interface VariantOffers {
   /** The offers that are the price, each from its start. */
@@ -43,8 +45,11 @@ const RULE = ["attribute", "operator", "values.value"]
 // Any minimum a cart offer asks is met in the reading: its target products are what it tells
 const ANY_CART = 1_000_000_000
 
-/** The shop's automatic promotions that may show before the cart, by code. */
-async function shownOffers(container: MedusaContainer, currency: string) {
+/** The shop's automatic promotions that may show before the cart, by code: read once per pricing. */
+export async function shownOffers(
+  container: Resolver,
+  currency: string
+): Promise<Map<string, Offer>> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "promotion",
     fields: [
@@ -82,18 +87,20 @@ async function shownOffers(container: MedusaContainer, currency: string) {
  * a shopper with no customer and a cart holding one of it: Medusa's own
  * promotion module decides which apply (status, dates, limits, budget,
  * target products), as it will in the cart. A variant no offer touches
- * is not in the answer.
+ * is not in the answer. `read` gives the shown promotions when the caller
+ * prices in parts (`shownOffers`, read once); left out, they are read here.
  */
 export async function automaticOffers(
-  container: MedusaContainer,
+  container: Resolver,
   prices: ReadonlyMap<string, Kurus>,
-  currency: string
+  currency: string,
+  read: () => Promise<ReadonlyMap<string, Offer>> = () => shownOffers(container, currency)
 ): Promise<Map<string, VariantOffers>> {
   const found = new Map<string, VariantOffers>()
   if (prices.size === 0) {
     return found
   }
-  const offers = await shownOffers(container, currency)
+  const offers = await read()
   if (offers.size === 0) {
     return found
   }

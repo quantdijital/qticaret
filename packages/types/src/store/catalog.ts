@@ -210,7 +210,8 @@ export interface StoreCardFacts {
   /**
    * A dated product's (adr/0076 §10), only while the shop sells them: the
    * lowest paying price over the departures on sale (else the base
-   * prices) in the currency's amount, and the nearest departure on sale
+   * prices), the automatic promotions every shopper gets taken off, in
+   * the currency's amount, and the nearest departure on sale
    * (ISO; said in `timezone`); each null when there is none.
    */
   booking?: {
@@ -226,6 +227,14 @@ export interface StoreCardFacts {
      */
     left?: number | null
     in_range?: true
+    /**
+     * The from price's place before the automatic promotions every
+     * shopper gets (`from_price` has them taken off, adr/0076 Ek "kart
+     * fiyatı promosyonlu"), struck through: only when the price-before
+     * rule lets it be shown as a discount, as an ordinary card's `before`.
+     * Absent otherwise, and from a backend before it.
+     */
+    before?: number
     /**
      * Its length in whole days, from its public tour length attribute (a
      * sector pack's "Süre", adr/0077 Ek "tur kartı"); absent without one,

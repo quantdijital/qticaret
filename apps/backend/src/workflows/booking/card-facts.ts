@@ -1,5 +1,4 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, QueryContext } from "@medusajs/framework/utils"
 import {
   STORE_SLOTS_LIMIT,
   adjustmentOf,
@@ -8,22 +7,35 @@ import {
   salesClosed,
 } from "../../lib/booking/cart-lines"
 import { payingCategoryIds } from "../../lib/booking/categories"
-import { fromMedusaAmount, toMedusaAmount } from "../../lib/money"
-import type { Kurus, MedusaAmount } from "../../lib/money"
+import { toMedusaAmount } from "../../lib/money"
+import type { Kurus } from "../../lib/money"
 import type { DepartureDates, SlotAvailability } from "../../modules/booking/service"
+import { basePriceRows, cardUnitDisplays, pricingOf } from "./card-price"
+import type { CardShown } from "./card-price"
 import { bookingService } from "./cart/target"
+
+export { basePrices } from "./card-price"
 
 type Container = Pick<MedusaContainer, "resolve">
 
 /**
  * What a dated product's card says (adr/0076 §10, Ek "D5 takip: kart
- * fiyatı"): the lowest price the main paying category sells at, in the currency's
- * amount ("1750.5"), and the nearest departure still on sale with a place
- * free; each null when there is none. Worked out on the server, a guest's
- * price, as the product page's departures are.
+ * fiyatı"): the lowest price the main paying category sells at, the
+ * automatic promotions every shopper gets taken off (Ek "kart fiyatı
+ * promosyonlu"), in the currency's amount ("1750.5"), and the nearest
+ * departure still on sale with a place free; each null when there is
+ * none. Worked out on the server, a guest's price, as the product page's
+ * departures are.
  */
 export interface BookingCardFact {
   from_price: number | null
+  /**
+   * The same unit's price struck through, only when the price-before rule
+   * lets it be shown as a discount (an ordinary card's `before`, F4.3),
+   * never on a departure with a difference (no record of it, card-price.ts);
+   * absent otherwise.
+   */
+  before?: number
   currency_code: string
   /** ISO time; the card says it in `timezone`. */
   next_departure: string | null
@@ -61,6 +73,13 @@ export interface DatedCardProduct {
     | undefined
 }
 
+/** A place's price before the promotions: its category, and the departure's difference on its base. */
+export interface PayingUnit {
+  variant_id: string
+  adjustment: number
+  amount: Kurus
+}
+
 /** Kuruş as the currency's amount a shopper reads (1750.5), the card's unit. */
 export const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
 
@@ -75,14 +94,14 @@ export function payingVariants(product: DatedCardProduct): string[] {
  * departure's difference (adr/0076 Ek "kart fiyatı ana kategoriden": the
  * adult's, not a cheaper child's). A category without a base price, or
  * whose difference this currency cannot take, has none and the next one
- * in the shop's order speaks; none at all: no price. One price or none.
+ * in the shop's order speaks; none at all: null.
  */
-export function payingPricesAt(
+export function payingUnitAt(
   product: DatedCardProduct,
   bases: ReadonlyMap<string, Kurus | null>,
   adjustments: Record<string, number> | null,
   currencyCode: string
-): Kurus[] {
+): PayingUnit | null {
   for (const variantId of payingVariants(product)) {
     const base = bases.get(variantId)
     if (base === null || base === undefined) {
@@ -90,17 +109,74 @@ export function payingPricesAt(
     }
     const adjustment = adjustmentOf(adjustments, variantId)
     if (!adjustmentProblem(currencyCode, adjustment)) {
-      return [bookingUnitPrice(base, adjustment)]
+      return { variant_id: variantId, adjustment, amount: bookingUnitPrice(base, adjustment) }
     }
   }
-  return []
+  return null
+}
+
+/** The same as a price: one or none. */
+export function payingPricesAt(
+  product: DatedCardProduct,
+  bases: ReadonlyMap<string, Kurus | null>,
+  adjustments: Record<string, number> | null,
+  currencyCode: string
+): Kurus[] {
+  const unit = payingUnitAt(product, bases, adjustments, currencyCode)
+  return unit ? [unit.amount] : []
+}
+
+/** The departures on sale now: open, with a place free, sales not closed. */
+function sellingSlots(
+  slots: readonly SlotAvailability[],
+  cutoffHours: number,
+  now: Date
+): SlotAvailability[] {
+  return slots.filter(
+    (slot) =>
+      slot.status === "open" && slot.available > 0 && !salesClosed(slot.starts_at, cutoffHours, now)
+  )
+}
+
+/**
+ * The places a dated card's price is the lowest of, before the
+ * promotions: for each paying category that speaks, its lowest unit over
+ * the departures on sale (each one's difference added), or its base
+ * price without one. A promotion takes no more off a lower price of the
+ * same category, so its lowest unit is its lowest price after it too.
+ */
+export function cardUnits(
+  product: DatedCardProduct,
+  bases: ReadonlyMap<string, Kurus | null>,
+  slots: readonly SlotAvailability[],
+  currencyCode: string,
+  now: Date
+): PayingUnit[] {
+  const bookable = product.bookable
+  if (!bookable) {
+    return []
+  }
+  const selling = sellingSlots(slots, bookable.cutoff_hours, now)
+  const units = (selling.length > 0 ? selling.map((slot) => slot.price_adjustments) : [null])
+    .map((adjustments) => payingUnitAt(product, bases, adjustments, currencyCode))
+    .filter((unit): unit is PayingUnit => unit !== null)
+  const lowest = new Map<string, PayingUnit>()
+  for (const unit of units) {
+    const known = lowest.get(unit.variant_id)
+    if (!known || unit.amount < known.amount) {
+      lowest.set(unit.variant_id, unit)
+    }
+  }
+  return [...lowest.values()]
 }
 
 /**
  * A dated card's fact from its base prices and its open slots (by start):
  * the first slot whose sales are not closed is the next departure; the
- * from price is the lowest over those slots of the main paying category
- * (each slot's difference added), or over the base prices without one.
+ * from price is the lowest of its places (`cardUnits`) as shown (`shown`,
+ * by category: the automatic promotions taken off, the price before them
+ * when the price-before rule allows); a place without a display is its
+ * own price.
  */
 export function bookingCardFactOf(
   product: DatedCardProduct,
@@ -108,27 +184,25 @@ export function bookingCardFactOf(
   slots: readonly SlotAvailability[],
   currencyCode: string,
   now: Date,
-  inRange = false
+  inRange = false,
+  shown: ReadonlyMap<string, CardShown> = new Map()
 ): BookingCardFact | null {
   const bookable = product.bookable
   if (!bookable || product.product_extension?.booking_mode !== "departure") {
     return null
   }
-  const selling = slots.filter(
-    (slot) =>
-      slot.status === "open" &&
-      slot.available > 0 &&
-      !salesClosed(slot.starts_at, bookable.cutoff_hours, now)
-  )
-  const pricesAt = (adjustments: Record<string, number> | null): Kurus[] =>
-    payingPricesAt(product, bases, adjustments, currencyCode)
-  const prices =
-    selling.length > 0
-      ? selling.flatMap((slot) => pricesAt(slot.price_adjustments))
-      : pricesAt(null)
-  const lowest = prices.length > 0 ? Math.min(...prices) : null
+  const selling = sellingSlots(slots, bookable.cutoff_hours, now)
+  let lowest: CardShown | null = null
+  for (const unit of cardUnits(product, bases, slots, currencyCode, now)) {
+    const price = shown.get(unit.variant_id) ?? { current: unit.amount, before: null }
+    if (!lowest || price.current < lowest.current) {
+      lowest = price
+    }
+  }
+  const before = lowest?.before ?? null
   const fact: BookingCardFact = {
-    from_price: lowest === null ? null : lira(lowest as Kurus),
+    from_price: lowest === null ? null : lira(lowest.current),
+    ...(lowest && before !== null && before > lowest.current ? { before: lira(before) } : {}),
     currency_code: currencyCode,
     next_departure: selling[0]?.starts_at.toISOString() ?? null,
     timezone: bookable.timezone,
@@ -136,60 +210,16 @@ export function bookingCardFactOf(
   return inRange ? { ...fact, left: selling[0]?.available ?? null, in_range: true } : fact
 }
 
-/** The region's currency, else lira; an unknown region prices as none. */
-async function pricingOf(container: Container, regionId: string | undefined) {
-  if (!regionId) {
-    return { currency_code: "try" }
-  }
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "region",
-    fields: ["id", "currency_code"],
-    filters: { id: regionId },
-  })
-  const region = data[0] as { id: string; currency_code: string } | undefined
-  return region
-    ? { currency_code: region.currency_code, region_id: region.id }
-    : { currency_code: "try" }
-}
-
-/** Base prices for many variants in one read, a guest's, in the pricing given. */
-export async function basePrices(
-  container: Container,
-  variantIds: readonly string[],
-  pricing: { currency_code: string; region_id?: string }
-): Promise<Map<string, Kurus | null>> {
-  if (variantIds.length === 0) {
-    return new Map()
-  }
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "product_variant",
-    fields: ["id", "calculated_price.calculated_amount"],
-    filters: { id: [...variantIds] },
-    context: { calculated_price: QueryContext({ ...pricing, quantity: 1 }) },
-  })
-  return new Map(
-    (data as { id: string; calculated_price?: { calculated_amount?: unknown } | null }[]).map(
-      (row): [string, Kurus | null] => {
-        const amount = row.calculated_price?.calculated_amount
-        return [
-          row.id,
-          amount === null || amount === undefined
-            ? null
-            : fromMedusaAmount(amount as MedusaAmount, { allowRounding: true }),
-        ]
-      }
-    )
-  )
-}
-
 /**
  * The card facts of a page's dated products (adr/0076 §10): one region
- * read, one price read for all their categories and one slot read for all
- * their departures, whatever the page's size. Products that are not dated
- * (or have no booking settings yet) are left out. With a date search's
- * `window` (adr/0077 §4) the departures read are those inside its dates
- * with room for its party: the next one is the nearest of them and the
- * from price is over them.
+ * read, one price read for all their categories, one slot read for all
+ * their departures and one promotions' reading for all their places,
+ * whatever the page's size. Products that are not dated (or have no
+ * booking settings yet) are left out. With a date search's `window`
+ * (adr/0077 §4) the departures read are those inside its dates with room
+ * for its party: the next one is the nearest of them and the from price is
+ * over them, the date search's price sort and filter included
+ * (listing-dated-prices.ts).
  */
 export async function bookingCardFacts(
   container: Container,
@@ -207,16 +237,30 @@ export async function bookingCardFacts(
   const pricing = await pricingOf(container, regionId)
   const bookableIds = dated.flatMap((product) => (product.bookable ? [product.bookable.id] : []))
   const service = bookingService(container)
-  const [bases, slots] = await Promise.all([
-    basePrices(container, dated.flatMap(payingVariants), pricing),
+  const [rows, slots] = await Promise.all([
+    basePriceRows(container, dated.flatMap(payingVariants), pricing),
     window
       ? service.windowSlots(bookableIds, { ...window, now }, STORE_SLOTS_LIMIT)
       : service.openSlots(bookableIds, { from: now, limit: STORE_SLOTS_LIMIT }),
   ])
+  const bases = new Map([...rows].map(([id, row]) => [id, row?.calculated ?? null]))
+  const slotsOf = (product: DatedCardProduct) =>
+    slots.filter((slot) => slot.bookable_id === product.bookable?.id)
+  const units = dated.flatMap((product) =>
+    cardUnits(product, bases, slotsOf(product), pricing.currency_code, now)
+  )
+  const shown = await cardUnitDisplays(container, units, rows, pricing.currency_code, now)
   const facts = new Map<string, BookingCardFact>()
   for (const product of dated) {
-    const own = slots.filter((slot) => slot.bookable_id === product.bookable?.id)
-    const fact = bookingCardFactOf(product, bases, own, pricing.currency_code, now, !!window)
+    const fact = bookingCardFactOf(
+      product,
+      bases,
+      slotsOf(product),
+      pricing.currency_code,
+      now,
+      !!window,
+      shown
+    )
     if (fact) {
       facts.set(product.id, fact)
     }

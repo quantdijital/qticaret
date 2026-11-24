@@ -1,7 +1,7 @@
 import { kurus } from "../../../lib/money"
 import type { Kurus } from "../../../lib/money"
 import type { SlotAvailability } from "../../../modules/booking/service"
-import { bookingCardFactOf } from "../card-facts"
+import { bookingCardFactOf, cardUnits } from "../card-facts"
 import type { DatedCardProduct } from "../card-facts"
 
 // adr/0076 §10: a dated card's from price and next departure, on the server
@@ -143,6 +143,59 @@ describe("bookingCardFactOf", () => {
     const plain = bookingCardFactOf(tour, bases, [slot("s1", 48)], "try", NOW)
     expect(plain).not.toHaveProperty("left")
     expect(plain).not.toHaveProperty("in_range")
+  })
+
+  it("takes its places one per category, each at its lowest departure (adr/0076 Ek promosyonlu)", () => {
+    const slots = [
+      slot("s1", 48, { price_adjustments: { adult: 25_050 } }),
+      slot("s2", 96, { price_adjustments: { adult: -10_000 } }),
+      slot("late", 2, { price_adjustments: { adult: -50_000 } }),
+    ]
+    expect(cardUnits(tour, bases, slots, "try", NOW)).toEqual([
+      { variant_id: "adult", adjustment: -10_000, amount: 140_000 },
+    ])
+    // No departure on sale: the base price, no difference
+    expect(cardUnits(tour, bases, [], "try", NOW)).toEqual([
+      { variant_id: "adult", adjustment: 0, amount: 150_000 },
+    ])
+  })
+
+  it("says the promoted price, struck through only when the display allows; as before without one", () => {
+    const slots = [slot("s1", 48)]
+    const promoted = bookingCardFactOf(
+      tour,
+      bases,
+      slots,
+      "try",
+      NOW,
+      false,
+      new Map([["adult", { current: kurus(120_000), before: kurus(150_000) }]])
+    )
+    expect(promoted).toMatchObject({ from_price: 1200, before: 1500 })
+    // A discount the price-before rule does not show: the price, nothing struck through
+    const hidden = bookingCardFactOf(
+      tour,
+      bases,
+      slots,
+      "try",
+      NOW,
+      true,
+      new Map([["adult", { current: kurus(120_000), before: null }]])
+    )
+    expect(hidden).toMatchObject({ from_price: 1200, in_range: true })
+    expect(hidden).not.toHaveProperty("before")
+    // Without a promotion the fact is as it was, with no `before`
+    const plain = bookingCardFactOf(
+      tour,
+      bases,
+      slots,
+      "try",
+      NOW,
+      false,
+      new Map([["adult", { current: kurus(150_000), before: null }]])
+    )
+    expect(plain).toEqual(bookingCardFactOf(tour, bases, slots, "try", NOW))
+    expect(plain).not.toHaveProperty("before")
   })
 
   it("prices the main category by the shop's order, the next one when it has no price", () => {
