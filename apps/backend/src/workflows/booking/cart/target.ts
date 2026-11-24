@@ -107,7 +107,14 @@ export function assertVariantsOf(target: BookingTarget, variantIds: readonly str
 
 export interface BookingPrice {
   unit_price: Kurus
-  /** The price before a sale list, with the departure's difference; null without a sale. */
+  /**
+   * The price before a sale list; null without a sale. On a departure with
+   * a difference the line's own price, nothing struck through: the
+   * difference has no record of its own (adr/0076 Ek "kalkış fiyatı
+   * promosyonlu", Ticari Reklam Yönetmeliği md. 14/3). Not null there: a
+   * line added without one gets the sale list's price before from Medusa
+   * (2.21.2), the difference left out of it.
+   */
   compare_at_unit_price: Kurus | null
   /**
    * Whether the price has the tax in, as the variant's own price does: the
@@ -138,10 +145,12 @@ export async function priceBookingLine(
   if (!base) {
     throw new ValidationError("booking.price_unavailable", { field: "variant_id" })
   }
+  const unitPrice = bookingUnitPrice(base.calculated, adjustment)
   return {
-    unit_price: bookingUnitPrice(base.calculated, adjustment),
+    unit_price: unitPrice,
+    // Shown only, never charged: struck through as the place is shown (`placeDisplays`)
     compare_at_unit_price:
-      base.original === null ? null : bookingUnitPrice(base.original, adjustment),
+      base.original === null ? null : adjustment === 0 ? base.original : unitPrice,
     is_tax_inclusive: base.tax_inclusive,
   }
 }
