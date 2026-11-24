@@ -64,3 +64,11 @@ for (const hook of ["beforeAll", "beforeEach", "afterAll", "afterEach"]) {
   const original = globalThis[hook]
   globalThis[hook] = (fn, timeout) => original(plainly(fn), timeout)
 }
+
+// On CI a test that fails is tried once more before its file fails (adr/0081):
+// a loaded runner must not cost a forty-minute run. The first failure stays in
+// the log ("RETRY ERRORS"), and the job's summary counts them, so a test that
+// needs its second try is seen and mended. Locally a failure is a failure.
+if (process.env.CI) {
+  jest.retryTimes(1, { logErrorsBeforeRetry: true })
+}
