@@ -14,7 +14,6 @@ import {
   MessageSquareText,
   Package,
   Paintbrush,
-  Search,
   Settings,
   ShoppingBag,
   Store,
@@ -118,7 +117,8 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    // Bringing customers in and back (the owner, 2026-11-23: "Büyüme" became "Pazarlama")
+    // Bringing customers in and back (the owner, 2026-11-23: "Büyüme" became "Pazarlama");
+    // SEO went to Settings > SEO, its one home (the owner, 2026-11-23)
     key: "marketing",
     items: [
       { key: "promotions", to: "/promotions", icon: BadgePercent },
@@ -131,7 +131,6 @@ export const NAV_GROUPS: NavGroup[] = [
         needs: "bulkMessages",
       },
       { key: "reviews", to: "/reviews", icon: MessageSquareText },
-      { key: "seo", to: "/seo", icon: Search },
     ],
   },
 ]

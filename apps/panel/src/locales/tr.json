@@ -575,7 +575,7 @@
     },
     "seo": {
       "title": "SEO",
-      "subtitle": "Arama motorlarında mağazanızın nasıl görüneceğini belirleyen genel ayarlar.",
+      "subtitle": "Mağazanızın arama motorlarında ve yapay zekâ aramalarında nasıl göründüğü: öneriler, denetim, yönlendirmeler ve ayarlar.",
       "addresses": "Alan adı",
       "addressesHint": "Kalıcı adresler ve paylaşım bağlantıları bu alan adıyla oluşur.",
       "host": "Ana alan adı",
@@ -684,9 +684,19 @@
         "descriptionHint": "Boşsa açıklama yazılmaz; arama motoru sayfadan bir parça seçer. Yaklaşık 155 karakter görünür."
       },
       "tabs": {
+        "overview": "Genel bakış",
+        "advisor": "Öneriler",
+        "audit": "Denetim",
+        "redirects": "Yönlendirmeler",
+        "siteSearch": "Site araması",
         "addresses": "Adresler",
         "pages": "Başlıklar ve görsel",
         "search": "Arama motorları"
+      },
+      "summary": {
+        "critical_one": "{{products}} üründe kritik eksik",
+        "critical_other": "{{products}} üründe kritik eksik",
+        "clean": "Kritik eksik yok"
       }
     },
     "features": {
@@ -2054,7 +2064,7 @@
     "sectionHints": {
       "store": "Mağaza adı ve logosu, iletişim bilgileri ve çalışma saatleri, yasal kimlik, sosyal hesaplar",
       "appearance": "Panelin marka rengi, köşeleri ve yoğunluğu",
-      "seo": "Alan adı ve adres yapısı, başlık şablonları, arama motorları",
+      "seo": "Öneriler, denetim, yönlendirmeler, site araması, adresler, başlıklar ve arama motorları",
       "attributes": "Özellik grupları ve ek seçenek grupları",
       "payments": "Kartla ödeme, taksit, havale ve kapıda ödeme",
       "shipping": "Kargo firmaları, seçenekler ve ücretler, iade, depolar ve stok",
@@ -6414,7 +6424,6 @@
     }
   },
   "seo": {
-    "description": "Mağazanızın arama motorlarında ve yapay zekâ aramalarında nasıl göründüğü",
     "editSettings": "SEO ayarları",
     "search": "Arama sonuçlarında",
     "searchHint": "Şablonlarınızla bir ürün sayfası böyle görünür.",
@@ -9012,7 +9021,8 @@
         "kept": "Kayıtlı biçim hazırlanıyor; hazır olana kadar vitrin standart biçimi çizer.",
         "hero": {
           "standard": "Tek görsel",
-          "category_list": "Kategori listesi"
+          "category_list": "Kategori listesi",
+          "full_image": "Tam görsel"
         },
         "products": {
           "grid": "Izgara",
@@ -11165,6 +11175,69 @@
         "link": "Düğme",
         "linkTerm": "button",
         "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür."
+      },
+      "heroFull": {
+        "accent": {
+          "label": "Vurgulu satır",
+          "term": "accent",
+          "placeholder": "Örn. Kaçışını bul.",
+          "hint": "Başlığın altında, ana renginizle yazılan ikinci satır. Boş bırakırsanız çizilmez."
+        },
+        "action": {
+          "label": "Başlığın altında",
+          "term": "action",
+          "hint": "Kapakta düğmeler ya da mağazanızın arama kutusu durur.",
+          "button": "Düğmeler",
+          "search": "Arama kutusu"
+        },
+        "searchNote": "Arama kutusunun alanlarını Tema ayarları › Arama kutusu bölümünden seçersiniz. Arama kutusu seçiliyken düğmeler çizilmez.",
+        "search_position": {
+          "label": "Arama kutusunun yeri",
+          "term": "position",
+          "hint": "Kutu kapağın içinde durur ya da alt kenarına taşan bir kart olur.",
+          "inside": "Kapağın içinde",
+          "overlap": "Alt kenara taşan kart"
+        },
+        "show_trust": {
+          "label": "Güven ikonlarını göster",
+          "term": "trust badges",
+          "hint": "Mağazanızın güven rozetleri (en çok 4) kapağın alt kenarında beyaz bir kutuda görünür."
+        },
+        "height": {
+          "label": "Yükseklik",
+          "term": "height",
+          "hint": "Kapağın ekranda kapladığı yer.",
+          "screen": "Tam ekran",
+          "tall": "Yüksek"
+        },
+        "align": {
+          "label": "Yazı hizası",
+          "term": "align",
+          "hint": "Başlık, metin ve düğmelerin hizası.",
+          "center": "Ortada",
+          "start": "Solda"
+        },
+        "image_side": {
+          "label": "Görselin yeri",
+          "term": "image",
+          "hint": "Görsel yazının arkasında bütün kapağı kaplar ya da açık zeminde yazının yanında durur.",
+          "full": "Yazının arkasında",
+          "end": "Yazının yanında"
+        },
+        "scrim": {
+          "label": "Görsel karartması",
+          "term": "overlay",
+          "hint": "Yazı her görselde okunsun diye görselin üstündeki koyu perde.",
+          "light": "Hafif",
+          "strong": "Güçlü"
+        },
+        "edge": {
+          "label": "Görselin kenarı",
+          "term": "edge",
+          "hint": "Görselin kenarı düz biter ya da yumuşak bir dalgayla.",
+          "straight": "Düz",
+          "wave": "Dalgalı"
+        }
       },
       "trustCard": {
         "lift": {

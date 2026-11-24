@@ -32,7 +32,8 @@ describe("the menu's groups (the owner, 2026-11-23)", () => {
       ["catalog", ["products", "categories", "brands", "collections", "inventory"]],
       ["storefront", ["themeEditor", "looks", "menus"]],
       ["content", ["pages", "content", "media"]],
-      ["marketing", ["promotions", "bulkMessages", "reviews", "seo"]],
+      // SEO is Settings > SEO now, its one home
+      ["marketing", ["promotions", "bulkMessages", "reviews"]],
     ])
   })
 
@@ -49,6 +50,13 @@ describe("the menu's groups (the owner, 2026-11-23)", () => {
       feature: "orders.payment_links",
       needs: "paymentLinks",
     })
+  })
+})
+
+describe("SEO (the owner, 2026-11-23: its one home is Settings > SEO)", () => {
+  it("is no item of the menu; its pages light Ayarlar", () => {
+    expect(() => navItem("seo")).toThrow()
+    expect(itemFor("/settings/seo")?.key).toBe("settings")
   })
 })
 

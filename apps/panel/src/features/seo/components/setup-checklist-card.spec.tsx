@@ -67,7 +67,8 @@ describe("SetupChecklistCard", () => {
       screen.getAllByRole("link", { name: /Tamamla/ }).map((link) => link.getAttribute("href"))
     ).toEqual([
       "/settings/store?part=legal",
-      "/settings/seo",
+      // The share image on Settings > SEO's own tab
+      "/settings/seo?part=pages",
       "/settings/marketing",
       "/settings/marketing",
     ])

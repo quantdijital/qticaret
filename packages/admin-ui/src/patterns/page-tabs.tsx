@@ -27,11 +27,14 @@ export function PageTabs({
   label,
   keepMounted = false,
   className,
+  onOpen,
 }: {
   tabs: readonly PageTab[]
   label: string
   keepMounted?: boolean
   className?: string
+  /** Opens a tab its own way (leaving the last tab's filters behind); by default `?part=` is set and the rest kept. */
+  onOpen?: (key: string) => void
 }) {
   // Any page's search: the package knows no app's routes, only the `part` key it writes
   const search: unknown = useSearch({ strict: false })
@@ -44,7 +47,11 @@ export function PageTabs({
     <Tabs
       value={current}
       onValueChange={(tab) => {
-        void open(tab)
+        if (onOpen) {
+          onOpen(tab)
+        } else {
+          void open(tab)
+        }
       }}
       className={cn("gap-6", className)}
     >

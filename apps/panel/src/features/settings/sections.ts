@@ -51,7 +51,9 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
       // adr/0053: everyone sees whether the storefront is dark; only the owner turns it
       { key: "maintenance", to: "/settings/maintenance", icon: Construction },
       { key: "appearance", to: "/settings/appearance", icon: Palette, needs: "settings" },
-      { key: "seo", to: "/settings/seo", icon: Search, needs: "settings" },
+      // The shop's one SEO home (the owner, 2026-11-23): its daily work for everyone, as under
+      // Pazarlama before; its settings are tabs only for those who may change them
+      { key: "seo", to: "/settings/seo", icon: Search },
       { key: "attributes", to: "/settings/attributes", icon: ListChecks, needs: "settings" },
       // F13.1: the contracts and policies the shop's customers read
       { key: "legal", to: "/settings/legal", icon: Scale, needs: "settings" },

@@ -1,4 +1,4 @@
-import { bandsRise } from "@qticaret/types"
+import { HERO_FULL_LIMITS, bandsRise } from "@qticaret/types"
 import type { HeroSection, PriceBandsSection } from "@/features/storefront/api/layout"
 import {
   HERO_CATALOG_LIMITS,
@@ -16,6 +16,18 @@ import { linkProblem, textProblem } from "./problems"
  */
 
 type Found = [string, Problem | null]
+
+/** The full image's accent line (adr/0077 §9): within its limit, the shop's details allowed. */
+export function heroFullProblems(section: HeroSection): Found[] {
+  return section.variant === "full_image"
+    ? [
+        [
+          "title_accent",
+          textProblem(section.title_accent ?? null, HERO_FULL_LIMITS.title_accent, true),
+        ],
+      ]
+    : []
+}
 
 /** H17's own fields; today's opening has none. */
 export function heroCatalogProblems(section: HeroSection): Found[] {

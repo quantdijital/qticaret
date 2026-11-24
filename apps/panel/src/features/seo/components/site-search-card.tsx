@@ -31,7 +31,7 @@ export function SiteSearchCard({ className }: { className?: string }) {
       className={className}
       action={
         <Button asChild variant="outline" size="sm">
-          <Link to="/seo/search">
+          <Link to="/settings/seo" search={{ part: "site-search" }}>
             {t(`${C}.open`)}
             <ArrowRight />
           </Link>

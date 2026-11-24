@@ -151,6 +151,17 @@ Yeni biçim `full_image`; `standard` ve `category_list` **dokunulmaz** (adr/0066
 
 Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; önden yüklenir (preload).
 
+**Ek (2026-11-24, PR8; "Vadi" ve "Patika" kapakları için):** aynı biçime, hepsi kapalı liste ve varsayılanı yukarıdaki kapak olan ayarlar eklendi (`packages/types/src/store/section-hero-full.ts`, backend aynası `lib/storefront/sections/hero-full.ts`):
+
+- `search_position`: `inside` | `overlap` (arama kutusu kapağın içinde ya da alt kenarına taşan kart); yalnız `action: search` iken okunur.
+- `image_side`: `full` | `end`. `end`: yazı sayfa zemininde ve kendi mürekkebiyle, görsel 1024 px'ten itibaren yanda ekran kenarına kadar (telefonda yazının üstünde); karartma bu yerleşimde çizilmez. Görsel yokken `end`, `full` gibi çizilir (grafit sahne, yazı üstünde; boş görsel kutusu yok).
+- `edge`: `straight` | `wave` (görselin kenarı dalgalı; tema stil dosyasında maske, `hero-full.css`).
+- `title_accent`: başlığın isteğe bağlı ikinci satırı, ana renkte; aynı `h1` içinde bir satırdır.
+- `show_trust`: tasarımın ortak güven rozetleri (en çok 4) kapağın alt kenarına taşan beyaz kutuda; varsayılan kapalı. Rozetler bölümün değil tasarımın verisidir (`settings.trust_badges`).
+- İkinci düğme yeni alan değildir: her kapakta zaten duran `links` (en çok 2) dizisinin ikincisi sessiz düğme olarak çizilir. Arama seçiliyken düğmeler çizilmez (kayıtta durur).
+- Görsel yokken ürün fotoğrafına düşülmez (standart kapaktan farklı): tam ekran zemin için ürün fotoğrafı uygun değildir; grafit sahne çizilir.
+- Arama kutusu ve güven kutusu sahnenin (`gf-stage`) dışında çizilir; beyaz zeminlerinde sayfanın kendi mürekkebini korurlar.
+
 ### 10. Yeni bölümler
 
 - **Genel** (her mağaza): `stats` (rakam şeridi), `steps` (numaralı adımlar), `photo_collage` (fotoğraf kolajı); `reviews` iki biçim alır: `grid` (bugünkü çizim) ve yeni `carousel`.

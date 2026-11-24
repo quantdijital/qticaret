@@ -43,7 +43,8 @@ function Score({ summary }: { summary: AdvisorSummary }) {
           </span>
         ) : null}
         <Link
-          to="/seo"
+          to="/settings/seo"
+          search={{ part: "advisor" }}
           className="mt-1 flex items-center gap-1 text-[13px] font-medium text-primary-text hover:underline"
         >
           {t("dashboard.seo.open")}
