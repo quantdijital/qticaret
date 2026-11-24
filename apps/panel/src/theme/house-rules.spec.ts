@@ -37,7 +37,7 @@ const ALLOWED: Record<string, string> = {
   "features/bulk-messages/editor/email-frame.tsx bg-white": "e-mail preview",
   // Cameras read dark modules on white, whatever the theme
   "features/security/components/authenticator-link.tsx bg-white": "QR code",
-  "features/settings/components/etbis-qr-card.tsx bg-white": "QR code",
+  "features/settings/components/etbis-qr-field.tsx bg-white": "QR code",
   // The browser's colour input takes a hex value only
   "features/settings/components/appearance-fields.tsx #000000": "colour input",
 }

@@ -574,9 +574,10 @@
       },
       "etbisQr": {
         "title": "ETBİS QR code",
-        "hint": "The QR code ETBİS (eticaret.gov.tr) gives on registration; shown in the storefront's footer. Optional.",
-        "size": "Upload the QR code image you downloaded from ETBİS as it is.",
-        "none": "No QR code"
+        "hint": "The QR code ETBİS (eticaret.gov.tr) gives on registration; upload the image you downloaded as it is. Shown in the storefront's footer. Optional.",
+        "none": "No QR code",
+        "set": "QR code added",
+        "choose": "Upload"
       }
     },
     "seo": {

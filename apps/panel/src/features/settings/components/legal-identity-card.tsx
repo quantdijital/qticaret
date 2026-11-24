@@ -1,12 +1,13 @@
 import { CircleAlert } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { useSaveSection } from "@/features/settings/api/sections"
-import type { LegalSettings } from "@/features/settings/api/sections"
+import type { LegalSettings, StoreSettings } from "@/features/settings/api/sections"
+import { EtbisQrField } from "@/features/settings/components/etbis-qr-field"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 
@@ -22,11 +23,13 @@ type Values = Record<
   | "etbis"
   | "document_name"
   | "document_number"
-  | "document_holder",
+  | "document_holder"
+  // The QR code is the store section's (`etbis_qr_url`), shown here beside the number
+  | "etbis_qr_url",
   string
 >
 
-const valuesOf = (saved: LegalSettings): Values => ({
+const valuesOf = (saved: LegalSettings, qrUrl: string | null): Values => ({
   company_title: saved.company_title ?? "",
   mersis: saved.mersis ?? "",
   tax_office: saved.tax_office ?? "",
@@ -37,6 +40,7 @@ const valuesOf = (saved: LegalSettings): Values => ({
   document_name: saved.document_name ?? "",
   document_number: saved.document_number ?? "",
   document_holder: saved.document_holder ?? "",
+  etbis_qr_url: qrUrl ?? "",
 })
 
 // The server's rule (lib/legal/identity.ts): MERSİS, KEP and ETBİS are asked, not required
@@ -54,26 +58,41 @@ function identityGaps(saved: LegalSettings, hasContact: boolean): string[] {
  */
 export function LegalIdentityCard({
   saved,
+  qrUrl,
   hasContact,
   className,
 }: {
   saved: LegalSettings
+  /** The ETBİS QR code's address (the store section's `etbis_qr_url`). */
+  qrUrl: string | null
   hasContact: boolean
   className?: string
 }) {
   const { t } = useTranslation()
   const save = useSaveSection<LegalSettings>("legal")
-  const initial = valuesOf(saved)
+  const saveQr = useSaveSection<StoreSettings>("store")
+  const initial = valuesOf(saved, qrUrl)
   const form = useForm<Values>({ values: initial, resetOptions: { keepDirtyValues: true } })
+  const { dirtyFields } = form.formState
+  const qr = useWatch({ control: form.control, name: "etbis_qr_url" })
   const gaps = identityGaps(saved, hasContact)
-  const submit = form.handleSubmit((next) => {
-    save.mutate(next, {
-      onSuccess: (result) => {
-        form.reset(valuesOf(result.values), FULL_RESET)
-        toast.success(t("settings.saved"))
-      },
-      onError: (failure) => toast.error(errorText(t, failure)),
-    })
+  // Each section is saved only when one of its own fields changed
+  const submit = form.handleSubmit(async ({ etbis_qr_url, ...legal }) => {
+    try {
+      const identity = Object.keys(dirtyFields).some((name) => name !== "etbis_qr_url")
+        ? await save.mutateAsync(legal)
+        : null
+      const code = dirtyFields.etbis_qr_url
+        ? await saveQr.mutateAsync({ etbis_qr_url: etbis_qr_url || null })
+        : null
+      form.reset(
+        valuesOf(identity?.values ?? saved, code ? code.values.etbis_qr_url : qrUrl),
+        FULL_RESET
+      )
+      toast.success(t("settings.saved"))
+    } catch (failure) {
+      toast.error(errorText(t, failure))
+    }
   })
   const field = (name: keyof Values, props: { required?: boolean; hint?: string } = {}) => ({
     label: t(`${K}.fields.${name}`),
@@ -87,7 +106,7 @@ export function LegalIdentityCard({
       description={t(`${K}.hint`)}
       className={className}
       dirty={form.formState.isDirty}
-      saving={save.isPending}
+      saving={save.isPending || saveQr.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
         form.reset(initial, FULL_RESET)
@@ -120,6 +139,13 @@ export function LegalIdentityCard({
         <Field {...field("etbis", { hint: t(`${K}.etbisHint`) })}>
           <Input id="legal-etbis" {...form.register("etbis")} />
         </Field>
+        <EtbisQrField
+          url={qr}
+          className="sm:col-span-2"
+          onChange={(url) => {
+            form.setValue("etbis_qr_url", url, { shouldDirty: true })
+          }}
+        />
       </div>
       {/* adr/0076 §12: a licence the shop's trade asks it to show, named by the shop */}
       <fieldset className="grid gap-3 border-t pt-4">

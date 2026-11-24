@@ -36,8 +36,9 @@ describe("StorePage: legal identity and social accounts", () => {
     renderPage()
     const mersis = await screen.findByRole("textbox", { name: "MERSİS numarası" })
     const identity = card("Yasal kimlik")
-    // The ETBİS QR code beside it, saved on its own
-    expect(within(card("ETBİS karekodu")).getByText("Karekod yok")).toBeInTheDocument()
+    // The ETBİS QR code is a thin row of the identity, no card of its own
+    expect(within(identity).getByText("Karekod yok")).toBeInTheDocument()
+    expect(screen.queryByRole("heading", { name: "ETBİS karekodu" })).toBeNull()
 
     expect(within(identity).getByText(/^Eksik:/)).toHaveTextContent(
       "Eksik: açık adres (İletişim sekmesinde)."
