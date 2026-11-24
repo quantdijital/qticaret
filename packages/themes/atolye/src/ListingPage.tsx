@@ -7,6 +7,7 @@ import { ListingText } from "./listing/ListingText"
 import { Pager, hasPages } from "./listing/Pager"
 import { Empty, SearchHelp } from "./listing/SearchHelp"
 import { Toolbar } from "./listing/Toolbar"
+import { Understood } from "./listing/Understood"
 import { Container } from "./parts/Container"
 import { ProductGrid } from "./parts/ProductCard"
 import { SearchForm } from "./parts/SearchForm"
@@ -69,6 +70,10 @@ export function ListingPage({
         </header>
         {/* A site search's box, its values those asked (adr/0077 §1) */}
         {view.searchForm && <SearchForm form={view.searchForm} className="mt-4 lg:mt-6" />}
+        {/* While the shop reads sentences: what may be written there (adr/0077 §7) */}
+        {view.searchForm && view.searchHint && (
+          <p className="mt-2 text-sm text-text-2">{view.searchHint}</p>
+        )}
         {banner && (
           <div className="gf-stage relative mt-6 aspect-[16/9] overflow-hidden rounded-tile sm:aspect-[3/1] lg:mt-8">
             <ResponsiveImage
@@ -80,6 +85,7 @@ export function ListingPage({
           </div>
         )}
         <div className="mt-6 flex flex-col gap-8 empty:hidden lg:mt-8">
+          {search && view.understood && <Understood understood={view.understood} />}
           {search && found && help && <SearchHelp help={help} t={t} />}
           {!search && (
             <TileRail

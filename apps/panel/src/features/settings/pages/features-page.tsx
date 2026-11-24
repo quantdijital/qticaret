@@ -11,6 +11,10 @@ import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import type { FeatureState } from "@/features/settings/api/features"
 import { featuresQuery, useSetFeature } from "@/features/settings/api/features"
 import { COLLECTIONS_FLAG } from "@/features/collections/paths"
+import {
+  AI_STOREFRONT_SEARCH_FLAG,
+  AiStorefrontSearchConfirm,
+} from "@/features/settings/components/ai-storefront-search-confirm"
 import { CollectionsOffConfirm } from "@/features/settings/components/collections-off-confirm"
 import { FeatureRow } from "@/features/settings/components/feature-row"
 import type { FeatureGroup } from "@/features/settings/feature-groups"
@@ -38,6 +42,7 @@ export function FeaturesPage() {
   const textOf = useFeatureText()
   const [search, setSearch] = useState("")
   const [confirmOff, setConfirmOff] = useState(false)
+  const [confirmSearch, setConfirmSearch] = useState(false)
 
   const save = (key: string, enabled: boolean) => {
     toggle.mutate(
@@ -85,6 +90,12 @@ export function FeaturesPage() {
               // Collections off takes their pages offline: asked first (a warning, not a block)
               if (feature.key === COLLECTIONS_FLAG && !enabled) {
                 setConfirmOff(true)
+                return
+              }
+              // Shoppers' sentences go to the AI service: what goes and what may not be
+              // taken out is said first (adr/0077 §7, KVKK)
+              if (feature.key === AI_STOREFRONT_SEARCH_FLAG && enabled) {
+                setConfirmSearch(true)
                 return
               }
               save(feature.key, enabled)
@@ -140,6 +151,17 @@ export function FeaturesPage() {
           }}
           onCancel={() => {
             setConfirmOff(false)
+          }}
+        />
+      ) : null}
+      {confirmSearch ? (
+        <AiStorefrontSearchConfirm
+          onConfirm={() => {
+            setConfirmSearch(false)
+            save(AI_STOREFRONT_SEARCH_FLAG, true)
+          }}
+          onCancel={() => {
+            setConfirmSearch(false)
           }}
         />
       ) : null}

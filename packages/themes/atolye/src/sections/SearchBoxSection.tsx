@@ -34,7 +34,15 @@ export function SearchBoxSection({ section }: { section: Of<"search_box"> }) {
             )}
           </div>
         )}
-        <SearchForm form={section.form} />
+        {section.hint ? (
+          // While the shop reads sentences: what may be written there (adr/0077 §7)
+          <div className="flex flex-col gap-2">
+            <SearchForm form={section.form} />
+            <p className="text-sm text-text-2">{section.hint}</p>
+          </div>
+        ) : (
+          <SearchForm form={section.form} />
+        )}
       </Container>
     </section>
   )

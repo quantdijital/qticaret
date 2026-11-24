@@ -182,9 +182,15 @@ describe("the address a tag hears", () => {
     expect(safeLocation("https://shop.test/ode/pl_abcDEF.mhx2k1.sig?durum=fiyat")).toBe(
       "https://shop.test/ode?durum=fiyat"
     )
+    // A search's words may be a shopper's sentence (adr/0077 §7): never told, the rest stays
     expect(safeLocation("https://shop.test/arama?q=g%C3%B6mlek&sayfa=2")).toBe(
-      "https://shop.test/arama?q=g%C3%B6mlek&sayfa=2"
+      "https://shop.test/arama?sayfa=2"
     )
+    expect(safeLocation("https://shop.test/arama?q=ali+veli+ankara")).toBe(
+      "https://shop.test/arama"
+    )
+    // Only on the search page: elsewhere `q` is no search's
+    expect(safeLocation("https://shop.test/blog?q=x")).toBe("https://shop.test/blog?q=x")
     expect(safeLocation("")).toBe("")
   })
 

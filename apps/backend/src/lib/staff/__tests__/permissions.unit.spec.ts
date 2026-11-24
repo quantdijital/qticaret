@@ -96,6 +96,7 @@ describe("staff roles", () => {
     ["POST", "/admin/einvoice/%62irfatura/token"],
     ["POST", "/admin/features/ai.reviews"],
     ["POST", "/admin/features/ai%2ereviews"],
+    ["POST", "/admin/features/ai.storefront_search"],
     ["POST", "/admin/google/connect"],
     ["POST", "/admin/google/reviews/connect"],
     ["DELETE", "/admin/google"],

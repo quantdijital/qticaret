@@ -103,6 +103,8 @@ export const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/einvoice/birfatura*" },
   // Customers' reviews and questions sent to the AI service (adr/0071 Aşama 9)
   { methods: WRITES, path: "/admin/features/ai.reviews" },
+  // Shoppers' search sentences sent to the AI service (adr/0077 §7)
+  { methods: WRITES, path: "/admin/features/ai.storefront_search" },
   { methods: ["POST"], path: "/admin/google/connect" },
   { methods: ["POST"], path: "/admin/google/reviews/connect" },
   { methods: ["DELETE"], path: "/admin/google" },

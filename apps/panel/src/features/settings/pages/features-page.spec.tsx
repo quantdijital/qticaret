@@ -123,6 +123,28 @@ describe("FeaturesPage", () => {
     })
   })
 
+  it("search in the shopper's words asks first before it goes on (adr/0077 §7)", async () => {
+    serve([
+      ...FLAGS,
+      { key: "ai.storefront_search", default: false, owner: "tenant", enabled: false },
+    ])
+    renderPage()
+    fireEvent.click(await screen.findByRole("switch", { name: "Kendi cümlesiyle arama" }))
+    const dialog = await screen.findByRole("alertdialog")
+    expect(within(dialog).getByText(/ad ve adres her zaman ayıklanamaz/)).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/admin/features/ai.storefront_search",
+      expect.anything()
+    )
+    fireEvent.click(within(dialog).getByRole("button", { name: "Aç" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/features/ai.storefront_search", {
+        method: "POST",
+        body: { enabled: true },
+      })
+    })
+  })
+
   it("no flags: the empty note, no search", async () => {
     serve([])
     renderPage()
