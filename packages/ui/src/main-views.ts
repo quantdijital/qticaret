@@ -47,6 +47,12 @@ export interface HeaderBarView {
   searchStyle?: HeaderSearchStyle
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
+  /**
+   * The other variants' action button (the catalog's is `catalog.highlight`):
+   * from 1024 px after the tools, on a phone first in the menu sheet; absent
+   * or null: none, drawn as before it.
+   */
+  highlight?: LinkView | null
 }
 
 /**
@@ -148,6 +154,11 @@ export interface BackToTopView {
 export interface ProductMainView {
   id: string
   variant: ProductMainVariant
+  /**
+   * The gallery's picture shape the shop chose: `landscape` 4:3 or
+   * `portrait` 3:4; absent: the square (the page as drawn before it).
+   */
+  imageRatio?: "landscape" | "portrait"
   /** The steps the shop set (adr/0049 Ek 2026-11-14 §6); absent: the theme's own drawing. */
   look?: SectionLookView
 }

@@ -9,7 +9,7 @@ import {
   storefrontFlagOn,
 } from "../store/section-requires.js"
 
-// The list is empty until the first flagged section (adr/0077 §10): a stand-in one
+// A list of the tests' own, beside the real one
 const REQUIRES = { departures: "catalog.booking" }
 
 describe("sections that need a feature flag (adr/0077 §8)", () => {
@@ -23,8 +23,10 @@ describe("sections that need a feature flag (adr/0077 §8)", () => {
     expect(capabilityOfFlag("catalog.addons")).toBeNull()
   })
 
-  it("needs no flag for a type off the list, the first list holding none", () => {
-    expect(SECTION_REQUIRES).toEqual({})
+  it("needs no flag for a type off the list; the departures need dated products' (adr/0077 §10)", () => {
+    expect(SECTION_REQUIRES).toEqual({ departures: "catalog.booking" })
+    expect(requiredFlag("departures")).toBe("catalog.booking")
+    expect(capabilityOf("departures")).toBe("dated")
     expect(requiredFlag("hero")).toBeNull()
     expect(requiredFlag("constructor", REQUIRES)).toBeNull()
     expect(capabilityOf("hero", REQUIRES)).toBeNull()

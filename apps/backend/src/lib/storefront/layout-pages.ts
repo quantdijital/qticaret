@@ -17,6 +17,7 @@ import { steps } from "./sections/steps"
 import { searchBox } from "./sections/search-box"
 import { photoCollage } from "./sections/photo-collage"
 import { reviews } from "./sections/reviews"
+import { departures } from "./sections/departures"
 import { stripGallery } from "./sections/strip-gallery"
 import { trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -54,6 +55,7 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "steps",
   "search_box",
   "photo_collage",
+  "departures",
   "contact",
   "payment_facts",
   "shipping_facts",
@@ -85,6 +87,7 @@ export const contentPageSection = z.discriminatedUnion(
     steps,
     searchBox,
     photoCollage,
+    departures,
     contact,
     paymentFacts,
     shippingFacts,

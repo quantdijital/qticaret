@@ -141,6 +141,44 @@ describe("the categories' icon row", () => {
   })
 })
 
+describe("the icon row's icons by handle (a preset's)", () => {
+  it("stays absent until written, so a row before it parses as it did", () => {
+    const doc = layoutDocument.parse({ home: [row()] })
+    expect(doc.home[0]).not.toHaveProperty("category_icons_by_handle")
+  })
+
+  it("holds each icon to the set, each key to a slug and the count to the items' limit", () => {
+    const by = (picked: Record<string, string>) =>
+      issues({ home: [row({ category_icons_by_handle: picked })] })
+    expect(by({ "dag-turlari": "mountain", plaj: "palm" })).toEqual([])
+    expect(by({ plaj: "rocket" })).not.toEqual([])
+    expect(by({ Plaj: "palm" })).not.toEqual([])
+    expect(by({ "../plaj": "palm" })).not.toEqual([])
+    expect(by({ ["a".repeat(81)]: "palm" })).not.toEqual([])
+    const many = Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`k${String(i)}`, "leaf"]))
+    expect(by(many)).not.toEqual([])
+    // Only the icon row takes it
+    expect(
+      issues({ home: [row({ variant: "tiles", category_icons_by_handle: { plaj: "palm" } })] })
+    ).not.toEqual([])
+  })
+
+  it("prints the handles' icons beside the ids' only once written", async () => {
+    const written = categories.parse(
+      row({ category_icons: { [CAT_A]: "mountain" }, category_icons_by_handle: { plaj: "palm" } })
+    )
+    expect(await hydrateSection(written, context)).toMatchObject({
+      category_icons: { [CAT_A]: "mountain" },
+      category_icons_by_handle: { plaj: "palm" },
+    })
+    const empty = categories.parse(row({ category_icons_by_handle: {} }))
+    expect(await hydrateSection(empty, context)).not.toHaveProperty("category_icons_by_handle")
+    expect(await hydrateSection(categories.parse(row()), context)).not.toHaveProperty(
+      "category_icons_by_handle"
+    )
+  })
+})
+
 describe("the figures strip's icons", () => {
   it("leaves the icons off and a figure's icon absent until picked", () => {
     const parsed = stats.parse(strip())

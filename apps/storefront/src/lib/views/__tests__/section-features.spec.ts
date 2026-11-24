@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { needsFlags, withFeatures } from "../section-features"
 
-// The list is empty until the first flagged section (adr/0077 §10): a stand-in one
+// The tests' own list, beside the real one (whose first is the departures, adr/0077 §10)
 const REQUIRES = { departures: "catalog.booking" }
 
 const sections = [
@@ -30,8 +30,9 @@ describe("a section that needs a feature flag (adr/0077 §8)", () => {
   it("asks for the frame only when a section needs a flag", () => {
     expect(needsFlags(sections, REQUIRES)).toBe(true)
     expect(needsFlags([{ type: "hero" }], REQUIRES)).toBe(false)
-    // None does yet
-    expect(needsFlags(sections)).toBe(false)
-    expect(withFeatures(sections, undefined)).toEqual(sections)
+    // The real list: the departures need dated products' flag
+    expect(needsFlags(sections)).toBe(true)
+    expect(needsFlags([{ type: "hero" }])).toBe(false)
+    expect(withFeatures(sections, undefined).map((each) => each.id)).toEqual(["acilis"])
   })
 })

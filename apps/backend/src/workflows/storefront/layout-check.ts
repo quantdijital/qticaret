@@ -70,22 +70,23 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "photo_collage") {
     return section.items.flatMap((each) => (each.link ? [each.link] : []))
   }
-  // The catalog header's highlighted last link and its strip's note (adr/0049 Ek 2026-11-15)
-  if (section.type === "header_bar" && section.variant === "catalog") {
-    return [section.highlight_link, section.strip_note_link].flatMap((link) => (link ? [link] : []))
+  // Every header's action button; the catalog header's strip note too (adr/0049 Ek 2026-11-15)
+  if (section.type === "header_bar") {
+    return [
+      section.highlight_link,
+      section.variant === "catalog" ? section.strip_note_link : null,
+    ].flatMap((link) => (link ? [link] : []))
   }
   return []
 }
 
 /**
  * The header's sections that hold links: its scrolling strip and the
- * catalog header bar (the announcement's lines are words).
+ * header bar (its action button; the catalog's strip note). The
+ * announcement's lines are words.
  */
 export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection[] =>
-  doc.header.filter(
-    (section) =>
-      section.type === "marquee" || (section.type === "header_bar" && section.variant === "catalog")
-  )
+  doc.header.filter((section) => section.type === "marquee" || section.type === "header_bar")
 
 /** Every record a section names by id, as a link would point at it. */
 export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {
@@ -124,6 +125,15 @@ export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: s
   }
   // A rail's or a product page's related products: their category, collection or choice
   // (each of a columns rail's lists too)
+  // Upcoming departures' category or collection (adr/0077 §10)
+  if (section.type === "departures") {
+    const { source } = section
+    return source.kind === "category"
+      ? [as("category")(source.category_id)]
+      : source.kind === "collection"
+        ? [as("collection")(source.collection_id)]
+        : []
+  }
   if (section.type === "products" || section.type === "related_products") {
     const sources =
       section.type === "products"

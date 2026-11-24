@@ -22,6 +22,9 @@ export type SearchFormCategoryStyle = (typeof SEARCH_FORM_CATEGORY_STYLES)[numbe
 /** An attribute key as the listing reads one in its address (adr/0013). */
 export const SEARCH_FORM_ATTRIBUTE_KEY = /^[a-z][a-z0-9_]{0,63}$/
 
+/** The longest words the shop may write in the words field before a search (`placeholder`). */
+export const SEARCH_FORM_PLACEHOLDER_MAX = 60
+
 export interface SearchFormSettings {
   /**
    * The filterable choice attribute whose values fill the "where" field;
@@ -34,6 +37,11 @@ export interface SearchFormSettings {
   /** Dated products only: places the party takes (`kisi`). */
   show_people: boolean
   category_style: SearchFormCategoryStyle
+  /**
+   * The words field's hint before a search ("Nereye gitmek istersiniz?");
+   * null: the storefront's own ("Ürün, kategori veya marka ara").
+   */
+  placeholder: string | null
 }
 
 /** Every field on, no attribute named, categories in a drop-down. */
@@ -43,6 +51,7 @@ export const SEARCH_FORM_DEFAULTS: Readonly<SearchFormSettings> = {
   show_dates: true,
   show_people: true,
   category_style: "select",
+  placeholder: null,
 }
 
 const flag = (value: unknown, fallback: boolean): boolean =>
@@ -68,5 +77,12 @@ export function searchFormOf(
     category_style: (SEARCH_FORM_CATEGORY_STYLES as readonly unknown[]).includes(style)
       ? (style as SearchFormCategoryStyle)
       : SEARCH_FORM_DEFAULTS.category_style,
+    placeholder: hintOf(value?.placeholder),
   }
+}
+
+/** The shop's hint, trimmed and at most its length; empty or anything else: none. */
+function hintOf(value: unknown): string | null {
+  const text = typeof value === "string" ? value.trim() : ""
+  return text === "" ? null : text.slice(0, SEARCH_FORM_PLACEHOLDER_MAX)
 }

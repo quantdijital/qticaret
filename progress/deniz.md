@@ -8,14 +8,18 @@
    - **Dilimler (K11):** S6 sözleşme + backend; S7 panel; S8 vitrin + tema + kilitler + dönüşüm dosyası `migration-scripts/content-pages-into-layout.ts`; S9 Katalog hazır görünümü. S6 ve S8 birleşmeden önce `security-reviewer`. `main`'e S9'dan sonra.
    - **Tarayıcı denetimi:** S1–S5'in üst/alt modeline eski bakış eskidi; S8/S9'dan sonra Hakkımızda ve İletişim'e 390 ve 1440 px'te bakılır.
    - **Durum (2026-11-20 akşam):** S6 + S7 + S8 + Vitrin > Sayfalar listesi + dönüşüm dosyası #235 ile `dev`'de. Kalan: **S9** (Katalog hazır görünümü K6 metin koruması; o gelene kadar Katalog yeniden uygulanmaz, Hakkımızda metni boş kalır) ve sahibin Hakkımızda/İletişim'e 390/1440'ta bakması.
-   - **Takip:** çok anahtarlı kilitte (`acquireLockStep` `[storefront-layout, content]`) bir anahtar alınamazsa diğeri test ortamında TTL'e kadar tutulu; Redis sağlayıcısında doğrulanacak. `POST /admin/storefront-layout` `placement` katlaması duruyor (S9'da kalkabilir).
-   - **ADR-0075 takibi (I2):** bağlantı yeniden yazma ve medya kullanımı kategori/marka/koleksiyon açıklama belgelerine bakmıyor (yalnız ürün belgeleri); adres değişince eski bağlantılar yönlendirmeyle çalışır.
+   - **Takip:** `POST /admin/storefront-layout` `placement` katlaması duruyor (S9'da kalkabilir). Çok anahtarlı kilit sızıntısı #294 ile, ADR-0075 I2 (liste açıklamalarında bağlantı yeniden yazma) #293 ile kapandı.
 2. **Test sunucusu ve BirFatura:** test sunucusuna kurulum planı; kurulumdan sonra BirFatura gerçek testi test alan adında (F1 #209 + F2 #210 birleşti, yerel sahte yok).
-3. **Canlıya çıkış listesi (F16, sahiple):** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); imajda ffmpeg ≥ 7 (`FFMPEG_PATH` / `FFPROBE_PATH`; CI'ın apt'si 6.1 veriyor); Cloudflare önde (adr/0003), ayrı depo origin'iyle birlikte; o zaman CSP `img-src`/`media-src` daraltılır. BirFatura için gerekirse ayrı alt alan adı. **Yayın sırası zorunlu (adr/0061 C16, C20):** önce mağazalar, sonra üst panel; üst panel yayınlanmadan önce filo sürüm kontrolüyle her mağazanın yeni sözleşmeyi taşıdığı doğrulanır (eski mağaza yeni alanlı plan belgesini reddeder).
+3. **Canlıya çıkış listesi (F16, sahiple):** dosya deposu yanıtlarına nginx'te CSP + `nosniff` ve depo için ayrı origin (SVG; docs/04); imajda ffmpeg ≥ 7 (`FFMPEG_PATH` / `FFPROBE_PATH`; CI'ın apt'si 6.1 veriyor) ve ffmpeg için ortak medya işçisi; Cloudflare önde (adr/0003), ayrı depo origin'iyle birlikte; o zaman CSP `img-src`/`media-src` daraltılır. BirFatura için gerekirse ayrı alt alan adı. **Yayın sırası zorunlu (adr/0061 C16, C20):** önce mağazalar, sonra üst panel; üst panel yayınlanmadan önce filo sürüm kontrolüyle her mağazanın yeni sözleşmeyi taşıdığı doğrulanır (eski mağaza yeni alanlı plan belgesini reddeder).
 4. **Küçük işler ve takipler:**
    - Etiketi oluşmuş siparişler için "Kurye bekliyor" gösterim durumu (önerildi, sahibin cevabı bekleniyor).
    - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
    - D4-1: düzenleme iadesinde referansla sürdürme gerçek bir düzenleme iadesiyle denenmedi.
+   - **Kilit incelemesi L2 (#294'ten):** iç içe katalog kayıtları (toplu düzenleme, çoğaltma, içe aktarma) alt workflow'da kilitsiz koşuyor (öncesinden var).
+   - Üst panel `sector-packs.spec.ts` `dev`'de düşüyor (cutlery hazır görünüm sayısı).
+   - CI HTTP parçası 10/12 35 dakikalık süre sınırına yakın.
+   - Kararsız zamanlama testi: `src/lib/integrations/health/__tests__/health.unit.spec.ts` "times out a check that ignores its signal" (<1000 ms bekliyor, CI'da 1252 ms).
+   - İsteğe bağlı: denetim yetkisi olmayan roller için "İndirmelerim" (#304'ten sonra dışa aktarmalarını indirecek ekran yok; sahip kararıyla bilinçli).
 5. **Sahibin tarayıcıda bakması bekleniyor:**
    - Kart görselinin üzerine gelince değişmesi, hover alt çizgisinin kalkması, küçük görsel oklarının kalkması (#201); Katalog'da "Canlı" hareket (#203).
    - İade formunda seçim kutusu okunun boşluğu (#223).
@@ -32,9 +36,31 @@
    - 2026-11-20 ve sonrası: glob 13.0.7, 14 gün kuralıyla uygun olur; uyarının (advisory) onu düzeltilmiş sayıp saymadığına bakılır.
    - 2026-11-27 ve sonrası: fast-xml-parser 5.12.1.
    - Kalan yüksekler Medusa yükseltmesini ya da üst projeyi bekliyor: @graphql-tools/utils 12.x ister; picomatch'in henüz düzeltmesi yok.
-   - **Sahip kararı:** Medusa 2.21.2 → 2.22.x yükseltmesi. 2.22.2 bugün yeterince eski; 2.22.3+ yakında olur. Tam testlerle ayrı PR.
+   - Medusa 2.21.2 → 2.22.6 yükseltmesi #302 ile birleşti.
 
-Bitenler: #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
+Bitenler: #292–#307 (2026-11-24 notunda); #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
+
+## 2026-11-24 — kilit sızıntısı, iç içe kategori adresleri, panel düzeni, abonelik, ek seçenek şablonları, Medusa 2.22.6
+
+- **Birleşenler (`dev`):**
+  - #292: kategori adreslerinde üçüncü biçim `nested` (önekisiz, üst kategorilerle: `/el-yapimi-caki/damascus-cakilar/`); taşıma/yeniden adlandırma alt ağacı 301'le taşır; kökte çakışma `seo.path_taken`, sistem yolları `seo.path_reserved`. adr/0017 Ek 2026-11-23.
+  - #293: ürün/sayfa adresi değişince bağlantı yeniden yazma kategori, marka ve koleksiyon açıklamalarına da bakar (ADR-0075 I2 takibi).
+  - #294: çok anahtarlı kilit sızıntısı düzeltildi: `acquireLocksStep` anahtarları tekilleştirip sıralar, tek tek ve koşuya özel sahiple alır, düşerse aldıklarını bırakır; para yolu tekli kilitleri de sahipli. Açık takip L2 sıradaki işler 4'te.
+  - #295: sol menü alanlara göre (Katalog, Vitrin, İçerik, Pazarlama); Ekip Güvenlik altında (`?part=team`), İşler Denetim kaydı altında sekme (`?part=jobs`); menü adları "Medya kütüphanesi" ve "Toplu mesaj" (panel ve backend metinleri).
+  - #296: Özellikler ekranı alan kartlarına gruplandı, arama, paket kilidi rozeti.
+  - #297: panelde temayla uyumlu kaydırma çubukları.
+  - #298: `catalog.collections` bayrağı (varsayılan açık); kapalıyken koleksiyon yazmaları, mağaza uçları, vitrin sayfası 404; veri silinmez.
+  - #299: Görünümler yalnız mağaza sahibine (`owner_only` 403, `can.looks`). adr/0064 Ek 2026-11-23.
+  - #300: yeniden kullanılabilir ek seçenek şablonları (`addon_template`, ürün ↔ şablon bağlantısı; etkin ek seçenekler tek çözücüden, fiyat yalnız sunucuda). adr/0052 Ek 2026-11-23. Migration'a kendine ait ad verildi; yinelenen migration adını yakalayan birim testi eklendi.
+  - #301: SEO Pazarlama'dan **Ayarlar > SEO**'ya, sekmeli (`/settings/seo?part=`); eski `/seo*` adresleri yönlenir.
+  - #302: Medusa 2.21.2 → 2.22.6 (bütün `@medusajs/*`; iade kaydı `pending` açılır, elle kaydedilen iade `succeeded`).
+  - #303: abonelik ekranı yeniden tasarlandı (paket kartı, kalan gün halkası, limit çubukları).
+  - #304: Denetim kaydı ve İşler yalnız `audit` yetkili rollerde; diğerlerinde gizli.
+  - #305: abonelik verileri: plan belgesinde dönem/ücret/deneme, imzalı `GET /tenant-api/v1/billing` ile ödeme geçmişi, `GET /admin/plan/payments`. **Yayın sırası zorunlu: önce mağazalar, sonra üst panel** (adr/0061 Ek C20; canlıya çıkış listesinde).
+  - #306: ek seçeneği yaratıldığı yerden bütün ürünlere / kategoriye / seçili ürünlere uygulama (toplu iş).
+  - #307: ürün özellikleri sadeleşti (Özellik grubu, Ek seçenek grubu, Değerler; örnekli tür kartları); yalnız panel.
+- **Dev ortamı:** Medusa 2.22.6 kuruldu, yerelde `db:migrate` koştu. `ADMIN_MFA=off` yalnız dev'de.
+- **Açık takipler:** sıradaki işler 4'te (kilit L2, `sector-packs.spec.ts`, HTTP parçası 10/12 süresi, kararsız sağlık zamanlama testi, isteğe bağlı "İndirmelerim"); ffmpeg ortak medya işçisi F16 listesinde (madde 3).
 
 ## 2026-11-20 (akşam) — Ubuntu'da ilk tam gün: sayfalar, kategoriler, açıklamalar, vitrin düzeltmeleri, WordPress
 

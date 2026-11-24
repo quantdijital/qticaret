@@ -49,6 +49,11 @@ export interface CategoriesIconsFields {
   disc: CategoryIconsStep<"disc">
   phone: CategoryIconsStep<"phone">
   category_icons: Record<string, SectionIcon>
+  /**
+   * Icons by category handle, a preset's (it cannot know the shop's ids):
+   * read after `category_icons`. The panel writes by id and keeps these as they are.
+   */
+  category_icons_by_handle?: Record<string, SectionIcon>
 }
 
 /** The footer's settings, the same in every footer variant. */

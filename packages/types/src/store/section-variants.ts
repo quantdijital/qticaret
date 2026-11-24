@@ -185,6 +185,22 @@ export const HEADER_SEARCH_STYLES = ["field", "icon"] as const
 
 export type HeaderSearchStyle = (typeof HEADER_SEARCH_STYLES)[number]
 
+/**
+ * The product page gallery's picture shape (`product_main.image_ratio`):
+ * `square` (the default, as drawn before the setting), `landscape` 4:3 or
+ * `portrait` 3:4. Mirrored by the backend's `PRODUCT_IMAGE_RATIOS`.
+ */
+export const PRODUCT_IMAGE_RATIOS = ["square", "landscape", "portrait"] as const
+
+export type ProductImageRatio = (typeof PRODUCT_IMAGE_RATIOS)[number]
+
+/** The gallery's shape as a reader takes it: absent or off the list, the square. */
+export function productImageRatioOf(value: unknown): ProductImageRatio {
+  return (PRODUCT_IMAGE_RATIOS as readonly unknown[]).includes(value)
+    ? (value as ProductImageRatio)
+    : "square"
+}
+
 /** The search's look as a reader takes it: absent or off the list, the default (`field`). */
 export function headerSearchStyleOf(value: unknown): HeaderSearchStyle {
   return (HEADER_SEARCH_STYLES as readonly unknown[]).includes(value)
