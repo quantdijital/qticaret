@@ -9,7 +9,8 @@ import {
   planState,
   ringShare,
   storageText,
-  tileSpan,
+  tileColumns,
+  lastPaymentOf,
 } from "./subscription-rules"
 
 const billing = (changes: Partial<BillingSummary> = {}): BillingSummary => ({
@@ -102,9 +103,39 @@ describe("countdownOf", () => {
   })
 })
 
-describe("tileSpan", () => {
-  it("shares a group's rows evenly on the 6-column grid", () => {
-    expect([1, 2, 3, 4, 5].map(tileSpan)).toEqual([6, 3, 2, 3, 2])
+describe("tileColumns", () => {
+  it("fills every row and never goes past three columns", () => {
+    expect([1, 2, 3, 4, 5, 6].map(tileColumns)).toEqual([1, 2, 3, 2, 3, 3])
+  })
+})
+
+describe("lastPaymentOf", () => {
+  const record = (id: string, status: "open" | "paid" | "waived", paid_on: string | null) => ({
+    id,
+    period: "monthly" as const,
+    period_start: "2026-11-01",
+    period_end: "2026-12-01",
+    due_on: "2026-11-01",
+    amount: 49_000,
+    currency: "TRY" as const,
+    status,
+    paid_on,
+    invoice_number: null,
+    invoice_url: null,
+  })
+
+  it("takes the paid one with the latest day, whatever the order", () => {
+    const records = [
+      record("chg_a", "open", null),
+      record("chg_b", "paid", "2026-10-02"),
+      record("chg_c", "paid", "2026-11-03"),
+      record("chg_d", "waived", null),
+    ]
+    expect(lastPaymentOf(records)?.id).toBe("chg_c")
+  })
+
+  it("is null before any payment", () => {
+    expect(lastPaymentOf([record("chg_a", "open", null)])).toBeNull()
   })
 })
 

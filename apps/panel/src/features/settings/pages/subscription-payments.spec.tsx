@@ -21,6 +21,15 @@ function renderPage() {
 
 const packageCard = () => within(screen.getByRole("region", { name: "Paket" }))
 
+/** One fact under the package card, by its label: the `dt` and its `dd`. */
+const factOf = (label: string): HTMLElement => {
+  const fact = packageCard().getByText(label).closest("div")
+  if (!fact) {
+    throw new Error(`no fact ${label}`)
+  }
+  return fact
+}
+
 const billingOf = (changes: Partial<BillingSummary>): BillingSummary => ({
   status: "active",
   due_on: "2026-12-01",
@@ -131,8 +140,48 @@ describe("SubscriptionPage: terms and payments (adr/0061 Ek C20)", () => {
 
     await screen.findByText("Standart")
     expect(packageCard().queryByText("/ ay")).toBeNull()
-    expect(packageCard().queryByText("Paket ücreti")).toBeNull()
+    // The facts it does not carry read "—", never a guess
+    expect(factOf("Fatura dönemi")).toHaveTextContent("—")
+    expect(factOf("Paket ücreti")).toHaveTextContent("—")
     expect(packageCard().getByRole("img", { name: "5 gün kaldı" })).toBeInTheDocument()
+  })
+
+  it("adds the cycle, the last payment made and what the package includes", async () => {
+    serve(planOf({ billing: billingOf({}) }), {
+      payments: {
+        state: "ok",
+        records: [
+          record({ id: "chg_02", status: "open", paid_on: null, due_on: "2026-12-01" }),
+          record({ id: "chg_01", paid_on: "2026-11-03", amount: 99_000 }),
+        ],
+      },
+    })
+    renderPage()
+
+    await screen.findByText("Standart")
+    expect(factOf("Fatura dönemi")).toHaveTextContent("Aylık")
+    expect(await within(factOf("Son ödeme")).findByText("3 Kas 2026")).toBeInTheDocument()
+    expect(factOf("Son ödeme")).toHaveTextContent(/990,00/)
+    const includes = packageCard().getByRole("list", { name: "Pakete dahil" })
+    expect(within(includes).getByText("Ürün videoları")).toBeInTheDocument()
+    expect(within(includes).getByText("Kendi yapay zekâ anahtarınız")).toBeInTheDocument()
+    expect(within(includes).getAllByText("dahil değil")).toHaveLength(1)
+  })
+
+  it("says there is no payment yet, and leaves out a feature it cannot name", async () => {
+    serve(
+      planOf({
+        billing: billingOf({}),
+        features: [{ key: "future.flag", enabled: true }],
+      }),
+      { payments: { state: "ok", records: [] } }
+    )
+    renderPage()
+
+    await screen.findByText("Standart")
+    expect(await within(factOf("Son ödeme")).findByText("Henüz yok")).toBeInTheDocument()
+    expect(packageCard().queryByRole("list", { name: "Pakete dahil" })).toBeNull()
+    expect(screen.queryByText("future.flag")).toBeNull()
   })
 
   it("lists the payments latest first: period, day, amount, status and the invoice", async () => {

@@ -68,7 +68,7 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     // The month as words, not `2026-11`; what it means behind the (i)
     expect(card.getByText("Kasım 2026")).toBeInTheDocument()
     expect(screen.queryByText("2026-11")).toBeNull()
-    expect(card.getByRole("button", { name: "Bilgi: Dönem" })).toBeInTheDocument()
+    expect(card.getByRole("button", { name: "Bilgi: Kullanım ayı" })).toBeInTheDocument()
     // The status's sentence is not on the card, only behind its (i) for a screen reader
     expect(card.getByRole("button", { name: "Bilgi: Etkin" })).toHaveAccessibleDescription(
       "Aboneliğiniz güncel."
@@ -80,7 +80,7 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     expect(fetchMock).toHaveBeenCalledWith("/admin/plan")
   })
 
-  it("shows each limit as a tile: use over limit, a bar coloured by threshold, monthly marked", async () => {
+  it("shows each limit as a tile in its group: shop totals, then this month's", async () => {
     fetchMock.mockResolvedValue({
       plan: planOf(
         {},
@@ -93,16 +93,29 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     })
     renderPage()
 
-    const list = await screen.findByRole("list", { name: "Limitler ve kullanım" })
+    const totals = await screen.findByRole("list", { name: "Mağaza geneli" })
+    const monthly = screen.getByRole("list", { name: "Bu ay (Kasım 2026)" })
     // Custom domains are not applied yet: no tile
-    expect(within(list).getAllByRole("listitem")).toHaveLength(5)
+    expect(
+      within(totals)
+        .getAllByRole("listitem")
+        .map((item) => item.getAttribute("aria-label"))
+    ).toEqual(["Ürünler", "Ekip", "Depolama"])
+    expect(
+      within(monthly)
+        .getAllByRole("listitem")
+        .map((item) => item.getAttribute("aria-label"))
+    ).toEqual(["Siparişler", "İçerik taslakları"])
     expect(screen.queryByText("Özel alan adları")).toBeNull()
+    // Never more than three to a row: a tile's name always has room (it was cut on a laptop)
+    expect(totals).toHaveClass("sm:grid-cols-3")
+    expect(totals.className).not.toMatch(/xl:grid-cols/)
+    expect(monthly).toHaveClass("sm:grid-cols-2")
 
     expect(tileOf("Ürünler").getByText("Limitte")).toBeInTheDocument()
     expect(tileOf("Ürünler").getByText("500")).toBeInTheDocument()
     expect(tileOf("Ürünler").getByText("/ 500")).toBeInTheDocument()
     expect(tileOf("Ürünler").getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100")
-    expect(tileOf("Ürünler").queryByText("Bu ay")).toBeNull()
     // Storage in GB, how much is left in MB
     expect(tileOf("Depolama").getByText("1,7 GB")).toBeInTheDocument()
     expect(tileOf("Depolama").getByText("/ 2 GB")).toBeInTheDocument()
@@ -110,12 +123,10 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     expect(tileOf("Depolama").getByText("348 MB kaldı")).toBeInTheDocument()
     // The month's orders past their limit: a warning, never a refusal (said behind the (i))
     const orders = tileOf("Siparişler")
-    expect(orders.getByText("Bu ay")).toBeInTheDocument()
     expect(orders.getByText("Limit aşıldı")).toBeInTheDocument()
     expect(orders.getByText("20 fazla")).toBeInTheDocument()
     expect(orders.getByRole("button", { name: "Bilgi: Siparişler" })).toBeInTheDocument()
     expect(tileOf("Ekip").getByText("1 davet bekliyor")).toBeInTheDocument()
-    expect(tileOf("İçerik taslakları").getByText("Bu ay")).toBeInTheDocument()
     expect(tileOf("İçerik taslakları").queryByText("Limite yaklaştı")).toBeNull()
     expect(tileOf("İçerik taslakları").getByText("93 kaldı")).toBeInTheDocument()
   })
@@ -210,7 +221,7 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     expect(await screen.findByText("Kurumsal")).toBeInTheDocument()
   })
 
-  it("shows a shop without a control plane only its use, every tile unlimited", async () => {
+  it("tells a shop without a control plane so, and shows its use, every tile unlimited", async () => {
     fetchMock.mockResolvedValue({
       plan: planOf(
         { managed: false, package_code: null, billing: null },
@@ -231,8 +242,13 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14, C16)", () => {
     expect(tileOf("Ürünler").getByText("120")).toBeInTheDocument()
     expect(tileOf("Depolama").getByText("380 MB")).toBeInTheDocument()
     expect(screen.queryByRole("progressbar")).toBeNull()
-    expect(screen.queryByRole("region", { name: "Paket" })).toBeNull()
+    // The package's place says plainly that nothing is known yet; no figure, no payments
+    const card = packageCard()
+    expect(card.getByRole("heading", { name: "Paket bilgisi henüz yok" })).toBeInTheDocument()
+    expect(card.queryByText(/₺|TL/)).toBeNull()
     expect(screen.queryByText("Ödeme bilgileri")).toBeNull()
+    expect(screen.queryByRole("heading", { name: "Ödemeler" })).toBeNull()
+    expect(fetchMock).not.toHaveBeenCalledWith("/admin/plan/payments")
   })
 
   it("shows the page's shape while it loads, and a retry when it fails", async () => {

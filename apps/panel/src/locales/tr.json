@@ -12571,18 +12571,14 @@
         "day": "gün",
         "trialUsed": "Deneme: {{used}} / {{total}} gün"
       },
-      "period": "Dönem",
-      "periodHint": "Aylık limitler her ayın başında sıfırlanır.",
       "per": {
         "monthly": "/ ay",
         "yearly": "/ yıl"
-      },
-      "price": "Paket ücreti"
+      }
     },
     "usage": {
       "title": "Limitler ve kullanım",
       "hint": "%80'den sarı, limitte kırmızı.",
-      "monthly": "Bu ay",
       "unlimited": "Sınırsız",
       "barLabel": "{{name}}: {{value}}",
       "left": "{{value}} kaldı",
@@ -12681,6 +12677,33 @@
         "waived": "Bağışlandı",
         "open": "Bekliyor",
         "late": "Gecikti"
+      }
+    },
+    "details": {
+      "cycle": "Fatura dönemi",
+      "cycleOf": {
+        "monthly": "Aylık",
+        "yearly": "Yıllık"
+      },
+      "price": "Paket ücreti",
+      "lastPayment": "Son ödeme",
+      "noPayment": "Henüz yok",
+      "usageMonth": "Kullanım ayı",
+      "usageMonthHint": "Aylık limitler her ayın başında sıfırlanır.",
+      "includes": "Pakete dahil",
+      "included": "dahil",
+      "notIncluded": "dahil değil",
+      "feature": {
+        "productVideos": "Ürün videoları",
+        "aiOwnKeys": "Kendi yapay zekâ anahtarınız"
+      },
+      "groups": {
+        "totals": "Mağaza geneli",
+        "monthly": "Bu ay ({{month}})"
+      },
+      "unlinked": {
+        "title": "Paket bilgisi henüz yok",
+        "text": "Mağazanız henüz bir pakete bağlanmadı; şimdilik hiçbir limit uygulanmıyor. Paketiniz, ödeme gününüz ve ödemeleriniz bağlantı kurulunca burada görünür."
       }
     }
   },

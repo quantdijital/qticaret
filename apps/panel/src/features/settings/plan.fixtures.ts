@@ -29,6 +29,10 @@ export function planOf(
     period: "2026-11",
     warning_ratio: 0.8,
     limits: LIMITS.map((limit) => ({ ...limit, ...limits[limit.key] })),
+    features: [
+      { key: "catalog.product_videos", enabled: true },
+      { key: "ai.own_keys", enabled: false },
+    ],
     billing: {
       status: "active",
       due_on: "2026-12-01",

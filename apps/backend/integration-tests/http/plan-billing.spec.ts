@@ -85,6 +85,12 @@ medusaIntegrationTestRunner({
         trial_started_on: null,
         trial_ends_on: null,
       })
+      // The package's features: the document names neither (its test flag is left out),
+      // so each takes its default
+      expect(summary.features).toEqual([
+        { key: "catalog.product_videos", enabled: true },
+        { key: "ai.own_keys", enabled: true },
+      ])
     })
 
     it("shows the subscription's terms a newer document carries: period, price, trial (Ek C20)", async () => {

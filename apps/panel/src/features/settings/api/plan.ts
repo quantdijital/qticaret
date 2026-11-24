@@ -37,6 +37,12 @@ export interface BillingSummary {
   trial_ends_on?: string | null
 }
 
+/** One of the package's features beyond its limits (a platform flag, Ek C9): on or off. */
+export interface PackageFeature {
+  key: string
+  enabled: boolean
+}
+
 /** `GET /admin/plan` (adr/0061 §5.6, Ek C14): the package, its limits and use, billing. */
 export interface PlanSummary {
   managed: boolean
@@ -47,6 +53,8 @@ export interface PlanSummary {
   period: string
   warning_ratio: number
   limits: LimitStanding[]
+  /** What the package turns on or off; absent from an older backend. */
+  features?: PackageFeature[]
   billing: BillingSummary | null
   payment_instruction: string | null
 }

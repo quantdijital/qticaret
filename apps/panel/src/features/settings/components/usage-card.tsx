@@ -13,7 +13,12 @@ import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { LimitStanding, PlanSummary } from "@/features/settings/api/plan"
 import { ratioOf, toneOf } from "@/features/settings/plan-rules"
 import type { UseTone } from "@/features/settings/plan-rules"
-import { limitGroups, storageText, tileSpan } from "@/features/settings/subscription-rules"
+import {
+  limitGroups,
+  periodLabel,
+  storageText,
+  tileColumns,
+} from "@/features/settings/subscription-rules"
 
 const ICONS: Record<LimitKey, LucideIcon> = {
   products: Boxes,
@@ -39,19 +44,8 @@ const BAR: Record<UseTone, string> = {
   over: "bg-warning/20 [&>[data-slot=progress-indicator]]:bg-warning",
 }
 
-// Static class names (Tailwind reads them from the source): a tile's share of the 6-column row
-const SPAN = { 2: "sm:col-span-2", 3: "sm:col-span-3", 6: "sm:col-span-6" } as const
-
-// From `xl` every tile sits on one row
-const XL_COLUMNS = [
-  "xl:grid-cols-1",
-  "xl:grid-cols-1",
-  "xl:grid-cols-2",
-  "xl:grid-cols-3",
-  "xl:grid-cols-4",
-  "xl:grid-cols-5",
-  "xl:grid-cols-6",
-] as const
+// Static class names (Tailwind reads them from the source): a group's columns from a tablet up
+const COLUMNS = { 1: "sm:grid-cols-1", 2: "sm:grid-cols-2", 3: "sm:grid-cols-3" } as const
 
 /** A count as the page writes it: storage in MB or GB, the rest as numbers. */
 const amountOf = (standing: LimitStanding, value: number): string =>
@@ -71,7 +65,7 @@ function noteOf(t: TFunction, standing: LimitStanding, tone: UseTone): string | 
     : t("plan.usage.left", { value: amountOf(standing, max - used) })
 }
 
-function Tile({ standing, span }: { standing: LimitStanding; span: 2 | 3 | 6 }) {
+function Tile({ standing }: { standing: LimitStanding }) {
   const { t } = useTranslation()
   const Icon = ICONS[standing.key]
   const name = t(`plan.keys.${standing.key}`)
@@ -81,25 +75,18 @@ function Tile({ standing, span }: { standing: LimitStanding; span: 2 | 3 | 6 }) 
   return (
     <li
       aria-label={name}
-      className={cn(
-        "flex min-w-0 flex-col gap-3 rounded-lg border bg-card p-4 text-card-foreground shadow-card xl:col-span-1",
-        SPAN[span]
-      )}
+      className="flex min-w-0 flex-col gap-3 rounded-lg border bg-card p-4 text-card-foreground shadow-card"
     >
       <div className="flex min-w-0 items-center gap-2">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
           <Icon className="size-4" aria-hidden="true" />
         </span>
-        <span className="min-w-0 truncate text-[13px] font-medium text-muted-foreground">
+        {/* Wraps rather than cut: the name is the tile's title (its group says "Bu ay") */}
+        <span className="min-w-0 text-[13px] leading-5 font-medium break-words text-muted-foreground">
           {name}
         </span>
         {standing.kind === "warn" ? (
           <InfoTip name={name} hint={t("plan.usage.ordersNote")} />
-        ) : null}
-        {standing.monthly ? (
-          <span className="ml-auto shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-            {t("plan.usage.monthly")}
-          </span>
         ) : null}
       </div>
       <div className="flex flex-wrap items-baseline gap-x-1.5">
@@ -138,17 +125,44 @@ function Tile({ standing, span }: { standing: LimitStanding; span: 2 | 3 | 6 }) 
   )
 }
 
+/** One group of tiles under its own heading, every row full. */
+function Group({ title, limits }: { title: string; limits: LimitStanding[] }) {
+  const titleId = useId()
+  if (limits.length === 0) {
+    return null
+  }
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <h3 id={titleId} className="text-[13px] leading-5 font-medium text-muted-foreground">
+        {title}
+      </h3>
+      <ul
+        aria-labelledby={titleId}
+        className={cn(
+          "grid grid-cols-1 gap-[var(--grid-gap)]",
+          COLUMNS[tileColumns(limits.length)]
+        )}
+      >
+        {limits.map((standing) => (
+          <Tile key={standing.key} standing={standing} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 /**
  * Each limit with its use (adr/0061 §5.3, §5.6) as a tile: icon, the use
  * over the limit large, a thin bar amber from 80 % and red at a limit that
- * stops new records (the month's orders only warn), "Bu ay" on the ones
- * counted per month, "Sınırsız" without a limit. The shop's totals first,
- * then the month's.
+ * stops new records (the month's orders only warn), "Sınırsız" without a
+ * limit. Two groups, each under its heading: the shop's totals, then the
+ * ones counted this month. A group never puts more than three tiles in a
+ * row, so a tile's name always has room (it was cut on a laptop when all
+ * five shared one row).
  */
 export function UsageCard({ plan }: { plan: PlanSummary }) {
   const { t } = useTranslation()
   const { totals, monthly } = limitGroups(plan.limits)
-  const count = totals.length + monthly.length
   const titleId = useId()
   return (
     <section aria-labelledby={titleId} className="flex min-w-0 flex-col gap-3">
@@ -164,20 +178,11 @@ export function UsageCard({ plan }: { plan: PlanSummary }) {
           </span>
         )}
       </div>
-      <ul
-        aria-labelledby={titleId}
-        className={cn(
-          "grid grid-cols-1 gap-[var(--grid-gap)] sm:grid-cols-6",
-          XL_COLUMNS[Math.min(count, 6)]
-        )}
-      >
-        {totals.map((standing) => (
-          <Tile key={standing.key} standing={standing} span={tileSpan(totals.length)} />
-        ))}
-        {monthly.map((standing) => (
-          <Tile key={standing.key} standing={standing} span={tileSpan(monthly.length)} />
-        ))}
-      </ul>
+      <Group title={t("plan.details.groups.totals")} limits={totals} />
+      <Group
+        title={t("plan.details.groups.monthly", { month: periodLabel(plan.period) })}
+        limits={monthly}
+      />
     </section>
   )
 }

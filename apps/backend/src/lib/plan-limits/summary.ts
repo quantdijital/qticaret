@@ -1,5 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { LIMIT_KEYS, LIMIT_REGISTRY, LIMIT_WARNING_RATIO } from "@qticaret/types/control-plane"
+import {
+  LIMIT_KEYS,
+  LIMIT_REGISTRY,
+  LIMIT_WARNING_RATIO,
+  PLATFORM_FLAGS,
+} from "@qticaret/types/control-plane"
 import type {
   LimitEnforcement,
   LimitKey,
@@ -23,6 +28,26 @@ export interface LimitStanding {
   /** Team seats: the open invitations counted in `used`. */
   pending?: number
 }
+
+/** One of the package's features (an `owner: platform` flag, Ek C9): on or off for this shop. */
+export interface PackageFeature {
+  key: string
+  enabled: boolean
+}
+
+/**
+ * The package's features as Settings > Abonelik lists them: every
+ * platform flag but the test-only ones, as the signed document sets it
+ * (its default where the document names none, and unmanaged).
+ */
+export const packageFeatures = (
+  managed: boolean,
+  flags: Readonly<Record<string, boolean>>
+): PackageFeature[] =>
+  PLATFORM_FLAGS.filter((flag) => flag.testOnly !== true).map((flag) => ({
+    key: flag.key,
+    enabled: managed ? (flags[flag.key] ?? flag.default) : flag.default,
+  }))
 
 type Terms = "period" | "price" | "trial_started_on" | "trial_ends_on"
 
@@ -55,6 +80,8 @@ export interface PlanSummary {
   period: string
   warning_ratio: number
   limits: LimitStanding[]
+  /** What the package turns on or off beyond its limits. */
+  features: PackageFeature[]
   billing: BillingStanding | null
   /**
    * How to pay, as the control plane signs it into the plan document (Ek
@@ -101,6 +128,7 @@ export async function readPlanSummary(
     period: turkishMonth(now),
     warning_ratio: LIMIT_WARNING_RATIO,
     limits,
+    features: packageFeatures(state.managed, state.platform_flags),
     billing: state.billing
       ? ({
           ...billing,
