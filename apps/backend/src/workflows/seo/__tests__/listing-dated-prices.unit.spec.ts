@@ -46,7 +46,7 @@ const slot = (
 })
 
 /** A container whose reads are counted: the products, the region, the prices and the slots. */
-function fakeContainer(count: number) {
+function fakeContainer(count: number, regionIds: string[] = ["reg_1"]) {
   const reads: string[] = []
   const products = Array.from({ length: count }, (_, at) => product(at))
   const graph = jest.fn((request: { entity: string; filters: { id: string[] } }) => {
@@ -57,7 +57,7 @@ function fakeContainer(count: number) {
       })
     }
     if (request.entity === "region") {
-      return Promise.resolve({ data: [{ id: "reg_1", currency_code: "try" }] })
+      return Promise.resolve({ data: regionIds.map((id) => ({ id, currency_code: "try" })) })
     }
     // Every adult 1.000 TL, an infant free
     return Promise.resolve({
@@ -174,6 +174,24 @@ describe("a date search's prices", () => {
       listingDatedPrices(container, asked, ids, { region_id: null, currency_code: "usd" })
     ).rejects.toThrow("listing.currency_mismatch")
     expect(windowSlots).not.toHaveBeenCalled()
+  })
+
+  it("prices in a region added since the shop's regions were kept, not refusing it", async () => {
+    const before = fakeContainer(2)
+    const after = fakeContainer(2, ["reg_1", "reg_new"])
+    const asked = query({ dates: { kind: "months", months: ["2026-12"] } })
+    const ids = ["prod_0", "prod_1"]
+
+    await listingDatedPrices(before.container, asked, ids, {
+      region_id: "reg_1",
+      currency_code: "try",
+    })
+    const prices = await listingDatedPrices(after.container, asked, ids, {
+      region_id: "reg_new",
+      currency_code: "try",
+    })
+
+    expect(prices).toEqual({ prod_0: 3500, prod_1: 900 })
   })
 
   it("works a search's prices out once however many ask at once", async () => {

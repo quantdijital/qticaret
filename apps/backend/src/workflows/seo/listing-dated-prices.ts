@@ -78,7 +78,9 @@ export async function datedPricingRegion(
     return null
   }
   const regions = await regionsCache("regions", () => regionCurrencies(container))
-  const own = regions.get(regionId)
+  // A region added since the list was kept is read afresh, not refused for a minute;
+  // one small read, on a request already held to the dated listing's budget
+  const own = regions.get(regionId) ?? (await regionCurrencies(container)).get(regionId)
   if (own === undefined) {
     throw new MedusaError(MedusaError.Types.INVALID_DATA, "listing.region_unknown")
   }
