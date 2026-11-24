@@ -66,6 +66,12 @@ describe("the theme's dated product card", () => {
     expect(html).not.toContain("<time")
   })
 
+  it("keeps the amount whole and lets only the words after it break on a narrow card", () => {
+    const [html = ""] = cardsOf([card("a", { booking: { next: null, nextAt: null } })])
+    expect(html).toMatch(/<span class="[^"]*whitespace-nowrap[^"]*">1\.750,50 TL&#x27;den<\/span>/)
+    expect(html).toMatch(/<span class="[^"]*@max-\[13rem\]:text-xs[^"]*">itibaren<\/span>/)
+  })
+
   it("draws a card without booking as before", () => {
     const [plain = ""] = cardsOf([card("a")])
     const [dated = ""] = cardsOf([card("a", { booking: { next: null, nextAt: null } })])

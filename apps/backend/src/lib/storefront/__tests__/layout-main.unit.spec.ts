@@ -166,4 +166,24 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       by_variant: {},
     })
   })
+
+  it("prints the product gallery's shape only when it is not the square, and refuses one off its list", () => {
+    const shaped = (image_ratio: string) =>
+      mainSectionsOf(
+        withMainSections(
+          layoutDocument.parse({
+            product: [{ id: "mainproduct", type: "product_main", image_ratio }],
+          }),
+          LEFT
+        )
+      ).product_main
+    expect(shaped("landscape")).toMatchObject({ image_ratio: "landscape" })
+    expect(shaped("portrait")).toMatchObject({ image_ratio: "portrait" })
+    expect(shaped("square")).not.toHaveProperty("image_ratio")
+    expect(
+      layoutDocument.safeParse({
+        product: [{ id: "mainproduct", type: "product_main", image_ratio: "wide" }],
+      }).success
+    ).toBe(false)
+  })
 })

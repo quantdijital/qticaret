@@ -47,7 +47,25 @@ describe("the travel pack (adr/0076 §12)", () => {
       "dahil_olanlar",
       "dahil_olmayanlar",
       "vize_pasaport_notu",
+      "gidilecek_yer",
     ])
+  })
+
+  it("offers the destination as one filterable choice (adr/0077 §11)", () => {
+    const destination = travel?.attribute_templates[0]?.definitions.find(
+      (each) => each.key === "gidilecek_yer"
+    )
+    expect(destination).toMatchObject({
+      label: "Gidilecek yer",
+      type: "select",
+      is_filterable: true,
+    })
+    const options = (destination?.["options"] ?? []) as { value: string; label: string }[]
+    expect(options.map((each) => each.value)).toEqual(
+      expect.arrayContaining(["kapadokya", "ege", "akdeniz", "karadeniz", "dogu-anadolu"])
+    )
+    // Not one of the search's reserved parameters (adr/0077 §2)
+    expect(["kategori", "tarih", "ay", "kisi", "sirala"]).not.toContain(destination?.key)
   })
 
   it("offers its cancellation terms as one page", () => {
@@ -55,8 +73,14 @@ describe("the travel pack (adr/0076 §12)", () => {
     expect(travel?.pages?.[0]?.body.type).toBe("doc")
   })
 
-  it("has no storefront preset: none is built for it yet", () => {
-    expect(travel?.presets).toEqual([])
+  it("offers three storefront presets, each asking the destination in its search", () => {
+    expect(travel?.version).toBe(2)
+    expect(travel?.presets.map((preset) => preset.code).sort()).toEqual(["patika", "rota", "vadi"])
+    for (const preset of travel?.presets ?? []) {
+      expect(preset.theme_settings).toMatchObject({
+        search_form: { attribute_key: "gidilecek_yer" },
+      })
+    }
   })
 
   it("leaves the other packs' defaults and pages empty", () => {

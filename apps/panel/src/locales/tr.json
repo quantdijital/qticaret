@@ -9835,6 +9835,10 @@
             "hint": "Ziyaretçinin seçeceği nitelik (ör. bölge, şehir). Yalnız filtrelenebilir ve seçenekli nitelikler listelenir.",
             "none": "Kelime kutusu (nitelik yok)"
           },
+          "placeholder": {
+            "label": "Kelime kutusundaki ipucu",
+            "hint": "Aramadan önce kelime kutusunda görünür (ör. \"Nereye gitmek istersiniz?\"). Boşsa: \"Ürün, kategori veya marka ara\"."
+          },
           "show_category": {
             "label": "Kategori alanı",
             "hint": "Üst kategorilerden birini seçtirir."
@@ -11365,6 +11369,16 @@
           "hint": "Dar ekranda fotoğraflar yana mı kayar, alt alta mı dizilir.",
           "scroll": "Yana kaydır",
           "stack": "Alt alta"
+        }
+      },
+      "productMain": {
+        "image_ratio": {
+          "label": "Görsel oranı",
+          "term": "image ratio",
+          "hint": "Ürün sayfasındaki büyük görselin biçimi. Küçük görseller kare kalır.",
+          "square": "Kare",
+          "landscape": "Yatay 4:3",
+          "portrait": "Dikey 3:4"
         }
       }
     },

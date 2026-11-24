@@ -246,5 +246,29 @@ medusaIntegrationTestRunner({
 
       expect(read.status).toBe(200)
     })
+
+    it("signs a member with a factor in by password alone where 2FA is off locally", async () => {
+      const member = await createAdminUser(http, getContainer(), "admin")
+      await setUpTotp(http, member)
+
+      process.env["ADMIN_MFA"] = "off"
+      try {
+        const login = await signIn(member.email, member.password)
+        const headers = bearer(login.data.token)
+        const reached = await settle(http.get("/admin/orders?limit=1", { headers }))
+        const me = await http.get<{ mfa: Record<string, boolean> }>("/admin/staff/me", {
+          headers,
+        })
+
+        expect(login.data.mfa_challenge).toBeUndefined()
+        expect(reached.status).toBe(200)
+        expect(me.data.mfa).toMatchObject({ available: false, required: false, enabled: true })
+      } finally {
+        process.env["ADMIN_MFA"] = "on"
+      }
+      // On again: the factor kept, the next sign-in asks its code
+      const again = await signIn(member.email, member.password)
+      expect(again.data.mfa_challenge).toBeDefined()
+    })
   },
 })

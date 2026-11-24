@@ -128,7 +128,7 @@ export function searchFormView(
       : {
           name: "q",
           label: t("search.form_words"),
-          placeholder: t("search.placeholder"),
+          placeholder: settings.placeholder ?? t("search.placeholder"),
           value: values.q,
         },
     category:

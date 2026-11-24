@@ -87,8 +87,8 @@ describe("the upcoming departures' view", () => {
       open: "İncele",
       layout: "list",
     })
-    expect(view?.rows.map((row) => [row.path, row.left, row.price?.from ?? null])).toEqual([
-      ["/kapadokya", "Son 3 yer", true],
+    expect(view?.rows.map((row) => [row.path, row.left, row.price?.current ?? null])).toEqual([
+      ["/kapadokya", "Son 3 yer", "1.750,50 TL'den itibaren"],
       ["/efes", null, null],
     ])
     expect(view?.rows[0]?.date).toMatchObject({ day: "12", month: "Ara", weekday: "Cmt" })
@@ -124,7 +124,7 @@ describe("Atölye's upcoming departures", () => {
     expect(html).toContain('dateTime="2026-12-12T06:00:00.000Z"')
     expect(html).toContain("Tur kapadokya")
     expect(html).toContain("Son 3 yer")
-    expect(html).toContain("1.750,50 TL'den başlayan")
+    expect(html).toContain("1.750,50 TL'den itibaren")
     expect(html).toContain('href="/kapadokya"')
     expect(html.match(/>İncele</g)).toHaveLength(2)
     // The list draws no photograph

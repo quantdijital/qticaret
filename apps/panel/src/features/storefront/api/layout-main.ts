@@ -9,6 +9,7 @@ import type {
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
+  ProductImageRatio,
   ProductMainVariant,
   SectionLook,
 } from "@qticaret/types"
@@ -111,6 +112,8 @@ export type FooterBarSection =
 export interface ProductMainSection extends MainBase {
   type: "product_main"
   variant: ProductMainVariant
+  /** The gallery's picture shape; left out: the square. */
+  image_ratio?: ProductImageRatio
   look?: SectionLook
 }
 

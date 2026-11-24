@@ -16,6 +16,7 @@ import {
   priceOf,
   productsIn,
 } from "./fixture-shop"
+import { SHOP_LISTING, departuresAnswer } from "./fixture-dated"
 import { linkOf } from "./preset-resolve"
 import { PACKS_DIR } from "./presets"
 
@@ -253,6 +254,11 @@ export function storeAnswer(
       return { images: CATEGORY_IMAGES }
     case "/store/category-counts":
       return { counts: CATEGORY_COUNTS }
+    // A dated shop's only (adr/0077): the departures section and the search box's "Nereye"
+    case "/store/departures":
+      return departuresAnswer(Number(query?.["limit"] ?? 6))
+    case "/store/listings/products":
+      return SHOP_LISTING
     case "/store/brands":
       return { brands: BRANDS, count: BRANDS.length }
     case "/store/content":

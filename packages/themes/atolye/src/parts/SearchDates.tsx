@@ -7,10 +7,11 @@ import type { SearchFormDatesView, SearchFormDayView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { DatePicker } from "./DatePicker"
 import type { DatesChoice, PickerMode } from "./date-picker-days"
-import { CONTROL, Cell, DayCell, SelectCell } from "./search-form-cells"
+import { CONTROL, Cell, DAY, DayCell, SelectCell } from "./search-form-cells"
 
+// On a phone its fields join the form's grid rows; from 768 px one part of the bar
 const GROUP =
-  "flex min-w-0 flex-col border-t border-rule md:flex-[2.4] md:flex-row md:border-t-0 md:border-l"
+  "flex min-w-0 max-md:contents md:flex-[2.4] md:flex-row md:border-l md:border-rule lg:flex-[3]"
 
 // False on the server and while hydrating, true after: the page as sent is the plain form's
 const never = () => () => undefined
@@ -29,7 +30,14 @@ const OPENING = new Set(["Enter", " ", "ArrowDown"])
  * (up to three) in a hidden field of the same name. Closed, the calendar
  * draws nothing; its days are asked for only once it opens.
  */
-export function SearchDates({ dates }: { dates: SearchFormDatesView }) {
+export function SearchDates({
+  dates,
+  wide,
+}: {
+  dates: SearchFormDatesView
+  /** The first day field across the phone's grid (an odd count of fields). */
+  wide?: string | false | undefined
+}) {
   const running = useSyncExternalStore(never, inBrowser, onServer)
   const [choice, setChoice] = useState<DatesChoice>(() => ({
     from: dates.from.value,
@@ -44,9 +52,9 @@ export function SearchDates({ dates }: { dates: SearchFormDatesView }) {
   if (!running || !calendar) {
     return (
       <div role="group" aria-label={dates.label} className={GROUP}>
-        <DayCell field={dates.from} />
+        <DayCell field={dates.from} className={wide} />
         <DayCell field={dates.to} />
-        <SelectCell icon={CalendarRange} field={dates.month} />
+        <SelectCell icon={CalendarRange} field={dates.month} className={DAY} />
       </div>
     )
   }
@@ -61,8 +69,8 @@ export function SearchDates({ dates }: { dates: SearchFormDatesView }) {
       show("exact", event.currentTarget)
     }
   }
-  const day = (field: SearchFormDayView, value: string) => (
-    <Cell icon={CalendarDays} label={field.label}>
+  const day = (field: SearchFormDayView, value: string, className?: string | false) => (
+    <Cell icon={CalendarDays} label={field.label} className={cn(DAY, className)}>
       <input
         key="calendar"
         type="date"
@@ -86,9 +94,9 @@ export function SearchDates({ dates }: { dates: SearchFormDatesView }) {
 
   return (
     <div ref={group} role="group" aria-label={dates.label} className={GROUP}>
-      {day(dates.from, choice.from)}
+      {day(dates.from, choice.from, wide)}
       {day(dates.to, choice.to)}
-      <Cell icon={CalendarRange} label={dates.month.label}>
+      <Cell icon={CalendarRange} label={dates.month.label} className={DAY}>
         <button
           type="button"
           aria-haspopup="dialog"

@@ -79,6 +79,7 @@ describe("theme section", () => {
         show_dates: true,
         show_people: true,
         category_style: "select",
+        placeholder: null,
       },
       // adr/0067 §1: the style kit at today's drawing
       menu_style: "filled",

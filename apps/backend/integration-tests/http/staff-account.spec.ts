@@ -203,13 +203,16 @@ medusaIntegrationTestRunner({
         "staff.password_wrong",
       ])
       expect(right.status).toBe(200)
-      // The new password signs in, still with the second step
+      // The new password signs in, still with the second step (asked where 2FA is on)
+      process.env["ADMIN_MFA"] = "on"
       const login = await settle(
         http.post<{ mfa_challenge?: unknown }>("/auth/user/emailpass", {
           email: member.email,
           password: fresh,
         })
-      )
+      ).finally(() => {
+        process.env["ADMIN_MFA"] = "off"
+      })
       expect(login.data.mfa_challenge).toBeDefined()
       expect(mail().messages.length).toBeGreaterThan(0)
     })
