@@ -16,6 +16,7 @@ interface Listing {
   product_ids: string[]
   count: number
   facets: { price: { min: number; max: number } | null }
+  message?: string
 }
 
 const DAY = 24 * 60 * 60 * 1000
@@ -84,15 +85,18 @@ medusaIntegrationTestRunner({
       return productId
     }
 
-    const listing = async (query: Record<string, string>) => {
+    const listing = async (
+      query: Record<string, string>,
+      pricing: { region_id?: string; currency_code?: string } = {}
+    ) => {
       await indexCatalogue(getContainer())
       return settle(
         http.get<Listing>(
           `/store/listings/products?${new URLSearchParams({
             type: "all",
             id: "all",
-            region_id: shop.regionId,
-            currency_code: "try",
+            region_id: pricing.region_id ?? shop.regionId,
+            currency_code: pricing.currency_code ?? "try",
             query: new URLSearchParams(query).toString(),
           }).toString()}`,
           { headers: store.headers }
@@ -139,6 +143,29 @@ medusaIntegrationTestRunner({
       expect(datedDesc.data.product_ids).toEqual([cheapBase, plainPrice])
       expect(datedAsc.data.facets.price).toEqual({ min: 1500, max: 3500 })
       expect(datedCheap.data.product_ids).toEqual([plainPrice])
+      // Both read whole lira: the same bounds keep the index's 1.000 TL and the card's 1.500 TL alike
+      const sameBoundsBase = await listing({ fiyat: "1000-1500" })
+      const sameBoundsDated = await listing({ tarih, fiyat: "1000-1500" })
+      expect(sameBoundsBase.data.product_ids).toEqual(
+        expect.arrayContaining([cheapBase, plainPrice])
+      )
+      expect(sameBoundsDated.data.product_ids).toEqual([plainPrice])
+    })
+
+    it("refuses a date search priced in a region the shop has not, or in another currency", async () => {
+      await tour(1500, [{ days: 9 }])
+      const tarih = `${dayAhead(7)}_${dayAhead(18)}`
+
+      const madeUp = await listing({ tarih }, { region_id: "reg_madeup1" })
+      const otherCurrency = await listing({ tarih }, { currency_code: "usd" })
+      const undated = await listing({}, { region_id: "reg_madeup1" })
+
+      expect(madeUp.status).toBe(400)
+      expect(madeUp.data.message).toBe("listing.region_unknown")
+      expect(otherCurrency.status).toBe(400)
+      expect(otherCurrency.data.message).toBe("listing.currency_mismatch")
+      // Without dates nothing is priced on the server: answered as before
+      expect(undated.status).toBe(200)
     })
   },
 })

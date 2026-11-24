@@ -112,13 +112,26 @@ describe("a date search's prices", () => {
     expect([...many.reads].sort()).toEqual([...one.reads].sort())
   })
 
-  it("leaves a listing without dates on the index's price, reading nothing", () => {
-    const { container, reads } = fakeContainer(2)
+  it("reads at most a date search's products, however many ids it is given", async () => {
+    const { container, graph } = fakeContainer(2)
+    const ids = Array.from({ length: 1500 }, (_, at) => `prod_${String(at)}`)
 
-    expect(listingDatedPrices(container, query(), null, "reg_1", NOW)).toBeUndefined()
-    expect(
-      listingDatedPrices(container, query({ sort: "fiyat-artan" }), null, "reg_1", NOW)
-    ).toBeUndefined()
+    await datedPricesOf(container, ids, window, "reg_1")
+
+    const productRead = graph.mock.calls.find(([request]) => request.entity === "product")
+    expect(productRead?.[0].filters.id).toHaveLength(1000)
+  })
+
+  it("leaves a listing without dates on the index's price, reading nothing", async () => {
+    const { container, reads } = fakeContainer(2)
+    const pricing = { region_id: "reg_x", currency_code: "usd" }
+
+    await expect(
+      listingDatedPrices(container, query(), null, pricing, NOW)
+    ).resolves.toBeUndefined()
+    await expect(
+      listingDatedPrices(container, query({ sort: "fiyat-artan" }), null, pricing, NOW)
+    ).resolves.toBeUndefined()
     expect(reads).toEqual([])
   })
 
@@ -130,7 +143,13 @@ describe("a date search's prices", () => {
       sort: "fiyat-azalan",
     })
 
-    const prices = await listingDatedPrices(container, asked, ["prod_0", "prod_1"], "reg_1", NOW)
+    const prices = await listingDatedPrices(
+      container,
+      asked,
+      ["prod_0", "prod_1"],
+      { region_id: "reg_1", currency_code: "try" },
+      NOW
+    )
 
     expect(prices).toEqual({ prod_0: 3500, prod_1: 900 })
     expect(windowSlots).toHaveBeenCalledWith(
@@ -138,5 +157,37 @@ describe("a date search's prices", () => {
       expect.objectContaining({ dates: { months: ["2026-12"] }, pax: 3 }),
       expect.any(Number)
     )
+  })
+
+  it("refuses a region the shop has not, or another currency than its, before any heavy read", async () => {
+    const { container, windowSlots } = fakeContainer(2)
+    const asked = query({ dates: { kind: "months", months: ["2026-12"] } })
+    const ids = ["prod_0", "prod_1"]
+
+    await expect(
+      listingDatedPrices(container, asked, ids, { region_id: "reg_made_up", currency_code: "try" })
+    ).rejects.toThrow("listing.region_unknown")
+    await expect(
+      listingDatedPrices(container, asked, ids, { region_id: "reg_1", currency_code: "usd" })
+    ).rejects.toThrow("listing.currency_mismatch")
+    await expect(
+      listingDatedPrices(container, asked, ids, { region_id: null, currency_code: "usd" })
+    ).rejects.toThrow("listing.currency_mismatch")
+    expect(windowSlots).not.toHaveBeenCalled()
+  })
+
+  it("works a search's prices out once however many ask at once", async () => {
+    const { container, windowSlots } = fakeContainer(2)
+    // Dates no other test here asks: the prices are kept a while per search
+    const asked = query({ dates: { kind: "range", from: "2026-12-21", to: "2026-12-28" } })
+    const pricing = { region_id: "reg_1", currency_code: "TRY" }
+
+    const [first, second] = await Promise.all([
+      listingDatedPrices(container, asked, ["prod_0", "prod_1"], pricing, NOW),
+      listingDatedPrices(container, asked, ["prod_0", "prod_1"], pricing, NOW),
+    ])
+
+    expect(second).toEqual(first)
+    expect(windowSlots).toHaveBeenCalledTimes(1)
   })
 })

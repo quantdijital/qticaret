@@ -81,6 +81,9 @@ export const RATE_LIMIT_PROFILES = {
   // A month's departure calendar (adr/0077 §6): asked as a shopper opens the date
   // picker or turns a month; each answer is kept a minute, a miss reads the month
   departure_calendar: { name: "departure_calendar", perIp: { max: 60, windowMs: MINUTE } },
+  // A listing asked with dates (adr/0077 §5 Ek): beside `listing`, its own budget, for
+  // a miss prices up to 1000 products over their departures; each answer is kept 30 s
+  dated_listing: { name: "dated_listing", perIp: { max: 60, windowMs: MINUTE } },
   // The header's live search (2026-11-05): a read as the shopper types, after a
   // pause; the storefront keeps each answer a minute, so a word asked again is free
   search_suggest: { name: "search_suggest", perIp: { max: 240, windowMs: MINUTE } },

@@ -122,7 +122,10 @@ export async function listingProducts(
   }
   // Dates asked: the price sorted and filtered by is the card's, over the departures inside them
   const byProduct = scope
-    ? await listingDatedPrices(container, query, dated.scope_ids, input.region_id)
+    ? await listingDatedPrices(container, query, dated.scope_ids, {
+        region_id: input.region_id,
+        currency_code: input.currency_code,
+      })
     : undefined
   const size = input.limit ?? LISTING_PAGE_SIZE
   const text = input.search?.trim() ?? ""

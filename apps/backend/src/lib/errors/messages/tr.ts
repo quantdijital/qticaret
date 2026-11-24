@@ -902,6 +902,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "listing.id_required": "Hangi listenin istendiği belirtilmeli.",
   "listing.search_query_invalid": "Aramak için bir kelime yazın (en çok 100 karakter).",
   "listing.search_query_unexpected": "Arama metni yalnızca aramada gönderilir.",
+  "listing.region_unknown": "Bölge bulunamadı.",
+  "listing.currency_mismatch": "Para birimi bölgenin para birimiyle aynı olmalı.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
   "legal.unknown": "Böyle bir yasal metin türü yok.",
   "legal.not_published": "Bu metin henüz yayımlanmadı.",

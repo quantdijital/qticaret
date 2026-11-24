@@ -21,6 +21,7 @@ import {
 import { StoreGetContent, StoreGetContentTerms } from "../store/content/validators"
 import { StoreGetLandingProducts } from "../store/landings/validators"
 import { StoreGetListingProducts, StoreGetListingSuggest } from "../store/listings/validators"
+import { datedListingProfile } from "./dated-listing-limit"
 import { rateLimit } from "./rate-limit"
 
 // An entry's own route: `/admin/content/terms` and `/admin/content/authors` are the blog's
@@ -150,6 +151,7 @@ export const CONTENT_ROUTES = [
     methods: ["GET" as const],
     middlewares: [
       rateLimit(() => RATE_LIMIT_PROFILES.listing),
+      rateLimit(datedListingProfile),
       validateAndTransformQuery(StoreGetListingProducts, {}),
     ],
   },
