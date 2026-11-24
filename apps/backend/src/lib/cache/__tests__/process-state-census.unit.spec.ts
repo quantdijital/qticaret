@@ -25,6 +25,9 @@ const REGISTERED = /registerProcessCache|createTtlCache|createVersionedCache/
 const ENV = "read once from the environment, which a bundled run does not change"
 const IN_FLIGHT = "work in flight, back to nothing when it ends"
 const ONCE = "said once a process: a log line, no behaviour"
+// Forgotten, the job ran again after every spec file, at a tick of its own, and
+// its session stood in the way of the next file's snapshot (dev, 2026-11-25)
+const JOB_RHYTHM = "a scheduled job's last run: once a process, as after one boot"
 
 /** Files whose module state is no request's: the same for every spec file. */
 const NEED_NOT_FORGET: ReadonlyMap<string, string> = new Map([
@@ -39,6 +42,8 @@ const NEED_NOT_FORGET: ReadonlyMap<string, string> = new Map([
   ["api/http/search-terms.ts", ENV],
   ["api/http/security-headers.ts", ENV],
   ["api/http/staff-guard.ts", ENV],
+  ["jobs/control-plane-pull.ts", JOB_RHYTHM],
+  ["jobs/control-plane-usage.ts", JOB_RHYTHM],
   ["lib/ai/scenes.ts", "the scene packs shipped with the code"],
   ["lib/control-plane/config.ts", `${ENV} (kept by its raw value)`],
   ["lib/control-plane/release.ts", "the release the process runs"],
