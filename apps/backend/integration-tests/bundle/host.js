@@ -12,6 +12,7 @@
 // and jest's own hooks.
 const path = require("node:path")
 const { withTemplate } = require("../template/runner")
+const { forgetProcessCaches } = require("../../src/lib/cache/process-caches")
 
 const HTTP_DIR = path.join(__dirname, "..", "http")
 const TEST_UTILS = "@medusajs/test-utils"
@@ -153,6 +154,10 @@ function hostSuites(context, state, specs, bundle) {
         started = Date.now()
         if (index > 0) {
           await context.dbUtils.restore({ templateName: booted })
+          // What the app holds in process (caches, provider clients and their
+          // circuit breakers, counters) goes with the database, as in a fresh
+          // process (src/lib/cache/process-caches.ts)
+          forgetProcessCaches()
         }
         state.snapshotDue = true
       })

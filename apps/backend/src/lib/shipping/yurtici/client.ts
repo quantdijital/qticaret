@@ -23,6 +23,7 @@ import type { YurticiLogin } from "./credentials"
 import { yurticiShipmentFields } from "./mappers"
 import type { YurticiShipmentInput } from "./mappers"
 import type { YurticiDelivery } from "./status"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * Yurtiçi Kargo's shipping order service (adr/0035): a JAX-WS SOAP
@@ -227,6 +228,10 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
 export type YurticiApi = ReturnType<typeof createYurticiApi>
 
 let shared: YurticiApi | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client set per process; a local fake server's address in development (`YURTICI_BASE_URL`). */
 export function yurticiApi(): YurticiApi {

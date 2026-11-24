@@ -22,6 +22,7 @@ import type { RateLimitProfile, RateLimitStore } from "../../lib/security/rate-l
 import { rejectRequest } from "./reject"
 import { routePath } from "./request-path"
 import { clientIp } from "./client-ip"
+import { registerProcessCache } from "../../lib/cache/process-caches"
 
 /**
  * Rate limiting for API routes (docs/04, F2.10). It runs after Medusa's
@@ -31,6 +32,10 @@ import { clientIp } from "./client-ip"
  */
 
 let sharedStore: RateLimitStore | undefined
+// Counters kept in process memory start afresh per spec file of a bundled test run
+registerProcessCache(() => {
+  sharedStore = undefined
+})
 
 /**
  * Counters live under the tenant's namespace (see `tenantNamespace`). An

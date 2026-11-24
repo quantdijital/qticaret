@@ -3,6 +3,7 @@ import type Redis from "ioredis"
 import { previewSigner } from "../content/preview-token"
 import { parseEnv } from "../env"
 import { createRedisClient, tenantNamespace } from "../redis"
+import { registerProcessCache } from "../cache/process-caches"
 
 /**
  * The theme editor's live preview session (adr/0065 §1, Faz 1): one stable
@@ -102,6 +103,10 @@ export function createMemorySessionStore(now: () => number = Date.now): EditorSe
 }
 
 let shared: EditorSessionStore | undefined
+// A store in process memory starts afresh per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** The tenant's store: Redis when configured, else this process's memory. */
 export function editorSessionStore(): EditorSessionStore {

@@ -1,11 +1,16 @@
 import { createSingleFlight } from "../../cache"
 import { paytrApi } from "./client"
 import type { PaytrCredentials, PaytrInstallmentRates } from "./types"
+import { registerProcessCache } from "../../cache/process-caches"
 
 // PayTR's rates change rarely; a product page must not ask PayTR on every view
 const TTL_MS = 24 * 60 * 60 * 1000
 
 let cached: { key: string; at: number; rates: PaytrInstallmentRates } | null = null
+// Forgotten per spec file of a bundled test run
+registerProcessCache(() => {
+  cached = null
+})
 const once = createSingleFlight<PaytrInstallmentRates>()
 
 /**

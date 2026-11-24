@@ -1,3 +1,5 @@
+import { registerProcessCache } from "../../lib/cache/process-caches"
+
 /**
  * When each identity's password last changed, as `sign-in-epoch.ts` read
  * it (seconds, or null for never), held a few seconds so a busy shopper's
@@ -9,6 +11,10 @@ const CACHE_MS = 5_000
 const CACHE_ENTRIES = 5_000
 
 const cached = new Map<string, { until: number; at: number | null }>()
+// Forgotten per spec file of a bundled test run
+registerProcessCache(() => {
+  cached.clear()
+})
 
 /** What was read for the identity, while it holds; undefined to read again. */
 export function heldPasswordChange(

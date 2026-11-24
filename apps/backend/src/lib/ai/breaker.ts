@@ -2,6 +2,7 @@ import { CircuitBreaker, DEFAULT_CIRCUIT_BREAKER } from "../clients/circuit-brea
 import type { CircuitBreakerOptions } from "../clients/circuit-breaker"
 import { aiProviderError } from "./errors"
 import { failureOf } from "./outcome"
+import { registerProcessCache } from "../cache/process-caches"
 
 /**
  * A circuit breaker per AI service (adr/0071 §8), as `lib/clients/http-client.ts`
@@ -13,6 +14,10 @@ import { failureOf } from "./outcome"
  */
 
 const breakers = new Map<string, CircuitBreaker>()
+// Every AI service starts closed per spec file of a bundled test run
+registerProcessCache(() => {
+  breakers.clear()
+})
 
 function breakerOf(serviceId: string, options: CircuitBreakerOptions): CircuitBreaker {
   let breaker = breakers.get(serviceId)

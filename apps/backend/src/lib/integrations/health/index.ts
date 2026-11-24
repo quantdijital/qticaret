@@ -8,6 +8,7 @@ import { iyzicoHealthCheck } from "./iyzico-check"
 import { paytrHealthCheck } from "./paytr-check"
 import { netgsmHealthCheck } from "./netgsm-check"
 import { yurticiHealthCheck } from "./yurtici-check"
+import { registerProcessCache } from "../../cache/process-caches"
 
 export { createHealthMonitor, runHealthChecks } from "./health"
 export type {
@@ -47,6 +48,10 @@ export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthC
 }
 
 let monitor: ReturnType<typeof createHealthMonitor> | undefined
+// A new monitor (and its cached results) per spec file of a bundled test run
+registerProcessCache(() => {
+  monitor = undefined
+})
 
 /** One monitor per process, so its cache spans requests. */
 export function integrationHealth(accounts: AccountSource): ReturnType<typeof createHealthMonitor> {

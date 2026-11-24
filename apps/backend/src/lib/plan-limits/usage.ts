@@ -9,6 +9,7 @@ import {
   megabytesOf,
   storedBytes,
 } from "../control-plane/usage"
+import { registerProcessCache } from "../cache/process-caches"
 
 type Resolver = Pick<MedusaContainer, "resolve">
 
@@ -61,6 +62,10 @@ export async function countUsage(container: Resolver, key: LimitKey, now: Date):
 export const USAGE_CACHE_MS = 10_000
 
 const cache = new Map<LimitKey, { at: number; usage: Usage }>()
+// Forgotten per spec file of a bundled test run
+registerProcessCache(() => {
+  cache.clear()
+})
 
 /**
  * A limit's use for the panel's reading, kept for `USAGE_CACHE_MS` in this

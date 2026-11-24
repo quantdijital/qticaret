@@ -9,6 +9,7 @@ import { shipmentCalls } from "./shipments"
 import { geliverAddress, geliverAddressList, geliverEnvelope } from "./schemas"
 import type { GeliverAddress } from "./schemas"
 import type { GeliverCredentialCheck, GeliverCredentials } from "./types"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * Geliver's API over the platform HTTP client (adr/0031): a Bearer token
@@ -138,6 +139,10 @@ export function createGeliverApi(
 }
 
 let shared: GeliverApi | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per process, on Geliver's address or a local fake server's (`GELIVER_BASE_URL`). */
 export function geliverApi(): GeliverApi {

@@ -27,6 +27,7 @@ import type {
   PaytrRefund,
   PaytrTokenRequest,
 } from "./types"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * PayTR's APIs (iFrame token, status query, refund, installment rates)
@@ -244,6 +245,10 @@ export function createPaytrApi(
 }
 
 let shared: PaytrApi | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per process, on PayTR's address or a local fake server's (`PAYTR_BASE_URL`). */
 export function paytrApi(): PaytrApi {

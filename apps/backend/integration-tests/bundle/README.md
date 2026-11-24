@@ -30,6 +30,12 @@ on for the HTTP jobs (`.github/workflows/ci.yml`).
    - the database goes back to the state Medusa booted into, before the next
      file's own `beforeAll`; the runner's per-test snapshot is taken again at
      the file's first test, so a file sees exactly what it saw alone;
+   - what the app holds in process is forgotten with it
+     (`src/lib/cache/process-caches.ts`): every TTL and versioned cache,
+     the provider clients built from a `*_BASE_URL` (and their circuit
+     breakers), the integration health monitor, rate limit counters and the
+     staff and editor session stores kept in memory (no Redis in CI). Each
+     registers how it forgets, under NODE_ENV=test only;
    - spies are restored (`jest.restoreAllMocks`) and real timers put back;
    - a file's `jest.setTimeout` is kept: its tests and hooks get it as their
      timeout. Medusa's boot and the runner's own hooks wait as long as the
@@ -55,13 +61,13 @@ run's first line says how many bundles and files alone there are.
 
 ## When a file fails in a bundle and passes alone
 
-It shares something in process with another file of its bundle: an in-memory
-cache (several hold 30–60 s), a rate limit counter (process memory in CI, no
-Redis), a module-level variable, a spy or a timer, or work still running
-after its last test. Find the other file (`[bundle] bundle-…: a, b, c` names
-a bundle's files, in order), then either mend the leak (clear the cache the
-way the file's own tests do, await the work) or add the file to `solo.txt`
-with the reason. A failing boot fails every file of its bundle; the error
+It shares something in process with another file of its bundle that is not
+forgotten between files: a module-level variable (a client, a store, a map)
+not registered with `registerProcessCache`, a spy or a timer, or work still
+running after its last test. Find the other file (`[bundle] bundle-…: a, b, c`
+names a bundle's files, in order), then either register the holder (one call
+next to it, as `lib/payments/paytr/client.ts` does) or add the file to
+`solo.txt` with the reason. A failing boot fails every file of its bundle; the error
 names them.
 
 ## Switching it off
