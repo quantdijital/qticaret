@@ -70,5 +70,6 @@ for (const hook of ["beforeAll", "beforeEach", "afterAll", "afterEach"]) {
 // the log ("RETRY ERRORS"), and the job's summary counts them, so a test that
 // needs its second try is seen and mended. Locally a failure is a failure.
 if (process.env.CI) {
+  // eslint-disable-next-line no-undef -- jest's own object, given to every setup file
   jest.retryTimes(1, { logErrorsBeforeRetry: true })
 }

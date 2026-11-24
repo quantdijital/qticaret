@@ -5,7 +5,11 @@
 # group only the packages the push can reach run (scripts/ci-changes.sh).
 set -euo pipefail
 
-group="$1"
+# "backend 2/3": the backend's tests are many (760 files, one at a time for
+# the Redis they share), so they are cut into shards, a job each
+group="${1%% *}"
+shard=""
+[ "$1" != "$group" ] && shard="${1#* }"
 filter="${TURBO_FILTER:-}"
 
 # shellcheck disable=SC2086
@@ -46,7 +50,11 @@ if [ "${#args[@]}" -eq 0 ]; then
   echo "ci-unit: nothing of '$group' is touched by this push"
   exit 0
 fi
-echo "ci-unit: $group -> ${args[*]}"
+echo "ci-unit: $group${shard:+ (shard $shard)} -> ${args[*]}"
 # One package's tests at a time: side by side they starved the UI suites
 # past their per-test timeout on a four-core runner
-pnpm turbo run test --continue --concurrency=1 "${args[@]}"
+if [ -n "$shard" ]; then
+  pnpm turbo run test --continue --concurrency=1 "${args[@]}" -- "--shard=$shard"
+else
+  pnpm turbo run test --continue --concurrency=1 "${args[@]}"
+fi

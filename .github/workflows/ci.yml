@@ -136,7 +136,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [backend, panel, storefront, packages]
+        group: ["backend 1/3", "backend 2/3", "backend 3/3", panel, storefront, packages]
     # The rate limiter's Redis counters (an atomic Lua script) are tested
     # against a real Redis; the same pinned image as local dev
     services:
@@ -202,7 +202,7 @@ jobs:
       # Product videos (adr/0069): the backend's unit tests run the real ffprobe
       # on clips ffmpeg makes in the test; without it they skip and say so
       - uses: ./.github/actions/ffmpeg
-        if: matrix.group == 'backend'
+        if: startsWith(matrix.group, 'backend')
       - name: Run the group's tests
         env:
           TURBO_FILTER: ${{ needs.changes.outputs.filter }}
@@ -221,13 +221,13 @@ jobs:
     timeout-minutes: 40
     # Each HTTP spec file boots Medusa (~20 s) on a database and a Redis
     # namespace of its own, so files run side by side: three jest workers on
-    # a runner's four cores, six shards of ~66 files (adr/0081; before, twelve
+    # a runner's four cores, eight shards of ~50 files (adr/0081; before, twelve
     # shards of one worker each left three cores idle and filled the
     # account's twenty job slots)
     strategy:
       fail-fast: false
       matrix:
-        suite: ["HTTP 1/6", "HTTP 2/6", "HTTP 3/6", "HTTP 4/6", "HTTP 5/6", "HTTP 6/6", "modules"]
+        suite: ["HTTP 1/8", "HTTP 2/8", "HTTP 3/8", "HTTP 4/8", "HTTP 5/8", "HTTP 6/8", "HTTP 7/8", "HTTP 8/8", "modules"]
     services:
       postgres:
         image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
