@@ -358,7 +358,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
       // The menu is longer than a short window: it scrolls up and down by design (e2e/support/scroll.ts)
       data-scroll-area="y"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        "flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto group-data-[collapsible=icon]:overflow-hidden",
         className
       )}
       {...props}

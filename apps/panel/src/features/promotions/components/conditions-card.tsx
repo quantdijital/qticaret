@@ -37,7 +37,7 @@ function CollectionList({
     <ul
       // The shop's collections can be many: they scroll in a box of fixed height (e2e/support/scroll.ts)
       data-scroll-area="y"
-      className="relative flex max-h-72 flex-col gap-0.5 overflow-y-auto rounded-md border p-1.5"
+      className="relative flex max-h-72 flex-col gap-0.5 overflow-x-hidden overflow-y-auto rounded-md border p-1.5"
     >
       {rows.map((collection) => (
         <li key={collection.id}>

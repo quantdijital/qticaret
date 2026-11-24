@@ -101,7 +101,7 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
             <div
               tabIndex={0}
               data-scroll-area="y"
-              className="flex max-h-[40vh] flex-col gap-2 overflow-y-auto rounded-md border bg-muted/40 px-3 py-2 text-sm break-words focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="flex max-h-[40vh] flex-col gap-2 overflow-x-hidden overflow-y-auto rounded-md border bg-muted/40 px-3 py-2 text-sm break-words focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               {several ? (
                 <AiCandidates
