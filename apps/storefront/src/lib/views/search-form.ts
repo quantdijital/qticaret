@@ -7,6 +7,7 @@ import type {
 } from "@qticaret/ui"
 import { DATED_PARAMS, DAY_FIELDS, MAX_PAX, NO_DATED, monthWords } from "./dated-search"
 import type { DatedState } from "./dated-search"
+import { calendarView } from "./search-calendar"
 
 /** Where the box sends its search. */
 export const SEARCH_FORM_ACTION = "/arama"
@@ -72,6 +73,7 @@ function datesOf(source: SearchFormSource, dated: DatedState, t: Translate) {
       // A form takes one month; a search of several shows its first
       value: dated.range ? "" : listed(options, dated.months?.split(",")[0]),
     },
+    calendar: calendarView(t),
   }
 }
 
