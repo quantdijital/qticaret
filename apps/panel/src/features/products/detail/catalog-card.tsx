@@ -14,6 +14,7 @@ import { BOOKING_FLAG } from "@/features/products/api/booking"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
 import type { ProductCatalog } from "@/features/products/api/product-edit"
 import { useFeature } from "@/features/settings/api/features"
+import { manualBadgesOn, productBadgesQuery } from "@/features/settings/api/product-badges"
 import { errorText } from "@/lib/errors"
 import { bookingFailureText } from "@/features/products/booking/booking-failure"
 import { BookingOffConfirm } from "@/features/products/booking/booking-off-confirm"
@@ -31,6 +32,7 @@ const catalogValuesOf = (catalog: ProductCatalog): CatalogValues => ({
   restriction: catalog.restriction,
   is_gift_card: catalog.is_gift_card,
   booking: catalog.booking_mode === "departure",
+  badge: catalog.badge ?? "",
 })
 
 /**
@@ -89,6 +91,7 @@ function CatalogDialog({
         ...(dirtyFields.restriction ? { restriction: values.restriction } : {}),
         ...(dirtyFields.is_gift_card ? { is_gift_card: values.is_gift_card } : {}),
         ...(bookingMode ? { booking_mode: bookingMode } : {}),
+        ...(dirtyFields.badge ? { badge: values.badge.trim() || null } : {}),
       },
       {
         onSuccess: () => {
@@ -184,6 +187,7 @@ function catalogRows(t: TFunction, catalog: ProductCatalog, shown: CatalogShown)
     ...(catalog.booking_mode === "departure"
       ? [{ label: t("products.booking.mode.label"), value: t("products.side.yes") }]
       : []),
+    ...(catalog.badge ? [{ label: t("products.catalog.badge"), value: catalog.badge }] : []),
     {
       label: t("products.side.withdrawal"),
       value: t(
@@ -217,6 +221,7 @@ export function CatalogCard({
     giftCards: useFeature(GIFT_CARDS_FLAG),
     booking: useFeature(BOOKING_FLAG),
   }
+  const badges = useQuery(productBadgesQuery())
   if (!catalog.data) {
     return <Skeleton className="h-44 w-full rounded-lg" />
   }
@@ -226,6 +231,7 @@ export function CatalogCard({
     restricted: flags.restricted || catalog.data.restriction !== null,
     giftCard: flags.giftCards || catalog.data.is_gift_card,
     booking: flags.booking || (catalog.data.booking_mode ?? "none") !== "none",
+    badge: manualBadgesOn(badges.data) || !!catalog.data.badge,
   }
   return (
     <SideCard

@@ -13,6 +13,7 @@ import { ADDONS_FLAG } from "@/features/products/api/addons"
 import { useFeatureState } from "@/features/settings/api/features"
 import { AddonTemplatesSection } from "@/features/products/addon-templates/addon-templates-section"
 import { TemplateDialog } from "@/features/attributes/components/template-dialog"
+import { ProductBadgesCard } from "@/features/settings/components/product-badges-card"
 import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
 
@@ -114,6 +115,8 @@ export function AttributesPage() {
       </section>
       {/* adr/0052 Ek 2026-11-23: add-ons defined once, beside the attribute templates */}
       <AddonTemplatesSection />
+      {/* The small badge on a product card's photo, each kind on its own switch */}
+      <ProductBadgesCard />
       {walk.open ? (
         <TemplateDialog
           template={walk.open}

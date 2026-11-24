@@ -64,7 +64,8 @@ export const ratingBadged = (product: ProductCardView): boolean =>
   (!!product.look?.ratingBadge || textOver(product))
 
 /**
- * The pills on a card's photo: the stars' average when the shop puts them
+ * The pills on a card's photo: the shop's badge ("Sınırlı", "Çok satan",
+ * "Yeni") when it has one on, the stars' average when the shop puts them
  * there ("★ 4,8", the reader hears the rating's whole sentence), a
  * discount ("%30", the reader hears "%30 indirim"), then "Tükendi" or "Az
  * kaldı" (a stock bucket, never a number); each as the shop shows it.
@@ -74,8 +75,18 @@ export function CardBadges({ product, t }: { product: ProductCardView; t: Transl
   const discount = badges.sale ? (product.price?.discount ?? null) : null
   const out = isOut(product)
   const rating = ratingBadged(product) ? product.rating : null
+  const badge = product.badge ?? null
   return (
     <ul className="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
+      {/* The shop's badge first, the stars' pill beside it: the row wraps, they never overlap */}
+      {badge && (
+        <li
+          data-badge={badge.kind}
+          className="max-w-full truncate rounded-pill bg-signal px-2 py-1 text-signal-ink"
+        >
+          {badge.text}
+        </li>
+      )}
       {rating && (
         <li className="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
           <Star className="size-3.5 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
