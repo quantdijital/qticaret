@@ -91,6 +91,23 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
   "brands.name_taken": "Bu adla bir marka zaten var.",
   "brands.unknown": "Marka bulunamadı.",
+  "popups.unknown": "Pop-up bulunamadı.",
+  "popups.text_invalid":
+    "Metin çok uzun ya da kullanılamayan karakterler içeriyor (düz metin; açıklama en çok 500 karakter ve 8 satır).",
+  "popups.link_invalid": "Bağlantı mağazada bir yol (/ ile başlar) ya da https adresi olmalı.",
+  "popups.promotion_required": "Kampanya pop-up'ı için bir indirim seçin.",
+  "popups.promotion_not_allowed": "İndirim yalnız kampanya pop-up'ına bağlanır.",
+  "popups.promotion_unknown": "Seçilen indirim bulunamadı.",
+  "popups.button_incomplete":
+    "Düğme için hem yazı hem bağlantı girin ya da ikisini de boş bırakın.",
+  "popups.button_link_not_allowed": "Bülten pop-up'ının düğmesi formu gönderir; bağlantı almaz.",
+  "popups.pages_required": "Pop-up'ın görüneceği en az bir sayfa türü seçin.",
+  "popups.trigger_value_invalid":
+    "Gecikme 0 ile 120 saniye, kaydırma oranı yüzde 1 ile 100 arasında olmalı.",
+  "popups.frequency_days_required": "Kaç günde bir gösterileceğini girin (1–365).",
+  "popups.dates_invalid": "Bitiş tarihi başlangıçtan sonra olmalı.",
+  "popups.image_unknown":
+    "Görsel medya kütüphanesinden seçilmeli: kütüphanedeki bir görsel olmalı.",
   "bulk_edit.addon_template_unknown": "Seçilen ek seçenek şablonu bulunamadı.",
   "bulk_edit.alt_not_filled": "Bazı görsellerin alt metni yazılamadı; ürün sayfasından ekleyin.",
   "bulk_edit.category_unknown": "Seçilen kategori bulunamadı.",

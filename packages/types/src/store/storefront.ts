@@ -275,12 +275,15 @@ export interface StorefrontAnswer {
    * need it drawn only while on (adr/0077 §8); absent from a backend before it.
    * `collections`: product collections (`catalog.collections`), on by default;
    * `false` only when the shop turned them off (absent: on).
+   * `popups`: storefront pop-ups (`marketing.popups`, adr/0080), on by
+   * default; `GET /store/popups` is read only while on (absent: off).
    */
   features?: {
     gift_cards: boolean
     product_addons: boolean
     booking?: boolean
     collections?: boolean
+    popups?: boolean
   }
   /**
    * The footer's ways to pay and carriers (adr/0046 Ek 2026-11-04), derived
