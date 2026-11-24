@@ -64,10 +64,14 @@ medusaIntegrationTestRunner({
     const url = () => `/admin/products/${productId}/videos`
     const record = async (id: string): Promise<MediaVideoRecord | undefined> =>
       (await media().listMediaVideos({ id }))[0]
+    // Done: the job writes "ready" first and drops the source after it, so a
+    // ready clip has settled once its source is gone too; a failed one keeps
+    // its source for a retry
     const settled = (id: string) =>
       until(
         () => record(id),
-        (video) => video?.status === "ready" || video?.status === "failed"
+        (video) =>
+          (video?.status === "ready" && video.source_file_id === null) || video?.status === "failed"
       )
 
     const upload = async (content: Buffer, name = "IMG_0042.MOV") => {
