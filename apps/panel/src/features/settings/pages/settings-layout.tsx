@@ -142,6 +142,8 @@ export function SettingsLayout() {
       <nav
         ref={menu}
         aria-label={t("settings.title")}
+        // On lg+ the menu is sticky and scrolls on its own when the window is short (docs/18 §2)
+        data-scroll-area="y"
         // A ring of room inside its edge, so a keyboard focus outline is not cut off
         className={cn(
           "lg:sticky lg:top-[calc(var(--layout-topbar-height)+var(--page-padding-wide)-0.25rem)] lg:-m-1 lg:w-[calc(15rem+0.5rem)] lg:shrink-0 lg:self-start lg:p-1",

@@ -43,7 +43,7 @@ function Decision({ row }: { row: OldAddress }) {
   const changed =
     decision !== row.decision || (decision === "redirect" && target !== (row.target ?? ""))
   return (
-    <div className="flex min-w-[16rem] flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <Select
         value={decision}
         onValueChange={(next) => {
@@ -93,12 +93,19 @@ function Decision({ row }: { row: OldAddress }) {
   )
 }
 
-/** One old address: its clicks, what it answers today, what an apply does, and the owner's word. */
+/**
+ * One old address: its clicks, what it answers today, what an apply does,
+ * and the owner's word. The address column takes what the others leave
+ * and truncates, so the table fits its card; in a card narrower than
+ * 48rem (a phone, a tablet, the settings page on a small laptop) the row
+ * is a block (the address on top, the rest wrapped under it) rather than
+ * a table that scrolls sideways.
+ */
 export function AddressRow({ row }: { row: OldAddress }) {
   const { t } = useTranslation()
   return (
-    <tr className="border-t align-middle">
-      <td className="max-w-[22rem] px-3 py-2">
+    <tr className="border-t align-middle @max-3xl:flex @max-3xl:flex-wrap @max-3xl:items-center @max-3xl:gap-2 @max-3xl:px-3 @max-3xl:py-3">
+      <td className="w-full max-w-0 px-3 py-2 @max-3xl:max-w-full @max-3xl:basis-full @max-3xl:p-0">
         <span className="block truncate font-mono text-[13px]" title={row.address}>
           {row.address}
         </span>
@@ -106,14 +113,19 @@ export function AddressRow({ row }: { row: OldAddress }) {
           <span className="block truncate text-[12px] text-muted-foreground">→ {row.location}</span>
         ) : null}
       </td>
-      <td className="px-3 py-2 text-right tabular-nums">{formatCount(row.clicks ?? 0)}</td>
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 text-right tabular-nums @max-3xl:p-0 @max-3xl:text-[13px] @max-3xl:text-muted-foreground">
+        <span className="@3xl:hidden">{t(`${A}.columns.clicks`)}: </span>
+        {formatCount(row.clicks ?? 0)}
+      </td>
+      <td className="px-3 py-2 @max-3xl:p-0">
         <StatusBadge tone={STATE_TONES[row.state]}>{t(`${A}.states.${row.state}`)}</StatusBadge>
       </td>
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 @max-3xl:p-0">
         <StatusBadge tone={ACTION_TONES[row.action]}>{t(`${A}.actions.${row.action}`)}</StatusBadge>
       </td>
-      <td className="px-3 py-2">{row.action === "covered" ? null : <Decision row={row} />}</td>
+      <td className="px-3 py-2 @max-3xl:basis-full @max-3xl:p-0 @max-3xl:empty:hidden">
+        {row.action === "covered" ? null : <Decision row={row} />}
+      </td>
     </tr>
   )
 }

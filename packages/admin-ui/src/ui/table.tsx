@@ -36,6 +36,8 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     <div
       ref={box}
       data-slot="table-container"
+      // A wide table scrolls sideways on a narrow screen by design (e2e/support/scroll.ts)
+      data-scroll-area="x"
       className="relative w-full overflow-x-auto"
       {...(scrolls ? { tabIndex: 0 } : {})}
     >

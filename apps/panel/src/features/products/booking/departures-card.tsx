@@ -108,7 +108,7 @@ function Departures({ productId, variants }: { productId: string; variants: Vari
         ) : null}
         {slots.isSuccess && list.length === 0 ? <EmptyState text={t(`${B}.empty`)} /> : null}
         {list.length > 0 ? (
-          <div className="overflow-x-auto rounded-md border">
+          <div data-scroll-area="x" className="overflow-x-auto rounded-md border">
             <SlotTable
               slots={list}
               zone={zone}
