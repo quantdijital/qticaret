@@ -6,7 +6,10 @@ import { resolveLinks } from "./menu-links"
 import type { StoredLink } from "./menu-links"
 
 /** Where a rail or a related rail takes its products from. */
-type AnySource = Extract<BodySection, { type: "products" | "related_products" }>["source"]
+type AnySource = Extract<
+  BodySection,
+  { type: "products" | "related_products" | "departures" }
+>["source"]
 
 /**
  * Keeps a group's sections with only the records live now; `live` asks of
@@ -73,6 +76,11 @@ export async function liveRecords(
         if (each.source.kind !== "custom") want(each.source.kind, each.source.target)
     } else if (section.type === "price_bands") {
       for (const band of section.bands) if (band.category_id) want("category", band.category_id)
+    } else if (section.type === "departures") {
+      // Upcoming departures' category or collection (adr/0077 §10)
+      const { source } = section
+      if (source.kind === "category") want("category", source.category_id)
+      if (source.kind === "collection") want("collection", source.collection_id)
     } else if (section.type === "products" || section.type === "related_products") {
       const sources =
         section.type === "products"
@@ -154,6 +162,11 @@ export async function liveRecords(
       return ids.length > 0 ? [{ ...section, brand_ids: ids }] : []
     }
     if (section.type === "related_products") {
+      const source = liveSource(section.source)
+      return source ? [{ ...section, source }] : []
+    }
+    // Departures whose category or collection is gone: none of its tours shown under it
+    if (section.type === "departures") {
       const source = liveSource(section.source)
       return source ? [{ ...section, source }] : []
     }

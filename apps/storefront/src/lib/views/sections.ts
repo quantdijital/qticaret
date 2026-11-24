@@ -36,6 +36,7 @@ import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
 import { collageView, statsView, stepsView } from "./points"
 import { searchBoxParts } from "./natural-search-on"
+import { departuresView } from "./departures"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
 
@@ -204,6 +205,8 @@ async function sectionView(
       return collageView(section, t)
     case "steps":
       return stepsView(section, t)
+    case "departures":
+      return departuresView(section, t)
     case "search_box":
       // The shop's one search box, its fields the theme's (adr/0077 §1); its hint while sentences are read (§7)
       return {

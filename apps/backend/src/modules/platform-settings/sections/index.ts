@@ -15,6 +15,7 @@ import { marketingSection } from "./marketing"
 import { notificationsSection } from "./notifications"
 import { paymentLinksSection } from "./payment-links"
 import { paymentsSection } from "./payments"
+import { productBadgesSection } from "./product-badges"
 import { promotionsSection } from "./promotions"
 import { returnsSection } from "./returns"
 import { complianceSection } from "./compliance"
@@ -42,6 +43,7 @@ export type { MarketingSettings } from "./marketing"
 export type { NotificationSettings } from "./notifications"
 export type { PaymentLinkSettings } from "./payment-links"
 export type { PaymentSettings } from "./payments"
+export type { ProductBadgeSettings } from "./product-badges"
 export type { PromotionSettings } from "./promotions"
 export type { ReturnsSettings } from "./returns"
 export type { ComplianceSettings } from "./compliance"
@@ -88,6 +90,7 @@ export const SECTIONS = {
   ai_guidance: aiGuidanceSection,
   catalog: catalogSection,
   booking: bookingFlowSection,
+  product_badges: productBadgesSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

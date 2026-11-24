@@ -20,6 +20,7 @@ import { StatsForm } from "./forms/stats-form"
 import { StepsForm } from "./forms/steps-form"
 import { SearchBoxForm } from "./forms/search-box-form"
 import { CollageForm } from "./forms/collage-form"
+import { DeparturesForm } from "./forms/departures-form"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { TrustBadgeList } from "./shared/trust-badge-list"
 import { NamedGroup } from "./named-group"
@@ -84,6 +85,8 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
       return <SearchBoxForm section={section} {...props} />
     case "photo_collage":
       return <CollageForm section={section} {...props} />
+    case "departures":
+      return <DeparturesForm section={section} {...props} />
     case "categories":
       return <CategoriesForm section={section} {...props} />
     case "products":
