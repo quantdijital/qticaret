@@ -15,6 +15,7 @@ import { cardLook } from "./card-look"
 import { cardShown } from "./card-shown"
 import { productImages, variantImages } from "./image"
 import { cardPrice, isAvailable, isVatExclusive, shownAmount, variantPrice } from "./price"
+import { isShipped } from "./product-shipping"
 import { productVideos } from "./product-videos"
 import { specGroupsOf, specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
@@ -225,6 +226,8 @@ export function productPage({
     specGroups: specGroupsOf(product.attribute_values, t),
     trustBadges,
     withdrawalNote: withdrawalNoteOf(product, t),
+    // Not shipped: the page's own headings are neutral ones (a physical product's view as before)
+    ...(isShipped(product) ? {} : { unshipped: true }),
   }
 }
 

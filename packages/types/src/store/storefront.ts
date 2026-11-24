@@ -8,6 +8,7 @@ import type { ListingTextSettings } from "./listing-text.js"
 import type { SearchFormSettings } from "./search-form.js"
 import type { CardVariant } from "./section-variants.js"
 import type { StyleKit } from "./style-kit.js"
+import type { TurnstilePublic } from "./turnstile.js"
 
 export type TrustIcon =
   "truck" | "clock" | "shield" | "card" | "refresh" | "award" | "gift" | "phone"
@@ -275,18 +276,23 @@ export interface StorefrontAnswer {
    * need it drawn only while on (adr/0077 §8); absent from a backend before it.
    * `collections`: product collections (`catalog.collections`), on by default;
    * `false` only when the shop turned them off (absent: on).
+   * `popups`: storefront pop-ups (`marketing.popups`, adr/0080), on by
+   * default; `GET /store/popups` is read only while on (absent: off).
    */
   features?: {
     gift_cards: boolean
     product_addons: boolean
     booking?: boolean
     collections?: boolean
+    popups?: boolean
   }
   /**
    * The footer's ways to pay and carriers (adr/0046 Ek 2026-11-04), derived
    * from what the shop set up; absent from a backend before it: none.
    */
   marks?: { payments: StorePaymentMark[]; carriers: StoreCarrierMark[] }
+  /** Turnstile's public site key for the risky forms (adr/0044 Ek 2026-11-24); absent from a backend before it. */
+  turnstile?: TurnstilePublic
 }
 
 /** Working days, the shorter first. */
@@ -351,11 +357,26 @@ export interface StoreContentTerm {
   path: string
 }
 
-/** `GET /store/content/terms?kind=`: a category or tag with live posts, in the shop's order. */
+/**
+ * `GET /store/content/terms?kind=`: a category or tag with live posts, in
+ * the shop's order. Its text is its archive's own read
+ * (`StoreContentTermDescription`, adr/0075 Ek 2026-11-24).
+ */
 export interface StoreContentTermSummary extends StoreContentTerm {
   kind: "category" | "tag"
-  description: string | null
   post_count: number
+}
+
+/**
+ * `GET /store/content/terms/:id/description` (adr/0075 Ek 2026-11-24): a
+ * listed blog category's or tag's text for the foot of its archive: as
+ * the shop formatted it, rendered on the server (null: none, or stale),
+ * and its plain text, shown without the HTML.
+ */
+export interface StoreContentTermDescription {
+  term_id: string
+  description: string | null
+  description_html: string | null
 }
 
 /** A blog author's link on a network or the web: the person's own profile (`sameAs`). */

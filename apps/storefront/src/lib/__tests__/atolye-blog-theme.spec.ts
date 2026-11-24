@@ -86,6 +86,40 @@ describe("the theme's blog list", () => {
     expect(html).toContain("Bu başlıkta henüz yazı yok.")
   })
 
+  it("draws an archive's own words at its foot, after the posts and the pages, as a listing's (adr/0075 Ek 2026-11-24)", () => {
+    const html = renderPage(atolyeTheme, "BlogIndexPage", {
+      view: blog({
+        title: "Çelikler",
+        pagination: {
+          page: 1,
+          pages: 2,
+          previous: null,
+          next: "/blog/kategori/celikler?sayfa=2",
+          pagePath: { 1: "/blog/kategori/celikler", 2: "/blog/kategori/celikler?sayfa=2" },
+        },
+        activeTerm: { kind: "category", name: "Çelikler", description: [] },
+        footText: {
+          html: `<h2>Çelik seçimi</h2><p>${"Sertlik ve tokluk dengesi. ".repeat(30)}</p>`,
+          paragraphs: [],
+          look: { size: "md", align: "start", width: "narrow", collapse: true },
+        },
+      }),
+    })
+    const text = html.indexOf("data-listing-text")
+    // After the last post and the pages, never in the head
+    expect(text).toBeGreaterThan(html.lastIndexOf("<article"))
+    expect(text).toBeGreaterThan(html.indexOf('rel="next"'))
+    expect(html.indexOf("<h2>Çelik seçimi</h2>")).toBeGreaterThan(text)
+    // One h1, the title; the long text folds behind "Devamını oku", every word in the HTML
+    expect(html.match(/<h1/g)).toHaveLength(1)
+    expect(html).toContain("Devamını oku")
+    expect(html).toContain("max-w-[46rem]")
+    // Inside the page's own container: no second gutter
+    expect(html.slice(html.lastIndexOf("<div", text - 200), text)).not.toContain(
+      "px-(--gutter) pt-12"
+    )
+  })
+
   it("puts two or four posts half wide under the lead so the rows of three come out full", () => {
     const pairOf = (count: number) => {
       const html = renderPage(atolyeTheme, "BlogIndexPage", {

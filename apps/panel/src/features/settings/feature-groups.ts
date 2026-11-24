@@ -18,7 +18,7 @@ export const FEATURE_GROUPS = [
       "catalog.product_videos",
     ],
   },
-  { id: "customers", keys: ["customers.wholesale", "marketing.campaigns"] },
+  { id: "customers", keys: ["customers.wholesale", "marketing.campaigns", "marketing.popups"] },
   { id: "seo", keys: ["seo.publish_gate", "seo.indexnow"] },
   {
     id: "sales",

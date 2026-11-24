@@ -4,13 +4,14 @@ import type { BlogIndexPageView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { JsonLd } from "@/lib/seo/JsonLd"
-import { blogAuthor, blogPosts, blogTerms } from "@/lib/store-api/blog"
+import { blogAuthor, blogPosts, blogTermDescription, blogTerms } from "@/lib/store-api/blog"
 import { siteSeo } from "@/lib/store-api/requests"
 import { authorView } from "@/lib/views/authors"
 import { blogPageOf, blogPagination, blogTermBar } from "@/lib/views/blog"
 import { postCards } from "@/lib/views/posts"
+import { listingTextView } from "@/lib/views/listing-text"
 import { breadcrumbsOf } from "@/lib/views/product"
-import { paragraphsOf } from "@/lib/views/text"
+import { currentTheme } from "@/lib/views/theme-settings"
 import { theme } from "@/theme"
 import type { Query } from "./shop"
 
@@ -84,17 +85,27 @@ const NONE: Posts = { entries: [], count: 0 }
 /**
  * A blog category's or tag's archive (`/blog/kategori/{handle}`,
  * `/blog/etiket/{handle}`, adr/0019 ek 2026-11-03): its live posts as the
- * blog lists them, its own words on the first page. Resolve found it; its
- * title, robots (noindex while it has no live post) and JSON-LD are the
- * backend's.
+ * blog lists them, its own words at the foot of the first page, after the
+ * posts, as a product category's (adr/0075 Ek 2026-11-24: formatted as the
+ * shop wrote them, in the theme's "Liste metni" look, folded behind
+ * "Devamını oku"). Resolve found it; its title, robots (noindex while it
+ * has no live post) and JSON-LD are the backend's.
  */
 export async function BlogArchiveScreen({ page, url }: { page: Entity; url: URL }) {
   const kind = page.entity_type === "post_tag" ? "tag" : "category"
-  const [terms, categories] = await Promise.all([blogTerms(kind), blogTerms("category")])
+  const asked = url.searchParams.getAll("sayfa")
+  const raw = asked.length > 1 ? asked : asked[0]
+  // The formatted text is read beside the lists, only for the first page, where it is drawn
+  const first = blogPageOf(raw) === 1
+  const [terms, categories, text, settings] = await Promise.all([
+    blogTerms(kind),
+    blogTerms("category"),
+    first ? blogTermDescription(page.entity_id) : null,
+    currentTheme(),
+  ])
   // Only a term with live posts is listed; one without has none to show
   const term = terms.find((each) => each.id === page.entity_id) ?? null
-  const asked = url.searchParams.getAll("sayfa")
-  const list = await blogList(url.pathname, asked.length > 1 ? asked : asked[0], (offset, limit) =>
+  const list = await blogList(url.pathname, raw, (offset, limit) =>
     term ? blogPosts(offset, limit, kind, term.handle) : Promise.resolve(NONE)
   )
   const name = term?.name ?? page.seo?.breadcrumbs.at(-1)?.name ?? ""
@@ -108,11 +119,15 @@ export async function BlogArchiveScreen({ page, url }: { page: Entity; url: URL 
           breadcrumbs: breadcrumbsOf(page.seo, t("home.label"), name),
           ...list,
           terms: blogTermBar(categories, url.pathname, t),
-          activeTerm: {
-            kind,
-            name,
-            description: list.pagination.page === 1 ? paragraphsOf(term?.description) : [],
-          },
+          // Its words at the foot now (adr/0075 Ek 2026-11-24), none under the title
+          activeTerm: { kind, name, description: [] },
+          footText: term
+            ? listingTextView(
+                { html: text?.description_html, plain: text?.description },
+                settings.listing_text,
+                list.pagination.page
+              )
+            : null,
         }}
       />
     </>

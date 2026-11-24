@@ -1,0 +1,27 @@
+# ffmpeg and ffprobe (product videos, adr/0069) from packages kept in the
+# Actions cache. Before 2026-11-24 every job fetched them from the Ubuntu
+# mirror, which on some runners took 16 minutes for 63 MB (adr/0081).
+name: ffmpeg
+description: Install ffmpeg from cached packages; the mirror only on a miss
+runs:
+  using: composite
+  steps:
+    - id: image
+      shell: bash
+      run: echo "version=${ImageVersion:-none}" >> "$GITHUB_OUTPUT"
+    # A new runner image has other library versions: its packages are kept apart
+    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      id: debs
+      with:
+        path: ~/.cache/qt-debs/ffmpeg
+        key: debs-ffmpeg-${{ runner.os }}-${{ runner.arch }}-${{ steps.image.outputs.version }}
+    - shell: bash
+      run: bash scripts/ci-debs.sh ffmpeg ffmpeg
+    # Saved here, straight after the mirror's packages arrived and before the
+    # job builds or tests anything: nothing the repository's code runs can
+    # put a package of its own in the cache every later job installs as root
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: steps.debs.outputs.cache-hit != 'true'
+      with:
+        path: ~/.cache/qt-debs/ffmpeg
+        key: debs-ffmpeg-${{ runner.os }}-${{ runner.arch }}-${{ steps.image.outputs.version }}

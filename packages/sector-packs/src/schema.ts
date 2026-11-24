@@ -48,13 +48,17 @@ export const attributeTemplateSchema = z.looseObject({
 
 /**
  * A suggested category: made hidden from the storefront (a category is shown
- * with its image), under its parent, which comes earlier in the list.
+ * with its image), under its parent, which comes earlier in the list. One
+ * marked `visible` is made shown: the pack's own storefront presets lean on
+ * it (a tour shop's tour types as its search tabs and its category row),
+ * and the shop hides it again from the panel as any other.
  */
 export const categorySchema = z.strictObject({
   handle,
   name: z.string().trim().min(1).max(100),
   parent: handle.optional(),
   description: z.string().trim().min(1).max(1000).optional(),
+  visible: z.boolean().optional(),
 })
 
 /** A shop-owned flag's starting value (adr/0012 `owner: tenant`); the backend's registry checks it. */

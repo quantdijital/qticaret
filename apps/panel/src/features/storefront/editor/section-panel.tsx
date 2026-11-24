@@ -248,8 +248,6 @@ export function SectionPanel({
 }
 
 // The sections whose content group would be empty: the header's stand in their own groups,
-// the main sections' variant and look are elsewhere
+// the category grid's variant and look are elsewhere
 const hasContent = (section: AnySection) =>
-  section.type !== "product_main" &&
-  section.type !== "category_main" &&
-  section.type !== "header_bar"
+  section.type !== "category_main" && section.type !== "header_bar"

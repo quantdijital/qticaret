@@ -84,6 +84,20 @@ describe("productPage", () => {
     ])
   })
 
+  it("marks a product that is not shipped, for its page's neutral headings; a shipped one as before", () => {
+    expect(page(null)).not.toHaveProperty("unshipped")
+    const service = productPage({
+      product: { ...product, product_extension: { kind: "service" } },
+      seo: null,
+      displays: {},
+      brandPath: null,
+      requestedVariant: null,
+      t,
+      trustBadges: [],
+    })
+    expect(service.unshipped).toBe(true)
+  })
+
   it("chooses ?variant= when it exists, else the first variant in stock", () => {
     expect(page("variant_s").selectedVariantId).toBe("variant_s")
     expect(page(null).selectedVariantId).toBe("variant_m")

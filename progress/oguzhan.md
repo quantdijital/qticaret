@@ -2,6 +2,29 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-24: adr/0077 §5 Ek, tarihli fiyat sırası
+
+- **Dal:** `oguzhan/tarihli-fiyat-sirasi`. `tarih`/`ay` varken fiyat sıralaması, fiyat süzgeci ve fiyat aralığı eşleşen ürünlerin aralıktaki en düşük kart fiyatıyla (`bookingCardFacts` ortak; `listing-dated-prices.ts`, sabit 4 okuma, 30 sn önbellek). Dizin sorgusuna `price.by_product` jsonb; tarih yokken sorgu birebir eski. Testler: birim (sorgu, okuma sayısı), HTTP `dated-price-sort.spec.ts` (CI). ADR §5 Ek, "Bilinen sınır" kapandı.
+## 2026-11-24: hazır görünüm boşlukları, handle ile kategori ikonu ve her üst bilgide eylem düğmesi
+
+- **Dal:** `oguzhan/ikon-ve-ust-dugme`. `categories`/`icons`'a `category_icons_by_handle` (kimlik > handle > görsel > baş harf); `highlight_link` (katalogdaki eylem düğmesi) `standard` ve `centered` üst bilgide de; panelde "Eylem düğmesi". Kilitli görünümlerin HTML'i ve stil özeti aynı. adr/0077 dalga 7 Ek.
+- **Sıradaki işler:** #312 birleşince Vadi'ye kategori ikonları (handle ile), Patika'ya üst bilgi düğmesi.
+## 2026-11-24: tur görünümleri ekran denetimi düzeltmeleri (#312)
+
+- **Dal:** `oguzhan/seyahat-paketi-v2` (`dev` birleştirildi). Kargolanmayan üründe kargo/teslimat/iade vaadi yok (`promisesFor`, ücretsiz kargo satırı da); kapakta yandaki görsel taşan kartların başladığı yerde biter, güven kutusu varken arama kutusu aynı genişlikte; arama kutusu telefonda iki sütunlu ızgara, tarih alanları 1024 px'ten en az 10rem; ikonlu kategori sırası 4 ve altı öğede ortada; görsel üstü kartta fiyat başlığın altında; yaklaşan kalkışlar telefonda sıkı satır, Rota alt yazısı veriye uygun; bant `medium` örtüde bulut yumuşadı; tarihli sonuçta "Yalnızca stokta olanlar" yok, aramada "N sonuç"; paket kategorilerinde `visible` (travel'da dört ana tür açık); Patika/Vadi e-bülten metinleri; Ayder görselinin koyu sağ kenarı kırpıldı; tur görünümlerinde `hover_image` açık (sahip 2026-11-18).
+- **Açık:** kapak güven şeridinde tura uygun rozetler (rozetler mağazanın, adr/0063 §4; paket varsayılanı tasarım belgesine taslak/yayın yazımı ister); galeri oranı ayarı yok; kuruşsuz fiyat ayarı yok.
+
+## 2026-11-24: adr/0077 PR11, `travel` paketi v2 ve "Rota", "Vadi", "Patika"
+
+- **Dal:** `oguzhan/seyahat-paketi-v2` (#290 departures + #309 Hero full_image üstüne; taban `dev`). Paket sürüm 2: "Tur bilgileri" şablonuna seçim niteliği `gidilecek_yer` (filtrelenebilir, 9 bölge değeri; önceki sürümü almış mağazaya yalnız bu nitelik eklenir). Üç hazır görünüm (yalnız veri): Rota (tam ekran kapak + arama, popüler turlar, yaklaşan kalkışlar, koyu rakam şeridi, adımlar, yorum kaydırıcı, kolaj, koyu `brand_columns` + e-bülten, Playfair), Vadi (yanda dalgalı görsel, taşan arama ve güven kutusu, görsel üstü yazılı kart, ikonlu kategoriler, tanıtım paneli, bölünmüş bant, ikonlu rakamlar), Patika (duyuru şeridi, sola hizalı kapak + sekmeli arama, rota kartları kolajı, ikonlu "neden biz", oklu tur kartları, geniş bant, yorumlar, yazılar, iletişim sütunlu alt bilgi). Görseller Commons CC0/CC BY, atıf `preset.json` `credits`.
+- **Kilit:** yeni örnekler `travel-rota`, `travel-vadi`, `travel-patika`; kilit dükkânına `/store/departures` ve `/store/listings/products` (Nereye) yanıtları (`fixture-dated.ts`), mevcut örnekler değişmedi.
+- **Açık:** kategori ikonları hazır görünümden seçilemez (`category_icons` kimlikle anahtarlı); menüler ve önizleme görseli yok; Rota'da "ortadaki büyük kart" ve kart fiyat rozeti, Patika'da üst bilgide düğme, ürün rozeti yok.
+
+## 2026-11-24: adr/0077 PR6, arama kutusunda takvim
+
+- **Dal:** `oguzhan/takvim-arayuzu` (#288'in dalı üstüne). Vitrin ara ucu `/api/search/calendar` (parametre doğrulama, fiyat sunucuda yazılır); temada `SearchDates` + `DatePicker` (Kesin tarih aralığı en çok 62 gün, Esnek ay en çok 3, gün altında en düşük fiyat, klavye, telefonda alt sayfa). JavaScript'siz form ve sunucu HTML'i aynı; yeni CSS yok, kilit değişmedi. ADR §6 "Uygulama notu (PR6)".
+- **Sıradaki işler:** #288 birleşince bu PR'ın tabanı kendiliğinden daralır; tarayıcıda elle bakış (telefon alt sayfası, fiyat sığması).
+
 ## 2026-11-24: adr/0077 PR8, Giriş bölümüne "Tam görsel" biçimi (#309)
 
 - **Dal:** `oguzhan/kapak-tam-gorsel` (#288 `oguzhan/arama-kutusu` üstüne kurulu; taban `dev`). Hero'ya üçüncü biçim `full_image`; `standard` ve `category_list` çizimine dokunulmadı. Ayarlar (kapalı liste, ilki varsayılan): `action` (düğme / arama kutusu, #288'in tek `SearchForm`'u), `search_position` (içinde / alt kenara taşan kart), `height`, `scrim`, `align`, `image_side` (arkada / yanda), `edge` (düz / dalgalı, `hero-full.css` maskesi), `title_accent` (aynı `h1` içinde ana renkte ikinci satır), `show_trust` (ortak güven rozetleri, en çok 4, taşan beyaz kutu). İkinci düğme mevcut `links`'in ikincisi. Görsel yoksa grafit sahne (`end` de `full` gibi çizilir). Zincir: `packages/types` `section-hero-full.ts`, backend `sections/hero.ts` + `hero-full.ts`, `packages/ui` `HeroFullView`, vitrin `views/hero-full.ts`, Atölye `HeroFull.tsx` + `HeroBlock.tsx`, panel `hero-full-fields.tsx` + `hero-full-registry.ts`; adr/0077 §9 eki.

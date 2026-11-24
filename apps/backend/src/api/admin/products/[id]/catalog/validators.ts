@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { RESTRICTIONS } from "../../../../../lib/catalog"
 import { AddonsInput } from "../../../../../lib/catalog/addons"
+import { productBadgeInput } from "../../../../../lib/catalog/badge"
 import { productDescriptionDoc } from "../../../../../lib/catalog/description"
 import { productSummaryDoc } from "../../../../../lib/catalog/summary"
 import { isCleanText } from "../../../../../lib/security"
@@ -63,6 +64,8 @@ export const AdminPostProductCatalog = z
     summary_doc: productSummaryDoc.nullable().optional(),
     // adr/0076 §2: a dated product; needs kind service and catalog.booking (checked in the workflow)
     booking_mode: z.enum(PRODUCT_BOOKING_MODES).optional(),
+    // The product's own card badge ("Sınırlı"): one short line; empty or null clears it
+    badge: productBadgeInput.nullable().optional(),
     variants: z
       .record(
         id,

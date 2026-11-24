@@ -150,6 +150,33 @@ describe("the theme's home sections", () => {
     expect(html.match(/bolum-yardim/g)).toBeNull()
   })
 
+  it("draws a rich answer as the backend's HTML and a group heading among the questions", () => {
+    const plain = { question: "İade süresi?", answer: "14 gün." }
+    const before = home([{ id: "sss", type: "faq", title: null, items: [plain] }])
+    const html = home([
+      {
+        id: "sss",
+        type: "faq",
+        title: null,
+        items: [
+          { heading: "İade" },
+          plain,
+          { question: "Nasıl?", html: '<p>Bize <a href="/iletisim">yazın</a>.</p>' },
+        ],
+        settings: { open_first: "on", single_open: "off" },
+      },
+    ])
+    // A plain answer from before rich answers draws as it did
+    expect(before).toContain('<p class="max-w-[65ch] px-5 pb-5 text-text-2">14 gün.</p>')
+    expect(html).toContain(
+      '<h3 class="pt-4 text-md font-semibold text-text-2 first:pt-0">İade</h3>'
+    )
+    expect(html).toContain('<p>Bize <a href="/iletisim">yazın</a>.</p>')
+    // The first question opens, not the heading's row
+    expect(html.match(/<details[^>]* open=""/g)).toHaveLength(1)
+    expect(html.indexOf('open=""')).toBeLessThan(html.indexOf("İade süresi?"))
+  })
+
   it("lists the guides with their date, and shows the shop's campaign and story as given", () => {
     const html = home([
       {

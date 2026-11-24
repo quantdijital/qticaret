@@ -433,3 +433,7 @@ Basit yol ilkesi: her ayrıntılı çözümün aç/kapa ile seçilen basit bir a
 ## Ek 2026-11-23: arama adr/0077'de
 
 Tarihli ürünün vitrinde aranması (kategori, kesin tarih ya da esnek ay, kişi sayısı), ay takvimi, kartta aralığa göre kalkış ve fiyat, `departures` bölümü ve travel paketi v2 adr/0077'de karara bağlandı.
+
+## Ek 2026-11-24 (kart fiyatı ana kategoriden)
+
+Kartın, `departures` bölümünün, takvim gününün ve arama dizininin "…den itibaren" fiyatı yalnız **ana fiyat kategorisinden** alınır: yer tutan (`pax > 0`) kategoriler arasında mağazanın sırasında (varyant sırası `variant_rank`, yoksa okunduğu sıra) ilki; genelde yetişkin. Eskiden yer tutan bütün kategorilerin en düşüğüydü ve daha ucuz çocuk fiyatı kartta görünüyordu (yetişkin 8.900, kart 5.340). Ana kategorinin bu para biriminde fiyatı yoksa sıradaki konuşur. Kural tek yerde: `lib/booking/categories.ts` (`payingCategoryIds`) ve `workflows/booking/card-facts.ts` (`payingPricesAt`).

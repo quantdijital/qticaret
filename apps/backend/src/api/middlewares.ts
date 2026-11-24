@@ -21,6 +21,7 @@ import { AdminGetAuditLog } from "./admin/audit-log/validators"
 import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { PANEL_ROUTES } from "./admin/panel-routes"
 import { AdminPostRevealTaxId } from "./admin/customers/[id]/billing-profile/reveal/validators"
+import { MFA_OFF_LOGIN_ROUTES } from "./http/mfa-off-login"
 import { REAUTH_ROUTES } from "./http/reauth-routes"
 import { STAFF_ROUTES } from "./http/staff-routes"
 import { STAFF_ACCOUNT_ROUTES } from "./http/staff-account-routes"
@@ -46,6 +47,7 @@ import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
 import { WHOLESALE_ROUTES } from "./http/wholesale-routes"
 import { WHOLESALE_STORE_ROUTES } from "./http/wholesale-store-routes"
 import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
+import { POPUP_ROUTES } from "./http/popup-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { COLLECTION_GATES, COLLECTION_ROUTES } from "./http/collection-routes"
 import { SEARCH_ROUTES } from "./http/search-routes"
@@ -103,6 +105,7 @@ import { GIFT_CARD_SALE_ROUTES, STORE_GIFT_PRODUCT_FIELDS } from "./http/gift-ca
 import { ORDER_REFUND_ROUTES } from "./http/order-refund-routes"
 import { PAYMENT_ROUTES } from "./http/payment-routes"
 import { FRAUD_ROUTES } from "./http/fraud-routes"
+import { TURNSTILE_ROUTES } from "./http/turnstile-routes"
 import { INTEGRATION_ROUTES } from "./http/integration-routes"
 import { restrictStoreGiftCardFields } from "./http/shopper-gift-cards"
 import { PRICING_ROUTES } from "./http/pricing-routes"
@@ -202,6 +205,9 @@ export default defineMiddlewares({
         auditMutations,
       ],
     },
+    // adr/0044 Ek 2026-11-24: Cloudflare Turnstile at the risky gates, right after the
+    // rate limits: a bot is turned away before anything works for it
+    ...TURNSTILE_ROUTES,
     // `catalog.collections` off: collection writes and the Store API's collections are missing
     ...COLLECTION_GATES,
     // F3.1: handles are storefront slugs. Without `methods` this runs before
@@ -339,6 +345,8 @@ export default defineMiddlewares({
     ...STAFF_ROUTES,
     ...STAFF_ACCOUNT_ROUTES,
     ...REAUTH_ROUTES,
+    // Locally with ADMIN_MFA=off: a login with a factor set up asks no code
+    ...MFA_OFF_LOGIN_ROUTES,
     {
       matcher: "/admin/customers/:id/billing-profile/reveal",
       methods: ["POST"],
@@ -366,6 +374,8 @@ export default defineMiddlewares({
     ...WHOLESALE_STORE_ROUTES,
     // adr/0050: bulk e-mail and SMS, behind their flag
     ...CAMPAIGN_ROUTES,
+    // adr/0080: storefront pop-ups, behind their flag
+    ...POPUP_ROUTES,
     ...REVIEW_ROUTES,
     ...CONTACT_ROUTES,
     ...EMAIL_LINK_ROUTES,

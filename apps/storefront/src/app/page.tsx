@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { addToCart } from "@/app/actions/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
+import { PopupPage } from "@/components/PopupPage"
 import { t } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { metadataOf } from "@/lib/seo/metadata"
@@ -21,6 +22,7 @@ export default async function HomePage() {
     <>
       {/* A FAQ section is shown, not written as `FAQPage` data (docs/13 §5, adr/0049 Ek 2026-11-06) */}
       <JsonLd blocks={site.home.jsonLd} />
+      <PopupPage kind="home" />
       <theme.HomePage
         t={t}
         view={{ sections }}

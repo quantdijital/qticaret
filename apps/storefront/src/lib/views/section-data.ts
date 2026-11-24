@@ -92,6 +92,8 @@ export interface ProductContext {
   id: string
   /** Its categories, the first one its own (`same_category`). */
   categoryIds: readonly string[]
+  /** Not shipped (dated, service, download, gift card): the rail's own title is a neutral one. */
+  unshipped?: boolean
 }
 
 /** At most `limit` of the items, the current product's own left out. */

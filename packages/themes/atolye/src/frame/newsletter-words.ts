@@ -18,6 +18,7 @@ const NEWSLETTER_ERRORS = [
   "newsletter.consent_required",
   "newsletter.rate_limited",
   "errors.challenge_failed",
+  "errors.turnstile_failed",
 ]
 
 /** A newsletter form's words: the consent sentence as the shop wrote it, the rest the storefront's. */

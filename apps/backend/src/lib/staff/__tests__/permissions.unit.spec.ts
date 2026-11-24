@@ -660,6 +660,11 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/wholesale/accounts/:id/password": false,
   "POST /admin/wholesale/accounts/:id/prices": false,
   // adr/0050: bulk messages are written and sent by the owner and admin only
+  // adr/0080: pop-ups are marketing, as promotions: owner and admin
+  "POST /admin/popups": false,
+  "POST /admin/popups/:id": false,
+  "DELETE /admin/popups/:id": false,
+  "POST /admin/popups/:id/status": false,
   "POST /admin/bulk-messages": false,
   "POST /admin/bulk-messages/:id": false,
   "DELETE /admin/bulk-messages/:id": false,

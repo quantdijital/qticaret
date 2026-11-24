@@ -28,8 +28,9 @@ import {
   takeInvite,
 } from "@/lib/account/session"
 import { cartIdFromCookie, forgetCart } from "@/lib/cart/cookie"
+import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeCall } from "@/lib/store-api/server"
-import { challengeOf } from "@/lib/checkout/pay"
+import { gateAsk, gated, gateHeaders, underGate } from "@/lib/store-api/gate"
 
 const NONE = null
 const failed = (error: string): ChallengeResult => ({ ok: false, error, challenge: NONE })
@@ -43,10 +44,9 @@ const Challenge = z
   .optional()
   .or(z.literal("").transform(() => undefined))
 
-/** A 428's challenge for the form, or the refusal in words' key. */
+/** What the bot checks want of the form (a proof of work, Turnstile), or the refusal in words' key. */
 function answered(error: unknown, fallback: string): ChallengeResult {
-  const challenge = challengeOf(error)
-  return challenge ? { ok: false, error: NONE, challenge } : failed(accountError(error, fallback))
+  return gateAsk(error) ?? failed(accountError(error, fallback))
 }
 
 /** Signed in: the session, the open cart made the customer's, the page the shopper came for. */
@@ -82,12 +82,15 @@ export async function loginAction(
   if (!parsed.success) {
     return failed("account.login_failed")
   }
-  const { email, password, challenge, next } = parsed.data
+  const { email, password, next } = parsed.data
   let answer: Awaited<ReturnType<typeof login>>
   try {
-    answer = await login(email, password, challenge ?? null)
+    answer = await login(email, password, gateHeaders(form))
     if (answer.kind === "verify") {
-      await requestVerification(answer.token, email)
+      const asking = answer.token
+      await underGate("verification", () =>
+        requestVerification(asking, email, gateHeaders(form, "verification"))
+      )
       await rememberPending(answer.token)
     }
   } catch (error) {
@@ -140,15 +143,27 @@ export async function registerAction(
   if (input.terms === "1" && input.accept !== "on") {
     return failed("account.terms_required")
   }
+  let token: string
   try {
-    const token = await registerIdentity(input.email, input.password, input.challenge ?? null)
+    token = await registerIdentity(input.email, input.password, gateHeaders(form))
     await createCustomer(token, {
       first_name: input.first_name,
       last_name: input.last_name,
       ...(input.phone ? { phone: input.phone } : {}),
     })
-    await requestVerification(token, input.email)
+    // Kept before the code is asked: a send again after the code's own check resumes here
     await rememberPending(token)
+  } catch (error) {
+    const kept = await resumedRegistration(error)
+    if (!kept) {
+      return answered(error, "account.register_failed")
+    }
+    token = kept
+  }
+  try {
+    await underGate("verification", () =>
+      requestVerification(token, input.email, gateHeaders(form, "verification"))
+    )
     if (input.davet) {
       await rememberInvite(input.davet)
     }
@@ -157,6 +172,30 @@ export async function registerAction(
   }
   // `yeni`: the account was just made (the sign-up event, docs/20)
   redirect("/hesap/dogrula?gonderildi=1&yeni=1")
+}
+
+/**
+ * The same form sent again after its verification code's check (a
+ * Turnstile token, or its stand-in while Cloudflare cannot answer): the
+ * login and its account were made by the first send, which kept the
+ * login's key. The backend now says the address is taken; the key kept
+ * is taken up instead, so the shopper goes on to the code and is never
+ * stuck. Only a refusal for an existing address, and only with a live key
+ * this browser kept (the code request is bound to that login's own address).
+ */
+async function resumedRegistration(error: unknown): Promise<string | null> {
+  if (
+    !isStoreApiError(error) ||
+    accountError(error, "account.register_failed") !== "account.email_taken"
+  ) {
+    return null
+  }
+  const kept = await pendingToken()
+  if (!kept) {
+    return null
+  }
+  const { exp } = claimsOf(kept)
+  return exp === undefined || exp * 1000 > Date.now() ? kept : null
 }
 
 const Verify = z.object({
@@ -179,7 +218,7 @@ export async function verifyAction(
   if (!parsed.success) {
     return failed("account.code_invalid")
   }
-  const { code, email, password, challenge } = parsed.data
+  const { code, email, password } = parsed.data
   let token = await pendingToken()
   let fresh: string
   try {
@@ -187,7 +226,7 @@ export async function verifyAction(
       if (!email || !password) {
         return failed("account.login_failed")
       }
-      const answer = await login(email, password, challenge ?? null)
+      const answer = await login(email, password, gateHeaders(form))
       // Verified already (a second click on the link): nothing to confirm
       token = answer.token
       if (answer.kind === "verify") {
@@ -216,11 +255,11 @@ export async function forgotAction(
     return failed("checkout.email_invalid")
   }
   try {
-    await requestPasswordReset(parsed.data)
+    await requestPasswordReset(parsed.data, gateHeaders(form))
   } catch (error) {
     // Whether the address has an account is not told (the answer is the same)
     const result = answered(error, "account.reset_failed")
-    if (result.challenge || result.error === "errors.too_many_requests") {
+    if (result.challenge || result.turnstile || result.error === "errors.too_many_requests") {
       return result
     }
   }
@@ -283,12 +322,12 @@ export async function lookupAction(
   if (!parsed.success) {
     return failed("account.lookup_failed")
   }
-  const { display_id, email, challenge } = parsed.data
+  const { display_id, email } = parsed.data
   try {
     await storeCall("/store/order-lookup", {
       method: "POST",
       body: { display_id: Number(display_id), email },
-      ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+      ...gated(form),
     })
   } catch (error) {
     return answered(error, "account.lookup_failed")

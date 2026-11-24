@@ -3,6 +3,7 @@ import {
   PHOTO_COLLAGE_SETTINGS,
   RICH_TEXT_IMAGE_SIDES,
   STEPS_SETTINGS,
+  DEPARTURES_SETTINGS,
   STRIP_GALLERY_SETTINGS,
   newsletterHasNote,
 } from "@qticaret/types"
@@ -65,6 +66,7 @@ export type ContentField =
   | "icons_phone"
   | "collage_layout"
   | "collage_phone"
+  | "departures_layout"
   | "action"
   | "search_position"
   | "show_trust"
@@ -297,6 +299,21 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "stats":
     case "steps":
       return [...pointsFields(section), ...iconFields(section, CONTENT_IDS.content)]
+    // The count in the content; the list or cards in "Diziliş" (adr/0077 §10)
+    case "departures":
+      return [
+        { ...limit(section), term: `${E}.departures.limitTerm` },
+        {
+          ...entry(
+            section,
+            "departures_layout",
+            `${E}.departures.layout.label`,
+            DEPARTURES_SETTINGS.layout.map((step) => `${E}.departures.layout.${step}`),
+            "layout"
+          ),
+          term: `${E}.departures.layout.term`,
+        },
+      ]
     // The box's fields are the theme's (adr/0077 §1), not the section's
     case "search_box":
       return []

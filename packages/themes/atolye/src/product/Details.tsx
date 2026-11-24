@@ -56,7 +56,7 @@ export function Details({ view, t }: { view: ProductPageView; t: Translate }) {
   if (!described && groups.length === 0) {
     return card ? <div className="max-w-xl">{card}</div> : null
   }
-  const words = infoWords(t)
+  const words = infoWords(t, view.unshipped === true)
   const description = described ? (
     <ReadMore id="aciklama-metni" long={lengthOf(view) > LONG} more={words.more} less={words.less}>
       {view.descriptionHtml !== null ? (

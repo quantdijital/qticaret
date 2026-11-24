@@ -63,6 +63,13 @@ export const CATALOG_BOOKING = "catalog.booking"
  */
 export const CATALOG_COLLECTIONS = "catalog.collections"
 
+/**
+ * Storefront pop-ups (adr/0080): on by default, so the screen is there;
+ * nothing shows until the shop makes one and switches it on. Off, their
+ * routes answer 404 and the storefront shows none; the records stay.
+ */
+export const MARKETING_POPUPS = "marketing.popups"
+
 /** Orders staff make and the customer pays through a link (adr/0051). */
 export const PAYMENT_LINKS = "orders.payment_links"
 
@@ -191,6 +198,13 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.marketing_campaigns.label",
     descriptionKey: "qticaret.features.marketing_campaigns.description",
+  },
+  // adr/0080: on by default; a pop-up shows only once the shop makes one and switches it on
+  [MARKETING_POPUPS]: {
+    default: true,
+    owner: "tenant",
+    labelKey: "qticaret.features.marketing_popups.label",
+    descriptionKey: "qticaret.features.marketing_popups.description",
   },
   // adr/0051: off until the shop sells through DMs; off, no link opens and none is made
   [PAYMENT_LINKS]: {

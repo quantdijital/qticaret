@@ -10,6 +10,7 @@ describe("search form settings", () => {
       show_dates: true,
       show_people: true,
       category_style: "select",
+      placeholder: null,
     })
     expect(SEARCH_FORM_CATEGORY_STYLES).toEqual(["select", "tabs"])
   })
@@ -34,6 +35,7 @@ describe("search form settings", () => {
         show_dates: false,
         show_people: false,
         category_style: "tabs",
+        placeholder: "  Nereye gitmek istersiniz?  ",
       })
     ).toEqual({
       attribute_key: "gidilecek_yer",
@@ -41,6 +43,7 @@ describe("search form settings", () => {
       show_dates: false,
       show_people: false,
       category_style: "tabs",
+      placeholder: "Nereye gitmek istersiniz?",
     })
   })
 })

@@ -104,7 +104,7 @@ describe("a product's search row (adr/0056)", () => {
     expect(documentOf(product({ status: "draft" }), {}, true).on_sale).toBe(false)
   })
 
-  it("prices a dated product by its paying categories only (adr/0077 §5)", () => {
+  it("prices a dated product by its main paying category only (adr/0077 §5, adr/0076 Ek)", () => {
     const variants = [{ id: "adult" }, { id: "child" }, { id: "infant" }]
     const pax_by_variant = { infant: { pax: 0 } }
     expect(
@@ -115,7 +115,20 @@ describe("a product's search row (adr/0056)", () => {
           bookable: { pax_by_variant },
         })
       )
-    ).toEqual(["adult", "child"])
+    ).toEqual(["adult"])
+    // The shop's order decides the main one, not the order read
+    expect(
+      pricedVariantIds(
+        product({
+          variants: [
+            { id: "child", variant_rank: 1 },
+            { id: "adult", variant_rank: 0 },
+          ],
+          product_extension: { booking_mode: "departure" },
+          bookable: { pax_by_variant },
+        })
+      )
+    ).toEqual(["adult"])
     // Not dated: every variant, whatever settings it kept
     expect(
       pricedVariantIds(

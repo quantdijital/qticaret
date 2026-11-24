@@ -6,6 +6,7 @@ import type StorefrontLayoutModuleService from "../../../modules/storefront-layo
 import { layoutRow } from "../../../workflows/storefront/layout"
 import type { LayoutRow } from "../../../workflows/storefront/layout-row"
 import { defaultLayout } from "../../../workflows/storefront/layout-default"
+import { goneTargets } from "../../../workflows/storefront/layout-gone"
 import { storedSettings } from "../../../lib/storefront/layout-settings"
 import { legacySettings, withLegacySettings } from "../../../workflows/storefront/layout-shared"
 
@@ -67,5 +68,16 @@ export async function adminLayout(container: MedusaContainer) {
     revision: row?.revision ?? 0,
     published_at: row?.published_at ?? null,
     revisions,
+    /** The draft's parts naming a record deleted since: the editor marks them (warned, not refused). */
+    missing_targets: await missingTargets(container, draft),
+  }
+}
+
+/** `goneTargets` of the draft; a document today's schema no longer reads marks none. */
+async function missingTargets(container: MedusaContainer, draft: LayoutDocument) {
+  try {
+    return await goneTargets(container, draft)
+  } catch {
+    return []
   }
 }

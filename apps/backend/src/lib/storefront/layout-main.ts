@@ -135,6 +135,10 @@ export function mainSectionsOf<L>(
       menu_images: header.menu_images,
       search_style: header.search_style,
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
+      // The other variants' action button (the catalog prints it in its own): only once set
+      ...(header.variant !== "catalog" && header.highlight_link
+        ? { highlight_link: resolve(header.highlight_link) }
+        : {}),
     },
     // Its own settings only when the shop changed them, so a footer left alone prints as before
     footer_bar: {
@@ -149,6 +153,10 @@ export function mainSectionsOf<L>(
       id: product.id,
       type: product.type,
       variant: product.variant,
+      // Only when the shop chose a shape other than the square: a block left alone prints as before
+      ...(product.image_ratio && product.image_ratio !== "square"
+        ? { image_ratio: product.image_ratio }
+        : {}),
       ...lookOf(product),
     },
     category_main: {

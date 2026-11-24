@@ -18,7 +18,13 @@ const S = `${C}.searchForm`
 const KEYWORDS = `${S}.words`
 
 const field = (
-  name: "attribute_key" | "show_category" | "show_dates" | "show_people" | "category_style",
+  name:
+    | "attribute_key"
+    | "placeholder"
+    | "show_category"
+    | "show_dates"
+    | "show_people"
+    | "category_style",
   shown?: (theme: ThemeChoices, variants: CardVariantsInUse, flags: ShopFlags) => boolean
 ): FieldMeta => ({
   group: "searchForm",
@@ -35,6 +41,7 @@ const dated = (_theme: ThemeChoices, _variants: CardVariantsInUse, flags: ShopFl
 
 export const SEARCH_FORM_META = {
   "search_form.attribute_key": field("attribute_key"),
+  "search_form.placeholder": field("placeholder"),
   "search_form.show_category": field("show_category"),
   "search_form.category_style": field("category_style", (theme) => theme.search_form.show_category),
   "search_form.show_dates": field("show_dates", dated),

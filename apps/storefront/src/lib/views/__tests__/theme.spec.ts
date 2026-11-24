@@ -75,6 +75,7 @@ describe("themeSettings", () => {
         show_dates: true,
         show_people: false,
         category_style: "tabs",
+        placeholder: "Nereye gitmek istersiniz?",
       },
       menu_style: "underline",
       shadow: "none",
@@ -133,6 +134,7 @@ describe("themeSettings", () => {
         show_dates: true,
         show_people: true,
         category_style: "select",
+        placeholder: null,
       },
       // adr/0067 §1: the style kit at today's drawing
       menu_style: "filled",

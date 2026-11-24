@@ -7,6 +7,7 @@ import type {
   StockFilterView,
   Translate,
 } from "@qticaret/ui"
+import { formatWholeLira } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { NumberInput } from "../parts/NumberInput"
 import { roundStep, stepCeiling } from "../parts/number-step"
@@ -186,7 +187,7 @@ function PriceRange({
             name="fiyat_en_az"
             rule={{ ...rule, start: price.min }}
             words={words}
-            placeholder={`${t("listing.price_min")} ${String(price.min)}`}
+            placeholder={`${t("listing.price_min")} ${formatWholeLira(price.min)}`}
             defaultValue={price.currentMin ?? undefined}
             className="px-4 text-md lg:text-sm"
           />
@@ -198,7 +199,7 @@ function PriceRange({
             name="fiyat_en_cok"
             rule={{ ...rule, start: price.max }}
             words={words}
-            placeholder={`${t("listing.price_max")} ${String(price.max)}`}
+            placeholder={`${t("listing.price_max")} ${formatWholeLira(price.max)}`}
             defaultValue={price.currentMax ?? undefined}
             className="px-4 text-md lg:text-sm"
           />

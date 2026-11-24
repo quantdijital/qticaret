@@ -1,4 +1,4 @@
-import { MARQUEE_LIMITS as MARQUEE, MARQUEE_PER_PAGE } from "@qticaret/types"
+import { FAQ_LIMITS, MARQUEE_LIMITS as MARQUEE, MARQUEE_PER_PAGE } from "@qticaret/types"
 import type { ShelfColumns } from "@qticaret/types"
 
 // The theme editor's limits (adr/0049)
@@ -8,10 +8,11 @@ export const LAYOUT_LIMITS = {
   home: 30,
   product: 12,
   category: 12,
-  faq: 12,
+  /** An FAQ's rows, questions and headings (adr/0073 Ek 2026-11-24 (2)). */
+  faq: FAQ_LIMITS.items,
   related: 12,
-  question: 160,
-  answer: 600,
+  question: FAQ_LIMITS.question,
+  answer: FAQ_LIMITS.answer,
   items: 24,
   slides: 6,
   lines: 5,

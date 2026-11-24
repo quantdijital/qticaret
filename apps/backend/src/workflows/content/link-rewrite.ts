@@ -16,6 +16,7 @@ import { LAYOUT_LOCK } from "../storefront/layout"
 import { recordSystemLayoutStep } from "../storefront/layout-system"
 import { rewriteLayoutLinksStep } from "./link-layout"
 import { rewriteListingLinksStep } from "./link-listings"
+import { rewriteTermLinksStep } from "./link-terms"
 import { CONTENT_LOCK } from "./workflows"
 
 /**
@@ -52,10 +53,12 @@ const planContentLinksStep = createStep(
  * Every document written takes the lock its own saves take: content's, the
  * design's (a page's text is its sections', adr/0073 Ek 2026-11-19 (2)
  * K7), each product's. A category's, brand's or collection's save takes
- * its own lock itself (adr/0075), so none of theirs is held here.
+ * its own lock itself (adr/0075), so none of theirs is held here. A blog
+ * category's or tag's is content's (adr/0075 Ek 2026-11-24).
  */
 const lockKeys = (plan: LinkPlan): string[] => [
   ...(plan.writes.entries.length > 0 ? [LAYOUT_LOCK.key, CONTENT_LOCK.key] : []),
+  ...(plan.writes.terms.length > 0 && plan.writes.entries.length === 0 ? [CONTENT_LOCK.key] : []),
   ...plan.writes.products.map((product) => `catalog:${product.product_id}`),
 ]
 
@@ -83,6 +86,10 @@ export const rewriteContentLinksWorkflow = createWorkflow(
     const listings = rewriteListingLinksStep(
       transform({ plan }, ({ plan }) => ({ listings: plan.writes.listings, next: plan.next }))
     )
+    // Blog categories' and tags' descriptions, under the content lock (adr/0075 Ek 2026-11-24)
+    const terms = rewriteTermLinksStep(
+      transform({ plan }, ({ plan }) => ({ ids: plan.writes.terms, next: plan.next }))
+    )
     // Recorded last: a failing record undoes the writes (ids and the revision only)
     recordSystemLayoutStep(
       transform({ layout }, ({ layout }) => ({
@@ -94,18 +101,21 @@ export const rewriteContentLinksWorkflow = createWorkflow(
     releaseLocksStep(held)
     // Pages and posts the storefront shows (its menus and lists); a product's text is read fresh
     refreshStorefrontStep(
-      transform({ entries, layout }, ({ entries, layout }) => [
-        ...(entries > 0 ? ["content" as const] : []),
+      transform({ entries, terms, layout }, ({ entries, terms, layout }) => [
+        ...(entries + terms > 0 ? ["content" as const] : []),
         ...(layout.changed ? ["layout" as const] : []),
       ])
     )
     return new WorkflowResponse(
-      transform({ plan, entries, products, listings }, ({ plan, entries, products, listings }) => ({
-        documents: plan.documents,
-        rewritten: entries + products + listings,
-        changed: plan.changed,
-        unresolved: plan.unresolved,
-      }))
+      transform(
+        { plan, entries, products, listings, terms },
+        ({ plan, entries, products, listings, terms }) => ({
+          documents: plan.documents,
+          rewritten: entries + products + listings + terms,
+          changed: plan.changed,
+          unresolved: plan.unresolved,
+        })
+      )
     )
   }
 )
@@ -120,7 +130,10 @@ export async function rewriteContentLinks(
     return {
       documents: plan.documents,
       rewritten:
-        plan.writes.entries.length + plan.writes.products.length + plan.writes.listings.length,
+        plan.writes.entries.length +
+        plan.writes.products.length +
+        plan.writes.listings.length +
+        plan.writes.terms.length,
       changed: plan.changed,
       unresolved: plan.unresolved,
     }

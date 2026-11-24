@@ -44,6 +44,12 @@ export type AnalyticsEvent =
       items: AnalyticsItem[]
     }
   | { name: "sign_up"; method: "email" }
+  /** A shop's pop-up shown, its button or code used, closed, or signed up from (adr/0080 §7). */
+  | {
+      name: "popup_view" | "popup_click" | "popup_close" | "popup_signup"
+      popupId: string
+      popupType: string
+    }
 
 /** A list of products as its cards lead on: the item behind each product page's path. */
 export interface ListContext {
@@ -93,6 +99,11 @@ export function ga4Event(event: AnalyticsEvent): [string, Record<string, unknown
       return ["search", { search_term: event.term }]
     case "sign_up":
       return ["sign_up", { method: event.method }]
+    case "popup_view":
+    case "popup_click":
+    case "popup_close":
+    case "popup_signup":
+      return [event.name, { popup_id: event.popupId, popup_type: event.popupType }]
     case "view_item_list":
     case "select_item":
       return [
@@ -215,6 +226,10 @@ export function metaEvent(event: AnalyticsEvent): MetaCall | null {
     case "remove_from_cart":
     case "view_cart":
     case "add_shipping_info":
+    case "popup_view":
+    case "popup_click":
+    case "popup_close":
+    case "popup_signup":
       return null
   }
 }

@@ -9,6 +9,7 @@ import type {
   StoreGoogleReviews,
   StoreLatestReviewPhoto,
   StoreReviewSummary,
+  StoreUpcomingDepartures,
 } from "@qticaret/types"
 import { isStoreApiError } from "./errors"
 import { liraRegion } from "./requests"
@@ -168,6 +169,32 @@ export const googleRatingReviews = cache(
         { google_reviews: null }
       )
     ).google_reviews
+)
+
+/**
+ * The nearest departures on sale (adr/0077 §10, the departures section):
+ * a category's or a collection's by id, or every dated product's. Never
+ * kept here (places left change; the backend keeps each answer 30
+ * seconds); asked with the shopper's address, as its rate limit counts.
+ * A backend that does not answer (the flag off: 404, an older one) gives none.
+ */
+export const upcomingDepartures = cache(
+  async (
+    limit: number,
+    kind: "all" | "category" | "collection",
+    id: string | null
+  ): Promise<StoreUpcomingDepartures["departures"]> =>
+    (
+      await orNone(
+        () =>
+          storeGet<StoreUpcomingDepartures>("/store/departures", {
+            limit,
+            ...(kind === "category" && id ? { category_id: id } : {}),
+            ...(kind === "collection" && id ? { collection_id: id } : {}),
+          }),
+        { currency: "try" as const, departures: [] }
+      )
+    ).departures
 )
 
 /** The newest photos on approved reviews, for the home page's reviews section. */

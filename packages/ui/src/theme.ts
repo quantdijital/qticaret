@@ -1,3 +1,5 @@
+import type { TurnstileAsk } from "@qticaret/types"
+import type { GatedChallenge } from "./lib/gate"
 import type { ComponentType, ReactNode } from "react"
 import type { AccountActions, AccountPageView, AuthActions, AuthPageView } from "./account-views"
 import type {
@@ -11,6 +13,7 @@ import type {
   PlaceOrderResult,
 } from "./checkout-views"
 import type { PaymentLinkPageView } from "./payment-link-views"
+import type { PopupSetup } from "./popup-views"
 import type { SaveTravelers } from "./traveler-views"
 import type {
   BlogIndexPageView,
@@ -40,6 +43,11 @@ export interface ActionResult {
   ok: boolean
   /** A message key for the shopper, when something went wrong. */
   error: string | null
+  /** A bot check the backend wants first (adr/0044 Ek 2026-11-24); `sendGated` answers it. */
+  challenge?: GatedChallenge | null
+  turnstile?: TurnstileAsk | null
+  /** Fields to send again in place of what was sent (`GatedResult.resume`). */
+  resume?: Record<string, string[]> | null
 }
 
 export type FormAction = (state: ActionResult, form: FormData) => Promise<ActionResult>
@@ -219,6 +227,15 @@ export interface StorefrontTheme {
      * card's button (if any) goes to the product's page.
      */
     quickView?: QuickViewSetup
+    /**
+     * The shop's pop-ups (adr/0080 §6), given only while the shop has them
+     * on and never on the paying pages: the list's and the counters'
+     * addresses on the storefront. The theme draws at most one a page
+     * view, after the page is up and the cookie question answered (the
+     * choosing is `@qticaret/ui/hooks/use-popup`'s); a newsletter pop-up
+     * sends `subscribe`. None: no pop-up.
+     */
+    popups?: PopupSetup
   }>
   HomePage: ComponentType<
     Page<HomePageView> & {

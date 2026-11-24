@@ -1,5 +1,6 @@
 import "server-only"
 import { cache } from "react"
+import type { StoreDepartureCalendar } from "@qticaret/types"
 import { liraRegion } from "./requests"
 import { storeGet, storePublicGet } from "./server"
 
@@ -104,4 +105,14 @@ export async function suggestPage(q: string): Promise<SuggestAnswer> {
     region_id: region.id,
     currency_code: region.currency_code,
   })
+}
+
+/**
+ * A month of the search's calendar (adr/0077 §6): each day with a departure
+ * a date search would match and its lowest guest price, lira only. Shop-wide
+ * (the guest's price, the shop's key), so kept a minute in this process as
+ * the backend keeps it.
+ */
+export function departureCalendar(query: Record<string, string>): Promise<StoreDepartureCalendar> {
+  return storePublicGet<StoreDepartureCalendar>("/store/departures/calendar", query)
 }

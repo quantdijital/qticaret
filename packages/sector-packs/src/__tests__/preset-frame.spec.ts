@@ -113,3 +113,24 @@ describe("a rich text in a preset's design", () => {
     expect(() => readPreset(dir, "deneme", "x1")).toThrow(message)
   })
 })
+
+describe("the fields a preset writes for a shop it does not know", () => {
+  it("takes category icons by handle and a non-catalog header's action button", () => {
+    const icons = {
+      id: "ikonsira01",
+      type: "categories",
+      variant: "icons",
+      category_icons_by_handle: { "dag-turlari": "mountain", plaj: "palm" },
+    }
+    const header = {
+      id: "mainheader",
+      type: "header_bar",
+      variant: "standard",
+      highlight_link: { $href: "/rezervasyon", label: "Rezervasyon" },
+    }
+    const dir = write({ "layout.json": { header: [header], home: [icons] } })
+    const read = readPreset(dir, "deneme", "x1")
+    expect(read.layout.home).toEqual([icons])
+    expect(read.layout.header).toEqual([header])
+  })
+})

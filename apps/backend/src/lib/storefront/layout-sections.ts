@@ -5,7 +5,7 @@ import { announcementBar } from "./sections/announcement-bar"
 import { banner, placedBanner } from "./sections/banner"
 import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
-import { faq } from "./sections/faq"
+import { faq, placedFaq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
 import { googleRating } from "./sections/google-rating"
 import { hero } from "./sections/hero"
@@ -23,6 +23,7 @@ import { steps } from "./sections/steps"
 import { searchBox } from "./sections/search-box"
 import { photoCollage } from "./sections/photo-collage"
 import { reviews } from "./sections/reviews"
+import { departures } from "./sections/departures"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -66,6 +67,7 @@ export const pageSection = z.discriminatedUnion(
     steps,
     searchBox,
     photoCollage,
+    departures,
     richText,
     trustBadges,
     newsletter,
@@ -105,7 +107,7 @@ export const categorySection = z.discriminatedUnion(
     categoryMain,
     placedRichText,
     placedBanner,
-    faq.extend({ placement }),
+    placedFaq,
     placedTrustBadges,
     worded("help").extend({ placement }),
     placedNewsletter,
