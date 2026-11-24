@@ -9361,6 +9361,12 @@
         },
         "eyebrowPlaceholder": "Örn. Özel fırsat",
         "splitFirst": "Bölünmüş bant yalnız ilk görseli gösterir; diğerleri biçim değişince geri gelir.",
+        "note": {
+          "label": "Not",
+          "term": "note",
+          "placeholder": "Örn. Sizi bekliyoruz!",
+          "hint": "Başlığın üstünde küçük, eğik bir not. Vurgu yazı tipi açıksa el yazısıyla görünür; boş bırakırsanız çizilmez."
+        },
         "edge": {
           "label": "Geçiş",
           "term": "edge",
@@ -9617,6 +9623,16 @@
         "fontNotes": {
           "noLira": "Bu yazı tipinde ₺ işareti yok. Fiyatlar metin yazı tipiyle çizilir; başlık metnine yazdığınız ₺ yedek bir yazı tipiyle görünür.",
           "singleWeight": "Tek kalınlığı vardır: başlıklar kalın değil, normal kalınlıkta çizilir."
+        },
+        "accentFont": "Vurgu yazı tipi",
+        "accentFontTerm": "el yazısı · font-family",
+        "accentFontHint": "Bölümlere yazdığınız kısa notlar (açılış ve bölünmüş bant) bu yazı tipiyle, el yazısı gibi görünür. Yok seçiliyse not metin yazı tipiyle italik çizilir. Yazı tipi yalnız not olan sayfada yüklenir.",
+        "handwriting": "el yazısı",
+        "accentFonts": {
+          "none": "Yok",
+          "caveat": "Caveat",
+          "dancing-script": "Dancing Script",
+          "kalam": "Kalam"
         },
         "shapes": "Şekiller",
         "radius": "Köşeler",
@@ -11265,6 +11281,12 @@
           "term": "accent",
           "placeholder": "Örn. Kaçışını bul.",
           "hint": "Başlığın altında, ana renginizle yazılan ikinci satır. Boş bırakırsanız çizilmez."
+        },
+        "note": {
+          "label": "Not",
+          "term": "note",
+          "placeholder": "Örn. Sizi bekliyoruz!",
+          "hint": "Başlığın üstünde küçük, eğik bir not. Vurgu yazı tipi açıksa el yazısıyla görünür; boş bırakırsanız çizilmez."
         },
         "action": {
           "label": "Başlığın altında",

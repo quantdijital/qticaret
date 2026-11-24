@@ -6,6 +6,7 @@ import { heroFullSettingsOf } from "@qticaret/types"
 import { NamedGroup } from "../named-group"
 import { F, TextField } from "./fields"
 import { HeroCatalogFields } from "./hero-catalog-fields"
+import { HandNoteField } from "./hand-note-field"
 import { HeroAccentField, HeroFullAction } from "./hero-full-fields"
 import { HeroSlidesField } from "./hero-slides-field"
 import { HeroVideoFields } from "./hero-video-fields"
@@ -68,6 +69,18 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
     <>
       <NamedGroup name="content">
         {eyebrow}
+        {/* The full image's hand note stands over its heading, as the storefront draws it */}
+        {full ? (
+          <HandNoteField
+            sectionId={section.id}
+            keys="storefront.editor.heroFull"
+            value={full.note ?? null}
+            problem={problems["note"]}
+            onChange={(note) => {
+              onChange({ ...full, note }, "note")
+            }}
+          />
+        ) : null}
         <TextField
           id={PREVIEW_IDS.text(section.id, "heading")}
           label={t(`${F}.heading`)}

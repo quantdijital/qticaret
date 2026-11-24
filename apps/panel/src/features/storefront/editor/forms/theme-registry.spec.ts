@@ -22,7 +22,8 @@ const leaves = (value: object, prefix = ""): string[] =>
 describe("the theme panel's register", () => {
   it("names every field of the theme's choices but the header bar's two", () => {
     expect(THEME_FIELDS.map((field) => field.key).sort()).toEqual(
-      leaves(GRAFIT_THEME)
+      // The hand note's face is optional: Grafit holds none, the panel names it all the same
+      [...leaves(GRAFIT_THEME), "typography.accent"]
         .filter((key) => !key.startsWith("header."))
         .sort()
     )
@@ -46,7 +47,11 @@ describe("the settings search over the theme", () => {
     expect(keys("ana renk")).toEqual(["colors.primary"])
     // The photo ground's "Sayfa" step is the page's own ground too (adr/0067 S4)
     expect(keys("sayfa zemini")).toEqual(["colors.background", "media_ground"])
-    expect(keys("yazı tipleri font")).toEqual(["typography.heading", "typography.body"])
+    expect(keys("yazı tipleri font")).toEqual([
+      "typography.heading",
+      "typography.body",
+      "typography.accent",
+    ])
     expect(keys("köşeler")).toEqual(["radius"])
     expect(keys("bolum araligi")).toEqual(["section_spacing"])
     expect(keys("kutu stili")).toEqual(["surface_style"])

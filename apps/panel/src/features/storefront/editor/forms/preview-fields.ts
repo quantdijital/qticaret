@@ -125,8 +125,12 @@ function heroField(section: HeroSection, parts: readonly string[]): PreviewField
   if (parts.length === 1 && (first === "heading" || first === "text" || first === "image")) {
     return content(PREVIEW_IDS.text(section.id, first))
   }
-  // The full image's accent line, a line of its heading (adr/0077 §9)
-  if (parts.length === 1 && first === "title_accent" && section.variant === "full_image") {
+  // The full image's accent line, a line of its heading (adr/0077 §9), and its hand note
+  if (
+    parts.length === 1 &&
+    (first === "title_accent" || first === "note") &&
+    section.variant === "full_image"
+  ) {
     return content(PREVIEW_IDS.text(section.id, first))
   }
   const link =
@@ -179,7 +183,9 @@ function wordField(section: AnySection, word: string): PreviewField | null {
     (section.type === "posts" &&
       section.variant === "intro_panel" &&
       (word === "eyebrow" || word === "intro" || word === "link")) ||
-    (word === "eyebrow" && section.type === "banner" && section.variant === "split") ||
+    ((word === "eyebrow" || word === "note") &&
+      section.type === "banner" &&
+      section.variant === "split") ||
     (section.type === "photo_collage" && word === "intro") ||
     // Upcoming departures' intro (adr/0077 §10)
     (section.type === "departures" && word === "intro") ||

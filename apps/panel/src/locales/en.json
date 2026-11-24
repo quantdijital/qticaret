@@ -9361,6 +9361,12 @@
         },
         "eyebrowPlaceholder": "E.g. Special offer",
         "splitFirst": "The split band shows the first picture only; the others return when the variant changes.",
+        "note": {
+          "label": "Note",
+          "term": "note",
+          "placeholder": "E.g. We are waiting for you!",
+          "hint": "A small, tilted note above the heading. Shown in handwriting when the accent font is on; left empty, nothing is drawn."
+        },
         "edge": {
           "label": "Edge",
           "term": "edge",
@@ -9617,6 +9623,16 @@
         "fontNotes": {
           "noLira": "This font has no ₺ sign. Prices are drawn in the body font; a ₺ you type into a heading shows in a fallback font.",
           "singleWeight": "It has one weight: headings are drawn regular, not bold."
+        },
+        "accentFont": "Accent font",
+        "accentFontTerm": "handwriting · font-family",
+        "accentFontHint": "The short notes you write in sections (the opening and the split band) show in this font, like handwriting. With None the note is drawn in the body font, italic. The font loads only on a page with a note.",
+        "handwriting": "handwriting",
+        "accentFonts": {
+          "none": "None",
+          "caveat": "Caveat",
+          "dancing-script": "Dancing Script",
+          "kalam": "Kalam"
         },
         "shapes": "Shapes",
         "radius": "Corners",
@@ -11265,6 +11281,12 @@
           "term": "accent",
           "placeholder": "E.g. Find your escape.",
           "hint": "A second line under the heading, in your main colour. Left empty, it is not drawn."
+        },
+        "note": {
+          "label": "Note",
+          "term": "note",
+          "placeholder": "E.g. We are waiting for you!",
+          "hint": "A small, tilted note above the heading. Shown in handwriting when the accent font is on; left empty, nothing is drawn."
         },
         "action": {
           "label": "Under the heading",

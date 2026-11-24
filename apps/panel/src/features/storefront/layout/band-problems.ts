@@ -1,4 +1,4 @@
-import { BANNER_EYEBROW_MAX, POSTS_INTRO_LIMITS } from "@qticaret/types"
+import { BANNER_EYEBROW_MAX, HAND_NOTE_MAX, POSTS_INTRO_LIMITS } from "@qticaret/types"
 import type { BannerSection, PostsSection } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import type { Problem } from "./problems"
@@ -29,3 +29,7 @@ export function postsProblems(section: PostsSection): Found[] {
 /** The split's upper line within its length, naming only the shop's details. */
 export const splitEyebrowProblem = (section: BannerSection): Problem | null =>
   textProblem(section.eyebrow ?? null, BANNER_EYEBROW_MAX, true)
+
+/** The split's hand note within its length, plain text (no shop details). */
+export const splitNoteProblem = (section: BannerSection): Problem | null =>
+  textProblem(section.note ?? null, HAND_NOTE_MAX)

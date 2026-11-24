@@ -1,4 +1,5 @@
 import {
+  ACCENT_FONTS,
   BACKGROUNDS,
   BODY_FONTS,
   BUTTON_SHAPES,
@@ -172,6 +173,14 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
     label: `${C}.body`,
     term: `${C}.fontTerm`,
     options: fonts(BODY_FONTS),
+  },
+  // The hand note's face (sahip 2026-11-24): "el yazısı" finds it
+  "typography.accent": {
+    group: "fonts",
+    label: `${C}.accentFont`,
+    term: `${C}.accentFontTerm`,
+    options: named(ACCENT_FONTS, "accentFonts"),
+    keywords: `${C}.handwriting`,
   },
   radius: {
     group: "shapes",
