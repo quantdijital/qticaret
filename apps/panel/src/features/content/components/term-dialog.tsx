@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/
 import { contentListQuery } from "@/features/content/api/content"
 import { useDeleteTerm } from "@/features/content/api/terms"
 import type { Term } from "@/features/content/api/terms"
+import { TermDescriptionCard } from "@/features/content/components/term-description-card"
 import { TermForm } from "@/features/content/components/term-form"
 import { SeoCard } from "@/features/seo/components/seo-card"
 import { DESCRIPTION_EXCERPT, excerpt } from "@/features/seo/seo-text"
@@ -45,7 +46,7 @@ function useFallbackDescription(term: Term): string {
     : ""
 }
 
-/** The general tab's form and the search result tab's card, for one term. */
+/** The general tab's form, the description tab's editor and the search result tab's card, for one term. */
 function TermParts({
   term,
   onDirtyChange,
@@ -54,12 +55,23 @@ function TermParts({
   onDirtyChange: (dirty: boolean) => void
 }) {
   const fallback = useFallbackDescription(term)
+  const [formDirty, setFormDirty] = useState(false)
+  const [textDirty, setTextDirty] = useState(false)
+  useEffect(() => {
+    onDirtyChange(formDirty || textDirty)
+  }, [formDirty, textDirty, onDirtyChange])
   return (
     <>
-      {/* Kept while the other tab shows: what is typed stays */}
+      {/* Kept while another tab shows: what is typed stays */}
       <TabsContent value="general" forceMount className={TAB_BODY}>
         <DialogBody>
-          <TermForm term={term} onDirtyChange={onDirtyChange} />
+          <TermForm term={term} onDirtyChange={setFormDirty} />
+        </DialogBody>
+      </TabsContent>
+      {/* The archive's own text (adr/0075 Ek 2026-11-24), saved on its own as a category's */}
+      <TabsContent value="description" forceMount className={TAB_BODY}>
+        <DialogBody>
+          <TermDescriptionCard term={term} onDirtyChange={setTextDirty} />
         </DialogBody>
       </TabsContent>
       {/* Read once the tab opens, as before */}
@@ -89,7 +101,8 @@ interface TermDialogProps {
 
 /**
  * A blog category or tag in one dialog (adr/0019 ek 2026-11-03): its
- * name, address, text and order, and on a tab of its own how its archive
+ * name, address and order; on a tab of its own its text, written as a
+ * product category's (adr/0075 Ek 2026-11-24); on another how its archive
  * shows in search results; the arrows go to the list's next one, asking
  * first when the form holds something unsaved. Deleting it never touches
  * the posts. The size of the variant dialog: the tabs never make it jump.
@@ -149,6 +162,7 @@ export function TermDialog({ term, steps, onClose }: TermDialogProps) {
         <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col gap-5">
           <TabsList className="w-full shrink-0 sm:w-fit">
             <TabsTrigger value="general">{t(`${T}.tabs.general`)}</TabsTrigger>
+            <TabsTrigger value="description">{t(`${T}.tabs.description`)}</TabsTrigger>
             <TabsTrigger value="seo">{t(`${T}.tabs.seo`)}</TabsTrigger>
           </TabsList>
           <TermParts key={term.id} term={term} onDirtyChange={setDirty} />

@@ -3,15 +3,17 @@ import type {
   StoreContactSection,
   StoreContentPageSection,
   StoreFactsSection,
+  StoreFaqSection,
   StoreRichTextSection,
 } from "@qticaret/types"
+import { faqSettingsOf } from "@qticaret/types/section-faq"
 import { contactSwitchOf } from "@qticaret/types/section-pages"
 import { pageTextSwitchOf } from "@qticaret/types/section-rich-text"
 import type { ContactFormView, PageTextSectionView, Translate } from "@qticaret/ui"
 import { currentCustomer } from "@/lib/account/auth"
 import { legalIdentity } from "@/lib/store-api/requests"
 import { identityRows } from "./content-extras"
-import { faqOf } from "./faq"
+import { faqOf, faqOfRows } from "./faq"
 import { legalDocument, legalPath } from "./legal"
 import { withOutline } from "./legal-outline"
 import { paymentFacts, shippingFacts } from "./page-facts"
@@ -32,15 +34,20 @@ import { contactOf } from "./shop"
 /** A page's article as the store read gives it. */
 export type StorePageArticle = StoreRichTextSection & { variant: "article" }
 
+/** A page's questions page (`faq` as `page`, adr/0073 Ek 2026-11-24 (2)) as the store read gives it. */
+export type StorePageFaq = StoreFaqSection & { variant: "page" }
+
 /** A page's own text section as the store read gives it. */
-export type StorePageText = StorePageArticle | StoreContactSection | StoreFactsSection
+export type StorePageText =
+  StorePageArticle | StorePageFaq | StoreContactSection | StoreFactsSection
 
 /** Whether a page's section is one of its own text sections. */
 export const isStorePageText = (section: StoreContentPageSection): section is StorePageText =>
   section.type === "contact" ||
   section.type === "payment_facts" ||
   section.type === "shipping_facts" ||
-  (section.type === "rich_text" && section.variant === "article")
+  (section.type === "rich_text" && section.variant === "article") ||
+  (section.type === "faq" && section.variant === "page")
 
 // `kvkk`: a guest's data request (adr/0047 Ek 2026-11-02); a customer asks from the account too
 const SUBJECTS = ["order", "product", "return", "payment", "kvkk", "other"] as const
@@ -83,6 +90,32 @@ async function articleView(
       ? withOutline(html, place.anchors)
       : { html, outline: [] }
   return { ...head, ...read, faq: null, help: null }
+}
+
+/**
+ * The page's questions page: the shop's rows by group, their anchors in
+ * the page's order as a text of questions took them, the ways to reach
+ * the shop beside them; its switches as set.
+ */
+async function faqView(
+  section: StorePageFaq,
+  t: Translate,
+  place: TextPlace
+): Promise<PageTextSectionView | null> {
+  // Read before any wait, so the page's texts take their anchors in its order
+  const faq = faqOfRows(section.items, place.anchors)
+  if (faq.groups.length === 0) {
+    return null
+  }
+  return {
+    id: section.id,
+    type: "faq",
+    variant: "page",
+    title: section.title,
+    faq,
+    help: contactOf(await legalIdentity(), t),
+    settings: faqSettingsOf(section),
+  }
 }
 
 /** The contact page's body: its words, the ways to reach the shop, the form and the imprint as switched. */
@@ -128,6 +161,8 @@ export async function pageTextView(
   switch (section.type) {
     case "rich_text":
       return articleView(section, t, place)
+    case "faq":
+      return faqView(section, t, place)
     case "contact":
       return contactView(section, t, place)
     case "payment_facts": {

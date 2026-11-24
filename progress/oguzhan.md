@@ -6,6 +6,9 @@
 
 - **Dal:** `oguzhan/dogal-dil-arayuz`. Vitrin: `/arama?q=<≥3 sözcük>` bayrak açıkken `POST /store/search/interpret` ile süzgece çevrilir, işaretli kanonik adrese 307 (`_anlam=1`), orada "Anladığım:" çipleri (nofollow, kaldırılabilir); hata/kapalıda düz `q` araması. Kutunun altında KVKK ipucu (yalnız bayrak açıkken). Backend: `features.natural_search`, bayrak yazımı yalnız sahip. Panel: Ayarlar › Yapay zekâ anahtarı + onay penceresi (Özellikler sayfasında da). ADR'ye PR9 notu.
 - **Sıradaki işler:** `security-reviewer` (public uç tüketimi, KVKK); üst bilgi canlı aramasına ipucu (takip).
+## 2026-11-24: adr/0077 §5 Ek, tarihli fiyat sırası
+
+- **Dal:** `oguzhan/tarihli-fiyat-sirasi`. `tarih`/`ay` varken fiyat sıralaması, fiyat süzgeci ve fiyat aralığı eşleşen ürünlerin aralıktaki en düşük kart fiyatıyla (`bookingCardFacts` ortak; `listing-dated-prices.ts`, sabit 4 okuma, 30 sn önbellek). Dizin sorgusuna `price.by_product` jsonb; tarih yokken sorgu birebir eski. Testler: birim (sorgu, okuma sayısı), HTTP `dated-price-sort.spec.ts` (CI). ADR §5 Ek, "Bilinen sınır" kapandı.
 ## 2026-11-24: hazır görünüm boşlukları, handle ile kategori ikonu ve her üst bilgide eylem düğmesi
 
 - **Dal:** `oguzhan/ikon-ve-ust-dugme`. `categories`/`icons`'a `category_icons_by_handle` (kimlik > handle > görsel > baş harf); `highlight_link` (katalogdaki eylem düğmesi) `standard` ve `centered` üst bilgide de; panelde "Eylem düğmesi". Kilitli görünümlerin HTML'i ve stil özeti aynı. adr/0077 dalga 7 Ek.

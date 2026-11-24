@@ -3,9 +3,10 @@ import { cache } from "react"
 import type {
   StoreContentAuthorPage,
   StoreContentSummary,
+  StoreContentTermDescription,
   StoreContentTermSummary,
 } from "@qticaret/types"
-import { storeGet, storePublicGet } from "./server"
+import { storeGet, storePublicFind, storePublicGet } from "./server"
 
 export type BlogTermKind = StoreContentTermSummary["kind"]
 /** What narrows the blog's posts: a category's, a tag's or an author's (adr/0060), by handle. */
@@ -33,6 +34,25 @@ export const blogTerms = cache(async (kind: BlogTermKind) => {
   )
   return terms
 })
+
+/**
+ * A listed blog category's or tag's text (adr/0075 Ek 2026-11-24) for the
+ * foot of its archive's first page: the backend's HTML of its document and
+ * its plain text, shop-wide, kept a minute as the backend's answer is.
+ * Null for one no longer listed (404), a backend before it, or a failed
+ * call: the page never fails for its text.
+ */
+export const blogTermDescription = cache(
+  async (id: string): Promise<StoreContentTermDescription | null> => {
+    try {
+      return await storePublicFind<StoreContentTermDescription>(
+        `/store/content/terms/${encodeURIComponent(id)}/description`
+      )
+    } catch {
+      return null
+    }
+  }
+)
 
 /** A blog author (adr/0060), as the author's page shows them, with their live posts counted. */
 export const blogAuthor = cache(async (id: string) => {

@@ -116,9 +116,24 @@ describe("a content page's own settings in the theme editor", () => {
     await waitFor(() => {
       expect(lastSaved(fetchMock)?.pages.at(-1)).toMatchObject({
         page_id: "cnt_yeni",
-        sections: [{ type: "rich_text", variant: "article", outline: "auto", questions: "auto" }],
+        // Never read as questions (adr/0073 Ek 2026-11-24 (2)): the shop's questions are an FAQ's
+        sections: [{ type: "rich_text", variant: "article", outline: "auto", questions: "off" }],
       })
     })
+  })
+
+  it("starts a new questions page with a question to write, not a text", async () => {
+    await open(DOC_WITH_PAGES, "cnt_hakkimizda")
+    await user.click(screen.getByRole("combobox", { name: "Düzenlenen içerik sayfası" }))
+    await user.click(await screen.findByRole("option", { name: "Yeni sayfa" }))
+    const dialog = await screen.findByRole("dialog", { name: "Yeni sayfa" })
+    await user.type(within(dialog).getByRole("textbox", { name: /Başlık/ }), "Sık Sorulan Sorular")
+    await user.click(within(dialog).getByRole("button", { name: "Oluştur" }))
+
+    // The FAQ's form opens on its first question (saved once it is written, as any new FAQ)
+    expect(await screen.findByRole("list", { name: "Sorular" })).toBeVisible()
+    expect(screen.getByRole("textbox", { name: /1\. sorunun metni/ })).toHaveValue("")
+    expect(screen.queryByRole("region", { name: "Sayfa metni" })).toBeNull()
   })
 
   it("gives a page just made on the Sayfalar list its empty text, opened (told in memory)", async () => {

@@ -6,6 +6,7 @@ import type {
   BannerVariant,
   CardVariant,
   FaqSettings,
+  FaqVariant,
   FeaturedProductSettings,
   MarqueeSettings,
   ProductSource,
@@ -328,22 +329,39 @@ export interface NewsletterSection extends BodySectionBase, NewsletterFields {
 /** A box of a title and a line: the help box, the newsletter box. */
 export type WordedSection = HelpSection | NewsletterSection
 
-export interface FaqItem {
+/**
+ * A question and its answer (adr/0073 Ek 2026-11-24 (2)): the answer a
+ * short rich text (`body`: paragraphs, lists, bold, italic, links; the
+ * shop's details as `{telefon}`), or a plain one saved before rich answers
+ * (`answer`), which the form turns into `body` once edited.
+ */
+export interface FaqQuestion {
   /** Plain text. */
   question: string
-  /** Plain text; may hold the shop's details (`{telefon}`). */
-  answer: string
+  body?: JSONContent
+  /** Plain text from before rich answers; may hold the shop's details. */
+  answer?: string
 }
+
+/** A group's heading: the questions under it until the next. */
+export interface FaqHeading {
+  heading: string
+}
+
+export type FaqItem = FaqQuestion | FaqHeading
 
 /**
  * Questions and answers, shown on the page; never `FAQPage` structured data
  * (docs/13 §5). Its switches (bilesen-denetimi (b) 8) are filled on reading;
- * one absent reads as its default (`faqSettingsOf`).
+ * one absent reads as its default (`faqSettingsOf`). `variant`: `standard`
+ * (the server fills it on reading), or `page`, a content page's questions
+ * page (the pages' only).
  */
 export interface FaqSection extends BodySectionBase, Partial<FaqSettings> {
   type: "faq"
   title: string | null
   items: FaqItem[]
+  variant: FaqVariant
 }
 
 /** Products under a product's own: its category's (the storefront finds it), a collection's or chosen ones. */

@@ -245,6 +245,7 @@ export {
   newFooterNewsletter,
   newHeaderMarquee,
   newHomeSection,
+  newPageFaq,
   newPageText,
 } from "./new-sections"
 

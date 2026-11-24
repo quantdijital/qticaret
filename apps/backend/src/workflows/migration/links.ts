@@ -55,6 +55,7 @@ export async function settleMigratedLinks(
       categories: [],
       brands: [],
       collections: [],
+      terms: [],
     },
   })
   return { reserved, legacy, ...result }

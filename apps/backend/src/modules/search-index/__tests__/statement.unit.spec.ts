@@ -122,4 +122,34 @@ describe("the listing statement (adr/0056)", () => {
     // Any other sort keeps its statement as before: no position worked out
     expect(listingStatement(plan()).sql).not.toContain("array_position")
   })
+
+  it("sorts, filters and ranges a date search by its prices by product (adr/0077 §5 Ek)", () => {
+    const byProduct = { prod_a: 3500, prod_b: 900 }
+    const dated = plan({
+      scope: { product_ids: ["prod_a", "prod_b"] },
+      price: { key: "reg_1:try", min: 800, max: 2000, by_product: byProduct },
+      sort: "price_asc",
+    })
+    const { sql, params } = listingStatement(dated)
+
+    expect(sql).toContain("::jsonb ->> d.product_id)::numeric AS price")
+    expect(sql).not.toContain("d.prices ->>")
+    expect(sql).toContain("price ASC NULLS LAST")
+    expect(sql).toContain("price >= ?")
+    expect(params).toContain(JSON.stringify(byProduct))
+    expect(params).not.toContain("reg_1:try")
+    expect(placeholders(sql)).toBe(params.length)
+  })
+
+  it("keeps the index's price, statement and values alike, without dates", () => {
+    const sorted = plan({
+      price: { key: "reg_1:try", min: 800, max: null },
+      sort: "price_desc",
+    })
+    const { sql, params } = listingStatement(sorted)
+
+    expect(sql).toContain("(d.prices ->> ?)::numeric AS price")
+    expect(sql).not.toContain("->> d.product_id")
+    expect(params[0]).toBe("reg_1:try")
+  })
 })

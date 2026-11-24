@@ -360,11 +360,26 @@ export interface StoreContentTerm {
   path: string
 }
 
-/** `GET /store/content/terms?kind=`: a category or tag with live posts, in the shop's order. */
+/**
+ * `GET /store/content/terms?kind=`: a category or tag with live posts, in
+ * the shop's order. Its text is its archive's own read
+ * (`StoreContentTermDescription`, adr/0075 Ek 2026-11-24).
+ */
 export interface StoreContentTermSummary extends StoreContentTerm {
   kind: "category" | "tag"
-  description: string | null
   post_count: number
+}
+
+/**
+ * `GET /store/content/terms/:id/description` (adr/0075 Ek 2026-11-24): a
+ * listed blog category's or tag's text for the foot of its archive: as
+ * the shop formatted it, rendered on the server (null: none, or stale),
+ * and its plain text, shown without the HTML.
+ */
+export interface StoreContentTermDescription {
+  term_id: string
+  description: string | null
+  description_html: string | null
 }
 
 /** A blog author's link on a network or the web: the person's own profile (`sameAs`). */
