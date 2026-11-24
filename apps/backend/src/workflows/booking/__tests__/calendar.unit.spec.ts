@@ -1,9 +1,9 @@
 import { kurus } from "../../../lib/money"
 import type { Kurus } from "../../../lib/money"
 import type { CalendarRow } from "../../../modules/booking/service"
-import { calendarDays } from "../calendar"
+import { calendarDays, placesKey } from "../calendar"
 import type { DatedCardProduct } from "../card-facts"
-import type { CardShown } from "../card-price"
+import type { BasePrice, CardShown } from "../card-price"
 
 // No promotion worked out for any place: each at its own price
 const NONE = new Map<string, CardShown>()
@@ -81,5 +81,42 @@ describe("calendarDays", () => {
       { date: "2027-03-02", from_price: null, departures: 1 },
       { date: "2027-03-09", from_price: null, departures: 1 },
     ])
+  })
+})
+
+describe("placesKey", () => {
+  const unit = (variant: string, adjustment: number, amount: number) => ({
+    variant_id: variant,
+    adjustment,
+    amount: kurus(amount),
+  })
+  const prices = new Map<string, BasePrice | null>([
+    ["a_adult", { calculated: kurus(150_000), original: kurus(180_000) }],
+    ["b_adult", null],
+  ])
+  const plain = unit("a_adult", 0, 150_000)
+  const raised = unit("a_adult", 25_000, 175_000)
+  const unpriced = unit("b_adult", 0, 1)
+  const all = [plain, raised, unpriced]
+
+  it("keys the places alone: a party whose days share them shares the promoted prices", () => {
+    // Order and a place met on several days do not matter
+    expect(placesKey(all, prices, "try")).toBe(
+      placesKey([unpriced, raised, plain, plain], prices, "TRY")
+    )
+  })
+
+  it("keys another place, price, sale or currency apart", () => {
+    const key = placesKey(all, prices, "try")
+    const unsold = new Map<string, BasePrice | null>([
+      ["a_adult", { calculated: kurus(150_000), original: kurus(150_000) }],
+    ])
+
+    expect(placesKey([raised, unpriced], prices, "try")).not.toBe(key)
+    expect(placesKey([unit("a_adult", 0, 140_000)], prices, "try")).not.toBe(
+      placesKey([plain], prices, "try")
+    )
+    expect(placesKey([plain], unsold, "try")).not.toBe(placesKey([plain], prices, "try"))
+    expect(placesKey(all, prices, "eur")).not.toBe(key)
   })
 })

@@ -384,6 +384,23 @@ medusaIntegrationTestRunner({
       })
       // Both tours leave that day: the lowest, the promoted one's
       expect(shown.calendar).toEqual([{ from_price: 1200, before: 1500, departures: 2 }])
+      // A party's size picks the days, never the price: the promoted one, kept by the places
+      const month = dayAhead(8).slice(0, 7)
+      const party = async (kisi: number) =>
+        (
+          await settle(
+            http.get<{ days: Shown[] }>(
+              `/store/departures/calendar?month=${month}&kategori=ege-turlari&kisi=${String(kisi)}`,
+              { headers: store.headers }
+            )
+          )
+        ).data.days.map(({ from_price, before, departures }) => ({
+          from_price,
+          before,
+          departures,
+        }))
+      expect(await party(2)).toEqual(shown.calendar)
+      expect(await party(11)).toEqual([])
       expect(shown.upcoming).toEqual({
         promoted: { from_price: 1200, before: 1500 },
         coded: { from_price: 1500 },
