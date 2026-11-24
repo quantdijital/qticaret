@@ -134,10 +134,10 @@ export function DefinitionRow({
         <button
           type="button"
           aria-expanded={open}
-          className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left"
+          className="flex min-h-9 min-w-0 flex-1 items-center gap-2 rounded-md px-1 py-1.5 text-left"
           onClick={onToggle}
         >
-          <span className="truncate text-sm font-medium">{name}</span>
+          <span className="min-w-0 text-sm font-medium wrap-anywhere">{name}</span>
           <span className="shrink-0 text-xs text-muted-foreground">{t(`${A}.types.${type}`)}</span>
           {/* On a phone the name keeps the line; the open row's switches tell the rest */}
           <span className="ml-auto flex shrink-0 gap-1">

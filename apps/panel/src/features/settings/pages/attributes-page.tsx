@@ -23,13 +23,15 @@ function useColumns(onOpen: (template: AttributeTemplate) => void): Column<Attri
   return [
     {
       key: "name",
+      // Long names and attribute lists wrap onto new lines; the table never scrolls sideways
+      className: "whitespace-normal",
       header: t(`${A}.columns.name`),
       cell: (template) => (
         <div className="flex min-w-0 flex-col items-start">
           {/* The row opens it too; this is the keyboard's way in */}
           <button
             type="button"
-            className="max-w-full truncate text-left font-medium hover:underline"
+            className="max-w-full text-left font-medium wrap-anywhere hover:underline"
             onClick={(event) => {
               event.stopPropagation()
               onOpen(template)
@@ -39,7 +41,7 @@ function useColumns(onOpen: (template: AttributeTemplate) => void): Column<Attri
           </button>
           {/* What it holds tells it apart better than any note */}
           {template.definitions.length > 0 || template.description ? (
-            <span className="max-w-full truncate text-xs text-muted-foreground">
+            <span className="max-w-full text-xs text-muted-foreground wrap-anywhere">
               {template.definitions.length > 0
                 ? [...template.definitions]
                     .sort((a, b) => a.rank - b.rank)
