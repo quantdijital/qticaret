@@ -1,5 +1,5 @@
 /* global describe, it, expect */
-const { bundleSource, parseSoloList, planBundles, soloReasonOf } = require("../plan")
+const { bundleSeconds, bundleSource, parseSoloList, planBundles, soloReasonOf } = require("../plan")
 
 const suite = (body = "") =>
   [
@@ -134,6 +134,27 @@ describe("planBundles", () => {
     expect(plan.solo[0].reason).toMatch(/"test-fail"/)
   })
 
+  it("fills bundles by seconds up to the target, a heavy file in a bundle of its own", () => {
+    const seconds = { "a.spec.ts": 40, "b.spec.ts": 50, "c.spec.ts": 300, "d.spec.ts": 20 }
+    const timing = { weightOf: (name) => seconds[name] ?? 10, target: 100, boot: 17 }
+    const specs = ["a", "b", "c", "d", "e", "f"].map((n) => spec(`${n}.spec.ts`))
+    const plan = planBundles(specs, 8, new Map(), timing)
+    expect(plan.bundles.map((bundle) => [bundle.specs, bundle.seconds])).toEqual([
+      [["a.spec.ts", "b.spec.ts"], 107],
+      [["c.spec.ts"], 317],
+      [["d.spec.ts", "e.spec.ts", "f.spec.ts"], 57],
+    ])
+    expect(planBundles([...specs].reverse(), 8, new Map(), timing)).toEqual(plan)
+  })
+
+  it("keeps the file count as a cap when filling by seconds", () => {
+    const timing = { weightOf: () => 1, target: 1000, boot: 17 }
+    const specs = ["a", "b", "c"].map((n) => spec(`${n}.spec.ts`))
+    const plan = planBundles(specs, 2, new Map(), timing)
+    expect(plan.bundles.map((bundle) => bundle.specs.length)).toEqual([2, 1])
+    expect(() => planBundles(specs, 2, new Map(), { ...timing, target: 0 })).toThrow(/target/)
+  })
+
   it("refuses a size that is not a whole number from 1 up", () => {
     expect(() => planBundles([], 0)).toThrow(/whole number/)
     expect(() => planBundles([], 2.5)).toThrow(/whole number/)
@@ -145,5 +166,11 @@ describe("bundleSource", () => {
     const text = bundleSource({ kind: "strict", specs: ["a.spec.ts", "b.spec.ts"] })
     expect(text).toContain('require("../bundle/host").runBundle("strict", [')
     expect(text).toContain('  "a.spec.ts",\n  "b.spec.ts",\n])')
+    expect(bundleSeconds(text)).toBeNull()
+  })
+
+  it("carries a weighed bundle's expected seconds for the sequencer", () => {
+    const text = bundleSource({ kind: "plain", specs: ["a.spec.ts"], seconds: 123 })
+    expect(bundleSeconds(text)).toBe(123)
   })
 })

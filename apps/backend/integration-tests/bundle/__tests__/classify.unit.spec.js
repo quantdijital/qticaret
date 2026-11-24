@@ -86,7 +86,9 @@ describe("prepareBundles", () => {
     )
     expect(first.testMatch.slice(1)).toEqual(["**/integration-tests/http/env.spec.ts"])
     expect(first.testMatch[0]).toMatch(/\/bundle-\*\.spec\.js$/)
-    expect(messages.at(-1)).toBe("2 files a bundle: 2 plain and 0 strict bundles, 1 files alone")
+    expect(messages.at(-1)).toBe(
+      "up to 2 files and 180 s of tests a bundle: 2 plain and 0 strict bundles, 1 files alone"
+    )
 
     const written = fs.statSync(path.join(outDir, "bundle-plain-001.spec.js")).mtimeMs
     const second = prepareBundles("2", quiet)
