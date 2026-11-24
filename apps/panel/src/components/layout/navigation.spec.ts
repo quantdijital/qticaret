@@ -33,7 +33,7 @@ describe("the menu's groups (the owner, 2026-11-23)", () => {
       ["storefront", ["themeEditor", "looks", "menus"]],
       ["content", ["pages", "content", "media"]],
       // SEO is Settings > SEO now, its one home
-      ["marketing", ["promotions", "bulkMessages", "reviews"]],
+      ["marketing", ["promotions", "bulkMessages", "popups", "reviews"]],
     ])
   })
 

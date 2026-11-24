@@ -73,6 +73,7 @@
     "menus": "Menüler",
     "themeEditor": "Tema düzenleyici",
     "bulkMessages": "Toplu mesaj",
+    "popups": "Pop-up'lar",
     "paymentLinks": "Ödeme bağlantıları",
     "media": "Medya kütüphanesi",
     "collections": "Koleksiyonlar",
@@ -11926,6 +11927,187 @@
         "title": "SMS metni öner",
         "description": "Yapay zekâ iletinin adından ve bugünkü metninden üç kısa metin yazar; her biri mağaza adı ve ret satırıyla tek SMS'e sığar. Alıcı listesi gönderilmez; Kaydet'e basana kadar hiçbir şey değişmez."
       }
+    }
+  },
+  "popups": {
+    "title": "Pop-up'lar",
+    "description": "Vitrinde bilgi, kampanya kodu ya da bülten kaydı gösteren pencereler.",
+    "new": "Yeni pop-up",
+    "newOf": "Yeni pop-up: {{type}}",
+    "views": "Pop-up türleri",
+    "allTypes": "Tümü",
+    "search": "Pop-up ara",
+    "empty": "Henüz pop-up yok.",
+    "emptyFiltered": "Bu seçimle eşleşen pop-up yok.",
+    "noAccess": "Pop-up oluşturma yetkiniz yok.",
+    "switchLabel": "{{name}} açık",
+    "turnedOn": "Pop-up açıldı.",
+    "turnedOff": "Pop-up kapatıldı.",
+    "delete": "Sil",
+    "deleteTitle": "{{name}} silinsin mi?",
+    "deleteDescription": "Pop-up vitrinden kalkar; sayaçları silinmez.",
+    "deleted": "Pop-up silindi.",
+    "gate": {
+      "off": "Pop-up'lar kapalı. Açıldığında kayıtlı pop-up'lar olduğu gibi döner.",
+      "turnOn": "Özelliklerden aç"
+    },
+    "state": {
+      "off": "Kapalı",
+      "scheduled": "Planlandı",
+      "live": "Yayında",
+      "ended": "Bitti",
+      "campaign_inactive": "Kampanya bitti"
+    },
+    "types": {
+      "info": "Bilgilendirme",
+      "campaign": "Kampanya",
+      "newsletter": "Bülten"
+    },
+    "typeHints": {
+      "info": "Duyuru, kargo bilgisi ya da bir sayfaya yönlendiren düğme.",
+      "campaign": "Bir indirimin kodu, kopyalama düğmesiyle.",
+      "newsletter": "E-posta bültenine kayıt formu."
+    },
+    "columns": {
+      "name": "Ad",
+      "type": "Tür",
+      "state": "Durum",
+      "dates": "Tarih",
+      "active": "Açık"
+    },
+    "dates": {
+      "from": "{{date}} itibarıyla",
+      "until": "{{date}} tarihine kadar",
+      "open": "Süresiz"
+    },
+    "counts": {
+      "impressions": "Gösterim",
+      "clicks": "Tıklama",
+      "closes": "Kapatma",
+      "signups": "Kayıt"
+    },
+    "choices": {
+      "page_scope": {
+        "all": "Tüm sayfalar",
+        "selected": "Seçili sayfalar"
+      },
+      "pages": {
+        "home": "Ana sayfa",
+        "category": "Kategori",
+        "product": "Ürün",
+        "content": "İçerik sayfası"
+      },
+      "device": {
+        "all": "Masaüstü ve mobil",
+        "desktop": "Yalnız masaüstü",
+        "mobile": "Yalnız mobil"
+      },
+      "visitor": {
+        "any": "Tüm ziyaretçiler",
+        "new": "İlk kez gelenler",
+        "returning": "Tekrar gelenler"
+      },
+      "membership": {
+        "any": "Üye ve misafir",
+        "member": "Yalnız üyeler",
+        "guest": "Yalnız misafirler"
+      },
+      "trigger": {
+        "delay": "Birkaç saniye sonra",
+        "scroll": "Sayfa kaydırılınca"
+      },
+      "frequency": {
+        "session": "Her ziyarette bir kez",
+        "days": "Birkaç günde bir",
+        "until_closed": "Kapatılana kadar"
+      },
+      "layout": {
+        "modal": "Ortada pencere",
+        "corner": "Köşede kart"
+      }
+    },
+    "form": {
+      "content": "İçerik",
+      "name": "Ad",
+      "nameHint": "Yalnız panelde görünür.",
+      "type": "Tür",
+      "title": "Başlık",
+      "body": "Metin",
+      "submitLabel": "Düğme yazısı",
+      "submitLabelHint": "Boş bırakılırsa \"Kaydol\" yazar.",
+      "buttonLabel": "Düğme yazısı",
+      "buttonHref": "Düğme bağlantısı",
+      "image": "Görsel",
+      "imageAdd": "Görsel ekle",
+      "imageAlt": "Görsel açıklaması",
+      "promotion": "İndirim",
+      "promotionPlaceholder": "İndirim seçin",
+      "promotionOff": "kapalı",
+      "automaticPromotion": "Otomatik indirim",
+      "noPromotions": "Henüz indirim yok.",
+      "newPromotion": "İndirim oluştur",
+      "audience": "Kime ve nerede",
+      "pages": "Sayfalar",
+      "device": "Cihaz",
+      "visitor": "Ziyaretçi",
+      "membership": "Üyelik",
+      "timing": "Ne zaman",
+      "startsAt": "Başlangıç",
+      "endsAt": "Bitiş",
+      "endsAtHint": "Boş bırakılırsa kapatılana kadar sürer.",
+      "trigger": "Açılış",
+      "delaySeconds": "Bekleme",
+      "scrollPercent": "Kaydırma oranı",
+      "secondsUnit": "sn",
+      "frequency": "Sıklık",
+      "frequencyDays": "Kaç günde bir",
+      "daysUnit": "gün",
+      "look": "Görünüm",
+      "layout": "Biçim",
+      "advanced": "Gelişmiş",
+      "priority": "Öncelik",
+      "priorityHint": "Aynı sayfada birden çok pop-up uyarsa büyük sayı önce gösterilir.",
+      "activate": "Kaydedince yayınla",
+      "create": "Pop-up oluştur",
+      "saved": "Pop-up kaydedildi.",
+      "created": "Pop-up oluşturuldu.",
+      "invalid": "Eksik ya da hatalı alanlar var."
+    },
+    "errors": {
+      "tooLong": "Bu alan çok uzun.",
+      "textInvalid": "Düz metin girin; kullanılamayan karakterler var.",
+      "nameRequired": "Bir ad girin.",
+      "titleRequired": "Bir başlık girin.",
+      "tooManyLines": "Metin en çok 8 satır olabilir.",
+      "linkInvalid": "Mağazada bir yol (/ ile başlar) ya da https adresi girin.",
+      "number": "Bir sayı girin.",
+      "priority": "Öncelik 0 ile 1000 arasında olmalı.",
+      "promotionRequired": "Bir indirim seçin.",
+      "buttonLinkRequired": "Düğme için bir bağlantı girin.",
+      "buttonLabelRequired": "Bağlantı için bir düğme yazısı girin.",
+      "pagesRequired": "En az bir sayfa seçin.",
+      "delayRange": "Bekleme 0 ile 120 saniye arasında olmalı.",
+      "scrollRange": "Kaydırma oranı yüzde 1 ile 100 arasında olmalı.",
+      "daysRange": "1 ile 365 gün arasında bir sayı girin.",
+      "dateInvalid": "Geçerli bir tarih girin.",
+      "datesOrder": "Bitiş başlangıçtan sonra olmalı."
+    },
+    "preview": {
+      "title": "Önizleme",
+      "titlePlaceholder": "Başlık",
+      "automatic": "Sepette kendiliğinden uygulanır",
+      "email": "E-posta adresiniz",
+      "subscribe": "Kaydol",
+      "codePlaceholder": "KOD",
+      "device": "Önizleme cihazı",
+      "desktop": "Masaüstü",
+      "mobile": "Mobil"
+    },
+    "stats": {
+      "title": "Sonuçlar",
+      "clickRate": "Tıklama oranı {{rate}}",
+      "last30": "Son 30 gün gösterim",
+      "daily": "Son 30 gün, günlük gösterim"
     }
   },
   "paymentLinks": {
