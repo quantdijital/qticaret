@@ -1,8 +1,9 @@
-import { defineConfig, devices } from "@playwright/test"
+import { defineConfig, devices, type ReporterDescription } from "@playwright/test"
 import { SESSION_FILE } from "./support/paths"
 
 const baseURL = process.env["E2E_BASE_URL"] ?? "http://localhost:5173"
 const isCI = Boolean(process.env["CI"])
+const CI_REPORTERS: ReporterDescription[] = [["github"]]
 
 /**
  * The panel's e2e smoke tests (docs/07, docs/06): a temporary admin signs
@@ -20,7 +21,13 @@ export default defineConfig({
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
   workers: 2,
-  reporter: [[isCI ? "github" : "list"], ["html", { open: "never", outputFolder: "./.report" }]],
+  // In CI, `list` beside `github`'s annotations: each test's time in the log,
+  // what the two e2e shards are balanced by (adr/0081)
+  reporter: [
+    ...(isCI ? CI_REPORTERS : []),
+    ["list"],
+    ["html", { open: "never", outputFolder: "./.report" }],
+  ],
   use: {
     baseURL,
     locale: "tr-TR",
