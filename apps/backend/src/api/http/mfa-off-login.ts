@@ -1,4 +1,6 @@
+import { getAuthContextFromJwtToken } from "@medusajs/framework/http"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import type { ConfigModule } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { generateJwtTokenForAuthIdentity } from "@medusajs/medusa/api/auth/utils/generate-jwt-token"
 import { errorSummary, logger } from "../../lib/logging"
@@ -9,37 +11,44 @@ interface ChallengedLogin {
   token: string
 }
 
+type HttpConfig = ConfigModule["projectConfig"]["http"]
+
 const isChallenged = (body: unknown): body is ChallengedLogin =>
   typeof body === "object" &&
   body !== null &&
   (body as { mfa_required?: unknown }).mfa_required === true &&
   typeof (body as { token?: unknown }).token === "string"
 
-/** The identity the challenge's actorless token names (Medusa signed it in this same request). */
-function identityOf(token: string): string | null {
-  const payload = token.split(".")[1]
-  if (!payload) {
-    return null
-  }
-  try {
-    const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
-      auth_identity_id?: unknown
-    }
-    return typeof claims.auth_identity_id === "string" && claims.auth_identity_id
-      ? claims.auth_identity_id
-      : null
-  } catch {
-    return null
-  }
+/**
+ * The identity the challenge's actorless token names, its signature checked
+ * as Medusa's authentication checks it (same key, same options); null when
+ * it does not verify.
+ */
+function identityOf(token: string, http: HttpConfig): string | null {
+  const claims = getAuthContextFromJwtToken(
+    `Bearer ${token}`,
+    http.jwtSecret ?? "",
+    ["bearer"],
+    ["user"],
+    http.jwtPublicKey,
+    http.jwtVerifyOptions ?? http.jwtOptions
+  )
+  const id = claims?.auth_identity_id
+  return typeof id === "string" && id ? id : null
 }
 
 /**
  * The full sign-in token Medusa would give once the challenge is passed,
  * without the challenge: marked as having no 2FA, so neither Medusa's
- * authentication nor ours asks for it. Null when the identity has no user.
+ * authentication nor ours asks for it. Null when the token does not verify
+ * or the identity has no user.
  */
 async function tokenWithoutChallenge(req: MedusaRequest, token: string): Promise<string | null> {
-  const id = identityOf(token)
+  const { http } = req.scope.resolve(ContainerRegistrationKeys.CONFIG_MODULE).projectConfig
+  if (!http.jwtSecret) {
+    return null
+  }
+  const id = identityOf(token, http)
   if (!id) {
     return null
   }
@@ -47,10 +56,6 @@ async function tokenWithoutChallenge(req: MedusaRequest, token: string): Promise
     .resolve(Modules.AUTH)
     .retrieveAuthIdentity(id, { relations: ["provider_identities"] })
   if (!authIdentity.app_metadata?.["user_id"]) {
-    return null
-  }
-  const { http } = req.scope.resolve(ContainerRegistrationKeys.CONFIG_MODULE).projectConfig
-  if (!http.jwtSecret) {
     return null
   }
   return generateJwtTokenForAuthIdentity(
@@ -63,6 +68,24 @@ async function tokenWithoutChallenge(req: MedusaRequest, token: string): Promise
     },
     { secret: http.jwtSecret, expiresIn: http.jwtExpiresIn, options: http.jwtOptions }
   )
+}
+
+/** The challenged answer sent on: the plain token when there is one, else the challenge. */
+async function sendWithoutChallenge(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  json: MedusaResponse["json"],
+  body: ChallengedLogin
+): Promise<void> {
+  try {
+    const token = await tokenWithoutChallenge(req, body.token)
+    json(token ? { token } : body)
+  } catch (error) {
+    logger.warn({ event: "staff.mfa_off_login_failed", err: errorSummary(error) })
+    if (!res.headersSent) {
+      json(body)
+    }
+  }
 }
 
 /**
@@ -88,13 +111,7 @@ export function skipMfaChallengeWhenOff(
     if (res.statusCode >= 400 || !isChallenged(body)) {
       return json(body)
     }
-    void tokenWithoutChallenge(req, body.token).then(
-      (token) => json(token ? { token } : body),
-      (error: unknown) => {
-        logger.warn({ event: "staff.mfa_off_login_failed", err: errorSummary(error) })
-        json(body)
-      }
-    )
+    void sendWithoutChallenge(req, res, json, body)
     return res
   }
   next()
