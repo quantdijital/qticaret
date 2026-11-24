@@ -89,6 +89,11 @@ describe("Cloudflare's CF-Connecting-IP (adr/0044 Ek 2026-11-24)", () => {
     resetClientIpSecret()
   })
 
+  beforeEach(() => {
+    // The suite above leaves the word "undefined" behind when it had no secret
+    delete process.env["STOREFRONT_IP_SECRET"]
+  })
+
   const edge = "172.68.1.1"
   const viaCloudflare = (value: string) => request({ "cf-connecting-ip": value }, edge)
 
