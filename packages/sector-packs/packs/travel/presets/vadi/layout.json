@@ -84,7 +84,13 @@
       "more": null,
       "disc": "tint",
       "phone": "scroll",
-      "category_icons": {}
+      "category_icons": {},
+      "category_icons_by_handle": {
+        "yurt-ici-turlar": "map_pin",
+        "yurt-disi-turlar": "plane",
+        "gemi-turlari": "compass",
+        "etkinlik-ve-atolyeler": "calendar"
+      }
     },
     {
       "id": "geziyazilari",
@@ -201,6 +207,15 @@
       "ends_at": null,
       "variant": "standard",
       "image_ratio": "landscape"
+    },
+    {
+      "id": "vadiprogram",
+      "type": "program",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "accordion",
+      "title": "Gün gün yolculuk"
     }
   ]
 }

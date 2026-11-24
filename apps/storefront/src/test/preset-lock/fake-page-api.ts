@@ -53,6 +53,27 @@ const QUESTIONS = {
 }
 
 /**
+ * Its program (adr/0078), for a preset that lays the `program` section out:
+ * two numbered days, one with a text and its tags, so the section's variant
+ * is drawn and locked. A preset without the section never asks for it.
+ */
+const PROGRAM = {
+  program: {
+    unit: "day",
+    steps: [
+      {
+        label: null,
+        title: "Varış ve tanışma",
+        body_html: "<p>Buluşma noktasında karşılama, kısa tanışma ve ilk yürüyüş.</p>",
+        image: null,
+        tags: ["dinner", "accommodation"],
+      },
+      { label: null, title: "Serbest gün", body_html: null, image: null, tags: ["free_time"] },
+    ],
+  },
+}
+
+/**
  * The category's own text as the shop formatted it (adr/0075): a heading,
  * paragraphs and a list, long enough to open folded at the page's foot.
  */
@@ -107,6 +128,8 @@ export function pageAnswer(
       return REVIEWS
     case `${PRODUCT_PATH}/questions`:
       return QUESTIONS
+    case `${PRODUCT_PATH}/program`:
+      return PROGRAM
     case "/store/payment/installments":
       return installments(query)
     case "/store/listings/products":

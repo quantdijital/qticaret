@@ -26,7 +26,8 @@
       "variant": "standard",
       "sticky": true,
       "menu_images": "off",
-      "search_style": "icon"
+      "search_style": "icon",
+      "highlight_link": { "$href": "/magaza", "label": "Tur bul" }
     }
   ],
   "home": [
@@ -331,6 +332,15 @@
       "ends_at": null,
       "variant": "standard",
       "image_ratio": "landscape"
+    },
+    {
+      "id": "patikaprogram",
+      "type": "program",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "timeline",
+      "title": "Yürüyüş programı"
     }
   ]
 }
