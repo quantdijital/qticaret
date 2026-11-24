@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import { readFileSync, readdirSync, rmSync } from "node:fs"
 import { basename, join } from "node:path"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
@@ -11,9 +12,11 @@ jest.setTimeout(60 * 1000)
 
 // Where the local file provider stores uploads (its default upload_dir)
 const STATIC_DIR = join(process.cwd(), "static")
-const storedFiles = () => {
+// Other spec files running beside this one (other jest workers) upload into
+// the same folder: what a test stores is told by its own names, not a count
+const storedFiles = (token: string) => {
   try {
-    return readdirSync(STATIC_DIR)
+    return readdirSync(STATIC_DIR).filter((name) => name.includes(token))
   } catch {
     return []
   }
@@ -133,26 +136,29 @@ medusaIntegrationTestRunner({
     // Images only (adr/0061 C14 M4): nothing uploads a CSV here any more (Medusa's
     // product import is closed, F3.9; the catalog sheets read their own body)
     it("refuses a plain CSV and stores nothing", async () => {
-      const before = storedFiles().length
+      const token = `csv${randomUUID().slice(0, 8)}`
 
       const response = await upload(
-        form(["Product Handle,Title\nsef-bicagi,Şef Bıçağı\n", "Ürünler.csv", "text/csv"])
+        form(["Product Handle,Title\nsef-bicagi,Şef Bıçağı\n", `Ürünler-${token}.csv`, "text/csv"])
       )
 
       expect(response.status).toBe(400)
       expect(response.data.message).toBe("upload.unsupported_type")
-      expect(storedFiles()).toHaveLength(before)
+      expect(storedFiles(token)).toEqual([])
     })
 
     it("stores nothing when one file of several is refused", async () => {
-      const before = storedFiles().length
+      const token = `batch${randomUUID().slice(0, 8)}`
 
       const response = await upload(
-        form([PNG_1X1, "a.png", "image/png"], [EMPTY_SVG, "b.svg", "image/svg+xml"])
+        form(
+          [PNG_1X1, `a-${token}.png`, "image/png"],
+          [EMPTY_SVG, `b-${token}.svg`, "image/svg+xml"]
+        )
       )
 
       expect(response.status).toBe(400)
-      expect(storedFiles()).toHaveLength(before)
+      expect(storedFiles(token)).toEqual([])
     })
   },
 })
