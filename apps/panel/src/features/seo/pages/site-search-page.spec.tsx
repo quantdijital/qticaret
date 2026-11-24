@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { SynonymGroup } from "@/features/seo/api/synonyms"
 import { answerWritesWith } from "@/features/seo/site-search/synonyms.fixtures"
-import { SiteSearchPage } from "./site-search-page"
+import { SiteSearchTab } from "./site-search-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
@@ -60,7 +60,7 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <SiteSearchPage />
+      <SiteSearchTab />
     </QueryClientProvider>
   )
 }
@@ -73,7 +73,7 @@ const row = (term: string) => {
   return cell
 }
 
-describe("SiteSearchPage", () => {
+describe("SiteSearchTab", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     toast.success.mockReset()
@@ -110,6 +110,29 @@ describe("SiteSearchPage", () => {
     expect(await screen.findByText("1 grup bulundu")).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith("/admin/search/synonyms", {
       query: { offset: 25, limit: 25, q: "tisort" },
+    })
+  })
+
+  it("writes what is typed into Settings > SEO's address, on its own tab, from the first page", async () => {
+    answers()
+    renderPage()
+    await screen.findByText("tişört")
+
+    await userEvent.type(screen.getByRole("searchbox"), "kupa")
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalled()
+    })
+    const call = navigate.mock.lastCall?.[0] as {
+      to: string
+      search: (previous: Record<string, unknown>) => Record<string, unknown>
+    }
+    expect(call.to).toBe("/settings/seo")
+    // The redirects' own filter does not come along
+    expect(call.search({ part: "site-search", tab: "missing", page: 3 })).toEqual({
+      part: "site-search",
+      q: "kupa",
+      page: undefined,
     })
   })
 

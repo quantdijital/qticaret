@@ -4,7 +4,6 @@ import { Download, FileUp, MoreHorizontal, Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
-import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { Button } from "@qticaret/admin-ui/ui/button"
@@ -35,18 +34,18 @@ import { PathTester } from "@/features/seo/redirects/path-tester"
 import { RedirectDialog } from "@/features/seo/redirects/redirect-dialog"
 import { RulesTab } from "@/features/seo/redirects/rules-tab"
 import { REDIRECT_TABS } from "@/features/seo/search"
-import type { RedirectsSearch } from "@/features/seo/search"
+import type { RedirectsSearch, SeoSearch } from "@/features/seo/search"
 
-const route = getRouteApi("/_auth/seo/redirects")
+const route = getRouteApi("/_auth/settings/seo")
 const ALL = "all"
 
 /**
- * Redirects (docs/13 §4, adr/0017): the shop's own rules, the addresses
- * products and categories left behind, and the 404s visitors hit, with a
- * one-click way to send them somewhere. A tester shows what any address
- * answers now.
+ * Settings > SEO's redirects tab (docs/13 §4, adr/0017): the shop's own
+ * rules, the addresses products and categories left behind, and the 404s
+ * visitors hit, with a one-click way to send them somewhere. A tester
+ * shows what any address answers now.
  */
-export function RedirectsPage() {
+export function RedirectsTab() {
   const { t } = useTranslation()
   const search = route.useSearch()
   const navigate = useNavigate()
@@ -59,10 +58,11 @@ export function RedirectsPage() {
 
   const setSearch = (next: Partial<RedirectsSearch>) => {
     void navigate({
-      to: "/seo/redirects",
-      search: (previous: RedirectsSearch) => {
+      to: "/settings/seo",
+      search: (previous: SeoSearch) => {
         const merged = { ...previous, ...next }
         return {
+          part: "redirects",
           tab: merged.tab === "rules" ? undefined : merged.tab,
           // An emptied search box leaves the URL
           q: merged.q === "" ? undefined : merged.q,
@@ -78,16 +78,24 @@ export function RedirectsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        back={{ to: "/seo", label: t("nav.seo") }}
+    <>
+      <SectionCard
+        title={t("seo.redirects.tester.title")}
+        description={t("seo.redirects.tester.hint")}
+      >
+        <PathTester />
+      </SectionCard>
+      {/* The list with the screen's own actions in its header: the page's header is Settings > SEO's */}
+      <SectionCard
         title={t("seo.redirects.title")}
         description={t("seo.redirects.description")}
+        className="overflow-hidden"
+        flush
         action={
           <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" aria-label={t("seo.redirects.fileMenu")}>
+                <Button variant="outline" size="icon-sm" aria-label={t("seo.redirects.fileMenu")}>
                   <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
@@ -109,6 +117,7 @@ export function RedirectsPage() {
               </DropdownMenuContent>
             </DropdownMenu>
             <Button
+              size="sm"
               onClick={() => {
                 setAdding({})
               }}
@@ -118,14 +127,7 @@ export function RedirectsPage() {
             </Button>
           </>
         }
-      />
-      <SectionCard
-        title={t("seo.redirects.tester.title")}
-        description={t("seo.redirects.tester.hint")}
       >
-        <PathTester />
-      </SectionCard>
-      <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("seo.redirects.title")}
           value={tab}
@@ -189,7 +191,7 @@ export function RedirectsPage() {
             }}
           />
         )}
-      </section>
+      </SectionCard>
       <RedirectDialog
         open={adding !== null}
         onOpenChange={(open) => {
@@ -200,6 +202,6 @@ export function RedirectsPage() {
         initial={adding ?? undefined}
       />
       <ImportDialog open={importing} onOpenChange={setImporting} />
-    </div>
+    </>
   )
 }

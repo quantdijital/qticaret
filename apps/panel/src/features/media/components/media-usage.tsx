@@ -81,7 +81,7 @@ function Place({ use }: { use: MediaUse }) {
       )
     case "share_image":
       return (
-        <Link to="/settings/seo" className={LINK}>
+        <Link to="/settings/seo" search={{ part: "pages" }} className={LINK}>
           {t(`${U}.shareImageLink`)}
         </Link>
       )

@@ -54,7 +54,11 @@ export function SearchConsoleCard({ className }: { className?: string }) {
       ) : !search ? (
         <p className="text-[13px] text-muted-foreground">
           {t(`${S}.empty`)}{" "}
-          <Link to="/settings/seo" className="underline underline-offset-2">
+          <Link
+            to="/settings/seo"
+            search={{ part: "search" }}
+            className="underline underline-offset-2"
+          >
             {t(`${S}.setUp`)}
           </Link>
         </p>
