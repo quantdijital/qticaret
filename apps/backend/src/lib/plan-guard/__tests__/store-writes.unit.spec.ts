@@ -41,6 +41,8 @@ const STORE_WRITES: Readonly<Record<string, "cart" | "guarded" | "read" | "open"
   "POST /store/gift-cards/balance": "read",
   "POST /store/newsletter": "open",
   "POST /store/order-lookup": "read",
+  // adr/0080 §7: a pop-up's counters, numbers only; a suspended shop shows no pop-up anyway
+  "POST /store/popups/:id/events": "open",
   "POST /store/orders/:id/bookings/cancel": "open",
   "POST /store/orders/:id/cancel": "open",
   "POST /store/orders/:id/returns": "open",

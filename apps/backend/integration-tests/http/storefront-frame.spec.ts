@@ -12,6 +12,7 @@ interface Frame {
     product_addons: boolean
     booking: boolean
     collections: boolean
+    popups: boolean
   }
   marks?: { payments: string[]; carriers: string[] }
   storefront: {
@@ -94,6 +95,8 @@ medusaIntegrationTestRunner({
         booking: false,
         // Collections are on unless the shop turns them off
         collections: true,
+        // Pop-ups too (adr/0080): none shows until the shop makes one
+        popups: true,
       })
       expect(before.headers["cache-control"]).toContain("max-age=300")
       expect(script.status).toBe(400)
@@ -228,6 +231,7 @@ medusaIntegrationTestRunner({
         product_addons: true,
         booking: false,
         collections: true,
+        popups: true,
       })
     })
   },

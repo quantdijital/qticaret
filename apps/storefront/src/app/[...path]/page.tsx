@@ -4,8 +4,10 @@ import { t } from "@/lib/i18n"
 import { metadataOf } from "@/lib/seo/metadata"
 import { resolvePath } from "@/lib/store-api/requests"
 import { pagedSeo } from "@/lib/seo/paging"
+import { PopupPage } from "@/components/PopupPage"
 import { blogPageOf } from "@/lib/views/blog"
 import { collectionsOn } from "@/lib/views/collections-on"
+import { popupPageOfEntity } from "@/lib/views/popups"
 import { EntityScreen } from "@/screens/entity"
 import { requestedUrl } from "@/screens/url"
 
@@ -79,6 +81,12 @@ export default async function CatchAllPage({ params }: CatchAllProps) {
     case "not_found":
       return notFound()
     case "entity":
-      return <EntityScreen page={page} url={url} />
+      return (
+        <>
+          {/* What the page is, for the shop's pop-ups (adr/0080 §3); draws nothing */}
+          <PopupPage kind={popupPageOfEntity(page.entity_type)} />
+          <EntityScreen page={page} url={url} />
+        </>
+      )
   }
 }

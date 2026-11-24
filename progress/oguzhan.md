@@ -5,6 +5,10 @@
 ## 2026-11-24: adr/0077 §5 Ek, tarihli fiyat sırası
 
 - **Dal:** `oguzhan/tarihli-fiyat-sirasi`. `tarih`/`ay` varken fiyat sıralaması, fiyat süzgeci ve fiyat aralığı eşleşen ürünlerin aralıktaki en düşük kart fiyatıyla (`bookingCardFacts` ortak; `listing-dated-prices.ts`, sabit 4 okuma, 30 sn önbellek). Dizin sorgusuna `price.by_product` jsonb; tarih yokken sorgu birebir eski. Testler: birim (sorgu, okuma sayısı), HTTP `dated-price-sort.spec.ts` (CI). ADR §5 Ek, "Bilinen sınır" kapandı.
+## 2026-11-24: hazır görünüm boşlukları, handle ile kategori ikonu ve her üst bilgide eylem düğmesi
+
+- **Dal:** `oguzhan/ikon-ve-ust-dugme`. `categories`/`icons`'a `category_icons_by_handle` (kimlik > handle > görsel > baş harf); `highlight_link` (katalogdaki eylem düğmesi) `standard` ve `centered` üst bilgide de; panelde "Eylem düğmesi". Kilitli görünümlerin HTML'i ve stil özeti aynı. adr/0077 dalga 7 Ek.
+- **Sıradaki işler:** #312 birleşince Vadi'ye kategori ikonları (handle ile), Patika'ya üst bilgi düğmesi.
 ## 2026-11-24: tur görünümleri ekran denetimi düzeltmeleri (#312)
 
 - **Dal:** `oguzhan/seyahat-paketi-v2` (`dev` birleştirildi). Kargolanmayan üründe kargo/teslimat/iade vaadi yok (`promisesFor`, ücretsiz kargo satırı da); kapakta yandaki görsel taşan kartların başladığı yerde biter, güven kutusu varken arama kutusu aynı genişlikte; arama kutusu telefonda iki sütunlu ızgara, tarih alanları 1024 px'ten en az 10rem; ikonlu kategori sırası 4 ve altı öğede ortada; görsel üstü kartta fiyat başlığın altında; yaklaşan kalkışlar telefonda sıkı satır, Rota alt yazısı veriye uygun; bant `medium` örtüde bulut yumuşadı; tarihli sonuçta "Yalnızca stokta olanlar" yok, aramada "N sonuç"; paket kategorilerinde `visible` (travel'da dört ana tür açık); Patika/Vadi e-bülten metinleri; Ayder görselinin koyu sağ kenarı kırpıldı; tur görünümlerinde `hover_image` açık (sahip 2026-11-18).

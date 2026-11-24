@@ -1,4 +1,5 @@
 import type { PaymentKind } from "../checkout-views"
+import type { PopupType } from "../popup-views"
 
 /**
  * What a shopper just did on a theme's form, told to the storefront
@@ -13,6 +14,13 @@ export type ShopEvent =
   | { type: "add_to_cart"; variantId: string; quantity: number }
   /** The payment step was sent with a way to pay. */
   | { type: "add_payment_info"; payment: PaymentKind }
+  /** A pop-up shown, its button or code used, closed, or signed up from (adr/0080 §7). */
+  | {
+      type: "popup"
+      action: "view" | "click" | "close" | "signup"
+      popupId: string
+      popupType: PopupType
+    }
 
 export function emitShopEvent(event: ShopEvent): void {
   window.dispatchEvent(new CustomEvent<ShopEvent>(SHOP_EVENT, { detail: event }))

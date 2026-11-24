@@ -41,6 +41,8 @@ const OWN_STORE_WRITES: Readonly<Record<string, "closed" | "open">> = {
   "POST /store/gift-cards/balance": "open",
   "POST /store/newsletter": "closed",
   "POST /store/order-lookup": "open",
+  // adr/0080 §7: a dark storefront shows no pop-up to count
+  "POST /store/popups/:id/events": "closed",
   "POST /store/orders/:id/bookings/cancel": "open",
   "POST /store/orders/:id/cancel": "open",
   "POST /store/orders/:id/returns": "open",
