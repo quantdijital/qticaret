@@ -7,7 +7,9 @@ import type { SectionSaveIssue } from "./define"
  * The owner's own craft of a text task (adr/0074 §3) in a save of the
  * `ai_guidance` section: a task's entry sent without `craft` keeps the
  * stored one (an admin's save of its note never sends it, and never
- * clears it); a craft that reads as the default is no craft; and the
+ * clears it), and so do its note and examples (the owner's save of a
+ * craft alone never clears an admin's note; sent empty, they are
+ * cleared); a craft that reads as the default is no craft; and the
  * default's version is kept beside it (`craft_base`) by the server: set
  * when the craft's text changes, kept when it does not, and moved to the
  * current version only when sent as it (the panel's "keep mine" after a
@@ -56,7 +58,10 @@ export function mergeGuidance(
     }
     const old = Object.hasOwn(before.tasks, id) ? before.tasks[id] : undefined
     const rest = Object.entries(entry).filter(([key]) => key !== "craft" && key !== "craft_base")
-    tasks[id] = { ...Object.fromEntries(rest), ...craftFields(id, entry, old) }
+    // The note and the examples as the craft: left out of the save, the
+    // stored ones stay (the owner's save of a craft alone keeps an admin's note)
+    const kept = { extra: old?.extra ?? null, examples: old?.examples ?? [] }
+    tasks[id] = { ...kept, ...Object.fromEntries(rest), ...craftFields(id, entry, old) }
   }
   return { ...merged, tasks }
 }

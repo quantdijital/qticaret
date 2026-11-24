@@ -69,6 +69,31 @@ describe("a task's craft in a save", () => {
     })
   })
 
+  it("leaves an admin's note and examples in place when the owner saves the craft alone", () => {
+    const before = stored({ extra: "Markayı sona koy", examples: ["Örnek başlık"] })
+    const { after, issue } = save(before, { tasks: { seo_title: { craft: "Önce ürün adı." } } })
+    expect(issue).toBeNull()
+    expect(after.tasks["seo_title"]).toMatchObject({
+      extra: "Markayı sona koy",
+      examples: ["Örnek başlık"],
+      craft: "Önce ürün adı.",
+    })
+    // Sent empty, they are cleared: leaving out is not clearing
+    const cleared = save(after, { tasks: { seo_title: { extra: null, examples: [] } } })
+    expect(cleared.after.tasks["seo_title"]).toMatchObject({
+      extra: null,
+      examples: [],
+      craft: "Önce ürün adı.",
+    })
+  })
+
+  it("makes a first entry whole: no note and no examples unless sent", () => {
+    const { after } = save(full.parse(defaults), {
+      tasks: { seo_title: { craft: "Önce ürün adı." } },
+    })
+    expect(after.tasks["seo_title"]).toMatchObject({ extra: null, examples: [] })
+  })
+
   it("keeps its old version when sent unchanged, and takes the current when its text changes", () => {
     const before = stored({ craft: "Benim talimatım.", craft_base: OLD_BASE })
     const same = save(before, { tasks: { seo_title: { craft: "Benim talimatım." } } })

@@ -203,10 +203,11 @@ const taskGuidance = z
     craft_base: z.string().regex(CRAFT_VERSION).nullable().optional(),
   })
   .strict()
-  .transform((value): AiTaskGuidance => ({
-    extra: value.extra ?? null,
-    examples: value.examples ?? [],
-    // Left out stays left out: a save that does not send the craft keeps the stored one
+  // Left out stays left out: a save keeps the stored note, examples and
+  // craft it does not send (mergeGuidance makes the entry whole again)
+  .transform((value): Partial<AiTaskGuidance> => ({
+    ...(value.extra === undefined ? {} : { extra: value.extra }),
+    ...(value.examples === undefined ? {} : { examples: value.examples }),
     ...(value.craft === undefined ? {} : { craft: value.craft }),
     ...(value.craft_base === undefined ? {} : { craft_base: value.craft_base }),
   }))
