@@ -33,6 +33,13 @@ if (process.env.TEST_TYPE === "integration:http") {
   module.exports.testMatch = ["**/integration-tests/http/*.spec.[jt]s"]
   module.exports.workerIdleMemoryLimit = INTEGRATION_WORKER_MEMORY
   module.exports.setupFilesAfterEnv = PLAIN_FAILURES
+  // Migrations run once per run, into a template database each spec file's
+  // database is copied from (integration-tests/template/README.md)
+  module.exports.globalSetup = "./integration-tests/template/global-setup.js"
+} else if (process.env.TEST_TYPE === "integration:template") {
+  // The one run that builds that template; started by its global setup only
+  module.exports.testMatch = ["**/integration-tests/template/build-template.js"]
+  module.exports.setupFilesAfterEnv = PLAIN_FAILURES
 } else if (process.env.TEST_TYPE === "integration:modules") {
   module.exports.testMatch = ["**/src/modules/*/__tests__/**/*.[jt]s"]
   module.exports.workerIdleMemoryLimit = INTEGRATION_WORKER_MEMORY
