@@ -39,6 +39,7 @@
     "./section-search-box": "./src/store/section-search-box.ts",
     "./section-hero-full": "./src/store/section-hero-full.ts",
     "./section-collage": "./src/store/section-collage.ts",
+    "./section-program": "./src/store/section-program.ts",
     "./section-departures": "./src/store/section-departures.ts",
     "./section-pages": "./src/store/section-pages.ts",
     "./editor-bridge": "./src/editor-bridge.ts",

@@ -335,6 +335,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "booking.product_not_dated":
     "Bu ürün tarihli satılmıyor; önce ürünün satış biçimini kalkış tarihli yapın.",
   "booking.variant_unknown": "Seçilen varyant bu ürüne ait değil.",
+  "booking.program_text_invalid":
+    "Program adımının etiketinde, başlığında ya da görsel metninde izin verilmeyen karakter var.",
+  "booking.program_title_required": "Programın her adımına bir başlık yazın.",
+  "booking.program_body_invalid":
+    "Program adımının metni yalnız paragraf ve listelerden oluşabilir, en çok 2000 karakter.",
+  "booking.program_image_unknown":
+    "Program görseli ortam kütüphanesindeki görsellerden biri olmalı.",
+  "booking.program_tag_unknown": "Program etiketi listedekilerden biri olmalı.",
+  "booking.program_too_long": "Program en çok 30 adım olabilir.",
   "booking.slot_unknown": "Kalkış bulunamadı.",
   "booking.slot_full": "Bu kalkışta yeterli yer kalmadı.",
   "booking.slot_closed": "Bu kalkış satışa kapalı.",

@@ -24,6 +24,7 @@ import {
   Package,
   PanelBottom,
   PanelTop,
+  Route,
   ScanSearch,
   Search,
   ShoppingBag,
@@ -68,6 +69,7 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   shipping_facts: Truck,
   faq: CircleHelp,
   related_products: Boxes,
+  program: Route,
   trust_badges: BadgeCheck,
   newsletter: Mail,
   help: LifeBuoy,
@@ -106,6 +108,7 @@ function ownTitle(section: AnySection): string | null {
     case "rich_text":
     case "faq":
     case "related_products":
+    case "program":
     case "newsletter":
     case "help":
     case "price_bands":

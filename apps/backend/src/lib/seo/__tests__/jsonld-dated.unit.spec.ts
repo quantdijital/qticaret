@@ -108,4 +108,45 @@ describe("datedJsonLd", () => {
     expect(subTrips).toHaveLength(DATED_DEPARTURES)
     expect(subTrips[0]?.offers.availability).toBe("https://schema.org/SoldOut")
   })
+
+  // adr/0078: a trip's program as its itinerary, in order
+  it("names the program's steps as the trip's itinerary, a step without text by its title only", () => {
+    const [trip] = datedJsonLd(
+      {
+        type: "TouristTrip",
+        departures: [departure(5)],
+        itinerary: [
+          { name: "Göreme", description: "Vadiler ve kiliseler." },
+          { name: "Balon", description: null },
+        ],
+      },
+      PAGE
+    )
+    expect(trip?.["itinerary"]).toEqual({
+      "@type": "ItemList",
+      numberOfItems: 2,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Göreme", description: "Vadiler ve kiliseler." },
+        { "@type": "ListItem", position: 2, name: "Balon" },
+      ],
+    })
+  })
+
+  it("leaves the itinerary out when the program is absent or empty", () => {
+    for (const itinerary of [undefined, []]) {
+      const [trip] = datedJsonLd(
+        { type: "TouristTrip", departures: [departure(5)], ...(itinerary ? { itinerary } : {}) },
+        PAGE
+      )
+      expect(trip).not.toHaveProperty("itinerary")
+    }
+  })
+
+  it("gives an event no itinerary", () => {
+    const events = datedJsonLd(
+      { type: "Event", departures: [departure(5)], itinerary: [{ name: "A", description: null }] },
+      PAGE
+    )
+    expect(events[0]).not.toHaveProperty("itinerary")
+  })
 })

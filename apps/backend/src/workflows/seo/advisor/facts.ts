@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { missingDimensions, variantGtin } from "../../../lib/catalog"
+import { programOf } from "../../../lib/booking/program"
 import { storedSummaryText } from "../../../lib/catalog/summary"
 import type { AdvisorFacts, PageKind } from "../../../lib/seo/advisor"
 import { plainText } from "../../../lib/seo"
@@ -50,7 +51,9 @@ type ProductRow = Omit<FactRow, "attribute_template" | "product_extension" | "im
     primary_category_id?: string | null
     kind?: string | null
     summary_doc?: unknown
+    booking_mode?: string | null
   } | null
+  bookable?: { program?: unknown } | null
   attribute_template?: {
     definitions?:
       | ({
@@ -84,6 +87,8 @@ const PRODUCT_FIELDS = [
   "product_extension.primary_category_id",
   "product_extension.kind",
   "product_extension.summary_doc",
+  "product_extension.booking_mode",
+  "bookable.program",
   "attribute_template.definitions.id",
   "attribute_template.definitions.label",
   "attribute_template.definitions.is_required",
@@ -136,6 +141,10 @@ function productFacts(row: ProductRow): NonNullable<AdvisorFacts["product"]> {
         : []
     ),
     summary: storedSummaryText(row.product_extension?.summary_doc).length,
+    // adr/0078: counted only for a product sold by departure
+    ...(row.product_extension?.booking_mode === "departure"
+      ? { programSteps: programOf(row.bookable?.program)?.steps.length ?? 0 }
+      : {}),
   }
 }
 

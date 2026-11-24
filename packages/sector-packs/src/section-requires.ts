@@ -6,10 +6,11 @@ import { SectorPackError } from "./read-json"
  * Section type → the feature flag it needs (adr/0077 §8). Mirrors
  * `@qticaret/types`' `SECTION_REQUIRES` (the loader runs compiled, reading
  * no runtime value from that package); a test keeps them equal.
- * The first: upcoming departures (adr/0077 §10).
+ * Upcoming departures (adr/0077 §10) and a dated product's program (adr/0078).
  */
 export const SECTION_REQUIRES: Readonly<Record<string, string>> = {
   departures: "catalog.booking",
+  program: "catalog.booking",
 }
 
 /** Every section type a preset lays out: its groups' and its content pages'. */

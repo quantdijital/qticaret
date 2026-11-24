@@ -112,6 +112,22 @@ describe("the advisor", () => {
     expect(ids(good())).not.toContain("P-CONT-09")
   })
 
+  it("hints at a dated product without a program, never costing the score (adr/0078)", () => {
+    const empty = good({ product: { ...PRODUCT, programSteps: 0 } })
+    expect(findIssues(empty)).toEqual([
+      expect.objectContaining({
+        ruleId: "P-CONT-10",
+        severity: "info",
+        category: "content",
+        fix: { kind: "manual", action: "edit_program" },
+      }),
+    ])
+    expect(assess(empty).score).toBe(100)
+    expect(ids(good({ product: { ...PRODUCT, programSteps: 3 } }))).not.toContain("P-CONT-10")
+    // A product not sold by date carries no count: no hint
+    expect(ids(good())).not.toContain("P-CONT-10")
+  })
+
   it("scores the same page the same way every time", () => {
     const facts = good({ product: { ...PRODUCT, images: 1 } })
     expect(assess(facts)).toEqual(assess(facts))

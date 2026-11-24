@@ -3,6 +3,7 @@ import { BOOKING_MODULE } from "../../../../modules/booking"
 import type BookingModuleService from "../../../../modules/booking/service"
 import type { AuditedResource, Snapshot } from "../types"
 import { ID } from "../types"
+import { docDigest } from "./catalog"
 
 const bookingOf = (scope: unknown) =>
   (scope as MedusaContainer).resolve<BookingModuleService>(BOOKING_MODULE)
@@ -39,6 +40,30 @@ export const BOOKING_RESOURCES: readonly AuditedResource[] = [
     resourceType: "bookable",
     resourceId: (params) => params["id"] ?? null,
     snapshot: ({ scope, params }) => bookableSnapshot(scope, params["id"] ?? ""),
+  },
+  {
+    // adr/0078: the program's unit, step count and a digest; its words stay out of the log
+    method: "POST",
+    route: "POST /admin/products/:id/program",
+    pattern: new RegExp(`^/admin/products/(?<id>${ID})/program$`, "i"),
+    resourceType: "bookable_program",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: async ({ scope, params }) => {
+      const [row] = await bookingOf(scope).listBookables(
+        { product_id: params["id"] ?? "" },
+        { take: 1, select: ["id", "program"] }
+      )
+      const program = (row as { program?: { unit?: unknown; steps?: unknown } } | undefined)
+        ?.program
+      if (!program) {
+        return {}
+      }
+      return {
+        unit: typeof program.unit === "string" ? program.unit : null,
+        steps: Array.isArray(program.steps) ? program.steps.length : 0,
+        digest: docDigest(program),
+      }
+    },
   },
   {
     method: "POST",

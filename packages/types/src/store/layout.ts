@@ -33,6 +33,7 @@ import type { StorePhotoCollageSection } from "./section-collage.js"
 import type {
   CardVariant,
   FaqVariant,
+  ProgramVariant,
   RelatedProductsVariant,
   ReviewsVariant,
   TrustBadgesVariant,
@@ -321,6 +322,14 @@ export type StoreProductSection =
       columns_mobile?: ShelfPhoneColumns
       /** `carousel`: the scroller kit's settings. */
       scroller?: ScrollerSettings
+    })
+  | (StoreSectionLookPart & {
+      id: string
+      /** A dated product's program (adr/0078); needs `catalog.booking` (`section-requires`). */
+      type: "program"
+      title: string | null
+      /** One this build does not know reads as `timeline`. */
+      variant?: ProgramVariant
     })
 
 /** A section of every category page: above the product grid (`top`) or below it. */

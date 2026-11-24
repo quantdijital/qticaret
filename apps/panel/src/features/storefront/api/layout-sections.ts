@@ -10,6 +10,7 @@ import type {
   FeaturedProductSettings,
   MarqueeSettings,
   ProductSource,
+  ProgramVariant,
   RelatedProductsVariant,
   ReviewsVariant,
   ScrollerSettings,
@@ -387,6 +388,17 @@ export interface RelatedProductsSection extends BodySectionBase {
   scroller?: ScrollerSettings
 }
 
+/**
+ * A dated product's program (adr/0078) under its own block: only a title
+ * and how it is drawn; the steps are the product's (its Program card).
+ */
+export interface ProgramSection extends BodySectionBase {
+  type: "program"
+  title: string | null
+  /** The server fills `timeline` on reading. */
+  variant: ProgramVariant
+}
+
 /** One item of a scrolling strip: an optional icon, its line, an optional second line and link. */
 export interface MarqueeItem {
   /** One of the trust badges' icons; none: no icon. */
@@ -434,6 +446,7 @@ export type HomeSectionType = HomeSection["type"]
 /** Under the product's own block, on every product page. */
 export type ProductSection =
   | RelatedProductsSection
+  | ProgramSection
   | RichTextSection
   | BannerSection
   | FaqSection

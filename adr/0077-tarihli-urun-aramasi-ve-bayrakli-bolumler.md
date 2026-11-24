@@ -146,6 +146,7 @@ Yeni bir eşleme: `SECTION_REQUIRES` (`packages/types/src/store/section-requires
 - "Bölüm ekle" penceresi gruplu olur; bayrağa bağlı bölümler yetenek adıyla bir grupta toplanır ("Tarihli ürünler").
 - Görünüm kilidi fikstürü `features` alanını paketin bayrak dosyasından alır.
 - `GET /store/storefront` `features` yanıtına `booking` eklenir.
+- **Ek (2026-11-24):** eşlemenin ilk kullanıcısı ürün sayfasının `program` bölümüdür (`program → catalog.booking`, adr/0078 §6); üç kopya (types, backend, sektör paketi) ve eşitlik testleri buna göre güncellendi.
 
 ### 9. Hero "Tam görsel" biçimi
 

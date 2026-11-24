@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { salesClosed } from "../../lib/booking/cart-lines"
+import { programItinerary, programOf } from "../../lib/booking/program"
 import type { Kurus } from "../../lib/money"
 import { DATED_DEPARTURES } from "../../lib/seo/jsonld"
 import type { DatedFacts, DepartureFacts } from "../../lib/seo/jsonld"
@@ -69,6 +70,7 @@ export async function datedFactsOf(
       "bookable.cutoff_hours",
       "bookable.pax_by_variant",
       "bookable.timezone",
+      "bookable.program",
     ],
     filters: { id: productId },
   })
@@ -85,8 +87,14 @@ export async function datedFactsOf(
     bookingService(container).openSlots([bookable.id], { from: now, limit: DATED_DEPARTURES * 2 }),
     settings.getSection("catalog") as Promise<unknown> as Promise<CatalogSettings>,
   ])
+  // adr/0078: a trip names its program's steps; an event has no itinerary
+  const program =
+    catalog.dated_schema_type === "TouristTrip"
+      ? programOf((bookable as { program?: unknown }).program)
+      : null
   return {
     type: catalog.dated_schema_type,
     departures: departureFactsOf(product, bases, slots, now),
+    ...(program ? { itinerary: programItinerary(program) } : {}),
   }
 }

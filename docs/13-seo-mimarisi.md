@@ -117,6 +117,7 @@ Backend `jsonLd` dizisini üretir; tema değiştiremez (sadece ek blok ekleyebil
 | İçerik / blog | `Article`/`BlogPosting` (yazar, tarih, güncelleme tarihi, yayıncı); yazar seçilmişse `Person` (`name`, yazar sayfası `url`, `jobTitle`, `image`, `sameAs`; adr/0060) |
 | Blog yazarı | `ProfilePage` (`mainEntity` `Person`) + `BreadcrumbList` (adr/0060) |
 | Ürün Soru-Cevap (F10.10) | `QAPage` (gerçek kullanıcı soruları; mağazanın kendi eklediği SSS sorusu basılmaz, adr/0074 Ek 2026-11-21 (6)). **`FAQPage` kullanılmaz**: Google FAQ rich result'ı 7 Mayıs 2026'da tüm siteler için kaldırdı (doküman Haziran 2026'da silindi); `HowTo` Eylül 2023'ten beri yok. SSS içeriği kullanıcı için sayfada kalabilir, şema yatırımı yapılmaz. Tema düzenleyicinin SSS bölümü de (ana sayfa, ürün, kategori; içerik sayfasındaki "Sayfa SSS'si" dahil, adr/0073 Ek 2026-11-24 (2)) yalnız sayfada görünür, cevaplar HTML'dedir, `FAQPage` basılmaz (adr/0049 Ek 2026-11-06) |
+| Tarihli ürün (adr/0076 §10) | `Product` yanında mağaza ayarına göre `TouristTrip` (yaklaşan kalkışlar `subTrip`, her biri `Offer`'lı) ya da kalkış başına `Event`; kargo ve iade alanları yazılmaz. `TouristTrip`'te ürünün programı varsa `itinerary`: `ItemList` + adım başına `ListItem` (`position`, `name` = adım başlığı, `description` = gövdenin düz metni, ≤ 300 karakter); program yoksa ya da boşsa yazılmaz, `Event`'te hiç yok (adr/0078 §8) |
 | Yetişkin ürünler | `hasAdultConsideration` (2026-05, zorunlu; değer `SexualContentConsideration`) — kısıtlı kategori bayrağıyla (F13.4) eşlenir |
 
 Kurallar:

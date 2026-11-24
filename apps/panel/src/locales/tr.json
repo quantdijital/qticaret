@@ -4442,6 +4442,47 @@
       "note": "Kaydedince grup oluşturulur ve seçilen ürünlere eklenir.",
       "linked": "Grup kaydedildi ve bu ürüne eklendi.",
       "notApplied": "Grup kaydedildi ama ürünlere uygulanamadı; grubun sayfasından \"Ürünlere uygula\" ile yeniden deneyin."
+    },
+    "program": {
+      "title": "Program",
+      "description": "Tarihli ürünün gün gün ya da adım adım akışı. Ürün sayfasında, tasarımdaki Program bölümünde görünür.",
+      "unit": "Adımlara ne denir",
+      "units": {
+        "day": "Gün (1. Gün, 2. Gün)",
+        "step": "Adım (1. Adım, 2. Adım)"
+      },
+      "autoDay": "{{n}}. Gün",
+      "autoStep": "{{n}}. Adım",
+      "empty": "Henüz adım yok. Gün gün akışı ya da ders sırasını adım adım ekleyin; boş program ürün sayfasında görünmez.",
+      "add": "Adım ekle",
+      "limit": "Program en çok {{max}} adım olabilir.",
+      "label": "Etiket",
+      "stepTitle": "Başlık",
+      "titlePlaceholder": "Örn. Varış ve şehir turu",
+      "body": "Açıklama",
+      "bodyPlaceholder": "Bu adımda neler var? Kısa bir metin.",
+      "image": "Görsel",
+      "imageHint": "İsteğe bağlı; ortam kütüphanesinden.",
+      "noImage": "Görsel yok",
+      "tags": "Dahil olanlar",
+      "tagNames": {
+        "breakfast": "Kahvaltı",
+        "lunch": "Öğle yemeği",
+        "dinner": "Akşam yemeği",
+        "accommodation": "Konaklama",
+        "transport": "Ulaşım",
+        "free_time": "Serbest zaman"
+      },
+      "moveUp": "{{n}}. adımı yukarı taşı",
+      "moveDown": "{{n}}. adımı aşağı taşı",
+      "remove": "{{n}}. adımı sil",
+      "errors": {
+        "titleRequired": "Adıma bir başlık yazın.",
+        "titleTooLong": "Başlık en çok 120 karakter olabilir.",
+        "labelTooLong": "Etiket en çok 40 karakter olabilir.",
+        "bodyTooLong": "Açıklama en çok 2.000 karakter olabilir.",
+        "tooMany": "Program en çok 30 adım olabilir."
+      }
     }
   },
   "orders": {
@@ -6894,6 +6935,11 @@
           "why": "Kısa açıklama ürün adının altında, fiyatın üstünde görünür; alıcı ürünü bir bakışta tanır. SEO açıklaması yazılmamışsa arama sonucundaki açıklama da buradan alınır.",
           "how": "Kısa açıklama kartına ürünü birkaç cümleyle tanıtan bir metin yazın."
         },
+        "CONT-10": {
+          "title": "Programı boş.",
+          "why": "Tarihli üründe gün gün akış alıcının en çok baktığı bilgidir; ürün sayfasında görünür ve yapılandırılmış veride (TouristTrip) güzergâh olarak arama motorlarına gider.",
+          "how": "Program kartına adımları (gün, ders, oturum) başlık ve kısa metinle ekleyin."
+        },
         "IMG-01": {
           "title": "{{count}} görsel var; en az {{target}} önerilir.",
           "why": "Görselsiz ürün Google Alışveriş'te ve arama sonuçlarında gösterilmez; birden çok açı alıcının güvenini artırır.",
@@ -9027,6 +9073,10 @@
         "photo_collage": {
           "name": "Fotoğraf kolajı",
           "description": "3–7 fotoğraf bir arada: ilki büyük ya da hepsi eşit; isterseniz başlık, giriş ve her fotoğrafa kısa yazı ile bağlantı."
+        },
+        "program": {
+          "name": "Program",
+          "description": "Tarihli ürünün gün gün ya da adım adım akışı; adımlar ürünün Program kartından yazılır."
         }
       },
       "variants": {
@@ -9106,6 +9156,10 @@
         "reviews": {
           "grid": "Izgara",
           "carousel": "Kaydırıcı"
+        },
+        "program": {
+          "timeline": "Zaman çizelgesi",
+          "accordion": "Açılır liste"
         }
       },
       "look": {
@@ -9254,6 +9308,7 @@
         "related_products": "Benzer ürünler",
         "price_bands": "Fiyata göre alışveriş",
         "steps": "Nasıl işler?",
+        "program": "Program",
         "departures": "Yaklaşan kalkışlar"
       },
       "fields": {
@@ -11406,6 +11461,9 @@
           "scroll": "Yana kaydır",
           "stack": "Alt alta"
         }
+      },
+      "program": {
+        "note": "Adımlar her ürünün kendi sayfasındaki Program kartından yazılır. Programı olmayan üründe bu bölüm görünmez."
       },
       "productMain": {
         "image_ratio": {

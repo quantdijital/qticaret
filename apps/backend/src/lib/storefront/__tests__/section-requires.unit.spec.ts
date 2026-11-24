@@ -16,7 +16,7 @@ const CONTRACT_FILE = path.resolve(
   "../../../../../../packages/types/src/store/section-requires.ts"
 )
 
-// A list of the tests' own beside the real one (whose first is the departures)
+// A list of the tests' own beside the real one (the departures and a dated product's program)
 const REQUIRES = { departures: "catalog.booking", tour_map: "catalog.booking", hero: "x.other" }
 
 const sections = [
@@ -32,7 +32,7 @@ describe("sections that need a feature flag (adr/0077 §8)", () => {
     )
     expect(SECTION_REQUIRES).toEqual(contract.SECTION_REQUIRES)
     expect(CAPABILITY_GROUPS).toEqual(contract.CAPABILITY_GROUPS)
-    expect(SECTION_REQUIRES).toEqual({ departures: "catalog.booking" })
+    expect(SECTION_REQUIRES).toEqual({ departures: "catalog.booking", program: "catalog.booking" })
   })
 
   it("names a type's flag, none for a type off the list", () => {

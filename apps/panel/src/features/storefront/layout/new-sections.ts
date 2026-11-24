@@ -195,6 +195,10 @@ export function newBodySection(
       columns: 3,
     }
   }
+  if (type === "program") {
+    // adr/0078: the steps are the product's; the section only says how they are drawn
+    return { ...base, type, title: null, variant: "timeline" }
+  }
   if (type === "contact") {
     // The contact page's body: its text beside the form, the imprint below (K2)
     return { ...base, type, body: emptyBody(), form: "on", imprint: "on" }

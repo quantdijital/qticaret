@@ -14,7 +14,7 @@ import type { ContentDoc } from "./doc"
  */
 export const FOOTER_DOC_LIMITS = { nodes: 200, textLength: 1500, depth: 4 } as const
 
-const FOOTER_NODES: ReadonlySet<string> = new Set([
+export const FOOTER_NODES: ReadonlySet<string> = new Set([
   "doc",
   "paragraph",
   "text",
@@ -47,10 +47,24 @@ export const fitsFooter = (doc: ContentDoc): boolean => fitsBare(doc, FOOTER_DOC
 /**
  * Whether a checked document holds only paragraphs, line breaks and lists
  * (bold, italic and links as marks) within `limits`: a footer block's
- * text, an FAQ's answer (adr/0073 Ek 2026-11-24 (2)). A loop with its own
- * stack, as the content document's own bounds.
+ * text, an FAQ's answer (adr/0073 Ek 2026-11-24 (2)).
  */
-export function fitsBare(doc: ContentDoc, limits: BareDocLimits): boolean {
+export const fitsBare = (doc: ContentDoc, limits: BareDocLimits): boolean =>
+  fitsNarrowDoc(doc, FOOTER_NODES, limits)
+
+/** The bounds under the name a program step's narrowing uses (adr/0078). */
+export type NarrowDocLimits = BareDocLimits
+
+/**
+ * Whether a checked document holds only the nodes on a list, within
+ * bounds: a footer column's, a program step's (adr/0078). A loop with its
+ * own stack, as the content document's own bounds.
+ */
+export function fitsNarrowDoc(
+  doc: ContentDoc,
+  allowed: ReadonlySet<string>,
+  limits: NarrowDocLimits
+): boolean {
   const stack: [Node, number][] = [[doc, 0]]
   let nodes = 0
   let text = 0
@@ -60,7 +74,7 @@ export function fitsBare(doc: ContentDoc, limits: BareDocLimits): boolean {
     text += typeof node.text === "string" ? node.text.length : 0
     if (
       typeof node.type !== "string" ||
-      !FOOTER_NODES.has(node.type) ||
+      !allowed.has(node.type) ||
       nodes > limits.nodes ||
       text > limits.textLength ||
       depth > limits.depth

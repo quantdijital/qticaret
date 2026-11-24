@@ -37,11 +37,13 @@ export type CapabilityFlag = (typeof CAPABILITY_GROUPS)[Capability]["flag"]
 export type CapabilityFeature = (typeof CAPABILITY_GROUPS)[Capability]["feature"]
 
 /**
- * Section type → the flag it needs; a type not here needs none. The first:
- * upcoming departures (adr/0077 §10), a dated product's.
+ * Section type → the flag it needs; a type not here needs none. Upcoming
+ * departures (adr/0077 §10) and a dated product's program (adr/0078) draw
+ * only while dated products are on.
  */
 export const SECTION_REQUIRES: Readonly<Record<string, CapabilityFlag>> = {
   departures: "catalog.booking",
+  program: "catalog.booking",
 }
 
 /** The flag a section type needs, else null. */

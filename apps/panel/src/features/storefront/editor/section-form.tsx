@@ -12,6 +12,7 @@ import { MarqueeForm } from "./forms/marquee-form"
 import { NewsletterForm } from "./forms/newsletter-form"
 import { PriceBandsForm } from "./forms/price-bands-form"
 import { ProductsForm } from "./forms/products-form"
+import { ProgramForm } from "./forms/program-form"
 import { ProductMainForm } from "./forms/product-main-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
@@ -107,6 +108,8 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
       return <FaqForm section={section} {...props} />
     case "related_products":
       return <RelatedForm section={section} {...props} />
+    case "program":
+      return <ProgramForm section={section} {...props} />
     case "marquee":
       return <MarqueeForm section={section} {...props} />
     case "price_bands":

@@ -30,6 +30,7 @@ import {
   type ProductContext,
   reviewViews,
 } from "./section-data"
+import { programView } from "./program"
 import { relatedView } from "./related"
 import { richTextView } from "./rich-text"
 import { needsFlags, withFeatures } from "./section-features"
@@ -114,6 +115,8 @@ async function sectionView(
       return shelfView(section, t)
     case "related_products":
       return relatedView(section, t, context.product)
+    case "program":
+      return programView(section, t, context.product)
     case "brands": {
       const brands = await brandLinks(section.brand_ids)
       return brands.length > 0

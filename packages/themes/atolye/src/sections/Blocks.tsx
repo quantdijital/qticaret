@@ -27,6 +27,7 @@ import { Marquee } from "./Marquee"
 import { boxLook, panelGround } from "./panel-ground"
 import { type Block, blocksOf, headingId } from "./plan"
 import { PriceBands } from "./PriceBands"
+import { Program } from "./Program"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
 import { SearchBoxSection } from "./SearchBoxSection"
@@ -228,6 +229,8 @@ function BlockView({
       return <SearchBoxSection section={section} />
     case "photo_collage":
       return <PhotoCollage section={section} first={first} />
+    case "program":
+      return <Program section={section} />
     case "departures":
       return <Departures section={section} t={t} />
     case "marquee":

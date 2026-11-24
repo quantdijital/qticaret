@@ -4442,6 +4442,47 @@
       "note": "Saving creates the group and adds it to the chosen products.",
       "linked": "Group saved and added to this product.",
       "notApplied": "The group was saved but not applied to products; try again with \"Apply to products\" on its page."
+    },
+    "program": {
+      "title": "Program",
+      "description": "A dated product’s day-by-day or step-by-step plan. It shows on the product page, in the design’s Program section.",
+      "unit": "What the steps are called",
+      "units": {
+        "day": "Day (Day 1, Day 2)",
+        "step": "Step (Step 1, Step 2)"
+      },
+      "autoDay": "Day {{n}}",
+      "autoStep": "Step {{n}}",
+      "empty": "No steps yet. Add the days or the lessons one by one; an empty program does not show on the product page.",
+      "add": "Add a step",
+      "limit": "A program holds at most {{max}} steps.",
+      "label": "Label",
+      "stepTitle": "Title",
+      "titlePlaceholder": "E.g. Arrival and a city tour",
+      "body": "Description",
+      "bodyPlaceholder": "What happens in this step? A short text.",
+      "image": "Picture",
+      "imageHint": "Optional; from the media library.",
+      "noImage": "No picture",
+      "tags": "Included",
+      "tagNames": {
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "dinner": "Dinner",
+        "accommodation": "Accommodation",
+        "transport": "Transport",
+        "free_time": "Free time"
+      },
+      "moveUp": "Move step {{n}} up",
+      "moveDown": "Move step {{n}} down",
+      "remove": "Delete step {{n}}",
+      "errors": {
+        "titleRequired": "Give the step a title.",
+        "titleTooLong": "A title holds at most 120 characters.",
+        "labelTooLong": "A label holds at most 40 characters.",
+        "bodyTooLong": "A description holds at most 2,000 characters.",
+        "tooMany": "A program holds at most 30 steps."
+      }
     }
   },
   "orders": {
@@ -6894,6 +6935,11 @@
           "why": "The short description shows under the product name, above the price, so a shopper knows it at a glance. Without an SEO description of its own, the search result’s description is taken from it too.",
           "how": "Introduce the product in a few sentences in the Short description card."
         },
+        "CONT-10": {
+          "title": "The program is empty.",
+          "why": "On a dated product the step-by-step plan is what shoppers look for most; it shows on the product page and goes to search engines as the trip’s itinerary in its structured data.",
+          "how": "Add the steps (days, lessons, sessions) with a title and a short text in the Program card."
+        },
         "IMG-01": {
           "title": "{{count}} images; at least {{target}} are advised.",
           "why": "Products without images do not show in Google Shopping nor in rich results; several angles build trust.",
@@ -9027,6 +9073,10 @@
         "photo_collage": {
           "name": "Photo collage",
           "description": "3–7 photos together: the first large or all even; optionally a title, an intro and a caption and link per photo."
+        },
+        "program": {
+          "name": "Program",
+          "description": "A dated product’s day-by-day or step-by-step plan; the steps are written in the product’s Program card."
         }
       },
       "variants": {
@@ -9106,6 +9156,10 @@
         "reviews": {
           "grid": "Grid",
           "carousel": "Carousel"
+        },
+        "program": {
+          "timeline": "Timeline",
+          "accordion": "Accordion"
         }
       },
       "look": {
@@ -9254,6 +9308,7 @@
         "related_products": "Related products",
         "price_bands": "Shop by price",
         "steps": "How it works",
+        "program": "Program",
         "departures": "Upcoming departures"
       },
       "fields": {
@@ -11406,6 +11461,9 @@
           "scroll": "Slide sideways",
           "stack": "Stacked"
         }
+      },
+      "program": {
+        "note": "The steps are written in each product’s own Program card. A product without a program does not show this section."
       },
       "productMain": {
         "image_ratio": {

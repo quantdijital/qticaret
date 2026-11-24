@@ -42,6 +42,8 @@ export const Bookable = model
     reminder_days: model.number().default(2),
     // adr/0076 Ek 2026-11-23: online (today's way), request only, or both
     sale_mode: model.enum([...SALE_MODES]).default("online"),
+    // adr/0078: the ordered steps the page shows (`lib/booking/program`); null: none
+    program: model.json().nullable(),
   })
   .indexes([{ on: ["product_id"], unique: true }])
   .checks([

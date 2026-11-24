@@ -38,6 +38,7 @@ import type { StatsSectionView, StepsSectionView } from "./points-views"
 import type { SearchBoxSectionView } from "./search-form-views"
 import type { CategoryIconsView } from "./icon-views"
 import type { PhotoCollageSectionView } from "./collage-views"
+import type { ProgramSectionView } from "./program-views"
 import type { DeparturesSectionView } from "./departures-views"
 import type { StripGallerySectionView } from "./strip-views"
 import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
@@ -211,6 +212,7 @@ export type HomeSectionView = {
        */
       settings?: FaqSettings
     }
+  | ProgramSectionView
 )
 
 export interface HomePageView {

@@ -64,6 +64,7 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
   "google_rating",
   "price_bands",
   "related_products",
+  "program",
   "featured_product",
   "strip_gallery",
   "stats",
