@@ -1,4 +1,5 @@
 import { logger } from "../../logging"
+import { forgetProcessCaches } from "../process-caches"
 import { createVersionedCache } from "../versioned-cache"
 import type { VersionSource } from "../versioned-cache"
 
@@ -143,5 +144,17 @@ describe("createVersionedCache", () => {
     await cache.get()
 
     expect(bump).toHaveBeenCalledTimes(2)
+  })
+
+  it("drops a marker write still owed when the process forgets its caches", async () => {
+    const source = counter()
+    const bump = jest.spyOn(source, "bump").mockRejectedValueOnce(new Error("redis down"))
+    const cache = createVersionedCache({ load: () => Promise.resolve("v"), source, name: "test" })
+
+    await cache.invalidate()
+    forgetProcessCaches()
+    await cache.get()
+
+    expect(bump).toHaveBeenCalledTimes(1)
   })
 })

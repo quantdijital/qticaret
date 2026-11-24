@@ -142,11 +142,13 @@ export function createVersionedCache<T>({
       await bump()
     },
   }
-  // This process's copy only: the shared marker is not bumped
+  // This process's copy only: the shared marker is not bumped, and a bump
+  // still owed by the previous file's failed write is dropped with it
   registerProcessCache(() => {
     generation += 1
     value = undefined
     inFlight = undefined
+    bumpPending = false
   }, cache)
   return cache
 }

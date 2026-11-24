@@ -8,8 +8,9 @@
  * holder registers how it forgets; the suite forgets them all between files,
  * as a fresh process would have.
  *
- * Outside NODE_ENV=test nothing registers: a running shop never forgets on
- * purpose.
+ * Outside NODE_ENV=test nothing registers and forgetting does nothing: a
+ * running shop never forgets on purpose. Only test code imports
+ * `forgetProcessCaches` (ESLint refuses it elsewhere).
  */
 
 const REGISTRY = Symbol.for("qticaret.process-caches")
@@ -34,7 +35,10 @@ function registry(): Set<Entry> {
 /**
  * Registers how a process-held value is forgotten (tests only). `owner`, the
  * cache object itself, for caches a factory makes; none for a module's own
- * value, which lives as long as the process.
+ * value, which lives as long as the process. A factory registers each cache
+ * it makes, so it is to be called once per process (at module level), not
+ * per request: entries of dropped caches leave the list only when it is next
+ * forgotten.
  */
 export function registerProcessCache(forget: () => void, owner?: object): void {
   if (process.env["NODE_ENV"] !== "test") {
@@ -43,8 +47,11 @@ export function registerProcessCache(forget: () => void, owner?: object): void {
   registry().add({ forget, owner: owner ? new WeakRef(owner) : null })
 }
 
-/** Forgets every registered value; returns how many there were. */
+/** Forgets every registered value; returns how many there were. Tests only. */
 export function forgetProcessCaches(): number {
+  if (process.env["NODE_ENV"] !== "test") {
+    return 0
+  }
   const list = registry()
   let count = 0
   for (const entry of list) {
