@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import sharp from "sharp"
 import {
   DIGITAL_SOURCE_TYPES,
@@ -47,10 +48,19 @@ describe("the IPTC mark of an AI picture", () => {
   })
 
   it("does not take long on a crafted packet", () => {
-    const crafted = `DigitalSourceType ${"a".repeat(300_000)}`
-    const started = Date.now()
-    expect(digitalSourceTypeOf(crafted)).toBeNull()
-    expect(Date.now() - started).toBeLessThan(500)
+    // By how the time grows with the input (8× the input: ~8× when linear,
+    // ~64× when quadratic), not a wall-clock budget (adr/0081)
+    const growth = measureGrowth(
+      (n) => {
+        const crafted = `DigitalSourceType ${"a".repeat(n)}`
+        return () => {
+          expect(digitalSourceTypeOf(crafted)).toBeNull()
+        }
+      },
+      37_500,
+      { rounds: 3 }
+    )
+    expect(growth).toMatchObject({ linear: true })
   })
 
   it.each(["jpeg", "png", "webp", "avif"] as const)(

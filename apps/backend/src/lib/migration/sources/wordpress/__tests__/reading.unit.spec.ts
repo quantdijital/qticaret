@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import { contentDoc } from "../../../../content/doc"
 import { looksLikeWxr, wxrText } from "../file"
 import { bodyBlocks, documentOf, hrefOf, plainText } from "../html"
@@ -18,10 +19,20 @@ const refusalOf = (work: () => unknown): string | null => {
   return null
 }
 
-const within = (ms: number, work: () => unknown) => {
-  const started = performance.now()
-  work()
-  expect(performance.now() - started).toBeLessThan(ms)
+// Judged by how the time grows with the input (eight times the input, about
+// eight times as long when linear, sixty-four when quadratic), not by a
+// wall-clock budget a loaded CI runner can miss (adr/0081). The largest input
+// is the one the old one-second budget timed.
+const linear = (work: (text: string) => unknown, input: (size: number) => string, size: number) => {
+  const growth = measureGrowth(
+    (n) => {
+      const text = input(n)
+      return () => work(text)
+    },
+    size,
+    { rounds: 3 }
+  )
+  expect(growth).toMatchObject({ linear: true })
 }
 
 describe("reading a WordPress export as untrusted data", () => {
@@ -85,7 +96,7 @@ describe("PHP serialized meta, read as data", () => {
     expect(unserialize(`${"a:1:{i:0;".repeat(20)}N;${"}".repeat(20)}`)).toBeUndefined()
     expect(unserialize("a:99999999:{}")).toBeUndefined()
     expect(unserialize("nope")).toBeUndefined()
-    within(1_000, () => unserialize(`a:1:{s:3:"x";s:9:"${'";'.repeat(200_000)}`))
+    linear(unserialize, (n) => `a:1:{s:3:"x";s:9:"${'";'.repeat(n)}`, 25_000)
   })
 })
 
@@ -142,9 +153,9 @@ describe("a WordPress body as the content document", () => {
       ).html
     ).toBe("<h3>Kargo?</h3><p>2 gün</p> [Not] [1]")
     expect(expandShortcodes("[embed]https://video.example.com/x[/embed]son").html).toBe("son")
-    within(1_000, () => expandShortcodes("[a ".repeat(200_000)))
-    within(1_000, () => bodyBlocks("<b><i><a href='x'>".repeat(30_000)))
-    within(1_000, () => bodyBlocks("<ul><li>".repeat(30_000)))
+    linear(expandShortcodes, (n) => "[a ".repeat(n), 25_000)
+    linear(bodyBlocks, (n) => "<b><i><a href='x'>".repeat(n), 3_750)
+    linear(bodyBlocks, (n) => "<ul><li>".repeat(n), 3_750)
   })
 })
 

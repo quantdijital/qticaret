@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import { XmlRefused, escapeXml, findAll, parseXml, soapEnvelope, textOf, xmlElement } from "../xml"
 
 describe("xml (adr/0035)", () => {
@@ -74,8 +75,18 @@ describe("xml (adr/0035)", () => {
     const refused = (source: string) => () => parseXml(source)
     expect(refused("<a>&#x110000;</a>")).toThrow(XmlRefused)
     expect(refused("<a>&#xD800;</a>")).toThrow(XmlRefused)
-    const started = Date.now()
-    expect(refused(`<a ${"b".repeat(5_000_000)}></a>`)).toThrow(XmlRefused)
-    expect(Date.now() - started).toBeLessThan(1000)
+    // Quickly: by how the time grows with the input (8× the input: ~8× when
+    // linear, ~64× when quadratic), not a wall-clock budget (adr/0081)
+    const growth = measureGrowth(
+      (n) => {
+        const source = `<a ${"b".repeat(n)}></a>`
+        return () => {
+          expect(refused(source)).toThrow(XmlRefused)
+        }
+      },
+      625_000,
+      { rounds: 3 }
+    )
+    expect(growth).toMatchObject({ linear: true })
   })
 })
