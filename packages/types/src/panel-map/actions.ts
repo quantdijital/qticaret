@@ -1,4 +1,4 @@
-import type { PanelMapEntry } from "./types.js"
+import type { PanelMapEntry } from "./types"
 
 /** The jobs people start most (the command menu's shortcuts, docs/06 §5) and the common asks. */
 export const ACTION_ENTRIES = [

@@ -1,0 +1,4 @@
+{
+  "//": "CommonJS so the backend loads the panel's map from source at runtime (the assistant's find_screen, adr/0079 §4), as src/control-plane; bundlers read it either way. Imports here stay extensionless.",
+  "type": "commonjs"
+}

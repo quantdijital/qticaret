@@ -4,6 +4,8 @@ import { useState } from "react"
 import type { CSSProperties, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { SidebarInset, SidebarProvider } from "@qticaret/admin-ui/ui/sidebar"
+import { AssistantProvider } from "@/features/assistant/assistant-context"
+import { AssistantPanel } from "@/features/assistant/assistant-panel"
 import { appearanceQuery } from "@/features/settings/api/appearance"
 import { AppSidebar } from "./app-sidebar"
 import { MaintenanceBanner } from "./maintenance-banner"
@@ -28,6 +30,7 @@ const SIDEBAR_STYLE = {
  * menu of its own beside the page (the owner, 2026-10-31: on a laptop the
  * two side by side left the page cramped), so there the menu is icons that
  * open while pointed at; one open on the way in opens again on the way out.
+ * The assistant, when the shop has it on, sits on the right beside the page.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
@@ -67,35 +70,39 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
   const peeking = mode === "auto" && peek && !pinned
   return (
-    <SidebarProvider
-      style={SIDEBAR_STYLE}
-      open={pinned || peeking}
-      onOpenChange={(open) => {
-        setPinned(open)
-        setPeek(false)
-      }}
-    >
-      <a
-        href="#content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm"
+    <AssistantProvider>
+      <SidebarProvider
+        style={SIDEBAR_STYLE}
+        open={pinned || peeking}
+        onOpenChange={(open) => {
+          setPinned(open)
+          setPeek(false)
+        }}
       >
-        {t("app.skipToContent")}
-      </a>
-      <AppSidebar peek={peeking} {...(mode === "auto" ? { onPeek: setPeek } : {})} />
-      <SidebarInset className="min-w-0 bg-background">
-        <Topbar />
-        <PlanStatusBanner />
-        <MaintenanceBanner />
-        {/* SidebarInset is the page's one <main>; this is the skip link's target */}
-        <div
-          id="content"
-          tabIndex={-1}
-          className="w-full flex-1 px-[var(--page-padding)] py-6 outline-none lg:px-[var(--page-padding-wide)] lg:py-8"
+        <a
+          href="#content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm"
         >
-          {children}
-        </div>
-      </SidebarInset>
-      <ReauthHost />
-    </SidebarProvider>
+          {t("app.skipToContent")}
+        </a>
+        <AppSidebar peek={peeking} {...(mode === "auto" ? { onPeek: setPeek } : {})} />
+        <SidebarInset className="min-w-0 bg-background">
+          <Topbar />
+          <PlanStatusBanner />
+          <MaintenanceBanner />
+          {/* SidebarInset is the page's one <main>; this is the skip link's target */}
+          <div
+            id="content"
+            tabIndex={-1}
+            className="w-full flex-1 px-[var(--page-padding)] py-6 outline-none lg:px-[var(--page-padding-wide)] lg:py-8"
+          >
+            {children}
+          </div>
+        </SidebarInset>
+        {/* The assistant (adr/0079 §9): a column that pushes the page aside */}
+        <AssistantPanel />
+        <ReauthHost />
+      </SidebarProvider>
+    </AssistantProvider>
   )
 }

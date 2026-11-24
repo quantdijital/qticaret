@@ -49,6 +49,8 @@ export interface AiServicesAnswer {
   tasks: AiTaskView[]
   /** `own_keys` false: the package leaves the shop's own key out; stored keys are kept, unused. */
   flags: { own_keys: boolean }
+  /** Connected services the panel assistant runs on (tool calling verified, adr/0079 §8). */
+  assistant_services?: string[]
 }
 
 export interface AiUsageLine {

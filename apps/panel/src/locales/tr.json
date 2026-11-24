@@ -3235,6 +3235,7 @@
     "canceled": "İptal"
   },
   "command": {
+    "ask": "Yardımcıya sor: {{text}}",
     "title": "Komut menüsü",
     "description": "Sipariş, müşteri, ürün ya da kargo arayın; bir sayfaya gidin ya da bir işlem çalıştırın.",
     "placeholder": "Sipariş no, müşteri, ürün, SKU, takip no ya da sayfa…",
@@ -13055,6 +13056,70 @@
     }
   },
   "ai": {
+    "assistant": {
+      "title": "Yardımcı",
+      "open": "Yardımcı",
+      "close": "Yardımcıyı kapat",
+      "newChat": "Yeni sohbet",
+      "resize": "Yardımcının genişliği",
+      "placeholder": "Ne yapmak istiyorsunuz?",
+      "send": "Gönder",
+      "hint": "Müşteri adı, telefon gibi kişisel bilgi yazmayın; sipariş numarasıyla sorun.",
+      "thinking": "Bakıyorum…",
+      "emptyTitle": "Panelde aradığınızı sorun",
+      "emptyText": "Ne yapmak istediğinizi yazın; yardımcı işin yapıldığı ekranı gösterir.",
+      "examplesLabel": "Örnek sorular",
+      "go": "Götür: {{name}}",
+      "you": "Siz",
+      "log": "Sohbet",
+      "examples": {
+        "general": {
+          "one": "Kargo ücretini nereden değiştiririm?",
+          "two": "Havale bilgilerimi nereye yazarım?",
+          "three": "Yeni ürünü nasıl eklerim?"
+        },
+        "orders": {
+          "one": "Kargoya verilecek siparişler nerede?",
+          "two": "İade talepleri nerede?",
+          "three": "Fatura sağlayıcısını nereden bağlarım?"
+        },
+        "products": {
+          "one": "Stoğu azalan ürünleri nerede görürüm?",
+          "two": "Ürünlere toplu indirim nasıl yapılır?",
+          "three": "Ürünün arama başlığını nereden düzenlerim?"
+        },
+        "settings": {
+          "one": "Alan adını nereden bağlarım?",
+          "two": "KVKK metinleri nerede?",
+          "three": "Kapıda ödemeyi nereden açarım?"
+        },
+        "reports": {
+          "one": "En çok satan ürünler hangi raporda?",
+          "two": "Stok raporu nerede?",
+          "three": "Raporu Excel olarak nasıl indiririm?"
+        }
+      },
+      "errors": {
+        "assistant_turn_limit": "Bu sohbet çok uzadı. Yeni sohbet başlatıp yeniden sorun.",
+        "assistant_daily_limit": "Yardımcının bugünkü kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz.",
+        "credits_exhausted": "Bu ayın yapay zekâ kredisi bitti.",
+        "assistant_no_tool_service": "Yardımcıyı çalıştırabilecek bağlı bir yapay zekâ servisi yok. Mağaza sahibi Ayarlar › Yapay zekâ'dan bağlayabilir.",
+        "assistant_off": "Yardımcı kapalı. Mağaza sahibi Ayarlar › Yapay zekâ'dan açabilir."
+      },
+      "setting": {
+        "title": "Yardımcı",
+        "description": "Panelin sağında açılan yardımcı: ne yapmak istediğinizi yazınca işin yapıldığı ekranı gösterir. Kısayolu ⌘J / Ctrl+J.",
+        "detail": "Personelin yazdığı metin mağazanın bağlı yapay zekâ servisine gider. Sohbet en çok 24 saat tutulur; Yeni sohbet ya da oturumu kapatınca hemen silinir.",
+        "ownerOnly": "Personelin yazdığı metin dış servise gittiği için bu ayarı yalnız mağaza sahibi açıp kapatabilir.",
+        "connect": "Yapay zekâyı bağla: yukarıdaki listeden araç çağırmayı destekleyen bir servis bağlayınca açılabilir.",
+        "confirmTitle": "Yardımcı açılsın mı?",
+        "confirmDescription": "Açmadan önce yardımcının ne yaptığını ve metnin nereye gittiğini okuyun.",
+        "confirmWhat": "Ne yapar: personelin sorusuna göre paneldeki ilgili ekranı gösterir. Kendiliğinden hiçbir şeyi değiştirmez.",
+        "confirmWhere": "Metin nereye gider: personelin yazdığı metin mağazanın bağlı yapay zekâ servisine, mağazanın o servisle sözleşmesiyle gider; servis yurt dışında olabilir. Müşteri adı, telefon gibi kişisel bilgi yazılmamalıdır.",
+        "confirmKeep": "Saklama: sohbet en çok 24 saat tutulur; Yeni sohbet ya da oturumu kapatınca hemen silinir. Yazılan metin veritabanına ve kayıtlara yazılmaz.",
+        "confirmAction": "Yardımcıyı aç"
+      }
+    },
     "title": "Yapay zekâ",
     "description": "Kendi anahtarınızla bağladığınız servisler ürün metni ve görsel taslakları hazırlar.",
     "notInPlan": "Paketiniz kendi anahtarınızla yapay zekâ kullanmayı kapsamıyor. Kayıtlı anahtarlar silinmez, paketiniz değişince yeniden çalışır.",

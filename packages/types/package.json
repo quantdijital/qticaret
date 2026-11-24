@@ -44,7 +44,10 @@
     "./section-departures": "./src/store/section-departures.ts",
     "./section-pages": "./src/store/section-pages.ts",
     "./editor-bridge": "./src/editor-bridge.ts",
-    "./panel-map": "./src/panel-map/index.ts",
+    "./panel-map": {
+      "qt-compiled": "./dist/panel-map/index.js",
+      "default": "./src/panel-map/index.ts"
+    },
     "./control-plane": {
       "qt-compiled": "./dist/control-plane/index.js",
       "default": "./src/control-plane/index.ts"
@@ -52,7 +55,7 @@
     "./control-plane/testing": "./src/control-plane/testing.ts"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && cp src/control-plane/package.json dist/control-plane/package.json",
+    "build": "tsc -p tsconfig.build.json && cp src/control-plane/package.json dist/control-plane/package.json && cp src/panel-map/package.json dist/panel-map/package.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

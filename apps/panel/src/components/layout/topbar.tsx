@@ -16,6 +16,7 @@ import {
 import { Kbd, KbdGroup } from "@qticaret/admin-ui/ui/kbd"
 import { Separator } from "@qticaret/admin-ui/ui/separator"
 import { SidebarTrigger } from "@qticaret/admin-ui/ui/sidebar"
+import { AssistantButton } from "@/features/assistant/assistant-button"
 import { useCurrentUser, useLogout } from "@/features/auth/api/me"
 import { useStaff } from "@/features/auth/api/staff"
 import { NotificationBell } from "@/features/notifications/notification-bell"
@@ -29,7 +30,7 @@ function initials(name: string): string {
   return letters.map((part) => (part ?? "").slice(0, 1).toLocaleUpperCase("tr")).join("")
 }
 
-/** Search, the shop's storefront and the account, above every page. */
+/** Search, the shop's storefront, the assistant (adr/0079 §9) and the account, above every page. */
 export function Topbar() {
   const { t } = useTranslation()
   const [commandOpen, setCommandOpen] = useState(false)
@@ -73,6 +74,7 @@ export function Topbar() {
             </a>
           </Button>
         ) : null}
+        <AssistantButton />
         <NotificationBell />
         <AccountMenu />
       </div>
