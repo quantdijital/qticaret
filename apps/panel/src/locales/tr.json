@@ -574,9 +574,10 @@
       },
       "etbisQr": {
         "title": "ETBİS karekodu",
-        "hint": "ETBİS'e (eticaret.gov.tr) kayıt olunca verilen karekod; vitrinin altbilgisinde gösterilir. İsteğe bağlı.",
-        "size": "ETBİS'ten indirdiğiniz karekod görselini olduğu gibi yükleyin.",
-        "none": "Karekod yok"
+        "hint": "ETBİS'e (eticaret.gov.tr) kayıt olunca verilen karekod; indirdiğiniz görseli olduğu gibi yükleyin. Vitrinin altbilgisinde gösterilir. İsteğe bağlı.",
+        "none": "Karekod yok",
+        "set": "Karekod eklendi",
+        "choose": "Yükle"
       }
     },
     "seo": {
