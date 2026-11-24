@@ -23,6 +23,14 @@ interface Listing {
 interface Fact {
   booking?: Record<string, unknown>
 }
+/** A day of the calendar, or a row of the upcoming departures, as the test reads it. */
+interface Shown {
+  product: { id: string }
+  date: string
+  from_price: number | null
+  before?: number
+  departures: number
+}
 
 const HOUR = 60 * 60 * 1000
 const DAY = 24 * HOUR
@@ -124,6 +132,54 @@ medusaIntegrationTestRunner({
         .resolve(ContainerRegistrationKeys.QUERY)
         .graph({ entity: "cart", fields: ["item_total"], filters: { id: cart.id } })
       return Math.round(Number((data[0] as { item_total: unknown }).item_total) * 100) / 100
+    }
+
+    /**
+     * Two tours' prices for their departure (8 days on, in "ege-turlari") where the
+     * storefront shows them: the page's departures, the category's calendar and
+     * upcoming departures, and the first tour's structured data.
+     */
+    const departureShown = async (promotedId: string, codedId: string) => {
+      const get = async <T>(url: string) =>
+        (await settle(http.get<T>(url, { headers: store.headers }))).data
+      const prices = async (productId: string) =>
+        (
+          await get<{ booking: { slots: { prices: unknown[] }[] } }>(
+            `/store/products/${productId}/booking?region_id=${shop.regionId}`
+          )
+        ).booking.slots[0]?.prices
+      const calendar = await get<{ days: Shown[] }>(
+        `/store/departures/calendar?month=${dayAhead(8).slice(0, 7)}&kategori=ege-turlari`
+      )
+      const upcoming = await get<{ departures: Shown[] }>(
+        "/store/departures?kategori=ege-turlari&limit=6"
+      )
+      const row = (productId: string) => {
+        const found = upcoming.departures.find((each) => each.product.id === productId)
+        return found && { from_price: found.from_price, before: found.before }
+      }
+      // Structured data needs the canonical host: its URLs are absolute
+      await staff("/admin/platform-settings/seo", { canonical_host: "ornek.com" })
+      const { data } = await http.get<{ product: { handle: string } }>(
+        `/admin/products/${promotedId}?fields=handle`,
+        { headers: admin.headers }
+      )
+      const path = encodeURIComponent(`/urun/${data.product.handle}`)
+      const seo = await get<{ seo?: { jsonLd: Record<string, unknown>[] } }>(
+        `/store/seo/resolve?path=${path}`
+      )
+      const trip = (seo.seo?.jsonLd ?? []).find((block) => block["@type"] === "TouristTrip") as
+        { subTrip?: { offers?: { price?: string } }[] } | undefined
+      return {
+        page: { promoted: await prices(promotedId), coded: await prices(codedId) },
+        calendar: calendar.days.map(({ from_price, before, departures }) => ({
+          from_price,
+          before,
+          departures,
+        })),
+        upcoming: { promoted: row(promotedId), coded: row(codedId) },
+        jsonld: trip?.subTrip?.[0]?.offers?.price,
+      }
     }
 
     beforeEach(async () => {
@@ -319,6 +375,20 @@ medusaIntegrationTestRunner({
       // The index and the date search filter by the price the card says
       expect(indexed.data.product_ids).toEqual([promoted.productId])
       expect(dated.data.product_ids).toEqual([promoted.productId])
+      // adr/0076 Ek "kalkış fiyatı promosyonlu": the page, the calendar, the upcoming
+      // departures and the structured data say the card's price too
+      const shown = await departureShown(promoted.productId, coded.productId)
+      expect(shown.page).toEqual({
+        promoted: [{ variant_id: promoted.variantId, amount: 1200, before: 1500 }],
+        coded: [{ variant_id: coded.variantId, amount: 1500 }],
+      })
+      // Both tours leave that day: the lowest, the promoted one's
+      expect(shown.calendar).toEqual([{ from_price: 1200, before: 1500, departures: 2 }])
+      expect(shown.upcoming).toEqual({
+        promoted: { from_price: 1200, before: 1500 },
+        coded: { from_price: 1500 },
+      })
+      expect(shown.jsonld).toBe("1200.00")
       // And the cart charges it: a guest's place on that departure, through the booking route
       expect(await bookedTotal(promoted.variantId, promoted.slotIds[0] ?? "")).toBe(1200)
     })

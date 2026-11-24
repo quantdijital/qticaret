@@ -139,4 +139,28 @@ describe("Atölye's upcoming departures", () => {
     expect(html.match(/bg-media\b/g)).toHaveLength(2)
     expect(html).toContain("Son 3 yer")
   })
+
+  // adr/0076 Ek "kalkış fiyatı promosyonlu": the promoted price, struck through only when sent
+  it("strikes the price before an automatic promotion through when the backend sends one", async () => {
+    extras.upcomingDepartures.mockResolvedValue([
+      departure("kapadokya", "2026-12-12T06:00:00Z", { from_price: 1200, before: 1500 }),
+      departure("efes", "2026-12-14T06:00:00Z", { from_price: 1400.4 }),
+    ])
+    const view = await departuresView(section(), t)
+
+    expect(view?.rows.map((row) => row.price)).toEqual([
+      {
+        current: "1.200,00 TL'den itibaren",
+        before: "1.500,00 TL",
+        from: false,
+        discount: 20,
+        saving: "300,00 TL",
+      },
+      { current: "1.400,40 TL'den itibaren", before: null, from: false, discount: null },
+    ])
+    const html = home(view ? [view] : [])
+    // The theme's own price part strikes it through, as on an ordinary card
+    expect(html).toMatch(/<s [^>]*>.*1\.500,00 TL<\/s>/)
+    expect(html.match(/<s /g)).toHaveLength(1)
+  })
 })

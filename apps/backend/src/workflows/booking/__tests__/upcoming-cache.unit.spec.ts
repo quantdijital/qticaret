@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { BOOKING_MODULE } from "../../../modules/booking"
 import type { DepartureMatch, SlotAvailability } from "../../../modules/booking/service"
+import { PRICE_HISTORY_MODULE } from "../../../modules/price-history"
 import { SEARCH_INDEX_MODULE } from "../../../modules/search-index"
 import { clearUpcomingCaches, upcomingDepartures } from "../upcoming"
 
@@ -78,6 +79,8 @@ function shop() {
     [BOOKING_MODULE]: booking,
     [SEARCH_INDEX_MODULE]: { listing },
     [ContainerRegistrationKeys.QUERY]: { graph },
+    // No price recorded and (the query reads none) no promotion: the card's price as it is
+    [PRICE_HISTORY_MODULE]: { historyOf: () => Promise.resolve(new Map()) },
   }
   const container = { resolve: (key: string) => services[key] } as unknown as MedusaContainer
   const reads = (entity: string) =>

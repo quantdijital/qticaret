@@ -7,14 +7,19 @@ import {
   salesClosed,
 } from "../../lib/booking/cart-lines"
 import { payingCategoryIds } from "../../lib/booking/categories"
-import { toMedusaAmount } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import type { DepartureDates, SlotAvailability } from "../../modules/booking/service"
-import { basePriceRows, cardUnitDisplays, pricingOf } from "./card-price"
+import {
+  baseAmounts,
+  basePriceRows,
+  lira,
+  lowestShown,
+  placeDisplays,
+  pricingOf,
+  struck,
+} from "./card-price"
 import type { CardShown } from "./card-price"
 import { bookingService } from "./cart/target"
-
-export { basePrices } from "./card-price"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -80,9 +85,6 @@ export interface PayingUnit {
   amount: Kurus
 }
 
-/** Kuruş as the currency's amount a shopper reads (1750.5), the card's unit. */
-export const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
-
 /** Its paying price categories, the main one first (an infant who takes no place is not a "from" price). */
 export function payingVariants(product: DatedCardProduct): string[] {
   return payingCategoryIds(product.variants, product.bookable?.pax_by_variant)
@@ -113,17 +115,6 @@ export function payingUnitAt(
     }
   }
   return null
-}
-
-/** The same as a price: one or none. */
-export function payingPricesAt(
-  product: DatedCardProduct,
-  bases: ReadonlyMap<string, Kurus | null>,
-  adjustments: Record<string, number> | null,
-  currencyCode: string
-): Kurus[] {
-  const unit = payingUnitAt(product, bases, adjustments, currencyCode)
-  return unit ? [unit.amount] : []
 }
 
 /** The departures on sale now: open, with a place free, sales not closed. */
@@ -174,9 +165,11 @@ export function cardUnits(
  * A dated card's fact from its base prices and its open slots (by start):
  * the first slot whose sales are not closed is the next departure; the
  * from price is the lowest of its places (`cardUnits`) as shown (`shown`,
- * by category: the automatic promotions taken off, the price before them
- * when the price-before rule allows); a place without a display is its
- * own price.
+ * by `placeKey`: the automatic promotions taken off, the price before
+ * them when the price-before rule allows); a place without a display is
+ * its own price. `shown` has no default, here and in the calendar, the
+ * upcoming departures and the structured data: a caller that left it out
+ * would say a price without the promotions the cart takes off.
  */
 export function bookingCardFactOf(
   product: DatedCardProduct,
@@ -184,25 +177,18 @@ export function bookingCardFactOf(
   slots: readonly SlotAvailability[],
   currencyCode: string,
   now: Date,
-  inRange = false,
-  shown: ReadonlyMap<string, CardShown> = new Map()
+  inRange: boolean,
+  shown: ReadonlyMap<string, CardShown>
 ): BookingCardFact | null {
   const bookable = product.bookable
   if (!bookable || product.product_extension?.booking_mode !== "departure") {
     return null
   }
   const selling = sellingSlots(slots, bookable.cutoff_hours, now)
-  let lowest: CardShown | null = null
-  for (const unit of cardUnits(product, bases, slots, currencyCode, now)) {
-    const price = shown.get(unit.variant_id) ?? { current: unit.amount, before: null }
-    if (!lowest || price.current < lowest.current) {
-      lowest = price
-    }
-  }
-  const before = lowest?.before ?? null
+  const lowest = lowestShown(cardUnits(product, bases, slots, currencyCode, now), shown)
   const fact: BookingCardFact = {
     from_price: lowest === null ? null : lira(lowest.current),
-    ...(lowest && before !== null && before > lowest.current ? { before: lira(before) } : {}),
+    ...struck(lowest),
     currency_code: currencyCode,
     next_departure: selling[0]?.starts_at.toISOString() ?? null,
     timezone: bookable.timezone,
@@ -243,13 +229,13 @@ export async function bookingCardFacts(
       ? service.windowSlots(bookableIds, { ...window, now }, STORE_SLOTS_LIMIT)
       : service.openSlots(bookableIds, { from: now, limit: STORE_SLOTS_LIMIT }),
   ])
-  const bases = new Map([...rows].map(([id, row]) => [id, row?.calculated ?? null]))
+  const bases = baseAmounts(rows)
   const slotsOf = (product: DatedCardProduct) =>
     slots.filter((slot) => slot.bookable_id === product.bookable?.id)
   const units = dated.flatMap((product) =>
     cardUnits(product, bases, slotsOf(product), pricing.currency_code, now)
   )
-  const shown = await cardUnitDisplays(container, units, rows, pricing.currency_code, now)
+  const shown = await placeDisplays(container, units, rows, pricing.currency_code, now)
   const facts = new Map<string, BookingCardFact>()
   for (const product of dated) {
     const fact = bookingCardFactOf(

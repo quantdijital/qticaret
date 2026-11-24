@@ -10,33 +10,46 @@ import { CATALOG_BOOKING } from "../../modules/platform-settings/features"
 import type { CatalogSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type { SlotAvailability } from "../../modules/booking/service"
-import { basePrices, bookingCardFactOf } from "../booking/card-facts"
+import { bookingCardFactOf, cardUnits } from "../booking/card-facts"
 import type { DatedCardProduct } from "../booking/card-facts"
+import { baseAmounts, basePriceRows, placeDisplays } from "../booking/card-price"
+import type { CardShown } from "../booking/card-price"
 import { bookingService } from "../booking/cart/target"
 
 type Container = Pick<MedusaContainer, "resolve">
 
+/** The departures its structured data names: still on sale, the first `DATED_DEPARTURES`. */
+function namedSlots(
+  product: DatedCardProduct,
+  slots: readonly SlotAvailability[],
+  now: Date
+): SlotAvailability[] {
+  const cutoff = product.bookable?.cutoff_hours ?? 0
+  return slots
+    .filter((slot) => slot.status === "open" && !salesClosed(slot.starts_at, cutoff, now))
+    .slice(0, DATED_DEPARTURES)
+}
+
 /**
  * A departure as its structured data says it: its times, the lowest price a
  * place sells at then (the card's rule, for this departure alone: a guest's
- * price in lira, each category's difference added) and whether one is free.
+ * price in lira, each category's difference added, the automatic promotions
+ * taken off as `shown` says by `placeKey`, adr/0076 Ek "kalkış fiyatı
+ * promosyonlu"; never a price struck through) and whether one is free.
  */
 export function departureFactsOf(
   product: DatedCardProduct,
   bases: ReadonlyMap<string, Kurus | null>,
   slots: readonly SlotAvailability[],
-  now: Date
+  now: Date,
+  shown: ReadonlyMap<string, CardShown>
 ): DepartureFacts[] {
-  const cutoff = product.bookable?.cutoff_hours ?? 0
-  return slots
-    .filter((slot) => slot.status === "open" && !salesClosed(slot.starts_at, cutoff, now))
-    .slice(0, DATED_DEPARTURES)
-    .map((slot) => ({
-      startsAt: slot.starts_at.toISOString(),
-      endsAt: slot.ends_at?.toISOString() ?? null,
-      price: bookingCardFactOf(product, bases, [slot], "try", now)?.from_price ?? null,
-      available: slot.available > 0,
-    }))
+  return namedSlots(product, slots, now).map((slot) => ({
+    startsAt: slot.starts_at.toISOString(),
+    endsAt: slot.ends_at?.toISOString() ?? null,
+    price: bookingCardFactOf(product, bases, [slot], "try", now, false, shown)?.from_price ?? null,
+    available: slot.available > 0,
+  }))
 }
 
 /**
@@ -82,8 +95,8 @@ export async function datedFactsOf(
   const now = new Date()
   const variantIds = (product.variants ?? []).flatMap((variant) => (variant ? [variant.id] : []))
   // Departures with a place free only; a full one is no offer to name
-  const [bases, slots, catalog] = await Promise.all([
-    basePrices(container, variantIds, { currency_code: "try" }),
+  const [prices, slots, catalog] = await Promise.all([
+    basePriceRows(container, variantIds, { currency_code: "try" }),
     bookingService(container).openSlots([bookable.id], { from: now, limit: DATED_DEPARTURES * 2 }),
     settings.getSection("catalog") as Promise<unknown> as Promise<CatalogSettings>,
   ])
@@ -92,9 +105,15 @@ export async function datedFactsOf(
     catalog.dated_schema_type === "TouristTrip"
       ? programOf((bookable as { program?: unknown }).program)
       : null
+  const bases = baseAmounts(prices)
+  // The named departures' places in one reading of the record and the promotions
+  const units = namedSlots(product, slots, now).flatMap((slot) =>
+    cardUnits(product, bases, [slot], "try", now)
+  )
+  const shown = await placeDisplays(container, units, prices, "try", now)
   return {
     type: catalog.dated_schema_type,
-    departures: departureFactsOf(product, bases, slots, now),
+    departures: departureFactsOf(product, bases, slots, now, shown),
     ...(program ? { itinerary: programItinerary(program) } : {}),
   }
 }

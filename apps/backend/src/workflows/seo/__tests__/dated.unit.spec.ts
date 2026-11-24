@@ -3,6 +3,7 @@ import type { Kurus } from "../../../lib/money"
 import type { SlotAvailability } from "../../../modules/booking/service"
 import type { ReturnsSettings } from "../../../modules/platform-settings/sections"
 import type { DatedCardProduct } from "../../booking/card-facts"
+import type { CardShown } from "../../booking/card-price"
 import { isDated } from "../../marketing/feed-catalog"
 import { departureFactsOf } from "../dated-facts"
 import { productFacts } from "../facts"
@@ -12,6 +13,9 @@ import type { FactRow, ShippingFacts } from "../facts"
 
 const NOW = new Date("2026-12-01T09:00:00.000Z")
 const HOUR = 60 * 60 * 1000
+
+// No promotion worked out for any place: each at its own price
+const NONE = new Map<string, CardShown>()
 
 const trip: DatedCardProduct = {
   id: "prod_trip",
@@ -55,7 +59,8 @@ describe("departureFactsOf", () => {
         slot("s1", 48, { price_adjustments: { adult: 50_000 } }),
         slot("s2", 96, { available: 0 }),
       ],
-      NOW
+      NOW,
+      NONE
     )
     expect(facts).toEqual([
       {
@@ -69,7 +74,7 @@ describe("departureFactsOf", () => {
   })
 
   it("names none when every departure has passed", () => {
-    expect(departureFactsOf(trip, bases, [], NOW)).toEqual([])
+    expect(departureFactsOf(trip, bases, [], NOW, NONE)).toEqual([])
   })
 })
 

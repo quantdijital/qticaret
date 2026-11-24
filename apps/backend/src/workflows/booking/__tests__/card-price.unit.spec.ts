@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { kurus } from "../../../lib/money"
 import { PRICE_HISTORY_MODULE } from "../../../modules/price-history"
 import { priceDisplays } from "../../pricing/price-display"
-import { cardUnitDisplays } from "../card-price"
+import { placeDisplays, placeKey } from "../card-price"
 import type { BasePrice } from "../card-price"
 
 /**
@@ -147,23 +147,24 @@ const level = { variant_id: "adult", adjustment: 0, amount: kurus(150_000) }
 
 const shownOf = async (promos: Promo[], history = {}, place = unit) => {
   const { container } = shop(promos, history)
-  return (await cardUnitDisplays(container, [place], bases, "try", NOW)).get("adult")
+  return (await placeDisplays(container, [place], bases, "try", NOW)).get(placeKey(place))
 }
 
-describe("cardUnitDisplays", () => {
+describe("placeDisplays", () => {
   it("is the unit's own price without a promotion, nothing struck through", async () => {
     expect(await shownOf([])).toEqual({ current: 175_050, before: null })
   })
 
   it("takes a percentage off the unit price the cart sees, the departure's difference included", async () => {
     const { container, computeActions } = shop([promo({ code: "OTO20" })])
-    const shown = (await cardUnitDisplays(container, [unit], bases, "try", NOW)).get("adult")
+    const shown = (await placeDisplays(container, [unit], bases, "try", NOW)).get(placeKey(unit))
     // 1.750,50 less 20%: 1.400,40; a difference has no record, so nothing struck through
     expect(shown).toEqual({ current: 140_040, before: null })
     // No code is ever asked: only what every shopper gets
     expect(computeActions.mock.calls[0]?.[0]).toEqual([])
     expect(computeActions.mock.calls[0]?.[1].items[0]).toMatchObject({
-      id: "adult",
+      id: "adult:25050",
+      variant_id: "adult",
       unit_price: "1750.50",
       product: { id: "prod_tour" },
     })
@@ -221,17 +222,26 @@ describe("cardUnitDisplays", () => {
     const promos = [promo({ code: "OTO20" })]
     const { container } = shop(promos, {}, { adult: 1500 })
     const index = (await priceDisplays(container, ["adult"], "try", NOW)).get("adult")
-    const card = (
-      await cardUnitDisplays(
-        container,
-        [{ variant_id: "adult", adjustment: 0, amount: kurus(150_000) }],
-        bases,
-        "try",
-        NOW
-      )
-    ).get("adult")
+    const card = (await placeDisplays(container, [level], bases, "try", NOW)).get(placeKey(level))
     expect(index?.current).toBe(120_000)
     expect(card?.current).toBe(index?.current)
+  })
+
+  it("prices one category on many departures apart, reading the record and promotions once", async () => {
+    const { container, computeActions, asked } = shop([promo({ code: "OTO20" })], {
+      adult: [{ at: new Date(NOW.getTime() - 20 * DAY), amount: 1500, original: 1500 }],
+    })
+    const places = [level, unit, { ...level }]
+    const shown = await placeDisplays(container, places, bases, "try", NOW)
+    // Two departures alike are one line; each a line of the same variant at its own price
+    expect(computeActions).toHaveBeenCalledTimes(1)
+    expect(computeActions.mock.calls[0]?.[1].items).toEqual([
+      expect.objectContaining({ id: "adult:0", variant_id: "adult", unit_price: "1500.00" }),
+      expect.objectContaining({ id: "adult:25050", variant_id: "adult", unit_price: "1750.50" }),
+    ])
+    expect(asked.filter((entity) => entity === "promotion")).toHaveLength(1)
+    expect(shown.get(placeKey(level))).toEqual({ current: 120_000, before: 150_000 })
+    expect(shown.get(placeKey(unit))).toEqual({ current: 140_040, before: null })
   })
 
   it("reads the promotions once however many parts of 100 variants it prices", async () => {

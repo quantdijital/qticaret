@@ -5,6 +5,7 @@ import { formatLira } from "@qticaret/ui"
 import type { DepartureDateView, DeparturesSectionView, Translate } from "@qticaret/ui"
 import { upcomingDepartures } from "@/lib/store-api/extras"
 import { pathsOf } from "@/lib/store-api/requests"
+import { withBefore } from "./card-booking"
 
 // The zone a departure is said in when the product's is not one the runtime knows
 const DEFAULT_ZONE = "Europe/Istanbul"
@@ -80,13 +81,17 @@ export function departureRows(
         price:
           departure.from_price === null
             ? null
-            : {
-                // The card's words ("…'den itibaren"), one phrase for a dated price
-                current: t("booking.card_from", { price: formatLira(departure.from_price) }),
-                before: null,
-                from: false,
-                discount: null,
-              },
+            : withBefore(
+                {
+                  // The card's words ("…'den itibaren"), one phrase for a dated price
+                  current: t("booking.card_from", { price: formatLira(departure.from_price) }),
+                  before: null,
+                  from: false,
+                  discount: null,
+                },
+                departure.from_price,
+                departure.before
+              ),
       },
     ]
   })

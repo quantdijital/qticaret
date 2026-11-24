@@ -31,6 +31,15 @@ export interface UnitPrice {
   original: Kurus
 }
 
+/**
+ * A unit priced apart from its variant's other units (a departure's place,
+ * its difference added): the variant whose recorded prices and promotions
+ * it takes, and its prices.
+ */
+export interface LinePrice extends UnitPrice {
+  variant_id: string
+}
+
 /** What every part of one pricing shares: its history, and its promotions read once (at the first part that has a price). */
 interface Pricing {
   container: Resolver
@@ -62,17 +71,12 @@ async function pricingFor(
 /** The displays of at most a chunk of units. */
 async function displaysOf(
   pricing: Pricing,
-  units: ReadonlyMap<string, UnitPrice>
+  units: ReadonlyMap<string, LinePrice>
 ): Promise<Map<string, ShownPrice>> {
   const displays = new Map<string, ShownPrice>()
-  const offers = await automaticOffers(
-    pricing.container,
-    new Map([...units].map(([id, unit]) => [id, unit.amount])),
-    pricing.currency,
-    pricing.offers
-  )
+  const offers = await automaticOffers(pricing.container, units, pricing.currency, pricing.offers)
   for (const [id, unit] of units) {
-    const points = (pricing.history.get(id) ?? []).map((row) => ({
+    const points = (pricing.history.get(unit.variant_id) ?? []).map((row) => ({
       at: new Date(row.recorded_at),
       amount: toKurus(row.amount),
       original: toKurus(row.original_amount),
@@ -98,19 +102,22 @@ async function displaysOf(
  * cart will), struck through only by the price-before rule over the
  * variant's recorded prices. The one place a promotion becomes a shown
  * price: `priceDisplays` reads every variant's selling price through it,
- * and a dated card its departure's unit price (adr/0076 Ek "kart fiyatı
- * promosyonlu").
+ * and a dated product its departures' places (adr/0076 Ek "kart fiyatı
+ * promosyonlu", "kalkış fiyatı promosyonlu"): one variant at several
+ * prices, each under its own key. The record and the promotions are read
+ * once for all of them.
  */
 export async function unitDisplays(
   container: Resolver,
-  units: ReadonlyMap<string, UnitPrice>,
+  units: ReadonlyMap<string, LinePrice>,
   currency: string,
   now: Date = new Date()
 ): Promise<Map<string, ShownPrice>> {
   if (units.size === 0) {
     return new Map()
   }
-  const pricing = await pricingFor(container, [...units.keys()], currency, now)
+  const variants = [...new Set([...units.values()].map((unit) => unit.variant_id))]
+  const pricing = await pricingFor(container, variants, currency, now)
   const displays = new Map<string, ShownPrice>()
   for (const chunk of chunksOf([...units], VARIANT_CHUNK)) {
     for (const entry of await displaysOf(pricing, new Map(chunk))) {
@@ -138,13 +145,14 @@ export async function priceDisplays(
   const pricing = await pricingFor(container, ids, currency, now)
   const displays = new Map<string, ShownPrice>()
   for (const chunk of chunksOf(ids, VARIANT_CHUNK)) {
-    const live = new Map<string, UnitPrice>()
+    const live = new Map<string, LinePrice>()
     for (const variant of await sellingPrices(container, chunk, currency)) {
       const amount = variant.calculated_price?.calculated_amount
       if (amount === null || amount === undefined) {
         continue
       }
       live.set(variant.id, {
+        variant_id: variant.id,
         amount: toKurus(amount),
         original: toKurus(variant.calculated_price?.original_amount ?? amount),
       })

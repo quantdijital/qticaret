@@ -79,8 +79,14 @@ export interface StoreUpcomingDeparture {
   timezone: string
   /** Places left, only when few (at most `FEW_PLACES_LEFT`); else null. */
   left: number | null
-  /** The lowest paying place on it, a guest's, in lira as the card's `from_price` (1750.5); null: none. */
+  /**
+   * The lowest paying place on it, a guest's, in lira as the card's
+   * `from_price` (1750.5), the automatic promotions taken off (adr/0076 Ek
+   * "kalkış fiyatı promosyonlu"); null: none.
+   */
   from_price: number | null
+  /** The card's `before`: only when the price-before rule allows and the departure has no difference; absent otherwise. */
+  before?: number
 }
 
 /** "Son N yer" from this many places free (the card's and the product page's rule, adr/0076 §10). */
