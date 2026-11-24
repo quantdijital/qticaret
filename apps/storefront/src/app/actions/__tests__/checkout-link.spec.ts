@@ -81,7 +81,7 @@ describe("placeOrder for a payment link's cart", () => {
     pay.completeCart.mockResolvedValue("order_1")
     pay.orderAccess.mockResolvedValue({ id: "order_1", token: "tok" })
     await expect(submit(COD)).rejects.toThrow("redirect:/siparis/order_1?token=tok&yeni=1")
-    expect(pay.startPayment).toHaveBeenCalledWith("cart_1", COD, null)
+    expect(pay.startPayment).toHaveBeenCalledWith("cart_1", COD, {})
   })
 
   it("says the backend's refusal of cash on delivery at placement in its own words", async () => {

@@ -21,20 +21,25 @@ import {
   CommandSeparator,
 } from "@qticaret/admin-ui/ui/command"
 import { useLogout } from "@/features/auth/api/me"
+import { panelScreen } from "@/features/panel-map/map"
+import type { PanelScreen } from "@/features/panel-map/map"
+import { ScreenResults } from "@/features/panel-map/screen-results"
 import { SearchResults } from "@/features/search/search-results"
-import { SEO_PART_ITEMS } from "@/features/seo/parts"
 import { ALL_NAV_ITEMS } from "./navigation"
 import { useNavAccess } from "./use-nav-access"
 
-// The jobs people start most, a keystroke away (docs/06 §5)
-const SHORTCUTS: { key: string; icon: LucideIcon; to: string; search?: Record<string, string> }[] =
-  [
-    { key: "addProduct", icon: PackagePlus, to: "/products/new" },
-    { key: "toShip", icon: Truck, to: "/orders", search: { stage: "to_ship" } },
-    { key: "lowStock", icon: PackageMinus, to: "/inventory", search: { view: "low" } },
-    { key: "addPromotion", icon: BadgePercent, to: "/promotions/new" },
-    { key: "addCategory", icon: FolderPlus, to: "/categories", search: { selected: "new" } },
-  ]
+// The jobs people start most, a keystroke away (docs/06 §5): screens of the panel's map
+const SHORTCUTS: { screen: PanelScreen; icon: LucideIcon }[] = [
+  { screen: panelScreen("products.new"), icon: PackagePlus },
+  { screen: panelScreen("orders.toShip"), icon: Truck },
+  { screen: panelScreen("inventory.low"), icon: PackageMinus },
+  { screen: panelScreen("promotions.new"), icon: BadgePercent },
+  { screen: panelScreen("categories.new"), icon: FolderPlus },
+]
+
+const NAV_ICONS: ReadonlyMap<string, LucideIcon> = new Map(
+  ALL_NAV_ITEMS.map((item) => [item.key, item.icon])
+)
 
 interface CommandMenuProps {
   open: boolean
@@ -43,7 +48,9 @@ interface CommandMenuProps {
 
 /**
  * ⌘K / Ctrl+K anywhere: find an order, a customer, a product or a parcel
- * (F12.9), jump to a page or run a common action.
+ * (F12.9), jump to a page or run a common action. Typed words also find
+ * the panel's screens by their everyday names (adr/0079 Y1-0): "kargo
+ * ücreti" opens Ayarlar › Kargo ve teslimat › Seçenekler ve ücretler.
  */
 export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const { t } = useTranslation()
@@ -52,6 +59,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const [search, setSearch] = useState("")
   // What the menu beside it offers: the shell has asked already
   const allowed = useNavAccess({ fetch: false })
+  const typing = search.trim() !== ""
   // Closed, it forgets what was typed: a new opening starts empty
   const change = (next: boolean) => {
     if (!next) {
@@ -81,6 +89,11 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
     change(false)
     action()
   }
+  const go = (screen: PanelScreen) => {
+    run(
+      () => void navigate({ to: screen.path, ...(screen.search ? { search: screen.search } : {}) })
+    )
+  }
 
   return (
     <CommandDialog
@@ -99,82 +112,65 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
       />
       <CommandList>
         <CommandEmpty>{t("command.empty")}</CommandEmpty>
+        {/* Typed words find the screens, the menu's pages and settings tabs among them */}
+        <ScreenResults
+          search={search}
+          allowed={allowed}
+          icons={NAV_ICONS}
+          onPick={() => {
+            change(false)
+          }}
+        />
         <SearchResults
           search={search}
           onPick={() => {
             change(false)
           }}
         />
-        <CommandGroup heading={t("command.pages")}>
-          {ALL_NAV_ITEMS.filter(allowed).map((item) => (
-            <CommandItem
-              key={item.key}
-              value={t(`nav.${item.key}`)}
-              onSelect={() => {
-                run(() => void navigate({ to: item.to }))
-              }}
-            >
-              <item.icon />
-              {t(`nav.${item.key}`)}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-        {/* Settings > SEO's tabs, each its own way in (the owner, 2026-11-23): shown once typing */}
-        {search ? (
-          <CommandGroup heading={t("nav.seo")}>
-            {SEO_PART_ITEMS.filter((item) =>
-              allowed({
-                key: item.part,
-                to: "/settings/seo",
-                icon: item.icon,
-                ...(item.needs ? { needs: item.needs } : {}),
-              })
-            ).map((item) => {
-              const label = `${t("nav.seo")} · ${t(`settings.seo.tabs.${item.label}`)}`
-              return (
-                <CommandItem
-                  key={item.part}
-                  value={label}
-                  onSelect={() => {
-                    run(() => void navigate({ to: "/settings/seo", search: { part: item.part } }))
-                  }}
-                >
-                  <item.icon />
-                  {label}
-                </CommandItem>
-              )
-            })}
+        {typing ? null : (
+          <CommandGroup heading={t("command.pages")}>
+            {ALL_NAV_ITEMS.filter(allowed).map((item) => (
+              <CommandItem
+                key={item.key}
+                value={t(item.label)}
+                onSelect={() => {
+                  run(() => void navigate({ to: item.to }))
+                }}
+              >
+                <item.icon />
+                {t(item.label)}
+              </CommandItem>
+            ))}
           </CommandGroup>
-        ) : null}
+        )}
         <CommandSeparator />
         <CommandGroup heading={t("command.actions")}>
-          {SHORTCUTS.map((shortcut) => (
+          {/* Once typing, the shortcuts are found among the screens */}
+          {typing
+            ? null
+            : SHORTCUTS.filter(({ screen }) => allowed(screen)).map(({ screen, icon: Icon }) => (
+                <CommandItem
+                  key={screen.key}
+                  value={t(screen.label)}
+                  onSelect={() => {
+                    go(screen)
+                  }}
+                >
+                  <Icon />
+                  {t(screen.label)}
+                </CommandItem>
+              ))}
+          {typing ? null : (
             <CommandItem
-              key={shortcut.key}
-              value={t(`command.shortcuts.${shortcut.key}`)}
+              value={t("command.appearance")}
               onSelect={() => {
-                run(
-                  () =>
-                    void navigate({
-                      to: shortcut.to,
-                      ...(shortcut.search ? { search: shortcut.search } : {}),
-                    })
-                )
+                run(() => void navigate({ to: "/settings/appearance" }))
               }}
             >
-              <shortcut.icon />
-              {t(`command.shortcuts.${shortcut.key}`)}
+              <Palette />
+              {t("command.appearance")}
             </CommandItem>
-          ))}
-          <CommandItem
-            value={t("command.appearance")}
-            onSelect={() => {
-              run(() => void navigate({ to: "/settings/appearance" }))
-            }}
-          >
-            <Palette />
-            {t("command.appearance")}
-          </CommandItem>
+          )}
           <CommandItem
             value={t("nav.logout")}
             onSelect={() => {

@@ -5,6 +5,7 @@ import giftCardIssue from "../../src/subscribers/gift-card-issue"
 import { issueOrderGiftCards, sweepGiftCards } from "../../src/workflows/gift-cards/issue-and-send"
 import { eraseGiftRecipients } from "../../src/workflows/gift-cards/kvkk"
 import { createAdminUser } from "../helpers/admin"
+import { NO_TURNSTILE } from "../helpers/challenge"
 import { eventually } from "../helpers/eventually"
 import {
   BANK_TRANSFER,
@@ -47,7 +48,8 @@ medusaIntegrationTestRunner({
       post(`/store/carts/${cartId}/line-items/${lineId}/gift`, body)
     const startPayment = (cartId: string, providerId: string) =>
       post(`/store/carts/${cartId}/payment-session`, { provider_id: providerId })
-    const balance = (code: string) => post("/store/gift-cards/balance", { code })
+    const balance = (code: string, headers: Record<string, string> = {}) =>
+      post("/store/gift-cards/balance", { code }, headers)
     const adminCard = async (value: number) =>
       (
         await http.post<{ gift_card: { code: string } }>(
@@ -311,27 +313,30 @@ medusaIntegrationTestRunner({
       ])
     })
 
-    it("answers a balance by code, 404 for an unknown one or while cards are off, and asks for proof past three tries", async () => {
+    it("answers a balance by code, 404 for an unknown one or while cards are off, and asks Turnstile past three tries", async () => {
       await flag(true)
       const code = await adminCard(250)
 
       const found = await balance(code)
       const unknown = await balance("GIFT-AAAA-BBBB-CCCC-DDDD")
       process.env["RATE_LIMIT_RELAXED"] = "0"
-      // Past three asks from this address (this file's earlier ones count too), a proof first
-      const asks = [await balance(code)]
+      // Past three asks from this address (this file's earlier ones count too), Turnstile first
+      const asks = [await balance(code, NO_TURNSTILE)]
       while (asks.length < 4 && asks.at(-1)?.status !== 428) {
-        asks.push(await balance(code))
+        asks.push(await balance(code, NO_TURNSTILE))
       }
       const proven = asks.at(-1)
+      // The token a test site key's widget gives opens it
+      const withToken = await balance(code)
       await flag(false)
       const off = await balance(code)
 
       expect(found.data).toEqual({ balance: 250, currency_code: "try", expires_at: null })
       expect([unknown.status, unknown.data.message]).toEqual([404, "gift_card.unknown"])
       expect(asks.slice(0, -1).every((ask) => ask.status === 200)).toBe(true)
-      expect([proven?.status, proven?.data.message]).toEqual([428, "fraud.challenge_required"])
-      expect(proven?.data).toHaveProperty("challenge")
+      expect([proven?.status, proven?.data.message]).toEqual([428, "fraud.turnstile_required"])
+      expect(proven?.data).toMatchObject({ turnstile: { action: "gift_card" } })
+      expect(withToken.status).toBe(200)
       expect(off.status).toBe(404)
       expect(off.data).not.toHaveProperty("balance")
     })

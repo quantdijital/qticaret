@@ -45,7 +45,7 @@ export function NavLink({
 }) {
   const { t } = useTranslation()
   const { setOpenMobile } = useSidebar()
-  const label = t(`nav.${item.key}`)
+  const label = t(item.label)
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={active} tooltip={label} className={ITEM_CLASS}>

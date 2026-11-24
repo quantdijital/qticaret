@@ -43,7 +43,10 @@ describe("the menu on a phone (a drawer)", () => {
       <SidebarProvider>
         <DrawerProbe />
         <SidebarMenu>
-          <NavLink item={{ key: "products", to: "/products", icon: Package }} active={false} />
+          <NavLink
+            item={{ key: "products", to: "/products", label: "nav.products", icon: Package }}
+            active={false}
+          />
         </SidebarMenu>
       </SidebarProvider>
     )

@@ -103,7 +103,7 @@ export function Toolbar({
   const run = (action: (chain: ReturnType<Editor["chain"]>) => ReturnType<Editor["chain"]>) => () =>
     action(editor.chain().focus()).run()
   return (
-    <div className="sticky top-14 z-10 flex flex-wrap items-center gap-0.5 border-b bg-card px-2 py-1.5">
+    <div className="sticky top-14 z-10 flex flex-wrap items-center gap-0.5 border-b bg-card px-2 py-1.5 [[role=dialog]_&]:static">
       {bare ? null : (
         <Select
           value={state.block}

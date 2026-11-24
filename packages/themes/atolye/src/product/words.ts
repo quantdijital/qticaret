@@ -128,6 +128,7 @@ export const alertWords = (t: Translate) => ({
     "checkout.email_invalid",
     "errors.too_many_requests",
     "errors.challenge_failed",
+    "errors.turnstile_failed",
   ]),
   fallback: t("product.alert_failed"),
 })
@@ -205,6 +206,8 @@ export const communityWords = (t: Translate) => ({
     "reviews.photo_uploads_full",
     "product.review_photos_invalid",
     "errors.too_many_requests",
+    "errors.challenge_failed",
+    "errors.turnstile_failed",
   ]),
   reviewFailed: t("product.review_failed"),
   questionFailed: t("product.question_failed"),

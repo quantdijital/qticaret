@@ -22,5 +22,17 @@ if (process.env.TEST_TYPE?.startsWith("integration")) {
   // runner, and the next call on the socket the server just closed gets
   // ECONNRESET (storefront-client-ip.spec.ts in CI)
   const http = require("node:http")
-  http.globalAgent = new http.Agent({ keepAlive: false })
+  // Cloudflare Turnstile (adr/0044 Ek 2026-11-24): every test request carries
+  // the token a test site key's widget gives, which the always-pass test
+  // secret (the default here) takes; a spec that sends the header itself
+  // keeps its own value (an empty one for "no token")
+  class TurnstileAgent extends http.Agent {
+    addRequest(req, options) {
+      if (!req.hasHeader("x-turnstile-token")) {
+        req.setHeader("x-turnstile-token", "XXXX.DUMMY.TOKEN.XXXX")
+      }
+      super.addRequest(req, options)
+    }
+  }
+  http.globalAgent = new TurnstileAgent({ keepAlive: false })
 }

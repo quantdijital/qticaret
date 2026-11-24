@@ -105,6 +105,11 @@
     "showPassword": "Şifreyi göster",
     "hidePassword": "Şifreyi gizle",
     "noAccount": "Hesabınız yoksa mağaza sahibinden davet isteyin.",
+    "turnstile": {
+      "label": "Güvenlik doğrulaması",
+      "hint": "Devam etmek için aşağıdaki güvenlik doğrulamasını tamamlayın.",
+      "failed": "Güvenlik doğrulaması geçilemedi. Yeniden deneyin; sorun sürerse sayfayı yenileyin."
+    },
     "intro": {
       "promise": "Mağazanızı tek panelden yönetin.",
       "orders": {
@@ -3229,6 +3234,7 @@
     "placeholder": "Sipariş no, müşteri, ürün, SKU, takip no ya da sayfa…",
     "empty": "Sonuç bulunamadı.",
     "pages": "Sayfalar",
+    "screens": "Ekranlar",
     "actions": "İşlemler",
     "appearance": "Görünüm ayarları",
     "trigger": "Ara ya da bir sayfaya git…",
@@ -8866,6 +8872,7 @@
       },
       "row": {
         "problem": "Düzeltilecek alan var",
+        "gone": "Gösterdiği kayıt silinmiş; yeniden seçin",
         "scheduled": "Zamanlanmış",
         "moveUpOf": "{{name}} bölümünü yukarı taşı",
         "moveDownOf": "{{name}} bölümünü aşağı taşı",
@@ -10223,6 +10230,10 @@
           "title": "Vitrin tercihleri",
           "description": "Mağazanın nasıl çalıştığı: iletişim formunun ve ödeme, kargo bilgisinin gösterildiği sayfalar. Bu ayarlar taslağa girmez: Kaydet'e bastığınızda hemen vitrine geçer, Yayınla'yı beklemez. Bakım modu Ayarlar > Bakım modu'ndadır."
         }
+      },
+      "goneRecords": {
+        "notice_one": "Bir bölümün gösterdiği kayıt (kategori, ürün, koleksiyon, marka ya da sayfa) silinmiş. Vitrinde gösterilmiyor; uyarı işaretli bölümü açıp yeniden seçin.",
+        "notice_other": "{{count}} bölümün gösterdiği kayıt (kategori, ürün, koleksiyon, marka ya da sayfa) silinmiş. Vitrinde gösterilmiyor; uyarı işaretli bölümleri açıp yeniden seçin."
       },
       "pendingMenus": {
         "text_one": "Taslakta geri yüklenen bir sürümün menüsü var: Yayınla'ya bastığınızda mağazanın menüsü bununla değişir.",
