@@ -60,6 +60,8 @@ export type MediaUseKind =
   | "storefront_design"
   /** A collection's picture: `id` the collection, `label` its title. */
   | "collection"
+  /** A storefront pop-up's picture (adr/0080): `id` the pop-up, `label` its name. */
+  | "popup"
 
 export interface MediaUse {
   kind: MediaUseKind

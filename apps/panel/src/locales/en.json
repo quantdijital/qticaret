@@ -794,6 +794,11 @@
             "label": "Bulk e-mail and SMS",
             "summary": "Bulk e-mail and SMS to consented customers from the panel.",
             "description": "Bulk e-mail and SMS campaigns to consented customers from the panel."
+          },
+          "popups": {
+            "label": "Pop-ups",
+            "summary": "Info, campaign and newsletter pop-ups on the storefront.",
+            "description": "From Marketing > Pop-ups the storefront shows an info, campaign code or newsletter pop-up, by page, device, visitor and frequency. Turned off, no pop-up shows and none is deleted."
           }
         },
         "seo": {
@@ -12255,6 +12260,7 @@
         "category": "Category image",
         "etbis_qr": "ETBİS QR code",
         "collection": "Collection picture",
+        "popup": "Pop-up",
         "storefront_design": "Saved look",
         "favicon": "Site icon"
       },

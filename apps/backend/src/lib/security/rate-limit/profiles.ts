@@ -170,6 +170,8 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: HOUR },
     perIdentity: { max: 3, windowMs: HOUR },
   },
+  // adr/0080 §7: a pop-up's counters; a page view sends two or three at most
+  popup_event: { name: "popup_event", perIp: { max: 60, windowMs: MINUTE } },
   // F18: a draft's signed preview link; a guess finds nothing
   content_preview: { name: "content_preview", perIp: { max: 60, windowMs: 15 * MINUTE } },
   // adr/0065: the theme editor's live preview reads the draft after every save (a
