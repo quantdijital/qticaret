@@ -73,6 +73,7 @@
     "menus": "Menus",
     "themeEditor": "Theme editor",
     "bulkMessages": "Bulk messages",
+    "popups": "Pop-ups",
     "paymentLinks": "Payment links",
     "media": "Media library",
     "collections": "Collections",
@@ -11898,6 +11899,187 @@
         "title": "Suggest SMS text",
         "description": "AI writes three short texts from the message's name and its current text; each fits one SMS with the shop's name and the opt-out line. No recipient list is sent; nothing changes until you save."
       }
+    }
+  },
+  "popups": {
+    "title": "Pop-ups",
+    "description": "Windows on the storefront with news, a discount code or a newsletter sign-up.",
+    "new": "New pop-up",
+    "newOf": "New pop-up: {{type}}",
+    "views": "Pop-up types",
+    "allTypes": "All",
+    "search": "Search pop-ups",
+    "empty": "No pop-ups yet.",
+    "emptyFiltered": "No pop-ups match this choice.",
+    "noAccess": "You may not create pop-ups.",
+    "switchLabel": "{{name}} on",
+    "turnedOn": "Pop-up turned on.",
+    "turnedOff": "Pop-up turned off.",
+    "delete": "Delete",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteDescription": "The pop-up leaves the storefront; its counts are kept.",
+    "deleted": "Pop-up deleted.",
+    "gate": {
+      "off": "Pop-ups are off. Turned on, the saved pop-ups come back as they were.",
+      "turnOn": "Turn on in Features"
+    },
+    "state": {
+      "off": "Off",
+      "scheduled": "Scheduled",
+      "live": "Live",
+      "ended": "Ended",
+      "campaign_inactive": "Campaign ended"
+    },
+    "types": {
+      "info": "Info",
+      "campaign": "Campaign",
+      "newsletter": "Newsletter"
+    },
+    "typeHints": {
+      "info": "An announcement, shipping news or a button to a page.",
+      "campaign": "A discount's code, with a copy button.",
+      "newsletter": "A newsletter sign-up form."
+    },
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "state": "Status",
+      "dates": "Dates",
+      "active": "On"
+    },
+    "dates": {
+      "from": "From {{date}}",
+      "until": "Until {{date}}",
+      "open": "No end"
+    },
+    "counts": {
+      "impressions": "Views",
+      "clicks": "Clicks",
+      "closes": "Closes",
+      "signups": "Sign-ups"
+    },
+    "choices": {
+      "page_scope": {
+        "all": "All pages",
+        "selected": "Selected pages"
+      },
+      "pages": {
+        "home": "Home",
+        "category": "Category",
+        "product": "Product",
+        "content": "Content page"
+      },
+      "device": {
+        "all": "Desktop and mobile",
+        "desktop": "Desktop only",
+        "mobile": "Mobile only"
+      },
+      "visitor": {
+        "any": "All visitors",
+        "new": "First-time visitors",
+        "returning": "Returning visitors"
+      },
+      "membership": {
+        "any": "Members and guests",
+        "member": "Members only",
+        "guest": "Guests only"
+      },
+      "trigger": {
+        "delay": "After a few seconds",
+        "scroll": "When the page is scrolled"
+      },
+      "frequency": {
+        "session": "Once a visit",
+        "days": "Every few days",
+        "until_closed": "Until closed"
+      },
+      "layout": {
+        "modal": "Centred window",
+        "corner": "Corner card"
+      }
+    },
+    "form": {
+      "content": "Content",
+      "name": "Name",
+      "nameHint": "Shown in the panel only.",
+      "type": "Type",
+      "title": "Title",
+      "body": "Text",
+      "submitLabel": "Button text",
+      "submitLabelHint": "Left empty, it says \"Subscribe\".",
+      "buttonLabel": "Button text",
+      "buttonHref": "Button link",
+      "image": "Image",
+      "imageAdd": "Add image",
+      "imageAlt": "Image description",
+      "promotion": "Discount",
+      "promotionPlaceholder": "Choose a discount",
+      "promotionOff": "off",
+      "automaticPromotion": "Automatic discount",
+      "noPromotions": "No discounts yet.",
+      "newPromotion": "Create a discount",
+      "audience": "Who and where",
+      "pages": "Pages",
+      "device": "Device",
+      "visitor": "Visitor",
+      "membership": "Membership",
+      "timing": "When",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "endsAtHint": "Left empty, it runs until turned off.",
+      "trigger": "Opens",
+      "delaySeconds": "Wait",
+      "scrollPercent": "Scrolled",
+      "secondsUnit": "s",
+      "frequency": "How often",
+      "frequencyDays": "Every how many days",
+      "daysUnit": "days",
+      "look": "Look",
+      "layout": "Layout",
+      "advanced": "Advanced",
+      "priority": "Priority",
+      "priorityHint": "When more than one pop-up fits a page, the larger number shows first.",
+      "activate": "Publish on save",
+      "create": "Create pop-up",
+      "saved": "Pop-up saved.",
+      "created": "Pop-up created.",
+      "invalid": "Some fields are missing or wrong."
+    },
+    "errors": {
+      "tooLong": "This field is too long.",
+      "textInvalid": "Enter plain text; some characters cannot be used.",
+      "nameRequired": "Enter a name.",
+      "titleRequired": "Enter a title.",
+      "tooManyLines": "The text may have at most 8 lines.",
+      "linkInvalid": "Enter a path on the shop (starting with /) or an https address.",
+      "number": "Enter a number.",
+      "priority": "Priority must be between 0 and 1000.",
+      "promotionRequired": "Choose a discount.",
+      "buttonLinkRequired": "Enter a link for the button.",
+      "buttonLabelRequired": "Enter the button's text for the link.",
+      "pagesRequired": "Choose at least one page.",
+      "delayRange": "The wait must be between 0 and 120 seconds.",
+      "scrollRange": "The scroll must be between 1 and 100 per cent.",
+      "daysRange": "Enter a number between 1 and 365 days.",
+      "dateInvalid": "Enter a valid date.",
+      "datesOrder": "The end must be after the start."
+    },
+    "preview": {
+      "title": "Preview",
+      "titlePlaceholder": "Title",
+      "automatic": "Applies in the cart on its own",
+      "email": "Your e-mail address",
+      "subscribe": "Subscribe",
+      "codePlaceholder": "CODE",
+      "device": "Preview device",
+      "desktop": "Desktop",
+      "mobile": "Mobile"
+    },
+    "stats": {
+      "title": "Results",
+      "clickRate": "Click rate {{rate}}",
+      "last30": "Views, last 30 days",
+      "daily": "Last 30 days, daily views"
     }
   },
   "paymentLinks": {
