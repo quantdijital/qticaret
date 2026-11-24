@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest"
-import type { PageContactView } from "@qticaret/ui"
+import { FAQ_DEFAULTS } from "@qticaret/types"
+import type { PageContactView, PageFaqView } from "@qticaret/ui"
 import {
   article,
+  contact,
   contactSection,
   outline,
   page,
@@ -66,6 +68,65 @@ describe("the theme's payment and shipping facts", () => {
     const html = page({ sections: [article({ faq, help: null }), shipping] })
     expect(html).not.toContain("lg:col-span-7")
     expect(html).toContain('data-qs="kargo"')
+  })
+})
+
+describe("the theme's questions page (`faq` as `page`, adr/0073 Ek 2026-11-24 (2))", () => {
+  const faq = {
+    intro: "",
+    groups: [
+      {
+        id: "kargo",
+        title: "Kargo",
+        lead: "",
+        items: [
+          { question: "Ne zaman?", html: "<p>Aynı gün.</p>" },
+          { question: "Nereden?", html: "<p>İstanbul.</p>" },
+        ],
+      },
+      {
+        id: "odeme",
+        title: "Ödeme",
+        lead: "",
+        items: [{ question: "Taksit?", html: "<ul><li>3 taksit</li></ul>" }],
+      },
+    ],
+  }
+  const section = (over: Partial<PageFaqView> = {}): PageFaqView => ({
+    id: "metin",
+    type: "faq",
+    variant: "page",
+    title: null,
+    faq,
+    help: contact,
+    ...over,
+  })
+
+  it("draws the shop's own questions exactly as a text of questions was drawn", () => {
+    const fromText = page({ sections: [article({ faq, help: contact })] })
+    expect(page({ sections: [section()] })).toBe(fromText)
+    expect(page({ sections: [section({ title: "Sorular" })] })).toBe(
+      page({ sections: [article({ faq, help: contact, title: "Sorular" })] })
+    )
+    expect(page({ sections: [section({ settings: FAQ_DEFAULTS })] })).toBe(fromText)
+  })
+
+  it("keeps every answer in the HTML as native disclosures, the topics as links to the groups", () => {
+    const html = page({ sections: [section()] })
+    expect(html.match(/<details/g)).toHaveLength(3)
+    expect(html).toContain("<summary")
+    expect(html).toContain("<ul><li>3 taksit</li></ul>")
+    expect(html).toContain('href="#kargo"')
+    expect(html).toContain('<h2 id="odeme"')
+    expect(html).not.toContain("<details open")
+  })
+
+  it("opens the first question and groups them as one when the shop asks", () => {
+    const html = page({
+      sections: [section({ settings: { open_first: "on", single_open: "on" } })],
+    })
+    expect(html.match(/<details[^>]* open=""/g)).toHaveLength(1)
+    expect(html.match(/name="sss-metin"/g)).toHaveLength(3)
   })
 })
 

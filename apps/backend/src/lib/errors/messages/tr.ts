@@ -233,6 +233,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.tags_too_many": "Bir yazıya en fazla 50 etiket eklenebilir.",
   "content.term_description_invalid":
     "Açıklama en fazla 1000 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.term_description_too_long": "Açıklamanın metni en fazla 5000 karakter olabilir.",
   "content.term_handle_taken":
     "Bu adres başka bir kategoride ya da etikette kullanılıyor; farklı bir ad ya da adres yazın.",
   "content.term_name_invalid":
@@ -927,6 +928,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "listing.id_required": "Hangi listenin istendiği belirtilmeli.",
   "listing.search_query_invalid": "Aramak için bir kelime yazın (en çok 100 karakter).",
   "listing.search_query_unexpected": "Arama metni yalnızca aramada gönderilir.",
+  "listing.region_unknown": "Bölge bulunamadı.",
+  "listing.currency_mismatch": "Para birimi bölgenin para birimiyle aynı olmalı.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
   "legal.unknown": "Böyle bir yasal metin türü yok.",
   "legal.not_published": "Bu metin henüz yayımlanmadı.",
@@ -1215,6 +1218,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Satırın sütun sayısı seçilen düzenle uyuşmuyor; sayfayı yenileyip yeniden deneyin.",
   "storefront_layout.footer_block_invalid":
     "Alt bilgideki bir blok kaydedilemedi; alanlarını kontrol edin (yazı bloğunda başlık, resim ve tablo kullanılamaz; uygulama bağlantıları yalnız App Store ve Google Play adresi olabilir).",
+  "storefront_layout.faq_answer_invalid":
+    "Sık sorulan sorulardaki bir yanıt kaydedilemedi; yanıt boş olamaz, en çok 1500 karakter olur ve yalnız paragraf, liste, kalın, eğik ve bağlantı içerebilir.",
   "storefront_layout.footer_newsletter_twice":
     "Alt bilgide iki bülten formu olamaz; bülten bloğunu ya da alt bilgi grubundaki bülten bölümünü kaldırın ya da gizleyin.",
   // adr/0073: content pages' own sections

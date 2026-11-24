@@ -1,6 +1,6 @@
 import type { JSONContent } from "@tiptap/react"
 import type { ReactNode } from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
@@ -36,6 +36,8 @@ interface DocumentCardProps {
    * text in the editor now (typed and unsaved included).
    */
   action?: ((put: (doc: JSONContent) => void, current: JSONContent) => ReactNode) | undefined
+  /** Whether the editor holds an unsaved change: a dialog asks before leaving it. */
+  onDirtyChange?: ((dirty: boolean) => void) | undefined
 }
 
 /**
@@ -54,10 +56,14 @@ export function DocumentCard({
   maxChars,
   placeholder,
   action,
+  onDirtyChange,
 }: DocumentCardProps) {
   const { t } = useTranslation()
   const [draft, setDraft] = useState<JSONContent | null>(null)
   const dirty = draft !== null && !sameDoc(draft, stored)
+  useEffect(() => {
+    onDirtyChange?.(dirty)
+  }, [dirty, onDirtyChange])
   return (
     <CardForm
       title={title}

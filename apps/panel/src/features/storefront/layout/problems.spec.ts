@@ -196,10 +196,33 @@ describe("sectionProblems", () => {
         ...faq,
         items: [
           { question: "Kargo ne kadar sürer?", answer: "{telefon} numarasından sorun." },
-          { question: "x".repeat(161), answer: "{bilinmeyen}" },
+          { question: "x".repeat(201), answer: "{bilinmeyen}" },
         ],
       })
     ).toEqual({ "items.1.question": "tooLong", "items.1.answer": "tokenUnknown" })
+  })
+
+  it("asks for a rich answer's words within its characters, and a group heading's words", () => {
+    const words = (text: string) => ({
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+    })
+    const faq = newHomeSection("faq", "sss") as FaqSection
+    expect(
+      sectionProblems({
+        ...faq,
+        items: [
+          { heading: " " },
+          { question: "Kargo?", body: words("{telefon} arayın") },
+          { question: "Uzun?", body: words("a".repeat(1501)) },
+          { question: "Bilinmeyen?", body: words("{telfon}") },
+        ],
+      })
+    ).toEqual({
+      "items.0.heading": "required",
+      "items.2.answer": "tooLong",
+      "items.3.answer": "tokenUnknown",
+    })
   })
 
   it("asks a related products section for its collection or products", () => {

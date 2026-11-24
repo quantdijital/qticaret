@@ -36,7 +36,7 @@ export function NewPageDialog({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreated: (id: string) => void
+  onCreated: (id: string, title: string) => void
 }) {
   const { t } = useTranslation()
   const create = useCreateContent()
@@ -58,7 +58,7 @@ export function NewPageDialog({
         onSuccess: ({ entry }) => {
           toast.success(t(`${N}.created`))
           close()
-          onCreated(entry.id)
+          onCreated(entry.id, entry.title)
         },
         onError: (error) => {
           setFailure(errorText(t, error))

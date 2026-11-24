@@ -31,7 +31,9 @@ describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
 
   it("offers a choice only for a type with more than one variant", () => {
     expect(hasVariants("trust_badges")).toBe(true)
-    expect(hasVariants("faq")).toBe(false)
+    // adr/0073 Ek 2026-11-24 (2): the FAQ is drawn two ways now; the help box one
+    expect(hasVariants("faq")).toBe(true)
+    expect(hasVariants("help")).toBe(false)
     expect(hasVariants("constructor")).toBe(false)
   })
 })

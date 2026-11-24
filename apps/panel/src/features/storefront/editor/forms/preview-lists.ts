@@ -46,7 +46,7 @@ export function listField(
   badges: number
 ): string | null {
   if (section.type === "faq") {
-    return row(parts, "items", section.items.length, ["question", "answer"])
+    return row(parts, "items", section.items.length, ["question", "answer", "heading"])
   }
   if (section.type === "marquee") {
     return row(parts, "items", section.items.length, ["text", "subtext"])

@@ -2,6 +2,7 @@ import type {
   CategoriesVariant,
   FaqSettings,
   HeroVariant,
+  StoreFaqItem,
   RichTextImageSide,
   RichTextVariant,
   ReviewsVariant,
@@ -20,6 +21,7 @@ import type {
 } from "./category-card-views"
 import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
 import type { HeroFullView } from "./hero-full-views"
+import type { ListingTextView } from "./listing-views"
 import type {
   FeaturedProductSectionView,
   GoogleRatingSectionView,
@@ -196,8 +198,13 @@ export type HomeSectionView = {
       type: "faq"
       /** None: the theme's own words ("Sık sorulan sorular"). */
       title: string | null
-      /** Plain text; the theme keeps the answers in the HTML (open or closed). */
-      items: { question: string; answer: string }[]
+      /**
+       * The rows in order (adr/0073 Ek 2026-11-24 (2)): a question with its
+       * answer as the backend's HTML (`html`), or a plain answer saved
+       * before rich answers (`answer`); or a group's heading. The theme
+       * keeps the answers in the HTML (open or closed).
+       */
+      items: StoreFaqItem[]
       /**
        * The first question open, one open at a time (bilesen-denetimi (b) 8).
        * Absent (an older storefront): all closed, each opened on its own.
@@ -240,8 +247,18 @@ export interface BlogIndexPageView {
   pagination: PaginationView
   /** The blog's categories with live posts; none: no bar. */
   terms?: BlogTermLinkView[]
-  /** On a category's or tag's archive: which, and its own words; null on the index. */
+  /**
+   * On a category's or tag's archive: which; null on the index. Its own
+   * words come as `footText` (adr/0075 Ek 2026-11-24); `description` is
+   * what an older storefront sends for under the title (now always empty).
+   */
   activeTerm?: { kind: "category" | "tag"; name: string; description: string[] } | null
+  /**
+   * The archive's own text at its foot, after the posts and their pages, on
+   * its first page only, drawn as a product listing's (adr/0075 Ek
+   * 2026-11-24); none or absent: nothing there.
+   */
+  footText?: ListingTextView | null
   /** On an author's page (`/blog/yazar/{handle}`, adr/0060): who, for the page's head; null elsewhere. */
   activeAuthor?: AuthorView | null
 }

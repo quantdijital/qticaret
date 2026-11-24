@@ -86,3 +86,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0078 | [Program: tarihli üründe gün gün akış](0078-program-gun-gun-akis.md) | — |
 | 0079 | [Panel yapay zekâ yardımcısı: doğal dille yol gösterme, okuma ve onaylı işlem](0079-panel-yapay-zeka-yardimcisi.md) | — |
 | 0080 | [Vitrin pop-up'ları: bilgi, kampanya ve bülten; hedefleme, sıklık, sayaçlar](0080-vitrin-pop-uplari.md) | — |
+| 0081 | [Hızlı CI: değişene göre koşan, önbellekli, paralel hat ve tek sonuç](0081-hizli-ci.md) | — |
