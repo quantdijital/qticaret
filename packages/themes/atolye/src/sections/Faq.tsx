@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react"
 import { fieldKey, fieldMark, sectionMark } from "@qticaret/ui"
 import type { Translate } from "@qticaret/ui"
+import { Prose } from "../content/Prose"
 import { Container } from "../parts/Container"
 import { Reach } from "./Help"
 import { type Of, headingId } from "./plan"
@@ -27,6 +28,7 @@ export function Faq({
   // time is the disclosures' shared `name` (an older browser opens each on its own).
   const openFirst = section.settings?.open_first === "on"
   const group = section.settings?.single_open === "on" ? `sss-${section.id}` : undefined
+  const firstQuestion = section.items.findIndex((item) => !("heading" in item))
   // The editor's field marks (adr/0065 Faz 2b): each row its place in the design
   const on = section.editor
   return (
@@ -36,32 +38,52 @@ export function Faq({
           {section.title ?? t("faq.title")}
         </h2>
         <div className="flex flex-col gap-2 lg:col-span-8 lg:col-start-5 lg:row-span-2 lg:row-start-1">
-          {section.items.map((item, index) => (
-            <details
-              key={item.question}
-              name={group}
-              open={openFirst && index === 0 ? true : undefined}
-              className="group rounded-media gf-pane"
-            >
-              <summary
-                className="flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-media px-5 py-3 text-md font-semibold hover:bg-paper-3"
-                {...fieldMark(on, fieldKey("items", index, "question"))}
+          {section.items.map((item, index) =>
+            // A group's heading among the questions (adr/0073 Ek 2026-11-24 (2)): the rows after it
+            "heading" in item ? (
+              <h3
+                key={`baslik-${String(index)}`}
+                className="pt-4 text-md font-semibold text-text-2 first:pt-0"
+                {...fieldMark(on, fieldKey("items", index, "heading"))}
               >
-                {item.question}
-                <Plus
-                  className="size-5 shrink-0 group-open:rotate-45 motion-safe:transition-transform"
-                  aria-hidden="true"
-                  strokeWidth={1.75}
-                />
-              </summary>
-              <p
-                className="max-w-[65ch] px-5 pb-5 text-text-2"
-                {...fieldMark(on, fieldKey("items", index, "answer"))}
+                {item.heading}
+              </h3>
+            ) : (
+              <details
+                key={`${item.question}-${String(index)}`}
+                name={group}
+                open={openFirst && index === firstQuestion ? true : undefined}
+                className="group rounded-media gf-pane"
               >
-                {item.answer}
-              </p>
-            </details>
-          ))}
+                <summary
+                  className="flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-media px-5 py-3 text-md font-semibold hover:bg-paper-3"
+                  {...fieldMark(on, fieldKey("items", index, "question"))}
+                >
+                  {item.question}
+                  <Plus
+                    className="size-5 shrink-0 group-open:rotate-45 motion-safe:transition-transform"
+                    aria-hidden="true"
+                    strokeWidth={1.75}
+                  />
+                </summary>
+                {"html" in item ? (
+                  // A rich answer: the backend's allow-listed HTML (adr/0019)
+                  <Prose
+                    html={item.html}
+                    className="gf-prose--small max-w-[65ch] px-5 pb-5 text-text-2"
+                    mark={fieldMark(on, fieldKey("items", index, "answer"))}
+                  />
+                ) : (
+                  <p
+                    className="max-w-[65ch] px-5 pb-5 text-text-2"
+                    {...fieldMark(on, fieldKey("items", index, "answer"))}
+                  >
+                    {item.answer}
+                  </p>
+                )}
+              </details>
+            )
+          )}
         </div>
         {help && (
           <div

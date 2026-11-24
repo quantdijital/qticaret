@@ -73,7 +73,14 @@ describe("storefront layout document (adr/0049)", () => {
         columns: 3,
         columns_mobile: 2,
       },
-      { ...faq("sss001"), ...ALWAYS, title: null, open_first: "off", single_open: "off" },
+      {
+        ...faq("sss001"),
+        ...ALWAYS,
+        title: null,
+        open_first: "off",
+        single_open: "off",
+        variant: "standard",
+      },
     ])
     expect(doc.category).toEqual([
       // No variant saved: the default, today's strip (adr/0049 Ek 2026-11-14 §2)
@@ -239,12 +246,12 @@ describe("storefront layout document (adr/0049)", () => {
     ["a place a category page has not", { category: [{ ...faq("sss001"), placement: "side" }] }],
     ["a FAQ without questions", { home: [faq("sss001", { items: [] })] }],
     [
-      "a FAQ of thirteen questions",
-      { home: [faq("sss001", { items: Array.from({ length: 13 }, () => QA) })] },
+      "a FAQ of forty-one rows",
+      { home: [faq("sss001", { items: Array.from({ length: 41 }, () => QA) })] },
     ],
     [
-      "a question over 160 characters",
-      { home: [faq("sss001", { items: [{ ...QA, question: "a".repeat(161) }] })] },
+      "a question over 200 characters",
+      { home: [faq("sss001", { items: [{ ...QA, question: "a".repeat(201) }] })] },
     ],
     [
       "an answer over 600 characters",

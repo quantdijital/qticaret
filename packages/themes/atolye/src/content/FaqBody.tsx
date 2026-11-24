@@ -1,14 +1,28 @@
 import { Plus } from "lucide-react"
+import type { FaqSettings } from "@qticaret/types"
 import type { ContactView, FaqGroupView, FaqView, Translate } from "@qticaret/ui"
 import { Reach } from "../sections/Help"
 import { Prose } from "./Prose"
 
-/** A group's questions as rounded disclosures, every answer in the HTML, closed. */
-function Questions({ group }: { group: FaqGroupView }) {
+/** How the disclosures open: the page's first one open, all in one group (`name`); none: closed, each on its own. */
+interface Opening {
+  first: string | null
+  name: string | undefined
+}
+
+const CLOSED: Opening = { first: null, name: undefined }
+
+/** A group's questions as rounded disclosures, every answer in the HTML, closed unless the shop opens the first. */
+function Questions({ group, opening }: { group: FaqGroupView; opening: Opening }) {
   return (
     <div className="flex flex-col gap-2">
-      {group.items.map((item) => (
-        <details key={item.question} className="group rounded-media gf-pane">
+      {group.items.map((item, index) => (
+        <details
+          key={item.question}
+          name={opening.name}
+          open={opening.first === group.id && index === 0 ? true : undefined}
+          className="group rounded-media gf-pane"
+        >
           <summary className="flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-media px-5 py-3 text-md font-semibold hover:bg-paper-3">
             {item.question}
             <Plus
@@ -36,14 +50,27 @@ export function FaqBody({
   help,
   t,
   suffix = "",
+  settings,
+  sectionId,
 }: {
   faq: FaqView
   help: ContactView | null
   t: Translate
   /** Added to its ids when another text of questions on the page has them (`idSuffixes`). */
   suffix?: string
+  /** An FAQ section's switches (adr/0073 Ek 2026-11-24 (2)); none: closed, each on its own. */
+  settings?: FaqSettings | undefined
+  /** The section's id, naming its disclosures' group when one opens at a time. */
+  sectionId?: string | undefined
 }) {
-  const titled = faq.groups.filter((group) => group.title !== null)
+  const titled = faq.groups.filter((each) => each.title !== null)
+  // Native, no script: the first question open, one open at a time by the disclosures' shared name
+  const opening: Opening = settings
+    ? {
+        first: settings.open_first === "on" ? (faq.groups[0]?.id ?? null) : null,
+        name: settings.single_open === "on" && sectionId ? `sss-${sectionId}` : undefined,
+      }
+    : CLOSED
   return (
     <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
       <aside className="max-lg:contents lg:col-span-4">
@@ -87,12 +114,12 @@ export function FaqBody({
                 {group.title}
               </h2>
               <Prose html={group.lead} className="gf-prose--small" />
-              <Questions group={group} />
+              <Questions group={group} opening={opening} />
             </section>
           ) : (
             <div key={group.id} className="flex flex-col gap-5">
               <Prose html={group.lead} className="gf-prose--small" />
-              <Questions group={group} />
+              <Questions group={group} opening={opening} />
             </div>
           )
         )}

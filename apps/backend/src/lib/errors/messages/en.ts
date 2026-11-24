@@ -85,6 +85,23 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Enter the brand's name (120 characters at most).",
   "brands.name_taken": "A brand with this name already exists.",
   "brands.unknown": "Brand not found.",
+  "popups.unknown": "Pop-up not found.",
+  "popups.text_invalid":
+    "The text is too long or holds characters that cannot be used (plain text; the body at most 500 characters and 8 lines).",
+  "popups.link_invalid":
+    "The link must be a path on the shop (starting with /) or an https address.",
+  "popups.promotion_required": "Choose a discount for a campaign pop-up.",
+  "popups.promotion_not_allowed": "Only a campaign pop-up takes a discount.",
+  "popups.promotion_unknown": "The chosen discount was not found.",
+  "popups.button_incomplete": "Give the button both its words and its link, or leave both empty.",
+  "popups.button_link_not_allowed":
+    "A newsletter pop-up's button sends the form; it takes no link.",
+  "popups.pages_required": "Choose at least one kind of page for the pop-up.",
+  "popups.trigger_value_invalid":
+    "The delay must be 0 to 120 seconds, the scroll share 1 to 100 percent.",
+  "popups.frequency_days_required": "Enter every how many days it shows (1–365).",
+  "popups.dates_invalid": "The end must come after the start.",
+  "popups.image_unknown": "The picture must come from the media library: an image in the library.",
   "bulk_edit.addon_template_unknown": "The chosen add-on template was not found.",
   "bulk_edit.alt_not_filled":
     "Some images' alt text could not be written; add it on the product page.",
@@ -211,6 +228,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.tags_too_many": "A post can have at most 50 tags.",
   "content.term_description_invalid":
     "The description must be at most 1000 characters, without disallowed characters.",
+  "content.term_description_too_long": "The description's text may be at most 5000 characters.",
   "content.term_handle_taken":
     "Another category or tag uses this address; write a different name or address.",
   "content.term_name_invalid":
@@ -1180,6 +1198,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The row's columns do not match its layout; refresh the page and try again.",
   "storefront_layout.footer_block_invalid":
     "A footer block could not be saved; check its fields (a text block takes no headings, pictures or tables; app links must be App Store or Google Play addresses).",
+  "storefront_layout.faq_answer_invalid":
+    "An FAQ answer could not be saved; it cannot be empty, holds up to 1500 characters and takes only paragraphs, lists, bold, italic and links.",
   "storefront_layout.footer_newsletter_twice":
     "The footer cannot show two newsletter forms; remove or hide the newsletter block or the footer group's newsletter section.",
   // adr/0073: content pages' own sections

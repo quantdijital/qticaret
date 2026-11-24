@@ -1,17 +1,29 @@
+import { Heading, Plus } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ListFooter, RowActions } from "@/features/settings/components/storefront-rows"
-import type { FaqItem, FaqSection } from "@/features/storefront/api/layout"
-import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { faqSettingsOf } from "@qticaret/types"
 import type { FaqSetting } from "@qticaret/types"
+import type { FaqItem, FaqSection } from "@/features/storefront/api/layout"
+import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import {
+  dropTo,
+  duplicatedRow,
+  isFaqHeadingRow,
+  movedRow,
+  newHeading,
+  newQuestion,
+  rowNumbers,
+} from "@/features/storefront/layout/faq-rows"
 import { SwitchRow } from "../theme-fields"
 import { NamedGroup } from "../named-group"
 import type { ContentField } from "./content-registry"
+import { FaqRow } from "./faq-row"
+import type { RowDrag } from "./faq-row"
 import { FIELD_IDS } from "./field-registry"
 import { F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
-import { PREVIEW_IDS } from "./preview-fields"
 
 const Q = "storefront.editor.faq"
 
@@ -22,22 +34,47 @@ const SWITCHES = [
 ] as const satisfies readonly (readonly [FaqSetting & ContentField, string])[]
 
 /**
- * Questions and their answers, in order (adr/0049 ek 2026-11-03). An
- * answer may hold the shop's details. Both are plain text; the storefront
+ * Questions and their answers, in order (adr/0049 ek 2026-11-03; adr/0073
+ * Ek 2026-11-24 (2)): the shop writes each question and its answer (a
+ * short rich text), and may put a heading above a group of them. Rows
+ * are dragged by their handle, moved, copied or removed. The storefront
  * shows them and writes no `FAQPage` data (docs/13 §5).
  */
 export function FaqForm({ section, problems, onChange }: SectionFormProps<FaqSection>) {
   const { t } = useTranslation()
   const problem = useProblemText()
+  const [dragged, setDragged] = useState<number | null>(null)
+  const [over, setOver] = useState<RowDrag["over"]>(null)
   const setItems = (items: FaqItem[], field?: string) => {
     onChange({ ...section, items }, field)
   }
-  const setItem = (index: number, next: Partial<FaqItem>, field: keyof FaqItem) => {
-    setItems(
-      section.items.map((item, at) => (at === index ? { ...item, ...next } : item)),
-      `items.${String(index)}.${field}`
-    )
+  const full = section.items.length >= L.faq
+  const stop = () => {
+    setDragged(null)
+    setOver(null)
   }
+  const drag: RowDrag = {
+    dragged,
+    over,
+    start: setDragged,
+    stop,
+    hover: (index, place) => {
+      const lands = dragged !== null && dropTo(dragged, index, place) !== null
+      const next = lands ? { index, place } : null
+      if (next?.index !== over?.index || next?.place !== over?.place) {
+        setOver(next)
+      }
+      return lands
+    },
+    drop: (index, place) => {
+      const to = dragged === null ? null : dropTo(dragged, index, place)
+      if (dragged !== null && to !== null) {
+        setItems(movedRow(section.items, dragged, to))
+      }
+      stop()
+    },
+  }
+  const numbers = rowNumbers(section.items)
   return (
     <>
       <NamedGroup name="content">
@@ -55,64 +92,67 @@ export function FaqForm({ section, problems, onChange }: SectionFormProps<FaqSec
         />
         <ol aria-label={t(`${Q}.items`)} className="flex flex-col gap-3">
           {section.items.map((item, index) => {
-            const number = index + 1
-            const at = `items.${String(index)}`
-            const name = t(`${Q}.item`, { number })
+            const heading = isFaqHeadingRow(item)
+            const number = numbers[index] ?? index + 1
+            const name = t(heading ? `${Q}.headingItem` : `${Q}.item`, { number })
             return (
-              <li key={index} className="flex flex-col gap-3 rounded-md border p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium">{name}</span>
-                  <RowActions
-                    index={index}
-                    count={section.items.length}
-                    item={name}
-                    removable={section.items.length > 1}
-                    onMove={(to) => {
-                      const next = section.items.filter((_, place) => place !== index)
-                      next.splice(to, 0, item)
-                      setItems(next)
-                    }}
-                    onRemove={() => {
-                      setItems(section.items.filter((_, place) => place !== index))
-                    }}
-                  />
-                </div>
-                <TextField
-                  id={PREVIEW_IDS.text(section.id, `${at}.question`)}
-                  label={t(`${Q}.question`, { number })}
-                  value={item.question}
-                  max={L.question}
-                  required
-                  error={problem(problems[`${at}.question`], L.question)}
-                  onChange={(question) => {
-                    setItem(index, { question: question ?? "" }, "question")
-                  }}
-                />
-                <TextField
-                  id={PREVIEW_IDS.text(section.id, `${at}.answer`)}
-                  label={t(`${Q}.answer`, { number })}
-                  value={item.answer}
-                  max={L.answer}
-                  tokens
-                  multiline
-                  required
-                  error={problem(problems[`${at}.answer`], L.answer)}
-                  onChange={(answer) => {
-                    setItem(index, { answer: answer ?? "" }, "answer")
-                  }}
-                />
-              </li>
+              <FaqRow
+                key={index}
+                sectionId={section.id}
+                item={item}
+                index={index}
+                count={section.items.length}
+                name={name}
+                number={number}
+                problems={problems}
+                drag={drag}
+                full={full}
+                onChange={(next, field) => {
+                  setItems(
+                    section.items.map((each, at) => (at === index ? next : each)),
+                    field
+                  )
+                }}
+                onMove={(to) => {
+                  setItems(movedRow(section.items, index, to))
+                }}
+                onDuplicate={() => {
+                  setItems(duplicatedRow(section.items, index))
+                }}
+                onRemove={() => {
+                  setItems(section.items.filter((_, place) => place !== index))
+                }}
+              />
             )
           })}
         </ol>
-        <ListFooter
-          label={t(`${Q}.add`)}
-          hint={t(`${Q}.hint`, { max: L.faq })}
-          full={section.items.length >= L.faq}
-          onAdd={() => {
-            setItems([...section.items, { question: "", answer: "" }])
-          }}
-        />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={full}
+            onClick={() => {
+              setItems([...section.items, newQuestion()])
+            }}
+          >
+            <Plus />
+            {t(`${Q}.add`)}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            disabled={full}
+            onClick={() => {
+              setItems([...section.items, newHeading()])
+            }}
+          >
+            <Heading />
+            {t(`${Q}.addHeading`)}
+          </Button>
+          <span className="text-xs text-muted-foreground">{t(`${Q}.hint`, { max: L.faq })}</span>
+        </div>
       </NamedGroup>
       {/* How the questions open (bilesen-denetimi (b) 8): both off, as before; closed */}
       <NamedGroup name="opening">

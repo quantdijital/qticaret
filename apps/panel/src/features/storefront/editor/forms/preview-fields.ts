@@ -190,9 +190,9 @@ function wordField(section: AnySection, word: string): PreviewField | null {
   ) {
     return content(PREVIEW_IDS.text(section.id, word))
   }
+  // Every header's action button; the catalog's other marked fields
   return section.type === "header_bar" &&
-    section.variant === "catalog" &&
-    HEADER_FIELDS.includes(word)
+    (section.variant === "catalog" ? HEADER_FIELDS.includes(word) : word === "highlight_link")
     ? {
         target: PREVIEW_IDS.header(section.id, word),
         group: HEADER_CATALOG_GROUPS[word as keyof typeof HEADER_CATALOG_GROUPS],

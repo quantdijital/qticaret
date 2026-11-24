@@ -160,6 +160,12 @@ export interface StoreCategoriesIcons {
   phone: CategoryIconsStep<"phone">
   /** Each picked icon by category id; a category with none is absent. */
   category_icons: Record<string, SectionIcon>
+  /**
+   * Icons by category handle (a preset's: it cannot know a shop's ids),
+   * read after `category_icons`: an id's icon wins, then its handle's, then
+   * the picture or initial. Absent while none is written (an older backend too).
+   */
+  category_icons_by_handle?: Record<string, SectionIcon>
 }
 
 /** The icon row's settings as a reader takes them: one missing or off the list reads as its default. */
