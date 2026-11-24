@@ -18,6 +18,7 @@ export const REQUEST_ERRORS = [
   "booking_request.rate_limited",
   "booking_request.failed",
   "errors.challenge_failed",
+  "errors.turnstile_failed",
 ]
 
 export const requestWords = (t: Translate) => ({

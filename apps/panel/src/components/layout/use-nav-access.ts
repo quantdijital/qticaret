@@ -10,7 +10,7 @@ import type { NavItem } from "./navigation"
  * menu), never asking the API itself.
  */
 export function useNavAccess({ fetch = true }: { fetch?: boolean } = {}): (
-  item: NavItem
+  item: Pick<NavItem, "feature" | "needs">
 ) => boolean {
   const features = useQuery({ ...featuresQuery(), enabled: fetch })
   const staff = useQuery({ ...staffQuery(), enabled: fetch })

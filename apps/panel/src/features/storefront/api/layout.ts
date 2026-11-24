@@ -40,6 +40,12 @@ export interface AdminLayout {
   published_at: string | null
   /** Newest first. */
   revisions: LayoutRevision[]
+  /**
+   * The draft's parts (a section's id, a free footer block's) naming a
+   * record deleted since: drawn without it, saved as they are, marked in the
+   * editor. An older backend leaves it out.
+   */
+  missing_targets?: string[]
 }
 
 /** A signed link to the draft as saved now; a later save ends it. */

@@ -73,3 +73,46 @@ describe("the storefront's signed calls (adr/0046 §5)", () => {
     expect(isStorefrontSigned(request(signed("203.0.113.9")))).toBe(false)
   })
 })
+
+describe("Cloudflare's CF-Connecting-IP (adr/0044 Ek 2026-11-24)", () => {
+  const before = process.env["TRUST_CF_CONNECTING_IP"]
+  const beforeSecret = process.env["STOREFRONT_IP_SECRET"]
+  afterEach(() => {
+    process.env["TRUST_CF_CONNECTING_IP"] = before
+    process.env["STOREFRONT_IP_SECRET"] = beforeSecret
+    if (before === undefined) {
+      delete process.env["TRUST_CF_CONNECTING_IP"]
+    }
+    if (beforeSecret === undefined) {
+      delete process.env["STOREFRONT_IP_SECRET"]
+    }
+    resetClientIpSecret()
+  })
+
+  beforeEach(() => {
+    // The suite above leaves the word "undefined" behind when it had no secret
+    delete process.env["STOREFRONT_IP_SECRET"]
+  })
+
+  const edge = "172.68.1.1"
+  const viaCloudflare = (value: string) => request({ "cf-connecting-ip": value }, edge)
+
+  it("ignores the header unless told to trust it", () => {
+    delete process.env["TRUST_CF_CONNECTING_IP"]
+    resetClientIpSecret()
+    expect(clientIp(viaCloudflare("203.0.113.9"))).toBe(edge)
+  })
+
+  it("takes one valid address when trusted, after the storefront's signed one", () => {
+    process.env["TRUST_CF_CONNECTING_IP"] = "on"
+    process.env["STOREFRONT_IP_SECRET"] = SECRET
+    resetClientIpSecret()
+    expect(clientIp(viaCloudflare("203.0.113.9"))).toBe("203.0.113.9")
+    expect(clientIp(viaCloudflare("2001:db8::1"))).toBe("2001:db8::1")
+    expect(clientIp(viaCloudflare("203.0.113.9, 198.51.100.7"))).toBe(edge)
+    expect(clientIp(viaCloudflare("bir-adres"))).toBe(edge)
+    expect(
+      clientIp(request({ ...signed("198.51.100.20"), "cf-connecting-ip": "203.0.113.9" }, edge))
+    ).toBe("198.51.100.20")
+  })
+})

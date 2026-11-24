@@ -10,8 +10,11 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Label } from "@qticaret/admin-ui/ui/label"
 import { InviteFailure, acceptInvite, inviteInfoQuery } from "@/features/auth/api/invite"
+import { TURNSTILE_FAILED, TURNSTILE_REQUIRED } from "@qticaret/types/turnstile"
+import { isTurnstileRefusal } from "@/features/auth/api/gated-post"
 import { useLogin } from "@/features/auth/api/me"
 import { AuthHeading, AuthShell } from "@/features/auth/components/auth-shell"
+import { useStaffTurnstile } from "@/features/auth/components/staff-turnstile"
 import { PasswordInput } from "@/features/auth/components/password-input"
 import { passwordRuleText } from "@/features/auth/password-rule"
 import { linkParams } from "@/lib/link-params"
@@ -35,9 +38,13 @@ const FAILURES: Record<string, string> = {
 
 const failureKey = (error: unknown) =>
   passwordRuleText(error) ??
-  (error instanceof InviteFailure && error.key
-    ? (FAILURES[error.key] ?? "errors.generic")
-    : "errors.generic")
+  (isTurnstileRefusal(error) ||
+  (error instanceof InviteFailure &&
+    (error.key === TURNSTILE_FAILED || error.key === TURNSTILE_REQUIRED))
+    ? "login.turnstile.failed"
+    : error instanceof InviteFailure && error.key
+      ? (FAILURES[error.key] ?? "errors.generic")
+      : "errors.generic")
 
 function Field({
   id,
@@ -68,8 +75,15 @@ export function InvitePage() {
   // From the link's fragment; an older link's query still works
   const [token] = useState(() => linkParams().get("token") ?? search.token)
   const info = useQuery({ ...inviteInfoQuery(token ?? ""), enabled: Boolean(token) })
-  const login = useLogin()
-  const accept = useMutation({ mutationFn: acceptInvite })
+  // Turnstile (adr/0044 Ek 2026-11-24): the login's creation, then the sign-in that follows (and an
+  // earlier try's login), each with its own gate's token
+  const registering = useStaffTurnstile("staff_register")
+  const turnstile = useStaffTurnstile("staff_login")
+  const login = useLogin(turnstile.gate)
+  const accept = useMutation({
+    mutationFn: (input: Parameters<typeof acceptInvite>[0]) =>
+      acceptInvite(input, { register: registering.gate, login: turnstile.gate }),
+  })
   const form = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: { first_name: "", last_name: "", password: "" },
@@ -116,6 +130,8 @@ export function InvitePage() {
             onSubmit={(event) => {
               void submit(event)
             }}
+            onFocus={registering.warm}
+            onPointerDown={registering.warm}
             noValidate
           >
             <Field id="invite-email" label={t("login.email")}>
@@ -138,9 +154,11 @@ export function InvitePage() {
                 {t("invite.passwordHint")}
               </p>
             </Field>
-            {accept.error ? (
+            {registering.slot}
+            {turnstile.slot}
+            {accept.error || login.error ? (
               <p role="alert" className="text-sm text-destructive">
-                {t(failureKey(accept.error))}
+                {t(failureKey(accept.error ?? login.error))}
               </p>
             ) : null}
             <Button type="submit" className="mt-2" disabled={accept.isPending || login.isPending}>

@@ -920,6 +920,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "listing.id_required": "Hangi listenin istendiği belirtilmeli.",
   "listing.search_query_invalid": "Aramak için bir kelime yazın (en çok 100 karakter).",
   "listing.search_query_unexpected": "Arama metni yalnızca aramada gönderilir.",
+  "listing.region_unknown": "Bölge bulunamadı.",
+  "listing.currency_mismatch": "Para birimi bölgenin para birimiyle aynı olmalı.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
   "legal.unknown": "Böyle bir yasal metin türü yok.",
   "legal.not_published": "Bu metin henüz yayımlanmadı.",
@@ -1554,6 +1556,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu şifre bilinen bir veri sızıntısında yer alıyor; başka bir şifre seçin.",
   "fraud.challenge_required":
     "Güvenlik doğrulaması gerekiyor; sayfa bunu kendisi yapar, yeniden deneyin.",
+  "fraud.turnstile_required":
+    "Güvenlik doğrulaması gerekiyor; doğrulamayı tamamlayıp yeniden deneyin.",
+  "fraud.turnstile_failed": "Güvenlik doğrulaması geçilemedi; sayfayı yenileyip yeniden deneyin.",
   "fraud.refused": "Bu işlem şu anda yapılamıyor; lütfen mağazayla iletişime geçin.",
   "fraud.checkout_refused": "Bu sipariş şu anda tamamlanamıyor; lütfen mağazayla iletişime geçin.",
   "fraud.velocity": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin.",

@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto"
 import { hashPii, safeEqual } from "@qticaret/server-kit"
+import type { TurnstileGate } from "../turnstile"
 
 /**
  * A proof of work the visitor's browser does instead of a picture puzzle
@@ -26,6 +27,15 @@ export const CHALLENGE_SCOPES = [
 ] as const
 export type ChallengeScope = (typeof CHALLENGE_SCOPES)[number]
 
+/**
+ * The proof asked in Turnstile's stead while Cloudflare cannot answer (adr/0044
+ * Ek 2026-11-24): a scope of its own per gate, so a proof given past an
+ * adaptive limit never stands for Turnstile at a gate that always asks it.
+ */
+export type FallbackScope = `ts_${TurnstileGate}`
+export type AnyChallengeScope = ChallengeScope | FallbackScope
+export const fallbackScope = (gate: TurnstileGate): FallbackScope => `ts_${gate}`
+
 export const CHALLENGE_TTL_MS = 5 * 60 * 1000
 // About 260,000 tries on average: under a second on a phone
 export const BASE_BITS = 18
@@ -50,7 +60,7 @@ const signed = (body: string, key: Buffer) => hashPii(body, key, PURPOSE)
 
 /** A new challenge for the scope; `bits` held to the bounds. */
 export function issueChallenge(
-  scope: ChallengeScope,
+  scope: AnyChallengeScope,
   key: Buffer,
   bits: number = BASE_BITS,
   now: number = Date.now()
@@ -97,7 +107,7 @@ export function solveChallenge(salt: string, bits: number): string {
  */
 export function checkChallenge(
   header: string,
-  scope: ChallengeScope,
+  scope: AnyChallengeScope,
   key: Buffer,
   now: number = Date.now(),
   minBits: number = MIN_BITS

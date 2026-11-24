@@ -97,7 +97,9 @@ function refuseBlocked(answer: "refused" | "sign_in") {
 /**
  * F15.6 (adr/0044): proofs of work past each scope's soft limit, the held
  * orders' queue and the block list. The checkout's guard sits in the
- * payment chain (payment-routes).
+ * payment chain (payment-routes). Cloudflare Turnstile (Ek 2026-11-24)
+ * runs before all of these, the block list included (whose answer must not
+ * tell a bot without a token who is on it): turnstile-routes.ts.
  */
 export const FRAUD_ROUTES = [
   {
@@ -125,16 +127,6 @@ export const FRAUD_ROUTES = [
     matcher: "/store/customers",
     methods: ["POST" as const],
     middlewares: [refuseBlocked("refused")],
-  },
-  {
-    matcher: "/store/order-lookup",
-    methods: ["POST" as const],
-    middlewares: [challengeOver("order_lookup", { max: 5, windowMs: HOUR })],
-  },
-  {
-    matcher: "/store/stock-alerts",
-    methods: ["POST" as const],
-    middlewares: [challengeOver("stock_alert", { max: 5, windowMs: HOUR })],
   },
   { matcher: "/admin/orders/:id/fulfillments", middlewares: [refuseHeldOrder] },
   { matcher: "/admin/fulfillments", middlewares: [refuseHeldOrder] },

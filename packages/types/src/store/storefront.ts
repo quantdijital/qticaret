@@ -8,6 +8,7 @@ import type { ListingTextSettings } from "./listing-text.js"
 import type { SearchFormSettings } from "./search-form.js"
 import type { CardVariant } from "./section-variants.js"
 import type { StyleKit } from "./style-kit.js"
+import type { TurnstilePublic } from "./turnstile.js"
 
 export type TrustIcon =
   "truck" | "clock" | "shield" | "card" | "refresh" | "award" | "gift" | "phone"
@@ -290,6 +291,8 @@ export interface StorefrontAnswer {
    * from what the shop set up; absent from a backend before it: none.
    */
   marks?: { payments: StorePaymentMark[]; carriers: StoreCarrierMark[] }
+  /** Turnstile's public site key for the risky forms (adr/0044 Ek 2026-11-24); absent from a backend before it. */
+  turnstile?: TurnstilePublic
 }
 
 /** Working days, the shorter first. */
