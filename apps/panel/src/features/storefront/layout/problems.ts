@@ -10,6 +10,7 @@ import { collageProblems, statsProblems, stepsProblems } from "./points-problems
 import { postsProblems, splitEyebrowProblem } from "./band-problems"
 import { marqueeLimitIds } from "./page-limits"
 import { footerBandProblem, footerRowsProblems } from "./footer-rows-problems"
+import { faqProblems } from "./faq-problems"
 import { allSections } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
@@ -194,26 +195,7 @@ function fieldsOf(section: AnySection): Found[] {
       ]
     }
     case "faq":
-      return [
-        ["title", textProblem(section.title, L.title)],
-        ...section.items.flatMap((item, index): Found[] => {
-          const at = `items.${String(index)}`
-          return [
-            [
-              `${at}.question`,
-              item.question.trim() === ""
-                ? "questionRequired"
-                : textProblem(item.question, L.question),
-            ],
-            [
-              `${at}.answer`,
-              item.answer.trim() === ""
-                ? "answerRequired"
-                : textProblem(item.answer, L.answer, true),
-            ],
-          ]
-        }),
-      ]
+      return [["title", textProblem(section.title, L.title)], ...faqProblems(section.items)]
     case "newsletter":
     case "help":
       return [

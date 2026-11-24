@@ -33,7 +33,9 @@ describe("a section's look (adr/0049 Ek 2026-11-14 §6)", () => {
   it("reads a section saved before looks as it was: no look, the theme's own drawing", () => {
     const doc = layoutDocument.parse({ home: [faq()] })
 
-    expect(doc.home).toEqual([{ ...faq(), ...ALWAYS, open_first: "off", single_open: "off" }])
+    expect(doc.home).toEqual([
+      { ...faq(), ...ALWAYS, open_first: "off", single_open: "off", variant: "standard" },
+    ])
     expect(doc.home[0]).not.toHaveProperty("look")
   })
 

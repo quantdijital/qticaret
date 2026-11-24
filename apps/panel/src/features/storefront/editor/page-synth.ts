@@ -54,7 +54,8 @@ export function synthesizedSections(
     const contact = newBodySection("pages", "contact", id("contact")) as ContentPageSection
     sections.push({ ...contact, body } as ContentPageSection)
   } else if (!isEmpty(body)) {
-    sections.push(newPageText(id("article"), body))
+    // Drawn as the storefront draws it today: a text of questions still read as questions
+    sections.push(newPageText(id("article"), body, "auto"))
   }
   if (roles.includes("payment")) {
     sections.push(newBodySection("pages", "payment_facts", id("payment")) as ContentPageSection)

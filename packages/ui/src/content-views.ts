@@ -2,6 +2,7 @@ import type {
   CategoriesVariant,
   FaqSettings,
   HeroVariant,
+  StoreFaqItem,
   RichTextImageSide,
   RichTextVariant,
   ReviewsVariant,
@@ -196,8 +197,13 @@ export type HomeSectionView = {
       type: "faq"
       /** None: the theme's own words ("Sık sorulan sorular"). */
       title: string | null
-      /** Plain text; the theme keeps the answers in the HTML (open or closed). */
-      items: { question: string; answer: string }[]
+      /**
+       * The rows in order (adr/0073 Ek 2026-11-24 (2)): a question with its
+       * answer as the backend's HTML (`html`), or a plain answer saved
+       * before rich answers (`answer`); or a group's heading. The theme
+       * keeps the answers in the HTML (open or closed).
+       */
+      items: StoreFaqItem[]
       /**
        * The first question open, one open at a time (bilesen-denetimi (b) 8).
        * Absent (an older storefront): all closed, each opened on its own.

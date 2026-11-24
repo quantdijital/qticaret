@@ -152,6 +152,7 @@ export const DOC: LayoutDocument = {
       placement: "top",
       title: null,
       items: [{ question: "Kargo ne zaman çıkar?", answer: "Aynı gün kargoya veririz." }],
+      variant: "standard",
     },
     { id: "kategoriyardim", type: "help", ...ALWAYS, placement: "bottom", title: null, text: null },
   ],

@@ -9083,6 +9083,10 @@
           "with_image": "Text with image",
           "article": "Page text"
         },
+        "faq": {
+          "standard": "Beside the heading",
+          "page": "FAQ page"
+        },
         "posts": {
           "grid": "Tiles",
           "intro_panel": "Intro panel"
@@ -9874,13 +9878,23 @@
         "question": "Question {{number}}'s text",
         "answer": "Question {{number}}'s answer",
         "add": "Add question",
-        "hint": "Up to {{max}} questions; answers may hold the shop's details.",
+        "hint": "Up to {{max}} rows; questions under a heading show in its group. Answers may use the shop's details.",
         "openFirst": "First question open",
         "openFirstTerm": "open first",
         "openFirstHint": "The first answer shows when the page opens.",
         "singleOpen": "One question open at a time",
         "singleOpenTerm": "accordion",
-        "singleOpenHint": "Opening a question closes the one already open."
+        "singleOpenHint": "Opening a question closes the one already open.",
+        "addHeading": "Add heading",
+        "headingItem": "Heading {{number}}",
+        "headingText": "Group heading",
+        "headingHint": "Groups the questions under it, e.g. \"Shipping and delivery\".",
+        "duplicate": "{{item}}: add a copy",
+        "answerEmpty": "No answer yet",
+        "answerEdit": "Edit the answer",
+        "answerDescription": "You can use paragraphs, lists, bold, italic and links.",
+        "answerPlaceholder": "Write the answer",
+        "done": "Done"
       },
       "related": {
         "source": "Which products",
@@ -11133,7 +11147,7 @@
         "outlineHint": "A long text shows an outline of its headings beside it.",
         "questions": "Questions and answers",
         "questionsTerm": "soru-cevap",
-        "questionsHint": "A text of questions and answers shows as grouped collapsible questions.",
+        "questionsHint": "For older pages: bold questions in the text show as expandable questions. Use the \"FAQ\" section for new questions.",
         "contactBody": "Text",
         "form": "Contact form",
         "formTerm": "iletişim formu",
