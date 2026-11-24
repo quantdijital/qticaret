@@ -17,7 +17,10 @@ on for the HTTP jobs (`.github/workflows/ci.yml`).
    the spec files in name order, split in two classes by the retry rule
    (`classify.js`, shared with `plain-failures.js`): **plain** files (a failed
    test is tried once more on CI) and **strict** ones (money, stock, races,
-   `Promise.all`: never). Each class is cut into bundles of n files. Same
+   `Promise.all`: never). Each class is cut, in name order, into bundles of
+   at most n files and about `BUNDLE_SECONDS` (180) seconds of tests, by the
+   seconds each file took on CI (`weights.json`; a file not in it counts as
+   the median). A file heavier than that starts a bundle of its own. Same
    checkout, same bundles: every `--shard` job plans alike.
 2. **Writing**: `integration-tests/.bundles/bundle-<plain|strict>-NNN.spec.js`
    (gitignored), rewritten each run; the folder ends up holding exactly this
@@ -36,6 +39,11 @@ on for the HTTP jobs (`.github/workflows/ci.yml`).
      breakers), the integration health monitor, rate limit counters and the
      staff and editor session stores kept in memory (no Redis in CI). Each
      registers how it forgets, under NODE_ENV=test only;
+   - async jobs still `queued` or `running` are deleted: a scheduled job
+     that fired while Medusa booted (`seo-sitemap-refresh` on its first
+     tick) is in the booted state with no process behind it, and would
+     refuse every later file's job of its kind (409
+     `async_job.already_running`);
    - spies are restored (`jest.restoreAllMocks`) and real timers put back;
    - a file's `jest.setTimeout` is kept: its tests and hooks get it as their
      timeout. Medusa's boot and the runner's own hooks wait as long as the
@@ -44,6 +52,38 @@ on for the HTTP jobs (`.github/workflows/ci.yml`).
 A bundle's class is in its name: `plain-failures.js` retries a plain bundle
 and never a strict one. "Tried twice" in the CI summary names the test with
 its file (`<file name> › <test>`).
+
+## Shards by seconds
+
+With bundles on, `jest.config.js` sets `testSequencer` to `sequencer.js`:
+`--shard=k/N` does not cut the test files by a hash of their paths (which
+put two heavy bundles in one job: 812 s beside 352 s) but by expected
+seconds. Each bundle file carries its seconds (`// Expected: …`, its files'
+and one boot, `BOOT_SECONDS` in `weights.js`); a file run alone weighs its
+own and a boot. Heaviest first, each to the lightest shard so far
+(`shards.js`): every job computes the same parts, and each file is in
+exactly one. Within a job the workers take the heaviest file first. With
+bundles off, jest's own sequencer runs as before.
+
+`weights.json` (file name → seconds, without the boot) is measured, not
+written by hand: a bundled file's seconds are the host's line for it
+(`[bundle] <file> <seconds> s`, from before its database is restored to
+after its last `afterAll`: hooks, snapshot and restore included), a lone
+file's are jest's `PASS <path> (<seconds> s)` less the boot. To refresh it
+after a CI run with bundles on, from `apps/backend`:
+
+```sh
+gh run view <run id> --repo quantdijital/qticaret --log > run.log && node integration-tests/bundle/weights.js run.log
+```
+
+Several runs' logs (`run-1.log run-2.log`) give each file its median. A
+file's seconds depend on what runs beside it (three workers on four cores)
+and on the runner (the same files took up to 1.6 times as long in one job
+as in another run), so one run is a noisy measure. A failed bundle's files
+and a failed lone file are left out: a failure cuts a file short or
+stretches it. A new spec file needs no entry: it weighs
+the median until the next refresh. To see a split: `--listTests
+--shard=k/N` with `QT_IT_BUNDLE=8` lists a job's files.
 
 ## Files that run alone
 

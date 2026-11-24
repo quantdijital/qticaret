@@ -102,28 +102,51 @@ function sharedIds(specs) {
   return clashing
 }
 
-function chunk(names, size, kind) {
-  const bundles = []
-  for (let start = 0; start < names.length; start += size) {
-    const number = String(bundles.length + 1).padStart(3, "0")
-    bundles.push({
-      file: `bundle-${kind}-${number}.spec.js`,
-      kind,
-      specs: names.slice(start, start + size),
-    })
+/**
+ * Cuts `names` (in name order) into bundles of at most `size` files. With
+ * `timing`, a bundle is also closed before a file would take it past
+ * `timing.target` seconds, so a heavy file starts a bundle of its own; each
+ * bundle then carries its expected seconds (its files' and one boot).
+ */
+function pack(names, size, kind, timing) {
+  const groups = []
+  let current = []
+  let seconds = 0
+  for (const name of names) {
+    const weight = timing ? timing.weightOf(name) : 0
+    const full = current.length >= size || (timing && seconds + weight > timing.target)
+    if (current.length > 0 && full) {
+      groups.push({ specs: current, seconds })
+      current = []
+      seconds = 0
+    }
+    current.push(name)
+    seconds += weight
   }
-  return bundles
+  if (current.length > 0) {
+    groups.push({ specs: current, seconds })
+  }
+  return groups.map((group, index) => ({
+    file: `bundle-${kind}-${String(index + 1).padStart(3, "0")}.spec.js`,
+    kind,
+    specs: group.specs,
+    ...(timing ? { seconds: Math.round(timing.boot + group.seconds) } : {}),
+  }))
 }
 
 /**
- * The bundles of `size` files each, in name order: plain files (a failed test
- * is tried again on CI) and strict ones (never) apart, so that a bundle's
- * class is its files' class. `specs` are `{ name, source }`; `soloList` is
- * the parsed solo.txt.
+ * The bundles, in name order: plain files (a failed test is tried again on
+ * CI) and strict ones (never) apart, so that a bundle's class is its files'
+ * class. `specs` are `{ name, source }`; `soloList` is the parsed solo.txt.
+ * A bundle holds at most `size` files and, given `timing` (`{ weightOf(name),
+ * target, boot }`, seconds: weights.js), about `target` seconds of tests.
  */
-function planBundles(specs, size, soloList = new Map()) {
+function planBundles(specs, size, soloList = new Map(), timing = null) {
   if (!Number.isInteger(size) || size < 1) {
     throw new Error(`bundle size must be a whole number from 1 up, not ${String(size)}`)
+  }
+  if (timing && !(timing.target > 0)) {
+    throw new Error(`a bundle's target must be some seconds, not ${String(timing.target)}`)
   }
   const sorted = [...specs].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
   const clashing = sharedIds(sorted)
@@ -147,11 +170,14 @@ function planBundles(specs, size, soloList = new Map()) {
   }
   const known = new Set(sorted.map((spec) => spec.name))
   return {
-    bundles: [...chunk(plain, size, "plain"), ...chunk(strict, size, "strict")],
+    bundles: [...pack(plain, size, "plain", timing), ...pack(strict, size, "strict", timing)],
     solo,
     unknownSolo: [...soloList.keys()].filter((name) => !known.has(name)),
   }
 }
+
+// The expected seconds a bundle file carries, for the sequencer (sequencer.js)
+const SECONDS_LINE = /^\/\/ Expected: (\d+) s$/m
 
 /** A generated bundle file's text: its spec files, loaded by host.js. */
 function bundleSource(bundle) {
@@ -159,6 +185,7 @@ function bundleSource(bundle) {
   return [
     "// Generated from integration-tests/http by integration-tests/bundle (QT_IT_BUNDLE);",
     "// not committed, rewritten on every run. See bundle/README.md.",
+    ...(typeof bundle.seconds === "number" ? [`// Expected: ${bundle.seconds} s`] : []),
     `require("../bundle/host").runBundle(${JSON.stringify(bundle.kind)}, [`,
     names,
     "])",
@@ -166,4 +193,10 @@ function bundleSource(bundle) {
   ].join("\n")
 }
 
-module.exports = { bundleSource, parseSoloList, planBundles, soloReasonOf }
+/** The expected seconds written into a bundle file's text; null when it has none. */
+function bundleSeconds(text) {
+  const match = SECONDS_LINE.exec(text)
+  return match ? Number(match[1]) : null
+}
+
+module.exports = { bundleSeconds, bundleSource, parseSoloList, planBundles, soloReasonOf }

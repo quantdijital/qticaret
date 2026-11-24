@@ -34,6 +34,10 @@ if (process.env.TEST_TYPE === "integration:http") {
   // written here, before jest looks for tests (integration-tests/bundle/README.md)
   const bundles = require("./integration-tests/bundle").prepareBundles(process.env.QT_IT_BUNDLE)
   module.exports.testMatch = bundles?.testMatch ?? ["**/integration-tests/http/*.spec.[jt]s"]
+  if (bundles) {
+    // --shard jobs take their part by expected seconds (bundle/weights.json)
+    module.exports.testSequencer = "./integration-tests/bundle/sequencer.js"
+  }
   module.exports.workerIdleMemoryLimit = INTEGRATION_WORKER_MEMORY
   module.exports.setupFilesAfterEnv = PLAIN_FAILURES
   // Migrations run once per run, into a template database each spec file's

@@ -1,4 +1,5 @@
 import type Redis from "ioredis"
+import { registerProcessCache } from "../cache/process-caches"
 import { parseEnv } from "../env"
 import { ProviderError } from "../errors"
 import { currentRequestId, errorSummary, logger } from "../logging"
@@ -76,6 +77,11 @@ export function createRedisFailureLog(client: () => Redis, prefix: string): Fail
 }
 
 let shared: FailureLog | undefined
+// Without Redis (tests) the log is the process's: a bundled test run gives each
+// spec file a fresh one, not the failures the file before it provoked
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** The tenant's log: Redis when it is set, except in tests, which read their own process. */
 export function providerFailureLog(): FailureLog {

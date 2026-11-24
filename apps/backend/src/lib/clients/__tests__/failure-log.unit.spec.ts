@@ -1,5 +1,7 @@
 import { runWithRequestContext } from "../../logging"
+import { forgetProcessCaches } from "../../cache/process-caches"
 import { createMemoryFailureLog, worthNoting } from "../failure-log"
+import type { FailureLog } from "../failure-log"
 import { Item, clientFor, errorOf, json, useProvider } from "./harness"
 
 const provider = useProvider()
@@ -84,5 +86,35 @@ describe("the provider failure log", () => {
     expect(kept[0]?.code).toBe("code_24")
     expect(await log.recent("acme", 50)).toEqual([])
     expect(await log.recent("other", 50)).toEqual([])
+  })
+
+  it("starts empty again once a test run forgets what the process holds", async () => {
+    let shared: () => FailureLog = () => {
+      throw new Error("not loaded")
+    }
+    jest.isolateModules(() => {
+      // Without Redis, under NODE_ENV=test: the log in process memory
+      jest.doMock("../../env", () => ({
+        ...jest.requireActual<object>("../../env"),
+        parseEnv: () => ({ NODE_ENV: "test" }),
+      }))
+      shared = jest.requireActual<{ providerFailureLog: () => FailureLog }>(
+        "../failure-log"
+      ).providerFailureLog
+    })
+    const failure = {
+      at: new Date().toISOString(),
+      code: "network_error",
+      status: null,
+      method: "POST",
+      path: "/x",
+      request_id: null,
+    }
+    await shared().note("acme", failure)
+    expect(await shared().recent("acme", 5)).toEqual([failure])
+
+    forgetProcessCaches()
+
+    expect(await shared().recent("acme", 5)).toEqual([])
   })
 })

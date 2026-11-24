@@ -46,15 +46,22 @@ export function baseConfig(tsconfigRootDir) {
     {
       // adr/0061 Ek C8 (review L4): the age library and the test-only escrow
       // opener stay out of application code, so nothing but a test can ever
-      // open an escrow. Allowed: tests, and the one module that seals with it
+      // open an escrow. Allowed: tests, and the one module that seals with it.
+      // Also the backend's forgetProcessCaches (adr/0081 Ek): only a test may
+      // empty what the app holds in process. One block, as a later block
+      // naming the same rule would replace these patterns, not add to them
       ignores: [...TEST_FILES, "**/src/crypto/escrow.ts", "**/src/testing/**", "**/jest.age.cjs"],
       rules: {
-        "no-restricted-imports": ["error", { patterns: [TEST_ONLY_IMPORTS] }],
+        "no-restricted-imports": ["error", { patterns: [TEST_ONLY_IMPORTS, TEST_ONLY_FORGET] }],
         "no-restricted-syntax": [
           "error",
           {
             selector: `CallExpression[callee.name='require'][arguments.0.value=${TEST_ONLY_REQUIRE}]`,
             message: TEST_ONLY_IMPORTS.message,
+          },
+          {
+            selector: `VariableDeclarator[init.callee.name='require'][init.arguments.0.value=${PROCESS_CACHES}] > ObjectPattern > Property[key.name='forgetProcessCaches']`,
+            message: TEST_ONLY_FORGET.message,
           },
         ],
       },
@@ -82,6 +89,15 @@ const TEST_ONLY_IMPORTS = {
   message:
     "Test-only: the escrow is opened by the offline identity alone (adr/0061 Ek C8), and the contract's test keys sign nothing real (Ek C9). Seal with @qticaret/server-kit/escrow.",
 }
+
+const TEST_ONLY_FORGET = {
+  regex: "(^|/)process-caches(\\.[jt]s)?$",
+  importNames: ["forgetProcessCaches"],
+  message:
+    "Test-only: forgetProcessCaches empties what the app holds in process (integration-tests/bundle, adr/0081 Ek); application code never forgets on purpose.",
+}
+
+const PROCESS_CACHES = "/(^|\\/)process-caches(\\.[jt]s)?$/"
 
 const TEST_ONLY_REQUIRE =
   "/^(age-encryption|@qticaret\\/server-kit\\/testing\\/|@qticaret\\/types\\/control-plane\\/testing)/"

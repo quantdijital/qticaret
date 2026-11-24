@@ -42,4 +42,19 @@ describe("process caches", () => {
     }
     expect(forgetProcessCaches()).toBe(before)
   })
+
+  it("forgets nothing outside tests", () => {
+    let held: string | undefined = "client"
+    registerProcessCache(() => {
+      held = undefined
+    })
+    const saved = process.env["NODE_ENV"]
+    process.env["NODE_ENV"] = "production"
+    try {
+      expect(forgetProcessCaches()).toBe(0)
+    } finally {
+      process.env["NODE_ENV"] = saved
+    }
+    expect(held).toBe("client")
+  })
 })

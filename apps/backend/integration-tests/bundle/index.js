@@ -6,7 +6,11 @@ const fs = require("node:fs")
 const path = require("node:path")
 const { BUNDLES_DIR } = require("./classify")
 const { bundleSource, parseSoloList, planBundles } = require("./plan")
+const { BOOT_SECONDS, loadWeights, weigher } = require("./weights")
 
+// A bundle is filled up to about this many seconds of tests (weights.json),
+// so bundles take alike and a heavy file has one of its own (adr/0081 Ek)
+const BUNDLE_SECONDS = 180
 const HTTP_DIR = path.join(__dirname, "..", "http")
 const SOLO_LIST = path.join(__dirname, "solo.txt")
 const SPEC_FILE = /\.spec\.[jt]s$/
@@ -54,7 +58,10 @@ function syncDirectory(dir, files) {
   }
 }
 
-function prepareBundles(value, { specDir = HTTP_DIR, outDir = BUNDLES_DIR, log } = {}) {
+function prepareBundles(
+  value,
+  { specDir = HTTP_DIR, outDir = BUNDLES_DIR, log, weights = loadWeights() } = {}
+) {
   const size = bundleSize(value)
   if (size === null) {
     return null
@@ -63,15 +70,19 @@ function prepareBundles(value, { specDir = HTTP_DIR, outDir = BUNDLES_DIR, log }
   const soloList = fs.existsSync(SOLO_LIST)
     ? parseSoloList(fs.readFileSync(SOLO_LIST, "utf8"))
     : new Map()
-  const plan = planBundles(readSpecs(specDir), size, soloList)
+  const plan = planBundles(readSpecs(specDir), size, soloList, {
+    weightOf: weigher(weights),
+    target: BUNDLE_SECONDS,
+    boot: BOOT_SECONDS,
+  })
   for (const name of plan.unknownSolo) {
     say(`solo.txt names ${name}, which is not in integration-tests/http: remove the line`)
   }
   syncDirectory(outDir, new Map(plan.bundles.map((bundle) => [bundle.file, bundleSource(bundle)])))
   const count = (kind) => plan.bundles.filter((bundle) => bundle.kind === kind).length
   say(
-    `${size} files a bundle: ${count("plain")} plain and ${count("strict")} strict bundles, ` +
-      `${plan.solo.length} files alone`
+    `up to ${size} files and ${BUNDLE_SECONDS} s of tests a bundle: ${count("plain")} plain ` +
+      `and ${count("strict")} strict bundles, ${plan.solo.length} files alone`
   )
   const relative = path.relative(path.join(__dirname, ".."), outDir).split(path.sep).join("/")
   return {
@@ -83,4 +94,4 @@ function prepareBundles(value, { specDir = HTTP_DIR, outDir = BUNDLES_DIR, log }
   }
 }
 
-module.exports = { bundleSize, prepareBundles, syncDirectory }
+module.exports = { BUNDLE_SECONDS, bundleSize, prepareBundles, syncDirectory }
