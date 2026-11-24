@@ -30,6 +30,8 @@ const EDGED = [
 const BARE = [
   "cart/CartPage.tsx",
   "frame/ConsentFrame.tsx",
+  // adr/0080 §6: the shop's pop-up, its dialog, card and phone sheet
+  "frame/PopupDialog.tsx",
   "frame/QuickViewDialog.tsx",
   "frame/SearchDrop.tsx",
   "frame/Sheet.tsx",

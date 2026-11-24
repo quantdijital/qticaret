@@ -13,6 +13,7 @@ interface Frame {
     booking: boolean
     collections: boolean
     natural_search: boolean
+    popups: boolean
   }
   marks?: { payments: string[]; carriers: string[] }
   storefront: {
@@ -97,6 +98,8 @@ medusaIntegrationTestRunner({
         collections: true,
         // Search in the shopper's own words is off until the shop turns it on (adr/0077 §7)
         natural_search: false,
+        // Pop-ups are on (adr/0080): none shows until the shop makes one
+        popups: true,
       })
       expect(before.headers["cache-control"]).toContain("max-age=300")
       expect(script.status).toBe(400)
@@ -232,6 +235,7 @@ medusaIntegrationTestRunner({
         booking: false,
         collections: true,
         natural_search: false,
+        popups: true,
       })
     })
   },

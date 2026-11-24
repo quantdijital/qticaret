@@ -1,4 +1,5 @@
 import {
+  AppWindow,
   BadgePercent,
   ChartColumnBig,
   FileText,
@@ -24,6 +25,7 @@ import {
 import type { LucideIcon } from "lucide-react"
 import type { Capability } from "@/features/auth/api/staff"
 import { COLLECTIONS_FLAG } from "@/features/collections/paths"
+import { POPUPS_FLAG } from "@/features/popups/api/types"
 import { WHOLESALE_FLAG } from "@/features/wholesale/api/types"
 
 /**
@@ -130,6 +132,8 @@ export const NAV_GROUPS: NavGroup[] = [
         feature: "marketing.campaigns",
         needs: "bulkMessages",
       },
+      // adr/0080: storefront pop-ups while the shop has them on (on by default); every role reads
+      { key: "popups", to: "/popups", icon: AppWindow, feature: POPUPS_FLAG },
       { key: "reviews", to: "/reviews", icon: MessageSquareText },
     ],
   },

@@ -5,6 +5,7 @@ import {
   CATALOG_BOOKING,
   CATALOG_COLLECTIONS,
   GIFT_CARDS,
+  MARKETING_POPUPS,
   PRODUCT_ADDONS,
 } from "../../../modules/platform-settings/features"
 import type {
@@ -90,6 +91,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     booking,
     collections,
     naturalSearch,
+    popups,
     values,
     marks,
     shared,
@@ -103,6 +105,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     settings.isFeatureEnabled(CATALOG_BOOKING),
     settings.isFeatureEnabled(CATALOG_COLLECTIONS),
     settings.isFeatureEnabled(AI_STOREFRONT_SEARCH),
+    settings.isFeatureEnabled(MARKETING_POPUPS),
     shopInfoValues(req.scope),
     shopMarks(req.scope),
     liveSettings(req.scope),
@@ -111,6 +114,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     PromotionSettings,
     ShippingSettings,
     MarketingSettings,
+    boolean,
     boolean,
     boolean,
     boolean,
@@ -145,6 +149,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       booking,
       collections,
       natural_search: naturalSearch,
+      // Pop-ups (`marketing.popups`, adr/0080 §5): `/store/popups` is read only while on
+      popups,
     },
     // The footer's ways to pay and carriers, as the shop has them set up (adr/0046 Ek 2026-11-04)
     marks,

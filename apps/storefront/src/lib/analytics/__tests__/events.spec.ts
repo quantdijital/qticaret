@@ -53,6 +53,14 @@ describe("GA4's events", () => {
       { search_term: "gömlek" },
     ])
     expect(ga4Event({ name: "sign_up", method: "email" })).toEqual(["sign_up", { method: "email" }])
+    // adr/0080 §7: a pop-up's own, GA4 alone
+    expect(ga4Event({ name: "popup_view", popupId: "popup_1", popupType: "campaign" })).toEqual([
+      "popup_view",
+      { popup_id: "popup_1", popup_type: "campaign" },
+    ])
+    expect(metaEvent({ name: "popup_signup", popupId: "popup_1", popupType: "newsletter" })).toBe(
+      null
+    )
     const [name, params] = ga4Event({
       name: "add_payment_info",
       value: 10,

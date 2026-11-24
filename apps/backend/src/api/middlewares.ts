@@ -47,6 +47,7 @@ import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
 import { WHOLESALE_ROUTES } from "./http/wholesale-routes"
 import { WHOLESALE_STORE_ROUTES } from "./http/wholesale-store-routes"
 import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
+import { POPUP_ROUTES } from "./http/popup-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { COLLECTION_GATES, COLLECTION_ROUTES } from "./http/collection-routes"
 import { SEARCH_ROUTES } from "./http/search-routes"
@@ -369,6 +370,8 @@ export default defineMiddlewares({
     ...WHOLESALE_STORE_ROUTES,
     // adr/0050: bulk e-mail and SMS, behind their flag
     ...CAMPAIGN_ROUTES,
+    // adr/0080: storefront pop-ups, behind their flag
+    ...POPUP_ROUTES,
     ...REVIEW_ROUTES,
     ...CONTACT_ROUTES,
     ...EMAIL_LINK_ROUTES,
