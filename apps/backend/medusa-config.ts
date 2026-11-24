@@ -282,6 +282,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/cart-reminders" },
     // adr/0050: bulk e-mail and SMS, recipients by keyed hash only
     { resolve: "./src/modules/campaigns" },
+    // adr/0080: storefront pop-ups and their daily counters (no personal data)
+    { resolve: "./src/modules/popups" },
     // F10.10 (adr/0037 §4): product questions and answers, moderated
     { resolve: "./src/modules/product-qa" },
     // F10.6 (adr/0037 §4): purchasers' reviews, moderated, and their ratings

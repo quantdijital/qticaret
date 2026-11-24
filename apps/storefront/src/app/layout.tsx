@@ -15,6 +15,7 @@ import { siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { layoutPreviewToken } from "@/lib/views/layout"
+import { POPUP_SETUP, popupsOn } from "@/lib/views/popups"
 import { quickViewAddress } from "@/lib/views/quick-view"
 import { SUGGEST_PATH } from "@/lib/views/search-suggest"
 import { shopView } from "@/lib/views/shop"
@@ -73,6 +74,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // The cart the header shows (asked once per render), for its "added" and "taken out": only to a
   // browser whose visitor allowed a tag
   const cart = measured ? cartSnapshotOf(await headerCart()) : NO_CART
+  // The shop's pop-ups (adr/0080): the browser asks for them only while the shop has them on,
+  // never in a design preview; the frame's own answer says so, no call of its own
+  const popups = !preview && (await popupsOn().catch(() => false))
   return (
     <html lang="tr">
       {/* Browser extensions write attributes on <body> before React loads */}
@@ -122,6 +126,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             {...(settings.product_card.quick_view
               ? { quickView: { address: quickViewAddress(previewToken), addToCart } }
               : {})}
+            {...(popups ? { popups: POPUP_SETUP } : {})}
           >
             {children}
           </theme.Layout>
