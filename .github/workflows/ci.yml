@@ -227,7 +227,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["HTTP 1/8", "HTTP 2/8", "HTTP 3/8", "HTTP 4/8", "HTTP 5/8", "HTTP 6/8", "HTTP 7/8", "HTTP 8/8", "modules"]
+        suite:
+          [
+            "HTTP 1/8",
+            "HTTP 2/8",
+            "HTTP 3/8",
+            "HTTP 4/8",
+            "HTTP 5/8",
+            "HTTP 6/8",
+            "HTTP 7/8",
+            "HTTP 8/8",
+            "modules",
+          ]
     services:
       postgres:
         image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
@@ -237,7 +248,10 @@ jobs:
           POSTGRES_DB: qticaret
         ports:
           - 5432:5432
+        # The data in memory: every spec file makes and migrates a database, and
+        # nothing of it outlives the job (adr/0081)
         options: >-
+          --tmpfs /var/lib/postgresql/data --shm-size 1g
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s
           --health-timeout 5s
@@ -317,7 +331,10 @@ jobs:
           POSTGRES_DB: qticaret
         ports:
           - 5432:5432
+        # The data in memory: every spec file makes and migrates a database, and
+        # nothing of it outlives the job (adr/0081)
         options: >-
+          --tmpfs /var/lib/postgresql/data --shm-size 1g
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s
           --health-timeout 5s
