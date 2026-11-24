@@ -286,8 +286,9 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "is required in production and staging",
     })
   }
-  // Bots at the risky gates (adr/0044 Ek 2026-11-24): no keys, no start
-  checkTurnstileEnv(env, deployed, (path, message) => {
+  // Bots at the risky gates (adr/0044 Ek 2026-11-24): the pair, never a test key
+  // live; the keys themselves are required at boot (assertTurnstileConfigured)
+  checkTurnstileEnv(env, (path, message) => {
     ctx.addIssue({ code: "custom", path: [path], message })
   })
   // Unsigned, every shopper the storefront serves would count as its server's

@@ -22,6 +22,7 @@ interface Answer {
   turnstile?: { action?: string; site_key?: string | null }
   challenge?: GivenChallenge
   fallback?: string
+  token?: string
 }
 
 // A made-up key in Cloudflare's shape: not a test key, so siteverify is asked
@@ -81,7 +82,13 @@ medusaIntegrationTestRunner({
     })
 
     it("asks a token at every always-on gate, and lets the test token through", async () => {
-      const gates: [string, string, unknown][] = [
+      // A code is asked by a signed-in identity: Medusa's own authentication may answer first
+      const made = await post("/auth/customer/emailpass/register", {
+        email: `kod-${randomUUID()}@example.com`,
+        password: `Uzun-${randomUUID()}`,
+      })
+      const signedIn = { authorization: `Bearer ${made.data.token ?? ""}` }
+      const gates: [string, string, unknown, Record<string, string>?][] = [
         ["/auth/customer/emailpass", "login", { email: "a@example.com", password: "x" }],
         [
           "/auth/customer/emailpass/register",
@@ -100,13 +107,25 @@ medusaIntegrationTestRunner({
           { identifier: "a@example.com" },
         ],
         [
+          "/auth/user/emailpass/register",
+          "staff_register",
+          { email: "a@example.com", password: "x" },
+        ],
+        [
+          "/auth/verification/request",
+          "verification",
+          { entity_id: "a@example.com", entity_type: "email" },
+          signedIn,
+        ],
+        [
           `/store/carts/cart_${randomUUID()}/payment-session`,
           "checkout",
           { provider_id: "pp_cod_cod" },
         ],
       ]
-      for (const [path, action, body] of gates) {
-        const bare = await post(path, body, NO_TURNSTILE)
+      expect(made.status).toBe(200)
+      for (const [path, action, body, headers = {}] of gates) {
+        const bare = await post(path, body, { ...headers, ...NO_TURNSTILE })
         expect([path, bare.status, bare.data.message, bare.data.turnstile]).toEqual([
           path,
           428,

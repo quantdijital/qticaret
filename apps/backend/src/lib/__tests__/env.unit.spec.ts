@@ -26,12 +26,6 @@ const validEnv = {
   PII_HASH_KEY: hexKey(),
 }
 
-// Made-up Turnstile keys in Cloudflare's shape, required once deployed (adr/0044 Ek 2026-11-24)
-const turnstileEnv = {
-  TURNSTILE_SITE_KEY: "0x4AAAAAAAmadeUpSiteKeyForEnvTests",
-  TURNSTILE_SECRET_KEY: "0x4AAAAAAAmadeUpSecretForEnvTests",
-}
-
 // Generated per run like the secrets above
 const s3Env = {
   S3_REGION: "us-east-1",
@@ -99,7 +93,6 @@ describe("parseEnv", () => {
         CREDENTIALS_ENCRYPTION_KEY: hexKey(),
         AUTH_MFA_ENCRYPTION_KEY: hexKey(),
         STOREFRONT_IP_SECRET: hexKey(),
-        ...turnstileEnv,
         BACKEND_URL: "https://api.example.com",
         NODE_ENV: env,
       }).REDIS_URL
@@ -129,7 +122,6 @@ describe("parseEnv", () => {
       CREDENTIALS_ENCRYPTION_KEY: hexKey(),
       AUTH_MFA_ENCRYPTION_KEY: hexKey(),
       STOREFRONT_IP_SECRET: hexKey(),
-      ...turnstileEnv,
       BACKEND_URL: "https://api.example.com",
       NODE_ENV: "production",
     }
