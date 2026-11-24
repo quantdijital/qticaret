@@ -38,6 +38,7 @@ export const calendarView = (t: Translate): SearchFormCalendarView => ({
     apply: t("search.calendar_apply"),
     weekdays: t("search.calendar_weekdays").split(","),
     dayPriced: t("search.calendar_day_priced"),
+    dayPricedBefore: t("search.calendar_day_priced_before"),
     dayCounted: t("search.calendar_day_counted"),
     dayEmpty: t("search.calendar_day_empty"),
     pickStart: t("search.calendar_pick_start"),
@@ -120,6 +121,10 @@ function dayView(day: StoreDepartureCalendar["days"][number]): SearchCalendarDay
     price: price === null ? null : formatLira(price),
     short: price === null ? null : `₺${SHORT.format(price)}`,
     whole: price === null ? null : `₺${WHOLE.format(price)}`,
+    // The backend's price-before rule decided it; never beside no price or a higher one
+    ...(price !== null && day.before !== undefined && day.before > price
+      ? { before: formatLira(day.before) }
+      : {}),
   }
 }
 

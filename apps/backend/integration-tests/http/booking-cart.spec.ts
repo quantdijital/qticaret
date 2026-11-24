@@ -627,6 +627,62 @@ medusaIntegrationTestRunner({
       expect(read.data.cart.total).toBe(3601)
     })
 
+    it("strikes a sale's price through on a line only without the departure's difference, charging as before", async () => {
+      await turnOn()
+      const container = getContainer()
+      const { adult, infant, slotId } = await tour(10)
+      await staff("/admin/price-lists", {
+        title: "Kampanya",
+        description: "",
+        status: "active",
+        type: "sale",
+        prices: [
+          { variant_id: adult, currency_code: "try", amount: 1200 },
+          { variant_id: infant, currency_code: "try", amount: 80 },
+        ],
+      })
+      const cartId = await emptyCart(container)
+      const booked = await book(cartId, {
+        slot_id: slotId,
+        items: [
+          { variant_id: adult, quantity: 2 },
+          { variant_id: infant, quantity: 1 },
+        ],
+      })
+      const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: "cart",
+        fields: ["items.variant_id", "items.unit_price", "items.compare_at_unit_price"],
+        filters: { id: cartId },
+      })
+      const lines = (
+        data[0] as {
+          items: { variant_id: string; unit_price: unknown; compare_at_unit_price: unknown }[]
+        }
+      ).items.map((line) => ({
+        variant_id: line.variant_id,
+        unit_price: Number(line.unit_price),
+        compare_at_unit_price:
+          line.compare_at_unit_price === null ? null : Number(line.compare_at_unit_price),
+      }))
+      const read = await settle(
+        http.get<{ cart: { total: number } }>(`/store/carts/${cartId}`, {
+          headers: store.headers,
+        })
+      )
+
+      expect(booked.status).toBe(200)
+      // The difference has no record of its own: nothing struck through, the line's own price
+      // as the one before (left out, Medusa puts the list's 1.500 there; adr/0076 Ek, md. 14/3)
+      expect(lines).toEqual(
+        expect.arrayContaining([
+          { variant_id: adult, unit_price: 1450.5, compare_at_unit_price: 1450.5 },
+          { variant_id: infant, unit_price: 80, compare_at_unit_price: 100 },
+        ])
+      )
+      // The sale's price plus the difference, as before: 2 × 1.450,50 + 80
+      expect(read.data.cart.total).toBe(2981)
+    })
+
     it("takes the shipping method off once only dated lines are left, and the order goes through", async () => {
       await turnOn()
       const container = getContainer()

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createTtlCache } from "../../lib/cache"
@@ -9,8 +10,16 @@ import type { CalendarRow } from "../../modules/booking/service"
 import { categorySubtreeByHandle, priceKey } from "../seo/listing-plan"
 import { payingUnitAt, payingVariants } from "./card-facts"
 import type { DatedCardProduct, PayingUnit } from "./card-facts"
-import { baseAmounts, basePriceRows, lira, lowestShown, placeDisplays, struck } from "./card-price"
-import type { CardShown } from "./card-price"
+import {
+  baseAmounts,
+  basePriceRows,
+  lira,
+  lowestShown,
+  placeDisplays,
+  placeKey,
+  struck,
+} from "./card-price"
+import type { BasePrice, CardShown } from "./card-price"
 import { bookingService } from "./cart/target"
 
 /**
@@ -59,6 +68,47 @@ export interface DepartureCalendar {
 const CURRENCY = "try"
 
 const calendarCache = createTtlCache<DepartureCalendar>({ ttlMs: 60_000, maxEntries: 500 })
+
+/**
+ * The places as shown, kept as long as the calendar, by the places alone
+ * (`placesKey`): a party's size only picks which departures count, never
+ * what a place costs, so parties whose days share places share one
+ * reading of the record and the promotions (adr/0076 Ek "kalkış fiyatı
+ * promosyonlu").
+ */
+const displayCache = createTtlCache<Map<string, CardShown>>({ ttlMs: 60_000, maxEntries: 500 })
+
+/** Forgets what is kept (tests that change departures, prices or promotions). */
+export function clearCalendarCaches(): void {
+  calendarCache.clear()
+  displayCache.clear()
+}
+
+/**
+ * Everything a place's display is worked out from (`placeDisplays`): the
+ * currency and, per place, its category, difference, price and the price
+ * before a sale list; in no order, each place once. Hashed: a month may
+ * have many places.
+ */
+export function placesKey(
+  units: readonly PayingUnit[],
+  bases: ReadonlyMap<string, BasePrice | null>,
+  currency: string
+): string {
+  const places = new Set(
+    units.map((unit) => {
+      const base = bases.get(unit.variant_id)
+      return JSON.stringify([
+        placeKey(unit),
+        String(unit.amount),
+        base ? [String(base.calculated), String(base.original)] : null,
+      ])
+    })
+  )
+  return createHash("sha256")
+    .update(JSON.stringify([currency.toLowerCase(), [...places].sort()]))
+    .digest("hex")
+}
 
 /** Products the departures matched that the shopper's listing shows, at most IDS_ONLY_LIMIT. */
 async function shownProducts(
@@ -183,9 +233,11 @@ async function readCalendar(
     service.calendarRows([...byBookable.keys()], { month: input.month, pax: input.pax, now }),
   ])
   const bases = baseAmounts(prices)
-  // Every day's places in one reading of the record and the promotions
+  // Every day's places in one reading of the record and the promotions, whatever the party
   const units = rows.flatMap((row) => rowUnits(row, byBookable, bases))
-  const displays = await placeDisplays(container, units, prices, CURRENCY, now)
+  const displays = await displayCache(placesKey(units, prices, CURRENCY), () =>
+    placeDisplays(container, units, prices, CURRENCY, now)
+  )
   return { ...empty, days: calendarDays(rows, byBookable, bases, displays) }
 }
 
@@ -198,7 +250,8 @@ const emptyCalendar = (month: string): DepartureCalendar => ({
 /**
  * The month's calendar for the shopper's channels, kept a minute per
  * month, category subtree (its ids, not the handle asked), party and
- * channels. A handle no shown category has answers empty at once: no
+ * channels; its places' promoted prices a minute by the places alone,
+ * whatever the party. A handle no shown category has answers empty at once: no
  * departure is read and nothing is kept for it, so made-up handles fill
  * no cache.
  */

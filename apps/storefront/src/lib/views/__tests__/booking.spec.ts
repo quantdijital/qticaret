@@ -98,6 +98,32 @@ describe("a dated product page's booking view", () => {
     expect(view.maxUnits).toBe(8)
   })
 
+  it("writes a category's price before its promotion only when the backend sent a higher one", () => {
+    const soon = BOOKING.slots[1]
+    const promoted: StoreProductBooking = {
+      ...BOOKING,
+      slots: soon
+        ? [
+            {
+              ...soon,
+              prices: [
+                { variant_id: "variant_adult", amount: 1000.4, before: 1250.5 },
+                { variant_id: "variant_child", amount: 600, before: 600 },
+              ],
+            },
+          ]
+        : [],
+    }
+    const [adult, child] = bookingViewOf(promoted, t).departures[0]?.prices ?? []
+
+    expect(adult?.before).toContain("1.250,50")
+    // The running total adds what the cart charges, never the price before
+    expect(adult?.kurus).toBe(100040)
+    expect(child).not.toHaveProperty("before")
+    // Without one, as before
+    expect(bookingViewOf(BOOKING, t).departures[0]?.prices[0]).not.toHaveProperty("before")
+  })
+
   it("says a call-me product's sale mode with the privacy notice and months; online says nothing", () => {
     // adr/0076 Ek 2026-11-23: an online-only product's view stays as it was
     expect(bookingViewOf({ ...BOOKING, sale_mode: "online" }, t)).toEqual(bookingViewOf(BOOKING, t))

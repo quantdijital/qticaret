@@ -68,6 +68,10 @@ export function DatePickerMonth({
     if (!found) {
       return fill(words.dayEmpty, { date })
     }
+    if (found.price && found.before && words.dayPricedBefore) {
+      const values = { date, price: found.price, before: found.before, count: found.departures }
+      return fill(words.dayPricedBefore, values)
+    }
     return found.price
       ? fill(words.dayPriced, { date, price: found.price, count: found.departures })
       : fill(words.dayCounted, { date, count: found.departures })
@@ -127,7 +131,11 @@ export function DatePickerMonth({
                   {found?.short && (
                     <span
                       aria-hidden="true"
-                      className={cn("text-[0.6875rem] leading-none", !ends && "text-text-2")}
+                      // Too narrow to strike the price before through: the sale's colour says it
+                      className={cn(
+                        "text-[0.6875rem] leading-none",
+                        !ends && (found.before ? "text-deal" : "text-text-2")
+                      )}
                     >
                       <span className="md:hidden">{found.short}</span>
                       <span className="max-md:hidden">{found.whole}</span>

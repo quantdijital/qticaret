@@ -47,7 +47,16 @@ vi.stubGlobal("fetch", (address: string) => {
     short: "₺12,4 B",
     whole: "₺12.400",
   }
-  return Promise.resolve(new Response(JSON.stringify({ month, days: [day] })))
+  // A day an automatic promotion cuts, the price before it allowed
+  const cut = {
+    date: `${month}-12`,
+    departures: 1,
+    price: "10.000,00 TL",
+    short: "₺10 B",
+    whole: "₺10.000",
+    before: "12.500,00 TL",
+  }
+  return Promise.resolve(new Response(JSON.stringify({ month, days: [day, cut] })))
 })
 
 let host: HTMLDivElement
@@ -139,6 +148,13 @@ describe("the search calendar", () => {
       "5 Aralık 2026, en düşük 12.400,00 TL, 2 kalkış"
     )
     expect(day("2026-12-05")?.textContent).toContain("₺12,4 B")
+    // A promoted day: too narrow to strike through, the sale's colour and its name say it
+    const under = (date: string) => day(date)?.querySelector("span[aria-hidden]")
+    expect(under("2026-12-05")?.className).toBe("text-[0.6875rem] leading-none text-text-2")
+    expect(under("2026-12-12")?.className).toBe("text-[0.6875rem] leading-none text-deal")
+    expect(day("2026-12-12")?.getAttribute("aria-label")).toBe(
+      "12 Aralık 2026, en düşük 10.000,00 TL, önceki fiyat 12.500,00 TL, 1 kalkış"
+    )
     // No departure: pale, still a day a range can start on
     expect(day("2026-12-06")?.getAttribute("aria-label")).toBe("6 Aralık 2026, kalkış yok")
     expect(day("2026-12-06")?.hasAttribute("aria-disabled")).toBe(false)

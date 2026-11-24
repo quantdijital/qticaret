@@ -158,7 +158,18 @@ export function Counts({
                     .filter(Boolean)
                     .join(" · ")}
                 </span>
-                <span className="tabular text-sm">{price?.price ?? words.noPrice}</span>
+                {price?.before ? (
+                  // As `Price`: the promoted price in the sale's colour, the one before struck through
+                  <span className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="tabular text-sm text-deal">{price.price}</span>
+                    <s className="tabular text-xs text-text-3">
+                      <span className="sr-only">{words.priceBefore} </span>
+                      {price.before}
+                    </s>
+                  </span>
+                ) : (
+                  <span className="tabular text-sm">{price?.price ?? words.noPrice}</span>
+                )}
               </div>
               <div role="group" aria-label={label} className="flex shrink-0 items-center gap-1">
                 <button

@@ -10,7 +10,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import { PRICE_HISTORY_MODULE } from "../../../modules/price-history"
 import { SEARCH_INDEX_MODULE } from "../../../modules/search-index"
 import { datedFactsOf } from "../../seo/dated-facts"
-import { departureCalendar } from "../calendar"
+import { clearCalendarCaches, departureCalendar } from "../calendar"
 import { bookingCardFacts } from "../card-facts"
 import { storeProductBooking } from "../store-view"
 import { clearUpcomingCaches, upcomingDepartures } from "../upcoming"
@@ -197,6 +197,7 @@ let asks = 0
 async function everyPlace(promotions: Promotion[]) {
   const { container, reads, graph, historyOf } = shop(promotions)
   clearUpcomingCaches()
+  clearCalendarCaches()
   const once = async <T>(read: () => Promise<T>) => {
     graph.mockClear()
     historyOf.mockClear()
