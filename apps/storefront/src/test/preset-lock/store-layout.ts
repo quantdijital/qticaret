@@ -194,6 +194,10 @@ function headerBar(bar: Section | undefined, theme: Record<string, unknown>) {
     ...(bar["variant"] === "catalog"
       ? { catalog: Object.fromEntries(CATALOG_FIELDS.map((key) => [key, bar[key] ?? null])) }
       : {}),
+    // Every other header's action button, only once written (`mainSectionsOf`)
+    ...(bar["variant"] !== "catalog" && bar["highlight_link"]
+      ? { highlight_link: bar["highlight_link"] }
+      : {}),
   }
 }
 

@@ -18,7 +18,8 @@ export function headerSetIn(section: HeaderBarSection, group: FieldGroupName): n
     (field) => HEADER_GROUPS[field] === group && section[field] !== HEADER_DEFAULTS[field]
   ).length
   if (section.variant !== "catalog") {
-    return own
+    // The action button counts once written, with the menu bar's settings
+    return own + (group === "menu" && section.highlight_link ? 1 : 0)
   }
   const catalog = section
   return (
