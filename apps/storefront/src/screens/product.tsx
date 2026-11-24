@@ -81,6 +81,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
       product: {
         id: product.id,
         categoryIds: (product.categories ?? []).map((category) => category.id),
+        unshipped: !isShipped(product),
       },
     }),
     // A gift card takes no add-ons; none while the shop has them off (`features`: not asked then)

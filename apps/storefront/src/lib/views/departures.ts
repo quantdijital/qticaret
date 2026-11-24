@@ -81,9 +81,10 @@ export function departureRows(
           departure.from_price === null
             ? null
             : {
-                current: formatLira(departure.from_price),
+                // The card's words ("…'den itibaren"), one phrase for a dated price
+                current: t("booking.card_from", { price: formatLira(departure.from_price) }),
                 before: null,
-                from: true,
+                from: false,
                 discount: null,
               },
       },

@@ -9819,6 +9819,10 @@
             "hint": "The attribute a visitor picks (e.g. region, city). Only filterable attributes with choices are listed.",
             "none": "Word box (no attribute)"
           },
+          "placeholder": {
+            "label": "Word box hint",
+            "hint": "Shown in the word box before a search (e.g. \"Where would you like to go?\"). Empty: \"Search products, categories or brands\"."
+          },
           "show_category": {
             "label": "Category field",
             "hint": "Lets the visitor pick one of the top categories."
@@ -11349,6 +11353,16 @@
           "hint": "On a narrow screen the photos slide sideways or stack.",
           "scroll": "Slide sideways",
           "stack": "Stacked"
+        }
+      },
+      "productMain": {
+        "image_ratio": {
+          "label": "Image ratio",
+          "term": "image ratio",
+          "hint": "The shape of the large picture on the product page. Thumbnails stay square.",
+          "square": "Square",
+          "landscape": "Landscape 4:3",
+          "portrait": "Portrait 3:4"
         }
       }
     },

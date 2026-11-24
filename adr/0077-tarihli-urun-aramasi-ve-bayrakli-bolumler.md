@@ -246,7 +246,7 @@ Rezervasyon dosyalarına dokunan açık bir iş dalı (talep formu) varken PR2 v
 - **SEO.** `/arama` `noindex,follow` kalır. robots.txt'e `tarih`, `ay`, `kisi` ve `sirala=kalkis` için `Disallow` satırları eklenir. "Anladığım" etiketleri ve takvim bağlantıları `nofollow`. Hero'da `h1` korunur. Yeni ayrılmış adlar, aynı anahtarlı bir niteliği süzgeçten çıkarır (uygulama PR'ında denetim notu).
 - **Güvenlik ve KVKK.** Doğal dil ucu herkese açık bir LLM kapısıdır: hız sınırı, günlük tavan, önbellek, gerekirse challenge; çıktı yalnız süzgeçtir, eylem tetiklemez; metin saklanmaz ve kullanım kaydına yazılmaz. adr/0071 §10'a istisna bu ADR'nin §7'sidir; bayrak varsayılan kapalı ve yalnız mağazanın kendi anahtarıyla.
 - **Biçim sözleşmesi.** Mevcut biçimler yerinde değişmez: Hero'ya yeni biçim, `reviews`'a yeni biçim (eski çizim `grid` adıyla aynen), kart alanları isteğe bağlı. Yeni Atölye CSS dosyaları `styles.lock.json`'u değiştirir; bilerek `pnpm lock:presets`, PR'a "HTML aynı, yalnız stil özeti". Paralel PR'larda kilit örnekleri çakışabilir: rebase sonrası kilit yeniden yazılır.
-- **Bilinen sınır.** Fiyat sıralaması dizin fiyatıyla, kart fiyatı aralıkla (§5).
+- **Bilinen sınır.** Fiyat sıralaması dizin fiyatıyla, kart fiyatı aralıkla (§5). İkisi de ana fiyat kategorisinden (yetişkin) alınır, daha ucuz çocuk fiyatından değil (adr/0076 Ek 2026-11-24).
 - **Bilinen sınır (takvim, §6).** Ayın en yakın 1000 ürünü, satış kanalı ve kategori süzgecinden **önce** seçilir; süzgeç sonra uygulanır. Sızıntı yoktur (başka kanalın ya da kategorinin ürünü hiç görünmez), ama ayda 1000'den çok tarihli ürünü olan mağazada takvim bazı günleri eksik gösterebilir.
 
 ## Açık

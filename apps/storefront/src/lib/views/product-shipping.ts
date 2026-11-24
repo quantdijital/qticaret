@@ -85,17 +85,21 @@ export const isShipped = (product: StoreProduct): boolean => {
   return (extension?.kind ?? "physical") === "physical" && extension?.is_gift_card !== true
 }
 
+/** The promise icons that speak of a parcel's delivery (shipping, the same-day hour); returns are not one. */
+const DELIVERY_ICONS: ReadonlySet<TrustBadgeView["icon"]> = new Set(["truck", "clock"])
+
 /**
  * The shop's promises as a product's page says them: all of them on a
  * product the shop ships; on one it does not (a dated tour, a service, a
- * download, a gift card) none of delivery and returns, no shipping
- * promise where nothing is shipped.
+ * download, a gift card) none of delivery, no shipping promise where
+ * nothing is shipped. Returns and cancellation stay (a free cancellation
+ * is a promise there too).
  */
 export const promisesFor = (
   product: StoreProduct,
   badges: readonly TrustBadgeView[]
 ): TrustBadgeView[] =>
-  isShipped(product) ? [...badges] : badges.filter((badge) => !SHIPPING_ICONS.has(badge.icon))
+  isShipped(product) ? [...badges] : badges.filter((badge) => !DELIVERY_ICONS.has(badge.icon))
 
 export interface ProductShippingInput {
   product: StoreProduct

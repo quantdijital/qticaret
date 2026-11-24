@@ -238,5 +238,16 @@
       "show_note": true,
       "joined": true
     }
+  ],
+  "product": [
+    {
+      "id": "mainproduct",
+      "type": "product_main",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "image_ratio": "landscape"
+    }
   ]
 }

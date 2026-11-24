@@ -186,7 +186,7 @@
       "width": "full",
       "height": "high",
       "text_position": "middle_left",
-      "overlay": "medium",
+      "overlay": "light",
       "button_style": "solid"
     },
     {
@@ -320,6 +320,17 @@
       "text": null,
       "description": "Yeni rotalar, açılan kalkışlar ve patikadan notlar.",
       "joined": true
+    }
+  ],
+  "product": [
+    {
+      "id": "mainproduct",
+      "type": "product_main",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "image_ratio": "landscape"
     }
   ]
 }

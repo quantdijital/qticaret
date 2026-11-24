@@ -40,6 +40,7 @@ interface VariantRow {
   id: string
   manage_inventory?: boolean | null
   allow_backorder?: boolean | null
+  variant_rank?: number | null
 }
 
 interface ProductRow {
@@ -59,6 +60,7 @@ interface ProductRow {
 // A dated product's booking settings and its length (adr/0077 Ek "tur kartı"), read only
 // while the shop sells them
 const BOOKABLE_FIELDS = [
+  "variants.variant_rank",
   "bookable.id",
   "bookable.cutoff_hours",
   "bookable.pax_by_variant",

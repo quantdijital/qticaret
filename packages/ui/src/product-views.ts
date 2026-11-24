@@ -243,6 +243,12 @@ export interface ProductPageView {
    */
   shipping?: ProductShippingView | null
   /**
+   * The product is not shipped (a dated product, a service, a download, a
+   * gift card): its page's own headings say nothing of a parcel ("Açıklama",
+   * "Güvenceler", "Bunlara da göz atın"). Absent or false: today's words.
+   */
+  unshipped?: boolean
+  /**
    * A physical product the shop marked as a sealed hygiene good, in words
    * near the cart form: its right of withdrawal ends once the seal is
    * opened, told before the purchase (MSY md. 5/1-h, 6/2, 15/1-ç).

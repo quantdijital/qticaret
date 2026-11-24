@@ -191,5 +191,16 @@
       "text": null,
       "description": "Yeni rotalar ve erken rezervasyon dönemleri e-postanızda."
     }
+  ],
+  "product": [
+    {
+      "id": "mainproduct",
+      "type": "product_main",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "image_ratio": "landscape"
+    }
   ]
 }

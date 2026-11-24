@@ -158,7 +158,13 @@ describe("the shop's promises on a product's page", () => {
     expect(promisesFor(product(), BADGES)).toEqual(BADGES)
   })
 
-  it("says no delivery or return promise on a product that is not shipped", () => {
+  it("says no delivery promise on a product that is not shipped, its free cancellation kept", () => {
+    const cancel: TrustBadgeView = {
+      icon: "refresh",
+      title: "Ücretsiz iptal",
+      text: "7 gün öncesine kadar",
+    }
+    expect(promisesFor(product({ kind: "service" }), [...BADGES, cancel])).toContain(cancel)
     const kept = BADGES.filter((badge) => badge.icon === "award" || badge.icon === "shield")
     expect(promisesFor(product({ kind: "service" }), BADGES)).toEqual(kept)
     expect(promisesFor(product({ kind: "digital" }), BADGES)).toEqual(kept)

@@ -73,10 +73,13 @@
   /*
    * Over the medium veil the cloud ends on a picture already darkened from
    * the words' side: spread wider and blurred twice as long, it melts into
-   * the veil (a short blur left a hard vertical edge beside the words)
+   * the veil (a short blur left a hard vertical edge beside the words). The
+   * spread is as wide as the blur, as on the light step: a blur longer than
+   * the spread starts thinning inside the plate and its edge shows as a
+   * faint rectangle
    */
   .gf-band[data-overlay="medium"] .gf-band-words {
-    box-shadow: 0 0 6rem 4rem color-mix(in srgb, var(--band-veil) 72%, transparent);
+    box-shadow: 0 0 6rem 6rem color-mix(in srgb, var(--band-veil) 72%, transparent);
   }
 
   /* Dark words: the counter's inks, the main button the shop-colour pill again */

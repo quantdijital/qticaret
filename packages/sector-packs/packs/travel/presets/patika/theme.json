@@ -28,7 +28,8 @@
     "show_category": true,
     "show_dates": true,
     "show_people": true,
-    "category_style": "tabs"
+    "category_style": "tabs",
+    "placeholder": "Nereye gitmek istersiniz?"
   },
   "menu_style": "plain",
   "chip_style": "lined",

@@ -15,7 +15,7 @@ const CELL =
 /** A field across the phone's grid (the words, or the one left over in an odd count). */
 const WIDE = "col-span-2"
 
-/** A date wide enough for its whole day (`gg.aa.yyyy` and the picker) once the bar is one row. */
+/** A date wide enough for its whole day (`gg.aa.yyyy` and the picker), and the flexible month for its whole name, once the bar is one row. */
 const DAY = "lg:min-w-40"
 const CONTROL =
   "w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
@@ -172,7 +172,7 @@ export function SearchForm({ form, className }: { form: SearchFormView; classNam
             >
               <DayCell field={form.dates.from} className={wide("dates")} />
               <DayCell field={form.dates.to} />
-              <SelectCell icon={CalendarRange} field={form.dates.month} />
+              <SelectCell icon={CalendarRange} field={form.dates.month} className={DAY} />
             </div>
           )}
           {form.people && (
