@@ -25,6 +25,9 @@ coverage/
 # Local file provider uploads (dev and test)
 apps/backend/static/
 
+# Bundles of HTTP integration spec files, written per run (QT_IT_BUNDLE)
+apps/backend/integration-tests/.bundles/
+
 # Shops the local provisioner set up (adr/0061 Ek C10): their secrets, files, logs
 infra/tenants/local/
 

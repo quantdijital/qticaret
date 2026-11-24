@@ -70,25 +70,10 @@ for (const hook of ["beforeAll", "beforeEach", "afterAll", "afterEach"]) {
 // the log ("RETRY ERRORS"), and the job's summary counts them, so a test that
 // needs its second try is seen and mended. Locally a failure is a failure.
 //
-// Not where failing now and then IS the finding: a file that tests a race,
-// an idempotent delivery, stock or money moved by two requests at once. A
-// second try there would turn a one-in-five double order into one in
-// twenty-five and call the rest green. Such a file is known by its name
-// (payments, stock, refunds, notifications) or by sending requests side by
-// side (`Promise.all`); a file that cannot be read is not retried either.
-const MONEY_OR_STOCK =
-  /(race|idempot|notification|webhook|callback|stock|gift-card|refund|payment|checkout|plan-limits)/
-const SIDE_BY_SIDE = /Promise\.all(Settled)?\(/
-
-function retriable(testPath) {
-  try {
-    const name = require("node:path").basename(testPath)
-    const source = require("node:fs").readFileSync(testPath, "utf8")
-    return !MONEY_OR_STOCK.test(name) && !SIDE_BY_SIDE.test(source)
-  } catch {
-    return false
-  }
-}
+// Not where failing now and then IS the finding (races, money, stock): which
+// files those are is decided in bundle/classify.js, which also names the
+// class of a generated bundle (bundle/README.md); a strict bundle never retries.
+const { retriable } = require("./bundle/classify")
 
 // eslint-disable-next-line no-undef -- jest's own objects, given to every setup file
 if (process.env.CI && retriable(String(expect.getState().testPath ?? ""))) {

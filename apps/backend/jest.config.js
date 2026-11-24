@@ -30,7 +30,10 @@ const INTEGRATION_WORKER_MEMORY = "1GB"
 const PLAIN_FAILURES = ["./integration-tests/plain-failures.js"]
 
 if (process.env.TEST_TYPE === "integration:http") {
-  module.exports.testMatch = ["**/integration-tests/http/*.spec.[jt]s"]
+  // QT_IT_BUNDLE=<n>: n spec files share one Medusa boot; the bundles are
+  // written here, before jest looks for tests (integration-tests/bundle/README.md)
+  const bundles = require("./integration-tests/bundle").prepareBundles(process.env.QT_IT_BUNDLE)
+  module.exports.testMatch = bundles?.testMatch ?? ["**/integration-tests/http/*.spec.[jt]s"]
   module.exports.workerIdleMemoryLimit = INTEGRATION_WORKER_MEMORY
   module.exports.setupFilesAfterEnv = PLAIN_FAILURES
   // Migrations run once per run, into a template database each spec file's
@@ -45,5 +48,8 @@ if (process.env.TEST_TYPE === "integration:http") {
   module.exports.workerIdleMemoryLimit = INTEGRATION_WORKER_MEMORY
   module.exports.setupFilesAfterEnv = PLAIN_FAILURES
 } else if (process.env.TEST_TYPE === "unit") {
-  module.exports.testMatch = ["**/src/**/__tests__/**/*.unit.spec.[jt]s"]
+  module.exports.testMatch = [
+    "**/src/**/__tests__/**/*.unit.spec.[jt]s",
+    "**/integration-tests/bundle/__tests__/*.unit.spec.[jt]s",
+  ]
 }
