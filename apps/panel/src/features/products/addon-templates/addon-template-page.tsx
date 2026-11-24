@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi, useNavigate } from "@tanstack/react-router"
-import { MoreHorizontal, Trash2 } from "lucide-react"
+import { ListChecks, MoreHorizontal, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -31,6 +31,7 @@ import { AddonNotice } from "@/features/products/detail/addon-notice"
 import { featuresQuery, useFeatureState } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { AddonTemplateAddonsCard } from "./addon-template-addons-card"
+import { AddonTemplateApplyDialog } from "./addon-template-apply-dialog"
 import { templateFailureOf } from "./template-failure"
 
 const T = "products.addonTemplates"
@@ -134,6 +135,7 @@ export function AddonTemplatePage() {
   const flagOn = features.isError ? false : state === true
   const remove = useDeleteAddonTemplate()
   const [deleting, setDeleting] = useState(false)
+  const [applying, setApplying] = useState(false)
 
   if (template.isError) {
     return (
@@ -151,24 +153,34 @@ export function AddonTemplatePage() {
         title={data.name}
         description={t(`${T}.dialogHint`)}
         action={
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" aria-label={t("common.actions")}>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => {
-                  setDeleting(true)
-                }}
-              >
-                <Trash2 />
-                {t(`${T}.delete`)}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => {
+                setApplying(true)
+              }}
+            >
+              <ListChecks />
+              {t(`${T}.apply.action`)}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" aria-label={t("common.actions")}>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => {
+                    setDeleting(true)
+                  }}
+                >
+                  <Trash2 />
+                  {t(`${T}.delete`)}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         }
       />
       {flagOn ? null : <AddonNotice tone="warning" text={t("products.addons.flagOff")} features />}
@@ -185,6 +197,13 @@ export function AddonTemplatePage() {
           <UsageCard template={data} />
         </PageColumn>
       </PageGrid>
+      <AddonTemplateApplyDialog
+        key={data.id}
+        template={data}
+        open={applying}
+        onOpenChange={setApplying}
+        flagOn={flagOn}
+      />
       <ConfirmDialog
         open={deleting}
         onOpenChange={setDeleting}

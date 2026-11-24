@@ -18,11 +18,14 @@ interface PaymentRow {
   refunds?: ({ id: string; note?: string | null; raw_amount?: Raw } | null)[] | null
 }
 
-// The payment module's generated method: a refund record, no provider call
+// The payment module's generated method: a refund record, no provider call.
+// Since 2.22 a refund carries a status (`pending` by default, `succeeded` once
+// the provider answered); this one records money the provider already gave back.
 interface RefundRecords {
   createRefunds(data: {
     payment: string
     amount: BigNumberInput
+    status: "succeeded"
     created_by?: string
     note?: string
   }): Promise<{ id: string }>
@@ -59,7 +62,7 @@ async function readPayment(
 
 /**
  * The payment collection's refunded total, as Medusa's own refund keeps it
- * (2.21.2 `maybeUpdatePaymentCollection_`: the sum of its payments' refunds).
+ * (2.22.6 `maybeUpdatePaymentCollection_`: the sum of its payments' refunds).
  */
 async function updateRefundedTotal(
   container: Pick<MedusaContainer, "resolve">,
@@ -125,6 +128,7 @@ export async function recordMadeRefund(
       await (container.resolve(Modules.PAYMENT) as unknown as RefundRecords).createRefunds({
         payment: payment.id,
         amount,
+        status: "succeeded",
         created_by: actorId,
         note: checkedNote(entry.reference),
       })

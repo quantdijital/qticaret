@@ -15,7 +15,7 @@ import { templateFailureOf } from "./template-failure"
 const T = "products.addonTemplates"
 
 /**
- * "Şablon oluştur": the template's name, the one thing it needs; saving
+ * "Ek seçenek grubu ekle": the template's name, the one thing it needs; saving
  * makes it and opens its page, where its add-ons are added (adr/0052 Ek
  * 2026-11-23).
  */

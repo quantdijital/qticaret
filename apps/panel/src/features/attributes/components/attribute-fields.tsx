@@ -1,6 +1,8 @@
 import type { Dispatch, SetStateAction } from "react"
 import { isEmpty } from "@/features/attributes/empty"
+import { isSelectType } from "@/features/attributes/types"
 import type { AttributeDefinition, AttributeValue } from "@/features/attributes/types"
+import type { AddOption } from "@/features/attributes/use-add-option"
 import type { AttributesAi } from "@/features/attributes/use-attributes-ai"
 import { AttributeInput } from "./attribute-input"
 import { AttributeSuggestion, AttributesAiBar } from "./attributes-ai"
@@ -16,11 +18,14 @@ export function AttributeFields({
   values,
   setValues,
   ai,
+  addOption,
 }: {
   definitions: readonly AttributeDefinition[]
   values: Record<string, AttributeValue>
   setValues: Dispatch<SetStateAction<Record<string, AttributeValue>>>
   ai: AttributesAi
+  /** A list field's missing value added to the group from the product. */
+  addOption?: AddOption | undefined
 }) {
   const offered = definitions.filter(
     (definition) => isEmpty(values[definition.key]) && ai.valueFor(definition.key) !== undefined
@@ -57,6 +62,11 @@ export function AttributeFields({
                 <AttributeInput
                   definition={definition}
                   value={values[definition.key]}
+                  addOption={
+                    addOption && isSelectType(definition.type)
+                      ? (label) => addOption(definition.key, label)
+                      : undefined
+                  }
                   onChange={(next) => {
                     setValues((was) => ({ ...was, [definition.key]: next }))
                   }}
